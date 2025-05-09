@@ -7,7 +7,7 @@ import { ArrowRight, ChevronDown } from "lucide-react";
 import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
 
-export const LanguageOptions = () => {
+export default function LanguageOptionsSelector() {
   const [language, setLanguage] = useAtom(configFields.language);
 
   const handleSourceLangChange = (e: React.ChangeEvent<HTMLSelectElement>) => {

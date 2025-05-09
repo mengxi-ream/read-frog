@@ -9,7 +9,7 @@ import { configFields } from "@/utils/atoms/config";
 import { PROVIDER_ITEMS } from "@/utils/constants/config";
 import { useAtom } from "jotai";
 
-export const ProviderSelector = () => {
+export default function ProviderSelector() {
   const [provider, setProvider] = useAtom(configFields.provider);
 
   return (
@@ -31,7 +31,7 @@ export const ProviderSelector = () => {
       </Select>
     </div>
   );
-};
+}
 
 const TranslateItem = ({ logo, name }: { logo: string; name: string }) => {
   return (

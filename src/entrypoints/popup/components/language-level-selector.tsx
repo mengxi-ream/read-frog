@@ -9,7 +9,7 @@ import {
 import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
 
-export const LanguageLevelSelector = () => {
+export default function LanguageLevelSelector() {
   const [language, setLanguage] = useAtom(configFields.language);
 
   return (

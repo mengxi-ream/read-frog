@@ -1,6 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
+import App from "./app.tsx";
 import "@/assets/tailwind/theme.css";
 import "@/assets/tailwind/text-small.css";
 import { Provider as JotaiProvider } from "jotai";

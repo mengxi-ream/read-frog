@@ -1,8 +1,16 @@
-import { Config } from "@/types/config/config";
+import { Config, Hotkey } from "@/types/config/config";
 import { Provider, ProviderConfig } from "@/types/config/provider";
 import openaiLogo from "@/assets/llm/openai.jpg";
 import deepseekLogo from "@/assets/llm/deepseek.png";
 export const CONFIG_STORAGE_KEY = "config";
+
+export const HOTKEYS = ["ctrl", "option", "shift", "~"] as const;
+export const HOTKEY_ITEMS: Record<Hotkey, { label: string; icon: string }> = {
+  ctrl: { label: "Ctrl", icon: "⌃" },
+  option: { label: "Option", icon: "⌥" },
+  shift: { label: "Shift", icon: "⇧" },
+  "~": { label: "Tilde", icon: "~" },
+};
 
 export const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
   openai: {

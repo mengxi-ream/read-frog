@@ -1,9 +1,9 @@
+import { HOTKEYS } from "@/utils/constants/config";
 import { LangCodeISO6393, LangLevel } from "./languages";
 import { ProviderConfig } from "./provider";
 import { Provider } from "./provider";
 
-export const hotkey = ["ctrl", "option", "shift", "~"] as const;
-export type Hotkey = (typeof hotkey)[number];
+export type Hotkey = (typeof HOTKEYS)[number];
 
 export type Config = {
   language: {

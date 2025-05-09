@@ -2,14 +2,7 @@ import { Switch } from "@/components/ui/Switch";
 import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
 
-export const EnabledFloatingButton = () => {
-  // const [enabledFloatingButton, setEnabledFloatingButton] =
-  //   useStorageState<boolean>(
-  //     "enabledFloatingButton" satisfies ConfigKey,
-  //     initialConfig.enabledFloatingButton
-  //   );
-  // console.log("EnabledFloatingButton", enabledFloatingButton);
-
+export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(
     configFields.floatingButton
   );
@@ -27,4 +20,4 @@ export const EnabledFloatingButton = () => {
       />
     </div>
   );
-};
+}
