@@ -2,6 +2,7 @@ export default defineBackground(() => {
   console.log("Hello background!", { id: browser.runtime.id });
 
   browser.runtime.onInstalled.addListener(async () => {
+    await storage.setItem<number>("local:__configSchemaVersion", 2);
     await initializeConfig();
   });
 

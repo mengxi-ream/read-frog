@@ -23,7 +23,7 @@ export default function HotkeySelector() {
       >
         <SelectTrigger
           size="sm"
-          className="text-[13px] truncate pl-0 font-medium cursor-pointer border-none bg-transparent ring-none focus-visible:border-none focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent dark:bg-transparent"
+          className="text-[13px] truncate pl-0 font-medium shadow-none cursor-pointer border-none bg-transparent ring-none focus-visible:border-none focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent dark:bg-transparent"
         >
           <div className="truncate">
             Hover + {HOTKEY_ITEMS[manualTranslate.hotkey].icon}{" "}

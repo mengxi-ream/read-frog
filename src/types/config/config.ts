@@ -1,5 +1,5 @@
 import { HOTKEYS } from "@/utils/constants/config";
-import { providerConfigSchema, providerSchema } from "./provider";
+import { providersConfigSchema, providerSchema } from "./provider";
 import { z } from "zod";
 import { langCodeISO6393, langLevel } from "@/types/config/languages";
 
@@ -29,7 +29,7 @@ const floatingButtonSchema = z.object({
 export const configSchema = z.object({
   language: languageSchema,
   provider: providerSchema,
-  providersConfig: providerConfigSchema,
+  providersConfig: providersConfigSchema,
   manualTranslate: manualTranslateSchema,
   floatingButton: floatingButtonSchema,
 });

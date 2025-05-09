@@ -1,5 +1,5 @@
 import { Config, Hotkey } from "@/types/config/config";
-import { Provider, ProviderConfig } from "@/types/config/provider";
+import { Provider, ProvidersConfig } from "@/types/config/provider";
 import openaiLogo from "@/assets/llm/openai.jpg";
 import deepseekLogo from "@/assets/llm/deepseek.png";
 export const CONFIG_STORAGE_KEY = "config";
@@ -12,7 +12,7 @@ export const HOTKEY_ITEMS: Record<Hotkey, { label: string; icon: string }> = {
   "~": { label: "Tilde", icon: "~" },
 };
 
-export const DEFAULT_PROVIDER_CONFIG: ProviderConfig = {
+export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
     apiKey: undefined,
     model: "gpt-4.1-mini",

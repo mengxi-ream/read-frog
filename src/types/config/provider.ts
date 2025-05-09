@@ -1,30 +1,49 @@
 import { z } from "zod";
 
-export const providerSchema = z.enum(["openai", "deepseek"]);
-export const providers = providerSchema.options;
-export type Provider = z.infer<typeof providerSchema>;
-
-// 定义一个映射对象，包含所有的provider及其对应的模型
+/* ──────────────────────────────
+   1.  Single source‑of‑truth
+   ────────────────────────────── */
 export const providerModels = {
   openai: ["gpt-4.1-mini", "gpt-4o-mini", "gpt-4o", "gpt-4.1", "gpt-4.1-nano"],
   deepseek: ["deepseek-chat"],
 } as const;
 
-export const providerConfigSchema = z.object({
-  openai: z.object({
+const providerNames = ["openai", "deepseek"] as const satisfies Readonly<
+  (keyof typeof providerModels)[]
+>;
+
+/* ──────────────────────────────
+   2. providerSchema
+   ────────────────────────────── */
+export const providerSchema = z.enum(providerNames);
+export type Provider = z.infer<typeof providerSchema>;
+
+/* ──────────────────────────────
+   3. providersConfigSchema
+   ────────────────────────────── */
+type ModelTuple = readonly [string, ...string[]]; // 至少一个元素才能给 z.enum
+const providerConfigSchema = <T extends ModelTuple>(models: T) =>
+  z.object({
     apiKey: z.string().optional(),
-    model: z.enum(providerModels.openai),
+    model: z.enum(models),
     isCustomModel: z.boolean(),
     customModel: z.string().optional(),
-  }),
-  deepseek: z.object({
-    apiKey: z.string().optional(),
-    model: z.enum(providerModels.deepseek),
-    isCustomModel: z.boolean(),
-    customModel: z.string().optional(),
-  }),
-});
-export type ProviderConfig = z.infer<typeof providerConfigSchema>;
+  });
+
+type SchemaShape<M extends Record<string, ModelTuple>> = {
+  [K in keyof M]: ReturnType<typeof providerConfigSchema<M[K]>>;
+};
+const buildSchema = <M extends Record<string, ModelTuple>>(models: M) =>
+  z.object(
+    // 用 reduce 而不用 Object.fromEntries ➙ 保留键名/类型
+    (Object.keys(models) as (keyof M)[]).reduce((acc, key) => {
+      acc[key] = providerConfigSchema(models[key]);
+      return acc;
+    }, {} as SchemaShape<M>)
+  );
+
+export const providersConfigSchema = buildSchema(providerModels);
+export type ProvidersConfig = z.infer<typeof providersConfigSchema>;
 
 // 为每个provider生成对应的模型类型
 export type ProviderToModel = {
