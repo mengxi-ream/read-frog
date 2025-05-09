@@ -1,11 +1,17 @@
 import { Config } from "@/types/config/config";
 import { DEFAULT_CONFIG, CONFIG_STORAGE_KEY } from "./constants/config";
+import { configSchema } from "./schemas/config";
+import deepmerge from "deepmerge";
 
 export async function initializeConfig() {
-  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, DEFAULT_CONFIG);
+  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`);
+  const newConfig: Config =
+    config && configSchema.safeParse(config).success
+      ? deepmerge(config, DEFAULT_CONFIG)
+      : DEFAULT_CONFIG;
+  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, newConfig);
 
   if (import.meta.env.DEV) {
-    const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`);
     if (config) {
       const newProviderConfig = Object.fromEntries(
         Object.entries(config.providersConfig).map(([provider, cfg]) => {
