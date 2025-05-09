@@ -8,18 +8,6 @@ import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
 
 export const LanguageOptions = () => {
-  // const detectedLangCode = useStorageStateValue<LangCodeISO6393>(
-  //   "detectedLangCode",
-  //   "eng"
-  // );
-
-  // const [sourceLangCode, setSourceLangCode] = useStorageState<
-  //   LangCodeISO6393 | "auto"
-  // >("sourceLangCode", "auto");
-  // const [targetLangCode, setTargetLangCode] = useStorageState<LangCodeISO6393>(
-  //   "targetLangCode",
-  //   "eng"
-  // );
   const [language, setLanguage] = useAtom(configFields.language);
 
   const handleSourceLangChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -31,6 +19,8 @@ export const LanguageOptions = () => {
     const newLangCode = e.target.value as LangCodeISO6393;
     setLanguage({ targetCode: newLangCode });
   };
+
+  console.log("language", language);
 
   return (
     <div className="flex items-center gap-2">
@@ -54,7 +44,7 @@ export const LanguageOptions = () => {
           </option>
           {langCodeISO6393.options.map(
             (key) =>
-              key !== language.sourceCode && (
+              key !== language.detectedCode && (
                 <option key={key} value={key}>
                   {langCodeToEnglishName[key]}
                 </option>
