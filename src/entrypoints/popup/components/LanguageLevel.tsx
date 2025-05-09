@@ -1,5 +1,4 @@
-import { LangLevel } from "@/types/languages";
-import { useStorageState } from "@/hooks/useStorageState";
+import { LangLevel } from "@/types/config/languages";
 import {
   Select,
   SelectContent,
@@ -7,17 +6,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/Select";
+import { configFields } from "@/utils/atoms/config";
+import { useAtom } from "jotai";
 
 export const LanguageLevelSelector = () => {
-  const [langLevel, setLangLevel] = useStorageState<LangLevel>(
-    "langLevel",
-    "intermediate"
-  );
+  const [language, setLanguage] = useAtom(configFields.language);
 
   return (
     <div className="flex items-center gap-2 justify-between">
       <span className="font-medium text-[13px]">{i18n.t("languageLevel")}</span>
-      <Select value={langLevel} onValueChange={setLangLevel}>
+      <Select
+        value={language.level}
+        onValueChange={(value: LangLevel) => setLanguage({ level: value })}
+      >
         <SelectTrigger
           size="sm"
           className="outline-none cursor-pointer bg-input/50 hover:bg-input !h-7 w-29 pl-2.5 pr-1.5"

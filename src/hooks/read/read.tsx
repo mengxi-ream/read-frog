@@ -2,7 +2,7 @@ import {
   progressAtom,
   readStateAtom,
   store,
-} from "@/entrypoints/content/atoms";
+} from "@/entrypoints/side.content/atoms";
 import {
   ArticleAnalysis,
   articleAnalysisSchema,
@@ -14,8 +14,8 @@ import {
   LangCodeISO6393,
   langCodeToEnglishName,
   LangLevel,
-} from "@/types/languages";
-import { ProviderConfig, Provider } from "@/types/provider";
+} from "@/types/config/languages";
+import { ProviderConfig, Provider } from "@/types/config/provider";
 import { getAnalyzePrompt } from "@/utils/prompts/analyze";
 import { getExplainPrompt } from "@/utils/prompts/explain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";

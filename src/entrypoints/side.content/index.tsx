@@ -31,7 +31,6 @@ export default defineContentScript({
       append: "last",
       onMount: (container, shadow) => {
         // Store shadow root reference
-
         const wrapper = document.createElement("div");
         wrapper.className = cn(
           "text-base antialiased font-sans z-[2147483647]",
@@ -71,21 +70,21 @@ export default defineContentScript({
           return children;
         };
 
-        root.render(
-          <QueryClientProvider client={queryClient}>
-            <JotaiProvider store={store}>
-              <HydrateAtoms>
-                <TooltipProvider>
-                  <App />
-                </TooltipProvider>
-              </HydrateAtoms>
-            </JotaiProvider>
-            <ReactQueryDevtools
-              initialIsOpen={false}
-              buttonPosition="bottom-left"
-            />
-          </QueryClientProvider>
-        );
+        // root.render(
+        //   <QueryClientProvider client={queryClient}>
+        //     <JotaiProvider store={store}>
+        //       <HydrateAtoms>
+        //         <TooltipProvider>
+        //           <App />
+        //         </TooltipProvider>
+        //       </HydrateAtoms>
+        //     </JotaiProvider>
+        //     <ReactQueryDevtools
+        //       initialIsOpen={false}
+        //       buttonPosition="bottom-left"
+        //     />
+        //   </QueryClientProvider>
+        // );
         return { root, wrapper };
       },
       onRemove: (elements) => {

@@ -1,5 +1,5 @@
 import { syntacticCategoryAbbr } from "@/types/content";
-import { LangLevel } from "@/types/languages";
+import { LangLevel } from "@/types/config/languages";
 
 export const getExplainPrompt = (
   sourceLang: string,

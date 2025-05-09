@@ -6,10 +6,7 @@ import { useState, useEffect } from "react";
  * @param initialValue Initial value to use if nothing found in storage
  * @returns [value, setValue] tuple where setValue also updates storage
  */
-export function useStorageState<T>(
-  key: string,
-  initialValue: T
-) {
+export function useStorageState<T>(key: string, initialValue: T) {
   const [value, setValue] = useState<T>(initialValue);
 
   // Load from storage and watch for changes
@@ -19,7 +16,7 @@ export function useStorageState<T>(
     const loadAndWatch = async () => {
       // Load initial value
       const storedValue = await storage.getItem<T>(`local:${key}`);
-      if (storedValue) setValue(storedValue);
+      if (storedValue !== null) setValue(storedValue);
 
       // Watch for changes
       unwatch = await storage.watch<T>(`local:${key}`, (newValue) => {
@@ -49,10 +46,7 @@ export function useStorageState<T>(
  * @param initialValue Initial value to use if nothing found in storage
  * @returns The current value from storage
  */
-export function useStorageStateValue<T>(
-  key: string,
-  initialValue: T,
-) {
+export function useStorageStateValue<T>(key: string, initialValue: T) {
   const [value] = useStorageState<T>(key, initialValue);
   return value;
 }
@@ -63,10 +57,7 @@ export function useStorageStateValue<T>(
  * @param initialValue Initial value to use if nothing found in storage
  * @returns Function to update the value in storage
  */
-export function useSetStorageState<T>(
-  key: string,
-  initialValue: T,
-) {
+export function useSetStorageState<T>(key: string, initialValue: T) {
   const [, setValue] = useStorageState<T>(key, initialValue);
   return setValue;
 }

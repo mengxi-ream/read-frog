@@ -3,12 +3,12 @@ import {
   LangCodeISO6393,
   langCodeToEnglishName,
   LangLevel,
-} from "@/types/languages";
+} from "@/types/config/languages";
 import { useSetAtom } from "jotai";
 import { ArrowRight, X } from "lucide-react";
 import { isSideOpenAtom } from "../../atoms";
 import { cn } from "@/utils/tailwind";
-import { Provider } from "@/types/provider";
+import { Provider } from "@/types/config/provider";
 import {
   Select,
   SelectContent,

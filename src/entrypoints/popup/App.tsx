@@ -1,9 +1,10 @@
 import { Bolt, Star } from "lucide-react";
 import { LanguageOptions } from "./components/LanguageOptions";
 import { LanguageLevelSelector } from "./components/LanguageLevel";
-import { ShowFloatingButton } from "./components/ShowFloatingButton";
+import { EnabledFloatingButton } from "./components/EnabledFloatingButton";
 import { ProviderSelector } from "./components/ProviderSelector";
 import { version } from "../../../package.json";
+import Hotkey from "./components/Hotkey";
 
 function App() {
   return (
@@ -13,7 +14,8 @@ function App() {
         <ProviderSelector />
         <LanguageLevelSelector />
         {/* <Button>{i18n.t("popup.readForMe")}</Button> */}
-        <ShowFloatingButton />
+        <Hotkey />
+        <EnabledFloatingButton />
       </div>
       <div className="py-1 flex items-center justify-between px-2 bg-neutral-200 dark:bg-neutral-800">
         <button

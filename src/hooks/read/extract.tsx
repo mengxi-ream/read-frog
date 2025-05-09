@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Readability } from "@mozilla/readability";
 import { franc } from "franc-min";
-import { flattenToParagraphs } from "@/entrypoints/content/utils/article";
+import { flattenToParagraphs } from "@/entrypoints/side.content/utils/article";
 import { ExtractedContent } from "@/types/content";
-import { LangCodeISO6393 } from "@/types/languages";
+import { LangCodeISO6393 } from "@/types/config/languages";
 
 export function useExtractContent() {
   return useQuery<ExtractedContent>({

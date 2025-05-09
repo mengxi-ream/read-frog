@@ -1,0 +1,30 @@
+import { Switch } from "@/components/ui/Switch";
+import { configFields } from "@/utils/atoms/config";
+import { useAtom } from "jotai";
+
+export const EnabledFloatingButton = () => {
+  // const [enabledFloatingButton, setEnabledFloatingButton] =
+  //   useStorageState<boolean>(
+  //     "enabledFloatingButton" satisfies ConfigKey,
+  //     initialConfig.enabledFloatingButton
+  //   );
+  // console.log("EnabledFloatingButton", enabledFloatingButton);
+
+  const [floatingButton, setFloatingButton] = useAtom(
+    configFields.floatingButton
+  );
+
+  return (
+    <div className="flex items-center justify-between gap-2">
+      <span className="font-medium text-[13px]">
+        {i18n.t("popup.enabledFloatingButton")}
+      </span>
+      <Switch
+        checked={floatingButton.enabled}
+        onCheckedChange={(checked) => {
+          setFloatingButton({ enabled: checked });
+        }}
+      />
+    </div>
+  );
+};

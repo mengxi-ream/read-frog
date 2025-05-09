@@ -1,4 +1,4 @@
-import { langCodeToEnglishName } from "@/types/languages";
+import { langCodeToEnglishName } from "@/types/config/languages";
 
 export const getAnalyzePrompt = (targetLang: string) => `# Identity
 

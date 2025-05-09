@@ -4,12 +4,14 @@ import { DEFAULT_BUTTON_POSITION } from "../../../utils/constants/side";
 import readFrogLogo from "@/assets/icon/read-frog.png";
 import { Bolt, X } from "lucide-react";
 import { APP_NAME } from "@/utils/constants/app";
+import { ConfigKey } from "@/types/config/config";
 
 export default function FloatingButton() {
-  const [showFloatingButton, setShowFloatingButton] = useStorageState<boolean>(
-    "showFloatingButton",
-    false
-  );
+  const [enabledFloatingButton, setEnabledFloatingButton] =
+    useStorageState<boolean>(
+      "enabledFloatingButton" satisfies ConfigKey,
+      initialConfig.enabledFloatingButton
+    );
   // top of the whole component
   const [buttonPosition, setButtonPosition] = useStorageState<number | null>(
     "buttonPosition",
@@ -93,7 +95,7 @@ export default function FloatingButton() {
   };
 
   return (
-    showFloatingButton &&
+    enabledFloatingButton &&
     buttonPosition && (
       <div
         className="fixed z-[2147483647] flex flex-col items-end group gap-2"
@@ -107,7 +109,7 @@ export default function FloatingButton() {
         <div
           title="Close floating button"
           className="cursor-pointer rounded-full dark:bg-neutral-900 bg-neutral-100 p-0.5 mr-1 group-hover:translate-x-0 translate-x-6 transition-transform duration-300"
-          onClick={() => setShowFloatingButton(false)}
+          onClick={() => setEnabledFloatingButton(false)}
         >
           <X className="w-3 h-3 dark:text-neutral-600 text-neutral-400" />
         </div>

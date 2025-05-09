@@ -5,7 +5,7 @@ popup:
   sourceLang: 來源語言
   targetLang: 目標語言
   readForMe: 為我閱讀
-  showFloatingButton: 開啟懸浮按鈕
+  enabledFloatingButton: 開啟懸浮按鈕
   setting: 設定
 translateService: 翻譯服務
 languageLevel: 你的來源語言水平

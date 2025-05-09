@@ -9,13 +9,10 @@ import {
   SelectItem,
 } from "@/components/ui/Select";
 import { useState } from "react";
-import { useStorageState } from "@/hooks/useStorageState";
-import {
-  Provider,
-  ProviderConfig,
-  providerModels,
-  providers,
-} from "@/types/provider";
+import { Provider, providerModels, providers } from "@/types/config/provider";
+import { configFields } from "@/utils/atoms/config";
+import { useAtom } from "jotai";
+import { PROVIDER_ITEMS } from "@/utils/constants/config";
 
 function App() {
   return (
@@ -29,32 +26,34 @@ function App() {
 
 const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
   const [showAPIKey, setShowAPIKey] = useState(false);
-  const [providerConfig, setProviderConfig] = useStorageState<ProviderConfig>(
-    "providerConfig",
-    defaultProviderConfig
+  const [providersConfig, setProvidersConfig] = useAtom(
+    configFields.providersConfig
   );
 
   return (
     <div>
       <div className="flex items-center justify-center gap-2 mb-4">
         <img
-          src={providerItems[provider].logo}
-          alt={providerItems[provider].name}
+          src={PROVIDER_ITEMS[provider].logo}
+          alt={PROVIDER_ITEMS[provider].name}
           className="w-6 h-6 rounded-full border border-border bg-white"
         />
         <span className="font-medium">
-          {providerItems[provider].name} Config
+          {PROVIDER_ITEMS[provider].name} Config
         </span>
       </div>
       <div className="text-sm font-medium">API Key</div>
       <Input
         className="mt-1 mb-2"
-        value={providerConfig[provider].apiKey}
+        value={providersConfig[provider].apiKey}
         type={showAPIKey ? "text" : "password"}
         onChange={(e) =>
-          setProviderConfig({
-            ...providerConfig,
-            [provider]: { ...providerConfig[provider], apiKey: e.target.value },
+          setProvidersConfig({
+            ...providersConfig,
+            [provider]: {
+              ...providersConfig[provider],
+              apiKey: e.target.value,
+            },
           })
         }
       />
@@ -72,15 +71,15 @@ const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
         </label>
       </div>
       <div className="text-sm font-medium mt-4">Model</div>
-      {providerConfig[provider].isCustomModel ? (
+      {providersConfig[provider].isCustomModel ? (
         <Input
           className="mt-1 mb-2"
-          value={providerConfig[provider].customModel}
+          value={providersConfig[provider].customModel}
           onChange={(e) =>
-            setProviderConfig({
-              ...providerConfig,
+            setProvidersConfig({
+              ...providersConfig,
               [provider]: {
-                ...providerConfig[provider],
+                ...providersConfig[provider],
                 customModel: e.target.value,
               },
             })
@@ -88,11 +87,11 @@ const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
         />
       ) : (
         <Select
-          value={providerConfig[provider].model}
+          value={providersConfig[provider].model}
           onValueChange={(value) =>
-            setProviderConfig({
-              ...providerConfig,
-              [provider]: { ...providerConfig[provider], model: value },
+            setProvidersConfig({
+              ...providersConfig,
+              [provider]: { ...providersConfig[provider], model: value },
             })
           }
         >
@@ -113,22 +112,22 @@ const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
       <div className="flex items-center space-x-2 mt-2">
         <Checkbox
           id={`isCustomModel-${provider}`}
-          checked={providerConfig[provider].isCustomModel}
+          checked={providersConfig[provider].isCustomModel}
           onCheckedChange={(checked) => {
             if (checked === false) {
-              setProviderConfig({
-                ...providerConfig,
+              setProvidersConfig({
+                ...providersConfig,
                 [provider]: {
-                  ...providerConfig[provider],
+                  ...providersConfig[provider],
                   isCustomModel: false,
                 },
               });
             } else {
-              setProviderConfig({
-                ...providerConfig,
+              setProvidersConfig({
+                ...providersConfig,
                 [provider]: {
-                  ...providerConfig[provider],
-                  customModel: providerConfig[provider].model,
+                  ...providersConfig[provider],
+                  customModel: providersConfig[provider].model,
                   isCustomModel: true,
                 },
               });

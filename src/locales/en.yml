@@ -5,7 +5,7 @@ popup:
   sourceLang: "Source"
   targetLang: "Target"
   readForMe: "Read For Me"
-  showFloatingButton: "Show Floating Button"
+  enabledFloatingButton: "Show Floating Button"
   setting: "Options"
 side:
   sourceLang: "Source Language"

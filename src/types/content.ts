@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { langCodeISO6393 } from "./languages";
+import { langCodeISO6393 } from "./config/languages";
 
 export type ExtractedContent = {
   article: {

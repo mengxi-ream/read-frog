@@ -5,13 +5,12 @@ import {
   SelectValue,
 } from "@/components/ui/Select";
 import { Select } from "@/components/ui/Select";
-import { Provider } from "@/types/provider";
+import { configFields } from "@/utils/atoms/config";
+import { PROVIDER_ITEMS } from "@/utils/constants/config";
+import { useAtom } from "jotai";
 
 export const ProviderSelector = () => {
-  const [provider, setProvider] = useStorageState<Provider>(
-    "provider",
-    "openai"
-  );
+  const [provider, setProvider] = useAtom(configFields.provider);
 
   return (
     <div className="flex items-center gap-2 justify-between">
@@ -23,7 +22,7 @@ export const ProviderSelector = () => {
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          {Object.entries(providerItems).map(([value, { logo, name }]) => (
+          {Object.entries(PROVIDER_ITEMS).map(([value, { logo, name }]) => (
             <SelectItem key={value} value={value}>
               <TranslateItem logo={logo} name={name} />
             </SelectItem>
