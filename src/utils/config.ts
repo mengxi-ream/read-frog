@@ -1,6 +1,5 @@
-import { Config } from "@/types/config/config";
+import { Config, configSchema } from "@/types/config/config";
 import { DEFAULT_CONFIG, CONFIG_STORAGE_KEY } from "./constants/config";
-import { configSchema } from "./schemas/config";
 import deepmerge from "deepmerge";
 
 export async function initializeConfig() {

@@ -1,21 +1,23 @@
 import { useAtom, useAtomValue } from "jotai";
 import { isSideOpenAtom, sideContentWidthAtom } from "../atoms";
-import { DEFAULT_BUTTON_POSITION } from "../../../utils/constants/side";
 import readFrogLogo from "@/assets/icon/read-frog.png";
 import { Bolt, X } from "lucide-react";
 import { APP_NAME } from "@/utils/constants/app";
-import { ConfigKey } from "@/types/config/config";
+import { configFields } from "@/utils/atoms/config";
 
 export default function FloatingButton() {
-  const [enabledFloatingButton, setEnabledFloatingButton] =
-    useStorageState<boolean>(
-      "enabledFloatingButton" satisfies ConfigKey,
-      initialConfig.enabledFloatingButton
-    );
-  // top of the whole component
-  const [buttonPosition, setButtonPosition] = useStorageState<number | null>(
-    "buttonPosition",
-    DEFAULT_BUTTON_POSITION
+  // const [enabledFloatingButton, setEnabledFloatingButton] =
+  //   useStorageState<boolean>(
+  //     "enabledFloatingButton" satisfies ConfigKey,
+  //     initialConfig.enabledFloatingButton
+  //   );
+  // // top of the whole component
+  // const [buttonPosition, setButtonPosition] = useStorageState<number | null>(
+  //   "buttonPosition",
+  //   DEFAULT_BUTTON_POSITION
+  // );
+  const [floatingButton, setFloatingButton] = useAtom(
+    configFields.floatingButton
   );
   const [isSideOpen, setIsSideOpen] = useAtom(isSideOpenAtom);
   const sideContentWidth = useAtomValue(sideContentWidthAtom);
@@ -25,10 +27,10 @@ export default function FloatingButton() {
 
   // 按钮拖动处理
   useEffect(() => {
-    if (!isDraggingButton || !initialClientY || !buttonPosition) return;
+    if (!isDraggingButton || !initialClientY || !floatingButton) return;
 
     const handleMouseMove = (e: MouseEvent) => {
-      const initialY = buttonPosition * window.innerHeight;
+      const initialY = floatingButton.position * window.innerHeight;
       const newY = Math.max(
         30,
         Math.min(
@@ -37,7 +39,7 @@ export default function FloatingButton() {
         )
       );
       const newPosition = newY / window.innerHeight;
-      setButtonPosition(newPosition);
+      setFloatingButton({ position: newPosition });
     };
 
     const handleMouseUp = () => {
@@ -95,21 +97,20 @@ export default function FloatingButton() {
   };
 
   return (
-    enabledFloatingButton &&
-    buttonPosition && (
+    floatingButton.enabled && (
       <div
         className="fixed z-[2147483647] flex flex-col items-end group gap-2"
         style={{
           right: isSideOpen
             ? `calc(${sideContentWidth}px + var(--removed-body-scroll-bar-size, 0px))`
             : "var(--removed-body-scroll-bar-size, 0px)",
-          top: `${buttonPosition * 100}vh`,
+          top: `${floatingButton.position * 100}vh`,
         }}
       >
         <div
           title="Close floating button"
           className="cursor-pointer rounded-full dark:bg-neutral-900 bg-neutral-100 p-0.5 mr-1 group-hover:translate-x-0 translate-x-6 transition-transform duration-300"
-          onClick={() => setEnabledFloatingButton(false)}
+          onClick={() => setFloatingButton({ enabled: false })}
         >
           <X className="w-3 h-3 dark:text-neutral-600 text-neutral-400" />
         </div>

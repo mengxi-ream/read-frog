@@ -165,5 +165,4 @@ export const langCodeToEnglishName: Record<LangCodeISO6393, string> = {
 };
 
 export const langLevel = z.enum(["beginner", "intermediate", "advanced"]);
-
 export type LangLevel = z.infer<typeof langLevel>;

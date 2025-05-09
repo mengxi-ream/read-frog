@@ -42,14 +42,11 @@ export default function LanguageOptionsSelector() {
           <option value="auto">
             {langCodeToEnglishName[language.detectedCode]} (auto)
           </option>
-          {langCodeISO6393.options.map(
-            (key) =>
-              key !== language.detectedCode && (
-                <option key={key} value={key}>
-                  {langCodeToEnglishName[key]}
-                </option>
-              )
-          )}
+          {langCodeISO6393.options.map((key) => (
+            <option key={key} value={key}>
+              {langCodeToEnglishName[key]}
+            </option>
+          ))}
         </select>
       </div>
       <ArrowRight className="w-4 h-4 text-neutral-500" strokeWidth={2} />
@@ -75,4 +72,4 @@ export default function LanguageOptionsSelector() {
       </div>
     </div>
   );
-};
+}

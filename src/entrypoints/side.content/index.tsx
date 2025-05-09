@@ -1,5 +1,5 @@
 import ReactDOM from "react-dom/client";
-import App from "./App";
+import App from "./app";
 import "@/assets/tailwind/theme.css";
 import "@/assets/tailwind/text-small.css";
 import {
@@ -8,8 +8,6 @@ import {
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { useHydrateAtoms } from "jotai/react/utils";
-import { queryClientAtom } from "jotai-tanstack-query";
 import { Provider as JotaiProvider } from "jotai/react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { store } from "./atoms";
@@ -65,26 +63,20 @@ export default defineContentScript({
             },
           }),
         });
-        const HydrateAtoms = ({ children }: { children: React.ReactNode }) => {
-          useHydrateAtoms([[queryClientAtom, queryClient]]);
-          return children;
-        };
 
-        // root.render(
-        //   <QueryClientProvider client={queryClient}>
-        //     <JotaiProvider store={store}>
-        //       <HydrateAtoms>
-        //         <TooltipProvider>
-        //           <App />
-        //         </TooltipProvider>
-        //       </HydrateAtoms>
-        //     </JotaiProvider>
-        //     <ReactQueryDevtools
-        //       initialIsOpen={false}
-        //       buttonPosition="bottom-left"
-        //     />
-        //   </QueryClientProvider>
-        // );
+        root.render(
+          <QueryClientProvider client={queryClient}>
+            <JotaiProvider store={store}>
+                <TooltipProvider>
+                  <App />
+                </TooltipProvider>
+            </JotaiProvider>
+            <ReactQueryDevtools
+              initialIsOpen={false}
+              buttonPosition="bottom-left"
+            />
+          </QueryClientProvider>
+        );
         return { root, wrapper };
       },
       onRemove: (elements) => {

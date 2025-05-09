@@ -12,6 +12,9 @@ export const HOTKEY_ITEMS: Record<Hotkey, { label: string; icon: string }> = {
   "~": { label: "Tilde", icon: "~" },
 };
 
+export const MIN_SIDE_CONTENT_WIDTH = 400; // px
+export const DEFAULT_SIDE_CONTENT_WIDTH = 400; // px
+
 export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
     apiKey: undefined,
@@ -42,6 +45,10 @@ export const DEFAULT_CONFIG: Config = {
   },
   floatingButton: {
     enabled: true,
+    position: 0.66,
+  },
+  sideContent: {
+    width: DEFAULT_SIDE_CONTENT_WIDTH,
   },
 };
 

@@ -1,5 +1,5 @@
-import FloatingButton from "./components/FloatingButton";
-import SideContent from "./components/SideContent";
+import FloatingButton from "./components/floating-button";
+import SideContent from "./components/side-content";
 
 export default function App() {
   return (

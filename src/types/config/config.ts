@@ -2,6 +2,7 @@ import { HOTKEYS } from "@/utils/constants/config";
 import { providersConfigSchema, providerSchema } from "./provider";
 import { z } from "zod";
 import { langCodeISO6393, langLevel } from "@/types/config/languages";
+import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side";
 
 const hotkey = z.enum(HOTKEYS);
 export type Hotkey = (typeof HOTKEYS)[number];
@@ -23,6 +24,12 @@ const manualTranslateSchema = z.object({
 // Floating button schema
 const floatingButtonSchema = z.object({
   enabled: z.boolean(),
+  position: z.number().min(0).max(1),
+});
+
+// side content schema
+const sideContentSchema = z.object({
+  width: z.number().min(MIN_SIDE_CONTENT_WIDTH),
 });
 
 // Complete config schema
@@ -32,6 +39,7 @@ export const configSchema = z.object({
   providersConfig: providersConfigSchema,
   manualTranslate: manualTranslateSchema,
   floatingButton: floatingButtonSchema,
+  sideContent: sideContentSchema,
 });
 
 export type Config = z.infer<typeof configSchema>;

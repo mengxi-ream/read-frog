@@ -2,13 +2,13 @@
 import {
   LangCodeISO6393,
   langCodeToEnglishName,
+  langLevel,
   LangLevel,
 } from "@/types/config/languages";
-import { useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { ArrowRight, X } from "lucide-react";
 import { isSideOpenAtom } from "../../atoms";
 import { cn } from "@/utils/tailwind";
-import { Provider } from "@/types/config/provider";
 import {
   Select,
   SelectContent,
@@ -17,13 +17,14 @@ import {
   SelectTrigger,
 } from "@/components/ui/Select";
 import { shadowWrapper } from "../..";
-import { useStorageState } from "@/hooks/useStorageState";
 import { SelectGroup } from "@radix-ui/react-select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/Tooltip";
+import { PROVIDER_ITEMS } from "@/utils/constants/config";
+import { configFields } from "@/utils/atoms/config";
 
 export const TopBar = ({ className }: { className?: string }) => {
   const setIsSideOpen = useSetAtom(isSideOpenAtom);
@@ -59,10 +60,7 @@ export const TopBar = ({ className }: { className?: string }) => {
 };
 
 const ProviderSelect = () => {
-  const [provider, setProvider] = useStorageState<Provider>(
-    "provider",
-    "openai"
-  );
+  const [provider, setProvider] = useAtom(configFields.provider);
 
   return (
     <Select value={provider} onValueChange={setProvider}>
@@ -71,7 +69,7 @@ const ProviderSelect = () => {
         className="!size-7 p-0 flex items-center justify-center"
       >
         <img
-          src={providerItems[provider].logo}
+          src={PROVIDER_ITEMS[provider].logo}
           alt={provider}
           className="size-4 rounded-full border bg-white"
         />
@@ -79,7 +77,7 @@ const ProviderSelect = () => {
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t("translateService")}</SelectLabel>
-          {Object.entries(providerItems).map(([provider, { logo, name }]) => (
+          {Object.entries(PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
             <SelectItem key={provider} value={provider}>
               <div className="flex items-center gap-x-2">
                 <img
@@ -98,34 +96,30 @@ const ProviderSelect = () => {
 };
 
 const LangLevelSelect = () => {
-  const [langLevel, setLangLevel] = useStorageState<LangLevel>(
-    "langLevel",
-    "intermediate"
-  );
+  const [language, setLanguage] = useAtom(configFields.language);
 
   return (
-    <Select value={langLevel} onValueChange={setLangLevel}>
+    <Select
+      value={language.level}
+      onValueChange={(newLevel: LangLevel) => setLanguage({ level: newLevel })}
+    >
       <SelectTrigger
         hideChevron
         className="flex items-center !h-7 gap-2 px-2 border rounded-md border-border w-auto"
       >
         <div className="w-1 h-1 rounded-full bg-orange-500 shrink-0"></div>
         <div className="min-w-0 max-w-16 truncate">
-          {i18n.t(`languageLevels.${langLevel}`)}
+          {i18n.t(`languageLevels.${language.level}`)}
         </div>
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t("languageLevel")}</SelectLabel>
-          <SelectItem value="beginner">
-            {i18n.t("languageLevels.beginner")}
-          </SelectItem>
-          <SelectItem value="intermediate">
-            {i18n.t("languageLevels.intermediate")}
-          </SelectItem>
-          <SelectItem value="advanced">
-            {i18n.t("languageLevels.advanced")}
-          </SelectItem>
+          {langLevel.options.map((level) => (
+            <SelectItem key={level} value={level}>
+              {i18n.t(`languageLevels.${level}`)}
+            </SelectItem>
+          ))}
         </SelectGroup>
       </SelectContent>
     </Select>
@@ -133,20 +127,22 @@ const LangLevelSelect = () => {
 };
 
 const TargetLangSelect = () => {
-  const [targetLangCode, setTargetLangCode] = useStorageState<LangCodeISO6393>(
-    "targetLangCode",
-    "eng"
-  );
+  const [language, setLanguage] = useAtom(configFields.language);
 
   return (
-    <Select value={targetLangCode} onValueChange={setTargetLangCode}>
+    <Select
+      value={language.targetCode}
+      onValueChange={(newTargetCode: LangCodeISO6393) =>
+        setLanguage({ targetCode: newTargetCode })
+      }
+    >
       <SelectTrigger
         hideChevron
         className="flex items-center !h-7 gap-2 px-2 border rounded-md border-border w-auto"
       >
         <div className="w-1 h-1 rounded-full bg-blue-500 shrink-0"></div>
         <div className="min-w-0 max-w-16 truncate">
-          {langCodeToEnglishName[targetLangCode]}
+          {langCodeToEnglishName[language.targetCode]}
         </div>
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
@@ -164,31 +160,31 @@ const TargetLangSelect = () => {
 };
 
 const SourceLangSelect = () => {
-  const [sourceLangCode, setSourceLangCode] = useStorageState<
-    LangCodeISO6393 | "auto"
-  >("sourceLangCode", "auto");
-  const detectedLangCode = useStorageStateValue<LangCodeISO6393>(
-    "detectedLangCode",
-    "eng"
-  );
+  const [language, setLanguage] = useAtom(configFields.language);
+
   return (
-    <Select value={sourceLangCode} onValueChange={setSourceLangCode}>
+    <Select
+      value={language.sourceCode}
+      onValueChange={(newSourceCode: LangCodeISO6393 | "auto") =>
+        setLanguage({ sourceCode: newSourceCode })
+      }
+    >
       <SelectTrigger
         hideChevron
         className="flex items-center !h-7 gap-2 px-2 border rounded-md border-border w-auto"
       >
         <div className="w-1 h-1 rounded-full bg-blue-500 shrink-0"></div>
         <div className="min-w-0 max-w-16 truncate">
-          {sourceLangCode === "auto"
-            ? langCodeToEnglishName[detectedLangCode]
-            : langCodeToEnglishName[sourceLangCode]}
+          {language.sourceCode === "auto"
+            ? langCodeToEnglishName[language.detectedCode]
+            : langCodeToEnglishName[language.sourceCode]}
         </div>
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t("side.sourceLang")}</SelectLabel>
           <SelectItem value="auto">
-            {langCodeToEnglishName[detectedLangCode]}
+            {langCodeToEnglishName[language.detectedCode]}
             <span className="text-xs bg-neutral-200 dark:bg-neutral-800 rounded-full px-1">
               auto
             </span>
