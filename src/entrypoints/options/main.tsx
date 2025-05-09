@@ -2,7 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "@/assets/tailwind/theme.css";
 import "./style.css";
-import App from "./App";
+import App from "./app";
 import { Provider as JotaiProvider } from "jotai";
 import { configAtom } from "@/utils/atoms/config";
 import { DEFAULT_CONFIG } from "@/utils/constants/config";

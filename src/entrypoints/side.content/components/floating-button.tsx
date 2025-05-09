@@ -1,26 +1,16 @@
 import { useAtom, useAtomValue } from "jotai";
-import { isSideOpenAtom, sideContentWidthAtom } from "../atoms";
+import { isSideOpenAtom } from "../atoms";
 import readFrogLogo from "@/assets/icon/read-frog.png";
 import { Bolt, X } from "lucide-react";
 import { APP_NAME } from "@/utils/constants/app";
 import { configFields } from "@/utils/atoms/config";
 
 export default function FloatingButton() {
-  // const [enabledFloatingButton, setEnabledFloatingButton] =
-  //   useStorageState<boolean>(
-  //     "enabledFloatingButton" satisfies ConfigKey,
-  //     initialConfig.enabledFloatingButton
-  //   );
-  // // top of the whole component
-  // const [buttonPosition, setButtonPosition] = useStorageState<number | null>(
-  //   "buttonPosition",
-  //   DEFAULT_BUTTON_POSITION
-  // );
   const [floatingButton, setFloatingButton] = useAtom(
     configFields.floatingButton
   );
+  const sideContent = useAtomValue(configFields.sideContent);
   const [isSideOpen, setIsSideOpen] = useAtom(isSideOpenAtom);
-  const sideContentWidth = useAtomValue(sideContentWidthAtom);
   const [isDraggingButton, setIsDraggingButton] = useState(false);
   // clientY is the top of the icon button
   const [initialClientY, setInitialClientY] = useState<number | null>(null);
@@ -102,7 +92,7 @@ export default function FloatingButton() {
         className="fixed z-[2147483647] flex flex-col items-end group gap-2"
         style={{
           right: isSideOpen
-            ? `calc(${sideContentWidth}px + var(--removed-body-scroll-bar-size, 0px))`
+            ? `calc(${sideContent.width}px + var(--removed-body-scroll-bar-size, 0px))`
             : "var(--removed-body-scroll-bar-size, 0px)",
           top: `${floatingButton.position * 100}vh`,
         }}

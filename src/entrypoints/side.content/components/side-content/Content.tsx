@@ -1,12 +1,12 @@
-import { Button } from "@/components/ui/Button";
-import { ScrollArea } from "@/components/ui/ScrollArea";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import Explanation from "./Explanation";
+import Explanation from "./explanation";
 import { useExtractContent } from "@/hooks/read/extract";
 import { useAtom, useAtomValue } from "jotai";
 import { progressAtom, readStateAtom } from "../../atoms";
-import LoadingDots from "@/components/LoadingDots";
-import { Progress } from "@/components/ui/Progress";
+import LoadingDots from "@/components/loading-dots";
+import { Progress } from "@/components/ui/progress";
 import { useExplainArticle } from "@/hooks/read/read";
 import { useMutationState } from "@tanstack/react-query";
 import { ArticleAnalysis, ArticleExplanation } from "@/types/content";

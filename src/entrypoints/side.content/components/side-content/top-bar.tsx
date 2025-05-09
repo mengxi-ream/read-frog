@@ -15,14 +15,14 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import { shadowWrapper } from "../..";
 import { SelectGroup } from "@radix-ui/react-select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/Tooltip";
+} from "@/components/ui/tooltip";
 import { PROVIDER_ITEMS } from "@/utils/constants/config";
 import { configFields } from "@/utils/atoms/config";
 

@@ -1,4 +1,4 @@
-import { Switch } from "@/components/ui/Switch";
+import { Switch } from "@/components/ui/switch";
 import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
 

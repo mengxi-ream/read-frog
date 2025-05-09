@@ -15,13 +15,18 @@ import { mirrorDynamicStyles, addStyleToShadow } from "./utils/styles";
 import { toast } from "sonner";
 import { APP_NAME } from "@/utils/constants/app";
 import { kebabCase } from "case-anything";
-import { TooltipProvider } from "@/components/ui/Tooltip";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { useHydrateAtoms } from "jotai/utils";
+import { Config } from "@/types/config/config";
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config";
+import { configAtom } from "@/utils/atoms/config";
 export let shadowWrapper: HTMLElement | null = null;
 
 export default defineContentScript({
   matches: ["*://*/*"],
   cssInjectionMode: "ui",
   async main(ctx) {
+    const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`);
     const ui = await createShadowRootUi(ctx, {
       name: kebabCase(APP_NAME),
       position: "overlay",
@@ -64,12 +69,27 @@ export default defineContentScript({
           }),
         });
 
+        const HydrateAtoms = ({
+          initialValues,
+          children,
+        }: {
+          initialValues: [[typeof configAtom, Config]];
+          children: React.ReactNode;
+        }) => {
+          useHydrateAtoms(initialValues);
+          return children;
+        };
+
         root.render(
           <QueryClientProvider client={queryClient}>
             <JotaiProvider store={store}>
+              <HydrateAtoms
+                initialValues={[[configAtom, config ?? DEFAULT_CONFIG]]}
+              >
                 <TooltipProvider>
                   <App />
                 </TooltipProvider>
+              </HydrateAtoms>
             </JotaiProvider>
             <ReactQueryDevtools
               initialIsOpen={false}

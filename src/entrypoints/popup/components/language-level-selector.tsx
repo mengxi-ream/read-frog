@@ -5,7 +5,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
 
@@ -39,4 +39,4 @@ export default function LanguageLevelSelector() {
       </Select>
     </div>
   );
-};
+}

@@ -1,5 +1,5 @@
-import { Input } from "@/components/ui/Input";
-import { Checkbox } from "@/components/ui/Checkbox";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -7,9 +7,13 @@ import {
   SelectTrigger,
   SelectGroup,
   SelectItem,
-} from "@/components/ui/Select";
+} from "@/components/ui/select";
 import { useState } from "react";
-import { Provider, providerModels, providers } from "@/types/config/provider";
+import {
+  Provider,
+  providerModels,
+  providerSchema,
+} from "@/types/config/provider";
 import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
 import { PROVIDER_ITEMS } from "@/utils/constants/config";
@@ -17,7 +21,7 @@ import { PROVIDER_ITEMS } from "@/utils/constants/config";
 function App() {
   return (
     <div className="max-w-[320px] mx-auto min-h-[100vh] my-10 flex flex-col gap-12">
-      {providers.map((provider) => (
+      {providerSchema.options.map((provider) => (
         <ProviderConfigSection key={provider} provider={provider} />
       ))}
     </div>

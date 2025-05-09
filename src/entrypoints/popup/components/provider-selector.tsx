@@ -3,8 +3,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/Select";
-import { Select } from "@/components/ui/Select";
+} from "@/components/ui/select";
+import { Select } from "@/components/ui/select";
 import { configFields } from "@/utils/atoms/config";
 import { PROVIDER_ITEMS } from "@/utils/constants/config";
 import { useAtom } from "jotai";

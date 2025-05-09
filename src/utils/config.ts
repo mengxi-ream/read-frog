@@ -11,17 +11,15 @@ export async function initializeConfig() {
   await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, newConfig);
 
   if (import.meta.env.DEV) {
-    if (config) {
-      const newProviderConfig = Object.fromEntries(
-        Object.entries(config.providersConfig).map(([provider, cfg]) => {
-          const apiKeyEnvName = `WXT_${provider.toUpperCase()}_API_KEY`;
-          return [provider, { ...cfg, apiKey: import.meta.env[apiKeyEnvName] }];
-        })
-      );
-      await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
-        ...config,
-        providersConfig: newProviderConfig,
-      });
-    }
+    const newProviderConfig = Object.fromEntries(
+      Object.entries(newConfig.providersConfig).map(([provider, cfg]) => {
+        const apiKeyEnvName = `WXT_${provider.toUpperCase()}_API_KEY`;
+        return [provider, { ...cfg, apiKey: import.meta.env[apiKeyEnvName] }];
+      })
+    );
+    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
+      ...newConfig,
+      providersConfig: newProviderConfig,
+    });
   }
 }

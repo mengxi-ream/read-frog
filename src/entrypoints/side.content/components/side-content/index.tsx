@@ -1,11 +1,9 @@
-import { sideContentWidthAtom } from "../../atoms";
 import { useAtom, useAtomValue } from "jotai";
 import { isSideOpenAtom } from "../../atoms";
 import { MIN_SIDE_CONTENT_WIDTH } from "../../../../utils/constants/side";
-import Content from "./Content";
 import { Toaster } from "sonner";
 import { TopBar } from "./top-bar";
-import { Metadata } from "./Metadata";
+import { Metadata } from "./metadata";
 import { APP_NAME } from "@/utils/constants/app";
 import { kebabCase } from "case-anything";
 import { configFields } from "@/utils/atoms/config";
@@ -102,8 +100,8 @@ export default function SideContent() {
 
         <div className="h-full flex flex-col gap-y-2 py-3">
           <TopBar className="mx-3" />
-          {/* <Metadata className="mx-3" />
-          <Content /> */}
+          <Metadata className="mx-3" />
+          {/* <Content /> */}
         </div>
         <Toaster richColors className="z-[2147483647]" />
       </div>

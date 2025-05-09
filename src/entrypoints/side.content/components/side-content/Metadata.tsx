@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { BookOpenText, RotateCcw } from "lucide-react";
 import { cn } from "@/utils/tailwind";
 import { useReadArticle } from "@/hooks/read/read";

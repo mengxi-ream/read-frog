@@ -10,17 +10,14 @@ import {
   articleExplanationSchema,
   ExtractedContent,
 } from "@/types/content";
-import {
-  LangCodeISO6393,
-  langCodeToEnglishName,
-  LangLevel,
-} from "@/types/config/languages";
-import { ProviderConfig, Provider } from "@/types/config/provider";
+import { langCodeToEnglishName } from "@/types/config/languages";
 import { getAnalyzePrompt } from "@/utils/prompts/analyze";
 import { getExplainPrompt } from "@/utils/prompts/explain";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { generateObject } from "ai";
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
+import { configFields } from "@/utils/atoms/config";
+import { configAtom } from "@/utils/atoms/config";
 
 type ExplainArticleParams = {
   extractedContent: ExtractedContent;
@@ -32,6 +29,8 @@ const MAX_CHARACTERS = 1500;
 
 export function useAnalyzeContent() {
   const setReadState = useSetAtom(readStateAtom);
+  const { language, provider, providersConfig } = useAtomValue(configAtom);
+  const setLanguage = useSetAtom(configFields.language);
   return useMutation<ArticleAnalysis, Error, ExtractedContent>({
     mutationKey: ["analyzeContent"],
     mutationFn: async (extractedContent: ExtractedContent) => {
@@ -44,24 +43,8 @@ export function useAnalyzeContent() {
       const maxAttempts = 3;
       let lastError;
 
-      const provider = await storage.getItem<Provider>("local:provider");
-      const providerConfig = await storage.getItem<ProviderConfig>(
-        "local:providerConfig"
-      );
-      if (!provider || !providerConfig) {
-        throw new Error("No provider config");
-      }
-      const model = providerConfig[provider].model;
-
-      const targetLangCode = await storage.getItem<LangCodeISO6393>(
-        "local:targetLangCode"
-      );
-
-      if (!targetLangCode || !model) {
-        throw new Error("No target language or model selected");
-      }
-
-      const targetLang = langCodeToEnglishName[targetLangCode];
+      const model = providersConfig[provider].model;
+      const targetLang = langCodeToEnglishName[language.targetCode];
       const providerRegistry = await getProviderRegistry();
 
       while (attempts < maxAttempts) {
@@ -77,12 +60,12 @@ export function useAnalyzeContent() {
           });
 
           // TODO: if und, then UI need to show UI to ask user to select the language or not continue
-          storage.setItem(
-            "local:detectedLangCode",
-            articleAnalysis.detectedLang === "und"
-              ? "cmn"
-              : articleAnalysis.detectedLang
-          );
+          setLanguage({
+            detectedCode:
+              articleAnalysis.detectedLang === "und"
+                ? "cmn"
+                : articleAnalysis.detectedLang,
+          });
           if (import.meta.env.DEV) {
             console.log("articleAnalysis", articleAnalysis);
           }
@@ -114,39 +97,16 @@ const explainBatch = async (
   let attempts = 0;
   let lastError;
 
-  const targetLangCode = await storage.getItem<LangCodeISO6393>(
-    "local:targetLangCode"
-  );
-  const sourceLangCode = await storage.getItem<LangCodeISO6393 | "auto">(
-    "local:sourceLangCode"
-  );
-  const detectedLangCode = await storage.getItem<LangCodeISO6393>(
-    "local:detectedLangCode"
-  );
-  const langLevel = await storage.getItem<LangLevel>("local:langLevel");
+  const { language, provider, providersConfig } = useAtomValue(configAtom);
 
-  if (!targetLangCode || !sourceLangCode || !detectedLangCode) {
-    throw new Error("Incomplete language settings");
-  }
-
-  const targetLang = langCodeToEnglishName[targetLangCode];
+  const targetLang = langCodeToEnglishName[language.targetCode];
   const sourceLang =
     langCodeToEnglishName[
-      sourceLangCode === "auto" ? detectedLangCode : sourceLangCode
+      language.sourceCode === "auto"
+        ? language.detectedCode
+        : language.sourceCode
     ];
-
-  const provider = await storage.getItem<Provider>("local:provider");
-  const providerConfig = await storage.getItem<ProviderConfig>(
-    "local:providerConfig"
-  );
-  if (!provider || !providerConfig) {
-    throw new Error("No provider config");
-  }
-  const model = providerConfig[provider].model;
-
-  if (!model) {
-    throw new Error("No model selected");
-  }
+  const model = providersConfig[provider].model;
 
   const providerRegistry = await getProviderRegistry();
   while (attempts < MAX_ATTEMPTS) {
@@ -156,7 +116,7 @@ const explainBatch = async (
         system: getExplainPrompt(
           sourceLang,
           targetLang,
-          langLevel ?? "intermediate"
+          language.level ?? "intermediate"
         ),
         prompt: JSON.stringify({
           overallSummary: articleAnalysis.summary,
