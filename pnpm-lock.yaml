@@ -77,9 +77,6 @@ importers:
       jotai:
         specifier: ^2.12.3
         version: 2.12.3(@types/react@19.1.2)(react@19.1.0)
-      jotai-tanstack-query:
-        specifier: ^0.9.0
-        version: 0.9.0(@tanstack/query-core@5.74.4)(jotai@2.12.3(@types/react@19.1.2)(react@19.1.0))
       lucide-react:
         specifier: ^0.501.0
         version: 0.501.0(react@19.1.0)
@@ -2455,12 +2452,6 @@ packages:
   jiti@2.4.2:
     resolution: {integrity: sha512-rg9zJN+G4n2nfJl5MW3BMygZX56zKPNVEYYqq7adpmMh4Jn2QNEwhvQlFy6jPVdcod7txZtKHWnyZiA3a0zP7A==}
     hasBin: true
-
-  jotai-tanstack-query@0.9.0:
-    resolution: {integrity: sha512-8n7/xV14+ZE63dyqngtmqs6aV1bNnQJF9bJN5Bj70USc2cMFRmsVhGGzL1cSvp5E/xXasU37czFFaZ0vavmyfA==}
-    peerDependencies:
-      '@tanstack/query-core': '*'
-      jotai: '>=2.0.0'
 
   jotai@2.12.3:
     resolution: {integrity: sha512-DpoddSkmPGXMFtdfnoIHfueFeGP643nqYUWC6REjUcME+PG2UkAtYnLbffRDw3OURI9ZUTcRWkRGLsOvxuWMCg==}
@@ -6109,11 +6100,6 @@ snapshots:
       set-function-name: 2.0.2
 
   jiti@2.4.2: {}
-
-  jotai-tanstack-query@0.9.0(@tanstack/query-core@5.74.4)(jotai@2.12.3(@types/react@19.1.2)(react@19.1.0)):
-    dependencies:
-      '@tanstack/query-core': 5.74.4
-      jotai: 2.12.3(@types/react@19.1.2)(react@19.1.0)
 
   jotai@2.12.3(@types/react@19.1.2)(react@19.1.0):
     optionalDependencies:

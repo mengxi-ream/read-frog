@@ -38,7 +38,6 @@
     "deepmerge": "^4.3.1",
     "franc-min": "^6.2.0",
     "jotai": "^2.12.3",
-    "jotai-tanstack-query": "^0.9.0",
     "lucide-react": "^0.501.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
