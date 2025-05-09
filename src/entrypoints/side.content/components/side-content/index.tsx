@@ -7,6 +7,7 @@ import { Metadata } from "./metadata";
 import { APP_NAME } from "@/utils/constants/app";
 import { kebabCase } from "case-anything";
 import { configFields } from "@/utils/atoms/config";
+import Content from "./content";
 
 export default function SideContent() {
   const isSideOpen = useAtomValue(isSideOpenAtom);
@@ -101,7 +102,7 @@ export default function SideContent() {
         <div className="h-full flex flex-col gap-y-2 py-3">
           <TopBar className="mx-3" />
           <Metadata className="mx-3" />
-          {/* <Content /> */}
+          <Content />
         </div>
         <Toaster richColors className="z-[2147483647]" />
       </div>

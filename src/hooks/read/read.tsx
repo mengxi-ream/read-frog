@@ -18,6 +18,7 @@ import { generateObject } from "ai";
 import { useAtomValue, useSetAtom } from "jotai";
 import { configFields } from "@/utils/atoms/config";
 import { configAtom } from "@/utils/atoms/config";
+import { Config } from "@/types/config/config";
 
 type ExplainArticleParams = {
   extractedContent: ExtractedContent;
@@ -92,12 +93,13 @@ export function useAnalyzeContent() {
 
 const explainBatch = async (
   batch: string[],
-  articleAnalysis: ArticleAnalysis
+  articleAnalysis: ArticleAnalysis,
+  config: Config
 ) => {
   let attempts = 0;
   let lastError;
 
-  const { language, provider, providersConfig } = useAtomValue(configAtom);
+  const { language, provider, providersConfig } = config;
 
   const targetLang = langCodeToEnglishName[language.targetCode];
   const sourceLang =
@@ -151,6 +153,7 @@ const explainBatch = async (
 
 export function useExplainArticle() {
   const setReadState = useSetAtom(readStateAtom);
+  const config = useAtomValue(configAtom);
   return useMutation<
     ArticleExplanation["paragraphs"],
     Error,
@@ -204,7 +207,7 @@ export function useExplainArticle() {
       }
 
       const allParagraphExplanations = await sendInBatchesWithFixedDelay(
-        batches.map((batch) => explainBatch(batch, articleAnalysis))
+        batches.map((batch) => explainBatch(batch, articleAnalysis, config))
       );
 
       const flattenedParagraphExplanations = allParagraphExplanations
