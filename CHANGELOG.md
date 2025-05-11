@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.4.6
+
+### Patch Changes
+
+- [#8](https://github.com/mengxi-ream/read-frog/pull/8) [`328afd9`](https://github.com/mengxi-ream/read-frog/commit/328afd9f556a960cc770647dd9947443b4c15c96) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - remove ctx
+
 ## 0.4.5
 
 ### Patch Changes
