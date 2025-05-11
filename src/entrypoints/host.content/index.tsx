@@ -6,7 +6,7 @@ import { isEditable } from "@/utils/host/dom";
 
 export default defineContentScript({
   matches: ["*://*/*"],
-  async main(ctx) {
+  async main() {
     await loadGlobalConfigPromise;
     registerTranslationTriggers();
     // const ui = createIntegratedUi(ctx, {
