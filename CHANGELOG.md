@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.4.4
+
+### Patch Changes
+
+- [`c7090e1`](https://github.com/mengxi-ream/read-frog/commit/c7090e1826a81897c78ebc4f93720bab69893fb6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - change release script
+
 ## 0.4.3
 
 ### Patch Changes
