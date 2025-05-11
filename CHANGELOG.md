@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.4.5
+
+### Patch Changes
+
+- [`856ca46`](https://github.com/mengxi-ream/read-frog/commit/856ca46e17383e91ff8035b65dff31633b3f20a0) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - allow tag for private package
+
 ## 0.4.4
 
 ### Patch Changes
