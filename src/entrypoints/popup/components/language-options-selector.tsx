@@ -21,7 +21,7 @@ export default function LanguageOptionsSelector() {
     setLanguage({ targetCode: newLangCode });
   };
 
-  console.log("language", language);
+  logger.log("language", language);
 
   return (
     <div className="flex items-center gap-2">

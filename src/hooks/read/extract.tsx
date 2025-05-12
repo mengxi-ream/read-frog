@@ -27,7 +27,7 @@ export function useExtractContent() {
       const lang = article?.textContent ? franc(article.textContent) : "und";
 
       if (import.meta.env.DEV) {
-        console.log("franc detected lang", lang);
+        logger.log("franc detected lang", lang);
       }
 
       setLanguage({
