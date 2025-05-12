@@ -11,7 +11,7 @@ export function isEditable(el: HTMLElement) {
 export function deepElementFromPoint(
   root: Document | ShadowRoot,
   x: number,
-  y: number
+  y: number,
 ) {
   // 第一步：在当前 root（Document 或 ShadowRoot）里拿第一级命中
   const el = root.elementFromPoint(x, y);

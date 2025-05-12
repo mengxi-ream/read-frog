@@ -1,13 +1,15 @@
 import { useAtom, useAtomValue } from "jotai";
-import { isSideOpenAtom } from "../atoms";
-import readFrogLogo from "@/assets/icon/read-frog.png";
 import { Bolt, X } from "lucide-react";
-import { APP_NAME } from "@/utils/constants/app";
+
+import readFrogLogo from "@/assets/icon/read-frog.png";
 import { configFields } from "@/utils/atoms/config";
+import { APP_NAME } from "@/utils/constants/app";
+
+import { isSideOpenAtom } from "../atoms";
 
 export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(
-    configFields.floatingButton
+    configFields.floatingButton,
   );
   const sideContent = useAtomValue(configFields.sideContent);
   const [isSideOpen, setIsSideOpen] = useAtom(isSideOpenAtom);
@@ -25,8 +27,8 @@ export default function FloatingButton() {
         30,
         Math.min(
           window.innerHeight - 100,
-          initialY + e.clientY - initialClientY
-        )
+          initialY + e.clientY - initialClientY,
+        ),
       );
       const newPosition = newY / window.innerHeight;
       setFloatingButton({ position: newPosition });
@@ -89,7 +91,7 @@ export default function FloatingButton() {
   return (
     floatingButton.enabled && (
       <div
-        className="fixed z-[2147483647] flex flex-col items-end group gap-2"
+        className="group fixed z-[2147483647] flex flex-col items-end gap-2"
         style={{
           right: isSideOpen
             ? `calc(${sideContent.width}px + var(--removed-body-scroll-bar-size, 0px))`
@@ -99,34 +101,34 @@ export default function FloatingButton() {
       >
         <div
           title="Close floating button"
-          className="cursor-pointer rounded-full dark:bg-neutral-900 bg-neutral-100 p-0.5 mr-1 group-hover:translate-x-0 translate-x-6 transition-transform duration-300"
+          className="mr-1 translate-x-6 cursor-pointer rounded-full bg-neutral-100 p-0.5 transition-transform duration-300 group-hover:translate-x-0 dark:bg-neutral-900"
           onClick={() => setFloatingButton({ enabled: false })}
         >
-          <X className="w-3 h-3 dark:text-neutral-600 text-neutral-400" />
+          <X className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
         </div>
         <div
           className={cn(
-            "w-15 h-10 rounded-l-full shadow-lg flex items-center dark:bg-neutral-900 border-border bg-white border border-r-0 opacity-60 group-hover:opacity-100",
-            "group-hover:translate-x-0 translate-x-5 transition-transform duration-300",
+            "border-border flex h-10 w-15 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900",
+            "translate-x-5 transition-transform duration-300 group-hover:translate-x-0",
             isSideOpen && "opacity-100",
-            isDraggingButton ? "cursor-move" : "cursor-pointer"
+            isDraggingButton ? "cursor-move" : "cursor-pointer",
           )}
           onMouseDown={handleButtonDragStart}
         >
           <img
             src={readFrogLogo}
             alt={APP_NAME}
-            className="ml-[5px] w-8 h-8 rounded-full"
+            className="ml-[5px] h-8 w-8 rounded-full"
           />
           <div className="absolute inset-0 opacity-0"></div>
         </div>
         <div
-          className="text-neutral-600 mr-2 border border-border rounded-full bg-white dark:bg-neutral-900 hover:bg-neutral-100 dark:hover:bg-neutral-800 cursor-pointer p-1.5 group-hover:translate-x-0 translate-x-12 transition-transform duration-300"
+          className="border-border mr-2 translate-x-12 cursor-pointer rounded-full border bg-white p-1.5 text-neutral-600 transition-transform duration-300 group-hover:translate-x-0 hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800"
           onClick={() => {
             browser.runtime.sendMessage({ action: "openOptionsPage" });
           }}
         >
-          <Bolt className="w-5 h-5" strokeWidth={1.8} />
+          <Bolt className="h-5 w-5" strokeWidth={1.8} />
         </div>
       </div>
     )

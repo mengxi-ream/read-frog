@@ -1,18 +1,19 @@
-import { Switch } from "@/components/ui/switch";
-import { configFields } from "@/utils/atoms/config";
 import { useAtom } from "jotai";
+
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
 } from "@/components/ui/select";
-import { HOTKEY_ITEMS, HOTKEYS } from "@/utils/constants/config";
+import { Switch } from "@/components/ui/switch";
 import { Hotkey } from "@/types/config/config";
+import { configFields } from "@/utils/atoms/config";
+import { HOTKEYS, HOTKEY_ITEMS } from "@/utils/constants/config";
 
 export default function HotkeySelector() {
   const [manualTranslate, setManualTranslate] = useAtom(
-    configFields.manualTranslate
+    configFields.manualTranslate,
   );
 
   return (
@@ -23,7 +24,7 @@ export default function HotkeySelector() {
       >
         <SelectTrigger
           size="sm"
-          className="text-[13px] truncate pl-0 font-medium shadow-none cursor-pointer border-none bg-transparent ring-none focus-visible:border-none focus-visible:ring-0 hover:bg-transparent dark:hover:bg-transparent dark:bg-transparent"
+          className="ring-none cursor-pointer truncate border-none bg-transparent pl-0 text-[13px] font-medium shadow-none hover:bg-transparent focus-visible:border-none focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent"
         >
           <div className="truncate">
             {i18n.t("popup.hover")} +{" "}

@@ -1,6 +1,7 @@
 import * as React from "react";
+import { type VariantProps, cva } from "class-variance-authority";
+
 import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/utils/tailwind";
 
@@ -33,7 +34,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 function Button({

@@ -167,10 +167,10 @@ export function extractSeoInfo(doc: Document) {
         .querySelector('meta[name="twitter:title"]')
         ?.getAttribute("content") || "",
     h1Tags: Array.from(doc.querySelectorAll("h1")).map(
-      (h) => h.textContent?.trim() || ""
+      (h) => h.textContent?.trim() || "",
     ),
     structuredData: Array.from(
-      doc.querySelectorAll('script[type="application/ld+json"]')
+      doc.querySelectorAll('script[type="application/ld+json"]'),
     ).map((script) => {
       try {
         return JSON.parse(script.textContent || "{}");

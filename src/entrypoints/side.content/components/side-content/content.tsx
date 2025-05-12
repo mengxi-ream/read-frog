@@ -1,15 +1,18 @@
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { toast } from "sonner";
-import Explanation from "./explanation";
-import { useExtractContent } from "@/hooks/read/extract";
 import { useAtom, useAtomValue } from "jotai";
-import { progressAtom, readStateAtom } from "../../atoms";
-import LoadingDots from "@/components/loading-dots";
-import { Progress } from "@/components/ui/progress";
-import { useExplainArticle } from "@/hooks/read/read";
+import { toast } from "sonner";
+
 import { useMutationState } from "@tanstack/react-query";
+
+import LoadingDots from "@/components/loading-dots";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useExtractContent } from "@/hooks/read/extract";
+import { useExplainArticle } from "@/hooks/read/read";
 import { ArticleAnalysis, ArticleExplanation } from "@/types/content";
+
+import { progressAtom, readStateAtom } from "../../atoms";
+import Explanation from "./explanation";
 
 export default function Content() {
   const progress = useAtomValue(progressAtom);
@@ -56,7 +59,7 @@ export default function Content() {
 
   if (isExtractingContent) {
     return (
-      <div className="flex-1 flex h-full w-full justify-center items-center p-4 gap-x-2">
+      <div className="flex h-full w-full flex-1 items-center justify-center gap-x-2 p-4">
         <LoadingDots />
         Extracting content...
       </div>
@@ -65,7 +68,7 @@ export default function Content() {
 
   if (readState === "analyzing") {
     return (
-      <div className="flex-1 flex h-full w-full justify-center items-center p-4 gap-x-2">
+      <div className="flex h-full w-full flex-1 items-center justify-center gap-x-2 p-4">
         <LoadingDots />
         Analyzing...
       </div>
@@ -74,7 +77,7 @@ export default function Content() {
 
   if (readState === "continue?") {
     return (
-      <div className="flex-1 flex h-full w-full justify-center items-center p-4 gap-x-2">
+      <div className="flex h-full w-full flex-1 items-center justify-center gap-x-2 p-4">
         <div className="flex flex-col gap-6">
           <p>
             The content does not appear to be an article or book. Are you sure
@@ -90,7 +93,7 @@ export default function Content() {
 
   if (readState === "explaining") {
     return (
-      <div className="flex-1 flex h-full w-full justify-center items-center p-4 gap-x-2">
+      <div className="flex h-full w-full flex-1 items-center justify-center gap-x-2 p-4">
         <div className="flex flex-col gap-6">
           <div className="flex items-center gap-2">
             <LoadingDots />
@@ -111,7 +114,7 @@ export default function Content() {
     <>
       {explainDataList.length > 0 &&
       explainDataList[explainDataList.length - 1] ? (
-        <ScrollArea className="flex-1 h-full">
+        <ScrollArea className="h-full flex-1">
           <Explanation
             articleExplanation={
               explainDataList[

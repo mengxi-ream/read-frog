@@ -1,7 +1,10 @@
 import { createProviderRegistry } from "ai";
-import { createOpenAI } from "@ai-sdk/openai";
+
 import { createDeepSeek } from "@ai-sdk/deepseek";
+import { createOpenAI } from "@ai-sdk/openai";
+
 import { Config } from "@/types/config/config";
+
 import { CONFIG_STORAGE_KEY } from "./constants/config";
 
 export async function getProviderRegistry() {

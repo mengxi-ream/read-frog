@@ -1,8 +1,9 @@
-import "@/assets/tailwind/theme.css";
 import "@/assets/tailwind/text-small.css";
-import "./style.css";
-import { handleShowOrHideTranslationAction } from "@/utils/host/translate";
+import "@/assets/tailwind/theme.css";
 import { isEditable } from "@/utils/host/dom";
+import { handleShowOrHideTranslationAction } from "@/utils/host/translate";
+
+import "./style.css";
 
 export default defineContentScript({
   matches: ["*://*/*"],

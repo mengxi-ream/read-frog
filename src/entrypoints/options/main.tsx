@@ -1,19 +1,21 @@
+import { Provider as JotaiProvider } from "jotai";
+import { useHydrateAtoms } from "jotai/utils";
 import React from "react";
 import ReactDOM from "react-dom/client";
+
 import "@/assets/tailwind/theme.css";
-import "./style.css";
-import App from "./app";
-import { Provider as JotaiProvider } from "jotai";
+import { Config } from "@/types/config/config";
 import { configAtom } from "@/utils/atoms/config";
 import { DEFAULT_CONFIG } from "@/utils/constants/config";
-import { useHydrateAtoms } from "jotai/utils";
-import { Config } from "@/types/config/config";
+
+import App from "./app";
+import "./style.css";
 
 document.documentElement.classList.toggle(
   "dark",
   localStorage.theme === "dark" ||
     (!("theme" in localStorage) &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches)
+      window.matchMedia("(prefers-color-scheme: dark)").matches),
 );
 
 const HydrateAtoms = ({
@@ -40,7 +42,7 @@ async function initApp() {
           <App />
         </HydrateAtoms>
       </JotaiProvider>
-    </React.StrictMode>
+    </React.StrictMode>,
   );
 }
 

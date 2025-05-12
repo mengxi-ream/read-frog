@@ -1,6 +1,6 @@
-import helpIcon from "@/assets/icon/help.svg";
 import adviceIcon from "@/assets/icon/advice.svg";
 import discordIcon from "@/assets/icon/discord.svg";
+import helpIcon from "@/assets/icon/help.svg";
 
 const LINKS: { label: string; icon: string; url: string }[] = [
   {
@@ -36,7 +36,7 @@ function LinkCard({ link }: { link: (typeof LINKS)[number] }) {
       href={link.url}
       target="_blank"
       rel="noreferrer"
-      className="text-sm flex flex-col items-center justify-center gap-1.5 w-20 border border-border py-3 bg-input/50 rounded-md hover:bg-input"
+      className="border-border bg-input/50 hover:bg-input flex w-20 flex-col items-center justify-center gap-1.5 rounded-md border py-3 text-sm"
     >
       <img src={link.icon} alt={link.label} className="size-5" />
       {link.label}

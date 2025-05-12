@@ -16,7 +16,7 @@ export function getFaviconUrl() {
 
   for (const rel of relList) {
     const links = document.head.querySelectorAll(
-      `link[rel="${rel}"]`
+      `link[rel="${rel}"]`,
     ) as NodeListOf<HTMLLinkElement>;
 
     links.forEach((link) => {

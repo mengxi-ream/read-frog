@@ -1,24 +1,26 @@
+import { generateObject } from "ai";
+import { useAtomValue, useSetAtom } from "jotai";
+
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import {
   progressAtom,
   readStateAtom,
   store,
 } from "@/entrypoints/side.content/atoms";
+import { Config } from "@/types/config/config";
+import { langCodeToEnglishName } from "@/types/config/languages";
 import {
   ArticleAnalysis,
-  articleAnalysisSchema,
   ArticleExplanation,
-  articleExplanationSchema,
   ExtractedContent,
+  articleAnalysisSchema,
+  articleExplanationSchema,
 } from "@/types/content";
-import { langCodeToEnglishName } from "@/types/config/languages";
-import { getAnalyzePrompt } from "@/utils/prompts/analyze";
-import { getExplainPrompt } from "@/utils/prompts/explain";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { generateObject } from "ai";
-import { useAtomValue, useSetAtom } from "jotai";
 import { configFields } from "@/utils/atoms/config";
 import { configAtom } from "@/utils/atoms/config";
-import { Config } from "@/types/config/config";
+import { getAnalyzePrompt } from "@/utils/prompts/analyze";
+import { getExplainPrompt } from "@/utils/prompts/explain";
 
 type ExplainArticleParams = {
   extractedContent: ExtractedContent;
@@ -77,7 +79,7 @@ export function useAnalyzeContent() {
           if (import.meta.env.DEV) {
             console.error(
               `error when attempt ${attempts} to analyze content`,
-              error
+              error,
             );
           }
         }
@@ -94,7 +96,7 @@ export function useAnalyzeContent() {
 const explainBatch = async (
   batch: string[],
   articleAnalysis: ArticleAnalysis,
-  config: Config
+  config: Config,
 ) => {
   let attempts = 0;
   let lastError;
@@ -118,7 +120,7 @@ const explainBatch = async (
         system: getExplainPrompt(
           sourceLang,
           targetLang,
-          language.level ?? "intermediate"
+          language.level ?? "intermediate",
         ),
         prompt: JSON.stringify({
           overallSummary: articleAnalysis.summary,
@@ -142,7 +144,7 @@ const explainBatch = async (
         console.error(
           `error when attempt ${attempts} to explain batch`,
           batch,
-          error
+          error,
         );
       }
     }
@@ -164,7 +166,7 @@ export function useExplainArticle() {
       const { extractedContent, articleAnalysis } = params;
       if (!extractedContent?.paragraphs.length || !articleAnalysis) {
         throw new Error(
-          "No content or summary available for explanation generation"
+          "No content or summary available for explanation generation",
         );
       }
       setReadState("explaining");
@@ -207,7 +209,7 @@ export function useExplainArticle() {
       }
 
       const allParagraphExplanations = await sendInBatchesWithFixedDelay(
-        batches.map((batch) => explainBatch(batch, articleAnalysis, config))
+        batches.map((batch) => explainBatch(batch, articleAnalysis, config)),
       );
 
       const flattenedParagraphExplanations = allParagraphExplanations

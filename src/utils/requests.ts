@@ -9,7 +9,7 @@
 export async function sendInBatchesWithFixedDelay<T>(
   promiseFns: Promise<T>[],
   batchSize = 8,
-  intervalMs = 5000
+  intervalMs = 5000,
 ) {
   const allPromises: Promise<T>[] = [];
 

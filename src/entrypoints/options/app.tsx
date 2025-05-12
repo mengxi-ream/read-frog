@@ -1,26 +1,27 @@
-import { Input } from "@/components/ui/input";
+import { useAtom } from "jotai";
+import { useState } from "react";
+
 import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
-  SelectValue,
-  SelectTrigger,
   SelectGroup,
   SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
-import { useState } from "react";
 import {
   Provider,
   providerModels,
   providerSchema,
 } from "@/types/config/provider";
 import { configFields } from "@/utils/atoms/config";
-import { useAtom } from "jotai";
 import { PROVIDER_ITEMS } from "@/utils/constants/config";
 
 function App() {
   return (
-    <div className="max-w-[320px] mx-auto min-h-[100vh] my-10 flex flex-col gap-12">
+    <div className="mx-auto my-10 flex min-h-[100vh] max-w-[320px] flex-col gap-12">
       {providerSchema.options.map((provider) => (
         <ProviderConfigSection key={provider} provider={provider} />
       ))}
@@ -31,16 +32,16 @@ function App() {
 const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
   const [showAPIKey, setShowAPIKey] = useState(false);
   const [providersConfig, setProvidersConfig] = useAtom(
-    configFields.providersConfig
+    configFields.providersConfig,
   );
 
   return (
     <div>
-      <div className="flex items-center justify-center gap-2 mb-4">
+      <div className="mb-4 flex items-center justify-center gap-2">
         <img
           src={PROVIDER_ITEMS[provider].logo}
           alt={PROVIDER_ITEMS[provider].name}
-          className="w-6 h-6 rounded-full border border-border bg-white"
+          className="border-border h-6 w-6 rounded-full border bg-white"
         />
         <span className="font-medium">
           {PROVIDER_ITEMS[provider].name} Config
@@ -69,12 +70,12 @@ const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
         />
         <label
           htmlFor={`apiKey-${provider}`}
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           Show API Key
         </label>
       </div>
-      <div className="text-sm font-medium mt-4">Model</div>
+      <div className="mt-4 text-sm font-medium">Model</div>
       {providersConfig[provider].isCustomModel ? (
         <Input
           className="mt-1 mb-2"
@@ -99,7 +100,7 @@ const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
             })
           }
         >
-          <SelectTrigger className="w-full mt-1">
+          <SelectTrigger className="mt-1 w-full">
             <SelectValue placeholder="Select a model" />
           </SelectTrigger>
           <SelectContent>
@@ -113,7 +114,7 @@ const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
           </SelectContent>
         </Select>
       )}
-      <div className="flex items-center space-x-2 mt-2">
+      <div className="mt-2 flex items-center space-x-2">
         <Checkbox
           id={`isCustomModel-${provider}`}
           checked={providersConfig[provider].isCustomModel}
@@ -140,7 +141,7 @@ const ProviderConfigSection = ({ provider }: { provider: Provider }) => {
         />
         <label
           htmlFor={`isCustomModel-${provider}`}
-          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
           Enter the name of the custom model
         </label>

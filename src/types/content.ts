@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { langCodeISO6393 } from "./config/languages";
 
 export type ExtractedContent = {
@@ -51,11 +52,11 @@ export const articleExplanationSchema = z.object({
             word: z.string(),
             syntacticCategory: syntacticCategoryAbbr,
             explanation: z.string(),
-          })
+          }),
         ),
         explanation: z.string(),
-      })
-    )
+      }),
+    ),
   ),
 });
 

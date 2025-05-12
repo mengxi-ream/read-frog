@@ -1,8 +1,10 @@
-import { HOTKEYS } from "@/utils/constants/config";
-import { providersConfigSchema, providerSchema } from "./provider";
 import { z } from "zod";
+
 import { langCodeISO6393, langLevel } from "@/types/config/languages";
+import { HOTKEYS } from "@/utils/constants/config";
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side";
+
+import { providerSchema, providersConfigSchema } from "./provider";
 
 const hotkey = z.enum(HOTKEYS);
 export type Hotkey = (typeof HOTKEYS)[number];

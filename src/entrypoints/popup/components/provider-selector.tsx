@@ -1,3 +1,5 @@
+import { useAtom } from "jotai";
+
 import {
   SelectContent,
   SelectItem,
@@ -7,18 +9,17 @@ import {
 import { Select } from "@/components/ui/select";
 import { configFields } from "@/utils/atoms/config";
 import { PROVIDER_ITEMS } from "@/utils/constants/config";
-import { useAtom } from "jotai";
 
 export default function ProviderSelector() {
   const [provider, setProvider] = useAtom(configFields.provider);
 
   return (
-    <div className="flex items-center gap-2 justify-between">
-      <span className="font-medium text-[13px]">
+    <div className="flex items-center justify-between gap-2">
+      <span className="text-[13px] font-medium">
         {i18n.t("translateService")}
       </span>
       <Select value={provider} onValueChange={setProvider}>
-        <SelectTrigger className="outline-none cursor-pointer bg-input/50 hover:bg-input w-31 !h-7 pl-2.5 pr-1.5">
+        <SelectTrigger className="bg-input/50 hover:bg-input !h-7 w-31 cursor-pointer pr-1.5 pl-2.5 outline-none">
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
@@ -39,7 +40,7 @@ const TranslateItem = ({ logo, name }: { logo: string; name: string }) => {
       <img
         src={logo}
         alt={name}
-        className="w-4 h-4 rounded-full border border-border bg-white"
+        className="border-border h-4 w-4 rounded-full border bg-white"
       />
       {name}
     </div>

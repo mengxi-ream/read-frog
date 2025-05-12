@@ -1,7 +1,8 @@
+import deepseekLogo from "@/assets/llm/deepseek.png";
+import openaiLogo from "@/assets/llm/openai.jpg";
 import { Config, Hotkey } from "@/types/config/config";
 import { Provider, ProvidersConfig } from "@/types/config/provider";
-import openaiLogo from "@/assets/llm/openai.jpg";
-import deepseekLogo from "@/assets/llm/deepseek.png";
+
 export const CONFIG_STORAGE_KEY = "config";
 
 export const HOTKEYS = ["Control", "Alt", "Shift", "`"] as const;

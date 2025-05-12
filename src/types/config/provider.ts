@@ -39,7 +39,7 @@ const buildSchema = <M extends Record<string, ModelTuple>>(models: M) =>
     (Object.keys(models) as (keyof M)[]).reduce((acc, key) => {
       acc[key] = providerConfigSchema(models[key]);
       return acc;
-    }, {} as SchemaShape<M>)
+    }, {} as SchemaShape<M>),
   );
 
 export const providersConfigSchema = buildSchema(providerModels);

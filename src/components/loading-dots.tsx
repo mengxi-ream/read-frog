@@ -12,7 +12,7 @@ export default function LoadingDots({ className }: LoadingDotsProps) {
       {[...Array(3)].map((_, i) => (
         <div
           key={i}
-          className="w-1 h-1.5 rounded-full bg-black dark:bg-white animate-bounce"
+          className="h-1.5 w-1 animate-bounce rounded-full bg-black dark:bg-white"
           style={{
             animationDelay: `${i * 0.2}s`,
           }}

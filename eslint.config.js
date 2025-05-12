@@ -1,10 +1,11 @@
-import js from "@eslint/js";
+import pluginReact from "eslint-plugin-react";
+import { defineConfig } from "eslint/config";
 import globals from "globals";
 import tseslint from "typescript-eslint";
-import pluginReact from "eslint-plugin-react";
-import json from "@eslint/json";
+
 import css from "@eslint/css";
-import { defineConfig } from "eslint/config";
+import js from "@eslint/js";
+import json from "@eslint/json";
 import pluginQuery from "@tanstack/eslint-plugin-query";
 
 export default defineConfig([

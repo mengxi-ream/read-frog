@@ -1,10 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
-import { Readability } from "@mozilla/readability";
 import { franc } from "franc-min";
-import { flattenToParagraphs } from "@/entrypoints/side.content/utils/article";
-import { ExtractedContent } from "@/types/content";
-import { LangCodeISO6393 } from "@/types/config/languages";
 import { useSetAtom } from "jotai";
+
+import { Readability } from "@mozilla/readability";
+import { useQuery } from "@tanstack/react-query";
+
+import { flattenToParagraphs } from "@/entrypoints/side.content/utils/article";
+import { LangCodeISO6393 } from "@/types/config/languages";
+import { ExtractedContent } from "@/types/content";
 import { configFields } from "@/utils/atoms/config";
 
 export function useExtractContent() {

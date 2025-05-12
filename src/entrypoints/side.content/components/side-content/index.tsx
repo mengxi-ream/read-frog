@@ -1,13 +1,15 @@
-import { useAtom, useAtomValue } from "jotai";
-import { isSideOpenAtom } from "../../atoms";
-import { MIN_SIDE_CONTENT_WIDTH } from "../../../../utils/constants/side";
-import { Toaster } from "sonner";
-import { TopBar } from "./top-bar";
-import { Metadata } from "./metadata";
-import { APP_NAME } from "@/utils/constants/app";
 import { kebabCase } from "case-anything";
+import { useAtom, useAtomValue } from "jotai";
+import { Toaster } from "sonner";
+
 import { configFields } from "@/utils/atoms/config";
+import { APP_NAME } from "@/utils/constants/app";
+
+import { MIN_SIDE_CONTENT_WIDTH } from "../../../../utils/constants/side";
+import { isSideOpenAtom } from "../../atoms";
 import Content from "./content";
+import { Metadata } from "./metadata";
+import { TopBar } from "./top-bar";
 
 export default function SideContent() {
   const isSideOpen = useAtomValue(isSideOpenAtom);
@@ -84,10 +86,10 @@ export default function SideContent() {
     <>
       <div
         className={cn(
-          "fixed top-0 right-0 bg-background h-full z-[2147483647] pr-[var(--removed-body-scroll-bar-size,0px)]",
+          "bg-background fixed top-0 right-0 z-[2147483647] h-full pr-[var(--removed-body-scroll-bar-size,0px)]",
           isSideOpen
-            ? "translate-x-0 border-l border-border"
-            : "translate-x-full"
+            ? "border-border translate-x-0 border-l"
+            : "translate-x-full",
         )}
         style={{
           width: `calc(${sideContent.width}px + var(--removed-body-scroll-bar-size, 0px))`,
@@ -95,11 +97,11 @@ export default function SideContent() {
       >
         {/* Resize handle */}
         <div
-          className="absolute left-0 top-0 w-2 h-full justify-center bg-transparent cursor-ew-resize z-10"
+          className="absolute top-0 left-0 z-10 h-full w-2 cursor-ew-resize justify-center bg-transparent"
           onMouseDown={handleResizeStart}
         ></div>
 
-        <div className="h-full flex flex-col gap-y-2 py-3">
+        <div className="flex h-full flex-col gap-y-2 py-3">
           <TopBar className="mx-3" />
           <Metadata className="mx-3" />
           <Content />
@@ -109,7 +111,7 @@ export default function SideContent() {
 
       {/* Transparent overlay to prevent other events during resizing */}
       {isResizing && (
-        <div className="fixed inset-0 bg-transparent z-[2147483647] cursor-ew-resize" />
+        <div className="fixed inset-0 z-[2147483647] cursor-ew-resize bg-transparent" />
       )}
     </>
   );

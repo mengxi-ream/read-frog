@@ -1,26 +1,30 @@
+import { kebabCase } from "case-anything";
+import { Provider as JotaiProvider } from "jotai/react";
+import { useHydrateAtoms } from "jotai/utils";
 import ReactDOM from "react-dom/client";
-import App from "./app";
-import "@/assets/tailwind/theme.css";
-import "@/assets/tailwind/text-small.css";
-import "@/entrypoints/host.content/style.css";
+import { toast } from "sonner";
+
 import {
   MutationCache,
   QueryCache,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { Provider as JotaiProvider } from "jotai/react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { store } from "./atoms";
-import { mirrorDynamicStyles, addStyleToShadow } from "./utils/styles";
-import { toast } from "sonner";
-import { APP_NAME } from "@/utils/constants/app";
-import { kebabCase } from "case-anything";
+
+import "@/assets/tailwind/text-small.css";
+import "@/assets/tailwind/theme.css";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { useHydrateAtoms } from "jotai/utils";
+import "@/entrypoints/host.content/style.css";
 import { Config } from "@/types/config/config";
-import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config";
 import { configAtom } from "@/utils/atoms/config";
+import { APP_NAME } from "@/utils/constants/app";
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config";
+
+import App from "./app";
+import { store } from "./atoms";
+import { addStyleToShadow, mirrorDynamicStyles } from "./utils/styles";
+
 export let shadowWrapper: HTMLElement | null = null;
 
 export default defineContentScript({
@@ -38,7 +42,7 @@ export default defineContentScript({
         const wrapper = document.createElement("div");
         wrapper.className = cn(
           "text-base antialiased font-sans z-[2147483647]",
-          isDarkMode() && "dark"
+          isDarkMode() && "dark",
         );
         shadowWrapper = wrapper;
         container.appendChild(wrapper);
@@ -96,7 +100,7 @@ export default defineContentScript({
               initialIsOpen={false}
               buttonPosition="bottom-left"
             />
-          </QueryClientProvider>
+          </QueryClientProvider>,
         );
         return { root, wrapper };
       },

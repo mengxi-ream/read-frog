@@ -1,14 +1,9 @@
 // import { onMessage } from "@/utils/message";
-import {
-  LangCodeISO6393,
-  langCodeToEnglishName,
-  langLevel,
-  LangLevel,
-} from "@/types/config/languages";
 import { useAtom, useSetAtom } from "jotai";
 import { ArrowRight, X } from "lucide-react";
-import { isSideOpenAtom } from "../../atoms";
-import { cn } from "@/utils/tailwind";
+
+import { SelectGroup } from "@radix-ui/react-select";
+
 import {
   Select,
   SelectContent,
@@ -16,22 +11,30 @@ import {
   SelectLabel,
   SelectTrigger,
 } from "@/components/ui/select";
-import { shadowWrapper } from "../..";
-import { SelectGroup } from "@radix-ui/react-select";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { PROVIDER_ITEMS } from "@/utils/constants/config";
+import {
+  LangCodeISO6393,
+  LangLevel,
+  langCodeToEnglishName,
+  langLevel,
+} from "@/types/config/languages";
 import { configFields } from "@/utils/atoms/config";
+import { PROVIDER_ITEMS } from "@/utils/constants/config";
+import { cn } from "@/utils/tailwind";
+
+import { shadowWrapper } from "../..";
+import { isSideOpenAtom } from "../../atoms";
 
 export const TopBar = ({ className }: { className?: string }) => {
   const setIsSideOpen = useSetAtom(isSideOpenAtom);
 
   return (
-    <div className={cn("flex justify-between items-start", className)}>
-      <div className="flex text-sm gap-x-2 items-center">
+    <div className={cn("flex items-start justify-between", className)}>
+      <div className="flex items-center gap-x-2 text-sm">
         <SourceLangSelect />
         <ArrowRight size={12} strokeWidth={1} className="-mx-1" />
         <TargetLangSelect />
@@ -45,7 +48,7 @@ export const TopBar = ({ className }: { className?: string }) => {
       <Tooltip>
         <TooltipTrigger asChild>
           <button
-            className="flex items-center justify-center bg-neutral-200 dark:bg-neutral-800 rounded-full p-0.5 h-4 w-4 cursor-pointer"
+            className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-neutral-200 p-0.5 dark:bg-neutral-800"
             onClick={() => setIsSideOpen(false)}
           >
             <X strokeWidth={1.2} className="text-neutral-500" />
@@ -66,7 +69,7 @@ const ProviderSelect = () => {
     <Select value={provider} onValueChange={setProvider}>
       <SelectTrigger
         hideChevron
-        className="!size-7 p-0 flex items-center justify-center"
+        className="flex !size-7 items-center justify-center p-0"
       >
         <img
           src={PROVIDER_ITEMS[provider].logo}
@@ -105,10 +108,10 @@ const LangLevelSelect = () => {
     >
       <SelectTrigger
         hideChevron
-        className="flex items-center !h-7 gap-2 px-2 border rounded-md border-border w-auto"
+        className="border-border flex !h-7 w-auto items-center gap-2 rounded-md border px-2"
       >
-        <div className="w-1 h-1 rounded-full bg-orange-500 shrink-0"></div>
-        <div className="min-w-0 max-w-16 truncate">
+        <div className="h-1 w-1 shrink-0 rounded-full bg-orange-500"></div>
+        <div className="max-w-16 min-w-0 truncate">
           {i18n.t(`languageLevels.${language.level}`)}
         </div>
       </SelectTrigger>
@@ -138,10 +141,10 @@ const TargetLangSelect = () => {
     >
       <SelectTrigger
         hideChevron
-        className="flex items-center !h-7 gap-2 px-2 border rounded-md border-border w-auto"
+        className="border-border flex !h-7 w-auto items-center gap-2 rounded-md border px-2"
       >
-        <div className="w-1 h-1 rounded-full bg-blue-500 shrink-0"></div>
-        <div className="min-w-0 max-w-16 truncate">
+        <div className="h-1 w-1 shrink-0 rounded-full bg-blue-500"></div>
+        <div className="max-w-16 min-w-0 truncate">
           {langCodeToEnglishName[language.targetCode]}
         </div>
       </SelectTrigger>
@@ -171,10 +174,10 @@ const SourceLangSelect = () => {
     >
       <SelectTrigger
         hideChevron
-        className="flex items-center !h-7 gap-2 px-2 border rounded-md border-border w-auto"
+        className="border-border flex !h-7 w-auto items-center gap-2 rounded-md border px-2"
       >
-        <div className="w-1 h-1 rounded-full bg-blue-500 shrink-0"></div>
-        <div className="min-w-0 max-w-16 truncate">
+        <div className="h-1 w-1 shrink-0 rounded-full bg-blue-500"></div>
+        <div className="max-w-16 min-w-0 truncate">
           {language.sourceCode === "auto"
             ? langCodeToEnglishName[language.detectedCode]
             : langCodeToEnglishName[language.sourceCode]}
@@ -185,7 +188,7 @@ const SourceLangSelect = () => {
           <SelectLabel>{i18n.t("side.sourceLang")}</SelectLabel>
           <SelectItem value="auto">
             {langCodeToEnglishName[language.detectedCode]}
-            <span className="text-xs bg-neutral-200 dark:bg-neutral-800 rounded-full px-1">
+            <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">
               auto
             </span>
           </SelectItem>

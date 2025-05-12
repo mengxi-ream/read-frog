@@ -1,14 +1,16 @@
-import { langCodeToEnglishName } from "@/types/config/languages";
 import { generateText } from "ai";
-import { getTranslateLinePrompt } from "../prompts/translate-line";
+
+import { langCodeToEnglishName } from "@/types/config/languages";
+
 import { INLINE_TRANSLATE_TAGS } from "../constants/dom";
+import { getTranslateLinePrompt } from "../prompts/translate-line";
 import { getTextContent, selectNode, smashTruncationStyle } from "./dom";
 
 const translatingNodes = new Set<HTMLElement>();
 
 export function handleShowOrHideTranslationAction(
   mouseX: number,
-  mouseY: number
+  mouseY: number,
 ) {
   if (!globalConfig) return;
 
@@ -58,7 +60,7 @@ async function translateNode(node: HTMLElement) {
 
     const translatedWrapperNode = createTranslatedWrapperNode(
       targetNode,
-      translatedText
+      translatedText,
     );
 
     targetNode.appendChild(translatedWrapperNode);
@@ -71,7 +73,7 @@ async function translateNode(node: HTMLElement) {
 
 function createTranslatedWrapperNode(
   targetNode: HTMLElement,
-  translatedText: string
+  translatedText: string,
 ) {
   const translatedWrapperNode = document.createElement("span");
   translatedWrapperNode.className =
@@ -108,7 +110,7 @@ async function translateText(sourceText: string) {
     model: registry.languageModel(`${provider}:${model}`),
     prompt: getTranslateLinePrompt(
       langCodeToEnglishName[globalConfig.language.targetCode],
-      sourceText
+      sourceText,
     ),
   });
 

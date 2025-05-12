@@ -14,7 +14,7 @@ export const addStyleToShadow = (shadow: ShadowRoot) => {
 export const mirrorDynamicStyles = (
   selector: string,
   shadowRoot: ShadowRoot,
-  contentMatch?: string
+  contentMatch?: string,
 ) => {
   // TODO: 目前函数只会把找到的第一个 style 放进来，但是可能存在多个 style 匹配，那其实要全部放进来，并且对应不同的 mirrorSheet
   const mirrorSheet = new CSSStyleSheet();
@@ -27,7 +27,7 @@ export const mirrorDynamicStyles = (
       return elements.find(
         (el) =>
           el instanceof HTMLStyleElement &&
-          el.textContent?.includes(contentMatch)
+          el.textContent?.includes(contentMatch),
       );
     }
     // If no contentMatch is provided, return the first matching element

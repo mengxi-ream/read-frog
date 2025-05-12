@@ -1,6 +1,8 @@
-import { Config, configSchema } from "@/types/config/config";
-import { DEFAULT_CONFIG, CONFIG_STORAGE_KEY } from "./constants/config";
 import deepmerge from "deepmerge";
+
+import { Config, configSchema } from "@/types/config/config";
+
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "./constants/config";
 
 export let globalConfig: Config | null = null;
 export const loadGlobalConfigPromise = loadGlobalConfig();
@@ -18,7 +20,7 @@ export async function initializeConfig() {
       Object.entries(newConfig.providersConfig).map(([provider, cfg]) => {
         const apiKeyEnvName = `WXT_${provider.toUpperCase()}_API_KEY`;
         return [provider, { ...cfg, apiKey: import.meta.env[apiKeyEnvName] }];
-      })
+      }),
     );
     await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, {
       ...newConfig,

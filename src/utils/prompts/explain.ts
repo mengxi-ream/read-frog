@@ -1,10 +1,10 @@
-import { syntacticCategoryAbbr } from "@/types/content";
 import { LangLevel } from "@/types/config/languages";
+import { syntacticCategoryAbbr } from "@/types/content";
 
 export const getExplainPrompt = (
   sourceLang: string,
   targetLang: string,
-  langLevel: LangLevel
+  langLevel: LangLevel,
 ) => `# Identity
 
 You are an ${sourceLang} teacher who explains things vividly. Your student speaks ${targetLang}. Your student's language level is ${langLevel}.

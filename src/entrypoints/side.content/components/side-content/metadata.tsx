@@ -1,9 +1,11 @@
-import { Button } from "@/components/ui/button";
 import { BookOpenText, RotateCcw } from "lucide-react";
-import { cn } from "@/utils/tailwind";
-import { useReadArticle } from "@/hooks/read/read";
-import { useExtractContent } from "@/hooks/read/extract";
+
 import { useMutationState } from "@tanstack/react-query";
+
+import { Button } from "@/components/ui/button";
+import { useExtractContent } from "@/hooks/read/extract";
+import { useReadArticle } from "@/hooks/read/read";
+import { cn } from "@/utils/tailwind";
 
 export const Metadata = ({ className }: { className?: string }) => {
   const title = document.title ?? "Untitled";
@@ -26,19 +28,19 @@ export const Metadata = ({ className }: { className?: string }) => {
   return (
     <div
       className={cn(
-        "relative flex justify-between items-center gap-x-2 bg-neutral-100 dark:bg-neutral-900 hover:bg-neutral-200 dark:hover:bg-neutral-800 rounded-md py-2 px-2",
-        className
+        "relative flex items-center justify-between gap-x-2 rounded-md bg-neutral-100 px-2 py-2 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800",
+        className,
       )}
     >
-      <div className="flex items-center gap-x-2 flex-1 min-w-0">
+      <div className="flex min-w-0 flex-1 items-center gap-x-2">
         {favicon && (
           <img
             src={favicon}
             alt="Favicon"
-            className="w-4 h-4 flex-shrink-0 rounded-xs"
+            className="h-4 w-4 flex-shrink-0 rounded-xs"
           />
         )}
-        <h1 className="text-base font-semibold truncate">{title}</h1>
+        <h1 className="truncate text-base font-semibold">{title}</h1>
       </div>
       <Button
         size="sm"
