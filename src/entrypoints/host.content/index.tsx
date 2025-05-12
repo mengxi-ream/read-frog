@@ -1,5 +1,3 @@
-import "@/assets/tailwind/text-small.css";
-import "@/assets/tailwind/theme.css";
 import { isEditable } from "@/utils/host/dom";
 import { handleShowOrHideTranslationAction } from "@/utils/host/translate";
 
@@ -7,7 +5,7 @@ import "./style.css";
 
 export default defineContentScript({
   matches: ["*://*/*"],
-  async main() {
+  async main(ctx) {
     await loadGlobalConfigPromise;
     registerTranslationTriggers();
     // const ui = createIntegratedUi(ctx, {
@@ -17,7 +15,7 @@ export default defineContentScript({
     //     // Append children to the container
     //     const app = document.createElement("p");
     //     app.textContent = "Hello host.content!";
-    //     app.classList.add("rf-translation-spinner");
+    //     app.classList.add("read-frog-spinner");
     //     container.append(app);
     //   },
     // });
