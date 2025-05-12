@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.4.7
+
+### Patch Changes
+
+- [#11](https://github.com/mengxi-ream/read-frog/pull/11) [`1337030`](https://github.com/mengxi-ream/read-frog/commit/1337030f10de66ef32f5849f702886f1f117b4f2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - import pollute the css in host
+
 ## 0.4.6
 
 ### Patch Changes
