@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.5.0
+
+### Minor Changes
+
+- [`cd59435`](https://github.com/mengxi-ream/read-frog/commit/cd59435805fe55ef530526ed13c6fee2883475cf) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - translate the whole page with button on popup and content script
+
 ## 0.4.8
 
 ### Patch Changes
