@@ -1,5 +1,13 @@
 # read-frog
 
+## 0.5.1
+
+### Patch Changes
+
+- [`60b5f42`](https://github.com/mengxi-ream/read-frog/commit/60b5f42ce12c16a16cde5bc9f57e6e29c8715d27) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - add read floating button
+
+- [`8162458`](https://github.com/mengxi-ream/read-frog/commit/81624587dd25c676d03a1362558b50eee499dbd7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - add popup and warning i18n
+
 ## 0.5.0
 
 ### Minor Changes
