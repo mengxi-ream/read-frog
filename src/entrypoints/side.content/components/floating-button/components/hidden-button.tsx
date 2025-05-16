@@ -1,13 +1,13 @@
-import { LucideIcon } from "lucide-react";
+import type { LucideIcon } from 'lucide-react'
 
 export default function HiddenButton({
   Icon,
   onClick,
   children,
 }: {
-  Icon: LucideIcon;
-  onClick: () => void;
-  children?: React.ReactNode;
+  Icon: LucideIcon
+  onClick: () => void
+  children?: React.ReactNode
 }) {
   return (
     <button
@@ -17,5 +17,5 @@ export default function HiddenButton({
       <Icon className="h-5 w-5" strokeWidth={1.8} />
       {children}
     </button>
-  );
+  )
 }

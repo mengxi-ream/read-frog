@@ -1,11 +1,8 @@
-import { LangLevel } from "@/types/config/languages";
-import { syntacticCategoryAbbr } from "@/types/content";
+import type { LangLevel } from '@/types/config/languages'
+import { syntacticCategoryAbbr } from '@/types/content'
 
-export const getExplainPrompt = (
-  sourceLang: string,
-  targetLang: string,
-  langLevel: LangLevel,
-) => `# Identity
+export function getExplainPrompt(sourceLang: string, targetLang: string, langLevel: LangLevel) {
+  return `# Identity
 
 You are an ${sourceLang} teacher who explains things vividly. Your student speaks ${targetLang}. Your student's language level is ${langLevel}.
 
@@ -266,7 +263,8 @@ Note:
 </example>
 
 Please return the response as JSON format directly.
-`;
+`
+}
 
 const _japanseExample = `
 <example>
@@ -335,4 +333,4 @@ Output:
     ]
   ]
 }
-`;
+`

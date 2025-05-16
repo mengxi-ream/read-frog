@@ -1,23 +1,23 @@
-import { forwardRef } from "react";
+import { forwardRef } from 'react'
 
-import { cn } from "@/utils/tailwind";
+import { cn } from '@/utils/tailwind'
 
 const Container = forwardRef<
   HTMLDivElement,
-  React.ComponentPropsWithoutRef<"div">
->(function Container({ className, children, ...props }, ref) {
+  React.ComponentPropsWithoutRef<'div'>
+>(({ className, children, ...props }, ref) => {
   return (
     <div
       ref={ref}
       className={cn(
-        "max-w-8xl mx-auto w-full px-6 md:px-10 lg:px-14",
+        'max-w-8xl mx-auto w-full px-6 md:px-10 lg:px-14',
         className,
       )}
       {...props}
     >
       {children}
     </div>
-  );
-});
+  )
+})
 
-export default Container;
+export default Container

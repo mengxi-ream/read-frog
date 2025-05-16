@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import deepmerge from 'deepmerge'
 
 import { CONFIG_SCHEMA_VERSION } from '../constants/config'

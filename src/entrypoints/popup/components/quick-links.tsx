@@ -1,37 +1,37 @@
-import adviceIcon from "@/assets/icon/advice.svg";
-import discordIcon from "@/assets/icon/discord.svg";
-import helpIcon from "@/assets/icon/help.svg";
+import adviceIcon from '@/assets/icon/advice.svg'
+import discordIcon from '@/assets/icon/discord.svg'
+import helpIcon from '@/assets/icon/help.svg'
 
 const LINKS: {
-  label: "help" | "advice" | "discord";
-  icon: string;
-  url: string;
+  label: 'help' | 'advice' | 'discord'
+  icon: string
+  url: string
 }[] = [
   {
-    label: "help",
+    label: 'help',
     icon: helpIcon,
-    url: "https://readfrog.mengxi.work/tutorial/installation",
+    url: 'https://readfrog.mengxi.work/tutorial/installation',
   },
   {
-    label: "advice",
+    label: 'advice',
     icon: adviceIcon,
-    url: "https://wj.qq.com/s2/22031975/aea0/",
+    url: 'https://wj.qq.com/s2/22031975/aea0/',
   },
   {
-    label: "discord",
+    label: 'discord',
     icon: discordIcon,
-    url: "https://discord.gg/nmhvb6u2T7",
+    url: 'https://discord.gg/nmhvb6u2T7',
   },
-];
+]
 
 export default function QuickLinks() {
   return (
     <div className="flex justify-between">
-      {LINKS.map((link) => (
+      {LINKS.map(link => (
         <LinkCard key={link.url} link={link} />
       ))}
     </div>
-  );
+  )
 }
 
 function LinkCard({ link }: { link: (typeof LINKS)[number] }) {
@@ -45,5 +45,5 @@ function LinkCard({ link }: { link: (typeof LINKS)[number] }) {
       <img src={link.icon} alt={link.label} className="size-5" />
       {i18n.t(`popup.${link.label}`)}
     </a>
-  );
+  )
 }

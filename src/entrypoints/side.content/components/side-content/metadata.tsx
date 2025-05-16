@@ -1,59 +1,59 @@
-import { useSetAtom } from "jotai";
-import { BookOpenText, RotateCcw } from "lucide-react";
-import { toast } from "sonner";
+import { useMutationState } from '@tanstack/react-query'
+import { useSetAtom } from 'jotai'
+import { BookOpenText, RotateCcw } from 'lucide-react'
 
-import { useMutationState } from "@tanstack/react-query";
+import { toast } from 'sonner'
 
-import { Button } from "@/components/ui/button";
-import { useExtractContent } from "@/hooks/read/extract";
-import { useReadArticle } from "@/hooks/read/read";
-import { cn } from "@/utils/tailwind";
+import { Button } from '@/components/ui/button'
+import { useExtractContent } from '@/hooks/read/extract'
+import { useReadArticle } from '@/hooks/read/read'
+import { cn } from '@/utils/tailwind'
 
-import { isSideOpenAtom } from "../../atoms";
+import { isSideOpenAtom } from '../../atoms'
 
-export const Metadata = ({ className }: { className?: string }) => {
-  const title = document.title ?? "Untitled";
-  const favicon = getFaviconUrl();
+export function Metadata({ className }: { className?: string }) {
+  const title = document.title ?? 'Untitled'
+  const favicon = getFaviconUrl()
   const {
     mutate: readArticle,
     analyzeContent,
     explainArticle,
-  } = useReadArticle();
-  const { isPending: isExtractingContent, data: extractedContent } =
-    useExtractContent();
+  } = useReadArticle()
+  const { isPending: isExtractingContent, data: extractedContent }
+    = useExtractContent()
   const explainData = useMutationState({
     filters: {
-      mutationKey: ["explainArticle"],
+      mutationKey: ['explainArticle'],
     },
-    select: (mutation) => mutation.state.data,
-  });
+    select: mutation => mutation.state.data,
+  })
   // TODO: show regenerate button at certain conditions and implement the logic
 
-  const setIsSideOpen = useSetAtom(isSideOpenAtom);
+  const setIsSideOpen = useSetAtom(isSideOpenAtom)
 
   useEffect(() => {
-    const removeListener = onMessage("readArticle", () => {
-      setIsSideOpen(true);
+    const removeListener = onMessage('readArticle', () => {
+      setIsSideOpen(true)
       if (!extractedContent) {
-        toast.warning("Waiting content to be extracted...");
-        return;
+        toast.warning('Waiting content to be extracted...')
+        return
       }
       if (analyzeContent.isPending || explainArticle.isPending) {
-        toast.warning("Reading in progress...");
-        return;
+        toast.warning('Reading in progress...')
+        return
       }
-      readArticle(extractedContent);
-    });
+      readArticle(extractedContent)
+    })
 
     return () => {
-      removeListener();
-    };
-  }, [extractedContent, analyzeContent, explainArticle]);
+      removeListener()
+    }
+  }, [extractedContent, analyzeContent, explainArticle])
 
   return (
     <div
       className={cn(
-        "relative flex items-center justify-between gap-x-2 rounded-md bg-neutral-100 px-2 py-2 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800",
+        'relative flex items-center justify-between gap-x-2 rounded-md bg-neutral-100 px-2 py-2 hover:bg-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800',
         className,
       )}
     >
@@ -71,23 +71,25 @@ export const Metadata = ({ className }: { className?: string }) => {
         size="sm"
         onClick={() => extractedContent && readArticle(extractedContent)}
         disabled={
-          isExtractingContent ||
-          analyzeContent.isPending ||
-          explainArticle.isPending
+          isExtractingContent
+          || analyzeContent.isPending
+          || explainArticle.isPending
         }
       >
-        {explainData.length > 0 && explainData[explainData.length - 1] ? (
-          <>
-            <RotateCcw className="size-3" />
-            Regenerate
-          </>
-        ) : (
-          <>
-            <BookOpenText className="size-3" />
-            Read
-          </>
-        )}
+        {explainData.length > 0 && explainData[explainData.length - 1]
+          ? (
+              <>
+                <RotateCcw className="size-3" />
+                Regenerate
+              </>
+            )
+          : (
+              <>
+                <BookOpenText className="size-3" />
+                Read
+              </>
+            )}
       </Button>
     </div>
-  );
-};
+  )
+}

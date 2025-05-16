@@ -1,15 +1,15 @@
-import { googleTranslate, microsoftTranslate } from "../translate-text";
+import { googleTranslate, microsoftTranslate } from '../translate-text'
 
-describe("googleTranslate", () => {
-  it("should translate text", async () => {
-    const result = await googleTranslate("Hello", "en", "zh");
-    expect(result).toBe("你好");
-  });
-});
+describe('googleTranslate', () => {
+  it('should translate text', async () => {
+    const result = await googleTranslate('Hello', 'en', 'zh')
+    expect(result).toBe('你好')
+  })
+})
 
-describe("microsoftTranslate", () => {
-  it("should translate text", async () => {
-    const result = await microsoftTranslate("Hello", "en", "zh");
-    expect(result).toBe("你好");
-  });
-});
+describe('microsoftTranslate', () => {
+  it('should translate text', async () => {
+    const result = await microsoftTranslate('Hello', 'en', 'zh')
+    expect(result).toBe('你好')
+  })
+})

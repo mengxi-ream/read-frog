@@ -1,23 +1,23 @@
-import { Point, TransNode } from "@/types/dom";
-import { globalConfig } from "@/utils/config/config";
+import type { Point, TransNode } from '@/types/dom'
+import { globalConfig } from '@/utils/config/config'
 import {
   INVALID_TRANSLATE_TAGS,
   MAIN_CONTENT_IGNORE_TAGS,
-} from "@/utils/constants/dom";
+} from '@/utils/constants/dom'
 import {
   BLOCK_ATTRIBUTE,
   INLINE_ATTRIBUTE,
   PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
-} from "@/utils/constants/translation";
+} from '@/utils/constants/translation'
 
-import { translateNode } from "../translate";
+import { translateNode } from '../translate'
 import {
   isDontWalkIntoElement,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
-} from "./filter";
-import { smashTruncationStyle } from "./style";
+} from './filter'
+import { smashTruncationStyle } from './style'
 
 /**
  * Find the element at the given point even inside shadow roots
@@ -25,12 +25,12 @@ import { smashTruncationStyle } from "./style";
  * @param point - The point to find the element
  */
 export function findElementAt(root: Document | ShadowRoot, point: Point) {
-  const { x, y } = point;
-  const element = root.elementFromPoint(x, y);
+  const { x, y } = point
+  const element = root.elementFromPoint(x, y)
   if (element && element.shadowRoot) {
-    return findElementAt(element.shadowRoot, point);
+    return findElementAt(element.shadowRoot, point)
   }
-  return element;
+  return element
 }
 
 /**
@@ -38,36 +38,36 @@ export function findElementAt(root: Document | ShadowRoot, point: Point) {
  * @param point - The point to find the nearest block node
  */
 export function findNearestBlockNodeAt(point: Point) {
-  let currentNode = findElementAt(document, point);
+  let currentNode = findElementAt(document, point)
 
   // TODO: support SVGElement in the future
   while (
-    currentNode instanceof HTMLElement &&
-    isShallowInlineHTMLElement(currentNode)
+    currentNode instanceof HTMLElement
+    && isShallowInlineHTMLElement(currentNode)
   ) {
-    currentNode = currentNode.parentElement;
+    currentNode = currentNode.parentElement
   }
 
-  return currentNode;
+  return currentNode
 }
 
 export function extractTextContent(node: TransNode): string {
   if (node instanceof Text) {
-    return node.textContent ?? "";
+    return node.textContent ?? ''
   }
 
   if (isDontWalkIntoElement(node)) {
-    return "";
+    return ''
   }
 
-  const childNodes = Array.from(node.childNodes);
+  const childNodes = Array.from(node.childNodes)
   return childNodes.reduce((text: string, child: Node): string => {
     // TODO: support SVGElement in the future
     if (child instanceof Text || child instanceof HTMLElement) {
-      return text + extractTextContent(child);
+      return text + extractTextContent(child)
     }
-    return text;
-  }, "");
+    return text
+  }, '')
 }
 
 /**
@@ -79,42 +79,44 @@ export function extractTextContent(node: TransNode): string {
 export function walkAndLabelElement(
   element: HTMLElement,
   walkId: string,
-): "hasBlock" | false {
-  element.setAttribute(WALKED_ATTRIBUTE, walkId);
+): 'hasBlock' | false {
+  element.setAttribute(WALKED_ATTRIBUTE, walkId)
 
   if (isDontWalkIntoElement(element)) {
-    return false;
+    return false
   }
 
   if (
-    globalConfig &&
-    globalConfig.translate.page.range !== "all" &&
-    MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
+    globalConfig
+    && globalConfig.translate.page.range !== 'all'
+    && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
   ) {
-    return false;
+    return false
   }
 
-  if (INVALID_TRANSLATE_TAGS.has(element.tagName)) return false;
+  if (INVALID_TRANSLATE_TAGS.has(element.tagName))
+    return false
 
   if (element.shadowRoot) {
-    if (globalConfig && globalConfig.translate.page.range === "all") {
+    if (globalConfig && globalConfig.translate.page.range === 'all') {
       for (const child of element.shadowRoot.children) {
         if (child instanceof HTMLElement) {
-          walkAndLabelElement(child, walkId);
+          walkAndLabelElement(child, walkId)
         }
       }
-    } else {
-      return false;
+    }
+    else {
+      return false
     }
   }
 
-  let hasInlineNodeChild = false;
-  let hasBlockNodeChild = false;
+  let hasInlineNodeChild = false
+  let hasBlockNodeChild = false
 
   for (const child of element.childNodes) {
     if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
-      hasInlineNodeChild = true;
-      continue;
+      hasInlineNodeChild = true
+      continue
     }
 
     if (child instanceof HTMLElement) {
@@ -122,11 +124,12 @@ export function walkAndLabelElement(
       //   hasInlineNodeChild = true;
       // }
 
-      const hasBlock = walkAndLabelElement(child, walkId);
+      const hasBlock = walkAndLabelElement(child, walkId)
       if (hasBlock) {
-        hasBlockNodeChild = true;
-      } else if (child.textContent?.trim()) {
-        hasInlineNodeChild = true;
+        hasBlockNodeChild = true
+      }
+      else if (child.textContent?.trim()) {
+        hasInlineNodeChild = true
       }
     }
   }
@@ -136,17 +139,18 @@ export function walkAndLabelElement(
   // }
 
   if (hasInlineNodeChild) {
-    element.setAttribute(PARAGRAPH_ATTRIBUTE, "");
+    element.setAttribute(PARAGRAPH_ATTRIBUTE, '')
   }
 
   if (hasBlockNodeChild || isShallowBlockHTMLElement(element)) {
-    element.setAttribute(BLOCK_ATTRIBUTE, "");
-    return "hasBlock";
-  } else if (isShallowInlineHTMLElement(element)) {
-    element.setAttribute(INLINE_ATTRIBUTE, "");
+    element.setAttribute(BLOCK_ATTRIBUTE, '')
+    return 'hasBlock'
+  }
+  else if (isShallowInlineHTMLElement(element)) {
+    element.setAttribute(INLINE_ATTRIBUTE, '')
   }
 
-  return false;
+  return false
 }
 
 /**
@@ -161,45 +165,49 @@ export function translateWalkedElement(
   toggle: boolean = false,
 ) {
   // if the walkId is not the same, return
-  if (element.getAttribute(WALKED_ATTRIBUTE) !== walkId) return;
+  if (element.getAttribute(WALKED_ATTRIBUTE) !== walkId)
+    return
 
   if (element.hasAttribute(PARAGRAPH_ATTRIBUTE)) {
-    let hasBlockNodeChild = false;
+    let hasBlockNodeChild = false
 
     for (const child of element.childNodes) {
       if (child instanceof HTMLElement && child.hasAttribute(BLOCK_ATTRIBUTE)) {
-        hasBlockNodeChild = true;
-        break;
+        hasBlockNodeChild = true
+        break
       }
     }
 
     if (!hasBlockNodeChild) {
-      translateNode(element, toggle);
-    } else {
+      translateNode(element, toggle)
+    }
+    else {
       // prevent children change during iteration
-      const children = Array.from(element.childNodes);
+      const children = Array.from(element.childNodes)
       for (const child of children) {
         if (!child.textContent?.trim()) {
-          continue;
+          continue
         }
 
         if (child instanceof Text) {
-          translateNode(child, toggle);
-        } else if (child instanceof HTMLElement) {
-          translateWalkedElement(child, walkId, toggle);
+          translateNode(child, toggle)
+        }
+        else if (child instanceof HTMLElement) {
+          translateWalkedElement(child, walkId, toggle)
         }
       }
     }
-  } else {
+  }
+  else {
     for (const child of element.childNodes) {
       if (child instanceof HTMLElement) {
-        translateWalkedElement(child, walkId, toggle);
+        translateWalkedElement(child, walkId, toggle)
       }
     }
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
         if (child instanceof HTMLElement) {
-          translateWalkedElement(child, walkId, toggle);
+          translateWalkedElement(child, walkId, toggle)
         }
       }
     }
@@ -207,20 +215,22 @@ export function translateWalkedElement(
 }
 
 export function unwrapDeepestOnlyChild(element: HTMLElement) {
-  let currentElement = element;
+  let currentElement = element
   while (currentElement) {
-    smashTruncationStyle(currentElement);
+    smashTruncationStyle(currentElement)
 
-    const onlyChild =
-      currentElement.childNodes.length === 1 &&
-      currentElement.children.length === 1;
-    if (!onlyChild) break;
+    const onlyChild
+      = currentElement.childNodes.length === 1
+        && currentElement.children.length === 1
+    if (!onlyChild)
+      break
 
-    const onlyChildElement = currentElement.children[0];
-    if (!(onlyChildElement instanceof HTMLElement)) break;
+    const onlyChildElement = currentElement.children[0]
+    if (!(onlyChildElement instanceof HTMLElement))
+      break
 
-    currentElement = onlyChildElement;
+    currentElement = onlyChildElement
   }
 
-  return currentElement;
+  return currentElement
 }

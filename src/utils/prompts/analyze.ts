@@ -1,6 +1,7 @@
-import { langCodeToEnglishName } from "@/types/config/languages";
+import { langCodeToEnglishName } from '@/types/config/languages'
 
-export const getAnalyzePrompt = (targetLang: string) => `# Identity
+export function getAnalyzePrompt(targetLang: string) {
+  return `# Identity
 
 You are an language teacher who explains things vividly.
 Your student speaks target language: ${targetLang}
@@ -137,4 +138,5 @@ Output:
 </example>
 
 Please return the response as JSON format directly.
-`;
+`
+}

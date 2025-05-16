@@ -16,22 +16,22 @@ popup:
   discord: Discord
 options:
   providerConfig:
-    title: "模型配置"
+    title: 模型配置
     description:
-      openai: "提供 GPT-4 等模型"
-      deepseek: "推荐在中国使用"
+      openai: 提供 GPT-4 等模型
+      deepseek: 推荐在中国使用
     apiKey:
-      showAPIKey: "显示 API Key"
+      showAPIKey: 显示 API Key
     model:
-      title: "模型"
-      enterCustomModel: "输入自定义模型名称"
+      title: 模型
+      enterCustomModel: 输入自定义模型名称
   translationConfig:
-    title: "翻译配置"
+    title: 翻译配置
     translateRange:
-      title: "翻译范围"
+      title: 翻译范围
       range:
-        main: "主要内容"
-        all: "所有内容"
+        main: 主要内容
+        all: 所有内容
 translateService: 翻译服务
 languageLevel: 你的来源语言水平
 languageLevels:

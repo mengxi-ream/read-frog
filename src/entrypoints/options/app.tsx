@@ -1,7 +1,7 @@
-import Container from "@/components/container";
+import Container from '@/components/container'
 
-import ProviderConfigSection from "./provider-config";
-import TranslationConfigSection from "./translation-config";
+import ProviderConfigSection from './provider-config'
+import TranslationConfigSection from './translation-config'
 
 export default function App() {
   return (
@@ -9,5 +9,5 @@ export default function App() {
       <ProviderConfigSection />
       <TranslationConfigSection />
     </Container>
-  );
+  )
 }

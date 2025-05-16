@@ -1,13 +1,13 @@
-import { atom, createStore } from "jotai";
+import { atom, createStore } from 'jotai'
 
-export const store = createStore();
+export const store = createStore()
 
-export const isSideOpenAtom = atom(false);
+export const isSideOpenAtom = atom(false)
 
 export const progressAtom = atom({
   completed: 0,
   total: 0,
-});
+})
 
 // export const explainAtom = atomWithMutation(() => ({
 //   mutationKey: ["explainArticle"],
@@ -15,5 +15,5 @@ export const progressAtom = atom({
 // }));
 
 export const readStateAtom = atom<
-  "analyzing" | "continue?" | "explaining" | undefined
->(undefined);
+  'analyzing' | 'continue?' | 'explaining' | undefined
+>(undefined)

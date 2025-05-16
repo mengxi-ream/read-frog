@@ -1,9 +1,9 @@
 {
   "name": "read-frog",
+  "type": "module",
   "version": "0.5.4",
   "private": true,
   "description": "Read Frog is a browser extension designed to help you learn languages deeply from any website.",
-  "type": "module",
   "scripts": {
     "build": "wxt build",
     "build:firefox": "wxt build -b firefox",
@@ -87,9 +87,6 @@
     "lint-staged": "^16.0.0",
     "postcss": "^8.5.3",
     "postcss-rem-to-responsive-pixel": "^6.0.2",
-    "prettier": "^3.5.3",
-    "prettier-plugin-packagejson": "^2.5.12",
-    "prettier-plugin-tailwindcss": "^0.6.11",
     "tailwindcss": "^4.1.4",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.31.0",

@@ -4,9 +4,9 @@
  */
 export function smashTruncationStyle(element: HTMLElement) {
   if (element.style && element.style.webkitLineClamp) {
-    element.style.webkitLineClamp = "unset";
+    element.style.webkitLineClamp = 'unset'
   }
   if (element.style && element.style.maxHeight) {
-    element.style.maxHeight = "unset";
+    element.style.maxHeight = 'unset'
   }
 }

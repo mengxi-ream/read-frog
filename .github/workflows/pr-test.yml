@@ -21,7 +21,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: "pnpm"
+          cache: pnpm
 
       - name: Install Dependencies
         run: pnpm install

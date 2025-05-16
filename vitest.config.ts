@@ -1,21 +1,21 @@
+import react from '@vitejs/plugin-react'
 // vitest.config.ts
-import { defineConfig } from "vitest/config";
-import { WxtVitest } from "wxt/testing";
+import { defineConfig } from 'vitest/config'
 
-import react from "@vitejs/plugin-react";
+import { WxtVitest } from 'wxt/testing'
 
 export default defineConfig({
   plugins: [WxtVitest(), react()],
   test: {
-    environment: "node",
+    environment: 'node',
     globals: true,
-    setupFiles: "vitest.setup.ts",
+    setupFiles: 'vitest.setup.ts',
     watch: false,
     coverage: {
-      provider: "istanbul",
-      reporter: ["text", "html", "lcov"],
+      provider: 'istanbul',
+      reporter: ['text', 'html', 'lcov'],
       // include: ['src/**/*.{ts,tsx}'],
       // exclude: ['src/**/*.spec.ts']
     },
   },
-});
+})

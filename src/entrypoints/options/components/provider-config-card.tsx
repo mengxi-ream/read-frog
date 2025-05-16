@@ -1,14 +1,15 @@
-import { useAtom } from "jotai";
+import type { Provider } from '@/types/config/provider'
 
+import { useAtom } from 'jotai'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
+} from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
 import {
   Select,
   SelectContent,
@@ -16,24 +17,24 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Provider, providerModels } from "@/types/config/provider";
-import { configFields } from "@/utils/atoms/config";
-import { PROVIDER_ITEMS } from "@/utils/constants/config";
+} from '@/components/ui/select'
+import { Switch } from '@/components/ui/switch'
+import { providerModels } from '@/types/config/provider'
+import { configFields } from '@/utils/atoms/config'
+import { PROVIDER_ITEMS } from '@/utils/constants/config'
 
 export function ProviderConfigCard({ provider }: { provider: Provider }) {
-  const [showAPIKey, setShowAPIKey] = useState(false);
+  const [showAPIKey, setShowAPIKey] = useState(false)
   const [providersConfig, setProvidersConfig] = useAtom(
     configFields.providersConfig,
-  );
-  const [currentProvider, setCurrentProvider] = useAtom(configFields.provider);
+  )
+  const [currentProvider, setCurrentProvider] = useAtom(configFields.provider)
 
   return (
     <Card
       className={cn(
-        "w-[360px]",
-        currentProvider === provider && "border-primary shadow-primary",
+        'w-[360px]',
+        currentProvider === provider && 'border-primary shadow-primary',
       )}
     >
       <CardHeader>
@@ -50,7 +51,7 @@ export function ProviderConfigCard({ provider }: { provider: Provider }) {
             checked={currentProvider === provider}
             onCheckedChange={() => {
               if (currentProvider !== provider) {
-                setCurrentProvider(provider);
+                setCurrentProvider(provider)
               }
             }}
           />
@@ -67,73 +68,72 @@ export function ProviderConfigCard({ provider }: { provider: Provider }) {
           <Input
             className="mt-1 mb-2"
             value={providersConfig[provider].apiKey}
-            type={showAPIKey ? "text" : "password"}
-            onChange={(e) =>
+            type={showAPIKey ? 'text' : 'password'}
+            onChange={e =>
               setProvidersConfig({
                 ...providersConfig,
                 [provider]: {
                   ...providersConfig[provider],
                   apiKey: e.target.value,
                 },
-              })
-            }
+              })}
           />
           <div className="flex items-center space-x-2">
             <Checkbox
               id={`apiKey-${provider}`}
               checked={showAPIKey}
-              onCheckedChange={(checked) => setShowAPIKey(checked === true)}
+              onCheckedChange={checked => setShowAPIKey(checked === true)}
             />
             <label
               htmlFor={`apiKey-${provider}`}
               className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              {i18n.t("options.providerConfig.apiKey.showAPIKey")}
+              {i18n.t('options.providerConfig.apiKey.showAPIKey')}
             </label>
           </div>
         </div>
         <div className="mt-6 grid max-w-sm items-center gap-0.5">
           <label htmlFor="model" className="text-sm font-medium">
-            {i18n.t("options.providerConfig.model.title")}
+            {i18n.t('options.providerConfig.model.title')}
           </label>
-          {providersConfig[provider].isCustomModel ? (
-            <Input
-              className="mt-1 mb-2"
-              value={providersConfig[provider].customModel}
-              onChange={(e) =>
-                setProvidersConfig({
-                  ...providersConfig,
-                  [provider]: {
-                    ...providersConfig[provider],
-                    customModel: e.target.value,
-                  },
-                })
-              }
-            />
-          ) : (
-            <Select
-              value={providersConfig[provider].model}
-              onValueChange={(value) =>
-                setProvidersConfig({
-                  ...providersConfig,
-                  [provider]: { ...providersConfig[provider], model: value },
-                })
-              }
-            >
-              <SelectTrigger className="mt-1 w-full">
-                <SelectValue placeholder="Select a model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {providerModels[provider].map((model) => (
-                    <SelectItem key={model} value={model}>
-                      {model}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
+          {providersConfig[provider].isCustomModel
+            ? (
+                <Input
+                  className="mt-1 mb-2"
+                  value={providersConfig[provider].customModel}
+                  onChange={e =>
+                    setProvidersConfig({
+                      ...providersConfig,
+                      [provider]: {
+                        ...providersConfig[provider],
+                        customModel: e.target.value,
+                      },
+                    })}
+                />
+              )
+            : (
+                <Select
+                  value={providersConfig[provider].model}
+                  onValueChange={value =>
+                    setProvidersConfig({
+                      ...providersConfig,
+                      [provider]: { ...providersConfig[provider], model: value },
+                    })}
+                >
+                  <SelectTrigger className="mt-1 w-full">
+                    <SelectValue placeholder="Select a model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {providerModels[provider].map(model => (
+                        <SelectItem key={model} value={model}>
+                          {model}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
           <div className="mt-2 flex items-center space-x-2">
             <Checkbox
               id={`isCustomModel-${provider}`}
@@ -146,8 +146,9 @@ export function ProviderConfigCard({ provider }: { provider: Provider }) {
                       ...providersConfig[provider],
                       isCustomModel: false,
                     },
-                  });
-                } else {
+                  })
+                }
+                else {
                   setProvidersConfig({
                     ...providersConfig,
                     [provider]: {
@@ -155,7 +156,7 @@ export function ProviderConfigCard({ provider }: { provider: Provider }) {
                       customModel: providersConfig[provider].model,
                       isCustomModel: true,
                     },
-                  });
+                  })
                 }
               }}
             />
@@ -163,11 +164,11 @@ export function ProviderConfigCard({ provider }: { provider: Provider }) {
               htmlFor={`isCustomModel-${provider}`}
               className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
             >
-              {i18n.t("options.providerConfig.model.enterCustomModel")}
+              {i18n.t('options.providerConfig.model.enterCustomModel')}
             </label>
           </div>
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }

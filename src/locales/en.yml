@@ -1,51 +1,51 @@
-extName: "Read Frog - Open Source AI Translator"
-extDescription: "Read Frog is an open source browser extension designed to help you learn languages deeply from any website."
+extName: Read Frog - Open Source AI Translator
+extDescription: Read Frog is an open source browser extension designed to help you learn languages deeply from any website.
 popup:
-  autoLang: "Auto"
-  sourceLang: "Source"
-  targetLang: "Target"
-  read: "Read Article"
-  translate: "Translate"
-  showOriginal: "Show Original"
-  enabledFloatingButton: "Show Floating Button"
-  options: "Options"
-  hover: "Hover"
-  translateParagraph: "to translate paragraph"
-  help: "Help"
-  advice: "Advice"
-  discord: "Discord"
+  autoLang: Auto
+  sourceLang: Source
+  targetLang: Target
+  read: Read Article
+  translate: Translate
+  showOriginal: Show Original
+  enabledFloatingButton: Show Floating Button
+  options: Options
+  hover: Hover
+  translateParagraph: to translate paragraph
+  help: Help
+  advice: Advice
+  discord: Discord
 options:
   providerConfig:
-    title: "Model Config"
+    title: Model Config
     description:
-      openai: "Provides models like GPT-4o"
-      deepseek: "Recommend to use in China"
+      openai: Provides models like GPT-4o
+      deepseek: Recommend to use in China
     apiKey:
-      showAPIKey: "Show API Key"
+      showAPIKey: Show API Key
     model:
-      title: "Model"
-      enterCustomModel: "Enter the name of the custom model"
+      title: Model
+      enterCustomModel: Enter the name of the custom model
   translationConfig:
-    title: "Translation Config"
+    title: Translation Config
     translateRange:
-      title: "Translate Range"
+      title: Translate Range
       range:
-        main: "Main Content"
-        all: "All Content"
+        main: Main Content
+        all: All Content
 side:
-  sourceLang: "Source Language"
-  targetLang: "Target Language"
-translateService: "Translation Service"
-languageLevel: "Your Source Lang Level"
+  sourceLang: Source Language
+  targetLang: Target Language
+translateService: Translation Service
+languageLevel: Your Source Lang Level
 languageLevels:
-  beginner: "Beginner"
-  intermediate: "Intermediate"
-  advanced: "Advanced"
+  beginner: Beginner
+  intermediate: Intermediate
+  advanced: Advanced
 noConfig:
-  warning: "Please set API key on the options page first"
+  warning: Please set API key on the options page first
   warningWithLink:
-    youMust: "You must"
-    setTheAPIKey: "set the API key"
-    firstOnThe: "first on the"
-    optionsPage: "options"
-    page: "page"
+    youMust: You must
+    setTheAPIKey: set the API key
+    firstOnThe: first on the
+    optionsPage: options
+    page: page

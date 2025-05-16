@@ -1,14 +1,14 @@
-import { createProviderRegistry } from "ai";
+import type { Config } from '@/types/config/config'
 
-import { createDeepSeek } from "@ai-sdk/deepseek";
-import { createOpenAI } from "@ai-sdk/openai";
+import { createDeepSeek } from '@ai-sdk/deepseek'
+import { createOpenAI } from '@ai-sdk/openai'
 
-import { Config } from "@/types/config/config";
+import { createProviderRegistry } from 'ai'
 
-import { CONFIG_STORAGE_KEY } from "./constants/config";
+import { CONFIG_STORAGE_KEY } from './constants/config'
 
 export async function getProviderRegistry() {
-  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`);
+  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
 
   return createProviderRegistry({
     openai: createOpenAI({
@@ -17,5 +17,5 @@ export async function getProviderRegistry() {
     deepseek: createDeepSeek({
       apiKey: config?.providersConfig?.deepseek.apiKey,
     }),
-  });
+  })
 }

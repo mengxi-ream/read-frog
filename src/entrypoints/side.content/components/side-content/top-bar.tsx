@@ -1,39 +1,41 @@
+import type {
+  LangCodeISO6393,
+  LangLevel,
+} from '@/types/config/languages'
+import { SelectGroup } from '@radix-ui/react-select'
+
 // import { onMessage } from "@/utils/message";
-import { useAtom, useSetAtom } from "jotai";
-import { ArrowRight, X } from "lucide-react";
+import { useAtom, useSetAtom } from 'jotai'
 
-import { SelectGroup } from "@radix-ui/react-select";
-
+import { ArrowRight, X } from 'lucide-react'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectLabel,
   SelectTrigger,
-} from "@/components/ui/select";
+} from '@/components/ui/select'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from '@/components/ui/tooltip'
 import {
-  LangCodeISO6393,
-  LangLevel,
   langCodeToEnglishName,
   langLevel,
-} from "@/types/config/languages";
-import { configFields } from "@/utils/atoms/config";
-import { PROVIDER_ITEMS } from "@/utils/constants/config";
-import { cn } from "@/utils/tailwind";
+} from '@/types/config/languages'
+import { configFields } from '@/utils/atoms/config'
+import { PROVIDER_ITEMS } from '@/utils/constants/config'
+import { cn } from '@/utils/tailwind'
 
-import { shadowWrapper } from "../..";
-import { isSideOpenAtom } from "../../atoms";
+import { shadowWrapper } from '../..'
+import { isSideOpenAtom } from '../../atoms'
 
-export const TopBar = ({ className }: { className?: string }) => {
-  const setIsSideOpen = useSetAtom(isSideOpenAtom);
+export function TopBar({ className }: { className?: string }) {
+  const setIsSideOpen = useSetAtom(isSideOpenAtom)
 
   return (
-    <div className={cn("flex items-start justify-between", className)}>
+    <div className={cn('flex items-start justify-between', className)}>
       <div className="flex items-center gap-x-2 text-sm">
         <SourceLangSelect />
         <ArrowRight size={12} strokeWidth={1} className="-mx-1" />
@@ -59,11 +61,11 @@ export const TopBar = ({ className }: { className?: string }) => {
         </TooltipContent>
       </Tooltip>
     </div>
-  );
-};
+  )
+}
 
-const ProviderSelect = () => {
-  const [provider, setProvider] = useAtom(configFields.provider);
+function ProviderSelect() {
+  const [provider, setProvider] = useAtom(configFields.provider)
 
   return (
     <Select value={provider} onValueChange={setProvider}>
@@ -79,7 +81,7 @@ const ProviderSelect = () => {
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
-          <SelectLabel>{i18n.t("translateService")}</SelectLabel>
+          <SelectLabel>{i18n.t('translateService')}</SelectLabel>
           {Object.entries(PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
             <SelectItem key={provider} value={provider}>
               <div className="flex items-center gap-x-2">
@@ -95,11 +97,11 @@ const ProviderSelect = () => {
         </SelectGroup>
       </SelectContent>
     </Select>
-  );
-};
+  )
+}
 
-const LangLevelSelect = () => {
-  const [language, setLanguage] = useAtom(configFields.language);
+function LangLevelSelect() {
+  const [language, setLanguage] = useAtom(configFields.language)
 
   return (
     <Select
@@ -117,8 +119,8 @@ const LangLevelSelect = () => {
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
-          <SelectLabel>{i18n.t("languageLevel")}</SelectLabel>
-          {langLevel.options.map((level) => (
+          <SelectLabel>{i18n.t('languageLevel')}</SelectLabel>
+          {langLevel.options.map(level => (
             <SelectItem key={level} value={level}>
               {i18n.t(`languageLevels.${level}`)}
             </SelectItem>
@@ -126,18 +128,17 @@ const LangLevelSelect = () => {
         </SelectGroup>
       </SelectContent>
     </Select>
-  );
-};
+  )
+}
 
-const TargetLangSelect = () => {
-  const [language, setLanguage] = useAtom(configFields.language);
+function TargetLangSelect() {
+  const [language, setLanguage] = useAtom(configFields.language)
 
   return (
     <Select
       value={language.targetCode}
       onValueChange={(newTargetCode: LangCodeISO6393) =>
-        setLanguage({ targetCode: newTargetCode })
-      }
+        setLanguage({ targetCode: newTargetCode })}
     >
       <SelectTrigger
         hideChevron
@@ -150,7 +151,7 @@ const TargetLangSelect = () => {
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
-          <SelectLabel>{i18n.t("side.targetLang")}</SelectLabel>
+          <SelectLabel>{i18n.t('side.targetLang')}</SelectLabel>
           {Object.entries(langCodeToEnglishName).map(([langCode, name]) => (
             <SelectItem key={langCode} value={langCode}>
               {name}
@@ -159,18 +160,17 @@ const TargetLangSelect = () => {
         </SelectGroup>
       </SelectContent>
     </Select>
-  );
-};
+  )
+}
 
-const SourceLangSelect = () => {
-  const [language, setLanguage] = useAtom(configFields.language);
+function SourceLangSelect() {
+  const [language, setLanguage] = useAtom(configFields.language)
 
   return (
     <Select
       value={language.sourceCode}
-      onValueChange={(newSourceCode: LangCodeISO6393 | "auto") =>
-        setLanguage({ sourceCode: newSourceCode })
-      }
+      onValueChange={(newSourceCode: LangCodeISO6393 | 'auto') =>
+        setLanguage({ sourceCode: newSourceCode })}
     >
       <SelectTrigger
         hideChevron
@@ -178,14 +178,14 @@ const SourceLangSelect = () => {
       >
         <div className="h-1 w-1 shrink-0 rounded-full bg-blue-500"></div>
         <div className="max-w-16 min-w-0 truncate">
-          {language.sourceCode === "auto"
+          {language.sourceCode === 'auto'
             ? langCodeToEnglishName[language.detectedCode]
             : langCodeToEnglishName[language.sourceCode]}
         </div>
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
-          <SelectLabel>{i18n.t("side.sourceLang")}</SelectLabel>
+          <SelectLabel>{i18n.t('side.sourceLang')}</SelectLabel>
           <SelectItem value="auto">
             {langCodeToEnglishName[language.detectedCode]}
             <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">
@@ -200,5 +200,5 @@ const SourceLangSelect = () => {
         </SelectGroup>
       </SelectContent>
     </Select>
-  );
-};
+  )
+}

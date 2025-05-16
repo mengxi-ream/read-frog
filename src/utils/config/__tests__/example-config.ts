@@ -1,30 +1,30 @@
-import { Config } from "@/types/config/config";
+import type { Config } from '@/types/config/config'
 
 export const ConfigV1Example = {
   language: {
-    detectedCode: "eng",
-    sourceCode: "auto",
-    targetCode: "jpn",
-    level: "intermediate",
+    detectedCode: 'eng',
+    sourceCode: 'auto',
+    targetCode: 'jpn',
+    level: 'intermediate',
   },
-  provider: "openai",
+  provider: 'openai',
   providersConfig: {
     openai: {
-      apiKey: "sk-1234567890",
-      model: "gpt-4.1-mini",
+      apiKey: 'sk-1234567890',
+      model: 'gpt-4.1-mini',
       isCustomModel: false,
-      customModel: "",
+      customModel: '',
     },
     deepseek: {
       apiKey: undefined,
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       isCustomModel: false,
-      customModel: "",
+      customModel: '',
     },
   },
   manualTranslate: {
     enabled: true,
-    hotkey: "Control",
+    hotkey: 'Control',
   },
   floatingButton: {
     enabled: true,
@@ -33,36 +33,36 @@ export const ConfigV1Example = {
   sideContent: {
     width: 400,
   },
-};
+}
 
 export const ConfigV2Example = {
   language: {
-    detectedCode: "eng",
-    sourceCode: "auto",
-    targetCode: "jpn",
-    level: "intermediate",
+    detectedCode: 'eng',
+    sourceCode: 'auto',
+    targetCode: 'jpn',
+    level: 'intermediate',
   },
-  provider: "openai",
+  provider: 'openai',
   providersConfig: {
     openai: {
-      apiKey: "sk-1234567890",
-      model: "gpt-4.1-mini",
+      apiKey: 'sk-1234567890',
+      model: 'gpt-4.1-mini',
       isCustomModel: false,
-      customModel: "",
+      customModel: '',
     },
     deepseek: {
       apiKey: undefined,
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       isCustomModel: false,
-      customModel: "",
+      customModel: '',
     },
   },
   manualTranslate: {
     enabled: true,
-    hotkey: "Control",
+    hotkey: 'Control',
   },
   pageTranslate: {
-    range: "mainContent",
+    range: 'mainContent',
   },
   floatingButton: {
     enabled: true,
@@ -71,38 +71,38 @@ export const ConfigV2Example = {
   sideContent: {
     width: 400,
   },
-};
+}
 
 export const ConfigV3Example: Config = {
   language: {
-    detectedCode: "eng",
-    sourceCode: "auto",
-    targetCode: "jpn",
-    level: "intermediate",
+    detectedCode: 'eng',
+    sourceCode: 'auto',
+    targetCode: 'jpn',
+    level: 'intermediate',
   },
-  provider: "openai",
+  provider: 'openai',
   providersConfig: {
     openai: {
-      apiKey: "sk-1234567890",
-      model: "gpt-4.1-mini",
+      apiKey: 'sk-1234567890',
+      model: 'gpt-4.1-mini',
       isCustomModel: false,
-      customModel: "",
+      customModel: '',
     },
     deepseek: {
       apiKey: undefined,
-      model: "deepseek-chat",
+      model: 'deepseek-chat',
       isCustomModel: false,
-      customModel: "",
+      customModel: '',
     },
   },
   translate: {
-    provider: "microsoft",
+    provider: 'microsoft',
     node: {
       enabled: true,
-      hotkey: "Control",
+      hotkey: 'Control',
     },
     page: {
-      range: "main",
+      range: 'main',
     },
   },
   floatingButton: {
@@ -112,4 +112,4 @@ export const ConfigV3Example: Config = {
   sideContent: {
     width: 400,
   },
-};
+}

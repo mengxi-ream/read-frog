@@ -1,22 +1,22 @@
-import { useAtom } from "jotai";
+import { useAtom } from 'jotai'
 
 import {
+  Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { Select } from "@/components/ui/select";
-import { configFields } from "@/utils/atoms/config";
-import { PROVIDER_ITEMS } from "@/utils/constants/config";
+} from '@/components/ui/select'
+import { configFields } from '@/utils/atoms/config'
+import { PROVIDER_ITEMS } from '@/utils/constants/config'
 
 export default function ProviderSelector() {
-  const [provider, setProvider] = useAtom(configFields.provider);
+  const [provider, setProvider] = useAtom(configFields.provider)
 
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-[13px] font-medium">
-        {i18n.t("translateService")}
+        {i18n.t('translateService')}
       </span>
       <Select value={provider} onValueChange={setProvider}>
         <SelectTrigger className="bg-input/50 hover:bg-input !h-7 w-31 cursor-pointer pr-1.5 pl-2.5 outline-none">
@@ -31,10 +31,10 @@ export default function ProviderSelector() {
         </SelectContent>
       </Select>
     </div>
-  );
+  )
 }
 
-const TranslateItem = ({ logo, name }: { logo: string; name: string }) => {
+function TranslateItem({ logo, name }: { logo: string, name: string }) {
   return (
     <div className="flex items-center gap-1.5">
       <img
@@ -44,5 +44,5 @@ const TranslateItem = ({ logo, name }: { logo: string; name: string }) => {
       />
       {name}
     </div>
-  );
-};
+  )
+}
