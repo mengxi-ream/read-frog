@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.5.2
+
+### Patch Changes
+
+- [`59ee40b`](https://github.com/mengxi-ream/read-frog/commit/59ee40bf26d6e71b6504561fad6e744ea6e6e1f7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - don't walk into hidden element
+
 ## 0.5.1
 
 ### Patch Changes
