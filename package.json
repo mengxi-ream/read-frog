@@ -1,6 +1,6 @@
 {
   "name": "read-frog",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "private": true,
   "description": "Read Frog is a browser extension designed to help you learn languages deeply from any website.",
   "type": "module",

@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.5.4
+
+### Patch Changes
+
+- [`487b78f`](https://github.com/mengxi-ream/read-frog/commit/487b78f97ca8b942fa86c3c9a3d36fec108c9adb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - clean zero-width space in sourcetext for translate
+
 ## 0.5.3
 
 ### Patch Changes
