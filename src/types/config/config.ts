@@ -21,7 +21,7 @@ const languageSchema = z.object({
   level: langLevel,
 })
 
-// Manual translate schema
+// Node translate schema
 const nodeTranslateSchema = z.object({
   enabled: z.boolean(),
   hotkey,

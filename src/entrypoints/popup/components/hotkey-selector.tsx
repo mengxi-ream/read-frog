@@ -1,5 +1,6 @@
 import type { Hotkey } from '@/types/config/config'
 
+import deepmerge from 'deepmerge'
 import { useAtom } from 'jotai'
 import {
   Select,
@@ -12,15 +13,15 @@ import { configFields } from '@/utils/atoms/config'
 import { HOTKEY_ITEMS, HOTKEYS } from '@/utils/constants/config'
 
 export default function HotkeySelector() {
-  const [manualTranslate, setManualTranslate] = useAtom(
-    configFields.manualTranslate,
+  const [translateConfig, setTranslateConfig] = useAtom(
+    configFields.translate,
   )
 
   return (
     <div className="flex items-center justify-between gap-2">
       <Select
-        value={manualTranslate.hotkey}
-        onValueChange={(value: Hotkey) => setManualTranslate({ hotkey: value })}
+        value={translateConfig.node.hotkey}
+        onValueChange={(value: Hotkey) => setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))}
       >
         <SelectTrigger
           size="sm"
@@ -31,9 +32,9 @@ export default function HotkeySelector() {
             {' '}
             +
             {' '}
-            {HOTKEY_ITEMS[manualTranslate.hotkey].icon}
+            {HOTKEY_ITEMS[translateConfig.node.hotkey].icon}
             {' '}
-            {HOTKEY_ITEMS[manualTranslate.hotkey].label}
+            {HOTKEY_ITEMS[translateConfig.node.hotkey].label}
             {' '}
             {i18n.t('popup.translateParagraph')}
           </div>
@@ -54,8 +55,8 @@ export default function HotkeySelector() {
         </SelectContent>
       </Select>
       <Switch
-        checked={manualTranslate.enabled}
-        onCheckedChange={checked => setManualTranslate({ enabled: checked })}
+        checked={translateConfig.node.enabled}
+        onCheckedChange={checked => setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))}
       />
     </div>
   )

@@ -20,7 +20,7 @@ import { translateText } from './translate-text'
 
 const translatingNodes = new Set<HTMLElement | Text>()
 
-export function hideOrShowManualTranslation(point: Point) {
+export function hideOrShowNodeTranslation(point: Point) {
   if (!globalConfig)
     return
 

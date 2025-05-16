@@ -1,7 +1,7 @@
 import type { Point } from '@/types/dom'
 import { globalConfig, loadGlobalConfigPromise } from '@/utils/config/config'
 import { isEditable } from '@/utils/host/dom/filter'
-import { hideOrShowManualTranslation } from '@/utils/host/translate'
+import { hideOrShowNodeTranslation } from '@/utils/host/translate'
 
 import './style.css'
 
@@ -40,7 +40,7 @@ function registerTranslationTriggers() {
         keyState.isOtherKeyPressed = false
         timerId = setTimeout(() => {
           if (!keyState.isOtherKeyPressed && keyState.isHotkeyPressed) {
-            hideOrShowManualTranslation(mousePosition)
+            hideOrShowNodeTranslation(mousePosition)
             actionTriggered = true
           }
           timerId = null
@@ -70,7 +70,7 @@ function registerTranslationTriggers() {
           timerId = null
         }
         if (!actionTriggered) {
-          hideOrShowManualTranslation(mousePosition)
+          hideOrShowNodeTranslation(mousePosition)
         }
       }
       actionTriggered = false
