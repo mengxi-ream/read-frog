@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.5.3
+
+### Patch Changes
+
+- [`2656a99`](https://github.com/mengxi-ream/read-frog/commit/2656a998f2925195337332e9a4e62dba0bb34704) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - don't read dummy node
+
 ## 0.5.2
 
 ### Patch Changes
