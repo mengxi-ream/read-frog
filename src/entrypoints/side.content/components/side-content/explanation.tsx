@@ -1,3 +1,4 @@
+/* eslint-disable react/no-array-index-key */
 import type { ArticleExplanation } from '../../../../types/content'
 
 function createCumulativeIndexMap(articleExplanation: ArticleExplanation['paragraphs']): number[] {

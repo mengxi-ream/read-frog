@@ -49,7 +49,7 @@ export default function SideContent() {
       document.removeEventListener('mouseup', handleMouseUp)
       document.body.style.userSelect = ''
     }
-  }, [isResizing])
+  }, [isResizing, setSideContent])
 
   // HTML width adjustment
   useEffect(() => {

@@ -50,6 +50,7 @@ export function TopBar({ className }: { className?: string }) {
       <Tooltip>
         <TooltipTrigger asChild>
           <button
+            type="button"
             className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-neutral-200 p-0.5 dark:bg-neutral-800"
             onClick={() => setIsSideOpen(false)}
           >

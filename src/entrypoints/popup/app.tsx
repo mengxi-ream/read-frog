@@ -22,7 +22,7 @@ function App() {
   const providersConfig = useAtomValue(configFields.providersConfig)
   useEffect(() => {
     initIsIgnoreTab()
-  }, [])
+  }, [initIsIgnoreTab])
 
   return (
     <>
@@ -43,6 +43,7 @@ function App() {
       </div>
       <div className="flex items-center justify-between bg-neutral-200 px-2 py-1 dark:bg-neutral-800">
         <button
+          type="button"
           className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-300 dark:hover:bg-neutral-700"
           onClick={() => browser.runtime.openOptionsPage()}
         >
@@ -55,6 +56,7 @@ function App() {
           {version}
         </span>
         <button
+          type="button"
           className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-300 dark:hover:bg-neutral-700"
           onClick={() =>
             window.open('https://github.com/mengxi-ream/read-frog', '_blank')}

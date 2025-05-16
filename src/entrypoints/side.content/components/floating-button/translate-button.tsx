@@ -31,7 +31,7 @@ export default function TranslateButton() {
     return () => {
       removeListener()
     }
-  }, [])
+  }, [setIsPageTranslated])
 
   return (
     <HiddenButton

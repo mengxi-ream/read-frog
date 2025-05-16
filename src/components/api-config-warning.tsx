@@ -20,6 +20,7 @@ export function APIConfigWarning({ className }: { className?: string }) {
       {i18n.t('noConfig.warningWithLink.firstOnThe')}
       {' '}
       <button
+        type="button"
         className="cursor-pointer underline"
         onClick={() => sendMessage('openOptionsPage', undefined)}
       >

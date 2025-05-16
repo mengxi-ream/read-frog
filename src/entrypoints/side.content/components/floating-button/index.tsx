@@ -53,7 +53,7 @@ export default function FloatingButton() {
       document.removeEventListener('mouseup', handleMouseUp)
       document.body.style.userSelect = ''
     }
-  }, [isDraggingButton, initialClientY])
+  }, [isDraggingButton, initialClientY, setFloatingButton, floatingButton])
 
   const handleButtonDragStart = (e: React.MouseEvent) => {
     // 记录初始位置，用于后续判断是点击还是拖动

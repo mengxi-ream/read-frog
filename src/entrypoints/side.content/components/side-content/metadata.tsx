@@ -48,7 +48,7 @@ export function Metadata({ className }: { className?: string }) {
     return () => {
       removeListener()
     }
-  }, [extractedContent, analyzeContent, explainArticle])
+  }, [extractedContent, analyzeContent, explainArticle, setIsSideOpen, readArticle])
 
   return (
     <div

@@ -20,8 +20,8 @@ function registerTranslationTriggers() {
     isOtherKeyPressed: false,
   }
 
-  const getHotkey = () => globalConfig?.manualTranslate.hotkey
-  const isEnabled = () => globalConfig?.manualTranslate.enabled
+  const getHotkey = () => globalConfig?.translate.node.hotkey
+  const isEnabled = () => globalConfig?.translate.node.enabled
 
   let timerId: NodeJS.Timeout | null = null // 延时触发的定时器
   let actionTriggered = false

@@ -1,11 +1,6 @@
-import { forwardRef } from 'react'
-
 import { cn } from '@/utils/tailwind'
 
-const Container = forwardRef<
-  HTMLDivElement,
-  React.ComponentPropsWithoutRef<'div'>
->(({ className, children, ...props }, ref) => {
+function Container({ ref, className, children, ...props }: React.ComponentPropsWithoutRef<'div'> & { ref?: React.RefObject<HTMLDivElement | null> }) {
   return (
     <div
       ref={ref}
@@ -18,6 +13,6 @@ const Container = forwardRef<
       {children}
     </div>
   )
-})
+}
 
 export default Container
