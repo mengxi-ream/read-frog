@@ -1,0 +1,31 @@
+name: PR Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v3
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm install
+        shell: bash
+
+      - name: Run tests
+        run: pnpm test
