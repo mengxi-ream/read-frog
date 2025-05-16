@@ -18,6 +18,13 @@ const providerNames = ["openai", "deepseek"] as const satisfies Readonly<
 export const providerSchema = z.enum(providerNames);
 export type Provider = z.infer<typeof providerSchema>;
 
+export const translateProviderSchema = z.enum([
+  ...providerNames,
+  "microsoft",
+  "google",
+]);
+export type TranslateProvider = z.infer<typeof translateProviderSchema>;
+
 /* ──────────────────────────────
    3. providersConfigSchema
    ────────────────────────────── */

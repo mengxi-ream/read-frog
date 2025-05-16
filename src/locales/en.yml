@@ -30,7 +30,7 @@ options:
     translateRange:
       title: "Translate Range"
       range:
-        mainContent: "Main Content"
+        main: "Main Content"
         all: "All Content"
 side:
   sourceLang: "Source Language"

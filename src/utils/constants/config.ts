@@ -4,7 +4,7 @@ import { Config, Hotkey, PageTranslateRange } from "@/types/config/config";
 import { Provider, ProvidersConfig } from "@/types/config/provider";
 
 export const CONFIG_STORAGE_KEY = "config";
-export const CONFIG_SCHEMA_VERSION = 2;
+export const CONFIG_SCHEMA_VERSION = 3;
 
 export const HOTKEYS = ["Control", "Alt", "Shift", "`"] as const;
 export const HOTKEY_ITEMS: Record<Hotkey, { label: string; icon: string }> = {
@@ -41,12 +41,15 @@ export const DEFAULT_CONFIG: Config = {
   },
   provider: "openai",
   providersConfig: DEFAULT_PROVIDER_CONFIG,
-  manualTranslate: {
-    enabled: true,
-    hotkey: "Control",
-  },
-  pageTranslate: {
-    range: "mainContent",
+  translate: {
+    provider: "microsoft",
+    node: {
+      enabled: true,
+      hotkey: "Control",
+    },
+    page: {
+      range: "main",
+    },
   },
   floatingButton: {
     enabled: true,
@@ -73,6 +76,6 @@ export const PAGE_TRANSLATE_RANGE_ITEMS: Record<
   PageTranslateRange,
   { label: string }
 > = {
-  mainContent: { label: "Main content" },
-  all: { label: "All content" },
+  main: { label: "Main" },
+  all: { label: "All" },
 };

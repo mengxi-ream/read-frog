@@ -4,7 +4,11 @@ import { langCodeISO6393, langLevel } from "@/types/config/languages";
 import { HOTKEYS } from "@/utils/constants/config";
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side";
 
-import { providerSchema, providersConfigSchema } from "./provider";
+import {
+  providerSchema,
+  providersConfigSchema,
+  translateProviderSchema,
+} from "./provider";
 
 const hotkey = z.enum(HOTKEYS);
 export type Hotkey = (typeof HOTKEYS)[number];
@@ -18,7 +22,7 @@ const languageSchema = z.object({
 });
 
 // Manual translate schema
-const manualTranslateSchema = z.object({
+const nodeTranslateSchema = z.object({
   enabled: z.boolean(),
   hotkey: hotkey,
 });
@@ -36,11 +40,18 @@ const sideContentSchema = z.object({
 
 // page translate schema
 // TODO: add "article" as a range
-export const pageTranslateRangeSchema = z.enum(["mainContent", "all"]);
+export const pageTranslateRangeSchema = z.enum(["main", "all"]);
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>;
 
 const pageTranslateSchema = z.object({
   range: pageTranslateRangeSchema,
+});
+
+// Translate schema
+const translateSchema = z.object({
+  provider: translateProviderSchema,
+  node: nodeTranslateSchema,
+  page: pageTranslateSchema,
 });
 
 // Complete config schema
@@ -48,8 +59,7 @@ export const configSchema = z.object({
   language: languageSchema,
   provider: providerSchema,
   providersConfig: providersConfigSchema,
-  manualTranslate: manualTranslateSchema,
-  pageTranslate: pageTranslateSchema,
+  translate: translateSchema,
   floatingButton: floatingButtonSchema,
   sideContent: sideContentSchema,
 });

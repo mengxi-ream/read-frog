@@ -14,6 +14,8 @@
     "format:check": "prettier . --check --ignore-unknown",
     "format:staged": "prettier --write $(git diff --staged --name-only --diff-filter d | xargs)",
     "postinstall": "wxt prepare",
+    "lint": "eslint",
+    "lint:fix": "eslint --fix",
     "prepare": "husky",
     "release": "changeset tag && git push origin --tags",
     "test": "vitest run",
@@ -57,6 +59,7 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^4.13.1",
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.3",
     "@commitlint/cli": "^19.8.1",

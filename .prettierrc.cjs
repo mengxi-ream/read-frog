@@ -10,9 +10,7 @@ module.exports = {
   importOrderGroupNamespaceSpecifiers: true,
   arrowParens: "always",
   printWidth: 80,
-  singleQuote: false,
-  jsxSingleQuote: false,
-  semi: true,
+  singleQuote: true,
   trailingComma: "all",
   tabWidth: 2,
 };

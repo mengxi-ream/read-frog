@@ -1,3 +1,4 @@
+import deepmerge from "deepmerge";
 import { useAtom } from "jotai";
 
 import {
@@ -11,10 +12,9 @@ import {
 import { pageTranslateRangeSchema } from "@/types/config/config";
 import { PageTranslateRange } from "@/types/config/config";
 import { configFields } from "@/utils/atoms/config";
-import { PAGE_TRANSLATE_RANGE_ITEMS } from "@/utils/constants/config";
 
 export default function TranslationConfigSection() {
-  const [pageTranslate, setPageTranslate] = useAtom(configFields.pageTranslate);
+  const [translateConfig, setTranslateConfig] = useAtom(configFields.translate);
   return (
     <section>
       <h2 className="mb-8 text-center text-2xl font-bold">
@@ -25,19 +25,18 @@ export default function TranslationConfigSection() {
           {i18n.t("options.translationConfig.translateRange.title")}
         </label>
         <Select
-          value={PAGE_TRANSLATE_RANGE_ITEMS[pageTranslate.range].label}
+          value={translateConfig.page.range}
           onValueChange={(value: PageTranslateRange) =>
-            setPageTranslate({
-              ...pageTranslate,
-              range: value,
-            })
+            setTranslateConfig(
+              deepmerge(translateConfig, { page: { range: value } }),
+            )
           }
         >
           <SelectTrigger className="mt-1 w-full">
             <SelectValue asChild>
               <span>
                 {i18n.t(
-                  `options.translationConfig.translateRange.range.${pageTranslate.range}`,
+                  `options.translationConfig.translateRange.range.${translateConfig.page.range}`,
                 )}
               </span>
             </SelectValue>

@@ -88,7 +88,7 @@ export function walkAndLabelElement(
 
   if (
     globalConfig &&
-    globalConfig.pageTranslate.range !== "all" &&
+    globalConfig.translate.page.range !== "all" &&
     MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
   ) {
     return false;
@@ -97,7 +97,7 @@ export function walkAndLabelElement(
   if (INVALID_TRANSLATE_TAGS.has(element.tagName)) return false;
 
   if (element.shadowRoot) {
-    if (globalConfig && globalConfig.pageTranslate.range === "all") {
+    if (globalConfig && globalConfig.translate.page.range === "all") {
       for (const child of element.shadowRoot.children) {
         if (child instanceof HTMLElement) {
           walkAndLabelElement(child, walkId);

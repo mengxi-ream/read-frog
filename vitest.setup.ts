@@ -1,4 +1,4 @@
-import "@testing-library/jest-dom";
+import '@testing-library/jest-dom'
 
 // JSDom + Vitest don't play well with each other. Long story short - default
 // TextEncoder produces Uint8Array objects that are _different_ from the global
@@ -6,22 +6,22 @@ import "@testing-library/jest-dom";
 // https://github.com/vitest-dev/vitest/issues/4043#issuecomment-1905172846
 class ESBuildAndJSDOMCompatibleTextEncoder extends TextEncoder {
   constructor() {
-    super();
+    super()
   }
 
   encode(input: string) {
-    if (typeof input !== "string") {
-      throw new TypeError("`input` must be a string");
+    if (typeof input !== 'string') {
+      throw new TypeError('`input` must be a string')
     }
 
-    const decodedURI = decodeURIComponent(encodeURIComponent(input));
-    const arr = new Uint8Array(decodedURI.length);
-    const chars = decodedURI.split("");
+    const decodedURI = decodeURIComponent(encodeURIComponent(input))
+    const arr = new Uint8Array(decodedURI.length)
+    const chars = decodedURI.split('')
     for (let i = 0; i < chars.length; i++) {
-      arr[i] = decodedURI[i].charCodeAt(0);
+      arr[i] = decodedURI[i].charCodeAt(0)
     }
-    return arr;
+    return arr
   }
 }
 
-global.TextEncoder = ESBuildAndJSDOMCompatibleTextEncoder;
+globalThis.TextEncoder = ESBuildAndJSDOMCompatibleTextEncoder

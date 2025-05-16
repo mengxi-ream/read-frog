@@ -30,7 +30,7 @@ options:
     translateRange:
       title: "翻译范围"
       range:
-        mainContent: "主要内容"
+        main: "主要内容"
         all: "所有内容"
 translateService: 翻译服务
 languageLevel: 你的来源语言水平
