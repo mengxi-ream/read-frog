@@ -36,10 +36,7 @@ export async function translateText(sourceText: string) {
     if (!targetLang) {
       throw new Error('Invalid target language code')
     }
-    logger.info('microsoft sourceLang', sourceLang)
-    logger.info('microsoft targetLang', targetLang)
     translatedText = await microsoftTranslate(cleanSourceText, sourceLang, targetLang)
-    logger.info('microsoft translatedText', translatedText)
   }
   else {
     const { text } = await generateText({

@@ -42,7 +42,7 @@ export function Metadata({ className }: { className?: string }) {
         toast.warning('Reading in progress...')
         return
       }
-      readArticle(extractedContent)
+      readArticle()
     })
 
     return () => {
@@ -69,7 +69,7 @@ export function Metadata({ className }: { className?: string }) {
       </div>
       <Button
         size="sm"
-        onClick={() => extractedContent && readArticle(extractedContent)}
+        onClick={() => extractedContent && readArticle()}
         disabled={
           isExtractingContent
           || analyzeContent.isPending

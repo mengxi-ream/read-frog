@@ -35,7 +35,7 @@ export default function FloatingReadButton() {
       toast.warning('Reading in progress...')
       return
     }
-    readArticle(extractedContent)
+    readArticle()
   }
 
   return <HiddenButton Icon={BookOpenText} onClick={startReadArticle} />

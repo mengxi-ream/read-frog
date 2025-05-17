@@ -230,7 +230,7 @@ export function useReadArticle() {
   const queryClient = useQueryClient()
   const providersConfig = useAtomValue(configFields.providersConfig)
 
-  const mutate = async (extractedContent: ExtractedContent) => {
+  const mutate = async () => {
     if (!isAnyAPIKey(providersConfig)) {
       toast.error(i18n.t('noConfig.warning'))
       return
@@ -241,13 +241,35 @@ export function useReadArticle() {
     // Remove previous mutations from the cache to clear useMutationState data
     queryClient.getMutationCache().clear()
 
-    const articleAnalysis = await analyzeContent.mutateAsync(extractedContent)
-    setReadState('continue?')
-    if (articleAnalysis.isArticle) {
-      await explainArticle.mutateAsync({
-        extractedContent,
-        articleAnalysis,
+    setReadState('extracting')
+
+    try {
+      // Re-trigger extract query and wait for the result
+      const freshData = await queryClient.fetchQuery<ExtractedContent>({
+        queryKey: ['extractContent'],
+        staleTime: 0,
       })
+
+      if (!freshData) {
+        setReadState(undefined)
+        throw new Error('Failed to extract content')
+      }
+
+      logger.log('freshExtractedContent', freshData)
+
+      const articleAnalysis = await analyzeContent.mutateAsync(freshData)
+      setReadState('continue?')
+      if (articleAnalysis.isArticle) {
+        await explainArticle.mutateAsync({
+          extractedContent: freshData,
+          articleAnalysis,
+        })
+      }
+    }
+    catch (error) {
+      logger.error('Error during content extraction or analysis', error)
+      setReadState(undefined)
+      throw error
     }
   }
 

@@ -15,5 +15,5 @@ export const progressAtom = atom({
 // }));
 
 export const readStateAtom = atom<
-  'analyzing' | 'continue?' | 'explaining' | undefined
+  'extracting' | 'analyzing' | 'continue?' | 'explaining' | undefined
 >(undefined)
