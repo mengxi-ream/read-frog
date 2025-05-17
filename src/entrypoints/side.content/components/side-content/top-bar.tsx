@@ -8,6 +8,7 @@ import { SelectGroup } from '@radix-ui/react-select'
 import { useAtom, useSetAtom } from 'jotai'
 
 import { ArrowRight, X } from 'lucide-react'
+import ProviderIcon from '@/components/provider-icon'
 import {
   Select,
   SelectContent,
@@ -26,8 +27,8 @@ import {
 } from '@/types/config/languages'
 import { configFields } from '@/utils/atoms/config'
 import { PROVIDER_ITEMS } from '@/utils/constants/config'
-import { cn } from '@/utils/tailwind'
 
+import { cn } from '@/utils/tailwind'
 import { shadowWrapper } from '../..'
 import { isSideOpenAtom } from '../../atoms'
 
@@ -77,7 +78,7 @@ function ProviderSelect() {
         <img
           src={PROVIDER_ITEMS[provider].logo}
           alt={provider}
-          className="size-4 rounded-full border bg-white"
+          className="size-3 bg-white"
         />
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
@@ -85,14 +86,7 @@ function ProviderSelect() {
           <SelectLabel>{i18n.t('aiService.title')}</SelectLabel>
           {Object.entries(PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
             <SelectItem key={provider} value={provider}>
-              <div className="flex items-center gap-x-2">
-                <img
-                  src={logo}
-                  alt={name}
-                  className="size-4 rounded-full border bg-white"
-                />
-                <span>{name}</span>
-              </div>
+              <ProviderIcon logo={logo} name={name} />
             </SelectItem>
           ))}
         </SelectGroup>
