@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.6.1
+
+### Patch Changes
+
+- [`d457f8e`](https://github.com/mengxi-ream/read-frog/commit/d457f8e562007a71d25ffc4642f532c786fb0b74) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix can't use normal translator when no api key
+
 ## 0.6.0
 
 ### Minor Changes
