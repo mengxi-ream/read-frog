@@ -35,7 +35,12 @@ options:
 side:
   sourceLang: Source Language
   targetLang: Target Language
-translateService: Translation Service
+aiService:
+  title: AI Service
+  description: For read and explain articles
+translateService:
+  title: Translation Service
+  description: For translate the webpage only
 languageLevel: Your Source Lang Level
 languageLevels:
   beginner: Beginner

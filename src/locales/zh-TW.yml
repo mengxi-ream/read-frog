@@ -32,7 +32,12 @@ options:
       range:
         main: 主要內容
         all: 所有內容
-translateService: 翻譯服務
+aiService:
+  title: AI 服務
+  description: 用於閱讀和解釋文章
+translateService:
+  title: 翻譯服務
+  description: 僅用於翻譯網頁內容
 languageLevel: 你的來源語言水平
 languageLevels:
   beginner: 初級

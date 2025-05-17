@@ -19,14 +19,14 @@ export default function ProviderSelector() {
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-[13px] font-medium flex items-center gap-1.5">
-        AI Service
+        {i18n.t('aiService.title')}
         <Tooltip>
           <TooltipTrigger asChild>
-            <CircleHelp className="size-3 text-blue-300" />
+            <CircleHelp className="size-3 text-blue-300 dark:text-blue-700/70" />
           </TooltipTrigger>
           <TooltipContent>
             <p>
-              For read and explain articles
+              {i18n.t('aiService.description')}
             </p>
           </TooltipContent>
         </Tooltip>

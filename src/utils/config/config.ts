@@ -55,7 +55,6 @@ export async function initializeConfig() {
   ])
 
   globalConfig = config
-  await loadAPIKeyFromEnv(config)
 }
 
 storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (newConfig) => {
@@ -70,7 +69,12 @@ export function isAnyAPIKey(providersConfig: ProvidersConfig) {
   })
 }
 
-async function loadAPIKeyFromEnv(config: Config) {
+export async function loadAPIKeyFromEnv() {
+  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+  if (!config) {
+    return
+  }
+
   if (import.meta.env.DEV) {
     const newProviderConfig = Object.fromEntries(
       Object.entries(config.providersConfig).map(([provider, cfg]) => {

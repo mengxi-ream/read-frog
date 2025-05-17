@@ -82,7 +82,7 @@ function ProviderSelect() {
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
-          <SelectLabel>{i18n.t('translateService')}</SelectLabel>
+          <SelectLabel>{i18n.t('aiService.title')}</SelectLabel>
           {Object.entries(PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
             <SelectItem key={provider} value={provider}>
               <div className="flex items-center gap-x-2">

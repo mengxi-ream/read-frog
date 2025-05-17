@@ -1,4 +1,4 @@
-import { initializeConfig } from '@/utils/config/config'
+import { initializeConfig, loadAPIKeyFromEnv } from '@/utils/config/config'
 import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 
 const isPageTranslatedMap = new Map<number, boolean>()
@@ -14,7 +14,7 @@ export default defineBackground(async () => {
       )
     }
     await initializeConfig()
-
+    await loadAPIKeyFromEnv()
     // Open tutorial page when extension is installed
     if (details.reason === 'install') {
       await browser.tabs.create({
