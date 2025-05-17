@@ -1,6 +1,6 @@
 import type { Config } from '@/types/config/config'
 
-import type { ProvidersConfig } from '@/types/config/provider'
+import type { ProvidersConfig } from '@/types/config/provider-old'
 import deepmerge from 'deepmerge'
 import { configSchema } from '@/types/config/config'
 

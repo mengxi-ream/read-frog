@@ -2,7 +2,7 @@ import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
-import { providerNames } from '@/types/config/provider'
+import { providerNames } from '@/types/config/provider-old'
 import { configFields } from '@/utils/atoms/config'
 import { isPageTranslatedAtom } from '@/utils/atoms/translation'
 

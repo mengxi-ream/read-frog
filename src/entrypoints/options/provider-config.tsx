@@ -1,4 +1,4 @@
-import { providerSchema } from '@/types/config/provider'
+import { providerSchema } from '@/types/config/provider-old'
 
 import { ProviderConfigCard } from './components/provider-config-card'
 

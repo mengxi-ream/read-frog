@@ -2,7 +2,7 @@ import { useAtom, useAtomValue } from 'jotai'
 import { Check, Languages } from 'lucide-react'
 import { toast } from 'sonner'
 
-import { providerNames } from '@/types/config/provider'
+import { providerNames } from '@/types/config/provider-old'
 import { configFields } from '@/utils/atoms/config'
 import { isPageTranslatedAtom } from '@/utils/atoms/translation'
 import { isAnyAPIKey } from '@/utils/config/config'

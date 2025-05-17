@@ -1,37 +1,58 @@
 import { z } from 'zod'
+import { HOTKEYS } from '@/utils/constants/config'
 
 /* ──────────────────────────────
-   1.  Single source‑of‑truth
-   ────────────────────────────── */
-export const providerModels = {
+  Single source of truth
+  ────────────────────────────── */
+export const readProviderModels = {
   openai: ['gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-nano'],
   deepseek: ['deepseek-chat'],
+  openrouter: ['deepseek/deepseek-chat-v3-0324:free', 'qwen/qwen3-235b-a22b:free'],
 } as const
+export const translateProviderModels = {
+  openai: ['gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-nano'],
+  deepseek: ['deepseek-chat'],
+  openrouter: ['meta-llama/llama-4-maverick:free', 'deepseek/deepseek-chat-v3-0324:free', 'deepseek/deepseek-prover-v2:free'],
+} as const
+export const pureTranslateProvider = ['google', 'microsoft'] as const
 
-export const providerNames = ['openai', 'deepseek'] as const satisfies Readonly<
-  (keyof typeof providerModels)[]
+export const apiProviderNames = ['openai', 'deepseek', 'openrouter'] as const
+
+/* ──────────────────────────────
+  Derived provider names
+  ────────────────────────────── */
+
+export const readProviderNames = ['openai', 'deepseek', 'openrouter'] as const satisfies Readonly<
+  (keyof typeof readProviderModels)[]
+>
+export const translateProviderNames = ['google', 'microsoft', 'openai', 'deepseek', 'openrouter'] as const satisfies Readonly<
+  (keyof typeof translateProviderModels | typeof pureTranslateProvider[number])[]
 >
 
 /* ──────────────────────────────
-   2. providerSchema
-   ────────────────────────────── */
-export const providerSchema = z.enum(providerNames)
-export type Provider = z.infer<typeof providerSchema>
+  Providers config schema
+  ────────────────────────────── */
 
-export const translateProviderSchema = z.enum([
-  ...providerNames,
-  'microsoft',
-  'google',
-])
-export type TranslateProvider = z.infer<typeof translateProviderSchema>
+const providerConfigItemSchema = z.object({
+  apiKey: z.string().optional(),
+})
+
+export const providersConfigSchema = z.object(
+  apiProviderNames.reduce((acc, provider) => {
+    acc[provider] = providerConfigItemSchema
+    return acc
+  }, {} as Record<typeof apiProviderNames[number], typeof providerConfigItemSchema>),
+)
+
+export type ProvidersConfig = z.infer<typeof providersConfigSchema>
 
 /* ──────────────────────────────
-   3. providersConfigSchema
-   ────────────────────────────── */
+  read or translate config helpers
+  ────────────────────────────── */
+
 type ModelTuple = readonly [string, ...string[]] // 至少一个元素才能给 z.enum
 function providerConfigSchema<T extends ModelTuple>(models: T) {
   return z.object({
-    apiKey: z.string().optional(),
     model: z.enum(models),
     isCustomModel: z.boolean(),
     customModel: z.string().optional(),
@@ -41,7 +62,8 @@ function providerConfigSchema<T extends ModelTuple>(models: T) {
 type SchemaShape<M extends Record<string, ModelTuple>> = {
   [K in keyof M]: ReturnType<typeof providerConfigSchema<M[K]>>;
 }
-function buildSchema<M extends Record<string, ModelTuple>>(models: M) {
+
+function buildModelSchema<M extends Record<string, ModelTuple>>(models: M) {
   return z.object(
     // 用 reduce 而不用 Object.fromEntries ➙ 保留键名/类型
     (Object.keys(models) as (keyof M)[]).reduce((acc, key) => {
@@ -51,30 +73,49 @@ function buildSchema<M extends Record<string, ModelTuple>>(models: M) {
   )
 }
 
-export const providersConfigSchema = buildSchema(providerModels)
-export type ProvidersConfig = z.infer<typeof providersConfigSchema>
+/* ──────────────────────────────
+  read config
+  ────────────────────────────── */
 
-// 为每个provider生成对应的模型类型
-export type ProviderToModel = {
-  [P in Provider]: (typeof providerModels)[P][number];
-}
+export const readModelSchema = buildModelSchema(readProviderModels)
+export type ReadModel = z.infer<typeof readModelSchema>
 
-// 通用Model类型
-export type Model = ProviderToModel[Provider]
+export const readConfigSchema = z.object({
+  provider: z.enum(apiProviderNames),
+  models: readModelSchema,
+})
+export type ReadConfig = z.infer<typeof readConfigSchema>
 
-// 为特定provider获取模型类型
-export type ModelForProvider<P extends Provider> = ProviderToModel[P]
+/* ──────────────────────────────
+  translate config
+  ────────────────────────────── */
 
-// 生成ProviderConfig类型
-// export type ProviderConfig = {
-//   [P in Provider]: {
-//     apiKey: string | undefined;
-//     model: ModelForProvider<P>;
-//     isCustomModel: boolean;
-//     customModel: string;
-//   };
-// };
+export const translateModelSchema = buildModelSchema(translateProviderModels)
+export type TranslateModel = z.infer<typeof translateModelSchema>
 
-// 为了向后兼容，保留这些类型定义
-// export type OpenAIModel = ModelForProvider<"openai">;
-// export type DeepseekModel = ModelForProvider<"deepseek">;
+export const pureTranslateModelSchema = z.object(
+  pureTranslateProvider.reduce((acc, provider) => {
+    acc[provider] = z.null()
+    return acc
+  }, {} as Record<typeof pureTranslateProvider[number], z.ZodNull>),
+)
+export type PureTranslateModel = z.infer<typeof pureTranslateModelSchema>
+
+// TODO: add "article" as a range
+export const pageTranslateRangeSchema = z.enum(['main', 'all'])
+
+export const translateConfigSchema = z.object({
+  provider: z.enum(translateProviderNames),
+  models: z.object({
+    ...pureTranslateModelSchema.shape,
+    ...translateModelSchema.shape,
+  }),
+  node: z.object({
+    enabled: z.boolean(),
+    hotkey: z.enum(HOTKEYS),
+  }),
+  page: z.object({
+    range: pageTranslateRangeSchema,
+  }),
+})
+export type TranslateConfig = z.infer<typeof translateConfigSchema>

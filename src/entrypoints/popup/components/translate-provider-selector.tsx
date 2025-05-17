@@ -1,4 +1,4 @@
-import type { TranslateProvider } from '@/types/config/provider'
+import type { TranslateProvider } from '@/types/config/provider-old'
 
 import { useAtom } from 'jotai'
 import { CircleHelp } from 'lucide-react'
@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { providerNames } from '@/types/config/provider'
+import { providerNames } from '@/types/config/provider-old'
 import { configFields } from '@/utils/atoms/config'
 import { PROVIDER_ITEMS, TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 

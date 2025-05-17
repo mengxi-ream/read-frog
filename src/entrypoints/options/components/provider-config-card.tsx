@@ -1,4 +1,4 @@
-import type { Provider } from '@/types/config/provider'
+import type { Provider } from '@/types/config/provider-old'
 
 import { useAtom } from 'jotai'
 import {
@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { providerModels } from '@/types/config/provider'
+import { providerModels } from '@/types/config/provider-old'
 import { configFields } from '@/utils/atoms/config'
 import { PROVIDER_ITEMS } from '@/utils/constants/config'
 

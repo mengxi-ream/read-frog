@@ -1,12 +1,12 @@
 import type { Config, Hotkey, PageTranslateRange } from '@/types/config/config'
-import type { Provider, ProvidersConfig, TranslateProvider } from '@/types/config/provider'
+import type { Provider, ProvidersConfig, TranslateProvider } from '@/types/config/provider-old'
 import deepseekLogo from '@/assets/llm/deepseek.png'
 import googleLogo from '@/assets/llm/google.png'
 import microsoftLogo from '@/assets/llm/microsoft.png'
 import openaiLogo from '@/assets/llm/openai.jpg'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION = 3
+export const CONFIG_SCHEMA_VERSION = 4
 
 export const HOTKEYS = ['Control', 'Alt', 'Shift', '`'] as const
 export const HOTKEY_ITEMS: Record<Hotkey, { label: string, icon: string }> = {
