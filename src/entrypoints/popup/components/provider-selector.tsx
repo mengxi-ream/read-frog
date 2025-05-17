@@ -1,5 +1,6 @@
 import { useAtom } from 'jotai'
 
+import { CircleHelp } from 'lucide-react'
 import ProviderIcon from '@/components/provider-icon'
 import {
   Select,
@@ -8,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { configFields } from '@/utils/atoms/config'
 import { PROVIDER_ITEMS } from '@/utils/constants/config'
 
@@ -16,8 +18,18 @@ export default function ProviderSelector() {
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[13px] font-medium">
+      <span className="text-[13px] font-medium flex items-center gap-1.5">
         AI Service
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <CircleHelp className="size-3 text-blue-300" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              For read and explain articles
+            </p>
+          </TooltipContent>
+        </Tooltip>
       </span>
       <Select value={provider} onValueChange={setProvider}>
         <SelectTrigger className="bg-input/50 hover:bg-input !h-7 w-31 cursor-pointer pr-1.5 pl-2.5 outline-none">

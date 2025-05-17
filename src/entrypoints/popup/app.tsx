@@ -30,9 +30,9 @@ function App() {
       )}
       <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
         <LanguageOptionsSelector />
+        <LanguageLevelSelector />
         <ProviderSelector />
         <TranslateProviderSelector />
-        <LanguageLevelSelector />
         <div className="grid w-full grid-cols-2 gap-2">
           <ReadButton />
           <TranslateButton />

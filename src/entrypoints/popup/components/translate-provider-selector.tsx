@@ -1,6 +1,7 @@
 import type { TranslateProvider } from '@/types/config/provider'
 
 import { useAtom } from 'jotai'
+import { CircleHelp } from 'lucide-react'
 import ProviderIcon from '@/components/provider-icon'
 import {
   Select,
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { configFields } from '@/utils/atoms/config'
 import { TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 
@@ -17,8 +19,18 @@ export default function TranslateProviderSelector() {
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[13px] font-medium">
+      <span className="text-[13px] font-medium flex items-center gap-1.5">
         {i18n.t('translateService')}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <CircleHelp className="size-3 text-blue-300" />
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>
+              For translate the webpage only
+            </p>
+          </TooltipContent>
+        </Tooltip>
       </span>
       <Select
         value={translateConfig.provider}

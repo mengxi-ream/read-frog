@@ -87,9 +87,6 @@ export async function googleTranslate(
     `https://translate.googleapis.com/translate_a/single?${queryString}`,
     {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     },
   ).catch((error) => {
     throw new Error(`Network error during translation: ${error.message}`)

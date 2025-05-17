@@ -4,12 +4,13 @@ import { useHydrateAtoms } from 'jotai/utils'
 import React from 'react'
 
 import ReactDOM from 'react-dom/client'
+import { TooltipProvider } from '@/components/ui/tooltip.tsx'
 import { configAtom } from '@/utils/atoms/config'
 import { isPageTranslatedAtom } from '@/utils/atoms/translation.ts'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import App from './app.tsx'
-import '@/assets/tailwind/text-small.css'
 
+import '@/assets/tailwind/text-small.css'
 import '@/assets/tailwind/theme.css'
 
 document.documentElement.classList.toggle(
@@ -60,7 +61,9 @@ async function initApp() {
             [isPageTranslatedAtom, isPageTranslated],
           ]}
         >
-          <App />
+          <TooltipProvider>
+            <App />
+          </TooltipProvider>
         </HydrateAtoms>
       </JotaiProvider>
     </React.StrictMode>,
