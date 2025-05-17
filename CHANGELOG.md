@@ -1,5 +1,15 @@
 # read-frog
 
+## 0.6.0
+
+### Minor Changes
+
+- [#25](https://github.com/mengxi-ream/read-frog/pull/25) [`054a767`](https://github.com/mengxi-ream/read-frog/commit/054a7674283c6767f57eddbcd85ebaf382372e07) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - add normal translation service from google and microsoft
+
+### Patch Changes
+
+- [#27](https://github.com/mengxi-ream/read-frog/pull/27) [`bf00519`](https://github.com/mengxi-ream/read-frog/commit/bf00519a2e4135f59ead03042be1d5df4089a15a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix extract old article
+
 ## 0.5.4
 
 ### Patch Changes
