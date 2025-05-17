@@ -1,6 +1,8 @@
 import type { Config, Hotkey, PageTranslateRange } from '@/types/config/config'
-import type { Provider, ProvidersConfig } from '@/types/config/provider'
+import type { Provider, ProvidersConfig, TranslateProvider } from '@/types/config/provider'
 import deepseekLogo from '@/assets/llm/deepseek.png'
+import googleLogo from '@/assets/llm/google.png'
+import microsoftLogo from '@/assets/llm/microsoft.png'
 import openaiLogo from '@/assets/llm/openai.jpg'
 
 export const CONFIG_STORAGE_KEY = 'config'
@@ -70,6 +72,19 @@ export const PROVIDER_ITEMS: Record<Provider, { logo: string, name: string }>
       logo: deepseekLogo,
       name: 'DeepSeek',
     },
+  }
+
+export const TRANSLATE_PROVIDER_ITEMS: Record<TranslateProvider, { logo: string, name: string }>
+  = {
+    microsoft: {
+      logo: microsoftLogo,
+      name: 'Microsoft Translator',
+    },
+    google: {
+      logo: googleLogo,
+      name: 'Google Translate',
+    },
+    ...PROVIDER_ITEMS,
   }
 
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<

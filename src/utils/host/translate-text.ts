@@ -1,6 +1,6 @@
 import { generateText } from 'ai'
 
-import { langCodeToEnglishName } from '@/types/config/languages'
+import { iso6393To1, langCodeToEnglishName } from '@/types/config/languages'
 
 import { globalConfig } from '../config/config'
 import { logger } from '../logger'
@@ -18,24 +18,50 @@ export async function translateText(sourceText: string) {
   const cleanSourceText = sourceText.replace(/\u200B/g, '').trim()
 
   // TODO: retry logic + cache logic
-  const { text } = await generateText({
-    model: registry.languageModel(`${provider}:${model}`),
-    prompt: getTranslateLinePrompt(
-      langCodeToEnglishName[globalConfig.language.targetCode],
-      cleanSourceText,
-    ),
-  })
+  const translateProvider = globalConfig.translate.provider
+  let translatedText = ''
+
+  // TODO: clean up the code
+  if (translateProvider === 'google') {
+    const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (iso6393To1[globalConfig.language.sourceCode] ?? 'auto')
+    const targetLang = iso6393To1[globalConfig.language.targetCode]
+    if (!targetLang) {
+      throw new Error('Invalid target language code')
+    }
+    translatedText = await googleTranslate(cleanSourceText, sourceLang, targetLang)
+  }
+  else if (translateProvider === 'microsoft') {
+    const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (iso6393To1[globalConfig.language.sourceCode] ?? 'auto')
+    const targetLang = iso6393To1[globalConfig.language.targetCode]
+    if (!targetLang) {
+      throw new Error('Invalid target language code')
+    }
+    logger.info('microsoft sourceLang', sourceLang)
+    logger.info('microsoft targetLang', targetLang)
+    translatedText = await microsoftTranslate(cleanSourceText, sourceLang, targetLang)
+    logger.info('microsoft translatedText', translatedText)
+  }
+  else {
+    const { text } = await generateText({
+      model: registry.languageModel(`${provider}:${model}`),
+      prompt: getTranslateLinePrompt(
+        langCodeToEnglishName[globalConfig.language.targetCode],
+        cleanSourceText,
+      ),
+    })
+    translatedText = text
+  }
 
   if (cleanSourceText.includes('介绍')) {
     logger.warn(
       'sourceText',
       sourceText,
       cleanSourceText,
-      text === cleanSourceText,
+      translatedText === cleanSourceText,
     )
   }
   // Compare cleaned versions to determine if translation is the same
-  return cleanSourceText === text ? '' : text
+  return cleanSourceText === translatedText ? '' : translatedText
 }
 
 export async function googleTranslate(

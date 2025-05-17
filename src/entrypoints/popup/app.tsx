@@ -1,11 +1,9 @@
 import { useAtomValue, useSetAtom } from 'jotai'
 import { Bolt, Star } from 'lucide-react'
 import { Toaster } from 'sonner'
-
 import { APIConfigWarning } from '@/components/api-config-warning'
 import { configFields } from '@/utils/atoms/config'
 import { isAnyAPIKey } from '@/utils/config/config'
-
 import { version } from '../../../package.json'
 import { initIsIgnoreTabAtom } from './atom'
 import FloatingButton from './components/floating-button'
@@ -16,6 +14,7 @@ import ProviderSelector from './components/provider-selector'
 import QuickLinks from './components/quick-links'
 import ReadButton from './components/read-button'
 import TranslateButton from './components/translate-button'
+import TranslateProviderSelector from './components/translate-provider-selector'
 
 function App() {
   const initIsIgnoreTab = useSetAtom(initIsIgnoreTabAtom)
@@ -32,6 +31,7 @@ function App() {
       <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
         <LanguageOptionsSelector />
         <ProviderSelector />
+        <TranslateProviderSelector />
         <LanguageLevelSelector />
         <div className="grid w-full grid-cols-2 gap-2">
           <ReadButton />
