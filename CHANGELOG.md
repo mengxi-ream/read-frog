@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.7.0
+
+### Minor Changes
+
+- [#34](https://github.com/mengxi-ream/read-frog/pull/34) [`5de10ce`](https://github.com/mengxi-ream/read-frog/commit/5de10ced51f3dd88dadaa0cfa32c2984d9eca854) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - add support to openrouter and support different model config for reading and translating
+
 ## 0.6.1
 
 ### Patch Changes
