@@ -47,7 +47,7 @@ export type LLMProviderNames = typeof llmProviderNames[number]
 
 const providerConfigItemSchema = z.object({
   apiKey: z.string().optional(),
-  baseURL: z.string().optional().nullable(),
+  baseURL: z.string().optional(),
 })
 
 export const providersConfigSchema = z.object(

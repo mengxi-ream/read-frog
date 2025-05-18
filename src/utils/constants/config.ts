@@ -9,7 +9,7 @@ import { pureTranslateProvider } from '@/types/config/provider'
 import { omit, pick } from '@/types/utils'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION = 4
+export const CONFIG_SCHEMA_VERSION = 5
 
 export const MIN_SIDE_CONTENT_WIDTH = 400 // px
 export const DEFAULT_SIDE_CONTENT_WIDTH = 400 // px
@@ -17,15 +17,15 @@ export const DEFAULT_SIDE_CONTENT_WIDTH = 400 // px
 export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
     apiKey: undefined,
-    baseURL: undefined,
+    baseURL: 'https://api.openai.com/v1',
   },
   deepseek: {
     apiKey: undefined,
-    baseURL: undefined,
+    baseURL: 'https://api.deepseek.com/v1',
   },
   openrouter: {
     apiKey: undefined,
-    baseURL: undefined,
+    baseURL: 'https://openrouter.ai/api/v1',
   },
 }
 
