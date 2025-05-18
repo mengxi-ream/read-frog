@@ -28,7 +28,7 @@ import {
 } from '@/types/config/languages'
 import { configFields } from '@/utils/atoms/config'
 
-import { TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
+import { READ_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { cn } from '@/utils/tailwind'
 import { shadowWrapper } from '../..'
 import { isSideOpenAtom } from '../../atoms'
@@ -85,7 +85,7 @@ function ProviderSelect() {
         className="flex !size-7 items-center justify-center p-0"
       >
         <img
-          src={TRANSLATE_PROVIDER_ITEMS[readConfig.provider].logo}
+          src={READ_PROVIDER_ITEMS[readConfig.provider].logo}
           alt={readConfig.provider}
           className="size-3 bg-white"
         />
@@ -93,7 +93,7 @@ function ProviderSelect() {
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t('aiService.title')}</SelectLabel>
-          {Object.entries(TRANSLATE_PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
+          {Object.entries(READ_PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
             <SelectItem key={provider} value={provider}>
               <ProviderIcon logo={logo} name={name} />
             </SelectItem>

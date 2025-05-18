@@ -17,6 +17,7 @@ export const pureTranslateProvider = ['google', 'microsoft'] as const
 
 // need to be set api key
 export const apiProviderNames = ['openai', 'deepseek', 'openrouter'] as const
+export type APIProviderNames = typeof apiProviderNames[number]
 
 /* ──────────────────────────────
   Derived provider names

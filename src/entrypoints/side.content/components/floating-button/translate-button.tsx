@@ -44,7 +44,7 @@ export default function TranslateButton() {
         const isPure = pureTranslateProvider.includes(
           provider as typeof pureTranslateProvider[number],
         )
-        if (!isPure || !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
+        if (!isPure && !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
           toast.error(i18n.t('noConfig.warning'))
           return
         }

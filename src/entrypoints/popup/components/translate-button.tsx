@@ -29,7 +29,7 @@ export default function TranslateButton({ className }: { className?: string }) {
           provider as typeof pureTranslateProvider[number],
         )
 
-        if (!isPure || !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
+        if (!isPure && !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
           toast.error(i18n.t('noConfig.warning'))
           return
         }
