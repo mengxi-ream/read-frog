@@ -1,4 +1,5 @@
 import APIKeyConfig from './api-key-config'
+import BaseURLConfig from './base-url-config'
 import ReadProvider from './read-provider'
 import TranslateProvider from './translate-provider'
 
@@ -12,6 +13,7 @@ export default function ProviderConfig() {
         <ReadProvider />
         <TranslateProvider />
         <APIKeyConfig />
+        <BaseURLConfig />
       </div>
     </section>
   )

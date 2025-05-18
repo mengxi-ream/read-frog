@@ -17,12 +17,15 @@ export const DEFAULT_SIDE_CONTENT_WIDTH = 400 // px
 export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
     apiKey: undefined,
+    baseURL: undefined,
   },
   deepseek: {
     apiKey: undefined,
+    baseURL: undefined,
   },
   openrouter: {
     apiKey: undefined,
+    baseURL: undefined,
   },
 }
 

@@ -14,9 +14,11 @@ export async function getProviderRegistry() {
 
   return createProviderRegistry({
     openai: createOpenAI({
+      baseURL: config?.providersConfig?.openai.baseURL ?? 'https://api.openai.com/v1',
       apiKey: config?.providersConfig?.openai.apiKey,
     }),
     deepseek: createDeepSeek({
+      baseURL: config?.providersConfig?.deepseek.baseURL ?? 'https://api.deepseek.com/v1',
       apiKey: config?.providersConfig?.deepseek.apiKey,
     }),
   })
@@ -27,6 +29,7 @@ export async function getTranslateModel(provider: keyof typeof translateProvider
   const registry = await getProviderRegistry()
   const openrouter = createOpenRouter({
     apiKey: config?.providersConfig?.openrouter.apiKey,
+    baseURL: config?.providersConfig?.openrouter.baseURL ?? 'https://openrouter.ai/api/v1',
   })
   if (provider === 'openrouter') {
     return openrouter.languageModel(model)
