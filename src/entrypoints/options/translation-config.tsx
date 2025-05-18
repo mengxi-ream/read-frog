@@ -1,6 +1,6 @@
-import type { PageTranslateRange } from '@/types/config/config'
-import deepmerge from 'deepmerge'
+import type { PageTranslateRange } from '@/types/config/provider'
 
+import deepmerge from 'deepmerge'
 import { useAtom } from 'jotai'
 import {
   Select,
@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { pageTranslateRangeSchema } from '@/types/config/config'
+import { pageTranslateRangeSchema } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 
 export default function TranslationConfigSection() {

@@ -1,5 +1,3 @@
-import type { Hotkey } from '@/types/config/config'
-
 import deepmerge from 'deepmerge'
 import { useAtom } from 'jotai'
 import {
@@ -21,7 +19,7 @@ export default function HotkeySelector() {
     <div className="flex items-center justify-between gap-2">
       <Select
         value={translateConfig.node.hotkey}
-        onValueChange={(value: Hotkey) => setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))}
+        onValueChange={(value: typeof HOTKEYS[number]) => setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))}
       >
         <SelectTrigger
           size="sm"

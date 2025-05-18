@@ -7,7 +7,6 @@ import { HOTKEYS } from '@/utils/constants/config'
 export const readProviderModels = {
   openai: ['gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-nano'],
   deepseek: ['deepseek-chat'],
-  openrouter: ['meta-llama/llama-4-maverick:free', 'deepseek/deepseek-chat-v3-0324:free', 'qwen/qwen3-235b-a22b:free'],
 } as const
 export const translateProviderModels = {
   openai: ['gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-nano'],
@@ -16,22 +15,30 @@ export const translateProviderModels = {
 } as const
 export const pureTranslateProvider = ['google', 'microsoft'] as const
 
+// need to be set api key
 export const apiProviderNames = ['openai', 'deepseek', 'openrouter'] as const
 
 /* ──────────────────────────────
   Derived provider names
   ────────────────────────────── */
 
-export const readProviderNames = ['openai', 'deepseek', 'openrouter'] as const satisfies Readonly<
+export const readProviderNames = ['openai', 'deepseek'] as const satisfies Readonly<
   (keyof typeof readProviderModels)[]
 >
+export type ReadProviderNames = typeof readProviderNames[number]
 export const translateProviderNames = ['google', 'microsoft', 'openai', 'deepseek', 'openrouter'] as const satisfies Readonly<
   (keyof typeof translateProviderModels | typeof pureTranslateProvider[number])[]
 >
+export type TranslateProviderNames = typeof translateProviderNames[number]
 
-export const providerNames = [...readProviderNames, ...translateProviderNames] as const satisfies Readonly<
+export const providerNames = ['openai', 'deepseek', 'google', 'microsoft', 'openrouter'] as const satisfies Readonly<
   (typeof readProviderNames[number] | typeof translateProviderNames[number])[]
 >
+export type ProviderNames = typeof providerNames[number]
+export const llmProviderNames = ['openai', 'deepseek', 'openrouter'] as const satisfies Readonly<
+  (keyof typeof readProviderModels | keyof typeof translateProviderModels)[]
+>
+export type LLMProviderNames = typeof llmProviderNames[number]
 
 /* ──────────────────────────────
   Providers config schema
@@ -85,7 +92,7 @@ export const readModelsSchema = buildModelSchema(readProviderModels)
 export type ReadModels = z.infer<typeof readModelsSchema>
 
 export const readConfigSchema = z.object({
-  provider: z.enum(apiProviderNames),
+  provider: z.enum(readProviderNames),
   models: readModelsSchema,
 })
 export type ReadConfig = z.infer<typeof readConfigSchema>
@@ -114,6 +121,7 @@ export type TranslateModels = z.infer<typeof translateModelsSchema>
 // TODO: add "article" as a range
 export const pageTranslateRangeSchema = z.enum(['main', 'all'])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
+
 export const translateConfigSchema = z.object({
   provider: z.enum(translateProviderNames),
   models: translateModelsSchema,

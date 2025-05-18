@@ -1,12 +1,13 @@
+import type { translateProviderModels } from '@/types/config/provider'
 import { useAtom, useAtomValue } from 'jotai'
 import { Check, Languages } from 'lucide-react'
-import { toast } from 'sonner'
 
-import { providerNames } from '@/types/config/provider-old'
+import { toast } from 'sonner'
+import { pureTranslateProvider } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { isPageTranslatedAtom } from '@/utils/atoms/translation'
-import { isAnyAPIKey } from '@/utils/config/config'
 
+import { hasSetAPIKey } from '@/utils/config/config'
 import { removeAllTranslatedWrapperNodes, translatePage } from '@/utils/host/translate'
 import HiddenButton from './components/hidden-button'
 
@@ -39,7 +40,11 @@ export default function TranslateButton() {
     <HiddenButton
       Icon={Languages}
       onClick={() => {
-        if ((providerNames as readonly string[]).includes(translateConfig.provider) && !isAnyAPIKey(providersConfig)) {
+        const provider = translateConfig.provider
+        const isPure = pureTranslateProvider.includes(
+          provider as typeof pureTranslateProvider[number],
+        )
+        if (!isPure || !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
           toast.error(i18n.t('noConfig.warning'))
           return
         }

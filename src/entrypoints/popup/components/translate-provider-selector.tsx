@@ -1,5 +1,4 @@
-import type { TranslateProvider } from '@/types/config/provider-old'
-
+import type { TranslateProviderNames } from '@/types/config/provider'
 import { useAtom } from 'jotai'
 import { CircleHelp } from 'lucide-react'
 import ProviderIcon from '@/components/provider-icon'
@@ -12,16 +11,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { providerNames } from '@/types/config/provider-old'
+import { pureTranslateProvider } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
-import { PROVIDER_ITEMS, TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
+import { TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 
 export default function TranslateProviderSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
 
   const PURE_TRANSLATE_PROVIDER_ITEMS = Object.fromEntries(Object.entries(TRANSLATE_PROVIDER_ITEMS).filter(([value]) => {
-    return !(providerNames as readonly string[]).includes(value)
+    return (pureTranslateProvider as readonly string[]).includes(value)
+  }))
+
+  const LLM_TRANSLATE_PROVIDER_ITEMS = Object.fromEntries(Object.entries(TRANSLATE_PROVIDER_ITEMS).filter(([value]) => {
+    return !(pureTranslateProvider as readonly string[]).includes(value)
   }))
 
   return (
@@ -41,7 +45,7 @@ export default function TranslateProviderSelector() {
       </span>
       <Select
         value={translateConfig.provider}
-        onValueChange={(value: TranslateProvider) => {
+        onValueChange={(value: TranslateProviderNames) => {
           setTranslateConfig({
             ...translateConfig,
             provider: value,
@@ -54,7 +58,7 @@ export default function TranslateProviderSelector() {
         <SelectContent>
           <SelectGroup>
             <SelectLabel>{i18n.t('translateService.aiTranslator')}</SelectLabel>
-            {Object.entries(PROVIDER_ITEMS).map(([value, { logo, name }]) => (
+            {Object.entries(LLM_TRANSLATE_PROVIDER_ITEMS).map(([value, { logo, name }]) => (
               <SelectItem key={value} value={value}>
                 <ProviderIcon logo={logo} name={name} />
               </SelectItem>

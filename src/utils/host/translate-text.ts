@@ -4,24 +4,23 @@ import { iso6393To1, langCodeToEnglishName } from '@/types/config/languages'
 
 import { globalConfig } from '../config/config'
 import { getTranslateLinePrompt } from '../prompts/translate-line'
+import { getTranslateModel } from '../provider'
 
 export async function translateText(sourceText: string) {
   if (!globalConfig) {
     throw new Error('No global config when translate text')
   }
-  const registry = await getProviderRegistry()
-  const provider = globalConfig.provider
-  const model = globalConfig.providersConfig[provider].model
+  const provider = globalConfig.translate.provider
+  const modelString = globalConfig.translate.models[provider]?.model
 
   // replace /\u200B/g is for Feishu, it's a zero-width space
   const cleanSourceText = sourceText.replace(/\u200B/g, '').trim()
 
   // TODO: retry logic + cache logic
-  const translateProvider = globalConfig.translate.provider
   let translatedText = ''
 
   // TODO: clean up the code
-  if (translateProvider === 'google') {
+  if (provider === 'google') {
     const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (iso6393To1[globalConfig.language.sourceCode] ?? 'auto')
     const targetLang = iso6393To1[globalConfig.language.targetCode]
     if (!targetLang) {
@@ -29,7 +28,7 @@ export async function translateText(sourceText: string) {
     }
     translatedText = await googleTranslate(cleanSourceText, sourceLang, targetLang)
   }
-  else if (translateProvider === 'microsoft') {
+  else if (provider === 'microsoft') {
     const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (iso6393To1[globalConfig.language.sourceCode] ?? 'auto')
     const targetLang = iso6393To1[globalConfig.language.targetCode]
     if (!targetLang) {
@@ -37,9 +36,10 @@ export async function translateText(sourceText: string) {
     }
     translatedText = await microsoftTranslate(cleanSourceText, sourceLang, targetLang)
   }
-  else {
+  else if (modelString) {
+    const model = await getTranslateModel(provider, modelString)
     const { text } = await generateText({
-      model: registry.languageModel(`${provider}:${model}`),
+      model,
       prompt: getTranslateLinePrompt(
         langCodeToEnglishName[globalConfig.language.targetCode],
         cleanSourceText,

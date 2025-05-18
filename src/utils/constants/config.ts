@@ -1,5 +1,5 @@
 import type { Config } from '@/types/config/config'
-import type { PageTranslateRange, providerNames, ProvidersConfig, ReadModels, TranslateModels } from '@/types/config/provider'
+import type { PageTranslateRange, ProvidersConfig, ReadModels, ReadProviderNames, TranslateModels, TranslateProviderNames } from '@/types/config/provider'
 import deepseekLogo from '@/assets/provider/deepseek.png'
 import googleLogo from '@/assets/provider/google.png'
 import microsoftLogo from '@/assets/provider/microsoft.png'
@@ -40,11 +40,6 @@ export const DEFAULT_READ_MODELS: ReadModels = {
   },
   deepseek: {
     model: 'deepseek-chat',
-    isCustomModel: false,
-    customModel: '',
-  },
-  openrouter: {
-    model: 'meta-llama/llama-4-maverick:free',
     isCustomModel: false,
     customModel: '',
   },
@@ -102,7 +97,7 @@ export const DEFAULT_CONFIG: Config = {
   },
 }
 
-export const PROVIDER_ITEMS: Record<typeof providerNames[number], { logo: string, name: string }>
+export const TRANSLATE_PROVIDER_ITEMS: Record<TranslateProviderNames, { logo: string, name: string }>
   = {
     microsoft: {
       logo: microsoftLogo,
@@ -123,6 +118,18 @@ export const PROVIDER_ITEMS: Record<typeof providerNames[number], { logo: string
     openrouter: {
       logo: openrouterLogo,
       name: 'OpenRouter',
+    },
+  }
+
+export const READ_PROVIDER_ITEMS: Record<ReadProviderNames, { logo: string, name: string }>
+  = {
+    openai: {
+      logo: openaiLogo,
+      name: 'OpenAI',
+    },
+    deepseek: {
+      logo: deepseekLogo,
+      name: 'DeepSeek',
     },
   }
 

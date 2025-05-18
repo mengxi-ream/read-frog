@@ -37,11 +37,6 @@ describe('config Migration 3 -> 4', () => {
           isCustomModel: false,
           customModel: '',
         },
-        openrouter: {
-          model: 'meta-llama/llama-4-maverick:free',
-          isCustomModel: false,
-          customModel: '',
-        },
       },
     })
     expect(newConfig.translate).toEqual({

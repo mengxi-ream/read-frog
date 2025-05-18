@@ -31,11 +31,6 @@ export const configExample: Config = {
         isCustomModel: false,
         customModel: '',
       },
-      openrouter: {
-        model: 'meta-llama/llama-4-maverick:free',
-        isCustomModel: false,
-        customModel: '',
-      },
     },
   },
   translate: {

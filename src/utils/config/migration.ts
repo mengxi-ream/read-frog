@@ -57,17 +57,9 @@ export const migrations: Record<number, (config: any) => any> = {
         }]
       }),
     )
-    const newReadModelsConfig = {
-      ...transferredModelsConfig,
-      openrouter: {
-        model: 'meta-llama/llama-4-maverick:free',
-        isCustomModel: false,
-        customModel: '',
-      },
-    }
     const newReadConfig = {
       provider: oldConfig.provider,
-      models: newReadModelsConfig,
+      models: transferredModelsConfig,
     }
     const newTranslateModelsConfig = {
       ...transferredModelsConfig,

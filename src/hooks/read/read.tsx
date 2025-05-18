@@ -24,6 +24,7 @@ import { configAtom, configFields } from '@/utils/atoms/config'
 import { isAnyAPIKey } from '@/utils/config/config'
 import { getAnalyzePrompt } from '@/utils/prompts/analyze'
 import { getExplainPrompt } from '@/utils/prompts/explain'
+import { getTranslateModel as getReadModel } from '@/utils/provider'
 
 interface ExplainArticleParams {
   extractedContent: ExtractedContent
@@ -35,7 +36,7 @@ const MAX_CHARACTERS = 1000
 
 export function useAnalyzeContent() {
   const setReadState = useSetAtom(readStateAtom)
-  const { language, provider, providersConfig } = useAtomValue(configAtom)
+  const { language, read } = useAtomValue(configAtom)
   const setLanguage = useSetAtom(configFields.language)
   return useMutation<ArticleAnalysis, Error, ExtractedContent>({
     mutationKey: ['analyzeContent'],
@@ -49,14 +50,18 @@ export function useAnalyzeContent() {
       const maxAttempts = 3
       let lastError
 
-      const model = providersConfig[provider].model
+      const modelConfig = read.models[read.provider]
+      const modelString = modelConfig.isCustomModel ? modelConfig.customModel : modelConfig.model
+      if (!modelString) {
+        throw new Error('No model string available for summary generation')
+      }
+      const model = await getReadModel(read.provider, modelString)
       const targetLang = langCodeToEnglishName[language.targetCode]
-      const providerRegistry = await getProviderRegistry()
 
       while (attempts < maxAttempts) {
         try {
           const { object: articleAnalysis } = await generateObject({
-            model: providerRegistry.languageModel(`${provider}:${model}`),
+            model,
             system: getAnalyzePrompt(targetLang),
             prompt: JSON.stringify({
               originalTitle: extractedContent.article.title,
@@ -99,7 +104,7 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
   let attempts = 0
   let lastError
 
-  const { language, provider, providersConfig } = config
+  const { language, read } = config
 
   const targetLang = langCodeToEnglishName[language.targetCode]
   const sourceLang
@@ -108,13 +113,19 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
         ? language.detectedCode
         : language.sourceCode
     ]
-  const model = providersConfig[provider].model
 
-  const providerRegistry = await getProviderRegistry()
+  const modelConfig = read.models[read.provider]
+  const modelString = modelConfig.isCustomModel ? modelConfig.customModel : modelConfig.model
+
+  if (!modelString) {
+    throw new Error('No model string available for explanation generation')
+  }
+
+  const model = await getReadModel(read.provider, modelString)
   while (attempts < MAX_ATTEMPTS) {
     try {
       const { object: articleExplanation } = await generateObject({
-        model: providerRegistry.languageModel(`${provider}:${model}`),
+        model,
         system: getExplainPrompt(
           sourceLang,
           targetLang,

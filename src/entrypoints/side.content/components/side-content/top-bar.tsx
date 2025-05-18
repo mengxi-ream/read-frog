@@ -2,11 +2,12 @@ import type {
   LangCodeISO6393,
   LangLevel,
 } from '@/types/config/languages'
+import type { ReadProviderNames } from '@/types/config/provider'
+
 import { SelectGroup } from '@radix-ui/react-select'
 
 // import { onMessage } from "@/utils/message";
 import { useAtom, useSetAtom } from 'jotai'
-
 import { ArrowRight, X } from 'lucide-react'
 import ProviderIcon from '@/components/provider-icon'
 import {
@@ -26,8 +27,8 @@ import {
   langLevel,
 } from '@/types/config/languages'
 import { configFields } from '@/utils/atoms/config'
-import { PROVIDER_ITEMS } from '@/utils/constants/config'
 
+import { TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { cn } from '@/utils/tailwind'
 import { shadowWrapper } from '../..'
 import { isSideOpenAtom } from '../../atoms'
@@ -67,24 +68,32 @@ export function TopBar({ className }: { className?: string }) {
 }
 
 function ProviderSelect() {
-  const [provider, setProvider] = useAtom(configFields.provider)
+  const [readConfig, setReadConfig] = useAtom(configFields.read)
 
   return (
-    <Select value={provider} onValueChange={setProvider}>
+    <Select
+      value={readConfig.provider}
+      onValueChange={(value: ReadProviderNames) => {
+        setReadConfig({
+          ...readConfig,
+          provider: value,
+        })
+      }}
+    >
       <SelectTrigger
         hideChevron
         className="flex !size-7 items-center justify-center p-0"
       >
         <img
-          src={PROVIDER_ITEMS[provider].logo}
-          alt={provider}
+          src={TRANSLATE_PROVIDER_ITEMS[readConfig.provider].logo}
+          alt={readConfig.provider}
           className="size-3 bg-white"
         />
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t('aiService.title')}</SelectLabel>
-          {Object.entries(PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
+          {Object.entries(TRANSLATE_PROVIDER_ITEMS).map(([provider, { logo, name }]) => (
             <SelectItem key={provider} value={provider}>
               <ProviderIcon logo={logo} name={name} />
             </SelectItem>

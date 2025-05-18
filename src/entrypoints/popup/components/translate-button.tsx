@@ -1,12 +1,13 @@
+import type { translateProviderModels } from '@/types/config/provider'
 import { useAtom, useAtomValue } from 'jotai'
+
 import { toast } from 'sonner'
-
 import { Button } from '@/components/ui/button'
-import { providerNames } from '@/types/config/provider-old'
+import { pureTranslateProvider } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
-import { isPageTranslatedAtom } from '@/utils/atoms/translation'
 
-import { isAnyAPIKey } from '@/utils/config/config'
+import { isPageTranslatedAtom } from '@/utils/atoms/translation'
+import { hasSetAPIKey } from '@/utils/config/config'
 import { isIgnoreTabAtom } from '../atom'
 
 export default function TranslateButton({ className }: { className?: string }) {
@@ -23,7 +24,12 @@ export default function TranslateButton({ className }: { className?: string }) {
 
     if (currentTab.id) {
       if (!isPageTranslated) {
-        if ((providerNames as readonly string[]).includes(translateConfig.provider) && !isAnyAPIKey(providersConfig)) {
+        const provider = translateConfig.provider
+        const isPure = pureTranslateProvider.includes(
+          provider as typeof pureTranslateProvider[number],
+        )
+
+        if (!isPure || !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
           toast.error(i18n.t('noConfig.warning'))
           return
         }
