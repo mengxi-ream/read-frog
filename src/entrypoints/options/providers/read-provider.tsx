@@ -12,7 +12,7 @@ import { READ_PROVIDER_ITEMS } from '@/utils/constants/config'
 export default function ReadProvider() {
   return (
     <div>
-      <h3>Read Provider</h3>
+      <h3 className="text-md font-semibold mb-2">Read Provider</h3>
       <div className="flex gap-8">
         <ReadProviderSelector />
         <ReadModelSelector />

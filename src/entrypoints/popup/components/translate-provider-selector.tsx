@@ -13,20 +13,11 @@ import {
 } from '@/components/ui/select'
 
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
-import { pureTranslateProvider } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
-import { TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
+import { LLM_TRANSLATE_PROVIDER_ITEMS, PURE_TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 
 export default function TranslateProviderSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
-
-  const PURE_TRANSLATE_PROVIDER_ITEMS = Object.fromEntries(Object.entries(TRANSLATE_PROVIDER_ITEMS).filter(([value]) => {
-    return (pureTranslateProvider as readonly string[]).includes(value)
-  }))
-
-  const LLM_TRANSLATE_PROVIDER_ITEMS = Object.fromEntries(Object.entries(TRANSLATE_PROVIDER_ITEMS).filter(([value]) => {
-    return !(pureTranslateProvider as readonly string[]).includes(value)
-  }))
 
   return (
     <div className="flex items-center justify-between gap-2">

@@ -4,15 +4,15 @@ import { useAtom } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { translateProviderModels } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
-import { TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
+import { LLM_TRANSLATE_PROVIDER_ITEMS, PURE_TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 
 export default function ReadProvider() {
   return (
     <div>
-      <h3>Read Provider</h3>
+      <h3 className="text-md font-semibold mb-2">Read Provider</h3>
       <div className="flex gap-8">
         <TranslateProviderSelector />
         <TranslateModelSelector />
@@ -40,7 +40,16 @@ function TranslateProviderSelector() {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {Object.entries(TRANSLATE_PROVIDER_ITEMS).map(([value, { logo, name }]) => (
+            <SelectLabel>{i18n.t('translateService.aiTranslator')}</SelectLabel>
+            {Object.entries(LLM_TRANSLATE_PROVIDER_ITEMS).map(([value, { logo, name }]) => (
+              <SelectItem key={value} value={value}>
+                <ProviderIcon logo={logo} name={name} />
+              </SelectItem>
+            ))}
+          </SelectGroup>
+          <SelectGroup>
+            <SelectLabel>{i18n.t('translateService.normalTranslator')}</SelectLabel>
+            {Object.entries(PURE_TRANSLATE_PROVIDER_ITEMS).map(([value, { logo, name }]) => (
               <SelectItem key={value} value={value}>
                 <ProviderIcon logo={logo} name={name} />
               </SelectItem>

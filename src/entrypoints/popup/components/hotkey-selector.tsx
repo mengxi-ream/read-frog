@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { configFields } from '@/utils/atoms/config'
-import { HOTKEY_ITEMS, HOTKEYS } from '@/utils/constants/config'
+import { HOTKEY_ITEMS, HOTKEYS } from '@/utils/constants/hotkeys'
 
 export default function HotkeySelector() {
   const [translateConfig, setTranslateConfig] = useAtom(

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { HOTKEYS } from '@/utils/constants/config'
+import { HOTKEYS } from '@/utils/constants/hotkeys'
 
 /* ──────────────────────────────
   Single source of truth

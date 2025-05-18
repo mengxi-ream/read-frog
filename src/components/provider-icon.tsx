@@ -1,6 +1,6 @@
-export default function ProviderIcon({ logo, name }: { logo: string, name?: string }) {
+export default function ProviderIcon({ logo, name, className }: { logo: string, name?: string, className?: string }) {
   return (
-    <div className="flex items-center gap-1.5 ">
+    <div className={cn('flex items-center gap-1.5', className)}>
       <div className="size-5 rounded-full bg-white border border-border flex items-center justify-center">
         <img
           src={logo}

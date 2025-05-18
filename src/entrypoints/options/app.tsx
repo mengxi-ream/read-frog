@@ -5,7 +5,7 @@ import TranslationConfigSection from './translation-config'
 
 export default function App() {
   return (
-    <Container className="mt-12 max-w-4xl space-y-16">
+    <Container className="mt-12 max-w-2xl space-y-16">
       <ProviderConfig />
       <TranslationConfigSection />
     </Container>
