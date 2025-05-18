@@ -27,5 +27,8 @@ jobs:
         run: pnpm install
         shell: bash
 
+      - name: Compile
+        run: pnpm compile
+
       - name: Run tests
         run: pnpm test

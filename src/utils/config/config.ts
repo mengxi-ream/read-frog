@@ -1,9 +1,9 @@
 import type { Config } from '@/types/config/config'
 
-import type { ProvidersConfig } from '@/types/config/provider-old'
+import type { ProvidersConfig } from '@/types/config/provider'
 import deepmerge from 'deepmerge'
-import { configSchema } from '@/types/config/config'
 
+import { configSchema } from '@/types/config/config'
 import {
   CONFIG_SCHEMA_VERSION,
   CONFIG_STORAGE_KEY,

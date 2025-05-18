@@ -1,15 +1,16 @@
-import type { Config, Hotkey, PageTranslateRange } from '@/types/config/config'
-import type { Provider, ProvidersConfig, TranslateProvider } from '@/types/config/provider-old'
-import deepseekLogo from '@/assets/llm/deepseek.png'
-import googleLogo from '@/assets/llm/google.png'
-import microsoftLogo from '@/assets/llm/microsoft.png'
-import openaiLogo from '@/assets/llm/openai.jpg'
+import type { Config } from '@/types/config/config'
+import type { PageTranslateRange, providerNames, ProvidersConfig, ReadModels, TranslateModels } from '@/types/config/provider'
+import deepseekLogo from '@/assets/provider/deepseek.png'
+import googleLogo from '@/assets/provider/google.png'
+import microsoftLogo from '@/assets/provider/microsoft.png'
+import openaiLogo from '@/assets/provider/openai.jpg'
+import openrouterLogo from '@/assets/provider/openrouter.png'
 
 export const CONFIG_STORAGE_KEY = 'config'
 export const CONFIG_SCHEMA_VERSION = 4
 
 export const HOTKEYS = ['Control', 'Alt', 'Shift', '`'] as const
-export const HOTKEY_ITEMS: Record<Hotkey, { label: string, icon: string }> = {
+export const HOTKEY_ITEMS: Record<typeof HOTKEYS[number], { label: string, icon: string }> = {
   'Control': { label: 'Ctrl', icon: '⌃' },
   'Alt': { label: 'Option', icon: '⌥' },
   'Shift': { label: 'Shift', icon: '⇧' },
@@ -22,13 +23,48 @@ export const DEFAULT_SIDE_CONTENT_WIDTH = 400 // px
 export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
     apiKey: undefined,
+  },
+  deepseek: {
+    apiKey: undefined,
+  },
+  openrouter: {
+    apiKey: undefined,
+  },
+}
+
+export const DEFAULT_READ_MODELS: ReadModels = {
+  openai: {
     model: 'gpt-4.1-mini',
     isCustomModel: false,
     customModel: '',
   },
   deepseek: {
-    apiKey: undefined,
     model: 'deepseek-chat',
+    isCustomModel: false,
+    customModel: '',
+  },
+  openrouter: {
+    model: 'meta-llama/llama-4-maverick:free',
+    isCustomModel: false,
+    customModel: '',
+  },
+}
+
+export const DEFAULT_TRANSLATE_MODELS: TranslateModels = {
+  microsoft: null,
+  google: null,
+  openai: {
+    model: 'gpt-4.1-mini',
+    isCustomModel: false,
+    customModel: '',
+  },
+  deepseek: {
+    model: 'deepseek-chat',
+    isCustomModel: false,
+    customModel: '',
+  },
+  openrouter: {
+    model: 'meta-llama/llama-4-maverick:free',
     isCustomModel: false,
     customModel: '',
   },
@@ -41,10 +77,14 @@ export const DEFAULT_CONFIG: Config = {
     targetCode: 'cmn',
     level: 'intermediate',
   },
-  provider: 'openai',
   providersConfig: DEFAULT_PROVIDER_CONFIG,
+  read: {
+    provider: 'openai',
+    models: DEFAULT_READ_MODELS,
+  },
   translate: {
     provider: 'microsoft',
+    models: DEFAULT_TRANSLATE_MODELS,
     node: {
       enabled: true,
       hotkey: 'Control',
@@ -62,19 +102,7 @@ export const DEFAULT_CONFIG: Config = {
   },
 }
 
-export const PROVIDER_ITEMS: Record<Provider, { logo: string, name: string }>
-  = {
-    openai: {
-      logo: openaiLogo,
-      name: 'OpenAI',
-    },
-    deepseek: {
-      logo: deepseekLogo,
-      name: 'DeepSeek',
-    },
-  }
-
-export const TRANSLATE_PROVIDER_ITEMS: Record<TranslateProvider, { logo: string, name: string }>
+export const PROVIDER_ITEMS: Record<typeof providerNames[number], { logo: string, name: string }>
   = {
     microsoft: {
       logo: microsoftLogo,
@@ -84,7 +112,18 @@ export const TRANSLATE_PROVIDER_ITEMS: Record<TranslateProvider, { logo: string,
       logo: googleLogo,
       name: 'Google Translate',
     },
-    ...PROVIDER_ITEMS,
+    openai: {
+      logo: openaiLogo,
+      name: 'OpenAI',
+    },
+    deepseek: {
+      logo: deepseekLogo,
+      name: 'DeepSeek',
+    },
+    openrouter: {
+      logo: openrouterLogo,
+      name: 'OpenRouter',
+    },
   }
 
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<
