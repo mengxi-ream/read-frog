@@ -3,9 +3,11 @@
   --read-frog-muted: oklch(0.97 0 0);
 }
 
-.dark {
-  --read-frog-primary: oklch(59.6% 0.145 163.225);
-  --read-frog-muted: oklch(0.269 0 0);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --read-frog-primary: oklch(59.6% 0.145 163.225);
+    --read-frog-muted: oklch(0.269 0 0);
+  }
 }
 
 @keyframes spin {
@@ -21,12 +23,13 @@
   border: 3px solid var(--read-frog-muted); /* 轨迹灰色 */
   border-top: 3px solid var(--read-frog-primary); /* 主色调，首次翻译蓝色、缓存应改为绿色 */
   border-radius: 50%;
-  width: 12px;
-  height: 12px;
+  width: 6px;
+  height: 6px;
   margin: 0 4px;
   animation: spin 1s linear infinite;
   display: inline-block;
   vertical-align: middle; /* 添加垂直居中对齐 */
+  box-sizing: content-box; /* 确保在所有网站上使用相同的盒模型 */
 }
 
 .read-frog-translated-content-wrapper {
