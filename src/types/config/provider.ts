@@ -38,6 +38,8 @@ export function isLLMTranslateProvider(provider: TranslateProviderNames): provid
   return llmTranslateProviderNames.includes(provider)
 }
 
+// hello
+
 // all provider names
 export const allProviderNames = ['openai', 'deepseek', 'google', 'microsoft', 'openrouter'] as const satisfies Readonly<
   (typeof readProviderNames[number] | typeof translateProviderNames[number])[]
