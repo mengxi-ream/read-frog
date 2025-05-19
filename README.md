@@ -9,11 +9,11 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 [Official website](https://readfrog.mengxi.work)
 
-![Read Frog](/docs/opengraph.svg)
+![Read Frog](/docs/read-demo.gif)
 
 <div align="center">
-  <img src="docs/popup-page.png" width="35%" alt="Read Frog Popup Interface" />
-  <img src="docs/translate.png" width="64%" alt="Read Frog Translation Interface" />
+  <img src="docs/node-translation-demo.gif" width="38%" alt="Read Frog Popup Interface" />
+  <img src="docs/page-translation-demo.gif" width="60%" alt="Read Frog Translation Interface" />
 </div>
 
 If you like it, **⭐️ Star to support**
