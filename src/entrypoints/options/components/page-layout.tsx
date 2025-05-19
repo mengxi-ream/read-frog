@@ -2,9 +2,9 @@ import Container from '@/components/container'
 import { Separator } from '@/components/ui/separator'
 import { SidebarTrigger } from '@/components/ui/sidebar'
 
-export function PageLayout({ title, children }: { title: string, children: React.ReactNode }) {
+export function PageLayout({ title, children, className, innerClassName }: { title: string, children: React.ReactNode, className?: string, innerClassName?: string }) {
   return (
-    <div className="w-full">
+    <div className={cn('w-full', className)}>
       <div className="border-b">
         <Container>
           <header className="flex h-14 -ml-1.5 shrink-0 items-center gap-2">
@@ -14,7 +14,7 @@ export function PageLayout({ title, children }: { title: string, children: React
           </header>
         </Container>
       </div>
-      <Container>
+      <Container className={innerClassName}>
         {children}
       </Container>
     </div>
