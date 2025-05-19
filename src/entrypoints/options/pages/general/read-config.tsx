@@ -4,17 +4,35 @@ import { useAtom, useAtomValue } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
 import { readProviderModels } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { READ_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog'
 
 export function ReadConfig() {
   return (
-    <ConfigCard title={i18n.t('options.general.readConfig.title')} description={i18n.t('options.general.readConfig.description')}>
+    <ConfigCard title="阅读配置" description="设置阅读功能相关的提供者和模型">
       <div className="flex flex-col gap-4">
         <ReadProviderSelector />
         <ReadModelSelector />
@@ -27,12 +45,13 @@ function ReadProviderSelector() {
   const [readConfig, setReadConfig] = useAtom(configFields.read)
   const providersConfig = useAtomValue(configFields.providersConfig)
   const providerConfig = providersConfig[readConfig.provider]
+
   return (
     <FieldWithLabel
       id="readProvider"
       label={(
         <div className="flex gap-2">
-          {i18n.t('options.general.readConfig.provider')}
+          阅读提供者
           {!providerConfig.apiKey && <SetApiKeyWarning />}
         </div>
       )}
@@ -64,8 +83,21 @@ function ReadProviderSelector() {
 function ReadModelSelector() {
   const [readConfig, setReadConfig] = useAtom(configFields.read)
   const modelConfig = readConfig.models[readConfig.provider]
+
+  const resetToDefault = () => {
+    setReadConfig(deepmerge(readConfig, {
+      models: {
+        [readConfig.provider]: {
+          customModel: '',
+          isCustomModel: false,
+          model: readProviderModels[readConfig.provider][0],
+        },
+      },
+    }))
+  }
+
   return (
-    <FieldWithLabel id="readModel" label={i18n.t('options.general.readConfig.model.title')}>
+    <FieldWithLabel id="readModel" label="阅读模型">
       {modelConfig.isCustomModel
         ? (
             <Input
@@ -77,8 +109,7 @@ function ReadModelSelector() {
                       customModel: e.target.value,
                     },
                   },
-                }))}
-            />
+                }))}/>
           )
         : (
             <Select
@@ -90,10 +121,9 @@ function ReadModelSelector() {
                       model: value,
                     },
                   },
-                }))}
-            >
+                }))}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a model" />
+                <SelectValue placeholder="请选择模型" />
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
@@ -120,8 +150,7 @@ function ReadModelSelector() {
                   },
                 },
               }))
-            }
-            else {
+            } else {
               setReadConfig(deepmerge(readConfig, {
                 models: {
                   [readConfig.provider]: {
@@ -137,8 +166,31 @@ function ReadModelSelector() {
           htmlFor={`isCustomModel-${readConfig.provider}`}
           className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
         >
-          {i18n.t('options.general.readConfig.model.enterCustomModel')}
+          输入自定义模型名称
         </label>
+      </div>
+
+      {/* ✅ 添加带确认的“重置模型”按钮 */}
+      <div className="mt-2">
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <button className="text-sm text-red-600 hover:underline">
+              重置为默认模型
+            </button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>确认重置？</AlertDialogTitle>
+              <AlertDialogDescription>
+                这将清除当前自定义模型并还原为默认模型，操作不可撤销。
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>取消</AlertDialogCancel>
+              <AlertDialogAction onClick={resetToDefault}>确认重置</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </FieldWithLabel>
   )
