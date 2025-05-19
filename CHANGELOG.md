@@ -1,5 +1,13 @@
 # read-frog
 
+## 0.7.1
+
+### Patch Changes
+
+- [#37](https://github.com/mengxi-ream/read-frog/pull/37) [`60f16cc`](https://github.com/mengxi-ream/read-frog/commit/60f16cc41496941b0738e5cfe7b865646827b232) Thanks [@missuo](https://github.com/missuo)! - add base URL configuration for providers
+
+- [#40](https://github.com/mengxi-ream/read-frog/pull/40) [`3db9d83`](https://github.com/mengxi-ream/read-frog/commit/3db9d8376ce67490d8c043b750f510510a3a4182) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - improve options page ui
+
 ## 0.7.0
 
 ### Minor Changes
