@@ -1,6 +1,6 @@
 import type { ReadProviderNames } from '@/types/config/provider'
 import deepmerge from 'deepmerge'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -10,6 +10,7 @@ import { configFields } from '@/utils/atoms/config'
 import { READ_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
+import { SetApiKeyWarning } from '../../components/set-api-key-warning'
 
 export function ReadConfig() {
   return (
@@ -24,8 +25,18 @@ export function ReadConfig() {
 
 function ReadProviderSelector() {
   const [readConfig, setReadConfig] = useAtom(configFields.read)
+  const providersConfig = useAtomValue(configFields.providersConfig)
+  const providerConfig = providersConfig[readConfig.provider]
   return (
-    <FieldWithLabel id="readProvider" label="Provider">
+    <FieldWithLabel
+      id="readProvider"
+      label={(
+        <div className="flex gap-2">
+          Provider
+          {!providerConfig.apiKey && <SetApiKeyWarning />}
+        </div>
+      )}
+    >
       <Select
         value={readConfig.provider}
         onValueChange={(value: ReadProviderNames) =>

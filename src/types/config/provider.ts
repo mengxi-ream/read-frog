@@ -19,14 +19,24 @@ export const pureTranslateProvider = ['google', 'microsoft'] as const
   Derived provider names
   ────────────────────────────── */
 
+// read provider names
 export const readProviderNames = ['openai', 'deepseek'] as const satisfies Readonly<
   (keyof typeof readProviderModels)[]
 >
 export type ReadProviderNames = typeof readProviderNames[number]
+// translate provider names
 export const translateProviderNames = ['google', 'microsoft', 'openai', 'deepseek', 'openrouter'] as const satisfies Readonly<
   (keyof typeof translateProviderModels | typeof pureTranslateProvider[number])[]
 >
 export type TranslateProviderNames = typeof translateProviderNames[number]
+// translate provider names that support LLM
+export const llmTranslateProviderNames = ['openai', 'deepseek', 'openrouter'] as const satisfies Readonly<
+  (keyof typeof translateProviderModels)[]
+>
+export type LLMTranslateProviderNames = typeof llmTranslateProviderNames[number]
+export function isLLMTranslateProvider(provider: TranslateProviderNames): provider is LLMTranslateProviderNames {
+  return llmTranslateProviderNames.includes(provider)
+}
 
 // all provider names
 export const allProviderNames = ['openai', 'deepseek', 'google', 'microsoft', 'openrouter'] as const satisfies Readonly<

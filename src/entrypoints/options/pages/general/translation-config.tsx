@@ -1,7 +1,7 @@
 import type { PageTranslateRange, TranslateProviderNames } from '@/types/config/provider'
 import deepmerge from 'deepmerge'
 
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
@@ -14,11 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { pageTranslateRangeSchema, translateProviderModels } from '@/types/config/provider'
+import { isLLMTranslateProvider, pageTranslateRangeSchema, translateProviderModels } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { LLM_TRANSLATE_PROVIDER_ITEMS, PURE_TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
+import { SetApiKeyWarning } from '../../components/set-api-key-warning'
 
 export default function TranslationConfig() {
   return (
@@ -70,8 +71,22 @@ function RangeSelector() {
 
 function TranslateProviderSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
+  const providersConfig = useAtomValue(configFields.providersConfig)
+
+  const providerConfig = isLLMTranslateProvider(translateConfig.provider)
+    ? providersConfig[translateConfig.provider]
+    : null
+
   return (
-    <FieldWithLabel id="translateProvider" label="Provider">
+    <FieldWithLabel
+      id="translateProvider"
+      label={(
+        <div className="flex gap-2">
+          Provider
+          {providerConfig && !providerConfig.apiKey && <SetApiKeyWarning />}
+        </div>
+      )}
+    >
       <Select
         value={translateConfig.provider}
         onValueChange={(value: TranslateProviderNames) =>
@@ -107,13 +122,14 @@ function TranslateProviderSelector() {
 
 function TranslateModelSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
-  const modelConfig = translateConfig.models[translateConfig.provider]
 
-  if (!modelConfig) {
+  const provider = translateConfig.provider
+
+  if (!isLLMTranslateProvider(provider)) {
     return null
   }
 
-  const provider = translateConfig.provider as keyof typeof translateProviderModels
+  const modelConfig = translateConfig.models[provider]
 
   return (
     <FieldWithLabel id="translateModel" label="LLM Model">
