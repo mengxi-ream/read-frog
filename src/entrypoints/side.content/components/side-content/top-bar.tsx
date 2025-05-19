@@ -87,7 +87,7 @@ function ProviderSelect() {
         <img
           src={READ_PROVIDER_ITEMS[readConfig.provider].logo}
           alt={readConfig.provider}
-          className="size-3 bg-white"
+          className="size-4 p-0.5 bg-white rounded-full"
         />
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
