@@ -32,16 +32,16 @@ Transform your everyday web reading into an immersive language learning journey!
 
 ✨ Key Features:
 
+- Immersive Translation: Translate elements directly adjacent to the original elements on the webpage
 - Smart Content Extraction: Automatically identifies and extracts the main content from articles
-- Intelligent Analysis: Understands the language style and context of your reading material
 - Comprehensive Explanations: Get detailed explanations of words, phrases, and sentences based on your language level
 - Contextual Learning: Learn languages through content you're actually interested in
 - Multiple AI Models: OpenAI, DeepSeek, and more in the future
 
 ✨ 主要特点：
 
+- 沉浸式翻译：直接翻译页面中相邻的元素
 - 智能内容提取：自动识别并提取文章的主要内容
-- 智能分析：理解您阅读材料的语言风格和上下文
 - 全面解释：根据您的语言水平，获取单词、短语和句子的详细解释
 - 情境学习：通过您真正感兴趣的内容来学习语言
 - 多种AI模型：OpenAI、DeepSeek，未来还将支持更多
