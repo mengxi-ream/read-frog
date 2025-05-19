@@ -4,12 +4,13 @@ import { useHydrateAtoms } from 'jotai/utils'
 import React from 'react'
 
 import ReactDOM from 'react-dom/client'
+import { HashRouter } from 'react-router'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { configAtom } from '@/utils/atoms/config'
-import { DEFAULT_CONFIG } from '@/utils/constants/config'
 
+import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import App from './app'
-import { AppSidebar } from './sidebar'
+import { AppSidebar } from './app-sidebar'
 import '@/assets/tailwind/theme.css'
 import './style.css'
 
@@ -41,10 +42,12 @@ async function initApp() {
     <React.StrictMode>
       <JotaiProvider>
         <HydrateAtoms initialValues={[[configAtom, config ?? DEFAULT_CONFIG]]}>
-          <SidebarProvider>
-            <AppSidebar />
-            <App />
-          </SidebarProvider>
+          <HashRouter>
+            <SidebarProvider>
+              <AppSidebar />
+              <App />
+            </SidebarProvider>
+          </HashRouter>
         </HydrateAtoms>
       </JotaiProvider>
     </React.StrictMode>,

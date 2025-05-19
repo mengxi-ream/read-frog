@@ -1,20 +1,13 @@
-import Container from '@/components/container'
+import { Route, Routes } from 'react-router'
 
-import { Separator } from '@/components/ui/separator'
-import { SidebarTrigger } from '@/components/ui/sidebar'
-import ProviderConfig from './providers'
-import TranslationConfigSection from './translation-config'
+import { NAV_ITEMS } from './app-sidebar/nav-items'
 
 export default function App() {
   return (
-    <Container className="max-w-7xl">
-      <header className="flex h-16 -ml-1.5 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-        <SidebarTrigger />
-        <Separator orientation="vertical" className="mr-1.5 h-4!" />
-        <h1>Options</h1>
-      </header>
-      <ProviderConfig />
-      <TranslationConfigSection />
-    </Container>
+    <Routes>
+      {Object.entries(NAV_ITEMS).map(([key, item]) => (
+        <Route key={key} path={item.url} element={<item.component />} />
+      ))}
+    </Routes>
   )
 }
