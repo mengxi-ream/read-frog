@@ -18,8 +18,6 @@ Master languages effortlessly and deeply with AI, right in your browser.
   <img src="docs/page-translation-demo.gif" width="60%" alt="Read Frog Translation Interface" />
 </div>
 
-If you like it, **⭐️ Star to support**
-
 ## 📦 Download
 
 | Browser | Version                                                                                                                                                                                                                                                                        | Download                                                                                                                                                                                                       |
@@ -76,6 +74,12 @@ For firefox:
 pnpm install
 pnpm zip:firefox
 ```
+
+## ❤️ Support us
+
+If you like Read Frog, you can give a star ⭐️ at Github or upvote us at [Product Hunt](https://www.producthunt.com/posts/read-frog?utm_source=other&utm_medium=social)
+
+<a href="https://www.producthunt.com/posts/read-frog?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-read&#0045;frog" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=964191&theme=light&t=1747696886914" alt="Read&#0032;Frog - Learn&#0032;Languages&#0032;in&#0032;Depth&#0032;with&#0032;AI | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 ## 🌟 Star History
 
