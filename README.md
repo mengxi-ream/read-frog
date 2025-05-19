@@ -20,9 +20,9 @@ If you like it, **⭐️ Star to support**
 
 ## 📦 Download
 
-| Browser | Download                                                                                                               |
-| ------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| Chrome  | [Chrome Web Store](https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb) | [中国镜像](https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb) |
+| Browser | Version                                                                                                                                                                                                                                                                        | Download                                                                                                                                                                                                       |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Chrome  | [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&logo=google-chrome&label=Chrome%20Web%20Store)](https://chrome.google.com/webstore/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb) | [Chrome Web Store](https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb) or [中国镜像](https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb) |
 
 ## 📖 Introduction
 
