@@ -12,14 +12,12 @@ import {
 } from '@/components/ui/select'
 import { pageTranslateRangeSchema } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
+import { ConfigCard } from '../../components/config-card'
 
-export default function TranslationConfigSection() {
+export default function TranslationConfig() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
   return (
-    <section>
-      <h2 className="mb-8 text-2xl font-bold">
-        {i18n.t('options.translationConfig.title')}
-      </h2>
+    <ConfigCard title="Translation Config" description="Only for translation within web pages, such as bilingual paragraph translation.">
       <div className="grid w-[220px] items-center gap-0.5">
         <label className="text-sm font-medium">
           {i18n.t('options.translationConfig.translateRange.title')}
@@ -53,6 +51,6 @@ export default function TranslationConfigSection() {
           </SelectContent>
         </Select>
       </div>
-    </section>
+    </ConfigCard>
   )
 }

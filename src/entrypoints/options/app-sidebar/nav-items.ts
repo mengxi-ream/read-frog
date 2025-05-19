@@ -1,4 +1,4 @@
-import { Home, Inbox } from 'lucide-react'
+import { Key, Settings } from 'lucide-react'
 import { ApiKeysPage } from '../pages/api-keys'
 import { GeneralPage } from '../pages/general'
 
@@ -11,13 +11,13 @@ export const NAV_ITEMS: Record<string, {
   '': {
     title: 'General',
     url: '/',
-    icon: Home,
+    icon: Settings,
     component: GeneralPage,
   },
   'api-keys': {
     title: 'API Keys',
     url: '/api-keys',
-    icon: Inbox,
+    icon: Key,
     component: ApiKeysPage,
   },
 }
