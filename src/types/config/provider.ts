@@ -35,10 +35,8 @@ export const llmTranslateProviderNames = ['openai', 'deepseek', 'openrouter'] as
 >
 export type LLMTranslateProviderNames = typeof llmTranslateProviderNames[number]
 export function isLLMTranslateProvider(provider: TranslateProviderNames): provider is LLMTranslateProviderNames {
-  return llmTranslateProviderNames.includes(provider)
+  return llmTranslateProviderNames.includes(provider as LLMTranslateProviderNames)
 }
-
-// hello
 
 // all provider names
 export const allProviderNames = ['openai', 'deepseek', 'google', 'microsoft', 'openrouter'] as const satisfies Readonly<
