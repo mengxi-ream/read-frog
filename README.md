@@ -9,6 +9,8 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 [Official website](https://readfrog.mengxi.work)
 
+## 📺 Demo
+
 ![Read Frog](/docs/read-demo.gif)
 
 <div align="center">
