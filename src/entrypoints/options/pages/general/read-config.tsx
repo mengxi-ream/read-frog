@@ -25,7 +25,7 @@ export function ReadConfig() {
 function ReadProviderSelector() {
   const [readConfig, setReadConfig] = useAtom(configFields.read)
   return (
-    <FieldWithLabel label="Provider">
+    <FieldWithLabel id="readProvider" label="Provider">
       <Select
         value={readConfig.provider}
         onValueChange={(value: ReadProviderNames) =>
@@ -54,7 +54,7 @@ function ReadModelSelector() {
   const [readConfig, setReadConfig] = useAtom(configFields.read)
   const modelConfig = readConfig.models[readConfig.provider]
   return (
-    <FieldWithLabel label="LLM Model">
+    <FieldWithLabel id="readModel" label="LLM Model">
       {modelConfig.isCustomModel
         ? (
             <Input

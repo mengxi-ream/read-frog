@@ -35,7 +35,7 @@ export default function TranslationConfig() {
 function RangeSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
   return (
-    <FieldWithLabel label={i18n.t('options.translationConfig.translateRange.title')}>
+    <FieldWithLabel id="translateRange" label={i18n.t('options.translationConfig.translateRange.title')}>
       <Select
         value={translateConfig.page.range}
         onValueChange={(value: PageTranslateRange) =>
@@ -71,7 +71,7 @@ function RangeSelector() {
 function TranslateProviderSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
   return (
-    <FieldWithLabel label="Provider">
+    <FieldWithLabel id="translateProvider" label="Provider">
       <Select
         value={translateConfig.provider}
         onValueChange={(value: TranslateProviderNames) =>
@@ -116,7 +116,7 @@ function TranslateModelSelector() {
   const provider = translateConfig.provider as keyof typeof translateProviderModels
 
   return (
-    <FieldWithLabel label="LLM Model">
+    <FieldWithLabel id="translateModel" label="LLM Model">
       {modelConfig.isCustomModel
         ? (
             <Input

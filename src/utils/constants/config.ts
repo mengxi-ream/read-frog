@@ -1,11 +1,11 @@
 import type { Config } from '@/types/config/config'
-import type { APIProviderNames, PageTranslateRange, ProvidersConfig, ReadModels, ReadProviderNames, TranslateModels, TranslateProviderNames } from '@/types/config/provider'
+import type { AllProviderNames, PageTranslateRange, ProvidersConfig, ReadModels, TranslateModels } from '@/types/config/provider'
 import deepseekLogo from '@/assets/provider/deepseek.png'
 import googleLogo from '@/assets/provider/google.png'
 import microsoftLogo from '@/assets/provider/microsoft.png'
 import openaiLogo from '@/assets/provider/openai.jpg'
 import openrouterLogo from '@/assets/provider/openrouter.png'
-import { pureTranslateProvider } from '@/types/config/provider'
+import { apiProviderNames, pureTranslateProvider, readProviderNames, translateProviderNames } from '@/types/config/provider'
 import { omit, pick } from '@/types/utils'
 
 export const CONFIG_STORAGE_KEY = 'config'
@@ -94,7 +94,7 @@ export const DEFAULT_CONFIG: Config = {
   },
 }
 
-export const TRANSLATE_PROVIDER_ITEMS: Record<TranslateProviderNames, { logo: string, name: string }>
+export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: string, name: string }>
   = {
     microsoft: {
       logo: microsoftLogo,
@@ -118,6 +118,11 @@ export const TRANSLATE_PROVIDER_ITEMS: Record<TranslateProviderNames, { logo: st
     },
   }
 
+export const TRANSLATE_PROVIDER_ITEMS = pick(
+  PROVIDER_ITEMS,
+  translateProviderNames,
+)
+
 export const PURE_TRANSLATE_PROVIDER_ITEMS = pick(
   TRANSLATE_PROVIDER_ITEMS,
   pureTranslateProvider,
@@ -128,33 +133,15 @@ export const LLM_TRANSLATE_PROVIDER_ITEMS = omit(
   pureTranslateProvider,
 )
 
-export const READ_PROVIDER_ITEMS: Record<ReadProviderNames, { logo: string, name: string }>
-  = {
-    openai: {
-      logo: openaiLogo,
-      name: 'OpenAI',
-    },
-    deepseek: {
-      logo: deepseekLogo,
-      name: 'DeepSeek',
-    },
-  }
+export const READ_PROVIDER_ITEMS = pick(
+  PROVIDER_ITEMS,
+  readProviderNames,
+)
 
-export const API_PROVIDER_ITEMS: Record<APIProviderNames, { logo: string, name: string }>
-  = {
-    openai: {
-      logo: openaiLogo,
-      name: 'OpenAI',
-    },
-    deepseek: {
-      logo: deepseekLogo,
-      name: 'DeepSeek',
-    },
-    openrouter: {
-      logo: openrouterLogo,
-      name: 'OpenRouter',
-    },
-  }
+export const API_PROVIDER_ITEMS = pick(
+  PROVIDER_ITEMS,
+  apiProviderNames,
+)
 
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<
   PageTranslateRange,

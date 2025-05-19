@@ -20,6 +20,7 @@ options:
     description:
       openai: 提供 GPT-4 等模型
       deepseek: 推荐在中国使用
+      openrouter: 多个 LLM 提供商的统一接口
     apiKey:
       showAPIKey: 显示 API Key
     model:

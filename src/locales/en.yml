@@ -20,6 +20,7 @@ options:
     description:
       openai: Provides models like GPT-4o
       deepseek: Recommend to use in China
+      openrouter: The unified interface for multiple LLM providers
     apiKey:
       showAPIKey: Show API Key
     model:
