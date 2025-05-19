@@ -1,4 +1,4 @@
-# Read Frog
+# 🐸 Read Frog
 
 [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&logo=google-chrome&label=Chrome%20Web%20Store)](https://chrome.google.com/webstore/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb)
 [![Discord](https://img.shields.io/discord/1371229720942874646?style=flat-square&label=Discord&logo=discord&logoColor=white&color=5865F2)](https://discord.com/invite/nmhvb6u2T7)
@@ -18,7 +18,13 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 If you like it, **⭐️ Star to support**
 
-## Introduction
+## 📦 Download
+
+| Browser | Download                                                                                                               |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
+| Chrome  | [Chrome Web Store](https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb) | [中国镜像](https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb) |
+
+## 📖 Introduction
 
 Transform your everyday web reading into an immersive language learning journey! Read Frog is your intelligent companion that makes language learning natural and enjoyable.
 
@@ -48,18 +54,14 @@ Perfect for:
 
 Join our growing community of language learners and help shape the future of Read Frog!
 
-🌟 Github (Open-Source Code): [https://github.com/mengxi-ream/read-frog](https://github.com/mengxi-ream/read-frog)
-
-## How to contribute
+## 🤝 Contribute
 
 ```bash
 pnpm install
 pnpm dev
 ```
 
-## How to build
-
-For chrome, edge:
+To build for chrome, edge:
 
 ```bash
 pnpm install
@@ -73,7 +75,7 @@ pnpm install
 pnpm zip:firefox
 ```
 
-## Star History
+## 🌟 Star History
 
 <a href="https://www.star-history.com/#mengxi-ream/read-frog&Date">
  <picture>
