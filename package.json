@@ -70,6 +70,7 @@
     "@tanstack/eslint-plugin-query": "^5.73.3",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
+    "@types/chrome": "^0.0.323",
     "@types/jest": "^29.5.14",
     "@types/react": "^19.1.0",
     "@types/react-dom": "^19.1.2",
