@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.7.2
+
+### Patch Changes
+
+- [`cefe29f`](https://github.com/mengxi-ream/read-frog/commit/cefe29f7af4ff6da87c5ed10ecd7cbcfdc4208d7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - direct url to translation guide after installation
+
 ## 0.7.1
 
 ### Patch Changes
