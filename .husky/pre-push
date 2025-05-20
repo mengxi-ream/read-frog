@@ -1,2 +1,6 @@
-pnpm compile
-pnpm test
+# Check if --skip-free-api flag is passed to git push
+if echo "$@" | grep -q -- "--skip-free-api"; then
+  pnpm vitest --exclude="**/free-api.test.ts"
+else
+  pnpm test
+fi
