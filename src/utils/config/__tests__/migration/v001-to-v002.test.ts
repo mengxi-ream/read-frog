@@ -1,7 +1,7 @@
 import type { Config } from '@/types/config/config'
 import { describe, expect, it } from 'vitest'
 import { migrations } from '../../migration'
-import { configExample } from '../example/v1'
+import { configExample } from '../example/v001'
 
 describe('config Migration 1 -> 2', () => {
   it('should have migration function for version 2', () => {
