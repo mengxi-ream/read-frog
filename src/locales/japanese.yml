@@ -1,0 +1,78 @@
+name: 読書カエル
+extName: 読書カエル - オープンソースAI翻訳
+extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
+popup:
+  autoLang: 自動検出
+  sourceLang: ソース言語
+  targetLang: 翻訳言語
+  read: 記事を読む
+  translate: 翻訳
+  showOriginal: 原文を表示
+  enabledFloatingButton: フローティングボタンを有効にする
+  options: オプション
+  hover: ホバー
+  translateParagraph: 段落を翻訳
+  help: ヘルプ
+  advice: フィードバック
+  discord: Discord
+options:
+  setAPIKeyWarning:
+    please: 設定ページで
+    page: APIキーを設定してください
+  apiKeys:
+    title: APIキー
+    description:
+      openai: GPT-4oなどのモデルを提供
+      deepseek: 中国国内での使用を推奨
+      openrouter: 複数のLLMプロバイダを統合するインターフェース
+    apiKey:
+      showAPIKey: APIキーを表示
+    advancedConfig:
+      show: 詳細設定を表示
+      hide: 詳細設定を非表示
+  general:
+    title: 一般
+    readConfig:
+      title: 読解設定
+      description: 高度なAI機能（記事の詳細解説、キーワード抽出など）に使用されます。
+      provider: プロバイダー
+      model:
+        title: モデル
+        enterCustomModel: カスタムモデル名を入力
+    translationConfig:
+      title: 翻訳設定
+      description: ウェブページ内の翻訳にのみ使用されます（バイリンガル段落翻訳など）。
+      provider: プロバイダー
+      model:
+        title: モデル
+        enterCustomModel: カスタムモデル名を入力
+      translateRange:
+        title: 翻訳範囲
+        range:
+          main: メインコンテンツ
+          all: すべてのコンテンツ
+side:
+  sourceLang: ソース言語
+  targetLang: 翻訳言語
+readService:
+  title: 読解サービス
+  description: 記事の読解と解説に使用
+translateService:
+  title: 翻訳サービス
+  description: ウェブページの翻訳にのみ使用
+  normalTranslator: 通常翻訳
+  aiTranslator: AI翻訳
+languageLevel: ソース言語のレベル
+languageLevels:
+  beginner: 初級
+  intermediate: 中級
+  advanced: 上級
+noConfig:
+  warning: AIモデルを使用するには、まずオプションページでAPIキーを設定してください
+  warningWithLink:
+    youMust: まず
+    setTheAPIKey: APIキーを設定
+    firstOnThe: する必要があります（
+    optionsPage: オプションページ
+    page: ）
+
