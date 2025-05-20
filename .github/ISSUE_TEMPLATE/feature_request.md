@@ -1,11 +1,15 @@
 ---
 name: Feature request
 about: Suggest an idea for this project
-title: ''
-labels: ''
+title: '[FEATURE] '
+labels: 'enhancement'
 assignees: ''
 
 ---
+
+<!-- Thanks for suggesting a feature for Read Frog! -->
+<!-- Please search existing issues to avoid creating duplicates. -->
+<!-- Provide as much context as possible to help us understand your needs. -->
 
 **Is your feature request related to a problem? Please describe.**
 A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
