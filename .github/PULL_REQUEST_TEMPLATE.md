@@ -1,0 +1,51 @@
+## Type of Changes
+
+<!--- Please select one type below -->
+
+- [ ] ✨ New feature (feat)
+- [ ] 🐛 Bug fix (fix)
+- [ ] 📝 Documentation change (docs)
+- [ ] 💄 UI/style change (style)
+- [ ] ♻️ Code refactoring (refactor)
+- [ ] ⚡ Performance improvement (perf)
+- [ ] ✅ Test related (test)
+- [ ] 🔧 Build or dependencies update (build)
+- [ ] 🔄 CI/CD related (ci)
+- [ ] 🌐 Internationalization (i18n)
+- [ ] 🧠 AI model related (ai)
+- [ ] 🔄 Revert a previous commit (revert)
+- [ ] 📦 Other changes that do not modify src or test files (chore)
+
+## Description
+
+<!--- Please describe the changes in this PR and the problem it solves -->
+
+## Related Issue
+
+<!--- If this PR closes an issue, please link the issue below -->
+
+Closes #
+
+## How Has This Been Tested?
+
+<!--- Please describe how you tested your changes -->
+
+- [ ] Added unit tests
+- [ ] Verified through manual testing
+
+## Screenshots
+
+<!--- If applicable, add screenshots to help explain your changes -->
+
+## Checklist
+
+<!--- Go over all the following points before requesting a review -->
+
+- [ ] I have tested these changes locally
+- [ ] I have updated the documentation accordingly if necessary
+- [ ] My code follows the code style of this project
+- [ ] My changes do not break existing functionality
+
+## Additional Information
+
+<!--- Any other information that reviewers should know -->
