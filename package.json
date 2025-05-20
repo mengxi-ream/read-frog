@@ -9,6 +9,7 @@
     "build:firefox": "wxt build -b firefox",
     "compile": "tsc --noEmit",
     "dev": "wxt",
+    "dev:edge": "wxt -b edge",
     "dev:firefox": "wxt -b firefox",
     "postinstall": "wxt prepare",
     "lint": "eslint",

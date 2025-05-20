@@ -11,6 +11,9 @@ interface ProtocolMap {
   setIsPageTranslatedOnSideContent: (data: { isPageTranslated: boolean }) => void
   readArticle: () => void
   popupRequestReadArticle: (data: { tabId: number }) => void
+  pinStateChanged: (data: { isPinned: boolean }) => void
+  getPinState: () => boolean
+  returnPinState: (data: { isPinned: boolean }) => void
 }
 
 export const { sendMessage, onMessage }
