@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.7.3
+
+### Patch Changes
+
+- [#54](https://github.com/mengxi-ream/read-frog/pull/54) [`7a5f187`](https://github.com/mengxi-ream/read-frog/commit/7a5f1873257dc6f09e76209c3c174564a8746a94) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - send isPinned to read frog website
+
 ## 0.7.2
 
 ### Patch Changes
