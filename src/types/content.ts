@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { langCodeISO6393 } from './config/languages'
+import { langCodeISO6393Schema } from './config/languages'
 
 export interface ExtractedContent {
   article: {
@@ -19,7 +19,7 @@ export interface ExtractedContent {
 
 export const articleAnalysisSchema = z.object({
   isArticle: z.boolean(),
-  detectedLang: langCodeISO6393.or(z.literal('und')),
+  detectedLang: langCodeISO6393Schema.or(z.literal('und')),
   summary: z.string(),
   introduction: z.string(),
   terms: z.array(z.string()),

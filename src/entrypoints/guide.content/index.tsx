@@ -18,5 +18,15 @@ export default defineContentScript({
         window.postMessage({ source: `${kebabCase(APP_NAME)}-ext`, type: 'getPinState', data: { isPinned } }, '*')
       }
     })
+
+    window.addEventListener('message', async (e) => {
+      if (e.source !== window)
+        return
+      const { source, type } = e.data || {}
+      if (source === 'read-frog-page' && type === 'setTargetLanguage') {
+        const langCodeISO6393 = e.data.langCodeISO6393 ?? 'eng'
+        await sendMessage('setTargetLanguage', { langCodeISO6393 })
+      }
+    })
   },
 })

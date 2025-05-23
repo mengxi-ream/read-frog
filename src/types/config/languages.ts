@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-export const langCodeISO6393 = z.enum([
+export const langCodeISO6393Schema = z.enum([
   'eng',
   'cmn',
   'cmn-Hant',
@@ -81,7 +81,7 @@ export const langCodeISO6393 = z.enum([
   'kaz',
 ])
 
-export const iso6391Code = z.enum([
+export const langCodeISO6391Schema = z.enum([
   'en', // English
   'zh', // Chinese（包含简/繁/粤等；只是在 BCP-47 里再加 -Hans / -Hant / -yue）
   'es',
@@ -145,9 +145,9 @@ export const iso6391Code = z.enum([
   'be',
 ] as const)
 
-export type ISO6391Code = z.infer<typeof iso6391Code>
+export type LangCodeISO6391 = z.infer<typeof langCodeISO6391Schema>
 
-export type LangCodeISO6393 = z.infer<typeof langCodeISO6393>
+export type LangCodeISO6393 = z.infer<typeof langCodeISO6393Schema>
 
 export const LANG_CODE_TO_EN_NAME: Record<LangCodeISO6393, string> = {
   'eng': 'English',
@@ -311,7 +311,7 @@ export const LANG_CODE_TO_LOCALE_NAME: Record<LangCodeISO6393, string> = {
   'kaz': 'Қазақ тілі',
 }
 
-export const ISO6393_TO_6391: Record<LangCodeISO6393, ISO6391Code | undefined> = {
+export const ISO6393_TO_6391: Record<LangCodeISO6393, LangCodeISO6391 | undefined> = {
   'eng': 'en',
   'cmn': 'zh',
   'cmn-Hant': 'zh',

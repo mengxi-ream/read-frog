@@ -1,14 +1,14 @@
 import { z } from 'zod'
 
-import { langCodeISO6393, langLevel } from '@/types/config/languages'
+import { langCodeISO6393Schema, langLevel } from '@/types/config/languages'
 import { MIN_SIDE_CONTENT_WIDTH } from '@/utils/constants/side'
 import { providersConfigSchema, readConfigSchema, translateConfigSchema } from './provider'
 
 // Language schema
 const languageSchema = z.object({
-  detectedCode: langCodeISO6393,
-  sourceCode: langCodeISO6393.or(z.literal('auto')),
-  targetCode: langCodeISO6393,
+  detectedCode: langCodeISO6393Schema,
+  sourceCode: langCodeISO6393Schema.or(z.literal('auto')),
+  targetCode: langCodeISO6393Schema,
   level: langLevel,
 })
 // Floating button schema

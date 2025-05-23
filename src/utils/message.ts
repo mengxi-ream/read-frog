@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from '@/types/config/languages'
 import { defineExtensionMessaging } from '@webext-core/messaging'
 
 interface ProtocolMap {
@@ -14,6 +15,7 @@ interface ProtocolMap {
   pinStateChanged: (data: { isPinned: boolean }) => void
   getPinState: () => boolean
   returnPinState: (data: { isPinned: boolean }) => void
+  setTargetLanguage: (data: { langCodeISO6393: LangCodeISO6393 }) => void
 }
 
 export const { sendMessage, onMessage }

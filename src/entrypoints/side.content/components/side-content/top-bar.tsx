@@ -25,7 +25,7 @@ import {
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
-  langCodeISO6393,
+  langCodeISO6393Schema,
   langLevel,
 } from '@/types/config/languages'
 import { configFields } from '@/utils/atoms/config'
@@ -158,7 +158,7 @@ function TargetLangSelect() {
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t('side.targetLang')}</SelectLabel>
-          {langCodeISO6393.options.map(key => (
+          {langCodeISO6393Schema.options.map(key => (
             <SelectItem key={key} value={key}>
               {`${LANG_CODE_TO_EN_NAME[key]} (${LANG_CODE_TO_LOCALE_NAME[key]})`}
             </SelectItem>
@@ -198,7 +198,7 @@ function SourceLangSelect() {
               auto
             </span>
           </SelectItem>
-          {langCodeISO6393.options.map(key => (
+          {langCodeISO6393Schema.options.map(key => (
             <SelectItem key={key} value={key}>
               {`${LANG_CODE_TO_EN_NAME[key]} (${LANG_CODE_TO_LOCALE_NAME[key]})`}
             </SelectItem>

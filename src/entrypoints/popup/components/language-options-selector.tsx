@@ -7,7 +7,7 @@ import { ArrowRight, ChevronDown } from 'lucide-react'
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
-  langCodeISO6393,
+  langCodeISO6393Schema,
 } from '@/types/config/languages'
 import { configFields } from '@/utils/atoms/config'
 
@@ -48,7 +48,7 @@ export default function LanguageOptionsSelector() {
             {' '}
             (auto)
           </option>
-          {langCodeISO6393.options.map(key => (
+          {langCodeISO6393Schema.options.map(key => (
             <option key={key} value={key}>
               {`${LANG_CODE_TO_EN_NAME[key]} (${LANG_CODE_TO_LOCALE_NAME[key]})`}
             </option>
@@ -69,7 +69,7 @@ export default function LanguageOptionsSelector() {
           value={language.targetCode}
           onChange={handleTargetLangChange}
         >
-          {langCodeISO6393.options.map(key => (
+          {langCodeISO6393Schema.options.map(key => (
             <option key={key} value={key}>
               {`${LANG_CODE_TO_EN_NAME[key]} (${LANG_CODE_TO_LOCALE_NAME[key]})`}
             </option>
