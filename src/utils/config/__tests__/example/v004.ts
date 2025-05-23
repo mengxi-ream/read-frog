@@ -18,7 +18,7 @@ export const configExample: Config = {
       apiKey: undefined,
     },
     ollama: {
-      apiKey: 1314520,
+      apiKey: 'ollama',
     },
   },
   read: {

@@ -20,6 +20,10 @@ export const configExample: Config = {
       apiKey: undefined,
       baseURL: 'https://openrouter.ai/api/v1',
     },
+    ollama: {
+      apiKey: 'ollama',
+      baseURL: 'http://localhost:11434/v1',
+    },
   },
   read: {
     provider: 'openai',
