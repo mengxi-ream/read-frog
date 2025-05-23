@@ -34,6 +34,11 @@ export const configExample: Config = {
         isCustomModel: false,
         customModel: '',
       },
+      ollama: {
+        model: 'gemma3:1b',
+        isCustomModel: false,
+        customModel: '',
+      },
     },
   },
   translate: {
@@ -53,6 +58,11 @@ export const configExample: Config = {
       },
       openrouter: {
         model: 'meta-llama/llama-4-maverick:free',
+        isCustomModel: false,
+        customModel: '',
+      },
+      ollama: {
+        model: 'gemma3:1b',
         isCustomModel: false,
         customModel: '',
       },

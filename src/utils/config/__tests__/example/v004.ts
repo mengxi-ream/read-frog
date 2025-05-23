@@ -17,6 +17,9 @@ export const configExample: Config = {
     openrouter: {
       apiKey: undefined,
     },
+    ollama: {
+      apiKey: 1314520,
+    },
   },
   read: {
     provider: 'openai',
@@ -28,6 +31,11 @@ export const configExample: Config = {
       },
       deepseek: {
         model: 'deepseek-chat',
+        isCustomModel: false,
+        customModel: '',
+      },
+      ollama: {
+        model: 'gemma3:1b',
         isCustomModel: false,
         customModel: '',
       },
@@ -50,6 +58,11 @@ export const configExample: Config = {
       },
       openrouter: {
         model: 'meta-llama/llama-4-maverick:free',
+        isCustomModel: false,
+        customModel: '',
+      },
+      ollama: {
+        model: 'gemma3:1b',
         isCustomModel: false,
         customModel: '',
       },
