@@ -1,5 +1,15 @@
 # read-frog
 
+## 0.7.4
+
+### Patch Changes
+
+- [`837fcc6`](https://github.com/mengxi-ream/read-frog/commit/837fcc63330897341e0a5df208ff964a9fa72f99) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(traversal): find deepest element from point
+
+- [`af0da30`](https://github.com/mengxi-ream/read-frog/commit/af0da303e77fa5d88e408e95b9e1d0c2f8c234a8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add new user guide
+
+- [#58](https://github.com/mengxi-ream/read-frog/pull/58) [`e5d4107`](https://github.com/mengxi-ream/read-frog/commit/e5d41079f7b2fd98a7e35de04c71e1dffa6538c6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - allow read frog website to set target language code
+
 ## 0.7.3
 
 ### Patch Changes
