@@ -21,10 +21,10 @@ export async function getProviderRegistry() {
       baseURL: config?.providersConfig?.deepseek.baseURL ?? DEFAULT_PROVIDER_CONFIG.deepseek.baseURL,
       apiKey: config?.providersConfig?.deepseek.apiKey,
     }),
-    ollama: createOpenRouter({
-      apiKey: config?.providersConfig?.ollama.apiKey,
-      baseURL: config?.providersConfig?.ollama.baseURL ?? DEFAULT_PROVIDER_CONFIG.ollama.baseURL,
-    }),
+    // ollama: createOpenRouter({
+    //   apiKey: config?.providersConfig?.ollama.apiKey,
+    //   baseURL: config?.providersConfig?.ollama.baseURL ?? DEFAULT_PROVIDER_CONFIG.ollama.baseURL,
+    // }),
   })
 }
 
