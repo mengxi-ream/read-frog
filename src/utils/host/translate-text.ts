@@ -1,6 +1,6 @@
 import { generateText } from 'ai'
 
-import { iso6393To1, langCodeToEnglishName } from '@/types/config/languages'
+import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 
 import { globalConfig } from '../config/config'
 import { getTranslateLinePrompt } from '../prompts/translate-line'
@@ -21,16 +21,16 @@ export async function translateText(sourceText: string) {
 
   // TODO: clean up the code
   if (provider === 'google') {
-    const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (iso6393To1[globalConfig.language.sourceCode] ?? 'auto')
-    const targetLang = iso6393To1[globalConfig.language.targetCode]
+    const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (ISO6393_TO_6391[globalConfig.language.sourceCode] ?? 'auto')
+    const targetLang = ISO6393_TO_6391[globalConfig.language.targetCode]
     if (!targetLang) {
       throw new Error('Invalid target language code')
     }
     translatedText = await googleTranslate(cleanSourceText, sourceLang, targetLang)
   }
   else if (provider === 'microsoft') {
-    const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (iso6393To1[globalConfig.language.sourceCode] ?? 'auto')
-    const targetLang = iso6393To1[globalConfig.language.targetCode]
+    const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (ISO6393_TO_6391[globalConfig.language.sourceCode] ?? 'auto')
+    const targetLang = ISO6393_TO_6391[globalConfig.language.targetCode]
     if (!targetLang) {
       throw new Error('Invalid target language code')
     }
@@ -41,7 +41,7 @@ export async function translateText(sourceText: string) {
     const { text } = await generateText({
       model,
       prompt: getTranslateLinePrompt(
-        langCodeToEnglishName[globalConfig.language.targetCode],
+        LANG_CODE_TO_EN_NAME[globalConfig.language.targetCode],
         cleanSourceText,
       ),
     })

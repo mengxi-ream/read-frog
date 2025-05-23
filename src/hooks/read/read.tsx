@@ -15,7 +15,7 @@ import {
   readStateAtom,
   store,
 } from '@/entrypoints/side.content/atoms'
-import { langCodeToEnglishName } from '@/types/config/languages'
+import { LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 import {
   articleAnalysisSchema,
   articleExplanationSchema,
@@ -56,7 +56,7 @@ export function useAnalyzeContent() {
         throw new Error('No model string available for summary generation')
       }
       const model = await getReadModel(read.provider, modelString)
-      const targetLang = langCodeToEnglishName[language.targetCode]
+      const targetLang = LANG_CODE_TO_EN_NAME[language.targetCode]
 
       while (attempts < maxAttempts) {
         try {
@@ -106,9 +106,9 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
 
   const { language, read } = config
 
-  const targetLang = langCodeToEnglishName[language.targetCode]
+  const targetLang = LANG_CODE_TO_EN_NAME[language.targetCode]
   const sourceLang
-    = langCodeToEnglishName[
+    = LANG_CODE_TO_EN_NAME[
       language.sourceCode === 'auto'
         ? language.detectedCode
         : language.sourceCode

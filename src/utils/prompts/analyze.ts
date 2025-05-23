@@ -1,4 +1,4 @@
-import { langCodeToEnglishName } from '@/types/config/languages'
+import { LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 
 export function getAnalyzePrompt(targetLang: string) {
   return `# Identity
@@ -47,7 +47,7 @@ Your response should following the JSON format:
 \`\`\`
 
 ISO 639-3 language code subset to English name, key is code, value is English name of the language:
-${JSON.stringify(langCodeToEnglishName)}
+${JSON.stringify(LANG_CODE_TO_EN_NAME)}
 If the language is not in the subset, return "und" for "detectedLang".
 
 # Examples

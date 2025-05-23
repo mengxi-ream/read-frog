@@ -23,7 +23,9 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip'
 import {
-  langCodeToEnglishName,
+  LANG_CODE_TO_EN_NAME,
+  LANG_CODE_TO_LOCALE_NAME,
+  langCodeISO6393,
   langLevel,
 } from '@/types/config/languages'
 import { configFields } from '@/utils/atoms/config'
@@ -150,15 +152,15 @@ function TargetLangSelect() {
       >
         <div className="h-1 w-1 shrink-0 rounded-full bg-blue-500"></div>
         <div className="max-w-16 min-w-0 truncate">
-          {langCodeToEnglishName[language.targetCode]}
+          {`${LANG_CODE_TO_EN_NAME[language.targetCode]} (${LANG_CODE_TO_LOCALE_NAME[language.targetCode]})`}
         </div>
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t('side.targetLang')}</SelectLabel>
-          {Object.entries(langCodeToEnglishName).map(([langCode, name]) => (
-            <SelectItem key={langCode} value={langCode}>
-              {name}
+          {langCodeISO6393.options.map(key => (
+            <SelectItem key={key} value={key}>
+              {`${LANG_CODE_TO_EN_NAME[key]} (${LANG_CODE_TO_LOCALE_NAME[key]})`}
             </SelectItem>
           ))}
         </SelectGroup>
@@ -183,22 +185,22 @@ function SourceLangSelect() {
         <div className="h-1 w-1 shrink-0 rounded-full bg-blue-500"></div>
         <div className="max-w-16 min-w-0 truncate">
           {language.sourceCode === 'auto'
-            ? langCodeToEnglishName[language.detectedCode]
-            : langCodeToEnglishName[language.sourceCode]}
+            ? LANG_CODE_TO_EN_NAME[language.detectedCode]
+            : LANG_CODE_TO_EN_NAME[language.sourceCode]}
         </div>
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t('side.sourceLang')}</SelectLabel>
           <SelectItem value="auto">
-            {langCodeToEnglishName[language.detectedCode]}
+            {`${LANG_CODE_TO_EN_NAME[language.detectedCode]} (${LANG_CODE_TO_LOCALE_NAME[language.detectedCode]})`}
             <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">
               auto
             </span>
           </SelectItem>
-          {Object.entries(langCodeToEnglishName).map(([langCode, name]) => (
-            <SelectItem key={langCode} value={langCode}>
-              {name}
+          {langCodeISO6393.options.map(key => (
+            <SelectItem key={key} value={key}>
+              {`${LANG_CODE_TO_EN_NAME[key]} (${LANG_CODE_TO_LOCALE_NAME[key]})`}
             </SelectItem>
           ))}
         </SelectGroup>
