@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.7.5
+
+### Patch Changes
+
+- [#65](https://github.com/mengxi-ream/read-frog/pull/65) [`9433dd8`](https://github.com/mengxi-ream/read-frog/commit/9433dd8400b1b299266c2fdc9fd9ec0e223e91d3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: only select editable area when select all in these elements
+
 ## 0.7.4
 
 ### Patch Changes
