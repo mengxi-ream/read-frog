@@ -1,5 +1,15 @@
 # read-frog
 
+## 0.7.5
+
+### Patch Changes
+
+- [#67](https://github.com/mengxi-ream/read-frog/pull/67) [`0818ad2`](https://github.com/mengxi-ream/read-frog/commit/0818ad22612e6e2a018929b96e0e0c47288f818a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add four finger touch trigger
+
+- [#61](https://github.com/mengxi-ream/read-frog/pull/61) [`cd5e64f`](https://github.com/mengxi-ream/read-frog/commit/cd5e64f1c107b9bf987247cc138de7872e674ab0) Thanks [@zmrlft](https://github.com/zmrlft)! - feat: the feature integrate ollama
+
+- [#65](https://github.com/mengxi-ream/read-frog/pull/65) [`9433dd8`](https://github.com/mengxi-ream/read-frog/commit/9433dd8400b1b299266c2fdc9fd9ec0e223e91d3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: only select editable area when select all in these elements
+
 ## 0.7.4
 
 ### Patch Changes
