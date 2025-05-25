@@ -8,6 +8,7 @@ export default defineContentScript({
   async main() {
     await loadGlobalConfigPromise
     eruda.init()
+    // hi
     registerTranslationTriggers()
   },
 })
