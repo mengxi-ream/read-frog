@@ -8,7 +8,7 @@ import {
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from '../constants/translation'
-import { isBlockTransNode, isInlineTransNode } from './dom/filter'
+import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode } from './dom/filter'
 import {
   extractTextContent,
   findNearestBlockNodeAt,
@@ -26,7 +26,7 @@ export function hideOrShowNodeTranslation(point: Point) {
 
   const node = findNearestBlockNodeAt(point)
 
-  if (!node || !(node instanceof HTMLElement) || !shouldTriggerAction(node))
+  if (!node || !isHTMLElement(node) || !shouldTriggerAction(node))
     return
 
   const id = crypto.randomUUID()
@@ -56,7 +56,7 @@ export function removeAllTranslatedWrapperNodes(
 
     // Recursively search through shadow roots
     root.querySelectorAll('*').forEach((element) => {
-      if (element instanceof HTMLElement && element.shadowRoot) {
+      if (isHTMLElement(element) && element.shadowRoot) {
         removeFromRoot(element.shadowRoot)
       }
     })
@@ -78,7 +78,7 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
     translatingNodes.add(node)
 
     const targetNode
-      = node instanceof HTMLElement ? unwrapDeepestOnlyChild(node) : node
+      = isHTMLElement(node) ? unwrapDeepestOnlyChild(node) : node
 
     const existedTranslatedWrapper = findExistedTranslatedWrapper(targetNode)
     if (existedTranslatedWrapper) {
@@ -97,10 +97,10 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
     const spinner = document.createElement('span')
     spinner.className = 'read-frog-spinner'
     translatedWrapperNode.appendChild(spinner)
-    if (targetNode instanceof HTMLElement) {
+    if (isHTMLElement(targetNode)) {
       targetNode.appendChild(translatedWrapperNode)
     }
-    else if (targetNode instanceof Text) {
+    else if (isTextNode(targetNode)) {
       targetNode.parentNode?.insertBefore(
         translatedWrapperNode,
         targetNode.nextSibling,
@@ -134,15 +134,15 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
 }
 
 function findExistedTranslatedWrapper(node: TransNode) {
-  if (node instanceof Text) {
+  if (isTextNode(node)) {
     if (
-      node.nextSibling instanceof HTMLElement
+      node.nextSibling && isHTMLElement(node.nextSibling)
       && node.nextSibling.classList.contains(NOTRANSLATE_CLASS)
     ) {
       return node.nextSibling
     }
   }
-  else if (node instanceof HTMLElement) {
+  else if (isHTMLElement(node)) {
     return node.querySelector(`:scope > .${NOTRANSLATE_CLASS}`)
   }
   return null
@@ -155,7 +155,7 @@ function insertTranslatedNodeIntoWrapper(
 ) {
   const translatedNode = document.createElement('span')
   const isForceInlineTranslationElement
-    = targetNode instanceof HTMLElement
+    = isHTMLElement(targetNode)
       && FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName)
 
   if (isForceInlineTranslationElement || isInlineTransNode(targetNode)) {

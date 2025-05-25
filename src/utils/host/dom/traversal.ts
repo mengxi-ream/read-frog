@@ -14,8 +14,10 @@ import {
 import { translateNode } from '../translate'
 import {
   isDontWalkIntoElement,
+  isHTMLElement,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
+  isTextNode,
 } from './filter'
 import { smashTruncationStyle } from './style'
 
@@ -29,7 +31,7 @@ export function findElementAt(root: Document | ShadowRoot, point: Point): Elemen
 
   function findDeepestElement(element: Element): Element {
     for (const child of element.children) {
-      if (child instanceof HTMLElement) {
+      if (isHTMLElement(child)) {
         const rect = child.getBoundingClientRect()
         const isPointInChild = x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom
 
@@ -65,7 +67,7 @@ export function findNearestBlockNodeAt(point: Point) {
 
   // TODO: support SVGElement in the future
   while (
-    currentNode instanceof HTMLElement
+    currentNode && isHTMLElement(currentNode)
     && isShallowInlineHTMLElement(currentNode)
   ) {
     currentNode = currentNode.parentElement
@@ -75,7 +77,7 @@ export function findNearestBlockNodeAt(point: Point) {
 }
 
 export function extractTextContent(node: TransNode): string {
-  if (node instanceof Text) {
+  if (isTextNode(node)) {
     return node.textContent ?? ''
   }
 
@@ -86,7 +88,7 @@ export function extractTextContent(node: TransNode): string {
   const childNodes = Array.from(node.childNodes)
   return childNodes.reduce((text: string, child: Node): string => {
     // TODO: support SVGElement in the future
-    if (child instanceof Text || child instanceof HTMLElement) {
+    if (isTextNode(child) || isHTMLElement(child)) {
       return text + extractTextContent(child)
     }
     return text
@@ -117,13 +119,14 @@ export function walkAndLabelElement(
     return false
   }
 
-  if (INVALID_TRANSLATE_TAGS.has(element.tagName))
+  if (INVALID_TRANSLATE_TAGS.has(element.tagName)) {
     return false
+  }
 
   if (element.shadowRoot) {
     if (globalConfig && globalConfig.translate.page.range === 'all') {
       for (const child of element.shadowRoot.children) {
-        if (child instanceof HTMLElement) {
+        if (isHTMLElement(child)) {
           walkAndLabelElement(child, walkId)
         }
       }
@@ -137,17 +140,16 @@ export function walkAndLabelElement(
   let hasBlockNodeChild = false
 
   for (const child of element.childNodes) {
-    if (child.nodeType === Node.TEXT_NODE && child.textContent?.trim()) {
-      hasInlineNodeChild = true
+    if (child.nodeType === Node.TEXT_NODE) {
+      if (child.textContent?.trim()) {
+        hasInlineNodeChild = true
+      }
       continue
     }
 
-    if (child instanceof HTMLElement) {
-      // if (isInlineHTMLElement(child) && child.textContent?.trim()) {
-      //   hasInlineNodeChild = true;
-      // }
-
+    if (isHTMLElement(child)) {
       const hasBlock = walkAndLabelElement(child, walkId)
+
       if (hasBlock) {
         hasBlockNodeChild = true
       }
@@ -156,10 +158,6 @@ export function walkAndLabelElement(
       }
     }
   }
-
-  // if (hasInlineNodeChild && !hasBlockNodeChild) {
-  //   node.setAttribute("data-read-frog-leaf-block-node", "");
-  // }
 
   if (hasInlineNodeChild) {
     element.setAttribute(PARAGRAPH_ATTRIBUTE, '')
@@ -195,7 +193,7 @@ export function translateWalkedElement(
     let hasBlockNodeChild = false
 
     for (const child of element.childNodes) {
-      if (child instanceof HTMLElement && child.hasAttribute(BLOCK_ATTRIBUTE)) {
+      if (isHTMLElement(child) && child.hasAttribute(BLOCK_ATTRIBUTE)) {
         hasBlockNodeChild = true
         break
       }
@@ -212,10 +210,10 @@ export function translateWalkedElement(
           continue
         }
 
-        if (child instanceof Text) {
+        if (isTextNode(child)) {
           translateNode(child, toggle)
         }
-        else if (child instanceof HTMLElement) {
+        else if (isHTMLElement(child)) {
           translateWalkedElement(child, walkId, toggle)
         }
       }
@@ -223,13 +221,13 @@ export function translateWalkedElement(
   }
   else {
     for (const child of element.childNodes) {
-      if (child instanceof HTMLElement) {
+      if (isHTMLElement(child)) {
         translateWalkedElement(child, walkId, toggle)
       }
     }
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
-        if (child instanceof HTMLElement) {
+        if (isHTMLElement(child)) {
           translateWalkedElement(child, walkId, toggle)
         }
       }
@@ -249,7 +247,7 @@ export function unwrapDeepestOnlyChild(element: HTMLElement) {
       break
 
     const onlyChildElement = currentElement.children[0]
-    if (!(onlyChildElement instanceof HTMLElement))
+    if (!isHTMLElement(onlyChildElement))
       break
 
     currentElement = onlyChildElement

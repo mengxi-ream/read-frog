@@ -1,14 +1,16 @@
 import type { Point } from '@/types/dom'
+import eruda from 'eruda'
 import { globalConfig, loadGlobalConfigPromise } from '@/utils/config/config'
 import { isEditable } from '@/utils/host/dom/filter'
-import { hideOrShowNodeTranslation } from '@/utils/host/translate'
 
+import { hideOrShowNodeTranslation, translatePage } from '@/utils/host/translate'
 import './style.css'
 
 export default defineContentScript({
   matches: ['*://*/*'],
   async main() {
     await loadGlobalConfigPromise
+    eruda.init()
     registerTranslationTriggers()
   },
 })
@@ -83,4 +85,73 @@ function registerTranslationTriggers() {
     mousePosition.x = event.clientX
     mousePosition.y = event.clientY
   })
+
+  // Four-finger touch gesture to trigger translatePage
+  let touchStartTime = 0
+  let fourFingerTouchStarted = false
+  let initialTouchPositions: Array<{ x: number, y: number }> = []
+
+  document.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 4) {
+      fourFingerTouchStarted = true
+      touchStartTime = Date.now()
+      // 记录初始触摸位置
+      initialTouchPositions = Array.from(e.touches).map(touch => ({
+        x: touch.clientX,
+        y: touch.clientY,
+      }))
+    }
+    else {
+      fourFingerTouchStarted = false
+      initialTouchPositions = []
+    }
+  }, { passive: true })
+
+  document.addEventListener('touchend', (e) => {
+    // Check if this was a four-finger tap (short duration touch)
+    if (fourFingerTouchStarted && e.touches.length === 0) {
+      const touchDuration = Date.now() - touchStartTime
+      // Consider it a tap if touch duration is less than 500ms
+      if (touchDuration < 500) {
+        translatePage()
+      }
+      fourFingerTouchStarted = false
+      initialTouchPositions = []
+    }
+  }, { passive: true })
+
+  document.addEventListener('touchmove', (e) => {
+    // Cancel four-finger gesture if fingers move too much or finger count changes
+    if (!fourFingerTouchStarted)
+      return
+
+    // 检查手指数量是否改变
+    if (e.touches.length !== 4) {
+      fourFingerTouchStarted = false
+      initialTouchPositions = []
+      return
+    }
+
+    // 检查移动距离是否超过阈值（允许一定的移动容差）
+    const MOVE_THRESHOLD = 30 // 30px 的移动阈值
+    let hasMoveExceedThreshold = false
+
+    for (let i = 0; i < Math.min(e.touches.length, initialTouchPositions.length); i++) {
+      const currentTouch = e.touches[i]
+      const initialPos = initialTouchPositions[i]
+      const deltaX = Math.abs(currentTouch.clientX - initialPos.x)
+      const deltaY = Math.abs(currentTouch.clientY - initialPos.y)
+      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+
+      if (distance > MOVE_THRESHOLD) {
+        hasMoveExceedThreshold = true
+        break
+      }
+    }
+
+    if (hasMoveExceedThreshold) {
+      fourFingerTouchStarted = false
+      initialTouchPositions = []
+    }
+  }, { passive: true })
 }

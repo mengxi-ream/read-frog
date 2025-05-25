@@ -90,3 +90,27 @@ export function isBlockTransNode(node: TransNode): boolean {
   }
   return node.hasAttribute(BLOCK_ATTRIBUTE)
 }
+
+/**
+ * More reliable check for HTML elements that works across different contexts (iframe, shadow DOM)
+ * @param node - The node to check
+ * @returns Whether the node is an HTML element
+ */
+export function isHTMLElement(node: Node): node is HTMLElement {
+  return node.nodeType === Node.ELEMENT_NODE
+    && node.nodeName !== undefined
+    && 'tagName' in node
+    && 'getAttribute' in node
+    && 'setAttribute' in node
+}
+
+/**
+ * More reliable check for Text nodes that works across different contexts
+ * @param node - The node to check
+ * @returns Whether the node is a Text node
+ */
+export function isTextNode(node: Node): node is Text {
+  return node.nodeType === Node.TEXT_NODE
+    && 'textContent' in node
+    && 'data' in node
+}
