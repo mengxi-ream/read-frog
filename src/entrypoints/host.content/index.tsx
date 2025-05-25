@@ -1,6 +1,7 @@
 // import eruda from 'eruda'
 import { loadGlobalConfigPromise } from '@/utils/config/config'
 import { registerTranslationTriggers } from './translation-trigger'
+import { observeAndTranslateVisibleElements } from './translation-trigger/page-translation'
 import './style.css'
 
 export default defineContentScript({
@@ -10,10 +11,10 @@ export default defineContentScript({
     // eruda.init()
     registerTranslationTriggers()
 
-    // const stop = observeAndTranslateVisibleElements()
+    const stop = observeAndTranslateVisibleElements()
 
-    // return () => {
-    //   stop()
-    // }
+    return () => {
+      stop()
+    }
   },
 })

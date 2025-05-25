@@ -179,12 +179,13 @@ export function observeAndTranslateVisibleElements(
 
 function observerTopLevelParagraphs(container: HTMLElement, id: string, io: IntersectionObserver) {
   walkAndLabelElement(container, id)
-  logger.info('array', Array.from(
-    container.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(id)}"]`),
-  ))
-  const topLevelParagraphs = Array.from(
-    container.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(id)}"]`),
-  ).filter(el => el.parentElement?.closest('[data-read-frog-paragraph]') == null)
+  const paragraphs = Array.from(container.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(id)}"]`))
+  const topLevelParagraphs = paragraphs.filter((el) => {
+    const ancestor = el.parentElement?.closest('[data-read-frog-paragraph]')
+    // keep it if either:
+    //  • no paragraph ancestor at all, or
+    //  • the ancestor is *not* inside container
+    return !ancestor || !container.contains(ancestor)
+  })
   topLevelParagraphs.forEach(el => io.observe(el))
-  logger.info('topLevelParagraphs', topLevelParagraphs)
 }
