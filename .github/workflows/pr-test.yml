@@ -27,6 +27,17 @@ jobs:
         run: pnpm install
         shell: bash
 
+      - name: Check for eruda imports
+        run: |
+          if grep -r "import.*eruda" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | grep -v "^[[:space:]]*//"; then
+            echo "❌ Found uncommented eruda imports in the codebase!"
+            echo "Please comment out or remove eruda imports before merging."
+            exit 1
+          else
+            echo "✅ No uncommented eruda imports found."
+          fi
+        shell: bash
+
       - name: Compile
         run: pnpm compile
 

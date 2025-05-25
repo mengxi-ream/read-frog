@@ -1,3 +1,13 @@
+# Check for eruda imports
+echo "🔍 Checking for uncommented eruda imports..."
+if grep -r "import.*eruda" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | grep -v "^[[:space:]]*//"; then
+  echo "❌ Found uncommented eruda imports in the codebase!"
+  echo "Please comment out or remove eruda imports before pushing."
+  exit 1
+else
+  echo "✅ No uncommented eruda imports found."
+fi
+
 pnpm compile
 
 # Check if SKIP_FREE_API environment variable is set
