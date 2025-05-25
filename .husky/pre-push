@@ -1,5 +1,3 @@
-echo "🚀 PRE-PUSH HOOK IS RUNNING!"
-
 # Check for eruda imports
 echo "🔍 Checking for uncommented eruda imports..."
 if grep -r "import.*eruda" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | grep -v ":.*[[:space:]]*//.*import.*eruda"; then
