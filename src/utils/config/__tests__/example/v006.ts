@@ -1,4 +1,6 @@
-export const configExample = {
+import type { Config } from '@/types/config/config'
+
+export const configExample: Config = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',
@@ -17,6 +19,10 @@ export const configExample = {
     openrouter: {
       apiKey: undefined,
       baseURL: 'https://openrouter.ai/api/v1',
+    },
+    ollama: {
+      apiKey: undefined,
+      baseURL: 'http://127.0.0.1:11434/v1',
     },
   },
   read: {
@@ -51,6 +57,11 @@ export const configExample = {
       },
       openrouter: {
         model: 'meta-llama/llama-4-maverick:free',
+        isCustomModel: false,
+        customModel: '',
+      },
+      ollama: {
+        model: 'gemma3:1b',
         isCustomModel: false,
         customModel: '',
       },

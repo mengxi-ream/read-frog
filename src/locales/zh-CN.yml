@@ -25,6 +25,7 @@ options:
       openai: 提供 GPT-4o 等模型
       deepseek: 推荐在中国使用
       openrouter: 多个 LLM 提供商的统一接口
+      ollama: 本地大模型服务
     apiKey:
       showAPIKey: 显示 API Key
     advancedConfig:

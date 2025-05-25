@@ -45,9 +45,13 @@ export async function translateText(sourceText: string) {
         cleanSourceText,
       ),
     })
-    translatedText = text
+    // Some deep thinking models, such as deepseek, return the thinking process. Therefore,
+    // the thinking process in the <think></think> tag needs to be filtered out and only the result is returned
+    const [, extracted = text] = text.match(/<\/think>([\s\S]*)/) || []
+    const cleaned = extracted.trim().replace(/\s+/g, '')
+    return cleanSourceText === cleaned ? '' : cleaned
   }
-
+  translatedText = translatedText.trim().replace(/\s+/g, '')
   // Compare cleaned versions to determine if translation is the same
   return cleanSourceText === translatedText ? '' : translatedText
 }

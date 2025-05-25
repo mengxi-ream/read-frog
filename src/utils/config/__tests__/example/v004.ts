@@ -1,6 +1,4 @@
-import type { Config } from '@/types/config/config'
-
-export const configExample: Config = {
+export const configExample = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',

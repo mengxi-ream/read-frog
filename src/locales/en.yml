@@ -25,6 +25,7 @@ options:
       openai: Provides models like GPT-4o
       deepseek: Recommend to use in China
       openrouter: The unified interface for multiple LLM providers
+      ollama: Local LLM
     apiKey:
       showAPIKey: Show API Key
     advancedConfig:

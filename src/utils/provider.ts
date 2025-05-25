@@ -21,6 +21,10 @@ export async function getProviderRegistry() {
       baseURL: config?.providersConfig?.deepseek.baseURL ?? DEFAULT_PROVIDER_CONFIG.deepseek.baseURL,
       apiKey: config?.providersConfig?.deepseek.apiKey,
     }),
+    ollama: createOpenAI({
+      baseURL: config?.providersConfig?.ollama.baseURL ?? DEFAULT_PROVIDER_CONFIG.ollama.baseURL,
+      apiKey: config?.providersConfig?.ollama.apiKey,
+    }),
   })
 }
 
