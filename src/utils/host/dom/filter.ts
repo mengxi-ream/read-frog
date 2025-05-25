@@ -93,6 +93,7 @@ export function isBlockTransNode(node: TransNode): boolean {
 
 /**
  * More reliable check for HTML elements that works across different contexts (iframe, shadow DOM)
+ * avoid using instanceof HTMLElement
  * @param node - The node to check
  * @returns Whether the node is an HTML element
  */
@@ -106,6 +107,7 @@ export function isHTMLElement(node: Node): node is HTMLElement {
 
 /**
  * More reliable check for Text nodes that works across different contexts
+ * avoid using instanceof Text
  * @param node - The node to check
  * @returns Whether the node is a Text node
  */
