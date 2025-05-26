@@ -117,13 +117,6 @@ export default defineContentScript({
         elements?.root.unmount()
         elements?.wrapper.remove()
         shadowWrapper = null
-
-        // Clean up port when component unmounts
-        const currentPort = store.get(translationPortAtom)
-        if (currentPort) {
-          currentPort.disconnect()
-          store.set(translationPortAtom, null)
-        }
       },
     })
 
