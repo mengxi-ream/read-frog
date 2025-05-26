@@ -1,16 +1,49 @@
 export function translationMessage() {
   const tabPageTranslationState = new Map<number, { enabled: boolean, ports: Browser.runtime.Port[] }>()
 
+  // 定义需要默认启用翻译的URL正则模式
+  const AUTO_ENABLE_URL_PATTERNS = [
+    /^https?:\/\/.*\.wikipedia\.org\//, // Wikipedia
+    /^https?:\/\/reddit\.com\//, // Reddit
+    /^https?:\/\/stackoverflow\.com\//, // Stack Overflow
+    /^https?:\/\/github\.com\//, // GitHub
+    // 可以根据需要添加更多模式
+  ]
+
+  function shouldAutoEnable(url: string): boolean {
+    return AUTO_ENABLE_URL_PATTERNS.some(pattern => pattern.test(url))
+  }
+
   browser.runtime.onConnect.addListener((port) => {
+    if (port.name !== 'translation') {
+      return
+    }
+
     const tabId = port.sender?.tab?.id
+    const tabUrl = port.sender?.tab?.url
     if (tabId == null)
       return
 
     const entry = tabPageTranslationState.get(tabId) ?? { enabled: false, ports: [] }
+
+    if (entry.ports.length === 0 && tabUrl && shouldAutoEnable(tabUrl)) {
+      entry.enabled = true
+    }
+
     entry.ports.push(port)
     tabPageTranslationState.set(tabId, entry)
 
     port.postMessage({ type: 'STATUS_PUSH', enabled: entry.enabled })
+
+    port.onMessage.addListener((message) => {
+      if (message.type === 'REQUEST_STATUS') {
+        const currentEntry = tabPageTranslationState.get(tabId)
+        port.postMessage({
+          type: 'STATUS_PUSH',
+          enabled: currentEntry?.enabled ?? false,
+        })
+      }
+    })
 
     port.onDisconnect.addListener(() => {
       const left = entry.ports.filter(p => p !== port)

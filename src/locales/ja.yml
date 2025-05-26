@@ -51,6 +51,8 @@ options:
         range:
           main: メインコンテンツ
           all: すべてのコンテンツ
+  translation:
+    title: 翻訳
 side:
   sourceLang: ソース言語
   targetLang: 翻訳言語
@@ -75,4 +77,3 @@ noConfig:
     firstOnThe: する必要があります（
     optionsPage: オプションページ
     page: ）
-

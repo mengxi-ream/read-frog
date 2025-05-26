@@ -21,7 +21,7 @@ import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { addStyleToShadow, mirrorDynamicStyles } from '../../utils/styles'
 import App from './app'
 
-import { store, translationPortAtom } from './atoms'
+import { enablePageTranslationAtom, store, translationPortAtom } from './atoms'
 import '@/assets/tailwind/text-small.css'
 import '@/assets/tailwind/theme.css'
 import '@/entrypoints/host.content/style.css'
@@ -89,10 +89,7 @@ export default defineContentScript({
           return children
         }
 
-        const port = browser.runtime.connect({ name: 'translation' })
-
-        // Set port to atom so React components can access it
-        store.set(translationPortAtom, port)
+        buildTranslationPort()
 
         root.render(
           <QueryClientProvider client={queryClient}>
@@ -123,3 +120,17 @@ export default defineContentScript({
     ui.mount()
   },
 })
+
+function buildTranslationPort() {
+  const port = browser.runtime.connect({ name: 'translation' })
+  store.set(translationPortAtom, port)
+  port.onMessage.addListener((msg: any) => {
+    if (msg.type === 'STATUS_PUSH') {
+      const currentAtom = store.get(enablePageTranslationAtom)
+      const enabled = msg.enabled ?? false
+      if (currentAtom !== enabled) {
+        store.set(enablePageTranslationAtom, enabled)
+      }
+    }
+  })
+}

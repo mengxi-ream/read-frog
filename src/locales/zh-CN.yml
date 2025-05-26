@@ -53,6 +53,8 @@ options:
         range:
           main: 主要内容
           all: 所有内容
+  translation:
+    title: 翻译
 side:
   sourceLang: 来源语言
   targetLang: 目标语言

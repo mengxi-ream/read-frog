@@ -53,6 +53,8 @@ options:
         range:
           main: Main Content
           all: All Content
+  translation:
+    title: Translation
 side:
   sourceLang: Source Language
   targetLang: Target Language
