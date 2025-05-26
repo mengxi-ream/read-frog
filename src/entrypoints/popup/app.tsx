@@ -3,6 +3,7 @@ import { Bolt, Star } from 'lucide-react'
 import { Toaster } from 'sonner'
 import { version } from '../../../package.json'
 import { initIsIgnoreTabAtom } from './atom'
+import { AlwaysTranslate } from './components/always-translate'
 import FloatingButton from './components/floating-button'
 import Hotkey from './components/hotkey-selector'
 import LanguageLevelSelector from './components/language-level-selector'
@@ -30,6 +31,7 @@ function App() {
           <ReadButton />
           <TranslateButton />
         </div>
+        <AlwaysTranslate />
         <Hotkey />
         <FloatingButton />
         <QuickLinks />
