@@ -9,6 +9,7 @@ popup:
   translate: 翻译
   showOriginal: 显示原文
   enabledFloatingButton: 开启悬浮按钮
+  alwaysTranslate: 总是翻译这个网站
   options: 选项
   hover: 鼠标悬停
   translateParagraph: 来翻译段落

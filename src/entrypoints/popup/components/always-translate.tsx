@@ -16,7 +16,7 @@ export function AlwaysTranslate() {
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-[13px] font-medium">
-        Always translate this site
+        {i18n.t('popup.alwaysTranslate')}
       </span>
       <Switch
         checked={isCurrentSiteInPatterns}

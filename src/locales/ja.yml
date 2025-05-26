@@ -9,6 +9,7 @@ popup:
   translate: 翻訳
   showOriginal: 原文を表示
   enabledFloatingButton: フローティングボタンを有効にする
+  alwaysTranslate: このサイトを常に翻訳する
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳

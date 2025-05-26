@@ -9,6 +9,7 @@ popup:
   translate: 翻譯
   showOriginal: 顯示原文
   enabledFloatingButton: 開啟懸浮按鈕
+  alwaysTranslate: 總是翻譯這個網站
   options: 選項
   hover: 滑鼠懸停
   translateParagraph: 來翻譯段落

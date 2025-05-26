@@ -8,7 +8,8 @@ popup:
   read: Read Article
   translate: Translate
   showOriginal: Show Original
-  enabledFloatingButton: Show Floating Button
+  enabledFloatingButton: Show floating button
+  alwaysTranslate: Always translate this site
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
