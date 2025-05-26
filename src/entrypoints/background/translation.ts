@@ -34,7 +34,10 @@ export function translationMessage() {
   onMessage('setEnablePageTranslationOnContentScript', (msg) => {
     const tabId = msg.sender?.tab?.id
     const { enabled } = msg.data
-    setEnabled(tabId, enabled)
+    if (typeof tabId === 'number')
+      setEnabled(tabId, enabled)
+    else
+      logger.info('tabId is not a number', msg)
   })
 
   function setEnabled(tabId: number, enabled: boolean) {
