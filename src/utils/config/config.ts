@@ -1,7 +1,6 @@
 import type { Config } from '@/types/config/config'
 
 import type { APIProviderNames, ProvidersConfig } from '@/types/config/provider'
-import deepmerge from 'deepmerge'
 
 import { configSchema } from '@/types/config/config'
 import {
@@ -25,6 +24,8 @@ export async function initializeConfig() {
   let currentVersion = storedCSchemaVersion ?? 1
 
   if (!config) {
+    logger.info('No config found, using default config')
+    logger.info('Default config:', DEFAULT_CONFIG)
     config = DEFAULT_CONFIG
     currentVersion = CONFIG_SCHEMA_VERSION
   }
@@ -40,9 +41,6 @@ export async function initializeConfig() {
       currentVersion = nextVersion
     }
   }
-
-  // if forget to migrate some new fields, use default config to fill
-  config = deepmerge(DEFAULT_CONFIG, config ?? {})
 
   if (!configSchema.safeParse(config).success) {
     logger.warn('Config is invalid, using default config')

@@ -9,12 +9,14 @@ import { storageAdapter } from './storage-adapter'
 
 export const configAtom = atom<Config>(DEFAULT_CONFIG)
 
+const overwriteMerge = (_target: unknown[], source: unknown[]) => source
+
 export const writeConfigAtom = atom(
   null,
   async (get, set, patch: Partial<Config>) => {
     // ! If we don't use HydrateAtoms, there will be a bug that every time refresh the page, the config will be reset to default
     // ! because we call this function when the page is loaded by extractContent useQuery, that time, configAtom is DEFAULT_CONFIG and the next will be deepmerge(DEFAULT_CONFIG, patch)
-    const next = deepmerge(get(configAtom), patch)
+    const next = deepmerge(get(configAtom), patch, { arrayMerge: overwriteMerge })
     set(configAtom, next) // UI 乐观更新，这会让 react 多一次渲染，因为 react 渲染只有浅比较，前后两个 object 值一样会触发两次渲染
     await storageAdapter.set(CONFIG_STORAGE_KEY, next) // 成功后会调用 onMount 的 callback，设置真正的值，第二次渲染
   },
