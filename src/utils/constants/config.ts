@@ -10,7 +10,7 @@ import { apiProviderNames, pureTranslateProvider, readProviderNames, translatePr
 import { omit, pick } from '@/types/utils'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION = 6
+export const CONFIG_SCHEMA_VERSION = 7
 
 export const MIN_SIDE_CONTENT_WIDTH = 400 // px
 export const DEFAULT_SIDE_CONTENT_WIDTH = 400 // px
@@ -93,6 +93,7 @@ export const DEFAULT_CONFIG: Config = {
     },
     page: {
       range: 'main',
+      autoTranslatePatterns: ['news.ycombinator.com'],
     },
   },
   floatingButton: {

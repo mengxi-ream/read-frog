@@ -1,6 +1,8 @@
-export const description = 'Add custom model configuration'
+import type { Config } from '@/types/config/config'
 
-export const configExample = {
+export const description = 'Add autoTranslate config'
+
+export const configExample: Config = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',
@@ -10,12 +12,19 @@ export const configExample = {
   providersConfig: {
     openai: {
       apiKey: 'sk-1234567890',
+      baseURL: 'https://api.openai.com/v1',
     },
     deepseek: {
       apiKey: undefined,
+      baseURL: 'https://api.deepseek.com/v1',
     },
     openrouter: {
       apiKey: undefined,
+      baseURL: 'https://openrouter.ai/api/v1',
+    },
+    ollama: {
+      apiKey: undefined,
+      baseURL: 'http://127.0.0.1:11434/v1',
     },
   },
   read: {
@@ -53,6 +62,11 @@ export const configExample = {
         isCustomModel: false,
         customModel: '',
       },
+      ollama: {
+        model: 'gemma3:1b',
+        isCustomModel: false,
+        customModel: '',
+      },
     },
     node: {
       enabled: true,
@@ -60,6 +74,7 @@ export const configExample = {
     },
     page: {
       range: 'main',
+      autoTranslatePatterns: ['news.ycombinator.com'],
     },
   },
   floatingButton: {

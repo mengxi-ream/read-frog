@@ -1,3 +1,5 @@
+export const description = 'Add pageTranslate config'
+
 export const configExample = {
   language: {
     detectedCode: 'eng',
@@ -32,7 +34,7 @@ export const configExample = {
   },
   floatingButton: {
     enabled: true,
-    position: 0.6,
+    position: 0.66,
   },
   sideContent: {
     width: 400,

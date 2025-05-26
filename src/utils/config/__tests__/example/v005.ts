@@ -1,3 +1,5 @@
+export const description = 'Add base URL configuration'
+
 export const configExample = {
   language: {
     detectedCode: 'eng',

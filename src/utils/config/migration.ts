@@ -1,146 +1,67 @@
-import deepmerge from 'deepmerge'
-
+import type { MigrationFunction, MigrationModule } from './migration-scripts/types'
 import { CONFIG_SCHEMA_VERSION } from '../constants/config'
 
 export const LATEST_SCHEMA_VERSION = CONFIG_SCHEMA_VERSION
 
-export const migrations: Record<number, (config: any) => any> = {
-  2: (oldConfig) => {
-    return deepmerge(oldConfig, {
-      pageTranslate: {
-        range: 'mainContent',
-      },
-    })
-  },
-  3: (oldConfig) => {
-    const {
-      manualTranslate,
-      pageTranslate,
-      ...restConfig
-    } = oldConfig
+// 自动发现和导入所有迁移脚本
+async function discoverMigrations(): Promise<Record<number, MigrationFunction>> {
+  const migrations: Record<number, MigrationFunction> = {}
 
-    if (pageTranslate.range === 'mainContent') {
-      pageTranslate.range = 'main'
-    }
+  // 使用动态导入来加载迁移脚本
+  const migrationModules = import.meta.glob('./migration-scripts/v*.ts')
 
-    return deepmerge(restConfig, {
-      translate: {
-        provider: 'microsoft',
-        node: manualTranslate,
-        page: pageTranslate,
-      },
-    })
-  },
-  4: (oldConfig) => {
-    const oldProvidersConfig = oldConfig.providersConfig
-    const transferredProvidersConfig = Object.fromEntries(
-      Object.entries(oldProvidersConfig).map(([key, value]) => {
-        return [key, {
-          apiKey: (value as any).apiKey,
-        }]
-      }),
-    )
+  for (const [path, importFn] of Object.entries(migrationModules)) {
+    try {
+      // 从文件路径提取版本号
+      const match = path.match(/v(\d{3})-to-v(\d{3})\.ts$/)
+      if (match) {
+        const toVersion = Number.parseInt(match[2], 10)
+        const module = await importFn() as MigrationModule
+        const migrationFn = module.migrate
 
-    const newProvidersConfig = {
-      ...transferredProvidersConfig,
-      openrouter: {
-        apiKey: undefined,
-      },
-    }
-
-    const transferredModelsConfig = Object.fromEntries(
-      Object.entries(oldProvidersConfig).map(([key, value]) => {
-        return [key, {
-          model: (value as any).model,
-          isCustomModel: (value as any).isCustomModel,
-          customModel: (value as any).customModel,
-        }]
-      }),
-    )
-    const newReadConfig = {
-      provider: oldConfig.provider,
-      models: transferredModelsConfig,
-    }
-    const newTranslateModelsConfig = {
-      ...transferredModelsConfig,
-      openrouter: {
-        model: 'meta-llama/llama-4-maverick:free',
-        isCustomModel: false,
-        customModel: '',
-      },
-    }
-
-    const newTranslateConfig = {
-      provider: oldConfig.translate.provider,
-      models: {
-        google: null,
-        microsoft: null,
-        ...newTranslateModelsConfig,
-      },
-      node: oldConfig.translate.node,
-      page: oldConfig.translate.page,
-    }
-
-    const { language, floatingButton, sideContent, ..._restConfig } = oldConfig
-    return {
-      language,
-      floatingButton,
-      sideContent,
-      providersConfig: newProvidersConfig,
-      read: newReadConfig,
-      translate: newTranslateConfig,
-    }
-  },
-  5: (oldConfig) => {
-    const oldProvidersConfig = oldConfig.providersConfig
-    const newProvidersConfig = Object.fromEntries(
-      (Object.entries(oldProvidersConfig) as [string, { apiKey?: string }][]).map(([key, value]) => {
-        const baseURLs = {
-          openai: 'https://api.openai.com/v1',
-          deepseek: 'https://api.deepseek.com/v1',
-          openrouter: 'https://openrouter.ai/api/v1',
+        if (typeof migrationFn === 'function') {
+          migrations[toVersion] = migrationFn
         }
-        return [key, {
-          ...value,
-          baseURL: baseURLs[key as keyof typeof baseURLs],
-        }]
-      }),
-    )
+        else {
+          console.warn(`Migration file ${path} does not export a valid migrate function`)
+        }
+      }
+      else {
+        console.warn(`Migration file ${path} does not follow naming convention v{from}-to-v{to}.ts`)
+      }
+    }
+    catch (error) {
+      console.error(`Failed to load migration from ${path}:`, error)
+    }
+  }
 
-    return {
-      ...oldConfig,
-      providersConfig: newProvidersConfig,
-    }
-  },
-  6: (oldConfig) => {
-    // 添加 Ollama 提供商配置
-    const oldProvidersConfig = oldConfig.providersConfig
-    const newProvidersConfig = {
-      ...oldProvidersConfig,
-      ollama: {
-        apiKey: undefined,
-        baseURL: 'http://127.0.0.1:11434/v1',
-      },
-    }
+  return migrations
+}
 
-    // 添加 Ollama 翻译模型配置
-    const oldTranslateModels = oldConfig.translate.models
-    const newTranslateModels = {
-      ...oldTranslateModels,
-      ollama: {
-        model: 'gemma3:1b',
-        isCustomModel: false,
-        customModel: '',
-      },
-    }
+// 缓存迁移函数以避免重复加载
+let _migrationsCache: Record<number, MigrationFunction> | null = null
 
-    return {
-      ...oldConfig,
-      providersConfig: newProvidersConfig,
-      translate: {
-        ...oldConfig.translate,
-        models: newTranslateModels,
-      },
-    }
-  },
+// 获取所有可用的迁移函数
+export async function getMigrations(): Promise<Record<number, MigrationFunction>> {
+  if (!_migrationsCache) {
+    _migrationsCache = await discoverMigrations()
+  }
+  return _migrationsCache
+}
+
+// 执行单个迁移
+export async function runMigration(version: number, config: any): Promise<any> {
+  const migrations = await getMigrations()
+  const migrationFn = migrations[version]
+
+  if (!migrationFn) {
+    throw new Error(`Migration function for version ${version} not found`)
+  }
+
+  return migrationFn(config)
+}
+
+// 清除迁移缓存（主要用于测试）
+export function clearMigrationsCache(): void {
+  _migrationsCache = null
 }

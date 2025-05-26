@@ -1,6 +1,6 @@
-import type { Config } from '@/types/config/config'
+export const description = 'Add Ollama provider configuration'
 
-export const configExample: Config = {
+export const configExample = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',

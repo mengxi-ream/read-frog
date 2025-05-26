@@ -1,20 +1,19 @@
+import type { Config } from '@/types/config/config'
+import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+
 export function translationMessage() {
   const tabPageTranslationState = new Map<number, { enabled: boolean, ports: Browser.runtime.Port[] }>()
 
-  // 定义需要默认启用翻译的URL正则模式
-  const AUTO_ENABLE_URL_PATTERNS = [
-    /^https?:\/\/.*\.wikipedia\.org\//, // Wikipedia
-    /^https?:\/\/reddit\.com\//, // Reddit
-    /^https?:\/\/stackoverflow\.com\//, // Stack Overflow
-    /^https?:\/\/github\.com\//, // GitHub
-    // 可以根据需要添加更多模式
-  ]
+  async function shouldAutoEnable(url: string): Promise<boolean> {
+    const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+    const autoTranslatePatterns = config?.translate.page.autoTranslatePatterns
+    if (!autoTranslatePatterns)
+      return false
 
-  function shouldAutoEnable(url: string): boolean {
-    return AUTO_ENABLE_URL_PATTERNS.some(pattern => pattern.test(url))
+    return autoTranslatePatterns.some(pattern => url.toLowerCase().includes(pattern.toLowerCase()))
   }
 
-  browser.runtime.onConnect.addListener((port) => {
+  browser.runtime.onConnect.addListener(async (port) => {
     if (port.name !== 'translation') {
       return
     }
@@ -26,7 +25,7 @@ export function translationMessage() {
 
     const entry = tabPageTranslationState.get(tabId) ?? { enabled: false, ports: [] }
 
-    if (entry.ports.length === 0 && tabUrl && shouldAutoEnable(tabUrl)) {
+    if (entry.ports.length === 0 && tabUrl && await shouldAutoEnable(tabUrl)) {
       entry.enabled = true
     }
 

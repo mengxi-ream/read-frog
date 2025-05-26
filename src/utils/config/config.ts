@@ -9,7 +9,7 @@ import {
   CONFIG_STORAGE_KEY,
   DEFAULT_CONFIG,
 } from '../constants/config'
-import { migrations } from './migration'
+import { runMigration } from './migration'
 
 // eslint-disable-next-line import/no-mutable-exports
 export let globalConfig: Config | null = null
@@ -31,13 +31,14 @@ export async function initializeConfig() {
 
   while (currentVersion < CONFIG_SCHEMA_VERSION) {
     const nextVersion = currentVersion + 1
-    const migrationFn = migrations[nextVersion]
-    if (typeof migrationFn === 'function') {
-      config = migrationFn(config)
+    try {
+      config = await runMigration(nextVersion, config)
       currentVersion = nextVersion
     }
-
-    currentVersion = nextVersion
+    catch (error) {
+      console.error(`Migration to version ${nextVersion} failed:`, error)
+      currentVersion = nextVersion
+    }
   }
 
   // if forget to migrate some new fields, use default config to fill

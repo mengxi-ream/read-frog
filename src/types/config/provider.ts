@@ -143,6 +143,7 @@ export const translateConfigSchema = z.object({
   }),
   page: z.object({
     range: pageTranslateRangeSchema,
+    autoTranslatePatterns: z.array(z.string()),
   }),
 })
 export type TranslateConfig = z.infer<typeof translateConfigSchema>

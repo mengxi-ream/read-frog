@@ -9,9 +9,9 @@ export const configExample = {
   providersConfig: {
     openai: {
       apiKey: 'sk-1234567890',
-      model: 'gpt-4.1-mini',
-      isCustomModel: false,
-      customModel: '',
+      model: 'gpt-4o-mini',
+      isCustomModel: true,
+      customModel: 'gpt-4.1-nano',
     },
     deepseek: {
       apiKey: undefined,
