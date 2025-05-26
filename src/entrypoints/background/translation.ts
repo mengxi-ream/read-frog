@@ -37,7 +37,7 @@ export function translationMessage() {
     if (typeof tabId === 'number')
       setEnabled(tabId, enabled)
     else
-      logger.info('tabId is not a number', msg)
+      logger.error('tabId is not a number', msg)
   })
 
   function setEnabled(tabId: number, enabled: boolean) {
