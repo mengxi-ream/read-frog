@@ -9,32 +9,24 @@ import { isPageTranslatedAtom } from '@/utils/atoms/translation'
 
 import { hasSetAPIKey } from '@/utils/config/config'
 import { removeAllTranslatedWrapperNodes, translatePage } from '@/utils/host/translate'
+import { translationPortAtom } from '../../atoms'
 import HiddenButton from './components/hidden-button'
 
 export default function TranslateButton() {
   const [isPageTranslated, setIsPageTranslated] = useAtom(isPageTranslatedAtom)
   const providersConfig = useAtomValue(configFields.providersConfig)
   const translateConfig = useAtomValue(configFields.translate)
+  const port = useAtomValue(translationPortAtom)
 
   useEffect(() => {
-    const removeListener = onMessage(
-      'setIsPageTranslatedOnSideContent',
-      async (message) => {
-        if (message.data.isPageTranslated) {
-          translatePage()
-          setIsPageTranslated(true)
-        }
-        else {
-          removeAllTranslatedWrapperNodes()
-          setIsPageTranslated(false)
-        }
-      },
-    )
-
-    return () => {
-      removeListener()
-    }
-  }, [setIsPageTranslated])
+    if (!port)
+      return
+    port.onMessage.addListener((msg) => {
+      if (msg.type === 'STATUS_PUSH') {
+        setIsPageTranslated(msg.enabled ?? false)
+      }
+    })
+  }, [port, setIsPageTranslated])
 
   return (
     <HiddenButton
@@ -51,15 +43,15 @@ export default function TranslateButton() {
         if (!isPageTranslated) {
           translatePage()
           setIsPageTranslated(true)
-          sendMessage('uploadIsPageTranslated', {
-            isPageTranslated: true,
+          sendMessage('setEnablePageTranslationOnContentScript', {
+            enabled: true,
           })
         }
         else {
           removeAllTranslatedWrapperNodes()
           setIsPageTranslated(false)
-          sendMessage('uploadIsPageTranslated', {
-            isPageTranslated: false,
+          sendMessage('setEnablePageTranslationOnContentScript', {
+            enabled: false,
           })
         }
       }}

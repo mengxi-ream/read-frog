@@ -34,11 +34,13 @@ export default function TranslateButton({ className }: { className?: string }) {
           return
         }
       }
-      setIsPageTranslated(prev => !prev)
-      sendMessage('updateIsPageTranslated', {
+
+      sendMessage('setEnablePageTranslation', {
         tabId: currentTab.id,
-        isPageTranslated: !isPageTranslated,
+        enabled: !isPageTranslated,
       })
+
+      setIsPageTranslated(prev => !prev)
     }
   }
 

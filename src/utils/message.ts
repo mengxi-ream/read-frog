@@ -3,20 +3,20 @@ import { defineExtensionMessaging } from '@webext-core/messaging'
 
 interface ProtocolMap {
   openOptionsPage: () => void
-  getIsPageTranslated: (data: { tabId: number }) => boolean | undefined
-  uploadIsPageTranslated: (data: { isPageTranslated: boolean }) => void
-  updateIsPageTranslated: (data: {
-    tabId: number
-    isPageTranslated: boolean
-  }) => void
-  setIsPageTranslatedOnSideContent: (data: { isPageTranslated: boolean }) => void
+  // translation state
+  getEnablePageTranslation: (data: { tabId: number }) => boolean | undefined
+  setEnablePageTranslation: (data: { tabId: number, enabled: boolean }) => void
+  setEnablePageTranslationOnContentScript: (data: { enabled: boolean }) => void
+  // read article
   readArticle: () => void
   popupRequestReadArticle: (data: { tabId: number }) => void
+  // user guide
   pinStateChanged: (data: { isPinned: boolean }) => void
   getPinState: () => boolean
   returnPinState: (data: { isPinned: boolean }) => void
   setTargetLanguage: (data: { langCodeISO6393: LangCodeISO6393 }) => void
   getTargetLanguage: () => LangCodeISO6393 | undefined
+  testMessage: (data: { message: string }) => string
 }
 
 export const { sendMessage, onMessage }

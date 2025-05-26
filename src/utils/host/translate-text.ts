@@ -50,7 +50,7 @@ export async function translateText(sourceText: string) {
     const [, extracted = text] = text.match(/<\/think>([\s\S]*)/) || []
     translatedText = extracted
   }
-  translatedText = translatedText.trim().replace(/\s+/g, '')
+  translatedText = translatedText.trim()
   // Compare cleaned versions to determine if translation is the same
   return cleanSourceText === translatedText ? '' : translatedText
 }

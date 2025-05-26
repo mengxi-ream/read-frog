@@ -11,12 +11,19 @@ export default defineContentScript({
     // eruda.init()
     registerTranslationTriggers()
 
+    const port = browser.runtime.connect({ name: 'translation' })
     const manager = new PageTranslationManager({
       root: null,
       rootMargin: '1000px',
       threshold: 0.1,
     })
 
-    manager.start()
+    port.onMessage.addListener((msg) => {
+      if (msg.type !== 'STATUS_PUSH')
+        return
+      if (msg.enabled === manager.isActive)
+        return
+      msg.enabled ? manager.start() : manager.stop()
+    })
   },
 })

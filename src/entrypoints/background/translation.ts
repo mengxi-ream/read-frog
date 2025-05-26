@@ -1,31 +1,48 @@
-const isPageTranslatedMap = new Map<number, boolean>()
-
 export function translationMessage() {
-  onMessage('getIsPageTranslated', (message) => {
-    return isPageTranslatedMap.get(message.data.tabId)
+  const tabPageTranslationState = new Map<number, { enabled: boolean, ports: Browser.runtime.Port[] }>()
+
+  browser.runtime.onConnect.addListener((port) => {
+    const tabId = port.sender?.tab?.id
+    if (tabId == null)
+      return
+
+    const entry = tabPageTranslationState.get(tabId) ?? { enabled: false, ports: [] }
+    entry.ports.push(port)
+    tabPageTranslationState.set(tabId, entry)
+
+    port.postMessage({ type: 'STATUS_PUSH', enabled: entry.enabled })
+
+    port.onDisconnect.addListener(() => {
+      const left = entry.ports.filter(p => p !== port)
+      if (left.length)
+        entry.ports = left
+      else tabPageTranslationState.delete(tabId)
+    })
   })
 
-  onMessage('updateIsPageTranslated', (message) => {
-    isPageTranslatedMap.set(message.data.tabId, message.data.isPageTranslated)
-    sendMessage(
-      'setIsPageTranslatedOnSideContent',
-      {
-        isPageTranslated: message.data.isPageTranslated,
-      },
-      message.data.tabId,
-    )
+  onMessage('getEnablePageTranslation', (msg) => {
+    const { tabId } = msg.data
+    const enabled = tabPageTranslationState.get(tabId)?.enabled
+    return enabled
   })
 
-  onMessage('uploadIsPageTranslated', async (message) => {
-    const tabId = message.sender.tab.id
-    isPageTranslatedMap.set(tabId, message.data.isPageTranslated)
+  onMessage('setEnablePageTranslation', (msg) => {
+    const { tabId, enabled } = msg.data
+    setEnabled(tabId, enabled)
   })
 
-  onMessage('popupRequestReadArticle', async (message) => {
-    sendMessage('readArticle', undefined, message.data.tabId)
+  onMessage('setEnablePageTranslationOnContentScript', (msg) => {
+    const tabId = msg.sender?.tab?.id
+    const { enabled } = msg.data
+    setEnabled(tabId, enabled)
   })
 
-  browser.tabs.onRemoved.addListener((tabId) => {
-    isPageTranslatedMap.delete(tabId)
-  })
+  function setEnabled(tabId: number, enabled: boolean) {
+    const entry = tabPageTranslationState.get(tabId) ?? { enabled, ports: [] }
+    entry.enabled = enabled
+    tabPageTranslationState.set(tabId, entry)
+
+    // 广播给本 tab 所有 content scripts
+    entry.ports.forEach(p => p.postMessage({ type: 'STATUS_PUSH', enabled }))
+  }
 }

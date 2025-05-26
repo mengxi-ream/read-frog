@@ -101,6 +101,10 @@ export class PageTranslationManager {
     this.id = crypto.randomUUID()
     this.isAutoTranslated = true
 
+    sendMessage('setEnablePageTranslationOnContentScript', {
+      enabled: true,
+    })
+
     // Listen to existing elements when they enter the viewpoint
     this.intersectionObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {
@@ -165,6 +169,10 @@ export class PageTranslationManager {
     removeAllTranslatedWrapperNodes()
 
     this.id = null
+
+    sendMessage('setEnablePageTranslationOnContentScript', {
+      enabled: false,
+    })
   }
 
   private observerTopLevelParagraphs(container: HTMLElement): void {

@@ -47,7 +47,7 @@ async function initApp() {
   let isPageTranslated: boolean = false
   if (tabId) {
     isPageTranslated
-      = (await sendMessage('getIsPageTranslated', {
+      = (await sendMessage('getEnablePageTranslation', {
         tabId,
       })) ?? false
   }

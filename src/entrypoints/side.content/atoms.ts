@@ -9,6 +9,9 @@ export const progressAtom = atom({
   total: 0,
 })
 
+// Translation port atom for browser.runtime.connect
+export const translationPortAtom = atom<Browser.runtime.Port | null>(null)
+
 // export const explainAtom = atomWithMutation(() => ({
 //   mutationKey: ["explainArticle"],
 //   mutationFn: mutationFn,

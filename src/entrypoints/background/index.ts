@@ -29,6 +29,5 @@ export default defineBackground(() => {
   })
 
   newUserGuide()
-
   translationMessage()
 })
