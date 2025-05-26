@@ -7,6 +7,7 @@ interface ProtocolMap {
   getEnablePageTranslation: (data: { tabId: number }) => boolean | undefined
   setEnablePageTranslation: (data: { tabId: number, enabled: boolean }) => void
   setEnablePageTranslationOnContentScript: (data: { enabled: boolean }) => void
+  resetPageTranslationOnNavigation: (data: { url: string }) => void
   // read article
   readArticle: () => void
   popupRequestReadArticle: (data: { tabId: number }) => void

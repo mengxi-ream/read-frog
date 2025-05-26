@@ -72,6 +72,16 @@ export function translationMessage() {
       logger.error('tabId is not a number', msg)
   })
 
+  onMessage('resetPageTranslationOnNavigation', async (msg) => {
+    const tabId = msg.sender?.tab?.id
+    const { url } = msg.data
+    if (typeof tabId === 'number') {
+      // 检查新 URL 是否应该自动启用翻译
+      const shouldEnable = await shouldAutoEnable(url)
+      setEnabled(tabId, shouldEnable)
+    }
+  })
+
   function setEnabled(tabId: number, enabled: boolean) {
     const entry = tabPageTranslationState.get(tabId) ?? { enabled, ports: [] }
     entry.enabled = enabled
