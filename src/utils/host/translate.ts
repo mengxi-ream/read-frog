@@ -173,6 +173,9 @@ function insertTranslatedNodeIntoWrapper(
     // not inline or block, maybe notranslate
     return
   }
+  if (isHTMLElement(targetNode) && targetNode.tagName === 'A') {
+    translatedNode.style.textDecoration = 'underline'
+  }
 
   translatedNode.textContent = translatedText
   translatedWrapperNode.appendChild(translatedNode)
