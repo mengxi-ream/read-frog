@@ -176,10 +176,16 @@ export class PageTranslationManager {
   }
 
   private observerTopLevelParagraphs(container: HTMLElement): void {
-    if (!this.id || !this.intersectionObserver)
+    const observer = this.intersectionObserver
+    if (!this.id || !observer)
       return
 
     walkAndLabelElement(container, this.id)
+    // if container itself has paragraph and the id
+    if (container.hasAttribute('data-read-frog-paragraph') && container.getAttribute('data-read-frog-walked') === this.id) {
+      observer.observe(container)
+      return
+    }
     const paragraphs = Array.from(container.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(this.id)}"]`))
     const topLevelParagraphs = paragraphs.filter((el) => {
       const ancestor = el.parentElement?.closest('[data-read-frog-paragraph]')
@@ -188,7 +194,7 @@ export class PageTranslationManager {
       //  • the ancestor is *not* inside container
       return !ancestor || !container.contains(ancestor)
     })
-    topLevelParagraphs.forEach(el => this.intersectionObserver!.observe(el))
+    topLevelParagraphs.forEach(el => observer.observe(el))
   }
 
   private registerPageTranslationTriggers() {
