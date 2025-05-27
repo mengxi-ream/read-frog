@@ -20,32 +20,98 @@
 }
 
 .read-frog-spinner {
-  border: 3px solid var(--read-frog-muted); /* 轨迹灰色 */
-  border-top: 3px solid var(--read-frog-primary); /* 主色调，首次翻译蓝色、缓存应改为绿色 */
+  border: 3px solid var(--read-frog-muted);
+  border-top: 3px solid var(--read-frog-primary);
   border-radius: 50%;
   width: 6px;
   height: 6px;
   margin: 0 4px;
   animation: spin 1s linear infinite;
   display: inline-block;
-  vertical-align: middle; /* 添加垂直居中对齐 */
-  box-sizing: content-box; /* 确保在所有网站上使用相同的盒模型 */
+  vertical-align: middle;
+  box-sizing: content-box;
 }
 
 .read-frog-translated-content-wrapper {
   word-break: break-word;
   user-select: text;
+  position: static !important;
+  display: block !important;
+  clear: both !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  box-sizing: border-box !important;
+  float: none !important;
+  overflow: visible !important;
 }
 
 .read-frog-translated-block-content {
-  display: inline-block;
-  margin: 8px 0 !important; /* 上下边距设置为8px，并强制覆盖其他样式 */
-  color: inherit; /* 保持文本颜色与周围文本一致 */
+  display: block !important;
+  margin: 8px 0 !important;
+  color: inherit;
   font-family: inherit;
+  font-style: normal !important;
+  position: static !important;
+  clear: both !important;
+  float: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  word-wrap: break-word !important;
+  word-break: normal !important;
 }
 
 .read-frog-translated-inline-content {
-  display: inline-block;
-  color: inherit; /* 保持文本颜色与周围文本一致 */
+  display: block !important;
+  color: inherit;
   font-family: inherit;
+  font-style: normal !important;
+  position: static !important;
+  clear: both !important;
+  float: none !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  word-wrap: break-word !important;
+  word-break: normal !important;
+}
+
+.read-frog-no-truncate {
+  overflow: visible !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  max-width: none !important;
+  max-height: none !important;
+  font-style: normal !important;
+  width: 100% !important;
+  display: block !important;
+}
+
+@media (min-width: 0px) {
+  [data-domain*='medium.com'] .read-frog-translated-block-content,
+  [href*='medium.com'] .read-frog-translated-block-content,
+  [data-domain*='medium.com'] .read-frog-translated-inline-content,
+  [href*='medium.com'] .read-frog-translated-inline-content {
+    max-width: 100% !important;
+    width: 100% !important;
+    overflow: visible !important;
+    white-space: normal !important;
+    text-overflow: clip !important;
+    position: static !important;
+    display: block !important;
+    float: none !important;
+    font-style: normal !important;
+    font-weight: inherit !important;
+    word-wrap: break-word !important;
+    word-break: normal !important;
+    transform: none !important;
+  }
 }

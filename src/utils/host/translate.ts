@@ -72,7 +72,6 @@ export function removeAllTranslatedWrapperNodes(
  */
 export async function translateNode(node: TransNode, toggle: boolean = false) {
   try {
-    // prevent duplicate translation
     if (translatingNodes.has(node))
       return
     translatingNodes.add(node)
@@ -92,19 +91,31 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
     if (!textContent)
       return
 
-    const translatedWrapperNode = document.createElement('span')
+    const translatedWrapperNode = document.createElement('div')
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    translatedWrapperNode.style.display = 'block'
+    translatedWrapperNode.style.position = 'static'
+    translatedWrapperNode.style.clear = 'both'
+    translatedWrapperNode.style.width = '100%'
+    translatedWrapperNode.style.maxWidth = '100%'
+    translatedWrapperNode.style.overflow = 'visible'
+    translatedWrapperNode.style.whiteSpace = 'normal'
+    translatedWrapperNode.style.boxSizing = 'border-box'
+
     const spinner = document.createElement('span')
     spinner.className = 'read-frog-spinner'
     translatedWrapperNode.appendChild(spinner)
+
     if (isHTMLElement(targetNode)) {
       targetNode.appendChild(translatedWrapperNode)
     }
     else if (isTextNode(targetNode)) {
-      targetNode.parentNode?.insertBefore(
-        translatedWrapperNode,
-        targetNode.nextSibling,
-      )
+      if (targetNode.parentNode) {
+        targetNode.parentNode.insertBefore(
+          translatedWrapperNode,
+          targetNode.nextSibling,
+        )
+      }
     }
 
     let translatedText: string | undefined
@@ -135,15 +146,19 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
 
 function findExistedTranslatedWrapper(node: TransNode) {
   if (isTextNode(node)) {
-    if (
-      node.nextSibling && isHTMLElement(node.nextSibling)
-      && node.nextSibling.classList.contains(NOTRANSLATE_CLASS)
-    ) {
-      return node.nextSibling
+    let nextSibling = node.nextSibling
+    while (nextSibling) {
+      if (isHTMLElement(nextSibling) && nextSibling.classList.contains(NOTRANSLATE_CLASS)) {
+        return nextSibling
+      }
+      nextSibling = nextSibling.nextSibling
     }
   }
   else if (isHTMLElement(node)) {
-    return node.querySelector(`:scope > .${NOTRANSLATE_CLASS}`)
+    const wrappers = node.querySelectorAll(`.${NOTRANSLATE_CLASS}.${CONTENT_WRAPPER_CLASS}`)
+    if (wrappers.length > 0) {
+      return wrappers[0] as HTMLElement
+    }
   }
   return null
 }
@@ -158,6 +173,16 @@ function insertTranslatedNodeIntoWrapper(
     = isHTMLElement(targetNode)
       && FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName)
 
+  translatedWrapperNode.style.display = 'block'
+  translatedWrapperNode.style.position = 'static'
+  translatedWrapperNode.style.clear = 'both'
+  translatedWrapperNode.style.width = '100%'
+  translatedWrapperNode.style.maxWidth = '100%'
+  translatedWrapperNode.style.overflow = 'visible'
+  translatedWrapperNode.style.boxSizing = 'border-box'
+  translatedWrapperNode.style.margin = '0'
+  translatedWrapperNode.style.padding = '0'
+
   if (isForceInlineTranslationElement || isInlineTransNode(targetNode)) {
     const spaceNode = document.createElement('span')
     spaceNode.textContent = '  '
@@ -170,11 +195,28 @@ function insertTranslatedNodeIntoWrapper(
     translatedNode.className = `${NOTRANSLATE_CLASS} ${BLOCK_CONTENT_CLASS}`
   }
   else {
-    // not inline or block, maybe notranslate
     return
   }
 
   translatedNode.textContent = translatedText
+  translatedNode.style.display = 'block'
+  translatedNode.style.position = 'static'
+  translatedNode.style.float = 'none'
+  translatedNode.style.clear = 'both'
+  translatedNode.style.width = '100%'
+  translatedNode.style.maxWidth = '100%'
+  translatedNode.style.overflow = 'visible'
+  translatedNode.style.whiteSpace = 'normal'
+  translatedNode.style.textOverflow = 'clip'
+  translatedNode.style.wordWrap = 'break-word'
+  translatedNode.style.wordBreak = 'normal'
+  translatedNode.style.boxSizing = 'border-box'
+
+  if (window.location.hostname.includes('medium.com')) {
+    translatedNode.style.fontStyle = 'normal'
+    translatedNode.style.transform = 'none'
+  }
+
   translatedWrapperNode.appendChild(translatedNode)
 }
 
