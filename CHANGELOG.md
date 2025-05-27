@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.8.1
+
+### Patch Changes
+
+- [#82](https://github.com/mengxi-ream/read-frog/pull/82) [`91bab3e`](https://github.com/mengxi-ream/read-frog/commit/91bab3eef28d308dfb705ccd0779dfaaddac9b36) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - test ci release action
+
 ## 0.8.0
 
 ### Minor Changes
