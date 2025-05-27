@@ -5,16 +5,18 @@ on:
     types:
       - opened
       - edited
-      - reopened
+      - synchronize
 
 jobs:
   main:
     name: Validate PR title
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: read
+      pull-requests: write
+      contents: read
     steps:
-      - uses: amannn/action-semantic-pull-request@v5
+      - name: Validate PR title
+        uses: amannn/action-semantic-pull-request@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -32,3 +34,56 @@ jobs:
             revert
             i18n
             ai
+
+      - name: Auto Label PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const title = context.payload.pull_request.title;
+            const prNumber = context.payload.pull_request.number;
+
+            // Mapping from commit type to label
+            const typeToLabel = {
+              'feat': 'feat',
+              'fix': 'fix',
+              'docs': 'docs',
+              'style': 'style',
+              'refactor': 'refactor',
+              'perf': 'perf',
+              'test': 'test',
+              'build': 'build',
+              'ci': 'ci',
+              'chore': 'chore',
+              'revert': 'chore',
+              'i18n': 'i18n',
+              'ai': 'ai'
+            };
+
+            // Extract type from PR title (format: "type: description" or "type(scope): description")
+            const match = title.match(/^(\w+)(?:\([^)]*\))?:\s/);
+
+            if (match) {
+              const commitType = match[1];
+              const label = typeToLabel[commitType];
+
+              if (label) {
+                console.log(`Adding label "${label}" to PR #${prNumber} based on type "${commitType}"`);
+
+                try {
+                  await github.rest.issues.addLabels({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: prNumber,
+                    labels: [label]
+                  });
+
+                  console.log(`Successfully added label "${label}"`);
+                } catch (error) {
+                  console.error(`Failed to add label: ${error.message}`);
+                }
+              } else {
+                console.log(`No label mapping found for commit type "${commitType}"`);
+              }
+            } else {
+              console.log(`PR title "${title}" doesn't match conventional commit format`);
+            }
