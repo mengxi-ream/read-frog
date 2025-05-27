@@ -9,7 +9,7 @@ on:
 
 jobs:
   main:
-    name: Validate PR title
+    name: Validate and Label PR
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -54,32 +54,44 @@ jobs:
               'build': 'build',
               'ci': 'ci',
               'chore': 'chore',
-              'revert': 'chore',
+              'revert': 'revert',
               'i18n': 'i18n',
               'ai': 'ai'
             };
 
             // Extract type from PR title (format: "type: description" or "type(scope): description")
-            const match = title.match(/^(\w+)(?:\([^)]*\))?:\s/);
+            const match = title.match(/^(\w+)(?:\([^)]*\))?(!)?:\s/);
 
             if (match) {
               const commitType = match[1];
+              const hasBreakingMark = match[2] === '!';
               const label = typeToLabel[commitType];
+
+              // Check for breaking change indicator
+              const isBreaking = hasBreakingMark || title.toLowerCase().includes('breaking change');
 
               if (label) {
                 console.log(`Adding label "${label}" to PR #${prNumber} based on type "${commitType}"`);
+
+                const labelsToAdd = [label];
+
+                // Add breaking-change label if it's a breaking change
+                if (isBreaking) {
+                  labelsToAdd.push('breaking-change');
+                  console.log(`Also adding "breaking-change" label due to breaking change indicator`);
+                }
 
                 try {
                   await github.rest.issues.addLabels({
                     owner: context.repo.owner,
                     repo: context.repo.repo,
                     issue_number: prNumber,
-                    labels: [label]
+                    labels: labelsToAdd
                   });
 
-                  console.log(`Successfully added label "${label}"`);
+                  console.log(`Successfully added labels: ${labelsToAdd.join(', ')}`);
                 } catch (error) {
-                  console.error(`Failed to add label: ${error.message}`);
+                  console.error(`Failed to add labels: ${error.message}`);
                 }
               } else {
                 console.log(`No label mapping found for commit type "${commitType}"`);
