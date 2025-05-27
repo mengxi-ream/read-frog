@@ -45,7 +45,8 @@
 }
 
 .read-frog-translated-inline-content {
-  display: inline-block;
-  color: inherit; /* 保持文本颜色与周围文本一致 */
+  display: inline;
+  color: inherit;
   font-family: inherit;
+  text-decoration: inherit;
 }
