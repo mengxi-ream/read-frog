@@ -24,8 +24,6 @@ export async function initializeConfig() {
   let currentVersion = storedCSchemaVersion ?? 1
 
   if (!config) {
-    logger.info('No config found, using default config')
-    logger.info('Default config:', DEFAULT_CONFIG)
     config = DEFAULT_CONFIG
     currentVersion = CONFIG_SCHEMA_VERSION
   }
