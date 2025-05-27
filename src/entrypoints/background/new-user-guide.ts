@@ -1,13 +1,9 @@
-import type { Config } from '@/types/config/config'
-import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 import { OFFICIAL_SITE_URL_PATTERNS } from '@/utils/constants/site'
 
 let lastIsPinned = false
 
 export function newUserGuide() {
-  guideSetTargetLanguage()
   guidePinExtension()
-  guideGetTargetLanguage()
 }
 
 export async function guidePinExtension() {
@@ -36,29 +32,5 @@ async function checkPinnedAndNotify() {
     for (const tab of tabs) {
       sendMessage('pinStateChanged', { isPinned: isOnToolbar }, tab.id)
     }
-  })
-}
-
-export async function guideSetTargetLanguage() {
-  onMessage('setTargetLanguage', async (msg) => {
-    logger.log('setTargetLanguage', msg)
-    const { langCodeISO6393 } = msg.data
-    const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
-    if (!config)
-      return
-    await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
-      ...config,
-      language: {
-        ...config.language,
-        targetCode: langCodeISO6393,
-      },
-    })
-  })
-}
-
-export async function guideGetTargetLanguage() {
-  onMessage('getTargetLanguage', async () => {
-    const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
-    return config?.language.targetCode
   })
 }

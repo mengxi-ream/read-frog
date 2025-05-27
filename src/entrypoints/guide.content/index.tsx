@@ -1,5 +1,7 @@
+import type { Config } from '@/types/config/config'
 import { kebabCase } from 'case-anything'
 import { APP_NAME } from '@/utils/constants/app'
+import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 import { OFFICIAL_SITE_URL_PATTERNS } from '@/utils/constants/site'
 
 export default defineContentScript({
@@ -25,7 +27,13 @@ export default defineContentScript({
       const { source, type } = e.data || {}
       if (source === 'read-frog-page' && type === 'setTargetLanguage') {
         const langCodeISO6393 = e.data.langCodeISO6393 ?? 'eng'
-        await sendMessage('setTargetLanguage', { langCodeISO6393 })
+        const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+        if (!config)
+          return
+        await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
+          ...config,
+          language: { ...config.language, targetCode: langCodeISO6393 },
+        })
       }
     })
 
@@ -34,7 +42,8 @@ export default defineContentScript({
         return
       const { source, type } = e.data || {}
       if (source === 'read-frog-page' && type === 'getTargetLanguage') {
-        const targetLanguage = await sendMessage('getTargetLanguage', undefined)
+        const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+        const targetLanguage = config?.language.targetCode
         window.postMessage({ source: `${kebabCase(APP_NAME)}-ext`, type: 'getTargetLanguage', data: { targetLanguage } }, '*')
       }
     })
