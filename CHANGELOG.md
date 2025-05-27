@@ -1,5 +1,17 @@
 # read-frog
 
+## 0.8.0
+
+### Minor Changes
+
+- [#72](https://github.com/mengxi-ream/read-frog/pull/72) [`2ef529e`](https://github.com/mengxi-ream/read-frog/commit/2ef529e30cee105754e956b131b2a1a1403867ea) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: enable auto translation for certain url pattern
+
+### Patch Changes
+
+- [#79](https://github.com/mengxi-ream/read-frog/pull/79) [`df67a59`](https://github.com/mengxi-ream/read-frog/commit/df67a59140cdf9287e857fc7862126dec6e917b7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: smash style in class by computed style
+
+- [#80](https://github.com/mengxi-ream/read-frog/pull/80) [`1af9574`](https://github.com/mengxi-ream/read-frog/commit/1af95743b8c64e7c6e12eb3c541e2ff914bb8e9b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: detect added container itself for autotranslate
+
 ## 0.7.5
 
 ### Patch Changes
