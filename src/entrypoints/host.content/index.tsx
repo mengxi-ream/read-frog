@@ -13,7 +13,7 @@ export default defineContentScript({
     // eruda.init()
     registerTranslationTriggers()
 
-    const port = browser.runtime.connect({ name: 'translation' })
+    const port = browser.runtime.connect({ name: 'translation-host.content' })
     const manager = new PageTranslationManager({
       root: null,
       rootMargin: '1000px',
@@ -38,6 +38,7 @@ export default defineContentScript({
     })
 
     port.onMessage.addListener((msg) => {
+      logger.info('onMessage', msg)
       if (msg.type !== 'STATUS_PUSH' || msg.enabled === manager.isActive)
         return
       msg.enabled ? manager.start() : manager.stop()

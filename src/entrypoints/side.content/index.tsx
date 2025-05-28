@@ -122,7 +122,7 @@ export default defineContentScript({
 })
 
 function buildTranslationPort() {
-  const port = browser.runtime.connect({ name: 'translation' })
+  const port = browser.runtime.connect({ name: 'translation-side.content' })
   store.set(translationPortAtom, port)
   port.onMessage.addListener((msg: any) => {
     if (msg.type === 'STATUS_PUSH') {

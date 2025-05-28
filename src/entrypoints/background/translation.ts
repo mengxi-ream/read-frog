@@ -6,7 +6,7 @@ export function translationMessage() {
   const tabPageTranslationState = new Map<number, { enabled: boolean, ports: Browser.runtime.Port[] }>()
 
   browser.runtime.onConnect.addListener(async (port) => {
-    if (port.name !== 'translation') {
+    if (!port.name.startsWith('translation')) {
       return
     }
 
@@ -15,7 +15,10 @@ export function translationMessage() {
     if (tabId == null)
       return
 
-    const entry = tabPageTranslationState.get(tabId) ?? { enabled: false, ports: [] }
+    const entry = ensureKeyInMap(tabPageTranslationState, tabId, () => ({
+      enabled: false,
+      ports: [] as Browser.runtime.Port[],
+    }))
 
     const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
     const autoEnable = config && tabUrl && await shouldAutoEnable(tabUrl, config)
@@ -24,7 +27,6 @@ export function translationMessage() {
     }
 
     entry.ports.push(port)
-    tabPageTranslationState.set(tabId, entry)
 
     port.postMessage({ type: 'STATUS_PUSH', enabled: entry.enabled })
 
@@ -79,9 +81,15 @@ export function translationMessage() {
   })
 
   function setEnabled(tabId: number, enabled: boolean) {
-    const entry = tabPageTranslationState.get(tabId) ?? { enabled, ports: [] }
+    if (!tabPageTranslationState.has(tabId)) {
+      tabPageTranslationState.set(tabId, { enabled, ports: [] })
+    }
+
+    const entry = tabPageTranslationState.get(tabId)
+    if (!entry)
+      return
+
     entry.enabled = enabled
-    tabPageTranslationState.set(tabId, entry)
 
     // 广播给本 tab 所有 content scripts
     entry.ports.forEach(p => p.postMessage({ type: 'STATUS_PUSH', enabled }))

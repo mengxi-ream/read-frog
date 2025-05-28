@@ -19,13 +19,7 @@ export default defineContentScript({
         const isPinned = await sendMessage('getPinState', undefined)
         window.postMessage({ source: `${kebabCase(APP_NAME)}-ext`, type: 'getPinState', data: { isPinned } }, '*')
       }
-    })
-
-    window.addEventListener('message', async (e) => {
-      if (e.source !== window)
-        return
-      const { source, type } = e.data || {}
-      if (source === 'read-frog-page' && type === 'setTargetLanguage') {
+      else if (source === 'read-frog-page' && type === 'setTargetLanguage') {
         const langCodeISO6393 = e.data.langCodeISO6393 ?? 'eng'
         const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
         if (!config)
@@ -35,13 +29,7 @@ export default defineContentScript({
           language: { ...config.language, targetCode: langCodeISO6393 },
         })
       }
-    })
-
-    window.addEventListener('message', async (e) => {
-      if (e.source !== window)
-        return
-      const { source, type } = e.data || {}
-      if (source === 'read-frog-page' && type === 'getTargetLanguage') {
+      else if (source === 'read-frog-page' && type === 'getTargetLanguage') {
         const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
         const targetLanguage = config?.language.targetCode
         window.postMessage({ source: `${kebabCase(APP_NAME)}-ext`, type: 'getTargetLanguage', data: { targetLanguage } }, '*')
