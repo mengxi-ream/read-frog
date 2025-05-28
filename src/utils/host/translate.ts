@@ -4,6 +4,7 @@ import { globalConfig } from '../config/config'
 import { FORCE_INLINE_TRANSLATION_TAGS } from '../constants/dom'
 import {
   BLOCK_CONTENT_CLASS,
+  CONSECUTIVE_INLINE_END_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
@@ -13,7 +14,7 @@ import {
   extractTextContent,
   findNearestBlockNodeAt,
   translateWalkedElement,
-  unwrapDeepestOnlyChild,
+  unwrapDeepestOnlyHTMLChild,
   walkAndLabelElement,
 } from './dom/traversal'
 import { translateText } from './translate-text'
@@ -38,11 +39,11 @@ function shouldTriggerAction(node: Node) {
   return node.textContent?.trim()
 }
 
-export async function translatePage() {
+export async function hideOrShowPageTranslation(toggle: boolean = false) {
   const id = crypto.randomUUID()
 
   walkAndLabelElement(document.body, id)
-  translateWalkedElement(document.body, id)
+  translateWalkedElement(document.body, id, toggle)
 }
 
 export function removeAllTranslatedWrapperNodes(
@@ -78,7 +79,7 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
     translatingNodes.add(node)
 
     const targetNode
-      = isHTMLElement(node) ? unwrapDeepestOnlyChild(node) : node
+      = isHTMLElement(node) ? unwrapDeepestOnlyHTMLChild(node) : node
 
     const existedTranslatedWrapper = findExistedTranslatedWrapper(targetNode)
     if (existedTranslatedWrapper) {
@@ -196,7 +197,7 @@ export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle
 }
 
 function findExistedTranslatedWrapper(node: TransNode) {
-  if (isInlineTransNode(node)) {
+  if (isTextNode(node) || node.hasAttribute(CONSECUTIVE_INLINE_END_ATTRIBUTE)) {
     if (
       node.nextSibling && isHTMLElement(node.nextSibling)
       && node.nextSibling.classList.contains(NOTRANSLATE_CLASS)
@@ -204,7 +205,7 @@ function findExistedTranslatedWrapper(node: TransNode) {
       return node.nextSibling
     }
   }
-  else if (isBlockTransNode(node) && isHTMLElement(node)) {
+  else if (isHTMLElement(node)) {
     return node.querySelector(`:scope > .${NOTRANSLATE_CLASS}`)
   }
   return null

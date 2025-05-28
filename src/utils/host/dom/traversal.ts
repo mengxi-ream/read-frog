@@ -6,6 +6,7 @@ import {
 } from '@/utils/constants/dom'
 import {
   BLOCK_ATTRIBUTE,
+  CONSECUTIVE_INLINE_END_ATTRIBUTE,
   INLINE_ATTRIBUTE,
   PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
@@ -221,7 +222,7 @@ export function translateWalkedElement(
           continue
         }
         else if (consecutiveInlineNodes.length) {
-          translateConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
+          dealWithConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
           consecutiveInlineNodes = []
         }
 
@@ -231,7 +232,7 @@ export function translateWalkedElement(
       }
 
       if (consecutiveInlineNodes.length) {
-        translateConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
+        dealWithConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
         consecutiveInlineNodes = []
       }
     }
@@ -252,7 +253,7 @@ export function translateWalkedElement(
   }
 }
 
-export function unwrapDeepestOnlyChild(element: HTMLElement) {
+export function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
   let currentElement = element
   while (currentElement) {
     smashTruncationStyle(currentElement)
@@ -273,11 +274,16 @@ export function unwrapDeepestOnlyChild(element: HTMLElement) {
   return currentElement
 }
 
-// function dealWithConsecutiveInlineNodes(nodes: TransNode[], toggle: boolean = false) {
-//   if (nodes.length > 1) {
-//     translateConsecutiveInlineNodes(nodes, toggle)
-//   }
-//   else if (nodes.length === 1) {
-//     translateNode(nodes[0], toggle)
-//   }
-// }
+function dealWithConsecutiveInlineNodes(nodes: TransNode[], toggle: boolean = false) {
+  if (nodes.length > 1) {
+    // give attribute to the last node
+    const lastNode = nodes[nodes.length - 1]
+    if (isHTMLElement(lastNode)) {
+      lastNode.setAttribute(CONSECUTIVE_INLINE_END_ATTRIBUTE, '')
+    }
+    translateConsecutiveInlineNodes(nodes, toggle)
+  }
+  else if (nodes.length === 1) {
+    translateNode(nodes[0], toggle)
+  }
+}

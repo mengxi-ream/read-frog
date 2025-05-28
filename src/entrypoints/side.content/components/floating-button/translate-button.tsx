@@ -7,7 +7,7 @@ import { pureTranslateProvider } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 
 import { hasSetAPIKey } from '@/utils/config/config'
-import { removeAllTranslatedWrapperNodes, translatePage } from '@/utils/host/translate'
+import { hideOrShowPageTranslation, removeAllTranslatedWrapperNodes } from '@/utils/host/translate'
 import { enablePageTranslationAtom } from '../../atoms'
 import HiddenButton from './components/hidden-button'
 
@@ -29,7 +29,7 @@ export default function TranslateButton() {
           return
         }
         if (!enablePageTranslation) {
-          translatePage()
+          hideOrShowPageTranslation()
           sendMessage('setEnablePageTranslationOnContentScript', {
             enabled: true,
           })
