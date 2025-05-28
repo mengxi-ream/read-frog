@@ -2,10 +2,30 @@
   /** 向外抛出的统一事件名 */
   const EVENT_NAME = 'extension:urlchange'
 
+  /** 检查两个URL的核心路径是否相同（只比较origin和pathname） */
+  const isSamePage = (from: string, to: string) => {
+    try {
+      const fromUrl = new URL(from)
+      const toUrl = new URL(to)
+
+      // 只比较origin和pathname，忽略search和hash
+      return fromUrl.origin === toUrl.origin
+        && fromUrl.pathname === toUrl.pathname
+    }
+    catch {
+      return false
+    }
+  }
+
   /** 触发自定义事件并携带前后 URL */
   const fire = (from: string, to: string, reason: string) => {
     if (from === to)
       return // 无变化
+
+    // 如果是同一个页面（只有search或hash变化），则不触发事件
+    if (isSamePage(from, to))
+      return
+
     const ev = new CustomEvent(EVENT_NAME, { detail: { from, to, reason } })
     window.dispatchEvent(ev)
   }
