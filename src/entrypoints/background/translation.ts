@@ -81,13 +81,10 @@ export function translationMessage() {
   })
 
   function setEnabled(tabId: number, enabled: boolean) {
-    if (!tabPageTranslationState.has(tabId)) {
-      tabPageTranslationState.set(tabId, { enabled, ports: [] })
-    }
-
-    const entry = tabPageTranslationState.get(tabId)
-    if (!entry)
-      return
+    const entry = ensureKeyInMap(tabPageTranslationState, tabId, () => ({
+      enabled: false,
+      ports: [] as Browser.runtime.Port[],
+    }))
 
     entry.enabled = enabled
 
