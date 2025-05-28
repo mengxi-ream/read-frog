@@ -97,14 +97,15 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
     const spinner = document.createElement('span')
     spinner.className = 'read-frog-spinner'
     translatedWrapperNode.appendChild(spinner)
-    if (isHTMLElement(targetNode)) {
-      targetNode.appendChild(translatedWrapperNode)
-    }
-    else if (isTextNode(targetNode)) {
+
+    if (isTextNode(targetNode)) {
       targetNode.parentNode?.insertBefore(
         translatedWrapperNode,
         targetNode.nextSibling,
       )
+    }
+    else {
+      targetNode.appendChild(translatedWrapperNode)
     }
 
     let translatedText: string | undefined
@@ -133,8 +134,69 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
   }
 }
 
+export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle: boolean = false) {
+  try {
+    // if translatingNodes has all nodes, return
+    if (nodes.every(node => translatingNodes.has(node))) {
+      return
+    }
+    nodes.forEach(node => translatingNodes.add(node))
+
+    const targetNode = nodes[nodes.length - 1]
+    const existedTranslatedWrapper = findExistedTranslatedWrapper(targetNode)
+    if (existedTranslatedWrapper) {
+      if (toggle) {
+        existedTranslatedWrapper.remove()
+      }
+      return
+    }
+
+    const textContent = nodes.map(node => extractTextContent(node)).join(' ')
+    if (!textContent)
+      return
+
+    const translatedWrapperNode = document.createElement('span')
+    translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    const spinner = document.createElement('span')
+    spinner.className = 'read-frog-spinner'
+    translatedWrapperNode.appendChild(spinner)
+
+    targetNode.parentNode?.insertBefore(
+      translatedWrapperNode,
+      targetNode.nextSibling,
+    )
+
+    let translatedText: string | undefined
+    try {
+      translatedText = await translateText(textContent)
+    }
+    catch (error) {
+      logger.error(error)
+      translatedWrapperNode.remove()
+    }
+    finally {
+      spinner.remove()
+    }
+
+    if (!translatedText)
+      return
+
+    insertTranslatedNodeIntoWrapper(
+      translatedWrapperNode,
+      targetNode,
+      translatedText,
+    )
+  }
+  catch (error) {
+    logger.error(error)
+  }
+  finally {
+    nodes.forEach(node => translatingNodes.delete(node))
+  }
+}
+
 function findExistedTranslatedWrapper(node: TransNode) {
-  if (isTextNode(node)) {
+  if (isInlineTransNode(node)) {
     if (
       node.nextSibling && isHTMLElement(node.nextSibling)
       && node.nextSibling.classList.contains(NOTRANSLATE_CLASS)
@@ -142,7 +204,7 @@ function findExistedTranslatedWrapper(node: TransNode) {
       return node.nextSibling
     }
   }
-  else if (isHTMLElement(node)) {
+  else if (isBlockTransNode(node) && isHTMLElement(node)) {
     return node.querySelector(`:scope > .${NOTRANSLATE_CLASS}`)
   }
   return null

@@ -11,10 +11,11 @@ import {
   WALKED_ATTRIBUTE,
 } from '@/utils/constants/translation'
 
-import { translateNode } from '../translate'
+import { translateConsecutiveInlineNodes, translateNode } from '../translate'
 import {
   isDontWalkIntoElement,
   isHTMLElement,
+  isInlineTransNode,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
   isTextNode,
@@ -206,17 +207,32 @@ export function translateWalkedElement(
     else {
       // prevent children change during iteration
       const children = Array.from(element.childNodes)
+      let consecutiveInlineNodes: TransNode[] = []
       for (const child of children) {
         if (!child.textContent?.trim()) {
           continue
         }
-
-        if (isTextNode(child)) {
-          translateNode(child, toggle)
+        if (!(isTextNode(child) || isHTMLElement(child))) {
+          continue
         }
-        else if (isHTMLElement(child)) {
+
+        if (isInlineTransNode(child)) {
+          consecutiveInlineNodes.push(child)
+          continue
+        }
+        else if (consecutiveInlineNodes.length) {
+          translateConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
+          consecutiveInlineNodes = []
+        }
+
+        if (isHTMLElement(child)) {
           translateWalkedElement(child, walkId, toggle)
         }
+      }
+
+      if (consecutiveInlineNodes.length) {
+        translateConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
+        consecutiveInlineNodes = []
       }
     }
   }
@@ -256,3 +272,12 @@ export function unwrapDeepestOnlyChild(element: HTMLElement) {
 
   return currentElement
 }
+
+// function dealWithConsecutiveInlineNodes(nodes: TransNode[], toggle: boolean = false) {
+//   if (nodes.length > 1) {
+//     translateConsecutiveInlineNodes(nodes, toggle)
+//   }
+//   else if (nodes.length === 1) {
+//     translateNode(nodes[0], toggle)
+//   }
+// }

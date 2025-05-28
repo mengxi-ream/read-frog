@@ -74,10 +74,13 @@ describe('translatePage', () => {
     render(
       <div data-testid="test-node">
         <span style={{ display: 'inline' }}>1</span>
-        <div>2</div>
-        3
-        <br />
+        <div style={{ display: 'block' }}>2</div>
+        <span style={{ display: 'inline' }}>3</span>
         4
+        <span style={{ display: 'block' }}>5</span>
+        6
+        <br />
+        7
       </div>,
     )
     const node = screen.getByTestId('test-node')
@@ -85,26 +88,25 @@ describe('translatePage', () => {
 
     const firstSpanChild = node.firstChild
     expect(firstSpanChild).toHaveAttribute('data-read-frog-paragraph')
-    expect(firstSpanChild?.childNodes[1]).toHaveClass(CONTENT_WRAPPER_CLASS)
-    expect(firstSpanChild?.childNodes[1].childNodes[1]).toHaveClass(
+    expect(firstSpanChild?.nextSibling).toHaveClass(CONTENT_WRAPPER_CLASS)
+    expect(firstSpanChild?.nextSibling?.childNodes[1]).toHaveClass(
       INLINE_CONTENT_CLASS,
     )
 
-    const secondDivChild = node.childNodes[1]
-    expect(secondDivChild).toHaveAttribute('data-read-frog-paragraph')
-    expect(secondDivChild?.childNodes[1]).toHaveClass(CONTENT_WRAPPER_CLASS)
-    expect(secondDivChild?.childNodes[1].childNodes[1]).toHaveClass(
+    const thirdDivChild = node.childNodes[2]
+    expect(thirdDivChild).toHaveAttribute('data-read-frog-paragraph')
+    expect(thirdDivChild?.childNodes[1]).toHaveClass(CONTENT_WRAPPER_CLASS)
+    expect(thirdDivChild?.childNodes[1].childNodes[1]).toHaveClass(
       BLOCK_CONTENT_CLASS,
     )
 
-    const forthInlineTranslationChild = node.childNodes[3]
-    expect(forthInlineTranslationChild).toHaveClass(CONTENT_WRAPPER_CLASS)
-    expect(forthInlineTranslationChild?.childNodes[1]).toHaveClass(
+    const sixthInlineTranslationChild = node.childNodes[5]
+    expect(sixthInlineTranslationChild).toHaveClass(CONTENT_WRAPPER_CLASS)
+    expect(sixthInlineTranslationChild?.childNodes[1]).toHaveClass(
       INLINE_CONTENT_CLASS,
     )
 
-    const lastInlineTranslationChild
-      = node.childNodes[node.childNodes.length - 1]
+    const lastInlineTranslationChild = node.lastChild
     expect(lastInlineTranslationChild).toHaveClass(CONTENT_WRAPPER_CLASS)
     expect(lastInlineTranslationChild?.childNodes[1]).toHaveClass(
       INLINE_CONTENT_CLASS,
@@ -118,8 +120,10 @@ describe('translatePage', () => {
         </span>
       </div>,
     )
+
     const node = screen.getByTestId('test-node')
     await translatePage()
+
     const targetNode = node.firstChild?.firstChild
     expect(targetNode?.childNodes[1]).toHaveClass(CONTENT_WRAPPER_CLASS)
     expect(targetNode?.childNodes[1].childNodes[1]).toHaveClass(

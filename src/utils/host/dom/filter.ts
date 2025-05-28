@@ -18,10 +18,10 @@ export function isEditable(element: HTMLElement): boolean {
 // shallow means only check the node itself, not the children
 // if a shallow inline node has children are block node, then it's block node rather than inline node
 export function isShallowInlineTransNode(node: Node): boolean {
-  if (node instanceof Text) {
+  if (isTextNode(node)) {
     return true
   }
-  else if (node instanceof HTMLElement) {
+  else if (isHTMLElement(node)) {
     return isShallowInlineHTMLElement(node)
   }
   return false
@@ -43,10 +43,10 @@ export function isShallowInlineHTMLElement(element: HTMLElement): boolean {
 
 // Note: !(inline node) != block node because of `notranslate` class and all cases not in the if else block
 export function isShallowBlockTransNode(node: Node): boolean {
-  if (node instanceof Text) {
+  if (isTextNode(node)) {
     return false
   }
-  else if (node instanceof HTMLElement) {
+  else if (isHTMLElement(node)) {
     return isShallowBlockHTMLElement(node)
   }
   return false
@@ -78,14 +78,14 @@ export function isDontWalkIntoElement(element: HTMLElement): boolean {
 }
 
 export function isInlineTransNode(node: TransNode): boolean {
-  if (node instanceof Text) {
+  if (isTextNode(node)) {
     return true
   }
   return node.hasAttribute(INLINE_ATTRIBUTE)
 }
 
 export function isBlockTransNode(node: TransNode): boolean {
-  if (node instanceof Text) {
+  if (isTextNode(node)) {
     return false
   }
   return node.hasAttribute(BLOCK_ATTRIBUTE)
