@@ -1,5 +1,15 @@
 # read-frog
 
+## 0.8.2
+
+### Patch Changes
+
+- [#89](https://github.com/mengxi-ream/read-frog/pull/89) [`d103106`](https://github.com/mengxi-ream/read-frog/commit/d1031063c58b4c0b1cabea7da19b06ed7120d5dc) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): connection race condition to push the port
+
+- [#87](https://github.com/mengxi-ream/read-frog/pull/87) [`ea25cff`](https://github.com/mengxi-ream/read-frog/commit/ea25cff5644439daa56e251ab0eb58d9bc30613a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(traversal): combine consecutive inline nodes together to translate in block-inline-mixed paragraph
+
+- [#85](https://github.com/mengxi-ream/read-frog/pull/85) [`03a8c21`](https://github.com/mengxi-ream/read-frog/commit/03a8c21060cef31c8fcc479b0e5afa3a0ad75967) Thanks [@LixWyk5](https://github.com/LixWyk5)! - underline anchor elements in translated content
+
 ## 0.8.1
 
 ### Patch Changes
