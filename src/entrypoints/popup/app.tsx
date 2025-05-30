@@ -60,7 +60,7 @@ function App() {
           <span className="text-[13px] font-medium">Github</span>
         </button>
       </div>
-      <Toaster richColors position="bottom-center" className="-translate-y-8" />
+      <Toaster richColors position="bottom-center" className="-translate-y-8" duration={10000} />
     </>
   )
 }

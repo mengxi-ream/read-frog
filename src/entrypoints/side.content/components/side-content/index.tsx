@@ -116,7 +116,7 @@ export default function SideContent() {
           <Metadata className="mx-3" />
           <Content />
         </div>
-        <Toaster richColors className="z-[2147483647]" />
+        <Toaster richColors className="z-[2147483647]" duration={10000} />
       </div>
 
       {/* Transparent overlay to prevent other events during resizing */}
