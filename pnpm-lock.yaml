@@ -83,9 +83,6 @@ importers:
       deepmerge:
         specifier: ^4.3.1
         version: 4.3.1
-      fastpriorityqueue:
-        specifier: ^0.7.5
-        version: 0.7.5
       franc-min:
         specifier: ^6.2.0
         version: 6.2.0
@@ -3192,9 +3189,6 @@ packages:
 
   fast-uri@3.0.6:
     resolution: {integrity: sha512-Atfo14OibSv5wAp4VWNsFYE1AchQRTv9cBGWET4pZWHzYshFSS9NQI6I57rdKn9croWVMbYFbLhJ+yJvmZIIHw==}
-
-  fastpriorityqueue@0.7.5:
-    resolution: {integrity: sha512-3Pa0n9gwy8yIbEsT3m2j/E9DXgWvvjfiZjjqcJ+AdNKTAlVMIuFYrYG5Y3RHEM8O6cwv9hOpOWY/NaMfywoQVA==}
 
   fastq@1.19.1:
     resolution: {integrity: sha512-GwLTyxkCXjXbxqIhTsMI2Nui8huMPtnxg7krajPJAjnEG/iiOS7i+zCtWGZR9G0NBKbXKh6X9m9UIsYX/N6vvQ==}
@@ -8832,8 +8826,6 @@ snapshots:
   fast-redact@3.5.0: {}
 
   fast-uri@3.0.6: {}
-
-  fastpriorityqueue@0.7.5: {}
 
   fastq@1.19.1:
     dependencies:
