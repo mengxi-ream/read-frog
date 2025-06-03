@@ -34,14 +34,6 @@ export class RequestQueue {
     this.bucketTokens = options.capacity
     this.lastRefill = Date.now()
     this.waitingQueue = new BinaryHeapPQ<RequestTask & { hash: string }>()
-
-    logger.info(`🚀 RequestQueue initialized with options:`, {
-      rate: this.options.rate,
-      capacity: this.options.capacity,
-      timeoutMs: this.options.timeoutMs,
-      maxRetries: this.options.maxRetries,
-      baseRetryDelayMs: this.options.baseRetryDelayMs,
-    })
   }
 
   enqueue<T>(thunk: () => Promise<T>, scheduleAt: number, hash: string): Promise<T> {
@@ -169,7 +161,7 @@ export class RequestQueue {
         const retryAt = Date.now() + delayMs
         task.scheduleAt = retryAt
 
-        logger.warn(`🔄 Retrying task ${task.id} (attempt ${task.retryCount}/${this.options.maxRetries}) after ${Math.round(delayMs)}ms`)
+        // console.warn(`🔄 Retrying task ${task.id} (attempt ${task.retryCount}/${this.options.maxRetries}) after ${Math.round(delayMs)}ms`)
 
         // Move task back to waiting queue for retry
         this.waitingTasks.set(task.hash, task)
