@@ -1,5 +1,13 @@
 # read-frog
 
+## 0.9.0
+
+### Minor Changes
+
+- [#97](https://github.com/mengxi-ream/read-frog/pull/97) [`43ca08f`](https://github.com/mengxi-ream/read-frog/commit/43ca08face81df6c64c278fc485c2c4c5ab54337) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - add request queue without retry mechanism
+
+- [#99](https://github.com/mengxi-ream/read-frog/pull/99) [`0d70375`](https://github.com/mengxi-ream/read-frog/commit/0d703751c46055bb0adba383e920b7938fa7a34d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: retry and timeout mechanism of request queue
+
 ## 0.8.2
 
 ### Patch Changes
