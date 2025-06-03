@@ -47,7 +47,7 @@ export class RequestQueue {
   enqueue<T>(thunk: () => Promise<T>, scheduleAt: number, hash: string): Promise<T> {
     const duplicateTask = this.duplicateTask(hash)
     if (duplicateTask) {
-      logger.info(`🔄 Found duplicate task for hash: ${hash}, returning existing promise`)
+      // console.info(`🔄 Found duplicate task for hash: ${hash}, returning existing promise`)
       return duplicateTask.promise
     }
 
@@ -72,7 +72,7 @@ export class RequestQueue {
     this.waitingTasks.set(hash, task)
     this.waitingQueue.push({ ...task, hash }, scheduleAt)
 
-    logger.info(`✅ Task ${task.id} added to queue. Queue size: ${this.waitingQueue.size()}, waiting: ${this.waitingTasks.size}, executing: ${this.executingTasks.size}`)
+    // console.info(`✅ Task ${task.id} added to queue. Queue size: ${this.waitingQueue.size()}, waiting: ${this.waitingTasks.size}, executing: ${this.executingTasks.size}`)
 
     this.schedule()
     return promise
@@ -117,7 +117,7 @@ export class RequestQueue {
   }
 
   private async executeTask(task: RequestTask & { hash: string }) {
-    logger.info(`🏃 Starting execution of task ${task.id} (attempt ${task.retryCount + 1}) at ${Date.now()}`)
+    // console.info(`🏃 Starting execution of task ${task.id} (attempt ${task.retryCount + 1}) at ${Date.now()}`)
 
     let timeoutId: NodeJS.Timeout | null = null
 
@@ -125,7 +125,7 @@ export class RequestQueue {
       // Create a timeout promise
       const timeoutPromise = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
-          logger.info(`⏰ Task ${task.id} timed out after ${this.options.timeoutMs}ms`)
+          // console.info(`⏰ Task ${task.id} timed out after ${this.options.timeoutMs}ms`)
           reject(new Error(`Task ${task.id} timed out after ${this.options.timeoutMs}ms`))
         }, this.options.timeoutMs)
       })
@@ -142,7 +142,7 @@ export class RequestQueue {
         timeoutId = null
       }
 
-      logger.info(`✅ Task ${task.id} completed successfully at ${Date.now()}`)
+      // console.info(`✅ Task ${task.id} completed successfully at ${Date.now()}`)
       task.resolve(result)
     }
     catch (error) {
@@ -152,7 +152,7 @@ export class RequestQueue {
         timeoutId = null
       }
 
-      logger.error(`❌ Task ${task.id} failed at ${Date.now()}:`, error)
+      // console.error(`❌ Task ${task.id} failed at ${Date.now()}:`, error)
 
       // Check if we should retry
       if (task.retryCount < this.options.maxRetries) {
@@ -178,7 +178,7 @@ export class RequestQueue {
       }
       else {
         // Max retries exceeded, reject the promise
-        console.error(`💀 Task ${task.id} failed permanently after ${this.options.maxRetries} retries`)
+        // console.error(`💀 Task ${task.id} failed permanently after ${this.options.maxRetries} retries`)
         task.reject(error)
       }
     }

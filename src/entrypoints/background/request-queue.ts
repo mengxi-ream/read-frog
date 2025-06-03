@@ -1,13 +1,13 @@
-import { googleTranslate, microsoftTranslate } from '@/utils/host/translate-text'
+import { aiTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate-text'
 import { RequestQueue } from '@/utils/request/request-queue'
 
 export function setUpRequestQueue() {
   const requestQueue = new RequestQueue({
-    rate: 2,
-    capacity: 3,
-    timeoutMs: 10_000,
+    rate: 5,
+    capacity: 300,
+    timeoutMs: 20_000,
     maxRetries: 2,
-    baseRetryDelayMs: 1000,
+    baseRetryDelayMs: 1_000,
   })
 
   onMessage('enqueueRequest', (message) => {
@@ -21,6 +21,9 @@ export function setUpRequestQueue() {
         break
       case 'microsoftTranslate':
         thunk = () => microsoftTranslate(data.params.text, data.params.fromLang, data.params.toLang)
+        break
+      case 'aiTranslate':
+        thunk = () => aiTranslate(data.params.provider, data.params.modelString, data.params.prompt)
         break
       default:
         throw new Error(`Unknown request type: ${data.type}`)

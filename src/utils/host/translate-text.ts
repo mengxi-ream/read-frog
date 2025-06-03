@@ -1,8 +1,11 @@
+import type { LLMTranslateProviderNames } from '@/types/config/provider'
 import { generateText } from 'ai'
-import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 
+import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 import { isPureTranslateProvider } from '@/types/config/provider'
 import { globalConfig } from '../config/config'
+import { Sha256Hex } from '../hash'
+import { sendMessage } from '../message'
 import { getTranslateLinePrompt } from '../prompts/translate-line'
 import { getTranslateModel } from '../provider'
 
@@ -28,17 +31,31 @@ export async function translateText(sourceText: string) {
       type: `${provider}Translate`,
       params: { text: cleanSourceText, fromLang: sourceLang, toLang: targetLang },
       scheduleAt: Date.now(),
-      hash: Sha256Hex(cleanSourceText, sourceLang, targetLang),
+      hash: Sha256Hex(cleanSourceText, provider, sourceLang, targetLang),
     })
   }
   else if (modelString) {
-    const model = await getTranslateModel(provider, modelString)
-    const { text } = await generateText({
-      model,
-      prompt: getTranslateLinePrompt(
-        LANG_CODE_TO_EN_NAME[globalConfig.language.targetCode],
-        cleanSourceText,
-      ),
+    // const { text } = await generateText({
+    //   model,
+    //   prompt: getTranslateLinePrompt(
+    //     LANG_CODE_TO_EN_NAME[globalConfig.language.targetCode],
+    //     cleanSourceText,
+    //   ),
+    // })
+    const targetLang = LANG_CODE_TO_EN_NAME[globalConfig.language.targetCode]
+    if (!targetLang) {
+      throw new Error('Invalid target language code')
+    }
+    const prompt = getTranslateLinePrompt(targetLang, cleanSourceText)
+    const text = await sendMessage('enqueueRequest', {
+      type: 'aiTranslate',
+      params: {
+        provider,
+        modelString,
+        prompt,
+      },
+      scheduleAt: Date.now(),
+      hash: Sha256Hex(cleanSourceText, provider, modelString, targetLang),
     })
     // Some deep thinking models, such as deepseek, return the thinking process. Therefore,
     // the thinking process in the <think></think> tag needs to be filtered out and only the result is returned
@@ -48,6 +65,15 @@ export async function translateText(sourceText: string) {
   translatedText = translatedText.trim()
   // Compare cleaned versions to determine if translation is the same
   return cleanSourceText === translatedText ? '' : translatedText
+}
+
+export async function aiTranslate(provider: LLMTranslateProviderNames, modelString: string, prompt: string) {
+  const model = await getTranslateModel(provider, modelString)
+  const { text } = await generateText({
+    model,
+    prompt,
+  })
+  return text
 }
 
 export async function googleTranslate(
