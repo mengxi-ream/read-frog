@@ -147,3 +147,11 @@ export const translateConfigSchema = z.object({
   }),
 })
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
+
+/* ──────────────────────────────
+  type guard functions
+  ────────────────────────────── */
+
+export function isPureTranslateProvider(provider: TranslateProviderNames): provider is typeof pureTranslateProvider[number] {
+  return pureTranslateProvider.includes(provider as typeof pureTranslateProvider[number])
+}

@@ -1,7 +1,7 @@
 import { generateText } from 'ai'
-
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 
+import { isPureTranslateProvider } from '@/types/config/provider'
 import { globalConfig } from '../config/config'
 import { getTranslateLinePrompt } from '../prompts/translate-line'
 import { getTranslateModel } from '../provider'
@@ -16,25 +16,20 @@ export async function translateText(sourceText: string) {
   // replace /\u200B/g is for Feishu, it's a zero-width space
   const cleanSourceText = sourceText.replace(/\u200B/g, '').trim()
 
-  // TODO: retry logic + cache logic
   let translatedText = ''
 
-  // TODO: clean up the code
-  if (provider === 'google') {
+  if (isPureTranslateProvider(provider)) {
     const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (ISO6393_TO_6391[globalConfig.language.sourceCode] ?? 'auto')
     const targetLang = ISO6393_TO_6391[globalConfig.language.targetCode]
     if (!targetLang) {
       throw new Error('Invalid target language code')
     }
-    translatedText = await googleTranslate(cleanSourceText, sourceLang, targetLang)
-  }
-  else if (provider === 'microsoft') {
-    const sourceLang = globalConfig.language.sourceCode === 'auto' ? 'auto' : (ISO6393_TO_6391[globalConfig.language.sourceCode] ?? 'auto')
-    const targetLang = ISO6393_TO_6391[globalConfig.language.targetCode]
-    if (!targetLang) {
-      throw new Error('Invalid target language code')
-    }
-    translatedText = await microsoftTranslate(cleanSourceText, sourceLang, targetLang)
+    translatedText = await sendMessage('enqueueRequest', {
+      type: `${provider}Translate`,
+      params: { text: cleanSourceText, fromLang: sourceLang, toLang: targetLang },
+      scheduleAt: Date.now(),
+      hash: Sha256Hex(cleanSourceText, sourceLang, targetLang),
+    })
   }
   else if (modelString) {
     const model = await getTranslateModel(provider, modelString)

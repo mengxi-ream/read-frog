@@ -14,6 +14,8 @@ interface ProtocolMap {
   pinStateChanged: (data: { isPinned: boolean }) => void
   getPinState: () => boolean
   returnPinState: (data: { isPinned: boolean }) => void
+  // request
+  enqueueRequest: (data: { type: string, params: Record<string, any>, scheduleAt: number, hash: string }) => Promise<any>
 }
 
 export const { sendMessage, onMessage }
