@@ -8,6 +8,7 @@ export interface RequestTask {
   reject: (error: any) => void
   scheduleAt: number
   createdAt: number
+  retryCount: number
 }
 
 export interface QueueOptions {
@@ -56,6 +57,7 @@ export class RequestQueue {
       reject,
       scheduleAt,
       createdAt: Date.now(),
+      retryCount: 0,
     }
 
     this.waitingTasks.set(hash, task)
@@ -104,11 +106,47 @@ export class RequestQueue {
 
   private async executeTask(task: RequestTask & { hash: string }) {
     try {
-      const result = await task.thunk()
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          reject(new Error(`Task ${task.id} timed out after ${this.options.timeoutMs}ms`))
+        }, this.options.timeoutMs)
+      })
+
+      // Race between the actual task and timeout
+      const result = await Promise.race([
+        task.thunk(),
+        timeoutPromise,
+      ])
       task.resolve(result)
     }
     catch (error) {
-      task.reject(error)
+      // Check if we should retry
+      if (task.retryCount < this.options.maxRetries) {
+        task.retryCount++
+
+        // Calculate exponential backoff delay
+        const backoffDelayMs = this.options.baseRetryDelayMs * (2 ** (task.retryCount - 1))
+
+        // Add some jitter to prevent thundering herd
+        const jitter = Math.random() * 0.1 * backoffDelayMs
+        const delayMs = backoffDelayMs + jitter
+
+        // Schedule retry
+        const retryAt = Date.now() + delayMs
+        task.scheduleAt = retryAt
+
+        console.warn(`Retrying task ${task.id} (attempt ${task.retryCount}/${this.options.maxRetries}) after ${Math.round(delayMs)}ms`)
+
+        // Move task back to waiting queue for retry
+        this.waitingTasks.set(task.hash, task)
+        this.waitingQueue.push(task, retryAt)
+        this.schedule()
+      }
+      else {
+        // Max retries exceeded, reject the promise
+        task.reject(error)
+      }
     }
     finally {
       this.executingTasks.delete(task.hash)

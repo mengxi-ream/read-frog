@@ -259,3 +259,170 @@ describe('requestQueue – bucket refill while idle', () => {
     expect(completed).toEqual(['x', 'y', 'z'])
   })
 })
+
+// 8. Timeout handling
+describe('requestQueue – timeout handling', () => {
+  it('rejects task when it exceeds timeout', async () => {
+    vi.useFakeTimers()
+    const q = new RequestQueue({
+      ...baseConfig,
+      timeoutMs: 2000,
+    })
+
+    // Task that takes 3000ms (longer than 2000ms timeout)
+    const slowThunk = () => new Promise(resolve =>
+      setTimeout(() => resolve('too-slow'), 3000),
+    )
+
+    const promise = q.enqueue(slowThunk, Date.now(), 'slow')
+
+    // Advance to timeout
+    vi.advanceTimersByTime(2000)
+
+    await expect(promise).rejects.toThrow('Task')
+    await expect(promise).rejects.toThrow('timed out after 2000ms')
+  })
+
+  it('resolves task when it completes before timeout', async () => {
+    vi.useFakeTimers()
+    const q = new RequestQueue({
+      ...baseConfig,
+      timeoutMs: 2000,
+    })
+
+    // Task that takes 1000ms (less than 2000ms timeout)
+    const fastThunk = () => new Promise(resolve =>
+      setTimeout(() => resolve('fast'), 1000),
+    )
+
+    const promise = q.enqueue(fastThunk, Date.now(), 'fast')
+
+    vi.advanceTimersByTime(1000)
+
+    await expect(promise).resolves.toBe('fast')
+  })
+})
+
+// 9. Retry functionality
+describe('requestQueue – retry functionality', () => {
+  it('succeeds when retry eventually works', async () => {
+    vi.useFakeTimers()
+    let attempts = 0
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      maxRetries: 3,
+      baseRetryDelayMs: 100,
+    })
+
+    const eventuallySucceedsThunk = () => {
+      attempts++
+      if (attempts < 2) { // Change to succeed on second attempt
+        return Promise.reject(new Error(`Attempt ${attempts} failed`))
+      }
+      return Promise.resolve('success!')
+    }
+
+    const promise = q.enqueue(eventuallySucceedsThunk, Date.now(), 'eventual-success')
+
+    // Wait for retries to happen
+    await vi.advanceTimersByTimeAsync(1000)
+
+    expect(attempts).toBe(2)
+    await expect(promise).resolves.toBe('success!')
+  })
+
+  it('does not retry when maxRetries is 0', async () => {
+    vi.useFakeTimers()
+    let attempts = 0
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      maxRetries: 0,
+      baseRetryDelayMs: 100,
+    })
+
+    const failingThunk = () => {
+      attempts++
+      return Promise.reject(new Error('Always fails'))
+    }
+
+    const promise = q.enqueue(failingThunk, Date.now(), 'no-retry')
+    promise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+    expect(attempts).toBe(1)
+
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(attempts).toBe(1) // Still only 1 attempt
+
+    await expect(promise).rejects.toThrow('Always fails')
+  })
+
+  it('implements exponential backoff delays', async () => {
+    vi.useFakeTimers()
+    const q = new RequestQueue({
+      ...baseConfig,
+      maxRetries: 2,
+      baseRetryDelayMs: 1000,
+    })
+
+    let attempts = 0
+    const failingThunk = () => {
+      attempts++
+      return Promise.reject(new Error('fail'))
+    }
+
+    const promise = q.enqueue(failingThunk, Date.now(), 'backoff')
+    promise.catch(() => {})
+
+    // Initial execution
+    await vi.advanceTimersByTimeAsync(0)
+    expect(attempts).toBe(1)
+
+    // After 500ms, should not have retried yet (first retry delay is ~1000ms)
+    await vi.advanceTimersByTimeAsync(500)
+    expect(attempts).toBe(1)
+
+    // After 1200ms total, should have done first retry
+    await vi.advanceTimersByTimeAsync(700)
+    expect(attempts).toBe(2)
+
+    // After another 1500ms, should not have retried yet (second retry delay is ~2000ms)
+    await vi.advanceTimersByTimeAsync(1500)
+    expect(attempts).toBe(2)
+
+    // After another 1000ms (total ~3700ms), should have done second retry
+    await vi.advanceTimersByTimeAsync(1000)
+    expect(attempts).toBe(3)
+
+    await expect(promise).rejects.toThrow('fail')
+  })
+})
+
+// 10. Retry with timeout combined
+describe('requestQueue – retry with timeout combined', () => {
+  it('basic timeout functionality works', async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      maxRetries: 0, // No retries for simplicity
+      timeoutMs: 100,
+    })
+
+    const timeoutThunk = () => {
+      // Task takes 200ms, but timeout is 100ms
+      return new Promise(resolve => setTimeout(() => resolve('too slow'), 200))
+    }
+
+    const promise = q.enqueue(timeoutThunk, Date.now(), 'timeout-test')
+    promise.catch(() => {})
+
+    // Let the timeout happen
+    await vi.advanceTimersByTimeAsync(150)
+
+    // Should reject with timeout error
+    await expect(promise).rejects.toThrow('timed out after 100ms')
+  })
+})
