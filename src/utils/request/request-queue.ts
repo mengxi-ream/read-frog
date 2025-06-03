@@ -68,20 +68,37 @@ export class RequestQueue {
     this.refillTokens()
 
     while (this.bucketTokens > 0 && this.waitingQueue.size() > 0) {
-      const task = this.waitingQueue.pop()
+      const task = this.waitingQueue.peek()
       if (task && task.scheduleAt <= Date.now()) {
+        this.waitingQueue.pop()
         this.waitingTasks.delete(task.hash)
         this.executingTasks.set(task.hash, task)
         this.bucketTokens--
         this.executeTask(task)
       }
+      else {
+        break
+      }
     }
 
-    if (this.waitingQueue.size() > 0 && this.nextScheduleTimer === null) {
-      const msUntilNextToken = this.bucketTokens >= 1 ? 0 : Math.ceil((1 - this.bucketTokens) / this.options.rate) * 1000
-      this.nextScheduleTimer = setTimeout(() => {
-        this.schedule()
-      }, msUntilNextToken)
+    if (this.nextScheduleTimer) {
+      clearTimeout(this.nextScheduleTimer)
+      this.nextScheduleTimer = null
+    }
+
+    if (this.waitingQueue.size() > 0) {
+      const nextTask = this.waitingQueue.peek()
+      if (nextTask) {
+        const now = Date.now()
+        const delayUntilScheduled = Math.max(0, nextTask.scheduleAt - now)
+        const msUntilNextToken = this.bucketTokens >= 1 ? 0 : Math.ceil((1 - this.bucketTokens) / this.options.rate * 1000)
+        const delay = Math.max(delayUntilScheduled, msUntilNextToken)
+
+        this.nextScheduleTimer = setTimeout(() => {
+          this.nextScheduleTimer = null
+          this.schedule()
+        }, delay)
+      }
     }
   }
 
