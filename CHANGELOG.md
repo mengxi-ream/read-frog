@@ -1,5 +1,11 @@
 # read-frog
 
+## 0.9.1
+
+### Patch Changes
+
+- [#104](https://github.com/mengxi-ream/read-frog/pull/104) [`22967a0`](https://github.com/mengxi-ream/read-frog/commit/22967a07ee99c1c144d181aab1688938649806cf) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: integrate request queue with translation api
+
 ## 0.9.0
 
 ### Minor Changes
