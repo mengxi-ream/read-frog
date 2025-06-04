@@ -12,7 +12,7 @@ import {
 import { hideOrShowPageTranslation, translateNode } from '../translate/node-manipulation'
 import { translateText } from '../translate/translate-text'
 
-vi.mock('../translate-text', () => ({
+vi.mock('../translate/translate-text', () => ({
   translateText: vi.fn(() => Promise.resolve('translation')),
 }))
 
@@ -70,6 +70,7 @@ describe('toggle translateWalkedElement', () => {
     )
     const node = screen.getByTestId('test-node')
     await hideOrShowPageTranslation(true)
+
     expect(node.childNodes[1]).toHaveClass(CONTENT_WRAPPER_CLASS)
     expect(node.childNodes[1].childNodes[1]).toHaveClass(BLOCK_CONTENT_CLASS)
 

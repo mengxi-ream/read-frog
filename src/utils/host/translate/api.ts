@@ -80,7 +80,6 @@ export async function microsoftTranslate(
   fromLang: string,
   toLang: string,
 ): Promise<string> {
-  throw new Error('Pure translate provider is not supported')
   // If fromLang is 'auto', use empty string as Microsoft's API expects
   const effectiveFromLang = fromLang === 'auto' ? '' : fromLang
 

@@ -200,7 +200,7 @@ export function walkAndLabelElement(
  * @param walkId - The walk id
  * @param toggle - Whether to toggle the translation, if true, the translation will be removed if it already exists
  */
-export function translateWalkedElement(
+export async function translateWalkedElement(
   element: HTMLElement,
   walkId: string,
   toggle: boolean = false,
@@ -220,7 +220,7 @@ export function translateWalkedElement(
     }
 
     if (!hasBlockNodeChild) {
-      translateNode(element, toggle)
+      await translateNode(element, toggle)
     }
     else {
       // prevent children change during iteration
@@ -239,34 +239,36 @@ export function translateWalkedElement(
           continue
         }
         else if (consecutiveInlineNodes.length) {
-          dealWithConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
+          await dealWithConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
           consecutiveInlineNodes = []
         }
 
         if (isHTMLElement(child)) {
-          translateWalkedElement(child, walkId, toggle)
+          await translateWalkedElement(child, walkId, toggle)
         }
       }
 
       if (consecutiveInlineNodes.length) {
-        dealWithConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
+        await dealWithConsecutiveInlineNodes(consecutiveInlineNodes, toggle)
         consecutiveInlineNodes = []
       }
     }
   }
   else {
+    const promises: Promise<void>[] = []
     for (const child of element.childNodes) {
       if (isHTMLElement(child)) {
-        translateWalkedElement(child, walkId, toggle)
+        promises.push(translateWalkedElement(child, walkId, toggle))
       }
     }
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
         if (isHTMLElement(child)) {
-          translateWalkedElement(child, walkId, toggle)
+          promises.push(translateWalkedElement(child, walkId, toggle))
         }
       }
     }
+    await Promise.all(promises)
   }
 }
 
@@ -291,16 +293,16 @@ export function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
   return currentElement
 }
 
-function dealWithConsecutiveInlineNodes(nodes: TransNode[], toggle: boolean = false) {
+async function dealWithConsecutiveInlineNodes(nodes: TransNode[], toggle: boolean = false) {
   if (nodes.length > 1) {
     // give attribute to the last node
     const lastNode = nodes[nodes.length - 1]
     if (isHTMLElement(lastNode)) {
       lastNode.setAttribute(CONSECUTIVE_INLINE_END_ATTRIBUTE, '')
     }
-    translateConsecutiveInlineNodes(nodes, toggle)
+    await translateConsecutiveInlineNodes(nodes, toggle)
   }
   else if (nodes.length === 1) {
-    translateNode(nodes[0], toggle)
+    await translateNode(nodes[0], toggle)
   }
 }

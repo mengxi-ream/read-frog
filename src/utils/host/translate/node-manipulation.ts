@@ -23,7 +23,7 @@ import { translateText } from './translate-text'
 
 const translatingNodes = new Set<HTMLElement | Text>()
 
-export function hideOrShowNodeTranslation(point: Point) {
+export async function hideOrShowNodeTranslation(point: Point) {
   if (!globalConfig)
     return
 
@@ -34,7 +34,7 @@ export function hideOrShowNodeTranslation(point: Point) {
 
   const id = crypto.randomUUID()
   walkAndLabelElement(node, id)
-  translateWalkedElement(node, id, true)
+  await translateWalkedElement(node, id, true)
 }
 
 function shouldTriggerAction(node: Node) {
@@ -45,7 +45,7 @@ export async function hideOrShowPageTranslation(toggle: boolean = false) {
   const id = crypto.randomUUID()
 
   walkAndLabelElement(document.body, id)
-  translateWalkedElement(document.body, id, toggle)
+  await translateWalkedElement(document.body, id, toggle)
 }
 
 export function removeAllTranslatedWrapperNodes(
