@@ -1,6 +1,6 @@
 import type { Config } from '@/types/config/config'
 import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { shouldAutoEnable } from '@/utils/host/translate'
+import { shouldAutoEnable } from '@/utils/host/translate/auto-translation'
 
 export function translationMessage() {
   const tabPageTranslationState = new Map<number, { enabled: boolean, ports: Browser.runtime.Port[] }>()

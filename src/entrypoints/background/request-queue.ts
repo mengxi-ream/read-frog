@@ -1,4 +1,4 @@
-import { aiTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate-text'
+import { aiTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
 import { RequestQueue } from '@/utils/request/request-queue'
 
 export function setUpRequestQueue() {

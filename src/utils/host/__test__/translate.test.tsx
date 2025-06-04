@@ -9,8 +9,8 @@ import {
   INLINE_CONTENT_CLASS,
 } from '@/utils/constants/translation'
 
-import { hideOrShowPageTranslation, translateNode } from '../translate'
-import { translateText } from '../translate-text'
+import { hideOrShowPageTranslation, translateNode } from '../translate/node-manipulation'
+import { translateText } from '../translate/translate-text'
 
 vi.mock('../translate-text', () => ({
   translateText: vi.fn(() => Promise.resolve('translation')),

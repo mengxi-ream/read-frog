@@ -1,7 +1,7 @@
 import type { Point } from '@/types/dom'
 import { globalConfig } from '@/utils/config/config'
 import { isEditable } from '@/utils/host/dom/filter'
-import { hideOrShowNodeTranslation } from '@/utils/host/translate'
+import { hideOrShowNodeTranslation } from '@/utils/host/translate/node-manipulation'
 
 export function registerNodeTranslationTriggers() {
   const mousePosition: Point = { x: 0, y: 0 }

@@ -12,7 +12,7 @@ import {
   WALKED_ATTRIBUTE,
 } from '@/utils/constants/translation'
 
-import { translateConsecutiveInlineNodes, translateNode } from '../translate'
+import { translateConsecutiveInlineNodes, translateNode } from '../translate/node-manipulation'
 import {
   isDontWalkIntoElement,
   isHTMLElement,

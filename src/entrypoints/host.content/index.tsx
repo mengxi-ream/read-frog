@@ -1,6 +1,6 @@
 // import eruda from 'eruda'
 import { globalConfig, loadGlobalConfigPromise } from '@/utils/config/config'
-import { shouldAutoEnable } from '@/utils/host/translate'
+import { shouldAutoEnable } from '@/utils/host/translate/auto-translation'
 import { registerTranslationTriggers } from './translation-trigger'
 import { PageTranslationManager } from './translation-trigger/page-translation'
 import './listen'

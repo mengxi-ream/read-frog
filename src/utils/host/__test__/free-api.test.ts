@@ -1,4 +1,4 @@
-import { googleTranslate, microsoftTranslate } from '../translate-text'
+import { googleTranslate, microsoftTranslate } from '../translate/api'
 
 describe('googleTranslate', () => {
   it('should translate text', async () => {

@@ -1,22 +1,24 @@
-import type { Config } from '@/types/config/config'
 import type { Point, TransNode } from '@/types/dom'
-import { globalConfig } from '../config/config'
-import { FORCE_INLINE_TRANSLATION_TAGS } from '../constants/dom'
+import React from 'react'
+import { TranslationError } from '@/components/tranlation-error'
+import { cleanupAllReactWrappers, createReactComponentWrapper } from '@/utils/render-react-component'
+import { globalConfig } from '../../config/config'
+import { FORCE_INLINE_TRANSLATION_TAGS } from '../../constants/dom'
 import {
   BLOCK_CONTENT_CLASS,
   CONSECUTIVE_INLINE_END_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
-} from '../constants/translation'
-import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode } from './dom/filter'
+} from '../../constants/translation'
+import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode } from '../dom/filter'
 import {
   extractTextContent,
   findNearestBlockNodeAt,
   translateWalkedElement,
   unwrapDeepestOnlyHTMLChild,
   walkAndLabelElement,
-} from './dom/traversal'
+} from '../dom/traversal'
 import { translateText } from './translate-text'
 
 const translatingNodes = new Set<HTMLElement | Text>()
@@ -53,7 +55,11 @@ export function removeAllTranslatedWrapperNodes(
     const translatedNodes = root.querySelectorAll(
       `.${NOTRANSLATE_CLASS}.${CONTENT_WRAPPER_CLASS}`,
     )
-    translatedNodes.forEach(node => node.remove())
+    translatedNodes.forEach((node) => {
+      // Clean up any React components before removing the node
+      cleanupAllReactWrappers(node as Element)
+      node.remove()
+    })
 
     // Recursively search through shadow roots
     root.querySelectorAll('*').forEach((element) => {
@@ -83,10 +89,10 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
 
     const existedTranslatedWrapper = findExistedTranslatedWrapper(targetNode)
     if (existedTranslatedWrapper) {
+      existedTranslatedWrapper.remove()
       if (toggle) {
-        existedTranslatedWrapper.remove()
+        return
       }
-      return
     }
 
     const textContent = extractTextContent(targetNode)
@@ -109,17 +115,7 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
       targetNode.appendChild(translatedWrapperNode)
     }
 
-    let translatedText: string | undefined
-    try {
-      translatedText = await translateText(textContent)
-    }
-    catch (error) {
-      logger.error(error)
-      translatedWrapperNode.remove()
-    }
-    finally {
-      spinner.remove()
-    }
+    const translatedText = await getTranslatedTextAndRemoveSpinner(node, textContent, spinner, translatedWrapperNode)
 
     if (!translatedText)
       return
@@ -146,10 +142,10 @@ export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle
     const targetNode = nodes[nodes.length - 1]
     const existedTranslatedWrapper = findExistedTranslatedWrapper(targetNode)
     if (existedTranslatedWrapper) {
+      existedTranslatedWrapper.remove()
       if (toggle) {
-        existedTranslatedWrapper.remove()
+        return
       }
-      return
     }
 
     const textContent = nodes.map(node => extractTextContent(node)).join(' ')
@@ -167,17 +163,7 @@ export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle
       targetNode.nextSibling,
     )
 
-    let translatedText: string | undefined
-    try {
-      translatedText = await translateText(textContent)
-    }
-    catch (error) {
-      logger.error(error)
-      translatedWrapperNode.remove()
-    }
-    finally {
-      spinner.remove()
-    }
+    const translatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
 
     if (!translatedText)
       return
@@ -241,10 +227,31 @@ function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode.appendChild(translatedNode)
 }
 
-export async function shouldAutoEnable(url: string, config: Config): Promise<boolean> {
-  const autoTranslatePatterns = config?.translate.page.autoTranslatePatterns
-  if (!autoTranslatePatterns)
-    return false
+async function getTranslatedTextAndRemoveSpinner(node: TransNode | TransNode[], textContent: string, spinner: HTMLElement, translatedWrapperNode: HTMLElement) {
+  let translatedText: string | undefined
 
-  return autoTranslatePatterns.some(pattern => url.toLowerCase().includes(pattern.toLowerCase()))
+  try {
+    translatedText = await translateText(textContent)
+  }
+  catch (error) {
+    spinner.remove()
+
+    const errorComponent = React.createElement(TranslationError, {
+      node,
+      error: error as Error,
+    })
+    const { container, cleanup } = createReactComponentWrapper(errorComponent, 'read-frog-error-wrapper')
+
+    // Store cleanup function on the container for later use
+    ;(container as any).__reactCleanup = cleanup
+
+    translatedWrapperNode.appendChild(container)
+  }
+  finally {
+    if (spinner.parentNode) {
+      spinner.remove()
+    }
+  }
+
+  return translatedText
 }

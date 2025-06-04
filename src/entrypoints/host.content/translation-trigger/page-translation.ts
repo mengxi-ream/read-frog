@@ -1,6 +1,6 @@
 import { isHTMLElement } from '@/utils/host/dom/filter'
 import { translateWalkedElement, walkAndLabelElement } from '@/utils/host/dom/traversal'
-import { removeAllTranslatedWrapperNodes } from '@/utils/host/translate'
+import { removeAllTranslatedWrapperNodes } from '@/utils/host/translate/node-manipulation'
 
 // export function registerPageTranslationTriggers() {
 //   // Four-finger touch gesture to trigger translatePage
