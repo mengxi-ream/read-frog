@@ -1,5 +1,5 @@
 name: 陪读蛙
-extName: 陪读蛙 - 开源 AI 翻译
+extName: 陪读蛙 - 开源沉浸式翻译
 extDescription: 陪读蛙是一款开放源代码的浏览器插件，旨在帮助您从任何网站深入学习语言。
 popup:
   autoLang: 自动检测

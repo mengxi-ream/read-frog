@@ -116,3 +116,8 @@ export function isTextNode(node: Node): node is Text {
     && 'textContent' in node
     && 'data' in node
 }
+
+export function isIFrameElement(node: Node): node is HTMLIFrameElement {
+  return node.nodeType === Node.ELEMENT_NODE
+    && node.nodeName === 'IFRAME'
+}

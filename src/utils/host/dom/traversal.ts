@@ -16,6 +16,7 @@ import { translateConsecutiveInlineNodes, translateNode } from '../translate/nod
 import {
   isDontWalkIntoElement,
   isHTMLElement,
+  isIFrameElement,
   isInlineTransNode,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
@@ -143,15 +144,17 @@ export function walkAndLabelElement(
   }
 
   if (element.shadowRoot) {
-    if (globalConfig && globalConfig.translate.page.range === 'all') {
-      for (const child of element.shadowRoot.children) {
-        if (isHTMLElement(child)) {
-          walkAndLabelElement(child, walkId)
-        }
+    for (const child of element.shadowRoot.children) {
+      if (isHTMLElement(child)) {
+        walkAndLabelElement(child, walkId)
       }
     }
-    else {
-      return false
+  }
+
+  if (isIFrameElement(element)) {
+    const iframeDocument = element.contentDocument
+    if (iframeDocument && iframeDocument.body) {
+      walkAndLabelElement(iframeDocument.body, walkId)
     }
   }
 
@@ -268,6 +271,8 @@ export async function translateWalkedElement(
         }
       }
     }
+
+    // TODO: don't need to await, otherwise, it's slow
     await Promise.all(promises)
   }
 }

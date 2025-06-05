@@ -29,16 +29,12 @@ export async function hideOrShowNodeTranslation(point: Point) {
 
   const node = findNearestBlockNodeAt(point)
 
-  if (!node || !isHTMLElement(node) || !shouldTriggerAction(node))
+  if (!node || !isHTMLElement(node) || !node.textContent?.trim())
     return
 
   const id = crypto.randomUUID()
   walkAndLabelElement(node, id)
   await translateWalkedElement(node, id, true)
-}
-
-function shouldTriggerAction(node: Node) {
-  return node.textContent?.trim()
 }
 
 export async function hideOrShowPageTranslation(toggle: boolean = false) {

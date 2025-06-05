@@ -1,4 +1,4 @@
-import { isHTMLElement } from '@/utils/host/dom/filter'
+import { isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
 import { translateWalkedElement, walkAndLabelElement } from '@/utils/host/dom/traversal'
 import { removeAllTranslatedWrapperNodes } from '@/utils/host/translate/node-manipulation'
 
@@ -130,6 +130,7 @@ export class PageTranslationManager {
           })
         }
         else if (
+          // TODO: animation will trigger this but we don't want to
           rec.type === 'attributes'
           && (rec.attributeName === 'style' || rec.attributeName === 'class')
         ) {
@@ -186,7 +187,8 @@ export class PageTranslationManager {
       observer.observe(container)
       return
     }
-    const paragraphs = Array.from(container.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(this.id)}"]`))
+
+    const paragraphs = this.collectParagraphElementsDeep(container, this.id)
     const topLevelParagraphs = paragraphs.filter((el) => {
       const ancestor = el.parentElement?.closest('[data-read-frog-paragraph]')
       // keep it if either:
@@ -195,6 +197,48 @@ export class PageTranslationManager {
       return !ancestor || !container.contains(ancestor)
     })
     topLevelParagraphs.forEach(el => observer.observe(el))
+  }
+
+  /**
+   * Recursively collect elements with paragraph attributes from shadow roots and iframes
+   */
+  private collectParagraphElementsDeep(container: HTMLElement, walkId: string): HTMLElement[] {
+    const result: HTMLElement[] = []
+
+    const collectFromContainer = (root: HTMLElement | Document | ShadowRoot) => {
+      const elements = root.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(walkId)}"]`)
+      result.push(...Array.from(elements))
+    }
+
+    const traverseElement = (element: HTMLElement) => {
+      if (element.shadowRoot) {
+        collectFromContainer(element.shadowRoot)
+        for (const child of element.shadowRoot.children) {
+          if (child instanceof HTMLElement) {
+            traverseElement(child)
+          }
+        }
+      }
+
+      if (isIFrameElement(element)) {
+        const iframeDocument = element.contentDocument
+        if (iframeDocument && iframeDocument.body) {
+          collectFromContainer(iframeDocument)
+          traverseElement(iframeDocument.body)
+        }
+      }
+
+      for (const child of element.children) {
+        if (child instanceof HTMLElement) {
+          traverseElement(child)
+        }
+      }
+    }
+
+    collectFromContainer(container)
+    traverseElement(container)
+
+    return result
   }
 
   private registerPageTranslationTriggers() {

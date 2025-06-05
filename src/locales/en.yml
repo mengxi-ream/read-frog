@@ -1,5 +1,5 @@
 name: Read Frog
-extName: Read Frog - Open Source AI Translate
+extName: Read Frog - Open Source Immersive Translate
 extDescription: Read Frog is an open source browser extension designed to help you learn languages deeply from any website.
 popup:
   autoLang: Auto
