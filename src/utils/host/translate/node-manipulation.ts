@@ -12,6 +12,7 @@ import {
   NOTRANSLATE_CLASS,
 } from '../../constants/translation'
 import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode } from '../dom/filter'
+import { injectStylesIntoDocument } from '../dom/style'
 import {
   extractTextContent,
   findNearestBlockNodeAt,
@@ -23,92 +24,11 @@ import { translateText } from './translate-text'
 
 const translatingNodes = new Set<HTMLElement | Text>()
 
-// Store which documents already have styles injected
-const documentsWithStyles = new WeakSet<Document>()
-
 /**
  * Get the document that owns the given node
  */
 function getOwnerDocument(node: Node): Document {
   return node.ownerDocument || document
-}
-
-/**
- * Check if the node is inside an iframe and inject necessary styles
- */
-function ensureStylesInjected(node: TransNode) {
-  const ownerDoc = getOwnerDocument(node)
-
-  // If this is the main document or we've already injected styles, skip
-  if (ownerDoc === document || documentsWithStyles.has(ownerDoc)) {
-    return
-  }
-
-  // Mark this document as having styles
-  documentsWithStyles.add(ownerDoc)
-
-  // Create and inject the necessary styles
-  const styleElement = ownerDoc.createElement('style')
-  styleElement.textContent = `
-    :root {
-      --read-frog-primary: oklch(76.5% 0.177 163.223);
-      --read-frog-muted: oklch(0.97 0 0);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --read-frog-primary: oklch(59.6% 0.145 163.225);
-        --read-frog-muted: oklch(0.269 0 0);
-      }
-    }
-
-    @keyframes spin {
-      0% {
-        transform: rotate(0deg);
-      }
-      100% {
-        transform: rotate(360deg);
-      }
-    }
-
-    .read-frog-spinner {
-      border: 3px solid var(--read-frog-muted);
-      border-top: 3px solid var(--read-frog-primary);
-      border-radius: 50%;
-      width: 6px;
-      height: 6px;
-      margin: 0 4px;
-      animation: spin 1s linear infinite;
-      display: inline-block;
-      vertical-align: middle;
-      box-sizing: content-box;
-    }
-
-    .read-frog-translated-content-wrapper {
-      word-break: break-word;
-      user-select: text;
-    }
-
-    .read-frog-translated-block-content {
-      display: inline-block;
-      margin: 8px 0 !important;
-      color: inherit;
-      font-family: inherit;
-    }
-
-    .read-frog-translated-inline-content {
-      display: inline;
-      color: inherit;
-      font-family: inherit;
-      text-decoration: inherit;
-    }
-  `
-
-  // Insert the style element into the head
-  const head = ownerDoc.head || ownerDoc.documentElement
-  if (head) {
-    head.appendChild(styleElement)
-  }
 }
 
 export async function hideOrShowNodeTranslation(point: Point) {
@@ -168,9 +88,6 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
       return
     translatingNodes.add(node)
 
-    // Ensure styles are injected if this node is in an iframe
-    ensureStylesInjected(node)
-
     const targetNode
       = isHTMLElement(node) ? unwrapDeepestOnlyHTMLChild(node) : node
 
@@ -188,6 +105,7 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
 
     // Use the node's owner document instead of main document
     const ownerDoc = getOwnerDocument(targetNode)
+    injectStylesIntoDocument(ownerDoc)
     const translatedWrapperNode = ownerDoc.createElement('span')
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
     const spinner = ownerDoc.createElement('span')
@@ -230,9 +148,6 @@ export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle
 
     const targetNode = nodes[nodes.length - 1]
 
-    // Ensure styles are injected if this node is in an iframe
-    ensureStylesInjected(targetNode)
-
     const existedTranslatedWrapper = findExistedTranslatedWrapper(targetNode)
     if (existedTranslatedWrapper) {
       existedTranslatedWrapper.remove()
@@ -247,6 +162,7 @@ export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle
 
     // Use the node's owner document instead of main document
     const ownerDoc = getOwnerDocument(targetNode)
+    injectStylesIntoDocument(ownerDoc)
     const translatedWrapperNode = ownerDoc.createElement('span')
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
     const spinner = ownerDoc.createElement('span')
