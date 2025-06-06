@@ -1,5 +1,21 @@
 # read-frog
 
+## 0.10.0
+
+### Minor Changes
+
+- [#106](https://github.com/mengxi-ream/read-frog/pull/106) [`e5ead6f`](https://github.com/mengxi-ream/read-frog/commit/e5ead6fc7991b97ea41affe40e49513bd2237b84) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - add retry and error ui for translation
+
+### Patch Changes
+
+- [#120](https://github.com/mengxi-ream/read-frog/pull/120) [`9805559`](https://github.com/mengxi-ream/read-frog/commit/9805559ec48e0141c3ca0b20721fa8d2090c4688) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: allow auto translation in iframe and shadow roots
+
+- [`d8a128a`](https://github.com/mengxi-ream/read-frog/commit/d8a128adc38a5089e9ad63738ce274dc5123dfc6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: add tab permission to set always translation domain
+
+- [#115](https://github.com/mengxi-ream/read-frog/pull/115) [`281f823`](https://github.com/mengxi-ream/read-frog/commit/281f82371f4add0fb695eccd595cc84a133e2709) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: translate to zh-TW when user select cmn-Hant
+
+- [`a67ae31`](https://github.com/mengxi-ream/read-frog/commit/a67ae312f24eb8048b62648b4aa22fe4b8b30b36) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: send message when clicking read button on popup page
+
 ## 0.9.1
 
 ### Patch Changes
