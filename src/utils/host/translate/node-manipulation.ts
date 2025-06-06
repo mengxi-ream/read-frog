@@ -23,6 +23,94 @@ import { translateText } from './translate-text'
 
 const translatingNodes = new Set<HTMLElement | Text>()
 
+// Store which documents already have styles injected
+const documentsWithStyles = new WeakSet<Document>()
+
+/**
+ * Get the document that owns the given node
+ */
+function getOwnerDocument(node: Node): Document {
+  return node.ownerDocument || document
+}
+
+/**
+ * Check if the node is inside an iframe and inject necessary styles
+ */
+function ensureStylesInjected(node: TransNode) {
+  const ownerDoc = getOwnerDocument(node)
+
+  // If this is the main document or we've already injected styles, skip
+  if (ownerDoc === document || documentsWithStyles.has(ownerDoc)) {
+    return
+  }
+
+  // Mark this document as having styles
+  documentsWithStyles.add(ownerDoc)
+
+  // Create and inject the necessary styles
+  const styleElement = ownerDoc.createElement('style')
+  styleElement.textContent = `
+    :root {
+      --read-frog-primary: oklch(76.5% 0.177 163.223);
+      --read-frog-muted: oklch(0.97 0 0);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --read-frog-primary: oklch(59.6% 0.145 163.225);
+        --read-frog-muted: oklch(0.269 0 0);
+      }
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .read-frog-spinner {
+      border: 3px solid var(--read-frog-muted);
+      border-top: 3px solid var(--read-frog-primary);
+      border-radius: 50%;
+      width: 6px;
+      height: 6px;
+      margin: 0 4px;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      vertical-align: middle;
+      box-sizing: content-box;
+    }
+
+    .read-frog-translated-content-wrapper {
+      word-break: break-word;
+      user-select: text;
+    }
+
+    .read-frog-translated-block-content {
+      display: inline-block;
+      margin: 8px 0 !important;
+      color: inherit;
+      font-family: inherit;
+    }
+
+    .read-frog-translated-inline-content {
+      display: inline;
+      color: inherit;
+      font-family: inherit;
+      text-decoration: inherit;
+    }
+  `
+
+  // Insert the style element into the head
+  const head = ownerDoc.head || ownerDoc.documentElement
+  if (head) {
+    head.appendChild(styleElement)
+  }
+}
+
 export async function hideOrShowNodeTranslation(point: Point) {
   if (!globalConfig)
     return
@@ -80,6 +168,9 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
       return
     translatingNodes.add(node)
 
+    // Ensure styles are injected if this node is in an iframe
+    ensureStylesInjected(node)
+
     const targetNode
       = isHTMLElement(node) ? unwrapDeepestOnlyHTMLChild(node) : node
 
@@ -95,9 +186,11 @@ export async function translateNode(node: TransNode, toggle: boolean = false) {
     if (!textContent)
       return
 
-    const translatedWrapperNode = document.createElement('span')
+    // Use the node's owner document instead of main document
+    const ownerDoc = getOwnerDocument(targetNode)
+    const translatedWrapperNode = ownerDoc.createElement('span')
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
-    const spinner = document.createElement('span')
+    const spinner = ownerDoc.createElement('span')
     spinner.className = 'read-frog-spinner'
     translatedWrapperNode.appendChild(spinner)
 
@@ -136,6 +229,10 @@ export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle
     nodes.forEach(node => translatingNodes.add(node))
 
     const targetNode = nodes[nodes.length - 1]
+
+    // Ensure styles are injected if this node is in an iframe
+    ensureStylesInjected(targetNode)
+
     const existedTranslatedWrapper = findExistedTranslatedWrapper(targetNode)
     if (existedTranslatedWrapper) {
       existedTranslatedWrapper.remove()
@@ -148,9 +245,11 @@ export async function translateConsecutiveInlineNodes(nodes: TransNode[], toggle
     if (!textContent)
       return
 
-    const translatedWrapperNode = document.createElement('span')
+    // Use the node's owner document instead of main document
+    const ownerDoc = getOwnerDocument(targetNode)
+    const translatedWrapperNode = ownerDoc.createElement('span')
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
-    const spinner = document.createElement('span')
+    const spinner = ownerDoc.createElement('span')
     spinner.className = 'read-frog-spinner'
     translatedWrapperNode.appendChild(spinner)
 
@@ -198,19 +297,21 @@ function insertTranslatedNodeIntoWrapper(
   targetNode: TransNode,
   translatedText: string,
 ) {
-  const translatedNode = document.createElement('span')
+  // Use the wrapper's owner document
+  const ownerDoc = getOwnerDocument(translatedWrapperNode)
+  const translatedNode = ownerDoc.createElement('span')
   const isForceInlineTranslationElement
     = isHTMLElement(targetNode)
       && FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName)
 
   if (isForceInlineTranslationElement || isInlineTransNode(targetNode)) {
-    const spaceNode = document.createElement('span')
+    const spaceNode = ownerDoc.createElement('span')
     spaceNode.textContent = '  '
     translatedWrapperNode.appendChild(spaceNode)
     translatedNode.className = `${NOTRANSLATE_CLASS} ${INLINE_CONTENT_CLASS}`
   }
   else if (isBlockTransNode(targetNode)) {
-    const brNode = document.createElement('br')
+    const brNode = ownerDoc.createElement('br')
     translatedWrapperNode.appendChild(brNode)
     translatedNode.className = `${NOTRANSLATE_CLASS} ${BLOCK_CONTENT_CLASS}`
   }
