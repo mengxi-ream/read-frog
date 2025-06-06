@@ -83,7 +83,8 @@ export const langCodeISO6393Schema = z.enum([
 
 export const langCodeISO6391Schema = z.enum([
   'en', // English
-  'zh', // Chinese（包含简/繁/粤等；只是在 BCP-47 里再加 -Hans / -Hant / -yue）
+  'zh', // Chinese（包含简/粤等；只是在 BCP-47 里再加 -Hans / -Hant / -yue）
+  'zh-TW', // Traditional Chinese
   'es',
   'ru',
   'ar',
@@ -314,7 +315,7 @@ export const LANG_CODE_TO_LOCALE_NAME: Record<LangCodeISO6393, string> = {
 export const ISO6393_TO_6391: Record<LangCodeISO6393, LangCodeISO6391 | undefined> = {
   'eng': 'en',
   'cmn': 'zh',
-  'cmn-Hant': 'zh',
+  'cmn-Hant': 'zh-TW',
   'yue': 'zh',
   'spa': 'es',
   'rus': 'ru',
