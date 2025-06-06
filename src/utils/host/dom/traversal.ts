@@ -311,3 +311,34 @@ async function dealWithConsecutiveInlineNodes(nodes: TransNode[], toggle: boolea
     await translateNode(nodes[0], toggle)
   }
 }
+
+export function deepQueryTopLevelSelector(element: HTMLElement, selectorFn: (element: HTMLElement) => boolean): HTMLElement[] {
+  if (selectorFn(element)) {
+    return [element]
+  }
+
+  const result: HTMLElement[] = []
+
+  if (element.shadowRoot) {
+    for (const child of element.shadowRoot.children) {
+      if (isHTMLElement(child)) {
+        result.push(...deepQueryTopLevelSelector(child, selectorFn))
+      }
+    }
+  }
+
+  if (isIFrameElement(element)) {
+    const iframeDocument = element.contentDocument
+    if (iframeDocument && iframeDocument.body) {
+      result.push(...deepQueryTopLevelSelector(iframeDocument.body, selectorFn))
+    }
+  }
+
+  for (const child of element.children) {
+    if (isHTMLElement(child)) {
+      result.push(...deepQueryTopLevelSelector(child, selectorFn))
+    }
+  }
+
+  return result
+}

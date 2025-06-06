@@ -1,5 +1,5 @@
-import { isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
-import { translateWalkedElement, walkAndLabelElement } from '@/utils/host/dom/traversal'
+import { isDontWalkIntoElement, isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
+import { deepQueryTopLevelSelector, translateWalkedElement, walkAndLabelElement } from '@/utils/host/dom/traversal'
 import { removeAllTranslatedWrapperNodes } from '@/utils/host/translate/node-manipulation'
 
 // export function registerPageTranslationTriggers() {
@@ -82,6 +82,7 @@ export class PageTranslationManager {
   private mutationObserver: MutationObserver | null = null
   private id: string | null = null
   private options: IntersectionObserverInit
+  private dontWalkIntoElementsCache = new WeakSet<HTMLElement>()
 
   constructor(options: IntersectionObserverInit = { root: null, rootMargin: '0px', threshold: 0.1 }) {
     this.options = options
@@ -117,6 +118,8 @@ export class PageTranslationManager {
       })
     }, this.options)
 
+    // Initialize walkability state for existing elements
+    this.addDontWalkIntoElements(document.body)
     this.observerTopLevelParagraphs(document.body)
 
     // Listen to new nodes
@@ -125,18 +128,19 @@ export class PageTranslationManager {
         if (rec.type === 'childList') {
           rec.addedNodes.forEach((node) => {
             if (isHTMLElement(node)) {
+              // Initialize walkability state for new elements
+              this.addDontWalkIntoElements(node)
               this.observerTopLevelParagraphs(node)
             }
           })
         }
         else if (
-          // TODO: animation will trigger this but we don't want to
           rec.type === 'attributes'
           && (rec.attributeName === 'style' || rec.attributeName === 'class')
         ) {
           const el = rec.target
           if (isHTMLElement(el)) {
-            this.observerTopLevelParagraphs(el)
+            this.handleElementWalkabilityChange(el)
           }
         }
       }
@@ -166,6 +170,8 @@ export class PageTranslationManager {
       this.mutationObserver.disconnect()
       this.mutationObserver = null
     }
+
+    this.dontWalkIntoElementsCache = new WeakSet()
 
     removeAllTranslatedWrapperNodes()
 
@@ -294,5 +300,37 @@ export class PageTranslationManager {
       document.removeEventListener('touchend', onEnd)
       document.removeEventListener('touchcancel', reset)
     }
+  }
+
+  /**
+   * Handle style/class attribute changes and only trigger observation
+   * when element transitions from "don't walk into" to "walkable"
+   */
+  private handleElementWalkabilityChange(element: HTMLElement): void {
+    const wasDontWalkInto = this.dontWalkIntoElementsCache.has(element)
+    const isDontWalkIntoNow = isDontWalkIntoElement(element)
+
+    // Update cache with current state
+    if (isDontWalkIntoNow) {
+      this.dontWalkIntoElementsCache.add(element)
+    }
+    else {
+      this.dontWalkIntoElementsCache.delete(element)
+    }
+
+    // Only trigger observation if element transitioned from "don't walk into" to "walkable"
+    // wasDontWalkInto === true means it was previously not walkable
+    // isDontWalkIntoNow === false means it's now walkable
+    if (wasDontWalkInto === true && isDontWalkIntoNow === false) {
+      this.observerTopLevelParagraphs(element)
+    }
+  }
+
+  /**
+   * Initialize walkability state for an element and its descendants
+   */
+  private addDontWalkIntoElements(element: HTMLElement): void {
+    const dontWalkIntoElements = deepQueryTopLevelSelector(element, isDontWalkIntoElement)
+    dontWalkIntoElements.forEach(el => this.dontWalkIntoElementsCache.add(el))
   }
 }
