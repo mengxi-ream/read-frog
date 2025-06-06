@@ -317,7 +317,7 @@ export class PageTranslationManager {
             if (isHTMLElement(node)) {
               this.addDontWalkIntoElements(node)
               this.observerTopLevelParagraphs(node)
-              this.observeIsolatedDescendants(node)
+              this.observeIsolatedDescendantsMutations(node)
             }
           })
         }
@@ -341,7 +341,7 @@ export class PageTranslationManager {
     })
 
     this.mutationObservers.push(mutationObserver)
-    this.observeIsolatedDescendants(container)
+    this.observeIsolatedDescendantsMutations(container)
   }
 
   /**
@@ -349,7 +349,7 @@ export class PageTranslationManager {
    * These can't be find as top level paragraph elements because isolated shadow roots and iframes are not
    * considered as part of the document.
    */
-  private observeIsolatedDescendants(element: HTMLElement): void {
+  private observeIsolatedDescendantsMutations(element: HTMLElement): void {
     // Check if this element has a shadow root
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
@@ -370,7 +370,7 @@ export class PageTranslationManager {
     // Recursively check children
     for (const child of element.children) {
       if (isHTMLElement(child)) {
-        this.observeIsolatedDescendants(child)
+        this.observeIsolatedDescendantsMutations(child)
       }
     }
   }

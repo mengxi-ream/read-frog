@@ -312,12 +312,24 @@ async function dealWithConsecutiveInlineNodes(nodes: TransNode[], toggle: boolea
   }
 }
 
-export function deepQueryTopLevelSelector(element: HTMLElement, selectorFn: (element: HTMLElement) => boolean): HTMLElement[] {
-  if (selectorFn(element)) {
-    return [element]
+export function deepQueryTopLevelSelector(element: HTMLElement | ShadowRoot | Document, selectorFn: (element: HTMLElement) => boolean): HTMLElement[] {
+  if (element instanceof Document) {
+    return deepQueryTopLevelSelector(element.body, selectorFn)
   }
 
   const result: HTMLElement[] = []
+  if (element instanceof ShadowRoot) {
+    for (const child of element.children) {
+      if (isHTMLElement(child)) {
+        result.push(...deepQueryTopLevelSelector(child, selectorFn))
+      }
+    }
+    return result
+  }
+
+  if (selectorFn(element)) {
+    return [element]
+  }
 
   if (element.shadowRoot) {
     for (const child of element.shadowRoot.children) {

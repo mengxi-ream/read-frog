@@ -14,6 +14,7 @@ import {
 import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode } from '../dom/filter'
 import { injectStylesIntoDocument } from '../dom/style'
 import {
+  deepQueryTopLevelSelector,
   extractTextContent,
   findNearestBlockNodeAt,
   translateWalkedElement,
@@ -55,25 +56,14 @@ export async function hideOrShowPageTranslation(toggle: boolean = false) {
 export function removeAllTranslatedWrapperNodes(
   root: Document | ShadowRoot = document,
 ) {
-  function removeFromRoot(root: Document | ShadowRoot) {
-    const translatedNodes = root.querySelectorAll(
-      `.${NOTRANSLATE_CLASS}.${CONTENT_WRAPPER_CLASS}`,
-    )
-    translatedNodes.forEach((node) => {
-      // Clean up any React components before removing the node
-      cleanupAllReactWrappers(node as Element)
-      node.remove()
-    })
-
-    // Recursively search through shadow roots
-    root.querySelectorAll('*').forEach((element) => {
-      if (isHTMLElement(element) && element.shadowRoot) {
-        removeFromRoot(element.shadowRoot)
-      }
-    })
+  const isTranslatedWrapperNode = (node: Node) => {
+    return isHTMLElement(node) && node.classList.contains(NOTRANSLATE_CLASS) && node.classList.contains(CONTENT_WRAPPER_CLASS)
   }
-
-  removeFromRoot(root)
+  const translatedNodes = deepQueryTopLevelSelector(root, isTranslatedWrapperNode)
+  translatedNodes.forEach((node) => {
+    cleanupAllReactWrappers(node)
+    node.remove()
+  })
 }
 
 /**
