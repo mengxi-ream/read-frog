@@ -1,5 +1,13 @@
 # read-frog
 
+## 0.10.1
+
+### Patch Changes
+
+- [`e819cf1`](https://github.com/mengxi-ream/read-frog/commit/e819cf12534d0afa04475f45570e31cbcfd9ed7c) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: don't translate code block
+
+- [`928c086`](https://github.com/mengxi-ream/read-frog/commit/928c0862ab84bbaee74c58f86074ddc8de1f864b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: concurrent translation
+
 ## 0.10.0
 
 ### Minor Changes
