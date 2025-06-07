@@ -1,5 +1,6 @@
 import { initializeConfig, loadAPIKeyFromEnv } from '@/utils/config/config'
 import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
+import { setupAnkiHandler } from './anki-handler'
 import { newUserGuide } from './new-user-guide'
 import { setUpRequestQueue } from './request-queue'
 import { translationMessage } from './translation'
@@ -37,4 +38,5 @@ export default defineBackground(() => {
   translationMessage()
 
   setUpRequestQueue()
+  setupAnkiHandler()
 })

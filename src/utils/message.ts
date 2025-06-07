@@ -16,6 +16,8 @@ interface ProtocolMap {
   returnPinState: (data: { isPinned: boolean }) => void
   // request
   enqueueRequest: (data: { type: string, params: Record<string, any>, scheduleAt: number, hash: string }) => Promise<any>
+  // anki
+  ANKI_REQUEST: (data: { url: string, request: any }) => Promise<{ success: boolean, result?: any, error?: string }>
 }
 
 export const { sendMessage, onMessage }

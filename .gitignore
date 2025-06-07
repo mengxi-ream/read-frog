@@ -30,3 +30,5 @@ web-ext.config.ts
 .env.*
 
 coverage/
+
+for-ai-docs/

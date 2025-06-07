@@ -3,6 +3,7 @@
   "type": "module",
   "version": "0.10.0",
   "private": true,
+  "packageManager": "pnpm@10.8.1+sha512.c50088ba998c67b8ca8c99df8a5e02fd2ae2e2b29aaf238feaa9e124248d3f48f9fb6db2424949ff901cffbb5e0f0cc1ad6aedb602cd29450751d11c35023677",
   "description": "Read Frog is a browser extension designed to help you learn languages deeply from any website.",
   "scripts": {
     "build": "wxt build",
@@ -36,6 +37,7 @@
     "@radix-ui/react-separator": "^1.1.6",
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-switch": "^1.2.2",
+    "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-tooltip": "^1.2.6",
     "@tabler/icons-react": "^3.31.0",
     "@tanstack/query-core": "^5.74.4",
@@ -47,6 +49,7 @@
     "case-anything": "^3.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "compromise": "^14.14.4",
     "crypto-js": "^4.2.0",
     "deepmerge": "^4.3.1",
     "franc-min": "^6.2.0",
