@@ -1,7 +1,7 @@
 import type { Point, TransNode } from '@/types/dom'
 import React from 'react'
 import { TranslationError } from '@/components/tranlation-error'
-import { cleanupAllReactWrappers, createReactComponentWrapper } from '@/utils/render-react-component'
+import { cleanupAllReactWrappers, createReactShadowWrapperSync, cssLoaders } from '@/utils/render-react-component'
 import { globalConfig } from '../../config/config'
 import { FORCE_INLINE_TRANSLATION_TAGS } from '../../constants/dom'
 import {
@@ -11,6 +11,7 @@ import {
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from '../../constants/translation'
+import { logger } from '../../logger'
 import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode } from '../dom/filter'
 import { injectStylesIntoDocument } from '../dom/style'
 import {
@@ -243,7 +244,13 @@ async function getTranslatedTextAndRemoveSpinner(node: TransNode | TransNode[], 
       node,
       error: error as Error,
     })
-    const { container, cleanup } = createReactComponentWrapper(errorComponent, 'read-frog-error-wrapper')
+
+    // Use the new shadow DOM version with CSS support
+    const { container, cleanup } = createReactShadowWrapperSync(
+      errorComponent,
+      'read-frog-error-wrapper',
+      cssLoaders.themeInline(),
+    )
 
     // Store cleanup function on the container for later use
     ;(container as any).__reactCleanup = cleanup
