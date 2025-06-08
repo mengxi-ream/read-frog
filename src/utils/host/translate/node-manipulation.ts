@@ -246,10 +246,11 @@ async function getTranslatedTextAndRemoveSpinner(node: TransNode | TransNode[], 
     })
 
     // Use the new shadow DOM version with CSS support
+    const cssContent = await cssLoaders.buildCss()
     const { container, cleanup } = createReactShadowWrapperSync(
       errorComponent,
       'read-frog-error-wrapper',
-      cssLoaders.themeInline(),
+      cssContent, // Use built CSS from wxt build system
     )
 
     // Store cleanup function on the container for later use

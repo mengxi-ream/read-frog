@@ -53,6 +53,26 @@ jobs:
           generateReleaseNotes: true
           omitBody: true
 
+      - name: Get Release Notes
+        if: steps.changesets.outputs.published == 'true'
+        id: release_notes
+        run: |
+          # Get release notes from GitHub API
+          RELEASE_NOTES=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.tag.outputs.TAG }}" \
+            | jq -r '.body // "No release notes available"')
+
+          # Limit to first 1000 characters for Discord embed limit
+          TRUNCATED_NOTES=$(echo "$RELEASE_NOTES" | head -c 1000)
+          if [ ${#RELEASE_NOTES} -gt 1000 ]; then
+            TRUNCATED_NOTES="${TRUNCATED_NOTES}..."
+          fi
+
+          # Escape special characters for JSON
+          ESCAPED_NOTES=$(echo "$TRUNCATED_NOTES" | sed 's/"/\\"/g' | sed 's/\\/\\\\/g' | sed 's/$/\\n/g' | tr -d '\n')
+
+          echo "NOTES=$ESCAPED_NOTES" >> $GITHUB_OUTPUT
+
       - name: Send Discord Notification
         if: steps.changesets.outputs.published == 'true'
         run: |
@@ -74,6 +94,11 @@ jobs:
                        "name": "Repository",
                        "value": "[${{ github.repository }}](https://github.com/${{ github.repository }})",
                        "inline": true
+                     },
+                     {
+                       "name": "Release Notes",
+                       "value": "${{ steps.release_notes.outputs.NOTES }}",
+                       "inline": false
                      }
                    ],
                    "footer": {

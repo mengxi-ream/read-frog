@@ -29,33 +29,171 @@ async function loadCssContent(source: string): Promise<string> {
 }
 
 /**
- * Create a complete HTML document structure in shadow DOM
- * @param shadowRoot - The shadow root to populate
- * @param cssContent - CSS content to inject
+ * Load the built CSS for the current entrypoint (similar to wxt's approach)
  */
-function createShadowHtmlStructure(shadowRoot: ShadowRoot, cssContent?: string): {
-  html: HTMLHtmlElement
-  head: HTMLHeadElement
-  body: HTMLBodyElement
-} {
-  // Create complete HTML structure
-  const html = document.createElement('html')
-  const head = document.createElement('head')
-  const body = document.createElement('body')
+async function loadBuildCss(entrypointName?: string): Promise<string> {
+  // Try to determine the entrypoint name if not provided
+  const currentEntrypoint = entrypointName || 'side.content'
+  const cacheKey = `build-css-${currentEntrypoint}`
 
-  // Add CSS to head if provided
-  if (cssContent) {
-    const styleElement = document.createElement('style')
-    styleElement.textContent = cssContent
-    head.appendChild(styleElement)
+  if (cssCache.has(cacheKey)) {
+    return cssCache.get(cacheKey)!
   }
 
-  // Build structure
-  html.appendChild(head)
-  html.appendChild(body)
-  shadowRoot.appendChild(html)
+  try {
+    // Map entrypoint names to actual CSS file names from build output
+    const cssFileName = currentEntrypoint.replace('.content', '') // side.content -> side
 
-  return { html, head, body }
+    // Use browser.runtime.getURL to get the CSS file path like wxt does
+    // @ts-expect-error: getURL is defined per-project, but type may not include all paths
+    const url = browser.runtime.getURL(`content-scripts/${cssFileName}.css`)
+    // console.log(`[CSS Loader] Attempting to load CSS from: ${url}`)
+
+    const response = await fetch(url)
+
+    if (response.ok) {
+      const content = await response.text()
+      // console.log(`[CSS Loader] Successfully loaded CSS, length: ${content.length}`)
+      cssCache.set(cacheKey, content)
+      return content
+    }
+    else {
+      console.warn(`[CSS Loader] Failed to load CSS from ${url}: ${response.status} ${response.statusText}`)
+    }
+  }
+  catch (error) {
+    console.warn(`[CSS Loader] Error loading build CSS for ${currentEntrypoint}:`, error)
+  }
+
+  return ''
+}
+
+/**
+ * Split CSS into shadow root CSS and document CSS (based on wxt approach)
+ * @param css - CSS content to split
+ * @returns Object with shadowCss and documentCss
+ */
+function splitShadowRootCss(css: string): {
+  documentCss: string
+  shadowCss: string
+} {
+  let shadowCss = css
+  let documentCss = ''
+
+  // Extract @property and @font-face rules that need to be in the document
+  // Using a simpler, safer regex pattern to avoid backtracking issues
+  const rulesRegex = /(@(?:property|font-face)[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g
+  const matches = css.matchAll(rulesRegex)
+
+  for (const match of matches) {
+    documentCss += match[1]
+    shadowCss = shadowCss.replace(match[1], '')
+  }
+
+  return {
+    documentCss: documentCss.trim(),
+    shadowCss: shadowCss.trim(),
+  }
+}
+
+/**
+ * Inject document CSS to document head
+ * @param css - CSS content to inject
+ * @param instanceId - Unique instance ID for cleanup
+ */
+function injectDocumentCss(css: string, instanceId: string): void {
+  if (!css || document.querySelector(`style[data-wxt-shadow-root-document-styles="${instanceId}"]`)) {
+    return
+  }
+
+  const style = document.createElement('style')
+  style.textContent = css
+  style.setAttribute('data-wxt-shadow-root-document-styles', instanceId)
+  document.head.appendChild(style)
+}
+
+/**
+ * Remove document CSS from document head
+ * @param instanceId - Instance ID to match
+ */
+function removeDocumentCss(instanceId: string): void {
+  const documentStyle = document.querySelector(
+    `style[data-wxt-shadow-root-document-styles="${instanceId}"]`,
+  )
+  documentStyle?.remove()
+}
+
+/**
+ * Create a simple Shadow DOM structure with styles (wxt-inspired)
+ * @param shadowRoot - The shadow root to populate
+ * @param cssContent - CSS content to inject
+ * @param inheritStyles - Whether to inherit styles from the page
+ * @returns The container element for React components and instance ID for cleanup
+ */
+function createShadowDomStructure(
+  shadowRoot: ShadowRoot,
+  cssContent?: string,
+  inheritStyles = false,
+): { container: HTMLElement, instanceId: string } {
+  const instanceId = Math.random().toString(36).substring(2, 15)
+  const css: string[] = []
+
+  // Add minimal reset styles for shadow DOM isolation
+  if (!inheritStyles) {
+    css.push(`
+      /* Minimal Shadow DOM Reset - preserving Tailwind classes */
+      :host {
+        /* Isolate from parent page but don't reset all styles */
+        font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        line-height: 1.5;
+        color: initial;
+        background: initial;
+        /* Allow CSS custom properties to inherit from the document */
+        color-scheme: inherit;
+      }
+      
+      /* Ensure proper box-sizing for all elements */
+      *, *::before, *::after {
+        box-sizing: border-box;
+      }
+    `)
+  }
+
+  // Process and add custom CSS
+  if (cssContent) {
+    // console.log(`[Shadow DOM] Processing CSS content, length: ${cssContent.length}`)
+    // Replace :root with :host for shadow DOM compatibility
+    const processedCss = cssContent.replaceAll(':root', ':host')
+    css.push(processedCss)
+  }
+
+  // Split CSS into shadow and document parts
+  const { shadowCss, documentCss } = splitShadowRootCss(css.join('\n').trim())
+
+  // Inject document CSS
+  if (documentCss) {
+    // console.log(`[Shadow DOM] Injecting document CSS, length: ${documentCss.length}`)
+    injectDocumentCss(documentCss, instanceId)
+  }
+
+  // Add shadow CSS to shadow root
+  if (shadowCss) {
+    // console.log(`[Shadow DOM] Injecting shadow CSS, length: ${shadowCss.length}`)
+    const styleElement = document.createElement('style')
+    styleElement.textContent = shadowCss
+    shadowRoot.appendChild(styleElement)
+  }
+
+  // Create a container for React components with minimal reset
+  const container = document.createElement('div')
+  container.style.cssText = `
+    display: block;
+    font-family: inherit;
+    color: inherit;
+  `
+
+  shadowRoot.appendChild(container)
+  return { container, instanceId }
 }
 
 /**
@@ -71,7 +209,6 @@ export function renderReactComponent(
   // Create a wrapper for style isolation
   const wrapper = document.createElement('div')
   wrapper.style.cssText = `
-    all: unset;
     display: contents;
   `
 
@@ -86,33 +223,36 @@ export function renderReactComponent(
 }
 
 /**
- * Render a React component into a Shadow DOM with complete HTML structure
+ * Render a React component into a Shadow DOM with proper style isolation (wxt-inspired)
  * @param component - The React component to render
  * @param container - The DOM container that will host the shadow root
  * @param cssContent - Optional CSS content to inject
- * @returns A cleanup function to unmount the component
+ * @param inheritStyles - Whether to inherit styles from the page
+ * @returns A cleanup function to unmount the component and clean up styles
  */
 export function renderReactComponentInShadow(
   component: React.ReactElement,
   container: HTMLElement,
   cssContent?: string,
+  inheritStyles = false,
 ): () => void {
   // Create shadow root for complete style isolation
-  const shadowRoot = container.attachShadow({ mode: 'closed' })
+  const shadowRoot = container.attachShadow({ mode: 'open' })
 
-  // Create complete HTML structure
-  const { body } = createShadowHtmlStructure(shadowRoot, cssContent)
-
-  // Create React wrapper inside shadow DOM body
-  const reactWrapper = document.createElement('div')
-  body.appendChild(reactWrapper)
+  // Create proper Shadow DOM structure
+  const { container: reactContainer, instanceId } = createShadowDomStructure(
+    shadowRoot,
+    cssContent,
+    inheritStyles,
+  )
 
   // Create React root and render
-  const root = ReactDOM.createRoot(reactWrapper)
+  const root = ReactDOM.createRoot(reactContainer)
   root.render(component)
 
   return () => {
     root.unmount()
+    removeDocumentCss(instanceId)
     shadowRoot.innerHTML = '' // Clean up shadow root content
   }
 }
@@ -139,16 +279,18 @@ export function createReactComponentWrapper(
 }
 
 /**
- * Create a shadow DOM wrapper for rendering a React component with CSS support
+ * Create a shadow DOM wrapper for rendering a React component with CSS support (wxt-inspired)
  * @param component - The React component to render
  * @param className - Optional CSS class for the container
  * @param cssPath - Optional path to CSS file (e.g., '/src/assets/tailwind/theme.css')
+ * @param inheritStyles - Whether to inherit styles from the page
  * @returns Object with container element and cleanup function
  */
 export async function createReactShadowWrapper(
   component: React.ReactElement,
   className?: string,
   cssPath?: string,
+  inheritStyles = false,
 ): Promise<{ container: HTMLElement, cleanup: () => void }> {
   const container = document.createElement('span')
 
@@ -162,18 +304,19 @@ export async function createReactShadowWrapper(
     cssContent = await loadCssContent(cssPath)
   }
 
-  const cleanup = renderReactComponentInShadow(component, container, cssContent)
+  const cleanup = renderReactComponentInShadow(component, container, cssContent, inheritStyles)
 
   return { container, cleanup }
 }
 
 /**
- * Synchronous version that accepts CSS content directly
+ * Synchronous version that accepts CSS content directly (wxt-inspired)
  */
 export function createReactShadowWrapperSync(
   component: React.ReactElement,
   className?: string,
   cssContent?: string,
+  inheritStyles = false,
 ): { container: HTMLElement, cleanup: () => void } {
   const container = document.createElement('span')
 
@@ -181,7 +324,7 @@ export function createReactShadowWrapperSync(
     container.className = className
   }
 
-  const cleanup = renderReactComponentInShadow(component, container, cssContent)
+  const cleanup = renderReactComponentInShadow(component, container, cssContent, inheritStyles)
 
   return { container, cleanup }
 }
@@ -190,137 +333,11 @@ export function createReactShadowWrapperSync(
  * Pre-defined CSS loaders for common cases
  */
 export const cssLoaders = {
-  // Load inline theme CSS content
-  themeInline: () => `
-    @import 'tailwindcss';
-    @import 'tw-animate-css';
-    
-    @custom-variant dark (&:is(.dark *));
-    
-    @theme inline {
-      --color-background: var(--background);
-      --color-foreground: var(--foreground);
-      --color-sidebar-ring: var(--sidebar-ring);
-      --color-sidebar-border: var(--sidebar-border);
-      --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-      --color-sidebar-accent: var(--sidebar-accent);
-      --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-      --color-sidebar-primary: var(--sidebar-primary);
-      --color-sidebar-foreground: var(--sidebar-foreground);
-      --color-sidebar: var(--sidebar);
-      --color-chart-5: var(--chart-5);
-      --color-chart-4: var(--chart-4);
-      --color-chart-3: var(--chart-3);
-      --color-chart-2: var(--chart-2);
-      --color-chart-1: var(--chart-1);
-      --color-ring: var(--ring);
-      --color-input: var(--input);
-      --color-border: var(--border);
-      --color-warning: var(--warning);
-      --color-warning-border: var(--warning-border);
-      --color-destructive: var(--destructive);
-      --color-accent-foreground: var(--accent-foreground);
-      --color-accent: var(--accent);
-      --color-muted-foreground: var(--muted-foreground);
-      --color-muted: var(--muted);
-      --color-secondary-foreground: var(--secondary-foreground);
-      --color-secondary: var(--secondary);
-      --color-primary-foreground: var(--primary-foreground);
-      --color-primary: var(--primary);
-      --color-popover-foreground: var(--popover-foreground);
-      --color-popover: var(--popover);
-      --color-card-foreground: var(--card-foreground);
-      --color-card: var(--card);
-      --radius-sm: calc(var(--radius) - 4px);
-      --radius-md: calc(var(--radius) - 2px);
-      --radius-lg: var(--radius);
-      --radius-xl: calc(var(--radius) + 4px);
-    }
-    
-    :root {
-      --radius: 0.625rem;
-      --background: oklch(1 0 0);
-      --foreground: oklch(0.145 0 0);
-      --card: oklch(1 0 0);
-      --card-foreground: oklch(0.145 0 0);
-      --popover: oklch(1 0 0);
-      --popover-foreground: oklch(0.145 0 0);
-      --primary: oklch(69.6% 0.17 162.48);
-      --primary-foreground: oklch(0.985 0 0);
-      --secondary: oklch(0.97 0 0);
-      --secondary-foreground: oklch(0.205 0 0);
-      --muted: oklch(0.97 0 0);
-      --muted-foreground: oklch(0.556 0 0);
-      --accent: oklch(0.97 0 0);
-      --accent-foreground: oklch(0.205 0 0);
-      --warning: oklch(97.3% 0.071 103.193);
-      --warning-border: oklch(85.2% 0.199 91.936);
-      --destructive: oklch(0.577 0.245 27.325);
-      --border: oklch(0.922 0 0);
-      --input: oklch(0.922 0 0);
-      --ring: oklch(0.708 0 0);
-      --chart-1: oklch(0.646 0.222 41.116);
-      --chart-2: oklch(0.6 0.118 184.704);
-      --chart-3: oklch(0.398 0.07 227.392);
-      --chart-4: oklch(0.828 0.189 84.429);
-      --chart-5: oklch(0.769 0.188 70.08);
-      --sidebar: oklch(0.985 0 0);
-      --sidebar-foreground: oklch(0.145 0 0);
-      --sidebar-primary: oklch(0.205 0 0);
-      --sidebar-primary-foreground: oklch(0.985 0 0);
-      --sidebar-accent: oklch(0.97 0 0);
-      --sidebar-accent-foreground: oklch(0.205 0 0);
-      --sidebar-border: oklch(0.922 0 0);
-      --sidebar-ring: oklch(0.708 0 0);
-    }
-    
-    .dark {
-      --background: oklch(0.145 0 0);
-      --foreground: oklch(0.985 0 0);
-      --card: oklch(0.205 0 0);
-      --card-foreground: oklch(0.985 0 0);
-      --popover: oklch(0.205 0 0);
-      --popover-foreground: oklch(0.985 0 0);
-      --primary: oklch(69.6% 0.17 162.48);
-      --primary-foreground: oklch(0.205 0 0);
-      --secondary: oklch(0.269 0 0);
-      --secondary-foreground: oklch(0.985 0 0);
-      --muted: oklch(0.269 0 0);
-      --muted-foreground: oklch(0.708 0 0);
-      --accent: oklch(0.269 0 0);
-      --accent-foreground: oklch(0.985 0 0);
-      --warning: oklch(42.1% 0.095 57.708);
-      --warning-border: oklch(68.1% 0.162 75.834);
-      --destructive: oklch(0.704 0.191 22.216);
-      --border: oklch(1 0 0 / 10%);
-      --input: oklch(1 0 0 / 15%);
-      --ring: oklch(0.556 0 0);
-      --chart-1: oklch(0.488 0.243 264.376);
-      --chart-2: oklch(0.696 0.17 162.48);
-      --chart-3: oklch(0.769 0.188 70.08);
-      --chart-4: oklch(0.627 0.265 303.9);
-      --chart-5: oklch(0.645 0.246 16.439);
-      --sidebar: oklch(0.205 0 0);
-      --sidebar-foreground: oklch(0.985 0 0);
-      --sidebar-primary: oklch(0.488 0.243 264.376);
-      --sidebar-primary-foreground: oklch(0.985 0 0);
-      --sidebar-accent: oklch(0.269 0 0);
-      --sidebar-accent-foreground: oklch(0.985 0 0);
-      --sidebar-border: oklch(1 0 0 / 10%);
-      --sidebar-ring: oklch(0.556 0 0);
-    }
-    
-    @layer base {
-      * {
-        border-color: var(--border);
-        outline-color: rgb(var(--ring) / 50%);
-      }
-      body {
-        background-color: var(--background);
-        color: var(--foreground);
-      }
-    }
-  `,
+  // Load built CSS from the wxt build system
+  buildCss: async (entrypointName?: string) => {
+    const css = await loadBuildCss(entrypointName)
+    return css
+  },
 }
 
 /**

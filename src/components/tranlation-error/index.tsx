@@ -11,7 +11,7 @@ export function TranslationError({ node, error }: { node: TransNode | TransNode[
   }
 
   return (
-    <div style={errorContainerStyle}>
+    <div className="bg-green-500" style={errorContainerStyle}>
       <RetryButton node={node} />
       <ErrorButton error={error} />
     </div>
