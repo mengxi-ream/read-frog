@@ -1,7 +1,7 @@
 import type { TransNode } from '@/types/dom'
 import { RotateCcw } from 'lucide-react'
 import { useState } from 'react'
-import { cleanupReactWrapper } from '@/utils/render-react-component'
+import { removeReactShadowHost } from '@/utils/render-react/create-shadow-host'
 
 interface RetryButtonProps {
   node: TransNode | TransNode[]
@@ -41,7 +41,7 @@ export function RetryButton({ node, onRetry }: RetryButtonProps) {
 
       // If translation succeeded, clean up and remove the error wrapper
       if (errorWrapper) {
-        cleanupReactWrapper(errorWrapper)
+        removeReactShadowHost(errorWrapper)
       }
 
       // Call optional callback
