@@ -1,19 +1,19 @@
 import { cssRegistry } from './css-registry'
 
 interface ShadowHostOptions {
-  cssContent?: string
+  position: 'inline' | 'block'
+  cssContent?: string[]
   inheritStyles?: boolean
 }
 
-const resetCss = `/* Minimal Shadow DOM Reset - preserving Tailwind classes */
+const resetCss = `/* WXT-inspired Shadow DOM Reset */
   :host {
-    /* Isolate from parent page but don't reset all styles */
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    line-height: 1.5;
-    color: initial;
-    background: initial;
-    /* Allow CSS custom properties to inherit from the document */
+    /* Essential style isolation */
+    all: initial;
+    /* Override all: initial for essential inherited properties we want to keep */
     color-scheme: inherit;
+    /* Restore modern font stack */
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   }
   
   /* Ensure proper box-sizing for all elements */
@@ -28,18 +28,20 @@ export class ShadowHostBuilder {
 
   constructor(
     private shadowRoot: ShadowRoot,
-    private opts: ShadowHostOptions = {},
+    private opts: ShadowHostOptions = {
+      position: 'block',
+    },
   ) {}
 
-  build(): ShadowRoot {
-    const { cssContent, inheritStyles } = this.opts
+  build(): HTMLElement {
+    const { cssContent, inheritStyles, position } = this.opts
     const css: string[] = []
 
     if (!inheritStyles) {
       css.push(resetCss)
     }
     if (cssContent)
-      css.push(cssContent.replaceAll(':root', ':host'))
+      css.push(...cssContent.map(css => css.replaceAll(':root', ':host')))
 
     const { shadowCss, documentCss } = this.splitShadowRootCss(css.join('\n'))
     if (documentCss) {
@@ -51,7 +53,13 @@ export class ShadowHostBuilder {
       this.shadowRoot.appendChild(style)
     }
 
-    return this.shadowRoot
+    // add wrapper
+    const wrapper = document.createElement('div')
+    wrapper.style.display = position
+    wrapper.classList.add(isDarkMode() ? 'dark' : '')
+    this.shadowRoot.appendChild(wrapper)
+
+    return wrapper
   }
 
   cleanup() {

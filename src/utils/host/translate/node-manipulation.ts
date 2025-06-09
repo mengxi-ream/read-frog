@@ -1,7 +1,9 @@
 import type { Point, TransNode } from '@/types/dom'
 import React from 'react'
+import textSmallCSS from '@/assets/tailwind/text-small.css?inline'
+import themeCSS from '@/assets/tailwind/theme.css?inline'
 import { TranslationError } from '@/components/tranlation-error'
-import { createReactShadowHost, removeReactShadowHost } from '@/utils/render-react/create-shadow-host'
+import { createReactShadowHost, removeReactShadowHost } from '@/utils/react-shadow-host/create-shadow-host'
 import { globalConfig } from '../../config/config'
 import {
   BLOCK_CONTENT_CLASS,
@@ -24,6 +26,7 @@ import {
   unwrapDeepestOnlyHTMLChild,
   walkAndLabelElement,
 } from '../dom/traversal'
+
 import { translateText } from './translate-text'
 
 const translatingNodes = new Set<HTMLElement | Text>()
@@ -253,8 +256,15 @@ async function getTranslatedTextAndRemoveSpinner(node: TransNode | TransNode[], 
 
     const container = createReactShadowHost(
       errorComponent,
-      TRANSLATION_ERROR_CONTAINER_CLASS,
-      'inline',
+      {
+        className: TRANSLATION_ERROR_CONTAINER_CLASS,
+        position: 'inline',
+        inheritStyles: false,
+        cssContent: [themeCSS, textSmallCSS],
+        style: {
+          verticalAlign: 'middle',
+        },
+      },
     )
 
     translatedWrapperNode.appendChild(container)
