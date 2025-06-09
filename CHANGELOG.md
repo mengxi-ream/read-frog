@@ -1,5 +1,15 @@
 # read-frog
 
+## 0.10.2
+
+### Patch Changes
+
+- [#134](https://github.com/mengxi-ream/read-frog/pull/134) [`c4af768`](https://github.com/mengxi-ream/read-frog/commit/c4af768f2b02ab17032163e3e773b884a7886d98) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: update translation error button style
+
+- [#130](https://github.com/mengxi-ream/read-frog/pull/130) [`e48ffda`](https://github.com/mengxi-ream/read-frog/commit/e48ffda23588c5d1e45f57642794b749a2522e5c) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: add shadow root for error ui
+
+- [#132](https://github.com/mengxi-ream/read-frog/pull/132) [`034d0b8`](https://github.com/mengxi-ream/read-frog/commit/034d0b8b15ad2c8c1ad42ceb53bf0023152d405c) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: disable the translate switch for ignore tabs
+
 ## 0.10.1
 
 ### Patch Changes
