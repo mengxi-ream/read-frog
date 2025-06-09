@@ -1,10 +1,10 @@
 import type { TransNode } from '@/types/dom'
-import { FORCE_BLOCK_TAGS } from '@/utils/constants/dom'
 import {
   BLOCK_ATTRIBUTE,
   INLINE_ATTRIBUTE,
   NOTRANSLATE_CLASS,
-} from '@/utils/constants/translation'
+} from '@/utils/constants/dom-labels'
+import { FORCE_BLOCK_TAGS } from '@/utils/constants/dom-tags'
 
 export function isEditable(element: HTMLElement): boolean {
   const tag = element.tagName

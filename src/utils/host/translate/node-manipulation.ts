@@ -1,16 +1,18 @@
 import type { Point, TransNode } from '@/types/dom'
 import React from 'react'
 import { TranslationError } from '@/components/tranlation-error'
-import { cleanupAllReactWrappers, createReactShadowWrapperSync, cssLoaders } from '@/utils/render-react-component'
+import { createReactShadowHost, removeReactShadowHost } from '@/utils/render-react/create-shadow-host'
 import { globalConfig } from '../../config/config'
-import { FORCE_INLINE_TRANSLATION_TAGS } from '../../constants/dom'
 import {
   BLOCK_CONTENT_CLASS,
   CONSECUTIVE_INLINE_END_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
-} from '../../constants/translation'
+  REACT_SHADOW_HOST_CLASS,
+  TRANSLATION_ERROR_CONTAINER_CLASS,
+} from '../../constants/dom-labels'
+import { FORCE_INLINE_TRANSLATION_TAGS } from '../../constants/dom-tags'
 import { logger } from '../../logger'
 import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode } from '../dom/filter'
 import { injectStylesIntoDocument } from '../dom/style'
@@ -62,7 +64,11 @@ export function removeAllTranslatedWrapperNodes(
   }
   const translatedNodes = deepQueryTopLevelSelector(root, isTranslatedWrapperNode)
   translatedNodes.forEach((node) => {
-    cleanupAllReactWrappers(node)
+    const translationShadowHost = node.querySelector(`.${REACT_SHADOW_HOST_CLASS}`)
+    if (translationShadowHost && isHTMLElement(translationShadowHost)) {
+      // TODO: test if this works or not
+      removeReactShadowHost(translationShadowHost)
+    }
     node.remove()
   })
 }
@@ -245,16 +251,11 @@ async function getTranslatedTextAndRemoveSpinner(node: TransNode | TransNode[], 
       error: error as Error,
     })
 
-    // Use the new shadow DOM version with CSS support
-    const cssContent = await cssLoaders.buildCss()
-    const { container, cleanup } = createReactShadowWrapperSync(
+    const container = createReactShadowHost(
       errorComponent,
-      'read-frog-error-wrapper',
-      cssContent, // Use built CSS from wxt build system
+      TRANSLATION_ERROR_CONTAINER_CLASS,
+      'inline',
     )
-
-    // Store cleanup function on the container for later use
-    ;(container as any).__reactCleanup = cleanup
 
     translatedWrapperNode.appendChild(container)
   }

@@ -15,3 +15,7 @@ export const INLINE_ATTRIBUTE = 'data-read-frog-inline-node'
 export const CONSECUTIVE_INLINE_END_ATTRIBUTE = 'data-read-frog-consecutive-consecutive-inline-end'
 
 export const NOTRANSLATE_CLASS = 'notranslate'
+
+export const REACT_SHADOW_HOST_CLASS = 'read-frog-react-shadow-host'
+
+export const TRANSLATION_ERROR_CONTAINER_CLASS = 'read-frog-translation-error-container'

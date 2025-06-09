@@ -7,7 +7,7 @@ import {
   BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
-} from '@/utils/constants/translation'
+} from '@/utils/constants/dom-labels'
 
 import { hideOrShowPageTranslation, translateNode } from '../translate/node-manipulation'
 import { translateText } from '../translate/translate-text'

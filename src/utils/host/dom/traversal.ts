@@ -1,16 +1,16 @@
 import type { Point, TransNode } from '@/types/dom'
 import { globalConfig } from '@/utils/config/config'
 import {
-  INVALID_TRANSLATE_TAGS,
-  MAIN_CONTENT_IGNORE_TAGS,
-} from '@/utils/constants/dom'
-import {
   BLOCK_ATTRIBUTE,
   CONSECUTIVE_INLINE_END_ATTRIBUTE,
   INLINE_ATTRIBUTE,
   PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
-} from '@/utils/constants/translation'
+} from '@/utils/constants/dom-labels'
+import {
+  INVALID_TRANSLATE_TAGS,
+  MAIN_CONTENT_IGNORE_TAGS,
+} from '@/utils/constants/dom-tags'
 
 import { translateConsecutiveInlineNodes, translateNode } from '../translate/node-manipulation'
 import {
