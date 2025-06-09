@@ -62,13 +62,13 @@ function SelectContent({
   className,
   children,
   position = 'popper',
-  container = document.body,
+  container,
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Content> & {
   container?: HTMLElement | null
 }) {
   return (
-    <SelectPrimitive.Portal container={container}>
+    <SelectPrimitive.Portal container={container ?? document.body}>
       <SelectPrimitive.Content
         data-slot="select-content"
         className={cn(
