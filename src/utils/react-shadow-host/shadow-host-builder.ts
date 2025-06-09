@@ -56,7 +56,9 @@ export class ShadowHostBuilder {
     // add wrapper
     const wrapper = document.createElement('div')
     wrapper.style.display = position
-    wrapper.classList.add(isDarkMode() ? 'dark' : '')
+    if (isDarkMode()) {
+      wrapper.classList.add('dark')
+    }
     this.shadowRoot.appendChild(wrapper)
 
     return wrapper
