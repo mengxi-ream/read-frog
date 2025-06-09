@@ -13,7 +13,7 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 陪读蛙 - 在浏览器中轻松深入地掌握语言，由AI驱动。
 
-[Official website](https://readfrog.mengxi.work)
+[Official website](https://readfrog.app)
 
 ## 📺 Demo
 
@@ -65,7 +65,7 @@ Join our growing community of language learners and help shape the future of Rea
 
 Understand the project through AI: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
-Check out the [Contribution Guide](https://readfrog.mengxi.work/en/tutorial/contribution) for more details.
+Check out the [Contribution Guide](https://readfrog.app/en/tutorial/contribution) for more details.
 
 ### Thanks to our Contributors
 

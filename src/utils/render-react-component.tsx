@@ -42,11 +42,11 @@ async function loadBuildCss(entrypointName?: string): Promise<string> {
 
   try {
     // Map entrypoint names to actual CSS file names from build output
-    const cssFileName = currentEntrypoint.replace('.content', '') // side.content -> side
+    // const cssFileName = currentEntrypoint.replace('.content', '') // side.content -> side
 
     // Use browser.runtime.getURL to get the CSS file path like wxt does
     // @ts-expect-error: getURL is defined per-project, but type may not include all paths
-    const url = browser.runtime.getURL(`content-scripts/${cssFileName}.css`)
+    const url = browser.runtime.getURL('assets/tailwind/theme.css')
     // console.log(`[CSS Loader] Attempting to load CSS from: ${url}`)
 
     const response = await fetch(url)
@@ -172,7 +172,7 @@ function createShadowDomStructure(
 
   // Inject document CSS
   if (documentCss) {
-    // console.log(`[Shadow DOM] Injecting document CSS, length: ${documentCss.length}`)
+    // console.log(`[Shadow DOM] Injecting document CSS, length: ${documentCss.length}, instanceId: ${instanceId}`)
     injectDocumentCss(documentCss, instanceId)
   }
 
@@ -318,7 +318,7 @@ export function createReactShadowWrapperSync(
   cssContent?: string,
   inheritStyles = false,
 ): { container: HTMLElement, cleanup: () => void } {
-  const container = document.createElement('span')
+  const container = document.createElement('div')
 
   if (className) {
     container.className = className

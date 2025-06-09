@@ -10,7 +10,7 @@ const LINKS: {
   {
     label: 'help',
     icon: helpIcon,
-    url: 'https://readfrog.mengxi.work/tutorial/',
+    url: 'https://readfrog.app/tutorial/',
   },
   {
     label: 'advice',

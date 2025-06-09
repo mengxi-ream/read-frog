@@ -9,7 +9,7 @@ export function APIConfigWarning({ className }: { className?: string }) {
       {i18n.t('noConfig.warningWithLink.youMust')}
       {' '}
       <a
-        href="https://readfrog.mengxi.work/tutorial/api-key"
+        href="https://readfrog.app/tutorial/api-key"
         target="_blank"
         rel="noreferrer"
         className="underline"

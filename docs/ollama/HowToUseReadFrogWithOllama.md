@@ -145,7 +145,7 @@ After execution, the model is removed from the local system, freeing disk space.
 
 ### 4.2 Do you want to contribute to the Ollama functionality of read - frog?
 
-- Please first read [here](https://readfrog.mengxi.work/en/tutorial/contribution).
+- Please first read [here](https://readfrog.app/en/tutorial/contribution).
 
 - You can try to deploy various large models with tool support locally using Ollama to test the translation and reading functions of read - frog. Note that you need a good graphics card and large memory. Please be aware that some large models on Ollama do not support tools, and such models cannot complete the read - frog reading function.
 
