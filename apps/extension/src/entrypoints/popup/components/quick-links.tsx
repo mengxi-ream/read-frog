@@ -1,26 +1,27 @@
-import adviceIcon from '@/assets/icon/advice.svg'
+import bookIcon from '@/assets/icon/book.svg'
 import discordIcon from '@/assets/icon/discord.svg'
 import helpIcon from '@/assets/icon/help.svg'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 const LINKS: {
-  label: 'help' | 'advice' | 'discord'
+  label: 'help' | 'book' | 'discord'
   icon: string
   url: string
 }[] = [
   {
-    label: 'help',
-    icon: helpIcon,
-    url: 'https://readfrog.app/tutorial/',
-  },
-  {
-    label: 'advice',
-    icon: adviceIcon,
-    url: 'https://wj.qq.com/s2/22031975/aea0/',
+    label: 'book',
+    icon: bookIcon,
+    url: 'https://neat-reader.cloudb.pub/',
   },
   {
     label: 'discord',
     icon: discordIcon,
     url: 'https://discord.gg/ej45e3PezJ',
+  },
+  {
+    label: 'help',
+    icon: helpIcon,
+    url: 'https://readfrog.app/tutorial/',
   },
 ]
 
@@ -36,14 +37,21 @@ export default function QuickLinks() {
 
 function LinkCard({ link }: { link: (typeof LINKS)[number] }) {
   return (
-    <a
-      href={link.url}
-      target="_blank"
-      rel="noreferrer"
-      className="border-border bg-input/50 hover:bg-input flex w-20 flex-col items-center justify-center gap-1.5 rounded-md border py-3 text-sm"
-    >
-      <img src={link.icon} alt={link.label} className="size-5" />
-      {i18n.t(`popup.${link.label}`)}
-    </a>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noreferrer"
+          className="border-border bg-input/50 hover:bg-input flex w-20 flex-col items-center justify-center gap-1.5 rounded-md border py-3 text-sm"
+        >
+          <img src={link.icon} alt={link.label} className="size-5" />
+          {i18n.t(`popup.${link.label}.title`)}
+        </a>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-[210px] break-words text-center">
+        {i18n.t(`popup.${link.label}.description`)}
+      </TooltipContent>
+    </Tooltip>
   )
 }

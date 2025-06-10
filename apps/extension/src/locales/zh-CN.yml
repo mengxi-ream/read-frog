@@ -13,9 +13,15 @@ popup:
   options: 选项
   hover: 鼠标悬停
   translateParagraph: 来翻译段落
-  help: 帮助
-  advice: 建议
-  discord: Discord
+  help:
+    title: 帮助
+    description: 发现更多提示和技巧
+  book:
+    title: 电子书
+    description: 阅读任何 ePub 电子书
+  discord:
+    title: Discord
+    description: 加入 Discord 服务器，与开发者和其他用户交流
 options:
   setAPIKeyWarning:
     please: 请在

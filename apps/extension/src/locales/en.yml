@@ -13,9 +13,15 @@ popup:
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
-  help: Help
-  advice: Advice
-  discord: Discord
+  help:
+    title: Help
+    description: Discover more tips and tricks
+  book:
+    title: E-book
+    description: Read any ePub books with AI
+  discord:
+    title: Discord
+    description: Join Discord server to connect with developers and other users
 options:
   setAPIKeyWarning:
     please: Please set API Key on

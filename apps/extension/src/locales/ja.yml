@@ -13,9 +13,15 @@ popup:
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
-  help: ヘルプ
-  advice: フィードバック
-  discord: Discord
+  help:
+    title: ヘルプ
+    description: より多くのヒントとトリックを発見します
+  book:
+    title: 電子書籍
+    description: 任意のePub書籍をAIで読み解きます
+  discord:
+    title: Discord
+    description: 開発者や他のユーザーとつながる
 options:
   setAPIKeyWarning:
     please: 設定ページで
