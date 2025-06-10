@@ -4,11 +4,22 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "outputs": [".output/**", "dist/**", ".wxt/**", ".next/**", "!.next/cache/**"]
+      "outputs": [
+        ".output/**",
+        "dist/**",
+        ".wxt/**",
+        ".next/**",
+        "!.next/cache/**"
+      ]
     },
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "start": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["build"]
     },
     "lint": {
       "dependsOn": ["^build"]
@@ -21,12 +32,19 @@
       "dependsOn": ["^build"],
       "outputs": ["coverage/**"]
     },
+    "test:cov": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
     "test:watch": {
       "cache": false,
       "persistent": true
     },
     "type-check": {
       "dependsOn": ["^build"]
+    },
+    "zip": {
+      "outputs": [".output/**"]
     }
   }
 }

@@ -12,6 +12,8 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
+    "dev:extension": "turbo dev --filter=extension",
+    "dev:website": "turbo dev --filter=website",
     "lint": "eslint . && turbo lint",
     "lint:fix": "eslint . --fix && turbo lint:fix",
     "syncpack:lint": "syncpack lint",
