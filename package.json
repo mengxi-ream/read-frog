@@ -1,33 +1,37 @@
 {
   "name": "read-frog",
-  "description": "Read Frog monorepo - browser extension and website for language learning",
+  "type": "module",
   "version": "0.0.0",
   "private": true,
-  "type": "module",
-  "author": "MengXi <contact@mengxi.work> (https://mengxi.work)",
   "packageManager": "pnpm@10.10.0",
+  "description": "Read Frog monorepo - browser extension and website for language learning",
+  "author": "MengXi <contact@mengxi.work> (https://mengxi.work)",
+  "engines": {
+    "node": ">=20.11.0"
+  },
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "lint": "turbo lint",
-    "lint:fix": "turbo lint:fix",
+    "lint": "eslint . && turbo lint",
+    "lint:fix": "eslint . --fix && turbo lint:fix",
+    "syncpack": "syncpack lint",
+    "syncpack:fix": "syncpack fix-mismatches",
     "prepare": "husky",
     "release": "changeset tag && git push origin --tags",
     "test": "turbo test",
     "type-check": "turbo type-check"
   },
   "devDependencies": {
+    "@antfu/eslint-config": "^4.14.1",
     "@changesets/changelog-github": "^0.5.1",
     "@changesets/cli": "^2.29.3",
     "@commitlint/cli": "^19.8.1",
     "@commitlint/config-conventional": "^19.8.1",
+    "eslint": "^9.28.0",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
     "syncpack": "^13.0.4",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
-  },
-  "engines": {
-    "node": ">=20.11.0"
   }
 }
