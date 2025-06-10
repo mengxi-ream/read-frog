@@ -23,6 +23,48 @@ Master languages effortlessly and deeply with AI, right in your browser.
 [![][edge-users-shield]][edge-store-link]<br/>
 [![][sponsor-shield]][sponsor-link]
 
+</div>
+
+<details>
+<summary><kbd>Table of contents</kbd></summary>
+
+#### TOC
+
+####
+
+<br/>
+
+</details>
+
+## 👋🏻 Getting Started & Join Our Community
+
+Read Frog's vision is to provide an easy-to-use, intelligent, and personalized language learning experience for language learners of all levels. This has become possible in the AI era, but there are few products on the market that meet this demand. Therefore, we decided to take matters into our own hands and ultimately make the world no longer reliant on human language instructors.
+
+Whether you are a user or a developer, Read Frog will be an important part of your journey toward this vision. Please be aware that Read Frog is currently under active development, and feedback is welcome for any [issues][issues-link] encountered.
+
+| [![][discord-shield-badge]][discord-link] | In Discord ask questions, and connect with developers.                                 |
+| :---------------------------------------- | :------------------------------------------------------------------------------------- |
+| [![][wechat-shield-badge]][wechat-link]   | If you are in mainland China, you can add the WeChat account to join the WeChat group. |
+
+> \[!IMPORTANT]
+>
+> **⭐️ Star Us**, You will receive all release notifications from GitHub without any delay \~
+
+<details>
+<summary>
+  <kbd>Star History</kbd>
+</summary>
+
+<a href="https://www.star-history.com/#mengxi-ream/read-frog&Timeline">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
+ </picture>
+</a>
+
+</details>
+
 ## 📺 Demo
 
 ![Read Frog](/docs/read-demo.gif)
@@ -34,10 +76,10 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 ## 📦 Download
 
-| Browser | Version                                                                                                                                                                                                                                                                                                                                                                                                                | Download                                                                                                                                                                                                       |
-| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Chrome  | [![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&logo=google-chrome&label=Chrome%20Web%20Store&labelColor=black)](https://chrome.google.com/webstore/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb)                                                                                                                        | [Chrome Web Store](https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb) or [中国镜像](https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb) |
-| Edge    | [![Edge Addons Version](https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Microsoft%20Edge%20Addons&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black&prefix=v)](https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo) | [Microsoft Edge Addons](https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo)                                                                            |
+| Browser | Version                                         | Download                                                          |
+| ------- | ----------------------------------------------- | ----------------------------------------------------------------- |
+| Chrome  | [![][chrome-version-shield]][chrome-store-link] | [Chrome Web Store](chrome-store-link) or [中国镜像](crxsoso-link) |
+| Edge    | [![][edge-version-shield]][edge-store-link]     | [Microsoft Edge Addons](edge-store-link)                          |
 
 ## 📖 Introduction
 
@@ -119,3 +161,7 @@ If you like Read Frog, you can give a star ⭐️ at Github.
 [discord-link]: https://discord.gg/ej45e3PezJ
 [sponsor-shield]: https://img.shields.io/github/sponsors/mengxi-ream?style=flat-square&label=Sponsor&color=EA4AAA&labelColor=black
 [sponsor-link]: https://github.com/sponsors/mengxi-ream
+[discord-shield-badge]: https://img.shields.io/badge/chat-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=black
+[wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
+[wechat-link]: ./docs/wechat.jpg
+[crxsoso-link]: https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb
