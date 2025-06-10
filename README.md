@@ -1,20 +1,27 @@
-![Read Frog Tile](/docs/store/large-promo-tile.png)
+<div align="center"><a name="readme-top"></a>
 
-![Extension Version](https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=apps%2Fextension%2Fpackage.json&style=flat-square&label=Extension%20Latest%20Version&color=success&labelColor=black)
-[![Chrome Web Store Version](https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20Web%20Store&labelColor=black)](https://chrome.google.com/webstore/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb)
-[![Edge Addons Version](https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Microsoft%20Edge%20Addons&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black&prefix=v)](https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo)
-[![Chrome Web Store Users](https://img.shields.io/chrome-web-store/users/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20users&color=orange&labelColor=black)](https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb)
-[![Edge Addons Users](https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Edge%20users&query=%24.activeInstallCount&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black)](https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo)
+[![][image-banner]][website]
 
-[![Discord](https://img.shields.io/discord/1371229720942874646?style=flat-square&label=Discord&logo=discord&logoColor=white&color=5865F2&labelColor=black)](https://discord.gg/ej45e3PezJ)
-![Website Version](https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=apps%2Fwebsite%2Fpackage.json&style=flat-square&label=Website%20Latest%20Version&color=blue&labelColor=black)
-![GitHub last commit](https://img.shields.io/github/last-commit/mengxi-ream/read-frog?style=flat-square&labelColor=black)
-
+An open-source AI-powered language learning extension for browsers.<br/>
+Supports immersive translation, article analysis, multiple AI models, and more.
 Master languages effortlessly and deeply with AI, right in your browser.
 
-陪读蛙 - 在浏览器中轻松深入地掌握语言，由AI驱动。
+**English** | [简体中文](./README.zh-CN.md) | [Official Website](https://readfrog.app)
 
-[Official website](https://readfrog.app)
+<!-- SHIELD GROUP -->
+
+[![][extension-release-shield]][github-release-link]
+[![][chrome-version-shield]][chrome-store-link]
+[![][edge-version-shield]][edge-store-link]
+[![][website-release-shield]][github-release-link]<br/>
+[![][star-history-shield]][star-history-link]
+[![][contributors-shield]][contributors-link]
+![][last-commit-shield]
+[![][issues-shield]][issues-link]<br/>
+[![][discord-shield]][discord-link]
+[![][chrome-users-shield]][chrome-store-link]
+[![][edge-users-shield]][edge-store-link]<br/>
+[![][sponsor-shield]][sponsor-link]
 
 ## 📺 Demo
 
@@ -87,3 +94,28 @@ If you like Read Frog, you can give a star ⭐️ at Github.
    <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
  </picture>
 </a>
+
+<!-- LINK GROUP -->
+
+[image-banner]: /docs/store/large-promo-tile.png
+[website]: https://readfrog.app
+[extension-release-shield]: https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=apps%2Fextension%2Fpackage.json&style=flat-square&label=extension&color=brightgreen&labelColor=black
+[github-release-link]: https://github.com/mengxi-ream/read-frog/releases
+[chrome-version-shield]: https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome&labelColor=black
+[edge-version-shield]: https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Edge&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black&prefix=v
+[chrome-users-shield]: https://img.shields.io/chrome-web-store/users/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20users&color=orange&labelColor=black
+[edge-users-shield]: https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Edge%20users&query=%24.activeInstallCount&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black
+[discord-shield]: https://img.shields.io/discord/1371229720942874646?style=flat-square&label=Discord&logo=discord&logoColor=white&color=5865F2&labelColor=black
+[last-commit-shield]: https://img.shields.io/github/last-commit/mengxi-ream/read-frog?style=flat-square&labelColor=black
+[issues-shield]: https://img.shields.io/github/issues/mengxi-ream/read-frog?style=flat-square&labelColor=black
+[issues-link]: https://github.com/mengxi-ream/read-frog/issues
+[contributors-shield]: https://img.shields.io/github/contributors/mengxi-ream/read-frog?style=flat-square&labelColor=black
+[contributors-link]: https://github.com/mengxi-ream/read-frog/graphs/contributors
+[star-history-shield]: https://img.shields.io/github/stars/mengxi-ream/read-frog?style=flat-square&label=stars&color=yellow&labelColor=black
+[star-history-link]: https://www.star-history.com/#mengxi-ream/read-frog&Timeline
+[website-release-shield]: https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=apps%2Fwebsite%2Fpackage.json&style=flat-square&label=website&color=success&labelColor=black
+[chrome-store-link]: https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb
+[edge-store-link]: https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo
+[discord-link]: https://discord.gg/ej45e3PezJ
+[sponsor-shield]: https://img.shields.io/github/sponsors/mengxi-ream?style=flat-square&label=Sponsor&color=EA4AAA&labelColor=black
+[sponsor-link]: https://github.com/sponsors/mengxi-ream
