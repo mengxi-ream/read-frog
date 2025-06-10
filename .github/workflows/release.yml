@@ -34,137 +34,59 @@ jobs:
           commit: 'chore(release): version packages'
           title: 'chore(release): version packages'
           publish: pnpm run release
-          createGithubReleases: false
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # Only proceed if packages were published (tagged)
-      - name: Get published packages info
-        if: steps.changesets.outputs.published == 'true'
-        id: packages
-        run: |
-          echo "Getting information about tagged packages..."
-
-          # Get all tags created in this release
-          RECENT_TAGS=$(git tag --sort=-version:refname --merged HEAD | head -5)
-          echo "Recent tags: $RECENT_TAGS"
-
-          # Get the latest tags for each package (check if they were just created)
-          EXTENSION_TAG=""
-          WEBSITE_TAG=""
-
-          # Check for extension tag in recent commits
-          LATEST_EXTENSION_TAG=$(git tag --sort=-version:refname | grep -E "^@read-frog/extension@" | head -1 || echo "")
-          if [ -n "$LATEST_EXTENSION_TAG" ]; then
-            # Check if this tag was created in the last commit (release commit)
-            TAG_COMMIT=$(git rev-list -n 1 "$LATEST_EXTENSION_TAG")
-            HEAD_COMMIT=$(git rev-parse HEAD)
-            if [ "$TAG_COMMIT" = "$HEAD_COMMIT" ]; then
-              EXTENSION_TAG="$LATEST_EXTENSION_TAG"
-            fi
-          fi
-
-          # Check for website tag in recent commits
-          LATEST_WEBSITE_TAG=$(git tag --sort=-version:refname | grep -E "^@read-frog/website@" | head -1 || echo "")
-          if [ -n "$LATEST_WEBSITE_TAG" ]; then
-            # Check if this tag was created in the last commit (release commit)
-            TAG_COMMIT=$(git rev-list -n 1 "$LATEST_WEBSITE_TAG")
-            HEAD_COMMIT=$(git rev-parse HEAD)
-            if [ "$TAG_COMMIT" = "$HEAD_COMMIT" ]; then
-              WEBSITE_TAG="$LATEST_WEBSITE_TAG"
-            fi
-          fi
-
-          echo "EXTENSION_TAG=$EXTENSION_TAG" >> $GITHUB_OUTPUT
-          echo "WEBSITE_TAG=$WEBSITE_TAG" >> $GITHUB_OUTPUT
-
-          # Determine which packages were tagged
-          PUBLISHED_PACKAGES=""
-          if [ -n "$EXTENSION_TAG" ]; then
-            PUBLISHED_PACKAGES="$PUBLISHED_PACKAGES extension:$EXTENSION_TAG"
-          fi
-          if [ -n "$WEBSITE_TAG" ]; then
-            PUBLISHED_PACKAGES="$PUBLISHED_PACKAGES website:$WEBSITE_TAG"
-          fi
-
-          echo "PUBLISHED_PACKAGES=$PUBLISHED_PACKAGES" >> $GITHUB_OUTPUT
-          echo "Tagged packages: $PUBLISHED_PACKAGES"
-
-      - name: Create GitHub Releases for each tagged package
-        if: steps.changesets.outputs.published == 'true'
-        run: |
-          # Function to create release for a specific package
-          create_package_release() {
-            local package_name=$1
-            local tag=$2
-            local display_name=$3
-
-            echo "Creating release for $display_name with tag: $tag"
-
-            # Create JSON payload with proper escaping
-            cat << EOF > /tmp/release_payload.json
-          {
-            "tag_name": "$tag",
-            "name": "$display_name $tag",
-            "generate_release_notes": true,
-            "draft": false,
-            "prerelease": false
-          }
-          EOF
-
-            # Use GitHub's auto-generated release notes
-            curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-              -H "Content-Type: application/json" \
-              -X POST \
-              "https://api.github.com/repos/${{ github.repository }}/releases" \
-              -d @/tmp/release_payload.json
-          }
-
-          # Create releases for tagged packages
-          PUBLISHED="${{ steps.packages.outputs.PUBLISHED_PACKAGES }}"
-
-          if [[ "$PUBLISHED" == *"extension:"* ]]; then
-            EXTENSION_TAG="${{ steps.packages.outputs.EXTENSION_TAG }}"
-            if [ -n "$EXTENSION_TAG" ]; then
-              create_package_release "extension" "$EXTENSION_TAG" "Read Frog Extension"
-            fi
-          fi
-
-          if [[ "$PUBLISHED" == *"website:"* ]]; then
-            WEBSITE_TAG="${{ steps.packages.outputs.WEBSITE_TAG }}"
-            if [ -n "$WEBSITE_TAG" ]; then
-              create_package_release "website" "$WEBSITE_TAG" "Read Frog Website"
-            fi
-          fi
 
       - name: Send Discord Notification
         if: steps.changesets.outputs.published == 'true'
         run: |
-          echo "Sending Discord notification for tagged packages..."
+          echo "Sending Discord notification for published packages..."
 
-          PUBLISHED="${{ steps.packages.outputs.PUBLISHED_PACKAGES }}"
+          # Get published packages from changesets output
+          PUBLISHED_PACKAGES='${{ steps.changesets.outputs.publishedPackages }}'
 
-          # Prepare notification content
+          if [ -z "$PUBLISHED_PACKAGES" ] || [ "$PUBLISHED_PACKAGES" = "[]" ]; then
+            echo "No packages were published"
+            exit 0
+          fi
+
+          echo "Published packages: $PUBLISHED_PACKAGES"
+
+          # Build notification content
           NOTIFICATION_CONTENT=""
           RELEASE_URLS=""
 
-          if [[ "$PUBLISHED" == *"extension:"* ]]; then
-            EXTENSION_TAG="${{ steps.packages.outputs.EXTENSION_TAG }}"
-            if [ -n "$EXTENSION_TAG" ]; then
-              EXTENSION_VERSION=$(echo "$EXTENSION_TAG" | sed 's/@read-frog\/extension@//')
-              NOTIFICATION_CONTENT="$NOTIFICATION_CONTENT\n📱 **Extension** \`$EXTENSION_VERSION\`"
-              RELEASE_URLS="$RELEASE_URLS\n[Extension Release](https://github.com/${{ github.repository }}/releases/tag/$EXTENSION_TAG)"
-            fi
-          fi
+          # Get package emoji based on name
+          get_package_emoji() {
+            case "$1" in
+              *"extension"*) echo "📱" ;;
+              *"website"*) echo "🌐" ;;
+              *"cli"*) echo "⚡" ;;
+              *"api"*) echo "🔌" ;;
+              *"core"*) echo "⚙️" ;;
+              *"sdk"*) echo "🛠️" ;;
+              *) echo "📦" ;;
+            esac
+          }
 
-          if [[ "$PUBLISHED" == *"website:"* ]]; then
-            WEBSITE_TAG="${{ steps.packages.outputs.WEBSITE_TAG }}"
-            if [ -n "$WEBSITE_TAG" ]; then
-              WEBSITE_VERSION=$(echo "$WEBSITE_TAG" | sed 's/@read-frog\/website@//')
-              NOTIFICATION_CONTENT="$NOTIFICATION_CONTENT\n🌐 **Website** \`$WEBSITE_VERSION\`"
-              RELEASE_URLS="$RELEASE_URLS\n[Website Release](https://github.com/${{ github.repository }}/releases/tag/$WEBSITE_TAG)"
+          # Parse published packages JSON
+          echo "$PUBLISHED_PACKAGES" | jq -c '.[]' | while read -r package_info; do
+            if [ -n "$package_info" ]; then
+              PACKAGE_NAME=$(echo "$package_info" | jq -r '.name')
+              PACKAGE_VERSION=$(echo "$package_info" | jq -r '.version')
+
+              # Generate tag name based on changesets convention
+              PACKAGE_TAG="$PACKAGE_NAME@$PACKAGE_VERSION"
+
+              EMOJI=$(get_package_emoji "$PACKAGE_NAME")
+              # Extract display name (e.g., @read-frog/extension -> Extension)
+              PACKAGE_DISPLAY_NAME=$(echo "$PACKAGE_NAME" | sed 's/.*\///g' | sed 's/\b\w/\U&/g')
+
+              NOTIFICATION_CONTENT="$NOTIFICATION_CONTENT\n$EMOJI **$PACKAGE_DISPLAY_NAME** \`$PACKAGE_VERSION\`"
+              RELEASE_URLS="$RELEASE_URLS\n[$PACKAGE_DISPLAY_NAME Release](https://github.com/${{ github.repository }}/releases/tag/$PACKAGE_TAG)"
             fi
-          fi
+          done
 
           # Create Discord payload
           cat << EOF > /tmp/discord_payload.json
