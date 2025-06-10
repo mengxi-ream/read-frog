@@ -19,7 +19,7 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
     nav: {
       title: (
         <>
-          <Image src="/logo.png" alt="Logo" className="size-6" />
+          <Image src="/logo.png" alt="Logo" className="size-6" width={24} height={24} />
           {APP_NAME_LOCALE[locale]}
         </>
       ),

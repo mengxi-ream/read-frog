@@ -46,7 +46,7 @@ export default function Footer({
       <Container className="py-16">
         <div className="flex flex-col items-start justify-between gap-x-8 gap-y-8 md:flex-row">
           <div className="flex flex-1 flex-col gap-y-2">
-            <Image src="/logo.png" alt="Read Frog" className="size-8" />
+            <Image src="/logo.png" alt="Read Frog" className="size-8" width={32} height={32} />
             <p className="text-sm font-medium text-zinc-700 dark:text-zinc-300">
               {t('description')}
             </p>

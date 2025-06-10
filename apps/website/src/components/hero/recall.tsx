@@ -15,7 +15,7 @@ export function Recall() {
         target="_blank"
         className="z-50 bg-black dark:bg-white rounded-full w-fit text-white dark:text-black px-4 py-2 flex items-center gap-2"
       >
-        <Image src="/images/icons/chrome.png" alt="Chrome" className="size-5" />
+        <Image src="/images/icons/chrome.png" alt="Chrome" className="size-5" width={20} height={20} />
         Install Now
       </Link>
       <p className="text-center mt-4 text-neutral-300 relative z-20">
