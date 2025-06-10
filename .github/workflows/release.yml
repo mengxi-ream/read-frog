@@ -101,17 +101,23 @@ jobs:
 
             echo "Creating release for $display_name with tag: $tag"
 
+            # Create JSON payload with proper escaping
+            cat << EOF > /tmp/release_payload.json
+          {
+            "tag_name": "$tag",
+            "name": "$display_name $tag",
+            "generate_release_notes": true,
+            "draft": false,
+            "prerelease": false
+          }
+          EOF
+
             # Use GitHub's auto-generated release notes
             curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Content-Type: application/json" \
               -X POST \
               "https://api.github.com/repos/${{ github.repository }}/releases" \
-              -d '{
-                "tag_name": "'$tag'",
-                "name": "'$display_name' '$tag'",
-                "generate_release_notes": true,
-                "draft": false,
-                "prerelease": false
-              }'
+              -d @/tmp/release_payload.json
           }
 
           # Create releases for tagged packages
