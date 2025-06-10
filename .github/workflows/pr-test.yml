@@ -38,6 +38,9 @@ jobs:
           fi
         shell: bash
 
+      - name: Syncpack lint
+        run: pnpm syncpack:lint
+
       - name: Type check
         run: pnpm type-check
 
