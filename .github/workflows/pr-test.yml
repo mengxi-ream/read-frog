@@ -38,8 +38,8 @@ jobs:
           fi
         shell: bash
 
-      - name: Compile
-        run: pnpm compile
+      - name: Type check
+        run: pnpm type-check
 
       - name: Run tests
         run: pnpm test

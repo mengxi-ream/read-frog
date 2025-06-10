@@ -7,7 +7,7 @@ else
   echo "✅ No uncommented eruda imports found."
 fi
 
-pnpm compile
+pnpm type-check
 
 # Check if SKIP_FREE_API environment variable is set
 if [ "$SKIP_FREE_API" = "true" ]; then
