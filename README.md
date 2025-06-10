@@ -36,35 +36,6 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 </details>
 
-## 👋🏻 Getting Started & Join Our Community
-
-Read Frog's vision is to provide an easy-to-use, intelligent, and personalized language learning experience for language learners of all levels. This has become possible in the AI era, but there are few products on the market that meet this demand. Therefore, we decided to take matters into our own hands and ultimately make the world no longer reliant on human language instructors.
-
-Whether you are a user or a developer, Read Frog will be an important part of your journey toward this vision. Please be aware that Read Frog is currently under active development, and feedback is welcome for any [issues][issues-link] encountered.
-
-| [![][discord-shield-badge]][discord-link] | In Discord ask questions, and connect with developers.                                 |
-| :---------------------------------------- | :------------------------------------------------------------------------------------- |
-| [![][wechat-shield-badge]][wechat-link]   | If you are in mainland China, you can add the WeChat account to join the WeChat group. |
-
-> \[!IMPORTANT]
->
-> **⭐️ Star Us**, You will receive all release notifications from GitHub without any delay \~
-
-<details>
-<summary>
-  <kbd>Star History</kbd>
-</summary>
-
-<a href="https://www.star-history.com/#mengxi-ream/read-frog&Timeline">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
- </picture>
-</a>
-
-</details>
-
 ## 📺 Demo
 
 ![Read Frog](/docs/read-demo.gif)
@@ -80,6 +51,37 @@ Whether you are a user or a developer, Read Frog will be an important part of yo
 | ------- | ----------------------------------------------- | ----------------------------------------------------------------- |
 | Chrome  | [![][chrome-version-shield]][chrome-store-link] | [Chrome Web Store](chrome-store-link) or [中国镜像](crxsoso-link) |
 | Edge    | [![][edge-version-shield]][edge-store-link]     | [Microsoft Edge Addons](edge-store-link)                          |
+
+## 👋🏻 Getting Started & Join Our Community
+
+Read Frog's vision is to provide an easy-to-use, intelligent, and personalized language learning experience for language learners of all levels. This has become possible in the AI era, but there are few products on the market that meet this demand. Therefore, we decided to take matters into our own hands and ultimately make the world no longer reliant on human language instructors.
+
+Whether you are a user or a developer, Read Frog will be an important part of your journey toward this vision. Please be aware that Read Frog is currently under active development, and feedback is welcome for any [issues][issues-link] encountered.
+
+| [![][discord-shield-badge]][discord-link] | In Discord ask questions, and connect with developers.                                 |
+| :---------------------------------------- | :------------------------------------------------------------------------------------- |
+| [![][wechat-shield-badge]][wechat-link]   | If you are in mainland China, you can add the WeChat account to join the WeChat group. |
+
+> \[!IMPORTANT]
+>
+> **⭐️ Star Us**, You will receive all release notifications from GitHub without any delay \~
+
+[![][image-star]][github-star-link]
+
+<details>
+<summary>
+  <kbd>Star History</kbd>
+</summary>
+
+<a href="https://www.star-history.com/#mengxi-ream/read-frog&Timeline">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=mengxi-ream/read-frog&type=Timeline" />
+ </picture>
+</a>
+
+</details>
 
 ## 📖 Introduction
 
@@ -165,3 +167,5 @@ If you like Read Frog, you can give a star ⭐️ at Github.
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 [wechat-link]: ./docs/wechat.jpg
 [crxsoso-link]: https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb
+[image-star]: ./docs/star.png
+[github-star-link]: https://github.com/mengxi-ream/read-frog/stargazers
