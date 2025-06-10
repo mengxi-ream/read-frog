@@ -1,0 +1,22 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "tasks": {
+    "build": {
+      "inputs": ["$TURBO_DEFAULT$", "!coverage/**"],
+      "dependsOn": ["^build"],
+      "outputs": [".output/**", ".wxt/**"]
+    },
+    "zip": {
+      "outputs": [".output/**"]
+    },
+    "test:cov": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"]
+    },
+    "test:watch": {
+      "cache": false,
+      "persistent": true
+    }
+  },
+  "extends": ["//"]
+}

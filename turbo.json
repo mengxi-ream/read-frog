@@ -3,23 +3,11 @@
   "ui": "tui",
   "tasks": {
     "build": {
-      "dependsOn": ["^build"],
-      "outputs": [
-        ".output/**",
-        "dist/**",
-        ".wxt/**",
-        ".next/**",
-        "!.next/cache/**"
-      ]
+      "dependsOn": ["^build"]
     },
     "dev": {
       "cache": false,
       "persistent": true
-    },
-    "start": {
-      "cache": false,
-      "persistent": true,
-      "dependsOn": ["build"]
     },
     "lint": {
       "dependsOn": ["^build"]
@@ -29,22 +17,10 @@
       "cache": false
     },
     "test": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
-    },
-    "test:cov": {
-      "dependsOn": ["^build"],
-      "outputs": ["coverage/**"]
-    },
-    "test:watch": {
-      "cache": false,
-      "persistent": true
+      "dependsOn": ["^build"]
     },
     "type-check": {
       "dependsOn": ["^build"]
-    },
-    "zip": {
-      "outputs": [".output/**"]
     }
   }
 }
