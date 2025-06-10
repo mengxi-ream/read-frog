@@ -1,19 +1,20 @@
 {
   "name": "read-frog",
-  "type": "module",
+  "description": "Read Frog monorepo - browser extension and website for language learning",
   "version": "0.0.0",
   "private": true,
+  "type": "module",
   "author": "MengXi <contact@mengxi.work> (https://mengxi.work)",
-  "description": "Read Frog monorepo - browser extension and website for language learning",
+  "packageManager": "pnpm@10.10.0",
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
     "lint": "turbo lint",
     "lint:fix": "turbo lint:fix",
-    "test": "turbo test",
-    "type-check": "turbo type-check",
+    "prepare": "husky",
     "release": "changeset tag && git push origin --tags",
-    "prepare": "husky"
+    "test": "turbo test",
+    "type-check": "turbo type-check"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
@@ -22,11 +23,11 @@
     "@commitlint/config-conventional": "^19.8.1",
     "husky": "^9.1.7",
     "lint-staged": "^16.0.0",
+    "syncpack": "^13.0.4",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
   },
-  "packageManager": "pnpm@10.10.0",
   "engines": {
     "node": ">=20.11.0"
   }
-} 
+}

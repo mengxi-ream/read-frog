@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/syncpack@13.0.4/dist/schema.json",
+  "formatBugs": false,
+  "versionGroups": [
+    {
+      "label": "Workspace packages",
+      "packages": ["**"],
+      "dependencies": ["@repo/**"],
+      "dependencyTypes": ["dev", "prod", "peer"],
+      "pinVersion": "workspace:*"
+    }
+  ],
+  "semverGroups": [
+    {
+      "label": "Use caret ranges",
+      "packages": ["**"],
+      "dependencies": ["**"],
+      "dependencyTypes": ["prod", "dev", "peer"],
+      "range": "^"
+    }
+  ]
+} 
