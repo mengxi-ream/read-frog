@@ -10,7 +10,6 @@ import {
 } from '../constants/config'
 import { runMigration } from './migration'
 
-// eslint-disable-next-line import/no-mutable-exports
 export let globalConfig: Config | null = null
 export const loadGlobalConfigPromise = initializeConfig()
 

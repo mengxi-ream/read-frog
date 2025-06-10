@@ -1,10 +1,9 @@
 import antfu from '@antfu/eslint-config'
-import pluginQuery from '@tanstack/eslint-plugin-query'
 
-export default antfu({
+export const antfuConfig = {
   formatters: {
     /**
-     * Format CSS, LESS, SCSS files, also the `<style>` blocks in Vue
+     * Format CSS, LESS, SCSS files, also the `<style>` blocks
      * By default uses Prettier
      */
     css: true,
@@ -20,11 +19,8 @@ export default antfu({
      */
     markdown: 'prettier',
   },
-  react: true,
-  rules: {
-    'react-refresh/only-export-components': 'off',
-  },
-  plugins: {
-    '@tanstack/query': pluginQuery,
-  },
-})
+}
+
+export const config = antfu(antfuConfig)
+
+

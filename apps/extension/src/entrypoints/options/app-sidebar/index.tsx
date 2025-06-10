@@ -11,7 +11,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
-import { version } from '../../../../package.json'
+import { version } from '../../../../../../package.json'
 import { NAV_ITEMS } from './nav-items'
 
 export function AppSidebar() {
