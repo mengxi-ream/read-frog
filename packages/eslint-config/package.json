@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     "./base": "./base.js",
-    "./extension": "./extension.js"
+    "./extension": "./extension.js",
+    "./next": "./next.js"
   },
   "devDependencies": {
     "eslint": "^9.28.0",
@@ -17,6 +18,7 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.24.0"
+    "typescript-eslint": "^8.24.0",
+    "@next/eslint-plugin-next": "^15.3.3"
   }
 }

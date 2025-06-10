@@ -1,0 +1,18 @@
+{
+  "title": "陪读蛙",
+  "pages": [
+    "---快速开始---",
+    "index",
+    "installation",
+    "translation",
+    "api-key",
+    "tool-compare",
+    "future-plan",
+    "---高级配置---",
+    "providers",
+    "---贡献---",
+    "contribution",
+    "tech-knowledge"
+  ],
+  "root": true
+}

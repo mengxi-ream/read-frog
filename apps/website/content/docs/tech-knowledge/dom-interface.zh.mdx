@@ -1,0 +1,239 @@
+---
+title: DOM 节点接口继承层级
+description: 下面的内容将详细介绍 DOM 中 `Node`、`Element`、`HTMLElement` 三个接口的继承关系，以及它们各自的主要子类型。
+---
+
+通过这份文档，你将清晰地了解：
+
+1. `Node` 作为所有 DOM 节点的基础，包含哪些节点类型（如文档、元素、文本、注释等）。
+2. `Element` 在 `Node` 之上的角色，如何划分 HTML、SVG、MathML 等不同分支。
+3. `HTMLElement` 作为所有 HTML 元素的基类，其下又有哪些常见的具体接口（如 `<div>`、`<input>`、`<canvas>` 等）。
+4. 最终给出一个完整的继承树，帮助你直观地掌握从最顶层通用节点到最底层具体标签接口的全貌。
+
+## 一、三个层级的概念解析
+
+### 1. `Node`（接口）
+
+- **定义**  
+  `Node` 是整个 DOM（文档对象模型）树中最基础的接口，位于继承链的顶端。任何在文档树里的“节点”（包括元素、文本、注释、文档本身等）都继承自 `Node`。
+- **主要特点**
+  - 拥有通用的属性和方法，比如 `.parentNode`、`.childNodes`、`.appendChild()`、`.removeChild()` 等。
+  - 可以代表**文档节点**（`Document`）、**元素节点**（`Element`）、**文本节点**（`Text`）、**注释节点**（`Comment`）、**文档片段**（`DocumentFragment`）等多种类型。
+  - 层次上位于：
+    ```
+    EventTarget → Node
+    ```
+    换句话说，`Node` 本身继承自 `EventTarget`，从而具有事件监听与分发能力。
+
+### 2. `Element`（接口，继承自 `Node`）
+
+- **定义**  
+  `Element` 也是一个接口，它继承自 `Node`，表示“元素节点”。与 `Node` 相比，`Element` 额外提供了与元素相关的属性和方法，比如 `.tagName`、`.getAttribute()` / `.setAttribute()`、`.classList`、`.querySelector()` 等。
+- **主要特点**
+  - 只要是 HTML 或 XML 中的标签节点（例如 `<div>`、`<span>`、`<svg>`、`<circle>`、`<math>`、自定义元素等），在 DOM 里都归为 `Element` 或它的子类型。
+  - 在继承链上：
+    ```
+    EventTarget → Node → Element
+    ```
+  - `Element` 本身又被进一步细分为：
+    ```
+    ├── HTMLElement   （所有 HTML 标签的基类）
+    ├── SVGElement    （所有 SVG 元素的基类）
+    ├── MathMLElement （所有 MathML 元素的基类）
+    └── （以及将来可能的其他 XML/自定义元素类型……）
+    ```
+  - 每种类型都有自己额外的方法和属性，比如 `SVGElement` 提供 `getBBox()`、`getCTM()` 等 SVG 专用方法；而 `HTMLElement` 提供诸如 `.innerText`、`.style`、`.dataset`、`.click()` 等 HTML 专用属性和方法。
+
+### 3. `HTMLElement`（接口，继承自 `Element`）
+
+- **定义**  
+  `HTMLElement` 是所有标准 **HTML 元素**（`<div>`、`<span>`、`<input>`、`<form>`……等）对应的接口的共同父类。在浏览器中，当你写 `<div>...</div>`，最终在 JS 里拿到的就是一个继承自 `HTMLElement` 的实例——具体类型是 `HTMLDivElement`。
+- **主要特点**
+  - 提供了 HTML 元素所共有的属性与方法，比如：
+    - 全局属性：`.id`、`.className`、`.title`、`.dataset`
+    - 与布局/尺寸相关：`.clientWidth`、`.offsetHeight`、`.getBoundingClientRect()`
+    - 与交互相关：`.click()`、`.focus()`、`.blur()`
+    - 与表单相关：如果是表单元素，还会有 `.disabled`、`.value`、`.checked` 等。
+  - 在继承链上：
+    ```
+    EventTarget → Node → Element → HTMLElement
+    ```
+  - **所有具体的 HTML 元素类型**（比如 `<a>`、`<button>`、`<canvas>` 等）都继承自 `HTMLElement`，并各自再扩展出了额外的属性与方法（比如 `HTMLCanvasElement` 有 `.getContext()`，`HTMLAnchorElement` 有 `.href`、`.target` 等）。
+
+---
+
+## 二、完整继承树（树形结构）
+
+下面用树形图展示从 `Node` 往下的继承体系，并将常见的子类型都列出来。出于清晰性考虑，将整个树分成几个层级来写。
+
+```
+EventTarget
+└─ Node
+   ├─ Document
+   │  ├─ HTMLDocument  （在浏览器中通常是 “document” 对象的具体类型）
+   │  ├─ XMLDocument   （如果在 XML 环境下）
+   │  └─ …（其他文档类型，视环境而定）
+   │
+   ├─ DocumentType      （<!DOCTYPE …> 对应的节点类型）
+   │
+   ├─ DocumentFragment  （用来临时存放子节点的“文档片段”；比如 document.createDocumentFragment() 返回的对象）
+   │  └─ ShadowRoot     （attachShadow 生成的节点类型，继承自 DocumentFragment）
+   │
+   ├─ Element
+   │   ├─ HTMLElement
+   │   │   ├─ HTMLAnchorElement          （<a>）
+   │   │   ├─ HTMLAreaElement            （<area>）
+   │   │   ├─ HTMLAudioElement           （<audio>）
+   │   │   ├─ HTMLBRElement              （<br>）
+   │   │   ├─ HTMLBaseElement            （<base>）
+   │   │   ├─ HTMLBodyElement            （<body>）
+   │   │   ├─ HTMLButtonElement          （<button>）
+   │   │   ├─ HTMLCanvasElement          （<canvas>）
+   │   │   ├─ HTMLDListElement           （<dl>）
+   │   │   ├─ HTMLDataElement            （<data>）
+   │   │   ├─ HTMLDataListElement        （<datalist>）
+   │   │   ├─ HTMLDialogElement          （<dialog>）
+   │   │   ├─ HTMLDivElement             （<div>）
+   │   │   ├─ HTMLEmbedElement           （<embed>）
+   │   │   ├─ HTMLFieldSetElement        （<fieldset>）
+   │   │   ├─ HTMLFormElement            （<form>）
+   │   │   ├─ HTMLFrameSetElement        （<frameset>，已废弃）
+   │   │   ├─ HTMLHRElement              （<hr>）
+   │   │   ├─ HTMLHeadElement            （<head>）
+   │   │   ├─ HTMLHeadingElement         （<h1> ~ <h6>）
+   │   │   ├─ HTMLHtmlElement            （<html>）
+   │   │   ├─ HTMLIFrameElement          （<iframe>）
+   │   │   ├─ HTMLImageElement           （<img>）
+   │   │   ├─ HTMLInputElement           （<input>）
+   │   │   ├─ HTMLLIElement              （<li>）
+   │   │   ├─ HTMLLabelElement           （<label>）
+   │   │   ├─ HTMLLegendElement          （<legend>）
+   │   │   ├─ HTMLLinkElement            （<link>）
+   │   │   ├─ HTMLMapElement             （<map>）
+   │   │   ├─ HTMLMediaElement           （<audio> 与 <video> 的抽象基类）
+   │   │   │   ├─ HTMLAudioElement       （<audio>，已在上面列出）
+   │   │   │   └─ HTMLVideoElement       （<video>）
+   │   │   ├─ HTMLMenuElement            （<menu>）
+   │   │   ├─ HTMLMetaElement            （<meta>）
+   │   │   ├─ HTMLMeterElement           （<meter>）
+   │   │   ├─ HTMLModElement             （<ins> / <del>）
+   │   │   ├─ HTMLOListElement           （<ol>）
+   │   │   ├─ HTMLObjectElement          （<object>）
+   │   │   ├─ HTMLOptGroupElement        （<optgroup>）
+   │   │   ├─ HTMLOptionElement          （<option>）
+   │   │   ├─ HTMLOutputElement          （<output>）
+   │   │   ├─ HTMLParagraphElement       （<p>）
+   │   │   ├─ HTMLPictureElement         （<picture>）
+   │   │   ├─ HTMLPreElement             （<pre>）
+   │   │   ├─ HTMLProgressElement        （<progress>）
+   │   │   ├─ HTMLQuoteElement           （<blockquote> / <q>）
+   │   │   ├─ HTMLScriptElement          （<script>）
+   │   │   ├─ HTMLSelectElement          （<select>）
+   │   │   ├─ HTMLSourceElement          （<source>）
+   │   │   ├─ HTMLSpanElement            （<span>）
+   │   │   ├─ HTMLStyleElement           （<style>）
+   │   │   ├─ HTMLTableCaptionElement    （<caption>）
+   │   │   ├─ HTMLTableCellElement       （<td> / <th>）
+   │   │   ├─ HTMLTableColElement        （<col> / <colgroup>）
+   │   │   ├─ HTMLTableElement           （<table>）
+   │   │   ├─ HTMLTableRowElement        （<tr>）
+   │   │   ├─ HTMLTableSectionElement    （<thead> / <tbody> / <tfoot>）
+   │   │   ├─ HTMLTemplateElement        （<template>）
+   │   │   ├─ HTMLTextAreaElement        （<textarea>）
+   │   │   ├─ HTMLTimeElement            （<time>）
+   │   │   ├─ HTMLTitleElement           （<title>）
+   │   │   ├─ HTMLTrackElement           （<track>）
+   │   │   ├─ HTMLUListElement           （<ul>）
+   │   │   ├─ HTMLUnknownElement         （自定义或浏览器不认识的标签类型）
+   │   │   └─ …（某些浏览器中可能还有额外扩展接口）
+   │   │
+   │   ├─ SVGElement
+   │   │   ├─ SVGAElement                （<a> 的 SVG 版本）
+   │   │   ├─ SVGCircleElement           （<circle>）
+   │   │   ├─ SVGClipPathElement         （<clipPath>）
+   │   │   ├─ SVGDefsElement             （<defs>）
+   │   │   ├─ SVGDescElement             （<desc>）
+   │   │   ├─ SVGEllipseElement          （<ellipse>）
+   │   │   ├─ SVGFEBlendElement          （<feBlend>）
+   │   │   ├─ SVGFEColorMatrixElement    （<feColorMatrix>）
+   │   │   ├─ …                         （省略数十种 SVG 过滤器、路径、文本等接口）
+   │   │   └─ SVGSVGElement              （<svg> 顶层容器）
+   │   │
+   │   └─ MathMLElement
+   │       ├─ MathMLFractionElement      （<mfrac>）
+   │       ├─ MathMLRootElement          （<math>）
+   │       ├─ MathMLOperatorElement      （<mo>）
+   │       ├─ MathMLIdentifierElement    （<mi>）
+   │       └─ …（各类 MathML 专用元素）
+   │
+   ├─ Text                         （文本节点，对应 Node.TEXT_NODE）
+   │
+   ├─ Comment                      （注释节点，对应 Node.COMMENT_NODE）
+   │
+   ├─ ProcessingInstruction        （处理指令节点，对应 Node.PROCESSING_INSTRUCTION_NODE）
+   │
+   ├─ CDATASection                 （仅在 XML/MathML/SVG 环境使用，对应 Node.CDATA_SECTION_NODE）
+   │
+   ├─ Attr                         （属性节点，对应 Node.ATTRIBUTE_NODE；现代多用 getAttribute()/setAttribute() 操作）
+   │
+   └─ DocumentType                 （<!DOCTYPE> 对应节点，对应 Node.DOCUMENT_TYPE_NODE）
+```
+
+---
+
+## 三、逐层级“类型”及其含义回顾
+
+1. **`Node` 下面主要有哪些类型？**
+
+   - **Document 相关**（代表整个文档或其片段）：
+     - `Document` / `HTMLDocument` / `XMLDocument`
+     - `DocumentFragment` / `ShadowRoot`
+     - `DocumentType`
+   - **元素节点**：`Element`
+   - **文本/注释/处理指令等**：
+     - `Text`（文本节点）
+     - `Comment`（注释节点）
+     - `ProcessingInstruction`（处理指令节点）
+     - `CDATASection`（仅限 XML 环境）
+     - `Attr`（属性节点）
+   - **过时的或废弃的节点**：
+     - `EntityReference`、`Notation` 等现代浏览器通常已经不再使用。
+
+2. **`Element` 下面有哪些主要分支？**
+
+   - `HTMLElement`
+   - `SVGElement`
+   - `MathMLElement`
+   - **（可能还有其他 XML 或自定义元素分支）**
+
+3. **`HTMLElement` 下面具体有哪些子类型？**
+   - 基本上，**每个 HTML 标签**（例如 `<div>`、`<span>`、`<input>`、`<form>`……）都对应一个以 `HTML…Element` 命名的接口。
+   - 这些接口在 `HTMLElement` 的基础上，额外加入该标签特有的属性与方法。
+   - 常见子类型包括：
+     ```
+     HTMLAnchorElement, HTMLAreaElement, HTMLAudioElement, HTMLBRElement,
+     HTMLBaseElement, HTMLBodyElement, HTMLButtonElement, HTMLCanvasElement,
+     HTMLDListElement, HTMLDialogElement, HTMLDivElement, HTMLEmbedElement,
+     HTMLFormElement, HTMLHeadingElement, HTMLIFrameElement, HTMLImageElement,
+     HTMLInputElement, HTMLLabelElement, HTMLLinkElement, HTMLLIElement,
+     HTMLMetaElement, HTMLParagraphElement, HTMLSelectElement, HTMLSpanElement,
+     HTMLTableElement, HTMLUListElement, …（等等几十种）
+     ```
+
+---
+
+### 小结
+
+- **`Node`** 是 DOM 中最通用的节点接口，代表各种“节点”——从文档本身到元素、文本、注释、属性等。
+- **`Element`** 继承自 `Node`，代表“元素节点”，包括 HTML、SVG、MathML、XML、自定义标签等。
+- **`HTMLElement`** 继承自 `Element`，专门对应 **HTML 标签**，是所有 HTML 元素接口（如 `HTMLDivElement`、`HTMLInputElement` 等）的基类。
+
+通过上述树形结构，可以直观地看到：
+
+```
+EventTarget → Node → Element →（下分 SVGElement、MathMLElement、HTMLElement …）
+                                               ↓
+                                    HTMLAnchorElement, HTMLDivElement, …
+```
+
+以及在 `Element` 之下并列存在的 `SVGElement`（其下还有几十种 SVG 接口）、`MathMLElement`（MathML 接口）等。

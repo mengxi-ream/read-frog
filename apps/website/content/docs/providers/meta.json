@@ -1,0 +1,5 @@
+{
+  "title": "Model Providers",
+  "icon": "ToyBrick",
+  "pages": ["ollama"]
+}

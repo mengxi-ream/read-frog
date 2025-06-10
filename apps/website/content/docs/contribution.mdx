@@ -1,0 +1,55 @@
+---
+title: Code Contribution
+description: Let's build a better language learning product together
+icon: GitPullRequestArrow
+---
+
+## Getting Started
+
+Fork the repository and clone it to your local machine.
+
+```bash
+# Clone the repository from your fork
+git clone https://github.com/xxxxx/read-frog.git
+
+# Enter the project directory
+cd read-frog
+
+# Start the project
+pnpm dev
+```
+
+<Callout title="pnpm dev can't load the extension automatically">
+  If you use Chrome version 137 or higher, you need to download [Chrome for
+  Testing](https://developer.chrome.com/blog/chrome-for-testing/) for
+  development. See
+  [details](https://wxt.dev/guide/essentials/config/browser-startup.html).
+</Callout>
+
+## Submitting Code
+
+Create a new branch
+
+```bash
+# For new features
+git checkout -b feat/the-feature
+
+# For bug fixes
+git checkout -b fix/the-bug
+```
+
+Create a Pull Request and wait for it to be merged.
+
+## Commit Convention
+
+We use the [Conventional Commits](https://www.conventionalcommits.org/) specification for writing commit messages.
+
+## Skip Google API Tests in China
+
+If you are a contributor from mainland China, when you need to push code, use the following command:
+
+```bash
+SKIP_FREE_API=true git push
+```
+
+Why is this necessary? Because code tests are performed during the push process, but Google's free API is inaccessible in mainland China. This would cause the tests to fail and the push to be rejected. By setting the `SKIP_FREE_API` environment variable, we skip the Google tests.

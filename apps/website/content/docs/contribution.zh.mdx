@@ -1,0 +1,54 @@
+---
+title: 贡献代码
+description: 一起构建更好的语言学习产品
+icon: GitPullRequestArrow
+---
+
+## 启动项目
+
+Fork 项目并克隆到本地。
+
+```bash
+# 从你的 fork 克隆项目
+git clone https://github.com/xxxxx/read-frog.git
+
+# 进入项目目录
+cd read-frog
+
+# 启动项目
+pnpm dev
+```
+
+<Callout title="pnpm dev 无法自动加载扩展">
+  如果你使用 Chrome 137 或更高版本，你需要下载 [Chrome for
+  Testing](https://developer.chrome.com/blog/chrome-for-testing/) 进行开发。
+  请参考[详细说明](https://wxt.dev/guide/essentials/config/browser-startup.html)。
+</Callout>
+
+## 提交代码
+
+创建新的分支
+
+```bash
+# 如果是新功能
+git checkout -b feat/the-feature
+
+# 如果是修复 bug
+git checkout -b fix/the-bug
+```
+
+发起 Pull Request，然后等待合并。
+
+## Commit 规范
+
+我们使用 [Conventional Commits](https://www.conventionalcommits.org/) 规范来编写 commit message。
+
+## 在中国大陆跳过谷歌测试
+
+如果你是中国大陆贡献者，那么当你要 push 代码的时候你得用
+
+```bash
+SKIP_FREE_API=true git push
+```
+
+为什么要这样做呢？因为在你 push 代码的时候会做代码测试，但是谷歌的免费 API 在国内无法访问，这会导致测试失败，从而 push 失败，我们通过设置 `SKIP_FREE_API` 环境变量来跳过谷歌测试。

@@ -1,0 +1,105 @@
+---
+title: Ollama
+description: read-frog can leverage a locally deployed Ollama server to achieve offline AI translation capabilities
+---  
+
+## What is the Ollama Server?  
+The Ollama server is a lightweight, open-source AI model runtime platform that allows users to easily deploy various large language models (LLMs) and AI models locally without complex configuration. It acts as an "AI model manager," simplifying tedious processes like model downloading, configuration, and runtime into just a few commands—making it accessible even for AI deployment beginners.
+
+
+## Ollama Local Deployment Tutorial  
+
+### 1. Download the Installer  
+You can download the installer from the official ollama.ai website [here](https://ollama.ai/).  
+
+### 2. Run the Installer  
+**Do not** directly click the downloaded `.exe` file to install (as it will default to the C drive). Instead, open the Windows Command Prompt (CMD), drag the installer into the CMD window, and enter the following command:  
+```bash  
+OllamaSetup.exe /DIR="D:\Your\Path"  
+```  
+This will install Ollama in the `Your\Path` folder on the D drive.  
+
+### 3. Configure Ollama's Cross-Origin Support  
+Set the following environment variables:  
+- API service listening address: `OLLAMA_HOST=0.0.0.0`  
+- Allow cross-origin access: `OLLAMA_ORIGINS=*`  
+- Model file download location: `OLLAMA_MODELS=F:\ollama\models`  
+  (This setting is unrelated to cross-origin access but is crucial because the default model download location is on the C drive, which may fill up your C drive. Manually specify the model storage path.)  
+
+**Restart your computer** after configuring the environment variables.  
+
+
+## Common Ollama Commands  
+
+### 1. Check Ollama Version and Start the Server  
+```bash  
+ollama version  
+ollama start  
+```  
+Use these commands to check the currently installed Ollama version, confirm successful installation, view version details, and start the Ollama server.  
+
+The default address for the Ollama server is: `http://127.0.0.1:11434`. The API Key can be arbitrarily set in the plugin settings, but the model name must exactly match the names listed by `ollama list`.  
+
+### 2. Search for Available Models  
+```bash  
+ollama search [keyword]  
+```  
+**Example**: Search for LLaMA-related models:  
+```bash  
+ollama search llama  
+```  
+This command lists models matching the keyword, including names and descriptions, to help users select the required model.  
+
+### 3. Pull a Model  
+```bash  
+ollama pull [model name]  
+```  
+**Example**: Pull the `llama2` model:  
+```bash  
+ollama pull llama2  
+```  
+After execution, Ollama downloads the specified model from the model repository to the local system for offline use.  
+
+### 4. Run a Model  
+```bash  
+ollama run [model name]  
+```  
+**Example**: Run the `llama2` model and interact with it:  
+```bash  
+ollama run llama2  
+```  
+After launching, enter questions or commands in the command line, and the model will return corresponding responses. You can also add parameters during runtime to adjust model behavior, e.g.:  
+```bash  
+ollama run llama2 --system "You are a professional translator. Translate the user's input into English."  
+```  
+Use the `--system` parameter to set the model's role or task description.  
+
+### 5. Stop a Running Model  
+```bash  
+ollama stop [model name]  
+```  
+**Example**: Stop the running `llama2` model:  
+```bash  
+ollama stop llama2  
+```  
+This command closes the running model process and frees system resources.  
+
+### 6. List Downloaded Models  
+```bash  
+ollama list  
+```  
+This command displays all locally downloaded models, including names, sizes, and creation times, to help users manage local model resources.  
+
+### 7. Delete a Model  
+```bash  
+ollama delete [model name]  
+```  
+**Example**: Delete the unused `llama2` model:  
+```bash  
+ollama delete llama2  
+```  
+After execution, the model is removed from the local system, freeing disk space.  
+
+
+## Ollama Usage Recommendations  
+**Recommended model**: `gemma3:1b` (815MB in size). Despite its small footprint, this model is fully functional, performs well in translation tasks, and has low system load (supports CPU operation). Avoid using inference models like `deepseek`, as they output reasoning processes, leading to poor translation quality and speed.
