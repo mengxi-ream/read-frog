@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/syncpack@13.0.4/dist/schema.json",
+  "lintFormatting": false,
   "versionGroups": [
     {
       "label": "Workspace packages",

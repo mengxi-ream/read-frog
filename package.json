@@ -14,7 +14,7 @@
     "dev": "turbo dev",
     "lint": "eslint . && turbo lint",
     "lint:fix": "eslint . --fix && turbo lint:fix",
-    "syncpack": "syncpack lint",
+    "syncpack:lint": "syncpack lint",
     "syncpack:fix": "syncpack fix-mismatches",
     "prepare": "husky",
     "release": "changeset tag && git push origin --tags",
