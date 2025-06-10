@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 0.10.5
+
+### Patch Changes
+
+- [#140](https://github.com/mengxi-ream/read-frog/pull/140) [`63f19d8`](https://github.com/mengxi-ream/read-frog/commit/63f19d84980f92d74d6aba463de2ca9b0f19fa08) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - ci: changelog from changeset
+
 ## 0.10.4
 
 ### Patch Changes
