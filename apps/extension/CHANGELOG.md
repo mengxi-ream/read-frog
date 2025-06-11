@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 0.10.6
+
+### Patch Changes
+
+- [#146](https://github.com/mengxi-ream/read-frog/pull/146) [`df733d4`](https://github.com/mengxi-ream/read-frog/commit/df733d415b04ecb17c42b54b8cea0d59d459b664) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: set target language right after entering guide step 1
+
+- [#144](https://github.com/mengxi-ream/read-frog/pull/144) [`5d3ac93`](https://github.com/mengxi-ream/read-frog/commit/5d3ac93d84fc501b6c2af3ced5000fb877067e1d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: add neat reader url on popup
+
 ## 0.10.5
 
 ### Patch Changes
