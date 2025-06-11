@@ -7,7 +7,7 @@ import { runMigration } from './migration'
  * Initialize the config, this function should only be called once in the background script
  * @returns The extension config
  */
-export async function initializeConfig(): Promise<Config | null> {
+export async function initializeConfig() {
   const [storedConfig, storedCSchemaVersion] = await Promise.all([
     storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
     storage.getItem<number>(`local:__configSchemaVersion`),
@@ -45,9 +45,6 @@ export async function initializeConfig(): Promise<Config | null> {
   ])
 
   await loadAPIKeyFromEnv()
-
-  const newConfig = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
-  return newConfig
 }
 
 async function loadAPIKeyFromEnv() {

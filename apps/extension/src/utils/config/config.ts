@@ -12,6 +12,7 @@ export let globalConfig: Config | null = null
 export async function loadGlobalConfig() {
   const config = await sendMessage('getInitialConfig', undefined)
   if (configSchema.safeParse(config).success) {
+    logger.info('Loaded global config', config)
     globalConfig = config
   }
 }
