@@ -3,121 +3,91 @@ import { deepQueryTopLevelSelector, translateWalkedElement, walkAndLabelElement 
 import { removeAllTranslatedWrapperNodes } from '@/utils/host/translate/node-manipulation'
 import { sendMessage } from '@/utils/message'
 
-// export function registerPageTranslationTriggers() {
-//   // Four-finger touch gesture to trigger translatePage
-//   let touchStartTime = 0
-//   let fourFingerTouchStarted = false
-//   let initialTouchPositions: Array<{ x: number, y: number }> = []
+type SimpleIntersectionOptions = Omit<IntersectionObserverInit, 'threshold'> & {
+  threshold?: number
+}
 
-//   document.addEventListener('touchstart', (e) => {
-//     if (e.touches.length === 4) {
-//       fourFingerTouchStarted = true
-//       touchStartTime = Date.now()
-//       // 记录初始触摸位置
-//       initialTouchPositions = Array.from(e.touches).map(touch => ({
-//         x: touch.clientX,
-//         y: touch.clientY,
-//       }))
-//     }
-//     else {
-//       fourFingerTouchStarted = false
-//       initialTouchPositions = []
-//     }
-//   }, { passive: true })
+interface IPageTranslationManager {
+  /**
+   * Indicates whether the page translation is currently active
+   */
+  readonly isActive: boolean
 
-//   document.addEventListener('touchend', (e) => {
-//     // Check if this was a four-finger tap (short duration touch)
-//     if (fourFingerTouchStarted && e.touches.length === 0) {
-//       const touchDuration = Date.now() - touchStartTime
-//       // Consider it a tap if touch duration is less than 500ms
-//       if (touchDuration < 500) {
-//         translatePage()
-//       }
-//       fourFingerTouchStarted = false
-//       initialTouchPositions = []
-//     }
-//   }, { passive: true })
+  /**
+   * Starts the automatic page translation functionality
+   * Registers observers, touch triggers and set storage
+   */
+  start: () => void
 
-//   document.addEventListener('touchmove', (e) => {
-//     // Cancel four-finger gesture if fingers move too much or finger count changes
-//     if (!fourFingerTouchStarted)
-//       return
+  /**
+   * Stops the automatic page translation functionality
+   * Cleans up all observers and removes translated content and set storage
+   */
+  stop: () => void
 
-//     // 检查手指数量是否改变
-//     if (e.touches.length !== 4) {
-//       fourFingerTouchStarted = false
-//       initialTouchPositions = []
-//       return
-//     }
+  /**
+   * Registers page translation triggers
+   */
+  registerPageTranslationTriggers: () => () => void
+}
 
-//     // 检查移动距离是否超过阈值（允许一定的移动容差）
-//     const MOVE_THRESHOLD = 30 // 30px 的移动阈值
-//     let hasMoveExceedThreshold = false
+export class PageTranslationManager implements IPageTranslationManager {
+  private static readonly MAX_DURATION = 500
+  private static readonly MOVE_THRESHOLD = 30 * 30
+  private static readonly DEFAULT_INTERSECTION_OPTIONS: SimpleIntersectionOptions = {
+    root: null,
+    rootMargin: '0px',
+    threshold: 0.1,
+  }
 
-//     for (let i = 0; i < Math.min(e.touches.length, initialTouchPositions.length); i++) {
-//       const currentTouch = e.touches[i]
-//       const initialPos = initialTouchPositions[i]
-//       const deltaX = Math.abs(currentTouch.clientX - initialPos.x)
-//       const deltaY = Math.abs(currentTouch.clientY - initialPos.y)
-//       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
-
-//       if (distance > MOVE_THRESHOLD) {
-//         hasMoveExceedThreshold = true
-//         break
-//       }
-//     }
-
-//     if (hasMoveExceedThreshold) {
-//       fourFingerTouchStarted = false
-//       initialTouchPositions = []
-//     }
-//   }, { passive: true })
-// }
-
-const MAX_DURATION = 500
-const MOVE_THRESHOLD2 = 30 * 30
-
-export class PageTranslationManager {
-  private isAutoTranslated: boolean = false
+  private isAutoTranslating: boolean = false
   private intersectionObserver: IntersectionObserver | null = null
   private mutationObservers: MutationObserver[] = []
-  private id: string | null = null
-  private options: IntersectionObserverInit
+  private walkId: string | null = null
+  private intersectionOptions: IntersectionObserverInit
   private dontWalkIntoElementsCache = new WeakSet<HTMLElement>()
 
-  constructor(options: IntersectionObserverInit = { root: null, rootMargin: '0px', threshold: 0.1 }) {
-    this.options = options
-    this.registerPageTranslationTriggers()
+  constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
+    if (intersectionOptions.threshold !== undefined) {
+      if (intersectionOptions.threshold < 0 || intersectionOptions.threshold > 1) {
+        throw new Error('IntersectionObserver threshold must be between 0 and 1')
+      }
+    }
+
+    this.intersectionOptions = {
+      ...PageTranslationManager.DEFAULT_INTERSECTION_OPTIONS,
+      ...intersectionOptions,
+    }
   }
 
   get isActive(): boolean {
-    return this.isAutoTranslated
+    return this.isAutoTranslating
   }
 
   start(): void {
-    if (this.isAutoTranslated) {
+    if (this.isAutoTranslating) {
       console.warn('AutoTranslationManager is already active')
       return
     }
 
-    this.id = crypto.randomUUID()
-    this.isAutoTranslated = true
-
+    this.isAutoTranslating = true
     sendMessage('setEnablePageTranslationOnContentScript', {
       enabled: true,
     })
 
     // Listen to existing elements when they enter the viewpoint
+    const walkId = crypto.randomUUID()
+    this.walkId = walkId
     this.intersectionObserver = new IntersectionObserver((entries, observer) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           if (isHTMLElement(entry.target)) {
-            translateWalkedElement(entry.target, this.id!)
+            translateWalkedElement(entry.target, walkId)
           }
           observer.unobserve(entry.target)
         }
       })
-    }, this.options)
+    }, this.intersectionOptions)
 
     // Initialize walkability state for existing elements
     this.addDontWalkIntoElements(document.body)
@@ -128,45 +98,97 @@ export class PageTranslationManager {
   }
 
   stop(): void {
-    if (!this.isAutoTranslated) {
+    if (!this.isAutoTranslating) {
+      console.warn('AutoTranslationManager is already inactive')
       return
     }
 
-    this.isAutoTranslated = false
+    this.isAutoTranslating = false
+    this.walkId = null
+    this.dontWalkIntoElementsCache = new WeakSet()
+
+    sendMessage('setEnablePageTranslationOnContentScript', {
+      enabled: false,
+    })
 
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect()
       this.intersectionObserver = null
     }
-
-    // Disconnect all mutation observers
     this.mutationObservers.forEach(observer => observer.disconnect())
     this.mutationObservers = []
 
-    this.dontWalkIntoElementsCache = new WeakSet()
-
     removeAllTranslatedWrapperNodes()
+  }
 
-    this.id = null
+  registerPageTranslationTriggers(): () => void {
+    let startTime = 0
+    let startTouches: TouchList | null = null
 
-    sendMessage('setEnablePageTranslationOnContentScript', {
-      enabled: false,
-    })
+    const reset = () => {
+      startTime = 0
+      startTouches = null
+    }
+
+    const onStart = (e: TouchEvent) => {
+      if (e.touches.length === 4) {
+        startTime = performance.now()
+        startTouches = e.touches
+      }
+      else {
+        reset()
+      }
+    }
+
+    const onMove = (e: TouchEvent) => {
+      if (!startTouches)
+        return
+      if (e.touches.length !== 4)
+        return reset()
+
+      for (let i = 0; i < 4; i++) {
+        const dx = e.touches[i].clientX - startTouches[i].clientX
+        const dy = e.touches[i].clientY - startTouches[i].clientY
+        if (dx * dx + dy * dy > PageTranslationManager.MOVE_THRESHOLD)
+          return reset()
+      }
+    }
+
+    const onEnd = () => {
+      if (!startTouches)
+        return
+      if (performance.now() - startTime < PageTranslationManager.MAX_DURATION)
+        this.isAutoTranslating ? this.stop() : this.start()
+      reset()
+    }
+
+    document.addEventListener('touchstart', onStart, { passive: true })
+    document.addEventListener('touchmove', onMove, { passive: true })
+    document.addEventListener('touchend', onEnd, { passive: true })
+    document.addEventListener('touchcancel', reset, { passive: true })
+
+    // 供调用方卸载
+    return () => {
+      document.removeEventListener('touchstart', onStart)
+      document.removeEventListener('touchmove', onMove)
+      document.removeEventListener('touchend', onEnd)
+      document.removeEventListener('touchcancel', reset)
+    }
   }
 
   private observerTopLevelParagraphs(container: HTMLElement): void {
     const observer = this.intersectionObserver
-    if (!this.id || !observer)
+    if (!this.walkId || !observer)
       return
 
-    walkAndLabelElement(container, this.id)
+    walkAndLabelElement(container, this.walkId)
     // if container itself has paragraph and the id
-    if (container.hasAttribute('data-read-frog-paragraph') && container.getAttribute('data-read-frog-walked') === this.id) {
+    if (container.hasAttribute('data-read-frog-paragraph') && container.getAttribute('data-read-frog-walked') === this.walkId) {
       observer.observe(container)
       return
     }
 
-    const paragraphs = this.collectParagraphElementsDeep(container, this.id)
+    const paragraphs = this.collectParagraphElementsDeep(container, this.walkId)
     const topLevelParagraphs = paragraphs.filter((el) => {
       const ancestor = el.parentElement?.closest('[data-read-frog-paragraph]')
       // keep it if either:
@@ -219,66 +241,11 @@ export class PageTranslationManager {
     return result
   }
 
-  private registerPageTranslationTriggers() {
-    let startTime = 0
-    let startTouches: TouchList | null = null
-
-    const reset = () => {
-      startTime = 0
-      startTouches = null
-    }
-
-    const onStart = (e: TouchEvent) => {
-      if (e.touches.length === 4) {
-        startTime = performance.now()
-        startTouches = e.touches
-      }
-      else {
-        reset()
-      }
-    }
-
-    const onMove = (e: TouchEvent) => {
-      if (!startTouches)
-        return
-      if (e.touches.length !== 4)
-        return reset()
-
-      for (let i = 0; i < 4; i++) {
-        const dx = e.touches[i].clientX - startTouches[i].clientX
-        const dy = e.touches[i].clientY - startTouches[i].clientY
-        if (dx * dx + dy * dy > MOVE_THRESHOLD2)
-          return reset()
-      }
-    }
-
-    const onEnd = () => {
-      if (!startTouches)
-        return
-      if (performance.now() - startTime < MAX_DURATION)
-        this.isAutoTranslated ? this.stop() : this.start()
-      reset()
-    }
-
-    document.addEventListener('touchstart', onStart, { passive: true })
-    document.addEventListener('touchmove', onMove, { passive: true })
-    document.addEventListener('touchend', onEnd, { passive: true })
-    document.addEventListener('touchcancel', reset, { passive: true })
-
-    // 供调用方卸载
-    return () => {
-      document.removeEventListener('touchstart', onStart)
-      document.removeEventListener('touchmove', onMove)
-      document.removeEventListener('touchend', onEnd)
-      document.removeEventListener('touchcancel', reset)
-    }
-  }
-
   /**
    * Handle style/class attribute changes and only trigger observation
    * when element transitions from "don't walk into" to "walkable"
    */
-  private handleElementWalkabilityChange(element: HTMLElement): void {
+  private didChangeToWalkable(element: HTMLElement): boolean {
     const wasDontWalkInto = this.dontWalkIntoElementsCache.has(element)
     const isDontWalkIntoNow = isDontWalkIntoElement(element)
 
@@ -293,9 +260,7 @@ export class PageTranslationManager {
     // Only trigger observation if element transitioned from "don't walk into" to "walkable"
     // wasDontWalkInto === true means it was previously not walkable
     // isDontWalkIntoNow === false means it's now walkable
-    if (wasDontWalkInto === true && isDontWalkIntoNow === false) {
-      this.observerTopLevelParagraphs(element)
-    }
+    return wasDontWalkInto === true && isDontWalkIntoNow === false
   }
 
   /**
@@ -326,8 +291,8 @@ export class PageTranslationManager {
           && (rec.attributeName === 'style' || rec.attributeName === 'class')
         ) {
           const el = rec.target
-          if (isHTMLElement(el)) {
-            this.handleElementWalkabilityChange(el)
+          if (isHTMLElement(el) && this.didChangeToWalkable(el)) {
+            this.observerTopLevelParagraphs(el)
           }
         }
       }

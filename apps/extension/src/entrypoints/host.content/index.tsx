@@ -1,8 +1,8 @@
 // import eruda from 'eruda'
 import { globalConfig, loadGlobalConfig } from '@/utils/config/config'
 import { shouldAutoEnable } from '@/utils/host/translate/auto-translation'
-import { registerTranslationTriggers } from './translation-trigger'
-import { PageTranslationManager } from './translation-trigger/page-translation'
+import { registerNodeTranslationTriggers } from './translation-control/node-translation'
+import { PageTranslationManager } from './translation-control/page-translation'
 import './listen'
 import './style.css'
 
@@ -11,7 +11,8 @@ export default defineContentScript({
   async main() {
     await loadGlobalConfig()
     // eruda.init()
-    registerTranslationTriggers()
+
+    registerNodeTranslationTriggers()
 
     const port = browser.runtime.connect({ name: 'translation-host.content' })
     const manager = new PageTranslationManager({
@@ -19,6 +20,8 @@ export default defineContentScript({
       rootMargin: '1000px',
       threshold: 0.1,
     })
+
+    manager.registerPageTranslationTriggers()
 
     const handleUrlChange = (from: string, to: string) => {
       if (from !== to) {

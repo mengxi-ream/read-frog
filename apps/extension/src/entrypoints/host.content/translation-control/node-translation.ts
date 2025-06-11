@@ -13,7 +13,7 @@ export function registerNodeTranslationTriggers() {
   const getHotkey = () => globalConfig?.translate.node.hotkey
   const isEnabled = () => globalConfig?.translate.node.enabled
 
-  let timerId: NodeJS.Timeout | null = null // 延时触发的定时器
+  let timerId: NodeJS.Timeout | null = null
   let actionTriggered = false
 
   // Listen the hotkey means the user can't press or hold any other key during the hotkey is holding
@@ -34,7 +34,7 @@ export function registerNodeTranslationTriggers() {
             actionTriggered = true
           }
           timerId = null
-        }, 500) // 延迟 500ms，可根据需要调整
+        }, 500)
       }
     }
     else if (keyState.isHotkeyPressed) {
