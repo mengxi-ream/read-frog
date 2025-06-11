@@ -18,7 +18,7 @@ popup:
     description: 發現更多提示和技巧
   book:
     title: 電子書
-    description: 閱讀任何 ePub 電子書
+    description: 閱讀 ePub 電子書。（Neat Reader 和陪讀蛙是獨立的產品；在 Neat Reader 中的購買與陪讀蛙無關。）
   discord:
     title: Discord
     description: 加入 Discord 服務器，與開發者和其他用戶交流

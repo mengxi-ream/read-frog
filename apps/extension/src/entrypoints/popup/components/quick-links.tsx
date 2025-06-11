@@ -11,7 +11,7 @@ const LINKS: {
   {
     label: 'book',
     icon: bookIcon,
-    url: 'https://neat-reader.cloudb.pub/',
+    url: 'https://www.neat-reader.com/webapp#/',
   },
   {
     label: 'discord',
