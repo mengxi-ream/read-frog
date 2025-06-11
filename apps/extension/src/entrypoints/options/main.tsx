@@ -7,7 +7,7 @@ import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { configAtom } from '@/utils/atoms/config'
-
+import { globalConfig, loadGlobalConfig } from '@/utils/config/config'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import App from './app'
 import { AppSidebar } from './app-sidebar'
@@ -33,15 +33,16 @@ function HydrateAtoms({
 }
 
 async function initApp() {
+  await loadGlobalConfig()
   const root = document.getElementById('root')!
   root.className = 'antialiased bg-background'
 
-  const config = await storage.getItem<Config>('local:config')
+  const config = globalConfig ?? DEFAULT_CONFIG
 
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <JotaiProvider>
-        <HydrateAtoms initialValues={[[configAtom, config ?? DEFAULT_CONFIG]]}>
+        <HydrateAtoms initialValues={[[configAtom, config]]}>
           <HashRouter>
             <SidebarProvider>
               <AppSidebar />

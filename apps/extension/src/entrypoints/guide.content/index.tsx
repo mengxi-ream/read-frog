@@ -25,11 +25,10 @@ export default defineContentScript({
       }
       else if (source === 'read-frog-page' && type === 'setTargetLanguage') {
         const langCodeISO6393 = e.data.langCodeISO6393 ?? 'eng'
-        // TODO: solve this race condition by distribution system knowledge
-        // wait for 500ms for race condition
-        // otherwise, if we enter guide page step 1, it trigger setTargetLanguage immediately
-        // then other place get the initial config and set that back by watch, it will be overwritten back to initial config
-        // then we lose the target language
+        // If we set storage too early, react of side content has not been mounted yet,
+        // so this set storage will not trigger the watch of storage adapter of atom in react of side content
+        // i.e. the side content will not be updated with the new config
+        // thus extract query will set the target language back to initial config when it call setLanguage
         await new Promise(resolve => setTimeout(resolve, 500))
         await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
           ...globalConfig,

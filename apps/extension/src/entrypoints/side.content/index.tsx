@@ -15,8 +15,9 @@ import ReactDOM from 'react-dom/client'
 import { toast } from 'sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { configAtom } from '@/utils/atoms/config'
+import { globalConfig, loadGlobalConfig } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
-import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from '@/utils/constants/config'
+import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { addStyleToShadow, mirrorDynamicStyles } from '../../utils/styles'
 import App from './app'
@@ -32,7 +33,8 @@ export default defineContentScript({
   matches: ['*://*/*'],
   cssInjectionMode: 'ui',
   async main(ctx) {
-    const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+    await loadGlobalConfig()
+    const config = globalConfig ?? DEFAULT_CONFIG
     const ui = await createShadowRootUi(ctx, {
       name: kebabCase(APP_NAME),
       position: 'overlay',
@@ -94,7 +96,7 @@ export default defineContentScript({
           <QueryClientProvider client={queryClient}>
             <JotaiProvider store={store}>
               <HydrateAtoms
-                initialValues={[[configAtom, config ?? DEFAULT_CONFIG]]}
+                initialValues={[[configAtom, config]]}
               >
                 <TooltipProvider>
                   <App />
