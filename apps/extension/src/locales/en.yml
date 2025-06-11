@@ -22,6 +22,8 @@ popup:
   discord:
     title: Discord
     description: Join Discord server to connect with developers and other users
+  github:
+    description: ⭐️ Star us for new release notifications without delay!
 options:
   setAPIKeyWarning:
     please: Please set API Key on

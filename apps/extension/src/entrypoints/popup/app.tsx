@@ -1,6 +1,7 @@
 import { useSetAtom } from 'jotai'
 import { Bolt, Star } from 'lucide-react'
 import { Toaster } from 'sonner'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { version } from '../../../package.json'
 import { initIsIgnoreTabAtom } from './atom'
 import { AlwaysTranslate } from './components/always-translate'
@@ -50,6 +51,17 @@ function App() {
         <span className="text-sm text-neutral-500 dark:text-neutral-400">
           {version}
         </span>
+        <GithubButton />
+      </div>
+      <Toaster richColors position="bottom-center" className="-translate-y-8" duration={10000} />
+    </>
+  )
+}
+
+function GithubButton() {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
         <button
           type="button"
           className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-300 dark:hover:bg-neutral-700"
@@ -59,9 +71,11 @@ function App() {
           <Star className="size-4" strokeWidth={1.6} />
           <span className="text-[13px] font-medium">Github</span>
         </button>
-      </div>
-      <Toaster richColors position="bottom-center" className="-translate-y-8" duration={10000} />
-    </>
+      </TooltipTrigger>
+      <TooltipContent className="max-w-[180px] break-words text-center">
+        {i18n.t('popup.github.description')}
+      </TooltipContent>
+    </Tooltip>
   )
 }
 
