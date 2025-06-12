@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 0.10.7
+
+### Patch Changes
+
+- [#149](https://github.com/mengxi-ream/read-frog/pull/149) [`0ccc7f5`](https://github.com/mengxi-ream/read-frog/commit/0ccc7f5aa403db8ed5b84552d4891833b59305af) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: load config to content script
+
+- [#149](https://github.com/mengxi-ream/read-frog/pull/149) [`0ccc7f5`](https://github.com/mengxi-ream/read-frog/commit/0ccc7f5aa403db8ed5b84552d4891833b59305af) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: translation control"
+
 ## 0.10.6
 
 ### Patch Changes
