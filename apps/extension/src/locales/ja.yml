@@ -65,6 +65,7 @@ options:
 side:
   sourceLang: ソース言語
   targetLang: 翻訳言語
+  fileExport: ファイルエクスポート
 readService:
   title: 読解サービス
   description: 記事の読解と解説に使用

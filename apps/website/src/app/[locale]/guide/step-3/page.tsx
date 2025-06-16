@@ -47,8 +47,8 @@ export default function GuidePage() {
   const quote = QUOTES[targetLanguage === 'eng' ? 'jpn' : 'eng']
 
   return (
-    <div className="bg-background grid grid-cols-2 h-[100vh]">
-      <div className="notranslate border-r p-8 lg:p-16 xl:p-30 flex flex-col gap-4 justify-center">
+    <div className="bg-background grid md:grid-cols-2 grid-rows-2 md:grid-rows-1 h-[100vh]">
+      <div className="notranslate md:border-r border-b md:border-b-0 p-8 lg:p-16 xl:p-30 flex flex-col gap-4 justify-center">
         <h1 className="text-2xl font-bold">{t('guide.step3.title')}</h1>
         <p className="text-sm text-muted-foreground">
           {t('guide.step3.description')}
@@ -90,7 +90,7 @@ export default function GuidePage() {
           {t('guide.skip')}
         </Link>
       </div>
-      <div className="p-8 flex justify-center items-center">
+      <div className="h-fit md:h-full p-8 flex justify-center items-center">
         {targetLanguage && (
           <div className="flex flex-col gap-4 text-neutral-700 dark:text-neutral-300">
             <h2 className="text-2xl font-bold mb-4">{quote.title}</h2>

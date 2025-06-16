@@ -67,6 +67,7 @@ options:
 side:
   sourceLang: Source Language
   targetLang: Target Language
+  fileExport: File Export
 readService:
   title: Read Service
   description: For read and explain articles

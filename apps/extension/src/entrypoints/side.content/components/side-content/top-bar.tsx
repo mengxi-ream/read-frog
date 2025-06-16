@@ -1,14 +1,15 @@
+import type { DOWNLOAD_FILE_TYPES } from '../../utils/downloader'
 import type {
   LangCodeISO6393,
   LangLevel,
 } from '@/types/config/languages'
 import type { ReadProviderNames } from '@/types/config/provider'
-
+import type { ArticleExplanation } from '@/types/content'
 import { SelectGroup } from '@radix-ui/react-select'
-
+import { useMutationState } from '@tanstack/react-query'
 // import { onMessage } from "@/utils/message";
 import { useAtom, useSetAtom } from 'jotai'
-import { ArrowRight, X } from 'lucide-react'
+import { ArrowRight, Download, X } from 'lucide-react'
 import ProviderIcon from '@/components/provider-icon'
 import {
   Select,
@@ -29,11 +30,12 @@ import {
   langLevel,
 } from '@/types/config/languages'
 import { configFields } from '@/utils/atoms/config'
-
 import { READ_PROVIDER_ITEMS } from '@/utils/constants/config'
+import { DOWNLOAD_FILE_ITEMS } from '@/utils/constants/side'
 import { cn } from '@/utils/tailwind'
 import { shadowWrapper } from '../..'
 import { isSideOpenAtom } from '../../atoms'
+import downloader from '../../utils/downloader'
 
 export function TopBar({ className }: { className?: string }) {
   const setIsSideOpen = useSetAtom(isSideOpenAtom)
@@ -50,6 +52,7 @@ export function TopBar({ className }: { className?: string }) {
         </div> */}
         <LangLevelSelect />
         <ProviderSelect />
+        <FileExport />
       </div>
       <Tooltip>
         <TooltipTrigger asChild>
@@ -201,6 +204,45 @@ function SourceLangSelect() {
           {langCodeISO6393Schema.options.map(key => (
             <SelectItem key={key} value={key}>
               {`${LANG_CODE_TO_EN_NAME[key]} (${LANG_CODE_TO_LOCALE_NAME[key]})`}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  )
+}
+
+function FileExport() {
+  const explainDataList = useMutationState<ArticleExplanation['paragraphs']>({
+    filters: {
+      mutationKey: ['explainArticle'],
+    },
+    select: mutation => mutation.state.data as ArticleExplanation['paragraphs'],
+  })
+
+  const allow = !!explainDataList.length && explainDataList.every(explainData => !!explainData)
+  return (
+    <Select
+      value=""
+      onValueChange={async (fileType: DOWNLOAD_FILE_TYPES) => {
+        downloader.download(explainDataList, fileType)
+      }}
+      disabled={!allow}
+    >
+      <SelectTrigger
+        hideChevron
+        className="rounded-md flex !size-7 items-center justify-center p-0 shadow-xs border focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50 border-input"
+      >
+        <Download
+          className="size-4 p-0.5 bg-white rounded-full"
+        />
+      </SelectTrigger>
+      <SelectContent container={shadowWrapper}>
+        <SelectGroup>
+          <SelectLabel>{i18n.t('side.fileExport')}</SelectLabel>
+          {Object.entries(DOWNLOAD_FILE_ITEMS).map(([fileType, { label }]) => (
+            <SelectItem key={fileType} value={fileType}>
+              { label }
             </SelectItem>
           ))}
         </SelectGroup>

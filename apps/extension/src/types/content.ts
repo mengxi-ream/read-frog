@@ -41,6 +41,12 @@ export const partOfSpeechAbbr = z.enum([
 
 export const syntacticCategoryAbbr = partOfSpeechAbbr.or(z.enum(['ph.']))
 
+export const articleWordSchema = z.object({
+  word: z.string(),
+  syntacticCategory: syntacticCategoryAbbr,
+  explanation: z.string(),
+})
+
 export const articleExplanationSchema = z.object({
   paragraphs: z.array(
     z.array(
@@ -48,11 +54,7 @@ export const articleExplanationSchema = z.object({
         originalSentence: z.string(),
         translatedSentence: z.string(),
         words: z.array(
-          z.object({
-            word: z.string(),
-            syntacticCategory: syntacticCategoryAbbr,
-            explanation: z.string(),
-          }),
+          articleWordSchema,
         ),
         explanation: z.string(),
       }),
@@ -60,6 +62,7 @@ export const articleExplanationSchema = z.object({
   ),
 })
 
+export type ArticleWord = z.infer<typeof articleWordSchema>
 export type ArticleAnalysis = z.infer<typeof articleAnalysisSchema>
 export type ArticleExplanation = z.infer<typeof articleExplanationSchema>
 export type SyntacticCategoryAbbr = z.infer<typeof syntacticCategoryAbbr>

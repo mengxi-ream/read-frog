@@ -67,6 +67,7 @@ options:
 side:
   sourceLang: 來源語言
   targetLang: 目標語言
+  fileExport: 文件導出
 readService:
   title: 閱讀服務
   description: 用於閱讀和解釋文章
