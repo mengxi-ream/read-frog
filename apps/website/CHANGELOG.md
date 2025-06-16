@@ -1,5 +1,15 @@
 # @read-frog/website
 
+## 0.1.2
+
+### Patch Changes
+
+- [#152](https://github.com/mengxi-ream/read-frog/pull/152) [`0934d69`](https://github.com/mengxi-ream/read-frog/commit/0934d69dba3ec7fdb4d048d006590e23c6057007) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - docs: update contribution guide
+
+- [#156](https://github.com/mengxi-ream/read-frog/pull/156) [`c795431`](https://github.com/mengxi-ream/read-frog/commit/c795431ad4b8091fcb511afd7b79eda68d384200) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: support markdown file export; fix scroll style in side.content
+
+  style: optimize ui in guide page
+
 ## 0.1.1
 
 ### Patch Changes

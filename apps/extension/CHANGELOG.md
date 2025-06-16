@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 0.10.8
+
+### Patch Changes
+
+- [#157](https://github.com/mengxi-ream/read-frog/pull/157) [`6f53060`](https://github.com/mengxi-ream/read-frog/commit/6f5306042639cae07fe56e5d69d353020aa16614) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: clean up translate utils
+
+- [#156](https://github.com/mengxi-ream/read-frog/pull/156) [`c795431`](https://github.com/mengxi-ream/read-frog/commit/c795431ad4b8091fcb511afd7b79eda68d384200) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: support markdown file export; fix scroll style in side.content
+
+  style: optimize ui in guide page
+
 ## 0.10.7
 
 ### Patch Changes
