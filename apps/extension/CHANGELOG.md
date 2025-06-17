@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 0.10.9
+
+### Patch Changes
+
+- [#163](https://github.com/mengxi-ream/read-frog/pull/163) [`4db3247`](https://github.com/mengxi-ream/read-frog/commit/4db32471d4da1e92726be34e716f2814bd305a77) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - i18n: add korean to extension ui
+
 ## 0.10.8
 
 ### Patch Changes
