@@ -60,6 +60,16 @@ options:
         range:
           main: メインコンテンツ
           all: すべてのコンテンツ
+    resetConfig:
+      title: 設定をリセット
+      description: すべての設定をデフォルト値にリセットします。
+      dialog:
+        title: 設定をリセット
+        trigger: 設定をリセット
+        confirm: 確認
+        cancel: キャンセル
+        description:
+          この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
   translation:
     title: 翻訳
 side:
