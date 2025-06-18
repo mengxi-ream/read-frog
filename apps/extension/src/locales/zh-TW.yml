@@ -62,6 +62,16 @@ options:
         range:
           main: 主要內容
           all: 所有內容
+    resetConfig:
+      title: 重置配置
+      description: 重置所有配置為預設值
+      dialog:
+        title: 重置配置
+        trigger: 重置配置
+        confirm: 確認
+        cancel: 取消
+        description:
+          此操作將清空您的所有自定義配置，並將其重置為預設值，請確認是否清除。
   translation:
     title: 翻譯
 side:
