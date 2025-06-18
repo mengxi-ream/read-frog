@@ -62,6 +62,16 @@ options:
         range:
           main: 주요 내용
           all: 전체 내용
+    resetConfig:
+      title: 기본 설정 복원
+      description: 모든 설정을 기본값으로 재설정
+      dialog:
+        title: 기본 설정 복원
+        trigger: 설정 초기화
+        confirm: 확인
+        cancel: 취소
+        description:
+          이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까??
   translation:
     title: 번역
 side:
