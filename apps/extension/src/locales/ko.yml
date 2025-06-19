@@ -70,8 +70,7 @@ options:
         trigger: 설정 초기화
         confirm: 확인
         cancel: 취소
-        description:
-          이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까??
+        description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
   translation:
     title: 번역
 side:

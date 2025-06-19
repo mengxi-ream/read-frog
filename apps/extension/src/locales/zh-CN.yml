@@ -71,8 +71,7 @@ options:
         trigger: 重置配置
         confirm: 确认
         cancel: 取消
-        description:
-          该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
+        description: 该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
   translation:
     title: 翻译
 side:

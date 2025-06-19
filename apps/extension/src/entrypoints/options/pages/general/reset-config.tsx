@@ -22,7 +22,7 @@ export function ResetConfig() {
   }
 
   return (
-    <ConfigCard title={i18n.t('options.general.resetConfig.dialog.title')} description={i18n.t('options.general.resetConfig.description')}>
+    <ConfigCard title={i18n.t('options.general.resetConfig.title')} description={i18n.t('options.general.resetConfig.description')}>
       <AlertDialog>
         <AlertDialogTrigger className="w-full flex items-center justify-end">
           <Button>{i18n.t('options.general.resetConfig.dialog.trigger')}</Button>

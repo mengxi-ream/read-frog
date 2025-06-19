@@ -68,8 +68,7 @@ options:
         trigger: 設定をリセット
         confirm: 確認
         cancel: キャンセル
-        description:
-          この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
+        description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
   translation:
     title: 翻訳
 side:
