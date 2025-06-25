@@ -50,7 +50,7 @@ export function PersonalizedPrompt() {
 function PromptList() {
   const translateConfig = useAtomValue(configFields.translate)
   const promptsConfig = translateConfig.promptsConfig
-  const prompts = promptsConfig.patterns
+  const patterns = promptsConfig.patterns
 
   return (
     <section className="w-full">
@@ -59,25 +59,25 @@ function PromptList() {
       </header>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {
-          prompts.map(prompt => (
-            <Card className="h-fit gap-4" key={prompt.id}>
+          patterns.map(pattern => (
+            <Card className="h-fit gap-4" key={pattern.id}>
               <CardHeader className="grid-rows-1">
                 <CardTitle className="truncate leading-relaxed">
                   {
-                    isDefaultPrompt(prompt.id) ? i18n.t('options.translation.personalizedPrompt.default') : prompt.name
+                    isDefaultPrompt(pattern.id) ? i18n.t('options.translation.personalizedPrompt.default') : pattern.name
                   }
                 </CardTitle>
                 <CardAction className="leading-relaxed">
                   {
-                    isDefaultPrompt(prompt.id) ? <></> : <DeletePrompt originPrompt={prompt}></DeletePrompt>
+                    isDefaultPrompt(pattern.id) ? <></> : <DeletePrompt originPrompt={pattern}></DeletePrompt>
                   }
                 </CardAction>
               </CardHeader>
               <CardContent className="flex flex-col gap-4 h-16">
-                <p className="text-sm text-ellipsis whitespace-pre-wrap line-clamp-3">{prompt.prompt}</p>
+                <p className="text-sm text-ellipsis whitespace-pre-wrap line-clamp-3">{pattern.prompt}</p>
               </CardContent>
               <CardFooter className="w-full flex justify-end mt-8">
-                <ConfigurePrompt originPrompt={prompt} />
+                <ConfigurePrompt originPrompt={pattern} />
               </CardFooter>
             </Card>
           ))
@@ -109,12 +109,15 @@ function DeletePrompt({ originPrompt }: { originPrompt: TranslatePrompt }) {
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{i18n.t('options.translation.personalizedPrompt.deletePrompt.title')}</AlertDialogTitle>
-          <AlertDialogDescription>
-            {i18n.t('options.translation.personalizedPrompt.deletePrompt.description')}
+          <AlertDialogTitle>
+            {i18n.t('options.translation.personalizedPrompt.deletePrompt.title')}
+            {' '}
             :
             {' '}
             {originPrompt.name}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {i18n.t('options.translation.personalizedPrompt.deletePrompt.description')}
             {' '}
             ?
           </AlertDialogDescription>

@@ -100,6 +100,9 @@ translateService:
   description: 웹페이지 번역 전용
   normalTranslator: 일반 번역기
   aiTranslator: AI 번역기
+translatePrompt:
+  title: AI 번역 스타일
+  description: 번역 시 사용할 프롬프트를 선택할 수 있습니다. 설정 페이지에서 사용자 정의 프롬프트를 추가하거나 수정할 수 있습니다
 languageLevel: 원본 언어 수준
 languageLevels:
   beginner: 초급

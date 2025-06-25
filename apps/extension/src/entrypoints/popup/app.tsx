@@ -13,6 +13,7 @@ import QuickLinks from './components/quick-links'
 import ReadButton from './components/read-button'
 import ReadProviderSelector from './components/read-provider-selector'
 import TranslateButton from './components/translate-button'
+import TranslatePromptSelector from './components/translate-prompt-selector'
 import TranslateProviderSelector from './components/translate-provider-selector'
 
 function App() {
@@ -29,6 +30,7 @@ function App() {
         <LanguageLevelSelector />
         <ReadProviderSelector />
         <TranslateProviderSelector />
+        <TranslatePromptSelector />
         <div className="grid w-full grid-cols-2 gap-2">
           <ReadButton />
           <TranslateButton />

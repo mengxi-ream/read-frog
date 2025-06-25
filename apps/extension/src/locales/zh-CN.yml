@@ -101,6 +101,9 @@ translateService:
   description: 仅用于翻译网页内容
   normalTranslator: 普通翻译
   aiTranslator: AI 翻译
+translatePrompt:
+  title: AI 翻译风格
+  description: 选择在翻译时使用的 Prompt，可在选项页新增或修改自定义 Prompt
 languageLevel: 你的来源语言水平
 languageLevels:
   beginner: 初级

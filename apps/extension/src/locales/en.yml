@@ -100,6 +100,9 @@ translateService:
   description: For translate the webpage only
   normalTranslator: Normal Translator
   aiTranslator: AI Translator
+translatePrompt:
+  title: AI Translation Style
+  description: Select a Prompt to use during translation. Add or modify custom Prompts on the options page.
 languageLevel: Your Source Lang Level
 languageLevels:
   beginner: Beginner
