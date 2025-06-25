@@ -49,7 +49,8 @@ export function PersonalizedPrompt() {
 
 function PromptList() {
   const translateConfig = useAtomValue(configFields.translate)
-  const prompts = translateConfig.prompts
+  const promptsConfig = translateConfig.promptsConfig
+  const prompts = promptsConfig.patterns
 
   return (
     <section className="w-full">
@@ -88,11 +89,14 @@ function PromptList() {
 
 function DeletePrompt({ originPrompt }: { originPrompt: TranslatePrompt }) {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
-
+  const { patterns, prompt } = translateConfig.promptsConfig
   const deletePrompt = () => {
     setTranslateConfig({
-      ...translateConfig,
-      prompts: translateConfig.prompts.filter(p => p.id !== originPrompt.id),
+      promptsConfig: {
+        ...translateConfig.promptsConfig,
+        patterns: patterns.filter(p => p.id !== originPrompt.id),
+        prompt: prompt !== originPrompt.id ? prompt : DEFAULT_TRANSLATE_PROMPT_ID,
+      },
     })
   }
 
@@ -154,11 +158,15 @@ function ConfigurePrompt({ originPrompt }: { originPrompt?: TranslatePrompt }) {
       return
     }
 
+    const _patterns = translateConfig.promptsConfig.patterns
+
     setTranslateConfig({
-      ...translateConfig,
-      prompts: inEdit
-        ? translateConfig.prompts.map(p => p.id === prompt.id ? prompt : p)
-        : [...translateConfig.prompts, prompt],
+      promptsConfig: {
+        ...translateConfig.promptsConfig,
+        patterns: inEdit
+          ? _patterns.map(p => p.id === prompt.id ? prompt : p)
+          : [..._patterns, prompt],
+      },
     })
 
     clearCachePrompt()

@@ -134,15 +134,19 @@ export type TranslateModels = z.infer<typeof translateModelsSchema>
 export const pageTranslateRangeSchema = z.enum(['main', 'all'])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
 
-export const translatePrompt = z.object({
+export const translatePromptSchema = z.object({
   name: z.string(),
   id: z.string(),
   prompt: z.string(),
 })
-export type TranslatePrompt = z.infer<typeof translatePrompt>
+export type TranslatePrompt = z.infer<typeof translatePromptSchema>
 
-export const translatePrompts = z.array(translatePrompt)
-export type TranslatePrompts = z.infer<typeof translatePrompts>
+export const promptsConfigSchema = z.object({
+  prompt: z.string(),
+  patterns: z.array(
+    translatePromptSchema,
+  ),
+})
 
 export const translateConfigSchema = z.object({
   provider: z.enum(translateProviderNames),
@@ -155,7 +159,7 @@ export const translateConfigSchema = z.object({
     range: pageTranslateRangeSchema,
     autoTranslatePatterns: z.array(z.string()),
   }),
-  prompts: translatePrompts,
+  promptsConfig: promptsConfigSchema,
 })
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
 
