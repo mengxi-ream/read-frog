@@ -73,6 +73,21 @@ options:
         description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
   translation:
     title: Translation
+    personalizedPrompt:
+      title: Personalized Prompt
+      description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM, where {{input}} denotes the text content of the paragraph and {{targetLang}} denotes the target language.
+      addPrompt: Add Prompt
+      default: Default
+      editPrompt:
+        title: 编辑 Prompt
+        name: Name
+        save: Save Changes
+        close: Cancel
+      deletePrompt:
+        title: Delete Prompt
+        description: Confirm delete prompt
+        confirm: Confirm
+        cancel: Cancel
 side:
   sourceLang: Source Language
   targetLang: Target Language

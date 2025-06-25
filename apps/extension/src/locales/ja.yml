@@ -71,6 +71,21 @@ options:
         description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
   translation:
     title: 翻訳
+    personalizedPrompt:
+      title: 個人化プロンプト
+      description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指し、その中で {{input}} は段落のテキスト内容を、{{targetLang}} はターゲット言語を表します。
+      addPrompt: プロンプトを追加
+      default: デフォルト
+      editPrompt:
+        title: プロンプトを編集
+        name: 名前
+        save: 保存
+        close: キャンセル
+      deletePrompt:
+        title: プロンプトを削除
+        description: このプロンプトを削除しますか
+        confirm: 確認
+
 side:
   sourceLang: ソース言語
   targetLang: 翻訳言語

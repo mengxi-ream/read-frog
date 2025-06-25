@@ -74,6 +74,21 @@ options:
         description: 该操作将清空您的所有自定义配置，并将其重置为默认值，请确认是否清除。
   translation:
     title: 翻译
+    personalizedPrompt:
+      title: 个性化 Prompt
+      description: 自定义不同类型的 Prompt，可以在翻译时自行调整 Prompt 类型。Prompt 表示以用户身份发送给 llm 的文本，其中 {{input}} 表示段落的文本内容，{{targetLang}} 表示目标语言。
+      addPrompt: 添加 Prompt
+      default: 通用
+      editPrompt:
+        title: 编辑 Prompt
+        name: 标题
+        save: 保存
+        close: 取消
+      deletePrompt:
+        title: 删除 Prompt
+        description: 确认删除该 Prompt
+        confirm: 确认
+        cancel: 取消
 side:
   sourceLang: 来源语言
   targetLang: 目标语言

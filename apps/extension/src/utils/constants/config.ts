@@ -8,10 +8,11 @@ import openaiLogo from '@/assets/provider/openai.jpg'
 import openrouterLogo from '@/assets/provider/openrouter.png'
 import { apiProviderNames, pureTranslateProvider, readProviderNames, translateProviderNames } from '@/types/config/provider'
 import { omit, pick } from '@/types/utils'
+import { DEFAULT_TRANSLATE_PROMPT } from './prompt'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION = 7
+export const CONFIG_SCHEMA_VERSION = 8
 
 export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
@@ -93,6 +94,7 @@ export const DEFAULT_CONFIG: Config = {
       range: 'main',
       autoTranslatePatterns: ['news.ycombinator.com'],
     },
+    prompts: [DEFAULT_TRANSLATE_PROMPT],
   },
   floatingButton: {
     enabled: true,
