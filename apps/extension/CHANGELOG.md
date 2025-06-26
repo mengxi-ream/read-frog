@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 0.11.0
+
+### Minor Changes
+
+- [#174](https://github.com/mengxi-ream/read-frog/pull/174) [`8c27264`](https://github.com/mengxi-ream/read-frog/commit/8c272640997f9754ee0f69248dbe55a3b5767561) Thanks [@taiiiyang](https://github.com/taiiiyang)! - support personalized translate prompt
+
+### Patch Changes
+
+- [#165](https://github.com/mengxi-ream/read-frog/pull/165) [`dbf42cd`](https://github.com/mengxi-ream/read-frog/commit/dbf42cd4ceb0632f6e857c06c04444518f10abf9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - add reset config button
+
 ## 0.10.9
 
 ### Patch Changes
