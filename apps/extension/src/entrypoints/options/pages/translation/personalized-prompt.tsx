@@ -42,7 +42,7 @@ const isDefaultPrompt = (id: string) => id === DEFAULT_TRANSLATE_PROMPT_ID
 
 export function PersonalizedPrompt() {
   return (
-    <ConfigCard title={i18n.t('options.translation.personalizedPrompt.title')} description={i18n.t('options.translation.personalizedPrompt.description')}>
+    <ConfigCard className="lg:flex-col" title={i18n.t('options.translation.personalizedPrompt.title')} description={i18n.t('options.translation.personalizedPrompt.description')}>
       <PromptList />
     </ConfigCard>
   )
@@ -58,7 +58,7 @@ function PromptList() {
       <header className="w-full text-end mb-4">
         <ConfigurePrompt />
       </header>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-auto p-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-h-96 overflow-auto p-2">
         {
           patterns.map(pattern => (
             <Card className="h-fit gap-4" key={pattern.id}>
