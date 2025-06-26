@@ -79,7 +79,7 @@ options:
       addPrompt: Add Prompt
       default: Default
       editPrompt:
-        title: 编辑 Prompt
+        title: Edit Prompt
         name: Name
         save: Save Changes
         close: Cancel

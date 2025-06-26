@@ -1,6 +1,7 @@
 import type { TranslatePrompt } from '@/types/config/provider'
 import { useAtom, useAtomValue } from 'jotai'
 import { Pencil, Trash2 } from 'lucide-react'
+import { useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -57,7 +58,7 @@ function PromptList() {
       <header className="w-full text-end mb-4">
         <ConfigurePrompt />
       </header>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-auto p-2">
         {
           patterns.map(pattern => (
             <Card className="h-fit gap-4" key={pattern.id}>
