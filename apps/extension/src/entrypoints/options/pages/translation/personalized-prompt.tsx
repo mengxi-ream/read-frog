@@ -1,7 +1,9 @@
+import type { PromptConfigList } from '../../utils/prompt-file'
 import type { TranslatePrompt } from '@/types/config/provider'
 import { useAtom, useAtomValue } from 'jotai'
-import { Pencil, Trash2 } from 'lucide-react'
+import { FileDown, FileUp, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { toast } from 'sonner'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,6 +24,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -37,6 +40,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { configFields } from '@/utils/atoms/config'
 import { DEFAULT_TRANSLATE_PROMPT_ID } from '@/utils/constants/prompt'
 import { ConfigCard } from '../../components/config-card'
+import { analysisJSONFile, downloadJSONFile } from '../../utils/prompt-file'
 
 const isDefaultPrompt = (id: string) => id === DEFAULT_TRANSLATE_PROMPT_ID
 
@@ -52,10 +56,13 @@ function PromptList() {
   const translateConfig = useAtomValue(configFields.translate)
   const promptsConfig = translateConfig.promptsConfig
   const patterns = promptsConfig.patterns
+  const [selectedPrompts, setSelectedPrompts] = useState<string[]>([])
 
   return (
     <section className="w-full">
-      <header className="w-full text-end mb-4">
+      <header className="w-full text-end mb-4 gap-3 flex justify-end">
+        <ImportPrompts />
+        <ExportPrompts selectedPrompts={selectedPrompts} />
         <ConfigurePrompt />
       </header>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-h-96 overflow-auto p-2">
@@ -63,9 +70,27 @@ function PromptList() {
           patterns.map(pattern => (
             <Card className="h-fit gap-4" key={pattern.id}>
               <CardHeader className="grid-rows-1">
-                <CardTitle className="truncate leading-relaxed">
+                <CardTitle className="truncate leading-relaxed gap-3 flex items-center">
                   {
-                    isDefaultPrompt(pattern.id) ? i18n.t('options.translation.personalizedPrompt.default') : pattern.name
+                    isDefaultPrompt(pattern.id)
+                      ? i18n.t('options.translation.personalizedPrompt.default')
+                      : (
+                          <>
+                            <Checkbox
+                              id={`translate-prompt-${pattern.id}`}
+                              checked={selectedPrompts.includes(pattern.id)}
+                              onCheckedChange={(checked) => {
+                                setSelectedPrompts((prev) => {
+                                  return checked
+                                    ? [...prev, pattern.id]
+                                    : prev.filter(id => id !== pattern.id)
+                                })
+                              }}
+                            >
+                            </Checkbox>
+                            {pattern.name}
+                          </>
+                        )
                   }
                 </CardTitle>
                 <CardAction className="leading-relaxed">
@@ -186,7 +211,12 @@ function ConfigurePrompt({ originPrompt }: { originPrompt?: TranslatePrompt }) {
                   <Pencil className="size-4" />
                 </Button>
               )
-            : <Button>{i18n.t('options.translation.personalizedPrompt.addPrompt')}</Button>
+            : (
+                <Button>
+                  <Plus className="size-4"></Plus>
+                  {i18n.t('options.translation.personalizedPrompt.addPrompt')}
+                </Button>
+              )
         }
       </SheetTrigger>
       <SheetContent className="w-[500px] sm:w-[640px]">
@@ -232,5 +262,88 @@ function ConfigurePrompt({ originPrompt }: { originPrompt?: TranslatePrompt }) {
         </SheetFooter>
       </SheetContent>
     </Sheet>
+  )
+}
+
+function ImportPrompts() {
+  const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
+
+  const injectPrompts = (list: PromptConfigList) => {
+    const originPatterns = translateConfig.promptsConfig.patterns
+    const patterns = list.map(item => ({
+      ...item,
+      id: crypto.randomUUID(),
+    }))
+
+    setTranslateConfig({
+      promptsConfig: {
+        ...translateConfig.promptsConfig,
+        patterns: [...originPatterns, ...patterns],
+      },
+    })
+  }
+
+  return (
+    <Button variant="outline" className="p-0">
+      <Label htmlFor="import-file" className="w-full px-3">
+        <FileDown className="size-4" />
+        导入
+      </Label>
+      <Input
+        type="file"
+        id="import-file"
+        className="hidden"
+        accept=".json"
+        onChange={async (e) => {
+          try {
+            const files = e.target.files
+            if (!files || !files[0])
+              return
+            const config = await analysisJSONFile(files[0])
+            injectPrompts(config)
+            toast.success(`${i18n.t('options.translation.personalizedPrompt.importSuccess')} !`)
+          }
+          catch (error) {
+            if (error instanceof Error) {
+              toast.error(error.message)
+            }
+            else {
+              toast.error('Something went error when importing')
+            }
+          }
+          finally {
+            e.target.value = ''
+            e.target.files = null
+          }
+        }}
+      >
+      </Input>
+    </Button>
+  )
+}
+
+function ExportPrompts({ selectedPrompts }: { selectedPrompts: string[] }) {
+  const translateConfig = useAtomValue(configFields.translate)
+  const promptsConfig = translateConfig.promptsConfig
+  const patterns = promptsConfig.patterns
+
+  const sortOutDownloadPrompts = patterns
+    .filter(pattern => selectedPrompts.includes(pattern.id))
+    .map(pattern => ({
+      name: pattern.name,
+      prompt: pattern.prompt,
+    }))
+
+  return (
+    <Button
+      variant="outline"
+      onClick={() => {
+        downloadJSONFile(sortOutDownloadPrompts)
+      }}
+      disabled={!selectedPrompts.length}
+    >
+      <FileUp className="size-4" />
+      导出
+    </Button>
   )
 }
