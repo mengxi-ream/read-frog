@@ -79,6 +79,9 @@ options:
       description: 自定义不同类型的 Prompt，可以在翻译时自行调整 Prompt 类型。Prompt 表示以用户身份发送给 llm 的文本，其中 {{input}} 表示段落的文本内容，{{targetLang}} 表示目标语言。
       addPrompt: 添加 Prompt
       default: 通用
+      importSuccess: 导入成功
+      import: 导入
+      export: 导出
       editPrompt:
         title: 编辑 Prompt
         name: 标题

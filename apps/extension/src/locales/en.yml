@@ -78,6 +78,9 @@ options:
       description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM, where {{input}} denotes the text content of the paragraph and {{targetLang}} denotes the target language.
       addPrompt: Add Prompt
       default: Default
+      importSuccess: Import Success
+      import: Import
+      export: Export
       editPrompt:
         title: Edit Prompt
         name: Name

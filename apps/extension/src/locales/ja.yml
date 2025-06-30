@@ -76,6 +76,9 @@ options:
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指し、その中で {{input}} は段落のテキスト内容を、{{targetLang}} はターゲット言語を表します。
       addPrompt: プロンプトを追加
       default: デフォルト
+      importSuccess: インポート成功
+      import: インポート
+      export: エクスポート
       editPrompt:
         title: プロンプトを編集
         name: 名前

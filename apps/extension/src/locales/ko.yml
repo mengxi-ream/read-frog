@@ -78,6 +78,9 @@ options:
       description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 나타내며, 여기서 {{input}}은 문단의 텍스트 내용을, {{targetLang}}은 목표 언어를 나타냅니다.
       addPrompt: 프롬프트 추가
       default: 기본
+      importSuccess: 가져오기 성공
+      import: 가져오기
+      export: 내보내기
       editPrompt:
         title: 프롬프트 편집
         name: 이름
