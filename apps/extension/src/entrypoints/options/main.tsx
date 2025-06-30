@@ -5,6 +5,7 @@ import React from 'react'
 
 import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router'
+import { Toaster } from 'sonner'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { configAtom } from '@/utils/atoms/config'
 import { globalConfig, loadGlobalConfig } from '@/utils/config/config'
@@ -47,6 +48,7 @@ async function initApp() {
             <SidebarProvider>
               <AppSidebar />
               <App />
+              <Toaster />
             </SidebarProvider>
           </HashRouter>
         </HydrateAtoms>

@@ -70,12 +70,12 @@ function PromptList() {
           patterns.map(pattern => (
             <Card className="h-fit gap-4" key={pattern.id}>
               <CardHeader className="grid-rows-1">
-                <CardTitle className="truncate leading-relaxed gap-3 flex items-center">
+                <CardTitle className="leading-relaxed">
                   {
                     isDefaultPrompt(pattern.id)
                       ? i18n.t('options.translation.personalizedPrompt.default')
                       : (
-                          <div>
+                          <div className="truncate leading-relaxed gap-3 flex items-center">
                             <Checkbox
                               id={`translate-prompt-${pattern.id}`}
                               checked={selectedPrompts.includes(pattern.id)}
@@ -310,7 +310,7 @@ function ImportPrompts() {
     <Button variant="outline" className="p-0">
       <Label htmlFor="import-file" className="w-full px-3">
         <FileDown className="size-4" />
-        {i18n.t('options.translation.personalizedPrompt.export')}
+        {i18n.t('options.translation.personalizedPrompt.import')}
       </Label>
       <Input
         type="file"
