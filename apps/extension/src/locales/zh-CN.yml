@@ -80,6 +80,8 @@ options:
       addPrompt: 添加 Prompt
       default: 通用
       importSuccess: 导入成功
+      import: 导入
+      export: 导出
       editPrompt:
         title: 编辑 Prompt
         name: 标题

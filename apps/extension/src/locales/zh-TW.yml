@@ -79,6 +79,8 @@ options:
       addPrompt: 添加 Prompt
       default: 通用
       importSuccess: 導入成功
+      import: 導入
+      export: 導出
       editPrompt:
         title: 編輯 Prompt
         name: 標題

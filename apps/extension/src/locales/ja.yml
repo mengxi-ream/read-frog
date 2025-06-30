@@ -77,6 +77,8 @@ options:
       addPrompt: プロンプトを追加
       default: デフォルト
       importSuccess: インポート成功
+      import: インポート
+      export: エクスポート
       editPrompt:
         title: プロンプトを編集
         name: 名前

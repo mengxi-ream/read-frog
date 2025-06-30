@@ -79,6 +79,8 @@ options:
       addPrompt: Add Prompt
       default: Default
       importSuccess: Import Success
+      import: Import
+      export: Export
       editPrompt:
         title: Edit Prompt
         name: Name

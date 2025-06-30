@@ -79,6 +79,8 @@ options:
       addPrompt: 프롬프트 추가
       default: 기본
       importSuccess: 가져오기 성공
+      import: 가져오기
+      export: 내보내기
       editPrompt:
         title: 프롬프트 편집
         name: 이름

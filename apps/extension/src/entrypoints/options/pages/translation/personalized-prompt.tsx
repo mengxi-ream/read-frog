@@ -75,7 +75,7 @@ function PromptList() {
                     isDefaultPrompt(pattern.id)
                       ? i18n.t('options.translation.personalizedPrompt.default')
                       : (
-                          <>
+                          <div>
                             <Checkbox
                               id={`translate-prompt-${pattern.id}`}
                               checked={selectedPrompts.includes(pattern.id)}
@@ -89,7 +89,7 @@ function PromptList() {
                             >
                             </Checkbox>
                             {pattern.name}
-                          </>
+                          </div>
                         )
                   }
                 </CardTitle>
@@ -213,7 +213,7 @@ function ConfigurePrompt({ originPrompt }: { originPrompt?: TranslatePrompt }) {
               )
             : (
                 <Button>
-                  <Plus className="size-4"></Plus>
+                  <Plus className="size-4" />
                   {i18n.t('options.translation.personalizedPrompt.addPrompt')}
                 </Button>
               )
@@ -283,39 +283,41 @@ function ImportPrompts() {
     })
   }
 
+  const importPrompts = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    try {
+      const files = e.target.files
+      if (!files || !files[0])
+        return
+      const config = await analysisJSONFile(files[0])
+      injectPrompts(config)
+      toast.success(`${i18n.t('options.translation.personalizedPrompt.importSuccess')} !`)
+    }
+    catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message)
+      }
+      else {
+        toast.error('Something went error when importing')
+      }
+    }
+    finally {
+      e.target.value = ''
+      e.target.files = null
+    }
+  }
+
   return (
     <Button variant="outline" className="p-0">
       <Label htmlFor="import-file" className="w-full px-3">
         <FileDown className="size-4" />
-        导入
+        {i18n.t('options.translation.personalizedPrompt.export')}
       </Label>
       <Input
         type="file"
         id="import-file"
         className="hidden"
         accept=".json"
-        onChange={async (e) => {
-          try {
-            const files = e.target.files
-            if (!files || !files[0])
-              return
-            const config = await analysisJSONFile(files[0])
-            injectPrompts(config)
-            toast.success(`${i18n.t('options.translation.personalizedPrompt.importSuccess')} !`)
-          }
-          catch (error) {
-            if (error instanceof Error) {
-              toast.error(error.message)
-            }
-            else {
-              toast.error('Something went error when importing')
-            }
-          }
-          finally {
-            e.target.value = ''
-            e.target.files = null
-          }
-        }}
+        onChange={importPrompts}
       >
       </Input>
     </Button>
@@ -343,7 +345,7 @@ function ExportPrompts({ selectedPrompts }: { selectedPrompts: string[] }) {
       disabled={!selectedPrompts.length}
     >
       <FileUp className="size-4" />
-      导出
+      {i18n.t('options.translation.personalizedPrompt.export')}
     </Button>
   )
 }

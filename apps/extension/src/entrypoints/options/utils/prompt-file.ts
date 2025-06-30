@@ -7,19 +7,12 @@ export type PromptConfigList = PromptConfig[]
 
 const TRANSLATE_PROMPTS_FILE = `${APP_NAME}: translate_prompts`
 
-const reader = new FileReader()
-
 export function checkPromptConfig(list: PromptConfig[]) {
   if (!Array.isArray(list)) {
     return false
   }
-  list.forEach((item) => {
-    if (!item.name || !item.prompt) {
-      return false
-    }
-  })
 
-  return true
+  return list.every(item => item.name && item.prompt)
 }
 
 export function downloadJSONFile(data: object) {
@@ -30,6 +23,7 @@ export function downloadJSONFile(data: object) {
 
 export function analysisJSONFile(file: File): Promise<PromptConfigList> {
   return new Promise((resolve, reject) => {
+    const reader = new FileReader()
     reader.readAsText(file)
     reader.onload = (e) => {
       try {
@@ -39,7 +33,9 @@ export function analysisJSONFile(file: File): Promise<PromptConfigList> {
           const checked = checkPromptConfig(list)
           checked ? resolve(list) : reject(new Error('Prompt config is invalid'))
         }
-        reject(new Error('Prompt config is invalid'))
+        else {
+          reject(new Error('Prompt config is invalid'))
+        }
       }
       catch (e) {
         reject(e)
