@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 0.11.1
+
+### Patch Changes
+
+- [#177](https://github.com/mengxi-ream/read-frog/pull/177) [`7572871`](https://github.com/mengxi-ream/read-frog/commit/75728718ed313a6ecf3d2fa7d528ac9cd841dfff) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: allow export and import custom translate prompts
+
+- [#175](https://github.com/mengxi-ream/read-frog/pull/175) [`6242002`](https://github.com/mengxi-ream/read-frog/commit/6242002efa97da7c7c13bde8650826fad0f547e0) Thanks [@zmrlft](https://github.com/zmrlft)! - fix: use customModel if isCustomModel is true
+
 ## 0.11.0
 
 ### Minor Changes
