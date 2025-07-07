@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 0.11.2
+
+### Patch Changes
+
+- [`b11a650`](https://github.com/mengxi-ream/read-frog/commit/b11a65087e2cf9a37a4da6b2d200f94aabc86bdb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: don't warning for pure translate provider
+
 ## 0.11.1
 
 ### Patch Changes
