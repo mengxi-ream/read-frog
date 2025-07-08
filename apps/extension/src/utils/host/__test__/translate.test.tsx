@@ -7,10 +7,11 @@ import {
   BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
+  NOTRANSLATE_CLASS,
 } from '@/utils/constants/dom-labels'
 
 import { translateWalkedElement, walkAndLabelElement } from '../dom/traversal'
-import { translateNodes } from '../translate/node-manipulation'
+import { hideOrShowNodeTranslation, translateNodes } from '../translate/node-manipulation'
 import { translateText } from '../translate/translate-text'
 
 vi.mock('../translate/translate-text', () => ({
@@ -242,5 +243,82 @@ describe('translatePage', () => {
     const targetNode = node.firstChild
     expect(targetNode?.lastChild).toHaveClass(CONTENT_WRAPPER_CLASS)
     expect(targetNode?.lastChild?.lastChild).toHaveClass(INLINE_CONTENT_CLASS)
+  })
+})
+
+describe('hideOrShowNodeTranslation', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    document.body.innerHTML = ''
+  })
+
+  it('should show translation when hotkey is pressed over original text', async () => {
+    const originalElement = document.createElement('div')
+    originalElement.textContent = 'Original text'
+    originalElement.style.position = 'absolute'
+    originalElement.style.left = '100px'
+    originalElement.style.top = '100px'
+    originalElement.style.width = '200px'
+    originalElement.style.height = '50px'
+    document.body.appendChild(originalElement)
+
+    // Mock getBoundingClientRect
+    originalElement.getBoundingClientRect = vi.fn(() => ({
+      left: 100,
+      top: 100,
+      right: 300,
+      bottom: 150,
+      width: 200,
+      height: 50,
+    } as DOMRect))
+
+    // Mock elementFromPoint
+    document.elementFromPoint = vi.fn(() => originalElement)
+
+    await hideOrShowNodeTranslation({ x: 150, y: 125 })
+
+    // Should find translation wrapper
+    const wrapper = document.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
+    expect(wrapper).toBeTruthy()
+  })
+
+  it('should hide translation when hotkey is pressed over translated content', async () => {
+    const originalElement = document.createElement('div')
+    originalElement.textContent = 'Original text'
+    document.body.appendChild(originalElement)
+
+    // Create translated content structure
+    const wrapper = document.createElement('span')
+    wrapper.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+
+    const translatedContent = document.createElement('span')
+    translatedContent.className = `${NOTRANSLATE_CLASS} ${BLOCK_CONTENT_CLASS}`
+    translatedContent.textContent = 'Translated text'
+    translatedContent.style.position = 'absolute'
+    translatedContent.style.left = '100px'
+    translatedContent.style.top = '100px'
+    translatedContent.style.width = '200px'
+    translatedContent.style.height = '50px'
+
+    wrapper.appendChild(translatedContent)
+    originalElement.appendChild(wrapper)
+
+    // Mock getBoundingClientRect for translated content
+    translatedContent.getBoundingClientRect = vi.fn(() => ({
+      left: 100,
+      top: 100,
+      right: 300,
+      bottom: 150,
+      width: 200,
+      height: 50,
+    } as DOMRect))
+
+    // Mock elementFromPoint to return translated content
+    document.elementFromPoint = vi.fn(() => translatedContent)
+
+    await hideOrShowNodeTranslation({ x: 150, y: 125 })
+
+    // Wrapper should be removed
+    expect(document.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
   })
 })
