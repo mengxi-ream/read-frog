@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 0.11.3
+
+### Patch Changes
+
+- [#183](https://github.com/mengxi-ream/read-frog/pull/183) [`a44530a`](https://github.com/mengxi-ream/read-frog/commit/a44530a357bc6af583f1f1a028d74f86fa6804ae) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add translated cache by dexie
+
+- [#181](https://github.com/mengxi-ream/read-frog/pull/181) [`7072612`](https://github.com/mengxi-ream/read-frog/commit/7072612ac0bf19628c4a699dcec4f81c54396e53) Thanks [@iuhoay](https://github.com/iuhoay)! - fix: improve node translation toggle logic to handle translated content
+
 ## 0.11.2
 
 ### Patch Changes
