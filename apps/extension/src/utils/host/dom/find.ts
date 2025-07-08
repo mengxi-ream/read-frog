@@ -1,8 +1,6 @@
 import type { Point } from '@/types/dom'
 
-import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
-import { isIFrameElement, isTranslatedContentNode } from './filter'
-import { isHTMLElement, isShallowInlineHTMLElement } from './filter'
+import { isHTMLElement, isIFrameElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from './filter'
 import { smashTruncationStyle } from './style'
 
 export function getOwnerDocument(node: Node): Document {
@@ -154,7 +152,7 @@ export function findTranslatedContentWrapper(node: HTMLElement): HTMLElement | n
 
   let currentElement = node.parentElement
   while (currentElement) {
-    if (currentElement.classList.contains(CONTENT_WRAPPER_CLASS)) {
+    if (isTranslatedWrapperNode(currentElement)) {
       return currentElement
     }
     currentElement = currentElement.parentElement
