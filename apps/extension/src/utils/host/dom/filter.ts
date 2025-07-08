@@ -1,8 +1,10 @@
 import type { TransNode } from '@/types/dom'
 import {
   BLOCK_ATTRIBUTE,
+  BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
   INLINE_ATTRIBUTE,
+  INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from '@/utils/constants/dom-labels'
 import { FORCE_BLOCK_TAGS } from '@/utils/constants/dom-tags'
@@ -125,4 +127,11 @@ export function isIFrameElement(node: Node): node is HTMLIFrameElement {
 
 export function isTranslatedWrapperNode(node: Node) {
   return isHTMLElement(node) && node.classList.contains(CONTENT_WRAPPER_CLASS)
+}
+
+/**
+ * Check if a node is translated content (block or inline)
+ */
+export function isTranslatedContentNode(node: Node): boolean {
+  return isHTMLElement(node) && (node.classList.contains(BLOCK_CONTENT_CLASS) || node.classList.contains(INLINE_CONTENT_CLASS))
 }

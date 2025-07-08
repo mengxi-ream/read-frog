@@ -15,8 +15,8 @@ import {
   TRANSLATION_ERROR_CONTAINER_CLASS,
 } from '../../constants/dom-labels'
 import { FORCE_INLINE_TRANSLATION_TAGS } from '../../constants/dom-tags'
-import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode, isTranslatedWrapperNode } from '../dom/filter'
-import { deepQueryTopLevelSelector, findNearestAncestorBlockNodeAt, unwrapDeepestOnlyHTMLChild } from '../dom/find'
+import { isBlockTransNode, isHTMLElement, isInlineTransNode, isTextNode, isTranslatedContentNode, isTranslatedWrapperNode } from '../dom/filter'
+import { deepQueryTopLevelSelector, findNearestAncestorBlockNodeAt, findTranslatedContentWrapper, unwrapDeepestOnlyHTMLChild } from '../dom/find'
 import { getOwnerDocument } from '../dom/node'
 import {
   extractTextContent,
@@ -32,6 +32,16 @@ export async function hideOrShowNodeTranslation(point: Point) {
 
   if (!node || !isHTMLElement(node))
     return
+
+  // Check if the found node is translated content
+  if (isTranslatedContentNode(node)) {
+    const wrapper = findTranslatedContentWrapper(node)
+    if (wrapper) {
+      removeShadowHostInTranslatedWrapper(wrapper)
+      wrapper.remove()
+    }
+    return
+  }
 
   const id = crypto.randomUUID()
   walkAndLabelElement(node, id)
