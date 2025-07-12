@@ -27,6 +27,7 @@ import '@/assets/tailwind/text-small.css'
 import '@/assets/tailwind/theme.css'
 import '@/entrypoints/host.content/style.css'
 
+// eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null
 
 export default defineContentScript({

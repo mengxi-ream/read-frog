@@ -7,9 +7,9 @@ async function getRepoStarsAndForks(
   repo: string,
   token?: string,
 ): Promise<{
-    stars: number
-    forks: number
-  }> {
+  stars: number
+  forks: number
+}> {
   const endpoint = `https://api.github.com/repos/${owner}/${repo}`
   const headers = new Headers({
     'Content-Type': 'application/json',

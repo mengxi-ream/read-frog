@@ -1,5 +1,6 @@
+import type { EntityTable } from 'dexie'
 import { upperCamelCase } from 'case-anything'
-import Dexie, { type EntityTable } from 'dexie'
+import Dexie from 'dexie'
 import { APP_NAME } from '@/utils/constants/app'
 import TranslationCache from './tables/translation-cache'
 

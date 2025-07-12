@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "incremental": true,
-    "target": "ESNext",
+    "target": "ES2022",
     "jsx": "preserve",
     "lib": [
       "dom",

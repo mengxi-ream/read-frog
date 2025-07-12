@@ -7,6 +7,7 @@ import {
   CONFIG_STORAGE_KEY,
 } from '../constants/config'
 
+// eslint-disable-next-line import/no-mutable-exports
 export let globalConfig: Config | null = null
 
 export async function loadGlobalConfig() {

@@ -11,6 +11,9 @@
   },
   "scripts": {
     "build": "turbo build",
+    "db:generate": "turbo db:generate",
+    "db:migrate": "turbo db:migrate",
+    "db:studio": "turbo db:studio",
     "dev": "turbo dev",
     "dev:extension": "turbo dev --filter=@read-frog/extension",
     "dev:website": "turbo dev --filter=@read-frog/website",
@@ -36,5 +39,10 @@
     "syncpack": "^13.0.4",
     "turbo": "^2.5.4",
     "typescript": "^5.8.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "rollup": "4.43.0"
+    }
   }
 }

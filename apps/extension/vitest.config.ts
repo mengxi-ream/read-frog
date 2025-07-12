@@ -5,7 +5,8 @@ import { defineConfig } from 'vitest/config'
 import { WxtVitest } from 'wxt/testing'
 
 export default defineConfig({
-  plugins: [WxtVitest(), react()],
+  // TODO: remove any
+  plugins: [WxtVitest() as any, react()],
   test: {
     environment: 'node',
     globals: true,
