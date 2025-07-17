@@ -160,6 +160,10 @@ export const translateConfigSchema = z.object({
     autoTranslatePatterns: z.array(z.string()),
   }),
   promptsConfig: promptsConfigSchema,
+  requestQueueConfig: z.object({
+    capacity: z.number().gt(1),
+    rate: z.number().gt(1),
+  }),
 })
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
 
