@@ -1,6 +1,8 @@
-export const description = 'Add personalized prompt'
+import type { Config } from '@/types/config/config'
 
-export const configExample = {
+export const description = 'Expose Translate Request Rate'
+
+export const configExample: Config = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',
@@ -86,6 +88,10 @@ Input:
 `,
         },
       ],
+    },
+    requestQueueConfig: {
+      capacity: 300,
+      rate: 5,
     },
   },
   floatingButton: {

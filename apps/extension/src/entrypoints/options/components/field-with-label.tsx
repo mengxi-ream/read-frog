@@ -1,6 +1,9 @@
-export function FieldWithLabel({ id, label, children }: { id: string, label: React.ReactNode, children: React.ReactNode }) {
+export function FieldWithLabel(
+  { id, label, children, className }:
+  { id: string, label: React.ReactNode, children: React.ReactNode, className?: string },
+) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className={cn('flex flex-col gap-1', className)}>
       <label htmlFor={id} className="text-sm font-medium">
         {label}
       </label>

@@ -1,3 +1,4 @@
+import deepmerge from 'deepmerge'
 import { BinaryHeapPQ } from './priority-queue'
 
 export interface RequestTask {
@@ -68,6 +69,12 @@ export class RequestQueue {
 
     this.schedule()
     return promise
+  }
+
+  setQueueOptions(options: Partial<QueueOptions>) {
+    this.options = deepmerge(this.options, options)
+    this.bucketTokens = this.options.capacity
+    this.lastRefill = Date.now()
   }
 
   private schedule() {

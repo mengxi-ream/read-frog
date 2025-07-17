@@ -426,3 +426,39 @@ describe('requestQueue – retry with timeout combined', () => {
     await expect(promise).rejects.toThrow('timed out after 100ms')
   })
 })
+
+// 11. Reconfigure the request queue
+describe('requestQueue – reconfigure the request queue', () => {
+  it('basic timeout functionality works', async () => {
+    vi.useFakeTimers()
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 10,
+    }) // 5 / sec
+    const count = 100
+    const completed: number[] = []
+
+    q.setQueueOptions({
+      rate: 10,
+      capacity: 10,
+    })
+
+    const trackingThunk = (id: number) => () => {
+      return new Promise((resolve) => {
+        completed.push(id)
+        resolve(id)
+      })
+    }
+
+    for (let i = 0; i < count; i++) {
+      q.enqueue(trackingThunk(i), Date.now(), `task-${i}`)
+    }
+
+    // Advance time enough: 100 tasks, initial 10 tokens, then 10 per sec
+    // First 10 tasks execute immediately, remaining 90 tasks need 90/10 = 9 seconds
+    vi.advanceTimersByTime(9_000)
+    await Promise.resolve()
+    expect(completed).toHaveLength(count)
+  })
+})

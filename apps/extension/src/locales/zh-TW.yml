@@ -73,6 +73,15 @@ options:
         description: 此操作將清空您的所有自定義配置，並將其重置為預設值，請確認是否清除。
   translation:
     title: 翻譯
+    requestQueueConfig:
+      title: 翻譯速率
+      description: 調整每秒請求數以及初始最大允許請求數
+      capacity:
+        title: 最大突發請求數
+        description: 系統允許的最大突發請求承載量。在這個容量範圍內的所有請求會立即被放行。
+      rate:
+        title: 每秒平均請求數量
+        description: 控制每秒平均請求數量
     personalizedPrompt:
       title: 個人化 Prompt
       description: 自訂不同類型的 Prompt，可以在翻譯時自行調整 Prompt 類型。Prompt 表示以用戶身份發送給 LLM 的文字，其中 {{input}} 表示段落的文字內容，{{targetLang}} 表示目標語言。
