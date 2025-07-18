@@ -1,6 +1,7 @@
 import type { Config } from '@/types/config/config'
 import type { AllProviderNames, PageTranslateRange, ProvidersConfig, ReadModels, TranslateModels } from '@/types/config/provider'
 import deepseekLogo from '@/assets/providers/deepseek.png'
+import geminiLogo from '@/assets/providers/gemini.png'
 import googleLogo from '@/assets/providers/google.png'
 import microsoftLogo from '@/assets/providers/microsoft.png'
 import ollamaLogo from '@/assets/providers/ollama.png'
@@ -30,6 +31,10 @@ export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   ollama: {
     apiKey: undefined,
     baseURL: 'http://localhost:11434/v1',
+  },
+  gemini: {
+    apiKey: undefined,
+    baseURL: 'https://generativelanguage.googleapis.com/v1beta/',
   },
 }
 
@@ -66,6 +71,11 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateModels = {
   },
   ollama: {
     model: 'gemma3:1b',
+    isCustomModel: false,
+    customModel: '',
+  },
+  gemini: {
+    model: 'gemini-2.5-pro',
     isCustomModel: false,
     customModel: '',
   },
@@ -130,6 +140,10 @@ export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: string, name: stri
     ollama: {
       logo: ollamaLogo,
       name: 'Ollama',
+    },
+    gemini: {
+      logo: geminiLogo,
+      name: 'Gemini',
     },
   }
 

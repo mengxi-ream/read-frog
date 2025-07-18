@@ -34,6 +34,8 @@ options:
       openai: GPT-4oなどのモデルを提供
       deepseek: 中国国内での使用を推奨
       openrouter: 複数のLLMプロバイダを統合するインターフェース
+      ollama: ローカル大規模言語モデルサービス
+      gemini: Gemini-1.5-Pro などのモデルを提供する
     apiKey:
       showAPIKey: APIキーを表示
     advancedConfig:
