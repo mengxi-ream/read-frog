@@ -2,8 +2,8 @@ import type { Config } from '@/types/config/config'
 
 import type { ReadProviderNames, translateProviderModels } from '@/types/config/provider'
 import { createDeepSeek } from '@ai-sdk/deepseek'
+import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
-
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 
 import { createProviderRegistry } from 'ai'
@@ -24,6 +24,10 @@ export async function getProviderRegistry() {
     ollama: createOpenAI({
       baseURL: config?.providersConfig?.ollama.baseURL ?? DEFAULT_PROVIDER_CONFIG.ollama.baseURL,
       apiKey: config?.providersConfig?.ollama.apiKey,
+    }),
+    gemini: createGoogleGenerativeAI({
+      baseURL: config?.providersConfig?.gemini.baseURL ?? DEFAULT_PROVIDER_CONFIG.gemini.baseURL,
+      apiKey: config?.providersConfig?.gemini.apiKey,
     }),
   })
 }
