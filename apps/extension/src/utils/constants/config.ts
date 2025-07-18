@@ -13,7 +13,7 @@ import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION = 8
+export const CONFIG_SCHEMA_VERSION = 9
 
 export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
