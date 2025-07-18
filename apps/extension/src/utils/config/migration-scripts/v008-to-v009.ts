@@ -1,7 +1,7 @@
 import { DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE, REQUEST_RATE_EXPOSE_PROPERTIES } from '@/utils/constants/translate'
 
 export function migrate(oldConfig: any): any {
-  // 暴露请求队列速率参数
+  // Expose request queue rate parameters
   return {
     ...oldConfig,
     translate: {

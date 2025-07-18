@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { HOTKEYS } from '@/utils/constants/hotkeys'
-
+import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
 /* ──────────────────────────────
   Single source of truth
   ────────────────────────────── */
@@ -161,8 +161,8 @@ export const translateConfigSchema = z.object({
   }),
   promptsConfig: promptsConfigSchema,
   requestQueueConfig: z.object({
-    capacity: z.number().gt(1),
-    rate: z.number().gt(1),
+    capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
+    rate: z.number().gte(MIN_TRANSLATE_RATE),
   }),
 })
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
