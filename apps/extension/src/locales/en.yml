@@ -75,13 +75,14 @@ options:
     title: Translation
     requestQueueConfig:
       title: Translation Rate
-      description: Adjust the number of requests per second and the initial maximum allowed requests
+      firstOnDescription: Adjust the processing speed of translation requests using the
+      lastOnDescription: algorithm
       capacity:
         title: Maximum Burst Request Count
-        description: The maximum burst request load allowed by the system. All requests within this capacity range will be immediately permitted to pass.
+        description: The allowed temporary burst request count determines the maximum number of requests that can be processed concurrently within a short period
       rate:
         title: Average Requests Per Second
-        description: Control the average requests per second
+        description: Average requests per second, but allows configuring a maximum burst count to temporarily send excess requests
     personalizedPrompt:
       title: Personalized Prompt
       description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM, where {{input}} denotes the text content of the paragraph and {{targetLang}} denotes the target language.

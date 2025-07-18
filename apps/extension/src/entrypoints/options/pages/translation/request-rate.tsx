@@ -1,20 +1,29 @@
 import { useAtom } from 'jotai'
 import { Input } from '@/components/ui/input'
+import { requestQueueConfigSchema } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
-import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE, REQUEST_RATE_EXPOSE_PROPERTIES } from '@/utils/constants/translate'
+import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
+
+type Prop = 'capacity' | 'rate'
 
 export function RequestRate() {
   return (
     <ConfigCard
       title={i18n.t('options.translation.requestQueueConfig.title')}
-      description={i18n.t('options.translation.requestQueueConfig.description')}
+      description={(
+        <div>
+          {i18n.t('options.translation.requestQueueConfig.firstOnDescription')}
+          <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Token_bucket"> Token Bucket </a>
+          {i18n.t('options.translation.requestQueueConfig.lastOnDescription')}
+        </div>
+      )}
     >
       <div className="flex flex-col gap-4">
-        <TranslateNumberSelector property={REQUEST_RATE_EXPOSE_PROPERTIES.Capacity} />
-        <TranslateNumberSelector property={REQUEST_RATE_EXPOSE_PROPERTIES.Rate} />
+        <TranslateNumberSelector property="capacity" />
+        <TranslateNumberSelector property="rate" />
       </div>
     </ConfigCard>
   )
@@ -39,19 +48,16 @@ function RateDescription() {
 }
 
 const propertyDescription = {
-  [REQUEST_RATE_EXPOSE_PROPERTIES.Capacity]: CapacityDescription,
-  [REQUEST_RATE_EXPOSE_PROPERTIES.Rate]: RateDescription,
+  capacity: CapacityDescription,
+  rate: RateDescription,
 }
 
 const propertyMin = {
-  [REQUEST_RATE_EXPOSE_PROPERTIES.Capacity]: MIN_TRANSLATE_CAPACITY,
-  [REQUEST_RATE_EXPOSE_PROPERTIES.Rate]: MIN_TRANSLATE_RATE,
+  capacity: MIN_TRANSLATE_CAPACITY,
+  rate: MIN_TRANSLATE_RATE,
 }
 
-function TranslateNumberSelector(
-  { property }:
-  { property: REQUEST_RATE_EXPOSE_PROPERTIES },
-) {
+function TranslateNumberSelector({ property }: { property: Prop }) {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
   const { requestQueueConfig } = translateConfig
 
@@ -68,16 +74,19 @@ function TranslateNumberSelector(
         min={min}
         value={value}
         onChange={(e) => {
-          setTranslateConfig({
-            ...translateConfig,
-            requestQueueConfig: {
-              ...translateConfig.requestQueueConfig,
-              [property]: Number(e.target.value),
-            },
-          })
-          sendMessage('setTranslateRequestQueueConfig', {
-            [property]: Number(e.target.value),
-          })
+          const _value = Number(e.target.value)
+          if (requestQueueConfigSchema.partial().safeParse({ [property]: _value }).success) {
+            setTranslateConfig({
+              ...translateConfig,
+              requestQueueConfig: {
+                ...translateConfig.requestQueueConfig,
+                [property]: _value,
+              },
+            })
+            sendMessage('setTranslateRequestQueueConfig', {
+              [property]: _value,
+            })
+          }
         }}
       />
     </FieldWithLabel>

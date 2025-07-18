@@ -73,13 +73,14 @@ options:
     title: 翻訳
     requestQueueConfig:
       title: 翻訳速度
-      description: 秒間のリクエスト数を調整することで、初期最大許可リクエスト数を変更できます
+      firstOnDescription: 翻訳リクエストの処理速度を調整し、
+      lastOnDescription: を利用して実装する
       capacity:
         title: 最大バーストリクエスト数
-        description: システムが許容する最大バーストリクエスト負荷量。この容量範囲内の全リクエストは即時通過が許可される。
+        description: 許容される一時的バーストリクエスト数は、短期間内に同時処理可能な最大リクエスト数を決定する
       rate:
         title: 秒間平均リクエスト数
-        description: 秒間平均リクエスト数を制御する。
+        description: 平均秒間リクエスト数（ただし、最大バーストリクエスト数を設定し一時的な超過リクエスト送信を許可）
     personalizedPrompt:
       title: 個人化プロンプト
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指し、その中で {{input}} は段落のテキスト内容を、{{targetLang}} はターゲット言語を表します。
