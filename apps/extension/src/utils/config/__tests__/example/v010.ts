@@ -1,6 +1,8 @@
-export const description = 'Expose Translate Request Rate'
+import type { Config } from '@/types/config/config'
 
-export const configExample = {
+export const description = 'Integrate Gemini Api'
+
+export const configExample: Config = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',
@@ -23,6 +25,10 @@ export const configExample = {
     ollama: {
       apiKey: undefined,
       baseURL: 'http://127.0.0.1:11434/v1',
+    },
+    gemini: {
+      apiKey: undefined,
+      baseURL: 'https://generativelanguage.googleapis.com/v1beta/',
     },
   },
   read: {
@@ -62,6 +68,11 @@ export const configExample = {
       },
       ollama: {
         model: 'gemma3:1b',
+        isCustomModel: false,
+        customModel: '',
+      },
+      gemini: {
+        model: 'gemini-2.5-pro',
         isCustomModel: false,
         customModel: '',
       },
