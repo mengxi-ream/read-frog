@@ -148,6 +148,11 @@ export const promptsConfigSchema = z.object({
   ),
 })
 
+export const requestQueueConfigSchema = z.object({
+  capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
+  rate: z.number().gte(MIN_TRANSLATE_RATE),
+})
+
 export const translateConfigSchema = z.object({
   provider: z.enum(translateProviderNames),
   models: translateModelsSchema,
@@ -160,10 +165,7 @@ export const translateConfigSchema = z.object({
     autoTranslatePatterns: z.array(z.string()),
   }),
   promptsConfig: promptsConfigSchema,
-  requestQueueConfig: z.object({
-    capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
-    rate: z.number().gte(MIN_TRANSLATE_RATE),
-  }),
+  requestQueueConfig: requestQueueConfigSchema,
 })
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
 

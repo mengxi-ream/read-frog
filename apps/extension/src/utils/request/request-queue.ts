@@ -1,4 +1,5 @@
 import deepmerge from 'deepmerge'
+import { requestQueueConfigSchema } from '@/types/config/provider'
 import { BinaryHeapPQ } from './priority-queue'
 
 export interface RequestTask {
@@ -72,6 +73,9 @@ export class RequestQueue {
   }
 
   setQueueOptions(options: Partial<QueueOptions>) {
+    if (!requestQueueConfigSchema.partial().safeParse(options).success) {
+      throw new Error('invalid queue options')
+    }
     this.options = deepmerge(this.options, options)
     this.bucketTokens = this.options.capacity
     this.lastRefill = Date.now()

@@ -75,13 +75,14 @@ options:
     title: 翻譯
     requestQueueConfig:
       title: 翻譯速率
-      description: 調整每秒請求數以及初始最大允許請求數
+      firstOnDescription: 調整翻譯請求的處理速度，使用
+      lastOnDescription: 實現
       capacity:
         title: 最大突發請求數
-        description: 系統允許的最大突發請求承載量。在這個容量範圍內的所有請求會立即被放行。
+        description: 允許的暫時突發請求數量，決定了在短時間內最多能同時處理多少個請求
       rate:
         title: 每秒平均請求數量
-        description: 控制每秒平均請求數量
+        description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫發送超量請求
     personalizedPrompt:
       title: 個人化 Prompt
       description: 自訂不同類型的 Prompt，可以在翻譯時自行調整 Prompt 類型。Prompt 表示以用戶身份發送給 LLM 的文字，其中 {{input}} 表示段落的文字內容，{{targetLang}} 表示目標語言。

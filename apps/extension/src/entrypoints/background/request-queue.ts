@@ -6,11 +6,11 @@ import { ensureConfig } from './config'
 
 export async function setUpRequestQueue() {
   const config = await ensureConfig()
-  const { translate: { requestQueueConfig } } = config ?? DEFAULT_CONFIG
+  const { translate: { requestQueueConfig: { rate, capacity } } } = config ?? DEFAULT_CONFIG
 
   const requestQueue = new RequestQueue({
-    rate: requestQueueConfig.rate,
-    capacity: requestQueueConfig.capacity,
+    rate,
+    capacity,
     timeoutMs: 20_000,
     maxRetries: 2,
     baseRetryDelayMs: 1_000,
