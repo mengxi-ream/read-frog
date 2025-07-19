@@ -167,6 +167,7 @@ export const translateConfigSchema = z.object({
   promptsConfig: promptsConfigSchema,
   requestQueueConfig: requestQueueConfigSchema,
 })
+export type RequestQueueConfig = z.infer<typeof requestQueueConfigSchema>
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
 
 /* ──────────────────────────────

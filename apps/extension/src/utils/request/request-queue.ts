@@ -73,12 +73,15 @@ export class RequestQueue {
   }
 
   setQueueOptions(options: Partial<QueueOptions>) {
-    if (!requestQueueConfigSchema.partial().safeParse(options).success) {
-      throw new Error('invalid queue options')
+    const parseConfigStatus = requestQueueConfigSchema.partial().safeParse(options)
+    if (parseConfigStatus.error) {
+      throw new Error(parseConfigStatus.error.issues[0].message)
     }
     this.options = deepmerge(this.options, options)
-    this.bucketTokens = this.options.capacity
-    this.lastRefill = Date.now()
+    if (options.capacity) {
+      this.bucketTokens = options.capacity
+      this.lastRefill = Date.now()
+    }
   }
 
   private schedule() {

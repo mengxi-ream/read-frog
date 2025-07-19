@@ -1,4 +1,6 @@
+import type { RequestQueueConfig } from '@/types/config/provider'
 import { useAtom } from 'jotai'
+import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { requestQueueConfigSchema } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
@@ -7,7 +9,7 @@ import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
 
-type Prop = 'capacity' | 'rate'
+type KeyOfRequestQueueConfig = keyof RequestQueueConfig
 
 export function RequestRate() {
   return (
@@ -16,7 +18,7 @@ export function RequestRate() {
       description={(
         <div>
           {i18n.t('options.translation.requestQueueConfig.firstOnDescription')}
-          <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Token_bucket"> Token Bucket </a>
+          <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Token_bucket" aria-label="Learn more about the Token Bucket algorithm on Wikipedia"> Token Bucket </a>
           {i18n.t('options.translation.requestQueueConfig.lastOnDescription')}
         </div>
       )}
@@ -52,17 +54,17 @@ const propertyDescription = {
   rate: RateDescription,
 }
 
-const propertyMin = {
+const propertyMinAllowedValue = {
   capacity: MIN_TRANSLATE_CAPACITY,
   rate: MIN_TRANSLATE_RATE,
 }
 
-function TranslateNumberSelector({ property }: { property: Prop }) {
+function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConfig }) {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
   const { requestQueueConfig } = translateConfig
 
-  const value = requestQueueConfig[property]
-  const min = propertyMin[property]
+  const currentConfigValue = requestQueueConfig[property]
+  const minAllowedValue = propertyMinAllowedValue[property]
 
   const Description = propertyDescription[property]
 
@@ -71,21 +73,26 @@ function TranslateNumberSelector({ property }: { property: Prop }) {
       <Input
         className="mt-1 mb-2 w-40 flex-shrink-0"
         type="number"
-        min={min}
-        value={value}
+        min={minAllowedValue}
+        value={currentConfigValue}
         onChange={(e) => {
-          const _value = Number(e.target.value)
-          if (requestQueueConfigSchema.partial().safeParse({ [property]: _value }).success) {
+          const parsedNumber = Number(e.target.value)
+          const parseResult = requestQueueConfigSchema.partial().safeParse({ [property]: parsedNumber })
+          logger.info(parseResult.error?.issues, 'error')
+          if (parseResult.success) {
             setTranslateConfig({
               ...translateConfig,
               requestQueueConfig: {
                 ...translateConfig.requestQueueConfig,
-                [property]: _value,
+                [property]: parsedNumber,
               },
             })
             sendMessage('setTranslateRequestQueueConfig', {
-              [property]: _value,
+              [property]: parsedNumber,
             })
+          }
+          else {
+            toast.error(parseResult.error?.issues[0].message)
           }
         }}
       />
