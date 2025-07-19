@@ -76,23 +76,22 @@ function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConf
         min={minAllowedValue}
         value={currentConfigValue}
         onChange={(e) => {
-          const parsedNumber = Number(e.target.value)
-          const parseResult = requestQueueConfigSchema.partial().safeParse({ [property]: parsedNumber })
-          logger.info(parseResult.error?.issues, 'error')
-          if (parseResult.success) {
+          const newConfigValue = Number(e.target.value)
+          const configParseResult = requestQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          if (configParseResult.success) {
             setTranslateConfig({
               ...translateConfig,
               requestQueueConfig: {
                 ...translateConfig.requestQueueConfig,
-                [property]: parsedNumber,
+                [property]: newConfigValue,
               },
             })
             sendMessage('setTranslateRequestQueueConfig', {
-              [property]: parsedNumber,
+              [property]: newConfigValue,
             })
           }
           else {
-            toast.error(parseResult.error?.issues[0].message)
+            toast.error(configParseResult.error?.issues[0].message)
           }
         }}
       />
