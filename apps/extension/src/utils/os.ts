@@ -7,7 +7,7 @@ function detectOS(): OS {
     return 'Unknown'
 
   // Modern browsers expose navigator.userAgentData.platform
-  const platform = (navigator as any).userAgentData?.platform || ''
+  const platform = (navigator as any).userAgentData?.platform || navigator.platform || navigator.userAgent || ''
 
   if (/Win/i.test(platform))
     return 'Windows'
@@ -15,7 +15,7 @@ function detectOS(): OS {
     return 'MacOS'
   if (/Linux/i.test(platform))
     return 'Linux'
-  if (/iPhone|iPad|iPod/i.test(platform))
+  if (/iPhone|iPad|iPod|iOS/i.test(platform))
     return 'iOS'
   if (/Android/i.test(platform))
     return 'Android'

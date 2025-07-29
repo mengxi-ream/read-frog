@@ -43,8 +43,8 @@ export default defineContentScript({
     })
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-      // Listen for Alt + Q for translation
-      if (e.altKey && e.key === 'q') {
+      // Listen for Alt + Q for translation toggle
+      if (e.altKey && e.key === 'q' && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
         if (manager.isActive) {
           manager.stop()
         }
