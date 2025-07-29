@@ -7,6 +7,7 @@ import { pureTranslateProvider } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { hasSetAPIKey } from '@/utils/config/config'
 import { sendMessage } from '@/utils/message'
+import { formatHotkey } from '@/utils/os.ts'
 import { cn } from '@/utils/tailwind'
 import { isPageTranslatedAtom } from '../atoms/auto-translate'
 import { isIgnoreTabAtom } from '../atoms/ignore'
@@ -54,7 +55,7 @@ export default function TranslateButton({ className }: { className?: string }) {
     >
       {isPageTranslated
         ? i18n.t('popup.showOriginal')
-        : i18n.t('popup.translate')}
+        : `${i18n.t('popup.translate')} (${formatHotkey(['alt', 'q'])})`}
     </Button>
   )
 }
