@@ -1,6 +1,8 @@
-export const description = 'Deprecate OpenRouter and Ollama'
+import type { Config } from '@/types/config/config'
 
-export const configExample = {
+export const description = 'Integrate Gemini Api'
+
+export const configExample: Config = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',
@@ -15,6 +17,10 @@ export const configExample = {
     deepseek: {
       apiKey: undefined,
       baseURL: 'https://api.deepseek.com/v1',
+    },
+    gemini: {
+      apiKey: undefined,
+      baseURL: 'https://generativelanguage.googleapis.com/v1beta/',
     },
   },
   read: {
@@ -44,6 +50,11 @@ export const configExample = {
       },
       deepseek: {
         model: 'deepseek-chat',
+        isCustomModel: false,
+        customModel: '',
+      },
+      gemini: {
+        model: 'gemini-2.5-pro',
         isCustomModel: false,
         customModel: '',
       },
