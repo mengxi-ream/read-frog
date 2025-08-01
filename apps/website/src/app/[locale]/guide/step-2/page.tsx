@@ -49,7 +49,7 @@ export default function GuidePage() {
         </Link>
       </div>
       <div className="p-8 flex justify-center items-center">
-        <div>
+        <div className="max-h-full">
           <Image
             src="/images/guide/step-2.png"
             alt="Guide Step 1"
