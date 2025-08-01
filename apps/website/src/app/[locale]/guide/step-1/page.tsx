@@ -25,7 +25,7 @@ export default function Step1Page() {
   const t = useTranslations()
   const [targetLanguage, updateTargetLanguage] = useInitTargetLanguage()
   return (
-    <div className="bg-background grid md:grid-cols-2 grid-rows-2 md:grid-rows-1 h-[100vh] ">
+    <div className="bg-background grid md:grid-cols-2 grid-rows-2 md:grid-rows-1 h-fit md:h-[100vh] ">
       <div className="md:border-r border-b md:border-b-0  p-8 lg:p-16 xl:p-30 flex flex-col gap-4 justify-center">
         <h1 className="text-2xl font-bold">{t('guide.step1.title')}</h1>
         <p className="text-sm text-muted-foreground">
