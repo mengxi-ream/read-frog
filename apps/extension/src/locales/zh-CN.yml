@@ -35,7 +35,7 @@ options:
       deepseek: 推荐在中国使用
       openrouter: 多个 LLM 提供商的统一接口
       ollama: 本地大模型服务
-      gemini: 提供 gemini-1.5-pro 等模型
+      gemini: 提供 gemini-2.5-pro 等模型
     apiKey:
       showAPIKey: 显示 API Key
     advancedConfig:

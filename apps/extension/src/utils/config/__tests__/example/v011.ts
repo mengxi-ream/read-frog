@@ -20,7 +20,7 @@ export const configExample: Config = {
     },
     gemini: {
       apiKey: undefined,
-      baseURL: 'https://generativelanguage.googleapis.com/v1beta/',
+      baseURL: 'https://generativelanguage.googleapis.com/v1beta',
     },
   },
   read: {

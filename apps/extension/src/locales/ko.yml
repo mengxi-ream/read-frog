@@ -35,7 +35,7 @@ options:
       deepseek: 중국에서 사용을 권장합니다
       openrouter: 여러 LLM 제공업체를 위한 통합 인터페이스
       ollama: 로컬 LLM
-      gemini: Gemini-1.5-Pro 등의 모델 제공
+      gemini: Gemini-2.5-Pro 등의 모델 제공
     apiKey:
       showAPIKey: API Key 표시
     advancedConfig:
