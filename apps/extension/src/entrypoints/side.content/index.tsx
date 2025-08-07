@@ -1,9 +1,6 @@
 import type { Config } from '@/types/config/config'
 import { browser, createShadowRootUi, defineContentScript } from '#imports'
 import {
-  MutationCache,
-  QueryCache,
-  QueryClient,
   QueryClientProvider,
 } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -11,7 +8,6 @@ import { kebabCase } from 'case-anything'
 import { Provider as JotaiProvider } from 'jotai/react'
 import { useHydrateAtoms } from 'jotai/utils'
 import ReactDOM from 'react-dom/client'
-import { toast } from 'sonner'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { configAtom } from '@/utils/atoms/config'
 import { globalConfig, loadGlobalConfig } from '@/utils/config/config'
@@ -19,6 +15,7 @@ import { APP_NAME } from '@/utils/constants/app'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { insertShadowRootUIWrapperInto } from '@/utils/shadow-root'
+import { queryClient } from '@/utils/trpc'
 import { addStyleToShadow, mirrorDynamicStyles } from '../../utils/styles'
 import App from './app'
 import { enablePageTranslationAtom, store, translationPortAtom } from './atoms'
@@ -52,23 +49,6 @@ export default defineContentScript({
         //   ".with-scroll-bars-hidden22"
         // );
         protectSelectAllShadowRoot(shadowHost, wrapper)
-
-        const queryClient = new QueryClient({
-          queryCache: new QueryCache({
-            onError: (error, query) => {
-              const errorDescription
-                = query.meta?.errorDescription || 'Something went wrong'
-              toast.error(`${errorDescription}: ${error.message}`)
-            },
-          }),
-          mutationCache: new MutationCache({
-            onError: (error, _variables, _context, mutation) => {
-              const errorDescription
-                = mutation.meta?.errorDescription || 'Something went wrong'
-              toast.error(`${errorDescription}: ${error.message}`)
-            },
-          }),
-        })
 
         const HydrateAtoms = ({
           initialValues,
