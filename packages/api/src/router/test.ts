@@ -3,9 +3,11 @@ import z from 'zod'
 import { createTRPCRouter, protectedProcedure, publicProcedure } from '../trpc'
 
 export const testRouter = createTRPCRouter({
-  hello: publicProcedure.query(() => {
-    return 'Hello, world!'
-  }),
+  hello: publicProcedure
+    .input(z.object({ text: z.string() }))
+    .query(({ input }) => {
+      return `Hello, ${input.text}!`
+    }),
   get: protectedProcedure.query(async ({ ctx }) => {
     const items = await ctx.db.query.test.findMany()
     return items

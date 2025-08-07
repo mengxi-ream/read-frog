@@ -9,6 +9,7 @@ import { Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { SITE_PUBLIC_URL } from '@/lib/constants'
+import { TRPCReactProvider } from '@/trpc/react'
 import '@/styles/global.css'
 
 const inter = Inter({
@@ -104,7 +105,9 @@ export default async function RootLayout({
               translations: locale !== 'en' ? { zh }[locale] : undefined,
             }}
           >
-            {children}
+            <TRPCReactProvider>
+              {children}
+            </TRPCReactProvider>
           </RootProvider>
         </NextIntlClientProvider>
         <Analytics />
