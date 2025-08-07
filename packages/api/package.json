@@ -3,6 +3,10 @@
   "type": "module",
   "version": "0.0.0",
   "private": true,
+  "exports": {
+    ".": "./src/index.ts",
+    "./trpc": "./src/trpc.ts"
+  },
   "main": "./src/index.ts",
   "dependencies": {
     "@repo/auth": "workspace:*",
