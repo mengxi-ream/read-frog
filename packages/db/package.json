@@ -4,7 +4,6 @@
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.ts",
-  "types": "./src/index.ts",
   "scripts": {
     "db:generate": "dotenv -e .env -- drizzle-kit generate",
     "db:migrate": "dotenv -e .env -- drizzle-kit migrate",
@@ -20,6 +19,7 @@
   },
   "devDependencies": {
     "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
     "@types/node": "^22.16.4",
     "dotenv-cli": "^8.0.0",
     "drizzle-kit": "^0.31.4"

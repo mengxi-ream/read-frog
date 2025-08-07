@@ -1,0 +1,19 @@
+{
+  "name": "@repo/auth",
+  "type": "module",
+  "version": "0.0.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "dependencies": {
+    "@repo/constants": "workspace:*",
+    "@repo/db": "workspace:*",
+    "@t3-oss/env-core": "^0.13.8",
+    "better-auth": "^1.2.12",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^22.16.4"
+  }
+}

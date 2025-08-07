@@ -1,6 +1,6 @@
 import type { BetterAuthOptions } from 'better-auth'
-import { env } from '@/env'
-import { APP_NAME } from '@/lib/constants'
+import { APP_NAME } from '@repo/constants'
+import { env } from './env'
 
 /**
  * Custom options for Better Auth
@@ -30,7 +30,6 @@ export const betterAuthOptions: BetterAuthOptions = {
   socialProviders: {
     google: {
       prompt: 'select_account',
-      // TODO: typesafe way to get GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET
       clientId: env.GOOGLE_CLIENT_ID,
       clientSecret: env.GOOGLE_CLIENT_SECRET,
     },

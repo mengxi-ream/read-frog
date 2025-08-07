@@ -1,6 +1,6 @@
+import { auth } from '@repo/auth'
 import { headers } from 'next/headers'
 import Link from 'next/link'
-import { auth } from '@/server/auth'
 import { Button } from '../shadcn/button'
 import { UserAvatar } from './user-avatar'
 
