@@ -10,6 +10,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string(),
     DATABASE_URL: z.string().url(),
     PUBLIC_REPO_GITHUB_TOKEN: z.string().optional(),
+    NODE_ENV: z
+      .enum(['development', 'test', 'production'])
+      .default('development'),
   },
   client: {},
   experimental__runtimeEnv: {},

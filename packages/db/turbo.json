@@ -2,7 +2,6 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "env": ["DATABASE_URL"],
       "outputs": ["dist/**"]
     },
     "db:generate": {

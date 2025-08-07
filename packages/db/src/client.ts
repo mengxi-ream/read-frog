@@ -1,13 +1,17 @@
-import process from 'node:process'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
-import * as schema from './schema/auth'
+import { env } from './env'
 
-export function createDb() {
-  // TODO: typesafe way to get DATABASE_URL
-  const sql = postgres(process.env.DATABASE_URL!, {
-    prepare: false,
-  })
-
-  return drizzle(sql, { schema })
+/**
+ * Cache the database connection in development. This avoids creating a new connection on every HMR
+ * update.
+ */
+const globalForDb = globalThis as unknown as {
+  conn: postgres.Sql | undefined
 }
+
+const conn = globalForDb.conn ?? postgres(env.DATABASE_URL)
+if (env.NODE_ENV !== 'production')
+  globalForDb.conn = conn
+
+export const db = drizzle(conn)
