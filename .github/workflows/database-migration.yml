@@ -39,6 +39,7 @@ jobs:
         run: pnpm --filter=@repo/db db:migrate
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: production
 
       - name: Notify on Success
         if: success()
