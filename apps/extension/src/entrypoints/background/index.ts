@@ -38,7 +38,7 @@ export default defineBackground(() => {
   onMessage('backgroundFetch', async (message) => {
     const { url, method, headers, body, credentials } = message.data
     const response = await fetch(url, {
-      method: method ?? 'GET',
+      method: method ?? 'POST',
       headers: headers ? new Headers(headers) : undefined,
       body,
       credentials: credentials ?? 'include',
