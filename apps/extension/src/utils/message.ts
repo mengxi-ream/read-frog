@@ -20,6 +20,19 @@ interface ProtocolMap {
   // request
   enqueueRequest: (data: { type: string, params: Record<string, any>, scheduleAt: number, hash: string }) => Promise<any>
   setTranslateRequestQueueConfig: (data: { rate?: number, capacity?: number }) => void
+  // network proxy
+  backgroundFetch: (data: {
+    url: string
+    method?: string
+    headers?: [string, string][]
+    body?: string
+    credentials?: 'omit' | 'same-origin' | 'include'
+  }) => Promise<{
+    status: number
+    statusText: string
+    headers: [string, string][]
+    body: string
+  }>
 }
 
 export const { sendMessage, onMessage }

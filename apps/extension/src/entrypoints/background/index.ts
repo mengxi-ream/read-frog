@@ -34,6 +34,27 @@ export default defineBackground(() => {
     sendMessage('readArticle', undefined, message.data.tabId)
   })
 
+  // Proxy cross-origin fetches for content scripts and other contexts
+  onMessage('backgroundFetch', async (message) => {
+    const { url, method, headers, body, credentials } = message.data
+    const response = await fetch(url, {
+      method: method ?? 'GET',
+      headers: headers ? new Headers(headers) : undefined,
+      body,
+      credentials: credentials ?? 'include',
+    })
+
+    const responseHeaders: [string, string][] = Array.from(response.headers.entries())
+    const textBody = await response.text()
+
+    return {
+      status: response.status,
+      statusText: response.statusText,
+      headers: responseHeaders,
+      body: textBody,
+    }
+  })
+
   newUserGuide()
   translationMessage()
 

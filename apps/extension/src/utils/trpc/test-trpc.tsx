@@ -130,7 +130,7 @@ export function TestTRPC() {
                     </div>
                   )
                 : (
-                    <div className="space-y-1">
+                    <div className="space-y-1 max-h-[200px] overflow-y-auto">
                       {getQuery.data.map(item => (
                         <div key={item.id} className="p-2 bg-secondary rounded text-sm">
                           <div className="font-medium">{item.name}</div>
