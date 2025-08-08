@@ -391,6 +391,9 @@ importers:
       '@repo/auth':
         specifier: workspace:*
         version: link:../auth
+      '@repo/db':
+        specifier: workspace:*
+        version: link:../db
       '@trpc/server':
         specifier: ^11.4.4
         version: 11.4.4(typescript@5.8.3)
@@ -401,9 +404,6 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
-      '@repo/db':
-        specifier: workspace:*
-        version: link:../db
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
