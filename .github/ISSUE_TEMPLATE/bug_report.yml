@@ -21,8 +21,7 @@ body:
       value: |
         This template is used for reporting an issue with Read Frog.
 
-        Feature requests should be opened via the Feature request form.
-        Feature requests: https://github.com/mengxi-ream/read-frog/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml&title=
+        Feature requests should be opened via the [Feature Request Form](https://github.com/mengxi-ream/read-frog/issues/new?assignees=&labels=enhancement&projects=&template=feature_request.yml&title=)
   - type: textarea
     id: expected
     attributes:
@@ -48,18 +47,6 @@ body:
         4. Observe translation not appearing on the page
     validations:
       required: true
-  - type: input
-    id: extension_version
-    attributes:
-      label: What version of Read Frog extension are you using? (if applicable)
-      description: Provide the current version of the browser extension
-      placeholder: 1.x.x
-  - type: input
-    id: website_version
-    attributes:
-      label: Website version (if applicable)
-      description: If reporting an issue with the website, provide the version
-      placeholder: 1.x.x
   - type: dropdown
     id: areas
     attributes:
@@ -71,6 +58,12 @@ body:
         - Other
     validations:
       required: true
+  - type: input
+    id: extension_version
+    attributes:
+      label: Extension version (if applicable)
+      description: Provide the current version of the browser extension
+      placeholder: 1.x.x
   - type: textarea
     id: environment
     attributes:
@@ -85,16 +78,8 @@ body:
     validations:
       required: true
   - type: textarea
-    id: logs
-    attributes:
-      label: Logs / screenshots
-      description: Console output, network errors, or relevant screenshots that help diagnose the issue. Remove any sensitive information.
-      render: shell
-  - type: textarea
     id: additional
     attributes:
       label: Additional context
       description: |
         Any extra information that might help us investigate. For example, is it only reproducible online, or locally too? Is the issue only happening in a specific website or browser?
-      placeholder: |
-        I tested my reproduction against the latest release.

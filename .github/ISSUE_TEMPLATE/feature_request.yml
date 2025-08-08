@@ -21,8 +21,7 @@ body:
       value: |
         This template is used for suggesting a feature for Read Frog.
 
-        Bug reports should be opened via the Bug report form.
-        Bug reports: https://github.com/mengxi-ream/read-frog/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=
+        Bug reports should be opened via the [Bug Report Form](https://github.com/mengxi-ream/read-frog/issues/new?assignees=&labels=bug&projects=&template=bug_report.yml&title=)
   - type: textarea
     id: problem
     attributes:
@@ -44,15 +43,6 @@ body:
         - Browser Extension
         - Website
         - Other
-  - type: dropdown
-    id: priority
-    attributes:
-      label: Priority
-      options:
-        - Nice to have
-        - Important
-        - Critical
-        - Unsure
   - type: textarea
     id: context
     attributes:
