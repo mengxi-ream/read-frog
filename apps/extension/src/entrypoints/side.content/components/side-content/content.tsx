@@ -10,7 +10,6 @@ import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { useExtractContent } from '@/hooks/read/extract'
 import { useExplainArticle } from '@/hooks/read/read'
-
 import { progressAtom, readStateAtom } from '../../atoms'
 import Explanation from './explanation'
 

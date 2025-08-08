@@ -5,7 +5,6 @@ import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
 import { toast } from 'sonner'
 import SuperJSON from 'superjson'
 
-// TODO: don't set this for every side content script
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {

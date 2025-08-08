@@ -1,4 +1,5 @@
 import { i18n } from '#imports'
+import { TestTRPC } from '@/utils/trpc/test-trpc'
 import { PageLayout } from '../../components/page-layout'
 import { ReadConfig } from './read-config'
 import { ResetConfig } from './reset-config'
@@ -10,6 +11,7 @@ export function GeneralPage() {
       <ReadConfig />
       <TranslationConfig />
       <ResetConfig />
+      {import.meta.env.DEV && <TestTRPC />}
     </PageLayout>
   )
 }

@@ -4,9 +4,11 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { trpc } from '@/utils/trpc'
+import { trpc } from '@/utils/trpc/client'
 
-export default function TestTRPC() {
+// TODO: remove this and the place where it is used
+
+export function TestTRPC() {
   const [helloText, setHelloText] = useState('world')
   const [createName, setCreateName] = useState('')
   const queryClient = useQueryClient()
