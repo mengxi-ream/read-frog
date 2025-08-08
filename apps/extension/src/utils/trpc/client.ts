@@ -1,9 +1,10 @@
 import type { AppRouter } from '@repo/api'
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
-import { createTRPCClient, httpBatchLink } from '@trpc/client'
+import { createTRPCClient, httpBatchLink, loggerLink } from '@trpc/client'
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
 import { toast } from 'sonner'
 import SuperJSON from 'superjson'
+import { getBaseUrl } from '../url'
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -23,8 +24,11 @@ export const queryClient = new QueryClient({
 })
 
 const trpcClient = createTRPCClient<AppRouter>({
-  // TODO: change to the correct url on production
-  links: [httpBatchLink({ url: 'http://localhost:8888/api/trpc', transformer: SuperJSON })],
+  links: [loggerLink({
+    enabled: op =>
+      import.meta.env.DEV
+        || (op.direction === 'down' && op.result instanceof Error),
+  }), httpBatchLink({ url: `${getBaseUrl()}/api/trpc`, transformer: SuperJSON })],
 })
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({
