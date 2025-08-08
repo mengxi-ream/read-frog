@@ -6,6 +6,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { useExtractContent } from '@/hooks/read/extract'
 import { useReadArticle } from '@/hooks/read/read'
+import { authClient } from '@/utils/auth/auth-client'
 import { getFaviconUrl } from '@/utils/content'
 import { onMessage } from '@/utils/message'
 import { cn } from '@/utils/tailwind'
@@ -50,6 +51,8 @@ export function Metadata({ className }: { className?: string }) {
     }
   }, [extractedContent, analyzeContent, explainArticle, setIsSideOpen, readArticle])
 
+  const { data, isPending } = authClient.useSession()
+
   return (
     <div
       className={cn(
@@ -57,6 +60,7 @@ export function Metadata({ className }: { className?: string }) {
         className,
       )}
     >
+      {isPending ? 'Loading...' : data?.user.name ?? 'Guest'}
       <div className="flex min-w-0 flex-1 items-center gap-x-2">
         {favicon && (
           <img

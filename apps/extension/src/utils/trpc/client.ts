@@ -1,6 +1,6 @@
 import type { AppRouter } from '@repo/api'
 import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
-import { createTRPCClient, httpBatchLink, loggerLink } from '@trpc/client'
+import { createTRPCClient, httpBatchStreamLink, loggerLink } from '@trpc/client'
 import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
 import { toast } from 'sonner'
 import SuperJSON from 'superjson'
@@ -28,7 +28,15 @@ const trpcClient = createTRPCClient<AppRouter>({
     enabled: op =>
       import.meta.env.DEV
         || (op.direction === 'down' && op.result instanceof Error),
-  }), httpBatchLink({ url: `${getBaseUrl()}/api/trpc`, transformer: SuperJSON })],
+  }), httpBatchStreamLink({
+    transformer: SuperJSON,
+    url: `${getBaseUrl()}/api/trpc`,
+    headers: () => {
+      const headers = new Headers()
+      headers.set('x-trpc-source', 'browser-extension')
+      return headers
+    },
+  })],
 })
 
 export const trpc = createTRPCOptionsProxy<AppRouter>({

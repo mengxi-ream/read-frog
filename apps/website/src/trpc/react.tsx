@@ -5,11 +5,12 @@ import type { AppRouter } from '@repo/api'
 import type { QueryClient } from '@tanstack/react-query'
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
 
+import { WEBSITE_DEV_PORT } from '@repo/constants'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { httpBatchStreamLink, loggerLink } from '@trpc/client'
 import { createTRPCReact } from '@trpc/react-query'
-import { useState } from 'react'
 
+import { useState } from 'react'
 import SuperJSON from 'superjson'
 import { createQueryClient } from './query-client'
 
@@ -80,6 +81,5 @@ function getBaseUrl() {
     return window.location.origin
   if (process.env.VERCEL_URL)
     return `https://${process.env.VERCEL_URL}`
-  // TODO: make 8888 only from one source of truth
-  return `http://localhost:${process.env.PORT ?? 8888}`
+  return `http://localhost:${process.env.PORT ?? WEBSITE_DEV_PORT}`
 }

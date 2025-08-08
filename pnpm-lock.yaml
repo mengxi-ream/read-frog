@@ -276,6 +276,9 @@ importers:
       '@repo/auth':
         specifier: workspace:*
         version: link:../../packages/auth
+      '@repo/constants':
+        specifier: workspace:*
+        version: link:../../packages/constants
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/db

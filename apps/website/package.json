@@ -18,6 +18,7 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@repo/api": "workspace:*",
     "@repo/auth": "workspace:*",
+    "@repo/constants": "workspace:*",
     "@repo/db": "workspace:*",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@tabler/icons-react": "^3.34.0",
