@@ -10,7 +10,6 @@
         "GOOGLE_CLIENT_SECRET",
         "DATABASE_URL",
         "PUBLIC_REPO_GITHUB_TOKEN",
-        "NODE_ENV",
         "VERCEL_URL",
         "PORT",
         "SKIP_ENV_VALIDATION"

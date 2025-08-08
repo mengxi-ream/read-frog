@@ -15,7 +15,6 @@ const withNextIntl = createNextIntlPlugin()
 /** @type {import('next').NextConfig} */
 const config = {
   reactStrictMode: true,
-  transpilePackages: ['@repo/db'],
   images: {
     // Set longer cache TTL to reduce transformations and cache writes
     minimumCacheTTL: 60 * 60,

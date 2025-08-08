@@ -19,7 +19,7 @@ export default defineConfig({
             'http://localhost:*/*',
           ]
         : [
-            'https://www.readfrog.app/*',
+            'https://*.readfrog.app/*',
             'https://readfrog.app/*', // Include both www and non-www versions
           ],
   }),

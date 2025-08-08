@@ -11,8 +11,7 @@ export const env = createEnv({
     DATABASE_URL: z.string().url(),
     PUBLIC_REPO_GITHUB_TOKEN: z.string().optional(),
     NODE_ENV: z
-      .enum(['development', 'test', 'production'])
-      .default('development'),
+      .enum(['development', 'test', 'production']),
   },
   client: {},
   experimental__runtimeEnv: {},
