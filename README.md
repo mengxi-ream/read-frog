@@ -43,6 +43,16 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 </details>
 
+> [!NOTE]
+>
+> **🚀 v1.0 Coming Soon!** The next major version will bring exciting new features:
+>
+> - 📚 **Vocabulary Book** - Save and review words you've learned
+> - ✨ **Word Selection Translation** - Translate by simply selecting text
+> - 🤖 **Expanded AI Support** - Including Gemini and more language models
+>
+> Stay tuned for the biggest update yet!
+
 ## 📺 Demo
 
 ![Read Frog](/assets/read-demo.gif)
