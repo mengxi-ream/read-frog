@@ -28,9 +28,13 @@ export function extractTextContent(node: TransNode): string {
     return node.textContent ?? ''
   }
 
-  if (isDontWalkIntoElement(node)) {
-    return ''
-  }
+  // We already don't walk and label the element which isDontWalkIntoElement
+  // for the parent element we already walk and label, if we have a notranslate element inside this parent element,
+  // we should extract the text content of the parent.
+  // see this issue: https://github.com/mengxi-ream/read-frog/issues/249
+  // if (isDontWalkIntoElement(node)) {
+  //   return ''
+  // }
 
   const childNodes = Array.from(node.childNodes)
   return childNodes.reduce((text: string, child: Node): string => {

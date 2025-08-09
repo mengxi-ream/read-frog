@@ -141,13 +141,13 @@ function findExistedTranslatedWrapper(node: TransNode): HTMLElement | null {
   if (isTextNode(node) || node.hasAttribute(CONSECUTIVE_INLINE_END_ATTRIBUTE)) {
     if (
       node.nextSibling && isHTMLElement(node.nextSibling)
-      && node.nextSibling.classList.contains(NOTRANSLATE_CLASS)
+      && node.nextSibling.classList.contains(CONTENT_WRAPPER_CLASS)
     ) {
       return node.nextSibling
     }
   }
   else if (isHTMLElement(node)) {
-    return node.querySelector(`:scope > .${NOTRANSLATE_CLASS}`)
+    return node.querySelector(`:scope > .${CONTENT_WRAPPER_CLASS}`)
   }
   return null
 }

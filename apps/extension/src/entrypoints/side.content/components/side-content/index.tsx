@@ -8,7 +8,6 @@ import { isAnyAPIKey } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
 import { MIN_SIDE_CONTENT_WIDTH } from '@/utils/constants/side'
 import { cn } from '@/utils/tailwind'
-import { TestTRPC } from '@/utils/trpc/test-trpc'
 import { isSideOpenAtom } from '../../atoms'
 import Content from './content'
 import { Metadata } from './metadata'
@@ -115,7 +114,6 @@ export default function SideContent() {
             <APIConfigWarning className="mx-3" />
           )}
           <Metadata className="mx-3" />
-          {import.meta.env.DEV && <TestTRPC />}
           <Content />
         </div>
         <Toaster richColors className="z-[2147483647] notranslate" duration={10000} />

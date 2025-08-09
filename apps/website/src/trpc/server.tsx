@@ -6,7 +6,7 @@ import { createTRPCOptionsProxy } from '@trpc/tanstack-react-query'
 import { headers } from 'next/headers'
 import { cache } from 'react'
 import { createQueryClient } from './query-client'
-import 'server-only' // TODO: eslint rule to make this head of file?
+import 'server-only'
 
 /**
  * This wraps the `createTRPCContext` helper and provides the required context for the tRPC API when
