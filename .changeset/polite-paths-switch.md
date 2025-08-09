@@ -2,4 +2,4 @@
 "@read-frog/website": patch
 ---
 
-Update example environment files
+chore: update example environment files

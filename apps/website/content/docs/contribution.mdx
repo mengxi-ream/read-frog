@@ -54,9 +54,16 @@ DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 NODE_ENV=development
 ```
 
-Or you can execute (at `<project_root>`)
-```
+Or you can copy the example file:
+```bash
+# On Unix/Linux/macOS:
 cp packages/db/.env.example packages/db/.env
+
+# On Windows (Command Prompt):
+copy packages\db\.env.example packages\db\.env
+
+# On Windows (PowerShell):
+Copy-Item packages/db/.env.example packages/db/.env
 ```
 
 Then, run the following command to initialize database schemas:
@@ -86,9 +93,16 @@ DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 PUBLIC_REPO_GITHUB_TOKEN=<SOME_PUBLIC_REPO_GITHUB_TOKEN>
 ```
 
-Or you can execute (at `<project_root>`)
-```
+Or you can copy the example file:
+```bash
+# On Unix/Linux/macOS:
 cp apps/website/.env.example apps/website/.env.local
+
+# On Windows (Command Prompt):
+copy apps\website\.env.example apps\website\.env.local
+
+# On Windows (PowerShell):
+Copy-Item apps/website/.env.example apps/website/.env.local
 ```
 
 ### Step 4: Start dev server
