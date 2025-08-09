@@ -51,6 +51,19 @@ service_role key: xxxxxxx
 示例 `<项目根目录>/packages/db/.env`：
 ```
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+NODE_ENV=development
+```
+
+或者你可以复制示例文件：
+```bash
+# 在 Unix/Linux/macOS 上：
+cp packages/db/.env.example packages/db/.env
+
+# 在 Windows (命令提示符)：
+copy packages\db\.env.example packages\db\.env
+
+# 在 Windows (PowerShell)：
+Copy-Item packages/db/.env.example packages/db/.env
 ```
 
 然后，运行以下命令初始化数据库模式：
@@ -77,6 +90,18 @@ GOOGLE_CLIENT_SECRET=<某个_GOOGLE_CLIENT_SECRET>
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
 PUBLIC_REPO_GITHUB_TOKEN=<某个_PUBLIC_REPO_GITHUB_TOKEN> (可选)
+```
+
+或者你可以复制示例文件：
+```bash
+# 在 Unix/Linux/macOS 上：
+cp apps/website/.env.example apps/website/.env.local
+
+# 在 Windows (命令提示符)：
+copy apps\website\.env.example apps\website\.env.local
+
+# 在 Windows (PowerShell)：
+Copy-Item apps/website/.env.example apps/website/.env.local
 ```
 
 ### 步骤 4: 启动开发服务器
