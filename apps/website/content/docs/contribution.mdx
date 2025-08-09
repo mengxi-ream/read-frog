@@ -51,6 +51,12 @@ If using Supabase from step 2.1, fill in `DB URL` obtained in that step.
 Example `<project_root>/packages/db/.env`:
 ```
 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
+NODE_ENV=development
+```
+
+Or you can execute (at `<project_root>`)
+```
+cp packages/db/.env.example packages/db/.env
 ```
 
 Then, run the following command to initialize database schemas:
@@ -78,6 +84,11 @@ DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:54322/postgres
 
 # Optional – only needed if you want the deal with rate limit of Github API
 PUBLIC_REPO_GITHUB_TOKEN=<SOME_PUBLIC_REPO_GITHUB_TOKEN>
+```
+
+Or you can execute (at `<project_root>`)
+```
+cp apps/website/.env.example apps/website/.env.local
 ```
 
 ### Step 4: Start dev server
