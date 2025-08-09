@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 import { isPureTranslateProvider } from '@/types/config/provider'
 import { globalConfig } from '@/utils/config/config'
-import { googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
+import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModel } from '@/utils/provider'
 import { isTooltipVisibleAtom, isTranslatePopoverVisibleAtom, mouseClickPositionAtom, selectionContentAtom } from './atom'
@@ -91,6 +91,9 @@ export function TranslatePopover() {
         }
         else if (provider === 'microsoft') {
           setTranslatedText(await microsoftTranslate(selectionContent, sourceLang, targetLang))
+        }
+        else if (provider === 'deeplx') {
+          setTranslatedText(await deeplxTranslate(selectionContent, sourceLang, targetLang))
         }
       }
       else if (modelString) {

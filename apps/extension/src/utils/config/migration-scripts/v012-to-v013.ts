@@ -1,21 +1,19 @@
 export function migrate(oldConfig: any): any {
-  // Add deeplx provider support and translation node style
   return {
     ...oldConfig,
     providersConfig: {
+      ...oldConfig.providersConfig,
       deeplx: {
         apiKey: undefined,
         baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
       },
-      ...oldConfig.providersConfig,
     },
     translate: {
       ...oldConfig.translate,
       models: {
+        ...oldConfig.translate?.models,
         deeplx: null,
-        ...oldConfig.translate.models,
       },
-      translationNodeStyle: 'default',
     },
   }
 }

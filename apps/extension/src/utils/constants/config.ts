@@ -1,5 +1,6 @@
 import type { Config } from '@/types/config/config'
 import type { AllProviderNames, PageTranslateRange, ProvidersConfig, ReadModels, TranslateModels } from '@/types/config/provider'
+import deeplxLogo from '@/assets/providers/deeplx.png'
 import deepseekLogo from '@/assets/providers/deepseek.png'
 import geminiLogo from '@/assets/providers/gemini.png'
 import googleLogo from '@/assets/providers/google.png'
@@ -13,7 +14,7 @@ import { DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
 import { DEFAULT_TRANSLATION_NODE_STYLE } from './translation-node-style'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION = 12
+export const CONFIG_SCHEMA_VERSION = 13
 
 export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   openai: {
@@ -27,6 +28,10 @@ export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   gemini: {
     apiKey: undefined,
     baseURL: 'https://generativelanguage.googleapis.com/v1beta',
+  },
+  deeplx: {
+    apiKey: undefined,
+    baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
   },
 }
 
@@ -46,6 +51,7 @@ export const DEFAULT_READ_MODELS: ReadModels = {
 export const DEFAULT_TRANSLATE_MODELS: TranslateModels = {
   microsoft: null,
   google: null,
+  deeplx: null,
   openai: {
     model: 'gpt-4.1-mini',
     isCustomModel: false,
@@ -111,6 +117,10 @@ export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: string, name: stri
     google: {
       logo: googleLogo,
       name: 'Google Translate',
+    },
+    deeplx: {
+      logo: deeplxLogo,
+      name: 'DeepL X',
     },
     openai: {
       logo: openaiLogo,

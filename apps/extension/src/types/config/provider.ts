@@ -14,7 +14,7 @@ export const translateProviderModels = {
   deepseek: ['deepseek-chat'],
   gemini: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-2.5-pro', 'gemini-2.5-flash'],
 } as const
-export const pureTranslateProvider = ['google', 'microsoft'] as const
+export const pureTranslateProvider = ['google', 'microsoft', 'deeplx'] as const
 
 /* ──────────────────────────────
   Derived provider names
@@ -26,7 +26,7 @@ export const readProviderNames = ['openai', 'deepseek'] as const satisfies Reado
 >
 export type ReadProviderNames = typeof readProviderNames[number]
 // translate provider names
-export const translateProviderNames = ['google', 'microsoft', 'openai', 'deepseek', 'gemini'] as const satisfies Readonly<
+export const translateProviderNames = ['google', 'microsoft', 'deeplx', 'openai', 'deepseek', 'gemini'] as const satisfies Readonly<
   (keyof typeof translateProviderModels | typeof pureTranslateProvider[number])[]
 >
 export type TranslateProviderNames = typeof translateProviderNames[number]
@@ -40,14 +40,14 @@ export function isLLMTranslateProvider(provider: TranslateProviderNames): provid
 }
 
 // all provider names
-export const allProviderNames = ['openai', 'deepseek', 'google', 'microsoft', 'gemini'] as const satisfies Readonly<
+export const allProviderNames = ['openai', 'deepseek', 'google', 'microsoft', 'deeplx', 'gemini'] as const satisfies Readonly<
   (typeof readProviderNames[number] | typeof translateProviderNames[number])[]
 >
 export type AllProviderNames = typeof allProviderNames[number]
 
 // need to be set api key for LLM
-export const apiProviderNames = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
-  (keyof typeof readProviderModels | keyof typeof translateProviderModels)[]
+export const apiProviderNames = ['openai', 'deepseek', 'gemini', 'deeplx'] as const satisfies Readonly<
+  (keyof typeof readProviderModels | keyof typeof translateProviderModels | typeof pureTranslateProvider[number])[]
 >
 export type APIProviderNames = typeof apiProviderNames[number]
 

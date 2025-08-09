@@ -1,4 +1,4 @@
-import type { PageTranslateRange, TranslateProviderNames } from '@/types/config/provider'
+import type { APIProviderNames, PageTranslateRange, TranslateProviderNames } from '@/types/config/provider'
 import { i18n } from '#imports'
 
 import deepmerge from 'deepmerge'
@@ -15,7 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { isLLMTranslateProvider, pageTranslateRangeSchema, translateProviderModels } from '@/types/config/provider'
+import { apiProviderNames, isLLMTranslateProvider, pageTranslateRangeSchema, translateProviderModels } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { LLM_TRANSLATE_PROVIDER_ITEMS, PURE_TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
@@ -74,8 +74,8 @@ function TranslateProviderSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
   const providersConfig = useAtomValue(configFields.providersConfig)
 
-  const providerConfig = isLLMTranslateProvider(translateConfig.provider)
-    ? providersConfig[translateConfig.provider]
+  const providerConfig = apiProviderNames.includes(translateConfig.provider as APIProviderNames)
+    ? providersConfig[translateConfig.provider as keyof typeof providersConfig]
     : null
 
   return (

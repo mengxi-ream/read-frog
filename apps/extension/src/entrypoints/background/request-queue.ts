@@ -1,6 +1,6 @@
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { db } from '@/utils/db/dexie/db'
-import { aiTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
+import { aiTranslate, deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
 import { onMessage } from '@/utils/message'
 import { RequestQueue } from '@/utils/request/request-queue'
 import { ensureConfig } from './config'
@@ -36,6 +36,9 @@ export async function setUpRequestQueue() {
         break
       case 'microsoftTranslate':
         thunk = () => microsoftTranslate(data.params.text, data.params.fromLang, data.params.toLang)
+        break
+      case 'deeplxTranslate':
+        thunk = () => deeplxTranslate(data.params.text, data.params.fromLang, data.params.toLang)
         break
       case 'aiTranslate':
         thunk = () => aiTranslate(data.params.provider, data.params.modelString, data.params.prompt)

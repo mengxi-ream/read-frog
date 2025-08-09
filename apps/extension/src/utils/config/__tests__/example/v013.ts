@@ -1,6 +1,6 @@
 import type { Config } from '@/types/config/config'
 
-export const description = 'Implement Translation Node Style'
+export const description = 'Add DeeplX provider'
 
 export const configExample: Config = {
   language: {
@@ -10,10 +10,6 @@ export const configExample: Config = {
     level: 'intermediate',
   },
   providersConfig: {
-    deeplx: {
-      apiKey: undefined,
-      baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
-    },
     openai: {
       apiKey: 'sk-1234567890',
       baseURL: 'https://api.openai.com/v1',
@@ -25,6 +21,10 @@ export const configExample: Config = {
     gemini: {
       apiKey: undefined,
       baseURL: 'https://generativelanguage.googleapis.com/v1beta',
+    },
+    deeplx: {
+      apiKey: undefined,
+      baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
     },
   },
   read: {

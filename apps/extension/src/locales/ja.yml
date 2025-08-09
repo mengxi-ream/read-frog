@@ -36,6 +36,7 @@ options:
       openrouter: 複数のLLMプロバイダを統合するインターフェース
       ollama: ローカル大規模言語モデルサービス
       gemini: Gemini-2.5-Pro などのモデルを提供する
+      deeplx: 非公式 DeepL API
     apiKey:
       showAPIKey: APIキーを表示
     advancedConfig:

@@ -36,6 +36,7 @@ options:
       openrouter: The unified interface for multiple LLM providers
       ollama: Local LLM
       gemini: Provide models such as Gemini-2.5-Pro
+      deeplx: Unofficial DeepL API
     apiKey:
       showAPIKey: Show API Key
     advancedConfig:

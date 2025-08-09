@@ -1,5 +1,8 @@
+import type { Config } from '@/types/config/config'
 import type { LLMTranslateProviderNames } from '@/types/config/provider'
+import { storage } from '#imports'
 import { generateText } from 'ai'
+import { CONFIG_STORAGE_KEY, DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/config'
 import { getTranslateModel } from '@/utils/provider'
 
 export async function aiTranslate(provider: LLMTranslateProviderNames, modelString: string, prompt: string) {
@@ -72,6 +75,60 @@ export async function googleTranslate(
   catch (error) {
     throw new Error(
       `Failed to parse translation response: ${(error as Error).message}`,
+    )
+  }
+}
+
+export async function deeplxTranslate(
+  sourceText: string,
+  fromLang: string,
+  toLang: string,
+): Promise<string> {
+  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+  const baseURL = config?.providersConfig?.deeplx?.baseURL ?? DEFAULT_PROVIDER_CONFIG.deeplx.baseURL
+  const apiKey = config?.providersConfig?.deeplx?.apiKey
+
+  if (!baseURL) {
+    throw new Error('Deeplx baseURL is not configured')
+  }
+
+  const formatLang = (lang: string) => (lang === 'auto' ? 'auto' : lang.toUpperCase())
+  const url = `${baseURL.replace(/\/$/, '')}/translate`
+
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
+    },
+    body: JSON.stringify({
+      text: sourceText,
+      source_lang: formatLang(fromLang),
+      target_lang: formatLang(toLang),
+    }),
+  }).catch((error) => {
+    throw new Error(`Network error during Deeplx translation: ${error.message}`)
+  })
+
+  if (!resp.ok) {
+    const errorText = await resp
+      .text()
+      .catch(() => 'Unable to read error response')
+    throw new Error(
+      `Deeplx translation request failed: ${resp.status} ${resp.statusText}${errorText ? ` - ${errorText}` : ''}`,
+    )
+  }
+
+  try {
+    const result = await resp.json()
+    if (typeof result?.data !== 'string') {
+      throw new TypeError('Unexpected response format from Deeplx translation API')
+    }
+    return result.data
+  }
+  catch (error) {
+    throw new Error(
+      `Failed to parse Deeplx translation response: ${(error as Error).message}`,
     )
   }
 }
