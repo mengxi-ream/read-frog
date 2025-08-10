@@ -89,7 +89,7 @@ export async function deeplxTranslate(
   const apiKey = config?.providersConfig?.deeplx?.apiKey
 
   if (!baseURL) {
-    throw new Error('Deeplx baseURL is not configured')
+    throw new Error('DeepLX baseURL is not configured')
   }
 
   const formatLang = (lang: string) => (lang === 'auto' ? 'auto' : lang.toUpperCase())
