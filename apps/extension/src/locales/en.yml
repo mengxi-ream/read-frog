@@ -108,6 +108,7 @@ options:
       style:
         default: None
         blur: Blur Effect
+        blockquote: Blockquote Style
 side:
   sourceLang: Source Language
   targetLang: Target Language

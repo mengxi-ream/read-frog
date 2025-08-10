@@ -109,6 +109,7 @@ options:
       style:
         default: 无
         blur: 模糊效果
+        blockquote: 引用样式
 side:
   sourceLang: 来源语言
   targetLang: 目标语言

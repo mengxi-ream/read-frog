@@ -108,6 +108,7 @@ options:
       style:
         default: 없음
         blur: 흐림 효과
+        blockquote: 인용 스타일
 side:
   sourceLang: 원본 언어
   targetLang: 대상 언어
