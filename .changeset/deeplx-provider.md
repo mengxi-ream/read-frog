@@ -2,4 +2,4 @@
 "@read-frog/extension": minor
 ---
 
-feat: add DeeplX translation provider
+feat: add DeepLX translation provider

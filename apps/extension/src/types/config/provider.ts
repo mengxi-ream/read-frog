@@ -47,7 +47,7 @@ export type AllProviderNames = typeof allProviderNames[number]
 
 // need to be set api key for LLM
 export const apiProviderNames = ['openai', 'deepseek', 'gemini', 'deeplx'] as const satisfies Readonly<
-  (keyof typeof readProviderModels | keyof typeof translateProviderModels | typeof pureTranslateProvider[number])[]
+  (keyof typeof readProviderModels | keyof typeof translateProviderModels | 'deeplx')[]
 >
 export type APIProviderNames = typeof apiProviderNames[number]
 

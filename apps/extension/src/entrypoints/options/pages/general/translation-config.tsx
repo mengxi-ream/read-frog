@@ -74,8 +74,12 @@ function TranslateProviderSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
   const providersConfig = useAtomValue(configFields.providersConfig)
 
-  const providerConfig = apiProviderNames.includes(translateConfig.provider as APIProviderNames)
-    ? providersConfig[translateConfig.provider as keyof typeof providersConfig]
+  function isAPIProvider(provider: TranslateProviderNames): provider is APIProviderNames {
+    return apiProviderNames.includes(provider as APIProviderNames)
+  }
+
+  const providerConfig = isAPIProvider(translateConfig.provider)
+    ? providersConfig[translateConfig.provider]
     : null
 
   return (

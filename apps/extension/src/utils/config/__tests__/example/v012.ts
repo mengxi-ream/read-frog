@@ -1,8 +1,6 @@
-import type { Config } from '@/types/config/config'
-
 export const description = 'Implement Translation Node Style'
 
-export const configExample: Config = {
+export const configExample = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',
@@ -10,10 +8,6 @@ export const configExample: Config = {
     level: 'intermediate',
   },
   providersConfig: {
-    deeplx: {
-      apiKey: undefined,
-      baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
-    },
     openai: {
       apiKey: 'sk-1234567890',
       baseURL: 'https://api.openai.com/v1',
@@ -47,7 +41,6 @@ export const configExample: Config = {
     models: {
       microsoft: null,
       google: null,
-      deeplx: null,
       openai: {
         model: 'gpt-4o-mini',
         isCustomModel: true,
