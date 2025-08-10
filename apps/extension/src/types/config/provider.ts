@@ -50,6 +50,9 @@ export const apiProviderNames = ['openai', 'deepseek', 'gemini', 'deeplx'] as co
   (keyof typeof readProviderModels | keyof typeof translateProviderModels | 'deeplx')[]
 >
 export type APIProviderNames = typeof apiProviderNames[number]
+export function isAPIProvider(provider: TranslateProviderNames): provider is APIProviderNames {
+  return apiProviderNames.includes(provider as APIProviderNames)
+}
 
 /* ──────────────────────────────
   Providers config schema
