@@ -1,6 +1,6 @@
 {
   "name": "@read-frog/website",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
