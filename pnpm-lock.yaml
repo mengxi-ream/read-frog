@@ -48,16 +48,16 @@ importers:
   apps/extension:
     dependencies:
       '@ai-sdk/deepseek':
-        specifier: 1.0.0-beta.9
-        version: 1.0.0-beta.9(zod@3.25.76)
+        specifier: ^1.0.5
+        version: 1.0.5(zod@4.0.17)
       '@ai-sdk/google':
-        specifier: 2.0.0-beta.18
-        version: 2.0.0-beta.18(zod@3.25.76)
+        specifier: ^2.0.4
+        version: 2.0.4(zod@4.0.17)
       '@ai-sdk/openai':
-        specifier: 2.0.10
+        specifier: ^2.0.10
         version: 2.0.10(zod@4.0.17)
       '@ai-sdk/react':
-        specifier: 2.0.10
+        specifier: ^2.0.10
         version: 2.0.10(react@19.1.1)(zod@4.0.17)
       '@mozilla/readability':
         specifier: ^0.6.0
@@ -485,9 +485,6 @@ importers:
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../eslint-config
-      zod:
-        specifier: ^4.0.17
-        version: 4.0.17
 
   packages/eslint-config:
     devDependencies:
