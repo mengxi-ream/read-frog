@@ -8,6 +8,10 @@
     "./trpc": "./src/trpc.ts"
   },
   "main": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix"
+  },
   "dependencies": {
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",

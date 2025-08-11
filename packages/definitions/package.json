@@ -4,10 +4,14 @@
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix"
+  },
   "dependencies": {
+    "zod": "^4.0.17"
   },
   "devDependencies": {
-    "@repo/eslint-config": "workspace:*",
-    "zod": "^4.0.17"
+    "@repo/eslint-config": "workspace:*"
   }
 }

@@ -12,7 +12,7 @@ export const env = createEnv({
     GOOGLE_CLIENT_ID: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     NODE_ENV: z
-      .enum(['development', 'test', 'production'])
+      .enum(['development', 'test', 'production']),
   },
 
   /**

@@ -4,9 +4,13 @@
   "version": "0.0.0",
   "private": true,
   "main": "./src/index.ts",
+  "scripts": {
+    "lint": "eslint .",
+    "lint:fix": "eslint --fix"
+  },
   "dependencies": {
-    "@repo/definitions": "workspace:*",
     "@repo/db": "workspace:*",
+    "@repo/definitions": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "better-auth": "^1.2.12",
     "zod": "^4.0.17"

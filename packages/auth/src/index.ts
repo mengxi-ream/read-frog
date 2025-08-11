@@ -1,5 +1,5 @@
-import { TRUSTED_ORIGINS } from '@repo/definitions'
 import { authSchema, db } from '@repo/db'
+import { TRUSTED_ORIGINS } from '@repo/definitions'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { openAPI } from 'better-auth/plugins'
