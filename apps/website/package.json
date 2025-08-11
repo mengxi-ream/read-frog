@@ -1,6 +1,6 @@
 {
   "name": "@read-frog/website",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "build": "next build",
@@ -18,8 +18,8 @@
     "@radix-ui/react-slot": "^1.2.3",
     "@repo/api": "workspace:*",
     "@repo/auth": "workspace:*",
-    "@repo/constants": "workspace:*",
     "@repo/db": "workspace:*",
+    "@repo/definitions": "workspace:*",
     "@t3-oss/env-nextjs": "^0.13.8",
     "@tabler/icons-react": "^3.34.0",
     "@tanstack/react-query": "^5.84.2",

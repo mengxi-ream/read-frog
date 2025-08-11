@@ -6,7 +6,7 @@ import { normalizeHeaders } from '../http'
 export const authClient = createAuthClient({
   baseURL: WEBSITE_URL,
   fetchOptions: {
-    // Use background proxy to avoid CORS in content scripts
+    // Avoid CORS in content scripts by using background proxy
     customFetchImpl: async (input: string | URL | globalThis.Request, init?: RequestInit): Promise<Response> => {
       const inputUrl = typeof input === 'string' ? input : (input instanceof URL ? input.toString() : input.url)
       const url = inputUrl.startsWith('http')

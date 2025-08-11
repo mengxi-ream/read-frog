@@ -4,7 +4,7 @@
 import type { AppRouter } from '@repo/api'
 import type { QueryClient } from '@tanstack/react-query'
 import type { inferRouterInputs, inferRouterOutputs } from '@trpc/server'
-import { WEBSITE_DEV_PORT } from '@repo/constants'
+import { WEBSITE_DEV_PORT } from '@repo/definitions'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { createTRPCClient, httpBatchStreamLink, loggerLink } from '@trpc/client'
 import { createTRPCContext } from '@trpc/tanstack-react-query'

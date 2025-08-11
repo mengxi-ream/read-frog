@@ -18,7 +18,7 @@
 
 ## Description
 
-<!--- Please describe the changes in this PR and the problem it solves -->
+<!--- Please describe the changes in the PR and the problem it solves -->
 
 ## Related Issue
 

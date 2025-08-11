@@ -12,6 +12,7 @@
     "lint:fix": "eslint . --fix"
   },
   "dependencies": {
+    "@repo/definitions": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "drizzle-orm": "^0.44.2",
     "postgres": "^3.4.7",

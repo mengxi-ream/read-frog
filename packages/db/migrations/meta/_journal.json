@@ -15,6 +15,13 @@
       "when": 1754544097980,
       "tag": "0001_add_test_table",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1754847534068,
+      "tag": "0002_broad_sabra",
+      "breakpoints": true
     }
   ]
 }

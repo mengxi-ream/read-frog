@@ -1,4 +1,4 @@
-import { TRUSTED_ORIGINS } from '@repo/constants'
+import { TRUSTED_ORIGINS } from '@repo/definitions'
 import { authSchema, db } from '@repo/db'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'

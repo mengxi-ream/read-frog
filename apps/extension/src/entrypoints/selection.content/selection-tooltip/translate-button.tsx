@@ -1,14 +1,20 @@
 import type { TextUIPart } from 'ai'
 import { Icon } from '@iconify/react'
+import { useMutation } from '@tanstack/react-query'
 import { readUIMessageStream, streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@/types/config/languages'
 import { isPureTranslateProvider } from '@/types/config/provider'
+import { authClient } from '@/utils/auth/auth-client'
 import { globalConfig } from '@/utils/config/config'
+import { WEBSITE_URL } from '@/utils/constants/url'
 import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
+import { sendMessage } from '@/utils/message'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModel } from '@/utils/provider'
+import { trpc } from '@/utils/trpc/client'
 import { isTooltipVisibleAtom, isTranslatePopoverVisibleAtom, mouseClickPositionAtom, selectionContentAtom } from './atom'
 
 export function TranslateButton() {
@@ -41,6 +47,14 @@ export function TranslatePopover() {
   const mouseClickPosition = useAtomValue(mouseClickPositionAtom)
   const selectionContent = useAtomValue(selectionContentAtom)
   const popoverRef = useRef<HTMLDivElement>(null)
+  const { data: session } = authClient.useSession()
+
+  const createVocabulary = useMutation({
+    ...trpc.vocabulary.create.mutationOptions(),
+    onSuccess: () => {
+      toast.success(`Translation saved successfully! Please go to ${WEBSITE_URL}/vocabulary to view it.`)
+    },
+  })
 
   const handleClose = useCallback(() => {
     setIsVisible(false)
@@ -50,8 +64,38 @@ export function TranslatePopover() {
   const handleCopy = useCallback(() => {
     if (translatedText) {
       navigator.clipboard.writeText(translatedText)
+      toast.success('Translation copied to clipboard!')
     }
   }, [translatedText])
+
+  const handleSave = useCallback(async () => {
+    if (!session?.user?.id) {
+      await sendMessage('openPage', { url: `${WEBSITE_URL}/log-in`, active: true })
+      return
+    }
+
+    if (!selectionContent || !translatedText) {
+      toast.error('No content to save')
+      return
+    }
+
+    if (!globalConfig) {
+      toast.error('Configuration not loaded')
+      return
+    }
+
+    try {
+      await createVocabulary.mutateAsync({
+        originalText: selectionContent,
+        translation: translatedText,
+        sourceLanguageISO6393: globalConfig.language.sourceCode === 'auto' ? 'eng' : globalConfig.language.sourceCode,
+        targetLanguageISO6393: globalConfig.language.targetCode,
+      })
+    }
+    catch {
+      // Error handled by mutation
+    }
+  }, [session?.user?.id, selectionContent, translatedText, createVocabulary])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -163,7 +207,22 @@ export function TranslatePopover() {
           </p>
         </div>
       </div>
-      <div className="p-4 flex justify-end items-center">
+      <div className="p-4 flex justify-between items-center">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={!translatedText || createVocabulary.isPending}
+          className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm rounded"
+        >
+          {createVocabulary.isPending
+            ? (
+                <Icon icon="svg-spinners:3-dots-bounce" className="size-4" />
+              )
+            : (
+                <Icon icon="tabler:bookmark-plus" strokeWidth={1} className="size-4" />
+              )}
+          {createVocabulary.isPending ? 'Saving...' : 'Save'}
+        </button>
         <button
           type="button"
           onClick={handleCopy}

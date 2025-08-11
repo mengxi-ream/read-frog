@@ -1,4 +1,4 @@
-import { WEBSITE_DEV_URL, WEBSITE_PROD_URL } from '@repo/constants'
+import { WEBSITE_DEV_URL, WEBSITE_PROD_URL } from '@repo/definitions'
 
 export const OFFICIAL_SITE_URL_PATTERNS = [
   'https://*.readfrog.app/*',

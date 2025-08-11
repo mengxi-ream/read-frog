@@ -5,7 +5,7 @@
   "private": true,
   "main": "./src/index.ts",
   "dependencies": {
-    "@repo/constants": "workspace:*",
+    "@repo/definitions": "workspace:*",
     "@repo/db": "workspace:*",
     "@t3-oss/env-core": "^0.13.8",
     "better-auth": "^1.2.12",

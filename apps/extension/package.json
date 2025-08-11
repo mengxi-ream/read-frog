@@ -1,7 +1,7 @@
 {
   "name": "@read-frog/extension",
   "type": "module",
-  "version": "0.11.3",
+  "version": "1.0.0",
   "private": true,
   "description": "Read Frog browser extension for language learning",
   "scripts": {
@@ -39,7 +39,7 @@
     "@radix-ui/react-switch": "^1.2.2",
     "@radix-ui/react-tooltip": "^1.2.6",
     "@repo/api": "workspace:*",
-    "@repo/constants": "workspace:*",
+    "@repo/definitions": "workspace:*",
     "@tabler/icons-react": "^3.34.0",
     "@tanstack/react-query": "^5.84.2",
     "@tanstack/react-query-devtools": "^5.84.2",

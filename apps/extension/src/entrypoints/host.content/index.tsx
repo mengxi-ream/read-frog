@@ -21,7 +21,7 @@ export default defineContentScript({
     const manager = new PageTranslationManager({
       root: null,
       rootMargin: '1000px',
-      threshold: 0.1,
+      threshold: 0,
     })
 
     manager.registerPageTranslationTriggers()
@@ -43,8 +43,15 @@ export default defineContentScript({
     })
 
     window.addEventListener('keydown', (e: KeyboardEvent) => {
-      // Listen for Alt + Q for translation toggle
-      if (e.altKey && e.key === 'q' && !e.ctrlKey && !e.shiftKey && !e.metaKey) {
+      // Listen for Alt + Q for translation toggle (Windows: Alt + Q, Mac: Option + Q)
+      if (
+        e.altKey
+        && !e.ctrlKey
+        && !e.shiftKey
+        && !e.metaKey
+        && (e.code === 'KeyQ' || (typeof e.key === 'string' && e.key.toLowerCase() === 'q'))
+      ) {
+        e.preventDefault() // Prevent any default browser behavior
         if (manager.isActive) {
           manager.stop()
         }
@@ -52,7 +59,7 @@ export default defineContentScript({
           manager.start()
         }
       }
-    })
+    }, { capture: true })
 
     port.onMessage.addListener((msg) => {
       logger.info('onMessage', msg)

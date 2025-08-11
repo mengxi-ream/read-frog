@@ -1,4 +1,5 @@
 import { testRouter } from './router/test'
+import { vocabularyRouter } from './router/vocabulary'
 import { createCallerFactory, createTRPCRouter } from './trpc'
 
 /**
@@ -8,6 +9,7 @@ import { createCallerFactory, createTRPCRouter } from './trpc'
  */
 export const appRouter = createTRPCRouter({
   test: testRouter,
+  vocabulary: vocabularyRouter,
 })
 
 // export type definition of API

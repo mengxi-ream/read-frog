@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat: integrate gemini api
+fix: shortcut to full translate

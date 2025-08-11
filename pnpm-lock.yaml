@@ -101,9 +101,9 @@ importers:
       '@repo/api':
         specifier: workspace:*
         version: link:../../packages/api
-      '@repo/constants':
+      '@repo/definitions':
         specifier: workspace:*
-        version: link:../../packages/constants
+        version: link:../../packages/definitions
       '@tabler/icons-react':
         specifier: ^3.34.0
         version: 3.34.0(react@19.1.1)
@@ -276,12 +276,12 @@ importers:
       '@repo/auth':
         specifier: workspace:*
         version: link:../../packages/auth
-      '@repo/constants':
-        specifier: workspace:*
-        version: link:../../packages/constants
       '@repo/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@repo/definitions':
+        specifier: workspace:*
+        version: link:../../packages/definitions
       '@t3-oss/env-nextjs':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.8.3)(zod@3.25.76)
@@ -397,6 +397,9 @@ importers:
       '@repo/db':
         specifier: workspace:*
         version: link:../db
+      '@repo/definitions':
+        specifier: workspace:*
+        version: link:../definitions
       '@trpc/server':
         specifier: ^11.4.4
         version: 11.4.4(typescript@5.8.3)
@@ -413,12 +416,12 @@ importers:
 
   packages/auth:
     dependencies:
-      '@repo/constants':
-        specifier: workspace:*
-        version: link:../constants
       '@repo/db':
         specifier: workspace:*
         version: link:../db
+      '@repo/definitions':
+        specifier: workspace:*
+        version: link:../definitions
       '@t3-oss/env-core':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.8.3)(zod@3.25.76)
@@ -439,14 +442,11 @@ importers:
         specifier: ^22.16.4
         version: 22.16.4
 
-  packages/constants:
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-
   packages/db:
     dependencies:
+      '@repo/definitions':
+        specifier: workspace:*
+        version: link:../definitions
       '@t3-oss/env-core':
         specifier: ^0.13.8
         version: 0.13.8(typescript@5.8.3)(zod@3.25.76)
@@ -475,6 +475,15 @@ importers:
       drizzle-kit:
         specifier: ^0.31.4
         version: 0.31.4
+
+  packages/definitions:
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      zod:
+        specifier: ^3.25.76
+        version: 3.25.76
 
   packages/eslint-config:
     devDependencies:

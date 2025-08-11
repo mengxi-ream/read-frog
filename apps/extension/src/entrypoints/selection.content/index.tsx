@@ -1,4 +1,5 @@
 import { createShadowRootUi, defineContentScript } from '#imports'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { kebabCase } from 'case-anything'
 import ReactDOM from 'react-dom/client'
 import { loadGlobalConfig } from '@/utils/config/config'
@@ -6,6 +7,7 @@ import { APP_NAME } from '@/utils/constants/app.ts'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { insertShadowRootUIWrapperInto } from '@/utils/shadow-root'
 import { addStyleToShadow } from '@/utils/styles'
+import { queryClient } from '@/utils/trpc/client'
 import App from './app'
 import '@/assets/tailwind/theme.css'
 
@@ -26,7 +28,11 @@ export default defineContentScript({
 
         // Create a root on the UI container and render a component
         const root = ReactDOM.createRoot(wrapper)
-        root.render(<App />)
+        root.render(
+          <QueryClientProvider client={queryClient}>
+            <App />
+          </QueryClientProvider>,
+        )
         return root
       },
       onRemove: (root) => {

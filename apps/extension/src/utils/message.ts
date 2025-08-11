@@ -33,6 +33,8 @@ interface ProtocolMap {
     headers: [string, string][]
     body: string
   }>
+  // navigation
+  openPage: (data: { url: string, active?: boolean }) => void
 }
 
 export const { sendMessage, onMessage }

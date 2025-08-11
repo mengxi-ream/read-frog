@@ -1,5 +1,45 @@
 # @read-frog/extension
 
+## 1.0.0
+
+### Major Changes
+
+- [#232](https://github.com/mengxi-ream/read-frog/pull/232) [`c5c062e`](https://github.com/mengxi-ream/read-frog/commit/c5c062ea0ff71c6e0b96396e780406a4a1de18b5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: integrate trpc
+
+### Minor Changes
+
+- [#191](https://github.com/mengxi-ream/read-frog/pull/191) [`31f816f`](https://github.com/mengxi-ream/read-frog/commit/31f816fbd8b69a1a4781dc2210636344a11144b8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add selection content
+
+- [`3c745d2`](https://github.com/mengxi-ream/read-frog/commit/3c745d2b10af534119066b9627edeaeefe3bc9e6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: save vocabulary
+
+- [#231](https://github.com/mengxi-ream/read-frog/pull/231) [`b213a41`](https://github.com/mengxi-ream/read-frog/commit/b213a41ce93c624c7663df8e52d960bd3b8a855a) Thanks [@taiiiyang](https://github.com/taiiiyang)! - implement custom translation node style
+
+- [#201](https://github.com/mengxi-ream/read-frog/pull/201) [`3ddfc81`](https://github.com/mengxi-ream/read-frog/commit/3ddfc816ef008a0bb221b56c288665463887b770) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: stream translate selected text
+
+- [#201](https://github.com/mengxi-ream/read-frog/pull/201) [`3ddfc81`](https://github.com/mengxi-ream/read-frog/commit/3ddfc816ef008a0bb221b56c288665463887b770) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - ai: deprecate openrouter and ollma provider
+
+- [#260](https://github.com/mengxi-ream/read-frog/pull/260) [`2bbe950`](https://github.com/mengxi-ream/read-frog/commit/2bbe950600bea6b6bc1c3dcfce8c59b2a39ac9e4) Thanks [@sedationh](https://github.com/sedationh)! - add blockquote translate style
+
+- [#187](https://github.com/mengxi-ream/read-frog/pull/187) [`0f6d20a`](https://github.com/mengxi-ream/read-frog/commit/0f6d20aff5ff23557bd880ab5eabc4765268c969) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add google oauth login
+
+### Patch Changes
+
+- [`ab2e8af`](https://github.com/mengxi-ream/read-frog/commit/ab2e8afb8da1614a8599d9757aac894f5943beae) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: floating button position range
+
+- [#256](https://github.com/mengxi-ream/read-frog/pull/256) [`b418c79`](https://github.com/mengxi-ream/read-frog/commit/b418c7946db90a2ca010df08990e9398967092ca) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - perf: increase default translate limit
+
+- [#190](https://github.com/mengxi-ream/read-frog/pull/190) [`adffd4d`](https://github.com/mengxi-ream/read-frog/commit/adffd4dd30aed74e22cc6f672ada1b2b3a052195) Thanks [@taiiiyang](https://github.com/taiiiyang)! - expose the rate config of translate request
+
+- [#218](https://github.com/mengxi-ream/read-frog/pull/218) [`3d5f791`](https://github.com/mengxi-ream/read-frog/commit/3d5f791ca79676b59b98d46c0da81e7ab0dedfd2) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: integrate gemini api
+
+- [#228](https://github.com/mengxi-ream/read-frog/pull/228) [`3e4f885`](https://github.com/mengxi-ream/read-frog/commit/3e4f8850507dad971fed84143a658220ab33b124) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: change more icons to iconify
+
+- [#219](https://github.com/mengxi-ream/read-frog/pull/219) [`f6fd1eb`](https://github.com/mengxi-ream/read-frog/commit/f6fd1eb561604675ad753a0c876c71bd739e1cf2) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: fix style issue for step 2 and 3
+
+- [#220](https://github.com/mengxi-ream/read-frog/pull/220) [`b3481d7`](https://github.com/mengxi-ream/read-frog/commit/b3481d750923b8ee92f2839424453cb422d67eb7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: change ui lib to iconify
+
+- [#210](https://github.com/mengxi-ream/read-frog/pull/210) [`9c583c8`](https://github.com/mengxi-ream/read-frog/commit/9c583c8399814b12835a6e017b8d6c070607be61) Thanks [@Andrew-Tan](https://github.com/Andrew-Tan)! - feat: added hot key for toggling translation
+
 ## 0.11.3
 
 ### Patch Changes

@@ -37,7 +37,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private static readonly MOVE_THRESHOLD = 30 * 30
   private static readonly DEFAULT_INTERSECTION_OPTIONS: SimpleIntersectionOptions = {
     root: null,
-    rootMargin: '0px',
+    rootMargin: '600px',
     threshold: 0.1,
   }
 

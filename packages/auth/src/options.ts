@@ -1,5 +1,5 @@
 import type { BetterAuthOptions } from 'better-auth'
-import { APP_NAME } from '@repo/constants'
+import { APP_NAME } from '@repo/definitions'
 import { env } from './env'
 
 /**
