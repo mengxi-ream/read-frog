@@ -1,8 +1,8 @@
-import { langCodeISO6393Schema } from '@repo/definitions'
+import { LANG_CODE_ISO6393_OPTIONS } from '@repo/definitions'
 import { pgEnum, pgTable, text, timestamp } from 'drizzle-orm/pg-core'
 import { user } from './auth'
 
-export const langCodeISO6393Enum = pgEnum('lang_code_iso_639_3', langCodeISO6393Schema.options)
+export const langCodeISO6393Enum = pgEnum('lang_code_iso_639_3', LANG_CODE_ISO6393_OPTIONS)
 
 export const vocabulary = pgTable('vocabulary', {
   id: text('id').primaryKey(),

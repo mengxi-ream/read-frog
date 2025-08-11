@@ -6,9 +6,6 @@
   "packageManager": "pnpm@10.14.0",
   "description": "Read Frog monorepo - browser extension and website for language learning",
   "author": "MengXi <contact@mengxi.work> (https://mengxi.work)",
-  "engines": {
-    "node": ">=20.11.0"
-  },
   "scripts": {
     "build": "turbo build",
     "db:generate": "turbo db:generate",
