@@ -47,7 +47,7 @@
     "@trpc/tanstack-react-query": "^11.4.4",
     "@webext-core/messaging": "^2.2.0",
     "@wxt-dev/i18n": "^0.2.4",
-    "ai": "5.0.9",
+    "ai": "^5.0.9",
     "better-auth": "^1.2.12",
     "case-anything": "^3.1.2",
     "class-variance-authority": "^0.7.1",
