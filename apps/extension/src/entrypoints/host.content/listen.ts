@@ -59,6 +59,7 @@
   }
 
   /* ---------- 4. Fallback polling (optional, to ensure 100% coverage) ---------- */
+  // eslint-disable-next-line turbo/no-undeclared-env-vars
   if (!['chrome', 'edge'].includes(import.meta.env.BROWSER)) {
     setInterval(() => {
       const now = location.href

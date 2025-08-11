@@ -48,6 +48,7 @@ describe('all Config Migrations', () => {
         expect(actualNewConfig).toEqual(expectedNewConfig)
 
         // 输出成功信息（仅在详细模式下）
+        // eslint-disable-next-line turbo/no-undeclared-env-vars
         if (process.env.VITEST_VERBOSE) {
           logger.info(`✓ Migration v${fromVersion} -> v${toVersion}: ${description}`)
         }

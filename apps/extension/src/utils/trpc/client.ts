@@ -28,6 +28,7 @@ export const queryClient = new QueryClient({
 const trpcClient = createTRPCClient<AppRouter>({
   links: [loggerLink({
     enabled: op =>
+      // eslint-disable-next-line turbo/no-undeclared-env-vars
       import.meta.env.DEV
         || (op.direction === 'down' && op.result instanceof Error),
   }), httpBatchLink({
