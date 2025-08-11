@@ -1,6 +1,8 @@
-export const description = 'Add DeeplX provider'
+import type { Config } from '@/types/config/config'
 
-export const configExample = {
+export const description = 'Add Gemini to read feature'
+
+export const configExample: Config = {
   language: {
     detectedCode: 'eng',
     sourceCode: 'auto',
@@ -35,6 +37,11 @@ export const configExample = {
       },
       deepseek: {
         model: 'deepseek-chat',
+        isCustomModel: false,
+        customModel: '',
+      },
+      gemini: {
+        model: 'gemini-2.5-pro',
         isCustomModel: false,
         customModel: '',
       },
