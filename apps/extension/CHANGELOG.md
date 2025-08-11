@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.1.0
+
+### Minor Changes
+
+- [#254](https://github.com/mengxi-ream/read-frog/pull/254) [`3f9ae9c`](https://github.com/mengxi-ream/read-frog/commit/3f9ae9c6aa979c22a975e6009cbcdc8239a94504) Thanks [@shuimu5418](https://github.com/shuimu5418)! - feat: add DeepLX translation provider
+
+- [#281](https://github.com/mengxi-ream/read-frog/pull/281) [`63986bf`](https://github.com/mengxi-ream/read-frog/commit/63986bfb431b333f9418458d10d17399aca9dab8) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add gemini to read feature and add gpt-5
+
+### Patch Changes
+
+- [#283](https://github.com/mengxi-ream/read-frog/pull/283) [`04cb32a`](https://github.com/mengxi-ream/read-frog/commit/04cb32a9b59a9cfac2c84125e8fac1fb82840af4) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: deeplx api call
+
 ## 1.0.1
 
 ### Patch Changes
