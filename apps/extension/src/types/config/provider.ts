@@ -6,13 +6,14 @@ import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style
   Single source of truth
   ────────────────────────────── */
 export const readProviderModels = {
-  openai: ['gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-nano'],
+  openai: ['gpt-5-mini', 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-5', 'gpt-4.1', 'gpt-4o'],
   deepseek: ['deepseek-chat'],
+  gemini: ['gemini-2.5-pro', 'gemini-2.5-flash'],
 } as const
 export const translateProviderModels = {
-  openai: ['gpt-4.1-mini', 'gpt-4o-mini', 'gpt-4o', 'gpt-4.1', 'gpt-4.1-nano'],
+  openai: ['gpt-5-mini', 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-5-nano', 'gpt-4.1-nano', 'gpt-5', 'gpt-4.1', 'gpt-4o'],
   deepseek: ['deepseek-chat'],
-  gemini: ['gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp', 'gemini-2.5-pro', 'gemini-2.5-flash'],
+  gemini: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp'],
 } as const
 export const pureTranslateProvider = ['google', 'microsoft', 'deeplx'] as const
 
@@ -21,7 +22,7 @@ export const pureTranslateProvider = ['google', 'microsoft', 'deeplx'] as const
   ────────────────────────────── */
 
 // read provider names
-export const readProviderNames = ['openai', 'deepseek'] as const satisfies Readonly<
+export const readProviderNames = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
   (keyof typeof readProviderModels)[]
 >
 export type ReadProviderNames = typeof readProviderNames[number]

@@ -46,6 +46,11 @@ export const DEFAULT_READ_MODELS: ReadModels = {
     isCustomModel: false,
     customModel: '',
   },
+  gemini: {
+    model: 'gemini-2.5-pro',
+    isCustomModel: false,
+    customModel: '',
+  },
 }
 
 export const DEFAULT_TRANSLATE_MODELS: TranslateModels = {
@@ -63,7 +68,7 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateModels = {
     customModel: '',
   },
   gemini: {
-    model: 'gemini-2.5-pro',
+    model: 'gemini-1.5-flash',
     isCustomModel: false,
     customModel: '',
   },
