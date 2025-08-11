@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.0.1
+
+### Patch Changes
+
+- [#271](https://github.com/mengxi-ream/read-frog/pull/271) [`5dcce6f`](https://github.com/mengxi-ream/read-frog/commit/5dcce6ff27d7e74acb66f04ad0c72b172330799d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: shortcut to full translate
+
+- [#276](https://github.com/mengxi-ream/read-frog/pull/276) [`e3a675a`](https://github.com/mengxi-ream/read-frog/commit/e3a675a82ba8d3c6b2bde805206abb3a86fddf38) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: show scoped block custom style
+
+- [#278](https://github.com/mengxi-ream/read-frog/pull/278) [`cff4fdf`](https://github.com/mengxi-ream/read-frog/commit/cff4fdfaaef9026021ebba2b8fb59a07fca39fbd) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - build: upgrade ai package
+
 ## 1.0.0
 
 ### Major Changes
