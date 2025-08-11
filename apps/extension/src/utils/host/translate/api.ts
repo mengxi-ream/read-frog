@@ -93,13 +93,12 @@ export async function deeplxTranslate(
   }
 
   const formatLang = (lang: string) => (lang === 'auto' ? 'auto' : lang.toUpperCase())
-  const url = `${baseURL.replace(/\/$/, '')}/translate`
+  const url = `${baseURL.replace(/\/$/, '')}${apiKey ? `/${apiKey}` : ''}/translate`
 
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...(apiKey ? { Authorization: `Bearer ${apiKey}` } : {}),
     },
     body: JSON.stringify({
       text: sourceText,
@@ -107,7 +106,7 @@ export async function deeplxTranslate(
       target_lang: formatLang(toLang),
     }),
   }).catch((error) => {
-    throw new Error(`Network error during Deeplx translation: ${error.message}`)
+    throw new Error(`Network error during DeepLX translation: ${error.message}`)
   })
 
   if (!resp.ok) {
@@ -115,20 +114,20 @@ export async function deeplxTranslate(
       .text()
       .catch(() => 'Unable to read error response')
     throw new Error(
-      `Deeplx translation request failed: ${resp.status} ${resp.statusText}${errorText ? ` - ${errorText}` : ''}`,
+      `DeepLX translation request failed: ${resp.status} ${resp.statusText}${errorText ? ` - ${errorText}` : ''}`,
     )
   }
 
   try {
     const result = await resp.json()
     if (typeof result?.data !== 'string') {
-      throw new TypeError('Unexpected response format from Deeplx translation API')
+      throw new TypeError('Unexpected response format from DeepLX translation API')
     }
     return result.data
   }
   catch (error) {
     throw new Error(
-      `Failed to parse Deeplx translation response: ${(error as Error).message}`,
+      `Failed to parse DeepLX translation response: ${(error as Error).message}`,
     )
   }
 }

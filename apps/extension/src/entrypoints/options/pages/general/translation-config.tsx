@@ -84,7 +84,7 @@ function TranslateProviderSelector() {
       label={(
         <div className="flex gap-2">
           {i18n.t('options.general.translationConfig.provider')}
-          {providerConfig && !providerConfig.apiKey && <SetApiKeyWarning />}
+          {providerConfig && !providerConfig.apiKey && translateConfig.provider !== 'deeplx' && <SetApiKeyWarning />}
         </div>
       )}
     >

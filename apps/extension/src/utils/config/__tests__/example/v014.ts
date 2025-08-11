@@ -24,7 +24,7 @@ export const configExample: Config = {
     },
     deeplx: {
       apiKey: undefined,
-      baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
+      baseURL: 'https://deeplx.vercel.app',
     },
   },
   read: {

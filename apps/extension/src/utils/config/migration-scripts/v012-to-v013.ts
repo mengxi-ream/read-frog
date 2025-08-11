@@ -5,7 +5,7 @@ export function migrate(oldConfig: any): any {
       ...oldConfig.providersConfig,
       deeplx: {
         apiKey: undefined,
-        baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
+        baseURL: 'https://deeplx.vercel.app',
       },
     },
     translate: {

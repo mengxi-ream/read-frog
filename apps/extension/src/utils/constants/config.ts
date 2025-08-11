@@ -31,7 +31,7 @@ export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = {
   },
   deeplx: {
     apiKey: undefined,
-    baseURL: 'https://api.deeplx.org/abcdefghijklmnopqrst',
+    baseURL: 'https://deeplx.vercel.app',
   },
 }
 
