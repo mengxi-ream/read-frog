@@ -120,7 +120,7 @@ export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: string, name: stri
     },
     deeplx: {
       logo: deeplxLogo,
-      name: 'DeepL X',
+      name: 'DeepLX',
     },
     openai: {
       logo: openaiLogo,
