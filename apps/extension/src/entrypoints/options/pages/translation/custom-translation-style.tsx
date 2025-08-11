@@ -75,7 +75,7 @@ function CustomTranslationStyleExample() {
     if (translatedNode.current) {
       decorateTranslationNode(translatedNode.current, translationNodeStyle)
     }
-  }, [translationNodeStyle, translatedNode])
+  }, [translationNodeStyle])
 
   return (
     <div className="w-full flex flex-col gap-2 mt-4">
