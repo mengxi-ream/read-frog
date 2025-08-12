@@ -104,9 +104,6 @@ importers:
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
-      clsx:
-        specifier: ^2.1.1
-        version: 2.1.1
       crypto-js:
         specifier: ^4.2.0
         version: 4.2.0
