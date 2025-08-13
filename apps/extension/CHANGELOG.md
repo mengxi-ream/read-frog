@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.2.0
+
+### Minor Changes
+
+- [#275](https://github.com/mengxi-ream/read-frog/pull/275) [`7d6714f`](https://github.com/mengxi-ream/read-frog/commit/7d6714f8e8dbce5cd0cbd5f54505ae7affed941b) Thanks [@AnotiaWang](https://github.com/AnotiaWang)! - feat: added new translation style `weakened`
+
+### Patch Changes
+
+- [#295](https://github.com/mengxi-ream/read-frog/pull/295) [`5e849b3`](https://github.com/mengxi-ream/read-frog/commit/5e849b3951783cc67081683d13d0d931073fb725) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: can't translate selection text with deeplx
+
+- [#290](https://github.com/mengxi-ream/read-frog/pull/290) [`d392aae`](https://github.com/mengxi-ream/read-frog/commit/d392aae9e81758e2fb7ae8d9e987a0a24ed06781) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: custom prompt textarea size
+
+- [#273](https://github.com/mengxi-ream/read-frog/pull/273) [`12624be`](https://github.com/mengxi-ream/read-frog/commit/12624be6c5cbfcc9097a9c5c2c519a74e12a055f) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor: extract ui, themes and cn to @repo/ui
+
 ## 1.1.0
 
 ### Minor Changes

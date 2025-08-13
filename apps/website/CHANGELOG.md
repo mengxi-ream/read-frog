@@ -1,5 +1,11 @@
 # @read-frog/website
 
+## 1.0.1
+
+### Patch Changes
+
+- [#273](https://github.com/mengxi-ream/read-frog/pull/273) [`12624be`](https://github.com/mengxi-ream/read-frog/commit/12624be6c5cbfcc9097a9c5c2c519a74e12a055f) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor: extract ui, themes and cn to @repo/ui
+
 ## 1.0.0
 
 ### Major Changes
