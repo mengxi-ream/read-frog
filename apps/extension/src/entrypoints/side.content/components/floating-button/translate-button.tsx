@@ -1,10 +1,10 @@
-import type { translateProviderModels } from '@/types/config/provider'
+import type { TRANSLATE_PROVIDER_MODELS } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { cn } from '@repo/ui/lib/utils'
 import { useAtomValue } from 'jotai'
 import { toast } from 'sonner'
-import { pureTranslateProvider } from '@/types/config/provider'
+import { PURE_TRANSLATE_PROVIDERS } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { hasSetAPIKey } from '@/utils/config/config'
 import { removeAllTranslatedWrapperNodes } from '@/utils/host/translate/node-manipulation'
@@ -22,10 +22,10 @@ export default function TranslateButton() {
       icon="ri:translate"
       onClick={() => {
         const provider = translateConfig.provider
-        const isPure = pureTranslateProvider.includes(
-          provider as typeof pureTranslateProvider[number],
+        const isPure = PURE_TRANSLATE_PROVIDERS.includes(
+          provider as typeof PURE_TRANSLATE_PROVIDERS[number],
         )
-        if (!isPure && !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
+        if (!isPure && !hasSetAPIKey(provider as keyof typeof TRANSLATE_PROVIDER_MODELS, providersConfig)) {
           toast.error(i18n.t('noConfig.warning'))
           return
         }

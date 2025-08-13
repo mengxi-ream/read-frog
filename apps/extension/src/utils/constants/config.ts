@@ -6,7 +6,7 @@ import geminiLogo from '@/assets/providers/gemini.png'
 import googleLogo from '@/assets/providers/google.png'
 import microsoftLogo from '@/assets/providers/microsoft.png'
 import openaiLogo from '@/assets/providers/openai.jpg'
-import { apiProviderNames, pureTranslateProvider, readProviderNames, translateProviderNames } from '@/types/config/provider'
+import { API_PROVIDER_NAMES, PURE_TRANSLATE_PROVIDERS, READ_PROVIDER_NAMES, TRANSLATE_PROVIDER_NAMES } from '@/types/config/provider'
 import { omit, pick } from '@/types/utils'
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
@@ -146,27 +146,27 @@ export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: string, name: stri
 
 export const TRANSLATE_PROVIDER_ITEMS = pick(
   PROVIDER_ITEMS,
-  translateProviderNames,
+  TRANSLATE_PROVIDER_NAMES,
 )
 
 export const PURE_TRANSLATE_PROVIDER_ITEMS = pick(
   TRANSLATE_PROVIDER_ITEMS,
-  pureTranslateProvider,
+  PURE_TRANSLATE_PROVIDERS,
 )
 
 export const LLM_TRANSLATE_PROVIDER_ITEMS = omit(
   TRANSLATE_PROVIDER_ITEMS,
-  pureTranslateProvider,
+  PURE_TRANSLATE_PROVIDERS,
 )
 
 export const READ_PROVIDER_ITEMS = pick(
   PROVIDER_ITEMS,
-  readProviderNames,
+  READ_PROVIDER_NAMES,
 )
 
 export const API_PROVIDER_ITEMS = pick(
   PROVIDER_ITEMS,
-  apiProviderNames,
+  API_PROVIDER_NAMES,
 )
 
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<

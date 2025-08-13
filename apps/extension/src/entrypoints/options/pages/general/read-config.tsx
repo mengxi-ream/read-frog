@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import deepmerge from 'deepmerge'
 import { useAtom, useAtomValue } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
-import { readProviderModels } from '@/types/config/provider'
+import { READ_PROVIDER_MODELS } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { READ_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
@@ -98,7 +98,7 @@ function ReadModelSelector() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {readProviderModels[readConfig.provider].map(model => (
+                  {READ_PROVIDER_MODELS[readConfig.provider].map(model => (
                     <SelectItem key={model} value={model}>
                       {model}
                     </SelectItem>
@@ -109,7 +109,7 @@ function ReadModelSelector() {
           )}
       <div className="mt-0.5 flex items-center space-x-2">
         <Checkbox
-          id={`isCustomModel-${readConfig.provider}`}
+          id={`isCustomModel-read-${readConfig.provider}`}
           checked={modelConfig.isCustomModel}
           onCheckedChange={(checked) => {
             if (checked === false) {
@@ -135,8 +135,8 @@ function ReadModelSelector() {
           }}
         />
         <label
-          htmlFor={`isCustomModel-${readConfig.provider}`}
-          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          htmlFor={`isCustomModel-read-${readConfig.provider}`}
+          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
         >
           {i18n.t('options.general.readConfig.model.enterCustomModel')}
         </label>

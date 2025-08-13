@@ -5,7 +5,7 @@ import { Input } from '@repo/ui/components/input'
 import { cn } from '@repo/ui/lib/utils'
 import { useAtom } from 'jotai'
 import { useState } from 'react'
-import { apiProviderNames } from '@/types/config/provider'
+import { API_PROVIDER_NAMES } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { API_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { ConfigCard } from '../components/config-card'
@@ -15,7 +15,7 @@ import { PageLayout } from '../components/page-layout'
 export function ApiProvidersPage() {
   return (
     <PageLayout title={i18n.t('options.apiProviders.title')} innerClassName="[&>*]:border-b [&>*:last-child]:border-b-0">
-      {apiProviderNames.map(provider => (
+      {API_PROVIDER_NAMES.map(provider => (
         <ProviderConfigCard key={provider} provider={provider} />
       ))}
     </PageLayout>

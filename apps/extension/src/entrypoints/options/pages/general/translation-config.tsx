@@ -15,7 +15,7 @@ import {
 import deepmerge from 'deepmerge'
 import { useAtom, useAtomValue } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
-import { isAPIProvider, isLLMTranslateProvider, pageTranslateRangeSchema, translateProviderModels } from '@/types/config/provider'
+import { isAPIProvider, isLLMTranslateProvider, pageTranslateRangeSchema, TRANSLATE_PROVIDER_MODELS } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { LLM_TRANSLATE_PROVIDER_ITEMS, PURE_TRANSLATE_PROVIDER_ITEMS } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
@@ -165,7 +165,7 @@ function TranslateModelSelector() {
               </SelectTrigger>
               <SelectContent>
                 <SelectGroup>
-                  {translateProviderModels[provider].map(model => (
+                  {TRANSLATE_PROVIDER_MODELS[provider].map(model => (
                     <SelectItem key={model} value={model}>
                       {model}
                     </SelectItem>
@@ -176,7 +176,7 @@ function TranslateModelSelector() {
           )}
       <div className="mt-0.5 flex items-center space-x-2">
         <Checkbox
-          id={`isCustomModel-${translateConfig.provider}`}
+          id={`isCustomModel-translate-${translateConfig.provider}`}
           checked={modelConfig.isCustomModel}
           onCheckedChange={(checked) => {
             if (checked === false) {
@@ -202,8 +202,8 @@ function TranslateModelSelector() {
           }}
         />
         <label
-          htmlFor={`isCustomModel-${translateConfig.provider}`}
-          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          htmlFor={`isCustomModel-translate-${translateConfig.provider}`}
+          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
         >
           {i18n.t('options.general.translationConfig.model.enterCustomModel')}
         </label>

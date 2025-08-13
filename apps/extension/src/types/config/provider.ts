@@ -5,54 +5,56 @@ import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style
 /* ──────────────────────────────
   Single source of truth
   ────────────────────────────── */
-export const readProviderModels = {
+export const READ_PROVIDER_MODELS = {
   openai: ['gpt-5-mini', 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-5', 'gpt-4.1', 'gpt-4o'],
   deepseek: ['deepseek-chat'],
   gemini: ['gemini-2.5-pro', 'gemini-2.5-flash'],
 } as const
-export const translateProviderModels = {
+export const TRANSLATE_PROVIDER_MODELS = {
   openai: ['gpt-5-mini', 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-5-nano', 'gpt-4.1-nano', 'gpt-5', 'gpt-4.1', 'gpt-4o'],
   deepseek: ['deepseek-chat'],
   gemini: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp'],
 } as const
-export const pureTranslateProvider = ['google', 'microsoft', 'deeplx'] as const
+export const PURE_TRANSLATE_PROVIDERS = ['google', 'microsoft', 'deeplx'] as const
+
+export const THINKING_MODELS = ['gemini-2.5-pro', 'gemini-1.5-pro'] as const
 
 /* ──────────────────────────────
   Derived provider names
   ────────────────────────────── */
 
 // read provider names
-export const readProviderNames = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
-  (keyof typeof readProviderModels)[]
+export const READ_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
+  (keyof typeof READ_PROVIDER_MODELS)[]
 >
-export type ReadProviderNames = typeof readProviderNames[number]
+export type ReadProviderNames = typeof READ_PROVIDER_NAMES[number]
 // translate provider names
-export const translateProviderNames = ['google', 'microsoft', 'deeplx', 'openai', 'deepseek', 'gemini'] as const satisfies Readonly<
-  (keyof typeof translateProviderModels | typeof pureTranslateProvider[number])[]
+export const TRANSLATE_PROVIDER_NAMES = ['google', 'microsoft', 'deeplx', 'openai', 'deepseek', 'gemini'] as const satisfies Readonly<
+  (keyof typeof TRANSLATE_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
 >
-export type TranslateProviderNames = typeof translateProviderNames[number]
+export type TranslateProviderNames = typeof TRANSLATE_PROVIDER_NAMES[number]
 // translate provider names that support LLM
-export const llmTranslateProviderNames = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
-  (keyof typeof translateProviderModels)[]
+export const LLM_TRANSLATE_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
+  (keyof typeof TRANSLATE_PROVIDER_MODELS)[]
 >
-export type LLMTranslateProviderNames = typeof llmTranslateProviderNames[number]
+export type LLMTranslateProviderNames = typeof LLM_TRANSLATE_PROVIDER_NAMES[number]
 export function isLLMTranslateProvider(provider: TranslateProviderNames): provider is LLMTranslateProviderNames {
-  return llmTranslateProviderNames.includes(provider as LLMTranslateProviderNames)
+  return LLM_TRANSLATE_PROVIDER_NAMES.includes(provider as LLMTranslateProviderNames)
 }
 
 // all provider names
-export const allProviderNames = ['openai', 'deepseek', 'google', 'microsoft', 'deeplx', 'gemini'] as const satisfies Readonly<
-  (typeof readProviderNames[number] | typeof translateProviderNames[number])[]
+export const ALL_PROVIDER_NAMES = ['openai', 'deepseek', 'google', 'microsoft', 'deeplx', 'gemini'] as const satisfies Readonly<
+  (typeof READ_PROVIDER_NAMES[number] | typeof TRANSLATE_PROVIDER_NAMES[number])[]
 >
-export type AllProviderNames = typeof allProviderNames[number]
+export type AllProviderNames = typeof ALL_PROVIDER_NAMES[number]
 
 // need to be set api key for LLM
-export const apiProviderNames = ['openai', 'deepseek', 'gemini', 'deeplx'] as const satisfies Readonly<
-  (keyof typeof readProviderModels | keyof typeof translateProviderModels | 'deeplx')[]
+export const API_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini', 'deeplx'] as const satisfies Readonly<
+  (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS | 'deeplx')[]
 >
-export type APIProviderNames = typeof apiProviderNames[number]
+export type APIProviderNames = typeof API_PROVIDER_NAMES[number]
 export function isAPIProvider(provider: TranslateProviderNames): provider is APIProviderNames {
-  return apiProviderNames.includes(provider as APIProviderNames)
+  return API_PROVIDER_NAMES.includes(provider as APIProviderNames)
 }
 
 /* ──────────────────────────────
@@ -65,10 +67,10 @@ const providerConfigItemSchema = z.object({
 })
 
 export const providersConfigSchema = z.object(
-  apiProviderNames.reduce((acc, provider) => {
+  API_PROVIDER_NAMES.reduce((acc, provider) => {
     acc[provider] = providerConfigItemSchema
     return acc
-  }, {} as Record<typeof apiProviderNames[number], typeof providerConfigItemSchema>),
+  }, {} as Record<typeof API_PROVIDER_NAMES[number], typeof providerConfigItemSchema>),
 )
 
 export type ProvidersConfig = z.infer<typeof providersConfigSchema>
@@ -104,11 +106,11 @@ function buildModelSchema<M extends Record<string, ModelTuple>>(models: M) {
   read config
   ────────────────────────────── */
 
-export const readModelsSchema = buildModelSchema(readProviderModels)
+export const readModelsSchema = buildModelSchema(READ_PROVIDER_MODELS)
 export type ReadModels = z.infer<typeof readModelsSchema>
 
 export const readConfigSchema = z.object({
-  provider: z.enum(readProviderNames),
+  provider: z.enum(READ_PROVIDER_NAMES),
   models: readModelsSchema,
 })
 export type ReadConfig = z.infer<typeof readConfigSchema>
@@ -117,14 +119,14 @@ export type ReadConfig = z.infer<typeof readConfigSchema>
   translate config
   ────────────────────────────── */
 
-export const translateLLMModelsSchema = buildModelSchema(translateProviderModels)
+export const translateLLMModelsSchema = buildModelSchema(TRANSLATE_PROVIDER_MODELS)
 export type TranslateLLMModels = z.infer<typeof translateLLMModelsSchema>
 
 export const pureTranslateModelsSchema = z.object(
-  pureTranslateProvider.reduce((acc, provider) => {
+  PURE_TRANSLATE_PROVIDERS.reduce((acc, provider) => {
     acc[provider] = z.null()
     return acc
-  }, {} as Record<typeof pureTranslateProvider[number], z.ZodNull>),
+  }, {} as Record<typeof PURE_TRANSLATE_PROVIDERS[number], z.ZodNull>),
 )
 export type PureTranslateModels = z.infer<typeof pureTranslateModelsSchema>
 
@@ -161,7 +163,7 @@ export const requestQueueConfigSchema = z.object({
 })
 
 export const translateConfigSchema = z.object({
-  provider: z.enum(translateProviderNames),
+  provider: z.enum(TRANSLATE_PROVIDER_NAMES),
   models: translateModelsSchema,
   node: z.object({
     enabled: z.boolean(),
@@ -182,6 +184,6 @@ export type TranslateConfig = z.infer<typeof translateConfigSchema>
   type guard functions
   ────────────────────────────── */
 
-export function isPureTranslateProvider(provider: TranslateProviderNames): provider is typeof pureTranslateProvider[number] {
-  return pureTranslateProvider.includes(provider as typeof pureTranslateProvider[number])
+export function isPureTranslateProvider(provider: TranslateProviderNames): provider is typeof PURE_TRANSLATE_PROVIDERS[number] {
+  return PURE_TRANSLATE_PROVIDERS.includes(provider as typeof PURE_TRANSLATE_PROVIDERS[number])
 }

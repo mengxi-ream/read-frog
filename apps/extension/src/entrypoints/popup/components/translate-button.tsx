@@ -1,10 +1,10 @@
-import type { translateProviderModels } from '@/types/config/provider'
+import type { TRANSLATE_PROVIDER_MODELS } from '@/types/config/provider'
 import { browser, i18n } from '#imports'
 import { Button } from '@repo/ui/components/button'
 import { cn } from '@repo/ui/lib/utils'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
-import { pureTranslateProvider } from '@/types/config/provider'
+import { PURE_TRANSLATE_PROVIDERS } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { hasSetAPIKey } from '@/utils/config/config'
 import { sendMessage } from '@/utils/message'
@@ -27,11 +27,11 @@ export default function TranslateButton({ className }: { className?: string }) {
     if (currentTab.id) {
       if (!isPageTranslated) {
         const provider = translateConfig.provider
-        const isPure = pureTranslateProvider.includes(
-          provider as typeof pureTranslateProvider[number],
+        const isPure = PURE_TRANSLATE_PROVIDERS.includes(
+          provider as typeof PURE_TRANSLATE_PROVIDERS[number],
         )
 
-        if (!isPure && !hasSetAPIKey(provider as keyof typeof translateProviderModels, providersConfig)) {
+        if (!isPure && !hasSetAPIKey(provider as keyof typeof TRANSLATE_PROVIDER_MODELS, providersConfig)) {
           toast.error(i18n.t('noConfig.warning'))
           return
         }
