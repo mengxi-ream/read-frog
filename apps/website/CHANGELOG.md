@@ -1,5 +1,13 @@
 # @read-frog/website
 
+## 1.0.2
+
+### Patch Changes
+
+- [#252](https://github.com/mengxi-ream/read-frog/pull/252) [`2756fee`](https://github.com/mengxi-ream/read-frog/commit/2756feeaf3ffcd5e7d367882e18896a8ffa4d4ba) Thanks [@chandanrakholia](https://github.com/chandanrakholia)! - fix: no login avatar on mobile home page after login
+
+- [#316](https://github.com/mengxi-ream/read-frog/pull/316) [`17409f6`](https://github.com/mengxi-ream/read-frog/commit/17409f6f9fc36882257b850007569b665da7b31a) Thanks [@sedationh](https://github.com/sedationh)! - add conteibution guide about dev
+
 ## 1.0.1
 
 ### Patch Changes

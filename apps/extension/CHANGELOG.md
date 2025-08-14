@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.3.0
+
+### Minor Changes
+
+- [#315](https://github.com/mengxi-ream/read-frog/pull/315) [`9d378a9`](https://github.com/mengxi-ream/read-frog/commit/9d378a9029e1d59ea6eefbd84de3c07010943da1) Thanks [@sedationh](https://github.com/sedationh)! - feat: warn user that the source language is the same as the target language
+
+### Patch Changes
+
+- [#331](https://github.com/mengxi-ream/read-frog/pull/331) [`92e855a`](https://github.com/mengxi-ream/read-frog/commit/92e855a8c2cddc4493d056df63d6f1ebe8d3ea58) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: reduce concurrent request capacity
+
+- [#330](https://github.com/mengxi-ream/read-frog/pull/330) [`5e75705`](https://github.com/mengxi-ream/read-frog/commit/5e75705adbede1cd8c317559e640165cf7383465) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: hide floating button when printing web
+
+- [#333](https://github.com/mengxi-ream/read-frog/pull/333) [`f5c2c10`](https://github.com/mengxi-ream/read-frog/commit/f5c2c1082daa03e7118b3f4e4dbb8663fb834736) Thanks [@sedationh](https://github.com/sedationh)! - fix: Shouldn't override Ctrl+Shift+A hotkey https://github.com/mengxi-ream/read-frog/issues/318
+
 ## 1.2.2
 
 ### Patch Changes
