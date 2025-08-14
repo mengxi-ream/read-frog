@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.2.2
+
+### Patch Changes
+
+- [#324](https://github.com/mengxi-ream/read-frog/pull/324) [`1d5472e`](https://github.com/mengxi-ream/read-frog/commit/1d5472e10e44ff27d31e0e691825c859b7f4d732) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: cache auth client by proxy
+
+- [#321](https://github.com/mengxi-ream/read-frog/pull/321) [`e531adc`](https://github.com/mengxi-ream/read-frog/commit/e531adc1abdcc1f481184e5ae042aea7d12e3945) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: weird format when translating reddit
+
 ## 1.2.1
 
 ### Patch Changes
