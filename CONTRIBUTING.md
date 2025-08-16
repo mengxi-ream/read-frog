@@ -15,4 +15,4 @@ Understand the project through AI. <br>
 
 This guide will help you understand how to contribute effectively to Read Frog.<br>
 
-[Contributor's guide](https://readfrog.app/en/tutorial/contribution)
+[Contributor's guide](https://readfrog.app/tutorial/contribution)
