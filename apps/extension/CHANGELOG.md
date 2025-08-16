@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.4.0
+
+### Minor Changes
+
+- [#346](https://github.com/mengxi-ream/read-frog/pull/346) [`1fe2780`](https://github.com/mengxi-ream/read-frog/commit/1fe2780b559f3392bec7f0be7755f8b4e34dc5fe) Thanks [@sedationh](https://github.com/sedationh)! - fix: when drag float button, should keep hover state
+
+### Patch Changes
+
+- [#349](https://github.com/mengxi-ream/read-frog/pull/349) [`7c0ce5d`](https://github.com/mengxi-ream/read-frog/commit/7c0ce5dc71b62f5429a2b54554aabd6f81c99e5d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: host content style missing
+
+- [#335](https://github.com/mengxi-ream/read-frog/pull/335) [`e044745`](https://github.com/mengxi-ream/read-frog/commit/e044745ca4395cc553829f657f846c9171796f0b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: try catch readability
+
 ## 1.3.0
 
 ### Minor Changes
