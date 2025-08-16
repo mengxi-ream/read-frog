@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.4.1
+
+### Patch Changes
+
+- [`35c6d73`](https://github.com/mengxi-ream/read-frog/commit/35c6d73688d484b6bdcd9daeb12fcaad72dcf271) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: redirect auth endpoint to /api/identity
+
 ## 1.4.0
 
 ### Minor Changes
