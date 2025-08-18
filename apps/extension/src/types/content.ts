@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from '@/utils/zod-csp'
 
 import { langCodeISO6393Schema } from './config/languages'
 

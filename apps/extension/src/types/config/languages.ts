@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from '@/utils/zod-csp'
 
 export const langCodeISO6393Schema = z.enum([
   'eng',

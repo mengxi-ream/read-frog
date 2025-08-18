@@ -1,13 +1,13 @@
 import { i18n } from '#imports'
+import { Switch } from '@repo/ui/components/switch'
+import deepmerge from 'deepmerge'
+import { useAtom } from 'jotai'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from '@repo/ui/components/select'
-import { Switch } from '@repo/ui/components/switch'
-import deepmerge from 'deepmerge'
-import { useAtom } from 'jotai'
+} from '@/components/browser-adaptive-select'
 import { configFields } from '@/utils/atoms/config'
 import { HOTKEY_ITEMS, HOTKEYS } from '@/utils/constants/hotkeys'
 

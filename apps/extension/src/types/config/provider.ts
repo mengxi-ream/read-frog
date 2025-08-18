@@ -1,7 +1,7 @@
-import { z } from 'zod'
 import { HOTKEYS } from '@/utils/constants/hotkeys'
 import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
 import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style'
+import { z } from '@/utils/zod-csp'
 /* ──────────────────────────────
   Single source of truth
   ────────────────────────────── */

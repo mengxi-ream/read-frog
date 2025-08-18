@@ -17,8 +17,32 @@ export function addStyleToShadow(shadow: ShadowRoot) {
 
 export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, contentMatch?: string) {
   // TODO: 目前函数只会把找到的第一个 style 放进来，但是可能存在多个 style 匹配，那其实要全部放进来，并且对应不同的 mirrorSheet
-  const mirrorSheet = new CSSStyleSheet()
-  shadowRoot.adoptedStyleSheets.push(mirrorSheet)
+  // Check adoptedStyleSheets compatibility
+  const supportsAdoptedStyleSheets = 'adoptedStyleSheets' in shadowRoot
+    && Array.isArray(shadowRoot.adoptedStyleSheets)
+    && typeof shadowRoot.adoptedStyleSheets.push === 'function'
+
+  let mirrorSheet: CSSStyleSheet | null = null
+  let mirrorStyleElement: HTMLStyleElement | null = null
+
+  if (supportsAdoptedStyleSheets) {
+    // Modern browsers: use adoptedStyleSheets
+    mirrorSheet = new CSSStyleSheet()
+    shadowRoot.adoptedStyleSheets = [...shadowRoot.adoptedStyleSheets, mirrorSheet]
+  }
+  else {
+    // Compatibility mode: use <style> element
+    // Check for existing mirror style element to prevent duplicates
+    const existingMirror = shadowRoot.querySelector('style[data-mirror-styles]')
+    if (existingMirror) {
+      mirrorStyleElement = existingMirror as HTMLStyleElement
+    }
+    else {
+      mirrorStyleElement = document.createElement('style')
+      mirrorStyleElement.setAttribute('data-mirror-styles', 'true')
+      shadowRoot.appendChild(mirrorStyleElement)
+    }
+  }
 
   // Find all elements matching selector, then filter by content if contentMatch is provided
   const findMatchingElement = () => {
@@ -45,14 +69,18 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
 
   const srcObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
-      mirrorSheet.replaceSync(mutation.target.textContent?.trim() ?? '')
+      if (mirrorSheet) {
+        mirrorSheet.replaceSync(mutation.target.textContent?.trim() ?? '')
+      }
     })
   })
 
   // If src is found, observe it
   if (src) {
     srcObserver.observe(src, opts)
-    mirrorSheet.replaceSync(src.textContent?.trim() ?? '')
+    if (mirrorSheet) {
+      mirrorSheet.replaceSync(src.textContent?.trim() ?? '')
+    }
   }
 
   // Observe the head for added style elements
@@ -63,7 +91,9 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
           // Only check content if contentMatch is provided
           if (!contentMatch || node.textContent?.includes(contentMatch)) {
             src = node
-            mirrorSheet.replaceSync(node.textContent?.trim() ?? '')
+            if (mirrorSheet) {
+              mirrorSheet.replaceSync(node.textContent?.trim() ?? '')
+            }
             srcObserver.observe(src, opts)
           }
         }

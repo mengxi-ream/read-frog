@@ -3,14 +3,14 @@ import type {
 } from '@/types/config/languages'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
+import { useAtom } from 'jotai'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@repo/ui/components/select'
-import { useAtom } from 'jotai'
+} from '@/components/browser-adaptive-select'
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
@@ -59,7 +59,7 @@ export default function LanguageOptionsSelector() {
           </div>
           <LangCodeSelectorChevronDownIcon />
         </SelectTrigger>
-        <SelectContent className="rounded-lg shadow-md w-72">
+        <SelectContent className="rounded-lg shadow-md">
           <SelectItem value="auto">
             {langCodeLabel(language.detectedCode)}
             <AutoLangCell />
@@ -84,7 +84,7 @@ export default function LanguageOptionsSelector() {
           </div>
           <LangCodeSelectorChevronDownIcon />
         </SelectTrigger>
-        <SelectContent className="rounded-lg shadow-md w-72">
+        <SelectContent className="rounded-lg shadow-md">
           {langCodeISO6393Schema.options.map(key => (
             <SelectItem key={key} value={key}>
               {langCodeLabel(key)}

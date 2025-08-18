@@ -6,10 +6,10 @@
   "description": "Read Frog browser extension for language learning",
   "scripts": {
     "build": "wxt build",
-    "build:firefox": "wxt build -b firefox",
+    "build:firefox": "wxt build -b firefox --mv3",
     "dev": "wxt",
     "dev:edge": "wxt -b edge",
-    "dev:firefox": "wxt -b firefox",
+    "dev:firefox": "wxt -b firefox --mv3",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "postinstall": "wxt prepare",
@@ -18,7 +18,7 @@
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
     "zip": "wxt zip",
-    "zip:firefox": "wxt zip -b firefox"
+    "zip:firefox": "wxt zip -b firefox --mv3"
   },
   "dependencies": {
     "@ai-sdk/deepseek": "^1.0.7",
@@ -26,6 +26,7 @@
     "@ai-sdk/openai": "^2.0.12",
     "@ai-sdk/react": "^2.0.12",
     "@mozilla/readability": "^0.6.0",
+    "@remixicon/react": "^4.6.0",
     "@repo/api": "workspace:*",
     "@repo/definitions": "workspace:*",
     "@repo/ui": "workspace:*",
