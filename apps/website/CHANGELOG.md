@@ -1,5 +1,11 @@
 # @read-frog/website
 
+## 1.0.4
+
+### Patch Changes
+
+- [#356](https://github.com/mengxi-ream/read-frog/pull/356) [`f23ae10`](https://github.com/mengxi-ream/read-frog/commit/f23ae10e8e5abc96913acee8dc0083f5b5e5ef71) Thanks [@sedationh](https://github.com/sedationh)! - docs: add doc about chrome extension debug
+
 ## 1.0.3
 
 ### Patch Changes

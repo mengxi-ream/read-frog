@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.4.2
+
+### Patch Changes
+
+- [#354](https://github.com/mengxi-ream/read-frog/pull/354) [`f3fc960`](https://github.com/mengxi-ream/read-frog/commit/f3fc960ef7e0fc2b383357748ba664a9efef8b3d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: more info and better ui for translation error
+
+- [#348](https://github.com/mengxi-ream/read-frog/pull/348) [`f2e3813`](https://github.com/mengxi-ream/read-frog/commit/f2e3813b44ff3527b4d05bdfa9fdc18ea2a5d6e5) Thanks [@yiyang-fairy](https://github.com/yiyang-fairy)! - feat: add dashed line style
+
+- [#361](https://github.com/mengxi-ream/read-frog/pull/361) [`ad27745`](https://github.com/mengxi-ream/read-frog/commit/ad27745f088d430130496b050d596e955416f83a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add translation mode config
+
+- [#359](https://github.com/mengxi-ream/read-frog/pull/359) [`c16ede2`](https://github.com/mengxi-ream/read-frog/commit/c16ede2b3256e4f26ecdde37c88237a87e39b932) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: add dontWalkAttr when translate page
+
 ## 1.4.1
 
 ### Patch Changes
