@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.4.3
+
+### Patch Changes
+
+- [#367](https://github.com/mengxi-ream/read-frog/pull/367) [`337abdb`](https://github.com/mengxi-ream/read-frog/commit/337abdb7ff56b9d69d5de24d011643534fde735a) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: unresponsive dropdown when zoom in
+
+- [#368](https://github.com/mengxi-ream/read-frog/pull/368) [`6ddff0f`](https://github.com/mengxi-ream/read-frog/commit/6ddff0f7f2cc4bf1525dee9d58410e7c7e38bb04) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - perf: only check better-auth.session_token
+
 ## 1.4.2
 
 ### Patch Changes
