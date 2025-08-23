@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.5.1
+
+### Patch Changes
+
+- [#382](https://github.com/mengxi-ream/read-frog/pull/382) [`9a1d016`](https://github.com/mengxi-ream/read-frog/commit/9a1d016462d22a9e6b0637264cde32664c040e20) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: collapse config css
+
 ## 1.5.0
 
 ### Minor Changes
