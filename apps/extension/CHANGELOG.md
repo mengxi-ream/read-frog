@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.5.0
+
+### Minor Changes
+
+- [#371](https://github.com/mengxi-ream/read-frog/pull/371) [`e63c568`](https://github.com/mengxi-ream/read-frog/commit/e63c568ea46bdde485f794543869b73777e779b4) Thanks [@sedationh](https://github.com/sedationh)! - feat: add config sync feature
+
+- [#381](https://github.com/mengxi-ream/read-frog/pull/381) [`19e9c3f`](https://github.com/mengxi-ream/read-frog/commit/19e9c3fb12263d08c819ba14160d8bbc22f73070) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add translation only mode
+
 ## 1.4.4
 
 ### Patch Changes
