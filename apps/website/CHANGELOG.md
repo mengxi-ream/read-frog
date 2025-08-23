@@ -1,5 +1,11 @@
 # @read-frog/website
 
+## 1.0.5
+
+### Patch Changes
+
+- [#377](https://github.com/mengxi-ream/read-frog/pull/377) [`873dcb3`](https://github.com/mengxi-ream/read-frog/commit/873dcb3a66f075cab81324def6feb18fa6036646) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - revert: remove auth end point
+
 ## 1.0.4
 
 ### Patch Changes
