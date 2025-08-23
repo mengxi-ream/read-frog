@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.5.2
+
+### Patch Changes
+
+- [#386](https://github.com/mengxi-ream/read-frog/pull/386) [`08d93dd`](https://github.com/mengxi-ream/read-frog/commit/08d93dd5d91db3599b3556f6afae099c6c16cb8e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: migrate to new prompt
+
 ## 1.5.1
 
 ### Patch Changes
