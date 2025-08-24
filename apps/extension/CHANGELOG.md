@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.5.3
+
+### Patch Changes
+
+- [#390](https://github.com/mengxi-ream/read-frog/pull/390) [`55462bd`](https://github.com/mengxi-ream/read-frog/commit/55462bdfc3ef3fc4bfbcd0948f28ce606f48e0b9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): improve floating element detection in DOM filter
+
+- [#388](https://github.com/mengxi-ream/read-frog/pull/388) [`5846556`](https://github.com/mengxi-ream/read-frog/commit/5846556a5df456e777bfead644228b07c66cbeb6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - test: enhance Claude Code guidance and standardize test directories
+
 ## 1.5.2
 
 ### Patch Changes
