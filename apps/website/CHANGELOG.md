@@ -1,5 +1,11 @@
 # @read-frog/website
 
+## 1.0.6
+
+### Patch Changes
+
+- [#391](https://github.com/mengxi-ream/read-frog/pull/391) [`fde3535`](https://github.com/mengxi-ream/read-frog/commit/fde3535c4bebfba81d584f5cde140c4af5f4b6df) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(extension): add flexible baseURL support for DeepLX providers
+
 ## 1.0.5
 
 ### Patch Changes
