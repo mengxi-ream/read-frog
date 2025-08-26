@@ -112,6 +112,7 @@ options:
         blockquote: 引用
         weakened: 弱化
         dashedLine: 虛線
+        border: 邊框
     translationMode:
       title: 翻譯模式
       description: 選擇翻譯文字的顯示方式：雙語對照或僅顯示翻譯

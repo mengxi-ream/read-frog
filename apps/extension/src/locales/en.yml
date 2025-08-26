@@ -112,6 +112,7 @@ options:
         blockquote: Blockquote
         weakened: Weakened
         dashedLine: Dashed Line
+        border: Border
     translationMode:
       title: Translation Mode
       description: 'Choose how the translated text is displayed: bilingual or translation only.'

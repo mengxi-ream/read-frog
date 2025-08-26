@@ -27,3 +27,10 @@
   text-decoration: underline dashed var(--read-frog-primary);
   text-underline-offset: 5px;
 }
+
+[data-read-frog-custom-translation-style='border'] {
+  border: 1px solid var(--read-frog-primary);
+  padding: 4px;
+  border-radius: 2px;
+  background-color: var(--read-frog-accent);
+}
