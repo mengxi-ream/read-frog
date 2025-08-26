@@ -82,6 +82,8 @@ options:
     alwaysTranslate:
       title: 常に翻訳
       description: このサイトを常に翻訳する
+      urlPattern: URL パターン
+      enterUrlPattern: URL パターンを入力
     personalizedPrompt:
       title: 個人化プロンプト
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指し、その中で {{input}} は段落のテキスト内容を、{{targetLang}} はターゲット言語を表します。

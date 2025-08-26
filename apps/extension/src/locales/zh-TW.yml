@@ -83,6 +83,8 @@ options:
     alwaysTranslate:
       title: 總是翻譯
       description: 總是翻譯這個網站
+      urlPattern: URL 模式
+      enterUrlPattern: 輸入 URL 模式
     personalizedPrompt:
       title: 個人化 Prompt
       description: 自訂不同類型的 Prompt，可以在翻譯時自行調整 Prompt 類型。Prompt 表示以用戶身份發送給 LLM 的文字，其中 {{input}} 表示段落的文字內容，{{targetLang}} 表示目標語言。

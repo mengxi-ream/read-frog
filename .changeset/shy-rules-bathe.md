@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat(docs): update the translation of 'always translate' for options page
+i18n(extension): update the translation of 'always translate' for options page
