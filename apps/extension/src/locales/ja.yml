@@ -79,6 +79,9 @@ options:
       rate:
         title: 秒間平均リクエスト数
         description: 平均秒間リクエスト数（ただし、最大バーストリクエスト数を設定し一時的な超過リクエスト送信を許可）
+    alwaysTranslate:
+      title: 常に翻訳
+      description: このサイトを常に翻訳する
     personalizedPrompt:
       title: 個人化プロンプト
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指し、その中で {{input}} は段落のテキスト内容を、{{targetLang}} はターゲット言語を表します。

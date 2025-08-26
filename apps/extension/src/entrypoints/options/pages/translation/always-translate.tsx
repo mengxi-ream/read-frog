@@ -1,3 +1,4 @@
+import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { Button } from '@repo/ui/components/button'
 import { Input } from '@repo/ui/components/input'
@@ -16,7 +17,7 @@ import { ConfigCard } from '../../components/config-card'
 
 export function AlwaysTranslate() {
   return (
-    <ConfigCard title="Always Translate" description="Always translate the webpage">
+    <ConfigCard title={i18n.t('options.translation.alwaysTranslate.title')} description={i18n.t('options.translation.alwaysTranslate.description')}>
       <PatternTable />
     </ConfigCard>
   )

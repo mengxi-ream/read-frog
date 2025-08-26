@@ -80,6 +80,9 @@ options:
       rate:
         title: 每秒平均請求數量
         description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫發送超量請求
+    alwaysTranslate:
+      title: 總是翻譯
+      description: 總是翻譯這個網站
     personalizedPrompt:
       title: 個人化 Prompt
       description: 自訂不同類型的 Prompt，可以在翻譯時自行調整 Prompt 類型。Prompt 表示以用戶身份發送給 LLM 的文字，其中 {{input}} 表示段落的文字內容，{{targetLang}} 表示目標語言。
