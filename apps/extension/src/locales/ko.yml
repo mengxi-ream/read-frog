@@ -82,7 +82,7 @@ options:
         description: 초당 평균 요청 수 (단, 최대 버스트 요청 수 설정을 통한 일시적 초과 요청 전송 허용)
     alwaysTranslate:
       title: 항상 번역
-      description: 이 사이트 항상 번역
+      description: 이 사이트를 항상 번역합니다
     personalizedPrompt:
       title: 개인화된 프롬프트
       description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 나타내며, 여기서 {{input}}은 문단의 텍스트 내용을, {{targetLang}}은 목표 언어를 나타냅니다.
