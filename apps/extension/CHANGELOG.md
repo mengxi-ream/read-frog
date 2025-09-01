@@ -1,5 +1,25 @@
 # @read-frog/extension
 
+## 1.6.0
+
+### Minor Changes
+
+- [#400](https://github.com/mengxi-ream/read-frog/pull/400) [`28cdf77`](https://github.com/mengxi-ream/read-frog/commit/28cdf771b01a87e6cbd864de989c6dcc6087b50d) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat(extension): support to clear cache
+
+- [#406](https://github.com/mengxi-ream/read-frog/pull/406) [`d8c3902`](https://github.com/mengxi-ream/read-frog/commit/d8c3902b727658a982c4cfad51fe806218accf4e) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: implement customize translation shortcut keys
+
+### Patch Changes
+
+- [#393](https://github.com/mengxi-ream/read-frog/pull/393) [`3451481`](https://github.com/mengxi-ream/read-frog/commit/34514811c3a794238d780248bfcd0ad5b48676cb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): improve BR tag handling and inline element processing
+
+- [#413](https://github.com/mengxi-ream/read-frog/pull/413) [`625e073`](https://github.com/mengxi-ream/read-frog/commit/625e0735fe96b8d5af8b46704a16ef6284904ef9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: improve translation algorithm and test descriptions
+
+- [#398](https://github.com/mengxi-ream/read-frog/pull/398) [`19960b9`](https://github.com/mengxi-ream/read-frog/commit/19960b90b5d4f63695bbcfec94ba9ac36806e152) Thanks [@Yukiniro](https://github.com/Yukiniro)! - i18n(extension): update the translation of 'always translate' for options page
+
+- [#403](https://github.com/mengxi-ream/read-frog/pull/403) [`25c25e8`](https://github.com/mengxi-ream/read-frog/commit/25c25e81e5a1aec6d252613bffcab0fbf17de6cb) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat(extension): support border style
+
+- [#396](https://github.com/mengxi-ream/read-frog/pull/396) [`91c07c0`](https://github.com/mengxi-ream/read-frog/commit/91c07c049312edaf18f6fb52a55477fe64e44cb8) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): don't label too many inline nodes
+
 ## 1.5.4
 
 ### Patch Changes
