@@ -1,4 +1,5 @@
 import { globalConfig } from '@/utils/config/config'
+import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
 import { isDontWalkIntoElement, isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
 import { deepQueryTopLevelSelector } from '@/utils/host/dom/find'
 import { walkAndLabelElement } from '@/utils/host/dom/traversal'
@@ -93,7 +94,9 @@ export class PageTranslationManager implements IPageTranslationManager {
               console.warn('Global config is not initialized')
               return
             }
-            translateWalkedElement(entry.target, walkId, globalConfig.translate.mode)
+            if (!entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
+              translateWalkedElement(entry.target, walkId, globalConfig.translate.mode)
+            }
           }
           observer.unobserve(entry.target)
         }
