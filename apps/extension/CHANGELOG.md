@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.6.1
+
+### Patch Changes
+
+- [#416](https://github.com/mengxi-ream/read-frog/pull/416) [`9ae6dc7`](https://github.com/mengxi-ream/read-frog/commit/9ae6dc70570f2eb9f0501e6212785f760d67bef9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: migrate default prompt to the new one
+
+- [#414](https://github.com/mengxi-ream/read-frog/pull/414) [`8f9ef56`](https://github.com/mengxi-ream/read-frog/commit/8f9ef56fbdc18a4d43f1d0da5adf97becb5853ef) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): don't retranslate the whole ancestor node when auto translate
+
+- [#418](https://github.com/mengxi-ream/read-frog/pull/418) [`80d0302`](https://github.com/mengxi-ream/read-frog/commit/80d0302e805248915694475383424df93054879e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: avoid recursive translate on translation only
+
 ## 1.6.0
 
 ### Minor Changes
