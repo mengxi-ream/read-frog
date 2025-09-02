@@ -10,13 +10,13 @@ jobs:
   stale:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/stale@v4
+      - uses: actions/stale@v9
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
 
           # ---- Issue settings ----
-          days-before-issue-stale: 30
-          days-before-issue-close: 180
+          days-before-issue-stale: 30  # Issues become stale after 30 days inactive
+          days-before-issue-close: 180 # Close Issues 180 days after stale
           stale-issue-message: |
             This issue has been inactive for 30 days and is now marked as stale.
             It will be automatically closed in 180 days if no further activity occurs.
@@ -25,8 +25,8 @@ jobs:
             If you need to continue, please reopen or create a new issue.
 
           # ---- PR settings ----
-          days-before-stale: 7
-          days-before-close: 30
+          days-before-pr-stale: 7   # PRs become stale after 7 days inactive
+          days-before-pr-close: 30  # Close PRs 30 days after stale
           stale-pr-message: |
             This PR has been inactive for 7 days and is now marked as stale.
             It will be automatically closed in 30 days if no further activity occurs.
