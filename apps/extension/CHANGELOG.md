@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.7.1
+
+### Patch Changes
+
+- [#432](https://github.com/mengxi-ream/read-frog/pull/432) [`d727e1e`](https://github.com/mengxi-ream/read-frog/commit/d727e1ed9e946e9a7afe8f79c0bb1274a8f7844b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): add missing v019-to-v020 config migration and schema validation
+
+- [#428](https://github.com/mengxi-ream/read-frog/pull/428) [`d937925`](https://github.com/mengxi-ream/read-frog/commit/d937925da924728c7ff0b987322bf23e063b05e0) Thanks [@taiiiyang](https://github.com/taiiiyang)! - perf: Use requestIdleCallback or requestAnimationFrame to delay the application of smash style to improve the performance of the walk element.
+
 ## 1.7.0
 
 ### Minor Changes
