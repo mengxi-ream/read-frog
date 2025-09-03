@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.7.0
+
+### Minor Changes
+
+- [#411](https://github.com/mengxi-ream/read-frog/pull/411) [`1c4fa39`](https://github.com/mengxi-ream/read-frog/commit/1c4fa3989bf3b81a6ec3cd551facd66806407d52) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat(extension): support disabling the floating button on specific websites
+
+### Patch Changes
+
+- [#420](https://github.com/mengxi-ream/read-frog/pull/420) [`bbbea54`](https://github.com/mengxi-ream/read-frog/commit/bbbea54788ed4abfcab5071ab76bf863bbf85afe) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: reinsert when an internal node is removed.
+
 ## 1.6.1
 
 ### Patch Changes
