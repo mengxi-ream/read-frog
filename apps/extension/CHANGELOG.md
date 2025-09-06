@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.8.0
+
+### Minor Changes
+
+- [#436](https://github.com/mengxi-ream/read-frog/pull/436) [`4e90344`](https://github.com/mengxi-ream/read-frog/commit/4e903444ac47528f14044963569c5ef51cf9b787) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat(extension): support automatic translation based on language
+
+### Patch Changes
+
+- [#430](https://github.com/mengxi-ream/read-frog/pull/430) [`bce5170`](https://github.com/mengxi-ream/read-frog/commit/bce517047ab99c7badd8a7a0adca9af6c820a76e) Thanks [@Rafacv23](https://github.com/Rafacv23)! - feat: interactable prompt textarea
+
+- [#441](https://github.com/mengxi-ream/read-frog/pull/441) [`f036a23`](https://github.com/mengxi-ream/read-frog/commit/f036a23ef8865a6a666cdc5db1fdc01799e4ee8d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: prevent infinite loop in MutationObserver causing browser freeze
+
+- [#427](https://github.com/mengxi-ream/read-frog/pull/427) [`c3995f8`](https://github.com/mengxi-ream/read-frog/commit/c3995f83e73a72ddae4fa53ccf664ad937515c59) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: skip empty word when translate
+
 ## 1.7.1
 
 ### Patch Changes
