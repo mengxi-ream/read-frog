@@ -10,18 +10,15 @@ import FrogToast from '@/components/frog-toast'
 import { configAtom } from '@/utils/atoms/config'
 import { globalConfig, loadGlobalConfig } from '@/utils/config/config'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
+import { isDarkMode } from '@/utils/tailwind'
 import { queryClient } from '@/utils/trpc/client'
 import App from './app'
 import { AppSidebar } from './app-sidebar'
 import '@/assets/tailwind/theme.css'
 import './style.css'
 
-document.documentElement.classList.toggle(
-  'dark',
-  localStorage.theme === 'dark'
-  || (!('theme' in localStorage)
-    && window.matchMedia('(prefers-color-scheme: dark)').matches),
-)
+document.documentElement.classList.toggle('dark', isDarkMode())
+document.documentElement.style.colorScheme = isDarkMode() ? 'dark' : 'light'
 
 function HydrateAtoms({
   initialValues,

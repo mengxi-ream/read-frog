@@ -63,6 +63,7 @@ export class ShadowHostBuilder {
     }
     if (isDarkMode()) {
       wrapper.classList.add('dark')
+      wrapper.style.colorScheme = 'dark'
     }
     this.shadowRoot.appendChild(wrapper)
 

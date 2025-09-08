@@ -7,6 +7,7 @@ export function insertShadowRootUIWrapperInto(container: HTMLElement) {
     'text-base antialiased font-sans z-[2147483647]',
     isDarkMode() && 'dark',
   )
+  wrapper.style.colorScheme = isDarkMode() ? 'dark' : 'light'
   container.append(wrapper)
   return wrapper
 }

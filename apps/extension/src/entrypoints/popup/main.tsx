@@ -9,17 +9,14 @@ import { configAtom } from '@/utils/atoms/config.ts'
 import { globalConfig, loadGlobalConfig } from '@/utils/config/config.ts'
 import { DEFAULT_CONFIG } from '@/utils/constants/config.ts'
 import { sendMessage } from '@/utils/message.ts'
+import { isDarkMode } from '@/utils/tailwind.ts'
 import App from './app.tsx'
 import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from './atoms/auto-translate.ts'
 import '@/assets/tailwind/text-small.css'
 import '@/assets/tailwind/theme.css'
 
-document.documentElement.classList.toggle(
-  'dark',
-  localStorage.theme === 'dark'
-  || (!('theme' in localStorage)
-    && window.matchMedia('(prefers-color-scheme: dark)').matches),
-)
+document.documentElement.classList.toggle('dark', isDarkMode())
+document.documentElement.style.colorScheme = isDarkMode() ? 'dark' : 'light'
 
 function HydrateAtoms({
   initialValues,
