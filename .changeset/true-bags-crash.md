@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat: use color-schema to support native components
+fix: use color-scheme to support native components
