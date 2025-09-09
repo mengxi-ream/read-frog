@@ -1,59 +1,49 @@
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useLayoutEffect, useRef } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { configFields } from '@/utils/atoms/config'
+import AiButton from './ai-button'
 import { isTooltipVisibleAtom, selectionContentAtom } from './atom'
 import { TranslateButton, TranslatePopover } from './translate-button'
 
-const DOWNWARD_OFFSET_Y = 18
-const UPWARD_OFFSET_Y = -10
 const MARGIN = 25
-const SELECTION_DIRECTION_THRESHOLD = 5
 
 export function SelectionToolbar() {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
-  const tooltipPositionRef = useRef({ x: 0, y: 0 }) // use ref to avoid re-rendering
-  const mouseDownDocPositionRef = useRef({ x: 0, y: 0 }) // track mousedown position
-  const pendingPositionRef = useRef<{ x: number, y: number, isDownwardSelection: boolean } | null>(null) // store pending position calculation
+  const selectionRef = useRef<{ x: number, y: number } | null>(null) // store selection position
   const isDraggingFromTooltipRef = useRef(false) // track if dragging started from tooltip
   const [isTooltipVisible, setIsTooltipVisible] = useAtom(isTooltipVisibleAtom)
   const setSelectionContent = useSetAtom(selectionContentAtom)
   const selectionToolbar = useAtomValue(configFields.selectionToolbar)
 
-  // Calculate position after tooltip is rendered
-  useLayoutEffect(() => {
-    if (isTooltipVisible && pendingPositionRef.current && tooltipRef.current) {
-      const { x, y, isDownwardSelection } = pendingPositionRef.current
-      const tooltipWidth = tooltipRef.current.offsetWidth
-      const tooltipHeight = tooltipRef.current.offsetHeight
+  const updatePosition = useCallback(() => {
+    if (!isTooltipVisible || !tooltipRef.current || !selectionRef.current)
+      return
 
-      // Recalculate x position with actual tooltip width
-      const docX = x - tooltipWidth / 2
+    const scrollY = window.scrollY
+    const viewportHeight = window.innerHeight
+    const clientWidth = document.documentElement.clientWidth
+    const tooltipWidth = tooltipRef.current.offsetWidth
+    const tooltipHeight = tooltipRef.current.offsetHeight
 
-      // X-axis boundary checking with margin
-      const clientWidth = document.documentElement.clientWidth
-      const leftBoundary = 0
-      const rightBoundary = clientWidth - tooltipWidth - MARGIN
+    // calculate strict boundaries
+    const topBoundary = scrollY + MARGIN
+    const bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN
+    const leftBoundary = MARGIN
+    const rightBoundary = clientWidth - tooltipWidth - MARGIN
 
-      // Priority: ensure left boundary first, then try to satisfy right boundary
-      const finalX = Math.max(leftBoundary, Math.min(rightBoundary, docX))
-      let finalY = y
-      if (isDownwardSelection) {
-        finalY = y + DOWNWARD_OFFSET_Y
-      }
-      else {
-        finalY = y - tooltipHeight + UPWARD_OFFSET_Y
-      }
+    // calculate the position of the tooltip, but strictly limit it within the boundaries
+    const clampedX = Math.max(Math.min(rightBoundary, selectionRef.current.x), leftBoundary)
+    const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, selectionRef.current.y))
 
-      tooltipPositionRef.current = { x: finalX, y: finalY }
-
-      // Update position immediately
-      tooltipRef.current.style.left = `${finalX}px`
-      tooltipRef.current.style.top = `${finalY}px`
-
-      pendingPositionRef.current = null
-    }
+    // directly operate the DOM, avoid React re-rendering
+    tooltipRef.current.style.top = `${clampedY}px`
+    tooltipRef.current.style.left = `${clampedX}px`
   }, [isTooltipVisible])
+
+  useLayoutEffect(() => {
+    updatePosition()
+  }, [isTooltipVisible, updatePosition])
 
   useEffect(() => {
     let animationFrameId: number
@@ -80,11 +70,9 @@ export function SelectionToolbar() {
 
           const docX = e.clientX + scrollX
           const docY = e.clientY + scrollY
-          // allow a small threshold to avoid the selection direction is not downward
-          const isDownwardSelection = docY + SELECTION_DIRECTION_THRESHOLD >= mouseDownDocPositionRef.current.y
 
           // Store pending position for useLayoutEffect to process
-          pendingPositionRef.current = { x: docX, y: docY, isDownwardSelection }
+          selectionRef.current = { x: docX, y: docY }
           setIsTooltipVisible(true)
         }
       })
@@ -105,7 +93,6 @@ export function SelectionToolbar() {
       }
 
       setIsTooltipVisible(false)
-      mouseDownDocPositionRef.current = { x: e.clientX + window.scrollX, y: e.clientY + window.scrollY }
     }
 
     const handleSelectionChange = () => {
@@ -114,31 +101,6 @@ export function SelectionToolbar() {
       if (!selection || selection.toString().trim().length === 0) {
         setIsTooltipVisible(false)
       }
-    }
-
-    const updatePosition = () => {
-      if (!isTooltipVisible || !tooltipRef.current)
-        return
-
-      const scrollY = window.scrollY
-      const viewportHeight = window.innerHeight
-      const tooltipHeight = tooltipRef.current.offsetHeight // calculate height from component
-
-      // calculate strict boundaries
-      const topBoundary = scrollY + MARGIN
-      const bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN
-
-      // calculate the position of the tooltip, but strictly limit it within the boundaries
-      const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, tooltipPositionRef.current.y))
-
-      // also clamp X position to viewport boundaries
-      const viewportWidth = document.documentElement.clientWidth
-      const tooltipWidth = tooltipRef.current.offsetWidth
-      const clampedX = Math.max(MARGIN, Math.min(viewportWidth - tooltipWidth - MARGIN, tooltipPositionRef.current.x))
-
-      // directly operate the DOM, avoid React re-rendering
-      tooltipRef.current.style.left = `${clampedX}px`
-      tooltipRef.current.style.top = `${clampedY}px`
     }
 
     const handleScroll = () => {
@@ -165,7 +127,7 @@ export function SelectionToolbar() {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [isTooltipVisible, setSelectionContent, setIsTooltipVisible])
+  }, [isTooltipVisible, setSelectionContent, setIsTooltipVisible, updatePosition])
 
   return (
     <div ref={tooltipContainerRef}>
@@ -173,12 +135,9 @@ export function SelectionToolbar() {
         <div
           ref={tooltipRef}
           className="absolute z-[2147483647] bg-zinc-200 dark:bg-zinc-800 rounded-sm shadow-lg overflow-hidden flex items-center"
-          style={{
-            left: `${tooltipPositionRef.current.x}px`,
-            top: `${tooltipPositionRef.current.y}px`,
-          }}
         >
           <TranslateButton />
+          <AiButton />
         </div>
       )}
       <TranslatePopover />
