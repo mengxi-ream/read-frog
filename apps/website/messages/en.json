@@ -26,9 +26,7 @@
     "businessPartnership": "Business Partnership",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy",
-    "github": "Github",
-    "creatorIntro": "Hey Curious 👋 I'm {name}, the creator of {appName}. Follow my work on",
-    "or": "or"
+    "github": "Github"
   },
   "metadata": {
     "appName": "Read Frog",

@@ -5,7 +5,6 @@ import { setRequestLocale } from 'next-intl/server'
 import Image from 'next/image'
 import Link from 'next/link'
 import { Container } from '@/components/container'
-import { APP_NAME_LOCALE } from '@/lib/constants'
 
 const navigation = {
   contact: [
@@ -82,40 +81,6 @@ export default function Footer({
           </nav>
         </div>
 
-        <div className="mt-12 flex items-center gap-x-2">
-          <Image
-            src="/images/mengxi.jpg"
-            alt="MengXi"
-            width={28}
-            height={28}
-            className="rounded-full"
-          />
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {t('creatorIntro', {
-              name: 'MengXi',
-              appName: APP_NAME_LOCALE[locale],
-            })}
-            {' '}
-            <Link
-              href="https://x.com/intent/follow?screen_name=mengxi_ream"
-              target="_blank"
-              className="underline hover:text-gray-900 dark:hover:text-gray-100"
-            >
-              <strong>X</strong>
-            </Link>
-            {' '}
-            {t('or')}
-            {' '}
-            <Link
-              href="https://github.com/mengxi-ream"
-              target="_blank"
-              className="underline hover:text-gray-900 dark:hover:text-gray-100"
-            >
-              <strong>Github</strong>
-            </Link>
-            .
-          </p>
-        </div>
       </Container>
     </footer>
   )

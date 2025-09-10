@@ -26,9 +26,7 @@
     "businessPartnership": "商务合作",
     "termsOfService": "服务条款",
     "privacyPolicy": "隐私政策",
-    "github": "Github",
-    "creatorIntro": "你好，👋 我是 {name}，{appName}的作者。在",
-    "or": "或"
+    "github": "Github"
   },
   "metadata": {
     "appName": "陪读蛙",
