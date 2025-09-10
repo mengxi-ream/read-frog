@@ -10,14 +10,14 @@ const MARGIN = 25
 export function SelectionToolbar() {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
-  const selectionRef = useRef<{ x: number, y: number } | null>(null) // store selection position
+  const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position
   const isDraggingFromTooltipRef = useRef(false) // track if dragging started from tooltip
   const [isTooltipVisible, setIsTooltipVisible] = useAtom(isTooltipVisibleAtom)
   const setSelectionContent = useSetAtom(selectionContentAtom)
   const selectionToolbar = useAtomValue(configFields.selectionToolbar)
 
   const updatePosition = useCallback(() => {
-    if (!isTooltipVisible || !tooltipRef.current || !selectionRef.current)
+    if (!isTooltipVisible || !tooltipRef.current || !selectionPositionRef.current)
       return
 
     const scrollY = window.scrollY
@@ -33,8 +33,8 @@ export function SelectionToolbar() {
     const rightBoundary = clientWidth - tooltipWidth - MARGIN
 
     // calculate the position of the tooltip, but strictly limit it within the boundaries
-    const clampedX = Math.max(Math.min(rightBoundary, selectionRef.current.x), leftBoundary)
-    const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, selectionRef.current.y))
+    const clampedX = Math.max(Math.min(rightBoundary, selectionPositionRef.current.x), leftBoundary)
+    const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, selectionPositionRef.current.y))
 
     // directly operate the DOM, avoid React re-rendering
     tooltipRef.current.style.top = `${clampedY}px`
@@ -43,7 +43,7 @@ export function SelectionToolbar() {
 
   useLayoutEffect(() => {
     updatePosition()
-  }, [isTooltipVisible, updatePosition])
+  }, [updatePosition])
 
   useEffect(() => {
     let animationFrameId: number
@@ -72,7 +72,7 @@ export function SelectionToolbar() {
           const docY = e.clientY + scrollY
 
           // Store pending position for useLayoutEffect to process
-          selectionRef.current = { x: docX, y: docY }
+          selectionPositionRef.current = { x: docX, y: docY }
           setIsTooltipVisible(true)
         }
       })
