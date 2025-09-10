@@ -11,6 +11,9 @@
     "aiTranslation": "AI翻译与理解的强大功能",
     "poweredBy": "由领先的AI模型驱动"
   },
+  "comment": {
+    "from": "来自"
+  },
   "footer": {
     "description": "借助 AI 轻松深入地学习语言。",
     "copyright": "版权所有 © {year} - 保留所有权利。",

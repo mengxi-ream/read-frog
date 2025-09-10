@@ -11,6 +11,9 @@
     "aiTranslation": "AI Translation & Understanding",
     "poweredBy": "Powered by leading AI models"
   },
+  "comment": {
+    "from": "From"
+  },
   "footer": {
     "description": "Learn languages deeply and effortlessly with AI.",
     "copyright": "Copyright © {year} - All rights reserved.",
