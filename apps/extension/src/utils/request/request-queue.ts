@@ -1,4 +1,4 @@
-import deepmerge from 'deepmerge'
+import { deepmerge } from 'deepmerge-ts'
 import { requestQueueConfigSchema } from '@/types/config/translate'
 import { BinaryHeapPQ } from './priority-queue'
 
@@ -77,7 +77,7 @@ export class RequestQueue {
     if (parseConfigStatus.error) {
       throw new Error(parseConfigStatus.error.issues[0].message)
     }
-    this.options = deepmerge(this.options, options)
+    this.options = deepmerge(this.options, options) as QueueOptions
     if (options.capacity) {
       this.bucketTokens = options.capacity
       this.lastRefill = Date.now()

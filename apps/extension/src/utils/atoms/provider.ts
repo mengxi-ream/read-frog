@@ -75,7 +75,6 @@ export const providerConfigAtom = atomFamily((name: string) =>
   ),
 )
 
-// TODO: update all places use deepmerge-ts
 export function updateLLMProviderConfig(
   config: LLMTranslateProviderConfig,
   updates: PartialDeep<LLMTranslateProviderConfig>,

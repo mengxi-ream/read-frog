@@ -1,5 +1,5 @@
 import type { Config } from '@/types/config/config'
-import deepmerge from 'deepmerge'
+import { deepmergeCustom } from 'deepmerge-ts'
 import { atom } from 'jotai'
 import { selectAtom } from 'jotai/utils'
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from '../constants/config'
@@ -7,7 +7,10 @@ import { storageAdapter } from './storage-adapter'
 
 export const configAtom = atom<Config>(DEFAULT_CONFIG)
 
-const overwriteMerge = (_target: unknown[], source: unknown[]) => source
+const mergeWithArrayOverwrite = deepmergeCustom({
+  // Use the last (source) array
+  mergeArrays: values => values[values.length - 1],
+})
 
 let configPromise: Promise<Config> | null = null
 
@@ -29,7 +32,7 @@ export const writeConfigAtom = atom(
       set(configAtom, savedConfig)
     }
 
-    const next = deepmerge(get(configAtom), patch, { arrayMerge: overwriteMerge })
+    const next = mergeWithArrayOverwrite(get(configAtom), patch)
     set(configAtom, next)
     await storageAdapter.set(CONFIG_STORAGE_KEY, next)
   },

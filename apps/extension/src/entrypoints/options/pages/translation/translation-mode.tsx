@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@repo/ui/components/select'
-import deepmerge from 'deepmerge'
+import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { TRANSLATION_MODES } from '@/types/config/translate'
 import { configFields } from '@/utils/atoms/config'

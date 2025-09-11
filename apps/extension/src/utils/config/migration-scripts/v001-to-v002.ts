@@ -1,4 +1,4 @@
-import deepmerge from 'deepmerge'
+import { deepmerge } from 'deepmerge-ts'
 
 export function migrate(oldConfig: any): any {
   return deepmerge(oldConfig, {
