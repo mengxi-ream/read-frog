@@ -1,4 +1,4 @@
-export interface UserComment {
+export interface TestimonialItem {
   id: string
   name: string
   comment: string
@@ -14,7 +14,7 @@ enum FromPlatforms {
   X = 'X',
 }
 
-export const userComments: UserComment[] = [
+export const testimonialList: TestimonialItem[] = [
   {
     id: 'Xander Lowe',
     name: 'Xander Lowe',

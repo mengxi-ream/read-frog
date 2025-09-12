@@ -3,7 +3,7 @@ import { setRequestLocale } from 'next-intl/server'
 import { use } from 'react'
 import { Demo } from '@/components/hero/demo'
 import { Header } from '@/components/hero/header'
-import { UserComments } from '@/components/social/user-comments'
+import { Testimonial } from '@/components/social/testimonial'
 
 export default function HomePage({
   params,
@@ -17,7 +17,7 @@ export default function HomePage({
     <main className="flex flex-1 flex-col dark:bg-[#18181b]">
       <Header />
       <Demo />
-      <UserComments />
+      <Testimonial />
     </main>
   )
 }

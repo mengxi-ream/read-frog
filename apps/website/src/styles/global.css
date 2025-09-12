@@ -24,4 +24,12 @@
       transform: translateX(-100%);
     }
   }
+  @keyframes marquee-vertical {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
 }
