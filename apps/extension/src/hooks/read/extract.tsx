@@ -8,13 +8,13 @@ import { franc } from 'franc-min'
 import { useSetAtom } from 'jotai'
 import { flattenToParagraphs } from '@/entrypoints/side.content/utils/article'
 import { configFields } from '@/utils/atoms/config'
-import { isDontWalkIntoElement } from '@/utils/host/dom/filter'
+import { isDontWalkIntoButTranslateAsChildElement } from '@/utils/host/dom/filter'
 import { logger } from '@/utils/logger'
 
 function removeDummyNodes(root: Document) {
   const elements = root.querySelectorAll('*')
   elements.forEach((element) => {
-    if (element instanceof HTMLElement && isDontWalkIntoElement(element)) {
+    if (element instanceof HTMLElement && isDontWalkIntoButTranslateAsChildElement(element)) {
       element.remove()
     }
   })

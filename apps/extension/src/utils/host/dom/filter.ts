@@ -1,4 +1,5 @@
 import type { TransNode } from '@/types/dom'
+import { globalConfig } from '@/utils/config/config'
 import {
   BLOCK_ATTRIBUTE,
   BLOCK_CONTENT_CLASS,
@@ -7,7 +8,7 @@ import {
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from '@/utils/constants/dom-labels'
-import { FORCE_BLOCK_TAGS } from '@/utils/constants/dom-tags'
+import { FORCE_BLOCK_TAGS, INVALID_TRANSLATE_TAGS, MAIN_CONTENT_IGNORE_TAGS } from '@/utils/constants/dom-tags'
 
 export function isEditable(element: HTMLElement): boolean {
   const tag = element.tagName
@@ -79,18 +80,24 @@ export function isShallowBlockHTMLElement(element: HTMLElement): boolean {
   )
 }
 
-export function isDontWalkIntoElement(element: HTMLElement): boolean {
+export function isDontWalkIntoButTranslateAsChildElement(element: HTMLElement): boolean {
   const dontWalkClass = [NOTRANSLATE_CLASS, 'sr-only'].some(className =>
     element.classList.contains(className),
   )
 
+  const dontWalkAttr = element.getAttribute('translate') === 'no'
+
+  return dontWalkClass || dontWalkAttr
+}
+
+export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElement): boolean {
+  const dontWalkContent = globalConfig && globalConfig.translate.page.range !== 'all' && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
+  const dontWalkInvalidTag = INVALID_TRANSLATE_TAGS.has(element.tagName)
   const dontWalkCSS
     = window.getComputedStyle(element).display === 'none'
       || window.getComputedStyle(element).visibility === 'hidden'
 
-  const dontWalkAttr = element.getAttribute('translate') === 'no'
-
-  return dontWalkClass || dontWalkCSS || dontWalkAttr
+  return dontWalkContent || dontWalkInvalidTag || dontWalkCSS
 }
 
 export function isInlineTransNode(node: TransNode): boolean {

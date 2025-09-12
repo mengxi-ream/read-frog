@@ -229,6 +229,10 @@ export async function translateNodeTranslationOnlyMode(nodes: ChildNode[], walkI
       }
     }
 
+    const innerTextContent = transNodes.map(node => extractTextContent(node)).join(' ')
+    if (!innerTextContent)
+      return
+
     const cleanTextContent = (content: string): string => {
       if (!content)
         return content

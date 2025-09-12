@@ -1,6 +1,6 @@
 import { globalConfig } from '@/utils/config/config'
 import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
-import { isDontWalkIntoElement, isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
+import { isDontWalkIntoButTranslateAsChildElement, isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
 import { deepQueryTopLevelSelector } from '@/utils/host/dom/find'
 import { walkAndLabelElement } from '@/utils/host/dom/traversal'
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from '@/utils/host/translate/node-manipulation'
@@ -261,7 +261,7 @@ export class PageTranslationManager implements IPageTranslationManager {
    */
   private didChangeToWalkable(element: HTMLElement): boolean {
     const wasDontWalkInto = this.dontWalkIntoElementsCache.has(element)
-    const isDontWalkIntoNow = isDontWalkIntoElement(element)
+    const isDontWalkIntoNow = isDontWalkIntoButTranslateAsChildElement(element)
 
     // Update cache with current state
     if (isDontWalkIntoNow) {
@@ -281,7 +281,7 @@ export class PageTranslationManager implements IPageTranslationManager {
    * Initialize walkability state for an element and its descendants
    */
   private addDontWalkIntoElements(element: HTMLElement): void {
-    const dontWalkIntoElements = deepQueryTopLevelSelector(element, isDontWalkIntoElement)
+    const dontWalkIntoElements = deepQueryTopLevelSelector(element, isDontWalkIntoButTranslateAsChildElement)
     dontWalkIntoElements.forEach(el => this.dontWalkIntoElementsCache.add(el))
   }
 

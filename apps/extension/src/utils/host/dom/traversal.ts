@@ -1,5 +1,4 @@
 import type { TransNode } from '@/types/dom'
-import { globalConfig } from '@/utils/config/config'
 import {
   BLOCK_ATTRIBUTE,
   INLINE_ATTRIBUTE,
@@ -7,11 +6,8 @@ import {
   WALKED_ATTRIBUTE,
 } from '@/utils/constants/dom-labels'
 import {
-  INVALID_TRANSLATE_TAGS,
-  MAIN_CONTENT_IGNORE_TAGS,
-} from '@/utils/constants/dom-tags'
-import {
-  isDontWalkIntoElement,
+  isDontWalkIntoAndDontTranslateAsChildElement,
+  isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
   isIFrameElement,
   isShallowBlockHTMLElement,
@@ -28,9 +24,13 @@ export function extractTextContent(node: TransNode): string {
   // for the parent element we already walk and label, if we have a notranslate element inside this parent element,
   // we should extract the text content of the parent.
   // see this issue: https://github.com/mengxi-ream/read-frog/issues/249
-  // if (isDontWalkIntoElement(node)) {
+  // if (isDontWalkIntoButTranslateAsChildElement(node)) {
   //   return ''
   // }
+
+  if (isDontWalkIntoAndDontTranslateAsChildElement(node)) {
+    return ''
+  }
 
   const childNodes = Array.from(node.childNodes)
   return childNodes.reduce((text: string, child: Node): string => {
@@ -52,23 +52,15 @@ export function walkAndLabelElement(
   element: HTMLElement,
   walkId: string,
 ): 'isOrHasBlockNode' | 'isShallowInlineNode' | false {
-  if (isDontWalkIntoElement(element)) {
+  if (isDontWalkIntoButTranslateAsChildElement(element)) {
+    return false
+  }
+
+  if (isDontWalkIntoAndDontTranslateAsChildElement(element)) {
     return false
   }
 
   element.setAttribute(WALKED_ATTRIBUTE, walkId)
-
-  if (
-    globalConfig
-    && globalConfig.translate.page.range !== 'all'
-    && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
-  ) {
-    return false
-  }
-
-  if (INVALID_TRANSLATE_TAGS.has(element.tagName)) {
-    return false
-  }
 
   if (element.shadowRoot) {
     for (const child of element.shadowRoot.children) {
