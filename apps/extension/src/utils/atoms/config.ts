@@ -7,7 +7,7 @@ import { storageAdapter } from './storage-adapter'
 
 export const configAtom = atom<Config>(DEFAULT_CONFIG)
 
-const mergeWithArrayOverwrite = deepmergeCustom({
+export const mergeWithArrayOverwrite = deepmergeCustom({
   // Use the last (source) array
   mergeArrays: values => values[values.length - 1],
 })
