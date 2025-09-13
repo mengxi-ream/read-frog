@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.9.1
+
+### Patch Changes
+
+- [`e0e3be5`](https://github.com/mengxi-ream/read-frog/commit/e0e3be5d531f7edbe6a22e0ca7884b7372b2e0b2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: remove ai button since the feature is not completed
+
 ## 1.9.0
 
 ### Minor Changes
