@@ -1,0 +1,87 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  # Root dependencies
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"
+      
+  # Dependencies inside apps/
+  - package-ecosystem: "npm"
+    directory: "/apps/website"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"
+      
+  - package-ecosystem: "npm"
+    directory: "/apps/extension"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"  
+      
+  # Dependencies inside packages/
+  - package-ecosystem: "npm"
+    directory: "/packages/api"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"  
+      
+  - package-ecosystem: "npm"
+    directory: "/packages/eslint-config"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"  
+      
+  - package-ecosystem: "npm"
+    directory: "/packages/ui"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"  
+      
+  - package-ecosystem: "npm"
+    directory: "/packages/db"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"  
+      
+  - package-ecosystem: "npm"
+    directory: "/packages/auth"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07" 
+      
+  - package-ecosystem: "npm"
+    directory: "/packages/definitions"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"  
+      
+  - package-ecosystem: "npm"
+    directory: "/packages/typescript-config"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"
+      
+  # GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps) by Raj-G07"
