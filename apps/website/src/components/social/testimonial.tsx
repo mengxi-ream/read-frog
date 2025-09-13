@@ -2,6 +2,7 @@
 
 import type { TestimonialItem } from '@/utils/constants/testimonial-list'
 import { cn } from '@repo/ui/lib/utils'
+import { motion } from 'motion/react'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
 import { FromPlatforms, testimonialList } from '@/utils/constants/testimonial-list'
@@ -18,7 +19,14 @@ export function Testimonial() {
 
 function TestimonialCard({ testimonial }: { testimonial: TestimonialItem }) {
   return (
-    <div
+    <motion.div
+      initial={{ opacity: 0, y: 40 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      transition={{
+        ease: 'easeInOut',
+        duration: 0.8,
+        delay: 0.2,
+      }}
       className="break-inside-avoid h-fit mb-4 last:mb-0 rounded-xl border border-fd-border bg-fd-card/60 backdrop-blur p-6 flex flex-col gap-4"
     >
       <header className="flex items-center justify-between">
@@ -43,7 +51,7 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialItem }) {
       <p className="text-base text-fd-foreground/90 leading-relaxed">
         {testimonial.comment}
       </p>
-    </div>
+    </motion.div>
   )
 }
 
