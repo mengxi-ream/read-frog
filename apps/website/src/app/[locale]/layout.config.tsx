@@ -2,11 +2,11 @@ import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared'
 import type { Locale } from '@/i18n/routing'
 import { GithubInfo } from 'fumadocs-ui/components/github-info'
 import Image from 'next/image'
+import { ThemeToggle } from '@/components/toggle-theme'
 import { UserAccount } from '@/components/user-account'
 import { env } from '@/env'
 import { APP_NAME_LOCALE, NAV_ITEMS_LOCALE } from '@/lib/constants'
 import { i18n } from '@/lib/i18n'
-
 /**
  * Shared layout configurations
  *
@@ -25,6 +25,9 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
           {APP_NAME_LOCALE[locale]}
         </>
       ),
+    },
+    themeSwitch: {
+      component: <ThemeToggle />,
     },
   }
 }

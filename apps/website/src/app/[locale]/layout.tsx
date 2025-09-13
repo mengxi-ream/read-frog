@@ -99,21 +99,26 @@ export default async function RootLayout({
     <html lang={locale} className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
         <NextIntlClientProvider>
-          <RootProvider
-            i18n={{
-              locale,
-              // available languages
-              locales: localesInUI,
-              // translations for UI
-              translations: locale !== 'en' ? { zh }[locale] : undefined,
-            }}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
           >
-            <ThemeProvider>
+            <RootProvider
+              i18n={{
+                locale,
+                // available languages
+                locales: localesInUI,
+                // translations for UI
+                translations: locale !== 'en' ? { zh }[locale] : undefined,
+              }}
+            >
               <TRPCReactProvider>
                 {children}
               </TRPCReactProvider>
-            </ThemeProvider>
-          </RootProvider>
+            </RootProvider>
+          </ThemeProvider>
         </NextIntlClientProvider>
         <Analytics />
         {/* <SpeedInsights /> */}
