@@ -1,5 +1,11 @@
 # @read-frog/website
 
+## 1.0.7
+
+### Patch Changes
+
+- [#443](https://github.com/mengxi-ream/read-frog/pull/443) [`97c0f37`](https://github.com/mengxi-ream/read-frog/commit/97c0f37fab323feaa99c80c659100ffe99d91bda) Thanks [@AprilYZL](https://github.com/AprilYZL)! - feat: added sitemap.xml
+
 ## 1.0.6
 
 ### Patch Changes
