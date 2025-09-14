@@ -1,4 +1,4 @@
-import CryptoJS from 'crypto-js'
+import { sha256 } from 'js-sha256'
 
 /**
  * Generate a SHA256 hash of multiple text parameters
@@ -16,5 +16,5 @@ export function Sha256Hex(...texts: string[]): string {
 
   // prevent parameter boundary ambiguity, e.g. 'a|bc' and 'ab|c' are different
   const combined = texts.join('|')
-  return CryptoJS.SHA256(combined).toString()
+  return sha256(combined)
 }
