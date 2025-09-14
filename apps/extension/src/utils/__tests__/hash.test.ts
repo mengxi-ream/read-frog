@@ -18,4 +18,8 @@ describe('test Sha256Hex', () => {
     const result2 = Sha256Hex('ab', 'c')
     expect(result1).not.toBe(result2)
   })
+
+  it('should throw error when no parameters provided', () => {
+    expect(() => Sha256Hex()).toThrow('At least one text parameter is required')
+  })
 })
