@@ -255,12 +255,26 @@ function buildModelSchema<M extends Record<string, ModelTuple>>(models: M) {
   read config
   ────────────────────────────── */
 
-export const readModelsSchema = buildModelSchema(READ_PROVIDER_MODELS)
+const { openaiCompatible: _, ...readModelsWithoutOpenaiCompatible } = READ_PROVIDER_MODELS
+export const readModelsSchema = buildModelSchema(readModelsWithoutOpenaiCompatible).extend({
+  openaiCompatible: z.object({
+    model: z.enum(READ_PROVIDER_MODELS.openaiCompatible),
+    isCustomModel: z.literal(true),
+    customModel: z.string().nullable(),
+  }),
+})
 export type ReadModels = z.infer<typeof readModelsSchema>
 
 /* ──────────────────────────────
   translate config
   ────────────────────────────── */
 
-export const translateLLMModelsSchema = buildModelSchema(TRANSLATE_PROVIDER_MODELS)
+const { openaiCompatible: __, ...translateModelsWithoutOpenaiCompatible } = TRANSLATE_PROVIDER_MODELS
+export const translateLLMModelsSchema = buildModelSchema(translateModelsWithoutOpenaiCompatible).extend({
+  openaiCompatible: z.object({
+    model: z.enum(TRANSLATE_PROVIDER_MODELS.openaiCompatible),
+    isCustomModel: z.literal(true),
+    customModel: z.string().nullable(),
+  }),
+})
 export type TranslateLLMModels = z.infer<typeof translateLLMModelsSchema>

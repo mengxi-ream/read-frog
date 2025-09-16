@@ -34,7 +34,7 @@ export const DEFAULT_READ_MODELS: ReadModels = {
   },
   openaiCompatible: {
     model: 'use-custom-model',
-    isCustomModel: false,
+    isCustomModel: true,
     customModel: null,
   },
 }
@@ -76,7 +76,7 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
   },
   openaiCompatible: {
     model: 'use-custom-model',
-    isCustomModel: false,
+    isCustomModel: true,
     customModel: null,
   },
 }
