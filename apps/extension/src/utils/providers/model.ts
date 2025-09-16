@@ -3,6 +3,7 @@ import { storage } from '#imports'
 import { createDeepSeek } from '@ai-sdk/deepseek'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { createOpenAI } from '@ai-sdk/openai'
+import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { getLLMTranslateProvidersConfig, getProviderConfigById } from '../config/helpers'
 import { CONFIG_STORAGE_KEY } from '../constants/config'
 
@@ -10,12 +11,14 @@ interface ProviderFactoryMap {
   openai: typeof createOpenAI
   deepseek: typeof createDeepSeek
   gemini: typeof createGoogleGenerativeAI
+  openaiCompatible: typeof createOpenAICompatible
 }
 
 const CREATE_AI_MAPPER: ProviderFactoryMap = {
   openai: createOpenAI,
   deepseek: createDeepSeek,
   gemini: createGoogleGenerativeAI,
+  openaiCompatible: createOpenAICompatible,
 }
 
 async function getLanguageModelById(providerId: string, modelType: 'read' | 'translate') {
@@ -30,10 +33,16 @@ async function getLanguageModelById(providerId: string, modelType: 'read' | 'tra
     throw new Error(`Provider ${providerId} not found`)
   }
 
-  const provider = CREATE_AI_MAPPER[providerConfig.provider]({
-    baseURL: providerConfig.baseURL,
-    apiKey: providerConfig.apiKey,
-  })
+  const provider = providerConfig.provider === 'openaiCompatible'
+    ? CREATE_AI_MAPPER[providerConfig.provider]({
+        name: providerConfig.name,
+        baseURL: providerConfig.baseURL,
+        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+      })
+    : CREATE_AI_MAPPER[providerConfig.provider]({
+        ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
+        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+      })
 
   const modelConfig = providerConfig.models[modelType]
   const modelId = modelConfig.isCustomModel

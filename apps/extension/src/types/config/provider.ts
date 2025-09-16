@@ -6,11 +6,13 @@ export const READ_PROVIDER_MODELS = {
   openai: ['gpt-5-mini', 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-5', 'gpt-4.1', 'gpt-4o'],
   deepseek: ['deepseek-chat'],
   gemini: ['gemini-2.5-pro', 'gemini-2.5-flash'],
+  openaiCompatible: ['use-custom-model'],
 } as const
 export const TRANSLATE_PROVIDER_MODELS = {
   openai: ['gpt-5-mini', 'gpt-4.1-mini', 'gpt-4o-mini', 'gpt-5-nano', 'gpt-4.1-nano', 'gpt-5', 'gpt-4.1', 'gpt-4o'],
   deepseek: ['deepseek-chat'],
   gemini: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-1.5-pro', 'gemini-1.5-flash', 'gemini-2.0-flash-exp'],
+  openaiCompatible: ['use-custom-model'],
 } as const
 export const NON_API_TRANSLATE_PROVIDERS = ['google', 'microsoft'] as const
 export const NON_API_TRANSLATE_PROVIDERS_MAP: Record<typeof NON_API_TRANSLATE_PROVIDERS[number], string> = {
@@ -26,7 +28,7 @@ export const THINKING_MODELS = ['gemini-2.5-pro', 'gemini-1.5-pro'] as const
   ────────────────────────────── */
 
 // read provider names
-export const READ_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
+export const READ_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini', 'openaiCompatible'] as const satisfies Readonly<
   (keyof typeof READ_PROVIDER_MODELS)[]
 >
 export type ReadProviderNames = typeof READ_PROVIDER_NAMES[number]
@@ -38,7 +40,7 @@ export function isReadProviderConfig(config: ProviderConfig): config is ReadProv
 }
 
 // translate provider names
-export const TRANSLATE_PROVIDER_NAMES = ['google', 'microsoft', 'deeplx', 'openai', 'deepseek', 'gemini'] as const satisfies Readonly<
+export const TRANSLATE_PROVIDER_NAMES = ['google', 'microsoft', 'deeplx', 'openai', 'deepseek', 'gemini', 'openaiCompatible'] as const satisfies Readonly<
   (keyof typeof TRANSLATE_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
 >
 export type TranslateProviderNames = typeof TRANSLATE_PROVIDER_NAMES[number]
@@ -47,7 +49,7 @@ export function isTranslateProvider(provider: TranslateProviderNames): provider 
 }
 
 // translate provider names that support LLM
-export const LLM_TRANSLATE_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini'] as const satisfies Readonly<
+export const LLM_TRANSLATE_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini', 'openaiCompatible'] as const satisfies Readonly<
   (keyof typeof TRANSLATE_PROVIDER_MODELS)[]
 >
 export type LLMTranslateProviderNames = typeof LLM_TRANSLATE_PROVIDER_NAMES[number]
@@ -58,7 +60,7 @@ export function isLLMTranslateProviderConfig(config: ProviderConfig): config is 
   return isLLMTranslateProvider(config.provider)
 }
 
-export const API_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini', 'deeplx'] as const satisfies Readonly<
+export const API_PROVIDER_NAMES = ['deeplx', 'openai', 'deepseek', 'gemini', 'openaiCompatible'] as const satisfies Readonly<
   (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS | 'deeplx')[]
 >
 export type APIProviderNames = typeof API_PROVIDER_NAMES[number]
@@ -89,7 +91,7 @@ export function isNonAPIProviderConfig(config: ProviderConfig): config is NonAPI
 }
 
 // all provider names
-export const ALL_PROVIDER_NAMES = ['openai', 'deepseek', 'google', 'microsoft', 'deeplx', 'gemini'] as const satisfies Readonly<
+export const ALL_PROVIDER_NAMES = ['google', 'microsoft', 'deeplx', 'openai', 'deepseek', 'gemini', 'openaiCompatible'] as const satisfies Readonly<
   (typeof READ_PROVIDER_NAMES[number] | typeof TRANSLATE_PROVIDER_NAMES[number])[]
 >
 export type AllProviderNames = typeof ALL_PROVIDER_NAMES[number]
@@ -107,17 +109,31 @@ function createProviderModelsSchema<T extends LLMTranslateProviderNames | ReadPr
   const readModels = isReadProvider(provider) ? READ_PROVIDER_MODELS[provider] : []
   const translateModels = isLLMTranslateProvider(provider) ? TRANSLATE_PROVIDER_MODELS[provider] : []
 
+  const readModelSchema = z.object({
+    model: z.enum(readModels),
+    isCustomModel: z.boolean(),
+    customModel: z.string().nullable(),
+  })
+  const translateModelSchema = z.object({
+    model: z.enum(translateModels),
+    isCustomModel: z.boolean(),
+    customModel: z.string().nullable(),
+  })
+
+  if (provider === 'openaiCompatible') {
+    return z.object({
+      read: readModelSchema.extend({
+        isCustomModel: z.literal(true),
+      }),
+      translate: translateModelSchema.extend({
+        isCustomModel: z.literal(true),
+      }),
+    })
+  }
+
   return z.object({
-    read: z.object({
-      model: z.enum(readModels),
-      isCustomModel: z.boolean(),
-      customModel: z.string().nullable(),
-    }),
-    translate: z.object({
-      model: z.enum(translateModels),
-      isCustomModel: z.boolean(),
-      customModel: z.string().nullable(),
-    }),
+    read: readModelSchema,
+    translate: translateModelSchema,
   })
 }
 
@@ -146,6 +162,11 @@ const llmProviderConfigSchemaList = [
   baseAPIProviderConfigSchema.extend({
     provider: z.literal('gemini'),
     models: createProviderModelsSchema<'gemini'>('gemini'),
+  }),
+  baseAPIProviderConfigSchema.extend({
+    provider: z.literal('openaiCompatible'),
+    baseURL: z.url(), // required for openaiCompatible
+    models: createProviderModelsSchema<'openaiCompatible'>('openaiCompatible'),
   }),
 ] as const
 
@@ -184,7 +205,6 @@ export const providersConfigSchema = z.array(providerConfigItemSchema).superRefi
       idSet.add(provider.id)
     })
 
-    // TODO: test this on the UI
     const nameSet = new Set<string>()
     providers.forEach((provider, index) => {
       if (nameSet.has(provider.name)) {
@@ -211,7 +231,7 @@ export type ReadProviderConfig = Extract<ProviderConfig, { provider: ReadProvide
   read or translate config helpers
   ────────────────────────────── */
 
-type ModelTuple = readonly [string, ...string[]] // 至少一个元素才能给 z.enum
+type ModelTuple = readonly string[] // 至少一个元素才能给 z.enum
 function providerConfigSchema<T extends ModelTuple>(models: T) {
   return z.object({
     model: z.enum(models),

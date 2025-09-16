@@ -32,6 +32,11 @@ export const DEFAULT_READ_MODELS: ReadModels = {
     isCustomModel: false,
     customModel: null,
   },
+  openaiCompatible: {
+    model: 'use-custom-model',
+    isCustomModel: false,
+    customModel: null,
+  },
 }
 
 export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
@@ -47,6 +52,11 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
   },
   gemini: {
     model: 'gemini-1.5-flash',
+    isCustomModel: false,
+    customModel: null,
+  },
+  openaiCompatible: {
+    model: 'use-custom-model',
     isCustomModel: false,
     customModel: null,
   },
@@ -180,6 +190,10 @@ export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: string, name: stri
     gemini: {
       logo: getLobeIconsCDNUrl('gemini-color'),
       name: 'Gemini',
+    },
+    openaiCompatible: {
+      logo: getLobeIconsCDNUrl('openai'),
+      name: 'OpenAI Compatible',
     },
   }
 
