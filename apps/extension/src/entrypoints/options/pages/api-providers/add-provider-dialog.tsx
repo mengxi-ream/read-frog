@@ -1,6 +1,6 @@
 import type { APIProviderConfig, APIProviderNames } from '@/types/config/provider'
 import { Button } from '@repo/ui/components/button'
-import { DialogContent, DialogHeader, DialogTitle } from '@repo/ui/components/dialog'
+import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@repo/ui/components/dialog'
 import { useAtom } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
 import { API_PROVIDER_NAMES } from '@/types/config/provider'
@@ -37,6 +37,9 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
     <DialogContent className="md:max-w-xl lg:max-w-2xl">
       <DialogHeader>
         <DialogTitle>Add New Provider</DialogTitle>
+        <DialogDescription>
+          Choose an API provider to add to your configuration.
+        </DialogDescription>
       </DialogHeader>
       <div className="grid gap-2 py-4">
         {API_PROVIDER_NAMES.map(providerType => (

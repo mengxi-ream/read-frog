@@ -7,7 +7,7 @@ export function InputField(
   { formForSubmit, label, ...props }:
   { formForSubmit: { handleSubmit: () => void }, label: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>,
 ) {
-  const field = useFieldContext<string>()
+  const field = useFieldContext<string | undefined>()
   const errors = useStore(field.store, state => state.meta.errors)
   const isValid = useStore(field.store, state => state.meta.isValid)
 
@@ -18,10 +18,10 @@ export function InputField(
     >
       <Input
         id={field.name}
-        value={field.state.value}
+        value={field.state.value ?? ''}
         onBlur={field.handleBlur}
         onChange={(e) => {
-          field.handleChange(e.target.value)
+          field.handleChange(e.target.value === '' ? undefined : e.target.value)
           void formForSubmit.handleSubmit()
         }}
         aria-invalid={!isValid}

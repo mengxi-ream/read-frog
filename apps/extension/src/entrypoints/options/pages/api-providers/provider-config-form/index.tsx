@@ -21,9 +21,6 @@ export function ProviderConfigForm() {
   const form = useAppForm({
     ...specificFormOpts,
     onSubmit: async ({ value }) => {
-      if (value.baseURL === '') {
-        value.baseURL = undefined
-      }
       void setProviderConfig(value)
     },
   })
