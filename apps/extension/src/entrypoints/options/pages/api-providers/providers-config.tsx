@@ -6,7 +6,7 @@ import { Dialog, DialogTrigger } from '@repo/ui/components/dialog'
 import { Switch } from '@repo/ui/components/switch'
 import { cn } from '@repo/ui/lib/utils'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import ProviderIcon from '@/components/provider-icon'
 import { configFields } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
@@ -37,9 +37,44 @@ function ProviderCardList() {
   const providersConfig = useAtomValue(configFields.providersConfig)
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
+  const [canScroll, setCanScroll] = useState(false)
+  const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const updateScrollState = () => {
+      const container = scrollContainerRef.current
+      if (container) {
+        const canScrollDown = container.scrollHeight > container.clientHeight
+        const isAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 1
+        setCanScroll(canScrollDown)
+        setIsScrolledToBottom(isAtBottom)
+      }
+    }
+
+    updateScrollState()
+  }, [apiProvidersConfig])
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const container = scrollContainerRef.current
+      if (container) {
+        const canScrollDown = container.scrollHeight > container.clientHeight
+        const isAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 1
+        setCanScroll(canScrollDown)
+        setIsScrolledToBottom(isAtBottom)
+      }
+    }
+
+    const container = scrollContainerRef.current
+    if (container) {
+      container.addEventListener('scroll', handleScroll)
+      return () => container.removeEventListener('scroll', handleScroll)
+    }
+  }, [])
 
   return (
-    <div className="w-40 lg:w-52 flex flex-col gap-4">
+    <div className="w-40 lg:w-52 flex flex-col gap-4 max-h-[500px] relative">
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogTrigger asChild>
           <Button
@@ -55,9 +90,19 @@ function ProviderCardList() {
         </DialogTrigger>
         <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
       </Dialog>
-      {apiProvidersConfig.map(providerConfig => (
-        <ProviderCard key={providerConfig.name} providerConfig={providerConfig} />
-      ))}
+      <div
+        ref={scrollContainerRef}
+        className="flex flex-col gap-2 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+      >
+        {apiProvidersConfig.map(providerConfig => (
+          <ProviderCard key={providerConfig.name} providerConfig={providerConfig} />
+        ))}
+      </div>
+      {canScroll && !isScrolledToBottom && (
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent flex items-center justify-center">
+          <Icon icon="tabler:chevron-down" className="size-4 text-muted-foreground animate-bounce" />
+        </div>
+      )}
     </div>
   )
 }
