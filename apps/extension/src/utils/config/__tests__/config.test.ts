@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/config'
+import { DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/providers'
 import { getObjectWithoutAPIKeys, hasAPIKey } from '../config'
 import { LATEST_SCHEMA_VERSION } from '../migration'
 

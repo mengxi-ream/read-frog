@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_DEEPLX_CONFIG } from '@/utils/constants/config'
+import { DEFAULT_DEEPLX_CONFIG } from '@/utils/constants/providers'
 import { deeplxTranslate, googleTranslate, microsoftTranslate } from '../../api'
 
 describe('googleTranslate', () => {

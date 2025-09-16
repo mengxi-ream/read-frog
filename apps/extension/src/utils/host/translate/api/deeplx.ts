@@ -1,6 +1,6 @@
 import type { LangCodeISO6391 } from '@repo/definitions'
 import type { PureAPIProviderConfig } from '@/types/config/provider'
-import { DEFAULT_DEEPLX_BASE_URL } from '@/utils/constants/config'
+import { DEFAULT_DEEPLX_BASE_URL } from '@/utils/constants/providers'
 import { sendMessage } from '@/utils/message'
 
 export async function deeplxTranslate(

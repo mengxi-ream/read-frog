@@ -31,8 +31,9 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import ReadProviderSelector from '@/components/provider/read-provider-selector'
 import { configFields } from '@/utils/atoms/config'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
-import { READ_PROVIDER_ITEMS } from '@/utils/constants/config'
+import { READ_PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { DOWNLOAD_FILE_ITEMS } from '@/utils/constants/side'
+import { isDarkMode } from '@/utils/tailwind'
 import { shadowWrapper } from '../..'
 import { isSideOpenAtom } from '../../atoms'
 import downloader from '../../utils/downloader'
@@ -54,7 +55,7 @@ export function TopBar({ className }: { className?: string }) {
           hideChevron
           customTrigger={(
             <img
-              src={READ_PROVIDER_ITEMS[readProviderConfig.provider].logo}
+              src={READ_PROVIDER_ITEMS[readProviderConfig.provider].logo(isDarkMode())}
               alt={readConfig.providerId}
               className="size-4 p-0.5 bg-white rounded-full"
             />
