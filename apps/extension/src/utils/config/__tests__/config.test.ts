@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/providers'
+import { DEFAULT_PROVIDER_CONFIG_LIST } from '@/utils/constants/providers'
 import { getObjectWithoutAPIKeys, hasAPIKey } from '../config'
 import { LATEST_SCHEMA_VERSION } from '../migration'
 
@@ -18,7 +18,7 @@ describe('config utilities', () => {
     }
 
     it('should remove apiKey from OpenAI provider config', () => {
-      const openaiConfigFromConstants = DEFAULT_PROVIDER_CONFIG.find(config => config.provider === 'openai')!
+      const openaiConfigFromConstants = DEFAULT_PROVIDER_CONFIG_LIST.find(config => config.provider === 'openai')!
       const openaiConfigWithApiKey = {
         ...openaiConfigFromConstants,
         apiKey: 'sk-1234567890abcdef',
@@ -34,7 +34,7 @@ describe('config utilities', () => {
     })
 
     it('should remove apiKey from DeepSeek provider config', () => {
-      const deepseekConfigFromConstants = DEFAULT_PROVIDER_CONFIG.find(config => config.provider === 'deepseek')!
+      const deepseekConfigFromConstants = DEFAULT_PROVIDER_CONFIG_LIST.find(config => config.provider === 'deepseek')!
       const deepseekConfigWithApiKey = {
         ...deepseekConfigFromConstants,
         apiKey: 'sk-deepseek-123',

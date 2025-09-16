@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_DEEPLX_CONFIG } from '@/utils/constants/providers'
+import { DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/providers'
 import { deeplxTranslate, googleTranslate, microsoftTranslate } from '../../api'
 
 describe('googleTranslate', () => {
@@ -26,11 +26,11 @@ describe('microsoftTranslate', () => {
 
 describe('deeplxTranslate', () => {
   it('should translate text', async () => {
-    const result = await deeplxTranslate('Library', 'en', 'zh', DEFAULT_DEEPLX_CONFIG)
+    const result = await deeplxTranslate('Library', 'en', 'zh', DEFAULT_PROVIDER_CONFIG.deeplx)
     expect(result).toBe('图书馆')
   })
   it('should translate text to traditional chinese', async () => {
-    const result = await deeplxTranslate('Library', 'en', 'zh-TW', DEFAULT_DEEPLX_CONFIG)
+    const result = await deeplxTranslate('Library', 'en', 'zh-TW', DEFAULT_PROVIDER_CONFIG.deeplx)
     expect(result).toBe('圖書館')
   })
 })

@@ -1,4 +1,4 @@
-import type { AllProviderNames, ProvidersConfig, PureAPIProviderConfig, ReadModels, TranslateLLMModels } from '@/types/config/provider'
+import type { AllProviderNames, ProviderConfig, ProvidersConfig, ReadModels, TranslateLLMModels } from '@/types/config/provider'
 import { i18n } from '#i18n'
 import deeplxLogoDark from '@/assets/providers/deeplx-dark.svg'
 import deeplxLogoLight from '@/assets/providers/deeplx-light.svg'
@@ -54,34 +54,22 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
   },
 }
 
-export const DEFAULT_DEEPLX_BASE_URL = 'https://deeplx.vercel.app'
-
-export const DEFAULT_DEEPLX_CONFIG: PureAPIProviderConfig = {
-  id: 'deeplx-default',
-  name: 'DeepLX',
-  description: i18n.t('options.apiProviders.providers.description.deeplx'),
-  enabled: true,
-  provider: 'deeplx',
-  baseURL: DEFAULT_DEEPLX_BASE_URL,
-}
-
-export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = [
-  {
+export const DEFAULT_PROVIDER_CONFIG = {
+  google: {
     id: 'google-default',
     name: 'Google Translate',
     enabled: true,
     provider: 'google',
   },
-  {
+  microsoft: {
     id: 'microsoft-default',
     name: 'Microsoft Translator',
     enabled: true,
     provider: 'microsoft',
   },
-  {
+  openai: {
     id: 'openai-default',
     name: 'OpenAI',
-    description: i18n.t('options.apiProviders.providers.description.openai'),
     enabled: true,
     provider: 'openai',
     models: {
@@ -89,10 +77,9 @@ export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = [
       translate: DEFAULT_TRANSLATE_MODELS.openai,
     },
   },
-  {
+  deepseek: {
     id: 'deepseek-default',
     name: 'DeepSeek',
-    description: i18n.t('options.apiProviders.providers.description.deepseek'),
     enabled: true,
     provider: 'deepseek',
     models: {
@@ -100,10 +87,9 @@ export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = [
       translate: DEFAULT_TRANSLATE_MODELS.deepseek,
     },
   },
-  {
+  gemini: {
     id: 'gemini-default',
     name: 'Gemini',
-    description: i18n.t('options.apiProviders.providers.description.gemini'),
     enabled: true,
     provider: 'gemini',
     models: {
@@ -111,7 +97,35 @@ export const DEFAULT_PROVIDER_CONFIG: ProvidersConfig = [
       translate: DEFAULT_TRANSLATE_MODELS.gemini,
     },
   },
-  DEFAULT_DEEPLX_CONFIG,
+  openaiCompatible: {
+    id: 'openai-compatible-default',
+    name: 'OpenAI Compatible',
+    enabled: true,
+    provider: 'openaiCompatible',
+    baseURL: 'https://api.example.com/v1',
+    models: {
+      read: DEFAULT_READ_MODELS.openaiCompatible,
+      translate: DEFAULT_TRANSLATE_MODELS.openaiCompatible,
+    },
+  },
+  deeplx: {
+    id: 'deeplx-default',
+    name: 'DeepLX',
+    description: i18n.t('options.apiProviders.providers.description.deeplx'),
+    enabled: true,
+    provider: 'deeplx',
+    baseURL: 'https://deeplx.vercel.app',
+  },
+} as const satisfies Record<AllProviderNames, ProviderConfig>
+
+export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
+  DEFAULT_PROVIDER_CONFIG.google,
+  DEFAULT_PROVIDER_CONFIG.microsoft,
+  DEFAULT_PROVIDER_CONFIG.openai,
+  DEFAULT_PROVIDER_CONFIG.deepseek,
+  DEFAULT_PROVIDER_CONFIG.gemini,
+  // DEFAULT_PROVIDER_CONFIG.openaiCompatible,
+  DEFAULT_PROVIDER_CONFIG.deeplx,
 ]
 
 export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: (isDark: boolean) => string, name: string }>

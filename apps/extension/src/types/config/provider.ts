@@ -60,7 +60,7 @@ export function isLLMTranslateProviderConfig(config: ProviderConfig): config is 
   return isLLMTranslateProvider(config.provider)
 }
 
-export const API_PROVIDER_NAMES = ['deeplx', 'openai', 'deepseek', 'gemini', 'openaiCompatible'] as const satisfies Readonly<
+export const API_PROVIDER_NAMES = ['openai', 'deepseek', 'gemini', 'openaiCompatible', 'deeplx'] as const satisfies Readonly<
   (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS | 'deeplx')[]
 >
 export type APIProviderNames = typeof API_PROVIDER_NAMES[number]

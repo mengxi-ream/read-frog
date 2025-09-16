@@ -1,6 +1,6 @@
 import type { LangCodeISO6391 } from '@repo/definitions'
 import type { PureAPIProviderConfig } from '@/types/config/provider'
-import { DEFAULT_DEEPLX_BASE_URL } from '@/utils/constants/providers'
+import { DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/providers'
 import { sendMessage } from '@/utils/message'
 
 export async function deeplxTranslate(
@@ -10,7 +10,7 @@ export async function deeplxTranslate(
   providerConfig: PureAPIProviderConfig,
   options?: { forceBackgroundFetch?: boolean },
 ): Promise<string> {
-  const baseURL = providerConfig.baseURL ?? DEFAULT_DEEPLX_BASE_URL
+  const baseURL = providerConfig.baseURL ?? DEFAULT_PROVIDER_CONFIG.deeplx.baseURL
   const apiKey = providerConfig.apiKey
 
   if (!baseURL) {

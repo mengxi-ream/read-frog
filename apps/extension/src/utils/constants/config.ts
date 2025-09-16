@@ -1,7 +1,7 @@
 import type { Config } from '@/types/config/config'
 import type { PageTranslateRange } from '@/types/config/translate'
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
-import { DEFAULT_PROVIDER_CONFIG } from './providers'
+import { DEFAULT_PROVIDER_CONFIG_LIST } from './providers'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
 import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
 import { DEFAULT_TRANSLATION_NODE_STYLE } from './translation-node-style'
@@ -18,7 +18,7 @@ export const DEFAULT_CONFIG: Config = {
     targetCode: 'cmn',
     level: 'intermediate',
   },
-  providersConfig: DEFAULT_PROVIDER_CONFIG,
+  providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   read: {
     providerId: 'openai-default',
   },
