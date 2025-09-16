@@ -39,6 +39,25 @@ export const DEFAULT_READ_MODELS: ReadModels = {
   },
 }
 
+// const testLLMConfig: LLMTranslateProviderConfig = {
+//   id: 'openai-default',
+//   name: 'OpenAI',
+//   enabled: true,
+//   provider: 'openaiCompatible',
+//   models: {
+//     read: {
+//       model: 'use-custom-model',
+//       isCustomModel: false,
+//       customModel: null,
+//     },
+//     translate: {
+//       model: 'use-custom-model',
+//       isCustomModel: false,
+//       customModel: null,
+//     },
+//   },
+// }
+
 export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
   openai: {
     model: 'gpt-4.1-mini',

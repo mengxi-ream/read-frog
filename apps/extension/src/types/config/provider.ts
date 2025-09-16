@@ -109,31 +109,17 @@ function createProviderModelsSchema<T extends LLMTranslateProviderNames | ReadPr
   const readModels = isReadProvider(provider) ? READ_PROVIDER_MODELS[provider] : []
   const translateModels = isLLMTranslateProvider(provider) ? TRANSLATE_PROVIDER_MODELS[provider] : []
 
-  const readModelSchema = z.object({
-    model: z.enum(readModels),
-    isCustomModel: z.boolean(),
-    customModel: z.string().nullable(),
-  })
-  const translateModelSchema = z.object({
-    model: z.enum(translateModels),
-    isCustomModel: z.boolean(),
-    customModel: z.string().nullable(),
-  })
-
-  if (provider === 'openaiCompatible') {
-    return z.object({
-      read: readModelSchema.extend({
-        isCustomModel: z.literal(true),
-      }),
-      translate: translateModelSchema.extend({
-        isCustomModel: z.literal(true),
-      }),
-    })
-  }
-
   return z.object({
-    read: readModelSchema,
-    translate: translateModelSchema,
+    read: z.object({
+      model: z.enum(readModels),
+      isCustomModel: z.boolean(),
+      customModel: z.string().nullable(),
+    }),
+    translate: z.object({
+      model: z.enum(translateModels),
+      isCustomModel: z.boolean(),
+      customModel: z.string().nullable(),
+    }),
   })
 }
 
@@ -166,7 +152,18 @@ const llmProviderConfigSchemaList = [
   baseAPIProviderConfigSchema.extend({
     provider: z.literal('openaiCompatible'),
     baseURL: z.url(), // required for openaiCompatible
-    models: createProviderModelsSchema<'openaiCompatible'>('openaiCompatible'),
+    models: z.object({
+      read: z.object({
+        model: z.enum(READ_PROVIDER_MODELS.openaiCompatible),
+        isCustomModel: z.literal(true),
+        customModel: z.string().nullable(),
+      }),
+      translate: z.object({
+        model: z.enum(TRANSLATE_PROVIDER_MODELS.openaiCompatible),
+        isCustomModel: z.literal(true),
+        customModel: z.string().nullable(),
+      }),
+    }),
   }),
 ] as const
 
@@ -231,7 +228,7 @@ export type ReadProviderConfig = Extract<ProviderConfig, { provider: ReadProvide
   read or translate config helpers
   ────────────────────────────── */
 
-type ModelTuple = readonly string[] // 至少一个元素才能给 z.enum
+type ModelTuple = readonly [string, ...string[]] // 至少一个元素才能给 z.enum
 function providerConfigSchema<T extends ModelTuple>(models: T) {
   return z.object({
     model: z.enum(models),
