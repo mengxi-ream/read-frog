@@ -82,7 +82,7 @@ describe('all Config Migrations', () => {
 
         // Ensure at least one series was tested
         if (seriesProcessed === 0) {
-          expect(seriesProcessed).toBeGreaterThan(0) // Fail the test if no series were processed
+          expect(seriesProcessed, `No test series found for migration v${fromVersion} -> v${toVersion}`).toBeGreaterThan(0)
         }
       }
       catch (error) {
