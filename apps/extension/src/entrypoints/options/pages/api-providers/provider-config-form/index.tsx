@@ -1,3 +1,4 @@
+import { i18n } from '#imports'
 import { Button } from '@repo/ui/components/button'
 import { cn } from '@repo/ui/lib/utils'
 import { useAtom } from 'jotai'
@@ -45,7 +46,7 @@ export function ProviderConfigForm() {
     const updatedAllProviders = allProvidersConfig.filter(provider => provider.id !== providerConfig.id)
     const updatedAllAPIProviders = getAPIProvidersConfig(updatedAllProviders)
     if (updatedAllAPIProviders.length === 0) {
-      toast.error('You must have at least one API provider')
+      toast.error(i18n.t('options.apiProviders.form.atLeastOneProvider'))
       return
     }
 
@@ -83,20 +84,20 @@ export function ProviderConfigForm() {
               },
             }}
           >
-            {field => <field.InputField formForSubmit={form} label="Name" />}
+            {field => <field.InputField formForSubmit={form} label={i18n.t('options.apiProviders.form.fields.name')} />}
           </form.AppField>
           <form.AppField name="description">
-            {field => <field.InputField formForSubmit={form} label="Description" />}
+            {field => <field.InputField formForSubmit={form} label={i18n.t('options.apiProviders.form.fields.description')} />}
           </form.AppField>
 
           <APIKeyField form={form} />
           <form.AppField name="baseURL">
-            {field => <field.InputField formForSubmit={form} label="Base URL" value={providerConfig.baseURL ?? ''} />}
+            {field => <field.InputField formForSubmit={form} label={i18n.t('options.apiProviders.form.fields.baseURL')} value={providerConfig.baseURL ?? ''} />}
           </form.AppField>
         </div>
         <div className="flex justify-end mt-8">
           <Button type="button" variant="destructive" onClick={handleDelete}>
-            Delete
+            {i18n.t('options.apiProviders.form.delete')}
           </Button>
         </div>
       </div>

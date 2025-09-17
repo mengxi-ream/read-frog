@@ -33,6 +33,15 @@ options:
   apiProviders:
     title: API 提供商
     description: 配置用於翻譯和閱讀功能的 API 提供商
+    addProvider: 新增提供商
+    form:
+      fields:
+        name: 名稱
+        description: 描述
+        apiKey: API Key
+        baseURL: Base URL
+      delete: 刪除
+      atLeastOneProvider: 您必須至少有一個 API 提供商
     providers:
       description:
         openai: 提供 GPT-4o 等模型
@@ -44,9 +53,6 @@ options:
         deeplx: 非官方 DeepL API
     apiKey:
       showAPIKey: 顯示 API Key
-    advancedConfig:
-      show: 顯示高級配置
-      hide: 隱藏高級配置
     testConnection:
       button: 測試連接
       testing: 測試中...

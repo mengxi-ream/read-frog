@@ -33,6 +33,15 @@ options:
   apiProviders:
     title: API Providers
     description: Configure the API providers for translation and reading functions here
+    addProvider: Add Provider
+    form:
+      fields:
+        name: Name
+        description: Description
+        apiKey: API Key
+        baseURL: Base URL
+      delete: Delete
+      atLeastOneProvider: You must have at least one API provider
     providers:
       description:
         openai: Provides models like GPT-4o
@@ -44,9 +53,6 @@ options:
         deeplx: Unofficial DeepL API
     apiKey:
       showAPIKey: Show API Key
-    advancedConfig:
-      show: Show Advanced Config
-      hide: Hide Advanced Config
     testConnection:
       button: Test Connection
       testing: Testing...

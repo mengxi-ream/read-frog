@@ -33,6 +33,15 @@ options:
   apiProviders:
     title: APIプロバイダー
     description: 翻訳および読解機能用のAPIプロバイダーを設定
+    addProvider: プロバイダーを追加
+    form:
+      fields:
+        name: 名前
+        description: 説明
+        apiKey: APIキー
+        baseURL: ベースURL
+      delete: 削除
+      atLeastOneProvider: 最低1つのAPIプロバイダーが必要です
     providers:
       description:
         openai: GPT-4oなどのモデルを提供
@@ -44,9 +53,6 @@ options:
         deeplx: 非公式 DeepL API
     apiKey:
       showAPIKey: APIキーを表示
-    advancedConfig:
-      show: 詳細設定を表示
-      hide: 詳細設定を非表示
     testConnection:
       button: 接続テスト
       testing: テスト中...

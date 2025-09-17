@@ -82,7 +82,7 @@ function ProviderCardList() {
           >
             <div className="flex items-center justify-center gap-2 w-full">
               <Icon icon="tabler:plus" className="size-4" />
-              <span className="text-sm">Add Provider</span>
+              <span className="text-sm">{i18n.t('options.apiProviders.addProvider')}</span>
             </div>
           </Button>
         </DialogTrigger>
