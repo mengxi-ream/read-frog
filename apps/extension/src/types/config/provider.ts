@@ -133,7 +133,7 @@ export const baseProviderConfigSchema = z.object({
 
 export const baseAPIProviderConfigSchema = baseProviderConfigSchema.extend({
   apiKey: z.string().optional(),
-  baseURL: z.url().optional(),
+  baseURL: z.string().optional(),
 })
 
 const llmProviderConfigSchemaList = [
@@ -151,7 +151,7 @@ const llmProviderConfigSchemaList = [
   }),
   baseAPIProviderConfigSchema.extend({
     provider: z.literal('openaiCompatible'),
-    baseURL: z.url(), // required for openaiCompatible
+    baseURL: z.string(), // required for openaiCompatible
     models: z.object({
       read: z.object({
         model: z.enum(READ_PROVIDER_MODELS.openaiCompatible),

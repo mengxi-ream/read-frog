@@ -70,6 +70,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
   openai: {
     id: 'openai-default',
     name: 'OpenAI',
+    description: i18n.t('options.apiProviders.providers.description.openai'),
     enabled: true,
     provider: 'openai',
     models: {
@@ -80,6 +81,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
   deepseek: {
     id: 'deepseek-default',
     name: 'DeepSeek',
+    description: i18n.t('options.apiProviders.providers.description.deepseek'),
     enabled: true,
     provider: 'deepseek',
     models: {
@@ -90,6 +92,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
   gemini: {
     id: 'gemini-default',
     name: 'Gemini',
+    description: i18n.t('options.apiProviders.providers.description.gemini'),
     enabled: true,
     provider: 'gemini',
     models: {
@@ -100,6 +103,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
   openaiCompatible: {
     id: 'openai-compatible-default',
     name: 'OpenAI Compatible',
+    description: i18n.t('options.apiProviders.providers.description.openaiCompatible'),
     enabled: true,
     provider: 'openaiCompatible',
     baseURL: 'https://api.example.com/v1',

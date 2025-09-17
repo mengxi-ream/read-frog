@@ -21,7 +21,7 @@ export function InputField(
         value={field.state.value ?? ''}
         onBlur={field.handleBlur}
         onChange={(e) => {
-          field.handleChange(e.target.value === '' ? undefined : e.target.value)
+          field.handleChange(e.target.value)
           void formForSubmit.handleSubmit()
         }}
         aria-invalid={!isValid}

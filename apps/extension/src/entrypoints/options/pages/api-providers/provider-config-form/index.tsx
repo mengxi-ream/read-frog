@@ -14,7 +14,9 @@ import { formOpts, useAppForm } from './form'
 export function ProviderConfigForm() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [providerConfig, setProviderConfig] = useAtom(providerConfigAtom(selectedProviderId ?? ''))
-  const [allProviders, setAllProviders] = useAtom(configFields.providersConfig)
+  const [allProvidersConfig, setAllProvidersConfig] = useAtom(configFields.providersConfig)
+  const [readConfig, setReadConfig] = useAtom(configFields.read)
+  const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
 
   const specificFormOpts = {
     ...formOpts,
@@ -36,18 +38,25 @@ export function ProviderConfigForm() {
   }, [providerConfig, form])
 
   if (!providerConfig || !isAPIProviderConfig(providerConfig)) {
-    return <div>Provider not found</div>
+    return null
   }
 
-  const handleDelete = () => {
-    const updatedAllProviders = allProviders.filter(provider => provider.id !== providerConfig.id)
+  const handleDelete = async () => {
+    const updatedAllProviders = allProvidersConfig.filter(provider => provider.id !== providerConfig.id)
     const updatedAllAPIProviders = getAPIProvidersConfig(updatedAllProviders)
     if (updatedAllAPIProviders.length === 0) {
       toast.error('You must have at least one API provider')
       return
     }
+
+    if (readConfig.providerId === providerConfig.id) {
+      void setReadConfig({ providerId: updatedAllAPIProviders[0].id })
+    }
+    if (translateConfig.providerId === providerConfig.id) {
+      void setTranslateConfig({ providerId: updatedAllAPIProviders[0].id })
+    }
+    await setAllProvidersConfig(updatedAllProviders)
     setSelectedProviderId(updatedAllAPIProviders[0].id)
-    void setAllProviders(updatedAllProviders)
   }
 
   return (
@@ -64,7 +73,7 @@ export function ProviderConfigForm() {
             name="name"
             validators={{
               onChange: ({ value }) => {
-                const duplicateProvider = allProviders.find(provider =>
+                const duplicateProvider = allProvidersConfig.find(provider =>
                   provider.name === value && provider.id !== providerConfig.id,
                 )
                 if (duplicateProvider) {

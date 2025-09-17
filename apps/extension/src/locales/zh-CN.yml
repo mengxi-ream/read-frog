@@ -40,6 +40,7 @@ options:
         openrouter: 多个 LLM 提供商的统一接口
         ollama: 本地大模型服务
         gemini: 提供 gemini-2.5-pro 等模型
+        openaiCompatible: OpenAI API 兼容的第三方
         deeplx: 非官方 DeepL API
     apiKey:
       showAPIKey: 显示 API Key
