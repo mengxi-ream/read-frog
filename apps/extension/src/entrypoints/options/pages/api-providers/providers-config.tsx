@@ -6,7 +6,7 @@ import { Dialog, DialogTrigger } from '@repo/ui/components/dialog'
 import { Switch } from '@repo/ui/components/switch'
 import { cn } from '@repo/ui/lib/utils'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import ProviderIcon from '@/components/provider-icon'
 import { configFields } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
@@ -41,20 +41,18 @@ function ProviderCardList() {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(false)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  useEffect(() => {
-    const updateScrollState = () => {
-      const container = scrollContainerRef.current
-      if (container) {
-        const canScrollDown = container.scrollHeight > container.clientHeight
-        const isAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 1
-        setCanScroll(canScrollDown)
-        setIsScrolledToBottom(isAtBottom)
-      }
+  // Update scroll state when apiProvidersConfig changes
+  useLayoutEffect(() => {
+    const container = scrollContainerRef.current
+    if (container) {
+      const canScrollDown = container.scrollHeight > container.clientHeight
+      const isAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 1
+      setCanScroll(canScrollDown)
+      setIsScrolledToBottom(isAtBottom)
     }
-
-    updateScrollState()
   }, [apiProvidersConfig])
 
+  // Add scroll listener
   useEffect(() => {
     const handleScroll = () => {
       const container = scrollContainerRef.current
