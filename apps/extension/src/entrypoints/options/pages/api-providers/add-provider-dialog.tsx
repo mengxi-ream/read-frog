@@ -1,5 +1,4 @@
 import type { APIProviderConfig, APIProviderNames } from '@/types/config/provider'
-import { Button } from '@repo/ui/components/button'
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@repo/ui/components/dialog'
 import { useAtom } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
@@ -34,28 +33,28 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
   }
 
   return (
-    <DialogContent className="md:max-w-xl lg:max-w-2xl">
+    <DialogContent className="md:max-w-xl lg:max-w-3xl xl:max-w-5xl">
       <DialogHeader>
         <DialogTitle>Add New Provider</DialogTitle>
         <DialogDescription>
           Choose an API provider to add to your configuration.
         </DialogDescription>
       </DialogHeader>
-      <div className="grid gap-2 py-4">
+      <div className="grid grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-9 gap-3 py-4">
         {API_PROVIDER_NAMES.map(providerType => (
-          <Button
+          <button
+            type="button"
             key={providerType}
-            variant="outline"
-            className="h-auto p-3 justify-start"
+            className="h-auto p-3 flex flex-col items-center space-y-2 hover:bg-muted/50 rounded-lg"
             onClick={() => handleAddProvider(providerType)}
           >
-            <div className="flex items-center gap-3">
-              <ProviderIcon logo={API_PROVIDER_ITEMS[providerType].logo(isDarkMode())} size="xl" />
-              <span className="text-sm font-medium">
-                {API_PROVIDER_ITEMS[providerType].name}
-              </span>
-            </div>
-          </Button>
+            <ProviderIcon logo={API_PROVIDER_ITEMS[providerType].logo(isDarkMode())} size="xl" />
+            <span
+              className="text-xs font-light w-full line-clamp-2 flex-1 flex items-center justify-center"
+            >
+              {API_PROVIDER_ITEMS[providerType].name}
+            </span>
+          </button>
         ))}
       </div>
     </DialogContent>
