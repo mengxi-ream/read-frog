@@ -1,9 +1,12 @@
+import type { Config } from '@/types/config/config'
 import { browser, createShadowRootUi, defineContentScript, storage } from '#imports'
 import { kebabCase } from 'case-anything'
 import ReactDOM from 'react-dom/client'
 // import eruda from 'eruda'
 import { globalConfig, loadGlobalConfig } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
+import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import { getDocumentInfo } from '@/utils/content'
 import { shouldEnableAutoTranslation } from '@/utils/host/translate/auto-translation'
 import { logger } from '@/utils/logger'
 import { sendMessage } from '@/utils/message'
@@ -93,6 +96,14 @@ export default defineContentScript({
         return
       msg.enabled ? manager.start() : manager.stop()
     })
+
+    if (globalConfig) {
+      const { detectedCode } = getDocumentInfo()
+      await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
+        ...globalConfig,
+        language: { ...globalConfig.language, detectedCode },
+      })
+    }
 
     // ! Temporary code for browser has no port.onMessage.addListener api like Orion
     const autoEnable = globalConfig && await shouldEnableAutoTranslation(window.location.href, globalConfig)

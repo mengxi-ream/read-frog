@@ -1,24 +1,9 @@
-import type { LangCodeISO6393 } from '@repo/definitions'
 import type { ExtractedContent } from '@/types/content'
-
-import { Readability } from '@mozilla/readability'
 import { useQuery } from '@tanstack/react-query'
-
-import { franc } from 'franc-min'
 import { useSetAtom } from 'jotai'
-import { flattenToParagraphs } from '@/entrypoints/side.content/utils/article'
 import { configFields } from '@/utils/atoms/config'
-import { isDontWalkIntoButTranslateAsChildElement } from '@/utils/host/dom/filter'
+import { getDocumentInfo } from '@/utils/content'
 import { logger } from '@/utils/logger'
-
-function removeDummyNodes(root: Document) {
-  const elements = root.querySelectorAll('*')
-  elements.forEach((element) => {
-    if (element instanceof HTMLElement && isDontWalkIntoButTranslateAsChildElement(element)) {
-      element.remove()
-    }
-  })
-}
 
 export function useExtractContent() {
   const setLanguage = useSetAtom(configFields.language)
@@ -27,23 +12,12 @@ export function useExtractContent() {
     queryKey: ['extractContent'],
     queryFn: async () => {
       try {
-        const documentClone = document.cloneNode(true)
-        removeDummyNodes(documentClone as Document)
-        const article = new Readability(documentClone as Document, {
-          serializer: el => el,
-        }).parse()
-        const paragraphs = article?.content
-          ? flattenToParagraphs(article.content)
-          : []
-
         // TODO: in analyzing, we should re-extract the article in case it changed, and reset the lang
-        const lang = article?.textContent ? franc(article.textContent) : 'und'
+        const { detectedCode, lang, paragraphs, article } = getDocumentInfo()
 
         logger.log('franc detected lang', lang)
 
-        void setLanguage({
-          detectedCode: lang === 'und' ? 'eng' : (lang as LangCodeISO6393),
-        })
+        void setLanguage({ detectedCode })
 
         return {
           article: {
