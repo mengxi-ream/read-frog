@@ -12,6 +12,7 @@ import {
 } from '@repo/ui/components/select'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom, useAtomValue } from 'jotai'
+import { toast } from 'sonner'
 import TranslateProviderSelector from '@/components/provider/translate-provider-selector'
 import { isAPIProviderConfig, isLLMTranslateProviderConfig, TRANSLATE_PROVIDER_MODELS } from '@/types/config/provider'
 import { pageTranslateRangeSchema } from '@/types/config/translate'
@@ -106,31 +107,43 @@ function TranslateModelSelector() {
         ? (
             <Input
               value={modelConfig.customModel ?? ''}
-              onChange={e =>
-                setTranslateProviderConfig(
-                  updateLLMProviderConfig(translateProviderConfig, {
-                    models: {
-                      translate: {
-                        customModel: e.target.value === '' ? null : e.target.value,
+              onChange={(e) => {
+                try {
+                  void setTranslateProviderConfig(
+                    updateLLMProviderConfig(translateProviderConfig, {
+                      models: {
+                        translate: {
+                          customModel: e.target.value === '' ? null : e.target.value,
+                        },
                       },
-                    },
-                  }),
-                )}
+                    }),
+                  )
+                }
+                catch (error) {
+                  toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
+                }
+              }}
             />
           )
         : (
             <Select
               value={modelConfig.model}
-              onValueChange={value =>
-                setTranslateProviderConfig(
-                  updateLLMProviderConfig(translateProviderConfig, {
-                    models: {
-                      translate: {
-                        model: value as any,
+              onValueChange={(value) => {
+                try {
+                  void setTranslateProviderConfig(
+                    updateLLMProviderConfig(translateProviderConfig, {
+                      models: {
+                        translate: {
+                          model: value as any,
+                        },
                       },
-                    },
-                  }),
-                )}
+                    }),
+                  )
+                }
+                catch (error) {
+                  toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
+                }
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a model" />
@@ -151,29 +164,34 @@ function TranslateModelSelector() {
           id={`isCustomModel-translate-${provider}`}
           checked={modelConfig.isCustomModel}
           onCheckedChange={(checked) => {
-            if (checked === false) {
-              void setTranslateProviderConfig(
-                updateLLMProviderConfig(translateProviderConfig, {
-                  models: {
-                    translate: {
-                      customModel: null,
-                      isCustomModel: false,
+            try {
+              if (checked === false) {
+                void setTranslateProviderConfig(
+                  updateLLMProviderConfig(translateProviderConfig, {
+                    models: {
+                      translate: {
+                        customModel: null,
+                        isCustomModel: false,
+                      },
                     },
-                  },
-                }),
-              )
+                  }),
+                )
+              }
+              else {
+                void setTranslateProviderConfig(
+                  updateLLMProviderConfig(translateProviderConfig, {
+                    models: {
+                      translate: {
+                        customModel: modelConfig.model,
+                        isCustomModel: true,
+                      },
+                    },
+                  }),
+                )
+              }
             }
-            else {
-              void setTranslateProviderConfig(
-                updateLLMProviderConfig(translateProviderConfig, {
-                  models: {
-                    translate: {
-                      customModel: modelConfig.model,
-                      isCustomModel: true,
-                    },
-                  },
-                }),
-              )
+            catch (error) {
+              toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
             }
           }}
         />

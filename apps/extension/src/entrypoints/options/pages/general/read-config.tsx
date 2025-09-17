@@ -3,6 +3,7 @@ import { Checkbox } from '@repo/ui/components/checkbox'
 import { Input } from '@repo/ui/components/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/select'
 import { useAtom, useAtomValue } from 'jotai'
+import { toast } from 'sonner'
 import ReadProviderSelector from '@/components/provider/read-provider-selector'
 import { READ_PROVIDER_MODELS } from '@/types/config/provider'
 import { readProviderConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
@@ -50,31 +51,43 @@ function ReadModelSelector() {
         ? (
             <Input
               value={modelConfig.customModel ?? ''}
-              onChange={e =>
-                setReadProviderConfig(
-                  updateLLMProviderConfig(readProviderConfig, {
-                    models: {
-                      read: {
-                        customModel: e.target.value === '' ? null : e.target.value,
+              onChange={(e) => {
+                try {
+                  void setReadProviderConfig(
+                    updateLLMProviderConfig(readProviderConfig, {
+                      models: {
+                        read: {
+                          customModel: e.target.value === '' ? null : e.target.value,
+                        },
                       },
-                    },
-                  }),
-                )}
+                    }),
+                  )
+                }
+                catch (error) {
+                  toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
+                }
+              }}
             />
           )
         : (
             <Select
               value={modelConfig.model}
-              onValueChange={value =>
-                setReadProviderConfig(
-                  updateLLMProviderConfig(readProviderConfig, {
-                    models: {
-                      read: {
-                        model: value as any,
+              onValueChange={(value) => {
+                try {
+                  void setReadProviderConfig(
+                    updateLLMProviderConfig(readProviderConfig, {
+                      models: {
+                        read: {
+                          model: value as any,
+                        },
                       },
-                    },
-                  }),
-                )}
+                    }),
+                  )
+                }
+                catch (error) {
+                  toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
+                }
+              }}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select a model" />
@@ -95,29 +108,34 @@ function ReadModelSelector() {
           id={`isCustomModel-read-${provider}`}
           checked={modelConfig.isCustomModel}
           onCheckedChange={(checked) => {
-            if (checked === false) {
-              void setReadProviderConfig(
-                updateLLMProviderConfig(readProviderConfig, {
-                  models: {
-                    read: {
-                      customModel: null,
-                      isCustomModel: false,
+            try {
+              if (checked === false) {
+                void setReadProviderConfig(
+                  updateLLMProviderConfig(readProviderConfig, {
+                    models: {
+                      read: {
+                        customModel: null,
+                        isCustomModel: false,
+                      },
                     },
-                  },
-                }),
-              )
+                  }),
+                )
+              }
+              else {
+                void setReadProviderConfig(
+                  updateLLMProviderConfig(readProviderConfig, {
+                    models: {
+                      read: {
+                        customModel: modelConfig.model,
+                        isCustomModel: true,
+                      },
+                    },
+                  }),
+                )
+              }
             }
-            else {
-              void setReadProviderConfig(
-                updateLLMProviderConfig(readProviderConfig, {
-                  models: {
-                    read: {
-                      customModel: modelConfig.model,
-                      isCustomModel: true,
-                    },
-                  },
-                }),
-              )
+            catch (error) {
+              toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
             }
           }}
         />
