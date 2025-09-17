@@ -2,7 +2,7 @@ import type { LangCodeISO6393 } from '@repo/definitions'
 import { Readability } from '@mozilla/readability'
 import { franc } from 'franc-min'
 import { flattenToParagraphs } from '@/entrypoints/side.content/utils/article'
-import { isDontWalkIntoButTranslateAsChildElement } from '@/utils/host/dom/filter'
+import { isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from '@/utils/host/dom/filter'
 
 /**
  * get the favicon url
@@ -72,7 +72,7 @@ export function getFaviconUrl(): string {
 function removeDummyNodes(root: Document) {
   const elements = root.querySelectorAll('*')
   elements.forEach((element) => {
-    if (element instanceof HTMLElement && isDontWalkIntoButTranslateAsChildElement(element)) {
+    if (isHTMLElement(element) && isDontWalkIntoButTranslateAsChildElement(element)) {
       element.remove()
     }
   })
