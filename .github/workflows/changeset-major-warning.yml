@@ -151,14 +151,24 @@ jobs:
               });
             }
 
-      - name: Create status check for major changes
-        if: steps.check-major.outputs.has_major == 'true'
+      - name: Fail workflow for major changes (fork repos only)
+        if: steps.check-major.outputs.has_major == 'true' && github.event.pull_request.head.repo.full_name != github.repository
         run: |
-          gh api repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }} \
-            --method POST \
-            --field state=failure \
-            --field target_url=https://semver.org \
-            --field description="Major version changes detected - please confirm breaking changes" \
-            --field context="changeset/major-warning"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          echo "::error::⚠️  Major version changes detected in fork repository!"
+          echo "::error::"
+          echo "::error::❓ Are you sure this PR contains BREAKING CHANGES?"
+          echo "::error::   Major versions (1.2.3 → 2.0.0) are only for:"
+          echo "::error::   • API removals or incompatible changes"
+          echo "::error::   • Behavior changes that break existing code"
+          echo "::error::   • Major dependency updates with breaking changes"
+          echo "::error::"
+          echo "::error::🚫 Fork repositories cannot submit major version changes due to their breaking nature."
+          echo "::error::   Major changes require repository maintainer approval and coordination."
+          echo "::error::"
+          echo "::error::📝 Please either:"
+          echo "::error::  1. Change 'major' to 'minor' or 'patch' in your changeset files"
+          echo "::error::  2. Contact repository maintainers to handle this major change"
+          echo "::error::  3. Open an issue to discuss the breaking changes first"
+          echo "::error::"
+          echo "::error::For more info about semantic versioning: https://semver.org/"
+          exit 1
