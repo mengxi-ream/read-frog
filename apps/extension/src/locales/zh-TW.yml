@@ -52,7 +52,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
       delete: 刪除
-      atLeastOneProvider: 您必須至少有一個 API 提供商
+      atLeastOneProvider: 您必須至少有一個閱讀或翻譯提供商
       duplicateProviderName: '重複的提供商名稱 "$1"'
       defaultProvider:
         translate: 設為預設翻譯提供商

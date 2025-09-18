@@ -1,3 +1,4 @@
+import type { ProvidersConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { Button } from '@repo/ui/components/button'
 import { Separator } from '@repo/ui/components/separator'
@@ -6,10 +7,10 @@ import { useStore } from '@tanstack/react-form'
 import { useAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { isAPIProviderConfig, isReadProvider, isTranslateProvider } from '@/types/config/provider'
+import { isAPIProviderConfig, isNonAPIProvider, isNonCustomLLMProvider, isReadProvider, isTranslateProvider } from '@/types/config/provider'
 import { configFields } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
-import { getAPIProvidersConfig } from '@/utils/config/helpers'
+import { getReadProvidersConfig, getTranslateProvidersConfig } from '@/utils/config/helpers'
 import { selectedProviderIdAtom } from '../atoms'
 import { APIKeyField } from './api-key-field'
 import { DefaultReadProviderSelector, DefaultTranslateProviderSelector } from './default-provider'
@@ -39,6 +40,7 @@ export function ProviderConfigForm() {
   const providerType = useStore(form.store, state => state.values.provider)
   const isReadProviderName = isReadProvider(providerType)
   const isTranslateProviderName = isTranslateProvider(providerType)
+  const isNonCustomLLMProviderName = isNonCustomLLMProvider(providerType)
 
   // Reset form when selectedProviderId changes
   useEffect(() => {
@@ -51,22 +53,29 @@ export function ProviderConfigForm() {
     return null
   }
 
+  const chooseNextProviderConfig = (providersConfig: ProvidersConfig) => {
+    // better not choose non API provider
+    const firstProvider = providersConfig.find(config => !isNonAPIProvider(config.provider))
+    return firstProvider ?? providersConfig[0]
+  }
+
   const handleDelete = async () => {
     const updatedAllProviders = allProvidersConfig.filter(provider => provider.id !== providerConfig.id)
-    const updatedAllAPIProviders = getAPIProvidersConfig(updatedAllProviders)
-    if (updatedAllAPIProviders.length === 0) {
+    const updatedAllReadProviders = getReadProvidersConfig(updatedAllProviders)
+    const updatedAllTranslateProviders = getTranslateProvidersConfig(updatedAllProviders)
+    if (updatedAllReadProviders.length === 0 || updatedAllTranslateProviders.length === 0) {
       toast.error(i18n.t('options.apiProviders.form.atLeastOneProvider'))
       return
     }
 
     if (readConfig.providerId === providerConfig.id) {
-      void setReadConfig({ providerId: updatedAllAPIProviders[0].id })
+      void setReadConfig({ providerId: updatedAllReadProviders[0].id })
     }
     if (translateConfig.providerId === providerConfig.id) {
-      void setTranslateConfig({ providerId: updatedAllAPIProviders[0].id })
+      void setTranslateConfig({ providerId: chooseNextProviderConfig(updatedAllTranslateProviders).id })
     }
     await setAllProvidersConfig(updatedAllProviders)
-    setSelectedProviderId(updatedAllAPIProviders[0].id)
+    setSelectedProviderId(chooseNextProviderConfig(updatedAllProviders).id)
   }
 
   return (
@@ -101,7 +110,7 @@ export function ProviderConfigForm() {
 
           <APIKeyField form={form} />
           <form.AppField name="baseURL">
-            {field => <field.InputField formForSubmit={form} label={i18n.t('options.apiProviders.form.fields.baseURL')} value={providerConfig.baseURL ?? ''} />}
+            {field => <field.InputField formForSubmit={form} label={`${i18n.t('options.apiProviders.form.fields.baseURL')}${isNonCustomLLMProviderName ? ' (Optional)' : ''}`} value={providerConfig.baseURL ?? ''} />}
           </form.AppField>
           {isTranslateProviderName && (
             <>

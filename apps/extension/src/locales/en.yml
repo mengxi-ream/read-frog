@@ -52,7 +52,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
       delete: Delete
-      atLeastOneProvider: You must have at least one API provider
+      atLeastOneProvider: Need at least one provider for reading or translation
       duplicateProviderName: 'Duplicate provider name "$1"'
       defaultProvider:
         translate: Set as default translate provider

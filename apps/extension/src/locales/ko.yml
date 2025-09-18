@@ -52,7 +52,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
       delete: 삭제
-      atLeastOneProvider: 최소 하나의 API 제공업체가 필요합니다
+      atLeastOneProvider: 최소 하나의 읽기 또는 번역 제공업체가 필요합니다
       duplicateProviderName: '중복된 제공업체 이름 "$1"'
       defaultProvider:
         translate: 기본 번역 제공업체로 설정

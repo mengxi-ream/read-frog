@@ -52,7 +52,7 @@ options:
         apiKey: APIキー
         baseURL: ベースURL
       delete: 削除
-      atLeastOneProvider: 最低1つのAPIプロバイダーが必要です
+      atLeastOneProvider: 最低1つの読解または翻訳プロバイダーが必要です
       duplicateProviderName: '重複するプロバイダー名 "$1"'
       defaultProvider:
         translate: デフォルト翻訳プロバイダーに設定
