@@ -64,7 +64,7 @@ jobs:
           fi
 
       - name: Comment on PR with major version warning
-        if: steps.check-major.outputs.has_major == 'true'
+        if: steps.check-major.outputs.has_major == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         uses: actions/github-script@v7
         with:
           script: |
@@ -150,3 +150,15 @@ jobs:
                 body: comment
               });
             }
+
+      - name: Create status check for major changes
+        if: steps.check-major.outputs.has_major == 'true'
+        run: |
+          gh api repos/${{ github.repository }}/statuses/${{ github.event.pull_request.head.sha }} \
+            --method POST \
+            --field state=failure \
+            --field target_url=https://semver.org \
+            --field description="Major version changes detected - please confirm breaking changes" \
+            --field context="changeset/major-warning"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
