@@ -178,6 +178,8 @@ The code comments should be in English.
 
 ## i18n
 
+Locale files are in `apps/extension/src/locales` for extension app and `apps/website/messages` for website app.
+
 After you updated the locale files for extension app, you need to run `pnpm dev:extension` to update the locale types to pass the ESLint check.
 
 ## Others

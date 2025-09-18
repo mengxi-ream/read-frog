@@ -3,7 +3,7 @@ import type { ProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from '@repo/definitions'
 import { toast } from 'sonner'
-import { isAPIProviderConfig, isLLMTranslateProviderConfig, isNonAPIProvider, isPureAPIProvider, isPureTranslateProvider } from '@/types/config/provider'
+import { isAPIProviderConfig, isLLMTranslateProviderConfig, isNonAPIProvider, isPureAPIProvider } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { logger } from '@/utils/logger'
 import { globalConfig } from '../../config/config'
@@ -85,20 +85,16 @@ export function validateTranslationConfig(config: Pick<Config, 'providersConfig'
   if (!providerConfig) {
     return false
   }
-  const { provider } = providerConfig
 
-  // check if the source language is the same as the target language
-  if (isPureTranslateProvider(provider)) {
-    if (languageConfig.sourceCode === languageConfig.targetCode) {
-      toast.error(i18n.t('translation.sameLanguage'))
-      logger.info('validateTranslationConfig: returning false (same language)')
-      return false
-    }
-    else if (languageConfig.sourceCode === 'auto' && languageConfig.detectedCode === languageConfig.targetCode) {
-      toast.warning(i18n.t('translation.autoModeSameLanguage', [
-        LANG_CODE_TO_LOCALE_NAME[languageConfig.detectedCode] ?? languageConfig.detectedCode,
-      ]))
-    }
+  if (languageConfig.sourceCode === languageConfig.targetCode) {
+    toast.error(i18n.t('translation.sameLanguage'))
+    logger.info('validateTranslationConfig: returning false (same language)')
+    return false
+  }
+  else if (languageConfig.sourceCode === 'auto' && languageConfig.detectedCode === languageConfig.targetCode) {
+    toast.warning(i18n.t('translation.autoModeSameLanguage', [
+      LANG_CODE_TO_LOCALE_NAME[languageConfig.detectedCode] ?? languageConfig.detectedCode,
+    ]))
   }
 
   // check if the API key is configured

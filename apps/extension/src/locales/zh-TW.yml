@@ -51,8 +51,9 @@ options:
         description: 描述
         apiKey: API Key
         baseURL: Base URL
+        optional: 可選
       delete: 刪除
-      atLeastOneProvider: 您必須至少有一個閱讀或翻譯提供商
+      atLeastOneProvider: 至少需要一個閱讀提供商和一個翻譯提供商。
       duplicateProviderName: '重複的提供商名稱 "$1"'
       defaultProvider:
         translate: 設為預設翻譯提供商

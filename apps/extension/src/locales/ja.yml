@@ -51,8 +51,9 @@ options:
         description: 説明
         apiKey: APIキー
         baseURL: ベースURL
+        optional: オプション
       delete: 削除
-      atLeastOneProvider: 最低1つの読解または翻訳プロバイダーが必要です
+      atLeastOneProvider: 最低1つの読解プロバイダーと1つの翻訳プロバイダーが必要です。
       duplicateProviderName: '重複するプロバイダー名 "$1"'
       defaultProvider:
         translate: デフォルト翻訳プロバイダーに設定

@@ -110,7 +110,7 @@ export function ProviderConfigForm() {
 
           <APIKeyField form={form} />
           <form.AppField name="baseURL">
-            {field => <field.InputField formForSubmit={form} label={`${i18n.t('options.apiProviders.form.fields.baseURL')}${isNonCustomLLMProviderName ? ' (Optional)' : ''}`} value={providerConfig.baseURL ?? ''} />}
+            {field => <field.InputField formForSubmit={form} label={`${i18n.t('options.apiProviders.form.fields.baseURL')}${isNonCustomLLMProviderName ? ` (${i18n.t('options.apiProviders.form.fields.optional')})` : ''}`} value={providerConfig.baseURL ?? ''} />}
           </form.AppField>
           {isTranslateProviderName && (
             <>

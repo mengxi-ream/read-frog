@@ -51,8 +51,9 @@ options:
         description: Description
         apiKey: API Key
         baseURL: Base URL
+        optional: Optional
       delete: Delete
-      atLeastOneProvider: Need at least one provider for reading or translation
+      atLeastOneProvider: At least one read provider and one translation provider are required.
       duplicateProviderName: 'Duplicate provider name "$1"'
       defaultProvider:
         translate: Set as default translate provider
