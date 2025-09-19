@@ -19,6 +19,35 @@ Translate to ${getTokenCellText(TARGET_LANG)}:
 ${getTokenCellText(INPUT)}
 `
 
+export const DEFAULT_BATCH_TRANSLATE_PROMPT = `## Multi-paragraph Translation Rules
+1. If input contains %%, use %% in your output, if input has no %%, don't use %% in your output
+
+## OUTPUT FORMAT:
+- **Single paragraph input** → Output translation directly (no separators, no extra text)
+- **Multi-paragraph input** → Use %% as paragraph separator between translations
+
+## Examples
+### Multi-paragraph Input:
+Paragraph A
+%%
+Paragraph B
+%%
+Paragraph C
+
+### Multi-paragraph Output:
+Translation A
+%%
+Translation B
+%%
+Translation C
+
+### Single paragraph Input:
+Single paragraph content
+
+### Single paragraph Output:
+Direct translation without separators
+`
+
 export const DEFAULT_TRANSLATE_PROMPT_ID = 'default'
 
 export const DEFAULT_TRANSLATE_PROMPT_OBJ: TranslatePromptObj = {

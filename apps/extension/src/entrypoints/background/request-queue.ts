@@ -14,7 +14,6 @@ export async function setUpRequestQueue() {
   const taskQueue = new TaskQueue(queueConfig.batchConfig || DEFAULT_BATCH_CONFIG)
 
   const batchQueue = new BatchQueue(
-    taskQueue,
     {
       rate: queueConfig.rate,
       capacity: queueConfig.capacity,
@@ -24,6 +23,8 @@ export async function setUpRequestQueue() {
     },
     queueConfig.batchConfig || DEFAULT_BATCH_CONFIG,
   )
+
+  taskQueue.setBatchQueue(batchQueue)
 
   onMessage('enqueueTranslateRequest', async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash } } = message
@@ -56,7 +57,18 @@ export async function setUpRequestQueue() {
       promise,
     }
 
-    return taskQueue.enqueue(task)
+    const result = await taskQueue.enqueue(task)
+
+    // Cache the translation result if successful
+    if (result && hash) {
+      await db.translationCache.put({
+        key: hash,
+        translation: result,
+        createdAt: new Date(),
+      })
+    }
+
+    return result
   })
 
   onMessage('setTranslateRequestQueueConfig', (message) => {

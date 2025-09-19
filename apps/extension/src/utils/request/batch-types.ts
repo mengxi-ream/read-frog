@@ -11,10 +11,7 @@ export interface BatchTask {
   scheduleAt: number
   createdAt: number
   retryCount: number
-  thunk: () => Promise<string[]>
-  promise: Promise<void>
-  resolve: (value: void) => void
-  reject: (error: Error) => void
+  thunk?: () => Promise<string[]>
 }
 
 export interface BatchQueueOptions {
