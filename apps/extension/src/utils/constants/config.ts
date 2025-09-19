@@ -3,7 +3,7 @@ import type { PageTranslateRange } from '@/types/config/translate'
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
 import { DEFAULT_PROVIDER_CONFIG_LIST } from './providers'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
-import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
+import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
 import { DEFAULT_TRANSLATION_NODE_STYLE } from './translation-node-style'
 
 export const CONFIG_STORAGE_KEY = 'config'
@@ -38,6 +38,7 @@ export const DEFAULT_CONFIG: Config = {
     requestQueueConfig: {
       capacity: DEFAULT_REQUEST_CAPACITY,
       rate: DEFAULT_REQUEST_RATE,
+      batchConfig: DEFAULT_BATCH_CONFIG,
     },
     translationNodeStyle: DEFAULT_TRANSLATION_NODE_STYLE,
     customAutoTranslateShortcutKey: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,

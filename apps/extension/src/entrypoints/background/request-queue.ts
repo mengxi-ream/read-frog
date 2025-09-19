@@ -1,51 +1,71 @@
+import type { TranslationTask } from '@/utils/request/task-queue'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
+import { DEFAULT_BATCH_CONFIG } from '@/utils/constants/translate'
 import { db } from '@/utils/db/dexie/db'
-import { executeTranslate } from '@/utils/host/translate/translate-text'
 import { onMessage } from '@/utils/message'
-import { RequestQueue } from '@/utils/request/request-queue'
+import { BatchQueue } from '@/utils/request/batch-queue'
+import { TaskQueue } from '@/utils/request/task-queue'
 import { ensureInitializedConfig } from './config'
 
 export async function setUpRequestQueue() {
   const config = await ensureInitializedConfig()
-  const { translate: { requestQueueConfig: { rate, capacity } } } = config ?? DEFAULT_CONFIG
+  const queueConfig = config?.translate?.requestQueueConfig ?? DEFAULT_CONFIG.translate.requestQueueConfig
 
-  const requestQueue = new RequestQueue({
-    rate,
-    capacity,
-    timeoutMs: 20_000,
-    maxRetries: 2,
-    baseRetryDelayMs: 1_000,
-  })
+  const taskQueue = new TaskQueue(queueConfig.batchConfig || DEFAULT_BATCH_CONFIG)
+
+  const batchQueue = new BatchQueue(
+    taskQueue,
+    {
+      rate: queueConfig.rate,
+      capacity: queueConfig.capacity,
+      timeoutMs: 20_000,
+      maxRetries: 2,
+      baseRetryDelayMs: 1_000,
+    },
+    queueConfig.batchConfig || DEFAULT_BATCH_CONFIG,
+  )
 
   onMessage('enqueueTranslateRequest', async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash } } = message
 
-    // Check cache first
+    // 缓存检查
     if (hash) {
       const cached = await db.translationCache.get(hash)
-      if (cached) {
+      if (cached)
         return cached.translation
-      }
     }
 
-    // Create thunk based on type and params
-    const thunk = () => executeTranslate(text, langConfig, providerConfig)
-    const result = await requestQueue.enqueue(thunk, scheduleAt, hash)
+    // 创建翻译任务
+    let resolve!: (value: string) => void
+    let reject!: (error: Error) => void
+    const promise = new Promise<string>((res, rej) => {
+      resolve = res
+      reject = rej
+    })
 
-    // Cache the translation result if successful
-    if (result && hash) {
-      await db.translationCache.put({
-        key: hash,
-        translation: result,
-        createdAt: new Date(),
-      })
+    const task: TranslationTask = {
+      id: crypto.randomUUID(),
+      text,
+      hash,
+      langConfig,
+      providerConfig,
+      scheduleAt,
+      createdAt: Date.now(),
+      resolve,
+      reject,
+      promise,
     }
 
-    return result
+    return taskQueue.enqueue(task)
   })
 
   onMessage('setTranslateRequestQueueConfig', (message) => {
     const { data } = message
-    requestQueue.setQueueOptions(data)
+    if (data.rate !== undefined || data.capacity !== undefined) {
+      batchQueue.setQueueOptions(data)
+    }
+    if (data.batchConfig) {
+      batchQueue.setBatchConfig(data.batchConfig)
+    }
   })
 }
