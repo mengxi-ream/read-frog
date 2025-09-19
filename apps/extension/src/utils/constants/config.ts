@@ -38,7 +38,10 @@ export const DEFAULT_CONFIG: Config = {
     requestQueueConfig: {
       capacity: DEFAULT_REQUEST_CAPACITY,
       rate: DEFAULT_REQUEST_RATE,
-      batchConfig: DEFAULT_BATCH_CONFIG,
+    },
+    requestBatchConfig: {
+      batchCharacters: DEFAULT_BATCH_CONFIG.batchCharacters,
+      batchSize: DEFAULT_BATCH_CONFIG.batchSize,
     },
     translationNodeStyle: DEFAULT_TRANSLATION_NODE_STYLE,
     customAutoTranslateShortcutKey: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,

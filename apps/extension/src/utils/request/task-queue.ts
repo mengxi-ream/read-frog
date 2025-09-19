@@ -150,7 +150,7 @@ export class TaskQueue {
     const taskCharacters = task.text.length
 
     // if task is too large, send directly
-    if (taskCharacters > this.batchConfig.maxCharacters) {
+    if (taskCharacters > this.batchConfig.batchCharacters) {
       const batch = this.createSingleTaskBatch(task)
       this.batchQueue!.enqueue(batch)
       return
@@ -166,7 +166,7 @@ export class TaskQueue {
     const existingBatch = this.pendingBatchMap.get(configKey)
 
     if (existingBatch) {
-      if (existingBatch.characters + taskCharacters <= this.batchConfig.maxCharacters) {
+      if (existingBatch.characters + taskCharacters <= this.batchConfig.batchCharacters) {
         existingBatch.tasks.push(task)
         existingBatch.characters += taskCharacters
 
@@ -186,8 +186,8 @@ export class TaskQueue {
 
   private shouldFlushBatch(batch: PendingBatch): boolean {
     return (
-      batch.tasks.length >= this.batchConfig.minBatchSize
-      || batch.characters >= this.batchConfig.maxCharacters
+      batch.tasks.length >= this.batchConfig.batchSize
+      || batch.characters >= this.batchConfig.batchCharacters
     )
   }
 
@@ -196,7 +196,7 @@ export class TaskQueue {
 
     const timer = setTimeout(() => {
       this.flushPendingBatchByKey(configKey)
-    }, this.batchConfig.maxDelay)
+    }, 100)
 
     const pendingBatch: PendingBatch = {
       id: batchId,
@@ -254,5 +254,9 @@ export class TaskQueue {
 
   private duplicateTask(hash: string): TranslationTask | undefined {
     return this.waitingTasks.get(hash)
+  }
+
+  setBatchConfig(config: Partial<BatchConfig>) {
+    this.batchConfig = { ...this.batchConfig, ...config }
   }
 }

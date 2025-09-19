@@ -1,6 +1,5 @@
 import type { TranslationTask } from '@/utils/request/task-queue'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
-import { DEFAULT_BATCH_CONFIG } from '@/utils/constants/translate'
 import { db } from '@/utils/db/dexie/db'
 import { onMessage } from '@/utils/message'
 import { BatchQueue } from '@/utils/request/batch-queue'
@@ -10,8 +9,9 @@ import { ensureInitializedConfig } from './config'
 export async function setUpRequestQueue() {
   const config = await ensureInitializedConfig()
   const queueConfig = config?.translate?.requestQueueConfig ?? DEFAULT_CONFIG.translate.requestQueueConfig
+  const batchConfig = config?.translate?.requestBatchConfig ?? DEFAULT_CONFIG.translate.requestBatchConfig
 
-  const taskQueue = new TaskQueue(queueConfig.batchConfig || DEFAULT_BATCH_CONFIG)
+  const taskQueue = new TaskQueue(batchConfig)
 
   const batchQueue = new BatchQueue(
     {
@@ -21,7 +21,6 @@ export async function setUpRequestQueue() {
       maxRetries: 2,
       baseRetryDelayMs: 1_000,
     },
-    queueConfig.batchConfig || DEFAULT_BATCH_CONFIG,
   )
 
   taskQueue.setBatchQueue(batchQueue)
@@ -29,14 +28,14 @@ export async function setUpRequestQueue() {
   onMessage('enqueueTranslateRequest', async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash } } = message
 
-    // 缓存检查
+    // Check cache
     if (hash) {
       const cached = await db.translationCache.get(hash)
       if (cached)
         return cached.translation
     }
 
-    // 创建翻译任务
+    // Create translation task
     let resolve!: (value: string) => void
     let reject!: (error: Error) => void
     const promise = new Promise<string>((res, rej) => {
@@ -76,8 +75,10 @@ export async function setUpRequestQueue() {
     if (data.rate !== undefined || data.capacity !== undefined) {
       batchQueue.setQueueOptions(data)
     }
-    if (data.batchConfig) {
-      batchQueue.setBatchConfig(data.batchConfig)
-    }
+  })
+
+  onMessage('setTranslateRequestBatchConfig', (message) => {
+    const { data } = message
+    taskQueue.setBatchConfig(data)
   })
 }

@@ -6,6 +6,7 @@ import { ClearCacheConfig } from './clear-cache-config'
 import { CustomAutoTranslateShortcutKey } from './custom-auto-translate-shortcut-key'
 import { CustomTranslationStyle } from './custom-translation-style'
 import { PersonalizedPrompts } from './personalized-prompt'
+import { RequestBatch } from './request-batch'
 import { RequestRate } from './request-rate'
 import { TranslationMode } from './translation-mode'
 
@@ -15,6 +16,7 @@ export function TranslationPage() {
       <TranslationMode />
       <CustomAutoTranslateShortcutKey />
       <RequestRate />
+      <RequestBatch />
       <CustomTranslationStyle />
       <AutoTranslateWebsitePatterns />
       <AutoTranslateLanguages />

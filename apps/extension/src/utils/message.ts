@@ -1,6 +1,6 @@
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
-import type { BatchTranslationConfig } from '@/types/config/translate'
+import type { RequestBatchConfig } from '@/types/config/translate'
 import type { ProxyRequest, ProxyResponse } from '@/types/proxy-fetch'
 import { defineExtensionMessaging } from '@webext-core/messaging'
 
@@ -24,7 +24,8 @@ interface ProtocolMap {
   returnPinState: (data: { isPinned: boolean }) => void
   // request
   enqueueTranslateRequest: (data: { text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string }) => Promise<string>
-  setTranslateRequestQueueConfig: (data: { rate?: number, capacity?: number, batchConfig?: Partial<BatchTranslationConfig> }) => void
+  setTranslateRequestQueueConfig: (data: { rate?: number, capacity?: number }) => void
+  setTranslateRequestBatchConfig: (data: Partial<RequestBatchConfig>) => void
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // cache management

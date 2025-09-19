@@ -1,4 +1,4 @@
-import type { BatchConfig, BatchQueueOptions, BatchTask } from './batch-types'
+import type { BatchQueueOptions, BatchTask } from './batch-types'
 import type { TranslationTask } from './task-queue'
 import { deepmerge } from 'deepmerge-ts'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
@@ -14,13 +14,9 @@ export class BatchQueue {
   private bucketTokens: number
   private lastRefill: number
 
-  private batchConfig: BatchConfig
-
   constructor(
     private options: BatchQueueOptions,
-    batchConfig: BatchConfig,
   ) {
-    this.batchConfig = batchConfig
     this.bucketTokens = options.capacity
     this.lastRefill = Date.now()
     this.waitingQueue = new BinaryHeapPQ<BatchTask & { hash: string }>()
@@ -177,9 +173,5 @@ export class BatchQueue {
       this.bucketTokens = options.capacity
       this.lastRefill = Date.now()
     }
-  }
-
-  setBatchConfig(config: Partial<BatchConfig>) {
-    this.batchConfig = { ...this.batchConfig, ...config }
   }
 }

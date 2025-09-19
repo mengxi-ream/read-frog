@@ -155,6 +155,15 @@ options:
       rate:
         title: Average Requests Per Second
         description: Average requests per second, but allows configuring a maximum burst count to temporarily send excess requests
+    requestBatchConfig:
+      title: Batch Translation
+      description: Configure character limits and maximum paragraph count for batch translation
+      batchCharacters:
+        title: Maximum Characters
+        description: Maximum number of characters allowed per batch request to control the content volume of each translation
+      batchSize:
+        title: Maximum Paragraph Count
+        description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
     alwaysTranslate:
       title: Always Translate
       description: Always translate this website

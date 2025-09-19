@@ -15,15 +15,14 @@ export interface BatchTask {
 }
 
 export interface BatchQueueOptions {
-  rate: number // tokens/sec (沿用现有)
-  capacity: number // token bucket size (沿用现有)
-  timeoutMs: number // 批次超时时间
-  maxRetries: number // 批次最大重试次数
-  baseRetryDelayMs: number // 重试延迟基数
+  rate: number // tokens/sec
+  capacity: number // token bucket size
+  timeoutMs: number // batch timeout
+  maxRetries: number // max retry count
+  baseRetryDelayMs: number // base retry delay
 }
 
 export interface BatchConfig {
-  maxCharacters: number // 单个batch最大字符数
-  maxDelay: number // 最大等待时间(ms)
-  minBatchSize: number // 最小batch大小
+  batchCharacters: number // max characters per batch
+  batchSize: number // max batch size
 }
