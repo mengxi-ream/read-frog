@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.10.3
+
+### Patch Changes
+
+- [#509](https://github.com/mengxi-ream/read-frog/pull/509) [`6928f28`](https://github.com/mengxi-ream/read-frog/commit/6928f28060107cdb4f9fe91718b30e818f535e5f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: provider selector in side content
+
 ## 1.10.2
 
 ### Patch Changes
