@@ -80,6 +80,13 @@ export class BatchQueue {
   private async executeBatch(batch: BatchTask & { hash: string }) {
     let timeoutId: NodeJS.Timeout | null = null
 
+    const clearTimer = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        timeoutId = null
+      }
+    }
+
     try {
       const timeoutPromise = new Promise<never>((_, reject) => {
         timeoutId = setTimeout(() => {
@@ -92,18 +99,20 @@ export class BatchQueue {
         timeoutPromise,
       ])
 
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-        timeoutId = null
+      clearTimer()
+
+      if (!results) {
+        throw new Error('Translation results are undefined')
       }
 
-      await this.handleBatchSuccess(batch, results ?? [])
+      if (results.length !== batch.tasks.length) {
+        throw new Error(`Translation count mismatch: expected ${batch.tasks.length}, got ${results.length}`)
+      }
+
+      batch.tasks.forEach((task, index) => task.resolve?.(results[index]))
     }
     catch (error) {
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-        timeoutId = null
-      }
+      clearTimer()
 
       if (batch.retryCount < this.options.maxRetries) {
         batch.retryCount++
@@ -123,9 +132,8 @@ export class BatchQueue {
       }
     }
     finally {
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
+      clearTimer()
+
       this.executingBatches.delete(batch.hash)
       this.schedule()
     }
@@ -154,13 +162,6 @@ export class BatchQueue {
     )
 
     return await Promise.all(translationPromises)
-  }
-
-  private async handleBatchSuccess(batch: BatchTask, results: string[]): Promise<void> {
-    if (results.length !== batch.tasks.length) {
-      throw new Error(`Translation count mismatch: expected ${batch.tasks.length}, got ${results.length}`)
-    }
-    batch.tasks.forEach((task, index) => task.resolve?.(results[index]))
   }
 
   private generateBatchHash(batch: BatchTask): string {
