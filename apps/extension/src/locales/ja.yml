@@ -159,7 +159,7 @@ options:
       description: バッチ翻訳時の文字数制限と最大段落数を設定
       batchCharacters:
         title: 最大文字数
-        description: バッチリクエストあたりの最大文字数、各翻訳のコンテンツ量を制御します
+        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します
       batchSize:
         title: 最大段落数
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
