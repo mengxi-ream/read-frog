@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.10.2
+
+### Patch Changes
+
+- [#506](https://github.com/mengxi-ream/read-frog/pull/506) [`5eff186`](https://github.com/mengxi-ream/read-frog/commit/5eff186707bad1aaf681cd871deb965a01e1368d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: static import migrations in service worker
+
+- [#508](https://github.com/mengxi-ream/read-frog/pull/508) [`bf0b7cd`](https://github.com/mengxi-ream/read-frog/commit/bf0b7cd0178758706c2e98f7f25e23e6de59e310) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add tensdaq provider
+
 ## 1.10.1
 
 ### Patch Changes
