@@ -72,9 +72,7 @@ export async function setUpRequestQueue() {
 
   onMessage('setTranslateRequestQueueConfig', (message) => {
     const { data } = message
-    if (data.rate !== undefined || data.capacity !== undefined) {
-      batchQueue.setQueueOptions(data)
-    }
+    batchQueue.setQueueOptions(data)
   })
 
   onMessage('setTranslateRequestBatchConfig', (message) => {

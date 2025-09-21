@@ -2,7 +2,9 @@ import type { BatchQueue } from './batch-queue'
 import type { BatchConfig, BatchTask, TranslationTask } from './types'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
+import { deepmerge } from 'deepmerge-ts'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { requestBatchConfigSchema } from '@/types/config/translate'
 import { BinaryHeapPQ } from './priority-queue'
 
 interface PendingBatch {
@@ -11,14 +13,14 @@ interface PendingBatch {
   characters: number
   langConfig: Config['language']
   providerConfig: ProviderConfig
-  timer: NodeJS.Timeout
+  timer: ReturnType<typeof setTimeout>
   createdAt: number
 }
 
 export class TaskQueue {
   private waitingQueue: BinaryHeapPQ<TranslationTask & { hash: string }>
   private waitingTasks = new Map<string, TranslationTask>()
-  private nextScheduleTimer: NodeJS.Timeout | null = null
+  private nextScheduleTimer: ReturnType<typeof setTimeout> | null = null
   private batchQueue: BatchQueue | null = null
   private batchConfig: BatchConfig
   private pendingBatchMap = new Map<string, PendingBatch>()
@@ -30,6 +32,10 @@ export class TaskQueue {
 
   setBatchQueue(batchQueue: BatchQueue): void {
     this.batchQueue = batchQueue
+    // If there are pending tasks, schedule them now
+    if (!this.isEmpty()) {
+      this.schedule()
+    }
   }
 
   enqueue(task: TranslationTask): Promise<string> {
@@ -81,7 +87,8 @@ export class TaskQueue {
 
   private schedule() {
     if (!this.batchQueue) {
-      throw new Error('Batch queue is not set')
+      // Batch queue not set yet, skip scheduling
+      return
     }
 
     if (this.nextScheduleTimer) {
@@ -244,6 +251,10 @@ export class TaskQueue {
   }
 
   setBatchConfig(config: Partial<BatchConfig>) {
-    this.batchConfig = { ...this.batchConfig, ...config }
+    const parseConfigStatus = requestBatchConfigSchema.partial().safeParse(config)
+    if (parseConfigStatus.error) {
+      throw new Error(parseConfigStatus.error.issues[0].message)
+    }
+    this.batchConfig = deepmerge(this.batchConfig, config) as BatchConfig
   }
 }

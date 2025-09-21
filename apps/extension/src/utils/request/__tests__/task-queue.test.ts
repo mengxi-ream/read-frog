@@ -412,10 +412,13 @@ describe('taskQueue – error handling', () => {
     taskQueue = new TaskQueue(baseBatchConfig)
   })
 
-  it('throws error when batch queue is not set', () => {
+  it('handles gracefully when batch queue is not set', () => {
     const task = createTranslationTask('hello')
 
-    expect(() => void taskQueue.enqueue(task)).toThrow('Batch queue is not set')
+    // Should not throw error, task should be queued but not processed
+    expect(() => void taskQueue.enqueue(task)).not.toThrow()
+    expect(taskQueue.size()).toBe(1)
+    expect(taskQueue.isEmpty()).toBe(false)
   })
 })
 

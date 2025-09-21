@@ -1,6 +1,7 @@
 import type { BatchQueueOptions, BatchTask, TranslationTask } from './types'
 import { deepmerge } from 'deepmerge-ts'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { requestQueueConfigSchema } from '@/types/config/translate'
 import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
 import { executeTranslate } from '@/utils/host/translate/translate-text'
 import { BinaryHeapPQ } from './priority-queue'
@@ -9,7 +10,7 @@ export class BatchQueue {
   private waitingQueue: BinaryHeapPQ<BatchTask & { hash: string }>
   private waitingBatches = new Map<string, BatchTask>()
   private executingBatches = new Map<string, BatchTask>()
-  private nextScheduleTimer: NodeJS.Timeout | null = null
+  private nextScheduleTimer: ReturnType<typeof setTimeout> | null = null
 
   private bucketTokens: number
   private lastRefill: number
@@ -78,7 +79,7 @@ export class BatchQueue {
   }
 
   private async executeBatch(batch: BatchTask & { hash: string }) {
-    let timeoutId: NodeJS.Timeout | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
 
     const clearTimer = () => {
       if (timeoutId) {
@@ -148,6 +149,10 @@ export class BatchQueue {
   }
 
   private async executeBatchTranslation(tasks: TranslationTask[]): Promise<string[]> {
+    if (tasks.length === 0) {
+      return []
+    }
+
     const { langConfig, providerConfig } = tasks[0]
 
     if (isLLMTranslateProviderConfig(providerConfig)) {
@@ -169,6 +174,10 @@ export class BatchQueue {
   }
 
   setQueueOptions(options: Partial<BatchQueueOptions>) {
+    const parseConfigStatus = requestQueueConfigSchema.partial().safeParse(options)
+    if (parseConfigStatus.error) {
+      throw new Error(parseConfigStatus.error.issues[0].message)
+    }
     this.options = deepmerge(this.options, options) as BatchQueueOptions
     if (options.capacity) {
       this.bucketTokens = options.capacity
