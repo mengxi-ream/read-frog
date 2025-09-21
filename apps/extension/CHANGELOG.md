@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.10.1
+
+### Patch Changes
+
+- [#504](https://github.com/mengxi-ream/read-frog/pull/504) [`d48a78d`](https://github.com/mengxi-ream/read-frog/commit/d48a78d966d3f72a19f765035ee1b9f4e706c1d9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: add 302 ai to default
+
 ## 1.10.0
 
 ### Minor Changes
