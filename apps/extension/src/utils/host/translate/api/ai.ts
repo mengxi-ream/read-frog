@@ -25,9 +25,9 @@ export async function aiTranslate(
     },
   }
 
-  const prompt = await options?.isBatch
-    ? getBatchTranslatePrompt(targetLangName, text)
-    : getTranslatePrompt(targetLangName, text)
+  const prompt = options?.isBatch
+    ? await getBatchTranslatePrompt(targetLangName, text)
+    : await getTranslatePrompt(targetLangName, text)
 
   const { text: translatedText } = await generateText({
     model,

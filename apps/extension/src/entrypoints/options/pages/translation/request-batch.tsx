@@ -4,7 +4,7 @@ import { Input } from '@repo/ui/components/input'
 import { useAtom } from 'jotai'
 import { toast } from 'sonner'
 import { requestBatchConfigSchema } from '@/types/config/translate'
-import { configFields } from '@/utils/atoms/config'
+import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MIN_BATCH_CHARACTERS, MIN_BATCH_SIZE } from '@/utils/constants/translate'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
@@ -59,7 +59,7 @@ const propertyMinValue = {
 }
 
 function BatchNumberSelector({ property }: { property: KeyOfRequestBatchConfig }) {
-  const [translateConfig, setTranslateConfig] = useAtom(configFields.translate)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const { requestBatchConfig } = translateConfig
 
   const currentConfigValue = requestBatchConfig[property]
