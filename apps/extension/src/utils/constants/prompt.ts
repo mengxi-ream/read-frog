@@ -24,7 +24,7 @@ export const DEFAULT_BATCH_TRANSLATE_PROMPT = `## Multi-paragraph Translation Ru
 
 ## OUTPUT FORMAT:
 - **Single paragraph input** → Output translation directly (no separators, no extra text)
-- **Multi-paragraph input** → Use %% as paragraph separator between translations
+- **Multi-paragraph input (input uses %% separators)** → Use %% as paragraph separator between translations
 
 ## Examples
 ### Multi-paragraph Input:
