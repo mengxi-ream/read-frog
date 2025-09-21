@@ -1,6 +1,7 @@
 import type { BatchQueueOptions, BatchTask, TranslationTask } from './types'
 import { deepmerge } from 'deepmerge-ts'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
 import { executeTranslate } from '@/utils/host/translate/translate-text'
 import { BinaryHeapPQ } from './priority-queue'
 
@@ -151,9 +152,9 @@ export class BatchQueue {
 
     if (isLLMTranslateProviderConfig(providerConfig)) {
       const inputs = tasks.map(task => task.text)
-      const text = inputs.join('%%')
+      const text = inputs.join(BATCH_SEPARATOR)
       const result = await executeTranslate(text, langConfig, providerConfig, { isBatch: true })
-      return result.split('%%').map(t => t.trim())
+      return result.split(BATCH_SEPARATOR).map(t => t.trim())
     }
 
     const translationPromises = tasks.map(task =>

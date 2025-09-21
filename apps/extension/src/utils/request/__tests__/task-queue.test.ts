@@ -2,6 +2,7 @@ import type { BatchConfig, BatchQueueOptions, TranslationTask } from '../types'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
 import { BatchQueue } from '../batch-queue'
 import { TaskQueue } from '../task-queue'
 
@@ -90,10 +91,10 @@ function createTranslationTask(
 // Mock the executeTranslate function
 vi.mock('@/utils/host/translate/translate-text', () => ({
   executeTranslate: vi.fn().mockImplementation((text: string) => {
-    if (text.includes('%%')) {
+    if (text.includes(BATCH_SEPARATOR)) {
       // Batch translation
-      const parts = text.split('%%')
-      return Promise.resolve(parts.map(part => `translated-${part.trim()}`).join('%%'))
+      const parts = text.split(BATCH_SEPARATOR)
+      return Promise.resolve(parts.map(part => `translated-${part.trim()}`).join(BATCH_SEPARATOR))
     }
     // Single translation
     return Promise.resolve(`translated-${text}`)

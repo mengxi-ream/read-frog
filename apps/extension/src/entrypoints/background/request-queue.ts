@@ -1,4 +1,4 @@
-import type { TranslationTask } from '@/utils/request/task-queue'
+import type { TranslationTask } from '@/utils/request/types'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { db } from '@/utils/db/dexie/db'
 import { onMessage } from '@/utils/message'

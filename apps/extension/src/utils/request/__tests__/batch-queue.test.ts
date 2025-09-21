@@ -2,6 +2,7 @@ import type { BatchQueueOptions, BatchTask, TranslationTask } from '../types'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
 import { executeTranslate } from '@/utils/host/translate/translate-text'
 
 import { BatchQueue } from '../batch-queue'
@@ -249,14 +250,14 @@ describe('batchQueue – batch processing by provider type', () => {
     ]
     const batch = createBatchTask(tasks)
 
-    mockExecuteTranslate.mockResolvedValueOnce('translated-hello%%translated-world')
+    mockExecuteTranslate.mockResolvedValueOnce(`translated-hello${BATCH_SEPARATOR}translated-world`)
 
     q.enqueue(batch)
 
     const results = await Promise.all(tasks.map(t => t.promise))
     expect(results).toEqual(['translated-hello', 'translated-world'])
     expect(mockExecuteTranslate).toHaveBeenCalledWith(
-      'hello%%world',
+      `hello${BATCH_SEPARATOR}world`,
       tasks[0].langConfig,
       tasks[0].providerConfig,
       { isBatch: true },
