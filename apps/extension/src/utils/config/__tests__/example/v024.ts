@@ -1,4 +1,5 @@
 import type { TestSeriesObject } from './types'
+import type { Config } from '@/types/config/config'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
@@ -136,6 +137,10 @@ Translate to {{targetLang}}:
           capacity: 400,
           rate: 8,
         },
+        requestBatchConfig: {
+          batchCharacters: 1000,
+          batchSize: 4,
+        },
         translationNodeStyle: 'blur',
         customAutoTranslateShortcutKey: ['alt', 'b'],
       },
@@ -148,6 +153,6 @@ Translate to {{targetLang}}:
         width: 700,
       },
       selectionToolbar: { enabled: false },
-    },
+    } satisfies Config,
   },
 }
