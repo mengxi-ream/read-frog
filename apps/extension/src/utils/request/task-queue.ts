@@ -1,22 +1,9 @@
 import type { BatchQueue } from './batch-queue'
-import type { BatchConfig, BatchTask } from './batch-types'
+import type { BatchConfig, BatchTask, TranslationTask } from './types'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { BinaryHeapPQ } from './priority-queue'
-
-export interface TranslationTask {
-  id: string
-  text: string
-  hash: string
-  langConfig: Config['language']
-  providerConfig: ProviderConfig
-  scheduleAt: number
-  createdAt: number
-  resolve: (value: string) => void
-  reject: (error: Error) => void
-  promise: Promise<string>
-}
 
 interface PendingBatch {
   id: string

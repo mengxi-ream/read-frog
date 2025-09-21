@@ -1,5 +1,4 @@
-import type { BatchConfig, BatchQueueOptions } from '../batch-types'
-import type { TranslationTask } from '../task-queue'
+import type { BatchConfig, BatchQueueOptions, TranslationTask } from '../types'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

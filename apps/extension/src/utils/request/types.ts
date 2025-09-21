@@ -1,6 +1,18 @@
-import type { TranslationTask } from './task-queue'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
+
+export interface TranslationTask {
+  id: string
+  text: string
+  hash: string
+  langConfig: Config['language']
+  providerConfig: ProviderConfig
+  scheduleAt: number
+  createdAt: number
+  resolve: (value: string) => void
+  reject: (error: Error) => void
+  promise: Promise<string>
+}
 
 export interface BatchTask {
   id: string

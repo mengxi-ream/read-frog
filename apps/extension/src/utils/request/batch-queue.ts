@@ -1,5 +1,4 @@
-import type { BatchQueueOptions, BatchTask } from './batch-types'
-import type { TranslationTask } from './task-queue'
+import type { BatchQueueOptions, BatchTask, TranslationTask } from './types'
 import { deepmerge } from 'deepmerge-ts'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { executeTranslate } from '@/utils/host/translate/translate-text'

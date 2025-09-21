@@ -1,40 +1,10 @@
-import type { BatchQueueOptions, BatchTask } from '../batch-types'
-import type { TranslationTask } from '../task-queue'
+import type { BatchQueueOptions, BatchTask, TranslationTask } from '../types'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { executeTranslate } from '@/utils/host/translate/translate-text'
 
 import { BatchQueue } from '../batch-queue'
-
-// Setup to handle expected promise rejections in tests
-beforeAll(() => {
-  // Add a process-level listener for unhandled rejections
-  if (typeof process !== 'undefined') {
-    const originalListeners = process.listeners('unhandledRejection')
-
-    process.removeAllListeners('unhandledRejection')
-    process.on('unhandledRejection', (reason: any) => {
-      const message = reason?.message || String(reason)
-      const expectedErrors = [
-        'Translation failed',
-        'Always fails',
-        'timed out after',
-        'fail',
-      ]
-
-      // Only report unexpected errors
-      if (!expectedErrors.some(error => message.includes(error))) {
-        // Re-emit for other handlers
-        originalListeners.forEach((listener) => {
-          if (typeof listener === 'function') {
-            listener(reason, Promise.resolve())
-          }
-        })
-      }
-    })
-  }
-})
 
 // Mock provider configs
 const mockLLMProvider: ProviderConfig = {
@@ -96,6 +66,12 @@ function createTranslationTask(
   const promise = new Promise<string>((res, rej) => {
     resolve = res
     reject = rej
+  })
+
+  // Add immediate error handler to prevent unhandled promise rejections in tests
+  promise.catch(() => {
+    // Silently catch to prevent unhandled promise rejection warnings
+    // Tests will handle rejections explicitly using Promise.allSettled or .catch()
   })
 
   return {
@@ -380,9 +356,9 @@ describe('batchQueue – timeout handling', () => {
     await vi.advanceTimersByTimeAsync(2000)
 
     // Catch the rejection to avoid unhandled promise rejection
-    const result = await task.promise.catch(err => err)
+    const result = await task.promise.catch((err: Error) => err)
     expect(result).toBeInstanceOf(Error)
-    expect(result.message).toContain('timed out after 2000ms')
+    expect((result as Error).message).toContain('timed out after 2000ms')
   })
 
   it('resolves batch when it completes before timeout', async () => {
@@ -463,9 +439,9 @@ describe('batchQueue – retry functionality', () => {
     expect(attempts).toBe(1)
 
     // Catch the rejection to avoid unhandled promise rejection
-    const result = await task.promise.catch(err => err)
+    const result = await task.promise.catch((err: Error) => err)
     expect(result).toBeInstanceOf(Error)
-    expect(result.message).toBe('Always fails')
+    expect((result as Error).message).toBe('Always fails')
   })
 
   it('implements exponential backoff delays', async () => {
@@ -508,9 +484,9 @@ describe('batchQueue – retry functionality', () => {
     expect(attempts).toBe(3)
 
     // Catch the rejection to avoid unhandled promise rejection
-    const result = await task.promise.catch(err => err)
+    const result = await task.promise.catch((err: Error) => err)
     expect(result).toBeInstanceOf(Error)
-    expect(result.message).toBe('fail')
+    expect((result as Error).message).toBe('fail')
   })
 })
 
