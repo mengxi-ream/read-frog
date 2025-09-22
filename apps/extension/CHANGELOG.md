@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.10.4
+
+### Patch Changes
+
+- [#512](https://github.com/mengxi-ream/read-frog/pull/512) [`ea6e1a7`](https://github.com/mengxi-ream/read-frog/commit/ea6e1a7b97f6f92737f12d0e37c7aab6799009bf) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add churn feedback survey
+
 ## 1.10.3
 
 ### Patch Changes
