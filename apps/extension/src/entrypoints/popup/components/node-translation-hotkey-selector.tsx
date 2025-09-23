@@ -11,7 +11,7 @@ import { useAtom } from 'jotai'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { HOTKEY_ITEMS, HOTKEYS } from '@/utils/constants/hotkeys'
 
-export default function HotkeySelector() {
+export default function NodeTranslationHotkeySelector() {
   const [translateConfig, setTranslateConfig] = useAtom(
     configFieldsAtomMap.translate,
   )
@@ -24,7 +24,7 @@ export default function HotkeySelector() {
       >
         <SelectTrigger
           size="sm"
-          className="py-0! h-5! ring-none cursor-pointer truncate border-none bg-transparent pl-0 text-[13px] font-medium shadow-none hover:bg-transparent focus-visible:border-none focus-visible:ring-0 dark:bg-transparent dark:hover:bg-transparent"
+          className="py-3.5 -my-3.5 px-2 -ml-2 h-5! ring-none cursor-pointer truncate border-none text-[13px] font-medium shadow-none focus-visible:border-none focus-visible:ring-0 bg-transparent rounded-md"
         >
           <div className="truncate">
             {i18n.t('popup.hover')}
