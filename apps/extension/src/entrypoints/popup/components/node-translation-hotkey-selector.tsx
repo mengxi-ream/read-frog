@@ -24,7 +24,7 @@ export default function NodeTranslationHotkeySelector() {
       >
         <SelectTrigger
           size="sm"
-          className="py-3.5 -my-3.5 px-2 -ml-2 h-5! ring-none cursor-pointer truncate border-none text-[13px] font-medium shadow-none focus-visible:border-none focus-visible:ring-0 bg-transparent rounded-md"
+          className="pt-3.5 -mt-3.5 pb-4 -mb-4 px-2 -ml-2 h-5! ring-none cursor-pointer truncate border-none text-[13px] font-medium shadow-none focus-visible:border-none focus-visible:ring-0 bg-transparent rounded-md"
         >
           <div className="truncate">
             {i18n.t('popup.hover')}
