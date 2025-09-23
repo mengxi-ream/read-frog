@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.10.5
+
+### Patch Changes
+
+- [#516](https://github.com/mengxi-ream/read-frog/pull/516) [`1884fb0`](https://github.com/mengxi-ream/read-frog/commit/1884fb0e3f057006464e8ae88754229c309da40b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: complete the hash key for translation
+
+- [#515](https://github.com/mengxi-ream/read-frog/pull/515) [`81b0183`](https://github.com/mengxi-ream/read-frog/commit/81b018330134e3c552302fc1bdf9e9e2f6d91e4a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: crash when delete the first provider
+
+- [#516](https://github.com/mengxi-ream/read-frog/pull/516) [`1884fb0`](https://github.com/mengxi-ream/read-frog/commit/1884fb0e3f057006464e8ae88754229c309da40b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: translate code inside a paragraph
+
 ## 1.10.4
 
 ### Patch Changes
