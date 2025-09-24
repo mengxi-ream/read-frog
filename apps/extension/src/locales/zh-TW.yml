@@ -31,6 +31,10 @@ options:
   setAPIKeyWarning:
     please: 請在
     page: 頁設置 API Key
+  betaExperience:
+    title: Beta 體驗
+    description: 啟用實驗性功能和早期訪問新功能。這些功能可能不穩定或不完整。
+    enabled: 啟用 Beta 體驗
   apiProviders:
     title: API 提供商
     description: 配置用於翻譯和閱讀功能的 API 提供商。我們內置了 20 多個 API 提供商，並且支持任何 OpenAI 兼容的 API 提供商。

@@ -31,6 +31,10 @@ options:
   setAPIKeyWarning:
     please: Please set API Key on
     page: page
+  betaExperience:
+    title: Beta Experience
+    description: Enable experimental features and early access to new functionality. These features may be unstable or incomplete.
+    enabled: Enable Beta Experience
   apiProviders:
     title: API Providers
     description: Configure the API providers for translation and reading functions here. We have 20+ API providers built-in and support any OpenAI compatible API providers.

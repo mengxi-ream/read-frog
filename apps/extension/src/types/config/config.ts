@@ -30,6 +30,11 @@ const sideContentSchema = z.object({
   width: z.number().min(MIN_SIDE_CONTENT_WIDTH),
 })
 
+// beta experience schema
+const betaExperienceSchema = z.object({
+  enabled: z.boolean(),
+})
+
 // Complete config schema
 export const configSchema = z.object({
   language: languageSchema,
@@ -39,6 +44,7 @@ export const configSchema = z.object({
   floatingButton: floatingButtonSchema,
   selectionToolbar: selectionToolbarSchema,
   sideContent: sideContentSchema,
+  betaExperience: betaExperienceSchema,
 }).superRefine((data, ctx) => {
   const providerIdsSet = new Set(data.providersConfig.map(p => p.id))
   const providerIds = Array.from(providerIdsSet)

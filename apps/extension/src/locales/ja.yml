@@ -30,6 +30,10 @@ options:
   setAPIKeyWarning:
     please: 設定ページで
     page: APIキーを設定してください
+  betaExperience:
+    title: Beta 体験
+    description: 実験的機能と新機能への早期アクセスを有効にします。これらの機能は不安定または不完全な場合があります。
+    enabled: Beta 体験を有効にする
   apiProviders:
     title: APIプロバイダー
     description: 翻訳および読解機能用のAPIプロバイダーを設定。20以上のAPIプロバイダーに加えて、OpenAI互換のAPIプロバイダーもサポートしています。
