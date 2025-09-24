@@ -1,5 +1,4 @@
 import type { TestSeriesObject } from './types'
-import type { Config } from '@/types/config/config'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
@@ -149,7 +148,7 @@ Translate to {{targetLang}}:
         width: 700,
       },
       selectionToolbar: { enabled: false },
-    } satisfies Config,
+    },
   },
   'config-from-v022': {
     description: 'Add provider config',
