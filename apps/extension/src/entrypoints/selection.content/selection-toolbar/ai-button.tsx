@@ -31,7 +31,7 @@ export function AiButton() {
   }
 
   // eslint-disable-next-line turbo/no-undeclared-env-vars
-  if (!import.meta.env.DEV || !betaExperienceConfig.enabled) {
+  if (!import.meta.env.DEV && !betaExperienceConfig.enabled) {
     return null
   }
 
