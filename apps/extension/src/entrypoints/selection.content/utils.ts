@@ -1,38 +1,37 @@
 /**
- * Get the context sentences for the selected text
- * TODO: this is a simple version, need to improve
+ * Extract context sentences from text based on selection
+ * This function handles pure text processing without DOM dependencies
  */
-export function getContext(selectionRange: Range) {
-  const container = selectionRange.commonAncestorContainer
-  const root = container.nodeType === Node.TEXT_NODE
-    ? container.parentElement
-    : (container as Element | null)
-
-  if (!root) {
-    return { before: '', selection: '', after: '' }
+export function extractTextContext(fullText: string, selection: string) {
+  // Handle empty text case
+  if (!fullText) {
+    return { before: '', selection, after: '' }
   }
 
-  const fullText = root.textContent ?? ''
-  const selection = selectionRange.toString()
+  // Handle empty selection case
+  if (selection === '') {
+    return { before: fullText, selection: '', after: '' }
+  }
+
   const index = fullText.indexOf(selection)
 
   if (index === -1) {
     return { before: '', selection, after: '' }
   }
 
-  // 定义句子边界
-  const boundaries = /[.!?。！？]/g
+  // Define sentence boundaries
+  const boundaries = /[.!?。！？]/
 
-  // 找到前一个边界
+  // Find previous boundary
   let start = 0
-  for (let i = index; i >= 0; i--) {
+  for (let i = index - 1; i >= 0; i--) {
     if (boundaries.test(fullText[i])) {
       start = i + 1
       break
     }
   }
 
-  // 找到后一个边界
+  // Find next boundary
   let end = fullText.length
   for (let i = index + selection.length; i < fullText.length; i++) {
     if (boundaries.test(fullText[i])) {
@@ -48,6 +47,22 @@ export function getContext(selectionRange: Range) {
   const after = sentence.slice(relIndex + selection.length)
 
   return { before, selection, after }
+}
+
+/**
+ * Get the context sentences for the selected text
+ * TODO: this is a simple version, need to improve
+ */
+export function getContext(selectionRange: Range) {
+  const container = selectionRange.commonAncestorContainer
+  const root = container.nodeType === Node.TEXT_NODE
+    ? container.parentElement
+    : (container as Element | null)
+
+  const fullText = root?.textContent ?? ''
+  const selection = selectionRange.toString()
+
+  return extractTextContext(fullText, selection)
 }
 
 interface Context {
