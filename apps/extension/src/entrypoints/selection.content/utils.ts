@@ -3,19 +3,19 @@
  * This function handles pure text processing without DOM dependencies
  */
 export function extractTextContext(fullText: string, selection: string) {
-  // Handle empty text case
-  if (!fullText) {
+  // Handle edge cases: empty text or empty selection
+  if (selection === '' || fullText === '') {
     return { before: '', selection, after: '' }
-  }
-
-  // Handle empty selection case
-  if (selection === '') {
-    return { before: fullText, selection: '', after: '' }
   }
 
   const index = fullText.indexOf(selection)
 
   if (index === -1) {
+    return { before: '', selection, after: '' }
+  }
+
+  // Handle case where selection equals full text
+  if (index === 0 && selection.length === fullText.length) {
     return { before: '', selection, after: '' }
   }
 
