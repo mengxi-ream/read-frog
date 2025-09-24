@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.10.7
+
+### Patch Changes
+
+- [#528](https://github.com/mengxi-ream/read-frog/pull/528) [`39dd45b`](https://github.com/mengxi-ream/read-frog/commit/39dd45b08ac45570d0b9929fd3a1dc6e27bd30ce) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add openrouter provider
+
 ## 1.10.6
 
 ### Patch Changes
