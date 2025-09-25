@@ -80,5 +80,44 @@ describe('extractTextContext', () => {
         after: '',
       })
     })
+
+    it('should handle selection with leading space when there is text before it', () => {
+      const fullText = 'The first sentence. This is a test sentence. Another sentence here.'
+      const selection = ' This is a test sentence.'
+
+      const result = extractTextContext(fullText, selection)
+
+      expect(result).toEqual({
+        before: '',
+        selection: ' This is a test sentence.',
+        after: '',
+      })
+    })
+
+    it('should handle selection with leading space but without quotes', () => {
+      const fullText = 'The first sentence. This is a test sentence. Another sentence here.'
+      const selection = ' This is a test sentence'
+
+      const result = extractTextContext(fullText, selection)
+
+      expect(result).toEqual({
+        before: '',
+        selection: ' This is a test sentence',
+        after: '',
+      })
+    })
+
+    it('should handle selection that spans multiple sentences', () => {
+      const fullText = 'The first sentence. This is a test sentence. Another sentence here.'
+      const selection = 'This is a test sentence. Another sentence here.'
+
+      const result = extractTextContext(fullText, selection)
+
+      expect(result).toEqual({
+        before: '',
+        selection: 'This is a test sentence. Another sentence here.',
+        after: '',
+      })
+    })
   })
 })

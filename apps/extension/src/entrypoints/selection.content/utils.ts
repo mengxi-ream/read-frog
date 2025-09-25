@@ -3,48 +3,50 @@
  * This function handles pure text processing without DOM dependencies
  */
 export function extractTextContext(fullText: string, selection: string) {
-  // Handle edge cases: empty text or empty selection
-  if (selection === '' || fullText === '') {
+  // Handle edge cases
+  if (selection === '' || fullText === '' || !fullText.includes(selection)) {
     return { before: '', selection, after: '' }
   }
 
   const index = fullText.indexOf(selection)
 
-  if (index === -1) {
-    return { before: '', selection, after: '' }
-  }
-
-  // Handle case where selection equals full text
+  // If selection is the entire text, return it with no context
   if (index === 0 && selection.length === fullText.length) {
     return { before: '', selection, after: '' }
   }
 
-  // Define sentence boundaries
-  const boundaries = /[.!?。！？]/
+  // Find sentence boundaries around the selection
+  const sentenceEndings = /[.!?。！？]/
 
-  // Find previous boundary
-  let start = 0
+  // Find the start of the current sentence (before the selection)
+  let sentenceStart = 0
   for (let i = index - 1; i >= 0; i--) {
-    if (boundaries.test(fullText[i])) {
-      start = i + 1
+    if (sentenceEndings.test(fullText[i])) {
+      sentenceStart = i + 1
       break
     }
   }
 
-  // Find next boundary
-  let end = fullText.length
+  // Find the end of the current sentence (after the selection)
+  let sentenceEnd = fullText.length
   for (let i = index + selection.length; i < fullText.length; i++) {
-    if (boundaries.test(fullText[i])) {
-      end = i + 1
+    if (sentenceEndings.test(fullText[i])) {
+      sentenceEnd = i + 1
       break
     }
   }
 
-  const sentence = fullText.slice(start, end).trim()
-  const relIndex = sentence.indexOf(selection)
+  // Extract the sentence containing the selection
+  const sentence = fullText.slice(sentenceStart, sentenceEnd)
+  const relativeIndex = sentence.indexOf(selection)
 
-  const before = sentence.slice(0, relIndex)
-  const after = sentence.slice(relIndex + selection.length)
+  // If selection is at the beginning or end of sentence, return empty context
+  if (relativeIndex === 0 || relativeIndex + selection.length === sentence.length) {
+    return { before: '', selection, after: '' }
+  }
+
+  const before = sentence.slice(0, relativeIndex)
+  const after = sentence.slice(relativeIndex + selection.length)
 
   return { before, selection, after }
 }
