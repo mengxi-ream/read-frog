@@ -1,6 +1,7 @@
 import type { Locale } from '@/i18n/routing'
 import { setRequestLocale } from 'next-intl/server'
 import { use } from 'react'
+import { SupportProviders } from '@/components/features/support-providers'
 import { Demo } from '@/components/hero/demo'
 import { Header } from '@/components/hero/header'
 import { Testimonial } from '@/components/social/testimonial'
@@ -17,6 +18,7 @@ export default function HomePage({
     <main className="flex flex-1 flex-col dark:bg-[#18181b]">
       <Header />
       <Demo />
+      <SupportProviders />
       <Testimonial />
     </main>
   )
