@@ -52,7 +52,7 @@ options:
       title: 添加新提供商
       description: 选择要添加到配置中的 API 提供商
       groups:
-        llmProviders: LLM 提供商
+        llmProviders: 内置 LLM 提供商
         customProviders: OpenAI 兼容自定义提供商
         pureTranslationProviders: 纯翻译提供商
     form:
@@ -82,7 +82,7 @@ options:
         openai: 提供 GPT-4o 等模型
         deepseek: 推荐在中国使用
         openrouter: 多个 LLM 提供商的统一接口，按使用量付费
-        ollama: 本地大模型服务
+        ollama: 在本地机器上运行大语言模型，确保完全隐私
         gemini: 具有先进推理能力的谷歌旗舰 AI 模型
         anthropic: 以安全性和推理能力著称的 Claude 模型
         xai: 马斯克的 AI 公司，提供具有实时数据访问能力的 Grok 模型

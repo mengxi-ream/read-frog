@@ -52,7 +52,7 @@ options:
       title: 新增提供商
       description: 選擇要新增到配置中的 API 提供商
       groups:
-        llmProviders: LLM 提供商
+        llmProviders: 內建 LLM 提供商
         customProviders: OpenAI 相容自定義提供商
         pureTranslationProviders: 純翻譯提供商
     form:

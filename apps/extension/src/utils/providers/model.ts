@@ -18,6 +18,7 @@ import { createTogetherAI } from '@ai-sdk/togetherai'
 import { createVercel } from '@ai-sdk/vercel'
 import { createXai } from '@ai-sdk/xai'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
+import { createOllama } from 'ai-sdk-ollama'
 import { isCustomLLMProvider } from '@/types/config/provider'
 import { getLLMTranslateProvidersConfig, getProviderConfigById } from '../config/helpers'
 import { CONFIG_STORAGE_KEY } from '../constants/config'
@@ -44,6 +45,7 @@ interface ProviderFactoryMap {
   replicate: typeof createReplicate
   perplexity: typeof createPerplexity
   vercel: typeof createVercel
+  ollama: typeof createOllama
 }
 
 const CREATE_AI_MAPPER: ProviderFactoryMap = {
@@ -68,6 +70,7 @@ const CREATE_AI_MAPPER: ProviderFactoryMap = {
   replicate: createReplicate,
   perplexity: createPerplexity,
   vercel: createVercel,
+  ollama: createOllama,
 }
 
 async function getLanguageModelById(providerId: string, modelType: 'read' | 'translate') {

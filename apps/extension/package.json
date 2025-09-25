@@ -1,7 +1,7 @@
 {
   "name": "@read-frog/extension",
   "type": "module",
-  "version": "1.10.7",
+  "version": "1.10.8",
   "private": true,
   "description": "Read Frog browser extension for language learning",
   "scripts": {
@@ -53,6 +53,7 @@
     "@webext-core/messaging": "^2.2.0",
     "@wxt-dev/i18n": "^0.2.4",
     "ai": "^5.0.29",
+    "ai-sdk-ollama": "^0.8.1",
     "better-auth": "^1.2.12",
     "case-anything": "^3.1.2",
     "class-variance-authority": "^0.7.1",

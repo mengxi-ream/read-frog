@@ -51,7 +51,7 @@ options:
       title: 새 제공업체 추가
       description: 구성에 추가할 API 제공업체를 선택하세요
       groups:
-        llmProviders: LLM 제공업체
+        llmProviders: 내장 LLM 제공업체
         customProviders: OpenAI 호환 사용자 정의 제공업체
         pureTranslationProviders: 순수 번역 제공업체
     form:

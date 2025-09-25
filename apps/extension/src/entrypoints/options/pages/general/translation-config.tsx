@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@repo/ui/components/select'
+import { cn } from '@repo/ui/lib/utils'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
@@ -159,7 +160,7 @@ function TranslateModelSelector() {
               </SelectContent>
             </Select>
           )}
-      <div className="mt-0.5 flex items-center space-x-2">
+      <div className={cn('mt-0.5 flex items-center space-x-2', provider === 'openaiCompatible' && 'hidden')}>
         <Checkbox
           id={`isCustomModel-translate-${provider}`}
           checked={modelConfig.isCustomModel}

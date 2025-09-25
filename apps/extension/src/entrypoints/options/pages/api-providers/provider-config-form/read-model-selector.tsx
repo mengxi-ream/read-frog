@@ -2,6 +2,7 @@ import type { APIProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { Checkbox } from '@repo/ui/components/checkbox'
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/select'
+import { cn } from '@repo/ui/lib/utils'
 import { useStore } from '@tanstack/react-form'
 import { useSetAtom } from 'jotai'
 import { toast } from 'sonner'
@@ -51,7 +52,7 @@ export const ReadModelSelector = withForm({
         <div className="mt-2.5 flex items-center space-x-2">
           <form.Field name="models.read">
             { field => (
-              <>
+              <div className={cn('flex items-center space-x-2', providerConfig.provider === 'openaiCompatible' && 'hidden')}>
                 <Checkbox
                   id="isCustomModel-read"
                   checked={field.state.value.isCustomModel}
@@ -93,7 +94,7 @@ export const ReadModelSelector = withForm({
                 >
                   {i18n.t('options.general.readConfig.model.enterCustomModel')}
                 </label>
-              </>
+              </div>
             )}
           </form.Field>
         </div>

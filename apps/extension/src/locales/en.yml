@@ -52,7 +52,7 @@ options:
       title: Add New Provider
       description: Choose an API provider to add to your configuration.
       groups:
-        llmProviders: LLM Providers
+        llmProviders: Built-in LLM Providers
         customProviders: OpenAI Compatible Custom Providers
         pureTranslationProviders: Pure Translation Providers
     form:
@@ -82,7 +82,7 @@ options:
         openai: Provides models like GPT-4o
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
-        ollama: Local LLM
+        ollama: Run large language models locally on your machine for complete privacy
         gemini: Google's flagship AI models with advanced reasoning capabilities
         anthropic: Claude models known for safety and reasoning excellence
         xai: Elon Musk's AI company offering Grok models with real-time data access

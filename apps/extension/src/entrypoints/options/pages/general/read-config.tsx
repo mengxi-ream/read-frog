@@ -2,6 +2,7 @@ import { i18n } from '#imports'
 import { Checkbox } from '@repo/ui/components/checkbox'
 import { Input } from '@repo/ui/components/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@repo/ui/components/select'
+import { cn } from '@repo/ui/lib/utils'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
 import ReadProviderSelector from '@/components/provider/read-provider-selector'
@@ -103,7 +104,7 @@ function ReadModelSelector() {
               </SelectContent>
             </Select>
           )}
-      <div className="mt-0.5 flex items-center space-x-2">
+      <div className={cn('mt-0.5 flex items-center space-x-2', provider === 'openaiCompatible' && 'hidden')}>
         <Checkbox
           id={`isCustomModel-read-${provider}`}
           checked={modelConfig.isCustomModel}

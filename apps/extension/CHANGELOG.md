@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.10.8
+
+### Patch Changes
+
+- [#536](https://github.com/mengxi-ream/read-frog/pull/536) [`8e61c09`](https://github.com/mengxi-ream/read-frog/commit/8e61c098ec32906655f03050eedab8c564f5b4d7) Thanks [@sedationh](https://github.com/sedationh)! - feat: add beta experience configuration and UI component
+
+- [#541](https://github.com/mengxi-ream/read-frog/pull/541) [`f7eb724`](https://github.com/mengxi-ream/read-frog/commit/f7eb7246b8ce5f16ce305bc0bdd6d031cbbee500) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add ollama provider
+
+- [#539](https://github.com/mengxi-ream/read-frog/pull/539) [`3625a9b`](https://github.com/mengxi-ream/read-frog/commit/3625a9b331a3e4be0c9ee4da2ecdd50aa59fea57) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: rename openai compatible provider to custom provider
+
+- [#496](https://github.com/mengxi-ream/read-frog/pull/496) [`3908f22`](https://github.com/mengxi-ream/read-frog/commit/3908f2207334865451226c62ca2335ce734b3571) Thanks [@sedationh](https://github.com/sedationh)! - feat: implement context extraction for selected text in AI popover
+
+- [#532](https://github.com/mengxi-ream/read-frog/pull/532) [`48fd692`](https://github.com/mengxi-ream/read-frog/commit/48fd692aece40504fb8102ebfc83af02aef44176) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: treat inline node with only one block node child as inline node
+
 ## 1.10.7
 
 ### Patch Changes

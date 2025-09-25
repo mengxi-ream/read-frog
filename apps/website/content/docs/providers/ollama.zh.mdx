@@ -1,6 +1,6 @@
 ---
 title: Ollama
-description: 陪读蛙可以借助本地部署的 Ollama 服务器，来实现本地 AI 离线翻译功能
+description: 陪读蛙可以借助本地部署的 Ollama 服务器，来实现本地 AI 离线翻译功能，完全免费使用强大的大语言 AI 模型
 ---
 
 ## Ollama 服务器是什么？
@@ -9,31 +9,16 @@ Ollama 服务器是一款主打轻量化、便捷性的开源 AI 模型运行平
 
 ## Ollama 本地部署教程
 
-### 1 下载安装程序
+### 下载安装程序
 
-你可以从  ollama.ai 官网下载安装程序 [here](https://ollama.ai/).
+你可以从 [ollama.ai](https://ollama.ai/) 官网下载安装程序。
 
-### 2 运行安装程序
-
-请不要直接点击下载的 `.exe` 文件来安装(因为他会默认安装在C盘). 相反，你最好打开windows的cmd窗口，把安装包拖到cmd窗口中，并输入以下命令：
-
-```bash
-OllamaSetup.exe /DIR="D:\Your\Path"
-```
-
-这将会安装在D盘的 `Your\Path` 文件夹中。
-
-### 3 配置 ollama 的跨域支持
+### 配置 ollama 的跨域支持
 
 请配置以下的环境变量：
 
-
-- API服务监听地址：`OLLAMA_HOST=0.0.0.0`
 - 允许跨域访问：`OLLAMA_ORIGINS=*`
-- 模型文件下载位置：`OLLAMA_MODELS=F:\ollama\models`
-  （此设置与跨域无关，但很有必要，因为默认模型下载位置在C盘，可能会占满你的C盘空间，需手动指定模型存储路径。）
-
-以上的环境变量配置完毕后请重启电脑
+- API服务监听地址：`OLLAMA_HOST=127.0.0.1:11434` （这是默认地址，可以不用手动配置，不过你可以根据实际情况修改）
 
 ## Ollama 常用命令
 
@@ -41,76 +26,26 @@ OllamaSetup.exe /DIR="D:\Your\Path"
 
 ```bash
 ollama version
-ollama start
+ollama serve
 ```
 
-用于检查当前安装的Ollama版本，以确认安装成功并查看版本详细信息，然后启动ollama服务器
+用于检查当前安装的 Ollama 版本，以确认安装成功并查看版本详细信息，然后启动 Ollama 服务器
 
-ollama服务器默认地址为：`http://127.0.0.1:11434` 在插件的设置中请求地址已经写好了，API Key 在默认配置启动下可以随意填写，但模型名称必须与 ollama list 列出的名称完全一致。
+### 2 找到可用模型并安装
 
-### 2 搜索可用模型
-
-```bash
-ollama search [关键词]
-```
-
-示例：搜索与LLaMA相关的模型：
-
-```bash
-ollama search llama
-```
-
-此命令会列出与关键词匹配的模型，包括模型名称和描述，以帮助用户选择所需模型。
-
-### 3 拉取模型
+你可以从 [ollama.ai](https://ollama.ai/) 找到可用模型并安装。
 
 ```bash
 ollama pull [模型名称]
 ```
 
-示例：拉取`llama2`模型：
+比如安装 `gemma3:4b` 模型：
 
 ```bash
-ollama pull llama2
+ollama pull gemma3:4b
 ```
 
-执行此命令后，Ollama会从模型仓库下载指定模型到本地系统，以供离线使用。
-
-### 4 运行模型
-
-```bash
-ollama run [模型名称]
-```
-
-示例：运行`llama2`模型并与其交互：
-
-```bash
-ollama run llama2
-```
-
-运行后，在命令行中输入问题或命令，模型将返回相应的回答。您还可以在运行时添加参数来调整模型行为，例如：
-
-```bash
-ollama run llama2 --system "你是一名专业翻译。将用户的输入翻译成英语。"
-```
-
-使用`--system`参数设置模型的角色或任务描述。
-
-### 5 停止运行中的模型
-
-```bash
-ollama stop [模型名称]
-```
-
-示例：停止运行中的`llama2`模型：
-
-```bash
-ollama stop llama2
-```
-
-此命令会关闭运行中的模型进程并释放系统资源。
-
-### 6 列出已下载的模型
+### 3 列出已下载的模型
 
 ```bash
 ollama list
@@ -118,21 +53,21 @@ ollama list
 
 此命令会显示所有本地下载的模型，包括名称、大小和创建时间，以帮助用户管理本地模型资源。
 
-### 7 删除模型
+### 4 启动服务
 
 ```bash
-ollama delete [模型名称]
+ollama serve
 ```
 
-示例：删除未使用的`llama2`模型：
+### 5 插件中配置 Ollama 提供商
 
-```bash
-ollama delete llama2
-```
+在插件的设置中，配置 Ollama 提供商，并选择一个模型。
 
-执行后，模型将从本地系统中移除，释放磁盘空间。
+![Ollama 提供商](/tutorial/providers/ollama/ollama.png)
 
-## Ollama 使用建议
+你可以点击“测试链接”按钮，来测试是否连接成功。
 
-推荐模型：`gemma3:1b`（大小815MB）。该模型麻雀虽小五脏俱全，翻译表现良好且系统负载低（支持CPU运行）。需避免使用如`deepseek`这类推理模型，因其会输出推理过程，导致翻译质量和速度较差。
+## 注意事项
 
+- 不要启动 Ollama Chat 图形客户端，它会和 `ollama serve` 争抢端口。
+- 在插件的设置中，配置 Ollama 提供商时，baseURL 默认是 `http://127.0.0.1:11434`，如果你的 `OLLAMA_HOST` 是这个地址，则可以不用手动配置。

@@ -7,12 +7,13 @@ import { useStore } from '@tanstack/react-form'
 import { useAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { isAPIProviderConfig, isNonAPIProvider, isNonCustomLLMProvider, isReadProvider, isTranslateProvider } from '@/types/config/provider'
+import { isAPIProviderConfig, isNonAPIProvider, isReadProvider, isTranslateProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
 import { getReadProvidersConfig, getTranslateProvidersConfig } from '@/utils/config/helpers'
 import { selectedProviderIdAtom } from '../atoms'
 import { APIKeyField } from './api-key-field'
+import { BaseURLField } from './base-url-field'
 import { DefaultReadProviderSelector, DefaultTranslateProviderSelector } from './default-provider'
 import { formOpts, useAppForm } from './form'
 import { ReadModelSelector } from './read-model-selector'
@@ -40,7 +41,6 @@ export function ProviderConfigForm() {
   const providerType = useStore(form.store, state => state.values.provider)
   const isReadProviderName = isReadProvider(providerType)
   const isTranslateProviderName = isTranslateProvider(providerType)
-  const isNonCustomLLMProviderName = isNonCustomLLMProvider(providerType)
 
   // Reset form when selectedProviderId changes
   useEffect(() => {
@@ -109,9 +109,10 @@ export function ProviderConfigForm() {
           </form.AppField>
 
           <APIKeyField form={form} />
-          <form.AppField name="baseURL">
+          <BaseURLField form={form} />
+          {/* <form.AppField name="baseURL">
             {field => <field.InputField formForSubmit={form} label={`${i18n.t('options.apiProviders.form.fields.baseURL')}${isNonCustomLLMProviderName ? ` (${i18n.t('options.apiProviders.form.fields.optional')})` : ''}`} value={providerConfig.baseURL ?? ''} />}
-          </form.AppField>
+          </form.AppField> */}
           {isTranslateProviderName && (
             <>
               <Separator className="my-2" />
