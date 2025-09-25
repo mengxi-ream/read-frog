@@ -55,9 +55,14 @@ export function extractTextContext(fullText: string, selection: string) {
  */
 export function getContext(selectionRange: Range) {
   const container = selectionRange.commonAncestorContainer
-  const root = container.nodeType === Node.TEXT_NODE
-    ? container.parentElement
-    : (container as Element | null)
+  let root: Node | null = null
+
+  if (container.nodeType === Node.TEXT_NODE) {
+    root = container.parentElement
+  }
+  else {
+    root = container
+  }
 
   const fullText = root?.textContent ?? ''
   const selection = selectionRange.toString()
