@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { MarkdownRenderer } from '@/components/markdown-renderer'
-import { configAtom } from '@/utils/atoms/config'
+import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
 import { logger } from '@/utils/logger'
 import { getWordExplainPrompt } from '@/utils/prompts/word-explain'
@@ -18,6 +18,7 @@ export function AiButton() {
   const setIsTooltipVisible = useSetAtom(isTooltipVisibleAtom)
   const setIsAiPopoverVisible = useSetAtom(isAiPopoverVisibleAtom)
   const setMousePosition = useSetAtom(mouseClickPositionAtom)
+  const betaExperienceConfig = useAtomValue(configFieldsAtomMap.betaExperience)
 
   const handleClick = async (event: React.MouseEvent) => {
     const rect = event.currentTarget.getBoundingClientRect()
@@ -30,7 +31,7 @@ export function AiButton() {
   }
 
   // eslint-disable-next-line turbo/no-undeclared-env-vars
-  if (!import.meta.env.DEV) {
+  if (!import.meta.env.DEV && !betaExperienceConfig.enabled) {
     return null
   }
 

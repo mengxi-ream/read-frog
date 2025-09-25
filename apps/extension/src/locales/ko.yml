@@ -30,6 +30,10 @@ options:
   setAPIKeyWarning:
     please: API Key를 설정해 주세요
     page: 페이지에서
+  betaExperience:
+    title: Beta 체험
+    description: 실험적 기능과 새로운 기능에 대한 조기 액세스를 활성화합니다. 이러한 기능은 불안정하거나 불완전할 수 있습니다.
+    enabled: Beta 체험 활성화
   apiProviders:
     title: API 제공업체
     description: 번역 및 읽기 기능을 위한 API 제공업체 구성. 20개 이상의 API 제공업체와 모든 OpenAI 호환 API 제공업체를 지원합니다.

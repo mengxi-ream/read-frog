@@ -1,8 +1,9 @@
 import type { TestSeriesObject } from './types'
+import type { Config } from '@/types/config/config'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Add provider config',
+    description: 'Add beta experience configuration',
     config: {
       language: {
         detectedCode: 'spa',
@@ -148,10 +149,13 @@ Translate to {{targetLang}}:
         width: 700,
       },
       selectionToolbar: { enabled: false },
-    },
+      betaExperience: {
+        enabled: false,
+      },
+    } satisfies Config,
   },
   'config-from-v022': {
-    description: 'Add provider config',
+    description: 'Add beta experience configuration with disabled state',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -284,6 +288,9 @@ Translate to {{targetLang}}:
           rate: 2,
         },
         translationNodeStyle: 'default',
+      },
+      betaExperience: {
+        enabled: false,
       },
     },
   },

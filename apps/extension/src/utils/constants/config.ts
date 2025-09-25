@@ -7,7 +7,7 @@ import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_REQUEST_CAPACITY, DEFAULT_
 import { DEFAULT_TRANSLATION_NODE_STYLE } from './translation-node-style'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION = 23
+export const CONFIG_SCHEMA_VERSION = 24
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -52,6 +52,9 @@ export const DEFAULT_CONFIG: Config = {
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,
+  },
+  betaExperience: {
+    enabled: false,
   },
 }
 
