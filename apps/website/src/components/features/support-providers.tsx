@@ -28,10 +28,10 @@ export function SupportProviders() {
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
   return (
-    <section className="min-h-screen w-full bg-white dark:bg-zinc-950">
-      <div className="mx-auto min-h-screen max-w-6xl px-4 py-16 md:py-24 grid grid-cols-1 md:grid-cols-2 grid-rows-2 md:grid-rows-1 gap-10 items-stretch">
-        <div className="flex flex-col h-full gap-12">
-          <div className="flex flex-col h-fit gap-8">
+    <section className="w-full bg-white dark:bg-zinc-950 flex-auto md:h-fit">
+      <div className="mx-auto max-w-6xl h-full px-4 py-16 md:py-16 flex flex-col md:grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch">
+        <div className="flex flex-col h-fit md:h-full gap-6 md:gap-12">
+          <div className="flex flex-col h-fit gap-6">
             <h1 className="text-4xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
               支持多种提供商
             </h1>
@@ -40,7 +40,7 @@ export function SupportProviders() {
             </span>
           </div>
           <LayoutGroup id="supportProviderLayoutGroup">
-            <div className="flex flex-col gap-4 items-start justify-center">
+            <div className="flex flex-col items-start justify-center">
               {supportProviders.map((tab, tabIndex) => (
                 <div key={tab.name} className="relative flex items-center">
                   {activeTabIndex === tabIndex && (
@@ -52,7 +52,7 @@ export function SupportProviders() {
                   <span
                     onClick={() => setActiveTabIndex(tabIndex)}
                     className={cn(
-                      'px-3 py-2 text-lg font-medium transition-colors cursor-pointer',
+                      'px-3 py-2 text-md font-medium transition-colors cursor-pointer',
                       activeTabIndex === tabIndex
                         ? 'text-primary dark:text-primary'
                         : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100',
@@ -65,7 +65,7 @@ export function SupportProviders() {
             </div>
           </LayoutGroup>
         </div>
-        <div className="h-full flex justify-center items-center">
+        <div className="flex justify-center items-center py-0 md:py-28 h-70 md:h-130">
           <AnimatePresence
             initial={false}
             mode="popLayout"

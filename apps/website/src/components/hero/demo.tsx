@@ -60,7 +60,7 @@ export function Demo() {
 
   return (
     <section
-      className="flex justify-center min-h-[90vh] bg-zinc-50 dark:bg-zinc-900 overflow-hidden py-8"
+      className="flex justify-center min-h-[90vh] bg-zinc-50 dark:bg-zinc-900 overflow-hidden pt-8"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
