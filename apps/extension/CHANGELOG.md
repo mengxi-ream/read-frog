@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.10.9
+
+### Patch Changes
+
+- [#545](https://github.com/mengxi-ream/read-frog/pull/545) [`0da1d19`](https://github.com/mengxi-ream/read-frog/commit/0da1d19b0cdcda9c45cf58c53d86f6e766c1726b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: ollama stream text and detect api key logic
+
+- [#535](https://github.com/mengxi-ream/read-frog/pull/535) [`3c711ee`](https://github.com/mengxi-ream/read-frog/commit/3c711eebc99d90ca8bef679b942699a9bae50114) Thanks [@sedationh](https://github.com/sedationh)! - fix: enhance extractTextContext to handle edge cases in text selection
+
+- [#546](https://github.com/mengxi-ream/read-frog/pull/546) [`a94f20e`](https://github.com/mengxi-ream/read-frog/commit/a94f20ec4d85b895856c4171b2ae3dcce0a96f23) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - perf: don't translte numbers
+
 ## 1.10.8
 
 ### Patch Changes
