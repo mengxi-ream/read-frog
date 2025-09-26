@@ -16,12 +16,12 @@ interface DemoItem {
 const DEMO_LIST: DemoItem[] = [
   {
     type: 'translation',
-    duration: 5000,
+    duration: 2000,
     content: <TranslationDemo />,
   },
   {
     type: 'read',
-    duration: 5000,
+    duration: 2000,
     content: <ReadDemo />,
   },
 ]
@@ -65,10 +65,7 @@ export function Demo() {
       onMouseLeave={handleMouseLeave}
     >
       <div className="w-full flex flex-col gap-4 md:gap-8 items-center overflow-hidden px-4">
-        <MacBrowserShell
-          url="https://readfrog.app"
-          className="mx-auto flex-auto max-w-4xl md:w-6xl h-full"
-        >
+        <MacBrowserShell className="mx-auto flex-auto max-w-4xl md:w-6xl h-full">
           <AnimatePresence>
             <motion.div
               key={currentStep}
@@ -114,7 +111,7 @@ function SwitchBanner({ currentStep, switchDemo }: { currentStep: number, switch
         </div>
       )
     : (
-        <ul className="flex w-full items-center justify-center border-y border-zinc-100 dark:border-zinc-900 overflow-hidden">
+        <ul className="flex w-full items-center justify-center border-b border-zinc-100 dark:border-zinc-800 overflow-hidden">
           {DEMO_LIST.map((demo, demoIndex) => (
             <DemoSwitchButton key={demo.type} demo={demo} focus={currentStep === demoIndex} onClick={() => switchDemo(demoIndex)} />
           ))}
@@ -136,7 +133,7 @@ function DemoSwitchButton({ demo, focus, className, onClick }: { demo: DemoItem,
         transition={{ duration: 0.2 }}
       >
 
-        {/* {focus && (
+        {focus && (
           <motion.div
             layoutId="activeTab"
             className="absolute inset-0 bg-white dark:bg-zinc-800 shadow-sm"
@@ -147,7 +144,7 @@ function DemoSwitchButton({ demo, focus, className, onClick }: { demo: DemoItem,
               damping: 30,
             }}
           />
-        )} */}
+        )}
 
         {focus && (
           <motion.div

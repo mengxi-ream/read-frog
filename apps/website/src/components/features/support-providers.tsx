@@ -13,22 +13,22 @@ export function SupportProviders() {
   const supportProviders = [
     {
       name: 'LLM 提供商',
-      component: NonCustomLLMProviders,
+      component: <NonCustomLLMProviders />,
     },
     {
       name: 'OpenAI 兼容自定义提供商',
-      component: CustomProvider,
+      component: <CustomProvider />,
     },
     {
       name: '纯翻译提供商',
-      component: PureProviders,
+      component: <PureProviders />,
     },
   ]
 
   const [activeTabIndex, setActiveTabIndex] = useState(0)
 
   return (
-    <section className="w-full bg-white dark:bg-zinc-950 flex-auto md:h-fit">
+    <section className="w-full bg-zinc-150 dark:bg-zinc-850 flex-auto md:h-fit">
       <div className="mx-auto max-w-6xl h-full px-4 py-16 md:py-16 flex flex-col md:grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch">
         <div className="flex flex-col h-fit md:h-full gap-6 md:gap-12">
           <div className="flex flex-col h-fit gap-6">
@@ -81,7 +81,7 @@ export function SupportProviders() {
                 duration: 0.2,
               }}
             >
-              {supportProviders[activeTabIndex]?.component()}
+              {supportProviders[activeTabIndex]?.component}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -138,9 +138,11 @@ function CustomProvider() {
   const providers = Object.values(CUSTOM_PROVIDER_ITEMS)
 
   return (
-    <div className="h-full flex justify-center items-center gap-8 md:gap-16">
+    <div className="h-full grid grid-cols-2 grid-rows-2 md:grid-rows-1 md:grid-cols-4 gap-y-24 gap-x-0 md:gap-16">
       {providers.map(provider => (
-        <ProviderMotionLogo key={provider.id} {...provider} />
+        <div key={provider.id} className="flex flex-col items-center justify-center">
+          <ProviderMotionLogo {...provider} />
+        </div>
       ))}
     </div>
   )

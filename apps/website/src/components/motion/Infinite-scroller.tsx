@@ -32,26 +32,7 @@ export function InfiniteScroller<T extends { id: number | string }>({
       {repeatCountArray.map(count => (
         <InfiniteScrollerPart key={count} orientation={orientation} {...props} />
       ))}
-      {orientation === 'horizontal' ? <HorizontalMask /> : <VerticalMask />}
     </div>
-  )
-}
-
-function HorizontalMask() {
-  return (
-    <>
-      <div className="pointer-events-none absolute inset-y-0 left-0 w-8 md:w-16 bg-gradient-to-r from-white dark:from-zinc-950 to-transparent" />
-      <div className="pointer-events-none absolute inset-y-0 right-0 w-8 md:w-16 bg-gradient-to-l from-white dark:from-zinc-950 to-transparent" />
-    </>
-  )
-}
-
-function VerticalMask() {
-  return (
-    <>
-      <div className="pointer-events-none absolute inset-x-0 top-0 w-8 md:h-16 bg-gradient-to-b from-white dark:from-zinc-950 to-transparent" />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 w-8 md:h-16 bg-gradient-to-t from-white dark:from-zinc-950 to-transparent" />
-    </>
   )
 }
 
