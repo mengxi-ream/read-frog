@@ -48,7 +48,7 @@ export async function setUpRequestQueue() {
       )
     }
     else {
-    // Create thunk based on type and params
+      // Create thunk based on type and params
       const thunk = () => executeTranslate(text, langConfig, providerConfig)
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
