@@ -21,7 +21,7 @@ export function registerNodeTranslationTriggers() {
     return config.translate.node.enabled
   }
 
-  let timerId: NodeJS.Timeout | null = null
+  let timerId: ReturnType<typeof setTimeout> | null = null
   let actionTriggered = false
 
   // Listen the hotkey means the user can't press or hold any other key during the hotkey is holding

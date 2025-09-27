@@ -2,6 +2,12 @@ import type { TranslatePromptObj } from '@/types/config/translate'
 
 export const TOKENS = ['targetLang', 'input'] as const
 
+/**
+ * Separator used to distinguish multiple text segments in batch translation.
+ * It is used to differentiate different text paragraphs when merging multiple translation tasks into a single request.
+ */
+export const BATCH_SEPARATOR = '%%'
+
 export const TARGET_LANG = TOKENS[0]
 export const INPUT = TOKENS[1]
 
@@ -17,6 +23,35 @@ export const DEFAULT_TRANSLATE_PROMPT = `You are a professional ${getTokenCellTe
 
 Translate to ${getTokenCellText(TARGET_LANG)}:
 ${getTokenCellText(INPUT)}
+`
+
+export const DEFAULT_BATCH_TRANSLATE_PROMPT = `## Multi-paragraph Translation Rules
+1. If input contains ${BATCH_SEPARATOR}, use ${BATCH_SEPARATOR} in your output, if input has no ${BATCH_SEPARATOR}, don't use ${BATCH_SEPARATOR} in your output
+
+## OUTPUT FORMAT:
+- **Single paragraph input** → Output translation directly (no separators, no extra text)
+- **Multi-paragraph input (input uses ${BATCH_SEPARATOR} separators)** → Use ${BATCH_SEPARATOR} as paragraph separator between translations
+
+## Examples
+### Multi-paragraph Input:
+Paragraph A
+${BATCH_SEPARATOR}
+Paragraph B
+${BATCH_SEPARATOR}
+Paragraph C
+
+### Multi-paragraph Output:
+Translation A
+${BATCH_SEPARATOR}
+Translation B
+${BATCH_SEPARATOR}
+Translation C
+
+### Single paragraph Input:
+Single paragraph content
+
+### Single paragraph Output:
+Direct translation without separators
 `
 
 export const DEFAULT_TRANSLATE_PROMPT_ID = 'default'

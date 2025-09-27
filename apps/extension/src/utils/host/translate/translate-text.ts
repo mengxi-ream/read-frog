@@ -43,7 +43,7 @@ export async function translateText(text: string) {
   })
 }
 
-export async function executeTranslate(text: string, langConfig: Config['language'], providerConfig: ProviderConfig, options?: { forceBackgroundFetch?: boolean }) {
+export async function executeTranslate(text: string, langConfig: Config['language'], providerConfig: ProviderConfig, options?: { forceBackgroundFetch?: boolean, isBatch?: boolean }) {
   const cleanText = text.replace(/\u200B/g, '').trim()
   if (cleanText === '') {
     return ''
@@ -77,7 +77,7 @@ export async function executeTranslate(text: string, langConfig: Config['languag
   }
   else if (isLLMTranslateProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
-    translatedText = await aiTranslate(text, targetLangName, providerConfig)
+    translatedText = await aiTranslate(text, targetLangName, providerConfig, options)
   }
   else {
     throw new Error(`Unknown provider: ${provider}`)
