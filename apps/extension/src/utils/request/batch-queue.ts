@@ -20,7 +20,6 @@ interface PendingBatch {
   id: string
   tasks: BatchTask[]
   characters: number
-  timer: ReturnType<typeof setTimeout>
   createdAt: number
 }
 
@@ -33,6 +32,7 @@ export interface BatchOptions {
 export class BatchQueue {
   private requestQueue: RequestQueue | null = null
   private pendingBatchMap = new Map<string, PendingBatch>()
+  private nextScheduleTimer: NodeJS.Timeout | null = null
   private batchCharacters: number
   private batchSize: number
   private batchDelay: number
@@ -56,18 +56,52 @@ export class BatchQueue {
     })
 
     const configKey = this.getConfigKey(langConfig, providerConfig)
-    const taskCharacters = text.length
-
-    const existingBatch = this.pendingBatchMap.get(configKey)
     const task = { text, langConfig, providerConfig, scheduleAt, hash, resolve, reject }
+
+    this.addTaskToBatch(task, configKey)
+    this.schedule()
+
+    return promise
+  }
+
+  private schedule() {
+    if (this.nextScheduleTimer) {
+      clearTimeout(this.nextScheduleTimer)
+      this.nextScheduleTimer = null
+    }
+
+    const now = Date.now()
+    const batchesToFlush: string[] = []
+
+    for (const [configKey, batch] of this.pendingBatchMap.entries()) {
+      const shouldFlushNow = this.shouldFlushBatch(batch)
+      const isTimedOut = now >= batch.createdAt + this.batchDelay
+
+      if (shouldFlushNow || isTimedOut) {
+        batchesToFlush.push(configKey)
+      }
+    }
+
+    for (const configKey of batchesToFlush) {
+      this.flushPendingBatchByKey(configKey)
+    }
+
+    if (this.pendingBatchMap.size > 0) {
+      this.nextScheduleTimer = setTimeout(() => {
+        this.nextScheduleTimer = null
+        this.schedule()
+      }, this.batchDelay)
+    }
+  }
+
+  private addTaskToBatch(task: BatchTask, configKey: string) {
+    const taskCharacters = task.text.length
+    const existingBatch = this.pendingBatchMap.get(configKey)
 
     if (existingBatch) {
       if (existingBatch.characters + taskCharacters <= this.batchCharacters) {
         existingBatch.tasks.push(task)
         existingBatch.characters += taskCharacters
-        if (this.shouldFlushBatch(existingBatch)) {
-          this.flushPendingBatchByKey(configKey)
-        }
       }
       else {
         this.flushPendingBatchByKey(configKey)
@@ -77,8 +111,6 @@ export class BatchQueue {
     else {
       this.createNewPendingBatch(task, configKey)
     }
-
-    return promise
   }
 
   private shouldFlushBatch(batch: PendingBatch): boolean {
@@ -91,23 +123,14 @@ export class BatchQueue {
   private createNewPendingBatch(task: BatchTask, configKey: string) {
     const batchId = crypto.randomUUID()
 
-    const timer = setTimeout(() => {
-      this.flushPendingBatchByKey(configKey)
-    }, this.batchDelay)
-
     const pendingBatch: PendingBatch = {
       id: batchId,
       tasks: [task],
       characters: task.text.length,
-      timer,
       createdAt: Date.now(),
     }
 
     this.pendingBatchMap.set(configKey, pendingBatch)
-
-    if (this.shouldFlushBatch(pendingBatch)) {
-      this.flushPendingBatchByKey(configKey)
-    }
   }
 
   private flushPendingBatchByKey(configKey: string) {
@@ -116,7 +139,6 @@ export class BatchQueue {
       return
 
     this.pendingBatchMap.delete(configKey)
-    clearTimeout(pendingBatch.timer)
 
     const { tasks } = pendingBatch
     const hash = Sha256Hex(...tasks.map(task => task.hash))
