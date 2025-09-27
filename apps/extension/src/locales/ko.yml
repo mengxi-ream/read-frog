@@ -162,13 +162,13 @@ options:
         description: 초당 평균 요청 수 (단, 최대 버스트 요청 수 설정을 통한 일시적 초과 요청 전송 허용)
     requestBatchConfig:
       title: 배치 번역
-      description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성
+      description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
       batchCharacters:
         title: 최대 문자 수
-        description: 배치 요청당 허용되는 최대 문자 수로 각 번역의 콘텐츠 양을 제어합니다
+        description: 배치 요청당 허용되는 최대 문자 수로 각 번역의 콘텐츠 양을 제어합니다 (대규모 언어 모델 번역에서만 유효)
       batchSize:
         title: 최대 단락 수
-        description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
+        description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다 (대규모 언어 모델 번역에서만 유효)
     alwaysTranslate:
       title: 항상 번역
       description: 이 사이트를 항상 번역합니다

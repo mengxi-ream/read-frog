@@ -161,13 +161,13 @@ options:
         description: 平均秒間リクエスト数（ただし、最大バーストリクエスト数を設定し一時的な超過リクエスト送信を許可）
     requestBatchConfig:
       title: バッチ翻訳
-      description: バッチ翻訳時の文字数制限と最大段落数を設定
+      description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
       batchCharacters:
         title: 最大文字数
-        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します
+        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します（大規模言語モデル翻訳でのみ有効）
       batchSize:
         title: 最大段落数
-        description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
+        description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します（大規模言語モデル翻訳でのみ有効）
     alwaysTranslate:
       title: 常に翻訳
       description: このサイトを常に翻訳する

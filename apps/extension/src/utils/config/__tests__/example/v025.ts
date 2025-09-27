@@ -1,4 +1,5 @@
 import type { TestSeriesObject } from './types'
+import type { Config } from '@/types/config/config'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
@@ -136,6 +137,10 @@ Translate to {{targetLang}}:
           capacity: 400,
           rate: 8,
         },
+        requestBatchConfig: {
+          batchCharacters: 1000,
+          batchSize: 4,
+        },
         translationNodeStyle: 'blur',
         customAutoTranslateShortcutKey: ['alt', 'b'],
       },
@@ -151,7 +156,7 @@ Translate to {{targetLang}}:
       betaExperience: {
         enabled: false,
       },
-    },
+    } satisfies Config,
   },
   'config-from-v022': {
     description: 'Add beta experience configuration with disabled state',
@@ -285,6 +290,10 @@ Translate to {{targetLang}}:
         requestQueueConfig: {
           capacity: 200,
           rate: 2,
+        },
+        requestBatchConfig: {
+          batchCharacters: 1000,
+          batchSize: 4,
         },
         translationNodeStyle: 'default',
       },

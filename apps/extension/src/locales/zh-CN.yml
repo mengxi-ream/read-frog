@@ -163,13 +163,13 @@ options:
         description: 平均每秒的请求数量，不过允许配置最大突发请求数来短暂发送超量请求。
     requestBatchConfig:
       title: 批量翻译
-      description: 配置批量翻译时的字符数限制和最大段落数量
+      description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）
       batchCharacters:
         title: 最大字符数
-        description: 每个批量请求允许的最大字符数，用于控制单次翻译的内容量
+        description: 每个批量请求允许的最大字符数，用于控制单次翻译的内容量（仅对大语言模型翻译有效）
       batchSize:
         title: 最大段落数
-        description: 每个批量翻译的最大段落数，用于控制单次翻译的内容量
+        description: 每个批量翻译的最大段落数，用于控制单次翻译的内容量（仅对大语言模型翻译有效）
     alwaysTranslate:
       title: 总是翻译
       description: 总是翻译这个网站
