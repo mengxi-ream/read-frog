@@ -3,22 +3,22 @@ import { IconBackground, IconPencilMinus, IconViewfinder, IconWorld } from '@tab
 export function LittleFeatureGrid() {
   const features = [
     {
-      icon: <IconWorld className="size-4" />,
+      icon: <IconWorld className="size-4 text-primary" />,
       title: '多国语言',
       description: '翻译支持多种语言，包括英语、法语、德语、西班牙语等。',
     },
     {
-      icon: <IconPencilMinus className="size-4" />,
+      icon: <IconPencilMinus className="size-4 text-primary" />,
       title: '划词翻译',
       description: '允许划词翻译，即时解析所需内容，同时支持保存生词本，所见即所得。',
     },
     {
-      icon: <IconBackground className="size-4" />,
+      icon: <IconBackground className="size-4 text-primary" />,
       title: '上下文结合',
       description: '翻译自动携带上下文，使您能够获得更准确的翻译效果。',
     },
     {
-      icon: <IconViewfinder className="size-4" />,
+      icon: <IconViewfinder className="size-4 text-primary" />,
       title: '多种格式',
       description: '后续将支持阅读或翻译多种格式，如：pdf，视频，漫画',
       badge: 'soon',

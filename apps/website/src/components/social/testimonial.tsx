@@ -5,6 +5,7 @@ import { cn } from '@repo/ui/lib/utils'
 import { motion } from 'motion/react'
 import { useTheme } from 'next-themes'
 import Image from 'next/image'
+import { useHydration } from '@/hooks/useHydration'
 import { FromPlatforms, testimonialList } from '@/utils/constants/testimonial-list'
 
 export function Testimonial() {
@@ -57,7 +58,11 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialItem }) {
 
 function BrandLogo({ brand }: { brand: FromPlatforms }) {
   const theme = useTheme()
-
+  const hydrated = useHydration()
+  if (!hydrated) {
+    return null
+  }
+  
   const supportDarkLogo = [FromPlatforms.X]
   const useDarkLogo = supportDarkLogo.includes(brand) && theme.resolvedTheme === 'dark'
   const imgSrc = useDarkLogo ? `/icons/${brand}-dark.png` : `/icons/${brand}.png`

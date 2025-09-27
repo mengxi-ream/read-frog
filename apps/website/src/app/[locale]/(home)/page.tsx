@@ -4,6 +4,8 @@ import { use } from 'react'
 import { Features } from '@/components/features/features'
 import { Demo } from '@/components/hero/demo'
 import { Header } from '@/components/hero/header'
+import { Recall } from '@/components/recall'
+import { ClientLogos } from '@/components/social/client-logos'
 import { Testimonial } from '@/components/social/testimonial'
 
 export default function HomePage({
@@ -19,7 +21,9 @@ export default function HomePage({
       <Header />
       <Demo />
       <Features />
+      <ClientLogos />
       <Testimonial />
+      <Recall />
     </main>
   )
 }

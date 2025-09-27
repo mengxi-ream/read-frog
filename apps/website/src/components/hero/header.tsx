@@ -2,9 +2,8 @@
 
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
-import Image from 'next/image'
-import Link from 'next/link'
 import React from 'react'
+import { Install } from '@/components/install'
 import { AuroraBackground } from '@/components/motion/aurora-background'
 
 export function Header() {
@@ -28,55 +27,13 @@ export function Header() {
         <div className="font-extralight text-base md:text-2xl dark:text-neutral-200 py-4 text-center">
           {t('subtitle')}
         </div>
-        <Install />
+        <div className="mt-6">
+          <div className="text-center mb-4 font-light text-sm text-neutral-500 dark:text-neutral-400">
+            {t('install.on')}
+          </div>
+          <Install />
+        </div>
       </motion.div>
     </AuroraBackground>
-  )
-}
-
-function Install() {
-  const t = useTranslations('home')
-  return (
-    <div className="mt-6">
-      <div className="text-center mb-4 font-light text-sm text-neutral-500 dark:text-neutral-400">
-        {t('install.on')}
-      </div>
-      <div className="flex items-center gap-4">
-        <InstallLink
-          href="https://chromewebstore.google.com/detail/read-frog/modkelfkcfjpgbfmnbnllalkiogfofhb?utm_source=official"
-          icon="/icons/chrome.png"
-        >
-          {t('install.chrome')}
-        </InstallLink>
-        <InstallLink
-          href="https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo"
-          icon="/icons/edge.png"
-        >
-          {t('install.edge')}
-        </InstallLink>
-
-      </div>
-    </div>
-  )
-}
-
-function InstallLink({
-  href,
-  icon,
-  children,
-}: {
-  href: string
-  icon: string
-  children: React.ReactNode
-}) {
-  return (
-    <Link
-      href={href}
-      target="_blank"
-      className="bg-black dark:bg-white rounded-full w-fit text-white dark:text-black px-4 py-2 flex items-center gap-2"
-    >
-      <Image src={icon} alt={icon} className="size-5" width={20} height={20} />
-      {children}
-    </Link>
   )
 }

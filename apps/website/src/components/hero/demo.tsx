@@ -65,7 +65,7 @@ export function Demo() {
       onMouseLeave={handleMouseLeave}
     >
       <div className="w-full flex flex-col gap-4 md:gap-8 items-center overflow-hidden px-4">
-        <MacBrowserShell className="mx-auto flex-auto max-w-4xl md:w-6xl h-full">
+        <MacBrowserShell className="mx-auto flex-auto max-w-4xl md:max-w-6xl h-full">
           <AnimatePresence>
             <motion.div
               key={currentStep}
@@ -125,12 +125,8 @@ function DemoSwitchButton({ demo, focus, className, onClick }: { demo: DemoItem,
       className={cn('flex justify-center items-center h-full cursor-pointer relative flex-1', className)}
       onClick={onClick}
     >
-      <motion.div
+      <div
         className="h-16 md:h-20 w-full p-3 md:p-4 relative z-10 flex flex-col items-center justify-center gap-1 md:gap-2"
-        animate={{
-          backgroundColor: focus ? 'bg-primary' : 'bg-zinc-100 dark:bg-zinc-900',
-        }}
-        transition={{ duration: 0.2 }}
       >
 
         {focus && (
@@ -162,7 +158,7 @@ function DemoSwitchButton({ demo, focus, className, onClick }: { demo: DemoItem,
         <span className="relative z-20 font-medium capitalize text-sm md:text-base">
           {demo.type}
         </span>
-      </motion.div>
+      </div>
     </motion.li>
   )
 }

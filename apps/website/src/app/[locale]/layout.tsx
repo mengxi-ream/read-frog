@@ -14,6 +14,7 @@ import { SITE_PUBLIC_URL } from '@/lib/constants'
 import { TRPCReactProvider } from '@/trpc/react'
 
 import '@/styles/global.css'
+import '@/styles/background.css'
 
 const inter = Inter({
   subsets: ['latin'],
