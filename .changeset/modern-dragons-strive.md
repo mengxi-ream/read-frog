@@ -2,4 +2,4 @@
 "@read-frog/extension": minor
 ---
 
-feat: support for batch translation for LLM
+feat(extension): support for batch translation for LLM

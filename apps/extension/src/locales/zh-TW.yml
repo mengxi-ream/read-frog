@@ -166,7 +166,7 @@ options:
       description: 配置批量翻譯時的字符數限制和最大段落數量（僅對大語言模型翻譯有效）
       batchCharacters:
         title: 最大字元數
-        description: 每個批量請求允許的最大字符數，用於控制單次翻譯的內容量（僅對大語言模型翻譯有效）
+        description: 每個批量請求允許的最大字元數，用於控制單次翻譯的內容量（僅對大語言模型翻譯有效）
       batchSize:
         title: 最大段落數
         description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量（僅對大語言模型翻譯有效）
