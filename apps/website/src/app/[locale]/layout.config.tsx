@@ -28,6 +28,15 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
     },
     themeSwitch: {
       component: <ThemeToggle />,
+    }
+  }
+}
+
+export function homeBaseOptions(locale: Locale): BaseLayoutProps {
+  return {
+    ...baseOptions(locale),
+    themeSwitch: {
+      enabled: false,
     },
   }
 }

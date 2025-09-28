@@ -62,7 +62,6 @@ function BrandLogo({ brand }: { brand: FromPlatforms }) {
   if (!hydrated) {
     return null
   }
-  
   const supportDarkLogo = [FromPlatforms.X]
   const useDarkLogo = supportDarkLogo.includes(brand) && theme.resolvedTheme === 'dark'
   const imgSrc = useDarkLogo ? `/icons/${brand}-dark.png` : `/icons/${brand}.png`

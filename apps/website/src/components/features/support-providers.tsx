@@ -2,35 +2,35 @@
 
 import type { Provider } from '@/utils/constants/providers'
 import { cn } from '@repo/ui/lib/utils'
-import { AnimatePresence, LayoutGroup, motion } from 'motion/react'
+import { LayoutGroup, motion } from 'motion/react'
 import { useTheme } from 'next-themes'
 import { useState } from 'react'
+import { Container } from '@/components/container'
 import ProviderIcon from '@/components/provider-icon'
 import { useHydration } from '@/hooks/useHydration'
 import { CUSTOM_PROVIDER_ITEMS, NON_CUSTOM_LLM_PROVIDER_ITEMS, PURE_PROVIDERS_ITEMS } from '@/utils/constants/providers'
 import { InfiniteScroller } from '../motion/Infinite-scroller'
 
-export function SupportProviders() {
-  const supportProviders = [
-    {
-      name: 'LLM 提供商',
-      component: <NonCustomLLMProviders />,
-    },
-    {
-      name: 'OpenAI 兼容自定义提供商',
-      component: <CustomProviders />,
-    },
-    {
-      name: '纯翻译提供商',
-      component: <PureProviders />,
-    },
-  ]
+enum PROVIDER_TYPES_ENUM {
+  NON_CUSTOM_LLM_PROVIDER = 'NON_CUSTOM_LLM_PROVIDER',
+  CUSTOM_PROVIDER = 'CUSTOM_PROVIDER',
+  PURE_PROVIDER = 'PURE_PROVIDER',
+}
 
-  const [activeTabIndex, setActiveTabIndex] = useState(0)
+const PROVIDER_TYPES = [PROVIDER_TYPES_ENUM.NON_CUSTOM_LLM_PROVIDER, PROVIDER_TYPES_ENUM.CUSTOM_PROVIDER, PROVIDER_TYPES_ENUM.PURE_PROVIDER] as const
+
+const providerTypeNameMap: Record<PROVIDER_TYPES_ENUM, string> = {
+  NON_CUSTOM_LLM_PROVIDER: 'LLM 提供商',
+  CUSTOM_PROVIDER: 'OpenAI 兼容自定义提供商',
+  PURE_PROVIDER: '纯翻译提供商',
+}
+
+export function SupportProviders() {
+  const [activeProviderType, setActiveProviderType] = useState('NON_CUSTOM_LLM_PROVIDER')
 
   return (
     <section className="w-full bg-zinc-150 dark:bg-zinc-850 flex-auto md:h-fit">
-      <div className="mx-auto max-w-6xl h-full px-4 py-16 md:py-16 flex flex-col md:grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch">
+      <Container className="h-full md:py-16 flex flex-col md:grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch">
         <div className="flex flex-col h-fit md:h-full gap-6 md:gap-12">
           <div className="flex flex-col h-fit gap-6">
             <h1 className="text-4xl md:text-4xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
@@ -42,51 +42,38 @@ export function SupportProviders() {
           </div>
           <LayoutGroup id="supportProviderLayoutGroup">
             <div className="flex flex-col items-start justify-center">
-              {supportProviders.map((tab, tabIndex) => (
-                <div key={tab.name} className="relative flex items-center">
-                  {activeTabIndex === tabIndex && (
+              {PROVIDER_TYPES.map(providerType => (
+                <div key={providerType} className="relative flex items-center">
+                  {activeProviderType === providerType && (
                     <motion.div
                       layoutId="supportAiActiveTab"
                       className="absolute -left-4 w-1 h-6 bg-primary rounded-full"
                     />
                   )}
                   <span
-                    onClick={() => setActiveTabIndex(tabIndex)}
+                    onClick={() => setActiveProviderType(providerType)}
                     className={cn(
                       'px-3 py-2 text-md font-medium transition-colors cursor-pointer',
-                      activeTabIndex === tabIndex
+                      activeProviderType === providerType
                         ? 'text-primary dark:text-primary'
                         : 'text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100',
                     )}
                   >
-                    {tab.name}
+                    {providerTypeNameMap[providerType]}
                   </span>
                 </div>
               ))}
             </div>
           </LayoutGroup>
         </div>
-        <div className="flex justify-center items-center py-0 md:py-28 h-70 md:h-130">
-          <AnimatePresence
-            initial={false}
-            mode="popLayout"
-          >
-            <motion.div
-              key={activeTabIndex}
-              className="w-full"
-              initial={{ opacity: 0, scale: 0.75 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.75 }}
-              transition={{
-                ease: 'easeInOut',
-                duration: 0.2,
-              }}
-            >
-              {supportProviders[activeTabIndex]?.component}
-            </motion.div>
-          </AnimatePresence>
+        <div className="flex justify-center items-center py-0 md:py-28 h-70 md:h-130 ">
+          <div className="w-full">
+            {activeProviderType === PROVIDER_TYPES_ENUM.NON_CUSTOM_LLM_PROVIDER ? <NonCustomLLMProviders /> : <></>}
+            {activeProviderType === PROVIDER_TYPES_ENUM.CUSTOM_PROVIDER ? <CustomProviders /> : <></>}
+            {activeProviderType === PROVIDER_TYPES_ENUM.PURE_PROVIDER ? <PureProviders /> : <></>}
+          </div>
         </div>
-      </div>
+      </Container>
     </section>
   )
 }

@@ -4,13 +4,12 @@ import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
 import React from 'react'
 import { Install } from '@/components/install'
-import { AuroraBackground } from '@/components/motion/aurora-background'
 
 export function Header() {
   const t = useTranslations('home')
 
   return (
-    <AuroraBackground>
+    <div className="relative flex h-[80svh] flex-col items-center justify-center bg-zinc-50 text-slate-950 dark:bg-zinc-900">
       <motion.div
         initial={{ opacity: 0.0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
@@ -34,6 +33,6 @@ export function Header() {
           <Install />
         </div>
       </motion.div>
-    </AuroraBackground>
+    </div>
   )
 }

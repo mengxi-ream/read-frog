@@ -62,7 +62,7 @@ interface ProviderIconProps extends VariantProps<typeof providerIconVariants> {
   className?: string
 }
 
-export default function ProviderIcon({ logo, name, size, className }: ProviderIconProps) {
+export default function ProviderIcon({ logo, name = '', size, className }: ProviderIconProps) {
   return (
     <div className={cn(providerIconVariants({ size }), className)}>
       <div className={iconContainerVariants({ size })}>

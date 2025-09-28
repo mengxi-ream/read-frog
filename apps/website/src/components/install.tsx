@@ -55,7 +55,7 @@ function InstallLink({
       className={
         cn(
           ' rounded-full w-fit px-10 py-3 flex items-center gap-4 active:scale-95 duration-150 transition-all ease-in-out',
-          focus ? 'bg-primary hover:bg-primary-strong text-white' : 'text-white dark:text-black bg-black dark:bg-white hover:bg-gray-600 dark:hover:bg-gray-200',
+          focus ? 'bg-primary-strong hover:bg-primary-strong text-white' : 'text-white dark:text-black bg-black dark:bg-white hover:bg-gray-600 dark:hover:bg-gray-200',
         )
       }
     >

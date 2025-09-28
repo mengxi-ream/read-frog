@@ -20,8 +20,8 @@ export default function HomePage({
     <main className="flex flex-1 flex-col dark:bg-[#18181b]">
       <Header />
       <Demo />
-      <Features />
       <ClientLogos />
+      <Features />
       <Testimonial />
       <Recall />
     </main>
