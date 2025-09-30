@@ -2,9 +2,7 @@
 
 import { cn } from '@repo/ui/lib/utils'
 import { motion, useMotionTemplate, useMotionValue } from 'motion/react'
-import { useTheme } from 'next-themes'
 import React from 'react'
-import { useHydration } from '@/hooks/useHydration'
 
 export default function HeroHighlight({
   children,
@@ -17,9 +15,6 @@ export default function HeroHighlight({
 }) {
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
-  const { resolvedTheme } = useTheme()
-  const isDark = resolvedTheme === 'dark'
-  const hydrated = useHydration()
 
   function handleMouseMove({
     currentTarget,
@@ -43,16 +38,10 @@ export default function HeroHighlight({
       onMouseMove={handleMouseMove}
     >
       <div
-        className={cn(
-          'pointer-events-none absolute inset-0',
-          hydrated && isDark ? 'hero-base-dot-bg-dark' : 'hero-base-dot-bg',
-        )}
+        className="pointer-events-none absolute inset-0 hero-base-dot-bg"
       />
       <motion.div
-        className={cn(
-          'pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100',
-          hydrated && isDark ? 'hero-color-dot-bg-dark' : 'hero-color-dot-bg',
-        )}
+        className="pointer-events-none absolute inset-0 opacity-0 transition duration-300 group-hover:opacity-100 hero-color-dot-bg"
         style={{
           WebkitMaskImage: useMotionTemplate`
             radial-gradient(
@@ -70,7 +59,6 @@ export default function HeroHighlight({
           `,
         }}
       />
-
       <div className={cn('relative z-20', className)}>{children}</div>
     </div>
   )

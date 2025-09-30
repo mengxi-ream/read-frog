@@ -18,7 +18,7 @@ export function Install() {
   }, [])
 
   return (
-    <div className="flex items-center gap-10">
+    <div className="grid grid-rows-2 md:grid-rows-1 grid-cols-1 md:grid-cols-2 items-center gap-4 md:gap-10">
       <InstallLink
         href="https://chromewebstore.google.com/detail/read-frog/modkelfkcfjpgbfmnbnllalkiogfofhb?utm_source=official"
         icon="/icons/chrome.png"
@@ -54,8 +54,10 @@ function InstallLink({
       target="_blank"
       className={
         cn(
-          ' rounded-full w-fit px-10 py-3 flex items-center gap-4 active:scale-95 duration-150 transition-all ease-in-out',
-          focus ? 'bg-primary-strong hover:bg-primary-strong text-white' : 'text-white dark:text-black bg-black dark:bg-white hover:bg-gray-600 dark:hover:bg-gray-200',
+          ' rounded-full w-full px-10 py-3 flex items-center justify-center gap-4 active:scale-95 duration-150 transition-all ease-in-out border shadow-sm hover:-translate-y-0.5 hover:shadow-md',
+          focus
+            ? 'border-primary-strong font-medium bg-white text-primary-strong ring-1 ring-white/20'
+            : 'border border-black/20 text-zinc-800 bg-white  hover:bg-white',
         )
       }
     >

@@ -2,26 +2,29 @@
 
 import { useIsMobile } from '@repo/ui/hooks/use-mobile'
 import { cn } from '@repo/ui/lib/utils'
+import { IconArrowLeft, IconArrowRight, IconBook, IconLanguage } from '@tabler/icons-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useState } from 'react'
-import { ChevronLeft, ChevronRight } from '@/components/icons'
 import { MacBrowserShell } from '@/components/mac-browser-shell'
 
 interface DemoItem {
   type: string
   duration: number
   content: React.ReactNode
+  icon: React.ReactNode
 }
 
 const DEMO_LIST: DemoItem[] = [
   {
     type: 'translation',
     duration: 2000,
+    icon: <IconLanguage />,
     content: <TranslationDemo />,
   },
   {
     type: 'read',
     duration: 2000,
+    icon: <IconBook />,
     content: <ReadDemo />,
   },
 ]
@@ -39,14 +42,14 @@ export function Demo() {
     if (!currentDemo)
       return
 
-    const { duration } = currentDemo
+    // const { duration } = currentDemo
 
-    const timeout = setTimeout(() => {
-      const nextStep = (currentStep + 1) % DEMO_LIST.length
-      setCurrentStep(nextStep)
-    }, duration)
+    // const timeout = setTimeout(() => {
+    //   const nextStep = (currentStep + 1) % DEMO_LIST.length
+    //   setCurrentStep(nextStep)
+    // }, duration)
 
-    return () => clearTimeout(timeout)
+    // return () => clearTimeout(timeout)
   }, [autoPlaying, currentStep])
 
   const handleMouseEnter = () => setAutoPlaying(false)
@@ -102,12 +105,16 @@ function SwitchBanner({ currentStep, switchDemo }: { currentStep: number, switch
   if (!currentDemo)
     return null
 
+  const backward = () => switchDemo(currentStep - 1)
+
+  const goAhead = () => switchDemo(currentStep + 1)
+
   return isMobile
     ? (
         <div className="grid grid-flow-col w-full col-span items-center justify-between">
-          <ChevronLeft className="col-span-1" onClick={() => switchDemo(currentStep - 1)} />
+          <IconArrowLeft className="col-span-1" onClick={backward} />
           <DemoSwitchButton className="row-span-full w-full" demo={currentDemo} focus />
-          <ChevronRight className="col-span-1" onClick={() => switchDemo(currentStep + 1)} />
+          <IconArrowRight className="col-span-1" onClick={goAhead} />
         </div>
       )
     : (
@@ -128,20 +135,6 @@ function DemoSwitchButton({ demo, focus, className, onClick }: { demo: DemoItem,
       <div
         className="h-16 md:h-20 w-full p-3 md:p-4 relative z-10 flex flex-col items-center justify-center gap-1 md:gap-2"
       >
-
-        {focus && (
-          <motion.div
-            layoutId="activeTab"
-            className="absolute inset-0 bg-white dark:bg-zinc-800 shadow-sm"
-            initial={false}
-            transition={{
-              type: 'spring',
-              stiffness: 500,
-              damping: 30,
-            }}
-          />
-        )}
-
         {focus && (
           <motion.div
             layoutId="underline"
@@ -155,9 +148,12 @@ function DemoSwitchButton({ demo, focus, className, onClick }: { demo: DemoItem,
           />
         )}
 
-        <span className="relative z-20 font-medium capitalize text-sm md:text-base">
+        <div className="relative z-20 font-medium capitalize text-sm md:text-base">
+          <div>
+            {demo.icon}
+          </div>
           {demo.type}
-        </span>
+        </div>
       </div>
     </motion.li>
   )

@@ -3,11 +3,9 @@
 import type { Provider } from '@/utils/constants/providers'
 import { cn } from '@repo/ui/lib/utils'
 import { LayoutGroup, motion } from 'motion/react'
-import { useTheme } from 'next-themes'
 import { useState } from 'react'
 import { Container } from '@/components/container'
 import ProviderIcon from '@/components/provider-icon'
-import { useHydration } from '@/hooks/useHydration'
 import { CUSTOM_PROVIDER_ITEMS, NON_CUSTOM_LLM_PROVIDER_ITEMS, PURE_PROVIDERS_ITEMS } from '@/utils/constants/providers'
 import { InfiniteScroller } from '../motion/Infinite-scroller'
 
@@ -79,17 +77,9 @@ export function SupportProviders() {
 }
 
 function ProviderMotionLogo({ logo, name }: Provider) {
-  const { resolvedTheme } = useTheme()
-  const isDarkMode = resolvedTheme === 'dark'
-
-  const hydrated = useHydration()
-  if (!hydrated) {
-    return null
-  }
-
   return (
     <motion.div whileHover={{ scale: 1.3 }}>
-      <ProviderIcon logo={logo(isDarkMode)} name={name} className="mx-4" size="xl" />
+      <ProviderIcon logo={logo(false)} name={name} className="mx-4" size="xl" />
     </motion.div>
   )
 }

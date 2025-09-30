@@ -10,7 +10,7 @@ export function Recall() {
         <div
           className="max-w-6xl py-32 px-8 flex items-center justify-center flex-col gap-12"
         >
-          <h1 className="text-4xl font-bold">
+          <h1 className="text-4xl font-bold text-center">
             获取您的 AI 学习助手
           </h1>
           <span className="text-center text-lg text-zinc-700 dark:text-zinc-300 text-wrap">

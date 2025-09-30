@@ -1,7 +1,9 @@
 {
   "home": {
-    "title": "深度学习语言",
-    "subtitle": "借助 AI 即时翻译和讲解任何网页",
+    "titleBefore": "AI 语言",
+    "study": "学习",
+    "titleAfter": "教师",
+    "subtitle": "Read Frog 无缝集成多家人工智能提供商，允许您自定义专属 AI 教师。无论您在阅读新闻、文章还是任何网络内容，Read Frog 都能帮助您深入理解和学习语言！",
     "install": {
       "on": "安装在",
       "chrome": "Chrome",

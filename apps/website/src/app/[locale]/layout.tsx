@@ -6,13 +6,11 @@ import { Analytics } from '@vercel/analytics/next'
 import { RootProvider } from 'fumadocs-ui/provider'
 import { hasLocale, NextIntlClientProvider } from 'next-intl'
 import { getTranslations, setRequestLocale } from 'next-intl/server'
-import { ThemeProvider } from 'next-themes'
 import { Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { SITE_PUBLIC_URL } from '@/lib/constants'
 import { TRPCReactProvider } from '@/trpc/react'
-
 import '@/styles/global.css'
 import '@/styles/background.css'
 
@@ -93,33 +91,29 @@ export default async function RootLayout({
   if (!hasLocale(routing.locales, locale)) {
     notFound()
   }
-
+  // console.log(headersList, 'pathname')
   setRequestLocale(locale)
 
   return (
     <html lang={locale} className={inter.className} suppressHydrationWarning>
       <body className="flex flex-col min-h-screen">
         <NextIntlClientProvider>
-          <ThemeProvider
-            attribute="class"
-            forcedTheme="light"
-            enableSystem={false}
-            disableTransitionOnChange
+          <RootProvider
+            i18n={{
+              locale,
+              // available languages
+              locales: localesInUI,
+              // translations for UI
+              translations: locale !== 'en' ? { zh }[locale] : undefined,
+            }}
+            theme={{
+              forcedTheme: 'light',
+            }}
           >
-            <RootProvider
-              i18n={{
-                locale,
-                // available languages
-                locales: localesInUI,
-                // translations for UI
-                translations: locale !== 'en' ? { zh }[locale] : undefined,
-              }}
-            >
-              <TRPCReactProvider>
-                {children}
-              </TRPCReactProvider>
-            </RootProvider>
-          </ThemeProvider>
+            <TRPCReactProvider>
+              {children}
+            </TRPCReactProvider>
+          </RootProvider>
         </NextIntlClientProvider>
         <Analytics />
         {/* <SpeedInsights /> */}

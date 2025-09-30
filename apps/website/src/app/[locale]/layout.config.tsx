@@ -2,7 +2,6 @@ import type { BaseLayoutProps, LinkItemType } from 'fumadocs-ui/layouts/shared'
 import type { Locale } from '@/i18n/routing'
 import { GithubInfo } from 'fumadocs-ui/components/github-info'
 import Image from 'next/image'
-import { ThemeToggle } from '@/components/toggle-theme'
 import { UserAccount } from '@/components/user-account'
 import { env } from '@/env'
 import { APP_NAME_LOCALE, NAV_ITEMS_LOCALE } from '@/lib/constants'
@@ -26,9 +25,6 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
         </>
       ),
     },
-    themeSwitch: {
-      component: <ThemeToggle />,
-    }
   }
 }
 

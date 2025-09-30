@@ -18,12 +18,16 @@ export function Header() {
           duration: 0.8,
           ease: 'easeInOut',
         }}
-        className="relative flex flex-col gap-4 items-center justify-center px-4 pt-14"
+        className="max-w-6xl flex flex-col gap-4 items-center justify-center px-8 md:px-4 pt-20"
       >
-        <div className="text-4xl md:text-7xl font-bold dark:text-white text-center">
-          {t('title')}
-        </div>
-        <div className="font-extralight text-base md:text-2xl dark:text-neutral-200 py-4 text-center">
+        <span className="text-4xl md:text-7xl font-bold dark:text-white text-center tracking-normal">
+          {t('titleBefore')}
+          <span className="text-primary-strong mx-2">
+            {t('study')}
+          </span>
+          {t('titleAfter')}
+        </span>
+        <div className="max-w-4xl text-base text-neutral-600 dark:text-neutral-200 py-4 text-center">
           {t('subtitle')}
         </div>
         <div className="mt-6">

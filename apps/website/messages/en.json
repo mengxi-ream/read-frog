@@ -1,7 +1,9 @@
 {
   "home": {
-    "title": "Learn Languages in Depth",
-    "subtitle": "Translate and understand any webpage instantly with AI assistance",
+    "titleBefore": "AI Language",
+    "study": "Study",
+    "titleAfter": "Teacher",
+    "subtitle": "Read Frog seamlessly integrates multiple AI providers, allowing you to customize your own AI teacher. Whether you’re reading news, articles, or any web content, Read Frog helps you deeply understand and learn languages.",
     "install": {
       "on": "Install on",
       "chrome": "Chrome",
