@@ -3,6 +3,7 @@ import type { ProviderConfig } from '@/types/config/provider'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
+import { Sha256Hex } from '@/utils/hash'
 import { executeTranslate } from '@/utils/host/translate/translate-text'
 import { BatchQueue } from '../batch-queue'
 import { RequestQueue } from '../request-queue'
@@ -53,9 +54,16 @@ const sampleProviderConfig: ProviderConfig = {
   },
 }
 
+interface TranslateBatchData {
+  text: string
+  langConfig: Config['language']
+  providerConfig: ProviderConfig
+  hash: string
+}
+
 const baseBatchConfig = {
-  batchCharacters: 100,
-  batchSize: 3,
+  maxCharactersPerBatch: 100,
+  maxItemsPerBatch: 3,
   batchDelay: 1000,
 }
 
@@ -67,29 +75,50 @@ const baseRequestQueueConfig = {
   baseRetryDelayMs: 100,
 }
 
+function createBatchQueue(requestQueue: RequestQueue, config = baseBatchConfig) {
+  return new BatchQueue<TranslateBatchData, string>({
+    ...config,
+    getBatchKey: (data) => {
+      return `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`
+    },
+    getCharacters: (data) => {
+      return data.text.length
+    },
+    executeBatch: async (dataList) => {
+      const { langConfig, providerConfig } = dataList[0]
+      const texts = dataList.map(d => d.text)
+      const batchText = texts.join(BATCH_SEPARATOR)
+      const hash = Sha256Hex(...dataList.map(d => d.hash))
+
+      const batchThunk = async (): Promise<string[]> => {
+        const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
+        return result.split(BATCH_SEPARATOR).map(t => t.trim())
+      }
+
+      return requestQueue.enqueue(batchThunk, Date.now(), hash)
+    },
+  })
+}
+
 afterEach(() => {
   vi.useRealTimers()
   vi.clearAllMocks()
 })
 
 describe('batchQueue – core functionality', () => {
-  it('throws error when request queue is not set', async () => {
-    const batchQueue = new BatchQueue(baseBatchConfig)
-
-    expect(() => {
-      void batchQueue.enqueue('test', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1')
-    }).toThrow('Request queue is not set')
-  })
-
   it('processes single task successfully', async () => {
     vi.useFakeTimers()
     mockTranslateSuccess(['result'])
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue(baseBatchConfig)
-    batchQueue.setRequestQueue(requestQueue)
+    const batchQueue = createBatchQueue(requestQueue)
 
-    const promise = batchQueue.enqueue('Hello', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1')
+    const promise = batchQueue.enqueue({
+      text: 'Hello',
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: 'hash1',
+    })
 
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
     vi.advanceTimersByTime(0)
@@ -104,13 +133,27 @@ describe('batchQueue – batching logic', () => {
     mockTranslateSuccess(['result1', 'result2', 'result3'])
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue(baseBatchConfig)
-    batchQueue.setRequestQueue(requestQueue)
+    const batchQueue = createBatchQueue(requestQueue)
 
     const promises = [
-      batchQueue.enqueue('Text 1', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1'),
-      batchQueue.enqueue('Text 2', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash2'),
-      batchQueue.enqueue('Text 3', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash3'),
+      batchQueue.enqueue({
+        text: 'Text 1',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash1',
+      }),
+      batchQueue.enqueue({
+        text: 'Text 2',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash2',
+      }),
+      batchQueue.enqueue({
+        text: 'Text 3',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash3',
+      }),
     ]
 
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
@@ -125,15 +168,24 @@ describe('batchQueue – batching logic', () => {
     mockTranslateSuccess(['result1', 'result2'])
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue({
+    const batchQueue = createBatchQueue(requestQueue, {
       ...baseBatchConfig,
-      batchSize: 2, // Flush when 2 tasks batched
+      maxItemsPerBatch: 2, // Flush when 2 tasks batched
     })
-    batchQueue.setRequestQueue(requestQueue)
 
     const promises = [
-      batchQueue.enqueue('A', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1'),
-      batchQueue.enqueue('B', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash2'), // Should trigger flush
+      batchQueue.enqueue({
+        text: 'A',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash1',
+      }),
+      batchQueue.enqueue({
+        text: 'B',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash2',
+      }), // Should trigger flush
     ]
 
     vi.advanceTimersByTime(0) // No delay needed
@@ -153,14 +205,23 @@ describe('batchQueue – batching logic', () => {
     })
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue({
+    const batchQueue = createBatchQueue(requestQueue, {
       ...baseBatchConfig,
-      batchCharacters: 10,
+      maxCharactersPerBatch: 10,
     })
-    batchQueue.setRequestQueue(requestQueue)
 
-    const promise1 = batchQueue.enqueue('Hi', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1')
-    const promise2 = batchQueue.enqueue('Very long text exceeding limit', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash2')
+    const promise1 = batchQueue.enqueue({
+      text: 'Hi',
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: 'hash1',
+    })
+    const promise2 = batchQueue.enqueue({
+      text: 'Very long text exceeding limit',
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: 'hash2',
+    })
 
     vi.advanceTimersByTime(0)
 
@@ -180,15 +241,24 @@ describe('batchQueue – batching logic', () => {
     })
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue(baseBatchConfig)
-    batchQueue.setRequestQueue(requestQueue)
+    const batchQueue = createBatchQueue(requestQueue)
 
     const config1 = { ...sampleLangConfig, targetCode: 'eng' as const }
     const config2 = { ...sampleLangConfig, targetCode: 'cmn' as const }
 
     const promises = [
-      batchQueue.enqueue('Text 1', config1, sampleProviderConfig, Date.now(), 'hash1'),
-      batchQueue.enqueue('Text 2', config2, sampleProviderConfig, Date.now(), 'hash2'),
+      batchQueue.enqueue({
+        text: 'Text 1',
+        langConfig: config1,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash1',
+      }),
+      batchQueue.enqueue({
+        text: 'Text 2',
+        langConfig: config2,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash2',
+      }),
     ]
 
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
@@ -205,13 +275,17 @@ describe('batchQueue – timing control', () => {
     mockTranslateSuccess(['delayed'])
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue({
+    const batchQueue = createBatchQueue(requestQueue, {
       ...baseBatchConfig,
       batchDelay: 500,
     })
-    batchQueue.setRequestQueue(requestQueue)
 
-    const promise = batchQueue.enqueue('Test', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1')
+    const promise = batchQueue.enqueue({
+      text: 'Test',
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: 'hash1',
+    })
 
     // Before timeout
     vi.advanceTimersByTime(400)
@@ -232,12 +306,21 @@ describe('batchQueue – error handling', () => {
     mockTranslateError(error)
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue(baseBatchConfig)
-    batchQueue.setRequestQueue(requestQueue)
+    const batchQueue = createBatchQueue(requestQueue)
 
     const promises = [
-      batchQueue.enqueue('Text 1', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1'),
-      batchQueue.enqueue('Text 2', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash2'),
+      batchQueue.enqueue({
+        text: 'Text 1',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash1',
+      }),
+      batchQueue.enqueue({
+        text: 'Text 2',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash2',
+      }),
     ]
 
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
@@ -251,18 +334,27 @@ describe('batchQueue – error handling', () => {
     mockExecuteTranslate.mockImplementation(() => Promise.resolve('single-result'))
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue(baseBatchConfig)
-    batchQueue.setRequestQueue(requestQueue)
+    const batchQueue = createBatchQueue(requestQueue)
 
     const promises = [
-      batchQueue.enqueue('Text 1', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1'),
-      batchQueue.enqueue('Text 2', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash2'),
+      batchQueue.enqueue({
+        text: 'Text 1',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash1',
+      }),
+      batchQueue.enqueue({
+        text: 'Text 2',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash2',
+      }),
     ]
 
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
     vi.advanceTimersByTime(0)
 
-    await expect(Promise.all(promises)).rejects.toThrow('Translation count mismatch')
+    await expect(Promise.all(promises)).rejects.toThrow('Batch result count mismatch')
   })
 })
 
@@ -272,17 +364,26 @@ describe('batchQueue – configuration', () => {
     mockTranslateSuccess(['result1', 'result2'])
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = new BatchQueue({
+    const batchQueue = createBatchQueue(requestQueue, {
       ...baseBatchConfig,
-      batchSize: 10,
+      maxItemsPerBatch: 10,
     })
-    batchQueue.setRequestQueue(requestQueue)
 
-    batchQueue.setBatchConfig({ batchSize: 2 })
+    batchQueue.setBatchConfig({ maxItemsPerBatch: 2 })
 
     const promises = [
-      batchQueue.enqueue('Text 1', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash1'),
-      batchQueue.enqueue('Text 2', sampleLangConfig, sampleProviderConfig, Date.now(), 'hash2'),
+      batchQueue.enqueue({
+        text: 'Text 1',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash1',
+      }),
+      batchQueue.enqueue({
+        text: 'Text 2',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash2',
+      }),
     ]
 
     vi.advanceTimersByTime(0) // Should flush immediately
@@ -292,11 +393,12 @@ describe('batchQueue – configuration', () => {
   })
 
   it('throws error for invalid configuration', () => {
-    const batchQueue = new BatchQueue(baseBatchConfig)
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue)
 
-    expect(() => batchQueue.setBatchConfig({ batchCharacters: 0 })).toThrow()
-    expect(() => batchQueue.setBatchConfig({ batchSize: 0 })).toThrow()
-    expect(() => batchQueue.setBatchConfig({ batchCharacters: -1 })).toThrow()
-    expect(() => batchQueue.setBatchConfig({ batchSize: -1 })).toThrow()
+    expect(() => batchQueue.setBatchConfig({ maxCharactersPerBatch: 0 })).toThrow()
+    expect(() => batchQueue.setBatchConfig({ maxItemsPerBatch: 0 })).toThrow()
+    expect(() => batchQueue.setBatchConfig({ maxCharactersPerBatch: -1 })).toThrow()
+    expect(() => batchQueue.setBatchConfig({ maxItemsPerBatch: -1 })).toThrow()
   })
 })

@@ -161,13 +161,13 @@ options:
       rate:
         title: Average Requests Per Second
         description: Average requests per second, but allows configuring a maximum burst count to temporarily send excess requests
-    requestBatchConfig:
+    batchQueueConfig:
       title: Batch Translation
       description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
-      batchCharacters:
+      maxCharactersPerBatch:
         title: Maximum Characters
         description: Maximum number of characters allowed per batch request to control the content volume of each translation (only effective for LLM translation)
-      batchSize:
+      maxItemsPerBatch:
         title: Maximum Paragraph Count
         description: Maximum number of paragraphs for each batch translation to control the content volume of each translation (only effective for LLM translation)
     alwaysTranslate:

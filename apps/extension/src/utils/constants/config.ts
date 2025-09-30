@@ -39,9 +39,9 @@ export const DEFAULT_CONFIG: Config = {
       capacity: DEFAULT_REQUEST_CAPACITY,
       rate: DEFAULT_REQUEST_RATE,
     },
-    requestBatchConfig: {
-      batchCharacters: DEFAULT_BATCH_CONFIG.batchCharacters,
-      batchSize: DEFAULT_BATCH_CONFIG.batchSize,
+    batchQueueConfig: {
+      maxCharactersPerBatch: DEFAULT_BATCH_CONFIG.maxCharactersPerBatch,
+      maxItemsPerBatch: DEFAULT_BATCH_CONFIG.maxItemsPerBatch,
     },
     translationNodeStyle: DEFAULT_TRANSLATION_NODE_STYLE,
     customAutoTranslateShortcutKey: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,

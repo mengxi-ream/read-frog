@@ -3,9 +3,9 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     translate: {
       ...oldConfig.translate,
-      requestBatchConfig: {
-        batchCharacters: 1000,
-        batchSize: 4,
+      batchQueueConfig: {
+        maxCharactersPerBatch: 1000,
+        maxItemsPerBatch: 4,
       },
     },
   }

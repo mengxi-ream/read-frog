@@ -2,7 +2,7 @@ import type { JSONValue } from 'ai'
 import type { LLMTranslateProviderConfig } from '@/types/config/provider'
 import { generateText } from 'ai'
 import { THINKING_MODELS } from '@/types/config/provider'
-import { getBatchTranslatePrompt, getTranslatePrompt } from '@/utils/prompts/translate'
+import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
 
 const DEFAULT_THINKING_BUDGET = 128
@@ -25,9 +25,7 @@ export async function aiTranslate(
     },
   }
 
-  const prompt = options?.isBatch
-    ? await getBatchTranslatePrompt(targetLangName, text)
-    : await getTranslatePrompt(targetLangName, text)
+  const prompt = await getTranslatePrompt(targetLangName, text, options)
 
   const { text: translatedText } = await generateText({
     model,

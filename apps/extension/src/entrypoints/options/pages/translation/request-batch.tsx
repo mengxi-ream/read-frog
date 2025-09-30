@@ -1,30 +1,30 @@
-import type { RequestBatchConfig } from '@/types/config/translate'
+import type { BatchQueueConfig } from '@/types/config/translate'
 import { i18n } from '#imports'
 import { Input } from '@repo/ui/components/input'
 import { useAtom } from 'jotai'
 import { toast } from 'sonner'
-import { requestBatchConfigSchema } from '@/types/config/translate'
+import { batchQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MIN_BATCH_CHARACTERS, MIN_BATCH_SIZE } from '@/utils/constants/translate'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
 
-type KeyOfRequestBatchConfig = keyof RequestBatchConfig
+type KeyOfBatchQueueConfig = keyof BatchQueueConfig
 
 export function RequestBatch() {
   return (
     <ConfigCard
-      title={i18n.t('options.translation.requestBatchConfig.title')}
+      title={i18n.t('options.translation.batchQueueConfig.title')}
       description={(
         <div>
-          {i18n.t('options.translation.requestBatchConfig.description')}
+          {i18n.t('options.translation.batchQueueConfig.description')}
         </div>
       )}
     >
       <div className="flex flex-col gap-4">
-        <BatchNumberSelector property="batchCharacters" />
-        <BatchNumberSelector property="batchSize" />
+        <BatchNumberSelector property="maxCharactersPerBatch" />
+        <BatchNumberSelector property="maxItemsPerBatch" />
       </div>
     </ConfigCard>
   )
@@ -33,8 +33,8 @@ export function RequestBatch() {
 function BatchCharactersDescription() {
   return (
     <div className="flex flex-col gap-2">
-      <h2>{i18n.t('options.translation.requestBatchConfig.batchCharacters.title' as any)}</h2>
-      <p className="text-xs text-gray-500">{i18n.t('options.translation.requestBatchConfig.batchCharacters.description' as any)}</p>
+      <h2>{i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.title' as any)}</h2>
+      <p className="text-xs text-gray-500">{i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.description' as any)}</p>
     </div>
   )
 }
@@ -42,27 +42,27 @@ function BatchCharactersDescription() {
 function BatchSizeDescription() {
   return (
     <div className="flex flex-col gap-2 flex-auto">
-      <h2>{i18n.t('options.translation.requestBatchConfig.batchSize.title' as any)}</h2>
-      <p className="text-xs text-gray-500">{i18n.t('options.translation.requestBatchConfig.batchSize.description' as any)}</p>
+      <h2>{i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.title' as any)}</h2>
+      <p className="text-xs text-gray-500">{i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.description' as any)}</p>
     </div>
   )
 }
 
 const propertyDescription = {
-  batchCharacters: BatchCharactersDescription,
-  batchSize: BatchSizeDescription,
+  maxCharactersPerBatch: BatchCharactersDescription,
+  maxItemsPerBatch: BatchSizeDescription,
 }
 
 const propertyMinValue = {
-  batchCharacters: MIN_BATCH_CHARACTERS,
-  batchSize: MIN_BATCH_SIZE,
+  maxCharactersPerBatch: MIN_BATCH_CHARACTERS,
+  maxItemsPerBatch: MIN_BATCH_SIZE,
 }
 
-function BatchNumberSelector({ property }: { property: KeyOfRequestBatchConfig }) {
+function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
-  const { requestBatchConfig } = translateConfig
+  const { batchQueueConfig } = translateConfig
 
-  const currentConfigValue = requestBatchConfig[property]
+  const currentConfigValue = batchQueueConfig[property]
   const minAllowedValue = propertyMinValue[property]
 
   const Description = propertyDescription[property]
@@ -76,16 +76,16 @@ function BatchNumberSelector({ property }: { property: KeyOfRequestBatchConfig }
         value={currentConfigValue}
         onChange={(e) => {
           const newConfigValue = Number(e.target.value)
-          const configParseResult = requestBatchConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          const configParseResult = batchQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
           if (configParseResult.success) {
             void setTranslateConfig({
               ...translateConfig,
-              requestBatchConfig: {
-                ...translateConfig.requestBatchConfig,
+              batchQueueConfig: {
+                ...translateConfig.batchQueueConfig,
                 [property]: newConfigValue,
               },
             })
-            void sendMessage('setTranslateRequestBatchConfig', {
+            void sendMessage('setTranslateBatchQueueConfig', {
               [property]: newConfigValue,
             })
           }

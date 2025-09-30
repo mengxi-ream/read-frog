@@ -1,64 +1,58 @@
-import type { RequestQueue } from './request-queue'
-import type { Config } from '@/types/config/config'
-import type { ProviderConfig } from '@/types/config/provider'
-import { requestBatchConfigSchema } from '@/types/config/translate'
-import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
-import { executeTranslate } from '@/utils/host/translate/translate-text'
-import { Sha256Hex } from '../hash'
+import { batchQueueConfigSchema } from '@/types/config/translate'
 
-interface BatchTask {
-  text: string
-  langConfig: Config['language']
-  providerConfig: ProviderConfig
-  scheduleAt: number
-  hash: string
-  resolve: (value: string) => void
+interface BatchTask<T, R> {
+  data: T
+  resolve: (value: R) => void
   reject: (error: Error) => void
 }
 
-interface PendingBatch {
+interface PendingBatch<T, R> {
   id: string
-  tasks: BatchTask[]
-  characters: number
+  tasks: BatchTask<T, R>[]
+  totalCharacters: number
   createdAt: number
 }
 
-export interface BatchOptions {
-  batchCharacters: number
-  batchSize: number
+export interface BatchOptions<T, R> {
+  maxCharactersPerBatch: number
+  maxItemsPerBatch: number
   batchDelay: number
+  getBatchKey: (data: T) => string
+  getCharacters: (data: T) => number
+  executeBatch: (dataList: T[]) => Promise<R[]>
 }
 
-export class BatchQueue {
-  private requestQueue: RequestQueue | null = null
-  private pendingBatchMap = new Map<string, PendingBatch>()
+export class BatchQueue<T, R> {
+  private pendingBatchMap = new Map<string, PendingBatch<T, R>>()
   private nextScheduleTimer: NodeJS.Timeout | null = null
-  private batchCharacters: number
-  private batchSize: number
+  private maxCharactersPerBatch: number
+  private maxItemsPerBatch: number
   private batchDelay: number
+  private getBatchKey: (data: T) => string
+  private getCharacters: (data: T) => number
+  private executeBatch: (dataList: T[]) => Promise<R[]>
 
-  constructor(config: BatchOptions) {
-    this.batchCharacters = config.batchCharacters
-    this.batchSize = config.batchSize
+  constructor(config: BatchOptions<T, R>) {
+    this.maxCharactersPerBatch = config.maxCharactersPerBatch
+    this.maxItemsPerBatch = config.maxItemsPerBatch
     this.batchDelay = config.batchDelay
+    this.getBatchKey = config.getBatchKey
+    this.getCharacters = config.getCharacters
+    this.executeBatch = config.executeBatch
   }
 
-  enqueue(text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string): Promise<string> {
-    if (!this.requestQueue) {
-      throw new Error('Request queue is not set. Call setRequestQueue() first.')
-    }
-
-    let resolve!: (value: string) => void
+  enqueue(data: T): Promise<R> {
+    let resolve!: (value: R) => void
     let reject!: (error: Error) => void
-    const promise = new Promise<string>((res, rej) => {
+    const promise = new Promise<R>((res, rej) => {
       resolve = res
       reject = rej
     })
 
-    const configKey = this.getConfigKey(langConfig, providerConfig)
-    const task = { text, langConfig, providerConfig, scheduleAt, hash, resolve, reject }
+    const batchKey = this.getBatchKey(data)
+    const task: BatchTask<T, R> = { data, resolve, reject }
 
-    this.addTaskToBatch(task, configKey)
+    this.addTaskToBatch(task, batchKey)
     this.schedule()
 
     return promise
@@ -73,17 +67,17 @@ export class BatchQueue {
     const now = Date.now()
     const batchesToFlush: string[] = []
 
-    for (const [configKey, batch] of this.pendingBatchMap.entries()) {
+    for (const [batchKey, batch] of this.pendingBatchMap.entries()) {
       const shouldFlushNow = this.shouldFlushBatch(batch)
       const isTimedOut = now >= batch.createdAt + this.batchDelay
 
       if (shouldFlushNow || isTimedOut) {
-        batchesToFlush.push(configKey)
+        batchesToFlush.push(batchKey)
       }
     }
 
-    for (const configKey of batchesToFlush) {
-      this.flushPendingBatchByKey(configKey)
+    for (const batchKey of batchesToFlush) {
+      this.flushPendingBatchByKey(batchKey)
     }
 
     if (this.pendingBatchMap.size > 0) {
@@ -94,94 +88,76 @@ export class BatchQueue {
     }
   }
 
-  private addTaskToBatch(task: BatchTask, configKey: string) {
-    const taskCharacters = task.text.length
-    const existingBatch = this.pendingBatchMap.get(configKey)
+  private addTaskToBatch(task: BatchTask<T, R>, batchKey: string) {
+    const characters = this.getCharacters(task.data)
+    const existingBatch = this.pendingBatchMap.get(batchKey)
 
     if (existingBatch) {
-      if (existingBatch.characters + taskCharacters <= this.batchCharacters) {
+      if (existingBatch.totalCharacters + characters <= this.maxCharactersPerBatch) {
         existingBatch.tasks.push(task)
-        existingBatch.characters += taskCharacters
+        existingBatch.totalCharacters += characters
       }
       else {
-        this.flushPendingBatchByKey(configKey)
-        this.createNewPendingBatch(task, configKey)
+        this.flushPendingBatchByKey(batchKey)
+        this.createNewPendingBatch(task, batchKey)
       }
     }
     else {
-      this.createNewPendingBatch(task, configKey)
+      this.createNewPendingBatch(task, batchKey)
     }
   }
 
-  private shouldFlushBatch(batch: PendingBatch): boolean {
+  private shouldFlushBatch(batch: PendingBatch<T, R>): boolean {
     return (
-      batch.tasks.length >= this.batchSize
-      || batch.characters >= this.batchCharacters
+      batch.tasks.length >= this.maxItemsPerBatch
+      || batch.totalCharacters >= this.maxCharactersPerBatch
     )
   }
 
-  private createNewPendingBatch(task: BatchTask, configKey: string) {
+  private createNewPendingBatch(task: BatchTask<T, R>, batchKey: string) {
     const batchId = crypto.randomUUID()
 
-    const pendingBatch: PendingBatch = {
+    const pendingBatch: PendingBatch<T, R> = {
       id: batchId,
       tasks: [task],
-      characters: task.text.length,
+      totalCharacters: this.getCharacters(task.data),
       createdAt: Date.now(),
     }
 
-    this.pendingBatchMap.set(configKey, pendingBatch)
+    this.pendingBatchMap.set(batchKey, pendingBatch)
   }
 
-  private flushPendingBatchByKey(configKey: string) {
-    const pendingBatch = this.pendingBatchMap.get(configKey)
+  private flushPendingBatchByKey(batchKey: string) {
+    const pendingBatch = this.pendingBatchMap.get(batchKey)
     if (!pendingBatch)
       return
 
-    this.pendingBatchMap.delete(configKey)
+    this.pendingBatchMap.delete(batchKey)
 
     const { tasks } = pendingBatch
-    const hash = Sha256Hex(...tasks.map(task => task.hash))
 
-    const batchThunk = async (): Promise<string[]> => {
-      const { langConfig, providerConfig } = tasks[0]
-      const inputs = tasks.map(task => task.text)
-      const text = inputs.join(BATCH_SEPARATOR)
-      const result = await executeTranslate(text, langConfig, providerConfig, { isBatch: true })
-      const results = result.split(BATCH_SEPARATOR).map(t => t.trim())
-
+    this.executeBatch(tasks.map(task => task.data)).then((results) => {
       if (!results) {
-        throw new Error('Translation results are undefined')
+        throw new Error('Batch execution results are undefined')
       }
 
       if (results.length !== tasks.length) {
-        throw new Error(`Translation count mismatch: expected ${tasks.length}, got ${results.length}`)
+        throw new Error(`Batch result count mismatch: expected ${tasks.length}, got ${results.length}`)
       }
 
-      return results
-    }
-
-    this.requestQueue!.enqueue(batchThunk, Date.now(), hash).then((results) => {
       tasks.forEach((task, index) => task.resolve(results[index]))
     }).catch((error) => {
       tasks.forEach(task => task.reject(error as Error))
     })
   }
 
-  private getConfigKey(langConfig: Config['language'], providerConfig: ProviderConfig): string {
-    return `${langConfig.sourceCode}-${langConfig.targetCode}-${providerConfig.id}`
-  }
-
-  setRequestQueue(requestQueue: RequestQueue): void {
-    this.requestQueue = requestQueue
-  }
-
-  setBatchConfig(config: Partial<BatchOptions>) {
-    const parseConfigStatus = requestBatchConfigSchema.partial().safeParse(config)
+  setBatchConfig(config: Partial<Pick<BatchOptions<T, R>, 'maxCharactersPerBatch' | 'maxItemsPerBatch'>>) {
+    const parseConfigStatus = batchQueueConfigSchema.partial().safeParse(config)
     if (parseConfigStatus.error) {
       throw new Error(parseConfigStatus.error.issues[0].message)
     }
-    this.batchCharacters = config.batchCharacters ?? this.batchCharacters
-    this.batchSize = config.batchSize ?? this.batchSize
+
+    this.maxCharactersPerBatch = config.maxCharactersPerBatch ?? this.maxCharactersPerBatch
+    this.maxItemsPerBatch = config.maxItemsPerBatch ?? this.maxItemsPerBatch
   }
 }

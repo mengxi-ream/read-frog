@@ -11,8 +11,8 @@ export const DEFAULT_BATCH_MIN_BATCH_SIZE = 4
 export const DEFAULT_BATCH_MAX_TASK_RETRIES = 3
 
 export const DEFAULT_BATCH_CONFIG = {
-  batchCharacters: DEFAULT_BATCH_CHARACTERS,
-  batchSize: DEFAULT_BATCH_MIN_BATCH_SIZE,
+  maxCharactersPerBatch: DEFAULT_BATCH_CHARACTERS,
+  maxItemsPerBatch: DEFAULT_BATCH_MIN_BATCH_SIZE,
 }
 
 export const DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY = ['alt', 'q']

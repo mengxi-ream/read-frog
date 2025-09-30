@@ -7,6 +7,6 @@ export interface BatchQueueOptions {
 }
 
 export interface BatchConfig {
-  batchCharacters: number // max characters per batch
-  batchSize: number // max batch size
+  maxCharactersPerBatch: number // max characters per batch
+  maxItemsPerBatch: number // max batch size
 }

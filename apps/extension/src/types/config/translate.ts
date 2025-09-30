@@ -9,9 +9,9 @@ export const requestQueueConfigSchema = z.object({
   rate: z.number().gte(MIN_TRANSLATE_RATE),
 })
 
-export const requestBatchConfigSchema = z.object({
-  batchCharacters: z.number().gte(MIN_BATCH_CHARACTERS),
-  batchSize: z.number().gte(MIN_BATCH_SIZE),
+export const batchQueueConfigSchema = z.object({
+  maxCharactersPerBatch: z.number().gte(MIN_BATCH_CHARACTERS),
+  maxItemsPerBatch: z.number().gte(MIN_BATCH_SIZE),
 })
 
 export const TRANSLATION_MODES = ['bilingual', 'translationOnly'] as const
@@ -52,12 +52,12 @@ export const translateConfigSchema = z.object({
   }),
   promptsConfig: promptsConfigSchema,
   requestQueueConfig: requestQueueConfigSchema,
-  requestBatchConfig: requestBatchConfigSchema,
+  batchQueueConfig: batchQueueConfigSchema,
   translationNodeStyle: translationNodeStyleSchema,
   customAutoTranslateShortcutKey: z.array(z.string()),
 })
 
 export type RequestQueueConfig = z.infer<typeof requestQueueConfigSchema>
-export type RequestBatchConfig = z.infer<typeof requestBatchConfigSchema>
+export type BatchQueueConfig = z.infer<typeof batchQueueConfigSchema>
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
 export type TranslationMode = z.infer<typeof translationModeSchema>
