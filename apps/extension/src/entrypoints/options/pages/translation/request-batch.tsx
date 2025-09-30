@@ -33,8 +33,8 @@ export function RequestBatch() {
 function BatchCharactersDescription() {
   return (
     <div className="flex flex-col gap-2">
-      <h2>{i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.title' as any)}</h2>
-      <p className="text-xs text-gray-500">{i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.description' as any)}</p>
+      <h2>{i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.title')}</h2>
+      <p className="text-xs text-gray-500">{i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.description')}</p>
     </div>
   )
 }
@@ -42,8 +42,8 @@ function BatchCharactersDescription() {
 function BatchSizeDescription() {
   return (
     <div className="flex flex-col gap-2 flex-auto">
-      <h2>{i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.title' as any)}</h2>
-      <p className="text-xs text-gray-500">{i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.description' as any)}</p>
+      <h2>{i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.title')}</h2>
+      <p className="text-xs text-gray-500">{i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.description')}</p>
     </div>
   )
 }
