@@ -1,5 +1,11 @@
 # @read-frog/website
 
+## 1.0.8
+
+### Patch Changes
+
+- [#550](https://github.com/mengxi-ream/read-frog/pull/550) [`a1a6e85`](https://github.com/mengxi-ream/read-frog/commit/a1a6e8516e9cf5c171c8e404578a45f830307c1d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - docs: add provider config docs
+
 ## 1.0.7
 
 ### Patch Changes
