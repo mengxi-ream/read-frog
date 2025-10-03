@@ -94,7 +94,9 @@ function createBatchQueue(requestQueue: RequestQueue, config = baseBatchConfig) 
 
       const batchThunk = async (): Promise<string[]> => {
         const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
-        return result.split(batchSeparator).map(t => t.trim())
+
+        // Use flexible regex to handle whitespace variations (spaces, tabs, etc.)
+        return result.split(/\s*\n%%\s*\n\s*/).map(t => t.trim())
       }
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)

@@ -1,4 +1,4 @@
-import type { JSONValue, TextUIPart } from 'ai'
+import type { TextUIPart } from 'ai'
 import { Icon } from '@iconify/react'
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@repo/definitions'
 import { useMutation } from '@tanstack/react-query'
@@ -6,11 +6,12 @@ import { readUIMessageStream, streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { isLLMTranslateProviderConfig, isNonAPIProvider, isPureAPIProvider, THINKING_MODELS } from '@/types/config/provider'
+import { isLLMTranslateProviderConfig, isNonAPIProvider, isPureAPIProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom } from '@/utils/atoms/provider'
 import { authClient } from '@/utils/auth/auth-client'
 import { getConfigFromStorage } from '@/utils/config/config'
+import { getProviderOptions } from '@/utils/constants/model'
 import { WEBSITE_URL } from '@/utils/constants/url'
 import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
 import { sendMessage } from '@/utils/message'
@@ -155,15 +156,7 @@ export function TranslatePopover() {
           const model = await getTranslateModelById(providerId)
 
           // Configure ultrathink for thinking models
-          const DEFAULT_THINKING_BUDGET = 128
-          const providerOptions: Record<string, Record<string, JSONValue>> = {
-            google: {
-              thinkingConfig: {
-                thinkingBudget: THINKING_MODELS.includes(translateModel as (typeof THINKING_MODELS)[number]) ? DEFAULT_THINKING_BUDGET : 0,
-              },
-            },
-          }
-
+          const providerOptions = getProviderOptions(translateModel ?? '')
           const prompt = await getTranslatePrompt(targetLangName, cleanText)
 
           // Use streaming for AI providers

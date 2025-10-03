@@ -27,6 +27,7 @@ ${getTokenCellText(INPUT)}
 
 export const DEFAULT_BATCH_TRANSLATE_PROMPT = `## Multi-paragraph Translation Rules
 1. If input contains ${BATCH_SEPARATOR}, use ${BATCH_SEPARATOR} in your output, if input has no ${BATCH_SEPARATOR}, don't use ${BATCH_SEPARATOR} in your output
+2. **CRITICAL**: Preserve exact formatting around ${BATCH_SEPARATOR} - use exactly one newline before and after, with no extra spaces, tabs, or whitespace
 
 ## OUTPUT FORMAT:
 - **Single paragraph input** → Output translation directly (no separators, no extra text)

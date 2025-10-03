@@ -1,13 +1,8 @@
-import type { AnthropicProviderOptions } from '@ai-sdk/anthropic'
-import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
-import type { JSONValue } from 'ai'
 import type { LLMTranslateProviderConfig } from '@/types/config/provider'
 import { generateText } from 'ai'
-import { THINKING_MODELS } from '@/types/config/provider'
+import { getProviderOptions } from '@/utils/constants/model'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
-
-const DEFAULT_THINKING_BUDGET = 128
 
 export async function aiTranslate(
   text: string,
@@ -19,17 +14,7 @@ export async function aiTranslate(
   const translateModel = translate.isCustomModel ? translate.customModel : translate.model
   const model = await getTranslateModelById(providerId)
 
-  const providerOptions: Record<string, Record<string, JSONValue>> = {
-    google: {
-      thinkingConfig: {
-        thinkingBudget: THINKING_MODELS.includes(translateModel as (typeof THINKING_MODELS)[number]) ? DEFAULT_THINKING_BUDGET : 0,
-      },
-    } satisfies GoogleGenerativeAIProviderOptions,
-    anthropic: {
-      thinking: { type: 'disabled' },
-    } satisfies AnthropicProviderOptions,
-  }
-
+  const providerOptions = getProviderOptions(translateModel ?? '')
   const prompt = await getTranslatePrompt(targetLangName, text, options)
 
   const { text: translatedText } = await generateText({

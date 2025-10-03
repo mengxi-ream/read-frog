@@ -142,7 +142,7 @@ export class BatchQueue<T, R> {
       }
 
       if (results.length !== tasks.length) {
-        throw new Error(`Batch result count mismatch: expected ${tasks.length}, got ${results.length}`)
+        throw new Error(`Batch result count mismatch: expected ${tasks.length}, got ${results.length}.\nResults: ["${results.join('",\n"')}"]`)
       }
 
       tasks.forEach((task, index) => task.resolve(results[index]))
