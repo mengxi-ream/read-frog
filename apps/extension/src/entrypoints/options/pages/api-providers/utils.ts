@@ -1,9 +1,9 @@
 import type { Config } from '@/types/config/config'
-import type { APIProviderConfig, APIProviderNames } from '@/types/config/provider'
+import type { APIProviderConfig, APIProviderTypes } from '@/types/config/provider'
 import { API_PROVIDER_ITEMS, DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/providers'
 
 export async function addProvider(
-  providerType: APIProviderNames,
+  providerType: APIProviderTypes,
   providersConfig: Config['providersConfig'],
   setProvidersConfig: (config: Partial<Config['providersConfig']>) => Promise<void>,
   setSelectedProviderId?: (id: string) => void,

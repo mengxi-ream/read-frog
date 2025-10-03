@@ -1,26 +1,19 @@
-import type { APIProviderNames } from '@/types/config/provider'
+import type { APIProviderTypes } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@repo/ui/components/dialog'
 import { useAtom, useSetAtom } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
-import { CUSTOM_LLM_PROVIDER_NAMES, NON_CUSTOM_LLM_PROVIDER_NAMES, PURE_API_PROVIDER_NAMES } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { API_PROVIDER_ITEMS } from '@/utils/constants/providers'
+import { API_PROVIDER_ITEMS, PROVIDER_GROUPS } from '@/utils/constants/providers'
 import { isDarkMode } from '@/utils/tailwind'
 import { selectedProviderIdAtom } from './atoms'
 import { addProvider } from './utils'
-
-export const PROVIDER_GROUPS = {
-  llmProviders: NON_CUSTOM_LLM_PROVIDER_NAMES,
-  customProviders: CUSTOM_LLM_PROVIDER_NAMES,
-  pureTranslationProviders: PURE_API_PROVIDER_NAMES,
-} as const
 
 export default function AddProviderDialog({ onClose }: { onClose: () => void }) {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
 
-  const handleAddProvider = async (providerType: APIProviderNames) => {
+  const handleAddProvider = async (providerType: APIProviderTypes) => {
     await addProvider(providerType, providersConfig, setProvidersConfig, setSelectedProviderId)
     onClose()
   }
@@ -33,14 +26,14 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
           {i18n.t('options.apiProviders.dialog.description')}
         </DialogDescription>
       </DialogHeader>
-      {Object.entries(PROVIDER_GROUPS).map(([groupTitle, providerTypes]) => (
-        <ProviderButtonGroup key={groupTitle} groupTitle={i18n.t(`options.apiProviders.dialog.groups.${groupTitle as keyof typeof PROVIDER_GROUPS}`)} providerTypes={providerTypes} handleAddProvider={handleAddProvider} />
+      {Object.entries(PROVIDER_GROUPS).map(([groupTitle, group]) => (
+        <ProviderButtonGroup key={groupTitle} groupTitle={i18n.t(`options.apiProviders.dialog.groups.${groupTitle as keyof typeof PROVIDER_GROUPS}`)} providerTypes={group.types} handleAddProvider={handleAddProvider} />
       ))}
     </DialogContent>
   )
 }
 
-function ProviderButtonGroup({ groupTitle, providerTypes, handleAddProvider }: { groupTitle: string, providerTypes: readonly APIProviderNames[], handleAddProvider: (providerType: APIProviderNames) => void }) {
+function ProviderButtonGroup({ groupTitle, providerTypes, handleAddProvider }: { groupTitle: string, providerTypes: readonly APIProviderTypes[], handleAddProvider: (providerType: APIProviderTypes) => void }) {
   return (
     <div>
       <h3 className="text-base font-base text-input-foreground text-center sm:text-left">{groupTitle}</h3>
@@ -53,7 +46,7 @@ function ProviderButtonGroup({ groupTitle, providerTypes, handleAddProvider }: {
   )
 }
 
-function ProviderButton({ providerType, handleAddProvider }: { providerType: APIProviderNames, handleAddProvider: (providerType: APIProviderNames) => void }) {
+function ProviderButton({ providerType, handleAddProvider }: { providerType: APIProviderTypes, handleAddProvider: (providerType: APIProviderTypes) => void }) {
   return (
     <button
       type="button"

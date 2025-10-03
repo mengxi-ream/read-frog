@@ -27,7 +27,7 @@ export const DEFAULT_CONFIG: Config = {
     mode: 'bilingual',
     node: {
       enabled: true,
-      hotkey: 'Control',
+      hotkey: 'Shift',
     },
     page: {
       range: 'main',

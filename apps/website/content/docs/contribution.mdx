@@ -114,6 +114,32 @@ After startup, access the main website at: http://localhost:8888/.
 
 ## Development Tips
 
+### Using npx with pnpm Node.js Management
+
+We're using pnpm's built-in Node.js version management (introduced in pnpm 10.14). You may encounter `EBADDEVENGINES` errors when running `npx` commands. There are two solutions:
+
+**Solution 1: Use `pnpm dlx` or `pnpx` instead of `npx`**
+
+```bash
+# Instead of npx
+npx some-package@latest
+
+# Use pnpm dlx
+pnpm dlx some-package@latest
+
+# Or use pnpx (alias for pnpm dlx)
+pnpx some-package@latest
+```
+
+**Solution 2: Align Node.js version with pnpm**
+
+When it's not convenient to replace `npx` (e.g., for user-scoped MCP installations in Claude Code), align your Node.js version:
+
+```bash
+# Install and use the required Node.js version globally
+pnpm env use --global 22.18.0
+```
+
 ### Open the extension in the specific browser
 
 You can modify the `web-ext.config.ts` file in the `apps/extension` directory to explicitly specify the browser path.

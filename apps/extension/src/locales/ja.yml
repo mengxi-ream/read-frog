@@ -51,8 +51,8 @@ options:
       title: 新しいプロバイダーを追加
       description: 設定に追加するAPIプロバイダーを選択してください
       groups:
-        llmProviders: 組み込みLLMプロバイダー
-        customProviders: OpenAI互換カスタムプロバイダー
+        builtInProviders: 組み込みLLMプロバイダー
+        openaiCompatibleProviders: OpenAI互換カスタムプロバイダー
         pureTranslationProviders: 純粋翻訳プロバイダー
     form:
       fields:
@@ -103,6 +103,7 @@ options:
         vercel: ウェブコンテンツの翻訳と分析に最適化されたAIモデル
     apiKey:
       showAPIKey: APIキーを表示
+    howToConfigure: 設定方法は?
     testConnection:
       button: 接続テスト
       testing: テスト中...

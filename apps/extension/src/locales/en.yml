@@ -52,8 +52,8 @@ options:
       title: Add New Provider
       description: Choose an API provider to add to your configuration.
       groups:
-        llmProviders: Built-in LLM Providers
-        customProviders: OpenAI Compatible Custom Providers
+        builtInProviders: Built-in LLM Providers
+        openaiCompatibleProviders: OpenAI Compatible Custom Providers
         pureTranslationProviders: Pure Translation Providers
     form:
       fields:
@@ -104,6 +104,7 @@ options:
         vercel: Optimized AI models for web content translation and analysis
     apiKey:
       showAPIKey: Show API Key
+    howToConfigure: How to configure?
     testConnection:
       button: Test Connection
       testing: Testing...

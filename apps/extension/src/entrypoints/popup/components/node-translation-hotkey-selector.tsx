@@ -44,6 +44,7 @@ export default function NodeTranslationHotkeySelector() {
               {i18n.t('popup.hover')}
               {' '}
               +
+              {' '}
               {HOTKEY_ITEMS[item].icon}
               {' '}
               {HOTKEY_ITEMS[item].label}

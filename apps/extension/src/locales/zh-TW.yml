@@ -52,8 +52,8 @@ options:
       title: 新增提供商
       description: 選擇要新增到配置中的 API 提供商
       groups:
-        llmProviders: 內建 LLM 提供商
-        customProviders: OpenAI 相容自定義提供商
+        builtInProviders: 內建 LLM 提供商
+        openaiCompatibleProviders: OpenAI 相容自定義提供商
         pureTranslationProviders: 純翻譯提供商
     form:
       fields:
@@ -104,6 +104,7 @@ options:
         vercel: 針對網頁內容翻譯和分析優化的 AI 模型
     apiKey:
       showAPIKey: 顯示 API Key
+    howToConfigure: 如何配置?
     testConnection:
       button: 測試連接
       testing: 測試中...

@@ -1,5 +1,5 @@
 {
   "title": "Model Providers",
   "icon": "ToyBrick",
-  "pages": ["deeplx", "ollama"]
+  "pages": ["built-in-providers", "openai-compatible-providers", "deeplx", "ollama"]
 }

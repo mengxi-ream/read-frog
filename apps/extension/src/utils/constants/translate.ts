@@ -15,7 +15,7 @@ export const DEFAULT_BATCH_CONFIG = {
   maxItemsPerBatch: DEFAULT_MAX_ITEMS_PER_BATCH,
 }
 
-export const DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY = ['alt', 'q']
+export const DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY = ['alt', 't']
 
 export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]> = {
   'chatgpt.com': [

@@ -51,8 +51,8 @@ options:
       title: 새 제공업체 추가
       description: 구성에 추가할 API 제공업체를 선택하세요
       groups:
-        llmProviders: 내장 LLM 제공업체
-        customProviders: OpenAI 호환 사용자 정의 제공업체
+        builtInProviders: 내장 LLM 제공업체
+        openaiCompatibleProviders: OpenAI 호환 사용자 정의 제공업체
         pureTranslationProviders: 순수 번역 제공업체
     form:
       fields:
@@ -103,6 +103,7 @@ options:
         vercel: 웹 콘텐츠 번역과 분석에 최적화된 AI 모델
     apiKey:
       showAPIKey: API Key 표시
+    howToConfigure: 구성 방법은?
     testConnection:
       button: 연결 테스트
       testing: 테스트 중...

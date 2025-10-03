@@ -1,0 +1,103 @@
+---
+title: Built-in AI Provider Configuration
+description: Learn how to configure and use Read Frog's built-in AI providers, including OpenAI, DeepSeek, Google, and other mainstream platforms.
+---
+
+## What is Built-in AI Provider Configuration
+
+Read Frog has built-in support for multiple mainstream large language model providers, allowing you to choose the most suitable model for translation and reading comprehension. We have pre-configured default request addresses, models, etc. for these providers, so you only need to configure the API Key to use them.
+
+## Provider Overview
+
+| Provider Category | Representative Providers | Features |
+| --- | --- | --- |
+| Major AI Companies | OpenAI | Provides GPT-4o and other models |
+| | Google Gemini | Google's flagship AI model with advanced reasoning capabilities |
+| | Anthropic | Claude models known for safety and reasoning capabilities |
+| | DeepSeek | Recommended for use in China |
+| | xAI | Elon Musk's AI company, providing Grok models with real-time data access |
+| Cloud Inference Platforms | Groq | Specialized hardware focused on ultra-fast LLM inference speed |
+| | Together AI | Collaborative platform for running and fine-tuning open-source models |
+| | DeepInfra | Cost-effective cloud inference for popular open-source models |
+| | Fireworks | Production-ready inference platform for open-source models |
+| | Cerebras | Ultra-fast AI inference, suitable for quick translation and text analysis |
+| | Replicate | Access to diverse open-source models, suitable for specialized translation tasks |
+| Enterprise Services | Amazon Bedrock | AWS managed service for enterprise-grade foundation models |
+| | Cohere | Enterprise-grade AI with strong multilingual and RAG capabilities |
+| Aggregation Platforms | OpenRouter | Unified interface for multiple LLM providers, pay-as-you-go |
+| European AI | Mistral | European AI company focused on efficient multilingual models |
+| Featured Platforms | Perplexity | Real-time knowledge-enhanced AI providing contextual translation and reading assistance |
+| | Vercel | AI models optimized for web content translation and analysis |
+
+## Detailed Configuration Guide
+
+### Step 1: Access Settings Page
+
+1. Click the Read Frog extension icon in your browser toolbar
+2. Click the "Options" button in the popup window
+3. Or right-click the extension icon and select "Options"
+
+### Step 2: Select Provider
+
+![API Providers Page](/tutorial/providers/built-in-providers/api-providers-page.png)
+
+Click the "Add Provider" button, select the "Built-in LLM Providers" section, and choose the provider you want to use.
+
+### Step 3: Get API Key
+
+Add the API Key in the corresponding field. Here's how to get API keys for major providers:
+
+| Provider | API Key Location | Special Notes |
+| --- | --- | --- |
+| OpenAI | [platform.openai.com/api-keys](https://platform.openai.com/api-keys) | Requires payment method |
+| Google | [aistudio.google.com/app/apikey](https://aistudio.google.com/app/apikey) | Has free quota |
+| DeepSeek | [platform.deepseek.com/api_keys](https://platform.deepseek.com/api_keys) | Very cost-effective |
+
+
+### Step 4: Configure Model Selection
+
+We have two scenarios: translation and reading. We recommend choosing the appropriate model based on your use case.
+
+| Scenario | Description | Requirements |
+| --- | --- | --- |
+| Translation | Only used to translate text from one language to another | Recommend using faster small models |
+| Reading | Read articles and perform analysis and summarization | Requires models that support structured output |
+
+<Callout type="warn">
+**Read Frog's reading feature requires AI models to output JSON objects in a specific format. Not all models support this feature**
+
+- ✅ **Full Support**: OpenAI GPT series, Google Gemini series, Anthropic Claude series
+- ⚠️ **Partial Support**: DeepSeek, most open-source models (may need adjustment)
+- ❌ **Not Supported**: Older models or models that don't support JSON output
+</Callout>
+
+### Step 5: Verify Configuration
+
+After configuration, test it:
+
+1. Click the "Test Connection" button
+2. System sends test request
+3. Check the returned result to confirm configuration is correct
+4. If it fails, check API key and network connection
+
+## Troubleshooting Guide
+
+### Common Configuration Issues
+
+| Issue Type | Symptoms | Solutions | Verification Method |
+| --- | --- | --- | --- |
+| API Key Error | "Invalid API Key" | Re-copy key, check for spaces | Test connection button |
+| Insufficient Balance | "Quota exceeded" | Top up account or switch provider | Check provider console |
+| Network Issues | Connection timeout | Check network, try proxy | Ping provider domain |
+| Model Restrictions | Model unavailable | Check permissions, choose other model | Review provider documentation |
+
+## Summary
+
+With this guide, you should be able to:
+
+1. ✅ Understand the features and applicable scenarios of each provider
+2. ✅ Successfully configure the required AI providers
+3. ✅ Choose appropriate models for translation and reading
+4. ✅ Solve common configuration and usage issues
+
+If you encounter other issues during use, we recommend checking the provider's official documentation or seeking help in the Read Frog [Discord](https://discord.gg/ej45e3PezJ) community.

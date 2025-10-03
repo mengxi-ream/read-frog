@@ -113,6 +113,32 @@ pnpm dev
 
 ## 开发 Tips
 
+### 使用 pnpm Node.js 管理时的 npx 问题
+
+我们正在使用 pnpm 的内置 Node.js 版本管理功能(在 pnpm 10.14 中引入)。运行 `npx` 命令时可能会遇到 `EBADDEVENGINES` 错误。有两种解决方案:
+
+**方案 1: 使用 `pnpm dlx` 或 `pnpx` 替代 `npx`**
+
+```bash
+# 以前用 npx
+npx some-package@latest
+
+# 现在用 pnpm dlx
+pnpm dlx some-package@latest
+
+# 或使用 pnpx (pnpm dlx 的别名)
+pnpx some-package@latest
+```
+
+**方案 2: 使用 pnpm 对齐 Node.js 版本**
+
+当不方便替换 `npx` 命令时(例如 Claude Code 的用户级 MCP 安装),可以对齐 Node.js 版本:
+
+```bash
+# 全局安装并使用所需的 Node.js 版本
+pnpm env use --global 22.18.0
+```
+
 ### 在特定浏览器中打开扩展
 
 你可以修改 `apps/extension` 目录下的 `web-ext.config.ts` 文件，显式指定浏览器路径。

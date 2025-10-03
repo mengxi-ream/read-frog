@@ -1,12 +1,13 @@
-import type { AllProviderNames, ProviderConfig, ProvidersConfig, ReadModels, TranslateLLMModels } from '@/types/config/provider'
+import type { AllProviderTypes, APIProviderTypes, ProviderConfig, ProvidersConfig, ReadModels, TranslateLLMModels } from '@/types/config/provider'
 import { i18n } from '#i18n'
 import customProviderLogo from '@/assets/providers/custom-provider.svg'
 import deeplxLogoDark from '@/assets/providers/deeplx-dark.svg'
 import deeplxLogoLight from '@/assets/providers/deeplx-light.svg'
 import tensdaqLogoColor from '@/assets/providers/tensdaq-color.svg'
-import { API_PROVIDER_NAMES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, PURE_TRANSLATE_PROVIDERS, READ_PROVIDER_NAMES, TRANSLATE_PROVIDER_NAMES } from '@/types/config/provider'
+import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, READ_PROVIDER_TYPES, TRANSLATE_PROVIDER_TYPES } from '@/types/config/provider'
 import { omit, pick } from '@/types/utils'
 import { getLobeIconsCDNUrlFn } from '../logo'
+import { WEBSITE_URL } from './url'
 
 export const DEFAULT_READ_MODELS: ReadModels = {
   siliconflow: {
@@ -15,7 +16,7 @@ export const DEFAULT_READ_MODELS: ReadModels = {
     customModel: null,
   },
   tensdaq: {
-    model: 'Qwen3-235B-A22B-Instruct-2507',
+    model: 'deepseek-v3.1',
     isCustomModel: false,
     customModel: null,
   },
@@ -50,7 +51,7 @@ export const DEFAULT_READ_MODELS: ReadModels = {
     customModel: null,
   },
   anthropic: {
-    model: 'claude-3-5-sonnet-20241022',
+    model: 'claude-sonnet-4-5',
     isCustomModel: false,
     customModel: null,
   },
@@ -163,7 +164,7 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
     customModel: null,
   },
   anthropic: {
-    model: 'claude-3-5-haiku-20241022',
+    model: 'claude-sonnet-4-5',
     isCustomModel: false,
     customModel: null,
   },
@@ -234,107 +235,132 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
   },
 }
 
-export const PROVIDER_ITEMS: Record<AllProviderNames, { logo: (isDark: boolean) => string, name: string }>
+export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (isDark: boolean) => string, name: string, website: string }>
   = {
     microsoft: {
       logo: getLobeIconsCDNUrlFn('microsoft-color'),
       name: NON_API_TRANSLATE_PROVIDERS_MAP.microsoft,
+      website: 'https://translator.microsoft.com',
     },
     google: {
       logo: getLobeIconsCDNUrlFn('google-color'),
       name: NON_API_TRANSLATE_PROVIDERS_MAP.google,
+      website: 'https://translate.google.com',
     },
     deeplx: {
       logo: (isDark: boolean) => isDark ? deeplxLogoDark : deeplxLogoLight,
       name: 'DeepLX',
+      website: 'https://deeplx.owo.network/',
     },
     siliconflow: {
       logo: getLobeIconsCDNUrlFn('siliconcloud-color'),
       name: 'SiliconFlow',
+      website: 'https://siliconflow.cn/',
     },
     ai302: {
       logo: getLobeIconsCDNUrlFn('ai302-color'),
       name: '302.AI',
+      website: 'https://share.302.ai/8o2r7P',
     },
     openrouter: {
       logo: getLobeIconsCDNUrlFn('openrouter'),
       name: 'OpenRouter',
+      website: 'https://openrouter.ai/',
     },
     openaiCompatible: {
       logo: () => customProviderLogo,
       name: 'Custom Provider',
+      website: `${WEBSITE_URL}/tutorial/providers/openai-compatible`,
     },
     openai: {
       logo: getLobeIconsCDNUrlFn('openai'),
       name: 'OpenAI',
+      website: 'https://platform.openai.com',
     },
     deepseek: {
       logo: getLobeIconsCDNUrlFn('deepseek-color'),
       name: 'DeepSeek',
+      website: 'https://platform.deepseek.com',
     },
     gemini: {
       logo: getLobeIconsCDNUrlFn('gemini-color'),
       name: 'Gemini',
+      website: 'https://aistudio.google.com',
     },
     anthropic: {
       logo: getLobeIconsCDNUrlFn('anthropic'),
       name: 'Anthropic',
+      website: 'https://console.anthropic.com',
     },
     grok: {
       logo: getLobeIconsCDNUrlFn('grok'),
       name: 'Grok',
+      website: 'https://x.ai/api',
     },
     amazonBedrock: {
       logo: getLobeIconsCDNUrlFn('bedrock-color'),
       name: 'Amazon Bedrock',
+      website: 'https://aws.amazon.com/bedrock/',
     },
     groq: {
       logo: getLobeIconsCDNUrlFn('groq'),
       name: 'Groq',
+      website: 'https://groq.com',
     },
     deepinfra: {
       logo: getLobeIconsCDNUrlFn('deepinfra-color'),
       name: 'DeepInfra',
+      website: 'https://deepinfra.com',
     },
     mistral: {
       logo: getLobeIconsCDNUrlFn('mistral-color'),
       name: 'Mistral AI',
+      website: 'https://mistral.ai',
     },
     togetherai: {
       logo: getLobeIconsCDNUrlFn('together-color'),
       name: 'Together.ai',
+      website: 'https://together.ai',
     },
     cohere: {
       logo: getLobeIconsCDNUrlFn('cohere-color'),
       name: 'Cohere',
+      website: 'https://cohere.com',
     },
     fireworks: {
       logo: getLobeIconsCDNUrlFn('fireworks-color'),
       name: 'Fireworks AI',
+      website: 'https://fireworks.ai',
     },
     cerebras: {
       logo: getLobeIconsCDNUrlFn('cerebras-color'),
       name: 'Cerebras',
+      website: 'https://cerebras.ai',
     },
     replicate: {
       logo: getLobeIconsCDNUrlFn('replicate'),
       name: 'Replicate',
+      website: 'https://replicate.com',
     },
     perplexity: {
       logo: getLobeIconsCDNUrlFn('perplexity-color'),
       name: 'Perplexity',
+      website: 'https://perplexity.ai',
     },
     vercel: {
       logo: getLobeIconsCDNUrlFn('vercel'),
       name: 'Vercel',
+      website: 'https://vercel.com',
     },
     tensdaq: {
       logo: () => tensdaqLogoColor,
       name: 'Tensdaq',
+      website: 'https://dashboard.x-aio.com/zh/register?ref=c356c1daba9a4641a18e',
     },
     ollama: {
       logo: getLobeIconsCDNUrlFn('ollama'),
       name: 'Ollama',
+      website: 'https://ollama.ai',
     },
   }
 
@@ -605,7 +631,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.ollama,
     },
   },
-} as const satisfies Record<AllProviderNames, ProviderConfig>
+} as const satisfies Record<AllProviderTypes, ProviderConfig>
 
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG.google,
@@ -638,7 +664,7 @@ export const NON_API_TRANSLATE_PROVIDER_ITEMS = pick(
 
 export const TRANSLATE_PROVIDER_ITEMS = pick(
   PROVIDER_ITEMS,
-  TRANSLATE_PROVIDER_NAMES,
+  TRANSLATE_PROVIDER_TYPES,
 )
 
 export const PURE_TRANSLATE_PROVIDER_ITEMS = pick(
@@ -653,10 +679,27 @@ export const LLM_TRANSLATE_PROVIDER_ITEMS = omit(
 
 export const READ_PROVIDER_ITEMS = pick(
   PROVIDER_ITEMS,
-  READ_PROVIDER_NAMES,
+  READ_PROVIDER_TYPES,
 )
 
 export const API_PROVIDER_ITEMS = pick(
   PROVIDER_ITEMS,
-  API_PROVIDER_NAMES,
+  API_PROVIDER_TYPES,
 )
+
+export const PROVIDER_GROUPS = {
+  builtInProviders: {
+    types: NON_CUSTOM_LLM_PROVIDER_TYPES,
+    tutorialSlug: 'built-in-providers',
+  },
+  openaiCompatibleProviders: {
+    types: CUSTOM_LLM_PROVIDER_TYPES,
+    tutorialSlug: 'openai-compatible-providers',
+  },
+  pureTranslationProviders: {
+    types: PURE_API_PROVIDER_TYPES,
+    tutorialSlug: 'pure-translation-providers',
+  },
+} as const satisfies Record<string, { types: readonly APIProviderTypes[], tutorialSlug: string }>
+
+export const SPECIFIC_TUTORIAL_PROVIDER_TYPES = ['ollama', 'deeplx'] as const satisfies readonly APIProviderTypes[]

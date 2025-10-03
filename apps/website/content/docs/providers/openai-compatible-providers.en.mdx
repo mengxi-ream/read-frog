@@ -1,0 +1,105 @@
+---
+title: OpenAI Compatible Custom Providers
+description: Configure any OpenAI API-compatible provider in Read Frog, including third-party services and self-hosted solutions
+---
+
+## What are OpenAI Compatible Providers?
+
+OpenAI Compatible providers are services that implement the same API interface as OpenAI, making them drop-in replacements. This standardization allows you to:
+
+- **Connect to proxy services** that provide access to multiple models
+- **Access regional AI services** that offer OpenAI-compatible endpoints
+- **Use self-hosted solutions** for complete control over your data
+- **Connect enterprise AI services** that follow OpenAI API standards
+
+## Compatible Provider Options
+
+Read Frog includes several pre-configured OpenAI compatible providers for convenience:
+
+### SiliconFlow
+- **Base URL**: `https://api.siliconflow.cn/v1`
+- **Models**: Qwen/Qwen3-Next-80B-A3B-Instruct
+- **Best for**: High-performance inference for Chinese and international models
+
+### Tensdaq
+- **Base URL**: `https://tensdaq-api.x-aio.com/v1`
+- **Models**: DeepSeek v3.1, Qwen3-235B-A22B-Instruct-2507
+- **Best for**: Revolutionary bidding platform with market-driven pricing
+
+### 302.AI
+- **Base URL**: `https://api.302.ai/v1`
+- **Models**: GPT-4.1 Mini, Qwen3-235B-A22B
+- **Best for**: Latest models with pay-as-you-go API in China
+
+And a fully customizable provider option that allows you to configure any OpenAI-compatible service.
+
+### Custom Provider
+- **Base URL**: Configurable (e.g., `https://api.example.com/v1`)
+- **Models**: Use custom model names
+- **Best for**: Any OpenAI-compatible service
+
+## Detailed Configuration Guide
+
+### Step 1: Access Settings Page
+
+1. Click the Read Frog extension icon in your browser toolbar
+2. Click the **"Options"** button in the popup window
+3. Or right-click the extension icon and select **"Options"**
+
+### Step 2: Select Provider
+
+![API Providers Page](/tutorial/providers/built-in-providers/api-providers-page.png)
+
+Click the **"Add Provider"** button, select from the **"Built-in LLM Providers"** section, and choose the provider you want to use.
+
+### Step 3: Get API Key
+
+Add your API Key in the corresponding field. If you're using a self-hosted service, you can create an API Key in the backend. If you're using a third-party service, you can create an API Key on the service provider's official website.
+
+### Step 4: Configure Model Selection
+
+We have two scenarios: translation and reading. We recommend you choose the appropriate model based on the use case.
+
+| Scenario | Description | Requirements |
+| --- | --- | --- |
+| Translation | Only used for translating text from one language to another | Recommend using faster, smaller models |
+| Reading | Reading articles, and performing analysis and summarization | Requires models that support structured output |
+
+<Callout type="warn">
+**Read Frog's reading feature requires AI models to output JSON objects in a specific format. Not all models support this feature**
+
+- ✅ **Fully supported**: OpenAI GPT series, Google Gemini series, Anthropic Claude series
+- ⚠️ **Partially supported**: DeepSeek, most open-source models (may require adjustments)
+- ❌ **Not supported**: Older models or models that don't support JSON output
+</Callout>
+
+### Step 5: Verify Configuration
+
+After configuration is complete, test it:
+
+1. Click the **"Test Connection"** button
+2. System sends a test request
+3. Check the returned result to confirm configuration is correct
+4. If it fails, check the API key and network connection
+
+## Troubleshooting Guide
+
+### Common Configuration Issues
+
+| Issue Type | Symptoms | Solution | Verification Method |
+| --- | --- | --- | --- |
+| API Key Error | "Invalid API Key" | Re-copy the key, check for spaces | Test Connection button |
+| Insufficient Balance | "Quota exceeded" | Recharge account or switch provider | Check provider console |
+| Network Issues | Connection timeout | Check network, try proxy | Ping provider domain |
+| Model Restrictions | Model unavailable | Check permissions, select another model | Check provider documentation |
+
+## Summary
+
+Through this guide, you should be able to:
+
+1. ✅ Understand the characteristics and use cases of each provider
+2. ✅ Successfully configure the required AI provider
+3. ✅ Select appropriate models for translation and reading
+4. ✅ Resolve common configuration and usage issues
+
+If you encounter other issues during use, we recommend checking the provider's official documentation or seeking help in the Read Frog [Discord](https://discord.gg/ej45e3PezJ) community.

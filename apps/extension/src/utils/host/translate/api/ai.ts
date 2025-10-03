@@ -1,3 +1,5 @@
+import type { AnthropicProviderOptions } from '@ai-sdk/anthropic'
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
 import type { JSONValue } from 'ai'
 import type { LLMTranslateProviderConfig } from '@/types/config/provider'
 import { generateText } from 'ai'
@@ -22,7 +24,10 @@ export async function aiTranslate(
       thinkingConfig: {
         thinkingBudget: THINKING_MODELS.includes(translateModel as (typeof THINKING_MODELS)[number]) ? DEFAULT_THINKING_BUDGET : 0,
       },
-    },
+    } satisfies GoogleGenerativeAIProviderOptions,
+    anthropic: {
+      thinking: { type: 'disabled' },
+    } satisfies AnthropicProviderOptions,
   }
 
   const prompt = await getTranslatePrompt(targetLangName, text, options)

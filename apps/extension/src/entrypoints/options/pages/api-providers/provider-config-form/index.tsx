@@ -14,6 +14,7 @@ import { getReadProvidersConfig, getTranslateProvidersConfig } from '@/utils/con
 import { selectedProviderIdAtom } from '../atoms'
 import { APIKeyField } from './api-key-field'
 import { BaseURLField } from './base-url-field'
+import { ConfigHeader } from './config-header'
 import { DefaultReadProviderSelector, DefaultTranslateProviderSelector } from './default-provider'
 import { formOpts, useAppForm } from './form'
 import { ReadModelSelector } from './read-model-selector'
@@ -88,6 +89,7 @@ export function ProviderConfigForm() {
     >
       <div className={cn('flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between', selectedProviderId !== providerConfig.id && 'hidden')}>
         <div className="flex flex-col gap-4">
+          <ConfigHeader providerType={providerType} />
           <form.AppField
             name="name"
             validators={{
@@ -110,9 +112,6 @@ export function ProviderConfigForm() {
 
           <APIKeyField form={form} />
           <BaseURLField form={form} />
-          {/* <form.AppField name="baseURL">
-            {field => <field.InputField formForSubmit={form} label={`${i18n.t('options.apiProviders.form.fields.baseURL')}${isNonCustomLLMProviderName ? ` (${i18n.t('options.apiProviders.form.fields.optional')})` : ''}`} value={providerConfig.baseURL ?? ''} />}
-          </form.AppField> */}
           {isTranslateProviderName && (
             <>
               <Separator className="my-2" />

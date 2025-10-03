@@ -73,6 +73,10 @@ const CREATE_AI_MAPPER: ProviderFactoryMap = {
   ollama: createOllama,
 }
 
+const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string, string>>> = {
+  anthropic: { 'anthropic-dangerous-direct-browser-access': 'true' },
+}
+
 async function getLanguageModelById(providerId: string, modelType: 'read' | 'translate') {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
@@ -85,15 +89,19 @@ async function getLanguageModelById(providerId: string, modelType: 'read' | 'tra
     throw new Error(`Provider ${providerId} not found`)
   }
 
+  const customHeaders = CUSTOM_HEADER_MAP[providerConfig.provider]
+
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
         name: providerConfig.name,
         baseURL: providerConfig.baseURL ?? '',
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+        ...(customHeaders && { headers: customHeaders }),
       })
     : CREATE_AI_MAPPER[providerConfig.provider]({
         ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+        ...(customHeaders && { headers: customHeaders }),
       })
 
   const modelConfig = providerConfig.models[modelType]
