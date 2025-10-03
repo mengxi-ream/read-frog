@@ -5,7 +5,7 @@ import { useAtom } from 'jotai'
 import { toast } from 'sonner'
 import { batchQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { MIN_BATCH_CHARACTERS, MIN_BATCH_SIZE } from '@/utils/constants/translate'
+import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from '@/utils/constants/translate'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
@@ -55,7 +55,7 @@ const propertyDescription = {
 
 const propertyMinValue = {
   maxCharactersPerBatch: MIN_BATCH_CHARACTERS,
-  maxItemsPerBatch: MIN_BATCH_SIZE,
+  maxItemsPerBatch: MIN_BATCH_ITEMS,
 }
 
 function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) {

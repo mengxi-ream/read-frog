@@ -166,10 +166,10 @@ options:
       description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
       maxCharactersPerBatch:
         title: Maximum Characters
-        description: Maximum number of characters allowed per batch request to control the content volume of each translation (only effective for LLM translation)
+        description: Maximum number of characters allowed per batch request to control the content volume of each translation
       maxItemsPerBatch:
         title: Maximum Paragraph Count
-        description: Maximum number of paragraphs for each batch translation to control the content volume of each translation (only effective for LLM translation)
+        description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
     alwaysTranslate:
       title: Always Translate
       description: Always translate this website

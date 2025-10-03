@@ -43,12 +43,13 @@ export async function setUpRequestQueue() {
     executeBatch: async (dataList) => {
       const { langConfig, providerConfig } = dataList[0]
       const texts = dataList.map(d => d.text)
-      const batchText = texts.join(BATCH_SEPARATOR)
+      const batchSeparator = `\n${BATCH_SEPARATOR}\n`
+      const batchText = texts.join(batchSeparator)
       const hash = Sha256Hex(...dataList.map(d => d.hash))
 
       const batchThunk = async (): Promise<string[]> => {
         const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
-        return result.split(BATCH_SEPARATOR).map(t => t.trim())
+        return result.split(batchSeparator).map(t => t.trim())
       }
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)

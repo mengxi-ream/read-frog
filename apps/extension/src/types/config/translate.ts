@@ -1,7 +1,7 @@
 import { langCodeISO6393Schema } from '@repo/definitions'
 import { z } from 'zod'
 import { HOTKEYS } from '@/utils/constants/hotkeys'
-import { MIN_BATCH_CHARACTERS, MIN_BATCH_SIZE, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
+import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
 import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style'
 
 export const requestQueueConfigSchema = z.object({
@@ -11,7 +11,7 @@ export const requestQueueConfigSchema = z.object({
 
 export const batchQueueConfigSchema = z.object({
   maxCharactersPerBatch: z.number().gte(MIN_BATCH_CHARACTERS),
-  maxItemsPerBatch: z.number().gte(MIN_BATCH_SIZE),
+  maxItemsPerBatch: z.number().gte(MIN_BATCH_ITEMS),
 })
 
 export const TRANSLATION_MODES = ['bilingual', 'translationOnly'] as const

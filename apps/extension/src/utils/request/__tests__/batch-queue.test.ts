@@ -22,8 +22,9 @@ const mockExecuteTranslate = vi.mocked(executeTranslate)
 // Helper: mock successful translation
 function mockTranslateSuccess(results: string[]) {
   mockExecuteTranslate.mockImplementation((text: string) => {
-    if (text.includes(BATCH_SEPARATOR)) {
-      return Promise.resolve(results.join(BATCH_SEPARATOR))
+    const batchSeparator = `\n${BATCH_SEPARATOR}\n`
+    if (text.includes(batchSeparator)) {
+      return Promise.resolve(results.join(batchSeparator))
     }
     return Promise.resolve(results[0] || 'translated')
   })
@@ -87,12 +88,13 @@ function createBatchQueue(requestQueue: RequestQueue, config = baseBatchConfig) 
     executeBatch: async (dataList) => {
       const { langConfig, providerConfig } = dataList[0]
       const texts = dataList.map(d => d.text)
-      const batchText = texts.join(BATCH_SEPARATOR)
+      const batchSeparator = `\n${BATCH_SEPARATOR}\n`
+      const batchText = texts.join(batchSeparator)
       const hash = Sha256Hex(...dataList.map(d => d.hash))
 
       const batchThunk = async (): Promise<string[]> => {
         const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
-        return result.split(BATCH_SEPARATOR).map(t => t.trim())
+        return result.split(batchSeparator).map(t => t.trim())
       }
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)
