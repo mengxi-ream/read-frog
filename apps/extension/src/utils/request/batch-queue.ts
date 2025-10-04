@@ -1,5 +1,8 @@
 import { batchQueueConfigSchema } from '@/types/config/translate'
 
+const BASE_BACKOFF_DELAY_MS = 1000
+const MAX_BACKOFF_DELAY_MS = 8000
+
 interface BatchTask<T, R> {
   data: T
   resolve: (value: R) => void
@@ -204,9 +207,7 @@ export class BatchQueue<T, R> {
   }
 
   private calculateBackoffDelay(retryCount: number): number {
-    const BASE_BACKOFF_DELAY = 1000
-    const MAX_BACKOFF_DELAY = 8000
-    return Math.min(BASE_BACKOFF_DELAY * (2 ** retryCount), MAX_BACKOFF_DELAY)
+    return Math.min(BASE_BACKOFF_DELAY_MS * (2 ** retryCount), MAX_BACKOFF_DELAY_MS)
   }
 
   private sleep(ms: number): Promise<void> {
