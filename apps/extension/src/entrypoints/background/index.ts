@@ -6,8 +6,8 @@ import { cleanupAllCache, setUpCacheCleanup } from './cache-cleanup'
 import { ensureInitializedConfig } from './config'
 import { newUserGuide } from './new-user-guide'
 import { proxyFetch } from './proxy-fetch'
-import { setUpRequestQueue } from './request-queue'
-import { translationMessage } from './translation'
+import { setUpRequestQueue } from './translation-queues'
+import { translationMessage } from './translation-signal'
 import { setupUninstallSurvey } from './uninstall-survey'
 
 export default defineBackground({

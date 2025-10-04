@@ -2,6 +2,7 @@ import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { parseBatchResult } from '@/entrypoints/background/translation-queues'
 import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
 import { Sha256Hex } from '@/utils/hash'
 import { executeTranslate } from '@/utils/host/translate/translate-text'
@@ -88,15 +89,12 @@ function createBatchQueue(requestQueue: RequestQueue, config = baseBatchConfig) 
     executeBatch: async (dataList) => {
       const { langConfig, providerConfig } = dataList[0]
       const texts = dataList.map(d => d.text)
-      const batchSeparator = `\n${BATCH_SEPARATOR}\n`
-      const batchText = texts.join(batchSeparator)
+      const batchText = texts.join(`\n${BATCH_SEPARATOR}\n`)
       const hash = Sha256Hex(...dataList.map(d => d.hash))
 
       const batchThunk = async (): Promise<string[]> => {
         const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
-
-        // Use flexible regex to handle whitespace variations (spaces, tabs, etc.)
-        return result.split(/\s*\n%%\s*\n\s*/).map(t => t.trim())
+        return parseBatchResult(result)
       }
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)

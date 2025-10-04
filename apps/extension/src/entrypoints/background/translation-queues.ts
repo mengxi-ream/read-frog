@@ -11,6 +11,10 @@ import { BatchQueue } from '@/utils/request/batch-queue'
 import { RequestQueue } from '@/utils/request/request-queue'
 import { ensureInitializedConfig } from './config'
 
+export function parseBatchResult(result: string): string[] {
+  return result.split(BATCH_SEPARATOR).map(t => t.trim())
+}
+
 interface TranslateBatchData {
   text: string
   langConfig: Config['language']
@@ -43,14 +47,12 @@ export async function setUpRequestQueue() {
     executeBatch: async (dataList) => {
       const { langConfig, providerConfig } = dataList[0]
       const texts = dataList.map(d => d.text)
-      const batchSeparator = `\n${BATCH_SEPARATOR}\n`
-      const batchText = texts.join(batchSeparator)
+      const batchText = texts.join(`\n${BATCH_SEPARATOR}\n`)
       const hash = Sha256Hex(...dataList.map(d => d.hash))
 
       const batchThunk = async (): Promise<string[]> => {
         const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
-        // Use flexible regex to handle whitespace variations (spaces, tabs, etc.)
-        return result.split(/\s*\n%%\s*\n\s*/).map(t => t.trim())
+        return parseBatchResult(result)
       }
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)
