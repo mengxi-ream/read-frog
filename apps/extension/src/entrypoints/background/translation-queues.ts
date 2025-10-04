@@ -21,6 +21,7 @@ interface TranslateBatchData {
   langConfig: Config['language']
   providerConfig: ProviderConfig
   hash: string
+  scheduleAt: number
 }
 
 export async function setUpRequestQueue() {
@@ -52,18 +53,19 @@ export async function setUpRequestQueue() {
       const texts = dataList.map(d => d.text)
       const batchText = texts.join(`\n${BATCH_SEPARATOR}\n`)
       const hash = Sha256Hex(...dataList.map(d => d.hash))
+      const earliestScheduleAt = Math.min(...dataList.map(d => d.scheduleAt))
 
       const batchThunk = async (): Promise<string[]> => {
         const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
         return parseBatchResult(result)
       }
 
-      return requestQueue.enqueue(batchThunk, Date.now(), hash)
+      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash)
     },
     executeIndividual: async (data) => {
-      const { text, langConfig, providerConfig, hash } = data
+      const { text, langConfig, providerConfig, hash, scheduleAt } = data
       const thunk = () => executeTranslate(text, langConfig, providerConfig)
-      return requestQueue.enqueue(thunk, Date.now(), hash)
+      return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
     onError: (error, context) => {
       const errorType = context.isFallback ? 'Individual request' : 'Batch request'
@@ -88,7 +90,7 @@ export async function setUpRequestQueue() {
     let result = ''
 
     if (isLLMTranslateProviderConfig(providerConfig)) {
-      const data = { text, langConfig, providerConfig, hash }
+      const data = { text, langConfig, providerConfig, hash, scheduleAt }
       result = await batchQueue.enqueue(data)
     }
     else {
