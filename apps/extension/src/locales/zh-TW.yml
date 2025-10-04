@@ -164,7 +164,7 @@ options:
         description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫發送超量請求
     batchQueueConfig:
       title: 批量翻譯
-      description: 配置批量翻譯時的字符數限制和最大段落數量（僅對大語言模型翻譯有效）
+      description: 配置批量翻譯時的字元數限制和最大段落數量（僅對大語言模型翻譯有效）
       maxCharactersPerBatch:
         title: 最大字元數
         description: 每個批量請求允許的最大字元數，用於控制單次翻譯的內容量
