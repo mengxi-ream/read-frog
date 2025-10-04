@@ -77,9 +77,20 @@ const baseRequestQueueConfig = {
   baseRetryDelayMs: 100,
 }
 
-function createBatchQueue(requestQueue: RequestQueue, config = baseBatchConfig) {
+function createBatchQueue(
+  requestQueue: RequestQueue,
+  config = baseBatchConfig,
+  options?: {
+    maxRetries?: number
+    enableFallbackToIndividual?: boolean
+    executeIndividual?: (data: TranslateBatchData) => Promise<string>
+    onError?: (error: Error, context: { batchKey: string, retryCount: number, isFallback: boolean }) => void
+  },
+) {
   return new BatchQueue<TranslateBatchData, string>({
     ...config,
+    maxRetries: options?.maxRetries,
+    enableFallbackToIndividual: options?.enableFallbackToIndividual,
     getBatchKey: (data) => {
       return `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`
     },
@@ -99,6 +110,8 @@ function createBatchQueue(requestQueue: RequestQueue, config = baseBatchConfig) 
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)
     },
+    executeIndividual: options?.executeIndividual,
+    onError: options?.onError,
   })
 }
 
@@ -302,13 +315,16 @@ describe('batchQueue – timing control', () => {
 })
 
 describe('batchQueue – error handling', () => {
-  it('propagates translation errors to all tasks', async () => {
+  it('propagates translation errors to all tasks (no retry)', async () => {
     vi.useFakeTimers()
     const error = new Error('Translation failed')
     mockTranslateError(error)
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = createBatchQueue(requestQueue)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
+      maxRetries: 0,
+      enableFallbackToIndividual: false,
+    })
 
     const promises = [
       batchQueue.enqueue({
@@ -331,12 +347,15 @@ describe('batchQueue – error handling', () => {
     await expect(Promise.all(promises)).rejects.toThrow('Translation failed')
   })
 
-  it('handles translation count mismatch', async () => {
+  it('handles translation count mismatch (no retry)', async () => {
     vi.useFakeTimers()
     mockExecuteTranslate.mockImplementation(() => Promise.resolve('single-result'))
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
-    const batchQueue = createBatchQueue(requestQueue)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
+      maxRetries: 0,
+      enableFallbackToIndividual: false,
+    })
 
     const promises = [
       batchQueue.enqueue({
@@ -357,6 +376,140 @@ describe('batchQueue – error handling', () => {
     vi.advanceTimersByTime(0)
 
     await expect(Promise.all(promises)).rejects.toThrow('Batch result count mismatch')
+  })
+
+  it('retries failed batch with exponential backoff', async () => {
+    vi.useFakeTimers()
+    let attemptCount = 0
+    mockExecuteTranslate.mockImplementation(() => {
+      attemptCount++
+      if (attemptCount <= 2) {
+        return Promise.reject(new Error('Temporary error'))
+      }
+      return Promise.resolve('success-after-retry')
+    })
+
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
+      maxRetries: 3,
+      enableFallbackToIndividual: false,
+    })
+
+    const promise = batchQueue.enqueue({
+      text: 'Test',
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: 'hash1',
+    })
+
+    // Initial execution
+    vi.advanceTimersByTime(baseBatchConfig.batchDelay)
+    vi.advanceTimersByTime(0)
+
+    // First retry (1s backoff)
+    await vi.advanceTimersByTimeAsync(1000)
+    // Second retry (2s backoff)
+    await vi.advanceTimersByTimeAsync(2000)
+
+    await expect(promise).resolves.toBe('success-after-retry')
+    expect(attemptCount).toBe(3)
+  })
+
+  it('falls back to individual requests after retries exhausted', async () => {
+    vi.useFakeTimers()
+    let batchAttemptCount = 0
+    mockExecuteTranslate.mockImplementation((text: string) => {
+      const batchSeparator = `\n${BATCH_SEPARATOR}\n`
+      if (text.includes(batchSeparator)) {
+        batchAttemptCount++
+        return Promise.reject(new Error('Batch always fails'))
+      }
+      // Individual requests succeed
+      return Promise.resolve(`individual-${text}`)
+    })
+
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
+      maxRetries: 2,
+      enableFallbackToIndividual: true,
+      executeIndividual: async (data) => {
+        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig)
+        return result
+      },
+    })
+
+    const promises = [
+      batchQueue.enqueue({
+        text: 'Text1',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash1',
+      }),
+      batchQueue.enqueue({
+        text: 'Text2',
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: 'hash2',
+      }),
+    ]
+
+    // Initial execution
+    vi.advanceTimersByTime(baseBatchConfig.batchDelay)
+    vi.advanceTimersByTime(0)
+
+    // First retry
+    await vi.advanceTimersByTimeAsync(1000)
+    // Second retry
+    await vi.advanceTimersByTimeAsync(2000)
+    // Wait for fallback individual requests
+    await vi.advanceTimersByTimeAsync(0)
+
+    const results = await Promise.all(promises)
+    expect(results).toEqual(['individual-Text1', 'individual-Text2'])
+    expect(batchAttemptCount).toBe(3) // Initial + 2 retries
+  })
+
+  it('calls onError callback for each failure', async () => {
+    vi.useFakeTimers()
+    const error = new Error('Test error')
+    mockTranslateError(error)
+
+    const onError = vi.fn()
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
+      maxRetries: 2,
+      enableFallbackToIndividual: false,
+      onError,
+    })
+
+    const promise = batchQueue.enqueue({
+      text: 'Test',
+      langConfig: sampleLangConfig,
+      providerConfig: sampleProviderConfig,
+      hash: 'hash1',
+    }).catch(err => err) // Catch the error to prevent unhandled rejection
+
+    // Initial execution
+    vi.advanceTimersByTime(baseBatchConfig.batchDelay)
+    vi.advanceTimersByTime(0)
+
+    // First retry
+    await vi.advanceTimersByTimeAsync(1000)
+    // Second retry
+    await vi.advanceTimersByTimeAsync(2000)
+
+    const result = await promise
+    expect(result).toBeInstanceOf(Error)
+    expect(result.message).toBe('Test error')
+    expect(onError).toHaveBeenCalledTimes(3) // Initial + 2 retries
+    expect(onError).toHaveBeenCalledWith(
+      error,
+      expect.objectContaining({
+        batchKey: expect.any(String),
+        retryCount: expect.any(Number),
+        isFallback: false,
+      }),
+    )
   })
 })
 

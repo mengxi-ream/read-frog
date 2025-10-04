@@ -6,6 +6,7 @@ import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
 import { db } from '@/utils/db/dexie/db'
 import { Sha256Hex } from '@/utils/hash'
 import { executeTranslate } from '@/utils/host/translate/translate-text'
+import { logger } from '@/utils/logger'
 import { onMessage } from '@/utils/message'
 import { BatchQueue } from '@/utils/request/batch-queue'
 import { RequestQueue } from '@/utils/request/request-queue'
@@ -38,6 +39,8 @@ export async function setUpRequestQueue() {
     maxCharactersPerBatch,
     maxItemsPerBatch,
     batchDelay: 100,
+    maxRetries: 3,
+    enableFallbackToIndividual: true,
     getBatchKey: (data) => {
       return Sha256Hex(`${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`)
     },
@@ -56,6 +59,18 @@ export async function setUpRequestQueue() {
       }
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)
+    },
+    executeIndividual: async (data) => {
+      const { text, langConfig, providerConfig, hash } = data
+      const thunk = () => executeTranslate(text, langConfig, providerConfig)
+      return requestQueue.enqueue(thunk, Date.now(), hash)
+    },
+    onError: (error, context) => {
+      const errorType = context.isFallback ? 'Individual request' : 'Batch request'
+      logger.error(
+        `${errorType} failed (batchKey: ${context.batchKey}, retry: ${context.retryCount}):`,
+        error.message,
+      )
     },
   })
 
