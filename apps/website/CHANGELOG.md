@@ -1,5 +1,13 @@
 # @read-frog/website
 
+## 1.1.1
+
+### Patch Changes
+
+- [#572](https://github.com/mengxi-ream/read-frog/pull/572) [`edd167a`](https://github.com/mengxi-ream/read-frog/commit/edd167afe5fb7e4360a9189f538eed441a169d30) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(style): noc header tailwind css for fumadocs
+
+- [#568](https://github.com/mengxi-ream/read-frog/pull/568) [`3b5c37e`](https://github.com/mengxi-ream/read-frog/commit/3b5c37e972e055837f4d729d532664bad1cb6c13) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: add extension version check for blog notifications
+
 ## 1.1.0
 
 ### Minor Changes
