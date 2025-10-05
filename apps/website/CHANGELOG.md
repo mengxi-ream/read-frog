@@ -1,5 +1,13 @@
 # @read-frog/website
 
+## 1.1.0
+
+### Minor Changes
+
+- [#566](https://github.com/mengxi-ream/read-frog/pull/566) [`184d644`](https://github.com/mengxi-ream/read-frog/commit/184d6443062dbf9828fd5f3c29aae020e260b949) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add blog notification indicator for new posts
+
+- [#563](https://github.com/mengxi-ream/read-frog/pull/563) [`de69529`](https://github.com/mengxi-ream/read-frog/commit/de6952956fbf844a4b2cde31ffa5a76accd2f6b7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add blog system
+
 ## 1.0.8
 
 ### Patch Changes

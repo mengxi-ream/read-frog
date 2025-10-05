@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.11.0
+
+### Minor Changes
+
+- [#566](https://github.com/mengxi-ream/read-frog/pull/566) [`184d644`](https://github.com/mengxi-ream/read-frog/commit/184d6443062dbf9828fd5f3c29aae020e260b949) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add blog notification indicator for new posts
+
+- [#548](https://github.com/mengxi-ream/read-frog/pull/548) [`ec5b305`](https://github.com/mengxi-ream/read-frog/commit/ec5b305579ee8b16dc1e14e4ebc3a086d4914612) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat(extension): support for batch translation for LLM
+
+### Patch Changes
+
+- [#562](https://github.com/mengxi-ream/read-frog/pull/562) [`73198f6`](https://github.com/mengxi-ream/read-frog/commit/73198f6d2c3dbb03af2a39d97886715f5d27c58d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): hide batch translation behind beta flag
+
 ## 1.10.10
 
 ### Patch Changes
