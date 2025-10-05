@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.12.0
+
+### Minor Changes
+
+- [#573](https://github.com/mengxi-ream/read-frog/pull/573) [`f0565e6`](https://github.com/mengxi-ream/read-frog/commit/f0565e6c64d8cf9dbf84caa9b9de39a108b4797c) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(extension): add survey notification and sidebar i18n support
+
 ## 1.11.1
 
 ### Patch Changes
