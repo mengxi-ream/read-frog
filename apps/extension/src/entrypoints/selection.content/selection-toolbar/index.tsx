@@ -68,6 +68,10 @@ export function SelectionToolbar() {
         const selection = window.getSelection()
         const selectedText = selection?.toString().trim() || ''
 
+        if (!isInputOrTextarea && !selection?.containsNode(e.target as Node, true)) {
+          return
+        }
+
         if (selection && selectedText.length > 0) {
           setSelectionContent(selectedText)
           setSelectionRange(selection.getRangeAt(0))
