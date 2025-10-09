@@ -8,6 +8,7 @@
     "dev:edge": "next dev -p 8888",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
+    "type-check": "tsc --noEmit",
     "postinstall": "fumadocs-mdx",
     "start": "next start -p 8888"
   },

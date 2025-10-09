@@ -1,6 +1,7 @@
+import { semanticVersionSchema } from '@repo/definitions'
 import { describe, expect, it, vi } from 'vitest'
 import { z } from 'zod'
-import { hasNewBlogPost, semanticVersionSchema } from '../blog'
+import { hasNewBlogPost } from '../blog'
 import { logger } from '../logger'
 
 vi.mock('../logger', () => ({
@@ -83,9 +84,10 @@ describe('hasNewBlogPost', () => {
     })
 
     it('should handle version strings with different segment counts', () => {
-      expect(hasNewBlogPost(null, baseDate, '1.11', '1.11.0')).toBe(true)
-      expect(hasNewBlogPost(null, baseDate, '1.11.0', '1.11')).toBe(true)
-      expect(hasNewBlogPost(null, baseDate, '1.10', '1.11.0')).toBe(false)
+      // Invalid versions (not 3 segments) should be treated as invalid and skip version check
+      expect(hasNewBlogPost(null, baseDate, '1.11', '1.11.0')).toBe(true) // '1.11' is invalid, skips check
+      expect(hasNewBlogPost(null, baseDate, '1.11.0', '1.11')).toBe(true) // '1.11' is invalid, skips check
+      expect(hasNewBlogPost(null, baseDate, '1.10', '1.11.0')).toBe(true) // '1.10' is invalid, skips check
     })
   })
 
@@ -203,15 +205,15 @@ describe('semanticVersionSchema', () => {
       expect(() => semanticVersionSchema.parse('10.20.30')).not.toThrow()
     })
 
-    it('should accept versions with fewer segments', () => {
-      expect(() => semanticVersionSchema.parse('1')).not.toThrow()
-      expect(() => semanticVersionSchema.parse('1.0')).not.toThrow()
-      expect(() => semanticVersionSchema.parse('1.11')).not.toThrow()
+    it('should reject versions with fewer segments', () => {
+      expect(() => semanticVersionSchema.parse('1')).toThrow(z.ZodError)
+      expect(() => semanticVersionSchema.parse('1.0')).toThrow(z.ZodError)
+      expect(() => semanticVersionSchema.parse('1.11')).toThrow(z.ZodError)
     })
 
-    it('should accept versions with more segments', () => {
-      expect(() => semanticVersionSchema.parse('1.0.0.0')).not.toThrow()
-      expect(() => semanticVersionSchema.parse('1.11.0.5')).not.toThrow()
+    it('should reject versions with more segments', () => {
+      expect(() => semanticVersionSchema.parse('1.0.0.0')).toThrow(z.ZodError)
+      expect(() => semanticVersionSchema.parse('1.11.0.5')).toThrow(z.ZodError)
     })
 
     it('should accept zero-padded versions', () => {

@@ -1,33 +1,11 @@
 import { storage } from '#imports'
+import { semanticVersionSchema } from '@repo/definitions'
 import { z } from 'zod'
 import { logger } from './logger'
 import { sendMessage } from './message'
 
 const LAST_VIEWED_BLOG_DATE_KEY = 'lastViewedBlogDate'
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
-
-/**
- * Semantic version regex pattern
- * Matches versions like: 1.0.0, 1.11, 10.20.30
- * Does NOT match: v1.0.0, 1.0.0-alpha, 1.-1.0
- */
-const SEMANTIC_VERSION_REGEX = /^\d+(\.\d+)*$/
-
-/**
- * Zod schema for semantic version validation
- * Exported for testing purposes
- */
-export const semanticVersionSchema = z.string().regex(
-  SEMANTIC_VERSION_REGEX,
-  'Must be a valid semantic version (e.g., 1.0.0, 1.11, 10.20.30)',
-).refine(
-  (version) => {
-    // Additional validation: ensure all parts are non-negative numbers
-    const parts = version.split('.')
-    return parts.every(part => !Number.isNaN(Number(part)) && Number(part) >= 0)
-  },
-  { message: 'Version parts must be non-negative numbers' },
-)
 
 /**
  * Zod schema for validating blog API response
