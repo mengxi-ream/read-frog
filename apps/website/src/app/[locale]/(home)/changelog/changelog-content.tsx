@@ -1,0 +1,234 @@
+'use client'
+
+import type { ChangelogEntry } from './parse-changelog'
+import { useTranslations } from 'next-intl'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+import { useMemo } from 'react'
+import { parseChangelog } from './parse-changelog'
+
+interface ChangelogContentProps {
+  activeTab: 'extension' | 'website'
+  extensionChangelog: string
+  websiteChangelog: string
+  locale: string
+}
+
+export function ChangelogContent({
+  activeTab,
+  extensionChangelog,
+  websiteChangelog,
+  locale,
+}: ChangelogContentProps) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const t = useTranslations('changelog')
+
+  const extensionEntries = useMemo(
+    () => parseChangelog(extensionChangelog),
+    [extensionChangelog],
+  )
+  const websiteEntries = useMemo(
+    () => parseChangelog(websiteChangelog),
+    [websiteChangelog],
+  )
+
+  const currentEntries
+    = activeTab === 'extension' ? extensionEntries : websiteEntries
+
+  const handleTabChange = (tab: 'extension' | 'website') => {
+    const params = new URLSearchParams(searchParams)
+    params.set('tab', tab)
+    router.push(`${pathname}?${params.toString()}`)
+  }
+
+  return (
+    <div className="mt-8">
+      {/* Tabs */}
+      <div className="flex border-b border-fd-border mb-8">
+        <button
+          type="button"
+          onClick={() => handleTabChange('extension')}
+          className={`px-6 py-3 text-sm font-medium transition-all duration-200 ease relative ${
+            activeTab === 'extension'
+              ? 'text-fd-foreground'
+              : 'text-fd-muted-foreground hover:text-fd-foreground'
+          }`}
+        >
+          {t('extension')}
+          {activeTab === 'extension' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-fd-primary transition-all duration-200 ease" />
+          )}
+        </button>
+        <button
+          type="button"
+          onClick={() => handleTabChange('website')}
+          className={`px-6 py-3 text-sm font-medium transition-all duration-200 ease relative ${
+            activeTab === 'website'
+              ? 'text-fd-foreground'
+              : 'text-fd-muted-foreground hover:text-fd-foreground'
+          }`}
+        >
+          {t('website')}
+          {activeTab === 'website' && (
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-fd-primary transition-all duration-200 ease" />
+          )}
+        </button>
+      </div>
+
+      {/* Timeline */}
+      <div className="relative">
+        {currentEntries.map((entry: ChangelogEntry, index: number) => (
+          <ChangelogEntryItem
+            key={`${entry.version}-${index}`}
+            entry={entry}
+            isLast={index === currentEntries.length - 1}
+            locale={locale}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ChangelogEntryItem({
+  entry,
+  isLast,
+  locale: _locale,
+}: {
+  entry: ChangelogEntry
+  isLast: boolean
+  locale: string
+}) {
+  const t = useTranslations('changelog')
+  return (
+    <div className="relative pb-12">
+      <div className="flex flex-col md:flex-row gap-y-6">
+        {/* Left side - Version */}
+        <div className="md:w-48 flex-shrink-0">
+          <div className="md:sticky md:top-8 space-y-3">
+            {entry.version && (
+              <>
+                <div className="inline-flex relative z-10 items-center justify-center px-4 py-2 text-fd-foreground border border-fd-border rounded-lg text-sm font-bold bg-fd-background transition-all duration-200 ease">
+                  v
+                  {entry.version}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Right side - Content */}
+        <div className="flex-1 md:pl-8 relative">
+          {/* Vertical timeline line */}
+          {!isLast && (
+            <div className="hidden md:block absolute top-2 left-0 w-px h-full bg-fd-border">
+              {/* Timeline dot */}
+              <div className="hidden md:block absolute -translate-x-1/2 size-3 bg-fd-primary rounded-full z-10" />
+            </div>
+          )}
+          {isLast && (
+            <div className="hidden md:block absolute top-2 left-0">
+              <div className="hidden md:block -translate-x-1/2 size-3 bg-fd-primary rounded-full z-10" />
+            </div>
+          )}
+
+          <div className="space-y-6">
+            {/* Changes by type */}
+            {entry.majorChanges.length > 0 && (
+              <ChangeSection
+                title={t('majorChanges')}
+                changes={entry.majorChanges}
+                type="major"
+              />
+            )}
+            {entry.minorChanges.length > 0 && (
+              <ChangeSection
+                title={t('minorChanges')}
+                changes={entry.minorChanges}
+                type="minor"
+              />
+            )}
+            {entry.patchChanges.length > 0 && (
+              <ChangeSection
+                title={t('patchChanges')}
+                changes={entry.patchChanges}
+                type="patch"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ChangeSection({
+  title,
+  changes,
+  type,
+}: {
+  title: string
+  changes: string[]
+  type: 'major' | 'minor' | 'patch'
+}) {
+  const colorClass
+    = type === 'major'
+      ? 'text-red-600 dark:text-red-400'
+      : type === 'minor'
+        ? 'text-blue-600 dark:text-blue-400'
+        : 'text-green-600 dark:text-green-400'
+
+  const borderColorClass
+    = type === 'major'
+      ? 'border-red-200 dark:border-red-800'
+      : type === 'minor'
+        ? 'border-blue-200 dark:border-blue-800'
+        : 'border-green-200 dark:border-green-800'
+
+  return (
+    <div className="group">
+      <h3 className={`text-lg font-semibold mb-3 ${colorClass}`}>{title}</h3>
+      <ul className="space-y-2">
+        {changes.map((change, index) => (
+          <li
+            key={index}
+            className={`text-sm text-fd-muted-foreground leading-relaxed pl-4 border-l-2 ${borderColorClass} transition-all duration-200 ease hover:border-l-4 hover:pl-3`}
+            dangerouslySetInnerHTML={{ __html: formatChangeText(change) }}
+          />
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+function formatChangeText(text: string): string {
+  // Convert markdown links to HTML with improved styling
+  let formatted = text.replace(
+    /\[#(\d+)\]\((https?:\/\/[^)]+)\)/g,
+    '<a href="$2" class="text-fd-primary hover:underline transition-all duration-200 ease font-medium" target="_blank" rel="noopener noreferrer">#$1</a>',
+  )
+
+  // Convert commit links with improved styling
+  formatted = formatted.replace(
+    /\[`([a-f0-9]+)`\]\((https?:\/\/[^)]+)\)/g,
+    '<a href="$2" class="text-fd-primary hover:underline transition-all duration-200 ease font-mono text-xs" target="_blank" rel="noopener noreferrer">$1</a>',
+  )
+
+  // Convert user mentions with improved styling
+  formatted = formatted.replace(
+    /\[@([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
+    '<a href="$2" class="text-fd-primary hover:underline transition-all duration-200 ease" target="_blank" rel="noopener noreferrer">@$1</a>',
+  )
+
+  // Convert bold text
+  formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold">$1</strong>')
+
+  // Convert inline code with improved styling
+  formatted = formatted.replace(
+    /`([^`]+)`/g,
+    '<code class="px-1.5 py-0.5 rounded bg-fd-muted text-fd-foreground font-mono text-xs border border-fd-border/50">$1</code>',
+  )
+
+  return formatted
+}

@@ -75,6 +75,15 @@
       "hint": "Hint: You need to set API Key to activate more advanced features."
     }
   },
+  "changelog": {
+    "title": "Changelog",
+    "description": "Track all updates and improvements to Read Frog",
+    "extension": "Extension",
+    "website": "Website",
+    "majorChanges": "Major Changes",
+    "minorChanges": "Minor Changes",
+    "patchChanges": "Patch Changes"
+  },
   "language": {
     "eng": "English",
     "cmn": "Simplified Mandarin Chinese",

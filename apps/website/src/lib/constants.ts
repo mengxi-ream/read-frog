@@ -19,6 +19,10 @@ export const NAV_ITEMS_LOCALE = {
     en: 'Blog',
     zh: '博客',
   },
+  changelog: {
+    en: 'Changelog',
+    zh: '更新日志',
+  },
 }
 
 export const CHROME_EXTENSION_ORIGIN = 'chrome-extension://modkelfkcfjpgbfmnbnllalkiogfofhb'

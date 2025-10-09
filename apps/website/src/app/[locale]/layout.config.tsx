@@ -42,6 +42,11 @@ export function homeLinks(locale: Locale): LinkItemType[] {
       active: 'nested-url',
     },
     {
+      text: NAV_ITEMS_LOCALE.changelog[locale],
+      url: `/${locale}/changelog`,
+      active: 'nested-url',
+    },
+    {
       type: 'custom',
       children: <UserAccount />,
       secondary: true,

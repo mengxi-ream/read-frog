@@ -75,6 +75,15 @@
       "hint": "提示：你需要设置 API Key 才能激活更多高级功能。"
     }
   },
+  "changelog": {
+    "title": "更新日志",
+    "description": "追踪陪读蛙的所有更新和改进",
+    "extension": "扩展",
+    "website": "网站",
+    "majorChanges": "重大变更",
+    "minorChanges": "次要变更",
+    "patchChanges": "补丁变更"
+  },
   "language": {
     "eng": "英语",
     "cmn": "简体中文",
