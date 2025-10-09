@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.12.1
+
+### Patch Changes
+
+- [#577](https://github.com/mengxi-ream/read-frog/pull/577) [`5fcf03c`](https://github.com/mengxi-ream/read-frog/commit/5fcf03cacbe34871d8d4764c0e27d31cd2bf6b17) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix(extension): fixed behavior when interactive and focus elements differ
+
+- [#580](https://github.com/mengxi-ream/read-frog/pull/580) [`6a1b26a`](https://github.com/mengxi-ream/read-frog/commit/6a1b26a48cb20e3814930a3dcb323946dae4a811) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: forceBlock logic to translate blocks inside inline node
+
 ## 1.12.0
 
 ### Minor Changes
