@@ -34,7 +34,7 @@ PRPs enable working code on the first attempt through:
    - Follow the PRP's Implementation Tasks sequence, add more detail as needed, especially when using subagents
    - Use the patterns and examples referenced in the PRP
    - Create files in locations specified by the desired codebase tree
-   - Apply naming conventions from the task specifications and CLAUDE.md
+   - Apply naming conventions from the task specifications and AGENTS.md
 
 4. **Progressive Validation**
 

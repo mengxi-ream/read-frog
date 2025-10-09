@@ -37,7 +37,7 @@ PRPs enable working TypeScript/React code on the first attempt through:
    - Follow the PRP's Implementation Tasks sequence, add more detail as needed, especially when using subagents
    - Use the TypeScript/React patterns and examples referenced in the PRP
    - Create files in locations specified by the desired codebase tree
-   - Apply TypeScript naming conventions from the task specifications and CLAUDE.md
+   - Apply TypeScript naming conventions from the task specifications and AGENTS.md
    - Ensure proper TypeScript typing throughout (interfaces, props, return types)
    - Follow Next.js App Router patterns for file-based routing
 

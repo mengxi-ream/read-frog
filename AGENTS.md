@@ -1,8 +1,4 @@
----
-alwaysApply: true
----
-
-# Base Rules
+# AGENTS.md
 
 This file provides guidance to Cursor (cursor.com) when working with code in this repository.
 
