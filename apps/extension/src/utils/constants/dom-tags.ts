@@ -42,6 +42,7 @@ export const DONT_WALK_AND_TRANSLATE_TAGS = new Set([
   'SCRIPT',
   'STYLE',
   'LINK',
+  'PRE',
 ])
 
 export const DONT_WALK_BUT_TRANSLATE_TAGS = new Set([

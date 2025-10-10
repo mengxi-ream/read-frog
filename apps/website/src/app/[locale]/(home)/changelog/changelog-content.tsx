@@ -194,41 +194,103 @@ function ChangeSection({
           <li
             key={index}
             className={`text-sm text-fd-muted-foreground leading-relaxed pl-4 border-l-2 ${borderColorClass} transition-all duration-200 ease hover:border-l-4 hover:pl-3`}
-            dangerouslySetInnerHTML={{ __html: formatChangeText(change) }}
-          />
+          >
+            <ChangeText text={change} />
+          </li>
         ))}
       </ul>
     </div>
   )
 }
 
-function formatChangeText(text: string): string {
-  // Convert markdown links to HTML with improved styling
-  let formatted = text.replace(
-    /\[#(\d+)\]\((https?:\/\/[^)]+)\)/g,
-    '<a href="$2" class="text-fd-primary hover:underline transition-all duration-200 ease font-medium" target="_blank" rel="noopener noreferrer">#$1</a>',
-  )
+function ChangeText({ text }: { text: string }) {
+  const parts: React.ReactNode[] = []
+  let lastIndex = 0
 
-  // Convert commit links with improved styling
-  formatted = formatted.replace(
-    /\[`([a-f0-9]+)`\]\((https?:\/\/[^)]+)\)/g,
-    '<a href="$2" class="text-fd-primary hover:underline transition-all duration-200 ease font-mono text-xs" target="_blank" rel="noopener noreferrer">$1</a>',
-  )
+  // Combined regex pattern for all markdown elements
+  const combined = /\[#(\d+)\]\((https?:\/\/[^)]+)\)|\[`([a-f0-9]+)`\]\((https?:\/\/[^)]+)\)|\[@([^\]]+)\]\((https?:\/\/[^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g
 
-  // Convert user mentions with improved styling
-  formatted = formatted.replace(
-    /\[@([^\]]+)\]\((https?:\/\/[^)]+)\)/g,
-    '<a href="$2" class="text-fd-primary hover:underline transition-all duration-200 ease" target="_blank" rel="noopener noreferrer">@$1</a>',
-  )
+  let key = 0
+  let match = combined.exec(text)
 
-  // Convert bold text
-  formatted = formatted.replace(/\*\*([^*]+)\*\*/g, '<strong class="font-semibold">$1</strong>')
+  while (match !== null) {
+    // Add text before match
+    if (match.index > lastIndex) {
+      parts.push(text.substring(lastIndex, match.index))
+    }
 
-  // Convert inline code with improved styling
-  formatted = formatted.replace(
-    /`([^`]+)`/g,
-    '<code class="px-1.5 py-0.5 rounded bg-fd-muted text-fd-foreground font-mono text-xs border border-fd-border/50">$1</code>',
-  )
+    // Issue link: [#123](url)
+    if (match[1] && match[2]) {
+      parts.push(
+        <a
+          key={key++}
+          href={match[2]}
+          className="text-fd-primary hover:underline transition-all duration-200 ease font-medium"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          #
+          {match[1]}
+        </a>,
+      )
+    }
+    // Commit link: [`abc123`](url)
+    else if (match[3] && match[4]) {
+      parts.push(
+        <a
+          key={key++}
+          href={match[4]}
+          className="text-fd-primary hover:underline transition-all duration-200 ease font-mono text-xs"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {match[3]}
+        </a>,
+      )
+    }
+    // User mention: [@user](url)
+    else if (match[5] && match[6]) {
+      parts.push(
+        <a
+          key={key++}
+          href={match[6]}
+          className="text-fd-primary hover:underline transition-all duration-200 ease"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          @
+          {match[5]}
+        </a>,
+      )
+    }
+    // Bold: **text**
+    else if (match[7]) {
+      parts.push(
+        <strong key={key++} className="font-semibold">
+          {match[7]}
+        </strong>,
+      )
+    }
+    // Inline code: `text`
+    else if (match[8]) {
+      parts.push(
+        <code
+          key={key++}
+          className="px-1.5 py-0.5 rounded bg-fd-muted text-fd-foreground font-mono text-xs border border-fd-border/50"
+        >
+          {match[8]}
+        </code>,
+      )
+    }
 
-  return formatted
+    lastIndex = combined.lastIndex
+    match = combined.exec(text)
+  }
+
+  // Add remaining text
+  if (lastIndex < text.length) {
+    parts.push(text.substring(lastIndex))
+  }
+
+  return <>{parts}</>
 }
