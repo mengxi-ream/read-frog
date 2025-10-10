@@ -11,14 +11,12 @@ interface ChangelogContentProps {
   activeTab: 'extension' | 'website'
   extensionChangelog: string
   websiteChangelog: string
-  locale: string
 }
 
 export function ChangelogContent({
   activeTab,
   extensionChangelog,
   websiteChangelog,
-  locale,
 }: ChangelogContentProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -84,7 +82,6 @@ export function ChangelogContent({
             key={`${entry.version}-${index}`}
             entry={entry}
             isLast={index === currentEntries.length - 1}
-            locale={locale}
           />
         ))}
       </div>
@@ -95,11 +92,9 @@ export function ChangelogContent({
 function ChangelogEntryItem({
   entry,
   isLast,
-  locale: _locale,
 }: {
   entry: ChangelogEntry
   isLast: boolean
-  locale: string
 }) {
   const t = useTranslations('changelog')
   return (

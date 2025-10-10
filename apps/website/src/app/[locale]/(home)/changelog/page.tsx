@@ -20,10 +20,8 @@ async function getChangelogContent(type: 'extension' | 'website') {
 }
 
 export default async function ChangelogPage(props: {
-  params: Promise<{ locale: string }>
   searchParams: Promise<{ tab?: string }>
 }) {
-  const params = await props.params
   const searchParams = await props.searchParams
   const t = await getTranslations('changelog')
   const activeTab = (searchParams.tab || 'extension') as 'extension' | 'website'
@@ -68,7 +66,6 @@ export default async function ChangelogPage(props: {
         activeTab={activeTab}
         extensionChangelog={extensionChangelog}
         websiteChangelog={websiteChangelog}
-        locale={params.locale}
       />
     </main>
   )
