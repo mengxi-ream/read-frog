@@ -119,9 +119,10 @@ describe('hasNewBlogPost', () => {
       expect(hasNewBlogPost(null, null, undefined, undefined)).toBe(false)
     })
 
-    it('should handle zero-padded versions', () => {
-      expect(hasNewBlogPost(null, baseDate, '1.09.0', '1.10.0')).toBe(false)
-      expect(hasNewBlogPost(null, baseDate, '1.10.0', '1.09.0')).toBe(true)
+    it('should reject zero-padded versions as invalid and skip version check', () => {
+      // Zero-padded versions are invalid per semver spec, so version check is skipped
+      expect(hasNewBlogPost(null, baseDate, '1.09.0', '1.10.0')).toBe(true) // '1.09.0' is invalid
+      expect(hasNewBlogPost(null, baseDate, '1.10.0', '1.09.0')).toBe(true) // '1.09.0' is invalid
     })
 
     it('should handle large version numbers', () => {
@@ -216,9 +217,11 @@ describe('semanticVersionSchema', () => {
       expect(() => semanticVersionSchema.parse('1.11.0.5')).toThrow(z.ZodError)
     })
 
-    it('should accept zero-padded versions', () => {
-      expect(() => semanticVersionSchema.parse('1.09.0')).not.toThrow()
-      expect(() => semanticVersionSchema.parse('01.10.00')).not.toThrow()
+    it('should reject zero-padded versions per semver spec', () => {
+      // Leading zeros are not allowed in semantic versioning
+      expect(() => semanticVersionSchema.parse('1.09.0')).toThrow(z.ZodError)
+      expect(() => semanticVersionSchema.parse('01.10.00')).toThrow(z.ZodError)
+      expect(() => semanticVersionSchema.parse('1.0.01')).toThrow(z.ZodError)
     })
 
     it('should accept large version numbers', () => {

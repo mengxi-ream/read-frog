@@ -958,6 +958,89 @@ describe('translate', () => {
     })
   })
 
+  describe('pre and code tag handling', () => {
+    describe('pre tag - should not translate content inside pre', () => {
+      it('bilingual mode: should not translate content inside pre tag', async () => {
+        render(
+          <div data-testid="test-node">
+            <pre>{MOCK_ORIGINAL_TEXT}</pre>
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await removeOrShowPageTranslation('bilingual', true)
+
+        // Should not have any translation wrapper
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
+      })
+
+      it('translation only mode: should not translate content inside pre tag', async () => {
+        render(
+          <div data-testid="test-node">
+            <pre>{MOCK_ORIGINAL_TEXT}</pre>
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await removeOrShowPageTranslation('translationOnly', true)
+
+        // Should not have any translation wrapper
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
+      })
+
+      it('bilingual mode: should not translate pre with multiple lines', async () => {
+        const codeContent = `function test() {
+  return "hello"
+}`
+        render(
+          <div data-testid="test-node">
+            <pre>{codeContent}</pre>
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await removeOrShowPageTranslation('bilingual', true)
+
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(node.textContent).toBe(codeContent)
+      })
+    })
+
+    describe('code tag - should not walk into but translate as child', () => {
+      it('bilingual mode: should translate text with code elements', async () => {
+        render(
+          <div data-testid="test-node">
+            {MOCK_ORIGINAL_TEXT}
+            <code>{MOCK_ORIGINAL_TEXT}</code>
+            {MOCK_ORIGINAL_TEXT}
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await removeOrShowPageTranslation('bilingual', true)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, 'bilingual')
+        expect(wrapper).toBe(node.lastChild)
+        expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS)
+      })
+
+      it('translation only mode: should translate text with code elements', async () => {
+        render(
+          <div data-testid="test-node">
+            {MOCK_ORIGINAL_TEXT}
+            <code>{MOCK_ORIGINAL_TEXT}</code>
+            {MOCK_ORIGINAL_TEXT}
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await removeOrShowPageTranslation('translationOnly', true)
+
+        expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
+        const wrapper = expectTranslationWrapper(node, 'translationOnly')
+        expect(wrapper).toBe(node.children[0])
+      })
+    })
+  })
+
   describe('numeric content handling', () => {
     describe('bilingual mode', () => {
       it('should not translate pure numbers', async () => {

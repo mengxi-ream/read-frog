@@ -36,13 +36,13 @@ export async function getLastViewedBlogDate(): Promise<Date | null> {
 /**
  * Checks if there's a new blog post by comparing last viewed date with latest blog date
  * and extension version compatibility
- * @param lastViewedDate - The last date the user viewed the blog
+ * @param latestViewedDate - The last date the user viewed the blog
  * @param latestDate - The date of the latest blog post
  * @param currentExtensionVersion - Current extension version (e.g., "1.10.0")
  * @param blogExtensionVersion - Minimum extension version required for the blog post (e.g., "1.11.0")
  */
 export function hasNewBlogPost(
-  lastViewedDate: Date | null,
+  latestViewedDate: Date | null,
   latestDate: Date | null,
   currentExtensionVersion?: string,
   blogExtensionVersion?: string | null,
@@ -70,9 +70,9 @@ export function hasNewBlogPost(
     }
   }
 
-  if (!lastViewedDate)
+  if (!latestViewedDate)
     return true
-  return latestDate > lastViewedDate
+  return latestDate > latestViewedDate
 }
 
 /**
