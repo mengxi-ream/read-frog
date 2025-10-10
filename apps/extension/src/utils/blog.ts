@@ -90,9 +90,10 @@ function compareVersions(v1: string, v2: string): number {
   const parts1 = v1.split('.').map(Number)
   const parts2 = v2.split('.').map(Number)
 
-  for (let i = 0; i < Math.max(parts1.length, parts2.length); i++) {
-    const part1 = parts1[i] || 0
-    const part2 = parts2[i] || 0
+  // After validation, both versions are guaranteed to have exactly 3 parts
+  for (let i = 0; i < 3; i++) {
+    const part1 = parts1[i]!
+    const part2 = parts2[i]!
 
     if (part1 < part2)
       return -1

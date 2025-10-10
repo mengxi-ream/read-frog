@@ -201,27 +201,33 @@ function ChangeSection({
 
 /**
  * Validates that a URL is safe to use in links
- * Only allows HTTP and HTTPS protocols to prevent XSS attacks
+ * Only allows HTTP/HTTPS protocols and trusted domains to prevent XSS and open redirect attacks
  */
 function isValidUrl(url: string): boolean {
   try {
     const parsed = new URL(url)
-    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      return false
+    }
+    // Add allowlist for trusted domains
+    const allowedDomains = ['github.com', 'www.github.com', 'readfrog.app', 'www.readfrog.app']
+    const hostname = parsed.hostname.toLowerCase()
+    return allowedDomains.some(domain => hostname === domain || hostname.endsWith(`.${domain}`))
   }
   catch {
     return false
   }
 }
 
+// Combined regex pattern for all markdown elements (moved to module scope for performance)
+const MARKDOWN_PATTERN = /\[#(\d+)\]\((https?:\/\/[^)]+)\)|\[`([a-f0-9]+)`\]\((https?:\/\/[^)]+)\)|\[@([^\]]+)\]\((https?:\/\/[^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g
+
 function ChangeText({ text }: { text: string }) {
   const parts: React.ReactNode[] = []
   let lastIndex = 0
 
-  // Combined regex pattern for all markdown elements
-  const combined = /\[#(\d+)\]\((https?:\/\/[^)]+)\)|\[`([a-f0-9]+)`\]\((https?:\/\/[^)]+)\)|\[@([^\]]+)\]\((https?:\/\/[^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g
-
   let key = 0
-  const matches = text.matchAll(combined)
+  const matches = text.matchAll(MARKDOWN_PATTERN)
 
   for (const match of matches) {
     // Add text before match
