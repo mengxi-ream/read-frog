@@ -5,7 +5,7 @@ import { z } from 'zod'
  * Matches versions like: 1.0.0, 10.20.30
  * Does NOT match: v1.0.0, 1.0.0-alpha, 1.0, 1.-1.0
  */
-export const SEMANTIC_VERSION_REGEX = /^\d+\.\d+\.\d+$/
+export const SEMANTIC_VERSION_REGEX = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/
 
 /**
  * Zod schema for semantic version validation
