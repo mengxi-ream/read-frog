@@ -204,6 +204,20 @@ function ChangeSection({
   )
 }
 
+/**
+ * Validates that a URL is safe to use in links
+ * Only allows HTTP and HTTPS protocols to prevent XSS attacks
+ */
+function isValidUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === 'http:' || parsed.protocol === 'https:'
+  }
+  catch {
+    return false
+  }
+}
+
 function ChangeText({ text }: { text: string }) {
   const parts: React.ReactNode[] = []
   let lastIndex = 0
@@ -212,16 +226,16 @@ function ChangeText({ text }: { text: string }) {
   const combined = /\[#(\d+)\]\((https?:\/\/[^)]+)\)|\[`([a-f0-9]+)`\]\((https?:\/\/[^)]+)\)|\[@([^\]]+)\]\((https?:\/\/[^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g
 
   let key = 0
-  let match = combined.exec(text)
+  const matches = text.matchAll(combined)
 
-  while (match !== null) {
+  for (const match of matches) {
     // Add text before match
-    if (match.index > lastIndex) {
+    if (match.index !== undefined && match.index > lastIndex) {
       parts.push(text.substring(lastIndex, match.index))
     }
 
     // Issue link: [#123](url)
-    if (match[1] && match[2]) {
+    if (match[1] && match[2] && isValidUrl(match[2])) {
       parts.push(
         <a
           key={key++}
@@ -236,7 +250,7 @@ function ChangeText({ text }: { text: string }) {
       )
     }
     // Commit link: [`abc123`](url)
-    else if (match[3] && match[4]) {
+    else if (match[3] && match[4] && isValidUrl(match[4])) {
       parts.push(
         <a
           key={key++}
@@ -250,7 +264,7 @@ function ChangeText({ text }: { text: string }) {
       )
     }
     // User mention: [@user](url)
-    else if (match[5] && match[6]) {
+    else if (match[5] && match[6] && isValidUrl(match[6])) {
       parts.push(
         <a
           key={key++}
@@ -284,8 +298,9 @@ function ChangeText({ text }: { text: string }) {
       )
     }
 
-    lastIndex = combined.lastIndex
-    match = combined.exec(text)
+    if (match.index !== undefined) {
+      lastIndex = match.index + match[0].length
+    }
   }
 
   // Add remaining text
