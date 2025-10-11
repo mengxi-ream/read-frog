@@ -31,6 +31,6 @@ export function Bilingual() {
   const sequence = runSequence()
 
   return (
-    <TranslationCard initial={{ x: -100 }} sequence={sequence} className="h-220 items-start" />
+    <TranslationCard initial={{ x: -50 }} whileInView={{ x: -10 }} sequence={sequence} className="origin-top-right text-right md:text-left" />
   )
 }

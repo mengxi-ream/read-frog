@@ -3,8 +3,8 @@ import { TranslationOnly } from './components/translation-only'
 
 export function Demo() {
   return (
-    <section className="flex justify-center h-fit md:h-180 bg-zinc-50 dark:bg-zinc-900">
-      <div className="max-w-full h-full w-full flex flex-col gap-4 md:grid md:grid-cols-2 md:grid-rows-1 pb-16">
+    <section className="flex items-center justify-center bg-zinc-50 dark:bg-zinc-900 overflow-hidden pb-4">
+      <div className="flex h-120 md:h-180 min-w-[200vw] max-w-[200vw]">
         <Bilingual />
         <TranslationOnly />
       </div>

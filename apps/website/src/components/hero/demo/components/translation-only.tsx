@@ -33,5 +33,5 @@ function runSequence() {
 export function TranslationOnly() {
   const sequence = runSequence()
 
-  return <TranslationCard initial={{ x: 100 }} sequence={sequence} className="items-end" />
+  return <TranslationCard initial={{ x: 50 }} whileInView={{ x: 10 }} sequence={sequence} className="origin-top-left" />
 }
