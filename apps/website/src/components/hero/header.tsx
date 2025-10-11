@@ -9,18 +9,19 @@ export function Header() {
   const t = useTranslations('home')
 
   return (
-    <div className="relative flex h-[80svh] flex-col items-center justify-center bg-zinc-50 text-slate-950 dark:bg-zinc-900">
+    <div className="relative flex h-160 md:h-200 flex-col items-center justify-center bg-zinc-50 text-slate-950 dark:bg-zinc-900">
       <motion.div
-        initial={{ opacity: 0.0, y: 40 }}
+        initial={{ opacity: 0, y: 40 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{
           delay: 0.3,
           duration: 0.8,
           ease: 'easeInOut',
         }}
-        className="max-w-6xl flex flex-col gap-4 items-center justify-center px-8 md:px-4 pt-20"
+        viewport={{ once: true }}
+        className="w-full md:max-w-6xl flex flex-col gap-4 items-center justify-center px-8 md:px-4 pt-20"
       >
-        <span className="text-4xl md:text-7xl font-bold dark:text-white text-center tracking-normal">
+        <span className="w-full break-all whitespace-pre-wrap text-4xl md:text-7xl font-bold dark:text-white text-center tracking-normal">
           {t('titleBefore')}
           <span className="text-primary-strong mx-2">
             {t('study')}

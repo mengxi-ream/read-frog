@@ -1,6 +1,7 @@
 import type { VariantProps } from 'class-variance-authority'
 import { cn } from '@repo/ui/lib/utils'
 import { cva } from 'class-variance-authority'
+import Image from 'next/image'
 
 const providerIconVariants = cva(
   'flex items-center min-w-0',
@@ -39,7 +40,7 @@ const iconContainerVariants = cva(
 )
 
 const iconVariants = cva(
-  '',
+  'object-contain',
   {
     variants: {
       size: {
@@ -63,13 +64,25 @@ interface ProviderIconProps extends VariantProps<typeof providerIconVariants> {
 }
 
 export default function ProviderIcon({ logo, name = '', size, className }: ProviderIconProps) {
+  const sizeMap = {
+    sm: 11,
+    base: 14,
+    md: 20,
+    lg: 24,
+    xl: 28,
+  } as const
+
+  const sizeValue = sizeMap[size || 'base']
+
   return (
     <div className={cn(providerIconVariants({ size }), className)}>
       <div className={iconContainerVariants({ size })}>
-        <img
+        <Image
           src={logo}
           alt={name}
           className={iconVariants({ size })}
+          width={sizeValue}
+          height={sizeValue}
         />
       </div>
     </div>

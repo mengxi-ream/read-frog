@@ -13,8 +13,31 @@
     "aiTranslation": "AI翻译与理解的强大功能",
     "poweredBy": "由领先的AI模型驱动"
   },
+  "features": {
+    "supportProviders": {
+      "title": "支持多种提供商",
+      "explanation": "Read Frog 可无缝接入多家大模型服务，你可以根据场景选择更合适的提供商。同时允许自定义 Api Key，完全在本地运行，不依托于远程服务。",
+      "nonCustomProvider": "LLM 提供商",
+      "customProvider": "OpenAI 兼容自定义提供商",
+      "pureProvider": "纯翻译提供商"
+    },
+    "littleFeatures": {
+      "multiLanguageSupport": "多国语言",
+      "multiLanguageSupportExplanation": "翻译支持多种语言，包括英语、法语、德语、西班牙语等",
+      "selectionTranslate": "划词翻译",
+      "selectionTranslateExplanation": "允许划词翻译，即时解析所需内容，同时支持保存生词本，所见即所得",
+      "context": "上下文结合",
+      "contextExplanation": "翻译自动携带上下文，使您能够获得更准确的翻译效果。",
+      "multiFormatSupport": "多种格式",
+      "multiFormatSupportExplanation": "后续将支持阅读或翻译多种格式，如：pdf，视频，漫画"
+    }
+  },
   "comment": {
     "from": "来自"
+  },
+  "recall": {
+    "title": "获取您的 AI 学习助手",
+    "description": "Read Frog 致力于为各个级别的语言学习者提供易于使用、智能化和个性化的语言学习体验，让世界不再依赖人类语言教师。"
   },
   "footer": {
     "description": "借助 AI 轻松深入地学习语言。",

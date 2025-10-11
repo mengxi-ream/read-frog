@@ -24,7 +24,7 @@
       transform: translateX(-100%);
     }
   }
-  @keyframes marquee-vertical {
+  @keyframes marquee_vertical {
     from {
       transform: translateY(-100%);
     }

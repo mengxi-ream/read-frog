@@ -7,38 +7,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useGetTargetLanguage } from '@/hooks/useGetTargetLanguage'
 import { useHasTranslation } from '@/hooks/useHasTranslation'
-
-const QUOTES: Record<
-  'eng' | 'jpn',
-  {
-    title: string
-    author: string
-    sentences: string[]
-  }
-> = {
-  eng: {
-    title: 'Spark: 5 Quotes',
-    author: '— Naoki Matayoshi',
-    sentences: [
-      '1. As long as you\'re alive, there\'s no bad ending.',
-      '2. Write down what you saw today in your own words while you\'re still alive.',
-      '3. Mr. Kamiya isn\'t confronting the world; he\'s confronting something that might make the world turn its head.',
-      '4. I believe comedians never truly retire.',
-      '5. Even the days you spent aimlessly will one day become treasures.',
-    ],
-  },
-  jpn: {
-    title: '『火花』名言五選',
-    author: '―― 又吉直樹',
-    sentences: [
-      '1. 生きている限り、バッドエンドはない。',
-      '2. お前の言葉で今日見たものを生きてるうちに書けよ。',
-      '3. 神谷さんが相手にしているのは世間やないねん。世間を振り向かせるかもしれん何かやねん。',
-      '4. オレな、芸人には引退なんてないと思うねん。',
-      '5. なんとなく過ごした日々も、後から宝物になるんですよ。',
-    ],
-  },
-}
+import { QUOTES } from '@/utils/constants/quotes'
 
 export default function GuidePage() {
   const t = useTranslations()

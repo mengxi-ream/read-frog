@@ -5,7 +5,7 @@ type Orientation = 'horizontal' | 'vertical'
 
 const animateClassNameMap: Record<Orientation, string> = {
   horizontal: 'animate-[marquee_linear_infinite]',
-  vertical: 'animate-[marquee-vertical_linear_infinite]',
+  vertical: 'animate-[marquee_vertical_linear_infinite]',
 }
 
 export function InfiniteScroller<T extends { id: number | string }>({
@@ -27,7 +27,10 @@ export function InfiniteScroller<T extends { id: number | string }>({
 
   return (
     <div
-      className={cn('relative flex items-center w-full overflow-hidden group', className)}
+      className={cn(
+        'relative flex items-center overflow-hidden w-full group',
+        className,
+      )}
     >
       {repeatCountArray.map(count => (
         <InfiniteScrollerPart key={count} orientation={orientation} {...props} />
