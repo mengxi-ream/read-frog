@@ -1,5 +1,4 @@
 import { Step, Steps } from 'fumadocs-ui/components/steps'
-import { createRelativeLink } from 'fumadocs-ui/mdx'
 import {
   DocsBody,
   DocsDescription,
@@ -33,8 +32,6 @@ export default async function Page(props: {
       <DocsBody>
         <MDXContent
           components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
-            a: createRelativeLink(source, page),
             GithubInfo: GithubInfoWithToken,
             Step,
             Steps,
