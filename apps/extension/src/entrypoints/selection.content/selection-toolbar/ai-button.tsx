@@ -4,6 +4,7 @@ import { Icon } from '@iconify/react'
 import { useQuery } from '@tanstack/react-query'
 import { streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { Activity } from 'react'
 import { MarkdownRenderer } from '@/components/markdown-renderer'
 import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
@@ -136,7 +137,7 @@ export function AiPopover() {
           </div>
         </div>
         <div className="pt-4">
-          {isLoading && !aiResponse && (
+          <Activity mode={isLoading && !aiResponse ? 'visible' : 'hidden'}>
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center space-x-3 text-slate-500">
                 <div className="flex space-x-1">
@@ -147,8 +148,9 @@ export function AiPopover() {
                 <span className="text-sm font-medium">AI正在分析中...</span>
               </div>
             </div>
-          )}
-          {error && (
+          </Activity>
+
+          <Activity mode={error ? 'visible' : 'hidden'}>
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
               <div className="flex items-center space-x-2">
                 <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
@@ -156,16 +158,17 @@ export function AiPopover() {
                 </div>
                 <div>
                   <p className="text-sm font-medium text-red-800 dark:text-red-200">分析失败</p>
-                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">{error.message}</p>
+                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">{error?.message}</p>
                 </div>
               </div>
             </div>
-          )}
-          {aiResponse && (
+          </Activity>
+
+          <Activity mode={aiResponse ? 'visible' : 'hidden'}>
             <div className="rounded-lg p-4 border border-slate-200 dark:border-slate-700">
               <MarkdownRenderer content={aiResponse} />
             </div>
-          )}
+          </Activity>
         </div>
       </div>
     </PopoverWrapper>
