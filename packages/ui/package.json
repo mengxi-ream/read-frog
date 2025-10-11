@@ -31,8 +31,8 @@
     "@tabler/icons-react": "^3.34.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "react": "^19.1.1",
-    "react-dom": "^19.1.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "tailwind-merge": "^3.3.1",
     "tw-animate-css": "^1.3.6"
   },
@@ -42,8 +42,8 @@
     "@tailwindcss/postcss": "^4.1.14",
     "@turbo/gen": "^2.5.5",
     "@types/node": "^22.16.4",
-    "@types/react": "^19.1.9",
-    "@types/react-dom": "^19.1.7",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
     "tailwindcss": "^4.1.14",
     "typescript": "^5.8.3"
   }
