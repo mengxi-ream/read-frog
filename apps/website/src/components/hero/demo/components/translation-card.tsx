@@ -37,9 +37,9 @@ export function TranslationCard(
   }, [inView])
 
   return (
-    <div className={cn('scale-50 md:scale-100 h-240 md:h-180 w-screen', className)}>
+    <div className={cn('scale-50 md:scale-100 h-240 md:h-180 md:w-320', className)}>
       <motion.div
-        className={cn('h-full w-screen flex flex-col gap-4 justify-start items-center border-zinc-200 overflow-hidden')}
+        className={cn('h-full w-screen md:w-full border-zinc-200 overflow-hidden')}
         initial={initial}
         whileInView={whileInView}
         transition={{ duration: 0.5 }}
@@ -49,12 +49,10 @@ export function TranslationCard(
           <div ref={scope} className="flex flex-col gap-4 text-neutral-700 dark:text-neutral-300 p-8 max-w-full overflow-hidden">
             <div className="mb-4 max-w-full">
               <div className="flex flex-col gap-2">
-                <div>
+                <span>
                   <span className="text-2xl font-bold title">{originalQuote.title}</span>
-                  <div className="spinner-title">
-                    <Spinner />
-                  </div>
-                </div>
+                  <Spinner className="spinner-title" />
+                </span>
                 <h2 className="translation-title text-2xl font-bold hidden">
                   {translatedQuote.title}
                 </h2>
@@ -63,12 +61,10 @@ export function TranslationCard(
 
             {originalQuote.sentences.map((sentence, index) => (
               <div key={sentence} className="flex flex-col gap-2 max-w-full">
-                <div className="flex justify-right items-center gap-2">
-                  <div className={`sentence-${index}`}>{sentence}</div>
-                  <div className={`spinner-sentence-${index}`}>
-                    <Spinner />
-                  </div>
-                </div>
+                <span>
+                  <span className={`sentence-${index}`}>{sentence}</span>
+                  <Spinner className={`spinner-sentence-${index}`} />
+                </span>
                 <span className={`translation-sentence-${index} hidden`}>
                   {translatedQuote.sentences[index]}
                 </span>
@@ -76,12 +72,10 @@ export function TranslationCard(
             ))}
 
             <div className="flex flex-col gap-2 max-w-full">
-              <div>
+              <span>
                 <span className="text-sm text-muted-foreground author">{originalQuote.author}</span>
-                <div className="spinner-author">
-                  <Spinner />
-                </div>
-              </div>
+                <Spinner className="spinner-author" />
+              </span>
               <span className="translation-author text-sm text-muted-foreground hidden">
                 {translatedQuote.author}
               </span>
