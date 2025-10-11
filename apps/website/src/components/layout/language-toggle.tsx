@@ -9,7 +9,7 @@ import {
 import { cn } from '@repo/ui/lib/utils'
 import { useI18n } from 'fumadocs-ui/contexts/i18n'
 
-export type LanguageSelectProps = ButtonHTMLAttributes<HTMLButtonElement>
+export type LanguageSelectProps = Omit<ButtonHTMLAttributes<HTMLButtonElement>, 'popover'>
 
 export function LanguageToggle(props: LanguageSelectProps): React.ReactElement {
   const context = useI18n()

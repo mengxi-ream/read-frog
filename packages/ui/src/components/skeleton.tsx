@@ -1,6 +1,7 @@
 import { cn } from '@repo/ui/lib/utils'
+import * as React from 'react'
 
-function Skeleton({ className, ...props }: React.ComponentProps<'div'>) {
+function Skeleton({ className, ...props }: Omit<React.ComponentProps<'div'>, 'popover'>) {
   return (
     <div
       data-slot="skeleton"

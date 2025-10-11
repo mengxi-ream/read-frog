@@ -34,7 +34,7 @@ export function RootToggle({
 }: {
   placeholder?: ReactNode
   options: Option[]
-} & HTMLAttributes<HTMLButtonElement>) {
+} & Omit<HTMLAttributes<HTMLButtonElement>, 'popover'>) {
   const [open, setOpen] = useState(false)
   const { closeOnRedirect } = useSidebar()
   const pathname = usePathname()

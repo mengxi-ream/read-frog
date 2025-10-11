@@ -1,10 +1,11 @@
 /* eslint-disable react/no-array-index-key */
 'use client'
 
+import type { ReactNode } from 'react'
 import type { ChangelogEntry } from './parse-changelog'
 import { useTranslations } from 'next-intl'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { useMemo } from 'react'
+import { Activity, useMemo } from 'react'
 import { parseChangelog } from './parse-changelog'
 
 interface ChangelogContentProps {
@@ -31,9 +32,6 @@ export function ChangelogContent({
     () => parseChangelog(websiteChangelog),
     [websiteChangelog],
   )
-
-  const currentEntries
-    = activeTab === 'extension' ? extensionEntries : websiteEntries
 
   const handleTabChange = (tab: 'extension' | 'website') => {
     const params = new URLSearchParams(searchParams)
@@ -75,16 +73,22 @@ export function ChangelogContent({
         </button>
       </div>
 
-      {/* Timeline */}
-      <div className="relative">
-        {currentEntries.map((entry: ChangelogEntry, index: number) => (
-          <ChangelogEntryItem
-            key={`${entry.version}-${index}`}
-            entry={entry}
-            isLast={index === currentEntries.length - 1}
-          />
-        ))}
-      </div>
+      {[
+        { tab: 'extension' as const, entries: extensionEntries },
+        { tab: 'website' as const, entries: websiteEntries },
+      ].map(({ tab, entries }) => (
+        <Activity key={tab} mode={activeTab === tab ? 'visible' : 'hidden'}>
+          <div className="relative">
+            {entries.map((entry: ChangelogEntry, index: number) => (
+              <ChangelogEntryItem
+                key={`${entry.version}-${index}`}
+                entry={entry}
+                isLast={index === entries.length - 1}
+              />
+            ))}
+          </div>
+        </Activity>
+      ))}
     </div>
   )
 }
@@ -223,7 +227,7 @@ function isValidUrl(url: string): boolean {
 const MARKDOWN_PATTERN = /\[#(\d+)\]\((https?:\/\/[^)]+)\)|\[`([a-f0-9]+)`\]\((https?:\/\/[^)]+)\)|\[@([^\]]+)\]\((https?:\/\/[^)]+)\)|\*\*([^*]+)\*\*|`([^`]+)`/g
 
 function ChangeText({ text }: { text: string }) {
-  const parts: React.ReactNode[] = []
+  const parts: ReactNode[] = []
   let lastIndex = 0
 
   let key = 0

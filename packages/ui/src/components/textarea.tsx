@@ -1,7 +1,7 @@
 import { cn } from '@repo/ui/lib/utils'
 import * as React from 'react'
 
-function Textarea({ className, ...props }: React.ComponentProps<'textarea'>) {
+function Textarea({ className, ...props }: Omit<React.ComponentProps<'textarea'>, 'popover'>) {
   return (
     <textarea
       data-slot="textarea"

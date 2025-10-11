@@ -2,7 +2,7 @@ import { cn } from '@repo/ui/lib/utils'
 
 import * as React from 'react'
 
-function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
+function Input({ className, type, ...props }: Omit<React.ComponentProps<'input'>, 'popover'>) {
   return (
     <input
       type={type}
