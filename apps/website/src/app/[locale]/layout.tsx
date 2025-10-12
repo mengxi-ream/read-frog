@@ -106,9 +106,6 @@ export default async function RootLayout({
               // translations for UI
               translations: locale !== 'en' ? { zh }[locale] : undefined,
             }}
-            theme={{
-              forcedTheme: 'light',
-            }}
           >
             <TRPCReactProvider>
               {children}

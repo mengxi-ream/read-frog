@@ -3,12 +3,14 @@
 import type { Provider } from '@/utils/constants/providers'
 import { motion } from 'motion/react'
 import { useTranslations } from 'next-intl'
+import { useTheme } from 'next-themes'
 import { useState } from 'react'
 import { Container } from '@/components/container'
 import { InfiniteScroller } from '@/components/motion/infinite-scroller'
 import { ProgressTabs } from '@/components/motion/progress-tabs'
 import { Wallet } from '@/components/motion/wallet-animation'
 import ProviderIcon from '@/components/provider-icon'
+import { useHydration } from '@/hooks/useHydration'
 import { CUSTOM_PROVIDER_ITEMS, NON_CUSTOM_LLM_PROVIDER_ITEMS, PURE_PROVIDERS_ITEMS } from '@/utils/constants/providers'
 
 enum PROVIDER_TYPES_ENUM {
@@ -38,7 +40,7 @@ export function SupportProviders() {
   const activeProviderType = PROVIDER_TYPES[activeProviderIndex]
 
   return (
-    <section className="w-full bg-zinc-150 dark:bg-zinc-850 border-t border-zinc-200 flex-auto md:h-fit">
+    <section className="w-full bg-zinc-150 dark:bg-zinc-850 border-t border-zinc-200 dark:border-zinc-800 flex-auto md:h-fit">
       <Container className="h-full py-15 md:py-30 flex flex-col md:grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-10 items-stretch">
         <div className="flex flex-col h-fit md:h-full gap-6 md:gap-12">
           <div className="flex flex-col h-fit gap-6">
@@ -62,9 +64,16 @@ export function SupportProviders() {
 }
 
 function ProviderMotionLogo({ logo, id }: Provider) {
+  const { resolvedTheme } = useTheme()
+  const isHydrated = useHydration()
+
+  if (!isHydrated)
+    return <></>
+
+  const isDark = resolvedTheme === 'dark'
   return (
     <motion.div whileHover={{ scale: 1.3 }}>
-      <ProviderIcon logo={logo(false)} name={id} className="mx-4" size="xl" />
+      <ProviderIcon logo={logo(isDark)} name={id} className="mx-4" size="xl" />
     </motion.div>
   )
 }

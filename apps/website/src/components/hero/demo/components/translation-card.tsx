@@ -22,7 +22,7 @@ export function TranslationCard(
   { initial: TargetAndTransition, whileInView: TargetAndTransition, className?: string, sequence: AnimationSequence },
 ) {
   const [scope, animate] = useAnimate()
-  const inView = useInView(scope, { amount: 0.6, once: true })
+  const inView = useInView(scope, { amount: 0.3, once: true })
 
   useEffect(() => {
     if (!inView)
@@ -37,7 +37,7 @@ export function TranslationCard(
   }, [inView])
 
   return (
-    <div className={cn('scale-50 md:scale-100 h-240 md:h-180 md:w-320', className)}>
+    <div className={cn('scale-50 md:scale-100 h-240 md:h-180 md:w-320 will-change-tr', className)}>
       <motion.div
         className={cn('h-full w-screen md:w-full border-zinc-200 overflow-hidden')}
         initial={initial}

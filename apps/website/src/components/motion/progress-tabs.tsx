@@ -101,7 +101,7 @@ export function ProgressTabs({
                 onClick={() => setActiveIndex(index)}
                 className={cn(
                   'py-2 text-md text-start font-medium transition-colors cursor-pointer',
-                  isActive ? 'text-primary' : 'text-zinc-700 hover:text-black',
+                  isActive ? 'text-primary' : 'text-zinc-700 dark:text-zinc-300 hover:text-black dark:hover:text-white',
                 )}
               >
                 {item.label}

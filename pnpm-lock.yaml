@@ -259,14 +259,14 @@ importers:
         specifier: ^0.7.1
         version: 0.7.1
       fumadocs-core:
-        specifier: ^15.7.11
-        version: 15.8.1(@types/react@19.1.10)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)
+        specifier: ^15.8.3
+        version: 15.8.5(@types/react@19.1.10)(lucide-react@0.507.0)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)
       fumadocs-mdx:
         specifier: ^11.6.11
-        version: 11.8.0(acorn@8.15.0)(fumadocs-core@15.8.1)(next@15.5.0)(react@19.1.1)
+        version: 11.8.0(acorn@8.15.0)(fumadocs-core@15.8.5)(next@15.5.0)(react@19.1.1)
       fumadocs-ui:
-        specifier: ^15.7.11
-        version: 15.8.1(@types/react-dom@19.1.7)(@types/react@19.1.10)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)(tailwindcss@4.1.12)
+        specifier: ^15.8.3
+        version: 15.8.5(@types/react-dom@19.1.7)(@types/react@19.1.10)(lucide-react@0.507.0)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)(tailwindcss@4.1.12)
       lucide-react:
         specifier: ^0.507.0
         version: 0.507.0(react@19.1.1)
@@ -2224,6 +2224,12 @@ packages:
 
   /@formatjs/intl-localematcher@0.6.1:
     resolution: {integrity: sha512-ePEgLgVCqi2BBFnTMWPfIghu6FkbZnnBVhO2sSxvLfrdFw7wCHAHiDoM2h4NRgjbaY7+B7HgOLZGkK187pZTZg==}
+    dependencies:
+      tslib: 2.8.1
+    dev: false
+
+  /@formatjs/intl-localematcher@0.6.2:
+    resolution: {integrity: sha512-XOMO2Hupl0wdd172Y06h6kLpBz6Dv+J4okPLl4LPtzbr8f66WbIoy4ev98EBuZ6ZK4h5ydTN6XneT4QVpD7cdA==}
     dependencies:
       tslib: 2.8.1
     dev: false
@@ -7784,14 +7790,15 @@ packages:
     requiresBuild: true
     optional: true
 
-  /fumadocs-core@15.8.1(@types/react@19.1.10)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1):
-    resolution: {integrity: sha512-3NBM2U3QlnDr4AwfDCLFaNjRGOj52g3geHSnwC9hU2en34xROe7/I8FI1eLkX68ppGnhSQYm/rIuMAPzvepnsg==}
+  /fumadocs-core@15.8.5(@types/react@19.1.10)(lucide-react@0.507.0)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1):
+    resolution: {integrity: sha512-hyJtKGuB2J/5y7tDfI1EnGMKlNbSXM5N5cpwvgCY0DcBJwFMDG/GpSpaVRzh3aWy67pAYDZFIwdtbKXBa/q5bg==}
     peerDependencies:
       '@mixedbread/sdk': ^0.19.0
       '@oramacloud/client': 1.x.x || 2.x.x
       '@tanstack/react-router': 1.x.x
       '@types/react': '*'
       algoliasearch: 5.x.x
+      lucide-react: '*'
       next: 14.x.x || 15.x.x
       react: 18.x.x || 19.x.x
       react-dom: 18.x.x || 19.x.x
@@ -7808,6 +7815,8 @@ packages:
         optional: true
       algoliasearch:
         optional: true
+      lucide-react:
+        optional: true
       next:
         optional: true
       react:
@@ -7819,7 +7828,7 @@ packages:
       waku:
         optional: true
     dependencies:
-      '@formatjs/intl-localematcher': 0.6.1
+      '@formatjs/intl-localematcher': 0.6.2
       '@orama/orama': 3.1.14
       '@shikijs/rehype': 3.13.0
       '@shikijs/transformers': 3.13.0
@@ -7828,9 +7837,11 @@ packages:
       hast-util-to-estree: 3.1.3
       hast-util-to-jsx-runtime: 2.3.6
       image-size: 2.0.2
+      lucide-react: 0.507.0(react@19.1.1)
       negotiator: 1.0.0
       next: 15.5.0(react-dom@19.1.1)(react@19.1.1)
       npm-to-yarn: 3.0.1
+      path-to-regexp: 8.3.0
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
       react-remove-scroll: 2.7.1(@types/react@19.1.10)(react@19.1.1)
@@ -7844,7 +7855,7 @@ packages:
       - supports-color
     dev: false
 
-  /fumadocs-mdx@11.8.0(acorn@8.15.0)(fumadocs-core@15.8.1)(next@15.5.0)(react@19.1.1):
+  /fumadocs-mdx@11.8.0(acorn@8.15.0)(fumadocs-core@15.8.5)(next@15.5.0)(react@19.1.1):
     resolution: {integrity: sha512-svbJBgkvLHG3GX2tG+TxiMPDnvE2QDHCIT2wgcYf+flWoDIMgh8ZWTvv4r5/BpU+svYeEd6sKFq3sEjlgDM4ag==}
     hasBin: true
     peerDependencies:
@@ -7868,7 +7879,7 @@ packages:
       chokidar: 4.0.3
       esbuild: 0.25.9
       estree-util-value-to-estree: 3.4.0
-      fumadocs-core: 15.8.1(@types/react@19.1.10)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)
+      fumadocs-core: 15.8.5(@types/react@19.1.10)(lucide-react@0.507.0)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)
       js-yaml: 4.1.0
       lru-cache: 11.1.0
       next: 15.5.0(react-dom@19.1.1)(react@19.1.1)
@@ -7883,8 +7894,8 @@ packages:
       - supports-color
     dev: false
 
-  /fumadocs-ui@15.8.1(@types/react-dom@19.1.7)(@types/react@19.1.10)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)(tailwindcss@4.1.12):
-    resolution: {integrity: sha512-GFJoKiDPTPefXtfwr4cheeprtAF+rHILeyovta3cODPsurSRvSfxqbGVN8YRDUh1ja9GpExSQFgUFwp1+7qVtQ==}
+  /fumadocs-ui@15.8.5(@types/react-dom@19.1.7)(@types/react@19.1.10)(lucide-react@0.507.0)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)(tailwindcss@4.1.12):
+    resolution: {integrity: sha512-9pyB+9rOOsrFnmmZ9xREp/OgVhyaSq2ocEpqTNbeQ7tlJ6JWbdFWfW0C9lRXprQEB6DJWUDtDxqKS5QXLH0EGA==}
     peerDependencies:
       '@types/react': '*'
       next: 14.x.x || 15.x.x
@@ -7911,7 +7922,7 @@ packages:
       '@radix-ui/react-tabs': 1.1.13(@types/react-dom@19.1.7)(@types/react@19.1.10)(react-dom@19.1.1)(react@19.1.1)
       '@types/react': 19.1.10
       class-variance-authority: 0.7.1
-      fumadocs-core: 15.8.1(@types/react@19.1.10)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)
+      fumadocs-core: 15.8.5(@types/react@19.1.10)(lucide-react@0.507.0)(next@15.5.0)(react-dom@19.1.1)(react@19.1.1)
       lodash.merge: 4.6.2
       next: 15.5.0(react-dom@19.1.1)(react@19.1.1)
       next-themes: 0.4.6(react-dom@19.1.1)(react@19.1.1)
@@ -7928,6 +7939,7 @@ packages:
       - '@tanstack/react-router'
       - '@types/react-dom'
       - algoliasearch
+      - lucide-react
       - react-router
       - supports-color
       - waku
@@ -10748,6 +10760,10 @@ packages:
       lru-cache: 10.4.3
       minipass: 7.1.2
     dev: true
+
+  /path-to-regexp@8.3.0:
+    resolution: {integrity: sha512-7jdwVIRtsP8MYpdXSwOS0YdD0Du+qOoF/AEPIt88PcCFrZCzx41oxku1jD88hZBwbNUIEfpqvuhjFaMAqMTWnA==}
+    dev: false
 
   /path-type@4.0.0:
     resolution: {integrity: sha512-gDKb8aZMDeD/tZWs9P6+q0J9Mwkdl6xMV8TjnGP3qJVJ06bdMgkbBlLU8IdfOsIsFz2BW1rNVT3XuNEl8zPAvw==}

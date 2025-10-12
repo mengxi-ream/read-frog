@@ -28,15 +28,6 @@ export function baseOptions(locale: Locale): BaseLayoutProps {
   }
 }
 
-export function homeBaseOptions(locale: Locale): BaseLayoutProps {
-  return {
-    ...baseOptions(locale),
-    themeSwitch: {
-      enabled: false,
-    },
-  }
-}
-
 export function homeLinks(locale: Locale): LinkItemType[] {
   return [
     {

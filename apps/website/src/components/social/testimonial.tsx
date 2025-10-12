@@ -3,7 +3,9 @@
 import type { TestimonialItem } from '@/utils/constants/testimonial-list'
 import { cn } from '@repo/ui/lib/utils'
 import { motion } from 'motion/react'
+import { useTheme } from 'next-themes'
 import Image from 'next/image'
+import { useHydration } from '@/hooks/useHydration'
 import { FromPlatforms, testimonialList } from '@/utils/constants/testimonial-list'
 
 export function Testimonial() {
@@ -55,11 +57,21 @@ function TestimonialCard({ testimonial }: { testimonial: TestimonialItem }) {
 }
 
 function BrandLogo({ brand }: { brand: FromPlatforms }) {
+  const { resolvedTheme } = useTheme()
+  const isHydrated = useHydration()
+
+  if (!isHydrated)
+    return <></>
+
+  const isDark = resolvedTheme === 'dark'
+
   const squareLogoSize = 25
   const circleLogoSize = 28
   const logoSize = [FromPlatforms.X].includes(brand) ? squareLogoSize : circleLogoSize
 
-  return <Image className="self-start" src={`/icons/${brand}.png`} alt={brand} width={logoSize} height={logoSize} />
+  const logoSrc = [FromPlatforms.X].includes(brand) && isDark ? `/icons/${brand}-dark.png` : `/icons/${brand}.png`
+
+  return <Image className="self-start" src={logoSrc} alt={brand} width={logoSize} height={logoSize} loading={!isHydrated ? 'eager' : 'lazy'} />
 }
 
 function CommentAvatar({ link, avatar, name }: { avatar?: string, name: string, link?: string }) {

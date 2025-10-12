@@ -57,7 +57,7 @@ function InstallLink({
           'rounded-full w-full px-10 py-3 flex items-center justify-center gap-4 active:scale-95 duration-150 transition-all ease-in-out border shadow-xs hover:-translate-y-0.5',
           focus
             ? 'border-primary-strong font-medium bg-white text-primary ring-1 ring-white/20 shadow-primary-strong'
-            : 'border border-black/20 text-zinc-800 bg-white  hover:bg-white',
+            : 'border border-black/20 text-zinc-800 bg-white hover:bg-white',
         )
       }
     >

@@ -1,9 +1,24 @@
-.hero-base-dot-bg {
-  background-size: 16px 16px;
-  background-image: radial-gradient(oklch(from oklch(15% 0.05 250) l c h / 15%) 1.5px, transparent 1px);
-}
-
+.hero-base-dot-bg,
 .hero-color-dot-bg {
   background-size: 16px 16px;
-  background-image: radial-gradient(oklch(from var(--color-primary-weak) l c h / 100%) 1.5px, transparent 1px);
+}
+
+.light {
+  .hero-base-dot-bg {
+    background-image: radial-gradient(oklch(from oklch(15% 0.05 250) l c h / 15%) 1.5px, transparent 1px);
+  }
+
+  .hero-color-dot-bg {
+    background-image: radial-gradient(oklch(from var(--color-primary-weak) l c h / 100%) 1.5px, transparent 1px);
+  }
+}
+
+.dark {
+  .hero-base-dot-bg {
+    background-image: radial-gradient(oklch(from oklch(75% 0.05 250) l c h / 15%) 1.5px, transparent 1px);
+  }
+
+  .hero-color-dot-bg {
+    background-image: radial-gradient(oklch(from var(--color-primary-weak) l c h / 100%) 1.5px, transparent 1px);
+  }
 }
