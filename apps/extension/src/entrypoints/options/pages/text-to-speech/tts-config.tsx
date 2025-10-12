@@ -16,7 +16,7 @@ import { experimental_generateSpeech as generateSpeech } from 'ai'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
 import ValidatedInput from '@/components/ui/validated-input'
-import { MAX_TTS_SPEED, MIN_TTS_SPEED, TTS_MODELS, TTS_VOICES, ttsSpeedSchema } from '@/types/config/tts'
+import { getVoicesForModel, isVoiceAvailableForModel, MAX_TTS_SPEED, MIN_TTS_SPEED, TTS_MODELS, ttsSpeedSchema } from '@/types/config/tts'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ttsProviderConfigAtom } from '@/utils/atoms/provider'
 import { getTTSProvidersConfig } from '@/utils/config/helpers'
@@ -103,7 +103,20 @@ function TtsModelField() {
       <Select
         value={ttsConfig.model}
         onValueChange={(value: TTSModel) => {
-          void setTtsConfig({ model: value })
+          // Check if current voice is available for the new model
+          const isCurrentVoiceAvailable = isVoiceAvailableForModel(ttsConfig.voice, value)
+
+          // If current voice is not available, select the first available voice
+          if (!isCurrentVoiceAvailable) {
+            const availableVoices = getVoicesForModel(value)
+            void setTtsConfig({
+              model: value,
+              voice: availableVoices[0] as TTSVoice,
+            })
+          }
+          else {
+            void setTtsConfig({ model: value })
+          }
         }}
       >
         <SelectTrigger className="w-full">
@@ -125,6 +138,7 @@ function TtsModelField() {
 
 function TtsVoiceField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
+  const availableVoices = getVoicesForModel(ttsConfig.model)
 
   const previewMutation = useMutation({
     mutationFn: async () => {
@@ -139,10 +153,11 @@ function TtsVoiceField() {
         text: i18n.t('options.config.tts.voice.previewSample'),
         voice: ttsConfig.voice,
         speed: ttsConfig.speed,
+        outputFormat: 'wav',
       })
 
       const audioBlob = new Blob([result.audio.uint8Array], {
-        type: 'audio/mpeg',
+        type: 'audio/wav',
       })
 
       return audioBlob
@@ -194,7 +209,7 @@ function TtsVoiceField() {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {TTS_VOICES.map(voice => (
+                {availableVoices.map(voice => (
                   <SelectItem key={voice} value={voice}>
                     {TTS_VOICES_ITEMS[voice].name}
                   </SelectItem>
