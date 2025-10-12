@@ -34,7 +34,7 @@
     "fumadocs-ui": "^15.8.3",
     "lucide-react": "^0.507.0",
     "motion": "^12.10.0",
-    "next": "16.0.0-canary.1",
+    "next": "^16.0.0-beta.0",
     "next-intl": "^4.3.12",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
