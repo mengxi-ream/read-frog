@@ -13,14 +13,18 @@ export const queryClient = new QueryClient({
     onError: (error, query) => {
       const errorDescription
       = query.meta?.errorDescription || 'Something went wrong'
-      toast.error(`${errorDescription}: ${error.message}`)
+      toast.error(`${errorDescription}`, {
+        description: error.message || undefined,
+      })
     },
   }),
   mutationCache: new MutationCache({
     onError: (error, _variables, _context, mutation) => {
       const errorDescription
       = mutation.meta?.errorDescription || 'Something went wrong'
-      toast.error(`${errorDescription}: ${error.message}`)
+      toast.error(`${errorDescription}`, {
+        description: error.message || undefined,
+      })
     },
   }),
 })

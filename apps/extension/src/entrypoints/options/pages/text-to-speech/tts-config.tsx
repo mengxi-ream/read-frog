@@ -11,9 +11,10 @@ import {
   SelectValue,
 } from '@repo/ui/components/select'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
-import { useMutation } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { experimental_generateSpeech as generateSpeech } from 'ai'
 import { useAtom, useAtomValue } from 'jotai'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import ValidatedInput from '@/components/ui/validated-input'
 import { getVoicesForModel, isVoiceAvailableForModel, MAX_TTS_SPEED, MIN_TTS_SPEED, TTS_MODELS, ttsSpeedSchema } from '@/types/config/tts'
@@ -139,9 +140,11 @@ function TtsModelField() {
 function TtsVoiceField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
   const availableVoices = getVoicesForModel(ttsConfig.model)
+  const [isPlaying, setIsPlaying] = useState(false)
 
-  const previewMutation = useMutation({
-    mutationFn: async () => {
+  const { data: cachedAudio, refetch, isFetching } = useQuery({
+    queryKey: ['tts-preview', ttsConfig],
+    queryFn: async () => {
       if (!ttsConfig.providerId) {
         throw new Error(i18n.t('options.config.tts.provider.noProvider'))
       }
@@ -162,29 +165,50 @@ function TtsVoiceField() {
 
       return audioBlob
     },
-    onSuccess: async (audioBlob) => {
-      try {
-        // Use HTML5 Audio element for faster playback with streaming support
-        const audioUrl = URL.createObjectURL(audioBlob)
-        const audio = new Audio(audioUrl)
-
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl)
-        }
-
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl)
-          throw new Error('Failed to play audio')
-        }
-
-        await audio.play()
-      }
-      catch (error) {
-        console.error('Error playing audio:', error)
-        toast.error('Failed to play audio')
-      }
-    },
+    enabled: false,
+    staleTime: Number.POSITIVE_INFINITY,
+    gcTime: 1000 * 60 * 10,
   })
+
+  const handlePreview = async () => {
+    let blob = cachedAudio
+
+    if (!blob) {
+      const result = await refetch()
+      blob = result.data
+    }
+
+    if (!blob) {
+      return
+    }
+
+    try {
+      setIsPlaying(true)
+      const audioUrl = URL.createObjectURL(blob)
+      const audio = new Audio(audioUrl)
+
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl)
+        setIsPlaying(false)
+      }
+
+      audio.onerror = () => {
+        URL.revokeObjectURL(audioUrl)
+        setIsPlaying(false)
+        throw new Error('Failed to play audio')
+      }
+
+      await audio.play()
+    }
+    catch (error) {
+      setIsPlaying(false)
+      toast.error('Failed to play audio', {
+        description: error instanceof Error ? error.message : undefined,
+      })
+    }
+  }
+
+  const isFetchingOrPlaying = isFetching || isPlaying
 
   return (
     <FieldWithLabel id="ttsVoice" label={i18n.t('options.config.tts.voice.label')}>
@@ -217,12 +241,10 @@ function TtsVoiceField() {
           type="button"
           variant="outline"
           className="sm:w-auto h-9"
-          onClick={() => {
-            previewMutation.mutate()
-          }}
-          disabled={previewMutation.isPending || !ttsConfig.providerId}
+          onClick={handlePreview}
+          disabled={isFetchingOrPlaying || !ttsConfig.providerId}
         >
-          {previewMutation.isPending ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconPlayerPlayFilled className="mr-2 size-4" />}
+          {isFetchingOrPlaying ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconPlayerPlayFilled className="mr-2 size-4" />}
           {i18n.t('options.config.tts.voice.preview')}
         </Button>
       </div>
