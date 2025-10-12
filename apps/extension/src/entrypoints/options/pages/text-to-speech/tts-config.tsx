@@ -163,30 +163,25 @@ function TtsVoiceField() {
       return audioBlob
     },
     onSuccess: async (audioBlob) => {
-      let audioContext: AudioContext | null = null
-      let source: AudioBufferSourceNode | null = null
-
       try {
-        audioContext = new AudioContext()
+        // Use HTML5 Audio element for faster playback with streaming support
+        const audioUrl = URL.createObjectURL(audioBlob)
+        const audio = new Audio(audioUrl)
 
-        const arrayBuffer = await audioBlob.arrayBuffer()
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-
-        source = audioContext.createBufferSource()
-        source.buffer = audioBuffer
-        source.connect(audioContext.destination)
-
-        source.onended = () => {
-          void audioContext?.close()
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl)
         }
 
-        source.start(0)
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl)
+          throw new Error('Failed to play audio')
+        }
+
+        await audio.play()
       }
       catch (error) {
         console.error('Error playing audio:', error)
         toast.error('Failed to play audio')
-        // Clean up on error
-        void audioContext?.close()
       }
     },
   })
