@@ -11,18 +11,15 @@ import {
   SelectValue,
 } from '@repo/ui/components/select'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
-import { useQuery } from '@tanstack/react-query'
-import { experimental_generateSpeech as generateSpeech } from 'ai'
 import { useAtom, useAtomValue } from 'jotai'
-import { useState } from 'react'
 import { toast } from 'sonner'
 import ValidatedInput from '@/components/ui/validated-input'
+import { useTextToSpeech } from '@/hooks/use-text-to-speech'
 import { getVoicesForModel, isVoiceAvailableForModel, MAX_TTS_SPEED, MIN_TTS_SPEED, TTS_MODELS, ttsSpeedSchema } from '@/types/config/tts'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ttsProviderConfigAtom } from '@/utils/atoms/provider'
 import { getTTSProvidersConfig } from '@/utils/config/helpers'
 import { TTS_VOICES_ITEMS } from '@/utils/constants/tts'
-import { getTTSProviderById } from '@/utils/providers/model'
 import { ConfigCard } from '../../components/config-card'
 import { FieldWithLabel } from '../../components/field-with-label'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
@@ -139,73 +136,21 @@ function TtsModelField() {
 
 function TtsVoiceField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
+  const ttsProviderConfig = useAtomValue(ttsProviderConfigAtom)
   const availableVoices = getVoicesForModel(ttsConfig.model)
-  const [isPlaying, setIsPlaying] = useState(false)
-
-  const { data: cachedAudio, refetch, isFetching } = useQuery({
-    queryKey: ['tts-preview', ttsConfig],
-    queryFn: async () => {
-      if (!ttsConfig.providerId) {
-        throw new Error(i18n.t('options.config.tts.provider.noProvider'))
-      }
-
-      const provider = await getTTSProviderById(ttsConfig.providerId)
-
-      const result = await generateSpeech({
-        model: provider.speech(ttsConfig.model),
-        text: i18n.t('options.config.tts.voice.previewSample'),
-        voice: ttsConfig.voice,
-        speed: ttsConfig.speed,
-        outputFormat: 'wav',
-      })
-
-      const audioBlob = new Blob([result.audio.uint8Array], {
-        type: 'audio/wav',
-      })
-
-      return audioBlob
-    },
-    enabled: false,
-    staleTime: Number.POSITIVE_INFINITY,
-    gcTime: 1000 * 60 * 10,
-  })
+  const { play, isFetching, isPlaying } = useTextToSpeech()
 
   const handlePreview = async () => {
-    let blob = cachedAudio
-
-    if (!blob) {
-      const result = await refetch()
-      blob = result.data
-    }
-
-    if (!blob) {
+    if (!ttsProviderConfig) {
+      toast.error(i18n.t('options.config.tts.provider.noProvider'))
       return
     }
 
-    try {
-      setIsPlaying(true)
-      const audioUrl = URL.createObjectURL(blob)
-      const audio = new Audio(audioUrl)
-
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl)
-        setIsPlaying(false)
-      }
-
-      audio.onerror = () => {
-        URL.revokeObjectURL(audioUrl)
-        setIsPlaying(false)
-        throw new Error('Failed to play audio')
-      }
-
-      await audio.play()
-    }
-    catch (error) {
-      setIsPlaying(false)
-      toast.error('Failed to play audio', {
-        description: error instanceof Error ? error.message : undefined,
-      })
-    }
+    void play(
+      i18n.t('options.config.tts.voice.previewSample'),
+      ttsConfig,
+      ttsProviderConfig,
+    )
   }
 
   const isFetchingOrPlaying = isFetching || isPlaying

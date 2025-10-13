@@ -20,6 +20,6 @@ export const TTS_VOICES_ITEMS: Record<TTSVoice, { name: string }> = {
 export const DEFAULT_TTS_CONFIG: TTSConfig = {
   providerId: 'openai-default',
   model: 'gpt-4o-mini-tts',
-  voice: 'alloy',
+  voice: 'ash',
   speed: 1,
 }
