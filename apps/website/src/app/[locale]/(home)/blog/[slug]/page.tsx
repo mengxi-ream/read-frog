@@ -4,6 +4,7 @@ import { buttonVariants } from 'fumadocs-ui/components/ui/button'
 import { getTranslations } from 'next-intl/server'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { SITE_PUBLIC_URL } from '@/lib/constants'
 import { blog } from '@/lib/source'
 import { getMDXComponents } from '@/mdx-components'
 import { ShareButton } from './page.client'
@@ -84,10 +85,28 @@ export async function generateMetadata(props: {
   if (!page)
     notFound()
 
+  const pageUrl = `${SITE_PUBLIC_URL}/${page.url}`
+  const pageTitle = page.data.title
+  const pageDescription = page.data.description ?? 'Read Frog - Browser Extension for Translation'
+  const author = page.data.author
+  const date = page.data.date
+
   return {
-    title: page.data.title,
-    description:
-      page.data.description ?? 'Read Frog - Browser Extension for Translation',
+    title: pageTitle,
+    description: pageDescription,
+    openGraph: {
+      type: 'article',
+      title: pageTitle,
+      description: pageDescription,
+      url: pageUrl,
+      publishedTime: date?.toString(),
+      authors: [author],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: pageTitle,
+      description: pageDescription,
+    },
   }
 }
 
