@@ -2,7 +2,9 @@ import { cn } from '@repo/ui/lib/utils'
 
 import * as React from 'react'
 
-function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
+// TODO: Remove 'popover' Omit when Radix UI supports React 19.2
+// React 19.2 added "hint" value to popover attribute, but Radix UI doesn't support it yet
+function Input({ className, type, ...props }: Omit<React.ComponentProps<'input'>, 'popover'>) {
   return (
     <input
       type={type}

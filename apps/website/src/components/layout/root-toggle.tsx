@@ -27,6 +27,8 @@ export interface Option {
   props?: HTMLAttributes<HTMLElement>
 }
 
+// TODO: Remove 'popover' Omit when Radix UI supports React 19.2
+// React 19.2 added "hint" value to popover attribute, but Radix UI doesn't support it yet
 export function RootToggle({
   options,
   placeholder,
@@ -34,7 +36,7 @@ export function RootToggle({
 }: {
   placeholder?: ReactNode
   options: Option[]
-} & HTMLAttributes<HTMLButtonElement>) {
+} & Omit<HTMLAttributes<HTMLButtonElement>, 'popover'>) {
   const [open, setOpen] = useState(false)
   const { closeOnRedirect } = useSidebar()
   const pathname = usePathname()
