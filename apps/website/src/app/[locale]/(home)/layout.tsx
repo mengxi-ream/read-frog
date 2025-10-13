@@ -22,7 +22,7 @@ export default async function Layout({
     <HomeLayout
       {...baseOptions(locale)}
       links={homeLinks(locale)}
-      className="pt-0"
+      className="pt-0 overflow-x-hidden"
     >
       {children}
       <Footer params={{ locale }} />

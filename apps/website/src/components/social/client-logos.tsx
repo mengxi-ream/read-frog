@@ -1,52 +1,32 @@
+import { cn } from '@repo/ui/lib/utils'
 import Image from 'next/image'
 import { Container } from '@/components/container'
-import { getLobeIconsCDNUrlFn } from '@/utils/logo'
+
+const logoList = [
+  { src: '/icons/pku.png', alt: 'PKU', invertColor: true },
+  { src: '/icons/thu.png', alt: 'THU', invertColor: true },
+  { src: '/icons/bytedance.svg', alt: 'ByteDance' },
+  { src: '/icons/alibaba.png', alt: 'Alibaba' },
+]
 
 export function ClientLogos() {
   return (
     <section>
-      <Container className="grid grid-rows-2 md:grid-rows-1 grid-cols-2 md:grid-cols-4 gap-y-10 flex-wrap w-full justify-between items-center py-12 md:py-12 md:px-20 place-items-center">
-        <PlainLogos />
-        <CompanyLogos />
+      <Container className="grid grid-rows-2 md:grid-rows-1 grid-cols-2 md:grid-cols-4 flex-wrap w-full justify-between items-center md:px-20 place-items-center mb-8">
+        {logoList.map(({ src, alt, invertColor }) => (
+          <Image
+            key={alt}
+            className={cn(
+              'hover:scale-110 ease-in-out transition-transform duration-100',
+              invertColor && 'dark:brightness-0 dark:invert-100',
+            )}
+            src={src}
+            alt={alt}
+            height={128}
+            width={128}
+          />
+        ))}
       </Container>
     </section>
-  )
-}
-
-function PlainLogos() {
-  return (
-    <>
-      <ClientLogo src="icons/PKU.svg" alt="PKU" />
-      <ClientLogo src="icons/THU.svg" alt="THU" />
-    </>
-  )
-}
-
-function CompanyLogos() {
-  const companiesLogoList = [
-    { src: getLobeIconsCDNUrlFn('Alibaba-color')(), alt: 'Alibaba' },
-    { src: getLobeIconsCDNUrlFn('ByteDance-color')(), alt: 'ByteDance' },
-  ]
-
-  return (
-    <>
-      {companiesLogoList.map(logo => (
-        <ClientLogo key={logo.alt} {...logo} />
-      ))}
-    </>
-  )
-}
-
-function ClientLogo({ src, alt }: { src: string, alt: string }) {
-  const size = 48
-
-  return (
-    <Image
-      className="hover:scale-110 ease-in-out transition-transform duration-100"
-      src={src}
-      alt={alt}
-      width={size}
-      height={size}
-    />
   )
 }

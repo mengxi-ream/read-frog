@@ -10,6 +10,7 @@ function runSequence() {
   const sequence: AnimationSequence = [
     ['.spinner-title', { display: 'none', opacity: 0 }],
     ['.translation-title', { display: 'block' }],
+
   ]
 
   for (let i = 0; i < originalQuote.sentences.length; i++) {
@@ -31,6 +32,11 @@ export function Bilingual() {
   const sequence = runSequence()
 
   return (
-    <TranslationCard initial={{ x: -50 }} whileInView={{ x: -10 }} sequence={sequence} className="origin-top-right text-right &>span:text-right" />
+    <TranslationCard
+      initial={{ x: -50 }}
+      whileInView={{ x: -10 }}
+      sequence={sequence}
+      className="origin-top-right text-right"
+    />
   )
 }

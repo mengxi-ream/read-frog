@@ -66,11 +66,8 @@ export function SupportProviders() {
 function ProviderMotionLogo({ logo, id }: Provider) {
   const { resolvedTheme } = useTheme()
   const isHydrated = useHydration()
+  const isDark = isHydrated && resolvedTheme === 'dark'
 
-  if (!isHydrated)
-    return <></>
-
-  const isDark = resolvedTheme === 'dark'
   return (
     <motion.div whileHover={{ scale: 1.3 }}>
       <ProviderIcon logo={logo(isDark)} name={id} className="mx-4" size="xl" />

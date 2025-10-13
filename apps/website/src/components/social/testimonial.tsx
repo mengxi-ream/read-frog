@@ -60,10 +60,7 @@ function BrandLogo({ brand }: { brand: FromPlatforms }) {
   const { resolvedTheme } = useTheme()
   const isHydrated = useHydration()
 
-  if (!isHydrated)
-    return <></>
-
-  const isDark = resolvedTheme === 'dark'
+  const isDark = isHydrated && resolvedTheme === 'dark'
 
   const squareLogoSize = 25
   const circleLogoSize = 28

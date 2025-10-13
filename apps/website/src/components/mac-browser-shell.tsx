@@ -11,8 +11,8 @@ interface MacBrowserShellProps {
 export function MacBrowserShell({ children, className }: MacBrowserShellProps) {
   return (
     <div className={cn(
-      'bg-white dark:bg-zinc-900 rounded-lg shadow-sm overflow-hidden mx-auto',
-      'border border-gray-200 dark:border-gray-700',
+      'bg-white dark:bg-zinc-800 rounded-lg shadow-sm overflow-hidden mx-auto',
+      'border border-gray-200 dark:border-gray-800',
       className,
     )}
     >
