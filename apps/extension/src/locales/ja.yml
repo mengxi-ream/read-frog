@@ -222,24 +222,6 @@ options:
       title: 言語に基づく自動翻訳
       description: 特定の言語が検出された場合にページコンテンツを自動翻訳します
       selectLanguages: 言語を選択
-  textToSpeech:
-    title: テキスト読み上げ
-    tts:
-      title: テキスト読み上げ
-      description: お好みの OpenAI 音声設定で読み上げボタンをカスタマイズします。
-      model:
-        label: OpenAI モデル
-      voice:
-        label: ボイス
-        placeholder: 例 alloy
-        selectPlaceholder: ボイスを選択
-        preview: 試聴
-        previewError: このボイスを再生できません。しばらくしてから再試行してください。
-        previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
-        selectVoiceFirst: 試聴する前にボイスを選択してください。
-      speed:
-        label: 速度
-        hint: 0.25〜4.0 の値を入力できます
   config:
     title: 設定
     tts:
@@ -253,12 +235,9 @@ options:
         label: モデル
       voice:
         label: ボイス
-        placeholder: 例 alloy
         selectPlaceholder: ボイスを選択
         preview: 試聴
-        previewError: このボイスを再生できません。しばらくしてから再試行してください。
         previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
-        selectVoiceFirst: 試聴する前にボイスを選択してください。
       speed:
         label: 速度
         hint: 0.25〜4.0 の値を入力できます

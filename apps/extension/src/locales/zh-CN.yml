@@ -224,24 +224,6 @@ options:
       title: 基于语言的自动翻译
       description: 当检测到指定语言时自动翻译页面内容
       selectLanguages: 选择语言
-  textToSpeech:
-    title: 文本转语音
-    tts:
-      title: 文本转语音
-      description: 自定义朗读按钮使用的 OpenAI 语音参数。
-      model:
-        label: OpenAI 模型
-      voice:
-        label: 声音
-        placeholder: 例如 alloy
-        selectPlaceholder: 请选择一个声音
-        preview: 试听
-        previewError: 暂时无法播放该声音，请稍后再试。
-        previewSample: 来自 Read Frog 的问候！这是我朗读时的声音。
-        selectVoiceFirst: 请先选择声音再试听。
-      speed:
-        label: 语速
-        hint: 支持的取值范围为 0.25 到 4.0
   config:
     title: 配置
     tts:
@@ -255,12 +237,9 @@ options:
         label: 模型
       voice:
         label: 声音
-        placeholder: 例如 alloy
         selectPlaceholder: 请选择一个声音
         preview: 试听
-        previewError: 暂时无法播放该声音，请稍后再试。
         previewSample: 来自 Read Frog 的问候！这是我朗读时的声音。
-        selectVoiceFirst: 请先选择声音再试听。
       speed:
         label: 语速
         hint: 支持的取值范围为 0.25 到 4.0

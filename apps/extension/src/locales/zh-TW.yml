@@ -224,24 +224,6 @@ options:
       title: 基於語言的自動翻譯
       description: 當檢測到特定語言時自動翻譯頁面內容
       selectLanguages: 選擇語言
-  textToSpeech:
-    title: 文字轉語音
-    tts:
-      title: 文字轉語音
-      description: 使用您偏好的 OpenAI 語音設定自訂「朗讀」按鈕。
-      model:
-        label: OpenAI 模型
-      voice:
-        label: 語音
-        placeholder: 例如 alloy
-        selectPlaceholder: 請選擇一個語音
-        preview: 試聽
-        previewError: 暫時無法播放此語音，請稍後再試。
-        previewSample: Read Frog 的問候！這是我朗讀時的語音。
-        selectVoiceFirst: 請先選擇語音再試聽。
-      speed:
-        label: 速度
-        hint: 可輸入 0.25 至 4.0 的數值
   config:
     title: 設定
     tts:
@@ -255,12 +237,9 @@ options:
         label: 模型
       voice:
         label: 語音
-        placeholder: 例如 alloy
         selectPlaceholder: 請選擇一個語音
         preview: 試聽
-        previewError: 暫時無法播放此語音，請稍後再試。
         previewSample: Read Frog 的問候！這是我朗讀時的語音。
-        selectVoiceFirst: 請先選擇語音再試聽。
       speed:
         label: 速度
         hint: 可輸入 0.25 至 4.0 的數值

@@ -224,24 +224,6 @@ options:
       title: Auto translate based on language
       description: Automatically translate page content when specific languages are detected
       selectLanguages: Select languages
-  textToSpeech:
-    title: Text to Speech
-    tts:
-      title: Text to Speech
-      description: Customize the Speak button with your preferred OpenAI voice settings.
-      model:
-        label: OpenAI model
-      voice:
-        label: Voice
-        placeholder: e.g. alloy
-        selectPlaceholder: Select a voice
-        preview: Preview
-        previewError: Unable to play this voice right now. Please try again.
-        previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
-        selectVoiceFirst: Pick a voice before previewing.
-      speed:
-        label: Speed
-        hint: Accepts values between 0.25 and 4.0
   config:
     title: Config
     tts:
@@ -255,12 +237,9 @@ options:
         label: model
       voice:
         label: Voice
-        placeholder: e.g. alloy
         selectPlaceholder: Select a voice
         preview: Preview
-        previewError: Unable to play this voice right now. Please try again.
         previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
-        selectVoiceFirst: Pick a voice before previewing.
       speed:
         label: Speed
         hint: Accepts values between 0.25 and 4.0
