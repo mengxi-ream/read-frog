@@ -6,7 +6,7 @@ import { GeneralPage } from '../pages/general'
 import { TextToSpeechPage } from '../pages/text-to-speech'
 import { TranslationPage } from '../pages/translation'
 
-type NavItemTitle = 'general' | 'apiProviders' | 'translation' | 'floatingButton' | 'textToSpeech' | 'config' | 'whatsNew' | 'survey'
+type NavItemTitle = 'general' | 'apiProviders' | 'translation' | 'floatingButton' | 'tts' | 'config' | 'whatsNew' | 'survey'
 
 interface ComponentNavItem {
   type: 'component'
@@ -58,8 +58,8 @@ export const SETTING_NAV_ITEMS = {
   },
   'text-to-speech': {
     type: 'component',
-    title: 'textToSpeech',
-    url: '/text-to-speech',
+    title: 'tts',
+    url: '/tts',
     icon: 'tabler:speakerphone',
     component: TextToSpeechPage,
   },

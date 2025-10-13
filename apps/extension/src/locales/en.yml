@@ -224,26 +224,26 @@ options:
       title: Auto translate based on language
       description: Automatically translate page content when specific languages are detected
       selectLanguages: Select languages
+  tts:
+    title: Text to Speech
+    description: Customize the Speak button with your preferred OpenAI voice settings.
+    provider:
+      label: Provider
+      selectPlaceholder: Select a provider
+      noProvider: Please add OpenAI provider
+    model:
+      label: model
+    voice:
+      label: Voice
+      selectPlaceholder: Select a voice
+      preview: Preview
+      previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
+    speed:
+      label: Speed
+      hint: Accepts values between 0.25 and 4.0
+    betaDisabled: Enable Beta Experience to customize text-to-speech settings.
   config:
     title: Config
-    tts:
-      title: Text to Speech
-      description: Customize the Speak button with your preferred OpenAI voice settings.
-      provider:
-        label: Provider
-        selectPlaceholder: Select a provider
-        noProvider: Please add OpenAI provider
-      model:
-        label: model
-      voice:
-        label: Voice
-        selectPlaceholder: Select a voice
-        preview: Preview
-        previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
-      speed:
-        label: Speed
-        hint: Accepts values between 0.25 and 4.0
-      betaDisabled: Enable Beta Experience to customize text-to-speech settings.
     sync:
       title: Config Sync
       description: Import and export your configuration settings

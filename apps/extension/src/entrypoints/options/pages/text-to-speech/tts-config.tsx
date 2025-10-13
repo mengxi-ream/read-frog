@@ -30,11 +30,11 @@ export function TtsConfig() {
     <ConfigCard
       title={(
         <div className="flex gap-2">
-          {i18n.t('options.config.tts.title')}
+          {i18n.t('options.tts.title')}
           <Badge variant="secondary">Public Beta</Badge>
         </div>
       )}
-      description={i18n.t('options.config.tts.description')}
+      description={i18n.t('options.tts.description')}
     >
       <div className="space-y-4">
         <TtsProviderField />
@@ -61,7 +61,7 @@ function TtsProviderField() {
       id="ttsProvider"
       label={(
         <div className="flex gap-2">
-          {i18n.t('options.config.tts.provider.label')}
+          {i18n.t('options.tts.provider.label')}
           {ttsProviderConfig && !ttsProviderConfig.apiKey && <SetApiKeyWarning />}
         </div>
       )}
@@ -74,7 +74,7 @@ function TtsProviderField() {
         disabled={ttsProvidersConfig.length === 0}
       >
         <SelectTrigger className="w-full">
-          {ttsProvidersConfig.length === 0 ? <SelectValue placeholder={i18n.t('options.config.tts.provider.noProvider')} /> : <SelectValue />}
+          {ttsProvidersConfig.length === 0 ? <SelectValue placeholder={i18n.t('options.tts.provider.noProvider')} /> : <SelectValue />}
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
@@ -96,7 +96,7 @@ function TtsModelField() {
   return (
     <FieldWithLabel
       id="ttsModel"
-      label={i18n.t('options.config.tts.model.label')}
+      label={i18n.t('options.tts.model.label')}
     >
       <Select
         value={ttsConfig.model}
@@ -142,12 +142,12 @@ function TtsVoiceField() {
 
   const handlePreview = async () => {
     if (!ttsProviderConfig) {
-      toast.error(i18n.t('options.config.tts.provider.noProvider'))
+      toast.error(i18n.t('options.tts.provider.noProvider'))
       return
     }
 
     void play(
-      i18n.t('options.config.tts.voice.previewSample'),
+      i18n.t('options.tts.voice.previewSample'),
       ttsConfig,
       ttsProviderConfig,
     )
@@ -156,7 +156,7 @@ function TtsVoiceField() {
   const isFetchingOrPlaying = isFetching || isPlaying
 
   return (
-    <FieldWithLabel id="ttsVoice" label={i18n.t('options.config.tts.voice.label')}>
+    <FieldWithLabel id="ttsVoice" label={i18n.t('options.tts.voice.label')}>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <div className="flex flex-1 items-center gap-2">
           <Select
@@ -169,7 +169,7 @@ function TtsVoiceField() {
               id="ttsVoice"
               className="w-full"
             >
-              <SelectValue placeholder={i18n.t('options.config.tts.voice.selectPlaceholder')} />
+              <SelectValue placeholder={i18n.t('options.tts.voice.selectPlaceholder')} />
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
@@ -190,7 +190,7 @@ function TtsVoiceField() {
           disabled={isFetchingOrPlaying || !ttsConfig.providerId}
         >
           {isFetchingOrPlaying ? <IconLoader2 className="mr-2 size-4 animate-spin" /> : <IconPlayerPlayFilled className="mr-2 size-4" />}
-          {i18n.t('options.config.tts.voice.preview')}
+          {i18n.t('options.tts.voice.preview')}
         </Button>
       </div>
     </FieldWithLabel>
@@ -201,7 +201,7 @@ function TtsSpeedField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
 
   return (
-    <FieldWithLabel id="ttsSpeed" label={i18n.t('options.config.tts.speed.label')}>
+    <FieldWithLabel id="ttsSpeed" label={i18n.t('options.tts.speed.label')}>
       <ValidatedInput
         id="ttsSpeed"
         type="number"
@@ -215,7 +215,7 @@ function TtsSpeedField() {
         }}
       />
       <p className="text-xs text-muted-foreground">
-        {i18n.t('options.config.tts.speed.hint')}
+        {i18n.t('options.tts.speed.hint')}
       </p>
     </FieldWithLabel>
   )

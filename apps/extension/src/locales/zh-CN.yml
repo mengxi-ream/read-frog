@@ -224,26 +224,26 @@ options:
       title: 基于语言的自动翻译
       description: 当检测到指定语言时自动翻译页面内容
       selectLanguages: 选择语言
+  tts:
+    title: 文本转语音
+    description: 自定义朗读按钮使用的 OpenAI 语音参数。
+    provider:
+      label: 提供商
+      selectPlaceholder: 选择提供商
+      noProvider: 请添加 OpenAI 提供商
+    model:
+      label: 模型
+    voice:
+      label: 声音
+      selectPlaceholder: 请选择一个声音
+      preview: 试听
+      previewSample: 来自 Read Frog 的问候！这是我朗读时的声音。
+    speed:
+      label: 语速
+      hint: 支持的取值范围为 0.25 到 4.0
+    betaDisabled: 启用测试体验后即可自定义文本转语音设置。
   config:
     title: 配置
-    tts:
-      title: 文本转语音
-      description: 自定义朗读按钮使用的 OpenAI 语音参数。
-      provider:
-        label: 提供商
-        selectPlaceholder: 选择提供商
-        noProvider: 请添加 OpenAI 提供商
-      model:
-        label: 模型
-      voice:
-        label: 声音
-        selectPlaceholder: 请选择一个声音
-        preview: 试听
-        previewSample: 来自 Read Frog 的问候！这是我朗读时的声音。
-      speed:
-        label: 语速
-        hint: 支持的取值范围为 0.25 到 4.0
-      betaDisabled: 启用测试体验后即可自定义文本转语音设置。
     sync:
       title: 配置同步
       description: 导入和导出您的配置设置

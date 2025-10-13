@@ -224,26 +224,26 @@ options:
       title: 基於語言的自動翻譯
       description: 當檢測到特定語言時自動翻譯頁面內容
       selectLanguages: 選擇語言
+  tts:
+    title: 文字轉語音
+    description: 使用您偏好的 OpenAI 語音設定自訂「朗讀」按鈕。
+    provider:
+      label: 提供商
+      selectPlaceholder: 選擇提供商
+      noProvider: 請新增 OpenAI 提供商
+    model:
+      label: 模型
+    voice:
+      label: 語音
+      selectPlaceholder: 請選擇一個語音
+      preview: 試聽
+      previewSample: Read Frog 的問候！這是我朗讀時的語音。
+    speed:
+      label: 速度
+      hint: 可輸入 0.25 至 4.0 的數值
+    betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
   config:
     title: 設定
-    tts:
-      title: 文字轉語音
-      description: 使用您偏好的 OpenAI 語音設定自訂「朗讀」按鈕。
-      provider:
-        label: 提供商
-        selectPlaceholder: 選擇提供商
-        noProvider: 請新增 OpenAI 提供商
-      model:
-        label: 模型
-      voice:
-        label: 語音
-        selectPlaceholder: 請選擇一個語音
-        preview: 試聽
-        previewSample: Read Frog 的問候！這是我朗讀時的語音。
-      speed:
-        label: 速度
-        hint: 可輸入 0.25 至 4.0 的數值
-      betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
     sync:
       title: 設定同步
       description: 匯入和匯出您的設定

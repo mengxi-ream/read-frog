@@ -223,26 +223,26 @@ options:
       title: 언어에 기반한 자동 번역
       description: 특정 언어가 감지되면 페이지 콘텐츠를 자동으로 번역합니다
       selectLanguages: 언어 선택
+  tts:
+    title: 텍스트 음성 변환
+    description: 선호하는 OpenAI 음성 설정으로 말하기 버튼을 사용자 지정하세요.
+    provider:
+      label: 제공업체
+      selectPlaceholder: 제공업체 선택
+      noProvider: OpenAI 제공업체를 추가하세요
+    model:
+      label: 모델
+    voice:
+      label: 음성
+      selectPlaceholder: 음성을 선택하세요
+      preview: 미리 듣기
+      previewSample: Read Frog의 인사입니다! 제가 읽어 드릴 때 이렇게 들립니다.
+    speed:
+      label: 속도
+      hint: 0.25에서 4.0 사이의 값을 입력할 수 있습니다
+    betaDisabled: 텍스트 음성 변환 설정을 사용자 지정하려면 Beta 체험을 활성화하세요.
   config:
     title: 설정
-    tts:
-      title: 텍스트 음성 변환
-      description: 선호하는 OpenAI 음성 설정으로 말하기 버튼을 사용자 지정하세요.
-      provider:
-        label: 제공업체
-        selectPlaceholder: 제공업체 선택
-        noProvider: OpenAI 제공업체를 추가하세요
-      model:
-        label: 모델
-      voice:
-        label: 음성
-        selectPlaceholder: 음성을 선택하세요
-        preview: 미리 듣기
-        previewSample: Read Frog의 인사입니다! 제가 읽어 드릴 때 이렇게 들립니다.
-      speed:
-        label: 속도
-        hint: 0.25에서 4.0 사이의 값을 입력할 수 있습니다
-      betaDisabled: 텍스트 음성 변환 설정을 사용자 지정하려면 Beta 체험을 활성화하세요.
     sync:
       title: 설정 동기화
       description: 설정 가져오기 및 내보내기
