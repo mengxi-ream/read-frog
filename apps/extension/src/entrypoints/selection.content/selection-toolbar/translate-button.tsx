@@ -1,4 +1,5 @@
 import type { TextUIPart } from 'ai'
+import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@repo/definitions'
 import { IconLoader2, IconVolume } from '@tabler/icons-react'
@@ -7,10 +8,10 @@ import { readUIMessageStream, streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
-import { useSpeakText } from '@/hooks/speak'
+import { useTextToSpeech } from '@/hooks/use-text-to-speech'
 import { isLLMTranslateProviderConfig, isNonAPIProvider, isPureAPIProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { translateProviderConfigAtom } from '@/utils/atoms/provider'
+import { translateProviderConfigAtom, ttsProviderConfigAtom } from '@/utils/atoms/provider'
 import { authClient } from '@/utils/auth/auth-client'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { getProviderOptions } from '@/utils/constants/model'
@@ -54,7 +55,6 @@ export function TranslatePopover() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const [isVisible, setIsVisible] = useAtom(isTranslatePopoverVisibleAtom)
   const { data: session } = authClient.useSession()
-  const { speak, isPending: isSpeaking, canSpeak } = useSpeakText()
 
   const createVocabulary = useMutation({
     ...trpc.vocabulary.create.mutationOptions(),
@@ -103,12 +103,6 @@ export function TranslatePopover() {
       // Error handled by mutation
     }
   }, [session?.user?.id, selectionContent, translatedText, createVocabulary])
-
-  const handleSpeak = useCallback(() => {
-    if (selectionContent) {
-      speak(selectionContent)
-    }
-  }, [selectionContent, speak])
 
   useEffect(() => {
     const translate = async () => {
@@ -241,23 +235,7 @@ export function TranslatePopover() {
           {createVocabulary.isPending ? 'Saving...' : 'Save'}
         </button>
         <div className="flex items-center gap-2">
-          {canSpeak && (
-            <button
-              type="button"
-              onClick={handleSpeak}
-              disabled={!selectionContent || isSpeaking}
-              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Speak original text"
-            >
-              {isSpeaking
-                ? (
-                    <IconLoader2 className="size-4 text-zinc-600 dark:text-zinc-400 animate-spin" strokeWidth={1.6} />
-                  )
-                : (
-                    <IconVolume className="size-4 text-zinc-600 dark:text-zinc-400" strokeWidth={1.6} />
-                  )}
-            </button>
-          )}
+          <SpeakOriginalButton />
           <button
             type="button"
             onClick={handleCopy}
@@ -268,5 +246,48 @@ export function TranslatePopover() {
         </div>
       </div>
     </PopoverWrapper>
+  )
+}
+
+function SpeakOriginalButton() {
+  const selectionContent = useAtomValue(selectionContentAtom)
+  const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
+  const ttsProviderConfig = useAtomValue(ttsProviderConfigAtom)
+  const { play, isFetching, isPlaying } = useTextToSpeech()
+
+  const handleSpeak = useCallback(async () => {
+    if (!selectionContent) {
+      toast.error(i18n.t('speak.noTextSelected'))
+      return
+    }
+
+    if (!ttsProviderConfig) {
+      toast.error(i18n.t('speak.openaiNotConfigured'))
+      return
+    }
+
+    void play(selectionContent, ttsConfig, ttsProviderConfig)
+  }, [selectionContent, ttsConfig, ttsProviderConfig, play])
+
+  if (!ttsProviderConfig) {
+    return null
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleSpeak}
+      disabled={isFetching || isPlaying}
+      className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
+      title={isFetching ? 'Fetching audio…' : isPlaying ? 'Playing audio…' : 'Speak original text'}
+    >
+      {isFetching || isPlaying
+        ? (
+            <IconLoader2 className="size-4 text-zinc-600 dark:text-zinc-400 animate-spin" strokeWidth={1.6} />
+          )
+        : (
+            <IconVolume className="size-4 text-zinc-600 dark:text-zinc-400" strokeWidth={1.6} />
+          )}
+    </button>
   )
 }
