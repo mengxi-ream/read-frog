@@ -10,7 +10,6 @@ function runSequence() {
   const sequence: AnimationSequence = [
     ['.spinner-title', { display: 'none', opacity: 0 }],
     ['.translation-title', { display: 'block' }],
-
   ]
 
   for (let i = 0; i < originalQuote.sentences.length; i++) {
