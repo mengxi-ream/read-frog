@@ -16,6 +16,7 @@ const MAX_CHUNK_SIZE = 4096
 /**
  * Split text into chunks that respect sentence boundaries
  * Each chunk will be <= maxSize characters
+ * Supports multiple languages including CJK (Chinese, Japanese, Korean)
  */
 function splitTextIntoChunks(text: string, maxSize: number = MAX_CHUNK_SIZE): string[] {
   if (text.length <= maxSize) {
@@ -23,8 +24,14 @@ function splitTextIntoChunks(text: string, maxSize: number = MAX_CHUNK_SIZE): st
   }
 
   const chunks: string[] = []
-  // Split by sentence boundaries (., !, ?, or newlines)
-  const sentences = text.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [text]
+  // Split by sentence boundaries:
+  // - Western: . ! ? with optional quotes/parentheses
+  // - CJK: 。！？；
+  // - Arabic: ؟ ۔
+  // - Devanagari: । ॥
+  // - Also split on newlines and paragraph breaks
+  const sentencePattern = /[^.!?。！？；؟۔।॥\n]+[.!?。！？；؟۔।॥\n]+|[^.!?。！？；؟۔।॥\n]+$/g
+  const sentences = text.match(sentencePattern) || [text]
 
   let currentChunk = ''
 
