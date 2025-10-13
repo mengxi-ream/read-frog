@@ -3,7 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MARGIN } from '@/utils/constants/selection'
 import { AiButton, AiPopover } from './ai-button'
-import { isTooltipVisibleAtom, selectionContentAtom, selectionRangeAtom } from './atom'
+import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from './atom'
 import { SpeakButton } from './speak-button'
 import { TranslateButton, TranslatePopover } from './translate-button'
 
@@ -12,13 +12,13 @@ export function SelectionToolbar() {
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
   const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position
   const isDraggingFromTooltipRef = useRef(false) // track if dragging started from tooltip
-  const [isTooltipVisible, setIsTooltipVisible] = useAtom(isTooltipVisibleAtom)
+  const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(isSelectionToolbarVisibleAtom)
   const setSelectionContent = useSetAtom(selectionContentAtom)
   const setSelectionRange = useSetAtom(selectionRangeAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
 
   const updatePosition = useCallback(() => {
-    if (!isTooltipVisible || !tooltipRef.current || !selectionPositionRef.current)
+    if (!isSelectionToolbarVisible || !tooltipRef.current || !selectionPositionRef.current)
       return
 
     const scrollY = window.scrollY
@@ -40,7 +40,7 @@ export function SelectionToolbar() {
     // directly operate the DOM, avoid React re-rendering
     tooltipRef.current.style.top = `${clampedY}px`
     tooltipRef.current.style.left = `${clampedX}px`
-  }, [isTooltipVisible])
+  }, [isSelectionToolbarVisible])
 
   useLayoutEffect(() => {
     updatePosition()
@@ -85,7 +85,7 @@ export function SelectionToolbar() {
 
           // Store pending position for useLayoutEffect to process
           selectionPositionRef.current = { x: docX, y: docY }
-          setIsTooltipVisible(true)
+          setIsSelectionToolbarVisible(true)
         }
       })
     }
@@ -104,14 +104,14 @@ export function SelectionToolbar() {
         return
       }
 
-      setIsTooltipVisible(false)
+      setIsSelectionToolbarVisible(false)
     }
 
     const handleSelectionChange = () => {
       // if the selected content is cleared, hide the tooltip
       const selection = window.getSelection()
       if (!selection || selection.toString().trim().length === 0) {
-        setIsTooltipVisible(false)
+        setIsSelectionToolbarVisible(false)
       }
     }
 
@@ -139,11 +139,11 @@ export function SelectionToolbar() {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [isTooltipVisible, setSelectionContent, setIsTooltipVisible, setSelectionRange, updatePosition])
+  }, [isSelectionToolbarVisible, setSelectionContent, setIsSelectionToolbarVisible, setSelectionRange, updatePosition])
 
   return (
     <div ref={tooltipContainerRef}>
-      {isTooltipVisible && selectionToolbar.enabled && (
+      {isSelectionToolbarVisible && selectionToolbar.enabled && (
         <div
           ref={tooltipRef}
           className="absolute z-[2147483647] bg-zinc-200 dark:bg-zinc-800 rounded-sm shadow-lg overflow-hidden flex items-center"

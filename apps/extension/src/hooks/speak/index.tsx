@@ -1,73 +1,34 @@
-import type { TTSModel } from '@/types/config/tts'
 import { i18n } from '#imports'
 import { IconVolume } from '@tabler/icons-react'
-import { useMutation } from '@tanstack/react-query'
 import { useAtomValue } from 'jotai'
 import { useCallback, useMemo } from 'react'
 import { toast } from 'sonner'
-import { audioCache } from '@/entrypoints/selection.content/selection-toolbar/audio-cache'
-import { playTextWithTTS } from '@/entrypoints/selection.content/selection-toolbar/audio-manager'
+import { useTextToSpeech } from '@/hooks/use-audio-player'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { getProviderApiKey, getProviderBaseURL } from '@/utils/config/helpers'
+import { getTTSProvidersConfig } from '@/utils/config/helpers'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 
-interface SpeakMutationVariables {
-  apiKey: string
-  baseURL?: string
-  text: string
-  model: TTSModel
-  voice: string
-  speed: number
-}
-
 /**
- * Custom hook for text-to-speech functionality
- * Encapsulates TTS mutation logic and provider checks
+ * High-level hook for text-to-speech with validation and toast notifications
+ * Uses useAudioPlayer internally for audio playback
+ * For more control, use useAudioPlayer directly
  */
 export function useSpeakText() {
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const betaExperienceConfig = useAtomValue(configFieldsAtomMap.betaExperience)
 
-  const openaiProvider = useMemo(
-    () => providersConfig.find(p => p.provider === 'openai' && p.enabled),
-    [providersConfig],
-  )
+  const { play, isFetching, isPlaying } = useTextToSpeech()
+
+  const ttsProvidersConfig = useMemo(() => getTTSProvidersConfig(providersConfig), [providersConfig])
+  const ttsProviderConfig = useMemo(() => ttsProvidersConfig[0], [ttsProvidersConfig])
 
   const isBetaEnabled = Boolean(betaExperienceConfig.enabled)
-  const hasApiKey = Boolean(openaiProvider && getProviderApiKey(providersConfig, openaiProvider.id))
-
-  const speakMutation = useMutation<void, Error, SpeakMutationVariables & { toastId?: string | number }>({
-    mutationFn: async ({ text, apiKey, baseURL, model, voice, speed, toastId }) => {
-      const onPlayStart = () => {
-        // Update toast when audio starts playing with success state and volume icon
-        if (toastId) {
-          toast.success(i18n.t('speak.playingAudio'), {
-            id: toastId,
-            icon: <IconVolume className="size-5 animate-pulse" />,
-            duration: Number.POSITIVE_INFINITY, // Keep showing until manually dismissed
-          })
-        }
-      }
-      await playTextWithTTS(text, apiKey, baseURL, model, voice, speed, audioCache, onPlayStart)
-
-      // Dismiss toast after playback completes
-      if (toastId) {
-        toast.dismiss(toastId)
-      }
-    },
-    onError: (error, variables) => {
-      if (variables.toastId) {
-        toast.dismiss(variables.toastId)
-      }
-      console.error('TTS error:', error)
-      toast.error(error.message || i18n.t('speak.failedToGenerateSpeech'))
-    },
-  })
+  const hasProvider = Boolean(ttsProviderConfig)
 
   /**
    * Speak the given text using TTS
-   * Handles all validation and error cases
+   * Handles all validation, error cases, and toast notifications
    */
   const speak = useCallback(
     (text: string) => {
@@ -80,40 +41,36 @@ export function useSpeakText() {
         return
       }
 
-      if (!openaiProvider) {
+      if (!ttsProviderConfig) {
         toast.error(i18n.t('speak.openaiNotConfigured'))
         return
       }
 
-      const apiKey = getProviderApiKey(providersConfig, openaiProvider.id)
-      if (!apiKey) {
-        toast.error(i18n.t('speak.openaiApiKeyNotConfigured'))
-        return
-      }
-
-      const baseURL = getProviderBaseURL(providersConfig, openaiProvider.id)
       const { model, voice, speed } = betaExperienceConfig.enabled ? ttsConfig : DEFAULT_CONFIG.tts
-
       const toastId = toast.loading(i18n.t('speak.fetchingAudio'))
 
-      speakMutation.mutate({
-        apiKey,
-        baseURL,
-        text,
-        model,
-        voice,
-        speed,
-        toastId,
-      })
+      play(text, { providerId: ttsProviderConfig.id, model, voice, speed })
+        .then(() => {
+          toast.success(i18n.t('speak.playingAudio'), {
+            id: toastId,
+            icon: <IconVolume className="size-5 animate-pulse" />,
+            duration: 2000,
+          })
+        })
+        .catch((error) => {
+          toast.error(error instanceof Error ? error.message : i18n.t('speak.failedToGenerateSpeech'), {
+            id: toastId,
+          })
+        })
     },
-    [isBetaEnabled, openaiProvider, providersConfig, betaExperienceConfig, ttsConfig, speakMutation],
+    [isBetaEnabled, ttsProviderConfig, betaExperienceConfig, ttsConfig, play],
   )
 
   return {
     speak,
-    isPending: speakMutation.isPending,
+    isPending: isFetching || isPlaying,
     isBetaEnabled,
-    hasApiKey,
-    canSpeak: isBetaEnabled && hasApiKey,
+    hasApiKey: hasProvider,
+    canSpeak: isBetaEnabled && hasProvider,
   }
 }

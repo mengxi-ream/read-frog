@@ -1,23 +1,33 @@
+import { i18n } from '#imports'
 import { IconLoader2, IconVolume } from '@tabler/icons-react'
-import { useAtomValue, useSetAtom } from 'jotai'
-import { useCallback } from 'react'
-import { useSpeakText } from '@/hooks/speak'
-import { isTooltipVisibleAtom, selectionContentAtom } from './atom'
+import { useAtomValue } from 'jotai'
+import { toast } from 'sonner'
+import { useTextToSpeech } from '@/hooks/use-audio-player'
+import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { ttsProviderConfigAtom } from '@/utils/atoms/provider'
+import { selectionContentAtom } from './atom'
 
 export function SpeakButton() {
   const selectionContent = useAtomValue(selectionContentAtom)
-  const setIsTooltipVisible = useSetAtom(isTooltipVisibleAtom)
-  const { speak, isPending, canSpeak } = useSpeakText()
+  const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
+  const ttsProviderConfig = useAtomValue(ttsProviderConfigAtom)
+  const { play, isFetching, isPlaying } = useTextToSpeech()
 
-  const handleClick = useCallback(() => {
-    setIsTooltipVisible(false)
-    if (selectionContent) {
-      speak(selectionContent)
+  const handleClick = async () => {
+    if (!selectionContent) {
+      toast.error(i18n.t('speak.noTextSelected'))
+      return
     }
-  }, [selectionContent, speak, setIsTooltipVisible])
 
-  // Don't render the button if TTS is not available
-  if (!canSpeak) {
+    if (!ttsProviderConfig) {
+      toast.error(i18n.t('speak.openaiNotConfigured'))
+      return
+    }
+
+    void play(selectionContent, ttsConfig, ttsProviderConfig)
+  }
+
+  if (!ttsProviderConfig) {
     return null
   }
 
@@ -26,10 +36,10 @@ export function SpeakButton() {
       type="button"
       className="size-6 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
       onClick={handleClick}
-      disabled={isPending}
-      title="Speak selected text"
+      disabled={isFetching || isPlaying}
+      title={isFetching ? 'Fetching audio…' : isPlaying ? 'Playing audio…' : 'Speak selected text'}
     >
-      {isPending
+      {isFetching || isPlaying
         ? (
             <IconLoader2 className="size-4 animate-spin" strokeWidth={1.6} />
           )

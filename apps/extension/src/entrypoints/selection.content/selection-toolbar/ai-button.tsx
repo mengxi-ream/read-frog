@@ -11,11 +11,11 @@ import { logger } from '@/utils/logger'
 import { getWordExplainPrompt } from '@/utils/prompts/word-explain'
 import { getReadModelById } from '@/utils/providers/model'
 import { createHighlightData } from '../utils'
-import { isAiPopoverVisibleAtom, isTooltipVisibleAtom, mouseClickPositionAtom, selectionRangeAtom } from './atom'
+import { isAiPopoverVisibleAtom, isSelectionToolbarVisibleAtom, mouseClickPositionAtom, selectionRangeAtom } from './atom'
 import { PopoverWrapper } from './components/popover-wrapper'
 
 export function AiButton() {
-  const setIsTooltipVisible = useSetAtom(isTooltipVisibleAtom)
+  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const setIsAiPopoverVisible = useSetAtom(isAiPopoverVisibleAtom)
   const setMousePosition = useSetAtom(mouseClickPositionAtom)
   const betaExperienceConfig = useAtomValue(configFieldsAtomMap.betaExperience)
@@ -26,7 +26,7 @@ export function AiButton() {
     const y = rect.top
 
     setMousePosition({ x, y })
-    setIsTooltipVisible(false)
+    setIsSelectionToolbarVisible(false)
     setIsAiPopoverVisible(true)
   }
 

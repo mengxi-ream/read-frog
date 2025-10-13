@@ -20,12 +20,12 @@ import { sendMessage } from '@/utils/message'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
 import { trpc } from '@/utils/trpc/client'
-import { isTooltipVisibleAtom, isTranslatePopoverVisibleAtom, mouseClickPositionAtom, selectionContentAtom } from './atom'
+import { isSelectionToolbarVisibleAtom, isTranslatePopoverVisibleAtom, mouseClickPositionAtom, selectionContentAtom } from './atom'
 import { PopoverWrapper } from './components/popover-wrapper'
 
 export function TranslateButton() {
   // const selectionContent = useAtomValue(selectionContentAtom)
-  const setIsTooltipVisible = useSetAtom(isTooltipVisibleAtom)
+  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const setIsTranslatePopoverVisible = useSetAtom(isTranslatePopoverVisibleAtom)
   const setMousePosition = useSetAtom(mouseClickPositionAtom)
 
@@ -35,7 +35,7 @@ export function TranslateButton() {
     const y = rect.top
 
     setMousePosition({ x, y })
-    setIsTooltipVisible(false)
+    setIsSelectionToolbarVisible(false)
     setIsTranslatePopoverVisible(true)
   }
 
