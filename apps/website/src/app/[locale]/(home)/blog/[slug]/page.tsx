@@ -97,6 +97,7 @@ export async function generateMetadata(props: {
     openGraph: {
       type: 'article',
       title: pageTitle,
+      description: pageDescription,
       url: pageUrl,
       publishedTime: date?.toString(),
       authors: [author],
@@ -104,6 +105,7 @@ export async function generateMetadata(props: {
     twitter: {
       card: 'summary_large_image',
       title: pageTitle,
+      description: pageDescription,
     },
   }
 }
