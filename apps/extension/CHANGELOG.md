@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.13.0
+
+### Minor Changes
+
+- [#570](https://github.com/mengxi-ream/read-frog/pull/570) [`1e4e269`](https://github.com/mengxi-ream/read-frog/commit/1e4e269a3c9203c7b2dd2fd0fc8df7275e0d87d2) Thanks [@darmau](https://github.com/darmau)! - feat(extension): add text-to-speech feature for selection toolbar
+
+### Patch Changes
+
+- [#586](https://github.com/mengxi-ream/read-frog/pull/586) [`a74666e`](https://github.com/mengxi-ream/read-frog/commit/a74666e5882b1a9f7edb9e6d18ffd22950031e2e) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix(extension): update custom translation node styles for blockquote and dashed line
+
+- [#584](https://github.com/mengxi-ream/read-frog/pull/584) [`0bcf449`](https://github.com/mengxi-ream/read-frog/commit/0bcf449edffad09f5967f13bdcbf9851db69ff90) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: don't translate code in pre tags
+
+- [#592](https://github.com/mengxi-ream/read-frog/pull/592) [`ae89107`](https://github.com/mengxi-ream/read-frog/commit/ae891071c86298953ca1f0b598d51ebe6eb60208) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: update DeepLX default API URL
+
+- [#586](https://github.com/mengxi-ream/read-frog/pull/586) [`a74666e`](https://github.com/mengxi-ream/read-frog/commit/a74666e5882b1a9f7edb9e6d18ffd22950031e2e) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: style of block node with inline and block children
+
+- [#588](https://github.com/mengxi-ream/read-frog/pull/588) [`f3eed7f`](https://github.com/mengxi-ream/read-frog/commit/f3eed7f85f073ac3ff9869c581dc13daa3e4ddbc) Thanks [@Yukiniro](https://github.com/Yukiniro)! - refactor: support Activity component
+
 ## 1.12.1
 
 ### Patch Changes

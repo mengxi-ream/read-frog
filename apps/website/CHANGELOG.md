@@ -1,5 +1,17 @@
 # @read-frog/website
 
+## 1.2.0
+
+### Minor Changes
+
+- [#584](https://github.com/mengxi-ream/read-frog/pull/584) [`0bcf449`](https://github.com/mengxi-ream/read-frog/commit/0bcf449edffad09f5967f13bdcbf9851db69ff90) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add changelog
+
+### Patch Changes
+
+- [#589](https://github.com/mengxi-ream/read-frog/pull/589) [`650f679`](https://github.com/mengxi-ream/read-frog/commit/650f679a094f59173f96d9acb0bb1dd621f2249a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: path of changelog in website
+
+- [#588](https://github.com/mengxi-ream/read-frog/pull/588) [`f3eed7f`](https://github.com/mengxi-ream/read-frog/commit/f3eed7f85f073ac3ff9869c581dc13daa3e4ddbc) Thanks [@Yukiniro](https://github.com/Yukiniro)! - refactor: support Activity component
+
 ## 1.1.1
 
 ### Patch Changes
