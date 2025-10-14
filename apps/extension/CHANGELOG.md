@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.13.1
+
+### Patch Changes
+
+- [#594](https://github.com/mengxi-ream/read-frog/pull/594) [`179ee34`](https://github.com/mengxi-ream/read-frog/commit/179ee34f6000624c745dd600fde2c8098bca0042) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): translation style for flex parent containers
+
 ## 1.13.0
 
 ### Minor Changes
