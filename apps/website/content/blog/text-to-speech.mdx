@@ -1,0 +1,163 @@
+---
+title: Listen to Any Text on the Web with Text-to-Speech
+description: Select any text and have it read aloud instantly. Read Frog now supports Text-to-Speech powered by OpenAI's voice models.
+author: ananaBMaster
+date: 2025-10-14
+extensionVersion: 1.13.0
+---
+
+## Your Personal Reading Companion Gets a Voice 🔊
+
+Reading long articles? Learning a new language? Sometimes, **hearing** the text makes all the difference.
+
+We're excited to introduce **Text-to-Speech (TTS)** to Read Frog—a feature that transforms any text on the web into natural-sounding audio with a single click.
+
+<Callout type="info">
+**Current Version**: TTS is currently available with OpenAI providers only. Support for additional AI providers is coming soon.
+</Callout>
+
+{/* TODO: Add hero image - Screenshot showing the TTS speaker icon in the selection toolbar */}
+
+**Special Thanks**: This feature was contributed by community member [@darmau](https://github.com/darmau). Thank you for bringing this powerful feature to Read Frog!
+
+---
+
+## Why Text-to-Speech?
+
+Reading isn't always convenient. Maybe you're:
+- 🚶 Walking or commuting
+- 👀 Giving your eyes a rest after hours of screen time
+- 🌍 Learning pronunciation in a foreign language
+- 📚 Absorbing long-form content more effectively
+
+With TTS, you can **listen** while you multitask, learn, or simply relax.
+
+<Callout type="info">
+**Did you know?** Listening to content can improve comprehension and retention, especially for auditory learners.
+</Callout>
+
+---
+
+## How It Works
+
+Getting started with TTS is incredibly simple:
+
+### 1. Configure Your Voice Settings
+
+Navigate to **Options → Text-to-Speech** to customize your listening experience.
+
+{/* TODO: Add screenshot - TTS settings page showing voice, model, and speed options */}
+
+Choose from:
+- **Voice**: Pick from 11 natural-sounding voices (Alloy, Ash, Ballad, Coral, Echo, and more)
+- **Model**: Select between `gpt-4o-mini-tts`, `tts-1`, or `tts-1-hd` for higher quality
+- **Speed**: Adjust playback speed from 0.25× to 4× to match your preference
+
+<Callout type="tip">
+**Pro tip**: Try the Preview button to hear each voice before making your choice. Find the perfect voice that suits your listening style!
+</Callout>
+
+### 2. Select and Listen
+
+Once configured, simply:
+
+1. **Select any text** on any webpage
+2. **Click the speaker icon** in the toolbar
+3. **Sit back and listen** as the text is read aloud
+
+{/* TODO: Add screenshot - Text selection with TTS speaker button highlighted */}
+
+| Before | After |
+|--------|-------|
+| Manual reading only | Listen while browsing |
+| Copy-paste to external TTS tools | One-click instant playback |
+| No voice customization | 11+ voices to choose from |
+
+---
+
+## Smart Performance Features
+
+We've built TTS with efficiency in mind:
+
+### Audio Caching
+Once audio is generated, it's **cached locally**—replay the same text instantly without regenerating.
+
+<Callout type="info">
+The cache stores up to **10 audio files** using an intelligent LRU (Least Recently Used) strategy, so your most-played content is always ready.
+</Callout>
+
+### Long Text Support
+Selected a massive paragraph? **No problem.** The extension automatically chunks long text and streams audio seamlessly for uninterrupted listening.
+
+### Single Playback Control
+Only one audio plays at a time. Click the speaker icon again to stop or switch to a new selection without overlapping audio chaos.
+
+---
+
+## Supported Models & Voices
+
+### Available Models
+
+| Model | Description | Best For |
+|-------|-------------|----------|
+| `gpt-4o-mini-tts` | Latest model with 11 voices | New users, best quality |
+| `tts-1` | Standard quality, 9 voices | Quick playback, lower cost |
+| `tts-1-hd` | High-definition audio, 9 voices | Audiophiles, clarity |
+
+### Voice Options
+
+Choose from diverse voices including:
+- **Alloy, Ash, Ballad** (calm and clear)
+- **Coral, Echo, Fable** (warm and expressive)
+- **Nova, Onyx, Sage** (professional and articulate)
+- **Shimmer, Verse** (bright and engaging)
+
+{/* TODO: Add comparison image - Waveform or voice characteristics visualization */}
+
+---
+
+## Setup Requirements
+
+To use TTS, you'll need:
+- ✅ **OpenAI API key** configured in Read Frog
+- ✅ A selected AI provider that supports TTS (currently OpenAI)
+
+<Callout type="warn">
+**Note**: TTS is currently in **Public Beta**. We're continuously improving voice quality, performance, and adding more provider support.
+</Callout>
+
+---
+
+## Use Cases
+
+### Language Learning
+Hear correct pronunciation while reading foreign language content—perfect for improving listening comprehension.
+
+### Accessibility
+Make the web more accessible by converting visual text into audio for those who prefer or need auditory input.
+
+### Multitasking
+Listen to articles, documentation, or news while cooking, exercising, or commuting.
+
+### Proofreading
+Catch errors in your writing by listening to how it sounds aloud—a classic editing technique now built into your browser.
+
+---
+
+## What's Next?
+
+This is just the beginning for TTS in Read Frog. We're exploring:
+- 🌐 Support for additional AI providers (Anthropic, DeepSeek, etc.)
+- 🎯 TTS for translated text (read translations aloud)
+- 🎧 Background playback controls
+- 📱 Mobile extension support
+
+---
+
+## Try It Now
+
+Update to the latest version of Read Frog and experience the power of Text-to-Speech.
+
+**Have feedback?** We'd love to hear how you're using TTS! Share your thoughts on [GitHub Issues](https://github.com/mengxi-ream/read-frog/issues) or join our community discussions.
+
+Happy listening! 🎧
