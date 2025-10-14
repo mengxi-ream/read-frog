@@ -94,6 +94,11 @@ export default async function Image(props: {
               marginBottom: '24px',
               maxWidth: '90%',
               letterSpacing: '-0.03em',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: 'vertical',
             }}
           >
             {page.data.title}
@@ -108,6 +113,11 @@ export default async function Image(props: {
                 margin: 0,
                 marginBottom: '32px',
                 maxWidth: '85%',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
               }}
             >
               {page.data.description}
