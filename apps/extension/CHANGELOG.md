@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.13.3
+
+### Patch Changes
+
+- [#607](https://github.com/mengxi-ream/read-frog/pull/607) [`ab44be5`](https://github.com/mengxi-ream/read-frog/commit/ab44be5644160bd5cbf28786c1b27932de1c0dc6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): set tts providerId to null in migration and fix selector placeholder
+
 ## 1.13.2
 
 ### Patch Changes
