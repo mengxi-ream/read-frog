@@ -3,10 +3,11 @@ import { ApiProvidersPage } from '../pages/api-providers'
 import { ConfigPage } from '../pages/config'
 import { FloatingButtonAndToolbarPage } from '../pages/floating-button-and-toolbar'
 import { GeneralPage } from '../pages/general'
+import { StatisticsPage } from '../pages/statistics'
 import { TextToSpeechPage } from '../pages/text-to-speech'
 import { TranslationPage } from '../pages/translation'
 
-type NavItemTitle = 'general' | 'apiProviders' | 'translation' | 'floatingButtonAndToolbar' | 'tts' | 'config' | 'whatsNew' | 'survey'
+type NavItemTitle = 'general' | 'apiProviders' | 'translation' | 'floatingButtonAndToolbar' | 'tts' | 'config' | 'whatsNew' | 'survey' | 'statistics'
 
 interface ComponentNavItem {
   type: 'component'
@@ -62,6 +63,13 @@ export const SETTING_NAV_ITEMS = {
     url: '/tts',
     icon: 'tabler:speakerphone',
     component: TextToSpeechPage,
+  },
+  'statistics': {
+    type: 'component',
+    title: 'statistics',
+    url: '/statistics',
+    icon: 'tabler:chart-dots',
+    component: StatisticsPage,
   },
   'config': {
     type: 'component',

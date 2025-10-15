@@ -316,6 +316,8 @@ options:
     title: 新機能
   survey:
     title: 新機能の提案
+  statistics:
+    title: 統計
 side:
   sourceLang: ソース言語
   targetLang: 翻訳言語

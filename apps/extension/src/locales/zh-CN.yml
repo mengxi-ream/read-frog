@@ -319,6 +319,8 @@ options:
     title: 最近更新
   survey:
     title: 新功能建议
+  statistics:
+    title: 统计
 side:
   sourceLang: 来源语言
   targetLang: 目标语言

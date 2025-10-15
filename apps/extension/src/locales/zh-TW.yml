@@ -318,6 +318,8 @@ options:
     title: 最近更新
   survey:
     title: 新功能建議
+  statistics:
+    title: 統計
 side:
   sourceLang: 來源語言
   targetLang: 目標語言

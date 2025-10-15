@@ -318,6 +318,8 @@ options:
     title: What's New
   survey:
     title: New Feature Suggestion
+  statistics:
+    title: Statistics
 side:
   sourceLang: Source Language
   targetLang: Target Language
