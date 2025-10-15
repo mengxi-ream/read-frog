@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.13.2
+
+### Patch Changes
+
+- [#606](https://github.com/mengxi-ream/read-frog/pull/606) [`e9f6cd3`](https://github.com/mengxi-ream/read-frog/commit/e9f6cd37167c8ebc61deb1b9d48f6409427c1ada) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): prevent selection popup from being translated
+
 ## 1.13.1
 
 ### Patch Changes

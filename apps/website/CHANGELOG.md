@@ -1,5 +1,13 @@
 # @read-frog/website
 
+## 1.2.1
+
+### Patch Changes
+
+- [#601](https://github.com/mengxi-ream/read-frog/pull/601) [`a8cb8f8`](https://github.com/mengxi-ream/read-frog/commit/a8cb8f85515cdd63fb992f7126baf5f15798fd96) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: twitter og image"
+
+- [#597](https://github.com/mengxi-ream/read-frog/pull/597) [`123aa77`](https://github.com/mengxi-ream/read-frog/commit/123aa77c1ceb0bf0774ae7beb6fa84a85d5eb36e) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat(website): support dynamic og content in blog
+
 ## 1.2.0
 
 ### Minor Changes
