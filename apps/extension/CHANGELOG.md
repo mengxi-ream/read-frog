@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.13.4
+
+### Patch Changes
+
+- [#614](https://github.com/mengxi-ream/read-frog/pull/614) [`96b04ea`](https://github.com/mengxi-ream/read-frog/commit/96b04eaef4145c18f90a9f913e008dfbaf5d6916) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): improve floating element detection for large initial letters
+
+- [#617](https://github.com/mengxi-ream/read-frog/pull/617) [`0dbdac8`](https://github.com/mengxi-ream/read-frog/commit/0dbdac871256b5d0d556778bbec6c0719aa01202) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add more custom translation style
+
+- [#615](https://github.com/mengxi-ream/read-frog/pull/615) [`a0197ff`](https://github.com/mengxi-ream/read-frog/commit/a0197fffe547966951cbc6ea00e6970b2deb1e6f) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore: change default shortcut based on feedback
+
+- [#618](https://github.com/mengxi-ream/read-frog/pull/618) [`421e9ab`](https://github.com/mengxi-ream/read-frog/commit/421e9ab9d92e2de5e13a059beb4052effff4a4e6) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): disable Google provider in translation-only mode
+
+- [#575](https://github.com/mengxi-ream/read-frog/pull/575) [`46dffff`](https://github.com/mengxi-ream/read-frog/commit/46dffff835991df95e3b2dbf490f0fc4cbb3d36a) Thanks [@mercutiojohn](https://github.com/mercutiojohn)! - feat(extension): improve prompt settings UX with enhanced export mode and radio group selection
+
 ## 1.13.3
 
 ### Patch Changes

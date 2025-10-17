@@ -1,5 +1,15 @@
 # @read-frog/website
 
+## 1.3.0
+
+### Minor Changes
+
+- [#593](https://github.com/mengxi-ream/read-frog/pull/593) [`3dce302`](https://github.com/mengxi-ream/read-frog/commit/3dce3026c00b98dfef8a2747b99fb2cececaa4a1) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor(website): refactor landing page
+
+### Patch Changes
+
+- [#613](https://github.com/mengxi-ream/read-frog/pull/613) [`b9fcadf`](https://github.com/mengxi-ream/read-frog/commit/b9fcadf884c6317f9ed5064df9a47cf1981b3075) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(website): fix auto jitter in home page and use text-balence for header title
+
 ## 1.2.1
 
 ### Patch Changes
