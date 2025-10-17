@@ -89,8 +89,7 @@ export async function setUpRequestQueue() {
 
     let result = ''
 
-    const currentConfig = await ensureInitializedConfig()
-    if (isLLMTranslateProviderConfig(providerConfig) && currentConfig?.betaExperience.enabled) {
+    if (isLLMTranslateProviderConfig(providerConfig)) {
       const data = { text, langConfig, providerConfig, hash, scheduleAt }
       result = await batchQueue.enqueue(data)
     }

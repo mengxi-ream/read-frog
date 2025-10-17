@@ -1,9 +1,8 @@
 import type { BatchQueueConfig } from '@/types/config/translate'
 import { i18n } from '#imports'
 import { Input } from '@repo/ui/components/input'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom } from 'jotai'
 import { toast } from 'sonner'
-import { BetaBadge } from '@/components/beta-badge'
 import { batchQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from '@/utils/constants/translate'
@@ -14,20 +13,9 @@ import { FieldWithLabel } from '../../components/field-with-label'
 type KeyOfBatchQueueConfig = keyof BatchQueueConfig
 
 export function RequestBatch() {
-  const betaExperience = useAtomValue(configFieldsAtomMap.betaExperience)
-
-  if (!betaExperience.enabled) {
-    return null
-  }
-
   return (
     <ConfigCard
-      title={(
-        <div className="flex items-center gap-2">
-          {i18n.t('options.translation.batchQueueConfig.title')}
-          <BetaBadge />
-        </div>
-      )}
+      title={i18n.t('options.translation.batchQueueConfig.title')}
       description={i18n.t('options.translation.batchQueueConfig.description')}
     >
       <div className="flex flex-col gap-4">
