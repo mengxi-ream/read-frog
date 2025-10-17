@@ -1,5 +1,8 @@
+import { Card } from '@repo/ui/components/card'
+import { IconPackages, IconSend, IconShield } from '@tabler/icons-react'
 import { VChart } from '@visactor/vchart'
 import { useEffect, useRef } from 'react'
+import { IndicatorCard } from '@/entrypoints/options/components/indicator-card'
 
 const spec = {
   type: 'line',
@@ -253,6 +256,12 @@ const spec = {
   invalidType: 'break',
 }
 
+const indicators = [
+  { title: '节省百分比', value: '80%', comparison: 10, icon: <IconShield /> },
+  { title: '七天内原请求数量', value: 1000, comparison: -10, icon: <IconSend /> },
+  { title: '七天内批量请求数量', value: 200, comparison: -10, icon: <IconPackages /> },
+]
+
 export function BatchRequestCache() {
   const containerRef = useRef<HTMLDivElement>(null)
   const lineChartRef = useRef<VChart>(null)
@@ -266,7 +275,12 @@ export function BatchRequestCache() {
 
   return (
     <div>
-      <div ref={containerRef} className="h-96 w-full" />
+      <header className="h-fit w-full grid gap-4 grid-cols-2 grid-rows-2 md:grid-cols-4 md:grid-rows-1">
+        { indicators.map(indicator => <IndicatorCard key={indicator.title} {...indicator} />) }
+      </header>
+      <Card>
+        <div ref={containerRef} className="h-96 w-full" />
+      </Card>
     </div>
   )
 }
