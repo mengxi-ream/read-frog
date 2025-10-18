@@ -7,6 +7,7 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import { HashRouter } from 'react-router'
 import FrogToast from '@/components/frog-toast'
+import { ChartThemeProvider } from '@/components/provider/chart-theme-provider'
 import { configAtom } from '@/utils/atoms/config'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { isDarkMode } from '@/utils/tailwind'
@@ -47,9 +48,11 @@ async function initApp() {
           <QueryClientProvider client={queryClient}>
             <HashRouter>
               <SidebarProvider>
-                <AppSidebar />
-                <App />
-                <FrogToast />
+                <ChartThemeProvider>
+                  <AppSidebar />
+                  <App />
+                  <FrogToast />
+                </ChartThemeProvider>
               </SidebarProvider>
             </HashRouter>
           </QueryClientProvider>

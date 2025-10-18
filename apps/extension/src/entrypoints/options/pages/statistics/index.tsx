@@ -1,16 +1,16 @@
 import { i18n } from '#imports'
 import { PageLayout } from '../../components/page-layout'
-import { BatchRequestCache } from './batch-request-cache'
-import { VChartRegister } from './register-chart'
+import { BatchRequestSaving } from './charts'
+import { Metrics } from './metrics'
 
 export function StatisticsPage() {
   return (
     <PageLayout
       title={i18n.t('options.statistics.title')}
-      innerClassName="[&>*]:border-b [&>*:last-child]:border-b-0"
+      innerClassName="p-8"
     >
-      <VChartRegister />
-      <BatchRequestCache />
+      <Metrics />
+      <BatchRequestSaving />
     </PageLayout>
   )
 }
