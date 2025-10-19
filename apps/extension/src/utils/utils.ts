@@ -21,5 +21,12 @@ export function addThousandsSeparator(num: number) {
 }
 
 export function numberToPercentage(num: number) {
-  return `${(num * 100)}%`
+  return `${(num * 100).toFixed(2)}%`
+}
+
+export function getStartDateFromDaysBack(daysBack: number) {
+  const date = new Date()
+  date.setDate(date.getDate() - daysBack + 1)
+  date.setHours(0, 0, 0, 0)
+  return date
 }

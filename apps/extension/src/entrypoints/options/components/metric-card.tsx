@@ -2,13 +2,15 @@ import { Icon } from '@iconify/react'
 import { Card, CardContent } from '@repo/ui/components/card'
 import { cn } from '@repo/ui/lib/utils'
 import { IconCircleArrowDownRightFilled, IconCircleArrowUpRightFilled } from '@tabler/icons-react'
+import { Activity } from 'react'
 
 export function MetricCard(
   { title, value, comparison, icon }:
-  { title: string, value: string, icon: string, comparison: number },
+  { title: string, value: string | number, icon: string, comparison?: number },
 ) {
-  const negative = comparison < 0
-  const comparisonText = `${negative ? '' : '+'}${comparison}%`
+  const hasComparison = comparison !== undefined
+  const positive = hasComparison && comparison >= 0
+  const comparisonText = hasComparison ? `${positive ? '+' : ''}${comparison}%` : null
 
   return (
     <div className="hover:scale-102 hover:-translate-y-1/8 transition-all duration-300 grid grid-cols-1 *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -23,16 +25,18 @@ export function MetricCard(
             <div className="leading-none text-muted-foreground text-sm">{title}</div>
             <div className="leading-none text-2xl font-semibold tabular-nums @[250px]/card:text-3xl flex flex-col md:flex-row gap-3 items-start md:items-center">
               {value}
-              <div className={
-                cn(
-                  'h-full text-base flex items-center gap-1',
-                  negative ? 'text-destructive/80' : 'text-primary-strong',
-                )
-              }
-              >
-                { comparison >= 0 ? <IconCircleArrowUpRightFilled className="size-5" /> : <IconCircleArrowDownRightFilled className="size-5" /> }
-                {comparisonText}
-              </div>
+              <Activity mode={hasComparison ? 'visible' : 'hidden'}>
+                <div className={
+                  cn(
+                    'h-full text-base flex items-center gap-1',
+                    positive ? 'text-destructive/80' : 'text-primary-strong',
+                  )
+                }
+                >
+                  { positive ? <IconCircleArrowUpRightFilled className="size-5" /> : <IconCircleArrowDownRightFilled className="size-5" /> }
+                  {comparisonText}
+                </div>
+              </Activity>
             </div>
           </div>
         </CardContent>

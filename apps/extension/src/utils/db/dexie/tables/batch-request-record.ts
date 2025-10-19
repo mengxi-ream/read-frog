@@ -1,6 +1,6 @@
 import { Entity } from 'dexie'
 
-export default class BatchRequestTimes extends Entity {
+export default class BatchRequestRecord extends Entity {
   key!: string
   createdAt!: Date
   originalRequestCount!: number

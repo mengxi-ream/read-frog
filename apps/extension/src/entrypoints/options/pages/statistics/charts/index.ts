@@ -1,1 +1,1 @@
-export { default as BatchRequestSaving } from './batch-request-saving'
+export { default as BatchRequestRecord } from './batch-request-record'

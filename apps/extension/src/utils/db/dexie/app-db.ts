@@ -2,7 +2,7 @@ import type { EntityTable } from 'dexie'
 import { upperCamelCase } from 'case-anything'
 import Dexie from 'dexie'
 import { APP_NAME } from '@/utils/constants/app'
-import BatchRequestTimes from './tables/batch-request-times'
+import BatchRequestRecord from './tables/batch-request-record'
 import TranslationCache from './tables/translation-cache'
 
 export default class AppDB extends Dexie {
@@ -11,8 +11,8 @@ export default class AppDB extends Dexie {
     'key'
   >
 
-  batchRequestTimes!: EntityTable<
-    BatchRequestTimes,
+  batchRequestRecord!: EntityTable<
+    BatchRequestRecord,
     'key'
   >
 
@@ -23,7 +23,7 @@ export default class AppDB extends Dexie {
         key,
         translation,
         createdAt`,
-      batchRequestTimes: `
+      batchRequestRecord: `
         key,
         createdAt,
         originalRequestCount,
@@ -31,6 +31,6 @@ export default class AppDB extends Dexie {
         model`,
     })
     this.translationCache.mapToClass(TranslationCache)
-    this.batchRequestTimes.mapToClass(BatchRequestTimes)
+    this.batchRequestRecord.mapToClass(BatchRequestRecord)
   }
 }
