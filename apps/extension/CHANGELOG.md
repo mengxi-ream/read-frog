@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.14.0
+
+### Minor Changes
+
+- [#582](https://github.com/mengxi-ream/read-frog/pull/582) [`ab2aedb`](https://github.com/mengxi-ream/read-frog/commit/ab2aedb9ea8730c424b36e945b9d51082d71e55b) Thanks [@darmau](https://github.com/darmau)! - feat: refine AI Button prompt structure to ensure more consistent responses
+
+- [#623](https://github.com/mengxi-ream/read-frog/pull/623) [`9f640c2`](https://github.com/mengxi-ream/read-frog/commit/9f640c2727219fecd7e21c14c5f3cf9cb109039d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add config backup feature
+
+### Patch Changes
+
+- [#625](https://github.com/mengxi-ream/read-frog/pull/625) [`ebfa592`](https://github.com/mengxi-ream/read-frog/commit/ebfa592703c5899e8d26c04c2e9c81e92b9b9677) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: extract RestoreButton and use ButtonGroup component
+
+- [#627](https://github.com/mengxi-ream/read-frog/pull/627) [`519b5aa`](https://github.com/mengxi-ream/read-frog/commit/519b5aaf172f4ae06e31909f5d59d53ce0267495) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor(extension): use session storage for translation state persistence
+
+  Replace in-memory Map with chrome.storage.session to ensure translation state survives service worker restarts. Simplifies architecture by removing port-based communication.
+
+- [#626](https://github.com/mengxi-ream/read-frog/pull/626) [`e3c015a`](https://github.com/mengxi-ream/read-frog/commit/e3c015aaabef21a11243c730329388b4f1ac4e2d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(extension): update Gemini model defaults and remove deprecated models
+
 ## 1.13.4
 
 ### Patch Changes
