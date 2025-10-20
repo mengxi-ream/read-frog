@@ -1,9 +1,10 @@
-import type { ILineChartSpec } from '@visactor/vchart'
+import type { IAreaChartSpec } from '@visactor/vchart'
 import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
+import { i18n } from '#imports'
 import { VChart } from '@visactor/vchart'
 import { useAtomValue } from 'jotai'
 import { useEffect, useRef } from 'react'
-import { batchRequestRecordsAtom } from './atom'
+import { currentPeriodBatchRequestRecordsAtom } from './atom'
 
 interface RequestRecordPoint {
   createdAt: string
@@ -11,16 +12,16 @@ interface RequestRecordPoint {
   count: number
 }
 
-function generateSpec(requestRecordPoints: RequestRecordPoint[]): ILineChartSpec {
+function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec {
   return {
-    type: 'line',
+    type: 'area',
     data: {
+      id: 'data',
       values: requestRecordPoints,
     },
     xField: 'createdAt',
     yField: 'count',
     seriesField: 'type',
-    animation: true,
     point: {
       visible: false,
     },
@@ -29,7 +30,9 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): ILineChartSpec
       type: 'discrete',
       item: {
         label: {
-          formatMethod: type => type === 'originalRequest' ? '原始请求数' : '应用批量翻译后请求数',
+          formatMethod: type => type === 'originalRequest'
+            ? i18n.t('options.statistics.batchRequest.originalRequestCount')
+            : i18n.t('options.statistics.batchRequest.batchRequestCount'),
         },
       },
     },
@@ -37,7 +40,9 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): ILineChartSpec
       dimension: {
         content: [
           {
-            key: datum => datum?.type === 'originalRequest' ? '原始请求数' : '应用批量翻译后请求数',
+            key: datum => datum?.type === 'originalRequest'
+              ? i18n.t('options.statistics.batchRequest.originalRequestCount')
+              : i18n.t('options.statistics.batchRequest.batchRequestCount'),
             value: datum => datum?.count ?? 0,
           },
         ],
@@ -48,33 +53,53 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): ILineChartSpec
         orient: 'left',
         visible: false,
       },
-      {
-        orient: 'bottom',
-        visible: true,
-        grid: {
-          visible: true,
+    ],
+    stack: false,
+    color: {
+      type: 'ordinal',
+      domain: ['originalRequest', 'batchRequest'],
+      range: ['#dadada', '#46d6b0'],
+    },
+    area: {
+      style: {
+        fill: {
+          gradient: 'linear',
+          x0: 0.5,
+          y0: 0,
+          x1: 0.5,
+          y1: 1,
+          stops: [
+            {
+              offset: 0,
+              opacity: 1,
+            },
+            {
+              offset: 1,
+              opacity: 0.3,
+            },
+          ],
         },
       },
-    ],
+    },
     line: {
       style: {
         curveType: 'monotone',
-        stroke: ({ type }) => type === 'originalRequest' ? 'oklch(0.8549 0 0)' : 'oklch(0.502 0.2 270)',
-        lineDash: ({ type }) => type === 'originalRequest' ? [5] : [0],
       },
     },
   }
 }
 
 export default function Chart() {
-  const batchRequestRecords = useAtomValue(batchRequestRecordsAtom)
+  const batchRequestRecords = useAtomValue(currentPeriodBatchRequestRecordsAtom)
+
+  const requestRecordPoints = transformBatchRequestRecordsToChartPoints(batchRequestRecords)
+
   const containerRef = useRef<HTMLDivElement>(null)
   const lineChartRef = useRef<VChart>(null)
 
-  const requestRecordPoints = transformBatchRequestRecordsToChartPoints(batchRequestRecords)
   const spec = generateSpec(requestRecordPoints)
 
-  const initializeChart = (spec: ILineChartSpec) => {
+  const initializeChart = (spec: IAreaChartSpec) => {
     if (!containerRef.current)
       return
 
@@ -84,12 +109,12 @@ export default function Chart() {
 
   useEffect(() => {
     if (lineChartRef.current) {
-      void lineChartRef.current.updateSpec(spec)
+      void lineChartRef.current.updateData('data', requestRecordPoints)
       return
     }
 
     initializeChart(spec)
-  }, [containerRef, lineChartRef, spec])
+  }, [containerRef, lineChartRef, requestRecordPoints, spec])
 
   return (
     <div ref={containerRef} className="h-full flex-auto" />

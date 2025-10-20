@@ -257,6 +257,13 @@ options:
       label: 语速
       hint: 支持的取值范围为 0.25 到 4.0
     betaDisabled: 启用测试体验后即可自定义文本转语音设置。
+  statistics:
+    title: 统计
+    batchRequest:
+      title: 批量翻译已节省请求
+      description: 周期内批量翻译节省的请求百分比
+      originalRequestCount: 原始请求数量
+      batchRequestCount: 批量请求数量
   config:
     title: 配置
     sync:
@@ -319,8 +326,6 @@ options:
     title: 最近更新
   survey:
     title: 新功能建议
-  statistics:
-    title: 统计
 side:
   sourceLang: 来源语言
   targetLang: 目标语言

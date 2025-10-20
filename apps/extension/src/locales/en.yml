@@ -257,6 +257,13 @@ options:
       label: Speed
       hint: Accepts values between 0.25 and 4.0
     betaDisabled: Enable Beta Experience to customize text-to-speech settings.
+  statistics:
+    title: Statistics
+    batchRequest:
+      title: Batch Translation Requests Saved
+      description: Percentage of requests saved by batch translation in the period
+      originalRequestCount: Original Request Count
+      batchRequestCount: Batch Request Count
   config:
     title: Config
     sync:
@@ -318,8 +325,6 @@ options:
     title: What's New
   survey:
     title: New Feature Suggestion
-  statistics:
-    title: Statistics
 side:
   sourceLang: Source Language
   targetLang: Target Language

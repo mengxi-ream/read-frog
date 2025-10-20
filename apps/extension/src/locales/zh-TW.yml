@@ -257,6 +257,13 @@ options:
       label: 速度
       hint: 可輸入 0.25 至 4.0 的數值
     betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
+  statistics:
+    title: 統計
+    batchRequest:
+      title: 批量翻譯已節省請求
+      description: 週期內批量翻譯節省的請求百分比
+      originalRequestCount: 原始請求數量
+      batchRequestCount: 批量請求數量
   config:
     title: 設定
     sync:
@@ -318,8 +325,6 @@ options:
     title: 最近更新
   survey:
     title: 新功能建議
-  statistics:
-    title: 統計
 side:
   sourceLang: 來源語言
   targetLang: 目標語言

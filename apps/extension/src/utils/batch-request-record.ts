@@ -1,15 +1,8 @@
 import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
 import { db } from '@/utils/db/dexie/db'
 import { Sha256Hex } from '@/utils/hash'
+import { getDateFromDaysBack } from '@/utils/utils'
 import { logger } from './logger'
-
-/**
- * Request count statistics for a time period
- */
-export interface RequestCountStats {
-  originalRequest: number
-  batchRequest: number
-}
 
 /**
  * Generate mock batch request records for testing
@@ -43,10 +36,8 @@ function generateMockBatchRequestRecords(days: number = 60): BatchRequestRecord[
       recordDate.setHours(hour, minute, 0, 0)
 
       // Generate request count with trend: gradually increasing over time
-      const baseLine = 10
-      const trend = Math.floor((days - i) / 10) // Increase every 10 days
-      const randomness = Math.floor(Math.random() * 20)
-      const originalRequestCount = baseLine + trend + randomness
+      const randomness = Math.floor(Math.random() * 10)
+      const originalRequestCount = randomness
 
       records.push({
         key: provider.key,
@@ -63,14 +54,19 @@ function generateMockBatchRequestRecords(days: number = 60): BatchRequestRecord[
 
 const allMockRecords = generateMockBatchRequestRecords(60)
 
-export async function getBatchRequestRecordsFromStartDate(startDate: Date) {
+export async function getRangeBatchRequestRecords(startDay: string | number, endDay?: string | number) {
+  const startDate = getDateFromDaysBack(Number(startDay))
+  const endDate = getDateFromDaysBack(Number(endDay ?? 0))
+
+  startDate.setHours(0, 0, 0, 0)
+  endDate.setHours(23, 59, 59, 999)
+
   // return await db.batchRequestRecord
   //   .where('createdAt')
-  //   .aboveOrEqual(startDate)
+  //   .between(startDate, endDate)
   //   .toArray()
 
-  // Use mock data for development
-  return allMockRecords.filter(record => record.createdAt >= startDate)
+  return allMockRecords.filter(record => record.createdAt >= startDate && record.createdAt <= endDate)
 }
 
 export async function putBatchRequestRecord(

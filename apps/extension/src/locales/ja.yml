@@ -255,6 +255,13 @@ options:
       label: 速度
       hint: 0.25〜4.0 の値を入力できます
     betaDisabled: テキスト読み上げ設定をカスタマイズするには Beta 体験を有効にしてください。
+  statistics:
+    title: 統計
+    batchRequest:
+      title: バッチ翻訳で節約されたリクエスト
+      description: 期間内にバッチ翻訳で節約されたリクエストの割合
+      originalRequestCount: 元のリクエスト数
+      batchRequestCount: バッチリクエスト数
   config:
     title: 設定
     sync:
@@ -316,8 +323,6 @@ options:
     title: 新機能
   survey:
     title: 新機能の提案
-  statistics:
-    title: 統計
 side:
   sourceLang: ソース言語
   targetLang: 翻訳言語

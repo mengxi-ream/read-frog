@@ -41,14 +41,6 @@ export function useTheme(): { theme: Theme, setTheme: (theme: Theme) => void } {
         setTheme(isDark ? 'dark' : 'light')
       }
     }
-
-    // Listen to localStorage changes (from other tabs/windows)
-    const handleStorageChange = (e: StorageEvent) => {
-      if (e.key === 'theme') {
-        updateTheme()
-      }
-    }
-
     // Listen to system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handleMediaChange = () => {
@@ -58,11 +50,9 @@ export function useTheme(): { theme: Theme, setTheme: (theme: Theme) => void } {
       }
     }
 
-    window.addEventListener('storage', handleStorageChange)
     mediaQuery.addEventListener('change', handleMediaChange)
 
     return () => {
-      window.removeEventListener('storage', handleStorageChange)
       mediaQuery.removeEventListener('change', handleMediaChange)
     }
   }, [])

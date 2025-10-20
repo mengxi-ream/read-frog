@@ -1,24 +1,48 @@
+import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
+import { i18n } from '#imports'
 import { useAtomValue } from 'jotai'
 import { MetricCard } from '@/entrypoints/options/components/metric-card'
-import { calculateAverageSavePercentage } from './aside'
-import { batchRequestRecordsAtom } from './atom'
+import { currentPeriodBatchRequestRecordsAtom, previousPeriodBatchRequestRecordsAtom } from './atom'
 
 export default function Metrics() {
-  const batchRequestRecords = useAtomValue(batchRequestRecordsAtom)
+  const currentPeriodRecords = useAtomValue(currentPeriodBatchRequestRecordsAtom)
+  const previousPeriodRecords = useAtomValue(previousPeriodBatchRequestRecordsAtom)
 
-  const savingPercentage = calculateAverageSavePercentage(batchRequestRecords)
-  const originalRequests = batchRequestRecords.length
-  const batchRequests = batchRequestRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
-
-  const metrics = {
-    savingPercentage: { title: '近30日批量翻译节省百分比', value: savingPercentage, comparison: 10, icon: 'tabler:circle-percentage-filled' },
-    originalRequests: { title: '近30日原始请求数量', value: originalRequests, comparison: -10, icon: 'tabler:circle-filled' },
-    batchRequests: { title: '近30日批量请求数量', value: batchRequests, comparison: -10, icon: 'tabler:squares-filled' },
-  }
+  const metrics = transformRecordsToMetrics(currentPeriodRecords, previousPeriodRecords)
 
   return (
     <header className="h-fit w-full grid gap-4 grid-cols-2 grid-rows-2 md:grid-cols-4 md:grid-rows-1">
       { Object.entries(metrics).map(([key, metric]) => <MetricCard key={key} {...metric} />) }
     </header>
   )
+}
+
+function transformRecordsToMetrics(currentPeriodRecords: BatchRequestRecord[], previousPeriodRecords: BatchRequestRecord[]) {
+  const originalRequestCount = currentPeriodRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
+  const batchRequestCount = currentPeriodRecords.length
+
+  const previousOriginalRequestCount = previousPeriodRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
+  const previousBatchRequestCount = previousPeriodRecords.length
+
+  const originalRequestComparison = calculateComparison(originalRequestCount, previousOriginalRequestCount)
+  const batchRequestComparison = calculateComparison(batchRequestCount, previousBatchRequestCount)
+
+  return {
+    originalRequestCount: {
+      title: i18n.t('options.statistics.batchRequest.originalRequestCount'),
+      value: originalRequestCount,
+      comparison: originalRequestComparison,
+      icon: 'tabler:circle-filled',
+    },
+    batchRequestCount: {
+      title: i18n.t('options.statistics.batchRequest.batchRequestCount'),
+      value: batchRequestCount,
+      comparison: batchRequestComparison,
+      icon: 'tabler:squares-filled',
+    },
+  }
+}
+
+function calculateComparison(currentPeriodValue: number, previousPeriodValue: number) {
+  return (currentPeriodValue - previousPeriodValue) / previousPeriodValue
 }
