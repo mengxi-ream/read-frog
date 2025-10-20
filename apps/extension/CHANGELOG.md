@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.14.1
+
+### Patch Changes
+
+- [#628](https://github.com/mengxi-ream/read-frog/pull/628) [`b28efbd`](https://github.com/mengxi-ream/read-frog/commit/b28efbd86f7cece91920fd75cc96e141dfe866e9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor(extension): use React Activity API for model selector state preservation
+
 ## 1.14.0
 
 ### Minor Changes
