@@ -5,7 +5,7 @@ import Container from '@/components/container'
 
 export function PageLayout({ title, children, className, innerClassName }: { title: React.ReactNode, children: React.ReactNode, className?: string, innerClassName?: string }) {
   return (
-    <div className={cn('w-full', className)}>
+    <div className={cn('w-full pb-8', className)}>
       <div className="border-b">
         <Container>
           <header className="flex h-14 -ml-1.5 shrink-0 items-center gap-2">
