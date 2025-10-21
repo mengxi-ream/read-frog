@@ -157,6 +157,10 @@ options:
         description: Configure websites where the floating button should be disabled
         enterUrlPattern: Enter URL pattern
         urlPattern: URL Pattern
+    selectionToolbar:
+      globalToggle:
+        title: Enable Selection Toolbar
+        description: Display the toolbar when selecting text on web pages for quick translation and reading
   translation:
     title: Translation
     requestQueueConfig:

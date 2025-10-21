@@ -157,6 +157,10 @@ options:
         description: 配置需要禁用悬浮按钮的网站
         enterUrlPattern: 输入网址模式
         urlPattern: 网址模式
+    selectionToolbar:
+      globalToggle:
+        title: 启用选择工具栏
+        description: 在网页上选择文本时显示工具栏，快速翻译和阅读
   translation:
     title: 翻译
     requestQueueConfig:

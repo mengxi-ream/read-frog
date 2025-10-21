@@ -156,6 +156,10 @@ options:
         description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
         enterUrlPattern: URL 패턴 입력
         urlPattern: URL 패턴
+    selectionToolbar:
+      globalToggle:
+        title: 선택 툴바 활성화
+        description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 읽기
   translation:
     title: 번역
     requestQueueConfig:

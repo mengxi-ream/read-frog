@@ -155,6 +155,10 @@ options:
         description: フローティングボタンを無効化するウェブサイトを設定します
         enterUrlPattern: URL パターンを入力
         urlPattern: URL パターン
+    selectionToolbar:
+      globalToggle:
+        title: 選択ツールバーを有効化
+        description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と読解
   translation:
     title: 翻訳
     requestQueueConfig:

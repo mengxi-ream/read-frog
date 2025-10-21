@@ -157,6 +157,10 @@ options:
         description: 設定需要停用懸浮按鈕的網站
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
+    selectionToolbar:
+      globalToggle:
+        title: 啟用選擇工具列
+        description: 在網頁上選擇文字時顯示工具列，快速翻譯和閱讀
   translation:
     title: 翻譯
     requestQueueConfig:
