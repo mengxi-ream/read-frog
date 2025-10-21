@@ -151,7 +151,7 @@ export default function FloatingButton() {
                 })
               }}
             >
-              {i18n.t('options.floatingButton.closeMenu.disableForSite')}
+              {i18n.t('options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite')}
             </DropdownMenuItem>
             <DropdownMenuItem
               onMouseDown={e => e.stopPropagation()}
@@ -159,7 +159,7 @@ export default function FloatingButton() {
                 void setFloatingButton({ ...floatingButton, enabled: false })
               }}
             >
-              {i18n.t('options.floatingButton.closeMenu.disableGlobally')}
+              {i18n.t('options.floatingButtonAndToolbar.floatingButton.closeMenu.disableGlobally')}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
