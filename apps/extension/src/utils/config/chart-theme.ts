@@ -7,4 +7,3 @@ export const customDarkTheme: Partial<ITheme> = {
 export const customLightTheme: Partial<ITheme> = {
   type: 'light',
 }
-  
