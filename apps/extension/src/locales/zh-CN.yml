@@ -146,6 +146,9 @@ options:
   floatingButtonAndToolbar:
     title: 悬浮按钮和工具栏
     floatingButton:
+      globalToggle:
+        title: 启用悬浮按钮
+        description: 在网页上显示悬浮按钮，快速访问陪读蛙功能
       closeMenu:
         disableForSite: 禁用此网站
         disableGlobally: 全局禁用

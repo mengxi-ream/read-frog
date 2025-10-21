@@ -145,6 +145,9 @@ options:
   floatingButtonAndToolbar:
     title: 플로팅 버튼 및 툴바
     floatingButton:
+      globalToggle:
+        title: 플로팅 버튼 활성화
+        description: 웹 페이지에 플로팅 버튼을 표시하여 Read Frog 기능에 빠르게 액세스
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화

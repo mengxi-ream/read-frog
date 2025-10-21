@@ -144,6 +144,9 @@ options:
   floatingButtonAndToolbar:
     title: フローティングボタンとツールバー
     floatingButton:
+      globalToggle:
+        title: フローティングボタンを有効化
+        description: ウェブページにフローティングボタンを表示し、Read Frog機能に素早くアクセス
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化

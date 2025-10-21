@@ -146,6 +146,9 @@ options:
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
     floatingButton:
+      globalToggle:
+        title: Enable Floating Button
+        description: Display the floating button on web pages for quick access to Read Frog features
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally

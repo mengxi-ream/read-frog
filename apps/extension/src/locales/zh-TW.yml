@@ -146,6 +146,9 @@ options:
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
     floatingButton:
+      globalToggle:
+        title: 啟用懸浮按鈕
+        description: 在網頁上顯示懸浮按鈕，快速存取陪讀蛙功能
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
