@@ -1,6 +1,7 @@
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { putBatchRequestRecord } from '@/utils/batch-request-record'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
 import { db } from '@/utils/db/dexie/db'
@@ -56,6 +57,7 @@ export async function setUpRequestQueue() {
       const earliestScheduleAt = Math.min(...dataList.map(d => d.scheduleAt))
 
       const batchThunk = async (): Promise<string[]> => {
+        await putBatchRequestRecord({ originalRequestCount: dataList.length, providerConfig })
         const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
         return parseBatchResult(result)
       }
@@ -64,7 +66,10 @@ export async function setUpRequestQueue() {
     },
     executeIndividual: async (data) => {
       const { text, langConfig, providerConfig, hash, scheduleAt } = data
-      const thunk = () => executeTranslate(text, langConfig, providerConfig)
+      const thunk = async () => {
+        await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
+        return executeTranslate(text, langConfig, providerConfig)
+      }
       return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
     onError: (error, context) => {

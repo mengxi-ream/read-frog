@@ -11,7 +11,7 @@ export default function Metrics() {
   const metrics = transformRecordsToMetrics(currentPeriodRecords, previousPeriodRecords)
 
   return (
-    <header className="h-fit w-full grid gap-4 grid-cols-2 grid-rows-2 md:grid-cols-4 md:grid-rows-1">
+    <header className="h-fit w-full grid gap-4 grid-cols-2 grid-rows-1 xl:grid-cols-4">
       { Object.entries(metrics).map(([key, metric]) => <MetricCard key={key} {...metric} />) }
     </header>
   )
@@ -30,13 +30,13 @@ function transformRecordsToMetrics(currentPeriodRecords: BatchRequestRecord[], p
   return {
     originalRequestCount: {
       title: i18n.t('options.statistics.batchRequest.originalRequestCount'),
-      value: originalRequestCount,
+      metric: originalRequestCount,
       comparison: originalRequestComparison,
       icon: 'tabler:circle-filled',
     },
     batchRequestCount: {
       title: i18n.t('options.statistics.batchRequest.batchRequestCount'),
-      value: batchRequestCount,
+      metric: batchRequestCount,
       comparison: batchRequestComparison,
       icon: 'tabler:squares-filled',
     },
@@ -44,5 +44,8 @@ function transformRecordsToMetrics(currentPeriodRecords: BatchRequestRecord[], p
 }
 
 function calculateComparison(currentPeriodValue: number, previousPeriodValue: number) {
+  if (previousPeriodValue === 0) {
+    return undefined
+  }
   return (currentPeriodValue - previousPeriodValue) / previousPeriodValue
 }

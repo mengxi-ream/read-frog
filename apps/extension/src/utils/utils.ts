@@ -26,6 +26,6 @@ export function numberToPercentage(num: number) {
 
 export function getDateFromDaysBack(daysBack: number) {
   const date = new Date()
-  date.setDate(date.getDate() - daysBack + 1)
+  date.setDate(date.getDate() - daysBack)
   return date
 }

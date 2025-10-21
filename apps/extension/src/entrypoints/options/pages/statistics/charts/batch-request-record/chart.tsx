@@ -13,6 +13,9 @@ interface RequestRecordPoint {
 }
 
 function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec {
+  const uniqueDates = new Set(requestRecordPoints.map(p => p.createdAt)).size
+  const shouldShowPoints = uniqueDates <= 1
+
   return {
     type: 'area',
     data: {
@@ -23,7 +26,7 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
     yField: 'count',
     seriesField: 'type',
     point: {
-      visible: false,
+      visible: shouldShowPoints,
     },
     legends: {
       visible: true,
@@ -38,6 +41,16 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
     },
     tooltip: {
       dimension: {
+        content: [
+          {
+            key: datum => datum?.type === 'originalRequest'
+              ? i18n.t('options.statistics.batchRequest.originalRequestCount')
+              : i18n.t('options.statistics.batchRequest.batchRequestCount'),
+            value: datum => datum?.count ?? 0,
+          },
+        ],
+      },
+      mark: {
         content: [
           {
             key: datum => datum?.type === 'originalRequest'

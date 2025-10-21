@@ -2,11 +2,11 @@ import { Icon } from '@iconify/react'
 import { Card, CardContent } from '@repo/ui/components/card'
 import { IconCircleArrowDownRightFilled, IconCircleArrowUpRightFilled, IconMinus } from '@tabler/icons-react'
 import { Activity } from 'react'
-import { numberToPercentage } from '@/utils/utils'
+import { addThousandsSeparator, numberToPercentage } from '@/utils/utils'
 
 export function MetricCard(
-  { title, value, comparison, icon }:
-  { title: string, value: string | number, icon: string, comparison?: number },
+  { title, metric, comparison, icon }:
+  { title: string, metric: number, icon: string, comparison?: number },
 ) {
   return (
     <div className="hover:scale-[1.01] hover:-translate-y-1/12 transition-all duration-300 grid grid-cols-1 *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
@@ -20,7 +20,7 @@ export function MetricCard(
           <div className="h-full flex flex-col gap-3 w-full items-start">
             <div className="leading-none text-muted-foreground text-sm">{title}</div>
             <div className="leading-none text-2xl font-semibold tabular-nums @[250px]/card:text-3xl flex flex-col md:flex-row gap-3 items-start md:items-center">
-              {value}
+              {addThousandsSeparator(metric)}
               <Comparison comparison={comparison} />
             </div>
           </div>

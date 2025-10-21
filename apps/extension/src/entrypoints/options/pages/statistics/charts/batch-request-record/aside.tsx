@@ -44,6 +44,9 @@ export default function Aside() {
 }
 
 export function calculateAverageSavePercentage(batchRequestRecords: BatchRequestRecord[]): string {
+  if (!batchRequestRecords.length)
+    return '0%'
+
   const originalRequestCount = batchRequestRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
   const batchRequestCount = batchRequestRecords.length
   const averageSavePercent = (originalRequestCount - batchRequestCount) / originalRequestCount
