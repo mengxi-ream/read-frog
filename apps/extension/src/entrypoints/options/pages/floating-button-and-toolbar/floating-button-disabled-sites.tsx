@@ -18,8 +18,8 @@ import { ConfigCard } from '../../components/config-card'
 export function FloatingButtonDisabledSites() {
   return (
     <ConfigCard
-      title={i18n.t('options.floatingButton.disabledSites.title')}
-      description={i18n.t('options.floatingButton.disabledSites.description')}
+      title={i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.title')}
+      description={i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.description')}
     >
       <PatternTable />
     </ConfigCard>
@@ -64,7 +64,7 @@ function PatternTable() {
     <div className="flex flex-col gap-2">
       <div className="flex items-center gap-2">
         <Input
-          placeholder={i18n.t('options.floatingButton.disabledSites.enterUrlPattern')}
+          placeholder={i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.enterUrlPattern')}
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           onKeyDown={handleKeyPress}
@@ -77,7 +77,7 @@ function PatternTable() {
         <TableHeader>
           <TableRow>
             <TableHead className="w-[100px]">
-              {i18n.t('options.floatingButton.disabledSites.urlPattern')}
+              {i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.urlPattern')}
             </TableHead>
             <TableHead className="text-right"></TableHead>
           </TableRow>

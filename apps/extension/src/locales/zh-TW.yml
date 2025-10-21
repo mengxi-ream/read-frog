@@ -10,7 +10,6 @@ popup:
   translate: 翻譯
   showOriginal: 顯示原文
   enabledFloatingButton: 啟用懸浮按鈕
-  disableFloatingButtonOnSite: 在此網站停用懸浮按鈕
   enabledSelectionToolbar: 啟用選擇工具列
   alwaysTranslate: 總是翻譯這個網站
   options: 選項
@@ -144,16 +143,17 @@ options:
         confirm: 確認
         cancel: 取消
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
-  floatingButton:
-    title: 懸浮按鈕
-    closeMenu:
-      disableForSite: 停用此網站
-      disableGlobally: 全域停用
-    disabledSites:
-      title: 懸浮按鈕停用網站
-      description: 設定需要停用懸浮按鈕的網站
-      enterUrlPattern: 輸入網址模式
-      urlPattern: URL 模式
+  floatingButtonAndToolbar:
+    title: 懸浮按鈕和工具列
+    floatingButton:
+      closeMenu:
+        disableForSite: 停用此網站
+        disableGlobally: 全域停用
+      disabledSites:
+        title: 懸浮按鈕停用網站
+        description: 設定需要停用懸浮按鈕的網站
+        enterUrlPattern: 輸入網址模式
+        urlPattern: URL 模式
   translation:
     title: 翻譯
     requestQueueConfig:

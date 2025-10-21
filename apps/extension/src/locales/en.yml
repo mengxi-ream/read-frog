@@ -10,7 +10,6 @@ popup:
   translate: Translate
   showOriginal: Show Original
   enabledFloatingButton: Enable floating button
-  disableFloatingButtonOnSite: Disable floating button on this site
   enabledSelectionToolbar: Enable selection toolbar
   alwaysTranslate: Always translate this site
   options: Options
@@ -144,16 +143,17 @@ options:
         confirm: Confirm
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
-  floatingButton:
-    title: Floating Button
-    closeMenu:
-      disableForSite: Disable for this site
-      disableGlobally: Disable globally
-    disabledSites:
-      title: Floating Button Disabled Sites
-      description: Configure websites where the floating button should be disabled
-      enterUrlPattern: Enter URL pattern
-      urlPattern: URL Pattern
+  floatingButtonAndToolbar:
+    title: Floating Button & Toolbar
+    floatingButton:
+      closeMenu:
+        disableForSite: Disable for this site
+        disableGlobally: Disable globally
+      disabledSites:
+        title: Floating Button Disabled Sites
+        description: Configure websites where the floating button should be disabled
+        enterUrlPattern: Enter URL pattern
+        urlPattern: URL Pattern
   translation:
     title: Translation
     requestQueueConfig:

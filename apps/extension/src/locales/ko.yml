@@ -9,7 +9,6 @@ popup:
   translate: 번역
   showOriginal: 원문 보기
   enabledFloatingButton: 플로팅 버튼 활성화
-  disableFloatingButtonOnSite: 이 사이트에서 플로팅 버튼 비활성화
   enabledSelectionToolbar: 선택 툴바 활성화
   alwaysTranslate: 이 사이트 항상 번역
   options: 옵션
@@ -143,16 +142,17 @@ options:
         confirm: 확인
         cancel: 취소
         description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
-  floatingButton:
-    title: 플로팅 버튼
-    closeMenu:
-      disableForSite: 이 사이트에서 비활성화
-      disableGlobally: 전역 비활성화
-    disabledSites:
-      title: 플로팅 버튼 비활성화 사이트
-      description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
-      enterUrlPattern: URL 패턴 입력
-      urlPattern: URL 패턴
+  floatingButtonAndToolbar:
+    title: 플로팅 버튼 및 툴바
+    floatingButton:
+      closeMenu:
+        disableForSite: 이 사이트에서 비활성화
+        disableGlobally: 전역 비활성화
+      disabledSites:
+        title: 플로팅 버튼 비활성화 사이트
+        description: 플로팅 버튼을 비활성화할 웹사이트를 설정합니다
+        enterUrlPattern: URL 패턴 입력
+        urlPattern: URL 패턴
   translation:
     title: 번역
     requestQueueConfig:

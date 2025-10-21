@@ -10,7 +10,6 @@ popup:
   translate: 翻译
   showOriginal: 显示原文
   enabledFloatingButton: 启用悬浮按钮
-  disableFloatingButtonOnSite: 在此网站禁用悬浮按钮
   enabledSelectionToolbar: 启用选择工具栏
   alwaysTranslate: 总是翻译这个网站
   options: 选项
@@ -144,16 +143,17 @@ options:
         confirm: 确认
         cancel: 取消
         description: 此操作将清理所有翻译缓存。此操作无法撤销。
-  floatingButton:
-    title: 悬浮按钮
-    closeMenu:
-      disableForSite: 禁用此网站
-      disableGlobally: 全局禁用
-    disabledSites:
-      title: 悬浮按钮禁用网站
-      description: 配置需要禁用悬浮按钮的网站
-      enterUrlPattern: 输入网址模式
-      urlPattern: 网址模式
+  floatingButtonAndToolbar:
+    title: 悬浮按钮和工具栏
+    floatingButton:
+      closeMenu:
+        disableForSite: 禁用此网站
+        disableGlobally: 全局禁用
+      disabledSites:
+        title: 悬浮按钮禁用网站
+        description: 配置需要禁用悬浮按钮的网站
+        enterUrlPattern: 输入网址模式
+        urlPattern: 网址模式
   translation:
     title: 翻译
     requestQueueConfig:

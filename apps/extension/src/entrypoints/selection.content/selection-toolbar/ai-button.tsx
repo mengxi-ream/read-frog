@@ -39,7 +39,7 @@ export function AiButton() {
 
   return (
     <button type="button" className="size-6 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer" onClick={handleClick}>
-      <Icon icon="hugeicons:ai-innovation-02" strokeWidth={0.8} className="size-4" />
+      <Icon icon="tabler:zoom-scan" strokeWidth={0.8} className="size-4" />
     </button>
   )
 }
