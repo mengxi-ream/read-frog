@@ -10,6 +10,9 @@ import { queryClient } from '@/utils/trpc/client'
 import App from './app'
 import '@/assets/tailwind/theme.css'
 
+// eslint-disable-next-line import/no-mutable-exports
+export let shadowWrapper: HTMLElement | null = null
+
 export default defineContentScript({
   matches: ['*://*/*'],
   cssInjectionMode: 'ui',
@@ -21,6 +24,7 @@ export default defineContentScript({
       onMount: (container, shadow, shadowHost) => {
         // Container is a body, and React warns when creating a root on the body, so create a wrapper div
         const wrapper = insertShadowRootUIWrapperInto(container)
+        shadowWrapper = wrapper
         addStyleToShadow(shadow)
         protectSelectAllShadowRoot(shadowHost, wrapper)
 
@@ -36,6 +40,7 @@ export default defineContentScript({
       onRemove: (root) => {
         // Unmount the root when the UI is removed
         root?.unmount()
+        shadowWrapper = null
       },
     })
 
