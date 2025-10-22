@@ -1,12 +1,13 @@
 import type { ProviderConfig } from '@/types/config/provider'
+import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { db } from '@/utils/db/dexie/db'
-import { getDateFromDaysBack } from '@/utils/utils'
+import { getDateFromDaysBack, numberToPercentage } from '@/utils/utils'
 import { logger } from './logger'
 
-export async function getRangeBatchRequestRecords(startDay: string | number, endDay?: string | number) {
-  const startDate = getDateFromDaysBack(Number(startDay))
-  const endDate = getDateFromDaysBack(Number(endDay ?? 0))
+export async function getRangeBatchRequestRecords(startDay: number, endDay?: number) {
+  const startDate = getDateFromDaysBack(startDay)
+  const endDate = getDateFromDaysBack(endDay ?? 0)
 
   startDate.setHours(0, 0, 0, 0)
   endDate.setHours(23, 59, 59, 999)
@@ -39,4 +40,15 @@ export async function putBatchRequestRecord(
   catch (error) {
     logger.error('Failed to put batch request record', error)
   }
+}
+
+export function calculateAverageSavePercentage(batchRequestRecords: BatchRequestRecord[]): string {
+  if (!batchRequestRecords.length)
+    return '0%'
+
+  const originalRequestCount = batchRequestRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
+  const batchRequestCount = batchRequestRecords.length
+
+  const averageSavePercent = (originalRequestCount - batchRequestCount) / originalRequestCount
+  return numberToPercentage(averageSavePercent)
 }

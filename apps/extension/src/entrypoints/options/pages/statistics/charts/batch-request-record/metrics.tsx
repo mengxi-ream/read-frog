@@ -2,11 +2,14 @@ import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-recor
 import { i18n } from '#imports'
 import { useAtomValue } from 'jotai'
 import { MetricCard } from '@/entrypoints/options/components/metric-card'
-import { currentPeriodBatchRequestRecordsAtom, previousPeriodBatchRequestRecordsAtom } from './atom'
+import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
+import { recentDayAtom } from './atom'
 
 export default function Metrics() {
-  const currentPeriodRecords = useAtomValue(currentPeriodBatchRequestRecordsAtom)
-  const previousPeriodRecords = useAtomValue(previousPeriodBatchRequestRecordsAtom)
+  const recentDay = useAtomValue(recentDayAtom)
+  const daysBack = Number(recentDay) - 1
+
+  const { currentPeriodRecords, previousPeriodRecords } = useBatchRequestRecords(daysBack)
 
   const metrics = transformRecordsToMetrics(currentPeriodRecords, previousPeriodRecords)
 

@@ -183,6 +183,9 @@ options:
       maxItemsPerBatch:
         title: 최대 단락 수
         description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
+      statisticsLink:
+        before: '지난 7일간 약 '
+        after: 의 비용을 절약했습니다
     alwaysTranslate:
       title: 항상 번역
       description: 이 사이트를 항상 번역합니다

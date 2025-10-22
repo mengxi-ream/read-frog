@@ -1,6 +1,6 @@
 'use client'
 
-import type { ITheme } from '@visactor/vchart'
+import type { ITheme } from '@visactor/react-vchart'
 import { ThemeManager } from '@visactor/vchart'
 import { createContext, use, useEffect } from 'react'
 import { customDarkTheme, customLightTheme } from '@/utils/config/chart-theme'
@@ -57,14 +57,11 @@ export function useChartTheme() {
 }
 
 function registerTheme() {
-  const font = '\'Gabarito\', \'Gabarito Fallback\''
   const lightTheme: Partial<ITheme> = {
     ...customLightTheme,
-    fontFamily: font,
   }
   const darkTheme: Partial<ITheme> = {
     ...customDarkTheme,
-    fontFamily: font,
   }
   ThemeManager.registerTheme('light', lightTheme)
   ThemeManager.registerTheme('dark', darkTheme)

@@ -2,9 +2,12 @@ import type { BatchQueueConfig } from '@/types/config/translate'
 import { i18n } from '#imports'
 import { Input } from '@repo/ui/components/input'
 import { useAtom } from 'jotai'
+import { Link } from 'react-router'
 import { toast } from 'sonner'
+import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
 import { batchQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { calculateAverageSavePercentage } from '@/utils/batch-request-record'
 import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from '@/utils/constants/translate'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
@@ -16,13 +19,37 @@ export function RequestBatch() {
   return (
     <ConfigCard
       title={i18n.t('options.translation.batchQueueConfig.title')}
-      description={i18n.t('options.translation.batchQueueConfig.description')}
+      description={(
+        <div className="flex flex-col">
+          <span>{i18n.t('options.translation.batchQueueConfig.description')}</span>
+          <StatisticsLink />
+        </div>
+      )}
     >
       <div className="flex flex-col gap-4">
         <BatchNumberSelector property="maxCharactersPerBatch" />
         <BatchNumberSelector property="maxItemsPerBatch" />
       </div>
     </ConfigCard>
+  )
+}
+
+function StatisticsLink() {
+  const { currentPeriodRecords } = useBatchRequestRecords(7)
+
+  const averageSavePercentage = calculateAverageSavePercentage(currentPeriodRecords)
+
+  return (
+    <Link
+      className="text-primary hover:opacity-95 cursor-pointer transition-opacity gap-1"
+      to="/statistics"
+    >
+      {i18n.t('options.translation.batchQueueConfig.statisticsLink.before')}
+      {' '}
+      {averageSavePercentage}
+      {' '}
+      {i18n.t('options.translation.batchQueueConfig.statisticsLink.after')}
+    </Link>
   )
 }
 

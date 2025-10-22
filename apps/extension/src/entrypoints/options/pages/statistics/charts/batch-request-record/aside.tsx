@@ -1,18 +1,19 @@
-import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
 import { i18n } from '#imports'
 import { Tabs, TabsList, TabsTrigger } from '@repo/ui/components/tabs'
-import { useAtom, useAtomValue } from 'jotai'
-import { numberToPercentage } from '@/utils/utils'
-import { currentPeriodBatchRequestRecordsAtom, recentDayAtom } from './atom'
+import { useAtom } from 'jotai'
+import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
+import { calculateAverageSavePercentage } from '@/utils/batch-request-record'
+import { recentDayAtom } from './atom'
 
 const recentDays = ['5', '7', '30', '60'] as const
 
 export default function Aside() {
   const [recentDay, setRecentDay] = useAtom(recentDayAtom)
+  const daysBack = Number(recentDay) - 1
 
-  const batchRequestRecords = useAtomValue(currentPeriodBatchRequestRecordsAtom)
+  const { currentPeriodRecords } = useBatchRequestRecords(daysBack)
 
-  const averageSavePercentage = calculateAverageSavePercentage(batchRequestRecords)
+  const averageSavePercentage = calculateAverageSavePercentage(currentPeriodRecords)
 
   return (
     <aside className="w-80 h-full flex flex-col py-4">
@@ -41,14 +42,4 @@ export default function Aside() {
       </Tabs>
     </aside>
   )
-}
-
-export function calculateAverageSavePercentage(batchRequestRecords: BatchRequestRecord[]): string {
-  if (!batchRequestRecords.length)
-    return '0%'
-
-  const originalRequestCount = batchRequestRecords.reduce((acc, record) => acc + record.originalRequestCount, 0)
-  const batchRequestCount = batchRequestRecords.length
-  const averageSavePercent = (originalRequestCount - batchRequestCount) / originalRequestCount
-  return numberToPercentage(averageSavePercent)
 }

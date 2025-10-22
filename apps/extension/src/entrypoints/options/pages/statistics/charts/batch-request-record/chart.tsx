@@ -1,10 +1,10 @@
-import type { IAreaChartSpec } from '@visactor/vchart'
+import type { IAreaChartSpec } from '@visactor/react-vchart'
 import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
 import { i18n } from '#imports'
-import { VChart } from '@visactor/vchart'
+import { VChart } from '@visactor/react-vchart'
 import { useAtomValue } from 'jotai'
-import { useEffect, useRef } from 'react'
-import { currentPeriodBatchRequestRecordsAtom } from './atom'
+import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
+import { recentDayAtom } from './atom'
 
 interface RequestRecordPoint {
   createdAt: string
@@ -103,33 +103,18 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
 }
 
 export default function Chart() {
-  const batchRequestRecords = useAtomValue(currentPeriodBatchRequestRecordsAtom)
+  const recentDay = useAtomValue(recentDayAtom)
+  const daysBack = Number(recentDay) - 1
 
-  const requestRecordPoints = transformBatchRequestRecordsToChartPoints(batchRequestRecords)
+  const { currentPeriodRecords } = useBatchRequestRecords(daysBack)
 
-  const containerRef = useRef<HTMLDivElement>(null)
-  const lineChartRef = useRef<VChart>(null)
-
+  const requestRecordPoints = transformBatchRequestRecordsToChartPoints(currentPeriodRecords)
   const spec = generateSpec(requestRecordPoints)
 
-  const initializeChart = (spec: IAreaChartSpec) => {
-    if (!containerRef.current)
-      return
-
-    lineChartRef.current = new VChart(spec, { dom: containerRef.current })
-    lineChartRef.current.renderSync()
-  }
-
-  useEffect(() => {
-    initializeChart(spec)
-
-    return () => {
-      lineChartRef.current?.release()
-    }
-  }, [containerRef, lineChartRef, requestRecordPoints, spec])
-
   return (
-    <div ref={containerRef} className="h-full flex-auto" />
+    <div className="relative min-w-[320px] flex-1">
+      <VChart spec={spec} className="" />
+    </div>
   )
 }
 
