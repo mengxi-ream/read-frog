@@ -163,6 +163,11 @@ options:
       globalToggle:
         title: Enable Selection Toolbar
         description: Display the toolbar when selecting text on web pages for quick translation and reading
+      disabledSites:
+        title: Selection Toolbar Disabled Sites
+        description: Configure websites where the selection toolbar should be disabled
+        enterUrlPattern: Enter URL pattern
+        urlPattern: URL Pattern
   translation:
     title: Translation
     requestQueueConfig:

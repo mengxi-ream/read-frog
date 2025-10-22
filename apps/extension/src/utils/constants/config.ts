@@ -57,6 +57,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   selectionToolbar: {
     enabled: true,
+    disabledSelectionToolbarPatterns: [],
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,
