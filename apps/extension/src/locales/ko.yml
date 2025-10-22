@@ -144,6 +144,8 @@ options:
         description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
   floatingButtonAndToolbar:
     title: 플로팅 버튼 및 툴바
+    floatingButtonDemoImageAlt: 플로팅 버튼 데모
+    selectionToolbarDemoImageAlt: 선택 툴바 데모
     floatingButton:
       globalToggle:
         title: 플로팅 버튼 활성화

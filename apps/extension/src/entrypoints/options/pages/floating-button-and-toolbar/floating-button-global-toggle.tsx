@@ -18,7 +18,7 @@ export function FloatingButtonGlobalToggle() {
         <Switch
           checked={floatingButton.enabled}
           onCheckedChange={(checked) => {
-            void setFloatingButton({ enabled: checked })
+            void setFloatingButton({ ...floatingButton, enabled: checked })
           }}
         />
       </div>

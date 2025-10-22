@@ -145,6 +145,8 @@ options:
         description: 此操作将清理所有翻译缓存。此操作无法撤销。
   floatingButtonAndToolbar:
     title: 悬浮按钮和工具栏
+    floatingButtonDemoImageAlt: 悬浮按钮演示
+    selectionToolbarDemoImageAlt: 选择工具栏演示
     floatingButton:
       globalToggle:
         title: 启用悬浮按钮

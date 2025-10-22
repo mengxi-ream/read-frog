@@ -145,6 +145,8 @@ options:
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
+    floatingButtonDemoImageAlt: 懸浮按鈕示範
+    selectionToolbarDemoImageAlt: 選擇工具列示範
     floatingButton:
       globalToggle:
         title: 啟用懸浮按鈕

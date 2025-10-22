@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { cn } from '@repo/ui/lib/utils'
+import { useId } from 'react'
 
 interface GradientBackgroundProps {
   children: ReactNode
@@ -7,8 +8,9 @@ interface GradientBackgroundProps {
 }
 
 export function GradientBackground({ children, className }: GradientBackgroundProps) {
+  const filterId = useId()
   const svg = `<svg viewBox='0 0 500 500' xmlns='http://www.w3.org/2000/svg'>
-  <filter id='noiseFilter'>
+  <filter id='${filterId}'>
     <feTurbulence
       type='fractalNoise'
       baseFrequency='0.9'
@@ -17,7 +19,7 @@ export function GradientBackground({ children, className }: GradientBackgroundPr
     <feColorMatrix type='saturate' values='0'/>
   </filter>
 
-  <rect width='100%' height='100%' filter='url(#noiseFilter)' opacity='0.03'/>
+  <rect width='100%' height='100%' filter='url(#${filterId})' opacity='0.03'/>
 </svg>`
 
   return (

@@ -11,12 +11,20 @@ export function FloatingButtonAndToolbarPage() {
   return (
     <PageLayout title={i18n.t('options.floatingButtonAndToolbar.title')}>
       <GradientBackground>
-        <img src={floatingButtonDemoImage} alt="Floating Button Demo" className="w-100 h-auto" />
+        <img
+          src={floatingButtonDemoImage}
+          alt={i18n.t('options.floatingButtonAndToolbar.floatingButtonDemoImageAlt')}
+          className="w-100 h-auto"
+        />
       </GradientBackground>
       <FloatingButtonGlobalToggle />
       <FloatingButtonDisabledSites />
       <GradientBackground>
-        <img src={selectionToolbarDemoImage} alt="Selection Toolbar Demo" className="w-100 h-auto" />
+        <img
+          src={selectionToolbarDemoImage}
+          alt={i18n.t('options.floatingButtonAndToolbar.selectionToolbarDemoImageAlt')}
+          className="w-100 h-auto"
+        />
       </GradientBackground>
       <SelectionToolbarGlobalToggle />
     </PageLayout>

@@ -143,6 +143,8 @@ options:
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
   floatingButtonAndToolbar:
     title: フローティングボタンとツールバー
+    floatingButtonDemoImageAlt: フローティングボタンデモ
+    selectionToolbarDemoImageAlt: 選択ツールバーデモ
     floatingButton:
       globalToggle:
         title: フローティングボタンを有効化

@@ -145,6 +145,8 @@ options:
         description: This operation will clear all translation cache. This action cannot be undone.
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
+    floatingButtonDemoImageAlt: Floating Button Demo
+    selectionToolbarDemoImageAlt: Selection Toolbar Demo
     floatingButton:
       globalToggle:
         title: Enable Floating Button
