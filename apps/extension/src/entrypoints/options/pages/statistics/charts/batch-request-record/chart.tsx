@@ -121,12 +121,11 @@ export default function Chart() {
   }
 
   useEffect(() => {
-    if (lineChartRef.current) {
-      void lineChartRef.current.updateData('data', requestRecordPoints)
-      return
-    }
-
     initializeChart(spec)
+
+    return () => {
+      lineChartRef.current?.release()
+    }
   }, [containerRef, lineChartRef, requestRecordPoints, spec])
 
   return (

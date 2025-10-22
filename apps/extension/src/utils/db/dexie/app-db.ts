@@ -23,6 +23,12 @@ export default class AppDB extends Dexie {
         key,
         translation,
         createdAt`,
+    })
+    this.version(2).stores({
+      translationCache: `
+        key,
+        translation,
+        createdAt`,
       batchRequestRecord: `
         key,
         createdAt,
