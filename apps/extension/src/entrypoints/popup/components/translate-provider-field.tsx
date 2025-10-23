@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@repo/ui/components/tooltip'
-import TranslateProviderSelector from '@/components/provider/translate-provider-selector'
+import TranslateProviderSelector from '@/components/llm-providers/translate-provider-selector'
 
 export default function TranslateProviderField() {
   return (

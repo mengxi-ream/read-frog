@@ -13,9 +13,10 @@ import ProviderIcon from '@/components/provider-icon'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'
-import { isDarkMode } from '@/utils/tailwind'
+import { useTheme } from '../providers/theme-provider'
 
 export default function TranslateProviderSelector({ className }: { className?: string }) {
+  const { theme } = useTheme()
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const filteredProvidersConfig = filterEnabledProvidersConfig(providersConfig)
@@ -43,7 +44,7 @@ export default function TranslateProviderSelector({ className }: { className?: s
           <SelectLabel>{i18n.t('translateService.aiTranslator')}</SelectLabel>
           {getLLMTranslateProvidersConfig(filteredProvidersConfig).map(({ id, name, provider }) => (
             <SelectItem key={id} value={id}>
-              <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(isDarkMode())} name={name} size="sm" />
+              <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(theme)} name={name} size="sm" />
             </SelectItem>
           ))}
         </SelectGroup>
@@ -51,12 +52,12 @@ export default function TranslateProviderSelector({ className }: { className?: s
           <SelectLabel>{i18n.t('translateService.normalTranslator')}</SelectLabel>
           {filteredNonAPIProviders.map(({ id, name, provider }) => (
             <SelectItem key={id} value={id}>
-              <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(isDarkMode())} name={name} size="sm" />
+              <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(theme)} name={name} size="sm" />
             </SelectItem>
           ))}
           {getPureAPIProvidersConfig(filteredProvidersConfig).map(({ id, name, provider }) => (
             <SelectItem key={id} value={id}>
-              <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(isDarkMode())} name={name} size="sm" />
+              <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(theme)} name={name} size="sm" />
             </SelectItem>
           ))}
         </SelectGroup>

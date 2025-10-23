@@ -9,11 +9,11 @@ import { cn } from '@repo/ui/lib/utils'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import ProviderIcon from '@/components/provider-icon'
+import { useTheme } from '@/components/providers/theme-provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom, readProviderConfigAtom, translateProviderConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
 import { API_PROVIDER_ITEMS } from '@/utils/constants/providers'
-import { isDarkMode } from '@/utils/tailwind'
 import { ConfigCard } from '../../components/config-card'
 import AddProviderDialog from './add-provider-dialog'
 import { selectedProviderIdAtom } from './atoms'
@@ -140,7 +140,7 @@ function ProviderCardList() {
 
 function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig }) {
   const { id, name, provider, enabled } = providerConfig
-
+  const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const setProviderConfig = useSetAtom(providerConfigAtom(id))
   const translateProviderConfig = useAtomValue(translateProviderConfigAtom)
@@ -166,7 +166,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
         )}
       </div>
       <div className="flex items-center justify-between gap-2">
-        <ProviderIcon logo={API_PROVIDER_ITEMS[provider].logo(isDarkMode())} name={name} size="base" textClassName="text-sm" />
+        <ProviderIcon logo={API_PROVIDER_ITEMS[provider].logo(theme)} name={name} size="base" textClassName="text-sm" />
         <Switch checked={enabled} onCheckedChange={checked => setProviderConfig({ ...providerConfig, enabled: checked })} />
       </div>
     </div>

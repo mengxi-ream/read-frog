@@ -1,4 +1,4 @@
-import type { Config } from '@/types/config/config.ts'
+import type { Config } from '@/types/config/config'
 import { browser } from '#imports'
 import { TooltipProvider } from '@repo/ui/components/tooltip'
 import { QueryClientProvider } from '@tanstack/react-query'
@@ -6,19 +6,30 @@ import { Provider as JotaiProvider } from 'jotai'
 import { useHydrateAtoms } from 'jotai/utils'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { configAtom } from '@/utils/atoms/config.ts'
-import { getConfigFromStorage } from '@/utils/config/config.ts'
-import { DEFAULT_CONFIG } from '@/utils/constants/config.ts'
-import { sendMessage } from '@/utils/message.ts'
-import { isDarkMode } from '@/utils/tailwind.ts'
-import { queryClient } from '@/utils/trpc/client.ts'
-import App from './app.tsx'
-import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from './atoms/auto-translate.ts'
+import { ThemeProvider } from '@/components/providers/theme-provider'
+import { configAtom } from '@/utils/atoms/config'
+import { getConfigFromStorage } from '@/utils/config/config'
+import { DEFAULT_CONFIG } from '@/utils/constants/config'
+import { sendMessage } from '@/utils/message'
+import { isDarkMode } from '@/utils/theme'
+import { queryClient } from '@/utils/trpc/client'
+import App from './app'
+import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from './atoms/auto-translate'
 import '@/assets/tailwind/text-small.css'
 import '@/assets/tailwind/theme.css'
 
-document.documentElement.classList.toggle('dark', isDarkMode())
-document.documentElement.style.colorScheme = isDarkMode() ? 'dark' : 'light'
+function applyTheme() {
+  const dark = isDarkMode()
+  document.documentElement.classList.toggle('dark', dark)
+  document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
+}
+
+applyTheme()
+
+// Listen for system theme changes
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+  applyTheme()
+})
 
 function HydrateAtoms({
   initialValues,
@@ -70,9 +81,11 @@ async function initApp() {
               [isCurrentSiteInPatternsAtom, isInPatterns],
             ]}
           >
-            <TooltipProvider>
-              <App />
-            </TooltipProvider>
+            <ThemeProvider>
+              <TooltipProvider>
+                <App />
+              </TooltipProvider>
+            </ThemeProvider>
           </HydrateAtoms>
         </JotaiProvider>
       </QueryClientProvider>

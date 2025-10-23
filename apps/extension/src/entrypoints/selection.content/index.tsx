@@ -2,6 +2,7 @@ import { createShadowRootUi, defineContentScript } from '#imports'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { kebabCase } from 'case-anything'
 import ReactDOM from 'react-dom/client'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { APP_NAME } from '@/utils/constants/app.ts'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { insertShadowRootUIWrapperInto } from '@/utils/shadow-root'
@@ -28,7 +29,9 @@ export default defineContentScript({
         const root = ReactDOM.createRoot(wrapper)
         root.render(
           <QueryClientProvider client={queryClient}>
-            <App />
+            <ThemeProvider>
+              <App />
+            </ThemeProvider>
           </QueryClientProvider>,
         )
         return root

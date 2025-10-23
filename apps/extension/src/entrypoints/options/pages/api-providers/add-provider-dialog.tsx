@@ -3,9 +3,9 @@ import { i18n } from '#imports'
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@repo/ui/components/dialog'
 import { useAtom, useSetAtom } from 'jotai'
 import ProviderIcon from '@/components/provider-icon'
+import { useTheme } from '@/components/providers/theme-provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { API_PROVIDER_ITEMS, PROVIDER_GROUPS } from '@/utils/constants/providers'
-import { isDarkMode } from '@/utils/tailwind'
 import { selectedProviderIdAtom } from './atoms'
 import { addProvider } from './utils'
 
@@ -47,6 +47,7 @@ function ProviderButtonGroup({ groupTitle, providerTypes, handleAddProvider }: {
 }
 
 function ProviderButton({ providerType, handleAddProvider }: { providerType: APIProviderTypes, handleAddProvider: (providerType: APIProviderTypes) => void }) {
+  const { theme } = useTheme()
   return (
     <button
       type="button"
@@ -54,7 +55,7 @@ function ProviderButton({ providerType, handleAddProvider }: { providerType: API
       className="h-auto p-3 flex flex-col items-center space-y-2 hover:bg-muted/70 rounded-lg"
       onClick={() => handleAddProvider(providerType)}
     >
-      <ProviderIcon logo={API_PROVIDER_ITEMS[providerType].logo(isDarkMode())} size="lg" />
+      <ProviderIcon logo={API_PROVIDER_ITEMS[providerType].logo(theme)} size="lg" />
       <span className="text-xs font-light w-full line-clamp-2 flex-1 flex items-center justify-center">
         {API_PROVIDER_ITEMS[providerType].name}
       </span>

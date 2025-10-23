@@ -1,3 +1,4 @@
+import type { Theme } from '@/components/providers/theme-provider'
 import type { AllProviderTypes, APIProviderTypes, ProviderConfig, ProvidersConfig, ReadModels, TranslateLLMModels } from '@/types/config/provider'
 import { i18n } from '#i18n'
 import customProviderLogo from '@/assets/providers/custom-provider.svg'
@@ -235,7 +236,7 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
   },
 }
 
-export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (isDark: boolean) => string, name: string, website: string }>
+export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string }>
   = {
     microsoft: {
       logo: getLobeIconsCDNUrlFn('microsoft-color'),
@@ -248,7 +249,7 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (isDark: boolean) 
       website: 'https://translate.google.com',
     },
     deeplx: {
-      logo: (isDark: boolean) => isDark ? deeplxLogoDark : deeplxLogoLight,
+      logo: (theme: Theme) => theme === 'light' ? deeplxLogoLight : deeplxLogoDark,
       name: 'DeepLX',
       website: 'https://deeplx.owo.network/',
     },

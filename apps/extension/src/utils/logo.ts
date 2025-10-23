@@ -1,5 +1,7 @@
+import type { Theme } from '@/components/providers/theme-provider'
+
 export function getLobeIconsCDNUrlFn(iconSlug: string) {
-  return (isDark: boolean = false) => {
-    return `https://registry.npmmirror.com/@lobehub/icons-static-webp/1.65.0/files/${isDark ? 'dark' : 'light'}/${iconSlug}.webp`
+  return (theme: Theme = 'light') => {
+    return `https://registry.npmmirror.com/@lobehub/icons-static-webp/1.65.0/files/${theme}/${iconSlug}.webp`
   }
 }

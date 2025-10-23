@@ -2,8 +2,9 @@
 
 import type { ITheme } from '@visactor/react-vchart'
 import { ThemeManager } from '@visactor/vchart'
-import { createContext, use, useEffect } from 'react'
+import { createContext, use, useEffect, useMemo } from 'react'
 import { customDarkTheme, customLightTheme } from '@/utils/config/chart-theme'
+import { useTheme } from './theme-provider'
 
 type ChartTheme = 'light' | 'dark'
 
@@ -11,44 +12,35 @@ interface ChartThemeContextI {
   theme: ChartTheme
 }
 
-export const ChartThemeContext = createContext<ChartThemeContextI>({ theme: 'light' })
-
-function getCurrentTheme() {
-  if (
-    typeof window !== 'undefined'
-    && window.matchMedia
-    && window.matchMedia('(prefers-color-scheme: dark)').matches
-  ) {
-    return 'dark'
-  }
-  else {
-    return 'light'
-  }
-}
+export const ChartThemeContext = createContext<ChartThemeContextI | null>(null)
 
 export function ChartThemeProvider({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const { theme } = useTheme()
+
+  const chartTheme = useMemo<ChartTheme>(() => theme === 'dark' ? 'dark' : 'light', [theme])
+
   useEffect(() => {
     registerTheme()
   }, [])
 
-  const theme = getCurrentTheme()
-
   useEffect(() => {
-    ThemeManager.setCurrentTheme(theme)
-  }, [theme])
+    ThemeManager.setCurrentTheme(chartTheme)
+  }, [chartTheme])
+
+  const contextValue = useMemo(() => ({ theme: chartTheme }), [chartTheme])
 
   return (
-    <ChartThemeContext value={{ theme }}>
+    <ChartThemeContext value={contextValue}>
       {children}
     </ChartThemeContext>
   )
 }
 
-export function useChartTheme() {
+export function useChartTheme(): ChartThemeContextI {
   const context = use(ChartThemeContext)
   if (!context) {
     throw new Error('useChartTheme must be used within a ChartThemeProvider')

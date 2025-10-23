@@ -1,4 +1,4 @@
-import { isDarkMode } from '../tailwind'
+import { isDarkMode } from '../theme'
 import { cssRegistry } from './css-registry'
 
 interface ShadowHostOptions {

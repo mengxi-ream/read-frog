@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { cn } from '@repo/ui/lib/utils'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
-import ReadProviderSelector from '@/components/provider/read-provider-selector'
+import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
 import { READ_PROVIDER_MODELS } from '@/types/config/provider'
 import { readProviderConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
 import { ConfigCard } from '../../components/config-card'

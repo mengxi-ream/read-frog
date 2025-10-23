@@ -7,6 +7,7 @@ import { kebabCase } from 'case-anything'
 import { Provider as JotaiProvider } from 'jotai/react'
 import { useHydrateAtoms } from 'jotai/utils'
 import ReactDOM from 'react-dom/client'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { configAtom } from '@/utils/atoms/config'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
@@ -90,9 +91,11 @@ export default defineContentScript({
               <HydrateAtoms
                 initialValues={[[configAtom, config]]}
               >
-                <TooltipProvider>
-                  <App />
-                </TooltipProvider>
+                <ThemeProvider>
+                  <TooltipProvider>
+                    <App />
+                  </TooltipProvider>
+                </ThemeProvider>
               </HydrateAtoms>
             </JotaiProvider>
             <ReactQueryDevtools
