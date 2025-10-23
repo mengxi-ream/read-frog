@@ -16,11 +16,11 @@ function previousPeriodEndDay(daysBack: number) {
 
 export function useBatchRequestRecords(currentDaysBack: number) {
   const currentPeriodQueries = useQueries({
-    queries: RECENT_DAYS.map((day) => {
-      // day is a period that includes today, so after conversion it represents (day - 1) days ago
+    queries: RECENT_DAYS.map((dayRange) => {
+      // dayRange is a period that includes today, so after conversion it represents (dayRange - 1) days ago
       // i.e., a period of 5 days represents 4 days ago
       // The default end date is 0 days ago
-      const daysBack = day - 1
+      const daysBack = dayRange - 1
       return {
         queryKey: ['current-period-records', daysBack],
         queryFn: () => getRangeBatchRequestRecords(daysBack),
@@ -29,8 +29,8 @@ export function useBatchRequestRecords(currentDaysBack: number) {
   })
 
   const previousPeriodQueries = useQueries({
-    queries: RECENT_DAYS.map((day) => {
-      const daysBack = day - 1
+    queries: RECENT_DAYS.map((dayRange) => {
+      const daysBack = dayRange - 1
       return {
         queryKey: ['previous-period-records', daysBack],
         queryFn: () => getRangeBatchRequestRecords(
