@@ -5,23 +5,25 @@ const RECENT_DAYS = [5, 7, 30, 60] as const
 
 function previousPeriodStartDay(daysBack: number) {
   // For example, the previous period for 4 days ago is from 9 days ago to 5 days ago
+  // i.e., 9 - 5 + 1 = 5 days
   return daysBack * 2 + 1
 }
 
-function currentPeriodStartDay(daysBack: number) {
+function previousPeriodEndDay(daysBack: number) {
+  // The end date of the previous period needs to be earlier than the start date of the current period
   return daysBack + 1
 }
 
 export function useBatchRequestRecords(currentDaysBack: number) {
   const currentPeriodQueries = useQueries({
     queries: RECENT_DAYS.map((day) => {
-      // day is a period that includes today, so after conversion it represents day - 1 days ago
+      // day is a period that includes today, so after conversion it represents (day - 1) days ago
       // i.e., a period of 5 days represents 4 days ago
       // The default end date is 0 days ago
       const daysBack = day - 1
       return {
         queryKey: ['current-period-records', daysBack],
-        queryFn: () => getRangeBatchRequestRecords(currentPeriodStartDay(daysBack)),
+        queryFn: () => getRangeBatchRequestRecords(daysBack),
       }
     }),
   })
@@ -33,7 +35,7 @@ export function useBatchRequestRecords(currentDaysBack: number) {
         queryKey: ['previous-period-records', daysBack],
         queryFn: () => getRangeBatchRequestRecords(
           previousPeriodStartDay(daysBack),
-          currentPeriodStartDay(daysBack),
+          previousPeriodEndDay(daysBack),
         ),
       }
     }),
