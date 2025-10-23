@@ -11,25 +11,11 @@ import { configAtom } from '@/utils/atoms/config'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { sendMessage } from '@/utils/message'
-import { isDarkMode } from '@/utils/theme'
 import { queryClient } from '@/utils/trpc/client'
 import App from './app'
 import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from './atoms/auto-translate'
 import '@/assets/tailwind/text-small.css'
 import '@/assets/tailwind/theme.css'
-
-function applyTheme() {
-  const dark = isDarkMode()
-  document.documentElement.classList.toggle('dark', dark)
-  document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
-}
-
-applyTheme()
-
-// Listen for system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  applyTheme()
-})
 
 function HydrateAtoms({
   initialValues,

@@ -11,25 +11,11 @@ import { ChartThemeProvider } from '@/components/providers/chart-theme-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { configAtom } from '@/utils/atoms/config'
 import { getConfigFromStorage } from '@/utils/config/config'
-import { isDarkMode } from '@/utils/theme'
 import { queryClient } from '@/utils/trpc/client'
 import App from './app'
 import { AppSidebar } from './app-sidebar'
 import '@/assets/tailwind/theme.css'
 import './style.css'
-
-function applyTheme() {
-  const dark = isDarkMode()
-  document.documentElement.classList.toggle('dark', dark)
-  document.documentElement.style.colorScheme = dark ? 'dark' : 'light'
-}
-
-applyTheme()
-
-// Listen for system theme changes
-window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-  applyTheme()
-})
 
 function HydrateAtoms({
   initialValues,

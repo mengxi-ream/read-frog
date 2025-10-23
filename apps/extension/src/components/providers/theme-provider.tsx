@@ -17,11 +17,22 @@ function getCurrentTheme(): Theme {
 
 export function ThemeProvider({
   children,
+  container,
 }: {
   children: React.ReactNode
+  container?: HTMLElement
 }) {
   const [theme, setTheme] = useState<Theme>(() => getCurrentTheme())
 
+  // Apply theme to document or shadow root container
+  useEffect(() => {
+    const target = container ?? document.documentElement
+    const dark = theme === 'dark'
+    target.classList.toggle('dark', dark)
+    target.style.colorScheme = dark ? 'dark' : 'light'
+  }, [theme, container])
+
+  // Listen for system theme changes
   useEffect(() => {
     const mq = window.matchMedia?.('(prefers-color-scheme: dark)')
     if (!mq)

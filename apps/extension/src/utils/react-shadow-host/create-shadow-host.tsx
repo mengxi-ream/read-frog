@@ -2,6 +2,7 @@ import { TooltipProvider } from '@repo/ui/components/tooltip'
 import { createContext } from 'react'
 
 import ReactDOM from 'react-dom/client'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { REACT_SHADOW_HOST_CLASS } from '../constants/dom-labels'
 import { ShadowHostBuilder } from './shadow-host-builder'
 
@@ -38,9 +39,11 @@ export function createReactShadowHost(
   const root = ReactDOM.createRoot(innerReactContainer)
   const wrappedComponent = (
     <ShadowWrapperContext value={innerReactContainer}>
-      <TooltipProvider>
-        {component}
-      </TooltipProvider>
+      <ThemeProvider container={innerReactContainer}>
+        <TooltipProvider>
+          {component}
+        </TooltipProvider>
+      </ThemeProvider>
     </ShadowWrapperContext>
   )
 

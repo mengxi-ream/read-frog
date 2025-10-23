@@ -29,7 +29,7 @@ export default defineContentScript({
         const root = ReactDOM.createRoot(wrapper)
         root.render(
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider>
+            <ThemeProvider container={wrapper}>
               <App />
             </ThemeProvider>
           </QueryClientProvider>,

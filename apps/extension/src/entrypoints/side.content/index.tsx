@@ -91,7 +91,7 @@ export default defineContentScript({
               <HydrateAtoms
                 initialValues={[[configAtom, config]]}
               >
-                <ThemeProvider>
+                <ThemeProvider container={wrapper}>
                   <TooltipProvider>
                     <App />
                   </TooltipProvider>

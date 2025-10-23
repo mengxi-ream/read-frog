@@ -29,17 +29,18 @@ import { cn } from '@repo/ui/lib/utils'
 import { useMutationState } from '@tanstack/react-query'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
+import { useTheme } from '@/components/providers/theme-provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
 import { getFinalSourceCode } from '@/utils/config/languages'
 import { READ_PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { DOWNLOAD_FILE_ITEMS } from '@/utils/constants/side'
-import { isDarkMode } from '@/utils/theme'
 import { shadowWrapper } from '../..'
 import { isSideOpenAtom } from '../../atoms'
 import downloader from '../../utils/downloader'
 
 export function TopBar({ className }: { className?: string }) {
+  const { theme } = useTheme()
   const setIsSideOpen = useSetAtom(isSideOpenAtom)
   const readProviderConfig = useAtomValue(readProviderConfigAtom)
   const readConfig = useAtomValue(configFieldsAtomMap.read)
@@ -56,7 +57,7 @@ export function TopBar({ className }: { className?: string }) {
           hideChevron
           customTrigger={(
             <img
-              src={READ_PROVIDER_ITEMS[readProviderConfig.provider].logo(isDarkMode())}
+              src={READ_PROVIDER_ITEMS[readProviderConfig.provider].logo(theme)}
               alt={readConfig.providerId}
               className="size-4 p-0.5 rounded-full"
             />
