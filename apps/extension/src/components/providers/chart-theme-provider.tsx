@@ -12,7 +12,7 @@ interface ChartThemeContextI {
   theme: ChartTheme
 }
 
-export const ChartThemeContext = createContext<ChartThemeContextI | null>(null)
+export const ChartThemeContext = createContext<ChartThemeContextI | undefined>(undefined)
 
 export function ChartThemeProvider({
   children,

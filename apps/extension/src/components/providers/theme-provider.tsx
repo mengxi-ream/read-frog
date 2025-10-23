@@ -9,7 +9,7 @@ interface ThemeContextI {
   theme: Theme
 }
 
-export const ThemeContext = createContext<ThemeContextI | null>(null)
+export const ThemeContext = createContext<ThemeContextI | undefined>(undefined)
 
 function getCurrentTheme(): Theme {
   return isDarkMode() ? 'dark' : 'light'
