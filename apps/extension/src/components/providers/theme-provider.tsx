@@ -27,9 +27,9 @@ export function ThemeProvider({
   // Apply theme to document or shadow root container
   useEffect(() => {
     const target = container ?? document.documentElement
-    const dark = theme === 'dark'
-    target.classList.toggle('dark', dark)
-    target.style.colorScheme = dark ? 'dark' : 'light'
+    target.classList.remove('light', 'dark')
+    target.classList.add(theme)
+    target.style.colorScheme = theme
   }, [theme, container])
 
   // Listen for system theme changes
