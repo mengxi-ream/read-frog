@@ -9,7 +9,7 @@ import { DEFAULT_TTS_CONFIG } from './tts'
 
 export const CONFIG_STORAGE_KEY = 'config'
 export const CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
-export const CONFIG_SCHEMA_VERSION = 27
+export const CONFIG_SCHEMA_VERSION = 28
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -57,6 +57,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   selectionToolbar: {
     enabled: true,
+    disabledSelectionToolbarPatterns: [],
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,

@@ -5,6 +5,7 @@ import { GradientBackground } from '@/components/gradient-background'
 import { PageLayout } from '../../components/page-layout'
 import { FloatingButtonDisabledSites } from './floating-button-disabled-sites'
 import { FloatingButtonGlobalToggle } from './floating-button-global-toggle'
+import { SelectionToolbarDisabledSites } from './selection-toolbar-disabled-sites'
 import { SelectionToolbarGlobalToggle } from './selection-toolbar-global-toggle'
 
 export function FloatingButtonAndToolbarPage() {
@@ -27,6 +28,7 @@ export function FloatingButtonAndToolbarPage() {
         />
       </GradientBackground>
       <SelectionToolbarGlobalToggle />
+      <SelectionToolbarDisabledSites />
     </PageLayout>
   )
 }

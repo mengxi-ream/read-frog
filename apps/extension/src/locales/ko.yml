@@ -162,6 +162,14 @@ options:
       globalToggle:
         title: 선택 툴바 활성화
         description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 읽기
+      closeMenu:
+        disableForSite: 이 사이트에서 비활성화
+        disableGlobally: 전역 비활성화
+      disabledSites:
+        title: 선택 툴바 비활성화 사이트
+        description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
+        enterUrlPattern: URL 패턴 입력
+        urlPattern: URL 패턴
   translation:
     title: 번역
     requestQueueConfig:

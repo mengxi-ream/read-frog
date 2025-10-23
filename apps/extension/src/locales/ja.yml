@@ -161,6 +161,14 @@ options:
       globalToggle:
         title: 選択ツールバーを有効化
         description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と読解
+      closeMenu:
+        disableForSite: このサイトで無効化
+        disableGlobally: グローバルで無効化
+      disabledSites:
+        title: 選択ツールバー無効化サイト
+        description: 選択ツールバーを無効化するウェブサイトを設定します
+        enterUrlPattern: URL パターンを入力
+        urlPattern: URL パターン
   translation:
     title: 翻訳
     requestQueueConfig:
