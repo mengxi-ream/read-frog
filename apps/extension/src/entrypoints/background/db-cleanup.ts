@@ -2,9 +2,10 @@ import { browser } from '#imports'
 import { db } from '@/utils/db/dexie/db'
 import { logger } from '@/utils/logger'
 
-export const CACHE_CLEANUP_ALARM = 'cache-cleanup'
-export const CLEANUP_INTERVAL_MINUTES = 7 * 24 * 60
 export const CHECK_INTERVAL_MINUTES = 24 * 60
+
+export const CACHE_CLEANUP_ALARM = 'cache-cleanup'
+export const CACHE_MAX_AGE_MINUTES = 7 * 24 * 60
 
 export const REQUEST_RECORD_CLEANUP_ALARM = 'request-record-cleanup'
 export const REQUEST_RECORD_MAX_COUNT = 10000
@@ -53,7 +54,7 @@ export function setUpRequestRecordCleanup() {
 async function cleanupOldCache() {
   try {
     const cutoffDate = new Date()
-    cutoffDate.setTime(cutoffDate.getTime() - CLEANUP_INTERVAL_MINUTES * 60 * 1000)
+    cutoffDate.setTime(cutoffDate.getTime() - CACHE_MAX_AGE_MINUTES * 60 * 1000)
 
     // Delete all cache entries older than the cutoff date
     const deletedCount = await db.translationCache
