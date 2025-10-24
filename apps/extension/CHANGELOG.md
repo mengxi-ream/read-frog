@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.15.0
+
+### Minor Changes
+
+- [#633](https://github.com/mengxi-ream/read-frog/pull/633) [`58529e1`](https://github.com/mengxi-ream/read-frog/commit/58529e1adf55c5f0e876e278b8aeac7cc4187348) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(extension): integrate statistics page on options
+
+### Patch Changes
+
+- [#638](https://github.com/mengxi-ream/read-frog/pull/638) [`93c78a0`](https://github.com/mengxi-ream/read-frog/commit/93c78a0a9b4e0b5b0cafdc58f767053e1834a036) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat(extension): support disabling selection-toolbar for specific websites
+
+- [#634](https://github.com/mengxi-ream/read-frog/pull/634) [`2d39087`](https://github.com/mengxi-ream/read-frog/commit/2d390876641036cd5537e0287c896d894a39282a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: disable floating button or selection toolbar in option page
+
 ## 1.14.1
 
 ### Patch Changes
