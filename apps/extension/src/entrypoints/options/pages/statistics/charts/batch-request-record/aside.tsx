@@ -32,7 +32,7 @@ export default function Aside() {
         <TabsList className="w-full bg-background">
           {
             recentDays.map(recentDay => (
-              <TabsTrigger key={recentDay} value={recentDay.toString()} className="transition-none [&[data-state=active]]:bg-primary-weak [&[data-state=active]]:shadow-none">
+              <TabsTrigger key={recentDay} value={recentDay.toString()} className="transition-none data-[state=active]:bg-primary-weak! data-[state=active]:shadow-none">
                 {recentDay}
                 D
               </TabsTrigger>
