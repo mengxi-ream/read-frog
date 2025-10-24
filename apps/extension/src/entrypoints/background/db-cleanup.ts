@@ -11,41 +11,39 @@ export const REQUEST_RECORD_CLEANUP_ALARM = 'request-record-cleanup'
 export const REQUEST_RECORD_MAX_COUNT = 10000
 export const REQUEST_RECORD_MAX_AGE_DAYS = 120
 
-export function setUpCacheCleanup() {
-  // Set up periodic alarm for cache cleanup
-  void browser.alarms.create(CACHE_CLEANUP_ALARM, {
-    delayInMinutes: 1,
-    periodInMinutes: CHECK_INTERVAL_MINUTES,
-  })
+export async function setUpDatabaseCleanup() {
+  // Set up periodic alarms (only if they don't exist)
+  const existingCacheAlarm = await browser.alarms.get(CACHE_CLEANUP_ALARM)
+  if (!existingCacheAlarm) {
+    void browser.alarms.create(CACHE_CLEANUP_ALARM, {
+      delayInMinutes: 1,
+      periodInMinutes: CHECK_INTERVAL_MINUTES,
+    })
+  }
 
-  // Listen for alarm events
+  const existingRequestAlarm = await browser.alarms.get(REQUEST_RECORD_CLEANUP_ALARM)
+  if (!existingRequestAlarm) {
+    void browser.alarms.create(REQUEST_RECORD_CLEANUP_ALARM, {
+      delayInMinutes: 1,
+      periodInMinutes: CHECK_INTERVAL_MINUTES,
+    })
+  }
+
+  // Register the alarm listener
   browser.alarms.onAlarm.addListener(async (alarm) => {
     if (alarm.name === CACHE_CLEANUP_ALARM) {
       await cleanupOldCache()
     }
-  })
-
-  // Also run cleanup immediately when background script starts
-  cleanupOldCache().catch((error) => {
-    logger.error('Failed to run initial cache cleanup:', error)
-  })
-}
-
-export function setUpRequestRecordCleanup() {
-  // Set up periodic alarm for request record cleanup
-  void browser.alarms.create(REQUEST_RECORD_CLEANUP_ALARM, {
-    delayInMinutes: 1,
-    periodInMinutes: CHECK_INTERVAL_MINUTES,
-  })
-
-  // Listen for alarm events
-  browser.alarms.onAlarm.addListener(async (alarm) => {
-    if (alarm.name === REQUEST_RECORD_CLEANUP_ALARM) {
+    else if (alarm.name === REQUEST_RECORD_CLEANUP_ALARM) {
       await cleanupOldRequestRecords()
     }
   })
 
-  // Also run cleanup immediately when background script starts
+  // Run cleanup immediately when background script starts
+  cleanupOldCache().catch((error) => {
+    logger.error('Failed to run initial cache cleanup:', error)
+  })
+
   cleanupOldRequestRecords().catch((error) => {
     logger.error('Failed to run initial request records cleanup:', error)
   })
