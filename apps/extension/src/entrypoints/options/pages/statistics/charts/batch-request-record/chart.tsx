@@ -113,7 +113,7 @@ export default function Chart() {
 
   return (
     <div className="relative min-w-[320px] flex-1">
-      <VChart spec={spec} className="" />
+      <VChart spec={spec} />
     </div>
   )
 }
