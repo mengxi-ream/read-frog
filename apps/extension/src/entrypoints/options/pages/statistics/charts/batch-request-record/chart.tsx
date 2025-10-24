@@ -122,7 +122,7 @@ function transformBatchRequestRecordsToChartPoints(batchRequestRecords: BatchReq
   const requestTimesGroupByDay: Record<string, { originalRequestCount: number, batchRequestCount: number }> = {}
 
   for (const record of batchRequestRecords) {
-    const createdAt = record.createdAt.toISOString().split('T')[0]
+    const createdAt = record.createdAt.toLocaleDateString('en-CA')
     if (!requestTimesGroupByDay[createdAt]) {
       requestTimesGroupByDay[createdAt] = {
         originalRequestCount: 0,
