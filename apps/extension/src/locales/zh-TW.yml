@@ -163,6 +163,14 @@ options:
       globalToggle:
         title: 啟用選擇工具列
         description: 在網頁上選擇文字時顯示工具列，快速翻譯和閱讀
+      closeMenu:
+        disableForSite: 停用此網站
+        disableGlobally: 全域停用
+      disabledSites:
+        title: 選擇工具列停用網站
+        description: 設定需要停用選擇工具列的網站
+        enterUrlPattern: 輸入網址模式
+        urlPattern: URL 模式
   translation:
     title: 翻譯
     requestQueueConfig:

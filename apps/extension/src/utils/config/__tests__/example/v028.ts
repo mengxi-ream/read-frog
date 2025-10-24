@@ -1,8 +1,9 @@
 import type { TestSeriesObject } from './types'
+import type { Config } from '@/types/config/config'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Migrate Gemini models from 1.5 to 2.5',
+    description: 'Add selection toolbar enabled config',
     config: {
       language: {
         detectedCode: 'spa',
@@ -157,14 +158,17 @@ Translate to {{targetLang}}:
       sideContent: {
         width: 700,
       },
-      selectionToolbar: { enabled: false },
+      selectionToolbar: {
+        enabled: false,
+        disabledSelectionToolbarPatterns: [],
+      },
       betaExperience: {
         enabled: false,
       },
-    },
+    } satisfies Config,
   },
   'config-with-no-default-openai-model': {
-    description: 'Migrate Gemini models from 1.5 to 2.5',
+    description: 'Add selection toolbar disabled patterns config',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -222,6 +226,7 @@ Translate to {{targetLang}}:
       },
       selectionToolbar: {
         enabled: true,
+        disabledSelectionToolbarPatterns: [],
       },
       sideContent: {
         width: 420,
@@ -273,6 +278,6 @@ Translate to {{targetLang}}:
       betaExperience: {
         enabled: false,
       },
-    },
+    } satisfies Config,
   },
 }

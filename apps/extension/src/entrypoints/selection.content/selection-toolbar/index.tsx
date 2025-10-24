@@ -5,6 +5,7 @@ import { NOTRANSLATE_CLASS } from '@/utils/constants/dom-labels'
 import { MARGIN } from '@/utils/constants/selection'
 import { AiButton, AiPopover } from './ai-button'
 import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from './atom'
+import { CloseButton } from './close-button'
 import { SpeakButton } from './speak-button'
 import { TranslateButton, TranslatePopover } from './translate-button'
 
@@ -142,16 +143,24 @@ export function SelectionToolbar() {
     }
   }, [isSelectionToolbarVisible, setSelectionContent, setIsSelectionToolbarVisible, setSelectionRange, updatePosition])
 
+  // Check if current site is disabled
+  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some(pattern =>
+    window.location.href.includes(pattern),
+  )
+
   return (
     <div ref={tooltipContainerRef} className={NOTRANSLATE_CLASS}>
-      {isSelectionToolbarVisible && selectionToolbar.enabled && (
+      {isSelectionToolbarVisible && selectionToolbar.enabled && !isSiteDisabled && (
         <div
           ref={tooltipRef}
-          className="absolute z-[2147483647] bg-zinc-200 dark:bg-zinc-800 rounded-sm shadow-lg overflow-hidden flex items-center"
+          className="group absolute z-[2147483647] bg-zinc-200 dark:bg-zinc-800 rounded-sm shadow-lg overflow-visible flex items-center"
         >
-          <AiButton />
-          <TranslateButton />
-          <SpeakButton />
+          <div className="flex items-center overflow-hidden rounded-sm">
+            <AiButton />
+            <TranslateButton />
+            <SpeakButton />
+          </div>
+          <CloseButton />
         </div>
       )}
       <AiPopover />

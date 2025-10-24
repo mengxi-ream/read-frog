@@ -24,6 +24,7 @@ const floatingButtonSchema = z.object({
 // Text selection button schema
 const selectionToolbarSchema = z.object({
   enabled: z.boolean(),
+  disabledSelectionToolbarPatterns: z.array(z.string()),
 })
 
 // side content schema

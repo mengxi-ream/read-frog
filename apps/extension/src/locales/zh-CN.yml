@@ -163,6 +163,14 @@ options:
       globalToggle:
         title: 启用选择工具栏
         description: 在网页上选择文本时显示工具栏，快速翻译和阅读
+      closeMenu:
+        disableForSite: 禁用此网站
+        disableGlobally: 全局禁用
+      disabledSites:
+        title: 选择工具栏禁用网站
+        description: 配置需要禁用选择工具栏的网站
+        enterUrlPattern: 输入网址模式
+        urlPattern: 网址模式
   translation:
     title: 翻译
     requestQueueConfig:
