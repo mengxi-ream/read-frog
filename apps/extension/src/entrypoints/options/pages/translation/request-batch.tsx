@@ -1,5 +1,6 @@
 import type { BatchQueueConfig } from '@/types/config/translate'
 import { i18n } from '#imports'
+import { Icon } from '@iconify/react'
 import { Input } from '@repo/ui/components/input'
 import { useAtom } from 'jotai'
 import { Link } from 'react-router'
@@ -41,14 +42,13 @@ function StatisticsLink() {
 
   return (
     <Link
-      className="text-primary hover:opacity-95 cursor-pointer transition-opacity gap-1"
+      className="text-primary hover:opacity-80 cursor-pointer transition-opacity"
       to="/statistics"
+      target="_blank"
     >
-      {i18n.t('options.translation.batchQueueConfig.statisticsLink.before')}
+      {i18n.t('options.translation.batchQueueConfig.statisticsLink', [averageSavePercentage])}
       {' '}
-      {averageSavePercentage}
-      {' '}
-      {i18n.t('options.translation.batchQueueConfig.statisticsLink.after')}
+      <Icon icon="tabler:external-link" className="inline w-3.5 h-3.5" />
     </Link>
   )
 }

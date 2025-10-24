@@ -192,9 +192,7 @@ options:
       maxItemsPerBatch:
         title: 最大段落數
         description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量
-      statisticsLink:
-        before: 過去七天已為您大約節省
-        after: 成本
+      statisticsLink: 過去 7 天已為您節省約 $1 成本
     alwaysTranslate:
       title: 總是翻譯
       description: 總是翻譯這個網站

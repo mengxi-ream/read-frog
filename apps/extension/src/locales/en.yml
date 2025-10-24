@@ -192,9 +192,7 @@ options:
       maxItemsPerBatch:
         title: Maximum Paragraph Count
         description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
-      statisticsLink:
-        before: 'Over the past seven days, you''ve saved approximately '
-        after: ' in costs'
+      statisticsLink: Saved approximately $1 cost in the past 7 days
     alwaysTranslate:
       title: Always Translate
       description: Always translate this website

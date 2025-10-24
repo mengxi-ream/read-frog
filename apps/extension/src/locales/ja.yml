@@ -190,9 +190,7 @@ options:
       maxItemsPerBatch:
         title: 最大段落数
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
-      statisticsLink:
-        before: 過去7日間で約
-        after: のコストを節約しました
+      statisticsLink: 過去 7 日間で約 $1 のコストを節約しました
     alwaysTranslate:
       title: 常に翻訳
       description: このサイトを常に翻訳する
