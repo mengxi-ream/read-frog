@@ -63,6 +63,6 @@ export default defineBackground({
     void setupUninstallSurvey()
 
     proxyFetch()
-    initMockData()
+    void initMockData()
   },
 })
