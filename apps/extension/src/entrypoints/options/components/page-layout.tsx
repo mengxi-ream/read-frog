@@ -15,7 +15,7 @@ export function PageLayout({ title, children, className, innerClassName }: { tit
           </header>
         </Container>
       </div>
-      <Container className={innerClassName}>
+      <Container className={cn('@container', innerClassName)}>
         {children}
       </Container>
     </div>

@@ -16,17 +16,17 @@ export default function Aside() {
   const averageSavePercentage = calculateAverageSavePercentage(currentPeriodRecords)
 
   return (
-    <aside className="w-80 h-full flex flex-col py-4">
+    <aside className="w-80 flex flex-col py-4 gap-y-4">
       <div className="flex flex-col items-start justify-between gap-2">
-        <h2 className="items-center leading-relax text-2xl">
+        <h2 className="items-center leading-relax text-xl font-medium">
           {i18n.t('options.statistics.batchRequest.title')}
         </h2>
-        <span className="items-center leading-relax text-base text-gray-500 dark:text-gray-400">
+        <span className="items-center leading-relax text-base text-muted-foreground">
           {i18n.t('options.statistics.batchRequest.description')}
         </span>
       </div>
-      <div className="w-full flex-auto flex items-center justify-start">
-        <h1 className="text-7xl font-medium leading-none">{averageSavePercentage}</h1>
+      <div className="w-full flex-1 flex items-center justify-start">
+        <span className="text-4xl font-bold leading-none">{averageSavePercentage}</span>
       </div>
       <Tabs className="w-full flex" defaultValue={recentDay} onValueChange={setRecentDay}>
         <TabsList className="w-full bg-background">

@@ -14,9 +14,9 @@ export default function Metrics() {
   const metrics = transformRecordsToMetrics(currentPeriodRecords, previousPeriodRecords)
 
   return (
-    <header className="h-fit w-full grid gap-4 grid-cols-2 grid-rows-1 xl:grid-cols-4">
+    <div className="h-fit w-full grid gap-4 grid-cols-1 @xl:grid-cols-2 @4xl:grid-cols-3 @6xl:grid-cols-4">
       { Object.entries(metrics).map(([key, metric]) => <MetricCard key={key} {...metric} />) }
-    </header>
+    </div>
   )
 }
 

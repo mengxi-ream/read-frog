@@ -9,24 +9,22 @@ export function MetricCard(
   { title: string, metric: number, icon: string, comparison?: number },
 ) {
   return (
-    <div className="hover:scale-[1.01] hover:-translate-y-1/12 transition-all duration-300 grid grid-cols-1 *:data-[slot=card]:shadow-xs @xl/main:grid-cols-2 @5xl/main:grid-cols-4">
-      <Card className="@container/card flex flex-row py-6">
-        <CardContent className="px-5 flex gap-4 w-full">
-          <div className="h-full flex items-center">
-            <div className="size-10 flex items-center justify-center rounded-xl bg-zinc-200 text-black dark:bg-zinc-800 dark:text-white">
-              <Icon icon={icon} className="size-5" />
-            </div>
+    <Card className="flex flex-row hover:scale-[1.01] hover:-translate-y-1/12 transition-all duration-200 shadow-xs">
+      <CardContent className="flex gap-4 w-full">
+        <div className="h-full flex items-center">
+          <div className="size-10 flex items-center justify-center rounded-xl bg-zinc-200 text-black dark:bg-zinc-800 dark:text-white">
+            <Icon icon={icon} className="size-5" />
           </div>
-          <div className="h-full flex flex-col gap-3 w-full items-start">
-            <div className="leading-none text-muted-foreground text-sm">{title}</div>
-            <div className="leading-none text-2xl font-semibold tabular-nums @[250px]/card:text-3xl flex flex-col md:flex-row gap-3 items-start md:items-center">
-              {addThousandsSeparator(metric)}
-              <Comparison comparison={comparison} />
-            </div>
+        </div>
+        <div className="h-full flex flex-col gap-3 w-full items-start">
+          <div className="leading-none text-muted-foreground text-sm">{title}</div>
+          <div className="leading-none text-lg font-semibold tabular-nums flex flex-wrap gap-x-3 items-center">
+            {addThousandsSeparator(metric)}
+            <Comparison comparison={comparison} />
           </div>
-        </CardContent>
-      </Card>
-    </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 

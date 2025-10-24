@@ -99,6 +99,7 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
         curveType: 'monotone',
       },
     },
+    autoFit: true,
   }
 }
 
@@ -112,8 +113,10 @@ export default function Chart() {
   const spec = generateSpec(requestRecordPoints)
 
   return (
-    <div className="relative min-w-[320px] flex-1">
-      <VChart spec={spec} />
+    <div className="relative h-80 flex-1 min-w-[400px] overflow-hidden">
+      <div className="absolute inset-0">
+        <VChart spec={spec} />
+      </div>
     </div>
   )
 }

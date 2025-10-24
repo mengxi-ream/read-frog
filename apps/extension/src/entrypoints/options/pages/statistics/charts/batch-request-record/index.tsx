@@ -6,7 +6,7 @@ export default function BatchRequestRecord() {
   return (
     <section className="flex flex-col gap-8">
       <Metrics />
-      <div className="flex flex-wrap gap-4 h-96">
+      <div className="flex flex-wrap gap-4">
         <Aside />
         <Chart />
       </div>
