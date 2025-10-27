@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.15.2
+
+### Patch Changes
+
+- [#653](https://github.com/mengxi-ream/read-frog/pull/653) [`b20c83a`](https://github.com/mengxi-ream/read-frog/commit/b20c83ad84b2d7c12cc57b025c879e897e75f5f0) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - build: upgrade deps
+
+- [#655](https://github.com/mengxi-ream/read-frog/pull/655) [`27a1346`](https://github.com/mengxi-ream/read-frog/commit/27a13463fff3f0ad0f75659770ae08aa808785f5) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: resolve CSS property conflicts with host pages
+
 ## 1.15.1
 
 ### Patch Changes

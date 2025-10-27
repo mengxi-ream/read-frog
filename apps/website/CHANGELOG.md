@@ -1,5 +1,11 @@
 # @read-frog/website
 
+## 1.3.1
+
+### Patch Changes
+
+- [#653](https://github.com/mengxi-ream/read-frog/pull/653) [`b20c83a`](https://github.com/mengxi-ream/read-frog/commit/b20c83ad84b2d7c12cc57b025c879e897e75f5f0) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - build: upgrade deps
+
 ## 1.3.0
 
 ### Minor Changes
