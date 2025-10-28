@@ -253,11 +253,13 @@ options:
             font-weight: bold;
             background-color: #ffffcc;
           saveButton: Save
+          savedButton: Saved
           validation:
             validating: Validating...
             valid: CSS is valid
             syntaxError: CSS has syntax errors
             tooLong: CSS is too long
+            saved: All changes saved
     translationMode:
       title: Translation Mode
       description: 'Choose how the translated text is displayed: bilingual or translation only.'

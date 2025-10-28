@@ -253,11 +253,13 @@ options:
             font-weight: bold;
             background-color: #ffffcc;
           saveButton: 儲存
+          savedButton: 已儲存
           validation:
             validating: 驗證中...
             valid: CSS 有效
             syntaxError: CSS 存在語法錯誤
             tooLong: CSS 過長
+            saved: 所有變更已儲存
     translationMode:
       title: 翻譯模式
       description: 選擇翻譯文字的顯示方式：雙語對照或僅顯示翻譯

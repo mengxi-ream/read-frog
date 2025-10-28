@@ -253,11 +253,13 @@ options:
             font-weight: bold;
             background-color: #ffffcc;
           saveButton: 保存
+          savedButton: 已保存
           validation:
             validating: 验证中...
             valid: CSS 有效
             syntaxError: CSS 存在语法错误
             tooLong: CSS 过长
+            saved: 所有更改已保存
     translationMode:
       title: 翻译模式
       description: 选择翻译文本的显示方式：双语对照或仅显示翻译

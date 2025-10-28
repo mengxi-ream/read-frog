@@ -251,11 +251,13 @@ options:
             font-weight: bold;
             background-color: #ffffcc;
           saveButton: 保存
+          savedButton: 保存済み
           validation:
             validating: 検証中...
             valid: CSSは有効です
             syntaxError: CSSに構文エラーがあります
             tooLong: CSSが長すぎます
+            saved: すべての変更が保存されました
     translationMode:
       title: 翻訳モード
       description: 翻訳テキストの表示方法を選択：バイリンガルまたは翻訳のみ

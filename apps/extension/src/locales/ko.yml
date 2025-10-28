@@ -252,11 +252,13 @@ options:
             font-weight: bold;
             background-color: #ffffcc;
           saveButton: 저장
+          savedButton: 저장됨
           validation:
             validating: 검증 중...
             valid: CSS가 유효합니다
             syntaxError: CSS에 구문 오류가 있습니다
             tooLong: CSS가 너무 깁니다
+            saved: 모든 변경사항이 저장되었습니다
     translationMode:
       title: 번역 모드
       description: '번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만'

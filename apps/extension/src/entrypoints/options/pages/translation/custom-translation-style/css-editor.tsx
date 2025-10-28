@@ -42,10 +42,11 @@ export function CSSEditor() {
 
   const hasSyntaxError = !syntaxCheck.valid
   const isValidating = cssInput !== debouncedCssInput
+  const hasChanges = cssInput !== (translateConfig.translationNodeStyle.customCSS ?? '')
 
   const handleSave = () => {
     // Must pass syntax check and length check
-    if (hasSyntaxError || hasLengthError || isValidating) {
+    if (hasSyntaxError || hasLengthError || isValidating || !hasChanges) {
       return
     }
 
@@ -104,10 +105,12 @@ export function CSSEditor() {
         </Activity> */}
         <div className="flex items-center gap-2 justify-between">
           <div className={cn('text-sm text-green-600 dark:text-green-400', isValidating && 'text-muted-foreground', (hasSyntaxError || hasLengthError) && 'text-destructive')}>
-            {cssInput.trim().length > 0 ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError) : ''}
+            {cssInput.trim().length > 0 ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError, hasChanges) : ''}
           </div>
-          <Button onClick={handleSave} disabled={isValidating || hasSyntaxError || hasLengthError}>
-            {i18n.t('options.translation.translationStyle.customCSS.editor.saveButton')}
+          <Button onClick={handleSave} disabled={isValidating || hasSyntaxError || hasLengthError || !hasChanges}>
+            {hasChanges
+              ? i18n.t('options.translation.translationStyle.customCSS.editor.saveButton')
+              : i18n.t('options.translation.translationStyle.customCSS.editor.savedButton')}
           </Button>
         </div>
       </Field>
@@ -115,7 +118,7 @@ export function CSSEditor() {
   )
 }
 
-function getValidationMessage(isValidating: boolean, hasSyntaxError: boolean, hasLengthError: boolean) {
+function getValidationMessage(isValidating: boolean, hasSyntaxError: boolean, hasLengthError: boolean, hasChanges: boolean) {
   if (isValidating) {
     return i18n.t('options.translation.translationStyle.customCSS.editor.validation.validating')
   }
@@ -126,6 +129,10 @@ function getValidationMessage(isValidating: boolean, hasSyntaxError: boolean, ha
 
   if (hasLengthError) {
     return i18n.t('options.translation.translationStyle.customCSS.editor.validation.tooLong')
+  }
+
+  if (!hasChanges) {
+    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.saved')
   }
 
   return i18n.t('options.translation.translationStyle.customCSS.editor.validation.valid')
