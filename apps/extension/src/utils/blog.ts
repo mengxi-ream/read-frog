@@ -14,7 +14,7 @@ const blogApiResponseSchema = z.object({
   date: z.string(),
   title: z.string(),
   description: z.string(),
-  slugs: z.array(z.string()),
+  url: z.string(),
   extensionVersion: semanticVersionSchema.nullable().optional(),
 }).nullable()
 
@@ -163,7 +163,7 @@ export async function getLatestBlogDate(
 
     return {
       date: new Date(latestPost.date),
-      url: `/blog/${latestPost.slugs.join('/')}`,
+      url: latestPost.url,
       extensionVersion: latestPost.extensionVersion ?? null,
     }
   }

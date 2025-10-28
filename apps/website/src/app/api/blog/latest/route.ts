@@ -49,7 +49,7 @@ export function GET(request: NextRequest) {
       date: date.toISOString(),
       title: latestPost.data.title,
       description: latestPost.data.description,
-      slugs: latestPost.slugs,
+      url: `/blog/${latestPost.slugs.join('/')}`,
       extensionVersion: latestPost.data.extensionVersion ?? null,
     })
   }
