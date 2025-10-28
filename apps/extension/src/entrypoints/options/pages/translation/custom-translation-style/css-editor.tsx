@@ -22,7 +22,7 @@ import { lintCSS } from '@/utils/css/lint-css'
 export function CSSEditor() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const { translationNodeStyle } = translateConfig
-  const [cssInput, setCssInput] = useState(translateConfig.translationNodeStyle.customCSS || '')
+  const [cssInput, setCssInput] = useState(translateConfig.translationNodeStyle.customCSS ?? '')
 
   // Debounce CSS input for validation
   const debouncedCssInput = useDebouncedValue(cssInput, 500)
