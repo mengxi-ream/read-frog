@@ -24,7 +24,7 @@ export const blog = defineCollections({
   dir: 'content/blog',
   schema: frontmatterSchema.extend({
     author: z.string(),
-    date: z.iso.date(),
+    date: z.date(),
     extensionVersion: z.string().optional(),
   }),
 })
