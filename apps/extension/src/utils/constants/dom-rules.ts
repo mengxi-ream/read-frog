@@ -85,6 +85,7 @@ export const DONT_WALK_AND_TRANSLATE_TAGS = new Set([
 
 export const DONT_WALK_BUT_TRANSLATE_TAGS = new Set([
   'CODE',
+  'TIME',
 ])
 
 export const FORCE_INLINE_TRANSLATION_TAGS = new Set([

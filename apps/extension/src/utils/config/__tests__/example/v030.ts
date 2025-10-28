@@ -141,7 +141,11 @@ Translate to {{targetLang}}:
           maxCharactersPerBatch: 1000,
           maxItemsPerBatch: 4,
         },
-        translationNodeStyle: 'blur',
+        translationNodeStyle: {
+          preset: 'blur',
+          isCustom: false,
+          customCSS: null,
+        },
       },
       tts: {
         providerId: null,
@@ -266,7 +270,11 @@ Translate to {{targetLang}}:
           maxCharactersPerBatch: 1000,
           maxItemsPerBatch: 4,
         },
-        translationNodeStyle: 'default',
+        translationNodeStyle: {
+          preset: 'default',
+          isCustom: false,
+          customCSS: null,
+        },
       },
       tts: {
         providerId: null,

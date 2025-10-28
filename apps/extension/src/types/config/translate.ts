@@ -20,8 +20,22 @@ export const translationModeSchema = z.enum(TRANSLATION_MODES)
 export const pageTranslateRangeSchema = z.enum(['main', 'all'])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
 
-export const translationNodeStyleSchema = z.enum(TRANSLATION_NODE_STYLE)
-export type TranslationNodeStyle = z.infer<typeof translationNodeStyleSchema>
+// Translation node style preset (excluding 'custom' - controlled by isCustom flag)
+export const translationNodeStylePresetSchema = z.enum(TRANSLATION_NODE_STYLE)
+export type TranslationNodeStylePreset = z.infer<typeof translationNodeStylePresetSchema>
+
+export const MAX_CUSTOM_CSS_LENGTH = 8192
+
+// Translation node style configuration
+export const translationNodeStyleConfigSchema = z.object({
+  preset: translationNodeStylePresetSchema,
+  isCustom: z.boolean(),
+  customCSS: z.string()
+    .max(MAX_CUSTOM_CSS_LENGTH, 'Custom CSS cannot exceed 8KB')
+    .nullable(),
+})
+
+export type TranslationNodeStyleConfig = z.infer<typeof translationNodeStyleConfigSchema>
 
 export const translatePromptObjSchema = z.object({
   name: z.string(),
@@ -54,7 +68,7 @@ export const translateConfigSchema = z.object({
   promptsConfig: promptsConfigSchema,
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,
-  translationNodeStyle: translationNodeStyleSchema,
+  translationNodeStyle: translationNodeStyleConfigSchema,
 })
 
 export type RequestQueueConfig = z.infer<typeof requestQueueConfigSchema>

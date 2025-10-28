@@ -9,7 +9,7 @@ import { DEFAULT_TTS_CONFIG } from './tts'
 
 export const CONFIG_STORAGE_KEY = 'config'
 export const CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
-export const CONFIG_SCHEMA_VERSION = 29
+export const CONFIG_SCHEMA_VERSION = 30
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -48,7 +48,11 @@ export const DEFAULT_CONFIG: Config = {
       maxCharactersPerBatch: DEFAULT_BATCH_CONFIG.maxCharactersPerBatch,
       maxItemsPerBatch: DEFAULT_BATCH_CONFIG.maxItemsPerBatch,
     },
-    translationNodeStyle: DEFAULT_TRANSLATION_NODE_STYLE,
+    translationNodeStyle: {
+      preset: DEFAULT_TRANSLATION_NODE_STYLE,
+      isCustom: false,
+      customCSS: null,
+    },
   },
   tts: DEFAULT_TTS_CONFIG,
   floatingButton: {

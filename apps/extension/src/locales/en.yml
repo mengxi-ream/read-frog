@@ -231,6 +231,11 @@ options:
     translationStyle:
       title: Translation Display Style
       description: Distinguish display styles for translation results (see sample for specific style demonstrations)
+      useCustomStyle: Use Custom Style
+      useCustomStyleDescription: Enable to define your own CSS styles for translation results
+      presetStyle: Preset Style
+      cssEditor: CSS Editor
+      preview: Preview
       style:
         default: None
         blur: Blur Effect
@@ -240,6 +245,20 @@ options:
         border: Border
         textColor: Text Color
         background: Background
+      customCSS:
+        title: Custom CSS
+        description: Define your own CSS styles for translation highlights to match your personal preferences or accessibility needs
+        editor:
+          placeholder: |
+            /* Enter CSS rules here */
+            color: blue;
+            font-weight: bold;
+            background-color: #ffffcc;
+          saveButton: Save Custom CSS
+        validation:
+          blocked: 'Blocked for security: {property}'
+          invalid: Invalid CSS syntax
+          tooLarge: CSS exceeds 8KB limit
     translationMode:
       title: Translation Mode
       description: 'Choose how the translated text is displayed: bilingual or translation only.'

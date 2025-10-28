@@ -1,6 +1,5 @@
 import { i18n } from '#imports'
 import { Input } from '@repo/ui/components/input'
-import { cn } from '@repo/ui/lib/utils'
 import hotkeys from 'hotkeys-js'
 import { useEffect, useRef, useState } from 'react'
 import { formatHotkey } from '@/utils/os'
@@ -88,7 +87,7 @@ export function ShortcutKeyRecorder(
   return (
     <Input
       ref={recordDomRef}
-      className={cn('select-none', className)}
+      className={className}
       onFocus={startRecord}
       onBlur={endRecord}
       onKeyUp={clearHotkeys}

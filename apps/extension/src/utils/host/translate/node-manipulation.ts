@@ -1,6 +1,6 @@
 import type { APICallError } from 'ai'
 import type { Config } from '@/types/config/config'
-import type { TranslationMode, TranslationNodeStyle } from '@/types/config/translate'
+import type { TranslationMode, TranslationNodeStyleConfig } from '@/types/config/translate'
 import type { Point, TransNode } from '@/types/dom'
 import React from 'react'
 import textSmallCSS from '@/assets/tailwind/text-small.css?inline'
@@ -373,7 +373,7 @@ async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode: HTMLElement,
   targetNode: TransNode,
   translatedText: string,
-  translationNodeStyle: TranslationNodeStyle,
+  translationNodeStyle: TranslationNodeStyleConfig,
   forceBlockTranslation: boolean = false,
 ) {
   // Use the wrapper's owner document
