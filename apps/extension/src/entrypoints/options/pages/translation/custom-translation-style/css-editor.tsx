@@ -104,7 +104,7 @@ export function CSSEditor() {
         </Activity> */}
         <div className="flex items-center gap-2 justify-between">
           <div className={cn('text-sm text-green-600 dark:text-green-400', isValidating && 'text-muted-foreground', (hasSyntaxError || hasLengthError) && 'text-destructive')}>
-            {cssInput.trim().length > 0 ? getValidationMessage({ isValidating, hasSyntaxError, hasLengthError }) : ''}
+            {cssInput.trim().length > 0 ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError) : ''}
           </div>
           <Button onClick={handleSave} disabled={isValidating || hasSyntaxError || hasLengthError}>
             {i18n.t('options.translation.translationStyle.customCSS.editor.saveButton')}
@@ -115,18 +115,18 @@ export function CSSEditor() {
   )
 }
 
-function getValidationMessage({ isValidating, hasSyntaxError, hasLengthError }: { isValidating: boolean, hasSyntaxError: boolean, hasLengthError: boolean }) {
+function getValidationMessage(isValidating: boolean, hasSyntaxError: boolean, hasLengthError: boolean) {
   if (isValidating) {
-    return 'Validating...'
+    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.validating')
   }
 
   if (hasSyntaxError) {
-    return 'CSS has syntax errors'
+    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.syntaxError')
   }
 
   if (hasLengthError) {
-    return 'CSS is too long'
+    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.tooLong')
   }
 
-  return 'CSS is valid'
+  return i18n.t('options.translation.translationStyle.customCSS.editor.validation.valid')
 }

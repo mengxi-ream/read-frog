@@ -229,6 +229,11 @@ options:
     translationStyle:
       title: 翻訳表示スタイル
       description: 翻訳結果の表示スタイルを区別（具体的な表示例はサンプルを参照）
+      useCustomStyle: カスタムスタイルを使用
+      useCustomStyleDescription: 翻訳結果のCSSスタイルを独自に定義する場合に有効化
+      presetStyle: プリセットスタイル
+      cssEditor: CSSエディター
+      preview: プレビュー
       style:
         default: なし
         blur: ぼかし効果
@@ -238,6 +243,19 @@ options:
         border: 枠線
         textColor: テキストカラー
         background: 背景
+      customCSS:
+        editor:
+          placeholder: |
+            /* ここにCSSルールを入力 */
+            color: blue;
+            font-weight: bold;
+            background-color: #ffffcc;
+          saveButton: 保存
+          validation:
+            validating: 検証中...
+            valid: CSSは有効です
+            syntaxError: CSSに構文エラーがあります
+            tooLong: CSSが長すぎます
     translationMode:
       title: 翻訳モード
       description: 翻訳テキストの表示方法を選択：バイリンガルまたは翻訳のみ

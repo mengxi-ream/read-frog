@@ -246,19 +246,18 @@ options:
         textColor: Text Color
         background: Background
       customCSS:
-        title: Custom CSS
-        description: Define your own CSS styles for translation highlights to match your personal preferences or accessibility needs
         editor:
           placeholder: |
             /* Enter CSS rules here */
             color: blue;
             font-weight: bold;
             background-color: #ffffcc;
-          saveButton: Save Custom CSS
-        validation:
-          blocked: 'Blocked for security: {property}'
-          invalid: Invalid CSS syntax
-          tooLarge: CSS exceeds 8KB limit
+          saveButton: Save
+          validation:
+            validating: Validating...
+            valid: CSS is valid
+            syntaxError: CSS has syntax errors
+            tooLong: CSS is too long
     translationMode:
       title: Translation Mode
       description: 'Choose how the translated text is displayed: bilingual or translation only.'

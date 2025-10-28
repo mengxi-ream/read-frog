@@ -230,6 +230,11 @@ options:
     translationStyle:
       title: 번역 표시 스타일
       description: 번역 결과 표시 스타일 구분 (구체적인 표시 예시는 샘플 참조)
+      useCustomStyle: 커스텀 스타일 사용
+      useCustomStyleDescription: 번역 결과에 대한 사용자 정의 CSS 스타일을 정의하려면 활성화
+      presetStyle: 프리셋 스타일
+      cssEditor: CSS 편집기
+      preview: 미리보기
       style:
         default: 없음
         blur: 흐림 효과
@@ -239,6 +244,19 @@ options:
         border: 테두리
         textColor: 텍스트 색상
         background: 배경
+      customCSS:
+        editor:
+          placeholder: |
+            /* 여기에 CSS 규칙 입력 */
+            color: blue;
+            font-weight: bold;
+            background-color: #ffffcc;
+          saveButton: 저장
+          validation:
+            validating: 검증 중...
+            valid: CSS가 유효합니다
+            syntaxError: CSS에 구문 오류가 있습니다
+            tooLong: CSS가 너무 깁니다
     translationMode:
       title: 번역 모드
       description: '번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만'

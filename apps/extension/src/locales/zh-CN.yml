@@ -231,6 +231,11 @@ options:
     translationStyle:
       title: 翻译显示样式
       description: 区分翻译结果的显示样式，具体展示样式可参考示例
+      useCustomStyle: 使用自定义样式
+      useCustomStyleDescription: 启用以定义您自己的翻译结果 CSS 样式
+      presetStyle: 预设样式
+      cssEditor: CSS 编辑器
+      preview: 预览
       style:
         default: 无
         blur: 模糊效果
@@ -240,6 +245,19 @@ options:
         border: 边框
         textColor: 文字颜色
         background: 背景
+      customCSS:
+        editor:
+          placeholder: |
+            /* 在此输入 CSS 规则 */
+            color: blue;
+            font-weight: bold;
+            background-color: #ffffcc;
+          saveButton: 保存
+          validation:
+            validating: 验证中...
+            valid: CSS 有效
+            syntaxError: CSS 存在语法错误
+            tooLong: CSS 过长
     translationMode:
       title: 翻译模式
       description: 选择翻译文本的显示方式：双语对照或仅显示翻译

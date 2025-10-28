@@ -231,6 +231,11 @@ options:
     translationStyle:
       title: 翻譯顯示樣式
       description: 區分翻譯結果的顯示樣式（具體展示樣式可參照範例）
+      useCustomStyle: 使用自訂樣式
+      useCustomStyleDescription: 啟用以定義您自己的翻譯結果 CSS 樣式
+      presetStyle: 預設樣式
+      cssEditor: CSS 編輯器
+      preview: 預覽
       style:
         default: 無
         blur: 模糊效果
@@ -240,6 +245,19 @@ options:
         border: 邊框
         textColor: 文字顏色
         background: 背景
+      customCSS:
+        editor:
+          placeholder: |
+            /* 在此輸入 CSS 規則 */
+            color: blue;
+            font-weight: bold;
+            background-color: #ffffcc;
+          saveButton: 儲存
+          validation:
+            validating: 驗證中...
+            valid: CSS 有效
+            syntaxError: CSS 存在語法錯誤
+            tooLong: CSS 過長
     translationMode:
       title: 翻譯模式
       description: 選擇翻譯文字的顯示方式：雙語對照或僅顯示翻譯
