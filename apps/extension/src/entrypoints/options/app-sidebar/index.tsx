@@ -31,6 +31,7 @@ function renderNavItem(
   open: boolean,
   action: boolean = false,
   onClick?: () => void,
+  overrideUrl?: string,
 ) {
   const title = i18n.t(`options.${item.title}.title`)
 
@@ -43,7 +44,7 @@ function renderNavItem(
             className={cn(action && 'text-primary font-semibold hover:text-primary active:text-primary')}
           >
             <a
-              href={item.externalUrl}
+              href={overrideUrl ?? item.externalUrl}
               target="_blank"
               rel="noopener noreferrer"
               onClick={onClick}
@@ -86,7 +87,7 @@ export function AppSidebar() {
   })
 
   const { data: latestBlogPost } = useQuery({
-    queryKey: ['latest-blog-date'],
+    queryKey: ['latest-blog-post'],
     queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, 'en'),
   })
 
@@ -161,6 +162,11 @@ export function AppSidebar() {
               {Object.entries(PRODUCT_NAV_ITEMS).map(([key, item]) => {
                 const shouldShowIndicator = indicatorMap[key] ?? false
                 const handleClick = clickHandlerMap[key]
+                // Use the latest blog post URL for the "What's New" item
+                // Convert relative URL to absolute URL
+                const overrideUrl = key === 'whats-new' && latestBlogPost?.url
+                  ? `${WEBSITE_URL}${latestBlogPost.url}`
+                  : undefined
                 return renderNavItem(
                   key,
                   item,
@@ -168,6 +174,7 @@ export function AppSidebar() {
                   open,
                   item.action && shouldShowIndicator,
                   item.action ? handleClick : undefined,
+                  overrideUrl,
                 )
               })}
             </SidebarMenu>

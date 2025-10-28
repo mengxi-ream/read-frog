@@ -14,7 +14,7 @@ const blogApiResponseSchema = z.object({
   date: z.string(),
   title: z.string(),
   description: z.string(),
-  url: z.string(),
+  slugs: z.array(z.string()),
   extensionVersion: semanticVersionSchema.nullable().optional(),
 }).nullable()
 
@@ -111,12 +111,12 @@ function compareVersions(v1: string, v2: string): number {
  * @param apiUrl - The URL of the blog API endpoint (default: production URL)
  * @param locale - The locale to fetch the latest post for (default: 'en')
  * @param useCache - Whether to use cache (default: true)
- * @returns Promise resolving to the latest blog post data (date and extensionVersion), or null if no posts found
+ * @returns Promise resolving to the latest blog post data (date, url, and extensionVersion), or null if no posts found
  *
  * @example
  * ```ts
  * const latestPost = await getLatestBlogDate('http://localhost:8888/api/blog/latest', 'en')
- * console.log(latestPost) // { date: Date, extensionVersion: '1.11.0' }
+ * console.log(latestPost) // { date: Date, url: '/blog/post-slug', extensionVersion: '1.11.0' }
  *
  * // Without cache
  * const freshPost = await getLatestBlogDate('http://localhost:8888/api/blog/latest', 'en', false)
@@ -126,7 +126,7 @@ export async function getLatestBlogDate(
   apiUrl: string = 'https://readfrog.app/api/blog/latest',
   locale: string = 'en',
   useCache: boolean = true,
-): Promise<{ date: Date, extensionVersion?: string | null } | null> {
+): Promise<{ date: Date, url: string, extensionVersion?: string | null } | null> {
   try {
     const url = new URL(apiUrl)
     url.searchParams.set('locale', locale)
@@ -155,15 +155,16 @@ export async function getLatestBlogDate(
       throw new Error(`Invalid blog API response: ${validationResult.error.message}`)
     }
 
-    const data = validationResult.data
+    const latestPost = validationResult.data
 
-    if (!data) {
+    if (!latestPost) {
       return null
     }
 
     return {
-      date: new Date(data.date),
-      extensionVersion: data.extensionVersion ?? null,
+      date: new Date(latestPost.date),
+      url: `/blog/${latestPost.slugs.join('/')}`,
+      extensionVersion: latestPost.extensionVersion ?? null,
     }
   }
   catch (error) {

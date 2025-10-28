@@ -16,7 +16,7 @@ export default function BlogNotification() {
   })
 
   const { data: latestBlogPost } = useQuery({
-    queryKey: ['latest-blog-date'],
+    queryKey: ['latest-blog-post'],
     queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, 'en'),
   })
 
@@ -25,7 +25,12 @@ export default function BlogNotification() {
       await saveLastViewedBlogDate(latestBlogPost.date)
       await queryClient.invalidateQueries({ queryKey: ['last-viewed-blog-date'] })
     }
-    window.open(`${WEBSITE_URL}/blog?latest-indicator=true`, '_blank')
+    // Open the latest blog post URL directly, or fallback to /blog if not available
+    // Convert relative URL to absolute URL
+    const blogUrl = latestBlogPost?.url
+      ? `${WEBSITE_URL}${latestBlogPost.url}`
+      : `${WEBSITE_URL}/blog`
+    window.open(blogUrl, '_blank')
   }
 
   const showIndicator = hasNewBlogPost(
