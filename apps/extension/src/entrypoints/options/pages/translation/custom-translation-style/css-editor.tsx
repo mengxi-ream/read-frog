@@ -33,8 +33,7 @@ export function CSSEditor() {
     if (!debouncedCssInput.trim()) {
       return { valid: true, errors: [] }
     }
-    const wrappedCSS = `.dummy { ${debouncedCssInput} }`
-    return lintCSS(wrappedCSS)
+    return lintCSS(debouncedCssInput)
   }, [debouncedCssInput])
 
   // Check CSS length

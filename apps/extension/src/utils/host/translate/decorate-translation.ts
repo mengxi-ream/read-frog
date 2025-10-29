@@ -22,7 +22,7 @@ export async function decorateTranslationNode(translatedNode: HTMLElement, style
 
     // Inject custom CSS using Constructable Stylesheets API (modern approach)
     // This is more performant and doesn't pollute the DOM
-    const cssText = `[data-${CUSTOM_TRANSLATION_NODE_ATTRIBUTE}="custom"] { ${styleConfig.customCSS} }`
+    const cssText = styleConfig.customCSS
 
     // Skip injection if CSS hasn't changed
     if (cachedCSSText === cssText) {
