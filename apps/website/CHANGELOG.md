@@ -1,5 +1,13 @@
 # @read-frog/website
 
+## 1.3.2
+
+### Patch Changes
+
+- [#659](https://github.com/mengxi-ream/read-frog/pull/659) [`4c19aa9`](https://github.com/mengxi-ream/read-frog/commit/4c19aa9f37075306aeecb9aaf29628f2fa3a5eb1) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: allow jump to specific blog from notification
+
+- [#666](https://github.com/mengxi-ream/read-frog/pull/666) [`e040a4e`](https://github.com/mengxi-ream/read-frog/commit/e040a4ed8a065c9c022abafbfac9abd8f027468f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: move version comparison logic to backend
+
 ## 1.3.1
 
 ### Patch Changes

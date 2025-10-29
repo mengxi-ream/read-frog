@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.16.0
+
+### Minor Changes
+
+- [#663](https://github.com/mengxi-ream/read-frog/pull/663) [`580549d`](https://github.com/mengxi-ream/read-frog/commit/580549d57226c86825fcc04e58cc92b75a0fd600) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: user can define custom translation css style
+
+### Patch Changes
+
+- [#667](https://github.com/mengxi-ream/read-frog/pull/667) [`4efa7f0`](https://github.com/mengxi-ream/read-frog/commit/4efa7f019825f0b141c7b16c210199b53835d6e4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: refactor Field component usage for consistent responsive layout
+
+- [#659](https://github.com/mengxi-ream/read-frog/pull/659) [`4c19aa9`](https://github.com/mengxi-ream/read-frog/commit/4c19aa9f37075306aeecb9aaf29628f2fa3a5eb1) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: allow jump to specific blog from notification
+
+- [#666](https://github.com/mengxi-ream/read-frog/pull/666) [`e040a4e`](https://github.com/mengxi-ream/read-frog/commit/e040a4ed8a065c9c022abafbfac9abd8f027468f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: move version comparison logic to backend
+
+- [#665](https://github.com/mengxi-ream/read-frog/pull/665) [`4e22813`](https://github.com/mengxi-ream/read-frog/commit/4e228132e71589e1c9d721f9ae856dbc97eff907) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: more powerful css for translation style
+
+- [#664](https://github.com/mengxi-ream/read-frog/pull/664) [`d7b6ec8`](https://github.com/mengxi-ream/read-frog/commit/d7b6ec83849796a870257b4be897b1280c5866ce) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add translation mode selector to popup
+
 ## 1.15.2
 
 ### Patch Changes
