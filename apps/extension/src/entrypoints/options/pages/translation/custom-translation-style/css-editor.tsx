@@ -103,7 +103,7 @@ export function CSSEditor() {
           </Alert>
         </Activity> */}
         <div className="flex items-center gap-2 justify-between">
-          <div className={cn('text-sm text-green-600 dark:text-green-400', isValidating && 'text-muted-foreground', (hasSyntaxError || hasLengthError) && 'text-destructive')}>
+          <div className={cn('text-sm text-green-500', isValidating && 'text-muted-foreground', (hasSyntaxError || hasLengthError) && 'text-destructive')}>
             {cssInput.trim().length > 0 ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError, hasChanges) : ''}
           </div>
           <Button onClick={handleSave} disabled={isValidating || hasSyntaxError || hasLengthError || !hasChanges}>

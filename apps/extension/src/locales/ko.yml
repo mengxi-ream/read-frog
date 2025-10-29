@@ -247,10 +247,13 @@ options:
       customCSS:
         editor:
           placeholder: |
-            /* 여기에 CSS 규칙 입력 */
-            color: blue;
-            font-weight: bold;
-            background-color: #ffffcc;
+            /* 예제: 사용자 정의 색상 및 배경 스타일 */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
           saveButton: 저장
           savedButton: 저장됨
           validation:

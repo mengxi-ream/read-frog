@@ -248,10 +248,13 @@ options:
       customCSS:
         editor:
           placeholder: |
-            /* 在此輸入 CSS 規則 */
-            color: blue;
-            font-weight: bold;
-            background-color: #ffffcc;
+            /* 範例：自訂顏色和背景樣式 */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
           saveButton: 儲存
           savedButton: 已儲存
           validation:

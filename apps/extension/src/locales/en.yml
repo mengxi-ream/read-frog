@@ -248,10 +248,13 @@ options:
       customCSS:
         editor:
           placeholder: |
-            /* Enter CSS rules here */
-            color: blue;
-            font-weight: bold;
-            background-color: #ffffcc;
+            /* Example: Custom style with color and background */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
           saveButton: Save
           savedButton: Saved
           validation:

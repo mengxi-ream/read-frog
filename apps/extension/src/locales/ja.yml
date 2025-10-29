@@ -246,10 +246,13 @@ options:
       customCSS:
         editor:
           placeholder: |
-            /* ここにCSSルールを入力 */
-            color: blue;
-            font-weight: bold;
-            background-color: #ffffcc;
+            /* 例：カスタムカラーと背景のスタイル */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
           saveButton: 保存
           savedButton: 保存済み
           validation:
