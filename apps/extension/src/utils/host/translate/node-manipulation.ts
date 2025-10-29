@@ -1,7 +1,9 @@
+import type { LangCodeISO6391 } from '@repo/definitions'
 import type { APICallError } from 'ai'
 import type { Config } from '@/types/config/config'
 import type { TranslationMode, TranslationNodeStyleConfig } from '@/types/config/translate'
 import type { Point, TransNode } from '@/types/dom'
+import { ISO6393_TO_6391 } from '@repo/definitions'
 import React from 'react'
 import textSmallCSS from '@/assets/tailwind/text-small.css?inline'
 import themeCSS from '@/assets/tailwind/theme.css?inline'
@@ -32,6 +34,13 @@ import {
 import { decorateTranslationNode } from './decorate-translation'
 import { translateText, validateTranslationConfig } from './translate-text'
 
+/**
+ * Languages that require explicit lang attribute for proper font rendering.
+ * Chinese and Japanese use language-specific font variants that need browser
+ * font fallback hints via the lang attribute to render correctly.
+ */
+const LANGUAGES_REQUIRING_FONT_HINT = new Set<LangCodeISO6391>(['ja', 'zh', 'zh-TW'])
+
 const translatingNodes = new WeakSet<ChildNode>()
 const originalContentMap = new Map<Element, string>()
 
@@ -54,6 +63,21 @@ function isNumericContent(text: string): boolean {
 
   // Additional check: ensure there's at least one digit
   return /\d/.test(cleanedText)
+}
+
+/**
+ * Computes a BCP-47 language tag for translated content when font rendering hints are needed.
+ *
+ * Only returns a lang attribute value for languages in LANGUAGES_REQUIRING_FONT_HINT (Chinese, Japanese),
+ * as these languages require explicit font family selection in browsers to render correctly.
+ * For other languages, browsers can handle font selection automatically.
+ */
+function computeLangAttribute(targetCode: Config['language']['targetCode']): string | undefined {
+  const iso6391 = ISO6393_TO_6391[targetCode as keyof typeof ISO6393_TO_6391]
+  if (!iso6391)
+    return undefined
+
+  return LANGUAGES_REQUIRING_FONT_HINT.has(iso6391) ? iso6391 : undefined
 }
 
 export async function removeOrShowNodeTranslation(point: Point, config: Config) {
@@ -133,6 +157,9 @@ export async function translateNodesBilingualMode(nodes: ChildNode[], walkId: st
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
     translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, 'bilingual' satisfies TranslationMode)
     translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
+    const langAttr = computeLangAttribute(config.language.targetCode)
+    if (langAttr)
+      translatedWrapperNode.setAttribute('lang', langAttr)
     const spinner = createSpinnerInside(translatedWrapperNode)
 
     if (isTextNode(targetNode) || transNodes.length > 1) {
@@ -285,6 +312,9 @@ export async function translateNodeTranslationOnlyMode(nodes: ChildNode[], walkI
     translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, 'translationOnly' satisfies TranslationMode)
     translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
     translatedWrapperNode.style.display = 'contents'
+    const langAttr = computeLangAttribute(config.language.targetCode)
+    if (langAttr)
+      translatedWrapperNode.setAttribute('lang', langAttr)
     const spinner = createSpinnerInside(translatedWrapperNode)
 
     if (isTextNode(targetNode) || transNodes.length > 1) {
@@ -397,6 +427,12 @@ async function insertTranslatedNodeIntoWrapper(
   else {
     // not inline or block, maybe notranslate
     return
+  }
+
+  // Copy lang attribute from wrapper to the actual translated node
+  const langAttr = translatedWrapperNode.getAttribute('lang')
+  if (langAttr) {
+    translatedNode.setAttribute('lang', langAttr)
   }
 
   translatedNode.textContent = translatedText

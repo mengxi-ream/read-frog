@@ -48,3 +48,25 @@
   font-family: inherit;
   text-decoration: inherit;
 }
+
+/* Set font-family for Chinese and Japanese translated content */
+.read-frog-translated-block-content[lang='zh'],
+.read-frog-translated-inline-content[lang='zh'] {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
+    'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+.read-frog-translated-block-content[lang='zh-TW'],
+.read-frog-translated-inline-content[lang='zh-TW'] {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Hiragino Sans GB', 'Microsoft JhengHei',
+    'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+}
+
+.read-frog-translated-block-content[lang='ja'],
+.read-frog-translated-inline-content[lang='ja'] {
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', 'Meiryo',
+    sans-serif !important;
+}
