@@ -1,0 +1,349 @@
+---
+title: 用自定义 CSS 随心定制你的翻译样式
+description: 通过强大的自定义 CSS 编辑器完全掌控翻译的视觉效果，配备语法高亮、颜色选择器和实时验证功能。
+author: ananaBMaster
+date: 2025-10-28
+extensionVersion: 1.16.0
+---
+
+## 随心定制你的翻译样式 🎨
+
+有没有想过让翻译的样式完全符合你的阅读心情?也许你想要柔和的粉彩色调来进行睡前阅读,或者想要醒目的高亮来辅助学习?
+
+**现在你可以完全掌控。** 陪读蛙的自定义 CSS 功能让你精确设计翻译在任何网站上的显示方式。
+
+---
+
+## 为什么自定义样式很重要 💡
+
+默认的翻译样式确实能用……但并不总是最合适。不同的内容需要不同的视觉处理:
+
+| 阅读场景 | 你需要什么 | 默认样式的问题 |
+|---------|-----------|---------------|
+| 📚 **深夜学习** | 柔和、护眼的颜色 | 明亮的默认样式让眼睛疲劳 |
+| 🎯 **重要研究** | 醒目、不会错过的高亮 | 微妙的样式容易被忽略 |
+| 📰 **休闲浏览** | 简洁、融入页面的设计 | 厚重的样式感觉很突兀 |
+| 🎨 **个人偏好** | 匹配网站的深色主题 | 一刀切的方案不适合你 |
+
+<Callout type="info">
+**真相是**: 你的阅读场景一直在变化。翻译样式也应该随之适应。
+</Callout>
+
+{/* TODO: Add screenshot - Grid showing 4 different custom CSS styles in action on the same webpage */}
+
+---
+
+## 认识你的新 CSS 编辑器 ⚡
+
+我们不是简单地加个文本框就了事。陪读蛙的 CSS 编辑器**真的很强大**:
+
+![Demo](/blog/custom-css-styles/demo.gif)
+
+### 为所有人打造
+
+**对初学者友好:**
+- 🎨 **颜色选择器** - 点击任何颜色值即可打开可视化选择器
+- ✅ **实时验证** - 即时获得语法错误反馈
+- 💡 **智能提示** - 输入时自动补全
+- 📝 **示例模板** - 从可用的示例开始
+
+**对高级用户强大:**
+- ⚡ **完整 CSS 支持** - 使用渐变、阴影、动画、变量
+- 🔧 **语法高亮** - CodeMirror 驱动的编辑器
+- 📏 **行号和折叠** - 轻松导航大型样式表
+- 🎯 **错误提示栏** - 一眼看到错误
+
+<Callout type="tip">
+**专业提示**: 编辑器使用 CodeMirror - 这是开发者工具背后同样强大的引擎。你在浏览器插件中获得了专业级的功能!
+</Callout>
+
+---
+
+## 颜色选择器的魔力 🌈
+
+这里开始变得有趣了。以前编写 CSS 颜色需要:
+
+❌ 谷歌搜索"颜色选择器"
+❌ 复制十六进制代码
+❌ 在标签页之间切换
+❌ 希望看起来正确
+
+**现在?** 只需点击 CSS 中的任何颜色:
+
+<img src="/blog/custom-css-styles/color-picker.png" alt="Color Picker" style={{ maxWidth: '600px', width: '100%' }} />
+
+1. 输入或粘贴任何颜色格式:`#FF5733`、`rgb(255, 87, 51)`、`hsl(9, 100%, 60%)`
+2. **点击它** - 颜色选择器立即出现
+3. **可视化调整** - 拖动、滑动或输入新值
+4. **完成** - 颜色实时更新
+
+选择器理解**所有 CSS 颜色格式**:
+- 十六进制:`#FF5733`
+- RGB/RGBA:`rgba(255, 87, 51, 0.8)`
+- HSL/HSLA:`hsla(9, 100%, 60%, 0.8)`
+- 命名颜色:`tomato`、`skyblue`、`gold`
+- CSS 变量:`var(--my-color)`
+
+{/* TODO: Add screenshot - Color picker interface showing sliders for RGB/HSL with live preview */}
+
+---
+
+## 实时验证拯救你的理智 ✨
+
+有没有保存 CSS 后才发现搞砸了一切?再也不会了。
+
+<Callout type="warn">
+**安全网**: 编辑器会在你**保存之前**验证 CSS。再也不会出现样式崩溃,再也不需要"撤销恐慌"。
+</Callout>
+
+### 验证内容:
+
+| 检查项 | 作用 | 示例 |
+|-------|------|------|
+| **语法错误** | 捕获拼写错误、缺失括号 | `color: #FF573` ❌ → 缺少一位数字 |
+| **属性名称** | 标记无效的 CSS 属性 | `colour: red` ❌ → 使用 `color` |
+| **长度限制** | 防止样式表过大 | 最大 8KB(足够复杂的样式使用) |
+| **选择器有效性** | 确保选择器有效 | `.my class` ❌ → `.my-class` ✅ |
+
+**实时的视觉反馈:**
+- 🟢 **绿色"有效"** - 你的 CSS 完美,可以保存
+- ⚪ **灰色"验证中..."** - 正在检查你的更改(500ms 防抖)
+- 🔴 **红色"语法错误"** - 有问题,会显示有用的错误消息
+
+{/* TODO: Add screenshot - Editor showing validation states with green/yellow/red indicators */}
+
+---
+
+## 如何创建你的第一个自定义样式 🎯
+
+**只需不到 2 分钟:**
+
+1. **打开陪读蛙设置** → **翻译** → **翻译显示样式**
+2. **将"使用自定义样式"切换为开启**
+3. **你会看到 CSS 编辑器**显示一个有用的模板:
+
+```css
+/* 示例:带颜色和背景的自定义样式 */
+[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: light-dark(#F2E3BC, #C19875);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+```
+
+4. **自定义它!** 点击颜色值打开选择器,调整内边距,添加边框
+5. **当验证显示绿色时点击"保存"**
+6. **访问任何网站**并翻译 - 你的样式立即应用!
+
+---
+
+## 样式创意推荐 💫
+
+在实际例子中看看这些样式的效果!每个示例都展示了 CSS 如何影响真实的翻译文本。
+
+import { CSSStylePreview } from '@/components/blog/css-style-preview'
+
+### 1. 柔和粉彩高亮
+
+**最适合**: 长时间阅读、小说、博客
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: light-dark(#F2E3BC, #C19875);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: light-dark(#F2E3BC, #C19875);
+  padding: 2px 4px;
+  border-radius: 4px;
+}`} />
+
+---
+
+### 2. 醒目学习模式
+
+**最适合**: 教科书、研究论文、记忆学习
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}`} />
+
+---
+
+### 3. 响应鼠标的动画
+
+**最适合**: 响应式的设计，让翻译更灵动
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}`} />
+
+---
+
+### 4. 炫酷的动画效果
+
+**最适合**: 给你的朋友展示酷炫动画效果
+
+```css
+[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}`} />
+
+---
+
+## 高级技巧 🚀
+
+### 使用 CSS 变量
+
+定义一次颜色,到处重用:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  --highlight-color: #FFE082;
+  --border-color: #FFA726;
+
+  background-color: var(--highlight-color);
+  border-left: 4px solid var(--border-color);
+  padding: 4px 10px;
+}
+```
+
+### 响应浅色/深色模式
+
+使用 `light-dark()` 函数(现代浏览器):
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: light-dark(#FFF9C4, #4A4A2A);
+  color: light-dark(#333, #E0E0E0);
+  border: 1px solid light-dark(#FFD54F, #8D7B3A);
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+```
+
+---
+
+## 技术细节 🔧
+
+对于想了解底层技术的人:
+
+| 功能 | 技术 | 为什么重要 |
+|-----|------|-----------|
+| **编辑器** | CodeMirror 6 | 行业标准,被 VS Code 在线版使用 |
+| **颜色选择器** | `@uiw/codemirror-extensions-color` | 原生集成,支持所有 CSS 格式 |
+| **验证** | `css-tree` 解析器 | 快速、准确的 CSS 语法验证 |
+| **大小限制** | 8KB (8,192 字符) | 足够复杂的样式使用,防止性能问题 |
+
+
+---
+
+## 最佳实践技巧 💡
+
+<Callout type="tip">
+**黄金法则**:
+1. **从简单开始** - 逐步增加复杂性
+2. **在多个网站上测试** - 样式与页面 CSS 的交互方式不同
+3. **使用低透明度背景** - 保持文本可读性
+4. **避免 `!important`** - 选择器已经足够特定
+5. **保存前预览** - 验证可以捕获错误,但也要视觉测试
+</Callout>
+
+### 要避免的常见陷阱:
+
+❌ **不要**: `color: #FF`(不完整的十六进制代码)
+✅ **要**: `color: #FF5733`(完整的 6 位十六进制)
+
+❌ **不要**: `padding: 10`(缺少单位)
+✅ **要**: `padding: 10px`(包含单位)
+
+❌ **不要**: 写 200 行 CSS
+✅ **要**: 专注于基本属性(颜色、背景、内边距、边框)
+
+---
+
+## 接下来? 🔮
+
+我们已经在计划令人兴奋的新增功能:
+
+- 🎨 **样式库** - 浏览并导入社区创建的样式
+- 📤 **导出/导入** - 与朋友分享你最喜欢的样式
+- 🎯 **每个网站的样式** - 为不同网站设置不同样式
+- 📊 **样式预览面板** - 保存前查看更改
+
+<Callout type="info">
+**有功能想法?** 加入我们的 [Discord](https://discord.gg/ej45e3PezJ),告诉我们什么能让你的翻译样式更好!
+</Callout>

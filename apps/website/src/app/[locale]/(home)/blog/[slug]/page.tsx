@@ -47,12 +47,12 @@ export default async function BlogPostPage(props: {
           {t('back')}
         </Link>
       </div>
-      <article className="mx-auto flex w-full max-w-fd-container flex-col py-8 lg:flex-row">
-        <div className="prose min-w-0 flex-1 p-4">
+      <article className="mx-auto flex w-full max-w-fd-container flex-col py-8 px-6 lg:flex-row">
+        <div className="prose min-w-0 flex-1 p-4 pb-16">
           <InlineTOC items={toc} />
           <Mdx components={getMDXComponents()} />
         </div>
-        <div className="flex flex-col gap-4 border-l p-4 text-sm lg:w-[250px]">
+        <div className="flex flex-col gap-4 border-t lg:border-l p-4 text-sm lg:w-[250px]">
           <div>
             <p className="mb-1 text-fd-muted-foreground">{t('writtenBy')}</p>
             <p className="font-medium">{page.data.author}</p>

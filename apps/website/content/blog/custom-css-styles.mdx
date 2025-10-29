@@ -1,0 +1,359 @@
+---
+title: Style Your Translations Your Way with Custom CSS
+description: Take complete control over how your translations look with our powerful custom CSS editor featuring syntax highlighting, color picker, and live validation.
+author: ananaBMaster
+date: 2025-10-28
+extensionVersion: 1.16.0
+---
+
+## Style Your Translations Your Way 🎨
+
+Ever wished your translations could match your reading vibe? Maybe you want soft pastels for bedtime reading, or bold highlights for study sessions?
+
+**You're in control now.** Read Frog's Custom CSS feature lets you design exactly how your translations appear on any website.
+
+---
+
+## Why Custom Styles Matter 💡
+
+Default translation styles work fine... until they don't. Different content needs different visual treatment:
+
+| Reading Scenario | What You Need | Problem with Defaults |
+|-----------------|---------------|----------------------|
+| 📚 **Late-night study** | Soft, easy-on-eyes colors | Bright defaults strain your eyes |
+| 🎯 **Important research** | Bold, unmissable highlights | Subtle styles get lost |
+| 📰 **Casual browsing** | Minimal, clean integration | Heavy styling feels intrusive |
+| 🎨 **Personal preference** | Match your site's dark theme | One-size-fits-all doesn't fit you |
+
+<Callout type="info">
+**The Truth**: Your reading context changes constantly. Your translation style should adapt with you.
+</Callout>
+
+---
+
+## Meet Your New CSS Editor ⚡
+
+We didn't just add a text box and call it a day. Read Frog's CSS editor is **legitimately powerful**:
+
+![Demo](/blog/custom-css-styles/demo.gif)
+
+### Built for Everyone
+
+**For Beginners:**
+- 🎨 **Color picker** - Click any color value to open a visual picker
+- ✅ **Live validation** - Instant feedback on syntax errors
+- 💡 **Smart suggestions** - Auto-complete as you type
+- 📝 **Example templates** - Start from working examples
+
+**For Advanced Users:**
+- ⚡ **Full CSS support** - Use gradients, shadows, animations, variables
+- 🔧 **Syntax highlighting** - CodeMirror-powered editor
+- 📏 **Line numbers & folding** - Navigate large stylesheets easily
+- 🎯 **Lint gutter** - See errors at a glance
+
+<Callout type="tip">
+**Pro Tip**: The editor uses CodeMirror - the same powerful engine behind developer tools. You get professional-grade features in a browser extension!
+</Callout>
+
+---
+
+## The Color Picker Magic 🌈
+
+Here's where things get fun. Writing CSS colors used to mean:
+
+❌ Googling "color picker"
+❌ Copying hex codes
+❌ Switching between tabs
+❌ Hoping it looks right
+
+**Now?** Just click any color in your CSS:
+
+<img src="/blog/custom-css-styles/color-picker.png" alt="Color Picker" style={{ maxWidth: '600px', width: '100%' }} />
+
+1. Type or paste any color format: `#FF5733`, `rgb(255, 87, 51)`, `hsl(9, 100%, 60%)`
+2. **Click it** - Color picker appears instantly
+3. **Adjust visually** - Drag, slide, or type new values
+4. **Done** - Color updates in real-time
+
+The picker understands **all CSS color formats**:
+- Hex: `#FF5733`
+- RGB/RGBA: `rgba(255, 87, 51, 0.8)`
+- HSL/HSLA: `hsla(9, 100%, 60%, 0.8)`
+- Named colors: `tomato`, `skyblue`, `gold`
+- CSS variables: `var(--my-color)`
+
+{/* TODO: Add screenshot - Color picker interface showing sliders for RGB/HSL with live preview */}
+
+---
+
+## Live Validation Saves Your Sanity ✨
+
+Ever saved CSS only to find it broke everything? Not anymore.
+
+<Callout type="warn">
+**Safety Net**: The editor validates your CSS **before** you save. No more broken styles, no more "undo panic."
+</Callout>
+
+### What Gets Validated:
+
+| Check | What It Does | Example |
+|-------|-------------|---------|
+| **Syntax errors** | Catches typos, missing brackets | `color: #FF573` ❌ → Missing digit |
+| **Property names** | Flags invalid CSS properties | `colour: red` ❌ → Use `color` |
+| **Length limits** | Prevents oversized stylesheets | Max 8KB (plenty for complex styles) |
+| **Selector validity** | Ensures selectors work | `.my class` ❌ → `.my-class` ✅ |
+
+**Visual feedback in real-time:**
+- 🟢 **Green "Valid"** - Your CSS is perfect, ready to save
+- ⚪ **Gray "Validating..."** - Checking your changes (500ms debounce)
+- 🔴 **Red "Syntax error"** - Something's wrong, with helpful error messages
+
+{/* TODO: Add screenshot - Editor showing validation states with green/yellow/red indicators */}
+
+---
+
+## How to Create Your First Custom Style 🎯
+
+**Takes less than 2 minutes:**
+
+1. **Open Read Frog settings** → **Translation** → **Translation Display Style**
+2. **Toggle "Use Custom Style"** to ON
+3. **You'll see the CSS editor** appear with a helpful template:
+
+```css
+/* Example: Custom style with color and background */
+[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: light-dark(#F2E3BC, #C19875);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+```
+
+4. **Customize it!** Click the color values to open the picker, adjust padding, add borders
+5. **Click "Save"** when validation shows green
+6. **Visit any website** and translate - your style applies instantly!
+
+<Callout type="tip">
+**Quick Win**: Try this soft highlight style for easy reading:
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: rgba(255, 247, 153, 0.3);
+  border-left: 3px solid #FFD700;
+  padding-left: 8px;
+}
+```
+</Callout>
+
+{/* TODO: Add screenshot - Step-by-step visual guide showing the settings page and CSS editor */}
+
+---
+
+## Style Ideas to Try 💫
+
+See these styles in action! Each example shows how the CSS affects real translated text.
+
+import { CSSStylePreview } from '@/components/blog/css-style-preview'
+
+### 1. Soft Pastel Highlight
+
+**Best for**: Long reading sessions, fiction, blogs
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: light-dark(#F2E3BC, #C19875);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: light-dark(#F2E3BC, #C19875);
+  padding: 2px 4px;
+  border-radius: 4px;
+}`} />
+
+---
+
+### 2. Bold Study Mode
+
+**Best for**: Textbooks, research papers, memorization
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}`} />
+
+---
+
+### 3. Hover-responsive Animation
+
+**Best for**: Interactive design, making translations feel alive
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}`} />
+
+---
+
+### 4. Cool Gradient Animation
+
+**Best for**: Showing off to your friends
+
+```css
+[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}`} />
+
+---
+
+## Advanced Tricks 🚀
+
+### Use CSS Variables
+
+Define colors once, reuse everywhere:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  --highlight-color: #FFE082;
+  --border-color: #FFA726;
+
+  background-color: var(--highlight-color);
+  border-left: 4px solid var(--border-color);
+  padding: 4px 10px;
+}
+```
+
+### Responsive to Light/Dark Mode
+
+Use `light-dark()` function (modern browsers):
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: light-dark(#FFF9C4, #4A4A2A);
+  color: light-dark(#333, #E0E0E0);
+  border: 1px solid light-dark(#FFD54F, #8D7B3A);
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+```
+
+---
+
+## Technical Details 🔧
+
+For those who want to know what's under the hood:
+
+| Feature | Technology | Why It Matters |
+|---------|-----------|----------------|
+| **Editor** | CodeMirror 6 | Industry-standard, used by VS Code online |
+| **Color Picker** | `@uiw/codemirror-extensions-color` | Native integration, supports all CSS formats |
+| **Validation** | `css-tree` parser | Fast, accurate CSS syntax validation |
+| **Size Limit** | 8KB (8,192 characters) | Enough for complex styles, prevents performance issues |
+
+---
+
+## Tips for Best Results 💡
+
+<Callout type="tip">
+**Golden Rules**:
+1. **Start simple** - Add complexity gradually
+2. **Test on multiple sites** - Styles interact with page CSS differently
+3. **Use low-opacity backgrounds** - Maintains text readability
+4. **Avoid `!important`** - The selector is already specific enough
+5. **Preview before saving** - Validation catches errors, but test visually too
+</Callout>
+
+### Common Pitfalls to Avoid:
+
+❌ **Don't**: `color: #FF` (incomplete hex code)
+✅ **Do**: `color: #FF5733` (full 6-digit hex)
+
+❌ **Don't**: `padding: 10` (missing unit)
+✅ **Do**: `padding: 10px` (include unit)
+
+❌ **Don't**: Write 200 lines of CSS
+✅ **Do**: Focus on essential properties (color, background, padding, border)
+
+---
+
+## What's Next? 🔮
+
+We're already planning exciting additions:
+
+- 🎨 **Style Library** - Browse and import community-created styles
+- 📤 **Export/Import** - Share your favorite styles with friends
+- 🎯 **Per-Site Styles** - Different styles for different websites
+- 📊 **Style Preview Panel** - See changes before saving
+
+<Callout type="info">
+**Have a feature idea?** Join our [Discord](https://discord.gg/ej45e3PezJ) and let us know what would make your translation styling even better!
+</Callout>

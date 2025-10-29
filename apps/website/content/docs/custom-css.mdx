@@ -1,0 +1,322 @@
+---
+title: Custom Translation Styles
+description: Configure custom CSS to personalize your translation appearance
+icon: Paintbrush
+---
+
+## Overview
+
+Read Frog allows you to customize how translations appear on webpages using your own CSS styles. This gives you complete control over colors, backgrounds, borders, animations, and more.
+
+## Enabling Custom CSS
+
+1. Open Read Frog settings
+2. Navigate to **Translation** → **Translation Display Style**
+3. Toggle **"Use Custom Style"** to ON
+4. The CSS editor will appear with a default template
+
+## CSS Selector
+
+All custom styles must target the specific selector:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  /* Your styles here */
+}
+```
+
+This selector applies to all translated text elements on the page.
+
+## Editor Features
+
+### Syntax Highlighting
+
+The editor uses CodeMirror 6, providing:
+- Color-coded CSS syntax
+- Line numbers
+- Code folding for large stylesheets
+- Auto-indentation
+
+### Color Picker
+
+Click any color value in the editor to open an interactive color picker:
+
+1. Click on color values like `#FF5733`, `rgb(255, 87, 51)`, or `hsl(9, 100%, 60%)`
+2. Visual picker appears instantly
+3. Adjust using sliders or input fields
+4. Changes update in real-time
+
+Supported color formats:
+- Hex: `#FF5733`
+- RGB/RGBA: `rgba(255, 87, 51, 0.8)`
+- HSL/HSLA: `hsla(9, 100%, 60%, 0.8)`
+- Named colors: `tomato`, `skyblue`, `gold`
+- CSS variables: `var(--my-color)`
+
+### Live Validation
+
+The editor validates your CSS before saving:
+
+- **Valid (Green)**: CSS is syntactically correct, ready to save
+- **Validating (Gray)**: Checking your changes (500ms debounce)
+- **Error (Red)**: Syntax error detected with error message
+
+Validation checks:
+- Syntax errors (typos, missing brackets)
+- Property name validity
+- Selector correctness
+- Size limits (8KB maximum)
+
+## Basic CSS Examples
+
+import { CSSStylePreview } from '@/components/blog/css-style-preview'
+
+### Simple Font Color
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: blue;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: blue;
+}`} />
+
+### With Border
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: #F2E3BC;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border-left: 3px solid #FFD700;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: #F2E3BC;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border-left: 3px solid #FFD700;
+}`} />
+
+### Bold Study Mode
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}`} />
+
+## Advanced Techniques
+
+### CSS Variables
+
+Define reusable values:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  --highlight-color: #FFE082;
+  --border-color: #FFA726;
+
+  background-color: var(--highlight-color);
+  border-left: 4px solid var(--border-color);
+  padding: 4px 10px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  --highlight-color: #FFE082;
+  --border-color: #FFA726;
+
+  background-color: var(--highlight-color);
+  border-left: 4px solid var(--border-color);
+  padding: 4px 10px;
+}`} />
+
+### Light/Dark Mode Support
+
+Use `light-dark()` function for automatic theme adaptation:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: light-dark(#FFF9C4, #4A4A2A);
+  color: light-dark(#333, #E0E0E0);
+  border: 1px solid light-dark(#FFD54F, #8D7B3A);
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  background-color: light-dark(#FFF9C4, #4A4A2A);
+  color: light-dark(#333, #E0E0E0);
+  border: 1px solid light-dark(#FFD54F, #8D7B3A);
+  padding: 5px 10px;
+  border-radius: 4px;
+}`} />
+
+### Hover Effects
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}`} />
+
+### Animations
+
+```css
+[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}`} />
+
+## Best Practices
+
+### Do's ✅
+
+- Start with simple styles and add complexity gradually
+- Test on multiple websites
+- Use low-opacity backgrounds to maintain readability
+- Include units for length values: `padding: 10px` not `padding: 10`
+- Use complete hex codes: `#FF5733` not `#FF`
+
+### Don'ts ❌
+
+- Avoid `!important` (selector specificity is already high)
+- Don't write overly complex styles (focus on essential properties)
+- Don't exceed 8KB size limit
+- Avoid missing units or incomplete color codes
+
+## Common Properties
+
+| Property | Purpose | Example |
+|----------|---------|---------|
+| `color` | Text color | `color: #333;` |
+| `background-color` | Background color | `background-color: #FFF59D;` |
+| `padding` | Inner spacing | `padding: 4px 8px;` |
+| `border` | Border style | `border: 1px solid #FFD54F;` |
+| `border-radius` | Rounded corners | `border-radius: 4px;` |
+| `font-weight` | Text boldness | `font-weight: 600;` |
+| `font-size` | Text size | `font-size: 14px;` |
+| `text-decoration` | Underline, etc. | `text-decoration: underline;` |
+| `opacity` | Transparency | `opacity: 0.8;` |
+| `transition` | Animation timing | `transition: color 0.2s ease-out;` |
+
+## Technical Limitations
+
+- **Maximum size**: 8KB (8,192 characters)
+- **Editor**: CodeMirror 6
+- **Validation**: CSS Tree parser
+- **Selector**: Must use `[data-read-frog-custom-translation-style='custom']`
+
+## Learning CSS
+
+If you're new to CSS, these resources will help:
+
+### Beginner Tutorials
+- [MDN CSS Basics](https://developer.mozilla.org/en-US/docs/Learn/CSS/First_steps) - Comprehensive introduction
+- [W3Schools CSS Tutorial](https://www.w3schools.com/css/) - Interactive examples
+- [CSS-Tricks Guides](https://css-tricks.com/guides/) - Practical CSS techniques
+
+### CSS Properties Reference
+- [MDN CSS Reference](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference) - Complete property documentation
+- [CSS Values and Units](https://developer.mozilla.org/en-US/docs/Learn/CSS/Building_blocks/Values_and_units) - Understanding units (px, %, em, etc.)
+
+### Colors
+- [MDN Color Values](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) - Color formats explained
+- [Coolors](https://coolors.co/) - Color palette generator
+- [Color Hunt](https://colorhunt.co/) - Color scheme inspiration
+
+### Interactive Practice
+- [CSS Diner](https://flukeout.github.io/) - Learn CSS selectors through games
+- [Flexbox Froggy](https://flexboxfroggy.com/) - Learn layout (though not needed for basic styling)
+
+## Troubleshooting
+
+### Style Not Applying
+
+1. Check validation status (must be green "Valid")
+2. Verify selector is exactly `[data-read-frog-custom-translation-style='custom']`
+3. Ensure "Use Custom Style" is toggled ON
+4. Refresh the webpage after saving
+
+### Syntax Errors
+
+Common mistakes:
+- Missing semicolon: `color: red` → `color: red;`
+- Missing unit: `padding: 10` → `padding: 10px`
+- Incomplete color: `#FF` → `#FF5733`
+- Invalid property: `colour: red` → `color: red`
+
+### Style Conflicts
+
+If styles look unexpected:
+- Check if website's CSS is overriding yours
+- Increase specificity if needed (though usually not required)
+- Test on different websites to identify site-specific issues

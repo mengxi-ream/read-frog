@@ -1,0 +1,322 @@
+---
+title: 自定义翻译样式
+description: 配置自定义 CSS 来个性化你的翻译外观
+icon: Paintbrush
+---
+
+## 概述
+
+陪读蛙允许你使用自己的 CSS 样式自定义翻译在网页上的显示方式。这让你可以完全控制颜色、背景、边框、动画等。
+
+## 启用自定义 CSS
+
+1. 打开陪读蛙设置
+2. 导航到 **翻译** → **翻译显示样式**
+3. 将 **"使用自定义样式"** 切换为开启
+4. CSS 编辑器将显示默认模板
+
+## CSS 选择器
+
+所有自定义样式必须针对特定选择器:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  /* 你的样式 */
+}
+```
+
+此选择器应用于页面上的所有翻译文本元素。
+
+## 编辑器功能
+
+### 语法高亮
+
+编辑器使用 CodeMirror 6,提供:
+- 彩色 CSS 语法
+- 行号
+- 大型样式表的代码折叠
+- 自动缩进
+
+### 颜色选择器
+
+点击编辑器中的任何颜色值以打开交互式颜色选择器:
+
+1. 点击颜色值如 `#FF5733`、`rgb(255, 87, 51)` 或 `hsl(9, 100%, 60%)`
+2. 可视化选择器立即出现
+3. 使用滑块或输入字段调整
+4. 更改实时更新
+
+支持的颜色格式:
+- 十六进制: `#FF5733`
+- RGB/RGBA: `rgba(255, 87, 51, 0.8)`
+- HSL/HSLA: `hsla(9, 100%, 60%, 0.8)`
+- 命名颜色: `tomato`、`skyblue`、`gold`
+- CSS 变量: `var(--my-color)`
+
+### 实时验证
+
+编辑器在保存前验证你的 CSS:
+
+- **有效(绿色)**: CSS 语法正确,可以保存
+- **验证中(灰色)**: 正在检查你的更改(500ms 防抖)
+- **错误(红色)**: 检测到语法错误并显示错误消息
+
+验证检查:
+- 语法错误(拼写错误、缺少括号)
+- 属性名称有效性
+- 选择器正确性
+- 大小限制(最大 8KB)
+
+## 基本 CSS 示例
+
+import { CSSStylePreview } from '@/components/blog/css-style-preview'
+
+### 简单字体颜色
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: blue;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: blue;
+}`} />
+
+### 带边框
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: #F2E3BC;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border-left: 3px solid #FFD700;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #414535;
+  background-color: #F2E3BC;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border-left: 3px solid #FFD700;
+}`} />
+
+### 醒目学习模式
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  background-color: #FFF59D;
+  color: #000;
+  font-weight: 600;
+  border: 2px solid #FFD54F;
+  padding: 6px 10px;
+  border-radius: 4px;
+}`} />
+
+## 高级技巧
+
+### CSS 变量
+
+定义可重用的值:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  --highlight-color: #FFE082;
+  --border-color: #FFA726;
+
+  background-color: var(--highlight-color);
+  border-left: 4px solid var(--border-color);
+  padding: 4px 10px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  --highlight-color: #FFE082;
+  --border-color: #FFA726;
+
+  background-color: var(--highlight-color);
+  border-left: 4px solid var(--border-color);
+  padding: 4px 10px;
+}`} />
+
+### 浅色/深色模式支持
+
+使用 `light-dark()` 函数自动适应主题:
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  background-color: light-dark(#FFF9C4, #4A4A2A);
+  color: light-dark(#333, #E0E0E0);
+  border: 1px solid light-dark(#FFD54F, #8D7B3A);
+  padding: 5px 10px;
+  border-radius: 4px;
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  background-color: light-dark(#FFF9C4, #4A4A2A);
+  color: light-dark(#333, #E0E0E0);
+  border: 1px solid light-dark(#FFD54F, #8D7B3A);
+  padding: 5px 10px;
+  border-radius: 4px;
+}`} />
+
+### 悬停效果
+
+```css
+[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style='custom'] {
+  color: #0277BD;
+  transition: color 0.2s ease-out, transform 0.2s ease-out;
+}
+[data-read-frog-custom-translation-style='custom']:hover {
+  color: #01579B;
+  transform: translateX(2px);
+}`} />
+
+### 动画
+
+```css
+[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+```
+
+<CSSStylePreview cssCode={`[data-read-frog-custom-translation-style="custom"] {
+  background: linear-gradient(90deg, #1fe5e1 0%, #a855f7 50%, #0ad6ff 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+  animation: gradient-shift 2s ease-in-out infinite;
+}
+
+@keyframes gradient-shift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}`} />
+
+## 最佳实践
+
+### 要做的 ✅
+
+- 从简单样式开始,逐步增加复杂性
+- 在多个网站上测试
+- 使用低透明度背景以保持可读性
+- 为长度值包含单位: `padding: 10px` 而不是 `padding: 10`
+- 使用完整的十六进制代码: `#FF5733` 而不是 `#FF`
+
+### 不要做的 ❌
+
+- 避免使用 `!important`(选择器特异性已经很高)
+- 不要编写过于复杂的样式(专注于基本属性)
+- 不要超过 8KB 大小限制
+- 避免缺少单位或不完整的颜色代码
+
+## 常用属性
+
+| 属性 | 用途 | 示例 |
+|------|------|------|
+| `color` | 文本颜色 | `color: #333;` |
+| `background-color` | 背景颜色 | `background-color: #FFF59D;` |
+| `padding` | 内边距 | `padding: 4px 8px;` |
+| `border` | 边框样式 | `border: 1px solid #FFD54F;` |
+| `border-radius` | 圆角 | `border-radius: 4px;` |
+| `font-weight` | 文本粗细 | `font-weight: 600;` |
+| `font-size` | 文本大小 | `font-size: 14px;` |
+| `text-decoration` | 下划线等 | `text-decoration: underline;` |
+| `opacity` | 透明度 | `opacity: 0.8;` |
+| `transition` | 动画时间 | `transition: color 0.2s ease-out;` |
+
+## 技术限制
+
+- **最大大小**: 8KB (8,192 字符)
+- **编辑器**: CodeMirror 6
+- **验证**: CSS Tree 解析器
+- **选择器**: 必须使用 `[data-read-frog-custom-translation-style='custom']`
+
+## 学习 CSS
+
+如果你是 CSS 新手,这些资源会有帮助:
+
+### 初学者教程
+- [MDN CSS 基础](https://developer.mozilla.org/zh-CN/docs/Learn/CSS/First_steps) - 全面的入门介绍
+- [W3Schools CSS 教程](https://www.w3schools.com/css/) - 交互式示例
+- [CSS-Tricks 指南](https://css-tricks.com/guides/) - 实用的 CSS 技巧
+
+### CSS 属性参考
+- [MDN CSS 参考](https://developer.mozilla.org/zh-CN/docs/Web/CSS/Reference) - 完整的属性文档
+- [CSS 值和单位](https://developer.mozilla.org/zh-CN/docs/Learn/CSS/Building_blocks/Values_and_units) - 理解单位(px、%、em 等)
+
+### 颜色
+- [MDN 颜色值](https://developer.mozilla.org/zh-CN/docs/Web/CSS/color_value) - 颜色格式说明
+- [Coolors](https://coolors.co/) - 调色板生成器
+- [Color Hunt](https://colorhunt.co/) - 配色方案灵感
+
+### 交互式练习
+- [CSS Diner](https://flukeout.github.io/) - 通过游戏学习 CSS 选择器
+- [Flexbox Froggy](https://flexboxfroggy.com/) - 学习布局(尽管基本样式不需要)
+
+## 故障排除
+
+### 样式未应用
+
+1. 检查验证状态(必须是绿色"有效")
+2. 验证选择器完全是 `[data-read-frog-custom-translation-style='custom']`
+3. 确保"使用自定义样式"已切换为开启
+4. 保存后刷新网页
+
+### 语法错误
+
+常见错误:
+- 缺少分号: `color: red` → `color: red;`
+- 缺少单位: `padding: 10` → `padding: 10px`
+- 不完整的颜色: `#FF` → `#FF5733`
+- 无效属性: `colour: red` → `color: red`
+
+### 样式冲突
+
+如果样式看起来不符合预期:
+- 检查网站的 CSS 是否覆盖了你的样式
+- 如果需要,增加特异性(尽管通常不需要)
+- 在不同网站上测试以识别特定于网站的问题
