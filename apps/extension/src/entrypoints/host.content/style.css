@@ -21,8 +21,7 @@
   display: inline-block;
   vertical-align: middle;
   box-sizing: content-box;
-  will-change: transform;
-  /* Use GPU to optimize animation performance */
+  will-change: transform; /* Use GPU to optimize animation performance */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -39,10 +38,8 @@
 
 .read-frog-translated-block-content {
   display: inline-block;
-  margin: 8px 0 !important;
-  /* 上下边距设置为8px，并强制覆盖其他样式 */
-  color: inherit;
-  /* 保持文本颜色与周围文本一致 */
+  margin: 8px 0 !important; /* 上下边距设置为8px，并强制覆盖其他样式 */
+  color: inherit; /* 保持文本颜色与周围文本一致 */
   font-family: inherit;
 }
 
