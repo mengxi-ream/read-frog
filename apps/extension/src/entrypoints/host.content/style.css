@@ -4,6 +4,7 @@
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -20,7 +21,8 @@
   display: inline-block;
   vertical-align: middle;
   box-sizing: content-box;
-  will-change: transform; /* Use GPU to optimize animation performance */
+  will-change: transform;
+  /* Use GPU to optimize animation performance */
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -37,8 +39,10 @@
 
 .read-frog-translated-block-content {
   display: inline-block;
-  margin: 8px 0 !important; /* 上下边距设置为8px，并强制覆盖其他样式 */
-  color: inherit; /* 保持文本颜色与周围文本一致 */
+  margin: 8px 0 !important;
+  /* 上下边距设置为8px，并强制覆盖其他样式 */
+  color: inherit;
+  /* 保持文本颜色与周围文本一致 */
   font-family: inherit;
 }
 
@@ -53,20 +57,21 @@
 .read-frog-translated-block-content[lang='zh'],
 .read-frog-translated-inline-content[lang='zh'] {
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei',
-    'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Heiti SC', 'WenQuanYi Micro Hei',
+    'Source Han Sans SC', 'Noto Sans SC', Helvetica, Arial, sans-serif !important;
 }
 
 .read-frog-translated-block-content[lang='zh-TW'],
 .read-frog-translated-inline-content[lang='zh-TW'] {
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Hiragino Sans GB', 'Microsoft JhengHei',
-    'Helvetica Neue', Helvetica, Arial, sans-serif !important;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', 'Heiti TC', 'STHeiti',
+    'STXihei', 'Hiragino Sans TC', 'WenQuanYi Zen Hei', 'Noto Sans TC', 'Source Han Sans TC', Helvetica, Arial,
+    sans-serif !important;
 }
 
 .read-frog-translated-block-content[lang='ja'],
 .read-frog-translated-inline-content[lang='ja'] {
   font-family:
-    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Hiragino Kaku Gothic ProN', 'Hiragino Sans', 'Yu Gothic', 'Meiryo',
-    sans-serif !important;
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic ProN', 'Meiryo',
+    'MS PGothic', 'MS Gothic', 'Noto Sans JP', 'Source Han Sans JP', 'IPAexGothic', Arial, Helvetica, sans-serif !important;
 }
