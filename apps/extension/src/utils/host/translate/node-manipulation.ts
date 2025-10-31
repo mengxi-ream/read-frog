@@ -33,8 +33,6 @@ import {
 import { decorateTranslationNode } from './decorate-translation'
 import { translateText, validateTranslationConfig } from './translate-text'
 
-// Always set lang based on target language code when available.
-
 const translatingNodes = new WeakSet<ChildNode>()
 const originalContentMap = new Map<Element, string>()
 
@@ -58,8 +56,6 @@ function isNumericContent(text: string): boolean {
   // Additional check: ensure there's at least one digit
   return /\d/.test(cleanedText)
 }
-
-// computeLangAttribute removed: we now directly map ISO6393 -> ISO6391 for lang
 
 export async function removeOrShowNodeTranslation(point: Point, config: Config) {
   const node = findNearestAncestorBlockNodeAt(point)
