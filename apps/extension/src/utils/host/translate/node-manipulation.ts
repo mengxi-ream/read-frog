@@ -410,12 +410,6 @@ async function insertTranslatedNodeIntoWrapper(
     return
   }
 
-  // Copy lang attribute from wrapper to the actual translated node
-  const langAttr = translatedWrapperNode.getAttribute('lang')
-  if (langAttr) {
-    translatedNode.setAttribute('lang', langAttr)
-  }
-
   translatedNode.textContent = translatedText
   await decorateTranslationNode(translatedNode, translationNodeStyle)
   translatedWrapperNode.appendChild(translatedNode)

@@ -50,24 +50,20 @@
   text-decoration: inherit;
 }
 
-/* Set font-family for Chinese and Japanese translated content */
-.read-frog-translated-block-content[lang='zh'],
-.read-frog-translated-inline-content[lang='zh'] {
+.read-frog-translated-content-wrapper[lang='zh'] {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', 'Heiti SC', 'WenQuanYi Micro Hei',
     'Source Han Sans SC', 'Noto Sans SC', Helvetica, Arial, sans-serif !important;
 }
 
-.read-frog-translated-block-content[lang='zh-TW'],
-.read-frog-translated-inline-content[lang='zh-TW'] {
+.read-frog-translated-content-wrapper[lang='zh-TW'] {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', 'Heiti TC', 'STHeiti',
     'STXihei', 'Hiragino Sans TC', 'WenQuanYi Zen Hei', 'Noto Sans TC', 'Source Han Sans TC', Helvetica, Arial,
     sans-serif !important;
 }
 
-.read-frog-translated-block-content[lang='ja'],
-.read-frog-translated-inline-content[lang='ja'] {
+.read-frog-translated-content-wrapper[lang='ja'] {
   font-family:
     -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Yu Gothic', 'YuGothic', 'Hiragino Kaku Gothic ProN', 'Meiryo',
     'MS PGothic', 'MS Gothic', 'Noto Sans JP', 'Source Han Sans JP', 'IPAexGothic', Arial, Helvetica, sans-serif !important;
