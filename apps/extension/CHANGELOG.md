@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.16.1
+
+### Patch Changes
+
+- [#683](https://github.com/mengxi-ream/read-frog/pull/683) [`d97b6ba`](https://github.com/mengxi-ream/read-frog/commit/d97b6ba741618d689ad6fe37bee33d68e1d78957) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): improve select-all behavior to support shadow roots and external apps like Excalidraw
+
+- [#669](https://github.com/mengxi-ream/read-frog/pull/669) [`aee1847`](https://github.com/mengxi-ream/read-frog/commit/aee18477edb4ed7f1bf7d8375801fc5e1ba3c276) Thanks [@darmau](https://github.com/darmau)! - style: set proper font-family for Japanese and Chinese translation, in order to render the right kanjis.
+
+- [#681](https://github.com/mengxi-ream/read-frog/pull/681) [`bfba497`](https://github.com/mengxi-ream/read-frog/commit/bfba497167aaa6bf9339d8f44d733e0868b0d8a2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: test changeset
+
 ## 1.16.0
 
 ### Minor Changes
