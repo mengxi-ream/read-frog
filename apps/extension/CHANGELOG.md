@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.16.2
+
+### Patch Changes
+
+- [#686](https://github.com/mengxi-ream/read-frog/pull/686) [`e727b97`](https://github.com/mengxi-ream/read-frog/commit/e727b9758b6f64ad61d6a9fbdc85b6d0af41b211) Thanks [@darmau](https://github.com/darmau)! - feat: rtl languages support.
+
+- [#690](https://github.com/mengxi-ream/read-frog/pull/690) [`377280a`](https://github.com/mengxi-ream/read-frog/commit/377280a12010fb1a91d1d519081e8b3134ccc968) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: batch insert translation wrapper to improve page translation performance
+
+- [#691](https://github.com/mengxi-ream/read-frog/pull/691) [`b281c14`](https://github.com/mengxi-ream/read-frog/commit/b281c1497d7ba580b74737fbabeae1a8c24c2dc7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: apply font families to translated content wrapper and all children elements
+
 ## 1.16.1
 
 ### Patch Changes
