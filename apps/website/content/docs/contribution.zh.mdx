@@ -179,6 +179,23 @@ export default defineWebExtConfig({
 
 **💡 提示：** 可以为 `--user-data-dir` 使用任何目录。当前配置为每个项目创建配置文件。
 
+### 开发模式下的 Google 登录问题
+
+如果你想在开发模式下使用 Google 账号登录，但遇到错误 **"This browser or app may not be secure."**（此浏览器或应用可能不安全），你需要禁用自动化检测。
+
+**解决方法：** 在 `web-ext.config.ts` 中添加 `chromiumArgs`：
+
+```typescript
+// apps/extension/web-ext.config.ts
+import { defineWebExtConfig } from 'wxt';
+
+export default defineWebExtConfig({
+  chromiumArgs: ['--disable-blink-features=AutomationControlled'],
+});
+```
+
+这将禁用自动化检测，避免 Google 阻止来自自动化浏览器的登录请求。
+
 ### 断点调试问题
 
 ⚠️ 如果你遇到了无法断点调试的问题，可能是因为 Chrome DevTools 的 ignore list 设置。扩展注入的内容脚本可能被自动忽略，导致断点失效。

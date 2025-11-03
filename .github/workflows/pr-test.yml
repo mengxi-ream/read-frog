@@ -51,7 +51,7 @@ jobs:
         run: pnpm type-check
 
       - name: Build
-        run: pnpm build
+        run: pnpm --filter=@read-frog/extension build
         env:
           SKIP_ENV_VALIDATION: true
           PUBLIC_REPO_GITHUB_TOKEN: ${{ secrets.PUBLIC_REPO_GITHUB_TOKEN }}

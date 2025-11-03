@@ -4,6 +4,7 @@ import { act, render, screen } from '@testing-library/react'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { BLOCK_ATTRIBUTE, BLOCK_CONTENT_CLASS, CONTENT_WRAPPER_CLASS, PARAGRAPH_ATTRIBUTE } from '@/utils/constants/dom-labels'
+import { flushBatchedOperations } from '../dom/batch-dom'
 import { removeOrShowNodeTranslation } from '../translate/node-manipulation'
 import { expectNodeLabels, expectTranslatedContent, expectTranslationWrapper, MOCK_ORIGINAL_TEXT } from './utils'
 
@@ -62,6 +63,8 @@ describe('node translation', () => {
       document.elementFromPoint = vi.fn(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        // Flush batched DOM operations to ensure all changes are applied before assertions
+        flushBatchedOperations()
       })
 
       expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE])
@@ -85,12 +88,14 @@ describe('node translation', () => {
       document.elementFromPoint = vi.fn(() => node)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        flushBatchedOperations()
       })
 
       const translatedContent = node.querySelector(`.${BLOCK_CONTENT_CLASS}`)
       document.elementFromPoint = vi.fn(() => translatedContent as Element)
       await act(async () => {
         await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        flushBatchedOperations()
       })
 
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()

@@ -180,6 +180,23 @@ export default defineWebExtConfig({
 
 **💡 TIP:** Use any directory for `--user-data-dir`. Current config creates a profile per project.
 
+### Google Login Issues in Dev Mode
+
+If you want to login with a Google account in dev mode and encounter the error **"This browser or app may not be secure."**, you need to disable automation detection.
+
+**Solution:** Add `chromiumArgs` to your `web-ext.config.ts`:
+
+```typescript
+// apps/extension/web-ext.config.ts
+import { defineWebExtConfig } from 'wxt';
+
+export default defineWebExtConfig({
+  chromiumArgs: ['--disable-blink-features=AutomationControlled'],
+});
+```
+
+This disables the automation detection that causes Google to block login attempts from automated browsers.
+
 ### Breakpoint Debugging Issues
 
 ⚠️ If you encounter issues with breakpoint debugging, it might be due to Chrome DevTools ignore list settings. Content scripts injected by extensions may be automatically ignored, causing breakpoints to fail.

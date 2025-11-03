@@ -109,5 +109,6 @@ export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]
   'www.reddit.com': [
     'faceplate-screen-reader-content > *',
     'reddit-header-large *',
+    'shreddit-comment-action-row > *',
   ],
 }

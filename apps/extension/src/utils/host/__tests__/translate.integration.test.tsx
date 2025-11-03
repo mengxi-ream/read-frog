@@ -12,6 +12,7 @@ import {
   INLINE_CONTENT_CLASS,
   PARAGRAPH_ATTRIBUTE,
 } from '@/utils/constants/dom-labels'
+import { flushBatchedOperations } from '@/utils/host/dom/batch-dom'
 import { walkAndLabelElement } from '@/utils/host/dom/traversal'
 import { translateWalkedElement } from '@/utils/host/translate/node-manipulation'
 import { translateText } from '@/utils/host/translate/translate-text'
@@ -81,6 +82,8 @@ describe('translate', () => {
     walkAndLabelElement(document.body, id, translationMode === 'bilingual' ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG)
     await act(async () => {
       await translateWalkedElement(document.body, id, translationMode === 'bilingual' ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG, toggle)
+      // Flush batched DOM operations to ensure all changes are applied before assertions
+      flushBatchedOperations()
     })
   }
 
