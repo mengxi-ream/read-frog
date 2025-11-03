@@ -1,4 +1,4 @@
-import { authSchema, db } from '@repo/db'
+import { authSchema, database } from '@repo/db'
 import { TRUSTED_ORIGINS } from '@repo/definitions'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
@@ -15,7 +15,7 @@ export function getTrustedOrigins() {
 
 export const auth = betterAuth({
   ...betterAuthOptions,
-  database: drizzleAdapter(db, {
+  database: drizzleAdapter(database, {
     provider: 'pg',
     schema: authSchema,
   }),

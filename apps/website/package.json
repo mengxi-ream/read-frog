@@ -14,10 +14,13 @@
   },
   "dependencies": {
     "@orama/tokenizers": "^3.1.6",
+    "@orpc/client": "^1.10.3",
+    "@orpc/server": "^1.10.3",
     "@repo/api": "workspace:*",
     "@repo/auth": "workspace:*",
     "@repo/db": "workspace:*",
     "@repo/definitions": "workspace:*",
+    "@repo/orpc": "workspace:*",
     "@repo/ui": "workspace:*",
     "@repo/utils": "workspace:*",
     "@t3-oss/env-nextjs": "^0.13.8",

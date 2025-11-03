@@ -8,7 +8,7 @@
  */
 
 import { auth } from '@repo/auth'
-import { db } from '@repo/db'
+import { database } from '@repo/db'
 import { initTRPC, TRPCError } from '@trpc/server'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
@@ -35,7 +35,7 @@ export async function createTRPCContext(opts: { headers: Headers }) {
   console.log('[tRPC] Request from', source, 'by', session?.user.email)
 
   return {
-    db,
+    db: database,
     session,
     ...opts,
   }
