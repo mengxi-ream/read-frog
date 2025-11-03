@@ -14,11 +14,9 @@ import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom, ttsProviderConfigAtom } from '@/utils/atoms/provider'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { getProviderOptions } from '@/utils/constants/model'
-import { WEBSITE_URL } from '@/utils/constants/url'
 import { createPortStreamPromise } from '@/utils/firefox-streaming'
 import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
 import { translateText } from '@/utils/host/translate/translate-text'
-import { sendMessage } from '@/utils/message'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
 import { isSelectionToolbarVisibleAtom, isTranslatePopoverVisibleAtom, mouseClickPositionAtom, selectionContentAtom } from './atom'
@@ -54,15 +52,7 @@ export function TranslatePopover() {
   const languageConfig = useAtomValue(configFieldsAtomMap.language)
   const selectionContent = useAtomValue(selectionContentAtom)
   const [isVisible, setIsVisible] = useAtom(isTranslatePopoverVisibleAtom)
-  const { data: session } = authClient.useSession()
   const isFirefoxExtensionEnv = useMemo(() => getIsFirefoxExtensionEnv(), [])
-
-  const createVocabulary = useMutation({
-    ...trpc.vocabulary.create.mutationOptions(),
-    onSuccess: () => {
-      toast.success(`Translation saved successfully! Please go to ${WEBSITE_URL}/vocabulary to view it.`)
-    },
-  })
 
   const handleClose = useCallback(() => {
     setTranslatedText(undefined)
