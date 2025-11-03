@@ -11,7 +11,7 @@ import { addBackup, getAllBackupsWithMetadata } from '@/utils/backup/storage'
 import { EXTENSION_VERSION } from '@/utils/constants/app'
 import { MAX_BACKUPS_COUNT } from '@/utils/constants/backup'
 import { CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { queryClient } from '@/utils/trpc/client'
+import { queryClient } from '@/utils/tanstack-query'
 import { BackupConfigItem } from './components/backup-config-item'
 
 export function ConfigBackup() {

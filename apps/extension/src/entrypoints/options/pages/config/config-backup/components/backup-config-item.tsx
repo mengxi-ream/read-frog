@@ -27,7 +27,7 @@ import { addBackup, isSameAsLatestBackup, removeBackup } from '@/utils/backup/st
 import { migrateConfig } from '@/utils/config/migration'
 import { EXTENSION_VERSION } from '@/utils/constants/app'
 import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { queryClient } from '@/utils/trpc/client'
+import { queryClient } from '@/utils/tanstack-query'
 import { ViewConfig } from '../../components/view-config'
 
 interface BackupConfigItemProps {

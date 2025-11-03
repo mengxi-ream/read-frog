@@ -122,9 +122,6 @@ importers:
       '@orpc/client':
         specifier: ^1.10.3
         version: 1.10.3(@opentelemetry/api@1.9.0)
-      '@repo/api':
-        specifier: workspace:*
-        version: link:../../packages/api
       '@repo/definitions':
         specifier: workspace:*
         version: link:../../packages/definitions
@@ -224,9 +221,6 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.0(react@19.2.0))(react@19.2.0)
-      superjson:
-        specifier: ^2.2.2
-        version: 2.2.2
       type-fest:
         specifier: ^4.41.0
         version: 4.41.0
@@ -315,9 +309,6 @@ importers:
       '@orpc/server':
         specifier: ^1.10.3
         version: 1.10.3(@opentelemetry/api@1.9.0)(ws@8.18.3)
-      '@repo/api':
-        specifier: workspace:*
-        version: link:../../packages/api
       '@repo/auth':
         specifier: workspace:*
         version: link:../../packages/auth
@@ -399,9 +390,6 @@ importers:
       server-only:
         specifier: ^0.0.1
         version: 0.0.1
-      superjson:
-        specifier: ^2.2.2
-        version: 2.2.2
       zod:
         specifier: ^4.0.17
         version: 4.0.17
@@ -442,34 +430,6 @@ importers:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
-
-  packages/api:
-    dependencies:
-      '@repo/auth':
-        specifier: workspace:*
-        version: link:../auth
-      '@repo/db':
-        specifier: workspace:*
-        version: link:../db
-      '@repo/definitions':
-        specifier: workspace:*
-        version: link:../definitions
-      '@trpc/server':
-        specifier: ^11.4.4
-        version: 11.4.4(typescript@5.9.3)
-      superjson:
-        specifier: ^2.2.2
-        version: 2.2.2
-      zod:
-        specifier: ^4.0.17
-        version: 4.0.17
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
 
   packages/auth:
     dependencies:
@@ -4667,10 +4627,6 @@ packages:
     resolution: {integrity: sha512-9Kr/j4O16ISv8zBBhJoi4bXOYNTkFLOqSL3UDB0njXxCXNezjeyVrJyGOWtgfs/q2km1gwBcfH8q1yEGoMYunA==}
     engines: {node: '>=18'}
 
-  copy-anything@3.0.5:
-    resolution: {integrity: sha512-yCEafptTtb4bk7GLEQoM8KVJpxAfdBJYaXyzQEgQQQgYrZiDp8SJmGKlYza6CYjEDNstAdNdKA3UuoULlEbS6w==}
-    engines: {node: '>=12.13'}
-
   core-js-compat@3.44.0:
     resolution: {integrity: sha512-JepmAj2zfl6ogy34qfWtcE7nHKAJnKsQFRn++scjVS2bZFllwptzw61BZcZFYBPpUznLfAvh0LGhxKppk04ClA==}
 
@@ -6201,10 +6157,6 @@ packages:
 
   is-upper-case@1.1.2:
     resolution: {integrity: sha512-GQYSJMgfeAmVwh9ixyk888l7OIhNAGKtY6QA+IrWlu9MDTCaXmeozOZ2S9Knj7bQwBO/H6J2kb+pbyTUiMNbsw==}
-
-  is-what@4.1.16:
-    resolution: {integrity: sha512-ZhMwEosbFJkA0YhFnNDgTM4ZxDRsS6HqTo7qsZM08fehyRYIYa0yHu5R6mgo1n/8MgaPBXiPimPD77baVFYg+A==}
-    engines: {node: '>=12.13'}
 
   is-windows@1.0.2:
     resolution: {integrity: sha512-eXK1UInq2bPmjyX6e3VHIzMLobc4J94i4AWn+Hpq3OU5KkrRC96OAcR3PRJ/pGu6m8TRnBHP9dkXQVsT/COVIA==}
@@ -8155,10 +8107,6 @@ packages:
         optional: true
       babel-plugin-macros:
         optional: true
-
-  superjson@2.2.2:
-    resolution: {integrity: sha512-5JRxVqC8I8NuOUjzBbvVJAKNM8qoVuH0O77h4WInc/qC2q5IreqKxYwgkga3PfA22OayK2ikceb/B26dztPl+Q==}
-    engines: {node: '>=16'}
 
   supports-color@5.5.0:
     resolution: {integrity: sha512-QjVjwdXIt408MIiAqCX4oUKsgU2EqAGzs2Ppkm4aQYbjm+ZEWEcW4SfFNTr4uMNZma0ey4f5lgLrkB0aX0QMow==}
@@ -13337,10 +13285,6 @@ snapshots:
 
   cookie@1.0.2: {}
 
-  copy-anything@3.0.5:
-    dependencies:
-      is-what: 4.1.16
-
   core-js-compat@3.44.0:
     dependencies:
       browserslist: 4.25.1
@@ -15018,8 +14962,6 @@ snapshots:
   is-upper-case@1.1.2:
     dependencies:
       upper-case: 1.1.3
-
-  is-what@4.1.16: {}
 
   is-windows@1.0.2: {}
 
@@ -17235,10 +17177,6 @@ snapshots:
     dependencies:
       client-only: 0.0.1
       react: 19.2.0
-
-  superjson@2.2.2:
-    dependencies:
-      copy-anything: 3.0.5
 
   supports-color@5.5.0:
     dependencies:

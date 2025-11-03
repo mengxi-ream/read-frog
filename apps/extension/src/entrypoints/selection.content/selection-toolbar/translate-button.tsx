@@ -4,7 +4,6 @@ import { Icon } from '@iconify/react'
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@repo/definitions'
 import { getIsFirefoxExtensionEnv } from '@repo/ui/utils/firefox-compat'
 import { IconLoader2, IconVolume } from '@tabler/icons-react'
-import { useMutation } from '@tanstack/react-query'
 import { readUIMessageStream, streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -13,7 +12,6 @@ import { useTextToSpeech } from '@/hooks/use-text-to-speech'
 import { isLLMTranslateProviderConfig, isNonAPIProvider, isPureAPIProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom, ttsProviderConfigAtom } from '@/utils/atoms/provider'
-import { authClient } from '@/utils/auth/auth-client'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { getProviderOptions } from '@/utils/constants/model'
 import { WEBSITE_URL } from '@/utils/constants/url'
@@ -23,7 +21,6 @@ import { translateText } from '@/utils/host/translate/translate-text'
 import { sendMessage } from '@/utils/message'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
-import { trpc } from '@/utils/trpc/client'
 import { isSelectionToolbarVisibleAtom, isTranslatePopoverVisibleAtom, mouseClickPositionAtom, selectionContentAtom } from './atom'
 import { PopoverWrapper } from './components/popover-wrapper'
 
@@ -77,36 +74,6 @@ export function TranslatePopover() {
       toast.success('Translation copied to clipboard!')
     }
   }, [translatedText])
-
-  const handleSave = useCallback(async () => {
-    if (!session?.user?.id) {
-      await sendMessage('openPage', { url: `${WEBSITE_URL}/log-in`, active: true })
-      return
-    }
-
-    if (!selectionContent || !translatedText) {
-      toast.error('No content to save')
-      return
-    }
-
-    const config = await getConfigFromStorage()
-    if (!config) {
-      toast.error('Configuration not loaded')
-      return
-    }
-
-    try {
-      await createVocabulary.mutateAsync({
-        originalText: selectionContent,
-        translation: translatedText,
-        sourceLanguageISO6393: config.language.sourceCode === 'auto' ? 'eng' : config.language.sourceCode,
-        targetLanguageISO6393: config.language.targetCode,
-      })
-    }
-    catch {
-      // Error handled by mutation
-    }
-  }, [session?.user?.id, selectionContent, translatedText, createVocabulary])
 
   useEffect(() => {
     let cancelTranslation: (() => void) | undefined
@@ -295,21 +262,7 @@ export function TranslatePopover() {
         </div>
       </div>
       <div className="p-4 flex justify-between items-center">
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={!translatedText || createVocabulary.isPending}
-          className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-400 disabled:cursor-not-allowed text-white text-sm rounded"
-        >
-          {createVocabulary.isPending
-            ? (
-                <Icon icon="svg-spinners:3-dots-bounce" className="size-4" />
-              )
-            : (
-                <Icon icon="tabler:bookmark-plus" strokeWidth={1} className="size-4" />
-              )}
-          {createVocabulary.isPending ? 'Saving...' : 'Save'}
-        </button>
+        <div></div>
         <div className="flex items-center gap-2">
           <SpeakOriginalButton />
           <button

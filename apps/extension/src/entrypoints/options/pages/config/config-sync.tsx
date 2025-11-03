@@ -23,7 +23,7 @@ import { addBackup } from '@/utils/backup/storage'
 import { migrateConfig } from '@/utils/config/migration'
 import { EXTENSION_VERSION } from '@/utils/constants/app'
 import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { queryClient } from '@/utils/trpc/client'
+import { queryClient } from '@/utils/tanstack-query'
 import { ConfigCard } from '../../components/config-card'
 import { ViewConfig } from './components/view-config'
 

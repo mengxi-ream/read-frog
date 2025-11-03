@@ -7,7 +7,7 @@ import { APP_NAME } from '@/utils/constants/app.ts'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { insertShadowRootUIWrapperInto } from '@/utils/shadow-root'
 import { addStyleToShadow } from '@/utils/styles'
-import { queryClient } from '@/utils/trpc/client'
+import { queryClient } from '@/utils/tanstack-query'
 import App from './app'
 import '@/assets/tailwind/theme.css'
 

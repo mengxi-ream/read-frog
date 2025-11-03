@@ -10,7 +10,6 @@ import { Inter } from 'next/font/google'
 import { notFound } from 'next/navigation'
 import { routing } from '@/i18n/routing'
 import { SITE_PUBLIC_URL } from '@/lib/constants'
-import { TRPCReactProvider } from '@/trpc/react'
 import '@/styles/global.css'
 import '@/styles/background.css'
 
@@ -106,9 +105,7 @@ export default async function RootLayout({
               translations: locale !== 'en' ? { zh }[locale] : undefined,
             }}
           >
-            <TRPCReactProvider>
-              {children}
-            </TRPCReactProvider>
+            {children}
           </RootProvider>
         </NextIntlClientProvider>
         <Analytics />
