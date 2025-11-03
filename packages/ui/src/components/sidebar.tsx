@@ -55,8 +55,8 @@ function useSidebar() {
 
 function SidebarProvider({
   defaultOpen = true,
-  open: controlledOpen,
-  onOpenChange: setControlledOpen,
+  open: openProp,
+  onOpenChange: setOpenProp,
   className,
   style,
   children,
@@ -72,12 +72,12 @@ function SidebarProvider({
   // This is the internal state of the sidebar.
   // We use openProp and setOpenProp for control from outside the component.
   const [_open, _setOpen] = React.useState(defaultOpen)
-  const open = controlledOpen ?? _open
+  const open = openProp ?? _open
   const setOpen = React.useCallback(
     (value: boolean | ((value: boolean) => boolean)) => {
       const openState = typeof value === 'function' ? value(open) : value
-      if (setControlledOpen) {
-        setControlledOpen(openState)
+      if (setOpenProp) {
+        setOpenProp(openState)
       }
       else {
         _setOpen(openState)
@@ -86,7 +86,7 @@ function SidebarProvider({
       // This sets the cookie to keep the sidebar state.
       document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`
     },
-    [setControlledOpen, open],
+    [setOpenProp, open],
   )
 
   // Helper to toggle the sidebar.

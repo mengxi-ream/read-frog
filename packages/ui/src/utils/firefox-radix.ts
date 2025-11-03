@@ -74,8 +74,8 @@ export function useFirefoxRadixOpenController(options: Options): Result {
     contentSelector,
   } = options
 
-  const isFirefoxEnv = React.useMemo(() => getIsFirefoxExtensionEnv(), [])
-  const isFirefoxMode = isFirefoxEnv && isEnabled
+  const isFirefoxExtensionEnv = React.useMemo(() => getIsFirefoxExtensionEnv(), [])
+  const isFirefoxMode = isFirefoxExtensionEnv && isEnabled
 
   const isControlled = controlledOpen !== undefined
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)

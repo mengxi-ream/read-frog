@@ -30,7 +30,6 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
   async main(ctx) {
     const config = await getConfigFromStorage() ?? DEFAULT_CONFIG
-    let disposeMirror: (() => void) | undefined
     const ui = await createShadowRootUi(ctx, {
       name: kebabCase(APP_NAME),
       position: 'overlay',
@@ -42,7 +41,7 @@ export default defineContentScript({
         shadowWrapper = wrapper
 
         addStyleToShadow(shadow)
-        disposeMirror = mirrorDynamicStyles('#_goober', shadow)
+        mirrorDynamicStyles('#_goober', shadow)
         // mirrorDynamicStyles(
         //   "style[type='text/css']",
         //   shadow,
@@ -108,8 +107,6 @@ export default defineContentScript({
         return { root, wrapper }
       },
       onRemove: (elements) => {
-        disposeMirror?.()
-        disposeMirror = undefined
         elements?.root.unmount()
         elements?.wrapper.remove()
         shadowWrapper = null
