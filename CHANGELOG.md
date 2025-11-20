@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.17.1
+
+### Patch Changes
+
+- [`f6d9b3a`](https://github.com/mengxi-ream/read-frog/commit/f6d9b3a503d589ebd304808e5d9520d828394016) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: ollama connection test button style
+
 ## 1.17.0
 
 ### Minor Changes
