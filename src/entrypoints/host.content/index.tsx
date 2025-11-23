@@ -1,8 +1,10 @@
 import type { Config } from '@/types/config/config'
 import { createShadowRootUi, defineContentScript, storage } from '#imports'
 import { kebabCase } from 'case-anything'
+import { Provider as JotaiProvider } from 'jotai'
 import ReactDOM from 'react-dom/client'
 // import eruda from 'eruda'
+import { ThemeProvider } from '@/components/providers/theme-provider'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
 import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
@@ -38,7 +40,11 @@ export default defineContentScript({
         // Create a root on the UI container and render a component
         const root = ReactDOM.createRoot(wrapper)
         root.render(
-          <App />,
+          <JotaiProvider>
+            <ThemeProvider container={wrapper}>
+              <App />
+            </ThemeProvider>
+          </JotaiProvider>,
         )
         return root
       },

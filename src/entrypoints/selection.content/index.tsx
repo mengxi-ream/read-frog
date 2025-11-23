@@ -1,6 +1,7 @@
 import { createShadowRootUi, defineContentScript } from '#imports'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { kebabCase } from 'case-anything'
+import { Provider as JotaiProvider } from 'jotai'
 import ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { APP_NAME } from '@/utils/constants/app.ts'
@@ -33,9 +34,11 @@ export default defineContentScript({
         const root = ReactDOM.createRoot(wrapper)
         root.render(
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider container={wrapper}>
-              <App />
-            </ThemeProvider>
+            <JotaiProvider>
+              <ThemeProvider container={wrapper}>
+                <App />
+              </ThemeProvider>
+            </JotaiProvider>
           </QueryClientProvider>,
         )
         return root
