@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.18.0
+
+### Minor Changes
+
+- [#735](https://github.com/mengxi-ream/read-frog/pull/735) [`30db212`](https://github.com/mengxi-ream/read-frog/commit/30db2125fc9e6d7f1d32da4082c0d0038afc20e9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add AI smart context translation for improved translation accuracy
+
+- [#739](https://github.com/mengxi-ream/read-frog/pull/739) [`f1fd0c5`](https://github.com/mengxi-ream/read-frog/commit/f1fd0c5bbab49ceaf6a28d6367816603a863fa86) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add system prompt support and improve prompt for batching
+
+### Patch Changes
+
+- [#738](https://github.com/mengxi-ream/read-frog/pull/738) [`6dce9e1`](https://github.com/mengxi-ream/read-frog/commit/6dce9e1fd26898ef3ff9d38939f14e147cc16120) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore: change default translation node style to 'textColor' for new installs
+
+- [#738](https://github.com/mengxi-ream/read-frog/pull/738) [`6dce9e1`](https://github.com/mengxi-ream/read-frog/commit/6dce9e1fd26898ef3ff9d38939f14e147cc16120) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: detect source language before translation to skip if already in target language
+
+- [#719](https://github.com/mengxi-ream/read-frog/pull/719) [`2fafa2a`](https://github.com/mengxi-ream/read-frog/commit/2fafa2add6ab63bcc00a1cff1e7f982d29a297d3) Thanks [@lisongkun](https://github.com/lisongkun)! - fix: domain patterns matching logic
+
+- [#738](https://github.com/mengxi-ream/read-frog/pull/738) [`6dce9e1`](https://github.com/mengxi-ream/read-frog/commit/6dce9e1fd26898ef3ff9d38939f14e147cc16120) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: add fallback values for empty title/summary in translation prompts
+
 ## 1.17.3
 
 ### Patch Changes
