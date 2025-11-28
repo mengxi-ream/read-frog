@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.18.1
+
+### Patch Changes
+
+- [`1859c74`](https://github.com/mengxi-ream/read-frog/commit/1859c743d2b1791f20f1639c652649529795fb5f) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style: llm status indicator color
+
+- [`90001a9`](https://github.com/mengxi-ream/read-frog/commit/90001a9d883e6400ab6d1066057cea6099f2d880) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - i18n: update i18n for custom translation style
+
+- [#742](https://github.com/mengxi-ream/read-frog/pull/742) [`ed8f173`](https://github.com/mengxi-ream/read-frog/commit/ed8f173905d8bc449fb1c28fd571c7011accfbe0) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style: extension style upgrade
+
+- [#741](https://github.com/mengxi-ream/read-frog/pull/741) [`51d3054`](https://github.com/mengxi-ream/read-frog/commit/51d3054c3a31242c287dff1ec303f1b19bb3538f) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style: update custom prompt sheet
+
 ## 1.18.0
 
 ### Minor Changes
