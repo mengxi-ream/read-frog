@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.19.0
+
+### Minor Changes
+
+- [#718](https://github.com/mengxi-ream/read-frog/pull/718) [`1205620`](https://github.com/mengxi-ream/read-frog/commit/120562069ac2b3a47051677b6b6b0cc3db010318) Thanks [@guoyongchang](https://github.com/guoyongchang)! - feat: add context menu translate option
+
+  Add right-click context menu option for translating pages directly from the browser context menu.
+
+  **Important**: This feature requires a new `contextMenus` permission. When upgrading, your browser may prompt you to approve this new permission and temporarily disable the extension until approved. This is normal browser behavior for permission changes.
+
+### Patch Changes
+
+- [#747](https://github.com/mengxi-ream/read-frog/pull/747) [`8844a84`](https://github.com/mengxi-ream/read-frog/commit/8844a848445bc21af1ca73571440f5f073410cf7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style: update shadcn ghost color
+
+- [#747](https://github.com/mengxi-ream/read-frog/pull/747) [`4f76f7b`](https://github.com/mengxi-ream/read-frog/commit/4f76f7b9c8a6507b352e9a8b7ad92ad5ea9b4289) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style: change more menu icons
+
 ## 1.18.1
 
 ### Patch Changes
