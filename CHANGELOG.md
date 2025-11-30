@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.19.1
+
+### Patch Changes
+
+- [#752](https://github.com/mengxi-ream/read-frog/pull/752) [`d3db08c`](https://github.com/mengxi-ream/read-frog/commit/d3db08c684372b7b72402e88150f257b55091292) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: skip aria-hidden elements in translation traversal
+
+- [#749](https://github.com/mengxi-ream/read-frog/pull/749) [`25de809`](https://github.com/mengxi-ream/read-frog/commit/25de8095a717b332c3c9bfd73c1fcd81bf769d25) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add rate us option to popup menu and options sidebar
+
 ## 1.19.0
 
 ### Minor Changes
