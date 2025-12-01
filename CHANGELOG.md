@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.19.3
+
+### Patch Changes
+
+- [#758](https://github.com/mengxi-ream/read-frog/pull/758) [`c444ef7`](https://github.com/mengxi-ream/read-frog/commit/c444ef73db58a6de0f6eeff93b04b3e5ae9f509d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add site-specific force block translation support
+
 ## 1.19.2
 
 ### Patch Changes
