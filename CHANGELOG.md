@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.19.2
+
+### Patch Changes
+
+- [#755](https://github.com/mengxi-ream/read-frog/pull/755) [`e5b8efa`](https://github.com/mengxi-ream/read-frog/commit/e5b8efa086479e4b23d59f8bb175259e98269905) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: exclude detectedCode from translation cache hash
+
+- [#757](https://github.com/mengxi-ream/read-frog/pull/757) [`67502f5`](https://github.com/mengxi-ream/read-frog/commit/67502f54198a0218240b227193728213529e9ec8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: filter don't walk into and don't translate as child elements in unwrapDeepestOnlyHTMLChild function
+
+- [#757](https://github.com/mengxi-ream/read-frog/pull/757) [`67502f5`](https://github.com/mengxi-ream/read-frog/commit/67502f54198a0218240b227193728213529e9ec8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: variable shadowing bug in translateWalkedElement that caused async translation promises to not be awaited
+
 ## 1.19.1
 
 ### Patch Changes
