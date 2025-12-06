@@ -2,7 +2,7 @@
 
 import type { ItemInstance } from '@headless-tree/core'
 import { Slot } from '@radix-ui/react-slot'
-import { ChevronDownIcon, SquareMinus, SquarePlus } from 'lucide-react'
+import { IconChevronDown, IconSquareMinus, IconSquarePlus } from '@tabler/icons-react'
 import * as React from 'react'
 import { useMemo } from 'react'
 import { cn } from '@/lib/utils'
@@ -137,14 +137,14 @@ function TreeItemLabel<T = any>({ item: propItem, children, className, ...props 
           ? (
               item.isExpanded()
                 ? (
-                    <SquareMinus className="text-muted-foreground size-3.5" stroke="currentColor" strokeWidth="1" />
+                    <IconSquareMinus className="text-muted-foreground size-3.5" stroke="currentColor" strokeWidth="1" />
                   )
                 : (
-                    <SquarePlus className="text-muted-foreground size-3.5" stroke="currentColor" strokeWidth="1" />
+                    <IconSquarePlus className="text-muted-foreground size-3.5" stroke="currentColor" strokeWidth="1" />
                   )
             )
           : (
-              <ChevronDownIcon className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90" />
+              <IconChevronDown className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90" />
             ))}
       {children || (typeof item.getItemName === 'function' ? item.getItemName() : null)}
     </span>

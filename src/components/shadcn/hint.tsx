@@ -1,5 +1,5 @@
 import type { ComponentProps } from 'react'
-import { HelpCircle } from 'lucide-react'
+import { IconHelpCircle } from '@tabler/icons-react'
 import { cn } from '@/utils/styles/tailwind'
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
 
@@ -11,7 +11,7 @@ export function Hint({ content, className, ...props }: HintProps) {
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <HelpCircle className="w-4 h-4 text-muted-foreground cursor-help" />
+        <IconHelpCircle className="size-3.5 text-muted-foreground cursor-help" />
       </TooltipTrigger>
       <TooltipContent className={cn('max-w-64', className)} {...props}>
         {content}
