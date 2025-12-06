@@ -367,6 +367,8 @@ options:
           remoteValue: 远端值
           useLocal: 使用本地
           useRemote: 使用远端
+          useAllLocal: 全选本地
+          useAllRemote: 全选远端
           reset: 撤销选择
           progress: 已解决 $1/$2 个冲突
           confirm: 确认同步

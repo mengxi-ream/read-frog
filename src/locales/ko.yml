@@ -368,6 +368,8 @@ options:
           remoteValue: 원격 값
           useLocal: 로컬 사용
           useRemote: 원격 사용
+          useAllLocal: 모두 로컬 사용
+          useAllRemote: 모두 원격 사용
           reset: 선택 재설정
           progress: $1/$2개의 충돌 해결됨
           confirm: 동기화 확인

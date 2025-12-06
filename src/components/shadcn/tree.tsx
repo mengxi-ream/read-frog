@@ -1,8 +1,8 @@
 'use client'
 
 import type { ItemInstance } from '@headless-tree/core'
+import { Slot as SlotPrimitive } from '@radix-ui/react-slot'
 import { ChevronDownIcon, SquareMinus, SquarePlus } from 'lucide-react'
-import { Slot as SlotPrimitive } from 'radix-ui'
 import * as React from 'react'
 import { cn } from '@/lib/utils'
 

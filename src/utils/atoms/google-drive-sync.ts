@@ -48,6 +48,26 @@ export const resetResolutionAtom = atom(null, (_get, set, pathKey: string) => {
   })
 })
 
+export const selectAllLocalAtom = atom(null, (get, set) => {
+  const diffResult = get(diffResultAtom)
+  if (!diffResult)
+    return
+  const resolutions = Object.fromEntries(
+    diffResult.conflicts.map(c => [c.path.join('.'), 'local' as const]),
+  )
+  set(conflictResolutionsAtom, resolutions)
+})
+
+export const selectAllRemoteAtom = atom(null, (get, set) => {
+  const diffResult = get(diffResultAtom)
+  if (!diffResult)
+    return
+  const resolutions = Object.fromEntries(
+    diffResult.conflicts.map(c => [c.path.join('.'), 'remote' as const]),
+  )
+  set(conflictResolutionsAtom, resolutions)
+})
+
 export const clearConflictStateAtom = atom(null, (_get, set) => {
   set(conflictDataAtom, null)
   set(conflictResolutionsAtom, {})

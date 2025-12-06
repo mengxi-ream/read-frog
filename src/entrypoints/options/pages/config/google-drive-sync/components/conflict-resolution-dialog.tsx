@@ -1,7 +1,7 @@
 import type { Config } from '@/types/config/config'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useMemo, useState } from 'react'
 import {
   AlertDialog,
@@ -13,10 +13,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/shadcn/alert-dialog'
+import { Button } from '@/components/shadcn/button'
 import {
   conflictResolutionsAtom,
   conflictStatusAtom,
   diffResultAtom,
+  selectAllLocalAtom,
+  selectAllRemoteAtom,
 } from '@/utils/atoms/google-drive-sync'
 import { applyResolutions } from '@/utils/google-drive/conflict-merge'
 import { syncMergedConfig } from '@/utils/google-drive/sync'
@@ -54,6 +57,8 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const diffResult = useAtomValue(diffResultAtom)
   const resolutions = useAtomValue(conflictResolutionsAtom)
   const { resolved, total, allResolved } = useAtomValue(conflictStatusAtom)
+  const selectAllLocal = useSetAtom(selectAllLocalAtom)
+  const selectAllRemote = useSetAtom(selectAllRemoteAtom)
 
   const mergedConfig = useMemo(() => {
     if (!diffResult)
@@ -94,9 +99,31 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
           <span>{i18n.t('options.config.sync.googleDrive.conflict.description')}</span>
         </AlertDialogDescription>
       </AlertDialogHeader>
-      <span className="text-xs">
-        {i18n.t('options.config.sync.googleDrive.conflict.progress', [resolved, total])}
-      </span>
+      <div className="flex items-center justify-between">
+        <span className="text-xs">
+          {i18n.t('options.config.sync.googleDrive.conflict.progress', [resolved, total])}
+        </span>
+        <div className="flex gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => selectAllLocal()}
+            disabled={isConfirming}
+          >
+            <Icon icon="mdi:check-all" className="size-4 mr-1 text-green-600 dark:text-green-400" />
+            {i18n.t('options.config.sync.googleDrive.conflict.useAllLocal')}
+          </Button>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => selectAllRemote()}
+            disabled={isConfirming}
+          >
+            <Icon icon="mdi:check-all" className="size-4 mr-1 text-blue-600 dark:text-blue-400" />
+            {i18n.t('options.config.sync.googleDrive.conflict.useAllRemote')}
+          </Button>
+        </div>
+      </div>
 
       <div className="flex-1 overflow-scroll">
         {mergedConfig && (

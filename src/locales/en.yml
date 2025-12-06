@@ -369,6 +369,8 @@ options:
           remoteValue: Remote Value
           useLocal: Use Local
           useRemote: Use Remote
+          useAllLocal: Use All Local
+          useAllRemote: Use All Remote
           reset: Reset Selection
           progress: Resolved $1/$2 conflicts
           confirm: Confirm Sync

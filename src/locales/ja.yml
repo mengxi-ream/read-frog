@@ -367,6 +367,8 @@ options:
           remoteValue: リモート値
           useLocal: ローカルを使用
           useRemote: リモートを使用
+          useAllLocal: すべてローカルを使用
+          useAllRemote: すべてリモートを使用
           reset: 選択をリセット
           progress: $1/$2 個の競合を解決しました
           confirm: 同期を確認
