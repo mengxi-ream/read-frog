@@ -67,8 +67,3 @@ export const selectAllRemoteAtom = atom(null, (get, set) => {
   )
   set(conflictResolutionsAtom, resolutions)
 })
-
-export const clearConflictStateAtom = atom(null, (_get, set) => {
-  set(conflictDataAtom, null)
-  set(conflictResolutionsAtom, {})
-})

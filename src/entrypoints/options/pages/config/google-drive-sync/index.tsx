@@ -1,10 +1,10 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/shadcn/button'
-import { clearConflictStateAtom, conflictDataAtom } from '@/utils/atoms/google-drive-sync'
+import { conflictDataAtom, conflictResolutionsAtom } from '@/utils/atoms/google-drive-sync'
 import { lastSyncTimeAtom } from '@/utils/atoms/last-sync-time'
 import { ConfigConflictError, syncConfig } from '@/utils/google-drive/sync'
 import { logger } from '@/utils/logger'
@@ -13,8 +13,9 @@ import { ConflictResolutionDialog } from './components/conflict-resolution-dialo
 
 export function GoogleDriveSyncCard() {
   const [isSyncing, setIsSyncing] = useState(false)
-  const [conflictData, setConflictData] = useAtom(conflictDataAtom)
-  const clearConflictState = useSetAtom(clearConflictStateAtom)
+  const [isOpen, setIsOpen] = useState(false)
+  const setConflictData = useSetAtom(conflictDataAtom)
+  const setConflictResolutions = useSetAtom(conflictResolutionsAtom)
   const lastSyncTime = useAtomValue(lastSyncTimeAtom)
 
   const handleSync = async () => {
@@ -28,6 +29,7 @@ export function GoogleDriveSyncCard() {
       if (error instanceof ConfigConflictError) {
         logger.info('Conflict detected, opening resolution dialog')
         setConflictData(error.data)
+        setIsOpen(true)
       }
       else {
         logger.error('Google Drive sync error from UI', error)
@@ -40,8 +42,8 @@ export function GoogleDriveSyncCard() {
   }
 
   const handleDialogClose = (success: boolean) => {
-    setConflictData(null)
-    clearConflictState()
+    setIsOpen(false)
+    setConflictResolutions({})
     if (success) {
       toast.success(i18n.t('options.config.sync.googleDrive.syncSuccess'))
     }
@@ -82,7 +84,7 @@ export function GoogleDriveSyncCard() {
       </ConfigCard>
 
       <ConflictResolutionDialog
-        open={conflictData !== null}
+        open={isOpen}
         onResolved={() => handleDialogClose(true)}
         onCancelled={() => handleDialogClose(false)}
       />
