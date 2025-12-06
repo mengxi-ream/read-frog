@@ -288,6 +288,15 @@ options:
     pageTranslationShortcut:
       title: 페이지 번역 단축키
       description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
+    preloadConfig:
+      title: 사전 번역 범위
+      description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
+      margin:
+        title: 미리 로드 거리 (픽셀)
+        description: 뷰포트에서 얼마나 떨어진 곳에서 콘텐츠 번역을 시작할지. 작은 값은 API 비용을 절약하지만 스크롤 시 지연이 발생할 수 있습니다.
+      threshold:
+        title: 가시성 임계값
+        description: 번역을 트리거하는 데 필요한 요소 가시성 비율 (0-1). 높은 값은 요소가 더 많이 보일 때까지 번역을 지연시킵니다.
     nodeTranslationHotkey:
       title: 호버 번역 단축키
       description: 텍스트 위에 호버하여 단락을 번역할 때 사용할 수정 키를 사용자 지정합니다

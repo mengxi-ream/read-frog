@@ -289,6 +289,15 @@ options:
     pageTranslationShortcut:
       title: Page Translation Shortcut
       description: Customize the shortcut key for translating entire web pages
+    preloadConfig:
+      title: Pre-translate Range
+      description: Control how much content below the viewport gets pre-translated to save API costs
+      margin:
+        title: Preload Distance (pixels)
+        description: How far below the viewport to start translating content. Lower values save API costs but may cause delays when scrolling.
+      threshold:
+        title: Visibility Threshold
+        description: Percentage of element visibility required to trigger translation (0-1). Higher values delay translation until more of the element is visible.
     nodeTranslationHotkey:
       title: Hover Translation Shortcut
       description: Customize the modifier key for hovering over text to translate paragraphs

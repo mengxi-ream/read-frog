@@ -289,6 +289,15 @@ options:
     pageTranslationShortcut:
       title: 網頁翻譯快捷鍵
       description: 自訂翻譯整個網頁的快捷鍵
+    preloadConfig:
+      title: 預翻譯範圍
+      description: 控制視窗下方多少內容會被預先翻譯，以節省 API 費用
+      margin:
+        title: 預載距離（像素）
+        description: 距離視窗多遠時開始翻譯內容。較小的值可節省 API 費用，但捲動時可能會有延遲。
+      threshold:
+        title: 可見度閾值
+        description: 觸發翻譯所需的元素可見度百分比（0-1）。較高的值會延遲翻譯，直到更多元素可見。
     nodeTranslationHotkey:
       title: 懸停翻譯快捷鍵
       description: 自訂懸停在文字上翻譯段落的修飾鍵

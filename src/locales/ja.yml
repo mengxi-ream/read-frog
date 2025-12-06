@@ -287,6 +287,15 @@ options:
     pageTranslationShortcut:
       title: ページ翻訳ショートカットキー
       description: ウェブページ全体を翻訳するショートカットキーをカスタマイズします
+    preloadConfig:
+      title: 事前翻訳範囲
+      description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します
+      margin:
+        title: プリロード距離（ピクセル）
+        description: ビューポートからどれくらい離れた位置でコンテンツの翻訳を開始するか。小さい値は API コストを節約しますが、スクロール時に遅延が発生する可能性があります。
+      threshold:
+        title: 可視性しきい値
+        description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
     nodeTranslationHotkey:
       title: ホバー翻訳ショートカットキー
       description: テキストにホバーして段落を翻訳する際の修飾キーをカスタマイズします

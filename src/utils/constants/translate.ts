@@ -15,3 +15,11 @@ export const DEFAULT_BATCH_CONFIG = {
 }
 
 export const DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY = ['alt', 'e']
+
+export const MIN_PRELOAD_MARGIN = 0
+export const MAX_PRELOAD_MARGIN = 5000
+export const DEFAULT_PRELOAD_MARGIN = 1000
+
+export const MIN_PRELOAD_THRESHOLD = 0
+export const MAX_PRELOAD_THRESHOLD = 1
+export const DEFAULT_PRELOAD_THRESHOLD = 0

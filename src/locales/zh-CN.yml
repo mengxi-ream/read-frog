@@ -289,6 +289,15 @@ options:
     pageTranslationShortcut:
       title: 网页翻译快捷键
       description: 自定义翻译整个网页的快捷键
+    preloadConfig:
+      title: 预翻译范围
+      description: 控制视口下方多少内容会被预先翻译，以节省 API 费用
+      margin:
+        title: 预加载距离（像素）
+        description: 距离视口多远时开始翻译内容。较小的值可节省 API 费用，但滚动时可能会有延迟。
+      threshold:
+        title: 可见度阈值
+        description: 触发翻译所需的元素可见度百分比（0-1）。较高的值会延迟翻译，直到更多元素可见。
     nodeTranslationHotkey:
       title: 悬停翻译快捷键
       description: 自定义悬停在文本上翻译段落的修饰键

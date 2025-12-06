@@ -5,7 +5,7 @@ import ReactDOM from 'react-dom/client'
 // import eruda from 'eruda'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
-import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from '@/utils/constants/config'
 import { getDocumentInfo } from '@/utils/content/analyze'
 import { logger } from '@/utils/logger'
 import { onMessage, sendMessage } from '@/utils/message'
@@ -53,10 +53,12 @@ export default defineContentScript({
 
     void registerNodeTranslationTriggers()
 
+    const initialConfig = await getConfigFromStorage()
+    const preloadConfig = initialConfig?.translate.page.preload ?? DEFAULT_CONFIG.translate.page.preload
     const manager = new PageTranslationManager({
       root: null,
-      rootMargin: '1000px',
-      threshold: 0,
+      rootMargin: `${preloadConfig.margin}px`,
+      threshold: preloadConfig.threshold,
     })
 
     // Removed shortcutKeyManager class

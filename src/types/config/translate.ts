@@ -1,7 +1,7 @@
 import { langCodeISO6393Schema } from '@read-frog/definitions'
 import { z } from 'zod'
 import { HOTKEYS } from '@/utils/constants/hotkeys'
-import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
+import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
 import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style'
 
 export const requestQueueConfigSchema = z.object({
@@ -19,6 +19,12 @@ export const translationModeSchema = z.enum(TRANSLATION_MODES)
 
 export const pageTranslateRangeSchema = z.enum(['main', 'all'])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
+
+export const preloadConfigSchema = z.object({
+  margin: z.number().min(MIN_PRELOAD_MARGIN).max(MAX_PRELOAD_MARGIN),
+  threshold: z.number().min(MIN_PRELOAD_THRESHOLD).max(MAX_PRELOAD_THRESHOLD),
+})
+export type PreloadConfig = z.infer<typeof preloadConfigSchema>
 
 // Translation node style preset (excluding 'custom' - controlled by isCustom flag)
 export const translationNodeStylePresetSchema = z.enum(TRANSLATION_NODE_STYLE)
@@ -77,6 +83,7 @@ export const translateConfigSchema = z.object({
     autoTranslateLanguages: z.array(langCodeISO6393Schema),
     shortcut: z.array(z.string()),
     enableLLMDetection: z.boolean(),
+    preload: preloadConfigSchema,
   }),
   enableAIContentAware: z.boolean(),
   customPromptsConfig: customPromptsConfigSchema,
