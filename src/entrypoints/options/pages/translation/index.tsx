@@ -18,7 +18,6 @@ export function TranslationPage() {
     <PageLayout title={i18n.t('options.translation.title')} innerClassName="[&>*]:border-b [&>*:last-child]:border-b-0">
       <TranslationMode />
       <PageTranslationShortcut />
-      <PreloadConfig />
       <NodeTranslationHotkey />
       <CustomTranslationStyle />
       <AIContentAware />
@@ -28,6 +27,7 @@ export function TranslationPage() {
       <RequestRate />
       <RequestBatch />
       <ClearCacheConfig />
+      <PreloadConfig />
     </PageLayout>
   )
 }
