@@ -1,7 +1,7 @@
 'use client'
 
 import type { ItemInstance } from '@headless-tree/core'
-import { Slot as SlotPrimitive } from '@radix-ui/react-slot'
+import { Slot } from '@radix-ui/react-slot'
 import { ChevronDownIcon, SquareMinus, SquarePlus } from 'lucide-react'
 import * as React from 'react'
 import { cn } from '@/lib/utils'
@@ -74,7 +74,7 @@ function TreeItem<T = any>({ item, className, asChild, children, ...props }: Omi
     '--tree-padding': `${item.getItemMeta().level * indent}px`,
   } as React.CSSProperties
 
-  const Comp = asChild ? SlotPrimitive.Slot : 'button'
+  const Comp = asChild ? Slot : 'button'
 
   return (
     <TreeContext value={{ ...parentContext, currentItem: item }}>
