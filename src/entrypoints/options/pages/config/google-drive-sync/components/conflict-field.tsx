@@ -49,27 +49,37 @@ interface OptionRowProps {
 
 function OptionRow({ type, value, isSelected, fieldKey, showFieldKey, onClick }: OptionRowProps) {
   const { text, hover, selected, badge, label } = STYLE_MAP[type]
+  const isComplexValue = typeof value === 'object' && value !== null
 
   return (
     <div
-      className={cn('flex items-center cursor-pointer py-1 ps-(--indent)', hover, isSelected && selected)}
+      className={cn('flex cursor-pointer py-1 ps-(--indent)', hover, isSelected && selected, isComplexValue ? 'flex-col items-start gap-1' : 'items-center')}
       onClick={onClick}
     >
-      <span className={cn('text-xs px-2 py-0.5 rounded mr-2 shrink-0', text, badge)}>
-        {i18n.t(label)}
-      </span>
-      {showFieldKey && (
-        <>
-          <span className={text}>
-            "
-            {fieldKey}
-            "
-          </span>
-          <span className="text-slate-500 mx-1">:</span>
-        </>
+      <div className="flex items-center text-sm">
+        <span className={cn('px-2 py-0.5 rounded mr-2 shrink-0', text, badge)}>
+          {i18n.t(label)}
+        </span>
+        {showFieldKey && (
+          <>
+            <span className={text}>
+              "
+              {fieldKey}
+              "
+            </span>
+            <span className="text-slate-500 mx-1">:</span>
+          </>
+        )}
+        {!isComplexValue && (
+          <span className="text-slate-700 dark:text-slate-300">{formatValue(value)}</span>
+        )}
+        {isSelected && <Icon icon="mdi:check-circle" className={cn('size-4 ml-2', text)} />}
+      </div>
+      {isComplexValue && (
+        <pre className="text-slate-700 dark:text-slate-300 text-xs ml-4 max-h-40 overflow-auto whitespace-pre-wrap break-all">
+          {formatValue(value)}
+        </pre>
       )}
-      <span className="text-slate-700 dark:text-slate-300">{formatValue(value)}</span>
-      {isSelected && <Icon icon="mdi:check-circle" className={cn('size-4 ml-2', text)} />}
     </div>
   )
 }
