@@ -1,5 +1,4 @@
 import type { ModifiedConfigData } from '../sync'
-import type { Config } from '@/types/config/config'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { configSchema } from '@/types/config/config'
 import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, LAST_SYNC_TIME_STORAGE_KEY } from '@/utils/constants/config'
@@ -84,7 +83,7 @@ const defaultProvidersConfig = [
   },
 ]
 
-function createMockConfig(overrides: Partial<Config> = {}): Config {
+function createMockConfig(overrides: any = {}): any {
   return {
     language: {
       detectedCode: 'eng',
@@ -175,10 +174,10 @@ describe('googleDrive configuration sync', () => {
     // Mock configSchema.safeParse to return success by default
     safeParseSpy = vi.spyOn(configSchema, 'safeParse').mockImplementation(data => ({
       success: true,
-      data: data as Config,
+      data: data as any,
     }))
     // Mock configSchema.parse to return the data by default
-    parseSpy = vi.spyOn(configSchema, 'parse').mockImplementation(data => data as Config)
+    parseSpy = vi.spyOn(configSchema, 'parse').mockImplementation(data => data as any)
   })
 
   afterEach(() => {

@@ -1,5 +1,5 @@
-import type { Config } from '@/types/config/config'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { configSchema } from '@/types/config/config'
 import { applyResolutions, detectConflicts } from '../conflict-merge'
 
 // Test data factory
@@ -32,7 +32,7 @@ const defaultProvidersConfig = [
   },
 ]
 
-function createMockConfig(overrides: Partial<Config> = {}): Config {
+function createMockConfig(overrides: any = {}): any {
   return {
     language: {
       detectedCode: 'eng',
@@ -83,6 +83,19 @@ function createMockConfig(overrides: Partial<Config> = {}): Config {
 }
 
 describe('conflict-merge', () => {
+  let safeParseSpy: ReturnType<typeof vi.spyOn>
+
+  beforeEach(() => {
+    safeParseSpy = vi.spyOn(configSchema, 'safeParse').mockImplementation(data => ({
+      success: true,
+      data: data as any,
+    }))
+  })
+
+  afterEach(() => {
+    safeParseSpy.mockRestore()
+  })
+
   describe('detectConflicts', () => {
     it('should detect no conflicts when all configs are identical', () => {
       const base = createMockConfig()
