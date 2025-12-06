@@ -1,11 +1,12 @@
 import type { ItemInstance } from '@headless-tree/core'
 import type { Config } from '@/types/config/config'
-import type { FieldConflict } from '@/utils/google-drive/conflict-merge'
 import { i18n } from '#i18n'
 import { syncDataLoaderFeature } from '@headless-tree/core'
 import { useTree } from '@headless-tree/react'
+import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 import { Tree, TreeItem, TreeItemLabel } from '@/components/shadcn/tree'
+import { diffResultAtom } from '@/utils/atoms/google-drive-sync'
 import { ConflictField } from './conflict-field'
 import { formatValue } from './utils'
 
@@ -18,11 +19,6 @@ interface JsonNodeData {
 
 interface JsonTreeViewProps {
   data: Config
-  conflictMap: Map<string, FieldConflict>
-  resolutions: Record<string, 'local' | 'remote'>
-  onSelectLocal: (pathKey: string) => void
-  onSelectRemote: (pathKey: string) => void
-  onReset: (pathKey: string) => void
 }
 
 function buildTreeData(data: Config): {
@@ -57,27 +53,27 @@ function buildTreeData(data: Config): {
   return { items, children }
 }
 
-export function JsonTreeView({
-  data,
-  conflictMap,
-  resolutions,
-  onSelectLocal,
-  onSelectRemote,
-  onReset,
-}: JsonTreeViewProps) {
+export function JsonTreeView({ data }: JsonTreeViewProps) {
+  const diffResult = useAtomValue(diffResultAtom)
   const { items, children } = useMemo(() => buildTreeData(data), [data])
+
+  const conflictPaths = useMemo(() => {
+    if (!diffResult)
+      return new Set<string>()
+    return new Set(diffResult.conflicts.map(c => c.path.join('.')))
+  }, [diffResult])
 
   // Expand all items that have conflicts when the component is mounted
   const initialExpandedItems = useMemo(() => {
     const expanded = new Set<string>(['root'])
-    for (const conflictPath of conflictMap.keys()) {
+    for (const conflictPath of conflictPaths) {
       const parts = conflictPath.split('.')
       for (let i = 1; i <= parts.length; i++) {
         expanded.add(parts.slice(0, i).join('.'))
       }
     }
     return Array.from(expanded)
-  }, [conflictMap])
+  }, [conflictPaths])
 
   const tree = useTree<JsonNodeData>({
     rootItemId: 'root',
@@ -101,24 +97,14 @@ export function JsonTreeView({
 
   const renderItem = (item: ItemInstance<JsonNodeData>): React.ReactNode => {
     const { pathKey, key, value, isArrayItem } = item.getItemData()
-    const conflict = conflictMap.get(pathKey)
+    const hasConflict = conflictPaths.has(pathKey)
     const level = item.getItemMeta().level
     const isFolder = item.isFolder()
     const isExpanded = item.isExpanded()
 
     // Conflict field - interactive selection
-    if (conflict) {
-      return (
-        <ConflictField
-          key={pathKey}
-          indent={level * 20 + 28}
-          conflict={conflict}
-          resolution={resolutions[pathKey]}
-          onSelectLocal={() => onSelectLocal(pathKey)}
-          onSelectRemote={() => onSelectRemote(pathKey)}
-          onReset={() => onReset(pathKey)}
-        />
-      )
+    if (hasConflict) {
+      return <ConflictField key={pathKey} pathKey={pathKey} indent={level * 20 + 28} />
     }
 
     return (

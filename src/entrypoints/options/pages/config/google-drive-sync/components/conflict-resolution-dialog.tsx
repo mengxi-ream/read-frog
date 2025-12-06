@@ -1,8 +1,7 @@
 import type { Config } from '@/types/config/config'
-import type { FieldConflict } from '@/utils/google-drive/conflict-merge'
-import type { ConflictData } from '@/utils/google-drive/sync'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
+import { useAtomValue } from 'jotai'
 import { useMemo, useState } from 'react'
 import {
   AlertDialog,
@@ -14,64 +13,57 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/shadcn/alert-dialog'
-import { applyResolutions, detectConflicts } from '@/utils/google-drive/conflict-merge'
+import {
+  conflictResolutionsAtom,
+  conflictStatusAtom,
+  diffResultAtom,
+} from '@/utils/atoms/google-drive-sync'
+import { applyResolutions } from '@/utils/google-drive/conflict-merge'
 import { syncMergedConfig } from '@/utils/google-drive/sync'
 import { logger } from '@/utils/logger'
 import { JsonTreeView } from './json-tree-view'
 
 interface ConflictResolutionDialogProps {
-  conflictData: ConflictData
+  open: boolean
   onResolved: () => void
   onCancelled: () => void
 }
 
 export function ConflictResolutionDialog({
-  conflictData,
+  open,
   onResolved,
   onCancelled,
 }: ConflictResolutionDialogProps) {
-  const { base, local, remote } = conflictData
-  const [resolutions, setResolutions] = useState<Record<string, 'local' | 'remote'>>({})
+  return (
+    <AlertDialog open={open}>
+      <DialogContent
+        onResolved={onResolved}
+        onCancelled={onCancelled}
+      />
+    </AlertDialog>
+  )
+}
+
+interface DialogContentProps {
+  onResolved: () => void
+  onCancelled: () => void
+}
+
+function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const [isConfirming, setIsConfirming] = useState(false)
+  const diffResult = useAtomValue(diffResultAtom)
+  const resolutions = useAtomValue(conflictResolutionsAtom)
+  const { resolved, total, allResolved } = useAtomValue(conflictStatusAtom)
 
-  const diffResult = useMemo(() => {
-    return detectConflicts(base, local, remote)
-  }, [base, local, remote])
-
-  // Build merged config with current resolutions
   const mergedConfig = useMemo(() => {
+    if (!diffResult)
+      return null
     return applyResolutions(diffResult, resolutions)
   }, [diffResult, resolutions])
 
-  // Create conflict map for quick lookup
-  const conflictMap = useMemo(() => {
-    const map = new Map<string, FieldConflict>()
-    diffResult.conflicts.forEach((conflict) => {
-      map.set(conflict.path.join('.'), conflict)
-    })
-    return map
-  }, [diffResult.conflicts])
-
-  const resolvedCount = Object.keys(resolutions).length
-  const allResolved = resolvedCount === diffResult.conflicts.length
-
-  const handleSelectLocal = (pathKey: string) => {
-    setResolutions(prev => ({ ...prev, [pathKey]: 'local' }))
-  }
-
-  const handleSelectRemote = (pathKey: string) => {
-    setResolutions(prev => ({ ...prev, [pathKey]: 'remote' }))
-  }
-
-  const handleReset = (pathKey: string) => {
-    setResolutions((prev) => {
-      const newResolutions = { ...prev }
-      delete newResolutions[pathKey]
-      return newResolutions
-    })
-  }
-
   const handleConfirm = async () => {
+    if (!mergedConfig)
+      return
     setIsConfirming(true)
     try {
       await syncMergedConfig(mergedConfig)
@@ -92,70 +84,51 @@ export function ConflictResolutionDialog({
   }
 
   return (
-    <AlertDialog open>
-      <AlertDialogContent className="md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="flex items-center gap-2">
-            <Icon icon="mdi:alert" className="size-5 text-yellow-500" />
-            {i18n.t('options.config.sync.googleDrive.conflict.title')}
-          </AlertDialogTitle>
-          <AlertDialogDescription className="flex items-center justify-between">
-            <span>{i18n.t('options.config.sync.googleDrive.conflict.description')}</span>
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <span className="text-xs">
-          {i18n.t('options.config.sync.googleDrive.conflict.progress', [resolvedCount, diffResult.conflicts.length])}
-        </span>
+    <AlertDialogContent className="md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col">
+      <AlertDialogHeader>
+        <AlertDialogTitle className="flex items-center gap-2">
+          <Icon icon="mdi:alert" className="size-5 text-yellow-500" />
+          {i18n.t('options.config.sync.googleDrive.conflict.title')}
+        </AlertDialogTitle>
+        <AlertDialogDescription className="flex items-center justify-between">
+          <span>{i18n.t('options.config.sync.googleDrive.conflict.description')}</span>
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <span className="text-xs">
+        {i18n.t('options.config.sync.googleDrive.conflict.progress', [resolved, total])}
+      </span>
 
-        <div className="flex-1 overflow-scroll">
-          <MergedConfigView
-            mergedConfig={mergedConfig}
-            conflictMap={conflictMap}
-            resolutions={resolutions}
-            onSelectLocal={handleSelectLocal}
-            onSelectRemote={handleSelectRemote}
-            onReset={handleReset}
-          />
-        </div>
+      <div className="flex-1 overflow-scroll">
+        {mergedConfig && (
+          <MergedConfigView mergedConfig={mergedConfig} />
+        )}
+      </div>
 
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isConfirming} onClick={handleCancel}>
-            {i18n.t('options.config.sync.googleDrive.conflict.cancel')}
-          </AlertDialogCancel>
-          <AlertDialogAction
-            disabled={!allResolved || isConfirming}
-            onClick={(e) => {
-              e.preventDefault()
-              void handleConfirm()
-            }}
-          >
-            {isConfirming
-              ? i18n.t('options.config.sync.googleDrive.syncing')
-              : i18n.t('options.config.sync.googleDrive.conflict.confirm')}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      <AlertDialogFooter>
+        <AlertDialogCancel disabled={isConfirming} onClick={handleCancel}>
+          {i18n.t('options.config.sync.googleDrive.conflict.cancel')}
+        </AlertDialogCancel>
+        <AlertDialogAction
+          disabled={!allResolved || isConfirming}
+          onClick={(e) => {
+            e.preventDefault()
+            void handleConfirm()
+          }}
+        >
+          {isConfirming
+            ? i18n.t('options.config.sync.googleDrive.syncing')
+            : i18n.t('options.config.sync.googleDrive.conflict.confirm')}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
   )
 }
 
 interface MergedConfigViewProps {
   mergedConfig: Config
-  conflictMap: Map<string, FieldConflict>
-  resolutions: Record<string, 'local' | 'remote'>
-  onSelectLocal: (pathKey: string) => void
-  onSelectRemote: (pathKey: string) => void
-  onReset: (pathKey: string) => void
 }
 
-function MergedConfigView({
-  mergedConfig,
-  conflictMap,
-  resolutions,
-  onSelectLocal,
-  onSelectRemote,
-  onReset,
-}: MergedConfigViewProps) {
+function MergedConfigView({ mergedConfig }: MergedConfigViewProps) {
   return (
     <div className="h-full rounded-lg overflow-hidden flex flex-col bg-slate-100 dark:bg-slate-900">
       <div className="px-4 py-2 flex items-center gap-4 text-xs border-b border-slate-200 dark:border-slate-700">
@@ -175,14 +148,7 @@ function MergedConfigView({
         </div>
       </div>
       <div className="flex-1 overflow-auto">
-        <JsonTreeView
-          data={mergedConfig}
-          conflictMap={conflictMap}
-          resolutions={resolutions}
-          onSelectLocal={onSelectLocal}
-          onSelectRemote={onSelectRemote}
-          onReset={onReset}
-        />
+        <JsonTreeView data={mergedConfig} />
       </div>
     </div>
   )

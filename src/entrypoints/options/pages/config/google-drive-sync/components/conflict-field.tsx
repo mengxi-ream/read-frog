@@ -1,19 +1,15 @@
 import type { CSSProperties } from 'react'
-import type { FieldConflict } from '@/utils/google-drive/conflict-merge'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { Button } from '@/components/shadcn/button'
+import { useConflictField } from '@/hooks/use-conflict-field'
 import { cn } from '@/lib/utils'
 import { formatValue } from './utils'
 
 type Resolution = 'local' | 'remote'
 
 interface ConflictFieldProps {
-  conflict: FieldConflict
-  resolution?: Resolution
-  onSelectLocal: () => void
-  onSelectRemote: () => void
-  onReset: () => void
+  pathKey: string
   indent: number
 }
 
@@ -78,21 +74,19 @@ function OptionRow({ type, value, isSelected, fieldKey, showFieldKey, onClick }:
   )
 }
 
-export function ConflictField({
-  conflict,
-  resolution,
-  onSelectLocal,
-  onSelectRemote,
-  onReset,
-  indent,
-}: ConflictFieldProps) {
+export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
+  const { conflict, resolution, selectLocal, selectRemote, reset } = useConflictField(pathKey)
+
+  if (!conflict)
+    return null
+
   const fieldKey = conflict.path.at(-1) ?? ''
   const showFieldKey = Number.isNaN(Number(fieldKey))
   const containerStyle = resolution ? STYLE_MAP[resolution] : STYLE_MAP.unresolved
 
   const options = [
-    { type: 'local' as const, value: conflict.localValue, onClick: onSelectLocal },
-    { type: 'remote' as const, value: conflict.remoteValue, onClick: onSelectRemote },
+    { type: 'local' as const, value: conflict.localValue, onClick: selectLocal },
+    { type: 'remote' as const, value: conflict.remoteValue, onClick: selectRemote },
   ]
 
   return (
@@ -110,7 +104,7 @@ export function ConflictField({
             size="sm"
             variant="ghost"
             className="h-6 text-xs text-slate-600 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 ml-2"
-            onClick={onReset}
+            onClick={reset}
           >
             <Icon icon="mdi:undo" className="size-3 mr-1" />
             {i18n.t('options.config.sync.googleDrive.conflict.reset')}
