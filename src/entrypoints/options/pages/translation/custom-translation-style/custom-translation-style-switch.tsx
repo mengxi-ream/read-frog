@@ -1,7 +1,8 @@
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/shadcn/field'
+import { Field, FieldContent, FieldLabel } from '@/components/shadcn/field'
+import { Hint } from '@/components/shadcn/hint'
 import { Switch } from '@/components/shadcn/switch'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
@@ -11,11 +12,11 @@ export function CustomTranslationStyleSwitch() {
 
   return (
     <Field orientation="horizontal">
-      <FieldContent>
-        <FieldLabel htmlFor="custom-style-toggle">{i18n.t('options.translation.translationStyle.useCustomStyle')}</FieldLabel>
-        <FieldDescription>
-          {i18n.t('options.translation.translationStyle.useCustomStyleDescription')}
-        </FieldDescription>
+      <FieldContent className="self-center">
+        <FieldLabel htmlFor="custom-style-toggle">
+          {i18n.t('options.translation.translationStyle.useCustomStyle')}
+          <Hint content={i18n.t('options.translation.translationStyle.useCustomStyleDescription')} />
+        </FieldLabel>
       </FieldContent>
       <Switch
         id="custom-style-toggle"

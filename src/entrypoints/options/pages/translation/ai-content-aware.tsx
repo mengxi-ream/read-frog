@@ -3,7 +3,8 @@ import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
 import { NewBadge } from '@/components/badges/new-badge'
-import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/shadcn/field'
+import { Field, FieldContent, FieldLabel } from '@/components/shadcn/field'
+import { Hint } from '@/components/shadcn/hint'
 import { Switch } from '@/components/shadcn/switch'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
@@ -37,13 +38,11 @@ export function AIContentAware() {
       )}
     >
       <Field orientation="horizontal">
-        <FieldContent>
+        <FieldContent className="self-center">
           <FieldLabel htmlFor="ai-content-aware-toggle">
             {i18n.t('options.translation.aiContentAware.enable')}
+            <Hint content={i18n.t('options.translation.aiContentAware.enableDescription')} />
           </FieldLabel>
-          <FieldDescription>
-            {i18n.t('options.translation.aiContentAware.enableDescription')}
-          </FieldDescription>
         </FieldContent>
         <Switch
           id="ai-content-aware-toggle"

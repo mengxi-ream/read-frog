@@ -2,7 +2,8 @@ import type { RequestQueueConfig } from '@/types/config/translate'
 import { i18n } from '#imports'
 import { useAtom } from 'jotai'
 import { toast } from 'sonner'
-import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel } from '@/components/shadcn/field'
+import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/shadcn/field'
+import { Hint } from '@/components/shadcn/hint'
 import { Input } from '@/components/shadcn/input'
 import { requestQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
@@ -59,13 +60,11 @@ function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConf
 
   return (
     <Field orientation="responsive">
-      <FieldContent>
+      <FieldContent className="self-center">
         <FieldLabel htmlFor={`translate-${property}`}>
           {info.label}
+          <Hint content={info.description} />
         </FieldLabel>
-        <FieldDescription>
-          {info.description}
-        </FieldDescription>
       </FieldContent>
       <Input
         id={`translate-${property}`}

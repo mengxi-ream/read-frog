@@ -26,8 +26,8 @@ export function TranslationPage() {
       <AutoTranslateLanguages />
       <RequestRate />
       <RequestBatch />
-      <ClearCacheConfig />
       <PreloadConfig />
+      <ClearCacheConfig />
     </PageLayout>
   )
 }

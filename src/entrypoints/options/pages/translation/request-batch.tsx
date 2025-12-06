@@ -4,7 +4,8 @@ import { Icon } from '@iconify/react'
 import { useAtom } from 'jotai'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
-import { Field, FieldContent, FieldDescription, FieldGroup, FieldLabel } from '@/components/shadcn/field'
+import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/shadcn/field'
+import { Hint } from '@/components/shadcn/hint'
 import { Input } from '@/components/shadcn/input'
 import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
 import { batchQueueConfigSchema } from '@/types/config/translate'
@@ -80,13 +81,11 @@ function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) 
 
   return (
     <Field orientation="responsive">
-      <FieldContent>
+      <FieldContent className="self-center">
         <FieldLabel htmlFor={`batch-${property}`}>
           {info.label}
+          <Hint content={info.description} />
         </FieldLabel>
-        <FieldDescription>
-          {info.description}
-        </FieldDescription>
       </FieldContent>
       <Input
         id={`batch-${property}`}

@@ -16,7 +16,8 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/shadcn/dropdown-menu'
-import { Field, FieldContent, FieldDescription, FieldLabel } from '@/components/shadcn/field'
+import { Field, FieldContent, FieldLabel } from '@/components/shadcn/field'
+import { Hint } from '@/components/shadcn/hint'
 import { Switch } from '@/components/shadcn/switch'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
@@ -60,13 +61,11 @@ function LLMDetectionToggle() {
 
   return (
     <Field orientation="horizontal">
-      <FieldContent>
+      <FieldContent className="self-center">
         <FieldLabel htmlFor="llm-detection-toggle">
           {i18n.t('options.translation.autoTranslateLanguages.enableLLMDetection')}
+          <Hint content={i18n.t('options.translation.autoTranslateLanguages.enableLLMDetectionDescription')} />
         </FieldLabel>
-        <FieldDescription>
-          {i18n.t('options.translation.autoTranslateLanguages.enableLLMDetectionDescription')}
-        </FieldDescription>
       </FieldContent>
       <Switch
         id="llm-detection-toggle"
