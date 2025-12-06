@@ -9,6 +9,9 @@ import { DEFAULT_TTS_CONFIG } from './tts'
 
 export const CONFIG_STORAGE_KEY = 'config'
 export const CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
+export const LAST_SYNC_TIME_STORAGE_KEY = '__lastGoogleDriveSyncTime'
+export const LAST_SYNCED_CONFIG_STORAGE_KEY = '__lastSyncedConfig'
+export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = '__googleDriveToken'
 export const CONFIG_SCHEMA_VERSION = 36
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66

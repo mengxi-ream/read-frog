@@ -125,8 +125,7 @@ options:
     title: 通用
     readConfig:
       title: 阅读配置
-      description:
-        适用于所有高级 AI 功能，如深度文章解释和关键词提取。
+      description: 适用于所有高级 AI 功能，如深度文章解释和关键词提取。
       provider: 提供商
       model:
         title: 模型
@@ -342,8 +341,8 @@ options:
   config:
     title: 配置
     sync:
-      title: 配置同步
-      description: 导入和导出您的配置设置
+      title: 手动配置同步
+      description: 手动导入和导出您的配置设置
       import: 导入配置
       export: 导出配置
       importSuccess: 配置导入成功
@@ -361,6 +360,35 @@ options:
       viewConfig:
         expand: 展开配置
         collapse: 收起配置
+      googleDrive:
+        title: Google Drive 云端同步
+        description: 自动同步配置到 Google Drive，远端配置较新时下载，本地配置较新时上传
+        sync: 同步到 Google Drive
+        syncing: 同步中...
+        syncSuccess: 同步成功
+        lastSyncTime: 最后同步时间
+        conflict:
+          title: 配置冲突
+          description: 检测到本地和云端都在上次同步后进行了修改，请选择每个冲突字段要保留的版本。
+          resolved: 已解决
+          unresolved: 未解决
+          localValue: 本地值
+          remoteValue: 远端值
+          useLocal: 使用本地
+          useRemote: 使用远端
+          useAllLocal: 全选本地
+          useAllRemote: 全选远端
+          reset: 撤销选择
+          progress: 已解决 $1/$2 个冲突
+          confirm: 确认同步
+          cancel: 取消
+          hasConflictInChildren: ⚠ 包含冲突
+          item: 项
+          items: 项
+          conflictPrompt: '[冲突 - 请选择]'
+          localLatest: 本地最新
+          remoteLatest: 远端最新
+        syncError: 同步失败，请重试
     backup:
       title: 配置备份
       description: 如果配置发生变化，每小时会自动创建备份。您可以在这里恢复之前的配置。（最多 $1 个备份）
@@ -389,8 +417,7 @@ options:
         confirm: 删除
     resetConfig:
       title: 恢复默认配置
-      description:
-        将所有配置重置为默认
+      description: 将所有配置重置为默认
       dialog:
         title: 恢复默认配置
         trigger: 重置配置

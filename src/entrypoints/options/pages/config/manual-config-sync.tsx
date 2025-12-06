@@ -27,7 +27,7 @@ import { queryClient } from '@/utils/tanstack-query'
 import { ConfigCard } from '../../components/config-card'
 import { ViewConfig } from './components/view-config'
 
-export default function ConfigSync() {
+export function ManualConfigSync() {
   const config = useAtomValue(configAtom)
   return (
     <ConfigCard

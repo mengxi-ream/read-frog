@@ -25,7 +25,7 @@
 
 export function migrate(oldConfig: any): any {
   const oldPatterns = oldConfig.translate?.promptsConfig?.patterns ?? []
-  const oldPromptValue = oldConfig.translate?.promptsConfig?.prompt
+  const oldPromptValue = oldConfig.translate?.promptsConfig?.prompt ?? null
 
   return {
     ...oldConfig,

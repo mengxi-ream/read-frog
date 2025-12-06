@@ -14,8 +14,11 @@
   "aliases": {
     "components": "@/components",
     "utils": "@/utils/styles/tailwind",
-    "hooks": "@/hooks",
+    "ui": "src/components/shadcn",
     "lib": "@/utils/styles",
-    "ui": "src/components/shadcn"
+    "hooks": "@/hooks"
+  },
+  "registries": {
+    "@reui": "https://reui.io/r/{name}.json"
   }
 }

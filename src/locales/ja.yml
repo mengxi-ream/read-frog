@@ -340,8 +340,8 @@ options:
   config:
     title: 設定
     sync:
-      title: 設定同期
-      description: 設定をインポート・エクスポート
+      title: 手動設定同期
+      description: 手動で設定をインポート・エクスポート
       import: 設定をインポート
       export: 設定をエクスポート
       importSuccess: 設定のインポートが完了しました
@@ -359,6 +359,35 @@ options:
       viewConfig:
         expand: 設定を展開
         collapse: 設定を折りたたむ
+      googleDrive:
+        title: Google Driveクラウド同期
+        description: 設定をGoogle Driveに自動同期します。リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロードします
+        sync: Google Driveに同期
+        syncing: 同期中...
+        syncSuccess: 同期が完了しました
+        syncError: 同期に失敗しました。もう一度お試しください
+        lastSyncTime: 最終同期時間
+        conflict:
+          title: 設定の競合
+          description: 前回の同期以降、ローカルとリモートの両方の設定が変更されています。競合する各フィールドについて、保持するバージョンを選択してください。
+          resolved: 解決済み
+          unresolved: 未解決
+          localValue: ローカル値
+          remoteValue: リモート値
+          useLocal: ローカルを使用
+          useRemote: リモートを使用
+          useAllLocal: すべてローカルを使用
+          useAllRemote: すべてリモートを使用
+          reset: 選択をリセット
+          progress: $1/$2 個の競合を解決しました
+          confirm: 同期を確認
+          cancel: キャンセル
+          hasConflictInChildren: ⚠ 競合を含む
+          item: 項目
+          items: 項目
+          conflictPrompt: '[競合 - 選択してください]'
+          localLatest: ローカル最新
+          remoteLatest: リモート最新
     backup:
       title: 設定のバックアップ
       description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。以前の設定をここで復元できます。（最大 $1 個のバックアップ）

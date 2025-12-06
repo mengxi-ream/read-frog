@@ -342,8 +342,8 @@ options:
   config:
     title: Config
     sync:
-      title: Config Sync
-      description: Import and export your configuration settings
+      title: Manual Config Sync
+      description: Manually import and export your configuration settings
       import: Import Config
       export: Export Config
       importSuccess: Config imported successfully
@@ -361,6 +361,35 @@ options:
       viewConfig:
         expand: Expand Config
         collapse: Collapse Config
+      googleDrive:
+        title: Google Drive Cloud Sync
+        description: Automatically sync configuration to Google Drive. Downloads when remote is newer, uploads when local is newer
+        sync: Sync to Google Drive
+        syncing: Syncing...
+        syncSuccess: Sync successful
+        syncError: Sync failed, please try again
+        lastSyncTime: Last sync at
+        conflict:
+          title: Configuration Conflict
+          description: Both local and remote configurations have been modified since the last sync. Please choose which version to keep for each conflicting field.
+          resolved: Resolved
+          unresolved: Unresolved
+          localValue: Local Value
+          remoteValue: Remote Value
+          useLocal: Use Local
+          useRemote: Use Remote
+          useAllLocal: Use All Local
+          useAllRemote: Use All Remote
+          reset: Reset Selection
+          progress: Resolved $1/$2 conflicts
+          confirm: Confirm Sync
+          cancel: Cancel
+          hasConflictInChildren: ⚠ Contains conflicts
+          item: item
+          items: items
+          conflictPrompt: '[Conflict - Please select]'
+          localLatest: Local Latest
+          remoteLatest: Remote Latest
     backup:
       title: Config Backup
       description: Automatic backups are created every hour if the config is changed. You can restore previous configurations here. (Maximum $1 backups)

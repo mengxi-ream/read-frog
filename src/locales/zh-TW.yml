@@ -125,8 +125,7 @@ options:
     title: 通用
     readConfig:
       title: 閱讀配置
-      description:
-        適用於所有高級 AI 功能，如深度文章解釋和關鍵詞提取。
+      description: 適用於所有高級 AI 功能，如深度文章解釋和關鍵詞提取。
       provider: 提供商
       model:
         title: 模型
@@ -342,8 +341,8 @@ options:
   config:
     title: 設定
     sync:
-      title: 設定同步
-      description: 匯入和匯出您的設定
+      title: 手動設定同步
+      description: 手動匯入和匯出您的設定
       import: 匯入設定
       export: 匯出設定
       importSuccess: 設定匯入成功
@@ -361,6 +360,35 @@ options:
       viewConfig:
         expand: 展開設定
         collapse: 收起設定
+      googleDrive:
+        title: Google Drive 雲端同步
+        description: 自動同步設定到 Google Drive，遠端設定較新時下載，本機設定較新時上傳
+        sync: 同步到 Google Drive
+        syncing: 同步中...
+        syncSuccess: 同步成功
+        syncError: 同步失敗，請重試
+        lastSyncTime: 最後同步時間
+        conflict:
+          title: 配置衝突
+          description: 檢測到本地和雲端都在上次同步後進行了修改，請選擇每個衝突欄位要保留的版本。
+          resolved: 已解決
+          unresolved: 未解決
+          localValue: 本地值
+          remoteValue: 遠端值
+          useLocal: 使用本地
+          useRemote: 使用遠端
+          useAllLocal: 全選本地
+          useAllRemote: 全選遠端
+          reset: 撤銷選擇
+          progress: 已解決 $1/$2 個衝突
+          confirm: 確認同步
+          cancel: 取消
+          hasConflictInChildren: ⚠ 包含衝突
+          item: 項
+          items: 項
+          conflictPrompt: '[衝突 - 請選擇]'
+          localLatest: 本地最新
+          remoteLatest: 遠端最新
     backup:
       title: 設定備份
       description: 如果設定發生變化，每小時會自動建立備份。您可以在這裡還原之前的設定。（最多 $1 個備份）
