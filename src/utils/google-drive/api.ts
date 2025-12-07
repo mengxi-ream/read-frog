@@ -1,21 +1,25 @@
+import { z } from 'zod'
 import { logger } from '../logger'
 import { clearAccessToken, getValidAccessToken } from './auth'
 
 const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3'
 const GOOGLE_DRIVE_UPLOAD_API_BASE = 'https://www.googleapis.com/upload/drive/v3'
 
-export interface GoogleDriveFile {
-  id: string
-  name: string
-  mimeType: string
-  modifiedTime: string
-  size?: string
-}
+const googleDriveFileSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  mimeType: z.string(),
+  modifiedTime: z.string(),
+  size: z.string().optional(),
+})
 
-export interface GoogleDriveFileListResponse {
-  files: GoogleDriveFile[]
-  nextPageToken?: string
-}
+const googleDriveFileListResponseSchema = z.object({
+  files: z.array(googleDriveFileSchema),
+  nextPageToken: z.string().optional(),
+})
+
+export type GoogleDriveFile = z.infer<typeof googleDriveFileSchema>
+export type GoogleDriveFileListResponse = z.infer<typeof googleDriveFileListResponseSchema>
 
 /**
  * Search for file in Google Drive appDataFolder
@@ -42,9 +46,14 @@ export async function findFileInAppData(fileName: string): Promise<GoogleDriveFi
       throw new Error(`Failed to search file: ${response.statusText}`)
     }
 
-    const data = await response.json() as GoogleDriveFileListResponse
+    const data = await response.json()
+    const result = googleDriveFileListResponseSchema.safeParse(data)
 
-    return data.files.length > 0 ? data.files[0] : null
+    if (!result.success) {
+      throw new Error(`Invalid response from Google Drive API: ${result.error.message}`)
+    }
+
+    return result.data.files.length > 0 ? result.data.files[0] : null
   }
   catch (error) {
     logger.error('Failed to find file in appData', error)
@@ -129,7 +138,14 @@ export async function uploadFile(
       throw new Error(`Failed to upload file: ${response.statusText}, ${errorText}`)
     }
 
-    return await response.json() as GoogleDriveFile
+    const data = await response.json()
+    const result = googleDriveFileSchema.safeParse(data)
+
+    if (!result.success) {
+      throw new Error(`Invalid response from Google Drive API: ${result.error.message}`)
+    }
+
+    return result.data
   }
   catch (error) {
     logger.error('Failed to upload file', error)
