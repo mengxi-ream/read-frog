@@ -367,6 +367,7 @@ options:
         syncing: 동기화 중...
         syncSuccess: 동기화 완료
         syncError: 동기화 실패, 다시 시도해 주세요
+        metadataCorrupted: 동기화 메타데이터가 손상되어 원격 구성을 적용했습니다
         lastSyncTime: 마지막 동기화 시간
         logout: 로그아웃
         logoutSuccess: Google 계정에서 로그아웃되었습니다

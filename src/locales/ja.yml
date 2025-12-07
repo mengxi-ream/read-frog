@@ -366,6 +366,7 @@ options:
         syncing: 同期中...
         syncSuccess: 同期が完了しました
         syncError: 同期に失敗しました。もう一度お試しください
+        metadataCorrupted: 同期メタデータが破損しています。リモート設定を適用しました
         lastSyncTime: 最終同期時間
         logout: ログアウト
         logoutSuccess: Googleアカウントからログアウトしました

@@ -367,6 +367,7 @@ options:
         syncing: 同步中...
         syncSuccess: 同步成功
         syncError: 同步失敗，請重試
+        metadataCorrupted: 同步資料損壞，已自動套用遠端設定
         lastSyncTime: 最後同步時間
         logout: 登出帳號
         logoutSuccess: 已登出 Google 帳號

@@ -368,6 +368,7 @@ options:
         syncing: Syncing...
         syncSuccess: Sync successful
         syncError: Sync failed, please try again
+        metadataCorrupted: Sync metadata corrupted, remote config applied
         lastSyncTime: Last sync at
         logout: Logout
         logoutSuccess: Logged out from Google account

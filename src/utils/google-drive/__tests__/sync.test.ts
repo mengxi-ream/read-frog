@@ -51,7 +51,7 @@ vi.mock('../auth', () => ({
 
 // Import after mocking - this is required for vi.mock to work properly
 // eslint-disable-next-line import/first
-import { syncConfig } from '../sync'
+import { syncConfig, SyncMetadataCorruptedError } from '../sync'
 
 // Test data factories
 const defaultProvidersConfig = [
@@ -193,8 +193,8 @@ describe('googleDrive configuration sync', () => {
         const localModifiedTime = Date.now() - 5000
 
         mockStorage.getItem
-          .mockResolvedValueOnce(mockConfig)
-          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION)
+          .mockResolvedValueOnce(mockConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
           .mockResolvedValueOnce(null) // No last sync time
         mockStorage.getMeta.mockResolvedValue({ modifiedAt: localModifiedTime })
         mockApi.findFileInAppData.mockResolvedValue(null)
@@ -226,9 +226,11 @@ describe('googleDrive configuration sync', () => {
         })
 
         mockStorage.getItem
-          .mockResolvedValueOnce(mockConfig)
-          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION)
-          .mockResolvedValueOnce(null) // No last sync time
+          .mockResolvedValueOnce(mockConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
+          .mockResolvedValueOnce(null) // No last sync time (first sync)
+          .mockResolvedValueOnce(null) // No last synced schema version (first sync)
+          .mockResolvedValueOnce(null) // No last synced config (first sync)
         mockStorage.getMeta.mockResolvedValue({ modifiedAt: Date.now() - 5000 })
         mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
         mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))
@@ -242,6 +244,98 @@ describe('googleDrive configuration sync', () => {
           expect.stringContaining(LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY),
           CONFIG_SCHEMA_VERSION,
         )
+      })
+    })
+
+    describe('metadata corruption scenarios', () => {
+      it('should throw SyncMetadataCorruptedError when lastSyncTime exists but lastSyncedConfig is missing', async () => {
+        const mockConfig = createMockConfig()
+        const mockRemoteData = createMockRemoteConfigData({
+          [CONFIG_STORAGE_KEY]: mockConfig,
+          lastModified: Date.now(),
+        })
+
+        mockStorage.getItem
+          .mockResolvedValueOnce(mockConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
+          .mockResolvedValueOnce(Date.now()) // last sync time exists
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // last synced schema version exists
+          .mockResolvedValueOnce(null) // last synced config is missing (corrupted)
+        mockStorage.getMeta.mockResolvedValue({ modifiedAt: Date.now() - 5000 })
+        mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
+        mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))
+        mockMigrateConfig.mockResolvedValue(mockConfig)
+
+        await expect(syncConfig()).rejects.toThrow(SyncMetadataCorruptedError)
+
+        // Should have downloaded remote config and updated metadata before throwing
+        expect(mockApi.downloadFile).toHaveBeenCalled()
+        expect(mockStorage.setItem).toHaveBeenCalledWith(`local:${CONFIG_STORAGE_KEY}`, mockConfig)
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNC_TIME_STORAGE_KEY),
+          expect.any(Number),
+        )
+        expect(mockLogger.warn).toHaveBeenCalledWith('Last sync is invalid, applying remote config')
+      })
+
+      it('should throw SyncMetadataCorruptedError when lastSyncTime exists but lastSyncedConfigSchemaVersion is missing', async () => {
+        const mockConfig = createMockConfig()
+        const mockRemoteData = createMockRemoteConfigData({
+          [CONFIG_STORAGE_KEY]: mockConfig,
+          lastModified: Date.now(),
+        })
+
+        mockStorage.getItem
+          .mockResolvedValueOnce(mockConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
+          .mockResolvedValueOnce(Date.now()) // last sync time exists
+          .mockResolvedValueOnce(null) // last synced schema version is missing (corrupted)
+          .mockResolvedValueOnce(mockConfig) // last synced config exists
+        mockStorage.getMeta.mockResolvedValue({ modifiedAt: Date.now() - 5000 })
+        mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
+        mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))
+        mockMigrateConfig.mockResolvedValue(mockConfig)
+
+        await expect(syncConfig()).rejects.toThrow(SyncMetadataCorruptedError)
+
+        // Should have downloaded remote config and updated metadata before throwing
+        expect(mockApi.downloadFile).toHaveBeenCalled()
+        expect(mockStorage.setItem).toHaveBeenCalledWith(`local:${CONFIG_STORAGE_KEY}`, mockConfig)
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNC_TIME_STORAGE_KEY),
+          expect.any(Number),
+        )
+        expect(mockLogger.warn).toHaveBeenCalledWith('Last sync is invalid, applying remote config')
+      })
+
+      it('should throw SyncMetadataCorruptedError when lastSyncTime exists but both other metadata are missing', async () => {
+        const mockConfig = createMockConfig()
+        const mockRemoteData = createMockRemoteConfigData({
+          [CONFIG_STORAGE_KEY]: mockConfig,
+          lastModified: Date.now(),
+        })
+
+        mockStorage.getItem
+          .mockResolvedValueOnce(mockConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
+          .mockResolvedValueOnce(Date.now()) // last sync time exists
+          .mockResolvedValueOnce(null) // last synced schema version is missing (corrupted)
+          .mockResolvedValueOnce(null) // last synced config is missing (corrupted)
+        mockStorage.getMeta.mockResolvedValue({ modifiedAt: Date.now() - 5000 })
+        mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
+        mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))
+        mockMigrateConfig.mockResolvedValue(mockConfig)
+
+        await expect(syncConfig()).rejects.toThrow(SyncMetadataCorruptedError)
+
+        // Should have downloaded remote config and updated metadata before throwing
+        expect(mockApi.downloadFile).toHaveBeenCalled()
+        expect(mockStorage.setItem).toHaveBeenCalledWith(`local:${CONFIG_STORAGE_KEY}`, mockConfig)
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNC_TIME_STORAGE_KEY),
+          expect.any(Number),
+        )
+        expect(mockLogger.warn).toHaveBeenCalledWith('Last sync is invalid, applying remote config')
       })
     })
 
@@ -261,9 +355,11 @@ describe('googleDrive configuration sync', () => {
         })
 
         mockStorage.getItem
-          .mockResolvedValueOnce(mockConfig)
-          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION)
-          .mockResolvedValueOnce(lastSyncTime)
+          .mockResolvedValueOnce(mockConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
+          .mockResolvedValueOnce(lastSyncTime) // last sync time
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // last synced schema version
+          .mockResolvedValueOnce(mockConfig) // last synced config
         mockStorage.getMeta.mockResolvedValue({ modifiedAt: localModifiedTime })
         mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
         mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))
@@ -293,9 +389,11 @@ describe('googleDrive configuration sync', () => {
         })
 
         mockStorage.getItem
-          .mockResolvedValueOnce(mockOldConfig)
-          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION)
-          .mockResolvedValueOnce(lastSyncTime)
+          .mockResolvedValueOnce(mockOldConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
+          .mockResolvedValueOnce(lastSyncTime) // last sync time
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // last synced schema version
+          .mockResolvedValueOnce(mockOldConfig) // last synced config
         mockStorage.getMeta.mockResolvedValue({ modifiedAt: localModifiedTime })
         mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
         mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))
@@ -366,9 +464,11 @@ describe('googleDrive configuration sync', () => {
         })
 
         mockStorage.getItem
-          .mockResolvedValueOnce(mockConfig)
-          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION)
-          .mockResolvedValueOnce(lastSyncTime)
+          .mockResolvedValueOnce(mockConfig) // local config
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // local schema version
+          .mockResolvedValueOnce(lastSyncTime) // last sync time
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION) // last synced schema version
+          .mockResolvedValueOnce(mockConfig) // last synced config
         mockStorage.getMeta.mockResolvedValue({ modifiedAt: sameTimestamp })
         mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
         mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))

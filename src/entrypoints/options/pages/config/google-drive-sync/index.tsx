@@ -7,7 +7,7 @@ import { Button } from '@/components/shadcn/button'
 import { conflictDataAtom, conflictResolutionsAtom } from '@/utils/atoms/google-drive-sync'
 import { lastSyncTimeAtom } from '@/utils/atoms/last-sync-time'
 import { clearAccessToken, isAuthenticated } from '@/utils/google-drive/auth'
-import { ConfigConflictError, syncConfig } from '@/utils/google-drive/sync'
+import { ConfigConflictError, syncConfig, SyncMetadataCorruptedError } from '@/utils/google-drive/sync'
 import { logger } from '@/utils/logger'
 import { ConfigCard } from '../../../components/config-card'
 import { ConflictResolutionDialog } from './components/conflict-resolution-dialog'
@@ -42,6 +42,10 @@ export function GoogleDriveSyncCard() {
         logger.info('Conflict detected, opening resolution dialog')
         setConflictData(error.data)
         setIsOpen(true)
+      }
+      else if (error instanceof SyncMetadataCorruptedError) {
+        logger.warn('Sync metadata corrupted, remote config applied')
+        toast.warning(i18n.t('options.config.sync.googleDrive.metadataCorrupted'))
       }
       else {
         logger.error('Google Drive sync error from UI', error)

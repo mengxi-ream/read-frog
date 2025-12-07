@@ -33,6 +33,14 @@ export class ConfigConflictError extends Error {
   }
 }
 
+export class SyncMetadataCorruptedError extends Error {
+  name = 'SyncMetadataCorruptedError'
+
+  constructor(public appliedConfig: Config) {
+    super('Sync metadata corrupted, applied remote config')
+  }
+}
+
 async function getLocalConfig(): Promise<ModifiedConfigData> {
   try {
     const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
@@ -257,15 +265,20 @@ export async function syncConfig(): Promise<void> {
 
     const isLastSyncValid = lastSyncTime !== null && lastSyncedConfigSchemaVersion !== null && lastSyncedConfig !== null
 
-    // If the last sync is invalid, download remote config
     if (!isLastSyncValid) {
-      logger.info('First sync, downloading remote config')
+      logger.warn('Last sync is invalid, applying remote config')
       await downloadRemoteConfig(remote)
       await updateSyncMetadata({
         timestamp: Date.now(),
         config: remote[CONFIG_STORAGE_KEY],
         schemaVersion: CONFIG_SCHEMA_VERSION,
       })
+
+      // Only throw corruption error if lastSyncTime exists but other metadata is missing
+      if (lastSyncTime !== null && (lastSyncedConfig === null || lastSyncedConfigSchemaVersion === null)) {
+        throw new SyncMetadataCorruptedError(remote[CONFIG_STORAGE_KEY])
+      }
+
       return
     }
 

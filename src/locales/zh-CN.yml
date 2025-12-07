@@ -366,6 +366,7 @@ options:
         sync: 同步到 Google Drive
         syncing: 同步中...
         syncSuccess: 同步成功
+        metadataCorrupted: 同步数据损坏，已自动应用远端配置
         lastSyncTime: 最后同步时间
         logout: 登出账号
         logoutSuccess: 已登出 Google 账号
