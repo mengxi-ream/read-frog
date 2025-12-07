@@ -368,6 +368,8 @@ options:
         syncSuccess: 동기화 완료
         syncError: 동기화 실패, 다시 시도해 주세요
         lastSyncTime: 마지막 동기화 시간
+        logout: 로그아웃
+        logoutSuccess: Google 계정에서 로그아웃되었습니다
         conflict:
           title: 구성 충돌
           description: 마지막 동기화 이후 로컬 및 원격 구성이 모두 수정되었습니다. 충돌하는 각 필드에 대해 유지할 버전을 선택하세요.

@@ -367,6 +367,8 @@ options:
         syncing: 同步中...
         syncSuccess: 同步成功
         lastSyncTime: 最后同步时间
+        logout: 登出账号
+        logoutSuccess: 已登出 Google 账号
         conflict:
           title: 配置冲突
           description: 检测到本地和云端都在上次同步后进行了修改，请选择每个冲突字段要保留的版本。

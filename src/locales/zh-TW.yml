@@ -368,6 +368,8 @@ options:
         syncSuccess: 同步成功
         syncError: 同步失敗，請重試
         lastSyncTime: 最後同步時間
+        logout: 登出帳號
+        logoutSuccess: 已登出 Google 帳號
         conflict:
           title: 配置衝突
           description: 檢測到本地和雲端都在上次同步後進行了修改，請選擇每個衝突欄位要保留的版本。

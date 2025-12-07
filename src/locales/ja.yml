@@ -367,6 +367,8 @@ options:
         syncSuccess: 同期が完了しました
         syncError: 同期に失敗しました。もう一度お試しください
         lastSyncTime: 最終同期時間
+        logout: ログアウト
+        logoutSuccess: Googleアカウントからログアウトしました
         conflict:
           title: 設定の競合
           description: 前回の同期以降、ローカルとリモートの両方の設定が変更されています。競合する各フィールドについて、保持するバージョンを選択してください。

@@ -369,6 +369,8 @@ options:
         syncSuccess: Sync successful
         syncError: Sync failed, please try again
         lastSyncTime: Last sync at
+        logout: Logout
+        logoutSuccess: Logged out from Google account
         conflict:
           title: Configuration Conflict
           description: Both local and remote configurations have been modified since the last sync. Please choose which version to keep for each conflicting field.
