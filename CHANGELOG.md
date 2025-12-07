@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.20.0
+
+### Minor Changes
+
+- [#726](https://github.com/mengxi-ream/read-frog/pull/726) [`c53e931`](https://github.com/mengxi-ream/read-frog/commit/c53e9318e001ff289f3986c7305b39fe2b58a00c) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat: supports google drive configuration synchronization
+
+### Patch Changes
+
+- [#775](https://github.com/mengxi-ream/read-frog/pull/775) [`cb83fca`](https://github.com/mengxi-ream/read-frog/commit/cb83fca369c441915509893c6f52f82355fb79c2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: clean up field description into hint of translation config
+
+- [#775](https://github.com/mengxi-ream/read-frog/pull/775) [`cb83fca`](https://github.com/mengxi-ream/read-frog/commit/cb83fca369c441915509893c6f52f82355fb79c2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: support preload config
+
+- [#777](https://github.com/mengxi-ream/read-frog/pull/777) [`1fddcc7`](https://github.com/mengxi-ream/read-frog/commit/1fddcc74b9bb35b867f0aee7f3bc080a7ac58355) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: move detectedCode from config to separate storage location
+
 ## 1.19.4
 
 ### Patch Changes
