@@ -56,4 +56,25 @@ export default defineConfig({
       port: 3333,
     },
   },
+  vite: configEnv => ({
+    plugins: configEnv.mode === 'production'
+      ? [
+          {
+            name: 'check-api-key-env',
+            buildStart() {
+              const apiKeyVars = Object.keys(process.env)
+                .filter(key => /^WXT_.*API_KEY/.test(key))
+
+              if (apiKeyVars.length > 0) {
+                throw new Error(
+                  `\n\nFound WXT_*_API_KEY environment variables that may be bundled:\n`
+                  + `${apiKeyVars.map(k => `   - ${k}`).join('\n')}\n\n`
+                  + `Please unset these variables before building for production.\n`,
+                )
+              }
+            },
+          },
+        ]
+      : [],
+  }),
 })
