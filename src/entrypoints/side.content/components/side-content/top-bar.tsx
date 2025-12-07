@@ -23,6 +23,7 @@ import {
 } from '@/components/shadcn/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
 import { getFinalSourceCode } from '@/utils/config/languages'
 import { READ_PROVIDER_ITEMS } from '@/utils/constants/providers'
@@ -141,6 +142,7 @@ function TargetLangSelect() {
 
 function SourceLangSelect() {
   const [language, setLanguage] = useAtom(configFieldsAtomMap.language)
+  const detectedCode = useAtomValue(detectedCodeAtom)
 
   return (
     <Select
@@ -153,15 +155,15 @@ function SourceLangSelect() {
         className="border-border flex !h-7 w-auto items-center gap-2 rounded-md border px-2"
       >
         <div className="max-w-15 min-w-0 truncate">
-          {LANG_CODE_TO_EN_NAME[getFinalSourceCode(language.sourceCode, language.detectedCode)]}
+          {LANG_CODE_TO_EN_NAME[getFinalSourceCode(language.sourceCode, detectedCode)]}
         </div>
       </SelectTrigger>
       <SelectContent container={shadowWrapper}>
         <SelectGroup>
           <SelectLabel>{i18n.t('side.sourceLang')}</SelectLabel>
           <SelectItem value="auto">
-            {`${LANG_CODE_TO_EN_NAME[language.detectedCode]} (${
-              LANG_CODE_TO_LOCALE_NAME[language.detectedCode]
+            {`${LANG_CODE_TO_EN_NAME[detectedCode]} (${
+              LANG_CODE_TO_LOCALE_NAME[detectedCode]
             })`}
             <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">
               auto

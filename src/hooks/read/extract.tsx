@@ -1,12 +1,12 @@
 import type { ExtractedContent } from '@/types/content'
 import { useQuery } from '@tanstack/react-query'
 import { useSetAtom } from 'jotai'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { getDocumentInfo } from '@/utils/content/analyze'
 import { logger } from '@/utils/logger'
 
 export function useExtractContent() {
-  const setLanguage = useSetAtom(configFieldsAtomMap.language)
+  const setDetectedCode = useSetAtom(detectedCodeAtom)
 
   return useQuery<ExtractedContent | null>({
     queryKey: ['extractContent'],
@@ -17,7 +17,7 @@ export function useExtractContent() {
 
         logger.log('detected lang', detectedCodeOrUnd)
 
-        void setLanguage({ detectedCode: detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd })
+        void setDetectedCode(detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd)
 
         return {
           article: {

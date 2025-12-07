@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ProvidersConfig } from '@/types/config/provider'
 import { storage } from '#imports'
@@ -6,8 +7,14 @@ import { isReadProviderConfig } from '@/types/config/provider'
 import {
   CONFIG_STORAGE_KEY,
   DEFAULT_CONFIG,
+  DEFAULT_DETECTED_CODE,
+  DETECTED_CODE_STORAGE_KEY,
 } from '../constants/config'
 import { logger } from '../logger'
+
+export async function getDetectedCodeFromStorage(): Promise<LangCodeISO6393> {
+  return await storage.getItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`) ?? DEFAULT_DETECTED_CODE
+}
 
 export async function getConfigFromStorage() {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)

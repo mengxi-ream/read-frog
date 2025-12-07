@@ -24,6 +24,7 @@ vi.mock('@/utils/host/translate/translate-text', () => ({
 
 vi.mock('@/utils/config/config', () => ({
   getConfigFromStorage: vi.fn(),
+  getDetectedCodeFromStorage: vi.fn(() => Promise.resolve('eng')),
 }))
 
 describe('node translation', () => {

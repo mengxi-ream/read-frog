@@ -1,11 +1,11 @@
-import type { Config } from '@/types/config/config'
+import type { LangCodeISO6393 } from '@read-frog/definitions'
 import { createShadowRootUi, defineContentScript, storage } from '#imports'
 import { kebabCase } from 'case-anything'
 import ReactDOM from 'react-dom/client'
 // import eruda from 'eruda'
 import { getConfigFromStorage } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
-import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from '@/utils/constants/config'
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from '@/utils/constants/config'
 import { getDocumentInfo } from '@/utils/content/analyze'
 import { logger } from '@/utils/logger'
 import { onMessage, sendMessage } from '@/utils/message'
@@ -71,14 +71,9 @@ export default defineContentScript({
         if (manager.isActive) {
           manager.stop()
         }
-        const config = await getConfigFromStorage()
-        if (!config)
-          return
         const { detectedCodeOrUnd } = await getDocumentInfo()
-        await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
-          ...config,
-          language: { ...config.language, detectedCode: detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd },
-        })
+        const detectedCode: LangCodeISO6393 = detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd
+        await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, detectedCode)
         // Notify background script that URL has changed, let it decide whether to automatically enable translation
         void sendMessage('checkAndAskAutoPageTranslation', { url: to, detectedCodeOrUnd })
       }
@@ -104,16 +99,11 @@ export default defineContentScript({
       enabled ? void manager.start() : manager.stop()
     })
 
-    const config = await getConfigFromStorage()
-    if (config) {
-      const { detectedCodeOrUnd } = await getDocumentInfo()
-      await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, {
-        ...config,
-        language: { ...config.language, detectedCode: detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd },
-      })
+    const { detectedCodeOrUnd } = await getDocumentInfo()
+    const initialDetectedCode: LangCodeISO6393 = detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd
+    await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, initialDetectedCode)
 
-      // Check if auto-translation should be enabled for initial page load
-      void sendMessage('checkAndAskAutoPageTranslation', { url: window.location.href, detectedCodeOrUnd })
-    }
+    // Check if auto-translation should be enabled for initial page load
+    void sendMessage('checkAndAskAutoPageTranslation', { url: window.location.href, detectedCodeOrUnd })
   },
 })

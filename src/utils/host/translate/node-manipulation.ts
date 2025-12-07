@@ -1,5 +1,6 @@
 import type { Config } from '@/types/config/config'
 import type { Point } from '@/types/dom'
+import { getDetectedCodeFromStorage } from '@/utils/config/config'
 import { isHTMLElement } from '../dom/filter'
 import { findNearestAncestorBlockNodeAt } from '../dom/find'
 import { walkAndLabelElement } from '../dom/traversal'
@@ -18,11 +19,13 @@ export async function removeOrShowNodeTranslation(point: Point, config: Config):
   if (!node || !isHTMLElement(node))
     return
 
+  const detectedCode = await getDetectedCodeFromStorage()
+
   if (!validateTranslationConfigAndToast({
     providersConfig: config.providersConfig,
     translate: config.translate,
     language: config.language,
-  })) {
+  }, detectedCode)) {
     return
   }
 

@@ -182,7 +182,10 @@ export async function translateText(text: string) {
   })
 }
 
-export function validateTranslationConfigAndToast(config: Pick<Config, 'providersConfig' | 'translate' | 'language'>): boolean {
+export function validateTranslationConfigAndToast(
+  config: Pick<Config, 'providersConfig' | 'translate' | 'language'>,
+  detectedCode: LangCodeISO6393,
+): boolean {
   const { providersConfig, translate: translateConfig, language: languageConfig } = config
   const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
   if (!providerConfig) {
@@ -194,9 +197,9 @@ export function validateTranslationConfigAndToast(config: Pick<Config, 'provider
     logger.info('validateTranslationConfig: returning false (same language)')
     return false
   }
-  else if (languageConfig.sourceCode === 'auto' && languageConfig.detectedCode === languageConfig.targetCode) {
+  else if (languageConfig.sourceCode === 'auto' && detectedCode === languageConfig.targetCode) {
     toast.warning(i18n.t('translation.autoModeSameLanguage', [
-      LANG_CODE_TO_LOCALE_NAME[languageConfig.detectedCode] ?? languageConfig.detectedCode,
+      LANG_CODE_TO_LOCALE_NAME[detectedCode] ?? detectedCode,
     ]))
   }
 

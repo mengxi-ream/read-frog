@@ -1,4 +1,4 @@
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getConfigFromStorage, getDetectedCodeFromStorage } from '@/utils/config/config'
 import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
 import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
 import { deepQueryTopLevelSelector } from '@/utils/host/dom/find'
@@ -81,11 +81,13 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
+    const detectedCode = await getDetectedCodeFromStorage()
+
     if (!validateTranslationConfigAndToast({
       providersConfig: config.providersConfig,
       translate: config.translate,
       language: config.language,
-    })) {
+    }, detectedCode)) {
       return
     }
 

@@ -1,3 +1,4 @@
+import type { LangCodeISO6393 } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ArticleAnalysis, ArticleExplanation, ExtractedContent } from '@/types/content'
 import { i18n } from '#imports'
@@ -10,6 +11,7 @@ import { progressAtom, readStateAtom, store } from '@/entrypoints/side.content/a
 import { articleAnalysisSchema, articleExplanationSchema } from '@/types/content'
 import { sendInBatchesWithFixedDelay } from '@/utils/ai-request'
 import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
+import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
 import { isAnyAPIKeyForReadProviders } from '@/utils/config/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
@@ -31,7 +33,7 @@ export function useAnalyzeContent() {
   const setReadState = useSetAtom(readStateAtom)
   const { language } = useAtomValue(configAtom)
   const readProviderConfig = useAtomValue(readProviderConfigAtom)
-  const setLanguage = useSetAtom(configFieldsAtomMap.language)
+  const setDetectedCode = useSetAtom(detectedCodeAtom)
   return useMutation<ArticleAnalysis, Error, ExtractedContent>({
     mutationKey: ['analyzeContent'],
     mutationFn: async (extractedContent: ExtractedContent) => {
@@ -60,10 +62,9 @@ export function useAnalyzeContent() {
           })
 
           // TODO: if und, then UI need to show UI to ask user to select the language or not continue
-          void setLanguage({
-            detectedCode:
-              articleAnalysis.detectedLang === 'und' ? 'eng' : articleAnalysis.detectedLang,
-          })
+          void setDetectedCode(
+            articleAnalysis.detectedLang === 'und' ? 'eng' : articleAnalysis.detectedLang,
+          )
           logger.log('articleAnalysis', articleAnalysis)
 
           return articleAnalysis
@@ -84,7 +85,7 @@ export function useAnalyzeContent() {
   })
 }
 
-async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, config: Config) {
+async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, config: Config, detectedCode: LangCodeISO6393) {
   let attempts = 0
   let lastError
 
@@ -96,7 +97,7 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
 
   const targetLang = LANG_CODE_TO_EN_NAME[language.targetCode]
   const sourceLang
-    = LANG_CODE_TO_EN_NAME[getFinalSourceCode(language.sourceCode, language.detectedCode)]
+    = LANG_CODE_TO_EN_NAME[getFinalSourceCode(language.sourceCode, detectedCode)]
 
   const model = await getReadModelById(readProviderConfig.id)
   while (attempts < MAX_ATTEMPTS) {
@@ -134,6 +135,7 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
 export function useExplainArticle() {
   const setReadState = useSetAtom(readStateAtom)
   const config = useAtomValue(configAtom)
+  const detectedCode = useAtomValue(detectedCodeAtom)
   return useMutation<ArticleExplanation['paragraphs'], Error, ExplainArticleParams>({
     mutationKey: ['explainArticle'],
     mutationFn: async (params: ExplainArticleParams) => {
@@ -180,7 +182,7 @@ export function useExplainArticle() {
       logger.log('batches', batches)
 
       const allParagraphExplanations = await sendInBatchesWithFixedDelay(
-        batches.map(batch => explainBatch(batch, articleAnalysis, config)),
+        batches.map(batch => explainBatch(batch, articleAnalysis, config, detectedCode)),
       )
 
       const flattenedParagraphExplanations = allParagraphExplanations

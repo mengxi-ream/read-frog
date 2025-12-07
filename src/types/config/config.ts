@@ -8,7 +8,6 @@ import { translateConfigSchema } from './translate'
 import { ttsConfigSchema } from './tts'
 // Language schema
 const languageSchema = z.object({
-  detectedCode: langCodeISO6393Schema,
   sourceCode: langCodeISO6393Schema.or(z.literal('auto')),
   targetCode: langCodeISO6393Schema,
   level: langLevel,

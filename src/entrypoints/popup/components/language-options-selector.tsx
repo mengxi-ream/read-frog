@@ -6,7 +6,7 @@ import {
   LANG_CODE_TO_LOCALE_NAME,
   langCodeISO6393Schema,
 } from '@read-frog/definitions'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import {
   Select,
   SelectContent,
@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/shadcn/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 
 function langCodeLabel(langCode: LangCodeISO6393) {
   return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
@@ -26,6 +27,7 @@ const langSelectorContentClasses = 'flex flex-col items-start text-base font-med
 
 export default function LanguageOptionsSelector() {
   const [language, setLanguage] = useAtom(configFieldsAtomMap.language)
+  const detectedCode = useAtomValue(detectedCodeAtom)
 
   const handleSourceLangChange = (newLangCode: LangCodeISO6393) => {
     void setLanguage({ sourceCode: newLangCode })
@@ -37,7 +39,7 @@ export default function LanguageOptionsSelector() {
 
   const sourceLangLabel
     = language.sourceCode === 'auto'
-      ? `${langCodeLabel(language.detectedCode)} (auto)`
+      ? `${langCodeLabel(detectedCode)} (auto)`
       : langCodeLabel(language.sourceCode)
 
   const targetLangLabel = langCodeLabel(language.targetCode)
@@ -60,7 +62,7 @@ export default function LanguageOptionsSelector() {
         </SelectTrigger>
         <SelectContent className="rounded-lg shadow-md w-72">
           <SelectItem value="auto">
-            {langCodeLabel(language.detectedCode)}
+            {langCodeLabel(detectedCode)}
             <AutoLangCell />
           </SelectItem>
           {langCodeISO6393Schema.options.map(key => (

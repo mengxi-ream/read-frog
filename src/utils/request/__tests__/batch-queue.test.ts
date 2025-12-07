@@ -40,7 +40,6 @@ function mockTranslateError(error: Error) {
 const sampleLangConfig: Config['language'] = {
   sourceCode: 'eng',
   targetCode: 'cmn',
-  detectedCode: 'eng',
   level: 'beginner',
 }
 

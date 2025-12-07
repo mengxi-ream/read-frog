@@ -7,6 +7,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Activity } from 'react'
 import { MarkdownRenderer } from '@/components/markdown-renderer'
 import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
+import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
 import { getFinalSourceCode } from '@/utils/config/languages'
 import { getIsFirefoxExtensionEnv } from '@/utils/firefox/firefox-compat'
@@ -49,6 +50,7 @@ export function AiPopover() {
   const [isVisible, setIsVisible] = useAtom(isAiPopoverVisibleAtom)
   const selectionRange = useAtomValue(selectionRangeAtom)
   const config = useAtomValue(configAtom)
+  const detectedCode = useAtomValue(detectedCodeAtom)
   const readProviderConfig = useAtomValue(readProviderConfigAtom)
   const popoverRef = useRef<PopoverWrapperRef>(null)
   const [aiResponse, setAiResponse] = useState('')
@@ -86,7 +88,7 @@ export function AiPopover() {
           return false
         }
 
-        const actualSourceCode = getFinalSourceCode(config.language.sourceCode, config.language.detectedCode)
+        const actualSourceCode = getFinalSourceCode(config.language.sourceCode, detectedCode)
         const systemPrompt = getWordExplainPrompt(
           actualSourceCode,
           config.language.targetCode,
