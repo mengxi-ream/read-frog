@@ -1,7 +1,7 @@
 import type { ModifiedConfigData } from '../sync'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { configSchema } from '@/types/config/config'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, LAST_SYNC_TIME_STORAGE_KEY } from '@/utils/constants/config'
+import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, LAST_SYNC_TIME_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 
 // Use vi.hoisted to define mocks before vi.mock hoisting
 const { mockStorage, mockMigrateConfig, mockLogger, mockApi, mockAuth } = vi.hoisted(() => ({
@@ -311,6 +311,8 @@ describe('googleDrive configuration sync', () => {
           .mockResolvedValueOnce(mockConfig)
           .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION)
           .mockResolvedValueOnce(lastSyncTime)
+          .mockResolvedValueOnce(CONFIG_SCHEMA_VERSION)
+          .mockResolvedValueOnce(mockConfig)
         mockStorage.getMeta.mockResolvedValue({ modifiedAt: localModifiedTime })
         mockApi.findFileInAppData.mockResolvedValue(createMockGoogleDriveFile())
         mockApi.downloadFile.mockResolvedValue(JSON.stringify(mockRemoteData))
@@ -318,6 +320,14 @@ describe('googleDrive configuration sync', () => {
         await syncConfig()
 
         expect(mockApi.uploadFile).toHaveBeenCalled()
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNC_TIME_STORAGE_KEY),
+          expect.any(Number),
+        )
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNCED_CONFIG_STORAGE_KEY),
+          mockConfig,
+        )
       })
     })
 
