@@ -56,6 +56,7 @@ export async function authenticateGoogleDrive(): Promise<string> {
     authUrl.searchParams.set('response_type', 'token')
     authUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI)
     authUrl.searchParams.set('scope', GOOGLE_SCOPES.join(' '))
+    authUrl.searchParams.set('prompt', 'select_account')
 
     const responseUrl = await browser.identity.launchWebAuthFlow({
       url: authUrl.toString(),
