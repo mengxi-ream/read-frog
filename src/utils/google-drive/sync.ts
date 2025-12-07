@@ -3,7 +3,7 @@ import type { Config } from '@/types/config/config'
 import { storage } from '#imports'
 import { configSchema } from '@/types/config/config'
 import { migrateConfig } from '../config/migration'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, DEFAULT_GOOGLE_DRIVE_LAST_SYNCED_CONFIG_SCHEMA_VERSION, LAST_SYNC_TIME_STORAGE_KEY, LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_KEY } from '../constants/config'
+import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, LAST_SYNC_TIME_STORAGE_KEY, LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_KEY } from '../constants/config'
 import { logger } from '../logger'
 import { downloadFile, findFileInAppData, uploadFile } from './api'
 import { getValidAccessToken } from './auth'
@@ -226,9 +226,13 @@ export async function syncConfig(): Promise<void> {
     }
 
     const lastSyncTime = await getLastSyncTime()
+    const lastSyncedConfigSchemaVersion = await getLastSyncedConfigSchemaVersion()
+    const lastSyncedConfig = await getLastSyncedConfig()
 
-    // If first sync, download remote config
-    if (lastSyncTime === null) {
+    const isLastSyncValid = lastSyncTime !== null && lastSyncedConfigSchemaVersion !== null && lastSyncedConfig !== null
+
+    // If the last sync is invalid, download remote config
+    if (!isLastSyncValid) {
       logger.info('First sync, downloading remote config')
       await downloadRemoteConfig(remote)
       await setLastSyncTime(Date.now())
@@ -237,8 +241,8 @@ export async function syncConfig(): Promise<void> {
     }
 
     // Check if both local and remote changed since last sync
-    const localChangedSinceSync = lastSyncTime && local.lastModified > lastSyncTime
-    const remoteChangedSinceSync = lastSyncTime && remote.lastModified > lastSyncTime
+    const localChangedSinceSync = isLastSyncValid && local.lastModified > lastSyncTime
+    const remoteChangedSinceSync = isLastSyncValid && remote.lastModified > lastSyncTime
 
     if (localChangedSinceSync && remoteChangedSinceSync) {
       logger.info('Both local and remote changed since last sync, checking for conflicts')
@@ -249,7 +253,6 @@ export async function syncConfig(): Promise<void> {
         throw new Error('Base config not found for conflict resolution')
       }
 
-      const lastSyncedConfigSchemaVersion = await getLastSyncedConfigSchemaVersion() || DEFAULT_GOOGLE_DRIVE_LAST_SYNCED_CONFIG_SCHEMA_VERSION
       const migratedBaseConfig = await migrateConfig(baseConfig, lastSyncedConfigSchemaVersion)
 
       const parsedMigratedBaseConfig = configSchema.safeParse(migratedBaseConfig)
