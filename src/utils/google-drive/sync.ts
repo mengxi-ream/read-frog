@@ -89,6 +89,26 @@ async function setLastSyncedConfigSchemaVersion(schemaVersion: number): Promise<
   await storage.setItem(`local:${LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY}`, schemaVersion)
 }
 
+interface SyncMetadata {
+  timestamp: number
+  config: Config
+  schemaVersion: number
+}
+
+/**
+ * Atomically update all sync metadata
+ * - Updates last sync time
+ * - Updates last synced config
+ * - Updates last synced config schema version
+ */
+async function updateSyncMetadata({ timestamp, config, schemaVersion }: SyncMetadata): Promise<void> {
+  await Promise.all([
+    setLastSyncTime(timestamp),
+    setLastSyncedConfig(config),
+    setLastSyncedConfigSchemaVersion(schemaVersion),
+  ])
+}
+
 async function getRemoteConfig(): Promise<ModifiedConfigData | null> {
   try {
     await getValidAccessToken()
@@ -195,8 +215,11 @@ export async function syncMergedConfig(mergedConfig: Config): Promise<void> {
     await uploadLocalConfig(validatedConfig, CONFIG_SCHEMA_VERSION, now)
 
     // Update sync metadata
-    await setLastSyncTime(now)
-    await setLastSyncedConfig(validatedConfig)
+    await updateSyncMetadata({
+      timestamp: now,
+      config: validatedConfig,
+      schemaVersion: CONFIG_SCHEMA_VERSION,
+    })
 
     logger.info('Synced config successfully')
   }
@@ -220,8 +243,11 @@ export async function syncConfig(): Promise<void> {
     if (!remote) {
       logger.info('No remote config found, uploading local config')
       await uploadLocalConfig(local[CONFIG_STORAGE_KEY], local[CONFIG_SCHEMA_VERSION_STORAGE_KEY], local.lastModified)
-      await setLastSyncTime(Date.now())
-      await setLastSyncedConfig(local[CONFIG_STORAGE_KEY])
+      await updateSyncMetadata({
+        timestamp: Date.now(),
+        config: local[CONFIG_STORAGE_KEY],
+        schemaVersion: local[CONFIG_SCHEMA_VERSION_STORAGE_KEY],
+      })
       return
     }
 
@@ -235,8 +261,11 @@ export async function syncConfig(): Promise<void> {
     if (!isLastSyncValid) {
       logger.info('First sync, downloading remote config')
       await downloadRemoteConfig(remote)
-      await setLastSyncTime(Date.now())
-      await setLastSyncedConfig(remote[CONFIG_STORAGE_KEY])
+      await updateSyncMetadata({
+        timestamp: Date.now(),
+        config: remote[CONFIG_STORAGE_KEY],
+        schemaVersion: CONFIG_SCHEMA_VERSION,
+      })
       return
     }
 
@@ -276,9 +305,11 @@ export async function syncConfig(): Promise<void> {
         await uploadLocalConfig(merged, CONFIG_SCHEMA_VERSION, now)
 
         // Update sync metadata
-        await setLastSyncTime(now)
-        await setLastSyncedConfig(merged)
-        await setLastSyncedConfigSchemaVersion(CONFIG_SCHEMA_VERSION)
+        await updateSyncMetadata({
+          timestamp: now,
+          config: merged,
+          schemaVersion: CONFIG_SCHEMA_VERSION,
+        })
 
         logger.info('Auto-merge completed successfully')
         return
@@ -297,22 +328,31 @@ export async function syncConfig(): Promise<void> {
     if (remote.lastModified > local.lastModified) {
       logger.info('Remote config is newer, downloading remote config')
       await downloadRemoteConfig(remote)
-      await setLastSyncTime(Date.now())
-      await setLastSyncedConfig(remote[CONFIG_STORAGE_KEY])
+      await updateSyncMetadata({
+        timestamp: Date.now(),
+        config: remote[CONFIG_STORAGE_KEY],
+        schemaVersion: CONFIG_SCHEMA_VERSION,
+      })
       return
     }
 
     if (local.lastModified > remote.lastModified) {
       logger.info('Local config is newer, uploading local config')
       await uploadLocalConfig(local[CONFIG_STORAGE_KEY], local[CONFIG_SCHEMA_VERSION_STORAGE_KEY], local.lastModified)
-      await setLastSyncTime(Date.now())
-      await setLastSyncedConfig(local[CONFIG_STORAGE_KEY])
+      await updateSyncMetadata({
+        timestamp: Date.now(),
+        config: local[CONFIG_STORAGE_KEY],
+        schemaVersion: local[CONFIG_SCHEMA_VERSION_STORAGE_KEY],
+      })
       return
     }
 
     logger.info('No changes, skipping sync')
-    await setLastSyncTime(Date.now())
-    await setLastSyncedConfig(local[CONFIG_STORAGE_KEY])
+    await updateSyncMetadata({
+      timestamp: Date.now(),
+      config: local[CONFIG_STORAGE_KEY],
+      schemaVersion: local[CONFIG_SCHEMA_VERSION_STORAGE_KEY],
+    })
   }
   catch (error) {
     logger.error('Config sync failed', error)

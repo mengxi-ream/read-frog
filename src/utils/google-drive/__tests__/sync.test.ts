@@ -1,7 +1,7 @@
 import type { ModifiedConfigData } from '../sync'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { configSchema } from '@/types/config/config'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, LAST_SYNC_TIME_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, LAST_SYNC_TIME_STORAGE_KEY, LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 
 // Use vi.hoisted to define mocks before vi.mock hoisting
 const { mockStorage, mockMigrateConfig, mockLogger, mockApi, mockAuth } = vi.hoisted(() => ({
@@ -208,6 +208,14 @@ describe('googleDrive configuration sync', () => {
           expect.stringContaining(LAST_SYNC_TIME_STORAGE_KEY),
           expect.any(Number),
         )
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNCED_CONFIG_STORAGE_KEY),
+          mockConfig,
+        )
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY),
+          CONFIG_SCHEMA_VERSION,
+        )
       })
 
       it('should download remote config on first sync when remote exists', async () => {
@@ -230,6 +238,10 @@ describe('googleDrive configuration sync', () => {
 
         expect(mockApi.downloadFile).toHaveBeenCalled()
         expect(mockStorage.setItem).toHaveBeenCalledWith(`local:${CONFIG_STORAGE_KEY}`, mockConfig)
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY),
+          CONFIG_SCHEMA_VERSION,
+        )
       })
     })
 
@@ -261,6 +273,10 @@ describe('googleDrive configuration sync', () => {
 
         expect(mockApi.downloadFile).toHaveBeenCalled()
         expect(mockStorage.setItem).toHaveBeenCalledWith(`local:${CONFIG_STORAGE_KEY}`, mockConfig)
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY),
+          CONFIG_SCHEMA_VERSION,
+        )
       })
 
       it('should migrate remote config when remote has older schema version', async () => {
@@ -328,6 +344,10 @@ describe('googleDrive configuration sync', () => {
           expect.stringContaining(LAST_SYNCED_CONFIG_STORAGE_KEY),
           mockConfig,
         )
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY),
+          CONFIG_SCHEMA_VERSION,
+        )
       })
     })
 
@@ -359,6 +379,10 @@ describe('googleDrive configuration sync', () => {
         expect(mockStorage.setItem).toHaveBeenCalledWith(
           expect.stringContaining(LAST_SYNC_TIME_STORAGE_KEY),
           expect.any(Number),
+        )
+        expect(mockStorage.setItem).toHaveBeenCalledWith(
+          expect.stringContaining(LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY),
+          CONFIG_SCHEMA_VERSION,
         )
       })
     })
