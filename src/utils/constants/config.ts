@@ -11,11 +11,13 @@ export const CONFIG_STORAGE_KEY = 'config'
 export const CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 export const LAST_SYNC_TIME_STORAGE_KEY = '__lastGoogleDriveSyncTime'
 export const LAST_SYNCED_CONFIG_STORAGE_KEY = '__lastSyncedConfig'
+export const LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__lastSyncedConfigSchemaVersion'
 export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = '__googleDriveToken'
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
 export const CONFIG_SCHEMA_VERSION = 37
 
+export const DEFAULT_GOOGLE_DRIVE_LAST_SYNCED_CONFIG_SCHEMA_VERSION = 35
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
 export const DEFAULT_CONFIG: Config = {

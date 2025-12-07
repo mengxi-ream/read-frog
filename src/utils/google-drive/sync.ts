@@ -3,7 +3,7 @@ import type { Config } from '@/types/config/config'
 import { storage } from '#imports'
 import { configSchema } from '@/types/config/config'
 import { migrateConfig } from '../config/migration'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, LAST_SYNC_TIME_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_KEY } from '../constants/config'
+import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, DEFAULT_GOOGLE_DRIVE_LAST_SYNCED_CONFIG_SCHEMA_VERSION, LAST_SYNC_TIME_STORAGE_KEY, LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_KEY } from '../constants/config'
 import { logger } from '../logger'
 import { downloadFile, findFileInAppData, uploadFile } from './api'
 import { getValidAccessToken } from './auth'
@@ -78,6 +78,15 @@ async function getLastSyncedConfig(): Promise<Config | null> {
 
 async function setLastSyncedConfig(config: Config): Promise<void> {
   await storage.setItem(`local:${LAST_SYNCED_CONFIG_STORAGE_KEY}`, config)
+}
+
+async function getLastSyncedConfigSchemaVersion(): Promise<number | null> {
+  const lastSyncedConfigSchemaVersion = await storage.getItem<number>(`local:${LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY}`)
+  return lastSyncedConfigSchemaVersion ?? null
+}
+
+async function setLastSyncedConfigSchemaVersion(schemaVersion: number): Promise<void> {
+  await storage.setItem(`local:${LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY}`, schemaVersion)
 }
 
 async function getRemoteConfig(): Promise<ModifiedConfigData | null> {
@@ -240,13 +249,16 @@ export async function syncConfig(): Promise<void> {
         throw new Error('Base config not found for conflict resolution')
       }
 
-      const parsedBaseConfig = configSchema.safeParse(baseConfig)
-      if (!parsedBaseConfig.success) {
+      const lastSyncedConfigSchemaVersion = await getLastSyncedConfigSchemaVersion() || DEFAULT_GOOGLE_DRIVE_LAST_SYNCED_CONFIG_SCHEMA_VERSION
+      const migratedBaseConfig = await migrateConfig(baseConfig, lastSyncedConfigSchemaVersion)
+
+      const parsedMigratedBaseConfig = configSchema.safeParse(migratedBaseConfig)
+      if (!parsedMigratedBaseConfig.success) {
         logger.error('Base config is invalid, cannot perform conflict merge')
         throw new Error('Base config is invalid for conflict resolution')
       }
 
-      const { conflicts, merged } = detectConflicts(parsedBaseConfig.data, local[CONFIG_STORAGE_KEY], remote[CONFIG_STORAGE_KEY])
+      const { conflicts, merged } = detectConflicts(parsedMigratedBaseConfig.data, local[CONFIG_STORAGE_KEY], remote[CONFIG_STORAGE_KEY])
 
       if (conflicts.length === 0) {
         // No conflicts, auto-merge and sync
@@ -263,6 +275,7 @@ export async function syncConfig(): Promise<void> {
         // Update sync metadata
         await setLastSyncTime(now)
         await setLastSyncedConfig(merged)
+        await setLastSyncedConfigSchemaVersion(CONFIG_SCHEMA_VERSION)
 
         logger.info('Auto-merge completed successfully')
         return
@@ -272,7 +285,7 @@ export async function syncConfig(): Promise<void> {
       logger.warn(`Conflicts detected: ${conflicts.length} conflicting fields`)
 
       throw new ConfigConflictError({
-        base: baseConfig,
+        base: migratedBaseConfig,
         local: local[CONFIG_STORAGE_KEY],
         remote: remote[CONFIG_STORAGE_KEY],
       })
