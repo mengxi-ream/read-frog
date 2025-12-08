@@ -1,3 +1,10 @@
+import { describe, it } from 'vitest'
+
+// TODO: Re-enable sync tests after refactoring
+describe('sync', () => {
+  it.todo('should be implemented')
+})
+
 // import type { ModifiedConfigData } from '../sync'
 // import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // import { configSchema } from '@/types/config/config'
