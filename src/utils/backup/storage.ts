@@ -3,7 +3,7 @@ import type { Config } from '@/types/config/config'
 import { storage } from '#imports'
 import { dequal } from 'dequal'
 import { BACKUP_ID_PREFIX, MAX_BACKUPS_COUNT } from '@/utils/constants/backup'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 import { logger } from '@/utils/logger'
 
 /**
@@ -47,11 +47,11 @@ export async function isSameAsLatestBackup(config: Config, configSchemaVersion: 
   const latestBackupWithMetadata = backupsWithMetadata[0]
 
   // Compare schema version
-  if (latestBackupWithMetadata[CONFIG_SCHEMA_VERSION_STORAGE_KEY] !== configSchemaVersion) {
+  if (latestBackupWithMetadata.schemaVersion !== configSchemaVersion) {
     return false
   }
 
-  return dequal(latestBackupWithMetadata[CONFIG_STORAGE_KEY], config)
+  return dequal(latestBackupWithMetadata.config, config)
 }
 
 /**
@@ -65,8 +65,8 @@ export async function addBackup(config: Config, extensionVersion: string): Promi
     const backupId = generateBackupId(timestamp)
 
     const backup: ConfigBackup = {
-      [CONFIG_SCHEMA_VERSION_STORAGE_KEY]: CONFIG_SCHEMA_VERSION,
-      [CONFIG_STORAGE_KEY]: config,
+      schemaVersion: CONFIG_SCHEMA_VERSION,
+      config,
     }
 
     // Get current backup IDs

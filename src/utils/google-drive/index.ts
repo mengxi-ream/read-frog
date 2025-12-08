@@ -16,6 +16,5 @@ export {
 } from './auth'
 
 export {
-  type ModifiedConfigData,
   syncConfig,
 } from './sync'

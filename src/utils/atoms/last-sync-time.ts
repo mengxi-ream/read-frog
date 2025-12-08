@@ -1,15 +1,20 @@
+import type { LastSyncedConfigMeta } from '@/types/config/meta'
 import { storage } from '#imports'
 import { atom } from 'jotai'
-import { LAST_SYNC_TIME_STORAGE_KEY } from '../constants/config'
+import { LAST_SYNCED_CONFIG_STORAGE_KEY } from '../constants/config'
 
-// internal atom for storing last sync time
+// internal atom for storing last sync time (from lastSyncedConfig meta)
 const _lastSyncTimeBaseAtom = atom<number | null>(null)
 
 _lastSyncTimeBaseAtom.onMount = (setAtom: (newValue: number | null) => void) => {
-  void storage.getItem<number>(`local:${LAST_SYNC_TIME_STORAGE_KEY}`).then(v => setAtom(v ?? null))
+  void storage.getMeta<LastSyncedConfigMeta>(`local:${LAST_SYNCED_CONFIG_STORAGE_KEY}`).then(meta => setAtom(meta?.lastSyncedAt ?? null))
 
-  const unwatch = storage.watch<number>(`local:${LAST_SYNC_TIME_STORAGE_KEY}`, (newValue) => {
-    setAtom(newValue ?? null)
+  // Add $ to the key to get the meta key for LAST_SYNCED_CONFIG_STORAGE_KEY
+  const metaKey = `local:${LAST_SYNCED_CONFIG_STORAGE_KEY}$`
+
+  const unwatch = storage.watch<LastSyncedConfigMeta>(metaKey, (_, newMeta) => {
+    const meta = newMeta
+    setAtom(meta?.lastSyncedAt ?? null)
   })
 
   return unwatch

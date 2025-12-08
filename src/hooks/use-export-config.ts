@@ -6,7 +6,6 @@ import { saveAs } from 'file-saver'
 import { toast } from 'sonner'
 import { getObjectWithoutAPIKeys } from '@/utils/config/config'
 import { APP_NAME } from '@/utils/constants/app'
-import { CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 
 interface UseExportConfigOptions {
   config: Config
@@ -24,8 +23,8 @@ export function useExportConfig({ config, schemaVersion, onSuccess }: UseExportC
       }
 
       const json = JSON.stringify({
-        [CONFIG_STORAGE_KEY]: exportConfig,
-        [CONFIG_SCHEMA_VERSION_STORAGE_KEY]: schemaVersion,
+        config: exportConfig,
+        schemaVersion,
       }, null, 2)
       const blob = new Blob([json], { type: 'text/json' })
       saveAs(blob, `${kebabCase(APP_NAME)}-config-v${schemaVersion}.json`)

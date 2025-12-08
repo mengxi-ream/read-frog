@@ -10,7 +10,6 @@ import { configAtom } from '@/utils/atoms/config'
 import { addBackup, getAllBackupsWithMetadata } from '@/utils/backup/storage'
 import { EXTENSION_VERSION } from '@/utils/constants/app'
 import { MAX_BACKUPS_COUNT } from '@/utils/constants/backup'
-import { CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 import { queryClient } from '@/utils/tanstack-query'
 import { BackupConfigItem } from './components/backup-config-item'
 
@@ -44,8 +43,8 @@ export function ConfigBackup() {
                 backupId={backupWithMetadata.id}
                 backupMetadata={backupWithMetadata.metadata}
                 backup={{
-                  [CONFIG_SCHEMA_VERSION_STORAGE_KEY]: backupWithMetadata[CONFIG_SCHEMA_VERSION_STORAGE_KEY],
-                  [CONFIG_STORAGE_KEY]: backupWithMetadata[CONFIG_STORAGE_KEY],
+                  schemaVersion: backupWithMetadata.schemaVersion,
+                  config: backupWithMetadata.config,
                 }}
               />
             ))}

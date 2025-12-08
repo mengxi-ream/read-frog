@@ -22,7 +22,7 @@ import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
 import { addBackup } from '@/utils/backup/storage'
 import { migrateConfig } from '@/utils/config/migration'
 import { EXTENSION_VERSION } from '@/utils/constants/app'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 import { queryClient } from '@/utils/tanstack-query'
 import { ConfigCard } from '../../components/config-card'
 import { ViewConfig } from './components/view-config'
@@ -66,12 +66,12 @@ function ImportConfig() {
         reader.readAsText(file)
       })
 
-      const {
-        [CONFIG_SCHEMA_VERSION_STORAGE_KEY]: importConfigSchemaVersion,
-        [CONFIG_STORAGE_KEY]: importConfig,
-      } = JSON.parse(fileContent)
+      const parsed = JSON.parse(fileContent)
+      // TODO: Remove __configSchemaVersion fallback after all users have migrated to v38+
+      const importConfigSchemaVersion = parsed.schemaVersion ?? parsed.__configSchemaVersion
+      const importConfigData = parsed.config
 
-      const newConfig = await migrateConfig(importConfig, importConfigSchemaVersion)
+      const newConfig = await migrateConfig(importConfigData, importConfigSchemaVersion)
       await addBackup(currentConfig, EXTENSION_VERSION)
       await setConfig(newConfig)
     },

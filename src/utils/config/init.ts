@@ -1,9 +1,10 @@
 import type { Config } from '@/types/config/config'
+import type { ConfigMeta } from '@/types/config/meta'
 import type { ProvidersConfig } from '@/types/config/provider'
 import { storage } from '#imports'
 import { configSchema } from '@/types/config/config'
 import { isAPIProviderConfig } from '@/types/config/provider'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from '../constants/config'
+import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG, LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY } from '../constants/config'
 import { logger } from '../logger'
 import { runMigration } from './migration'
 
@@ -12,13 +13,17 @@ import { runMigration } from './migration'
  * @returns The extension config
  */
 export async function initializeConfig() {
-  const [storedConfig, storedConfigSchemaVersion] = await Promise.all([
+  // Read schema version from meta (v38+) or legacy key (pre-v38)
+  // TODO: Remove legacySchemaVersion reading after all users have migrated to v38+
+  const [storedConfig, configMeta, legacySchemaVersion] = await Promise.all([
     storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
-    storage.getItem<number>(`local:${CONFIG_SCHEMA_VERSION_STORAGE_KEY}`),
+    storage.getMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`),
+    storage.getItem<number>(`local:${LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY}`),
   ])
 
   let config: Config | null = storedConfig
-  let currentVersion = storedConfigSchemaVersion ?? 1
+  // Use meta.schemaVersion for v38+, fall back to legacy key for pre-v38
+  let currentVersion = configMeta?.schemaVersion ?? legacySchemaVersion ?? 1
 
   if (!config) {
     config = DEFAULT_CONFIG
@@ -43,10 +48,13 @@ export async function initializeConfig() {
     currentVersion = CONFIG_SCHEMA_VERSION
   }
 
-  await Promise.all([
-    storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, config),
-    storage.setItem<number>(`local:${CONFIG_SCHEMA_VERSION_STORAGE_KEY}`, currentVersion),
-  ])
+  // Save config and update meta with schemaVersion
+  const updatedMeta = await storage.getMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`)
+  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, config)
+  await storage.setMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`, {
+    schemaVersion: currentVersion,
+    lastModifiedAt: updatedMeta?.lastModifiedAt ?? Date.now(),
+  })
 
   if (import.meta.env.DEV) {
     await loadAPIKeyFromEnv()

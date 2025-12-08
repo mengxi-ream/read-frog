@@ -8,7 +8,7 @@ import { useGoogleDriveAuth } from '@/hooks/use-google-drive-auth'
 import { conflictDataAtom, conflictResolutionsAtom } from '@/utils/atoms/google-drive-sync'
 import { lastSyncTimeAtom } from '@/utils/atoms/last-sync-time'
 import { clearAccessToken } from '@/utils/google-drive/auth'
-import { ConfigConflictError, syncConfig, SyncMetadataCorruptedError } from '@/utils/google-drive/sync'
+import { ConfigConflictOrNotValidError, syncConfig, SyncMetadataCorruptedError } from '@/utils/google-drive/sync'
 import { logger } from '@/utils/logger'
 import { ConfigCard } from '../../../components/config-card'
 import { ConflictResolutionDialog } from './components/conflict-resolution-dialog'
@@ -30,7 +30,7 @@ export function GoogleDriveSyncCard() {
       toast.success(i18n.t('options.config.sync.googleDrive.syncSuccess'))
     }
     catch (error) {
-      if (error instanceof ConfigConflictError) {
+      if (error instanceof ConfigConflictOrNotValidError) {
         logger.info('Conflict detected, opening resolution dialog')
         setConflictData(error.data)
         setIsOpen(true)

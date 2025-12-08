@@ -8,11 +8,13 @@ import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from './translation-node-style'
 import { DEFAULT_TTS_CONFIG } from './tts'
 
 export const CONFIG_STORAGE_KEY = 'config'
-export const CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
-export const LAST_SYNC_TIME_STORAGE_KEY = '__lastGoogleDriveSyncTime'
-export const LAST_SYNCED_CONFIG_STORAGE_KEY = '__lastSyncedConfig'
-export const LAST_SYNCED_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__lastSyncedConfigSchemaVersion'
+export const LAST_SYNCED_CONFIG_STORAGE_KEY = 'lastSyncedConfig'
 export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = '__googleDriveToken'
+
+// Legacy storage keys for migration only
+// TODO: Remove these after all users have migrated to v38+
+export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
+
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
 export const CONFIG_SCHEMA_VERSION = 37

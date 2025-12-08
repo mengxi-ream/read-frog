@@ -94,7 +94,7 @@ export async function runMigration(version: number, config: any): Promise<any> {
   return migrationFn(config)
 }
 
-export async function migrateConfig(originalConfig: Config, originalConfigSchemaVersion: number) {
+export async function migrateConfig(originalConfig: unknown, originalConfigSchemaVersion: number): Promise<Config> {
   if (originalConfigSchemaVersion > CONFIG_SCHEMA_VERSION) {
     throw new Error(i18n.t('options.config.sync.versionTooNew'))
   }

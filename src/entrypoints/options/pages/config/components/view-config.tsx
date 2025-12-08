@@ -5,7 +5,7 @@ import { Icon } from '@iconify/react'
 import { useState } from 'react'
 import { Button } from '@/components/shadcn/button'
 import { ScrollArea } from '@/components/shadcn/scroll-area'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 
 export function ViewConfig({ config, configSchemaVersion, size = 'default' }: { config: Config, configSchemaVersion?: number, size?: ButtonProps['size'] }) {
   const [isExpanded, setIsExpanded] = useState(false)
@@ -27,8 +27,8 @@ export function ViewConfig({ config, configSchemaVersion, size = 'default' }: { 
         <ScrollArea className="h-96 w-full rounded-lg border bg-muted mt-3">
           <pre className="text-xs p-4 whitespace-pre-wrap break-all overflow-wrap-anywhere">
             {JSON.stringify({
-              [CONFIG_SCHEMA_VERSION_STORAGE_KEY]: configSchemaVersion ?? CONFIG_SCHEMA_VERSION,
-              [CONFIG_STORAGE_KEY]: config,
+              schemaVersion: configSchemaVersion ?? CONFIG_SCHEMA_VERSION,
+              config,
             }, null, 2)}
           </pre>
         </ScrollArea>

@@ -26,7 +26,7 @@ import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
 import { addBackup, isSameAsLatestBackup, removeBackup } from '@/utils/backup/storage'
 import { migrateConfig } from '@/utils/config/migration'
 import { EXTENSION_VERSION } from '@/utils/constants/app'
-import { CONFIG_SCHEMA_VERSION, CONFIG_SCHEMA_VERSION_STORAGE_KEY, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 import { queryClient } from '@/utils/tanstack-query'
 import { ViewConfig } from '../../components/view-config'
 
@@ -54,7 +54,7 @@ export function BackupConfigItem({ backupId, backupMetadata, backup }: BackupCon
           <span>
             {i18n.t('options.config.backup.item.schemaVersion')}
             {' '}
-            {backup[CONFIG_SCHEMA_VERSION_STORAGE_KEY]}
+            {backup.schemaVersion}
           </span>
         </ItemDescription>
       </ItemContent>
@@ -75,7 +75,7 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
 
   const { mutate: restoreBackup, isPending: isRestoring } = useMutation({
     mutationFn: async (backup: ConfigBackup) => {
-      const migratedBackup = await migrateConfig(backup[CONFIG_STORAGE_KEY], backup[CONFIG_SCHEMA_VERSION_STORAGE_KEY])
+      const migratedBackup = await migrateConfig(backup.config, backup.schemaVersion)
 
       const isSame = await isSameAsLatestBackup(currentConfig, CONFIG_SCHEMA_VERSION)
 
@@ -129,8 +129,8 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
   })
 
   const { mutate: exportConfig, isPending: isExporting } = useExportConfig({
-    config: backup[CONFIG_STORAGE_KEY],
-    schemaVersion: backup[CONFIG_SCHEMA_VERSION_STORAGE_KEY],
+    config: backup.config,
+    schemaVersion: backup.schemaVersion,
   })
 
   return (

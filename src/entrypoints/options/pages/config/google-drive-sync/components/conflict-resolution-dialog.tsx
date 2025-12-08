@@ -14,7 +14,9 @@ import {
   AlertDialogTitle,
 } from '@/components/shadcn/alert-dialog'
 import { Button } from '@/components/shadcn/button'
+import { useGoogleDriveAuth } from '@/hooks/use-google-drive-auth'
 import {
+  conflictDataAtom,
   conflictResolutionsAtom,
   conflictStatusAtom,
   diffResultAtom,
@@ -54,11 +56,15 @@ interface DialogContentProps {
 
 function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const [isConfirming, setIsConfirming] = useState(false)
+  const conflictData = useAtomValue(conflictDataAtom)
   const diffResult = useAtomValue(diffResultAtom)
   const resolutions = useAtomValue(conflictResolutionsAtom)
   const { resolved, total, allResolved } = useAtomValue(conflictStatusAtom)
   const selectAllLocal = useSetAtom(selectAllLocalAtom)
   const selectAllRemote = useSetAtom(selectAllRemoteAtom)
+  const { query: { data: authData } } = useGoogleDriveAuth()
+
+  const email = useMemo(() => authData?.userInfo?.email, [authData])
 
   const mergedConfig = useMemo(() => {
     if (!diffResult)
@@ -67,11 +73,11 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   }, [diffResult, resolutions])
 
   const handleConfirm = async () => {
-    if (!mergedConfig)
+    if (!mergedConfig || !conflictData || !email)
       return
     setIsConfirming(true)
     try {
-      await syncMergedConfig(mergedConfig)
+      await syncMergedConfig(mergedConfig, email)
       onResolved()
     }
     catch (error) {
