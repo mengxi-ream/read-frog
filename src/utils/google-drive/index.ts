@@ -8,11 +8,11 @@ export {
 } from './api'
 
 export {
-  authenticateGoogleDrive,
+  authenticateGoogleDriveAndSaveTokenToStorage as authenticateGoogleDrive,
   clearAccessToken,
   getValidAccessToken,
   type GoogleAuthToken,
-  isAuthenticated,
+  getIsAuthenticated as isAuthenticated,
 } from './auth'
 
 export {

@@ -7,20 +7,25 @@ const GOOGLE_CLIENT_ID = import.meta.env.WXT_GOOGLE_CLIENT_ID || 'YOUR_CLIENT_ID
 const GOOGLE_REDIRECT_URI = browser.identity.getRedirectURL()
 const GOOGLE_SCOPES = [
   'https://www.googleapis.com/auth/drive.appdata',
+  'https://www.googleapis.com/auth/userinfo.email',
 ]
 const TOKEN_EXPIRY_BUFFER_MS = 60000
-
-export interface GoogleAuthToken {
-  access_token: string
-  expires_at: number
-  token_type: string
-}
 
 const googleAuthTokenSchema = z.object({
   access_token: z.string(),
   expires_at: z.number(),
   token_type: z.string().default('Bearer'),
 })
+
+const googleUserInfoSchema = z.object({
+  id: z.string(),
+  email: z.email(),
+  verified_email: z.boolean(),
+  picture: z.url().optional(),
+})
+
+export type GoogleAuthToken = z.infer<typeof googleAuthTokenSchema>
+export type GoogleUserInfo = z.infer<typeof googleUserInfoSchema>
 
 /**
  * Get token from storage with validation
@@ -49,7 +54,7 @@ async function getTokenFromStorage(): Promise<GoogleAuthToken | null> {
 /**
  * Authenticate with Google Drive using OAuth 2.0
  */
-export async function authenticateGoogleDrive(): Promise<string> {
+export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<string> {
   try {
     const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
     authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID)
@@ -105,7 +110,7 @@ export async function getValidAccessToken(): Promise<string> {
 
     // Re-authenticate if token not found or expiring soon (within 1 minute)
     if (!tokenData || Date.now() >= tokenData.expires_at - TOKEN_EXPIRY_BUFFER_MS) {
-      return await authenticateGoogleDrive()
+      return await authenticateGoogleDriveAndSaveTokenToStorage()
     }
 
     // Trust local expiry check - validate only on API 401 errors
@@ -130,7 +135,7 @@ export async function clearAccessToken(): Promise<void> {
 /**
  * Check if user is authenticated with valid token
  */
-export async function isAuthenticated(): Promise<boolean> {
+export async function getIsAuthenticated(): Promise<boolean> {
   try {
     const tokenData = await getTokenFromStorage()
 
@@ -144,4 +149,27 @@ export async function isAuthenticated(): Promise<boolean> {
     logger.error('Failed to check authentication status', error)
     return false
   }
+}
+
+/**
+ * Fetch Google user info using access token
+ */
+export async function getGoogleUserInfo(accessToken: string): Promise<GoogleUserInfo> {
+  const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  })
+
+  if (!res.ok) {
+    throw new Error(`Failed to fetch user info: ${res.status}`)
+  }
+
+  const data = await res.json()
+  const parsed = googleUserInfoSchema.safeParse(data)
+
+  if (!parsed.success) {
+    logger.error('Invalid user info response', parsed.error)
+    throw new Error('Invalid user info response')
+  }
+
+  return parsed.data
 }

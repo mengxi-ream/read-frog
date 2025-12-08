@@ -1,12 +1,13 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/shadcn/button'
+import { useGoogleDriveAuth } from '@/hooks/use-google-drive-auth'
 import { conflictDataAtom, conflictResolutionsAtom } from '@/utils/atoms/google-drive-sync'
 import { lastSyncTimeAtom } from '@/utils/atoms/last-sync-time'
-import { clearAccessToken, isAuthenticated } from '@/utils/google-drive/auth'
+import { clearAccessToken } from '@/utils/google-drive/auth'
 import { ConfigConflictError, syncConfig, SyncMetadataCorruptedError } from '@/utils/google-drive/sync'
 import { logger } from '@/utils/logger'
 import { ConfigCard } from '../../../components/config-card'
@@ -15,26 +16,17 @@ import { ConflictResolutionDialog } from './components/conflict-resolution-dialo
 export function GoogleDriveSyncCard() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const { query: { data: authData }, invalidate: refreshAuthData } = useGoogleDriveAuth()
   const setConflictData = useSetAtom(conflictDataAtom)
   const setConflictResolutions = useSetAtom(conflictResolutionsAtom)
   const lastSyncTime = useAtomValue(lastSyncTimeAtom)
-
-  const checkAuthStatus = async () => {
-    const authenticated = await isAuthenticated()
-    setIsLoggedIn(authenticated)
-  }
-
-  useEffect(() => {
-    void checkAuthStatus()
-  }, [])
 
   const handleSync = async () => {
     setIsSyncing(true)
 
     try {
       await syncConfig()
-      await checkAuthStatus()
+      void refreshAuthData()
       toast.success(i18n.t('options.config.sync.googleDrive.syncSuccess'))
     }
     catch (error) {
@@ -59,7 +51,7 @@ export function GoogleDriveSyncCard() {
 
   const handleLogout = async () => {
     await clearAccessToken()
-    setIsLoggedIn(false)
+    void refreshAuthData()
     toast.success(i18n.t('options.config.sync.googleDrive.logoutSuccess'))
   }
 
@@ -84,30 +76,38 @@ export function GoogleDriveSyncCard() {
         title={i18n.t('options.config.sync.googleDrive.title')}
         description={i18n.t('options.config.sync.googleDrive.description')}
       >
-        <div className="w-full flex flex-col items-end gap-2">
-          <div className="flex gap-2">
-            {isLoggedIn && (
+        <div className="w-full flex flex-col items-end gap-4">
+          <div className="flex flex-col gap-2 items-end">
+            <div className="flex gap-2">
+              <Button
+                onClick={handleSync}
+                disabled={isSyncing}
+              >
+                <Icon icon="logos:google-drive" className="size-4" />
+                {isSyncing
+                  ? i18n.t('options.config.sync.googleDrive.syncing')
+                  : i18n.t('options.config.sync.googleDrive.sync')}
+              </Button>
+            </div>
+            {lastSyncTime && (
+              <span className="text-xs text-muted-foreground">
+                {i18n.t('options.config.sync.googleDrive.lastSyncTime')}
+                :
+                {' '}
+                {formatLastSyncTime(lastSyncTime)}
+              </span>
+            )}
+          </div>
+          {authData?.isAuthenticated && authData.userInfo && (
+            <div className="flex items-center gap-2">
+              {authData.userInfo.picture && (
+                <img src={authData.userInfo.picture} alt="Google Account" className="size-5 border rounded-full" />
+              )}
+              <span className="text-sm text-muted-foreground">{authData.userInfo.email}</span>
               <Button variant="outline" onClick={handleLogout}>
                 {i18n.t('options.config.sync.googleDrive.logout')}
               </Button>
-            )}
-            <Button
-              onClick={handleSync}
-              disabled={isSyncing}
-            >
-              <Icon icon="logos:google-drive" className="size-4" />
-              {isSyncing
-                ? i18n.t('options.config.sync.googleDrive.syncing')
-                : i18n.t('options.config.sync.googleDrive.sync')}
-            </Button>
-          </div>
-          {lastSyncTime && (
-            <span className="text-xs text-muted-foreground">
-              {i18n.t('options.config.sync.googleDrive.lastSyncTime')}
-              :
-              {' '}
-              {formatLastSyncTime(lastSyncTime)}
-            </span>
+            </div>
           )}
         </div>
       </ConfigCard>

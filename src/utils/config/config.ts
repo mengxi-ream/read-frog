@@ -30,6 +30,11 @@ export async function getConfigFromStorage() {
   return parsedConfig.data
 }
 
+export async function setConfigToStorage(config: Config) {
+  await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, config)
+  await storage.setMeta(`local:${CONFIG_STORAGE_KEY}`, { modifiedAt: Date.now() })
+}
+
 export function isAnyAPIKeyForReadProviders(providersConfig: ProvidersConfig) {
   const readProvidersConfig = providersConfig.filter(isReadProviderConfig)
   return readProvidersConfig.some((providerConfig) => {
