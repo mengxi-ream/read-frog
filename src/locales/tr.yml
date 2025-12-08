@@ -363,15 +363,23 @@ options:
         collapse: Yapılandırmayı Daralt
       googleDrive:
         title: Google Drive Bulut Senkronizasyonu
-        description: Yapılandırmayı otomatik olarak Google Drive'a senkronize edin. Uzak daha yeniyse indirir, yerel daha yeniyse yükler
+        description: Uzak daha yeniyse indirir, yerel daha yeniyse yükler
         sync: Google Drive'a Senkronize Et
         syncing: Senkronize ediliyor...
-        syncSuccess: Senkronizasyon başarılı
+        syncSuccess:
+          uploaded: Yerel ayarlar buluta yüklendi
+          downloaded: Uzak ayarlar uygulandı
+          merged: Ayarlar otomatik birleştirildi
+          noChange: Zaten güncel
+          unresolved: Çakışmalar çözüldü ve senkronize edildi
         syncError: Senkronizasyon başarısız, lütfen tekrar deneyin
+        metadataCorrupted: Senkronizasyon meta verileri bozuk, uzak yapılandırma uygulandı
         lastSyncTime: Son senkronizasyon
-        conflict:
-          title: Yapılandırma Çakışması
-          description: Son senkronizasyondan bu yana hem yerel hem de uzak yapılandırmalar değiştirildi. Lütfen her çakışan alan için hangi sürümün tutulacağını seçin.
+        logout: Çıkış yap
+        logoutSuccess: Google hesabından çıkış yapıldı
+        unresolved:
+          title: Yapılandırma Senkronizasyon Çözümü
+          description: Yerel ve uzak yapılandırmalar farklı. Lütfen her alan için hangi sürümün tutulacağını seçin.
           resolved: Çözüldü
           unresolved: Çözülmedi
           localValue: Yerel Değer
@@ -381,15 +389,21 @@ options:
           useAllLocal: Tüm Yereli Kullan
           useAllRemote: Tüm Uzakı Kullan
           reset: Seçimi Sıfırla
-          progress: $1/$2 çakışma çözüldü
+          progress: $1/$2 değişiklik çözüldü
           confirm: Senkronizasyonu Onayla
           cancel: İptal
-          hasConflictInChildren: ⚠ Çakışmalar içeriyor
+          hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
           item: öğe
           items: öğe
-          conflictPrompt: '[Çakışma - Lütfen seçin]'
+          unresolvedPrompt: '[Çözülmedi - Lütfen seçin]'
           localLatest: En Son Yerel
           remoteLatest: En Son Uzak
+          localChanged: Yerel değişti
+          remoteChanged: Uzak değişti
+          configValid: Yapılandırma geçerli
+          configInvalid: Yapılandırma geçersiz
+          validationError: 'Birleştirilmiş yapılandırmada doğrulama hataları var. Düzeltmek için aşağıdaki farklılıkları ayarlayın:'
+          moreErrors: ...ve $1 hata daha
     backup:
       title: Yapılandırma Yedekleme
       description: Yapılandırma değiştirilirse otomatik yedeklemeler her saat oluşturulur. Önceki yapılandırmaları buradan geri yükleyebilirsiniz. (Maksimum $1 yedekleme)

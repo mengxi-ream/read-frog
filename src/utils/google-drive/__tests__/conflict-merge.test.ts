@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { configSchema } from '@/types/config/config'
-import { applyResolutions, detectConflicts } from '../conflict-merge'
+import { applyResolutions, detectChanges } from '../conflict-merge'
 
 // Test data factory
 const defaultProvidersConfig = [
@@ -96,41 +96,49 @@ describe('conflict-merge', () => {
     safeParseSpy.mockRestore()
   })
 
-  describe('detectConflicts', () => {
+  describe('detectChanges', () => {
     it('should detect no conflicts when all configs are identical', () => {
       const base = createMockConfig()
       const local = createMockConfig()
       const remote = createMockConfig()
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
+      expect(result.differences).toHaveLength(0)
+      expect(result.validationError).toBeNull()
       expect(result.merged).toEqual(base)
     })
 
-    it('should detect no conflict when only local changed', () => {
+    it('should detect difference when only local changed', () => {
       const base = createMockConfig()
       const local = createMockConfig({
         language: { ...base.language, targetCode: 'jpn' },
       })
       const remote = createMockConfig()
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
+      expect(result.differences.length).toBeGreaterThan(0)
+      expect(result.differences.find(d => d.path.join('.') === 'language.targetCode')).toBeDefined()
+      expect(result.validationError).toBeNull()
       expect(result.merged.language.targetCode).toBe('jpn')
     })
 
-    it('should detect no conflict when only remote changed', () => {
+    it('should detect difference when only remote changed', () => {
       const base = createMockConfig()
       const local = createMockConfig()
       const remote = createMockConfig({
         language: { ...base.language, targetCode: 'jpn' },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
+      expect(result.differences.length).toBeGreaterThan(0)
+      expect(result.differences.find(d => d.path.join('.') === 'language.targetCode')).toBeDefined()
+      expect(result.validationError).toBeNull()
       expect(result.merged.language.targetCode).toBe('jpn')
     })
 
@@ -143,7 +151,7 @@ describe('conflict-merge', () => {
         language: { ...base.language, targetCode: 'jpn' },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
       expect(result.merged.language.targetCode).toBe('jpn')
@@ -158,15 +166,17 @@ describe('conflict-merge', () => {
         language: { ...base.language, targetCode: 'kor' },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(1)
       expect(result.conflicts[0]).toEqual({
+        type: 'conflict',
         path: ['language', 'targetCode'],
         baseValue: 'cmn',
         localValue: 'jpn',
         remoteValue: 'kor',
       })
+      expect(result.validationError).toBeNull()
     })
 
     it('should detect multiple conflicts', () => {
@@ -180,7 +190,7 @@ describe('conflict-merge', () => {
         translate: { ...base.translate, batchQueueConfig: { ...base.translate.batchQueueConfig, maxCharactersPerBatch: 2000 } },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(2)
       expect(result.conflicts.find(c => c.path.join('.') === 'language.targetCode')).toBeDefined()
@@ -208,7 +218,7 @@ describe('conflict-merge', () => {
         },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(1)
       expect(result.conflicts[0].path).toEqual(['translate', 'page', 'autoTranslatePatterns'])
@@ -235,7 +245,7 @@ describe('conflict-merge', () => {
         },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts.length).toBeGreaterThan(0)
       expect(result.conflicts.find(c => c.path.join('.') === 'translate.requestQueueConfig.capacity')).toBeDefined()
@@ -250,7 +260,7 @@ describe('conflict-merge', () => {
         translate: { ...base.translate, mode: 'translationOnly' },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
       expect(result.merged.language.targetCode).toBe('jpn')
@@ -274,7 +284,7 @@ describe('conflict-merge', () => {
         },
       })
 
-      const result = detectConflicts(base, local, remote)
+      const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
       expect(result.merged.language.targetCode).toBe('jpn')
@@ -296,14 +306,15 @@ describe('conflict-merge', () => {
         language: { ...base.language, targetCode: 'kor' },
       })
 
-      const diffResult = detectConflicts(base, local, remote)
+      const diffResult = detectChanges(base, local, remote)
       const resolutions = {
         'language.targetCode': 'local' as const,
       }
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.language.targetCode).toBe('jpn')
+      expect(result.config?.language.targetCode).toBe('jpn')
+      expect(result.validationError).toBeNull()
     })
 
     it('should apply remote resolution', () => {
@@ -315,14 +326,15 @@ describe('conflict-merge', () => {
         language: { ...base.language, targetCode: 'kor' },
       })
 
-      const diffResult = detectConflicts(base, local, remote)
+      const diffResult = detectChanges(base, local, remote)
       const resolutions = {
         'language.targetCode': 'remote' as const,
       }
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.language.targetCode).toBe('kor')
+      expect(result.config?.language.targetCode).toBe('kor')
+      expect(result.validationError).toBeNull()
     })
 
     it('should apply multiple resolutions', () => {
@@ -336,7 +348,7 @@ describe('conflict-merge', () => {
         translate: { ...base.translate, batchQueueConfig: { ...base.translate.batchQueueConfig, maxCharactersPerBatch: 2000 } },
       })
 
-      const diffResult = detectConflicts(base, local, remote)
+      const diffResult = detectChanges(base, local, remote)
       const resolutions = {
         'language.targetCode': 'local' as const,
         'translate.batchQueueConfig.maxCharactersPerBatch': 'remote' as const,
@@ -344,8 +356,9 @@ describe('conflict-merge', () => {
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.language.targetCode).toBe('jpn')
-      expect(result.translate.batchQueueConfig.maxCharactersPerBatch).toBe(2000)
+      expect(result.config?.language.targetCode).toBe('jpn')
+      expect(result.config?.translate.batchQueueConfig.maxCharactersPerBatch).toBe(2000)
+      expect(result.validationError).toBeNull()
     })
 
     it('should preserve non-conflicting merged values', () => {
@@ -357,15 +370,16 @@ describe('conflict-merge', () => {
         language: { ...base.language, targetCode: 'kor' },
       })
 
-      const diffResult = detectConflicts(base, local, remote)
+      const diffResult = detectChanges(base, local, remote)
       const resolutions = {
         'language.targetCode': 'remote' as const,
       }
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.language.targetCode).toBe('kor')
-      expect(result.language.level).toBe('advanced') // Non-conflicting change preserved
+      expect(result.config?.language.targetCode).toBe('kor')
+      expect(result.config?.language.level).toBe('advanced') // Non-conflicting change preserved
+      expect(result.validationError).toBeNull()
     })
 
     it('should preserve local value when conflict is unresolved', () => {
@@ -377,13 +391,14 @@ describe('conflict-merge', () => {
         language: { ...base.language, targetCode: 'kor' },
       })
 
-      const diffResult = detectConflicts(base, local, remote)
+      const diffResult = detectChanges(base, local, remote)
       const resolutions = {} // No resolution provided
 
       const result = applyResolutions(diffResult, resolutions)
 
       // Should preserve local value (default behavior in detectConflicts)
-      expect(result.language.targetCode).toBe('jpn')
+      expect(result.config?.language.targetCode).toBe('jpn')
+      expect(result.validationError).toBeNull()
     })
   })
 })

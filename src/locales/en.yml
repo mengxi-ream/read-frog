@@ -363,18 +363,23 @@ options:
         collapse: Collapse Config
       googleDrive:
         title: Google Drive Cloud Sync
-        description: Automatically sync configuration to Google Drive. Downloads when remote is newer, uploads when local is newer
+        description: Downloads config when remote is newer, uploads config when local is newer
         sync: Sync to Google Drive
         syncing: Syncing...
-        syncSuccess: Sync successful
+        syncSuccess:
+          uploaded: Local config uploaded to cloud
+          downloaded: Remote config applied
+          merged: Configs auto-merged successfully
+          noChange: Already in sync
+          unresolved: Conflicts resolved and synced
         syncError: Sync failed, please try again
         metadataCorrupted: Sync metadata corrupted, remote config applied
         lastSyncTime: Last sync at
         logout: Logout
         logoutSuccess: Logged out from Google account
-        conflict:
-          title: Configuration Conflict
-          description: Both local and remote configurations have been modified since the last sync. Please choose which version to keep for each conflicting field.
+        unresolved:
+          title: Configuration Sync Resolution
+          description: Local and remote configurations differ. Please choose which version to keep for each field.
           resolved: Resolved
           unresolved: Unresolved
           localValue: Local Value
@@ -384,15 +389,21 @@ options:
           useAllLocal: Use All Local
           useAllRemote: Use All Remote
           reset: Reset Selection
-          progress: Resolved $1/$2 conflicts
+          progress: Resolved $1/$2 changes
           confirm: Confirm Sync
           cancel: Cancel
-          hasConflictInChildren: ⚠ Contains conflicts
+          hasUnresolvedInChildren: ⚠ Contains unresolved changes
           item: item
           items: items
-          conflictPrompt: '[Conflict - Please select]'
+          unresolvedPrompt: '[Unresolved - Please select]'
           localLatest: Local Latest
           remoteLatest: Remote Latest
+          localChanged: Local changed
+          remoteChanged: Remote changed
+          configValid: Config is valid
+          configInvalid: Config is invalid
+          validationError: 'The merged config has validation errors. Adjust the differences below to fix:'
+          moreErrors: ...and $1 more errors
     backup:
       title: Config Backup
       description: Automatic backups are created every hour if the config is changed. You can restore previous configurations here. (Maximum $1 backups)

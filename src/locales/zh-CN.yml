@@ -362,17 +362,23 @@ options:
         collapse: 收起配置
       googleDrive:
         title: Google Drive 云端同步
-        description: 自动同步配置到 Google Drive，远端配置较新时下载，本地配置较新时上传
+        description: 远端配置较新时下载，本地配置较新时上传
         sync: 同步到 Google Drive
         syncing: 同步中...
-        syncSuccess: 同步成功
+        syncSuccess:
+          uploaded: 本地配置已上传至云端
+          downloaded: 已应用远程配置
+          merged: 配置已自动合并
+          noChange: 已是最新状态
+          unresolved: 冲突已解决并同步至本地和云端
+        syncError: 同步失败，请重试
         metadataCorrupted: 同步数据损坏，已自动应用远端配置
         lastSyncTime: 最后同步时间
         logout: 登出账号
         logoutSuccess: 已登出 Google 账号
-        conflict:
-          title: 配置冲突
-          description: 检测到本地和云端都在上次同步后进行了修改，请选择每个冲突字段要保留的版本。
+        unresolved:
+          title: 配置同步解决
+          description: 本地与云端配置存在差异，请选择每个字段要保留的版本。
           resolved: 已解决
           unresolved: 未解决
           localValue: 本地值
@@ -382,16 +388,21 @@ options:
           useAllLocal: 全选本地
           useAllRemote: 全选远端
           reset: 撤销选择
-          progress: 已解决 $1/$2 个冲突
+          progress: 已解决 $1/$2 个更改
           confirm: 确认同步
           cancel: 取消
-          hasConflictInChildren: ⚠ 包含冲突
+          hasUnresolvedInChildren: ⚠ 包含待解决项
           item: 项
           items: 项
-          conflictPrompt: '[冲突 - 请选择]'
+          unresolvedPrompt: '[待解决 - 请选择]'
           localLatest: 本地最新
           remoteLatest: 远端最新
-        syncError: 同步失败，请重试
+          localChanged: 本地已更改
+          remoteChanged: 远端已更改
+          configValid: 配置有效
+          configInvalid: 配置无效
+          validationError: 合并后的配置存在验证错误。请调整下方差异以修复：
+          moreErrors: ...还有 $1 个错误
     backup:
       title: 配置备份
       description: 如果配置发生变化，每小时会自动创建备份。您可以在这里恢复之前的配置。（最多 $1 个备份）

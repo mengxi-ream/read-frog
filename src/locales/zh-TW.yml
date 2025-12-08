@@ -362,18 +362,23 @@ options:
         collapse: 收起設定
       googleDrive:
         title: Google Drive 雲端同步
-        description: 自動同步設定到 Google Drive，遠端設定較新時下載，本機設定較新時上傳
+        description: 遠端設定較新時下載，本機設定較新時上傳
         sync: 同步到 Google Drive
         syncing: 同步中...
-        syncSuccess: 同步成功
+        syncSuccess:
+          uploaded: 本機設定已上傳至雲端
+          downloaded: 已套用遠端設定
+          merged: 設定已自動合併
+          noChange: 已是最新狀態
+          unresolved: 衝突已解決並同步至本機和雲端
         syncError: 同步失敗，請重試
         metadataCorrupted: 同步資料損壞，已自動套用遠端設定
         lastSyncTime: 最後同步時間
         logout: 登出帳號
         logoutSuccess: 已登出 Google 帳號
-        conflict:
-          title: 配置衝突
-          description: 檢測到本地和雲端都在上次同步後進行了修改，請選擇每個衝突欄位要保留的版本。
+        unresolved:
+          title: 設定同步解決
+          description: 本地與雲端設定存在差異，請選擇每個欄位要保留的版本。
           resolved: 已解決
           unresolved: 未解決
           localValue: 本地值
@@ -383,15 +388,21 @@ options:
           useAllLocal: 全選本地
           useAllRemote: 全選遠端
           reset: 撤銷選擇
-          progress: 已解決 $1/$2 個衝突
+          progress: 已解決 $1/$2 個更改
           confirm: 確認同步
           cancel: 取消
-          hasConflictInChildren: ⚠ 包含衝突
+          hasUnresolvedInChildren: ⚠ 包含待解決項
           item: 項
           items: 項
-          conflictPrompt: '[衝突 - 請選擇]'
+          unresolvedPrompt: '[待解決 - 請選擇]'
           localLatest: 本地最新
           remoteLatest: 遠端最新
+          localChanged: 本地已變更
+          remoteChanged: 遠端已變更
+          configValid: 設定有效
+          configInvalid: 設定無效
+          validationError: 合併後的設定存在驗證錯誤。請調整下方差異以修復：
+          moreErrors: ...還有 $1 個錯誤
     backup:
       title: 設定備份
       description: 如果設定發生變化，每小時會自動建立備份。您可以在這裡還原之前的設定。（最多 $1 個備份）

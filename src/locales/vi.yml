@@ -363,15 +363,23 @@ options:
         collapse: Thu gọn cấu hình
       googleDrive:
         title: Đồng bộ đám mây Google Drive
-        description: Tự động đồng bộ cấu hình với Google Drive. Tải xuống khi bản từ xa mới hơn, tải lên khi bản cục bộ mới hơn
+        description: Tải xuống khi bản từ xa mới hơn, tải lên khi bản cục bộ mới hơn
         sync: Đồng bộ với Google Drive
         syncing: Đang đồng bộ...
-        syncSuccess: Đồng bộ thành công
+        syncSuccess:
+          uploaded: Đã tải cấu hình lên đám mây
+          downloaded: Đã áp dụng cấu hình từ xa
+          merged: Đã tự động hợp nhất cấu hình
+          noChange: Đã đồng bộ
+          unresolved: Đã giải quyết xung đột và đồng bộ
         syncError: Đồng bộ thất bại, vui lòng thử lại
+        metadataCorrupted: Siêu dữ liệu đồng bộ bị hỏng, đã áp dụng cấu hình từ xa
         lastSyncTime: Đồng bộ lần cuối lúc
-        conflict:
-          title: Xung đột cấu hình
-          description: Cả cấu hình cục bộ và từ xa đều đã được sửa đổi kể từ lần đồng bộ cuối. Vui lòng chọn phiên bản nào để giữ cho mỗi trường xung đột.
+        logout: Đăng xuất
+        logoutSuccess: Đã đăng xuất khỏi tài khoản Google
+        unresolved:
+          title: Giải quyết đồng bộ cấu hình
+          description: Cấu hình cục bộ và từ xa khác nhau. Vui lòng chọn phiên bản nào để giữ cho mỗi trường.
           resolved: Đã giải quyết
           unresolved: Chưa giải quyết
           localValue: Giá trị cục bộ
@@ -381,15 +389,21 @@ options:
           useAllLocal: Dùng tất cả cục bộ
           useAllRemote: Dùng tất cả từ xa
           reset: Đặt lại lựa chọn
-          progress: Đã giải quyết $1/$2 xung đột
+          progress: Đã giải quyết $1/$2 thay đổi
           confirm: Xác nhận đồng bộ
           cancel: Hủy
-          hasConflictInChildren: ⚠ Chứa xung đột
+          hasUnresolvedInChildren: ⚠ Chứa thay đổi chưa giải quyết
           item: mục
           items: mục
-          conflictPrompt: '[Xung đột - Vui lòng chọn]'
+          unresolvedPrompt: '[Chưa giải quyết - Vui lòng chọn]'
           localLatest: Cục bộ mới nhất
           remoteLatest: Từ xa mới nhất
+          localChanged: Cục bộ đã thay đổi
+          remoteChanged: Từ xa đã thay đổi
+          configValid: Cấu hình hợp lệ
+          configInvalid: Cấu hình không hợp lệ
+          validationError: 'Cấu hình đã hợp nhất có lỗi xác thực. Điều chỉnh các khác biệt bên dưới để sửa:'
+          moreErrors: ...và $1 lỗi nữa
     backup:
       title: Sao lưu cấu hình
       description: Các bản sao lưu tự động được tạo mỗi giờ nếu cấu hình thay đổi. Bạn có thể khôi phục các cấu hình trước đó tại đây. (Tối đa $1 bản sao lưu)

@@ -16,29 +16,27 @@ import {
 import { Button } from '@/components/shadcn/button'
 import { useGoogleDriveAuth } from '@/hooks/use-google-drive-auth'
 import {
-  conflictDataAtom,
-  conflictResolutionsAtom,
-  conflictStatusAtom,
-  diffResultAtom,
+  resolutionStatusAtom,
+  resolvedConfigAtom,
   selectAllLocalAtom,
   selectAllRemoteAtom,
+  unresolvedDataAtom,
 } from '@/utils/atoms/google-drive-sync'
-import { applyResolutions } from '@/utils/google-drive/conflict-merge'
 import { syncMergedConfig } from '@/utils/google-drive/sync'
 import { logger } from '@/utils/logger'
 import { JsonTreeView } from './json-tree-view'
 
-interface ConflictResolutionDialogProps {
+interface UnresolvedDialogProps {
   open: boolean
   onResolved: () => void
   onCancelled: () => void
 }
 
-export function ConflictResolutionDialog({
+export function UnresolvedDialog({
   open,
   onResolved,
   onCancelled,
-}: ConflictResolutionDialogProps) {
+}: UnresolvedDialogProps) {
   return (
     <AlertDialog open={open}>
       <DialogContent
@@ -56,28 +54,21 @@ interface DialogContentProps {
 
 function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const [isConfirming, setIsConfirming] = useState(false)
-  const conflictData = useAtomValue(conflictDataAtom)
-  const diffResult = useAtomValue(diffResultAtom)
-  const resolutions = useAtomValue(conflictResolutionsAtom)
-  const { resolved, total, allResolved } = useAtomValue(conflictStatusAtom)
+  const unresolvedData = useAtomValue(unresolvedDataAtom)
+  const resolvedConfig = useAtomValue(resolvedConfigAtom)
+  const status = useAtomValue(resolutionStatusAtom)
   const selectAllLocal = useSetAtom(selectAllLocalAtom)
   const selectAllRemote = useSetAtom(selectAllRemoteAtom)
   const { query: { data: authData } } = useGoogleDriveAuth()
 
   const email = useMemo(() => authData?.userInfo?.email, [authData])
 
-  const mergedConfig = useMemo(() => {
-    if (!diffResult)
-      return null
-    return applyResolutions(diffResult, resolutions)
-  }, [diffResult, resolutions])
-
   const handleConfirm = async () => {
-    if (!mergedConfig || !conflictData || !email)
+    if (!resolvedConfig?.config || !unresolvedData || !email)
       return
     setIsConfirming(true)
     try {
-      await syncMergedConfig(mergedConfig, email)
+      await syncMergedConfig(resolvedConfig.config, email)
       onResolved()
     }
     catch (error) {
@@ -94,21 +85,45 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
     onCancelled()
   }
 
+  const canConfirm = status.isValid && !isConfirming
+
   return (
     <AlertDialogContent className="md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] flex flex-col">
       <AlertDialogHeader>
         <AlertDialogTitle className="flex items-center gap-2">
           <Icon icon="mdi:alert" className="size-5 text-yellow-500" />
-          {i18n.t('options.config.sync.googleDrive.conflict.title')}
+          {i18n.t('options.config.sync.googleDrive.unresolved.title')}
         </AlertDialogTitle>
         <AlertDialogDescription className="flex items-center justify-between">
-          <span>{i18n.t('options.config.sync.googleDrive.conflict.description')}</span>
+          <span>{i18n.t('options.config.sync.googleDrive.unresolved.description')}</span>
         </AlertDialogDescription>
       </AlertDialogHeader>
-      <div className="flex items-center justify-between">
-        <span className="text-xs">
-          {i18n.t('options.config.sync.googleDrive.conflict.progress', [resolved, total])}
-        </span>
+
+      {/* Status bar */}
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-4 text-xs">
+          {status.conflictCount > 0 && (
+            <span>
+              {i18n.t('options.config.sync.googleDrive.unresolved.progress', [
+                status.conflictResolved ? status.conflictCount : status.resolvedCount,
+                status.conflictCount,
+              ])}
+            </span>
+          )}
+          {status.hasValidationError
+            ? (
+                <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                  <Icon icon="mdi:alert-circle" className="size-4" />
+                  {i18n.t('options.config.sync.googleDrive.unresolved.configInvalid')}
+                </span>
+              )
+            : (
+                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                  <Icon icon="mdi:check-circle" className="size-4" />
+                  {i18n.t('options.config.sync.googleDrive.unresolved.configValid')}
+                </span>
+              )}
+        </div>
         <div className="flex gap-2">
           <Button
             size="sm"
@@ -117,7 +132,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             disabled={isConfirming}
           >
             <Icon icon="mdi:check-all" className="size-4 mr-1 text-green-600 dark:text-green-400" />
-            {i18n.t('options.config.sync.googleDrive.conflict.useAllLocal')}
+            {i18n.t('options.config.sync.googleDrive.unresolved.useAllLocal')}
           </Button>
           <Button
             size="sm"
@@ -126,23 +141,53 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             disabled={isConfirming}
           >
             <Icon icon="mdi:check-all" className="size-4 mr-1 text-blue-600 dark:text-blue-400" />
-            {i18n.t('options.config.sync.googleDrive.conflict.useAllRemote')}
+            {i18n.t('options.config.sync.googleDrive.unresolved.useAllRemote')}
           </Button>
         </div>
       </div>
 
+      {/* Validation error display */}
+      {status.validationError && (
+        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-xs">
+          <div className="flex items-start gap-2">
+            <Icon icon="mdi:alert-circle" className="size-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="font-medium text-red-800 dark:text-red-200">
+                {i18n.t('options.config.sync.googleDrive.unresolved.validationError')}
+              </p>
+              <ul className="mt-1 text-red-700 dark:text-red-300 list-disc list-inside">
+                {status.validationError.issues.slice(0, 5).map(issue => (
+                  <li key={`${issue.path.join('.')}-${issue.message}`}>
+                    <code className="text-xs">{issue.path.join('.')}</code>
+                    {': '}
+                    {issue.message}
+                  </li>
+                ))}
+                {status.validationError.issues.length > 5 && (
+                  <li>
+                    {i18n.t('options.config.sync.googleDrive.unresolved.moreErrors', [
+                      status.validationError.issues.length - 5,
+                    ])}
+                  </li>
+                )}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex-1 overflow-scroll">
-        {mergedConfig && (
-          <MergedConfigView mergedConfig={mergedConfig} />
+        {resolvedConfig?.config && (
+          <MergedConfigView mergedConfig={resolvedConfig.config} />
         )}
       </div>
 
       <AlertDialogFooter>
         <AlertDialogCancel disabled={isConfirming} onClick={handleCancel}>
-          {i18n.t('options.config.sync.googleDrive.conflict.cancel')}
+          {i18n.t('options.config.sync.googleDrive.unresolved.cancel')}
         </AlertDialogCancel>
         <AlertDialogAction
-          disabled={!allResolved || isConfirming}
+          disabled={!canConfirm}
           onClick={(e) => {
             e.preventDefault()
             void handleConfirm()
@@ -150,7 +195,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
         >
           {isConfirming
             ? i18n.t('options.config.sync.googleDrive.syncing')
-            : i18n.t('options.config.sync.googleDrive.conflict.confirm')}
+            : i18n.t('options.config.sync.googleDrive.unresolved.confirm')}
         </AlertDialogAction>
       </AlertDialogFooter>
     </AlertDialogContent>
@@ -167,16 +212,16 @@ function MergedConfigView({ mergedConfig }: MergedConfigViewProps) {
       <div className="px-4 py-2 flex items-center gap-4 text-xs border-b border-slate-200 dark:border-slate-700">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-yellow-500" />
-          <span className="text-slate-700 dark:text-slate-300">{i18n.t('options.config.sync.googleDrive.conflict.title')}</span>
+          <span className="text-slate-700 dark:text-slate-300">{i18n.t('options.config.sync.googleDrive.unresolved.title')}</span>
         </div>
         <div className="flex items-center gap-4 ml-auto text-slate-600 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
-            <span>{i18n.t('options.config.sync.googleDrive.conflict.localValue')}</span>
+            <span>{i18n.t('options.config.sync.googleDrive.unresolved.localValue')}</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-blue-500" />
-            <span>{i18n.t('options.config.sync.googleDrive.conflict.remoteValue')}</span>
+            <span>{i18n.t('options.config.sync.googleDrive.unresolved.remoteValue')}</span>
           </div>
         </div>
       </div>

@@ -362,18 +362,23 @@ options:
         collapse: 설정 접기
       googleDrive:
         title: Google Drive 클라우드 동기화
-        description: 설정을 Google Drive에 자동 동기화합니다. 원격이 최신일 때는 다운로드, 로컬이 최신일 때는 업로드합니다
+        description: 원격이 최신이면 다운로드, 로컬이 최신이면 업로드
         sync: Google Drive 동기화
         syncing: 동기화 중...
-        syncSuccess: 동기화 완료
+        syncSuccess:
+          uploaded: 로컬 설정이 클라우드에 업로드됨
+          downloaded: 원격 설정이 적용됨
+          merged: 설정이 자동 병합됨
+          noChange: 이미 동기화됨
+          unresolved: 충돌이 해결되고 로컬 및 클라우드에 동기화됨
         syncError: 동기화 실패, 다시 시도해 주세요
         metadataCorrupted: 동기화 메타데이터가 손상되어 원격 구성을 적용했습니다
         lastSyncTime: 마지막 동기화 시간
         logout: 로그아웃
         logoutSuccess: Google 계정에서 로그아웃되었습니다
-        conflict:
-          title: 구성 충돌
-          description: 마지막 동기화 이후 로컬 및 원격 구성이 모두 수정되었습니다. 충돌하는 각 필드에 대해 유지할 버전을 선택하세요.
+        unresolved:
+          title: 구성 동기화 해결
+          description: 로컬 및 원격 구성이 다릅니다. 각 필드에 대해 유지할 버전을 선택하세요.
           resolved: 해결됨
           unresolved: 미해결
           localValue: 로컬 값
@@ -383,15 +388,21 @@ options:
           useAllLocal: 모두 로컬 사용
           useAllRemote: 모두 원격 사용
           reset: 선택 재설정
-          progress: $1/$2개의 충돌 해결됨
+          progress: $1/$2개의 변경 해결됨
           confirm: 동기화 확인
           cancel: 취소
-          hasConflictInChildren: ⚠ 충돌 포함
+          hasUnresolvedInChildren: ⚠ 미해결 변경 포함
           item: 항목
           items: 항목
-          conflictPrompt: '[충돌 - 선택하세요]'
+          unresolvedPrompt: '[미해결 - 선택하세요]'
           localLatest: 로컬 최신
           remoteLatest: 원격 최신
+          localChanged: 로컬이 변경됨
+          remoteChanged: 원격이 변경됨
+          configValid: 구성이 유효합니다
+          configInvalid: 구성이 유효하지 않습니다
+          validationError: '병합된 구성에 유효성 검사 오류가 있습니다. 아래 차이점을 조정하여 수정하세요:'
+          moreErrors: ...그리고 $1개의 오류가 더 있습니다
     backup:
       title: 설정 백업
       description: 설정이 변경되면 매시간 자동으로 백업이 생성됩니다. 여기에서 이전 설정을 복원할 수 있습니다. (최대 $1개 백업)

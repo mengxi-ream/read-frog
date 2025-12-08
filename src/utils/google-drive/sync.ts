@@ -1,3 +1,4 @@
+import type { UnresolvedData } from '../atoms/google-drive-sync'
 import type { Config } from '@/types/config/config'
 import type { ConfigMeta, ConfigValueAndMeta, LastSyncedConfigMeta, LastSyncedConfigMetaFields, LastSyncedConfigValueAndMeta } from '@/types/config/meta'
 import { storage } from '#imports'
@@ -8,31 +9,16 @@ import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_K
 import { logger } from '../logger'
 import { downloadFile, findFileInAppData, uploadFile } from './api'
 import { getGoogleUserInfo, getValidAccessToken } from './auth'
-import { detectConflicts } from './conflict-merge'
+import { detectChanges } from './conflict-merge'
 
 const GOOGLE_DRIVE_CONFIG_FILENAME = 'read-frog-config.json'
 
-export interface ConflictData {
-  base: Config
-  local: Config
-  remote: Config
-}
+export type SyncAction = 'uploaded' | 'downloaded' | 'merged' | 'no-change'
 
-export class ConfigConflictOrNotValidError extends Error {
-  name = 'ConfigConflictOrNotValidError'
-
-  constructor(public data: ConflictData) {
-    super('Config sync conflict or not valid')
-  }
-}
-
-export class SyncMetadataCorruptedError extends Error {
-  name = 'SyncMetadataCorruptedError'
-
-  constructor(public appliedConfig: Config) {
-    super('Sync metadata corrupted, applied remote config')
-  }
-}
+export type SyncResult
+  = | { status: 'success', action: SyncAction }
+    | { status: 'unresolved', data: UnresolvedData }
+    | { status: 'error', error: Error }
 
 async function getLocalConfigAndMeta(): Promise<ConfigValueAndMeta> {
   try {
@@ -217,7 +203,7 @@ export async function syncMergedConfig(mergedConfig: Config, email: string): Pro
   }
 }
 
-export async function syncConfig(): Promise<void> {
+export async function syncConfig(): Promise<SyncResult> {
   try {
     const localConfigValueAndMeta = await getLocalConfigAndMeta()
     const lastSyncedConfigValueAndMeta = await getLastSyncedConfigAndMeta()
@@ -231,6 +217,7 @@ export async function syncConfig(): Promise<void> {
           value: remoteConfigValueAndMeta.value,
           meta: { ...remoteConfigValueAndMeta.meta, email, lastSyncedAt: Date.now() },
         })
+        return { status: 'success', action: 'downloaded' }
       }
       else {
         logger.info('No remote config found, uploading local config')
@@ -239,8 +226,8 @@ export async function syncConfig(): Promise<void> {
           value: localConfigValueAndMeta.value,
           meta: { ...localConfigValueAndMeta.meta, email, lastSyncedAt: Date.now() },
         })
+        return { status: 'success', action: 'uploaded' }
       }
-      return
     }
 
     // Check if both local and remote changed since last sync
@@ -250,7 +237,7 @@ export async function syncConfig(): Promise<void> {
     if (localChangedSinceSync && remoteChangedSinceSync) {
       logger.info('Both local and remote changed since last sync, checking for conflicts')
 
-      const { conflicts, merged } = detectConflicts(
+      const { conflicts, merged } = detectChanges(
         lastSyncedConfigValueAndMeta.value,
         localConfigValueAndMeta.value,
         remoteConfigValueAndMeta.value,
@@ -277,18 +264,20 @@ export async function syncConfig(): Promise<void> {
         })
 
         logger.info('Auto-merge completed successfully')
-        return
+        return { status: 'success', action: 'merged' }
       }
 
-      // Conflicts detected, throw error for UI to handle
+      // Conflicts detected, return conflict for UI to handle
       logger.warn(`Conflicts detected: ${conflicts.length} conflicting fields`)
 
-      // TODO: throw more about validation errors
-      throw new ConfigConflictOrNotValidError({
-        base: lastSyncedConfigValueAndMeta.value,
-        local: localConfigValueAndMeta.value,
-        remote: remoteConfigValueAndMeta.value,
-      })
+      return {
+        status: 'unresolved',
+        data: {
+          base: lastSyncedConfigValueAndMeta.value,
+          local: localConfigValueAndMeta.value,
+          remote: remoteConfigValueAndMeta.value,
+        },
+      }
     }
     else if (localChangedSinceSync) {
       logger.info('Local config is newer, uploading local config')
@@ -297,6 +286,7 @@ export async function syncConfig(): Promise<void> {
         value: localConfigValueAndMeta.value,
         meta: { ...localConfigValueAndMeta.meta, email, lastSyncedAt: Date.now() },
       })
+      return { status: 'success', action: 'uploaded' }
     }
     else if (remoteChangedSinceSync) {
       logger.info('Remote config is newer, downloading remote config')
@@ -305,6 +295,7 @@ export async function syncConfig(): Promise<void> {
         value: remoteConfigValueAndMeta.value,
         meta: { ...remoteConfigValueAndMeta.meta, email, lastSyncedAt: Date.now() },
       })
+      return { status: 'success', action: 'downloaded' }
     }
     else {
       logger.info('No changes, skipping sync')
@@ -312,10 +303,14 @@ export async function syncConfig(): Promise<void> {
         value: localConfigValueAndMeta.value,
         meta: { ...localConfigValueAndMeta.meta, email, lastSyncedAt: Date.now() },
       })
+      return { status: 'success', action: 'no-change' }
     }
   }
   catch (error) {
     logger.error('Config sync failed', error)
-    throw error
+    return {
+      status: 'error',
+      error: error instanceof Error ? error : new Error(String(error)),
+    }
   }
 }

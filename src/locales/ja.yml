@@ -361,18 +361,23 @@ options:
         collapse: 設定を折りたたむ
       googleDrive:
         title: Google Driveクラウド同期
-        description: 設定をGoogle Driveに自動同期します。リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロードします
+        description: リモートが新しい場合はダウンロード、ローカルが新しい場合はアップロード
         sync: Google Driveに同期
         syncing: 同期中...
-        syncSuccess: 同期が完了しました
+        syncSuccess:
+          uploaded: ローカル設定をクラウドにアップロードしました
+          downloaded: リモート設定を適用しました
+          merged: 設定を自動マージしました
+          noChange: 既に同期済みです
+          unresolved: 競合を解決し、ローカルとクラウドに同期しました
         syncError: 同期に失敗しました。もう一度お試しください
         metadataCorrupted: 同期メタデータが破損しています。リモート設定を適用しました
         lastSyncTime: 最終同期時間
         logout: ログアウト
         logoutSuccess: Googleアカウントからログアウトしました
-        conflict:
-          title: 設定の競合
-          description: 前回の同期以降、ローカルとリモートの両方の設定が変更されています。競合する各フィールドについて、保持するバージョンを選択してください。
+        unresolved:
+          title: 設定の同期解決
+          description: ローカルとリモートの設定が異なります。各フィールドについて、保持するバージョンを選択してください。
           resolved: 解決済み
           unresolved: 未解決
           localValue: ローカル値
@@ -382,15 +387,21 @@ options:
           useAllLocal: すべてローカルを使用
           useAllRemote: すべてリモートを使用
           reset: 選択をリセット
-          progress: $1/$2 個の競合を解決しました
+          progress: $1/$2 個の変更を解決しました
           confirm: 同期を確認
           cancel: キャンセル
-          hasConflictInChildren: ⚠ 競合を含む
+          hasUnresolvedInChildren: ⚠ 未解決の変更を含む
           item: 項目
           items: 項目
-          conflictPrompt: '[競合 - 選択してください]'
+          unresolvedPrompt: '[未解決 - 選択してください]'
           localLatest: ローカル最新
           remoteLatest: リモート最新
+          localChanged: ローカルが変更されました
+          remoteChanged: リモートが変更されました
+          configValid: 設定は有効です
+          configInvalid: 設定は無効です
+          validationError: マージされた設定に検証エラーがあります。以下の差異を調整して修正してください：
+          moreErrors: ...他 $1 件のエラー
     backup:
       title: 設定のバックアップ
       description: 設定が変更された場合、1時間ごとに自動的にバックアップが作成されます。以前の設定をここで復元できます。（最大 $1 個のバックアップ）
