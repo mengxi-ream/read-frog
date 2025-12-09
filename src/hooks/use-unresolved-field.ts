@@ -2,7 +2,7 @@ import type { FieldConflict } from '@/utils/google-drive/conflict-merge'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useMemo } from 'react'
 import {
-  diffResultAtom,
+  diffConflictsResultAtom,
   resetResolutionAtom,
   resolutionsAtom,
   selectResolutionAtom,
@@ -17,7 +17,7 @@ export interface UseConflictFieldResult {
 }
 
 export function useConflictField(pathKey: string): UseConflictFieldResult {
-  const diffResult = useAtomValue(diffResultAtom)
+  const diffResult = useAtomValue(diffConflictsResultAtom)
   const resolutions = useAtomValue(resolutionsAtom)
   const selectResolution = useSetAtom(selectResolutionAtom)
   const resetResolution = useSetAtom(resetResolutionAtom)

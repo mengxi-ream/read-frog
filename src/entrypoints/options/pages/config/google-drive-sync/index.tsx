@@ -5,7 +5,7 @@ import { Activity, useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/shadcn/button'
 import { useGoogleDriveAuth } from '@/hooks/use-google-drive-auth'
-import { resolutionsAtom, unresolvedDataAtom } from '@/utils/atoms/google-drive-sync'
+import { resolutionsAtom, unresolvedConfigsAtom } from '@/utils/atoms/google-drive-sync'
 import { lastSyncTimeAtom } from '@/utils/atoms/last-sync-time'
 import { clearAccessToken } from '@/utils/google-drive/auth'
 import { syncConfig } from '@/utils/google-drive/sync'
@@ -17,7 +17,7 @@ export function GoogleDriveSyncCard() {
   const [isSyncing, setIsSyncing] = useState(false)
   const [isOpen, setIsOpen] = useState(false)
   const { query: { data: authData }, invalidate: invalidateAuthData } = useGoogleDriveAuth()
-  const setUnresolvedData = useSetAtom(unresolvedDataAtom)
+  const setUnresolvedData = useSetAtom(unresolvedConfigsAtom)
   const setResolutions = useSetAtom(resolutionsAtom)
   const lastSyncTime = useAtomValue(lastSyncTimeAtom)
 
@@ -35,7 +35,7 @@ export function GoogleDriveSyncCard() {
       const messages = {
         'uploaded': i18n.t('options.config.sync.googleDrive.syncSuccess.uploaded'),
         'downloaded': i18n.t('options.config.sync.googleDrive.syncSuccess.downloaded'),
-        'merged': i18n.t('options.config.sync.googleDrive.syncSuccess.merged'),
+        'same-changes': i18n.t('options.config.sync.googleDrive.syncSuccess.sameChanges'),
         'no-change': i18n.t('options.config.sync.googleDrive.syncSuccess.noChange'),
       } as const
       toast.success(messages[result.action])
@@ -78,7 +78,7 @@ export function GoogleDriveSyncCard() {
         description={(
           <div className="flex flex-col gap-2">
             {i18n.t('options.config.sync.googleDrive.description')}
-            <Activity mode={authData ? 'visible' : 'hidden'}>
+            <Activity mode={authData?.isAuthenticated ? 'visible' : 'hidden'}>
               <div className="flex items-center gap-2 text-sm">
                 {authData?.userInfo?.picture && (
                   <img src={authData.userInfo.picture} alt="Google Account" className="size-5 border rounded-full" />
@@ -111,7 +111,7 @@ export function GoogleDriveSyncCard() {
               </span>
             </Activity>
           </div>
-          <Activity mode={authData ? 'visible' : 'hidden'}>
+          <Activity mode={authData?.isAuthenticated ? 'visible' : 'hidden'}>
             <Button variant="outline" onClick={handleLogout}>
               {i18n.t('options.config.sync.googleDrive.logout')}
             </Button>

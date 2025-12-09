@@ -11,21 +11,20 @@ export interface FieldConflict {
   remoteValue: unknown
 }
 
-export interface ChangeDiffResult {
-  merged: Config
+export interface DiffConflictsResult {
+  draft: Config // base + same-changes applied, conflicts keep base value
   conflicts: FieldConflict[]
-  validationError: ZodError | null
 }
 
 /**
  * Recursively detect changes between base, local, and remote configs
- * Returns merged config and list of conflicts
+ * Returns draft config (base + same-changes, conflicts keep base value) and list of conflicts
  */
-export function detectChanges(
+export function detectConflicts(
   base: Config,
   local: Config,
   remote: Config,
-): ChangeDiffResult {
+): DiffConflictsResult {
   const conflicts: FieldConflict[] = []
 
   const isAtomicValue = (val: unknown) =>
@@ -44,7 +43,7 @@ export function detectChanges(
 
       if (localChanged && remoteChanged) {
         if (dequal(localVal, remoteVal)) {
-          // Both changed to same value - no conflict
+          // Both changed to same value - auto apply
           return localVal
         }
         else {
@@ -55,8 +54,8 @@ export function detectChanges(
             localValue: localVal,
             remoteValue: remoteVal,
           })
-          // Default to local for now (will be resolved by user)
-          return localVal
+          // Keep base value until user resolves
+          return baseVal
         }
       }
       else if (localChanged) {
@@ -67,7 +66,8 @@ export function detectChanges(
           localValue: localVal,
           remoteValue: remoteVal,
         })
-        return localVal
+        // Keep base value until user resolves
+        return baseVal
       }
       else if (remoteChanged) {
         // Only remote changed - track as conflict for user to confirm
@@ -77,7 +77,8 @@ export function detectChanges(
           localValue: localVal,
           remoteValue: remoteVal,
         })
-        return remoteVal
+        // Keep base value until user resolves
+        return baseVal
       }
       else {
         // No change
@@ -105,23 +106,11 @@ export function detectChanges(
     return result
   }
 
-  const mergedResult = traverse([], base, local, remote)
-
-  const validatedMergedResult = configSchema.safeParse(mergedResult)
-  if (!validatedMergedResult.success) {
-    logger.error('Merged config is invalid', validatedMergedResult.error)
-    // Return with validation error instead of throwing
-    return {
-      merged: mergedResult as Config,
-      conflicts,
-      validationError: validatedMergedResult.error,
-    }
-  }
+  const draft = traverse([], base, local, remote)
 
   return {
-    merged: validatedMergedResult.data,
+    draft,
     conflicts,
-    validationError: null,
   }
 }
 
@@ -150,22 +139,24 @@ export interface ApplyResolutionsResult {
 }
 
 /**
- * Apply user resolutions to the merged config
+ * Apply user resolutions to the draft config
+ * All conflicts must have resolutions
  */
 export function applyResolutions(
-  diffResult: ChangeDiffResult,
+  diffConflictsResult: DiffConflictsResult,
   resolutions: Record<string, 'local' | 'remote'>,
 ): ApplyResolutionsResult {
-  // Deep clone the merged result to avoid mutating original
-  const result = structuredClone(diffResult.merged)
+  // Deep clone the draft result to avoid mutating original
+  const result = structuredClone(diffConflictsResult.draft)
 
   // Apply resolutions for conflicts
-  for (const conflict of diffResult.conflicts) {
+  for (const conflict of diffConflictsResult.conflicts) {
     const pathKey = conflict.path.join('.')
     const resolution = resolutions[pathKey]
 
     if (!resolution) {
-      // No resolution for conflict - keep merged value (defaults to appropriate side)
+      // All conflicts must be resolved
+      logger.error(`Missing resolution for conflict at path: ${pathKey}`)
       continue
     }
 
@@ -176,7 +167,7 @@ export function applyResolutions(
   if (!validatedResult.success) {
     logger.error('Resolved config is invalid', validatedResult.error)
     return {
-      config: result as Config,
+      config: result,
       validationError: validatedResult.error,
     }
   }

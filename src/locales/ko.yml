@@ -368,7 +368,7 @@ options:
         syncSuccess:
           uploaded: 로컬 설정이 클라우드에 업로드됨
           downloaded: 원격 설정이 적용됨
-          merged: 설정이 자동 병합됨
+          sameChanges: 로컬과 원격 변경 사항이 동일하여 동기화됨
           noChange: 이미 동기화됨
           unresolved: 충돌이 해결되고 로컬 및 클라우드에 동기화됨
         syncError: 동기화 실패, 다시 시도해 주세요

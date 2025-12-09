@@ -369,7 +369,7 @@ options:
         syncSuccess:
           uploaded: Local config uploaded to cloud
           downloaded: Remote config applied
-          merged: Configs auto-merged successfully
+          sameChanges: Same changes on both sides, synced
           noChange: Already in sync
           unresolved: Conflicts resolved and synced
         syncError: Sync failed, please try again

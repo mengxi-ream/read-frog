@@ -367,7 +367,7 @@ options:
         syncSuccess:
           uploaded: ローカル設定をクラウドにアップロードしました
           downloaded: リモート設定を適用しました
-          merged: 設定を自動マージしました
+          sameChanges: ローカルとリモートの変更が一致、同期しました
           noChange: 既に同期済みです
           unresolved: 競合を解決し、ローカルとクラウドに同期しました
         syncError: 同期に失敗しました。もう一度お試しください

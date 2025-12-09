@@ -6,7 +6,7 @@ import { useTree } from '@headless-tree/react'
 import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 import { Tree, TreeItem, TreeItemLabel } from '@/components/shadcn/tree'
-import { diffResultAtom } from '@/utils/atoms/google-drive-sync'
+import { diffConflictsResultAtom } from '@/utils/atoms/google-drive-sync'
 import { ConflictField } from './unresolved-field'
 import { formatValue } from './utils'
 
@@ -15,10 +15,6 @@ interface JsonNodeData {
   value: unknown
   pathKey: string
   isArrayItem: boolean
-}
-
-interface JsonTreeViewProps {
-  data: Config
 }
 
 function buildTreeData(data: Config): {
@@ -53,15 +49,15 @@ function buildTreeData(data: Config): {
   return { items, children }
 }
 
-export function JsonTreeView({ data }: JsonTreeViewProps) {
-  const diffResult = useAtomValue(diffResultAtom)
+export function JsonTreeView({ data }: { data: Config }) {
+  const diffConflictsResult = useAtomValue(diffConflictsResultAtom)
   const { items, children } = useMemo(() => buildTreeData(data), [data])
 
   const conflictPaths = useMemo(() => {
-    if (!diffResult)
+    if (!diffConflictsResult)
       return new Set<string>()
-    return new Set(diffResult.conflicts.map(c => c.path.join('.')))
-  }, [diffResult])
+    return new Set(diffConflictsResult.conflicts.map(c => c.path.join('.')))
+  }, [diffConflictsResult])
 
   // Expand all items that have conflicts when the component is mounted
   const initialExpandedItems = useMemo(() => {

@@ -20,7 +20,7 @@ import {
   resolvedConfigAtom,
   selectAllLocalAtom,
   selectAllRemoteAtom,
-  unresolvedDataAtom,
+  unresolvedConfigsAtom,
 } from '@/utils/atoms/google-drive-sync'
 import { syncMergedConfig } from '@/utils/google-drive/sync'
 import { logger } from '@/utils/logger'
@@ -54,7 +54,7 @@ interface DialogContentProps {
 
 function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const [isConfirming, setIsConfirming] = useState(false)
-  const unresolvedData = useAtomValue(unresolvedDataAtom)
+  const unresolvedConfigs = useAtomValue(unresolvedConfigsAtom)
   const resolvedConfig = useAtomValue(resolvedConfigAtom)
   const status = useAtomValue(resolutionStatusAtom)
   const selectAllLocal = useSetAtom(selectAllLocalAtom)
@@ -64,7 +64,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const email = useMemo(() => authData?.userInfo?.email, [authData])
 
   const handleConfirm = async () => {
-    if (!resolvedConfig?.config || !unresolvedData || !email)
+    if (!resolvedConfig?.config || !unresolvedConfigs || !email)
       return
     setIsConfirming(true)
     try {
@@ -180,7 +180,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
 
       <div className="flex-1 overflow-scroll">
         {resolvedConfig?.config && (
-          <MergedConfigView mergedConfig={resolvedConfig.config} />
+          <MergeConfigView mergedConfig={resolvedConfig.config} />
         )}
       </div>
 
@@ -208,7 +208,7 @@ interface MergedConfigViewProps {
   mergedConfig: Config
 }
 
-function MergedConfigView({ mergedConfig }: MergedConfigViewProps) {
+function MergeConfigView({ mergedConfig }: MergedConfigViewProps) {
   return (
     <div className="h-full rounded-lg overflow-hidden flex flex-col bg-slate-100 dark:bg-slate-900">
       <div className="px-4 py-2 flex items-center gap-4 text-xs border-b border-slate-200 dark:border-slate-700">

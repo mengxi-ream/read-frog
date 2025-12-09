@@ -368,7 +368,7 @@ options:
         syncSuccess:
           uploaded: 本地配置已上传至云端
           downloaded: 已应用远程配置
-          merged: 配置已自动合并
+          sameChanges: 本地和远程修改一致，已同步
           noChange: 已是最新状态
           unresolved: 冲突已解决并同步至本地和云端
         syncError: 同步失败，请重试

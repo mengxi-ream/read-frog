@@ -368,7 +368,7 @@ options:
         syncSuccess:
           uploaded: 本機設定已上傳至雲端
           downloaded: 已套用遠端設定
-          merged: 設定已自動合併
+          sameChanges: 本機和遠端修改一致，已同步
           noChange: 已是最新狀態
           unresolved: 衝突已解決並同步至本機和雲端
         syncError: 同步失敗，請重試

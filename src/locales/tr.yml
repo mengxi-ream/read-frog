@@ -369,7 +369,7 @@ options:
         syncSuccess:
           uploaded: Yerel ayarlar buluta yüklendi
           downloaded: Uzak ayarlar uygulandı
-          merged: Ayarlar otomatik birleştirildi
+          sameChanges: Yerel ve uzak değişiklikler aynı, senkronize edildi
           noChange: Zaten güncel
           unresolved: Çakışmalar çözüldü ve senkronize edildi
         syncError: Senkronizasyon başarısız, lütfen tekrar deneyin

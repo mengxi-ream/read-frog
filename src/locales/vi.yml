@@ -369,7 +369,7 @@ options:
         syncSuccess:
           uploaded: Đã tải cấu hình lên đám mây
           downloaded: Đã áp dụng cấu hình từ xa
-          merged: Đã tự động hợp nhất cấu hình
+          sameChanges: Thay đổi cục bộ và từ xa giống nhau, đã đồng bộ
           noChange: Đã đồng bộ
           unresolved: Đã giải quyết xung đột và đồng bộ
         syncError: Đồng bộ thất bại, vui lòng thử lại

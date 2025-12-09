@@ -1,7 +1,8 @@
-import type { UnresolvedData } from '../atoms/google-drive-sync'
+import type { UnresolvedConfigs } from '../atoms/google-drive-sync'
 import type { Config } from '@/types/config/config'
 import type { ConfigMeta, ConfigValueAndMeta, LastSyncedConfigMeta, LastSyncedConfigMetaFields, LastSyncedConfigValueAndMeta } from '@/types/config/meta'
 import { storage } from '#imports'
+import { dequal } from 'dequal'
 import { configSchema } from '@/types/config/config'
 import { setConfigToStorage } from '../config/config'
 import { migrateConfig } from '../config/migration'
@@ -9,15 +10,14 @@ import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, LAST_SYNCED_CONFIG_STORAGE_K
 import { logger } from '../logger'
 import { downloadFile, findFileInAppData, uploadFile } from './api'
 import { getGoogleUserInfo, getValidAccessToken } from './auth'
-import { detectChanges } from './conflict-merge'
 
 const GOOGLE_DRIVE_CONFIG_FILENAME = 'read-frog-config.json'
 
-export type SyncAction = 'uploaded' | 'downloaded' | 'merged' | 'no-change'
+export type SyncAction = 'uploaded' | 'downloaded' | 'same-changes' | 'no-change'
 
 export type SyncResult
   = | { status: 'success', action: SyncAction }
-    | { status: 'unresolved', data: UnresolvedData }
+    | { status: 'unresolved', data: UnresolvedConfigs }
     | { status: 'error', error: Error }
 
 async function getLocalConfigAndMeta(): Promise<ConfigValueAndMeta> {
@@ -237,22 +237,15 @@ export async function syncConfig(): Promise<SyncResult> {
     if (localChangedSinceSync && remoteChangedSinceSync) {
       logger.info('Both local and remote changed since last sync, checking for conflicts')
 
-      const { conflicts, merged } = detectChanges(
-        lastSyncedConfigValueAndMeta.value,
-        localConfigValueAndMeta.value,
-        remoteConfigValueAndMeta.value,
-      )
+      const sameLocalAndRemote = dequal(localConfigValueAndMeta.value, remoteConfigValueAndMeta.value)
 
-      const validatedMergedConfig = configSchema.safeParse(merged)
-
-      // even if there are no conflicts, there might still be some stricter validation errors, so we need to check that
-      if (conflicts.length === 0 && validatedMergedConfig.success) {
-        // No conflicts, auto-merge and sync
-        logger.info('No conflicts detected, auto-merging configurations')
+      if (sameLocalAndRemote) {
+        logger.info('Local and remote configurations are the same, no conflicts detected')
         const now = Date.now()
 
+        // if the schemaVersion is different, use local config's schemaVersion
         const mergedConfigValueAndMeta = {
-          value: validatedMergedConfig.data,
+          value: localConfigValueAndMeta.value,
           meta: { schemaVersion: CONFIG_SCHEMA_VERSION, lastModifiedAt: now },
         }
 
@@ -263,12 +256,8 @@ export async function syncConfig(): Promise<SyncResult> {
           meta: { ...mergedConfigValueAndMeta.meta, email, lastSyncedAt: now },
         })
 
-        logger.info('Auto-merge completed successfully')
-        return { status: 'success', action: 'merged' }
+        return { status: 'success', action: 'same-changes' }
       }
-
-      // Conflicts detected, return conflict for UI to handle
-      logger.warn(`Conflicts detected: ${conflicts.length} conflicting fields`)
 
       return {
         status: 'unresolved',
