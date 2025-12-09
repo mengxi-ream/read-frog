@@ -2,6 +2,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { Activity, useMemo, useState } from 'react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/alert'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -118,7 +119,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             : (
                 <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
                   <Icon icon="tabler:circle-dashed-check" className="size-4" />
-                  Resolve conflicts to continue
+                  {i18n.t('options.config.sync.googleDrive.unresolved.resolveToContinue')}
                 </span>
               )}
         </div>
@@ -146,39 +147,38 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
 
       {/* Validation error display */}
       {status.validationError && (
-        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-3 text-xs">
-          <div className="flex items-start gap-2">
-            <Icon icon="mdi:alert-circle" className="size-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <p className="font-medium text-red-800 dark:text-red-200">
-                {i18n.t('options.config.sync.googleDrive.unresolved.validationError')}
-              </p>
-              <ul className="mt-1 text-red-700 dark:text-red-300 list-disc list-inside">
-                {status.validationError.issues.slice(0, 5).map(issue => (
-                  <li key={`${issue.path.join('.')}-${issue.message}`}>
-                    <code className="text-xs">{issue.path.join('.')}</code>
-                    {': '}
-                    {issue.message}
-                  </li>
-                ))}
-                {status.validationError.issues.length > 5 && (
-                  <li>
-                    {i18n.t('options.config.sync.googleDrive.unresolved.moreErrors', [
-                      status.validationError.issues.length - 5,
-                    ])}
-                  </li>
-                )}
-              </ul>
-            </div>
-          </div>
-        </div>
+        <Alert variant="destructive">
+          <Icon icon="tabler:alert-circle-filled" className="size-4" />
+          <AlertTitle>
+            {i18n.t('options.config.sync.googleDrive.unresolved.validationAlert.title')}
+          </AlertTitle>
+          <AlertDescription>
+            <p>{i18n.t('options.config.sync.googleDrive.unresolved.validationAlert.description')}</p>
+            <ul className="list-disc list-inside text-xs">
+              {status.validationError.issues.slice(0, 5).map(issue => (
+                <li key={`${issue.path.join('.')}-${issue.message}`}>
+                  <code className="text-xs">{issue.path.join('.')}</code>
+                  {': '}
+                  {issue.message}
+                </li>
+              ))}
+              {status.validationError.issues.length > 5 && (
+                <li>
+                  {i18n.t('options.config.sync.googleDrive.unresolved.moreErrors', [
+                    status.validationError.issues.length - 5,
+                  ])}
+                </li>
+              )}
+            </ul>
+          </AlertDescription>
+        </Alert>
       )}
 
-      <Activity mode={resolvedConfigResult?.config ? 'visible' : 'hidden'}>
-        <div className="flex-1 overflow-scroll">
+      <div className="flex-1 min-h-0 flex flex-col">
+        <Activity mode={resolvedConfigResult?.config ? 'visible' : 'hidden'}>
           <MergeConfigView />
-        </div>
-      </Activity>
+        </Activity>
+      </div>
 
       <AlertDialogFooter>
         <AlertDialogCancel disabled={isConfirming} onClick={handleCancel}>
@@ -209,16 +209,16 @@ function MergeConfigView() {
 
   return (
     <div className="h-full rounded-lg overflow-hidden flex flex-col bg-muted">
-      <div className="px-4 py-2 flex items-center gap-4 text-xs border-b">
+      <div className="px-4 py-2 flex items-center gap-4 text-xs border-b bg-muted">
         {status.conflictCount > 0 && (
-          <span className="text-slate-700 dark:text-slate-300">
+          <span className="text-zinc-700 dark:text-zinc-300">
             {i18n.t('options.config.sync.googleDrive.unresolved.progress', [
               status.allResolved ? status.conflictCount : status.resolvedCount,
               status.conflictCount,
             ])}
           </span>
         )}
-        <div className="flex items-center gap-4 ml-auto text-slate-600 dark:text-slate-400">
+        <div className="flex items-center gap-4 ml-auto text-zinc-600 dark:text-zinc-400">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
             <span>{i18n.t('options.config.sync.googleDrive.unresolved.localValue')}</span>
@@ -229,7 +229,7 @@ function MergeConfigView() {
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto min-h-0">
         <JsonTreeView resolvedConfig={resolvedConfig} />
       </div>
     </div>

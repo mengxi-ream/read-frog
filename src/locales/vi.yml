@@ -403,7 +403,10 @@ options:
           remoteChanged: Từ xa đã thay đổi
           configValid: Cấu hình hợp lệ
           configInvalid: Cấu hình không hợp lệ
-          validationError: 'Cấu hình đã hợp nhất có lỗi xác thực. Điều chỉnh các khác biệt bên dưới để sửa:'
+          resolveToContinue: Giải quyết xung đột để tiếp tục
+          validationAlert:
+            title: Cấu hình đã hợp nhất có lỗi xác thực
+            description: 'Điều chỉnh các khác biệt bên dưới để sửa:'
           moreErrors: ...và $1 lỗi nữa
     backup:
       title: Sao lưu cấu hình

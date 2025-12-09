@@ -403,7 +403,10 @@ options:
           remoteChanged: Remote changed
           configValid: Config is valid
           configInvalid: Config is invalid
-          validationError: 'The merged config has validation errors. Adjust the differences below to fix:'
+          resolveToContinue: Resolve conflicts to continue
+          validationAlert:
+            title: The merged config has validation errors.
+            description: 'Adjust the differences below to fix:'
           moreErrors: ...and $1 more errors
     backup:
       title: Config Backup

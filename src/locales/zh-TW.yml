@@ -402,7 +402,10 @@ options:
           remoteChanged: 遠端已變更
           configValid: 設定有效
           configInvalid: 設定無效
-          validationError: 合併後的設定存在驗證錯誤。請調整下方差異以修復：
+          resolveToContinue: 解決衝突後繼續
+          validationAlert:
+            title: 合併後的設定存在驗證錯誤
+            description: 請調整下方差異以修復：
           moreErrors: ...還有 $1 個錯誤
     backup:
       title: 設定備份

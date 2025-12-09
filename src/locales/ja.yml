@@ -401,7 +401,10 @@ options:
           remoteChanged: リモートが変更されました
           configValid: 設定は有効です
           configInvalid: 設定は無効です
-          validationError: マージされた設定に検証エラーがあります。以下の差異を調整して修正してください：
+          resolveToContinue: 続行するには競合を解決してください
+          validationAlert:
+            title: マージされた設定に検証エラーがあります
+            description: 以下の差異を調整して修正してください：
           moreErrors: ...他 $1 件のエラー
     backup:
       title: 設定のバックアップ

@@ -403,7 +403,10 @@ options:
           remoteChanged: Uzak değişti
           configValid: Yapılandırma geçerli
           configInvalid: Yapılandırma geçersiz
-          validationError: 'Birleştirilmiş yapılandırmada doğrulama hataları var. Düzeltmek için aşağıdaki farklılıkları ayarlayın:'
+          resolveToContinue: Devam etmek için çakışmaları çözün
+          validationAlert:
+            title: Birleştirilmiş yapılandırmada doğrulama hataları var
+            description: 'Düzeltmek için aşağıdaki farklılıkları ayarlayın:'
           moreErrors: ...ve $1 hata daha
     backup:
       title: Yapılandırma Yedekleme

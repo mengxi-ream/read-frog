@@ -402,7 +402,10 @@ options:
           remoteChanged: 远端已更改
           configValid: 配置有效
           configInvalid: 配置无效
-          validationError: 合并后的配置存在验证错误。请调整下方差异以修复：
+          resolveToContinue: 解决冲突后继续
+          validationAlert:
+            title: 合并后的配置存在验证错误
+            description: 请调整下方差异以修复：
           moreErrors: ...还有 $1 个错误
     backup:
       title: 配置备份
