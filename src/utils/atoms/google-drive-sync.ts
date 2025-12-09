@@ -36,18 +36,16 @@ export const resolutionStatusAtom = atom((get) => {
   const resolvedConfig = get(resolvedConfigAtom)
 
   const conflictCount = diffResult?.conflicts.length ?? 0
-  const differenceCount = diffResult?.differences.length ?? 0
   const resolvedCount = Object.keys(resolutions).length
-  const conflictResolved = diffResult?.conflicts.every(c => resolutions[c.path.join('.')]) ?? true
+  const allResolved = diffResult?.conflicts.every(c => resolutions[c.path.join('.')]) ?? true
 
   return {
     conflictCount,
-    differenceCount,
     resolvedCount,
-    conflictResolved,
+    allResolved,
     hasValidationError: resolvedConfig?.validationError != null,
     validationError: resolvedConfig?.validationError ?? null,
-    isValid: conflictResolved && resolvedConfig?.validationError == null,
+    isValid: allResolved && resolvedConfig?.validationError == null,
   }
 })
 
@@ -58,7 +56,7 @@ export const conflictStatusAtom = atom((get) => {
   return {
     total: status.conflictCount,
     resolved: status.resolvedCount,
-    allResolved: status.conflictResolved,
+    allResolved: status.allResolved,
   }
 })
 
@@ -82,12 +80,8 @@ export const selectAllLocalAtom = atom(null, (get, set) => {
   if (!diffResult)
     return
   const resolutions: Record<string, Resolution> = {}
-  // Include both conflicts and differences
   for (const c of diffResult.conflicts) {
     resolutions[c.path.join('.')] = 'local'
-  }
-  for (const d of diffResult.differences) {
-    resolutions[d.path.join('.')] = 'local'
   }
   set(resolutionsAtom, resolutions)
 })
@@ -97,12 +91,8 @@ export const selectAllRemoteAtom = atom(null, (get, set) => {
   if (!diffResult)
     return
   const resolutions: Record<string, Resolution> = {}
-  // Include both conflicts and differences
   for (const c of diffResult.conflicts) {
     resolutions[c.path.join('.')] = 'remote'
-  }
-  for (const d of diffResult.differences) {
-    resolutions[d.path.join('.')] = 'remote'
   }
   set(resolutionsAtom, resolutions)
 })

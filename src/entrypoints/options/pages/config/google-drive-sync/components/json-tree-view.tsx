@@ -7,8 +7,7 @@ import { useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 import { Tree, TreeItem, TreeItemLabel } from '@/components/shadcn/tree'
 import { diffResultAtom } from '@/utils/atoms/google-drive-sync'
-import { DifferenceField } from './difference-field'
-import { UnresolvedField } from './unresolved-field'
+import { ConflictField } from './unresolved-field'
 import { formatValue } from './utils'
 
 interface JsonNodeData {
@@ -58,30 +57,23 @@ export function JsonTreeView({ data }: JsonTreeViewProps) {
   const diffResult = useAtomValue(diffResultAtom)
   const { items, children } = useMemo(() => buildTreeData(data), [data])
 
-  const unresolvedPaths = useMemo(() => {
+  const conflictPaths = useMemo(() => {
     if (!diffResult)
       return new Set<string>()
     return new Set(diffResult.conflicts.map(c => c.path.join('.')))
   }, [diffResult])
 
-  const differencePaths = useMemo(() => {
-    if (!diffResult)
-      return new Set<string>()
-    return new Set(diffResult.differences.map(d => d.path.join('.')))
-  }, [diffResult])
-
-  // Expand all items that have conflicts or differences when the component is mounted
+  // Expand all items that have conflicts when the component is mounted
   const initialExpandedItems = useMemo(() => {
     const expanded = new Set<string>(['root'])
-    const allChangePaths = [...unresolvedPaths, ...differencePaths]
-    for (const changePath of allChangePaths) {
-      const parts = changePath.split('.')
+    for (const conflictPath of conflictPaths) {
+      const parts = conflictPath.split('.')
       for (let i = 1; i <= parts.length; i++) {
         expanded.add(parts.slice(0, i).join('.'))
       }
     }
     return Array.from(expanded)
-  }, [unresolvedPaths, differencePaths])
+  }, [conflictPaths])
 
   const tree = useTree<JsonNodeData>({
     rootItemId: 'root',
@@ -105,20 +97,14 @@ export function JsonTreeView({ data }: JsonTreeViewProps) {
 
   const renderItem = (item: ItemInstance<JsonNodeData>): React.ReactNode => {
     const { pathKey, key, value, isArrayItem } = item.getItemData()
-    const hasUnresolved = unresolvedPaths.has(pathKey)
-    const hasDifference = differencePaths.has(pathKey)
+    const hasConflict = conflictPaths.has(pathKey)
     const level = item.getItemMeta().level
     const isFolder = item.isFolder()
     const isExpanded = item.isExpanded()
 
-    // Unresolved field - interactive selection (higher priority)
-    if (hasUnresolved) {
-      return <UnresolvedField key={pathKey} pathKey={pathKey} indent={level * 20 + 28} />
-    }
-
-    // Difference field - shows one-sided changes
-    if (hasDifference) {
-      return <DifferenceField key={pathKey} pathKey={pathKey} indent={level * 20 + 28} />
+    // Conflict field - interactive selection
+    if (hasConflict) {
+      return <ConflictField key={pathKey} pathKey={pathKey} indent={level * 20 + 28} />
     }
 
     return (

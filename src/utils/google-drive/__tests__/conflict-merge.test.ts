@@ -105,12 +105,11 @@ describe('conflict-merge', () => {
       const result = detectChanges(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
-      expect(result.differences).toHaveLength(0)
       expect(result.validationError).toBeNull()
       expect(result.merged).toEqual(base)
     })
 
-    it('should detect difference when only local changed', () => {
+    it('should detect conflict when only local changed', () => {
       const base = createMockConfig()
       const local = createMockConfig({
         language: { ...base.language, targetCode: 'jpn' },
@@ -119,14 +118,13 @@ describe('conflict-merge', () => {
 
       const result = detectChanges(base, local, remote)
 
-      expect(result.conflicts).toHaveLength(0)
-      expect(result.differences.length).toBeGreaterThan(0)
-      expect(result.differences.find(d => d.path.join('.') === 'language.targetCode')).toBeDefined()
+      expect(result.conflicts.length).toBeGreaterThan(0)
+      expect(result.conflicts.find(c => c.path.join('.') === 'language.targetCode')).toBeDefined()
       expect(result.validationError).toBeNull()
       expect(result.merged.language.targetCode).toBe('jpn')
     })
 
-    it('should detect difference when only remote changed', () => {
+    it('should detect conflict when only remote changed', () => {
       const base = createMockConfig()
       const local = createMockConfig()
       const remote = createMockConfig({
@@ -135,9 +133,8 @@ describe('conflict-merge', () => {
 
       const result = detectChanges(base, local, remote)
 
-      expect(result.conflicts).toHaveLength(0)
-      expect(result.differences.length).toBeGreaterThan(0)
-      expect(result.differences.find(d => d.path.join('.') === 'language.targetCode')).toBeDefined()
+      expect(result.conflicts.length).toBeGreaterThan(0)
+      expect(result.conflicts.find(c => c.path.join('.') === 'language.targetCode')).toBeDefined()
       expect(result.validationError).toBeNull()
       expect(result.merged.language.targetCode).toBe('jpn')
     })
@@ -170,7 +167,6 @@ describe('conflict-merge', () => {
 
       expect(result.conflicts).toHaveLength(1)
       expect(result.conflicts[0]).toEqual({
-        type: 'conflict',
         path: ['language', 'targetCode'],
         baseValue: 'cmn',
         localValue: 'jpn',
@@ -251,7 +247,7 @@ describe('conflict-merge', () => {
       expect(result.conflicts.find(c => c.path.join('.') === 'translate.requestQueueConfig.capacity')).toBeDefined()
     })
 
-    it('should auto-merge non-conflicting changes', () => {
+    it('should merge non-conflicting changes with conflicts for each change', () => {
       const base = createMockConfig()
       const local = createMockConfig({
         language: { ...base.language, targetCode: 'jpn' },
@@ -262,12 +258,13 @@ describe('conflict-merge', () => {
 
       const result = detectChanges(base, local, remote)
 
-      expect(result.conflicts).toHaveLength(0)
+      // Both one-sided changes are now tracked as conflicts
+      expect(result.conflicts.length).toBeGreaterThan(0)
       expect(result.merged.language.targetCode).toBe('jpn')
       expect(result.merged.translate.mode).toBe('translationOnly')
     })
 
-    it('should auto-merge when both sides change different nested fields', () => {
+    it('should merge when both sides change different nested fields with conflicts', () => {
       const base = createMockConfig()
       const local = createMockConfig({
         language: { ...base.language, targetCode: 'jpn', level: 'advanced' },
@@ -286,7 +283,8 @@ describe('conflict-merge', () => {
 
       const result = detectChanges(base, local, remote)
 
-      expect(result.conflicts).toHaveLength(0)
+      // All one-sided changes are now tracked as conflicts
+      expect(result.conflicts.length).toBeGreaterThan(0)
       expect(result.merged.language.targetCode).toBe('jpn')
       expect(result.merged.language.level).toBe('advanced')
       expect(result.merged.floatingButton.position).toBe(0.8)

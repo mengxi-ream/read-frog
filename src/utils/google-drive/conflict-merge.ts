@@ -4,29 +4,22 @@ import { dequal } from 'dequal'
 import { configSchema } from '@/types/config/config'
 import { logger } from '../logger'
 
-// Base shape + type discriminator
-export interface FieldChange {
-  type: 'conflict' | 'difference'
+export interface FieldConflict {
   path: string[] // ['language', 'targetCode']
   baseValue: unknown
   localValue: unknown
   remoteValue: unknown
 }
 
-// Type aliases for narrowed types
-export type FieldConflict = FieldChange & { type: 'conflict' }
-export type FieldDifference = FieldChange & { type: 'difference' }
-
 export interface ChangeDiffResult {
   merged: Config
   conflicts: FieldConflict[]
-  differences: FieldDifference[]
   validationError: ZodError | null
 }
 
 /**
  * Recursively detect changes between base, local, and remote configs
- * Returns merged config and list of conflicts/differences
+ * Returns merged config and list of conflicts
  */
 export function detectChanges(
   base: Config,
@@ -34,7 +27,6 @@ export function detectChanges(
   remote: Config,
 ): ChangeDiffResult {
   const conflicts: FieldConflict[] = []
-  const differences: FieldDifference[] = []
 
   const isAtomicValue = (val: unknown) =>
     val == null || typeof val !== 'object' || Array.isArray(val)
@@ -52,11 +44,12 @@ export function detectChanges(
 
       if (localChanged && remoteChanged) {
         if (dequal(localVal, remoteVal)) {
+          // Both changed to same value - no conflict
           return localVal
         }
         else {
+          // Both changed to different values - conflict
           conflicts.push({
-            type: 'conflict',
             path: basePath,
             baseValue: baseVal,
             localValue: localVal,
@@ -67,9 +60,8 @@ export function detectChanges(
         }
       }
       else if (localChanged) {
-        // Only local changed - track as difference
-        differences.push({
-          type: 'difference',
+        // Only local changed - track as conflict for user to confirm
+        conflicts.push({
           path: basePath,
           baseValue: baseVal,
           localValue: localVal,
@@ -78,9 +70,8 @@ export function detectChanges(
         return localVal
       }
       else if (remoteChanged) {
-        // Only remote changed - track as difference
-        differences.push({
-          type: 'difference',
+        // Only remote changed - track as conflict for user to confirm
+        conflicts.push({
           path: basePath,
           baseValue: baseVal,
           localValue: localVal,
@@ -123,7 +114,6 @@ export function detectChanges(
     return {
       merged: mergedResult as Config,
       conflicts,
-      differences,
       validationError: validatedMergedResult.error,
     }
   }
@@ -131,28 +121,27 @@ export function detectChanges(
   return {
     merged: validatedMergedResult.data,
     conflicts,
-    differences,
     validationError: null,
   }
 }
 
 /**
- * Apply a resolution to a field change (conflict or difference)
+ * Apply a resolution to a field conflict
  */
 function applyFieldResolution(
   result: any,
-  change: FieldChange,
+  conflict: FieldConflict,
   resolution: 'local' | 'remote',
 ): void {
   // Navigate to the parent object
   let current: any = result
-  for (let i = 0; i < change.path.length - 1; i++) {
-    current = current[change.path[i]]
+  for (let i = 0; i < conflict.path.length - 1; i++) {
+    current = current[conflict.path[i]]
   }
 
   // Set the resolved value
-  const lastKey = change.path[change.path.length - 1]
-  current[lastKey] = resolution === 'local' ? change.localValue : change.remoteValue
+  const lastKey = conflict.path[conflict.path.length - 1]
+  current[lastKey] = resolution === 'local' ? conflict.localValue : conflict.remoteValue
 }
 
 export interface ApplyResolutionsResult {
@@ -162,14 +151,13 @@ export interface ApplyResolutionsResult {
 
 /**
  * Apply user resolutions to the merged config
- * Handles both conflicts and differences
  */
 export function applyResolutions(
   diffResult: ChangeDiffResult,
   resolutions: Record<string, 'local' | 'remote'>,
 ): ApplyResolutionsResult {
   // Deep clone the merged result to avoid mutating original
-  const result = JSON.parse(JSON.stringify(diffResult.merged))
+  const result = structuredClone(diffResult.merged)
 
   // Apply resolutions for conflicts
   for (const conflict of diffResult.conflicts) {
@@ -177,31 +165,18 @@ export function applyResolutions(
     const resolution = resolutions[pathKey]
 
     if (!resolution) {
-      logger.warn('Unresolved conflict', { path: pathKey })
+      // No resolution for conflict - keep merged value (defaults to appropriate side)
       continue
     }
 
     applyFieldResolution(result, conflict, resolution)
   }
 
-  // Apply resolutions for differences (if user chose to override)
-  for (const difference of diffResult.differences) {
-    const pathKey = difference.path.join('.')
-    const resolution = resolutions[pathKey]
-
-    if (!resolution) {
-      // No override for difference - keep merged value
-      continue
-    }
-
-    applyFieldResolution(result, difference, resolution)
-  }
-
   const validatedResult = configSchema.safeParse(result)
   if (!validatedResult.success) {
     logger.error('Resolved config is invalid', validatedResult.error)
     return {
-      config: null,
+      config: result as Config,
       validationError: validatedResult.error,
     }
   }

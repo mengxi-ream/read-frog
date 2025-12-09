@@ -94,8 +94,8 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
           <Icon icon="mdi:alert" className="size-5 text-yellow-500" />
           {i18n.t('options.config.sync.googleDrive.unresolved.title')}
         </AlertDialogTitle>
-        <AlertDialogDescription className="flex items-center justify-between">
-          <span>{i18n.t('options.config.sync.googleDrive.unresolved.description')}</span>
+        <AlertDialogDescription>
+          {i18n.t('options.config.sync.googleDrive.unresolved.description')}
         </AlertDialogDescription>
       </AlertDialogHeader>
 
@@ -105,7 +105,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
           {status.conflictCount > 0 && (
             <span>
               {i18n.t('options.config.sync.googleDrive.unresolved.progress', [
-                status.conflictResolved ? status.conflictCount : status.resolvedCount,
+                status.allResolved ? status.conflictCount : status.resolvedCount,
                 status.conflictCount,
               ])}
             </span>
@@ -117,12 +117,14 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
                   {i18n.t('options.config.sync.googleDrive.unresolved.configInvalid')}
                 </span>
               )
-            : (
-                <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                  <Icon icon="mdi:check-circle" className="size-4" />
-                  {i18n.t('options.config.sync.googleDrive.unresolved.configValid')}
-                </span>
-              )}
+            : status.isValid
+              ? (
+                  <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                    <Icon icon="mdi:check-circle" className="size-4" />
+                    {i18n.t('options.config.sync.googleDrive.unresolved.configValid')}
+                  </span>
+                )
+              : null}
         </div>
         <div className="flex gap-2">
           <Button
