@@ -77,8 +77,8 @@ async function updateLastSyncConfigAndMeta({ value, meta }: LastSyncConfigAndMet
   const lastSyncedAt = meta.lastSyncedAt ?? Date.now()
 
   await Promise.all([
-    storage.setItem(`local:${LAST_SYNCED_CONFIG_STORAGE_KEY}`, value),
-    storage.setMeta(`local:${LAST_SYNCED_CONFIG_STORAGE_KEY}`, {
+    storage.setItem<Config>(`local:${LAST_SYNCED_CONFIG_STORAGE_KEY}`, value),
+    storage.setMeta<Partial<LastSyncedConfigMeta>>(`local:${LAST_SYNCED_CONFIG_STORAGE_KEY}`, {
       ...meta,
       lastSyncedAt,
     } satisfies LastSyncedConfigMeta),
@@ -152,8 +152,8 @@ async function saveConfigValueAndMeta(configValueAndMeta: ConfigValueAndMeta): P
 
     const validatedConfig = configSchema.parse(value)
 
-    await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, validatedConfig)
-    await storage.setMeta(`local:${CONFIG_STORAGE_KEY}`, meta)
+    await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, validatedConfig)
+    await storage.setMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, meta)
   }
   catch (error) {
     logger.error('Failed to download remote config', error)

@@ -28,7 +28,7 @@ export const writeConfigAtom = atom(
     set(configAtom, next)
     try {
       await storageAdapter.set(CONFIG_STORAGE_KEY, next, configSchema)
-      await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { modifiedAt: Date.now() })
+      await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { lastModifiedAt: Date.now() })
     }
     catch (error) {
       console.error('Failed to set config to storage:', next, error)

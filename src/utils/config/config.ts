@@ -1,5 +1,6 @@
 import type { LangCodeISO6393 } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
+import type { ConfigMeta } from '@/types/config/meta'
 import type { ProvidersConfig } from '@/types/config/provider'
 import { storage } from '#imports'
 import { configSchema } from '@/types/config/config'
@@ -31,8 +32,8 @@ export async function getConfigFromStorage() {
 }
 
 export async function setConfigToStorage(config: Config) {
-  await storage.setItem(`local:${CONFIG_STORAGE_KEY}`, config)
-  await storage.setMeta(`local:${CONFIG_STORAGE_KEY}`, { modifiedAt: Date.now() })
+  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, config)
+  await storage.setMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, { lastModifiedAt: Date.now() })
 }
 
 export function isAnyAPIKeyForReadProviders(providersConfig: ProvidersConfig) {

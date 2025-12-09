@@ -36,21 +36,17 @@ export function detectChanges(
   const conflicts: FieldConflict[] = []
   const differences: FieldDifference[] = []
 
+  const isAtomicValue = (val: unknown) =>
+    val == null || typeof val !== 'object' || Array.isArray(val)
+
   function traverse(
     basePath: string[],
     baseVal: any,
     localVal: any,
     remoteVal: any,
   ) {
-    // Handle primitive values or null
-    if (
-      baseVal == null
-      || localVal == null
-      || remoteVal == null
-      || typeof baseVal !== 'object'
-      || typeof localVal !== 'object'
-      || typeof remoteVal !== 'object'
-    ) {
+    // Handle atomic values (primitives, nulls, arrays)
+    if (isAtomicValue(baseVal) || isAtomicValue(localVal) || isAtomicValue(remoteVal)) {
       const localChanged = !dequal(localVal, baseVal)
       const remoteChanged = !dequal(remoteVal, baseVal)
 
@@ -94,54 +90,6 @@ export function detectChanges(
       }
       else {
         // No change
-        return baseVal
-      }
-    }
-
-    // Handle arrays
-    // TODO: can this logic merged to the previous one
-    if (Array.isArray(baseVal)) {
-      const localChanged = !dequal(localVal, baseVal)
-      const remoteChanged = !dequal(remoteVal, baseVal)
-
-      if (localChanged && remoteChanged) {
-        if (dequal(localVal, remoteVal)) {
-          return localVal
-        }
-        else {
-          conflicts.push({
-            type: 'conflict',
-            path: basePath,
-            baseValue: baseVal,
-            localValue: localVal,
-            remoteValue: remoteVal,
-          })
-          return localVal
-        }
-      }
-      else if (localChanged) {
-        // Only local changed - track as difference
-        differences.push({
-          type: 'difference',
-          path: basePath,
-          baseValue: baseVal,
-          localValue: localVal,
-          remoteValue: remoteVal,
-        })
-        return localVal
-      }
-      else if (remoteChanged) {
-        // Only remote changed - track as difference
-        differences.push({
-          type: 'difference',
-          path: basePath,
-          baseValue: baseVal,
-          localValue: localVal,
-          remoteValue: remoteVal,
-        })
-        return remoteVal
-      }
-      else {
         return baseVal
       }
     }
