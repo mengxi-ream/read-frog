@@ -398,6 +398,7 @@ options:
           unresolvedPrompt: '[Unresolved - Please select]'
           localLatest: Local Latest
           remoteLatest: Remote Latest
+          bothChanged: Both changed
           localChanged: Local changed
           remoteChanged: Remote changed
           configValid: Config is valid

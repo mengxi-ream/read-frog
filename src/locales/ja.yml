@@ -396,6 +396,7 @@ options:
           unresolvedPrompt: '[未解決 - 選択してください]'
           localLatest: ローカル最新
           remoteLatest: リモート最新
+          bothChanged: 両方が変更されました
           localChanged: ローカルが変更されました
           remoteChanged: リモートが変更されました
           configValid: 設定は有効です

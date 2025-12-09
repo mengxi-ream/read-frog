@@ -398,6 +398,7 @@ options:
           unresolvedPrompt: '[Chưa giải quyết - Vui lòng chọn]'
           localLatest: Cục bộ mới nhất
           remoteLatest: Từ xa mới nhất
+          bothChanged: Cả hai đã thay đổi
           localChanged: Cục bộ đã thay đổi
           remoteChanged: Từ xa đã thay đổi
           configValid: Cấu hình hợp lệ

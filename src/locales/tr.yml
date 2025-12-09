@@ -398,6 +398,7 @@ options:
           unresolvedPrompt: '[Çözülmedi - Lütfen seçin]'
           localLatest: En Son Yerel
           remoteLatest: En Son Uzak
+          bothChanged: Her ikisi de değişti
           localChanged: Yerel değişti
           remoteChanged: Uzak değişti
           configValid: Yapılandırma geçerli

@@ -397,6 +397,7 @@ options:
           unresolvedPrompt: '[미해결 - 선택하세요]'
           localLatest: 로컬 최신
           remoteLatest: 원격 최신
+          bothChanged: 양쪽 모두 변경됨
           localChanged: 로컬이 변경됨
           remoteChanged: 원격이 변경됨
           configValid: 구성이 유효합니다

@@ -28,10 +28,6 @@ export const STYLE_MAP = {
     bg: 'bg-orange-100/50 dark:bg-orange-900/30',
     border: 'border-l-orange-500',
   },
-  difference: {
-    bg: 'bg-slate-100/50 dark:bg-slate-800/30',
-    border: 'border-l-slate-400',
-  },
 } as const
 
 interface FieldOptionRowProps {
@@ -49,10 +45,10 @@ export function FieldOptionRow({ type, value, isSelected, fieldKey, showFieldKey
 
   return (
     <div
-      className={cn('flex cursor-pointer py-1 ps-(--indent)', hover, isSelected && selected, isComplexValue ? 'flex-col items-start gap-1' : 'items-center')}
+      className={cn('flex cursor-pointer py-1 ps-(--indent) text-xs', hover, isSelected && selected, isComplexValue ? 'flex-col items-start gap-1' : 'items-center')}
       onClick={onClick}
     >
-      <div className="flex items-center text-sm">
+      <div className="flex items-center">
         <span className={cn('px-2 py-0.5 rounded mr-2 shrink-0', text, badge)}>
           {i18n.t(label)}
         </span>
@@ -72,7 +68,7 @@ export function FieldOptionRow({ type, value, isSelected, fieldKey, showFieldKey
         {isSelected && <Icon icon="mdi:check-circle" className={cn('size-4 ml-2', text)} />}
       </div>
       {isComplexValue && (
-        <pre className="text-slate-700 dark:text-slate-300 text-xs ml-4 max-h-40 overflow-auto whitespace-pre-wrap break-all">
+        <pre className="text-slate-700 dark:text-slate-300 ml-4 max-h-40 overflow-auto whitespace-pre-wrap break-all">
           {formatValue(value)}
         </pre>
       )}

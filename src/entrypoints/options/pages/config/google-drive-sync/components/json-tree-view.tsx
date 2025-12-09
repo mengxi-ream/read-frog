@@ -49,9 +49,9 @@ function buildTreeData(data: Config): {
   return { items, children }
 }
 
-export function JsonTreeView({ data }: { data: Config }) {
+export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
   const diffConflictsResult = useAtomValue(diffConflictsResultAtom)
-  const { items, children } = useMemo(() => buildTreeData(data), [data])
+  const { items, children } = useMemo(() => buildTreeData(resolvedConfig), [resolvedConfig])
 
   const conflictPaths = useMemo(() => {
     if (!diffConflictsResult)
@@ -106,7 +106,7 @@ export function JsonTreeView({ data }: { data: Config }) {
     return (
       <div key={item.getId()}>
         <TreeItem item={item}>
-          <TreeItemLabel className="font-mono text-sm bg-transparent hover:bg-transparent">
+          <TreeItemLabel className="font-mono text-xs bg-transparent hover:bg-transparent">
             {!isArrayItem && <span className="text-blue-600 dark:text-blue-400">{key}</span>}
             {!isArrayItem && <span className="text-slate-500 mx-1">:</span>}
             <span className="text-slate-700 dark:text-slate-300">

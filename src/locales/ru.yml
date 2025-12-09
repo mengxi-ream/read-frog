@@ -398,6 +398,7 @@ options:
           unresolvedPrompt: '[Не разрешено - Выберите]'
           localLatest: Локальная последняя
           remoteLatest: Удалённая последняя
+          bothChanged: Оба изменены
           localChanged: Локальное изменено
           remoteChanged: Удалённое изменено
           configValid: Конфигурация действительна

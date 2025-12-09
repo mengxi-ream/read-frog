@@ -24,33 +24,29 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
   // Determine the type of change
   const localChanged = !dequal(conflict.localValue, conflict.baseValue)
   const remoteChanged = !dequal(conflict.remoteValue, conflict.baseValue)
-  const isTrueConflict = localChanged && remoteChanged
+  const bothChanged = localChanged && remoteChanged
 
   // Select appropriate container style
   const getContainerStyle = () => {
     if (resolution)
       return STYLE_MAP[resolution]
-    return isTrueConflict ? STYLE_MAP.unresolved : STYLE_MAP.difference
+    return STYLE_MAP.unresolved
   }
   const containerStyle = getContainerStyle()
 
   // Get the appropriate icon and label
   const getIconAndLabel = () => {
-    if (isTrueConflict) {
-      return {
-        icon: 'mdi:alert',
-        iconClass: 'text-orange-500 dark:text-orange-400',
-        label: i18n.t('options.config.sync.googleDrive.unresolved.unresolvedPrompt'),
-        labelClass: 'text-orange-600 dark:text-orange-300 font-semibold',
-      }
-    }
-    return {
-      icon: 'mdi:swap-horizontal',
-      iconClass: 'text-slate-500 dark:text-slate-400',
-      label: localChanged
+    const label = bothChanged
+      ? i18n.t('options.config.sync.googleDrive.unresolved.bothChanged')
+      : localChanged
         ? i18n.t('options.config.sync.googleDrive.unresolved.localChanged')
-        : i18n.t('options.config.sync.googleDrive.unresolved.remoteChanged'),
-      labelClass: 'text-slate-600 dark:text-slate-300',
+        : i18n.t('options.config.sync.googleDrive.unresolved.remoteChanged')
+
+    return {
+      icon: 'tabler:git-merge',
+      iconClass: 'text-orange-500 dark:text-orange-400',
+      label,
+      labelClass: 'text-orange-600 dark:text-orange-300 font-semibold',
     }
   }
   const { icon, iconClass, label, labelClass } = getIconAndLabel()
@@ -65,7 +61,7 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
       className={cn('border-l-4 my-1', containerStyle.bg, containerStyle.border)}
       style={{ '--indent': `${indent}px` } as CSSProperties}
     >
-      <div className="flex items-center py-1 ps-(--indent)">
+      <div className="flex items-center py-1 ps-(--indent) h-8">
         <Icon icon={icon} className={cn('size-4 shrink-0 mr-2', iconClass)} />
         <span className={cn('text-xs', labelClass)}>
           {label}

@@ -22,18 +22,19 @@ export const diffConflictsResultAtom = atom<DiffConflictsResult | null>((get) =>
 })
 
 // Derived atom that applies resolutions and returns the result with validation status
-export const resolvedConfigAtom = atom<ApplyResolutionsResult | null>((get) => {
+export const resolvedConfigResultAtom = atom<ApplyResolutionsResult | null>((get) => {
   const diffConflictsResult = get(diffConflictsResultAtom)
   const resolutions = get(resolutionsAtom)
   if (!diffConflictsResult)
     return null
+  // can partially resolved because resolutions are not required to be all conflicts
   return applyResolutions(diffConflictsResult, resolutions)
 })
 
 export const resolutionStatusAtom = atom((get) => {
   const diffConflictsResult = get(diffConflictsResultAtom)
   const resolutions = get(resolutionsAtom)
-  const resolvedConfig = get(resolvedConfigAtom)
+  const resolvedConfig = get(resolvedConfigResultAtom)
 
   const conflictCount = diffConflictsResult?.conflicts.length ?? 0
   const resolvedCount = Object.keys(resolutions).length

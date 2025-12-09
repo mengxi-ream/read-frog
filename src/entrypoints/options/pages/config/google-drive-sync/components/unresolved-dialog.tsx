@@ -1,8 +1,7 @@
-import type { Config } from '@/types/config/config'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import { useMemo, useState } from 'react'
+import { Activity, useMemo, useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,7 +16,7 @@ import { Button } from '@/components/shadcn/button'
 import { useGoogleDriveAuth } from '@/hooks/use-google-drive-auth'
 import {
   resolutionStatusAtom,
-  resolvedConfigAtom,
+  resolvedConfigResultAtom,
   selectAllLocalAtom,
   selectAllRemoteAtom,
   unresolvedConfigsAtom,
@@ -55,7 +54,7 @@ interface DialogContentProps {
 function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const [isConfirming, setIsConfirming] = useState(false)
   const unresolvedConfigs = useAtomValue(unresolvedConfigsAtom)
-  const resolvedConfig = useAtomValue(resolvedConfigAtom)
+  const resolvedConfigResult = useAtomValue(resolvedConfigResultAtom)
   const status = useAtomValue(resolutionStatusAtom)
   const selectAllLocal = useSetAtom(selectAllLocalAtom)
   const selectAllRemote = useSetAtom(selectAllRemoteAtom)
@@ -64,11 +63,11 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const email = useMemo(() => authData?.userInfo?.email, [authData])
 
   const handleConfirm = async () => {
-    if (!resolvedConfig?.config || !unresolvedConfigs || !email)
+    if (!resolvedConfigResult?.config || !unresolvedConfigs || !email)
       return
     setIsConfirming(true)
     try {
-      await syncMergedConfig(resolvedConfig.config, email)
+      await syncMergedConfig(resolvedConfigResult.config, email)
       onResolved()
     }
     catch (error) {
@@ -178,11 +177,11 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
         </div>
       )}
 
-      <div className="flex-1 overflow-scroll">
-        {resolvedConfig?.config && (
-          <MergeConfigView mergedConfig={resolvedConfig.config} />
-        )}
-      </div>
+      <Activity mode={resolvedConfigResult?.config ? 'visible' : 'hidden'}>
+        <div className="flex-1 overflow-scroll">
+          <MergeConfigView />
+        </div>
+      </Activity>
 
       <AlertDialogFooter>
         <AlertDialogCancel disabled={isConfirming} onClick={handleCancel}>
@@ -204,14 +203,15 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   )
 }
 
-interface MergedConfigViewProps {
-  mergedConfig: Config
-}
+function MergeConfigView() {
+  const resolvedConfigResult = useAtomValue(resolvedConfigResultAtom)
+  const resolvedConfig = resolvedConfigResult?.config
+  if (!resolvedConfig)
+    return null
 
-function MergeConfigView({ mergedConfig }: MergedConfigViewProps) {
   return (
-    <div className="h-full rounded-lg overflow-hidden flex flex-col bg-slate-100 dark:bg-slate-900">
-      <div className="px-4 py-2 flex items-center gap-4 text-xs border-b border-slate-200 dark:border-slate-700">
+    <div className="h-full rounded-lg overflow-hidden flex flex-col bg-muted">
+      <div className="px-4 py-2 flex items-center gap-4 text-xs border-b">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-full bg-yellow-500" />
           <span className="text-slate-700 dark:text-slate-300">{i18n.t('options.config.sync.googleDrive.unresolved.title')}</span>
@@ -228,7 +228,7 @@ function MergeConfigView({ mergedConfig }: MergedConfigViewProps) {
         </div>
       </div>
       <div className="flex-1 overflow-auto">
-        <JsonTreeView data={mergedConfig} />
+        <JsonTreeView resolvedConfig={resolvedConfig} />
       </div>
     </div>
   )

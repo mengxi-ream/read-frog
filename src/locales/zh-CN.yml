@@ -397,6 +397,7 @@ options:
           unresolvedPrompt: '[待解决 - 请选择]'
           localLatest: 本地最新
           remoteLatest: 远端最新
+          bothChanged: 双方已更改
           localChanged: 本地已更改
           remoteChanged: 远端已更改
           configValid: 配置有效
