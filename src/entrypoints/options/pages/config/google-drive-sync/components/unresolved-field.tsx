@@ -6,6 +6,7 @@ import { Button } from '@/components/shadcn/button'
 import { useConflictField } from '@/hooks/use-unresolved-field'
 import { cn } from '@/lib/utils'
 import { FieldOptionRow, STYLE_MAP } from './field-option-row'
+import { isMeaningfulFieldKey } from './utils'
 
 interface ConflictFieldProps {
   pathKey: string
@@ -19,7 +20,7 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
     return null
 
   const fieldKey = conflict.path.at(-1) ?? ''
-  const showFieldKey = !Number.isNaN(Number(fieldKey)) === false
+  const showFieldKey = isMeaningfulFieldKey(fieldKey)
 
   // Determine the type of change
   const localChanged = !dequal(conflict.localValue, conflict.baseValue)

@@ -101,29 +101,26 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
       {/* Status bar */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-4 text-xs">
-          {status.conflictCount > 0 && (
-            <span>
-              {i18n.t('options.config.sync.googleDrive.unresolved.progress', [
-                status.allResolved ? status.conflictCount : status.resolvedCount,
-                status.conflictCount,
-              ])}
-            </span>
-          )}
-          {status.hasValidationError
-            ? (
-                <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
-                  <Icon icon="mdi:alert-circle" className="size-4" />
-                  {i18n.t('options.config.sync.googleDrive.unresolved.configInvalid')}
+          {status.allResolved
+            ? (!status.isValid
+                ? (
+                    <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                      <Icon icon="tabler:alert-circle-filled" className="size-4" />
+                      {i18n.t('options.config.sync.googleDrive.unresolved.configInvalid')}
+                    </span>
+                  )
+                : (
+                    <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                      <Icon icon="tabler:circle-check-filled" className="size-4" />
+                      {i18n.t('options.config.sync.googleDrive.unresolved.configValid')}
+                    </span>
+                  ))
+            : (
+                <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+                  <Icon icon="tabler:circle-dashed-check" className="size-4" />
+                  Resolve conflicts to continue
                 </span>
-              )
-            : status.isValid
-              ? (
-                  <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                    <Icon icon="mdi:check-circle" className="size-4" />
-                    {i18n.t('options.config.sync.googleDrive.unresolved.configValid')}
-                  </span>
-                )
-              : null}
+              )}
         </div>
         <div className="flex gap-2">
           <Button
@@ -205,6 +202,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
 
 function MergeConfigView() {
   const resolvedConfigResult = useAtomValue(resolvedConfigResultAtom)
+  const status = useAtomValue(resolutionStatusAtom)
   const resolvedConfig = resolvedConfigResult?.config
   if (!resolvedConfig)
     return null
@@ -212,10 +210,14 @@ function MergeConfigView() {
   return (
     <div className="h-full rounded-lg overflow-hidden flex flex-col bg-muted">
       <div className="px-4 py-2 flex items-center gap-4 text-xs border-b">
-        <div className="flex items-center gap-2">
-          <div className="w-3 h-3 rounded-full bg-yellow-500" />
-          <span className="text-slate-700 dark:text-slate-300">{i18n.t('options.config.sync.googleDrive.unresolved.title')}</span>
-        </div>
+        {status.conflictCount > 0 && (
+          <span className="text-slate-700 dark:text-slate-300">
+            {i18n.t('options.config.sync.googleDrive.unresolved.progress', [
+              status.allResolved ? status.conflictCount : status.resolvedCount,
+              status.conflictCount,
+            ])}
+          </span>
+        )}
         <div className="flex items-center gap-4 ml-auto text-slate-600 dark:text-slate-400">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500" />
