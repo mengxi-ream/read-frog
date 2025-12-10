@@ -20,6 +20,10 @@ vi.mock('wxt/testing', async () => {
         ...actual.fakeBrowser.i18n,
         getMessage: (key: string) => key.replaceAll('_', '.'),
       },
+      identity: {
+        ...actual.fakeBrowser.identity,
+        getRedirectURL: () => 'https://mock-redirect-url.chromiumapp.org/',
+      },
       runtime: {
         ...actual.fakeBrowser.runtime,
         getManifest: () => ({
