@@ -15,7 +15,7 @@ import {
 } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom, ttsProviderConfigAtom } from '@/utils/atoms/provider'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { getProviderOptions } from '@/utils/constants/model'
 import { getIsFirefoxExtensionEnv } from '@/utils/firefox/firefox-compat'
 import { createPortStreamPromise } from '@/utils/firefox/firefox-streaming'
@@ -88,7 +88,7 @@ export function TranslatePopover() {
         return
       }
 
-      const config = await getConfigFromStorage()
+      const config = await getLocalConfig()
       if (!config) {
         throw new Error('No global config when translate text')
       }

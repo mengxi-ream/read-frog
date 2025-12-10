@@ -1,4 +1,5 @@
-import { getConfigFromStorage, getDetectedCodeFromStorage } from '@/utils/config/config'
+import { getDetectedCodeFromStorage } from '@/utils/config/languages'
+import { getLocalConfig } from '@/utils/config/storage'
 import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
 import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
 import { deepQueryTopLevelSelector } from '@/utils/host/dom/find'
@@ -75,7 +76,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    const config = await getConfigFromStorage()
+    const config = await getLocalConfig()
     if (!config) {
       console.warn('Config is not initialized')
       return
@@ -105,7 +106,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         if (entry.isIntersecting) {
           if (isHTMLElement(entry.target)) {
             if (!entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
-              const currentConfig = await getConfigFromStorage()
+              const currentConfig = await getLocalConfig()
               if (!currentConfig) {
                 logger.error('Global config is not initialized')
                 return
@@ -210,7 +211,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     if (!this.walkId || !observer)
       return
 
-    const config = await getConfigFromStorage()
+    const config = await getLocalConfig()
     if (!config) {
       logger.error('Global config is not initialized')
       return

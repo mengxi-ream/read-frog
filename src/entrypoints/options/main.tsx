@@ -10,7 +10,7 @@ import { ChartThemeProvider } from '@/components/providers/chart-theme-provider'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { SidebarProvider } from '@/components/shadcn/sidebar'
 import { configAtom } from '@/utils/atoms/config'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { queryClient } from '@/utils/tanstack-query'
 import App from './app'
 import { AppSidebar } from './app-sidebar'
@@ -32,7 +32,7 @@ async function initApp() {
   const root = document.getElementById('root')!
   root.className = 'antialiased bg-background'
 
-  const config = await getConfigFromStorage()
+  const config = await getLocalConfig()
 
   if (!config) {
     throw new Error('Global config is not loaded')

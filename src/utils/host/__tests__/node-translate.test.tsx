@@ -22,8 +22,11 @@ vi.mock('@/utils/host/translate/translate-text', () => ({
   validateTranslationConfigAndToast: vi.fn(() => true),
 }))
 
-vi.mock('@/utils/config/config', () => ({
-  getConfigFromStorage: vi.fn(),
+vi.mock('@/utils/config/storage', () => ({
+  getLocalConfig: vi.fn(),
+}))
+
+vi.mock('@/utils/config/languages', () => ({
   getDetectedCodeFromStorage: vi.fn(() => Promise.resolve('eng')),
 }))
 
@@ -31,9 +34,9 @@ describe('node translation', () => {
   const originalGetComputedStyle = window.getComputedStyle
 
   beforeAll(async () => {
-    // Mock getConfigFromStorage to return TEST_CONFIG with bilingual mode
-    const { getConfigFromStorage } = await import('@/utils/config/config')
-    vi.mocked(getConfigFromStorage).mockResolvedValue(TEST_CONFIG)
+    // Mock getLocalConfig to return TEST_CONFIG with bilingual mode
+    const { getLocalConfig } = await import('@/utils/config/storage')
+    vi.mocked(getLocalConfig).mockResolvedValue(TEST_CONFIG)
 
     window.getComputedStyle = vi.fn((element) => {
       const originalStyle = originalGetComputedStyle(element)

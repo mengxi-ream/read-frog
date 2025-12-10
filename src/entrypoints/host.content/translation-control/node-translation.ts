@@ -1,5 +1,5 @@
 import type { Point } from '@/types/dom'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { isEditable } from '@/utils/host/dom/filter'
 import { removeOrShowNodeTranslation } from '@/utils/host/translate/node-manipulation'
@@ -11,11 +11,11 @@ export function registerNodeTranslationTriggers() {
   let isHotkeySessionPure = true // tracks if any other key was pressed during this hotkey session
 
   const getHotkey = async () => {
-    const config = await getConfigFromStorage() ?? DEFAULT_CONFIG
+    const config = await getLocalConfig() ?? DEFAULT_CONFIG
     return config.translate.node.hotkey
   }
   const isEnabled = async () => {
-    const config = await getConfigFromStorage() ?? DEFAULT_CONFIG
+    const config = await getLocalConfig() ?? DEFAULT_CONFIG
     return config.translate.node.enabled
   }
 
@@ -36,7 +36,7 @@ export function registerNodeTranslationTriggers() {
         // isHotkeySessionPure will be false if any key was pressed before hotkey
         timerId = setTimeout(async () => {
           if (isHotkeySessionPure && isHotkeyPressed) {
-            const config = await getConfigFromStorage()
+            const config = await getLocalConfig()
             if (!config) {
               logger.error('Global config is not initialized')
               return
@@ -77,7 +77,7 @@ export function registerNodeTranslationTriggers() {
           timerId = null
         }
         if (!actionTriggered) {
-          const config = await getConfigFromStorage()
+          const config = await getLocalConfig()
           if (!config) {
             logger.error('Global config is not initialized')
             return

@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { TooltipProvider } from '@/components/shadcn/tooltip'
 import { configAtom } from '@/utils/atoms/config'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { APP_NAME } from '@/utils/constants/app'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
@@ -28,7 +28,7 @@ export default defineContentScript({
   matches: ['*://*/*'],
   cssInjectionMode: 'ui',
   async main(ctx) {
-    const config = await getConfigFromStorage() ?? DEFAULT_CONFIG
+    const config = await getLocalConfig() ?? DEFAULT_CONFIG
     const ui = await createShadowRootUi(ctx, {
       name: kebabCase(APP_NAME),
       position: 'overlay',

@@ -5,7 +5,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import LoadingDots from '@/components/loading-dots'
 import { Button } from '@/components/shadcn/button'
-import { getObjectWithoutAPIKeys } from '@/utils/config/config'
+import { getObjectWithoutAPIKeys } from '@/utils/config/api'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { executeTranslate } from '@/utils/host/translate/execute-translate'
 

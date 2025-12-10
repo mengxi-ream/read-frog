@@ -1,7 +1,7 @@
 import type { Config } from '@/types/config/config'
 import { defineContentScript, storage } from '#imports'
 import { kebabCase } from 'case-anything'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { APP_NAME } from '@/utils/constants/app'
 import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 import { OFFICIAL_SITE_URL_PATTERNS } from '@/utils/constants/url'
@@ -15,7 +15,7 @@ export default defineContentScript({
     })
 
     window.addEventListener('message', async (e) => {
-      const config = await getConfigFromStorage()
+      const config = await getLocalConfig()
       if (!config)
         return
       if (e.source !== window)

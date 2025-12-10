@@ -1,6 +1,6 @@
 import type { Point } from '@/types/dom'
 
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
 import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isIFrameElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from './filter'
@@ -125,7 +125,7 @@ export function deepQueryTopLevelSelector(element: HTMLElement | ShadowRoot | Do
 }
 
 export async function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
-  const config = await getConfigFromStorage() ?? DEFAULT_CONFIG
+  const config = await getLocalConfig() ?? DEFAULT_CONFIG
   let currentElement = element
   while (currentElement) {
     smashTruncationStyle(currentElement)

@@ -2,399 +2,275 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { configSchema } from '@/types/config/config'
 import { applyResolutions, detectConflicts } from '../conflict-merge'
 
-// Test data factory
-const defaultProvidersConfig = [
-  {
-    id: 'test-read',
-    name: 'Test Read Provider',
-    enabled: true,
-    provider: 'openai' as const,
-    apiKey: 'test-key',
-    baseURL: 'https://api.openai.com/v1',
-    models: {
-      read: {
-        model: 'gpt-4o-mini' as const,
-        isCustomModel: false,
-        customModel: '',
-      },
-      translate: {
-        model: 'gpt-4o-mini' as const,
-        isCustomModel: false,
-        customModel: '',
-      },
-    },
-  },
-  {
-    id: 'test-translate',
-    name: 'Test Translate Provider',
-    enabled: true,
-    provider: 'google' as const,
-  },
-]
-
-function createMockConfig(overrides: any = {}): any {
+// Simple test config factory - tests algorithm behavior, not specific Config fields
+function createTestConfig(overrides: Record<string, unknown> = {}): any {
   return {
-    language: {
-      detectedCode: 'eng',
-      sourceCode: 'auto',
-      targetCode: 'cmn',
-      level: 'intermediate',
+    primitive: 'base',
+    number: 100,
+    nested: {
+      value: 'nested-value',
+      deep: { flag: true, count: 5 },
     },
-    providersConfig: overrides.providersConfig ?? defaultProvidersConfig,
-    read: { providerId: 'test-read' },
-    translate: {
-      providerId: 'test-translate',
-      mode: 'bilingual',
-      enableAIContentAware: false,
-      customPromptsConfig: {
-        promptId: null,
-        patterns: [],
-      },
-      node: { enabled: true, hotkey: 'Control' },
-      page: {
-        range: 'main',
-        autoTranslatePatterns: [],
-        autoTranslateLanguages: [],
-        shortcut: ['ctrl+shift+t'],
-        enableLLMDetection: false,
-      },
-      requestQueueConfig: {
-        capacity: 10,
-        rate: 2,
-      },
-      batchQueueConfig: {
-        maxCharactersPerBatch: 1000,
-        maxItemsPerBatch: 5,
-      },
-      translationNodeStyle: {
-        preset: 'default',
-        isCustom: false,
-        customCSS: null,
-      },
-    },
-    tts: { providerId: null, model: 'tts-1', voice: 'alloy', speed: 1 },
-    floatingButton: { enabled: true, position: 0.66, disabledFloatingButtonPatterns: [] },
-    selectionToolbar: { enabled: true, disabledSelectionToolbarPatterns: [] },
-    sideContent: { width: 500 },
-    betaExperience: { enabled: false },
-    contextMenu: { enabled: true },
+    array: [1, 2, 3],
     ...overrides,
   }
 }
 
 describe('conflict-merge', () => {
-  let safeParseSpy: ReturnType<typeof vi.spyOn>
-
-  beforeEach(() => {
-    safeParseSpy = vi.spyOn(configSchema, 'safeParse').mockImplementation(data => ({
-      success: true,
-      data: data as any,
-    }))
-  })
-
-  afterEach(() => {
-    safeParseSpy.mockRestore()
-  })
-
-  describe('detectChanges', () => {
+  describe('detectConflicts', () => {
     it('should detect no conflicts when all configs are identical', () => {
-      const base = createMockConfig()
-      const local = createMockConfig()
-      const remote = createMockConfig()
+      const base = createTestConfig()
+      const local = createTestConfig()
+      const remote = createTestConfig()
 
       const result = detectConflicts(base, local, remote)
 
       expect(result.conflicts).toHaveLength(0)
-      expect(result.validationError).toBeNull()
       expect(result.draft).toEqual(base)
     })
 
     it('should detect conflict when only local changed', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-      const remote = createMockConfig()
-
-      const result = detectConflicts(base, local, remote)
-
-      expect(result.conflicts.length).toBeGreaterThan(0)
-      expect(result.conflicts.find(c => c.path.join('.') === 'language.targetCode')).toBeDefined()
-      expect(result.validationError).toBeNull()
-      // Draft keeps base value for conflicts until resolved
-      expect(result.draft.language.targetCode).toBe('cmn')
-    })
-
-    it('should detect conflict when only remote changed', () => {
-      const base = createMockConfig()
-      const local = createMockConfig()
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-
-      const result = detectConflicts(base, local, remote)
-
-      expect(result.conflicts.length).toBeGreaterThan(0)
-      expect(result.conflicts.find(c => c.path.join('.') === 'language.targetCode')).toBeDefined()
-      expect(result.validationError).toBeNull()
-      // Draft keeps base value for conflicts until resolved
-      expect(result.draft.language.targetCode).toBe('cmn')
-    })
-
-    it('should detect no conflict when both changed to same value', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-
-      const result = detectConflicts(base, local, remote)
-
-      expect(result.conflicts).toHaveLength(0)
-      // Same change is auto-applied to draft
-      expect(result.draft.language.targetCode).toBe('jpn')
-    })
-
-    it('should detect conflict when both changed to different values', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'kor' },
-      })
+      const base = createTestConfig()
+      const local = createTestConfig({ primitive: 'local-changed' })
+      const remote = createTestConfig()
 
       const result = detectConflicts(base, local, remote)
 
       expect(result.conflicts).toHaveLength(1)
       expect(result.conflicts[0]).toEqual({
-        path: ['language', 'targetCode'],
-        baseValue: 'cmn',
-        localValue: 'jpn',
-        remoteValue: 'kor',
+        path: ['primitive'],
+        baseValue: 'base',
+        localValue: 'local-changed',
+        remoteValue: 'base',
       })
-      expect(result.validationError).toBeNull()
+      // Draft keeps base value until resolved
+      expect((result.draft as any).primitive).toBe('base')
     })
 
-    it('should detect multiple conflicts', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-        translate: { ...base.translate, batchQueueConfig: { ...base.translate.batchQueueConfig, maxCharactersPerBatch: 800 } },
+    it('should detect conflict when only remote changed', () => {
+      const base = createTestConfig()
+      const local = createTestConfig()
+      const remote = createTestConfig({ primitive: 'remote-changed' })
+
+      const result = detectConflicts(base, local, remote)
+
+      expect(result.conflicts).toHaveLength(1)
+      expect(result.conflicts[0]).toEqual({
+        path: ['primitive'],
+        baseValue: 'base',
+        localValue: 'base',
+        remoteValue: 'remote-changed',
       })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'kor' },
-        translate: { ...base.translate, batchQueueConfig: { ...base.translate.batchQueueConfig, maxCharactersPerBatch: 2000 } },
+      // Draft keeps base value until resolved
+      expect((result.draft as any).primitive).toBe('base')
+    })
+
+    it('should detect no conflict when both changed to same value', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({ primitive: 'same-value' })
+      const remote = createTestConfig({ primitive: 'same-value' })
+
+      const result = detectConflicts(base, local, remote)
+
+      expect(result.conflicts).toHaveLength(0)
+      // Same change is auto-applied to draft
+      expect((result.draft as any).primitive).toBe('same-value')
+    })
+
+    it('should detect conflict when both changed to different values', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({ primitive: 'local-value' })
+      const remote = createTestConfig({ primitive: 'remote-value' })
+
+      const result = detectConflicts(base, local, remote)
+
+      expect(result.conflicts).toHaveLength(1)
+      expect(result.conflicts[0]).toEqual({
+        path: ['primitive'],
+        baseValue: 'base',
+        localValue: 'local-value',
+        remoteValue: 'remote-value',
+      })
+      // Draft keeps base value until resolved
+      expect((result.draft as any).primitive).toBe('base')
+    })
+
+    it('should detect multiple conflicts at different paths', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({
+        primitive: 'local-primitive',
+        number: 200,
+      })
+      const remote = createTestConfig({
+        primitive: 'remote-primitive',
+        number: 300,
       })
 
       const result = detectConflicts(base, local, remote)
 
       expect(result.conflicts).toHaveLength(2)
-      expect(result.conflicts.find(c => c.path.join('.') === 'language.targetCode')).toBeDefined()
-      expect(result.conflicts.find(c => c.path.join('.') === 'translate.batchQueueConfig.maxCharactersPerBatch')).toBeDefined()
+      expect(result.conflicts.find(c => c.path.join('.') === 'primitive')).toBeDefined()
+      expect(result.conflicts.find(c => c.path.join('.') === 'number')).toBeDefined()
     })
 
-    it('should handle array conflicts', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        translate: {
-          ...base.translate,
-          page: {
-            ...base.translate.page,
-            autoTranslatePatterns: ['example.com'],
-          },
+    it('should handle array conflicts (arrays are atomic)', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({ array: [1, 2, 3, 4] })
+      const remote = createTestConfig({ array: [1, 2] })
+
+      const result = detectConflicts(base, local, remote)
+
+      expect(result.conflicts).toHaveLength(1)
+      expect(result.conflicts[0]).toEqual({
+        path: ['array'],
+        baseValue: [1, 2, 3],
+        localValue: [1, 2, 3, 4],
+        remoteValue: [1, 2],
+      })
+    })
+
+    it('should handle nested object conflicts', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({
+        nested: { ...base.nested, value: 'local-nested' },
+      })
+      const remote = createTestConfig({
+        nested: { ...base.nested, value: 'remote-nested' },
+      })
+
+      const result = detectConflicts(base, local, remote)
+
+      expect(result.conflicts).toHaveLength(1)
+      expect(result.conflicts[0].path).toEqual(['nested', 'value'])
+    })
+
+    it('should handle deeply nested object conflicts', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({
+        nested: {
+          ...base.nested,
+          deep: { ...base.nested.deep, count: 10 },
         },
       })
-      const remote = createMockConfig({
-        translate: {
-          ...base.translate,
-          page: {
-            ...base.translate.page,
-            autoTranslatePatterns: ['test.com'],
-          },
+      const remote = createTestConfig({
+        nested: {
+          ...base.nested,
+          deep: { ...base.nested.deep, count: 20 },
         },
       })
 
       const result = detectConflicts(base, local, remote)
 
       expect(result.conflicts).toHaveLength(1)
-      expect(result.conflicts[0].path).toEqual(['translate', 'page', 'autoTranslatePatterns'])
+      expect(result.conflicts[0].path).toEqual(['nested', 'deep', 'count'])
+      expect(result.conflicts[0].baseValue).toBe(5)
+      expect(result.conflicts[0].localValue).toBe(10)
+      expect(result.conflicts[0].remoteValue).toBe(20)
     })
 
-    it('should handle nested object conflicts', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        translate: {
-          ...base.translate,
-          requestQueueConfig: {
-            capacity: 20,
-            rate: 3,
-          },
-        },
-      })
-      const remote = createMockConfig({
-        translate: {
-          ...base.translate,
-          requestQueueConfig: {
-            capacity: 15,
-            rate: 2,
-          },
-        },
-      })
-
-      const result = detectConflicts(base, local, remote)
-
-      expect(result.conflicts.length).toBeGreaterThan(0)
-      expect(result.conflicts.find(c => c.path.join('.') === 'translate.requestQueueConfig.capacity')).toBeDefined()
-    })
-
-    it('should track one-sided changes as conflicts with draft keeping base values', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-      const remote = createMockConfig({
-        translate: { ...base.translate, mode: 'translationOnly' },
-      })
+    it('should track one-sided changes from different sources as separate conflicts', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({ primitive: 'local-only' })
+      const remote = createTestConfig({ number: 999 })
 
       const result = detectConflicts(base, local, remote)
 
       // Both one-sided changes are tracked as conflicts
-      expect(result.conflicts.length).toBeGreaterThan(0)
-      // Draft keeps base values for conflicts until resolved
-      expect(result.draft.language.targetCode).toBe('cmn')
-      expect(result.draft.translate.mode).toBe('bilingual')
-    })
-
-    it('should track multiple one-sided changes as conflicts with draft keeping base values', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn', level: 'advanced' },
-        floatingButton: { ...base.floatingButton, position: 0.8 },
-      })
-      const remote = createMockConfig({
-        translate: {
-          ...base.translate,
-          mode: 'translationOnly',
-          requestQueueConfig: {
-            capacity: 20,
-            rate: 3,
-          },
-        },
-      })
-
-      const result = detectConflicts(base, local, remote)
-
-      // All one-sided changes are tracked as conflicts
-      expect(result.conflicts.length).toBeGreaterThan(0)
-      // Draft keeps base values for conflicts until resolved
-      expect(result.draft.language.targetCode).toBe('cmn')
-      expect(result.draft.language.level).toBe('intermediate')
-      expect(result.draft.floatingButton.position).toBe(0.66)
-      expect(result.draft.translate.mode).toBe('bilingual')
-      expect(result.draft.translate.requestQueueConfig.capacity).toBe(10)
-      expect(result.draft.translate.requestQueueConfig.rate).toBe(2)
+      expect(result.conflicts).toHaveLength(2)
+      // Draft keeps base values until resolved
+      expect((result.draft as any).primitive).toBe('base')
+      expect((result.draft as any).number).toBe(100)
     })
   })
 
   describe('applyResolutions', () => {
+    let safeParseSpy: ReturnType<typeof vi.spyOn>
+
+    beforeEach(() => {
+      safeParseSpy = vi.spyOn(configSchema, 'safeParse').mockImplementation(data => ({
+        success: true,
+        data: data as any,
+      }))
+    })
+
+    afterEach(() => {
+      safeParseSpy.mockRestore()
+    })
+
     it('should apply local resolution', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'kor' },
-      })
+      const base = createTestConfig()
+      const local = createTestConfig({ primitive: 'local-value' })
+      const remote = createTestConfig({ primitive: 'remote-value' })
 
       const diffResult = detectConflicts(base, local, remote)
-      const resolutions = {
-        'language.targetCode': 'local' as const,
-      }
+      const resolutions = { primitive: 'local' as const }
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.config?.language.targetCode).toBe('jpn')
+      expect((result.config as any)?.primitive).toBe('local-value')
       expect(result.validationError).toBeNull()
     })
 
     it('should apply remote resolution', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'kor' },
-      })
+      const base = createTestConfig()
+      const local = createTestConfig({ primitive: 'local-value' })
+      const remote = createTestConfig({ primitive: 'remote-value' })
 
       const diffResult = detectConflicts(base, local, remote)
-      const resolutions = {
-        'language.targetCode': 'remote' as const,
-      }
+      const resolutions = { primitive: 'remote' as const }
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.config?.language.targetCode).toBe('kor')
+      expect((result.config as any)?.primitive).toBe('remote-value')
       expect(result.validationError).toBeNull()
     })
 
     it('should apply multiple resolutions', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-        translate: { ...base.translate, batchQueueConfig: { ...base.translate.batchQueueConfig, maxCharactersPerBatch: 800 } },
+      const base = createTestConfig()
+      const local = createTestConfig({
+        primitive: 'local-primitive',
+        number: 200,
       })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'kor' },
-        translate: { ...base.translate, batchQueueConfig: { ...base.translate.batchQueueConfig, maxCharactersPerBatch: 2000 } },
+      const remote = createTestConfig({
+        primitive: 'remote-primitive',
+        number: 300,
       })
 
       const diffResult = detectConflicts(base, local, remote)
       const resolutions = {
-        'language.targetCode': 'local' as const,
-        'translate.batchQueueConfig.maxCharactersPerBatch': 'remote' as const,
+        primitive: 'local' as const,
+        number: 'remote' as const,
       }
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.config?.language.targetCode).toBe('jpn')
-      expect(result.config?.translate.batchQueueConfig.maxCharactersPerBatch).toBe(2000)
+      expect((result.config as any)?.primitive).toBe('local-primitive')
+      expect((result.config as any)?.number).toBe(300)
       expect(result.validationError).toBeNull()
     })
 
-    it('should apply all resolutions correctly', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn', level: 'advanced' },
+    it('should apply nested path resolutions', () => {
+      const base = createTestConfig()
+      const local = createTestConfig({
+        nested: { ...base.nested, value: 'local-nested' },
       })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'kor' },
+      const remote = createTestConfig({
+        nested: { ...base.nested, value: 'remote-nested' },
       })
 
       const diffResult = detectConflicts(base, local, remote)
-      // All conflicts must be resolved
-      const resolutions = {
-        'language.targetCode': 'remote' as const,
-        'language.level': 'local' as const,
-      }
+      const resolutions = { 'nested.value': 'remote' as const }
 
       const result = applyResolutions(diffResult, resolutions)
 
-      expect(result.config?.language.targetCode).toBe('kor')
-      expect(result.config?.language.level).toBe('advanced')
+      expect((result.config as any)?.nested.value).toBe('remote-nested')
       expect(result.validationError).toBeNull()
     })
 
     it('should preserve base value when conflict is unresolved', () => {
-      const base = createMockConfig()
-      const local = createMockConfig({
-        language: { ...base.language, targetCode: 'jpn' },
-      })
-      const remote = createMockConfig({
-        language: { ...base.language, targetCode: 'kor' },
-      })
+      const base = createTestConfig()
+      const local = createTestConfig({ primitive: 'local-value' })
+      const remote = createTestConfig({ primitive: 'remote-value' })
 
       const diffResult = detectConflicts(base, local, remote)
       const resolutions = {} // No resolution provided
@@ -402,7 +278,7 @@ describe('conflict-merge', () => {
       const result = applyResolutions(diffResult, resolutions)
 
       // Draft keeps base value for unresolved conflicts
-      expect(result.config?.language.targetCode).toBe('cmn')
+      expect((result.config as any)?.primitive).toBe('base')
       expect(result.validationError).toBeNull()
     })
   })

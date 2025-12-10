@@ -8,7 +8,7 @@ import ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@/components/providers/theme-provider'
 import { TooltipProvider } from '@/components/shadcn/tooltip'
 import { configAtom } from '@/utils/atoms/config'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { sendMessage } from '@/utils/message'
 import { queryClient } from '@/utils/tanstack-query'
@@ -35,7 +35,7 @@ function HydrateAtoms({
 async function initApp() {
   const root = document.getElementById('root')!
   root.className = 'text-base antialiased w-[320px] bg-background'
-  const config = (await getConfigFromStorage()) ?? DEFAULT_CONFIG
+  const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
 
   const activeTab = await browser.tabs.query({
     active: true,

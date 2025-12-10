@@ -6,7 +6,7 @@ import { useExtractContent } from '@/hooks/read/extract'
 import { useReadArticle } from '@/hooks/read/read'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
-import { isAnyAPIKeyForReadProviders } from '@/utils/config/config'
+import { isAnyAPIKeyForReadProviders } from '@/utils/config/api'
 import { isSideOpenAtom } from '../../atoms'
 import HiddenButton from './components/hidden-button'
 

@@ -23,8 +23,8 @@ vi.mock('@/utils/host/translate/translate-text', () => ({
   validateTranslationConfig: vi.fn(() => true),
 }))
 
-vi.mock('@/utils/config/config', () => ({
-  getConfigFromStorage: vi.fn(),
+vi.mock('@/utils/config/storage', () => ({
+  getLocalConfig: vi.fn(),
 }))
 
 const BILINGUAL_CONFIG: Config = {
@@ -48,9 +48,9 @@ describe('translate', () => {
   const originalGetComputedStyle = window.getComputedStyle
 
   beforeAll(async () => {
-    // Mock getConfigFromStorage to return DEFAULT_CONFIG
-    const { getConfigFromStorage } = await import('@/utils/config/config')
-    vi.mocked(getConfigFromStorage).mockResolvedValue(DEFAULT_CONFIG)
+    // Mock getLocalConfig to return DEFAULT_CONFIG
+    const { getLocalConfig } = await import('@/utils/config/storage')
+    vi.mocked(getLocalConfig).mockResolvedValue(DEFAULT_CONFIG)
 
     window.getComputedStyle = vi.fn((element) => {
       const originalStyle = originalGetComputedStyle(element)

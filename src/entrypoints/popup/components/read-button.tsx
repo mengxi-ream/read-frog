@@ -5,7 +5,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/shadcn/button'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
-import { isAnyAPIKeyForReadProviders } from '@/utils/config/config'
+import { isAnyAPIKeyForReadProviders } from '@/utils/config/api'
 import { sendMessage } from '@/utils/message'
 import { cn } from '@/utils/styles/tailwind'
 import { isIgnoreTabAtom } from '../atoms/ignore'

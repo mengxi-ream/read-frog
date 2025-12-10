@@ -4,8 +4,8 @@ import { executeTranslate } from '@/utils/host/translate/execute-translate'
 import { translateText } from '@/utils/host/translate/translate-text'
 
 // Mock dependencies
-vi.mock('@/utils/config/config', () => ({
-  getConfigFromStorage: vi.fn(),
+vi.mock('@/utils/config/storage', () => ({
+  getLocalConfig: vi.fn(),
 }))
 
 vi.mock('@/utils/message', () => ({
@@ -30,7 +30,7 @@ describe('translate-text', () => {
     vi.clearAllMocks()
     mockSendMessage = vi.mocked((await import('@/utils/message')).sendMessage)
     mockMicrosoftTranslate = vi.mocked((await import('@/utils/host/translate/api/microsoft')).microsoftTranslate)
-    mockGetConfigFromStorage = vi.mocked((await import('@/utils/config/config')).getConfigFromStorage)
+    mockGetConfigFromStorage = vi.mocked((await import('@/utils/config/storage')).getLocalConfig)
     mockGetTranslatePrompt = vi.mocked((await import('@/utils/prompts/translate')).getTranslatePrompt)
 
     // Mock getConfigFromStorage to return DEFAULT_CONFIG

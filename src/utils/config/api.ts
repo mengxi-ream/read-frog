@@ -1,40 +1,5 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import type { Config } from '@/types/config/config'
-import type { ConfigMeta } from '@/types/config/meta'
 import type { ProvidersConfig } from '@/types/config/provider'
-import { storage } from '#imports'
-import { configSchema } from '@/types/config/config'
 import { isReadProviderConfig } from '@/types/config/provider'
-import {
-  CONFIG_STORAGE_KEY,
-  DEFAULT_CONFIG,
-  DEFAULT_DETECTED_CODE,
-  DETECTED_CODE_STORAGE_KEY,
-} from '../constants/config'
-import { logger } from '../logger'
-
-export async function getDetectedCodeFromStorage(): Promise<LangCodeISO6393> {
-  return await storage.getItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`) ?? DEFAULT_DETECTED_CODE
-}
-
-export async function getConfigFromStorage() {
-  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
-  if (!config) {
-    logger.warn('No config found in storage')
-    return null
-  }
-  const parsedConfig = configSchema.safeParse(config)
-  if (!parsedConfig.success) {
-    logger.error('Config is invalid, using default config')
-    return DEFAULT_CONFIG
-  }
-  return parsedConfig.data
-}
-
-export async function setConfigToStorage(config: Config) {
-  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, config)
-  await storage.setMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, { lastModifiedAt: Date.now() })
-}
 
 export function isAnyAPIKeyForReadProviders(providersConfig: ProvidersConfig) {
   const readProvidersConfig = providersConfig.filter(isReadProviderConfig)

@@ -1,5 +1,5 @@
 import type { ArticleContent } from '@/types/content'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { DEFAULT_CONFIG } from '../constants/config'
 import { DEFAULT_BATCH_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_SYSTEM_PROMPT, getTokenCellText, INPUT, SUMMARY, TARGET_LANG, TITLE } from '../constants/prompt'
 
@@ -18,7 +18,7 @@ export async function getTranslatePrompt(
   input: string,
   options?: TranslatePromptOptions,
 ): Promise<TranslatePromptResult> {
-  const config = await getConfigFromStorage() ?? DEFAULT_CONFIG
+  const config = await getLocalConfig() ?? DEFAULT_CONFIG
   const customPromptsConfig = config.translate.customPromptsConfig
   const { patterns = [], promptId } = customPromptsConfig
 

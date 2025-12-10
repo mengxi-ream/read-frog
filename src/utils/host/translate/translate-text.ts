@@ -11,7 +11,7 @@ import { getProviderConfigById } from '@/utils/config/helpers'
 import { removeDummyNodes } from '@/utils/content/utils'
 import { logger } from '@/utils/logger'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
-import { getConfigFromStorage } from '../../config/config'
+import { getLocalConfig } from '../../config/storage'
 import { Sha256Hex } from '../../hash'
 import { sendMessage } from '../../message'
 
@@ -129,7 +129,7 @@ async function buildHashComponents(
 }
 
 export async function translateText(text: string) {
-  const config = await getConfigFromStorage()
+  const config = await getLocalConfig()
   if (!config) {
     throw new Error('No global config when translate text')
   }

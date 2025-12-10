@@ -1,6 +1,6 @@
 import type { Config } from '@/types/config/config'
 import type { Point } from '@/types/dom'
-import { getDetectedCodeFromStorage } from '@/utils/config/config'
+import { getDetectedCodeFromStorage } from '@/utils/config/languages'
 import { isHTMLElement } from '../dom/filter'
 import { findNearestAncestorBlockNodeAt } from '../dom/find'
 import { walkAndLabelElement } from '../dom/traversal'

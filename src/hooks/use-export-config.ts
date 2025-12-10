@@ -4,7 +4,7 @@ import { useMutation } from '@tanstack/react-query'
 import { kebabCase } from 'case-anything'
 import { saveAs } from 'file-saver'
 import { toast } from 'sonner'
-import { getObjectWithoutAPIKeys } from '@/utils/config/config'
+import { getObjectWithoutAPIKeys } from '@/utils/config/api'
 import { APP_NAME } from '@/utils/constants/app'
 
 interface UseExportConfigOptions {

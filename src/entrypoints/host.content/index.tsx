@@ -3,7 +3,7 @@ import { createShadowRootUi, defineContentScript, storage } from '#imports'
 import { kebabCase } from 'case-anything'
 import ReactDOM from 'react-dom/client'
 // import eruda from 'eruda'
-import { getConfigFromStorage } from '@/utils/config/config'
+import { getLocalConfig } from '@/utils/config/storage'
 import { APP_NAME } from '@/utils/constants/app'
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from '@/utils/constants/config'
 import { getDocumentInfo } from '@/utils/content/analyze'
@@ -53,7 +53,7 @@ export default defineContentScript({
 
     void registerNodeTranslationTriggers()
 
-    const initialConfig = await getConfigFromStorage()
+    const initialConfig = await getLocalConfig()
     const preloadConfig = initialConfig?.translate.page.preload ?? DEFAULT_CONFIG.translate.page.preload
     const manager = new PageTranslationManager({
       root: null,

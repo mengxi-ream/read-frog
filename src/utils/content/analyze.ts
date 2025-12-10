@@ -6,8 +6,8 @@ import { franc } from 'franc-min'
 import z from 'zod'
 import { flattenToParagraphs } from '@/entrypoints/side.content/utils/article'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
-import { getConfigFromStorage } from '../config/config'
 import { getProviderConfigById } from '../config/helpers'
+import { getLocalConfig } from '../config/storage'
 import { getProviderOptions } from '../constants/model'
 import { logger } from '../logger'
 import { getTranslateModelById } from '../providers/model'
@@ -36,7 +36,7 @@ export async function getDocumentInfo(): Promise<{
   let detectionSource: DetectionSource = 'fallback'
 
   // Get config to check if LLM detection is enabled
-  const config = await getConfigFromStorage()
+  const config = await getLocalConfig()
 
   // Try LLM detection first if enabled and auto-translate languages are configured
   if (config?.translate.page.enableLLMDetection && config?.translate.page.autoTranslateLanguages?.length > 0) {
@@ -104,7 +104,7 @@ export async function detectLanguageWithLLM(
 
   // Get model from config
   try {
-    const config = await getConfigFromStorage()
+    const config = await getLocalConfig()
     if (!config) {
       logger.warn('No config found for language detection')
       return null
