@@ -2,10 +2,9 @@ import type { Config } from '@/types/config/config'
 import type { ConfigValueAndMeta } from '@/types/config/meta'
 import { migrateConfig } from '../config/migration'
 import { CONFIG_SCHEMA_VERSION } from '../constants/config'
-import { getGoogleUserInfo } from '../google-drive/auth'
 import { logger } from '../logger'
 import { downloadFile, findFileInAppData, uploadFile } from './api'
-import { getValidAccessToken } from './auth'
+import { getGoogleUserInfo, getValidAccessToken } from './auth'
 import { GOOGLE_DRIVE_CONFIG_FILENAME } from './constants'
 
 export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
