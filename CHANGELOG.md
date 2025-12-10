@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.20.1
+
+### Patch Changes
+
+- [#788](https://github.com/mengxi-ream/read-frog/pull/788) [`c58f3d0`](https://github.com/mengxi-ream/read-frog/commit/c58f3d08f20067265b4ee7b957a071b66d43e8b3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: separate Google Drive remote storage functions into dedicated module
+
+- [#780](https://github.com/mengxi-ream/read-frog/pull/780) [`eb82c74`](https://github.com/mengxi-ream/read-frog/commit/eb82c740ab4bef83ead54cbeb3ea90fee1c1bf10) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: fix Google Drive sync with last synced config schema version tracking
+
+- [#781](https://github.com/mengxi-ream/read-frog/pull/781) [`d3bb1a1`](https://github.com/mengxi-ream/read-frog/commit/d3bb1a1c6de340c15d8de1a189d32e7f3a84e5f5) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat: support logout for google drive sync
+
 ## 1.20.0
 
 ### Minor Changes
