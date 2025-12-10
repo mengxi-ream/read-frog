@@ -243,12 +243,12 @@ describe('selectionToolbar - isInputOrTextarea logic', () => {
     await waitFor(expectToolbarVisible)
   })
 
-  it('should not show toolbar when selection does not contain the click target', async () => {
+  it('should not show toolbar when selection does not contain the click target when click target is a button', async () => {
     render(
       <div>
         <SelectionToolbar />
-        <div data-testid="selected-element">Selected text</div>
-        <div data-testid="click-element">Click target</div>
+        <input data-testid="selected-element" type="text" defaultValue={MOCK_SELECTED_TEXT} />
+        <button data-testid="click-element" type="button">Click target</button>
       </div>,
     )
 
