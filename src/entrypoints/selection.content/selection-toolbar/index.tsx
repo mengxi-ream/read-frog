@@ -73,7 +73,7 @@ export function SelectionToolbar() {
         const selection = window.getSelection()
         const selectedText = selection?.toString().trim() || ''
 
-        if (!isInputOrTextarea && !selection?.containsNode(e.target as Node, true)) {
+        if (!isInputOrTextarea && !selection?.containsNode(e.target as Node, true) && e.target instanceof HTMLButtonElement) {
           return
         }
 
