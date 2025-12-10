@@ -3,9 +3,6 @@ import type { ConfigMeta, ConfigValueAndMeta, LastSyncedConfigMeta, LastSyncedCo
 import { storage } from '#imports'
 import { configSchema } from '@/types/config/config'
 import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG, LAST_SYNCED_CONFIG_STORAGE_KEY } from '../constants/config'
-import { downloadFile, findFileInAppData, uploadFile } from '../google-drive/api'
-import { getGoogleUserInfo, getValidAccessToken } from '../google-drive/auth'
-import { GOOGLE_DRIVE_CONFIG_FILENAME } from '../google-drive/constants'
 import { logger } from '../logger'
 import { migrateConfig } from './migration'
 
@@ -96,64 +93,4 @@ export async function setLastSyncConfigAndMeta(value: Config, meta: Partial<Last
       lastSyncedAt,
     }),
   ])
-}
-
-export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
-  configValueAndMeta: ConfigValueAndMeta | null
-  email: string
-}> {
-  try {
-    const accessToken = await getValidAccessToken()
-
-    // Fetch user email from Google API
-    const userInfo = await getGoogleUserInfo(accessToken)
-
-    const file = await findFileInAppData(GOOGLE_DRIVE_CONFIG_FILENAME)
-
-    if (!file) {
-      return { configValueAndMeta: null, email: userInfo.email }
-    }
-
-    const content = await downloadFile(file.id)
-    const remoteData = JSON.parse(content) as ConfigValueAndMeta
-
-    let migratedConfig: Config
-    try {
-      migratedConfig = await migrateConfig(remoteData.value, remoteData.meta.schemaVersion)
-    }
-    catch (error) {
-      logger.error('Failed to migrate remote config', error)
-      return { configValueAndMeta: null, email: userInfo.email }
-    }
-
-    return {
-      configValueAndMeta: {
-        value: migratedConfig,
-        meta: {
-          schemaVersion: CONFIG_SCHEMA_VERSION,
-          lastModifiedAt: remoteData.meta.lastModifiedAt,
-        },
-      },
-      email: userInfo.email,
-    }
-  }
-  catch (error) {
-    logger.error('Failed to get remote config', error)
-    throw error
-  }
-}
-
-export async function setRemoteConfigAndMeta(
-  configValueAndMeta: ConfigValueAndMeta,
-): Promise<void> {
-  try {
-    const existingFile = await findFileInAppData(GOOGLE_DRIVE_CONFIG_FILENAME)
-
-    const content = JSON.stringify(configValueAndMeta, null, 2)
-    await uploadFile(GOOGLE_DRIVE_CONFIG_FILENAME, content, existingFile?.id)
-  }
-  catch (error) {
-    logger.error('Failed to upload local config', error)
-    throw error
-  }
 }

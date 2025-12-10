@@ -3,21 +3,23 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   getLastSyncedConfigAndMeta,
   getLocalConfigAndMeta,
-  getRemoteConfigAndMetaWithUserEmail,
   setLastSyncConfigAndMeta,
   setLocalConfigAndMeta,
-  setRemoteConfigAndMeta,
 } from '@/utils/config/storage'
+import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from '../storage'
 import { syncConfig } from '../sync'
 
-// Mock the storage module
+// Mock the storage modules
 vi.mock('@/utils/config/storage', () => ({
   getLocalConfigAndMeta: vi.fn(),
   getLastSyncedConfigAndMeta: vi.fn(),
-  getRemoteConfigAndMetaWithUserEmail: vi.fn(),
   setLocalConfigAndMeta: vi.fn(),
-  setRemoteConfigAndMeta: vi.fn(),
   setLastSyncConfigAndMeta: vi.fn(),
+}))
+
+vi.mock('../storage', () => ({
+  getRemoteConfigAndMetaWithUserEmail: vi.fn(),
+  setRemoteConfigAndMeta: vi.fn(),
 }))
 
 // Mock the logger

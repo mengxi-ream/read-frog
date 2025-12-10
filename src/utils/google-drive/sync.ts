@@ -5,13 +5,12 @@ import { configSchema } from '@/types/config/config'
 import {
   getLastSyncedConfigAndMeta,
   getLocalConfigAndMeta,
-  getRemoteConfigAndMetaWithUserEmail,
   setLastSyncConfigAndMeta,
   setLocalConfigAndMeta,
-  setRemoteConfigAndMeta,
 } from '../config/storage'
 import { CONFIG_SCHEMA_VERSION } from '../constants/config'
 import { logger } from '../logger'
+import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from './storage'
 
 export type SyncAction = 'uploaded' | 'downloaded' | 'same-changes' | 'no-change'
 
