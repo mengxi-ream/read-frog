@@ -15,11 +15,10 @@ export function ExportPrompts() {
 
   const sortOutDownloadPrompts = patterns
     .filter(pattern => selectedPrompts.includes(pattern.id))
-    .map(pattern => ({
-      name: pattern.name,
-      systemPrompt: pattern.systemPrompt,
-      prompt: pattern.prompt,
-    }))
+    .map((pattern) => {
+      const { id, ...patternWithoutId } = pattern
+      return patternWithoutId
+    })
 
   return (
     <Button
