@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.20.2
+
+### Patch Changes
+
+- [#793](https://github.com/mengxi-ream/read-frog/pull/793) [`20d9c1b`](https://github.com/mengxi-ream/read-frog/commit/20d9c1b3ed8012b90960ff345cb0fa1f0d647924) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: add systemPrompt to translation prompt export
+
+- [#796](https://github.com/mengxi-ream/read-frog/pull/796) [`b6f74fc`](https://github.com/mengxi-ream/read-frog/commit/b6f74fc09d267d22a3bea5fec1053ee5428f048f) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - build: upgrade packages
+
+- [#790](https://github.com/mengxi-ream/read-frog/pull/790) [`475417b`](https://github.com/mengxi-ream/read-frog/commit/475417bbb24d905c4c3f87c8bf59284fe56b690c) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: refine selection handling in toolbar to ensure button interactions are valid
+
 ## 1.20.1
 
 ### Patch Changes
