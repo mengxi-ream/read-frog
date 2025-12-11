@@ -17,6 +17,7 @@ export function ExportPrompts() {
     .filter(pattern => selectedPrompts.includes(pattern.id))
     .map(pattern => ({
       name: pattern.name,
+      systemPrompt: pattern.systemPrompt,
       prompt: pattern.prompt,
     }))
 
