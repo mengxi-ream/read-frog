@@ -169,6 +169,11 @@ options:
         description: Configure websites where the floating button should be disabled
         enterUrlPattern: Enter URL pattern
         urlPattern: URL Pattern
+      clickAction:
+        title: Click Action
+        description: Choose the action when clicking the floating button
+        panel: Open Panel
+        translate: Toggle Page Translation
     selectionToolbar:
       globalToggle:
         title: Enable Selection Toolbar

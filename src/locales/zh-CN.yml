@@ -168,6 +168,11 @@ options:
         description: 配置需要禁用悬浮按钮的网站
         enterUrlPattern: 输入网址模式
         urlPattern: 网址模式
+      clickAction:
+        title: 点击行为
+        description: 选择点击悬浮按钮时执行的操作
+        panel: 打开面板
+        translate: 切换页面翻译
     selectionToolbar:
       globalToggle:
         title: 启用选择工具栏

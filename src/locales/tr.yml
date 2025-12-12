@@ -169,6 +169,11 @@ options:
         description: Yüzen butonun devre dışı bırakılması gereken web sitelerini yapılandırın
         enterUrlPattern: URL kalıbı girin
         urlPattern: URL Kalıbı
+      clickAction:
+        title: Tıklama Eylemi
+        description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
+        panel: Paneli Aç
+        translate: Sayfa Çevirisini Aç/Kapat
     selectionToolbar:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir

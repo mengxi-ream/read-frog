@@ -4,6 +4,7 @@ import selectionToolbarDemoImage from '@/assets/demo/selection-toolbar.png'
 import { GradientBackground } from '@/components/gradient-background'
 import { PageLayout } from '../../components/page-layout'
 import { ContextMenuTranslateToggle } from './context-menu-translate-toggle'
+import { FloatingButtonClickAction } from './floating-button-click-action'
 import { FloatingButtonDisabledSites } from './floating-button-disabled-sites'
 import { FloatingButtonGlobalToggle } from './floating-button-global-toggle'
 import { SelectionToolbarDisabledSites } from './selection-toolbar-disabled-sites'
@@ -20,6 +21,7 @@ export function FloatingButtonAndToolbarPage() {
         />
       </GradientBackground>
       <FloatingButtonGlobalToggle />
+      <FloatingButtonClickAction />
       <FloatingButtonDisabledSites />
       <GradientBackground>
         <img

@@ -168,6 +168,11 @@ options:
         description: 設定需要停用懸浮按鈕的網站
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
+      clickAction:
+        title: 點擊行為
+        description: 選擇點擊懸浮按鈕時執行的操作
+        panel: 開啟面板
+        translate: 切換頁面翻譯
     selectionToolbar:
       globalToggle:
         title: 啟用選擇工具列

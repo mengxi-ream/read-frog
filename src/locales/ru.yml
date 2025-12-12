@@ -169,6 +169,11 @@ options:
         description: Настройте веб-сайты, где плавающая кнопка должна быть отключена
         enterUrlPattern: Введите URL-шаблон
         urlPattern: URL-шаблон
+      clickAction:
+        title: Действие по клику
+        description: Выберите действие при нажатии на плавающую кнопку
+        panel: Открыть панель
+        translate: Переключить перевод страницы
     selectionToolbar:
       globalToggle:
         title: Включить панель выделения

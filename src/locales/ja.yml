@@ -167,6 +167,11 @@ options:
         description: フローティングボタンを無効化するウェブサイトを設定します
         enterUrlPattern: URL パターンを入力
         urlPattern: URL パターン
+      clickAction:
+        title: クリック動作
+        description: フローティングボタンをクリックしたときの動作を選択
+        panel: パネルを開く
+        translate: ページ翻訳を切り替え
     selectionToolbar:
       globalToggle:
         title: 選択ツールバーを有効化

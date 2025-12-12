@@ -15,7 +15,7 @@ import { sendMessage } from '@/utils/message'
 import { cn } from '@/utils/styles/tailwind'
 import { matchDomainPattern } from '@/utils/url'
 import { shadowWrapper } from '../../'
-import { isDraggingButtonAtom, isSideOpenAtom } from '../../atoms'
+import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from '../../atoms'
 import HiddenButton from './components/hidden-button'
 import FloatingReadButton from './floating-read-button'
 import TranslateButton from './translate-button'
@@ -25,6 +25,7 @@ export default function FloatingButton() {
     configFieldsAtomMap.floatingButton,
   )
   const sideContent = useAtomValue(configFieldsAtomMap.sideContent)
+  const translationState = useAtomValue(enablePageTranslationAtom)
   const [isSideOpen, setIsSideOpen] = useAtom(isSideOpenAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
@@ -90,7 +91,12 @@ export default function FloatingButton() {
 
       // 只有未移动过才触发点击
       if (!hasMoved) {
-        setIsSideOpen(o => !o)
+        if (floatingButton.clickAction === 'translate') {
+          void sendMessage('tryToSetEnablePageTranslationOnContentScript', { enabled: !translationState.enabled })
+        }
+        else {
+          setIsSideOpen(o => !o)
+        }
       }
     }
 
