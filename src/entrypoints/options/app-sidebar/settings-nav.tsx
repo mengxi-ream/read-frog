@@ -22,9 +22,7 @@ const OVERLAY_TOOLS_PATHS = ['/floating-button', '/selection-toolbar', '/context
 
 export function SettingsNav() {
   const { pathname } = useLocation()
-  const isOverlayToolsActive = OVERLAY_TOOLS_PATHS.includes(
-    pathname as (typeof OVERLAY_TOOLS_PATHS)[number],
-  )
+  const isOverlayToolsActive = OVERLAY_TOOLS_PATHS.includes(pathname)
 
   return (
     <SidebarGroup>
