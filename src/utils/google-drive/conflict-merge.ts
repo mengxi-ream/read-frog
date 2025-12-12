@@ -155,8 +155,6 @@ export function applyResolutions(
     const resolution = resolutions[pathKey]
 
     if (!resolution) {
-      // All conflicts must be resolved
-      logger.error(`Missing resolution for conflict at path: ${pathKey}`)
       continue
     }
 
