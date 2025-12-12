@@ -1,5 +1,6 @@
 import type { Config } from '@/types/config/config'
 import type { ConfigValueAndMeta } from '@/types/config/meta'
+import { ConfigVersionTooNewError } from '../config/errors'
 import { migrateConfig } from '../config/migration'
 import { CONFIG_SCHEMA_VERSION } from '../constants/config'
 import { logger } from '../logger'
@@ -31,6 +32,9 @@ export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
       migratedConfig = await migrateConfig(remoteData.value, remoteData.meta.schemaVersion)
     }
     catch (error) {
+      if (error instanceof ConfigVersionTooNewError) {
+        throw error
+      }
       logger.error('Failed to migrate remote config', error)
       return { configValueAndMeta: null, email: userInfo.email }
     }

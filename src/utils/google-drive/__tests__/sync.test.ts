@@ -1,5 +1,6 @@
 import type { ConfigMeta, ConfigValueAndMeta, LastSyncedConfigMeta, LastSyncedConfigValueAndMeta } from '@/types/config/meta'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { ConfigVersionTooNewError } from '@/utils/config/errors'
 import {
   getLastSyncedConfigAndMeta,
   getLocalConfigAndMeta,
@@ -392,6 +393,22 @@ describe('syncConfig', () => {
       expect(result.status).toBe('error')
       expect((result as any).error).toBeInstanceOf(Error)
       expect((result as any).error.message).toBe('string error')
+    })
+
+    it('should propagate ConfigVersionTooNewError from remote config', async () => {
+      const versionError = new ConfigVersionTooNewError('Please upgrade')
+
+      vi.mocked(getLocalConfigAndMeta).mockResolvedValue(
+        createConfigValueAndMeta(createTestConfig()),
+      )
+      vi.mocked(getLastSyncedConfigAndMeta).mockResolvedValue(null)
+      vi.mocked(getRemoteConfigAndMetaWithUserEmail).mockRejectedValue(versionError)
+
+      const result = await syncConfig()
+
+      expect(result.status).toBe('error')
+      expect((result as any).error).toBeInstanceOf(ConfigVersionTooNewError)
+      expect((result as any).error.message).toBe('Please upgrade')
     })
   })
 })

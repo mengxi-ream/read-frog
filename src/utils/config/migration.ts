@@ -3,6 +3,7 @@ import type { Config } from '@/types/config/config'
 import { i18n } from '#imports'
 import { configSchema } from '@/types/config/config'
 import { CONFIG_SCHEMA_VERSION } from '../constants/config'
+import { ConfigVersionTooNewError } from './errors'
 import { migrate as migrateV001ToV002 } from './migration-scripts/v001-to-v002'
 import { migrate as migrateV002ToV003 } from './migration-scripts/v002-to-v003'
 import { migrate as migrateV003ToV004 } from './migration-scripts/v003-to-v004'
@@ -98,7 +99,7 @@ export async function runMigration(version: number, config: any): Promise<any> {
 
 export async function migrateConfig(originalConfig: unknown, originalConfigSchemaVersion: number): Promise<Config> {
   if (originalConfigSchemaVersion > CONFIG_SCHEMA_VERSION) {
-    throw new Error(i18n.t('options.config.sync.versionTooNew'))
+    throw new ConfigVersionTooNewError(i18n.t('options.config.sync.versionTooNew'))
   }
 
   if (originalConfigSchemaVersion < CONFIG_SCHEMA_VERSION) {
