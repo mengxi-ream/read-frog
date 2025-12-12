@@ -20,8 +20,8 @@
     "test:cov": "vitest run --coverage",
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
-    "zip": "wxt zip",
-    "zip:firefox": "wxt zip -b firefox",
+    "zip": "WXT_ZIP_MODE=true wxt zip",
+    "zip:firefox": "WXT_ZIP_MODE=true wxt zip -b firefox",
     "release": "changeset tag && git push origin --tags",
     "prepare": "husky"
   },
