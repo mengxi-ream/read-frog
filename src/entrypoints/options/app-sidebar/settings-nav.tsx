@@ -2,12 +2,20 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { Link, useLocation } from 'react-router'
 import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from '@/components/shadcn/collapsible'
+import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
 } from '@/components/shadcn/sidebar'
 
 export function SettingsNav() {
@@ -45,14 +53,54 @@ export function SettingsNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild isActive={pathname === '/floating-button-and-toolbar'}>
-              <Link to="/floating-button-and-toolbar">
-                <Icon icon="tabler:float-right" />
-                <span>{i18n.t('options.floatingButtonAndToolbar.title')}</span>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          <Collapsible
+            defaultOpen={['/floating-button', '/selection-toolbar', '/context-menu'].includes(
+              pathname,
+            )}
+            className="group/collapsible"
+          >
+            <SidebarMenuItem>
+              <CollapsibleTrigger asChild>
+                <SidebarMenuButton
+                  isActive={['/floating-button', '/selection-toolbar', '/context-menu'].includes(
+                    pathname,
+                  )}
+                >
+                  <Icon icon="tabler:layers-intersect" />
+                  <span>{i18n.t('options.overlayTools.title')}</span>
+                  <Icon
+                    icon="tabler:chevron-right"
+                    className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                  />
+                </SidebarMenuButton>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <SidebarMenuSub>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild isActive={pathname === '/floating-button'}>
+                      <Link to="/floating-button">
+                        <span>{i18n.t('options.overlayTools.floatingButton.title')}</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild isActive={pathname === '/selection-toolbar'}>
+                      <Link to="/selection-toolbar">
+                        <span>{i18n.t('options.overlayTools.selectionToolbar.title')}</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton asChild isActive={pathname === '/context-menu'}>
+                      <Link to="/context-menu">
+                        <span>{i18n.t('options.overlayTools.contextMenu.title')}</span>
+                      </Link>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
+                </SidebarMenuSub>
+              </CollapsibleContent>
+            </SidebarMenuItem>
+          </Collapsible>
 
           <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/tts'}>

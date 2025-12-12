@@ -153,6 +153,14 @@ options:
         confirm: Подтвердить
         cancel: Отмена
         description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
+  overlayTools:
+    title: Инструменты наложения
+    floatingButton:
+      title: Плавающая кнопка
+    selectionToolbar:
+      title: Панель выделения
+    contextMenu:
+      title: Контекстное меню
   floatingButtonAndToolbar:
     title: Плавающая кнопка и панель инструментов
     floatingButtonDemoImageAlt: Демо плавающей кнопки

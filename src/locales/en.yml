@@ -153,6 +153,14 @@ options:
         confirm: Confirm
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
+  overlayTools:
+    title: Overlay Tools
+    floatingButton:
+      title: Floating Button
+    selectionToolbar:
+      title: Selection Toolbar
+    contextMenu:
+      title: Context Menu
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
     floatingButtonDemoImageAlt: Floating Button Demo

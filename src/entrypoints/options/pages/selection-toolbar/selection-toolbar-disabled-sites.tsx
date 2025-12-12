@@ -22,7 +22,7 @@ export function SelectionToolbarDisabledSites() {
   const removePattern = (pattern: string) => {
     void setSelectionToolbarConfig({
       ...selectionToolbarConfig,
-      disabledSelectionToolbarPatterns: disabledSelectionToolbarPatterns.filter(p => p !== pattern),
+      disabledSelectionToolbarPatterns: disabledSelectionToolbarPatterns.filter((p: string) => p !== pattern),
     })
   }
 

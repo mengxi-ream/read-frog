@@ -152,6 +152,14 @@ options:
         confirm: 確認
         cancel: 取消
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
+  overlayTools:
+    title: 懸浮工具
+    floatingButton:
+      title: 懸浮按鈕
+    selectionToolbar:
+      title: 選擇工具列
+    contextMenu:
+      title: 右鍵選單
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
     floatingButtonDemoImageAlt: 懸浮按鈕示範

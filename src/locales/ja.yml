@@ -151,6 +151,14 @@ options:
         confirm: 確認
         cancel: キャンセル
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
+  overlayTools:
+    title: オーバーレイツール
+    floatingButton:
+      title: フローティングボタン
+    selectionToolbar:
+      title: 選択ツールバー
+    contextMenu:
+      title: コンテキストメニュー
   floatingButtonAndToolbar:
     title: フローティングボタンとツールバー
     floatingButtonDemoImageAlt: フローティングボタンデモ

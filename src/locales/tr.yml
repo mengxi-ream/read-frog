@@ -153,6 +153,14 @@ options:
         confirm: Onayla
         cancel: İptal
         description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
+  overlayTools:
+    title: Kaplama Araçları
+    floatingButton:
+      title: Yüzen Buton
+    selectionToolbar:
+      title: Seçim Araç Çubuğu
+    contextMenu:
+      title: Bağlam Menüsü
   floatingButtonAndToolbar:
     title: Yüzen Buton ve Araç Çubuğu
     floatingButtonDemoImageAlt: Yüzen Buton Demosu

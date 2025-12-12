@@ -152,6 +152,14 @@ options:
         confirm: 확인
         cancel: 취소
         description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
+  overlayTools:
+    title: 오버레이 도구
+    floatingButton:
+      title: 플로팅 버튼
+    selectionToolbar:
+      title: 선택 툴바
+    contextMenu:
+      title: 컨텍스트 메뉴
   floatingButtonAndToolbar:
     title: 플로팅 버튼 및 툴바
     floatingButtonDemoImageAlt: 플로팅 버튼 데모

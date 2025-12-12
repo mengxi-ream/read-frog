@@ -53,6 +53,9 @@ export default defineConfig({
     },
   },
   vite: configEnv => ({
+    optimizeDeps: {
+      include: ['@radix-ui/react-collapsible'],
+    },
     plugins: configEnv.mode === 'production'
       ? [
           {

@@ -153,6 +153,14 @@ options:
         confirm: Xác nhận
         cancel: Hủy
         description: Thao tác này sẽ xóa tất cả bộ nhớ đệm dịch. Hành động này không thể hoàn tác.
+  overlayTools:
+    title: Công cụ nổi
+    floatingButton:
+      title: Nút nổi
+    selectionToolbar:
+      title: Thanh công cụ chọn
+    contextMenu:
+      title: Menu ngữ cảnh
   floatingButtonAndToolbar:
     title: Nút nổi & Thanh công cụ
     floatingButtonDemoImageAlt: Demo nút nổi
