@@ -18,8 +18,13 @@ import {
   SidebarMenuSubItem,
 } from '@/components/shadcn/sidebar'
 
+const OVERLAY_TOOLS_PATHS = ['/floating-button', '/selection-toolbar', '/context-menu'] as const
+
 export function SettingsNav() {
   const { pathname } = useLocation()
+  const isOverlayToolsActive = OVERLAY_TOOLS_PATHS.includes(
+    pathname as (typeof OVERLAY_TOOLS_PATHS)[number],
+  )
 
   return (
     <SidebarGroup>
@@ -53,19 +58,10 @@ export function SettingsNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
-          <Collapsible
-            defaultOpen={['/floating-button', '/selection-toolbar', '/context-menu'].includes(
-              pathname,
-            )}
-            className="group/collapsible"
-          >
+          <Collapsible defaultOpen={isOverlayToolsActive} className="group/collapsible">
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
-                <SidebarMenuButton
-                  isActive={['/floating-button', '/selection-toolbar', '/context-menu'].includes(
-                    pathname,
-                  )}
-                >
+                <SidebarMenuButton isActive={isOverlayToolsActive}>
                   <Icon icon="tabler:layers-intersect" />
                   <span>{i18n.t('options.overlayTools.title')}</span>
                   <Icon
