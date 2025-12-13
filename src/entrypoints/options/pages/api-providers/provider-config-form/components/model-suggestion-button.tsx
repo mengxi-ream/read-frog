@@ -5,6 +5,7 @@ import { useState } from 'react'
 import LoadingDots from '@/components/loading-dots'
 import { Button } from '@/components/shadcn/button'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn/popover'
+import { extractErrorMessage } from '@/utils/api-error'
 
 interface ModelsResponse {
   object: string
@@ -28,15 +29,19 @@ export function ModelSuggestionButton({
 
   const mutation = useMutation({
     mutationKey: ['fetchModels', baseURL],
+    meta: {
+      errorDescription: i18n.t('options.apiProviders.form.models.fetchError'),
+    },
     mutationFn: async () => {
-      const headers: HeadersInit = {}
-      if (apiKey) {
-        headers.Authorization = `Bearer ${apiKey}`
+      if (!apiKey) {
+        throw new Error(i18n.t('options.apiProviders.form.models.apiKeyRequired'))
       }
 
-      const response = await fetch(`${baseURL}/models`, { headers })
+      const response = await fetch(`${baseURL}/models`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+      })
       if (!response.ok) {
-        throw new Error(`Failed to fetch models: ${response.status}`)
+        throw new Error(await extractErrorMessage(response))
       }
 
       const data: ModelsResponse = await response.json()

@@ -89,6 +89,12 @@ options:
           title: 翻譯模型
           customTitle: 自定義翻譯模型
           placeholder: 選擇一個模型
+        fetchModels: 獲取可用模型
+        fetchError: 獲取模型失敗
+        clickToRetry: 點擊重試
+        noModels: 沒有可用的模型
+        selectModel: 選擇模型
+        apiKeyRequired: 請先添加 API 密鑰
     providers:
       description:
         openai: 提供 GPT-4o 等模型

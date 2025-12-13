@@ -89,6 +89,12 @@ options:
           title: Mô hình dịch
           customTitle: Mô hình dịch tùy chỉnh
           placeholder: Chọn mô hình
+        fetchModels: Lấy các mô hình có sẵn
+        fetchError: Không thể lấy mô hình
+        clickToRetry: Nhấp để thử lại
+        noModels: Không có mô hình nào
+        selectModel: Chọn mô hình
+        apiKeyRequired: Vui lòng thêm khóa API trước
     providers:
       description:
         openai: Cung cấp các mô hình như GPT-4o

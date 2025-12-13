@@ -88,6 +88,12 @@ options:
           title: 번역 모델
           customTitle: 사용자 정의 번역 모델
           placeholder: 모델을 선택하세요
+        fetchModels: 사용 가능한 모델 가져오기
+        fetchError: 모델을 가져오지 못했습니다
+        clickToRetry: 다시 시도하려면 클릭
+        noModels: 사용 가능한 모델이 없습니다
+        selectModel: 모델 선택
+        apiKeyRequired: 먼저 API 키를 추가하세요
     providers:
       description:
         openai: GPT-4o 같은 모델을 제공합니다

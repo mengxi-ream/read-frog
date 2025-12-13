@@ -88,6 +88,12 @@ options:
           title: 翻訳モデル
           customTitle: カスタム翻訳モデル
           placeholder: モデルを選択してください
+        fetchModels: 利用可能なモデルを取得
+        fetchError: モデルの取得に失敗しました
+        clickToRetry: クリックして再試行
+        noModels: 利用可能なモデルがありません
+        selectModel: モデルを選択
+        apiKeyRequired: 先にAPIキーを追加してください
     providers:
       description:
         openai: GPT-4oなどのモデルを提供

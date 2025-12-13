@@ -89,6 +89,12 @@ options:
           title: Çeviri Modeli
           customTitle: Özel Çeviri Modeli
           placeholder: Bir model seçin
+        fetchModels: Mevcut modelleri getir
+        fetchError: Modeller getirilemedi
+        clickToRetry: Yeniden denemek için tıklayın
+        noModels: Mevcut model yok
+        selectModel: Model seç
+        apiKeyRequired: Lütfen önce API anahtarı ekleyin
     providers:
       description:
         openai: GPT-4o gibi modeller sağlar

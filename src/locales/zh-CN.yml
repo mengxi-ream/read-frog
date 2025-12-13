@@ -94,6 +94,7 @@ options:
         clickToRetry: 点击重试
         noModels: 没有可用的模型
         selectModel: 选择模型
+        apiKeyRequired: 请先添加 API 密钥
     providers:
       description:
         openai: 提供 GPT-4o 等模型

@@ -11,21 +11,6 @@ import { getLobeIconsCDNUrlFn } from '../logo'
 import { WEBSITE_URL } from './url'
 
 export const DEFAULT_READ_MODELS: ReadModels = {
-  siliconflow: {
-    model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
-    isCustomModel: false,
-    customModel: null,
-  },
-  tensdaq: {
-    model: 'MiniMax-M2',
-    isCustomModel: false,
-    customModel: null,
-  },
-  ai302: {
-    model: 'gpt-4.1-mini',
-    isCustomModel: false,
-    customModel: null,
-  },
   openrouter: {
     model: 'deepseek/deepseek-chat-v3.1:free',
     isCustomModel: false,
@@ -121,29 +106,29 @@ export const DEFAULT_READ_MODELS: ReadModels = {
     isCustomModel: false,
     customModel: null,
   },
+  siliconflow: {
+    model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
+    isCustomModel: true,
+    customModel: null,
+  },
+  tensdaq: {
+    model: 'MiniMax-M2',
+    isCustomModel: true,
+    customModel: null,
+  },
+  ai302: {
+    model: 'gpt-4.1-mini',
+    isCustomModel: true,
+    customModel: null,
+  },
   volcengine: {
     model: 'doubao-seed-1-6-251015',
-    isCustomModel: false,
+    isCustomModel: true,
     customModel: null,
   },
 }
 
 export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
-  siliconflow: {
-    model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
-    isCustomModel: false,
-    customModel: null,
-  },
-  tensdaq: {
-    model: 'Qwen3-30B-A3B-Instruct-2507',
-    isCustomModel: false,
-    customModel: null,
-  },
-  ai302: {
-    model: 'gpt-4.1-mini',
-    isCustomModel: false,
-    customModel: null,
-  },
   openrouter: {
     model: 'x-ai/grok-4-fast:free',
     isCustomModel: false,
@@ -239,9 +224,24 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
     isCustomModel: false,
     customModel: null,
   },
+  siliconflow: {
+    model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
+    isCustomModel: true,
+    customModel: null,
+  },
+  tensdaq: {
+    model: 'Qwen3-30B-A3B-Instruct-2507',
+    isCustomModel: true,
+    customModel: null,
+  },
+  ai302: {
+    model: 'gpt-4.1-mini',
+    isCustomModel: true,
+    customModel: null,
+  },
   volcengine: {
     model: 'doubao-seed-1-6-flash-250828',
-    isCustomModel: false,
+    isCustomModel: true,
     customModel: null,
   },
 }

@@ -89,6 +89,12 @@ options:
           title: Модель перевода
           customTitle: Пользовательская модель перевода
           placeholder: Выберите модель
+        fetchModels: Получить доступные модели
+        fetchError: Не удалось получить модели
+        clickToRetry: Нажмите для повтора
+        noModels: Нет доступных моделей
+        selectModel: Выбрать модель
+        apiKeyRequired: Сначала добавьте API ключ
     providers:
       description:
         openai: Предоставляет модели, такие как GPT-4o

@@ -94,6 +94,7 @@ options:
         clickToRetry: Click to retry
         noModels: No models available
         selectModel: Select a model
+        apiKeyRequired: Please add API key first
     providers:
       description:
         openai: Provides models like GPT-4o
