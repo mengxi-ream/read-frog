@@ -110,9 +110,10 @@ export function TranslatePopover() {
           const {
             id: providerId,
             models: { translate },
+            name: providerName,
           } = translateProviderConfig
           const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-          const providerOptions = getProviderOptions(translateModel ?? '')
+          const providerOptions = getProviderOptions(translateModel ?? '', providerName)
           const prompt = await getTranslatePrompt(targetLangName, cleanText)
 
           const abortController = new AbortController()
@@ -198,11 +199,12 @@ export function TranslatePopover() {
           const {
             id: providerId,
             models: { translate },
+            name: providerName,
           } = translateProviderConfig
           const translateModel = translate.isCustomModel ? translate.customModel : translate.model
           const model = await getTranslateModelById(providerId)
 
-          const providerOptions = getProviderOptions(translateModel ?? '')
+          const providerOptions = getProviderOptions(translateModel ?? '', providerName)
           const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
 
           const result = streamText({
