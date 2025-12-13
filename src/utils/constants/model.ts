@@ -6,11 +6,17 @@ import { THINKING_MODELS } from '@/types/config/provider'
 
 const DEFAULT_THINKING_BUDGET = 128
 
+/**
+ * Model-specific provider options configuration.
+ * Used to apply special configurations for certain models that need custom behavior.
+ */
 const MODEL_SPECIFIC_OPTIONS: Array<{
   pattern: RegExp
   options: Record<string, JSONValue>
 }> = [
   {
+    // GLM models have issues with thinking mode, causing errors or unexpected behavior
+    // Disable thinking for all GLM-* models (case-insensitive)
     pattern: /^GLM-/i,
     options: { thinking: { type: 'disabled' } },
   },
