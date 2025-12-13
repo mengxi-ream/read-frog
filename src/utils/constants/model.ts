@@ -6,8 +6,18 @@ import { THINKING_MODELS } from '@/types/config/provider'
 
 const DEFAULT_THINKING_BUDGET = 128
 
+const MODEL_SPECIFIC_OPTIONS: Array<{
+  pattern: RegExp
+  options: Record<string, JSONValue>
+}> = [
+  {
+    pattern: /^GLM-/i,
+    options: { thinking: { type: 'disabled' } },
+  },
+]
+
 export function getProviderOptions(translateModel: string, providerName?: string): Record<string, Record<string, JSONValue>> {
-  const options = {
+  const options: Record<string, Record<string, JSONValue>> = {
     google: {
       thinkingConfig: {
         thinkingBudget: THINKING_MODELS.includes(translateModel) ? DEFAULT_THINKING_BUDGET : 0,
@@ -20,13 +30,14 @@ export function getProviderOptions(translateModel: string, providerName?: string
     openai: {
       reasoningEffort: 'minimal',
     } satisfies OpenAIResponsesProviderOptions,
-  } as Record<string, Record<string, JSONValue>>
+  }
 
-  if (providerName && (translateModel.includes('GLM') || translateModel.includes('glm'))) {
-    options[providerName] = {
-      thinking: {
-        type: 'disabled',
-      },
+  if (providerName) {
+    for (const { pattern, options: modelOptions } of MODEL_SPECIFIC_OPTIONS) {
+      if (pattern.test(translateModel)) {
+        options[providerName] = modelOptions
+        break
+      }
     }
   }
 
