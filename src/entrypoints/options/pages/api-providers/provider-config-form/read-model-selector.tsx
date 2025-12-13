@@ -6,9 +6,10 @@ import { Activity } from 'react'
 import { toast } from 'sonner'
 import { Checkbox } from '@/components/shadcn/checkbox'
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
-import { isReadProviderConfig, READ_PROVIDER_MODELS } from '@/types/config/provider'
+import { isCustomLLMProviderConfig, isReadProviderConfig, READ_PROVIDER_MODELS } from '@/types/config/provider'
 import { providerConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
 import { cn } from '@/utils/styles/tailwind'
+import { ModelSuggestionButton } from './components/model-suggestion-button'
 import { withForm } from './form'
 
 export const ReadModelSelector = withForm({
@@ -24,7 +25,27 @@ export const ReadModelSelector = withForm({
       <div>
         <Activity mode={isCustomModel ? 'visible' : 'hidden'}>
           <form.AppField name="models.read.customModel">
-            {field => <field.InputField formForSubmit={form} label={i18n.t('options.apiProviders.form.models.read.customTitle')} value={customModel ?? ''} />}
+            {field => (
+              <field.InputField
+                formForSubmit={form}
+                label={(
+                  <div className="flex items-end justify-between w-full">
+                    <span>{i18n.t('options.apiProviders.form.models.read.customTitle')}</span>
+                    {isCustomLLMProviderConfig(providerConfig) && (
+                      <ModelSuggestionButton
+                        baseURL={providerConfig.baseURL}
+                        apiKey={providerConfig.apiKey}
+                        onSelect={(model) => {
+                          field.handleChange(model)
+                          void form.handleSubmit()
+                        }}
+                      />
+                    )}
+                  </div>
+                )}
+                value={customModel ?? ''}
+              />
+            )}
           </form.AppField>
         </Activity>
 

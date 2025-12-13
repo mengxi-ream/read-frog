@@ -89,6 +89,11 @@ options:
           title: 翻译模型
           customTitle: 自定义翻译模型
           placeholder: 选择一个模型
+        fetchModels: 获取可用模型
+        fetchError: 获取模型失败
+        clickToRetry: 点击重试
+        noModels: 没有可用的模型
+        selectModel: 选择模型
     providers:
       description:
         openai: 提供 GPT-4o 等模型
