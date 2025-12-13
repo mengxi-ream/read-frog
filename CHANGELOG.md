@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.20.4
+
+### Patch Changes
+
+- [#802](https://github.com/mengxi-ream/read-frog/pull/802) [`9de0da8`](https://github.com/mengxi-ream/read-frog/commit/9de0da8d2d055b4bb097dc26c83d598a2269d5e1) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: update model list
+
+- [#802](https://github.com/mengxi-ream/read-frog/pull/802) [`9de0da8`](https://github.com/mengxi-ream/read-frog/commit/9de0da8d2d055b4bb097dc26c83d598a2269d5e1) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: allow fetch model list from custom providers
+
 ## 1.20.3
 
 ### Patch Changes
