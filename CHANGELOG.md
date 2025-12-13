@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.20.3
+
+### Patch Changes
+
+- [#797](https://github.com/mengxi-ream/read-frog/pull/797) [`7587b9e`](https://github.com/mengxi-ream/read-frog/commit/7587b9e3bf745b5b77a30be57a9008956900231e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: split floating button & toolbar into collapsible overlay tools sidebar
+
+- [#799](https://github.com/mengxi-ream/read-frog/pull/799) [`45f3097`](https://github.com/mengxi-ream/read-frog/commit/45f3097f20e00503a6428108bb0843bee3cb0988) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: add custom error type for remote config version too new during Google Drive sync
+
+- [#797](https://github.com/mengxi-ream/read-frog/pull/797) [`7587b9e`](https://github.com/mengxi-ream/read-frog/commit/7587b9e3bf745b5b77a30be57a9008956900231e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add floating button click action configuration
+
 ## 1.20.2
 
 ### Patch Changes
