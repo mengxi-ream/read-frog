@@ -27,12 +27,10 @@ export function GoogleDriveSyncCard() {
     const result = await syncConfig()
 
     if (result.status === 'unresolved') {
-      void invalidateAuthData()
       setUnresolvedData(result.data)
       setIsOpen(true)
     }
     else if (result.status === 'success') {
-      void invalidateAuthData()
       const messages = {
         'uploaded': i18n.t('options.config.sync.googleDrive.syncSuccess.uploaded'),
         'downloaded': i18n.t('options.config.sync.googleDrive.syncSuccess.downloaded'),
