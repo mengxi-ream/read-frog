@@ -51,6 +51,8 @@ function applyDirectionOffset(
       return { x: baseX, y: baseY - tooltipHeight }
     case SelectionDirection.TOP_LEFT:
       return { x: baseX - tooltipWidth, y: baseY - tooltipHeight }
+    default:
+      return { x: baseX, y: baseY }
   }
 }
 
@@ -141,14 +143,19 @@ export function SelectionToolbar() {
           const scrollY = window.scrollY
           const scrollX = window.scrollX
 
-          // Get selection start and end positions
-          const startX = selectionStartRef.current?.x ?? e.clientX
-          const startY = selectionStartRef.current?.y ?? e.clientY
-          const endX = e.clientX
-          const endY = e.clientY
+          if (selectionStartRef.current) {
+            // Get selection start and end positions
+            const startX = selectionStartRef.current.x
+            const startY = selectionStartRef.current.y
+            const endX = e.clientX
+            const endY = e.clientY
 
-          // Determine and store selection direction
-          selectionDirectionRef.current = getSelectionDirection(startX, startY, endX, endY)
+            // Determine and store selection direction
+            selectionDirectionRef.current = getSelectionDirection(startX, startY, endX, endY)
+          }
+          else {
+            selectionDirectionRef.current = SelectionDirection.BOTTOM_RIGHT
+          }
 
           const docX = e.clientX + scrollX
           const docY = e.clientY + scrollY
