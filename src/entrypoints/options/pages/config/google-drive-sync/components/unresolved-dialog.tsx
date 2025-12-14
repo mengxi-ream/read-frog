@@ -2,6 +2,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { Activity, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/alert'
 import {
   AlertDialog,
@@ -64,8 +65,13 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const email = useMemo(() => authData?.userInfo?.email, [authData])
 
   const handleConfirm = async () => {
-    if (!resolvedConfigResult?.config || !unresolvedConfigs || !email)
+    if (!resolvedConfigResult?.config || !unresolvedConfigs) {
       return
+    }
+    if (!email) {
+      toast.error('Email is not available')
+      return
+    }
     setIsConfirming(true)
     try {
       await syncMergedConfig(resolvedConfigResult.config, email)
