@@ -433,6 +433,19 @@ describe('selectionToolbar - positioning logic', () => {
     return document.querySelector('.absolute.z-2147483647') as HTMLElement
   }
 
+  const mockToolbarDimensions = (toolbar: HTMLElement, width: number, height: number) => {
+    Object.defineProperty(toolbar, 'offsetWidth', {
+      writable: true,
+      configurable: true,
+      value: width,
+    })
+    Object.defineProperty(toolbar, 'offsetHeight', {
+      writable: true,
+      configurable: true,
+      value: height,
+    })
+  }
+
   it('should position toolbar at bottom-right when selecting from top-left to bottom-right', async () => {
     render(
       <div>
@@ -449,8 +462,15 @@ describe('selectionToolbar - positioning logic', () => {
     await waitFor(() => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
-      expect(toolbar.style.left).toBeTruthy()
-      expect(toolbar.style.top).toBeTruthy()
+      // For bottom-right, toolbar should be positioned at mouseUp coordinates (200, 200)
+      // Accounting for scroll offset (0) and potential clamping
+      const leftValue = Number.parseInt(toolbar.style.left)
+      const topValue = Number.parseInt(toolbar.style.top)
+      // Should be close to mouseUp position (200, 200) for bottom-right direction
+      expect(leftValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
+      expect(leftValue).toBeLessThanOrEqual(225) // Allow some margin for clamping
+      expect(topValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
+      expect(topValue).toBeLessThanOrEqual(225) // Allow some margin for clamping
     })
   })
 
@@ -470,8 +490,16 @@ describe('selectionToolbar - positioning logic', () => {
     await waitFor(() => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
-      expect(toolbar.style.left).toBeTruthy()
-      expect(toolbar.style.top).toBeTruthy()
+      // For bottom-left, toolbar should be positioned at (endX - tooltipWidth, endY)
+      // MouseUp is at (100, 200), so left should be less than 100 (minus tooltip width)
+      const leftValue = Number.parseInt(toolbar.style.left)
+      const topValue = Number.parseInt(toolbar.style.top)
+      const toolbarWidth = toolbar.offsetWidth || 0
+      // Left should be endX - tooltipWidth, clamped to boundaries
+      expect(leftValue).toBeLessThanOrEqual(100) // Should be left of mouseUp X position
+      expect(leftValue + toolbarWidth).toBeGreaterThanOrEqual(75) // Toolbar should extend near mouseUp position
+      expect(topValue).toBeGreaterThanOrEqual(175) // Top should be near mouseUp Y (200)
+      expect(topValue).toBeLessThanOrEqual(225) // Allow some margin
     })
   })
 
@@ -491,8 +519,17 @@ describe('selectionToolbar - positioning logic', () => {
     await waitFor(() => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
-      expect(toolbar.style.left).toBeTruthy()
-      expect(toolbar.style.top).toBeTruthy()
+      // For top-right, toolbar should be positioned at (endX, endY - tooltipHeight)
+      // MouseUp is at (200, 100), so top should be less than 100 (minus tooltip height)
+      const leftValue = Number.parseInt(toolbar.style.left)
+      const topValue = Number.parseInt(toolbar.style.top)
+      const toolbarHeight = toolbar.offsetHeight || 0
+      // Left should be near mouseUp X position (200)
+      expect(leftValue).toBeGreaterThanOrEqual(175) // Allow some margin for clamping
+      expect(leftValue).toBeLessThanOrEqual(225) // Allow some margin
+      // Top should be endY - tooltipHeight, clamped to boundaries
+      expect(topValue).toBeLessThanOrEqual(100) // Should be above or at mouseUp Y position
+      expect(topValue + toolbarHeight).toBeGreaterThanOrEqual(75) // Toolbar should extend near mouseUp position
     })
   })
 
@@ -512,8 +549,18 @@ describe('selectionToolbar - positioning logic', () => {
     await waitFor(() => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
-      expect(toolbar.style.left).toBeTruthy()
-      expect(toolbar.style.top).toBeTruthy()
+      // For top-left, toolbar should be positioned at (endX - tooltipWidth, endY - tooltipHeight)
+      // MouseUp is at (100, 100), so both left and top should account for toolbar dimensions
+      const leftValue = Number.parseInt(toolbar.style.left)
+      const topValue = Number.parseInt(toolbar.style.top)
+      const toolbarWidth = toolbar.offsetWidth || 0
+      const toolbarHeight = toolbar.offsetHeight || 0
+      // Left should be less than mouseUp X (100) minus tooltip width
+      expect(leftValue).toBeLessThanOrEqual(100) // Should be left of mouseUp X position
+      expect(leftValue + toolbarWidth).toBeGreaterThanOrEqual(75) // Toolbar should extend near mouseUp position
+      // Top should be less than mouseUp Y (100) minus tooltip height
+      expect(topValue).toBeLessThanOrEqual(100) // Should be above or at mouseUp Y position
+      expect(topValue + toolbarHeight).toBeGreaterThanOrEqual(75) // Toolbar should extend near mouseUp position
     })
   })
 
@@ -577,10 +624,32 @@ describe('selectionToolbar - positioning logic', () => {
     await waitFor(() => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
-      // Should be clamped within right boundary
+
+      // Mock toolbar dimensions for jsdom (no layout engine)
+      // Using a realistic toolbar width of 200px
+      const mockToolbarWidth = 200
+      mockToolbarDimensions(toolbar, mockToolbarWidth, 50)
+
+      // Trigger position update with mocked dimensions
+      // Simulate what updatePosition does: rightBoundary = clientWidth - tooltipWidth - MARGIN = 1200 - 200 - 25 = 975
+      // Since mouseUp is at x=1195, toolbar should be clamped to left <= 975
+      // Manually trigger updatePosition by dispatching a scroll event
+      act(() => {
+        window.dispatchEvent(new Event('scroll'))
+        const callbacks = [...rafCallbacks]
+        rafCallbacks = []
+        callbacks.forEach(cb => cb(0))
+      })
+    })
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
       const leftValue = Number.parseInt(toolbar.style.left)
-      const toolbarWidth = toolbar.offsetWidth || 0
-      expect(leftValue + toolbarWidth).toBeLessThanOrEqual(1200)
+      const toolbarWidth = toolbar.offsetWidth
+      // Should be clamped within right boundary
+      // rightBoundary = clientWidth - tooltipWidth - MARGIN = 1200 - 200 - 25 = 975
+      expect(leftValue).toBeLessThanOrEqual(975)
+      expect(leftValue + toolbarWidth + 25).toBeLessThanOrEqual(1200) // left + width + margin <= clientWidth
     })
   })
 
@@ -600,10 +669,32 @@ describe('selectionToolbar - positioning logic', () => {
     await waitFor(() => {
       const toolbar = getToolbarElement()
       expect(toolbar).toBeTruthy()
-      // Should be clamped within bottom boundary
+
+      // Mock toolbar dimensions for jsdom (no layout engine)
+      // Using a realistic toolbar height of 50px
+      const mockToolbarHeight = 50
+      mockToolbarDimensions(toolbar, 200, mockToolbarHeight)
+
+      // Trigger position update with mocked dimensions
+      // Simulate what updatePosition does: bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN = 0 + 800 - 50 - 25 = 725
+      // Since mouseUp is at y=795, toolbar should be clamped to top <= 725
+      // Manually trigger updatePosition by dispatching a scroll event
+      act(() => {
+        window.dispatchEvent(new Event('scroll'))
+        const callbacks = [...rafCallbacks]
+        rafCallbacks = []
+        callbacks.forEach(cb => cb(0))
+      })
+    })
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
       const topValue = Number.parseInt(toolbar.style.top)
-      const toolbarHeight = toolbar.offsetHeight || 0
-      expect(topValue + toolbarHeight).toBeLessThanOrEqual(800)
+      const toolbarHeight = toolbar.offsetHeight
+      // Should be clamped within bottom boundary
+      // bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN = 0 + 800 - 50 - 25 = 725
+      expect(topValue).toBeLessThanOrEqual(725)
+      expect(topValue + toolbarHeight + 25).toBeLessThanOrEqual(800) // top + height + margin <= innerHeight
     })
   })
 
