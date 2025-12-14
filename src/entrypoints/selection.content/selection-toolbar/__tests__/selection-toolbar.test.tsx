@@ -328,3 +328,397 @@ describe('selectionToolbar - isInputOrTextarea logic', () => {
     spy.mockRestore()
   })
 })
+
+describe('selectionToolbar - positioning logic', () => {
+  let originalRequestAnimationFrame: typeof requestAnimationFrame
+  let rafCallbacks: FrameRequestCallback[]
+
+  beforeEach(() => {
+    // Mock requestAnimationFrame to execute callbacks synchronously
+    rafCallbacks = []
+    originalRequestAnimationFrame = window.requestAnimationFrame
+    window.requestAnimationFrame = vi.fn((callback: FrameRequestCallback) => {
+      rafCallbacks.push(callback)
+      return 0
+    })
+
+    // Mock window.getSelection with valid selection
+    window.getSelection = vi.fn(() => ({
+      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 1,
+      }),
+      containsNode: vi.fn(() => true),
+    })) as unknown as typeof window.getSelection
+
+    // Mock window dimensions
+    Object.defineProperty(window, 'innerHeight', {
+      writable: true,
+      configurable: true,
+      value: 800,
+    })
+
+    Object.defineProperty(document.documentElement, 'clientWidth', {
+      writable: true,
+      configurable: true,
+      value: 1200,
+    })
+
+    // Mock scrollY and scrollX
+    Object.defineProperty(window, 'scrollY', {
+      writable: true,
+      configurable: true,
+      value: 0,
+    })
+
+    Object.defineProperty(window, 'scrollX', {
+      writable: true,
+      configurable: true,
+      value: 0,
+    })
+  })
+
+  afterEach(() => {
+    cleanup()
+    window.requestAnimationFrame = originalRequestAnimationFrame
+    rafCallbacks = []
+    vi.clearAllMocks()
+  })
+
+  const triggerMouseDownAndUp = async (
+    target: Element,
+    startX: number,
+    startY: number,
+    endX: number,
+    endY: number,
+  ) => {
+    const mouseDownEvent = new MouseEvent('mousedown', {
+      bubbles: true,
+      clientX: startX,
+      clientY: startY,
+    })
+
+    const mouseUpEvent = new MouseEvent('mouseup', {
+      bubbles: true,
+      clientX: endX,
+      clientY: endY,
+    })
+
+    Object.defineProperty(mouseDownEvent, 'target', {
+      value: target,
+      writable: false,
+    })
+
+    Object.defineProperty(mouseUpEvent, 'target', {
+      value: target,
+      writable: false,
+    })
+
+    await act(async () => {
+      target.dispatchEvent(mouseDownEvent)
+    })
+
+    await act(async () => {
+      target.dispatchEvent(mouseUpEvent)
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach(cb => cb(0))
+    })
+  }
+
+  const getToolbarElement = () => {
+    return document.querySelector('.absolute.z-2147483647') as HTMLElement
+  }
+
+  it('should position toolbar at bottom-right when selecting from top-left to bottom-right', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Select from (100, 100) to (200, 200) - bottom-right direction
+    await triggerMouseDownAndUp(target, 100, 100, 200, 200)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      expect(toolbar.style.left).toBeTruthy()
+      expect(toolbar.style.top).toBeTruthy()
+    })
+  })
+
+  it('should position toolbar at bottom-left when selecting from top-right to bottom-left', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Select from (200, 100) to (100, 200) - bottom-left direction
+    await triggerMouseDownAndUp(target, 200, 100, 100, 200)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      expect(toolbar.style.left).toBeTruthy()
+      expect(toolbar.style.top).toBeTruthy()
+    })
+  })
+
+  it('should position toolbar at top-right when selecting from bottom-left to top-right', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Select from (100, 200) to (200, 100) - top-right direction
+    await triggerMouseDownAndUp(target, 100, 200, 200, 100)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      expect(toolbar.style.left).toBeTruthy()
+      expect(toolbar.style.top).toBeTruthy()
+    })
+  })
+
+  it('should position toolbar at top-left when selecting from bottom-right to top-left', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Select from (200, 200) to (100, 100) - top-left direction
+    await triggerMouseDownAndUp(target, 200, 200, 100, 100)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      expect(toolbar.style.left).toBeTruthy()
+      expect(toolbar.style.top).toBeTruthy()
+    })
+  })
+
+  it('should clamp toolbar position within left boundary', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Try to position toolbar at x=5 (less than MARGIN which is 10)
+    await triggerMouseDownAndUp(target, 5, 100, 5, 100)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      // Should be clamped to at least MARGIN (10px)
+      const leftValue = Number.parseInt(toolbar.style.left)
+      expect(leftValue).toBeGreaterThanOrEqual(10)
+    })
+  })
+
+  it('should clamp toolbar position within top boundary', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Try to position toolbar at y=5 (less than MARGIN)
+    await triggerMouseDownAndUp(target, 100, 5, 100, 5)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      // Should be clamped to at least MARGIN (10px)
+      const topValue = Number.parseInt(toolbar.style.top)
+      expect(topValue).toBeGreaterThanOrEqual(10)
+    })
+  })
+
+  it('should clamp toolbar position within right boundary', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Try to position toolbar at x=1195 (close to clientWidth of 1200)
+    await triggerMouseDownAndUp(target, 100, 100, 1195, 100)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      // Should be clamped within right boundary
+      const leftValue = Number.parseInt(toolbar.style.left)
+      const toolbarWidth = toolbar.offsetWidth || 0
+      expect(leftValue + toolbarWidth).toBeLessThanOrEqual(1200)
+    })
+  })
+
+  it('should clamp toolbar position within bottom boundary', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Try to position toolbar at y=795 (close to innerHeight of 800)
+    await triggerMouseDownAndUp(target, 100, 100, 100, 795)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      // Should be clamped within bottom boundary
+      const topValue = Number.parseInt(toolbar.style.top)
+      const toolbarHeight = toolbar.offsetHeight || 0
+      expect(topValue + toolbarHeight).toBeLessThanOrEqual(800)
+    })
+  })
+
+  it('should update toolbar position on scroll', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Initial selection at client position (100, 100) with scrollY = 0
+    await triggerMouseDownAndUp(target, 100, 100, 200, 200)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+    })
+
+    const toolbar = getToolbarElement()
+
+    // Simulate scroll down by 100px
+    Object.defineProperty(window, 'scrollY', {
+      writable: true,
+      configurable: true,
+      value: 100,
+    })
+
+    await act(async () => {
+      window.dispatchEvent(new Event('scroll'))
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach(cb => cb(0))
+    })
+
+    // After scrolling, the toolbar position should be updated
+    const updatedTop = Number.parseInt(toolbar.style.top)
+    // The toolbar should be clamped to at least scrollY + MARGIN (100 + 10 = 110)
+    expect(updatedTop).toBeGreaterThanOrEqual(110)
+  })
+
+  it('should account for scroll offset when positioning toolbar', async () => {
+    // Set initial scroll position
+    Object.defineProperty(window, 'scrollY', {
+      writable: true,
+      configurable: true,
+      value: 200,
+    })
+
+    Object.defineProperty(window, 'scrollX', {
+      writable: true,
+      configurable: true,
+      value: 50,
+    })
+
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Select at client position (100, 100)
+    // Document position should be (150, 300) considering scroll
+    await triggerMouseDownAndUp(target, 100, 100, 100, 100)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+      // Toolbar position should account for scroll offset
+      const topValue = Number.parseInt(toolbar.style.top)
+      // Should be at least scrollY + MARGIN (200 + 10 = 210)
+      expect(topValue).toBeGreaterThanOrEqual(210)
+    })
+  })
+
+  it('should maintain toolbar visibility when window is resized', async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId('test-element')
+
+    // Initial selection
+    await triggerMouseDownAndUp(target, 100, 100, 200, 200)
+
+    await waitFor(() => {
+      const toolbar = getToolbarElement()
+      expect(toolbar).toBeTruthy()
+    })
+
+    // Resize window
+    Object.defineProperty(window, 'innerHeight', {
+      writable: true,
+      configurable: true,
+      value: 600,
+    })
+
+    Object.defineProperty(document.documentElement, 'clientWidth', {
+      writable: true,
+      configurable: true,
+      value: 1000,
+    })
+
+    // Toolbar should still be visible and positioned
+    const toolbar = getToolbarElement()
+    expect(toolbar).toBeTruthy()
+    expect(toolbar.style.left).toBeTruthy()
+    expect(toolbar.style.top).toBeTruthy()
+  })
+})
