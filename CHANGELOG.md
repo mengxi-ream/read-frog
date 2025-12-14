@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.20.5
+
+### Patch Changes
+
+- [#807](https://github.com/mengxi-ream/read-frog/pull/807) [`4d98864`](https://github.com/mengxi-ream/read-frog/commit/4d98864480f0aca0791b9288072c760dc1826c12) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: refresh auth data and add email validation in Google Drive sync
+
 ## 1.20.4
 
 ### Patch Changes

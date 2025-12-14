@@ -104,38 +104,38 @@ jobs:
             echo "❌ Discord notification failed (HTTP $HTTP_CODE)"
           fi
 
-      - name: Build and Zip Extension
-        if: steps.changesets.outputs.published == 'true'
-        run: pnpm zip
-        env:
-          WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID }}
+      # - name: Build and Zip Extension
+      #   if: steps.changesets.outputs.published == 'true'
+      #   run: pnpm zip
+      #   env:
+      #     WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID }}
 
-      - name: Upload Extension Zip to Release
-        if: steps.changesets.outputs.published == 'true'
-        run: |
-          VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
-          gh release upload "v$VERSION" .output/*-chrome.zip --clobber
-        env:
-          GH_TOKEN: ${{ github.token }}
+      # - name: Upload Extension Zip to Release
+      #   if: steps.changesets.outputs.published == 'true'
+      #   run: |
+      #     VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
+      #     gh release upload "v$VERSION" .output/*-chrome.zip --clobber
+      #   env:
+      #     GH_TOKEN: ${{ github.token }}
 
-      - name: Submit to Chrome & Edge Stores
-        if: steps.changesets.outputs.published == 'true'
-        run: |
-          ZIP_FILE=$(ls .output/*-chrome.zip)
-          echo "Uploading: $ZIP_FILE"
+      # - name: Submit to Chrome & Edge Stores
+      #   if: steps.changesets.outputs.published == 'true'
+      #   run: |
+      #     ZIP_FILE=$(ls .output/*-chrome.zip)
+      #     echo "Uploading: $ZIP_FILE"
 
-          # Verify manifest version before upload
-          MANIFEST_VERSION=$(unzip -p "$ZIP_FILE" manifest.json | jq -r '.version')
-          echo "Manifest version: $MANIFEST_VERSION"
+      #     # Verify manifest version before upload
+      #     MANIFEST_VERSION=$(unzip -p "$ZIP_FILE" manifest.json | jq -r '.version')
+      #     echo "Manifest version: $MANIFEST_VERSION"
 
-          pnpm wxt submit \
-            --chrome-zip "$ZIP_FILE" \
-            --edge-zip "$ZIP_FILE"
-        env:
-          CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
-          CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
-          CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
-          CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
-          EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
-          EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
-          EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}
+      #     pnpm wxt submit \
+      #       --chrome-zip "$ZIP_FILE" \
+      #       --edge-zip "$ZIP_FILE"
+      #   env:
+      #     CHROME_EXTENSION_ID: ${{ secrets.CHROME_EXTENSION_ID }}
+      #     CHROME_CLIENT_ID: ${{ secrets.CHROME_CLIENT_ID }}
+      #     CHROME_CLIENT_SECRET: ${{ secrets.CHROME_CLIENT_SECRET }}
+      #     CHROME_REFRESH_TOKEN: ${{ secrets.CHROME_REFRESH_TOKEN }}
+      #     EDGE_PRODUCT_ID: ${{ secrets.EDGE_PRODUCT_ID }}
+      #     EDGE_CLIENT_ID: ${{ secrets.EDGE_CLIENT_ID }}
+      #     EDGE_API_KEY: ${{ secrets.EDGE_API_KEY }}

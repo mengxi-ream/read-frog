@@ -31,7 +31,6 @@ export function GoogleDriveSyncCard() {
       setIsOpen(true)
     }
     else if (result.status === 'success') {
-      void invalidateAuthData()
       const messages = {
         'uploaded': i18n.t('options.config.sync.googleDrive.syncSuccess.uploaded'),
         'downloaded': i18n.t('options.config.sync.googleDrive.syncSuccess.downloaded'),
