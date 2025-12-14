@@ -10,10 +10,56 @@ import { CloseButton, DropEvent } from './close-button'
 import { SpeakButton } from './speak-button'
 import { TranslateButton, TranslatePopover } from './translate-button'
 
+enum SelectionDirection {
+  TOP_LEFT = 'TOP_LEFT',
+  TOP_RIGHT = 'TOP_RIGHT',
+  BOTTOM_LEFT = 'BOTTOM_LEFT',
+  BOTTOM_RIGHT = 'BOTTOM_RIGHT',
+}
+
+function getSelectionDirection(
+  startX: number,
+  startY: number,
+  endX: number,
+  endY: number,
+): SelectionDirection {
+  const isRightward = endX >= startX
+  const isDownward = endY >= startY
+
+  if (isRightward && isDownward)
+    return SelectionDirection.BOTTOM_RIGHT
+  if (isRightward && !isDownward)
+    return SelectionDirection.TOP_RIGHT
+  if (!isRightward && isDownward)
+    return SelectionDirection.BOTTOM_LEFT
+  return SelectionDirection.TOP_LEFT
+}
+
+function applyDirectionOffset(
+  direction: SelectionDirection,
+  baseX: number,
+  baseY: number,
+  tooltipWidth: number,
+  tooltipHeight: number,
+): { x: number, y: number } {
+  switch (direction) {
+    case SelectionDirection.BOTTOM_RIGHT:
+      return { x: baseX, y: baseY }
+    case SelectionDirection.BOTTOM_LEFT:
+      return { x: baseX - tooltipWidth, y: baseY }
+    case SelectionDirection.TOP_RIGHT:
+      return { x: baseX, y: baseY - tooltipHeight }
+    case SelectionDirection.TOP_LEFT:
+      return { x: baseX - tooltipWidth, y: baseY - tooltipHeight }
+  }
+}
+
 export function SelectionToolbar() {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
-  const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position
+  const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position (base position without direction offset)
+  const selectionStartRef = useRef<{ x: number, y: number } | null>(null) // store selection start position
+  const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
   const isDraggingFromTooltipRef = useRef(false) // track if dragging started from tooltip
   const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(isSelectionToolbarVisibleAtom)
   const setSelectionContent = useSetAtom(selectionContentAtom)
@@ -31,6 +77,15 @@ export function SelectionToolbar() {
     const tooltipWidth = tooltipRef.current.offsetWidth
     const tooltipHeight = tooltipRef.current.offsetHeight
 
+    // Apply direction offset based on selection direction and tooltip dimensions
+    const { x: offsetX, y: offsetY } = applyDirectionOffset(
+      selectionDirectionRef.current,
+      selectionPositionRef.current.x,
+      selectionPositionRef.current.y,
+      tooltipWidth,
+      tooltipHeight,
+    )
+
     // calculate strict boundaries
     const topBoundary = scrollY + MARGIN
     const bottomBoundary = scrollY + viewportHeight - tooltipHeight - MARGIN
@@ -38,8 +93,8 @@ export function SelectionToolbar() {
     const rightBoundary = clientWidth - tooltipWidth - MARGIN
 
     // calculate the position of the tooltip, but strictly limit it within the boundaries
-    const clampedX = Math.max(leftBoundary, Math.min(rightBoundary, selectionPositionRef.current.x))
-    const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, selectionPositionRef.current.y))
+    const clampedX = Math.max(leftBoundary, Math.min(rightBoundary, offsetX))
+    const clampedY = Math.max(topBoundary, Math.min(bottomBoundary, offsetY))
 
     // directly operate the DOM, avoid React re-rendering
     tooltipRef.current.style.top = `${clampedY}px`
@@ -86,6 +141,15 @@ export function SelectionToolbar() {
           const scrollY = window.scrollY
           const scrollX = window.scrollX
 
+          // Get selection start and end positions
+          const startX = selectionStartRef.current?.x ?? e.clientX
+          const startY = selectionStartRef.current?.y ?? e.clientY
+          const endX = e.clientX
+          const endY = e.clientY
+
+          // Determine and store selection direction
+          selectionDirectionRef.current = getSelectionDirection(startX, startY, endX, endY)
+
           const docX = e.clientX + scrollX
           const docY = e.clientY + scrollY
 
@@ -109,6 +173,9 @@ export function SelectionToolbar() {
       if (isDraggingFromTooltipRef.current) {
         return
       }
+
+      // Record selection start position
+      selectionStartRef.current = { x: e.clientX, y: e.clientY }
 
       setIsSelectionToolbarVisible(false)
     }
