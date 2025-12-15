@@ -118,6 +118,7 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
 
 function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBackup }) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showExportDialog, setShowExportDialog] = useState(false)
 
   const { mutate: deleteBackup, isPending: isDeleting } = useMutation({
     mutationFn: async (backupId: string) => {
@@ -142,7 +143,7 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40" align="end">
-          <DropdownMenuItem onSelect={() => exportConfig(false)} disabled={isExporting}>
+          <DropdownMenuItem onSelect={() => setShowExportDialog(true)} disabled={isExporting}>
             <Icon icon="tabler:file-export" />
             {i18n.t('options.config.backup.item.export')}
           </DropdownMenuItem>
@@ -164,6 +165,28 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
             <AlertDialogAction variant="destructive" onClick={() => deleteBackup(backupId)} disabled={isDeleting}>
               {i18n.t('options.config.backup.delete.confirm')}
             </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showExportDialog} onOpenChange={setShowExportDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{i18n.t('options.config.sync.exportOptions.title')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {i18n.t('options.config.sync.exportOptions.description')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex justify-between!">
+            <AlertDialogCancel>{i18n.t('options.config.sync.exportOptions.cancel')}</AlertDialogCancel>
+            <div className="flex gap-2">
+              <AlertDialogAction variant="secondary" onClick={() => exportConfig(true)} disabled={isExporting}>
+                {i18n.t('options.config.sync.exportOptions.includeAPIKeys')}
+              </AlertDialogAction>
+              <AlertDialogAction onClick={() => exportConfig(false)} disabled={isExporting}>
+                {i18n.t('options.config.sync.exportOptions.excludeAPIKeys')}
+              </AlertDialogAction>
+            </div>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
