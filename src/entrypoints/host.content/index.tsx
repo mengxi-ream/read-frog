@@ -78,7 +78,14 @@ export default defineContentScript({
     manager.registerPageTranslationTriggers()
 
     // For late-loading iframes: check if translation is already enabled for this tab
-    const translationEnabled = await sendMessage('getEnablePageTranslationFromContentScript', undefined)
+    let translationEnabled = false
+    try {
+      translationEnabled = await sendMessage('getEnablePageTranslationFromContentScript', undefined)
+    }
+    catch (error) {
+      // Extension context may be invalidated during update, proceed without auto-start
+      logger.error('Failed to check translation state:', error)
+    }
     if (translationEnabled) {
       void manager.start()
     }
