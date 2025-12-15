@@ -104,19 +104,19 @@ jobs:
             echo "❌ Discord notification failed (HTTP $HTTP_CODE)"
           fi
 
-      # - name: Build and Zip Extension
-      #   if: steps.changesets.outputs.published == 'true'
-      #   run: pnpm zip
-      #   env:
-      #     WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID }}
+      - name: Build and Zip Extension
+        if: steps.changesets.outputs.published == 'true'
+        run: pnpm zip:all
+        env:
+          WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID }}
 
-      # - name: Upload Extension Zip to Release
-      #   if: steps.changesets.outputs.published == 'true'
-      #   run: |
-      #     VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
-      #     gh release upload "v$VERSION" .output/*-chrome.zip --clobber
-      #   env:
-      #     GH_TOKEN: ${{ github.token }}
+      - name: Upload Extension Zip to Release
+        if: steps.changesets.outputs.published == 'true'
+        run: |
+          VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
+          gh release upload "v$VERSION" .output/*-chrome.zip .output/*-edge.zip --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
 
       # - name: Submit to Chrome & Edge Stores
       #   if: steps.changesets.outputs.published == 'true'

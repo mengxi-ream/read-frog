@@ -21,7 +21,9 @@
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
     "zip": "WXT_ZIP_MODE=true wxt zip",
+    "zip:edge": "WXT_ZIP_MODE=true wxt zip -b edge",
     "zip:firefox": "WXT_ZIP_MODE=true wxt zip -b firefox",
+    "zip:all": "pnpm zip && pnpm zip:edge",
     "release": "changeset tag && git push origin --tags",
     "prepare": "husky"
   },
