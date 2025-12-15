@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.20.6
+
+### Patch Changes
+
+- [#813](https://github.com/mengxi-ream/read-frog/pull/813) [`a935d9d`](https://github.com/mengxi-ream/read-frog/commit/a935d9da2615e979c56c9ef515c3c575444851d0) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add export confirmation dialog for config backup items
+
+- [#811](https://github.com/mengxi-ream/read-frog/pull/811) [`dd0a924`](https://github.com/mengxi-ream/read-frog/commit/dd0a924b65b4e915d026a5165a0fa77aee73be16) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: support page translation in iframes via programmatic injection
+
+- [#804](https://github.com/mengxi-ream/read-frog/pull/804) [`d038ce4`](https://github.com/mengxi-ream/read-frog/commit/d038ce4d8cdf8febf96fee0203d06ed1948b0d74) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: fix the thought process in the translation of the custom model.
+
 ## 1.20.5
 
 ### Patch Changes
