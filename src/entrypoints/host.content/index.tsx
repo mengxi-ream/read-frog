@@ -19,10 +19,22 @@ import { PageTranslationManager } from './translation-control/page-translation'
 import './listen'
 import './style.css'
 
+declare global {
+  interface Window {
+    __READ_FROG_HOST_INJECTED__?: boolean
+  }
+}
+
 export default defineContentScript({
   matches: ['*://*/*'],
   cssInjectionMode: 'manifest',
+  allFrames: true,
   async main(ctx) {
+    // Prevent double injection (manifest-based + programmatic injection)
+    if (window.__READ_FROG_HOST_INJECTED__)
+      return
+    window.__READ_FROG_HOST_INJECTED__ = true
+
     // eruda.init()
 
     const ui = await createShadowRootUi(ctx, {
@@ -64,6 +76,12 @@ export default defineContentScript({
     // Removed shortcutKeyManager class
 
     manager.registerPageTranslationTriggers()
+
+    // For late-loading iframes: check if translation is already enabled for this tab
+    const translationEnabled = await sendMessage('getEnablePageTranslationFromContentScript', undefined)
+    if (translationEnabled) {
+      void manager.start()
+    }
 
     const handleUrlChange = async (from: string, to: string) => {
       if (from !== to) {

@@ -8,6 +8,7 @@ import { setUpConfigBackup } from './config-backup'
 import { initializeContextMenu, registerContextMenuListeners } from './context-menu'
 import { cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from './db-cleanup'
 import { handleAnalyzeSelectionPort, handleTranslateStreamPort, runAnalyzeSelectionStream } from './firefox-stream'
+import { setupIframeInjection } from './iframe-injection'
 import { initMockData } from './mock-data'
 import { newUserGuide } from './new-user-guide'
 import { proxyFetch } from './proxy-fetch'
@@ -95,5 +96,8 @@ export default defineBackground({
 
     proxyFetch()
     void initMockData()
+
+    // Setup programmatic injection for iframes that Chrome's manifest-based all_frames misses
+    setupIframeInjection()
   },
 })

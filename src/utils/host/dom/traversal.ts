@@ -11,7 +11,6 @@ import {
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
-  isIFrameElement,
   isShallowBlockHTMLElement,
   isShallowBlockTransNode,
   isShallowInlineHTMLElement,
@@ -65,13 +64,6 @@ export function walkAndLabelElement(
       if (isHTMLElement(child)) {
         walkAndLabelElement(child, walkId, config)
       }
-    }
-  }
-
-  if (isIFrameElement(element)) {
-    const iframeDocument = element.contentDocument
-    if (iframeDocument && iframeDocument.body) {
-      walkAndLabelElement(iframeDocument.body, walkId, config)
     }
   }
 

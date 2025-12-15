@@ -1,7 +1,7 @@
 import { getDetectedCodeFromStorage } from '@/utils/config/languages'
 import { getLocalConfig } from '@/utils/config/storage'
 import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
-import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement, isIFrameElement } from '@/utils/host/dom/filter'
+import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from '@/utils/host/dom/filter'
 import { deepQueryTopLevelSelector } from '@/utils/host/dom/find'
 import { walkAndLabelElement } from '@/utils/host/dom/traversal'
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from '@/utils/host/translate/node-manipulation'
@@ -260,14 +260,6 @@ export class PageTranslationManager implements IPageTranslationManager {
         }
       }
 
-      if (isIFrameElement(element)) {
-        const iframeDocument = element.contentDocument
-        if (iframeDocument && iframeDocument.body) {
-          collectFromContainer(iframeDocument)
-          traverseElement(iframeDocument.body)
-        }
-      }
-
       for (const child of element.children) {
         if (child instanceof HTMLElement) {
           traverseElement(child)
@@ -361,14 +353,6 @@ export class PageTranslationManager implements IPageTranslationManager {
         if (isHTMLElement(child)) {
           this.observeMutations(child)
         }
-      }
-    }
-
-    // Check iframes
-    if (isIFrameElement(element)) {
-      const iframeDocument = element.contentDocument
-      if (iframeDocument && iframeDocument.body) {
-        this.observeMutations(iframeDocument.body)
       }
     }
 

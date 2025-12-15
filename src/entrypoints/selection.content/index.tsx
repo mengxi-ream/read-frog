@@ -14,10 +14,22 @@ import '@/assets/styles/theme.css'
 // eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null
 
+declare global {
+  interface Window {
+    __READ_FROG_SELECTION_INJECTED__?: boolean
+  }
+}
+
 export default defineContentScript({
   matches: ['*://*/*'],
   cssInjectionMode: 'ui',
+  allFrames: true,
   async main(ctx) {
+    // Prevent double injection (manifest-based + programmatic injection)
+    if (window.__READ_FROG_SELECTION_INJECTED__)
+      return
+    window.__READ_FROG_SELECTION_INJECTED__ = true
+
     const ui = await createShadowRootUi(ctx, {
       name: `${kebabCase(APP_NAME)}-selection`,
       position: 'overlay',

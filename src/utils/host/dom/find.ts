@@ -3,7 +3,7 @@ import type { Point } from '@/types/dom'
 import { getLocalConfig } from '@/utils/config/storage'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
-import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isIFrameElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from './filter'
+import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from './filter'
 import { smashTruncationStyle } from './style'
 
 /**
@@ -105,13 +105,6 @@ export function deepQueryTopLevelSelector(element: HTMLElement | ShadowRoot | Do
       if (isHTMLElement(child)) {
         result.push(...deepQueryTopLevelSelector(child, selectorFn))
       }
-    }
-  }
-
-  if (isIFrameElement(element)) {
-    const iframeDocument = element.contentDocument
-    if (iframeDocument && iframeDocument.body) {
-      result.push(...deepQueryTopLevelSelector(iframeDocument.body, selectorFn))
     }
   }
 
