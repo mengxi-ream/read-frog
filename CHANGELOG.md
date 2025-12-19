@@ -1,5 +1,29 @@
 # @read-frog/extension
 
+## 1.20.7
+
+### Patch Changes
+
+- [`434068d`](https://github.com/mengxi-ream/read-frog/commit/434068d4182900ef49e97e37eb4c914bd414eea0) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore: add prompt sharing discussion links
+
+- [#815](https://github.com/mengxi-ream/read-frog/pull/815) [`282a852`](https://github.com/mengxi-ream/read-frog/commit/282a8521e6225d3fd1f547093e0345b4e93c607c) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: treat last synced config as null if it is invalid to unlock sync flow
+
+## 1.20.6
+
+### Patch Changes
+
+- [#813](https://github.com/mengxi-ream/read-frog/pull/813) [`a935d9d`](https://github.com/mengxi-ream/read-frog/commit/a935d9da2615e979c56c9ef515c3c575444851d0) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add export confirmation dialog for config backup items
+
+- [#811](https://github.com/mengxi-ream/read-frog/pull/811) [`dd0a924`](https://github.com/mengxi-ream/read-frog/commit/dd0a924b65b4e915d026a5165a0fa77aee73be16) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: support page translation in iframes via programmatic injection
+
+- [#804](https://github.com/mengxi-ream/read-frog/pull/804) [`d038ce4`](https://github.com/mengxi-ream/read-frog/commit/d038ce4d8cdf8febf96fee0203d06ed1948b0d74) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: fix the thought process in the translation of the custom model.
+
+## 1.20.5
+
+### Patch Changes
+
+- [#807](https://github.com/mengxi-ream/read-frog/pull/807) [`4d98864`](https://github.com/mengxi-ream/read-frog/commit/4d98864480f0aca0791b9288072c760dc1826c12) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: refresh auth data and add email validation in Google Drive sync
+
 ## 1.20.4
 
 ### Patch Changes

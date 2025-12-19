@@ -180,8 +180,8 @@ importers:
         specifier: ^5.0.112
         version: 5.0.112(zod@4.1.12)
       better-auth:
-        specifier: ^1.4.3
-        version: 1.4.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+        specifier: ^1.4.7
+        version: 1.4.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@20.19.25)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(yaml@2.8.1))
       case-anything:
         specifier: ^3.1.2
         version: 3.1.2
@@ -686,26 +686,26 @@ packages:
     resolution: {integrity: sha512-qQ5m48eI/MFLQ5PxQj4PFaprjyCTLI37ElWMmNs0K8Lk3dVeOdNpB3ks8jc7yM5CDmVC73eMVk/trk3fgmrUpA==}
     engines: {node: '>=6.9.0'}
 
-  '@better-auth/core@1.4.3':
-    resolution: {integrity: sha512-6PjF/GMvR+dV/PJDvInsU4BQaL+OvAB17i72Pz3zYwxF709hIaTHOshysTiFoLxjfFN2GGwgk5pGLKHVL/pB2w==}
+  '@better-auth/core@1.4.7':
+    resolution: {integrity: sha512-rNfj8aNFwPwAMYo+ahoWDsqKrV7svD3jhHSC6+A77xxKodbgV0UgH+RO21GMaZ0PPAibEl851nw5e3bsNslW/w==}
     peerDependencies:
       '@better-auth/utils': 0.3.0
-      '@better-fetch/fetch': 1.1.18
-      better-call: 1.1.0
+      '@better-fetch/fetch': 1.1.21
+      better-call: 1.1.5
       jose: ^6.1.0
       kysely: ^0.28.5
       nanostores: ^1.0.1
 
-  '@better-auth/telemetry@1.4.3':
-    resolution: {integrity: sha512-rBkNdUCZJVuc6AQyg9W5A8fgYdOxDyhytfGy3aWrZw77JGJ2KiPwZfZ+OrFxubOzZvFdhoeTo6yfFURRqTFCwQ==}
+  '@better-auth/telemetry@1.4.7':
+    resolution: {integrity: sha512-k07C/FWnX6m+IxLruNkCweIxuaIwVTB2X40EqwamRVhYNBAhOYZFGLHH+PtQyM+Yf1Z4+8H6MugLOXSreXNAjQ==}
     peerDependencies:
-      '@better-auth/core': 1.4.3
+      '@better-auth/core': 1.4.7
 
   '@better-auth/utils@0.3.0':
     resolution: {integrity: sha512-W+Adw6ZA6mgvnSnhOki270rwJ42t4XzSK6YWGF//BbVXL6SwCLWfyzBc1lN2m/4RM28KubdBKQ4X5VMoLRNPQw==}
 
-  '@better-fetch/fetch@1.1.18':
-    resolution: {integrity: sha512-rEFOE1MYIsBmoMJtQbl32PGHHXuG2hDxvEd7rUHE0vCBoFQVSDqaVs9hkZEtHCxRoY+CljXKFCOuJ8uxqw1LcA==}
+  '@better-fetch/fetch@1.1.21':
+    resolution: {integrity: sha512-/ImESw0sskqlVR94jB+5+Pxjf+xBwDZF/N5+y2/q4EqD7IARUTSpPfIo8uf39SYpCxyOCtbyYpUrZ3F/k0zT4A==}
 
   '@changesets/apply-release-plan@7.0.13':
     resolution: {integrity: sha512-BIW7bofD2yAWoE8H4V40FikC+1nNFEKBisMECccS16W1rt6qqhNTBDmIw5HaqmMgtLNz9e7oiALiEUuKrQ4oHg==}
@@ -2966,23 +2966,51 @@ packages:
     resolution: {integrity: sha512-2CXFpkjVnY2FT+B6GrSYxzYf65BJWEqz5tIRHCvNsZZ2F3CmsCB37h8SpYgKG7y9C4YAeTipIPWG7EmFmhAeXA==}
     hasBin: true
 
-  better-auth@1.4.3:
-    resolution: {integrity: sha512-cMY6PxXZ9Ep+KmLUcVEQ5RwtZtdawxTbDqUIgIIUYWJgq0KwNkQfFNimSYjHI0cNZwwAJyvbV42+uLogsDOUqQ==}
+  better-auth@1.4.7:
+    resolution: {integrity: sha512-kVmDQxzqGwP4FFMOYpS5I7oAaoFW3hwooUAAtcbb2DrOYv5EUvRUDJbTMaPoMTj7URjNDQ6vG9gcCS1Q+0aVBw==}
     peerDependencies:
       '@lynx-js/react': '*'
-      '@sveltejs/kit': '*'
-      next: '*'
-      react: '*'
-      react-dom: '*'
-      solid-js: '*'
-      svelte: '*'
-      vue: '*'
+      '@prisma/client': ^5.22.0
+      '@sveltejs/kit': ^2.0.0
+      '@tanstack/react-start': ^1.0.0
+      better-sqlite3: ^12.4.1
+      drizzle-kit: ^0.31.4
+      drizzle-orm: ^0.41.0
+      mongodb: ^6.18.0
+      mysql2: ^3.14.4
+      next: ^14.0.0 || ^15.0.0 || ^16.0.0
+      pg: ^8.16.3
+      prisma: ^5.22.0
+      react: ^18.0.0 || ^19.0.0
+      react-dom: ^18.0.0 || ^19.0.0
+      solid-js: ^1.0.0
+      svelte: ^4.0.0 || ^5.0.0
+      vitest: ^4.0.15
+      vue: ^3.0.0
     peerDependenciesMeta:
       '@lynx-js/react':
         optional: true
+      '@prisma/client':
+        optional: true
       '@sveltejs/kit':
         optional: true
+      '@tanstack/react-start':
+        optional: true
+      better-sqlite3:
+        optional: true
+      drizzle-kit:
+        optional: true
+      drizzle-orm:
+        optional: true
+      mongodb:
+        optional: true
+      mysql2:
+        optional: true
       next:
+        optional: true
+      pg:
+        optional: true
+      prisma:
         optional: true
       react:
         optional: true
@@ -2992,11 +3020,18 @@ packages:
         optional: true
       svelte:
         optional: true
+      vitest:
+        optional: true
       vue:
         optional: true
 
-  better-call@1.1.0:
-    resolution: {integrity: sha512-7CecYG+yN8J1uBJni/Mpjryp8bW/YySYsrGEWgFe048ORASjq17keGjbKI2kHEOSc6u8pi11UxzkJ7jIovQw6w==}
+  better-call@1.1.5:
+    resolution: {integrity: sha512-nQJ3S87v6wApbDwbZ++FrQiSiVxWvZdjaO+2v6lZJAG2WWggkB2CziUDjPciz3eAt9TqfRursIQMZIcpkBnvlw==}
+    peerDependencies:
+      zod: ^4.0.0
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   better-path-resolve@1.0.0:
     resolution: {integrity: sha512-pbnl5XzGBdrFU/wT4jqmJVPn2B6UHPBOhzMQkY/SPUPB6QtUXtmBHBIwCbXJol93mOpGMnQyP/+BB19q04xj7g==}
@@ -5741,8 +5776,8 @@ packages:
     engines: {node: '>=18.0.0', npm: '>=8.0.0'}
     hasBin: true
 
-  rou3@0.5.1:
-    resolution: {integrity: sha512-OXMmJ3zRk2xeXFGfA3K+EOPHC5u7RDFG7lIOx0X1pdnhUkI8MdVrbV+sNsD80ElpUZ+MRHdyxPnFthq9VHs8uQ==}
+  rou3@0.7.12:
+    resolution: {integrity: sha512-iFE4hLDuloSWcD7mjdCDhx2bKcIsYbtOTpfH5MHHLSKMOUyjqQXTeZVa289uuwEGEKFoE/BAPbhaU4B774nceg==}
 
   roughjs@4.6.6:
     resolution: {integrity: sha512-ZUz/69+SYpFN/g/lUlo2FXcIjRkSu3nDarreVdGGndHEBJ6cXPdKguS8JGxwj5HA5xIbVKSmLgr5b3AWxtRfvQ==}
@@ -6943,26 +6978,26 @@ snapshots:
       '@babel/helper-string-parser': 7.27.1
       '@babel/helper-validator-identifier': 7.28.5
 
-  '@better-auth/core@1.4.3(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.18)(better-call@1.1.0)(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)':
+  '@better-auth/core@1.4.7(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.5(zod@4.1.12))(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)':
     dependencies:
       '@better-auth/utils': 0.3.0
-      '@better-fetch/fetch': 1.1.18
+      '@better-fetch/fetch': 1.1.21
       '@standard-schema/spec': 1.0.0
-      better-call: 1.1.0
+      better-call: 1.1.5(zod@4.1.13)
       jose: 6.1.1
       kysely: 0.28.8
       nanostores: 1.0.1
-      zod: 4.1.12
+      zod: 4.1.13
 
-  '@better-auth/telemetry@1.4.3(@better-auth/core@1.4.3(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.18)(better-call@1.1.0)(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1))':
+  '@better-auth/telemetry@1.4.7(@better-auth/core@1.4.7(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.5(zod@4.1.12))(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1))':
     dependencies:
-      '@better-auth/core': 1.4.3(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.18)(better-call@1.1.0)(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)
+      '@better-auth/core': 1.4.7(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.5(zod@4.1.12))(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)
       '@better-auth/utils': 0.3.0
-      '@better-fetch/fetch': 1.1.18
+      '@better-fetch/fetch': 1.1.21
 
   '@better-auth/utils@0.3.0': {}
 
-  '@better-fetch/fetch@1.1.18': {}
+  '@better-fetch/fetch@1.1.21': {}
 
   '@changesets/apply-release-plan@7.0.13':
     dependencies:
@@ -9480,31 +9515,33 @@ snapshots:
 
   baseline-browser-mapping@2.8.27: {}
 
-  better-auth@1.4.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+  better-auth@1.4.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(vitest@4.0.8(@types/debug@4.1.12)(@types/node@20.19.25)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(yaml@2.8.1)):
     dependencies:
-      '@better-auth/core': 1.4.3(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.18)(better-call@1.1.0)(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)
-      '@better-auth/telemetry': 1.4.3(@better-auth/core@1.4.3(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.18)(better-call@1.1.0)(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1))
+      '@better-auth/core': 1.4.7(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.5(zod@4.1.12))(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1)
+      '@better-auth/telemetry': 1.4.7(@better-auth/core@1.4.7(@better-auth/utils@0.3.0)(@better-fetch/fetch@1.1.21)(better-call@1.1.5(zod@4.1.12))(jose@6.1.1)(kysely@0.28.8)(nanostores@1.0.1))
       '@better-auth/utils': 0.3.0
-      '@better-fetch/fetch': 1.1.18
+      '@better-fetch/fetch': 1.1.21
       '@noble/ciphers': 2.0.1
       '@noble/hashes': 2.0.1
-      '@standard-schema/spec': 1.0.0
-      better-call: 1.1.0
+      better-call: 1.1.5(zod@4.1.13)
       defu: 6.1.4
       jose: 6.1.1
       kysely: 0.28.8
       nanostores: 1.0.1
-      zod: 4.1.12
+      zod: 4.1.13
     optionalDependencies:
       react: 19.2.3
       react-dom: 19.2.3(react@19.2.3)
+      vitest: 4.0.8(@types/debug@4.1.12)(@types/node@20.19.25)(jiti@2.6.1)(jsdom@26.1.0)(lightningcss@1.30.2)(yaml@2.8.1)
 
-  better-call@1.1.0:
+  better-call@1.1.5(zod@4.1.13):
     dependencies:
       '@better-auth/utils': 0.3.0
-      '@better-fetch/fetch': 1.1.18
-      rou3: 0.5.1
+      '@better-fetch/fetch': 1.1.21
+      rou3: 0.7.12
       set-cookie-parser: 2.7.2
+    optionalDependencies:
+      zod: 4.1.13
 
   better-path-resolve@1.0.0:
     dependencies:
@@ -12488,7 +12525,7 @@ snapshots:
       '@rollup/rollup-win32-x64-msvc': 4.53.2
       fsevents: 2.3.3
 
-  rou3@0.5.1: {}
+  rou3@0.7.12: {}
 
   roughjs@4.6.6:
     dependencies:

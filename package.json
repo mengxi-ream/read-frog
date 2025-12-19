@@ -1,7 +1,7 @@
 {
   "name": "@read-frog/extension",
   "type": "module",
-  "version": "1.20.4",
+  "version": "1.20.7",
   "private": true,
   "packageManager": "pnpm@10.16.1",
   "description": "Read Frog browser extension for language learning",
@@ -21,7 +21,9 @@
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
     "zip": "WXT_ZIP_MODE=true wxt zip",
+    "zip:edge": "WXT_ZIP_MODE=true wxt zip -b edge",
     "zip:firefox": "WXT_ZIP_MODE=true wxt zip -b firefox",
+    "zip:all": "pnpm zip && pnpm zip:edge",
     "release": "changeset tag && git push origin --tags",
     "prepare": "husky"
   },
@@ -83,7 +85,7 @@
     "@webext-core/messaging": "^2.2.0",
     "@wxt-dev/i18n": "^0.2.4",
     "ai": "^5.0.112",
-    "better-auth": "^1.4.3",
+    "better-auth": "^1.4.7",
     "case-anything": "^3.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

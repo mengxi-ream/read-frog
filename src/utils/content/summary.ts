@@ -20,9 +20,9 @@ export async function generateArticleSummary(
   }
 
   try {
-    const { models: { translate } } = providerConfig
+    const { models: { translate }, name: providerName } = providerConfig
     const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-    const providerOptions = getProviderOptions(translateModel ?? '')
+    const providerOptions = getProviderOptions(translateModel ?? '', providerName)
     const model = await getTranslateModelById(providerConfig.id)
 
     const prompt = `Summarize the following article in 2-3 sentences. Focus on the main topic and key points. Return ONLY the summary, no explanations or formatting.

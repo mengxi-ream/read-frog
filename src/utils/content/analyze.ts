@@ -120,9 +120,9 @@ export async function detectLanguageWithLLM(
       return null
     }
 
-    const { models: { translate } } = providerConfig
+    const { models: { translate }, name: providerName } = providerConfig
     const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-    const providerOptions = getProviderOptions(translateModel ?? '')
+    const providerOptions = getProviderOptions(translateModel ?? '', providerName)
     const model = await getTranslateModelById(providerConfig.id)
 
     // Create language list for prompt

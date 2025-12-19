@@ -234,6 +234,8 @@ options:
     personalizedPrompts:
       title: 個人化 Prompt
       description: 自訂不同類型的 Prompt，可以在翻譯時自行調整 Prompt 類型。Prompt 表示以用戶身份發送給 LLM 的文字。
+      communityPrompts: 獲取或分享社區 Prompt
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/820
       addPrompt: 添加 Prompt
       default: 通用
       importSuccess: 導入成功

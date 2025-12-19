@@ -14,7 +14,6 @@ import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewe
 import { WEBSITE_URL } from '@/utils/constants/url'
 import { cn } from '@/utils/styles/tailwind'
 import { getLastViewedSurvey, hasNewSurvey, saveLastViewedSurvey } from '@/utils/survey'
-import { getReviewUrl } from '@/utils/utils'
 import { version } from '../../../../package.json'
 import { AnimatedIndicator } from './animated-indicator'
 
@@ -101,19 +100,6 @@ export function ProductNav() {
               </a>
             </SidebarMenuButton>
             <AnimatedIndicator show={showSurveyIndicator && open} />
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <a
-                href={getReviewUrl('options')}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Icon icon="noto:star" />
-                <span>{i18n.t('options.rateUs.title')}</span>
-              </a>
-            </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarGroupContent>
