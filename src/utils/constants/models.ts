@@ -58,3 +58,5 @@ export const NON_API_TRANSLATE_PROVIDERS_MAP: Record<typeof NON_API_TRANSLATE_PR
 export const PURE_TRANSLATE_PROVIDERS = ['google', 'microsoft', 'deeplx'] as const
 
 export const THINKING_MODELS = ['gemini-2.5-pro'] as const
+
+export const THINKING_LEVEL_MODELS = ['gemini-3-flash-preview', 'gemini-3-pro-preview'] as const

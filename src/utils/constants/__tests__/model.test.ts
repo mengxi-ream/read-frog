@@ -17,6 +17,12 @@ describe('getProviderOptions', () => {
 
       const nonThinkingOptions = getProviderOptions('gemini-2.5-flash')
       expect(nonThinkingOptions.google.thinkingConfig).toMatchObject({ thinkingBudget: 0 })
+
+      const thinkingLevelFlashOptions = getProviderOptions('gemini-3-flash-preview')
+      expect(thinkingLevelFlashOptions.google.thinkingConfig).toMatchObject({ thinkingLevel: 'low', includeThoughts: false })
+
+      const thinkingLevelProOptions = getProviderOptions('gemini-3-pro-preview')
+      expect(thinkingLevelProOptions.google.thinkingConfig).toMatchObject({ thinkingLevel: 'low', includeThoughts: false })
     })
   })
 
