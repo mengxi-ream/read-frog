@@ -3,7 +3,7 @@ import type { TransNode } from '@/types/dom'
 import { BLOCK_CONTENT_CLASS, INLINE_CONTENT_CLASS, NOTRANSLATE_CLASS } from '../../../constants/dom-labels'
 import { isBlockTransNode, isCustomForceBlockTranslation, isHTMLElement, isInlineTransNode } from '../../dom/filter'
 import { getOwnerDocument } from '../../dom/node'
-import { decorateTranslationNode } from '../decorate-translation'
+import { decorateTranslationNode } from '../ui/decorate-translation'
 import { isForceInlineTranslation } from '../ui/translation-utils'
 
 export function addInlineTranslation(ownerDoc: Document, translatedWrapperNode: HTMLElement, translatedNode: HTMLElement): void {
@@ -54,6 +54,6 @@ export async function insertTranslatedNodeIntoWrapper(
   }
 
   translatedNode.textContent = translatedText
-  await decorateTranslationNode(translatedNode, translationNodeStyle)
   translatedWrapperNode.appendChild(translatedNode)
+  await decorateTranslationNode(translatedNode, translationNodeStyle)
 }

@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/shadcn/textarea'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { BLOCK_CONTENT_CLASS, CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
-import { decorateTranslationNode } from '@/utils/host/translate/decorate-translation'
+import { decorateTranslationNode } from '@/utils/host/translate/ui/decorate-translation'
 
 export function StylePreview() {
   const { translationNodeStyle } = useAtomValue(configFieldsAtomMap.translate)
