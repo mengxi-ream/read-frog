@@ -58,14 +58,15 @@ export function ensurePresetStyles(root: StyleRoot): void {
   if (injectedPresetRoots.has(root))
     return
 
+  // Mark as injected first to prevent race condition with concurrent calls
+  injectedPresetRoots.add(root)
+
   if (supportsAdoptedStyleSheets(root)) {
     root.adoptedStyleSheets = [...root.adoptedStyleSheets, getPresetStyleSheet()]
   }
   else {
     injectStyleElement(root, 'read-frog-preset-styles', FULL_PRESET_CSS)
   }
-
-  injectedPresetRoots.add(root)
 }
 
 // ============ Custom CSS Injection ============
@@ -87,8 +88,9 @@ export async function ensureCustomCSS(root: StyleRoot, cssText: string): Promise
     let sheet = customCSSMap.get(root)
     if (!sheet) {
       sheet = new CSSStyleSheet()
-      root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+      // Set in map first to prevent race condition with concurrent calls
       customCSSMap.set(root, sheet)
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
     }
     await sheet.replace(cssText)
   }
