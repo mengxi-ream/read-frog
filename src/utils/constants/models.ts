@@ -1,3 +1,8 @@
+import type { AnthropicProviderOptions } from '@ai-sdk/anthropic'
+import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
+import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
+import type { JSONValue } from 'ai'
+
 export const READ_PROVIDER_MODELS = {
   openai: ['gpt-5.2-pro', 'gpt-5.2', 'gpt-5.2-chat-latest', 'gpt-5.1-codex', 'gpt-5.1', 'gpt-5.1-codex-mini', 'gpt-5.1-chat-latest', 'gpt-5-pro', 'gpt-5-codex', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano', 'gpt-5-chat-latest', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'gpt-4o', 'gpt-4o-mini'],
   deepseek: ['deepseek-chat', 'deepseek-reasoner'],
@@ -57,6 +62,58 @@ export const NON_API_TRANSLATE_PROVIDERS_MAP: Record<typeof NON_API_TRANSLATE_PR
 
 export const PURE_TRANSLATE_PROVIDERS = ['google', 'microsoft', 'deeplx'] as const
 
-export const THINKING_MODELS = ['gemini-2.5-pro'] as const
+/**
+ * Provider options configuration.
+ * Centralized configuration for all AI provider-specific options.
+ */
+export const PROVIDER_OPTIONS_CONFIG = {
+  google: {
+    default: {
+      thinkingConfig: { thinkingBudget: 0, includeThoughts: false },
+    } satisfies GoogleGenerativeAIProviderOptions,
+    modelPatterns: [
+      {
+        // Gemini 3.x uses thinkingLevel mode
+        match: /^gemini-3-.*-preview$/,
+        options: {
+          thinkingConfig: { thinkingLevel: 'low', includeThoughts: false },
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
+      {
+        // Gemini 2.5 Pro uses thinkingBudget mode but the minimum thinkingBudget is 128
+        match: ['gemini-2.5-pro'],
+        options: {
+          thinkingConfig: { thinkingBudget: 128, includeThoughts: false },
+        } satisfies GoogleGenerativeAIProviderOptions,
+      },
+    ],
+  },
+  anthropic: {
+    default: {
+      thinking: { type: 'disabled' },
+    } satisfies AnthropicProviderOptions,
+  },
+  openai: {
+    default: {
+      reasoningEffort: 'minimal',
+    } satisfies OpenAIResponsesProviderOptions,
+  },
+} as const
 
-export const THINKING_LEVEL_MODELS = ['gemini-3-flash-preview', 'gemini-3-pro-preview'] as const
+export type ProviderOptionsConfig = typeof PROVIDER_OPTIONS_CONFIG
+
+/**
+ * Model-specific options that override provider defaults.
+ * Used for models with compatibility issues (e.g., GLM models).
+ */
+export const MODEL_SPECIFIC_OPTIONS: Array<{
+  pattern: RegExp
+  options: Record<string, JSONValue>
+}> = [
+  {
+    // GLM models have issues with thinking mode, causing errors or unexpected behavior
+    // Disable thinking for all GLM-* models (case-insensitive)
+    pattern: /^GLM-/i,
+    options: { thinking: { type: 'disabled' } },
+  },
+]

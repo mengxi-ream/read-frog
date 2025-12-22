@@ -1,49 +1,54 @@
-import type { AnthropicProviderOptions } from '@ai-sdk/anthropic'
-import type { GoogleGenerativeAIProviderOptions } from '@ai-sdk/google'
-import type { OpenAIResponsesProviderOptions } from '@ai-sdk/openai'
 import type { JSONValue } from 'ai'
-import { THINKING_MODELS } from '@/types/config/provider'
-import { THINKING_LEVEL_MODELS } from './models'
-
-const DEFAULT_THINKING_BUDGET = 128
+import { MODEL_SPECIFIC_OPTIONS, PROVIDER_OPTIONS_CONFIG } from './models'
 
 /**
- * Model-specific provider options configuration.
- * Used to apply special configurations for certain models that need custom behavior.
+ * Match model against a pattern (string array or RegExp)
  */
-const MODEL_SPECIFIC_OPTIONS: Array<{
-  pattern: RegExp
-  options: Record<string, JSONValue>
-}> = [
-  {
-    // GLM models have issues with thinking mode, causing errors or unexpected behavior
-    // Disable thinking for all GLM-* models (case-insensitive)
-    pattern: /^GLM-/i,
-    options: { thinking: { type: 'disabled' } },
-  },
-]
+function matchesPattern(model: string, pattern: readonly string[] | RegExp): boolean {
+  if (pattern instanceof RegExp) {
+    return pattern.test(model)
+  }
+  return pattern.includes(model)
+}
 
-export function getProviderOptions(translateModel: string, providerName?: string): Record<string, Record<string, JSONValue>> {
-  const options: Record<string, Record<string, JSONValue>> = {
-    google: {
-      thinkingConfig: THINKING_LEVEL_MODELS.includes(translateModel)
-        ? {
-            thinkingLevel: 'low',
-            includeThoughts: false,
-          }
-        : {
-            thinkingBudget: THINKING_MODELS.includes(translateModel) ? DEFAULT_THINKING_BUDGET : 0,
-            includeThoughts: false,
-          },
-    } satisfies GoogleGenerativeAIProviderOptions,
-    anthropic: {
-      thinking: { type: 'disabled' },
-    } satisfies AnthropicProviderOptions,
-    openai: {
-      reasoningEffort: 'minimal',
-    } satisfies OpenAIResponsesProviderOptions,
+/**
+ * Get options for a specific provider based on model name
+ */
+function getOptionsForProvider(
+  providerConfig: {
+    default: Record<string, JSONValue>
+    modelPatterns?: readonly { match: readonly string[] | RegExp, options: Record<string, JSONValue> }[]
+  },
+  model: string,
+): Record<string, JSONValue> {
+  // Check model-specific patterns first
+  if (providerConfig.modelPatterns) {
+    for (const { match, options } of providerConfig.modelPatterns) {
+      if (matchesPattern(model, match)) {
+        return options as Record<string, JSONValue>
+      }
+    }
+  }
+  // Fall back to default
+  return providerConfig.default as Record<string, JSONValue>
+}
+
+/**
+ * Get provider options for AI SDK generateText calls.
+ * Returns configured options for all standard providers, with optional
+ */
+export function getProviderOptions(
+  translateModel: string,
+  providerName?: string,
+): Record<string, Record<string, JSONValue>> {
+  // Build options for all configured providers
+  const options: Record<string, Record<string, JSONValue>> = {}
+
+  for (const [provider, config] of Object.entries(PROVIDER_OPTIONS_CONFIG)) {
+    options[provider] = getOptionsForProvider(config, translateModel)
   }
 
+  // Apply model-specific overrides for custom providers (e.g., GLM models)
   if (providerName) {
     for (const { pattern, options: modelOptions } of MODEL_SPECIFIC_OPTIONS) {
       if (pattern.test(translateModel)) {
