@@ -97,7 +97,8 @@ options:
         apiKeyRequired: Сначала добавьте API ключ
       advancedOptions: Расширенные настройки
       providerOptions: Параметры провайдера
-      providerOptionsHint: Параметры по умолчанию показаны в качестве заполнителя
+      providerOptionsHint: Специфические параметры провайдера для нестандартных функций API, таких как режим размышления/рассуждения. Подробнее см. документацию Vercel AI SDK или официальную документацию вашего провайдера.
+      providerOptionsDocsLink: Документация провайдера
       invalidJson: Неверный формат JSON
     providers:
       description:

@@ -97,7 +97,8 @@ options:
         apiKeyRequired: 請先添加 API 密鑰
       advancedOptions: 進階選項
       providerOptions: 提供者選項
-      providerOptionsHint: 預設選項顯示為佔位符
+      providerOptionsHint: 用於非標準 API 功能（如思考/推理模式）的提供者特定選項。詳情請參閱 Vercel AI SDK 文件或您的提供者官方文件。
+      providerOptionsDocsLink: 查看提供者文件
       invalidJson: JSON 格式無效
     providers:
       description:

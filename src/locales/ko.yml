@@ -96,7 +96,8 @@ options:
         apiKeyRequired: 먼저 API 키를 추가하세요
       advancedOptions: 고급 옵션
       providerOptions: 제공자 옵션
-      providerOptionsHint: 기본 옵션이 플레이스홀더로 표시됩니다
+      providerOptionsHint: 사고/추론 모드와 같은 비표준 API 기능을 위한 공급자별 옵션입니다. 자세한 내용은 Vercel AI SDK 문서 또는 공급자의 공식 문서를 참조하세요.
+      providerOptionsDocsLink: 공급자 문서 보기
       invalidJson: 잘못된 JSON 형식
     providers:
       description:

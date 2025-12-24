@@ -96,7 +96,8 @@ options:
         apiKeyRequired: 先にAPIキーを追加してください
       advancedOptions: 詳細オプション
       providerOptions: プロバイダーオプション
-      providerOptionsHint: デフォルトオプションがプレースホルダーとして表示されます
+      providerOptionsHint: 思考/推論モードなどの非標準API機能のためのプロバイダー固有オプション。詳細はVercel AI SDKドキュメントまたはプロバイダーの公式ドキュメントをご覧ください。
+      providerOptionsDocsLink: プロバイダードキュメントを見る
       invalidJson: 無効なJSON形式
     providers:
       description:

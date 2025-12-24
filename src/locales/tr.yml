@@ -97,7 +97,8 @@ options:
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
       advancedOptions: Gelişmiş Seçenekler
       providerOptions: Sağlayıcı Seçenekleri
-      providerOptionsHint: Varsayılan seçenekler yer tutucu olarak gösterilir
+      providerOptionsHint: Düşünme/akıl yürütme modu gibi standart dışı API özellikleri için sağlayıcıya özel seçenekler. Ayrıntılar için Vercel AI SDK belgelerine veya sağlayıcınızın resmi belgelerine bakın.
+      providerOptionsDocsLink: Sağlayıcı Belgelerini Görüntüle
       invalidJson: Geçersiz JSON formatı
     providers:
       description:

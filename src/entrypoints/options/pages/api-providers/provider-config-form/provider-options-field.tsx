@@ -1,20 +1,18 @@
 import type { APIProviderConfig, LLMTranslateProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
 import { useStore } from '@tanstack/react-form'
 import { useMemo, useState } from 'react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/shadcn/collapsible'
 import { Field, FieldError, FieldLabel } from '@/components/shadcn/field'
+import { Hint } from '@/components/shadcn/hint'
 import { JSONCodeEditor } from '@/components/ui/json-code-editor'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderOptions } from '@/utils/providers/options'
-import { cn } from '@/utils/styles/tailwind'
+import { AdvancedOptionsSection } from './components/advanced-options-section'
 import { withForm } from './form'
 
 export const ProviderOptionsField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const [isOpen, setIsOpen] = useState(false)
     const providerConfig = useStore(form.store, state => state.values)
     const isLLMProvider = isLLMTranslateProviderConfig(providerConfig)
 
@@ -51,25 +49,12 @@ export const ProviderOptionsField = withForm({
     }
 
     return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-4">
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
-          <Icon
-            icon="tabler:chevron-right"
-            className={cn(
-              'size-4 transition-transform duration-200',
-              isOpen && 'rotate-90',
-            )}
-          />
-          <span>{i18n.t('options.apiProviders.form.advancedOptions')}</span>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <ProviderOptionsEditor
-            form={form}
-            placeholderText={placeholderText}
-            hasDefaultOptions={Object.keys(defaultOptions).length > 0}
-          />
-        </CollapsibleContent>
-      </Collapsible>
+      <AdvancedOptionsSection>
+        <ProviderOptionsEditor
+          form={form}
+          placeholderText={placeholderText}
+        />
+      </AdvancedOptionsSection>
     )
   },
 })
@@ -77,10 +62,9 @@ export const ProviderOptionsField = withForm({
 interface ProviderOptionsEditorProps {
   form: any
   placeholderText: string
-  hasDefaultOptions: boolean
 }
 
-function ProviderOptionsEditor({ form, placeholderText, hasDefaultOptions }: ProviderOptionsEditorProps) {
+function ProviderOptionsEditor({ form, placeholderText }: ProviderOptionsEditorProps) {
   const [jsonError, setJsonError] = useState<string | null>(null)
 
   return (
@@ -90,7 +74,6 @@ function ProviderOptionsEditor({ form, placeholderText, hasDefaultOptions }: Pro
           field={field}
           form={form}
           placeholderText={placeholderText}
-          hasDefaultOptions={hasDefaultOptions}
           jsonError={jsonError}
           setJsonError={setJsonError}
         />
@@ -103,7 +86,6 @@ interface ProviderOptionsEditorInnerProps {
   field: any
   form: any
   placeholderText: string
-  hasDefaultOptions: boolean
   jsonError: string | null
   setJsonError: (error: string | null) => void
 }
@@ -112,7 +94,6 @@ function ProviderOptionsEditorInner({
   field,
   form,
   placeholderText,
-  hasDefaultOptions,
   jsonError,
   setJsonError,
 }: ProviderOptionsEditorInnerProps) {
@@ -145,12 +126,18 @@ function ProviderOptionsEditorInner({
     <Field className="mt-2">
       <FieldLabel>
         <div className="flex items-center justify-between w-full">
-          <span>{i18n.t('options.apiProviders.form.providerOptions')}</span>
-          {hasDefaultOptions && (
-            <span className="text-xs text-muted-foreground">
-              {i18n.t('options.apiProviders.form.providerOptionsHint')}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5">
+            <span>{i18n.t('options.apiProviders.form.providerOptions')}</span>
+            <Hint content={i18n.t('options.apiProviders.form.providerOptionsHint')} />
+          </div>
+          <a
+            href="https://ai-sdk.dev/providers/ai-sdk-providers"
+            target="_blank"
+            rel="noreferrer"
+            className="text-xs text-link hover:opacity-90"
+          >
+            {i18n.t('options.apiProviders.form.providerOptionsDocsLink')}
+          </a>
         </div>
       </FieldLabel>
       <JSONCodeEditor

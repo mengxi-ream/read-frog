@@ -97,7 +97,8 @@ options:
         apiKeyRequired: Vui lòng thêm khóa API trước
       advancedOptions: Tùy chọn nâng cao
       providerOptions: Tùy chọn nhà cung cấp
-      providerOptionsHint: Tùy chọn mặc định được hiển thị dưới dạng placeholder
+      providerOptionsHint: Các tùy chọn dành riêng cho nhà cung cấp cho các tính năng API không chuẩn như chế độ suy nghĩ/lập luận. Xem tài liệu Vercel AI SDK hoặc tài liệu chính thức của nhà cung cấp để biết chi tiết cấu hình.
+      providerOptionsDocsLink: Xem Tài liệu Nhà cung cấp
       invalidJson: Định dạng JSON không hợp lệ
     providers:
       description:
