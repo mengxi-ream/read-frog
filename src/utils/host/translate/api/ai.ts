@@ -23,6 +23,7 @@ export async function aiTranslate(
     system: systemPrompt,
     prompt,
     providerOptions,
+    maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
   })
 
   const [, finalTranslation = translatedText] = translatedText.match(/<\/think>([\s\S]*)/) || []

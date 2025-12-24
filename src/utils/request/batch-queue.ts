@@ -1,5 +1,12 @@
 import { batchQueueConfigSchema } from '@/types/config/translate'
 
+export class BatchCountMismatchError extends Error {
+  constructor(expected: number, got: number, results: unknown[]) {
+    super(`Batch result count mismatch: expected ${expected}, got ${got}.\nResults: ["${results.join('",\n"')}"]`)
+    this.name = 'BatchCountMismatchError'
+  }
+}
+
 const BASE_BACKOFF_DELAY_MS = 1000
 const MAX_BACKOFF_DELAY_MS = 8000
 
@@ -163,7 +170,7 @@ export class BatchQueue<T, R> {
       }
 
       if (results.length !== tasks.length) {
-        throw new Error(`Batch result count mismatch: expected ${tasks.length}, got ${results.length}.\nResults: ["${results.join('",\n"')}"]`)
+        throw new BatchCountMismatchError(tasks.length, results.length, results)
       }
 
       tasks.forEach((task, index) => task.resolve(results[index]))
@@ -173,7 +180,8 @@ export class BatchQueue<T, R> {
 
       this.onError?.(err, { batchKey, retryCount, isFallback: false })
 
-      if (retryCount < this.maxRetries) {
+      // Only retry on count mismatch errors (LLM returned wrong number of results)
+      if (retryCount < this.maxRetries && err instanceof BatchCountMismatchError) {
         const delay = this.calculateBackoffDelay(retryCount)
         await this.sleep(delay)
         return this.executeBatchWithRetry(tasks, batchKey, retryCount + 1)
