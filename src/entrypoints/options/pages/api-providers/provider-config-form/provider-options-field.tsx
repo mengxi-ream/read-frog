@@ -12,10 +12,10 @@ import { withForm } from './form'
 export const ProviderOptionsField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
+    const [jsonError, setJsonError] = useState<string | null>(null)
     const providerConfig = useStore(form.store, state => state.values)
     const isLLMProvider = isLLMTranslateProviderConfig(providerConfig)
 
-    // Compute translate model - safe to call unconditionally since we check isLLMProvider in render
     const translateModel = useMemo(() => {
       if (!isLLMProvider) {
         return null
@@ -26,7 +26,6 @@ export const ProviderOptionsField = withForm({
         : llmConfig.models.translate.model
     }, [isLLMProvider, providerConfig])
 
-    // Get default options for placeholder
     const defaultOptions = useMemo(() => {
       if (!isLLMProvider || !translateModel) {
         return {}
@@ -42,111 +41,67 @@ export const ProviderOptionsField = withForm({
       return JSON.stringify(defaultOptions, null, 2)
     }, [defaultOptions])
 
-    // Only show for LLM providers
     if (!isLLMProvider) {
       return null
     }
 
     return (
-      <ProviderOptionsEditor
-        form={form}
-        placeholderText={placeholderText}
-      />
+      <form.Field name="providerOptions">
+        {(field) => {
+          const stringValue = field.state.value
+            ? JSON.stringify(field.state.value, null, 2)
+            : ''
+
+          const handleChange = (value: string) => {
+            if (!value.trim()) {
+              setJsonError(null)
+              field.handleChange(undefined)
+              void form.handleSubmit()
+              return
+            }
+            try {
+              const parsed = JSON.parse(value)
+              setJsonError(null)
+              field.handleChange(parsed)
+              void form.handleSubmit()
+            }
+            catch {
+              setJsonError(i18n.t('options.apiProviders.form.invalidJson'))
+            }
+          }
+
+          return (
+            <Field className="mt-2">
+              <FieldLabel>
+                <div className="flex items-center justify-between w-full">
+                  <div className="flex items-center gap-1.5">
+                    <span>{i18n.t('options.apiProviders.form.providerOptions')}</span>
+                    <Hint content={i18n.t('options.apiProviders.form.providerOptionsHint')} />
+                  </div>
+                  <a
+                    href="https://ai-sdk.dev/providers/ai-sdk-providers"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-link hover:opacity-90"
+                  >
+                    {i18n.t('options.apiProviders.form.providerOptionsDocsLink')}
+                  </a>
+                </div>
+              </FieldLabel>
+              <JSONCodeEditor
+                value={stringValue}
+                onChange={handleChange}
+                placeholder={placeholderText}
+                hasError={!!jsonError}
+                height="150px"
+              />
+              {jsonError && (
+                <FieldError>{jsonError}</FieldError>
+              )}
+            </Field>
+          )
+        }}
+      </form.Field>
     )
   },
 })
-
-interface ProviderOptionsEditorProps {
-  form: any
-  placeholderText: string
-}
-
-function ProviderOptionsEditor({ form, placeholderText }: ProviderOptionsEditorProps) {
-  const [jsonError, setJsonError] = useState<string | null>(null)
-
-  return (
-    <form.Field name="providerOptions">
-      {(field: any) => (
-        <ProviderOptionsEditorInner
-          field={field}
-          form={form}
-          placeholderText={placeholderText}
-          jsonError={jsonError}
-          setJsonError={setJsonError}
-        />
-      )}
-    </form.Field>
-  )
-}
-
-interface ProviderOptionsEditorInnerProps {
-  field: any
-  form: any
-  placeholderText: string
-  jsonError: string | null
-  setJsonError: (error: string | null) => void
-}
-
-function ProviderOptionsEditorInner({
-  field,
-  form,
-  placeholderText,
-  jsonError,
-  setJsonError,
-}: ProviderOptionsEditorInnerProps) {
-  const stringValue = useMemo(() => {
-    if (!field.state.value) {
-      return ''
-    }
-    return JSON.stringify(field.state.value, null, 2)
-  }, [field.state.value])
-
-  const handleChange = (value: string) => {
-    if (!value.trim()) {
-      setJsonError(null)
-      field.handleChange(undefined)
-      void form.handleSubmit()
-      return
-    }
-    try {
-      const parsed = JSON.parse(value)
-      setJsonError(null)
-      field.handleChange(parsed)
-      void form.handleSubmit()
-    }
-    catch {
-      setJsonError(i18n.t('options.apiProviders.form.invalidJson'))
-    }
-  }
-
-  return (
-    <Field className="mt-2">
-      <FieldLabel>
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-1.5">
-            <span>{i18n.t('options.apiProviders.form.providerOptions')}</span>
-            <Hint content={i18n.t('options.apiProviders.form.providerOptionsHint')} />
-          </div>
-          <a
-            href="https://ai-sdk.dev/providers/ai-sdk-providers"
-            target="_blank"
-            rel="noreferrer"
-            className="text-xs text-link hover:opacity-90"
-          >
-            {i18n.t('options.apiProviders.form.providerOptionsDocsLink')}
-          </a>
-        </div>
-      </FieldLabel>
-      <JSONCodeEditor
-        value={stringValue}
-        onChange={handleChange}
-        placeholder={placeholderText}
-        hasError={!!jsonError}
-        height="150px"
-      />
-      {jsonError && (
-        <FieldError>{jsonError}</FieldError>
-      )}
-    </Field>
-  )
-}
