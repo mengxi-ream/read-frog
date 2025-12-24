@@ -116,6 +116,7 @@ async function getLanguageModelById(providerId: string, modelType: 'read' | 'tra
     throw new Error(`Model is undefined for ${modelType}`)
   }
 
+  // TODO: remove `as LanguageModel` after openrouter provider is compatible with AI SDK v6
   return provider.languageModel(modelId) as LanguageModel
 }
 
