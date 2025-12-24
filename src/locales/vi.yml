@@ -101,7 +101,7 @@ options:
         deepseek: Khuyến nghị sử dụng ở Trung Quốc
         openrouter: Giao diện thống nhất cho nhiều nhà cung cấp LLM với giá trả theo lần sử dụng
         ollama: Chạy các mô hình ngôn ngữ lớn cục bộ trên máy của bạn để bảo mật hoàn toàn
-        gemini: Các mô hình AI hàng đầu của Google với khả năng suy luận tiên tiến
+        google: Các mô hình AI hàng đầu của Google với khả năng suy luận tiên tiến
         anthropic: Các mô hình Claude nổi tiếng về độ an toàn và khả năng suy luận xuất sắc
         xai: Công ty AI của Elon Musk cung cấp các mô hình Grok với truy cập dữ liệu thời gian thực
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
@@ -109,7 +109,7 @@ options:
         ai302: Cung cấp các mô hình mới nhất và toàn diện nhất với API trả theo lần sử dụng
         openaiCompatible: Bên thứ ba và tương thích API OpenAI
         deeplx: API DeepL không chính thức
-        amazonBedrock: Dịch vụ được quản lý bởi AWS cho các mô hình nền tảng cấp doanh nghiệp
+        bedrock: Dịch vụ được quản lý bởi AWS cho các mô hình nền tảng cấp doanh nghiệp
         groq: Phần cứng chuyên dụng cho tốc độ suy luận LLM siêu nhanh
         deepinfra: Suy luận đám mây hiệu quả chi phí cho các mô hình mã nguồn mở phổ biến
         mistral: Công ty AI châu Âu chuyên về các mô hình đa ngôn ngữ hiệu quả

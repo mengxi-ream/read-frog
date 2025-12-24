@@ -31,10 +31,10 @@ function TranslationModeSelector() {
   const handleModeChange = (mode: TranslationModeType) => {
     const currentProvider = getProviderConfigById(providersConfig, translateConfig.providerId)
 
-    if (mode === 'translationOnly' && currentProvider && currentProvider.provider === 'google') {
+    if (mode === 'translationOnly' && currentProvider && currentProvider.provider === 'google-translate') {
       const enabledProviders = filterEnabledProvidersConfig(providersConfig)
 
-      const microsoftProvider = enabledProviders.find(p => p.provider === 'microsoft')
+      const microsoftProvider = enabledProviders.find(p => p.provider === 'microsoft-translate')
       if (microsoftProvider) {
         void setTranslateConfig(
           deepmerge(translateConfig, {

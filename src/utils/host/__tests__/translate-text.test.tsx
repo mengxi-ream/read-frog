@@ -69,7 +69,7 @@ describe('translate-text', () => {
       id: 'microsoft-default',
       enabled: true,
       name: 'Microsoft Translator',
-      provider: 'microsoft' as const,
+      provider: 'microsoft-translate' as const,
     }
 
     it('should return empty string for empty/whitespace input', async () => {

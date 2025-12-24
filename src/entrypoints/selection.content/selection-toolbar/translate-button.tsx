@@ -16,13 +16,13 @@ import {
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom, ttsProviderConfigAtom } from '@/utils/atoms/provider'
 import { getLocalConfig } from '@/utils/config/storage'
-import { getProviderOptions } from '@/utils/constants/model'
 import { getIsFirefoxExtensionEnv } from '@/utils/firefox/firefox-compat'
 import { createPortStreamPromise } from '@/utils/firefox/firefox-streaming'
 import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
 import { translateText } from '@/utils/host/translate/translate-text'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
+import { getProviderOptions } from '@/utils/providers/options'
 import {
   isSelectionToolbarVisibleAtom,
   isTranslatePopoverVisibleAtom,
@@ -110,10 +110,10 @@ export function TranslatePopover() {
           const {
             id: providerId,
             models: { translate },
-            name: providerName,
+            provider,
           } = translateProviderConfig
           const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-          const providerOptions = getProviderOptions(translateModel ?? '', providerName)
+          const providerOptions = getProviderOptions(translateModel ?? '', provider)
           const prompt = await getTranslatePrompt(targetLangName, cleanText)
 
           const abortController = new AbortController()
@@ -167,10 +167,10 @@ export function TranslatePopover() {
             throw new Error(`Invalid target language code: ${languageConfig.targetCode}`)
           }
 
-          if (provider === 'google') {
+          if (provider === 'google-translate') {
             translatedText = await googleTranslate(cleanText, sourceLang, targetLang)
           }
-          else if (provider === 'microsoft') {
+          else if (provider === 'microsoft-translate') {
             translatedText = await microsoftTranslate(cleanText, sourceLang, targetLang)
           }
         }
@@ -199,12 +199,12 @@ export function TranslatePopover() {
           const {
             id: providerId,
             models: { translate },
-            name: providerName,
+            provider,
           } = translateProviderConfig
           const translateModel = translate.isCustomModel ? translate.customModel : translate.model
           const model = await getTranslateModelById(providerId)
 
-          const providerOptions = getProviderOptions(translateModel ?? '', providerName)
+          const providerOptions = getProviderOptions(translateModel ?? '', provider)
           const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
 
           const result = streamText({

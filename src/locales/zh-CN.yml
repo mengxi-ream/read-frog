@@ -101,7 +101,7 @@ options:
         deepseek: 推荐在中国使用
         openrouter: 多个 LLM 提供商的统一接口，按使用量付费
         ollama: 在本地机器上运行大语言模型，确保完全隐私
-        gemini: 具有先进推理能力的谷歌旗舰 AI 模型
+        google: 具有先进推理能力的谷歌旗舰 AI 模型
         anthropic: 以安全性和推理能力著称的 Claude 模型
         xai: 马斯克的 AI 公司，提供具有实时数据访问能力的 Grok 模型
         siliconflow: 面向中国和国际模型的高性能推理平台
@@ -109,7 +109,7 @@ options:
         ai302: 提供最新、全面的模型和按量付费 API
         openaiCompatible: OpenAI API 兼容的第三方
         deeplx: 非官方 DeepL API
-        amazonBedrock: 面向企业级基础模型的 AWS 托管服务
+        bedrock: 面向企业级基础模型的 AWS 托管服务
         groq: 专注于超高速 LLM 推理速度的专用硬件
         deepinfra: 面向热门开源模型的经济高效云推理
         mistral: 专注于高效多语言模型的欧洲 AI 公司

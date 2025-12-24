@@ -32,10 +32,10 @@ export async function executeTranslate(
     if (!targetLang) {
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
-    if (provider === 'google') {
+    if (provider === 'google-translate') {
       translatedText = await googleTranslate(text, sourceLang, targetLang)
     }
-    else if (provider === 'microsoft') {
+    else if (provider === 'microsoft-translate') {
       translatedText = await microsoftTranslate(text, sourceLang, targetLang)
     }
   }

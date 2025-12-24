@@ -101,7 +101,7 @@ options:
         deepseek: Çin'de kullanım için önerilir
         openrouter: Kullandıkça öde fiyatlandırmasıyla birden fazla LLM sağlayıcısı için birleşik arayüz
         ollama: Tam gizlilik için büyük dil modellerini makinenizde yerel olarak çalıştırın
-        gemini: Gelişmiş akıl yürütme yeteneklerine sahip Google'ın amiral gemisi AI modelleri
+        google: Gelişmiş akıl yürütme yeteneklerine sahip Google'ın amiral gemisi AI modelleri
         anthropic: Güvenlik ve akıl yürütme mükemmelliğiyle tanınan Claude modelleri
         xai: Gerçek zamanlı veri erişimli Grok modelleri sunan Elon Musk'ın AI şirketi
         siliconflow: Çin ve uluslararası modeller için yüksek performanslı çıkarım platformu
@@ -109,7 +109,7 @@ options:
         ai302: Kullandıkça öde API ile en son ve en kapsamlı modelleri sağlar
         openaiCompatible: Üçüncü taraf ve OpenAI API uyumlu
         deeplx: Resmi olmayan DeepL API
-        amazonBedrock: Kurumsal düzeyde temel modeller için AWS yönetilen hizmeti
+        bedrock: Kurumsal düzeyde temel modeller için AWS yönetilen hizmeti
         groq: Ultra hızlı LLM çıkarım hızları için özel donanım
         deepinfra: Popüler açık kaynak modelleri için uygun maliyetli bulut çıkarımı
         mistral: Verimli çok dilli modellerde uzmanlaşmış Avrupalı AI şirketi

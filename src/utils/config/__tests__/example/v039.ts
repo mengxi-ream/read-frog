@@ -2,7 +2,7 @@ import type { TestSeriesObject } from './types'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Add clickAction to floatingButton config',
+    description: 'Migrate provider keys to match AI SDK expectations',
     config: {
       language: {
         sourceCode: 'spa',
@@ -11,16 +11,16 @@ export const testSeries: TestSeriesObject = {
       },
       providersConfig: [
         {
-          id: 'google-default',
+          id: 'google-translate-default',
           enabled: true,
           name: 'Google Translate',
-          provider: 'google',
+          provider: 'google-translate',
         },
         {
-          id: 'microsoft-default',
+          id: 'microsoft-translate-default',
           enabled: true,
           name: 'Microsoft Translator',
-          provider: 'microsoft',
+          provider: 'microsoft-translate',
         },
         {
           id: 'openai-default',
@@ -63,10 +63,10 @@ export const testSeries: TestSeriesObject = {
           },
         },
         {
-          id: 'gemini-default',
+          id: 'google-default',
           enabled: true,
           name: 'Gemini',
-          provider: 'gemini',
+          provider: 'google',
           apiKey: undefined,
           baseURL: undefined,
           models: {
@@ -166,7 +166,7 @@ export const testSeries: TestSeriesObject = {
     },
   },
   'config-with-no-default-openai-model': {
-    description: 'Add clickAction to floatingButton config',
+    description: 'Migrate provider keys to match AI SDK expectations',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -181,19 +181,19 @@ export const testSeries: TestSeriesObject = {
       },
       providersConfig: [
         {
-          id: 'google-default',
+          id: 'google-translate-default',
           enabled: true,
           name: 'Google Translate',
-          provider: 'google',
+          provider: 'google-translate',
         },
         {
-          id: 'microsoft-default',
+          id: 'microsoft-translate-default',
           enabled: true,
           name: 'Microsoft Translator',
-          provider: 'microsoft',
+          provider: 'microsoft-translate',
         },
         {
-          id: 'gemini-default',
+          id: 'google-default',
           enabled: true,
           apiKey: '1',
           models: {
@@ -209,7 +209,7 @@ export const testSeries: TestSeriesObject = {
             },
           },
           name: 'Gemini',
-          provider: 'gemini',
+          provider: 'google',
         },
         {
           id: 'deeplx-default',
@@ -220,7 +220,7 @@ export const testSeries: TestSeriesObject = {
         },
       ],
       read: {
-        providerId: 'gemini-default',
+        providerId: 'google-default',
       },
       selectionToolbar: {
         enabled: true,
@@ -256,7 +256,7 @@ export const testSeries: TestSeriesObject = {
           patterns: [],
           promptId: null,
         },
-        providerId: 'gemini-default',
+        providerId: 'google-default',
         requestQueueConfig: {
           capacity: 200,
           rate: 2,
@@ -295,22 +295,22 @@ export const testSeries: TestSeriesObject = {
       },
       providersConfig: [
         {
-          id: 'google-default',
+          id: 'google-translate-default',
           enabled: true,
           name: 'Google Translate',
-          provider: 'google',
+          provider: 'google-translate',
         },
         {
-          id: 'microsoft-default',
+          id: 'microsoft-translate-default',
           enabled: true,
           name: 'Microsoft Translator',
-          provider: 'microsoft',
+          provider: 'microsoft-translate',
         },
         {
-          id: 'gemini-default',
+          id: 'google-default',
           enabled: true,
           name: 'Gemini',
-          provider: 'gemini',
+          provider: 'google',
           apiKey: 'test-gemini-key',
           models: {
             read: {
@@ -329,7 +329,7 @@ export const testSeries: TestSeriesObject = {
           id: 'xai-default',
           enabled: true,
           name: 'Grok',
-          provider: 'grok',
+          provider: 'xai',
           apiKey: 'test-grok-key',
           models: {
             read: {
@@ -345,10 +345,10 @@ export const testSeries: TestSeriesObject = {
           },
         },
         {
-          id: 'amazon-bedrock-default',
+          id: 'bedrock-default',
           enabled: true,
           name: 'Amazon Bedrock',
-          provider: 'amazonBedrock',
+          provider: 'bedrock',
           models: {
             read: {
               model: 'anthropic.claude-3-5-sonnet-20241022-v2:0',
@@ -366,7 +366,7 @@ export const testSeries: TestSeriesObject = {
           id: 'openai-compatible-default',
           enabled: true,
           name: 'Custom OpenAI Compatible',
-          provider: 'openaiCompatible',
+          provider: 'openai-compatible',
           apiKey: 'test-compatible-key',
           baseURL: 'https://custom-api.example.com/v1',
           models: {
@@ -403,10 +403,10 @@ export const testSeries: TestSeriesObject = {
         },
       ],
       read: {
-        providerId: 'amazon-bedrock-default',
+        providerId: 'bedrock-default',
       },
       translate: {
-        providerId: 'gemini-default',
+        providerId: 'google-default',
         mode: 'translationOnly',
         enableAIContentAware: false,
         node: {

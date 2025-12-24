@@ -100,7 +100,7 @@ options:
         deepseek: 中国国内での使用を推奨
         openrouter: 複数のLLMプロバイダの統合インターフェース、従量課金制
         ollama: ローカル大規模言語モデルサービス
-        gemini: 高度な推論能力を持つGoogleの主力AIモデル
+        google: 高度な推論能力を持つGoogleの主力AIモデル
         anthropic: 安全性と推論能力に優れたClaudeモデル
         xai: リアルタイムデータアクセス可能なGrokモデルを提供するイーロン・マスクのAI企業
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
@@ -108,7 +108,7 @@ options:
         ai302: 最新かつ包括的なモデルと従量課金制APIを提供
         openaiCompatible: OpenAI API互換のサードパーティー
         deeplx: 非公式 DeepL API
-        amazonBedrock: エンタープライズグレードの基盤モデル向けAWSマネージドサービス
+        bedrock: エンタープライズグレードの基盤モデル向けAWSマネージドサービス
         groq: 超高速LLM推論速度に特化したハードウェア
         deepinfra: 人気のオープンソースモデル向けコスト効率的なクラウド推論
         mistral: 効率的な多言語モデルに特化したヨーロッパのAI企業
