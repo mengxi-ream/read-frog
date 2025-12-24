@@ -11,117 +11,117 @@ import { getLobeIconsCDNUrlFn } from '../logo'
 import { WEBSITE_URL } from './url'
 
 export const DEFAULT_READ_MODELS: ReadModels = {
-  openrouter: {
+  'openrouter': {
     model: 'deepseek/deepseek-chat-v3.1:free',
     isCustomModel: false,
     customModel: null,
   },
-  openaiCompatible: {
+  'openai-compatible': {
     model: 'use-custom-model',
     isCustomModel: true,
     customModel: null,
   },
-  openai: {
+  'openai': {
     model: 'gpt-5-mini',
     isCustomModel: false,
     customModel: null,
   },
-  deepseek: {
+  'deepseek': {
     model: 'deepseek-chat',
     isCustomModel: false,
     customModel: null,
   },
-  gemini: {
+  'google': {
     model: 'gemini-3-pro-preview',
     isCustomModel: false,
     customModel: null,
   },
-  anthropic: {
+  'anthropic': {
     model: 'claude-opus-4-5',
     isCustomModel: false,
     customModel: null,
   },
-  grok: {
+  'xai': {
     model: 'grok-4',
     isCustomModel: false,
     customModel: null,
   },
-  amazonBedrock: {
+  'bedrock': {
     model: 'us.meta.llama4-maverick-17b-instruct-v1:0',
     isCustomModel: false,
     customModel: null,
   },
-  groq: {
+  'groq': {
     model: 'meta-llama/llama-4-maverick-17b-128e-instruct',
     isCustomModel: false,
     customModel: null,
   },
-  deepinfra: {
+  'deepinfra': {
     model: 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8',
     isCustomModel: false,
     customModel: null,
   },
-  mistral: {
+  'mistral': {
     model: 'magistral-medium-2506',
     isCustomModel: false,
     customModel: null,
   },
-  togetherai: {
+  'togetherai': {
     model: 'deepseek-ai/DeepSeek-V3',
     isCustomModel: false,
     customModel: null,
   },
-  cohere: {
+  'cohere': {
     model: 'command-a-reasoning-08-2025',
     isCustomModel: false,
     customModel: null,
   },
-  fireworks: {
+  'fireworks': {
     model: 'accounts/fireworks/models/kimi-k2-instruct',
     isCustomModel: false,
     customModel: null,
   },
-  cerebras: {
+  'cerebras': {
     model: 'qwen-3-235b-a22b-thinking-2507',
     isCustomModel: false,
     customModel: null,
   },
-  replicate: {
+  'replicate': {
     model: 'meta/meta-llama-3.1-405b-instruct',
     isCustomModel: false,
     customModel: null,
   },
-  perplexity: {
+  'perplexity': {
     model: 'sonar-deep-research',
     isCustomModel: false,
     customModel: null,
   },
-  vercel: {
+  'vercel': {
     model: 'v0-1.5-lg',
     isCustomModel: false,
     customModel: null,
   },
-  ollama: {
+  'ollama': {
     model: 'gemma3:27b',
     isCustomModel: false,
     customModel: null,
   },
-  siliconflow: {
+  'siliconflow': {
     model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
     isCustomModel: true,
     customModel: null,
   },
-  tensdaq: {
+  'tensdaq': {
     model: 'MiniMax-M2',
     isCustomModel: true,
     customModel: null,
   },
-  ai302: {
+  'ai302': {
     model: 'gpt-4.1-mini',
     isCustomModel: true,
     customModel: null,
   },
-  volcengine: {
+  'volcengine': {
     model: 'doubao-seed-1-6-251015',
     isCustomModel: true,
     customModel: null,
@@ -129,117 +129,117 @@ export const DEFAULT_READ_MODELS: ReadModels = {
 }
 
 export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
-  openrouter: {
+  'openrouter': {
     model: 'x-ai/grok-4-fast:free',
     isCustomModel: false,
     customModel: null,
   },
-  openaiCompatible: {
+  'openai-compatible': {
     model: 'use-custom-model',
     isCustomModel: true,
     customModel: null,
   },
-  openai: {
+  'openai': {
     model: 'gpt-5-mini',
     isCustomModel: false,
     customModel: null,
   },
-  deepseek: {
+  'deepseek': {
     model: 'deepseek-chat',
     isCustomModel: false,
     customModel: null,
   },
-  gemini: {
+  'google': {
     model: 'gemini-3-pro-preview',
     isCustomModel: false,
     customModel: null,
   },
-  anthropic: {
+  'anthropic': {
     model: 'claude-haiku-4-5',
     isCustomModel: false,
     customModel: null,
   },
-  grok: {
+  'xai': {
     model: 'grok-4-fast-non-reasoning',
     isCustomModel: false,
     customModel: null,
   },
-  amazonBedrock: {
+  'bedrock': {
     model: 'us.meta.llama4-scout-17b-instruct-v1:0',
     isCustomModel: false,
     customModel: null,
   },
-  groq: {
+  'groq': {
     model: 'meta-llama/llama-4-scout-17b-16e-instruct',
     isCustomModel: false,
     customModel: null,
   },
-  deepinfra: {
+  'deepinfra': {
     model: 'meta-llama/Llama-4-Scout-17B-16E-Instruct',
     isCustomModel: false,
     customModel: null,
   },
-  mistral: {
+  'mistral': {
     model: 'magistral-small-2506',
     isCustomModel: false,
     customModel: null,
   },
-  togetherai: {
+  'togetherai': {
     model: 'deepseek-ai/DeepSeek-V3',
     isCustomModel: false,
     customModel: null,
   },
-  cohere: {
+  'cohere': {
     model: 'command-a-reasoning-08-2025',
     isCustomModel: false,
     customModel: null,
   },
-  fireworks: {
+  'fireworks': {
     model: 'accounts/fireworks/models/kimi-k2-instruct',
     isCustomModel: false,
     customModel: null,
   },
-  cerebras: {
+  'cerebras': {
     model: 'qwen-3-235b-a22b-instruct-2507',
     isCustomModel: false,
     customModel: null,
   },
-  replicate: {
+  'replicate': {
     model: 'meta/meta-llama-3.1-70b-instruct',
     isCustomModel: false,
     customModel: null,
   },
-  perplexity: {
+  'perplexity': {
     model: 'sonar',
     isCustomModel: false,
     customModel: null,
   },
-  vercel: {
+  'vercel': {
     model: 'v0-1.5-md',
     isCustomModel: false,
     customModel: null,
   },
-  ollama: {
+  'ollama': {
     model: 'gemma3:4b',
     isCustomModel: false,
     customModel: null,
   },
-  siliconflow: {
+  'siliconflow': {
     model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
     isCustomModel: true,
     customModel: null,
   },
-  tensdaq: {
+  'tensdaq': {
     model: 'Qwen3-30B-A3B-Instruct-2507',
     isCustomModel: true,
     customModel: null,
   },
-  ai302: {
+  'ai302': {
     model: 'gpt-4.1-mini',
     isCustomModel: true,
     customModel: null,
   },
-  volcengine: {
+  'volcengine': {
     model: 'doubao-seed-1-6-flash-250828',
     isCustomModel: true,
     customModel: null,
@@ -248,132 +248,132 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
 
 export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string }>
   = {
-    microsoft: {
+    'microsoft-translate': {
       logo: getLobeIconsCDNUrlFn('microsoft-color'),
-      name: NON_API_TRANSLATE_PROVIDERS_MAP.microsoft,
+      name: NON_API_TRANSLATE_PROVIDERS_MAP['microsoft-translate'],
       website: 'https://translator.microsoft.com',
     },
-    google: {
+    'google-translate': {
       logo: getLobeIconsCDNUrlFn('google-color'),
-      name: NON_API_TRANSLATE_PROVIDERS_MAP.google,
+      name: NON_API_TRANSLATE_PROVIDERS_MAP['google-translate'],
       website: 'https://translate.google.com',
     },
-    deeplx: {
+    'deeplx': {
       logo: (theme: Theme) => theme === 'light' ? deeplxLogoLight : deeplxLogoDark,
       name: 'DeepLX',
       website: 'https://deeplx.owo.network/',
     },
-    siliconflow: {
+    'siliconflow': {
       logo: getLobeIconsCDNUrlFn('siliconcloud-color'),
       name: 'SiliconFlow',
       website: 'https://siliconflow.cn/',
     },
-    ai302: {
+    'ai302': {
       logo: getLobeIconsCDNUrlFn('ai302-color'),
       name: '302.AI',
       website: 'https://share.302.ai/8o2r7P',
     },
-    openrouter: {
+    'openrouter': {
       logo: getLobeIconsCDNUrlFn('openrouter'),
       name: 'OpenRouter',
       website: 'https://openrouter.ai/',
     },
-    openaiCompatible: {
+    'openai-compatible': {
       logo: () => customProviderLogo,
       name: 'Custom Provider',
       website: `${WEBSITE_URL}/tutorial/providers/openai-compatible`,
     },
-    openai: {
+    'openai': {
       logo: getLobeIconsCDNUrlFn('openai'),
       name: 'OpenAI',
       website: 'https://platform.openai.com',
     },
-    deepseek: {
+    'deepseek': {
       logo: getLobeIconsCDNUrlFn('deepseek-color'),
       name: 'DeepSeek',
       website: 'https://platform.deepseek.com',
     },
-    gemini: {
+    'google': {
       logo: getLobeIconsCDNUrlFn('gemini-color'),
       name: 'Gemini',
       website: 'https://aistudio.google.com',
     },
-    anthropic: {
+    'anthropic': {
       logo: getLobeIconsCDNUrlFn('anthropic'),
       name: 'Anthropic',
       website: 'https://console.anthropic.com',
     },
-    grok: {
+    'xai': {
       logo: getLobeIconsCDNUrlFn('grok'),
       name: 'Grok',
       website: 'https://x.ai/api',
     },
-    amazonBedrock: {
+    'bedrock': {
       logo: getLobeIconsCDNUrlFn('bedrock-color'),
       name: 'Amazon Bedrock',
       website: 'https://aws.amazon.com/bedrock/',
     },
-    groq: {
+    'groq': {
       logo: getLobeIconsCDNUrlFn('groq'),
       name: 'Groq',
       website: 'https://groq.com',
     },
-    deepinfra: {
+    'deepinfra': {
       logo: getLobeIconsCDNUrlFn('deepinfra-color'),
       name: 'DeepInfra',
       website: 'https://deepinfra.com',
     },
-    mistral: {
+    'mistral': {
       logo: getLobeIconsCDNUrlFn('mistral-color'),
       name: 'Mistral AI',
       website: 'https://mistral.ai',
     },
-    togetherai: {
+    'togetherai': {
       logo: getLobeIconsCDNUrlFn('together-color'),
       name: 'Together.ai',
       website: 'https://together.ai',
     },
-    cohere: {
+    'cohere': {
       logo: getLobeIconsCDNUrlFn('cohere-color'),
       name: 'Cohere',
       website: 'https://cohere.com',
     },
-    fireworks: {
+    'fireworks': {
       logo: getLobeIconsCDNUrlFn('fireworks-color'),
       name: 'Fireworks AI',
       website: 'https://fireworks.ai',
     },
-    cerebras: {
+    'cerebras': {
       logo: getLobeIconsCDNUrlFn('cerebras-color'),
       name: 'Cerebras',
       website: 'https://cerebras.ai',
     },
-    replicate: {
+    'replicate': {
       logo: getLobeIconsCDNUrlFn('replicate'),
       name: 'Replicate',
       website: 'https://replicate.com',
     },
-    perplexity: {
+    'perplexity': {
       logo: getLobeIconsCDNUrlFn('perplexity-color'),
       name: 'Perplexity',
       website: 'https://perplexity.ai',
     },
-    vercel: {
+    'vercel': {
       logo: getLobeIconsCDNUrlFn('vercel'),
       name: 'Vercel',
       website: 'https://vercel.com',
     },
-    tensdaq: {
+    'tensdaq': {
       logo: () => tensdaqLogoColor,
       name: 'Tensdaq',
       website: 'https://dashboard.x-aio.com/zh/register?ref=c356c1daba9a4641a18e',
     },
-    ollama: {
+    'ollama': {
       logo: getLobeIconsCDNUrlFn('ollama'),
       name: 'Ollama',
       website: 'https://ollama.ai',
     },
-    volcengine: {
+    'volcengine': {
       logo: getLobeIconsCDNUrlFn('volcengine-color'),
       name: 'Volcengine',
       website: 'https://www.volcengine.com/product/doubao',
@@ -381,19 +381,19 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
   }
 
 export const DEFAULT_PROVIDER_CONFIG = {
-  google: {
-    id: 'google-default',
-    name: PROVIDER_ITEMS.google.name,
+  'google-translate': {
+    id: 'google-translate-default',
+    name: PROVIDER_ITEMS['google-translate'].name,
     enabled: true,
-    provider: 'google',
+    provider: 'google-translate',
   },
-  microsoft: {
-    id: 'microsoft-default',
-    name: PROVIDER_ITEMS.microsoft.name,
+  'microsoft-translate': {
+    id: 'microsoft-translate-default',
+    name: PROVIDER_ITEMS['microsoft-translate'].name,
     enabled: true,
-    provider: 'microsoft',
+    provider: 'microsoft-translate',
   },
-  siliconflow: {
+  'siliconflow': {
     id: 'siliconflow-default',
     name: PROVIDER_ITEMS.siliconflow.name,
     description: i18n.t('options.apiProviders.providers.description.siliconflow'),
@@ -405,7 +405,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.siliconflow,
     },
   },
-  tensdaq: {
+  'tensdaq': {
     id: 'tensdaq-default',
     name: PROVIDER_ITEMS.tensdaq.name,
     description: i18n.t('options.apiProviders.providers.description.tensdaq'),
@@ -417,7 +417,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.tensdaq,
     },
   },
-  ai302: {
+  'ai302': {
     id: 'ai302-default',
     name: PROVIDER_ITEMS.ai302.name,
     description: i18n.t('options.apiProviders.providers.description.ai302'),
@@ -429,19 +429,19 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.ai302,
     },
   },
-  openaiCompatible: {
+  'openai-compatible': {
     id: 'openai-compatible-default',
-    name: PROVIDER_ITEMS.openaiCompatible.name,
+    name: PROVIDER_ITEMS['openai-compatible'].name,
     description: i18n.t('options.apiProviders.providers.description.openaiCompatible'),
     enabled: true,
-    provider: 'openaiCompatible',
+    provider: 'openai-compatible',
     baseURL: 'https://api.example.com/v1',
     models: {
-      read: DEFAULT_READ_MODELS.openaiCompatible,
-      translate: DEFAULT_TRANSLATE_MODELS.openaiCompatible,
+      read: DEFAULT_READ_MODELS['openai-compatible'],
+      translate: DEFAULT_TRANSLATE_MODELS['openai-compatible'],
     },
   },
-  openai: {
+  'openai': {
     id: 'openai-default',
     name: PROVIDER_ITEMS.openai.name,
     description: i18n.t('options.apiProviders.providers.description.openai'),
@@ -452,7 +452,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.openai,
     },
   },
-  deepseek: {
+  'deepseek': {
     id: 'deepseek-default',
     name: PROVIDER_ITEMS.deepseek.name,
     description: i18n.t('options.apiProviders.providers.description.deepseek'),
@@ -463,18 +463,18 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.deepseek,
     },
   },
-  gemini: {
-    id: 'gemini-default',
-    name: PROVIDER_ITEMS.gemini.name,
-    description: i18n.t('options.apiProviders.providers.description.gemini'),
+  'google': {
+    id: 'google-default',
+    name: PROVIDER_ITEMS.google.name,
+    description: i18n.t('options.apiProviders.providers.description.google'),
     enabled: true,
-    provider: 'gemini',
+    provider: 'google',
     models: {
-      read: DEFAULT_READ_MODELS.gemini,
-      translate: DEFAULT_TRANSLATE_MODELS.gemini,
+      read: DEFAULT_READ_MODELS.google,
+      translate: DEFAULT_TRANSLATE_MODELS.google,
     },
   },
-  anthropic: {
+  'anthropic': {
     id: 'anthropic-default',
     name: PROVIDER_ITEMS.anthropic.name,
     description: i18n.t('options.apiProviders.providers.description.anthropic'),
@@ -485,18 +485,18 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.anthropic,
     },
   },
-  grok: {
+  'xai': {
     id: 'xai-default',
-    name: PROVIDER_ITEMS.grok.name,
+    name: PROVIDER_ITEMS.xai.name,
     description: i18n.t('options.apiProviders.providers.description.xai'),
     enabled: true,
-    provider: 'grok',
+    provider: 'xai',
     models: {
-      read: DEFAULT_READ_MODELS.grok,
-      translate: DEFAULT_TRANSLATE_MODELS.grok,
+      read: DEFAULT_READ_MODELS.xai,
+      translate: DEFAULT_TRANSLATE_MODELS.xai,
     },
   },
-  deeplx: {
+  'deeplx': {
     id: 'deeplx-default',
     name: PROVIDER_ITEMS.deeplx.name,
     description: i18n.t('options.apiProviders.providers.description.deeplx'),
@@ -504,18 +504,18 @@ export const DEFAULT_PROVIDER_CONFIG = {
     provider: 'deeplx',
     baseURL: 'https://api.deeplx.org',
   },
-  amazonBedrock: {
-    id: 'amazon-bedrock-default',
-    name: PROVIDER_ITEMS.amazonBedrock.name,
-    description: i18n.t('options.apiProviders.providers.description.amazonBedrock'),
+  'bedrock': {
+    id: 'bedrock-default',
+    name: PROVIDER_ITEMS.bedrock.name,
+    description: i18n.t('options.apiProviders.providers.description.bedrock'),
     enabled: true,
-    provider: 'amazonBedrock',
+    provider: 'bedrock',
     models: {
-      read: DEFAULT_READ_MODELS.amazonBedrock,
-      translate: DEFAULT_TRANSLATE_MODELS.amazonBedrock,
+      read: DEFAULT_READ_MODELS.bedrock,
+      translate: DEFAULT_TRANSLATE_MODELS.bedrock,
     },
   },
-  groq: {
+  'groq': {
     id: 'groq-default',
     name: PROVIDER_ITEMS.groq.name,
     description: i18n.t('options.apiProviders.providers.description.groq'),
@@ -526,7 +526,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.groq,
     },
   },
-  deepinfra: {
+  'deepinfra': {
     id: 'deepinfra-default',
     name: PROVIDER_ITEMS.deepinfra.name,
     description: i18n.t('options.apiProviders.providers.description.deepinfra'),
@@ -537,7 +537,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.deepinfra,
     },
   },
-  mistral: {
+  'mistral': {
     id: 'mistral-default',
     name: PROVIDER_ITEMS.mistral.name,
     description: i18n.t('options.apiProviders.providers.description.mistral'),
@@ -548,7 +548,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.mistral,
     },
   },
-  togetherai: {
+  'togetherai': {
     id: 'togetherai-default',
     name: PROVIDER_ITEMS.togetherai.name,
     description: i18n.t('options.apiProviders.providers.description.togetherai'),
@@ -559,7 +559,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.togetherai,
     },
   },
-  cohere: {
+  'cohere': {
     id: 'cohere-default',
     name: PROVIDER_ITEMS.cohere.name,
     description: i18n.t('options.apiProviders.providers.description.cohere'),
@@ -570,7 +570,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.cohere,
     },
   },
-  fireworks: {
+  'fireworks': {
     id: 'fireworks-default',
     name: PROVIDER_ITEMS.fireworks.name,
     description: i18n.t('options.apiProviders.providers.description.fireworks'),
@@ -581,7 +581,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.fireworks,
     },
   },
-  cerebras: {
+  'cerebras': {
     id: 'cerebras-default',
     name: PROVIDER_ITEMS.cerebras.name,
     description: i18n.t('options.apiProviders.providers.description.cerebras'),
@@ -592,7 +592,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.cerebras,
     },
   },
-  replicate: {
+  'replicate': {
     id: 'replicate-default',
     name: PROVIDER_ITEMS.replicate.name,
     description: i18n.t('options.apiProviders.providers.description.replicate'),
@@ -603,7 +603,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.replicate,
     },
   },
-  perplexity: {
+  'perplexity': {
     id: 'perplexity-default',
     name: PROVIDER_ITEMS.perplexity.name,
     description: i18n.t('options.apiProviders.providers.description.perplexity'),
@@ -614,7 +614,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.perplexity,
     },
   },
-  vercel: {
+  'vercel': {
     id: 'vercel-default',
     name: PROVIDER_ITEMS.vercel.name,
     description: i18n.t('options.apiProviders.providers.description.vercel'),
@@ -625,7 +625,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.vercel,
     },
   },
-  openrouter: {
+  'openrouter': {
     id: 'openrouter-default',
     name: PROVIDER_ITEMS.openrouter.name,
     description: i18n.t('options.apiProviders.providers.description.openrouter'),
@@ -636,7 +636,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.openrouter,
     },
   },
-  ollama: {
+  'ollama': {
     id: 'ollama-default',
     name: PROVIDER_ITEMS.ollama.name,
     description: i18n.t('options.apiProviders.providers.description.ollama'),
@@ -647,7 +647,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
       translate: DEFAULT_TRANSLATE_MODELS.ollama,
     },
   },
-  volcengine: {
+  'volcengine': {
     id: 'volcengine-default',
     name: PROVIDER_ITEMS.volcengine.name,
     description: i18n.t('options.apiProviders.providers.description.volcengine'),
@@ -662,18 +662,18 @@ export const DEFAULT_PROVIDER_CONFIG = {
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
-  DEFAULT_PROVIDER_CONFIG.google,
-  DEFAULT_PROVIDER_CONFIG.microsoft,
+  DEFAULT_PROVIDER_CONFIG['google-translate'],
+  DEFAULT_PROVIDER_CONFIG['microsoft-translate'],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.tensdaq,
   DEFAULT_PROVIDER_CONFIG.ai302,
   // DEFAULT_PROVIDER_CONFIG.deepseek,
-  DEFAULT_PROVIDER_CONFIG.gemini,
+  DEFAULT_PROVIDER_CONFIG.google,
   // DEFAULT_PROVIDER_CONFIG.openaiCompatible,
   DEFAULT_PROVIDER_CONFIG.deeplx,
   // DEFAULT_PROVIDER_CONFIG.anthropic,
-  // DEFAULT_PROVIDER_CONFIG.grok,
-  // DEFAULT_PROVIDER_CONFIG.amazonBedrock,
+  // DEFAULT_PROVIDER_CONFIG.xai,
+  // DEFAULT_PROVIDER_CONFIG.bedrock,
   // DEFAULT_PROVIDER_CONFIG.groq,
   // DEFAULT_PROVIDER_CONFIG.deepinfra,
   // DEFAULT_PROVIDER_CONFIG.mistral,

@@ -24,55 +24,55 @@ import { getLLMTranslateProvidersConfig, getProviderConfigById, getTTSProvidersC
 import { CONFIG_STORAGE_KEY } from '../constants/config'
 
 interface ProviderFactoryMap {
-  siliconflow: typeof createOpenAICompatible
-  tensdaq: typeof createOpenAICompatible
-  ai302: typeof createOpenAICompatible
-  volcengine: typeof createOpenAICompatible
-  openrouter: typeof createOpenRouter
-  openaiCompatible: typeof createOpenAICompatible
-  openai: typeof createOpenAI
-  deepseek: typeof createDeepSeek
-  gemini: typeof createGoogleGenerativeAI
-  anthropic: typeof createAnthropic
-  grok: typeof createXai
-  amazonBedrock: typeof createAmazonBedrock
-  groq: typeof createGroq
-  deepinfra: typeof createDeepInfra
-  mistral: typeof createMistral
-  togetherai: typeof createTogetherAI
-  cohere: typeof createCohere
-  fireworks: typeof createFireworks
-  cerebras: typeof createCerebras
-  replicate: typeof createReplicate
-  perplexity: typeof createPerplexity
-  vercel: typeof createVercel
-  ollama: typeof createOllama
+  'siliconflow': typeof createOpenAICompatible
+  'tensdaq': typeof createOpenAICompatible
+  'ai302': typeof createOpenAICompatible
+  'volcengine': typeof createOpenAICompatible
+  'openrouter': typeof createOpenRouter
+  'openai-compatible': typeof createOpenAICompatible
+  'openai': typeof createOpenAI
+  'deepseek': typeof createDeepSeek
+  'google': typeof createGoogleGenerativeAI
+  'anthropic': typeof createAnthropic
+  'xai': typeof createXai
+  'bedrock': typeof createAmazonBedrock
+  'groq': typeof createGroq
+  'deepinfra': typeof createDeepInfra
+  'mistral': typeof createMistral
+  'togetherai': typeof createTogetherAI
+  'cohere': typeof createCohere
+  'fireworks': typeof createFireworks
+  'cerebras': typeof createCerebras
+  'replicate': typeof createReplicate
+  'perplexity': typeof createPerplexity
+  'vercel': typeof createVercel
+  'ollama': typeof createOllama
 }
 
 const CREATE_AI_MAPPER: ProviderFactoryMap = {
-  siliconflow: createOpenAICompatible,
-  tensdaq: createOpenAICompatible,
-  ai302: createOpenAICompatible,
-  volcengine: createOpenAICompatible,
-  openrouter: createOpenRouter,
-  openaiCompatible: createOpenAICompatible,
-  openai: createOpenAI,
-  deepseek: createDeepSeek,
-  gemini: createGoogleGenerativeAI,
-  anthropic: createAnthropic,
-  grok: createXai,
-  amazonBedrock: createAmazonBedrock,
-  groq: createGroq,
-  deepinfra: createDeepInfra,
-  mistral: createMistral,
-  togetherai: createTogetherAI,
-  cohere: createCohere,
-  fireworks: createFireworks,
-  cerebras: createCerebras,
-  replicate: createReplicate,
-  perplexity: createPerplexity,
-  vercel: createVercel,
-  ollama: createOllama,
+  'siliconflow': createOpenAICompatible,
+  'tensdaq': createOpenAICompatible,
+  'ai302': createOpenAICompatible,
+  'volcengine': createOpenAICompatible,
+  'openrouter': createOpenRouter,
+  'openai-compatible': createOpenAICompatible,
+  'openai': createOpenAI,
+  'deepseek': createDeepSeek,
+  'google': createGoogleGenerativeAI,
+  'anthropic': createAnthropic,
+  'xai': createXai,
+  'bedrock': createAmazonBedrock,
+  'groq': createGroq,
+  'deepinfra': createDeepInfra,
+  'mistral': createMistral,
+  'togetherai': createTogetherAI,
+  'cohere': createCohere,
+  'fireworks': createFireworks,
+  'cerebras': createCerebras,
+  'replicate': createReplicate,
+  'perplexity': createPerplexity,
+  'vercel': createVercel,
+  'ollama': createOllama,
 }
 
 const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string, string>>> = {
@@ -95,7 +95,7 @@ async function getLanguageModelById(providerId: string, modelType: 'read' | 'tra
 
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
-        name: providerConfig.name,
+        name: providerConfig.provider,
         baseURL: providerConfig.baseURL ?? '',
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
         ...(customHeaders && { headers: customHeaders }),

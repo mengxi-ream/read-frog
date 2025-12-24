@@ -103,7 +103,7 @@ function ReadModelSelector() {
               </SelectContent>
             </Select>
           )}
-      <div className={cn('mt-0.5 flex items-center space-x-2', provider === 'openaiCompatible' && 'hidden')}>
+      <div className={cn('mt-0.5 flex items-center space-x-2', provider === 'openai-compatible' && 'hidden')}>
         <Checkbox
           id={`isCustomModel-read-${provider}`}
           checked={modelConfig.isCustomModel}

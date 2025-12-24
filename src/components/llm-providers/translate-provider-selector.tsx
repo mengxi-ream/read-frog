@@ -24,7 +24,7 @@ export default function TranslateProviderSelector({ className }: { className?: s
   const isTranslationOnlyMode = translateConfig.mode === 'translationOnly'
   const nonAPIProviders = getNonAPIProvidersConfig(filteredProvidersConfig)
   const filteredNonAPIProviders = isTranslationOnlyMode
-    ? nonAPIProviders.filter(p => p.provider !== 'google')
+    ? nonAPIProviders.filter(p => p.provider !== 'google-translate')
     : nonAPIProviders
 
   return (

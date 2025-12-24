@@ -72,7 +72,7 @@ export const ReadModelSelector = withForm({
         <div className="mt-2.5 flex items-center space-x-2">
           <form.Field name="models.read.isCustomModel">
             { field => (
-              <div className={cn('flex items-center space-x-2', providerConfig.provider === 'openaiCompatible' && 'hidden')}>
+              <div className={cn('flex items-center space-x-2', providerConfig.provider === 'openai-compatible' && 'hidden')}>
                 <Checkbox
                   id="isCustomModel-read"
                   checked={field.state.value}

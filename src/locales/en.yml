@@ -101,7 +101,7 @@ options:
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
         ollama: Run large language models locally on your machine for complete privacy
-        gemini: Google's flagship AI models with advanced reasoning capabilities
+        google: Google's flagship AI models with advanced reasoning capabilities
         anthropic: Claude models known for safety and reasoning excellence
         xai: Elon Musk's AI company offering Grok models with real-time data access
         siliconflow: High-performance inference platform for Chinese and international models
@@ -109,7 +109,7 @@ options:
         ai302: Provides the latest and most comprehensive models with pay-as-you-go API
         openaiCompatible: Third-party and OpenAI API compatible
         deeplx: Unofficial DeepL API
-        amazonBedrock: AWS managed service for enterprise-grade foundation models
+        bedrock: AWS managed service for enterprise-grade foundation models
         groq: Specialized hardware for ultra-fast LLM inference speeds
         deepinfra: Cost-effective cloud inference for popular open-source models
         mistral: European AI company specializing in efficient multilingual models

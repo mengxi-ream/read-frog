@@ -100,7 +100,7 @@ options:
         deepseek: 중국에서 사용을 권장합니다
         openrouter: 여러 LLM 제공업체를 위한 통합 인터페이스, 사용량 기반 과금
         ollama: 로컬 LLM
-        gemini: 고급 추론 능력을 갖춘 구글의 주력 AI 모델
+        google: 고급 추론 능력을 갖춘 구글의 주력 AI 모델
         anthropic: 안전성과 추론 능력이 뛰어난 Claude 모델
         xai: 실시간 데이터 접근이 가능한 Grok 모델을 제공하는 일론 머스크의 AI 회사
         siliconflow: 중국 및 국제 모델을 위한 고성능 추론 플랫폼
@@ -108,7 +108,7 @@ options:
         ai302: 최신의 포괄적인 모델과 종량제 API를 제공
         openaiCompatible: OpenAI API 호환 서드파티
         deeplx: 비공식 DeepL API
-        amazonBedrock: 엔터프라이즈급 파운데이션 모델을 위한 AWS 관리 서비스
+        bedrock: 엔터프라이즈급 파운데이션 모델을 위한 AWS 관리 서비스
         groq: 초고속 LLM 추론 속도에 특화된 하드웨어
         deepinfra: 인기 있는 오픈소스 모델을 위한 비용 효율적인 클라우드 추론
         mistral: 효율적인 다국어 모델에 특화된 유럽 AI 회사
