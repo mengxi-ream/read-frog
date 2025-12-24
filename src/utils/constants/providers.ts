@@ -150,7 +150,7 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
     customModel: null,
   },
   'google': {
-    model: 'gemini-3-pro-preview',
+    model: 'gemini-2.5-flash',
     isCustomModel: false,
     customModel: null,
   },
