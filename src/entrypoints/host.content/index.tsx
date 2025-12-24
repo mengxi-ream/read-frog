@@ -1,4 +1,5 @@
 import type { LangCodeISO6393 } from '@read-frog/definitions'
+import type { Config } from '@/types/config/config'
 import { createShadowRootUi, defineContentScript, storage } from '#imports'
 import { kebabCase } from 'case-anything'
 import ReactDOM from 'react-dom/client'
@@ -112,8 +113,16 @@ export default defineContentScript({
     void bindTranslationShortcutKey(manager)
 
     // This may not work when the tab is not active, if so, need refresh the webpage
-    storage.watch(`local:${CONFIG_STORAGE_KEY}`, () => {
+    storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (newConfig, oldConfig) => {
       void bindTranslationShortcutKey(manager)
+
+      // Auto re-translate when translation mode changes while page translation is active
+      const modeChanged = newConfig && oldConfig && newConfig.translate.mode !== oldConfig.translate.mode
+      if (modeChanged && manager.isActive) {
+        logger.info('Translation mode changed, re-translating page')
+        manager.stop()
+        void manager.start()
+      }
     })
 
     // Listen for translation state changes from background
