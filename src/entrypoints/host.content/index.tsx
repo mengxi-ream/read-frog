@@ -15,6 +15,7 @@ import { insertShadowRootUIWrapperInto } from '@/utils/shadow-root'
 import { addStyleToShadow } from '@/utils/styles'
 import App from './app'
 import { bindTranslationShortcutKey } from './translation-control/bind-translation-shortcut'
+import { handleTranslationModeChange } from './translation-control/handle-config-change'
 import { registerNodeTranslationTriggers } from './translation-control/node-translation'
 import { PageTranslationManager } from './translation-control/page-translation'
 import './listen'
@@ -117,12 +118,7 @@ export default defineContentScript({
       void bindTranslationShortcutKey(manager)
 
       // Auto re-translate when translation mode changes while page translation is active
-      const modeChanged = newConfig && oldConfig && newConfig.translate.mode !== oldConfig.translate.mode
-      if (modeChanged && manager.isActive) {
-        logger.info('Translation mode changed, re-translating page')
-        manager.stop()
-        void manager.start()
-      }
+      handleTranslationModeChange(newConfig, oldConfig, manager)
     })
 
     // Listen for translation state changes from background
