@@ -96,6 +96,8 @@ options:
         selectModel: Select a model
         apiKeyRequired: Please add API key first
       advancedOptions: Advanced Options
+      temperature: Temperature
+      temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
       providerOptions: Provider Options
       providerOptionsHint: Provider-specific options for non-standard API features like thinking/reasoning mode. See the Vercel AI SDK docs or your provider's official documentation for configuration details.
       providerOptionsDocsLink: View Provider Docs

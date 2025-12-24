@@ -3,6 +3,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/shadcn/collapsible'
+import { FieldGroup } from '@/components/shadcn/field'
 import { cn } from '@/utils/styles/tailwind'
 
 interface AdvancedOptionsSectionProps {
@@ -25,7 +26,9 @@ export function AdvancedOptionsSection({ children }: AdvancedOptionsSectionProps
         <span>{i18n.t('options.apiProviders.form.advancedOptions')}</span>
       </CollapsibleTrigger>
       <CollapsibleContent>
-        {children}
+        <FieldGroup className="pt-4">
+          {children}
+        </FieldGroup>
       </CollapsibleContent>
     </Collapsible>
   )

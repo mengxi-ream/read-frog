@@ -120,7 +120,7 @@ export async function detectLanguageWithLLM(
       return null
     }
 
-    const { models: { translate }, provider, providerOptions: userProviderOptions } = providerConfig
+    const { models: { translate }, provider, providerOptions: userProviderOptions, temperature } = providerConfig
     const translateModel = translate.isCustomModel ? translate.customModel : translate.model
     const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
     const model = await getTranslateModelById(providerConfig.id)
@@ -150,6 +150,7 @@ ${languageList}`
           model,
           system,
           prompt,
+          temperature,
           providerOptions,
         })
 

@@ -7,7 +7,6 @@ import { Hint } from '@/components/shadcn/hint'
 import { JSONCodeEditor } from '@/components/ui/json-code-editor'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderOptions } from '@/utils/providers/options'
-import { AdvancedOptionsSection } from './components/advanced-options-section'
 import { withForm } from './form'
 
 export const ProviderOptionsField = withForm({
@@ -49,12 +48,10 @@ export const ProviderOptionsField = withForm({
     }
 
     return (
-      <AdvancedOptionsSection>
-        <ProviderOptionsEditor
-          form={form}
-          placeholderText={placeholderText}
-        />
-      </AdvancedOptionsSection>
+      <ProviderOptionsEditor
+        form={form}
+        placeholderText={placeholderText}
+      />
     )
   },
 })

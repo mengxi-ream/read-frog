@@ -11,7 +11,7 @@ export async function aiTranslate(
   providerConfig: LLMTranslateProviderConfig,
   options?: { isBatch?: boolean, content?: ArticleContent },
 ) {
-  const { id: providerId, models: { translate }, provider, providerOptions: userProviderOptions } = providerConfig
+  const { id: providerId, models: { translate }, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const translateModel = translate.isCustomModel ? translate.customModel : translate.model
   const model = await getTranslateModelById(providerId)
 
@@ -22,6 +22,7 @@ export async function aiTranslate(
     model,
     system: systemPrompt,
     prompt,
+    temperature,
     providerOptions,
     maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
   })
