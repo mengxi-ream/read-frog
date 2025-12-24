@@ -17,6 +17,7 @@ import { BaseURLField } from './base-url-field'
 import { ConfigHeader } from './config-header'
 import { DefaultReadProviderSelector, DefaultTranslateProviderSelector } from './default-provider'
 import { formOpts, useAppForm } from './form'
+import { ProviderOptionsField } from './provider-options-field'
 import { ReadModelSelector } from './read-model-selector'
 import { TranslateModelSelector } from './translate-model-selector'
 
@@ -136,6 +137,7 @@ export function ProviderConfigForm() {
               <ReadModelSelector form={form} />
             </>
           )}
+          <ProviderOptionsField form={form} />
         </div>
         <div className="flex justify-end mt-8">
           <Button type="button" variant="destructive" onClick={handleDelete}>

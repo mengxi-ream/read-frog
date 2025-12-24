@@ -47,6 +47,7 @@
     "@ai-sdk/vercel": "^2.0.1",
     "@ai-sdk/xai": "^3.0.1",
     "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-json": "^6.0.2",
     "@codemirror/lint": "^6.9.1",
     "@codemirror/state": "^6.5.2",
     "@codemirror/view": "^6.38.6",

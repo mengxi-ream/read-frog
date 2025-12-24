@@ -162,6 +162,7 @@ export const baseProviderConfigSchema = z.object({
 export const baseAPIProviderConfigSchema = baseProviderConfigSchema.extend({
   apiKey: z.string().optional(),
   baseURL: z.string().optional(),
+  providerOptions: z.record(z.string(), z.any()).optional(),
 })
 
 export const baseCustomLLMProviderConfigSchema = baseAPIProviderConfigSchema.extend({

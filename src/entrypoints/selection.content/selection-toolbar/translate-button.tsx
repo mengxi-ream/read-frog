@@ -22,7 +22,7 @@ import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/ho
 import { translateText } from '@/utils/host/translate/translate-text'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
-import { getProviderOptions } from '@/utils/providers/options'
+import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import {
   isSelectionToolbarVisibleAtom,
   isTranslatePopoverVisibleAtom,
@@ -111,9 +111,10 @@ export function TranslatePopover() {
             id: providerId,
             models: { translate },
             provider,
+            providerOptions: userProviderOptions,
           } = translateProviderConfig
           const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-          const providerOptions = getProviderOptions(translateModel ?? '', provider)
+          const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
           const prompt = await getTranslatePrompt(targetLangName, cleanText)
 
           const abortController = new AbortController()
@@ -200,11 +201,12 @@ export function TranslatePopover() {
             id: providerId,
             models: { translate },
             provider,
+            providerOptions: userProviderOptions2,
           } = translateProviderConfig
           const translateModel = translate.isCustomModel ? translate.customModel : translate.model
           const model = await getTranslateModelById(providerId)
 
-          const providerOptions = getProviderOptions(translateModel ?? '', provider)
+          const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions2)
           const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
 
           const result = streamText({

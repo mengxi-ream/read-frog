@@ -2,7 +2,7 @@ import type { LLMTranslateProviderConfig } from '@/types/config/provider'
 import { generateText } from 'ai'
 import { logger } from '@/utils/logger'
 import { getTranslateModelById } from '@/utils/providers/model'
-import { getProviderOptions } from '@/utils/providers/options'
+import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import { cleanText } from './utils'
 
 /**
@@ -20,9 +20,9 @@ export async function generateArticleSummary(
   }
 
   try {
-    const { models: { translate }, provider } = providerConfig
+    const { models: { translate }, provider, providerOptions: userProviderOptions } = providerConfig
     const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-    const providerOptions = getProviderOptions(translateModel ?? '', provider)
+    const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
     const model = await getTranslateModelById(providerConfig.id)
 
     const prompt = `Summarize the following article in 2-3 sentences. Focus on the main topic and key points. Return ONLY the summary, no explanations or formatting.

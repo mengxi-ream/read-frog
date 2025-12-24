@@ -95,6 +95,10 @@ options:
         noModels: No models available
         selectModel: Select a model
         apiKeyRequired: Please add API key first
+      advancedOptions: Advanced Options
+      providerOptions: Provider Options
+      providerOptionsHint: Default options shown as placeholder
+      invalidJson: Invalid JSON format
     providers:
       description:
         openai: Provides models like GPT-4o

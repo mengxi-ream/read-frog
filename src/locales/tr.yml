@@ -95,6 +95,10 @@ options:
         noModels: Mevcut model yok
         selectModel: Model seç
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
+      advancedOptions: Gelişmiş Seçenekler
+      providerOptions: Sağlayıcı Seçenekleri
+      providerOptionsHint: Varsayılan seçenekler yer tutucu olarak gösterilir
+      invalidJson: Geçersiz JSON formatı
     providers:
       description:
         openai: GPT-4o gibi modeller sağlar

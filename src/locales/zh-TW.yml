@@ -95,6 +95,10 @@ options:
         noModels: 沒有可用的模型
         selectModel: 選擇模型
         apiKeyRequired: 請先添加 API 密鑰
+      advancedOptions: 進階選項
+      providerOptions: 提供者選項
+      providerOptionsHint: 預設選項顯示為佔位符
+      invalidJson: JSON 格式無效
     providers:
       description:
         openai: 提供 GPT-4o 等模型

@@ -95,6 +95,10 @@ options:
         noModels: Không có mô hình nào
         selectModel: Chọn mô hình
         apiKeyRequired: Vui lòng thêm khóa API trước
+      advancedOptions: Tùy chọn nâng cao
+      providerOptions: Tùy chọn nhà cung cấp
+      providerOptionsHint: Tùy chọn mặc định được hiển thị dưới dạng placeholder
+      invalidJson: Định dạng JSON không hợp lệ
     providers:
       description:
         openai: Cung cấp các mô hình như GPT-4o

@@ -94,6 +94,10 @@ options:
         noModels: 利用可能なモデルがありません
         selectModel: モデルを選択
         apiKeyRequired: 先にAPIキーを追加してください
+      advancedOptions: 詳細オプション
+      providerOptions: プロバイダーオプション
+      providerOptionsHint: デフォルトオプションがプレースホルダーとして表示されます
+      invalidJson: 無効なJSON形式
     providers:
       description:
         openai: GPT-4oなどのモデルを提供

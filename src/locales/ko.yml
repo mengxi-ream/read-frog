@@ -94,6 +94,10 @@ options:
         noModels: 사용 가능한 모델이 없습니다
         selectModel: 모델 선택
         apiKeyRequired: 먼저 API 키를 추가하세요
+      advancedOptions: 고급 옵션
+      providerOptions: 제공자 옵션
+      providerOptionsHint: 기본 옵션이 플레이스홀더로 표시됩니다
+      invalidJson: 잘못된 JSON 형식
     providers:
       description:
         openai: GPT-4o 같은 모델을 제공합니다
