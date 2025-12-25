@@ -1,33 +1,38 @@
 /**
- * CSS Code Editor Component
+ * JSON Code Editor Component
  *
- * CodeMirror-based code editor for CSS with syntax highlighting and theme support.
- * Uses @uiw/react-codemirror with @codemirror/lang-css for rich editing experience.
+ * CodeMirror-based code editor for JSON with syntax highlighting and theme support.
+ * Uses @uiw/react-codemirror with @codemirror/lang-json for rich editing experience.
  */
 
 import type { ReactCodeMirrorProps } from '@uiw/react-codemirror'
-import { css } from '@codemirror/lang-css'
-import { lintGutter } from '@codemirror/lint'
-import { color } from '@uiw/codemirror-extensions-color'
+import { json, jsonParseLinter } from '@codemirror/lang-json'
+import { linter, lintGutter } from '@codemirror/lint'
 import CodeMirror from '@uiw/react-codemirror'
 import { useTheme } from '@/components/providers/theme-provider'
-import { cssLinter } from '@/utils/css/lint-css'
 import { cn } from '@/utils/styles/tailwind'
 
-interface CSSCodeEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {
+// Custom linter that allows empty content (jsonParseLinter throws on empty string)
+const allowEmptyJsonLinter = linter((view) => {
+  const content = view.state.doc.toString().trim()
+  if (!content) {
+    return []
+  }
+  return jsonParseLinter()(view)
+})
+
+interface JSONCodeEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {
   hasError?: boolean
 }
 
-export function CSSCodeEditor({ hasError, className, editable = true, ...props }: CSSCodeEditorProps) {
+export function JSONCodeEditor({ hasError, className, editable = true, ...props }: JSONCodeEditorProps) {
   const { theme } = useTheme()
 
   return (
     <CodeMirror
       extensions={[
-        color,
-        css(),
-        // CSS syntax linter - shows red squiggly lines for errors
-        cssLinter(),
+        json(),
+        allowEmptyJsonLinter,
         lintGutter(),
       ]}
       theme={theme}
@@ -52,9 +57,10 @@ export function CSSCodeEditor({ hasError, className, editable = true, ...props }
         fontSize: 14,
         fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "Courier New", monospace',
       }}
+      editable={editable}
       {...props}
     />
   )
 }
 
-CSSCodeEditor.displayName = 'CSSCodeEditor'
+JSONCodeEditor.displayName = 'JSONCodeEditor'

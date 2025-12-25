@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/shadcn/button'
 import { Separator } from '@/components/shadcn/separator'
-import { isAPIProviderConfig, isNonAPIProvider, isReadProvider, isTranslateProvider } from '@/types/config/provider'
+import { isAPIProviderConfig, isLLMTranslateProvider, isNonAPIProvider, isReadProvider, isTranslateProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
 import { getReadProvidersConfig, getTranslateProvidersConfig, getTTSProvidersConfig } from '@/utils/config/helpers'
@@ -14,10 +14,13 @@ import { cn } from '@/utils/styles/tailwind'
 import { selectedProviderIdAtom } from '../atoms'
 import { APIKeyField } from './api-key-field'
 import { BaseURLField } from './base-url-field'
+import { AdvancedOptionsSection } from './components/advanced-options-section'
 import { ConfigHeader } from './config-header'
 import { DefaultReadProviderSelector, DefaultTranslateProviderSelector } from './default-provider'
 import { formOpts, useAppForm } from './form'
+import { ProviderOptionsField } from './provider-options-field'
 import { ReadModelSelector } from './read-model-selector'
+import { TemperatureField } from './temperature-field'
 import { TranslateModelSelector } from './translate-model-selector'
 
 export function ProviderConfigForm() {
@@ -43,6 +46,7 @@ export function ProviderConfigForm() {
   const providerType = useStore(form.store, state => state.values.provider)
   const isReadProviderName = isReadProvider(providerType)
   const isTranslateProviderName = isTranslateProvider(providerType)
+  const isLLMProvider = isLLMTranslateProvider(providerType)
 
   // Reset form when selectedProviderId changes
   useEffect(() => {
@@ -135,6 +139,12 @@ export function ProviderConfigForm() {
               <DefaultReadProviderSelector form={form} />
               <ReadModelSelector form={form} />
             </>
+          )}
+          {isLLMProvider && (
+            <AdvancedOptionsSection>
+              <TemperatureField form={form} />
+              <ProviderOptionsField form={form} />
+            </AdvancedOptionsSection>
           )}
         </div>
         <div className="flex justify-end mt-8">

@@ -95,6 +95,13 @@ options:
         noModels: Mevcut model yok
         selectModel: Model seç
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
+      advancedOptions: Gelişmiş Seçenekler
+      temperature: Sıcaklık
+      temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
+      providerOptions: Sağlayıcı Seçenekleri
+      providerOptionsHint: Düşünme/akıl yürütme modu gibi standart dışı API özellikleri için sağlayıcıya özel seçenekler. Ayrıntılar için Vercel AI SDK belgelerine veya sağlayıcınızın resmi belgelerine bakın.
+      providerOptionsDocsLink: Sağlayıcı Belgelerini Görüntüle
+      invalidJson: Geçersiz JSON formatı
     providers:
       description:
         openai: GPT-4o gibi modeller sağlar
@@ -121,6 +128,7 @@ options:
         perplexity: Bağlamsal çeviriler ve okuma yardımı için gerçek zamanlı bilgi ile güçlendirilmiş AI
         vercel: Web içeriği çevirisi ve analizi için optimize edilmiş AI modelleri
         volcengine: Çeviri ve okuma için Doubao modelleri sunan ByteDance'ın bulut AI platformu
+        minimax: Gelişmiş MiniMax-M2 modelleri sunan MiniMax AI platformu
     apiKey:
       showAPIKey: API Anahtarını Göster
     howToConfigure: Nasıl yapılandırılır?

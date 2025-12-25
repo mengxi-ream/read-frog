@@ -95,6 +95,13 @@ options:
         noModels: No models available
         selectModel: Select a model
         apiKeyRequired: Please add API key first
+      advancedOptions: Advanced Options
+      temperature: Temperature
+      temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
+      providerOptions: Provider Options
+      providerOptionsHint: Provider-specific options for non-standard API features like thinking/reasoning mode. See the Vercel AI SDK docs or your provider's official documentation for configuration details.
+      providerOptionsDocsLink: View Provider Docs
+      invalidJson: Invalid JSON format
     providers:
       description:
         openai: Provides models like GPT-4o
@@ -121,6 +128,7 @@ options:
         perplexity: Real-time knowledge-enhanced AI for contextual translations and reading assistance
         vercel: Optimized AI models for web content translation and analysis
         volcengine: ByteDance's cloud AI platform offering Doubao models for translation and reading
+        minimax: MiniMax AI platform offering advanced MiniMax-M2 models for text generation
     apiKey:
       showAPIKey: Show API Key
     howToConfigure: How to configure?

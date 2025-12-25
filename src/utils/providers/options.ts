@@ -17,3 +17,21 @@ export function getProviderOptions(
   }
   return {}
 }
+
+/**
+ * Get provider options for AI SDK generateText calls.
+ * If user-defined options exist, use them directly (no merge).
+ * Otherwise fall back to default pattern-matched options.
+ */
+export function getProviderOptionsWithOverride(
+  model: string,
+  provider: string,
+  userOptions?: Record<string, JSONValue>,
+): Record<string, Record<string, JSONValue>> {
+  // User options completely override defaults
+  if (userOptions && Object.keys(userOptions).length > 0) {
+    return { [provider]: userOptions }
+  }
+
+  return getProviderOptions(model, provider)
+}
