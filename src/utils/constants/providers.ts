@@ -126,6 +126,11 @@ export const DEFAULT_READ_MODELS: ReadModels = {
     isCustomModel: true,
     customModel: null,
   },
+  'minimax': {
+    model: 'MiniMax-M2',
+    isCustomModel: false,
+    customModel: null,
+  },
 }
 
 export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
@@ -242,6 +247,11 @@ export const DEFAULT_TRANSLATE_MODELS: TranslateLLMModels = {
   'volcengine': {
     model: 'doubao-seed-1-6-flash-250828',
     isCustomModel: true,
+    customModel: null,
+  },
+  'minimax': {
+    model: 'MiniMax-M2',
+    isCustomModel: false,
     customModel: null,
   },
 }
@@ -377,6 +387,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn('volcengine-color'),
       name: 'Volcengine',
       website: 'https://www.volcengine.com/product/doubao',
+    },
+    'minimax': {
+      logo: getLobeIconsCDNUrlFn('minimax-color'),
+      name: 'MiniMax',
+      website: 'https://platform.minimax.io',
     },
   }
 
@@ -657,6 +672,17 @@ export const DEFAULT_PROVIDER_CONFIG = {
     models: {
       read: DEFAULT_READ_MODELS.volcengine,
       translate: DEFAULT_TRANSLATE_MODELS.volcengine,
+    },
+  },
+  'minimax': {
+    id: 'minimax-default',
+    name: PROVIDER_ITEMS.minimax.name,
+    description: i18n.t('options.apiProviders.providers.description.minimax'),
+    enabled: true,
+    provider: 'minimax',
+    models: {
+      read: DEFAULT_READ_MODELS.minimax,
+      translate: DEFAULT_TRANSLATE_MODELS.minimax,
     },
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>

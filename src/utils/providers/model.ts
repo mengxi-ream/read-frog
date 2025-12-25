@@ -20,6 +20,7 @@ import { createVercel } from '@ai-sdk/vercel'
 import { createXai } from '@ai-sdk/xai'
 import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { createOllama } from 'ollama-ai-provider-v2'
+import { createMinimax } from 'vercel-minimax-ai-provider'
 import { isCustomLLMProvider } from '@/types/config/provider'
 import { getLLMTranslateProvidersConfig, getProviderConfigById, getTTSProvidersConfig } from '../config/helpers'
 import { CONFIG_STORAGE_KEY } from '../constants/config'
@@ -48,6 +49,7 @@ interface ProviderFactoryMap {
   'perplexity': typeof createPerplexity
   'vercel': typeof createVercel
   'ollama': typeof createOllama
+  'minimax': typeof createMinimax
 }
 
 const CREATE_AI_MAPPER: ProviderFactoryMap = {
@@ -74,6 +76,7 @@ const CREATE_AI_MAPPER: ProviderFactoryMap = {
   'perplexity': createPerplexity,
   'vercel': createVercel,
   'ollama': createOllama,
+  'minimax': createMinimax,
 }
 
 const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string, string>>> = {

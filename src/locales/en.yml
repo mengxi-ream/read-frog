@@ -128,6 +128,7 @@ options:
         perplexity: Real-time knowledge-enhanced AI for contextual translations and reading assistance
         vercel: Optimized AI models for web content translation and analysis
         volcengine: ByteDance's cloud AI platform offering Doubao models for translation and reading
+        minimax: MiniMax AI platform offering advanced MiniMax-M2 models for text generation
     apiKey:
       showAPIKey: Show API Key
     howToConfigure: How to configure?

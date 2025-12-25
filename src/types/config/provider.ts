@@ -9,7 +9,7 @@ export { NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, PURE_TRAN
   ────────────────────────────── */
 
 // read provider names
-export const READ_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine'] as const satisfies Readonly<
+export const READ_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   (keyof typeof READ_PROVIDER_MODELS)[]
 >
 export type ReadProviderTypes = typeof READ_PROVIDER_TYPES[number]
@@ -21,7 +21,7 @@ export function isReadProviderConfig(config: ProviderConfig): config is ReadProv
 }
 
 // translate provider names
-export const TRANSLATE_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine'] as const satisfies Readonly<
+export const TRANSLATE_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   (keyof typeof TRANSLATE_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
 >
 export type TranslateProviderTypes = typeof TRANSLATE_PROVIDER_TYPES[number]
@@ -33,7 +33,7 @@ export function isTranslateProviderConfig(config: ProviderConfig): config is Tra
 }
 
 // translate provider names that support LLM
-export const LLM_TRANSLATE_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine'] as const satisfies Readonly<
+export const LLM_TRANSLATE_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   (keyof typeof TRANSLATE_PROVIDER_MODELS)[]
 >
 export type LLMTranslateProviderTypes = typeof LLM_TRANSLATE_PROVIDER_TYPES[number]
@@ -44,7 +44,7 @@ export function isLLMTranslateProviderConfig(config: ProviderConfig): config is 
   return isLLMTranslateProvider(config.provider)
 }
 
-export const LLM_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine'] as const satisfies Readonly<
+export const LLM_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS)[]
 >
 export type LLMProviderTypes = typeof LLM_PROVIDER_TYPES[number]
@@ -66,7 +66,7 @@ export function isCustomLLMProviderConfig(config: ProviderConfig): config is Cus
   return isCustomLLMProvider(config.provider)
 }
 
-export const NON_CUSTOM_LLM_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama'] as const satisfies Readonly<
+export const NON_CUSTOM_LLM_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'minimax'] as const satisfies Readonly<
   Exclude<keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS, CustomLLMProviderTypes>[]
 >
 export type NonCustomLLMProviderTypes = typeof NON_CUSTOM_LLM_PROVIDER_TYPES[number]
@@ -77,7 +77,7 @@ export function isNonCustomLLMProviderConfig(config: ProviderConfig): config is 
   return isNonCustomLLMProvider(config.provider)
 }
 
-export const API_PROVIDER_TYPES = ['siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'deeplx', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine'] as const satisfies Readonly<
+export const API_PROVIDER_TYPES = ['siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'deeplx', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS | 'deeplx')[]
 >
 export type APIProviderTypes = typeof API_PROVIDER_TYPES[number]
@@ -119,7 +119,7 @@ export function isTTSProviderConfig(config: ProviderConfig): config is TTSProvid
 }
 
 // all provider names
-export const ALL_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine'] as const satisfies Readonly<
+export const ALL_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   (typeof READ_PROVIDER_TYPES[number] | typeof TRANSLATE_PROVIDER_TYPES[number])[]
 >
 export type AllProviderTypes = typeof ALL_PROVIDER_TYPES[number]
@@ -273,6 +273,10 @@ const llmProviderConfigSchemaList = [
   baseAPIProviderConfigSchema.extend({
     provider: z.literal('ollama'),
     models: createProviderModelsSchema<'ollama'>('ollama'),
+  }),
+  baseAPIProviderConfigSchema.extend({
+    provider: z.literal('minimax'),
+    models: createProviderModelsSchema<'minimax'>('minimax'),
   }),
 ] as const
 

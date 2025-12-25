@@ -127,6 +127,7 @@ options:
         perplexity: 맥락적 번역과 읽기 지원을 위한 실시간 지식 강화 AI
         vercel: 웹 콘텐츠 번역과 분석에 최적화된 AI 모델
         volcengine: ByteDance의 클라우드 AI 플랫폼, Doubao 모델 제공
+        minimax: MiniMax AI 플랫폼, 고급 MiniMax-M2 모델 제공
     apiKey:
       showAPIKey: API Key 표시
     howToConfigure: 구성 방법은?

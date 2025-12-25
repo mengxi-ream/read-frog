@@ -128,6 +128,7 @@ options:
         perplexity: Bağlamsal çeviriler ve okuma yardımı için gerçek zamanlı bilgi ile güçlendirilmiş AI
         vercel: Web içeriği çevirisi ve analizi için optimize edilmiş AI modelleri
         volcengine: Çeviri ve okuma için Doubao modelleri sunan ByteDance'ın bulut AI platformu
+        minimax: Gelişmiş MiniMax-M2 modelleri sunan MiniMax AI platformu
     apiKey:
       showAPIKey: API Anahtarını Göster
     howToConfigure: Nasıl yapılandırılır?

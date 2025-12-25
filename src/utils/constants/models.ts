@@ -27,6 +27,7 @@ export const READ_PROVIDER_MODELS = {
   'openrouter': ['deepseek/deepseek-chat-v3.1:free', 'openai/gpt-4.1-mini'],
   'ollama': ['gemma3:27b', 'deepseek-v3'],
   'volcengine': ['doubao-seed-1-6-251015', 'doubao-seed-1-6-lite-251015', 'doubao-seed-1-6-flash-250828'],
+  'minimax': ['MiniMax-M2', 'MiniMax-M2-Stable'],
 } as const
 export const TRANSLATE_PROVIDER_MODELS = {
   'openai': ['gpt-5.2-chat-latest', 'gpt-5.2', 'gpt-5.2-pro', 'gpt-5.1-chat-latest', 'gpt-5.1-codex-mini', 'gpt-5.1', 'gpt-5.1-codex', 'gpt-5-chat-latest', 'gpt-5-nano', 'gpt-5-mini', 'gpt-5', 'gpt-5-codex', 'gpt-5-pro', 'gpt-4.1-nano', 'gpt-4.1-mini', 'gpt-4.1', 'gpt-4o-mini', 'gpt-4o'],
@@ -52,6 +53,7 @@ export const TRANSLATE_PROVIDER_MODELS = {
   'openrouter': ['x-ai/grok-4-fast:free', 'openai/gpt-4.1-mini'],
   'ollama': ['gemma3:4b', 'llama3.2:3b'],
   'volcengine': ['doubao-seed-1-6-flash-250828', 'doubao-seed-1-6-lite-251015', 'doubao-seed-1-6-251015'],
+  'minimax': ['MiniMax-M2', 'MiniMax-M2-Stable'],
 } as const
 
 export const NON_API_TRANSLATE_PROVIDERS = ['google-translate', 'microsoft-translate'] as const
