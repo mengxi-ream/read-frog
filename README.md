@@ -6,7 +6,7 @@ An open-source AI-powered language learning extension for browsers.<br/>
 Supports immersive translation, article analysis, multiple AI models, and more.<br/>
 Master languages effortlessly and deeply with AI, right in your browser.
 
-**English** | [简体中文](./README.zh-CN.md) | [Official Website](https://readfrog.app)
+**English** · [简体中文](./README.zh-CN.md) · [Official Website](https://readfrog.app) · [Tutorial](https://www.readfrog.app/tutorial) · [Changelog](https://www.readfrog.app/changelog) · [Blog](https://www.readfrog.app/blog)
 
 <!-- SHIELD GROUP -->
 
