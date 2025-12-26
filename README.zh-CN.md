@@ -6,7 +6,7 @@
 支持沉浸式翻译、文章分析、多种 AI 模型等功能。<br/>
 在浏览器中利用 AI 轻松深入地掌握语言。
 
-[English](./README.md) | **简体中文** | [官方网站](https://readfrog.app)
+[English](./README.md) · **简体中文** · [官方网站](https://readfrog.app) · [教程](https://www.readfrog.app/zh/tutorial) · [更新日志](https://www.readfrog.app/zh/changelog) · [博客](https://www.readfrog.app/zh/blog)
 
 <!-- SHIELD GROUP -->
 
@@ -36,6 +36,15 @@
   - [下载](#下载)
   - [社区](#社区)
 - [✨ 功能](#-功能)
+  - [🔄 双语 / 仅译文](#-双语--仅译文)
+  - [🧠 上下文感知翻译](#-上下文感知翻译)
+  - [✨ 划词翻译](#-划词翻译)
+  - [📝 自定义提示词](#-自定义提示词)
+  - [📦 批量请求](#-批量请求)
+  - [🤖 20+ AI 服务商](#-20-ai-服务商)
+  - [🎬 字幕翻译 (Beta)](#-字幕翻译-beta)
+  - [🔊 文字转语音 (TTS)](#-文字转语音-tts)
+  - [📖 阅读文章](#-阅读文章)
 - [🤝 贡献](#-贡献)
   - [贡献代码](#贡献代码)
 - [❤️ 赞助者](#️-赞助者)
@@ -101,23 +110,125 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 ## ✨ 功能
 
-将您的日常网络阅读转变为沉浸式语言学习之旅！Read Frog 是您的智能伴侣，让语言学习变得自然而愉快。
+借助 Read Frog 的强大功能，将您的日常网页阅读转变为沉浸式语言学习之旅。
 
-- 沉浸式翻译：直接在网页原始元素旁边翻译内容
-- 智能内容提取：自动识别并提取文章的主要内容
-- 全面解释：根据您的语言水平提供详细的单词、短语和句子解释
-- 情境学习：通过您真正感兴趣的内容学习语言
-- 多种 AI 模型：支持 OpenAI、DeepSeek，未来将支持更多
+<!-- ![][image-feat-bilingual] -->
 
-无论您在阅读新闻、文章还是任何网络内容，Read Frog 都能帮助您深入理解和学习语言。就像在浏览器中拥有一位语言老师！
+### 🔄 [双语 / 仅译文][docs-tutorial]
 
-适用人群：
+在两种翻译显示模式之间无缝切换。**双语模式**将原文与译文并排显示，非常适合学习和对比。**仅译文模式**完全替换原文，提供更简洁的阅读体验。
 
-- 希望通过真实内容学习语言的语言学习者
-- 希望更好理解外语文章的读者
-- 任何想让网络浏览更具教育意义的人
+当翻译处于激活状态时切换模式，扩展会自动重新翻译所有可见内容，确保平滑过渡，无需刷新页面。
 
-加入我们不断增长的语言学习者社区，帮助塑造 Read Frog 的未来！
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-context] -->
+
+### 🧠 [上下文感知翻译][docs-tutorial]
+
+让 AI 理解您正在阅读内容的完整上下文。启用后，Read Frog 使用 Mozilla 的 Readability 库提取文章的标题和内容，将此上下文提供给 AI，以获得更准确、更符合语境的翻译。
+
+这意味着技术术语会在其领域内被正确翻译，文学表达会保持其韵味，歧义短语会根据周围内容而非孤立地进行解释。
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-selection] -->
+
+### ✨ [划词翻译][docs-tutorial]
+
+在网页上选择任何文本即可显示智能工具栏。**翻译**实时流式输出翻译结果。**解释**根据您的语言水平提供详细解释。**朗读**使用文字转语音功能朗读文本。
+
+工具栏会智能定位以保持在视口内，支持拖拽交互，并可在所有网站上使用。非常适合阅读时快速查词。
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-prompts] -->
+
+### 📝 [自定义提示词][docs-tutorial]
+
+定义您自己的翻译提示词，像专家一样翻译。为技术文档、文学作品或日常内容创建特定领域的提示词。使用 `[TARGET_LANG]`、`[INPUT]`、`[TITLE]` 和 `[SUMMARY]` 等令牌构建动态、上下文感知的提示词。
+
+保存多个提示词模板，根据阅读内容随时切换。您的提示词，您做主。
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-batch] -->
+
+### 📦 [批量请求][docs-tutorial]
+
+通过智能请求批处理节省高达 70% 的 API 成本。Read Frog 将多个翻译请求合并为单次 API 调用，在保持翻译质量的同时减少开销和令牌使用。
+
+系统包含智能重试逻辑，支持指数退避，并在批处理失败时自动回退到单独请求。所有操作都在后台透明处理。
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-providers] -->
+
+### 🤖 [20+ AI 服务商][docs-tutorial]
+
+通过 Vercel AI SDK 连接 20+ AI 服务商：OpenAI、DeepSeek、Anthropic Claude、Google Gemini、xAI Grok、Groq、Mistral、Ollama 等。为每个服务商配置自定义端点、API 密钥和模型设置。
+
+此外还有免费翻译选项：Google 翻译、微软翻译和 DeepLX，提供零成本的基础翻译。
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-subtitle] -->
+
+### 🎬 [字幕翻译 (Beta)][docs-tutorial]
+
+直接在视频播放器中翻译 YouTube 字幕。观看外语内容时，翻译会与原始字幕一起显示，让视频内容成为语言学习的好帮手。
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-tts] -->
+
+### 🔊 [文字转语音 (TTS)][docs-tutorial]
+
+使用高质量 AI 语音朗读任何选中的文本。由 OpenAI 的 TTS 模型驱动，可从多种语音中选择（Alloy、Ash、Coral、Echo 等），并可调节 0.25x 到 4x 的播放速度。
+
+智能的句子感知分块功能处理长文本时会在自然边界处分割，并预取下一个片段以实现无缝播放。非常适合发音练习和听力学习。
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-read] -->
+
+### 📖 [阅读文章][docs-tutorial]
+
+一键深度文章分析。Read Frog 使用 Mozilla 的 Readability 提取主要内容，检测源语言，并用您的目标语言生成摘要和导读。
+
+然后提供逐句翻译，配合根据您的语言水平（初级、中级或高级）定制的词汇解释。每个句子都包含关键词定义、语法分析和上下文解释。就像有一位私人语言导师分析您阅读的每篇文章。
 
 <div align="right">
 
@@ -214,3 +325,19 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 [website]: https://readfrog.app
 [wechat-link]: ./assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/聊天-微信-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
+
+<!-- Feature images (placeholders) -->
+
+[image-feat-bilingual]: /assets/features/bilingual.png
+[image-feat-context]: /assets/features/context-aware.png
+[image-feat-selection]: /assets/features/selection.png
+[image-feat-prompts]: /assets/features/prompts.png
+[image-feat-batch]: /assets/features/batch.png
+[image-feat-providers]: /assets/features/providers.png
+[image-feat-subtitle]: /assets/features/subtitle.png
+[image-feat-tts]: /assets/features/tts.png
+[image-feat-read]: /assets/features/read.png
+
+<!-- Feature docs link -->
+
+[docs-tutorial]: https://readfrog.app/zh/tutorial
