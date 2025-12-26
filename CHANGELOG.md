@@ -1,5 +1,31 @@
 # @read-frog/extension
 
+## 1.21.0
+
+### Minor Changes
+
+- [#836](https://github.com/mengxi-ream/read-frog/pull/836) [`3119bd4`](https://github.com/mengxi-ream/read-frog/commit/3119bd409bab1da2eae97e54a187fbc8a746d514) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add MiniMax AI provider support
+
+- [#835](https://github.com/mengxi-ream/read-frog/pull/835) [`f817e81`](https://github.com/mengxi-ream/read-frog/commit/f817e81f143ecf4d8729fdea557c029c574c9c9f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add custom provider options and temperature configuration
+
+- [#809](https://github.com/mengxi-ream/read-frog/pull/809) [`aa62e0f`](https://github.com/mengxi-ream/read-frog/commit/aa62e0f11343f4c0fdec2ca7c19d420606426567) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: implement youtube subtitles
+
+- [#834](https://github.com/mengxi-ream/read-frog/pull/834) [`6eaaa95`](https://github.com/mengxi-ream/read-frog/commit/6eaaa958acf6b69930738b341acee882889ea715) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - ai: upgrade AI SDK from v5 to v6
+
+### Patch Changes
+
+- [#827](https://github.com/mengxi-ream/read-frog/pull/827) [`ab0582e`](https://github.com/mengxi-ream/read-frog/commit/ab0582efbc82c25cce8c7173ed746f776b4d8805) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: clear translation state when navigating to a new URL in the same tab
+
+- [#825](https://github.com/mengxi-ream/read-frog/pull/825) [`e259773`](https://github.com/mengxi-ream/read-frog/commit/e259773b2f896ef650a7f8b57255a206e2187fd8) Thanks [@Yukiniro](https://github.com/Yukiniro)! - perf: don't retry when request queue fail in batch queue
+
+- [#830](https://github.com/mengxi-ream/read-frog/pull/830) [`5ed2c53`](https://github.com/mengxi-ream/read-frog/commit/5ed2c536fcfce7b9f1e200f8dcc4e505fd9ff37d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: translation styles not applying inside website Shadow DOMs
+
+- [#825](https://github.com/mengxi-ream/read-frog/pull/825) [`e259773`](https://github.com/mengxi-ream/read-frog/commit/e259773b2f896ef650a7f8b57255a206e2187fd8) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: fixed the thinking error of gemini 3
+
+- [#832](https://github.com/mengxi-ream/read-frog/pull/832) [`aa32739`](https://github.com/mengxi-ream/read-frog/commit/aa32739a50175a06039bac0743e1730e362e5f18) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: re-translate page on translation mode change while active
+
+- [#806](https://github.com/mengxi-ream/read-frog/pull/806) [`7d6465f`](https://github.com/mengxi-ream/read-frog/commit/7d6465fafbd58a5c8e9a1bb16708a27b9ed56906) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat: supports automatic toolbar positioning
+
 ## 1.20.7
 
 ### Patch Changes

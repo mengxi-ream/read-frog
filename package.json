@@ -1,7 +1,7 @@
 {
   "name": "@read-frog/extension",
   "type": "module",
-  "version": "1.20.7",
+  "version": "1.21.0",
   "private": true,
   "packageManager": "pnpm@10.16.1",
   "description": "Read Frog browser extension for language learning",
