@@ -6,7 +6,7 @@ An open-source AI-powered language learning extension for browsers.<br/>
 Supports immersive translation, article analysis, multiple AI models, and more.<br/>
 Master languages effortlessly and deeply with AI, right in your browser.
 
-**English** | [简体中文](./README.zh-CN.md) | [Official Website](https://readfrog.app)
+**English** · [简体中文](./README.zh-CN.md) · [Official Website](https://readfrog.app) · [Tutorial](https://www.readfrog.app/tutorial) · [Changelog](https://www.readfrog.app/changelog) · [Blog](https://www.readfrog.app/blog)
 
 <!-- SHIELD GROUP -->
 
@@ -24,6 +24,8 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 </div>
 
+![2025 Recap](/assets/2025-recap.png)
+
 <details>
 <summary><kbd>Table of contents</kbd></summary>
 
@@ -34,6 +36,15 @@ Master languages effortlessly and deeply with AI, right in your browser.
   - [Download](#download)
   - [Community](#community)
 - [✨ Features](#-features)
+  - [🔄 Bilingual / Translation Only](#-bilingual--translation-only)
+  - [🧠 Context-Aware Translation](#-context-aware-translation)
+  - [✨ Selection Translation](#-selection-translation)
+  - [📝 Custom Prompts](#-custom-prompts)
+  - [📦 Batch Requests](#-batch-requests)
+  - [🤖 20+ AI Providers](#-20-ai-providers)
+  - [🎬 Subtitle Translation (Beta)](#-subtitle-translation-beta)
+  - [🔊 Text-to-Speech (TTS)](#-text-to-speech-tts)
+  - [📖 Read Article](#-read-article)
 - [🤝 Contribute](#-contribute)
   - [Contribute Code](#contribute-code)
 - [❤️ Sponsors](#️-sponsors)
@@ -99,23 +110,125 @@ Whether you are a user or a developer, Read Frog will be an important part of yo
 
 ## ✨ Features
 
-Transform your everyday web reading into an immersive language learning journey! Read Frog is your intelligent companion that makes language learning natural and enjoyable.
+Transform your everyday web reading into an immersive language learning journey with Read Frog's powerful features.
 
-- Immersive Translation: Translate elements directly adjacent to the original elements on the webpage
-- Smart Content Extraction: Automatically identifies and extracts the main content from articles
-- Comprehensive Explanations: Get detailed explanations of words, phrases, and sentences based on your language level
-- Contextual Learning: Learn languages through content you're actually interested in
-- Multiple AI Models: OpenAI, DeepSeek, and more in the future
+<!-- ![][image-feat-bilingual] -->
 
-Whether you're reading news, articles, or any web content, Read Frog helps you understand and learn languages in depth. It's like having a language teacher right in your browser!
+### 🔄 [Bilingual / Translation Only][docs-tutorial]
 
-Perfect for:
+Switch seamlessly between two translation display modes. **Bilingual mode** shows the original text alongside its translation, perfect for learning and comparison. **Translation-only mode** replaces the original text entirely for a cleaner reading experience.
 
-- Language learners who want to learn through authentic content
-- Readers who want to understand foreign language articles better
-- Anyone who wants to make their web browsing more educational
+The extension automatically re-translates all visible content when you switch modes while translation is active, ensuring a smooth transition without needing to refresh the page.
 
-Join our growing community of language learners and help shape the future of Read Frog!
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-context] -->
+
+### 🧠 [Context-Aware Translation][docs-tutorial]
+
+Enable AI to understand the full context of what you're reading. When activated, Read Frog uses Mozilla's Readability library to extract the article's title and content, providing this context to the AI for more accurate, contextually-appropriate translations.
+
+This means technical terms get translated correctly within their domain, literary expressions maintain their nuance, and ambiguous phrases are interpreted based on the surrounding content rather than in isolation.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-selection] -->
+
+### ✨ [Selection Translation][docs-tutorial]
+
+Select any text on a webpage to reveal a smart toolbar with powerful options. **Translate** streams the translation in real-time. **Explain** provides detailed explanations tailored to your language level. **Speak** reads the text aloud using text-to-speech.
+
+The toolbar intelligently positions itself to stay within the viewport, supports drag interactions, and works across all websites. Perfect for quick lookups while reading.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-prompts] -->
+
+### 📝 [Custom Prompts][docs-tutorial]
+
+Define your own translation prompts to translate like an expert. Create domain-specific prompts for technical documents, literary works, or casual content. Use tokens like `[TARGET_LANG]`, `[INPUT]`, `[TITLE]`, and `[SUMMARY]` to build dynamic, context-aware prompts.
+
+Save multiple prompt patterns and switch between them based on what you're reading. Your prompts, your rules.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-batch] -->
+
+### 📦 [Batch Requests][docs-tutorial]
+
+Save up to 70% on API costs with intelligent request batching. Read Frog groups multiple translation requests into single API calls, reducing overhead and token usage while maintaining translation quality.
+
+The system includes smart retry logic with exponential backoff and automatic fallback to individual requests if batch processing fails. All handled transparently in the background.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-providers] -->
+
+### 🤖 [20+ AI Providers][docs-tutorial]
+
+Connect to 20+ AI providers through Vercel AI SDK: OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama, and many more. Configure custom endpoints, API keys, and model settings for each provider.
+
+Plus free translation options: Google Translate, Microsoft Translate, and DeepLX for cost-free basic translations.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-subtitle] -->
+
+### 🎬 [Subtitle Translation (Beta)][docs-tutorial]
+
+Translate YouTube subtitles directly in the video player. Watch foreign language content with translations displayed alongside the original subtitles, making video content accessible for language learning.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-tts] -->
+
+### 🔊 [Text-to-Speech (TTS)][docs-tutorial]
+
+Listen to any selected text with high-quality AI voices. Powered by OpenAI's TTS models, choose from multiple voices (Alloy, Ash, Coral, Echo, and more) and adjust playback speed from 0.25x to 4x.
+
+Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-read] -->
+
+### 📖 [Read Article][docs-tutorial]
+
+One-click deep article analysis. Read Frog extracts the main content using Mozilla's Readability, detects the source language, and generates a summary and introduction in your target language.
+
+Then it provides sentence-by-sentence translations with vocabulary explanations tailored to your language level (beginner, intermediate, or advanced). Each sentence includes key word definitions, grammatical analysis, and contextual explanations. It's like having a personal language tutor analyze every article you read.
 
 <div align="right">
 
@@ -185,6 +298,7 @@ Every donation helps us build a better language learning experience. Thank you f
 
 <!-- LINK GROUP -->
 
+[2025-recap]: /assets/2025-recap.png
 [back-to-top]: https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square
 [chrome-store-link]: https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb
 [chrome-users-shield]: https://img.shields.io/chrome-web-store/users/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20Users&color=orange&labelColor=black
@@ -214,3 +328,19 @@ Every donation helps us build a better language learning experience. Thank you f
 [website]: https://readfrog.app
 [wechat-link]: ./assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
+
+<!-- Feature images (placeholders) -->
+
+[image-feat-bilingual]: /assets/features/bilingual.png
+[image-feat-context]: /assets/features/context-aware.png
+[image-feat-selection]: /assets/features/selection.png
+[image-feat-prompts]: /assets/features/prompts.png
+[image-feat-batch]: /assets/features/batch.png
+[image-feat-providers]: /assets/features/providers.png
+[image-feat-subtitle]: /assets/features/subtitle.png
+[image-feat-tts]: /assets/features/tts.png
+[image-feat-read]: /assets/features/read.png
+
+<!-- Feature docs link -->
+
+[docs-tutorial]: https://readfrog.app/tutorial
