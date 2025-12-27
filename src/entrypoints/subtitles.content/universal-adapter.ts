@@ -6,7 +6,7 @@ import { toast } from 'sonner'
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
 import { waitForElement } from '@/utils/dom/wait-for-element'
 import { ToastSubtitlesError } from '@/utils/subtitles/errors'
-import { createSubtitlesBlocks, findNextBlockToTranslate, updateBatchState } from '@/utils/subtitles/processor/block-strategy'
+import { createSubtitlesBlocks, findNextBlockToTranslate, updateBlockState } from '@/utils/subtitles/processor/block-strategy'
 import { translateSubtitles } from '@/utils/subtitles/processor/translator'
 import { currentSubtitleAtom, subtitlesStore, subtitlesTranslationBlocksAtom } from './atoms'
 import { renderSubtitlesTranslateButton } from './renderer/render-translate-button'
@@ -42,13 +42,13 @@ export class UniversalVideoAdapter {
   private resetSubtitlesData() {
     this.subtitlesScheduler?.reset()
     this.stopBlockMonitoring()
-    subtitlesStore.set(subtitlesTranslationBlocksAtom, [])
     this.originalSubtitles = []
     this.subtitlesFetcher.cleanup()
   }
 
   private resetForNavigation() {
     this.destroyScheduler()
+    this.stopBlockMonitoring()
     this.originalSubtitles = []
     this.cachedVideoId = null
     this.subtitlesFetcher.cleanup()
@@ -220,7 +220,7 @@ export class UniversalVideoAdapter {
 
   private async translateSubtitlesBlock(batch: SubtitlesTranslationBlock) {
     const subtitlesBlocks = subtitlesStore.get(subtitlesTranslationBlocksAtom)
-    subtitlesStore.set(subtitlesTranslationBlocksAtom, updateBatchState(subtitlesBlocks, batch.id, 'processing'))
+    subtitlesStore.set(subtitlesTranslationBlocksAtom, updateBlockState(subtitlesBlocks, batch.id, 'processing'))
 
     const currentSubtitle = subtitlesStore.get(currentSubtitleAtom)
     if (!currentSubtitle) {
@@ -233,7 +233,7 @@ export class UniversalVideoAdapter {
       const updatedBatches = subtitlesStore.get(subtitlesTranslationBlocksAtom)
       subtitlesStore.set(
         subtitlesTranslationBlocksAtom,
-        updateBatchState(updatedBatches, batch.id, 'completed'),
+        updateBlockState(updatedBatches, batch.id, 'completed'),
       )
 
       this.subtitlesScheduler?.supplementSubtitles(translated)
@@ -243,7 +243,7 @@ export class UniversalVideoAdapter {
       const updatedBatches = subtitlesStore.get(subtitlesTranslationBlocksAtom)
       subtitlesStore.set(
         subtitlesTranslationBlocksAtom,
-        updateBatchState(updatedBatches, batch.id, 'error'),
+        updateBlockState(updatedBatches, batch.id, 'error'),
       )
 
       const errorMessage = error instanceof Error ? error.message : String(error)
@@ -280,6 +280,8 @@ export class UniversalVideoAdapter {
   }
 
   private stopBlockMonitoring() {
+    subtitlesStore.set(subtitlesTranslationBlocksAtom, [])
+
     if (!this.subtitlesScheduler)
       return
 

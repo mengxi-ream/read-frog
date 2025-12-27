@@ -10,7 +10,7 @@ import { FIRST_BATCH_DURATION_MS, PRELOAD_AHEAD_MS, SUBSEQUENT_BATCH_DURATION_MS
  * - And so on...
  *
  * This ensures fragments crossing boundaries (e.g., 98s-103s)
- * are fully included in the batch where they start
+ * are fully included in the block where they start
  */
 export function createSubtitlesBlocks(fragments: SubtitlesFragment[]): SubtitlesTranslationBlock[] {
   if (fragments.length === 0)
@@ -76,7 +76,7 @@ export function findNextBlockToTranslate(blocks: SubtitlesTranslationBlock[], cu
   return upcomingBlock || null
 }
 
-export function updateBatchState(
+export function updateBlockState(
   blocks: SubtitlesTranslationBlock[],
   blockId: number,
   state: SubtitlesTranslationBlockState,
