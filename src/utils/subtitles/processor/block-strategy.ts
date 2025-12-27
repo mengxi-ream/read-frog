@@ -1,9 +1,5 @@
 import type { SubtitlesFragment, SubtitlesTranslationBlock, SubtitlesTranslationBlockState } from '@/utils/subtitles/types'
-import {
-  FIRST_BATCH_DURATION_MS,
-  PRELOAD_AHEAD_MS,
-  SUBSEQUENT_BATCH_DURATION_MS,
-} from '@/utils/constants/subtitles'
+import { FIRST_BATCH_DURATION_MS, PRELOAD_AHEAD_MS, SUBSEQUENT_BATCH_DURATION_MS } from '@/utils/constants/subtitles'
 
 /**
  * Create translation blocks from subtitle fragments
@@ -21,51 +17,47 @@ export function createSubtitlesBlocks(fragments: SubtitlesFragment[]): Subtitles
     return []
 
   const blocks: SubtitlesTranslationBlock[] = []
-  let batchStartMs = 0
-  let batchId = 0
+  let blockStartMs = FIRST_BATCH_DURATION_MS
+  let blockId = 0
 
-  const firstBatchFragments = fragments.filter(
+  const firstBlockFragments = fragments.filter(
     f => f.start >= 0 && f.start < FIRST_BATCH_DURATION_MS,
   )
 
-  if (firstBatchFragments.length > 0) {
+  if (firstBlockFragments.length > 0) {
     blocks.push({
-      id: batchId++,
+      id: blockId++,
       startMs: 0,
       endMs: FIRST_BATCH_DURATION_MS,
       state: 'idle',
-      fragments: firstBatchFragments,
+      fragments: firstBlockFragments,
     })
   }
-  batchStartMs = FIRST_BATCH_DURATION_MS
 
   const maxEndMs = Math.max(...fragments.map(f => f.end))
 
-  while (batchStartMs < maxEndMs) {
-    const batchEndMs = batchStartMs + SUBSEQUENT_BATCH_DURATION_MS
+  while (blockStartMs < maxEndMs) {
+    const batchEndMs = blockStartMs + SUBSEQUENT_BATCH_DURATION_MS
     const batchFragments = fragments.filter(
-      f => f.start >= batchStartMs && f.start < batchEndMs,
+      f => f.start >= blockStartMs && f.start < batchEndMs,
     )
 
     if (batchFragments.length > 0) {
       blocks.push({
-        id: batchId++,
-        startMs: batchStartMs,
+        id: blockId++,
+        startMs: blockStartMs,
         endMs: batchEndMs,
         state: 'idle',
         fragments: batchFragments,
       })
     }
-    batchStartMs = batchEndMs
+    blockStartMs = batchEndMs
   }
 
   return blocks
 }
 
-export function findNextBlockToTranslate(
-  blocks: SubtitlesTranslationBlock[],
-  currentTimeMs: number,
-): SubtitlesTranslationBlock | null {
+export function findNextBlockToTranslate(blocks: SubtitlesTranslationBlock[], currentTimeMs: number): SubtitlesTranslationBlock | null {
   const pendingBlocks = blocks.filter(block => block.state === 'idle')
 
   if (pendingBlocks.length === 0)
@@ -86,10 +78,10 @@ export function findNextBlockToTranslate(
 
 export function updateBatchState(
   blocks: SubtitlesTranslationBlock[],
-  batchId: number,
+  blockId: number,
   state: SubtitlesTranslationBlockState,
 ): SubtitlesTranslationBlock[] {
   return blocks.map(block =>
-    block.id === batchId ? { ...block, state } : block,
+    block.id === blockId ? { ...block, state } : block,
   )
 }
