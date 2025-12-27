@@ -5,12 +5,6 @@ import {
   SUBSEQUENT_BATCH_DURATION_MS,
 } from '@/utils/constants/subtitles'
 
-export const DEFAULT_BATCH_CONFIG = {
-  firstBatchDurationMs: FIRST_BATCH_DURATION_MS,
-  subsequentBatchDurationMs: SUBSEQUENT_BATCH_DURATION_MS,
-  preloadAheadMs: PRELOAD_AHEAD_MS,
-}
-
 /**
  * Create translation blocks from subtitle fragments
  *
@@ -22,10 +16,7 @@ export const DEFAULT_BATCH_CONFIG = {
  * This ensures fragments crossing boundaries (e.g., 98s-103s)
  * are fully included in the batch where they start
  */
-export function createSubtitlesBlocks(
-  fragments: SubtitlesFragment[],
-  config = DEFAULT_BATCH_CONFIG,
-): SubtitlesTranslationBlock[] {
+export function createSubtitlesBlocks(fragments: SubtitlesFragment[]): SubtitlesTranslationBlock[] {
   if (fragments.length === 0)
     return []
 
@@ -33,26 +24,25 @@ export function createSubtitlesBlocks(
   let batchStartMs = 0
   let batchId = 0
 
-  const firstBatchEndMs = config.firstBatchDurationMs
   const firstBatchFragments = fragments.filter(
-    f => f.start >= 0 && f.start < firstBatchEndMs,
+    f => f.start >= 0 && f.start < FIRST_BATCH_DURATION_MS,
   )
 
   if (firstBatchFragments.length > 0) {
     blocks.push({
       id: batchId++,
       startMs: 0,
-      endMs: firstBatchEndMs,
+      endMs: FIRST_BATCH_DURATION_MS,
       state: 'idle',
       fragments: firstBatchFragments,
     })
   }
-  batchStartMs = firstBatchEndMs
+  batchStartMs = FIRST_BATCH_DURATION_MS
 
   const maxEndMs = Math.max(...fragments.map(f => f.end))
 
   while (batchStartMs < maxEndMs) {
-    const batchEndMs = batchStartMs + config.subsequentBatchDurationMs
+    const batchEndMs = batchStartMs + SUBSEQUENT_BATCH_DURATION_MS
     const batchFragments = fragments.filter(
       f => f.start >= batchStartMs && f.start < batchEndMs,
     )
@@ -75,7 +65,6 @@ export function createSubtitlesBlocks(
 export function findNextBlockToTranslate(
   blocks: SubtitlesTranslationBlock[],
   currentTimeMs: number,
-  preloadAheadMs: number = DEFAULT_BATCH_CONFIG.preloadAheadMs,
 ): SubtitlesTranslationBlock | null {
   const pendingBlocks = blocks.filter(block => block.state === 'idle')
 
@@ -89,7 +78,7 @@ export function findNextBlockToTranslate(
     return currentBlock
 
   const upcomingBlock = pendingBlocks.find(
-    block => block.startMs <= currentTimeMs + preloadAheadMs && block.startMs >= currentTimeMs,
+    block => block.startMs <= currentTimeMs + PRELOAD_AHEAD_MS && block.startMs >= currentTimeMs,
   )
 
   return upcomingBlock || null

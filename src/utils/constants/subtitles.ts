@@ -2,7 +2,7 @@
 export const NAVIGATION_HANDLER_DELAY = 1000
 export const FETCH_CHECK_INTERVAL = 100
 export const FETCH_SUBTITLES_TIMEOUT = 10_000
-export const MAX_GAP_MS = 2000
+export const MAX_GAP_MS = 2_000
 export const PAUSE_TIMEOUT_MS = 1_000
 
 // Segmentation constants

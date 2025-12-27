@@ -3,7 +3,7 @@ import type { SubtitlesFetcher } from '@/utils/subtitles/fetchers/types'
 import type { SubtitlesFragment, SubtitlesTranslationBlock } from '@/utils/subtitles/types'
 import { i18n } from '#imports'
 import { toast } from 'sonner'
-import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, PRELOAD_AHEAD_MS, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
+import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
 import { waitForElement } from '@/utils/dom/wait-for-element'
 import { ToastSubtitlesError } from '@/utils/subtitles/errors'
 import { createSubtitlesBlocks, findNextBlockToTranslate, updateBatchState } from '@/utils/subtitles/processor/block-strategy'
@@ -203,7 +203,7 @@ export class UniversalVideoAdapter {
 
       const video = this.subtitlesScheduler?.getVideoElement()
       const currentTimeMs = (video?.currentTime ?? 0) * 1000
-      const firstBlockToTranslate = findNextBlockToTranslate(subtitlesBlocks, currentTimeMs, PRELOAD_AHEAD_MS)
+      const firstBlockToTranslate = findNextBlockToTranslate(subtitlesBlocks, currentTimeMs)
 
       if (firstBlockToTranslate) {
         await this.translateSubtitlesBlock(firstBlockToTranslate)
