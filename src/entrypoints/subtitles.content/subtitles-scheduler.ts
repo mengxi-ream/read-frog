@@ -1,5 +1,4 @@
 import type { StateData, SubtitlesFragment, SubtitlesState } from '@/utils/subtitles/types'
-import { COMPLETED_STATE_HIDE_DELAY } from '@/utils/constants/subtitles'
 import { currentSubtitleAtom, subtitlesStateAtom, subtitlesStore, subtitlesVisibleAtom } from './atoms'
 
 export class SubtitlesScheduler {
@@ -10,8 +9,6 @@ export class SubtitlesScheduler {
   private currentState: StateData = {
     state: 'idle',
   }
-
-  private hideStateTimeout: NodeJS.Timeout | null = null
 
   constructor({ videoElement }: { videoElement: HTMLVideoElement }) {
     this.videoElement = videoElement
@@ -28,14 +25,12 @@ export class SubtitlesScheduler {
       return
     }
 
-    // Merge and deduplicate by start time (for incremental batch translation)
     const existingStarts = new Set(this.subtitles.map(s => s.start))
     const newSubtitles = subtitles.filter(s => !existingStarts.has(s.start))
 
     this.subtitles.push(...newSubtitles)
     this.subtitles.sort((a, b) => a.start - b.start)
 
-    // Don't reset currentIndex, just re-evaluate current subtitle
     this.updateSubtitles(this.videoElement.currentTime)
   }
 
@@ -46,7 +41,6 @@ export class SubtitlesScheduler {
   stop() {
     this.isActive = false
     this.detachListeners()
-    this.clearHideStateTimeout()
     this.updateVisibility()
   }
 
@@ -65,18 +59,7 @@ export class SubtitlesScheduler {
       state,
       message: data?.message,
     }
-    this.clearHideStateTimeout()
-
     this.updateState()
-
-    if (state === 'completed') {
-      this.hideStateTimeout = setTimeout(
-        () => {
-          this.setState('idle')
-        },
-        COMPLETED_STATE_HIDE_DELAY,
-      )
-    }
   }
 
   reset() {
@@ -135,12 +118,5 @@ export class SubtitlesScheduler {
 
   private updateVisibility() {
     subtitlesStore.set(subtitlesVisibleAtom, this.isActive)
-  }
-
-  private clearHideStateTimeout() {
-    if (this.hideStateTimeout) {
-      clearTimeout(this.hideStateTimeout)
-      this.hideStateTimeout = null
-    }
   }
 }

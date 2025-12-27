@@ -25,10 +25,6 @@ const STATE_CONFIG: Record<SubtitlesState, { color: string, getText: () => strin
     color: 'oklch(70% 0.19 250)',
     getText: () => i18n.t('subtitles.state.processing'),
   },
-  completed: {
-    color: 'oklch(70% 0.17 165)',
-    getText: () => i18n.t('subtitles.state.completed'),
-  },
   error: {
     color: 'oklch(63% 0.24 25)',
     getText: () => i18n.t('subtitles.state.error'),

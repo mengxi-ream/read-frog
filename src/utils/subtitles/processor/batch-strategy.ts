@@ -1,5 +1,4 @@
-import type { BatchState, TranslationBatch } from '@/entrypoints/subtitles.content/atoms'
-import type { SubtitlesFragment } from '@/utils/subtitles/types'
+import type { BatchState, SubtitlesFragment, TranslationBatch } from '@/utils/subtitles/types'
 import {
   FIRST_BATCH_DURATION_MS,
   PRELOAD_AHEAD_MS,
@@ -57,7 +56,6 @@ export function createBatches(
   }
   batchStartMs = firstBatchEndMs
 
-  // Subsequent batches
   const maxEndMs = Math.max(...fragments.map(f => f.end))
 
   while (batchStartMs < maxEndMs) {
@@ -81,14 +79,6 @@ export function createBatches(
   return batches
 }
 
-/**
- * Find the next batch to translate based on current video time
- *
- * Priority:
- * 1. Batch containing current time (user is watching this segment)
- * 2. Upcoming batch within preload window (preload ahead)
- * 3. Nearest future batch
- */
 export function findNextBatchToTranslate(
   batches: TranslationBatch[],
   currentTimeMs: number,
@@ -99,14 +89,12 @@ export function findNextBatchToTranslate(
   if (pendingBatches.length === 0)
     return null
 
-  // 1. Batch containing current time
   const currentBatch = pendingBatches.find(
     b => b.startMs <= currentTimeMs && b.endMs > currentTimeMs,
   )
   if (currentBatch)
     return currentBatch
 
-  // 2. Upcoming batch within preload window (only translate when within preload window to save tokens)
   const upcomingBatch = pendingBatches.find(
     b => b.startMs <= currentTimeMs + preloadAheadMs && b.startMs > currentTimeMs,
   )
@@ -114,9 +102,6 @@ export function findNextBatchToTranslate(
   return upcomingBatch || null
 }
 
-/**
- * Update batch state immutably
- */
 export function updateBatchState(
   batches: TranslationBatch[],
   batchId: number,

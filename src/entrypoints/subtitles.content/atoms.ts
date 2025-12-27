@@ -1,30 +1,11 @@
-import type { StateData, SubtitlesFragment, SubtitlesState } from '@/utils/subtitles/types'
+import type { StateData, SubtitlesFragment, TranslationBatch } from '@/utils/subtitles/types'
 import { atom, createStore } from 'jotai'
 
 export const subtitlesStore = createStore()
 
-// Batch translation types
-export type BatchState = Extract<SubtitlesState, 'idle' | 'processing' | 'completed' | 'error'>
-
-export interface TranslationBatch {
-  id: number
-  startMs: number
-  endMs: number
-  state: BatchState
-  fragments: SubtitlesFragment[]
-}
-
-// Batch translation atoms
 export const translationBatchesAtom = atom<TranslationBatch[]>([])
-export const currentTranslatingBatchIdAtom = atom<number | null>(null)
 
-export const translationProgressAtom = atom((get) => {
-  const batches = get(translationBatchesAtom)
-  if (batches.length === 0)
-    return { completed: 0, total: 0 }
-  const completed = batches.filter(b => b.state === 'completed').length
-  return { completed, total: batches.length }
-})
+export const currentTranslatingBatchIdAtom = atom<number | null>(null)
 
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 

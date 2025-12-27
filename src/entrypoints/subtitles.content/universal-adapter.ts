@@ -1,7 +1,6 @@
-import type { TranslationBatch } from './atoms'
 import type { PlatformConfig } from '@/entrypoints/subtitles.content/platforms'
 import type { SubtitlesFetcher } from '@/utils/subtitles/fetchers/types'
-import type { SubtitlesFragment } from '@/utils/subtitles/types'
+import type { SubtitlesFragment, TranslationBatch } from '@/utils/subtitles/types'
 import { i18n } from '#imports'
 import { toast } from 'sonner'
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, PRELOAD_AHEAD_MS, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
@@ -9,7 +8,7 @@ import { waitForElement } from '@/utils/dom/wait-for-element'
 import { ToastSubtitlesError } from '@/utils/subtitles/errors'
 import { createBatches, findNextBatchToTranslate, updateBatchState } from '@/utils/subtitles/processor/batch-strategy'
 import { translateSubtitles } from '@/utils/subtitles/processor/translator'
-import { currentTranslatingBatchIdAtom, subtitlesStore, translationBatchesAtom } from './atoms'
+import { currentSubtitleAtom, currentTranslatingBatchIdAtom, subtitlesStore, translationBatchesAtom } from './atoms'
 import { renderSubtitlesTranslateButton } from './renderer/render-translate-button'
 import { SubtitlesScheduler } from './subtitles-scheduler'
 
@@ -200,11 +199,9 @@ export class UniversalVideoAdapter {
     try {
       this.subtitlesScheduler?.setState('processing')
 
-      // Create batches from original subtitles
       const batches = createBatches(this.originalSubtitles)
       subtitlesStore.set(translationBatchesAtom, batches)
 
-      // Find batch to translate based on current video time (user may start from any position)
       const video = this.subtitlesScheduler?.getVideoElement()
       const currentTimeMs = (video?.currentTime ?? 0) * 1000
       const firstBatchToTranslate = findNextBatchToTranslate(batches, currentTimeMs, PRELOAD_AHEAD_MS)
@@ -213,52 +210,51 @@ export class UniversalVideoAdapter {
         await this.translateBatch(firstBatchToTranslate)
       }
 
-      // Start monitoring for subsequent batches (only translate the next batch user will see)
       this.startBatchMonitoring()
-
-      this.subtitlesScheduler?.setState('completed')
     }
     catch {
-      // Silent degradation: show original subtitles without translation
       this.subtitlesScheduler?.supplementSubtitles(
         this.originalSubtitles.map(f => ({ ...f, translation: '' })),
       )
-      this.subtitlesScheduler?.setState('completed')
+    }
+    finally {
+      this.subtitlesScheduler?.setState('idle')
     }
   }
 
   private async translateBatch(batch: TranslationBatch) {
-    // Update state to processing
     const batches = subtitlesStore.get(translationBatchesAtom)
     subtitlesStore.set(translationBatchesAtom, updateBatchState(batches, batch.id, 'processing'))
     subtitlesStore.set(currentTranslatingBatchIdAtom, batch.id)
 
+    // Only show processing state when there's no current subtitle
+    const currentSubtitle = subtitlesStore.get(currentSubtitleAtom)
+    if (!currentSubtitle) {
+      this.subtitlesScheduler?.setState('processing')
+    }
+
     try {
       const translated = await translateSubtitles(batch.fragments)
 
-      // Update state to completed
       const updatedBatches = subtitlesStore.get(translationBatchesAtom)
       subtitlesStore.set(translationBatchesAtom, updateBatchState(updatedBatches, batch.id, 'completed'))
 
-      // Supply to scheduler
       this.subtitlesScheduler?.supplementSubtitles(translated)
     }
     catch {
-      // Silent degradation
       const updatedBatches = subtitlesStore.get(translationBatchesAtom)
       subtitlesStore.set(translationBatchesAtom, updateBatchState(updatedBatches, batch.id, 'error'))
 
-      // Supply original fragments as fallback
       this.subtitlesScheduler?.supplementSubtitles(
         batch.fragments.map(f => ({ ...f, translation: '' })),
       )
     }
     finally {
       subtitlesStore.set(currentTranslatingBatchIdAtom, null)
+      this.subtitlesScheduler?.setState('idle')
     }
   }
 
-  // Event-driven batch monitoring (replaces interval polling)
   private handleBatchCheck = () => {
     const video = this.subtitlesScheduler?.getVideoElement()
     if (!video)
@@ -268,11 +264,9 @@ export class UniversalVideoAdapter {
     const batches = subtitlesStore.get(translationBatchesAtom)
     const currentTranslating = subtitlesStore.get(currentTranslatingBatchIdAtom)
 
-    // Skip if a batch is already being translated
     if (currentTranslating !== null)
       return
 
-    // Find next batch to translate
     const nextBatch = findNextBatchToTranslate(batches, currentTimeMs, PRELOAD_AHEAD_MS)
     if (nextBatch) {
       void this.translateBatch(nextBatch)
@@ -284,9 +278,7 @@ export class UniversalVideoAdapter {
     if (!video)
       return
 
-    // Listen to seeking event - triggered when user jumps
     video.addEventListener('seeking', this.handleBatchCheck)
-    // Listen to timeupdate event - triggered during normal playback
     video.addEventListener('timeupdate', this.handleBatchCheck)
   }
 

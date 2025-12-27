@@ -528,7 +528,6 @@ subtitles:
     fetchSuccess: Đã tải phụ đề
     fetchFailed: Lấy phụ đề thất bại
     processing: Đang dịch phụ đề (khoảng 2 phút)
-    completed: Dịch hoàn tất
     error: Đã xảy ra lỗi
   errors:
     http429: 429 Đã gửi quá nhiều yêu cầu đến API phụ đề Youtube, vui lòng thử lại sau
