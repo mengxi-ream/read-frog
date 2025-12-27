@@ -1,14 +1,14 @@
 import type { PlatformConfig } from '@/entrypoints/subtitles.content/platforms'
 import type { SubtitlesFetcher } from '@/utils/subtitles/fetchers/types'
-import type { SubtitlesFragment, TranslationBatch } from '@/utils/subtitles/types'
+import type { SubtitlesFragment, SubtitlesTranslationBlock } from '@/utils/subtitles/types'
 import { i18n } from '#imports'
 import { toast } from 'sonner'
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, PRELOAD_AHEAD_MS, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
 import { waitForElement } from '@/utils/dom/wait-for-element'
 import { ToastSubtitlesError } from '@/utils/subtitles/errors'
-import { createBatches, findNextBatchToTranslate, updateBatchState } from '@/utils/subtitles/processor/batch-strategy'
+import { createSubtitlesBlocks, findNextBlockToTranslate, updateBatchState } from '@/utils/subtitles/processor/block-strategy'
 import { translateSubtitles } from '@/utils/subtitles/processor/translator'
-import { currentSubtitleAtom, currentTranslatingBatchIdAtom, subtitlesStore, translationBatchesAtom } from './atoms'
+import { currentSubtitleAtom, subtitlesStore, subtitlesTranslationBlocksAtom } from './atoms'
 import { renderSubtitlesTranslateButton } from './renderer/render-translate-button'
 import { SubtitlesScheduler } from './subtitles-scheduler'
 
@@ -41,9 +41,8 @@ export class UniversalVideoAdapter {
 
   private resetSubtitlesData() {
     this.subtitlesScheduler?.reset()
-    this.stopBatchMonitoring()
-    subtitlesStore.set(translationBatchesAtom, [])
-    subtitlesStore.set(currentTranslatingBatchIdAtom, null)
+    this.stopBlockMonitoring()
+    subtitlesStore.set(subtitlesTranslationBlocksAtom, [])
     this.originalSubtitles = []
     this.subtitlesFetcher.cleanup()
   }
@@ -199,35 +198,30 @@ export class UniversalVideoAdapter {
     try {
       this.subtitlesScheduler?.setState('processing')
 
-      const batches = createBatches(this.originalSubtitles)
-      subtitlesStore.set(translationBatchesAtom, batches)
+      const subtitlesBlocks = createSubtitlesBlocks(this.originalSubtitles)
+      subtitlesStore.set(subtitlesTranslationBlocksAtom, subtitlesBlocks)
 
       const video = this.subtitlesScheduler?.getVideoElement()
       const currentTimeMs = (video?.currentTime ?? 0) * 1000
-      const firstBatchToTranslate = findNextBatchToTranslate(batches, currentTimeMs, PRELOAD_AHEAD_MS)
+      const firstBlockToTranslate = findNextBlockToTranslate(subtitlesBlocks, currentTimeMs, PRELOAD_AHEAD_MS)
 
-      if (firstBatchToTranslate) {
-        await this.translateBatch(firstBatchToTranslate)
+      if (firstBlockToTranslate) {
+        await this.translateSubtitlesBlock(firstBlockToTranslate)
       }
 
-      this.startBatchMonitoring()
-    }
-    catch {
-      this.subtitlesScheduler?.supplementSubtitles(
-        this.originalSubtitles.map(f => ({ ...f, translation: '' })),
-      )
-    }
-    finally {
+      this.startBlockMonitoring()
       this.subtitlesScheduler?.setState('idle')
+    }
+    catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      this.subtitlesScheduler?.setState('error', { message: errorMessage })
     }
   }
 
-  private async translateBatch(batch: TranslationBatch) {
-    const batches = subtitlesStore.get(translationBatchesAtom)
-    subtitlesStore.set(translationBatchesAtom, updateBatchState(batches, batch.id, 'processing'))
-    subtitlesStore.set(currentTranslatingBatchIdAtom, batch.id)
+  private async translateSubtitlesBlock(batch: SubtitlesTranslationBlock) {
+    const subtitlesBlocks = subtitlesStore.get(subtitlesTranslationBlocksAtom)
+    subtitlesStore.set(subtitlesTranslationBlocksAtom, updateBatchState(subtitlesBlocks, batch.id, 'processing'))
 
-    // Only show processing state when there's no current subtitle
     const currentSubtitle = subtitlesStore.get(currentSubtitleAtom)
     if (!currentSubtitle) {
       this.subtitlesScheduler?.setState('processing')
@@ -236,58 +230,62 @@ export class UniversalVideoAdapter {
     try {
       const translated = await translateSubtitles(batch.fragments)
 
-      const updatedBatches = subtitlesStore.get(translationBatchesAtom)
-      subtitlesStore.set(translationBatchesAtom, updateBatchState(updatedBatches, batch.id, 'completed'))
+      const updatedBatches = subtitlesStore.get(subtitlesTranslationBlocksAtom)
+      subtitlesStore.set(
+        subtitlesTranslationBlocksAtom,
+        updateBatchState(updatedBatches, batch.id, 'completed'),
+      )
 
       this.subtitlesScheduler?.supplementSubtitles(translated)
-    }
-    catch {
-      const updatedBatches = subtitlesStore.get(translationBatchesAtom)
-      subtitlesStore.set(translationBatchesAtom, updateBatchState(updatedBatches, batch.id, 'error'))
-
-      this.subtitlesScheduler?.supplementSubtitles(
-        batch.fragments.map(f => ({ ...f, translation: '' })),
-      )
-    }
-    finally {
-      subtitlesStore.set(currentTranslatingBatchIdAtom, null)
       this.subtitlesScheduler?.setState('idle')
     }
-  }
+    catch (error) {
+      const updatedBatches = subtitlesStore.get(subtitlesTranslationBlocksAtom)
+      subtitlesStore.set(
+        subtitlesTranslationBlocksAtom,
+        updateBatchState(updatedBatches, batch.id, 'error'),
+      )
 
-  private handleBatchCheck = () => {
-    const video = this.subtitlesScheduler?.getVideoElement()
-    if (!video)
-      return
-
-    const currentTimeMs = video.currentTime * 1000
-    const batches = subtitlesStore.get(translationBatchesAtom)
-    const currentTranslating = subtitlesStore.get(currentTranslatingBatchIdAtom)
-
-    if (currentTranslating !== null)
-      return
-
-    const nextBatch = findNextBatchToTranslate(batches, currentTimeMs, PRELOAD_AHEAD_MS)
-    if (nextBatch) {
-      void this.translateBatch(nextBatch)
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      this.subtitlesScheduler?.setState('error', { message: errorMessage })
     }
   }
 
-  private startBatchMonitoring() {
-    const video = this.subtitlesScheduler?.getVideoElement()
-    if (!video)
+  private handleBlockCheck = () => {
+    if (!this.subtitlesScheduler)
       return
 
-    video.addEventListener('seeking', this.handleBatchCheck)
-    video.addEventListener('timeupdate', this.handleBatchCheck)
+    const video = this.subtitlesScheduler.getVideoElement()
+
+    const currentTimeMs = video.currentTime * 1_000
+    const blocks = subtitlesStore.get(subtitlesTranslationBlocksAtom)
+
+    if (blocks.some(b => b.state === 'processing'))
+      return
+
+    const nextBlock = findNextBlockToTranslate(blocks, currentTimeMs)
+    if (nextBlock) {
+      void this.translateSubtitlesBlock(nextBlock)
+    }
   }
 
-  private stopBatchMonitoring() {
-    const video = this.subtitlesScheduler?.getVideoElement()
-    if (!video)
+  private startBlockMonitoring() {
+    if (!this.subtitlesScheduler)
       return
 
-    video.removeEventListener('seeking', this.handleBatchCheck)
-    video.removeEventListener('timeupdate', this.handleBatchCheck)
+    const video = this.subtitlesScheduler.getVideoElement()
+
+    video.addEventListener('seeked', this.handleBlockCheck)
+    video.addEventListener('timeupdate', this.handleBlockCheck)
+  }
+
+  private stopBlockMonitoring() {
+    if (!this.subtitlesScheduler)
+      return
+
+    const video = this.subtitlesScheduler.getVideoElement()
+
+    video.removeEventListener('seeked', this.handleBlockCheck)
+    video.removeEventListener('timeupdate', this.handleBlockCheck)
   }
 }

@@ -18,13 +18,12 @@ export interface SubtitlesFragment {
   translation?: string
 }
 
-// Batch translation types
-export type BatchState = 'idle' | 'processing' | 'completed' | 'error'
+export type SubtitlesTranslationBlockState = 'idle' | 'processing' | 'completed' | 'error'
 
-export interface TranslationBatch {
+export interface SubtitlesTranslationBlock {
   id: number
   startMs: number
   endMs: number
-  state: BatchState
+  state: SubtitlesTranslationBlockState
   fragments: SubtitlesFragment[]
 }

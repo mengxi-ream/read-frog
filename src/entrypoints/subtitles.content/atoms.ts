@@ -1,11 +1,9 @@
-import type { StateData, SubtitlesFragment, TranslationBatch } from '@/utils/subtitles/types'
+import type { StateData, SubtitlesFragment, SubtitlesTranslationBlock } from '@/utils/subtitles/types'
 import { atom, createStore } from 'jotai'
 
 export const subtitlesStore = createStore()
 
-export const translationBatchesAtom = atom<TranslationBatch[]>([])
-
-export const currentTranslatingBatchIdAtom = atom<number | null>(null)
+export const subtitlesTranslationBlocksAtom = atom<SubtitlesTranslationBlock[]>([])
 
 export const currentSubtitleAtom = atom<SubtitlesFragment | null>(null)
 

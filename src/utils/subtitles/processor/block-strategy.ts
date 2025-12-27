@@ -1,24 +1,18 @@
-import type { BatchState, SubtitlesFragment, TranslationBatch } from '@/utils/subtitles/types'
+import type { SubtitlesFragment, SubtitlesTranslationBlock, SubtitlesTranslationBlockState } from '@/utils/subtitles/types'
 import {
   FIRST_BATCH_DURATION_MS,
   PRELOAD_AHEAD_MS,
   SUBSEQUENT_BATCH_DURATION_MS,
 } from '@/utils/constants/subtitles'
 
-export interface BatchConfig {
-  firstBatchDurationMs: number
-  subsequentBatchDurationMs: number
-  preloadAheadMs: number
-}
-
-export const DEFAULT_BATCH_CONFIG: BatchConfig = {
+export const DEFAULT_BATCH_CONFIG = {
   firstBatchDurationMs: FIRST_BATCH_DURATION_MS,
   subsequentBatchDurationMs: SUBSEQUENT_BATCH_DURATION_MS,
   preloadAheadMs: PRELOAD_AHEAD_MS,
 }
 
 /**
- * Create translation batches from subtitle fragments
+ * Create translation blocks from subtitle fragments
  *
  * Boundary strategy: Divide by fragment's **start time**
  * - Fragments with start in [0, 100s) → first batch
@@ -28,25 +22,24 @@ export const DEFAULT_BATCH_CONFIG: BatchConfig = {
  * This ensures fragments crossing boundaries (e.g., 98s-103s)
  * are fully included in the batch where they start
  */
-export function createBatches(
+export function createSubtitlesBlocks(
   fragments: SubtitlesFragment[],
-  config: BatchConfig = DEFAULT_BATCH_CONFIG,
-): TranslationBatch[] {
+  config = DEFAULT_BATCH_CONFIG,
+): SubtitlesTranslationBlock[] {
   if (fragments.length === 0)
     return []
 
-  const batches: TranslationBatch[] = []
+  const blocks: SubtitlesTranslationBlock[] = []
   let batchStartMs = 0
   let batchId = 0
 
-  // First batch: 0 to firstBatchDurationMs
   const firstBatchEndMs = config.firstBatchDurationMs
   const firstBatchFragments = fragments.filter(
     f => f.start >= 0 && f.start < firstBatchEndMs,
   )
 
   if (firstBatchFragments.length > 0) {
-    batches.push({
+    blocks.push({
       id: batchId++,
       startMs: 0,
       endMs: firstBatchEndMs,
@@ -65,7 +58,7 @@ export function createBatches(
     )
 
     if (batchFragments.length > 0) {
-      batches.push({
+      blocks.push({
         id: batchId++,
         startMs: batchStartMs,
         endMs: batchEndMs,
@@ -76,38 +69,38 @@ export function createBatches(
     batchStartMs = batchEndMs
   }
 
-  return batches
+  return blocks
 }
 
-export function findNextBatchToTranslate(
-  batches: TranslationBatch[],
+export function findNextBlockToTranslate(
+  blocks: SubtitlesTranslationBlock[],
   currentTimeMs: number,
   preloadAheadMs: number = DEFAULT_BATCH_CONFIG.preloadAheadMs,
-): TranslationBatch | null {
-  const pendingBatches = batches.filter(b => b.state === 'idle')
+): SubtitlesTranslationBlock | null {
+  const pendingBlocks = blocks.filter(block => block.state === 'idle')
 
-  if (pendingBatches.length === 0)
+  if (pendingBlocks.length === 0)
     return null
 
-  const currentBatch = pendingBatches.find(
-    b => b.startMs <= currentTimeMs && b.endMs > currentTimeMs,
+  const currentBlock = pendingBlocks.find(
+    block => block.startMs <= currentTimeMs && block.endMs > currentTimeMs,
   )
-  if (currentBatch)
-    return currentBatch
+  if (currentBlock)
+    return currentBlock
 
-  const upcomingBatch = pendingBatches.find(
-    b => b.startMs <= currentTimeMs + preloadAheadMs && b.startMs > currentTimeMs,
+  const upcomingBlock = pendingBlocks.find(
+    block => block.startMs <= currentTimeMs + preloadAheadMs && block.startMs >= currentTimeMs,
   )
 
-  return upcomingBatch || null
+  return upcomingBlock || null
 }
 
 export function updateBatchState(
-  batches: TranslationBatch[],
+  blocks: SubtitlesTranslationBlock[],
   batchId: number,
-  state: BatchState,
-): TranslationBatch[] {
-  return batches.map(b =>
-    b.id === batchId ? { ...b, state } : b,
+  state: SubtitlesTranslationBlockState,
+): SubtitlesTranslationBlock[] {
+  return blocks.map(block =>
+    block.id === batchId ? { ...block, state } : block,
   )
 }
