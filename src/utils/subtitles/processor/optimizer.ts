@@ -114,7 +114,6 @@ function processSubtitles(
     if (lastSegment) {
       const isEndOfSentence = SENTENCE_END_PATTERN.test(lastSegment.text)
       const isTimeout = frag.start - lastSegment.end > PAUSE_TIMEOUT_MS
-      // Check if adding this fragment would exceed the limit
       const wouldExceedLimit = bufferWordCount + fragWordCount > MAX_WORDS
 
       const startsWithSign = /^[[(♪]/.test(frag.text)
