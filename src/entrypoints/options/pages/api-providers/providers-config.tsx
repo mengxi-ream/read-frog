@@ -9,6 +9,7 @@ import { Badge } from '@/components/shadcn/badge'
 import { Button } from '@/components/shadcn/button'
 import { Dialog, DialogTrigger } from '@/components/shadcn/dialog'
 import { Switch } from '@/components/shadcn/switch'
+import { SortableList } from '@/components/sortable-list'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom, readProviderConfigAtom, translateProviderConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
@@ -35,7 +36,7 @@ export function ProvidersConfig() {
 }
 
 function ProviderCardList() {
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [canScroll, setCanScroll] = useState(false)
@@ -120,14 +121,16 @@ function ProviderCardList() {
             <Icon icon="tabler:chevron-up" className="size-4 text-muted-foreground animate-bounce" />
           </div>
         )}
-        <div
-          ref={scrollContainerRef}
+        <SortableList
+          items={apiProvidersConfig}
+          getItemId={item => item.id}
+          onReorder={setProvidersConfig}
+          containerRef={scrollContainerRef}
           className="flex flex-col gap-4 pt-2 overflow-y-auto overflow-x-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]"
-        >
-          {apiProvidersConfig.map(providerConfig => (
-            <ProviderCard key={providerConfig.name} providerConfig={providerConfig} />
-          ))}
-        </div>
+          renderItem={providerConfig => (
+            <ProviderCard providerConfig={providerConfig} />
+          )}
+        />
         {canScroll && !isScrolledToBottom && (
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
             <Icon icon="tabler:chevron-down" className="size-4 text-muted-foreground animate-bounce" />
@@ -150,7 +153,10 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   return (
     <div
-      className={cn('rounded-xl p-3 border bg-card cursor-pointer relative', selectedProviderId === id && 'border-primary')}
+      className={cn(
+        'rounded-xl p-3 border bg-card cursor-pointer relative',
+        selectedProviderId === id && 'border-primary',
+      )}
       onClick={() => setSelectedProviderId(id)}
     >
       <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
