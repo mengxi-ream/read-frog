@@ -261,7 +261,7 @@ Check out the [Contribution Guide](https://readfrog.app/en/tutorial/code-contrib
         <br>
       </th>
     </tr>
-    <tr>
+    <!-- <tr>
       <td>
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-recent-top-contributors/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=dark" width="373" height="auto">
@@ -274,7 +274,7 @@ Check out the [Contribution Guide](https://readfrog.app/en/tutorial/code-contrib
           <img alt="Performance Stats of mengxi-ream/read-frog - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-last-28-days-stats/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=light" width="655" height="auto">
         </picture>
       </td>
-    </tr>
+    </tr> -->
   </table>
 </a>
 
