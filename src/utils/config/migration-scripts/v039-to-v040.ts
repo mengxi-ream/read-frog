@@ -6,7 +6,7 @@
  *   { ... }
  *
  * After (v040):
- *   { ..., inputTranslation: { enabled: true, direction: 'normal', timeThreshold: 300, showToast: true } }
+ *   { ..., inputTranslation: { enabled: true, direction: 'normal', targetCode: 'eng', timeThreshold: 300 } }
  */
 
 export function migrate(oldConfig: any): any {
@@ -15,8 +15,8 @@ export function migrate(oldConfig: any): any {
     inputTranslation: {
       enabled: true,
       direction: 'normal',
+      targetCode: 'eng',
       timeThreshold: 300,
-      showToast: true,
     },
   }
 }

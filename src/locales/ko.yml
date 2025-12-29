@@ -183,22 +183,18 @@ options:
     direction:
       title: 번역 방향
       description: 텍스트 번역 방향 선택
-      normal: 모국어 → 외국어
-      reverse: 외국어 → 모국어
+      normal: 소스 → 타겟
+      reverse: 타겟 → 소스
       cycle: 순환
+    targetCode:
+      title: 타겟 언어
+      description: 입력 번역의 기본 타겟 언어
     threshold:
       title: 트리거 임계값
       description: 스페이스바 누름 사이의 시간 간격
       label: 임계값 (밀리초)
       hint: 연속 스페이스바 누름 사이의 시간 간격 (100-1000밀리초)
       error: 값은 $1에서 $2 사이여야 합니다
-    showToast:
-      title: 알림 표시
-      description: 번역 진행 중일 때 토스트 알림 표시
-    toast:
-      translating: 번역 중...
-      success: 번역 완료
-      failed: 번역 실패
   floatingButtonAndToolbar:
     title: 플로팅 버튼 및 툴바
     floatingButtonDemoImageAlt: 플로팅 버튼 데모

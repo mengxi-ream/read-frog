@@ -89,8 +89,8 @@ export const DEFAULT_CONFIG: Config = {
   inputTranslation: {
     enabled: true,
     direction: 'normal',
+    targetCode: 'eng',
     timeThreshold: 300,
-    showToast: true,
   },
   videoSubtitles: {
     enabled: false,

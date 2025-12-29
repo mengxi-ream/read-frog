@@ -1,13 +1,12 @@
-import { i18n } from '#imports'
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useRef } from 'react'
-import { toast } from 'sonner'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateTextWithDirection } from '@/utils/host/translate/translate-text'
 
 const SPACE_KEY = ' '
 const TRIGGER_COUNT = 3
 const LAST_CYCLE_DIRECTION_KEY = 'read-frog-input-translation-last-cycle-direction'
+const SPINNER_ID = 'read-frog-input-translation-spinner'
 
 /**
  * Get last cycle direction from sessionStorage
@@ -34,6 +33,70 @@ function setLastCycleDirection(direction: 'normal' | 'reverse'): void {
   }
   catch {
     // sessionStorage may not be available in some contexts
+  }
+}
+
+/**
+ * Create and show a loading spinner near the input element
+ * Uses the same style as page translation loading (border spinner with primary color)
+ */
+function showSpinner(element: HTMLElement): () => void {
+  // Remove any existing spinner
+  const existingSpinner = document.getElementById(SPINNER_ID)
+  if (existingSpinner) {
+    existingSpinner.remove()
+  }
+
+  // Create spinner element - same style as createLightweightSpinner in translate/ui/spinner.ts
+  const spinner = document.createElement('span')
+  spinner.id = SPINNER_ID
+
+  // Use the same border spinner style as page translation
+  // Colors: primary green (#4ade80 / oklch(76.5% 0.177 163.223)) and muted gray
+  spinner.style.cssText = `
+    position: absolute !important;
+    display: inline-block !important;
+    width: 10px !important;
+    height: 10px !important;
+    border: 3px solid #e5e5e5 !important;
+    border-top: 3px solid #4ade80 !important;
+    border-radius: 50% !important;
+    box-sizing: content-box !important;
+    z-index: 999999 !important;
+    pointer-events: none !important;
+  `
+
+  // Use Web Animations API for rotation
+  spinner.animate(
+    [
+      { transform: 'rotate(0deg)' },
+      { transform: 'rotate(360deg)' },
+    ],
+    {
+      duration: 600,
+      iterations: Infinity,
+      easing: 'linear',
+    },
+  )
+
+  // Calculate position - vertically centered relative to the element
+  const rect = element.getBoundingClientRect()
+  const scrollX = window.scrollX
+  const scrollY = window.scrollY
+  const spinnerSize = 16 // 10px + 3px border * 2
+
+  // Vertically center for all element types
+  const top = rect.top + scrollY + (rect.height - spinnerSize) / 2
+  const left = rect.right + scrollX - spinnerSize - 8
+
+  spinner.style.top = `${top}px`
+  spinner.style.left = `${left}px`
+
+  document.body.appendChild(spinner)
+
+  // Return cleanup function
+  return () => {
+    spinner.remove()
   }
 }
 
@@ -115,13 +178,15 @@ export function useInputTranslation() {
     }
 
     isTranslatingRef.current = true
-    const toastId = inputTranslationConfig.showToast ? toast.loading(i18n.t('options.inputTranslation.toast.translating')) : undefined
+
+    // Show spinner near the input element
+    const hideSpinner = showSpinner(element)
 
     // Store original text to detect if user edited during translation
     const originalText = text
 
     try {
-      const translatedText = await translateTextWithDirection(text, actualDirection)
+      const translatedText = await translateTextWithDirection(text, actualDirection, inputTranslationConfig.targetCode)
 
       // Check if element content changed during translation (user input)
       let currentText: string
@@ -138,30 +203,16 @@ export function useInputTranslation() {
       // Only apply translation if content hasn't changed during async operation
       if (currentText === originalText && translatedText) {
         setTextWithUndo(element, translatedText)
-        if (inputTranslationConfig.showToast) {
-          toast.success(i18n.t('options.inputTranslation.toast.success'), { id: toastId })
-        }
-      }
-      else if (currentText !== originalText) {
-        // User edited during translation, dismiss the loading toast
-        if (inputTranslationConfig.showToast && toastId) {
-          toast.dismiss(toastId)
-        }
-      }
-      else if (inputTranslationConfig.showToast && toastId) {
-        toast.dismiss(toastId)
       }
     }
     catch (error) {
       console.error('Input translation error:', error)
-      if (inputTranslationConfig.showToast) {
-        toast.error(i18n.t('options.inputTranslation.toast.failed'), { id: toastId })
-      }
     }
     finally {
+      hideSpinner()
       isTranslatingRef.current = false
     }
-  }, [inputTranslationConfig.direction, inputTranslationConfig.showToast])
+  }, [inputTranslationConfig.direction, inputTranslationConfig.targetCode])
 
   useEffect(() => {
     if (!inputTranslationConfig.enabled)

@@ -183,22 +183,18 @@ options:
     direction:
       title: 翻译方向
       description: 选择文本翻译的方向
-      normal: 母语 → 外语
-      reverse: 外语 → 母语
+      normal: 源语言 → 目标语言
+      reverse: 目标语言 → 源语言
       cycle: 循环切换
+    targetCode:
+      title: 目标语言
+      description: 输入翻译的默认目标语言
     threshold:
       title: 触发阈值
       description: 连续空格按键之间的时间间隔
       label: 阈值 (毫秒)
       hint: 连续空格按键之间的时间间隔 (100-1000毫秒)
       error: 数值必须在 $1 到 $2 之间
-    showToast:
-      title: 显示通知
-      description: 翻译进行中时显示消息提示
-    toast:
-      translating: 正在翻译...
-      success: 翻译完成
-      failed: 翻译失败
   floatingButtonAndToolbar:
     title: 悬浮按钮和工具栏
     floatingButtonDemoImageAlt: 悬浮按钮演示

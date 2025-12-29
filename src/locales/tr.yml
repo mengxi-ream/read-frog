@@ -184,22 +184,18 @@ options:
     direction:
       title: Çeviri Yönü
       description: Metin çeviri yönünü seçin
-      normal: Ana dil → Yabancı dil
-      reverse: Yabancı dil → Ana dil
+      normal: Kaynak → Hedef
+      reverse: Hedef → Kaynak
       cycle: Döngü
+    targetCode:
+      title: Hedef Dil
+      description: Giriş çevirisi için varsayılan hedef dil
     threshold:
       title: Tetikleme Eşiği
       description: Boşluk tuşuna basışlar arasındaki zaman aralığı
       label: Eşik (ms)
       hint: Ardışık boşluk tuşuna basışlar arasındaki milisaniye cinsinden süre (100-1000ms)
       error: Değer $1 ile $2 arasında olmalıdır
-    showToast:
-      title: Bildirimleri Göster
-      description: Çeviri devam ederken bildirim mesajları göster
-    toast:
-      translating: Çevriliyor...
-      success: Çeviri tamamlandı
-      failed: Çeviri başarısız
   floatingButtonAndToolbar:
     title: Yüzen Buton ve Araç Çubuğu
     floatingButtonDemoImageAlt: Yüzen Buton Demosu

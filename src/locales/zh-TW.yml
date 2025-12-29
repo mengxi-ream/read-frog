@@ -183,22 +183,18 @@ options:
     direction:
       title: 翻譯方向
       description: 選擇文字翻譯的方向
-      normal: 母語 → 外語
-      reverse: 外語 → 母語
+      normal: 源語言 → 目標語言
+      reverse: 目標語言 → 源語言
       cycle: 循環切換
+    targetCode:
+      title: 目標語言
+      description: 輸入翻譯的預設目標語言
     threshold:
       title: 觸發閾值
       description: 連續空格按鍵之間的時間間隔
       label: 閾值 (毫秒)
       hint: 連續空格按鍵之間的時間間隔 (100-1000毫秒)
       error: 數值必須在 $1 到 $2 之間
-    showToast:
-      title: 顯示通知
-      description: 翻譯進行中時顯示訊息提示
-    toast:
-      translating: 正在翻譯...
-      success: 翻譯完成
-      failed: 翻譯失敗
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
     floatingButtonDemoImageAlt: 懸浮按鈕示範

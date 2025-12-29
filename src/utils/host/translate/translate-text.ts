@@ -210,11 +210,13 @@ export async function translateText(text: string): Promise<string> {
 /**
  * Translate text with configurable direction
  * @param text - The text to translate
- * @param direction - 'normal' (target→source), 'reverse' (source→target)
+ * @param direction - 'normal' (source→target), 'reverse' (target→source)
+ * @param customTargetCode - Optional custom target language code for input translation
  */
 export async function translateTextWithDirection(
   text: string,
   direction: 'normal' | 'reverse' = 'normal',
+  customTargetCode?: LangCodeISO6393,
 ): Promise<string> {
   const config = await getLocalConfig()
   if (!config) {
@@ -222,21 +224,34 @@ export async function translateTextWithDirection(
   }
 
   // Determine translation direction
-  // normal: target → source (type in native language, translate for foreigners to read)
-  // reverse: source → target (type in foreign language, translate for yourself to read)
+  // normal: source → target (type in source language, translate to target language)
+  // reverse: target → source (type in target language, translate to source language)
   let langConfig = config.language
 
+  // Use customTargetCode if provided, otherwise use global targetCode
+  const targetCode = customTargetCode ?? config.language.targetCode
+
   if (direction === 'normal') {
-    // Translate FROM target language TO source language
-    // e.g., User types Chinese (target) → get English (source)
-    const effectiveSourceCode = config.language.sourceCode
+    // Translate FROM source (auto-detect) TO target
+    // e.g., User types Chinese → get English (if targetCode is 'eng')
     langConfig = {
       ...config.language,
-      sourceCode: config.language.targetCode,
-      targetCode: effectiveSourceCode === 'auto' ? 'eng' : effectiveSourceCode,
+      sourceCode: 'auto',
+      targetCode,
     }
   }
-  // For 'reverse' mode, keep original langConfig (source → target)
+  else {
+    // For 'reverse' mode: FROM target TO source
+    // e.g., User types English → get Chinese (if source is Chinese)
+    const effectiveSourceCode = config.language.sourceCode === 'auto'
+      ? config.language.targetCode
+      : config.language.sourceCode
+    langConfig = {
+      ...config.language,
+      sourceCode: targetCode,
+      targetCode: effectiveSourceCode,
+    }
+  }
 
   return translateTextCore({
     text,

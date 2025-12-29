@@ -169,8 +169,8 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
+        targetCode: 'eng',
         timeThreshold: 300,
-        showToast: true,
       },
     },
   },
@@ -298,8 +298,8 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
+        targetCode: 'eng',
         timeThreshold: 300,
-        showToast: true,
       },
     },
   },
@@ -491,8 +491,8 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
+        targetCode: 'eng',
         timeThreshold: 300,
-        showToast: true,
       },
     },
   },

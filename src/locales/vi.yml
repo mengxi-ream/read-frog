@@ -184,22 +184,18 @@ options:
     direction:
       title: Hướng dịch
       description: Chọn hướng dịch văn bản
-      normal: Tiếng mẹ đẻ → Ngoại ngữ
-      reverse: Ngoại ngữ → Tiếng mẹ đẻ
+      normal: Nguồn → Đích
+      reverse: Đích → Nguồn
       cycle: Luân phiên
+    targetCode:
+      title: Ngôn ngữ đích
+      description: Ngôn ngữ đích mặc định cho dịch đầu vào
     threshold:
       title: Ngưỡng kích hoạt
       description: Khoảng thời gian giữa các lần nhấn phím cách
       label: Ngưỡng (ms)
       hint: Thời gian tính bằng mili giây giữa các lần nhấn phím cách liên tiếp (100-1000ms)
       error: Giá trị phải từ $1 đến $2
-    showToast:
-      title: Hiển thị thông báo
-      description: Hiển thị thông báo toast khi đang dịch
-    toast:
-      translating: Đang dịch...
-      success: Dịch hoàn tất
-      failed: Dịch thất bại
   floatingButtonAndToolbar:
     title: Nút nổi & Thanh công cụ
     floatingButtonDemoImageAlt: Demo nút nổi

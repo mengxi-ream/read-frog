@@ -45,14 +45,14 @@ const contextMenuSchema = z.object({
 // input translation schema (triple-space trigger)
 const inputTranslationSchema = z.object({
   enabled: z.boolean(),
-  // normal: target → source (type native, get foreign for others to read)
-  // reverse: source → target (type foreign, get native for yourself)
+  // normal: source → target (type in source language, translate to target)
+  // reverse: target → source (type in target language, translate to source)
   // cycle: alternate between the two each time
   direction: z.enum(['normal', 'reverse', 'cycle']),
+  // Target language for input translation (defaults to English)
+  targetCode: langCodeISO6393Schema,
   // Time threshold in milliseconds between space presses (default 300ms)
   timeThreshold: z.number().min(100).max(1000),
-  // Show toast notifications for translation status
-  showToast: z.boolean(),
 })
 
 // video subtitles schema

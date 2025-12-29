@@ -184,22 +184,18 @@ options:
     direction:
       title: Translation Direction
       description: Choose how text should be translated
-      normal: Native → Foreign
-      reverse: Foreign → Native
+      normal: Source → Target
+      reverse: Target → Source
       cycle: Cycle
+    targetCode:
+      title: Target Language
+      description: Default target language for input translation
     threshold:
       title: Trigger Threshold
       description: Time interval between space presses to trigger translation
       label: Threshold (ms)
       hint: Time in milliseconds between consecutive space presses (100-1000ms)
       error: Value must be between $1 and $2
-    showToast:
-      title: Show Notifications
-      description: Display toast notifications when translation is in progress
-    toast:
-      translating: Translating...
-      success: Translation complete
-      failed: Translation failed
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
     floatingButtonDemoImageAlt: Floating Button Demo

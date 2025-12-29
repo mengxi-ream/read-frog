@@ -18,7 +18,7 @@ import {
   SidebarMenuSubItem,
 } from '@/components/shadcn/sidebar'
 
-const OVERLAY_TOOLS_PATHS = ['/floating-button', '/selection-toolbar', '/context-menu', '/input-translation'] as const
+const OVERLAY_TOOLS_PATHS = ['/floating-button', '/selection-toolbar', '/context-menu'] as const
 
 export function SettingsNav() {
   const { pathname } = useLocation()
@@ -65,6 +65,15 @@ export function SettingsNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
+          <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname === '/input-translation'}>
+              <Link to="/input-translation">
+                <Icon icon="tabler:keyboard" />
+                <span>{i18n.t('options.overlayTools.inputTranslation.title')}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
           <Collapsible defaultOpen={isOverlayToolsActive} className="group/collapsible">
             <SidebarMenuItem>
               <CollapsibleTrigger asChild>
@@ -97,13 +106,6 @@ export function SettingsNav() {
                     <SidebarMenuSubButton asChild isActive={pathname === '/context-menu'}>
                       <Link to="/context-menu">
                         <span>{i18n.t('options.overlayTools.contextMenu.title')}</span>
-                      </Link>
-                    </SidebarMenuSubButton>
-                  </SidebarMenuSubItem>
-                  <SidebarMenuSubItem>
-                    <SidebarMenuSubButton asChild isActive={pathname === '/input-translation'}>
-                      <Link to="/input-translation">
-                        <span>{i18n.t('options.overlayTools.inputTranslation.title')}</span>
                       </Link>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
