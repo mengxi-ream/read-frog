@@ -66,18 +66,27 @@ function showSpinner(element: HTMLElement): () => void {
     pointer-events: none !important;
   `
 
-  // Use Web Animations API for rotation
-  spinner.animate(
-    [
-      { transform: 'rotate(0deg)' },
-      { transform: 'rotate(360deg)' },
-    ],
-    {
-      duration: 600,
-      iterations: Infinity,
-      easing: 'linear',
-    },
-  )
+  // Respect user's motion preferences for accessibility
+  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+
+  if (!prefersReducedMotion) {
+    // Use Web Animations API for rotation
+    spinner.animate(
+      [
+        { transform: 'rotate(0deg)' },
+        { transform: 'rotate(360deg)' },
+      ],
+      {
+        duration: 600,
+        iterations: Infinity,
+        easing: 'linear',
+      },
+    )
+  }
+  else {
+    // For reduced motion, show static spinner with muted color
+    spinner.style.borderTopColor = '#a3a3a3'
+  }
 
   // Calculate position - vertically centered relative to the element
   const rect = element.getBoundingClientRect()

@@ -246,6 +246,13 @@ export async function translateTextWithDirection(
     const effectiveSourceCode = config.language.sourceCode === 'auto'
       ? config.language.targetCode
       : config.language.sourceCode
+
+    // Guard against same-language translation when sourceCode is 'auto'
+    // and no customTargetCode is provided
+    if (effectiveSourceCode === targetCode) {
+      return ''
+    }
+
     langConfig = {
       ...config.language,
       sourceCode: targetCode,
