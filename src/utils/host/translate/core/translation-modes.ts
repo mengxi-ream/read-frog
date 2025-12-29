@@ -74,7 +74,7 @@ export async function translateNodesBilingualMode(
       }
     }
 
-    const textContent = transNodes.map(node => extractTextContent(node, config)).join(' ').trim()
+    const textContent = transNodes.map(node => extractTextContent(node, config)).join('').trim()
     if (!textContent || isNumericContent(textContent))
       return
 
@@ -213,7 +213,7 @@ export async function translateNodeTranslationOnlyMode(
       }
     }
 
-    const innerTextContent = transNodes.map(node => extractTextContent(node, config)).join(' ')
+    const innerTextContent = transNodes.map(node => extractTextContent(node, config)).join('')
     if (!innerTextContent.trim() || isNumericContent(innerTextContent))
       return
 
@@ -223,7 +223,11 @@ export async function translateNodeTranslationOnlyMode(
 
       let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, '')
       cleanedContent = cleanedContent.replace(/<!--[\s\S]*?-->/g, ' ')
-      cleanedContent = cleanedContent.replace(/\s+/g, ' ').trim()
+      // Preserve newlines, only collapse horizontal whitespace (spaces/tabs)
+      cleanedContent = cleanedContent.replace(/[^\S\n]+/g, ' ')
+      // Trim spaces at start/end of each line, but preserve newlines
+      cleanedContent = cleanedContent.split('\n').map(line => line.trim()).join('\n')
+      cleanedContent = cleanedContent.trim()
 
       return cleanedContent
     }
@@ -276,7 +280,8 @@ export async function translateNodeTranslationOnlyMode(
       return
     }
 
-    translatedWrapperNode.innerHTML = translatedText
+    // Convert newlines to <br> for proper rendering in innerHTML
+    translatedWrapperNode.innerHTML = translatedText.replace(/\n/g, '<br>')
 
     // Batch final DOM mutations to reduce layout thrashing
     batchDOMOperation(() => {
