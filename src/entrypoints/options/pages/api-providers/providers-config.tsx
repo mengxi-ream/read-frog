@@ -3,13 +3,13 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { ReactSortable } from 'react-sortablejs'
 import ProviderIcon from '@/components/provider-icon'
 import { useTheme } from '@/components/providers/theme-provider'
 import { Badge } from '@/components/shadcn/badge'
 import { Button } from '@/components/shadcn/button'
 import { Dialog, DialogTrigger } from '@/components/shadcn/dialog'
 import { Switch } from '@/components/shadcn/switch'
-import { SortableList } from '@/components/sortable-list'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom, readProviderConfigAtom, translateProviderConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
@@ -38,11 +38,20 @@ export function ProvidersConfig() {
 function ProviderCardList() {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
+  const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [canScroll, setCanScroll] = useState(false)
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true)
   const [isScrolledToTop, setIsScrolledToTop] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  // Lock in initial selection to prevent it from jumping after reorder
+  useEffect(() => {
+    if (apiProvidersConfig.length > 0 && selectedProviderId === apiProvidersConfig[0].id) {
+      setSelectedProviderId(apiProvidersConfig[0].id)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Update scroll state when apiProvidersConfig changes
   useLayoutEffect(() => {
@@ -121,16 +130,30 @@ function ProviderCardList() {
             <Icon icon="tabler:chevron-up" className="size-4 text-muted-foreground animate-bounce" />
           </div>
         )}
-        <SortableList
-          items={apiProvidersConfig}
-          getItemId={item => item.id}
-          onReorder={setProvidersConfig}
-          containerRef={scrollContainerRef}
-          className="flex flex-col gap-4 pt-2 overflow-y-auto overflow-x-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]"
-          renderItem={providerConfig => (
-            <ProviderCard providerConfig={providerConfig} />
-          )}
-        />
+        <div
+          ref={scrollContainerRef}
+          className="overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]"
+        >
+          <ReactSortable
+            tag="div"
+            list={apiProvidersConfig}
+            setList={setProvidersConfig}
+            delayOnTouchOnly
+            scroll={scrollContainerRef.current ?? true}
+            scrollSensitivity={200}
+            scrollSpeed={10}
+            className="flex flex-col gap-4 pt-2"
+          >
+            {apiProvidersConfig.map(providerConfig => (
+              <div
+                key={providerConfig.id}
+                className="rounded-xl cursor-grab active:cursor-grabbing transition-transform duration-200 [&.sortable-chosen]:-translate-y-1 [&.sortable-chosen]:shadow-lg"
+              >
+                <ProviderCard providerConfig={providerConfig} />
+              </div>
+            ))}
+          </ReactSortable>
+        </div>
         {canScroll && !isScrolledToBottom && (
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
             <Icon icon="tabler:chevron-down" className="size-4 text-muted-foreground animate-bounce" />
@@ -154,7 +177,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   return (
     <div
       className={cn(
-        'rounded-xl p-3 border bg-card cursor-pointer relative',
+        'rounded-xl p-3 border bg-card relative',
         selectedProviderId === id && 'border-primary',
       )}
       onClick={() => setSelectedProviderId(id)}
