@@ -2,7 +2,7 @@ import type { APIProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useLayoutEffect, useRef, useState } from 'react'
 import ProviderIcon from '@/components/provider-icon'
 import { useTheme } from '@/components/providers/theme-provider'
 import { Badge } from '@/components/shadcn/badge'
@@ -52,11 +52,14 @@ function ProviderCardList() {
   }
 
   // Lock in initial selection to prevent it from jumping after reorder
-  useEffect(() => {
+  const initSelectProvider = useEffectEvent(() => {
     if (apiProvidersConfig.length > 0 && selectedProviderId === apiProvidersConfig[0].id) {
       setSelectedProviderId(apiProvidersConfig[0].id)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+
+  useEffect(() => {
+    initSelectProvider()
   }, [])
 
   // Update scroll state when apiProvidersConfig changes
