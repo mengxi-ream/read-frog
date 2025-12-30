@@ -187,9 +187,11 @@ options:
       normal: Исходный → Целевой
       reverse: Целевой → Исходный
       cycle: Цикл
-    targetCode:
+    useCustomTarget:
       title: Целевой язык
-      description: Язык перевода по умолчанию для ввода
+      description: Выберите язык перевода
+      sourceLanguage: Исходный язык Read Frog
+      customTarget: Пользовательский целевой язык
     threshold:
       title: Порог срабатывания
       description: Временной интервал между нажатиями пробела

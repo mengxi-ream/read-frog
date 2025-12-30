@@ -186,9 +186,11 @@ options:
       normal: 소스 → 타겟
       reverse: 타겟 → 소스
       cycle: 순환
-    targetCode:
+    useCustomTarget:
       title: 타겟 언어
-      description: 입력 번역의 기본 타겟 언어
+      description: 번역할 언어 선택
+      sourceLanguage: Read Frog 소스 언어
+      customTarget: 사용자 지정 타겟 언어
     threshold:
       title: 트리거 임계값
       description: 스페이스바 누름 사이의 시간 간격

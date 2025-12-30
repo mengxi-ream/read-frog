@@ -169,6 +169,7 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
+        useCustomTarget: true,
         targetCode: 'eng',
         timeThreshold: 300,
       },
@@ -298,6 +299,7 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
+        useCustomTarget: true,
         targetCode: 'eng',
         timeThreshold: 300,
       },
@@ -491,6 +493,7 @@ export const testSeries: TestSeriesObject = {
       inputTranslation: {
         enabled: true,
         direction: 'normal',
+        useCustomTarget: true,
         targetCode: 'eng',
         timeThreshold: 300,
       },

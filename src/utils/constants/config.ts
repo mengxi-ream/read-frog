@@ -89,6 +89,7 @@ export const DEFAULT_CONFIG: Config = {
   inputTranslation: {
     enabled: true,
     direction: 'normal',
+    useCustomTarget: true,
     targetCode: 'eng',
     timeThreshold: 300,
   },

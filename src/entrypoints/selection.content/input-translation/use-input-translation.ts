@@ -195,7 +195,11 @@ export function useInputTranslation() {
     const originalText = text
 
     try {
-      const translatedText = await translateTextWithDirection(text, actualDirection, inputTranslationConfig.targetCode)
+      // Only pass custom target code when useCustomTarget is enabled
+      const customTargetCode = inputTranslationConfig.useCustomTarget
+        ? inputTranslationConfig.targetCode
+        : undefined
+      const translatedText = await translateTextWithDirection(text, actualDirection, customTargetCode)
 
       // Check if element content changed during translation (user input)
       let currentText: string
@@ -221,7 +225,7 @@ export function useInputTranslation() {
       hideSpinner()
       isTranslatingRef.current = false
     }
-  }, [inputTranslationConfig.direction, inputTranslationConfig.targetCode])
+  }, [inputTranslationConfig.direction, inputTranslationConfig.useCustomTarget, inputTranslationConfig.targetCode])
 
   useEffect(() => {
     if (!inputTranslationConfig.enabled)

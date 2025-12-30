@@ -187,9 +187,11 @@ options:
       normal: Source → Target
       reverse: Target → Source
       cycle: Cycle
-    targetCode:
+    useCustomTarget:
       title: Target Language
-      description: Default target language for input translation
+      description: Choose which language to translate to
+      sourceLanguage: Read Frog's source language
+      customTarget: Custom target language
     threshold:
       title: Trigger Threshold
       description: Time interval between space presses to trigger translation

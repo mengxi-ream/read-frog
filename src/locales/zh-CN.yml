@@ -186,9 +186,11 @@ options:
       normal: 源语言 → 目标语言
       reverse: 目标语言 → 源语言
       cycle: 循环切换
-    targetCode:
+    useCustomTarget:
       title: 目标语言
-      description: 输入翻译的默认目标语言
+      description: 选择翻译的目标语言
+      sourceLanguage: 陪读蛙设置的来源语言
+      customTarget: 指定目标语言
     threshold:
       title: 触发阈值
       description: 连续空格按键之间的时间间隔

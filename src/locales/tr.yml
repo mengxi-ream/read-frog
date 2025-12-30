@@ -187,9 +187,11 @@ options:
       normal: Kaynak → Hedef
       reverse: Hedef → Kaynak
       cycle: Döngü
-    targetCode:
+    useCustomTarget:
       title: Hedef Dil
-      description: Giriş çevirisi için varsayılan hedef dil
+      description: Çeviri yapılacak dili seçin
+      sourceLanguage: Read Frog kaynak dili
+      customTarget: Özel hedef dil
     threshold:
       title: Tetikleme Eşiği
       description: Boşluk tuşuna basışlar arasındaki zaman aralığı

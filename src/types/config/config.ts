@@ -49,7 +49,9 @@ const inputTranslationSchema = z.object({
   // reverse: target → source (type in target language, translate to source)
   // cycle: alternate between the two each time
   direction: z.enum(['normal', 'reverse', 'cycle']),
-  // Target language for input translation (defaults to English)
+  // When false, use Read Frog's source language as target; when true, use custom targetCode
+  useCustomTarget: z.boolean(),
+  // Custom target language for input translation (only used when useCustomTarget is true)
   targetCode: langCodeISO6393Schema,
   // Time threshold in milliseconds between space presses (default 300ms)
   timeThreshold: z.number().min(100).max(1000),

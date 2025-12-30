@@ -187,9 +187,11 @@ options:
       normal: Nguồn → Đích
       reverse: Đích → Nguồn
       cycle: Luân phiên
-    targetCode:
+    useCustomTarget:
       title: Ngôn ngữ đích
-      description: Ngôn ngữ đích mặc định cho dịch đầu vào
+      description: Chọn ngôn ngữ dịch
+      sourceLanguage: Ngôn ngữ nguồn của Read Frog
+      customTarget: Ngôn ngữ đích tùy chỉnh
     threshold:
       title: Ngưỡng kích hoạt
       description: Khoảng thời gian giữa các lần nhấn phím cách
