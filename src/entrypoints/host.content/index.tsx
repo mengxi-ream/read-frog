@@ -98,11 +98,14 @@ export default defineContentScript({
         if (manager.isActive) {
           manager.stop()
         }
-        const { detectedCodeOrUnd } = await getDocumentInfo()
-        const detectedCode: LangCodeISO6393 = detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd
-        await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, detectedCode)
-        // Notify background script that URL has changed, let it decide whether to automatically enable translation
-        void sendMessage('checkAndAskAutoPageTranslation', { url: to, detectedCodeOrUnd })
+        // Only the top frame should detect and set language to avoid race conditions from iframes
+        if (window === window.top) {
+          const { detectedCodeOrUnd } = await getDocumentInfo()
+          const detectedCode: LangCodeISO6393 = detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd
+          await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, detectedCode)
+          // Notify background script that URL has changed, let it decide whether to automatically enable translation
+          void sendMessage('checkAndAskAutoPageTranslation', { url: to, detectedCodeOrUnd })
+        }
       }
     }
 
@@ -129,11 +132,14 @@ export default defineContentScript({
       enabled ? void manager.start() : manager.stop()
     })
 
-    const { detectedCodeOrUnd } = await getDocumentInfo()
-    const initialDetectedCode: LangCodeISO6393 = detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd
-    await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, initialDetectedCode)
+    // Only the top frame should detect and set language to avoid race conditions from iframes
+    if (window === window.top) {
+      const { detectedCodeOrUnd } = await getDocumentInfo()
+      const initialDetectedCode: LangCodeISO6393 = detectedCodeOrUnd === 'und' ? 'eng' : detectedCodeOrUnd
+      await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, initialDetectedCode)
 
-    // Check if auto-translation should be enabled for initial page load
-    void sendMessage('checkAndAskAutoPageTranslation', { url: window.location.href, detectedCodeOrUnd })
+      // Check if auto-translation should be enabled for initial page load
+      void sendMessage('checkAndAskAutoPageTranslation', { url: window.location.href, detectedCodeOrUnd })
+    }
   },
 })
