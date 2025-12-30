@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { cn } from '@/utils/styles/tailwind'
 
 export function SortableList<T extends { id: string }>({
@@ -31,15 +31,9 @@ export function SortableList<T extends { id: string }>({
   renderItem: (item: T) => React.ReactNode
   className?: string
 }) {
-  // Use local state to ensure immediate UI updates during drag operations,
-  // since the external setList may be async (e.g., storage sync)
-  const [localList, setLocalList] = useState(list)
-  const [activeItem, setActiveItem] = useState<T | null>(null)
+  const [activeId, setActiveId] = useState<string | null>(null)
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-    setLocalList(list)
-  }, [list])
+  const activeItem = activeId ? (list.find(item => item.id === activeId) ?? null) : null
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -53,19 +47,31 @@ export function SortableList<T extends { id: string }>({
   )
 
   const handleDragStart = (event: DragStartEvent) => {
-    const item = localList.find(item => item.id === event.active.id)
-    setActiveItem(item ?? null)
+    setActiveId(String(event.active.id))
   }
 
   const handleDragEnd = (event: DragEndEvent) => {
-    setActiveItem(null)
+    setActiveId(null)
     const { active, over } = event
-    if (over && active.id !== over.id) {
-      const oldIndex = localList.findIndex(item => item.id === active.id)
-      const newIndex = localList.findIndex(item => item.id === over.id)
-      const newList = arrayMove(localList, oldIndex, newIndex)
-      setLocalList(newList)
-      setList(newList)
+    if (over && String(active.id) !== String(over.id)) {
+      const activeItemId = String(active.id)
+
+      const activeElement = document.querySelector<HTMLElement>(`[data-sortable-id="${activeItemId}"]`)
+      const scrollContainer = findVerticalScrollContainer(activeElement)
+      const scrollTopBeforeUpdate = scrollContainer?.scrollTop
+
+      const oldIndex = list.findIndex(item => item.id === activeItemId)
+      const newIndex = list.findIndex(item => item.id === String(over.id))
+      if (oldIndex === -1 || newIndex === -1)
+        return
+      setList(arrayMove(list, oldIndex, newIndex))
+
+      // Keep the scroll position stable after reordering.
+      if (scrollContainer && scrollTopBeforeUpdate !== undefined) {
+        requestAnimationFrame(() => {
+          scrollContainer.scrollTop = scrollTopBeforeUpdate
+        })
+      }
     }
   }
 
@@ -76,13 +82,14 @@ export function SortableList<T extends { id: string }>({
       modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
+      onDragCancel={() => setActiveId(null)}
     >
       <SortableContext
-        items={localList.map(item => item.id)}
+        items={list.map(item => item.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className={className}>
-          {localList.map(item => (
+        <div className={className} style={{ overflowAnchor: 'none' }}>
+          {list.map(item => (
             <SortableItemWrapper key={item.id} id={item.id}>
               {renderItem(item)}
             </SortableItemWrapper>
@@ -111,11 +118,13 @@ function SortableItemWrapper({ id, children }: { id: string, children: React.Rea
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    overflowAnchor: 'none' as const,
   }
 
   return (
     <div
       ref={setNodeRef}
+      data-sortable-id={id}
       style={style}
       className={cn(
         'cursor-grab active:cursor-grabbing rounded-xl transition-all duration-200',
@@ -127,4 +136,18 @@ function SortableItemWrapper({ id, children }: { id: string, children: React.Rea
       {children}
     </div>
   )
+}
+
+function findVerticalScrollContainer(element: HTMLElement | null): HTMLElement | null {
+  let current: HTMLElement | null = element
+  while (current) {
+    const style = window.getComputedStyle(current)
+    const overflowY = style.overflowY
+    const isScrollable = overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay'
+    if (isScrollable && current.scrollHeight > current.clientHeight) {
+      return current
+    }
+    current = current.parentElement
+  }
+  return null
 }
