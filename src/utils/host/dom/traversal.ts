@@ -23,6 +23,11 @@ export function extractTextContent(node: TransNode, config: Config): string {
     return node.textContent ?? ''
   }
 
+  // Handle <br> elements as line breaks
+  if (isHTMLElement(node) && node.tagName === 'BR') {
+    return '\n'
+  }
+
   // We already don't walk and label the element which isDontWalkIntoElement
   // for the parent element we already walk and label, if we have a notranslate element inside this parent element,
   // we should extract the text content of the parent.
