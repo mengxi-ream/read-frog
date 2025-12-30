@@ -3,13 +3,14 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import { ReactSortable } from 'react-sortablejs'
 import ProviderIcon from '@/components/provider-icon'
 import { useTheme } from '@/components/providers/theme-provider'
 import { Badge } from '@/components/shadcn/badge'
 import { Button } from '@/components/shadcn/button'
 import { Dialog, DialogTrigger } from '@/components/shadcn/dialog'
 import { Switch } from '@/components/shadcn/switch'
+import { SortableList } from '@/components/sortable-list'
+import { isAPIProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom, readProviderConfigAtom, translateProviderConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
@@ -44,6 +45,11 @@ function ProviderCardList() {
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true)
   const [isScrolledToTop, setIsScrolledToTop] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const handleReorder = (newList: APIProviderConfig[]) => {
+    const nonApiProviders = providersConfig.filter(provider => !isAPIProviderConfig(provider))
+    void setProvidersConfig([...nonApiProviders, ...newList])
+  }
 
   // Lock in initial selection to prevent it from jumping after reorder
   useEffect(() => {
@@ -134,25 +140,14 @@ function ProviderCardList() {
           ref={scrollContainerRef}
           className="overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]"
         >
-          <ReactSortable
-            tag="div"
+          <SortableList
             list={apiProvidersConfig}
-            setList={setProvidersConfig}
-            delayOnTouchOnly
-            scroll={scrollContainerRef.current ?? true}
-            scrollSensitivity={200}
-            scrollSpeed={10}
+            setList={handleReorder}
             className="flex flex-col gap-4 pt-2"
-          >
-            {apiProvidersConfig.map(providerConfig => (
-              <div
-                key={providerConfig.id}
-                className="rounded-xl cursor-grab active:cursor-grabbing transition-transform duration-200 [&.sortable-chosen]:-translate-y-1 [&.sortable-chosen]:shadow-lg"
-              >
-                <ProviderCard providerConfig={providerConfig} />
-              </div>
-            ))}
-          </ReactSortable>
+            renderItem={providerConfig => (
+              <ProviderCard providerConfig={providerConfig} />
+            )}
+          />
         </div>
         {canScroll && !isScrolledToBottom && (
           <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
