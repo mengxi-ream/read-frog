@@ -90,13 +90,9 @@ export function SortableList<T extends { id: string }>({
         </div>
       </SortableContext>
       <DragOverlay>
-        {activeItem
-          ? (
-              <div className="cursor-grabbing rounded-xl scale-110 shadow-xl">
-                {renderItem(activeItem)}
-              </div>
-            )
-          : null}
+        <div className="cursor-grabbing rounded-xl scale-110 shadow-xl">
+          {activeItem ? renderItem(activeItem) : null}
+        </div>
       </DragOverlay>
     </DndContext>
   )
