@@ -14,32 +14,64 @@ export const mergeWithArrayOverwrite = deepmergeCustom({
   mergeArrays: values => values[values.length - 1],
 })
 
+let writeQueue: Promise<void> = Promise.resolve()
+let writeVersion = 0
+
 export const writeConfigAtom = atom(
   null,
   async (get, set, patch: Partial<Config>) => {
-    const configInStorage = await storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
-    // Update atom to the newest config from storage
-    // This is to prevent the bug that somewhere call setAtom before `unwatch` in `configAtom.onMount`
-    // so prevent the race condition that the config is not the newest
-    set(configAtom, configInStorage)
+    const localPrev = get(configAtom)
+    const optimisticNext = mergeWithArrayOverwrite(localPrev, patch)
+    set(configAtom, optimisticNext)
 
-    const prev = get(configAtom)
-    const next = mergeWithArrayOverwrite(get(configAtom), patch)
-    set(configAtom, next)
-    try {
-      await storageAdapter.set(CONFIG_STORAGE_KEY, next, configSchema)
-      await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { lastModifiedAt: Date.now() })
-    }
-    catch (error) {
-      console.error('Failed to set config to storage:', next, error)
-      set(configAtom, prev)
-    }
+    const currentWriteVersion = ++writeVersion
+
+    const task = writeQueue.then(async () => {
+      const configInStorage = await storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
+      const nextToPersist = mergeWithArrayOverwrite(configInStorage, patch)
+
+      try {
+        await storageAdapter.set(CONFIG_STORAGE_KEY, nextToPersist, configSchema)
+        await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { lastModifiedAt: Date.now() })
+
+        // Reconcile atom state with the persisted value (storage is the source of truth),
+        // but only if no newer writes happened in this JS context.
+        if (currentWriteVersion === writeVersion) {
+          set(configAtom, nextToPersist)
+        }
+      }
+      catch (error) {
+        console.error('Failed to set config to storage:', nextToPersist, error)
+
+        // Roll back to the latest value from storage, but don't clobber newer writes.
+        if (currentWriteVersion === writeVersion) {
+          set(configAtom, configInStorage)
+        }
+
+        throw error
+      }
+    })
+
+    // Ensure the queue continues even if a write fails.
+    writeQueue = task.catch(() => {})
+
+    return task
   },
 )
 
 configAtom.onMount = (setAtom: (newValue: Config) => void) => {
-  void storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema).then(setAtom)
-  const unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, setAtom)
+  let didReceiveStorageUpdate = false
+
+  void storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema).then((value) => {
+    if (!didReceiveStorageUpdate) {
+      setAtom(value)
+    }
+  })
+
+  const unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (value) => {
+    didReceiveStorageUpdate = true
+    setAtom(value)
+  })
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'visible') {
