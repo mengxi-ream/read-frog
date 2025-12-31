@@ -94,13 +94,7 @@ export function ProviderConfigForm() {
   }
 
   return (
-    <form.AppForm
-      // onSubmit={(e) => {
-      //   e.preventDefault()
-      //   e.stopPropagation()
-      //   void form.handleSubmit()
-      // }}
-    >
+    <form.AppForm>
       <div className={cn('flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between', selectedProviderId !== providerConfig.id && 'hidden')}>
         <div className="flex flex-col gap-4">
           <ConfigHeader providerType={providerType} />

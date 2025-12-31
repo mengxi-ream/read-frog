@@ -313,7 +313,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 [github-release-link]: https://github.com/mengxi-ream/read-frog/releases
 [github-star-link]: https://github.com/mengxi-ream/read-frog/stargazers
 [image-banner]: /assets/store/large-promo-tile.png
-[sponsor-image]: ./assets/sponsorkit/sponsors.svg
+[sponsor-image]: https://cdn.jsdelivr.net/gh/mengxi-ream/static/sponsorkit/sponsors.svg
 [image-star]: ./assets/star.png
 [issues-link]: https://github.com/mengxi-ream/read-frog/issues
 [issues-shield]: https://img.shields.io/github/issues/mengxi-ream/read-frog?style=flat-square&labelColor=black
