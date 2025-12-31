@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.21.2
+
+### Patch Changes
+
+- [#838](https://github.com/mengxi-ream/read-frog/pull/838) [`dadee30`](https://github.com/mengxi-ream/read-frog/commit/dadee308734ac62b1ce5c3b512be1097e8bbddf6) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: Improve the speed of subtitle translation through block translation
+
 ## 1.21.1
 
 ### Patch Changes
