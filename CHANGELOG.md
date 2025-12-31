@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.21.1
+
+### Patch Changes
+
+- [#844](https://github.com/mengxi-ream/read-frog/pull/844) [`6f0f9fa`](https://github.com/mengxi-ream/read-frog/commit/6f0f9fabe02a07af8dfb37f5f6a44443770571e3) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: add drag-and-drop sorting for API provider cards
+
+- [#841](https://github.com/mengxi-ream/read-frog/pull/841) [`33acbfc`](https://github.com/mengxi-ream/read-frog/commit/33acbfc7afa3bc265181bb1e1a1d8222e857df1a) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: ensure language detection only occurs in the top frame to prevent race conditions with iframes
+
+- [#846](https://github.com/mengxi-ream/read-frog/pull/846) [`35eaa5f`](https://github.com/mengxi-ream/read-frog/commit/35eaa5f6aa3eade07b5f6920fe21073784f12b06) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: no new line when translating twitter in translation only mode
+
 ## 1.21.0
 
 ### Minor Changes
