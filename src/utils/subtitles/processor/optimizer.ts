@@ -57,6 +57,10 @@ function getWordCount(text: string): number {
   return text.split(/\s+/).filter(Boolean).length
 }
 
+function cleanText(text: string): string {
+  return text.replace(/^>>\s*/, '').replace(/>>/g, ' ').trim()
+}
+
 function getFirstWord(text: string): string {
   return text.toLowerCase().split(/\s+/)[0] || ''
 }
@@ -101,27 +105,29 @@ function processSubtitles(
     if (!frag.text)
       continue
 
+    const text = cleanText(frag.text)
+    if (!text)
+      continue
+    const fragWordCount = getWordCount(text)
     const lastSegment = buffer[buffer.length - 1]
 
     if (lastSegment) {
       const isEndOfSentence = SENTENCE_END_PATTERN.test(lastSegment.text)
-      const isPauseOfSentence = lastSegment.text.endsWith(',')
       const isTimeout = frag.start - lastSegment.end > PAUSE_TIMEOUT_MS
-      const isWordLimitExceeded = (usePause || isPauseOfSentence) && bufferWordCount >= MAX_WORDS
+      const wouldExceedLimit = bufferWordCount + fragWordCount > MAX_WORDS
 
       const startsWithSign = /^[[(♪]/.test(frag.text)
       const startsWithPauseWord = usePause
         && PAUSE_WORDS.has(getFirstWord(frag.text))
         && buffer.length > 1
 
-      if (isEndOfSentence || isTimeout || isWordLimitExceeded || startsWithSign || startsWithPauseWord) {
+      if (isEndOfSentence || isTimeout || wouldExceedLimit || startsWithSign || startsWithPauseWord) {
         flushBuffer()
       }
     }
 
-    const text = frag.text.trim()
     buffer.push({ text, start: frag.start, end: frag.end })
-    bufferWordCount += getWordCount(text)
+    bufferWordCount += fragWordCount
   }
 
   flushBuffer()
