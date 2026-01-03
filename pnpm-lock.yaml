@@ -355,7 +355,7 @@ importers:
         specifier: ^16.2.7
         version: 16.2.7
       node:
-        specifier: runtime:^24.9.1
+        specifier: runtime:^24.12.0
         version: runtime:24.12.0
       nx:
         specifier: ^22.3.3
@@ -5532,7 +5532,8 @@ packages:
           targets:
             - cpu: x64
               os: win32
-    version: 0.0.0
+    version: 24.12.0
+    hasBin: true
 
   normalize-path@3.0.0:
     resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
