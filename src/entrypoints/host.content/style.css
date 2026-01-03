@@ -13,7 +13,6 @@
   margin: 8px 0 !important; /* 上下边距设置为8px，并强制覆盖其他样式 */
   color: inherit; /* 保持文本颜色与周围文本一致 */
   font-family: inherit;
-  white-space: pre-wrap; /* 保留换行符 */
 }
 
 .read-frog-translated-inline-content {
@@ -21,7 +20,6 @@
   color: inherit;
   font-family: inherit;
   text-decoration: inherit;
-  white-space: pre-wrap; /* 保留换行符 */
 }
 
 /* Simplified Chinese - macOS > Windows > Cross-platform > Fallback */
