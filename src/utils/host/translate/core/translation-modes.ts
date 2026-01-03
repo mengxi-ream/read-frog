@@ -223,10 +223,6 @@ export async function translateNodeTranslationOnlyMode(
 
       let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, '')
       cleanedContent = cleanedContent.replace(/<!--[\s\S]*?-->/g, ' ')
-      // Only collapse horizontal whitespace (spaces/tabs), preserve newlines
-      // Whitespace-only nodes already normalized to single space in extractTextContent
-      // cleanedContent = cleanedContent.replace(/[^\S\n]+/g, ' ')
-      // cleanedContent = cleanedContent.split('\n').map(line => line.trim()).join('\n').trim()
 
       return cleanedContent
     }
