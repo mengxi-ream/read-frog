@@ -9,6 +9,8 @@ import { Badge } from '@/components/shadcn/badge'
 import { Button } from '@/components/shadcn/button'
 import { Dialog, DialogTrigger } from '@/components/shadcn/dialog'
 import { Switch } from '@/components/shadcn/switch'
+import { SortableList } from '@/components/sortable-list'
+import { isAPIProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom, readProviderConfigAtom, translateProviderConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
@@ -35,13 +37,50 @@ export function ProvidersConfig() {
 }
 
 function ProviderCardList() {
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
+  const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [canScroll, setCanScroll] = useState(false)
   const [isScrolledToBottom, setIsScrolledToBottom] = useState(true)
   const [isScrolledToTop, setIsScrolledToTop] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const didLockInitialSelectionRef = useRef(false)
+
+  const handleReorder = (newList: APIProviderConfig[]) => {
+    const desiredOrderIds = newList.map(provider => provider.id)
+    const desiredOrderIdSet = new Set(desiredOrderIds)
+
+    const nonApiProviders = providersConfig.filter(provider => !isAPIProviderConfig(provider))
+    const currentApiProviders = providersConfig.filter(isAPIProviderConfig)
+
+    const apiProvidersById = new Map(currentApiProviders.map(provider => [provider.id, provider] as const))
+
+    const reorderedApiProviders: APIProviderConfig[] = []
+    for (const id of desiredOrderIds) {
+      const provider = apiProvidersById.get(id)
+      if (provider)
+        reorderedApiProviders.push(provider)
+    }
+
+    // Preserve any API providers that appeared while dragging (e.g. config sync)
+    for (const provider of currentApiProviders) {
+      if (!desiredOrderIdSet.has(provider.id)) {
+        reorderedApiProviders.push(provider)
+      }
+    }
+
+    void setProvidersConfig([...nonApiProviders, ...reorderedApiProviders])
+  }
+
+  useEffect(() => {
+    if (didLockInitialSelectionRef.current)
+      return
+    if (selectedProviderId) {
+      setSelectedProviderId(selectedProviderId)
+      didLockInitialSelectionRef.current = true
+    }
+  }, [selectedProviderId, setSelectedProviderId])
 
   // Update scroll state when apiProvidersConfig changes
   useLayoutEffect(() => {
@@ -116,20 +155,26 @@ function ProviderCardList() {
       </Dialog>
       <div className="relative">
         {canScroll && !isScrolledToTop && (
-          <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-background to-transparent flex items-center justify-center z-10 pointer-events-none">
+          <div className="absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-background to-transparent flex items-center justify-center z-10 pointer-events-none">
             <Icon icon="tabler:chevron-up" className="size-4 text-muted-foreground animate-bounce" />
           </div>
         )}
         <div
           ref={scrollContainerRef}
-          className="flex flex-col gap-4 pt-2 overflow-y-auto overflow-x-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]"
+          style={{ overflowAnchor: 'none' }}
+          className="overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]"
         >
-          {apiProvidersConfig.map(providerConfig => (
-            <ProviderCard key={providerConfig.name} providerConfig={providerConfig} />
-          ))}
+          <SortableList
+            list={apiProvidersConfig}
+            setList={handleReorder}
+            className="flex flex-col gap-4 pt-2"
+            renderItem={providerConfig => (
+              <ProviderCard providerConfig={providerConfig} />
+            )}
+          />
         </div>
         {canScroll && !isScrolledToBottom && (
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
+          <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
             <Icon icon="tabler:chevron-down" className="size-4 text-muted-foreground animate-bounce" />
           </div>
         )}
@@ -150,7 +195,10 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   return (
     <div
-      className={cn('rounded-xl p-3 border bg-card cursor-pointer relative', selectedProviderId === id && 'border-primary')}
+      className={cn(
+        'rounded-xl p-3 border bg-card relative',
+        selectedProviderId === id && 'border-primary',
+      )}
       onClick={() => setSelectedProviderId(id)}
     >
       <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
@@ -167,7 +215,12 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       </div>
       <div className="flex items-center justify-between gap-2">
         <ProviderIcon logo={API_PROVIDER_ITEMS[provider].logo(theme)} name={name} size="base" textClassName="text-sm" />
-        <Switch checked={enabled} onCheckedChange={checked => setProviderConfig({ ...providerConfig, enabled: checked })} />
+        <Switch
+          checked={enabled}
+          onCheckedChange={checked => setProviderConfig({ ...providerConfig, enabled: checked })}
+          onPointerDown={e => e.stopPropagation()}
+          onClick={e => e.stopPropagation()}
+        />
       </div>
     </div>
   )

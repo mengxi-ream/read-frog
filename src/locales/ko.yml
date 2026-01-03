@@ -527,7 +527,6 @@ subtitles:
     fetchSuccess: 자막 로드 완료
     fetchFailed: 자막 가져오기 실패
     processing: 자막 번역 중 (약 2분 소요)
-    completed: 번역 완료
     error: 오류 발생
   errors:
     http429: 429 유튜브 자막 인터페이스 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요

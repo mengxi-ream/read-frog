@@ -528,7 +528,6 @@ subtitles:
     fetchSuccess: Altyazılar yüklendi
     fetchFailed: Altyazılar alınamadı
     processing: Altyazılar çevriliyor (yaklaşık 2 dakika)
-    completed: Çeviri tamamlandı
     error: Bir hata oluştu
   errors:
     http429: 429 YouTube altyazı API'sine çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.

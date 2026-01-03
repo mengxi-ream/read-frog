@@ -526,7 +526,6 @@ subtitles:
     fetchSuccess: 字幕読み込み完了
     fetchFailed: 字幕取得失敗
     processing: 字幕翻訳中（約2分）
-    completed: 翻訳完了
     error: エラーが発生しました
   errors:
     http429: 429 YouTube字幕APIへのリクエストが多すぎます。しばらくしてから再試行してください

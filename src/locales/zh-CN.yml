@@ -529,7 +529,6 @@ subtitles:
     fetchSuccess: 字幕加载成功
     fetchFailed: 字幕获取失败
     processing: 字幕翻译中（预计等待 2 分钟）
-    completed: 翻译完成
     error: 发生错误
   errors:
     http429: 429 youtube 字幕接口请求次数过多，请稍后再试

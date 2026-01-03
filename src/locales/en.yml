@@ -530,7 +530,6 @@ subtitles:
     fetchSuccess: Captions loaded
     fetchFailed: Failed to fetch captions
     processing: Translating captions (approx. 2 minutes)
-    completed: Translation completed
     error: Error occurred
   errors:
     http429: 429 Too many requests to youtube subtitle API, please try again later
