@@ -162,8 +162,8 @@ importers:
         specifier: 0.0.2
         version: 0.0.2(@opentelemetry/api@1.9.0)
       '@read-frog/definitions':
-        specifier: 0.0.6
-        version: 0.0.6
+        specifier: 0.0.7
+        version: 0.0.7
       '@tabler/icons-react':
         specifier: ^3.35.0
         version: 3.35.0(react@19.2.3)
@@ -2081,8 +2081,8 @@ packages:
   '@read-frog/api-contract@0.0.2':
     resolution: {integrity: sha512-6JuC7ZSfa1vgc5FJa7ZgjNRUcldEKHkO2nQfF8oJMIwVnoRvzn+EBvJ9xSp9IF/py6FzfHi3AEkd1nifIqw/CA==}
 
-  '@read-frog/definitions@0.0.6':
-    resolution: {integrity: sha512-RjIHwqJejGGyKEXj1eEt87DauiSV++/5OhzYOsLPZb/vPg4z7wEPSeNGY6LiHSnCuzALALRGCOcMKgd73wHVrw==}
+  '@read-frog/definitions@0.0.7':
+    resolution: {integrity: sha512-kappv/m0ZDpxqYHO5Ij0L4jLMul4oImEaoUwX9IQSLyCLl1vB6JN8ZYh/7nYkb5RdhRg2JzA/rQKEncjuU5cDg==}
 
   '@resvg/resvg-js-android-arm-eabi@2.4.1':
     resolution: {integrity: sha512-AA6f7hS0FAPpvQMhBCf6f1oD1LdlqNXKCxAAPpKh6tR11kqV0YIB9zOlIYgITM14mq2YooLFl6XIbbvmY+jwUw==}
@@ -8624,9 +8624,9 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@read-frog/definitions@0.0.6':
+  '@read-frog/definitions@0.0.7':
     dependencies:
-      zod: 4.1.12
+      zod: 4.1.13
 
   '@resvg/resvg-js-android-arm-eabi@2.4.1':
     optional: true
