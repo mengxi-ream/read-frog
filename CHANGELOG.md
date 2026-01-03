@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.21.3
+
+### Patch Changes
+
+- [#850](https://github.com/mengxi-ream/read-frog/pull/850) [`4b3ba80`](https://github.com/mengxi-ream/read-frog/commit/4b3ba802218983e0f208618509827d778bbeaa8f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: normalize whitespace without preserving newlines in translation
+
+- [#839](https://github.com/mengxi-ream/read-frog/pull/839) [`ce49281`](https://github.com/mengxi-ream/read-frog/commit/ce49281f254f87456e13a3d2520426ee6a10f835) Thanks [@Yukiniro](https://github.com/Yukiniro)! - chore: replace franc-min with franc
+
+- [#839](https://github.com/mengxi-ream/read-frog/pull/839) [`ce49281`](https://github.com/mengxi-ream/read-frog/commit/ce49281f254f87456e13a3d2520426ee6a10f835) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: upgrade zod and ai packages to solve memory issue of type check
+
 ## 1.21.2
 
 ### Patch Changes
