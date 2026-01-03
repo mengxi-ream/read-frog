@@ -223,11 +223,10 @@ export async function translateNodeTranslationOnlyMode(
 
       let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, '')
       cleanedContent = cleanedContent.replace(/<!--[\s\S]*?-->/g, ' ')
-      // Preserve newlines, only collapse horizontal whitespace (spaces/tabs)
-      cleanedContent = cleanedContent.replace(/[^\S\n]+/g, ' ')
-      // Trim spaces at start/end of each line, but preserve newlines
-      cleanedContent = cleanedContent.split('\n').map(line => line.trim()).join('\n')
-      cleanedContent = cleanedContent.trim()
+      // Only collapse horizontal whitespace (spaces/tabs), preserve newlines
+      // Whitespace-only nodes already normalized to single space in extractTextContent
+      // cleanedContent = cleanedContent.replace(/[^\S\n]+/g, ' ')
+      // cleanedContent = cleanedContent.split('\n').map(line => line.trim()).join('\n').trim()
 
       return cleanedContent
     }
@@ -280,8 +279,7 @@ export async function translateNodeTranslationOnlyMode(
       return
     }
 
-    // Convert newlines to <br> for proper rendering in innerHTML
-    translatedWrapperNode.innerHTML = translatedText.replace(/\n/g, '<br>')
+    translatedWrapperNode.innerHTML = translatedText
 
     // Batch final DOM mutations to reduce layout thrashing
     batchDOMOperation(() => {

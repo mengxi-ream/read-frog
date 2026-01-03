@@ -20,7 +20,15 @@ import {
 
 export function extractTextContent(node: TransNode, config: Config): string {
   if (isTextNode(node)) {
-    return node.textContent ?? ''
+    const text = node.textContent ?? ''
+    const trimmed = text.trim()
+    if (trimmed === '')
+      return ' '
+    const leadingWs = text.slice(0, text.length - text.trimStart().length)
+    const trailingWs = text.slice(text.trimEnd().length)
+    const hasLeading = /[^\S\n]/.test(leadingWs)
+    const hasTrailing = /[^\S\n]/.test(trailingWs)
+    return (hasLeading ? ' ' : '') + trimmed + (hasTrailing ? ' ' : '')
   }
 
   // Handle <br> elements as line breaks
