@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.21.4
+
+### Patch Changes
+
+- [#853](https://github.com/mengxi-ream/read-frog/pull/853) [`42f6b2c`](https://github.com/mengxi-ream/read-frog/commit/42f6b2c3d2098fad7dc5941cd2cad80f4dc14337) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: migrate atomFamily from jotai/utils to jotai-family
+
+- [#851](https://github.com/mengxi-ream/read-frog/pull/851) [`13ae51e`](https://github.com/mengxi-ream/read-frog/commit/13ae51e09d006088d7aa5ddadb31393a83521a68) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: upgrade dependencies
+
 ## 1.21.3
 
 ### Patch Changes
