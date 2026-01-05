@@ -349,6 +349,13 @@ options:
       threshold:
         title: 可見度閾值
         description: 觸發翻譯所需的元素可見度百分比（0-1）。較高的值會延遲翻譯，直到更多元素可見。
+    minCharactersConfig:
+      title: 最小字元數過濾
+      description: 跳過翻譯少於指定字元數的文字節點（0 = 停用）
+      minCharacters:
+        title: 最小字元數
+        description: 少於此字元數的文字節點將不會被翻譯。字元計數包含空格。
+      error: 數值必須在 $1 到 $2 之間
     nodeTranslationHotkey:
       title: 懸停翻譯快捷鍵
       description: 自訂懸停在文字上翻譯段落的修飾鍵

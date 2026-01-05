@@ -346,6 +346,13 @@ options:
       threshold:
         title: 可視性しきい値
         description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
+    minCharactersConfig:
+      title: 最小文字数フィルター
+      description: 指定した文字数より少ないテキストノードの翻訳をスキップします（0 = 無効）
+      minCharacters:
+        title: 最小文字数
+        description: この値より少ない文字数のテキストノードは翻訳されません。文字数には空白が含まれます。
+      error: 値は $1 から $2 の間である必要があります
     nodeTranslationHotkey:
       title: ホバー翻訳ショートカットキー
       description: テキストにホバーして段落を翻訳する際の修飾キーをカスタマイズします

@@ -350,6 +350,13 @@ options:
       threshold:
         title: Visibility Threshold
         description: Percentage of element visibility required to trigger translation (0-1). Higher values delay translation until more of the element is visible.
+    minCharactersConfig:
+      title: Minimum Characters Filter
+      description: Skip translating text nodes with fewer characters than the threshold (0 = disabled)
+      minCharacters:
+        title: Minimum Characters
+        description: Text nodes with fewer characters than this value will not be translated. Character count includes whitespace.
+      error: Value must be between $1 and $2
     nodeTranslationHotkey:
       title: Hover Translation Shortcut
       description: Customize the modifier key for hovering over text to translate paragraphs

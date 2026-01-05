@@ -348,6 +348,13 @@ options:
       threshold:
         title: Ngưỡng hiển thị
         description: Tỷ lệ phần trăm hiển thị của phần tử cần thiết để kích hoạt dịch (0-1). Giá trị cao hơn sẽ trì hoãn dịch cho đến khi nhiều phần tử hơn được hiển thị.
+    minCharactersConfig:
+      title: Bộ lọc ký tự tối thiểu
+      description: Bỏ qua dịch các nút văn bản có ít ký tự hơn ngưỡng (0 = tắt)
+      minCharacters:
+        title: Số ký tự tối thiểu
+        description: Các nút văn bản có ít ký tự hơn giá trị này sẽ không được dịch. Số ký tự bao gồm khoảng trắng.
+      error: Giá trị phải từ $1 đến $2
     nodeTranslationHotkey:
       title: Phím tắt dịch khi di chuột
       description: Tùy chỉnh phím bổ trợ để dịch đoạn văn khi di chuột qua văn bản

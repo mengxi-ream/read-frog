@@ -78,6 +78,11 @@ export async function translateNodesBilingualMode(
     if (!textContent || isNumericContent(textContent))
       return
 
+    // Check minimum character threshold for page translation (character count includes whitespace)
+    const minChars = config.translate.page.minCharactersPerNode
+    if (minChars > 0 && textContent.length < minChars)
+      return
+
     const ownerDoc = getOwnerDocument(targetNode)
     const translatedWrapperNode = ownerDoc.createElement('span')
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
@@ -215,6 +220,11 @@ export async function translateNodeTranslationOnlyMode(
 
     const innerTextContent = transNodes.map(node => extractTextContent(node, config)).join('')
     if (!innerTextContent.trim() || isNumericContent(innerTextContent))
+      return
+
+    // Check minimum character threshold for page translation (pure text only, no HTML)
+    const minChars = config.translate.page.minCharactersPerNode
+    if (minChars > 0 && innerTextContent.length < minChars)
       return
 
     const cleanTextContent = (content: string): string => {

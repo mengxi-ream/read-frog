@@ -349,6 +349,13 @@ options:
       threshold:
         title: 可见度阈值
         description: 触发翻译所需的元素可见度百分比（0-1）。较高的值会延迟翻译，直到更多元素可见。
+    minCharactersConfig:
+      title: 最小字符数过滤
+      description: 跳过翻译少于指定字符数的文本节点（0 = 禁用）
+      minCharacters:
+        title: 最小字符数
+        description: 少于此字符数的文本节点将不会被翻译。字符计数包含空格。
+      error: 数值必须在 $1 到 $2 之间
     nodeTranslationHotkey:
       title: 悬停翻译快捷键
       description: 自定义悬停在文本上翻译段落的修饰键

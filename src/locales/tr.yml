@@ -348,6 +348,13 @@ options:
       threshold:
         title: Görünürlük Eşiği
         description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
+    minCharactersConfig:
+      title: Minimum Karakter Filtresi
+      description: Eşik değerinden az karakterli metin düğümlerinin çevirisini atla (0 = devre dışı)
+      minCharacters:
+        title: Minimum Karakter
+        description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
+      error: Değer $1 ile $2 arasında olmalıdır
     nodeTranslationHotkey:
       title: Üzerine Gelme Çeviri Kısayolu
       description: Paragrafları çevirmek için metnin üzerine gelirken değiştirici tuşu özelleştirin
