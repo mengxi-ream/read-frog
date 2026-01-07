@@ -29,6 +29,7 @@ export default function FloatingButton() {
   const [isSideOpen, setIsSideOpen] = useAtom(isSideOpenAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [dragPosition, setDragPosition] = useState<number | null>(null)
   const initialClientYRef = useRef<number | null>(null)
 
   // 按钮拖动处理
@@ -47,7 +48,7 @@ export default function FloatingButton() {
         ),
       )
       const newPosition = newY / window.innerHeight
-      void setFloatingButton({ position: newPosition })
+      setDragPosition(newPosition)
     }
 
     const handleMouseUp = () => {
@@ -66,6 +67,15 @@ export default function FloatingButton() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraggingButton])
+
+  // 拖拽结束时写入 storage
+  useEffect(() => {
+    if (!isDraggingButton && dragPosition !== null) {
+      void setFloatingButton({ position: dragPosition })
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setDragPosition(null)
+    }
+  }, [isDraggingButton, dragPosition, setFloatingButton])
 
   const handleButtonDragStart = (e: React.MouseEvent) => {
     // 记录初始位置，用于后续判断是点击还是拖动
@@ -117,7 +127,7 @@ export default function FloatingButton() {
         right: isSideOpen
           ? `calc(${sideContent.width}px + var(--removed-body-scroll-bar-size, 0px))`
           : 'var(--removed-body-scroll-bar-size, 0px)',
-        top: `${floatingButton.position * 100}vh`,
+        top: `${(dragPosition ?? floatingButton.position) * 100}vh`,
       }}
     >
       <FloatingReadButton className={attachSideClassName} />

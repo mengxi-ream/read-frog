@@ -10,7 +10,7 @@ export function parseStandardSubtitles(events: YoutubeTimedText[] = []): Subtitl
 
   events.forEach(({ segs = [], tStartMs = 0, dDurationMs = 0 }) => {
     segs.forEach(({ utf8 = '', tOffsetMs = 0 }, segIndex) => {
-      const text = utf8.trim().replace(/\s+/g, ' ').replace(/>>/g, ' ')
+      const text = utf8.trim().replace(/\s+/g, ' ')
       const start = tStartMs + tOffsetMs
 
       if (buffer) {

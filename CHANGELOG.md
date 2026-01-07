@@ -1,5 +1,39 @@
 # @read-frog/extension
 
+## 1.21.4
+
+### Patch Changes
+
+- [#853](https://github.com/mengxi-ream/read-frog/pull/853) [`42f6b2c`](https://github.com/mengxi-ream/read-frog/commit/42f6b2c3d2098fad7dc5941cd2cad80f4dc14337) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: migrate atomFamily from jotai/utils to jotai-family
+
+- [#851](https://github.com/mengxi-ream/read-frog/pull/851) [`13ae51e`](https://github.com/mengxi-ream/read-frog/commit/13ae51e09d006088d7aa5ddadb31393a83521a68) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: upgrade dependencies
+
+## 1.21.3
+
+### Patch Changes
+
+- [#850](https://github.com/mengxi-ream/read-frog/pull/850) [`4b3ba80`](https://github.com/mengxi-ream/read-frog/commit/4b3ba802218983e0f208618509827d778bbeaa8f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: normalize whitespace without preserving newlines in translation
+
+- [#839](https://github.com/mengxi-ream/read-frog/pull/839) [`ce49281`](https://github.com/mengxi-ream/read-frog/commit/ce49281f254f87456e13a3d2520426ee6a10f835) Thanks [@Yukiniro](https://github.com/Yukiniro)! - chore: replace franc-min with franc
+
+- [#839](https://github.com/mengxi-ream/read-frog/pull/839) [`ce49281`](https://github.com/mengxi-ream/read-frog/commit/ce49281f254f87456e13a3d2520426ee6a10f835) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: upgrade zod and ai packages to solve memory issue of type check
+
+## 1.21.2
+
+### Patch Changes
+
+- [#838](https://github.com/mengxi-ream/read-frog/pull/838) [`dadee30`](https://github.com/mengxi-ream/read-frog/commit/dadee308734ac62b1ce5c3b512be1097e8bbddf6) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: Improve the speed of subtitle translation through block translation
+
+## 1.21.1
+
+### Patch Changes
+
+- [#844](https://github.com/mengxi-ream/read-frog/pull/844) [`6f0f9fa`](https://github.com/mengxi-ream/read-frog/commit/6f0f9fabe02a07af8dfb37f5f6a44443770571e3) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: add drag-and-drop sorting for API provider cards
+
+- [#841](https://github.com/mengxi-ream/read-frog/pull/841) [`33acbfc`](https://github.com/mengxi-ream/read-frog/commit/33acbfc7afa3bc265181bb1e1a1d8222e857df1a) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: ensure language detection only occurs in the top frame to prevent race conditions with iframes
+
+- [#846](https://github.com/mengxi-ream/read-frog/pull/846) [`35eaa5f`](https://github.com/mengxi-ream/read-frog/commit/35eaa5f6aa3eade07b5f6920fe21073784f12b06) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: no new line when translating twitter in translation only mode
+
 ## 1.21.0
 
 ### Minor Changes

@@ -173,6 +173,29 @@ options:
       title: 選択ツールバー
     contextMenu:
       title: コンテキストメニュー
+    inputTranslation:
+      title: 入力翻訳
+  inputTranslation:
+    toggle:
+      title: トリプルスペース翻訳を有効化
+      description: 任意の入力欄でスペースキーを素早く3回押すと内容を翻訳します
+    direction:
+      title: 翻訳方向
+      description: テキストの翻訳方向を選択
+      normal: ソース → ターゲット
+      reverse: ターゲット → ソース
+      cycle: サイクル
+    useCustomTarget:
+      title: ターゲット言語
+      description: 翻訳先の言語を選択
+      sourceLanguage: Read Frogのソース言語
+      customTarget: カスタムターゲット言語
+    threshold:
+      title: トリガーしきい値
+      description: スペースキー押下間の時間間隔
+      label: しきい値 (ミリ秒)
+      hint: 連続したスペースキー押下間の時間間隔 (100-1000ミリ秒)
+      error: 値は $1 から $2 の間である必要があります
   floatingButtonAndToolbar:
     title: フローティングボタンとツールバー
     floatingButtonDemoImageAlt: フローティングボタンデモ
@@ -323,6 +346,13 @@ options:
       threshold:
         title: 可視性しきい値
         description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
+    minCharactersConfig:
+      title: 最小文字数フィルター
+      description: 指定した文字数より少ないテキストノードの翻訳をスキップします（0 = 無効）
+      minCharacters:
+        title: 最小文字数
+        description: この値より少ない文字数のテキストノードは翻訳されません。文字数には空白が含まれます。
+      error: 値は $1 から $2 の間である必要があります
     nodeTranslationHotkey:
       title: ホバー翻訳ショートカットキー
       description: テキストにホバーして段落を翻訳する際の修飾キーをカスタマイズします
@@ -526,7 +556,6 @@ subtitles:
     fetchSuccess: 字幕読み込み完了
     fetchFailed: 字幕取得失敗
     processing: 字幕翻訳中（約2分）
-    completed: 翻訳完了
     error: エラーが発生しました
   errors:
     http429: 429 YouTube字幕APIへのリクエストが多すぎます。しばらくしてから再試行してください

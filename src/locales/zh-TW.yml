@@ -174,6 +174,29 @@ options:
       title: 選擇工具列
     contextMenu:
       title: 右鍵選單
+    inputTranslation:
+      title: 輸入翻譯
+  inputTranslation:
+    toggle:
+      title: 啟用三連空格翻譯
+      description: 在任意輸入框中快速按3次空格鍵即可翻譯其內容
+    direction:
+      title: 翻譯方向
+      description: 選擇文字翻譯的方向
+      normal: 源語言 → 目標語言
+      reverse: 目標語言 → 源語言
+      cycle: 循環切換
+    useCustomTarget:
+      title: 目標語言
+      description: 選擇翻譯的目標語言
+      sourceLanguage: 陪讀蛙設定的來源語言
+      customTarget: 指定目標語言
+    threshold:
+      title: 觸發閾值
+      description: 連續空格按鍵之間的時間間隔
+      label: 閾值 (毫秒)
+      hint: 連續空格按鍵之間的時間間隔 (100-1000毫秒)
+      error: 數值必須在 $1 到 $2 之間
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
     floatingButtonDemoImageAlt: 懸浮按鈕示範
@@ -326,6 +349,13 @@ options:
       threshold:
         title: 可見度閾值
         description: 觸發翻譯所需的元素可見度百分比（0-1）。較高的值會延遲翻譯，直到更多元素可見。
+    minCharactersConfig:
+      title: 最小字元數過濾
+      description: 跳過翻譯少於指定字元數的文字節點（0 = 停用）
+      minCharacters:
+        title: 最小字元數
+        description: 少於此字元數的文字節點將不會被翻譯。字元計數包含空格。
+      error: 數值必須在 $1 到 $2 之間
     nodeTranslationHotkey:
       title: 懸停翻譯快捷鍵
       description: 自訂懸停在文字上翻譯段落的修飾鍵
@@ -529,7 +559,6 @@ subtitles:
     fetchSuccess: 字幕載入成功
     fetchFailed: 字幕獲取失敗
     processing: 字幕翻譯中（預計等待 2 分鐘）
-    completed: 翻譯完成
     error: 發生錯誤
   errors:
     http429: 429 youtube 字幕介面請求次數過多，請稍後再試

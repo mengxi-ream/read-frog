@@ -175,6 +175,29 @@ options:
       title: Seçim Araç Çubuğu
     contextMenu:
       title: Bağlam Menüsü
+    inputTranslation:
+      title: Giriş Çevirisi
+  inputTranslation:
+    toggle:
+      title: Üçlü Boşluk Çevirisini Etkinleştir
+      description: Herhangi bir giriş alanında boşluk tuşuna hızlıca 3 kez basarak içeriği çevirin
+    direction:
+      title: Çeviri Yönü
+      description: Metin çeviri yönünü seçin
+      normal: Kaynak → Hedef
+      reverse: Hedef → Kaynak
+      cycle: Döngü
+    useCustomTarget:
+      title: Hedef Dil
+      description: Çeviri yapılacak dili seçin
+      sourceLanguage: Read Frog kaynak dili
+      customTarget: Özel hedef dil
+    threshold:
+      title: Tetikleme Eşiği
+      description: Boşluk tuşuna basışlar arasındaki zaman aralığı
+      label: Eşik (ms)
+      hint: Ardışık boşluk tuşuna basışlar arasındaki milisaniye cinsinden süre (100-1000ms)
+      error: Değer $1 ile $2 arasında olmalıdır
   floatingButtonAndToolbar:
     title: Yüzen Buton ve Araç Çubuğu
     floatingButtonDemoImageAlt: Yüzen Buton Demosu
@@ -325,6 +348,13 @@ options:
       threshold:
         title: Görünürlük Eşiği
         description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
+    minCharactersConfig:
+      title: Minimum Karakter Filtresi
+      description: Eşik değerinden az karakterli metin düğümlerinin çevirisini atla (0 = devre dışı)
+      minCharacters:
+        title: Minimum Karakter
+        description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
+      error: Değer $1 ile $2 arasında olmalıdır
     nodeTranslationHotkey:
       title: Üzerine Gelme Çeviri Kısayolu
       description: Paragrafları çevirmek için metnin üzerine gelirken değiştirici tuşu özelleştirin
@@ -528,7 +558,6 @@ subtitles:
     fetchSuccess: Altyazılar yüklendi
     fetchFailed: Altyazılar alınamadı
     processing: Altyazılar çevriliyor (yaklaşık 2 dakika)
-    completed: Çeviri tamamlandı
     error: Bir hata oluştu
   errors:
     http429: 429 YouTube altyazı API'sine çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.

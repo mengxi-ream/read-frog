@@ -174,6 +174,29 @@ options:
       title: 선택 툴바
     contextMenu:
       title: 컨텍스트 메뉴
+    inputTranslation:
+      title: 입력 번역
+  inputTranslation:
+    toggle:
+      title: 트리플 스페이스 번역 활성화
+      description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 내용이 번역됩니다
+    direction:
+      title: 번역 방향
+      description: 텍스트 번역 방향 선택
+      normal: 소스 → 타겟
+      reverse: 타겟 → 소스
+      cycle: 순환
+    useCustomTarget:
+      title: 타겟 언어
+      description: 번역할 언어 선택
+      sourceLanguage: Read Frog 소스 언어
+      customTarget: 사용자 지정 타겟 언어
+    threshold:
+      title: 트리거 임계값
+      description: 스페이스바 누름 사이의 시간 간격
+      label: 임계값 (밀리초)
+      hint: 연속 스페이스바 누름 사이의 시간 간격 (100-1000밀리초)
+      error: 값은 $1에서 $2 사이여야 합니다
   floatingButtonAndToolbar:
     title: 플로팅 버튼 및 툴바
     floatingButtonDemoImageAlt: 플로팅 버튼 데모
@@ -324,6 +347,13 @@ options:
       threshold:
         title: 가시성 임계값
         description: 번역을 트리거하는 데 필요한 요소 가시성 비율 (0-1). 높은 값은 요소가 더 많이 보일 때까지 번역을 지연시킵니다.
+    minCharactersConfig:
+      title: 최소 문자 수 필터
+      description: 지정한 문자 수보다 적은 텍스트 노드의 번역을 건너뜁니다 (0 = 비활성화)
+      minCharacters:
+        title: 최소 문자 수
+        description: 이 값보다 적은 문자 수의 텍스트 노드는 번역되지 않습니다. 문자 수에는 공백이 포함됩니다.
+      error: 값은 $1에서 $2 사이여야 합니다
     nodeTranslationHotkey:
       title: 호버 번역 단축키
       description: 텍스트 위에 호버하여 단락을 번역할 때 사용할 수정 키를 사용자 지정합니다
@@ -527,7 +557,6 @@ subtitles:
     fetchSuccess: 자막 로드 완료
     fetchFailed: 자막 가져오기 실패
     processing: 자막 번역 중 (약 2분 소요)
-    completed: 번역 완료
     error: 오류 발생
   errors:
     http429: 429 유튜브 자막 인터페이스 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요

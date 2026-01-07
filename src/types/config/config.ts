@@ -42,6 +42,21 @@ const contextMenuSchema = z.object({
   enabled: z.boolean(),
 })
 
+// input translation schema (triple-space trigger)
+const inputTranslationSchema = z.object({
+  enabled: z.boolean(),
+  // normal: source → target (type in source language, translate to target)
+  // reverse: target → source (type in target language, translate to source)
+  // cycle: alternate between the two each time
+  direction: z.enum(['normal', 'reverse', 'cycle']),
+  // When false, use Read Frog's source language as target; when true, use custom targetCode
+  useCustomTarget: z.boolean(),
+  // Custom target language for input translation (only used when useCustomTarget is true)
+  targetCode: langCodeISO6393Schema,
+  // Time threshold in milliseconds between space presses (default 300ms)
+  timeThreshold: z.number().min(100).max(1000),
+})
+
 // video subtitles schema
 const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
@@ -59,6 +74,7 @@ export const configSchema = z.object({
   sideContent: sideContentSchema,
   betaExperience: betaExperienceSchema,
   contextMenu: contextMenuSchema,
+  inputTranslation: inputTranslationSchema,
   videoSubtitles: videoSubtitlesSchema,
 }).superRefine((data, ctx) => {
   const providerIdsSet = new Set(data.providersConfig.map(p => p.id))

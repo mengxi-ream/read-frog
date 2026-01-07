@@ -4,7 +4,6 @@ export type SubtitlesState
     | 'fetchSuccess'
     | 'fetchFailed'
     | 'processing'
-    | 'completed'
     | 'error'
 
 export interface StateData {
@@ -17,4 +16,14 @@ export interface SubtitlesFragment {
   start: number
   end: number
   translation?: string
+}
+
+export type SubtitlesTranslationBlockState = 'idle' | 'processing' | 'completed' | 'error'
+
+export interface SubtitlesTranslationBlock {
+  id: number
+  startMs: number
+  endMs: number
+  state: SubtitlesTranslationBlockState
+  fragments: SubtitlesFragment[]
 }

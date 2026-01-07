@@ -1,10 +1,10 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
+import type { LangCodeISO6393, LangLevel } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { Readability } from '@mozilla/readability'
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from '@read-frog/definitions'
-import { franc } from 'franc-min'
+import { franc } from 'franc'
 import { toast } from 'sonner'
 import { isAPIProviderConfig, isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
@@ -128,11 +128,23 @@ export async function buildHashComponents(
   return hashComponents
 }
 
-export async function translateText(text: string) {
+interface TranslateTextOptions {
+  text: string
+  langConfig: { sourceCode: LangCodeISO6393 | 'auto', targetCode: LangCodeISO6393, level: LangLevel }
+  extraHashTags?: string[]
+}
+
+/**
+ * Core translation function that handles common logic
+ */
+async function translateTextCore(options: TranslateTextOptions): Promise<string> {
+  const { text, langConfig, extraHashTags = [] } = options
+
   const config = await getLocalConfig()
   if (!config) {
     throw new Error('No global config when translate text')
   }
+
   const providerId = config.translate.providerId
   const providerConfig = getProviderConfigById(config.providersConfig, providerId)
 
@@ -140,18 +152,16 @@ export async function translateText(text: string) {
     throw new Error(`No provider config for id ${providerId} when translate text`)
   }
 
-  const langConfig = config.language
-
   // Skip translation if text is already in target language
   if (text.length >= MIN_LENGTH_FOR_LANG_DETECTION) {
     const detectedLang = franc(text)
     if (detectedLang === langConfig.targetCode) {
-      logger.info(`translateText: skipping translation because text is already in target language. text: ${text}`)
+      logger.info(`translateTextCore: skipping translation because text is already in target language. text: ${text}`)
       return ''
     }
   }
 
-  // Get article data for LLM providers first (needed for both hash and request)
+  // Get article data for LLM providers (needed for both hash and request)
   let articleTitle: string | undefined
   let articleTextContent: string | undefined
 
@@ -171,6 +181,9 @@ export async function translateText(text: string) {
     { title: articleTitle, textContent: articleTextContent },
   )
 
+  // Add extra hash tags for cache differentiation
+  hashComponents.push(...extraHashTags)
+
   return await sendMessage('enqueueTranslateRequest', {
     text,
     langConfig,
@@ -179,6 +192,78 @@ export async function translateText(text: string) {
     hash: Sha256Hex(...hashComponents),
     articleTitle,
     articleTextContent,
+  })
+}
+
+export async function translateText(text: string): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    throw new Error('No global config when translate text')
+  }
+
+  return translateTextCore({
+    text,
+    langConfig: config.language,
+  })
+}
+
+/**
+ * Translate text with configurable direction
+ * @param text - The text to translate
+ * @param direction - 'normal' (source→target), 'reverse' (target→source)
+ * @param customTargetCode - Optional custom target language code for input translation
+ */
+export async function translateTextWithDirection(
+  text: string,
+  direction: 'normal' | 'reverse' = 'normal',
+  customTargetCode?: LangCodeISO6393,
+): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    throw new Error('No global config when translate text')
+  }
+
+  // Determine translation direction
+  // normal: source → target (type in source language, translate to target language)
+  // reverse: target → source (type in target language, translate to source language)
+  let langConfig = config.language
+
+  // Use customTargetCode if provided, otherwise use global targetCode
+  const targetCode = customTargetCode ?? config.language.targetCode
+
+  if (direction === 'normal') {
+    // Translate FROM source (auto-detect) TO target
+    // e.g., User types Chinese → get English (if targetCode is 'eng')
+    langConfig = {
+      ...config.language,
+      sourceCode: 'auto',
+      targetCode,
+    }
+  }
+  else {
+    // For 'reverse' mode: FROM target TO source
+    // e.g., User types English → get Chinese (if source is Chinese)
+    const effectiveSourceCode = config.language.sourceCode === 'auto'
+      ? config.language.targetCode
+      : config.language.sourceCode
+
+    // Guard against same-language translation when sourceCode is 'auto'
+    // and no customTargetCode is provided
+    if (effectiveSourceCode === targetCode) {
+      return ''
+    }
+
+    langConfig = {
+      ...config.language,
+      sourceCode: targetCode,
+      targetCode: effectiveSourceCode,
+    }
+  }
+
+  return translateTextCore({
+    text,
+    langConfig,
+    extraHashTags: direction === 'normal' ? ['direction=normal'] : ['direction=reverse'],
   })
 }
 

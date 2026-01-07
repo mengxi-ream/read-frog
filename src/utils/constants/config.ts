@@ -3,7 +3,7 @@ import type { PageTranslateRange } from '@/types/config/translate'
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
 import { DEFAULT_PROVIDER_CONFIG_LIST } from './providers'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
-import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
+import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
 import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from './translation-node-style'
 import { DEFAULT_TTS_CONFIG } from './tts'
 
@@ -17,7 +17,7 @@ export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
-export const CONFIG_SCHEMA_VERSION = 39
+export const CONFIG_SCHEMA_VERSION = 41
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -49,6 +49,7 @@ export const DEFAULT_CONFIG: Config = {
         margin: DEFAULT_PRELOAD_MARGIN,
         threshold: DEFAULT_PRELOAD_THRESHOLD,
       },
+      minCharactersPerNode: DEFAULT_MIN_CHARACTERS_PER_NODE,
     },
     enableAIContentAware: false,
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
@@ -85,6 +86,13 @@ export const DEFAULT_CONFIG: Config = {
   },
   contextMenu: {
     enabled: true,
+  },
+  inputTranslation: {
+    enabled: true,
+    direction: 'normal',
+    useCustomTarget: true,
+    targetCode: 'eng',
+    timeThreshold: 300,
   },
   videoSubtitles: {
     enabled: false,
