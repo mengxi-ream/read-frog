@@ -346,7 +346,7 @@ options:
       threshold:
         title: 可視性しきい値
         description: 翻訳をトリガーするために必要な要素の可視性の割合（0-1）。高い値は、要素がより多く表示されるまで翻訳を遅らせます。
-    minCharactersConfig:
+    smallParagraphFilter:
       title: 短いテキストフィルター
       description: 指定した文字数または単語数より少ないテキストノードの翻訳をスキップします（0 = 無効）
       minCharacters:
@@ -355,7 +355,6 @@ options:
       minWords:
         title: 最小単語数
         description: この値より少ない単語数のテキストノードは翻訳されません。すべての言語で正確な単語カウントのために Intl.Segmenter を使用します。
-        error: 値は $1 から $2 の間である必要があります
       error: 値は $1 から $2 の間である必要があります
     nodeTranslationHotkey:
       title: ホバー翻訳ショートカットキー

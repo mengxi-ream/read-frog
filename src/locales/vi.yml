@@ -348,7 +348,7 @@ options:
       threshold:
         title: Ngưỡng hiển thị
         description: Tỷ lệ phần trăm hiển thị của phần tử cần thiết để kích hoạt dịch (0-1). Giá trị cao hơn sẽ trì hoãn dịch cho đến khi nhiều phần tử hơn được hiển thị.
-    minCharactersConfig:
+    smallParagraphFilter:
       title: Bộ lọc văn bản ngắn
       description: Bỏ qua dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng (0 = tắt)
       minCharacters:
@@ -357,7 +357,6 @@ options:
       minWords:
         title: Số từ tối thiểu
         description: Các nút văn bản có ít từ hơn giá trị này sẽ không được dịch. Sử dụng Intl.Segmenter để đếm từ chính xác trên tất cả các ngôn ngữ.
-        error: Giá trị phải từ $1 đến $2
       error: Giá trị phải từ $1 đến $2
     nodeTranslationHotkey:
       title: Phím tắt dịch khi di chuột

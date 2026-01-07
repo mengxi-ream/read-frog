@@ -8,21 +8,21 @@ import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MAX_CHARACTERS_PER_NODE, MAX_WORDS_PER_NODE, MIN_CHARACTERS_PER_NODE, MIN_WORDS_PER_NODE } from '@/utils/constants/translate'
 import { ConfigCard } from '../../components/config-card'
 
-export function MinCharactersConfig() {
+export function SmallParagraphFilter() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const { minCharactersPerNode, minWordsPerNode } = translateConfig.page
 
   return (
     <ConfigCard
-      title={i18n.t('options.translation.minCharactersConfig.title')}
-      description={i18n.t('options.translation.minCharactersConfig.description')}
+      title={i18n.t('options.translation.smallParagraphFilter.title')}
+      description={i18n.t('options.translation.smallParagraphFilter.description')}
     >
       <FieldGroup>
         <Field orientation="responsive">
           <FieldContent className="self-center">
             <FieldLabel htmlFor="min-characters-per-node">
-              {i18n.t('options.translation.minCharactersConfig.minCharacters.title')}
-              <Hint content={i18n.t('options.translation.minCharactersConfig.minCharacters.description')} />
+              {i18n.t('options.translation.smallParagraphFilter.minCharacters.title')}
+              <Hint content={i18n.t('options.translation.smallParagraphFilter.minCharacters.description')} />
             </FieldLabel>
           </FieldContent>
           <Input
@@ -45,7 +45,7 @@ export function MinCharactersConfig() {
                 })
               }
               else {
-                toast.error(i18n.t('options.translation.minCharactersConfig.error', [MIN_CHARACTERS_PER_NODE, MAX_CHARACTERS_PER_NODE]))
+                toast.error(i18n.t('options.translation.smallParagraphFilter.error', [MIN_CHARACTERS_PER_NODE, MAX_CHARACTERS_PER_NODE]))
               }
             }}
           />
@@ -53,8 +53,8 @@ export function MinCharactersConfig() {
         <Field orientation="responsive">
           <FieldContent className="self-center">
             <FieldLabel htmlFor="min-words-per-node">
-              {i18n.t('options.translation.minCharactersConfig.minWords.title')}
-              <Hint content={i18n.t('options.translation.minCharactersConfig.minWords.description')} />
+              {i18n.t('options.translation.smallParagraphFilter.minWords.title')}
+              <Hint content={i18n.t('options.translation.smallParagraphFilter.minWords.description')} />
             </FieldLabel>
           </FieldContent>
           <Input
@@ -77,7 +77,7 @@ export function MinCharactersConfig() {
                 })
               }
               else {
-                toast.error(i18n.t('options.translation.minCharactersConfig.minWords.error', [MIN_WORDS_PER_NODE, MAX_WORDS_PER_NODE]))
+                toast.error(i18n.t('options.translation.smallParagraphFilter.error', [MIN_WORDS_PER_NODE, MAX_WORDS_PER_NODE]))
               }
             }}
           />

@@ -349,7 +349,7 @@ options:
       threshold:
         title: 可见度阈值
         description: 触发翻译所需的元素可见度百分比（0-1）。较高的值会延迟翻译，直到更多元素可见。
-    minCharactersConfig:
+    smallParagraphFilter:
       title: 小段落过滤
       description: 跳过翻译少于指定字符数或词数的文本节点（0 = 禁用）
       minCharacters:
@@ -358,7 +358,6 @@ options:
       minWords:
         title: 最小词数
         description: 少于此词数的文本节点将不会被翻译。使用 Intl.Segmenter 进行跨语言准确分词。
-        error: 数值必须在 $1 到 $2 之间
       error: 数值必须在 $1 到 $2 之间
     nodeTranslationHotkey:
       title: 悬停翻译快捷键

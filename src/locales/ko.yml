@@ -347,7 +347,7 @@ options:
       threshold:
         title: 가시성 임계값
         description: 번역을 트리거하는 데 필요한 요소 가시성 비율 (0-1). 높은 값은 요소가 더 많이 보일 때까지 번역을 지연시킵니다.
-    minCharactersConfig:
+    smallParagraphFilter:
       title: 짧은 텍스트 필터
       description: 지정한 문자 수 또는 단어 수보다 적은 텍스트 노드의 번역을 건너뜁니다 (0 = 비활성화)
       minCharacters:
@@ -356,7 +356,6 @@ options:
       minWords:
         title: 최소 단어 수
         description: 이 값보다 적은 단어 수의 텍스트 노드는 번역되지 않습니다. 모든 언어에서 정확한 단어 카운트를 위해 Intl.Segmenter를 사용합니다.
-        error: 값은 $1에서 $2 사이여야 합니다
       error: 값은 $1에서 $2 사이여야 합니다
     nodeTranslationHotkey:
       title: 호버 번역 단축키

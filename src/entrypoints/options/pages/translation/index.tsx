@@ -5,13 +5,13 @@ import { AutoTranslateLanguages } from './auto-translate-languages'
 import { AutoTranslateWebsitePatterns } from './auto-translate-website-patterns'
 import { ClearCacheConfig } from './clear-cache-config'
 import { CustomTranslationStyle } from './custom-translation-style'
-import { MinCharactersConfig } from './min-characters-config'
 import { NodeTranslationHotkey } from './node-translation-hotkey'
 import { PageTranslationShortcut } from './page-translation-shortcut'
 import { PersonalizedPrompts } from './personalized-prompt'
 import { PreloadConfig } from './preload-config'
 import { RequestBatch } from './request-batch'
 import { RequestRate } from './request-rate'
+import { SmallParagraphFilter } from './small-paragraph-filter'
 import { TranslationMode } from './translation-mode'
 
 export function TranslationPage() {
@@ -28,7 +28,7 @@ export function TranslationPage() {
       <RequestRate />
       <RequestBatch />
       <PreloadConfig />
-      <MinCharactersConfig />
+      <SmallParagraphFilter />
       <ClearCacheConfig />
     </PageLayout>
   )
