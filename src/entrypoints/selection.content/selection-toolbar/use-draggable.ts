@@ -11,6 +11,7 @@ interface UseDraggableOptions {
   onPositionChange?: (position: Position) => void
   margin?: number
   isVisible: boolean
+  boundaryRef?: React.RefObject<HTMLElement>
 }
 
 interface UseDraggableReturn {
@@ -27,7 +28,7 @@ interface UseDraggableReturn {
  * @returns Object containing position, drag state, ref and styles
  */
 export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
-  const { initialPosition = { x: 0, y: 0 }, onPositionChange, margin = 0, isVisible } = options
+  const { initialPosition = { x: 0, y: 0 }, onPositionChange, margin = 0, isVisible, boundaryRef } = options
 
   const [isDragging, setIsDragging] = useState(false)
   const dragOffsetRef = useRef<Position>({ x: 0, y: 0 })
@@ -45,10 +46,13 @@ export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
     const containerWidth = containerRect.width
     const containerHeight = containerRect.height
 
+    const viewportWidth = boundaryRef?.current?.clientWidth ?? window.innerWidth
+    const viewportHeight = boundaryRef?.current?.clientHeight ?? window.innerHeight
+
     const minX = margin
-    const maxX = window.innerWidth - containerWidth - margin
+    const maxX = viewportWidth - containerWidth - margin
     const minY = margin
-    const maxY = window.innerHeight - containerHeight - margin
+    const maxY = viewportHeight - containerHeight - margin
 
     const clampedPosition = {
       x: Math.max(minX, Math.min(newPosition.x, maxX)),
@@ -61,7 +65,9 @@ export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
   }, [onPositionChange, margin])
 
   useLayoutEffect(() => {
-    updatePosition(initialPosition)
+    if (initialPosition.x !== 0 || initialPosition.y !== 0) {
+      updatePosition(initialPosition)
+    }
   }, [initialPosition, updatePosition])
 
   // Handle mouse move during drag
