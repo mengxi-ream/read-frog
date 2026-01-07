@@ -1641,4 +1641,108 @@ describe('translate', () => {
       })
     })
   })
+
+  describe('small paragraph filter', () => {
+    const SHORT_TEXT = 'Hi'
+    const LONG_TEXT = 'This is a longer text with multiple words for testing'
+
+    const MIN_CHARS_CONFIG: Config = {
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        mode: 'bilingual' as const,
+        page: {
+          ...DEFAULT_CONFIG.translate.page,
+          minCharactersPerNode: 10,
+          minWordsPerNode: 0,
+        },
+      },
+    }
+
+    const MIN_WORDS_CONFIG: Config = {
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        mode: 'bilingual' as const,
+        page: {
+          ...DEFAULT_CONFIG.translate.page,
+          minCharactersPerNode: 0,
+          minWordsPerNode: 5,
+        },
+      },
+    }
+
+    async function translateWithConfig(config: Config, toggle: boolean = false) {
+      const id = crypto.randomUUID()
+      walkAndLabelElement(document.body, id, config)
+      await act(async () => {
+        await translateWalkedElement(document.body, id, config, toggle)
+        flushBatchedOperations()
+      })
+    }
+
+    describe('minCharactersPerNode filter', () => {
+      it('should skip translation for text shorter than minCharactersPerNode', async () => {
+        vi.mocked(translateText).mockClear()
+        render(
+          <div data-testid="test-node">
+            {SHORT_TEXT}
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await translateWithConfig(MIN_CHARS_CONFIG, true)
+
+        // Should not have translation wrapper because text is too short
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(translateText).not.toHaveBeenCalled()
+      })
+
+      it('should translate text longer than minCharactersPerNode', async () => {
+        vi.mocked(translateText).mockClear()
+        render(
+          <div data-testid="test-node">
+            {LONG_TEXT}
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await translateWithConfig(MIN_CHARS_CONFIG, true)
+
+        // Should have translation wrapper because text is long enough
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeTruthy()
+        expect(translateText).toHaveBeenCalled()
+      })
+    })
+
+    describe('minWordsPerNode filter', () => {
+      it('should skip translation for text with fewer words than minWordsPerNode', async () => {
+        vi.mocked(translateText).mockClear()
+        render(
+          <div data-testid="test-node">
+            Two words
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await translateWithConfig(MIN_WORDS_CONFIG, true)
+
+        // Should not have translation wrapper because word count is too low
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+        expect(translateText).not.toHaveBeenCalled()
+      })
+
+      it('should translate text with more words than minWordsPerNode', async () => {
+        vi.mocked(translateText).mockClear()
+        render(
+          <div data-testid="test-node">
+            {LONG_TEXT}
+          </div>,
+        )
+        const node = screen.getByTestId('test-node')
+        await translateWithConfig(MIN_WORDS_CONFIG, true)
+
+        // Should have translation wrapper because word count is enough
+        expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeTruthy()
+        expect(translateText).toHaveBeenCalled()
+      })
+    })
+  })
 })

@@ -20,6 +20,11 @@ import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from '../ui/sp
 import { isNumericContent } from '../ui/translation-utils'
 import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from './translation-state'
 
+function countWords(text: string): number {
+  const segmenter = new Intl.Segmenter('en', { granularity: 'word' })
+  return [...segmenter.segment(text)].filter(s => s.isWordLike).length
+}
+
 export async function translateNodes(
   nodes: ChildNode[],
   walkId: string,
@@ -81,6 +86,11 @@ export async function translateNodesBilingualMode(
     // Check minimum character threshold for page translation (character count includes whitespace)
     const minChars = config.translate.page.minCharactersPerNode
     if (minChars > 0 && textContent.length < minChars)
+      return
+
+    // Check minimum word threshold for page translation (uses Intl.Segmenter for cross-language accuracy)
+    const minWords = config.translate.page.minWordsPerNode
+    if (minWords > 0 && countWords(textContent) < minWords)
       return
 
     const ownerDoc = getOwnerDocument(targetNode)
@@ -225,6 +235,11 @@ export async function translateNodeTranslationOnlyMode(
     // Check minimum character threshold for page translation (pure text only, no HTML)
     const minChars = config.translate.page.minCharactersPerNode
     if (minChars > 0 && innerTextContent.length < minChars)
+      return
+
+    // Check minimum word threshold for page translation (uses Intl.Segmenter for cross-language accuracy)
+    const minWords = config.translate.page.minWordsPerNode
+    if (minWords > 0 && countWords(innerTextContent) < minWords)
       return
 
     const cleanTextContent = (content: string): string => {

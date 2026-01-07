@@ -27,3 +27,7 @@ export const DEFAULT_PRELOAD_THRESHOLD = 0
 export const MIN_CHARACTERS_PER_NODE = 0
 export const MAX_CHARACTERS_PER_NODE = 1000
 export const DEFAULT_MIN_CHARACTERS_PER_NODE = 0
+
+export const MIN_WORDS_PER_NODE = 0
+export const MAX_WORDS_PER_NODE = 100
+export const DEFAULT_MIN_WORDS_PER_NODE = 0

@@ -349,11 +349,15 @@ options:
         title: Görünürlük Eşiği
         description: Çeviriyi tetiklemek için gereken öğe görünürlük yüzdesi (0-1). Daha yüksek değerler, öğenin daha fazlası görünür olana kadar çeviriyi geciktirir.
     minCharactersConfig:
-      title: Minimum Karakter Filtresi
-      description: Eşik değerinden az karakterli metin düğümlerinin çevirisini atla (0 = devre dışı)
+      title: Kısa Metin Filtresi
+      description: Eşik değerinden az karakterli veya kelimeli metin düğümlerinin çevirisini atla (0 = devre dışı)
       minCharacters:
         title: Minimum Karakter
         description: Bu değerden az karakterli metin düğümleri çevrilmeyecektir. Karakter sayısı boşlukları içerir.
+      minWords:
+        title: Minimum Kelime
+        description: Bu değerden az kelimeli metin düğümleri çevrilmeyecektir. Tüm dillerde doğru kelime sayımı için Intl.Segmenter kullanılır.
+        error: Değer $1 ile $2 arasında olmalıdır
       error: Değer $1 ile $2 arasında olmalıdır
     nodeTranslationHotkey:
       title: Üzerine Gelme Çeviri Kısayolu
