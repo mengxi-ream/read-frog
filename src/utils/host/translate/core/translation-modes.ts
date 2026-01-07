@@ -3,9 +3,7 @@ import type { Config } from '@/types/config/config'
 import type { TranslationMode } from '@/types/config/translate'
 import type { TransNode } from '@/types/dom'
 import { ISO6393_TO_6391 } from '@read-frog/definitions'
-import { getDefaultStore } from 'jotai'
-import { detectedCodeAtom } from '@/utils/atoms/detected-code'
-import { getFinalSourceCode } from '@/utils/config/languages'
+import { getDetectedCodeFromStorage, getFinalSourceCode } from '@/utils/config/languages'
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -32,9 +30,8 @@ function countWords(text: string, sourceCode: LangCodeISO6393): number {
   return [...segmenter.segment(text)].filter(s => s.isWordLike).length
 }
 
-function getSourceCode(configSourceCode: LangCodeISO6393 | 'auto'): LangCodeISO6393 {
-  const store = getDefaultStore()
-  const detectedCode = store.get(detectedCodeAtom)
+async function getSourceCode(configSourceCode: LangCodeISO6393 | 'auto'): Promise<LangCodeISO6393> {
+  const detectedCode = await getDetectedCodeFromStorage()
   return getFinalSourceCode(configSourceCode, detectedCode)
 }
 
@@ -65,7 +62,6 @@ export async function translateNodesBilingualMode(
   if (transNodes.length === 0) {
     return
   }
-
   try {
     // prevent duplicate translation
     if (transNodes.every(node => translatingNodes.has(node))) {
@@ -103,7 +99,7 @@ export async function translateNodesBilingualMode(
 
     // Check minimum word threshold for page translation (uses Intl.Segmenter for cross-language accuracy)
     const minWords = config.translate.page.minWordsPerNode
-    if (minWords > 0 && countWords(textContent, getSourceCode(config.language.sourceCode)) < minWords)
+    if (minWords > 0 && countWords(textContent, await getSourceCode(config.language.sourceCode)) < minWords)
       return
 
     const ownerDoc = getOwnerDocument(targetNode)
@@ -252,7 +248,7 @@ export async function translateNodeTranslationOnlyMode(
 
     // Check minimum word threshold for page translation (uses Intl.Segmenter for cross-language accuracy)
     const minWords = config.translate.page.minWordsPerNode
-    if (minWords > 0 && countWords(innerTextContent, getSourceCode(config.language.sourceCode)) < minWords)
+    if (minWords > 0 && countWords(innerTextContent, await getSourceCode(config.language.sourceCode)) < minWords)
       return
 
     const cleanTextContent = (content: string): string => {
