@@ -8,6 +8,7 @@ import {
 } from '@/utils/constants/dom-labels'
 import { FORCE_BLOCK_TAGS } from '@/utils/constants/dom-rules'
 import {
+  isCustomForceBlockTranslation,
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
@@ -134,7 +135,7 @@ export function walkAndLabelElement(
 
   const isInlineNode = isShallowInlineHTMLElement(element)
 
-  if (isShallowBlockHTMLElement(element) || forceBlock) {
+  if (isShallowBlockHTMLElement(element) || forceBlock || isCustomForceBlockTranslation(element)) {
     element.setAttribute(BLOCK_ATTRIBUTE, '')
   }
   else if (isInlineNode) {
