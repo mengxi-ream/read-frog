@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat: upgrade video subtitles to public beta
+feat: make video subtitles feature available as public beta
