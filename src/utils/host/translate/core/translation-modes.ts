@@ -1,9 +1,6 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { TranslationMode } from '@/types/config/translate'
 import type { TransNode } from '@/types/dom'
-import { ISO6393_TO_6391 } from '@read-frog/definitions'
-import { getDetectedCodeFromStorage, getFinalSourceCode } from '@/utils/config/languages'
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
@@ -18,22 +15,11 @@ import { extractTextContent } from '../../dom/traversal'
 import { removeTranslatedWrapperWithRestore } from '../dom/translation-cleanup'
 import { insertTranslatedNodeIntoWrapper } from '../dom/translation-insertion'
 import { findPreviousTranslatedWrapperInside } from '../dom/translation-wrapper'
+import { shouldSkipSmallParagraph } from '../skip-small-paragraph'
 import { setTranslationDirAndLang } from '../translation-attributes'
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from '../ui/spinner'
 import { isNumericContent } from '../ui/translation-utils'
 import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from './translation-state'
-
-function countWords(text: string, sourceCode: LangCodeISO6393): number {
-  // Convert ISO 639-3 (e.g., 'eng') to ISO 639-1 (e.g., 'en') for Intl.Segmenter
-  const locale = ISO6393_TO_6391[sourceCode] ?? 'en'
-  const segmenter = new Intl.Segmenter(locale, { granularity: 'word' })
-  return [...segmenter.segment(text)].filter(s => s.isWordLike).length
-}
-
-async function getSourceCode(configSourceCode: LangCodeISO6393 | 'auto'): Promise<LangCodeISO6393> {
-  const detectedCode = await getDetectedCodeFromStorage()
-  return getFinalSourceCode(configSourceCode, detectedCode)
-}
 
 export async function translateNodes(
   nodes: ChildNode[],
@@ -92,14 +78,7 @@ export async function translateNodesBilingualMode(
     if (!textContent || isNumericContent(textContent))
       return
 
-    // Check minimum character threshold for page translation (character count includes whitespace)
-    const minChars = config.translate.page.minCharactersPerNode
-    if (minChars > 0 && textContent.length < minChars)
-      return
-
-    // Check minimum word threshold for page translation (uses Intl.Segmenter for cross-language accuracy)
-    const minWords = config.translate.page.minWordsPerNode
-    if (minWords > 0 && countWords(textContent, await getSourceCode(config.language.sourceCode)) < minWords)
+    if (await shouldSkipSmallParagraph(textContent, config))
       return
 
     const ownerDoc = getOwnerDocument(targetNode)
@@ -241,14 +220,7 @@ export async function translateNodeTranslationOnlyMode(
     if (!innerTextContent.trim() || isNumericContent(innerTextContent))
       return
 
-    // Check minimum character threshold for page translation (pure text only, no HTML)
-    const minChars = config.translate.page.minCharactersPerNode
-    if (minChars > 0 && innerTextContent.length < minChars)
-      return
-
-    // Check minimum word threshold for page translation (uses Intl.Segmenter for cross-language accuracy)
-    const minWords = config.translate.page.minWordsPerNode
-    if (minWords > 0 && countWords(innerTextContent, await getSourceCode(config.language.sourceCode)) < minWords)
+    if (await shouldSkipSmallParagraph(innerTextContent, config))
       return
 
     const cleanTextContent = (content: string): string => {
