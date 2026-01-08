@@ -15,7 +15,7 @@ async function getSourceCode(configSourceCode: LangCodeISO6393 | 'auto'): Promis
   return getFinalSourceCode(configSourceCode, detectedCode)
 }
 
-export async function shouldSkipSmallParagraph(
+export async function shouldFilterSmallParagraph(
   text: string,
   config: Config,
 ): Promise<boolean> {
