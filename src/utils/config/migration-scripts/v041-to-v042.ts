@@ -1,22 +1,32 @@
 /**
  * Migration script from v041 to v042
- * Adds 'minWordsPerNode' to page translation config
+ * Migrates hotkey values to camelCase format for i18n compatibility
  *
  * Before (v041):
- *   { ..., translate: { page: { ..., minCharactersPerNode: 0 } } }
+ *   { ..., translate: { node: { hotkey: 'Control' } } }
  *
  * After (v042):
- *   { ..., translate: { page: { ..., minCharactersPerNode: 0, minWordsPerNode: 0 } } }
+ *   { ..., translate: { node: { hotkey: 'control' } } }
  */
 
+const HOTKEY_MIGRATION: Record<string, string> = {
+  'Control': 'control',
+  'Alt': 'alt',
+  'Shift': 'shift',
+  '`': 'backtick',
+}
+
 export function migrate(oldConfig: any): any {
+  const oldHotkey = oldConfig.translate?.node?.hotkey
+  const newHotkey = oldHotkey ? (HOTKEY_MIGRATION[oldHotkey] ?? 'control') : 'control'
+
   return {
     ...oldConfig,
     translate: {
       ...oldConfig.translate,
-      page: {
-        ...oldConfig.translate?.page,
-        minWordsPerNode: 0,
+      node: {
+        ...oldConfig.translate?.node,
+        hotkey: newHotkey,
       },
     },
   }

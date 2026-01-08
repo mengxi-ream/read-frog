@@ -2,7 +2,7 @@ import type { TestSeriesObject } from './types'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Migrate hotkey from Alt to alt',
+    description: 'Add minWordsPerNode to page config',
     config: {
       language: {
         sourceCode: 'spa',
@@ -113,6 +113,7 @@ export const testSeries: TestSeriesObject = {
             threshold: 0,
           },
           minCharactersPerNode: 0,
+          minWordsPerNode: 0,
         },
         customPromptsConfig: {
           promptId: '123e4567-e89b-12d3-a456-426614174000',
@@ -177,7 +178,7 @@ export const testSeries: TestSeriesObject = {
     },
   },
   'config-with-no-default-openai-model': {
-    description: 'Migrate hotkey from Control to control',
+    description: 'Add minWordsPerNode to page config',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -263,6 +264,7 @@ export const testSeries: TestSeriesObject = {
             threshold: 0,
           },
           minCharactersPerNode: 0,
+          minWordsPerNode: 0,
         },
         customPromptsConfig: {
           patterns: [],
@@ -308,7 +310,7 @@ export const testSeries: TestSeriesObject = {
     },
   },
   'comprehensive-provider-migration-test': {
-    description: 'Migrate hotkey from Alt to alt',
+    description: 'Add minWordsPerNode to page config',
     config: {
       language: {
         sourceCode: 'auto',
@@ -446,6 +448,7 @@ export const testSeries: TestSeriesObject = {
             threshold: 0,
           },
           minCharactersPerNode: 0,
+          minWordsPerNode: 0,
         },
         customPromptsConfig: {
           promptId: null,

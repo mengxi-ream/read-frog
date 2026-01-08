@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from '@/components/shadcn/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { HOTKEY_ITEMS, HOTKEYS } from '@/utils/constants/hotkeys'
+import { HOTKEY_ICONS, HOTKEYS } from '@/utils/constants/hotkeys'
 import { ConfigCard } from '../../components/config-card'
 
 export function NodeTranslationHotkey() {
@@ -33,9 +33,9 @@ export function NodeTranslationHotkey() {
         <SelectTrigger className="w-full">
           <SelectValue asChild>
             <span>
-              {HOTKEY_ITEMS[translateConfig.node.hotkey].icon}
+              {HOTKEY_ICONS[translateConfig.node.hotkey]}
               {' '}
-              {HOTKEY_ITEMS[translateConfig.node.hotkey].label}
+              {i18n.t(`hotkey.${translateConfig.node.hotkey}`)}
             </span>
           </SelectValue>
         </SelectTrigger>
@@ -43,9 +43,9 @@ export function NodeTranslationHotkey() {
           <SelectGroup>
             {HOTKEYS.map(item => (
               <SelectItem key={item} value={item}>
-                {HOTKEY_ITEMS[item].icon}
+                {HOTKEY_ICONS[item]}
                 {' '}
-                {HOTKEY_ITEMS[item].label}
+                {i18n.t(`hotkey.${item}`)}
               </SelectItem>
             ))}
           </SelectGroup>

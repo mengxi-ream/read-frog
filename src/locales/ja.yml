@@ -357,8 +357,8 @@ options:
         description: この値より少ない単語数のテキストノードは翻訳されません。すべての言語で正確な単語カウントのために Intl.Segmenter を使用します。
       error: 値は $1 から $2 の間である必要があります
     nodeTranslationHotkey:
-      title: ホバー翻訳ショートカットキー
-      description: テキストにホバーして段落を翻訳する際の修飾キーをカスタマイズします
+      title: ホバーまたは長押し翻訳ショートカットキー
+      description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
     llmProviderConfigured: LLM 翻訳プロバイダーが設定されています
     llmProviderNotConfigured: LLM 翻訳プロバイダーが設定されていません
     autoTranslateLanguages:
@@ -572,3 +572,9 @@ subtitles:
     noSubtitlesFound: 字幕が見つかりません
     videoNotFound: 動画要素が見つかりません
     controlsBarNotFound: コントロールバーが見つかりません
+hotkey:
+  control: Ctrl
+  alt: Option
+  shift: Shift
+  backtick: バッククォート
+  clickAndHold: クリックして長押し

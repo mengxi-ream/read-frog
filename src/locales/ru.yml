@@ -359,8 +359,8 @@ options:
         description: Текстовые узлы с меньшим количеством слов не будут переведены. Используется Intl.Segmenter для точного подсчёта слов на всех языках.
       error: Значение должно быть от $1 до $2
     nodeTranslationHotkey:
-      title: Горячая клавиша перевода при наведении
-      description: Настройте клавишу-модификатор для перевода абзацев при наведении на текст
+      title: Горячая клавиша перевода при наведении или долгом нажатии
+      description: Настройте клавишу-модификатор для перевода при наведении или используйте долгое нажатие для перевода абзацев
     llmProviderConfigured: LLM-провайдер перевода настроен
     llmProviderNotConfigured: LLM-провайдер перевода не настроен
     autoTranslateLanguages:
@@ -574,3 +574,9 @@ subtitles:
     noSubtitlesFound: Субтитры не найдены
     videoNotFound: Видео элемент не найден
     controlsBarNotFound: Панель управления не найдена
+hotkey:
+  control: Ctrl
+  alt: Option
+  shift: Shift
+  backtick: Обратный апостроф
+  clickAndHold: Нажмите и удерживайте

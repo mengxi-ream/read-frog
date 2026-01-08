@@ -360,8 +360,8 @@ options:
         description: 少于此词数的文本节点将不会被翻译。使用 Intl.Segmenter 进行跨语言准确分词。
       error: 数值必须在 $1 到 $2 之间
     nodeTranslationHotkey:
-      title: 悬停翻译快捷键
-      description: 自定义悬停在文本上翻译段落的修饰键
+      title: 悬停或长按翻译快捷键
+      description: 自定义悬停翻译的修饰键，或使用鼠标长按翻译段落
     llmProviderConfigured: 已配置 LLM 翻译提供商
     llmProviderNotConfigured: 未配置 LLM 翻译提供商
     autoTranslateLanguages:
@@ -575,3 +575,9 @@ subtitles:
     noSubtitlesFound: 未找到字幕
     videoNotFound: 视频元素未找到
     controlsBarNotFound: 控制栏未找到
+hotkey:
+  control: Ctrl
+  alt: Option
+  shift: Shift
+  backtick: 反引号
+  clickAndHold: 点击并按住

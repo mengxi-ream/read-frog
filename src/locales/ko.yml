@@ -358,8 +358,8 @@ options:
         description: 이 값보다 적은 단어 수의 텍스트 노드는 번역되지 않습니다. 모든 언어에서 정확한 단어 카운트를 위해 Intl.Segmenter를 사용합니다.
       error: 값은 $1에서 $2 사이여야 합니다
     nodeTranslationHotkey:
-      title: 호버 번역 단축키
-      description: 텍스트 위에 호버하여 단락을 번역할 때 사용할 수정 키를 사용자 지정합니다
+      title: 호버 또는 길게 누르기 번역 단축키
+      description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
     llmProviderConfigured: LLM 번역 제공업체가 설정되었습니다
     llmProviderNotConfigured: LLM 번역 제공업체가 설정되지 않았습니다
     autoTranslateLanguages:
@@ -573,3 +573,9 @@ subtitles:
     noSubtitlesFound: 자막을 찾을 수 없습니다
     videoNotFound: 비디오 요소를 찾을 수 없습니다
     controlsBarNotFound: 컨트롤 바를 찾을 수 없습니다
+hotkey:
+  control: Ctrl
+  alt: Option
+  shift: Shift
+  backtick: 백틱
+  clickAndHold: 클릭하고 길게 누르기

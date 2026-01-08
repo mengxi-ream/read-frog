@@ -359,8 +359,8 @@ options:
         description: Bu değerden az kelimeli metin düğümleri çevrilmeyecektir. Tüm dillerde doğru kelime sayımı için Intl.Segmenter kullanılır.
       error: Değer $1 ile $2 arasında olmalıdır
     nodeTranslationHotkey:
-      title: Üzerine Gelme Çeviri Kısayolu
-      description: Paragrafları çevirmek için metnin üzerine gelirken değiştirici tuşu özelleştirin
+      title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
+      description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
     llmProviderConfigured: LLM çeviri sağlayıcısı yapılandırıldı
     llmProviderNotConfigured: LLM çeviri sağlayıcısı yapılandırılmadı
     autoTranslateLanguages:
@@ -574,3 +574,9 @@ subtitles:
     noSubtitlesFound: Altyazı bulunamadı
     videoNotFound: Video öğesi bulunamadı
     controlsBarNotFound: Kontrol çubuğu bulunamadı
+hotkey:
+  control: Ctrl
+  alt: Option
+  shift: Shift
+  backtick: Ters tırnak
+  clickAndHold: Tıkla ve basılı tut
