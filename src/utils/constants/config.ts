@@ -17,7 +17,7 @@ export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
-export const CONFIG_SCHEMA_VERSION = 43
+export const CONFIG_SCHEMA_VERSION = 44
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -97,6 +97,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   videoSubtitles: {
     enabled: false,
+    autoStart: false,
   },
 }
 

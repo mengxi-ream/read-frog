@@ -60,6 +60,7 @@ const inputTranslationSchema = z.object({
 // video subtitles schema
 const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
+  autoStart: z.boolean(),
 })
 
 // Complete config schema

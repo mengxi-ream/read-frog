@@ -1,6 +1,7 @@
-import { Activity, useState } from 'react'
+import { Activity, useEffect, useEffectEvent, useState } from 'react'
 import logo from '@/assets/icons/original/read-frog.png'
 import { cn } from '@/lib/utils'
+import { getLocalConfig } from '@/utils/config/storage'
 import { TRANSLATE_BUTTON_CLASS } from '@/utils/constants/subtitles'
 
 export function SubtitleToggleButton(
@@ -10,6 +11,19 @@ export function SubtitleToggleButton(
   },
 ) {
   const [isEnabled, setIsEnabled] = useState(false)
+
+  const tryStartSubtitles = useEffectEvent(async () => {
+    const config = await getLocalConfig()
+    const autoStart = config?.videoSubtitles?.autoStart ?? false
+    if (autoStart) {
+      setIsEnabled(true)
+      onToggle(true)
+    }
+  })
+
+  useEffect(() => {
+    void tryStartSubtitles()
+  }, [])
 
   const handleClick = () => {
     const newState = !isEnabled

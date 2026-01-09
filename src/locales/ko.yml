@@ -507,6 +507,8 @@ options:
     description: 현재 YouTube 비디오 자막만 지원
     enable: 비디오 자막 활성화
     enableDescription: 활성화하면 YouTube 플레이어 컨트롤 바에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
+    autoStart: 자막 자동 활성화
+    autoStartDescription: 비디오가 로드되면 자동으로 자막 번역을 활성화합니다.
   whatsNew:
     title: 새로운 기능
   survey:

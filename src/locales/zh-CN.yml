@@ -509,6 +509,8 @@ options:
     description: 当前仅支持 YouTube 视频字幕
     enable: 开启视频字幕
     enableDescription: 启用后，YouTube 播放器控制栏会出现翻译按钮。点击即可开始翻译字幕。
+    autoStart: 自动开启字幕
+    autoStartDescription: 当视频加载完成后，自动开启字幕翻译。
   whatsNew:
     title: 最近更新
   survey:

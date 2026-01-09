@@ -508,6 +508,8 @@ options:
     description: Hiện chỉ hỗ trợ phụ đề video YouTube
     enable: Bật phụ đề video
     enableDescription: Khi bật, nút dịch sẽ xuất hiện trong thanh điều khiển YouTube. Nhấp để bắt đầu dịch phụ đề.
+    autoStart: Tự động bật phụ đề
+    autoStartDescription: Tự động bật dịch phụ đề khi video được tải xong.
   whatsNew:
     title: Có gì mới
   survey:

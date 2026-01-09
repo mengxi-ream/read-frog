@@ -508,6 +508,8 @@ options:
     description: Şu anda yalnızca YouTube video altyazılarını desteklemektedir
     enable: Video Altyazılarını Etkinleştir
     enableDescription: Etkinleştirildiğinde, YouTube oynatıcı kontrollerinde bir çeviri düğmesi görünecektir. Altyazıları çevirmeye başlamak için tıklayın.
+    autoStart: Altyazıyı Otomatik Etkinleştir
+    autoStartDescription: Video yüklendiğinde altyazı çevirisini otomatik olarak etkinleştirir.
   whatsNew:
     title: Yenilikler
   survey:

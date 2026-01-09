@@ -509,6 +509,8 @@ options:
     description: 目前僅支援 YouTube 影片字幕
     enable: 開啟影片字幕
     enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點擊即可開始翻譯字幕。
+    autoStart: 自動開啟字幕
+    autoStartDescription: 當影片載入完成後，自動開啟字幕翻譯。
   whatsNew:
     title: 最近更新
   survey:

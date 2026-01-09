@@ -506,6 +506,8 @@ options:
     description: 現在 YouTube 動画字幕のみ対応
     enable: 動画字幕を有効にする
     enableDescription: 有効にすると、YouTube プレーヤーのコントロールバーに翻訳ボタンが表示されます。クリックして字幕の翻訳を開始します。
+    autoStart: 字幕を自動有効化
+    autoStartDescription: 動画の読み込みが完了したら、自動的に字幕翻訳を有効にします。
   whatsNew:
     title: 新機能
   survey:

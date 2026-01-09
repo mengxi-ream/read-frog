@@ -82,6 +82,10 @@ export class UniversalVideoAdapter {
 
     if (navigation.event) {
       const navigationListener = () => {
+        // Immediately hide subtitles to prevent stale content showing during navigation
+        this.subtitlesScheduler?.hide()
+        this.subtitlesScheduler?.reset()
+
         setTimeout(() => {
           this.handleNavigation()
         }, NAVIGATION_HANDLER_DELAY)
