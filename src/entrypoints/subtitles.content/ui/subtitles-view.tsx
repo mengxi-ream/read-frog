@@ -51,7 +51,7 @@ function SubtitlesContent() {
 
 export function SubtitlesView() {
   const subtitle = useAtomValue(currentSubtitleAtom)
-  const { containerRef, handleRef } = useVerticalDrag()
+  const { containerRef, handleRef, topPercent } = useVerticalDrag()
 
   if (!subtitle) {
     return null
@@ -60,16 +60,19 @@ export function SubtitlesView() {
   return (
     <div
       ref={containerRef}
-      className="group flex flex-col items-center absolute w-full bottom-12 left-0 right-0"
+      className="group flex flex-col items-center absolute w-full left-0 right-0"
       style={{
         fontFamily: 'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
+        top: `${topPercent}%`,
       }}
     >
-      <div
-        ref={handleRef}
-        className="pointer-events-auto mb-1 px-3 py-1.5 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
-      >
-        <Icon icon="tabler:grip-horizontal" className="size-4 text-white" />
+      <div className="w-full flex justify-center pointer-events-auto">
+        <div
+          ref={handleRef}
+          className="mb-0.5 px-2 py-1 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
+        >
+          <Icon icon="tabler:grip-horizontal" className="size-4 text-white" />
+        </div>
       </div>
 
       <SubtitlesContent />

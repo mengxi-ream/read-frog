@@ -1,11 +1,15 @@
+import { useAtom } from 'jotai'
 import { useEffect, useRef } from 'react'
+import { getContainingShadowRoot } from '@/utils/host/dom/node'
+import { subtitlesTopPercentAtom } from '../atoms'
 
 export function useVerticalDrag() {
   const containerRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
   const startY = useRef(0)
-  const offsetY = useRef(0)
+  const startPercent = useRef(0)
+  const [topPercent, setTopPercent] = useAtom(subtitlesTopPercentAtom)
 
   useEffect(() => {
     const handle = handleRef.current
@@ -13,55 +17,49 @@ export function useVerticalDrag() {
     if (!handle || !container)
       return
 
+    const rootNode = getContainingShadowRoot(container)
+    const boundary = rootNode?.host?.parentElement
+
     const onMouseDown = (e: MouseEvent) => {
       if (e.button !== 0)
         return
       isDragging.current = true
-      startY.current = e.clientY - offsetY.current
+      startY.current = e.clientY
+      startPercent.current = topPercent
       e.preventDefault()
       e.stopPropagation()
     }
 
     const onMouseMove = (e: MouseEvent) => {
-      if (!isDragging.current)
+      if (!isDragging.current || !boundary)
         return
 
-      const rootNode = container.getRootNode() as ShadowRoot
-      const boundary = rootNode?.host?.parentElement
-      let newOffsetY = e.clientY - startY.current
+      const boundaryRect = boundary.getBoundingClientRect()
+      const containerRect = container.getBoundingClientRect()
+      const boundaryHeight = boundaryRect.height
+      const containerHeight = containerRect.height
 
-      if (boundary) {
-        const boundaryRect = boundary.getBoundingClientRect()
-        const containerRect = container.getBoundingClientRect()
-        const minY = boundaryRect.top - (containerRect.top - offsetY.current)
-        const maxY = boundaryRect.bottom - (containerRect.bottom - offsetY.current)
-        newOffsetY = Math.max(minY, Math.min(newOffsetY, maxY))
-      }
+      const deltaPercent = ((e.clientY - startY.current) / boundaryHeight) * 100
+      const newPercent = startPercent.current + deltaPercent
 
-      offsetY.current = newOffsetY
-      container.style.transform = `translateY(${offsetY.current}px)`
+      const maxPercent = ((boundaryHeight - containerHeight) / boundaryHeight) * 100
+      setTopPercent(Math.max(0, Math.min(maxPercent, newPercent)))
     }
 
     const onMouseUp = () => {
       isDragging.current = false
     }
 
-    const onClick = (e: MouseEvent) => {
-      e.stopPropagation()
-    }
-
     handle.addEventListener('mousedown', onMouseDown)
-    handle.addEventListener('click', onClick, true)
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
 
     return () => {
       handle.removeEventListener('mousedown', onMouseDown)
-      handle.removeEventListener('click', onClick, true)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup', onMouseUp)
     }
-  }, [])
+  }, [topPercent, setTopPercent])
 
-  return { containerRef, handleRef }
+  return { containerRef, handleRef, topPercent }
 }

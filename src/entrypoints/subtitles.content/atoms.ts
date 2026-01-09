@@ -11,6 +11,8 @@ export const subtitlesStateAtom = atom<StateData | null>(null)
 
 export const subtitlesVisibleAtom = atom<boolean>(false)
 
+export const subtitlesTopPercentAtom = atom<number>(70)
+
 export const subtitlesDisplayAtom = atom((get) => {
   const subtitle = get(currentSubtitleAtom)
   const stateData = get(subtitlesStateAtom)
