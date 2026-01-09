@@ -47,19 +47,48 @@ export function useVerticalDrag() {
     isDragging.current = false
   })
 
+  const clampTopPercent = useEffectEvent(() => {
+    const container = containerRef.current
+    if (!container)
+      return
+
+    const rootNode = getContainingShadowRoot(container)
+    const boundary = rootNode?.host?.parentElement
+    if (!boundary)
+      return
+
+    const boundaryHeight = boundary.getBoundingClientRect().height
+    const containerHeight = container.getBoundingClientRect().height
+    const maxPercent = ((boundaryHeight - containerHeight) / boundaryHeight) * 100
+
+    if (topPercent > maxPercent) {
+      setTopPercent(maxPercent)
+    }
+  })
+
   useEffect(() => {
     const handle = handleRef.current
-    if (!handle)
+    const container = containerRef.current
+    if (!handle || !container)
       return
+
+    const rootNode = getContainingShadowRoot(container)
+    const boundary = rootNode?.host?.parentElement
 
     handle.addEventListener('mousedown', onMouseDown)
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
 
+    const resizeObserver = new ResizeObserver(clampTopPercent)
+    if (boundary) {
+      resizeObserver.observe(boundary)
+    }
+
     return () => {
       handle.removeEventListener('mousedown', onMouseDown)
       window.removeEventListener('mousemove', onMouseMove)
       window.removeEventListener('mouseup', onMouseUp)
+      resizeObserver.disconnect()
     }
   }, [])
 
