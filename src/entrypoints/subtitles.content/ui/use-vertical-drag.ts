@@ -61,8 +61,9 @@ export function useVerticalDrag() {
     const containerHeight = container.getBoundingClientRect().height
     const maxPercent = ((boundaryHeight - containerHeight) / boundaryHeight) * 100
 
-    if (topPercent > maxPercent) {
-      setTopPercent(maxPercent)
+    const clampedPercent = Math.max(0, Math.min(maxPercent, topPercent))
+    if (topPercent !== clampedPercent) {
+      setTopPercent(clampedPercent)
     }
   })
 
