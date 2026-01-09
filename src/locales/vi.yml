@@ -348,16 +348,19 @@ options:
       threshold:
         title: Ngưỡng hiển thị
         description: Tỷ lệ phần trăm hiển thị của phần tử cần thiết để kích hoạt dịch (0-1). Giá trị cao hơn sẽ trì hoãn dịch cho đến khi nhiều phần tử hơn được hiển thị.
-    minCharactersConfig:
-      title: Bộ lọc ký tự tối thiểu
-      description: Bỏ qua dịch các nút văn bản có ít ký tự hơn ngưỡng (0 = tắt)
+    smallParagraphFilter:
+      title: Bộ lọc văn bản ngắn
+      description: Bỏ qua dịch các nút văn bản có ít ký tự hoặc từ hơn ngưỡng (0 = tắt)
       minCharacters:
         title: Số ký tự tối thiểu
         description: Các nút văn bản có ít ký tự hơn giá trị này sẽ không được dịch. Số ký tự bao gồm khoảng trắng.
+      minWords:
+        title: Số từ tối thiểu
+        description: Các nút văn bản có ít từ hơn giá trị này sẽ không được dịch. Sử dụng Intl.Segmenter để đếm từ chính xác trên tất cả các ngôn ngữ.
       error: Giá trị phải từ $1 đến $2
     nodeTranslationHotkey:
-      title: Phím tắt dịch khi di chuột
-      description: Tùy chỉnh phím bổ trợ để dịch đoạn văn khi di chuột qua văn bản
+      title: Phím tắt dịch khi di chuột hoặc nhấn giữ
+      description: Tùy chỉnh phím bổ trợ khi di chuột hoặc dùng nhấn giữ để dịch đoạn văn
     llmProviderConfigured: Đã cấu hình nhà cung cấp dịch LLM
     llmProviderNotConfigured: Chưa cấu hình nhà cung cấp dịch LLM
     autoTranslateLanguages:
@@ -571,3 +574,9 @@ subtitles:
     noSubtitlesFound: Không tìm thấy phụ đề
     videoNotFound: Không tìm thấy phần tử video
     controlsBarNotFound: Không tìm thấy thanh điều khiển
+hotkey:
+  control: Ctrl
+  alt: Option
+  shift: Shift
+  backtick: Dấu huyền
+  clickAndHold: Nhấn và giữ

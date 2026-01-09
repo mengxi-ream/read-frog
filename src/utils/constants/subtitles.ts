@@ -7,7 +7,7 @@ export const PAUSE_TIMEOUT_MS = 1_000
 
 // Segmentation constants
 export const MAX_WORDS = 15
-export const SENTENCE_END_PATTERN = /[,.?!…\])]$/
+export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
 
 // Batch translation constants
 export const FIRST_BATCH_DURATION_MS = 100_000

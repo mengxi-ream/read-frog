@@ -15,6 +15,7 @@ import { extractTextContent } from '../../dom/traversal'
 import { removeTranslatedWrapperWithRestore } from '../dom/translation-cleanup'
 import { insertTranslatedNodeIntoWrapper } from '../dom/translation-insertion'
 import { findPreviousTranslatedWrapperInside } from '../dom/translation-wrapper'
+import { shouldFilterSmallParagraph } from '../filter-small-paragraph'
 import { setTranslationDirAndLang } from '../translation-attributes'
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from '../ui/spinner'
 import { isNumericContent } from '../ui/translation-utils'
@@ -47,7 +48,6 @@ export async function translateNodesBilingualMode(
   if (transNodes.length === 0) {
     return
   }
-
   try {
     // prevent duplicate translation
     if (transNodes.every(node => translatingNodes.has(node))) {
@@ -78,9 +78,7 @@ export async function translateNodesBilingualMode(
     if (!textContent || isNumericContent(textContent))
       return
 
-    // Check minimum character threshold for page translation (character count includes whitespace)
-    const minChars = config.translate.page.minCharactersPerNode
-    if (minChars > 0 && textContent.length < minChars)
+    if (await shouldFilterSmallParagraph(textContent, config))
       return
 
     const ownerDoc = getOwnerDocument(targetNode)
@@ -222,9 +220,7 @@ export async function translateNodeTranslationOnlyMode(
     if (!innerTextContent.trim() || isNumericContent(innerTextContent))
       return
 
-    // Check minimum character threshold for page translation (pure text only, no HTML)
-    const minChars = config.translate.page.minCharactersPerNode
-    if (minChars > 0 && innerTextContent.length < minChars)
+    if (await shouldFilterSmallParagraph(innerTextContent, config))
       return
 
     const cleanTextContent = (content: string): string => {

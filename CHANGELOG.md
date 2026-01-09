@@ -1,5 +1,27 @@
 # @read-frog/extension
 
+## 1.22.0
+
+### Minor Changes
+
+- [#859](https://github.com/mengxi-ream/read-frog/pull/859) [`ed8ed19`](https://github.com/mengxi-ream/read-frog/commit/ed8ed1946b76a85df1264872bb5dd7459a2d34e5) Thanks [@zmrlft](https://github.com/zmrlft)! - feat: add click and hold to translate
+
+- [#817](https://github.com/mengxi-ream/read-frog/pull/817) [`db45a88`](https://github.com/mengxi-ream/read-frog/commit/db45a88ef4a0c9b8b19fe4e2bd55b2b02ca54c27) Thanks [@guoyongchang](https://github.com/guoyongchang)! - feat: add triple-space input translation feature
+
+- [#856](https://github.com/mengxi-ream/read-frog/pull/856) [`597ce14`](https://github.com/mengxi-ream/read-frog/commit/597ce14e70aae37b5fa6b538e8b02a78ae93ab86) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add minimum characters filter for page translation
+
+### Patch Changes
+
+- [#868](https://github.com/mengxi-ream/read-frog/pull/868) [`ff23528`](https://github.com/mengxi-ream/read-frog/commit/ff2352805ee0923cc761234eeb3d457504c91b1d) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: supplement subtitles sentence end pattern with international punctuation
+
+- [#869](https://github.com/mengxi-ream/read-frog/pull/869) [`98e2edf`](https://github.com/mengxi-ream/read-frog/commit/98e2edfc0bcde7d57c7bc626e9542ffb7c0d7daf) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: force <task-list> to be block in github website
+
+- [#856](https://github.com/mengxi-ream/read-frog/pull/856) [`597ce14`](https://github.com/mengxi-ream/read-frog/commit/597ce14e70aae37b5fa6b538e8b02a78ae93ab86) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: improve floating button drag smoothness by deferring storage writes
+
+- [#862](https://github.com/mengxi-ream/read-frog/pull/862) [`acc7d8d`](https://github.com/mengxi-ream/read-frog/commit/acc7d8d0fe1267fcf4779e17be3ad58d5f3e5dca) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: add minimum words filter for small paragraph translation
+
+- [#866](https://github.com/mengxi-ream/read-frog/pull/866) [`f95cf61`](https://github.com/mengxi-ream/read-frog/commit/f95cf61a4daf87364f7f4fd72166f9309becbca8) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: make video subtitles feature available as public beta
+
 ## 1.21.4
 
 ### Patch Changes

@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { BetaBadge } from '@/components/badges/beta-badge'
+import { Badge } from '@/components/shadcn/badge'
 import { Field, FieldContent, FieldLabel } from '@/components/shadcn/field'
 import { Hint } from '@/components/shadcn/hint'
 import { Switch } from '@/components/shadcn/switch'
@@ -17,7 +17,7 @@ export function VideoSubtitlesToggle() {
         <>
           {i18n.t('options.videoSubtitles.title')}
           {' '}
-          <BetaBadge className="align-middle" />
+          <Badge variant="secondary" className="align-middle">Public Beta</Badge>
         </>
       )}
       description={i18n.t('options.videoSubtitles.description')}

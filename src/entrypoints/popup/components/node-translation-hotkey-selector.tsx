@@ -9,7 +9,38 @@ import {
 } from '@/components/shadcn/select'
 import { Switch } from '@/components/shadcn/switch'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { HOTKEY_ITEMS, HOTKEYS } from '@/utils/constants/hotkeys'
+import { HOTKEY_ICONS, HOTKEYS } from '@/utils/constants/hotkeys'
+
+function HotkeyDisplay({ hotkey }: { hotkey: typeof HOTKEYS[number] }) {
+  const icon = HOTKEY_ICONS[hotkey]
+  const label = i18n.t(`hotkey.${hotkey}`)
+
+  if (hotkey === 'clickAndHold') {
+    return (
+      <>
+        {icon}
+        {' '}
+        {label}
+        {' '}
+        {i18n.t('popup.translateParagraph')}
+      </>
+    )
+  }
+
+  return (
+    <>
+      {i18n.t('popup.hover')}
+      {' '}
+      +
+      {' '}
+      {icon}
+      {' '}
+      {label}
+      {' '}
+      {i18n.t('popup.translateParagraph')}
+    </>
+  )
+}
 
 export default function NodeTranslationHotkeySelector() {
   const [translateConfig, setTranslateConfig] = useAtom(
@@ -27,29 +58,13 @@ export default function NodeTranslationHotkeySelector() {
           className="pt-3.5 -mt-3.5 pb-4 -mb-4 px-2 -ml-2 h-5! ring-none cursor-pointer truncate border-none text-[13px] font-medium shadow-none focus-visible:border-none focus-visible:ring-0 bg-transparent rounded-md"
         >
           <div className="truncate">
-            {i18n.t('popup.hover')}
-            {' '}
-            +
-            {' '}
-            {HOTKEY_ITEMS[translateConfig.node.hotkey].icon}
-            {' '}
-            {HOTKEY_ITEMS[translateConfig.node.hotkey].label}
-            {' '}
-            {i18n.t('popup.translateParagraph')}
+            <HotkeyDisplay hotkey={translateConfig.node.hotkey} />
           </div>
         </SelectTrigger>
         <SelectContent>
           {HOTKEYS.map(item => (
             <SelectItem key={item} value={item}>
-              {i18n.t('popup.hover')}
-              {' '}
-              +
-              {' '}
-              {HOTKEY_ITEMS[item].icon}
-              {' '}
-              {HOTKEY_ITEMS[item].label}
-              {' '}
-              {i18n.t('popup.translateParagraph')}
+              <HotkeyDisplay hotkey={item} />
             </SelectItem>
           ))}
         </SelectContent>
