@@ -67,7 +67,7 @@ export function SubtitlesView() {
     >
       <div
         ref={handleRef}
-        className="pointer-events-auto mb-1 px-3 py-1.5 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        className="pointer-events-auto mb-1 px-3 py-1.5 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
       >
         <Icon icon="tabler:grip-horizontal" className="size-4 text-white" />
       </div>

@@ -25,7 +25,20 @@ export function useVerticalDrag() {
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging.current)
         return
-      offsetY.current = e.clientY - startY.current
+
+      const rootNode = container.getRootNode() as ShadowRoot
+      const boundary = rootNode?.host?.parentElement
+      let newOffsetY = e.clientY - startY.current
+
+      if (boundary) {
+        const boundaryRect = boundary.getBoundingClientRect()
+        const containerRect = container.getBoundingClientRect()
+        const minY = boundaryRect.top - (containerRect.top - offsetY.current)
+        const maxY = boundaryRect.bottom - (containerRect.bottom - offsetY.current)
+        newOffsetY = Math.max(minY, Math.min(newOffsetY, maxY))
+      }
+
+      offsetY.current = newOffsetY
       container.style.transform = `translateY(${offsetY.current}px)`
     }
 
