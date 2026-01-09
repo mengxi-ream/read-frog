@@ -12,6 +12,7 @@ interface UseDraggableOptions {
   margin?: number
   isVisible: boolean
   boundaryRef?: React.RefObject<HTMLElement>
+  axis?: 'x' | 'y' | 'both'
 }
 
 interface UseDraggableReturn {
@@ -28,7 +29,7 @@ interface UseDraggableReturn {
  * @returns Object containing position, drag state, ref and styles
  */
 export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
-  const { initialPosition = { x: 0, y: 0 }, onPositionChange, margin = 0, isVisible, boundaryRef } = options
+  const { initialPosition = { x: 0, y: 0 }, onPositionChange, margin = 0, isVisible, boundaryRef, axis = 'both' } = options
 
   const [isDragging, setIsDragging] = useState(false)
   const dragOffsetRef = useRef<Position>({ x: 0, y: 0 })
@@ -74,41 +75,44 @@ export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
   const handleMouseMove = useCallback((event: MouseEvent) => {
     if (isDragging) {
       const newPosition = {
-        x: event.clientX - dragOffsetRef.current.x,
-        y: event.clientY - dragOffsetRef.current.y,
+        x: axis === 'y' ? 0 : event.clientX - dragOffsetRef.current.x,
+        y: axis === 'x' ? 0 : event.clientY - dragOffsetRef.current.y,
       }
       updatePosition(newPosition)
     }
-  }, [isDragging, updatePosition])
+  }, [isDragging, updatePosition, axis])
 
   // Handle mouse up to end drag
-  const handleMouseUp = useCallback(() => {
+  const handleMouseUp = useCallback((event: MouseEvent) => {
+    if (isDragging) {
+      event.stopPropagation()
+    }
     setIsDragging(false)
-  }, [])
+  }, [isDragging])
 
   // Handle mouse down to start drag
   const handleMouseDown = useCallback((event: MouseEvent) => {
     if (!dragRef.current || event.button !== 0)
       return
 
-    const rect = dragRef.current.getBoundingClientRect()
     dragOffsetRef.current = {
-      x: event.clientX - rect.left,
-      y: event.clientY - rect.top,
+      x: event.clientX - positionRef.current.x,
+      y: event.clientY - positionRef.current.y,
     }
     setIsDragging(true)
 
-    // Prevent text selection during drag
+    // Prevent text selection and event propagation to video
     event.preventDefault()
+    event.stopPropagation()
   }, [])
 
   // Add/remove event listeners for drag
   useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
     }
   }, [handleMouseMove, handleMouseUp])
 
