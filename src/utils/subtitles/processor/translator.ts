@@ -26,9 +26,8 @@ async function initializeContext(
   const isLLM = providerConfig && isLLMTranslateProviderConfig(providerConfig)
 
   if (isLLM && enableContext) {
-    if (typeof document !== 'undefined') {
-      videoTitle = document.title || ''
-    }
+    videoTitle = document.title || ''
+
     if (fragments.length > 0) {
       subtitlesTextContent = fragments.map(s => s.text).join('\n')
     }
