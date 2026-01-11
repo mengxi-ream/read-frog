@@ -3,9 +3,11 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { kebabCase } from 'case-anything'
 import ReactDOM from 'react-dom/client'
 import { ThemeProvider } from '@/components/providers/theme-provider'
+import { getLocalConfig } from '@/utils/config/storage'
 import { APP_NAME } from '@/utils/constants/app.ts'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { insertShadowRootUIWrapperInto } from '@/utils/shadow-root'
+import { isSiteEnabled } from '@/utils/site-control'
 import { addStyleToShadow } from '@/utils/styles'
 import { queryClient } from '@/utils/tanstack-query'
 import App from './app'
@@ -29,6 +31,12 @@ export default defineContentScript({
     if (window.__READ_FROG_SELECTION_INJECTED__)
       return
     window.__READ_FROG_SELECTION_INJECTED__ = true
+
+    // Check global site control
+    const config = await getLocalConfig()
+    if (!isSiteEnabled(window.location.href, config)) {
+      return
+    }
 
     const ui = await createShadowRootUi(ctx, {
       name: `${kebabCase(APP_NAME)}-selection`,

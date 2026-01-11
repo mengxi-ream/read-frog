@@ -167,6 +167,18 @@ options:
         confirm: Xác nhận
         cancel: Hủy
         description: Thao tác này sẽ xóa tất cả bộ nhớ đệm dịch. Hành động này không thể hoàn tác.
+  siteControl:
+    title: Kiểm soát trang web
+    mode:
+      title: Chế độ kích hoạt tiện ích mở rộng
+      description: Chọn tiện ích mở rộng chạy trên tất cả các trang web hay chỉ trên các trang web cụ thể
+      all: Chạy trên tất cả các trang web
+      whitelist: Chỉ chạy trên các trang web được liệt kê (Danh sách trắng)
+    patterns:
+      title: Các trang web đã bật
+      description: Cấu hình các trang web mà tiện ích mở rộng sẽ hoạt động
+      enterUrlPattern: Nhập mẫu URL (ví dụ example.com)
+      urlPattern: Mẫu URL
   overlayTools:
     title: Công cụ nổi
     floatingButton:

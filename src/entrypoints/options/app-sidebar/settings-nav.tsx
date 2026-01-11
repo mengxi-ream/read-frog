@@ -39,6 +39,15 @@ export function SettingsNav() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
+            <SidebarMenuButton asChild isActive={pathname === '/site-control'}>
+              <Link to="/site-control">
+                <Icon icon="tabler:world-check" />
+                <span>{i18n.t('options.siteControl.title')}</span>
+              </Link>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
             <SidebarMenuButton asChild isActive={pathname === '/api-providers'}>
               <Link to="/api-providers">
                 <Icon icon="tabler:api" />

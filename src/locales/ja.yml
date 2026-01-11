@@ -165,6 +165,18 @@ options:
         confirm: 確認
         cancel: キャンセル
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
+  siteControl:
+    title: サイト制御
+    mode:
+      title: 拡張機能の有効化モード
+      description: 拡張機能をすべてのサイトで実行するか、特定のサイトでのみ実行するかを選択します
+      all: すべてのサイトで実行
+      whitelist: リストされたサイトでのみ実行（ホワイトリスト）
+    patterns:
+      title: 有効なサイト
+      description: 拡張機能を有効にするウェブサイトを設定します
+      enterUrlPattern: URLパターンを入力（例：example.com）
+      urlPattern: URLパターン
   overlayTools:
     title: オーバーレイツール
     floatingButton:

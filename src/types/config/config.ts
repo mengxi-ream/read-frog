@@ -79,6 +79,12 @@ export type InputTranslationLang = z.infer<typeof inputTranslationLangSchema>
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>
 export type SubtitlesTranslationPosition = z.infer<typeof subtitlesTranslationPositionSchema>
 
+// site control schema
+const siteControlSchema = z.object({
+  mode: z.enum(['all', 'whitelist']),
+  patterns: z.array(z.string()),
+})
+
 // Complete config schema
 export const configSchema = z.object({
   language: languageSchema,
@@ -93,6 +99,7 @@ export const configSchema = z.object({
   contextMenu: contextMenuSchema,
   inputTranslation: inputTranslationSchema,
   videoSubtitles: videoSubtitlesSchema,
+  siteControl: siteControlSchema,
 }).superRefine((data, ctx) => {
   const providerIdsSet = new Set(data.providersConfig.map(p => p.id))
   const providerIds = Array.from(providerIdsSet)

@@ -167,6 +167,18 @@ options:
         confirm: Confirm
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
+  siteControl:
+    title: Site Control
+    mode:
+      title: Extension Activation Mode
+      description: Choose whether the extension runs on all sites or only on specific sites
+      all: Run on all sites
+      whitelist: Only run on listed sites (Whitelist)
+    patterns:
+      title: Enabled Sites
+      description: Configure websites where the extension should be active
+      enterUrlPattern: Enter URL pattern (e.g., example.com)
+      urlPattern: URL Pattern
   overlayTools:
     title: Overlay Tools
     floatingButton:

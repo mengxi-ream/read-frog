@@ -166,6 +166,18 @@ options:
         confirm: 확인
         cancel: 취소
         description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
+  siteControl:
+    title: 사이트 제어
+    mode:
+      title: 확장 프로그램 활성화 모드
+      description: 확장 프로그램을 모든 사이트에서 실행할지 특정 사이트에서만 실행할지 선택합니다
+      all: 모든 사이트에서 실행
+      whitelist: 나열된 사이트에서만 실행 (화이트리스트)
+    patterns:
+      title: 활성화된 사이트
+      description: 확장 프로그램이 활성화될 웹사이트를 설정합니다
+      enterUrlPattern: 'URL 패턴 입력 (예: example.com)'
+      urlPattern: URL 패턴
   overlayTools:
     title: 오버레이 도구
     floatingButton:

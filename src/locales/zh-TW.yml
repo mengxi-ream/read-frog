@@ -166,6 +166,18 @@ options:
         confirm: 確認
         cancel: 取消
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
+  siteControl:
+    title: 站點控制
+    mode:
+      title: 擴充功能啟動模式
+      description: 選擇擴充功能是在所有站點執行還是僅在指定站點執行
+      all: 在所有站點執行
+      whitelist: 僅在列出的站點執行（白名單）
+    patterns:
+      title: 啟用的站點
+      description: 設定擴充功能應該啟動的網站
+      enterUrlPattern: 輸入 URL 模式（例如 example.com）
+      urlPattern: URL 模式
   overlayTools:
     title: 懸浮工具
     floatingButton:

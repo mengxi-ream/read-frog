@@ -167,6 +167,18 @@ options:
         confirm: Onayla
         cancel: İptal
         description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
+  siteControl:
+    title: Site Kontrolü
+    mode:
+      title: Uzantı Etkinleştirme Modu
+      description: Uzantının tüm sitelerde mi yoksa yalnızca belirli sitelerde mi çalışacağını seçin
+      all: Tüm sitelerde çalıştır
+      whitelist: Yalnızca listelenen sitelerde çalıştır (Beyaz Liste)
+    patterns:
+      title: Etkin Siteler
+      description: Uzantının etkin olması gereken web sitelerini yapılandırın
+      enterUrlPattern: URL deseni girin (örn. example.com)
+      urlPattern: URL Deseni
   overlayTools:
     title: Kaplama Araçları
     floatingButton:
