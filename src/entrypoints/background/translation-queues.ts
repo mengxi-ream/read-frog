@@ -240,4 +240,14 @@ export async function setUpSubtitlesTranslationQueue() {
 
     return result
   })
+
+  onMessage('setTranslateRequestQueueConfig', (message) => {
+    const { data } = message
+    requestQueue.setQueueOptions(data)
+  })
+
+  onMessage('setTranslateBatchQueueConfig', (message) => {
+    const { data } = message
+    batchQueue.setBatchConfig(data)
+  })
 }
