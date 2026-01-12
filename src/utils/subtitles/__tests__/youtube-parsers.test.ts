@@ -200,6 +200,8 @@ describe('youTube Subtitle Parsers', () => {
       expect(result).toHaveLength(1)
       expect(result[0].text).toBe('テスト文章。')
       expect(result[0].start).toBe(1000)
+      // end = last seg start (3000 + 500) + ESTIMATED_WORD_DURATION_MS (200) = 3700
+      expect(result[0].end).toBe(3700)
     })
 
     it('should split on sentence boundary with separator events', () => {
