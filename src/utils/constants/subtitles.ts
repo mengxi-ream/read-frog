@@ -7,12 +7,13 @@ export const PAUSE_TIMEOUT_MS = 1_000
 
 // Segmentation constants
 export const MAX_WORDS = 15
+export const MAX_WORDS_EXTENDED = 25
 export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
 
 // Batch translation constants
 export const FIRST_BATCH_DURATION_MS = 100_000
 export const SUBSEQUENT_BATCH_DURATION_MS = 60_000
-export const PRELOAD_AHEAD_MS = 30_000
+export const PRELOAD_AHEAD_MS = 40_000
 
 // DOM IDs
 export const TRANSLATE_BUTTON_CONTAINER_ID = 'read-frog-subtitles-translate-button-container'

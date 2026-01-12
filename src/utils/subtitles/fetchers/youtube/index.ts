@@ -107,7 +107,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
         return parseKaraokeSubtitles(events)
       case 'scrolling-asr':
       {
-        const fragments = parseScrollingAsrSubtitles(events)
+        const fragments = parseScrollingAsrSubtitles(events, this.sourceLanguage)
         return optimizeSubtitles(fragments, this.sourceLanguage)
       }
       default:
