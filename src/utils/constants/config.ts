@@ -52,6 +52,8 @@ export const DEFAULT_CONFIG: Config = {
       },
       minCharactersPerNode: DEFAULT_MIN_CHARACTERS_PER_NODE,
       minWordsPerNode: DEFAULT_MIN_WORDS_PER_NODE,
+      skipLanguages: [],
+      enableSkipLanguagesLLMDetection: false,
     },
     enableAIContentAware: false,
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,

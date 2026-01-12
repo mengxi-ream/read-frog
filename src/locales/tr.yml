@@ -377,6 +377,12 @@ options:
       selectLanguages: Dilleri seçin
       enableLLMDetection: Dil algılama için LLM kullan
       enableLLMDetectionDescription: Doğruluğu artırır ancak gecikme ve API maliyetleri ekler. LLM çeviri sağlayıcısı ve yapılandırılmış otomatik çeviri dilleri gerektirir.
+    skipLanguages:
+      title: Belirli Dillerde Çeviriyi Atla
+      description: Bu dillerdeki paragrafların çevirisini atla
+      selectLanguages: Dilleri seçin
+      enableLLMDetection: Dil algılama için LLM kullan
+      enableLLMDetectionDescription: Paragraf dilini daha doğru algılamak için LLM kullanır. Her paragraf için gecikme ve API maliyeti ekler. LLM çeviri sağlayıcısı gerektirir.
     aiContentAware:
       title: AI Akıllı Bağlam Çevirisi
       description: AI'ya makale bağlamı sağlayarak çeviri kalitesini artırın

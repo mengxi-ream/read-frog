@@ -9,7 +9,8 @@ import { toast } from 'sonner'
 import { isAPIProviderConfig, isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { getDetectedCodeFromStorage, getFinalSourceCode } from '@/utils/config/languages'
-import { removeDummyNodes } from '@/utils/content/utils'
+import { detectLanguageWithLLM } from '@/utils/content/analyze'
+import { cleanText, removeDummyNodes } from '@/utils/content/utils'
 import { logger } from '@/utils/logger'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getLocalConfig } from '../../config/storage'
@@ -17,6 +18,44 @@ import { Sha256Hex } from '../../hash'
 import { sendMessage } from '../../message'
 
 const MIN_LENGTH_FOR_LANG_DETECTION = 50
+const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
+const MAX_LENGTH_FOR_SKIP_LLM_DETECTION = 500
+
+/**
+ * Check if text should be skipped based on language detection
+ * @returns true if text language is in skipLanguages list
+ */
+async function shouldSkipByLanguage(
+  text: string,
+  skipLanguages: LangCodeISO6393[],
+  enableLLMDetection: boolean,
+  providerConfig: ProviderConfig,
+): Promise<boolean> {
+  let detectedLang: LangCodeISO6393 | 'und' | null = null
+
+  // Try LLM detection first if enabled and provider supports it
+  if (enableLLMDetection && isLLMTranslateProviderConfig(providerConfig)) {
+    try {
+      const textForLLM = cleanText(text, MAX_LENGTH_FOR_SKIP_LLM_DETECTION)
+      detectedLang = await detectLanguageWithLLM(textForLLM)
+    }
+    catch (error) {
+      logger.warn('LLM detection failed for skipLanguages check, falling back to franc:', error)
+    }
+  }
+
+  // Fallback to franc
+  if (!detectedLang || detectedLang === 'und') {
+    const francResult = franc(text)
+    detectedLang = francResult === 'und' ? null : (francResult as LangCodeISO6393)
+  }
+
+  if (!detectedLang) {
+    return false
+  }
+
+  return skipLanguages.includes(detectedLang)
+}
 
 // Module-level cache for article data (only meaningful in content script context)
 let cachedArticleData: {
@@ -158,6 +197,21 @@ async function translateTextCore(options: TranslateTextOptions): Promise<string>
     const detectedLang = franc(text)
     if (detectedLang === langConfig.targetCode) {
       logger.info(`translateTextCore: skipping translation because text is already in target language. text: ${text}`)
+      return ''
+    }
+  }
+
+  // Skip translation if text is in skipLanguages list
+  const { skipLanguages, enableSkipLanguagesLLMDetection } = config.translate.page
+  if (skipLanguages.length > 0 && text.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
+    const shouldSkip = await shouldSkipByLanguage(
+      text,
+      skipLanguages,
+      enableSkipLanguagesLLMDetection,
+      providerConfig,
+    )
+    if (shouldSkip) {
+      logger.info(`translateTextCore: skipping translation because text is in skip language list. text: ${text}`)
       return ''
     }
   }
