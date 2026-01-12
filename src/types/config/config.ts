@@ -57,11 +57,25 @@ const inputTranslationSchema = z.object({
   timeThreshold: z.number().min(100).max(1000),
 })
 
+// video subtitles style schema
+const subtitlesDisplayModeSchema = z.enum(['bilingual', 'originalOnly', 'translationOnly'])
+const subtitlesTranslationPositionSchema = z.enum(['above', 'below'])
+
+const subtitlesStyleSchema = z.object({
+  displayMode: subtitlesDisplayModeSchema,
+  translationPosition: subtitlesTranslationPositionSchema,
+})
+
 // video subtitles schema
 const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
   autoStart: z.boolean(),
+  style: subtitlesStyleSchema,
 })
+
+// Export types for use in components
+export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>
+export type SubtitlesTranslationPosition = z.infer<typeof subtitlesTranslationPositionSchema>
 
 // Complete config schema
 export const configSchema = z.object({

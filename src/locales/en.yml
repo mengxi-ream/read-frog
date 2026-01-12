@@ -512,6 +512,24 @@ options:
     enableDescription: When enabled, a translation button will appear in the YouTube player controls. Click it to start translating subtitles.
     autoStart: Auto-Enable Subtitles
     autoStartDescription: Automatically enable subtitle translation when the video is loaded.
+    style:
+      title: Subtitle Style
+      description: Customize subtitle appearance
+      preview: Preview
+      displayMode:
+        title: Display Mode
+        bilingual: Bilingual
+        bilingualDescription: Show both original and translation
+        originalOnly: Original Only
+        originalOnlyDescription: Show original text only
+        translationOnly: Translation Only
+        translationOnlyDescription: Show translation only
+      translationPosition:
+        title: Translation Position
+        above: Above
+        aboveDescription: Translation above original
+        below: Below
+        belowDescription: Translation below original
   whatsNew:
     title: What's New
   survey:

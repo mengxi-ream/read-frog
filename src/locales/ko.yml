@@ -509,6 +509,24 @@ options:
     enableDescription: 활성화하면 YouTube 플레이어 컨트롤 바에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
     autoStart: 자막 자동 활성화
     autoStartDescription: 비디오가 로드되면 자동으로 자막 번역을 활성화합니다.
+    style:
+      title: 자막 스타일
+      description: 자막 외관 사용자 지정
+      preview: 미리보기
+      displayMode:
+        title: 표시 모드
+        bilingual: 이중 언어
+        bilingualDescription: 원문과 번역을 모두 표시
+        originalOnly: 원문만
+        originalOnlyDescription: 원문만 표시
+        translationOnly: 번역만
+        translationOnlyDescription: 번역만 표시
+      translationPosition:
+        title: 번역 위치
+        above: 위
+        aboveDescription: 번역을 원문 위에 표시
+        below: 아래
+        belowDescription: 번역을 원문 아래에 표시
   whatsNew:
     title: 새로운 기능
   survey:
