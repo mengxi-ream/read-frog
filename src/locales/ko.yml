@@ -516,17 +516,12 @@ options:
       displayMode:
         title: 표시 모드
         bilingual: 이중 언어
-        bilingualDescription: 원문과 번역을 모두 표시
         originalOnly: 원문만
-        originalOnlyDescription: 원문만 표시
         translationOnly: 번역만
-        translationOnlyDescription: 번역만 표시
       translationPosition:
         title: 번역 위치
         above: 위
-        aboveDescription: 번역을 원문 위에 표시
         below: 아래
-        belowDescription: 번역을 원문 아래에 표시
   whatsNew:
     title: 새로운 기능
   survey:

@@ -519,17 +519,12 @@ options:
       displayMode:
         title: Display Mode
         bilingual: Bilingual
-        bilingualDescription: Show both original and translation
         originalOnly: Original Only
-        originalOnlyDescription: Show original text only
         translationOnly: Translation Only
-        translationOnlyDescription: Show translation only
       translationPosition:
         title: Translation Position
         above: Above
-        aboveDescription: Translation above original
         below: Below
-        belowDescription: Translation below original
   whatsNew:
     title: What's New
   survey:

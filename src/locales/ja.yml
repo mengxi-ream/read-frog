@@ -515,17 +515,12 @@ options:
       displayMode:
         title: 表示モード
         bilingual: バイリンガル
-        bilingualDescription: 原文と翻訳を両方表示
         originalOnly: 原文のみ
-        originalOnlyDescription: 原文のみ表示
         translationOnly: 翻訳のみ
-        translationOnlyDescription: 翻訳のみ表示
       translationPosition:
         title: 翻訳の位置
         above: 上
-        aboveDescription: 翻訳を原文の上に表示
         below: 下
-        belowDescription: 翻訳を原文の下に表示
   whatsNew:
     title: 新機能
   survey:

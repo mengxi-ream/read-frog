@@ -517,17 +517,12 @@ options:
       displayMode:
         title: Görüntüleme Modu
         bilingual: İki Dilli
-        bilingualDescription: Hem orijinal hem çeviri göster
         originalOnly: Sadece Orijinal
-        originalOnlyDescription: Sadece orijinal metni göster
         translationOnly: Sadece Çeviri
-        translationOnlyDescription: Sadece çeviriyi göster
       translationPosition:
         title: Çeviri Konumu
         above: Üstte
-        aboveDescription: Çeviri orijinalin üstünde
         below: Altta
-        belowDescription: Çeviri orijinalin altında
   whatsNew:
     title: Yenilikler
   survey:

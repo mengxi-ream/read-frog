@@ -517,17 +517,12 @@ options:
       displayMode:
         title: Chế độ hiển thị
         bilingual: Song ngữ
-        bilingualDescription: Hiển thị cả bản gốc và bản dịch
         originalOnly: Chỉ bản gốc
-        originalOnlyDescription: Chỉ hiển thị văn bản gốc
         translationOnly: Chỉ bản dịch
-        translationOnlyDescription: Chỉ hiển thị bản dịch
       translationPosition:
         title: Vị trí bản dịch
         above: Phía trên
-        aboveDescription: Bản dịch ở trên bản gốc
         below: Phía dưới
-        belowDescription: Bản dịch ở dưới bản gốc
   whatsNew:
     title: Có gì mới
   survey:

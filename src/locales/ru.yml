@@ -517,17 +517,12 @@ options:
       displayMode:
         title: Режим отображения
         bilingual: Двуязычный
-        bilingualDescription: Показывать оригинал и перевод
         originalOnly: Только оригинал
-        originalOnlyDescription: Показывать только оригинальный текст
         translationOnly: Только перевод
-        translationOnlyDescription: Показывать только перевод
       translationPosition:
         title: Позиция перевода
         above: Сверху
-        aboveDescription: Перевод над оригиналом
         below: Снизу
-        belowDescription: Перевод под оригиналом
   whatsNew:
     title: Что нового
   survey:

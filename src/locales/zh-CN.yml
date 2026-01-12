@@ -518,17 +518,12 @@ options:
       displayMode:
         title: 显示模式
         bilingual: 双语模式
-        bilingualDescription: 同时显示原文和译文
         originalOnly: 仅原文
-        originalOnlyDescription: 只显示原文
         translationOnly: 仅译文
-        translationOnlyDescription: 只显示译文
       translationPosition:
         title: 译文位置
         above: 上方
-        aboveDescription: 译文在原文上方
         below: 下方
-        belowDescription: 译文在原文下方
   whatsNew:
     title: 最近更新
   survey:
