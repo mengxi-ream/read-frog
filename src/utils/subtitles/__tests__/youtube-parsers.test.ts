@@ -305,6 +305,52 @@ describe('youTube Subtitle Parsers', () => {
       expect(result).toHaveLength(1)
       expect(result[0].text).toBe('Valid')
     })
+
+    it('should split CJK lyrics at character limit when no punctuation', () => {
+      // Japanese lyrics without sentence-ending punctuation
+      // MAX_CHARS_CJK = 30, so text longer than 30 chars should trigger split
+      const events: YoutubeTimedText[] = [
+        {
+          tStartMs: 1280,
+          dDurationMs: 6190,
+          wWinId: 1,
+          segs: [
+            { utf8: '水溜り' }, // 3
+            { utf8: '映る', tOffsetMs: 1000 }, // 2 -> 5
+            { utf8: '光', tOffsetMs: 1919 }, // 1 -> 6
+            { utf8: 'に', tOffsetMs: 2400 }, // 1 -> 7
+            { utf8: '鮮やか', tOffsetMs: 3400 }, // 3 -> 10
+            { utf8: 'な', tOffsetMs: 3960 }, // 1 -> 11
+          ],
+        },
+        { tStartMs: 7470, dDurationMs: 9490, wWinId: 1, aAppend: 1, segs: [{ utf8: '\n' }] },
+        {
+          tStartMs: 7480,
+          dDurationMs: 9470,
+          wWinId: 1,
+          segs: [
+            { utf8: '景色' }, // 2 -> 13
+            { utf8: '君', tOffsetMs: 1400 }, // 1 -> 14
+            { utf8: '笑えば', tOffsetMs: 2400 }, // 3 -> 17
+            { utf8: 'ほら', tOffsetMs: 3520 }, // 2 -> 19
+            { utf8: '雨', tOffsetMs: 4440 }, // 1 -> 20
+            { utf8: 'の', tOffsetMs: 5239 }, // 1 -> 21
+            { utf8: 'れて', tOffsetMs: 6159 }, // 2 -> 23
+            { utf8: '虹', tOffsetMs: 6520 }, // 1 -> 24
+            { utf8: 'が', tOffsetMs: 7159 }, // 1 -> 25
+            { utf8: 'かかる', tOffsetMs: 8000 }, // 3 -> 28
+            { utf8: 'ワン', tOffsetMs: 9000 }, // 2 -> 30 (triggers split)
+            { utf8: 'ツー', tOffsetMs: 9400 }, // 2
+          ],
+        },
+        { tStartMs: 16950, dDurationMs: 5370, wWinId: 1, aAppend: 1, segs: [{ utf8: '\n' }] },
+      ]
+      const result = parseScrollingAsrSubtitles(events, 'ja')
+
+      // Should split when character count reaches 30
+      expect(result.length).toBeGreaterThan(1)
+      expect(result[0].text.length).toBeLessThanOrEqual(30)
+    })
   })
 
   describe('standard Format + Optimizer', () => {

@@ -1,15 +1,12 @@
 import type { SubtitlesFragment } from '../../../types'
 import type { YoutubeTimedText } from '../types'
-import { MAX_WORDS_EXTENDED, SENTENCE_END_PATTERN } from '@/utils/constants/subtitles'
+import { SENTENCE_END_PATTERN } from '@/utils/constants/subtitles'
+import { getMaxLength, getTextLength, isCJKLanguage } from '@/utils/subtitles/utils'
 
 const ESTIMATED_WORD_DURATION_MS = 200
 
 function isSpecialTag(text: string): boolean {
   return text.startsWith('[') && text.endsWith(']')
-}
-
-function getWordCount(text: string): number {
-  return text.split(/\s+/).filter(Boolean).length
 }
 
 function pushFragment(result: SubtitlesFragment[], fragment: SubtitlesFragment) {
@@ -19,6 +16,20 @@ function pushFragment(result: SubtitlesFragment[], fragment: SubtitlesFragment) 
     last.end = fragment.start
   }
   result.push(fragment)
+}
+
+function flushPendingFragment(
+  result: SubtitlesFragment[],
+  currentText: string,
+  currentStart: number,
+  lastSegEnd: number,
+): boolean {
+  const trimmed = currentText.trim()
+  if (trimmed && !isSpecialTag(trimmed)) {
+    pushFragment(result, { text: trimmed, start: currentStart, end: lastSegEnd })
+    return true
+  }
+  return false
 }
 
 /**
@@ -34,6 +45,8 @@ export function parseScrollingAsrSubtitles(
 ): SubtitlesFragment[] {
   const result: SubtitlesFragment[] = []
   const isSpaceSeparated = lang?.startsWith('en') || false
+  const isCJK = isCJKLanguage(lang)
+  const maxLength = getMaxLength(isCJK, true)
 
   // Cross-event buffer
   let currentText = ''
@@ -49,14 +62,7 @@ export function parseScrollingAsrSubtitles(
         lastSegEnd = event.tStartMs + (event.dDurationMs || 0)
 
         if (pendingSplit) {
-          const trimmed = currentText.trim()
-          if (trimmed && !isSpecialTag(trimmed)) {
-            pushFragment(result, {
-              text: trimmed,
-              start: currentStart,
-              end: lastSegEnd,
-            })
-          }
+          flushPendingFragment(result, currentText, currentStart, lastSegEnd)
           currentText = ''
           isFirstSeg = true
           pendingSplit = false
@@ -70,14 +76,7 @@ export function parseScrollingAsrSubtitles(
 
     // If pending split and starting new event, output current fragment first
     if (pendingSplit && currentText) {
-      const trimmed = currentText.trim()
-      if (trimmed && !isSpecialTag(trimmed)) {
-        pushFragment(result, {
-          text: trimmed,
-          start: currentStart,
-          end: lastSegEnd,
-        })
-      }
+      flushPendingFragment(result, currentText, currentStart, lastSegEnd)
       currentText = ''
       isFirstSeg = true
       pendingSplit = false
@@ -92,14 +91,7 @@ export function parseScrollingAsrSubtitles(
 
       // If pending split and this is a new seg, output current fragment first
       if (pendingSplit && currentText) {
-        const trimmed = currentText.trim()
-        if (trimmed && !isSpecialTag(trimmed)) {
-          pushFragment(result, {
-            text: trimmed,
-            start: currentStart,
-            end: lastSegEnd,
-          })
-        }
+        flushPendingFragment(result, currentText, currentStart, lastSegEnd)
         currentText = ''
         isFirstSeg = true
         pendingSplit = false
@@ -122,26 +114,17 @@ export function parseScrollingAsrSubtitles(
       lastSegEnd = segStart + ESTIMATED_WORD_DURATION_MS
 
       const isSentenceEnd = SENTENCE_END_PATTERN.test(text.trim())
-      const wordCount = getWordCount(currentText)
+      const textLength = getTextLength(currentText, isCJK)
 
-      // Mark pending split at sentence boundaries or word limit
-      if (isSentenceEnd || wordCount >= MAX_WORDS_EXTENDED) {
+      // Mark pending split at sentence boundaries or length limit
+      if (isSentenceEnd || textLength >= maxLength) {
         pendingSplit = true
       }
     }
   }
 
   // Handle remaining text after all events
-  if (currentText.trim()) {
-    const trimmed = currentText.trim()
-    if (!isSpecialTag(trimmed)) {
-      pushFragment(result, {
-        text: trimmed,
-        start: currentStart,
-        end: lastSegEnd,
-      })
-    }
-  }
+  flushPendingFragment(result, currentText, currentStart, lastSegEnd)
 
   return result
 }

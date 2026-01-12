@@ -1,5 +1,6 @@
 import type { SubtitlesFragment } from '../types'
-import { MAX_WORDS, PAUSE_TIMEOUT_MS, SENTENCE_END_PATTERN } from '@/utils/constants/subtitles'
+import { PAUSE_TIMEOUT_MS, SENTENCE_END_PATTERN } from '@/utils/constants/subtitles'
+import { getMaxLength, getTextLength, isCJKLanguage } from '@/utils/subtitles/utils'
 
 const QUALITY_LENGTH_THRESHOLD = 250
 const QUALITY_PERCENTAGE_THRESHOLD = 0.2
@@ -49,14 +50,6 @@ const PAUSE_WORDS = new Set([
   'while',
 ])
 
-function isCJKLanguage(lang: string): boolean {
-  return ['zh', 'ja', 'ko', 'th', 'lo', 'km', 'my'].some(l => lang.startsWith(l))
-}
-
-function getWordCount(text: string): number {
-  return text.split(/\s+/).filter(Boolean).length
-}
-
 function cleanText(text: string): string {
   return text.replace(/^>>\s*/, '').replace(/>>/g, ' ').trim()
 }
@@ -85,8 +78,10 @@ function processSubtitles(
 ): SubtitlesFragment[] {
   const result: SubtitlesFragment[] = []
   const buffer: BufferSegment[] = []
-  let bufferWordCount = 0
-  const separator = isCJKLanguage(language) ? '' : ' '
+  let bufferLength = 0
+  const isCJK = isCJKLanguage(language)
+  const separator = isCJK ? '' : ' '
+  const maxLength = getMaxLength(isCJK)
 
   const flushBuffer = () => {
     if (buffer.length === 0)
@@ -97,7 +92,7 @@ function processSubtitles(
       end: buffer[buffer.length - 1].end,
     })
     buffer.length = 0
-    bufferWordCount = 0
+    bufferLength = 0
   }
 
   for (let i = 0; i < fragments.length; i++) {
@@ -108,13 +103,13 @@ function processSubtitles(
     const text = cleanText(frag.text)
     if (!text)
       continue
-    const fragWordCount = getWordCount(text)
+    const fragLength = getTextLength(text, isCJK)
     const lastSegment = buffer[buffer.length - 1]
 
     if (lastSegment) {
       const isEndOfSentence = SENTENCE_END_PATTERN.test(lastSegment.text)
       const isTimeout = frag.start - lastSegment.end > PAUSE_TIMEOUT_MS
-      const wouldExceedLimit = bufferWordCount + fragWordCount > MAX_WORDS
+      const wouldExceedLimit = bufferLength + fragLength > maxLength
 
       const startsWithSign = /^[[(♪]/.test(frag.text)
       const startsWithPauseWord = usePause
@@ -127,7 +122,7 @@ function processSubtitles(
     }
 
     buffer.push({ text, start: frag.start, end: frag.end })
-    bufferWordCount += fragWordCount
+    bufferLength += fragLength
   }
 
   flushBuffer()
