@@ -5,12 +5,12 @@ import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { getLocalConfig } from '@/utils/config/storage'
 import { Sha256Hex } from '@/utils/hash'
-import { buildHashComponents, getOrFetchArticleData } from '@/utils/host/translate/translate-text'
+import { buildHashComponents } from '@/utils/host/translate/translate-text'
 import { sendMessage } from '@/utils/message'
 
 export interface TranslateContext {
   enableContext: boolean
-  articleTitle: string
+  videoTitle: string
   subtitlesTextContent: string
 }
 
@@ -20,20 +20,20 @@ async function initializeContext(
   fragments: SubtitlesFragment[],
 ): Promise<TranslateContext> {
   const enableContext = !!config?.translate.enableAIContentAware
-  let articleTitle = ''
+  let videoTitle = ''
   let subtitlesTextContent = ''
 
-  if (providerConfig && isLLMTranslateProviderConfig(providerConfig) && enableContext) {
-    const articleData = await getOrFetchArticleData(enableContext)
-    if (articleData) {
-      articleTitle = articleData.title
-    }
+  const isLLM = providerConfig && isLLMTranslateProviderConfig(providerConfig)
+
+  if (isLLM && enableContext) {
+    videoTitle = document.title || ''
+
     if (fragments.length > 0) {
       subtitlesTextContent = fragments.map(s => s.text).join('\n')
     }
   }
 
-  return { enableContext, articleTitle, subtitlesTextContent }
+  return { enableContext, videoTitle, subtitlesTextContent }
 }
 
 async function translateSingleSubtitle(
@@ -47,17 +47,17 @@ async function translateSingleSubtitle(
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     context.enableContext,
-    { title: context.articleTitle, textContent: context.subtitlesTextContent },
+    { title: context.videoTitle, textContent: context.subtitlesTextContent },
   )
 
-  return await sendMessage('enqueueTranslateRequest', {
+  return await sendMessage('enqueueSubtitlesTranslateRequest', {
     text,
     langConfig,
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
-    articleTitle: context.articleTitle,
-    articleTextContent: context.subtitlesTextContent,
+    videoTitle: context.videoTitle,
+    subtitlesContext: context.subtitlesTextContent,
   })
 }
 
