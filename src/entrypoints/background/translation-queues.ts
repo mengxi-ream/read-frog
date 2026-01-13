@@ -20,6 +20,57 @@ export function parseBatchResult(result: string): string[] {
   return result.split(BATCH_SEPARATOR).map(t => t.trim())
 }
 
+async function getOrGenerateSummary(
+  title: string,
+  textContent: string,
+  providerConfig: LLMTranslateProviderConfig,
+  requestQueue: RequestQueue,
+): Promise<string | undefined> {
+  const preparedText = cleanText(textContent)
+  if (!preparedText) {
+    return undefined
+  }
+
+  const textHash = Sha256Hex(preparedText)
+  const cacheKey = Sha256Hex(textHash, JSON.stringify(providerConfig))
+
+  const cached = await db.articleSummaryCache.get(cacheKey)
+  if (cached) {
+    logger.info('Using cached summary')
+    return cached.summary
+  }
+
+  const thunk = async () => {
+    const cachedAgain = await db.articleSummaryCache.get(cacheKey)
+    if (cachedAgain) {
+      return cachedAgain.summary
+    }
+
+    const summary = await generateArticleSummary(title, textContent, providerConfig)
+    if (!summary) {
+      return ''
+    }
+
+    await db.articleSummaryCache.put({
+      key: cacheKey,
+      summary,
+      createdAt: new Date(),
+    })
+
+    logger.info('Generated and cached new summary')
+    return summary
+  }
+
+  try {
+    const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey)
+    return summary || undefined
+  }
+  catch (error) {
+    logger.warn('Failed to get/generate summary:', error)
+    return undefined
+  }
+}
+
 interface TranslateBatchData {
   text: string
   langConfig: Config['language']
@@ -29,7 +80,7 @@ interface TranslateBatchData {
   content?: ArticleContent
 }
 
-export async function setUpRequestQueue() {
+async function createTranslationQueues() {
   const config = await ensureInitializedConfig()
   const { translate: { requestQueueConfig: { rate, capacity }, batchQueueConfig: { maxCharactersPerBatch, maxItemsPerBatch } } } = config ?? DEFAULT_CONFIG
 
@@ -41,66 +92,6 @@ export async function setUpRequestQueue() {
     baseRetryDelayMs: 1_000,
   })
 
-  /**
-   * Get cached summary or generate a new one (using requestQueue for deduplication)
-   */
-  async function getOrGenerateSummary(
-    articleTitle: string,
-    articleTextContent: string,
-    providerConfig: LLMTranslateProviderConfig,
-  ): Promise<string | undefined> {
-    // Prepare text for cache key
-    const preparedText = cleanText(articleTextContent)
-    if (!preparedText) {
-      return undefined
-    }
-
-    // Generate cache key from text content hash and provider config
-    const textHash = Sha256Hex(preparedText)
-    const cacheKey = Sha256Hex(textHash, JSON.stringify(providerConfig))
-
-    // Check cache first
-    const cached = await db.articleSummaryCache.get(cacheKey)
-    if (cached) {
-      logger.info('Using cached article summary')
-      return cached.summary
-    }
-
-    // Use requestQueue to deduplicate concurrent summary generation requests
-    const thunk = async () => {
-      // Double-check cache inside thunk (another request might have cached it)
-      const cachedAgain = await db.articleSummaryCache.get(cacheKey)
-      if (cachedAgain) {
-        return cachedAgain.summary
-      }
-
-      // Generate new summary
-      const summary = await generateArticleSummary(articleTitle, articleTextContent, providerConfig)
-      if (!summary) {
-        return ''
-      }
-
-      // Cache the summary
-      await db.articleSummaryCache.put({
-        key: cacheKey,
-        summary,
-        createdAt: new Date(),
-      })
-
-      logger.info('Generated and cached new article summary')
-      return summary
-    }
-
-    try {
-      const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey)
-      return summary || undefined
-    }
-    catch (error) {
-      logger.warn('Failed to get/generate article summary:', error)
-      return undefined
-    }
-  }
-
   const batchQueue = new BatchQueue<TranslateBatchData, string>({
     maxCharactersPerBatch,
     maxItemsPerBatch,
@@ -110,9 +101,7 @@ export async function setUpRequestQueue() {
     getBatchKey: (data) => {
       return Sha256Hex(`${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`)
     },
-    getCharacters: (data) => {
-      return data.text.length
-    },
+    getCharacters: data => data.text.length,
     executeBatch: async (dataList) => {
       const { langConfig, providerConfig, content } = dataList[0]
       const texts = dataList.map(d => d.text)
@@ -145,6 +134,12 @@ export async function setUpRequestQueue() {
     },
   })
 
+  return { requestQueue, batchQueue }
+}
+
+export async function setUpRequestQueue() {
+  const { requestQueue, batchQueue } = await createTranslationQueues()
+
   onMessage('enqueueTranslateRequest', async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, articleTitle, articleTextContent } } = message
 
@@ -165,7 +160,7 @@ export async function setUpRequestQueue() {
       // Generate or fetch cached summary if AI Content Aware is enabled
       const config = await ensureInitializedConfig()
       if (config?.translate.enableAIContentAware && articleTitle !== undefined && articleTextContent !== undefined) {
-        content.summary = await getOrGenerateSummary(articleTitle, articleTextContent, providerConfig)
+        content.summary = await getOrGenerateSummary(articleTitle, articleTextContent, providerConfig, requestQueue)
       }
 
       const data = { text, langConfig, providerConfig, hash, scheduleAt, content }
@@ -178,6 +173,63 @@ export async function setUpRequestQueue() {
     }
 
     // Cache the translation result if successful
+    if (result && hash) {
+      await db.translationCache.put({
+        key: hash,
+        translation: result,
+        createdAt: new Date(),
+      })
+    }
+
+    return result
+  })
+
+  onMessage('setTranslateRequestQueueConfig', (message) => {
+    const { data } = message
+    requestQueue.setQueueOptions(data)
+  })
+
+  onMessage('setTranslateBatchQueueConfig', (message) => {
+    const { data } = message
+    batchQueue.setBatchConfig(data)
+  })
+}
+
+/**
+ * Set up subtitles translation queue and message handlers
+ */
+export async function setUpSubtitlesTranslationQueue() {
+  const { requestQueue, batchQueue } = await createTranslationQueues()
+
+  onMessage('enqueueSubtitlesTranslateRequest', async (message) => {
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, subtitlesContext } } = message
+
+    if (hash) {
+      const cached = await db.translationCache.get(hash)
+      if (cached) {
+        return cached.translation
+      }
+    }
+
+    let result = ''
+    const content: ArticleContent = {
+      title: videoTitle || '',
+    }
+
+    if (isLLMTranslateProviderConfig(providerConfig)) {
+      const config = await ensureInitializedConfig()
+      if (config?.translate.enableAIContentAware && videoTitle && subtitlesContext) {
+        content.summary = await getOrGenerateSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
+      }
+
+      const data = { text, langConfig, providerConfig, hash, scheduleAt, content }
+      result = await batchQueue.enqueue(data)
+    }
+    else {
+      const thunk = () => executeTranslate(text, langConfig, providerConfig)
+      result = await requestQueue.enqueue(thunk, scheduleAt, hash)
+    }
+
     if (result && hash) {
       await db.translationCache.put({
         key: hash,
