@@ -12,7 +12,7 @@ export const MAX_CHARS_CJK = 30
 export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
 
 // Batch translation constants
-export const FIRST_BATCH_DURATION_MS = 100_000
+export const FIRST_BATCH_DURATION_MS = 50_000
 export const SUBSEQUENT_BATCH_DURATION_MS = 60_000
 export const PRELOAD_AHEAD_MS = 40_000
 
