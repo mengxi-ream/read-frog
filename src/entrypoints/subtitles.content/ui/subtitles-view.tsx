@@ -1,50 +1,34 @@
 import { Icon } from '@iconify/react'
 import { useAtomValue } from 'jotai'
-import { cn } from '@/lib/utils'
+import { Activity } from 'react'
+import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { SUBTITLES_VIEW_CLASS } from '@/utils/constants/subtitles'
 import { currentSubtitleAtom } from '../atoms'
+import { MainSubtitle, TranslationSubtitle } from './subtitle-lines'
 import { useVerticalDrag } from './use-vertical-drag'
 
 function SubtitlesContent() {
   const subtitle = useAtomValue(currentSubtitleAtom)
+  const { style: { displayMode, translationPosition } } = useAtomValue(configFieldsAtomMap.videoSubtitles)
 
-  if (!subtitle) {
+  if (!subtitle)
     return null
-  }
 
-  const originalLines = subtitle.text.split('\n').filter(line => line.trim())
-  const translationLines = subtitle.translation
-    ? subtitle.translation.split('\n').filter(line => line.trim())
-    : []
+  const translationAbove = translationPosition === 'above'
+  const showMain = displayMode !== 'translationOnly'
+  const showTranslation = displayMode !== 'originalOnly'
 
   return (
     <div className={`${SUBTITLES_VIEW_CLASS} flex w-full flex-col items-center justify-end pb-3 pointer-events-none`}>
-      {originalLines.map((line, index) => {
-        const translation = translationLines[index] || ''
-        const key = `subtitle-line-${line.substring(0, 20)}-${translation.substring(0, 20)}`
+      <div className="flex flex-col gap-2 w-fit mx-auto px-2 py-1.5 rounded text-center text-white bg-black/75 pointer-events-auto">
+        <Activity mode={showMain ? 'visible' : 'hidden'}>
+          <MainSubtitle className={translationAbove ? 'order-2' : 'order-1'} />
+        </Activity>
 
-        return (
-          <div
-            key={key}
-            className="w-fit mx-auto my-1 px-2 py-1.5 rounded text-center text-white pointer-events-auto"
-            style={{ background: 'rgba(0,0,0,0.75)' }}
-          >
-            {translation && (
-              <div className="text-2xl leading-tight mb-1">
-                {translation}
-              </div>
-            )}
-            <div
-              className={cn(
-                'leading-snug',
-                translation ? 'text-lg opacity-80' : 'text-2xl',
-              )}
-            >
-              {line}
-            </div>
-          </div>
-        )
-      })}
+        <Activity mode={showTranslation ? 'visible' : 'hidden'}>
+          <TranslationSubtitle className={translationAbove ? 'order-1' : 'order-2'} />
+        </Activity>
+      </div>
     </div>
   )
 }

@@ -510,6 +510,19 @@ options:
     enableDescription: При включении в панели управления YouTube появится кнопка перевода. Нажмите её, чтобы начать перевод субтитров.
     autoStart: Автовключение субтитров
     autoStartDescription: Автоматически включать перевод субтитров после загрузки видео.
+    style:
+      title: Стиль субтитров
+      description: Настройка внешнего вида субтитров
+      preview: Предпросмотр
+      displayMode:
+        title: Режим отображения
+        bilingual: Двуязычный
+        originalOnly: Только оригинал
+        translationOnly: Только перевод
+      translationPosition:
+        title: Позиция перевода
+        above: Сверху
+        below: Снизу
   whatsNew:
     title: Что нового
   survey:

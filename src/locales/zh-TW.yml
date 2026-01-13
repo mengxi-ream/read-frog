@@ -511,6 +511,19 @@ options:
     enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點擊即可開始翻譯字幕。
     autoStart: 自動開啟字幕
     autoStartDescription: 當影片載入完成後，自動開啟字幕翻譯。
+    style:
+      title: 字幕樣式
+      description: 自訂字幕外觀
+      preview: 預覽
+      displayMode:
+        title: 顯示模式
+        bilingual: 雙語模式
+        originalOnly: 僅原文
+        translationOnly: 僅譯文
+      translationPosition:
+        title: 譯文位置
+        above: 上方
+        below: 下方
   whatsNew:
     title: 最近更新
   survey:

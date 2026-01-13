@@ -510,6 +510,19 @@ options:
     enableDescription: Khi bật, nút dịch sẽ xuất hiện trong thanh điều khiển YouTube. Nhấp để bắt đầu dịch phụ đề.
     autoStart: Tự động bật phụ đề
     autoStartDescription: Tự động bật dịch phụ đề khi video được tải xong.
+    style:
+      title: Kiểu phụ đề
+      description: Tùy chỉnh giao diện phụ đề
+      preview: Xem trước
+      displayMode:
+        title: Chế độ hiển thị
+        bilingual: Song ngữ
+        originalOnly: Chỉ bản gốc
+        translationOnly: Chỉ bản dịch
+      translationPosition:
+        title: Vị trí bản dịch
+        above: Phía trên
+        below: Phía dưới
   whatsNew:
     title: Có gì mới
   survey:

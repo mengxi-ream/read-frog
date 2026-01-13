@@ -90,7 +90,7 @@ export function registerNodeTranslationTriggers() {
       return
     if (e.key === HOTKEY_EVENT_KEYS[hotkey]) {
       // translate if user releases the hotkey and session is pure
-      if (isHotkeySessionPure) {
+      if (isHotkeyPressed && isHotkeySessionPure) {
         if (timerId) {
           clearTimeout(timerId)
           timerId = null
