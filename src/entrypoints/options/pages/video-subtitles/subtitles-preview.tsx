@@ -2,6 +2,7 @@ import { i18n } from '#imports'
 import { useAtomValue } from 'jotai'
 import { Activity } from 'react'
 import { Label } from '@/components/shadcn/label'
+import { MainSubtitle, TranslationSubtitle } from '@/entrypoints/subtitles.content/ui/subtitle-lines'
 import { cn } from '@/lib/utils'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
@@ -11,9 +12,11 @@ export function SubtitlesPreview() {
   const sampleOriginal = 'Mr. Kamiya is not fighting against the world, but against things that could make the world take notice.'
   const sampleTranslation = '神谷先生不是在对抗世界，而是在对抗可能让世界为之侧目的事物。'
 
-  const showOriginal = displayMode !== 'translationOnly'
+  const translationAbove = translationPosition === 'above'
+  const showMain = displayMode !== 'translationOnly'
   const showTranslation = displayMode !== 'originalOnly'
-  const translationFirst = displayMode === 'bilingual' && translationPosition === 'above'
+
+  const fontFamily = 'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif'
 
   return (
     <div className="mb-4">
@@ -27,33 +30,15 @@ export function SubtitlesPreview() {
         }}
       >
         <div
-          className="px-3 py-2 rounded text-center text-white max-w-[90%]"
-          style={{
-            background: 'rgba(0,0,0,0.75)',
-            fontFamily: 'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
-          }}
+          className="flex flex-col gap-2 px-3 py-2 rounded text-center text-white bg-black/75 max-w-[90%]"
+          style={{ fontFamily }}
         >
-          <Activity mode={translationFirst && showTranslation ? 'visible' : 'hidden'}>
-            <div className="text-base leading-tight mb-0.5">
-              {sampleTranslation}
-            </div>
+          <Activity mode={showMain ? 'visible' : 'hidden'}>
+            <MainSubtitle content={sampleOriginal} className={cn('text-sm', translationAbove ? 'order-2' : 'order-1')} />
           </Activity>
 
-          <Activity mode={showOriginal ? 'visible' : 'hidden'}>
-            <div
-              className={cn(
-                'leading-snug',
-                showTranslation ? 'text-sm opacity-80' : 'text-base',
-              )}
-            >
-              {sampleOriginal}
-            </div>
-          </Activity>
-
-          <Activity mode={!translationFirst && showTranslation ? 'visible' : 'hidden'}>
-            <div className="text-base leading-tight mt-0.5">
-              {sampleTranslation}
-            </div>
+          <Activity mode={showTranslation ? 'visible' : 'hidden'}>
+            <TranslationSubtitle content={sampleTranslation} className={cn('text-sm', translationAbove ? 'order-1' : 'order-2')} />
           </Activity>
         </div>
       </div>
