@@ -180,17 +180,12 @@ options:
     toggle:
       title: 트리플 스페이스 번역 활성화
       description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 내용이 번역됩니다
-    direction:
-      title: 번역 방향
-      description: 텍스트 번역 방향 선택
-      normal: 소스 → 타겟
-      reverse: 타겟 → 소스
-      cycle: 순환
-    useCustomTarget:
-      title: 타겟 언어
-      description: 번역할 언어 선택
-      sourceLanguage: Read Frog 소스 언어
-      customTarget: 사용자 지정 타겟 언어
+    languages:
+      title: 번역 언어
+      description: 입력 번역의 소스 및 타겟 언어 선택
+      sourceCode: 페이지 소스 언어
+      targetCode: 페이지 타겟 언어
+      enableCycle: 매번 방향 전환
     threshold:
       title: 트리거 임계값
       description: 스페이스바 누름 사이의 시간 간격

@@ -181,17 +181,12 @@ options:
     toggle:
       title: Enable Triple-Space Translation
       description: Press spacebar 3 times quickly in any input field to translate its content
-    direction:
-      title: Translation Direction
-      description: Choose how text should be translated
-      normal: Source → Target
-      reverse: Target → Source
-      cycle: Cycle
-    useCustomTarget:
-      title: Target Language
-      description: Choose which language to translate to
-      sourceLanguage: Read Frog's source language
-      customTarget: Custom target language
+    languages:
+      title: Translation Languages
+      description: Choose source and target languages for input translation
+      sourceCode: Page Source Language
+      targetCode: Translation Target Language
+      enableCycle: Swap direction each time
     threshold:
       title: Trigger Threshold
       description: Time interval between space presses to trigger translation

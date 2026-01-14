@@ -1,38 +1,28 @@
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useRef } from 'react'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { translateTextWithDirection } from '@/utils/host/translate/translate-text'
+import { translateTextForInput } from '@/utils/host/translate/translate-text'
 
 const SPACE_KEY = ' '
 const TRIGGER_COUNT = 3
-const LAST_CYCLE_DIRECTION_KEY = 'read-frog-input-translation-last-cycle-direction'
+const LAST_CYCLE_SWAPPED_KEY = 'read-frog-input-translation-last-cycle-swapped'
 const SPINNER_ID = 'read-frog-input-translation-spinner'
 
-/**
- * Get last cycle direction from sessionStorage
- */
-function getLastCycleDirection(): 'normal' | 'reverse' | undefined {
+function getLastCycleSwapped(): boolean {
   try {
-    const value = sessionStorage.getItem(LAST_CYCLE_DIRECTION_KEY)
-    if (value === 'normal' || value === 'reverse') {
-      return value
-    }
+    return sessionStorage.getItem(LAST_CYCLE_SWAPPED_KEY) === 'true'
   }
   catch {
-    // sessionStorage may not be available in some contexts
+    return false
   }
-  return undefined
 }
 
-/**
- * Set last cycle direction in sessionStorage
- */
-function setLastCycleDirection(direction: 'normal' | 'reverse'): void {
+function setLastCycleSwapped(swapped: boolean): void {
   try {
-    sessionStorage.setItem(LAST_CYCLE_DIRECTION_KEY, direction)
+    sessionStorage.setItem(LAST_CYCLE_SWAPPED_KEY, String(swapped))
   }
   catch {
-    // sessionStorage may not be available in some contexts
+    // sessionStorage may not be available
   }
 }
 
@@ -164,8 +154,8 @@ export function useInputTranslation() {
     }
 
     // Remove trailing spaces (only TRIGGER_COUNT - 1 because the last space
-    // was prevented by preventDefault and never inserted)
-    text = text.slice(0, -(TRIGGER_COUNT - 1))
+    // was prevented by preventDefault and never inserted) and trim whitespace
+    text = text.slice(0, -(TRIGGER_COUNT - 1)).trim()
 
     // Set the trimmed text back immediately (with undo support)
     setTextWithUndo(element, text)
@@ -174,16 +164,21 @@ export function useInputTranslation() {
       return
     }
 
-    // Determine actual translation direction
-    let actualDirection: 'normal' | 'reverse' = 'normal'
-    if (inputTranslationConfig.direction === 'cycle') {
-      // Toggle from last direction (stored in sessionStorage, not config)
-      const lastDirection = getLastCycleDirection()
-      actualDirection = lastDirection === 'normal' ? 'reverse' : 'normal'
-      setLastCycleDirection(actualDirection)
-    }
-    else {
-      actualDirection = inputTranslationConfig.direction
+    // Determine fromLang and toLang, possibly swapped if cycle is enabled
+    let fromLang = inputTranslationConfig.fromLang
+    let toLang = inputTranslationConfig.toLang
+
+    if (inputTranslationConfig.enableCycle) {
+      const wasSwapped = getLastCycleSwapped()
+      if (wasSwapped) {
+        // Already swapped last time, use original direction
+        setLastCycleSwapped(false)
+      }
+      else {
+        // Swap direction
+        ;[fromLang, toLang] = [toLang, fromLang]
+        setLastCycleSwapped(true)
+      }
     }
 
     isTranslatingRef.current = true
@@ -195,11 +190,7 @@ export function useInputTranslation() {
     const originalText = text
 
     try {
-      // Only pass custom target code when useCustomTarget is enabled
-      const customTargetCode = inputTranslationConfig.useCustomTarget
-        ? inputTranslationConfig.targetCode
-        : undefined
-      const translatedText = await translateTextWithDirection(text, actualDirection, customTargetCode)
+      const translatedText = await translateTextForInput(text, fromLang, toLang)
 
       // Check if element content changed during translation (user input)
       let currentText: string
@@ -225,7 +216,7 @@ export function useInputTranslation() {
       hideSpinner()
       isTranslatingRef.current = false
     }
-  }, [inputTranslationConfig.direction, inputTranslationConfig.useCustomTarget, inputTranslationConfig.targetCode])
+  }, [inputTranslationConfig.fromLang, inputTranslationConfig.toLang, inputTranslationConfig.enableCycle])
 
   useEffect(() => {
     if (!inputTranslationConfig.enabled)

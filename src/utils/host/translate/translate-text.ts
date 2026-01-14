@@ -1,18 +1,18 @@
 import type { LangCodeISO6393, LangLevel } from '@read-frog/definitions'
-import type { Config } from '@/types/config/config'
+import type { Config, InputTranslationLang } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
-import { i18n, storage } from '#imports'
+import { i18n } from '#imports'
 import { Readability } from '@mozilla/readability'
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from '@read-frog/definitions'
 import { franc } from 'franc'
 import { toast } from 'sonner'
 import { isAPIProviderConfig, isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
+import { getDetectedCodeFromStorage, getFinalSourceCode } from '@/utils/config/languages'
 import { removeDummyNodes } from '@/utils/content/utils'
 import { logger } from '@/utils/logger'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getLocalConfig } from '../../config/storage'
-import { DEFAULT_DETECTED_CODE, DETECTED_CODE_STORAGE_KEY } from '../../constants/config'
 import { Sha256Hex } from '../../hash'
 import { sendMessage } from '../../message'
 
@@ -208,90 +208,45 @@ export async function translateText(text: string): Promise<string> {
   })
 }
 
-/**
- * Translate text with configurable direction
- * @param text - The text to translate
- * @param direction - 'normal' (source→target), 'reverse' (target→source)
- * @param customTargetCode - Optional custom target language code for input translation
- */
-export async function translateTextWithDirection(
+async function resolveInputLang(
+  lang: InputTranslationLang,
+  globalLangConfig: Config['language'],
+): Promise<LangCodeISO6393> {
+  if (lang === 'sourceCode') {
+    const detectedCode = await getDetectedCodeFromStorage()
+    return getFinalSourceCode(globalLangConfig.sourceCode, detectedCode)
+  }
+  if (lang === 'targetCode') {
+    return globalLangConfig.targetCode
+  }
+  return lang
+}
+
+export async function translateTextForInput(
   text: string,
-  direction: 'normal' | 'reverse' = 'normal',
-  customTargetCode?: LangCodeISO6393,
+  fromLang: InputTranslationLang,
+  toLang: InputTranslationLang,
 ): Promise<string> {
   const config = await getLocalConfig()
   if (!config) {
     throw new Error('No global config when translate text')
   }
 
-  // Determine translation direction
-  // normal: source → target (type in source language, translate to target language)
-  // reverse: target → source (type in target language, translate to source language)
-  let langConfig = config.language
+  const resolvedFromLang = await resolveInputLang(fromLang, config.language)
+  const resolvedToLang = await resolveInputLang(toLang, config.language)
 
-  // Use customTargetCode if provided, otherwise use Read Frog's source language
-  // When sourceCode is 'auto', use the detected page language
-  // Note: useCustomTarget logic only applies to normal mode; reverse mode uses global targetCode
-  let targetCode: LangCodeISO6393
-  if (customTargetCode) {
-    targetCode = customTargetCode
-  }
-  else if (direction === 'reverse') {
-    // In reverse mode without custom target, use global target code
-    targetCode = config.language.targetCode
-  }
-  else if (config.language.sourceCode === 'auto') {
-    // Normal mode with auto source: use detected page language
-    const detectedCode = await storage.getItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`)
-    targetCode = detectedCode ?? DEFAULT_DETECTED_CODE
-  }
-  else {
-    // Normal mode with explicit source: use source code
-    targetCode = config.language.sourceCode
-  }
-
-  if (direction === 'normal') {
-    // Translate FROM source (auto-detect) TO target
-    // e.g., User types Chinese → get English (if targetCode is 'eng')
-    langConfig = {
-      ...config.language,
-      sourceCode: 'auto',
-      targetCode,
-    }
-  }
-  else {
-    // For 'reverse' mode: translate back to user's language
-    if (customTargetCode) {
-      // Custom target provided: FROM customTargetCode TO effectiveSourceCode
-      const effectiveSourceCode = config.language.sourceCode === 'auto'
-        ? config.language.targetCode
-        : config.language.sourceCode
-
-      if (effectiveSourceCode === customTargetCode) {
-        return ''
-      }
-
-      langConfig = {
-        ...config.language,
-        sourceCode: customTargetCode,
-        targetCode: effectiveSourceCode,
-      }
-    }
-    else {
-      // No custom target (useCustomTarget is false): FROM auto TO globalTargetCode
-      // e.g., User types Japanese → get Chinese (user's target language)
-      langConfig = {
-        ...config.language,
-        sourceCode: 'auto',
-        targetCode: config.language.targetCode,
-      }
-    }
+  if (resolvedFromLang === resolvedToLang) {
+    return ''
   }
 
   return translateTextCore({
     text,
-    langConfig,
-    extraHashTags: direction === 'normal' ? ['direction=normal'] : ['direction=reverse'],
+    langConfig: {
+      sourceCode: resolvedFromLang,
+      targetCode: resolvedToLang,
+      level: config.language.level,
+    },
+    extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
   })
 }
 

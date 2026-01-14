@@ -180,17 +180,12 @@ options:
     toggle:
       title: 啟用三連空格翻譯
       description: 在任意輸入框中快速按3次空格鍵即可翻譯其內容
-    direction:
-      title: 翻譯方向
-      description: 選擇文字翻譯的方向
-      normal: 源語言 → 目標語言
-      reverse: 目標語言 → 源語言
-      cycle: 循環切換
-    useCustomTarget:
-      title: 目標語言
-      description: 選擇翻譯的目標語言
-      sourceLanguage: 陪讀蛙設定的來源語言
-      customTarget: 指定目標語言
+    languages:
+      title: 翻譯語言
+      description: 選擇輸入翻譯的源語言和目標語言
+      sourceCode: 網頁源語言
+      targetCode: 翻譯目標語言
+      enableCycle: 每次翻譯時交換方向
     threshold:
       title: 觸發閾值
       description: 連續空格按鍵之間的時間間隔

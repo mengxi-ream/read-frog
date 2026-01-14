@@ -181,17 +181,12 @@ options:
     toggle:
       title: Включить тройной пробел для перевода
       description: Быстро нажмите пробел 3 раза в любом поле ввода для перевода его содержимого
-    direction:
-      title: Направление перевода
-      description: Выберите направление перевода текста
-      normal: Исходный → Целевой
-      reverse: Целевой → Исходный
-      cycle: Цикл
-    useCustomTarget:
-      title: Целевой язык
-      description: Выберите язык перевода
-      sourceLanguage: Исходный язык Read Frog
-      customTarget: Пользовательский целевой язык
+    languages:
+      title: Языки перевода
+      description: Выберите исходный и целевой языки для перевода ввода
+      sourceCode: Исходный язык страницы
+      targetCode: Целевой язык страницы
+      enableCycle: Менять направление каждый раз
     threshold:
       title: Порог срабатывания
       description: Временной интервал между нажатиями пробела

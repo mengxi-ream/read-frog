@@ -181,17 +181,12 @@ options:
     toggle:
       title: Üçlü Boşluk Çevirisini Etkinleştir
       description: Herhangi bir giriş alanında boşluk tuşuna hızlıca 3 kez basarak içeriği çevirin
-    direction:
-      title: Çeviri Yönü
-      description: Metin çeviri yönünü seçin
-      normal: Kaynak → Hedef
-      reverse: Hedef → Kaynak
-      cycle: Döngü
-    useCustomTarget:
-      title: Hedef Dil
-      description: Çeviri yapılacak dili seçin
-      sourceLanguage: Read Frog kaynak dili
-      customTarget: Özel hedef dil
+    languages:
+      title: Çeviri Dilleri
+      description: Giriş çevirisi için kaynak ve hedef dilleri seçin
+      sourceCode: Sayfa Kaynak Dili
+      targetCode: Sayfa Hedef Dili
+      enableCycle: Her seferinde yönü değiştir
     threshold:
       title: Tetikleme Eşiği
       description: Boşluk tuşuna basışlar arasındaki zaman aralığı

@@ -181,17 +181,12 @@ options:
     toggle:
       title: Bật dịch ba lần nhấn phím cách
       description: Nhấn phím cách nhanh 3 lần trong bất kỳ trường nhập nào để dịch nội dung
-    direction:
-      title: Hướng dịch
-      description: Chọn hướng dịch văn bản
-      normal: Nguồn → Đích
-      reverse: Đích → Nguồn
-      cycle: Luân phiên
-    useCustomTarget:
-      title: Ngôn ngữ đích
-      description: Chọn ngôn ngữ dịch
-      sourceLanguage: Ngôn ngữ nguồn của Read Frog
-      customTarget: Ngôn ngữ đích tùy chỉnh
+    languages:
+      title: Ngôn ngữ dịch
+      description: Chọn ngôn ngữ nguồn và đích cho dịch đầu vào
+      sourceCode: Ngôn ngữ nguồn trang
+      targetCode: Ngôn ngữ đích trang
+      enableCycle: Đổi hướng mỗi lần
     threshold:
       title: Ngưỡng kích hoạt
       description: Khoảng thời gian giữa các lần nhấn phím cách

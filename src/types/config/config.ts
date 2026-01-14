@@ -42,18 +42,19 @@ const contextMenuSchema = z.object({
   enabled: z.boolean(),
 })
 
+// input translation language selector: 'sourceCode', 'targetCode', or fixed language code
+const inputTranslationLangSchema = z.union([
+  z.literal('sourceCode'),
+  z.literal('targetCode'),
+  langCodeISO6393Schema,
+])
+
 // input translation schema (triple-space trigger)
 const inputTranslationSchema = z.object({
   enabled: z.boolean(),
-  // normal: source → target (type in source language, translate to target)
-  // reverse: target → source (type in target language, translate to source)
-  // cycle: alternate between the two each time
-  direction: z.enum(['normal', 'reverse', 'cycle']),
-  // When false, use Read Frog's source language as target; when true, use custom targetCode
-  useCustomTarget: z.boolean(),
-  // Custom target language for input translation (only used when useCustomTarget is true)
-  targetCode: langCodeISO6393Schema,
-  // Time threshold in milliseconds between space presses (default 300ms)
+  fromLang: inputTranslationLangSchema,
+  toLang: inputTranslationLangSchema,
+  enableCycle: z.boolean(),
   timeThreshold: z.number().min(100).max(1000),
 })
 
@@ -74,6 +75,7 @@ const videoSubtitlesSchema = z.object({
 })
 
 // Export types for use in components
+export type InputTranslationLang = z.infer<typeof inputTranslationLangSchema>
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>
 export type SubtitlesTranslationPosition = z.infer<typeof subtitlesTranslationPositionSchema>
 

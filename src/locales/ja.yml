@@ -179,17 +179,12 @@ options:
     toggle:
       title: トリプルスペース翻訳を有効化
       description: 任意の入力欄でスペースキーを素早く3回押すと内容を翻訳します
-    direction:
-      title: 翻訳方向
-      description: テキストの翻訳方向を選択
-      normal: ソース → ターゲット
-      reverse: ターゲット → ソース
-      cycle: サイクル
-    useCustomTarget:
-      title: ターゲット言語
-      description: 翻訳先の言語を選択
-      sourceLanguage: Read Frogのソース言語
-      customTarget: カスタムターゲット言語
+    languages:
+      title: 翻訳言語
+      description: 入力翻訳のソース言語とターゲット言語を選択
+      sourceCode: ページソース言語
+      targetCode: ページターゲット言語
+      enableCycle: 毎回方向を切り替え
     threshold:
       title: トリガーしきい値
       description: スペースキー押下間の時間間隔
