@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix(input-translation): use correct target language when useCustomTarget is false
+refactor(input-translation): update config fields design and fix truncation issue
