@@ -18,7 +18,7 @@ export function SubtitlesPreview() {
   const showMain = displayMode !== 'translationOnly'
   const showTranslation = displayMode !== 'originalOnly'
 
-  const containerStyle: React.CSSProperties = {
+  const containerStyle = {
     backgroundColor: `rgba(0, 0, 0, ${container.backgroundOpacity / 100})`,
   }
 
@@ -43,7 +43,6 @@ export function SubtitlesPreview() {
           </div>
         </div>
       </GradientBackground>
-
     </div>
   )
 }

@@ -10,10 +10,12 @@ interface SubtitleLineProps {
   className?: string
 }
 
-function getTextStyles(textStyle: SubtitleTextStyle): React.CSSProperties {
+function getTextStyles(textStyle: SubtitleTextStyle) {
+  const baseFontSize = 20
+
   return {
     fontFamily: SUBTITLE_FONT_FAMILIES[textStyle.fontFamily] || SUBTITLE_FONT_FAMILIES.system,
-    fontSize: `${(textStyle.fontScale / 100) * 20}px`,
+    fontSize: `${(textStyle.fontScale / 100) * baseFontSize}px`,
     color: textStyle.color,
     fontWeight: textStyle.fontWeight,
   }

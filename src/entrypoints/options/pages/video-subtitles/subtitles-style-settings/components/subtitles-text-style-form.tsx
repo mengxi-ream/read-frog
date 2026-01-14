@@ -12,8 +12,6 @@ const FONT_FAMILY_OPTIONS: { value: SubtitlesFontFamily, label: string }[] = [
   { value: 'roboto', label: 'Roboto' },
   { value: 'noto-sans', label: 'Noto Sans' },
   { value: 'noto-serif', label: 'Noto Serif' },
-  { value: 'microsoft-yahei', label: '微软雅黑' },
-  { value: 'pingfang', label: '苹方' },
 ]
 
 interface SubtitlesTextStyleFormProps {
