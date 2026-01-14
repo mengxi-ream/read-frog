@@ -37,9 +37,14 @@ export const MAX_FONT_SCALE = 150
 export const DEFAULT_FONT_SCALE = 100
 export const MIN_FONT_WEIGHT = 300
 export const MAX_FONT_WEIGHT = 700
+export const DEFAULT_FONT_WEIGHT = 400
 export const MIN_BACKGROUND_OPACITY = 0
 export const MAX_BACKGROUND_OPACITY = 100
 export const DEFAULT_BACKGROUND_OPACITY = 75
+export const DEFAULT_FONT_FAMILY = 'system' as const
+export const DEFAULT_SUBTITLE_COLOR = '#FFFFFF'
+export const DEFAULT_DISPLAY_MODE = 'bilingual' as const
+export const DEFAULT_TRANSLATION_POSITION = 'above' as const
 
 // Font family mapping
 export const SUBTITLE_FONT_FAMILIES = {

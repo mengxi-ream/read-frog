@@ -3,7 +3,7 @@ import type { PageTranslateRange } from '@/types/config/translate'
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
 import { DEFAULT_PROVIDER_CONFIG_LIST } from './providers'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
-import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_FONT_SCALE } from './subtitles'
+import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR, DEFAULT_TRANSLATION_POSITION } from './subtitles'
 import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_MIN_WORDS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
 import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from './translation-node-style'
 import { DEFAULT_TTS_CONFIG } from './tts'
@@ -100,19 +100,19 @@ export const DEFAULT_CONFIG: Config = {
     enabled: false,
     autoStart: false,
     style: {
-      displayMode: 'bilingual',
-      translationPosition: 'above',
+      displayMode: DEFAULT_DISPLAY_MODE,
+      translationPosition: DEFAULT_TRANSLATION_POSITION,
       main: {
-        fontFamily: 'system',
+        fontFamily: DEFAULT_FONT_FAMILY,
         fontScale: DEFAULT_FONT_SCALE,
-        color: '#FFFFFF',
-        fontWeight: 400,
+        color: DEFAULT_SUBTITLE_COLOR,
+        fontWeight: DEFAULT_FONT_WEIGHT,
       },
       translation: {
-        fontFamily: 'system',
+        fontFamily: DEFAULT_FONT_FAMILY,
         fontScale: DEFAULT_FONT_SCALE,
-        color: '#FFFFFF',
-        fontWeight: 400,
+        color: DEFAULT_SUBTITLE_COLOR,
+        fontWeight: DEFAULT_FONT_WEIGHT,
       },
       container: {
         backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,

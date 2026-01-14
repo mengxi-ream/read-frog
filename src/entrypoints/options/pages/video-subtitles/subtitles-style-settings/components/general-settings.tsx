@@ -7,8 +7,9 @@ import { Activity } from 'react'
 import { Card } from '@/components/shadcn/card'
 import { Label } from '@/components/shadcn/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { MAX_BACKGROUND_OPACITY, MIN_BACKGROUND_OPACITY } from '@/utils/constants/subtitles'
+import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MIN_BACKGROUND_OPACITY } from '@/utils/constants/subtitles'
 
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
@@ -26,11 +27,33 @@ export function GeneralSettings() {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: style } }))
   }
 
+  const resetGeneralConfig = () => {
+    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
+      style: {
+        displayMode: DEFAULT_DISPLAY_MODE,
+        translationPosition: DEFAULT_TRANSLATION_POSITION,
+        container: {
+          backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
+        },
+      },
+    }))
+  }
+
   return (
     <Card className="p-5">
-      <div className="flex items-center gap-2 mb-2">
-        <Icon icon="tabler:settings" className="size-4" />
-        <Label className="text-sm font-semibold">{i18n.t('options.videoSubtitles.style.generalSettings')}</Label>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2">
+          <Icon icon="tabler:settings" className="size-4" />
+          <Label className="text-sm font-semibold">{i18n.t('options.videoSubtitles.style.generalSettings')}</Label>
+        </div>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" onClick={resetGeneralConfig} className="p-1 rounded hover:bg-muted transition-colors">
+              <Icon icon="tabler:refresh" className="size-4 text-red-500" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{i18n.t('options.videoSubtitles.style.reset')}</TooltipContent>
+        </Tooltip>
       </div>
 
       <div className="flex items-center justify-between gap-4">

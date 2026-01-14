@@ -13,7 +13,7 @@ interface SubtitleLineProps {
 function getTextStyles(textStyle: SubtitleTextStyle): React.CSSProperties {
   return {
     fontFamily: SUBTITLE_FONT_FAMILIES[textStyle.fontFamily] || SUBTITLE_FONT_FAMILIES.system,
-    fontSize: `${textStyle.fontScale}%`,
+    fontSize: `${(textStyle.fontScale / 100) * 20}px`,
     color: textStyle.color,
     fontWeight: textStyle.fontWeight,
   }

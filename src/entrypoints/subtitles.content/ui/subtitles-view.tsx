@@ -54,7 +54,6 @@ export function SubtitlesView() {
       ref={containerRef}
       className="group flex flex-col items-center absolute w-full left-0 right-0"
       style={{
-        fontFamily: 'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
         top: `${topPercent}%`,
       }}
     >

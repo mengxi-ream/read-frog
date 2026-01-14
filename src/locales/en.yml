@@ -529,6 +529,7 @@ options:
       color: Color
       fontWeight: Font Weight
       backgroundOpacity: Background Opacity
+      reset: Reset to Default
   whatsNew:
     title: What's New
   survey:
