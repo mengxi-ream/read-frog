@@ -231,16 +231,22 @@ export async function translateTextWithDirection(
 
   // Use customTargetCode if provided, otherwise use Read Frog's source language
   // When sourceCode is 'auto', use the detected page language
+  // Note: useCustomTarget logic only applies to normal mode; reverse mode uses global targetCode
   let targetCode: LangCodeISO6393
   if (customTargetCode) {
     targetCode = customTargetCode
   }
+  else if (direction === 'reverse') {
+    // In reverse mode without custom target, use global target code
+    targetCode = config.language.targetCode
+  }
   else if (config.language.sourceCode === 'auto') {
-    // Read detected page language from storage
+    // Normal mode with auto source: use detected page language
     const detectedCode = await storage.getItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`)
     targetCode = detectedCode ?? DEFAULT_DETECTED_CODE
   }
   else {
+    // Normal mode with explicit source: use source code
     targetCode = config.language.sourceCode
   }
 
