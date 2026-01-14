@@ -260,22 +260,31 @@ export async function translateTextWithDirection(
     }
   }
   else {
-    // For 'reverse' mode: FROM target TO source
-    // e.g., User types English → get Chinese (if source is Chinese)
-    const effectiveSourceCode = config.language.sourceCode === 'auto'
-      ? config.language.targetCode
-      : config.language.sourceCode
+    // For 'reverse' mode: translate back to user's language
+    if (customTargetCode) {
+      // Custom target provided: FROM customTargetCode TO effectiveSourceCode
+      const effectiveSourceCode = config.language.sourceCode === 'auto'
+        ? config.language.targetCode
+        : config.language.sourceCode
 
-    // Guard against same-language translation when sourceCode is 'auto'
-    // and no customTargetCode is provided
-    if (effectiveSourceCode === targetCode) {
-      return ''
+      if (effectiveSourceCode === customTargetCode) {
+        return ''
+      }
+
+      langConfig = {
+        ...config.language,
+        sourceCode: customTargetCode,
+        targetCode: effectiveSourceCode,
+      }
     }
-
-    langConfig = {
-      ...config.language,
-      sourceCode: targetCode,
-      targetCode: effectiveSourceCode,
+    else {
+      // No custom target (useCustomTarget is false): FROM auto TO globalTargetCode
+      // e.g., User types Japanese → get Chinese (user's target language)
+      langConfig = {
+        ...config.language,
+        sourceCode: 'auto',
+        targetCode: config.language.targetCode,
+      }
     }
   }
 
