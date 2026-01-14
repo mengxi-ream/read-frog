@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: Enable floating button
   enabledSelectionToolbar: Enable selection toolbar
   alwaysTranslate: Always translate this site
+  addToWhitelist: Add this site to whitelist
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph

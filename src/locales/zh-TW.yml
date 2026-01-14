@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: 啟用懸浮按鈕
   enabledSelectionToolbar: 啟用選擇工具列
   alwaysTranslate: 總是翻譯這個網站
+  addToWhitelist: 將此網站加入白名單
   options: 選項
   hover: 滑鼠懸停
   translateParagraph: 來翻譯段落

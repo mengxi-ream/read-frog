@@ -9,10 +9,13 @@ import { isAnyAPIKeyForReadProviders } from '@/utils/config/api'
 import { sendMessage } from '@/utils/message'
 import { cn } from '@/utils/styles/tailwind'
 import { isIgnoreTabAtom } from '../atoms/ignore'
+import { isCurrentSiteInWhitelistAtom, isWhitelistModeAtom } from '../atoms/site-control'
 
 export default function ReadButton({ className }: { className?: string }) {
   const isIgnoreTab = useAtomValue(isIgnoreTabAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const isWhitelistMode = useAtomValue(isWhitelistModeAtom)
+  const isCurrentSiteInWhitelist = useAtomValue(isCurrentSiteInWhitelistAtom)
 
   const requestReadArticle = async () => {
     if (!isAnyAPIKeyForReadProviders(providersConfig)) {
@@ -30,12 +33,14 @@ export default function ReadButton({ className }: { className?: string }) {
     }
   }
 
+  const isDisabled = isIgnoreTab || (isWhitelistMode && !isCurrentSiteInWhitelist)
+
   return (
     <Button
       onClick={requestReadArticle}
       variant="outline"
       className={cn('border-primary', className)}
-      disabled={isIgnoreTab}
+      disabled={isDisabled}
     >
       {i18n.t('popup.read')}
     </Button>

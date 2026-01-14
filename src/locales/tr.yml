@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: Yüzen butonu etkinleştir
   enabledSelectionToolbar: Seçim araç çubuğunu etkinleştir
   alwaysTranslate: Bu siteyi her zaman çevir
+  addToWhitelist: Bu siteyi beyaz listeye ekle
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için

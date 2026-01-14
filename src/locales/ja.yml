@@ -14,6 +14,7 @@ popup:
   enabledFloatingButton: フローティングボタンを有効化
   enabledSelectionToolbar: 選択ツールバーを有効化
   alwaysTranslate: このサイトを常に翻訳する
+  addToWhitelist: このサイトをホワイトリストに追加
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳

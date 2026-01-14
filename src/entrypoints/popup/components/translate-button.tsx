@@ -7,11 +7,14 @@ import { formatHotkey } from '@/utils/os.ts'
 import { cn } from '@/utils/styles/tailwind'
 import { isPageTranslatedAtom } from '../atoms/auto-translate'
 import { isIgnoreTabAtom } from '../atoms/ignore'
+import { isCurrentSiteInWhitelistAtom, isWhitelistModeAtom } from '../atoms/site-control'
 
 export default function TranslateButton({ className }: { className?: string }) {
   const [isPageTranslated, setIsPageTranslated] = useAtom(isPageTranslatedAtom)
   const isIgnoreTab = useAtomValue(isIgnoreTabAtom)
   const translateConfig = useAtomValue(configFieldsAtomMap.translate)
+  const isWhitelistMode = useAtomValue(isWhitelistModeAtom)
+  const isCurrentSiteInWhitelist = useAtomValue(isCurrentSiteInWhitelistAtom)
 
   const toggleTranslation = async () => {
     const [currentTab] = await browser.tabs.query({
@@ -29,10 +32,12 @@ export default function TranslateButton({ className }: { className?: string }) {
     }
   }
 
+  const isDisabled = isIgnoreTab || (isWhitelistMode && !isCurrentSiteInWhitelist)
+
   return (
     <Button
       onClick={toggleTranslation}
-      disabled={isIgnoreTab}
+      disabled={isDisabled}
       className={cn(
         'block truncate',
         className,

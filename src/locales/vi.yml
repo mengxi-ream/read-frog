@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: Bật nút nổi
   enabledSelectionToolbar: Bật thanh công cụ chọn văn bản
   alwaysTranslate: Luôn dịch trang web này
+  addToWhitelist: Thêm trang web này vào danh sách trắng
   options: Tùy chọn
   hover: Di chuột
   translateParagraph: để dịch đoạn văn

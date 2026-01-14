@@ -14,6 +14,7 @@ popup:
   enabledFloatingButton: 플로팅 버튼 활성화
   enabledSelectionToolbar: 선택 툴바 활성화
   alwaysTranslate: 이 사이트 항상 번역
+  addToWhitelist: 이 사이트를 화이트리스트에 추가
   options: 옵션
   hover: 마우스 오버
   translateParagraph: 단락 번역

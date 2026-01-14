@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: Включить плавающую кнопку
   enabledSelectionToolbar: Включить панель выделения
   alwaysTranslate: Всегда переводить этот сайт
+  addToWhitelist: Добавить этот сайт в белый список
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца

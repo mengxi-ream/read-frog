@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: 启用悬浮按钮
   enabledSelectionToolbar: 启用选择工具栏
   alwaysTranslate: 总是翻译这个网站
+  addToWhitelist: 将此网站添加到白名单
   options: 选项
   hover: 鼠标悬停
   translateParagraph: 来翻译段落
