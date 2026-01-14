@@ -19,6 +19,7 @@ import { queryClient } from '@/utils/tanstack-query'
 import { addStyleToShadow, mirrorDynamicStyles, protectInternalStyles } from '../../utils/styles'
 import App from './app'
 import { store } from './atoms'
+import '@/utils/crypto-polyfill'
 import '@/assets/styles/theme.css'
 import '@/assets/styles/text-small.css'
 

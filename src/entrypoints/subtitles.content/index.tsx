@@ -1,6 +1,7 @@
 import { defineContentScript } from '#imports'
 import { getLocalConfig } from '@/utils/config/storage'
 import { initYoutubeSubtitles } from './init-youtube-subtitles'
+import '@/utils/crypto-polyfill'
 
 declare global {
   interface Window {

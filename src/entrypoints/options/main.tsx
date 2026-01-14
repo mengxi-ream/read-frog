@@ -14,6 +14,7 @@ import { getLocalConfig } from '@/utils/config/storage'
 import { queryClient } from '@/utils/tanstack-query'
 import App from './app'
 import { AppSidebar } from './app-sidebar'
+import '@/utils/crypto-polyfill'
 import '@/assets/styles/theme.css'
 import './style.css'
 

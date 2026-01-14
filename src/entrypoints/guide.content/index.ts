@@ -6,6 +6,7 @@ import { APP_NAME } from '@/utils/constants/app'
 import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
 import { OFFICIAL_SITE_URL_PATTERNS } from '@/utils/constants/url'
 import { onMessage, sendMessage } from '@/utils/message'
+import '@/utils/crypto-polyfill'
 
 export default defineContentScript({
   matches: OFFICIAL_SITE_URL_PATTERNS,

@@ -14,6 +14,7 @@ import { sendMessage } from '@/utils/message'
 import { queryClient } from '@/utils/tanstack-query'
 import App from './app'
 import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from './atoms/auto-translate'
+import '@/utils/crypto-polyfill'
 import '@/assets/styles/text-small.css'
 import '@/assets/styles/theme.css'
 

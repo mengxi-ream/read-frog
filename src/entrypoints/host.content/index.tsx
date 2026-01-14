@@ -19,6 +19,7 @@ import { bindTranslationShortcutKey } from './translation-control/bind-translati
 import { handleTranslationModeChange } from './translation-control/handle-config-change'
 import { registerNodeTranslationTriggers } from './translation-control/node-translation'
 import { PageTranslationManager } from './translation-control/page-translation'
+import '@/utils/crypto-polyfill'
 import './listen'
 import './style.css'
 
