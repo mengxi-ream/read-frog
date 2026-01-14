@@ -1,7 +1,7 @@
 import type { LangCodeISO6393, LangLevel } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
-import { i18n } from '#imports'
+import { i18n, storage } from '#imports'
 import { Readability } from '@mozilla/readability'
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from '@read-frog/definitions'
 import { franc } from 'franc'
@@ -12,6 +12,7 @@ import { removeDummyNodes } from '@/utils/content/utils'
 import { logger } from '@/utils/logger'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getLocalConfig } from '../../config/storage'
+import { DEFAULT_DETECTED_CODE, DETECTED_CODE_STORAGE_KEY } from '../../constants/config'
 import { Sha256Hex } from '../../hash'
 import { sendMessage } from '../../message'
 
@@ -229,11 +230,19 @@ export async function translateTextWithDirection(
   let langConfig = config.language
 
   // Use customTargetCode if provided, otherwise use Read Frog's source language
-  // When sourceCode is 'auto', fall back to targetCode
-  const targetCode = customTargetCode
-    ?? (config.language.sourceCode === 'auto'
-      ? config.language.targetCode
-      : config.language.sourceCode)
+  // When sourceCode is 'auto', use the detected page language
+  let targetCode: LangCodeISO6393
+  if (customTargetCode) {
+    targetCode = customTargetCode
+  }
+  else if (config.language.sourceCode === 'auto') {
+    // Read detected page language from storage
+    const detectedCode = await storage.getItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`)
+    targetCode = detectedCode ?? DEFAULT_DETECTED_CODE
+  }
+  else {
+    targetCode = config.language.sourceCode
+  }
 
   if (direction === 'normal') {
     // Translate FROM source (auto-detect) TO target
