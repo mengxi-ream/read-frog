@@ -228,8 +228,12 @@ export async function translateTextWithDirection(
   // reverse: target → source (type in target language, translate to source language)
   let langConfig = config.language
 
-  // Use customTargetCode if provided, otherwise use global targetCode
-  const targetCode = customTargetCode ?? config.language.targetCode
+  // Use customTargetCode if provided, otherwise use Read Frog's source language
+  // When sourceCode is 'auto', fall back to targetCode
+  const targetCode = customTargetCode
+    ?? (config.language.sourceCode === 'auto'
+      ? config.language.targetCode
+      : config.language.sourceCode)
 
   if (direction === 'normal') {
     // Translate FROM source (auto-detect) TO target
