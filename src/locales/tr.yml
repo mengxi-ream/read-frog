@@ -527,6 +527,7 @@ options:
       color: Renk
       fontWeight: Yazı Kalınlığı
       backgroundOpacity: Arka Plan Şeffaflığı
+      reset: Varsayılana Sıfırla
   whatsNew:
     title: Yenilikler
   survey:

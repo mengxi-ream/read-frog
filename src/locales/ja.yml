@@ -525,6 +525,7 @@ options:
       color: 色
       fontWeight: フォントウェイト
       backgroundOpacity: 背景の透明度
+      reset: デフォルトにリセット
   whatsNew:
     title: 新機能
   survey:

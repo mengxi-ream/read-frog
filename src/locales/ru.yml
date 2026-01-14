@@ -527,6 +527,7 @@ options:
       color: Цвет
       fontWeight: Толщина шрифта
       backgroundOpacity: Прозрачность фона
+      reset: Сбросить по умолчанию
   whatsNew:
     title: Что нового
   survey:

@@ -527,6 +527,7 @@ options:
       color: Màu sắc
       fontWeight: Độ đậm chữ
       backgroundOpacity: Độ trong suốt nền
+      reset: Đặt lại về mặc định
   whatsNew:
     title: Có gì mới
   survey:
