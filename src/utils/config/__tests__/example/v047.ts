@@ -2,7 +2,7 @@ import type { TestSeriesObject } from './types'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Add style to videoSubtitles config',
+    description: 'Add text style settings to videoSubtitles.style',
     config: {
       language: {
         sourceCode: 'spa',
@@ -171,19 +171,34 @@ export const testSeries: TestSeriesObject = {
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
+          main: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          translation: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          container: {
+            backgroundOpacity: 75,
+          },
         },
       },
       inputTranslation: {
         enabled: true,
-        direction: 'normal',
-        useCustomTarget: true,
-        targetCode: 'eng',
+        fromLang: 'targetCode',
+        toLang: 'sourceCode',
+        enableCycle: false,
         timeThreshold: 300,
       },
     },
   },
   'config-with-no-default-openai-model': {
-    description: 'Add style to videoSubtitles config',
+    description: 'Add text style settings to videoSubtitles.style',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -308,13 +323,28 @@ export const testSeries: TestSeriesObject = {
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
+          main: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          translation: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          container: {
+            backgroundOpacity: 75,
+          },
         },
       },
       inputTranslation: {
         enabled: true,
-        direction: 'normal',
-        useCustomTarget: true,
-        targetCode: 'eng',
+        fromLang: 'targetCode',
+        toLang: 'sourceCode',
+        enableCycle: false,
         timeThreshold: 300,
       },
     },

@@ -1,21 +1,14 @@
 /**
  * Migration script from v044 to v045
- * Adds 'style' object to videoSubtitles config with text and container styling options
+ * Adds 'style' object to videoSubtitles config
  *
  * Before (v044):
  *   { ..., videoSubtitles: { enabled: false, autoStart: false } }
  *
  * After (v045):
- *   { ..., videoSubtitles: { enabled: false, autoStart: false, style: { displayMode, translationPosition, main, translation, container } } }
+ *   { ..., videoSubtitles: { enabled: false, autoStart: false, style: { displayMode: 'bilingual', translationPosition: 'above' } } }
  */
 export function migrate(oldConfig: any): any {
-  const subtitlesStyle = {
-    fontFamily: 'system',
-    fontScale: 100,
-    color: '#FFFFFF',
-    fontWeight: 400,
-  }
-
   return {
     ...oldConfig,
     videoSubtitles: {
@@ -23,11 +16,6 @@ export function migrate(oldConfig: any): any {
       style: {
         displayMode: 'bilingual',
         translationPosition: 'above',
-        main: { ...subtitlesStyle },
-        translation: { ...subtitlesStyle },
-        container: {
-          backgroundOpacity: 75,
-        },
       },
     },
   }
