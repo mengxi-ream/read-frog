@@ -52,6 +52,4 @@ export const SUBTITLE_FONT_FAMILIES = {
   'roboto': 'Roboto, sans-serif',
   'noto-sans': '"Noto Sans", "Noto Sans SC", "Noto Sans JP", "Noto Sans KR", sans-serif',
   'noto-serif': '"Noto Serif", "Noto Serif SC", "Noto Serif JP", "Noto Serif KR", serif',
-  'microsoft-yahei': '"Microsoft YaHei", "微软雅黑", sans-serif',
-  'pingfang': '"PingFang SC", "苹方-简", sans-serif',
 }
