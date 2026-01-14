@@ -18,14 +18,22 @@ import { Sha256Hex } from '../../hash'
 import { sendMessage } from '../../message'
 
 const MIN_LENGTH_FOR_LANG_DETECTION = 50
+// Minimum text length for skip language detection (shorter than general detection
+// to catch short phrases like "Bonjour!" or "こんにちは")
 const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
+// Maximum text length sent to LLM for language detection (limits token cost)
 const MAX_LENGTH_FOR_SKIP_LLM_DETECTION = 500
 
 /**
- * Check if text should be skipped based on language detection
- * @returns true if text language is in skipLanguages list
+ * Check if text should be skipped based on language detection.
+ * Uses LLM detection if enabled, falls back to franc library.
+ * @param text - Text to detect language for
+ * @param skipLanguages - List of languages to skip translation for
+ * @param enableLLMDetection - Whether to use LLM for language detection
+ * @param providerConfig - Provider configuration for LLM detection
+ * @returns true if text language is in skipLanguages list (should skip translation)
  */
-async function shouldSkipByLanguage(
+export async function shouldSkipByLanguage(
   text: string,
   skipLanguages: LangCodeISO6393[],
   enableLLMDetection: boolean,
