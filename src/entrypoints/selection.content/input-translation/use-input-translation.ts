@@ -153,9 +153,8 @@ export function useInputTranslation() {
       return
     }
 
-    // Remove trailing spaces (only TRIGGER_COUNT - 1 because the last space
-    // was prevented by preventDefault and never inserted) and trim whitespace
-    text = text.slice(0, -(TRIGGER_COUNT - 1)).trim()
+    // Remove trailing whitespace added by space key presses
+    text = text.trim()
 
     // Set the trimmed text back immediately (with undo support)
     setTextWithUndo(element, text)
