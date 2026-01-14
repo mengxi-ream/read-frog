@@ -15,7 +15,7 @@ popup:
   enabledFloatingButton: Bật nút nổi
   enabledSelectionToolbar: Bật thanh công cụ chọn văn bản
   alwaysTranslate: Luôn dịch trang web này
-  addToWhitelist: Thêm trang web này vào danh sách trắng
+  addToWhitelist: Bật tiện ích trên trang web này
   options: Tùy chọn
   hover: Di chuột
   translateParagraph: để dịch đoạn văn
@@ -172,12 +172,12 @@ options:
     title: Kiểm soát trang web
     mode:
       title: Chế độ kích hoạt tiện ích mở rộng
-      description: Chọn tiện ích mở rộng chạy trên tất cả các trang web hay chỉ trên các trang web cụ thể
+      description: Theo mặc định, tiện ích mở rộng chạy trên tất cả các trang web. Sử dụng chế độ danh sách trắng để giới hạn chỉ các trang web cụ thể.
       all: Chạy trên tất cả các trang web
       whitelist: Chỉ chạy trên các trang web được liệt kê (Danh sách trắng)
     patterns:
       title: Các trang web đã bật
-      description: Cấu hình các trang web mà tiện ích mở rộng sẽ hoạt động
+      description: Trong chế độ danh sách trắng, tiện ích mở rộng chỉ hoạt động trên các trang web được liệt kê bên dưới
       enterUrlPattern: Nhập mẫu URL (ví dụ example.com)
       urlPattern: Mẫu URL
   overlayTools:
