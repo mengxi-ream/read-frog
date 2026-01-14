@@ -2,6 +2,7 @@ import { langCodeISO6393Schema, langLevel } from '@read-frog/definitions'
 
 import { z } from 'zod'
 import { MIN_SIDE_CONTENT_WIDTH } from '@/utils/constants/side'
+import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MIN_BACKGROUND_OPACITY, MIN_FONT_SCALE } from '@/utils/constants/subtitles'
 import { isReadProvider, isTranslateProvider, isTTSProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from './provider'
 import { readConfigSchema } from './read'
 import { translateConfigSchema } from './translate'
@@ -61,10 +62,27 @@ const inputTranslationSchema = z.object({
 // video subtitles style schema
 const subtitlesDisplayModeSchema = z.enum(['bilingual', 'originalOnly', 'translationOnly'])
 const subtitlesTranslationPositionSchema = z.enum(['above', 'below'])
+const subtitlesFontFamilySchema = z.enum(['system', 'roboto', 'noto-sans', 'noto-serif', 'microsoft-yahei', 'pingfang'])
+
+// Single subtitle text style
+const subtitleTextStyleSchema = z.object({
+  fontFamily: subtitlesFontFamilySchema,
+  fontScale: z.number().min(MIN_FONT_SCALE).max(MAX_FONT_SCALE),
+  color: z.string(),
+  fontWeight: z.number().min(300).max(700),
+})
+
+// Container style
+const subtitleContainerStyleSchema = z.object({
+  backgroundOpacity: z.number().min(MIN_BACKGROUND_OPACITY).max(MAX_BACKGROUND_OPACITY),
+})
 
 const subtitlesStyleSchema = z.object({
   displayMode: subtitlesDisplayModeSchema,
   translationPosition: subtitlesTranslationPositionSchema,
+  main: subtitleTextStyleSchema,
+  translation: subtitleTextStyleSchema,
+  container: subtitleContainerStyleSchema,
 })
 
 // video subtitles schema
@@ -78,6 +96,10 @@ const videoSubtitlesSchema = z.object({
 export type InputTranslationLang = z.infer<typeof inputTranslationLangSchema>
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>
 export type SubtitlesTranslationPosition = z.infer<typeof subtitlesTranslationPositionSchema>
+export type SubtitlesFontFamily = z.infer<typeof subtitlesFontFamilySchema>
+export type SubtitleTextStyle = z.infer<typeof subtitleTextStyleSchema>
+export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema>
+export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>
 
 // Complete config schema
 export const configSchema = z.object({

@@ -518,6 +518,15 @@ options:
         title: Позиция перевода
         above: Сверху
         below: Снизу
+      generalSettings: Общие настройки
+      mainSubtitle: Основные субтитры
+      translationSubtitle: Перевод субтитров
+      containerStyle: Фон
+      fontFamily: Шрифт
+      fontScale: Размер шрифта
+      color: Цвет
+      fontWeight: Толщина шрифта
+      backgroundOpacity: Прозрачность фона
   whatsNew:
     title: Что нового
   survey:

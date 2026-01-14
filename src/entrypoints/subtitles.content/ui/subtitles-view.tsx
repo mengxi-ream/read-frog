@@ -9,7 +9,8 @@ import { useVerticalDrag } from './use-vertical-drag'
 
 function SubtitlesContent() {
   const subtitle = useAtomValue(currentSubtitleAtom)
-  const { style: { displayMode, translationPosition } } = useAtomValue(configFieldsAtomMap.videoSubtitles)
+  const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
+  const { displayMode, translationPosition, container } = style
 
   if (!subtitle)
     return null
@@ -18,9 +19,16 @@ function SubtitlesContent() {
   const showMain = displayMode !== 'translationOnly'
   const showTranslation = displayMode !== 'originalOnly'
 
+  const containerStyle: React.CSSProperties = {
+    backgroundColor: `rgba(0, 0, 0, ${container.backgroundOpacity / 100})`,
+  }
+
   return (
     <div className={`${SUBTITLES_VIEW_CLASS} flex w-full flex-col items-center justify-end pb-3 pointer-events-none`}>
-      <div className="flex flex-col gap-2 w-fit mx-auto px-2 py-1.5 rounded text-center text-white bg-black/75 pointer-events-auto">
+      <div
+        className="flex flex-col gap-2 w-fit max-w-[80%] mx-auto px-2 py-1.5 rounded text-center text-white pointer-events-auto"
+        style={containerStyle}
+      >
         <Activity mode={showMain ? 'visible' : 'hidden'}>
           <MainSubtitle className={translationAbove ? 'order-2' : 'order-1'} />
         </Activity>

@@ -516,6 +516,15 @@ options:
         title: 翻訳の位置
         above: 上
         below: 下
+      generalSettings: 一般設定
+      mainSubtitle: メイン字幕
+      translationSubtitle: 翻訳字幕
+      containerStyle: 背景
+      fontFamily: フォント
+      fontScale: フォントサイズ
+      color: 色
+      fontWeight: フォントウェイト
+      backgroundOpacity: 背景の透明度
   whatsNew:
     title: 新機能
   survey:

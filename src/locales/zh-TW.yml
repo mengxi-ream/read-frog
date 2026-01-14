@@ -519,6 +519,15 @@ options:
         title: 譯文位置
         above: 上方
         below: 下方
+      generalSettings: 通用設定
+      mainSubtitle: 主字幕
+      translationSubtitle: 翻譯字幕
+      containerStyle: 背景
+      fontFamily: 字體
+      fontScale: 字號
+      color: 顏色
+      fontWeight: 字重
+      backgroundOpacity: 背景透明度
   whatsNew:
     title: 最近更新
   survey:

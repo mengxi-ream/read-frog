@@ -171,6 +171,21 @@ export const testSeries: TestSeriesObject = {
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
+          main: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          translation: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          container: {
+            backgroundOpacity: 75,
+          },
         },
       },
       inputTranslation: {
@@ -308,6 +323,21 @@ export const testSeries: TestSeriesObject = {
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
+          main: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          translation: {
+            fontFamily: 'system',
+            fontScale: 100,
+            color: '#FFFFFF',
+            fontWeight: 400,
+          },
+          container: {
+            backgroundOpacity: 75,
+          },
         },
       },
       inputTranslation: {

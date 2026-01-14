@@ -3,6 +3,7 @@ import type { PageTranslateRange } from '@/types/config/translate'
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
 import { DEFAULT_PROVIDER_CONFIG_LIST } from './providers'
 import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
+import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_FONT_SCALE } from './subtitles'
 import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_MIN_WORDS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
 import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from './translation-node-style'
 import { DEFAULT_TTS_CONFIG } from './tts'
@@ -101,6 +102,21 @@ export const DEFAULT_CONFIG: Config = {
     style: {
       displayMode: 'bilingual',
       translationPosition: 'above',
+      main: {
+        fontFamily: 'system',
+        fontScale: DEFAULT_FONT_SCALE,
+        color: '#FFFFFF',
+        fontWeight: 400,
+      },
+      translation: {
+        fontFamily: 'system',
+        fontScale: DEFAULT_FONT_SCALE,
+        color: '#FFFFFF',
+        fontWeight: 400,
+      },
+      container: {
+        backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
+      },
     },
   },
 }

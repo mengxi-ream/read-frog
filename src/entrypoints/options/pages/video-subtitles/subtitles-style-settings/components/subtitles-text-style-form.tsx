@@ -1,0 +1,89 @@
+import type { SubtitlesFontFamily, SubtitleTextStyle } from '@/types/config/config'
+import { i18n } from '#imports'
+import { Label } from '@/components/shadcn/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
+import { MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from '@/utils/constants/subtitles'
+
+const FONT_FAMILY_OPTIONS: { value: SubtitlesFontFamily, label: string }[] = [
+  { value: 'system', label: 'System Default' },
+  { value: 'roboto', label: 'Roboto' },
+  { value: 'noto-sans', label: 'Noto Sans' },
+  { value: 'noto-serif', label: 'Noto Serif' },
+  { value: 'microsoft-yahei', label: '微软雅黑' },
+  { value: 'pingfang', label: '苹方' },
+]
+
+interface SubtitlesTextStyleFormProps {
+  textStyle: SubtitleTextStyle
+  onChange: (style: Partial<SubtitleTextStyle>) => void
+}
+
+export function SubtitlesTextStyleForm({ textStyle, onChange }: SubtitlesTextStyleFormProps) {
+  return (
+    <>
+      <div className="flex items-center justify-between gap-4">
+        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontFamily')}</Label>
+        <Select
+          value={textStyle.fontFamily}
+          onValueChange={(value: SubtitlesFontFamily) => onChange({ fontFamily: value })}
+        >
+          <SelectTrigger className="w-48 h-8">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {FONT_FAMILY_OPTIONS.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontScale')}</Label>
+        <div className="flex items-center gap-2 w-48">
+          <input
+            type="range"
+            min={MIN_FONT_SCALE}
+            max={MAX_FONT_SCALE}
+            step={10}
+            value={textStyle.fontScale}
+            onChange={e => onChange({ fontScale: Number(e.target.value) })}
+            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+          />
+          <span className="w-10 text-sm text-right">
+            {textStyle.fontScale}
+            %
+          </span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontWeight')}</Label>
+        <div className="flex items-center gap-2 w-48">
+          <input
+            type="range"
+            min={MIN_FONT_WEIGHT}
+            max={MAX_FONT_WEIGHT}
+            step={100}
+            value={textStyle.fontWeight}
+            onChange={e => onChange({ fontWeight: Number(e.target.value) })}
+            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+          />
+          <span className="w-10 text-sm text-right">{textStyle.fontWeight}</span>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between gap-4">
+        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.color')}</Label>
+        <input
+          type="color"
+          value={textStyle.color}
+          onChange={e => onChange({ color: e.target.value })}
+          className="w-8 h-8 p-0.5 rounded border border-input cursor-pointer"
+        />
+      </div>
+    </>
+  )
+}

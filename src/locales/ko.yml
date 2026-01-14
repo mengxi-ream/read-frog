@@ -517,6 +517,15 @@ options:
         title: 번역 위치
         above: 위
         below: 아래
+      generalSettings: 일반 설정
+      mainSubtitle: 메인 자막
+      translationSubtitle: 번역 자막
+      containerStyle: 배경
+      fontFamily: 글꼴
+      fontScale: 글꼴 크기
+      color: 색상
+      fontWeight: 글꼴 굵기
+      backgroundOpacity: 배경 투명도
   whatsNew:
     title: 새로운 기능
   survey:

@@ -518,6 +518,15 @@ options:
         title: Vị trí bản dịch
         above: Phía trên
         below: Phía dưới
+      generalSettings: Cài đặt chung
+      mainSubtitle: Phụ đề chính
+      translationSubtitle: Phụ đề dịch
+      containerStyle: Nền
+      fontFamily: Phông chữ
+      fontScale: Cỡ chữ
+      color: Màu sắc
+      fontWeight: Độ đậm chữ
+      backgroundOpacity: Độ trong suốt nền
   whatsNew:
     title: Có gì mới
   survey:
