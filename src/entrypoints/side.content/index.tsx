@@ -14,6 +14,7 @@ import { APP_NAME } from '@/utils/constants/app'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { protectSelectAllShadowRoot } from '@/utils/select-all'
 import { insertShadowRootUIWrapperInto } from '@/utils/shadow-root'
+import { isSiteEnabled } from '@/utils/site-control'
 import { queryClient } from '@/utils/tanstack-query'
 import { addStyleToShadow, mirrorDynamicStyles, protectInternalStyles } from '../../utils/styles'
 import App from './app'
@@ -29,6 +30,12 @@ export default defineContentScript({
   cssInjectionMode: 'ui',
   async main(ctx) {
     const config = await getLocalConfig() ?? DEFAULT_CONFIG
+
+    // Check global site control
+    if (!isSiteEnabled(window.location.href, config)) {
+      return
+    }
+
     const ui = await createShadowRootUi(ctx, {
       name: kebabCase(APP_NAME),
       position: 'overlay',

@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: Включить плавающую кнопку
   enabledSelectionToolbar: Включить панель выделения
   alwaysTranslate: Всегда переводить этот сайт
+  addToWhitelist: Включить расширение на этом сайте
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца
@@ -167,6 +168,18 @@ options:
         confirm: Подтвердить
         cancel: Отмена
         description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
+  siteControl:
+    title: Управление сайтами
+    mode:
+      title: Режим активации расширения
+      description: По умолчанию расширение работает на всех сайтах. Используйте режим белого списка, чтобы ограничить работу только указанными сайтами.
+      all: Работать на всех сайтах
+      whitelist: Работать только на указанных сайтах (белый список)
+    patterns:
+      title: Активные сайты
+      description: В режиме белого списка расширение будет активно только на сайтах, перечисленных ниже
+      enterUrlPattern: Введите шаблон URL (например, example.com)
+      urlPattern: Шаблон URL
   overlayTools:
     title: Инструменты наложения
     floatingButton:

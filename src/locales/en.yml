@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: Enable floating button
   enabledSelectionToolbar: Enable selection toolbar
   alwaysTranslate: Always translate this site
+  addToWhitelist: Enable extension on this site
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
@@ -167,6 +168,18 @@ options:
         confirm: Confirm
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
+  siteControl:
+    title: Site Control
+    mode:
+      title: Extension Activation Mode
+      description: By default, the extension runs on all websites. Use whitelist mode to limit it to specific sites only.
+      all: Run on all sites
+      whitelist: Only run on listed sites (Whitelist)
+    patterns:
+      title: Enabled Sites
+      description: When in whitelist mode, the extension will only be active on the sites listed below
+      enterUrlPattern: Enter URL pattern (e.g., example.com)
+      urlPattern: URL Pattern
   overlayTools:
     title: Overlay Tools
     floatingButton:

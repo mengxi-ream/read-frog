@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: Yüzen butonu etkinleştir
   enabledSelectionToolbar: Seçim araç çubuğunu etkinleştir
   alwaysTranslate: Bu siteyi her zaman çevir
+  addToWhitelist: Bu sitede uzantıyı etkinleştir
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için
@@ -167,6 +168,18 @@ options:
         confirm: Onayla
         cancel: İptal
         description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
+  siteControl:
+    title: Site Kontrolü
+    mode:
+      title: Uzantı Etkinleştirme Modu
+      description: Varsayılan olarak uzantı tüm web sitelerinde çalışır. Beyaz liste modunu kullanarak uzantıyı yalnızca belirli sitelerle sınırlayabilirsiniz.
+      all: Tüm sitelerde çalıştır
+      whitelist: Yalnızca listelenen sitelerde çalıştır (Beyaz Liste)
+    patterns:
+      title: Etkin Siteler
+      description: Beyaz liste modunda uzantı yalnızca aşağıda listelenen sitelerde etkin olacaktır
+      enterUrlPattern: URL deseni girin (örn. example.com)
+      urlPattern: URL Deseni
   overlayTools:
     title: Kaplama Araçları
     floatingButton:

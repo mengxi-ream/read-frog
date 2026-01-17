@@ -2,7 +2,7 @@ import type { TestSeriesObject } from './types'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Add text style settings to videoSubtitles.style',
+    description: 'Adds siteControl field',
     config: {
       language: {
         sourceCode: 'spa',
@@ -171,21 +171,6 @@ export const testSeries: TestSeriesObject = {
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
-          main: {
-            fontFamily: 'system',
-            fontScale: 100,
-            color: '#FFFFFF',
-            fontWeight: 400,
-          },
-          translation: {
-            fontFamily: 'system',
-            fontScale: 100,
-            color: '#FFFFFF',
-            fontWeight: 400,
-          },
-          container: {
-            backgroundOpacity: 75,
-          },
         },
       },
       inputTranslation: {
@@ -195,10 +180,14 @@ export const testSeries: TestSeriesObject = {
         enableCycle: false,
         timeThreshold: 300,
       },
+      siteControl: {
+        mode: 'all',
+        patterns: [],
+      },
     },
   },
   'config-with-no-default-openai-model': {
-    description: 'Add text style settings to videoSubtitles.style',
+    description: 'Adds siteControl field',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -323,21 +312,6 @@ export const testSeries: TestSeriesObject = {
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
-          main: {
-            fontFamily: 'system',
-            fontScale: 100,
-            color: '#FFFFFF',
-            fontWeight: 400,
-          },
-          translation: {
-            fontFamily: 'system',
-            fontScale: 100,
-            color: '#FFFFFF',
-            fontWeight: 400,
-          },
-          container: {
-            backgroundOpacity: 75,
-          },
         },
       },
       inputTranslation: {
@@ -346,6 +320,10 @@ export const testSeries: TestSeriesObject = {
         toLang: 'sourceCode',
         enableCycle: false,
         timeThreshold: 300,
+      },
+      siteControl: {
+        mode: 'all',
+        patterns: [],
       },
     },
   },

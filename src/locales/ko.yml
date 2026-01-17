@@ -14,6 +14,7 @@ popup:
   enabledFloatingButton: 플로팅 버튼 활성화
   enabledSelectionToolbar: 선택 툴바 활성화
   alwaysTranslate: 이 사이트 항상 번역
+  addToWhitelist: 이 사이트에서 확장 프로그램 활성화
   options: 옵션
   hover: 마우스 오버
   translateParagraph: 단락 번역
@@ -166,6 +167,18 @@ options:
         confirm: 확인
         cancel: 취소
         description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
+  siteControl:
+    title: 사이트 제어
+    mode:
+      title: 확장 프로그램 활성화 모드
+      description: 기본적으로 확장 프로그램은 모든 웹사이트에서 실행됩니다. 화이트리스트 모드를 사용하면 특정 사이트에서만 실행되도록 제한할 수 있습니다.
+      all: 모든 사이트에서 실행
+      whitelist: 나열된 사이트에서만 실행 (화이트리스트)
+    patterns:
+      title: 활성화된 사이트
+      description: 화이트리스트 모드에서는 확장 프로그램이 아래에 나열된 사이트에서만 활성화됩니다
+      enterUrlPattern: 'URL 패턴 입력 (예: example.com)'
+      urlPattern: URL 패턴
   overlayTools:
     title: 오버레이 도구
     floatingButton:

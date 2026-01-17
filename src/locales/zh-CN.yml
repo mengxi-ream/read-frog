@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: 启用悬浮按钮
   enabledSelectionToolbar: 启用选择工具栏
   alwaysTranslate: 总是翻译这个网站
+  addToWhitelist: 在此网站启用扩展
   options: 选项
   hover: 鼠标悬停
   translateParagraph: 来翻译段落
@@ -166,6 +167,18 @@ options:
         confirm: 确认
         cancel: 取消
         description: 此操作将清理所有翻译缓存。此操作无法撤销。
+  siteControl:
+    title: 站点控制
+    mode:
+      title: 扩展激活模式
+      description: 默认情况下，扩展在所有网站上运行。使用白名单模式可以限制扩展仅在特定网站上运行。
+      all: 在所有站点运行
+      whitelist: 仅在列出的站点运行（白名单）
+    patterns:
+      title: 启用的站点
+      description: 在白名单模式下，扩展仅在下方列出的网站上激活
+      enterUrlPattern: 输入 URL 模式（例如 example.com）
+      urlPattern: URL 模式
   overlayTools:
     title: 悬浮工具
     floatingButton:

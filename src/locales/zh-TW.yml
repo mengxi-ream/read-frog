@@ -15,6 +15,7 @@ popup:
   enabledFloatingButton: 啟用懸浮按鈕
   enabledSelectionToolbar: 啟用選擇工具列
   alwaysTranslate: 總是翻譯這個網站
+  addToWhitelist: 在此網站啟用擴充功能
   options: 選項
   hover: 滑鼠懸停
   translateParagraph: 來翻譯段落
@@ -166,6 +167,18 @@ options:
         confirm: 確認
         cancel: 取消
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
+  siteControl:
+    title: 站點控制
+    mode:
+      title: 擴充功能啟動模式
+      description: 預設情況下，擴充功能在所有網站上執行。使用白名單模式可以限制擴充功能僅在特定網站上執行。
+      all: 在所有站點執行
+      whitelist: 僅在列出的站點執行（白名單）
+    patterns:
+      title: 啟用的站點
+      description: 在白名單模式下，擴充功能僅在下方列出的網站上啟動
+      enterUrlPattern: 輸入 URL 模式（例如 example.com）
+      urlPattern: URL 模式
   overlayTools:
     title: 懸浮工具
     floatingButton:

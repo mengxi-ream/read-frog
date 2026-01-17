@@ -14,6 +14,7 @@ popup:
   enabledFloatingButton: フローティングボタンを有効化
   enabledSelectionToolbar: 選択ツールバーを有効化
   alwaysTranslate: このサイトを常に翻訳する
+  addToWhitelist: このサイトで拡張機能を有効にする
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
@@ -165,6 +166,18 @@ options:
         confirm: 確認
         cancel: キャンセル
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
+  siteControl:
+    title: サイト制御
+    mode:
+      title: 拡張機能の有効化モード
+      description: デフォルトでは、拡張機能はすべてのウェブサイトで実行されます。ホワイトリストモードを使用すると、特定のサイトのみに制限できます。
+      all: すべてのサイトで実行
+      whitelist: リストされたサイトでのみ実行（ホワイトリスト）
+    patterns:
+      title: 有効なサイト
+      description: ホワイトリストモードでは、拡張機能は以下にリストされたサイトでのみ有効になります
+      enterUrlPattern: URLパターンを入力（例：example.com）
+      urlPattern: URLパターン
   overlayTools:
     title: オーバーレイツール
     floatingButton:
