@@ -19,7 +19,7 @@ import { getLocalConfig } from '@/utils/config/storage'
 import { getIsFirefoxExtensionEnv } from '@/utils/firefox/firefox-compat'
 import { createPortStreamPromise } from '@/utils/firefox/firefox-streaming'
 import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
-import { translateText } from '@/utils/host/translate/translate-text'
+import { translateTextForSelection } from '@/utils/host/translate/translate-text'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
@@ -147,7 +147,7 @@ export function TranslatePopover() {
         }
 
         if (isFirefoxExtensionEnv) {
-          const backgroundTranslation = await translateText(cleanText)
+          const backgroundTranslation = await translateTextForSelection(cleanText)
           if (isCancelled) {
             return
           }

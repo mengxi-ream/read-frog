@@ -209,21 +209,6 @@ async function translateTextCore(options: TranslateTextOptions): Promise<string>
     }
   }
 
-  // Skip translation if text is in skipLanguages list
-  const { skipLanguages, enableSkipLanguagesLLMDetection } = config.translate.page
-  if (skipLanguages.length > 0 && text.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
-    const shouldSkip = await shouldSkipByLanguage(
-      text,
-      skipLanguages,
-      enableSkipLanguagesLLMDetection,
-      providerConfig,
-    )
-    if (shouldSkip) {
-      logger.info(`translateTextCore: skipping translation because text is in skip language list. text: ${text}`)
-      return ''
-    }
-  }
-
   // Get article data for LLM providers (needed for both hash and request)
   let articleTitle: string | undefined
   let articleTextContent: string | undefined
@@ -262,6 +247,24 @@ export async function translateText(text: string): Promise<string> {
   const config = await getLocalConfig()
   if (!config) {
     throw new Error('No global config when translate text')
+  }
+
+  // Skip translation if text is in skipLanguages list (page translation only)
+  const { skipLanguages, enableSkipLanguagesLLMDetection } = config.translate.page
+  if (skipLanguages.length > 0 && text.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
+    const providerConfig = getProviderConfigById(config.providersConfig, config.translate.providerId)
+    if (providerConfig) {
+      const shouldSkip = await shouldSkipByLanguage(
+        text,
+        skipLanguages,
+        enableSkipLanguagesLLMDetection,
+        providerConfig,
+      )
+      if (shouldSkip) {
+        logger.info(`translateText: skipping translation because text is in skip language list. text: ${text}`)
+        return ''
+      }
+    }
   }
 
   return translateTextCore({
@@ -309,6 +312,19 @@ export async function translateTextForInput(
       level: config.language.level,
     },
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
+  })
+}
+
+export async function translateTextForSelection(text: string): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    throw new Error('No global config when translate text')
+  }
+
+  return translateTextCore({
+    text,
+    langConfig: config.language,
+    extraHashTags: ['selectionTranslation'],
   })
 }
 
