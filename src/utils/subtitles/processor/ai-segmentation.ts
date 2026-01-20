@@ -21,23 +21,14 @@ function isNoiseText(text: string): boolean {
   return NOISE_PATTERNS.some(pattern => pattern.test(trimmed))
 }
 
-/**
- * Clean and filter fragments before AI processing
- * - Remove newlines from text
- * - Remove empty fragments
- * - Filter out noise annotations like [Music], [Applause]
- */
 export function cleanFragmentsForAi(fragments: SubtitlesFragment[]): SubtitlesFragment[] {
   return fragments
     .map(fragment => ({
       ...fragment,
-      // Remove newlines and normalize whitespace
       text: fragment.text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim(),
     }))
     .filter(fragment =>
-      // Remove empty fragments
       fragment.text.length > 0
-      // Remove noise annotations
       && !isNoiseText(fragment.text),
     )
 }
@@ -65,14 +56,14 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
   const fragments: SubtitlesFragment[] = []
   const lines = vtt.trim().split('\n')
 
-  let i = 0
+  let lineIndex = 0
   // Skip WEBVTT header
-  while (i < lines.length && !lines[i].includes('-->')) {
-    i++
+  while (lineIndex < lines.length && !lines[lineIndex].includes('-->')) {
+    lineIndex++
   }
 
-  while (i < lines.length) {
-    const line = lines[i].trim()
+  while (lineIndex < lines.length) {
+    const line = lines[lineIndex].trim()
 
     // Match timestamp line: "1000 --> 1500" (milliseconds format)
     const match = line.match(/^(\d+)\s*-->\s*(\d+)$/)
@@ -82,10 +73,10 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
 
       // Collect text lines
       const textLines: string[] = []
-      i++
-      while (i < lines.length && lines[i].trim() !== '' && !lines[i].includes('-->')) {
-        textLines.push(lines[i].trim())
-        i++
+      lineIndex++
+      while (lineIndex < lines.length && lines[lineIndex].trim() !== '' && !lines[lineIndex].includes('-->')) {
+        textLines.push(lines[lineIndex].trim())
+        lineIndex++
       }
 
       if (textLines.length > 0) {
@@ -97,7 +88,7 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
       }
     }
     else {
-      i++
+      lineIndex++
     }
   }
 
@@ -115,7 +106,6 @@ export async function aiSegmentBlock(
     return fragments
   }
 
-  // Clean fragments before AI processing
   const cleanedFragments = cleanFragmentsForAi(fragments)
 
   if (cleanedFragments.length === 0) {
@@ -124,20 +114,16 @@ export async function aiSegmentBlock(
 
   const translateProviderId = config.translate.providerId
 
-  // Format fragments to JSON
   const jsonContent = formatFragmentsToJson(cleanedFragments)
 
   try {
-    // Send to background for AI processing
     const segmentedVtt = await sendMessage('aiSegmentSubtitles', {
       jsonContent,
       providerId: translateProviderId,
     })
 
-    // Parse the simplified VTT result
     const segmentedFragments = parseSimplifiedVttToFragments(segmentedVtt)
 
-    // If parsing failed or returned empty, return original fragments
     if (segmentedFragments.length === 0) {
       return fragments
     }
@@ -145,7 +131,6 @@ export async function aiSegmentBlock(
     return segmentedFragments
   }
   catch (error) {
-    // On error, fall back to original fragments
     console.error('AI segmentation failed:', error)
     return fragments
   }
