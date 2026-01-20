@@ -9,6 +9,7 @@ import {
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom, useAtomValue } from 'jotai'
 import { useMemo } from 'react'
+import { LLMStatusIndicator } from '@/components/llm-status-indicator'
 import { Button } from '@/components/shadcn/button'
 import {
   DropdownMenu,
@@ -22,7 +23,6 @@ import { Switch } from '@/components/shadcn/switch'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
-import { LLMStatusIndicator } from '../../../../components/llm-status-indicator'
 import { ConfigCard } from '../../components/config-card'
 
 export function SkipLanguages() {
