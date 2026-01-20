@@ -7,7 +7,7 @@ import {
   langCodeISO6393Schema,
 } from '@read-frog/definitions'
 import { deepmerge } from 'deepmerge-ts'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useMemo } from 'react'
 import { Button } from '@/components/shadcn/button'
 import {
@@ -26,8 +26,8 @@ import { LLMStatusIndicator } from '../../../../components/llm-status-indicator'
 import { ConfigCard } from '../../components/config-card'
 
 export function SkipLanguages() {
-  const [translateConfig] = useAtom(configFieldsAtomMap.translate)
-  const [providersConfig] = useAtom(configFieldsAtomMap.providersConfig)
+  const translateConfig = useAtomValue(configFieldsAtomMap.translate)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
   const hasLLMProvider = useMemo(() => {
     const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
