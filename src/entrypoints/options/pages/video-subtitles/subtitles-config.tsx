@@ -62,6 +62,26 @@ export function SubtitlesConfig() {
             }}
           />
         </Field>
+
+        <Field orientation="horizontal">
+          <FieldContent className="self-center">
+            <FieldLabel htmlFor="video-subtitles-ai-segmentation">
+              {i18n.t('options.videoSubtitles.aiSegmentation.enable')}
+              <Hint content={i18n.t('options.videoSubtitles.aiSegmentation.enableDescription')} />
+            </FieldLabel>
+          </FieldContent>
+          <Switch
+            id="video-subtitles-ai-segmentation"
+            checked={videoSubtitlesConfig?.aiSegmentation ?? false}
+            onCheckedChange={(checked) => {
+              void setVideoSubtitlesConfig(
+                deepmerge(videoSubtitlesConfig, {
+                  aiSegmentation: checked,
+                }),
+              )
+            }}
+          />
+        </Field>
       </div>
     </ConfigCard>
   )

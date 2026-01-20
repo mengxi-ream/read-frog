@@ -90,6 +90,7 @@ const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
   autoStart: z.boolean(),
   style: subtitlesStyleSchema,
+  aiSegmentation: z.boolean(),
 })
 
 // Export types for use in components

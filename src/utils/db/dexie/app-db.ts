@@ -2,6 +2,7 @@ import type { EntityTable } from 'dexie'
 import { upperCamelCase } from 'case-anything'
 import Dexie from 'dexie'
 import { APP_NAME } from '@/utils/constants/app'
+import AiSegmentationCache from './tables/ai-segmentation-cache'
 import ArticleSummaryCache from './tables/article-summary-cache'
 import BatchRequestRecord from './tables/batch-request-record'
 import TranslationCache from './tables/translation-cache'
@@ -19,6 +20,11 @@ export default class AppDB extends Dexie {
 
   articleSummaryCache!: EntityTable<
     ArticleSummaryCache,
+    'key'
+  >
+
+  aiSegmentationCache!: EntityTable<
+    AiSegmentationCache,
     'key'
   >
 
@@ -57,8 +63,27 @@ export default class AppDB extends Dexie {
         key,
         createdAt`,
     })
+    this.version(4).stores({
+      translationCache: `
+        key,
+        translation,
+        createdAt`,
+      batchRequestRecord: `
+        key,
+        createdAt,
+        originalRequestCount,
+        provider,
+        model`,
+      articleSummaryCache: `
+        key,
+        createdAt`,
+      aiSegmentationCache: `
+        key,
+        createdAt`,
+    })
     this.translationCache.mapToClass(TranslationCache)
     this.batchRequestRecord.mapToClass(BatchRequestRecord)
     this.articleSummaryCache.mapToClass(ArticleSummaryCache)
+    this.aiSegmentationCache.mapToClass(AiSegmentationCache)
   }
 }

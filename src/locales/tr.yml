@@ -541,6 +541,17 @@ options:
       fontWeight: Yazı Kalınlığı
       backgroundOpacity: Arka Plan Şeffaflığı
       reset: Varsayılana Sıfırla
+    aiSegmentation:
+      title: AI Akıllı Bölümlendirme
+      enable: AI Akıllı Bölümlendirmeyi Etkinleştir
+      enableDescription: Daha iyi okunabilirlik için altyazıları akıllıca bölümlemek üzere AI kullanın. Zaman çizelgesi AI tarafından belirlenir ve zaman zaman zamanlama kayması olabilir. LLM çeviri sağlayıcısı gerektirir.
+      clearCache: Önbelleği Temizle
+      clearing: Temizleniyor...
+      clearCacheDialog:
+        title: AI Bölümlendirme Önbelleğini Temizle
+        description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
+        cancel: İptal
+        confirm: Onayla
   whatsNew:
     title: Yenilikler
   survey:
@@ -593,6 +604,7 @@ subtitles:
     fetching: Altyazılar alınıyor
     fetchSuccess: Altyazılar yüklendi
     fetchFailed: Altyazılar alınamadı
+    segmenting: AI bölümlendirmesi...
     processing: Altyazılar çevriliyor (yaklaşık 2 dakika)
     error: Bir hata oluştu
   errors:

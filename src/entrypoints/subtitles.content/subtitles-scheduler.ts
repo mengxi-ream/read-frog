@@ -1,5 +1,5 @@
 import type { StateData, SubtitlesFragment, SubtitlesState } from '@/utils/subtitles/types'
-import { currentSubtitleAtom, subtitlesStateAtom, subtitlesStore, subtitlesVisibleAtom } from './atoms'
+import { currentSubtitleAtom, currentTimeMsAtom, subtitlesStateAtom, subtitlesStore, subtitlesVisibleAtom } from './atoms'
 
 export class SubtitlesScheduler {
   private videoElement: HTMLVideoElement
@@ -97,6 +97,8 @@ export class SubtitlesScheduler {
 
   private updateSubtitles(currentTime: number) {
     const timeMs = currentTime * 1000
+    subtitlesStore.set(currentTimeMsAtom, timeMs)
+
     const subtitle = this.subtitles.find(sub => sub.start <= timeMs && sub.end > timeMs)
     const newIndex = subtitle ? this.subtitles.indexOf(subtitle) : -1
 

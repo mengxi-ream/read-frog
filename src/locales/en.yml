@@ -543,6 +543,17 @@ options:
       fontWeight: Font Weight
       backgroundOpacity: Background Opacity
       reset: Reset to Default
+    aiSegmentation:
+      title: AI Smart Segmentation
+      enable: Enable AI Smart Segmentation
+      enableDescription: Use AI to intelligently segment subtitles for better readability. Timeline is determined by AI, which may occasionally cause timing misalignment. Requires LLM translate provider.
+      clearCache: Clear Cache
+      clearing: Clearing...
+      clearCacheDialog:
+        title: Clear AI Segmentation Cache
+        description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
+        cancel: Cancel
+        confirm: Confirm
   whatsNew:
     title: What's New
   survey:
@@ -595,6 +606,7 @@ subtitles:
     fetching: Fetching captions
     fetchSuccess: Captions loaded
     fetchFailed: Failed to fetch captions
+    segmenting: AI segmenting...
     processing: Translating captions (approx. 2 minutes)
     error: Error occurred
   errors:

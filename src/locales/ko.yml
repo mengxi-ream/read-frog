@@ -540,6 +540,17 @@ options:
       fontWeight: 글꼴 굵기
       backgroundOpacity: 배경 투명도
       reset: 기본값으로 재설정
+    aiSegmentation:
+      title: AI 스마트 분할
+      enable: AI 스마트 분할 활성화
+      enableDescription: AI를 사용하여 자막을 지능적으로 분할하여 가독성을 향상시킵니다. 타임라인은 AI가 결정하므로 타이밍 오차가 발생할 수 있습니다. LLM 번역 공급자가 필요합니다.
+      clearCache: 캐시 삭제
+      clearing: 삭제 중...
+      clearCacheDialog:
+        title: AI 분할 캐시 삭제
+        description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
+        cancel: 취소
+        confirm: 확인
   whatsNew:
     title: 새로운 기능
   survey:
@@ -592,6 +603,7 @@ subtitles:
     fetching: 자막 가져오는 중
     fetchSuccess: 자막 로드 완료
     fetchFailed: 자막 가져오기 실패
+    segmenting: AI 문장 구분 중...
     processing: 자막 번역 중 (약 2분 소요)
     error: 오류 발생
   errors:

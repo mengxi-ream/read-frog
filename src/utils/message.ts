@@ -34,12 +34,15 @@ interface ProtocolMap {
   // request
   enqueueTranslateRequest: (data: { text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string, articleTitle?: string, articleTextContent?: string }) => Promise<string>
   enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string, videoTitle?: string, subtitlesContext?: string }) => Promise<string>
+  // AI subtitle segmentation
+  aiSegmentSubtitles: (data: { jsonContent: string, providerId: string }) => Promise<string>
   setTranslateRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
   setTranslateBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // cache management
   clearAllTranslationRelatedCache: () => Promise<void>
+  clearAiSegmentationCache: () => Promise<void>
 }
 
 export const { sendMessage, onMessage }

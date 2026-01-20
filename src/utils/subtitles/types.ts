@@ -3,6 +3,7 @@ export type SubtitlesState
     | 'fetching'
     | 'fetchSuccess'
     | 'fetchFailed'
+    | 'segmenting'
     | 'processing'
     | 'error'
 

@@ -3,9 +3,11 @@ import type { SubtitlesFetcher } from '@/utils/subtitles/fetchers/types'
 import type { SubtitlesFragment, SubtitlesTranslationBlock } from '@/utils/subtitles/types'
 import { i18n } from '#imports'
 import { toast } from 'sonner'
+import { getLocalConfig } from '@/utils/config/storage'
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
 import { waitForElement } from '@/utils/dom/wait-for-element'
 import { ToastSubtitlesError } from '@/utils/subtitles/errors'
+import { aiSegmentBlock } from '@/utils/subtitles/processor/ai-segmentation'
 import { createSubtitlesBlocks, findNextBlockToTranslate, updateBlockState } from '@/utils/subtitles/processor/block-strategy'
 import { translateSubtitles } from '@/utils/subtitles/processor/translator'
 import { currentSubtitleAtom, subtitlesStore, subtitlesTranslationBlocksAtom } from './atoms'
@@ -232,7 +234,17 @@ export class UniversalVideoAdapter {
     }
 
     try {
-      const translated = await translateSubtitles(batch.fragments)
+      let fragmentsToTranslate = batch.fragments
+
+      // AI segmentation before translation if enabled
+      const config = await getLocalConfig()
+      if (config?.videoSubtitles?.aiSegmentation) {
+        this.subtitlesScheduler?.setState('segmenting')
+        fragmentsToTranslate = await aiSegmentBlock(batch.fragments, config)
+      }
+
+      this.subtitlesScheduler?.setState('processing')
+      const translated = await translateSubtitles(fragmentsToTranslate)
 
       const updatedBatches = subtitlesStore.get(subtitlesTranslationBlocksAtom)
       subtitlesStore.set(

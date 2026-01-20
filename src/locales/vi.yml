@@ -541,6 +541,17 @@ options:
       fontWeight: Độ đậm chữ
       backgroundOpacity: Độ trong suốt nền
       reset: Đặt lại về mặc định
+    aiSegmentation:
+      title: AI Phân đoạn thông minh
+      enable: Bật AI Phân đoạn thông minh
+      enableDescription: Sử dụng AI để phân đoạn phụ đề thông minh nhằm cải thiện khả năng đọc. Dòng thời gian do AI xác định, có thể đôi khi gây lệch thời gian. Yêu cầu nhà cung cấp dịch LLM.
+      clearCache: Xóa bộ nhớ đệm
+      clearing: Đang xóa...
+      clearCacheDialog:
+        title: Xóa bộ nhớ đệm AI phân đoạn
+        description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
+        cancel: Hủy
+        confirm: Xác nhận
   whatsNew:
     title: Có gì mới
   survey:
@@ -593,6 +604,7 @@ subtitles:
     fetching: Đang lấy phụ đề
     fetchSuccess: Đã tải phụ đề
     fetchFailed: Lấy phụ đề thất bại
+    segmenting: AI đang phân đoạn...
     processing: Đang dịch phụ đề (khoảng 2 phút)
     error: Đã xảy ra lỗi
   errors:

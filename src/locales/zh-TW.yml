@@ -542,6 +542,17 @@ options:
       fontWeight: 字重
       backgroundOpacity: 背景透明度
       reset: 重置為預設值
+    aiSegmentation:
+      title: AI 智能斷句
+      enable: 啟用 AI 智能斷句
+      enableDescription: 使用 AI 智能斷句字幕，提升可讀性。啟用後時間軸由 AI 判斷，可能出現時間軸錯位。需要配置 LLM 翻譯提供商。
+      clearCache: 清除快取
+      clearing: 清除中...
+      clearCacheDialog:
+        title: 清除 AI 斷句快取
+        description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
+        cancel: 取消
+        confirm: 確認
   whatsNew:
     title: 最近更新
   survey:
@@ -594,6 +605,7 @@ subtitles:
     fetching: 字幕獲取中
     fetchSuccess: 字幕載入成功
     fetchFailed: 字幕獲取失敗
+    segmenting: AI 斷句中...
     processing: 字幕翻譯中（預計等待 2 分鐘）
     error: 發生錯誤
   errors:

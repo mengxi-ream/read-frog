@@ -3,10 +3,11 @@ import { WEBSITE_URL } from '@/utils/constants/url'
 import { logger } from '@/utils/logger'
 import { onMessage, sendMessage } from '@/utils/message'
 import { SessionCacheGroupRegistry } from '@/utils/session-cache/session-cache-group-registry'
+import { runAiSegmentSubtitles } from './ai-segmentation'
 import { ensureInitializedConfig } from './config'
 import { setUpConfigBackup } from './config-backup'
 import { initializeContextMenu, registerContextMenuListeners } from './context-menu'
-import { cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from './db-cleanup'
+import { cleanupAllAiSegmentationCache, cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from './db-cleanup'
 import { handleAnalyzeSelectionPort, handleTranslateStreamPort, runAnalyzeSelectionStream } from './firefox-stream'
 import { setupIframeInjection } from './iframe-injection'
 import { initMockData } from './mock-data'
@@ -63,6 +64,16 @@ export default defineBackground({
       }
     })
 
+    onMessage('aiSegmentSubtitles', async (message) => {
+      try {
+        return await runAiSegmentSubtitles(message.data)
+      }
+      catch (error) {
+        logger.error('[Background] aiSegmentSubtitles failed', error)
+        throw error
+      }
+    })
+
     browser.runtime.onConnect.addListener((port) => {
       if (port.name === 'analyze-selection-stream') {
         handleAnalyzeSelectionPort(port)
@@ -77,6 +88,10 @@ export default defineBackground({
     onMessage('clearAllTranslationRelatedCache', async () => {
       await cleanupAllTranslationCache()
       await cleanupAllSummaryCache()
+    })
+
+    onMessage('clearAiSegmentationCache', async () => {
+      await cleanupAllAiSegmentationCache()
     })
 
     newUserGuide()

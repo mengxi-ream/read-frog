@@ -18,7 +18,7 @@ export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
-export const CONFIG_SCHEMA_VERSION = 48
+export const CONFIG_SCHEMA_VERSION = 49
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -118,6 +118,7 @@ export const DEFAULT_CONFIG: Config = {
         backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
       },
     },
+    aiSegmentation: false,
   },
   siteControl: {
     mode: 'all',

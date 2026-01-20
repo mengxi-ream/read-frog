@@ -15,6 +15,7 @@ export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
 export const FIRST_BATCH_DURATION_MS = 50_000
 export const SUBSEQUENT_BATCH_DURATION_MS = 60_000
 export const PRELOAD_AHEAD_MS = 40_000
+export const BLOCK_BOUNDARY_LOOK_AHEAD_MS = 20_000
 
 // DOM IDs
 export const TRANSLATE_BUTTON_CONTAINER_ID = 'read-frog-subtitles-translate-button-container'

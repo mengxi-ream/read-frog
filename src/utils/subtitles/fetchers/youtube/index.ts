@@ -2,6 +2,7 @@ import type { SubtitlesFragment } from '../../types'
 import type { SubtitlesFetcher } from '../types'
 import type { SubtitlesInterceptMessage, YoutubeTimedText } from './types'
 import { i18n } from '#imports'
+import { getLocalConfig } from '@/utils/config/storage'
 import { FETCH_SUBTITLES_TIMEOUT } from '@/utils/constants/subtitles'
 import { OverlaySubtitlesError, ToastSubtitlesError } from '@/utils/subtitles/errors'
 import { optimizeSubtitles } from '@/utils/subtitles/processor/optimizer'
@@ -73,13 +74,13 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
       this.subtitles = []
       this.rawEvents = []
-      this.handleInterceptedSubtitle(parsed.data)
+      void this.handleInterceptedSubtitle(parsed.data)
     }
 
     window.addEventListener('message', this.messageListener)
   }
 
-  private handleInterceptedSubtitle(data: SubtitlesInterceptMessage) {
+  private async handleInterceptedSubtitle(data: SubtitlesInterceptMessage) {
     if (data.errorStatus) {
       this.rejectAndClearPending(new OverlaySubtitlesError(i18n.t(`subtitles.errors.http${data.errorStatus}`)))
       return
@@ -94,28 +95,32 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     this.rawEvents = parsed.data.events
     this.sourceLanguage = data.lang
 
-    this.subtitles = this.processRawEvents(this.rawEvents)
+    this.subtitles = await this.processRawEvents(this.rawEvents)
     this.pendingResolve?.(this.subtitles)
     this.clearPending()
   }
 
-  private processRawEvents(events: YoutubeTimedText[]): SubtitlesFragment[] {
+  private async processRawEvents(events: YoutubeTimedText[]): Promise<SubtitlesFragment[]> {
+    const config = await getLocalConfig()
+    const enableAISegmentation = config?.videoSubtitles?.aiSegmentation ?? false
     const format = detectFormat(events)
 
-    switch (format) {
-      case 'karaoke':
-        return parseKaraokeSubtitles(events)
-      case 'scrolling-asr':
-      {
-        const fragments = parseScrollingAsrSubtitles(events, this.sourceLanguage)
-        return optimizeSubtitles(fragments, this.sourceLanguage)
-      }
-      default:
-      {
-        const fragments = parseStandardSubtitles(events)
-        return optimizeSubtitles(fragments, this.sourceLanguage)
-      }
+    // Karaoke format: dedicated parser
+    if (format === 'karaoke') {
+      return parseKaraokeSubtitles(events)
     }
+
+    // AI segmentation: needs raw word-level fragments, skip optimization
+    if (enableAISegmentation) {
+      return parseStandardSubtitles(events)
+    }
+
+    // Traditional path: format-specific parsing + optimization
+    const fragments = format === 'scrolling-asr'
+      ? parseScrollingAsrSubtitles(events, this.sourceLanguage)
+      : parseStandardSubtitles(events)
+
+    return optimizeSubtitles(fragments, this.sourceLanguage)
   }
 
   private clickYoutubeSubtitleButton() {

@@ -539,6 +539,17 @@ options:
       fontWeight: フォントウェイト
       backgroundOpacity: 背景の透明度
       reset: デフォルトにリセット
+    aiSegmentation:
+      title: AI スマート区切り
+      enable: AI スマート区切りを有効にする
+      enableDescription: AIを使用して字幕を賢く区切り、読みやすさを向上させます。タイムラインはAIが判断するため、タイミングのずれが生じる場合があります。LLM翻訳プロバイダーが必要です。
+      clearCache: キャッシュをクリア
+      clearing: クリア中...
+      clearCacheDialog:
+        title: AI区切りキャッシュをクリア
+        description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
+        cancel: キャンセル
+        confirm: 確認
   whatsNew:
     title: 新機能
   survey:
@@ -591,6 +602,7 @@ subtitles:
     fetching: 字幕取得中
     fetchSuccess: 字幕読み込み完了
     fetchFailed: 字幕取得失敗
+    segmenting: AI区切り中...
     processing: 字幕翻訳中（約2分）
     error: エラーが発生しました
   errors:
