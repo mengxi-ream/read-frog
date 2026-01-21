@@ -138,6 +138,9 @@ export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]
     '[id^="message-username"]',
     'span[class*="-timestamp"]',
     'div[class*="-repliedMessage"]',
+    'li[class*="-containerDefault"]',
+    '[class*="-subtitleContainer"]',
+    '[class*="-formWithLoadedChatInput"]',
   ],
 }
 
