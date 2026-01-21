@@ -379,6 +379,12 @@ options:
       selectLanguages: Select languages
       enableLLMDetection: Use LLM for language detection
       enableLLMDetectionDescription: Improves accuracy but adds latency and API costs. Requires LLM translate provider and configured auto-translate languages.
+    skipLanguages:
+      title: Auto Skip Based on Language
+      description: Automatically skip paragraph translation when specific languages are detected
+      selectLanguages: Select languages
+      enableLLMDetection: Use LLM for language detection
+      enableLLMDetectionDescription: Improves accuracy but adds latency and API costs. Requires LLM translate provider.
     aiContentAware:
       title: AI Smart Context Translation
       description: Enhance translation quality by providing article context to the AI

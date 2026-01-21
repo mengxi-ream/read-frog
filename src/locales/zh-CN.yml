@@ -378,6 +378,12 @@ options:
       selectLanguages: 选择语言
       enableLLMDetection: 使用 LLM 检测语言
       enableLLMDetectionDescription: 提高准确率，但会增加延迟和 API 费用。需要配置 LLM 翻译提供商，并需配置自动翻译语言。
+    skipLanguages:
+      title: 基于语言的自动跳过
+      description: 当检测到指定语言时自动跳过段落翻译
+      selectLanguages: 选择语言
+      enableLLMDetection: 使用 LLM 检测语言
+      enableLLMDetectionDescription: 提高准确率，但会增加延迟和 API 费用。需要配置 LLM 翻译提供商。
     aiContentAware:
       title: AI 智能上下文翻译
       description: 通过向 AI 提供文章上下文来提高翻译质量

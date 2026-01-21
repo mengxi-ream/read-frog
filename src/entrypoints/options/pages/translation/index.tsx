@@ -11,6 +11,7 @@ import { PersonalizedPrompts } from './personalized-prompt'
 import { PreloadConfig } from './preload-config'
 import { RequestBatch } from './request-batch'
 import { RequestRate } from './request-rate'
+import { SkipLanguages } from './skip-languages'
 import { SmallParagraphFilter } from './small-paragraph-filter'
 import { TranslationMode } from './translation-mode'
 
@@ -25,6 +26,7 @@ export function TranslationPage() {
       <PersonalizedPrompts />
       <AutoTranslateWebsitePatterns />
       <AutoTranslateLanguages />
+      <SkipLanguages />
       <RequestRate />
       <RequestBatch />
       <PreloadConfig />

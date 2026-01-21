@@ -377,6 +377,12 @@ options:
       selectLanguages: Chọn ngôn ngữ
       enableLLMDetection: Sử dụng LLM để phát hiện ngôn ngữ
       enableLLMDetectionDescription: Cải thiện độ chính xác nhưng thêm độ trễ và chi phí API. Yêu cầu nhà cung cấp dịch LLM và các ngôn ngữ tự động dịch đã cấu hình.
+    skipLanguages:
+      title: Tự động bỏ qua theo ngôn ngữ
+      description: Tự động bỏ qua dịch đoạn văn khi phát hiện các ngôn ngữ cụ thể
+      selectLanguages: Chọn ngôn ngữ
+      enableLLMDetection: Sử dụng LLM để phát hiện ngôn ngữ
+      enableLLMDetectionDescription: Cải thiện độ chính xác nhưng thêm độ trễ và chi phí API. Yêu cầu nhà cung cấp dịch LLM.
     aiContentAware:
       title: Dịch ngữ cảnh thông minh AI
       description: Nâng cao chất lượng dịch bằng cách cung cấp ngữ cảnh bài viết cho AI

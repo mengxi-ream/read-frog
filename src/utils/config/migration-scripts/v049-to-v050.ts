@@ -1,30 +1,24 @@
 /**
  * Migration script from v049 to v050
- * Adds requestQueueConfig and batchQueueConfig to videoSubtitles for independent subtitle translation rate configuration
+ * Adds 'skipLanguages' and 'enableSkipLanguagesLLMDetection' to translate.page config
  *
  * Before (v049):
- *   { ..., videoSubtitles: { enabled, autoStart, style, aiSegmentation } }
+ *   { ..., translate: { page: { ... } } }
  *
  * After (v050):
- *   { ..., videoSubtitles: { enabled, autoStart, style, aiSegmentation, requestQueueConfig, batchQueueConfig } }
+ *   { ..., translate: { page: { ..., skipLanguages: [], enableSkipLanguagesLLMDetection: false } } }
  */
-export function migrate(oldConfig: any): any {
-  // Copy values from translate config for seamless migration
-  const requestQueueConfig = oldConfig.translate?.requestQueueConfig ?? {
-    capacity: 60,
-    rate: 8,
-  }
-  const batchQueueConfig = oldConfig.translate?.batchQueueConfig ?? {
-    maxCharactersPerBatch: 1000,
-    maxItemsPerBatch: 4,
-  }
 
+export function migrate(oldConfig: any): any {
   return {
     ...oldConfig,
-    videoSubtitles: {
-      ...oldConfig.videoSubtitles,
-      requestQueueConfig: { ...requestQueueConfig },
-      batchQueueConfig: { ...batchQueueConfig },
+    translate: {
+      ...oldConfig.translate,
+      page: {
+        ...oldConfig.translate.page,
+        skipLanguages: [],
+        enableSkipLanguagesLLMDetection: false,
+      },
     },
   }
 }

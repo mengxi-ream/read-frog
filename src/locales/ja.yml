@@ -375,6 +375,12 @@ options:
       selectLanguages: 言語を選択
       enableLLMDetection: LLM を使用した言語検出
       enableLLMDetectionDescription: 精度が向上しますが、遅延と API コストが増加します。LLM 翻訳プロバイダーと自動翻訳言語の設定が必要です。
+    skipLanguages:
+      title: 言語に基づく自動スキップ
+      description: 指定された言語が検出されると、段落の翻訳を自動的にスキップします
+      selectLanguages: 言語を選択
+      enableLLMDetection: LLM を使用した言語検出
+      enableLLMDetectionDescription: 精度が向上しますが、遅延と API コストが増加します。LLM 翻訳プロバイダーが必要です。
     aiContentAware:
       title: AI スマートコンテキスト翻訳
       description: 記事のコンテキストを AI に提供して翻訳品質を向上させます

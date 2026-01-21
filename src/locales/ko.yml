@@ -376,6 +376,12 @@ options:
       selectLanguages: 언어 선택
       enableLLMDetection: LLM을 사용한 언어 감지
       enableLLMDetectionDescription: 정확도가 향상되지만 지연 시간과 API 비용이 증가합니다. LLM 번역 제공업체와 자동 번역 언어 설정이 필요합니다.
+    skipLanguages:
+      title: 언어 기반 자동 건너뛰기
+      description: 지정된 언어가 감지되면 단락 번역을 자동으로 건너뜁니다
+      selectLanguages: 언어 선택
+      enableLLMDetection: LLM을 사용한 언어 감지
+      enableLLMDetectionDescription: 정확도가 향상되지만 지연 시간과 API 비용이 증가합니다. LLM 번역 제공업체가 필요합니다.
     aiContentAware:
       title: AI 스마트 컨텍스트 번역
       description: AI에 문서 컨텍스트를 제공하여 번역 품질을 향상시킵니다

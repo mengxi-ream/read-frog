@@ -377,6 +377,12 @@ options:
       selectLanguages: Выберите языки
       enableLLMDetection: Использовать LLM для определения языка
       enableLLMDetectionDescription: Повышает точность, но добавляет задержку и затраты на API. Требуется LLM-провайдер перевода и настроенные языки автоперевода.
+    skipLanguages:
+      title: Автопропуск по языку
+      description: Автоматически пропускать перевод абзацев при обнаружении указанных языков
+      selectLanguages: Выберите языки
+      enableLLMDetection: Использовать LLM для определения языка
+      enableLLMDetectionDescription: Повышает точность, но добавляет задержку и затраты на API. Требуется LLM-провайдер перевода.
     aiContentAware:
       title: Умный контекстный перевод ИИ
       description: Улучшайте качество перевода, предоставляя контекст статьи ИИ

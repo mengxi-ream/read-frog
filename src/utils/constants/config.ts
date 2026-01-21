@@ -18,7 +18,7 @@ export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
-export const CONFIG_SCHEMA_VERSION = 50
+export const CONFIG_SCHEMA_VERSION = 51
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -52,6 +52,8 @@ export const DEFAULT_CONFIG: Config = {
       },
       minCharactersPerNode: DEFAULT_MIN_CHARACTERS_PER_NODE,
       minWordsPerNode: DEFAULT_MIN_WORDS_PER_NODE,
+      skipLanguages: [],
+      enableSkipLanguagesLLMDetection: false,
     },
     enableAIContentAware: false,
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,

@@ -2,7 +2,7 @@ import type { TestSeriesObject } from './types'
 
 export const testSeries: TestSeriesObject = {
   'complex-config-from-v020': {
-    description: 'Add skipLanguages and enableSkipLanguagesLLMDetection to translate.page config',
+    description: 'Adds requestQueueConfig and batchQueueConfig to videoSubtitles',
     config: {
       language: {
         sourceCode: 'spa',
@@ -190,6 +190,14 @@ export const testSeries: TestSeriesObject = {
           },
         },
         aiSegmentation: false,
+        requestQueueConfig: {
+          capacity: 400,
+          rate: 8,
+        },
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 4,
+        },
       },
       inputTranslation: {
         enabled: true,
@@ -205,7 +213,7 @@ export const testSeries: TestSeriesObject = {
     },
   },
   'config-with-no-default-openai-model': {
-    description: 'Add skipLanguages and enableSkipLanguagesLLMDetection to translate.page config',
+    description: 'Adds requestQueueConfig and batchQueueConfig to videoSubtitles',
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -349,6 +357,14 @@ export const testSeries: TestSeriesObject = {
           },
         },
         aiSegmentation: false,
+        requestQueueConfig: {
+          capacity: 200,
+          rate: 2,
+        },
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 4,
+        },
       },
       inputTranslation: {
         enabled: true,
