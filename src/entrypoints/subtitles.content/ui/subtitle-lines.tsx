@@ -1,4 +1,4 @@
-import type { SubtitleTextStyle } from '@/types/config/config'
+import type { SubtitleTextStyle } from '@/types/config/subtitles'
 import { useAtomValue } from 'jotai'
 import { cn } from '@/lib/utils'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
