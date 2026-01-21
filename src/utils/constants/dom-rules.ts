@@ -136,7 +136,6 @@ export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]
   ],
   'discord.com': [
     '[id^="message-username"]',
-    'span[class*="-username"]',
     'span[class*="-timestamp"]',
     'div[class*="-repliedMessage"]',
   ],
