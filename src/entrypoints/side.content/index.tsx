@@ -26,7 +26,7 @@ import '@/assets/styles/text-small.css'
 export let shadowWrapper: HTMLElement | null = null
 
 export default defineContentScript({
-  matches: ['*://*/*'],
+  matches: ['*://*/*', 'file:///*'],
   cssInjectionMode: 'ui',
   async main(ctx) {
     const config = await getLocalConfig() ?? DEFAULT_CONFIG

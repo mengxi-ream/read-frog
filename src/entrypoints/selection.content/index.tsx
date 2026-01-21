@@ -23,7 +23,7 @@ declare global {
 }
 
 export default defineContentScript({
-  matches: ['*://*/*'],
+  matches: ['*://*/*', 'file:///*'],
   cssInjectionMode: 'ui',
   allFrames: true,
   async main(ctx) {
