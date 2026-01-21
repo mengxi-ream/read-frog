@@ -143,7 +143,7 @@ async function createTranslationQueues(config: QueueConfig) {
   return { requestQueue, batchQueue }
 }
 
-export async function setUpRequestQueue() {
+export async function setUpWebPageTranslationQueue() {
   const config = await ensureInitializedConfig()
 
   const { translate: { requestQueueConfig, batchQueueConfig } } = config ?? DEFAULT_CONFIG
