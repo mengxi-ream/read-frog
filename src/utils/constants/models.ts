@@ -94,9 +94,33 @@ export const TRANSLATE_MODEL_OPTIONS: Array<{
     options: { thinking: { type: 'disabled' } } satisfies AnthropicProviderOptions as Record<string, JSONValue>,
   },
 
-  // OpenAI reasoning models
+  // OpenAI o1/o3 reasoning models - use 'minimal'
   {
-    pattern: /^(gpt-5|o1-|o3-)/,
+    pattern: /^(o1-|o3-)/,
+    options: { reasoningEffort: 'minimal' } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
+  },
+
+  // OpenAI gpt-5.x-chat-latest and gpt-5.2-pro - use 'medium'
+  {
+    pattern: /^gpt-5(\.\d-chat-latest|\.2-pro)/,
+    options: { reasoningEffort: 'medium' } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
+  },
+
+  // OpenAI gpt-5-pro - use 'high'
+  {
+    pattern: /^gpt-5-pro/,
+    options: { reasoningEffort: 'high' } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
+  },
+
+  // OpenAI GPT-5.1+ - use 'none' (minimal not supported)
+  {
+    pattern: /^gpt-5\.\d/,
+    options: { reasoningEffort: 'none' } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
+  },
+
+  // OpenAI GPT-5 models (before 5.1) - use 'minimal' (none not supported)
+  {
+    pattern: /^gpt-5/,
     options: { reasoningEffort: 'minimal' } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
   },
 

@@ -29,12 +29,50 @@ describe('getProviderOptions', () => {
       expect(options.anthropic?.thinking).toEqual({ type: 'disabled' })
     })
 
-    it('should return options for OpenAI reasoning models', () => {
+    it('should return options for OpenAI o1/o3 reasoning models', () => {
       const o1Options = getProviderOptions('o1-preview', 'openai')
       expect(o1Options.openai?.reasoningEffort).toBe('minimal')
 
-      const gpt5Options = getProviderOptions('gpt-5-mini', 'openai')
+      const o3Options = getProviderOptions('o3-mini', 'openai')
+      expect(o3Options.openai?.reasoningEffort).toBe('minimal')
+    })
+
+    it('should return medium for gpt-5.x-chat-latest and gpt-5.2-pro', () => {
+      const gpt52ProOptions = getProviderOptions('gpt-5.2-pro', 'openai')
+      expect(gpt52ProOptions.openai?.reasoningEffort).toBe('medium')
+
+      const gpt52ChatLatestOptions = getProviderOptions('gpt-5.2-chat-latest', 'openai')
+      expect(gpt52ChatLatestOptions.openai?.reasoningEffort).toBe('medium')
+
+      const gpt51ChatLatestOptions = getProviderOptions('gpt-5.1-chat-latest', 'openai')
+      expect(gpt51ChatLatestOptions.openai?.reasoningEffort).toBe('medium')
+    })
+
+    it('should return high for gpt-5-pro', () => {
+      const gpt5ProOptions = getProviderOptions('gpt-5-pro', 'openai')
+      expect(gpt5ProOptions.openai?.reasoningEffort).toBe('high')
+    })
+
+    it('should return none for GPT-5.1+ models', () => {
+      const gpt51Options = getProviderOptions('gpt-5.1', 'openai')
+      expect(gpt51Options.openai?.reasoningEffort).toBe('none')
+
+      const gpt52Options = getProviderOptions('gpt-5.2', 'openai')
+      expect(gpt52Options.openai?.reasoningEffort).toBe('none')
+
+      const gpt51CodexOptions = getProviderOptions('gpt-5.1-codex', 'openai')
+      expect(gpt51CodexOptions.openai?.reasoningEffort).toBe('none')
+    })
+
+    it('should return minimal for GPT-5 models before 5.1 (none not supported)', () => {
+      const gpt5Options = getProviderOptions('gpt-5', 'openai')
       expect(gpt5Options.openai?.reasoningEffort).toBe('minimal')
+
+      const gpt5MiniOptions = getProviderOptions('gpt-5-mini', 'openai')
+      expect(gpt5MiniOptions.openai?.reasoningEffort).toBe('minimal')
+
+      const gpt5NanoOptions = getProviderOptions('gpt-5-nano', 'openai')
+      expect(gpt5NanoOptions.openai?.reasoningEffort).toBe('minimal')
     })
 
     it('should return empty object for non-matching models', () => {
