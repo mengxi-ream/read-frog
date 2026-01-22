@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-Add crypto.randomUUID polyfill to support HTTP website translation
+fix: add crypto.randomUUID polyfill to support HTTP website translation
