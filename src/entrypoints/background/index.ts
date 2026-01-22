@@ -16,7 +16,6 @@ import { proxyFetch } from './proxy-fetch'
 import { setUpRequestQueue, setUpSubtitlesTranslationQueue } from './translation-queues'
 import { translationMessage } from './translation-signal'
 import { setupUninstallSurvey } from './uninstall-survey'
-import '@/utils/crypto-polyfill'
 
 export default defineBackground({
   type: 'module',
