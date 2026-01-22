@@ -1,5 +1,5 @@
 ---
-"@read-frog/extension": minor
+"@read-frog/extension": patch
 ---
 
 feat: add support for local HTML file translation
