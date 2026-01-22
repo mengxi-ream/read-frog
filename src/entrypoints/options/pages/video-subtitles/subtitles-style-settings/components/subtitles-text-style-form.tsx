@@ -1,4 +1,4 @@
-import type { SubtitlesFontFamily, SubtitleTextStyle } from '@/types/config/config'
+import type { SubtitlesFontFamily, SubtitleTextStyle } from '@/types/config/subtitles'
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'

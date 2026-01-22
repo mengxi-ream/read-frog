@@ -1,5 +1,6 @@
 import type { Config } from '@/types/config/config'
 import type { LLMTranslateProviderConfig, ProviderConfig } from '@/types/config/provider'
+import type { BatchQueueConfig, RequestQueueConfig } from '@/types/config/translate'
 import type { ArticleContent } from '@/types/content'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { putBatchRequestRecord } from '@/utils/batch-request-record'
@@ -80,9 +81,14 @@ interface TranslateBatchData {
   content?: ArticleContent
 }
 
-async function createTranslationQueues() {
-  const config = await ensureInitializedConfig()
-  const { translate: { requestQueueConfig: { rate, capacity }, batchQueueConfig: { maxCharactersPerBatch, maxItemsPerBatch } } } = config ?? DEFAULT_CONFIG
+interface QueueConfig {
+  requestQueueConfig: RequestQueueConfig
+  batchQueueConfig: BatchQueueConfig
+}
+
+async function createTranslationQueues(config: QueueConfig) {
+  const { rate, capacity } = config.requestQueueConfig
+  const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
 
   const requestQueue = new RequestQueue({
     rate,
@@ -137,8 +143,15 @@ async function createTranslationQueues() {
   return { requestQueue, batchQueue }
 }
 
-export async function setUpRequestQueue() {
-  const { requestQueue, batchQueue } = await createTranslationQueues()
+export async function setUpWebPageTranslationQueue() {
+  const config = await ensureInitializedConfig()
+
+  const { translate: { requestQueueConfig, batchQueueConfig } } = config ?? DEFAULT_CONFIG
+
+  const { requestQueue, batchQueue } = await createTranslationQueues({
+    requestQueueConfig,
+    batchQueueConfig,
+  })
 
   onMessage('enqueueTranslateRequest', async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, articleTitle, articleTextContent } } = message
@@ -199,7 +212,13 @@ export async function setUpRequestQueue() {
  * Set up subtitles translation queue and message handlers
  */
 export async function setUpSubtitlesTranslationQueue() {
-  const { requestQueue, batchQueue } = await createTranslationQueues()
+  const config = await ensureInitializedConfig()
+  const { videoSubtitles: { requestQueueConfig, batchQueueConfig } } = config ?? DEFAULT_CONFIG
+
+  const { requestQueue, batchQueue } = await createTranslationQueues({
+    requestQueueConfig,
+    batchQueueConfig,
+  })
 
   onMessage('enqueueSubtitlesTranslateRequest', async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, subtitlesContext } } = message
@@ -217,8 +236,8 @@ export async function setUpSubtitlesTranslationQueue() {
     }
 
     if (isLLMTranslateProviderConfig(providerConfig)) {
-      const config = await ensureInitializedConfig()
-      if (config?.translate.enableAIContentAware && videoTitle && subtitlesContext) {
+      const runtimeConfig = await ensureInitializedConfig()
+      if (runtimeConfig?.translate.enableAIContentAware && videoTitle && subtitlesContext) {
         content.summary = await getOrGenerateSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
       }
 
@@ -241,12 +260,12 @@ export async function setUpSubtitlesTranslationQueue() {
     return result
   })
 
-  onMessage('setTranslateRequestQueueConfig', (message) => {
+  onMessage('setSubtitlesRequestQueueConfig', (message) => {
     const { data } = message
     requestQueue.setQueueOptions(data)
   })
 
-  onMessage('setTranslateBatchQueueConfig', (message) => {
+  onMessage('setSubtitlesBatchQueueConfig', (message) => {
     const { data } = message
     batchQueue.setBatchConfig(data)
   })

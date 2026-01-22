@@ -9,7 +9,8 @@ import { toast } from 'sonner'
 import { isAPIProviderConfig, isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { getDetectedCodeFromStorage, getFinalSourceCode } from '@/utils/config/languages'
-import { removeDummyNodes } from '@/utils/content/utils'
+import { detectLanguageWithLLM } from '@/utils/content/analyze'
+import { cleanText, removeDummyNodes } from '@/utils/content/utils'
 import { logger } from '@/utils/logger'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getLocalConfig } from '../../config/storage'
@@ -17,6 +18,52 @@ import { Sha256Hex } from '../../hash'
 import { sendMessage } from '../../message'
 
 const MIN_LENGTH_FOR_LANG_DETECTION = 50
+// Minimum text length for skip language detection (shorter than general detection
+// to catch short phrases like "Bonjour!" or "こんにちは")
+const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
+// Maximum text length sent to LLM for language detection (limits token cost)
+const MAX_LENGTH_FOR_SKIP_LLM_DETECTION = 500
+
+/**
+ * Check if text should be skipped based on language detection.
+ * Uses LLM detection if enabled, falls back to franc library.
+ * @param text - Text to detect language for
+ * @param skipLanguages - List of languages to skip translation for
+ * @param enableLLMDetection - Whether to use LLM for language detection
+ * @param providerConfig - Provider configuration for LLM detection
+ * @returns true if text language is in skipLanguages list (should skip translation)
+ */
+export async function shouldSkipByLanguage(
+  text: string,
+  skipLanguages: LangCodeISO6393[],
+  enableLLMDetection: boolean,
+  providerConfig: ProviderConfig,
+): Promise<boolean> {
+  let detectedLang: LangCodeISO6393 | 'und' | null = null
+
+  // Try LLM detection first if enabled and provider supports it
+  if (enableLLMDetection && isLLMTranslateProviderConfig(providerConfig)) {
+    try {
+      const textForLLM = cleanText(text, MAX_LENGTH_FOR_SKIP_LLM_DETECTION)
+      detectedLang = await detectLanguageWithLLM(textForLLM)
+    }
+    catch (error) {
+      logger.warn('LLM detection failed for skipLanguages check, falling back to franc:', error)
+    }
+  }
+
+  // Fallback to franc
+  if (!detectedLang || detectedLang === 'und') {
+    const francResult = franc(text)
+    detectedLang = francResult === 'und' ? null : (francResult as LangCodeISO6393)
+  }
+
+  if (!detectedLang) {
+    return false
+  }
+
+  return skipLanguages.includes(detectedLang)
+}
 
 // Module-level cache for article data (only meaningful in content script context)
 let cachedArticleData: {
@@ -202,6 +249,24 @@ export async function translateText(text: string): Promise<string> {
     throw new Error('No global config when translate text')
   }
 
+  // Skip translation if text is in skipLanguages list (page translation only)
+  const { skipLanguages, enableSkipLanguagesLLMDetection } = config.translate.page
+  if (skipLanguages.length > 0 && text.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
+    const providerConfig = getProviderConfigById(config.providersConfig, config.translate.providerId)
+    if (providerConfig) {
+      const shouldSkip = await shouldSkipByLanguage(
+        text,
+        skipLanguages,
+        enableSkipLanguagesLLMDetection,
+        providerConfig,
+      )
+      if (shouldSkip) {
+        logger.info(`translateText: skipping translation because text is in skip language list. text: ${text}`)
+        return ''
+      }
+    }
+  }
+
   return translateTextCore({
     text,
     langConfig: config.language,
@@ -247,6 +312,19 @@ export async function translateTextForInput(
       level: config.language.level,
     },
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
+  })
+}
+
+export async function translateTextForSelection(text: string): Promise<string> {
+  const config = await getLocalConfig()
+  if (!config) {
+    throw new Error('No global config when translate text')
+  }
+
+  return translateTextCore({
+    text,
+    langConfig: config.language,
+    extraHashTags: ['selectionTranslation'],
   })
 }
 

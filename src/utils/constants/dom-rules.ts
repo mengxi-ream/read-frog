@@ -134,6 +134,14 @@ export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]
     `.${STATE_MESSAGE_CLASS}`,
     `.${TRANSLATE_BUTTON_CLASS}`,
   ],
+  'discord.com': [
+    '[id^="message-username"]',
+    'span[class*="-timestamp"]',
+    'div[class*="-repliedMessage"]',
+    'li[class*="-containerDefault"]',
+    '[class*="-subtitleContainer"]',
+    '[class*="-formWithLoadedChatInput"]',
+  ],
 }
 
 export const CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP: Record<string, string[]> = {

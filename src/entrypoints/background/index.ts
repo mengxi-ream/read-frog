@@ -13,7 +13,7 @@ import { setupIframeInjection } from './iframe-injection'
 import { initMockData } from './mock-data'
 import { newUserGuide } from './new-user-guide'
 import { proxyFetch } from './proxy-fetch'
-import { setUpRequestQueue, setUpSubtitlesTranslationQueue } from './translation-queues'
+import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from './translation-queues'
 import { translationMessage } from './translation-signal'
 import { setupUninstallSurvey } from './uninstall-survey'
 
@@ -104,7 +104,7 @@ export default defineBackground({
     // Initialize context menu items asynchronously
     void initializeContextMenu()
 
-    void setUpRequestQueue()
+    void setUpWebPageTranslationQueue()
     void setUpSubtitlesTranslationQueue()
     void setUpDatabaseCleanup()
     setUpConfigBackup()

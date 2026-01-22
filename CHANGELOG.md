@@ -1,5 +1,27 @@
 # @read-frog/extension
 
+## 1.23.0
+
+### Minor Changes
+
+- [#894](https://github.com/mengxi-ream/read-frog/pull/894) [`895294d`](https://github.com/mengxi-ream/read-frog/commit/895294d87d11dbc00a2f4e8703d5c82a542fba32) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add AI-powered intelligent sentence segmentation
+
+- [#878](https://github.com/mengxi-ream/read-frog/pull/878) [`59ea5ef`](https://github.com/mengxi-ream/read-frog/commit/59ea5ef812e28ce9ba9f5c4c5daf16f6fca9971f) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat: add global site whitelist mode
+
+  Add a new Site Control feature that allows users to configure the extension to only run on specific whitelisted sites instead of all sites.
+
+- [#882](https://github.com/mengxi-ream/read-frog/pull/882) [`4839415`](https://github.com/mengxi-ream/read-frog/commit/4839415f9b5d8bcbe880d910d4b88e8b9da0bfef) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat: add skip languages feature to preserve paragraphs in specified languages
+
+- [#886](https://github.com/mengxi-ream/read-frog/pull/886) [`76aae58`](https://github.com/mengxi-ream/read-frog/commit/76aae58c29dea465a57fa87e17133e5f727678c8) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add subtitle display mode and custom style settings
+
+### Patch Changes
+
+- [#895](https://github.com/mengxi-ream/read-frog/pull/895) [`793aed0`](https://github.com/mengxi-ream/read-frog/commit/793aed08ba5bf7e72f9276fdafa7d7cb26495303) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(translation): skip usernames, timestamps, and quoted replies on Discord
+
+- [#883](https://github.com/mengxi-ream/read-frog/pull/883) [`5dc9f8c`](https://github.com/mengxi-ream/read-frog/commit/5dc9f8c0315114a0266227c549502c39360f541d) Thanks [@guoyongchang](https://github.com/guoyongchang)! - refactor(input-translation): update config fields design and fix truncation issue
+
+- [#897](https://github.com/mengxi-ream/read-frog/pull/897) [`d5e3c2f`](https://github.com/mengxi-ream/read-frog/commit/d5e3c2f0d6bdf81c33c4b54892422ec0f5d29771) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add independent translation rate configuration for video subtitles
+
 ## 1.22.1
 
 ### Patch Changes

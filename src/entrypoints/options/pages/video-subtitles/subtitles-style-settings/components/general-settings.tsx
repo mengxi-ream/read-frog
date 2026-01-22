@@ -1,4 +1,4 @@
-import type { SubtitlesDisplayMode, SubtitlesTranslationPosition } from '@/types/config/config'
+import type { SubtitlesDisplayMode, SubtitlesTranslationPosition } from '@/types/config/subtitles'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'

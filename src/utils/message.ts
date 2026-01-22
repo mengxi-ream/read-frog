@@ -38,6 +38,9 @@ interface ProtocolMap {
   aiSegmentSubtitles: (data: { jsonContent: string, providerId: string }) => Promise<string>
   setTranslateRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
   setTranslateBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
+  // Subtitle-specific queue config messages
+  setSubtitlesRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
+  setSubtitlesBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // cache management
