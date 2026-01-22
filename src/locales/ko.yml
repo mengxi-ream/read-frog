@@ -557,6 +557,25 @@ options:
         description: 모든 캐시된 AI 분할 결과가 삭제됩니다. 다음에 AI 분할이 활성화된 비디오를 재생하면 자막이 다시 처리됩니다.
         cancel: 취소
         confirm: 확인
+    requestQueueConfig:
+      title: 자막 번역 속도
+      firstOnDescription: 자막 번역 요청 처리 속도를
+      lastOnDescription: 알고리즘으로 조정
+      capacity:
+        title: 최대 버스트 요청 수
+        description: 짧은 시간 내에 동시에 처리할 수 있는 최대 자막 번역 요청 수
+      rate:
+        title: 초당 평균 요청 수
+        description: 초당 평균 자막 번역 요청 수. 최대 버스트 수를 설정하여 일시적으로 초과 요청을 보낼 수 있습니다
+    batchQueueConfig:
+      title: 자막 일괄 번역
+      description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
+      maxCharactersPerBatch:
+        title: 최대 문자 수
+        description: 배치 요청당 허용되는 최대 문자 수로 각 번역의 콘텐츠 양을 제어합니다
+      maxItemsPerBatch:
+        title: 최대 단락 수
+        description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
   whatsNew:
     title: 새로운 기능
   survey:

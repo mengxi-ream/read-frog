@@ -560,6 +560,25 @@ options:
         description: This will delete all cached AI segmentation results. The next time you play a video with AI segmentation enabled, it will re-process the subtitles.
         cancel: Cancel
         confirm: Confirm
+    requestQueueConfig:
+      title: Subtitle Translation Rate
+      firstOnDescription: Adjust the processing speed of subtitle translation requests using the
+      lastOnDescription: algorithm
+      capacity:
+        title: Maximum Burst Request Count
+        description: The allowed temporary burst request count determines the maximum number of subtitle translation requests that can be processed concurrently within a short period
+      rate:
+        title: Average Requests Per Second
+        description: Average subtitle translation requests per second, but allows configuring a maximum burst count to temporarily send excess requests
+    batchQueueConfig:
+      title: Subtitle Batch Translation
+      description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
+      maxCharactersPerBatch:
+        title: Maximum Characters
+        description: Maximum number of characters allowed per batch request, used to control the content volume per translation
+      maxItemsPerBatch:
+        title: Maximum Paragraph Count
+        description: Maximum paragraphs per batch translation, used to control the content volume per translation
   whatsNew:
     title: What's New
   survey:

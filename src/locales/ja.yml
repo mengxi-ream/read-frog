@@ -556,6 +556,25 @@ options:
         description: すべてのキャッシュされたAI区切り結果が削除されます。次回AI区切りを有効にして動画を再生すると、字幕が再処理されます。
         cancel: キャンセル
         confirm: 確認
+    requestQueueConfig:
+      title: 字幕翻訳速度
+      firstOnDescription: 字幕翻訳リクエストの処理速度を
+      lastOnDescription: アルゴリズムで調整
+      capacity:
+        title: 最大バースト数
+        description: 短時間で同時に処理できる字幕翻訳リクエストの最大数
+      rate:
+        title: 平均リクエスト数/秒
+        description: 1秒あたりの平均字幕翻訳リクエスト数。最大バースト数を設定して一時的に超過リクエストを送信できます
+    batchQueueConfig:
+      title: 字幕バッチ翻訳
+      description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
+      maxCharactersPerBatch:
+        title: 最大文字数
+        description: バッチリクエストあたりの最大文字数で、各翻訳のコンテンツ量を制御します
+      maxItemsPerBatch:
+        title: 最大段落数
+        description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
   whatsNew:
     title: 新機能
   survey:

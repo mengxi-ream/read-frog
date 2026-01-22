@@ -558,6 +558,25 @@ options:
         description: Tüm önbelleğe alınmış AI bölümlendirme sonuçları silinecektir. AI bölümlendirme etkinleştirilmiş bir video oynatıldığında altyazılar yeniden işlenecektir.
         cancel: İptal
         confirm: Onayla
+    requestQueueConfig:
+      title: Altyazı Çeviri Hızı
+      firstOnDescription: Altyazı çeviri isteklerinin işlem hızını ayarlamak için
+      lastOnDescription: algoritmasını kullanın
+      capacity:
+        title: Maksimum Patlama İstek Sayısı
+        description: Kısa sürede eşzamanlı olarak işlenebilecek maksimum altyazı çeviri isteği sayısı
+      rate:
+        title: Saniyede Ortalama İstek
+        description: Saniyede ortalama altyazı çeviri isteği sayısı. Geçici olarak fazla istek göndermek için maksimum patlama sayısı yapılandırılabilir
+    batchQueueConfig:
+      title: Altyazı Toplu Çeviri
+      description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
+      maxCharactersPerBatch:
+        title: Maksimum Karakter
+        description: Her çevirinin içerik hacmini kontrol etmek için toplu istek başına izin verilen maksimum karakter sayısı
+      maxItemsPerBatch:
+        title: Maksimum Paragraf Sayısı
+        description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
   whatsNew:
     title: Yenilikler
   survey:

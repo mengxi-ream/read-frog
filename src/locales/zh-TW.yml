@@ -559,6 +559,25 @@ options:
         description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
         cancel: 取消
         confirm: 確認
+    requestQueueConfig:
+      title: 字幕翻譯速率
+      firstOnDescription: 使用
+      lastOnDescription: 演算法調整字幕翻譯請求的處理速度
+      capacity:
+        title: 最大突發請求數
+        description: 允許的臨時突發請求數決定了在短時間內可以同時處理的最大字幕翻譯請求數量
+      rate:
+        title: 平均每秒請求數
+        description: 平均每秒字幕翻譯請求數，但允許配置最大突發數以臨時發送超額請求
+    batchQueueConfig:
+      title: 字幕批次翻譯
+      description: 配置批量翻譯時的字元數限制和最大段落數量（僅對大語言模型翻譯有效）
+      maxCharactersPerBatch:
+        title: 最大字元數
+        description: 每個批量請求允許的最大字元數，用於控制單次翻譯的內容量
+      maxItemsPerBatch:
+        title: 最大段落數
+        description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量
   whatsNew:
     title: 最近更新
   survey:

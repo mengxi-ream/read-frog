@@ -559,6 +559,25 @@ options:
         description: 这将删除所有已缓存的 AI 断句结果。下次播放启用 AI 断句的视频时，将重新处理字幕。
         cancel: 取消
         confirm: 确认
+    requestQueueConfig:
+      title: 字幕翻译速率
+      firstOnDescription: 使用
+      lastOnDescription: 算法调整字幕翻译请求的处理速度
+      capacity:
+        title: 最大突发请求数
+        description: 允许的临时突发请求数决定了在短时间内可以并发处理的最大字幕翻译请求数量
+      rate:
+        title: 平均每秒请求数
+        description: 平均每秒字幕翻译请求数，但允许配置最大突发数以临时发送超额请求
+    batchQueueConfig:
+      title: 字幕批量翻译
+      description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）
+      maxCharactersPerBatch:
+        title: 最大字符数
+        description: 每个批量请求允许的最大字符数，用于控制单次翻译的内容量
+      maxItemsPerBatch:
+        title: 最大段落数
+        description: 每个批量翻译的最大段落数，用于控制单次翻译的内容量
   whatsNew:
     title: 最近更新
   survey:

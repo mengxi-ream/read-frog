@@ -558,6 +558,25 @@ options:
         description: Tất cả kết quả AI phân đoạn đã lưu trong bộ nhớ đệm sẽ bị xóa. Lần tới khi phát video có bật AI phân đoạn, phụ đề sẽ được xử lý lại.
         cancel: Hủy
         confirm: Xác nhận
+    requestQueueConfig:
+      title: Tốc độ dịch phụ đề
+      firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch phụ đề bằng thuật toán
+      lastOnDescription: ''
+      capacity:
+        title: Số yêu cầu tối đa đồng thời
+        description: Số lượng yêu cầu dịch phụ đề tối đa có thể xử lý đồng thời trong khoảng thời gian ngắn
+      rate:
+        title: Số yêu cầu trung bình/giây
+        description: Số yêu cầu dịch phụ đề trung bình mỗi giây, có thể cấu hình số yêu cầu tối đa để tạm thời gửi yêu cầu vượt quá
+    batchQueueConfig:
+      title: Dịch phụ đề theo lô
+      description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
+      maxCharactersPerBatch:
+        title: Số ký tự tối đa
+        description: Số ký tự tối đa được phép cho mỗi yêu cầu lô để kiểm soát khối lượng nội dung của mỗi bản dịch
+      maxItemsPerBatch:
+        title: Số đoạn văn tối đa
+        description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
   whatsNew:
     title: Có gì mới
   survey:
