@@ -155,6 +155,6 @@ export const CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP: Record<string, string[
     'task-lists', // https://github.com/mengxi-ream/read-frog/issues/867
   ],
   'engoo.com': [
-    '#windowexer´cise-2 > div > div > div.css-ep7xq6 > div > div > div.css-19m2fbm *',
+    '#windowexercise-2 > div > div > div.css-ep7xq6 > div > div > div.css-19m2fbm *',
   ],
 }
