@@ -5,10 +5,6 @@ export function isSiteEnabled(url: string, config: Config | null): boolean {
   if (!config)
     return true
 
-  // Always enable for file:// URLs
-  if (url.startsWith('file://'))
-    return true
-
   const { mode, patterns } = config.siteControl
 
   if (mode === 'all')
