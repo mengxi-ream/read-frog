@@ -2,6 +2,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
+import { Button } from '@/components/shadcn/button'
 import { Card } from '@/components/shadcn/card'
 import { Label } from '@/components/shadcn/label'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
@@ -27,16 +28,16 @@ export function MainSubtitlesStyle() {
 
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon icon="tabler:typography" className="size-4" />
           <Label className="text-sm font-semibold">{i18n.t('options.videoSubtitles.style.mainSubtitle')}</Label>
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button type="button" onClick={resetSubtitlesStyleConfig} className="p-1 rounded hover:bg-muted transition-colors">
-              <Icon icon="tabler:refresh" className="size-4 text-red-500" />
-            </button>
+            <Button variant="ghost" size="sm" className="-mr-2" onClick={resetSubtitlesStyleConfig}>
+              <Icon icon="tabler:refresh" />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>{i18n.t('options.videoSubtitles.style.reset')}</TooltipContent>
         </Tooltip>

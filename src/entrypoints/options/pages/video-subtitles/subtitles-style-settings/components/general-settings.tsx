@@ -4,7 +4,9 @@ import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { Activity } from 'react'
+import { Button } from '@/components/shadcn/button'
 import { Card } from '@/components/shadcn/card'
+import { Field, FieldGroup, FieldLabel } from '@/components/shadcn/field'
 import { Label } from '@/components/shadcn/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
@@ -41,78 +43,80 @@ export function GeneralSettings() {
 
   return (
     <Card className="p-5">
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon icon="tabler:settings" className="size-4" />
           <Label className="text-sm font-semibold">{i18n.t('options.videoSubtitles.style.generalSettings')}</Label>
         </div>
         <Tooltip>
           <TooltipTrigger asChild>
-            <button type="button" onClick={resetGeneralConfig} className="p-1 rounded hover:bg-muted transition-colors">
-              <Icon icon="tabler:refresh" className="size-4 text-red-500" />
-            </button>
+            <Button variant="ghost" size="sm" className="-mr-2" onClick={resetGeneralConfig}>
+              <Icon icon="tabler:refresh" />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>{i18n.t('options.videoSubtitles.style.reset')}</TooltipContent>
         </Tooltip>
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-1">
-        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.displayMode.title')}</Label>
-        <Select value={displayMode} onValueChange={handleDisplayModeChange}>
-          <SelectTrigger className="w-40 h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="bilingual">
-              {i18n.t('options.videoSubtitles.style.displayMode.bilingual')}
-            </SelectItem>
-            <SelectItem value="originalOnly">
-              {i18n.t('options.videoSubtitles.style.displayMode.originalOnly')}
-            </SelectItem>
-            <SelectItem value="translationOnly">
-              {i18n.t('options.videoSubtitles.style.displayMode.translationOnly')}
-            </SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      <Activity mode={displayMode === 'bilingual' ? 'visible' : 'hidden'}>
-        <div className="flex flex-wrap items-center justify-between gap-1">
-          <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.translationPosition.title')}</Label>
-          <Select value={translationPosition} onValueChange={handleTranslationPositionChange}>
-            <SelectTrigger className="w-40 h-8">
+      <FieldGroup>
+        <Field orientation="responsive-compact">
+          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.displayMode.title')}</FieldLabel>
+          <Select value={displayMode} onValueChange={handleDisplayModeChange}>
+            <SelectTrigger className="h-8">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="above">
-                {i18n.t('options.videoSubtitles.style.translationPosition.above')}
+              <SelectItem value="bilingual">
+                {i18n.t('options.videoSubtitles.style.displayMode.bilingual')}
               </SelectItem>
-              <SelectItem value="below">
-                {i18n.t('options.videoSubtitles.style.translationPosition.below')}
+              <SelectItem value="originalOnly">
+                {i18n.t('options.videoSubtitles.style.displayMode.originalOnly')}
+              </SelectItem>
+              <SelectItem value="translationOnly">
+                {i18n.t('options.videoSubtitles.style.displayMode.translationOnly')}
               </SelectItem>
             </SelectContent>
           </Select>
-        </div>
-      </Activity>
+        </Field>
 
-      <div className="flex flex-wrap items-center justify-between gap-1">
-        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.backgroundOpacity')}</Label>
-        <div className="flex items-center gap-2 w-40">
-          <input
-            type="range"
-            min={MIN_BACKGROUND_OPACITY}
-            max={MAX_BACKGROUND_OPACITY}
-            step={5}
-            value={container.backgroundOpacity}
-            onChange={e => handleContainerChange({ backgroundOpacity: Number(e.target.value) })}
-            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
-          />
-          <span className="w-10 text-sm text-right">
-            {container.backgroundOpacity}
-            %
-          </span>
-        </div>
-      </div>
+        <Activity mode={displayMode === 'bilingual' ? 'visible' : 'hidden'}>
+          <Field orientation="responsive-compact">
+            <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.translationPosition.title')}</FieldLabel>
+            <Select value={translationPosition} onValueChange={handleTranslationPositionChange}>
+              <SelectTrigger className="h-8">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="above">
+                  {i18n.t('options.videoSubtitles.style.translationPosition.above')}
+                </SelectItem>
+                <SelectItem value="below">
+                  {i18n.t('options.videoSubtitles.style.translationPosition.below')}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+          </Field>
+        </Activity>
+
+        <Field orientation="responsive-compact">
+          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.backgroundOpacity')}</FieldLabel>
+          <div className="flex items-center gap-2">
+            <input
+              type="range"
+              min={MIN_BACKGROUND_OPACITY}
+              max={MAX_BACKGROUND_OPACITY}
+              step={5}
+              value={container.backgroundOpacity}
+              onChange={e => handleContainerChange({ backgroundOpacity: Number(e.target.value) })}
+              className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+            />
+            <span className="w-10 text-sm text-right">
+              {container.backgroundOpacity}
+              %
+            </span>
+          </div>
+        </Field>
+      </FieldGroup>
     </Card>
   )
 }

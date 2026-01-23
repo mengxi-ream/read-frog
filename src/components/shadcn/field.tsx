@@ -58,16 +58,21 @@ const fieldVariants = cva(
   {
     variants: {
       orientation: {
-        vertical: ['flex-col [&>*]:w-full [&>.sr-only]:w-auto'],
-        horizontal: [
+        'vertical': ['flex-col [&>*]:w-full [&>.sr-only]:w-auto'],
+        'horizontal': [
           'flex-row items-center',
           '[&>[data-slot=field-label]]:flex-auto',
           'has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
         ],
-        responsive: [
+        'responsive': [
           'flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto',
           '@md/field-group:[&>[data-slot=field-label]]:flex-auto',
           '@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
+        ],
+        'responsive-compact': [
+          'flex-col [&>*]:w-full [&>.sr-only]:w-auto @xs/field-group:flex-row @xs/field-group:items-center @xs/field-group:[&>*]:w-auto',
+          '@xs/field-group:[&>[data-slot=field-label]]:flex-auto',
+          '@xs/field-group:has-[>[data-slot=field-content]]:items-start @xs/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px',
         ],
       },
     },

@@ -2,7 +2,7 @@ import type { SubtitlesFontFamily, SubtitleTextStyle } from '@/types/config/subt
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { Label } from '@/components/shadcn/label'
+import { Field, FieldGroup, FieldLabel } from '@/components/shadcn/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from '@/utils/constants/subtitles'
@@ -27,14 +27,14 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
   }
 
   return (
-    <>
-      <div className="flex flex-wrap items-center justify-between gap-1">
-        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontFamily')}</Label>
+    <FieldGroup>
+      <Field orientation="responsive-compact">
+        <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontFamily')}</FieldLabel>
         <Select
           value={textStyle.fontFamily}
           onValueChange={(value: SubtitlesFontFamily) => handleChange({ fontFamily: value })}
         >
-          <SelectTrigger className="w-40 h-8">
+          <SelectTrigger className="h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -45,11 +45,11 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
             ))}
           </SelectContent>
         </Select>
-      </div>
+      </Field>
 
-      <div className="flex flex-wrap items-center justify-between gap-1">
-        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontScale')}</Label>
-        <div className="flex items-center gap-2 w-40">
+      <Field orientation="responsive-compact">
+        <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontScale')}</FieldLabel>
+        <div className="flex items-center gap-2">
           <input
             type="range"
             min={MIN_FONT_SCALE}
@@ -64,11 +64,11 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
             %
           </span>
         </div>
-      </div>
+      </Field>
 
-      <div className="flex flex-wrap items-center justify-between gap-1">
-        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontWeight')}</Label>
-        <div className="flex items-center gap-2 w-40">
+      <Field orientation="responsive-compact">
+        <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontWeight')}</FieldLabel>
+        <div className="flex items-center gap-2">
           <input
             type="range"
             min={MIN_FONT_WEIGHT}
@@ -80,17 +80,17 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
           />
           <span className="w-10 text-sm text-right">{textStyle.fontWeight}</span>
         </div>
-      </div>
+      </Field>
 
-      <div className="flex flex-wrap items-center justify-between gap-1">
-        <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.color')}</Label>
+      <Field orientation="responsive-compact">
+        <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.color')}</FieldLabel>
         <input
           type="color"
           value={textStyle.color}
           onChange={e => handleChange({ color: e.target.value })}
-          className="w-8 h-8 p-0.5 rounded border border-input cursor-pointer"
+          className="!w-8 h-8 p-0.5 rounded border border-input cursor-pointer"
         />
-      </div>
-    </>
+      </Field>
+    </FieldGroup>
   )
 }
