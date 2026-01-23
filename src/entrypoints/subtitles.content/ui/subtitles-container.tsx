@@ -1,4 +1,5 @@
 import { useAtomValue } from 'jotai'
+import { Activity } from 'react'
 import { currentBlockCompletedAtom, subtitlesDisplayAtom } from '../atoms'
 import { StateMessage } from './state-message'
 import { SubtitlesView } from './subtitles-view'
@@ -11,13 +12,14 @@ export function SubtitlesContainer() {
     return null
   }
 
-  if (currentBlockCompleted) {
-    return <SubtitlesView />
-  }
+  const showStateMessage = !currentBlockCompleted && stateData && stateData.state !== 'idle'
 
-  if (stateData && stateData.state !== 'idle') {
-    return <StateMessage />
-  }
-
-  return null
+  return (
+    <>
+      <SubtitlesView />
+      <Activity mode={showStateMessage ? 'visible' : 'hidden'}>
+        <StateMessage />
+      </Activity>
+    </>
+  )
 }
