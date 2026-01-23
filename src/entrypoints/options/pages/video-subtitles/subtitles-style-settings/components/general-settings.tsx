@@ -56,10 +56,10 @@ export function GeneralSettings() {
         </Tooltip>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.displayMode.title')}</Label>
         <Select value={displayMode} onValueChange={handleDisplayModeChange}>
-          <SelectTrigger className="w-48 h-8">
+          <SelectTrigger className="w-40 h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -77,10 +77,10 @@ export function GeneralSettings() {
       </div>
 
       <Activity mode={displayMode === 'bilingual' ? 'visible' : 'hidden'}>
-        <div className="flex items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center justify-between gap-1">
           <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.translationPosition.title')}</Label>
           <Select value={translationPosition} onValueChange={handleTranslationPositionChange}>
-            <SelectTrigger className="w-48 h-8">
+            <SelectTrigger className="w-40 h-8">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -95,9 +95,9 @@ export function GeneralSettings() {
         </div>
       </Activity>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.backgroundOpacity')}</Label>
-        <div className="flex items-center gap-2 w-48">
+        <div className="flex items-center gap-2 w-40">
           <input
             type="range"
             min={MIN_BACKGROUND_OPACITY}

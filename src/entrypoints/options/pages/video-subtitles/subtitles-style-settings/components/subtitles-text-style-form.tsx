@@ -28,13 +28,13 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontFamily')}</Label>
         <Select
           value={textStyle.fontFamily}
           onValueChange={(value: SubtitlesFontFamily) => handleChange({ fontFamily: value })}
         >
-          <SelectTrigger className="w-48 h-8">
+          <SelectTrigger className="w-40 h-8">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -47,9 +47,9 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
         </Select>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontScale')}</Label>
-        <div className="flex items-center gap-2 w-48">
+        <div className="flex items-center gap-2 w-40">
           <input
             type="range"
             min={MIN_FONT_SCALE}
@@ -66,9 +66,9 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.fontWeight')}</Label>
-        <div className="flex items-center gap-2 w-48">
+        <div className="flex items-center gap-2 w-40">
           <input
             type="range"
             min={MIN_FONT_WEIGHT}
@@ -82,7 +82,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <Label className="text-sm shrink-0">{i18n.t('options.videoSubtitles.style.color')}</Label>
         <input
           type="color"
