@@ -36,5 +36,3 @@ coverage/
 .nx/
 
 tsconfig.local.json
-
-immersive-translate-config-example.txt
