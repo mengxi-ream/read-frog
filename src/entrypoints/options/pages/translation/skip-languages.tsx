@@ -9,8 +9,8 @@ import {
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom, useAtomValue } from 'jotai'
 import { useMemo } from 'react'
+import { Button } from '@/components/base-ui/button'
 import { LLMStatusIndicator } from '@/components/llm-status-indicator'
-import { Button } from '@/components/shadcn/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

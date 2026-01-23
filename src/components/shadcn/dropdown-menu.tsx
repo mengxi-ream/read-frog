@@ -1,7 +1,7 @@
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu'
 import { IconCheck, IconChevronRight, IconCircle } from '@tabler/icons-react'
 import * as React from 'react'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import {
   getFirefoxExtensionRoot,
   getIsFirefoxExtensionEnv,

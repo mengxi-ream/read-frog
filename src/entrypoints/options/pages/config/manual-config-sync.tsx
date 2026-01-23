@@ -3,6 +3,7 @@ import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
+import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,7 +15,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/shadcn/alert-dialog'
-import { Button } from '@/components/shadcn/button'
 import { Input } from '@/components/shadcn/input'
 import { Label } from '@/components/shadcn/label'
 import { useExportConfig } from '@/hooks/use-export-config'

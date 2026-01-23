@@ -1,4 +1,4 @@
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 function Kbd({ className, ...props }: React.ComponentProps<'kbd'>) {
   return (

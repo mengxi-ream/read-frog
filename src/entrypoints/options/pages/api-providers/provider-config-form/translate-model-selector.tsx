@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/shadcn/checkbox'
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
 import { isCustomLLMProviderConfig, isLLMTranslateProviderConfig, TRANSLATE_PROVIDER_MODELS } from '@/types/config/provider'
 import { providerConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { ModelSuggestionButton } from './components/model-suggestion-button'
 import { withForm } from './form'
 

@@ -12,7 +12,7 @@ import {
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { APP_NAME } from '@/utils/constants/app'
 import { sendMessage } from '@/utils/message'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { matchDomainPattern } from '@/utils/url'
 import { shadowWrapper } from '../../'
 import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from '../../atoms'

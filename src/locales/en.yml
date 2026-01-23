@@ -19,6 +19,8 @@ popup:
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
+  hub:
+    tooltip: Translate text with multiple models simultaneously
   discord:
     tooltip: Join Discord to connect with developers and get early access to new features
   blog:
@@ -27,6 +29,7 @@ popup:
   aiSmartContextDescription: Uses webpage context to improve translation quality. Requires LLM translation provider.
   more:
     title: More
+    translationHub: Translation Hub
     joinDiscord: Join Discord
     joinWechat: Join WeChat Group
     starGithub: Star on Github
@@ -597,6 +600,9 @@ translateService:
   description: For translate the webpage only
   normalTranslator: Normal Translator
   aiTranslator: AI Translator
+  selectServices: Select services
+  translationProviders: Translation Providers
+  configureAPI: Configure API
 translatePrompt:
   title: AI Translation Style
   description: Select a Prompt to use during translation. Add or modify custom Prompts on the options page.

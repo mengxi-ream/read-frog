@@ -1,7 +1,7 @@
 import type { VariantProps } from 'class-variance-authority'
 
 import { cva } from 'class-variance-authority'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 function Empty({ className, ...props }: React.ComponentProps<'div'>) {
   return (

@@ -19,6 +19,8 @@ popup:
   options: Tùy chọn
   hover: Di chuột
   translateParagraph: để dịch đoạn văn
+  hub:
+    tooltip: Dịch văn bản với nhiều mô hình đồng thời
   discord:
     tooltip: Tham gia Discord để kết nối với các nhà phát triển và truy cập sớm các tính năng mới
   blog:
@@ -27,6 +29,7 @@ popup:
   aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp dịch LLM.
   more:
     title: Thêm
+    translationHub: Trung tâm Dịch thuật
     joinDiscord: Tham gia Discord
     joinWechat: Tham gia nhóm WeChat
     starGithub: Đánh dấu sao trên Github
@@ -595,6 +598,9 @@ translateService:
   description: Chỉ để dịch trang web
   normalTranslator: Trình dịch thông thường
   aiTranslator: Trình dịch AI
+  selectServices: Chọn dịch vụ
+  translationProviders: Dịch vụ dịch thuật
+  configureAPI: Cấu hình API
 translatePrompt:
   title: Kiểu dịch AI
   description: Chọn một Prompt để sử dụng trong quá trình dịch. Thêm hoặc sửa đổi Prompt tùy chỉnh trên trang tùy chọn.

@@ -10,7 +10,7 @@ import { json, jsonParseLinter } from '@codemirror/lang-json'
 import { linter, lintGutter } from '@codemirror/lint'
 import CodeMirror from '@uiw/react-codemirror'
 import { useTheme } from '@/components/providers/theme-provider'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 // Custom linter that allows empty content (jsonParseLinter throws on empty string)
 const allowEmptyJsonLinter = linter((view) => {

@@ -1,5 +1,5 @@
 import { Icon } from '@iconify/react'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 export default function HiddenButton({
   icon,

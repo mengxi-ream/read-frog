@@ -21,7 +21,7 @@ import {
   TooltipTrigger,
 } from '@/components/shadcn/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7

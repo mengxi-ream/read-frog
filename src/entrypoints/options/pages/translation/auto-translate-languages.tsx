@@ -9,7 +9,7 @@ import {
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,

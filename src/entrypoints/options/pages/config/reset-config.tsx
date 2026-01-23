@@ -1,6 +1,7 @@
 import { i18n } from '#imports'
 import { IconRefresh } from '@tabler/icons-react'
 import { useSetAtom } from 'jotai'
+import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +13,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/shadcn/alert-dialog'
-import { Button } from '@/components/shadcn/button'
 import { writeConfigAtom } from '@/utils/atoms/config'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'

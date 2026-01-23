@@ -3,8 +3,8 @@ import { i18n } from '#imports'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
+import { Button } from '@/components/base-ui/button'
 import { Badge } from '@/components/shadcn/badge'
-import { Button } from '@/components/shadcn/button'
 import { Field, FieldLabel } from '@/components/shadcn/field'
 import {
   Select,

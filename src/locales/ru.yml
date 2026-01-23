@@ -19,6 +19,8 @@ popup:
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца
+  hub:
+    tooltip: Переводите текст несколькими моделями одновременно
   discord:
     tooltip: Присоединяйтесь к Discord, чтобы связаться с разработчиками и получить ранний доступ к новым функциям
   blog:
@@ -27,6 +29,7 @@ popup:
   aiSmartContextDescription: Использует контекст веб-страницы для улучшения качества перевода. Требуется LLM-провайдер перевода.
   more:
     title: Ещё
+    translationHub: Центр переводов
     joinDiscord: Присоединиться к Discord
     joinWechat: Присоединиться к группе WeChat
     starGithub: Поставить звезду на Github
@@ -595,6 +598,9 @@ translateService:
   description: Только для перевода веб-страницы
   normalTranslator: Обычный переводчик
   aiTranslator: ИИ-переводчик
+  selectServices: Выберите сервисы
+  translationProviders: Сервисы перевода
+  configureAPI: Настроить API
 translatePrompt:
   title: Стиль ИИ-перевода
   description: Выберите промпт для использования во время перевода. Добавляйте или изменяйте пользовательские промпты на странице настроек.

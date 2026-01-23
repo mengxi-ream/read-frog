@@ -2,7 +2,7 @@ import * as SheetPrimitive from '@radix-ui/react-dialog'
 import { IconX } from '@tabler/icons-react'
 import * as React from 'react'
 
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />

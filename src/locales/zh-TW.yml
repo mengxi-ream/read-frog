@@ -19,6 +19,8 @@ popup:
   options: 選項
   hover: 滑鼠懸停
   translateParagraph: 來翻譯段落
+  hub:
+    tooltip: 一次性調用多個翻譯模型翻譯文本
   discord:
     tooltip: 加入 Discord 與開發者交流，搶先體驗新功能
   blog:
@@ -27,6 +29,7 @@ popup:
   aiSmartContextDescription: 結合網頁上下文提升翻譯效果。需要配置 LLM 翻譯服務商。
   more:
     title: 更多
+    translationHub: 翻譯中心
     joinDiscord: 加入 Discord
     joinWechat: 加入微信群
     starGithub: Github 加星
@@ -596,6 +599,9 @@ translateService:
   description: 僅用於翻譯網頁內容
   normalTranslator: 普通翻譯
   aiTranslator: AI 翻譯
+  selectServices: 選擇服務
+  translationProviders: 翻譯服務
+  configureAPI: 設定 API
 translatePrompt:
   title: AI 翻譯風格
   description: 選擇在翻譯時使用的 Prompt。可在選項頁面新增或修改自訂 Prompt

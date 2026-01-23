@@ -4,7 +4,7 @@ import { cva } from 'class-variance-authority'
 import { useMemo } from 'react'
 import { Label } from '@/components/shadcn/label'
 import { Separator } from '@/components/shadcn/separator'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
   return (

@@ -1,9 +1,9 @@
-import type { ButtonProps } from '@/components/shadcn/button'
+import type { ButtonProps } from '@/components/base-ui/button'
 import type { Config } from '@/types/config/config'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useState } from 'react'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { ScrollArea } from '@/components/shadcn/scroll-area'
 import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 
