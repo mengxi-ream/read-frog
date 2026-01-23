@@ -1,4 +1,4 @@
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { isDarkMode } from './theme'
 
 export function insertShadowRootUIWrapperInto(container: HTMLElement) {

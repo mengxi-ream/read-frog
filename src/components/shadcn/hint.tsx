@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react'
 import { IconHelpCircle } from '@tabler/icons-react'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { Tooltip, TooltipContent, TooltipTrigger } from './tooltip'
 
 type HintProps = {

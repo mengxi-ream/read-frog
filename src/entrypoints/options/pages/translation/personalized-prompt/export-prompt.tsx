@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { isExportPromptModeAtom, selectedPromptsToExportAtom } from './atoms'
 import { downloadJSONFile } from './utils/prompt-file'

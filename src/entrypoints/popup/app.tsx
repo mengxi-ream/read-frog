@@ -20,6 +20,7 @@ import ReadProviderField from './components/read-provider-field'
 import TranslateButton from './components/translate-button'
 import TranslatePromptSelector from './components/translate-prompt-selector'
 import TranslateProviderField from './components/translate-provider-field'
+import { TranslationHubButton } from './components/translation-hub-button'
 import TranslationModeSelector from './components/translation-mode-selector'
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
         <div className="flex items-center justify-between">
           <UserAccount />
           <div className="flex items-center">
+            <TranslationHubButton />
             <DiscordButton />
             <BlogNotification />
           </div>

@@ -19,7 +19,7 @@ import { isAPIProviderConfig, isLLMTranslateProviderConfig, TRANSLATE_PROVIDER_M
 import { pageTranslateRangeSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { ConfigCard } from '../../components/config-card'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
 

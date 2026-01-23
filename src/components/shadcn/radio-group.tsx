@@ -2,7 +2,7 @@ import * as RadioGroupPrimitive from '@radix-ui/react-radio-group'
 import { IconCircle } from '@tabler/icons-react'
 import * as React from 'react'
 
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 function RadioGroup({
   className,

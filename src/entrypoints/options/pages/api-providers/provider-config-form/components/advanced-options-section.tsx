@@ -4,7 +4,7 @@ import { Icon } from '@iconify/react'
 import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/shadcn/collapsible'
 import { FieldGroup } from '@/components/shadcn/field'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 interface AdvancedOptionsSectionProps {
   children: ReactNode

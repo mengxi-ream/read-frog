@@ -18,6 +18,8 @@ popup:
   options: 옵션
   hover: 마우스 오버
   translateParagraph: 단락 번역
+  hub:
+    tooltip: 여러 번역 모델로 동시에 텍스트 번역
   discord:
     tooltip: Discord에 참여하여 개발자와 소통하고 새 기능을 먼저 체험하세요
   blog:
@@ -26,6 +28,7 @@ popup:
   aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 번역 제공자가 필요합니다.
   more:
     title: 더보기
+    translationHub: 번역 허브
     joinDiscord: Discord 참여
     joinWechat: WeChat 그룹 참여
     starGithub: Github에서 스타
@@ -594,6 +597,9 @@ translateService:
   description: 웹페이지 번역 전용
   normalTranslator: 일반 번역기
   aiTranslator: AI 번역기
+  selectServices: 서비스 선택
+  translationProviders: 번역 서비스
+  configureAPI: API 설정
 translatePrompt:
   title: AI 번역 스타일
   description: 번역 시 사용할 프롬프트를 선택할 수 있습니다. 설정 페이지에서 사용자 정의 프롬프트를 추가하거나 수정할 수 있습니다

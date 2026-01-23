@@ -12,7 +12,7 @@ import { color } from '@uiw/codemirror-extensions-color'
 import CodeMirror from '@uiw/react-codemirror'
 import { useTheme } from '@/components/providers/theme-provider'
 import { cssLinter } from '@/utils/css/lint-css'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 interface CSSCodeEditorProps extends Omit<ReactCodeMirrorProps, 'theme' | 'extensions'> {
   hasError?: boolean

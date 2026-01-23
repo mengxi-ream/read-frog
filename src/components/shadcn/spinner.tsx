@@ -1,6 +1,6 @@
 import type { IconProps } from '@tabler/icons-react'
 import { IconLoader2 } from '@tabler/icons-react'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 function Spinner({ className, ...props }: IconProps) {
   return (

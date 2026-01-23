@@ -19,6 +19,8 @@ popup:
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için
+  hub:
+    tooltip: Birden fazla çeviri modeliyle aynı anda metin çevirin
   discord:
     tooltip: Geliştiricilerle bağlantı kurmak ve yeni özelliklere erken erişim sağlamak için Discord'a katılın
   blog:
@@ -27,6 +29,7 @@ popup:
   aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM çeviri sağlayıcısı gerektirir.
   more:
     title: Daha Fazla
+    translationHub: Çeviri Merkezi
     joinDiscord: Discord'a Katıl
     joinWechat: WeChat Grubuna Katıl
     starGithub: Github'da Yıldız Ver
@@ -595,6 +598,9 @@ translateService:
   description: Yalnızca web sayfası çevirisi için
   normalTranslator: Normal Çevirmen
   aiTranslator: AI Çevirmen
+  selectServices: Hizmet seçin
+  translationProviders: Çeviri Hizmetleri
+  configureAPI: API Yapılandır
 translatePrompt:
   title: AI Çeviri Stili
   description: Çeviri sırasında kullanılacak bir Prompt seçin. Seçenekler sayfasında özel Promptlar ekleyin veya değiştirin.

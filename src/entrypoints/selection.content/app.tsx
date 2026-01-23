@@ -1,6 +1,6 @@
 import { Toaster } from 'sonner'
 import { NOTRANSLATE_CLASS } from '@/utils/constants/dom-labels'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { useInputTranslation } from './input-translation'
 import { SelectionToolbar } from './selection-toolbar'
 

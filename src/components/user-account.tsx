@@ -1,8 +1,8 @@
 import guest from '@/assets/icons/avatars/guest.svg'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { authClient } from '@/utils/auth/auth-client'
 import { WEBSITE_URL } from '@/utils/constants/url'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 export function UserAccount() {
   const { data, isPending } = authClient.useSession()

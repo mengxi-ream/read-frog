@@ -1,4 +1,4 @@
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 
 export function ConfigCard(
   { title, description, children, className, titleClassName }:

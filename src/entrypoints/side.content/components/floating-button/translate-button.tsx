@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react'
 import { useAtomValue } from 'jotai'
 import { sendMessage } from '@/utils/message'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { enablePageTranslationAtom } from '../../atoms'
 import HiddenButton from './components/hidden-button'
 

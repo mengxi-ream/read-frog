@@ -18,6 +18,8 @@ popup:
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
+  hub:
+    tooltip: 複数の翻訳モデルで同時にテキストを翻訳
   discord:
     tooltip: Discordに参加して開発者とつながり、新機能を先行体験しましょう
   blog:
@@ -26,6 +28,7 @@ popup:
   aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM翻訳プロバイダーが必要です。
   more:
     title: その他
+    translationHub: 翻訳ハブ
     joinDiscord: Discordに参加
     joinWechat: WeChatグループに参加
     starGithub: Githubでスター
@@ -593,6 +596,9 @@ translateService:
   description: ウェブページの翻訳にのみ使用
   normalTranslator: 通常翻訳
   aiTranslator: AI翻訳
+  selectServices: サービスを選択
+  translationProviders: 翻訳サービス
+  configureAPI: API設定
 translatePrompt:
   title: AI翻訳スタイル
   description: 翻訳時に使用するプロンプトを選択できます。オプションページでカスタムプロンプトを追加または変更できます

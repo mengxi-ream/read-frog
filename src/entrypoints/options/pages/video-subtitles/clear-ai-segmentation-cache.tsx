@@ -1,6 +1,7 @@
 import { i18n } from '#imports'
 import { IconTrash } from '@tabler/icons-react'
 import { useState } from 'react'
+import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +13,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/shadcn/alert-dialog'
-import { Button } from '@/components/shadcn/button'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 

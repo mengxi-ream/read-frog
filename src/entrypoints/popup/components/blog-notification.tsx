@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
 import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from '@/utils/blog'
 import { WEBSITE_URL } from '@/utils/constants/url'

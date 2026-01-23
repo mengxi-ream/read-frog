@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import { useState } from 'react'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { Input } from '@/components/shadcn/input'
 import {
   Table,

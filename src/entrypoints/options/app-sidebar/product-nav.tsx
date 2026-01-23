@@ -12,7 +12,7 @@ import {
 } from '@/components/shadcn/sidebar'
 import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from '@/utils/blog'
 import { WEBSITE_URL } from '@/utils/constants/url'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { getLastViewedSurvey, hasNewSurvey, saveLastViewedSurvey } from '@/utils/survey'
 import { version } from '../../../../package.json'
 import { AnimatedIndicator } from './animated-indicator'

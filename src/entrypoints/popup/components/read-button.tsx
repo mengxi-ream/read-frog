@@ -2,12 +2,12 @@ import { browser, i18n } from '#imports'
 import { useAtomValue } from 'jotai'
 
 import { toast } from 'sonner'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
 import { isAnyAPIKeyForReadProviders } from '@/utils/config/api'
 import { sendMessage } from '@/utils/message'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { isIgnoreTabAtom } from '../atoms/ignore'
 import { isCurrentSiteInWhitelistAtom, isWhitelistModeAtom } from '../atoms/site-control'
 

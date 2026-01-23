@@ -1,6 +1,6 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
 
 export function DiscordButton() {

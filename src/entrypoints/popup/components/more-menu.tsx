@@ -1,4 +1,4 @@
-import { i18n } from '#imports'
+import { browser, i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import {
   DropdownMenu,
@@ -7,39 +7,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/shadcn/dropdown-menu'
 import { getReviewUrl } from '@/utils/utils'
-
-const MENU_ITEMS = [
-  {
-    key: 'joinDiscord',
-    icon: 'logos:discord-icon',
-    url: 'https://discord.gg/ej45e3PezJ',
-  },
-  {
-    key: 'joinWechat',
-    icon: 'streamline-logos:wechat-logo-solid',
-    url: 'https://github.com/mengxi-ream/read-frog/blob/main/assets/wechat-account.jpg',
-  },
-  {
-    key: 'starGithub',
-    icon: 'fa7-brands:github',
-    url: 'https://github.com/mengxi-ream/read-frog',
-  },
-  {
-    key: 'rateUs',
-    icon: 'tabler:star',
-    url: getReviewUrl('popup'),
-  },
-  {
-    key: 'ebook',
-    icon: 'tabler:book',
-    url: 'https://www.neat-reader.com/webapp#/',
-  },
-  {
-    key: 'tutorial',
-    icon: 'tabler:help-circle',
-    url: 'https://readfrog.app/tutorial/',
-  },
-] as const
 
 export function MoreMenu() {
   return (
@@ -54,16 +21,61 @@ export function MoreMenu() {
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top">
-        {MENU_ITEMS.map(item => (
-          <DropdownMenuItem
-            key={item.key}
-            onClick={() => window.open(item.url, '_blank', 'noopener,noreferrer')}
-            className="cursor-pointer"
-          >
-            <Icon icon={item.icon} className="size-4" strokeWidth={1.6} />
-            {i18n.t(`popup.more.${item.key}`)}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuItem
+          onClick={() => window.open('https://discord.gg/ej45e3PezJ', '_blank', 'noopener,noreferrer')}
+          className="cursor-pointer"
+        >
+          <Icon icon="logos:discord-icon" className="size-4" strokeWidth={1.6} />
+          {i18n.t('popup.more.joinDiscord')}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => window.open('https://github.com/mengxi-ream/read-frog/blob/main/assets/wechat-account.jpg', '_blank', 'noopener,noreferrer')}
+          className="cursor-pointer"
+        >
+          <Icon icon="streamline-logos:wechat-logo-solid" className="size-4" strokeWidth={1.6} />
+          {i18n.t('popup.more.joinWechat')}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => window.open('https://github.com/mengxi-ream/read-frog', '_blank', 'noopener,noreferrer')}
+          className="cursor-pointer"
+        >
+          <Icon icon="fa7-brands:github" className="size-4" strokeWidth={1.6} />
+          {i18n.t('popup.more.starGithub')}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => window.open(getReviewUrl('popup'), '_blank', 'noopener,noreferrer')}
+          className="cursor-pointer"
+        >
+          <Icon icon="tabler:star" className="size-4" strokeWidth={1.6} />
+          {i18n.t('popup.more.rateUs')}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => void browser.tabs.create({ url: browser.runtime.getURL('/translation-hub.html') })}
+          className="cursor-pointer"
+        >
+          <Icon icon="tabler:language-hiragana" className="size-4" strokeWidth={1.6} />
+          {i18n.t('popup.more.translationHub')}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => window.open('https://www.neat-reader.com/webapp#/', '_blank', 'noopener,noreferrer')}
+          className="cursor-pointer"
+        >
+          <Icon icon="tabler:book" className="size-4" strokeWidth={1.6} />
+          {i18n.t('popup.more.ebook')}
+        </DropdownMenuItem>
+
+        <DropdownMenuItem
+          onClick={() => window.open('https://readfrog.app/tutorial/', '_blank', 'noopener,noreferrer')}
+          className="cursor-pointer"
+        >
+          <Icon icon="tabler:help-circle" className="size-4" strokeWidth={1.6} />
+          {i18n.t('popup.more.tutorial')}
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )

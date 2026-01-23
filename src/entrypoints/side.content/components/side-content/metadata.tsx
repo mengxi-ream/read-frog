@@ -3,12 +3,12 @@ import { useMutationState } from '@tanstack/react-query'
 import { useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { useExtractContent } from '@/hooks/read/extract'
 import { useReadArticle } from '@/hooks/read/read'
 import { getFaviconUrl } from '@/utils/content/favicon'
 import { onMessage } from '@/utils/message'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { isSideOpenAtom } from '../../atoms'
 
 export function Metadata({ className }: { className?: string }) {
@@ -66,7 +66,7 @@ export function Metadata({ className }: { className?: string }) {
           <img
             src={favicon}
             alt="Favicon"
-            className="h-4 w-4 flex-shrink-0 rounded-xs"
+            className="h-4 w-4 shrink-0 rounded-xs"
           />
         )}
         <h1 className="truncate text-base font-semibold">{title}</h1>

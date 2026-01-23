@@ -8,7 +8,7 @@ import { Input } from '@/components/shadcn/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
 import { READ_PROVIDER_MODELS } from '@/types/config/provider'
 import { readProviderConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
-import { cn } from '@/utils/styles/tailwind'
+import { cn } from '@/utils/styles/utils'
 import { ConfigCard } from '../../components/config-card'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
 
