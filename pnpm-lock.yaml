@@ -336,6 +336,9 @@ importers:
       '@wxt-dev/module-react':
         specifier: ^1.1.5
         version: 1.1.5(vite@7.2.2(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(yaml@2.8.2))(wxt@0.20.13(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.30.2)(rollup@4.53.2)(yaml@2.8.2))
+      agentation:
+        specifier: ^1.3.0
+        version: 1.3.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       autoprefixer:
         specifier: ^10.4.23
         version: 10.4.23(postcss@8.5.6)
@@ -3120,6 +3123,12 @@ packages:
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
+
+  agentation@1.3.0:
+    resolution: {integrity: sha512-Mq05RrE00bC0lrGSSr1uj7pAT6SnEFGr9TtDgtYUHNH685OAjDgFobEgEV7jgUu0xCWIfIukH7n/Gy05plFw8Q==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
 
   ai@6.0.6:
     resolution: {integrity: sha512-LM0eAMWVn3RTj+0X5O1m/8g+7QiTeWG5aN5FsDbdmCkAQHVg93XxLbljFOLzi0NMjuJgf7fKLKmWoPsrdMyqfw==}
@@ -9942,6 +9951,11 @@ snapshots:
   adm-zip@0.5.16: {}
 
   agent-base@7.1.4: {}
+
+  agentation@1.3.0(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   ai@6.0.6(zod@4.3.4):
     dependencies:
