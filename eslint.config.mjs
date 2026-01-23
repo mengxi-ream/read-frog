@@ -21,8 +21,7 @@ export default antfu({
     markdown: 'prettier',
   },
   ignores: [
-    '.claude/skills/**',
-    '.cursor/skills/**',
+    '**/skills/**',
   ],
   rules: {
     'unused-imports/no-unused-imports': 'error',
