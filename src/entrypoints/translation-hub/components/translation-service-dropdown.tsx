@@ -96,8 +96,8 @@ export function TranslationServiceDropdown({
         </SelectContent>
       </Select>
 
-      <Button variant="outline" size="icon-lg" onClick={handleConfigureAPI} title={i18n.t('translateService.configureAPI')}>
-        <IconSettings className="h-4 w-4" />
+      <Button variant="outline" size="icon" onClick={handleConfigureAPI} title={i18n.t('translateService.configureAPI')}>
+        <IconSettings />
       </Button>
     </div>
   )
