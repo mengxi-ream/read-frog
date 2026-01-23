@@ -17,7 +17,7 @@ import { getLastViewedSurvey, hasNewSurvey, saveLastViewedSurvey } from '@/utils
 import { version } from '../../../../package.json'
 import { AnimatedIndicator } from './animated-indicator'
 
-const SURVEY_URL = 'https://tally.so/r/nrxr6L'
+const SURVEY_URL = 'https://tally.so/r/kdNN5R'
 
 export function ProductNav() {
   const { open } = useSidebar()

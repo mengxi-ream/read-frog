@@ -1,5 +1,6 @@
 import type { Config } from '@/types/config/config'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { Agentation } from 'agentation'
 import { Provider as JotaiProvider } from 'jotai'
 import { useHydrateAtoms } from 'jotai/utils'
 import React from 'react'
@@ -50,6 +51,7 @@ async function initApp() {
                     <AppSidebar />
                     <App />
                     <FrogToast />
+                    {import.meta.env.DEV && <Agentation />}
                   </ChartThemeProvider>
                 </ThemeProvider>
               </SidebarProvider>

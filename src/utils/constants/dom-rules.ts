@@ -142,11 +142,16 @@ export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]
     '[class*="-subtitleContainer"]',
     '[class*="-formWithLoadedChatInput"]',
   ],
+  'github.com': [
+    '[aria-labelledby="folders-and-files"] *',
+    'header *',
+    '#repository-container-header *',
+    '[class*="OverviewContent-module__Box_1--"] *',
+  ],
 }
 
 export const CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP: Record<string, string[]> = {
   'github.com': [
-    '.react-directory-row-commit-cell *',
     'task-lists', // https://github.com/mengxi-ream/read-frog/issues/867
   ],
   'engoo.com': [
