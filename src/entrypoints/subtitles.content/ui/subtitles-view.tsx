@@ -9,12 +9,8 @@ import { MainSubtitle, TranslationSubtitle } from './subtitle-lines'
 import { useVerticalDrag } from './use-vertical-drag'
 
 function SubtitlesContent() {
-  const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = style
-
-  if (!subtitle)
-    return null
 
   const translationAbove = translationPosition === 'above'
   const showMain = displayMode !== 'translationOnly'
