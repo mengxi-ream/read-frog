@@ -9,8 +9,8 @@ import { toast } from 'sonner'
 import { isAPIProviderConfig, isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { getDetectedCodeFromStorage, getFinalSourceCode } from '@/utils/config/languages'
-import { detectLanguageWithLLM } from '@/utils/content/analyze'
-import { cleanText, removeDummyNodes } from '@/utils/content/utils'
+import { detectLanguage } from '@/utils/content/language'
+import { removeDummyNodes } from '@/utils/content/utils'
 import { logger } from '@/utils/logger'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getLocalConfig } from '../../config/storage'
@@ -21,8 +21,6 @@ const MIN_LENGTH_FOR_LANG_DETECTION = 50
 // Minimum text length for skip language detection (shorter than general detection
 // to catch short phrases like "Bonjour!" or "こんにちは")
 const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
-// Maximum text length sent to LLM for language detection (limits token cost)
-const MAX_LENGTH_FOR_SKIP_LLM_DETECTION = 500
 
 /**
  * Check if text should be skipped based on language detection.
@@ -39,24 +37,11 @@ export async function shouldSkipByLanguage(
   enableLLMDetection: boolean,
   providerConfig: ProviderConfig,
 ): Promise<boolean> {
-  let detectedLang: LangCodeISO6393 | 'und' | null = null
-
-  // Try LLM detection first if enabled and provider supports it
-  if (enableLLMDetection && isLLMTranslateProviderConfig(providerConfig)) {
-    try {
-      const textForLLM = cleanText(text, MAX_LENGTH_FOR_SKIP_LLM_DETECTION)
-      detectedLang = await detectLanguageWithLLM(textForLLM)
-    }
-    catch (error) {
-      logger.warn('LLM detection failed for skipLanguages check, falling back to franc:', error)
-    }
-  }
-
-  // Fallback to franc
-  if (!detectedLang || detectedLang === 'und') {
-    const francResult = franc(text)
-    detectedLang = francResult === 'und' ? null : (francResult as LangCodeISO6393)
-  }
+  const detectedLang = await detectLanguage(text, {
+    minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
+    enableLLM: enableLLMDetection,
+    providerConfig,
+  })
 
   if (!detectedLang) {
     return false

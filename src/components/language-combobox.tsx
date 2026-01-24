@@ -15,15 +15,24 @@ import {
 } from '@/components/base-ui/combobox'
 
 interface LanguageItem {
-  value: LangCodeISO6393
+  value: LangCodeISO6393 | 'auto'
   label: string
 }
 
-function getLanguageItems(): LanguageItem[] {
-  return langCodeISO6393Schema.options.map(code => ({
+function getLanguageItems(detectedLangCode?: LangCodeISO6393): LanguageItem[] {
+  const items: LanguageItem[] = langCodeISO6393Schema.options.map(code => ({
     value: code,
     label: `${i18n.t(`languages.${camelCase(code)}` as Parameters<typeof i18n.t>[0])} (${LANG_CODE_TO_LOCALE_NAME[code]})`,
   }))
+
+  if (detectedLangCode) {
+    items.unshift({
+      value: 'auto',
+      label: `${i18n.t(`languages.${camelCase(detectedLangCode)}` as Parameters<typeof i18n.t>[0])} (${LANG_CODE_TO_LOCALE_NAME[detectedLangCode]})`,
+    })
+  }
+
+  return items
 }
 
 function filterLanguage(item: LanguageItem, query: string): boolean {
@@ -32,9 +41,14 @@ function filterLanguage(item: LanguageItem, query: string): boolean {
     || item.value.toLowerCase().includes(searchLower)
 }
 
+function AutoBadge() {
+  return <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">auto</span>
+}
+
 interface LanguageComboboxProps {
-  value: LangCodeISO6393
-  onValueChange: (value: LangCodeISO6393) => void
+  value: LangCodeISO6393 | 'auto'
+  onValueChange: (value: LangCodeISO6393 | 'auto') => void
+  detectedLangCode?: LangCodeISO6393
   placeholder?: string
   className?: string
 }
@@ -42,10 +56,11 @@ interface LanguageComboboxProps {
 export function LanguageCombobox({
   value,
   onValueChange,
+  detectedLangCode,
   placeholder,
   className,
 }: LanguageComboboxProps) {
-  const languageItems = getLanguageItems()
+  const languageItems = getLanguageItems(detectedLangCode)
 
   return (
     <Combobox
@@ -67,6 +82,7 @@ export function LanguageCombobox({
           {(item: LanguageItem) => (
             <ComboboxItem key={item.value} value={item}>
               {item.label}
+              {item.value === 'auto' && <AutoBadge />}
             </ComboboxItem>
           )}
         </ComboboxList>

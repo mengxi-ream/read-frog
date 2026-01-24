@@ -215,6 +215,9 @@ importers:
       css-tree:
         specifier: ^3.1.0
         version: 3.1.0
+      debounce:
+        specifier: ^3.0.0
+        version: 3.0.0
       deepmerge-ts:
         specifier: ^7.1.5
         version: 7.1.5
@@ -3745,6 +3748,10 @@ packages:
 
   debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
+
+  debounce@3.0.0:
+    resolution: {integrity: sha512-64byRbF0/AirwbuHqB3/ZpMG9/nckDa6ZA0yd6UnaQNwbbemCOwvz2sL5sjXLHhZHADyiwLm0M5qMhltUUx+TA==}
+    engines: {node: '>=20'}
 
   debug@4.3.7:
     resolution: {integrity: sha512-Er2nc/H7RrMXZBFCEim6TCmMk02Z8vLC2Rbi1KEBggpo0fS6l0S1nnapwmIi3yW/+GOJap1Krg4w0Hg80oCqgQ==}
@@ -10547,6 +10554,8 @@ snapshots:
   dataloader@1.4.0: {}
 
   debounce@1.2.1: {}
+
+  debounce@3.0.0: {}
 
   debug@4.3.7:
     dependencies:
