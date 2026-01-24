@@ -658,6 +658,16 @@ translationHub:
   searchLanguages: 言語を検索...
   noLanguagesFound: 言語が見つかりません
   exchangeLanguages: 言語を入れ替える
+  title: マルチAPI テキスト翻訳
+  noServicesSelected: 翻訳サービスが選択されていません
+  noServicesDescription: 上から翻訳サービスを選択して、翻訳カードを表示してください。
+  inputPlaceholder: 翻訳するテキストを入力...
+  translate: 翻訳
+  copiedToClipboard: 翻訳をクリップボードにコピーしました！
+  copyTranslation: 翻訳をコピー
+  deleteCard: カードを削除
+  translationFailed: 翻訳に失敗しました
+  translationFailedFallback: 翻訳に失敗しました
 languages:
   eng: 英語
   cmn: 簡体字中国語

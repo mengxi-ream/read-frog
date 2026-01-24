@@ -1,3 +1,4 @@
+import { i18n } from '#imports'
 import { LanguageControlPanel } from './components/language-control-panel'
 import { TextInput } from './components/text-input'
 import { TranslationPanel } from './components/translation-panel'
@@ -9,7 +10,7 @@ export default function App() {
       <div className="max-w-6xl mx-auto">
         <header className="px-6 py-3">
           <h1 className="text-3xl font-semibold text-foreground">
-            Multi-API Text Translation
+            {i18n.t('translationHub.title')}
           </h1>
         </header>
 

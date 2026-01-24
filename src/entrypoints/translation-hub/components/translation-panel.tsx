@@ -1,3 +1,4 @@
+import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtomValue } from 'jotai'
 import {
@@ -20,9 +21,9 @@ export function TranslationPanel() {
           <EmptyMedia variant="icon">
             <Icon icon="tabler:language-off" className="size-6" />
           </EmptyMedia>
-          <EmptyTitle>No Translation Services Selected</EmptyTitle>
+          <EmptyTitle>{i18n.t('translationHub.noServicesSelected')}</EmptyTitle>
           <EmptyDescription>
-            Select translation services above to see translation cards here.
+            {i18n.t('translationHub.noServicesDescription')}
           </EmptyDescription>
         </EmptyHeader>
       </Empty>

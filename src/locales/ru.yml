@@ -660,6 +660,16 @@ translationHub:
   searchLanguages: Поиск языков...
   noLanguagesFound: Языки не найдены
   exchangeLanguages: Поменять языки местами
+  title: Мульти-API перевод текста
+  noServicesSelected: Сервисы перевода не выбраны
+  noServicesDescription: Выберите сервисы перевода выше, чтобы увидеть карточки перевода.
+  inputPlaceholder: Введите текст для перевода...
+  translate: Перевести
+  copiedToClipboard: Перевод скопирован в буфер обмена!
+  copyTranslation: Копировать перевод
+  deleteCard: Удалить карточку
+  translationFailed: Ошибка перевода
+  translationFailedFallback: Ошибка перевода
 languages:
   eng: Английский
   cmn: Упрощённый китайский

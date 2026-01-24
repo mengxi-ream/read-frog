@@ -660,6 +660,16 @@ translationHub:
   searchLanguages: Tìm kiếm ngôn ngữ...
   noLanguagesFound: Không tìm thấy ngôn ngữ
   exchangeLanguages: Đổi ngôn ngữ
+  title: Dịch Văn Bản Đa API
+  noServicesSelected: Chưa Chọn Dịch Vụ Dịch Thuật
+  noServicesDescription: Chọn dịch vụ dịch thuật ở trên để xem thẻ dịch thuật tại đây.
+  inputPlaceholder: Nhập văn bản cần dịch...
+  translate: Dịch
+  copiedToClipboard: Đã sao chép bản dịch vào bộ nhớ tạm!
+  copyTranslation: Sao chép bản dịch
+  deleteCard: Xóa thẻ
+  translationFailed: Dịch Thất Bại
+  translationFailedFallback: Dịch thất bại
 languages:
   eng: Tiếng Anh
   cmn: Tiếng Trung giản thể

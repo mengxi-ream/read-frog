@@ -1,4 +1,5 @@
 import type { TranslateProviderConfig } from '@/types/config/provider'
+import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useAtom, useAtomValue } from 'jotai'
@@ -54,7 +55,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   const handleCopy = () => {
     if (mutation.data) {
       void navigator.clipboard.writeText(mutation.data)
-      toast.success('Translation copied to clipboard!')
+      toast.success(i18n.t('translationHub.copiedToClipboard'))
     }
   }
 
@@ -95,7 +96,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
               size="icon"
               onClick={handleCopy}
               className="h-7 w-7"
-              title="Copy translation"
+              title={i18n.t('translationHub.copyTranslation')}
             >
               <Icon icon="tabler:copy" className="h-3.5 w-3.5" />
             </Button>
@@ -105,7 +106,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
             size="icon"
             onClick={handleRemove}
             className="h-7 w-7"
-            title="Delete card"
+            title={i18n.t('translationHub.deleteCard')}
           >
             <Icon icon="tabler:x" className="h-3.5 w-3.5" />
           </Button>
@@ -119,10 +120,10 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
                 <div>
                   <div className="flex items-center space-x-2 text-destructive mb-1">
                     <Icon icon="tabler:alert-circle" className="h-4 w-4" />
-                    <span className="text-sm font-medium">Translation Failed</span>
+                    <span className="text-sm font-medium">{i18n.t('translationHub.translationFailed')}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {mutation.error instanceof Error ? mutation.error.message : 'Translation failed'}
+                    {mutation.error instanceof Error ? mutation.error.message : i18n.t('translationHub.translationFailedFallback')}
                   </p>
                 </div>
               )

@@ -661,6 +661,16 @@ translationHub:
   searchLanguages: 搜索语言...
   noLanguagesFound: 未找到语言
   exchangeLanguages: 交换语言
+  title: 多接口文本翻译
+  noServicesSelected: 未选择翻译服务
+  noServicesDescription: 请在上方选择翻译服务以查看翻译结果。
+  inputPlaceholder: 输入要翻译的文本...
+  translate: 翻译
+  copiedToClipboard: 翻译已复制到剪贴板！
+  copyTranslation: 复制翻译
+  deleteCard: 删除卡片
+  translationFailed: 翻译失败
+  translationFailedFallback: 翻译失败
 languages:
   eng: 英语
   cmn: 简体中文

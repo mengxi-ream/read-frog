@@ -662,6 +662,16 @@ translationHub:
   searchLanguages: Search languages...
   noLanguagesFound: No languages found
   exchangeLanguages: Exchange languages
+  title: Multi-API Text Translation
+  noServicesSelected: No Translation Services Selected
+  noServicesDescription: Select translation services above to see translation cards here.
+  inputPlaceholder: Enter text to translate...
+  translate: Translate
+  copiedToClipboard: Translation copied to clipboard!
+  copyTranslation: Copy translation
+  deleteCard: Delete card
+  translationFailed: Translation Failed
+  translationFailedFallback: Translation failed
 languages:
   eng: English
   cmn: Simplified Chinese

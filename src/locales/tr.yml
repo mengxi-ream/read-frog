@@ -660,6 +660,16 @@ translationHub:
   searchLanguages: Dil ara...
   noLanguagesFound: Dil bulunamadı
   exchangeLanguages: Dilleri değiştir
+  title: Çoklu API Metin Çevirisi
+  noServicesSelected: Çeviri Hizmeti Seçilmedi
+  noServicesDescription: Çeviri kartlarını görmek için yukarıdan çeviri hizmetlerini seçin.
+  inputPlaceholder: Çevrilecek metni girin...
+  translate: Çevir
+  copiedToClipboard: Çeviri panoya kopyalandı!
+  copyTranslation: Çeviriyi kopyala
+  deleteCard: Kartı sil
+  translationFailed: Çeviri Başarısız
+  translationFailedFallback: Çeviri başarısız
 languages:
   eng: İngilizce
   cmn: Basitleştirilmiş Çince

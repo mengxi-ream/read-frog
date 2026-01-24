@@ -1,3 +1,4 @@
+import { i18n } from '#imports'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Button } from '@/components/base-ui/button'
 import { Textarea } from '@/components/base-ui/textarea'
@@ -35,7 +36,7 @@ export function TextInput() {
         value={value}
         onChange={e => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Enter text to translate..."
+        placeholder={i18n.t('translationHub.inputPlaceholder')}
         className="h-96 min-h-0 resize-none px-4 py-3 text-lg"
         style={{ userSelect: 'text' }}
       />
@@ -46,7 +47,7 @@ export function TextInput() {
         size="sm"
         className="absolute bottom-3 right-3"
       >
-        Translate
+        {i18n.t('translationHub.translate')}
         <span className="ml-1.5 text-xs">⌘↵</span>
       </Button>
     </div>
