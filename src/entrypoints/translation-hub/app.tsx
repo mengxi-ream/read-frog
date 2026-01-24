@@ -1,5 +1,6 @@
 import { i18n } from '#imports'
 import { LanguageControlPanel } from './components/language-control-panel'
+import { PromptSelector } from './components/prompt-selector'
 import { TextInput } from './components/text-input'
 import { TranslationPanel } from './components/translation-panel'
 import { TranslationServiceDropdown } from './components/translation-service-dropdown'
@@ -21,7 +22,10 @@ export default function App() {
               <LanguageControlPanel />
             </div>
             <div className="order-3 lg:order-2 flex justify-end lg:items-end lg:h-full">
-              <TranslationServiceDropdown />
+              <div className="flex items-center gap-2">
+                <PromptSelector />
+                <TranslationServiceDropdown />
+              </div>
             </div>
 
             {/* Row 2: Content */}
