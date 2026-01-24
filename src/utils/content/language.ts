@@ -1,5 +1,5 @@
 import type { LangCodeISO6393 } from '@read-frog/definitions'
-import type { ProviderConfig } from '@/types/config/provider'
+import type { LLMTranslateProviderConfig } from '@/types/config/provider'
 import { LANG_CODE_TO_EN_NAME, langCodeISO6393Schema } from '@read-frog/definitions'
 import { generateText } from 'ai'
 import { franc } from 'franc'
@@ -22,8 +22,8 @@ export interface DetectLanguageOptions {
   minLength?: number
   /** Enable LLM detection */
   enableLLM?: boolean
-  /** Provider config for LLM detection (if not provided, will get from global config) */
-  providerConfig?: ProviderConfig
+  /** LLM provider config for detection (non-LLM providers not supported) */
+  providerConfig?: LLMTranslateProviderConfig
   /** Max text length for LLM detection (default: 500) */
   maxLengthForLLM?: number
 }
@@ -56,7 +56,10 @@ export async function detectLanguageWithSource(
     try {
       const maxLength = options.maxLengthForLLM ?? DEFAULT_MAX_LENGTH_FOR_LLM
       const textForLLM = cleanText(trimmedText, maxLength)
-      const llmResult = await detectLanguageWithLLM(textForLLM)
+      const llmResult = await detectLanguageWithLLM(
+        textForLLM,
+        options?.providerConfig,
+      )
       if (llmResult && llmResult !== 'und') {
         return { code: llmResult, source: 'llm' }
       }
@@ -91,10 +94,12 @@ export async function detectLanguage(
 /**
  * Detect language using LLM with retry logic
  * @param text - Text to analyze (caller is responsible for combining title and content)
+ * @param providerConfig - Optional provider config (if not provided, will get from global config)
  * @returns ISO 639-3 language code or null if all attempts fail (null = no LLM provider or all attempts failed)
  */
 export async function detectLanguageWithLLM(
   text: string,
+  providerConfig?: LLMTranslateProviderConfig,
 ): Promise<LangCodeISO6393 | 'und' | null> {
   const MAX_ATTEMPTS = 3 // 1 original + 2 retries
 
@@ -103,28 +108,37 @@ export async function detectLanguageWithLLM(
     return null
   }
 
-  // Get model from config
+  // Get provider config - use passed or fall back to global
+  let config: LLMTranslateProviderConfig | undefined = providerConfig
+
+  if (!config) {
+    try {
+      const globalConfig = await getLocalConfig()
+      if (!globalConfig) {
+        logger.warn('No config found for language detection')
+        return null
+      }
+      const globalProvider = getProviderConfigById(
+        globalConfig.providersConfig,
+        globalConfig.translate.providerId,
+      )
+      if (!globalProvider || !isLLMTranslateProviderConfig(globalProvider)) {
+        logger.info('No LLM translate provider configured')
+        return null
+      }
+      config = globalProvider
+    }
+    catch (error) {
+      logger.error('Failed to get global config for language detection:', error)
+      return null
+    }
+  }
+
   try {
-    const config = await getLocalConfig()
-    if (!config) {
-      logger.warn('No config found for language detection')
-      return null
-    }
-
-    const providerConfig = getProviderConfigById(
-      config.providersConfig,
-      config.translate.providerId,
-    )
-
-    if (!providerConfig || !isLLMTranslateProviderConfig(providerConfig)) {
-      logger.info('No LLM translate provider configured')
-      return null
-    }
-
-    const { models: { translate }, provider, providerOptions: userProviderOptions, temperature } = providerConfig
+    const { models: { translate }, provider, providerOptions: userProviderOptions, temperature } = config
     const translateModel = translate.isCustomModel ? translate.customModel : translate.model
     const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
-    const model = await getTranslateModelById(providerConfig.id)
+    const model = await getTranslateModelById(config.id)
 
     // Create language list for prompt
     const languageList = Object.entries(LANG_CODE_TO_EN_NAME)

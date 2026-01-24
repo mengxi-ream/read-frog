@@ -5,6 +5,7 @@ import {
   langCodeISO6393Schema,
 } from '@read-frog/definitions'
 import { camelCase } from 'case-anything'
+import { useMemo } from 'react'
 import {
   Combobox,
   ComboboxContent,
@@ -60,7 +61,10 @@ export function LanguageCombobox({
   placeholder,
   className,
 }: LanguageComboboxProps) {
-  const languageItems = getLanguageItems(detectedLangCode)
+  const languageItems = useMemo(
+    () => getLanguageItems(detectedLangCode),
+    [detectedLangCode],
+  )
 
   return (
     <Combobox

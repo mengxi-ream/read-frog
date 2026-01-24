@@ -37,10 +37,11 @@ export async function shouldSkipByLanguage(
   enableLLMDetection: boolean,
   providerConfig: ProviderConfig,
 ): Promise<boolean> {
+  const isLLMProvider = isLLMTranslateProviderConfig(providerConfig)
   const detectedLang = await detectLanguage(text, {
     minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
-    enableLLM: enableLLMDetection,
-    providerConfig,
+    enableLLM: enableLLMDetection && isLLMProvider,
+    providerConfig: isLLMProvider ? providerConfig : undefined,
   })
 
   if (!detectedLang) {

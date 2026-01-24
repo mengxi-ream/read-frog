@@ -19,16 +19,17 @@ export function LanguageControlPanel() {
   const translateProviderConfig = useAtomValue(translateProviderConfigAtom)
 
   // Debounced language detection from input text
+  const isLLMProvider = isLLMTranslateProviderConfig(translateProviderConfig)
   const debouncedDetect = useMemo(
     () => debounce(async (text: string) => {
       const detected = await detectLanguage(text, {
         minLength: 1,
-        enableLLM: isLLMTranslateProviderConfig(translateProviderConfig),
-        providerConfig: translateProviderConfig,
+        enableLLM: isLLMProvider,
+        providerConfig: isLLMProvider ? translateProviderConfig : undefined,
       })
       setDetectedSourceLangCode(detected)
     }, 1000),
-    [setDetectedSourceLangCode, translateProviderConfig],
+    [setDetectedSourceLangCode, translateProviderConfig, isLLMProvider],
   )
 
   useEffect(() => {

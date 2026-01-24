@@ -3,7 +3,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useAtom, useAtomValue } from 'jotai'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/base-ui/button'
 import ProviderIcon from '@/components/provider-icon'
@@ -29,6 +29,9 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   const provider = getProviderConfigById(providersConfig, providerId) as TranslateProviderConfig | undefined
   const providerItem = provider ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS] : undefined
 
+  // Track request IDs to ignore stale responses from slow providers
+  const requestIdRef = useRef(0)
+
   const mutation = useMutation({
     mutationKey: ['translate', providerId],
     meta: { suppressToast: true },
@@ -36,11 +39,19 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
       if (!provider)
         throw new Error('Provider not found')
 
-      return executeTranslate(req.inputText, {
+      const myRequestId = ++requestIdRef.current
+      const result = await executeTranslate(req.inputText, {
         sourceCode: req.sourceLanguage,
         targetCode: req.targetLanguage,
         level: language.level,
       }, provider)
+
+      // Ignore stale responses
+      if (requestIdRef.current !== myRequestId) {
+        throw new Error('Stale request')
+      }
+
+      return result
     },
   })
 

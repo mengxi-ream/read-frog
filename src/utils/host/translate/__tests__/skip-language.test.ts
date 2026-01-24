@@ -160,7 +160,7 @@ describe('shouldSkipByLanguage', () => {
       })
     })
 
-    it('should pass non-LLM provider config to detectLanguage', async () => {
+    it('should disable LLM detection when provider does not support it', async () => {
       mockedDetect.mockResolvedValueOnce('jpn')
 
       const japaneseText = 'これは日本語のテストです。日本語で書かれたテキストです。'
@@ -173,11 +173,12 @@ describe('shouldSkipByLanguage', () => {
         mockAPIProviderConfig,
       )
 
-      // detectLanguage is called; it handles the LLM check internally
+      // Non-LLM providers cannot use LLM detection, so enableLLM is false
+      // and providerConfig is undefined (type safety enforced at call site)
       expect(mockedDetect).toHaveBeenCalledWith(japaneseText, {
         minLength: 10,
-        enableLLM: true,
-        providerConfig: mockAPIProviderConfig,
+        enableLLM: false,
+        providerConfig: undefined,
       })
     })
   })
