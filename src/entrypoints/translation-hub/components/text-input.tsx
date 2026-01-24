@@ -37,7 +37,7 @@ export function TextInput() {
         onChange={e => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={i18n.t('translationHub.inputPlaceholder')}
-        className="h-96 min-h-0 resize-none px-4 py-3 text-lg"
+        className="h-96 min-h-0 resize-none px-4 py-3 text-lg!"
         style={{ userSelect: 'text' }}
       />
 
