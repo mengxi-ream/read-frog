@@ -8,6 +8,7 @@ import { toast } from 'sonner'
 import { Button } from '@/components/base-ui/button'
 import ProviderIcon from '@/components/provider-icon'
 import { useTheme } from '@/components/providers/theme-provider'
+import { cn } from '@/lib/utils'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'
@@ -32,15 +33,14 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
     mutationKey: ['translate', providerId],
     meta: { suppressToast: true },
     mutationFn: async (req: NonNullable<typeof request>) => {
-      const providerConfig = getProviderConfigById(providersConfig, providerId)
-      if (!providerConfig)
-        throw new Error(`Provider not found`)
+      if (!provider)
+        throw new Error('Provider not found')
 
       return executeTranslate(req.inputText, {
         sourceCode: req.sourceLanguage,
         targetCode: req.targetLanguage,
         level: language.level,
-      }, providerConfig)
+      }, provider)
     },
   })
 
@@ -70,7 +70,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
 
   return (
     <div className="border rounded-lg bg-card">
-      <div className={`flex items-center justify-between px-3 py-2 ${hasContent ? 'border-b' : ''}`}>
+      <div className={cn('flex items-center justify-between px-3 py-2', hasContent && 'border-b')}>
         <div className="flex items-center space-x-2">
           {providerItem
             ? (

@@ -39,7 +39,10 @@ popup:
 options:
   sidebar:
     settings: Cài đặt
+    tools: Công cụ
     product: Sản phẩm
+  tools:
+    translationHub: Trung tâm Dịch thuật
   setAPIKeyWarning:
     please: Vui lòng đặt API Key trên trang
     page: cài đặt

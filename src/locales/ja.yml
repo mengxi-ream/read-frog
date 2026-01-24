@@ -38,7 +38,10 @@ popup:
 options:
   sidebar:
     settings: 設定
+    tools: ツール
     product: 製品
+  tools:
+    translationHub: 翻訳ハブ
   setAPIKeyWarning:
     please: 設定ページで
     page: APIキーを設定してください

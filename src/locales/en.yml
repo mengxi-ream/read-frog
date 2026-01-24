@@ -39,7 +39,10 @@ popup:
 options:
   sidebar:
     settings: Settings
+    tools: Tools
     product: Product
+  tools:
+    translationHub: Translation Hub
   setAPIKeyWarning:
     please: Please set API Key on
     page: page

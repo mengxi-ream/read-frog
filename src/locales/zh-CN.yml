@@ -39,7 +39,10 @@ popup:
 options:
   sidebar:
     settings: 设置
+    tools: 工具
     product: 产品
+  tools:
+    translationHub: 翻译中心
   setAPIKeyWarning:
     please: 请在
     page: 页设置 API Key

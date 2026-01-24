@@ -39,7 +39,10 @@ popup:
 options:
   sidebar:
     settings: Настройки
+    tools: Инструменты
     product: Продукт
+  tools:
+    translationHub: Центр переводов
   setAPIKeyWarning:
     please: Пожалуйста, установите API-ключ на странице
     page: настроек

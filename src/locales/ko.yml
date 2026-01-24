@@ -38,7 +38,10 @@ popup:
 options:
   sidebar:
     settings: 설정
+    tools: 도구
     product: 제품
+  tools:
+    translationHub: 번역 허브
   setAPIKeyWarning:
     please: API Key를 설정해 주세요
     page: 페이지에서

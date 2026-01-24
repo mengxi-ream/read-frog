@@ -8,6 +8,7 @@ import {
 import { version } from '../../../../package.json'
 import { ProductNav } from './product-nav'
 import { SettingsNav } from './settings-nav'
+import { ToolsNav } from './tools-nav'
 
 export function AppSidebar() {
   return (
@@ -23,6 +24,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent className="group-data-[state=expanded]:px-2 transition-all">
         <SettingsNav />
+        <ToolsNav />
         <ProductNav />
       </SidebarContent>
     </Sidebar>
