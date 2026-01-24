@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       SKIP_ENV_VALIDATION: true
-      SKIP_PRE_PUSH: true
+      HUSKY: 0
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4

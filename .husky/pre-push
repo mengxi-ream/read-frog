@@ -1,9 +1,3 @@
-# Check if SKIP_PRE_PUSH environment variable is set
-if [ "$SKIP_HUSKY" = "true" ]; then
-  echo "⏭️  Skipping pre-push checks (SKIP_HUSKY=true)"
-  exit 0
-fi
-
 echo "🔍 Checking for uncommented eruda imports..."
 if grep -r "import.*eruda" src/ --include="*.ts" --include="*.tsx" --include="*.js" --include="*.jsx" | grep -v ":.*[[:space:]]*//.*import.*eruda"; then
   echo "❌ Found uncommented eruda imports in the codebase!"

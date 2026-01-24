@@ -1,6 +1,1 @@
-if [ "$SKIP_HUSKY" = "true" ]; then
-  echo "⏭️  Skipping pre-push checks (SKIP_PRE_COMMIT=true)"
-  exit 0
-fi
-
 pnpm exec lint-staged
