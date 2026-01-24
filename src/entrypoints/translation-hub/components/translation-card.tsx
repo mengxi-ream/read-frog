@@ -29,6 +29,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
 
   const mutation = useMutation({
     mutationKey: ['translate', providerId],
+    meta: { suppressToast: true },
     mutationFn: async (req: NonNullable<typeof request>) => {
       const providerConfig = getProviderConfigById(providersConfig, providerId)
       if (!providerConfig)

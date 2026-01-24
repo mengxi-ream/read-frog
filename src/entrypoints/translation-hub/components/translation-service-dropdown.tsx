@@ -49,14 +49,18 @@ export function TranslationServiceDropdown() {
       >
         <SelectTrigger className="min-w-52">
           <SelectValue placeholder={i18n.t('translateService.selectServices')}>
-            {selectedIds.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span>{i18n.t('translateService.translationProviders')}</span>
-                <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
-                  {selectedIds.length}
-                </span>
-              </div>
-            )}
+            {selectedIds.length > 0
+              ? (
+                  <div className="flex items-center gap-2">
+                    <span>{i18n.t('translateService.translationProviders')}</span>
+                    <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
+                      {selectedIds.length}
+                    </span>
+                  </div>
+                )
+              : (
+                  <span className="text-muted-foreground">{i18n.t('translateService.selectServices')}</span>
+                )}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
