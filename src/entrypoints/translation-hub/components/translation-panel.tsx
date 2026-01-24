@@ -31,7 +31,7 @@ export function TranslationPanel() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {selectedProviderIds.map(id => (
         <TranslationCard key={id} providerId={id} />
       ))}

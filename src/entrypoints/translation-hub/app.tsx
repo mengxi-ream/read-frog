@@ -9,14 +9,14 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <div className="max-w-6xl mx-auto">
-        <header className="px-6 py-3">
-          <h1 className="text-3xl font-semibold text-foreground">
+        <header className="px-6 py-4">
+          <h1 className="text-2xl font-semibold text-foreground">
             {i18n.t('translationHub.title')}
           </h1>
         </header>
 
-        <main className="px-6 pb-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-6 gap-y-3">
+        <main className="p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Row 1: Controls */}
             <div className="order-1">
               <LanguageControlPanel />

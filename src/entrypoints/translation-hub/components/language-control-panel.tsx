@@ -48,7 +48,7 @@ export function LanguageControlPanel() {
         label={i18n.t('side.sourceLang')}
       />
 
-      <div className="shrink-0 mt-6">
+      <div className="shrink-0 self-end pb-0.5">
         <Button
           variant="ghost"
           size="icon"
