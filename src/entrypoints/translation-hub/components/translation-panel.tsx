@@ -1,28 +1,12 @@
 import { Icon } from '@iconify/react'
 import { useAtomValue } from 'jotai'
-import { selectedServicesAtom, translationResultsAtom } from '../atoms'
+import { selectedProviderIdsAtom } from '../atoms'
 import { TranslationCard } from './translation-card'
 
-interface TranslationPanelProps {
-  onCopy: (text: string) => void
-  onRemove: (id: string) => void
-}
+export function TranslationPanel() {
+  const selectedProviderIds = useAtomValue(selectedProviderIdsAtom)
 
-export function TranslationPanel({ onCopy, onRemove }: TranslationPanelProps) {
-  const results = useAtomValue(translationResultsAtom)
-  const selectedServices = useAtomValue(selectedServicesAtom)
-
-  // Create cards for all selected services, showing empty state if no result yet
-  const displayCards = selectedServices.map(service =>
-    results.find(r => r.id === service.id) ?? {
-      id: service.id,
-      name: service.name,
-      provider: service.provider,
-      isLoading: false,
-    },
-  )
-
-  if (selectedServices.length === 0) {
+  if (selectedProviderIds.length === 0) {
     return (
       <div className="text-center py-16">
         <Icon icon="tabler:language-off" className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-50" />
@@ -36,13 +20,8 @@ export function TranslationPanel({ onCopy, onRemove }: TranslationPanelProps) {
 
   return (
     <div className="space-y-3">
-      {displayCards.map(result => (
-        <TranslationCard
-          key={result.id}
-          result={result}
-          onCopy={onCopy}
-          onRemove={onRemove}
-        />
+      {selectedProviderIds.map(id => (
+        <TranslationCard key={id} providerId={id} />
       ))}
     </div>
   )

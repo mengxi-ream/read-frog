@@ -1,27 +1,70 @@
-import type { TranslationResult } from '../types'
+import type { TranslateProviderConfig } from '@/types/config/provider'
 import { Icon } from '@iconify/react'
+import { useMutation } from '@tanstack/react-query'
+import { useAtom, useAtomValue } from 'jotai'
+import { useEffect } from 'react'
+import { toast } from 'sonner'
 import { Button } from '@/components/base-ui/button'
 import ProviderIcon from '@/components/provider-icon'
 import { useTheme } from '@/components/providers/theme-provider'
+import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { getProviderConfigById } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'
+import { executeTranslate } from '@/utils/host/translate/execute-translate'
+import { selectedProviderIdsAtom, translateRequestAtom } from '../atoms'
 
 interface TranslationCardProps {
-  result: TranslationResult
-  onCopy: (text: string) => void
-  onRemove: (id: string) => void
+  providerId: string
 }
 
-export function TranslationCard({ result, onCopy, onRemove }: TranslationCardProps) {
+export function TranslationCard({ providerId }: TranslationCardProps) {
   const { theme } = useTheme()
+  const request = useAtomValue(translateRequestAtom)
+  const language = useAtomValue(configFieldsAtomMap.language)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const [selectedProviderIds, setSelectedProviderIds] = useAtom(selectedProviderIdsAtom)
+
+  const provider = getProviderConfigById(providersConfig, providerId) as TranslateProviderConfig | undefined
+  const providerItem = provider ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS] : undefined
+
+  const mutation = useMutation({
+    mutationKey: ['translate', providerId],
+    mutationFn: async (req: NonNullable<typeof request>) => {
+      const providerConfig = getProviderConfigById(providersConfig, providerId)
+      if (!providerConfig)
+        throw new Error(`Provider not found`)
+
+      return executeTranslate(req.inputText, {
+        sourceCode: req.sourceLanguage,
+        targetCode: req.targetLanguage,
+        level: language.level,
+      }, providerConfig)
+    },
+  })
+
+  // Trigger translation when request changes
+  useEffect(() => {
+    if (request?.inputText.trim()) {
+      mutation.mutate(request)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [request?.timestamp])
 
   const handleCopy = () => {
-    if (result.text) {
-      onCopy(result.text)
+    if (mutation.data) {
+      void navigator.clipboard.writeText(mutation.data)
+      toast.success('Translation copied to clipboard!')
     }
   }
 
-  const hasContent = result.error || result.text
-  const providerItem = PROVIDER_ITEMS[result.provider as keyof typeof PROVIDER_ITEMS]
+  const handleRemove = () => {
+    setSelectedProviderIds(selectedProviderIds.filter(id => id !== providerId))
+  }
+
+  if (!provider)
+    return null
+
+  const hasContent = mutation.isError || mutation.data
 
   return (
     <div className="border rounded-lg bg-card">
@@ -31,7 +74,7 @@ export function TranslationCard({ result, onCopy, onRemove }: TranslationCardPro
             ? (
                 <ProviderIcon
                   logo={providerItem.logo(theme)}
-                  name={result.name}
+                  name={provider.name}
                   size="sm"
                 />
               )
@@ -42,10 +85,10 @@ export function TranslationCard({ result, onCopy, onRemove }: TranslationCardPro
               )}
         </div>
         <div className="flex items-center space-x-1">
-          {result.isLoading && (
+          {mutation.isPending && (
             <Icon icon="tabler:loader-2" className="h-4 w-4 animate-spin text-muted-foreground" />
           )}
-          {result.text && !result.isLoading && (
+          {mutation.data && !mutation.isPending && (
             <Button
               variant="ghost"
               size="icon"
@@ -59,7 +102,7 @@ export function TranslationCard({ result, onCopy, onRemove }: TranslationCardPro
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => onRemove(result.id)}
+            onClick={handleRemove}
             className="h-7 w-7"
             title="Delete card"
           >
@@ -70,22 +113,24 @@ export function TranslationCard({ result, onCopy, onRemove }: TranslationCardPro
 
       {hasContent && (
         <div className="p-3">
-          {result.error
+          {mutation.isError
             ? (
                 <div>
                   <div className="flex items-center space-x-2 text-destructive mb-1">
                     <Icon icon="tabler:alert-circle" className="h-4 w-4" />
                     <span className="text-sm font-medium">Translation Failed</span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{result.error}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {mutation.error instanceof Error ? mutation.error.message : 'Translation failed'}
+                  </p>
                 </div>
               )
             : (
                 <div
-                  key={result.text}
+                  key={mutation.data}
                   className="text-base leading-relaxed whitespace-pre-wrap animate-in fade-in duration-300"
                 >
-                  {result.text}
+                  {mutation.data}
                 </div>
               )}
         </div>

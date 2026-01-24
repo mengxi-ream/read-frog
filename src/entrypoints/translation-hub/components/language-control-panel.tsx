@@ -1,18 +1,13 @@
 import { Icon } from '@iconify/react'
-import { useAtom } from 'jotai'
+import { useAtom, useSetAtom } from 'jotai'
 import { Button } from '@/components/base-ui/button'
-import { sourceLanguageAtom, targetLanguageAtom } from '../atoms'
+import { exchangeLanguagesAtom, sourceLanguageAtom, targetLanguageAtom } from '../atoms'
 import { SearchableLanguageSelector } from './searchable-language-selector'
 
-interface LanguageControlPanelProps {
-  onLanguageExchange: () => void
-}
-
-export function LanguageControlPanel({
-  onLanguageExchange,
-}: LanguageControlPanelProps) {
+export function LanguageControlPanel() {
   const [sourceLanguage, setSourceLanguage] = useAtom(sourceLanguageAtom)
   const [targetLanguage, setTargetLanguage] = useAtom(targetLanguageAtom)
+  const exchangeLanguages = useSetAtom(exchangeLanguagesAtom)
 
   return (
     <div className="flex items-center gap-3">
@@ -26,7 +21,7 @@ export function LanguageControlPanel({
         <Button
           variant="ghost"
           size="icon"
-          onClick={onLanguageExchange}
+          onClick={exchangeLanguages}
           title="Exchange languages"
         >
           <Icon icon="tabler:arrows-exchange" className="h-4 w-4" />
