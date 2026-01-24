@@ -1,9 +1,8 @@
-import type { TranslateProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useAtom, useAtomValue } from 'jotai'
-import { useEffect, useRef } from 'react'
+import { useEffect, useEffectEvent, useRef } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/base-ui/button'
 import ProviderIcon from '@/components/provider-icon'
@@ -26,7 +25,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const [selectedProviderIds, setSelectedProviderIds] = useAtom(selectedProviderIdsAtom)
 
-  const provider = getProviderConfigById(providersConfig, providerId) as TranslateProviderConfig | undefined
+  const provider = getProviderConfigById(providersConfig, providerId)
   const providerItem = provider ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS] : undefined
 
   // Track request IDs to ignore stale responses from slow providers
@@ -46,9 +45,9 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
         level: language.level,
       }, provider)
 
-      // Ignore stale responses
+      // Ignore stale responses - return undefined to silently discard
       if (requestIdRef.current !== myRequestId) {
-        throw new Error('Stale request')
+        return undefined
       }
 
       return result
@@ -56,11 +55,14 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   })
 
   // Trigger translation when request changes
-  useEffect(() => {
+  const triggerTranslation = useEffectEvent(() => {
     if (request?.inputText.trim()) {
       mutation.mutate(request)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  })
+
+  useEffect(() => {
+    triggerTranslation()
   }, [request?.timestamp])
 
   const handleCopy = () => {
@@ -77,7 +79,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   if (!provider)
     return null
 
-  const hasContent = mutation.isError || mutation.data
+  const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== '')
 
   return (
     <div className="border rounded-lg bg-card">
