@@ -656,3 +656,187 @@ hotkey:
   shift: Shift
   backtick: Ters tırnak
   clickAndHold: Tıkla ve basılı tut
+translationHub:
+  searchLanguages: Dil ara...
+  noLanguagesFound: Dil bulunamadı
+  exchangeLanguages: Dilleri değiştir
+languages:
+  eng: İngilizce
+  cmn: Basitleştirilmiş Çince
+  cmnHant: Geleneksel Çince
+  yue: Kantonca
+  spa: İspanyolca
+  rus: Rusça
+  arb: Arapça
+  ben: Bengalce
+  hin: Hintçe
+  por: Portekizce
+  ind: Endonezce
+  jpn: Japonca
+  fra: Fransızca
+  deu: Almanca
+  jav: Cava Dili
+  kor: Korece
+  tel: Telugu
+  vie: Vietnamca
+  mar: Marathi
+  ita: İtalyanca
+  tam: Tamilce
+  tur: Türkçe
+  urd: Urduca
+  guj: Gujarati
+  pol: Lehçe
+  ukr: Ukraynaca
+  kan: Kannada
+  mai: Maithili
+  mal: Malayalam
+  pes: Farsça
+  mya: Birmanca
+  swh: Svahili
+  sun: Sundaca
+  ron: Romence
+  pan: Pencapça
+  bho: Bhojpuri
+  amh: Amharca
+  hau: Hausaca
+  fuv: Fulani
+  bos: Boşnakça
+  hrv: Hırvatça
+  nld: Felemenkçe
+  srp: Sırpça
+  tha: Tayca
+  ckb: Orta Kürtçe
+  yor: Yoruba
+  uzn: Özbekçe
+  zlm: Malayca
+  ibo: İbo Dili
+  npi: Nepalce
+  ceb: Sebuano
+  skr: Saraiki
+  tgl: Tagalogca
+  hun: Macarca
+  azj: Azerice
+  sin: Sinhalaca
+  koi: Komi-Permyak
+  ell: Yunanca
+  ces: Çekçe
+  mag: Magahi
+  run: Kirundi
+  bel: Belarusça
+  plt: Malgaşça
+  qug: Chimborazo Dağlık Quechua
+  mad: Maduraca
+  nya: Çeva
+  zyb: Zhuangca
+  pbu: Peştuca
+  kin: Kinyarwanda
+  zul: Zuluca
+  bul: Bulgarca
+  swe: İsveççe
+  lin: Lingala
+  som: Somalice
+  hms: Qiandong Miao
+  hnj: Hmong Njua
+  ilo: İlokanoca
+  kaz: Kazakça
+  heb: İbranice
+  nob: Norveççe (Bokmål)
+  nno: Norveççe (Nynorsk)
+  afr: Afrikaanca
+  sqi: Arnavutça
+  asm: Asamca
+  eus: Baskça
+  bre: Bretonca
+  cat: Katalanca
+  cos: Korsikaca
+  cym: Galce
+  dan: Danca
+  div: Divehi
+  epo: Esperanto
+  ekk: Estonca
+  fao: Faroece
+  fij: Fiji Dili
+  fin: Fince
+  fry: Batı Frizce
+  gla: İskoç Galcesi
+  gle: İrlandaca
+  glg: Galiçyaca
+  grn: Guarani
+  hat: Haiti Kreolcesi
+  haw: Hawaiice
+  hye: Ermenice
+  ido: İdo
+  ina: Interlingua
+  isl: İzlandaca
+  kat: Gürcüce
+  khm: Kmerce
+  kir: Kırgızca
+  lao: Laoca
+  lat: Latince
+  lvs: Letonca
+  lit: Litvanca
+  ltz: Lüksemburgca
+  mkd: Makedonca
+  mlt: Maltaca
+  mon: Moğolca
+  mri: Maori
+  nso: Kuzey Sotho
+  oci: Oksitanca
+  ori: Oriya
+  orm: Oromo
+  prs: Dari
+  san: Sanskritçe
+  slk: Slovakça
+  slv: Slovence
+  smo: Samoaca
+  sna: Şona
+  snd: Sindhi
+  sot: Güney Sotho
+  tah: Tahitice
+  tat: Tatarca
+  tgk: Tacikçe
+  tir: Tigrinya
+  ton: Tongaca
+  tsn: Tsvana
+  tuk: Türkmence
+  uig: Uygurca
+  vol: Volapük
+  wol: Volofça
+  xho: Zosa
+  ydd: Yidişçe
+  aka: Akan
+  bam: Bambara
+  bis: Bislama
+  bod: Tibetçe
+  che: Çeçence
+  chv: Çuvaşça
+  dzo: Dzongkha
+  ewe: Ewe
+  kab: Kabilce
+  lug: Luganda
+  oss: Osetçe
+  ssw: Svati
+  ven: Venda
+  war: Waray
+  nde: Kuzey Ndebele
+  nbl: Güney Ndebele
+  pam: Pampanga
+  hil: Hiligaynon
+  bcl: Merkez Bikolano
+  min: Minangkabau
+  ace: Açece
+  bug: Bugisce
+  ban: Balice
+  bjn: Banjar
+  mak: Makasarca
+  sas: Sasak
+  tet: Tetum
+  cha: Chamorro
+  niu: Niue Dili
+  tvl: Tuvaluca
+  gil: Kiribatice
+  mah: Marshall Dili
+  pau: Palau Dili
+  wls: Wallis Dili
+  rar: Rarotongan
+  hif: Fiji Hintçesi

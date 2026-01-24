@@ -658,3 +658,187 @@ hotkey:
   shift: Shift
   backtick: Backtick
   clickAndHold: Click and hold
+translationHub:
+  searchLanguages: Search languages...
+  noLanguagesFound: No languages found
+  exchangeLanguages: Exchange languages
+languages:
+  eng: English
+  cmn: Simplified Chinese
+  cmnHant: Traditional Chinese
+  yue: Cantonese
+  spa: Spanish
+  rus: Russian
+  arb: Arabic
+  ben: Bengali
+  hin: Hindi
+  por: Portuguese
+  ind: Indonesian
+  jpn: Japanese
+  fra: French
+  deu: German
+  jav: Javanese
+  kor: Korean
+  tel: Telugu
+  vie: Vietnamese
+  mar: Marathi
+  ita: Italian
+  tam: Tamil
+  tur: Turkish
+  urd: Urdu
+  guj: Gujarati
+  pol: Polish
+  ukr: Ukrainian
+  kan: Kannada
+  mai: Maithili
+  mal: Malayalam
+  pes: Persian
+  mya: Burmese
+  swh: Swahili
+  sun: Sundanese
+  ron: Romanian
+  pan: Punjabi
+  bho: Bhojpuri
+  amh: Amharic
+  hau: Hausa
+  fuv: Fulani
+  bos: Bosnian
+  hrv: Croatian
+  nld: Dutch
+  srp: Serbian
+  tha: Thai
+  ckb: Central Kurdish
+  yor: Yoruba
+  uzn: Uzbek
+  zlm: Malay
+  ibo: Igbo
+  npi: Nepali
+  ceb: Cebuano
+  skr: Saraiki
+  tgl: Tagalog
+  hun: Hungarian
+  azj: Azerbaijani
+  sin: Sinhala
+  koi: Komi-Permyak
+  ell: Greek
+  ces: Czech
+  mag: Magahi
+  run: Rundi
+  bel: Belarusian
+  plt: Malagasy
+  qug: Chimborazo Highland Quichua
+  mad: Madurese
+  nya: Chewa
+  zyb: Zhuang
+  pbu: Pashto
+  kin: Kinyarwanda
+  zul: Zulu
+  bul: Bulgarian
+  swe: Swedish
+  lin: Lingala
+  som: Somali
+  hms: Qiandong Miao
+  hnj: Hmong Njua
+  ilo: Ilocano
+  kaz: Kazakh
+  heb: Hebrew
+  nob: Norwegian Bokmål
+  nno: Norwegian Nynorsk
+  afr: Afrikaans
+  sqi: Albanian
+  asm: Assamese
+  eus: Basque
+  bre: Breton
+  cat: Catalan
+  cos: Corsican
+  cym: Welsh
+  dan: Danish
+  div: Divehi
+  epo: Esperanto
+  ekk: Estonian
+  fao: Faroese
+  fij: Fijian
+  fin: Finnish
+  fry: Western Frisian
+  gla: Scottish Gaelic
+  gle: Irish
+  glg: Galician
+  grn: Guarani
+  hat: Haitian Creole
+  haw: Hawaiian
+  hye: Armenian
+  ido: Ido
+  ina: Interlingua
+  isl: Icelandic
+  kat: Georgian
+  khm: Khmer
+  kir: Kyrgyz
+  lao: Lao
+  lat: Latin
+  lvs: Latvian
+  lit: Lithuanian
+  ltz: Luxembourgish
+  mkd: Macedonian
+  mlt: Maltese
+  mon: Mongolian
+  mri: Maori
+  nso: Northern Sotho
+  oci: Occitan
+  ori: Odia
+  orm: Oromo
+  prs: Dari
+  san: Sanskrit
+  slk: Slovak
+  slv: Slovenian
+  smo: Samoan
+  sna: Shona
+  snd: Sindhi
+  sot: Southern Sotho
+  tah: Tahitian
+  tat: Tatar
+  tgk: Tajik
+  tir: Tigrinya
+  ton: Tongan
+  tsn: Tswana
+  tuk: Turkmen
+  uig: Uyghur
+  vol: Volapük
+  wol: Wolof
+  xho: Xhosa
+  ydd: Yiddish
+  aka: Akan
+  bam: Bambara
+  bis: Bislama
+  bod: Tibetan
+  che: Chechen
+  chv: Chuvash
+  dzo: Dzongkha
+  ewe: Ewe
+  kab: Kabyle
+  lug: Luganda
+  oss: Ossetian
+  ssw: Swati
+  ven: Venda
+  war: Waray
+  nde: Northern Ndebele
+  nbl: Southern Ndebele
+  pam: Pampanga
+  hil: Hiligaynon
+  bcl: Central Bicolano
+  min: Minangkabau
+  ace: Acehnese
+  bug: Buginese
+  ban: Balinese
+  bjn: Banjar
+  mak: Makasar
+  sas: Sasak
+  tet: Tetum
+  cha: Chamorro
+  niu: Niuean
+  tvl: Tuvaluan
+  gil: Gilbertese
+  mah: Marshallese
+  pau: Palauan
+  wls: Wallisian
+  rar: Rarotongan
+  hif: Fiji Hindi

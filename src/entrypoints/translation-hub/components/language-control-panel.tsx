@@ -1,3 +1,4 @@
+import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useSetAtom } from 'jotai'
 import { Button } from '@/components/base-ui/button'
@@ -14,7 +15,7 @@ export function LanguageControlPanel() {
       <SearchableLanguageSelector
         value={sourceLanguage}
         onValueChange={setSourceLanguage}
-        label="Source Language"
+        label={i18n.t('side.sourceLang')}
       />
 
       <div className="shrink-0 mt-6">
@@ -22,7 +23,7 @@ export function LanguageControlPanel() {
           variant="ghost"
           size="icon"
           onClick={exchangeLanguages}
-          title="Exchange languages"
+          title={i18n.t('translationHub.exchangeLanguages')}
         >
           <Icon icon="tabler:arrows-exchange" className="h-4 w-4" />
         </Button>
@@ -31,7 +32,7 @@ export function LanguageControlPanel() {
       <SearchableLanguageSelector
         value={targetLanguage}
         onValueChange={setTargetLanguage}
-        label="Target Language"
+        label={i18n.t('side.targetLang')}
       />
     </div>
   )

@@ -656,3 +656,187 @@ hotkey:
   shift: Shift
   backtick: Dấu huyền
   clickAndHold: Nhấn và giữ
+translationHub:
+  searchLanguages: Tìm kiếm ngôn ngữ...
+  noLanguagesFound: Không tìm thấy ngôn ngữ
+  exchangeLanguages: Đổi ngôn ngữ
+languages:
+  eng: Tiếng Anh
+  cmn: Tiếng Trung giản thể
+  cmnHant: Tiếng Trung phồn thể
+  yue: Tiếng Quảng Đông
+  spa: Tiếng Tây Ban Nha
+  rus: Tiếng Nga
+  arb: Tiếng Ả Rập
+  ben: Tiếng Bengal
+  hin: Tiếng Hindi
+  por: Tiếng Bồ Đào Nha
+  ind: Tiếng Indonesia
+  jpn: Tiếng Nhật
+  fra: Tiếng Pháp
+  deu: Tiếng Đức
+  jav: Tiếng Java
+  kor: Tiếng Hàn
+  tel: Tiếng Telugu
+  vie: Tiếng Việt
+  mar: Tiếng Marathi
+  ita: Tiếng Ý
+  tam: Tiếng Tamil
+  tur: Tiếng Thổ Nhĩ Kỳ
+  urd: Tiếng Urdu
+  guj: Tiếng Gujarati
+  pol: Tiếng Ba Lan
+  ukr: Tiếng Ukraine
+  kan: Tiếng Kannada
+  mai: Tiếng Maithili
+  mal: Tiếng Malayalam
+  pes: Tiếng Ba Tư
+  mya: Tiếng Miến Điện
+  swh: Tiếng Swahili
+  sun: Tiếng Sunda
+  ron: Tiếng Romania
+  pan: Tiếng Punjab
+  bho: Tiếng Bhojpuri
+  amh: Tiếng Amhara
+  hau: Tiếng Hausa
+  fuv: Tiếng Fulani
+  bos: Tiếng Bosnia
+  hrv: Tiếng Croatia
+  nld: Tiếng Hà Lan
+  srp: Tiếng Serbia
+  tha: Tiếng Thái
+  ckb: Tiếng Kurd Trung
+  yor: Tiếng Yoruba
+  uzn: Tiếng Uzbek
+  zlm: Tiếng Mã Lai
+  ibo: Tiếng Igbo
+  npi: Tiếng Nepal
+  ceb: Tiếng Cebuano
+  skr: Tiếng Saraiki
+  tgl: Tiếng Tagalog
+  hun: Tiếng Hungary
+  azj: Tiếng Azerbaijan
+  sin: Tiếng Sinhala
+  koi: Tiếng Komi-Permyak
+  ell: Tiếng Hy Lạp
+  ces: Tiếng Séc
+  mag: Tiếng Magahi
+  run: Tiếng Rundi
+  bel: Tiếng Belarus
+  plt: Tiếng Malagasy
+  qug: Tiếng Quechua Chimborazo
+  mad: Tiếng Madura
+  nya: Tiếng Chewa
+  zyb: Tiếng Choang
+  pbu: Tiếng Pashto
+  kin: Tiếng Kinyarwanda
+  zul: Tiếng Zulu
+  bul: Tiếng Bulgaria
+  swe: Tiếng Thụy Điển
+  lin: Tiếng Lingala
+  som: Tiếng Somali
+  hms: Tiếng Miêu Qiandong
+  hnj: Tiếng Hmong Njua
+  ilo: Tiếng Ilocano
+  kaz: Tiếng Kazakh
+  heb: Tiếng Hebrew
+  nob: Tiếng Na Uy (Bokmål)
+  nno: Tiếng Na Uy (Nynorsk)
+  afr: Tiếng Afrikaans
+  sqi: Tiếng Albania
+  asm: Tiếng Assam
+  eus: Tiếng Basque
+  bre: Tiếng Breton
+  cat: Tiếng Catalan
+  cos: Tiếng Corsica
+  cym: Tiếng Wales
+  dan: Tiếng Đan Mạch
+  div: Tiếng Divehi
+  epo: Tiếng Esperanto
+  ekk: Tiếng Estonia
+  fao: Tiếng Faroe
+  fij: Tiếng Fiji
+  fin: Tiếng Phần Lan
+  fry: Tiếng Frisia
+  gla: Tiếng Gael Scotland
+  gle: Tiếng Ireland
+  glg: Tiếng Galicia
+  grn: Tiếng Guarani
+  hat: Tiếng Creole Haiti
+  haw: Tiếng Hawaii
+  hye: Tiếng Armenia
+  ido: Tiếng Ido
+  ina: Tiếng Interlingua
+  isl: Tiếng Iceland
+  kat: Tiếng Georgia
+  khm: Tiếng Khmer
+  kir: Tiếng Kyrgyz
+  lao: Tiếng Lào
+  lat: Tiếng Latin
+  lvs: Tiếng Latvia
+  lit: Tiếng Lithuania
+  ltz: Tiếng Luxembourg
+  mkd: Tiếng Macedonia
+  mlt: Tiếng Malta
+  mon: Tiếng Mông Cổ
+  mri: Tiếng Maori
+  nso: Tiếng Bắc Sotho
+  oci: Tiếng Occitan
+  ori: Tiếng Odia
+  orm: Tiếng Oromo
+  prs: Tiếng Dari
+  san: Tiếng Phạn
+  slk: Tiếng Slovak
+  slv: Tiếng Slovenia
+  smo: Tiếng Samoa
+  sna: Tiếng Shona
+  snd: Tiếng Sindhi
+  sot: Tiếng Nam Sotho
+  tah: Tiếng Tahiti
+  tat: Tiếng Tatar
+  tgk: Tiếng Tajik
+  tir: Tiếng Tigrinya
+  ton: Tiếng Tonga
+  tsn: Tiếng Tswana
+  tuk: Tiếng Turkmen
+  uig: Tiếng Uyghur
+  vol: Tiếng Volapük
+  wol: Tiếng Wolof
+  xho: Tiếng Xhosa
+  ydd: Tiếng Yiddish
+  aka: Tiếng Akan
+  bam: Tiếng Bambara
+  bis: Tiếng Bislama
+  bod: Tiếng Tây Tạng
+  che: Tiếng Chechen
+  chv: Tiếng Chuvash
+  dzo: Tiếng Dzongkha
+  ewe: Tiếng Ewe
+  kab: Tiếng Kabyle
+  lug: Tiếng Luganda
+  oss: Tiếng Ossetia
+  ssw: Tiếng Swati
+  ven: Tiếng Venda
+  war: Tiếng Waray
+  nde: Tiếng Bắc Ndebele
+  nbl: Tiếng Nam Ndebele
+  pam: Tiếng Pampanga
+  hil: Tiếng Hiligaynon
+  bcl: Tiếng Bicolano Trung
+  min: Tiếng Minangkabau
+  ace: Tiếng Aceh
+  bug: Tiếng Bugis
+  ban: Tiếng Bali
+  bjn: Tiếng Banjar
+  mak: Tiếng Makassar
+  sas: Tiếng Sasak
+  tet: Tiếng Tetum
+  cha: Tiếng Chamorro
+  niu: Tiếng Niue
+  tvl: Tiếng Tuvalu
+  gil: Tiếng Kiribati
+  mah: Tiếng Marshall
+  pau: Tiếng Palau
+  wls: Tiếng Wallis
+  rar: Tiếng Rarotongan
+  hif: Tiếng Hindi Fiji
