@@ -21,12 +21,14 @@ export const youtubeSubtitlesResponseSchema = z.object({
 })
 
 // XHR intercept message schema (from window.postMessage)
-const xhrInterceptErrorStatusSchema = z.union([
+export const knownHttpErrorStatusSchema = z.union([
   z.literal(429),
   z.literal(404),
   z.literal(403),
   z.literal(500),
 ])
+
+const xhrInterceptErrorStatusSchema = z.number()
 
 export const subtitlesInterceptMessageSchema = z.object({
   type: z.literal(SUBTITLE_INTERCEPT_MESSAGE_TYPE),

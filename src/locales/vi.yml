@@ -646,6 +646,7 @@ subtitles:
     http404: 404 Không tìm thấy phụ đề Youtube
     http403: 403 Không được phép truy cập phụ đề Youtube
     http500: 500 Lỗi máy chủ Youtube
+    httpUnknown: Lỗi HTTP $1
     invalidResponse: Định dạng phản hồi phụ đề Youtube không hợp lệ
     networkError: Xảy ra lỗi mạng khi lấy phụ đề
     fetchSubTimeout: Quá thời gian lấy phụ đề Youtube

@@ -8,7 +8,7 @@ import { OverlaySubtitlesError, ToastSubtitlesError } from '@/utils/subtitles/er
 import { optimizeSubtitles } from '@/utils/subtitles/processor/optimizer'
 import { detectFormat } from './format-detector'
 import { parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles } from './parser'
-import { subtitlesInterceptMessageSchema, youtubeSubtitlesResponseSchema } from './types'
+import { knownHttpErrorStatusSchema, subtitlesInterceptMessageSchema, youtubeSubtitlesResponseSchema } from './types'
 
 export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
   private subtitles: SubtitlesFragment[] = []
@@ -82,7 +82,11 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
   private async handleInterceptedSubtitle(data: SubtitlesInterceptMessage) {
     if (data.errorStatus) {
-      this.rejectAndClearPending(new OverlaySubtitlesError(i18n.t(`subtitles.errors.http${data.errorStatus}`)))
+      const parsed = knownHttpErrorStatusSchema.safeParse(data.errorStatus)
+      const errorMessage = parsed.success
+        ? i18n.t(`subtitles.errors.http${parsed.data}`)
+        : i18n.t('subtitles.errors.httpUnknown', [data.errorStatus])
+      this.rejectAndClearPending(new OverlaySubtitlesError(errorMessage))
       return
     }
 
