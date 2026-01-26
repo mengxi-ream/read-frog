@@ -3,7 +3,7 @@ import { Slot } from '@radix-ui/react-slot'
 import { IconLayoutSidebarLeftExpand, IconLayoutSidebarRightExpand } from '@tabler/icons-react'
 import { cva } from 'class-variance-authority'
 import * as React from 'react'
-import { Button } from '@/components/shadcn/button'
+import { Button } from '@/components/base-ui/button'
 import { Input } from '@/components/shadcn/input'
 import { Separator } from '@/components/shadcn/separator'
 import {
