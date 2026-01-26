@@ -1,5 +1,36 @@
 # @read-frog/extension
 
+## 1.24.0
+
+### Minor Changes
+
+- [#875](https://github.com/mengxi-ream/read-frog/pull/875) [`e456666`](https://github.com/mengxi-ream/read-frog/commit/e45666685fd152d38688573522f87790efadd276) Thanks [@flowKKo](https://github.com/flowKKo)! - feat: implement multi-api translation feature
+
+### Patch Changes
+
+- [#903](https://github.com/mengxi-ream/read-frog/pull/903) [`7cbc45f`](https://github.com/mengxi-ream/read-frog/commit/7cbc45f048ce8f48ebf7329ef7cb4bcc7d2eef4e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: github translation rule
+
+- [#901](https://github.com/mengxi-ream/read-frog/pull/901) [`e06df1d`](https://github.com/mengxi-ream/read-frog/commit/e06df1de8b4ff4ea12b71cb4afae98b38e373beb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(ai): configure reasoning effort per GPT-5 model variant
+
+  - GPT-5.2 and GPT-5.1+ don't support 'minimal', now use 'none'
+  - gpt-5-pro uses 'high', gpt-5.2-pro uses 'medium'
+  - gpt-5.x-chat-latest models use 'medium'
+  - GPT-5 (before 5.1) and o1/o3 models keep 'minimal'
+
+- [#910](https://github.com/mengxi-ream/read-frog/pull/910) [`6a56694`](https://github.com/mengxi-ream/read-frog/commit/6a56694e30892fedfb64c74b315471564bafedcd) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(video): prevent subtitle container unmounting to fix drag becoming unresponsive
+
+- [#912](https://github.com/mengxi-ream/read-frog/pull/912) [`693f1f2`](https://github.com/mengxi-ream/read-frog/commit/693f1f29a99e17682e5155448f9a71126f529fbe) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: improve translation hub
+
+- [#907](https://github.com/mengxi-ream/read-frog/pull/907) [`8292480`](https://github.com/mengxi-ream/read-frog/commit/829248065bddc3e41cd321b9ede5494277b72680) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(ui): add ON/OFF badge to subtitle toggle button
+
+- [#896](https://github.com/mengxi-ream/read-frog/pull/896) [`4f24028`](https://github.com/mengxi-ream/read-frog/commit/4f24028821a9aaa1ed5d07652ef9c267e1b51dd9) Thanks [@moxi000](https://github.com/moxi000)! - feat: add support for local HTML file (file://) translation
+
+- [#902](https://github.com/mengxi-ream/read-frog/pull/902) [`77d081f`](https://github.com/mengxi-ream/read-frog/commit/77d081f256b36ea8b11814d0ed727a34e364137c) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: replace feature suggestion survey with subtitle translation survey
+
+- [#888](https://github.com/mengxi-ream/read-frog/pull/888) [`b6ef3c0`](https://github.com/mengxi-ream/read-frog/commit/b6ef3c0d4c5cdcec3603913edb3911bbd3d2d6af) Thanks [@yrom](https://github.com/yrom)! - fix: add crypto.randomUUID polyfill to support HTTP website translation
+
+- [#904](https://github.com/mengxi-ream/read-frog/pull/904) [`0a35256`](https://github.com/mengxi-ream/read-frog/commit/0a3525696c4262c6d2a2276310f01ddca1c138c9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(ui): improve video subtitle settings cards responsive layout
+
 ## 1.23.0
 
 ### Minor Changes
