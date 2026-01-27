@@ -1,6 +1,8 @@
 import type { StateData, SubtitlesFragment, SubtitlesState } from '@/utils/subtitles/types'
 import { currentSubtitleAtom, currentTimeMsAtom, subtitlesStateAtom, subtitlesStore, subtitlesVisibleAtom } from './atoms'
 
+const ERROR_STATE_AUTO_HIDE_MS = 5_000
+
 export class SubtitlesScheduler {
   private videoElement: HTMLVideoElement
   private subtitles: SubtitlesFragment[] = []
@@ -9,6 +11,8 @@ export class SubtitlesScheduler {
   private currentState: StateData = {
     state: 'idle',
   }
+
+  private errorAutoHideTimeoutId: ReturnType<typeof setTimeout> | null = null
 
   constructor({ videoElement }: { videoElement: HTMLVideoElement }) {
     this.videoElement = videoElement
@@ -55,11 +59,20 @@ export class SubtitlesScheduler {
   }
 
   setState(state: SubtitlesState, data?: Partial<Omit<StateData, 'state'>>) {
+    this.clearErrorAutoHide()
     this.currentState = {
       state,
       message: data?.message,
     }
     this.updateState()
+
+    if (state === 'error') {
+      this.errorAutoHideTimeoutId = setTimeout(() => {
+        if (this.currentState.state === 'error') {
+          this.setState('idle')
+        }
+      }, ERROR_STATE_AUTO_HIDE_MS)
+    }
   }
 
   reset() {
@@ -116,6 +129,13 @@ export class SubtitlesScheduler {
   private updateState() {
     const stateData = this.currentState.state !== 'idle' ? this.currentState : null
     subtitlesStore.set(subtitlesStateAtom, stateData)
+  }
+
+  private clearErrorAutoHide() {
+    if (this.errorAutoHideTimeoutId !== null) {
+      clearTimeout(this.errorAutoHideTimeoutId)
+      this.errorAutoHideTimeoutId = null
+    }
   }
 
   private updateVisibility() {
