@@ -153,7 +153,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     const isDisabled = ccButton.getAttribute('aria-disabled') === 'true'
       || ccButton.getAttribute('disabled') !== null
-      || ('disabled' in ccButton && (ccButton as HTMLButtonElement).disabled)
+      || (ccButton instanceof HTMLButtonElement && ccButton.disabled)
 
     if (isDisabled) {
       this.rejectAndClearPending(new OverlaySubtitlesError(i18n.t('subtitles.errors.noSubtitlesFound')))
