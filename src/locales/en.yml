@@ -262,6 +262,15 @@ options:
       rate:
         title: Average Requests Per Second
         description: Average requests per second, but allows configuring a maximum burst count to temporarily send excess requests
+      timeoutMs:
+        title: Request Timeout
+        description: Timeout duration for a single translation request (milliseconds). Request will be cancelled and retried (if retries are enabled) after this time.
+      maxRetries:
+        title: Maximum Retry Attempts
+        description: Maximum number of retry attempts for failed translation requests
+      baseRetryDelayMs:
+        title: Base Retry Delay
+        description: Base delay duration for exponential backoff retry strategy (milliseconds). First retry uses this value, subsequent retries double each time.
     batchQueueConfig:
       title: Batch Translation
       description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
@@ -271,6 +280,9 @@ options:
       maxItemsPerBatch:
         title: Maximum Paragraph Count
         description: Maximum number of paragraphs for each batch translation to control the content volume of each translation
+      batchDelay:
+        title: Batch Accumulation Delay
+        description: Delay duration to wait for accumulating more translation tasks (milliseconds). Longer delays merge more requests but increase overall wait time.
       statisticsLink: Saved approximately $1 cost in the past 7 days
     autoTranslateWebsite:
       title: Auto Translate Based on Website
@@ -576,6 +588,15 @@ options:
       rate:
         title: Average Requests Per Second
         description: Average subtitle translation requests per second, but allows configuring a maximum burst count to temporarily send excess requests
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for a subtitle translation request to complete before timing out
+      maxRetries:
+        title: Maximum Retry Attempts
+        description: Maximum number of retry attempts for failed subtitle translation requests
+      baseRetryDelayMs:
+        title: Base Retry Delay
+        description: Base delay duration for exponential backoff retry strategy (milliseconds). First retry uses this value, subsequent retries double each time.
     batchQueueConfig:
       title: Subtitle Batch Translation
       description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
@@ -585,6 +606,9 @@ options:
       maxItemsPerBatch:
         title: Maximum Paragraph Count
         description: Maximum paragraphs per batch translation, used to control the content volume per translation
+      batchDelay:
+        title: Batch Accumulation Delay
+        description: Delay duration to wait for accumulating more translation tasks (milliseconds). Longer delays merge more requests but increase overall wait time.
   whatsNew:
     title: What's New
   survey:

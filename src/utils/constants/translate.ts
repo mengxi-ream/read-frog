@@ -31,3 +31,23 @@ export const DEFAULT_MIN_CHARACTERS_PER_NODE = 0
 export const MIN_WORDS_PER_NODE = 0
 export const MAX_WORDS_PER_NODE = 100
 export const DEFAULT_MIN_WORDS_PER_NODE = 0
+
+// Request queue timeout
+export const MIN_REQUEST_TIMEOUT_MS = 1_000
+export const MAX_REQUEST_TIMEOUT_MS = 120_000
+export const DEFAULT_REQUEST_TIMEOUT_MS = 20_000
+
+// Request queue retries
+export const MIN_MAX_RETRIES = 0
+export const MAX_MAX_RETRIES = 10
+export const DEFAULT_MAX_RETRIES = 2
+
+// Request queue retry delay
+export const MIN_BASE_RETRY_DELAY_MS = 100
+export const MAX_BASE_RETRY_DELAY_MS = 30_000
+export const DEFAULT_BASE_RETRY_DELAY_MS = 1_500
+
+// Batch queue delay
+export const MIN_BATCH_DELAY_MS = 50
+export const MAX_BATCH_DELAY_MS = 5_000
+export const DEFAULT_BATCH_DELAY_MS = 100

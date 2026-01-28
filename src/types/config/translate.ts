@@ -1,17 +1,40 @@
 import { langCodeISO6393Schema } from '@read-frog/definitions'
 import { z } from 'zod'
 import { HOTKEYS } from '@/utils/constants/hotkeys'
-import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS, MIN_CHARACTERS_PER_NODE, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE, MIN_WORDS_PER_NODE } from '@/utils/constants/translate'
+import {
+  MAX_BASE_RETRY_DELAY_MS,
+  MAX_BATCH_DELAY_MS,
+  MAX_MAX_RETRIES,
+  MAX_PRELOAD_MARGIN,
+  MAX_PRELOAD_THRESHOLD,
+  MAX_REQUEST_TIMEOUT_MS,
+  MIN_BASE_RETRY_DELAY_MS,
+  MIN_BATCH_CHARACTERS,
+  MIN_BATCH_DELAY_MS,
+  MIN_BATCH_ITEMS,
+  MIN_CHARACTERS_PER_NODE,
+  MIN_MAX_RETRIES,
+  MIN_PRELOAD_MARGIN,
+  MIN_PRELOAD_THRESHOLD,
+  MIN_REQUEST_TIMEOUT_MS,
+  MIN_TRANSLATE_CAPACITY,
+  MIN_TRANSLATE_RATE,
+  MIN_WORDS_PER_NODE,
+} from '@/utils/constants/translate'
 import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style'
 
 export const requestQueueConfigSchema = z.object({
   capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
   rate: z.number().gte(MIN_TRANSLATE_RATE),
+  timeoutMs: z.number().min(MIN_REQUEST_TIMEOUT_MS).max(MAX_REQUEST_TIMEOUT_MS),
+  maxRetries: z.number().min(MIN_MAX_RETRIES).max(MAX_MAX_RETRIES),
+  baseRetryDelayMs: z.number().min(MIN_BASE_RETRY_DELAY_MS).max(MAX_BASE_RETRY_DELAY_MS),
 })
 
 export const batchQueueConfigSchema = z.object({
   maxCharactersPerBatch: z.number().gte(MIN_BATCH_CHARACTERS),
   maxItemsPerBatch: z.number().gte(MIN_BATCH_ITEMS),
+  batchDelay: z.number().min(MIN_BATCH_DELAY_MS).max(MAX_BATCH_DELAY_MS),
 })
 
 export const TRANSLATION_MODES = ['bilingual', 'translationOnly'] as const

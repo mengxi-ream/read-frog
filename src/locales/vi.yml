@@ -262,6 +262,15 @@ options:
       rate:
         title: Số yêu cầu trung bình mỗi giây
         description: Số yêu cầu trung bình mỗi giây, nhưng cho phép cấu hình số lượng burst tối đa để gửi tạm thời các yêu cầu vượt quá
+      timeoutMs:
+        title: Thời gian chờ yêu cầu
+        description: Thời gian chờ cho một yêu cầu dịch thuật (mili-giây). Sau thời gian này, yêu cầu sẽ bị hủy và thử lại (nếu đã bật thử lại).
+      maxRetries:
+        title: Số lần thử lại tối đa
+        description: Số lần thử lại tối đa sau khi yêu cầu dịch thuật thất bại. Đặt thành 0 để tắt thử lại.
+      baseRetryDelayMs:
+        title: Độ trễ thử lại cơ bản
+        description: Độ trễ cơ bản cho chiến lược thử lại lùi theo cấp số nhân (mili-giây). Lần thử lại đầu tiên sử dụng giá trị này, các lần sau sẽ nhân đôi mỗi lần.
     batchQueueConfig:
       title: Dịch theo lô
       description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
@@ -271,6 +280,9 @@ options:
       maxItemsPerBatch:
         title: Số đoạn văn tối đa
         description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
+      batchDelay:
+        title: Độ trễ tích lô
+        description: Thời gian chờ để tích lũy nhiều tác vụ dịch thuật hơn (mili-giây). Độ trễ càng lâu thì càng yêu cầu được gộp lại nhưng tăng thời gian chờ tổng thể.
       statisticsLink: Đã tiết kiệm khoảng $1 chi phí trong 7 ngày qua
     autoTranslateWebsite:
       title: Tự động dịch theo trang web

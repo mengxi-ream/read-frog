@@ -222,7 +222,7 @@ export class BatchQueue<T, R> {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  setBatchConfig(config: Partial<Pick<BatchOptions<T, R>, 'maxCharactersPerBatch' | 'maxItemsPerBatch'>>) {
+  setBatchConfig(config: Partial<Pick<BatchOptions<T, R>, 'maxCharactersPerBatch' | 'maxItemsPerBatch' | 'batchDelay'>>) {
     const parseConfigStatus = batchQueueConfigSchema.partial().safeParse(config)
     if (parseConfigStatus.error) {
       throw new Error(parseConfigStatus.error.issues[0].message)
@@ -230,5 +230,6 @@ export class BatchQueue<T, R> {
 
     this.maxCharactersPerBatch = config.maxCharactersPerBatch ?? this.maxCharactersPerBatch
     this.maxItemsPerBatch = config.maxItemsPerBatch ?? this.maxItemsPerBatch
+    this.batchDelay = config.batchDelay ?? this.batchDelay
   }
 }

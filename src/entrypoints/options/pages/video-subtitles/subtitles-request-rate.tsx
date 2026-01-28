@@ -7,7 +7,16 @@ import { Hint } from '@/components/shadcn/hint'
 import { Input } from '@/components/shadcn/input'
 import { requestQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from '@/utils/constants/translate'
+import {
+  MAX_BASE_RETRY_DELAY_MS,
+  MAX_MAX_RETRIES,
+  MAX_REQUEST_TIMEOUT_MS,
+  MIN_BASE_RETRY_DELAY_MS,
+  MIN_MAX_RETRIES,
+  MIN_REQUEST_TIMEOUT_MS,
+  MIN_TRANSLATE_CAPACITY,
+  MIN_TRANSLATE_RATE,
+} from '@/utils/constants/translate'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 
@@ -28,6 +37,9 @@ export function SubtitlesRequestRate() {
       <FieldGroup>
         <SubtitlesNumberSelector property="capacity" />
         <SubtitlesNumberSelector property="rate" />
+        <SubtitlesNumberSelector property="timeoutMs" />
+        <SubtitlesNumberSelector property="maxRetries" />
+        <SubtitlesNumberSelector property="baseRetryDelayMs" />
       </FieldGroup>
     </ConfigCard>
   )
@@ -42,11 +54,32 @@ const propertyInfo = {
     label: i18n.t('options.videoSubtitles.requestQueueConfig.rate.title'),
     description: i18n.t('options.videoSubtitles.requestQueueConfig.rate.description'),
   },
+  timeoutMs: {
+    label: i18n.t('options.videoSubtitles.requestQueueConfig.timeoutMs.title'),
+    description: i18n.t('options.videoSubtitles.requestQueueConfig.timeoutMs.description'),
+  },
+  maxRetries: {
+    label: i18n.t('options.videoSubtitles.requestQueueConfig.maxRetries.title'),
+    description: i18n.t('options.videoSubtitles.requestQueueConfig.maxRetries.description'),
+  },
+  baseRetryDelayMs: {
+    label: i18n.t('options.videoSubtitles.requestQueueConfig.baseRetryDelayMs.title'),
+    description: i18n.t('options.videoSubtitles.requestQueueConfig.baseRetryDelayMs.description'),
+  },
 }
 
 const propertyMinAllowedValue = {
   capacity: MIN_TRANSLATE_CAPACITY,
   rate: MIN_TRANSLATE_RATE,
+  timeoutMs: MIN_REQUEST_TIMEOUT_MS,
+  maxRetries: MIN_MAX_RETRIES,
+  baseRetryDelayMs: MIN_BASE_RETRY_DELAY_MS,
+}
+
+const propertyMaxAllowedValue = {
+  timeoutMs: MAX_REQUEST_TIMEOUT_MS,
+  maxRetries: MAX_MAX_RETRIES,
+  baseRetryDelayMs: MAX_BASE_RETRY_DELAY_MS,
 }
 
 function SubtitlesNumberSelector({ property }: { property: KeyOfRequestQueueConfig }) {
@@ -55,6 +88,7 @@ function SubtitlesNumberSelector({ property }: { property: KeyOfRequestQueueConf
 
   const currentConfigValue = requestQueueConfig[property]
   const minAllowedValue = propertyMinAllowedValue[property]
+  const maxAllowedValue = propertyMaxAllowedValue[property as keyof typeof propertyMaxAllowedValue]
 
   const info = propertyInfo[property]
 
@@ -71,6 +105,7 @@ function SubtitlesNumberSelector({ property }: { property: KeyOfRequestQueueConf
         className="w-40 shrink-0"
         type="number"
         min={minAllowedValue}
+        max={maxAllowedValue}
         value={currentConfigValue}
         onChange={(e) => {
           const newConfigValue = Number(e.target.value)

@@ -261,6 +261,15 @@ options:
       rate:
         title: 每秒平均請求數量
         description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫發送超量請求
+      timeoutMs:
+        title: 請求超時時間
+        description: 單個翻譯請求的超時時長（毫秒），超時後將取消請求並進行重試（如果啟用了重試）
+      maxRetries:
+        title: 最大重試次數
+        description: 翻譯請求失敗後的最大重試次數，0 表示不重試
+      baseRetryDelayMs:
+        title: 重試基礎延遲
+        description: 指數退避重試策略的基礎延遲時長（毫秒），首次重試延遲為此值，後續每次翻倍
     batchQueueConfig:
       title: 批量翻譯
       description: 配置批量翻譯時的字元數限制和最大段落數量（僅對大語言模型翻譯有效）
@@ -270,6 +279,9 @@ options:
       maxItemsPerBatch:
         title: 最大段落數
         description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量
+      batchDelay:
+        title: 批次累積延遲
+        description: 等待累積更多翻譯任務的延遲時長（毫秒），延遲越長能合併的請求越多，但會增加整體等待時間
       statisticsLink: 過去 7 天已為您節省約 $1 成本
     autoTranslateWebsite:
       title: 基於網站自動翻譯

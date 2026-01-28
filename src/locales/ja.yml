@@ -260,6 +260,15 @@ options:
       rate:
         title: 秒間平均リクエスト数
         description: 平均秒間リクエスト数（ただし、最大バーストリクエスト数を設定し一時的な超過リクエスト送信を許可）
+      timeoutMs:
+        title: リクエストタイムアウト
+        description: 翻訳リクエストのタイムアウト時間（ミリ秒）。この時間を超えるとリクエストがキャンセルされ、再試行されます（再試行が有効な場合）。
+      maxRetries:
+        title: 最大再試行回数
+        description: 翻訳リクエストが失敗した場合の最大再試行回数。0 は再試行しないことを示します。
+      baseRetryDelayMs:
+        title: ベース再試行遅延
+        description: 指数バックオフ再試行戦略のベース遅延時間（ミリ秒）。最初の再試行はこの値を使用し、その後は毎回2倍になります。
     batchQueueConfig:
       title: バッチ翻訳
       description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
@@ -269,6 +278,9 @@ options:
       maxItemsPerBatch:
         title: 最大段落数
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
+      batchDelay:
+        title: バッチ累積遅延
+        description: より多くの翻訳タスクを蓄積するための待機時間（ミリ秒）。遅延が長いほどリクエストをまとめられますが、全体的な待機時間が長くなります。
       statisticsLink: 過去 7 日間で約 $1 のコストを節約しました
     autoTranslateWebsite:
       title: ウェブサイトに基づく自動翻訳

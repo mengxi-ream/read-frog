@@ -262,6 +262,15 @@ options:
       rate:
         title: Saniyedeki Ortalama İstek
         description: Saniyedeki ortalama istek, ancak geçici olarak fazla istek göndermek için maksimum ani sayısını yapılandırmaya izin verir
+      timeoutMs:
+        title: İstek Zaman Aşımı
+        description: Tek bir çeviri isteği için zaman aşımı süresi (milisaniye). Bu süre sonunda istek iptal edilir ve yeniden denenir (yeniden deneme etkinse).
+      maxRetries:
+        title: Maksimum Yeniden Deneme Sayısı
+        description: Başarısız bir çeviri isteğinden sonraki maksimum yeniden deneme sayısı. Yeniden denemeyi devre dışı bırakmak için 0'a ayarlayın.
+      baseRetryDelayMs:
+        title: Temel Yeniden Deneme Gecikmesi
+        description: Üstel geri yükleme yeniden deneme stratejisi için temel gecikme süresi (milisaniye). İlk yeniden deneme bu değeri kullanır, sonraki denemeler her seferinde iki katına çıkar.
     batchQueueConfig:
       title: Toplu Çeviri
       description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
@@ -271,6 +280,9 @@ options:
       maxItemsPerBatch:
         title: Maksimum Paragraf Sayısı
         description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
+      batchDelay:
+        title: Batch Birikme Gecikmesi
+        description: Daha fazla çeviri görevi birikmesini beklemek için gecikme süresi (milisaniye). Gecikme ne kadar uzun olursa o kadar çok istek birleştirilir ancak toplam bekleme süresi artar.
       statisticsLink: Son 7 günde yaklaşık $1 maliyet tasarrufu sağlandı
     autoTranslateWebsite:
       title: Web Sitesine Göre Otomatik Çevir

@@ -261,6 +261,15 @@ options:
       rate:
         title: 초당 평균 요청 수
         description: 초당 평균 요청 수 (단, 최대 버스트 요청 수 설정을 통한 일시적 초과 요청 전송 허용)
+      timeoutMs:
+        title: 요청 시간 초과
+        description: 단일 번역 요청의 시간 초과 기간(밀리초)입니다. 이 시간이 지나면 요청이 취소되고 재시도됩니다(재시도가 활성화된 경우).
+      maxRetries:
+        title: 최대 재시도 횟수
+        description: 번역 요청 실패 후 최대 재시도 횟수입니다. 0으로 설정하면 재시도하지 않습니다.
+      baseRetryDelayMs:
+        title: 기본 재시도 지연
+        description: 지수 백오프 재시도 전략의 기본 지연 시간(밀리초)입니다. 첫 번째 재시도는 이 값을 사용하고 이후 재시도는 매번 두 배가 됩니다.
     batchQueueConfig:
       title: 배치 번역
       description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
@@ -270,6 +279,9 @@ options:
       maxItemsPerBatch:
         title: 최대 단락 수
         description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
+      batchDelay:
+        title: 배치 누적 지연
+        description: 더 많은 번역 작업을 누적하기 위한 대기 시간(밀리초)입니다. 지연이 길수록 더 많은 요청을 병합할 수 있지만 전체 대기 시간이 길어집니다.
       statisticsLink: 지난 7일간 약 $1 의 비용을 절약했습니다
     autoTranslateWebsite:
       title: 웹사이트 기반 자동 번역

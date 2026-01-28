@@ -6,6 +6,12 @@ import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { putBatchRequestRecord } from '@/utils/batch-request-record'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
+import {
+  DEFAULT_BASE_RETRY_DELAY_MS,
+  DEFAULT_BATCH_DELAY_MS,
+  DEFAULT_MAX_RETRIES,
+  DEFAULT_REQUEST_TIMEOUT_MS,
+} from '@/utils/constants/translate'
 import { generateArticleSummary } from '@/utils/content/summary'
 import { cleanText } from '@/utils/content/utils'
 import { db } from '@/utils/db/dexie/db'
@@ -87,21 +93,32 @@ interface QueueConfig {
 }
 
 async function createTranslationQueues(config: QueueConfig) {
-  const { rate, capacity } = config.requestQueueConfig
-  const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
+  const {
+    rate,
+    capacity,
+    timeoutMs,
+    maxRetries,
+    baseRetryDelayMs,
+  } = config.requestQueueConfig
+
+  const {
+    maxCharactersPerBatch,
+    maxItemsPerBatch,
+    batchDelay,
+  } = config.batchQueueConfig
 
   const requestQueue = new RequestQueue({
     rate,
     capacity,
-    timeoutMs: 20_000,
-    maxRetries: 2,
-    baseRetryDelayMs: 1_000,
+    timeoutMs: timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS,
+    maxRetries: maxRetries ?? DEFAULT_MAX_RETRIES,
+    baseRetryDelayMs: baseRetryDelayMs ?? DEFAULT_BASE_RETRY_DELAY_MS,
   })
 
   const batchQueue = new BatchQueue<TranslateBatchData, string>({
     maxCharactersPerBatch,
     maxItemsPerBatch,
-    batchDelay: 100,
+    batchDelay: batchDelay ?? DEFAULT_BATCH_DELAY_MS,
     maxRetries: 3,
     enableFallbackToIndividual: true,
     getBatchKey: (data) => {

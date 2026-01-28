@@ -7,7 +7,12 @@ import { Hint } from '@/components/shadcn/hint'
 import { Input } from '@/components/shadcn/input'
 import { batchQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from '@/utils/constants/translate'
+import {
+  MAX_BATCH_DELAY_MS,
+  MIN_BATCH_CHARACTERS,
+  MIN_BATCH_DELAY_MS,
+  MIN_BATCH_ITEMS,
+} from '@/utils/constants/translate'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 
@@ -22,6 +27,7 @@ export function SubtitlesRequestBatch() {
       <FieldGroup>
         <SubtitlesBatchNumberSelector property="maxCharactersPerBatch" />
         <SubtitlesBatchNumberSelector property="maxItemsPerBatch" />
+        <SubtitlesBatchNumberSelector property="batchDelay" />
       </FieldGroup>
     </ConfigCard>
   )
@@ -36,11 +42,20 @@ const propertyInfo = {
     label: i18n.t('options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.title'),
     description: i18n.t('options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.description'),
   },
+  batchDelay: {
+    label: i18n.t('options.videoSubtitles.batchQueueConfig.batchDelay.title'),
+    description: i18n.t('options.videoSubtitles.batchQueueConfig.batchDelay.description'),
+  },
 }
 
 const propertyMinValue = {
   maxCharactersPerBatch: MIN_BATCH_CHARACTERS,
   maxItemsPerBatch: MIN_BATCH_ITEMS,
+  batchDelay: MIN_BATCH_DELAY_MS,
+}
+
+const propertyMaxValue = {
+  batchDelay: MAX_BATCH_DELAY_MS,
 }
 
 function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) {
@@ -49,6 +64,7 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
 
   const currentConfigValue = batchQueueConfig[property]
   const minAllowedValue = propertyMinValue[property]
+  const maxAllowedValue = propertyMaxValue[property as keyof typeof propertyMaxValue]
 
   const info = propertyInfo[property]
 
@@ -65,6 +81,7 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
         className="w-40 shrink-0"
         type="number"
         min={minAllowedValue}
+        max={maxAllowedValue}
         value={currentConfigValue}
         onChange={(e) => {
           const newConfigValue = Number(e.target.value)

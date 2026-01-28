@@ -261,6 +261,15 @@ options:
       rate:
         title: 每秒平均请求数量
         description: 平均每秒的请求数量，不过允许配置最大突发请求数来短暂发送超量请求。
+      timeoutMs:
+        title: 请求超时时间
+        description: 单个翻译请求的超时时长（毫秒），超时后将取消请求并进行重试（如果启用了重试）
+      maxRetries:
+        title: 最大重试次数
+        description: 翻译请求失败后的最大重试次数，0 表示不重试
+      baseRetryDelayMs:
+        title: 重试基础延迟
+        description: 指数退避重试策略的基础延迟时长（毫秒），首次重试延迟为此值，后续每次翻倍
     batchQueueConfig:
       title: 批量翻译
       description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）
@@ -270,6 +279,9 @@ options:
       maxItemsPerBatch:
         title: 最大段落数
         description: 每个批量翻译的最大段落数，用于控制单次翻译的内容量
+      batchDelay:
+        title: 批次累积延迟
+        description: 等待累积更多翻译任务的延迟时长（毫秒），延迟越长能合并的请求越多，但会增加整体等待时间
       statisticsLink: 过去 7 天已为您节省约 $1 成本
     autoTranslateWebsite:
       title: 基于网站自动翻译
