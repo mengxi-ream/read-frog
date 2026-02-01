@@ -17,14 +17,13 @@ export function useControlsInfo(
     if (!controlsConfig)
       return
 
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
     setInfo({
       controlsVisible: controlsConfig.checkVisibility(container),
       controlsHeight: controlsConfig.measureHeight(container),
     })
   })
 
-  useEffect(() => {
+  const setupObserver = useEffectEvent(() => {
     if (!controlsConfig)
       return
 
@@ -51,7 +50,11 @@ export function useControlsInfo(
     })
 
     return () => observer.disconnect()
-  }, [controlsConfig])
+  })
+
+  useEffect(() => {
+    return setupObserver()
+  }, [])
 
   return info
 }

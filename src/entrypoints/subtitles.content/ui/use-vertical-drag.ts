@@ -97,7 +97,6 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     if (!rects)
       return
 
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
     setWindowStyle({
       width: rects.videoRect.width,
       height: rects.videoRect.height,
@@ -183,7 +182,7 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     }
   })
 
-  useEffect(() => {
+  const setupListeners = useEffectEvent(() => {
     const handle = handleRef.current
     const container = containerRef.current
     if (!handle || !container)
@@ -211,6 +210,10 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
       window.removeEventListener('mouseup', onMouseUp)
       resizeObserver.disconnect()
     }
+  })
+
+  useEffect(() => {
+    return setupListeners()
   }, [])
 
   const controlsOffsetPercent = controlsVisible && position.anchor === 'bottom' && windowStyle.height > 0
