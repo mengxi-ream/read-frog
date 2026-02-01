@@ -1,9 +1,5 @@
 {
   "dontWalkIntoSelectors": {
-    "file://**/test.html": [
-      ".test-metadata",
-      ".test-code-block"
-    ],
     "*.wikipedia.org": [
       ".mw-editsection",
       ".mw-cite-backlink",
