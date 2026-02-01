@@ -7,7 +7,7 @@ import { subtitlesPositionAtom } from '../atoms'
 
 const BASE_FONT_RATIO = 0.03
 
-export interface SubtitleWindowStyle {
+interface SubtitleWindowStyle {
   width: number
   height: number
   fontSize: number
