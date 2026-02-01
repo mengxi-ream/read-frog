@@ -18,7 +18,12 @@ export const youtubeConfig: PlatformConfig = {
   },
 
   controls: {
-    height: 60,
+    measureHeight: (container) => {
+      const player = container.closest('.html5-video-player')
+      const progressBar = player?.querySelector('.ytp-progress-bar-container')
+      const controlsBar = progressBar?.parentElement
+      return controlsBar?.getBoundingClientRect().height ?? 60
+    },
     checkVisibility: (container) => {
       const player = container.closest('.html5-video-player')
       return !!player && !player.classList.contains('ytp-autohide')

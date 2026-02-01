@@ -1,5 +1,5 @@
 export interface ControlsConfig {
-  height: number
+  measureHeight: (container: HTMLElement) => number
   checkVisibility: (container: HTMLElement) => boolean
 }
 

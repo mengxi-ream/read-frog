@@ -7,10 +7,15 @@ import { subtitlesPositionAtom } from '../atoms'
 
 const BASE_FONT_RATIO = 0.03
 
-export interface SubtitleWindowSize {
+export interface SubtitleWindowStyle {
   width: number
   height: number
   fontSize: number
+}
+
+export interface SubtitlePositionStyle {
+  top?: string
+  bottom?: string
 }
 
 interface Rects {
@@ -81,19 +86,19 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
   const startPosition = useRef<SubtitlePosition>({ percent: 10, anchor: 'bottom' })
   const [position, setPosition] = useAtom(subtitlesPositionAtom)
   const [isDragging, setIsDragging] = useState(false)
-  const [windowSize, setWindowSize] = useState<SubtitleWindowSize>({
+  const [windowStyle, setWindowStyle] = useState<SubtitleWindowStyle>({
     width: 0,
     height: 0,
     fontSize: 16,
   })
 
-  const updateWindowSize = useEffectEvent(() => {
+  const updateWindowStyle = useEffectEvent(() => {
     const rects = getRects(containerRef)
     if (!rects)
       return
 
     // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-    setWindowSize({
+    setWindowStyle({
       width: rects.videoRect.width,
       height: rects.videoRect.height,
       fontSize: rects.videoRect.height * BASE_FONT_RATIO,
@@ -132,13 +137,27 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
       ? startPosition.current.percent - deltaPercent
       : startPosition.current.percent + deltaPercent
 
-    // Clamp to valid range (0 to max that keeps subtitle visible)
-    // Account for controls height when anchor is top
-    const reservedHeight = controlsVisible && startPosition.current.anchor === 'top'
+    const reservedHeight = controlsVisible && startPosition.current.anchor === 'bottom'
       ? controlsHeight
       : 0
     const maxPercent = ((videoHeight - containerRect.height - reservedHeight) / videoHeight) * 100
     newPercent = Math.max(0, Math.min(maxPercent, newPercent))
+
+    // Check if we need to switch anchor (crossed midline)
+    const newAnchorPosition = calculateAnchorPosition({
+      videoRect,
+      containerRect,
+      controlsVisible,
+      controlsHeight,
+    })
+
+    // If anchor changed, update start position and reset drag origin
+    if (newAnchorPosition.anchor !== startPosition.current.anchor) {
+      startPosition.current = newAnchorPosition
+      startY.current = e.clientY
+      setPosition(newAnchorPosition)
+      return
+    }
 
     setPosition({ ...startPosition.current, percent: newPercent })
   })
@@ -148,22 +167,6 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
       return
     isDraggingRef.current = false
     setIsDragging(false)
-
-    const rects = getRects(containerRef)
-    if (!rects)
-      return
-
-    const newPosition = calculateAnchorPosition({
-      videoRect: rects.videoRect,
-      containerRect: rects.containerRect,
-      controlsVisible,
-      controlsHeight,
-    })
-
-    // Only update if anchor changed (position already correct from onMouseMove)
-    if (newPosition.anchor !== position.anchor) {
-      setPosition(newPosition)
-    }
   })
 
   const clampPosition = useEffectEvent(() => {
@@ -182,22 +185,25 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
 
   useEffect(() => {
     const handle = handleRef.current
-    const rects = getRects(containerRef)
-    if (!handle || !rects)
+    const container = containerRef.current
+    if (!handle || !container)
       return
+
+    const videoContainer = getVideoContainer(container)
 
     handle.addEventListener('mousedown', onMouseDown)
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
 
     const resizeObserver = new ResizeObserver(() => {
-      updateWindowSize()
+      updateWindowStyle()
       clampPosition()
     })
-    resizeObserver.observe(rects.videoContainer)
 
-    // Initial size update
-    updateWindowSize()
+    if (videoContainer) {
+      resizeObserver.observe(videoContainer)
+      updateWindowStyle()
+    }
 
     return () => {
       handle.removeEventListener('mousedown', onMouseDown)
@@ -207,10 +213,18 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     }
   }, [])
 
-  // Calculate offset for rendering
-  const controlsOffsetPercent = controlsVisible && position.anchor === 'bottom' && windowSize.height > 0
-    ? (controlsHeight / windowSize.height) * 100
+  const controlsOffsetPercent = controlsVisible && position.anchor === 'bottom' && windowStyle.height > 0
+    ? (controlsHeight / windowStyle.height) * 100
     : 0
 
-  return { containerRef, handleRef, position, windowSize, isDragging, controlsOffsetPercent }
+  const positionStyle: SubtitlePositionStyle = position.anchor === 'top'
+    ? { top: `${position.percent}%`, bottom: 'unset' }
+    : { bottom: `${position.percent + controlsOffsetPercent}%`, top: 'unset' }
+
+  return {
+    refs: { container: containerRef, handle: handleRef },
+    windowStyle,
+    positionStyle,
+    isDragging,
+  }
 }

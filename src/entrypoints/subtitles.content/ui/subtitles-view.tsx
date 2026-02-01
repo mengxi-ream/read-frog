@@ -7,7 +7,7 @@ import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { SUBTITLES_VIEW_CLASS } from '@/utils/constants/subtitles'
 import { currentSubtitleAtom } from '../atoms'
 import { MainSubtitle, TranslationSubtitle } from './subtitle-lines'
-import { useControlsVisible } from './use-controls-visible'
+import { useControlsInfo } from './use-controls-visible'
 import { useVerticalDrag } from './use-vertical-drag'
 
 interface SubtitlesViewProps {
@@ -47,20 +47,16 @@ function SubtitlesContent() {
 export function SubtitlesView({ controlsConfig }: SubtitlesViewProps) {
   const subtitle = useAtomValue(currentSubtitleAtom)
   const windowRef = useRef<HTMLDivElement>(null)
-  const controlsVisible = useControlsVisible(windowRef, controlsConfig?.checkVisibility)
-  const { containerRef, handleRef, position, windowSize, isDragging, controlsOffsetPercent } = useVerticalDrag(controlsVisible, controlsConfig?.height ?? 0)
-
-  const positionStyle = position.anchor === 'top'
-    ? { top: `${position.percent}%`, bottom: 'unset' }
-    : { bottom: `${position.percent + controlsOffsetPercent}%`, top: 'unset' }
+  const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
+  const { refs, windowStyle, positionStyle, isDragging } = useVerticalDrag(controlsVisible, controlsHeight)
 
   return (
     <div
       ref={windowRef}
       style={{
-        width: windowSize.width,
-        height: windowSize.height,
-        fontSize: windowSize.fontSize,
+        width: windowStyle.width,
+        height: windowStyle.height,
+        fontSize: windowStyle.fontSize,
         position: 'absolute',
         top: 0,
         left: 0,
@@ -69,7 +65,7 @@ export function SubtitlesView({ controlsConfig }: SubtitlesViewProps) {
       }}
     >
       <div
-        ref={containerRef}
+        ref={refs.container}
         className={cn(
           'group flex flex-col items-center absolute w-full left-0 right-0',
           !isDragging && 'transition-[top,bottom] duration-200',
@@ -79,7 +75,7 @@ export function SubtitlesView({ controlsConfig }: SubtitlesViewProps) {
       >
         <div className="w-full flex justify-center pointer-events-auto">
           <div
-            ref={handleRef}
+            ref={refs.handle}
             className="mb-0.5 px-2 py-1 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
           >
             <Icon icon="tabler:grip-horizontal" className="size-4 text-white" />

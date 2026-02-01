@@ -1,23 +1,31 @@
+import type { ControlsConfig } from '@/entrypoints/subtitles.content/platforms'
 import { useEffect, useEffectEvent, useState } from 'react'
 import { getContainingShadowRoot } from '@/utils/host/dom/node'
 
-type CheckVisibilityFn = (container: HTMLElement) => boolean
+interface ControlsInfo {
+  controlsVisible: boolean
+  controlsHeight: number
+}
 
-export function useControlsVisible(
+export function useControlsInfo(
   elementRef: React.RefObject<HTMLElement | null>,
-  checkVisibility?: CheckVisibilityFn,
-) {
-  const [controlsVisible, setControlsVisible] = useState(false)
+  controlsConfig?: ControlsConfig,
+): ControlsInfo {
+  const [info, setInfo] = useState<ControlsInfo>({ controlsVisible: false, controlsHeight: 0 })
 
-  const updateVisibility = useEffectEvent((container: HTMLElement) => {
-    if (checkVisibility) {
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setControlsVisible(checkVisibility(container))
-    }
+  const updateInfo = useEffectEvent((container: HTMLElement) => {
+    if (!controlsConfig)
+      return
+
+    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    setInfo({
+      controlsVisible: controlsConfig.checkVisibility(container),
+      controlsHeight: controlsConfig.measureHeight(container),
+    })
   })
 
   useEffect(() => {
-    if (!checkVisibility)
+    if (!controlsConfig)
       return
 
     const element = elementRef.current
@@ -30,10 +38,10 @@ export function useControlsVisible(
     if (!videoContainer)
       return
 
-    updateVisibility(videoContainer)
+    updateInfo(videoContainer)
 
     const observer = new MutationObserver(() => {
-      updateVisibility(videoContainer)
+      updateInfo(videoContainer)
     })
 
     observer.observe(videoContainer, {
@@ -43,7 +51,7 @@ export function useControlsVisible(
     })
 
     return () => observer.disconnect()
-  }, [elementRef, checkVisibility])
+  }, [controlsConfig])
 
-  return controlsVisible
+  return info
 }
