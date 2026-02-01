@@ -1,4 +1,4 @@
-import { logger } from '../logger'
+import domRulesModule from '@/assets/dom-rules.json'
 
 // Type definitions for DOM rules configuration
 export interface DomRulesConfig {
@@ -6,7 +6,7 @@ export interface DomRulesConfig {
   forceBlockTranslationSelectors?: Record<string, string[]>
 }
 
-let domRules: DomRulesConfig | null = null
+const domRules: DomRulesConfig = domRulesModule as DomRulesConfig
 
 export const FORCE_BLOCK_TAGS = new Set([
   'BODY',
@@ -176,30 +176,3 @@ export function findMatchingSelectors(
 
   return []
 }
-
-async function loadDomRulesFromJson(): Promise<DomRulesConfig | null> {
-  try {
-    const rulesModule = await import('@/assets/dom-rules.json')
-    const rules = rulesModule.default as DomRulesConfig
-    if (typeof rules === 'object') {
-      return rules
-    }
-    else {
-      logger.error('Failed to load dom rules: rules json is not a json object')
-      return null
-    }
-  }
-  catch (e) {
-    logger.error('Failed to load dom rules', e)
-    return null
-  }
-}
-
-loadDomRulesFromJson()
-  .then((rules) => {
-    logger.info(`Successfully loaded rules`)
-    domRules = rules
-  })
-  .catch((e) => {
-    logger.error('Failed to load dom rules', e)
-  })
