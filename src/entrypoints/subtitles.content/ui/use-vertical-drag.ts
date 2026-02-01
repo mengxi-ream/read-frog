@@ -133,7 +133,11 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
       : startPosition.current.percent + deltaPercent
 
     // Clamp to valid range (0 to max that keeps subtitle visible)
-    const maxPercent = ((videoHeight - containerRect.height) / videoHeight) * 100
+    // Account for controls height when anchor is top
+    const reservedHeight = controlsVisible && startPosition.current.anchor === 'top'
+      ? controlsHeight
+      : 0
+    const maxPercent = ((videoHeight - containerRect.height - reservedHeight) / videoHeight) * 100
     newPercent = Math.max(0, Math.min(maxPercent, newPercent))
 
     setPosition({ ...startPosition.current, percent: newPercent })
