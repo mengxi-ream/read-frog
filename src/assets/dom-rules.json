@@ -599,8 +599,12 @@
       ".styles_count___6_8F"
     ],
     "https://discord.com/channels/*": [
-      "[class*='username']",
-      "[class*='repliedMessage']"
+      "[id^=\"message-username\"]",
+      "span[class*=\"-timestamp\"]",
+      "div[class*=\"-repliedMessage\"]",
+      "li[class*=\"-containerDefault\"]",
+      "[class*=\"-subtitleContainer\"]",
+      "[class*=\"-formWithLoadedChatInput\"]"
     ],
     "web.telegram.org/z/*": [
       ".time",
@@ -939,6 +943,7 @@
       "div[class='flex items-center justify-center gap-1 border-b border-black/10 bg-gray-50 p-3 text-gray-500 dark:border-gray-900/50 dark:bg-gray-700 dark:text-gray-300']"
     ],
     "chatgpt.com": [
+      ".ProseMirror",
       "div.absolute.bottom-0.left-0.w-full",
       "h1",
       "div#headlessui-portal-root",

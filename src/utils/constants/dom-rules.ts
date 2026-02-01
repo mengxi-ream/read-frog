@@ -1,10 +1,12 @@
-import { STATE_MESSAGE_CLASS, SUBTITLES_VIEW_CLASS, TRANSLATE_BUTTON_CLASS, YOUTUBE_NATIVE_SUBTITLES_CLASS } from './subtitles'
+import { logger } from '../logger'
 
 // Type definitions for DOM rules configuration
 export interface DomRulesConfig {
   dontWalkIntoSelectors?: Record<string, string[]>
   forceBlockTranslationSelectors?: Record<string, string[]>
 }
+
+let domRules: DomRulesConfig | null = null
 
 export const FORCE_BLOCK_TAGS = new Set([
   'BODY',
@@ -107,64 +109,6 @@ export const FORCE_INLINE_TRANSLATION_TAGS = new Set([
 
 export const MAIN_CONTENT_IGNORE_TAGS = new Set(['HEADER', 'FOOTER', 'NAV', 'NOSCRIPT'])
 
-export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]> = {
-  'chatgpt.com': [
-    '.ProseMirror',
-  ],
-  'arxiv.org': [
-    '.ltx_listing',
-  ],
-  'www.reddit.com': [
-    'faceplate-screen-reader-content > *',
-    'reddit-header-large *',
-    'shreddit-comment-action-row > *',
-  ],
-  'www.youtube.com': [
-    '#masthead-container *',
-    '#guide-inner-content *',
-    '#metadata *',
-    '#channel-name',
-    '.translate-button',
-    '.yt-lockup-metadata-view-model__metadata',
-    '.yt-spec-avatar-shape__badge-text',
-    '.shortsLockupViewModelHostOutsideMetadataSubhead',
-    'ytd-comments-header-renderer',
-    '#top-row',
-    '#header-author',
-    '#reply-button-end',
-    '#more-replies',
-    '#info',
-    '#badges *',
-    `${YOUTUBE_NATIVE_SUBTITLES_CLASS}`,
-    `.${SUBTITLES_VIEW_CLASS}`,
-    `.${STATE_MESSAGE_CLASS}`,
-    `.${TRANSLATE_BUTTON_CLASS}`,
-  ],
-  'discord.com': [
-    '[id^="message-username"]',
-    'span[class*="-timestamp"]',
-    'div[class*="-repliedMessage"]',
-    'li[class*="-containerDefault"]',
-    '[class*="-subtitleContainer"]',
-    '[class*="-formWithLoadedChatInput"]',
-  ],
-  'github.com': [
-    '[aria-labelledby="folders-and-files"] *',
-    'header *',
-    '#repository-container-header *',
-    '[class*="OverviewContent-module__Box_1--"] *',
-  ],
-}
-
-export const CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP: Record<string, string[]> = {
-  'github.com': [
-    'task-lists', // https://github.com/mengxi-ream/read-frog/issues/867
-  ],
-  'engoo.com': [
-    '#windowexercise-2 > div > div > div.css-ep7xq6 > div > div > div.css-19m2fbm *',
-  ],
-}
-
 /**
  * Convert glob pattern to RegExp for URL matching
  * Supports: *, **, and protocol-optional patterns
@@ -201,35 +145,30 @@ export function matchUrlPattern(url: string, pattern: string): boolean {
   return false
 }
 
-/**
- * Build full URL from current location for matching
- */
-function getCurrentUrl(): string {
-  return window.location.href
-}
-
 export function findMatchingSelectors(
-  map: Record<string, string[]>,
+  ruleName: 'dontWalkIntoSelectors' | 'forceBlockTranslationSelectors',
   currentUrl?: string,
 ): string[] {
-  const url = currentUrl || getCurrentUrl()
-  const hostname = currentUrl
-    ? (() => {
-        try {
-          return new URL(currentUrl).hostname || currentUrl
-        }
-        catch {
-          return currentUrl
-        }
-      })()
-    : window.location.hostname
+  if (!domRules)
+    // Not initialized yet
+    return []
 
-  if (map[hostname])
-    return map[hostname]
-  if (map[url])
-    return map[url]
+  const ruleset = ruleName === 'dontWalkIntoSelectors' ? domRules.dontWalkIntoSelectors : domRules.forceBlockTranslationSelectors
 
-  for (const [pattern, selectors] of Object.entries(map)) {
+  if (!ruleset)
+    // invalid ruleset
+    return []
+
+  const url = currentUrl || window.location.href
+
+  const hostname = new URL(url).hostname
+
+  if (ruleset[hostname])
+    return ruleset[hostname]
+  if (ruleset[url])
+    return ruleset[url]
+
+  for (const [pattern, selectors] of Object.entries(ruleset || {})) {
     if (matchUrlPattern(url, pattern) || matchUrlPattern(hostname, pattern)) {
       return selectors
     }
@@ -242,43 +181,25 @@ async function loadDomRulesFromJson(): Promise<DomRulesConfig | null> {
   try {
     const rulesModule = await import('@/assets/dom-rules.json')
     const rules = rulesModule.default as DomRulesConfig
-    return rules && typeof rules === 'object' ? rules : null
+    if (typeof rules === 'object') {
+      return rules
+    }
+    else {
+      logger.error('Failed to load dom rules: rules json is not a json object')
+      return null
+    }
   }
-  catch {
+  catch (e) {
+    logger.error('Failed to load dom rules', e)
     return null
   }
 }
 
-export async function initializeDomRules(): Promise<void> {
-  const loadedRules = await loadDomRulesFromJson()
-  if (!loadedRules)
-    return
-
-  if (loadedRules.dontWalkIntoSelectors) {
-    for (const [domain, selectors] of Object.entries(loadedRules.dontWalkIntoSelectors)) {
-      if (CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP[domain]) {
-        const existing = CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP[domain]
-        CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP[domain] = [...new Set([...existing, ...selectors])]
-      }
-      else {
-        CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP[domain] = selectors
-      }
-    }
-  }
-
-  if (loadedRules.forceBlockTranslationSelectors) {
-    for (const [domain, selectors] of Object.entries(loadedRules.forceBlockTranslationSelectors)) {
-      if (CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP[domain]) {
-        const existing = CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP[domain]
-        CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP[domain] = [...new Set([...existing, ...selectors])]
-      }
-      else {
-        CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP[domain] = selectors
-      }
-    }
-  }
-}
-
-initializeDomRules().catch(() => {
-  // Silent fail - use default rules
-})
+loadDomRulesFromJson()
+  .then((rules) => {
+    logger.info(`Successfully loaded rules`)
+    domRules = rules
+  })
+  .catch((e) => {
+    logger.error('Failed to load dom rules', e)
+  })

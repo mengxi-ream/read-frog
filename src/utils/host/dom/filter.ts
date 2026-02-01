@@ -8,7 +8,7 @@ import {
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from '@/utils/constants/dom-labels'
-import { CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP, CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP, DONT_WALK_AND_TRANSLATE_TAGS, DONT_WALK_BUT_TRANSLATE_TAGS, findMatchingSelectors, FORCE_BLOCK_TAGS, MAIN_CONTENT_IGNORE_TAGS } from '@/utils/constants/dom-rules'
+import { DONT_WALK_AND_TRANSLATE_TAGS, DONT_WALK_BUT_TRANSLATE_TAGS, findMatchingSelectors, FORCE_BLOCK_TAGS, MAIN_CONTENT_IGNORE_TAGS } from '@/utils/constants/dom-rules'
 
 export function isEditable(element: HTMLElement): boolean {
   const tag = element.tagName
@@ -87,7 +87,7 @@ export function isShallowBlockHTMLElement(element: HTMLElement): boolean {
 }
 
 export function isCustomDontWalkIntoElement(element: HTMLElement): boolean {
-  const dontWalkIntoElementSelectorList = findMatchingSelectors(CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP)
+  const dontWalkIntoElementSelectorList = findMatchingSelectors('dontWalkIntoSelectors', window.location.href)
 
   const dontWalkSelector = dontWalkIntoElementSelectorList.join(',')
 
@@ -98,7 +98,7 @@ export function isCustomDontWalkIntoElement(element: HTMLElement): boolean {
 }
 
 export function isCustomForceBlockTranslation(element: HTMLElement): boolean {
-  const forceBlockSelectorList = findMatchingSelectors(CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP)
+  const forceBlockSelectorList = findMatchingSelectors('forceBlockTranslationSelectors', window.location.href)
 
   const forceBlockSelector = forceBlockSelectorList.join(',')
 
