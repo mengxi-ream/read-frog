@@ -24,7 +24,7 @@ export class UniversalVideoAdapter {
   private cachedVideoId: string | null = null
 
   get videoIdChanged() {
-    const currentVideoId = this.config.navigation.getVideoId?.()
+    const currentVideoId = this.config.getVideoId?.()
     return !!(this.cachedVideoId && currentVideoId && currentVideoId !== this.cachedVideoId)
   }
 
@@ -39,9 +39,8 @@ export class UniversalVideoAdapter {
     this.subtitlesFetcher = subtitlesFetcher
   }
 
-  async initialize() {
-    this.subtitlesFetcher.initialize()
-    await this.initializeScheduler()
+  initialize() {
+    void this.initializeScheduler()
     void this.renderTranslateButton()
     this.setupNavigationListener()
   }
@@ -85,9 +84,9 @@ export class UniversalVideoAdapter {
   }
 
   private setupNavigationListener() {
-    const { navigation } = this.config
+    const { events } = this.config
 
-    if (navigation.event) {
+    if (events.navigate) {
       const navigationListener = () => {
         if (!this.videoIdChanged) {
           return
@@ -100,7 +99,7 @@ export class UniversalVideoAdapter {
         }, NAVIGATION_HANDLER_DELAY)
       }
 
-      window.addEventListener(navigation.event, navigationListener)
+      window.addEventListener(events.navigate, navigationListener)
     }
   }
 
@@ -179,7 +178,7 @@ export class UniversalVideoAdapter {
 
   private async startTranslation() {
     try {
-      const currentVideoId = this.config.navigation.getVideoId?.() ?? ''
+      const currentVideoId = this.config.getVideoId?.() ?? ''
       this.cachedVideoId = currentVideoId
       this.subtitlesScheduler?.setState('fetching')
 

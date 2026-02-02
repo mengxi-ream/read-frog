@@ -6,8 +6,9 @@ export interface PlatformConfig {
     nativeSubtitles: string
   }
 
-  navigation: {
-    event?: string
-    getVideoId?: () => string | null
+  events: {
+    navigate?: string
   }
+
+  getVideoId?: () => string | null
 }
