@@ -128,21 +128,23 @@ export function matchUrlPattern(url: string, pattern: string): boolean {
   if (url === pattern)
     return true
 
+  // Normalize both by removing protocols for comparison
+  const cleanUrl = url.replace(/^https?:\/\//, '')
+  const cleanPattern = pattern.replace(/^https?:\/\//, '')
+
   if (!pattern.includes('*')) {
-    const cleanUrl = url.replace(/^https?:\/\//, '')
-    const cleanPattern = pattern.replace(/^https?:\/\//, '')
     return cleanUrl === cleanPattern
   }
 
-  const regex = globToRegex(pattern)
-  if (regex.test(url))
+  // Use the cleaned pattern to create the regex
+  const regex = globToRegex(cleanPattern)
+
+  // Also check the original regex against the full URL
+  // (to support patterns that specifically require a certain protocol)
+  if (globToRegex(pattern).test(url))
     return true
 
-  if (!pattern.startsWith('http://') && !pattern.startsWith('https://')) {
-    return regex.test(url.replace(/^https?:\/\//, ''))
-  }
-
-  return false
+  return regex.test(cleanUrl)
 }
 
 export function findMatchingSelectors(
