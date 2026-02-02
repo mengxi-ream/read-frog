@@ -149,8 +149,8 @@ export function findMatchingSelectors(
   ruleName: 'dontWalkIntoSelectors' | 'forceBlockTranslationSelectors',
   currentUrl?: string,
 ): string[] {
+  // Not initialized yet
   if (!domRules)
-    // Not initialized yet
     return []
 
   const ruleset = ruleName === 'dontWalkIntoSelectors' ? domRules.dontWalkIntoSelectors : domRules.forceBlockTranslationSelectors
