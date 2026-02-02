@@ -10,8 +10,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+} from '@/components/base-ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import { TRANSLATION_MODES } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
@@ -21,7 +21,9 @@ export default function TranslationModeSelector() {
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const currentMode = translateConfig.mode
 
-  const handleModeChange = (mode: TranslationModeType) => {
+  const handleModeChange = (mode: TranslationModeType | null) => {
+    if (!mode)
+      return
     const currentProvider = getProviderConfigById(providersConfig, translateConfig.providerId)
 
     if (mode === 'translationOnly' && currentProvider && currentProvider.provider === 'google-translate') {
@@ -60,9 +62,7 @@ export default function TranslationModeSelector() {
       <span className="text-[13px] font-medium flex items-center gap-1.5">
         {i18n.t('options.translation.translationMode.title')}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />
-          </TooltipTrigger>
+          <TooltipTrigger render={<Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />} />
           <TooltipContent className="w-36">
             <p>
               {i18n.t('options.translation.translationMode.description')}
@@ -75,10 +75,8 @@ export default function TranslationModeSelector() {
         onValueChange={handleModeChange}
       >
         <SelectTrigger className="h-7! w-31 pr-1.5 pl-2.5">
-          <SelectValue asChild>
-            <span>
-              {i18n.t(`options.translation.translationMode.mode.${currentMode}`)}
-            </span>
+          <SelectValue render={<span />}>
+            {i18n.t(`options.translation.translationMode.mode.${currentMode}`)}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>

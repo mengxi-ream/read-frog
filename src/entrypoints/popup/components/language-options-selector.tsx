@@ -10,10 +10,11 @@ import { useAtom, useAtomValue } from 'jotai'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 
@@ -29,11 +30,15 @@ export default function LanguageOptionsSelector() {
   const [language, setLanguage] = useAtom(configFieldsAtomMap.language)
   const detectedCode = useAtomValue(detectedCodeAtom)
 
-  const handleSourceLangChange = (newLangCode: LangCodeISO6393) => {
+  const handleSourceLangChange = (newLangCode: LangCodeISO6393 | 'auto' | null) => {
+    if (!newLangCode)
+      return
     void setLanguage({ sourceCode: newLangCode })
   }
 
-  const handleTargetLangChange = (newLangCode: LangCodeISO6393) => {
+  const handleTargetLangChange = (newLangCode: LangCodeISO6393 | null) => {
+    if (!newLangCode)
+      return
     void setLanguage({ targetCode: newLangCode })
   }
 
@@ -47,10 +52,10 @@ export default function LanguageOptionsSelector() {
   return (
     <div className="flex items-center justify-between">
       <Select value={language.sourceCode} onValueChange={handleSourceLangChange}>
-        <SelectTrigger hideChevron className={langSelectorTriggerClasses}>
+        <SelectTrigger className={langSelectorTriggerClasses}>
           <div className={langSelectorContentClasses}>
-            <SelectValue asChild>
-              <span className="truncate w-full">{sourceLangLabel}</span>
+            <SelectValue render={<span className="truncate w-full" />}>
+              {sourceLangLabel}
             </SelectValue>
             <span className="text-sm text-neutral-500">
               {language.sourceCode === 'auto'
@@ -58,37 +63,39 @@ export default function LanguageOptionsSelector() {
                 : i18n.t('popup.sourceLang')}
             </span>
           </div>
-          <LangCodeSelectorChevronDownIcon />
         </SelectTrigger>
         <SelectContent className="rounded-lg shadow-md w-72">
-          <SelectItem value="auto">
-            {langCodeLabel(detectedCode)}
-            <AutoLangCell />
-          </SelectItem>
-          {langCodeISO6393Schema.options.map(key => (
-            <SelectItem key={key} value={key}>
-              {langCodeLabel(key)}
+          <SelectGroup>
+            <SelectItem value="auto">
+              {langCodeLabel(detectedCode)}
+              <AutoLangCell />
             </SelectItem>
-          ))}
+            {langCodeISO6393Schema.options.map(key => (
+              <SelectItem key={key} value={key}>
+                {langCodeLabel(key)}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
       <Icon icon="tabler:arrow-right" className="h-4 w-4 text-neutral-500" />
       <Select value={language.targetCode} onValueChange={handleTargetLangChange}>
-        <SelectTrigger hideChevron className={langSelectorTriggerClasses}>
+        <SelectTrigger className={langSelectorTriggerClasses}>
           <div className={langSelectorContentClasses}>
-            <SelectValue asChild>
-              <span className="truncate w-full">{targetLangLabel}</span>
+            <SelectValue render={<span className="truncate w-full" />}>
+              {targetLangLabel}
             </SelectValue>
             <span className="text-sm text-neutral-500">{i18n.t('popup.targetLang')}</span>
           </div>
-          <LangCodeSelectorChevronDownIcon />
         </SelectTrigger>
         <SelectContent className="rounded-lg shadow-md w-72">
-          {langCodeISO6393Schema.options.map(key => (
-            <SelectItem key={key} value={key}>
-              {langCodeLabel(key)}
-            </SelectItem>
-          ))}
+          <SelectGroup>
+            {langCodeISO6393Schema.options.map(key => (
+              <SelectItem key={key} value={key}>
+                {langCodeLabel(key)}
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
     </div>
@@ -96,15 +103,5 @@ export default function LanguageOptionsSelector() {
 }
 
 function AutoLangCell() {
-  return <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">auto</span>
-}
-
-function LangCodeSelectorChevronDownIcon() {
-  return (
-    <Icon
-      icon="tabler:chevron-down"
-      className="flex-shrink-0 h-5 w-5 text-neutral-400 dark:text-neutral-600"
-      strokeWidth={1.5}
-    />
-  )
+  return <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800 flex items-center">auto</span>
 }

@@ -1,27 +1,19 @@
 import type { APICallError } from 'ai'
 import { Icon } from '@iconify/react'
-import { use } from 'react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/shadcn/alert'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/shadcn/hover-card'
-import { ShadowWrapperContext } from '@/utils/react-shadow-host/create-shadow-host'
+import { Alert, AlertDescription, AlertTitle } from '@/components/base-ui/alert'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base-ui/hover-card'
 
 export function ErrorButton({ error }: { error: APICallError }) {
-  const shadowWrapper = use(ShadowWrapperContext)
-
   return (
-    <HoverCard openDelay={0} closeDelay={0}>
-      <HoverCardTrigger asChild>
-        <Icon icon="tabler:alert-circle" className="size-4 text-destructive hover:text-destructive/90 cursor-pointer" />
-      </HoverCardTrigger>
-      <HoverCardContent className="w-64 notranslate" container={shadowWrapper} asChild>
-        <Alert>
-          <Icon icon="tabler:alert-circle" className="size-4 text-red-500!" />
-          <AlertTitle>Translation Error</AlertTitle>
-          <AlertDescription className="break-all">
-            <StatusCode statusCode={error.statusCode ?? 500} />
-            <p className="text-zinc-900 dark:text-zinc-100">{error.message || 'Something went wrong'}</p>
-          </AlertDescription>
-        </Alert>
+    <HoverCard>
+      <HoverCardTrigger render={<Icon icon="tabler:alert-circle" className="size-4 text-destructive hover:text-destructive/90 cursor-pointer" />} />
+      <HoverCardContent className="w-64 notranslate" render={<Alert />}>
+        <Icon icon="tabler:alert-circle" className="size-4 text-red-500!" />
+        <AlertTitle>Translation Error</AlertTitle>
+        <AlertDescription className="break-all">
+          <StatusCode statusCode={error.statusCode ?? 500} />
+          <p className="text-zinc-900 dark:text-zinc-100">{error.message || 'Something went wrong'}</p>
+        </AlertDescription>
       </HoverCardContent>
     </HoverCard>
   )

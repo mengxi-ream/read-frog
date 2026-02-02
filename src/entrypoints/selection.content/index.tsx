@@ -12,6 +12,7 @@ import { addStyleToShadow } from '@/utils/styles'
 import { queryClient } from '@/utils/tanstack-query'
 import App from './app'
 import '@/assets/styles/theme.css'
+import '@/assets/styles/text-small.css'
 
 // eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null

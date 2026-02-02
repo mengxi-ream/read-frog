@@ -1,7 +1,6 @@
 import { i18n } from '#imports'
 import { IconTrash } from '@tabler/icons-react'
 import { useState } from 'react'
-import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/shadcn/alert-dialog'
+} from '@/components/base-ui/alert-dialog'
+import { Button } from '@/components/base-ui/button'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 
@@ -38,11 +38,9 @@ export function ClearCacheConfig() {
     <ConfigCard title={i18n.t('options.general.clearCache.title')} description={i18n.t('options.general.clearCache.description')}>
       <AlertDialog>
         <div className="w-full flex justify-end">
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" disabled={isClearing}>
-              <IconTrash className="size-4" />
-              {isClearing ? i18n.t('options.general.clearCache.clearing') : i18n.t('options.general.clearCache.dialog.trigger')}
-            </Button>
+          <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
+            <IconTrash className="size-4" />
+            {isClearing ? i18n.t('options.general.clearCache.clearing') : i18n.t('options.general.clearCache.dialog.trigger')}
           </AlertDialogTrigger>
         </div>
         <AlertDialogContent>

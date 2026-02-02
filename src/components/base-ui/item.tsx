@@ -1,9 +1,8 @@
 import type { VariantProps } from 'class-variance-authority'
-import { Slot } from '@radix-ui/react-slot'
 import { cva } from 'class-variance-authority'
 
 import * as React from 'react'
-import { Separator } from '@/components/shadcn/separator'
+import { Separator } from '@/components/base-ui/separator'
 import { cn } from '@/utils/styles/utils'
 
 function ItemGroup({ className, ...props }: React.ComponentProps<'div'>) {
@@ -56,13 +55,10 @@ function Item({
   className,
   variant = 'default',
   size = 'default',
-  asChild = false,
   ...props
-}: React.ComponentProps<'div'>
-  & VariantProps<typeof itemVariants> & { asChild?: boolean }) {
-  const Comp = asChild ? Slot : 'div'
+}: React.ComponentProps<'div'> & VariantProps<typeof itemVariants>) {
   return (
-    <Comp
+    <div
       data-slot="item"
       data-variant={variant}
       data-size={size}
@@ -78,7 +74,7 @@ const itemMediaVariants = cva(
     variants: {
       variant: {
         default: 'bg-transparent',
-        icon: 'size-8 border rounded-sm bg-muted [&_svg:not([class*=\'size-\'])]:size-4',
+        icon: 'size-8 border rounded-sm bg-muted [&_svg:not([class*="size-"])]:size-4',
         image:
           'size-10 rounded-sm overflow-hidden [&_img]:size-full [&_img]:object-cover',
       },

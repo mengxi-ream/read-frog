@@ -3,7 +3,6 @@ import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
-import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,9 +13,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/shadcn/alert-dialog'
-import { Input } from '@/components/shadcn/input'
-import { Label } from '@/components/shadcn/label'
+} from '@/components/base-ui/alert-dialog'
+import { Button } from '@/components/base-ui/button'
+import { Input } from '@/components/base-ui/input'
+import { Label } from '@/components/base-ui/label'
 import { useExportConfig } from '@/hooks/use-export-config'
 import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
 import { addBackup } from '@/utils/backup/storage'
@@ -120,11 +120,9 @@ function ExportConfig() {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button disabled={isExporting}>
-          <Icon icon="tabler:file-export" className="size-4" />
-          {i18n.t('options.config.sync.export')}
-        </Button>
+      <AlertDialogTrigger render={<Button disabled={isExporting} />}>
+        <Icon icon="tabler:file-export" className="size-4" />
+        {i18n.t('options.config.sync.export')}
       </AlertDialogTrigger>
 
       <AlertDialogContent>

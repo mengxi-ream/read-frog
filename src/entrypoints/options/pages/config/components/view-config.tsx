@@ -4,7 +4,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useState } from 'react'
 import { Button } from '@/components/base-ui/button'
-import { ScrollArea } from '@/components/shadcn/scroll-area'
+import { ScrollArea } from '@/components/base-ui/scroll-area'
 import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 
 export function ViewConfig({ config, configSchemaVersion, size = 'default' }: { config: Config, configSchemaVersion?: number, size?: ButtonProps['size'] }) {

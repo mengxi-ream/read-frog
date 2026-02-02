@@ -8,14 +8,14 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/shadcn/dropdown-menu'
+} from '@/components/base-ui/dropdown-menu'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { APP_NAME } from '@/utils/constants/app'
 import { sendMessage } from '@/utils/message'
 import { cn } from '@/utils/styles/utils'
 import { matchDomainPattern } from '@/utils/url'
-import { shadowWrapper } from '../../'
 import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from '../../atoms'
+import { shadowWrapper } from '../../index'
 import HiddenButton from './components/hidden-button'
 import FloatingReadButton from './floating-read-button'
 import TranslateButton from './translate-button'
@@ -143,20 +143,22 @@ export default function FloatingButton() {
         onMouseDown={handleButtonDragStart}
       >
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
-          <DropdownMenuTrigger asChild>
-            <div
-              title="Close floating button"
-              className={cn(
-                'border-border absolute -top-1 -left-1 hidden cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900',
-                'group-hover:block',
-                isDropdownOpen && 'block',
-              )}
-              onMouseDown={e => e.stopPropagation()} // 父级不会收到 mousedown
-            >
-              <Icon icon="tabler:x" className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
-            </div>
+          <DropdownMenuTrigger
+            render={(
+              <div
+                title="Close floating button"
+                className={cn(
+                  'border-border absolute -top-1 -left-1 hidden cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900',
+                  'group-hover:block',
+                  isDropdownOpen && 'block',
+                )}
+                onMouseDown={e => e.stopPropagation()} // 父级不会收到 mousedown
+              />
+            )}
+          >
+            <Icon icon="tabler:x" className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" side="left" className="z-[2147483647]" container={shadowWrapper} hideWhenDetached>
+          <DropdownMenuContent container={shadowWrapper} align="start" side="left" className="z-2147483647 w-fit! whitespace-nowrap">
             <DropdownMenuItem
               onMouseDown={e => e.stopPropagation()}
               onClick={() => {

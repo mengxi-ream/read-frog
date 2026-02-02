@@ -3,8 +3,8 @@ import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { NewBadge } from '@/components/badges/new-badge'
-import { Switch } from '@/components/shadcn/switch'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+import { Switch } from '@/components/base-ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
 export function AISmartContext() {
@@ -16,9 +16,9 @@ export function AISmartContext() {
         {i18n.t('popup.aiSmartContext')}
         <NewBadge size="sm" />
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />
-          </TooltipTrigger>
+          <TooltipTrigger
+            render={<Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />}
+          />
           <TooltipContent className="w-44">
             <p>
               {i18n.t('popup.aiSmartContextDescription')}

@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { Button } from '@/components/base-ui/button'
-import { Textarea } from '@/components/shadcn/textarea'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+import { Textarea } from '@/components/base-ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import { cn } from '@/utils/styles/utils'
 
 interface InsertableTextareaHandle extends HTMLTextAreaElement {
@@ -104,20 +104,22 @@ function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS
       >
         {insertCells.map(cell => (
           <Tooltip key={cell.text}>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className={cn(
-                  'h-8 px-3 text-xs font-medium',
-                  cellClassName,
-                )}
-                onClick={() => handleCellClick(cell.text)}
-                disabled={props.disabled}
-              >
-                {cell.text}
-              </Button>
+            <TooltipTrigger
+              render={(
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className={cn(
+                    'h-8 px-3 text-xs font-medium',
+                    cellClassName,
+                  )}
+                  onClick={() => handleCellClick(cell.text)}
+                  disabled={props.disabled}
+                />
+              )}
+            >
+              {cell.text}
             </TooltipTrigger>
             <TooltipContent>
               <p>{cell.description}</p>

@@ -1,7 +1,6 @@
 import { i18n } from '#imports'
 import { IconRefresh } from '@tabler/icons-react'
 import { useSetAtom } from 'jotai'
-import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/shadcn/alert-dialog'
+} from '@/components/base-ui/alert-dialog'
+import { Button } from '@/components/base-ui/button'
 import { writeConfigAtom } from '@/utils/atoms/config'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
@@ -27,11 +27,9 @@ export function ResetConfig() {
     <ConfigCard title={i18n.t('options.config.resetConfig.title')} description={i18n.t('options.config.resetConfig.description')}>
       <AlertDialog>
         <div className="w-full flex justify-end">
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive">
-              <IconRefresh className="size-4" />
-              {i18n.t('options.config.resetConfig.dialog.trigger')}
-            </Button>
+          <AlertDialogTrigger render={<Button variant="destructive" />}>
+            <IconRefresh className="size-4" />
+            {i18n.t('options.config.resetConfig.dialog.trigger')}
           </AlertDialogTrigger>
         </div>
         <AlertDialogContent>

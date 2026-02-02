@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { useAtom } from 'jotai'
-import { Label } from '@/components/shadcn/label'
-import { RadioGroup, RadioGroupItem } from '@/components/shadcn/radio-group'
+import { Label } from '@/components/base-ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/base-ui/radio-group'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ConfigCard } from '../../components/config-card'
 
@@ -15,10 +15,10 @@ export function SiteControlMode() {
     >
       <RadioGroup
         value={siteControl.mode}
-        onValueChange={(value: 'all' | 'whitelist') => {
+        onValueChange={(value) => {
           void setSiteControl({
             ...siteControl,
-            mode: value,
+            mode: value as 'all' | 'whitelist',
           })
         }}
         className="flex flex-col gap-2"

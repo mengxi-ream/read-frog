@@ -15,10 +15,10 @@ import {
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/shadcn/dropdown-menu'
-import { Field, FieldContent, FieldLabel } from '@/components/shadcn/field'
-import { Hint } from '@/components/shadcn/hint'
-import { Switch } from '@/components/shadcn/switch'
+} from '@/components/base-ui/dropdown-menu'
+import { Field, FieldContent, FieldLabel } from '@/components/base-ui/field'
+import { Hint } from '@/components/base-ui/hint'
+import { Switch } from '@/components/base-ui/switch'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
@@ -102,13 +102,11 @@ function AutoTranslateLanguagesSelector() {
   return (
     <div className="w-full flex justify-start md:justify-end">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="w-40 justify-between">
-            <span className="truncate">
-              {i18n.t('options.translation.autoTranslateLanguages.selectLanguages')}
-            </span>
-            <Icon icon="tabler:chevron-down" className="h-4 w-4" />
-          </Button>
+        <DropdownMenuTrigger render={<Button variant="outline" className="w-40 justify-between" />}>
+          <span className="truncate">
+            {i18n.t('options.translation.autoTranslateLanguages.selectLanguages')}
+          </span>
+          <Icon icon="tabler:chevron-down" className="h-4 w-4" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="max-h-60 overflow-y-auto" align="end">
           {allLanguages.map(language => (
