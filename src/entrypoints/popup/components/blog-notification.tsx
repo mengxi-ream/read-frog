@@ -2,7 +2,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/base-ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from '@/utils/blog'
 import { WEBSITE_URL } from '@/utils/constants/url'
 import { version } from '../../../../package.json'
@@ -40,21 +40,23 @@ export default function BlogNotification() {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
-          onClick={handleClick}
-        >
-          <Icon icon="tabler:bell-filled" />
-          {showIndicator && (
-            <span className="absolute top-1.5 right-1.5 flex items-center justify-center size-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
-              <span className="relative inline-flex size-1.5 rounded-full bg-primary"></span>
-            </span>
-          )}
-        </Button>
+      <TooltipTrigger
+        render={(
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative"
+            onClick={handleClick}
+          />
+        )}
+      >
+        <Icon icon="tabler:bell-filled" />
+        {showIndicator && (
+          <span className="absolute top-1.5 right-1.5 flex items-center justify-center size-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-primary opacity-75"></span>
+            <span className="relative inline-flex size-1.5 rounded-full bg-primary"></span>
+          </span>
+        )}
       </TooltipTrigger>
       <TooltipContent>
         {i18n.t('popup.blog.notification')}

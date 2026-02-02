@@ -1,6 +1,6 @@
 import { useStore } from '@tanstack/react-form'
-import { Field, FieldError, FieldLabel } from '@/components/shadcn/field'
-import { Input } from '@/components/shadcn/input'
+import { Field, FieldLabel } from '@/components/base-ui/field'
+import { Input } from '@/components/base-ui/input'
 import { useFieldContext } from '../form-context'
 
 export function InputField(
@@ -47,11 +47,11 @@ export function InputField(
         aria-invalid={!isValid}
         {...props}
       />
-      <FieldError
-        errors={errors.map(error => ({
-          message: typeof error === 'string' ? error : error?.message,
-        }))}
-      />
+      {errors.length > 0 && (
+        <span className="text-sm font-normal text-destructive">
+          {errors.map(error => typeof error === 'string' ? error : error?.message).join(', ')}
+        </span>
+      )}
     </Field>
   )
 }

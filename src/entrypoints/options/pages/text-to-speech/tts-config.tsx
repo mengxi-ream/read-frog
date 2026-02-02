@@ -3,9 +3,9 @@ import { i18n } from '#imports'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
+import { Badge } from '@/components/base-ui/badge'
 import { Button } from '@/components/base-ui/button'
-import { Badge } from '@/components/shadcn/badge'
-import { Field, FieldLabel } from '@/components/shadcn/field'
+import { Field, FieldLabel } from '@/components/base-ui/field'
 import {
   Select,
   SelectContent,
@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/base-ui/select'
 import ValidatedInput from '@/components/ui/validated-input'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
 import { getVoicesForModel, isVoiceAvailableForModel, MAX_TTS_SPEED, MIN_TTS_SPEED, TTS_MODELS, ttsSpeedSchema } from '@/types/config/tts'
@@ -67,7 +67,9 @@ function TtsProviderField() {
       </FieldLabel>
       <Select
         value={ttsConfig.providerId || undefined}
-        onValueChange={(value: string) => {
+        onValueChange={(value: string | null) => {
+          if (!value)
+            return
           void setTtsConfig({ providerId: value })
         }}
         disabled={ttsProvidersConfig.length === 0}
@@ -99,7 +101,9 @@ function TtsModelField() {
       </FieldLabel>
       <Select
         value={ttsConfig.model}
-        onValueChange={(value: TTSModel) => {
+        onValueChange={(value: TTSModel | null) => {
+          if (!value)
+            return
           // Check if current voice is available for the new model
           const isCurrentVoiceAvailable = isVoiceAvailableForModel(ttsConfig.voice, value)
 
@@ -163,7 +167,9 @@ function TtsVoiceField() {
         <div className="flex flex-1 items-center gap-2">
           <Select
             value={ttsConfig.voice}
-            onValueChange={(value: TTSVoice) => {
+            onValueChange={(value: TTSVoice | null) => {
+              if (!value)
+                return
               void setTtsConfig({ voice: value })
             }}
           >

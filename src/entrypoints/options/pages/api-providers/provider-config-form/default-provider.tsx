@@ -2,7 +2,7 @@ import type { APIProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
 import { useAtom } from 'jotai'
-import { Switch } from '@/components/shadcn/switch'
+import { Switch } from '@/components/base-ui/switch'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { withForm } from './form'
 

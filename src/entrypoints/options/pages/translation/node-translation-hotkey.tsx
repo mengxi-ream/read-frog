@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { HOTKEY_ICONS, HOTKEYS } from '@/utils/constants/hotkeys'
 import { ConfigCard } from '../../components/config-card'
@@ -25,18 +25,19 @@ export function NodeTranslationHotkey() {
     >
       <Select
         value={translateConfig.node.hotkey}
-        onValueChange={(value: typeof HOTKEYS[number]) =>
-          setTranslateConfig(
+        onValueChange={(value: typeof HOTKEYS[number] | null) => {
+          if (!value)
+            return
+          void setTranslateConfig(
             deepmerge(translateConfig, { node: { hotkey: value } }),
-          )}
+          )
+        }}
       >
         <SelectTrigger className="w-full">
-          <SelectValue asChild>
-            <span>
-              {HOTKEY_ICONS[translateConfig.node.hotkey]}
-              {' '}
-              {i18n.t(`hotkey.${translateConfig.node.hotkey}`)}
-            </span>
+          <SelectValue render={<span />}>
+            {HOTKEY_ICONS[translateConfig.node.hotkey]}
+            {' '}
+            {i18n.t(`hotkey.${translateConfig.node.hotkey}`)}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>

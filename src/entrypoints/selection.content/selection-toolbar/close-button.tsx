@@ -7,9 +7,9 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/shadcn/dropdown-menu'
+} from '@/components/base-ui/dropdown-menu'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { shadowWrapper } from '../'
+import { shadowWrapper } from '..'
 
 export const DropEvent = 'rf-dropdown-change'
 
@@ -30,16 +30,18 @@ export function CloseButton() {
         window.dispatchEvent(new CustomEvent(DropEvent, { detail: { open } }))
       }}
     >
-      <DropdownMenuTrigger asChild>
-        <div
-          title="Close selection toolbar"
-          className={`border-border absolute -top-1 -right-1 cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? 'block' : 'hidden group-hover:block'}`}
-          onMouseDown={handleMouseDown}
-        >
-          <Icon icon="tabler:x" className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
-        </div>
+      <DropdownMenuTrigger
+        render={(
+          <div
+            title="Close selection toolbar"
+            className={`border-border absolute -top-1 -right-1 cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? 'block' : 'hidden group-hover:block'}`}
+            onMouseDown={handleMouseDown}
+          />
+        )}
+      >
+        <Icon icon="tabler:x" className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" side="right" className="z-[2147483647]" container={shadowWrapper} hideWhenDetached>
+      <DropdownMenuContent container={shadowWrapper} align="start" side="right" className="z-2147483647 w-fit! whitespace-nowrap">
         <DropdownMenuItem
           onMouseDown={handleMouseDown}
           onClick={() => {

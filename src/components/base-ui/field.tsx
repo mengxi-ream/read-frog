@@ -3,7 +3,7 @@ import { Field as FieldPrimitive } from '@base-ui/react/field'
 import { cva } from 'class-variance-authority'
 
 import * as React from 'react'
-import { Separator } from '@/components/shadcn/separator'
+import { Separator } from '@/components/base-ui/separator'
 import { cn } from '@/utils/styles/utils'
 
 function FieldSet({ className, ...props }: React.ComponentProps<'fieldset'>) {
@@ -219,6 +219,7 @@ function FieldSeparator({
 }
 
 export {
+  FieldRoot as Field,
   FieldContent,
   FieldControl,
   FieldDescription,

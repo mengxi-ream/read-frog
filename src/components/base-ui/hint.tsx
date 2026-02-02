@@ -10,7 +10,7 @@ type HintProps = {
 export function Hint({ content, className, ...props }: HintProps) {
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
+      <TooltipTrigger>
         <IconHelpCircle className="size-3.5 text-muted-foreground cursor-help" />
       </TooltipTrigger>
       <TooltipContent className={cn('max-w-64', className)} {...props}>

@@ -1,7 +1,6 @@
 import { i18n } from '#imports'
 import { IconTrash } from '@tabler/icons-react'
 import { useState } from 'react'
-import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -12,7 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/shadcn/alert-dialog'
+} from '@/components/base-ui/alert-dialog'
+import { Button } from '@/components/base-ui/button'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 
@@ -39,11 +39,9 @@ export function ClearAiSegmentationCache() {
     >
       <AlertDialog>
         <div className="w-full flex justify-end">
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" disabled={isClearing}>
-              <IconTrash className="size-4" />
-              {isClearing ? i18n.t('options.videoSubtitles.aiSegmentation.clearing') : i18n.t('options.videoSubtitles.aiSegmentation.clearCache')}
-            </Button>
+          <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
+            <IconTrash className="size-4" />
+            {isClearing ? i18n.t('options.videoSubtitles.aiSegmentation.clearing') : i18n.t('options.videoSubtitles.aiSegmentation.clearCache')}
           </AlertDialogTrigger>
         </div>
         <AlertDialogContent>
