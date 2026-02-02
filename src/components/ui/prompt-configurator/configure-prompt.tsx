@@ -4,8 +4,8 @@ import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue } from 'jotai'
 import { useState } from 'react'
 import { Button } from '@/components/base-ui/button'
-import { Field, FieldGroup, FieldLabel } from '@/components/shadcn/field'
-import { Input } from '@/components/shadcn/input'
+import { Field, FieldGroup, FieldLabel } from '@/components/base-ui/field'
+import { Input } from '@/components/base-ui/input'
 import {
   Sheet,
   SheetClose,
@@ -14,7 +14,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/shadcn/sheet'
+} from '@/components/base-ui/sheet'
 import { QuickInsertableTextarea } from '@/components/ui/insertable-textarea'
 import { DEFAULT_TRANSLATE_PROMPT_ID, getTokenCellText, TOKENS } from '@/utils/constants/prompt'
 import { cn } from '@/utils/styles/utils'
@@ -79,20 +79,18 @@ export function ConfigurePrompt({
       }
     }}
     >
-      <SheetTrigger asChild>
-        {inEdit
-          ? (
-              <Button variant="ghost" className={cn('size-8', className)} disabled={isExportMode} {...props}>
-                <Icon icon={isDefault ? 'tabler:eye' : 'tabler:pencil'} className="size-4" />
-              </Button>
-            )
-          : (
-              <Button className={className} {...props}>
-                <Icon icon="tabler:plus" className="size-4" />
-                {i18n.t('options.translation.personalizedPrompts.addPrompt')}
-              </Button>
-            )}
-      </SheetTrigger>
+      {inEdit
+        ? (
+            <SheetTrigger render={<Button variant="ghost" className={cn('size-8', className)} disabled={isExportMode} {...props} />}>
+              <Icon icon={isDefault ? 'tabler:eye' : 'tabler:pencil'} className="size-4" />
+            </SheetTrigger>
+          )
+        : (
+            <SheetTrigger render={<Button className={className} {...props} />}>
+              <Icon icon="tabler:plus" className="size-4" />
+              {i18n.t('options.translation.personalizedPrompts.addPrompt')}
+            </SheetTrigger>
+          )}
       <SheetContent className="w-[400px] sm:w-[500px] sm:max-w-none">
         <SheetHeader>
           <SheetTitle>{sheetTitle}</SheetTitle>
@@ -141,11 +139,11 @@ export function ConfigurePrompt({
         </FieldGroup>
         {!isDefault && (
           <SheetFooter>
-            <SheetClose asChild>
-              <Button onClick={configurePrompt}>{i18n.t('options.translation.personalizedPrompts.editPrompt.save')}</Button>
+            <SheetClose render={<Button onClick={configurePrompt} />}>
+              {i18n.t('options.translation.personalizedPrompts.editPrompt.save')}
             </SheetClose>
-            <SheetClose asChild>
-              <Button variant="outline">{i18n.t('options.translation.personalizedPrompts.editPrompt.close')}</Button>
+            <SheetClose render={<Button variant="outline" />}>
+              {i18n.t('options.translation.personalizedPrompts.editPrompt.close')}
             </SheetClose>
           </SheetFooter>
         )}

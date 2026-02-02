@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/base-ui/select'
 import { TRANSLATION_MODES } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
@@ -28,7 +28,9 @@ function TranslationModeSelector() {
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const currentMode = translateConfig.mode
 
-  const handleModeChange = (mode: TranslationModeType) => {
+  const handleModeChange = (mode: TranslationModeType | null) => {
+    if (!mode)
+      return
     const currentProvider = getProviderConfigById(providersConfig, translateConfig.providerId)
 
     if (mode === 'translationOnly' && currentProvider && currentProvider.provider === 'google-translate') {
@@ -69,10 +71,8 @@ function TranslationModeSelector() {
         onValueChange={handleModeChange}
       >
         <SelectTrigger className="w-40">
-          <SelectValue asChild>
-            <span>
-              {i18n.t(`options.translation.translationMode.mode.${currentMode}`)}
-            </span>
+          <SelectValue render={<span />}>
+            {i18n.t(`options.translation.translationMode.mode.${currentMode}`)}
           </SelectValue>
         </SelectTrigger>
         <SelectContent>

@@ -1,7 +1,7 @@
 import type { APIProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
-import { Hint } from '@/components/shadcn/hint'
+import { Hint } from '@/components/base-ui/hint'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { withForm } from './form'
 

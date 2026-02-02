@@ -1,7 +1,7 @@
 import { Icon } from '@iconify/react'
 import { useState } from 'react'
 import { Button } from '@/components/base-ui/button'
-import { Input } from '@/components/shadcn/input'
+import { Input } from '@/components/base-ui/input'
 import {
   Table,
   TableBody,
@@ -9,7 +9,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/shadcn/table'
+} from '@/components/base-ui/table'
 
 interface DisabledPatternsTableProps {
   patterns: string[]

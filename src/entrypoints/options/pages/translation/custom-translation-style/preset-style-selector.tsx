@@ -3,8 +3,8 @@ import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { Activity } from 'react'
-import { Field, FieldLabel } from '@/components/shadcn/field'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
+import { Field, FieldLabel } from '@/components/base-ui/field'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style'
 
@@ -20,7 +20,9 @@ export function PresetStyleSelector() {
         </FieldLabel>
         <Select
           value={translationNodeStyle.preset}
-          onValueChange={(preset: TranslationNodeStylePreset) => {
+          onValueChange={(preset: TranslationNodeStylePreset | null) => {
+            if (!preset)
+              return
             void setTranslateConfig(
               deepmerge(translateConfig, {
                 translationNodeStyle: { preset },
@@ -29,10 +31,8 @@ export function PresetStyleSelector() {
           }}
         >
           <SelectTrigger id="preset-style-selector" className="w-40">
-            <SelectValue asChild>
-              <span>
-                {i18n.t(`options.translation.translationStyle.style.${translationNodeStyle.preset}`)}
-              </span>
+            <SelectValue render={<span />}>
+              {i18n.t(`options.translation.translationStyle.style.${translationNodeStyle.preset}`)}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>

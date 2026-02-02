@@ -3,12 +3,18 @@ import { useAtom } from 'jotai'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ConfigCard } from '../../components/config-card'
+
+const items = [
+  { value: 'panel', label: i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.panel') },
+  { value: 'translate', label: i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.translate') },
+]
 
 export function FloatingButtonClickAction() {
   const [floatingButton, setFloatingButton] = useAtom(
@@ -22,8 +28,11 @@ export function FloatingButtonClickAction() {
     >
       <div className="w-full flex justify-end">
         <Select
+          items={items}
           value={floatingButton.clickAction}
-          onValueChange={(value: 'panel' | 'translate') => {
+          onValueChange={(value) => {
+            if (!value)
+              return
             void setFloatingButton({ ...floatingButton, clickAction: value })
           }}
         >
@@ -31,12 +40,13 @@ export function FloatingButtonClickAction() {
             <SelectValue />
           </SelectTrigger>
           <SelectContent align="end">
-            <SelectItem value="panel">
-              {i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.panel')}
-            </SelectItem>
-            <SelectItem value="translate">
-              {i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.translate')}
-            </SelectItem>
+            <SelectGroup>
+              {items.map(item => (
+                <SelectItem key={item.value} value={item.value}>
+                  {item.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </div>

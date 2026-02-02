@@ -8,8 +8,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+} from '@/components/base-ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import { isLLMTranslateProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom } from '@/utils/atoms/provider'
@@ -25,14 +25,17 @@ export default function TranslatePromptSelector() {
   const customPromptsConfig = translateConfig.customPromptsConfig
   const { patterns = [], promptId } = customPromptsConfig
 
+  const items = [
+    { value: DEFAULT_TRANSLATE_PROMPT_ID, label: i18n.t('options.translation.personalizedPrompts.default') },
+    ...patterns.map(prompt => ({ value: prompt.id, label: prompt.name })),
+  ]
+
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-[13px] font-medium flex items-center gap-1.5">
         {i18n.t('translatePrompt.title')}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />
-          </TooltipTrigger>
+          <TooltipTrigger render={<Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />} />
           <TooltipContent className="w-36">
             <p>
               {i18n.t('translatePrompt.description')}
@@ -41,6 +44,7 @@ export default function TranslatePromptSelector() {
         </Tooltip>
       </span>
       <Select
+        items={items}
         value={promptId ?? DEFAULT_TRANSLATE_PROMPT_ID}
         onValueChange={(value) => {
           void setTranslateConfig({
@@ -56,14 +60,9 @@ export default function TranslatePromptSelector() {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {/* Default option - comes from code constant, not storage */}
-            <SelectItem value={DEFAULT_TRANSLATE_PROMPT_ID}>
-              {i18n.t('options.translation.personalizedPrompts.default')}
-            </SelectItem>
-            {/* Custom prompts from storage */}
-            {patterns.map(prompt => (
-              <SelectItem key={prompt.id} value={prompt.id}>
-                {prompt.name}
+            {items.map(item => (
+              <SelectItem key={item.value} value={item.value}>
+                {item.label}
               </SelectItem>
             ))}
           </SelectGroup>

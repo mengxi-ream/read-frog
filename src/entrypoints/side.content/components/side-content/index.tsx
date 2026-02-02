@@ -1,22 +1,17 @@
 import { kebabCase } from 'case-anything'
 import { useAtom, useAtomValue } from 'jotai'
 import { useEffect, useState } from 'react'
-import { APIConfigWarning } from '@/components/api-config-warning'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { isAnyAPIKeyForReadProviders } from '@/utils/config/api'
 import { APP_NAME } from '@/utils/constants/app'
 import { MIN_SIDE_CONTENT_WIDTH } from '@/utils/constants/side'
 import { cn } from '@/utils/styles/utils'
 import { isSideOpenAtom } from '../../atoms'
-import Content from './content'
-import { Metadata } from './metadata'
-import { TopBar } from './top-bar'
 
 export default function SideContent() {
   const isSideOpen = useAtomValue(isSideOpenAtom)
   const [sideContent, setSideContent] = useAtom(configFieldsAtomMap.sideContent)
   const [isResizing, setIsResizing] = useState(false)
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  // const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
   // Setup resize handlers
   useEffect(() => {
@@ -107,13 +102,14 @@ export default function SideContent() {
         >
         </div>
 
-        <div className="flex h-full flex-col gap-y-2 py-3">
-          <TopBar className="mx-3" />
+        <div className="flex h-full flex-col gap-y-2 py-3 items-center justify-center">
+          {/* <TopBar className="mx-3" />
           {!isAnyAPIKeyForReadProviders(providersConfig) && (
             <APIConfigWarning className="mx-3" />
           )}
           <Metadata className="mx-3" />
-          <Content />
+          <Content /> */}
+          The function is being upgraded
         </div>
       </div>
 

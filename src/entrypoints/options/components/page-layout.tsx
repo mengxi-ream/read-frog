@@ -1,6 +1,6 @@
+import { Separator } from '@/components/base-ui/separator'
+import { SidebarTrigger } from '@/components/base-ui/sidebar'
 import Container from '@/components/container'
-import { Separator } from '@/components/shadcn/separator'
-import { SidebarTrigger } from '@/components/shadcn/sidebar'
 import { cn } from '@/utils/styles/utils'
 
 export function PageLayout({ title, children, className, innerClassName }: { title: React.ReactNode, children: React.ReactNode, className?: string, innerClassName?: string }) {
@@ -10,7 +10,7 @@ export function PageLayout({ title, children, className, innerClassName }: { tit
         <Container>
           <header className="flex h-14 -ml-1.5 shrink-0 items-center gap-2">
             <SidebarTrigger />
-            <Separator orientation="vertical" className="mr-1.5 h-4!" />
+            <Separator orientation="vertical" className="mr-1.5 h-4! my-auto" />
             <h1>{title}</h1>
           </header>
         </Container>

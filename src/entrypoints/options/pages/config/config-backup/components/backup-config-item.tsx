@@ -5,7 +5,6 @@ import { useMutation } from '@tanstack/react-query'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useState } from 'react'
 import { toast } from 'sonner'
-import { Button } from '@/components/base-ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,11 +15,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/shadcn/alert-dialog'
-import { ButtonGroup } from '@/components/shadcn/button-group'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/shadcn/dropdown-menu'
-import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemTitle } from '@/components/shadcn/item'
-import { Spinner } from '@/components/shadcn/spinner'
+} from '@/components/base-ui/alert-dialog'
+import { Button } from '@/components/base-ui/button'
+import { ButtonGroup } from '@/components/base-ui/button-group'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/base-ui/dropdown-menu'
+import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemTitle } from '@/components/base-ui/item'
+import { Spinner } from '@/components/base-ui/spinner'
 import { useExportConfig } from '@/hooks/use-export-config'
 import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
 import { addBackup, isSameAsLatestBackup, removeBackup } from '@/utils/backup/storage'
@@ -92,11 +92,9 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
 
   return (
     <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="outline" size="sm" disabled={isRestoring}>
-          {isRestoring ? <Spinner /> : <Icon icon="tabler:restore" />}
-          {i18n.t('options.config.backup.item.restore')}
-        </Button>
+      <AlertDialogTrigger render={<Button variant="outline" size="sm" disabled={isRestoring} />}>
+        {isRestoring ? <Spinner /> : <Icon icon="tabler:restore" />}
+        {i18n.t('options.config.backup.item.restore')}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
@@ -137,10 +135,8 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
   return (
     <>
       <DropdownMenu modal={false}>
-        <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon-sm" disabled={isExporting || isDeleting}>
-            <Icon icon="tabler:dots" />
-          </Button>
+        <DropdownMenuTrigger render={<Button variant="outline" size="icon-sm" disabled={isExporting || isDeleting} />}>
+          <Icon icon="tabler:dots" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-40" align="end">
           <DropdownMenuItem onSelect={() => setShowExportDialog(true)} disabled={isExporting}>
