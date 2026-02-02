@@ -1,9 +1,9 @@
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { Field, FieldContent, FieldLabel } from '@/components/shadcn/field'
-import { Hint } from '@/components/shadcn/hint'
-import { Switch } from '@/components/shadcn/switch'
+import { Field, FieldContent, FieldLabel } from '@/components/base-ui/field'
+import { Hint } from '@/components/base-ui/hint'
+import { Switch } from '@/components/base-ui/switch'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
 export function CustomTranslationStyleSwitch() {

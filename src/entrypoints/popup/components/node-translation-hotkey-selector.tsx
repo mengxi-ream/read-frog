@@ -6,8 +6,8 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-} from '@/components/shadcn/select'
-import { Switch } from '@/components/shadcn/switch'
+} from '@/components/base-ui/select'
+import { Switch } from '@/components/base-ui/switch'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { HOTKEY_ICONS, HOTKEYS } from '@/utils/constants/hotkeys'
 
@@ -51,7 +51,10 @@ export default function NodeTranslationHotkeySelector() {
     <div className="flex items-center justify-between gap-2">
       <Select
         value={translateConfig.node.hotkey}
-        onValueChange={(value: typeof HOTKEYS[number]) => setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))}
+        onValueChange={(value: typeof HOTKEYS[number] | null) => {
+          if (value)
+            void setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))
+        }}
       >
         <SelectTrigger
           size="sm"

@@ -3,8 +3,8 @@ import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Button } from '@/components/base-ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/base-ui/popover'
 import LoadingDots from '@/components/loading-dots'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/shadcn/popover'
 import { extractErrorMessage } from '@/utils/api-error'
 
 interface ModelsResponse {
@@ -130,11 +130,9 @@ export function ModelSuggestionButton({
 
     return (
       <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button type="button" variant="outline" size="sm">
-            <Icon icon="tabler:list" />
-            {i18n.t('options.apiProviders.form.models.selectModel')}
-          </Button>
+        <PopoverTrigger render={<Button type="button" variant="outline" size="sm" />}>
+          <Icon icon="tabler:list" />
+          {i18n.t('options.apiProviders.form.models.selectModel')}
         </PopoverTrigger>
         <PopoverContent align="end" className="w-64 p-1 max-h-60 overflow-y-auto">
           {models.map(model => (

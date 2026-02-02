@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@/components/shadcn/sidebar'
+} from '@/components/base-ui/sidebar'
 import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from '@/utils/blog'
 import { WEBSITE_URL } from '@/utils/constants/url'
 import { cn } from '@/utils/styles/utils'
@@ -68,36 +68,22 @@ export function ProductNav() {
         <SidebarMenu>
           <SidebarMenuItem className="relative">
             <SidebarMenuButton
-              asChild
+              render={<a href={blogUrl} target="_blank" rel="noopener noreferrer" onClick={handleWhatsNewClick} />}
               className={cn(showBlogIndicator && 'text-primary font-semibold hover:text-primary active:text-primary')}
             >
-              <a
-                href={blogUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={handleWhatsNewClick}
-              >
-                <Icon icon="tabler:sparkles" />
-                <span>{i18n.t('options.whatsNew.title')}</span>
-              </a>
+              <Icon icon="tabler:sparkles" />
+              <span>{i18n.t('options.whatsNew.title')}</span>
             </SidebarMenuButton>
             <AnimatedIndicator show={showBlogIndicator && open} />
           </SidebarMenuItem>
 
           <SidebarMenuItem className="relative">
             <SidebarMenuButton
-              asChild
+              render={<a href={SURVEY_URL} target="_blank" rel="noopener noreferrer" onClick={handleSurveyClick} />}
               className={cn(showSurveyIndicator && 'text-primary font-semibold hover:text-primary active:text-primary')}
             >
-              <a
-                href={SURVEY_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={handleSurveyClick}
-              >
-                <Icon icon="tabler:message-question" />
-                <span>{i18n.t('options.survey.title')}</span>
-              </a>
+              <Icon icon="tabler:message-question" />
+              <span>{i18n.t('options.survey.title')}</span>
             </SidebarMenuButton>
             <AnimatedIndicator show={showSurveyIndicator && open} />
           </SidebarMenuItem>

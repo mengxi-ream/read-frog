@@ -1,6 +1,6 @@
 import type { ItemInstance } from '@headless-tree/core'
 import type { Config } from '@/types/config/config'
-import { i18n } from '#i18n'
+import { i18n } from '#imports'
 import { syncDataLoaderFeature } from '@headless-tree/core'
 import { useTree } from '@headless-tree/react'
 import { useAtomValue } from 'jotai'

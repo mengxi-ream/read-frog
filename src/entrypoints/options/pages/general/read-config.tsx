@@ -1,14 +1,14 @@
 import { i18n } from '#imports'
 import { useAtom, useAtomValue } from 'jotai'
+import { Activity } from 'react'
 import { toast } from 'sonner'
+import { Checkbox } from '@/components/base-ui/checkbox'
+import { Field, FieldLabel } from '@/components/base-ui/field'
+import { Input } from '@/components/base-ui/input'
 import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
-import { Checkbox } from '@/components/shadcn/checkbox'
-import { Field, FieldLabel } from '@/components/shadcn/field'
-import { Input } from '@/components/shadcn/input'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
 import { READ_PROVIDER_MODELS } from '@/types/config/provider'
 import { readProviderConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
-import { cn } from '@/utils/styles/utils'
 import { ConfigCard } from '../../components/config-card'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
 
@@ -47,105 +47,106 @@ function ReadModelSelector() {
       <FieldLabel htmlFor="readModel">
         {i18n.t('options.general.readConfig.model.title')}
       </FieldLabel>
-      {modelConfig.isCustomModel
-        ? (
-            <Input
-              value={modelConfig.customModel ?? ''}
-              onChange={(e) => {
-                try {
-                  void setReadProviderConfig(
-                    updateLLMProviderConfig(readProviderConfig, {
-                      models: {
-                        read: {
-                          customModel: e.target.value === '' ? null : e.target.value,
-                        },
-                      },
-                    }),
-                  )
-                }
-                catch (error) {
-                  toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
-                }
-              }}
-            />
-          )
-        : (
-            <Select
-              value={modelConfig.model}
-              onValueChange={(value) => {
-                try {
-                  void setReadProviderConfig(
-                    updateLLMProviderConfig(readProviderConfig, {
-                      models: {
-                        read: {
-                          model: value as any,
-                        },
-                      },
-                    }),
-                  )
-                }
-                catch (error) {
-                  toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
-                }
-              }}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a model" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {READ_PROVIDER_MODELS[provider].map(model => (
-                    <SelectItem key={model} value={model}>
-                      {model}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          )}
-      <div className={cn('mt-0.5 flex items-center space-x-2', provider === 'openai-compatible' && 'hidden')}>
-        <Checkbox
-          id={`isCustomModel-read-${provider}`}
-          checked={modelConfig.isCustomModel}
-          onCheckedChange={(checked) => {
+      <Activity mode={modelConfig.isCustomModel ? 'visible' : 'hidden'}>
+        <Input
+          value={modelConfig.customModel ?? ''}
+          onChange={(e) => {
             try {
-              if (checked === false) {
-                void setReadProviderConfig(
-                  updateLLMProviderConfig(readProviderConfig, {
-                    models: {
-                      read: {
-                        customModel: null,
-                        isCustomModel: false,
-                      },
+              void setReadProviderConfig(
+                updateLLMProviderConfig(readProviderConfig, {
+                  models: {
+                    read: {
+                      customModel: e.target.value === '' ? null : e.target.value,
                     },
-                  }),
-                )
-              }
-              else if (checked === true) {
-                void setReadProviderConfig(
-                  updateLLMProviderConfig(readProviderConfig, {
-                    models: {
-                      read: {
-                        customModel: modelConfig.model,
-                        isCustomModel: true,
-                      },
-                    },
-                  }),
-                )
-              }
+                  },
+                }),
+              )
             }
             catch (error) {
               toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
             }
           }}
         />
-        <label
-          htmlFor={`isCustomModel-read-${provider}`}
-          className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+      </Activity>
+      <Activity mode={modelConfig.isCustomModel ? 'hidden' : 'visible'}>
+        <Select
+          value={modelConfig.model}
+          onValueChange={(value) => {
+            try {
+              void setReadProviderConfig(
+                updateLLMProviderConfig(readProviderConfig, {
+                  models: {
+                    read: {
+                      model: value as any,
+                    },
+                  },
+                }),
+              )
+            }
+            catch (error) {
+              toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
+            }
+          }}
         >
-          {i18n.t('options.general.readConfig.model.enterCustomModel')}
-        </label>
-      </div>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Select a model" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {READ_PROVIDER_MODELS[provider].map(model => (
+                <SelectItem key={model} value={model}>
+                  {model}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      </Activity>
+      <Activity mode={provider === 'openai-compatible' ? 'hidden' : 'visible'}>
+        <div className="mt-0.5 flex items-center space-x-2">
+          <Checkbox
+            id={`isCustomModel-read-${provider}`}
+            checked={modelConfig.isCustomModel}
+            onCheckedChange={(checked) => {
+              try {
+                if (checked === false) {
+                  void setReadProviderConfig(
+                    updateLLMProviderConfig(readProviderConfig, {
+                      models: {
+                        read: {
+                          customModel: null,
+                          isCustomModel: false,
+                        },
+                      },
+                    }),
+                  )
+                }
+                else if (checked === true) {
+                  void setReadProviderConfig(
+                    updateLLMProviderConfig(readProviderConfig, {
+                      models: {
+                        read: {
+                          customModel: modelConfig.model,
+                          isCustomModel: true,
+                        },
+                      },
+                    }),
+                  )
+                }
+              }
+              catch (error) {
+                toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
+              }
+            }}
+          />
+          <label
+            htmlFor={`isCustomModel-read-${provider}`}
+            className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+          >
+            {i18n.t('options.general.readConfig.model.enterCustomModel')}
+          </label>
+        </div>
+      </Activity>
     </Field>
   )
 }

@@ -3,12 +3,12 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { Badge } from '@/components/base-ui/badge'
 import { Button } from '@/components/base-ui/button'
+import { Dialog, DialogTrigger } from '@/components/base-ui/dialog'
+import { Switch } from '@/components/base-ui/switch'
 import ProviderIcon from '@/components/provider-icon'
 import { useTheme } from '@/components/providers/theme-provider'
-import { Badge } from '@/components/shadcn/badge'
-import { Dialog, DialogTrigger } from '@/components/shadcn/dialog'
-import { Switch } from '@/components/shadcn/switch'
 import { SortableList } from '@/components/sortable-list'
 import { isAPIProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
@@ -139,17 +139,19 @@ function ProviderCardList() {
   return (
     <div className="w-40 lg:w-52 flex flex-col gap-4">
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogTrigger asChild>
-          <Button
-            variant="outline"
-            className="h-auto p-3 border-dashed rounded-xl"
-            onClick={() => setIsAddDialogOpen(true)}
-          >
-            <div className="flex items-center justify-center gap-2 w-full">
-              <Icon icon="tabler:plus" className="size-4" />
-              <span className="text-sm">{i18n.t('options.apiProviders.addProvider')}</span>
-            </div>
-          </Button>
+        <DialogTrigger
+          render={(
+            <Button
+              variant="outline"
+              className="h-auto p-3 border-dashed rounded-xl"
+              onClick={() => setIsAddDialogOpen(true)}
+            />
+          )}
+        >
+          <div className="flex items-center justify-center gap-2 w-full">
+            <Icon icon="tabler:plus" className="size-4" />
+            <span className="text-sm">{i18n.t('options.apiProviders.addProvider')}</span>
+          </div>
         </DialogTrigger>
         <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
       </Dialog>

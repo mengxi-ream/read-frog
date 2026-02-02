@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react'
 import { z } from 'zod'
-import { Input } from '@/components/shadcn/input'
+import { Input } from '@/components/base-ui/input'
 import { cn } from '@/utils/styles/utils'
 
 interface ValidatedInputProps extends React.InputHTMLAttributes<HTMLInputElement> {

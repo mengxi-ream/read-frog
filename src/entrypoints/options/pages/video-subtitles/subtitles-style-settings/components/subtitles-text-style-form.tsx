@@ -2,7 +2,7 @@ import type { SubtitlesFontFamily, SubtitleTextStyle } from '@/types/config/subt
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { Field, FieldGroup, FieldLabel } from '@/components/shadcn/field'
+import { Field, FieldGroup, FieldLabel } from '@/components/base-ui/field'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from '@/utils/constants/subtitles'

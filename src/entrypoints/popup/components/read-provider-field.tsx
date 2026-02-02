@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
 
 export default function ReadProviderField() {
   return (
@@ -9,9 +9,7 @@ export default function ReadProviderField() {
       <span className="text-[13px] font-medium flex items-center gap-1.5">
         {i18n.t('readService.title')}
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />
-          </TooltipTrigger>
+          <TooltipTrigger render={<Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />} />
           <TooltipContent>
             <p>
               {i18n.t('readService.description')}

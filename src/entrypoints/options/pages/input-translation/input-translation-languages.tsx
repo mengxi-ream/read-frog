@@ -9,15 +9,16 @@ import {
 } from '@read-frog/definitions'
 import { useAtom } from 'jotai'
 import { Activity } from 'react'
-import { Checkbox } from '@/components/shadcn/checkbox'
-import { Label } from '@/components/shadcn/label'
+import { Checkbox } from '@/components/base-ui/checkbox'
+import { Label } from '@/components/base-ui/label'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ConfigCard } from '../../components/config-card'
 
@@ -35,24 +36,24 @@ function LangSelect({ value, onValueChange, getDisplayLabel }: LangSelectProps) 
   return (
     <Select value={value} onValueChange={v => onValueChange(v as InputTranslationLang)}>
       <SelectTrigger className="w-full max-h-52 min-w-0">
-        <SelectValue asChild>
-          <span className="flex-1 min-w-0">
-            <span className="block min-w-0 truncate">{getDisplayLabel(value)}</span>
-          </span>
+        <SelectValue render={<span className="flex-1 min-w-0" />}>
+          <span className="block min-w-0 truncate">{getDisplayLabel(value)}</span>
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="max-h-64" align="end">
-        <SelectItem value="targetCode">
-          {getDisplayLabel('targetCode')}
-        </SelectItem>
-        <SelectItem value="sourceCode">
-          {getDisplayLabel('sourceCode')}
-        </SelectItem>
-        {langCodeISO6393Schema.options.map(code => (
-          <SelectItem key={code} value={code}>
-            {langCodeLabel(code)}
+        <SelectGroup>
+          <SelectItem value="targetCode">
+            {getDisplayLabel('targetCode')}
           </SelectItem>
-        ))}
+          <SelectItem value="sourceCode">
+            {getDisplayLabel('sourceCode')}
+          </SelectItem>
+          {langCodeISO6393Schema.options.map(code => (
+            <SelectItem key={code} value={code}>
+              {langCodeLabel(code)}
+            </SelectItem>
+          ))}
+        </SelectGroup>
       </SelectContent>
     </Select>
   )
