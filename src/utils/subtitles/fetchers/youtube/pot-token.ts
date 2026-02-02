@@ -1,4 +1,5 @@
 import type { AudioCaptionTrack, CaptionTrack, PlayerData } from './types'
+import { logger } from '@/utils/logger'
 
 export interface PotToken {
   pot: string | null
@@ -43,7 +44,9 @@ export function extractPotToken(
         potc: url.searchParams.get('potc'),
       }
     }
-    catch {}
+    catch (e) {
+      logger.error('Failed to parse POT token from URL', e)
+    }
   }
 
   return { pot: null, potc: null }

@@ -104,7 +104,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     data?: PlayerData
   }> {
     return new Promise((resolve) => {
-      const requestId = Math.random().toString(36).slice(2)
+      const requestId = crypto.randomUUID()
 
       const handler = (event: MessageEvent) => {
         if (
@@ -141,18 +141,31 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     })
   }
 
+  /**
+   * Select the best subtitle track from available tracks.
+   *
+   * Priority order:
+   * 1. Human-created subtitles without name (original language, highest quality)
+   * 2. Human-created subtitles with name (may be translated versions)
+   * 3. Auto-generated ASR subtitles (lower quality but better than nothing)
+   * 4. First available track as fallback
+   */
   private selectTrack(tracks: CaptionTrack[]): CaptionTrack | null {
     if (tracks.length === 0)
       return null
 
+    // Prefer human subtitles without name - these are typically the original
+    // language subtitles uploaded by the video creator
     const humanExact = tracks.find(t => t.kind !== 'asr' && !t.name)
     if (humanExact)
       return humanExact
 
+    // Human subtitles with name - may be translated or have additional metadata
     const humanWithName = tracks.find(t => t.kind !== 'asr')
     if (humanWithName)
       return humanWithName
 
+    // Auto-generated speech recognition subtitles
     const asr = tracks.find(t => t.kind === 'asr')
     if (asr)
       return asr
@@ -170,16 +183,18 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
         if (!response.ok) {
           const status = response.status
           switch (status) {
+            // Permanent errors - don't retry
             case 403:
               throw new OverlaySubtitlesError(i18n.t('subtitles.errors.http403'))
             case 404:
               throw new OverlaySubtitlesError(i18n.t('subtitles.errors.http404'))
             case 429:
               throw new OverlaySubtitlesError(i18n.t('subtitles.errors.http429'))
+            // Retryable errors - throw and let retry logic handle
             case 500:
-              throw new OverlaySubtitlesError(i18n.t('subtitles.errors.http500'))
+              throw new Error(`${i18n.t('subtitles.errors.http500')}`)
             default:
-              throw new OverlaySubtitlesError(i18n.t('subtitles.errors.httpUnknown', [status]))
+              throw new Error(`${i18n.t('subtitles.errors.httpUnknown', [status])}`)
           }
         }
 
@@ -192,14 +207,18 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
         return parsed.data.events
       }
       catch (e) {
-        lastError = e as Error
+        // Don't retry permanent errors (OverlaySubtitlesError)
+        if (e instanceof OverlaySubtitlesError) {
+          throw e
+        }
+        lastError = e instanceof Error ? e : new Error(String(e))
         if (i < MAX_FETCH_RETRIES - 1) {
           await sleep(FETCH_RETRY_DELAY_MS)
         }
       }
     }
 
-    throw lastError ?? new OverlaySubtitlesError(i18n.t('subtitles.errors.fetchSubTimeout'))
+    throw new OverlaySubtitlesError(lastError?.message ?? i18n.t('subtitles.errors.fetchSubTimeout'))
   }
 
   private async processRawEvents(events: YoutubeTimedText[]): Promise<SubtitlesFragment[]> {

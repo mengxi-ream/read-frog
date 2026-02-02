@@ -1,4 +1,6 @@
+import type { AudioCaptionTrack, CaptionTrack, PlayerData } from '@/utils/subtitles/fetchers/youtube/types'
 import { PLAYER_DATA_REQUEST_TYPE, PLAYER_DATA_RESPONSE_TYPE } from '@/utils/constants/subtitles'
+import { logger } from '@/utils/logger'
 
 interface PlayerDataRequest {
   type: typeof PLAYER_DATA_REQUEST_TYPE
@@ -6,35 +8,12 @@ interface PlayerDataRequest {
   expectedVideoId: string
 }
 
-interface CaptionTrack {
-  baseUrl: string
-  languageCode: string
-  kind?: string
-  vssId: string
-  name?: { simpleText: string }
-  trackName?: string
-}
-
-interface AudioCaptionTrack {
-  url: string
-  vssId: string
-  kind?: string
-  languageCode?: string
-}
-
 interface PlayerDataResponse {
   type: typeof PLAYER_DATA_RESPONSE_TYPE
   requestId: string
   success: boolean
   error?: string
-  data?: {
-    videoId: string
-    captionTracks: CaptionTrack[]
-    audioCaptionTracks: AudioCaptionTrack[]
-    device: string | null
-    cver: string | null
-    playerState: number
-  }
+  data?: PlayerData
 }
 
 interface YouTubePlayer extends HTMLElement {
@@ -118,11 +97,15 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
               languageCode: new URL(t.url).searchParams.get('lang') ?? undefined,
             })
           }
-          catch {}
+          catch (e) {
+            logger.error('Failed to parse audio caption track URL', e)
+          }
         }
       }
     }
-    catch {}
+    catch (e) {
+      logger.error('Failed to get audio track from player', e)
+    }
 
     const device = window.ytcfg?.get?.('DEVICE') ?? null
 
@@ -130,7 +113,9 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
     try {
       cver = player.getWebPlayerContextConfig?.()?.innertubeContextClientVersion ?? null
     }
-    catch {}
+    catch (e) {
+      logger.error('Failed to get web player context config', e)
+    }
 
     const playerState = player.getPlayerState?.() ?? -1
 
