@@ -1,11 +1,11 @@
 import { defineContentScript } from '#imports'
-import { injectXhrInterceptor } from './inject-xhr-interceptor'
+import { injectPlayerApi } from './inject-player-api'
 
 export default defineContentScript({
   matches: ['*://*.youtube.com/*'],
   world: 'MAIN',
   runAt: 'document_start',
   main() {
-    injectXhrInterceptor()
+    injectPlayerApi()
   },
 })
