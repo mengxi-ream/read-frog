@@ -1,7 +1,7 @@
 import { browser, i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { Button } from '@/components/base-ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 
 export function TranslationHubButton() {
   const handleClick = async () => {
@@ -12,14 +12,8 @@ export function TranslationHubButton() {
 
   return (
     <Tooltip>
-      <TooltipTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleClick}
-        >
-          <Icon icon="tabler:language-hiragana" />
-        </Button>
+      <TooltipTrigger render={<Button variant="ghost" size="icon" onClick={handleClick} />}>
+        <Icon icon="tabler:language-hiragana" />
       </TooltipTrigger>
       <TooltipContent className="max-w-[200px] text-wrap">
         {i18n.t('popup.hub.tooltip')}

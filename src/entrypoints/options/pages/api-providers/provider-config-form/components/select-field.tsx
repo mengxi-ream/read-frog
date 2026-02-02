@@ -1,6 +1,7 @@
 import type * as React from 'react'
 import { useStore } from '@tanstack/react-form'
-import { Field, FieldError, FieldLabel } from '@/components/shadcn/field'
+import { useCallback } from 'react'
+import { Field, FieldLabel } from '@/components/base-ui/field'
 import { Select } from '@/components/shadcn/select'
 import { useFieldContext } from '../form-context'
 
@@ -15,6 +16,11 @@ export function SelectField(
   const field = useFieldContext<string | undefined>()
   const errors = useStore(field.store, state => state.meta.errors)
 
+  const handleValueChange = useCallback((value: string) => {
+    field.handleChange(value)
+    void formForSubmit.handleSubmit()
+  }, [field, formForSubmit])
+
   return (
     <Field>
       <FieldLabel htmlFor={field.name}>
@@ -22,19 +28,16 @@ export function SelectField(
       </FieldLabel>
       <Select
         value={field.state.value}
-        onValueChange={(value: string) => {
-          field.handleChange(value)
-          void formForSubmit.handleSubmit()
-        }}
+        onValueChange={handleValueChange}
         {...props}
       >
         {props.children}
       </Select>
-      <FieldError
-        errors={errors.map(error => ({
-          message: typeof error === 'string' ? error : error?.message,
-        }))}
-      />
+      {errors.length > 0 && (
+        <span className="text-sm font-normal text-destructive">
+          {errors.map(error => typeof error === 'string' ? error : error?.message).join(', ')}
+        </span>
+      )}
     </Field>
   )
 }

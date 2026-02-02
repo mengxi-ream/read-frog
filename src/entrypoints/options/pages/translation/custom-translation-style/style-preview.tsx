@@ -2,9 +2,9 @@ import { i18n } from '#imports'
 import { LANG_CODE_ISO6391_OPTIONS } from '@read-frog/definitions'
 import { useAtomValue } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
-import { Field, FieldLabel } from '@/components/shadcn/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
-import { Textarea } from '@/components/shadcn/textarea'
+import { Field, FieldLabel } from '@/components/base-ui/field'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/base-ui/select'
+import { Textarea } from '@/components/base-ui/textarea'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { BLOCK_CONTENT_CLASS, CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
 import { decorateTranslationNode } from '@/utils/host/translate/ui/decorate-translation'
@@ -31,7 +31,13 @@ export function StylePreview() {
             <FieldLabel htmlFor="language-select">
               {i18n.t('options.translation.translationStyle.stylePreviewLanguage')}
             </FieldLabel>
-            <Select value={language} onValueChange={setLanguage}>
+            <Select
+              value={language}
+              onValueChange={(value) => {
+                if (value)
+                  setLanguage(value)
+              }}
+            >
               <SelectTrigger id="language-select" className="w-full">
                 <SelectValue />
               </SelectTrigger>

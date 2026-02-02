@@ -8,7 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
 export default function LanguageLevelSelector() {
@@ -19,7 +19,10 @@ export default function LanguageLevelSelector() {
       <span className="text-[13px] font-medium">{i18n.t('languageLevel')}</span>
       <Select
         value={language.level}
-        onValueChange={(value: LangLevel) => setLanguage({ level: value })}
+        onValueChange={(value: LangLevel | null) => {
+          if (value)
+            void setLanguage({ level: value })
+        }}
       >
         <SelectTrigger size="sm" className="!h-7 w-29 pr-1.5 pl-2.5">
           <SelectValue />

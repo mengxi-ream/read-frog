@@ -11,8 +11,6 @@ import {
 } from '@read-frog/definitions'
 import { useMutationState } from '@tanstack/react-query'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
-import { useTheme } from '@/components/providers/theme-provider'
 import {
   Select,
   SelectContent,
@@ -20,8 +18,10 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-} from '@/components/shadcn/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
+} from '@/components/base-ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
+import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
+import { useTheme } from '@/components/providers/theme-provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
@@ -29,7 +29,6 @@ import { getFinalSourceCode } from '@/utils/config/languages'
 import { READ_PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { DOWNLOAD_FILE_ITEMS } from '@/utils/constants/side'
 import { cn } from '@/utils/styles/utils'
-import { shadowWrapper } from '../..'
 import { isSideOpenAtom } from '../../atoms'
 import downloader from '../../utils/downloader'
 
@@ -48,7 +47,6 @@ export function TopBar({ className }: { className?: string }) {
         <LangLevelSelect />
         <ReadProviderSelector
           className="flex !size-7 items-center justify-center p-0"
-          hideChevron
           customTrigger={(
             <img
               src={READ_PROVIDER_ITEMS[readProviderConfig.provider].logo(theme)}
@@ -56,21 +54,22 @@ export function TopBar({ className }: { className?: string }) {
               className="size-4 p-0.5 rounded-full"
             />
           )}
-          container={shadowWrapper}
         />
         <FileExport />
       </div>
       <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-neutral-200 p-0.5 dark:bg-neutral-800"
-            onClick={() => setIsSideOpen(false)}
-          >
-            <Icon icon="tabler:x" className="text-neutral-500" />
-          </button>
+        <TooltipTrigger
+          render={(
+            <button
+              type="button"
+              className="flex h-4 w-4 cursor-pointer items-center justify-center rounded-full bg-neutral-200 p-0.5 dark:bg-neutral-800"
+              onClick={() => setIsSideOpen(false)}
+            />
+          )}
+        >
+          <Icon icon="tabler:x" className="text-neutral-500" />
         </TooltipTrigger>
-        <TooltipContent container={shadowWrapper} side="left">
+        <TooltipContent side="left">
           <p>Close</p>
         </TooltipContent>
       </Tooltip>
@@ -84,17 +83,19 @@ function LangLevelSelect() {
   return (
     <Select
       value={language.level}
-      onValueChange={(newLevel: LangLevel) => setLanguage({ level: newLevel })}
+      onValueChange={(newLevel: LangLevel | null) => {
+        if (newLevel)
+          void setLanguage({ level: newLevel })
+      }}
     >
       <SelectTrigger
-        hideChevron
         className="border-border flex !h-7 w-auto items-center gap-2 rounded-md border px-2"
       >
         <div className="max-w-15 min-w-0 truncate">
           {i18n.t(`languageLevels.${language.level}`)}
         </div>
       </SelectTrigger>
-      <SelectContent container={shadowWrapper}>
+      <SelectContent>
         <SelectGroup>
           <SelectLabel>{i18n.t('languageLevel')}</SelectLabel>
           {langLevel.options.map(level => (
@@ -114,10 +115,12 @@ function TargetLangSelect() {
   return (
     <Select
       value={language.targetCode}
-      onValueChange={(newTargetCode: LangCodeISO6393) => setLanguage({ targetCode: newTargetCode })}
+      onValueChange={(newTargetCode: LangCodeISO6393 | null) => {
+        if (newTargetCode)
+          void setLanguage({ targetCode: newTargetCode })
+      }}
     >
       <SelectTrigger
-        hideChevron
         className="border-border flex !h-7 w-auto items-center gap-2 rounded-md border px-2"
       >
         <div className="max-w-15 min-w-0 truncate">
@@ -126,7 +129,7 @@ function TargetLangSelect() {
           })`}
         </div>
       </SelectTrigger>
-      <SelectContent container={shadowWrapper}>
+      <SelectContent>
         <SelectGroup>
           <SelectLabel>{i18n.t('side.targetLang')}</SelectLabel>
           {langCodeISO6393Schema.options.map(key => (
@@ -147,18 +150,20 @@ function SourceLangSelect() {
   return (
     <Select
       value={language.sourceCode}
-      onValueChange={(newSourceCode: LangCodeISO6393 | 'auto') =>
-        setLanguage({ sourceCode: newSourceCode })}
+      onValueChange={(newSourceCode: LangCodeISO6393 | 'auto' | null) => {
+        if (!newSourceCode)
+          return
+        void setLanguage({ sourceCode: newSourceCode })
+      }}
     >
       <SelectTrigger
-        hideChevron
         className="border-border flex !h-7 w-auto items-center gap-2 rounded-md border px-2"
       >
         <div className="max-w-15 min-w-0 truncate">
           {LANG_CODE_TO_EN_NAME[getFinalSourceCode(language.sourceCode, detectedCode)]}
         </div>
       </SelectTrigger>
-      <SelectContent container={shadowWrapper}>
+      <SelectContent>
         <SelectGroup>
           <SelectLabel>{i18n.t('side.sourceLang')}</SelectLabel>
           <SelectItem value="auto">
@@ -195,17 +200,18 @@ function FileExport() {
   return (
     <Select
       value=""
-      onValueChange={async (fileType: DOWNLOAD_FILE_TYPES) => {
-        downloader.download(explainDataList, fileType)
+      onValueChange={(value) => {
+        if (!value)
+          return
+        downloader.download(explainDataList, value as DOWNLOAD_FILE_TYPES)
       }}
     >
       <SelectTrigger
-        hideChevron
         className="rounded-md flex !size-7 items-center justify-center p-0 shadow-xs border focus-visible:ring-ring/50 dark:bg-input/30 dark:hover:bg-input/50 border-input"
       >
         <Icon icon="tabler:download" className="size-4 p-0.5 bg-white rounded-full" />
       </SelectTrigger>
-      <SelectContent container={shadowWrapper}>
+      <SelectContent>
         <SelectGroup>
           <SelectLabel>{i18n.t('side.fileExport')}</SelectLabel>
           {Object.entries(DOWNLOAD_FILE_ITEMS).map(([fileType, { label }]) => (

@@ -4,12 +4,12 @@ import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { Activity } from 'react'
-import { Button } from '@/components/shadcn/button'
-import { Card } from '@/components/shadcn/card'
-import { Field, FieldGroup, FieldLabel } from '@/components/shadcn/field'
-import { Label } from '@/components/shadcn/label'
+import { Button } from '@/components/base-ui/button'
+import { Card } from '@/components/base-ui/card'
+import { Field, FieldGroup, FieldLabel } from '@/components/base-ui/field'
+import { Label } from '@/components/base-ui/label'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/shadcn/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MIN_BACKGROUND_OPACITY } from '@/utils/constants/subtitles'
 
@@ -49,10 +49,10 @@ export function GeneralSettings() {
           <Label className="text-sm font-semibold">{i18n.t('options.videoSubtitles.style.generalSettings')}</Label>
         </div>
         <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" size="sm" className="-mr-2" onClick={resetGeneralConfig}>
-              <Icon icon="tabler:refresh" />
-            </Button>
+          <TooltipTrigger
+            render={<Button variant="ghost" size="sm" className="-mr-2" onClick={resetGeneralConfig} />}
+          >
+            <Icon icon="tabler:refresh" />
           </TooltipTrigger>
           <TooltipContent>{i18n.t('options.videoSubtitles.style.reset')}</TooltipContent>
         </Tooltip>
