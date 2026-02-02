@@ -646,6 +646,7 @@ subtitles:
     http404: 404 YouTube altyazı bulunamadı.
     http403: 403 YouTube altyazı erişimi reddedildi.
     http500: 500 YouTube sunucu hatası oluştu.
+    httpUnknown: HTTP hatası $1
     invalidResponse: YouTube altyazı yanıt biçimi geçersiz
     networkError: YouTube altyazılar alınırken ağ hatası oluştu.
     fetchSubTimeout: YouTube altyazılar alınırken zaman aşımı oluştu.

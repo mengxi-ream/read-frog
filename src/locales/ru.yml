@@ -646,6 +646,7 @@ subtitles:
     http404: 404 Субтитры YouTube не найдены
     http403: 403 Доступ к субтитрам YouTube запрещён
     http500: 500 Произошла ошибка сервера YouTube
+    httpUnknown: Ошибка HTTP $1
     invalidResponse: Неверный формат ответа субтитров YouTube
     networkError: Произошла сетевая ошибка при получении субтитров
     fetchSubTimeout: Получение субтитров YouTube завершилось с ошибкой

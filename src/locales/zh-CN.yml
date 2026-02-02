@@ -647,6 +647,7 @@ subtitles:
     http404: 404 未找到 youtube 字幕
     http403: 403 youtube 字幕访问被拒绝
     http500: 500 youtube 服务器错误
+    httpUnknown: HTTP 错误 $1
     invalidResponse: youtube 字幕响应格式无效
     networkError: 获取字幕时发生网络错误
     fetchSubTimeout: 获取 youtube 字幕超时

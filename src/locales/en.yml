@@ -648,6 +648,7 @@ subtitles:
     http404: 404 Youtube captions not found
     http403: 403 Youtube caption access denied
     http500: 500 Youtube server error
+    httpUnknown: HTTP error $1
     invalidResponse: Invalid Youtube subtitle response format
     networkError: Network error occurred when fetching captions
     fetchSubTimeout: Fetching youtube captions timed out
