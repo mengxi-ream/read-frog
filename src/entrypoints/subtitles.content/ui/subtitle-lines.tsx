@@ -11,11 +11,9 @@ interface SubtitleLineProps {
 }
 
 function getTextStyles(textStyle: SubtitleTextStyle) {
-  const baseFontSize = 20
-
   return {
     fontFamily: SUBTITLE_FONT_FAMILIES[textStyle.fontFamily] || SUBTITLE_FONT_FAMILIES.system,
-    fontSize: `${(textStyle.fontScale / 100) * baseFontSize}px`,
+    fontSize: `${textStyle.fontScale / 100}em`,
     color: textStyle.color,
     fontWeight: textStyle.fontWeight,
   }

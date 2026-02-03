@@ -1,3 +1,4 @@
+import type { PlatformConfig } from '@/entrypoints/subtitles.content/platforms'
 import { Provider as JotaiProvider } from 'jotai'
 import ReactDOM from 'react-dom/client'
 import { Toaster } from 'sonner'
@@ -10,8 +11,8 @@ import { ShadowHostBuilder } from '@/utils/react-shadow-host/shadow-host-builder
 import { subtitlesStore } from '../atoms'
 import { SubtitlesContainer } from '../ui/subtitles-container'
 
-export async function mountSubtitlesUI(containerSelector: string): Promise<void> {
-  const videoContainer = await waitForElement(containerSelector)
+export async function mountSubtitlesUI(config: PlatformConfig): Promise<void> {
+  const videoContainer = await waitForElement(config.selectors.playerContainer)
   if (!videoContainer)
     return
 
@@ -27,10 +28,12 @@ export async function mountSubtitlesUI(containerSelector: string): Promise<void>
     position: absolute;
     top: 0;
     left: 0;
-    width: 100%;
-    height: 100%;
+    right: 0;
+    bottom: 0;
     pointer-events: none;
     z-index: 9999;
+    transition: bottom 0.2s ease-out;
+    overflow: hidden;
   `
 
   const shadowRoot = shadowHost.attachShadow({ mode: 'open' })
@@ -42,8 +45,8 @@ export async function mountSubtitlesUI(containerSelector: string): Promise<void>
       position: 'absolute',
       top: '0',
       left: '0',
-      width: '100%',
-      height: '100%',
+      right: '0',
+      bottom: '0',
       pointerEvents: 'none',
     },
   })
@@ -62,7 +65,7 @@ export async function mountSubtitlesUI(containerSelector: string): Promise<void>
     <JotaiProvider store={subtitlesStore}>
       <ShadowWrapperContext value={reactContainer}>
         <ThemeProvider container={reactContainer}>
-          <SubtitlesContainer />
+          <SubtitlesContainer controlsConfig={config.controls} />
           <Toaster richColors className="z-2147483647 notranslate" />
         </ThemeProvider>
       </ShadowWrapperContext>

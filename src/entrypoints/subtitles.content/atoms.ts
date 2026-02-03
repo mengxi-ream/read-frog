@@ -13,7 +13,15 @@ export const subtitlesStateAtom = atom<StateData | null>(null)
 
 export const subtitlesVisibleAtom = atom<boolean>(false)
 
-export const subtitlesTopPercentAtom = atom<number>(70)
+export interface SubtitlePosition {
+  percent: number
+  anchor: 'top' | 'bottom'
+}
+
+export const subtitlesPositionAtom = atom<SubtitlePosition>({
+  percent: 10,
+  anchor: 'bottom',
+})
 
 export const subtitlesDisplayAtom = atom((get) => {
   const subtitle = get(currentSubtitleAtom)

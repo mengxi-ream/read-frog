@@ -56,6 +56,7 @@ export const DEFAULT_FONT_FAMILY = 'system' as const
 export const DEFAULT_SUBTITLE_COLOR = '#FFFFFF'
 export const DEFAULT_DISPLAY_MODE = 'bilingual' as const
 export const DEFAULT_TRANSLATION_POSITION = 'above' as const
+export const DEFAULT_CONTROLS_HEIGHT = 60
 
 // Font family mapping
 export const SUBTITLE_FONT_FAMILIES = {
