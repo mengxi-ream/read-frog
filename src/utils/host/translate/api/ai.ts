@@ -2,7 +2,6 @@ import type { LLMTranslateProviderConfig } from '@/types/config/provider'
 import type { ArticleContent } from '@/types/content'
 import type { TranslatePromptOptions, TranslatePromptResult } from '@/utils/prompts/translate'
 import { generateText } from 'ai'
-import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { getTranslateModelById } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 
@@ -16,15 +15,14 @@ export async function aiTranslate(
   text: string,
   targetLangName: string,
   providerConfig: LLMTranslateProviderConfig,
-  options?: { isBatch?: boolean, content?: ArticleContent, promptResolver?: PromptResolver },
+  options: { promptResolver: PromptResolver, isBatch?: boolean, content?: ArticleContent },
 ) {
   const { id: providerId, models: { translate }, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const translateModel = translate.isCustomModel ? translate.customModel : translate.model
   const model = await getTranslateModelById(providerId)
 
   const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
-  const resolver = options?.promptResolver ?? getTranslatePrompt
-  const { systemPrompt, prompt } = await resolver(targetLangName, text, options)
+  const { systemPrompt, prompt } = await options.promptResolver(targetLangName, text, options)
 
   const { text: translatedText } = await generateText({
     model,

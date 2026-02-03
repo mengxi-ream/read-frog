@@ -13,11 +13,11 @@ export async function executeTranslate(
   text: string,
   langConfig: Config['language'],
   providerConfig: ProviderConfig,
-  options?: {
+  options: {
+    promptResolver: PromptResolver
     forceBackgroundFetch?: boolean
     isBatch?: boolean
     content?: ArticleContent
-    promptResolver?: PromptResolver
   },
 ) {
   const cleanText = text.replace(/\u200B/g, '').trim()

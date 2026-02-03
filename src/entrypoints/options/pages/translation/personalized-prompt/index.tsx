@@ -1,5 +1,5 @@
 import { i18n } from '#imports'
-import { PromptConfigurator } from '@/components/ui/prompt-configurator'
+import { PromptConfigurator } from '@/components/prompt-configurator'
 import { promptAtoms } from './atoms'
 
 export function PersonalizedPrompts() {
