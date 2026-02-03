@@ -18,6 +18,7 @@ import { OverlaySubtitlesError } from '@/utils/subtitles/errors'
 import { optimizeSubtitles } from '@/utils/subtitles/processor/optimizer'
 import { getYoutubeVideoId } from '@/utils/subtitles/video-id'
 import { detectFormat } from './format-detector'
+import { filterNoiseFromEvents } from './noise-filter'
 import { parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles } from './parser'
 import { extractPotToken } from './pot-token'
 import { youtubeSubtitlesResponseSchema } from './types'
@@ -224,19 +225,21 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
   private async processRawEvents(events: YoutubeTimedText[]): Promise<SubtitlesFragment[]> {
     const config = await getLocalConfig()
     const enableAISegmentation = config?.videoSubtitles?.aiSegmentation ?? false
-    const format = detectFormat(events)
+
+    const filteredEvents = filterNoiseFromEvents(events)
+    const format = detectFormat(filteredEvents)
 
     if (format === 'karaoke') {
-      return parseKaraokeSubtitles(events)
+      return parseKaraokeSubtitles(filteredEvents)
     }
 
     if (enableAISegmentation) {
-      return parseStandardSubtitles(events)
+      return parseStandardSubtitles(filteredEvents)
     }
 
     const fragments = format === 'scrolling-asr'
-      ? parseScrollingAsrSubtitles(events, this.sourceLanguage)
-      : parseStandardSubtitles(events)
+      ? parseScrollingAsrSubtitles(filteredEvents, this.sourceLanguage)
+      : parseStandardSubtitles(filteredEvents)
 
     return optimizeSubtitles(fragments, this.sourceLanguage)
   }
