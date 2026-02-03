@@ -236,6 +236,8 @@ export class UniversalVideoAdapter {
   }
 
   private async translateSubtitlesBlock(batch: SubtitlesTranslationBlock) {
+    const config = await getLocalConfig()
+
     const subtitlesBlocks = subtitlesStore.get(subtitlesTranslationBlocksAtom)
     subtitlesStore.set(subtitlesTranslationBlocksAtom, updateBlockState(subtitlesBlocks, batch.id, 'processing'))
 
@@ -248,7 +250,6 @@ export class UniversalVideoAdapter {
       let fragmentsToTranslate = batch.fragments
 
       // AI segmentation before translation if enabled
-      const config = await getLocalConfig()
       if (config?.videoSubtitles?.aiSegmentation) {
         this.subtitlesScheduler?.setState('segmenting')
         fragmentsToTranslate = await aiSegmentBlock(batch.fragments, config)
@@ -273,8 +274,8 @@ export class UniversalVideoAdapter {
         updateBlockState(updatedBatches, batch.id, 'error'),
       )
 
-      // Add original subtitles as fallback (use original text as translation for translation-only mode)
-      const fallbackSubtitles = batch.fragments.map(f => ({ ...f, translation: f.text }))
+      const displayMode = config?.videoSubtitles?.style.displayMode
+      const fallbackSubtitles = batch.fragments.map(f => ({ ...f, translation: displayMode === 'translationOnly' ? f.text : '' }))
       this.subtitlesScheduler?.supplementSubtitles(fallbackSubtitles)
 
       const errorMessage = error instanceof Error ? error.message : String(error)
