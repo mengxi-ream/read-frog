@@ -672,6 +672,7 @@ translationHub:
   deleteCard: カードを削除
   translationFailed: 翻訳に失敗しました
   translationFailedFallback: 翻訳に失敗しました
+  retryTranslation: 翻訳を再試行
 languages:
   eng: 英語
   cmn: 簡体字中国語

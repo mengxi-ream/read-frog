@@ -674,6 +674,7 @@ translationHub:
   deleteCard: Удалить карточку
   translationFailed: Ошибка перевода
   translationFailedFallback: Ошибка перевода
+  retryTranslation: Повторить перевод
 languages:
   eng: Английский
   cmn: Упрощённый китайский

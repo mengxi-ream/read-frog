@@ -676,6 +676,7 @@ translationHub:
   deleteCard: Delete card
   translationFailed: Translation Failed
   translationFailedFallback: Translation failed
+  retryTranslation: Retry translation
 languages:
   eng: English
   cmn: Simplified Chinese

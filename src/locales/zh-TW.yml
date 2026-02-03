@@ -675,6 +675,7 @@ translationHub:
   deleteCard: 刪除卡片
   translationFailed: 翻譯失敗
   translationFailedFallback: 翻譯失敗
+  retryTranslation: 重試翻譯
 languages:
   eng: 英語
   cmn: 簡體中文

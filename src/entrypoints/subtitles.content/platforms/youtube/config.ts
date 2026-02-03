@@ -1,5 +1,6 @@
 import type { PlatformConfig } from '@/entrypoints/subtitles.content/platforms'
 import { DEFAULT_CONTROLS_HEIGHT, YOUTUBE_NATIVE_SUBTITLES_CLASS, YOUTUBE_NAVIGATE_EVENT } from '@/utils/constants/subtitles'
+import { getYoutubeVideoId } from '@/utils/subtitles/video-id'
 
 export const youtubeConfig: PlatformConfig = {
   selectors: {
@@ -9,12 +10,8 @@ export const youtubeConfig: PlatformConfig = {
     nativeSubtitles: YOUTUBE_NATIVE_SUBTITLES_CLASS,
   },
 
-  navigation: {
-    event: YOUTUBE_NAVIGATE_EVENT,
-    getVideoId: () => {
-      const params = new URLSearchParams(window.location.search)
-      return params.get('v')
-    },
+  events: {
+    navigate: YOUTUBE_NAVIGATE_EVENT,
   },
 
   controls: {
@@ -29,4 +26,6 @@ export const youtubeConfig: PlatformConfig = {
       return !!player && !player.classList.contains('ytp-autohide')
     },
   },
+  
+  getVideoId: getYoutubeVideoId,
 }

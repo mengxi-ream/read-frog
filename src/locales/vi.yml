@@ -674,6 +674,7 @@ translationHub:
   deleteCard: Xóa thẻ
   translationFailed: Dịch Thất Bại
   translationFailedFallback: Dịch thất bại
+  retryTranslation: Thử lại dịch
 languages:
   eng: Tiếng Anh
   cmn: Tiếng Trung giản thể

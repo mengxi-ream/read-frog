@@ -673,6 +673,7 @@ translationHub:
   deleteCard: 카드 삭제
   translationFailed: 번역 실패
   translationFailedFallback: 번역 실패
+  retryTranslation: 번역 재시도
 languages:
   eng: 영어
   cmn: 중국어 간체
