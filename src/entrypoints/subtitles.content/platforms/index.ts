@@ -16,6 +16,6 @@ export interface PlatformConfig {
   }
 
   controls?: ControlsConfig
-  
+
   getVideoId?: () => string | null
 }

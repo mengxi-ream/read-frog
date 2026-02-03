@@ -26,6 +26,6 @@ export const youtubeConfig: PlatformConfig = {
       return !!player && !player.classList.contains('ytp-autohide')
     },
   },
-  
+
   getVideoId: getYoutubeVideoId,
 }
