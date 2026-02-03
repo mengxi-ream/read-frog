@@ -7,14 +7,14 @@ export type { CustomPromptsConfig, PromptAtoms } from './context'
 export { usePromptAtoms } from './context'
 
 interface PromptConfiguratorProps {
-  atoms: PromptAtoms
+  promptAtoms: PromptAtoms
   title: string
   description: React.ReactNode
 }
 
-export function PromptConfigurator({ atoms, title, description }: PromptConfiguratorProps) {
+export function PromptConfigurator({ promptAtoms, title, description }: PromptConfiguratorProps) {
   return (
-    <PromptConfiguratorContext value={atoms}>
+    <PromptConfiguratorContext value={promptAtoms}>
       <ConfigCard className="lg:flex-col" title={title} description={description}>
         <PromptList />
       </ConfigCard>

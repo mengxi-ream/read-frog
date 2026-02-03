@@ -5,7 +5,7 @@ import { promptAtoms } from './atoms'
 export function SubtitlesCustomPrompts() {
   return (
     <PromptConfigurator
-      atoms={promptAtoms}
+      promptAtoms={promptAtoms}
       title={i18n.t('options.videoSubtitles.customPrompts.title')}
       description={i18n.t('options.videoSubtitles.customPrompts.description')}
     />

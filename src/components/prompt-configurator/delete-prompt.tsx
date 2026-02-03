@@ -14,9 +14,9 @@ export function DeletePrompt({
   originPrompt: TranslatePromptObj
   className?: string
 } & React.ComponentProps<'button'>) {
-  const atoms = usePromptAtoms()
-  const isExportMode = useAtomValue(atoms.exportMode)
-  const [config, setConfig] = useAtom(atoms.config)
+  const promptAtoms = usePromptAtoms()
+  const isExportMode = useAtomValue(promptAtoms.exportMode)
+  const [config, setConfig] = useAtom(promptAtoms.config)
 
   const { patterns, promptId } = config
 

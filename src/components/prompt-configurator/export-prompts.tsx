@@ -6,10 +6,10 @@ import { usePromptAtoms } from './context'
 import { downloadJSONFile } from './utils/prompt-file'
 
 export function ExportPrompts() {
-  const atoms = usePromptAtoms()
-  const config = useAtomValue(atoms.config)
-  const [selectedPrompts, setSelectedPrompts] = useAtom(atoms.selectedPrompts)
-  const setIsExportMode = useSetAtom(atoms.exportMode)
+  const promptAtoms = usePromptAtoms()
+  const config = useAtomValue(promptAtoms.config)
+  const [selectedPrompts, setSelectedPrompts] = useAtom(promptAtoms.selectedPrompts)
+  const setIsExportMode = useSetAtom(promptAtoms.exportMode)
 
   const patterns = config.patterns
 

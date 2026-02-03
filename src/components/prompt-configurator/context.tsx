@@ -14,9 +14,9 @@ export interface PromptAtoms {
 export const PromptConfiguratorContext = createContext<PromptAtoms | null>(null)
 
 export function usePromptAtoms() {
-  const atoms = use(PromptConfiguratorContext)
-  if (!atoms) {
+  const promptAtoms = use(PromptConfiguratorContext)
+  if (!promptAtoms) {
     throw new Error('usePromptAtoms must be used within PromptConfigurator')
   }
-  return atoms
+  return promptAtoms
 }

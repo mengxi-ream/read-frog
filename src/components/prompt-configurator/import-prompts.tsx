@@ -11,8 +11,8 @@ import { usePromptAtoms } from './context'
 import { analysisJSONFile } from './utils/prompt-file'
 
 export function ImportPrompts() {
-  const atoms = usePromptAtoms()
-  const [config, setConfig] = useAtom(atoms.config)
+  const promptAtoms = usePromptAtoms()
+  const [config, setConfig] = useAtom(promptAtoms.config)
   const inputId = useId()
 
   const injectPrompts = (list: PromptConfigList) => {

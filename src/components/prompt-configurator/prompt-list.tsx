@@ -10,10 +10,10 @@ import { ImportPrompts } from './import-prompts'
 import { PromptGrid } from './prompt-grid'
 
 export function PromptList() {
-  const atoms = usePromptAtoms()
-  const [config, setConfig] = useAtom(atoms.config)
-  const setSelectedPrompts = useSetAtom(atoms.selectedPrompts)
-  const [isExportMode, setIsExportMode] = useAtom(atoms.exportMode)
+  const promptAtoms = usePromptAtoms()
+  const [config, setConfig] = useAtom(promptAtoms.config)
+  const setSelectedPrompts = useSetAtom(promptAtoms.selectedPrompts)
+  const [isExportMode, setIsExportMode] = useAtom(promptAtoms.exportMode)
 
   const patterns = config.patterns
   const currentPromptId = config.promptId

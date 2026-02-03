@@ -28,9 +28,9 @@ export function ConfigurePrompt({
   originPrompt?: TranslatePromptObj
   className?: string
 } & React.ComponentProps<'button'>) {
-  const atoms = usePromptAtoms()
-  const [config, setConfig] = useAtom(atoms.config)
-  const isExportMode = useAtomValue(atoms.exportMode)
+  const promptAtoms = usePromptAtoms()
+  const [config, setConfig] = useAtom(promptAtoms.config)
+  const isExportMode = useAtomValue(promptAtoms.exportMode)
 
   const inEdit = !!originPrompt
   const isDefault = originPrompt?.id === DEFAULT_TRANSLATE_PROMPT_ID
