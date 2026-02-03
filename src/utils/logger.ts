@@ -21,7 +21,12 @@ const css = {
 
 type Level = 'log' | 'info' | 'warn' | 'error'
 
-function format(level: Level, msgs: any[]) {
+function noop() {}
+
+function createLogger(level: Level) {
+  if (!isDev) {
+    return noop
+  }
   const prefix = '[dev-log]'
   // Node 环境 → 用 ANSI；否则用浏览器 %c
   const useAnsi = typeof window === 'undefined'
@@ -34,14 +39,14 @@ function format(level: Level, msgs: any[]) {
   }[level]
 
   if (useAnsi) {
-    return [`${color}${prefix}${ansi.reset}`, ...msgs]
+    return console[level].bind(console, `${color}${prefix}${ansi.reset}`)
   }
-  return [`%c${prefix}`, color, ...msgs]
+  return console[level].bind(console, `%c${prefix}`, color)
 }
 
 export const logger = {
-  log: (...m: any[]) => isDev && console.log(...format('log', m)),
-  info: (...m: any[]) => isDev && console.info(...format('info', m)),
-  warn: (...m: any[]) => isDev && console.warn(...format('warn', m)),
-  error: (...m: any[]) => isDev && console.error(...format('error', m)),
+  log: createLogger('log'),
+  info: createLogger('info'),
+  warn: createLogger('warn'),
+  error: createLogger('error'),
 }
