@@ -32,6 +32,9 @@ export const YOUTUBE_NAVIGATE_EVENT = 'yt-navigate-finish'
 export const YOUTUBE_NATIVE_SUBTITLES_CLASS = '.ytp-caption-window-container'
 export const PLAYER_DATA_REQUEST_TYPE = 'READ_FROG_GET_PLAYER_DATA'
 export const PLAYER_DATA_RESPONSE_TYPE = 'READ_FROG_PLAYER_DATA'
+export const WAIT_TIMEDTEXT_REQUEST_TYPE = 'READ_FROG_WAIT_TIMEDTEXT'
+export const WAIT_TIMEDTEXT_RESPONSE_TYPE = 'READ_FROG_TIMEDTEXT_READY'
+export const TIMEDTEXT_WAIT_TIMEOUT_MS = 5000
 
 // YouTube player wait constants
 export const MAX_PLAYER_WAIT_ATTEMPTS = 50
@@ -41,6 +44,8 @@ export const STATE_WAIT_INTERVAL_MS = 300
 export const MAX_FETCH_RETRIES = 5
 export const FETCH_RETRY_DELAY_MS = 1000
 export const PLAYER_DATA_REQUEST_TIMEOUT_MS = 2000
+export const MAX_POT_WAIT_ATTEMPTS = 30
+export const POT_WAIT_INTERVAL_MS = 200
 
 // Subtitle style constants
 export const MIN_FONT_SCALE = 30

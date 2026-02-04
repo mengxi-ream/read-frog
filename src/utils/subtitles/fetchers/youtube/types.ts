@@ -23,6 +23,8 @@ export interface PlayerData {
   device: string | null
   cver: string | null
   playerState: number
+  selectedTrackLanguageCode: string | null
+  cachedTimedtextUrl: string | null
 }
 
 export const youtubeTimedTextSegSchema = z.object({

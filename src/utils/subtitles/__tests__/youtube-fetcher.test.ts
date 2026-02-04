@@ -43,21 +43,34 @@ describe('youtube subtitles fetcher', () => {
       writable: true,
     })
 
-    window.addEventListener('message', (event) => {
-      if (event.data?.type === PLAYER_DATA_REQUEST_TYPE) {
-        window.dispatchEvent(new MessageEvent('message', {
-          origin: window.location.origin,
-          data: {
-            type: PLAYER_DATA_RESPONSE_TYPE,
-            requestId: event.data.requestId,
-            success: false,
-            error: 'PLAYER_NOT_FOUND',
-          },
-        }))
+    const originalPostMessage = window.postMessage.bind(window)
+    ;(window as any).postMessage = function (message: any, targetOrigin: string) {
+      originalPostMessage(message, targetOrigin)
+      if (message?.type === PLAYER_DATA_REQUEST_TYPE) {
+        setTimeout(() => {
+          window.dispatchEvent(new MessageEvent('message', {
+            origin: window.location.origin,
+            data: {
+              type: PLAYER_DATA_RESPONSE_TYPE,
+              requestId: message.requestId,
+              success: true,
+              data: {
+                videoId: 'test123',
+                captionTracks: [],
+                audioCaptionTracks: [],
+                device: null,
+                cver: null,
+                playerState: 1,
+                selectedTrackLanguageCode: null,
+                cachedTimedtextUrl: 'https://www.youtube.com/api/timedtext?v=test123&lang=en',
+              },
+            },
+          }))
+        }, 0)
       }
-    })
+    }
 
-    await expect(fetcher.fetch()).rejects.toThrow('subtitles.errors.fetchSubTimeout')
+    await expect(fetcher.fetch()).rejects.toThrow('subtitles.errors.noSubtitlesFound')
 
     fetcher.cleanup()
   })
