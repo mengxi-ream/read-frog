@@ -2,9 +2,9 @@ import type { LangCodeISO6393 } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ArticleAnalysis, ArticleExplanation, ExtractedContent } from '@/types/content'
 import { i18n } from '#imports'
-import { LANG_CODE_TO_EN_NAME } from '@read-frog/definitions'
+import { LANG_CODE_TO_EN_NAME, langCodeISO6393Schema } from '@read-frog/definitions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { generateObject } from 'ai'
+import { generateText, Output } from 'ai'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { progressAtom, readStateAtom, store } from '@/entrypoints/side.content/atoms'
@@ -29,6 +29,14 @@ interface ExplainArticleParams {
 const MAX_ATTEMPTS = 3
 const MAX_CHARACTERS = 1000
 
+function parseISO6393WithFallback(lang: unknown): LangCodeISO6393 {
+  const result = langCodeISO6393Schema.safeParse(lang)
+  if (result.success) {
+    return result.data
+  }
+  return 'eng'
+}
+
 export function useAnalyzeContent() {
   const setReadState = useSetAtom(readStateAtom)
   const { language } = useAtomValue(configAtom)
@@ -51,20 +59,18 @@ export function useAnalyzeContent() {
 
       while (attempts < maxAttempts) {
         try {
-          const { object: articleAnalysis } = await generateObject({
+          const { output: articleAnalysis } = await generateText({
             model,
             system: getAnalyzePrompt(targetLang),
             prompt: JSON.stringify({
               originalTitle: extractedContent.article.title,
               content: extractedContent.paragraphs.join('\n'),
             }),
-            schema: articleAnalysisSchema,
+            output: Output.object({ schema: articleAnalysisSchema }),
           })
 
-          // TODO: if und, then UI need to show UI to ask user to select the language or not continue
-          void setDetectedCode(
-            articleAnalysis.detectedLang === 'und' ? 'eng' : articleAnalysis.detectedLang,
-          )
+          // TODO: parseISO6393WithFallback should return { success, value } so UI can prompt user to select language on failure
+          void setDetectedCode(parseISO6393WithFallback(articleAnalysis.detectedLang))
           logger.log('articleAnalysis', articleAnalysis)
 
           return articleAnalysis
@@ -102,14 +108,14 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
   const model = await getReadModelById(readProviderConfig.id)
   while (attempts < MAX_ATTEMPTS) {
     try {
-      const { object: articleExplanation } = await generateObject({
+      const { output: articleExplanation } = await generateText({
         model,
         system: getExplainPrompt(sourceLang, targetLang, language.level ?? 'intermediate'),
         prompt: JSON.stringify({
           overallSummary: articleAnalysis.summary,
           paragraphs: batch,
         }),
-        schema: articleExplanationSchema,
+        output: Output.object({ schema: articleExplanationSchema }),
       })
 
       store.set(progressAtom, prev => ({

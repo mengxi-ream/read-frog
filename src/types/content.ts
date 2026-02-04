@@ -1,5 +1,3 @@
-import { langCodeISO6393Schema } from '@read-frog/definitions'
-
 import { z } from 'zod'
 
 export interface ExtractedContent {
@@ -19,7 +17,9 @@ export interface ExtractedContent {
 
 export const articleAnalysisSchema = z.object({
   isArticle: z.boolean(),
-  detectedLang: langCodeISO6393Schema.or(z.literal('und')),
+  detectedLang: z.string().describe(
+    'ISO 639-3 language code (e.g., \'eng\', \'cmn\'). If unknown or unsupported, return \'und\'.',
+  ),
   summary: z.string(),
   introduction: z.string(),
   terms: z.array(z.string()),
