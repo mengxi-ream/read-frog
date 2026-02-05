@@ -46,8 +46,6 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       return this.subtitles
     }
 
-    this.cachedTrackHash = currentHash
-
     // Wait for player state >= 1 (video ready) BEFORE getting POT
     // YouTube only makes timedtext XHR request when video is ready to play
     await this.waitForPlayerState(videoId)
@@ -65,6 +63,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     this.sourceLanguage = track.languageCode
     this.subtitles = await this.processRawEvents(events)
+    this.cachedTrackHash = currentHash
 
     return this.subtitles
   }
