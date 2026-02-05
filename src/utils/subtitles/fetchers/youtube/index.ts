@@ -32,6 +32,7 @@ function sleep(ms: number): Promise<void> {
 export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
   private subtitles: SubtitlesFragment[] = []
   private sourceLanguage: string = ''
+  private cachedTrackHash: string | null = null
 
   async fetch(): Promise<SubtitlesFragment[]> {
     const videoId = getYoutubeVideoId()
@@ -39,10 +40,13 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       throw new OverlaySubtitlesError(i18n.t('subtitles.errors.videoNotFound'))
     }
 
-    const cached = await this.getCachedOrInvalidate(videoId)
-    if (cached) {
-      return cached
+    const currentHash = await this.computeTrackHash()
+
+    if (currentHash && this.subtitles.length > 0 && this.cachedTrackHash === currentHash) {
+      return this.subtitles
     }
+
+    this.cachedTrackHash = currentHash
 
     // Wait for player state >= 1 (video ready) BEFORE getting POT
     // YouTube only makes timedtext XHR request when video is ready to play
@@ -68,23 +72,40 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
   cleanup(): void {
     this.subtitles = []
     this.sourceLanguage = ''
+    this.cachedTrackHash = null
   }
 
-  private async getCachedOrInvalidate(videoId: string): Promise<SubtitlesFragment[] | null> {
-    const playerData = await this.requestPlayerData(videoId)
-    if (!playerData.success || !playerData.data) {
+  async shouldUseSameTrack(): Promise<boolean> {
+    if (this.subtitles.length === 0 || !this.cachedTrackHash) {
+      return false
+    }
+
+    try {
+      const currentHash = await this.computeTrackHash()
+      return currentHash !== null && this.cachedTrackHash === currentHash
+    }
+    catch {
+      return false
+    }
+  }
+
+  private async computeTrackHash(): Promise<string | null> {
+    const videoId = getYoutubeVideoId()
+    if (!videoId) {
       return null
     }
 
-    const selectedLanguage = playerData.data.selectedTrackLanguageCode
-    const hasCache = this.subtitles.length > 0
-    const trackChanged = selectedLanguage && selectedLanguage !== this.sourceLanguage
-
-    if (hasCache && trackChanged) {
-      this.cleanup()
+    const response = await this.requestPlayerData(videoId)
+    if (!response.success || !response.data) {
+      return null
     }
 
-    return this.subtitles.length > 0 ? this.subtitles : null
+    const track = this.selectTrack(response.data.captionTracks, response.data.selectedTrackLanguageCode)
+    if (!track) {
+      return null
+    }
+
+    return `${videoId}:${track.languageCode}:${track.kind ?? ''}:${track.vssId}`
   }
 
   private async waitForPlayerState(videoId: string): Promise<void> {

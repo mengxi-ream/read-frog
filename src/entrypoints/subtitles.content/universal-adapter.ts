@@ -4,13 +4,13 @@ import type { SubtitlesFragment, SubtitlesTranslationBlock } from '@/utils/subti
 import { i18n } from '#imports'
 import { toast } from 'sonner'
 import { getLocalConfig } from '@/utils/config/storage'
-import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
+import { DEFAULT_SUBTITLE_POSITION, HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
 import { waitForElement } from '@/utils/dom/wait-for-element'
 import { ToastSubtitlesError } from '@/utils/subtitles/errors'
 import { aiSegmentBlock } from '@/utils/subtitles/processor/ai-segmentation'
 import { createSubtitlesBlocks, findNextBlockToTranslate, updateBlockState } from '@/utils/subtitles/processor/block-strategy'
 import { translateSubtitles } from '@/utils/subtitles/processor/translator'
-import { currentSubtitleAtom, subtitlesStore, subtitlesTranslationBlocksAtom } from './atoms'
+import { currentSubtitleAtom, subtitlesPositionAtom, subtitlesStore, subtitlesTranslationBlocksAtom } from './atoms'
 import { renderSubtitlesTranslateButton } from './renderer/render-translate-button'
 import { SubtitlesScheduler } from './subtitles-scheduler'
 
@@ -45,20 +45,15 @@ export class UniversalVideoAdapter {
     this.setupNavigationListener()
   }
 
-  private resetSubtitlesData() {
-    this.subtitlesScheduler?.reset()
-    this.stopBlockMonitoring()
-    this.originalSubtitles = []
-    this.subtitlesFetcher.cleanup()
-  }
-
   private resetForNavigation() {
     this.destroyScheduler()
     this.stopBlockMonitoring()
+    this.clearBlocks()
     this.originalSubtitles = []
     this.cachedVideoId = null
     this.subtitlesFetcher.cleanup()
     this.showNativeSubtitles()
+    subtitlesStore.set(subtitlesPositionAtom, DEFAULT_SUBTITLE_POSITION)
   }
 
   private destroyScheduler() {
@@ -138,7 +133,7 @@ export class UniversalVideoAdapter {
     else {
       this.subtitlesScheduler?.hide()
       this.showNativeSubtitles()
-      this.resetSubtitlesData()
+      this.stopBlockMonitoring()
     }
   }
 
@@ -180,6 +175,17 @@ export class UniversalVideoAdapter {
     try {
       const currentVideoId = this.config.getVideoId?.() ?? ''
       this.cachedVideoId = currentVideoId
+
+      const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
+
+      if (useSameTrack) {
+        this.resetErrorBlocksToIdle()
+        this.startBlockMonitoring()
+        return
+      }
+
+      this.clearBlocks()
+      this.subtitlesScheduler?.reset()
       this.subtitlesScheduler?.setState('fetching')
 
       this.originalSubtitles = await this.subtitlesFetcher.fetch()
@@ -203,6 +209,20 @@ export class UniversalVideoAdapter {
         this.subtitlesScheduler?.setState('error', { message: errorMessage })
       }
     }
+  }
+
+  private resetErrorBlocksToIdle(): void {
+    const blocks = subtitlesStore.get(subtitlesTranslationBlocksAtom)
+    const updatedBlocks = blocks.map(block =>
+      block.state === 'error'
+        ? { ...block, state: 'idle' as const, fragments: block.fragments.map(f => ({ ...f, translation: '' })) }
+        : block,
+    )
+    subtitlesStore.set(subtitlesTranslationBlocksAtom, updatedBlocks)
+  }
+
+  private clearBlocks(): void {
+    subtitlesStore.set(subtitlesTranslationBlocksAtom, [])
   }
 
   private async processSubtitles() {
@@ -312,8 +332,6 @@ export class UniversalVideoAdapter {
   }
 
   private stopBlockMonitoring() {
-    subtitlesStore.set(subtitlesTranslationBlocksAtom, [])
-
     if (!this.subtitlesScheduler)
       return
 
