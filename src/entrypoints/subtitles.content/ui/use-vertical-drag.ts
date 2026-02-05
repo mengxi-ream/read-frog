@@ -1,88 +1,207 @@
+import type { RefObject } from 'react'
+import type { SubtitlePosition } from '../atoms'
 import { useAtom } from 'jotai'
-import { useEffect, useEffectEvent, useRef } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { getContainingShadowRoot } from '@/utils/host/dom/node'
-import { subtitlesTopPercentAtom } from '../atoms'
+import { subtitlesPositionAtom } from '../atoms'
 
-export function useVerticalDrag() {
+const BASE_FONT_RATIO = 0.03
+
+interface SubtitleWindowStyle {
+  width: number
+  height: number
+  fontSize: number
+}
+
+export interface SubtitlePositionStyle {
+  top?: string
+  bottom?: string
+}
+
+interface Rects {
+  container: HTMLDivElement
+  videoContainer: HTMLElement
+  containerRect: DOMRect
+  videoRect: DOMRect
+}
+
+interface AnchorPositionContext {
+  videoRect: DOMRect
+  containerRect: DOMRect
+  controlsVisible: boolean
+  controlsHeight: number
+}
+
+function getVideoContainer(element: HTMLElement): HTMLElement | null {
+  const rootNode = getContainingShadowRoot(element)
+  const shadowHost = rootNode?.host as HTMLElement | undefined
+  return shadowHost?.parentElement ?? null
+}
+
+function getRects(containerRef: RefObject<HTMLDivElement | null>): Rects | null {
+  const container = containerRef.current
+  if (!container)
+    return null
+
+  const videoContainer = getVideoContainer(container)
+  if (!videoContainer)
+    return null
+
+  return {
+    container,
+    videoContainer,
+    containerRect: container.getBoundingClientRect(),
+    videoRect: videoContainer.getBoundingClientRect(),
+  }
+}
+
+function calculateAnchorPosition(ctx: AnchorPositionContext): SubtitlePosition {
+  const { videoRect, containerRect, controlsVisible, controlsHeight } = ctx
+  const videoHeight = videoRect.height
+
+  const subtitleTop = containerRect.top - videoRect.top
+  const subtitleCenter = subtitleTop + containerRect.height / 2
+  const midPoint = videoHeight / 2
+
+  const anchor = subtitleCenter < midPoint ? 'top' : 'bottom'
+
+  if (anchor === 'top') {
+    const percent = (subtitleTop / videoHeight) * 100
+    return { percent: Math.max(0, percent), anchor: 'top' }
+  }
+
+  const subtitleBottom = videoHeight - (containerRect.bottom - videoRect.top)
+  const subtitleBottomPercent = (subtitleBottom / videoHeight) * 100
+  const controlsOffsetPercent = controlsVisible ? (controlsHeight / videoHeight) * 100 : 0
+  const percent = subtitleBottomPercent - controlsOffsetPercent
+
+  return { percent: Math.max(0, percent), anchor: 'bottom' }
+}
+
+export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number) {
   const containerRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)
-  const isDragging = useRef(false)
+  const isDraggingRef = useRef(false)
   const startY = useRef(0)
-  const startPercent = useRef(0)
-  const [topPercent, setTopPercent] = useAtom(subtitlesTopPercentAtom)
+  const startPosition = useRef<SubtitlePosition>({ percent: 10, anchor: 'bottom' })
+  const [position, setPosition] = useAtom(subtitlesPositionAtom)
+  const [isDragging, setIsDragging] = useState(false)
+  const [windowStyle, setWindowStyle] = useState<SubtitleWindowStyle>({
+    width: 0,
+    height: 0,
+    fontSize: 16,
+  })
+
+  const updateWindowStyle = useEffectEvent(() => {
+    const rects = getRects(containerRef)
+    if (!rects)
+      return
+
+    setWindowStyle({
+      width: rects.videoRect.width,
+      height: rects.videoRect.height,
+      fontSize: rects.videoRect.height * BASE_FONT_RATIO,
+    })
+  })
 
   const onMouseDown = useEffectEvent((e: MouseEvent) => {
     if (e.button !== 0)
       return
-    isDragging.current = true
+    isDraggingRef.current = true
+    setIsDragging(true)
     startY.current = e.clientY
-    startPercent.current = topPercent
+    startPosition.current = { ...position }
     e.preventDefault()
     e.stopPropagation()
   })
 
   const onMouseMove = useEffectEvent((e: MouseEvent) => {
-    const container = containerRef.current
-    if (!isDragging.current || !container)
+    if (!isDraggingRef.current)
       return
 
-    const rootNode = getContainingShadowRoot(container)
-    const boundary = rootNode?.host?.parentElement
-    if (!boundary)
+    const rects = getRects(containerRef)
+    if (!rects)
       return
 
-    const boundaryRect = boundary.getBoundingClientRect()
-    const containerRect = container.getBoundingClientRect()
-    const boundaryHeight = boundaryRect.height
-    const containerHeight = containerRect.height
+    const { videoRect, containerRect } = rects
+    const videoHeight = videoRect.height
 
-    const deltaPercent = ((e.clientY - startY.current) / boundaryHeight) * 100
-    const newPercent = startPercent.current + deltaPercent
+    // Calculate deltaY relative to video container height
+    const deltaY = e.clientY - startY.current
+    const deltaPercent = (deltaY / videoHeight) * 100
 
-    const maxPercent = ((boundaryHeight - containerHeight) / boundaryHeight) * 100
-    setTopPercent(Math.max(0, Math.min(maxPercent, newPercent)))
+    // Calculate new position based on current anchor
+    const isBottomAnchor = startPosition.current.anchor === 'bottom'
+    let newPercent = isBottomAnchor
+      ? startPosition.current.percent - deltaPercent
+      : startPosition.current.percent + deltaPercent
+
+    const reservedHeight = controlsVisible && startPosition.current.anchor === 'bottom'
+      ? controlsHeight
+      : 0
+    const maxPercent = ((videoHeight - containerRect.height - reservedHeight) / videoHeight) * 100
+    newPercent = Math.max(0, Math.min(maxPercent, newPercent))
+
+    // Check if we need to switch anchor (crossed midline)
+    const newAnchorPosition = calculateAnchorPosition({
+      videoRect,
+      containerRect,
+      controlsVisible,
+      controlsHeight,
+    })
+
+    // If anchor changed, update start position and reset drag origin
+    if (newAnchorPosition.anchor !== startPosition.current.anchor) {
+      startPosition.current = newAnchorPosition
+      startY.current = e.clientY
+      setPosition(newAnchorPosition)
+      return
+    }
+
+    setPosition({ ...startPosition.current, percent: newPercent })
   })
 
   const onMouseUp = useEffectEvent(() => {
-    isDragging.current = false
+    if (!isDraggingRef.current)
+      return
+    isDraggingRef.current = false
+    setIsDragging(false)
   })
 
-  const clampTopPercent = useEffectEvent(() => {
-    const container = containerRef.current
-    if (!container)
+  const clampPosition = useEffectEvent(() => {
+    const rects = getRects(containerRef)
+    if (!rects)
       return
 
-    const rootNode = getContainingShadowRoot(container)
-    const boundary = rootNode?.host?.parentElement
-    if (!boundary)
-      return
+    const { videoRect, containerRect } = rects
+    const maxPercent = ((videoRect.height - containerRect.height) / videoRect.height) * 100
+    const clampedPercent = Math.max(0, Math.min(maxPercent, position.percent))
 
-    const boundaryHeight = boundary.getBoundingClientRect().height
-    const containerHeight = container.getBoundingClientRect().height
-    const maxPercent = ((boundaryHeight - containerHeight) / boundaryHeight) * 100
-
-    const clampedPercent = Math.max(0, Math.min(maxPercent, topPercent))
-    if (topPercent !== clampedPercent) {
-      setTopPercent(clampedPercent)
+    if (position.percent !== clampedPercent) {
+      setPosition({ ...position, percent: clampedPercent })
     }
   })
 
-  useEffect(() => {
+  const setupListeners = useEffectEvent(() => {
     const handle = handleRef.current
     const container = containerRef.current
     if (!handle || !container)
       return
 
-    const rootNode = getContainingShadowRoot(container)
-    const boundary = rootNode?.host?.parentElement
+    const videoContainer = getVideoContainer(container)
 
     handle.addEventListener('mousedown', onMouseDown)
     window.addEventListener('mousemove', onMouseMove)
     window.addEventListener('mouseup', onMouseUp)
 
-    const resizeObserver = new ResizeObserver(clampTopPercent)
-    if (boundary) {
-      resizeObserver.observe(boundary)
+    const resizeObserver = new ResizeObserver(() => {
+      updateWindowStyle()
+      clampPosition()
+    })
+
+    if (videoContainer) {
+      resizeObserver.observe(videoContainer)
+      updateWindowStyle()
     }
 
     return () => {
@@ -91,7 +210,24 @@ export function useVerticalDrag() {
       window.removeEventListener('mouseup', onMouseUp)
       resizeObserver.disconnect()
     }
+  })
+
+  useEffect(() => {
+    return setupListeners()
   }, [])
 
-  return { containerRef, handleRef, topPercent }
+  const controlsOffsetPercent = controlsVisible && position.anchor === 'bottom' && windowStyle.height > 0
+    ? (controlsHeight / windowStyle.height) * 100
+    : 0
+
+  const positionStyle: SubtitlePositionStyle = position.anchor === 'top'
+    ? { top: `${position.percent}%`, bottom: 'unset' }
+    : { bottom: `${position.percent + controlsOffsetPercent}%`, top: 'unset' }
+
+  return {
+    refs: { container: containerRef, handle: handleRef },
+    windowStyle,
+    positionStyle,
+    isDragging,
+  }
 }

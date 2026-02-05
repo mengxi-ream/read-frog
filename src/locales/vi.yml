@@ -657,6 +657,10 @@ subtitles:
     noSubtitlesFound: Không tìm thấy phụ đề
     videoNotFound: Không tìm thấy phần tử video
     controlsBarNotFound: Không tìm thấy thanh điều khiển
+    aiRateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau
+    aiAuthFailed: Xác thực API thất bại, vui lòng kiểm tra API key của bạn
+    aiServiceUnavailable: Dịch vụ dịch thuật tạm thời không khả dụng
+    aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc
 hotkey:
   control: Ctrl
   alt: Option
@@ -677,6 +681,7 @@ translationHub:
   deleteCard: Xóa thẻ
   translationFailed: Dịch Thất Bại
   translationFailedFallback: Dịch thất bại
+  retryTranslation: Thử lại dịch
 languages:
   eng: Tiếng Anh
   cmn: Tiếng Trung giản thể

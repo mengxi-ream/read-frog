@@ -656,6 +656,10 @@ subtitles:
     noSubtitlesFound: 자막을 찾을 수 없습니다
     videoNotFound: 비디오 요소를 찾을 수 없습니다
     controlsBarNotFound: 컨트롤 바를 찾을 수 없습니다
+    aiRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요
+    aiAuthFailed: API 인증에 실패했습니다. API 키를 확인해 주세요
+    aiServiceUnavailable: 번역 서비스를 일시적으로 사용할 수 없습니다
+    aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다
 hotkey:
   control: Ctrl
   alt: Option
@@ -676,6 +680,7 @@ translationHub:
   deleteCard: 카드 삭제
   translationFailed: 번역 실패
   translationFailedFallback: 번역 실패
+  retryTranslation: 번역 재시도
 languages:
   eng: 영어
   cmn: 중국어 간체

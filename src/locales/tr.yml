@@ -657,6 +657,10 @@ subtitles:
     noSubtitlesFound: Altyazı bulunamadı
     videoNotFound: Video öğesi bulunamadı
     controlsBarNotFound: Kontrol çubuğu bulunamadı
+    aiRateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin
+    aiAuthFailed: API kimlik doğrulaması başarısız, lütfen API anahtarınızı kontrol edin
+    aiServiceUnavailable: Çeviri hizmeti geçici olarak kullanılamıyor
+    aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor
 hotkey:
   control: Ctrl
   alt: Option
@@ -677,6 +681,7 @@ translationHub:
   deleteCard: Kartı sil
   translationFailed: Çeviri Başarısız
   translationFailedFallback: Çeviri başarısız
+  retryTranslation: Çeviriyi yeniden dene
 languages:
   eng: İngilizce
   cmn: Basitleştirilmiş Çince

@@ -657,6 +657,10 @@ subtitles:
     noSubtitlesFound: Субтитры не найдены
     videoNotFound: Видео элемент не найден
     controlsBarNotFound: Панель управления не найдена
+    aiRateLimited: Слишком много запросов, пожалуйста, повторите позже
+    aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
+    aiServiceUnavailable: Служба перевода временно недоступна
+    aiNoResponse: Служба AI не ответила, отображается оригинальный текст
 hotkey:
   control: Ctrl
   alt: Option
@@ -677,6 +681,7 @@ translationHub:
   deleteCard: Удалить карточку
   translationFailed: Ошибка перевода
   translationFailedFallback: Ошибка перевода
+  retryTranslation: Повторить перевод
 languages:
   eng: Английский
   cmn: Упрощённый китайский

@@ -658,6 +658,10 @@ subtitles:
     noSubtitlesFound: 未找到字幕
     videoNotFound: 视频元素未找到
     controlsBarNotFound: 控制栏未找到
+    aiRateLimited: 请求过于频繁，请稍后再试
+    aiAuthFailed: API 认证失败，请检查您的 API 密钥
+    aiServiceUnavailable: 翻译服务暂时不可用
+    aiNoResponse: AI 服务未响应，使用原文显示
 hotkey:
   control: Ctrl
   alt: Option
@@ -678,6 +682,7 @@ translationHub:
   deleteCard: 删除卡片
   translationFailed: 翻译失败
   translationFailedFallback: 翻译失败
+  retryTranslation: 重试翻译
 languages:
   eng: 英语
   cmn: 简体中文

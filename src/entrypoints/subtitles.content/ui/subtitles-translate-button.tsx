@@ -1,8 +1,10 @@
-import { useEffect, useEffectEvent, useState } from 'react'
+import { useAtomValue } from 'jotai'
+import { useEffect, useEffectEvent } from 'react'
 import logo from '@/assets/icons/original/read-frog.png'
 import { cn } from '@/lib/utils'
 import { getLocalConfig } from '@/utils/config/storage'
 import { TRANSLATE_BUTTON_CLASS } from '@/utils/constants/subtitles'
+import { subtitlesStore, subtitlesVisibleAtom } from '../atoms'
 
 export function SubtitleToggleButton(
   { onToggle }:
@@ -10,13 +12,12 @@ export function SubtitleToggleButton(
     onToggle: (enabled: boolean) => void
   },
 ) {
-  const [isEnabled, setIsEnabled] = useState(false)
+  const isVisible = useAtomValue(subtitlesVisibleAtom, { store: subtitlesStore })
 
   const tryStartSubtitles = useEffectEvent(async () => {
     const config = await getLocalConfig()
     const autoStart = config?.videoSubtitles?.autoStart ?? false
     if (autoStart) {
-      setIsEnabled(true)
       onToggle(true)
     }
   })
@@ -26,9 +27,7 @@ export function SubtitleToggleButton(
   }, [])
 
   const handleClick = () => {
-    const newState = !isEnabled
-    setIsEnabled(newState)
-    onToggle(newState)
+    onToggle(!isVisible)
   }
 
   return (
@@ -43,16 +42,16 @@ export function SubtitleToggleButton(
         alt="Subtitle Toggle"
         className={cn(
           'w-8 h-8 transition-opacity duration-200 object-contain block',
-          isEnabled ? 'opacity-100' : 'opacity-70',
+          isVisible ? 'opacity-100' : 'opacity-70',
         )}
       />
       <div
         className={cn(
           'absolute bottom-1 right-0 px-1 py-0.5 rounded text-[8px] font-medium leading-none transition-colors duration-200',
-          isEnabled ? 'bg-green-500 text-white' : 'bg-gray-500 text-white',
+          isVisible ? 'bg-green-500 text-white' : 'bg-gray-500 text-white',
         )}
       >
-        {isEnabled ? 'ON' : 'OFF'}
+        {isVisible ? 'ON' : 'OFF'}
       </div>
     </button>
   )

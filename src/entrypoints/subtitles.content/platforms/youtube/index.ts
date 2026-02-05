@@ -10,5 +10,5 @@ export function setupYoutubeSubtitles() {
     subtitlesFetcher,
   })
 
-  adapter.initialize()
+  void adapter.initialize()
 }

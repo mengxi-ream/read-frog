@@ -659,6 +659,10 @@ subtitles:
     noSubtitlesFound: No subtitles found
     videoNotFound: Video element not found
     controlsBarNotFound: Controls bar not found
+    aiRateLimited: Too many requests, please try again later
+    aiAuthFailed: API authentication failed, please check your API key
+    aiServiceUnavailable: Translation service temporarily unavailable
+    aiNoResponse: AI service did not respond, using original text
 hotkey:
   control: Ctrl
   alt: Option
@@ -679,6 +683,7 @@ translationHub:
   deleteCard: Delete card
   translationFailed: Translation Failed
   translationFailedFallback: Translation failed
+  retryTranslation: Retry translation
 languages:
   eng: English
   cmn: Simplified Chinese

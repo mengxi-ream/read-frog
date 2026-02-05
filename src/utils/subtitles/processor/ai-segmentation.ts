@@ -2,35 +2,13 @@ import type { SubtitlesFragment } from '../types'
 import type { Config } from '@/types/config/config'
 import { sendMessage } from '@/utils/message'
 
-/**
- * Patterns to filter out from subtitles (non-speech annotations)
- */
-const NOISE_PATTERNS = [
-  /^\[.*\]$/, // [Music], [Applause], [Laughter], etc.
-  /^\(.*\)$/, // (Music), (Applause), etc.
-  /^♪.*♪$/, // ♪ Music ♪
-  /^🎵.*🎵$/, // 🎵 Music 🎵
-  /^🎶.*🎶$/, // 🎶 Music 🎶
-]
-
-/**
- * Check if text is a noise annotation that should be filtered out
- */
-function isNoiseText(text: string): boolean {
-  const trimmed = text.trim()
-  return NOISE_PATTERNS.some(pattern => pattern.test(trimmed))
-}
-
 export function cleanFragmentsForAi(fragments: SubtitlesFragment[]): SubtitlesFragment[] {
   return fragments
     .map(fragment => ({
       ...fragment,
       text: fragment.text.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim(),
     }))
-    .filter(fragment =>
-      fragment.text.length > 0
-      && !isNoiseText(fragment.text),
-    )
+    .filter(fragment => fragment.text.length > 0)
 }
 
 export function formatFragmentsToJson(fragments: SubtitlesFragment[]): string {

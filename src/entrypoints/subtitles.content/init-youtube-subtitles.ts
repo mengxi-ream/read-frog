@@ -14,7 +14,8 @@ export function initYoutubeSubtitles() {
       return
     }
     initialized = true
-    await mountSubtitlesUI(youtubeConfig.selectors.playerContainer)
+
+    await mountSubtitlesUI(youtubeConfig)
     setupYoutubeSubtitles()
   }
 
