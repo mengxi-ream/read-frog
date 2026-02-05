@@ -44,7 +44,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
         sourceCode: req.sourceLanguage,
         targetCode: req.targetLanguage,
         level: language.level,
-      }, provider, { promptResolver: getTranslatePrompt })
+      }, provider, getTranslatePrompt)
 
       // Ignore stale responses - return undefined to silently discard
       if (requestIdRef.current !== myRequestId) {

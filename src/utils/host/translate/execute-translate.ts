@@ -13,8 +13,8 @@ export async function executeTranslate(
   text: string,
   langConfig: Config['language'],
   providerConfig: ProviderConfig,
-  options: {
-    promptResolver: PromptResolver
+  promptResolver: PromptResolver,
+  options?: {
     forceBackgroundFetch?: boolean
     isBatch?: boolean
     content?: ArticleContent
@@ -53,7 +53,7 @@ export async function executeTranslate(
   }
   else if (isLLMTranslateProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
-    translatedText = await aiTranslate(text, targetLangName, providerConfig, options)
+    translatedText = await aiTranslate(text, targetLangName, providerConfig, promptResolver, options)
   }
   else {
     throw new Error(`Unknown provider: ${provider}`)

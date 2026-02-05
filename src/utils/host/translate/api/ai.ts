@@ -15,14 +15,15 @@ export async function aiTranslate(
   text: string,
   targetLangName: string,
   providerConfig: LLMTranslateProviderConfig,
-  options: { promptResolver: PromptResolver, isBatch?: boolean, content?: ArticleContent },
+  promptResolver: PromptResolver,
+  options?: { isBatch?: boolean, content?: ArticleContent },
 ) {
   const { id: providerId, models: { translate }, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const translateModel = translate.isCustomModel ? translate.customModel : translate.model
   const model = await getTranslateModelById(providerId)
 
   const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
-  const { systemPrompt, prompt } = await options.promptResolver(targetLangName, text, options)
+  const { systemPrompt, prompt } = await promptResolver(targetLangName, text, options)
 
   const { text: translatedText } = await generateText({
     model,

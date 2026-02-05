@@ -44,7 +44,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     // for safety, we should not include apiKey in the mutationKey
     mutationKey: ['apiConnection', getObjectWithoutAPIKeys(providerConfig)],
     mutationFn: async () => {
-      return await executeTranslate('Hi', DEFAULT_CONFIG.language, providerConfig, { promptResolver: getTranslatePrompt })
+      return await executeTranslate('Hi', DEFAULT_CONFIG.language, providerConfig, getTranslatePrompt)
     },
   })
 

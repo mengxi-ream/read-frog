@@ -105,7 +105,7 @@ function createBatchQueue(
       const hash = Sha256Hex(...dataList.map(d => d.hash))
 
       const batchThunk = async (): Promise<string[]> => {
-        const result = await executeTranslate(batchText, langConfig, providerConfig, { promptResolver: mockPromptResolver, isBatch: true })
+        const result = await executeTranslate(batchText, langConfig, providerConfig, mockPromptResolver, { isBatch: true })
         return parseBatchResult(result)
       }
 
@@ -475,7 +475,7 @@ describe('batchQueue – error handling', () => {
       maxRetries: 2,
       enableFallbackToIndividual: true,
       executeIndividual: async (data) => {
-        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, { promptResolver: mockPromptResolver })
+        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
         return result
       },
     })
@@ -529,7 +529,7 @@ describe('batchQueue – error handling', () => {
       maxRetries: 3,
       enableFallbackToIndividual: true,
       executeIndividual: async (data) => {
-        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, { promptResolver: mockPromptResolver })
+        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
         return result
       },
     })
