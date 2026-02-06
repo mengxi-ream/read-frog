@@ -583,6 +583,9 @@ options:
       maxItemsPerBatch:
         title: Số đoạn văn tối đa
         description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
+    customPrompts:
+      title: Tùy chỉnh Prompt phụ đề
+      description: Tùy chỉnh mẫu prompt cho dịch phụ đề (độc lập với prompt dịch trang web)
   whatsNew:
     title: Có gì mới
   survey:

@@ -581,6 +581,9 @@ options:
       maxItemsPerBatch:
         title: 最大段落数
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
+    customPrompts:
+      title: カスタム字幕プロンプト
+      description: 字幕翻訳用のプロンプトテンプレートをカスタマイズ（ウェブページ翻訳プロンプトとは独立）
   whatsNew:
     title: 新機能
   survey:

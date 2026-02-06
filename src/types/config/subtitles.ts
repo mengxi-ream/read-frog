@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_BACKGROUND_OPACITY, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from '@/utils/constants/subtitles'
-import { batchQueueConfigSchema, requestQueueConfigSchema } from './translate'
+import { batchQueueConfigSchema, customPromptsConfigSchema, requestQueueConfigSchema } from './translate'
 
 export const subtitlesDisplayModeSchema = z.enum(['bilingual', 'originalOnly', 'translationOnly'])
 export const subtitlesTranslationPositionSchema = z.enum(['above', 'below'])
@@ -32,6 +32,7 @@ export const videoSubtitlesSchema = z.object({
   aiSegmentation: z.boolean(),
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,
+  customPromptsConfig: customPromptsConfigSchema,
 })
 
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>

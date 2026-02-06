@@ -9,6 +9,8 @@ import { executeTranslate } from '@/utils/host/translate/execute-translate'
 import { BatchQueue } from '../batch-queue'
 import { RequestQueue } from '../request-queue'
 
+const mockPromptResolver = vi.fn().mockResolvedValue({ systemPrompt: '', prompt: '' })
+
 // Mock dependencies
 vi.mock('@/utils/host/translate/execute-translate', () => ({
   executeTranslate: vi.fn(),
@@ -103,7 +105,7 @@ function createBatchQueue(
       const hash = Sha256Hex(...dataList.map(d => d.hash))
 
       const batchThunk = async (): Promise<string[]> => {
-        const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true })
+        const result = await executeTranslate(batchText, langConfig, providerConfig, mockPromptResolver, { isBatch: true })
         return parseBatchResult(result)
       }
 
@@ -473,7 +475,7 @@ describe('batchQueue – error handling', () => {
       maxRetries: 2,
       enableFallbackToIndividual: true,
       executeIndividual: async (data) => {
-        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig)
+        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
         return result
       },
     })
@@ -527,7 +529,7 @@ describe('batchQueue – error handling', () => {
       maxRetries: 3,
       enableFallbackToIndividual: true,
       executeIndividual: async (data) => {
-        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig)
+        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
         return result
       },
     })

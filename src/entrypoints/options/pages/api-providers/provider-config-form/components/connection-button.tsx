@@ -8,6 +8,7 @@ import LoadingDots from '@/components/loading-dots'
 import { getObjectWithoutAPIKeys } from '@/utils/config/api'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { executeTranslate } from '@/utils/host/translate/execute-translate'
+import { getTranslatePrompt } from '@/utils/prompts/translate'
 
 function ConnectionSuccessIcon() {
   return (
@@ -43,7 +44,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     // for safety, we should not include apiKey in the mutationKey
     mutationKey: ['apiConnection', getObjectWithoutAPIKeys(providerConfig)],
     mutationFn: async () => {
-      return await executeTranslate('Hi', DEFAULT_CONFIG.language, providerConfig)
+      return await executeTranslate('Hi', DEFAULT_CONFIG.language, providerConfig, getTranslatePrompt)
     },
   })
 

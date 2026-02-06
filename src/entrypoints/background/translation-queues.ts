@@ -2,6 +2,7 @@ import type { Config } from '@/types/config/config'
 import type { LLMTranslateProviderConfig, ProviderConfig } from '@/types/config/provider'
 import type { BatchQueueConfig, RequestQueueConfig } from '@/types/config/translate'
 import type { ArticleContent } from '@/types/content'
+import type { PromptResolver } from '@/utils/host/translate/api/ai'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { putBatchRequestRecord } from '@/utils/batch-request-record'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
@@ -13,6 +14,8 @@ import { Sha256Hex } from '@/utils/hash'
 import { executeTranslate } from '@/utils/host/translate/execute-translate'
 import { logger } from '@/utils/logger'
 import { onMessage } from '@/utils/message'
+import { getSubtitlesTranslatePrompt } from '@/utils/prompts/subtitles'
+import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { BatchQueue } from '@/utils/request/batch-queue'
 import { RequestQueue } from '@/utils/request/request-queue'
 import { ensureInitializedConfig } from './config'
@@ -81,14 +84,16 @@ interface TranslateBatchData {
   content?: ArticleContent
 }
 
-interface QueueConfig {
+interface TranslationQueueSetupConfig {
   requestQueueConfig: RequestQueueConfig
   batchQueueConfig: BatchQueueConfig
+  promptResolver: PromptResolver
 }
 
-async function createTranslationQueues(config: QueueConfig) {
+async function createTranslationQueues(config: TranslationQueueSetupConfig) {
   const { rate, capacity } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
+  const { promptResolver } = config
 
   const requestQueue = new RequestQueue({
     rate,
@@ -117,7 +122,7 @@ async function createTranslationQueues(config: QueueConfig) {
 
       const batchThunk = async (): Promise<string[]> => {
         await putBatchRequestRecord({ originalRequestCount: dataList.length, providerConfig })
-        const result = await executeTranslate(batchText, langConfig, providerConfig, { isBatch: true, content })
+        const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })
         return parseBatchResult(result)
       }
 
@@ -127,7 +132,7 @@ async function createTranslationQueues(config: QueueConfig) {
       const { text, langConfig, providerConfig, hash, scheduleAt, content } = data
       const thunk = async () => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
-        return executeTranslate(text, langConfig, providerConfig, { content })
+        return executeTranslate(text, langConfig, providerConfig, promptResolver, { content })
       }
       return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
@@ -151,6 +156,7 @@ export async function setUpWebPageTranslationQueue() {
   const { requestQueue, batchQueue } = await createTranslationQueues({
     requestQueueConfig,
     batchQueueConfig,
+    promptResolver: getTranslatePrompt,
   })
 
   onMessage('enqueueTranslateRequest', async (message) => {
@@ -181,7 +187,7 @@ export async function setUpWebPageTranslationQueue() {
     }
     else {
       // Create thunk based on type and params
-      const thunk = () => executeTranslate(text, langConfig, providerConfig)
+      const thunk = () => executeTranslate(text, langConfig, providerConfig, getTranslatePrompt)
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
 
@@ -218,6 +224,7 @@ export async function setUpSubtitlesTranslationQueue() {
   const { requestQueue, batchQueue } = await createTranslationQueues({
     requestQueueConfig,
     batchQueueConfig,
+    promptResolver: getSubtitlesTranslatePrompt,
   })
 
   onMessage('enqueueSubtitlesTranslateRequest', async (message) => {
@@ -245,7 +252,7 @@ export async function setUpSubtitlesTranslationQueue() {
       result = await batchQueue.enqueue(data)
     }
     else {
-      const thunk = () => executeTranslate(text, langConfig, providerConfig)
+      const thunk = () => executeTranslate(text, langConfig, providerConfig, getSubtitlesTranslatePrompt)
       result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
 
