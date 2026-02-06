@@ -1,4 +1,4 @@
-import React from 'react'
+import * as React from 'react'
 import themeCSS from '@/assets/styles/theme.css?inline'
 import { TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
 import { createReactShadowHost } from '@/utils/react-shadow-host/create-shadow-host'

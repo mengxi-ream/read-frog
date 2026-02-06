@@ -1,5 +1,5 @@
 import type { APICallError } from 'ai'
-import React from 'react'
+import * as React from 'react'
 import textSmallCSS from '@/assets/styles/text-small.css?inline'
 import themeCSS from '@/assets/styles/theme.css?inline'
 import { TranslationError } from '@/components/translation/error'

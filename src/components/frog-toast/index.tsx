@@ -1,5 +1,5 @@
 import { kebabCase } from 'case-anything'
-import React from 'react'
+import * as React from 'react'
 
 import { Toaster } from 'sonner'
 import frogIcon from '@/assets/icons/read-frog.png'

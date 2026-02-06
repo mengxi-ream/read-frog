@@ -27,7 +27,12 @@ export default antfu({
     'unused-imports/no-unused-imports': 'error',
     'no-inner-declarations': 'error',
   },
-  react: true,
+  react: {
+    overrides: {
+      // Disable globally: requires type info, only works with tsconfig-backed files
+      'react/no-implicit-key': 'off',
+    },
+  },
 }, [
   {
     files: ['**/*.ts', '**/*.tsx'],
@@ -39,6 +44,7 @@ export default antfu({
     },
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
+      'react/no-implicit-key': 'warn',
     },
   },
 ]).append({
