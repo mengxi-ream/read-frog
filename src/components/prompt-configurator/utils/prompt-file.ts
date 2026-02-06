@@ -5,7 +5,7 @@ import { APP_NAME } from '@/utils/constants/app'
 export type PromptConfig = Omit<TranslatePromptObj, 'id'>
 export type PromptConfigList = PromptConfig[]
 
-const TRANSLATE_PROMPTS_FILE = `${APP_NAME}: translate_prompts`
+const PROMPTS_FILE = `${APP_NAME}_prompts`
 
 export function checkPromptConfig(list: PromptConfig[]) {
   if (!Array.isArray(list)) {
@@ -18,7 +18,7 @@ export function checkPromptConfig(list: PromptConfig[]) {
 export function downloadJSONFile(data: object) {
   const json = JSON.stringify(data, null, 2)
   const blob = new Blob([json], { type: 'text/json' })
-  saveAs(blob, `${TRANSLATE_PROMPTS_FILE}.json`)
+  saveAs(blob, `${PROMPTS_FILE}.json`)
 }
 
 export function analysisJSONFile(file: File): Promise<PromptConfigList> {

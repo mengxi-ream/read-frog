@@ -1,5 +1,6 @@
 import type { StateData, SubtitlesFragment, SubtitlesTranslationBlock } from '@/utils/subtitles/types'
 import { atom, createStore } from 'jotai'
+import { DEFAULT_SUBTITLE_POSITION } from '@/utils/constants/subtitles'
 
 export const subtitlesStore = createStore()
 
@@ -18,10 +19,7 @@ export interface SubtitlePosition {
   anchor: 'top' | 'bottom'
 }
 
-export const subtitlesPositionAtom = atom<SubtitlePosition>({
-  percent: 10,
-  anchor: 'bottom',
-})
+export const subtitlesPositionAtom = atom<SubtitlePosition>({ ...DEFAULT_SUBTITLE_POSITION })
 
 export const subtitlesDisplayAtom = atom((get) => {
   const subtitle = get(currentSubtitleAtom)

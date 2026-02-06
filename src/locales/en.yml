@@ -585,6 +585,9 @@ options:
       maxItemsPerBatch:
         title: Maximum Paragraph Count
         description: Maximum paragraphs per batch translation, used to control the content volume per translation
+    customPrompts:
+      title: Custom Subtitle Prompts
+      description: Customize prompt templates for subtitle translation (separate from webpage translation prompts)
   whatsNew:
     title: What's New
   survey:

@@ -583,6 +583,9 @@ options:
       maxItemsPerBatch:
         title: Maksimum Paragraf Sayısı
         description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
+    customPrompts:
+      title: Özel Altyazı İstemleri
+      description: Altyazı çevirisi için istem şablonlarını özelleştirin (web sayfası çeviri istemlerinden bağımsız)
   whatsNew:
     title: Yenilikler
   survey:

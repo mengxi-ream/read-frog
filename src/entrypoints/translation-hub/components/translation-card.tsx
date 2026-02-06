@@ -12,6 +12,7 @@ import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { executeTranslate } from '@/utils/host/translate/execute-translate'
+import { getTranslatePrompt } from '@/utils/prompts/translate'
 import { selectedProviderIdsAtom, translateRequestAtom } from '../atoms'
 
 interface TranslationCardProps {
@@ -43,7 +44,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
         sourceCode: req.sourceLanguage,
         targetCode: req.targetLanguage,
         level: language.level,
-      }, provider)
+      }, provider, getTranslatePrompt)
 
       // Ignore stale responses - return undefined to silently discard
       if (requestIdRef.current !== myRequestId) {

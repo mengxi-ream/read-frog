@@ -1,5 +1,4 @@
 import type { AudioCaptionTrack, CaptionTrack, PlayerData } from './types'
-import { logger } from '@/utils/logger'
 
 export interface PotToken {
   pot: string | null
@@ -10,42 +9,46 @@ export function extractPotToken(
   selectedTrack: CaptionTrack,
   playerData: PlayerData,
 ): PotToken {
-  const { audioCaptionTracks } = playerData
+  const { audioCaptionTracks, cachedTimedtextUrl } = playerData
 
-  if (!audioCaptionTracks.length)
-    return { pot: null, potc: null }
-
-  let matchedTrack: AudioCaptionTrack | undefined = audioCaptionTracks.find(
-    t => t.vssId === selectedTrack.vssId,
-  )
-
-  if (!matchedTrack) {
-    matchedTrack = audioCaptionTracks.find(
-      t => t.languageCode === selectedTrack.languageCode
-        && t.kind === selectedTrack.kind,
+  if (audioCaptionTracks.length > 0) {
+    let matchedTrack: AudioCaptionTrack | undefined = audioCaptionTracks.find(
+      t => t.vssId === selectedTrack.vssId,
     )
-  }
 
-  if (!matchedTrack) {
-    matchedTrack = audioCaptionTracks.find(
-      t => t.languageCode === selectedTrack.languageCode,
-    )
-  }
+    if (!matchedTrack) {
+      matchedTrack = audioCaptionTracks.find(
+        t => t.languageCode === selectedTrack.languageCode
+          && t.kind === selectedTrack.kind,
+      )
+    }
 
-  if (!matchedTrack && audioCaptionTracks.length > 0) {
-    matchedTrack = audioCaptionTracks[0]
-  }
+    if (!matchedTrack) {
+      matchedTrack = audioCaptionTracks.find(
+        t => t.languageCode === selectedTrack.languageCode,
+      )
+    }
 
-  if (matchedTrack?.url) {
-    try {
+    if (!matchedTrack) {
+      matchedTrack = audioCaptionTracks[0]
+    }
+
+    if (matchedTrack?.url) {
       const url = new URL(matchedTrack.url)
-      return {
-        pot: url.searchParams.get('pot'),
-        potc: url.searchParams.get('potc'),
+      const pot = url.searchParams.get('pot')
+      const potc = url.searchParams.get('potc')
+      if (pot) {
+        return { pot, potc }
       }
     }
-    catch (e) {
-      logger.error('Failed to parse POT token from URL', e)
+  }
+
+  if (cachedTimedtextUrl) {
+    const url = new URL(cachedTimedtextUrl)
+    const pot = url.searchParams.get('pot')
+    const potc = url.searchParams.get('potc')
+    if (pot) {
+      return { pot, potc }
     }
   }
 

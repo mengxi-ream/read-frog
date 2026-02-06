@@ -2,6 +2,7 @@ import type { RefObject } from 'react'
 import type { SubtitlePosition } from '../atoms'
 import { useAtom } from 'jotai'
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { DEFAULT_SUBTITLE_POSITION } from '@/utils/constants/subtitles'
 import { getContainingShadowRoot } from '@/utils/host/dom/node'
 import { subtitlesPositionAtom } from '../atoms'
 
@@ -83,7 +84,7 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
   const handleRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
   const startY = useRef(0)
-  const startPosition = useRef<SubtitlePosition>({ percent: 10, anchor: 'bottom' })
+  const startPosition = useRef<SubtitlePosition>(DEFAULT_SUBTITLE_POSITION)
   const [position, setPosition] = useAtom(subtitlesPositionAtom)
   const [isDragging, setIsDragging] = useState(false)
   const [windowStyle, setWindowStyle] = useState<SubtitleWindowStyle>({

@@ -584,6 +584,9 @@ options:
       maxItemsPerBatch:
         title: 最大段落數
         description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量
+    customPrompts:
+      title: 自訂字幕提示詞
+      description: 自訂字幕翻譯的提示詞模板（與網頁翻譯提示詞獨立）
   whatsNew:
     title: 最近更新
   survey:

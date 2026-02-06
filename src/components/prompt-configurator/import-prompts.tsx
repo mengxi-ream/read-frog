@@ -2,18 +2,21 @@ import type { PromptConfigList } from './utils/prompt-file'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import { useAtom } from 'jotai'
+import { useId } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/base-ui/button'
 import { Input } from '@/components/base-ui/input'
 import { Label } from '@/components/base-ui/label'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { usePromptAtoms } from './context'
 import { analysisJSONFile } from './utils/prompt-file'
 
 export function ImportPrompts() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const promptAtoms = usePromptAtoms()
+  const [config, setConfig] = useAtom(promptAtoms.config)
+  const inputId = useId()
 
   const injectPrompts = (list: PromptConfigList) => {
-    const originPatterns = translateConfig.customPromptsConfig.patterns
+    const originPatterns = config.patterns
     const patterns = list.map(item => ({
       ...item,
       id: crypto.randomUUID(),
@@ -21,11 +24,9 @@ export function ImportPrompts() {
       systemPrompt: item.systemPrompt ?? '',
     }))
 
-    void setTranslateConfig({
-      customPromptsConfig: {
-        ...translateConfig.customPromptsConfig,
-        patterns: [...originPatterns, ...patterns],
-      },
+    setConfig({
+      ...config,
+      patterns: [...originPatterns, ...patterns],
     })
   }
 
@@ -34,8 +35,8 @@ export function ImportPrompts() {
       const files = e.target.files
       if (!files || !files[0])
         return
-      const config = await analysisJSONFile(files[0])
-      injectPrompts(config)
+      const promptConfig = await analysisJSONFile(files[0])
+      injectPrompts(promptConfig)
       toast.success(`${i18n.t('options.translation.personalizedPrompts.importSuccess')} !`)
     }
     catch (error) {
@@ -54,18 +55,17 @@ export function ImportPrompts() {
 
   return (
     <Button variant="outline" className="p-0">
-      <Label htmlFor="import-file" className="w-full px-3">
+      <Label htmlFor={inputId} className="w-full px-3">
         <Icon icon="tabler:file-import" className="size-4" />
         {i18n.t('options.translation.personalizedPrompts.import')}
       </Label>
       <Input
         type="file"
-        id="import-file"
+        id={inputId}
         className="hidden"
         accept=".json"
         onChange={importPrompts}
-      >
-      </Input>
+      />
     </Button>
   )
 }

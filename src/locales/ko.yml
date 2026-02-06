@@ -582,6 +582,9 @@ options:
       maxItemsPerBatch:
         title: 최대 단락 수
         description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
+    customPrompts:
+      title: 사용자 정의 자막 프롬프트
+      description: 자막 번역용 프롬프트 템플릿 사용자 정의 (웹페이지 번역 프롬프트와 독립)
   whatsNew:
     title: 새로운 기능
   survey:

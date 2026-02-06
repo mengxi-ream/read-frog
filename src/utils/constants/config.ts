@@ -18,7 +18,7 @@ export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
-export const CONFIG_SCHEMA_VERSION = 51
+export const CONFIG_SCHEMA_VERSION = 52
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -129,6 +129,7 @@ export const DEFAULT_CONFIG: Config = {
       maxCharactersPerBatch: DEFAULT_BATCH_CONFIG.maxCharactersPerBatch,
       maxItemsPerBatch: DEFAULT_BATCH_CONFIG.maxItemsPerBatch,
     },
+    customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
   },
   siteControl: {
     mode: 'all',

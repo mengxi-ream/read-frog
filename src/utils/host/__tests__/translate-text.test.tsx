@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { executeTranslate } from '@/utils/host/translate/execute-translate'
 import { translateText } from '@/utils/host/translate/translate-text'
+import { getTranslatePrompt } from '@/utils/prompts/translate'
 
 // Mock dependencies
 vi.mock('@/utils/config/storage', () => ({
@@ -73,23 +74,23 @@ describe('translate-text', () => {
     }
 
     it('should return empty string for empty/whitespace input', async () => {
-      expect(await executeTranslate('', langConfig, providerConfig)).toBe('')
-      expect(await executeTranslate(' ', langConfig, providerConfig)).toBe('')
-      expect(await executeTranslate('\n', langConfig, providerConfig)).toBe('')
-      expect(await executeTranslate(' \n ', langConfig, providerConfig)).toBe('')
-      expect(await executeTranslate(' \n \t', langConfig, providerConfig)).toBe('')
+      expect(await executeTranslate('', langConfig, providerConfig, getTranslatePrompt)).toBe('')
+      expect(await executeTranslate(' ', langConfig, providerConfig, getTranslatePrompt)).toBe('')
+      expect(await executeTranslate('\n', langConfig, providerConfig, getTranslatePrompt)).toBe('')
+      expect(await executeTranslate(' \n ', langConfig, providerConfig, getTranslatePrompt)).toBe('')
+      expect(await executeTranslate(' \n \t', langConfig, providerConfig, getTranslatePrompt)).toBe('')
     })
 
     it('should handle zero-width spaces correctly', async () => {
       // Only zero-width spaces should return empty
-      expect(await executeTranslate('\u200B\u200B', langConfig, providerConfig)).toBe('')
+      expect(await executeTranslate('\u200B\u200B', langConfig, providerConfig, getTranslatePrompt)).toBe('')
 
       // Mixed invisible + whitespace should return empty
-      expect(await executeTranslate('\u200B \u200B', langConfig, providerConfig)).toBe('')
+      expect(await executeTranslate('\u200B \u200B', langConfig, providerConfig, getTranslatePrompt)).toBe('')
 
       // Should translate valid content after removing zero-width spaces
       mockMicrosoftTranslate.mockResolvedValue('你好')
-      const result = await executeTranslate('\u200B hello \u200B', langConfig, providerConfig)
+      const result = await executeTranslate('\u200B hello \u200B', langConfig, providerConfig, getTranslatePrompt)
       expect(result).toBe('你好')
       // Microsoft translate should receive the original text
       expect(mockMicrosoftTranslate).toHaveBeenCalledWith('\u200B hello \u200B', 'en', 'zh')
@@ -98,7 +99,7 @@ describe('translate-text', () => {
     it('should trim translation result', async () => {
       mockMicrosoftTranslate.mockResolvedValue('  测试结果  ')
 
-      const result = await executeTranslate('test input', langConfig, providerConfig)
+      const result = await executeTranslate('test input', langConfig, providerConfig, getTranslatePrompt)
 
       expect(result).toBe('测试结果')
     })
