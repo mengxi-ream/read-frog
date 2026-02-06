@@ -1,6 +1,5 @@
 import domRulesModule from '@/assets/dom-rules.json'
 
-// Type definitions for DOM rules configuration
 export interface DomRulesConfig {
   dontWalkIntoSelectors?: Record<string, string[]>
   forceBlockTranslationSelectors?: Record<string, string[]>
@@ -111,7 +110,7 @@ export const MAIN_CONTENT_IGNORE_TAGS = new Set(['HEADER', 'FOOTER', 'NAV', 'NOS
 
 /**
  * Convert glob pattern to RegExp for URL matching
- * Supports: *, **, and protocol-optional patterns
+ * Supports: * (single segment) and ** (any depth)
  */
 function globToRegex(pattern: string): RegExp {
   let regexStr = pattern.replace(/[.+?^${}()|[\]\\]/g, '\\$&')
@@ -119,61 +118,39 @@ function globToRegex(pattern: string): RegExp {
   regexStr = regexStr.replace(/\*\*/g, '§DBL§')
   regexStr = regexStr.replace(/\*/g, '[^/]*')
   regexStr = regexStr.replace(/§DBL§/g, '.*')
-  regexStr = regexStr.replace(/^https?:\/\//, '(?:https?:\\/\\/)?')
 
   return new RegExp(`^${regexStr}$`, 'i')
 }
 
+/** Protocol-agnostic URL matching with glob support */
 export function matchUrlPattern(url: string, pattern: string): boolean {
-  if (url === pattern)
-    return true
-
-  // Normalize both by removing protocols for comparison
   const cleanUrl = url.replace(/^https?:\/\//, '')
   const cleanPattern = pattern.replace(/^https?:\/\//, '')
 
-  if (!pattern.includes('*')) {
+  if (!pattern.includes('*'))
     return cleanUrl === cleanPattern
-  }
 
-  // Use the cleaned pattern to create the regex
-  const regex = globToRegex(cleanPattern)
-
-  // Also check the original regex against the full URL
-  // (to support patterns that specifically require a certain protocol)
-  if (globToRegex(pattern).test(url))
-    return true
-
-  return regex.test(cleanUrl)
+  return globToRegex(cleanPattern).test(cleanUrl)
 }
 
 export function findMatchingSelectors(
   ruleName: 'dontWalkIntoSelectors' | 'forceBlockTranslationSelectors',
   currentUrl?: string,
 ): string[] {
-  // Not initialized yet
-  if (!domRules)
-    return []
-
-  const ruleset = ruleName === 'dontWalkIntoSelectors' ? domRules.dontWalkIntoSelectors : domRules.forceBlockTranslationSelectors
-
+  const ruleset = domRules?.[ruleName]
   if (!ruleset)
-    // invalid ruleset
     return []
 
   const url = currentUrl || window.location.href
-
   const hostname = new URL(url).hostname
 
+  // Fast path: O(1) exact key lookup before O(n) glob matching
   if (ruleset[hostname])
     return ruleset[hostname]
-  if (ruleset[url])
-    return ruleset[url]
 
-  for (const [pattern, selectors] of Object.entries(ruleset || {})) {
-    if (matchUrlPattern(url, pattern) || matchUrlPattern(hostname, pattern)) {
+  for (const [pattern, selectors] of Object.entries(ruleset)) {
+    if (matchUrlPattern(url, pattern) || matchUrlPattern(hostname, pattern))
       return selectors
-    }
   }
 
   return []
