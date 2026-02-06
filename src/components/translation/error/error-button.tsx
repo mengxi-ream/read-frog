@@ -1,7 +1,7 @@
 import type { APICallError } from 'ai'
 import { Icon } from '@iconify/react'
-import { Alert, AlertDescription, AlertTitle } from '@/components/base-ui/alert'
-import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/base-ui/hover-card'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/base-ui/alert'
+import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/base-ui/hover-card'
 
 export function ErrorButton({ error }: { error: APICallError }) {
   return (

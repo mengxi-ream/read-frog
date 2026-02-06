@@ -14,7 +14,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
+} from '@/components/ui/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 

@@ -3,6 +3,9 @@
 /* @import "shadcn/tailwind.css"; */
 
 @custom-variant dark (&:is(.dark *));
+/* Base UI uses data-orientation="horizontal|vertical", map to short variants for Tailwind */
+@custom-variant data-horizontal (&[data-orientation="horizontal"]);
+@custom-variant data-vertical (&[data-orientation="vertical"]);
 
 @theme inline {
   --font-sans: var(--font-sans);
@@ -84,7 +87,7 @@
   --chart-3: oklch(0.7 0.15 162);
   --chart-4: oklch(0.6 0.13 163);
   --chart-5: oklch(0.51 0.1 166);
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   --sidebar: oklch(0.985 0 0);
   --sidebar-foreground: oklch(0.141 0.005 285.823);
   --sidebar-primary: oklch(0.6 0.13 163);

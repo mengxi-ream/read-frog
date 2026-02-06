@@ -7,7 +7,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
+} from '@/components/ui/base-ui/select'
 import { isLLMTranslateProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { DEFAULT_TRANSLATE_PROMPT_ID } from '@/utils/constants/prompt'

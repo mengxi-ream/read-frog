@@ -1,6 +1,6 @@
 import { useStore } from '@tanstack/react-form'
-import { Field, FieldLabel } from '@/components/base-ui/field'
-import { Input } from '@/components/base-ui/input'
+import { Field, FieldLabel } from '@/components/ui/base-ui/field'
+import { Input } from '@/components/ui/base-ui/input'
 import { useFieldContext } from '../form-context'
 
 export function InputField(

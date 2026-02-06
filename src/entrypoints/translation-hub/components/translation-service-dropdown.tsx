@@ -1,7 +1,9 @@
 import { browser, i18n } from '#imports'
 import { IconSettings } from '@tabler/icons-react'
 import { useAtom, useAtomValue } from 'jotai'
-import { Button } from '@/components/base-ui/button'
+import ProviderIcon from '@/components/provider-icon'
+import { useTheme } from '@/components/providers/theme-provider'
+import { Button } from '@/components/ui/base-ui/button'
 import {
   Select,
   SelectContent,
@@ -10,9 +12,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
-import ProviderIcon from '@/components/provider-icon'
-import { useTheme } from '@/components/providers/theme-provider'
+} from '@/components/ui/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig, getTranslateProvidersConfig } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'

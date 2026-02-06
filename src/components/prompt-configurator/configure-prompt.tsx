@@ -3,9 +3,9 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue } from 'jotai'
 import { useState } from 'react'
-import { Button } from '@/components/base-ui/button'
-import { Field, FieldGroup, FieldLabel } from '@/components/base-ui/field'
-import { Input } from '@/components/base-ui/input'
+import { Button } from '@/components/ui/base-ui/button'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
+import { Input } from '@/components/ui/base-ui/input'
 import {
   Sheet,
   SheetClose,
@@ -14,7 +14,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from '@/components/base-ui/sheet'
+} from '@/components/ui/base-ui/sheet'
 import { QuickInsertableTextarea } from '@/components/ui/insertable-textarea'
 import { DEFAULT_TRANSLATE_PROMPT_ID, getTokenCellText, TOKENS } from '@/utils/constants/prompt'
 import { cn } from '@/utils/styles/utils'

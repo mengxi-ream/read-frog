@@ -1,9 +1,9 @@
 import { i18n } from '#imports'
 import { useAtom } from 'jotai'
 import { toast } from 'sonner'
-import { Field, FieldContent, FieldLabel } from '@/components/base-ui/field'
-import { Hint } from '@/components/base-ui/hint'
-import { Input } from '@/components/base-ui/input'
+import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
+import { Hint } from '@/components/ui/base-ui/hint'
+import { Input } from '@/components/ui/base-ui/input'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ConfigCard } from '../../components/config-card'
 

@@ -2,8 +2,9 @@ import type { SubtitlesFontFamily, SubtitleTextStyle } from '@/types/config/subt
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { Field, FieldGroup, FieldLabel } from '@/components/base-ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
+import { Slider } from '@/components/ui/base-ui/slider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from '@/utils/constants/subtitles'
 
@@ -32,17 +33,24 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
         <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontFamily')}</FieldLabel>
         <Select
           value={textStyle.fontFamily}
-          onValueChange={(value: SubtitlesFontFamily) => handleChange({ fontFamily: value })}
+          onValueChange={(value) => {
+            if (value)
+              handleChange({ fontFamily: value })
+          }}
         >
           <SelectTrigger className="h-8">
-            <SelectValue />
+            <SelectValue>
+              {FONT_FAMILY_OPTIONS.find(o => o.value === textStyle.fontFamily)?.label}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {FONT_FAMILY_OPTIONS.map(option => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {FONT_FAMILY_OPTIONS.map(option => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
       </Field>
@@ -50,14 +58,13 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
       <Field orientation="responsive-compact">
         <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontScale')}</FieldLabel>
         <div className="flex items-center gap-2">
-          <input
-            type="range"
+          <Slider
             min={MIN_FONT_SCALE}
             max={MAX_FONT_SCALE}
             step={10}
             value={textStyle.fontScale}
-            onChange={e => handleChange({ fontScale: Number(e.target.value) })}
-            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+            onValueChange={value => handleChange({ fontScale: value as number })}
+            className="flex-1"
           />
           <span className="w-10 text-sm text-right">
             {textStyle.fontScale}
@@ -69,14 +76,13 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
       <Field orientation="responsive-compact">
         <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontWeight')}</FieldLabel>
         <div className="flex items-center gap-2">
-          <input
-            type="range"
+          <Slider
             min={MIN_FONT_WEIGHT}
             max={MAX_FONT_WEIGHT}
             step={100}
             value={textStyle.fontWeight}
-            onChange={e => handleChange({ fontWeight: Number(e.target.value) })}
-            className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+            onValueChange={value => handleChange({ fontWeight: value as number })}
+            className="flex-1"
           />
           <span className="w-10 text-sm text-right">{textStyle.fontWeight}</span>
         </div>

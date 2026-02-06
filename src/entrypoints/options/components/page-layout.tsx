@@ -1,6 +1,6 @@
-import { Separator } from '@/components/base-ui/separator'
-import { SidebarTrigger } from '@/components/base-ui/sidebar'
 import Container from '@/components/container'
+import { Separator } from '@/components/ui/base-ui/separator'
+import { SidebarTrigger } from '@/components/ui/base-ui/sidebar'
 import { cn } from '@/utils/styles/utils'
 
 export function PageLayout({ title, children, className, innerClassName }: { title: React.ReactNode, children: React.ReactNode, className?: string, innerClassName?: string }) {

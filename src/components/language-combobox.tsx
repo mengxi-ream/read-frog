@@ -13,7 +13,7 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '@/components/base-ui/combobox'
+} from '@/components/ui/base-ui/combobox'
 
 interface LanguageItem {
   value: LangCodeISO6393 | 'auto'

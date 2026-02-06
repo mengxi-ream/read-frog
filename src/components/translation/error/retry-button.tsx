@@ -1,6 +1,6 @@
 import { Icon } from '@iconify/react'
 import { useAtomValue } from 'jotai'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { configAtom } from '@/utils/atoms/config'
 import { translateNodesBilingualMode, translateNodeTranslationOnlyMode } from '@/utils/host/translate/node-manipulation'
 

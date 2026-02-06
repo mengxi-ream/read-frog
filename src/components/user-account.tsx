@@ -1,5 +1,5 @@
 import guest from '@/assets/icons/avatars/guest.svg'
-import { Button } from '@/components/base-ui/button'
+import { Button } from '@/components/ui/base-ui/button'
 import { authClient } from '@/utils/auth/auth-client'
 import { WEBSITE_URL } from '@/utils/constants/url'
 import { cn } from '@/utils/styles/utils'

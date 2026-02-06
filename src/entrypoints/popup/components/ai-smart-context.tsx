@@ -3,8 +3,8 @@ import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { NewBadge } from '@/components/badges/new-badge'
-import { Switch } from '@/components/base-ui/switch'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
+import { Switch } from '@/components/ui/base-ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
 export function AISmartContext() {

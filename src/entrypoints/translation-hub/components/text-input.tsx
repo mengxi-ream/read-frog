@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { Button } from '@/components/base-ui/button'
-import { Textarea } from '@/components/base-ui/textarea'
+import { Button } from '@/components/ui/base-ui/button'
+import { Textarea } from '@/components/ui/base-ui/textarea'
 import { inputTextAtom, sourceLangCodeAtom, targetLangCodeAtom, translateRequestAtom } from '../atoms'
 
 export function TextInput() {

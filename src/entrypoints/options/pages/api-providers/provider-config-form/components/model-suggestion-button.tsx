@@ -2,9 +2,9 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useState } from 'react'
-import { Button } from '@/components/base-ui/button'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/base-ui/popover'
 import LoadingDots from '@/components/loading-dots'
+import { Button } from '@/components/ui/base-ui/button'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/base-ui/popover'
 import { extractErrorMessage } from '@/utils/api-error'
 
 interface ModelsResponse {

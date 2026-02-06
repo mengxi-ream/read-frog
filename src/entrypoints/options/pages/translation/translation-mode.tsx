@@ -9,7 +9,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
+} from '@/components/ui/base-ui/select'
 import { TRANSLATION_MODES } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'

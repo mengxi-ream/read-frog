@@ -7,7 +7,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/base-ui/sidebar'
+} from '@/components/ui/base-ui/sidebar'
 
 export function ToolsNav() {
   return (

@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
-import { Button } from '@/components/base-ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
+import { Button } from '@/components/ui/base-ui/button'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 
 export function DiscordButton() {
   return (

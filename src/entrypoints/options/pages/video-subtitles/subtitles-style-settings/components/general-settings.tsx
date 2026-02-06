@@ -3,13 +3,13 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { Activity } from 'react'
-import { Button } from '@/components/base-ui/button'
-import { Card } from '@/components/base-ui/card'
-import { Field, FieldGroup, FieldLabel } from '@/components/base-ui/field'
-import { Label } from '@/components/base-ui/label'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/shadcn/select'
+import { Button } from '@/components/ui/base-ui/button'
+import { Card } from '@/components/ui/base-ui/card'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
+import { Label } from '@/components/ui/base-ui/label'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
+import { Slider } from '@/components/ui/base-ui/slider'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MIN_BACKGROUND_OPACITY } from '@/utils/constants/subtitles'
 
@@ -17,12 +17,16 @@ export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = videoSubtitlesConfig.style
 
-  const handleDisplayModeChange = (displayMode: SubtitlesDisplayMode) => {
-    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { displayMode } }))
+  const handleDisplayModeChange = (value: SubtitlesDisplayMode | null) => {
+    if (!value)
+      return
+    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { displayMode: value } }))
   }
 
-  const handleTranslationPositionChange = (translationPosition: SubtitlesTranslationPosition) => {
-    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { translationPosition } }))
+  const handleTranslationPositionChange = (value: SubtitlesTranslationPosition | null) => {
+    if (!value)
+      return
+    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { translationPosition: value } }))
   }
 
   const handleContainerChange = (style: Partial<typeof container>) => {
@@ -63,52 +67,59 @@ export function GeneralSettings() {
           <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.displayMode.title')}</FieldLabel>
           <Select value={displayMode} onValueChange={handleDisplayModeChange}>
             <SelectTrigger className="h-8">
-              <SelectValue />
+              <SelectValue>
+                {i18n.t(`options.videoSubtitles.style.displayMode.${displayMode}`)}
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="bilingual">
-                {i18n.t('options.videoSubtitles.style.displayMode.bilingual')}
-              </SelectItem>
-              <SelectItem value="originalOnly">
-                {i18n.t('options.videoSubtitles.style.displayMode.originalOnly')}
-              </SelectItem>
-              <SelectItem value="translationOnly">
-                {i18n.t('options.videoSubtitles.style.displayMode.translationOnly')}
-              </SelectItem>
+              <SelectGroup>
+                <SelectItem value="bilingual">
+                  {i18n.t('options.videoSubtitles.style.displayMode.bilingual')}
+                </SelectItem>
+                <SelectItem value="originalOnly">
+                  {i18n.t('options.videoSubtitles.style.displayMode.originalOnly')}
+                </SelectItem>
+                <SelectItem value="translationOnly">
+                  {i18n.t('options.videoSubtitles.style.displayMode.translationOnly')}
+                </SelectItem>
+              </SelectGroup>
             </SelectContent>
           </Select>
         </Field>
 
-        <Activity mode={displayMode === 'bilingual' ? 'visible' : 'hidden'}>
+        {displayMode === 'bilingual' && (
           <Field orientation="responsive-compact">
             <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.translationPosition.title')}</FieldLabel>
             <Select value={translationPosition} onValueChange={handleTranslationPositionChange}>
               <SelectTrigger className="h-8">
-                <SelectValue />
+                <SelectValue>
+                  {i18n.t(`options.videoSubtitles.style.translationPosition.${translationPosition}`)}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="above">
-                  {i18n.t('options.videoSubtitles.style.translationPosition.above')}
-                </SelectItem>
-                <SelectItem value="below">
-                  {i18n.t('options.videoSubtitles.style.translationPosition.below')}
-                </SelectItem>
+                <SelectGroup>
+                  <SelectItem value="above">
+                    {i18n.t('options.videoSubtitles.style.translationPosition.above')}
+                  </SelectItem>
+                  <SelectItem value="below">
+                    {i18n.t('options.videoSubtitles.style.translationPosition.below')}
+                  </SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </Field>
-        </Activity>
+        )}
 
         <Field orientation="responsive-compact">
           <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.backgroundOpacity')}</FieldLabel>
           <div className="flex items-center gap-2">
-            <input
-              type="range"
+            <Slider
               min={MIN_BACKGROUND_OPACITY}
               max={MAX_BACKGROUND_OPACITY}
               step={5}
               value={container.backgroundOpacity}
-              onChange={e => handleContainerChange({ backgroundOpacity: Number(e.target.value) })}
-              className="flex-1 h-1.5 bg-muted rounded-lg appearance-none cursor-pointer accent-primary"
+              onValueChange={value => handleContainerChange({ backgroundOpacity: value as number })}
+              className="flex-1"
             />
             <span className="w-10 text-sm text-right">
               {container.backgroundOpacity}

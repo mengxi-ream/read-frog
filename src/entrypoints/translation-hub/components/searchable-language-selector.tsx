@@ -1,6 +1,6 @@
 import type { LangCodeISO6393 } from '@read-frog/definitions'
-import { FieldLabel, FieldRoot } from '@/components/base-ui/field'
 import { LanguageCombobox } from '@/components/language-combobox'
+import { FieldLabel, FieldRoot } from '@/components/ui/base-ui/field'
 
 interface SearchableLanguageSelectorProps {
   value: LangCodeISO6393 | 'auto'

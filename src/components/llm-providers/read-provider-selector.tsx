@@ -1,5 +1,6 @@
 import type { ReadProviderConfig } from '@/types/config/provider'
 import { useAtom, useAtomValue } from 'jotai'
+import ProviderIcon from '@/components/provider-icon'
 import {
   Select,
   SelectContent,
@@ -7,8 +8,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
-import ProviderIcon from '@/components/provider-icon'
+} from '@/components/ui/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getReadProvidersConfig } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'

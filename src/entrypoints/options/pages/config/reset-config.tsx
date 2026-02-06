@@ -11,8 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/base-ui/alert-dialog'
-import { Button } from '@/components/base-ui/button'
+} from '@/components/ui/base-ui/alert-dialog'
+import { Button } from '@/components/ui/base-ui/button'
 import { writeConfigAtom } from '@/utils/atoms/config'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'

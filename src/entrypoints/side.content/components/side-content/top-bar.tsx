@@ -11,6 +11,8 @@ import {
 } from '@read-frog/definitions'
 import { useMutationState } from '@tanstack/react-query'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
+import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
+import { useTheme } from '@/components/providers/theme-provider'
 import {
   Select,
   SelectContent,
@@ -18,10 +20,8 @@ import {
   SelectItem,
   SelectLabel,
   SelectTrigger,
-} from '@/components/base-ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
-import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
-import { useTheme } from '@/components/providers/theme-provider'
+} from '@/components/ui/base-ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'

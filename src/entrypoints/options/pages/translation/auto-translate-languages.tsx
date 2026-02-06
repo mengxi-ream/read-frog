@@ -9,16 +9,16 @@ import {
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
-import { Button } from '@/components/base-ui/button'
+import { Button } from '@/components/ui/base-ui/button'
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/base-ui/dropdown-menu'
-import { Field, FieldContent, FieldLabel } from '@/components/base-ui/field'
-import { Hint } from '@/components/base-ui/hint'
-import { Switch } from '@/components/base-ui/switch'
+} from '@/components/ui/base-ui/dropdown-menu'
+import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
+import { Hint } from '@/components/ui/base-ui/hint'
+import { Switch } from '@/components/ui/base-ui/switch'
 import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'

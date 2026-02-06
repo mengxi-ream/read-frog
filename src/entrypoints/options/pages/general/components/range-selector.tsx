@@ -1,8 +1,8 @@
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
-import { Field, FieldLabel } from '@/components/base-ui/field'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/base-ui/select'
+import { Field, FieldLabel } from '@/components/ui/base-ui/field'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
 import { pageTranslateRangeSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 

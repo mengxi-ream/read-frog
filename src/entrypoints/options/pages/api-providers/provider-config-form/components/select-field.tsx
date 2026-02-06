@@ -1,8 +1,8 @@
 import type * as React from 'react'
 import { useStore } from '@tanstack/react-form'
 import { useCallback } from 'react'
-import { Field, FieldLabel } from '@/components/base-ui/field'
-import { Select } from '@/components/shadcn/select'
+import { Field, FieldLabel } from '@/components/ui/base-ui/field'
+import { Select } from '@/components/ui/base-ui/select'
 import { useFieldContext } from '../form-context'
 
 type SelectFieldProps = React.ComponentProps<typeof Select> & {
@@ -16,7 +16,9 @@ export function SelectField(
   const field = useFieldContext<string | undefined>()
   const errors = useStore(field.store, state => state.meta.errors)
 
-  const handleValueChange = useCallback((value: string) => {
+  const handleValueChange = useCallback((value: unknown) => {
+    if (typeof value !== 'string')
+      return
     field.handleChange(value)
     void formForSubmit.handleSubmit()
   }, [field, formForSubmit])

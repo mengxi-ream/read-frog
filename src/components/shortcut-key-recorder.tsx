@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import hotkeys from 'hotkeys-js'
 import { useEffect, useRef, useState } from 'react'
-import { Input } from '@/components/base-ui/input'
+import { Input } from '@/components/ui/base-ui/input'
 import { formatHotkey } from '@/utils/os'
 
 const MODIFIERS = ['shift', 'alt', 'ctrl', 'command'] as const

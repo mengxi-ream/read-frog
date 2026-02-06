@@ -1,6 +1,7 @@
 import type { TranslateProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useAtom, useAtomValue } from 'jotai'
+import ProviderIcon from '@/components/provider-icon'
 import {
   Select,
   SelectContent,
@@ -9,8 +10,7 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
-import ProviderIcon from '@/components/provider-icon'
+} from '@/components/ui/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'

@@ -9,7 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from '@/components/base-ui/sidebar'
+} from '@/components/ui/base-ui/sidebar'
 import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from '@/utils/blog'
 import { WEBSITE_URL } from '@/utils/constants/url'
 import { cn } from '@/utils/styles/utils'

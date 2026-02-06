@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { useAtom, useAtomValue } from 'jotai'
 import { Activity } from 'react'
-import { Switch } from '@/components/base-ui/switch'
+import { Switch } from '@/components/ui/base-ui/switch'
 import { isCurrentSiteInPatternsAtom, toggleCurrentSiteAtom } from '../atoms/auto-translate'
 import { isIgnoreTabAtom } from '../atoms/ignore'
 import { isCurrentSiteInWhitelistAtom, isWhitelistModeAtom } from '../atoms/site-control'

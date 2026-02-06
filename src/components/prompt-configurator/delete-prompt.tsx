@@ -2,8 +2,8 @@ import type { TranslatePromptObj } from '@/types/config/translate'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react/dist/iconify.js'
 import { useAtom, useAtomValue } from 'jotai'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/base-ui/alert-dialog'
-import { Button } from '@/components/base-ui/button'
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/base-ui/alert-dialog'
+import { Button } from '@/components/ui/base-ui/button'
 import { usePromptAtoms } from './context'
 
 export function DeletePrompt({

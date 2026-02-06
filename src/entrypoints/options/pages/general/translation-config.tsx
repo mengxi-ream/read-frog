@@ -1,12 +1,11 @@
 import { i18n } from '#imports'
 import { useAtom, useAtomValue } from 'jotai'
-import { Activity } from 'react'
 import { toast } from 'sonner'
-import { Field, FieldLabel } from '@/components/base-ui/field'
-import { Input } from '@/components/base-ui/input'
 import TranslateProviderSelector from '@/components/llm-providers/translate-provider-selector'
 // TODO: use base-ui/checkbox has the bug Maximum update depth, report to base-ui
-import { Checkbox } from '@/components/shadcn/checkbox'
+import { Checkbox } from '@/components/ui/base-ui/checkbox'
+import { Field, FieldLabel } from '@/components/ui/base-ui/field'
+import { Input } from '@/components/ui/base-ui/input'
 import {
   Select,
   SelectContent,
@@ -14,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/shadcn/select'
+} from '@/components/ui/base-ui/select'
 import { isAPIProviderConfig, isLLMTranslateProviderConfig, TRANSLATE_PROVIDER_MODELS } from '@/types/config/provider'
 import { translateProviderConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
 import { ConfigCard } from '../../components/config-card'
@@ -61,59 +60,62 @@ function TranslateModelSelector() {
   const modelConfig = translateProviderConfig.models.translate
 
   return (
-    <Field>
-      <FieldLabel nativeLabel={false} render={<div />}>
-        {i18n.t('options.general.translationConfig.model.title')}
-      </FieldLabel>
-      <Activity mode={modelConfig.isCustomModel ? 'visible' : 'hidden'}>
-        <Input
-          value={modelConfig.customModel ?? ''}
-          onChange={(e) => {
-            void setTranslateProviderConfig(
-              updateLLMProviderConfig(translateProviderConfig, {
-                models: {
-                  translate: {
-                    customModel: e.target.value === '' ? null : e.target.value,
-                  },
-                },
-              }),
+    <>
+      <Field>
+        <FieldLabel nativeLabel={false} render={<div />}>
+          {i18n.t('options.general.translationConfig.model.title')}
+        </FieldLabel>
+        {modelConfig.isCustomModel
+          ? (
+              <Input
+                value={modelConfig.customModel ?? ''}
+                onChange={(e) => {
+                  void setTranslateProviderConfig(
+                    updateLLMProviderConfig(translateProviderConfig, {
+                      models: {
+                        translate: {
+                          customModel: e.target.value === '' ? null : e.target.value,
+                        },
+                      },
+                    }),
+                  )
+                }}
+              />
             )
-          }}
-        />
-      </Activity>
-      <Activity mode={modelConfig.isCustomModel ? 'hidden' : 'visible'}>
-        <Select
-          value={modelConfig.model}
-          onValueChange={(value) => {
-            if (!value)
-              return
-            void setTranslateProviderConfig(
-              updateLLMProviderConfig(translateProviderConfig, {
-                models: {
-                  translate: {
-                    model: value as any,
-                  },
-                },
-              }),
-            )
-          }}
-        >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Select a model" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {TRANSLATE_PROVIDER_MODELS[provider].map(model => (
-                <SelectItem key={model} value={model}>
-                  {model}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      </Activity>
-      <Activity mode={provider === 'openai-compatible' ? 'hidden' : 'visible'}>
-        <div className="mt-0.5 flex items-center space-x-2">
+          : (
+              <Select
+                value={modelConfig.model}
+                onValueChange={(value) => {
+                  if (!value)
+                    return
+                  void setTranslateProviderConfig(
+                    updateLLMProviderConfig(translateProviderConfig, {
+                      models: {
+                        translate: {
+                          model: value as any,
+                        },
+                      },
+                    }),
+                  )
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a model" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {TRANSLATE_PROVIDER_MODELS[provider].map(model => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            )}
+      </Field>
+      {provider !== 'openai-compatible' && (
+        <div className="flex items-center space-x-2">
           <Checkbox
             id={`isCustomModel-translate-${provider}`}
             checked={modelConfig.isCustomModel}
@@ -156,7 +158,7 @@ function TranslateModelSelector() {
             {i18n.t('options.general.translationConfig.model.enterCustomModel')}
           </label>
         </div>
-      </Activity>
-    </Field>
+      )}
+    </>
   )
 }

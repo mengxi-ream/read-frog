@@ -5,22 +5,22 @@ import { IconLayoutSidebarLeftExpand, IconLayoutSidebarRightExpand } from '@tabl
 import { cva } from 'class-variance-authority'
 
 import * as React from 'react'
-import { Button } from '@/components/base-ui/button'
-import { Input } from '@/components/base-ui/input'
-import { Separator } from '@/components/base-ui/separator'
+import { Button } from '@/components/ui/base-ui/button'
+import { Input } from '@/components/ui/base-ui/input'
+import { Separator } from '@/components/ui/base-ui/separator'
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from '@/components/base-ui/sheet'
-import { Skeleton } from '@/components/base-ui/skeleton'
+} from '@/components/ui/base-ui/sheet'
+import { Skeleton } from '@/components/ui/base-ui/skeleton'
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from '@/components/base-ui/tooltip'
+} from '@/components/ui/base-ui/tooltip'
 import { useIsMobile } from '@/hooks/use-mobile'
 import { cn } from '@/utils/styles/utils'
 

@@ -8,8 +8,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
+} from '@/components/ui/base-ui/select'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { isLLMTranslateProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom } from '@/utils/atoms/provider'

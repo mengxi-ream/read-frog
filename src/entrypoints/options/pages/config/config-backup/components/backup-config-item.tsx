@@ -15,12 +15,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/base-ui/alert-dialog'
-import { Button } from '@/components/base-ui/button'
-import { ButtonGroup } from '@/components/base-ui/button-group'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/base-ui/dropdown-menu'
-import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemTitle } from '@/components/base-ui/item'
-import { Spinner } from '@/components/base-ui/spinner'
+} from '@/components/ui/base-ui/alert-dialog'
+import { Button } from '@/components/ui/base-ui/button'
+import { ButtonGroup } from '@/components/ui/base-ui/button-group'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/base-ui/dropdown-menu'
+import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemTitle } from '@/components/ui/base-ui/item'
+import { Spinner } from '@/components/ui/base-ui/spinner'
 import { useExportConfig } from '@/hooks/use-export-config'
 import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
 import { addBackup, isSameAsLatestBackup, removeBackup } from '@/utils/backup/storage'

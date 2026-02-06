@@ -13,10 +13,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/base-ui/alert-dialog'
-import { Button } from '@/components/base-ui/button'
-import { Input } from '@/components/base-ui/input'
-import { Label } from '@/components/base-ui/label'
+} from '@/components/ui/base-ui/alert-dialog'
+import { Button } from '@/components/ui/base-ui/button'
+import { Input } from '@/components/ui/base-ui/input'
+import { Label } from '@/components/ui/base-ui/label'
 import { useExportConfig } from '@/hooks/use-export-config'
 import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
 import { addBackup } from '@/utils/backup/storage'

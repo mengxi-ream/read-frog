@@ -1,7 +1,7 @@
 import * as React from 'react'
-import { Button } from '@/components/base-ui/button'
-import { Textarea } from '@/components/base-ui/textarea'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
+import { Button } from '@/components/ui/base-ui/button'
+import { Textarea } from '@/components/ui/base-ui/textarea'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { cn } from '@/utils/styles/utils'
 
 interface InsertableTextareaHandle extends HTMLTextAreaElement {

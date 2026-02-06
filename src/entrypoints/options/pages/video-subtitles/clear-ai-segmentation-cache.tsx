@@ -11,8 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/base-ui/alert-dialog'
-import { Button } from '@/components/base-ui/button'
+} from '@/components/ui/base-ui/alert-dialog'
+import { Button } from '@/components/ui/base-ui/button'
 import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 

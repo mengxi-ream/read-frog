@@ -7,7 +7,7 @@ import {
   EmptyHeader,
   EmptyMedia,
   EmptyTitle,
-} from '@/components/base-ui/empty'
+} from '@/components/ui/base-ui/empty'
 import { selectedProviderIdsAtom } from '../atoms'
 import { TranslationCard } from './translation-card'
 

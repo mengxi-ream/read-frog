@@ -4,7 +4,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
-} from '@/components/base-ui/sidebar'
+} from '@/components/ui/base-ui/sidebar'
 import { version } from '../../../../package.json'
 import { ProductNav } from './product-nav'
 import { SettingsNav } from './settings-nav'

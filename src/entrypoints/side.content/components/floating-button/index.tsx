@@ -8,7 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/base-ui/dropdown-menu'
+} from '@/components/ui/base-ui/dropdown-menu'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { APP_NAME } from '@/utils/constants/app'
 import { sendMessage } from '@/utils/message'

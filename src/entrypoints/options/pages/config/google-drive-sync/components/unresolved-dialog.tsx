@@ -3,7 +3,7 @@ import { Icon } from '@iconify/react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { Activity, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { Alert, AlertDescription, AlertTitle } from '@/components/base-ui/alert'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/base-ui/alert'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,8 +13,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/base-ui/alert-dialog'
-import { Button } from '@/components/base-ui/button'
+} from '@/components/ui/base-ui/alert-dialog'
+import { Button } from '@/components/ui/base-ui/button'
 import { useGoogleDriveAuth } from '@/hooks/use-google-drive-auth'
 import {
   resolutionStatusAtom,

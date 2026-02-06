@@ -1,6 +1,6 @@
 import { browser, i18n } from '#imports'
 import { useAtom, useAtomValue } from 'jotai'
-import { Button } from '@/components/base-ui/button'
+import { Button } from '@/components/ui/base-ui/button'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { sendMessage } from '@/utils/message'
 import { formatHotkey } from '@/utils/os.ts'

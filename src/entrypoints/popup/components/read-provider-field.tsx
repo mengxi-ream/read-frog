@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/base-ui/tooltip'
 import ReadProviderSelector from '@/components/llm-providers/read-provider-selector'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 
 export default function ReadProviderField() {
   return (

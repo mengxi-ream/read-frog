@@ -3,9 +3,9 @@ import { i18n } from '#imports'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
-import { Badge } from '@/components/base-ui/badge'
-import { Button } from '@/components/base-ui/button'
-import { Field, FieldLabel } from '@/components/base-ui/field'
+import { Badge } from '@/components/ui/base-ui/badge'
+import { Button } from '@/components/ui/base-ui/button'
+import { Field, FieldLabel } from '@/components/ui/base-ui/field'
 import {
   Select,
   SelectContent,
@@ -13,7 +13,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
+} from '@/components/ui/base-ui/select'
 import ValidatedInput from '@/components/ui/validated-input'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
 import { getVoicesForModel, isVoiceAvailableForModel, MAX_TTS_SPEED, MIN_TTS_SPEED, TTS_MODELS, ttsSpeedSchema } from '@/types/config/tts'

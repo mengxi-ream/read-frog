@@ -2,7 +2,7 @@ import { browser, i18n } from '#imports'
 import { useAtomValue } from 'jotai'
 
 import { toast } from 'sonner'
-import { Button } from '@/components/base-ui/button'
+import { Button } from '@/components/ui/base-ui/button'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
 import { isAnyAPIKeyForReadProviders } from '@/utils/config/api'

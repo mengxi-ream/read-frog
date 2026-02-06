@@ -5,7 +5,7 @@ import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from '@/components/base-ui/collapsible'
+} from '@/components/ui/base-ui/collapsible'
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -16,7 +16,7 @@ import {
   SidebarMenuSub,
   SidebarMenuSubButton,
   SidebarMenuSubItem,
-} from '@/components/base-ui/sidebar'
+} from '@/components/ui/base-ui/sidebar'
 
 const OVERLAY_TOOLS_PATHS = ['/floating-button', '/selection-toolbar', '/context-menu'] as const
 

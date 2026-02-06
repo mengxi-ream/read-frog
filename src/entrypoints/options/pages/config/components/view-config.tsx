@@ -1,10 +1,10 @@
-import type { ButtonProps } from '@/components/base-ui/button'
+import type { ButtonProps } from '@/components/ui/base-ui/button'
 import type { Config } from '@/types/config/config'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useState } from 'react'
-import { Button } from '@/components/base-ui/button'
-import { ScrollArea } from '@/components/base-ui/scroll-area'
+import { Button } from '@/components/ui/base-ui/button'
+import { ScrollArea } from '@/components/ui/base-ui/scroll-area'
 import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 
 export function ViewConfig({ config, configSchemaVersion, size = 'default' }: { config: Config, configSchemaVersion?: number, size?: ButtonProps['size'] }) {

@@ -9,8 +9,8 @@ import {
 } from '@read-frog/definitions'
 import { useAtom } from 'jotai'
 import { Activity } from 'react'
-import { Checkbox } from '@/components/base-ui/checkbox'
-import { Label } from '@/components/base-ui/label'
+import { Checkbox } from '@/components/ui/base-ui/checkbox'
+import { Label } from '@/components/ui/base-ui/label'
 import {
   Select,
   SelectContent,
@@ -18,7 +18,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/base-ui/select'
+} from '@/components/ui/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ConfigCard } from '../../components/config-card'
 

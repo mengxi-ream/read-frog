@@ -5,7 +5,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/base-ui/dropdown-menu'
+} from '@/components/ui/base-ui/dropdown-menu'
 import { getReviewUrl } from '@/utils/utils'
 
 export function MoreMenu() {

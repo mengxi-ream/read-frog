@@ -14,7 +14,7 @@
   "aliases": {
     "components": "@/components",
     "utils": "@/utils/styles/tailwind",
-    "ui": "@/components/base-ui",
+    "ui": "@/components/ui/base-ui",
     "lib": "@/utils/styles",
     "hooks": "@/hooks"
   },
