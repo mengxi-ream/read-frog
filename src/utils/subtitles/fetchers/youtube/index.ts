@@ -4,14 +4,17 @@ import type { CaptionTrack, PlayerData, YoutubeTimedText } from './types'
 import { i18n } from '#imports'
 import { getLocalConfig } from '@/utils/config/storage'
 import {
+  ENSURE_SUBTITLES_REQUEST_TYPE,
+  ENSURE_SUBTITLES_RESPONSE_TYPE,
   FETCH_RETRY_DELAY_MS,
   MAX_FETCH_RETRIES,
+  MAX_POT_WAIT_ATTEMPTS,
   MAX_STATE_WAIT_ATTEMPTS,
-  PLAYER_DATA_REQUEST_TIMEOUT_MS,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
+  POST_MESSAGE_TIMEOUT_MS,
+  POT_WAIT_INTERVAL_MS,
   STATE_WAIT_INTERVAL_MS,
-  TIMEDTEXT_WAIT_TIMEOUT_MS,
   WAIT_TIMEDTEXT_REQUEST_TYPE,
   WAIT_TIMEDTEXT_RESPONSE_TYPE,
 } from '@/utils/constants/subtitles'
@@ -27,6 +30,36 @@ import { buildSubtitleUrl } from './url-builder'
 
 function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+function postMessageRequest(
+  responseType: string,
+  message: Record<string, unknown>,
+): Promise<any> {
+  return new Promise((resolve) => {
+    const requestId = crypto.randomUUID()
+
+    const handler = (event: MessageEvent) => {
+      if (
+        event.origin !== window.location.origin
+        || event.data?.type !== responseType
+        || event.data?.requestId !== requestId
+      ) {
+        return
+      }
+
+      window.removeEventListener('message', handler)
+      resolve(event.data)
+    }
+
+    window.addEventListener('message', handler)
+    window.postMessage({ ...message, requestId }, window.location.origin)
+
+    setTimeout(() => {
+      window.removeEventListener('message', handler)
+      resolve(null)
+    }, POST_MESSAGE_TIMEOUT_MS)
+  })
 }
 
 export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
@@ -126,19 +159,23 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       throw new OverlaySubtitlesError(i18n.t('subtitles.errors.fetchSubTimeout'))
     }
 
-    const playerData = response.data
+    let playerData = response.data
 
-    const hasPot = playerData.audioCaptionTracks.some((t) => {
-      try {
-        return new URL(t.url).searchParams.has('pot')
-      }
-      catch {
-        return false
-      }
-    })
-
-    if (hasPot || playerData.cachedTimedtextUrl) {
+    if (this.hasPotInAudioTracks(playerData) || playerData.cachedTimedtextUrl) {
       return playerData
+    }
+
+    await this.ensureSubtitlesEnabled()
+
+    for (let i = 0; i < MAX_POT_WAIT_ATTEMPTS; i++) {
+      await sleep(POT_WAIT_INTERVAL_MS)
+      const pollResponse = await this.requestPlayerData(videoId)
+      if (pollResponse.success && pollResponse.data) {
+        playerData = pollResponse.data
+        if (this.hasPotInAudioTracks(playerData) || playerData.cachedTimedtextUrl) {
+          return playerData
+        }
+      }
     }
 
     const timedtextUrl = await this.waitForTimedtextUrl(videoId)
@@ -149,82 +186,44 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return playerData
   }
 
-  private waitForTimedtextUrl(videoId: string): Promise<string | null> {
-    return new Promise((resolve) => {
-      const requestId = crypto.randomUUID()
-
-      const handler = (event: MessageEvent) => {
-        if (
-          event.origin !== window.location.origin
-          || event.data?.type !== WAIT_TIMEDTEXT_RESPONSE_TYPE
-          || event.data?.requestId !== requestId
-        ) {
-          return
-        }
-
-        window.removeEventListener('message', handler)
-        resolve(event.data.url ?? null)
+  private hasPotInAudioTracks(playerData: PlayerData): boolean {
+    return playerData.audioCaptionTracks.some((t) => {
+      try {
+        return new URL(t.url).searchParams.has('pot')
       }
-
-      window.addEventListener('message', handler)
-
-      window.postMessage(
-        {
-          type: WAIT_TIMEDTEXT_REQUEST_TYPE,
-          requestId,
-          videoId,
-        },
-        window.location.origin,
-      )
-
-      setTimeout(() => {
-        window.removeEventListener('message', handler)
-        resolve(null)
-      }, TIMEDTEXT_WAIT_TIMEOUT_MS + 1000)
+      catch {
+        return false
+      }
     })
   }
 
-  private requestPlayerData(videoId: string): Promise<{
+  private async waitForTimedtextUrl(videoId: string): Promise<string | null> {
+    const resp = await postMessageRequest(
+      WAIT_TIMEDTEXT_RESPONSE_TYPE,
+      { type: WAIT_TIMEDTEXT_REQUEST_TYPE, videoId },
+    )
+    return resp?.url ?? null
+  }
+
+  private async requestPlayerData(videoId: string): Promise<{
     success: boolean
     error?: string
     data?: PlayerData
   }> {
-    return new Promise((resolve) => {
-      const requestId = crypto.randomUUID()
+    const resp = await postMessageRequest(
+      PLAYER_DATA_RESPONSE_TYPE,
+      { type: PLAYER_DATA_REQUEST_TYPE, expectedVideoId: videoId },
+    )
+    if (!resp)
+      return { success: false, error: 'TIMEOUT' }
+    return { success: resp.success, error: resp.error, data: resp.data }
+  }
 
-      const handler = (event: MessageEvent) => {
-        if (
-          event.origin !== window.location.origin
-          || event.data?.type !== PLAYER_DATA_RESPONSE_TYPE
-          || event.data?.requestId !== requestId
-        ) {
-          return
-        }
-
-        window.removeEventListener('message', handler)
-        resolve({
-          success: event.data.success,
-          error: event.data.error,
-          data: event.data.data,
-        })
-      }
-
-      window.addEventListener('message', handler)
-
-      window.postMessage(
-        {
-          type: PLAYER_DATA_REQUEST_TYPE,
-          requestId,
-          expectedVideoId: videoId,
-        },
-        window.location.origin,
-      )
-
-      setTimeout(() => {
-        window.removeEventListener('message', handler)
-        resolve({ success: false, error: 'TIMEOUT' })
-      }, PLAYER_DATA_REQUEST_TIMEOUT_MS)
-    })
+  private async ensureSubtitlesEnabled(): Promise<void> {
+    await postMessageRequest(
+      ENSURE_SUBTITLES_RESPONSE_TYPE,
+      { type: ENSURE_SUBTITLES_REQUEST_TYPE },
+    )
   }
 
   /**

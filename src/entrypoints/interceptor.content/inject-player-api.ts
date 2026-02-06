@@ -1,5 +1,7 @@
 import type { PlayerDataResponse } from './utils'
 import {
+  ENSURE_SUBTITLES_REQUEST_TYPE,
+  ENSURE_SUBTITLES_RESPONSE_TYPE,
   PLAYER_DATA_REQUEST_TYPE,
   PLAYER_DATA_RESPONSE_TYPE,
   TIMEDTEXT_WAIT_TIMEOUT_MS,
@@ -21,6 +23,7 @@ interface YouTubePlayer extends HTMLElement {
   getPlayerState?: () => number
   getWebPlayerContextConfig?: () => any
   getOption?: (module: string, option: string) => any
+  toggleSubtitles?: () => void
 }
 
 declare global {
@@ -29,6 +32,12 @@ declare global {
       get?: (key: string) => string | undefined
     }
   }
+}
+
+function findYoutubePlayer(): YouTubePlayer | null {
+  return document.querySelector(
+    '.html5-video-player.playing-mode, .html5-video-player.paused-mode',
+  )
 }
 
 export function injectPlayerApi(): void {
@@ -56,15 +65,22 @@ function handleMessage(event: MessageEvent): void {
       }, window.location.origin)
     })
   }
+
+  if (event.data?.type === ENSURE_SUBTITLES_REQUEST_TYPE) {
+    const { requestId } = event.data
+    ensureSubtitlesEnabled()
+    window.postMessage({
+      type: ENSURE_SUBTITLES_RESPONSE_TYPE,
+      requestId,
+    }, window.location.origin)
+  }
 }
 
 function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
   const { requestId, expectedVideoId } = request
 
   try {
-    const player = document.querySelector(
-      '.html5-video-player.playing-mode, .html5-video-player.paused-mode',
-    ) as YouTubePlayer | null
+    const player = findYoutubePlayer()
 
     if (!player)
       return errorResponse(requestId, 'PLAYER_NOT_FOUND')
@@ -95,5 +111,23 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
   }
   catch (e) {
     return errorResponse(requestId, String(e))
+  }
+}
+
+function ensureSubtitlesEnabled(): void {
+  const button = document.querySelector('.ytp-subtitles-button') as HTMLElement | null
+  if (!button)
+    return
+
+  if (button.getAttribute('aria-pressed') === 'true')
+    return
+
+  const player = findYoutubePlayer()
+
+  if (player?.toggleSubtitles) {
+    player.toggleSubtitles()
+  }
+  else {
+    button.click()
   }
 }
