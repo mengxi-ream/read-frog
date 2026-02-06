@@ -29,7 +29,7 @@ export default antfu({
   },
   react: {
     overrides: {
-      // Disable globally: requires type info, only works with tsconfig-backed files
+      // Not useful in React 19 — key is no longer part of props
       'react/no-implicit-key': 'off',
     },
   },
@@ -44,7 +44,6 @@ export default antfu({
     },
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
-      'react/no-implicit-key': 'warn',
     },
   },
 ]).append({
