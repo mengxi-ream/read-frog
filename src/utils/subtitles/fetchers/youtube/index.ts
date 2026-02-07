@@ -101,6 +101,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return this.subtitles
   }
 
+  getSourceLanguage(): string {
+    return this.sourceLanguage
+  }
+
   cleanup(): void {
     this.subtitles = []
     this.sourceLanguage = ''

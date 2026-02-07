@@ -644,7 +644,7 @@ subtitles:
     fetchSuccess: Altyazılar yüklendi
     fetchFailed: Altyazılar alınamadı
     segmenting: AI bölümlendirmesi...
-    processing: Altyazılar çevriliyor (yaklaşık 2 dakika)
+    processing: Altyazılar çevriliyor
     error: Bir hata oluştu
   errors:
     http429: 429 YouTube altyazı API'sine çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.
