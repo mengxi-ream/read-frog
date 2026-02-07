@@ -17,6 +17,7 @@ import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 
 export function ClearAiSegmentationCache() {
+  const [open, setOpen] = useState(false)
   const [isClearing, setIsClearing] = useState(false)
 
   async function handleClearCache() {
@@ -29,6 +30,7 @@ export function ClearAiSegmentationCache() {
     }
     finally {
       setIsClearing(false)
+      setOpen(false)
     }
   }
 
@@ -37,7 +39,7 @@ export function ClearAiSegmentationCache() {
       title={i18n.t('options.videoSubtitles.aiSegmentation.clearCacheDialog.title')}
       description={i18n.t('options.videoSubtitles.aiSegmentation.clearCacheDialog.description')}
     >
-      <AlertDialog>
+      <AlertDialog open={open} onOpenChange={setOpen}>
         <div className="w-full flex justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
             <IconTrash className="size-4" />

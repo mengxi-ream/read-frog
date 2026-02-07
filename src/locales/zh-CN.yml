@@ -102,6 +102,8 @@ options:
         noModels: 没有可用的模型
         selectModel: 选择模型
         apiKeyRequired: 请先添加 API 密钥
+        searchModels: 搜索模型...
+        noModelsFound: 未找到模型
       advancedOptions: 高级选项
       temperature: 温度
       temperatureHint: 控制响应的随机性。较低的值（0）更确定性，较高的值更具创造性。范围因提供商而异。留空则使用提供商默认值。

@@ -1,6 +1,7 @@
 import { i18n } from '#imports'
 import { IconRefresh } from '@tabler/icons-react'
 import { useSetAtom } from 'jotai'
+import { useState } from 'react'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,14 +19,16 @@ import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { ConfigCard } from '../../components/config-card'
 
 export function ResetConfig() {
+  const [open, setOpen] = useState(false)
   const setConfig = useSetAtom(writeConfigAtom)
-  function resetToDefaultConfig() {
-    void setConfig(DEFAULT_CONFIG)
+  async function resetToDefaultConfig() {
+    await setConfig(DEFAULT_CONFIG)
+    setOpen(false)
   }
 
   return (
     <ConfigCard title={i18n.t('options.config.resetConfig.title')} description={i18n.t('options.config.resetConfig.description')}>
-      <AlertDialog>
+      <AlertDialog open={open} onOpenChange={setOpen}>
         <div className="w-full flex justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" />}>
             <IconRefresh className="size-4" />

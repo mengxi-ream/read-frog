@@ -102,6 +102,8 @@ options:
         noModels: No models available
         selectModel: Select a model
         apiKeyRequired: Please add API key first
+        searchModels: Search models...
+        noModelsFound: No models found
       advancedOptions: Advanced Options
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.

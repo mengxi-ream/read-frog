@@ -70,6 +70,7 @@ export function BackupConfigItem({ backupId, backupMetadata, backup }: BackupCon
 }
 
 function RestoreButton({ backup }: { backup: ConfigBackup }) {
+  const [open, setOpen] = useState(false)
   const currentConfig = useAtomValue(configAtom)
   const setConfig = useSetAtom(writeConfigAtom)
 
@@ -91,7 +92,7 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
   })
 
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger render={<Button variant="outline" size="sm" disabled={isRestoring} />}>
         {isRestoring ? <Spinner /> : <Icon icon="tabler:restore" />}
         {i18n.t('options.config.backup.item.restore')}
@@ -105,7 +106,7 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{i18n.t('options.config.backup.restore.cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={() => restoreBackup(backup)} disabled={isRestoring}>
+          <AlertDialogAction onClick={() => restoreBackup(backup, { onSettled: () => setOpen(false) })} disabled={isRestoring}>
             {i18n.t('options.config.backup.restore.confirm')}
           </AlertDialogAction>
         </AlertDialogFooter>
@@ -158,7 +159,7 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{i18n.t('options.config.backup.delete.cancel')}</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={() => deleteBackup(backupId)} disabled={isDeleting}>
+            <AlertDialogAction variant="destructive" onClick={() => deleteBackup(backupId, { onSettled: () => setShowDeleteDialog(false) })} disabled={isDeleting}>
               {i18n.t('options.config.backup.delete.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>
@@ -176,10 +177,10 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
           <AlertDialogFooter className="flex justify-between!">
             <AlertDialogCancel>{i18n.t('options.config.sync.exportOptions.cancel')}</AlertDialogCancel>
             <div className="flex gap-2">
-              <AlertDialogAction variant="secondary" onClick={() => exportConfig(true)} disabled={isExporting}>
+              <AlertDialogAction variant="secondary" onClick={() => exportConfig(true, { onSettled: () => setShowExportDialog(false) })} disabled={isExporting}>
                 {i18n.t('options.config.sync.exportOptions.includeAPIKeys')}
               </AlertDialogAction>
-              <AlertDialogAction onClick={() => exportConfig(false)} disabled={isExporting}>
+              <AlertDialogAction onClick={() => exportConfig(false, { onSettled: () => setShowExportDialog(false) })} disabled={isExporting}>
                 {i18n.t('options.config.sync.exportOptions.excludeAPIKeys')}
               </AlertDialogAction>
             </div>

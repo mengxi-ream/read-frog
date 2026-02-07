@@ -2,6 +2,7 @@ import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useMutation } from '@tanstack/react-query'
 import { useAtomValue, useSetAtom } from 'jotai'
+import { useState } from 'react'
 import { toast } from 'sonner'
 import {
   AlertDialog,
@@ -108,6 +109,7 @@ function ImportConfig() {
 }
 
 function ExportConfig() {
+  const [open, setOpen] = useState(false)
   const config = useAtomValue(configAtom)
 
   const { mutate: exportConfig, isPending: isExporting } = useExportConfig({
@@ -119,7 +121,7 @@ function ExportConfig() {
   })
 
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger render={<Button disabled={isExporting} />}>
         <Icon icon="tabler:file-export" className="size-4" />
         {i18n.t('options.config.sync.export')}
@@ -136,10 +138,10 @@ function ExportConfig() {
         <AlertDialogFooter className="flex justify-between!">
           <AlertDialogCancel>{i18n.t('options.config.sync.exportOptions.cancel')}</AlertDialogCancel>
           <div className="flex gap-2">
-            <AlertDialogAction variant="secondary" onClick={() => exportConfig(true)} disabled={isExporting}>
+            <AlertDialogAction variant="secondary" onClick={() => exportConfig(true, { onSettled: () => setOpen(false) })} disabled={isExporting}>
               {i18n.t('options.config.sync.exportOptions.includeAPIKeys')}
             </AlertDialogAction>
-            <AlertDialogAction onClick={() => exportConfig(false)} disabled={isExporting}>
+            <AlertDialogAction onClick={() => exportConfig(false, { onSettled: () => setOpen(false) })} disabled={isExporting}>
               {i18n.t('options.config.sync.exportOptions.excludeAPIKeys')}
             </AlertDialogAction>
           </div>

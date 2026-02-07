@@ -4,8 +4,8 @@ import { Input } from '@/components/ui/base-ui/input'
 import { useFieldContext } from '../form-context'
 
 export function InputField(
-  { formForSubmit, label, type, ...props }:
-  { formForSubmit: { handleSubmit: () => void }, label: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>,
+  { formForSubmit, label, labelExtra, type, ...props }:
+  { formForSubmit: { handleSubmit: () => void }, label: React.ReactNode, labelExtra?: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>,
 ) {
   const field = useFieldContext<string | number | undefined>()
   const errors = useStore(field.store, state => state.meta.errors)
@@ -35,9 +35,12 @@ export function InputField(
 
   return (
     <Field>
-      <FieldLabel htmlFor={field.name}>
-        {label}
-      </FieldLabel>
+      <div className="flex items-end justify-between w-full">
+        <FieldLabel nativeLabel={false} render={<div />}>
+          {label}
+        </FieldLabel>
+        {labelExtra}
+      </div>
       <Input
         id={field.name}
         type={type}

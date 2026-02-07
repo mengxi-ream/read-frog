@@ -64,11 +64,10 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     <div className="flex items-center gap-2">
       {ConnectionTestResultIcon}
       <Button
-        size="sm"
+        size="xs"
         variant="outline"
         onClick={handleTestConnection}
         disabled={mutation.isPending || (!apiKey && provider !== 'deeplx' && provider !== 'ollama')}
-        className="h-7 px-3"
       >
         {mutation.isPending
           ? (

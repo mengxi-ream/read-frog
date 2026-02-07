@@ -101,6 +101,8 @@ options:
         noModels: 사용 가능한 모델이 없습니다
         selectModel: 모델 선택
         apiKeyRequired: 먼저 API 키를 추가하세요
+        searchModels: 모델 검색...
+        noModelsFound: 모델을 찾을 수 없습니다
       advancedOptions: 고급 옵션
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
