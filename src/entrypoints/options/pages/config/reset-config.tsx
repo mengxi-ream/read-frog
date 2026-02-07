@@ -21,8 +21,8 @@ import { ConfigCard } from '../../components/config-card'
 export function ResetConfig() {
   const [open, setOpen] = useState(false)
   const setConfig = useSetAtom(writeConfigAtom)
-  function resetToDefaultConfig() {
-    void setConfig(DEFAULT_CONFIG)
+  async function resetToDefaultConfig() {
+    await setConfig(DEFAULT_CONFIG)
     setOpen(false)
   }
 
