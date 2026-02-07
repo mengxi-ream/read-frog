@@ -17,7 +17,7 @@ export default function TranslateProviderField() {
           </TooltipContent>
         </Tooltip>
       </span>
-      <TranslateProviderSelector className="!h-7 w-31 cursor-pointer pr-1.5 pl-2.5" />
+      <TranslateProviderSelector className="h-7! w-31 cursor-pointer pr-1.5 pl-2.5" />
     </div>
   )
 }

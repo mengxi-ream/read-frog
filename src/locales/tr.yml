@@ -102,6 +102,8 @@ options:
         noModels: Mevcut model yok
         selectModel: Model seç
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
+        searchModels: Model ara...
+        noModelsFound: Model bulunamadı
       advancedOptions: Gelişmiş Seçenekler
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.

@@ -20,20 +20,12 @@ export const BaseURLField = withForm({
         {field => (
           <field.InputField
             formForSubmit={form}
-            label={providerType !== 'ollama'
-              ? labelText
-              : (
-                  (
-                    <div className="flex items-end justify-between w-full">
-                      <span className="text-sm font-medium">
-                        {labelText}
-                      </span>
-                      <ConnectionTestButton
-                        providerConfig={providerConfig}
-                      />
-                    </div>
-                  )
-                )}
+            label={labelText}
+            labelExtra={providerType === 'ollama' && (
+              <ConnectionTestButton
+                providerConfig={providerConfig}
+              />
+            )}
           />
         )}
       </form.AppField>

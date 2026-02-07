@@ -101,6 +101,8 @@ options:
         noModels: 利用可能なモデルがありません
         selectModel: モデルを選択
         apiKeyRequired: 先にAPIキーを追加してください
+        searchModels: モデルを検索...
+        noModelsFound: モデルが見つかりません
       advancedOptions: 詳細オプション
       temperature: 温度
       temperatureHint: 応答のランダム性を制御します。低い値（0）はより決定的で、高い値はより創造的です。範囲はプロバイダーによって異なります。空欄の場合はプロバイダーのデフォルト値を使用します。

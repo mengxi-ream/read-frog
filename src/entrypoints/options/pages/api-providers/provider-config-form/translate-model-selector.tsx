@@ -28,20 +28,16 @@ export const TranslateModelSelector = withForm({
                 {field => (
                   <field.InputField
                     formForSubmit={form}
-                    label={(
-                      <div className="flex items-end justify-between w-full">
-                        <span>{i18n.t('options.apiProviders.form.models.translate.customTitle')}</span>
-                        {isCustomLLMProviderConfig(providerConfig) && (
-                          <ModelSuggestionButton
-                            baseURL={providerConfig.baseURL}
-                            apiKey={providerConfig.apiKey}
-                            onSelect={(model) => {
-                              field.handleChange(model)
-                              void form.handleSubmit()
-                            }}
-                          />
-                        )}
-                      </div>
+                    label={i18n.t('options.apiProviders.form.models.translate.customTitle')}
+                    labelExtra={isCustomLLMProviderConfig(providerConfig) && (
+                      <ModelSuggestionButton
+                        baseURL={providerConfig.baseURL}
+                        apiKey={providerConfig.apiKey}
+                        onSelect={(model) => {
+                          field.handleChange(model)
+                          void form.handleSubmit()
+                        }}
+                      />
                     )}
                     value={customModel ?? ''}
                   />

@@ -24,18 +24,12 @@ export const APIKeyField = withForm({
           <div className="flex flex-col gap-2">
             <field.InputField
               formForSubmit={form}
-              label={
-                (
-                  <div className="flex w-full items-end justify-between">
-                    <span className="text-sm font-medium">
-                      API Key
-                    </span>
-                    <ConnectionTestButton
-                      providerConfig={providerConfig}
-                    />
-                  </div>
-                )
-              }
+              label="API Key"
+              labelExtra={(
+                <ConnectionTestButton
+                  providerConfig={providerConfig}
+                />
+              )}
               type={showAPIKey ? 'text' : 'password'}
             />
             <div className="mt-0.5 flex items-center space-x-2">
