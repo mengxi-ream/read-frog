@@ -42,13 +42,14 @@ async function translateSingleSubtitle(
   text: string,
   langConfig: Config['language'],
   providerConfig: ProviderConfig,
+  enableAIContentAware: boolean,
   videoContext: SubtitlesVideoContext,
 ): Promise<string> {
   const hashComponents = await buildHashComponents(
     text,
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
-    true,
+    enableAIContentAware,
     { title: videoContext.videoTitle, textContent: videoContext.subtitlesTextContent },
   )
 
@@ -58,8 +59,8 @@ async function translateSingleSubtitle(
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
-    videoTitle: videoContext.videoTitle,
-    subtitlesContext: videoContext.subtitlesTextContent,
+    videoTitle: enableAIContentAware ? videoContext.videoTitle : '',
+    subtitlesContext: enableAIContentAware ? videoContext.subtitlesTextContent : '',
   })
 }
 
@@ -79,9 +80,10 @@ export async function translateSubtitles(
   }
 
   const langConfig = config.language
+  const enableAIContentAware = !!config.translate.enableAIContentAware
 
   const translationPromises = fragments.map(fragment =>
-    translateSingleSubtitle(fragment.text, langConfig, providerConfig, videoContext),
+    translateSingleSubtitle(fragment.text, langConfig, providerConfig, enableAIContentAware, videoContext),
   )
 
   const results = await Promise.allSettled(translationPromises)
