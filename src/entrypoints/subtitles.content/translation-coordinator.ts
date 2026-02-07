@@ -1,4 +1,5 @@
 import type { SegmentationPipeline } from './segmentation-pipeline'
+import type { SubtitlesVideoContext } from '@/utils/subtitles/processor/translator'
 import type { SubtitlesFragment, SubtitlesState } from '@/utils/subtitles/types'
 import { getLocalConfig } from '@/utils/config/storage'
 import { TRANSLATE_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from '@/utils/constants/subtitles'
@@ -17,7 +18,7 @@ export class TranslationCoordinator {
   private translatedStarts = new Set<number>()
   private failedStarts = new Set<number>()
   private isTranslating = false
-  private allSubtitlesContext = ''
+  private videoContext: SubtitlesVideoContext = { videoTitle: '', subtitlesTextContent: '' }
 
   private getFragments: () => SubtitlesFragment[]
   private getVideoElement: () => HTMLVideoElement | null
@@ -33,9 +34,9 @@ export class TranslationCoordinator {
     this.onStateChange = options.onStateChange
   }
 
-  start(allSubtitlesContext?: string) {
-    if (allSubtitlesContext !== undefined) {
-      this.allSubtitlesContext = allSubtitlesContext
+  start(videoContext?: SubtitlesVideoContext) {
+    if (videoContext !== undefined) {
+      this.videoContext = videoContext
     }
 
     const video = this.getVideoElement()
@@ -68,7 +69,7 @@ export class TranslationCoordinator {
     this.translatedStarts.clear()
     this.failedStarts.clear()
     this.isTranslating = false
-    this.allSubtitlesContext = ''
+    this.videoContext = { videoTitle: '', subtitlesTextContent: '' }
   }
 
   clearFailed() {
@@ -121,7 +122,7 @@ export class TranslationCoordinator {
     batch.forEach(f => this.translatingStarts.add(f.start))
 
     try {
-      const translated = await translateSubtitles(batch, this.allSubtitlesContext)
+      const translated = await translateSubtitles(batch, this.videoContext)
       translated.forEach((f) => {
         this.translatingStarts.delete(f.start)
         this.translatedStarts.add(f.start)

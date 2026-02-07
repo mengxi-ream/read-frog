@@ -4,7 +4,7 @@ import type { SubtitlesFragment } from '@/utils/subtitles/types'
 import { i18n } from '#imports'
 import { toast } from 'sonner'
 import { getLocalConfig } from '@/utils/config/storage'
-import { DEFAULT_SUBTITLE_POSITION, HIDE_NATIVE_CAPTIONS_STYLE_ID, MAX_CONTEXT_CHARS, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
+import { DEFAULT_SUBTITLE_POSITION, HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
 import { waitForElement } from '@/utils/dom/wait-for-element'
 import { ToastSubtitlesError } from '@/utils/subtitles/errors'
 import { subtitlesPositionAtom, subtitlesStore } from './atoms'
@@ -230,8 +230,10 @@ export class UniversalVideoAdapter {
 
     const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation
 
-    const fullText = this.originalSubtitles.map(f => f.text).join('\n')
-    const allSubtitlesContext = fullText.slice(0, MAX_CONTEXT_CHARS)
+    const videoContext = {
+      videoTitle: document.title || '',
+      subtitlesTextContent: this.originalSubtitles.map(f => f.text).join(''),
+    }
 
     if (useAiSegmentation) {
       this.segmentationPipeline = new SegmentationPipeline({
@@ -253,6 +255,6 @@ export class UniversalVideoAdapter {
       onTranslated: fragments => this.subtitlesScheduler?.supplementSubtitles(fragments),
       onStateChange: (state, data) => this.subtitlesScheduler?.setState(state, data),
     })
-    this.translationCoordinator.start(allSubtitlesContext)
+    this.translationCoordinator.start(videoContext)
   }
 }
