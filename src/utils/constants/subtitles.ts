@@ -15,7 +15,6 @@ export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
 export const TRANSLATION_BATCH_SIZE = 5
 export const TRANSLATE_LOOK_AHEAD_MS = 30_000
 export const PROCESS_LOOK_AHEAD_MS = 60_000
-export const MAX_CONTEXT_CHARS = 5_000
 
 // DOM IDs
 export const TRANSLATE_BUTTON_CONTAINER_ID = 'read-frog-subtitles-translate-button-container'
