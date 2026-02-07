@@ -32,7 +32,8 @@ export function CloseButton() {
     >
       <DropdownMenuTrigger
         render={(
-          <div
+          <button
+            type="button"
             title="Close selection toolbar"
             className={`border-border absolute -top-1 -right-1 cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? 'block' : 'hidden group-hover:block'}`}
             onMouseDown={handleMouseDown}
