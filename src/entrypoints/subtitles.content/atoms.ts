@@ -1,10 +1,8 @@
-import type { StateData, SubtitlesFragment, SubtitlesTranslationBlock } from '@/utils/subtitles/types'
+import type { StateData, SubtitlesFragment } from '@/utils/subtitles/types'
 import { atom, createStore } from 'jotai'
 import { DEFAULT_SUBTITLE_POSITION } from '@/utils/constants/subtitles'
 
 export const subtitlesStore = createStore()
-
-export const subtitlesTranslationBlocksAtom = atom<SubtitlesTranslationBlock[]>([])
 
 export const currentTimeMsAtom = atom<number>(0)
 
@@ -31,15 +29,4 @@ export const subtitlesDisplayAtom = atom((get) => {
     stateData,
     isVisible,
   }
-})
-
-export const currentBlockCompletedAtom = atom((get) => {
-  const currentTimeMs = get(currentTimeMsAtom)
-  const blocks = get(subtitlesTranslationBlocksAtom)
-
-  const currentBlock = blocks.find(
-    block => block.startMs <= currentTimeMs && block.endMs > currentTimeMs,
-  )
-
-  return currentBlock?.state === 'completed'
 })

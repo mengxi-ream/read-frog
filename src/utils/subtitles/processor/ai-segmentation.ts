@@ -90,26 +90,18 @@ export async function aiSegmentBlock(
     return fragments
   }
 
-  const translateProviderId = config.translate.providerId
-
   const jsonContent = formatFragmentsToJson(cleanedFragments)
 
-  try {
-    const segmentedVtt = await sendMessage('aiSegmentSubtitles', {
-      jsonContent,
-      providerId: translateProviderId,
-    })
+  const segmentedVtt = await sendMessage('aiSegmentSubtitles', {
+    jsonContent,
+    providerId: config.translate.providerId,
+  })
 
-    const segmentedFragments = parseSimplifiedVttToFragments(segmentedVtt)
+  const segmentedFragments = parseSimplifiedVttToFragments(segmentedVtt)
 
-    if (segmentedFragments.length === 0) {
-      return fragments
-    }
-
-    return segmentedFragments
+  if (segmentedFragments.length === 0) {
+    throw new Error('AI segmentation returned empty result')
   }
-  catch (error) {
-    console.error('AI segmentation failed:', error)
-    return fragments
-  }
+
+  return segmentedFragments
 }

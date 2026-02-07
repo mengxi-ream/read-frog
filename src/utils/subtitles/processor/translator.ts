@@ -44,6 +44,7 @@ async function initializeContext(
   config: Config,
   providerConfig: ProviderConfig | undefined,
   fragments: SubtitlesFragment[],
+  externalContext?: string,
 ): Promise<TranslateContext> {
   const enableContext = !!config?.translate.enableAIContentAware
   let videoTitle = ''
@@ -54,7 +55,10 @@ async function initializeContext(
   if (isLLM && enableContext) {
     videoTitle = document.title || ''
 
-    if (fragments.length > 0) {
+    if (externalContext) {
+      subtitlesTextContent = externalContext
+    }
+    else if (fragments.length > 0) {
       subtitlesTextContent = fragments.map(s => s.text).join('\n')
     }
   }
@@ -89,6 +93,7 @@ async function translateSingleSubtitle(
 
 export async function translateSubtitles(
   fragments: SubtitlesFragment[],
+  subtitlesContext?: string,
 ): Promise<SubtitlesFragment[]> {
   const config = await getLocalConfig()
   if (!config) {
@@ -102,7 +107,7 @@ export async function translateSubtitles(
     return fragments.map(f => ({ ...f, translation: '' }))
   }
 
-  const context = await initializeContext(config, providerConfig, fragments)
+  const context = await initializeContext(config, providerConfig, fragments, subtitlesContext)
   const langConfig = config.language
 
   const translationPromises = fragments.map(fragment =>

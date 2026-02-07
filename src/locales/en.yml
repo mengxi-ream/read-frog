@@ -646,7 +646,7 @@ subtitles:
     fetchSuccess: Captions loaded
     fetchFailed: Failed to fetch captions
     segmenting: AI segmenting...
-    processing: Translating captions (approx. 2 minutes)
+    processing: Translating captions
     error: Error occurred
   errors:
     http429: 429 Too many requests to youtube subtitle API, please try again later

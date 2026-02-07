@@ -18,13 +18,3 @@ export interface SubtitlesFragment {
   end: number
   translation?: string
 }
-
-export type SubtitlesTranslationBlockState = 'idle' | 'processing' | 'completed' | 'error'
-
-export interface SubtitlesTranslationBlock {
-  id: number
-  startMs: number
-  endMs: number
-  state: SubtitlesTranslationBlockState
-  fragments: SubtitlesFragment[]
-}
