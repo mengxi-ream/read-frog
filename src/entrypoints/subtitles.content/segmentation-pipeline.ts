@@ -61,8 +61,10 @@ export class SegmentationPipeline {
     this.running = true
 
     const video = this.getVideoElement()
-    if (!video)
+    if (!video) {
+      this.running = false
       return
+    }
 
     try {
       while (!this.stopped && this.hasUnprocessedChunks()) {
