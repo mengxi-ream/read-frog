@@ -17,26 +17,26 @@ import { sendMessage } from '@/utils/message'
 import { ConfigCard } from '../../components/config-card'
 
 export function ClearCacheConfig() {
+  const [open, setOpen] = useState(false)
   const [isClearing, setIsClearing] = useState(false)
 
   async function handleClearCache() {
     try {
       setIsClearing(true)
       await sendMessage('clearAllTranslationRelatedCache')
-      // Show success message or notification here if needed
     }
     catch (error) {
       console.error('Failed to clear cache:', error)
-      // Show error message or notification here if needed
     }
     finally {
       setIsClearing(false)
+      setOpen(false)
     }
   }
 
   return (
     <ConfigCard title={i18n.t('options.general.clearCache.title')} description={i18n.t('options.general.clearCache.description')}>
-      <AlertDialog>
+      <AlertDialog open={open} onOpenChange={setOpen}>
         <div className="w-full flex justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
             <IconTrash className="size-4" />
