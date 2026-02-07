@@ -4,4 +4,5 @@ export interface SubtitlesFetcher {
   fetch: () => Promise<SubtitlesFragment[]>
   cleanup: () => void
   shouldUseSameTrack: () => Promise<boolean>
+  getSourceLanguage: () => string
 }
