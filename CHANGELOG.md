@@ -1,5 +1,47 @@
 # @read-frog/extension
 
+## 1.25.0
+
+### Minor Changes
+
+- [#930](https://github.com/mengxi-ream/read-frog/pull/930) [`a1ec67a`](https://github.com/mengxi-ream/read-frog/commit/a1ec67a8cb246843abf7a1dbe7d3c4b3e09217c1) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): improve subtitle container positioning and visual effects
+
+- [#933](https://github.com/mengxi-ream/read-frog/pull/933) [`4928469`](https://github.com/mengxi-ream/read-frog/commit/4928469699596946a5acec15b15b62bb992cb0c3) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor(subtitles): replace XHR interception with direct fetch for YouTube subtitles
+
+- [#932](https://github.com/mengxi-ream/read-frog/pull/932) [`aa6cc36`](https://github.com/mengxi-ream/read-frog/commit/aa6cc36cf1d76bc3732c47a1489e4d720dfffdce) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor(ui): migrate shadcn components to base-ui
+
+### Patch Changes
+
+- [#943](https://github.com/mengxi-ream/read-frog/pull/943) [`d0986d4`](https://github.com/mengxi-ream/read-frog/commit/d0986d42081c3c6dcc77944fc4fc4646da0ef72b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor(ui): consolidate UI components under src/components/ui/
+
+- [#923](https://github.com/mengxi-ream/read-frog/pull/923) [`955dafd`](https://github.com/mengxi-ream/read-frog/commit/955dafd7594d9f67d66c70f9e7b2c820fb78c6e4) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat: add custom prompts support for video subtitles translation
+
+- [#945](https://github.com/mengxi-ream/read-frog/pull/945) [`d721988`](https://github.com/mengxi-ream/read-frog/commit/d72198852a507a855906957be4510d45848d8c1b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): ensure CC enabled to trigger YouTube BotGuard POT token generation
+
+- [#947](https://github.com/mengxi-ream/read-frog/pull/947) [`011519c`](https://github.com/mengxi-ream/read-frog/commit/011519c9616ebc848476fc4676002058ee75b783) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(ui): close AlertDialog on action button click
+
+- [#939](https://github.com/mengxi-ream/read-frog/pull/939) [`01f0e95`](https://github.com/mengxi-ream/read-frog/commit/01f0e95a987cf5cda06177b650b7acc848189a0a) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): respect user's selected subtitle track on YouTube
+
+- [#929](https://github.com/mengxi-ream/read-frog/pull/929) [`ddbc50d`](https://github.com/mengxi-ream/read-frog/commit/ddbc50d4ed5b139a5b9d26f4290b89df2a801dec) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): prevent navigation events from hiding subtitles unexpectedly and improve AI error messages
+
+- [#924](https://github.com/mengxi-ream/read-frog/pull/924) [`d7e8c23`](https://github.com/mengxi-ream/read-frog/commit/d7e8c235c17709f7b4a872dffee6a549a0013ff0) Thanks [@sdxdlgz](https://github.com/sdxdlgz)! - fix(subtitles): auto-hide error state and harden YouTube fetcher
+
+- [#914](https://github.com/mengxi-ream/read-frog/pull/914) [`79f8702`](https://github.com/mengxi-ream/read-frog/commit/79f870279e014f6f38f739eae06c1a6b00e8e6e1) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: handle unknown HTTP error status in YouTube subtitle fetcher
+
+- [#922](https://github.com/mengxi-ream/read-frog/pull/922) [`fa99c8a`](https://github.com/mengxi-ream/read-frog/commit/fa99c8a29bd6889e0eceb16d06cfd860129d8b55) Thanks [@flowKKo](https://github.com/flowKKo)! - feat: add retry button for translation cards
+
+- [#946](https://github.com/mengxi-ream/read-frog/pull/946) [`1f61823`](https://github.com/mengxi-ream/read-frog/commit/1f6182333746d7e3ad54e0b51cbc1a0163d9232b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(ui): replace model selector popover with searchable combobox
+
+- [#949](https://github.com/mengxi-ream/read-frog/pull/949) [`67a9310`](https://github.com/mengxi-ream/read-frog/commit/67a9310a90bbd210aac6af66edd27b02bd51397b) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor(subtitles): replace block-based translation with on-demand strategy
+
+- [#936](https://github.com/mengxi-ream/read-frog/pull/936) [`ef84d44`](https://github.com/mengxi-ream/read-frog/commit/ef84d4445808cdfeceec51a992fd19b53c7b567a) Thanks [@ishiko732](https://github.com/ishiko732)! - perf(logger): show caller source location in browser console by using `console.bind` instead of wrapper functions
+
+- [#950](https://github.com/mengxi-ream/read-frog/pull/950) [`2d6fa6f`](https://github.com/mengxi-ream/read-frog/commit/2d6fa6f9d1242068d495ab7d1d7f71fc13c2fe02) Thanks [@taiiiyang](https://github.com/taiiiyang)! - i18n: shorten survey sidebar text and add gift emoji
+
+- [#937](https://github.com/mengxi-ream/read-frog/pull/937) [`adab0ac`](https://github.com/mengxi-ream/read-frog/commit/adab0ac62efcfec8aab0d121e213e0a844d7ca04) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor(subtitles): unify noise filtering to fetcher layer
+
+- [#944](https://github.com/mengxi-ream/read-frog/pull/944) [`6dc3562`](https://github.com/mengxi-ream/read-frog/commit/6dc3562a991d244ffcd8d9d55b36cacbe4f9d003) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore: upgrade AI SDK and other dependencies
+
 ## 1.24.0
 
 ### Minor Changes
