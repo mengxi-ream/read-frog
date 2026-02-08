@@ -112,7 +112,7 @@ export function GeneralSettings() {
 
         <Field orientation="responsive-compact">
           <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.backgroundOpacity')}</FieldLabel>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-1 min-w-0 items-center gap-2">
             <Slider
               min={MIN_BACKGROUND_OPACITY}
               max={MAX_BACKGROUND_OPACITY}

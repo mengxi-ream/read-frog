@@ -57,7 +57,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
 
       <Field orientation="responsive-compact">
         <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontScale')}</FieldLabel>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-1 min-w-0 items-center gap-2">
           <Slider
             min={MIN_FONT_SCALE}
             max={MAX_FONT_SCALE}
@@ -75,7 +75,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
 
       <Field orientation="responsive-compact">
         <FieldLabel className="text-sm whitespace-nowrap">{i18n.t('options.videoSubtitles.style.fontWeight')}</FieldLabel>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-1 min-w-0 items-center gap-2">
           <Slider
             min={MIN_FONT_WEIGHT}
             max={MAX_FONT_WEIGHT}
