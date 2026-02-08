@@ -2,7 +2,6 @@ import type { PopoverWrapperRef } from './components/popover-wrapper'
 import { useMemo, useRef, useState } from '#imports'
 import { Icon } from '@iconify/react'
 import { useQuery } from '@tanstack/react-query'
-import { streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Activity } from 'react'
 import { MarkdownRenderer } from '@/components/markdown-renderer'
@@ -10,11 +9,9 @@ import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
 import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
 import { getFinalSourceCode } from '@/utils/config/languages'
-import { getIsFirefoxExtensionEnv } from '@/utils/firefox/firefox-compat'
-import { createPortStreamPromise } from '@/utils/firefox/firefox-streaming'
+import { streamBackgroundText } from '@/utils/content-script/background-stream-client'
 import { logger } from '@/utils/logger'
 import { getWordExplainPrompt } from '@/utils/prompts/word-explain'
-import { getReadModelById } from '@/utils/providers/model'
 import { createHighlightData } from '../utils'
 import { isAiPopoverVisibleAtom, isSelectionToolbarVisibleAtom, mouseClickPositionAtom, selectionRangeAtom } from './atom'
 import { PopoverWrapper } from './components/popover-wrapper'
@@ -54,7 +51,6 @@ export function AiPopover() {
   const readProviderConfig = useAtomValue(readProviderConfigAtom)
   const popoverRef = useRef<PopoverWrapperRef>(null)
   const [aiResponse, setAiResponse] = useState('')
-  const isFirefoxExtensionEnv = useMemo(() => getIsFirefoxExtensionEnv(), [])
 
   const highlightData = useMemo(() => {
     if (!selectionRange || !isVisible) {
@@ -74,7 +70,6 @@ export function AiPopover() {
       highlightData,
       readProviderConfig,
       config,
-      isFirefoxExtensionEnv,
     ],
     queryFn: async ({ signal }) => {
       if (!highlightData || !readProviderConfig || !config) {
@@ -98,53 +93,29 @@ export function AiPopover() {
           = `query: ${highlightData.context.selection}\n`
             + `context: ${highlightData.context.before} ${highlightData.context.selection} ${highlightData.context.after}`
 
-        if (isFirefoxExtensionEnv) {
-          const finalResponse = await createPortStreamPromise<string>(
-            'analyze-selection-stream',
-            {
-              providerId: readProviderConfig.id,
-              systemPrompt,
-              userMessage,
-              temperature: 0.2,
-            },
-            {
-              signal,
-              onChunk: (data) => {
-                setAiResponse(data)
-                popoverRef.current?.scrollToBottom()
+        const finalResponse = await streamBackgroundText(
+          {
+            providerId: readProviderConfig.id,
+            modelRole: 'read',
+            temperature: 0.2,
+            system: systemPrompt,
+            messages: [
+              {
+                role: 'user',
+                content: userMessage,
               },
+            ],
+          },
+          {
+            signal,
+            onChunk: (data) => {
+              setAiResponse(data)
+              popoverRef.current?.scrollToBottom()
             },
-          )
+          },
+        )
 
-          logger.log('aiResponse', '\n', finalResponse)
-          return true
-        }
-
-        const model = await getReadModelById(readProviderConfig.id)
-        const result = await streamText({
-          model,
-          temperature: 0.2,
-          system: systemPrompt,
-          messages: [
-            {
-              role: 'user',
-              content: userMessage,
-            },
-          ],
-          abortSignal: signal,
-        })
-
-        let fullResponse = ''
-        for await (const delta of result.textStream) {
-          if (signal?.aborted) {
-            throw new DOMException('aborted', 'AbortError')
-          }
-          fullResponse += delta
-          setAiResponse(fullResponse)
-          popoverRef.current?.scrollToBottom()
-        }
-
-        logger.log('aiResponse', '\n', fullResponse)
+        logger.log('aiResponse', '\n', finalResponse)
         return true
       }
       catch (error) {

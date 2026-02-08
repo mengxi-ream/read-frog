@@ -4,11 +4,11 @@ import { logger } from '@/utils/logger'
 import { onMessage, sendMessage } from '@/utils/message'
 import { SessionCacheGroupRegistry } from '@/utils/session-cache/session-cache-group-registry'
 import { runAiSegmentSubtitles } from './ai-segmentation'
+import { dispatchBackgroundStreamPort } from './background-stream'
 import { ensureInitializedConfig } from './config'
 import { setUpConfigBackup } from './config-backup'
 import { initializeContextMenu, registerContextMenuListeners } from './context-menu'
 import { cleanupAllAiSegmentationCache, cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from './db-cleanup'
-import { handleAnalyzeSelectionPort, handleTranslateStreamPort, runAnalyzeSelectionStream } from './firefox-stream'
 import { setupIframeInjection } from './iframe-injection'
 import { initMockData } from './mock-data'
 import { newUserGuide } from './new-user-guide'
@@ -54,16 +54,6 @@ export default defineBackground({
       void sendMessage('readArticle', undefined, message.data.tabId)
     })
 
-    onMessage('analyzeSelection', async (message) => {
-      try {
-        return await runAnalyzeSelectionStream(message.data)
-      }
-      catch (error) {
-        logger.error('[Background] analyzeSelection failed', error)
-        throw error
-      }
-    })
-
     onMessage('aiSegmentSubtitles', async (message) => {
       try {
         return await runAiSegmentSubtitles(message.data)
@@ -75,14 +65,7 @@ export default defineBackground({
     })
 
     browser.runtime.onConnect.addListener((port) => {
-      if (port.name === 'analyze-selection-stream') {
-        handleAnalyzeSelectionPort(port)
-        return
-      }
-
-      if (port.name === 'translate-text-stream') {
-        handleTranslateStreamPort(port)
-      }
+      dispatchBackgroundStreamPort(port)
     })
 
     onMessage('clearAllTranslationRelatedCache', async () => {

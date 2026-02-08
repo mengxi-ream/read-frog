@@ -1,27 +1,17 @@
-import type { TextUIPart } from 'ai'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
-import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@read-frog/definitions'
+import { LANG_CODE_TO_EN_NAME } from '@read-frog/definitions'
 import { IconLoader2, IconVolume } from '@tabler/icons-react'
-import { readUIMessageStream, streamText } from 'ai'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
-import {
-  isLLMTranslateProviderConfig,
-  isNonAPIProvider,
-  isPureAPIProvider,
-} from '@/types/config/provider'
+import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { translateProviderConfigAtom, ttsProviderConfigAtom } from '@/utils/atoms/provider'
-import { getLocalConfig } from '@/utils/config/storage'
-import { getIsFirefoxExtensionEnv } from '@/utils/firefox/firefox-compat'
-import { createPortStreamPromise } from '@/utils/firefox/firefox-streaming'
-import { deeplxTranslate, googleTranslate, microsoftTranslate } from '@/utils/host/translate/api'
+import { streamBackgroundText } from '@/utils/content-script/background-stream-client'
 import { translateTextForSelection } from '@/utils/host/translate/translate-text'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
-import { getTranslateModelById } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import {
   isSelectionToolbarVisibleAtom,
@@ -65,7 +55,6 @@ export function TranslatePopover() {
   const languageConfig = useAtomValue(configFieldsAtomMap.language)
   const selectionContent = useAtomValue(selectionContentAtom)
   const [isVisible, setIsVisible] = useAtom(isTranslatePopoverVisibleAtom)
-  const isFirefoxExtensionEnv = useMemo(() => getIsFirefoxExtensionEnv(), [])
 
   const handleClose = useCallback(() => {
     setTranslatedText(undefined)
@@ -88,44 +77,38 @@ export function TranslatePopover() {
         return
       }
 
-      const config = await getLocalConfig()
-      if (!config) {
-        throw new Error('No global config when translate text')
-      }
-
       if (!translateProviderConfig) {
-        throw new Error(
-          `No provider config for ${config.translate.providerId} when translate text`,
-        )
+        throw new Error('No provider config when translate text')
       }
-
-      const { provider } = translateProviderConfig
 
       setIsTranslating(true)
       cancelTranslation = undefined
 
       try {
-        if (isFirefoxExtensionEnv && isLLMTranslateProviderConfig(translateProviderConfig)) {
+        if (isLLMTranslateProviderConfig(translateProviderConfig)) {
           const targetLangName = LANG_CODE_TO_EN_NAME[languageConfig.targetCode]
           const {
             id: providerId,
             models: { translate },
             provider,
             providerOptions: userProviderOptions,
+            temperature,
           } = translateProviderConfig
           const translateModel = translate.isCustomModel ? translate.customModel : translate.model
           const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
-          const prompt = await getTranslatePrompt(targetLangName, cleanText)
+          const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
 
           const abortController = new AbortController()
           cancelTranslation = () => abortController.abort()
 
-          const latestText = await createPortStreamPromise<string>(
-            'translate-text-stream',
+          const latestText = await streamBackgroundText(
             {
               providerId,
+              modelRole: 'translate',
+              system: systemPrompt,
               prompt,
               providerOptions,
+              temperature,
             },
             {
               signal: abortController.signal,
@@ -146,101 +129,12 @@ export function TranslatePopover() {
           return
         }
 
-        if (isFirefoxExtensionEnv) {
-          const backgroundTranslation = await translateTextForSelection(cleanText)
-          if (isCancelled) {
-            return
-          }
-          const normalized = backgroundTranslation.trim()
-          setTranslatedText(normalized === cleanText ? '' : normalized)
+        const backgroundTranslation = await translateTextForSelection(cleanText)
+        if (isCancelled) {
           return
         }
-
-        let translatedText = ''
-
-        if (isNonAPIProvider(provider)) {
-          const sourceLang
-            = languageConfig.sourceCode === 'auto'
-              ? 'auto'
-              : ISO6393_TO_6391[languageConfig.sourceCode] ?? 'auto'
-          const targetLang = ISO6393_TO_6391[languageConfig.targetCode]
-          if (!targetLang) {
-            throw new Error(`Invalid target language code: ${languageConfig.targetCode}`)
-          }
-
-          if (provider === 'google-translate') {
-            translatedText = await googleTranslate(cleanText, sourceLang, targetLang)
-          }
-          else if (provider === 'microsoft-translate') {
-            translatedText = await microsoftTranslate(cleanText, sourceLang, targetLang)
-          }
-        }
-        else if (isPureAPIProvider(provider)) {
-          const sourceLang
-            = languageConfig.sourceCode === 'auto'
-              ? 'auto'
-              : ISO6393_TO_6391[languageConfig.sourceCode] ?? 'auto'
-          const targetLang = ISO6393_TO_6391[languageConfig.targetCode]
-          if (!targetLang) {
-            throw new Error(`Invalid target language code: ${languageConfig.targetCode}`)
-          }
-
-          if (provider === 'deeplx') {
-            translatedText = await deeplxTranslate(
-              cleanText,
-              sourceLang,
-              targetLang,
-              translateProviderConfig,
-              { forceBackgroundFetch: true },
-            )
-          }
-        }
-        else if (isLLMTranslateProviderConfig(translateProviderConfig)) {
-          const targetLangName = LANG_CODE_TO_EN_NAME[languageConfig.targetCode]
-          const {
-            id: providerId,
-            models: { translate },
-            provider,
-            providerOptions: userProviderOptions2,
-          } = translateProviderConfig
-          const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-          const model = await getTranslateModelById(providerId)
-
-          const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions2)
-          const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
-
-          const result = streamText({
-            model,
-            system: systemPrompt,
-            prompt,
-            providerOptions,
-          })
-
-          const abortController = new AbortController()
-          cancelTranslation = () => {
-            abortController.abort()
-          }
-
-          for await (const uiMessage of readUIMessageStream({
-            stream: result.toUIMessageStream(),
-          })) {
-            if (isCancelled || abortController.signal.aborted) {
-              return
-            }
-            const lastPart = uiMessage.parts[uiMessage.parts.length - 1] as TextUIPart
-            setTranslatedText(lastPart.text)
-          }
-
-          cancelTranslation = undefined
-        }
-        else {
-          throw new Error(`Unknown provider: ${provider}`)
-        }
-
-        if (translatedText && !isLLMTranslateProviderConfig(translateProviderConfig)) {
-          translatedText = translatedText.trim()
-          setTranslatedText(translatedText === cleanText ? '' : translatedText)
-        }
+        const normalized = backgroundTranslation.trim()
+        setTranslatedText(normalized === cleanText ? '' : normalized)
       }
       catch (error) {
         if (error instanceof DOMException && error.name === 'AbortError') {
@@ -272,10 +166,8 @@ export function TranslatePopover() {
   }, [
     isVisible,
     selectionContent,
-    languageConfig.sourceCode,
     languageConfig.targetCode,
     translateProviderConfig,
-    isFirefoxExtensionEnv,
   ])
 
   return (

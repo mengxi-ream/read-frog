@@ -83,8 +83,8 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
   const containerRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
-  const startY = useRef(0)
-  const startPosition = useRef<SubtitlePosition>(DEFAULT_SUBTITLE_POSITION)
+  const startYRef = useRef(0)
+  const startPositionRef = useRef<SubtitlePosition>(DEFAULT_SUBTITLE_POSITION)
   const [position, setPosition] = useAtom(subtitlesPositionAtom)
   const [isDragging, setIsDragging] = useState(false)
   const [windowStyle, setWindowStyle] = useState<SubtitleWindowStyle>({
@@ -110,8 +110,8 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
       return
     isDraggingRef.current = true
     setIsDragging(true)
-    startY.current = e.clientY
-    startPosition.current = { ...position }
+    startYRef.current = e.clientY
+    startPositionRef.current = { ...position }
     e.preventDefault()
     e.stopPropagation()
   })
@@ -128,16 +128,16 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     const videoHeight = videoRect.height
 
     // Calculate deltaY relative to video container height
-    const deltaY = e.clientY - startY.current
+    const deltaY = e.clientY - startYRef.current
     const deltaPercent = (deltaY / videoHeight) * 100
 
     // Calculate new position based on current anchor
-    const isBottomAnchor = startPosition.current.anchor === 'bottom'
+    const isBottomAnchor = startPositionRef.current.anchor === 'bottom'
     let newPercent = isBottomAnchor
-      ? startPosition.current.percent - deltaPercent
-      : startPosition.current.percent + deltaPercent
+      ? startPositionRef.current.percent - deltaPercent
+      : startPositionRef.current.percent + deltaPercent
 
-    const reservedHeight = controlsVisible && startPosition.current.anchor === 'bottom'
+    const reservedHeight = controlsVisible && startPositionRef.current.anchor === 'bottom'
       ? controlsHeight
       : 0
     const maxPercent = ((videoHeight - containerRect.height - reservedHeight) / videoHeight) * 100
@@ -152,14 +152,14 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     })
 
     // If anchor changed, update start position and reset drag origin
-    if (newAnchorPosition.anchor !== startPosition.current.anchor) {
-      startPosition.current = newAnchorPosition
-      startY.current = e.clientY
+    if (newAnchorPosition.anchor !== startPositionRef.current.anchor) {
+      startPositionRef.current = newAnchorPosition
+      startYRef.current = e.clientY
       setPosition(newAnchorPosition)
       return
     }
 
-    setPosition({ ...startPosition.current, percent: newPercent })
+    setPosition({ ...startPositionRef.current, percent: newPercent })
   })
 
   const onMouseUp = useEffectEvent(() => {

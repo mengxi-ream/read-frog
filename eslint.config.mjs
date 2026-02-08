@@ -26,6 +26,7 @@ export default antfu({
   rules: {
     'unused-imports/no-unused-imports': 'error',
     'no-inner-declarations': 'error',
+    'antfu/consistent-list-newline': 'off',
   },
   react: {
     overrides: {
