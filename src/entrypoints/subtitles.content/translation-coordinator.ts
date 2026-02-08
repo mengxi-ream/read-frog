@@ -138,10 +138,10 @@ export class TranslationCoordinator {
 
       const config = await getLocalConfig()
       const displayMode = config?.videoSubtitles?.style.displayMode
-      if (displayMode === 'translationOnly') {
-        const fallback = batch.map(f => ({ ...f, translation: f.text }))
-        this.onTranslated(fallback)
-      }
+      const fallback = displayMode === 'translationOnly'
+        ? batch.map(f => ({ ...f, translation: f.text }))
+        : batch.map(f => ({ ...f, translation: '' }))
+      this.onTranslated(fallback)
 
       const errorMessage = error instanceof Error ? error.message : String(error)
       this.onStateChange('error', { message: errorMessage })
