@@ -77,14 +77,14 @@ export function TranslatePopover() {
         return
       }
 
-      if (!translateProviderConfig) {
-        throw new Error('No provider config when translate text')
-      }
-
       setIsTranslating(true)
       cancelTranslation = undefined
 
       try {
+        if (!translateProviderConfig) {
+          throw new Error('No provider config when translate text')
+        }
+
         if (isLLMTranslateProviderConfig(translateProviderConfig)) {
           const targetLangName = LANG_CODE_TO_EN_NAME[languageConfig.targetCode]
           const {
