@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.25.1
+
+### Patch Changes
+
+- [#951](https://github.com/mengxi-ream/read-frog/pull/951) [`af2e930`](https://github.com/mengxi-ream/read-frog/commit/af2e930ff9a3db661ef56b6a30ffb94b12126273) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(ui): fix slider track collapse on wide screen in video subtitles settings
+
+- [#953](https://github.com/mengxi-ream/read-frog/pull/953) [`e27858d`](https://github.com/mengxi-ream/read-frog/commit/e27858de1a833950417680cf74907fc31ef06e1e) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): fallback to show original subtitle in bilingual mode on translation error
+
 ## 1.25.0
 
 ### Minor Changes
