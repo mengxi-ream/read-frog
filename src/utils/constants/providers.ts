@@ -291,7 +291,7 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
     'openai-compatible': {
       logo: () => customProviderLogo,
       name: 'Custom Provider',
-      website: `${WEBSITE_URL}/tutorial/providers/openai-compatible`,
+      website: `${WEBSITE_URL}/tutorial/providers/openai-compatible-providers`,
     },
     'openai': {
       logo: getLobeIconsCDNUrlFn('openai'),
