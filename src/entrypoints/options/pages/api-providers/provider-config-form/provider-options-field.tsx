@@ -53,9 +53,9 @@ export const ProviderOptionsField = withForm({
         return null
       }
       const llmConfig = providerConfig as LLMTranslateProviderConfig
-      return llmConfig.models.translate.isCustomModel
-        ? llmConfig.models.translate.customModel
-        : llmConfig.models.translate.model
+      return llmConfig.model.isCustomModel
+        ? llmConfig.model.customModel
+        : llmConfig.model.model
     }, [isLLMProvider, providerConfig])
 
     const defaultOptions = useMemo(() => {

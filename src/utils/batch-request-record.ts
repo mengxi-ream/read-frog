@@ -25,8 +25,8 @@ export async function putBatchRequestRecord(
   if (!isLLMTranslateProviderConfig(providerConfig))
     return
 
-  const { provider, models: { translate } } = providerConfig
-  const translateModel = translate.isCustomModel ? translate.customModel : translate.model
+  const { provider, model: providerModel } = providerConfig
+  const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
 
   try {
     await db.batchRequestRecord.put({
@@ -34,7 +34,7 @@ export async function putBatchRequestRecord(
       createdAt: new Date(),
       originalRequestCount,
       provider,
-      model: translateModel ?? '',
+      model: modelName ?? '',
     })
   }
   catch (error) {

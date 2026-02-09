@@ -43,18 +43,10 @@ export function getProviderKeyByName(providersConfig: ProvidersConfig, providerI
   return provider?.provider
 }
 
-export function getReadModelConfig(config: Config, providerId: string) {
-  const provider = getProviderConfigById(config.providersConfig, providerId)
-  if (provider && isReadProviderConfig(provider)) {
-    return provider.models.read
-  }
-  return undefined
-}
-
-export function getTranslateModelConfig(config: Config, providerId: string) {
+export function getProviderModelConfig(config: Config, providerId: string) {
   const providerConfig = getProviderConfigById(config.providersConfig, providerId)
   if (providerConfig && isLLMTranslateProviderConfig(providerConfig)) {
-    return providerConfig.models.translate
+    return providerConfig.model
   }
   return undefined
 }

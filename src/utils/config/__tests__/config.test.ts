@@ -29,7 +29,7 @@ describe('config utilities', () => {
       expect(result).not.toHaveProperty('apiKey')
       expect(result.name).toBe(openaiConfigFromConstants.name)
       expect(result.provider).toBe('openai')
-      expect(result.models).toEqual(openaiConfigFromConstants.models)
+      expect(result.model).toEqual(openaiConfigFromConstants.model)
       expect(hasAPIKey(result)).toBe(false)
     })
 
@@ -46,7 +46,7 @@ describe('config utilities', () => {
       expect(result).not.toHaveProperty('apiKey')
       expect(result.name).toBe(deepseekConfigFromConstants.name)
       expect(result.provider).toBe('deepseek')
-      expect(result.models).toEqual(deepseekConfigFromConstants.models)
+      expect(result.model).toEqual(deepseekConfigFromConstants.model)
       expect(hasAPIKey(result)).toBe(false)
     })
 

@@ -19,7 +19,7 @@ import { getFinalSourceCode } from '@/utils/config/languages'
 import { logger } from '@/utils/logger'
 import { getAnalyzePrompt } from '@/utils/prompts/analyze'
 import { getExplainPrompt } from '@/utils/prompts/explain'
-import { getReadModelById } from '@/utils/providers/model'
+import { getModelById } from '@/utils/providers/model'
 
 interface ExplainArticleParams {
   extractedContent: ExtractedContent
@@ -46,7 +46,7 @@ export function useAnalyzeContent() {
       const maxAttempts = 3
       let lastError
 
-      const model = await getReadModelById(readProviderConfig.id)
+      const model = await getModelById(readProviderConfig.id)
       const targetLang = LANG_CODE_TO_EN_NAME[language.targetCode]
 
       while (attempts < maxAttempts) {
@@ -99,7 +99,7 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
   const sourceLang
     = LANG_CODE_TO_EN_NAME[getFinalSourceCode(language.sourceCode, detectedCode)]
 
-  const model = await getReadModelById(readProviderConfig.id)
+  const model = await getModelById(readProviderConfig.id)
   while (attempts < MAX_ATTEMPTS) {
     try {
       const { object: articleExplanation } = await generateObject({

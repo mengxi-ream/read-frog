@@ -21,10 +21,7 @@ const mockLLMProviderConfig = {
   name: 'OpenAI Test',
   enabled: true,
   provider: 'openai',
-  models: {
-    read: { model: 'gpt-4o-mini', isCustomModel: false, customModel: null },
-    translate: { model: 'gpt-4o-mini', isCustomModel: false, customModel: null },
-  },
+  model: { model: 'gpt-4o-mini', isCustomModel: false, customModel: null },
 } as ProviderConfig
 
 const mockAPIProviderConfig = {

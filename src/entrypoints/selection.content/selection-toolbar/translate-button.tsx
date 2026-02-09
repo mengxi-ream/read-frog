@@ -89,13 +89,13 @@ export function TranslatePopover() {
           const targetLangName = LANG_CODE_TO_EN_NAME[languageConfig.targetCode]
           const {
             id: providerId,
-            models: { translate },
+            model: providerModel,
             provider,
             providerOptions: userProviderOptions,
             temperature,
           } = translateProviderConfig
-          const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-          const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
+          const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
+          const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
           const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
 
           const abortController = new AbortController()
@@ -104,7 +104,6 @@ export function TranslatePopover() {
           const latestText = await streamBackgroundText(
             {
               providerId,
-              modelRole: 'translate',
               system: systemPrompt,
               prompt,
               providerOptions,

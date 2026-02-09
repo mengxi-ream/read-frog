@@ -5,7 +5,7 @@ import { db } from '@/utils/db/dexie/db'
 import { Sha256Hex } from '@/utils/hash'
 import { logger } from '@/utils/logger'
 import { getSubtitlesSegmentationPrompt } from '@/utils/prompts/subtitles-segmentation'
-import { getTranslateModelById } from '@/utils/providers/model'
+import { getModelById } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import { ensureInitializedConfig } from './config'
 
@@ -68,10 +68,10 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
     return cached.result
   }
 
-  const { models: { translate }, provider, providerOptions: userProviderOptions, temperature } = providerConfig
-  const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-  const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
-  const model = await getTranslateModelById(providerId)
+  const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
+  const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
+  const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
+  const model = await getModelById(providerId)
 
   const { systemPrompt, prompt } = getSubtitlesSegmentationPrompt(jsonContent)
 

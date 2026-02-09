@@ -96,7 +96,6 @@ export function AiPopover() {
         const finalResponse = await streamBackgroundText(
           {
             providerId: readProviderConfig.id,
-            modelRole: 'read',
             temperature: 0.2,
             system: systemPrompt,
             messages: [

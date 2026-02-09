@@ -8,7 +8,7 @@ import { isLLMTranslateProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { getLocalConfig } from '@/utils/config/storage'
 import { logger } from '@/utils/logger'
-import { getTranslateModelById } from '@/utils/providers/model'
+import { getModelById } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import { cleanText } from './utils'
 
@@ -135,10 +135,10 @@ export async function detectLanguageWithLLM(
   }
 
   try {
-    const { models: { translate }, provider, providerOptions: userProviderOptions, temperature } = config
-    const translateModel = translate.isCustomModel ? translate.customModel : translate.model
-    const providerOptions = getProviderOptionsWithOverride(translateModel ?? '', provider, userProviderOptions)
-    const model = await getTranslateModelById(config.id)
+    const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = config
+    const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
+    const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
+    const model = await getModelById(config.id)
 
     // Create language list for prompt
     const languageList = Object.entries(LANG_CODE_TO_EN_NAME)

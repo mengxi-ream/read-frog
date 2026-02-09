@@ -4,12 +4,11 @@ import type {
   StreamPortRequestMessage,
   StreamPortResponse,
   StreamPortStartMessage,
-  StreamTextModelRole,
 } from '@/types/background-stream'
 import { streamText } from 'ai'
 import { BACKGROUND_STREAM_PORTS } from '@/types/background-stream'
 import { logger } from '@/utils/logger'
-import { getReadModelById, getTranslateModelById } from '@/utils/providers/model'
+import { getModelById } from '@/utils/providers/model'
 
 export interface StreamOptions {
   signal?: AbortSignal
@@ -43,14 +42,6 @@ function getErrorMessage(error: unknown) {
     return error
   }
   return 'Unexpected error occurred'
-}
-
-async function getModelByRole(providerId: string, modelRole: StreamTextModelRole = 'read') {
-  if (modelRole === 'translate') {
-    return getTranslateModelById(providerId)
-  }
-
-  return getReadModelById(providerId)
 }
 
 function createStreamPortHandler<TPayload>(
@@ -154,14 +145,14 @@ export async function runStreamTextInBackground(
   payload: BackgroundStreamTextPayload,
   options: StreamOptions = {},
 ) {
-  const { providerId, modelRole = 'read', ...streamTextParams } = payload
+  const { providerId, ...streamTextParams } = payload
   const { signal, onChunk } = options
 
   if (signal?.aborted) {
     throw new DOMException('stream aborted', 'AbortError')
   }
 
-  const model = await getModelByRole(providerId, modelRole)
+  const model = await getModelById(providerId)
 
   const result = await streamText({
     ...(streamTextParams as Parameters<typeof streamText>[0]),

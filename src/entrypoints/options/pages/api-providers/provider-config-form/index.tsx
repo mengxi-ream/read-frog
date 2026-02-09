@@ -19,7 +19,6 @@ import { ConfigHeader } from './config-header'
 import { DefaultReadProviderSelector, DefaultTranslateProviderSelector } from './default-provider'
 import { formOpts, useAppForm } from './form'
 import { ProviderOptionsField } from './provider-options-field'
-import { ReadModelSelector } from './read-model-selector'
 import { TemperatureField } from './temperature-field'
 import { TranslateModelSelector } from './translate-model-selector'
 
@@ -131,7 +130,6 @@ export function ProviderConfigForm() {
             <>
               <Separator className="my-2" />
               <DefaultReadProviderSelector form={form} />
-              <ReadModelSelector form={form} />
             </>
           )}
           {isLLMProvider && (

@@ -82,7 +82,7 @@ const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string,
   anthropic: { 'anthropic-dangerous-direct-browser-access': 'true' },
 }
 
-async function getLanguageModelById(providerId: string, modelType: 'read' | 'translate') {
+async function getLanguageModelById(providerId: string) {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
     throw new Error('Config not found')
@@ -109,24 +109,20 @@ async function getLanguageModelById(providerId: string, modelType: 'read' | 'tra
         ...(customHeaders && { headers: customHeaders }),
       })
 
-  const modelConfig = providerConfig.models[modelType]
+  const modelConfig = providerConfig.model
   const modelId = modelConfig.isCustomModel
     ? modelConfig.customModel
     : modelConfig.model
 
   if (!modelId) {
-    throw new Error(`Model is undefined for ${modelType}`)
+    throw new Error('Model is undefined')
   }
 
   return provider.languageModel(modelId)
 }
 
-export async function getTranslateModelById(providerId: string) {
-  return getLanguageModelById(providerId, 'translate')
-}
-
-export async function getReadModelById(providerId: string) {
-  return getLanguageModelById(providerId, 'read')
+export async function getModelById(providerId: string) {
+  return getLanguageModelById(providerId)
 }
 
 export async function getTTSProviderById(providerId: string) {
