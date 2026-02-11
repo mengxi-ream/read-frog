@@ -4,29 +4,29 @@ import type { ArticleAnalysis, ArticleExplanation, ExtractedContent } from '@/ty
 import { i18n } from '#imports'
 import { LANG_CODE_TO_EN_NAME, langCodeISO6393Schema } from '@read-frog/definitions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { generateText, Output } from 'ai'
+import { Output } from 'ai'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { progressAtom, readStateAtom, store } from '@/entrypoints/side.content/atoms'
 import { articleAnalysisSchema, articleExplanationSchema } from '@/types/content'
-import { sendInBatchesWithFixedDelay } from '@/utils/ai-request'
+import { generateTextWithRetry, sendInBatchesWithFixedDelay } from '@/utils/ai-request'
 import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
 import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { readProviderConfigAtom } from '@/utils/atoms/provider'
 import { isAnyAPIKeyForReadProviders } from '@/utils/config/api'
-import { getProviderConfigById } from '@/utils/config/helpers'
+import { getProviderConfigById, getReadProvidersConfig } from '@/utils/config/helpers'
 import { getFinalSourceCode } from '@/utils/config/languages'
 import { logger } from '@/utils/logger'
 import { getAnalyzePrompt } from '@/utils/prompts/analyze'
 import { getExplainPrompt } from '@/utils/prompts/explain'
 import { getReadModelById } from '@/utils/providers/model'
+import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 
 interface ExplainArticleParams {
   extractedContent: ExtractedContent
   articleAnalysis: ArticleAnalysis
 }
 
-const MAX_ATTEMPTS = 3
 const MAX_CHARACTERS = 1000
 
 function parseISO6393WithFallback(lang: unknown): LangCodeISO6393 {
@@ -50,40 +50,35 @@ export function useAnalyzeContent() {
       }
 
       setReadState('analyzing')
-      let attempts = 0
-      const maxAttempts = 3
-      let lastError
 
       const model = await getReadModelById(readProviderConfig.id)
+      const providerOptions = getProviderOptionsWithOverride(model.modelId, readProviderConfig.provider, readProviderConfig.providerOptions)
       const targetLang = LANG_CODE_TO_EN_NAME[language.targetCode]
 
-      while (attempts < maxAttempts) {
-        try {
-          const { output: articleAnalysis } = await generateText({
-            model,
-            system: getAnalyzePrompt(targetLang),
-            prompt: JSON.stringify({
+      const { output: articleAnalysis } = await generateTextWithRetry({
+        model,
+        messages: [
+          {
+            role: 'system',
+            content: getAnalyzePrompt(targetLang),
+          },
+          {
+            role: 'user',
+            content: JSON.stringify({
               originalTitle: extractedContent.article.title,
               content: extractedContent.paragraphs.join('\n'),
             }),
-            output: Output.object({ schema: articleAnalysisSchema }),
-          })
+          },
+        ],
+        providerOptions,
+        output: Output.object({ schema: articleAnalysisSchema }),
+      })
 
-          // TODO: parseISO6393WithFallback should return { success, value } so UI can prompt user to select language on failure
-          void setDetectedCode(parseISO6393WithFallback(articleAnalysis.detectedLang))
-          logger.log('articleAnalysis', articleAnalysis)
+      // TODO: parseISO6393WithFallback should return { success, value } so UI can prompt user to select language on failure
+      void setDetectedCode(parseISO6393WithFallback(articleAnalysis.detectedLang))
+      logger.log('articleAnalysis', articleAnalysis)
 
-          return articleAnalysis
-        }
-        catch (error) {
-          lastError = error
-          attempts++
-
-          logger.error(`error when attempt ${attempts} to analyze content`, error)
-        }
-      }
-
-      throw lastError
+      return articleAnalysis
     },
     onError: () => {
       setReadState(undefined)
@@ -92,11 +87,9 @@ export function useAnalyzeContent() {
 }
 
 async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, config: Config, detectedCode: LangCodeISO6393) {
-  let attempts = 0
-  let lastError
-
   const { language, read, providersConfig } = config
-  const readProviderConfig = getProviderConfigById(providersConfig, read.providerId)
+  const readProvidersConfig = getReadProvidersConfig(providersConfig)
+  const readProviderConfig = getProviderConfigById(readProvidersConfig, read.providerId)
   if (!readProviderConfig) {
     throw new Error(`Provider ${read.providerId} not found`)
   }
@@ -106,36 +99,35 @@ async function explainBatch(batch: string[], articleAnalysis: ArticleAnalysis, c
     = LANG_CODE_TO_EN_NAME[getFinalSourceCode(language.sourceCode, detectedCode)]
 
   const model = await getReadModelById(readProviderConfig.id)
-  while (attempts < MAX_ATTEMPTS) {
-    try {
-      const { output: articleExplanation } = await generateText({
-        model,
-        system: getExplainPrompt(sourceLang, targetLang, language.level ?? 'intermediate'),
-        prompt: JSON.stringify({
+  const providerOptions = getProviderOptionsWithOverride(model.modelId, readProviderConfig.provider, readProviderConfig.providerOptions)
+
+  const { output: articleExplanation } = await generateTextWithRetry({
+    model,
+    messages: [
+      {
+        role: 'system',
+        content: getExplainPrompt(sourceLang, targetLang, language.level ?? 'intermediate'),
+      },
+      {
+        role: 'user',
+        content: JSON.stringify({
           overallSummary: articleAnalysis.summary,
           paragraphs: batch,
         }),
-        output: Output.object({ schema: articleExplanationSchema }),
-      })
+      },
+    ],
+    providerOptions,
+    output: Output.object({ schema: articleExplanationSchema }),
+  })
 
-      store.set(progressAtom, prev => ({
-        ...prev,
-        completed: prev.completed + 1,
-      }))
+  store.set(progressAtom, prev => ({
+    ...prev,
+    completed: prev.completed + 1,
+  }))
 
-      logger.log('articleExplanation', articleExplanation)
+  logger.log('articleExplanation', articleExplanation)
 
-      return articleExplanation
-    }
-    catch (error) {
-      lastError = error
-      attempts++
-
-      logger.error(`error when attempt ${attempts} to explain batch`, batch, error)
-    }
-  }
-
-  throw lastError
+  return articleExplanation
 }
 
 export function useExplainArticle() {

@@ -1,3 +1,6 @@
+import { generateText, NoObjectGeneratedError } from 'ai'
+import { logger } from './logger'
+
 /**
  * Start promises in batches, waiting intervalMs after each batch before starting the next one.
  * Finally use Promise.all to wait for all promises to complete.
@@ -28,4 +31,39 @@ export async function sendInBatchesWithFixedDelay<T>(
 
   // All promises have been started, collect their results
   return Promise.all(allPromises)
+}
+
+const MAX_ATTEMPTS = 3
+export async function generateTextWithRetry({
+  maxAttempts = MAX_ATTEMPTS,
+  ...rest
+}: Parameters<typeof generateText>[0] & {
+  maxAttempts?: number
+}) {
+  let attempts = 0
+  let lastError
+  const messages = rest.messages
+
+  while (attempts < maxAttempts) {
+    try {
+      return await generateText(rest)
+    }
+    catch (error) {
+      lastError = error
+      attempts++
+
+      if (error instanceof NoObjectGeneratedError && error.text) {
+        messages?.push({
+          role: 'assistant',
+          content: error.text,
+        }, {
+          role: 'user',
+          content: `The output should strictly follow the specified JSON format and schema. The error encountered was: JSON.parse("${error.text}"). Please correct the output format and try again.`,
+        })
+      }
+      logger.error(`error when attempt ${attempts} to generate text`, error)
+    }
+  }
+
+  throw lastError ?? new Error('Failed to generate text after multiple attempts')
 }
