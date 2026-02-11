@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix(read): improve Gemini model compatibility for article analysis
+fix(reading): restore Gemini model reading support and migrate to generateText
