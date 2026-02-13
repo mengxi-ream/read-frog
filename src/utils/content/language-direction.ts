@@ -10,5 +10,5 @@ export function getLanguageDirectionAndLang(targetCode: LangCodeISO6393): Langua
   const dir = RTL_LANG_CODES.includes(targetCode as typeof RTL_LANG_CODES[number]) ? 'rtl' : 'ltr'
   const lang = ISO6393_TO_6391[targetCode]
 
-  return lang ? { dir, lang } : { dir }
+  return { dir, lang }
 }
