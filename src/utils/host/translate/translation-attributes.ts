@@ -1,10 +1,11 @@
 import type { Config } from '@/types/config/config'
-import { ISO6393_TO_6391, RTL_LANG_CODES } from '@read-frog/definitions'
+import { getLanguageDirectionAndLang } from '@/utils/content/language-direction'
 
 export function setTranslationDirAndLang(element: HTMLElement, config: Config): void {
-  const dir = RTL_LANG_CODES.includes(config.language.targetCode as typeof RTL_LANG_CODES[number]) ? 'rtl' : 'ltr'
+  const { dir, lang } = getLanguageDirectionAndLang(config.language.targetCode)
   element.setAttribute('dir', dir)
-  const langAttr = ISO6393_TO_6391[config.language.targetCode]
-  if (langAttr)
-    element.setAttribute('lang', langAttr)
+
+  if (lang) {
+    element.setAttribute('lang', lang)
+  }
 }
