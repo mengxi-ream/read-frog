@@ -199,11 +199,9 @@ export class UniversalVideoAdapter {
       this.processedFragments = []
       this.segmentationPipeline = null
       this.subtitlesScheduler?.reset()
-      this.subtitlesScheduler?.setState('fetching')
+      this.subtitlesScheduler?.setState('loading')
 
       this.originalSubtitles = await this.subtitlesFetcher.fetch()
-
-      this.subtitlesScheduler?.setState('fetchSuccess')
 
       if (this.originalSubtitles.length === 0) {
         this.subtitlesScheduler?.setState('error', { message: i18n.t('subtitles.errors.noSubtitlesFound') })
@@ -225,7 +223,7 @@ export class UniversalVideoAdapter {
   }
 
   private async processSubtitles() {
-    this.subtitlesScheduler?.setState('processing')
+    this.subtitlesScheduler?.setState('loading')
     const config = await getLocalConfig()
 
     const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation

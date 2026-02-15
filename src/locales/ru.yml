@@ -640,11 +640,7 @@ shortcutKeySelector:
 subtitles:
   state:
     idle: Готово
-    fetching: Получение субтитров
-    fetchSuccess: Субтитры загружены
-    fetchFailed: Не удалось получить субтитры
-    segmenting: AI сегментация...
-    processing: Перевод субтитров
+    loading: Read Frog загрузка субтитров
     error: Произошла ошибка
   errors:
     http429: 429 Слишком много запросов к API YouTube субтитров, пожалуйста, попробуйте снова позже

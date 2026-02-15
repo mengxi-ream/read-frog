@@ -1,11 +1,4 @@
-export type SubtitlesState
-  = | 'idle'
-    | 'fetching'
-    | 'fetchSuccess'
-    | 'fetchFailed'
-    | 'segmenting'
-    | 'processing'
-    | 'error'
+export type SubtitlesState = 'idle' | 'loading' | 'error'
 
 export interface StateData {
   state: SubtitlesState

@@ -640,11 +640,7 @@ shortcutKeySelector:
 subtitles:
   state:
     idle: Hazır
-    fetching: Altyazılar alınıyor
-    fetchSuccess: Altyazılar yüklendi
-    fetchFailed: Altyazılar alınamadı
-    segmenting: AI bölümlendirmesi...
-    processing: Altyazılar çevriliyor
+    loading: Read Frog altyazılar yükleniyor
     error: Bir hata oluştu
   errors:
     http429: 429 YouTube altyazı API'sine çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.

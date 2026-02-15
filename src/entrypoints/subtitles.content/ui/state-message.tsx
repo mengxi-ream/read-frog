@@ -4,34 +4,21 @@ import { useAtomValue } from 'jotai'
 import { STATE_MESSAGE_CLASS } from '@/utils/constants/subtitles'
 import { subtitlesStateAtom } from '../atoms'
 
-const STATE_CONFIG: Record<SubtitlesState, { color: string, getText: () => string }> = {
+const STATE_CONFIG: Record<SubtitlesState, { color: string, getText: () => string, position: string }> = {
   idle: {
     color: 'oklch(100% 0 0)',
     getText: () => i18n.t('subtitles.state.idle'),
+    position: 'top-1/2 -translate-y-1/2',
   },
-  fetching: {
+  loading: {
     color: 'oklch(70% 0.19 250)',
-    getText: () => i18n.t('subtitles.state.fetching'),
-  },
-  fetchSuccess: {
-    color: 'oklch(70% 0.17 165)',
-    getText: () => i18n.t('subtitles.state.fetchSuccess'),
-  },
-  fetchFailed: {
-    color: 'oklch(63% 0.24 25)',
-    getText: () => i18n.t('subtitles.state.fetchFailed'),
-  },
-  segmenting: {
-    color: 'oklch(70% 0.19 250)',
-    getText: () => i18n.t('subtitles.state.segmenting'),
-  },
-  processing: {
-    color: 'oklch(70% 0.19 250)',
-    getText: () => i18n.t('subtitles.state.processing'),
+    getText: () => i18n.t('subtitles.state.loading'),
+    position: 'bottom-20',
   },
   error: {
     color: 'oklch(63% 0.24 25)',
     getText: () => i18n.t('subtitles.state.error'),
+    position: 'top-1/2 -translate-y-1/2',
   },
 }
 
@@ -42,12 +29,12 @@ export function StateMessage() {
     return null
   }
 
-  const { color, getText } = STATE_CONFIG[stateData.state]
+  const { color, getText, position } = STATE_CONFIG[stateData.state]
   const message = stateData.message || getText()
 
   return (
     <div
-      className={`${STATE_MESSAGE_CLASS} absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-auto`}
+      className={`${STATE_MESSAGE_CLASS} absolute left-1/2 -translate-x-1/2 pointer-events-auto ${position}`}
       style={{
         fontFamily: 'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
       }}

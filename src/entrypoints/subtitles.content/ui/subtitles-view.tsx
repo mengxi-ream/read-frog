@@ -5,13 +5,13 @@ import { Activity, useRef } from 'react'
 import { cn } from '@/lib/utils'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { SUBTITLES_VIEW_CLASS } from '@/utils/constants/subtitles'
-import { currentSubtitleAtom } from '../atoms'
 import { MainSubtitle, TranslationSubtitle } from './subtitle-lines'
 import { useControlsInfo } from './use-controls-visible'
 import { useVerticalDrag } from './use-vertical-drag'
 
 interface SubtitlesViewProps {
   controlsConfig?: ControlsConfig
+  isRenderable: boolean
 }
 
 function SubtitlesContent() {
@@ -44,8 +44,7 @@ function SubtitlesContent() {
   )
 }
 
-export function SubtitlesView({ controlsConfig }: SubtitlesViewProps) {
-  const subtitle = useAtomValue(currentSubtitleAtom)
+export function SubtitlesView({ controlsConfig, isRenderable }: SubtitlesViewProps) {
   const windowRef = useRef<HTMLDivElement>(null)
   const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
   const { refs, windowStyle, positionStyle, isDragging } = useVerticalDrag(controlsVisible, controlsHeight)
@@ -69,7 +68,7 @@ export function SubtitlesView({ controlsConfig }: SubtitlesViewProps) {
         className={cn(
           'group flex flex-col items-center absolute w-full left-0 right-0',
           !isDragging && 'transition-[top,bottom] duration-200',
-          !subtitle && 'invisible',
+          !isRenderable && 'invisible',
         )}
         style={positionStyle}
       >
@@ -82,7 +81,7 @@ export function SubtitlesView({ controlsConfig }: SubtitlesViewProps) {
           </div>
         </div>
 
-        <Activity mode={subtitle ? 'visible' : 'hidden'}>
+        <Activity mode={isRenderable ? 'visible' : 'hidden'}>
           <SubtitlesContent />
         </Activity>
       </div>

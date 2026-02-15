@@ -642,11 +642,7 @@ shortcutKeySelector:
 subtitles:
   state:
     idle: Ready
-    fetching: Fetching captions
-    fetchSuccess: Captions loaded
-    fetchFailed: Failed to fetch captions
-    segmenting: AI segmenting...
-    processing: Translating captions
+    loading: Read Frog loading captions
     error: Error occurred
   errors:
     http429: 429 Too many requests to youtube subtitle API, please try again later

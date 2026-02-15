@@ -81,21 +81,19 @@ export class TranslationCoordinator {
     if (!video)
       return
 
-    // Heartbeat: ensure segmentation loop keeps running
+    const currentTimeMs = video.currentTime * 1000
+    const fragments = this.getFragments()
+
+    this.updateLoadingStateAt(currentTimeMs, fragments)
+
     if (this.segmentationPipeline && !this.segmentationPipeline.isRunning
       && this.segmentationPipeline.hasUnprocessedChunks()) {
-      const currentTimeMs = video.currentTime * 1000
-      const fragments = this.segmentationPipeline.processedFragments
-      const currentSub = fragments.find(f => f.start <= currentTimeMs && f.end > currentTimeMs)
-      if (!currentSub || !this.translatedStarts.has(currentSub.start)) {
-        this.onStateChange('segmenting')
-      }
       this.segmentationPipeline.restart()
     }
 
     if (this.isTranslating)
       return
-    void this.translateNearby(video.currentTime * 1000)
+    void this.translateNearby(currentTimeMs)
   }
 
   private async translateNearby(currentTimeMs: number) {
@@ -109,14 +107,12 @@ export class TranslationCoordinator {
         && f.start <= currentTimeMs + TRANSLATE_LOOK_AHEAD_MS)
       .slice(0, TRANSLATION_BATCH_SIZE)
 
-    if (batch.length === 0)
+    if (batch.length === 0) {
+      this.updateLoadingStateAt(currentTimeMs, fragments)
       return
-
-    const currentSub = fragments.find(f => f.start <= currentTimeMs && f.end > currentTimeMs)
-
-    if (currentSub && !this.translatedStarts.has(currentSub.start)) {
-      this.onStateChange('processing')
     }
+
+    this.updateLoadingStateAt(currentTimeMs, fragments)
 
     this.isTranslating = true
     batch.forEach(f => this.translatingStarts.add(f.start))
@@ -128,7 +124,10 @@ export class TranslationCoordinator {
         this.translatedStarts.add(f.start)
       })
       this.onTranslated(translated)
-      this.onStateChange('idle')
+
+      const latestTimeMs = this.getCurrentVideoTimeMs(currentTimeMs)
+      const latestFragments = this.getFragments()
+      this.updateLoadingStateAt(latestTimeMs, latestFragments)
     }
     catch (error) {
       batch.forEach((f) => {
@@ -149,6 +148,37 @@ export class TranslationCoordinator {
     finally {
       this.isTranslating = false
     }
+  }
+
+  private getCurrentVideoTimeMs(fallbackTimeMs: number): number {
+    const video = this.getVideoElement()
+    if (!video) {
+      return fallbackTimeMs
+    }
+    return video.currentTime * 1000
+  }
+
+  private findActiveCue(
+    timeMs: number,
+    fragments: SubtitlesFragment[],
+  ): SubtitlesFragment | null {
+    return fragments.find(f => f.start <= timeMs && f.end > timeMs) ?? null
+  }
+
+  private updateLoadingStateAt(timeMs: number, fragments: SubtitlesFragment[]) {
+    const activeCue = this.findActiveCue(timeMs, fragments)
+
+    if (!activeCue) {
+      this.onStateChange('idle')
+      return
+    }
+
+    if (!this.translatedStarts.has(activeCue.start)) {
+      this.onStateChange('loading')
+      return
+    }
+
+    this.onStateChange('idle')
   }
 
   private handleSeek = () => {

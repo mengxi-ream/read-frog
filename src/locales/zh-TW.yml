@@ -641,11 +641,7 @@ shortcutKeySelector:
 subtitles:
   state:
     idle: 就緒
-    fetching: 字幕獲取中
-    fetchSuccess: 字幕載入成功
-    fetchFailed: 字幕獲取失敗
-    segmenting: AI 斷句中...
-    processing: 字幕翻譯中
+    loading: Read Frog 字幕載入中
     error: 發生錯誤
   errors:
     http429: 429 youtube 字幕介面請求次數過多，請稍後再試
