@@ -18,6 +18,7 @@ export class TranslationCoordinator {
   private translatedStarts = new Set<number>()
   private failedStarts = new Set<number>()
   private isTranslating = false
+  private lastEmittedState: SubtitlesState = 'idle'
   private videoContext: SubtitlesVideoContext = { videoTitle: '', subtitlesTextContent: '' }
 
   private getFragments: () => SubtitlesFragment[]
@@ -69,6 +70,7 @@ export class TranslationCoordinator {
     this.translatedStarts.clear()
     this.failedStarts.clear()
     this.isTranslating = false
+    this.lastEmittedState = 'idle'
     this.videoContext = { videoTitle: '', subtitlesTextContent: '' }
   }
 
@@ -108,11 +110,8 @@ export class TranslationCoordinator {
       .slice(0, TRANSLATION_BATCH_SIZE)
 
     if (batch.length === 0) {
-      this.updateLoadingStateAt(currentTimeMs, fragments)
       return
     }
-
-    this.updateLoadingStateAt(currentTimeMs, fragments)
 
     this.isTranslating = true
     batch.forEach(f => this.translatingStarts.add(f.start))
@@ -168,17 +167,15 @@ export class TranslationCoordinator {
   private updateLoadingStateAt(timeMs: number, fragments: SubtitlesFragment[]) {
     const activeCue = this.findActiveCue(timeMs, fragments)
 
-    if (!activeCue) {
-      this.onStateChange('idle')
-      return
-    }
+    const nextState: SubtitlesState = activeCue && !this.translatedStarts.has(activeCue.start)
+      ? 'loading'
+      : 'idle'
 
-    if (!this.translatedStarts.has(activeCue.start)) {
-      this.onStateChange('loading')
+    if (nextState === this.lastEmittedState)
       return
-    }
 
-    this.onStateChange('idle')
+    this.lastEmittedState = nextState
+    this.onStateChange(nextState)
   }
 
   private handleSeek = () => {

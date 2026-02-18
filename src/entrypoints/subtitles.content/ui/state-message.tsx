@@ -4,12 +4,7 @@ import { useAtomValue } from 'jotai'
 import { STATE_MESSAGE_CLASS } from '@/utils/constants/subtitles'
 import { subtitlesStateAtom } from '../atoms'
 
-const STATE_CONFIG: Record<SubtitlesState, { color: string, getText: () => string, position: string }> = {
-  idle: {
-    color: 'oklch(100% 0 0)',
-    getText: () => i18n.t('subtitles.state.idle'),
-    position: 'top-1/2 -translate-y-1/2',
-  },
+const STATE_CONFIG: Record<Exclude<SubtitlesState, 'idle'>, { color: string, getText: () => string, position: string }> = {
   loading: {
     color: 'oklch(70% 0.19 250)',
     getText: () => i18n.t('subtitles.state.loading'),
