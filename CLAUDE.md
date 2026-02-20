@@ -179,46 +179,6 @@ pnpm lint
 pnpm lint:fix
 ```
 
-## Architecture
-
-### Extension Structure
-
-The extension follows WXT's entrypoints pattern:
-
-- **`src/entrypoints/background/`** - Background service worker
-  - Handles extension lifecycle, message routing, proxy fetch
-  - Manages translation queues, database cleanup, config backup
-  - Coordinates between content scripts and popup
-
-- **`src/entrypoints/*.content/`** - Content scripts injected into web pages
-  - `host.content` - Main article reading and analysis UI
-  - `selection.content` - Selection translation popup
-  - `side.content` - Side panel interface
-  - `guide.content` - Onboarding guide overlay
-
-- **`src/entrypoints/popup/`** - Extension popup UI
-- **`src/entrypoints/options/`** - Settings page (multi-page React app)
-
-### Extension Config Migration
-
-When changing the schema of the config, you need to add a migration script to the `src/utils/config/migration-scripts` directory, update the `CONFIG_SCHEMA_VERSION` constant and write examples for testing migration scripts.
-
-### State Management Architecture
-
-Uses Jotai atoms with a custom storage adapter pattern:
-
-- **Config Atom** ([src/utils/atoms/config.ts](src/utils/atoms/config.ts))
-  - Single source of truth for extension settings
-  - Syncs with browser.storage.local via `storageAdapter`
-  - Uses `deepmerge-ts` with array overwrite strategy for updates
-  - Watches for changes across extension contexts (popup, content, options)
-  - Handles visibility changes to prevent stale config in inactive tabs
-
-- **Storage Adapter** ([src/utils/atoms/storage-adapter.ts](src/utils/atoms/storage-adapter.ts))
-  - Abstraction over browser.storage API
-  - Provides `get`, `set`, `watch` methods with Zod schema validation
-  - Enables reactive state sync across extension contexts
-
 ## Commit Conventions
 
 Follow [Conventional Commits](https://www.conventionalcommits.org/) with these types:
@@ -226,19 +186,6 @@ Follow [Conventional Commits](https://www.conventionalcommits.org/) with these t
 Standard types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
 
 Custom types: `i18n`, `ai`
-
-Examples:
-
-- `feat: add openrouter provider support`
-- `fix: resolve translation state race condition`
-- `i18n: update Japanese translations`
-- `ai: improve read article prompt for better analysis`
-
-Enforced via commitlint and husky pre-commit hooks.
-
-## Pull Request Process
-
-follow `.claude/commands/create-pr.md`
 
 ## Important Notes
 
