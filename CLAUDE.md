@@ -181,7 +181,7 @@ pnpm lint:fix
 
 ## Commit Conventions
 
-Follow [Conventional Commits](https://www.conventionalcommits.org/) with these types:
+Follow Conventional Commits with these types:
 
 Standard types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
 
