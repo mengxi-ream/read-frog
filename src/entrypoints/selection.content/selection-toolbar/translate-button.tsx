@@ -6,12 +6,13 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig, isTTSProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { translateProviderConfigAtom, ttsProviderConfigAtom } from '@/utils/atoms/provider'
+import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { streamBackgroundText } from '@/utils/content-script/background-stream-client'
-import { translateTextForSelection } from '@/utils/host/translate/translate-text'
+import { translateTextForSelection } from '@/utils/host/translate/translate-variants'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
+import { resolveModelId } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import {
   isSelectionToolbarVisibleAtom,
@@ -51,7 +52,7 @@ export function TranslateButton() {
 export function TranslatePopover() {
   const [isTranslating, setIsTranslating] = useState(false)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
-  const translateProviderConfig = useAtomValue(translateProviderConfigAtom)
+  const translateProviderConfig = useAtomValue(featureProviderConfigAtom('selectionToolbar.translate'))
   const languageConfig = useAtomValue(configFieldsAtomMap.language)
   const selectionContent = useAtomValue(selectionContentAtom)
   const [isVisible, setIsVisible] = useAtom(isTranslatePopoverVisibleAtom)
@@ -85,16 +86,15 @@ export function TranslatePopover() {
           throw new Error('No provider config when translate text')
         }
 
-        if (isLLMTranslateProviderConfig(translateProviderConfig)) {
+        if (isLLMProviderConfig(translateProviderConfig)) {
           const targetLangName = LANG_CODE_TO_EN_NAME[languageConfig.targetCode]
           const {
             id: providerId,
-            model: providerModel,
             provider,
             providerOptions: userProviderOptions,
             temperature,
           } = translateProviderConfig
-          const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
+          const modelName = resolveModelId(translateProviderConfig.model)
           const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
           const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
 
@@ -213,7 +213,7 @@ export function TranslatePopover() {
 function SpeakOriginalButton() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
-  const ttsProviderConfig = useAtomValue(ttsProviderConfigAtom)
+  const ttsProviderConfig = useAtomValue(featureProviderConfigAtom('tts'))
   const { play, isFetching, isPlaying } = useTextToSpeech()
 
   const handleSpeak = useCallback(async () => {
@@ -222,7 +222,7 @@ function SpeakOriginalButton() {
       return
     }
 
-    if (!ttsProviderConfig) {
+    if (!ttsProviderConfig || !isTTSProviderConfig(ttsProviderConfig)) {
       toast.error(i18n.t('speak.openaiNotConfigured'))
       return
     }
@@ -230,7 +230,7 @@ function SpeakOriginalButton() {
     void play(selectionContent, ttsConfig, ttsProviderConfig)
   }, [selectionContent, ttsConfig, ttsProviderConfig, play])
 
-  if (!ttsProviderConfig) {
+  if (!ttsProviderConfig || !isTTSProviderConfig(ttsProviderConfig)) {
     return null
   }
 

@@ -94,7 +94,7 @@ export async function aiSegmentBlock(
 
   const segmentedVtt = await sendMessage('aiSegmentSubtitles', {
     jsonContent,
-    providerId: config.translate.providerId,
+    providerId: config.videoSubtitles.providerId,
   })
 
   const segmentedFragments = parseSimplifiedVttToFragments(segmentedVtt)

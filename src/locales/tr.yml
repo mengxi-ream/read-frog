@@ -9,7 +9,6 @@ popup:
   autoLang: Otomatik
   sourceLang: Kaynak
   targetLang: Hedef
-  read: Makaleyi Oku
   translate: Çevir
   showOriginal: Orijinali Göster
   enabledFloatingButton: Yüzen butonu etkinleştir
@@ -52,7 +51,7 @@ options:
     enabled: Beta Deneyimini Etkinleştir
   apiProviders:
     title: API Sağlayıcıları
-    description: Çeviri ve okuma işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik API sağlayıcımız var ve herhangi bir OpenAI uyumlu API sağlayıcısını destekliyoruz.
+    description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
     promotion:
       ai302:
         description: 302.AI'ye kaydolmak ve 1 USD API kredisi almak için sağdaki bağlantıya tıklayın
@@ -61,7 +60,6 @@ options:
     addProvider: Sağlayıcı Ekle
     badges:
       translate: Çeviri
-      read: Okuma
     dialog:
       title: Yeni Sağlayıcı Ekle
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: İsteğe Bağlı
       delete: Sil
-      atLeastOneProvider: En az bir okuma sağlayıcısı ve bir çeviri sağlayıcısı gereklidir.
+      atLeastOneLLMProvider: En az bir LLM çeviri sağlayıcısı gereklidir.
       duplicateProviderName: 'Yinelenen sağlayıcı adı "$1"'
       defaultProvider:
         translate: Varsayılan çeviri sağlayıcısı olarak ayarla
-        read: Varsayılan okuma sağlayıcısı olarak ayarla
       models:
-        read:
-          title: Okuma Modeli
-          customTitle: Özel Okuma Modeli
-          placeholder: Bir model seçin
         translate:
           title: Çeviri Modeli
           customTitle: Özel Çeviri Modeli
@@ -146,14 +139,6 @@ options:
       testing: Test ediliyor...
   general:
     title: Genel
-    readConfig:
-      title: Okuma Yapılandırması
-      description:
-        Derinlemesine makale açıklamaları ve anahtar kelime çıkarma gibi tüm gelişmiş AI işlevleri için.
-      provider: Sağlayıcı
-      model:
-        title: Model
-        enterCustomModel: Özel model adını girin
     translationConfig:
       title: Çeviri Yapılandırması
       description: Yalnızca web sayfalarındaki çeviri için, örneğin iki dilli paragraf çevirisi.
@@ -199,6 +184,10 @@ options:
     inputTranslation:
       title: Giriş Çevirisi
   inputTranslation:
+    provider:
+      title: Çeviri Sağlayıcısı
+      description: Giriş çevirisi için kullanılacak çeviri sağlayıcısını seçin
+      label: Sağlayıcı
     toggle:
       title: Üçlü Boşluk Çevirisini Etkinleştir
       description: Herhangi bir giriş alanında boşluk tuşuna hızlıca 3 kez basarak içeriği çevirin
@@ -238,7 +227,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir
-        description: Hızlı çeviri ve okuma için web sayfalarında metin seçerken araç çubuğunu görüntüle
+        description: Hızlı çeviri ve kelime analizi için web sayfalarında metin seçerken araç çubuğunu görüntüle
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
@@ -247,6 +236,21 @@ options:
         description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
         enterUrlPattern: URL kalıbı girin
         urlPattern: URL Kalıbı
+      features:
+        provider: Sağlayıcı
+        selectProvider: Sağlayıcı seçin
+        noProviderAvailable: Kullanılabilir sağlayıcı yok
+        useProviderDefaultModel: Sağlayıcının varsayılan modelini kullan
+        useCustomModel: Özel model kullan
+        customModel: Özel model
+        model: Model
+        modelNotAvailableForNonLLM: Model ayarları yalnızca LLM sağlayıcılarında kullanılabilir
+        translate:
+          title: Seçim Çevirisi
+          description: Seçim araç çubuğu çeviri özelliği için sağlayıcı ve model yapılandırın
+        vocabularyInsight:
+          title: Kelime Analizi
+          description: Seçim araç çubuğunda kelime/ifade analizi için sağlayıcı ve model yapılandırın
     contextMenu:
       title: Bağlam Menüsü
       translate:
@@ -528,6 +532,10 @@ options:
   videoSubtitles:
     title: Video Altyazıları
     description: Şu anda yalnızca YouTube video altyazılarını desteklemektedir
+    provider:
+      title: Çeviri Sağlayıcısı
+      description: Video altyazı çevirisi için kullanılacak çeviri sağlayıcısını seçin
+      label: Sağlayıcı
     enable: Video Altyazılarını Etkinleştir
     enableDescription: Etkinleştirildiğinde, YouTube oynatıcı kontrollerinde bir çeviri düğmesi görünecektir. Altyazıları çevirmeye başlamak için tıklayın.
     autoStart: Altyazıyı Otomatik Etkinleştir
@@ -598,9 +606,6 @@ side:
   sourceLang: Kaynak Dil
   targetLang: Hedef Dil
   fileExport: Dosya Dışa Aktarma
-readService:
-  title: Okuma Servisi
-  description: İçerik okuma ve açıklama için
 translateService:
   title: Çeviri Servisi
   description: Yalnızca web sayfası çevirisi için

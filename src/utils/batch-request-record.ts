@@ -1,6 +1,6 @@
 import type { ProviderConfig } from '@/types/config/provider'
 import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import { db } from '@/utils/db/dexie/db'
 import { getDateFromDaysBack, numberToPercentage } from '@/utils/utils'
 import { logger } from './logger'
@@ -22,7 +22,7 @@ export async function putBatchRequestRecord(
   { originalRequestCount, providerConfig }:
   { originalRequestCount: number, providerConfig: ProviderConfig },
 ) {
-  if (!isLLMTranslateProviderConfig(providerConfig))
+  if (!isLLMProviderConfig(providerConfig))
     return
 
   const { provider, model: providerModel } = providerConfig

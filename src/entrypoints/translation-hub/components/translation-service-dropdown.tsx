@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from '@/components/ui/base-ui/select'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig, getTranslateProvidersConfig } from '@/utils/config/helpers'
+import { filterEnabledProvidersConfig, getLLMProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig, getTranslateProvidersConfig } from '@/utils/config/helpers'
 import { PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { selectedProviderIdsAtom } from '../atoms'
 
@@ -36,7 +36,7 @@ export function TranslationServiceDropdown() {
     }
   }
 
-  const aiProviders = getLLMTranslateProvidersConfig(filteredProvidersConfig)
+  const aiProviders = getLLMProvidersConfig(filteredProvidersConfig)
   const nonAPIProviders = getNonAPIProvidersConfig(filteredProvidersConfig)
   const pureAPIProviders = getPureAPIProvidersConfig(filteredProvidersConfig)
 

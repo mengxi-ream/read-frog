@@ -1,22 +1,22 @@
 import type { ProvidersConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
-import { useAtom } from 'jotai'
+import { useAtom, useAtomValue } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/base-ui/button'
 import { Separator } from '@/components/ui/base-ui/separator'
-import { isAPIProviderConfig, isLLMTranslateProvider, isNonAPIProvider, isReadProvider, isTranslateProvider } from '@/types/config/provider'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvider } from '@/types/config/provider'
+import { configAtom, configFieldsAtomMap, writeConfigAtom } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
-import { getReadProvidersConfig, getTranslateProvidersConfig, getTTSProvidersConfig } from '@/utils/config/helpers'
+import { buildFeatureProviderPatch, computeProviderFallbacksAfterDeletion, findFeatureMissingProvider } from '@/utils/config/helpers'
 import { cn } from '@/utils/styles/utils'
 import { selectedProviderIdAtom } from '../atoms'
 import { APIKeyField } from './api-key-field'
 import { BaseURLField } from './base-url-field'
 import { AdvancedOptionsSection } from './components/advanced-options-section'
 import { ConfigHeader } from './config-header'
-import { DefaultReadProviderSelector, DefaultTranslateProviderSelector } from './default-provider'
+import { DefaultTranslateProviderSelector } from './default-provider'
 import { formOpts, useAppForm } from './form'
 import { ProviderOptionsField } from './provider-options-field'
 import { TemperatureField } from './temperature-field'
@@ -26,9 +26,8 @@ export function ProviderConfigForm() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [providerConfig, setProviderConfig] = useAtom(providerConfigAtom(selectedProviderId ?? ''))
   const [allProvidersConfig, setAllProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
-  const [readConfig, setReadConfig] = useAtom(configFieldsAtomMap.read)
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
-  const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
+  const setConfig = useAtom(writeConfigAtom)[1]
+  const config = useAtomValue(configAtom)
 
   const specificFormOpts = {
     ...formOpts,
@@ -43,9 +42,8 @@ export function ProviderConfigForm() {
   })
 
   const providerType = useStore(form.store, state => state.values.provider)
-  const isReadProviderName = isReadProvider(providerType)
   const isTranslateProviderName = isTranslateProvider(providerType)
-  const isLLMProvider = isLLMTranslateProvider(providerType)
+  const isLLM = isLLMProvider(providerType)
 
   // Reset form when selectedProviderId changes
   useEffect(() => {
@@ -60,34 +58,24 @@ export function ProviderConfigForm() {
 
   const chooseNextProviderConfig = (providersConfig: ProvidersConfig) => {
     // better not choose non API provider
-    const firstProvider = providersConfig.find(config => !isNonAPIProvider(config.provider))
+    const firstProvider = providersConfig.find(p => !isNonAPIProvider(p.provider))
     return firstProvider ?? providersConfig[0]
   }
 
   const handleDelete = async () => {
     const updatedAllProviders = allProvidersConfig.filter(provider => provider.id !== providerConfig.id)
-    const updatedAllReadProviders = getReadProvidersConfig(updatedAllProviders)
-    const updatedAllTranslateProviders = getTranslateProvidersConfig(updatedAllProviders)
-    const updatedAllTTSProviders = getTTSProvidersConfig(updatedAllProviders)
-    if (updatedAllReadProviders.length === 0 || updatedAllTranslateProviders.length === 0) {
-      toast.error(i18n.t('options.apiProviders.form.atLeastOneProvider'))
+
+    const unsatisfied = findFeatureMissingProvider(updatedAllProviders)
+    if (unsatisfied) {
+      toast.error(i18n.t('options.apiProviders.form.atLeastOneLLMProvider')) // TODO: make this word more general
       return
     }
 
-    if (readConfig.providerId === providerConfig.id) {
-      await setReadConfig({ providerId: updatedAllReadProviders[0].id })
-    }
-    if (translateConfig.providerId === providerConfig.id) {
-      await setTranslateConfig({ providerId: chooseNextProviderConfig(updatedAllTranslateProviders).id })
-    }
-    if (ttsConfig.providerId === providerConfig.id) {
-      if (updatedAllTTSProviders.length === 0) {
-        await setTtsConfig({ providerId: null })
-      }
-      else {
-        await setTtsConfig({ providerId: updatedAllTTSProviders[0].id })
-      }
-    }
+    const fallbacks = computeProviderFallbacksAfterDeletion(providerConfig.id, config, updatedAllProviders)
+    const patch = buildFeatureProviderPatch(fallbacks)
+    if (Object.keys(patch).length > 0)
+      await setConfig(patch)
+
     await setAllProvidersConfig(updatedAllProviders)
     setSelectedProviderId(chooseNextProviderConfig(updatedAllProviders).id)
   }
@@ -126,13 +114,7 @@ export function ProviderConfigForm() {
               <TranslateModelSelector form={form} />
             </>
           )}
-          {isReadProviderName && (
-            <>
-              <Separator className="my-2" />
-              <DefaultReadProviderSelector form={form} />
-            </>
-          )}
-          {isLLMProvider && (
+          {isLLM && (
             <AdvancedOptionsSection>
               <TemperatureField form={form} />
               <ProviderOptionsField form={form} />

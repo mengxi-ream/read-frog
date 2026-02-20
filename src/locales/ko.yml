@@ -8,7 +8,6 @@ popup:
   autoLang: 자동
   sourceLang: 원본
   targetLang: 대상
-  read: 기사 읽기
   translate: 번역
   showOriginal: 원문 보기
   enabledFloatingButton: 플로팅 버튼 활성화
@@ -51,7 +50,7 @@ options:
     enabled: Beta 체험 활성화
   apiProviders:
     title: API 제공업체
-    description: 번역 및 읽기 기능을 위한 API 제공업체 구성. 20개 이상의 API 제공업체와 모든 OpenAI 호환 API 제공업체를 지원합니다.
+    description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
     promotion:
       ai302:
         description: 오른쪽 링크를 클릭하여 302.AI에 등록하면 1달러 API 크레딧을 받을 수 있습니다
@@ -60,7 +59,6 @@ options:
     addProvider: 제공업체 추가
     badges:
       translate: 번역
-      read: 읽기
     dialog:
       title: 새 제공업체 추가
       groups:
@@ -81,16 +79,11 @@ options:
         baseURL: Base URL
         optional: 선택사항
       delete: 삭제
-      atLeastOneProvider: 최소 하나의 읽기 제공업체와 하나의 번역 제공업체가 필요합니다.
+      atLeastOneLLMProvider: 최소 하나의 LLM 번역 제공업체가 필요합니다.
       duplicateProviderName: '중복된 제공업체 이름 "$1"'
       defaultProvider:
         translate: 기본 번역 제공업체로 설정
-        read: 기본 읽기 제공업체로 설정
       models:
-        read:
-          title: 읽기 모델
-          customTitle: 사용자 정의 읽기 모델
-          placeholder: 모델을 선택하세요
         translate:
           title: 번역 모델
           customTitle: 사용자 정의 번역 모델
@@ -145,14 +138,6 @@ options:
       testing: 테스트 중...
   general:
     title: 일반
-    readConfig:
-      title: 읽기 설정
-      description:
-        심층 기사 설명 및 키워드 추출과 같은 모든 고급 AI 기능에 사용됩니다.
-      provider: 제공업체
-      model:
-        title: 모델
-        enterCustomModel: 사용자 정의 모델 이름 입력
     translationConfig:
       title: 번역 설정
       description: 이중 언어 단락 번역과 같은 웹 페이지 내 번역에만 사용됩니다.
@@ -198,6 +183,10 @@ options:
     inputTranslation:
       title: 입력 번역
   inputTranslation:
+    provider:
+      title: 번역 제공자
+      description: 입력 번역에 사용할 번역 제공자 선택
+      label: 제공자
     toggle:
       title: 트리플 스페이스 번역 활성화
       description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 내용이 번역됩니다
@@ -237,7 +226,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 선택 툴바 활성화
-        description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 읽기
+        description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 어휘 분석
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화
@@ -246,6 +235,21 @@ options:
         description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
         enterUrlPattern: URL 패턴 입력
         urlPattern: URL 패턴
+      features:
+        provider: 제공업체
+        selectProvider: 제공업체 선택
+        noProviderAvailable: 사용 가능한 제공업체가 없습니다
+        useProviderDefaultModel: 제공업체 기본 모델 사용
+        useCustomModel: 사용자 지정 모델 사용
+        customModel: 사용자 지정 모델
+        model: 모델
+        modelNotAvailableForNonLLM: 모델 설정은 LLM 제공업체에서만 사용할 수 있습니다
+        translate:
+          title: 선택 번역
+          description: 선택 툴바 번역 기능의 제공업체와 모델을 구성합니다
+        vocabularyInsight:
+          title: 어휘 분석
+          description: 선택 툴바에서 단어/구문 분석 기능의 제공업체와 모델을 구성합니다
     contextMenu:
       title: 컨텍스트 메뉴
       translate:
@@ -527,6 +531,10 @@ options:
   videoSubtitles:
     title: 비디오 자막
     description: 현재 YouTube 비디오 자막만 지원
+    provider:
+      title: 번역 제공자
+      description: 비디오 자막 번역에 사용할 번역 제공자를 선택하세요
+      label: 제공자
     enable: 비디오 자막 활성화
     enableDescription: 활성화하면 YouTube 플레이어 컨트롤 바에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
     autoStart: 자막 자동 활성화
@@ -597,9 +605,6 @@ side:
   sourceLang: 원본 언어
   targetLang: 대상 언어
   fileExport: 파일 내보내기
-readService:
-  title: 읽기 서비스
-  description: 기사 읽기 및 설명
 translateService:
   title: 번역 서비스
   description: 웹페이지 번역 전용

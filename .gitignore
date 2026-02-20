@@ -36,3 +36,5 @@ coverage/
 .nx/
 
 tsconfig.local.json
+
+docs/

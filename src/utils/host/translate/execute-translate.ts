@@ -3,7 +3,7 @@ import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import type { ArticleContent } from '@/types/content'
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@read-frog/definitions'
-import { isLLMTranslateProviderConfig, isNonAPIProvider, isPureAPIProvider } from '@/types/config/provider'
+import { isLLMProviderConfig, isNonAPIProvider, isPureAPIProvider } from '@/types/config/provider'
 import { aiTranslate } from './api/ai'
 import { deeplxTranslate } from './api/deeplx'
 import { googleTranslate } from './api/google'
@@ -51,7 +51,7 @@ export async function executeTranslate(
       translatedText = await deeplxTranslate(text, sourceLang, targetLang, providerConfig, options)
     }
   }
-  else if (isLLMTranslateProviderConfig(providerConfig)) {
+  else if (isLLMProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
     translatedText = await aiTranslate(text, targetLangName, providerConfig, promptResolver, options)
   }

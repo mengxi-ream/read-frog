@@ -11,16 +11,16 @@ export const testSeries: TestSeriesObject = {
       },
       providersConfig: [
         {
-          id: 'google-translate-default',
-          enabled: true,
-          name: 'Google Translate',
-          provider: 'google-translate',
-        },
-        {
           id: 'microsoft-translate-default',
           enabled: true,
           name: 'Microsoft Translator',
           provider: 'microsoft-translate',
+        },
+        {
+          id: 'google-translate-default',
+          enabled: true,
+          name: 'Google Translate',
+          provider: 'google-translate',
         },
         {
           id: 'openai-default',
@@ -70,9 +70,6 @@ export const testSeries: TestSeriesObject = {
           baseURL: 'https://deeplx.vercel.app',
         },
       ],
-      read: {
-        providerId: 'deepseek-default',
-      },
       translate: {
         providerId: 'openai-default',
         mode: 'translationOnly',
@@ -139,6 +136,14 @@ export const testSeries: TestSeriesObject = {
       selectionToolbar: {
         enabled: false,
         disabledSelectionToolbarPatterns: [],
+        features: {
+          translate: {
+            providerId: 'openai-default',
+          },
+          vocabularyInsight: {
+            providerId: 'openai-default',
+          },
+        },
       },
       betaExperience: {
         enabled: false,
@@ -149,6 +154,7 @@ export const testSeries: TestSeriesObject = {
       videoSubtitles: {
         enabled: false,
         autoStart: false,
+        providerId: 'openai-default',
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
@@ -184,6 +190,7 @@ export const testSeries: TestSeriesObject = {
       },
       inputTranslation: {
         enabled: true,
+        providerId: 'openai-default',
         fromLang: 'targetCode',
         toLang: 'sourceCode',
         enableCycle: false,
@@ -211,16 +218,16 @@ export const testSeries: TestSeriesObject = {
       },
       providersConfig: [
         {
-          id: 'google-translate-default',
-          enabled: true,
-          name: 'Google Translate',
-          provider: 'google-translate',
-        },
-        {
           id: 'microsoft-translate-default',
           enabled: true,
           name: 'Microsoft Translator',
           provider: 'microsoft-translate',
+        },
+        {
+          id: 'google-translate-default',
+          enabled: true,
+          name: 'Google Translate',
+          provider: 'google-translate',
         },
         {
           id: 'google-default',
@@ -242,12 +249,17 @@ export const testSeries: TestSeriesObject = {
           provider: 'deeplx',
         },
       ],
-      read: {
-        providerId: 'google-default',
-      },
       selectionToolbar: {
         enabled: true,
         disabledSelectionToolbarPatterns: [],
+        features: {
+          translate: {
+            providerId: 'google-default',
+          },
+          vocabularyInsight: {
+            providerId: 'google-default',
+          },
+        },
       },
       sideContent: {
         width: 420,
@@ -313,6 +325,7 @@ export const testSeries: TestSeriesObject = {
       videoSubtitles: {
         enabled: false,
         autoStart: false,
+        providerId: 'google-default',
         style: {
           displayMode: 'bilingual',
           translationPosition: 'above',
@@ -348,6 +361,7 @@ export const testSeries: TestSeriesObject = {
       },
       inputTranslation: {
         enabled: true,
+        providerId: 'google-default',
         fromLang: 'targetCode',
         toLang: 'sourceCode',
         enableCycle: false,

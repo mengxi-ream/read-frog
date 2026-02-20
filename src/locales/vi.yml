@@ -9,7 +9,6 @@ popup:
   autoLang: Tự động
   sourceLang: Nguồn
   targetLang: Đích
-  read: Đọc bài viết
   translate: Dịch
   showOriginal: Hiển thị bản gốc
   enabledFloatingButton: Bật nút nổi
@@ -52,7 +51,7 @@ options:
     enabled: Bật trải nghiệm Beta
   apiProviders:
     title: Nhà cung cấp API
-    description: Cấu hình các nhà cung cấp API cho chức năng dịch và đọc tại đây. Chúng tôi có hơn 20 nhà cung cấp API tích hợp sẵn và hỗ trợ bất kỳ nhà cung cấp API tương thích OpenAI nào.
+    description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
     promotion:
       ai302:
         description: Nhấp vào liên kết bên phải để đăng ký 302.AI và nhận 1 USD tín dụng API
@@ -61,7 +60,6 @@ options:
     addProvider: Thêm nhà cung cấp
     badges:
       translate: Dịch
-      read: Đọc
     dialog:
       title: Thêm nhà cung cấp mới
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: Tùy chọn
       delete: Xóa
-      atLeastOneProvider: Cần ít nhất một nhà cung cấp đọc và một nhà cung cấp dịch.
+      atLeastOneLLMProvider: Cần ít nhất một nhà cung cấp dịch LLM.
       duplicateProviderName: 'Tên nhà cung cấp trùng lặp "$1"'
       defaultProvider:
         translate: Đặt làm nhà cung cấp dịch mặc định
-        read: Đặt làm nhà cung cấp đọc mặc định
       models:
-        read:
-          title: Mô hình đọc
-          customTitle: Mô hình đọc tùy chỉnh
-          placeholder: Chọn mô hình
         translate:
           title: Mô hình dịch
           customTitle: Mô hình dịch tùy chỉnh
@@ -146,14 +139,6 @@ options:
       testing: Đang kiểm tra...
   general:
     title: Chung
-    readConfig:
-      title: Cấu hình đọc
-      description:
-        Cho tất cả các chức năng AI nâng cao, như giải thích bài viết chi tiết và trích xuất từ khóa.
-      provider: Nhà cung cấp
-      model:
-        title: Mô hình
-        enterCustomModel: Nhập tên mô hình tùy chỉnh
     translationConfig:
       title: Cấu hình dịch
       description: Chỉ dùng cho dịch trong trang web, như dịch đoạn văn song ngữ.
@@ -199,6 +184,10 @@ options:
     inputTranslation:
       title: Dịch đầu vào
   inputTranslation:
+    provider:
+      title: Nhà cung cấp dịch
+      description: Chọn nhà cung cấp dịch để sử dụng cho dịch đầu vào
+      label: Nhà cung cấp
     toggle:
       title: Bật dịch ba lần nhấn phím cách
       description: Nhấn phím cách nhanh 3 lần trong bất kỳ trường nhập nào để dịch nội dung
@@ -238,7 +227,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
-        description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch và đọc nhanh
+        description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch và phân tích từ vựng nhanh
       closeMenu:
         disableForSite: Tắt cho trang web này
         disableGlobally: Tắt toàn cục
@@ -247,6 +236,21 @@ options:
         description: Cấu hình các trang web mà thanh công cụ chọn văn bản nên bị tắt
         enterUrlPattern: Nhập mẫu URL
         urlPattern: Mẫu URL
+      features:
+        provider: Nhà cung cấp
+        selectProvider: Chọn nhà cung cấp
+        noProviderAvailable: Không có nhà cung cấp khả dụng
+        useProviderDefaultModel: Dùng model mặc định của nhà cung cấp
+        useCustomModel: Dùng model tùy chỉnh
+        customModel: Model tùy chỉnh
+        model: Model
+        modelNotAvailableForNonLLM: Cài đặt model chỉ khả dụng với nhà cung cấp LLM
+        translate:
+          title: Dịch văn bản chọn
+          description: Cấu hình nhà cung cấp và model cho tính năng dịch của selection toolbar
+        vocabularyInsight:
+          title: Phân tích từ vựng
+          description: Cấu hình nhà cung cấp và model cho tính năng phân tích từ/cụm từ của selection toolbar
     contextMenu:
       title: Menu ngữ cảnh
       translate:
@@ -528,6 +532,10 @@ options:
   videoSubtitles:
     title: Phụ đề video
     description: Hiện chỉ hỗ trợ phụ đề video YouTube
+    provider:
+      title: Nhà cung cấp dịch thuật
+      description: Chọn nhà cung cấp dịch thuật để sử dụng cho phụ đề video
+      label: Nhà cung cấp
     enable: Bật phụ đề video
     enableDescription: Khi bật, nút dịch sẽ xuất hiện trong thanh điều khiển YouTube. Nhấp để bắt đầu dịch phụ đề.
     autoStart: Tự động bật phụ đề
@@ -598,9 +606,6 @@ side:
   sourceLang: Ngôn ngữ nguồn
   targetLang: Ngôn ngữ đích
   fileExport: Xuất tệp
-readService:
-  title: Dịch vụ đọc
-  description: Để đọc và giải thích nội dung
 translateService:
   title: Dịch vụ dịch thuật
   description: Chỉ để dịch trang web

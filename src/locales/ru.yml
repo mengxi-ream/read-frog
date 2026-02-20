@@ -9,7 +9,6 @@ popup:
   autoLang: Авто
   sourceLang: Исходный
   targetLang: Целевой
-  read: Читать статью
   translate: Перевести
   showOriginal: Показать оригинал
   enabledFloatingButton: Включить плавающую кнопку
@@ -52,7 +51,7 @@ options:
     enabled: Включить бета-функции
   apiProviders:
     title: API-провайдеры
-    description: Настройте API-провайдеров для функций перевода и чтения. У нас более 20 встроенных API-провайдеров, а также поддержка любых OpenAI-совместимых провайдеров.
+    description: Настройте API-провайдеров для функций перевода и анализа слов. У нас более 20 встроенных провайдеров и поддержка любых OpenAI-совместимых API.
     promotion:
       ai302:
         description: Нажмите на ссылку справа, чтобы зарегистрироваться на 302.AI и получить 1 USD API-кредита
@@ -61,7 +60,6 @@ options:
     addProvider: Добавить провайдера
     badges:
       translate: Перевод
-      read: Чтение
     dialog:
       title: Добавить нового провайдера
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: Необязательно
       delete: Удалить
-      atLeastOneProvider: Требуется как минимум один провайдер чтения и один провайдер перевода.
+      atLeastOneLLMProvider: Требуется как минимум один LLM-провайдер перевода.
       duplicateProviderName: 'Дублирующееся имя провайдера "$1"'
       defaultProvider:
         translate: Установить как провайдер перевода по умолчанию
-        read: Установить как провайдер чтения по умолчанию
       models:
-        read:
-          title: Модель чтения
-          customTitle: Пользовательская модель чтения
-          placeholder: Выберите модель
         translate:
           title: Модель перевода
           customTitle: Пользовательская модель перевода
@@ -146,14 +139,6 @@ options:
       testing: Тестирование...
   general:
     title: Общие
-    readConfig:
-      title: Настройки чтения
-      description:
-        Для всех продвинутых ИИ-функций, таких как подробные объяснения статей и извлечение ключевых слов.
-      provider: Провайдер
-      model:
-        title: Модель
-        enterCustomModel: Введите название пользовательской модели
     translationConfig:
       title: Настройки перевода
       description: Только для перевода на веб-страницах, например, двуязычный перевод абзацев.
@@ -199,6 +184,10 @@ options:
     inputTranslation:
       title: Перевод ввода
   inputTranslation:
+    provider:
+      title: Поставщик перевода
+      description: Выберите поставщика перевода для перевода ввода
+      label: Поставщик
     toggle:
       title: Включить тройной пробел для перевода
       description: Быстро нажмите пробел 3 раза в любом поле ввода для перевода его содержимого
@@ -238,7 +227,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Включить панель выделения
-        description: Отображать панель при выделении текста на веб-страницах для быстрого перевода и чтения
+        description: Отображать панель при выделении текста на веб-страницах для быстрого перевода и анализа слов
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
@@ -247,6 +236,21 @@ options:
         description: Настройте веб-сайты, где панель выделения должна быть отключена
         enterUrlPattern: Введите URL-шаблон
         urlPattern: URL-шаблон
+      features:
+        provider: Провайдер
+        selectProvider: Выберите провайдера
+        noProviderAvailable: Нет доступных провайдеров
+        useProviderDefaultModel: Использовать модель провайдера по умолчанию
+        useCustomModel: Использовать пользовательскую модель
+        customModel: Пользовательская модель
+        model: Модель
+        modelNotAvailableForNonLLM: Настройки модели доступны только для LLM-провайдеров
+        translate:
+          title: Перевод выделения
+          description: Настройка провайдера и модели для перевода в панели выделения
+        vocabularyInsight:
+          title: Анализ слов
+          description: Настройка провайдера и модели для анализа слов/фраз в панели выделения
     contextMenu:
       title: Контекстное меню
       translate:
@@ -528,6 +532,10 @@ options:
   videoSubtitles:
     title: Видео субтитры
     description: В настоящее время поддерживаются только субтитры YouTube
+    provider:
+      title: Провайдер перевода
+      description: Выберите провайдера перевода для перевода видеосубтитров
+      label: Провайдер
     enable: Включить видео субтитры
     enableDescription: При включении в панели управления YouTube появится кнопка перевода. Нажмите её, чтобы начать перевод субтитров.
     autoStart: Автовключение субтитров
@@ -598,9 +606,6 @@ side:
   sourceLang: Исходный язык
   targetLang: Целевой язык
   fileExport: Экспорт файла
-readService:
-  title: Сервис чтения
-  description: Для чтения и объяснения контента
 translateService:
   title: Сервис перевода
   description: Только для перевода веб-страницы

@@ -1,9 +1,10 @@
 import { i18n } from '#imports'
-import { useAtomValue } from 'jotai'
-import TranslateProviderSelector from '@/components/llm-providers/translate-provider-selector'
+import { useAtom, useAtomValue } from 'jotai'
+import ProviderSelector from '@/components/llm-providers/provider-selector'
 import { Field, FieldLabel } from '@/components/ui/base-ui/field'
 import { isAPIProviderConfig } from '@/types/config/provider'
-import { translateProviderConfigAtom } from '@/utils/atoms/provider'
+import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { ConfigCard } from '../../components/config-card'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
 import { RangeSelector } from './components/range-selector'
@@ -20,7 +21,8 @@ export default function TranslationConfig() {
 }
 
 function TranslateProviderSelectorField() {
-  const translateProviderConfig = useAtomValue(translateProviderConfigAtom)
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const translateProviderConfig = useAtomValue(featureProviderConfigAtom('translate'))
 
   // some deeplx providers don't need api key
   const needSetAPIKey = translateProviderConfig && isAPIProviderConfig(translateProviderConfig) && translateProviderConfig.provider !== 'deeplx' && !translateProviderConfig.apiKey
@@ -31,7 +33,13 @@ function TranslateProviderSelectorField() {
         {i18n.t('options.general.translationConfig.provider')}
         {needSetAPIKey && <SetApiKeyWarning />}
       </FieldLabel>
-      <TranslateProviderSelector className="w-full" />
+      <ProviderSelector
+        featureKey="translate"
+        value={translateConfig.providerId}
+        onChange={id => void setTranslateConfig({ providerId: id })}
+        excludeProviderTypes={translateConfig.mode === 'translationOnly' ? ['google-translate'] : undefined}
+        className="w-full"
+      />
     </Field>
   )
 }

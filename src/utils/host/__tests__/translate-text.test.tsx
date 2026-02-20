@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { executeTranslate } from '@/utils/host/translate/execute-translate'
-import { translateText } from '@/utils/host/translate/translate-text'
+import { translateTextForPage } from '@/utils/host/translate/translate-variants'
 import { getTranslatePrompt } from '@/utils/prompts/translate'
 
 // Mock dependencies
@@ -41,11 +41,11 @@ describe('translate-text', () => {
     mockGetTranslatePrompt.mockResolvedValue('Translate to {{targetLang}}: {{input}}')
   })
 
-  describe('translateText', () => {
+  describe('translateTextForPage', () => {
     it('should send message with correct parameters', async () => {
       mockSendMessage.mockResolvedValue('translated text')
 
-      const result = await translateText('test text')
+      const result = await translateTextForPage('test text')
 
       expect(result).toBe('translated text')
       expect(mockSendMessage).toHaveBeenCalledWith('enqueueTranslateRequest', expect.objectContaining({

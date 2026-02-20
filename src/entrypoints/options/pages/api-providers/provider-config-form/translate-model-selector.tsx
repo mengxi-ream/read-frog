@@ -5,7 +5,7 @@ import { useSetAtom } from 'jotai'
 import { toast } from 'sonner'
 import { Checkbox } from '@/components/ui/base-ui/checkbox'
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
-import { isCustomLLMProviderConfig, isLLMTranslateProviderConfig, LLM_PROVIDER_MODELS } from '@/types/config/provider'
+import { isCustomLLMProviderConfig, isLLMProviderConfig, LLM_PROVIDER_MODELS } from '@/types/config/provider'
 import { providerConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
 import { ModelSuggestionButton } from './components/model-suggestion-button'
 import { withForm } from './form'
@@ -15,7 +15,7 @@ export const TranslateModelSelector = withForm({
   render: function Render({ form }) {
     const providerConfig = useStore(form.store, state => state.values)
     const setProviderConfig = useSetAtom(providerConfigAtom(providerConfig.id))
-    if (!isLLMTranslateProviderConfig(providerConfig))
+    if (!isLLMProviderConfig(providerConfig))
       return <></>
 
     const { isCustomModel, customModel, model } = providerConfig.model

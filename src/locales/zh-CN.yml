@@ -9,7 +9,6 @@ popup:
   autoLang: 自动检测
   sourceLang: 来源语言
   targetLang: 目标语言
-  read: 阅读文章
   translate: 翻译
   showOriginal: 显示原文
   enabledFloatingButton: 启用悬浮按钮
@@ -52,7 +51,7 @@ options:
     enabled: 启用 Beta 体验
   apiProviders:
     title: API 提供商
-    description: 配置用于翻译和阅读功能的 API 提供商。我们内置了 20 多个 API 提供商，并且支持任何 OpenAI 兼容的 API 提供商。
+    description: 配置用于翻译和词汇解析功能的 API 提供商。我们内置了 20 多个提供商，并支持任何 OpenAI 兼容 API 提供商。
     promotion:
       ai302:
         description: 点击右方链接注册 302.AI 可以获得 1 美元 API 额度
@@ -61,7 +60,6 @@ options:
     addProvider: 添加提供商
     badges:
       translate: 翻译
-      read: 阅读
     dialog:
       title: 添加新提供商
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: 可选
       delete: 删除
-      atLeastOneProvider: 至少需要一个阅读提供商和一个翻译提供商。
+      atLeastOneLLMProvider: 至少需要一个 LLM 翻译提供商。
       duplicateProviderName: '重复的提供商名称 "$1"'
       defaultProvider:
         translate: 设为默认翻译提供商
-        read: 设为默认阅读提供商
       models:
-        read:
-          title: 阅读模型
-          customTitle: 自定义阅读模型
-          placeholder: 选择一个模型
         translate:
           title: 翻译模型
           customTitle: 自定义翻译模型
@@ -146,13 +139,6 @@ options:
       testing: 测试中...
   general:
     title: 通用
-    readConfig:
-      title: 阅读配置
-      description: 适用于所有高级 AI 功能，如深度文章解释和关键词提取。
-      provider: 提供商
-      model:
-        title: 模型
-        enterCustomModel: 输入自定义模型名称
     translationConfig:
       title: 翻译配置
       description: 仅用于网页内的翻译，如双语段落翻译。
@@ -198,6 +184,10 @@ options:
     inputTranslation:
       title: 输入翻译
   inputTranslation:
+    provider:
+      title: 翻译服务
+      description: 选择用于输入翻译的翻译服务
+      label: 服务
     toggle:
       title: 启用三连空格翻译
       description: 在任意输入框中快速按3次空格键即可翻译其内容
@@ -237,7 +227,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 启用选择工具栏
-        description: 在网页上选择文本时显示工具栏，快速翻译和阅读
+        description: 在网页上选择文本时显示工具栏，快速翻译和词汇解析
       closeMenu:
         disableForSite: 禁用此网站
         disableGlobally: 全局禁用
@@ -246,6 +236,21 @@ options:
         description: 配置需要禁用选择工具栏的网站
         enterUrlPattern: 输入网址模式
         urlPattern: 网址模式
+      features:
+        provider: 提供商
+        selectProvider: 选择提供商
+        noProviderAvailable: 暂无可用提供商
+        useProviderDefaultModel: 使用提供商默认模型
+        useCustomModel: 使用自定义模型
+        customModel: 自定义模型
+        model: 模型
+        modelNotAvailableForNonLLM: 仅 LLM 提供商支持模型设置
+        translate:
+          title: 划词翻译
+          description: 配置选择工具栏翻译功能使用的提供商与模型
+        vocabularyInsight:
+          title: 词汇解析
+          description: 配置选择工具栏词汇/短语解析功能使用的提供商与模型
     contextMenu:
       title: 右键菜单
       translate:
@@ -529,6 +534,10 @@ options:
   videoSubtitles:
     title: 视频字幕
     description: 当前仅支持 YouTube 视频字幕
+    provider:
+      title: 翻译服务商
+      description: 选择用于视频字幕翻译的翻译服务商
+      label: 服务商
     enable: 开启视频字幕
     enableDescription: 启用后，YouTube 播放器控制栏会出现翻译按钮。点击即可开始翻译字幕。
     autoStart: 自动开启字幕
@@ -599,9 +608,6 @@ side:
   sourceLang: 来源语言
   targetLang: 目标语言
   fileExport: 文件导出
-readService:
-  title: 阅读服务
-  description: 用于阅读和解释文章
 translateService:
   title: 翻译服务
   description: 仅用于翻译网页内容

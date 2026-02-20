@@ -1,9 +1,9 @@
 import { langCodeISO6393Schema, langLevel } from '@read-frog/definitions'
 
 import { z } from 'zod'
+import { FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
 import { MIN_SIDE_CONTENT_WIDTH } from '@/utils/constants/side'
-import { isReadProvider, isTranslateProvider, isTTSProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from './provider'
-import { readConfigSchema } from './read'
+import { NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from './provider'
 import { videoSubtitlesSchema } from './subtitles'
 import { translateConfigSchema } from './translate'
 import { ttsConfigSchema } from './tts'
@@ -22,10 +22,18 @@ const floatingButtonSchema = z.object({
   clickAction: z.enum(['panel', 'translate']),
 })
 
-// Text selection button schema
+const selectionToolbarFeatureSchema = z.object({
+  providerId: z.string().nonempty(),
+})
+
+// Text selection toolbar schema
 const selectionToolbarSchema = z.object({
   enabled: z.boolean(),
   disabledSelectionToolbarPatterns: z.array(z.string()),
+  features: z.object({
+    translate: selectionToolbarFeatureSchema,
+    vocabularyInsight: selectionToolbarFeatureSchema,
+  }),
 })
 
 // side content schema
@@ -53,6 +61,7 @@ const inputTranslationLangSchema = z.union([
 // input translation schema (triple-space trigger)
 const inputTranslationSchema = z.object({
   enabled: z.boolean(),
+  providerId: z.string().nonempty(),
   fromLang: inputTranslationLangSchema,
   toLang: inputTranslationLangSchema,
   enableCycle: z.boolean(),
@@ -72,7 +81,6 @@ const siteControlSchema = z.object({
 export const configSchema = z.object({
   language: languageSchema,
   providersConfig: providersConfigSchema,
-  read: readConfigSchema,
   translate: translateConfigSchema,
   tts: ttsConfigSchema,
   floatingButton: floatingButtonSchema,
@@ -85,63 +93,37 @@ export const configSchema = z.object({
   siteControl: siteControlSchema,
 }).superRefine((data, ctx) => {
   const providerIdsSet = new Set(data.providersConfig.map(p => p.id))
-  const providerIds = Array.from(providerIdsSet)
 
-  if (!providerIdsSet.has(data.read.providerId)) {
-    ctx.addIssue({
-      code: 'invalid_value',
-      values: providerIds,
-      message: `Invalid provider id "${data.read.providerId}". Must be one of: ${providerIds.join(', ')}`,
-      path: ['read', 'providerId'],
-    })
-  }
-  const readProvider = data.providersConfig.find(p => p.id === data.read.providerId)
-  if (readProvider && !isReadProvider(readProvider.provider)) {
-    ctx.addIssue({
-      code: 'invalid_value',
-      values: providerIds,
-      message: `Invalid provider id "${data.read.providerId}". Must be a read provider`,
-      path: ['read', 'providerId'],
-    })
-  }
+  for (const def of Object.values(FEATURE_PROVIDER_DEFS)) {
+    const providerId = def.getProviderId(data)
+    if (!providerId)
+      continue
 
-  const validTranslateProviders = [...providerIds, ...Object.values(NON_API_TRANSLATE_PROVIDERS_MAP)]
-  const validTranslateProvidersSet = new Set(validTranslateProviders)
+    const validIds = new Set(providerIdsSet)
+    for (const [type, name] of Object.entries(NON_API_TRANSLATE_PROVIDERS_MAP)) {
+      if (def.isProvider(type))
+        validIds.add(name)
+    }
 
-  if (!validTranslateProvidersSet.has(data.translate.providerId)) {
-    ctx.addIssue({
-      code: 'invalid_value',
-      values: validTranslateProviders,
-      message: `Invalid provider id "${data.translate.providerId}". Must be one of: ${validTranslateProviders.join(', ')}`,
-      path: ['translate', 'providerId'],
-    })
-  }
-  const translateProvider = data.providersConfig.find(p => p.id === data.translate.providerId)
-  if (translateProvider && !isTranslateProvider(translateProvider.provider)) {
-    ctx.addIssue({
-      code: 'invalid_value',
-      values: validTranslateProviders,
-      message: `Invalid provider id "${data.translate.providerId}". Must be a translate provider`,
-      path: ['translate', 'providerId'],
-    })
-  }
+    if (!validIds.has(providerId)) {
+      ctx.addIssue({
+        code: 'invalid_value',
+        values: Array.from(validIds),
+        message: `Invalid provider id "${providerId}".`,
+        path: def.configPath,
+      })
+      continue
+    }
 
-  if (data.tts.providerId && !providerIdsSet.has(data.tts.providerId)) {
-    ctx.addIssue({
-      code: 'invalid_value',
-      values: providerIds,
-      message: `Invalid provider id "${data.tts.providerId}". Must be one of: ${providerIds.join(', ')}`,
-      path: ['tts', 'provider'],
-    })
-  }
-  const ttsProvider = data.providersConfig.find(p => p.id === data.tts.providerId)
-  if (ttsProvider && !isTTSProvider(ttsProvider.provider)) {
-    ctx.addIssue({
-      code: 'invalid_value',
-      values: providerIds,
-      message: `Invalid provider id "${data.tts.providerId}". Must be a tts provider`,
-      path: ['tts', 'provider'],
-    })
+    const provider = data.providersConfig.find(p => p.id === providerId)
+    if (provider && !def.isProvider(provider.provider)) {
+      ctx.addIssue({
+        code: 'invalid_value',
+        values: Array.from(validIds),
+        message: `Provider "${providerId}" is not a valid provider for this feature.`,
+        path: def.configPath,
+      })
+    }
   }
 })
 

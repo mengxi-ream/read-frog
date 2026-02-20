@@ -12,7 +12,7 @@ import { Dialog, DialogTrigger } from '@/components/ui/base-ui/dialog'
 import { Switch } from '@/components/ui/base-ui/switch'
 import { isAPIProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { providerConfigAtom, readProviderConfigAtom, translateProviderConfigAtom } from '@/utils/atoms/provider'
+import { featureProviderConfigAtom, providerConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
 import { API_PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { cn } from '@/utils/styles/utils'
@@ -190,10 +190,8 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const setProviderConfig = useSetAtom(providerConfigAtom(id))
-  const translateProviderConfig = useAtomValue(translateProviderConfigAtom)
-  const readProviderConfig = useAtomValue(readProviderConfigAtom)
+  const translateProviderConfig = useAtomValue(featureProviderConfigAtom('translate'))
   const isDefaultTranslateProvider = translateProviderConfig?.id === id
-  const isDefaultReadProvider = readProviderConfig?.id === id
 
   return (
     <div
@@ -207,11 +205,6 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
         {isDefaultTranslateProvider && (
           <Badge className="bg-blue-500" size="sm">
             {i18n.t('options.apiProviders.badges.translate')}
-          </Badge>
-        )}
-        {isDefaultReadProvider && (
-          <Badge className="bg-blue-500" size="sm">
-            {i18n.t('options.apiProviders.badges.read')}
           </Badge>
         )}
       </div>

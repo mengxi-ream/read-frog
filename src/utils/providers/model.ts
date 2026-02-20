@@ -1,4 +1,5 @@
 import type { Config } from '@/types/config/config'
+import type { LLMProviderConfig } from '@/types/config/provider'
 import { storage } from '#imports'
 import { createAmazonBedrock } from '@ai-sdk/amazon-bedrock'
 import { createAnthropic } from '@ai-sdk/anthropic'
@@ -21,7 +22,7 @@ import { createOpenRouter } from '@openrouter/ai-sdk-provider'
 import { createOllama } from 'ollama-ai-provider-v2'
 import { createMinimax } from 'vercel-minimax-ai-provider'
 import { isCustomLLMProvider } from '@/types/config/provider'
-import { getLLMTranslateProvidersConfig, getProviderConfigById, getTTSProvidersConfig } from '../config/helpers'
+import { getLLMProvidersConfig, getProviderConfigById, getTTSProvidersConfig } from '../config/helpers'
 import { CONFIG_STORAGE_KEY } from '../constants/config'
 
 interface ProviderFactoryMap {
@@ -82,13 +83,22 @@ const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string,
   anthropic: { 'anthropic-dangerous-direct-browser-access': 'true' },
 }
 
+export function resolveModelId(providerModel: LLMProviderConfig['model']) {
+  const selectedModelId = providerModel.isCustomModel
+    ? providerModel.customModel?.trim()
+    : providerModel.model?.trim()
+  const fallbackModelId = providerModel.customModel?.trim() || providerModel.model
+
+  return selectedModelId || fallbackModelId
+}
+
 async function getLanguageModelById(providerId: string) {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
     throw new Error('Config not found')
   }
 
-  const LLMProvidersConfig = getLLMTranslateProvidersConfig(config.providersConfig)
+  const LLMProvidersConfig = getLLMProvidersConfig(config.providersConfig)
   const providerConfig = getProviderConfigById(LLMProvidersConfig, providerId)
   if (!providerConfig) {
     throw new Error(`Provider ${providerId} not found`)
@@ -109,10 +119,7 @@ async function getLanguageModelById(providerId: string) {
         ...(customHeaders && { headers: customHeaders }),
       })
 
-  const modelConfig = providerConfig.model
-  const modelId = modelConfig.isCustomModel
-    ? modelConfig.customModel
-    : modelConfig.model
+  const modelId = resolveModelId(providerConfig.model)
 
   if (!modelId) {
     throw new Error('Model is undefined')

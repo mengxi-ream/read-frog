@@ -1,7 +1,7 @@
 import { browser, defineBackground } from '#imports'
 import { WEBSITE_URL } from '@/utils/constants/url'
 import { logger } from '@/utils/logger'
-import { onMessage, sendMessage } from '@/utils/message'
+import { onMessage } from '@/utils/message'
 import { SessionCacheGroupRegistry } from '@/utils/session-cache/session-cache-group-registry'
 import { runAiSegmentSubtitles } from './ai-segmentation'
 import { dispatchBackgroundStreamPort } from './background-stream'
@@ -48,10 +48,6 @@ export default defineBackground({
     onMessage('openOptionsPage', () => {
       logger.info('openOptionsPage')
       void browser.runtime.openOptionsPage()
-    })
-
-    onMessage('popupRequestReadArticle', async (message) => {
-      void sendMessage('readArticle', undefined, message.data.tabId)
     })
 
     onMessage('aiSegmentSubtitles', async (message) => {

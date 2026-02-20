@@ -1,9 +1,9 @@
 import type { Config } from '@/types/config/config'
-import type { LLMTranslateProviderConfig, ProviderConfig } from '@/types/config/provider'
+import type { LLMProviderConfig, ProviderConfig } from '@/types/config/provider'
 import type { BatchQueueConfig, RequestQueueConfig } from '@/types/config/translate'
 import type { ArticleContent } from '@/types/content'
 import type { PromptResolver } from '@/utils/host/translate/api/ai'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import { putBatchRequestRecord } from '@/utils/batch-request-record'
 import { DEFAULT_CONFIG } from '@/utils/constants/config'
 import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
@@ -27,7 +27,7 @@ export function parseBatchResult(result: string): string[] {
 async function getOrGenerateSummary(
   title: string,
   textContent: string,
-  providerConfig: LLMTranslateProviderConfig,
+  providerConfig: LLMProviderConfig,
   requestQueue: RequestQueue,
 ): Promise<string | undefined> {
   const preparedText = cleanText(textContent)
@@ -175,7 +175,7 @@ export async function setUpWebPageTranslationQueue() {
       title: articleTitle || '',
     }
 
-    if (isLLMTranslateProviderConfig(providerConfig)) {
+    if (isLLMProviderConfig(providerConfig)) {
       // Generate or fetch cached summary if AI Content Aware is enabled
       const config = await ensureInitializedConfig()
       if (config?.translate.enableAIContentAware && articleTitle !== undefined && articleTextContent !== undefined) {
@@ -242,7 +242,7 @@ export async function setUpSubtitlesTranslationQueue() {
       title: videoTitle || '',
     }
 
-    if (isLLMTranslateProviderConfig(providerConfig)) {
+    if (isLLMProviderConfig(providerConfig)) {
       const runtimeConfig = await ensureInitializedConfig()
       if (runtimeConfig?.translate.enableAIContentAware && videoTitle && subtitlesContext) {
         content.summary = await getOrGenerateSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)

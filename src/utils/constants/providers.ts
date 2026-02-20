@@ -5,7 +5,7 @@ import customProviderLogo from '@/assets/providers/custom-provider.svg'
 import deeplxLogoDark from '@/assets/providers/deeplx-dark.svg'
 import deeplxLogoLight from '@/assets/providers/deeplx-light.svg'
 import tensdaqLogoColor from '@/assets/providers/tensdaq-color.svg'
-import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, READ_PROVIDER_TYPES, TRANSLATE_PROVIDER_TYPES } from '@/types/config/provider'
+import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, TRANSLATE_PROVIDER_TYPES } from '@/types/config/provider'
 import { omit, pick } from '@/types/utils'
 import { getLobeIconsCDNUrlFn } from '../logo'
 import { WEBSITE_URL } from './url'
@@ -493,8 +493,8 @@ export const DEFAULT_PROVIDER_CONFIG = {
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
-  DEFAULT_PROVIDER_CONFIG['google-translate'],
   DEFAULT_PROVIDER_CONFIG['microsoft-translate'],
+  DEFAULT_PROVIDER_CONFIG['google-translate'],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.tensdaq,
   DEFAULT_PROVIDER_CONFIG.ai302,
@@ -532,14 +532,9 @@ export const PURE_TRANSLATE_PROVIDER_ITEMS = pick(
   PURE_TRANSLATE_PROVIDERS,
 )
 
-export const LLM_TRANSLATE_PROVIDER_ITEMS = omit(
+export const LLM_PROVIDER_ITEMS = omit(
   TRANSLATE_PROVIDER_ITEMS,
   PURE_TRANSLATE_PROVIDERS,
-)
-
-export const READ_PROVIDER_ITEMS = pick(
-  PROVIDER_ITEMS,
-  READ_PROVIDER_TYPES,
 )
 
 export const API_PROVIDER_ITEMS = pick(

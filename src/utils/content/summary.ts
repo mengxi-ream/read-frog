@@ -1,7 +1,7 @@
-import type { LLMTranslateProviderConfig } from '@/types/config/provider'
+import type { LLMProviderConfig } from '@/types/config/provider'
 import { generateText } from 'ai'
 import { logger } from '@/utils/logger'
-import { getModelById } from '@/utils/providers/model'
+import { getModelById, resolveModelId } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import { cleanText } from './utils'
 
@@ -11,7 +11,7 @@ import { cleanText } from './utils'
 export async function generateArticleSummary(
   title: string,
   textContent: string,
-  providerConfig: LLMTranslateProviderConfig,
+  providerConfig: LLMProviderConfig,
 ): Promise<string | null> {
   const preparedText = cleanText(textContent)
 
@@ -21,7 +21,7 @@ export async function generateArticleSummary(
 
   try {
     const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
-    const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
+    const modelName = resolveModelId(providerModel)
     const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
     const model = await getModelById(providerConfig.id)
 

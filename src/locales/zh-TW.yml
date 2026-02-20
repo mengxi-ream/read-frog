@@ -9,7 +9,6 @@ popup:
   autoLang: 自動偵測
   sourceLang: 來源語言
   targetLang: 目標語言
-  read: 閱讀文章
   translate: 翻譯
   showOriginal: 顯示原文
   enabledFloatingButton: 啟用懸浮按鈕
@@ -52,7 +51,7 @@ options:
     enabled: 啟用 Beta 體驗
   apiProviders:
     title: API 提供商
-    description: 配置用於翻譯和閱讀功能的 API 提供商。我們內置了 20 多個 API 提供商，並且支持任何 OpenAI 兼容的 API 提供商。
+    description: 配置用於翻譯和詞彙解析功能的 API 提供商。我們內建了 20 多個提供商，並支援任何 OpenAI 相容 API 提供商。
     promotion:
       ai302:
         description: 點擊右方鏈接註冊 302.AI 可以獲得 1 美元 API 額度
@@ -61,7 +60,6 @@ options:
     addProvider: 新增提供商
     badges:
       translate: 翻譯
-      read: 閱讀
     dialog:
       title: 新增提供商
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: 可選
       delete: 刪除
-      atLeastOneProvider: 至少需要一個閱讀提供商和一個翻譯提供商。
+      atLeastOneLLMProvider: 至少需要一個 LLM 翻譯提供商。
       duplicateProviderName: '重複的提供商名稱 "$1"'
       defaultProvider:
         translate: 設為預設翻譯提供商
-        read: 設為預設閱讀提供商
       models:
-        read:
-          title: 閱讀模型
-          customTitle: 自定義閱讀模型
-          placeholder: 選擇一個模型
         translate:
           title: 翻譯模型
           customTitle: 自定義翻譯模型
@@ -146,13 +139,6 @@ options:
       testing: 測試中...
   general:
     title: 通用
-    readConfig:
-      title: 閱讀配置
-      description: 適用於所有高級 AI 功能，如深度文章解釋和關鍵詞提取。
-      provider: 提供商
-      model:
-        title: 模型
-        enterCustomModel: 輸入自定義模型名稱
     translationConfig:
       title: 翻譯配置
       description: 僅用於網頁內的翻譯，如雙語段落翻譯。
@@ -198,6 +184,10 @@ options:
     inputTranslation:
       title: 輸入翻譯
   inputTranslation:
+    provider:
+      title: 翻譯服務
+      description: 選擇用於輸入翻譯的翻譯服務
+      label: 服務
     toggle:
       title: 啟用三連空格翻譯
       description: 在任意輸入框中快速按3次空格鍵即可翻譯其內容
@@ -237,7 +227,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 啟用選擇工具列
-        description: 在網頁上選擇文字時顯示工具列，快速翻譯和閱讀
+        description: 在網頁上選擇文字時顯示工具列，快速翻譯和詞彙解析
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
@@ -246,6 +236,21 @@ options:
         description: 設定需要停用選擇工具列的網站
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
+      features:
+        provider: 提供商
+        selectProvider: 選擇提供商
+        noProviderAvailable: 暫無可用提供商
+        useProviderDefaultModel: 使用提供商預設模型
+        useCustomModel: 使用自定義模型
+        customModel: 自定義模型
+        model: 模型
+        modelNotAvailableForNonLLM: 僅 LLM 提供商支援模型設定
+        translate:
+          title: 劃詞翻譯
+          description: 配置選擇工具列翻譯功能使用的提供商與模型
+        vocabularyInsight:
+          title: 詞彙解析
+          description: 配置選擇工具列詞彙/短語解析功能使用的提供商與模型
     contextMenu:
       title: 右鍵選單
       translate:
@@ -529,6 +534,10 @@ options:
   videoSubtitles:
     title: 影片字幕
     description: 目前僅支援 YouTube 影片字幕
+    provider:
+      title: 翻譯服務商
+      description: 選擇用於影片字幕翻譯的翻譯服務商
+      label: 服務商
     enable: 開啟影片字幕
     enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點擊即可開始翻譯字幕。
     autoStart: 自動開啟字幕
@@ -599,9 +608,6 @@ side:
   sourceLang: 來源語言
   targetLang: 目標語言
   fileExport: 文件導出
-readService:
-  title: 閱讀服務
-  description: 用於閱讀和解釋文章
 translateService:
   title: 翻譯服務
   description: 僅用於翻譯網頁內容

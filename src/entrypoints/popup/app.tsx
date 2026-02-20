@@ -15,8 +15,6 @@ import { DiscordButton } from './components/discord-button'
 import LanguageOptionsSelector from './components/language-options-selector'
 import { MoreMenu } from './components/more-menu'
 import Hotkey from './components/node-translation-hotkey-selector'
-import ReadButton from './components/read-button'
-import ReadProviderField from './components/read-provider-field'
 import TranslateButton from './components/translate-button'
 import TranslatePromptSelector from './components/translate-prompt-selector'
 import TranslateProviderField from './components/translate-provider-field'
@@ -48,10 +46,8 @@ function App() {
         <TranslationModeSelector />
         <TranslateProviderField />
         <TranslatePromptSelector />
-        <ReadProviderField />
-        <div className="grid w-full grid-cols-2 gap-2">
-          <ReadButton />
-          <TranslateButton />
+        <div className="w-full">
+          <TranslateButton className="w-full" />
         </div>
         <AddToWhitelist />
         <AlwaysTranslate />

@@ -9,7 +9,6 @@ popup:
   autoLang: Auto
   sourceLang: Source
   targetLang: Target
-  read: Read Article
   translate: Translate
   showOriginal: Show Original
   enabledFloatingButton: Enable floating button
@@ -52,7 +51,7 @@ options:
     enabled: Enable Beta Experience
   apiProviders:
     title: API Providers
-    description: Configure the API providers for translation and reading functions here. We have 20+ API providers built-in and support any OpenAI compatible API providers.
+    description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
     promotion:
       ai302:
         description: Click the link on the right to register 302.AI and get 1 USD API credit
@@ -61,7 +60,6 @@ options:
     addProvider: Add Provider
     badges:
       translate: Translate
-      read: Read
     dialog:
       title: Add New Provider
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: Optional
       delete: Delete
-      atLeastOneProvider: At least one read provider and one translation provider are required.
+      atLeastOneLLMProvider: At least one LLM translation provider is required.
       duplicateProviderName: 'Duplicate provider name "$1"'
       defaultProvider:
         translate: Set as default translate provider
-        read: Set as default read provider
       models:
-        read:
-          title: Read Model
-          customTitle: Read Custom Model
-          placeholder: Select a model
         translate:
           title: Translate Model
           customTitle: Translate Custom Model
@@ -146,14 +139,6 @@ options:
       testing: Testing...
   general:
     title: General
-    readConfig:
-      title: Read Config
-      description:
-        For all advanced AI functions, such as in-depth article explanations and keyword extraction.
-      provider: Provider
-      model:
-        title: Model
-        enterCustomModel: Enter the name of the custom model
     translationConfig:
       title: Translation Config
       description: Only for translation within web pages, such as bilingual paragraph translation.
@@ -199,6 +184,10 @@ options:
     inputTranslation:
       title: Input Translation
   inputTranslation:
+    provider:
+      title: Translation Provider
+      description: Choose which translation provider to use for input translation
+      label: Provider
     toggle:
       title: Enable Triple-Space Translation
       description: Press spacebar 3 times quickly in any input field to translate its content
@@ -238,7 +227,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Enable Selection Toolbar
-        description: Display the toolbar when selecting text on web pages for quick translation and reading
+        description: Display the toolbar when selecting text on web pages for quick translation and vocabulary insights
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
@@ -247,6 +236,21 @@ options:
         description: Configure websites where the selection toolbar should be disabled
         enterUrlPattern: Enter URL pattern
         urlPattern: URL Pattern
+      features:
+        provider: Provider
+        selectProvider: Select a provider
+        noProviderAvailable: No available provider
+        useProviderDefaultModel: Use provider default model
+        useCustomModel: Use custom model
+        customModel: Custom model
+        model: Model
+        modelNotAvailableForNonLLM: Model settings are only available for LLM providers
+        translate:
+          title: Selection Translation
+          description: Configure provider and model for the selection toolbar translation feature
+        vocabularyInsight:
+          title: Vocabulary Insight
+          description: Configure provider and model for vocabulary/phrase analysis in the selection toolbar
     contextMenu:
       title: Context Menu
       translate:
@@ -530,6 +534,10 @@ options:
   videoSubtitles:
     title: Video Subtitles
     description: Currently only supports YouTube video subtitles
+    provider:
+      title: Translation Provider
+      description: Choose which translation provider to use for video subtitle translation
+      label: Provider
     enable: Enable Video Subtitles
     enableDescription: When enabled, a translation button will appear in the YouTube player controls. Click it to start translating subtitles.
     autoStart: Auto-Enable Subtitles
@@ -600,9 +608,6 @@ side:
   sourceLang: Source Language
   targetLang: Target Language
   fileExport: File Export
-readService:
-  title: Read Service
-  description: For read and explain content
 translateService:
   title: Translation Service
   description: For translate the webpage only

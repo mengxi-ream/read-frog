@@ -20,7 +20,7 @@ import {
 import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
 import { Hint } from '@/components/ui/base-ui/hint'
 import { Switch } from '@/components/ui/base-ui/switch'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { ConfigCard } from '../../components/config-card'
@@ -31,7 +31,7 @@ export function SkipLanguages() {
 
   const hasLLMProvider = useMemo(() => {
     const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
-    return providerConfig ? isLLMTranslateProviderConfig(providerConfig) : false
+    return providerConfig ? isLLMProviderConfig(providerConfig) : false
   }, [providersConfig, translateConfig.providerId])
 
   return (

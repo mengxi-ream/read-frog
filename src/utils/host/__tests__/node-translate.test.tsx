@@ -17,8 +17,11 @@ const TEST_CONFIG: Config = {
   },
 }
 
+vi.mock('@/utils/host/translate/translate-variants', () => ({
+  translateTextForPage: vi.fn(() => Promise.resolve('translation')),
+}))
+
 vi.mock('@/utils/host/translate/translate-text', () => ({
-  translateText: vi.fn(() => Promise.resolve('translation')),
   validateTranslationConfigAndToast: vi.fn(() => true),
 }))
 

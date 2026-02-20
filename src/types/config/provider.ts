@@ -8,18 +8,6 @@ export { LLM_PROVIDER_MODELS, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PRO
   Derived provider names
   ────────────────────────────── */
 
-// read provider names
-export const READ_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (keyof typeof LLM_PROVIDER_MODELS)[]
->
-export type ReadProviderTypes = typeof READ_PROVIDER_TYPES[number]
-export function isReadProvider(provider: string): provider is ReadProviderTypes {
-  return READ_PROVIDER_TYPES.includes(provider)
-}
-export function isReadProviderConfig(config: ProviderConfig): config is ReadProviderConfig {
-  return isReadProvider(config.provider)
-}
-
 // translate provider names
 export const TRANSLATE_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   (keyof typeof LLM_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
@@ -30,18 +18,6 @@ export function isTranslateProvider(provider: string): provider is TranslateProv
 }
 export function isTranslateProviderConfig(config: ProviderConfig): config is TranslateProviderConfig {
   return isTranslateProvider(config.provider)
-}
-
-// translate provider names that support LLM
-export const LLM_TRANSLATE_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (keyof typeof LLM_PROVIDER_MODELS)[]
->
-export type LLMTranslateProviderTypes = typeof LLM_TRANSLATE_PROVIDER_TYPES[number]
-export function isLLMTranslateProvider(provider: string): provider is LLMTranslateProviderTypes {
-  return LLM_TRANSLATE_PROVIDER_TYPES.includes(provider)
-}
-export function isLLMTranslateProviderConfig(config: ProviderConfig): config is LLMTranslateProviderConfig {
-  return isLLMTranslateProvider(config.provider)
 }
 
 export const LLM_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
@@ -89,7 +65,7 @@ export function isAPIProviderConfig(config: ProviderConfig): config is APIProvid
 }
 
 export const PURE_API_PROVIDER_TYPES = ['deeplx'] as const satisfies Readonly<
-  Exclude<APIProviderTypes, LLMTranslateProviderTypes>[]
+  Exclude<APIProviderTypes, LLMProviderTypes>[]
 >
 export type PureAPIProviderTypes = typeof PURE_API_PROVIDER_TYPES[number]
 export function isPureAPIProvider(provider: string): provider is PureAPIProviderTypes {
@@ -120,7 +96,7 @@ export function isTTSProviderConfig(config: ProviderConfig): config is TTSProvid
 
 // all provider names
 export const ALL_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (typeof READ_PROVIDER_TYPES[number] | typeof TRANSLATE_PROVIDER_TYPES[number])[]
+  TranslateProviderTypes[]
 >
 export type AllProviderTypes = typeof ALL_PROVIDER_TYPES[number]
 
@@ -314,10 +290,8 @@ export type NonAPIProviderConfig = Extract<ProviderConfig, { provider: NonAPIPro
 export type PureProviderConfig = Extract<ProviderConfig, { provider: PureAPIProviderTypes }>
 export type APIProviderConfig = Extract<ProviderConfig, { provider: APIProviderTypes }>
 export type PureAPIProviderConfig = Extract<ProviderConfig, { provider: PureAPIProviderTypes }>
-export type LLMTranslateProviderConfig = Extract<ProviderConfig, { provider: LLMTranslateProviderTypes }>
 export type LLMProviderConfig = Extract<ProviderConfig, { provider: LLMProviderTypes }>
 export type TranslateProviderConfig = Extract<ProviderConfig, { provider: TranslateProviderTypes }>
-export type ReadProviderConfig = Extract<ProviderConfig, { provider: ReadProviderTypes }>
 export type NonCustomLLMProviderConfig = Extract<ProviderConfig, { provider: NonCustomLLMProviderTypes }>
 export type CustomLLMProviderConfig = Extract<ProviderConfig, { provider: CustomLLMProviderTypes }>
 export type TTSProviderConfig = Extract<ProviderConfig, { provider: TTSProviderTypes }>

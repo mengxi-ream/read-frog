@@ -8,7 +8,6 @@ popup:
   autoLang: 自動検出
   sourceLang: ソース言語
   targetLang: 翻訳言語
-  read: 記事を読む
   translate: 翻訳
   showOriginal: 原文を表示
   enabledFloatingButton: フローティングボタンを有効化
@@ -51,7 +50,7 @@ options:
     enabled: Beta 体験を有効にする
   apiProviders:
     title: APIプロバイダー
-    description: 翻訳および読解機能用のAPIプロバイダーを設定。20以上のAPIプロバイダーに加えて、OpenAI互換のAPIプロバイダーもサポートしています。
+    description: 翻訳および語彙分析機能用のAPIプロバイダーを設定。20以上の内蔵プロバイダーに加え、OpenAI互換APIもサポートしています。
     promotion:
       ai302:
         description: 右のリンクをクリックして 302.AI に登録すると、1ドルのAPIクレジットを受け取ることができます
@@ -60,7 +59,6 @@ options:
     addProvider: プロバイダーを追加
     badges:
       translate: 翻訳
-      read: 読解
     dialog:
       title: 新しいプロバイダーを追加
       groups:
@@ -81,16 +79,11 @@ options:
         baseURL: ベースURL
         optional: オプション
       delete: 削除
-      atLeastOneProvider: 最低1つの読解プロバイダーと1つの翻訳プロバイダーが必要です。
+      atLeastOneLLMProvider: 最低1つのLLM翻訳プロバイダーが必要です。
       duplicateProviderName: '重複するプロバイダー名 "$1"'
       defaultProvider:
         translate: デフォルト翻訳プロバイダーに設定
-        read: デフォルト読解プロバイダーに設定
       models:
-        read:
-          title: 読解モデル
-          customTitle: カスタム読解モデル
-          placeholder: モデルを選択してください
         translate:
           title: 翻訳モデル
           customTitle: カスタム翻訳モデル
@@ -145,13 +138,6 @@ options:
       testing: テスト中...
   general:
     title: 一般
-    readConfig:
-      title: 読解設定
-      description: 高度なAI機能（記事の詳細解説、キーワード抽出など）に使用されます。
-      provider: プロバイダー
-      model:
-        title: モデル
-        enterCustomModel: カスタムモデル名を入力
     translationConfig:
       title: 翻訳設定
       description: ウェブページ内の翻訳にのみ使用されます（バイリンガル段落翻訳など）。
@@ -197,6 +183,10 @@ options:
     inputTranslation:
       title: 入力翻訳
   inputTranslation:
+    provider:
+      title: 翻訳プロバイダー
+      description: 入力翻訳に使用する翻訳プロバイダーを選択
+      label: プロバイダー
     toggle:
       title: トリプルスペース翻訳を有効化
       description: 任意の入力欄でスペースキーを素早く3回押すと内容を翻訳します
@@ -236,7 +226,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 選択ツールバーを有効化
-        description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と読解
+        description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と語彙分析
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
@@ -245,6 +235,21 @@ options:
         description: 選択ツールバーを無効化するウェブサイトを設定します
         enterUrlPattern: URL パターンを入力
         urlPattern: URL パターン
+      features:
+        provider: プロバイダー
+        selectProvider: プロバイダーを選択
+        noProviderAvailable: 利用可能なプロバイダーがありません
+        useProviderDefaultModel: プロバイダーのデフォルトモデルを使用
+        useCustomModel: カスタムモデルを使用
+        customModel: カスタムモデル
+        model: モデル
+        modelNotAvailableForNonLLM: モデル設定はLLMプロバイダーでのみ利用可能です
+        translate:
+          title: 選択翻訳
+          description: 選択ツールバー翻訳機能のプロバイダーとモデルを設定
+        vocabularyInsight:
+          title: 語彙分析
+          description: 選択ツールバーで単語/フレーズを分析するためのプロバイダーとモデルを設定
     contextMenu:
       title: コンテキストメニュー
       translate:
@@ -526,6 +531,10 @@ options:
   videoSubtitles:
     title: 動画字幕
     description: 現在 YouTube 動画字幕のみ対応
+    provider:
+      title: 翻訳プロバイダー
+      description: 動画字幕翻訳に使用する翻訳プロバイダーを選択
+      label: プロバイダー
     enable: 動画字幕を有効にする
     enableDescription: 有効にすると、YouTube プレーヤーのコントロールバーに翻訳ボタンが表示されます。クリックして字幕の翻訳を開始します。
     autoStart: 字幕を自動有効化
@@ -596,9 +605,6 @@ side:
   sourceLang: ソース言語
   targetLang: 翻訳言語
   fileExport: ファイルエクスポート
-readService:
-  title: 読解サービス
-  description: 記事の読解と解説に使用
 translateService:
   title: 翻訳サービス
   description: ウェブページの翻訳にのみ使用

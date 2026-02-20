@@ -73,7 +73,7 @@ export async function translateSubtitles(
     return fragments.map(f => ({ ...f, translation: '' }))
   }
 
-  const providerConfig = getProviderConfigById(config.providersConfig, config.translate.providerId)
+  const providerConfig = getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
 
   if (!providerConfig) {
     return fragments.map(f => ({ ...f, translation: '' }))

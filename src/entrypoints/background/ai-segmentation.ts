@@ -1,11 +1,11 @@
 import { generateText } from 'ai'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { db } from '@/utils/db/dexie/db'
 import { Sha256Hex } from '@/utils/hash'
 import { logger } from '@/utils/logger'
 import { getSubtitlesSegmentationPrompt } from '@/utils/prompts/subtitles-segmentation'
-import { getModelById } from '@/utils/providers/model'
+import { getModelById, resolveModelId } from '@/utils/providers/model'
 import { getProviderOptionsWithOverride } from '@/utils/providers/options'
 import { ensureInitializedConfig } from './config'
 
@@ -55,7 +55,7 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
     throw new Error(`Provider config not found for id: ${providerId}`)
   }
 
-  if (!isLLMTranslateProviderConfig(providerConfig)) {
+  if (!isLLMProviderConfig(providerConfig)) {
     throw new Error('AI segmentation requires an LLM translate provider')
   }
 
@@ -69,7 +69,7 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
   }
 
   const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
-  const modelName = providerModel.isCustomModel ? providerModel.customModel : providerModel.model
+  const modelName = resolveModelId(providerModel)
   const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
   const model = await getModelById(providerId)
 
