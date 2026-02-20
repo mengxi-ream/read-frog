@@ -36,7 +36,7 @@ function SelectionToolbarFeatureProviderModelCard({
   const providers = filteredProvidersConfig.filter(p => def.isProvider(p.provider))
 
   const featureConfig = selectionToolbar.features[featureKey]
-  const currentProvider = getProviderConfigById(providers, featureConfig.providerId) ?? providers[0]
+  const currentProvider = getProviderConfigById(providers, featureConfig.providerId)
 
   const updateFeatureConfig = (patch: Partial<SelectionToolbarFeatureConfig>) => {
     void setSelectionToolbar({

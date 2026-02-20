@@ -141,7 +141,7 @@ export const testSeries: TestSeriesObject = {
             providerId: 'openai-default',
           },
           vocabularyInsight: {
-            providerId: 'openai-default',
+            providerId: 'deepseek-default',
           },
         },
       },

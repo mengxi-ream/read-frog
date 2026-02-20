@@ -115,12 +115,18 @@ function resolveTranslateProviderId(oldConfig: any, translateProviderIds: string
   return translateProviderIds[0] ?? 'microsoft-translate-default'
 }
 
-function resolveVocabularyInsightProviderId(preferredProviderId: string, llmProviderIds: string[]): string {
-  if (llmProviderIds.includes(preferredProviderId)) {
-    return preferredProviderId
+function resolveVocabularyInsightProviderId(oldConfig: any, fallbackProviderId: string, llmProviderIds: string[]): string {
+  // Prefer legacy read provider (vocabulary insight is the successor to read)
+  const readProviderId = oldConfig?.read?.providerId
+  if (typeof readProviderId === 'string' && llmProviderIds.includes(readProviderId)) {
+    return readProviderId
   }
 
-  return llmProviderIds[0] ?? preferredProviderId
+  if (llmProviderIds.includes(fallbackProviderId)) {
+    return fallbackProviderId
+  }
+
+  return llmProviderIds[0] ?? fallbackProviderId
 }
 
 function normalizeFeatureConfig(
@@ -145,7 +151,7 @@ function migrateSelectionToolbarFeatures(oldConfig: any, providersConfig: any[])
   const llmProviderIds = getLLMProviderIds(providersConfig)
 
   const defaultTranslateProviderId = resolveTranslateProviderId(oldConfig, translateProviderIds)
-  const defaultVocabularyInsightProviderId = resolveVocabularyInsightProviderId(defaultTranslateProviderId, llmProviderIds)
+  const defaultVocabularyInsightProviderId = resolveVocabularyInsightProviderId(oldConfig, defaultTranslateProviderId, llmProviderIds)
 
   const features = {
     translate: normalizeFeatureConfig(
@@ -222,7 +228,7 @@ export function migrate(oldConfig: any): any {
   return {
     ...configWithoutRead,
     providersConfig: migratedProvidersConfig,
-    selectionToolbar: migrateSelectionToolbarFeatures(configWithoutRead, migratedProvidersConfig),
+    selectionToolbar: migrateSelectionToolbarFeatures(oldConfig, migratedProvidersConfig),
     inputTranslation: migrateInputTranslation(configWithoutRead, translateProviderIds),
     videoSubtitles: migrateVideoSubtitles(configWithoutRead, translateProviderIds),
   }
