@@ -121,9 +121,23 @@ export function isDontWalkIntoButTranslateAsChildElement(element: HTMLElement): 
   return dontWalkClass || dontWalkTag
 }
 
+// https://github.com/mengxi-ream/read-frog/issues/940
+function isInsideContentContainer(element: HTMLElement): boolean {
+  let current: HTMLElement | null = element.parentElement
+  while (current) {
+    if (current.tagName === 'ARTICLE' || current.tagName === 'MAIN') {
+      return true
+    }
+    current = current.parentElement
+  }
+  return false
+}
+
 export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElement, config: Config): boolean {
   const dontWalkCustomElement = isCustomDontWalkIntoElement(element)
-  const dontWalkContent = config.translate.page.range !== 'all' && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
+  const dontWalkContent = config.translate.page.range !== 'all'
+    && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
+    && !isInsideContentContainer(element)
   const dontWalkInvalidTag = DONT_WALK_AND_TRANSLATE_TAGS.has(element.tagName)
   const dontWalkCSS
     = window.getComputedStyle(element).display === 'none'
