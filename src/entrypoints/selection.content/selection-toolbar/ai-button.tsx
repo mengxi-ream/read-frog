@@ -99,7 +99,7 @@ export function AiPopover() {
           = `query: ${highlightData.context.selection}\n`
             + `context: ${highlightData.context.before} ${highlightData.context.selection} ${highlightData.context.after}`
 
-        const modelName = resolveModelId(vocabularyInsightProviderConfig.model)
+        const modelName = resolveModelId(vocabularyInsightProviderConfig.model) ?? ''
         const providerOptions = getProviderOptionsWithOverride(
           modelName,
           vocabularyInsightProviderConfig.provider,
