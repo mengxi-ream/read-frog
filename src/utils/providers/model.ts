@@ -84,12 +84,9 @@ const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string,
 }
 
 export function resolveModelId(providerModel: LLMProviderConfig['model']) {
-  const selectedModelId = providerModel.isCustomModel
+  return providerModel.isCustomModel
     ? providerModel.customModel?.trim()
     : providerModel.model?.trim()
-  const fallbackModelId = providerModel.customModel?.trim() || providerModel.model
-
-  return selectedModelId || fallbackModelId
 }
 
 async function getLanguageModelById(providerId: string) {
