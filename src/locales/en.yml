@@ -641,7 +641,6 @@ shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
   state:
-    idle: Ready
     loading: Read Frog loading captions
     error: Error occurred
   errors:

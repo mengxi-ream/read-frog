@@ -639,7 +639,6 @@ shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
   state:
-    idle: Hazır
     loading: Read Frog altyazılar yükleniyor
     error: Bir hata oluştu
   errors:

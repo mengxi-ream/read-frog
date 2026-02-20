@@ -639,7 +639,6 @@ shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
   state:
-    idle: Готово
     loading: Read Frog загрузка субтитров
     error: Произошла ошибка
   errors:

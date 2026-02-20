@@ -640,7 +640,6 @@ shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
   state:
-    idle: 就绪
     loading: Read Frog 字幕加载中
     error: 发生错误
   errors:

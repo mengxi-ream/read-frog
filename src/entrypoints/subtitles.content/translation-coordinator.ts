@@ -142,6 +142,7 @@ export class TranslationCoordinator {
       this.onTranslated(fallback)
 
       const errorMessage = error instanceof Error ? error.message : String(error)
+      this.lastEmittedState = 'error'
       this.onStateChange('error', { message: errorMessage })
     }
     finally {

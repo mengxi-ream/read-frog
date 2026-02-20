@@ -638,7 +638,6 @@ shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
   state:
-    idle: 준비 완료
     loading: Read Frog 자막 로딩 중
     error: 오류 발생
   errors:

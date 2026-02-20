@@ -637,7 +637,6 @@ shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:
   state:
-    idle: 準備完了
     loading: Read Frog 字幕読み込み中
     error: エラーが発生しました
   errors:
