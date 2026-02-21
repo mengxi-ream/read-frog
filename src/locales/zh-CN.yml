@@ -59,7 +59,7 @@ options:
         addProvider: 添加 302.AI 配置
     addProvider: 添加提供商
     badges:
-      translate: 翻译
+      featureCount: $1 个功能
     dialog:
       title: 添加新提供商
       groups:
@@ -97,6 +97,7 @@ options:
         apiKeyRequired: 请先添加 API 密钥
         searchModels: 搜索模型...
         noModelsFound: 未找到模型
+      featureProviders: 功能提供商
       advancedOptions: 高级选项
       temperature: 温度
       temperatureHint: 控制响应的随机性。较低的值（0）更确定性，较高的值更具创造性。范围因提供商而异。留空则使用提供商默认值。
@@ -139,6 +140,16 @@ options:
       testing: 测试中...
   general:
     title: 通用
+    featureProviders:
+      title: 功能提供商
+      description: 为每个功能选择使用的提供商
+      features:
+        translate: 网页翻译
+        selectionToolbar_translate: 划词翻译
+        selectionToolbar_vocabularyInsight: 划词词汇解析
+        tts: 文本转语音
+        inputTranslation: 输入翻译
+        videoSubtitles: 视频字幕
     translationConfig:
       title: 翻译配置
       description: 仅用于网页内的翻译，如双语段落翻译。

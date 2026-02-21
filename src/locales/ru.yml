@@ -59,7 +59,7 @@ options:
         addProvider: Добавить конфигурацию 302.AI
     addProvider: Добавить провайдера
     badges:
-      translate: Перевод
+      featureCount: $1 функций
     dialog:
       title: Добавить нового провайдера
       groups:
@@ -97,6 +97,7 @@ options:
         apiKeyRequired: Сначала добавьте API ключ
         searchModels: Поиск моделей...
         noModelsFound: Модели не найдены
+      featureProviders: Поставщики функций
       advancedOptions: Расширенные настройки
       temperature: Температура
       temperatureHint: Контролирует случайность ответов. Низкие значения (0) более детерминированы, высокие — более креативны. Диапазон зависит от провайдера. Оставьте пустым для использования значения по умолчанию.
@@ -139,6 +140,16 @@ options:
       testing: Тестирование...
   general:
     title: Общие
+    featureProviders:
+      title: Провайдеры функций
+      description: Выберите провайдера для каждой функции
+      features:
+        translate: Перевод страницы
+        selectionToolbar_translate: Перевод выделения
+        selectionToolbar_vocabularyInsight: Анализ слов выделения
+        tts: Озвучивание текста
+        inputTranslation: Перевод ввода
+        videoSubtitles: Субтитры видео
     translationConfig:
       title: Настройки перевода
       description: Только для перевода на веб-страницах, например, двуязычный перевод абзацев.

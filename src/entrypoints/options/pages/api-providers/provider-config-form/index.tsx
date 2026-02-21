@@ -16,7 +16,7 @@ import { APIKeyField } from './api-key-field'
 import { BaseURLField } from './base-url-field'
 import { AdvancedOptionsSection } from './components/advanced-options-section'
 import { ConfigHeader } from './config-header'
-import { DefaultTranslateProviderSelector } from './default-provider'
+import { FeatureProviderSection } from './feature-provider-section'
 import { formOpts, useAppForm } from './form'
 import { ProviderOptionsField } from './provider-options-field'
 import { TemperatureField } from './temperature-field'
@@ -110,10 +110,10 @@ export function ProviderConfigForm() {
           {isTranslateProviderName && (
             <>
               <Separator className="my-2" />
-              <DefaultTranslateProviderSelector form={form} />
               <TranslateModelSelector form={form} />
             </>
           )}
+          <FeatureProviderSection form={form} />
           {isLLM && (
             <AdvancedOptionsSection>
               <TemperatureField form={form} />

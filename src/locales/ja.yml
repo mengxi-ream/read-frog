@@ -58,7 +58,7 @@ options:
         addProvider: 302.AI設定を追加
     addProvider: プロバイダーを追加
     badges:
-      translate: 翻訳
+      featureCount: $1 件の機能
     dialog:
       title: 新しいプロバイダーを追加
       groups:
@@ -96,6 +96,7 @@ options:
         apiKeyRequired: 先にAPIキーを追加してください
         searchModels: モデルを検索...
         noModelsFound: モデルが見つかりません
+      featureProviders: 機能プロバイダー
       advancedOptions: 詳細オプション
       temperature: 温度
       temperatureHint: 応答のランダム性を制御します。低い値（0）はより決定的で、高い値はより創造的です。範囲はプロバイダーによって異なります。空欄の場合はプロバイダーのデフォルト値を使用します。
@@ -138,6 +139,16 @@ options:
       testing: テスト中...
   general:
     title: 一般
+    featureProviders:
+      title: 機能プロバイダー
+      description: 各機能に使用するプロバイダーを選択
+      features:
+        translate: ページ翻訳
+        selectionToolbar_translate: 選択ツールバー翻訳
+        selectionToolbar_vocabularyInsight: 選択ツールバー語彙解析
+        tts: テキスト読み上げ
+        inputTranslation: 入力翻訳
+        videoSubtitles: 動画字幕
     translationConfig:
       title: 翻訳設定
       description: ウェブページ内の翻訳にのみ使用されます（バイリンガル段落翻訳など）。
