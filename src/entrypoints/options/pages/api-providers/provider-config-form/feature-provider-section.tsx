@@ -3,7 +3,7 @@ import type { FeatureKey } from '@/utils/constants/feature-providers'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useStore } from '@tanstack/react-form'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/base-ui/collapsible'
 import { Switch } from '@/components/ui/base-ui/switch'
@@ -19,7 +19,7 @@ export const FeatureProviderSection = withForm({
     const providerType = useStore(form.store, state => state.values.provider)
     const providerId = useStore(form.store, state => state.values.id)
     const config = useAtomValue(configAtom)
-    const setConfig = useAtom(writeConfigAtom)[1]
+    const setConfig = useSetAtom(writeConfigAtom)
     const [isOpen, setIsOpen] = useState(false)
 
     const compatibleFeatures = Object.entries(FEATURE_PROVIDER_DEFS)
