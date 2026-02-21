@@ -59,7 +59,7 @@ options:
         addProvider: 302.AI Yapılandırması Ekle
     addProvider: Sağlayıcı Ekle
     badges:
-      translate: Çeviri
+      featureCount: $1 özellik
     dialog:
       title: Yeni Sağlayıcı Ekle
       groups:
@@ -97,6 +97,7 @@ options:
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
         searchModels: Model ara...
         noModelsFound: Model bulunamadı
+      featureProviders: Özellik Sağlayıcıları
       advancedOptions: Gelişmiş Seçenekler
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
@@ -139,6 +140,16 @@ options:
       testing: Test ediliyor...
   general:
     title: Genel
+    featureProviders:
+      title: Özellik Sağlayıcıları
+      description: Her özellik için kullanılacak sağlayıcıyı seçin
+      features:
+        translate: Sayfa Çevirisi
+        selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
+        selectionToolbar_vocabularyInsight: Seçim Araç Çubuğu Kelime Analizi
+        tts: Metin Okuma
+        inputTranslation: Giriş Çevirisi
+        videoSubtitles: Video Altyazıları
     translationConfig:
       title: Çeviri Yapılandırması
       description: Yalnızca web sayfalarındaki çeviri için, örneğin iki dilli paragraf çevirisi.

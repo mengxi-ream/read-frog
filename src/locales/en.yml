@@ -59,7 +59,7 @@ options:
         addProvider: Add 302.AI Configuration
     addProvider: Add Provider
     badges:
-      translate: Translate
+      featureCount: $1 features
     dialog:
       title: Add New Provider
       groups:
@@ -97,6 +97,7 @@ options:
         apiKeyRequired: Please add API key first
         searchModels: Search models...
         noModelsFound: No models found
+      featureProviders: Feature Providers
       advancedOptions: Advanced Options
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
@@ -139,6 +140,16 @@ options:
       testing: Testing...
   general:
     title: General
+    featureProviders:
+      title: Feature Providers
+      description: Choose which provider to use for each feature
+      features:
+        translate: Page Translation
+        selectionToolbar_translate: Selection Toolbar Translation
+        selectionToolbar_vocabularyInsight: Selection Toolbar Vocabulary Insight
+        tts: Text to Speech
+        inputTranslation: Input Translation
+        videoSubtitles: Video Subtitles
     translationConfig:
       title: Translation Config
       description: Only for translation within web pages, such as bilingual paragraph translation.

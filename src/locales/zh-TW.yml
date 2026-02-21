@@ -59,7 +59,7 @@ options:
         addProvider: 新增 302.AI 配置
     addProvider: 新增提供商
     badges:
-      translate: 翻譯
+      featureCount: $1 個功能
     dialog:
       title: 新增提供商
       groups:
@@ -97,6 +97,7 @@ options:
         apiKeyRequired: 請先添加 API 密鑰
         searchModels: 搜尋模型...
         noModelsFound: 未找到模型
+      featureProviders: 功能提供商
       advancedOptions: 進階選項
       temperature: 溫度
       temperatureHint: 控制回應的隨機性。較低的值（0）更具確定性，較高的值更具創造性。範圍因提供者而異。留空則使用提供者預設值。
@@ -139,6 +140,16 @@ options:
       testing: 測試中...
   general:
     title: 通用
+    featureProviders:
+      title: 功能提供商
+      description: 為每個功能選擇使用的提供商
+      features:
+        translate: 網頁翻譯
+        selectionToolbar_translate: 劃詞翻譯
+        selectionToolbar_vocabularyInsight: 劃詞詞彙解析
+        tts: 文字轉語音
+        inputTranslation: 輸入翻譯
+        videoSubtitles: 影片字幕
     translationConfig:
       title: 翻譯配置
       description: 僅用於網頁內的翻譯，如雙語段落翻譯。

@@ -16,6 +16,12 @@ export const FEATURE_PROVIDER_DEFS = {
     getProviderId: (c: Config) => c.translate.providerId,
     configPath: ['translate', 'providerId'],
   },
+  'videoSubtitles': {
+    isProvider: isTranslateProvider,
+    nullable: false,
+    getProviderId: (c: Config) => c.videoSubtitles.providerId,
+    configPath: ['videoSubtitles', 'providerId'],
+  },
   'selectionToolbar.translate': {
     isProvider: isTranslateProvider,
     nullable: false,
@@ -40,15 +46,19 @@ export const FEATURE_PROVIDER_DEFS = {
     getProviderId: (c: Config) => c.inputTranslation.providerId,
     configPath: ['inputTranslation', 'providerId'],
   },
-  'videoSubtitles': {
-    isProvider: isTranslateProvider,
-    nullable: false,
-    getProviderId: (c: Config) => c.videoSubtitles.providerId,
-    configPath: ['videoSubtitles', 'providerId'],
-  },
 } as const satisfies Record<string, FeatureProviderDef>
 
 export type FeatureKey = keyof typeof FEATURE_PROVIDER_DEFS
+
+/** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.general.featureProviders.features.*` */
+export const FEATURE_KEY_I18N_MAP: Record<FeatureKey, string> = {
+  'translate': 'translate',
+  'videoSubtitles': 'videoSubtitles',
+  'selectionToolbar.translate': 'selectionToolbar_translate',
+  'selectionToolbar.vocabularyInsight': 'selectionToolbar_vocabularyInsight',
+  'tts': 'tts',
+  'inputTranslation': 'inputTranslation',
+}
 
 export function resolveProviderConfig(config: Config, featureKey: keyof typeof FEATURE_PROVIDER_DEFS) {
   const def = FEATURE_PROVIDER_DEFS[featureKey]

@@ -58,7 +58,7 @@ options:
         addProvider: 302.AI 구성 추가
     addProvider: 제공업체 추가
     badges:
-      translate: 번역
+      featureCount: $1 개 기능
     dialog:
       title: 새 제공업체 추가
       groups:
@@ -96,6 +96,7 @@ options:
         apiKeyRequired: 먼저 API 키를 추가하세요
         searchModels: 모델 검색...
         noModelsFound: 모델을 찾을 수 없습니다
+      featureProviders: 기능 제공업체
       advancedOptions: 고급 옵션
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
@@ -138,6 +139,16 @@ options:
       testing: 테스트 중...
   general:
     title: 일반
+    featureProviders:
+      title: 기능 제공업체
+      description: 각 기능에 사용할 제공업체를 선택
+      features:
+        translate: 페이지 번역
+        selectionToolbar_translate: 선택 툴바 번역
+        selectionToolbar_vocabularyInsight: 선택 툴바 어휘 분석
+        tts: 텍스트 음성 변환
+        inputTranslation: 입력 번역
+        videoSubtitles: 비디오 자막
     translationConfig:
       title: 번역 설정
       description: 이중 언어 단락 번역과 같은 웹 페이지 내 번역에만 사용됩니다.

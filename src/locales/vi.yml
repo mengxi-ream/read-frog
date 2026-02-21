@@ -59,7 +59,7 @@ options:
         addProvider: Thêm cấu hình 302.AI
     addProvider: Thêm nhà cung cấp
     badges:
-      translate: Dịch
+      featureCount: $1 tính năng
     dialog:
       title: Thêm nhà cung cấp mới
       groups:
@@ -97,6 +97,7 @@ options:
         apiKeyRequired: Vui lòng thêm khóa API trước
         searchModels: Tìm kiếm mô hình...
         noModelsFound: Không tìm thấy mô hình
+      featureProviders: Nhà cung cấp tính năng
       advancedOptions: Tùy chọn nâng cao
       temperature: Nhiệt độ
       temperatureHint: Kiểm soát tính ngẫu nhiên trong phản hồi. Giá trị thấp (0) mang tính xác định hơn, giá trị cao mang tính sáng tạo hơn. Phạm vi thay đổi theo nhà cung cấp. Để trống để sử dụng giá trị mặc định của nhà cung cấp.
@@ -139,6 +140,16 @@ options:
       testing: Đang kiểm tra...
   general:
     title: Chung
+    featureProviders:
+      title: Nhà cung cấp tính năng
+      description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
+      features:
+        translate: Dịch trang
+        selectionToolbar_translate: Dịch thanh công cụ chọn
+        selectionToolbar_vocabularyInsight: Phân tích từ vựng thanh công cụ chọn
+        tts: Chuyển văn bản thành giọng nói
+        inputTranslation: Dịch đầu vào
+        videoSubtitles: Phụ đề video
     translationConfig:
       title: Cấu hình dịch
       description: Chỉ dùng cho dịch trong trang web, như dịch đoạn văn song ngữ.

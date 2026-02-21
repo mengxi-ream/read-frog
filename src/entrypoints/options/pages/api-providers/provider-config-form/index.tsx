@@ -1,7 +1,7 @@
 import type { ProvidersConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/base-ui/button'
@@ -16,7 +16,7 @@ import { APIKeyField } from './api-key-field'
 import { BaseURLField } from './base-url-field'
 import { AdvancedOptionsSection } from './components/advanced-options-section'
 import { ConfigHeader } from './config-header'
-import { DefaultTranslateProviderSelector } from './default-provider'
+import { FeatureProviderSection } from './feature-provider-section'
 import { formOpts, useAppForm } from './form'
 import { ProviderOptionsField } from './provider-options-field'
 import { TemperatureField } from './temperature-field'
@@ -26,7 +26,7 @@ export function ProviderConfigForm() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [providerConfig, setProviderConfig] = useAtom(providerConfigAtom(selectedProviderId ?? ''))
   const [allProvidersConfig, setAllProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
-  const setConfig = useAtom(writeConfigAtom)[1]
+  const setConfig = useSetAtom(writeConfigAtom)
   const config = useAtomValue(configAtom)
 
   const specificFormOpts = {
@@ -110,10 +110,10 @@ export function ProviderConfigForm() {
           {isTranslateProviderName && (
             <>
               <Separator className="my-2" />
-              <DefaultTranslateProviderSelector form={form} />
               <TranslateModelSelector form={form} />
             </>
           )}
+          <FeatureProviderSection form={form} />
           {isLLM && (
             <AdvancedOptionsSection>
               <TemperatureField form={form} />

@@ -37,7 +37,7 @@ export default antfu({
 }, [
   {
     files: ['**/*.ts', '**/*.tsx'],
-    ignores: ['**/*.md/**'],
+    ignores: ['.claude/**/*'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
@@ -46,6 +46,10 @@ export default antfu({
     rules: {
       '@typescript-eslint/no-floating-promises': 'error',
     },
+  },
+], [
+  {
+    ignores: ['**/*.md/**', '.agents/**/*', '.claude/**/*', '.codex/**/*', '.cursor/**/*'],
   },
 ]).append({
   plugins: {
