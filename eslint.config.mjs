@@ -37,6 +37,7 @@ export default antfu({
 }, [
   {
     files: ['**/*.ts', '**/*.tsx'],
+    ignores: ['.claude/**/*'],
     languageOptions: {
       parserOptions: {
         project: './tsconfig.json',
