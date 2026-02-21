@@ -1,12 +1,21 @@
+import type { ProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useAtom, useAtomValue } from 'jotai'
 import ProviderSelector from '@/components/llm-providers/provider-selector'
 import { Field, FieldLabel } from '@/components/ui/base-ui/field'
-import { isAPIProviderConfig } from '@/types/config/provider'
+import { isAPIProviderConfig, isPureAPIProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { ConfigCard } from '../../components/config-card'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
+
+/** Pure API providers (e.g. DeepLX) don't require an API key */
+function needsApiKeyWarning(providerConfig: ProviderConfig | null): boolean {
+  return !!providerConfig
+    && isAPIProviderConfig(providerConfig)
+    && !isPureAPIProvider(providerConfig.provider)
+    && !providerConfig.apiKey
+}
 
 export default function FeatureProvidersConfig() {
   return (
@@ -30,13 +39,11 @@ function TranslateField() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const providerConfig = useAtomValue(featureProviderConfigAtom('translate'))
 
-  const needSetAPIKey = providerConfig && isAPIProviderConfig(providerConfig) && providerConfig.provider !== 'deeplx' && !providerConfig.apiKey
-
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
         {i18n.t('options.general.featureProviders.features.translate')}
-        {needSetAPIKey && <SetApiKeyWarning />}
+        {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>
       <ProviderSelector
         featureKey="translate"
@@ -53,13 +60,11 @@ function SelectionToolbarTranslateField() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
   const providerConfig = useAtomValue(featureProviderConfigAtom('selectionToolbar.translate'))
 
-  const needSetAPIKey = providerConfig && isAPIProviderConfig(providerConfig) && providerConfig.provider !== 'deeplx' && !providerConfig.apiKey
-
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
         {i18n.t('options.general.featureProviders.features.selectionToolbar_translate')}
-        {needSetAPIKey && <SetApiKeyWarning />}
+        {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>
       <ProviderSelector
         featureKey="selectionToolbar.translate"
@@ -81,13 +86,11 @@ function SelectionToolbarVocabularyInsightField() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
   const providerConfig = useAtomValue(featureProviderConfigAtom('selectionToolbar.vocabularyInsight'))
 
-  const needSetAPIKey = providerConfig && isAPIProviderConfig(providerConfig) && !providerConfig.apiKey
-
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
         {i18n.t('options.general.featureProviders.features.selectionToolbar_vocabularyInsight')}
-        {needSetAPIKey && <SetApiKeyWarning />}
+        {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>
       <ProviderSelector
         featureKey="selectionToolbar.vocabularyInsight"
@@ -109,13 +112,11 @@ function TtsField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
   const providerConfig = useAtomValue(featureProviderConfigAtom('tts'))
 
-  const needSetAPIKey = providerConfig && isAPIProviderConfig(providerConfig) && !providerConfig.apiKey
-
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
         {i18n.t('options.general.featureProviders.features.tts')}
-        {needSetAPIKey && <SetApiKeyWarning />}
+        {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>
       <ProviderSelector
         featureKey="tts"
@@ -132,13 +133,11 @@ function InputTranslationField() {
   const [inputTranslation, setInputTranslation] = useAtom(configFieldsAtomMap.inputTranslation)
   const providerConfig = useAtomValue(featureProviderConfigAtom('inputTranslation'))
 
-  const needSetAPIKey = providerConfig && isAPIProviderConfig(providerConfig) && providerConfig.provider !== 'deeplx' && !providerConfig.apiKey
-
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
         {i18n.t('options.general.featureProviders.features.inputTranslation')}
-        {needSetAPIKey && <SetApiKeyWarning />}
+        {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>
       <ProviderSelector
         featureKey="inputTranslation"
@@ -154,13 +153,11 @@ function VideoSubtitlesField() {
   const [videoSubtitles, setVideoSubtitles] = useAtom(configFieldsAtomMap.videoSubtitles)
   const providerConfig = useAtomValue(featureProviderConfigAtom('videoSubtitles'))
 
-  const needSetAPIKey = providerConfig && isAPIProviderConfig(providerConfig) && providerConfig.provider !== 'deeplx' && !providerConfig.apiKey
-
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
         {i18n.t('options.general.featureProviders.features.videoSubtitles')}
-        {needSetAPIKey && <SetApiKeyWarning />}
+        {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>
       <ProviderSelector
         featureKey="videoSubtitles"
