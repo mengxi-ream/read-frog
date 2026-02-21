@@ -1,7 +1,7 @@
 import type { ProvidersConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
-import { useAtom, useAtomValue } from 'jotai'
+import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/base-ui/button'
@@ -26,7 +26,7 @@ export function ProviderConfigForm() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [providerConfig, setProviderConfig] = useAtom(providerConfigAtom(selectedProviderId ?? ''))
   const [allProvidersConfig, setAllProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
-  const setConfig = useAtom(writeConfigAtom)[1]
+  const setConfig = useSetAtom(writeConfigAtom)
   const config = useAtomValue(configAtom)
 
   const specificFormOpts = {
