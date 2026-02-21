@@ -1,8 +1,8 @@
 import { i18n } from '#imports'
 import { useAtom } from 'jotai'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../components/config-card'
-import { DisabledPatternsTable } from '../../components/disabled-patterns-table'
+import { ConfigCard } from '../../../../components/config-card'
+import { DisabledPatternsTable } from '../../../../components/disabled-patterns-table'
 
 export function SiteControlPatterns() {
   const [siteControl, setSiteControl] = useAtom(configFieldsAtomMap.siteControl)

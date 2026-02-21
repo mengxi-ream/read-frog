@@ -1,7 +1,7 @@
 import { i18n } from '#imports'
 import { PageLayout } from '../../components/page-layout'
-import { SiteControlMode } from '../site-control/site-control-mode'
-import { SiteControlPatterns } from '../site-control/site-control-patterns'
+import { SiteControlMode } from './components/site-control/site-control-mode'
+import { SiteControlPatterns } from './components/site-control/site-control-patterns'
 import TranslationConfig from './translation-config'
 
 export function GeneralPage() {
