@@ -1,5 +1,6 @@
 import type { Config } from '@/types/config/config'
 import { isLLMProvider, isTranslateProvider } from '@/types/config/provider'
+import { mergeWithArrayOverwrite } from '../atoms/config'
 import { getProviderConfigById } from '../config/helpers'
 
 export interface FeatureProviderDef {
@@ -71,4 +72,31 @@ export function resolveProviderConfig(config: Config, featureKey: keyof typeof F
     throw new Error(`No provider config for id "${providerId}" (feature "${featureKey}")`)
   }
   return providerConfig
+}
+
+/**
+ * Convert a feature→providerId mapping into a Partial<Config> using FEATURE_PROVIDER_DEFS.configPath.
+ * Generic — works for any scenario that assigns provider IDs to features.
+ */
+
+export function buildFeatureProviderPatch(
+  assignments: Partial<Record<FeatureKey, string | null>>,
+): Partial<Config> {
+  let patch: Record<string, any> = {}
+
+  for (const [key, newId] of Object.entries(assignments)) {
+    const def = FEATURE_PROVIDER_DEFS[key as FeatureKey]
+
+    const fragment: Record<string, any> = {}
+    let current = fragment
+    for (let i = 0; i < def.configPath.length - 1; i++) {
+      current[def.configPath[i]] = {}
+      current = current[def.configPath[i]]
+    }
+    current[def.configPath[def.configPath.length - 1]] = newId
+
+    patch = mergeWithArrayOverwrite(patch, fragment) as Record<string, any>
+  }
+
+  return patch as Partial<Config>
 }

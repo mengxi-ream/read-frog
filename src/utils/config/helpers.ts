@@ -2,7 +2,6 @@ import type { Config } from '@/types/config/config'
 import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig, TTSProviderConfig } from '@/types/config/provider'
 import type { FeatureKey } from '@/utils/constants/feature-providers'
 import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig, isTTSProviderConfig } from '@/types/config/provider'
-import { mergeWithArrayOverwrite } from '@/utils/atoms/config'
 import { FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
 
 export function getProviderConfigById<T extends ProviderConfig>(providersConfig: T[], providerId: string): T | undefined {
@@ -88,32 +87,6 @@ export function computeProviderFallbacksAfterDeletion(
       updates[key as FeatureKey] = null
   }
   return updates
-}
-
-/**
- * Convert a feature→providerId mapping into a Partial<Config> using FEATURE_PROVIDER_DEFS.configPath.
- * Generic — works for any scenario that assigns provider IDs to features.
- */
-export function buildFeatureProviderPatch(
-  assignments: Partial<Record<FeatureKey, string | null>>,
-): Partial<Config> {
-  let patch: Record<string, any> = {}
-
-  for (const [key, newId] of Object.entries(assignments)) {
-    const def = FEATURE_PROVIDER_DEFS[key as FeatureKey]
-
-    const fragment: Record<string, any> = {}
-    let current = fragment
-    for (let i = 0; i < def.configPath.length - 1; i++) {
-      current[def.configPath[i]] = {}
-      current = current[def.configPath[i]]
-    }
-    current[def.configPath[def.configPath.length - 1]] = newId
-
-    patch = mergeWithArrayOverwrite(patch, fragment) as Record<string, any>
-  }
-
-  return patch as Partial<Config>
 }
 
 export function findFeatureMissingProvider(
