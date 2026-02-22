@@ -151,17 +151,9 @@ options:
         inputTranslation: Input Translation
         videoSubtitles: Video Subtitles
     translationConfig:
-      title: Translation Config
-      description: Only for translation within web pages, such as bilingual paragraph translation.
-      provider: Provider
       model:
         title: Model
         enterCustomModel: Enter the name of the custom model
-      translateRange:
-        title: Translate Range
-        range:
-          main: Main Content
-          all: All Content
     clearCache:
       title: Clear Cache
       description: Clear all translation cache in your browser
@@ -369,6 +361,12 @@ options:
       mode:
         bilingual: Bilingual
         translationOnly: Translation Only
+    translateRange:
+      title: Translate Range
+      description: Select whether to translate only the main content or all content on the page.
+      range:
+        main: Main Content
+        all: All Content
     pageTranslationShortcut:
       title: Page Translation Shortcut
       description: Customize the shortcut key for translating entire web pages

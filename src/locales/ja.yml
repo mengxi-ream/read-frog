@@ -150,17 +150,9 @@ options:
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
     translationConfig:
-      title: 翻訳設定
-      description: ウェブページ内の翻訳にのみ使用されます（バイリンガル段落翻訳など）。
-      provider: プロバイダー
       model:
         title: モデル
         enterCustomModel: カスタムモデル名を入力
-      translateRange:
-        title: 翻訳範囲
-        range:
-          main: メインコンテンツ
-          all: すべてのコンテンツ
     clearCache:
       title: キャッシュクリア
       description: ブラウザのすべての翻訳キャッシュをクリアします
@@ -366,6 +358,12 @@ options:
       mode:
         bilingual: バイリンガル
         translationOnly: 翻訳のみ
+    translateRange:
+      title: 翻訳範囲
+      description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。
+      range:
+        main: メインコンテンツ
+        all: すべてのコンテンツ
     pageTranslationShortcut:
       title: ページ翻訳ショートカットキー
       description: ウェブページ全体を翻訳するショートカットキーをカスタマイズします

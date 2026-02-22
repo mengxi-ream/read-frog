@@ -5,13 +5,22 @@ import { Field, FieldLabel } from '@/components/ui/base-ui/field'
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
 import { pageTranslateRangeSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { ConfigCard } from '../../components/config-card'
 
-export function RangeSelector() {
+export function TranslateRange() {
+  return (
+    <ConfigCard title={i18n.t('options.translation.translateRange.title')} description={i18n.t('options.translation.translateRange.description')}>
+      <TranslateRangeSelector />
+    </ConfigCard>
+  )
+}
+
+function TranslateRangeSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
-        {i18n.t('options.general.translationConfig.translateRange.title')}
+        {i18n.t('options.translation.translateRange.title')}
       </FieldLabel>
       <Select
         value={translateConfig.page.range}
@@ -26,7 +35,7 @@ export function RangeSelector() {
         <SelectTrigger className="w-full">
           <SelectValue>
             {i18n.t(
-              `options.general.translationConfig.translateRange.range.${translateConfig.page.range}`,
+              `options.translation.translateRange.range.${translateConfig.page.range}`,
             )}
           </SelectValue>
         </SelectTrigger>
@@ -35,7 +44,7 @@ export function RangeSelector() {
             {pageTranslateRangeSchema.options.map(range => (
               <SelectItem key={range} value={range}>
                 {i18n.t(
-                  `options.general.translationConfig.translateRange.range.${range}`,
+                  `options.translation.translateRange.range.${range}`,
                 )}
               </SelectItem>
             ))}

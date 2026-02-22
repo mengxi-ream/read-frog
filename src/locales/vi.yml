@@ -151,17 +151,9 @@ options:
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
     translationConfig:
-      title: Cấu hình dịch
-      description: Chỉ dùng cho dịch trong trang web, như dịch đoạn văn song ngữ.
-      provider: Nhà cung cấp
       model:
         title: Mô hình
         enterCustomModel: Nhập tên mô hình tùy chỉnh
-      translateRange:
-        title: Phạm vi dịch
-        range:
-          main: Nội dung chính
-          all: Tất cả nội dung
     clearCache:
       title: Xóa bộ nhớ đệm
       description: Xóa tất cả bộ nhớ đệm dịch trong trình duyệt của bạn
@@ -367,6 +359,12 @@ options:
       mode:
         bilingual: Song ngữ
         translationOnly: Chỉ bản dịch
+    translateRange:
+      title: Phạm vi dịch
+      description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.
+      range:
+        main: Nội dung chính
+        all: Tất cả nội dung
     pageTranslationShortcut:
       title: Phím tắt dịch trang
       description: Tùy chỉnh phím tắt để dịch toàn bộ trang web

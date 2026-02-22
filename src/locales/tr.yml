@@ -151,17 +151,9 @@ options:
         inputTranslation: Giriş Çevirisi
         videoSubtitles: Video Altyazıları
     translationConfig:
-      title: Çeviri Yapılandırması
-      description: Yalnızca web sayfalarındaki çeviri için, örneğin iki dilli paragraf çevirisi.
-      provider: Sağlayıcı
       model:
         title: Model
         enterCustomModel: Özel model adını girin
-      translateRange:
-        title: Çeviri Kapsamı
-        range:
-          main: Ana İçerik
-          all: Tüm İçerik
     clearCache:
       title: Önbelleği Temizle
       description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
@@ -367,6 +359,12 @@ options:
       mode:
         bilingual: İki Dilli
         translationOnly: Yalnızca Çeviri
+    translateRange:
+      title: Çeviri Kapsamı
+      description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
+      range:
+        main: Ana İçerik
+        all: Tüm İçerik
     pageTranslationShortcut:
       title: Sayfa Çeviri Kısayolu
       description: Tüm web sayfalarını çevirmek için kısayol tuşunu özelleştirin

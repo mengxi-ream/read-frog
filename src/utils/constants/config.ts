@@ -73,7 +73,7 @@ export const DEFAULT_CONFIG: Config = {
     enabled: true,
     position: DEFAULT_FLOATING_BUTTON_POSITION,
     disabledFloatingButtonPatterns: [],
-    clickAction: 'panel',
+    clickAction: 'translate',
   },
   selectionToolbar: {
     enabled: true,

@@ -151,17 +151,9 @@ options:
         inputTranslation: Перевод ввода
         videoSubtitles: Субтитры видео
     translationConfig:
-      title: Настройки перевода
-      description: Только для перевода на веб-страницах, например, двуязычный перевод абзацев.
-      provider: Провайдер
       model:
         title: Модель
         enterCustomModel: Введите название пользовательской модели
-      translateRange:
-        title: Диапазон перевода
-        range:
-          main: Основное содержимое
-          all: Всё содержимое
     clearCache:
       title: Очистить кэш
       description: Очистить весь кэш перевода в вашем браузере
@@ -367,6 +359,12 @@ options:
       mode:
         bilingual: Двуязычный
         translationOnly: Только перевод
+    translateRange:
+      title: Диапазон перевода
+      description: Выберите, переводить только основное содержимое или всё содержимое на странице.
+      range:
+        main: Основное содержимое
+        all: Всё содержимое
     pageTranslationShortcut:
       title: Горячая клавиша перевода страницы
       description: Настройте горячую клавишу для перевода всей веб-страницы

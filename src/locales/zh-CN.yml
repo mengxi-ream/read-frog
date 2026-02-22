@@ -151,17 +151,9 @@ options:
         inputTranslation: 输入翻译
         videoSubtitles: 视频字幕
     translationConfig:
-      title: 翻译配置
-      description: 仅用于网页内的翻译，如双语段落翻译。
-      provider: 提供商
       model:
         title: 模型
         enterCustomModel: 输入自定义模型名称
-      translateRange:
-        title: 翻译范围
-        range:
-          main: 主要内容
-          all: 所有内容
     clearCache:
       title: 清理缓存
       description: 清理浏览器中的所有翻译缓存
@@ -369,6 +361,12 @@ options:
       mode:
         bilingual: 双语对照
         translationOnly: 仅显示翻译
+    translateRange:
+      title: 翻译范围
+      description: 选择是仅翻译主要内容还是翻译页面上的所有内容。
+      range:
+        main: 主要内容
+        all: 全部内容
     pageTranslationShortcut:
       title: 网页翻译快捷键
       description: 自定义翻译整个网页的快捷键

@@ -150,17 +150,9 @@ options:
         inputTranslation: 입력 번역
         videoSubtitles: 비디오 자막
     translationConfig:
-      title: 번역 설정
-      description: 이중 언어 단락 번역과 같은 웹 페이지 내 번역에만 사용됩니다.
-      provider: 제공업체
       model:
         title: 모델
         enterCustomModel: 사용자 정의 모델 이름 입력
-      translateRange:
-        title: 번역 범위
-        range:
-          main: 주요 내용
-          all: 전체 내용
     clearCache:
       title: 캐시 지우기
       description: 브라우저의 모든 번역 캐시를 지웁니다
@@ -366,6 +358,12 @@ options:
       mode:
         bilingual: 이중 언어
         translationOnly: 번역만
+    translateRange:
+      title: 번역 범위
+      description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.
+      range:
+        main: 주요 내용
+        all: 전체 내용
     pageTranslationShortcut:
       title: 페이지 번역 단축키
       description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
