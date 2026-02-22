@@ -8,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/base-ui/select'
-import { isLLMTranslateProvider } from '@/types/config/provider'
+import { isLLMProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { DEFAULT_TRANSLATE_PROMPT_ID } from '@/utils/constants/prompt'
 import { selectedProvidersAtom } from '../atoms'
@@ -18,7 +18,7 @@ export function PromptSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
 
   // Only show when at least one LLM provider is selected
-  const hasLLMProvider = selectedProviders.some(p => isLLMTranslateProvider(p.provider))
+  const hasLLMProvider = selectedProviders.some(p => isLLMProvider(p.provider))
   if (!hasLLMProvider)
     return null
 

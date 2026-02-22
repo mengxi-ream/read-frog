@@ -1,11 +1,9 @@
 import type { streamText } from 'ai'
 
-export type StreamTextModelRole = 'read' | 'translate'
 export type BackgroundStreamTextParams = Omit<Parameters<typeof streamText>[0], 'model' | 'abortSignal'>
 
 export type BackgroundStreamTextPayload = {
   providerId: string
-  modelRole?: StreamTextModelRole
 } & BackgroundStreamTextParams
 
 export const BACKGROUND_STREAM_PORTS = {

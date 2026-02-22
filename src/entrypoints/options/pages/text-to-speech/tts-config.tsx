@@ -3,6 +3,7 @@ import { i18n } from '#imports'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
+import ProviderSelector from '@/components/llm-providers/provider-selector'
 import { Badge } from '@/components/ui/base-ui/badge'
 import { Button } from '@/components/ui/base-ui/button'
 import { Field, FieldLabel } from '@/components/ui/base-ui/field'
@@ -16,10 +17,10 @@ import {
 } from '@/components/ui/base-ui/select'
 import ValidatedInput from '@/components/ui/validated-input'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
+import { isTTSProviderConfig } from '@/types/config/provider'
 import { getVoicesForModel, isVoiceAvailableForModel, MAX_TTS_SPEED, MIN_TTS_SPEED, TTS_MODELS, ttsSpeedSchema } from '@/types/config/tts'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ttsProviderConfigAtom } from '@/utils/atoms/provider'
-import { getTTSProvidersConfig } from '@/utils/config/helpers'
+import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { TTS_VOICES_ITEMS } from '@/utils/constants/tts'
 import { ConfigCard } from '../../components/config-card'
 import { SetApiKeyWarning } from '../../components/set-api-key-warning'
@@ -53,40 +54,22 @@ export function TtsConfig() {
 
 function TtsProviderField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-  const ttsProviderConfig = useAtomValue(ttsProviderConfigAtom)
-  const ttsProvidersConfig = getTTSProvidersConfig(providersConfig)
-
-  const selectorPlaceholder = ttsProvidersConfig.length === 0 ? i18n.t('options.tts.provider.noProvider') : i18n.t('options.tts.provider.selectPlaceholder')
+  const ttsProviderConfig = useAtomValue(featureProviderConfigAtom('tts'))
 
   return (
     <Field>
       <FieldLabel htmlFor="ttsProvider">
         {i18n.t('options.tts.provider.label')}
-        {ttsProviderConfig && !ttsProviderConfig.apiKey && <SetApiKeyWarning />}
+        {ttsProviderConfig && isTTSProviderConfig(ttsProviderConfig) && !ttsProviderConfig.apiKey && <SetApiKeyWarning />}
       </FieldLabel>
-      <Select
-        value={ttsConfig.providerId || undefined}
-        onValueChange={(value: string | null) => {
-          if (!value)
-            return
-          void setTtsConfig({ providerId: value })
-        }}
-        disabled={ttsProvidersConfig.length === 0}
-      >
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder={selectorPlaceholder} id="ttsProvider" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectGroup>
-            {ttsProvidersConfig.map(provider => (
-              <SelectItem key={provider.id} value={provider.id}>
-                {provider.name}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <ProviderSelector
+        featureKey="tts"
+        value={ttsConfig.providerId || null}
+        onChange={id => void setTtsConfig({ providerId: id })}
+        nullable
+        placeholder={i18n.t('options.tts.provider.selectPlaceholder')}
+        className="w-full"
+      />
     </Field>
   )
 }
@@ -139,12 +122,12 @@ function TtsModelField() {
 
 function TtsVoiceField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
-  const ttsProviderConfig = useAtomValue(ttsProviderConfigAtom)
+  const ttsProviderConfig = useAtomValue(featureProviderConfigAtom('tts'))
   const availableVoices = getVoicesForModel(ttsConfig.model)
   const { play, isFetching, isPlaying } = useTextToSpeech()
 
   const handlePreview = async () => {
-    if (!ttsProviderConfig) {
+    if (!ttsProviderConfig || !isTTSProviderConfig(ttsProviderConfig)) {
       toast.error(i18n.t('options.tts.provider.noProvider'))
       return
     }

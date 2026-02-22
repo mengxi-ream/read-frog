@@ -1,4 +1,4 @@
-import type { APIProviderConfig, LLMTranslateProviderConfig } from '@/types/config/provider'
+import type { APIProviderConfig, LLMProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
 import { useEffect, useMemo, useState } from 'react'
@@ -6,7 +6,8 @@ import { Field, FieldError, FieldLabel } from '@/components/ui/base-ui/field'
 import { Hint } from '@/components/ui/base-ui/hint'
 import { JSONCodeEditor } from '@/components/ui/json-code-editor'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
+import { resolveModelId } from '@/utils/providers/model'
 import { getProviderOptions } from '@/utils/providers/options'
 import { withForm } from './form'
 
@@ -26,7 +27,7 @@ export const ProviderOptionsField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
     const providerConfig = useStore(form.store, state => state.values)
-    const isLLMProvider = isLLMTranslateProviderConfig(providerConfig)
+    const isLLMProvider = isLLMProviderConfig(providerConfig)
 
     // Local state for the JSON string input
     const initialValue = providerConfig.providerOptions
@@ -52,10 +53,8 @@ export const ProviderOptionsField = withForm({
       if (!isLLMProvider) {
         return null
       }
-      const llmConfig = providerConfig as LLMTranslateProviderConfig
-      return llmConfig.models.translate.isCustomModel
-        ? llmConfig.models.translate.customModel
-        : llmConfig.models.translate.model
+      const llmConfig = providerConfig as LLMProviderConfig
+      return resolveModelId(llmConfig.model)
     }, [isLLMProvider, providerConfig])
 
     const defaultOptions = useMemo(() => {

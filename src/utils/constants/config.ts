@@ -18,7 +18,7 @@ export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
-export const CONFIG_SCHEMA_VERSION = 52
+export const CONFIG_SCHEMA_VERSION = 53
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -29,9 +29,6 @@ export const DEFAULT_CONFIG: Config = {
     level: 'intermediate',
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
-  read: {
-    providerId: 'openai-default',
-  },
   translate: {
     providerId: 'microsoft-translate-default',
     mode: 'bilingual',
@@ -81,6 +78,14 @@ export const DEFAULT_CONFIG: Config = {
   selectionToolbar: {
     enabled: true,
     disabledSelectionToolbarPatterns: [],
+    features: {
+      translate: {
+        providerId: 'microsoft-translate-default',
+      },
+      vocabularyInsight: {
+        providerId: 'openai-default',
+      },
+    },
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,
@@ -93,6 +98,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   inputTranslation: {
     enabled: true,
+    providerId: 'microsoft-translate-default',
     fromLang: 'targetCode',
     toLang: 'sourceCode',
     enableCycle: false,
@@ -101,6 +107,7 @@ export const DEFAULT_CONFIG: Config = {
   videoSubtitles: {
     enabled: false,
     autoStart: false,
+    providerId: 'microsoft-translate-default',
     style: {
       displayMode: DEFAULT_DISPLAY_MODE,
       translationPosition: DEFAULT_TRANSLATION_POSITION,

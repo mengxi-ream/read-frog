@@ -1,15 +1,3 @@
-import type { ProvidersConfig } from '@/types/config/provider'
-import { isReadProviderConfig } from '@/types/config/provider'
-
-export function isAnyAPIKeyForReadProviders(providersConfig: ProvidersConfig) {
-  const readProvidersConfig = providersConfig.filter(isReadProviderConfig)
-  return readProvidersConfig.some((providerConfig) => {
-    return providerConfig.apiKey
-  }) || readProvidersConfig.some((providerConfig) => {
-    return providerConfig.provider === 'ollama'
-  })
-}
-
 // Dynamically adapt to all API key situations, theoretically should not fail
 export function getObjectWithoutAPIKeys<T extends Record<string, any>>(originalObject: T): T {
   function deepClean(obj: any): any {

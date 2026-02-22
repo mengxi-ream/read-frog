@@ -34,5 +34,8 @@ web-ext.config.ts
 coverage/
 .turbo/
 .nx/
+.claude/worktrees/
 
 tsconfig.local.json
+
+docs/

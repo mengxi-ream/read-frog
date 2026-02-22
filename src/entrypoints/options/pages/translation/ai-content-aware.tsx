@@ -6,7 +6,7 @@ import { NewBadge } from '@/components/badges/new-badge'
 import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
 import { Hint } from '@/components/ui/base-ui/hint'
 import { Switch } from '@/components/ui/base-ui/switch'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
 import { LLMStatusIndicator } from '../../../../components/llm-status-indicator'
@@ -18,7 +18,7 @@ export function AIContentAware() {
 
   const hasLLMProvider = useMemo(() => {
     const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
-    return providerConfig ? isLLMTranslateProviderConfig(providerConfig) : false
+    return providerConfig ? isLLMProviderConfig(providerConfig) : false
   }, [providersConfig, translateConfig.providerId])
 
   return (

@@ -17,7 +17,6 @@ import { matchDomainPattern } from '@/utils/url'
 import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from '../../atoms'
 import { shadowWrapper } from '../../index'
 import HiddenButton from './components/hidden-button'
-import FloatingReadButton from './floating-read-button'
 import TranslateButton from './translate-button'
 
 export default function FloatingButton() {
@@ -130,7 +129,6 @@ export default function FloatingButton() {
         top: `${(dragPosition ?? floatingButton.position) * 100}vh`,
       }}
     >
-      <FloatingReadButton className={attachSideClassName} />
       <TranslateButton className={attachSideClassName} />
       <div
         className={cn(

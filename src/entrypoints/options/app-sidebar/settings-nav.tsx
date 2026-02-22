@@ -37,13 +37,6 @@ export function SettingsNav() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link to="/site-control" />} isActive={pathname === '/site-control'}>
-              <Icon icon="tabler:world-check" />
-              <span>{i18n.t('options.siteControl.title')}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-
-          <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/api-providers" />} isActive={pathname === '/api-providers'}>
               <Icon icon="tabler:api" />
               <span>{i18n.t('options.apiProviders.title')}</span>

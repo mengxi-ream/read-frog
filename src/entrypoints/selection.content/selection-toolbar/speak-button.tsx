@@ -3,14 +3,15 @@ import { IconLoader2, IconVolume } from '@tabler/icons-react'
 import { useAtomValue } from 'jotai'
 import { toast } from 'sonner'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
+import { isTTSProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ttsProviderConfigAtom } from '@/utils/atoms/provider'
+import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { selectionContentAtom } from './atom'
 
 export function SpeakButton() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
-  const ttsProviderConfig = useAtomValue(ttsProviderConfigAtom)
+  const ttsProviderConfig = useAtomValue(featureProviderConfigAtom('tts'))
   const { play, isFetching, isPlaying } = useTextToSpeech()
 
   const handleClick = async () => {
@@ -19,7 +20,7 @@ export function SpeakButton() {
       return
     }
 
-    if (!ttsProviderConfig) {
+    if (!ttsProviderConfig || !isTTSProviderConfig(ttsProviderConfig)) {
       toast.error(i18n.t('speak.openaiNotConfigured'))
       return
     }
@@ -27,7 +28,7 @@ export function SpeakButton() {
     void play(selectionContent, ttsConfig, ttsProviderConfig)
   }
 
-  if (!ttsProviderConfig) {
+  if (!ttsProviderConfig || !isTTSProviderConfig(ttsProviderConfig)) {
     return null
   }
 

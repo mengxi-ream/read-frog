@@ -2,14 +2,14 @@ import type { APIProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
 import { Hint } from '@/components/ui/base-ui/hint'
-import { isLLMTranslateProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import { withForm } from './form'
 
 export const TemperatureField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
     const providerConfig = useStore(form.store, state => state.values)
-    const isLLMProvider = isLLMTranslateProviderConfig(providerConfig)
+    const isLLMProvider = isLLMProviderConfig(providerConfig)
 
     if (!isLLMProvider) {
       return null

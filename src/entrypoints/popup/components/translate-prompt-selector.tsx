@@ -10,16 +10,16 @@ import {
   SelectValue,
 } from '@/components/ui/base-ui/select'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
-import { isLLMTranslateProvider } from '@/types/config/provider'
+import { isLLMProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { translateProviderConfigAtom } from '@/utils/atoms/provider'
+import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { DEFAULT_TRANSLATE_PROMPT_ID } from '@/utils/constants/prompt'
 
 export default function TranslatePromptSelector() {
-  const translateProviderConfig = useAtomValue(translateProviderConfigAtom)
+  const translateProviderConfig = useAtomValue(featureProviderConfigAtom('translate'))
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
 
-  if (!translateProviderConfig?.provider || !isLLMTranslateProvider(translateProviderConfig?.provider))
+  if (!translateProviderConfig?.provider || !isLLMProvider(translateProviderConfig?.provider))
     return null
 
   const customPromptsConfig = translateConfig.customPromptsConfig

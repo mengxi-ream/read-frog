@@ -103,12 +103,6 @@ export default function SideContent() {
         </div>
 
         <div className="flex h-full flex-col gap-y-2 py-3 items-center justify-center">
-          {/* <TopBar className="mx-3" />
-          {!isAnyAPIKeyForReadProviders(providersConfig) && (
-            <APIConfigWarning className="mx-3" />
-          )}
-          <Metadata className="mx-3" />
-          <Content /> */}
           The function is being upgraded
         </div>
       </div>

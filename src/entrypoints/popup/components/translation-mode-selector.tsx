@@ -14,7 +14,7 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { TRANSLATION_MODES } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
+import { filterEnabledProvidersConfig, getLLMProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
 
 export default function TranslationModeSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
@@ -40,7 +40,7 @@ export default function TranslationModeSelector() {
         return
       }
 
-      const llmProviders = getLLMTranslateProvidersConfig(enabledProviders)
+      const llmProviders = getLLMProvidersConfig(enabledProviders)
       if (llmProviders.length > 0) {
         void setTranslateConfig(
           deepmerge(translateConfig, {

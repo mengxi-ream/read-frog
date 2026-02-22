@@ -6,7 +6,7 @@ import { TranslationError } from '@/components/translation/error'
 import { createReactShadowHost } from '@/utils/react-shadow-host/create-shadow-host'
 import { TRANSLATION_ERROR_CONTAINER_CLASS } from '../../../constants/dom-labels'
 import { getOwnerDocument } from '../../dom/node'
-import { translateText } from '../translate-text'
+import { translateTextForPage } from '../translate-variants'
 
 /**
  * Create a lightweight spinner element without React/Shadow DOM overhead
@@ -73,7 +73,7 @@ export async function getTranslatedTextAndRemoveSpinner(
   let translatedText: string | undefined
 
   try {
-    translatedText = await translateText(textContent)
+    translatedText = await translateTextForPage(textContent)
   }
   catch (error) {
     const errorComponent = React.createElement(TranslationError, {

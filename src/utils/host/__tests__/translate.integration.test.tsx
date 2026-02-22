@@ -15,12 +15,11 @@ import {
 import { flushBatchedOperations } from '@/utils/host/dom/batch-dom'
 import { walkAndLabelElement } from '@/utils/host/dom/traversal'
 import { translateWalkedElement } from '@/utils/host/translate/node-manipulation'
-import { translateText } from '@/utils/host/translate/translate-text'
+import { translateTextForPage } from '@/utils/host/translate/translate-variants'
 import { expectNodeLabels, expectTranslatedContent, expectTranslationWrapper, MOCK_ORIGINAL_TEXT, MOCK_TRANSLATION } from './utils'
 
-vi.mock('@/utils/host/translate/translate-text', () => ({
-  translateText: vi.fn(() => Promise.resolve(MOCK_TRANSLATION)),
-  validateTranslationConfig: vi.fn(() => true),
+vi.mock('@/utils/host/translate/translate-variants', () => ({
+  translateTextForPage: vi.fn(() => Promise.resolve(MOCK_TRANSLATION)),
 }))
 
 vi.mock('@/utils/config/storage', () => ({
@@ -87,9 +86,9 @@ describe('translate', () => {
     })
   }
 
-  describe('translateText stub', () => {
-    it('translateText should be mocked', async () => {
-      expect(await translateText('任何文字')).toBe(MOCK_TRANSLATION)
+  describe('translateTextForPage stub', () => {
+    it('translateTextForPage should be mocked', async () => {
+      expect(await translateTextForPage('任何文字')).toBe(MOCK_TRANSLATION)
     })
   })
 
@@ -1126,9 +1125,9 @@ describe('translate', () => {
       expect(node.textContent).toBe(` ${MOCK_TRANSLATION} `)
     })
     it('translation only mode: should have translation wrapper', async () => {
-    // Mock translateText to return the exact HTML string with spaces
+    // Mock translateTextForPage to return the exact HTML string with spaces
       const TRANSLATED_TEXT = `<div>${MOCK_TRANSLATION}</div>`
-      vi.mocked(translateText).mockResolvedValueOnce(TRANSLATED_TEXT)
+      vi.mocked(translateTextForPage).mockResolvedValueOnce(TRANSLATED_TEXT)
 
       render(
         <div data-testid="test-node">
@@ -1513,7 +1512,7 @@ describe('translate', () => {
   describe('whitespace and newline handling', () => {
     describe('inline elements separated by newline-only whitespace', () => {
       it('bilingual mode: should preserve word separation when separated by newlines', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         // When inline elements are separated by newline-only whitespace,
         // whitespace-only nodes still return single space to preserve word separation
         render(
@@ -1526,13 +1525,13 @@ describe('translate', () => {
         await removeOrShowPageTranslation('bilingual', true)
 
         // Whitespace-only nodes return single space for word separation
-        expect(translateText).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
       })
     })
 
     describe('inline elements has space in between', () => {
       it('bilingual mode: should preserve word separation when separated by newlines', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             <span style={{ display: 'inline' }}>{MOCK_ORIGINAL_TEXT}</span>
@@ -1541,13 +1540,13 @@ describe('translate', () => {
         )
         await removeOrShowPageTranslation('bilingual', true)
 
-        expect(translateText).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
       })
     })
 
     describe('text node with newline-only vs space leading/trailing whitespace', () => {
       it('bilingual mode: newline-only leading/trailing should not add inner spaces', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         // Text like "\nHello\n" - the newlines are trimmed without adding spaces
         // Final text is trimmed before translation anyway
         render(
@@ -1557,11 +1556,11 @@ describe('translate', () => {
         )
         await removeOrShowPageTranslation('bilingual', true)
 
-        expect(translateText).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
       })
 
       it('bilingual mode: space leading/trailing is trimmed before translation', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         // Text like " Hello " - extracted with spaces, then trimmed before translation
         render(
           <div data-testid="test-node">
@@ -1571,13 +1570,13 @@ describe('translate', () => {
         await removeOrShowPageTranslation('bilingual', true)
 
         // Final text is trimmed before translation
-        expect(translateText).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
       })
     })
 
     describe('multiple inline elements with different whitespace separators', () => {
       it('bilingual mode: whitespace-only nodes between elements preserve word separation', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             <span style={{ display: 'inline' }}>{MOCK_ORIGINAL_TEXT}</span>
@@ -1588,11 +1587,11 @@ describe('translate', () => {
         await removeOrShowPageTranslation('bilingual', true)
 
         // Whitespace-only node returns single space to preserve word separation
-        expect(translateText).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
       })
 
       it('bilingual mode: space-separated inline elements', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             <span style={{ display: 'inline' }}>{MOCK_ORIGINAL_TEXT}</span>
@@ -1602,13 +1601,13 @@ describe('translate', () => {
         )
         await removeOrShowPageTranslation('bilingual', true)
 
-        expect(translateText).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
       })
     })
 
     describe('br elements in content', () => {
       it('bilingual mode: should handle BR elements as paragraph separators', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             {MOCK_ORIGINAL_TEXT}
@@ -1619,13 +1618,13 @@ describe('translate', () => {
         await removeOrShowPageTranslation('bilingual', true)
 
         // BR elements are handled as paragraph separators, each paragraph translated separately
-        expect(translateText).toHaveBeenCalledTimes(2)
-        expect(translateText).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
-        expect(translateText).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledTimes(2)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
       })
 
       it('translationOnly mode: should handle BR elements as paragraph separators', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             {MOCK_ORIGINAL_TEXT}
@@ -1635,9 +1634,9 @@ describe('translate', () => {
         )
         await removeOrShowPageTranslation('translationOnly', true)
 
-        expect(translateText).toHaveBeenCalledTimes(2)
-        expect(translateText).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
-        expect(translateText).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledTimes(2)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
       })
     })
   })
@@ -1683,7 +1682,7 @@ describe('translate', () => {
 
     describe('minCharactersPerNode filter', () => {
       it('should skip translation for text shorter than minCharactersPerNode', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             {SHORT_TEXT}
@@ -1694,11 +1693,11 @@ describe('translate', () => {
 
         // Should not have translation wrapper because text is too short
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(translateText).not.toHaveBeenCalled()
+        expect(translateTextForPage).not.toHaveBeenCalled()
       })
 
       it('should translate text longer than minCharactersPerNode', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             {LONG_TEXT}
@@ -1709,13 +1708,13 @@ describe('translate', () => {
 
         // Should have translation wrapper because text is long enough
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeTruthy()
-        expect(translateText).toHaveBeenCalled()
+        expect(translateTextForPage).toHaveBeenCalled()
       })
     })
 
     describe('minWordsPerNode filter', () => {
       it('should skip translation for text with fewer words than minWordsPerNode', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             Two words
@@ -1726,11 +1725,11 @@ describe('translate', () => {
 
         // Should not have translation wrapper because word count is too low
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
-        expect(translateText).not.toHaveBeenCalled()
+        expect(translateTextForPage).not.toHaveBeenCalled()
       })
 
       it('should translate text with more words than minWordsPerNode', async () => {
-        vi.mocked(translateText).mockClear()
+        vi.mocked(translateTextForPage).mockClear()
         render(
           <div data-testid="test-node">
             {LONG_TEXT}
@@ -1741,7 +1740,7 @@ describe('translate', () => {
 
         // Should have translation wrapper because word count is enough
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeTruthy()
-        expect(translateText).toHaveBeenCalled()
+        expect(translateTextForPage).toHaveBeenCalled()
       })
     })
   })

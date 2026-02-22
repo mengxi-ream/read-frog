@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/base-ui/select'
 import { TRANSLATION_MODES } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { filterEnabledProvidersConfig, getLLMTranslateProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
+import { filterEnabledProvidersConfig, getLLMProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
 import { ConfigCard } from '../../components/config-card'
 
 export function TranslationMode() {
@@ -47,7 +47,7 @@ function TranslationModeSelector() {
         return
       }
 
-      const llmProviders = getLLMTranslateProvidersConfig(enabledProviders)
+      const llmProviders = getLLMProvidersConfig(enabledProviders)
       if (llmProviders.length > 0) {
         void setTranslateConfig(
           deepmerge(translateConfig, {

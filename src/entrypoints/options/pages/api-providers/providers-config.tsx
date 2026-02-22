@@ -1,4 +1,5 @@
 import type { APIProviderConfig } from '@/types/config/provider'
+import type { FeatureKey } from '@/utils/constants/feature-providers'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
@@ -10,10 +11,12 @@ import { Badge } from '@/components/ui/base-ui/badge'
 import { Button } from '@/components/ui/base-ui/button'
 import { Dialog, DialogTrigger } from '@/components/ui/base-ui/dialog'
 import { Switch } from '@/components/ui/base-ui/switch'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { isAPIProviderConfig } from '@/types/config/provider'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { providerConfigAtom, readProviderConfigAtom, translateProviderConfigAtom } from '@/utils/atoms/provider'
+import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
+import { providerConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
+import { FEATURE_KEY_I18N_MAP, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
 import { API_PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { cn } from '@/utils/styles/utils'
 import { ConfigCard } from '../../components/config-card'
@@ -190,10 +193,11 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const setProviderConfig = useSetAtom(providerConfigAtom(id))
-  const translateProviderConfig = useAtomValue(translateProviderConfigAtom)
-  const readProviderConfig = useAtomValue(readProviderConfigAtom)
-  const isDefaultTranslateProvider = translateProviderConfig?.id === id
-  const isDefaultReadProvider = readProviderConfig?.id === id
+  const config = useAtomValue(configAtom)
+
+  const assignedFeatures = Object.entries(FEATURE_PROVIDER_DEFS)
+    .filter(([_, def]) => def.getProviderId(config) === id)
+    .map(([key]) => key as FeatureKey)
 
   return (
     <div
@@ -203,18 +207,26 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       )}
       onClick={() => setSelectedProviderId(id)}
     >
-      <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
-        {isDefaultTranslateProvider && (
-          <Badge className="bg-blue-500" size="sm">
-            {i18n.t('options.apiProviders.badges.translate')}
-          </Badge>
-        )}
-        {isDefaultReadProvider && (
-          <Badge className="bg-blue-500" size="sm">
-            {i18n.t('options.apiProviders.badges.read')}
-          </Badge>
-        )}
-      </div>
+      {assignedFeatures.length > 0 && (
+        <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
+          <Tooltip>
+            <TooltipTrigger
+              render={(
+                <Badge className="bg-blue-500 cursor-default" size="sm" />
+              )}
+            >
+              {i18n.t('options.apiProviders.badges.featureCount', [assignedFeatures.length])}
+            </TooltipTrigger>
+            <TooltipContent>
+              <ul className="list-disc list-inside marker:text-green-500">
+                {assignedFeatures.map(key => (
+                  <li key={key}>{i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[key]}`)}</li>
+                ))}
+              </ul>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
       <div className="flex items-center justify-between gap-2">
         <ProviderIcon logo={API_PROVIDER_ITEMS[provider].logo(theme)} name={name} size="base" textClassName="text-sm" />
         <Switch

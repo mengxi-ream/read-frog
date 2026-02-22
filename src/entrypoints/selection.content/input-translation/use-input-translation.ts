@@ -1,7 +1,7 @@
 import { useAtom } from 'jotai'
 import { useCallback, useEffect, useRef } from 'react'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { translateTextForInput } from '@/utils/host/translate/translate-text'
+import { translateTextForInput } from '@/utils/host/translate/translate-variants'
 
 const SPACE_KEY = ' '
 const TRIGGER_COUNT = 3

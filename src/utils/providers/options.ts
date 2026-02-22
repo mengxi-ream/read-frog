@@ -1,5 +1,5 @@
 import type { JSONValue } from 'ai'
-import { TRANSLATE_MODEL_OPTIONS } from '../constants/models'
+import { LLM_MODEL_OPTIONS } from '../constants/models'
 
 /**
  * Get provider options for AI SDK generateText calls.
@@ -10,7 +10,7 @@ export function getProviderOptions(
   model: string,
   provider: string,
 ): Record<string, Record<string, JSONValue>> {
-  for (const { pattern, options } of TRANSLATE_MODEL_OPTIONS) {
+  for (const { pattern, options } of LLM_MODEL_OPTIONS) {
     if (pattern.test(model)) {
       return { [provider]: options }
     }

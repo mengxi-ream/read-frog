@@ -5,7 +5,6 @@ import { FloatingButtonPage } from '../pages/floating-button'
 import { GeneralPage } from '../pages/general'
 import { InputTranslationPage } from '../pages/input-translation'
 import { SelectionToolbarPage } from '../pages/selection-toolbar'
-import { SiteControlPage } from '../pages/site-control'
 import { StatisticsPage } from '../pages/statistics'
 import { TextToSpeechPage } from '../pages/text-to-speech'
 import { TranslationPage } from '../pages/translation'
@@ -13,7 +12,6 @@ import { VideoSubtitlesPage } from '../pages/video-subtitles'
 
 export const ROUTE_CONFIG = [
   { path: '/', component: GeneralPage },
-  { path: '/site-control', component: SiteControlPage },
   { path: '/api-providers', component: ApiProvidersPage },
   { path: '/translation', component: TranslationPage },
   { path: '/video-subtitles', component: VideoSubtitlesPage },
