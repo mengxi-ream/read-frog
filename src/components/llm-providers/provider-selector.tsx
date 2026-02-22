@@ -115,7 +115,7 @@ function TranslateGroupedSelect({
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="min-w-fit">
         <SelectGroup>
           <SelectLabel>{i18n.t('translateService.aiTranslator')}</SelectLabel>
           {llmProviders.map(provider => (
@@ -175,7 +175,7 @@ function FlatSelect({
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="min-w-fit">
         <SelectGroup>
           {providers.map(provider => (
             <SelectItem key={provider.id} value={provider}>

@@ -16,9 +16,8 @@ export function UserAccount() {
       {isPending ? 'Loading...' : data?.user.name ?? 'Guest'}
       {!isPending && !data && (
         <Button
-          size="sm"
+          size="xs"
           variant="outline"
-          className="h-5 rounded-sm"
           onClick={() =>
             window.open(`${WEBSITE_URL}/log-in`, '_blank')}
         >

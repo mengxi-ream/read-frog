@@ -1,8 +1,8 @@
 import type { TranslationMode as TranslationModeType } from '@/types/config/translate'
 import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom, useAtomValue } from 'jotai'
+import { HelpTooltip } from '@/components/help-tooltip'
 import {
   Select,
   SelectContent,
@@ -11,7 +11,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/base-ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { TRANSLATION_MODES } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { filterEnabledProvidersConfig, getLLMProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
@@ -61,21 +60,16 @@ export default function TranslationModeSelector() {
     <div className="flex items-center justify-between gap-2">
       <span className="text-[13px] font-medium flex items-center gap-1.5">
         {i18n.t('options.translation.translationMode.title')}
-        <Tooltip>
-          <TooltipTrigger render={<Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />} />
-          <TooltipContent className="w-36">
-            <p>
-              {i18n.t('options.translation.translationMode.description')}
-            </p>
-          </TooltipContent>
-        </Tooltip>
+        <HelpTooltip>
+          {i18n.t('options.translation.translationMode.description')}
+        </HelpTooltip>
       </span>
       <Select
         value={currentMode}
         onValueChange={handleModeChange}
       >
-        <SelectTrigger className="h-7! w-31 pr-1.5 pl-2.5">
-          <SelectValue render={<span />}>
+        <SelectTrigger className="h-7! w-31">
+          <SelectValue>
             {i18n.t(`options.translation.translationMode.mode.${currentMode}`)}
           </SelectValue>
         </SelectTrigger>

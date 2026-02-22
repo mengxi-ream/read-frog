@@ -1,8 +1,7 @@
 import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
 import { useAtom } from 'jotai'
+import { HelpTooltip } from '@/components/help-tooltip'
 import ProviderSelector from '@/components/llm-providers/provider-selector'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 
 export default function TranslateProviderField() {
@@ -12,14 +11,9 @@ export default function TranslateProviderField() {
     <div className="flex items-center justify-between gap-2">
       <span className="text-[13px] font-medium flex items-center gap-1.5">
         {i18n.t('translateService.title')}
-        <Tooltip>
-          <TooltipTrigger render={<Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />} />
-          <TooltipContent>
-            <p>
-              {i18n.t('translateService.description')}
-            </p>
-          </TooltipContent>
-        </Tooltip>
+        <HelpTooltip>
+          {i18n.t('translateService.description')}
+        </HelpTooltip>
       </span>
       <ProviderSelector
         featureKey="translate"

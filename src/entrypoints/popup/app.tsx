@@ -42,7 +42,6 @@ function App() {
           </div>
         </div>
         <LanguageOptionsSelector />
-        {/* <LanguageLevelSelector /> */}
         <TranslationModeSelector />
         <TranslateProviderField />
         <TranslatePromptSelector />

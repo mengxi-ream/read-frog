@@ -4,6 +4,7 @@ import { useAtom } from 'jotai'
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
 } from '@/components/ui/base-ui/select'
@@ -64,12 +65,14 @@ export default function NodeTranslationHotkeySelector() {
             <HotkeyDisplay hotkey={translateConfig.node.hotkey} />
           </div>
         </SelectTrigger>
-        <SelectContent>
-          {HOTKEYS.map(item => (
-            <SelectItem key={item} value={item}>
-              <HotkeyDisplay hotkey={item} />
-            </SelectItem>
-          ))}
+        <SelectContent className="min-w-fit">
+          <SelectGroup>
+            {HOTKEYS.map(item => (
+              <SelectItem key={item} value={item}>
+                <HotkeyDisplay hotkey={item} />
+              </SelectItem>
+            ))}
+          </SelectGroup>
         </SelectContent>
       </Select>
       <Switch

@@ -1,6 +1,6 @@
 import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue } from 'jotai'
+import { HelpTooltip } from '@/components/help-tooltip'
 import {
   Select,
   SelectContent,
@@ -9,7 +9,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/base-ui/select'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
 import { isLLMProvider } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { featureProviderConfigAtom } from '@/utils/atoms/provider'
@@ -34,14 +33,9 @@ export default function TranslatePromptSelector() {
     <div className="flex items-center justify-between gap-2">
       <span className="text-[13px] font-medium flex items-center gap-1.5">
         {i18n.t('translatePrompt.title')}
-        <Tooltip>
-          <TooltipTrigger render={<Icon icon="tabler:help" className="size-3 text-blue-300 dark:text-blue-700/70" />} />
-          <TooltipContent className="w-36">
-            <p>
-              {i18n.t('translatePrompt.description')}
-            </p>
-          </TooltipContent>
-        </Tooltip>
+        <HelpTooltip>
+          {i18n.t('translatePrompt.description')}
+        </HelpTooltip>
       </span>
       <Select
         items={items}
