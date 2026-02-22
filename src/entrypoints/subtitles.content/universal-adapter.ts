@@ -199,6 +199,12 @@ export class UniversalVideoAdapter {
       this.processedFragments = []
       this.segmentationPipeline = null
       this.subtitlesScheduler?.reset()
+
+      if (!await this.subtitlesFetcher.hasAvailableSubtitles()) {
+        this.subtitlesScheduler?.setState('error', { message: i18n.t('subtitles.errors.noSubtitlesFound') })
+        return
+      }
+
       this.subtitlesScheduler?.setState('loading')
 
       this.originalSubtitles = await this.subtitlesFetcher.fetch()

@@ -111,6 +111,18 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     this.cachedTrackHash = null
   }
 
+  async hasAvailableSubtitles(): Promise<boolean> {
+    const videoId = getYoutubeVideoId()
+    if (!videoId) {
+      return false
+    }
+
+    const response = await this.requestPlayerData(videoId)
+    return response.success === true
+      && response.data != null
+      && response.data.captionTracks.length > 0
+  }
+
   async shouldUseSameTrack(): Promise<boolean> {
     if (this.subtitles.length === 0 || !this.cachedTrackHash) {
       return false
@@ -166,6 +178,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     let playerData = response.data
 
     if (this.hasPotInAudioTracks(playerData) || playerData.cachedTimedtextUrl) {
+      return playerData
+    }
+
+    if (playerData.captionTracks.length === 0) {
       return playerData
     }
 

@@ -673,7 +673,7 @@ subtitles:
     networkError: 取得字幕時發生網路錯誤
     fetchSubTimeout: 取得 youtube 字幕逾時
     buttonNotFound: 字幕按鈕未找到
-    noSubtitlesFound: 未找到字幕
+    noSubtitlesFound: 當前影片沒有字幕
     videoNotFound: 影片元素未找到
     controlsBarNotFound: 控制列未找到
     aiRateLimited: 請求過於頻繁，請稍後再試
