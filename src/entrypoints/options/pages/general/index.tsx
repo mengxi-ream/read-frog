@@ -1,8 +1,7 @@
 import { i18n } from '#imports'
 import { PageLayout } from '../../components/page-layout'
-import { SiteControlMode } from './components/site-control/site-control-mode'
-import { SiteControlPatterns } from './components/site-control/site-control-patterns'
 import FeatureProvidersConfig from './feature-providers-config'
+import SiteControlMode from './site-control-mode'
 import TranslationConfig from './translation-config'
 
 export function GeneralPage() {
@@ -11,7 +10,6 @@ export function GeneralPage() {
       <FeatureProvidersConfig />
       <TranslationConfig />
       <SiteControlMode />
-      <SiteControlPatterns />
     </PageLayout>
   )
 }

@@ -1,8 +1,8 @@
 import { i18n } from '#imports'
 import { useAtom } from 'jotai'
 import { toast } from 'sonner'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
 import { Input } from '@/components/ui/base-ui/input'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { MAX_CHARACTERS_PER_NODE, MAX_WORDS_PER_NODE, MIN_CHARACTERS_PER_NODE, MIN_WORDS_PER_NODE } from '@/utils/constants/translate'
@@ -22,7 +22,7 @@ export function SmallParagraphFilter() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="min-characters-per-node">
               {i18n.t('options.translation.smallParagraphFilter.minCharacters.title')}
-              <Hint content={i18n.t('options.translation.smallParagraphFilter.minCharacters.description')} />
+              <HelpTooltip>{i18n.t('options.translation.smallParagraphFilter.minCharacters.description')}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Input
@@ -54,7 +54,7 @@ export function SmallParagraphFilter() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="min-words-per-node">
               {i18n.t('options.translation.smallParagraphFilter.minWords.title')}
-              <Hint content={i18n.t('options.translation.smallParagraphFilter.minWords.description')} />
+              <HelpTooltip>{i18n.t('options.translation.smallParagraphFilter.minWords.description')}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Input

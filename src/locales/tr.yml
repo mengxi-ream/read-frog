@@ -392,20 +392,26 @@ options:
     nodeTranslationHotkey:
       title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
       description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
-    llmProviderConfigured: LLM çeviri sağlayıcısı yapılandırıldı
-    llmProviderNotConfigured: LLM çeviri sağlayıcısı yapılandırılmadı
+    llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
+    llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
     autoTranslateLanguages:
       title: Dile Göre Otomatik Çevir
       description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
       selectLanguages: Dilleri seçin
-      enableLLMDetection: Dil algılama için LLM kullan
-      enableLLMDetectionDescription: Doğruluğu artırır ancak gecikme ve API maliyetleri ekler. LLM çeviri sağlayıcısı ve yapılandırılmış otomatik çeviri dilleri gerektirir.
+      detection:
+        label: Dil Algılama
+        basic: Temel
+        llm: LLM
+        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. Yapılandırılmış otomatik çeviri dilleri gerektirir.
     skipLanguages:
       title: Dile Göre Otomatik Atla
       description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
       selectLanguages: Dilleri seçin
-      enableLLMDetection: Dil algılama için LLM kullan
-      enableLLMDetectionDescription: Doğruluğu artırır ancak gecikme ve API maliyetleri ekler. LLM çeviri sağlayıcısı gerektirir.
+      detection:
+        label: Dil Algılama
+        basic: Temel
+        llm: LLM
+        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
     aiContentAware:
       title: AI Akıllı Bağlam Çevirisi
       description: AI'ya makale bağlamı sağlayarak çeviri kalitesini artırın

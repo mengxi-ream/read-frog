@@ -1,7 +1,7 @@
 import type { APIProviderConfig } from '@/types/config/provider'
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
-import { Hint } from '@/components/ui/base-ui/hint'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { isLLMProviderConfig } from '@/types/config/provider'
 import { withForm } from './form'
 
@@ -23,7 +23,7 @@ export const TemperatureField = withForm({
             label={(
               <div className="flex items-center gap-1.5">
                 <span>{i18n.t('options.apiProviders.form.temperature')}</span>
-                <Hint content={i18n.t('options.apiProviders.form.temperatureHint')} />
+                <HelpTooltip>{i18n.t('options.apiProviders.form.temperatureHint')}</HelpTooltip>
               </div>
             )}
             type="number"

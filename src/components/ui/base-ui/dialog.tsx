@@ -53,7 +53,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          'bg-background data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-6 rounded-xl p-6 text-sm ring-1 duration-100 sm:max-w-md fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none',
+          'bg-background data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 ring-foreground/10 grid max-w-[calc(100%-2rem)] gap-4 rounded-xl p-4 text-sm ring-1 duration-100 sm:max-w-sm fixed top-1/2 left-1/2 z-50 w-full -translate-x-1/2 -translate-y-1/2 outline-none',
           className,
         )}
         {...props}
@@ -63,16 +63,12 @@ function DialogContent({
           <DialogPrimitive.Close
             data-slot="dialog-close"
             render={(
-              <Button
-                variant="ghost"
-                className="absolute top-4 right-4"
-                size="icon-sm"
-              />
+              <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
+                <IconX />
+                <span className="sr-only">Close</span>
+              </Button>
             )}
-          >
-            <IconX />
-            <span className="sr-only">Close</span>
-          </DialogPrimitive.Close>
+          />
         )}
       </DialogPrimitive.Popup>
     </DialogPortal>
@@ -101,16 +97,14 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        'gap-2 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end',
+        'bg-muted/50 -mx-4 -mb-4 rounded-b-xl border-t p-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end',
         className,
       )}
       {...props}
     >
       {children}
       {showCloseButton && (
-        <DialogPrimitive.Close render={<Button variant="outline" />}>
-          Close
-        </DialogPrimitive.Close>
+        <DialogPrimitive.Close render={<Button variant="outline">Close</Button>} />
       )}
     </div>
   )
@@ -120,7 +114,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn('leading-none font-medium', className)}
+      className={cn('text-base leading-none font-medium', className)}
       {...props}
     />
   )

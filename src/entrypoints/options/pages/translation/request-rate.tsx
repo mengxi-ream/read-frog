@@ -2,8 +2,8 @@ import type { RequestQueueConfig } from '@/types/config/translate'
 import { i18n } from '#imports'
 import { useAtom } from 'jotai'
 import { toast } from 'sonner'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
 import { Input } from '@/components/ui/base-ui/input'
 import { requestQueueConfigSchema } from '@/types/config/translate'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
@@ -63,7 +63,7 @@ function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConf
       <FieldContent className="self-center">
         <FieldLabel htmlFor={`translate-${property}`}>
           {info.label}
-          <Hint content={info.description} />
+          <HelpTooltip>{info.description}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Input

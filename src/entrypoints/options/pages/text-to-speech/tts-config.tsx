@@ -3,7 +3,6 @@ import { i18n } from '#imports'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
 import { useAtom, useAtomValue } from 'jotai'
 import { toast } from 'sonner'
-import ProviderSelector from '@/components/llm-providers/provider-selector'
 import { Badge } from '@/components/ui/base-ui/badge'
 import { Button } from '@/components/ui/base-ui/button'
 import { Field, FieldLabel } from '@/components/ui/base-ui/field'
@@ -23,7 +22,6 @@ import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { TTS_VOICES_ITEMS } from '@/utils/constants/tts'
 import { ConfigCard } from '../../components/config-card'
-import { SetApiKeyWarning } from '../../components/set-api-key-warning'
 
 export function TtsConfig() {
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
@@ -39,7 +37,6 @@ export function TtsConfig() {
       description={i18n.t('options.tts.description')}
     >
       <div className="space-y-4">
-        <TtsProviderField />
         {ttsConfig.providerId && (
           <>
             <TtsModelField />
@@ -49,28 +46,6 @@ export function TtsConfig() {
         )}
       </div>
     </ConfigCard>
-  )
-}
-
-function TtsProviderField() {
-  const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
-  const ttsProviderConfig = useAtomValue(featureProviderConfigAtom('tts'))
-
-  return (
-    <Field>
-      <FieldLabel htmlFor="ttsProvider">
-        {i18n.t('options.tts.provider.label')}
-        {ttsProviderConfig && isTTSProviderConfig(ttsProviderConfig) && !ttsProviderConfig.apiKey && <SetApiKeyWarning />}
-      </FieldLabel>
-      <ProviderSelector
-        featureKey="tts"
-        value={ttsConfig.providerId || null}
-        onChange={id => void setTtsConfig({ providerId: id })}
-        nullable
-        placeholder={i18n.t('options.tts.provider.selectPlaceholder')}
-        className="w-full"
-      />
-    </Field>
   )
 }
 

@@ -14,8 +14,8 @@ export function AdvancedOptionsSection({ children }: AdvancedOptionsSectionProps
   const [isOpen, setIsOpen] = useState(false)
 
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-4">
-      <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
         <Icon
           icon="tabler:chevron-right"
           className={cn(

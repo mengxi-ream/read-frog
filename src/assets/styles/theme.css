@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
-@import 'shadcn/tailwind.css';
+/* @import 'shadcn/tailwind.css'; */
 
 @custom-variant dark (&:is(.dark *));
 /* Base UI uses data-orientation="horizontal|vertical", map to short variants for Tailwind */
@@ -89,9 +89,8 @@
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
   /* Additional theme variables */
-  --color-warning: oklch(97.3% 0.071 103.193);
-  --color-warning-foreground: oklch(85.2% 0.199 91.936);
-  --color-link: oklch(54.6% 0.245 262.881);
+  --warning: oklch(97.3% 0.071 103.193);
+  --link: oklch(54.6% 0.245 262.881);
 }
 
 .dark {
@@ -127,9 +126,8 @@
   --sidebar-border: oklch(1 0 0 / 10%);
   --sidebar-ring: oklch(0.552 0.016 285.938);
   /* Additional theme variables */
-  --color-warning: oklch(42.1% 0.095 57.708);
-  --color-warning-foreground: oklch(68.1% 0.162 75.834);
-  --color-link: oklch(70.7% 0.165 254.624);
+  --warning: oklch(42.1% 0.095 57.708);
+  --link: oklch(70.7% 0.165 254.624);
 }
 
 @layer base {

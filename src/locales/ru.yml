@@ -392,20 +392,26 @@ options:
     nodeTranslationHotkey:
       title: Горячая клавиша перевода при наведении или долгом нажатии
       description: Настройте клавишу-модификатор для перевода при наведении или используйте долгое нажатие для перевода абзацев
-    llmProviderConfigured: LLM-провайдер перевода настроен
-    llmProviderNotConfigured: LLM-провайдер перевода не настроен
+    llmProviderConfigured: LLM-провайдер выбран для $1
+    llmProviderNotConfigured: LLM-провайдер не выбран для $1
     autoTranslateLanguages:
       title: Автоперевод по языку
       description: Автоматически переводить содержимое страницы при обнаружении определённых языков
       selectLanguages: Выберите языки
-      enableLLMDetection: Использовать LLM для определения языка
-      enableLLMDetectionDescription: Повышает точность, но добавляет задержку и затраты на API. Требуется LLM-провайдер перевода и настроенные языки автоперевода.
+      detection:
+        label: Определение языка
+        basic: Базовое
+        llm: LLM
+        description: Базовое определение быстрое и бесплатное. LLM определение точнее, но добавляет задержку и затраты на API. Требуются настроенные языки автоперевода.
     skipLanguages:
       title: Автопропуск по языку
       description: Автоматически пропускать перевод абзацев при обнаружении указанных языков
       selectLanguages: Выберите языки
-      enableLLMDetection: Использовать LLM для определения языка
-      enableLLMDetectionDescription: Повышает точность, но добавляет задержку и затраты на API. Требуется LLM-провайдер перевода.
+      detection:
+        label: Определение языка
+        basic: Базовое
+        llm: LLM
+        description: Базовое определение быстрое и бесплатное. LLM определение точнее, но добавляет задержку и затраты на API.
     aiContentAware:
       title: Умный контекстный перевод ИИ
       description: Улучшайте качество перевода, предоставляя контекст статьи ИИ

@@ -5,7 +5,6 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useEffect } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/base-ui/button'
-import { Separator } from '@/components/ui/base-ui/separator'
 import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvider } from '@/types/config/provider'
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
@@ -43,7 +42,7 @@ export function ProviderConfigForm() {
   })
 
   const providerType = useStore(form.store, state => state.values.provider)
-  const isTranslateProviderName = isTranslateProvider(providerType)
+  const isTranslateProviderType = isTranslateProvider(providerType)
   const isLLM = isLLMProvider(providerType)
 
   useEffect(() => {
@@ -106,11 +105,8 @@ export function ProviderConfigForm() {
 
           <APIKeyField form={form} />
           <BaseURLField form={form} />
-          {isTranslateProviderName && (
-            <>
-              <Separator className="my-2" />
-              <TranslateModelSelector form={form} />
-            </>
+          {isTranslateProviderType && (
+            <TranslateModelSelector form={form} />
           )}
           <FeatureProviderSection form={form} />
           {isLLM && (

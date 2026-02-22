@@ -123,7 +123,7 @@ export async function detectLanguageWithLLM(
         globalConfig.translate.providerId,
       )
       if (!globalProvider || !isLLMProviderConfig(globalProvider)) {
-        logger.info('No LLM translate provider configured')
+        logger.info('No LLM provider configured for page translation')
         return null
       }
       config = globalProvider

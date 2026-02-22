@@ -1,9 +1,9 @@
 import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { Badge } from '@/components/ui/base-ui/badge'
 import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
 import { Switch } from '@/components/ui/base-ui/switch'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ConfigCard } from '../../components/config-card'
@@ -27,7 +27,7 @@ export function SubtitlesConfig() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="video-subtitles-toggle">
               {i18n.t('options.videoSubtitles.enable')}
-              <Hint content={i18n.t('options.videoSubtitles.enableDescription')} />
+              <HelpTooltip>{i18n.t('options.videoSubtitles.enableDescription')}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Switch
@@ -47,7 +47,7 @@ export function SubtitlesConfig() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="video-subtitles-autostart">
               {i18n.t('options.videoSubtitles.autoStart')}
-              <Hint content={i18n.t('options.videoSubtitles.autoStartDescription')} />
+              <HelpTooltip>{i18n.t('options.videoSubtitles.autoStartDescription')}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Switch
@@ -67,7 +67,7 @@ export function SubtitlesConfig() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="video-subtitles-ai-segmentation">
               {i18n.t('options.videoSubtitles.aiSegmentation.enable')}
-              <Hint content={i18n.t('options.videoSubtitles.aiSegmentation.enableDescription')} />
+              <HelpTooltip>{i18n.t('options.videoSubtitles.aiSegmentation.enableDescription')}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Switch

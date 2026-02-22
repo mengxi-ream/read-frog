@@ -4,21 +4,16 @@ import { Icon } from '@iconify/react'
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
-  langCodeISO6393Schema,
 } from '@read-frog/definitions'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { useMemo } from 'react'
+import { HelpTooltip } from '@/components/help-tooltip'
+import { MultiLanguageCombobox } from '@/components/multi-language-combobox'
 import { Button } from '@/components/ui/base-ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuTrigger,
-} from '@/components/ui/base-ui/dropdown-menu'
 import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
-import { Switch } from '@/components/ui/base-ui/switch'
+import { Label } from '@/components/ui/base-ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/base-ui/radio-group'
 import { isLLMProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { getProviderConfigById } from '@/utils/config/helpers'
@@ -41,7 +36,7 @@ export function AutoTranslateLanguages() {
         description={(
           <>
             {i18n.t('options.translation.autoTranslateLanguages.description')}
-            <LLMStatusIndicator hasLLMProvider={hasLLMProvider} />
+            <LLMStatusIndicator hasLLMProvider={hasLLMProvider} featureName={i18n.t('options.general.featureProviders.features.translate')} />
           </>
         )}
         className="py-0"
@@ -62,22 +57,31 @@ function LLMDetectionToggle() {
   return (
     <Field orientation="horizontal">
       <FieldContent className="self-center">
-        <FieldLabel htmlFor="llm-detection-toggle">
-          {i18n.t('options.translation.autoTranslateLanguages.enableLLMDetection')}
-          <Hint content={i18n.t('options.translation.autoTranslateLanguages.enableLLMDetectionDescription')} />
+        <FieldLabel>
+          {i18n.t('options.translation.autoTranslateLanguages.detection.label')}
+          <HelpTooltip>{i18n.t('options.translation.autoTranslateLanguages.detection.description')}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
-      <Switch
-        id="llm-detection-toggle"
-        checked={translateConfig.page.enableLLMDetection}
-        onCheckedChange={(checked) => {
+      <RadioGroup
+        value={translateConfig.page.enableLLMDetection ? 'llm' : 'basic'}
+        onValueChange={(value: string) => {
           void setTranslateConfig(
             deepmerge(translateConfig, {
-              page: { enableLLMDetection: checked },
+              page: { enableLLMDetection: value === 'llm' },
             }),
           )
         }}
-      />
+        className="flex flex-row gap-4 w-auto"
+      >
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="basic" id="auto-translate-detection-basic" />
+          <Label htmlFor="auto-translate-detection-basic">{i18n.t('options.translation.autoTranslateLanguages.detection.basic')}</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="llm" id="auto-translate-detection-llm" />
+          <Label htmlFor="auto-translate-detection-llm">{i18n.t('options.translation.autoTranslateLanguages.detection.llm')}</Label>
+        </div>
+      </RadioGroup>
     </Field>
   )
 }
@@ -86,41 +90,19 @@ function AutoTranslateLanguagesSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const selectedLanguages = translateConfig.page.autoTranslateLanguages
 
-  const allLanguages = langCodeISO6393Schema.options
-
-  const handleLanguageToggle = (language: LangCodeISO6393, checked: boolean) => {
-    void setTranslateConfig({
-      page: {
-        ...translateConfig.page,
-        autoTranslateLanguages: checked
-          ? [...selectedLanguages, language]
-          : selectedLanguages.filter(lang => lang !== language),
-      },
-    })
-  }
-
   return (
     <div className="w-full flex justify-start md:justify-end">
-      <DropdownMenu>
-        <DropdownMenuTrigger render={<Button variant="outline" className="w-40 justify-between" />}>
-          <span className="truncate">
-            {i18n.t('options.translation.autoTranslateLanguages.selectLanguages')}
-          </span>
-          <Icon icon="tabler:chevron-down" className="h-4 w-4" />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent className="max-h-60 overflow-y-auto" align="end">
-          {allLanguages.map(language => (
-            <DropdownMenuCheckboxItem
-              key={language}
-              checked={selectedLanguages.includes(language)}
-              onCheckedChange={checked => handleLanguageToggle(language, checked)}
-              onSelect={e => e.preventDefault()}
-            >
-              {`${LANG_CODE_TO_EN_NAME[language]} (${LANG_CODE_TO_LOCALE_NAME[language]})`}
-            </DropdownMenuCheckboxItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
+      <MultiLanguageCombobox
+        selectedLanguages={selectedLanguages}
+        onLanguagesChange={languages =>
+          void setTranslateConfig({
+            page: {
+              ...translateConfig.page,
+              autoTranslateLanguages: languages,
+            },
+          })}
+        buttonLabel={i18n.t('options.translation.autoTranslateLanguages.selectLanguages')}
+      />
     </div>
   )
 }

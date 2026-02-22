@@ -1,4 +1,5 @@
-import type { ButtonProps } from '@/components/ui/base-ui/button'
+import type { VariantProps } from 'class-variance-authority'
+import type { buttonVariants } from '@/components/ui/base-ui/button'
 import type { Config } from '@/types/config/config'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
@@ -7,7 +8,9 @@ import { Button } from '@/components/ui/base-ui/button'
 import { ScrollArea } from '@/components/ui/base-ui/scroll-area'
 import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
 
-export function ViewConfig({ config, configSchemaVersion, size = 'default' }: { config: Config, configSchemaVersion?: number, size?: ButtonProps['size'] }) {
+export function ViewConfig(
+  { config, configSchemaVersion, size = 'default' }:
+  { config: Config, configSchemaVersion?: number, size?: VariantProps<typeof buttonVariants>['size'] }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (

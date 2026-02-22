@@ -391,20 +391,26 @@ options:
     nodeTranslationHotkey:
       title: ホバーまたは長押し翻訳ショートカットキー
       description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
-    llmProviderConfigured: LLM 翻訳プロバイダーが設定されています
-    llmProviderNotConfigured: LLM 翻訳プロバイダーが設定されていません
+    llmProviderConfigured: $1の LLM プロバイダー選択済み
+    llmProviderNotConfigured: $1の LLM プロバイダー未選択
     autoTranslateLanguages:
       title: 言語に基づく自動翻訳
       description: 特定の言語が検出された場合にページコンテンツを自動翻訳します
       selectLanguages: 言語を選択
-      enableLLMDetection: LLM を使用した言語検出
-      enableLLMDetectionDescription: 精度が向上しますが、遅延と API コストが増加します。LLM 翻訳プロバイダーと自動翻訳言語の設定が必要です。
+      detection:
+        label: 言語検出
+        basic: 基本
+        llm: LLM
+        description: 基本検出は高速で無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。自動翻訳言語の設定が必要です。
     skipLanguages:
       title: 言語に基づく自動スキップ
       description: 指定された言語が検出されると、段落の翻訳を自動的にスキップします
       selectLanguages: 言語を選択
-      enableLLMDetection: LLM を使用した言語検出
-      enableLLMDetectionDescription: 精度が向上しますが、遅延と API コストが増加します。LLM 翻訳プロバイダーが必要です。
+      detection:
+        label: 言語検出
+        basic: 基本
+        llm: LLM
+        description: 基本検出は高速で無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。
     aiContentAware:
       title: AI スマートコンテキスト翻訳
       description: 記事のコンテキストを AI に提供して翻訳品質を向上させます

@@ -3,7 +3,7 @@ import { LANG_CODE_ISO6391_OPTIONS } from '@read-frog/definitions'
 import { useAtomValue } from 'jotai'
 import { useEffect, useRef, useState } from 'react'
 import { Field, FieldLabel } from '@/components/ui/base-ui/field'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
 import { Textarea } from '@/components/ui/base-ui/textarea'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { BLOCK_CONTENT_CLASS, CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
@@ -42,11 +42,13 @@ export function StylePreview() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {LANG_CODE_ISO6391_OPTIONS.map(lang => (
-                  <SelectItem key={lang} value={lang}>
-                    {lang}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {LANG_CODE_ISO6391_OPTIONS.map(lang => (
+                    <SelectItem key={lang} value={lang}>
+                      {lang}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
           </Field>
@@ -60,8 +62,10 @@ export function StylePreview() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ltr">ltr (Left to Right)</SelectItem>
-                <SelectItem value="rtl">rtl (Right to Left)</SelectItem>
+                <SelectGroup>
+                  <SelectItem value="ltr">ltr (Left to Right)</SelectItem>
+                  <SelectItem value="rtl">rtl (Right to Left)</SelectItem>
+                </SelectGroup>
               </SelectContent>
             </Select>
           </Field>

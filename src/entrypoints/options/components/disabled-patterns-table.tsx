@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/base-ui/table'
+import { cn } from '@/utils/styles/utils'
 
 interface DisabledPatternsTableProps {
   patterns: string[]
@@ -17,6 +18,7 @@ interface DisabledPatternsTableProps {
   onRemovePattern: (pattern: string) => void
   placeholderText: string
   tableHeaderText: string
+  className?: string
 }
 
 export function DisabledPatternsTable({
@@ -25,6 +27,7 @@ export function DisabledPatternsTable({
   onRemovePattern,
   placeholderText,
   tableHeaderText,
+  className,
 }: DisabledPatternsTableProps) {
   const [inputValue, setInputValue] = useState('')
 
@@ -41,7 +44,7 @@ export function DisabledPatternsTable({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className={cn('flex flex-col gap-2', className)}>
       <div className="flex items-center gap-2">
         <Input
           placeholder={placeholderText}

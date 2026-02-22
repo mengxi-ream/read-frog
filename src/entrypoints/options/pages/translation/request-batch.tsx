@@ -4,8 +4,8 @@ import { Icon } from '@iconify/react'
 import { useAtom } from 'jotai'
 import { Link } from 'react-router'
 import { toast } from 'sonner'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
 import { Input } from '@/components/ui/base-ui/input'
 import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
 import { batchQueueConfigSchema } from '@/types/config/translate'
@@ -84,7 +84,7 @@ function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) 
       <FieldContent className="self-center">
         <FieldLabel htmlFor={`batch-${property}`}>
           {info.label}
-          <Hint content={info.description} />
+          <HelpTooltip>{info.description}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Input

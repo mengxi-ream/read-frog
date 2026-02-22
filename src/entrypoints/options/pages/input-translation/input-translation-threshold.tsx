@@ -1,8 +1,8 @@
 import { i18n } from '#imports'
 import { useAtom } from 'jotai'
 import { toast } from 'sonner'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
 import { Input } from '@/components/ui/base-ui/input'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { ConfigCard } from '../../components/config-card'
@@ -24,7 +24,7 @@ export function InputTranslationThreshold() {
         <FieldContent className="self-center">
           <FieldLabel htmlFor="input-translation-threshold">
             {i18n.t('options.inputTranslation.threshold.label')}
-            <Hint content={i18n.t('options.inputTranslation.threshold.hint')} />
+            <HelpTooltip>{i18n.t('options.inputTranslation.threshold.hint')}</HelpTooltip>
           </FieldLabel>
         </FieldContent>
         <Input

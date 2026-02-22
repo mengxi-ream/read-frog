@@ -394,20 +394,26 @@ options:
     nodeTranslationHotkey:
       title: 懸停或長按翻譯快捷鍵
       description: 自訂懸停翻譯的修飾鍵，或使用滑鼠長按翻譯段落
-    llmProviderConfigured: 已設定 LLM 翻譯提供商
-    llmProviderNotConfigured: 未設定 LLM 翻譯提供商
+    llmProviderConfigured: 已為$1選擇 LLM 提供商
+    llmProviderNotConfigured: 沒有為$1選擇 LLM 提供商
     autoTranslateLanguages:
       title: 基於語言的自動翻譯
       description: 當檢測到特定語言時自動翻譯頁面內容
       selectLanguages: 選擇語言
-      enableLLMDetection: 使用 LLM 偵測語言
-      enableLLMDetectionDescription: 提高準確率，但會增加延遲和 API 費用。需要設定 LLM 翻譯提供商，並需配置自動翻譯語言。
+      detection:
+        label: 語言偵測
+        basic: 基礎
+        llm: LLM
+        description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。需配置自動翻譯語言。
     skipLanguages:
       title: 基於語言的自動跳過
       description: 當檢測到指定語言時自動跳過段落翻譯
       selectLanguages: 選擇語言
-      enableLLMDetection: 使用 LLM 偵測語言
-      enableLLMDetectionDescription: 提高準確率，但會增加延遲和 API 費用。需要設定 LLM 翻譯提供商。
+      detection:
+        label: 語言偵測
+        basic: 基礎
+        llm: LLM
+        description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。
     aiContentAware:
       title: AI 智慧上下文翻譯
       description: 透過向 AI 提供文章上下文來提高翻譯品質

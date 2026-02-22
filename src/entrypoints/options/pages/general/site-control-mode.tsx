@@ -3,10 +3,30 @@ import { useAtom } from 'jotai'
 import { Label } from '@/components/ui/base-ui/label'
 import { RadioGroup, RadioGroupItem } from '@/components/ui/base-ui/radio-group'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../../../components/config-card'
+import { ConfigCard } from '../../components/config-card'
+import { DisabledPatternsTable } from '../../components/disabled-patterns-table'
 
-export function SiteControlMode() {
+export default function SiteControlMode() {
   const [siteControl, setSiteControl] = useAtom(configFieldsAtomMap.siteControl)
+  const { patterns = [] } = siteControl
+
+  const addPattern = (pattern: string) => {
+    const cleanedPattern = pattern.trim()
+    if (!cleanedPattern || patterns.includes(cleanedPattern))
+      return
+
+    void setSiteControl({
+      ...siteControl,
+      patterns: [...patterns, cleanedPattern],
+    })
+  }
+
+  const removePattern = (pattern: string) => {
+    void setSiteControl({
+      ...siteControl,
+      patterns: patterns.filter(p => p !== pattern),
+    })
+  }
 
   return (
     <ConfigCard
@@ -36,6 +56,16 @@ export function SiteControlMode() {
           </Label>
         </div>
       </RadioGroup>
+      {siteControl.mode === 'whitelist' && (
+        <DisabledPatternsTable
+          patterns={patterns}
+          onAddPattern={addPattern}
+          onRemovePattern={removePattern}
+          placeholderText={i18n.t('options.siteControl.patterns.enterUrlPattern')}
+          tableHeaderText={i18n.t('options.siteControl.patterns.urlPattern')}
+          className="mt-6"
+        />
+      )}
     </ConfigCard>
   )
 }

@@ -2,8 +2,8 @@ import type { APIProviderConfig, LLMProviderConfig } from '@/types/config/provid
 import { i18n } from '#imports'
 import { useStore } from '@tanstack/react-form'
 import { useEffect, useMemo, useState } from 'react'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { Field, FieldError, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
 import { JSONCodeEditor } from '@/components/ui/json-code-editor'
 import { useDebouncedValue } from '@/hooks/use-debounced-value'
 import { isLLMProviderConfig } from '@/types/config/provider'
@@ -84,7 +84,7 @@ export const ProviderOptionsField = withForm({
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-1.5">
               <span>{i18n.t('options.apiProviders.form.providerOptions')}</span>
-              <Hint content={i18n.t('options.apiProviders.form.providerOptionsHint')} />
+              <HelpTooltip>{i18n.t('options.apiProviders.form.providerOptionsHint')}</HelpTooltip>
             </div>
             <a
               href="https://ai-sdk.dev/providers/ai-sdk-providers"

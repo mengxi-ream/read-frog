@@ -6,7 +6,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { Activity } from 'react'
 import { MarkdownRenderer } from '@/components/markdown-renderer'
 import { isLLMProviderConfig } from '@/types/config/provider'
-import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
+import { configAtom } from '@/utils/atoms/config'
 import { detectedCodeAtom } from '@/utils/atoms/detected-code'
 import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { getFinalSourceCode } from '@/utils/config/languages'
@@ -23,8 +23,6 @@ export function AiButton() {
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const setIsAiPopoverVisible = useSetAtom(isAiPopoverVisibleAtom)
   const setMousePosition = useSetAtom(mouseClickPositionAtom)
-  const betaExperienceConfig = useAtomValue(configFieldsAtomMap.betaExperience)
-
   const handleClick = async (event: React.MouseEvent) => {
     const rect = event.currentTarget.getBoundingClientRect()
     const x = rect.left
@@ -33,10 +31,6 @@ export function AiButton() {
     setMousePosition({ x, y })
     setIsSelectionToolbarVisible(false)
     setIsAiPopoverVisible(true)
-  }
-
-  if (!import.meta.env.DEV && !betaExperienceConfig.enabled) {
-    return null
   }
 
   return (

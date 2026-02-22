@@ -28,7 +28,7 @@ export const FeatureProviderSection = withForm({
       return null
 
     return (
-      <Collapsible open={isOpen} onOpenChange={setIsOpen} className="mt-4">
+      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
           <Icon
             icon="tabler:chevron-right"
@@ -40,7 +40,7 @@ export const FeatureProviderSection = withForm({
           <span>{i18n.t('options.apiProviders.form.featureProviders')}</span>
         </CollapsibleTrigger>
         <CollapsibleContent>
-          <div className="flex flex-col gap-3 pt-4">
+          <div className="flex flex-col gap-3">
             {compatibleFeatures.map(([featureKey, def]) => {
               const isAssigned = def.getProviderId(config) === providerId
               return (

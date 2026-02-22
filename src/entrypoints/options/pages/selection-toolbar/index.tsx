@@ -2,7 +2,6 @@ import { i18n } from '#imports'
 import selectionToolbarDemoImage from '@/assets/demo/selection-toolbar.png'
 import { GradientBackground } from '@/components/gradient-background'
 import { PageLayout } from '../../components/page-layout'
-import { SelectionToolbarTranslateFeatureConfig, SelectionToolbarVocabularyInsightFeatureConfig } from './feature-provider-model'
 import { SelectionToolbarDisabledSites } from './selection-toolbar-disabled-sites'
 import { SelectionToolbarGlobalToggle } from './selection-toolbar-global-toggle'
 
@@ -18,8 +17,6 @@ export function SelectionToolbarPage() {
       </GradientBackground>
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <SelectionToolbarGlobalToggle />
-        <SelectionToolbarTranslateFeatureConfig />
-        <SelectionToolbarVocabularyInsightFeatureConfig />
         <SelectionToolbarDisabledSites />
       </div>
     </PageLayout>
