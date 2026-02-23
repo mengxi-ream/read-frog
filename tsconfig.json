@@ -7,5 +7,6 @@
       "@/*": ["./src/*"]
     },
     "allowImportingTsExtensions": true
-  }
+  },
+  "exclude": ["repos"]
 }
