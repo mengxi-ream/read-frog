@@ -30,10 +30,17 @@ export const ProviderOptionsField = withForm({
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
     // Local state for the JSON string input
-    const initialValue = providerConfig.providerOptions
-      ? JSON.stringify(providerConfig.providerOptions, null, 2)
-      : ''
+    const initialValue = useMemo(() => (
+      providerConfig.providerOptions
+        ? JSON.stringify(providerConfig.providerOptions, null, 2)
+        : ''
+    ), [providerConfig.providerOptions])
     const [jsonInput, setJsonInput] = useState(initialValue)
+
+    // Keep editor input in sync when switching to a different provider config.
+    useEffect(() => {
+      setJsonInput(initialValue)
+    }, [providerConfig.id, initialValue])
 
     // Debounce the input value
     const debouncedJsonInput = useDebouncedValue(jsonInput, 500)
