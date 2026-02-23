@@ -16,6 +16,7 @@ import { newUserGuide } from './new-user-guide'
 import { proxyFetch } from './proxy-fetch'
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from './translation-queues'
 import { translationMessage } from './translation-signal'
+import { setupTTSPlaybackMessageHandlers } from './tts-playback'
 import { setupUninstallSurvey } from './uninstall-survey'
 
 export default defineBackground({
@@ -92,6 +93,7 @@ export default defineBackground({
 
     proxyFetch()
     setupEdgeTTSMessageHandlers()
+    setupTTSPlaybackMessageHandlers()
     void initMockData()
 
     // Setup programmatic injection for iframes that Chrome's manifest-based all_frames misses
