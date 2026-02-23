@@ -422,9 +422,14 @@ options:
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
     voice:
       label: 語音
+      fallback: 後備
       selectPlaceholder: 請選擇一個語音
       preview: 試聽
       previewSample: Read Frog 的問候！這是我朗讀時的語音。
+    languageVoice:
+      label: 語言語音
+      reset: 重設為預設
+      description: 選擇一種語言，並指定當 TTS 偵測到該語言時要使用的語音。
     rate:
       label: 語速 (%)
       hint: 支援 -100 到 100 的整數

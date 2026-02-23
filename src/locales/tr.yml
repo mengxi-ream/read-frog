@@ -420,9 +420,14 @@ options:
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
     voice:
       label: Ses
+      fallback: Yedek
       selectPlaceholder: Bir ses seçin
       preview: Önizleme
       previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
+    languageVoice:
+      label: Dil Sesi
+      reset: Varsayılana Sıfırla
+      description: Bir dil seçin ve TTS bu dili algıladığında kullanılacak sesi atayın.
     rate:
       label: Hız (%)
       hint: -100 ile 100 arasında tam sayı değerleri kabul eder

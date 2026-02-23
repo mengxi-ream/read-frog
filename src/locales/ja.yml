@@ -419,9 +419,14 @@ options:
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
     voice:
       label: ボイス
+      fallback: フォールバック
       selectPlaceholder: ボイスを選択
       preview: 試聴
       previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
+    languageVoice:
+      label: 言語別ボイス
+      reset: デフォルトにリセット
+      description: 言語を選択し、TTS がその言語を検出したときに使用するボイスを割り当てます。
     rate:
       label: 速度 (%)
       hint: -100 から 100 までの整数を入力できます

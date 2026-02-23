@@ -41,6 +41,14 @@ function hasValidCachedToken(now = Date.now()): boolean {
   return now < (tokenInfo.expiredAt - EDGE_TTS_TOKEN_REFRESH_BEFORE_EXPIRY_MS)
 }
 
+function hasUnexpiredCachedToken(now = Date.now()): boolean {
+  if (!tokenInfo) {
+    return false
+  }
+
+  return now < tokenInfo.expiredAt
+}
+
 function ensureEndpointPayload(data: unknown): EdgeTTSEndpointResponse {
   if (!data || typeof data !== 'object') {
     throw new EdgeTTSError('TOKEN_FETCH_FAILED', 'Invalid endpoint response payload')
@@ -97,7 +105,7 @@ export async function getEdgeTTSEndpointToken(): Promise<EdgeTTSTokenInfo> {
     return tokenInfo
   }
   catch (error) {
-    if (tokenInfo) {
+    if (hasUnexpiredCachedToken() && tokenInfo) {
       return tokenInfo
     }
 

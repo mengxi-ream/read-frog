@@ -41,6 +41,14 @@ function isRetryableError(error: unknown): boolean {
   return error instanceof TypeError
 }
 
+function resolveOutputFormat(outputFormat?: string): string {
+  const trimmed = outputFormat?.trim()
+  if (!trimmed) {
+    return EDGE_TTS_OUTPUT_FORMAT
+  }
+  return trimmed
+}
+
 function isConcatenationSafeOutputFormat(outputFormat: string): boolean {
   const normalized = outputFormat.toLowerCase()
   return normalized.includes('mp3') || normalized.startsWith('raw-')
@@ -51,15 +59,28 @@ function assertChunkConcatSupported(chunkRequests: EdgeTTSSynthesizeRequest[]): 
     return
   }
 
-  const requestedFormat = chunkRequests[0]?.outputFormat ?? EDGE_TTS_OUTPUT_FORMAT
-  if (isConcatenationSafeOutputFormat(requestedFormat)) {
-    return
-  }
+  const requestedFormats = chunkRequests.map(chunkRequest => resolveOutputFormat(chunkRequest.outputFormat))
+  const firstFormat = requestedFormats[0]!
+  const firstFormatNormalized = firstFormat.toLowerCase()
 
-  throw new EdgeTTSError(
-    'SYNTH_REQUEST_FAILED',
-    `Output format "${requestedFormat}" is not safe for multi-chunk concatenation`,
-  )
+  for (let index = 0; index < requestedFormats.length; index++) {
+    const requestedFormat = requestedFormats[index]!
+    const requestedFormatNormalized = requestedFormat.toLowerCase()
+
+    if (!isConcatenationSafeOutputFormat(requestedFormat)) {
+      throw new EdgeTTSError(
+        'SYNTH_REQUEST_FAILED',
+        `Output format "${requestedFormat}" is not safe for multi-chunk concatenation`,
+      )
+    }
+
+    if (requestedFormatNormalized !== firstFormatNormalized) {
+      throw new EdgeTTSError(
+        'SYNTH_REQUEST_FAILED',
+        `Mixed output formats are not supported for multi-chunk concatenation: "${firstFormat}" and "${requestedFormat}"`,
+      )
+    }
+  }
 }
 
 async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeTTSResponse> {
@@ -72,7 +93,7 @@ async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeT
       'Authorization': endpointInfo.endpoint.t,
       'Content-Type': 'application/ssml+xml',
       'User-Agent': EDGE_TTS_USER_AGENT,
-      'X-Microsoft-OutputFormat': request.outputFormat ?? EDGE_TTS_OUTPUT_FORMAT,
+      'X-Microsoft-OutputFormat': resolveOutputFormat(request.outputFormat),
     },
     body: buildSSMLRequest(request),
   })

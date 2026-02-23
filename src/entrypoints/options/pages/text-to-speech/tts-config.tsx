@@ -89,7 +89,9 @@ function TtsDefaultVoiceField() {
       <FieldLabel nativeLabel={false} render={<div />}>
         {i18n.t('options.tts.voice.label')}
         {' '}
-        (Fallback)
+        (
+        {i18n.t('options.tts.voice.fallback')}
+        )
       </FieldLabel>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <div className="flex flex-1 items-center gap-2">
@@ -159,7 +161,7 @@ function TtsLanguageVoiceField() {
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
-        Language Voice
+        {i18n.t('options.tts.languageVoice.label')}
       </FieldLabel>
       <div className="space-y-2">
         <LanguageCombobox
@@ -208,12 +210,12 @@ function TtsLanguageVoiceField() {
             onClick={resetLanguageVoice}
             disabled={selectedLanguageVoice === defaultLanguageVoice}
           >
-            Reset Default
+            {i18n.t('options.tts.languageVoice.reset')}
           </Button>
         </div>
       </div>
       <FieldDescription>
-        Select a language and assign a voice used when TTS detects that language.
+        {i18n.t('options.tts.languageVoice.description')}
       </FieldDescription>
     </Field>
   )

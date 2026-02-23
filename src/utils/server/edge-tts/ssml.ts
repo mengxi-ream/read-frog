@@ -31,6 +31,11 @@ export function buildSSMLRequest(params: EdgeTTSRequestParams): string {
   const rate = params.rate ?? '+0%'
   const pitch = params.pitch ?? '+0Hz'
   const volume = params.volume ?? '+0%'
+  const escapedLocale = escapeXml(locale)
+  const escapedVoice = escapeXml(params.voice)
+  const escapedRate = escapeXml(rate)
+  const escapedPitch = escapeXml(pitch)
+  const escapedVolume = escapeXml(volume)
 
-  return `<speak version=\"1.0\" xmlns=\"http://www.w3.org/2001/10/synthesis\" xml:lang=\"${locale}\"><voice name=\"${params.voice}\"><prosody rate=\"${rate}\" pitch=\"${pitch}\" volume=\"${volume}\">${escapeXml(cleanText)}</prosody></voice></speak>`
+  return `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${escapedLocale}"><voice name="${escapedVoice}"><prosody rate="${escapedRate}" pitch="${escapedPitch}" volume="${escapedVolume}">${escapeXml(cleanText)}</prosody></voice></speak>`
 }

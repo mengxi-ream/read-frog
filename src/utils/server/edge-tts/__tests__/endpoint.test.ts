@@ -39,7 +39,29 @@ describe('getEdgeTTSEndpointToken', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1)
   })
 
-  it('falls back to cached token when refresh request fails', async () => {
+  it('falls back to cached token when refresh request fails but token is still unexpired', async () => {
+    const nowSeconds = Math.floor(Date.now() / 1000)
+    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+
+    fetchSpy.mockResolvedValueOnce(
+      new Response(JSON.stringify({
+        r: 'eastus',
+        t: createJwt(nowSeconds + 60),
+      }), {
+        status: 200,
+      }),
+    )
+
+    fetchSpy.mockRejectedValueOnce(new TypeError('network down'))
+
+    const first = await getEdgeTTSEndpointToken()
+    const second = await getEdgeTTSEndpointToken()
+
+    expect(first.token).toBe(second.token)
+    expect(fetchSpy).toHaveBeenCalledTimes(2)
+  })
+
+  it('throws when refresh request fails and cached token is expired', async () => {
     const nowSeconds = Math.floor(Date.now() / 1000)
     const fetchSpy = vi.spyOn(globalThis, 'fetch')
 
@@ -54,10 +76,11 @@ describe('getEdgeTTSEndpointToken', () => {
 
     fetchSpy.mockRejectedValueOnce(new TypeError('network down'))
 
-    const first = await getEdgeTTSEndpointToken()
-    const second = await getEdgeTTSEndpointToken()
+    await getEdgeTTSEndpointToken()
 
-    expect(first.token).toBe(second.token)
+    await expect(getEdgeTTSEndpointToken()).rejects.toMatchObject({
+      code: 'TOKEN_FETCH_FAILED',
+    })
     expect(fetchSpy).toHaveBeenCalledTimes(2)
   })
 })

@@ -422,9 +422,14 @@ options:
     description: Use Edge TTS voice settings for the Speak button.
     voice:
       label: Voice
+      fallback: Fallback
       selectPlaceholder: Select a voice
       preview: Preview
       previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
+    languageVoice:
+      label: Language Voice
+      reset: Reset to Default
+      description: Select a language and assign a voice used when TTS detects that language.
     rate:
       label: Rate (%)
       hint: Accepts integer values between -100 and 100
