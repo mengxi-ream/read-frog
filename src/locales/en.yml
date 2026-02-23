@@ -673,7 +673,7 @@ subtitles:
     networkError: Network error occurred when fetching captions
     fetchSubTimeout: Fetching youtube captions timed out
     buttonNotFound: Subtitle button not found
-    noSubtitlesFound: No subtitles found
+    noSubtitlesFound: No subtitles available for this video
     videoNotFound: Video element not found
     controlsBarNotFound: Controls bar not found
     aiRateLimited: Too many requests, please try again later

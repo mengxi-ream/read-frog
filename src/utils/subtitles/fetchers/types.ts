@@ -5,4 +5,5 @@ export interface SubtitlesFetcher {
   cleanup: () => void
   shouldUseSameTrack: () => Promise<boolean>
   getSourceLanguage: () => string
+  hasAvailableSubtitles: () => Promise<boolean>
 }

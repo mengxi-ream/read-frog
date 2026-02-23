@@ -671,7 +671,7 @@ subtitles:
     networkError: Xảy ra lỗi mạng khi lấy phụ đề
     fetchSubTimeout: Quá thời gian lấy phụ đề Youtube
     buttonNotFound: Không tìm thấy nút phụ đề
-    noSubtitlesFound: Không tìm thấy phụ đề
+    noSubtitlesFound: Video hiện tại không có phụ đề
     videoNotFound: Không tìm thấy phần tử video
     controlsBarNotFound: Không tìm thấy thanh điều khiển
     aiRateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau

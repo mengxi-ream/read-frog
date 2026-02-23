@@ -4,16 +4,14 @@ import { useAtomValue } from 'jotai'
 import { STATE_MESSAGE_CLASS } from '@/utils/constants/subtitles'
 import { subtitlesStateAtom } from '../atoms'
 
-const STATE_CONFIG: Record<Exclude<SubtitlesState, 'idle'>, { color: string, getText: () => string, position: string }> = {
+const STATE_CONFIG: Record<Exclude<SubtitlesState, 'idle'>, { color: string, getText: () => string }> = {
   loading: {
     color: 'oklch(70% 0.19 250)',
     getText: () => i18n.t('subtitles.state.loading'),
-    position: 'bottom-20',
   },
   error: {
     color: 'oklch(63% 0.24 25)',
     getText: () => i18n.t('subtitles.state.error'),
-    position: 'top-1/2 -translate-y-1/2',
   },
 }
 
@@ -24,12 +22,12 @@ export function StateMessage() {
     return null
   }
 
-  const { color, getText, position } = STATE_CONFIG[stateData.state]
+  const { color, getText } = STATE_CONFIG[stateData.state]
   const message = stateData.message || getText()
 
   return (
     <div
-      className={`${STATE_MESSAGE_CLASS} absolute left-1/2 -translate-x-1/2 pointer-events-auto ${position}`}
+      className={`${STATE_MESSAGE_CLASS} absolute left-1/2 -translate-x-1/2 bottom-1/6 pointer-events-auto`}
       style={{
         fontFamily: 'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
       }}

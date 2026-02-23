@@ -670,7 +670,7 @@ subtitles:
     networkError: 字幕取得時にネットワークエラーが発生しました
     fetchSubTimeout: YouTube字幕の取得がタイムアウトしました
     buttonNotFound: 字幕ボタンが見つかりません
-    noSubtitlesFound: 字幕が見つかりません
+    noSubtitlesFound: この動画には字幕がありません
     videoNotFound: 動画要素が見つかりません
     controlsBarNotFound: コントロールバーが見つかりません
     aiRateLimited: リクエストが多すぎます。後でもう一度お試しください
