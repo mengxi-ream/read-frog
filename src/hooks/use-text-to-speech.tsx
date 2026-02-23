@@ -34,7 +34,7 @@ function resolveVoiceForText(text: string, ttsConfig: TTSConfig): string {
     return ttsConfig.languageVoices[detectedLanguage as keyof typeof ttsConfig.languageVoices] ?? ttsConfig.defaultVoice
   }
 
-  return ttsConfig.languageVoices.eng ?? ttsConfig.defaultVoice
+  return ttsConfig.defaultVoice
 }
 
 function getTTSFriendlyErrorDescription(error: Error): string | undefined {

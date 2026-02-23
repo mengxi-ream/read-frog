@@ -51,7 +51,7 @@ export async function synthesizeEdgeTTS(params: EdgeTTSRequestParams): Promise<E
   }
   catch (error) {
     const payload = toEdgeTTSErrorPayload(error)
-    if (!['INVALID_TEXT', 'TEXT_TOO_LONG', 'UNSUPPORTED_BROWSER', 'FEATURE_DISABLED'].includes(payload.code)) {
+    if (!['INVALID_TEXT', 'TEXT_TOO_LONG', 'UNSUPPORTED_BROWSER', 'FEATURE_DISABLED', 'CIRCUIT_OPEN'].includes(payload.code)) {
       recordEdgeTTSFailure()
     }
     return {
