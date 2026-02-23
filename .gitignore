@@ -39,3 +39,5 @@ coverage/
 tsconfig.local.json
 
 docs/
+
+/repos

@@ -39,7 +39,6 @@ function FeatureProviderField({ featureKey, excludeProviderTypes }: {
         featureKey={featureKey}
         value={providerId}
         onChange={id => void setConfig(buildFeatureProviderPatch({ [featureKey]: id }))}
-        nullable={def.nullable || undefined}
         excludeProviderTypes={excludeProviderTypes}
         className="w-full"
       />
@@ -63,7 +62,6 @@ export default function FeatureProvidersConfig() {
         <FeatureProviderField featureKey="videoSubtitles" />
         <FeatureProviderField featureKey="selectionToolbar.translate" />
         <FeatureProviderField featureKey="selectionToolbar.vocabularyInsight" />
-        <FeatureProviderField featureKey="tts" />
         <FeatureProviderField featureKey="inputTranslation" />
       </div>
     </ConfigCard>

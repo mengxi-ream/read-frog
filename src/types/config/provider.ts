@@ -83,17 +83,6 @@ export function isNonAPIProviderConfig(config: ProviderConfig): config is NonAPI
   return isNonAPIProvider(config.provider)
 }
 
-export const TTS_PROVIDER_TYPES = ['openai'] as const satisfies Readonly<
-  (keyof typeof LLM_PROVIDER_MODELS)[]
->
-export type TTSProviderTypes = typeof TTS_PROVIDER_TYPES[number]
-export function isTTSProvider(provider: string): provider is TTSProviderTypes {
-  return TTS_PROVIDER_TYPES.includes(provider)
-}
-export function isTTSProviderConfig(config: ProviderConfig): config is TTSProviderConfig {
-  return isTTSProvider(config.provider)
-}
-
 // all provider names
 export const ALL_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
   TranslateProviderTypes[]
@@ -294,7 +283,6 @@ export type LLMProviderConfig = Extract<ProviderConfig, { provider: LLMProviderT
 export type TranslateProviderConfig = Extract<ProviderConfig, { provider: TranslateProviderTypes }>
 export type NonCustomLLMProviderConfig = Extract<ProviderConfig, { provider: NonCustomLLMProviderTypes }>
 export type CustomLLMProviderConfig = Extract<ProviderConfig, { provider: CustomLLMProviderTypes }>
-export type TTSProviderConfig = Extract<ProviderConfig, { provider: TTSProviderTypes }>
 
 /* ──────────────────────────────
   unified llm model config helpers

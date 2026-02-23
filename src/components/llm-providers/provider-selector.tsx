@@ -1,5 +1,5 @@
 import type { Theme } from '@/components/providers/theme-provider'
-import type { ProviderConfig, TranslateProviderConfig } from '@/types/config/provider'
+import type { ProviderConfig } from '@/types/config/provider'
 import type { FeatureKey } from '@/utils/constants/feature-providers'
 import { i18n } from '#imports'
 import { useAtomValue } from 'jotai'
@@ -22,9 +22,8 @@ import { useTheme } from '../providers/theme-provider'
 
 interface ProviderSelectorProps {
   featureKey: FeatureKey
-  value: string | null
+  value: string
   onChange: (id: string) => void
-  nullable?: boolean
   excludeProviderTypes?: string[]
   placeholder?: string
   className?: string
@@ -99,8 +98,8 @@ function TranslateGroupedSelect({
   const pureAPIProviders = getPureAPIProvidersConfig(enabledProvidersConfig)
 
   return (
-    <Select<TranslateProviderConfig>
-      value={currentProvider as TranslateProviderConfig | undefined}
+    <Select<ProviderConfig>
+      value={currentProvider}
       onValueChange={(provider) => {
         if (!provider)
           return
@@ -110,7 +109,7 @@ function TranslateGroupedSelect({
     >
       <SelectTrigger className={className}>
         <SelectValue placeholder={placeholder}>
-          {(provider: TranslateProviderConfig) => (
+          {(provider: ProviderConfig) => (
             <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
           )}
         </SelectValue>

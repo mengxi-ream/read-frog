@@ -416,21 +416,21 @@ options:
       enableDescription: AI は記事の要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
   tts:
     title: テキスト読み上げ
-    description: お好みの OpenAI 音声設定で読み上げボタンをカスタマイズします。
-    provider:
-      label: プロバイダー
-      selectPlaceholder: プロバイダーを選択
-      noProvider: OpenAI プロバイダーを追加してください
-    model:
-      label: モデル
+    description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
     voice:
       label: ボイス
       selectPlaceholder: ボイスを選択
       preview: 試聴
       previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
-    speed:
-      label: 速度
-      hint: 0.25〜4.0 の値を入力できます
+    rate:
+      label: 速度 (%)
+      hint: -100 から 100 までの整数を入力できます
+    pitch:
+      label: ピッチ (Hz)
+      hint: -100 から 100 までの整数を入力できます
+    volume:
+      label: 音量 (%)
+      hint: -100 から 100 までの整数を入力できます
     betaDisabled: テキスト読み上げ設定をカスタマイズするには Beta 体験を有効にしてください。
   statistics:
     title: 統計

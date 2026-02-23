@@ -419,21 +419,21 @@ options:
       enableDescription: AI 使用文章摘要來提高翻譯準確性。需要 LLM 翻譯提供商。剛開始翻譯頁面時會有延遲，並增加 API 費用。
   tts:
     title: 文字轉語音
-    description: 使用您偏好的 OpenAI 語音設定自訂「朗讀」按鈕。
-    provider:
-      label: 提供商
-      selectPlaceholder: 選擇提供商
-      noProvider: 請新增 OpenAI 提供商
-    model:
-      label: 模型
+    description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
     voice:
       label: 語音
       selectPlaceholder: 請選擇一個語音
       preview: 試聽
       previewSample: Read Frog 的問候！這是我朗讀時的語音。
-    speed:
-      label: 速度
-      hint: 可輸入 0.25 至 4.0 的數值
+    rate:
+      label: 語速 (%)
+      hint: 支援 -100 到 100 的整數
+    pitch:
+      label: 音高 (Hz)
+      hint: 支援 -100 到 100 的整數
+    volume:
+      label: 音量 (%)
+      hint: 支援 -100 到 100 的整數
     betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
   statistics:
     title: 統計

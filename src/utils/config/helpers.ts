@@ -1,8 +1,8 @@
 import type { Config } from '@/types/config/config'
-import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig, TTSProviderConfig } from '@/types/config/provider'
+import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig } from '@/types/config/provider'
 import type { FeatureKey } from '@/utils/constants/feature-providers'
-import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig, isTTSProviderConfig } from '@/types/config/provider'
-import { FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
+import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig } from '@/types/config/provider'
+import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
 
 export function getProviderConfigById<T extends ProviderConfig>(providersConfig: T[], providerId: string): T | undefined {
   return providersConfig.find(p => p.id === providerId)
@@ -26,10 +26,6 @@ export function getNonAPIProvidersConfig(providersConfig: ProvidersConfig): NonA
 
 export function getTranslateProvidersConfig(providersConfig: ProvidersConfig): TranslateProviderConfig[] {
   return providersConfig.filter(isTranslateProviderConfig)
-}
-
-export function getTTSProvidersConfig(providersConfig: ProvidersConfig): TTSProviderConfig[] {
-  return providersConfig.filter(isTTSProviderConfig)
 }
 
 export function filterEnabledProvidersConfig(providersConfig: ProvidersConfig): ProvidersConfig {
@@ -67,24 +63,22 @@ export function getProviderBaseURL(providersConfig: ProvidersConfig, providerId:
 
 /**
  * Compute fallback provider assignments when a provider is deleted.
- * For each feature using the deleted provider, picks the first compatible remaining provider,
- * or null if the feature is nullable.
+ * For each feature using the deleted provider, picks the first compatible remaining provider.
  */
 export function computeProviderFallbacksAfterDeletion(
   deletedProviderId: string,
   config: Config,
   remainingProviders: ProvidersConfig,
-): Partial<Record<FeatureKey, string | null>> {
-  const updates: Partial<Record<FeatureKey, string | null>> = {}
-  for (const [key, def] of Object.entries(FEATURE_PROVIDER_DEFS)) {
+): Partial<Record<FeatureKey, string>> {
+  const updates: Partial<Record<FeatureKey, string>> = {}
+  for (const key of FEATURE_KEYS) {
+    const def = FEATURE_PROVIDER_DEFS[key]
     const currentId = def.getProviderId(config)
     if (currentId !== deletedProviderId)
       continue
     const candidates = remainingProviders.filter(p => def.isProvider(p.provider))
     if (candidates.length > 0)
-      updates[key as FeatureKey] = candidates[0].id
-    else if (def.nullable)
-      updates[key as FeatureKey] = null
+      updates[key] = candidates[0].id
   }
   return updates
 }
@@ -92,11 +86,10 @@ export function computeProviderFallbacksAfterDeletion(
 export function findFeatureMissingProvider(
   remainingProviders: ProvidersConfig,
 ): FeatureKey | null {
-  for (const [key, def] of Object.entries(FEATURE_PROVIDER_DEFS)) {
-    if (def.nullable)
-      continue
-    if (remainingProviders.filter(p => def.isProvider(p.provider)).length === 0)
-      return key as FeatureKey
+  for (const key of FEATURE_KEYS) {
+    const def = FEATURE_PROVIDER_DEFS[key]
+    if (!remainingProviders.some(p => def.isProvider(p.provider)))
+      return key
   }
   return null
 }

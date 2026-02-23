@@ -1,5 +1,4 @@
 import type { APIProviderConfig } from '@/types/config/provider'
-import type { FeatureKey } from '@/utils/constants/feature-providers'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useStore } from '@tanstack/react-form'
@@ -8,7 +7,7 @@ import { useState } from 'react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/base-ui/collapsible'
 import { Switch } from '@/components/ui/base-ui/switch'
 import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
-import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
+import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
 import { cn } from '@/utils/styles/utils'
 import { withForm } from './form'
 
@@ -21,8 +20,8 @@ export const FeatureProviderSection = withForm({
     const setConfig = useSetAtom(writeConfigAtom)
     const [isOpen, setIsOpen] = useState(false)
 
-    const compatibleFeatures = Object.entries(FEATURE_PROVIDER_DEFS)
-      .filter(([_, def]) => def.isProvider(providerType))
+    const compatibleFeatures = FEATURE_KEYS
+      .filter(featureKey => FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType))
 
     if (compatibleFeatures.length === 0)
       return null
@@ -41,7 +40,8 @@ export const FeatureProviderSection = withForm({
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="flex flex-col gap-3">
-            {compatibleFeatures.map(([featureKey, def]) => {
+            {compatibleFeatures.map((featureKey) => {
+              const def = FEATURE_PROVIDER_DEFS[featureKey]
               const isAssigned = def.getProviderId(config) === providerId
               return (
                 <div key={featureKey} className="flex items-center gap-2">
@@ -50,13 +50,13 @@ export const FeatureProviderSection = withForm({
                     disabled={isAssigned}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        const patch = buildFeatureProviderPatch({ [featureKey as FeatureKey]: providerId })
+                        const patch = buildFeatureProviderPatch({ [featureKey]: providerId })
                         void setConfig(patch)
                       }
                     }}
                   />
                   <span className="text-sm">
-                    {i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey as FeatureKey]}`)}
+                    {i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`)}
                   </span>
                 </div>
               )

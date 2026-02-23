@@ -3,53 +3,49 @@ import { isLLMProvider, isTranslateProvider } from '@/types/config/provider'
 import { mergeWithArrayOverwrite } from '../atoms/config'
 import { getProviderConfigById } from '../config/helpers'
 
+export const FEATURE_KEYS = [
+  'translate',
+  'videoSubtitles',
+  'selectionToolbar.translate',
+  'selectionToolbar.vocabularyInsight',
+  'inputTranslation',
+] as const
+
+export type FeatureKey = (typeof FEATURE_KEYS)[number]
+
 export interface FeatureProviderDef {
-  nullable: boolean
-  getProviderId: (config: Config) => string | null
-  configPath: string[]
+  getProviderId: (config: Config) => string
+  configPath: readonly string[]
   isProvider: (provider: string) => boolean
 }
 
 export const FEATURE_PROVIDER_DEFS = {
   'translate': {
     isProvider: isTranslateProvider,
-    nullable: false,
     getProviderId: (c: Config) => c.translate.providerId,
     configPath: ['translate', 'providerId'],
   },
   'videoSubtitles': {
     isProvider: isTranslateProvider,
-    nullable: false,
     getProviderId: (c: Config) => c.videoSubtitles.providerId,
     configPath: ['videoSubtitles', 'providerId'],
   },
   'selectionToolbar.translate': {
     isProvider: isTranslateProvider,
-    nullable: false,
     getProviderId: (c: Config) => c.selectionToolbar.features.translate.providerId,
     configPath: ['selectionToolbar', 'features', 'translate', 'providerId'],
   },
   'selectionToolbar.vocabularyInsight': {
     isProvider: isLLMProvider,
-    nullable: false,
     getProviderId: (c: Config) => c.selectionToolbar.features.vocabularyInsight.providerId,
     configPath: ['selectionToolbar', 'features', 'vocabularyInsight', 'providerId'],
   },
-  'tts': {
-    isProvider: isLLMProvider,
-    nullable: true, // TODO: remove nullable once we have Edge TTS provider
-    getProviderId: (c: Config) => c.tts.providerId,
-    configPath: ['tts', 'providerId'],
-  },
   'inputTranslation': {
     isProvider: isTranslateProvider,
-    nullable: false,
     getProviderId: (c: Config) => c.inputTranslation.providerId,
     configPath: ['inputTranslation', 'providerId'],
   },
-} as const satisfies Record<string, FeatureProviderDef>
-
-export type FeatureKey = keyof typeof FEATURE_PROVIDER_DEFS
+} as const satisfies Record<FeatureKey, FeatureProviderDef>
 
 /** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.general.featureProviders.features.*` */
 export const FEATURE_KEY_I18N_MAP: Record<FeatureKey, string> = {
@@ -57,16 +53,12 @@ export const FEATURE_KEY_I18N_MAP: Record<FeatureKey, string> = {
   'videoSubtitles': 'videoSubtitles',
   'selectionToolbar.translate': 'selectionToolbar_translate',
   'selectionToolbar.vocabularyInsight': 'selectionToolbar_vocabularyInsight',
-  'tts': 'tts',
   'inputTranslation': 'inputTranslation',
 }
 
-export function resolveProviderConfig(config: Config, featureKey: keyof typeof FEATURE_PROVIDER_DEFS) {
+export function resolveProviderConfig(config: Config, featureKey: FeatureKey) {
   const def = FEATURE_PROVIDER_DEFS[featureKey]
   const providerId = def.getProviderId(config)
-  if (!providerId) {
-    throw new Error(`No provider id for feature "${featureKey}"`)
-  }
   const providerConfig = getProviderConfigById(config.providersConfig, providerId)
   if (!providerConfig) {
     throw new Error(`No provider config for id "${providerId}" (feature "${featureKey}")`)
@@ -80,22 +72,27 @@ export function resolveProviderConfig(config: Config, featureKey: keyof typeof F
  */
 
 export function buildFeatureProviderPatch(
-  assignments: Partial<Record<FeatureKey, string | null>>,
+  assignments: Partial<Record<FeatureKey, string>>,
 ): Partial<Config> {
-  let patch: Record<string, any> = {}
+  let patch: Record<string, unknown> = {}
 
-  for (const [key, newId] of Object.entries(assignments)) {
-    const def = FEATURE_PROVIDER_DEFS[key as FeatureKey]
+  for (const key of FEATURE_KEYS) {
+    const newId = assignments[key]
+    if (newId === undefined)
+      continue
 
-    const fragment: Record<string, any> = {}
-    let current = fragment
+    const def = FEATURE_PROVIDER_DEFS[key]
+
+    const fragment: Record<string, unknown> = {}
+    let current: Record<string, unknown> = fragment
     for (let i = 0; i < def.configPath.length - 1; i++) {
-      current[def.configPath[i]] = {}
-      current = current[def.configPath[i]]
+      const next: Record<string, unknown> = {}
+      current[def.configPath[i]] = next
+      current = next
     }
     current[def.configPath[def.configPath.length - 1]] = newId
 
-    patch = mergeWithArrayOverwrite(patch, fragment) as Record<string, any>
+    patch = mergeWithArrayOverwrite(patch, fragment)
   }
 
   return patch as Partial<Config>

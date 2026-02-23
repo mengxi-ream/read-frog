@@ -419,21 +419,21 @@ options:
       enableDescription: AI uses article summary to improve translation accuracy. Requires LLM provider. Adds latency when starting to translate a page and increases API costs.
   tts:
     title: Text to Speech
-    description: Customize the Speak button with your preferred OpenAI voice settings.
-    provider:
-      label: Provider
-      selectPlaceholder: Select a provider
-      noProvider: Please add OpenAI provider
-    model:
-      label: Model
+    description: Use Edge TTS voice settings for the Speak button.
     voice:
       label: Voice
       selectPlaceholder: Select a voice
       preview: Preview
       previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
-    speed:
-      label: Speed
-      hint: Accepts values between 0.25 and 4.0
+    rate:
+      label: Rate (%)
+      hint: Accepts integer values between -100 and 100
+    pitch:
+      label: Pitch (Hz)
+      hint: Accepts integer values between -100 and 100
+    volume:
+      label: Volume (%)
+      hint: Accepts integer values between -100 and 100
     betaDisabled: Enable Beta Experience to customize text-to-speech settings.
   statistics:
     title: Statistics

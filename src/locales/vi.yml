@@ -417,21 +417,21 @@ options:
       enableDescription: AI sử dụng tóm tắt bài viết để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
   tts:
     title: Chuyển văn bản thành giọng nói
-    description: Tùy chỉnh nút Đọc với cài đặt giọng nói OpenAI ưa thích của bạn.
-    provider:
-      label: Nhà cung cấp
-      selectPlaceholder: Chọn nhà cung cấp
-      noProvider: Vui lòng thêm nhà cung cấp OpenAI
-    model:
-      label: Mô hình
+    description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.
     voice:
       label: Giọng nói
       selectPlaceholder: Chọn giọng nói
       preview: Xem trước
       previewSample: Xin chào từ Read Frog! Đây là cách tôi sẽ phát âm khi đọc to.
-    speed:
-      label: Tốc độ
-      hint: Chấp nhận giá trị từ 0.25 đến 4.0
+    rate:
+      label: Tốc độ (%)
+      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
+    pitch:
+      label: Cao độ (Hz)
+      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
+    volume:
+      label: Âm lượng (%)
+      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
     betaDisabled: Bật Trải nghiệm Beta để tùy chỉnh cài đặt chuyển văn bản thành giọng nói.
   statistics:
     title: Thống kê

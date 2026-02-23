@@ -6,7 +6,7 @@ import { useAtom, useAtomValue, useSetAtom } from 'jotai'
 import { useCallback, useEffect, useState } from 'react'
 import { toast } from 'sonner'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
-import { isLLMProviderConfig, isTTSProviderConfig } from '@/types/config/provider'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
 import { featureProviderConfigAtom } from '@/utils/atoms/provider'
 import { streamBackgroundText } from '@/utils/content-script/background-stream-client'
@@ -213,7 +213,6 @@ export function TranslatePopover() {
 function SpeakOriginalButton() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
-  const ttsProviderConfig = useAtomValue(featureProviderConfigAtom('tts'))
   const { play, isFetching, isPlaying } = useTextToSpeech()
 
   const handleSpeak = useCallback(async () => {
@@ -222,17 +221,8 @@ function SpeakOriginalButton() {
       return
     }
 
-    if (!ttsProviderConfig || !isTTSProviderConfig(ttsProviderConfig)) {
-      toast.error(i18n.t('speak.openaiNotConfigured'))
-      return
-    }
-
-    void play(selectionContent, ttsConfig, ttsProviderConfig)
-  }, [selectionContent, ttsConfig, ttsProviderConfig, play])
-
-  if (!ttsProviderConfig || !isTTSProviderConfig(ttsProviderConfig)) {
-    return null
-  }
+    void play(selectionContent, ttsConfig)
+  }, [selectionContent, ttsConfig, play])
 
   return (
     <button

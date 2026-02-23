@@ -1,5 +1,4 @@
 import type { APIProviderConfig } from '@/types/config/provider'
-import type { FeatureKey } from '@/utils/constants/feature-providers'
 import { i18n } from '#imports'
 import { Icon } from '@iconify/react'
 import { useAtom, useAtomValue, useSetAtom } from 'jotai'
@@ -16,7 +15,7 @@ import { isAPIProviderConfig } from '@/types/config/provider'
 import { configAtom, configFieldsAtomMap } from '@/utils/atoms/config'
 import { providerConfigAtom } from '@/utils/atoms/provider'
 import { getAPIProvidersConfig } from '@/utils/config/helpers'
-import { FEATURE_KEY_I18N_MAP, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
+import { FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
 import { API_PROVIDER_ITEMS } from '@/utils/constants/providers'
 import { cn } from '@/utils/styles/utils'
 import { ConfigCard } from '../../components/config-card'
@@ -195,9 +194,8 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const setProviderConfig = useSetAtom(providerConfigAtom(id))
   const config = useAtomValue(configAtom)
 
-  const assignedFeatures = Object.entries(FEATURE_PROVIDER_DEFS)
-    .filter(([_, def]) => def.getProviderId(config) === id)
-    .map(([key]) => key as FeatureKey)
+  const assignedFeatures = FEATURE_KEYS
+    .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
 
   return (
     <div

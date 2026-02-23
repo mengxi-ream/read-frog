@@ -2,7 +2,13 @@ import type { LangCodeISO6393 } from '@read-frog/definitions'
 import type { Config } from '@/types/config/config'
 import type { ProviderConfig } from '@/types/config/provider'
 import type { BatchQueueConfig, RequestQueueConfig } from '@/types/config/translate'
+import type {
+  EdgeTTSHealthStatus,
+  EdgeTTSSynthesizeRequest,
+  EdgeTTSSynthesizeWireResponse,
+} from '@/types/edge-tts'
 import type { ProxyRequest, ProxyResponse } from '@/types/proxy-fetch'
+import type { EdgeTTSVoice } from '@/utils/server/edge-tts/types'
 import { defineExtensionMessaging } from '@webext-core/messaging'
 
 interface ProtocolMap {
@@ -41,6 +47,10 @@ interface ProtocolMap {
   // cache management
   clearAllTranslationRelatedCache: () => Promise<void>
   clearAiSegmentationCache: () => Promise<void>
+  // edge tts
+  edgeTtsSynthesize: (data: EdgeTTSSynthesizeRequest) => Promise<EdgeTTSSynthesizeWireResponse>
+  edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>
+  edgeTtsHealthCheck: () => Promise<EdgeTTSHealthStatus>
 }
 
 export const { sendMessage, onMessage }

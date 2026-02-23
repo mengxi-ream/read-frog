@@ -96,8 +96,6 @@ export const configSchema = z.object({
 
   for (const def of Object.values(FEATURE_PROVIDER_DEFS)) {
     const providerId = def.getProviderId(data)
-    if (!providerId)
-      continue
 
     const validIds = new Set(providerIdsSet)
     for (const [type, name] of Object.entries(NON_API_TRANSLATE_PROVIDERS_MAP)) {
@@ -110,7 +108,7 @@ export const configSchema = z.object({
         code: 'invalid_value',
         values: Array.from(validIds),
         message: `Invalid provider id "${providerId}".`,
-        path: def.configPath,
+        path: [...def.configPath],
       })
       continue
     }
@@ -121,7 +119,7 @@ export const configSchema = z.object({
         code: 'invalid_value',
         values: Array.from(validIds),
         message: `Provider "${providerId}" is not a valid provider for this feature.`,
-        path: def.configPath,
+        path: [...def.configPath],
       })
     }
   }

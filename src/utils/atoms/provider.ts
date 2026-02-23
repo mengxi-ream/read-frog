@@ -14,11 +14,6 @@ export const featureProviderConfigAtom = atomFamily((featureKey: FeatureKey) =>
     const config = get(configAtom)
     const def = FEATURE_PROVIDER_DEFS[featureKey]
     const providerId = def.getProviderId(config)
-    if (!providerId) {
-      if (def.nullable)
-        return null
-      throw new Error(`No provider id for feature "${featureKey}"`)
-    }
     return getProviderConfigById(config.providersConfig, providerId) ?? null
   }),
 )

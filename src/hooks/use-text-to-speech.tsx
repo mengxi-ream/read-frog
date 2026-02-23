@@ -1,82 +1,77 @@
-import type { TTSProviderConfig } from '@/types/config/provider'
 import type { TTSConfig } from '@/types/config/tts'
+import { i18n } from '#imports'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { experimental_generateSpeech as generateSpeech } from 'ai'
+import { franc } from 'franc'
 import { useRef, useState } from 'react'
-import { getTTSProviderById } from '@/utils/providers/model'
+import { toast } from 'sonner'
+import { sendMessage } from '@/utils/message'
+import { splitTextByUtf8Bytes } from '@/utils/server/edge-tts/chunk'
 
 interface PlayAudioParams {
   text: string
   ttsConfig: TTSConfig
-  ttsProviderConfig: TTSProviderConfig
 }
 
-const MAX_CHUNK_SIZE = 4096
+const TTS_ERROR_TOAST_ID = 'tts-synthesize-error'
 
-/**
- * Split text into chunks that respect sentence boundaries
- * Each chunk will be <= maxSize characters
- * Supports multiple languages including CJK (Chinese, Japanese, Korean)
- */
-function splitTextIntoChunks(text: string, maxSize: number = MAX_CHUNK_SIZE): string[] {
-  if (text.length <= maxSize) {
-    return [text]
+function toSignedValue(value: number, unit: '%' | 'Hz'): string {
+  return `${value >= 0 ? '+' : ''}${value}${unit}`
+}
+
+function base64ToArrayBuffer(base64: string): ArrayBuffer {
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let index = 0; index < binary.length; index++) {
+    bytes[index] = binary.charCodeAt(index)
+  }
+  return bytes.buffer
+}
+
+function resolveVoiceForText(text: string, ttsConfig: TTSConfig): string {
+  const detectedLanguage = franc(text)
+
+  if (detectedLanguage !== 'und' && detectedLanguage in ttsConfig.languageVoices) {
+    return ttsConfig.languageVoices[detectedLanguage as keyof typeof ttsConfig.languageVoices] ?? ttsConfig.defaultVoice
   }
 
-  const chunks: string[] = []
-  // Split by sentence boundaries:
-  // - Western: . ! ? with optional quotes/parentheses
-  // - CJK: 。！？；
-  // - Arabic: ؟ ۔
-  // - Devanagari: । ॥
-  // - Also split on newlines and paragraph breaks
-  const sentencePattern = /[^.!?。！？；؟۔।॥\n]+[.!?。！？；؟۔।॥\n]+|[^.!?。！？；؟۔।॥\n]+$/g
-  const sentences = text.match(sentencePattern) || [text]
+  return ttsConfig.languageVoices.eng ?? ttsConfig.defaultVoice
+}
 
-  let currentChunk = ''
-
-  for (const sentence of sentences) {
-    // If a single sentence is longer than maxSize, split it by words
-    if (sentence.length > maxSize) {
-      if (currentChunk) {
-        chunks.push(currentChunk.trim())
-        currentChunk = ''
-      }
-
-      const words = sentence.split(/\s+/)
-      for (const word of words) {
-        const combined = currentChunk ? `${currentChunk} ${word}` : word
-        if (combined.length > maxSize) {
-          if (currentChunk) {
-            chunks.push(currentChunk.trim())
-          }
-          currentChunk = word
-        }
-        else {
-          currentChunk = combined
-        }
-      }
-      continue
-    }
-
-    // If adding this sentence would exceed maxSize, start a new chunk
-    const combined = currentChunk + sentence
-    if (combined.length > maxSize) {
-      if (currentChunk) {
-        chunks.push(currentChunk.trim())
-      }
-      currentChunk = sentence
-    }
-    else {
-      currentChunk = combined
-    }
+function getTTSFriendlyErrorDescription(error: Error): string | undefined {
+  if (error.message.includes('Edge TTS returned empty audio data')) {
+    return 'The current voice may not support this language. Try switching to a matching voice.'
   }
 
-  if (currentChunk) {
-    chunks.push(currentChunk.trim())
+  if (error.message.includes('[SYNTH_RATE_LIMITED]')) {
+    return 'Too many TTS requests. Please try again in a moment.'
   }
 
-  return chunks.filter(chunk => chunk.length > 0)
+  if (error.message.includes('[NETWORK_ERROR]') || error.message.includes('[TOKEN_FETCH_FAILED]') || error.message.includes('[TOKEN_INVALID]')) {
+    return 'Edge TTS is temporarily unavailable. Please check your network and retry.'
+  }
+
+  return error.message || undefined
+}
+
+async function synthesizeEdgeTTSAudioBlob(chunk: string, voice: string, ttsConfig: TTSConfig): Promise<Blob> {
+  const response = await sendMessage('edgeTtsSynthesize', {
+    text: chunk,
+    voice,
+    rate: toSignedValue(ttsConfig.rate, '%'),
+    pitch: toSignedValue(ttsConfig.pitch, 'Hz'),
+    volume: toSignedValue(ttsConfig.volume, '%'),
+  })
+
+  if (!response.ok) {
+    throw new Error(`[${response.error.code}] ${response.error.message}`)
+  }
+
+  const audioBuffer = base64ToArrayBuffer(response.audioBase64)
+  if (audioBuffer.byteLength === 0) {
+    throw new Error('Edge TTS returned empty audio data')
+  }
+
+  return new Blob([audioBuffer], { type: response.contentType })
 }
 
 export function useTextToSpeech() {
@@ -99,40 +94,29 @@ export function useTextToSpeech() {
   }
 
   const playMutation = useMutation<void, Error, PlayAudioParams>({
-    mutationFn: async ({ text, ttsConfig, ttsProviderConfig }) => {
-      // Stop any currently playing audio first
+    meta: {
+      suppressToast: true,
+    },
+    mutationFn: async ({ text, ttsConfig }) => {
       stop()
       shouldStopRef.current = false
 
-      // Split text into chunks
-      const chunks = splitTextIntoChunks(text)
+      const selectedVoice = resolveVoiceForText(text, ttsConfig)
+      const chunks = splitTextByUtf8Bytes(text)
       setTotalChunks(chunks.length)
 
-      // Helper to fetch a chunk's audio blob
       const fetchChunkBlob = async (chunk: string) => {
         return queryClient.fetchQuery({
-          queryKey: ['tts-audio', { text: chunk, ttsConfig, ttsProviderConfig }],
-          queryFn: async () => {
-            const provider = await getTTSProviderById(ttsProviderConfig.id)
-
-            const result = await generateSpeech({
-              model: provider.speech(ttsConfig.model),
-              text: chunk,
-              voice: ttsConfig.voice,
-              speed: ttsConfig.speed,
-              outputFormat: 'wav',
-            })
-
-            return new Blob([result.audio.uint8Array.buffer as ArrayBuffer], {
-              type: result.audio.mediaType || 'audio/wav',
-            })
-          },
+          queryKey: ['tts-audio', { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume }],
+          queryFn: () => synthesizeEdgeTTSAudioBlob(chunk, selectedVoice, ttsConfig),
           staleTime: Number.POSITIVE_INFINITY,
           gcTime: 1000 * 60 * 10,
+          meta: {
+            suppressToast: true,
+          },
         })
       }
 
-      // Helper to play a blob
       const playBlob = async (blob: Blob) => {
         return new Promise<void>((resolve, reject) => {
           try {
@@ -155,43 +139,35 @@ export function useTextToSpeech() {
               reject(new Error('Failed to play audio'))
             }
 
-            audio.play()
-              .catch((err) => {
-                URL.revokeObjectURL(audioUrl)
-                setIsPlaying(false)
-                audioRef.current = null
-                reject(err)
-              })
+            audio.play().catch((error) => {
+              URL.revokeObjectURL(audioUrl)
+              setIsPlaying(false)
+              audioRef.current = null
+              reject(error)
+            })
           }
-          catch (err) {
+          catch (error) {
             setIsPlaying(false)
-            reject(err)
+            reject(error)
           }
         })
       }
 
-      // Play each chunk sequentially with prefetching
-      for (let i = 0; i < chunks.length; i++) {
+      for (let index = 0; index < chunks.length; index++) {
         if (shouldStopRef.current) {
           break
         }
 
-        setCurrentChunk(i + 1)
-
-        // Fetch current chunk and prefetch next chunk in parallel
-        const currentBlobPromise = fetchChunkBlob(chunks[i])
-        const nextBlobPromise = i + 1 < chunks.length ? fetchChunkBlob(chunks[i + 1]) : null
-
+        setCurrentChunk(index + 1)
+        const currentBlobPromise = fetchChunkBlob(chunks[index]!)
+        const nextBlobPromise = index + 1 < chunks.length ? fetchChunkBlob(chunks[index + 1]!) : null
         const blob = await currentBlobPromise
 
         if (shouldStopRef.current) {
           break
         }
 
-        // Play current chunk while next chunk is being fetched
         await playBlob(blob)
-
-        // Wait for next chunk to be ready (if it's still fetching)
         if (nextBlobPromise) {
           await nextBlobPromise
         }
@@ -200,15 +176,19 @@ export function useTextToSpeech() {
       setCurrentChunk(0)
       setTotalChunks(0)
     },
-    onError: () => {
+    onError: (error) => {
+      toast.error(i18n.t('speak.failedToGenerateSpeech'), {
+        id: TTS_ERROR_TOAST_ID,
+        description: getTTSFriendlyErrorDescription(error),
+      })
       setIsPlaying(false)
       setCurrentChunk(0)
       setTotalChunks(0)
     },
   })
 
-  const play = (text: string, ttsConfig: TTSConfig, ttsProviderConfig: TTSProviderConfig) => {
-    return playMutation.mutateAsync({ text, ttsConfig, ttsProviderConfig })
+  const play = (text: string, ttsConfig: TTSConfig) => {
+    return playMutation.mutateAsync({ text, ttsConfig })
   }
 
   const isFetching = playMutation.isPending && !isPlaying

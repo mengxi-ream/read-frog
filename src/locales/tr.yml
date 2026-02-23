@@ -417,21 +417,21 @@ options:
       enableDescription: AI, çeviri doğruluğunu artırmak için makale özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
   tts:
     title: Metinden Konuşmaya
-    description: Tercih ettiğiniz OpenAI ses ayarlarıyla Konuş butonunu özelleştirin.
-    provider:
-      label: Sağlayıcı
-      selectPlaceholder: Bir sağlayıcı seçin
-      noProvider: Lütfen OpenAI sağlayıcısı ekleyin
-    model:
-      label: Model
+    description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
     voice:
       label: Ses
       selectPlaceholder: Bir ses seçin
       preview: Önizleme
       previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
-    speed:
-      label: Hız
-      hint: 0.25 ile 4.0 arasında değerler kabul eder
+    rate:
+      label: Hız (%)
+      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
+    pitch:
+      label: Perde (Hz)
+      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
+    volume:
+      label: Ses Düzeyi (%)
+      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
     betaDisabled: Metinden konuşmaya ayarlarını özelleştirmek için Beta Deneyimini etkinleştirin.
   statistics:
     title: İstatistikler

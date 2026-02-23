@@ -4,6 +4,9 @@ import { toast } from 'sonner'
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
+      if (query.meta?.suppressToast)
+        return
+
       const errorDescription
         = query.meta?.errorDescription || 'Something went wrong'
       toast.error(`${errorDescription}`, {
