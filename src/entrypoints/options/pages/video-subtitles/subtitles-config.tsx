@@ -2,7 +2,6 @@ import { i18n } from '#imports'
 import { deepmerge } from 'deepmerge-ts'
 import { useAtom } from 'jotai'
 import { HelpTooltip } from '@/components/help-tooltip'
-import { Badge } from '@/components/ui/base-ui/badge'
 import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
 import { Switch } from '@/components/ui/base-ui/switch'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
@@ -13,13 +12,7 @@ export function SubtitlesConfig() {
 
   return (
     <ConfigCard
-      title={(
-        <>
-          {i18n.t('options.videoSubtitles.title')}
-          {' '}
-          <Badge variant="secondary" className="align-middle">Public Beta</Badge>
-        </>
-      )}
+      title={i18n.t('options.videoSubtitles.title')}
       description={i18n.t('options.videoSubtitles.description')}
     >
       <div className="space-y-6">

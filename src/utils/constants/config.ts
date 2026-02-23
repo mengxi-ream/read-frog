@@ -18,7 +18,7 @@ export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
 
 export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
 export const DEFAULT_DETECTED_CODE = 'eng' as const
-export const CONFIG_SCHEMA_VERSION = 54
+export const CONFIG_SCHEMA_VERSION = 55
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -105,7 +105,7 @@ export const DEFAULT_CONFIG: Config = {
     timeThreshold: 300,
   },
   videoSubtitles: {
-    enabled: false,
+    enabled: true,
     autoStart: false,
     providerId: 'microsoft-translate-default',
     style: {
