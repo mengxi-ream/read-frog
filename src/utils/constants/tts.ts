@@ -4,6 +4,7 @@ import { createDefaultTTSLanguageVoices, EDGE_TTS_FALLBACK_VOICE } from '@/types
 export const DEFAULT_TTS_CONFIG: TTSConfig = {
   defaultVoice: EDGE_TTS_FALLBACK_VOICE,
   languageVoices: createDefaultTTSLanguageVoices(),
+  detectLanguageMode: 'basic',
   rate: 0,
   pitch: 0,
   volume: 0,

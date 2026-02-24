@@ -11,11 +11,13 @@ import { initializeContextMenu, registerContextMenuListeners } from './context-m
 import { cleanupAllAiSegmentationCache, cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from './db-cleanup'
 import { setupEdgeTTSMessageHandlers } from './edge-tts'
 import { setupIframeInjection } from './iframe-injection'
+import { setupLLMGenerateTextMessageHandlers } from './llm-generate-text'
 import { initMockData } from './mock-data'
 import { newUserGuide } from './new-user-guide'
 import { proxyFetch } from './proxy-fetch'
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from './translation-queues'
 import { translationMessage } from './translation-signal'
+import { setupTTSPlaybackMessageHandlers } from './tts-playback'
 import { setupUninstallSurvey } from './uninstall-survey'
 
 export default defineBackground({
@@ -92,6 +94,8 @@ export default defineBackground({
 
     proxyFetch()
     setupEdgeTTSMessageHandlers()
+    setupLLMGenerateTextMessageHandlers()
+    setupTTSPlaybackMessageHandlers()
     void initMockData()
 
     // Setup programmatic injection for iframes that Chrome's manifest-based all_frames misses

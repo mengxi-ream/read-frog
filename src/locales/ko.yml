@@ -417,6 +417,11 @@ options:
   tts:
     title: 텍스트 음성 변환
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
+    detectLanguage:
+      label: 언어 감지
+      basic: 기본
+      llm: LLM
+      description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다. LLM 모드는 번역 페이지의 제공자를 사용합니다.
     voice:
       label: 음성
       fallback: 대체

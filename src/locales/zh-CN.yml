@@ -420,6 +420,11 @@ options:
   tts:
     title: 文本转语音
     description: 使用 Edge TTS 语音参数来自定义朗读按钮。
+    detectLanguage:
+      label: 语言检测
+      basic: 基础
+      llm: LLM
+      description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。LLM 模式使用「翻译」页面的提供商。
     voice:
       label: 声音
       fallback: 兜底

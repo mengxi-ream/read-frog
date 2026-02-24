@@ -212,9 +212,9 @@ Translate YouTube subtitles directly in the video player. Watch foreign language
 
 ### 🔊 [Text-to-Speech (TTS)][docs-tutorial]
 
-Listen to any selected text with high-quality AI voices. Powered by OpenAI's TTS models, choose from multiple voices (Alloy, Ash, Coral, Echo, and more) and adjust playback speed from 0.25x to 4x.
+Listen to any selected text with high-quality AI voices. Powered by **Edge TTS** — completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
 
-Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
+Automatic language detection (basic or LLM-powered) with per-language voice mapping ensures the right voice for every language. Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
 
 <div align="right">
 
