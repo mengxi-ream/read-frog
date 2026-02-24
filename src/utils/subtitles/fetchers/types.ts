@@ -1,4 +1,4 @@
-import type { SubtitlesFragment } from '@/utils/subtitles/types'
+import type { SubtitlesFragment } from "@/utils/subtitles/types"
 
 export interface SubtitlesFetcher {
   fetch: () => Promise<SubtitlesFragment[]>

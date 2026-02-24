@@ -1,25 +1,25 @@
-import { browser, i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useSetAtom } from 'jotai'
-import { useEffect } from 'react'
-import FrogToast from '@/components/frog-toast'
-import { UserAccount } from '@/components/user-account'
-import { version } from '../../../package.json'
-import { initIsIgnoreTabAtom } from './atoms/ignore'
-import { initSiteControlAtomsAtom } from './atoms/site-control'
-import { AddToWhitelist } from './components/add-to-whitelist'
-import { AISmartContext } from './components/ai-smart-context'
-import { AlwaysTranslate } from './components/always-translate'
-import BlogNotification from './components/blog-notification'
-import { DiscordButton } from './components/discord-button'
-import LanguageOptionsSelector from './components/language-options-selector'
-import { MoreMenu } from './components/more-menu'
-import Hotkey from './components/node-translation-hotkey-selector'
-import TranslateButton from './components/translate-button'
-import TranslatePromptSelector from './components/translate-prompt-selector'
-import TranslateProviderField from './components/translate-provider-field'
-import { TranslationHubButton } from './components/translation-hub-button'
-import TranslationModeSelector from './components/translation-mode-selector'
+import { browser, i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useSetAtom } from "jotai"
+import { useEffect } from "react"
+import FrogToast from "@/components/frog-toast"
+import { UserAccount } from "@/components/user-account"
+import { version } from "../../../package.json"
+import { initIsIgnoreTabAtom } from "./atoms/ignore"
+import { initSiteControlAtomsAtom } from "./atoms/site-control"
+import { AddToWhitelist } from "./components/add-to-whitelist"
+import { AISmartContext } from "./components/ai-smart-context"
+import { AlwaysTranslate } from "./components/always-translate"
+import BlogNotification from "./components/blog-notification"
+import { DiscordButton } from "./components/discord-button"
+import LanguageOptionsSelector from "./components/language-options-selector"
+import { MoreMenu } from "./components/more-menu"
+import Hotkey from "./components/node-translation-hotkey-selector"
+import TranslateButton from "./components/translate-button"
+import TranslatePromptSelector from "./components/translate-prompt-selector"
+import TranslateProviderField from "./components/translate-provider-field"
+import { TranslationHubButton } from "./components/translation-hub-button"
+import TranslationModeSelector from "./components/translation-mode-selector"
 
 function App() {
   const initIsIgnoreTab = useSetAtom(initIsIgnoreTabAtom)
@@ -61,7 +61,7 @@ function App() {
         >
           <Icon icon="tabler:settings" className="size-4" strokeWidth={1.6} />
           <span className="text-[13px] font-medium">
-            {i18n.t('popup.options')}
+            {i18n.t("popup.options")}
           </span>
         </button>
         <span className="text-sm text-neutral-500 dark:text-neutral-400">

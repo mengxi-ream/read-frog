@@ -1,12 +1,12 @@
-import type { TTSConfig } from '@/types/config/tts'
-import { i18n } from '#imports'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
-import { toast } from 'sonner'
-import { detectLanguage } from '@/utils/content/language'
-import { logger } from '@/utils/logger'
-import { sendMessage } from '@/utils/message'
-import { splitTextByUtf8Bytes } from '@/utils/server/edge-tts/chunk'
+import type { TTSConfig } from "@/types/config/tts"
+import { i18n } from "#imports"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useRef, useState } from "react"
+import { toast } from "sonner"
+import { detectLanguage } from "@/utils/content/language"
+import { logger } from "@/utils/logger"
+import { sendMessage } from "@/utils/message"
+import { splitTextByUtf8Bytes } from "@/utils/server/edge-tts/chunk"
 
 interface PlayAudioParams {
   text: string
@@ -18,18 +18,18 @@ interface SynthesizedAudioChunk {
   contentType: string
 }
 
-const TTS_ERROR_TOAST_ID = 'tts-synthesize-error'
+const TTS_ERROR_TOAST_ID = "tts-synthesize-error"
 
-function toSignedValue(value: number, unit: '%' | 'Hz'): string {
-  return `${value >= 0 ? '+' : ''}${value}${unit}`
+function toSignedValue(value: number, unit: "%" | "Hz"): string {
+  return `${value >= 0 ? "+" : ""}${value}${unit}`
 }
 
 async function resolveVoiceForText(text: string, ttsConfig: TTSConfig): Promise<string> {
   const detectedLanguage = await detectLanguage(text, {
     minLength: 0,
-    enableLLM: ttsConfig.detectLanguageMode === 'llm',
+    enableLLM: ttsConfig.detectLanguageMode === "llm",
   })
-  logger.info('[TextToSpeech] Resolving voice for text', {
+  logger.info("[TextToSpeech] Resolving voice for text", {
     text,
     detectedLanguage,
     detectionMode: ttsConfig.detectLanguageMode,
@@ -43,16 +43,16 @@ async function resolveVoiceForText(text: string, ttsConfig: TTSConfig): Promise<
 }
 
 function getTTSFriendlyErrorDescription(error: Error): string | undefined {
-  if (error.message.includes('Edge TTS returned empty audio data')) {
-    return 'The current voice may not support this language. Try switching to a matching voice.'
+  if (error.message.includes("Edge TTS returned empty audio data")) {
+    return "The current voice may not support this language. Try switching to a matching voice."
   }
 
-  if (error.message.includes('[SYNTH_RATE_LIMITED]')) {
-    return 'Too many TTS requests. Please try again in a moment.'
+  if (error.message.includes("[SYNTH_RATE_LIMITED]")) {
+    return "Too many TTS requests. Please try again in a moment."
   }
 
-  if (error.message.includes('[NETWORK_ERROR]') || error.message.includes('[TOKEN_FETCH_FAILED]') || error.message.includes('[TOKEN_INVALID]')) {
-    return 'Edge TTS is temporarily unavailable. Please check your network and retry.'
+  if (error.message.includes("[NETWORK_ERROR]") || error.message.includes("[TOKEN_FETCH_FAILED]") || error.message.includes("[TOKEN_INVALID]")) {
+    return "Edge TTS is temporarily unavailable. Please check your network and retry."
   }
 
   return error.message || undefined
@@ -63,12 +63,12 @@ async function synthesizeEdgeTTSAudioChunk(
   voice: string,
   ttsConfig: TTSConfig,
 ): Promise<SynthesizedAudioChunk> {
-  const response = await sendMessage('edgeTtsSynthesize', {
+  const response = await sendMessage("edgeTtsSynthesize", {
     text: chunk,
     voice,
-    rate: toSignedValue(ttsConfig.rate, '%'),
-    pitch: toSignedValue(ttsConfig.pitch, 'Hz'),
-    volume: toSignedValue(ttsConfig.volume, '%'),
+    rate: toSignedValue(ttsConfig.rate, "%"),
+    pitch: toSignedValue(ttsConfig.pitch, "Hz"),
+    volume: toSignedValue(ttsConfig.volume, "%"),
   })
 
   if (!response.ok) {
@@ -76,7 +76,7 @@ async function synthesizeEdgeTTSAudioChunk(
   }
 
   if (!response.audioBase64) {
-    throw new Error('Edge TTS returned empty audio data')
+    throw new Error("Edge TTS returned empty audio data")
   }
 
   return {
@@ -99,7 +99,7 @@ export function useTextToSpeech() {
     const activeRequestId = activeRequestIdRef.current
     activeRequestIdRef.current = null
     if (activeRequestId) {
-      void sendMessage('ttsPlaybackStop', { requestId: activeRequestId }).catch(() => {})
+      void sendMessage("ttsPlaybackStop", { requestId: activeRequestId }).catch(() => {})
     }
 
     setIsPlaying(false)
@@ -124,12 +124,12 @@ export function useTextToSpeech() {
       }
       const chunks = splitTextByUtf8Bytes(text)
       setTotalChunks(chunks.length)
-      await sendMessage('ttsPlaybackEnsureOffscreen')
+      await sendMessage("ttsPlaybackEnsureOffscreen")
 
       const fetchChunkAudio = async (chunk: string) => {
-        logger.info('[TextToSpeech] Fetching chunk audio', { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume })
+        logger.info("[TextToSpeech] Fetching chunk audio", { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume })
         return queryClient.fetchQuery({
-          queryKey: ['tts-audio', { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume }],
+          queryKey: ["tts-audio", { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume }],
           queryFn: () => synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig),
           staleTime: Number.POSITIVE_INFINITY,
           gcTime: 1000 * 60 * 10,
@@ -142,7 +142,7 @@ export function useTextToSpeech() {
       const playChunk = async (audioChunk: SynthesizedAudioChunk): Promise<boolean> => {
         setIsPlaying(true)
         try {
-          const playbackResult = await sendMessage('ttsPlaybackStart', {
+          const playbackResult = await sendMessage("ttsPlaybackStart", {
             requestId,
             audioBase64: audioChunk.audioBase64,
             contentType: audioChunk.contentType,
@@ -185,7 +185,7 @@ export function useTextToSpeech() {
       setTotalChunks(0)
     },
     onError: (error) => {
-      toast.error(i18n.t('speak.failedToGenerateSpeech'), {
+      toast.error(i18n.t("speak.failedToGenerateSpeech"), {
         id: TTS_ERROR_TOAST_ID,
         description: getTTSFriendlyErrorDescription(error),
       })

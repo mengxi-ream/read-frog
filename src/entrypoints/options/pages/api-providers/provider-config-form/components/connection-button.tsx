@@ -1,14 +1,14 @@
-import type { APIProviderConfig } from '@/types/config/provider'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useMutation } from '@tanstack/react-query'
-import { useEffect } from 'react'
-import LoadingDots from '@/components/loading-dots'
-import { Button } from '@/components/ui/base-ui/button'
-import { getObjectWithoutAPIKeys } from '@/utils/config/api'
-import { DEFAULT_CONFIG } from '@/utils/constants/config'
-import { executeTranslate } from '@/utils/host/translate/execute-translate'
-import { getTranslatePrompt } from '@/utils/prompts/translate'
+import type { APIProviderConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useMutation } from "@tanstack/react-query"
+import { useEffect } from "react"
+import LoadingDots from "@/components/loading-dots"
+import { Button } from "@/components/ui/base-ui/button"
+import { getObjectWithoutAPIKeys } from "@/utils/config/api"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { getTranslatePrompt } from "@/utils/prompts/translate"
 
 function ConnectionSuccessIcon() {
   return (
@@ -42,9 +42,9 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
 
   const mutation = useMutation({
     // for safety, we should not include apiKey in the mutationKey
-    mutationKey: ['apiConnection', getObjectWithoutAPIKeys(providerConfig)],
+    mutationKey: ["apiConnection", getObjectWithoutAPIKeys(providerConfig)],
     mutationFn: async () => {
-      return await executeTranslate('Hi', DEFAULT_CONFIG.language, providerConfig, getTranslatePrompt)
+      return await executeTranslate("Hi", DEFAULT_CONFIG.language, providerConfig, getTranslatePrompt)
     },
   })
 
@@ -57,7 +57,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [provider, apiKey, baseURL])
 
-  const testResult = mutation.isSuccess ? 'success' : mutation.isError ? 'error' : null
+  const testResult = mutation.isSuccess ? "success" : mutation.isError ? "error" : null
   const ConnectionTestResultIcon = testResult ? ConnectionTestResultIconMap[testResult] : null
 
   return (
@@ -67,20 +67,20 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
         size="xs"
         variant="outline"
         onClick={handleTestConnection}
-        disabled={mutation.isPending || (!apiKey && provider !== 'deeplx' && provider !== 'ollama')}
+        disabled={mutation.isPending || (!apiKey && provider !== "deeplx" && provider !== "ollama")}
       >
         {mutation.isPending
           ? (
               <div className="flex items-center gap-2">
                 <LoadingDots className="scale-75" />
                 <span className="text-xs">
-                  {i18n.t('options.apiProviders.testConnection.testing')}
+                  {i18n.t("options.apiProviders.testConnection.testing")}
                 </span>
               </div>
             )
           : (
               <span className="text-xs">
-                {i18n.t('options.apiProviders.testConnection.button')}
+                {i18n.t("options.apiProviders.testConnection.button")}
               </span>
             )}
       </Button>

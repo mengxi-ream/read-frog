@@ -1,14 +1,14 @@
-import type { ItemInstance } from '@headless-tree/core'
-import type { Config } from '@/types/config/config'
-import { i18n } from '#imports'
-import { syncDataLoaderFeature } from '@headless-tree/core'
-import { useTree } from '@headless-tree/react'
-import { useAtomValue } from 'jotai'
-import { useMemo } from 'react'
-import { Tree, TreeItem, TreeItemLabel } from '@/components/ui/tree'
-import { diffConflictsResultAtom } from '@/utils/atoms/google-drive-sync'
-import { ConflictField } from './unresolved-field'
-import { formatValue } from './utils'
+import type { ItemInstance } from "@headless-tree/core"
+import type { Config } from "@/types/config/config"
+import { i18n } from "#imports"
+import { syncDataLoaderFeature } from "@headless-tree/core"
+import { useTree } from "@headless-tree/react"
+import { useAtomValue } from "jotai"
+import { useMemo } from "react"
+import { Tree, TreeItem, TreeItemLabel } from "@/components/ui/tree"
+import { diffConflictsResultAtom } from "@/utils/atoms/google-drive-sync"
+import { ConflictField } from "./unresolved-field"
+import { formatValue } from "./utils"
 
 interface JsonNodeData {
   key: string
@@ -25,17 +25,17 @@ function buildTreeData(data: Config): {
   const children = new Map<string, string[]>()
 
   function traverse(value: Config, path: string[]) {
-    const pathKey = path.join('.')
-    const key = path[path.length - 1] || 'root'
-    const itemId = pathKey || 'root'
+    const pathKey = path.join(".")
+    const key = path[path.length - 1] || "root"
+    const itemId = pathKey || "root"
 
     items.set(itemId, { key, value, pathKey, isArrayItem: !Number.isNaN(Number(key)) })
 
-    if (value !== null && typeof value === 'object') {
+    if (value !== null && typeof value === "object") {
       const entries = Array.isArray(value)
         ? value.map((v, i) => [String(i), v] as const)
         : Object.entries(value)
-      children.set(itemId, entries.map(([k]) => [...path, k].join('.')))
+      children.set(itemId, entries.map(([k]) => [...path, k].join(".")))
       for (const [childKey, childValue] of entries) {
         traverse(childValue, [...path, childKey])
       }
@@ -56,23 +56,23 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
   const conflictPaths = useMemo(() => {
     if (!diffConflictsResult)
       return new Set<string>()
-    return new Set(diffConflictsResult.conflicts.map(c => c.path.join('.')))
+    return new Set(diffConflictsResult.conflicts.map(c => c.path.join(".")))
   }, [diffConflictsResult])
 
   // Expand all items that have conflicts when the component is mounted
   const initialExpandedItems = useMemo(() => {
-    const expanded = new Set<string>(['root'])
+    const expanded = new Set<string>(["root"])
     for (const conflictPath of conflictPaths) {
-      const parts = conflictPath.split('.')
+      const parts = conflictPath.split(".")
       for (let i = 1; i <= parts.length; i++) {
-        expanded.add(parts.slice(0, i).join('.'))
+        expanded.add(parts.slice(0, i).join("."))
       }
     }
     return Array.from(expanded)
   }, [conflictPaths])
 
   const tree = useTree<JsonNodeData>({
-    rootItemId: 'root',
+    rootItemId: "root",
     dataLoader: {
       getItem: (itemId: string) => items.get(itemId)!,
       getChildren: (itemId: string) => children.get(itemId) || [],
@@ -85,8 +85,8 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
 
   const formatFolderLabel = (value: unknown, childrenCount: number): string => {
     const countText = childrenCount === 1
-      ? `${childrenCount} ${i18n.t('options.config.sync.googleDrive.unresolved.item')}`
-      : `${childrenCount} ${i18n.t('options.config.sync.googleDrive.unresolved.items')}`
+      ? `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.item")}`
+      : `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.items")}`
 
     return Array.isArray(value) ? `[${countText}]` : `{${countText}}`
   }

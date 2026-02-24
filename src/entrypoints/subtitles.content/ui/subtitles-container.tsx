@@ -1,11 +1,11 @@
-import type { ControlsConfig } from '@/entrypoints/subtitles.content/platforms'
-import { useAtomValue } from 'jotai'
-import { Activity } from 'react'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { deriveSubtitleDisplayDecision } from '@/utils/subtitles/display-rules'
-import { subtitlesDisplayAtom } from '../atoms'
-import { StateMessage } from './state-message'
-import { SubtitlesView } from './subtitles-view'
+import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
+import { useAtomValue } from "jotai"
+import { Activity } from "react"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { deriveSubtitleDisplayDecision } from "@/utils/subtitles/display-rules"
+import { subtitlesDisplayAtom } from "../atoms"
+import { StateMessage } from "./state-message"
+import { SubtitlesView } from "./subtitles-view"
 
 interface SubtitlesContainerProps {
   controlsConfig?: ControlsConfig
@@ -28,7 +28,7 @@ export function SubtitlesContainer({ controlsConfig }: SubtitlesContainerProps) 
   return (
     <>
       <SubtitlesView controlsConfig={controlsConfig} isRenderable={hasRenderableSubtitle} />
-      <Activity mode={showStateMessage ? 'visible' : 'hidden'}>
+      <Activity mode={showStateMessage ? "visible" : "hidden"}>
         <StateMessage />
       </Activity>
     </>

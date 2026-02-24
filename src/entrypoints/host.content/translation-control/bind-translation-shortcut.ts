@@ -1,6 +1,6 @@
-import type { PageTranslationManager } from './page-translation'
-import hotkeys from 'hotkeys-js'
-import { getLocalConfig } from '@/utils/config/storage'
+import type { PageTranslationManager } from "./page-translation"
+import hotkeys from "hotkeys-js"
+import { getLocalConfig } from "@/utils/config/storage"
 
 export async function bindTranslationShortcutKey(pageTranslationManager: PageTranslationManager) {
   // Clear all existing hotkeys first
@@ -10,7 +10,7 @@ export async function bindTranslationShortcutKey(pageTranslationManager: PageTra
   if (!config)
     return
 
-  const shortcut = config.translate.page.shortcut.join('+')
+  const shortcut = config.translate.page.shortcut.join("+")
 
   hotkeys(shortcut, () => {
     void (async () => {

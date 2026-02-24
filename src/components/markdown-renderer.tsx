@@ -1,11 +1,11 @@
-import ReactMarkdown from 'react-markdown'
+import ReactMarkdown from "react-markdown"
 
 interface MarkdownRendererProps {
   content: string
   className?: string
 }
 
-export function MarkdownRenderer({ content, className = '' }: MarkdownRendererProps) {
+export function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
   return (
     <div className={`markdown-content ${className}`}>
       <ReactMarkdown

@@ -3,7 +3,7 @@
  * Adds tts.detectLanguageMode with default "basic"
  */
 export function migrate(oldConfig: any): any {
-  const detectLanguageMode = 'basic'
+  const detectLanguageMode = "basic"
 
   return {
     ...oldConfig,

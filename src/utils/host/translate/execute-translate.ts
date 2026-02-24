@@ -1,17 +1,17 @@
-import type { PromptResolver } from './api/ai'
-import type { Config } from '@/types/config/config'
-import type { ProviderConfig } from '@/types/config/provider'
-import type { ArticleContent } from '@/types/content'
-import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from '@read-frog/definitions'
-import { isLLMProviderConfig, isNonAPIProvider, isPureAPIProvider } from '@/types/config/provider'
-import { aiTranslate } from './api/ai'
-import { deeplxTranslate } from './api/deeplx'
-import { googleTranslate } from './api/google'
-import { microsoftTranslate } from './api/microsoft'
+import type { PromptResolver } from "./api/ai"
+import type { Config } from "@/types/config/config"
+import type { ProviderConfig } from "@/types/config/provider"
+import type { ArticleContent } from "@/types/content"
+import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { isLLMProviderConfig, isNonAPIProvider, isPureAPIProvider } from "@/types/config/provider"
+import { aiTranslate } from "./api/ai"
+import { deeplxTranslate } from "./api/deeplx"
+import { googleTranslate } from "./api/google"
+import { microsoftTranslate } from "./api/microsoft"
 
 export async function executeTranslate(
   text: string,
-  langConfig: Config['language'],
+  langConfig: Config["language"],
   providerConfig: ProviderConfig,
   promptResolver: PromptResolver,
   options?: {
@@ -20,34 +20,34 @@ export async function executeTranslate(
     content?: ArticleContent
   },
 ) {
-  const cleanText = text.replace(/\u200B/g, '').trim()
-  if (cleanText === '') {
-    return ''
+  const cleanText = text.replace(/\u200B/g, "").trim()
+  if (cleanText === "") {
+    return ""
   }
 
   const { provider } = providerConfig
-  let translatedText = ''
+  let translatedText = ""
 
   if (isNonAPIProvider(provider)) {
-    const sourceLang = langConfig.sourceCode === 'auto' ? 'auto' : (ISO6393_TO_6391[langConfig.sourceCode] ?? 'auto')
+    const sourceLang = langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
     const targetLang = ISO6393_TO_6391[langConfig.targetCode]
     if (!targetLang) {
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
-    if (provider === 'google-translate') {
+    if (provider === "google-translate") {
       translatedText = await googleTranslate(text, sourceLang, targetLang)
     }
-    else if (provider === 'microsoft-translate') {
+    else if (provider === "microsoft-translate") {
       translatedText = await microsoftTranslate(text, sourceLang, targetLang)
     }
   }
   else if (isPureAPIProvider(provider)) {
-    const sourceLang = langConfig.sourceCode === 'auto' ? 'auto' : (ISO6393_TO_6391[langConfig.sourceCode] ?? 'auto')
+    const sourceLang = langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
     const targetLang = ISO6393_TO_6391[langConfig.targetCode]
     if (!targetLang) {
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
-    if (provider === 'deeplx') {
+    if (provider === "deeplx") {
       translatedText = await deeplxTranslate(text, sourceLang, targetLang, providerConfig, options)
     }
   }

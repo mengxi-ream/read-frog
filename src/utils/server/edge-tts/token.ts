@@ -3,7 +3,7 @@
  * Kept for backward compatibility with existing imports.
  */
 
-import { clearEdgeTTSTokenCache, getEdgeTTSEndpointToken } from './endpoint'
+import { clearEdgeTTSTokenCache, getEdgeTTSEndpointToken } from "./endpoint"
 
 export async function getEdgeTTSAccessToken(): Promise<string> {
   const tokenInfo = await getEdgeTTSEndpointToken()

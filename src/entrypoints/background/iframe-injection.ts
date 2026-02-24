@@ -1,4 +1,4 @@
-import { browser } from '#imports'
+import { browser } from "#imports"
 
 export function setupIframeInjection() {
   // Listen for iframe loads and inject content scripts programmatically
@@ -13,13 +13,13 @@ export function setupIframeInjection() {
       // Inject host.content script into the iframe
       await browser.scripting.executeScript({
         target: { tabId: details.tabId, frameIds: [details.frameId] },
-        files: ['/content-scripts/host.js'],
+        files: ["/content-scripts/host.js"],
       })
 
       // Inject selection.content script into the iframe
       await browser.scripting.executeScript({
         target: { tabId: details.tabId, frameIds: [details.frameId] },
-        files: ['/content-scripts/selection.js'],
+        files: ["/content-scripts/selection.js"],
       })
     }
     catch {

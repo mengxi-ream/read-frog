@@ -12,7 +12,7 @@ export function migrate(oldConfig: any): any {
   return {
     ...oldConfig,
     siteControl: {
-      mode: 'all',
+      mode: "all",
       patterns: [],
     },
   }

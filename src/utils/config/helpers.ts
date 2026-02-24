@@ -1,8 +1,8 @@
-import type { Config } from '@/types/config/config'
-import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig } from '@/types/config/provider'
-import type { FeatureKey } from '@/utils/constants/feature-providers'
-import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig } from '@/types/config/provider'
-import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
+import type { Config } from "@/types/config/config"
+import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
+import type { FeatureKey } from "@/utils/constants/feature-providers"
+import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 
 export function getProviderConfigById<T extends ProviderConfig>(providersConfig: T[], providerId: string): T | undefined {
   return providersConfig.find(p => p.id === providerId)

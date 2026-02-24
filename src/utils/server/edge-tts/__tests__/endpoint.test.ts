@@ -1,20 +1,20 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { clearEdgeTTSTokenCache, getEdgeTTSEndpointToken } from '../endpoint'
-import * as signatureModule from '../signature'
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { clearEdgeTTSTokenCache, getEdgeTTSEndpointToken } from "../endpoint"
+import * as signatureModule from "../signature"
 
 function toBase64Url(obj: unknown): string {
   const json = JSON.stringify(obj)
-  return btoa(json).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
+  return btoa(json).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "")
 }
 
 function createJwt(expSeconds: number): string {
-  return `${toBase64Url({ alg: 'HS256', typ: 'JWT' })}.${toBase64Url({ exp: expSeconds })}.signature`
+  return `${toBase64Url({ alg: "HS256", typ: "JWT" })}.${toBase64Url({ exp: expSeconds })}.signature`
 }
 
-describe('getEdgeTTSEndpointToken', () => {
+describe("getEdgeTTSEndpointToken", () => {
   beforeEach(() => {
     clearEdgeTTSTokenCache()
-    vi.spyOn(signatureModule, 'generateTranslatorSignature').mockResolvedValue('mock-signature')
+    vi.spyOn(signatureModule, "generateTranslatorSignature").mockResolvedValue("mock-signature")
   })
 
   afterEach(() => {
@@ -22,10 +22,10 @@ describe('getEdgeTTSEndpointToken', () => {
     vi.restoreAllMocks()
   })
 
-  it('caches endpoint token until refresh threshold', async () => {
-    const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+  it("caches endpoint token until refresh threshold", async () => {
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
       new Response(JSON.stringify({
-        r: 'eastus',
+        r: "eastus",
         t: createJwt(Math.floor(Date.now() / 1000) + 600),
       }), {
         status: 200,
@@ -39,20 +39,20 @@ describe('getEdgeTTSEndpointToken', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(1)
   })
 
-  it('falls back to cached token when refresh request fails but token is still unexpired', async () => {
+  it("falls back to cached token when refresh request fails but token is still unexpired", async () => {
     const nowSeconds = Math.floor(Date.now() / 1000)
-    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
 
     fetchSpy.mockResolvedValueOnce(
       new Response(JSON.stringify({
-        r: 'eastus',
+        r: "eastus",
         t: createJwt(nowSeconds + 60),
       }), {
         status: 200,
       }),
     )
 
-    fetchSpy.mockRejectedValueOnce(new TypeError('network down'))
+    fetchSpy.mockRejectedValueOnce(new TypeError("network down"))
 
     const first = await getEdgeTTSEndpointToken()
     const second = await getEdgeTTSEndpointToken()
@@ -61,25 +61,25 @@ describe('getEdgeTTSEndpointToken', () => {
     expect(fetchSpy).toHaveBeenCalledTimes(2)
   })
 
-  it('throws when refresh request fails and cached token is expired', async () => {
+  it("throws when refresh request fails and cached token is expired", async () => {
     const nowSeconds = Math.floor(Date.now() / 1000)
-    const fetchSpy = vi.spyOn(globalThis, 'fetch')
+    const fetchSpy = vi.spyOn(globalThis, "fetch")
 
     fetchSpy.mockResolvedValueOnce(
       new Response(JSON.stringify({
-        r: 'eastus',
+        r: "eastus",
         t: createJwt(nowSeconds - 10),
       }), {
         status: 200,
       }),
     )
 
-    fetchSpy.mockRejectedValueOnce(new TypeError('network down'))
+    fetchSpy.mockRejectedValueOnce(new TypeError("network down"))
 
     await getEdgeTTSEndpointToken()
 
     await expect(getEdgeTTSEndpointToken()).rejects.toMatchObject({
-      code: 'TOKEN_FETCH_FAILED',
+      code: "TOKEN_FETCH_FAILED",
     })
     expect(fetchSpy).toHaveBeenCalledTimes(2)
   })

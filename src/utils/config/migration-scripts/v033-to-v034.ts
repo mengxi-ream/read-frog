@@ -34,7 +34,7 @@ export function migrate(oldConfig: any): any {
         ...oldConfig.translate?.customPromptsConfig,
         patterns: patterns.map((pattern: any) => ({
           ...pattern,
-          systemPrompt: '',
+          systemPrompt: "",
         })),
       },
     },

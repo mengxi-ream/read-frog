@@ -1,11 +1,11 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import type { ProviderConfig } from '@/types/config/provider'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { detectLanguage } from '@/utils/content/language'
-import { shouldSkipByLanguage } from '../translate-text'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { ProviderConfig } from "@/types/config/provider"
+import { beforeEach, describe, expect, it, vi } from "vitest"
+import { detectLanguage } from "@/utils/content/language"
+import { shouldSkipByLanguage } from "../translate-text"
 
 // Mock detectLanguage
-vi.mock('@/utils/content/language', () => ({
+vi.mock("@/utils/content/language", () => ({
   detectLanguage: vi.fn(),
 }))
 
@@ -17,27 +17,27 @@ beforeEach(() => {
 
 // Mock provider configs - only provider field is needed for shouldSkipByLanguage
 const mockLLMProviderConfig = {
-  id: 'openai-test',
-  name: 'OpenAI Test',
+  id: "openai-test",
+  name: "OpenAI Test",
   enabled: true,
-  provider: 'openai',
-  model: { model: 'gpt-4o-mini', isCustomModel: false, customModel: null },
+  provider: "openai",
+  model: { model: "gpt-4o-mini", isCustomModel: false, customModel: null },
 } as ProviderConfig
 
 const mockAPIProviderConfig = {
-  id: 'google-translate-test',
-  name: 'Google Translate Test',
+  id: "google-translate-test",
+  name: "Google Translate Test",
   enabled: true,
-  provider: 'google-translate',
+  provider: "google-translate",
 } as ProviderConfig
 
-describe('shouldSkipByLanguage', () => {
-  describe('basic skip logic', () => {
-    it('should return true when detected language is in skipLanguages', async () => {
-      mockedDetect.mockResolvedValueOnce('jpn')
+describe("shouldSkipByLanguage", () => {
+  describe("basic skip logic", () => {
+    it("should return true when detected language is in skipLanguages", async () => {
+      mockedDetect.mockResolvedValueOnce("jpn")
 
-      const japaneseText = 'これは日本語のテストです。日本語で書かれたテキストです。'
-      const skipLanguages: LangCodeISO6393[] = ['jpn']
+      const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
+      const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
       const result = await shouldSkipByLanguage(
         japaneseText,
@@ -49,11 +49,11 @@ describe('shouldSkipByLanguage', () => {
       expect(result).toBe(true)
     })
 
-    it('should return false when detected language is not in skipLanguages', async () => {
-      mockedDetect.mockResolvedValueOnce('eng')
+    it("should return false when detected language is not in skipLanguages", async () => {
+      mockedDetect.mockResolvedValueOnce("eng")
 
-      const englishText = 'This is a test written in English.'
-      const skipLanguages: LangCodeISO6393[] = ['jpn']
+      const englishText = "This is a test written in English."
+      const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
       const result = await shouldSkipByLanguage(
         englishText,
@@ -65,10 +65,10 @@ describe('shouldSkipByLanguage', () => {
       expect(result).toBe(false)
     })
 
-    it('should return false when skipLanguages is empty', async () => {
-      mockedDetect.mockResolvedValueOnce('jpn')
+    it("should return false when skipLanguages is empty", async () => {
+      mockedDetect.mockResolvedValueOnce("jpn")
 
-      const japaneseText = 'これは日本語のテストです。日本語で書かれたテキストです。'
+      const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
       const skipLanguages: LangCodeISO6393[] = []
 
       const result = await shouldSkipByLanguage(
@@ -81,11 +81,11 @@ describe('shouldSkipByLanguage', () => {
       expect(result).toBe(false)
     })
 
-    it('should return false when language cannot be detected', async () => {
+    it("should return false when language cannot be detected", async () => {
       mockedDetect.mockResolvedValueOnce(null)
 
-      const undetectableText = '12345 67890 !@#$%'
-      const skipLanguages: LangCodeISO6393[] = ['jpn', 'eng']
+      const undetectableText = "12345 67890 !@#$%"
+      const skipLanguages: LangCodeISO6393[] = ["jpn", "eng"]
 
       const result = await shouldSkipByLanguage(
         undetectableText,
@@ -98,12 +98,12 @@ describe('shouldSkipByLanguage', () => {
     })
   })
 
-  describe('with LLM detection enabled', () => {
-    it('should use LLM detection when enabled and provider supports it', async () => {
-      mockedDetect.mockResolvedValueOnce('jpn')
+  describe("with LLM detection enabled", () => {
+    it("should use LLM detection when enabled and provider supports it", async () => {
+      mockedDetect.mockResolvedValueOnce("jpn")
 
-      const text = 'これは日本語のテストです。日本語で書かれたテキストです。'
-      const skipLanguages: LangCodeISO6393[] = ['jpn']
+      const text = "これは日本語のテストです。日本語で書かれたテキストです。"
+      const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
       const result = await shouldSkipByLanguage(
         text,
@@ -120,11 +120,11 @@ describe('shouldSkipByLanguage', () => {
       expect(result).toBe(true)
     })
 
-    it('should return false when detectLanguage returns null', async () => {
+    it("should return false when detectLanguage returns null", async () => {
       mockedDetect.mockResolvedValueOnce(null)
 
-      const japaneseText = 'これは日本語のテストです。日本語で書かれたテキストです。'
-      const skipLanguages: LangCodeISO6393[] = ['jpn']
+      const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
+      const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
       const result = await shouldSkipByLanguage(
         japaneseText,
@@ -137,11 +137,11 @@ describe('shouldSkipByLanguage', () => {
       expect(result).toBe(false) // null detection means no skip
     })
 
-    it('should pass LLM options to detectLanguage', async () => {
-      mockedDetect.mockResolvedValueOnce('jpn')
+    it("should pass LLM options to detectLanguage", async () => {
+      mockedDetect.mockResolvedValueOnce("jpn")
 
-      const japaneseText = 'これは日本語のテストです。日本語で書かれたテキストです。'
-      const skipLanguages: LangCodeISO6393[] = ['jpn']
+      const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
+      const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
       await shouldSkipByLanguage(
         japaneseText,
@@ -157,11 +157,11 @@ describe('shouldSkipByLanguage', () => {
       })
     })
 
-    it('should disable LLM detection when provider does not support it', async () => {
-      mockedDetect.mockResolvedValueOnce('jpn')
+    it("should disable LLM detection when provider does not support it", async () => {
+      mockedDetect.mockResolvedValueOnce("jpn")
 
-      const japaneseText = 'これは日本語のテストです。日本語で書かれたテキストです。'
-      const skipLanguages: LangCodeISO6393[] = ['jpn']
+      const japaneseText = "これは日本語のテストです。日本語で書かれたテキストです。"
+      const skipLanguages: LangCodeISO6393[] = ["jpn"]
 
       await shouldSkipByLanguage(
         japaneseText,

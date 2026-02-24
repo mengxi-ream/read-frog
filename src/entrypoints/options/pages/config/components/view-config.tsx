@@ -1,16 +1,16 @@
-import type { VariantProps } from 'class-variance-authority'
-import type { buttonVariants } from '@/components/ui/base-ui/button'
-import type { Config } from '@/types/config/config'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useState } from 'react'
-import { Button } from '@/components/ui/base-ui/button'
-import { ScrollArea } from '@/components/ui/base-ui/scroll-area'
-import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
+import type { VariantProps } from "class-variance-authority"
+import type { buttonVariants } from "@/components/ui/base-ui/button"
+import type { Config } from "@/types/config/config"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useState } from "react"
+import { Button } from "@/components/ui/base-ui/button"
+import { ScrollArea } from "@/components/ui/base-ui/scroll-area"
+import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 
 export function ViewConfig(
-  { config, configSchemaVersion, size = 'default' }:
-  { config: Config, configSchemaVersion?: number, size?: VariantProps<typeof buttonVariants>['size'] }) {
+  { config, configSchemaVersion, size = "default" }:
+  { config: Config, configSchemaVersion?: number, size?: VariantProps<typeof buttonVariants>["size"] }) {
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
@@ -21,9 +21,9 @@ export function ViewConfig(
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <Icon
-          icon={isExpanded ? 'tabler:chevron-up' : 'tabler:chevron-down'}
+          icon={isExpanded ? "tabler:chevron-up" : "tabler:chevron-down"}
         />
-        {isExpanded ? i18n.t('options.config.sync.viewConfig.collapse') : i18n.t('options.config.sync.viewConfig.expand')}
+        {isExpanded ? i18n.t("options.config.sync.viewConfig.collapse") : i18n.t("options.config.sync.viewConfig.expand")}
       </Button>
 
       {isExpanded && (

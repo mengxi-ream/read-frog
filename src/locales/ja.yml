@@ -505,7 +505,7 @@ options:
           hasUnresolvedInChildren: ⚠ 未解決の変更を含む
           item: 項目
           items: 項目
-          unresolvedPrompt: '[未解決 - 選択してください]'
+          unresolvedPrompt: "[未解決 - 選択してください]"
           localLatest: ローカル最新
           remoteLatest: リモート最新
           bothChanged: 両方が変更されました

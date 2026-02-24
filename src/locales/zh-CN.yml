@@ -508,7 +508,7 @@ options:
           hasUnresolvedInChildren: ⚠ 包含待解决项
           item: 项
           items: 项
-          unresolvedPrompt: '[待解决 - 请选择]'
+          unresolvedPrompt: "[待解决 - 请选择]"
           localLatest: 本地最新
           remoteLatest: 远端最新
           bothChanged: 双方已更改

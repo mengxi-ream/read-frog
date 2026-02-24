@@ -1,11 +1,11 @@
-import { i18n } from '#imports'
-import { useAtom } from 'jotai'
-import { toast } from 'sonner'
-import { HelpTooltip } from '@/components/help-tooltip'
-import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
-import { Input } from '@/components/ui/base-ui/input'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../components/config-card'
+import { i18n } from "#imports"
+import { useAtom } from "jotai"
+import { toast } from "sonner"
+import { HelpTooltip } from "@/components/help-tooltip"
+import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
+import { Input } from "@/components/ui/base-ui/input"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { ConfigCard } from "../../components/config-card"
 
 const MIN_THRESHOLD = 100
 const MAX_THRESHOLD = 1000
@@ -17,14 +17,14 @@ export function InputTranslationThreshold() {
 
   return (
     <ConfigCard
-      title={i18n.t('options.inputTranslation.threshold.title')}
-      description={i18n.t('options.inputTranslation.threshold.description')}
+      title={i18n.t("options.inputTranslation.threshold.title")}
+      description={i18n.t("options.inputTranslation.threshold.description")}
     >
       <Field orientation="responsive">
         <FieldContent className="self-center">
           <FieldLabel htmlFor="input-translation-threshold">
-            {i18n.t('options.inputTranslation.threshold.label')}
-            <HelpTooltip>{i18n.t('options.inputTranslation.threshold.hint')}</HelpTooltip>
+            {i18n.t("options.inputTranslation.threshold.label")}
+            <HelpTooltip>{i18n.t("options.inputTranslation.threshold.hint")}</HelpTooltip>
           </FieldLabel>
         </FieldContent>
         <Input
@@ -44,7 +44,7 @@ export function InputTranslationThreshold() {
               })
             }
             else {
-              toast.error(i18n.t('options.inputTranslation.threshold.error', [MIN_THRESHOLD, MAX_THRESHOLD]))
+              toast.error(i18n.t("options.inputTranslation.threshold.error", [MIN_THRESHOLD, MAX_THRESHOLD]))
             }
           }}
           onBlur={(e) => {

@@ -1,12 +1,12 @@
-import type { APICallError } from 'ai'
-import * as React from 'react'
-import textSmallCSS from '@/assets/styles/text-small.css?inline'
-import themeCSS from '@/assets/styles/theme.css?inline'
-import { TranslationError } from '@/components/translation/error'
-import { createReactShadowHost } from '@/utils/react-shadow-host/create-shadow-host'
-import { TRANSLATION_ERROR_CONTAINER_CLASS } from '../../../constants/dom-labels'
-import { getOwnerDocument } from '../../dom/node'
-import { translateTextForPage } from '../translate-variants'
+import type { APICallError } from "ai"
+import * as React from "react"
+import textSmallCSS from "@/assets/styles/text-small.css?inline"
+import themeCSS from "@/assets/styles/theme.css?inline"
+import { TranslationError } from "@/components/translation/error"
+import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
+import { TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
+import { getOwnerDocument } from "../../dom/node"
+import { translateTextForPage } from "../translate-variants"
 
 /**
  * Create a lightweight spinner element without React/Shadow DOM overhead
@@ -14,8 +14,8 @@ import { translateTextForPage } from '../translate-variants'
  * This is significantly faster than the React-based spinner for bulk operations
  */
 export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
-  const spinner = ownerDoc.createElement('span')
-  spinner.className = 'read-frog-spinner'
+  const spinner = ownerDoc.createElement("span")
+  spinner.className = "read-frog-spinner"
   // Inline styles to match the original spinner design
   // add important to make the styles don't get overridden by the host page styles,
   // Otherwise, in some page like https://www.reddit.com/r/canadaexpressentry/, some spinners size will be overridden by the host page styles.
@@ -34,24 +34,24 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
   // Use Web Animations API instead of CSS keyframes - no DOM manipulation needed
   // Respect user's motion preferences
   const prefersReducedMotion = ownerDoc.defaultView?.matchMedia
-    ? ownerDoc.defaultView.matchMedia('(prefers-reduced-motion: reduce)').matches
+    ? ownerDoc.defaultView.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false
   if (!prefersReducedMotion && spinner.animate) {
     spinner.animate(
       [
-        { transform: 'rotate(0deg)' },
-        { transform: 'rotate(360deg)' },
+        { transform: "rotate(0deg)" },
+        { transform: "rotate(360deg)" },
       ],
       {
         duration: 600,
         iterations: Infinity,
-        easing: 'linear',
+        easing: "linear",
       },
     )
   }
   else {
     // For reduced motion or when Web Animations API isn't available, show static spinner with muted color
-    spinner.style.borderTopColor = 'var(--read-frog-muted)'
+    spinner.style.borderTopColor = "var(--read-frog-muted)"
   }
 
   return spinner
@@ -85,11 +85,11 @@ export async function getTranslatedTextAndRemoveSpinner(
       errorComponent,
       {
         className: TRANSLATION_ERROR_CONTAINER_CLASS,
-        position: 'inline',
+        position: "inline",
         inheritStyles: false,
         cssContent: [themeCSS, textSmallCSS],
         style: {
-          verticalAlign: 'middle',
+          verticalAlign: "middle",
         },
       },
     )

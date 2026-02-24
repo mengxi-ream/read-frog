@@ -355,7 +355,7 @@ options:
             saved: Все изменения сохранены
     translationMode:
       title: Режим перевода
-      description: 'Выберите способ отображения переведённого текста: двуязычный или только перевод.'
+      description: "Выберите способ отображения переведённого текста: двуязычный или только перевод."
       mode:
         bilingual: Двуязычный
         translationOnly: Только перевод
@@ -506,7 +506,7 @@ options:
           hasUnresolvedInChildren: ⚠ Содержит неразрешённые изменения
           item: элемент
           items: элементов
-          unresolvedPrompt: '[Не разрешено - Выберите]'
+          unresolvedPrompt: "[Не разрешено - Выберите]"
           localLatest: Локальная последняя
           remoteLatest: Удалённая последняя
           bothChanged: Оба изменены
@@ -517,7 +517,7 @@ options:
           resolveToContinue: Разрешите конфликты для продолжения
           validationAlert:
             title: Объединённая конфигурация содержит ошибки валидации
-            description: 'Настройте различия ниже для исправления:'
+            description: "Настройте различия ниже для исправления:"
           moreErrors: ...и ещё $1 ошибок
     backup:
       title: Резервное копирование конфигурации
@@ -530,8 +530,8 @@ options:
         title: Резервные копии пока недоступны
         description: Резервные копии создаются автоматически каждый час при изменении конфигурации.
       item:
-        extensionVersion: 'Версия расширения:'
-        schemaVersion: 'Версия схемы:'
+        extensionVersion: "Версия расширения:"
+        schemaVersion: "Версия схемы:"
         restore: Восстановить
         export: Экспорт
         delete: Удалить
@@ -602,7 +602,7 @@ options:
     requestQueueConfig:
       title: Скорость перевода субтитров
       firstOnDescription: Регулировка скорости обработки запросов перевода субтитров с помощью алгоритма
-      lastOnDescription: ''
+      lastOnDescription: ""
       capacity:
         title: Макс. пакетных запросов
         description: Максимальное количество запросов перевода субтитров, которые могут обрабатываться одновременно за короткий период
@@ -654,7 +654,7 @@ noAPIKeyConfig:
     setTheAPIKey: установить API-ключ
     firstOnThe: сначала на странице
     optionsPage: настроек
-    page: ''
+    page: ""
 translation:
   sameLanguage: Исходный и целевой языки должны различаться
   autoModeSameLanguage: Обнаруженный язык '$1' совпадает с целевым языком

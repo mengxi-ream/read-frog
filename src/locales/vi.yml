@@ -355,7 +355,7 @@ options:
             saved: Tất cả thay đổi đã được lưu
     translationMode:
       title: Chế độ dịch
-      description: 'Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch.'
+      description: "Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch."
       mode:
         bilingual: Song ngữ
         translationOnly: Chỉ bản dịch
@@ -506,7 +506,7 @@ options:
           hasUnresolvedInChildren: ⚠ Chứa thay đổi chưa giải quyết
           item: mục
           items: mục
-          unresolvedPrompt: '[Chưa giải quyết - Vui lòng chọn]'
+          unresolvedPrompt: "[Chưa giải quyết - Vui lòng chọn]"
           localLatest: Cục bộ mới nhất
           remoteLatest: Từ xa mới nhất
           bothChanged: Cả hai đã thay đổi
@@ -517,7 +517,7 @@ options:
           resolveToContinue: Giải quyết xung đột để tiếp tục
           validationAlert:
             title: Cấu hình đã hợp nhất có lỗi xác thực
-            description: 'Điều chỉnh các khác biệt bên dưới để sửa:'
+            description: "Điều chỉnh các khác biệt bên dưới để sửa:"
           moreErrors: ...và $1 lỗi nữa
     backup:
       title: Sao lưu cấu hình
@@ -530,8 +530,8 @@ options:
         title: Chưa có bản sao lưu nào
         description: Các bản sao lưu được tạo tự động mỗi giờ nếu cấu hình thay đổi.
       item:
-        extensionVersion: 'Phiên bản tiện ích:'
-        schemaVersion: 'Phiên bản schema:'
+        extensionVersion: "Phiên bản tiện ích:"
+        schemaVersion: "Phiên bản schema:"
         restore: Khôi phục
         export: Xuất
         delete: Xóa
@@ -602,7 +602,7 @@ options:
     requestQueueConfig:
       title: Tốc độ dịch phụ đề
       firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch phụ đề bằng thuật toán
-      lastOnDescription: ''
+      lastOnDescription: ""
       capacity:
         title: Số yêu cầu tối đa đồng thời
         description: Số lượng yêu cầu dịch phụ đề tối đa có thể xử lý đồng thời trong khoảng thời gian ngắn
@@ -654,7 +654,7 @@ noAPIKeyConfig:
     setTheAPIKey: đặt API key
     firstOnThe: trước trên trang
     optionsPage: tùy chọn
-    page: ''
+    page: ""
 translation:
   sameLanguage: Ngôn ngữ nguồn và đích phải khác nhau
   autoModeSameLanguage: Ngôn ngữ phát hiện '$1' giống với ngôn ngữ đích

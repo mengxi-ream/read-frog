@@ -1,11 +1,11 @@
-import { kebabCase } from 'case-anything'
-import { useAtom, useAtomValue } from 'jotai'
-import { useEffect, useState } from 'react'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { APP_NAME } from '@/utils/constants/app'
-import { MIN_SIDE_CONTENT_WIDTH } from '@/utils/constants/side'
-import { cn } from '@/utils/styles/utils'
-import { isSideOpenAtom } from '../../atoms'
+import { kebabCase } from "case-anything"
+import { useAtom, useAtomValue } from "jotai"
+import { useEffect, useState } from "react"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { APP_NAME } from "@/utils/constants/app"
+import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
+import { cn } from "@/utils/styles/utils"
+import { isSideOpenAtom } from "../../atoms"
 
 export default function SideContent() {
   const isSideOpen = useAtomValue(isSideOpenAtom)
@@ -33,15 +33,15 @@ export default function SideContent() {
       setIsResizing(false)
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
 
-    document.body.style.userSelect = 'none'
+    document.body.style.userSelect = "none"
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.body.style.userSelect = ''
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+      document.body.style.userSelect = ""
     }
   }, [isResizing, setSideContent])
 
@@ -52,7 +52,7 @@ export default function SideContent() {
 
     if (isSideOpen) {
       if (!styleTag) {
-        styleTag = document.createElement('style')
+        styleTag = document.createElement("style")
         styleTag.id = styleId
         document.head.appendChild(styleTag)
       }
@@ -86,10 +86,10 @@ export default function SideContent() {
     <>
       <div
         className={cn(
-          'bg-background fixed top-0 right-0 z-[2147483647] h-full pr-[var(--removed-body-scroll-bar-size,0px)]',
+          "bg-background fixed top-0 right-0 z-[2147483647] h-full pr-[var(--removed-body-scroll-bar-size,0px)]",
           isSideOpen
-            ? 'border-border translate-x-0 border-l'
-            : 'translate-x-full',
+            ? "border-border translate-x-0 border-l"
+            : "translate-x-full",
         )}
         style={{
           width: `calc(${sideContent.width}px + var(--removed-body-scroll-bar-size, 0px))`,

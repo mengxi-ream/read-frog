@@ -1,14 +1,14 @@
-import type { EdgeTTSResponse } from './types'
-import type { EdgeTTSSynthesizeRequest } from '@/types/edge-tts'
+import type { EdgeTTSResponse } from "./types"
+import type { EdgeTTSSynthesizeRequest } from "@/types/edge-tts"
 import {
   EDGE_TTS_MAX_RETRIES,
   EDGE_TTS_OUTPUT_FORMAT,
   EDGE_TTS_RETRY_BASE_DELAY_MS,
   EDGE_TTS_USER_AGENT,
-} from './constants'
-import { clearEdgeTTSTokenCache, getEdgeTTSEndpointToken } from './endpoint'
-import { EdgeTTSError } from './errors'
-import { buildSSMLRequest } from './ssml'
+} from "./constants"
+import { clearEdgeTTSTokenCache, getEdgeTTSEndpointToken } from "./endpoint"
+import { EdgeTTSError } from "./errors"
+import { buildSSMLRequest } from "./ssml"
 
 function toRetryDelay(attempt: number): number {
   const base = EDGE_TTS_RETRY_BASE_DELAY_MS * (attempt + 1)
@@ -51,7 +51,7 @@ function resolveOutputFormat(outputFormat?: string): string {
 
 function isConcatenationSafeOutputFormat(outputFormat: string): boolean {
   const normalized = outputFormat.toLowerCase()
-  return normalized.includes('mp3') || normalized.startsWith('raw-')
+  return normalized.includes("mp3") || normalized.startsWith("raw-")
 }
 
 function assertChunkConcatSupported(chunkRequests: EdgeTTSSynthesizeRequest[]): void {
@@ -69,14 +69,14 @@ function assertChunkConcatSupported(chunkRequests: EdgeTTSSynthesizeRequest[]): 
 
     if (!isConcatenationSafeOutputFormat(requestedFormat)) {
       throw new EdgeTTSError(
-        'SYNTH_REQUEST_FAILED',
+        "SYNTH_REQUEST_FAILED",
         `Output format "${requestedFormat}" is not safe for multi-chunk concatenation`,
       )
     }
 
     if (requestedFormatNormalized !== firstFormatNormalized) {
       throw new EdgeTTSError(
-        'SYNTH_REQUEST_FAILED',
+        "SYNTH_REQUEST_FAILED",
         `Mixed output formats are not supported for multi-chunk concatenation: "${firstFormat}" and "${requestedFormat}"`,
       )
     }
@@ -88,49 +88,49 @@ async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeT
   const url = `https://${endpointInfo.endpoint.r}.tts.speech.microsoft.com/cognitiveservices/v1`
 
   const response = await fetch(url, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Authorization': endpointInfo.endpoint.t,
-      'Content-Type': 'application/ssml+xml',
-      'User-Agent': EDGE_TTS_USER_AGENT,
-      'X-Microsoft-OutputFormat': resolveOutputFormat(request.outputFormat),
+      "Authorization": endpointInfo.endpoint.t,
+      "Content-Type": "application/ssml+xml",
+      "User-Agent": EDGE_TTS_USER_AGENT,
+      "X-Microsoft-OutputFormat": resolveOutputFormat(request.outputFormat),
     },
     body: buildSSMLRequest(request),
   })
 
   if (!response.ok) {
-    const errorText = await response.text().catch(() => '')
+    const errorText = await response.text().catch(() => "")
 
     if (response.status === 401 || response.status === 403) {
       clearEdgeTTSTokenCache()
-      throw new EdgeTTSError('TOKEN_INVALID', `Edge TTS token invalid: ${response.status} ${errorText}`, {
+      throw new EdgeTTSError("TOKEN_INVALID", `Edge TTS token invalid: ${response.status} ${errorText}`, {
         status: response.status,
         retryable: true,
       })
     }
 
     if (response.status === 429) {
-      throw new EdgeTTSError('SYNTH_RATE_LIMITED', `Edge TTS rate limited: ${errorText}`, {
+      throw new EdgeTTSError("SYNTH_RATE_LIMITED", `Edge TTS rate limited: ${errorText}`, {
         status: response.status,
         retryable: true,
       })
     }
 
     if (response.status >= 500) {
-      throw new EdgeTTSError('SYNTH_SERVER_ERROR', `Edge TTS server error: ${response.status} ${errorText}`, {
+      throw new EdgeTTSError("SYNTH_SERVER_ERROR", `Edge TTS server error: ${response.status} ${errorText}`, {
         status: response.status,
         retryable: true,
       })
     }
 
-    throw new EdgeTTSError('SYNTH_REQUEST_FAILED', `Edge TTS request failed: ${response.status} ${errorText}`, {
+    throw new EdgeTTSError("SYNTH_REQUEST_FAILED", `Edge TTS request failed: ${response.status} ${errorText}`, {
       status: response.status,
     })
   }
 
   return {
     audio: await response.arrayBuffer(),
-    contentType: response.headers.get('content-type') || 'audio/mpeg',
+    contentType: response.headers.get("content-type") || "audio/mpeg",
   }
 }
 
@@ -156,13 +156,13 @@ export async function synthesizeEdgeTTSChunkWithRetry(
   }
 
   if (lastError instanceof TypeError) {
-    throw new EdgeTTSError('NETWORK_ERROR', `Network error while requesting Edge TTS: ${lastError.message}`, {
+    throw new EdgeTTSError("NETWORK_ERROR", `Network error while requesting Edge TTS: ${lastError.message}`, {
       cause: lastError,
       retryable: true,
     })
   }
 
-  throw new EdgeTTSError('UNKNOWN_ERROR', 'Unknown Edge TTS synthesis error', {
+  throw new EdgeTTSError("UNKNOWN_ERROR", "Unknown Edge TTS synthesis error", {
     cause: lastError,
   })
 }
@@ -173,7 +173,7 @@ export async function combineEdgeTTSAudioChunks(
   assertChunkConcatSupported(chunkRequests)
 
   const chunkAudioBuffers: ArrayBuffer[] = []
-  let contentType = 'audio/mpeg'
+  let contentType = "audio/mpeg"
 
   for (const chunkRequest of chunkRequests) {
     const response = await synthesizeEdgeTTSChunkWithRetry(chunkRequest)

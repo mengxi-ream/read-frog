@@ -1,14 +1,14 @@
-import type { PromptConfigList } from './utils/prompt-file'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react/dist/iconify.js'
-import { useAtom } from 'jotai'
-import { useId } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/base-ui/button'
-import { Input } from '@/components/ui/base-ui/input'
-import { Label } from '@/components/ui/base-ui/label'
-import { usePromptAtoms } from './context'
-import { analysisJSONFile } from './utils/prompt-file'
+import type { PromptConfigList } from "./utils/prompt-file"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react/dist/iconify.js"
+import { useAtom } from "jotai"
+import { useId } from "react"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/base-ui/button"
+import { Input } from "@/components/ui/base-ui/input"
+import { Label } from "@/components/ui/base-ui/label"
+import { usePromptAtoms } from "./context"
+import { analysisJSONFile } from "./utils/prompt-file"
 
 export function ImportPrompts() {
   const promptAtoms = usePromptAtoms()
@@ -21,7 +21,7 @@ export function ImportPrompts() {
       ...item,
       id: crypto.randomUUID(),
       // Backwards compatibility: add systemPrompt if missing from imported file
-      systemPrompt: item.systemPrompt ?? '',
+      systemPrompt: item.systemPrompt ?? "",
     }))
 
     setConfig({
@@ -37,18 +37,18 @@ export function ImportPrompts() {
         return
       const promptConfig = await analysisJSONFile(files[0])
       injectPrompts(promptConfig)
-      toast.success(`${i18n.t('options.translation.personalizedPrompts.importSuccess')} !`)
+      toast.success(`${i18n.t("options.translation.personalizedPrompts.importSuccess")} !`)
     }
     catch (error) {
       if (error instanceof Error) {
         toast.error(error.message)
       }
       else {
-        toast.error('Something went error when importing')
+        toast.error("Something went error when importing")
       }
     }
     finally {
-      e.target.value = ''
+      e.target.value = ""
       e.target.files = null
     }
   }
@@ -57,7 +57,7 @@ export function ImportPrompts() {
     <Button variant="outline" className="p-0">
       <Label htmlFor={inputId} className="w-full px-3">
         <Icon icon="tabler:file-import" className="size-4" />
-        {i18n.t('options.translation.personalizedPrompts.import')}
+        {i18n.t("options.translation.personalizedPrompts.import")}
       </Label>
       <Input
         type="file"

@@ -1,13 +1,13 @@
-import type { PartialDeep } from 'type-fest'
-import type { FeatureKey } from '../constants/feature-providers'
-import type { LLMProviderConfig, ProviderConfig } from '@/types/config/provider'
-import { deepmerge } from 'deepmerge-ts'
-import { atom } from 'jotai'
-import { atomFamily } from 'jotai-family'
-import { llmProviderConfigItemSchema, providerConfigItemSchema } from '@/types/config/provider'
-import { getProviderConfigById } from '../config/helpers'
-import { FEATURE_PROVIDER_DEFS } from '../constants/feature-providers'
-import { configAtom, configFieldsAtomMap } from './config'
+import type { PartialDeep } from "type-fest"
+import type { FeatureKey } from "../constants/feature-providers"
+import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
+import { deepmerge } from "deepmerge-ts"
+import { atom } from "jotai"
+import { atomFamily } from "jotai-family"
+import { llmProviderConfigItemSchema, providerConfigItemSchema } from "@/types/config/provider"
+import { getProviderConfigById } from "../config/helpers"
+import { FEATURE_PROVIDER_DEFS } from "../constants/feature-providers"
+import { configAtom, configFieldsAtomMap } from "./config"
 
 export const featureProviderConfigAtom = atomFamily((featureKey: FeatureKey) =>
   atom((get) => {

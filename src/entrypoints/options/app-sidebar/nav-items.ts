@@ -1,25 +1,25 @@
-import { ApiProvidersPage } from '../pages/api-providers'
-import { ConfigPage } from '../pages/config'
-import { ContextMenuPage } from '../pages/context-menu'
-import { FloatingButtonPage } from '../pages/floating-button'
-import { GeneralPage } from '../pages/general'
-import { InputTranslationPage } from '../pages/input-translation'
-import { SelectionToolbarPage } from '../pages/selection-toolbar'
-import { StatisticsPage } from '../pages/statistics'
-import { TextToSpeechPage } from '../pages/text-to-speech'
-import { TranslationPage } from '../pages/translation'
-import { VideoSubtitlesPage } from '../pages/video-subtitles'
+import { ApiProvidersPage } from "../pages/api-providers"
+import { ConfigPage } from "../pages/config"
+import { ContextMenuPage } from "../pages/context-menu"
+import { FloatingButtonPage } from "../pages/floating-button"
+import { GeneralPage } from "../pages/general"
+import { InputTranslationPage } from "../pages/input-translation"
+import { SelectionToolbarPage } from "../pages/selection-toolbar"
+import { StatisticsPage } from "../pages/statistics"
+import { TextToSpeechPage } from "../pages/text-to-speech"
+import { TranslationPage } from "../pages/translation"
+import { VideoSubtitlesPage } from "../pages/video-subtitles"
 
 export const ROUTE_CONFIG = [
-  { path: '/', component: GeneralPage },
-  { path: '/api-providers', component: ApiProvidersPage },
-  { path: '/translation', component: TranslationPage },
-  { path: '/video-subtitles', component: VideoSubtitlesPage },
-  { path: '/floating-button', component: FloatingButtonPage },
-  { path: '/selection-toolbar', component: SelectionToolbarPage },
-  { path: '/context-menu', component: ContextMenuPage },
-  { path: '/input-translation', component: InputTranslationPage },
-  { path: '/tts', component: TextToSpeechPage },
-  { path: '/statistics', component: StatisticsPage },
-  { path: '/config', component: ConfigPage },
+  { path: "/", component: GeneralPage },
+  { path: "/api-providers", component: ApiProvidersPage },
+  { path: "/translation", component: TranslationPage },
+  { path: "/video-subtitles", component: VideoSubtitlesPage },
+  { path: "/floating-button", component: FloatingButtonPage },
+  { path: "/selection-toolbar", component: SelectionToolbarPage },
+  { path: "/context-menu", component: ContextMenuPage },
+  { path: "/input-translation", component: InputTranslationPage },
+  { path: "/tts", component: TextToSpeechPage },
+  { path: "/statistics", component: StatisticsPage },
+  { path: "/config", component: ConfigPage },
 ] as const

@@ -1,5 +1,5 @@
 (() => {
-  const EVENT_NAME = 'extension:URLChange'
+  const EVENT_NAME = "extension:URLChange"
 
   const isSamePage = (from: string, to: string) => {
     try {
@@ -27,43 +27,43 @@
 
   /* ---------- 1. pushState / replaceState ---------- */
   let prev = location.href;
-  ['pushState', 'replaceState'].forEach((fn) => {
-    const orig = history[fn as 'pushState']
-    history[fn as 'pushState'] = function (...args) {
+  ["pushState", "replaceState"].forEach((fn) => {
+    const orig = history[fn as "pushState"]
+    history[fn as "pushState"] = function (...args) {
       orig.apply(this, args as any)
       const now = location.href
-      fire(prev, now, 'pushState')
+      fire(prev, now, "pushState")
       prev = now
     }
   })
 
   /* ---------- 2. popstate / hashchange ---------- */
-  window.addEventListener('popstate', () => {
+  window.addEventListener("popstate", () => {
     const now = location.href
-    fire(prev, now, 'popstate')
+    fire(prev, now, "popstate")
     prev = now
   })
-  window.addEventListener('hashchange', () => {
+  window.addEventListener("hashchange", () => {
     const now = location.href
-    fire(prev, now, 'hashchange')
+    fire(prev, now, "hashchange")
     prev = now
   })
 
   /* ---------- 3. Modern Navigation API (only Chrome/Edge) ---------- */
-  if ('navigation' in window) {
-    (window as any).navigation.addEventListener('navigate', (e: any) => {
+  if ("navigation" in window) {
+    (window as any).navigation.addEventListener("navigate", (e: any) => {
       const now = e.destination?.url ?? location.href
-      fire(prev, now, 'navigate')
+      fire(prev, now, "navigate")
       prev = now
     })
   }
 
   /* ---------- 4. Fallback polling (optional, to ensure 100% coverage) ---------- */
-  if (!['chrome', 'edge'].includes(import.meta.env.BROWSER)) {
+  if (!["chrome", "edge"].includes(import.meta.env.BROWSER)) {
     setInterval(() => {
       const now = location.href
       if (now !== prev) {
-        fire(prev, now, 'interval')
+        fire(prev, now, "interval")
         prev = now
       }
     }, 1000)

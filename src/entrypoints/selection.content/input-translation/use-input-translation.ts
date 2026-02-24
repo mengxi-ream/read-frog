@@ -1,16 +1,16 @@
-import { useAtom } from 'jotai'
-import { useCallback, useEffect, useRef } from 'react'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { translateTextForInput } from '@/utils/host/translate/translate-variants'
+import { useAtom } from "jotai"
+import { useCallback, useEffect, useRef } from "react"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { translateTextForInput } from "@/utils/host/translate/translate-variants"
 
-const SPACE_KEY = ' '
+const SPACE_KEY = " "
 const TRIGGER_COUNT = 3
-const LAST_CYCLE_SWAPPED_KEY = 'read-frog-input-translation-last-cycle-swapped'
-const SPINNER_ID = 'read-frog-input-translation-spinner'
+const LAST_CYCLE_SWAPPED_KEY = "read-frog-input-translation-last-cycle-swapped"
+const SPINNER_ID = "read-frog-input-translation-spinner"
 
 function getLastCycleSwapped(): boolean {
   try {
-    return sessionStorage.getItem(LAST_CYCLE_SWAPPED_KEY) === 'true'
+    return sessionStorage.getItem(LAST_CYCLE_SWAPPED_KEY) === "true"
   }
   catch {
     return false
@@ -38,7 +38,7 @@ function showSpinner(element: HTMLElement): () => void {
   }
 
   // Create spinner element - same style as createLightweightSpinner in translate/ui/spinner.ts
-  const spinner = document.createElement('span')
+  const spinner = document.createElement("span")
   spinner.id = SPINNER_ID
 
   // Use the same border spinner style as page translation
@@ -57,25 +57,25 @@ function showSpinner(element: HTMLElement): () => void {
   `
 
   // Respect user's motion preferences for accessibility
-  const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
+  const prefersReducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false
 
   if (!prefersReducedMotion) {
     // Use Web Animations API for rotation
     spinner.animate(
       [
-        { transform: 'rotate(0deg)' },
-        { transform: 'rotate(360deg)' },
+        { transform: "rotate(0deg)" },
+        { transform: "rotate(360deg)" },
       ],
       {
         duration: 600,
         iterations: Infinity,
-        easing: 'linear',
+        easing: "linear",
       },
     )
   }
   else {
     // For reduced motion, show static spinner with muted color
-    spinner.style.borderTopColor = '#a3a3a3'
+    spinner.style.borderTopColor = "#a3a3a3"
   }
 
   // Calculate position - vertically centered relative to the element
@@ -121,10 +121,10 @@ function setTextWithUndo(element: HTMLInputElement | HTMLTextAreaElement | HTMLE
 
   // Use execCommand to insert text with undo support
   // Note: execCommand is deprecated but still the only way to support undo
-  document.execCommand('insertText', false, text)
+  document.execCommand("insertText", false, text)
 
   // Dispatch input event for framework compatibility (React, Vue, etc.)
-  element.dispatchEvent(new Event('input', { bubbles: true }))
+  element.dispatchEvent(new Event("input", { bubbles: true }))
 }
 
 export function useInputTranslation() {
@@ -137,7 +137,7 @@ export function useInputTranslation() {
       return
 
     // Security: skip password fields to prevent exposing sensitive data
-    if (element instanceof HTMLInputElement && element.type === 'password') {
+    if (element instanceof HTMLInputElement && element.type === "password") {
       return
     }
 
@@ -147,7 +147,7 @@ export function useInputTranslation() {
       text = element.value
     }
     else if (element.isContentEditable) {
-      text = element.textContent || ''
+      text = element.textContent || ""
     }
     else {
       return
@@ -197,7 +197,7 @@ export function useInputTranslation() {
         currentText = element.value
       }
       else if (element.isContentEditable) {
-        currentText = element.textContent || ''
+        currentText = element.textContent || ""
       }
       else {
         currentText = originalText
@@ -209,7 +209,7 @@ export function useInputTranslation() {
       }
     }
     catch (error) {
-      console.error('Input translation error:', error)
+      console.error("Input translation error:", error)
     }
     finally {
       hideSpinner()
@@ -269,9 +269,9 @@ export function useInputTranslation() {
       }
     }
 
-    document.addEventListener('keydown', handleKeyDown, true)
+    document.addEventListener("keydown", handleKeyDown, true)
     return () => {
-      document.removeEventListener('keydown', handleKeyDown, true)
+      document.removeEventListener("keydown", handleKeyDown, true)
     }
   }, [inputTranslationConfig.enabled, inputTranslationConfig.timeThreshold, handleTranslation])
 }

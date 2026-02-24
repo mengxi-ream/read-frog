@@ -1,8 +1,8 @@
-import { faker } from '@faker-js/faker'
-import { REQUEST_RECORD_MAX_AGE_DAYS, REQUEST_RECORD_MAX_COUNT } from '@/entrypoints/background/db-cleanup'
-import { LLM_PROVIDER_MODELS, LLM_PROVIDER_TYPES } from '@/types/config/provider'
-import { logger } from '@/utils/logger'
-import { db } from './db'
+import { faker } from "@faker-js/faker"
+import { REQUEST_RECORD_MAX_AGE_DAYS, REQUEST_RECORD_MAX_COUNT } from "@/entrypoints/background/db-cleanup"
+import { LLM_PROVIDER_MODELS, LLM_PROVIDER_TYPES } from "@/types/config/provider"
+import { logger } from "@/utils/logger"
+import { db } from "./db"
 
 export async function generateMockBatchRequestRecords(
   count = REQUEST_RECORD_MAX_COUNT,
@@ -30,5 +30,5 @@ export async function generateMockBatchRequestRecords(
  */
 export async function clearMockData() {
   await db.batchRequestRecord.clear()
-  logger.info('🗑️  Cleared all batch request records')
+  logger.info("🗑️  Cleared all batch request records")
 }

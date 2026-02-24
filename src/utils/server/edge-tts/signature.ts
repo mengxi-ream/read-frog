@@ -2,8 +2,8 @@ import {
   EDGE_TTS_ENDPOINT_URL,
   EDGE_TTS_SIGNATURE_APP_ID,
   getEdgeTTSSignatureSecretBase64,
-} from './constants'
-import { EdgeTTSError } from './errors'
+} from "./constants"
+import { EdgeTTSError } from "./errors"
 
 function base64ToBytes(base64: string): Uint8Array {
   const binaryString = atob(base64)
@@ -15,7 +15,7 @@ function base64ToBytes(base64: string): Uint8Array {
 }
 
 function bytesToBase64(bytes: Uint8Array): string {
-  let binaryString = ''
+  let binaryString = ""
   for (let i = 0; i < bytes.length; i++) {
     binaryString += String.fromCharCode(bytes[i])
   }
@@ -26,15 +26,15 @@ async function hmacSha256(key: Uint8Array, data: string): Promise<Uint8Array> {
   const keyBuffer = new ArrayBuffer(key.byteLength)
   new Uint8Array(keyBuffer).set(key)
   const cryptoKey = await crypto.subtle.importKey(
-    'raw',
+    "raw",
     keyBuffer,
-    { name: 'HMAC', hash: { name: 'SHA-256' } },
+    { name: "HMAC", hash: { name: "SHA-256" } },
     false,
-    ['sign'],
+    ["sign"],
   )
 
   const signatureBuffer = await crypto.subtle.sign(
-    'HMAC',
+    "HMAC",
     cryptoKey,
     new TextEncoder().encode(data),
   )
@@ -42,7 +42,7 @@ async function hmacSha256(key: Uint8Array, data: string): Promise<Uint8Array> {
 }
 
 export function buildSignatureDate(date = new Date()): string {
-  return `${date.toUTCString().replace(/GMT/, '').trim().toLowerCase()} GMT`
+  return `${date.toUTCString().replace(/GMT/, "").trim().toLowerCase()} GMT`
 }
 
 export async function generateTranslatorSignature(
@@ -50,8 +50,8 @@ export async function generateTranslatorSignature(
   now = new Date(),
 ): Promise<string> {
   try {
-    const encodedUrl = encodeURIComponent(url.split('://')[1] ?? '')
-    const requestId = crypto.randomUUID().replace(/-/g, '')
+    const encodedUrl = encodeURIComponent(url.split("://")[1] ?? "")
+    const requestId = crypto.randomUUID().replace(/-/g, "")
     const formattedDate = buildSignatureDate(now)
 
     const payload = `${EDGE_TTS_SIGNATURE_APP_ID}${encodedUrl}${formattedDate}${requestId}`.toLowerCase()
@@ -61,7 +61,7 @@ export async function generateTranslatorSignature(
     return `${EDGE_TTS_SIGNATURE_APP_ID}::${bytesToBase64(signature)}::${formattedDate}::${requestId}`
   }
   catch (error) {
-    throw new EdgeTTSError('SIGNATURE_GENERATION_FAILED', 'Failed to generate translator signature', {
+    throw new EdgeTTSError("SIGNATURE_GENERATION_FAILED", "Failed to generate translator signature", {
       cause: error,
     })
   }

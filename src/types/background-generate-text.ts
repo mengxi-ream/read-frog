@@ -1,4 +1,4 @@
-import type { JSONValue } from 'ai'
+import type { JSONValue } from "ai"
 
 export interface BackgroundGenerateTextPayload {
   providerId: string

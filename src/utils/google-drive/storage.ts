@@ -1,12 +1,12 @@
-import type { Config } from '@/types/config/config'
-import type { ConfigValueAndMeta } from '@/types/config/meta'
-import { ConfigVersionTooNewError } from '../config/errors'
-import { migrateConfig } from '../config/migration'
-import { CONFIG_SCHEMA_VERSION } from '../constants/config'
-import { logger } from '../logger'
-import { downloadFile, findFileInAppData, uploadFile } from './api'
-import { getGoogleUserInfo, getValidAccessToken } from './auth'
-import { GOOGLE_DRIVE_CONFIG_FILENAME } from './constants'
+import type { Config } from "@/types/config/config"
+import type { ConfigValueAndMeta } from "@/types/config/meta"
+import { ConfigVersionTooNewError } from "../config/errors"
+import { migrateConfig } from "../config/migration"
+import { CONFIG_SCHEMA_VERSION } from "../constants/config"
+import { logger } from "../logger"
+import { downloadFile, findFileInAppData, uploadFile } from "./api"
+import { getGoogleUserInfo, getValidAccessToken } from "./auth"
+import { GOOGLE_DRIVE_CONFIG_FILENAME } from "./constants"
 
 export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
   configValueAndMeta: ConfigValueAndMeta | null
@@ -35,7 +35,7 @@ export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
       if (error instanceof ConfigVersionTooNewError) {
         throw error
       }
-      logger.error('Failed to migrate remote config', error)
+      logger.error("Failed to migrate remote config", error)
       return { configValueAndMeta: null, email: userInfo.email }
     }
 
@@ -51,7 +51,7 @@ export async function getRemoteConfigAndMetaWithUserEmail(): Promise<{
     }
   }
   catch (error) {
-    logger.error('Failed to get remote config', error)
+    logger.error("Failed to get remote config", error)
     throw error
   }
 }
@@ -66,7 +66,7 @@ export async function setRemoteConfigAndMeta(
     await uploadFile(GOOGLE_DRIVE_CONFIG_FILENAME, content, existingFile?.id)
   }
   catch (error) {
-    logger.error('Failed to upload local config', error)
+    logger.error("Failed to upload local config", error)
     throw error
   }
 }

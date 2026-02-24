@@ -4,7 +4,7 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     translate: {
       ...oldConfig.translate,
-      translationNodeStyle: 'default',
+      translationNodeStyle: "default",
     },
   }
 }

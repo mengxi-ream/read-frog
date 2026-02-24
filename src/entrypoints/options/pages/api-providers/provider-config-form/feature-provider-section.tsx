@@ -1,15 +1,15 @@
-import type { APIProviderConfig } from '@/types/config/provider'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useStore } from '@tanstack/react-form'
-import { useAtomValue, useSetAtom } from 'jotai'
-import { useState } from 'react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/base-ui/collapsible'
-import { Switch } from '@/components/ui/base-ui/switch'
-import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
-import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
-import { cn } from '@/utils/styles/utils'
-import { withForm } from './form'
+import type { APIProviderConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useStore } from "@tanstack/react-form"
+import { useAtomValue, useSetAtom } from "jotai"
+import { useState } from "react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
+import { Switch } from "@/components/ui/base-ui/switch"
+import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
+import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { cn } from "@/utils/styles/utils"
+import { withForm } from "./form"
 
 export const FeatureProviderSection = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
@@ -32,11 +32,11 @@ export const FeatureProviderSection = withForm({
           <Icon
             icon="tabler:chevron-right"
             className={cn(
-              'size-4 transition-transform duration-200',
-              isOpen && 'rotate-90',
+              "size-4 transition-transform duration-200",
+              isOpen && "rotate-90",
             )}
           />
-          <span>{i18n.t('options.apiProviders.form.featureProviders')}</span>
+          <span>{i18n.t("options.apiProviders.form.featureProviders")}</span>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <div className="flex flex-col gap-3">

@@ -1,13 +1,13 @@
-import type { TTSOffscreenStopRequest, TTSPlaybackStartResponse } from '@/types/tts-playback'
-import { browser } from '#imports'
-import { logger } from '@/utils/logger'
-import { onMessage, sendMessage } from '@/utils/message'
+import type { TTSOffscreenStopRequest, TTSPlaybackStartResponse } from "@/types/tts-playback"
+import { browser } from "#imports"
+import { logger } from "@/utils/logger"
+import { onMessage, sendMessage } from "@/utils/message"
 
-const OFFSCREEN_DOCUMENT_PATH = '/offscreen.html' as const
+const OFFSCREEN_DOCUMENT_PATH = "/offscreen.html" as const
 const OFFSCREEN_DOCUMENT_URL = browser.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)
-const OFFSCREEN_REASON = 'AUDIO_PLAYBACK'
+const OFFSCREEN_REASON = "AUDIO_PLAYBACK"
 const OFFSCREEN_JUSTIFICATION
-  = 'Play synthesized speech from extension context to avoid webpage CSP media restrictions.'
+  = "Play synthesized speech from extension context to avoid webpage CSP media restrictions."
 
 interface ChromeRuntimeContext {
   contextType?: string
@@ -34,15 +34,15 @@ function getChromeLike(): ChromeLike {
 
 function isSingleOffscreenDocumentError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
-  return message.includes('Only a single offscreen document may be created')
-    || message.includes('already exists')
+  return message.includes("Only a single offscreen document may be created")
+    || message.includes("already exists")
 }
 
 function isMissingReceiverError(error: unknown): boolean {
   const message = error instanceof Error ? error.message : String(error)
-  return message.includes('Could not establish connection')
-    || message.includes('Receiving end does not exist')
-    || message.includes('No response')
+  return message.includes("Could not establish connection")
+    || message.includes("Receiving end does not exist")
+    || message.includes("No response")
 }
 
 async function hasOffscreenDocument(): Promise<boolean> {
@@ -52,11 +52,11 @@ async function hasOffscreenDocument(): Promise<boolean> {
   }
 
   const contexts = await chromeApi.runtime.getContexts({
-    contextTypes: ['OFFSCREEN_DOCUMENT'],
+    contextTypes: ["OFFSCREEN_DOCUMENT"],
     documentUrls: [OFFSCREEN_DOCUMENT_URL],
   })
 
-  return contexts.some(context => context.contextType === 'OFFSCREEN_DOCUMENT')
+  return contexts.some(context => context.contextType === "OFFSCREEN_DOCUMENT")
 }
 
 async function ensureOffscreenDocument(): Promise<void> {
@@ -71,7 +71,7 @@ async function ensureOffscreenDocument(): Promise<void> {
   ensureOffscreenPromise = (async () => {
     const chromeApi = getChromeLike()
     if (!chromeApi.offscreen?.createDocument) {
-      throw new Error('Offscreen API is unavailable in this browser')
+      throw new Error("Offscreen API is unavailable in this browser")
     }
 
     try {
@@ -95,7 +95,7 @@ async function ensureOffscreenDocument(): Promise<void> {
 
 async function stopOffscreenPlayback(data: TTSOffscreenStopRequest): Promise<void> {
   try {
-    await sendMessage('ttsOffscreenStop', data)
+    await sendMessage("ttsOffscreenStop", data)
   }
   catch (error) {
     if (!isMissingReceiverError(error)) {
@@ -112,10 +112,10 @@ async function startOffscreenPlayback(
   await ensureOffscreenDocument()
 
   // Latest request wins: always stop any in-progress playback first.
-  await stopOffscreenPlayback({ reason: 'interrupted' })
+  await stopOffscreenPlayback({ reason: "interrupted" })
 
   try {
-    return await sendMessage('ttsOffscreenPlay', {
+    return await sendMessage("ttsOffscreenPlay", {
       requestId,
       audioBase64,
       contentType,
@@ -126,11 +126,11 @@ async function startOffscreenPlayback(
       throw error
     }
 
-    logger.warn('[Background][TTSPlayback] offscreen receiver missing, retrying once', error)
+    logger.warn("[Background][TTSPlayback] offscreen receiver missing, retrying once", error)
 
     // Offscreen documents can be reclaimed by the browser and briefly lose handlers.
     await ensureOffscreenDocument()
-    return sendMessage('ttsOffscreenPlay', {
+    return sendMessage("ttsOffscreenPlay", {
       requestId,
       audioBase64,
       contentType,
@@ -139,12 +139,12 @@ async function startOffscreenPlayback(
 }
 
 export function setupTTSPlaybackMessageHandlers() {
-  onMessage('ttsPlaybackEnsureOffscreen', async () => {
+  onMessage("ttsPlaybackEnsureOffscreen", async () => {
     await ensureOffscreenDocument()
     return { ok: true as const }
   })
 
-  onMessage('ttsPlaybackStart', async (message) => {
+  onMessage("ttsPlaybackStart", async (message) => {
     return startOffscreenPlayback(
       message.data.requestId,
       message.data.audioBase64,
@@ -152,15 +152,15 @@ export function setupTTSPlaybackMessageHandlers() {
     )
   })
 
-  onMessage('ttsPlaybackStop', async (message) => {
+  onMessage("ttsPlaybackStop", async (message) => {
     try {
       await stopOffscreenPlayback({
         requestId: message.data.requestId,
-        reason: 'stopped',
+        reason: "stopped",
       })
     }
     catch (error) {
-      logger.warn('[Background][TTSPlayback] stop failed', error)
+      logger.warn("[Background][TTSPlayback] stop failed", error)
       throw error
     }
 

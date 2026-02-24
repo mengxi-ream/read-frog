@@ -1,5 +1,5 @@
-import type { Config } from '@/types/config/config'
-import type { TransNode } from '@/types/dom'
+import type { Config } from "@/types/config/config"
+import type { TransNode } from "@/types/dom"
 import {
   BLOCK_ATTRIBUTE,
   BLOCK_CONTENT_CLASS,
@@ -7,12 +7,12 @@ import {
   INLINE_ATTRIBUTE,
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
-} from '@/utils/constants/dom-labels'
-import { CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP, CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP, DONT_WALK_AND_TRANSLATE_TAGS, DONT_WALK_BUT_TRANSLATE_TAGS, FORCE_BLOCK_TAGS, MAIN_CONTENT_IGNORE_TAGS } from '@/utils/constants/dom-rules'
+} from "@/utils/constants/dom-labels"
+import { CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP, CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP, DONT_WALK_AND_TRANSLATE_TAGS, DONT_WALK_BUT_TRANSLATE_TAGS, FORCE_BLOCK_TAGS, MAIN_CONTENT_IGNORE_TAGS } from "@/utils/constants/dom-rules"
 
 export function isEditable(element: HTMLElement): boolean {
   const tag = element.tagName
-  if (tag === 'INPUT' || tag === 'TEXTAREA')
+  if (tag === "INPUT" || tag === "TEXTAREA")
     return true
   if (element.isContentEditable)
     return true
@@ -35,7 +35,7 @@ export function isShallowInlineTransNode(node: Node): boolean {
 // for example: https://www.economist.com/business/2025/08/21/china-is-quietly-upstaging-america-with-its-open-models
 function isLargeInitialFloatingLetter(element: HTMLElement): boolean {
   const computedStyle = window.getComputedStyle(element)
-  return computedStyle.float === 'left' && !!element.nextSibling && isShallowInlineTransNode(element.nextSibling)
+  return computedStyle.float === "left" && !!element.nextSibling && isShallowInlineTransNode(element.nextSibling)
 }
 
 export function isShallowInlineHTMLElement(element: HTMLElement): boolean {
@@ -54,7 +54,7 @@ export function isShallowInlineHTMLElement(element: HTMLElement): boolean {
     return true
   }
 
-  const isInlineDisplay = ['inline', 'contents'].some(display => computedStyle.display.includes(display))
+  const isInlineDisplay = ["inline", "contents"].some(display => computedStyle.display.includes(display))
 
   return isInlineDisplay
 }
@@ -81,7 +81,7 @@ export function isShallowBlockHTMLElement(element: HTMLElement): boolean {
     return false
   }
 
-  const isInlineDisplay = ['inline', 'contents'].some(display => computedStyle.display.includes(display))
+  const isInlineDisplay = ["inline", "contents"].some(display => computedStyle.display.includes(display))
 
   return !isInlineDisplay
 }
@@ -89,7 +89,7 @@ export function isShallowBlockHTMLElement(element: HTMLElement): boolean {
 export function isCustomDontWalkIntoElement(element: HTMLElement): boolean {
   const dontWalkIntoElementSelectorList = CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP[window.location.hostname] ?? []
 
-  const dontWalkSelector = dontWalkIntoElementSelectorList.join(',')
+  const dontWalkSelector = dontWalkIntoElementSelectorList.join(",")
 
   if (!dontWalkSelector)
     return false
@@ -100,7 +100,7 @@ export function isCustomDontWalkIntoElement(element: HTMLElement): boolean {
 export function isCustomForceBlockTranslation(element: HTMLElement): boolean {
   const forceBlockSelectorList = CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP[window.location.hostname] ?? []
 
-  const forceBlockSelector = forceBlockSelectorList.join(',')
+  const forceBlockSelector = forceBlockSelectorList.join(",")
 
   if (!forceBlockSelector)
     return false
@@ -109,7 +109,7 @@ export function isCustomForceBlockTranslation(element: HTMLElement): boolean {
 }
 
 export function isDontWalkIntoButTranslateAsChildElement(element: HTMLElement): boolean {
-  const dontWalkClass = [NOTRANSLATE_CLASS, 'sr-only'].some(className =>
+  const dontWalkClass = [NOTRANSLATE_CLASS, "sr-only"].some(className =>
     element.classList.contains(className),
   )
 
@@ -123,12 +123,12 @@ export function isDontWalkIntoButTranslateAsChildElement(element: HTMLElement): 
 
 export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElement, config: Config): boolean {
   const dontWalkCustomElement = isCustomDontWalkIntoElement(element)
-  const dontWalkContent = config.translate.page.range !== 'all' && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
+  const dontWalkContent = config.translate.page.range !== "all" && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
   const dontWalkInvalidTag = DONT_WALK_AND_TRANSLATE_TAGS.has(element.tagName)
   const dontWalkCSS
-    = window.getComputedStyle(element).display === 'none'
-      || window.getComputedStyle(element).visibility === 'hidden'
-  const dontWalkAriaHidden = element.getAttribute('aria-hidden') === 'true'
+    = window.getComputedStyle(element).display === "none"
+      || window.getComputedStyle(element).visibility === "hidden"
+  const dontWalkAriaHidden = element.getAttribute("aria-hidden") === "true"
   return dontWalkCustomElement || dontWalkContent || dontWalkInvalidTag || dontWalkCSS || dontWalkAriaHidden
 }
 
@@ -155,9 +155,9 @@ export function isBlockTransNode(node: TransNode): boolean {
 export function isHTMLElement(node: Node): node is HTMLElement {
   return node.nodeType === Node.ELEMENT_NODE
     && node.nodeName !== undefined
-    && 'tagName' in node
-    && 'getAttribute' in node
-    && 'setAttribute' in node
+    && "tagName" in node
+    && "getAttribute" in node
+    && "setAttribute" in node
 }
 
 export function isElement(node: Node): node is Element {
@@ -172,8 +172,8 @@ export function isElement(node: Node): node is Element {
  */
 export function isTextNode(node: Node): node is Text {
   return node.nodeType === Node.TEXT_NODE
-    && 'textContent' in node
-    && 'data' in node
+    && "textContent" in node
+    && "data" in node
 }
 
 export function isTransNode(node: Node): node is TransNode {
@@ -182,7 +182,7 @@ export function isTransNode(node: Node): node is TransNode {
 
 export function isIFrameElement(node: Node): node is HTMLIFrameElement {
   return node.nodeType === Node.ELEMENT_NODE
-    && node.nodeName === 'IFRAME'
+    && node.nodeName === "IFRAME"
 }
 
 export function isTranslatedWrapperNode(node: Node) {

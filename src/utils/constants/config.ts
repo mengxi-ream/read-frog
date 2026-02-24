@@ -1,45 +1,45 @@
-import type { Config } from '@/types/config/config'
-import type { PageTranslateRange } from '@/types/config/translate'
-import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from './prompt'
-import { DEFAULT_PROVIDER_CONFIG_LIST } from './providers'
-import { DEFAULT_SIDE_CONTENT_WIDTH } from './side'
-import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR, DEFAULT_TRANSLATION_POSITION } from './subtitles'
-import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_MIN_WORDS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from './translate'
-import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from './translation-node-style'
-import { DEFAULT_TTS_CONFIG } from './tts'
+import type { Config } from "@/types/config/config"
+import type { PageTranslateRange } from "@/types/config/translate"
+import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
+import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
+import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
+import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR, DEFAULT_TRANSLATION_POSITION } from "./subtitles"
+import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_MIN_WORDS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from "./translate"
+import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from "./translation-node-style"
+import { DEFAULT_TTS_CONFIG } from "./tts"
 
-export const CONFIG_STORAGE_KEY = 'config'
-export const LAST_SYNCED_CONFIG_STORAGE_KEY = 'lastSyncedConfig'
-export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = '__googleDriveToken'
+export const CONFIG_STORAGE_KEY = "config"
+export const LAST_SYNCED_CONFIG_STORAGE_KEY = "lastSyncedConfig"
+export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 // Legacy storage keys for migration only
 // TODO: Remove these after all users have migrated to v38+
-export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = '__configSchemaVersion'
+export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = "__configSchemaVersion"
 
-export const DETECTED_CODE_STORAGE_KEY = 'detectedCode'
-export const DEFAULT_DETECTED_CODE = 'eng' as const
+export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
+export const DEFAULT_DETECTED_CODE = "eng" as const
 export const CONFIG_SCHEMA_VERSION = 55
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
 export const DEFAULT_CONFIG: Config = {
   language: {
-    sourceCode: 'auto',
-    targetCode: 'cmn',
-    level: 'intermediate',
+    sourceCode: "auto",
+    targetCode: "cmn",
+    level: "intermediate",
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   translate: {
-    providerId: 'microsoft-translate-default',
-    mode: 'bilingual',
+    providerId: "microsoft-translate-default",
+    mode: "bilingual",
     node: {
       enabled: true,
-      hotkey: 'control',
+      hotkey: "control",
     },
     page: {
       // TODO: change this to "all" for users once our translation algorithm can handle most cases elegantly
-      range: import.meta.env.DEV ? 'all' : 'main',
-      autoTranslatePatterns: ['news.ycombinator.com'],
+      range: import.meta.env.DEV ? "all" : "main",
+      autoTranslatePatterns: ["news.ycombinator.com"],
       autoTranslateLanguages: [],
       shortcut: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
       enableLLMDetection: false,
@@ -73,17 +73,17 @@ export const DEFAULT_CONFIG: Config = {
     enabled: true,
     position: DEFAULT_FLOATING_BUTTON_POSITION,
     disabledFloatingButtonPatterns: [],
-    clickAction: 'translate',
+    clickAction: "translate",
   },
   selectionToolbar: {
     enabled: true,
     disabledSelectionToolbarPatterns: [],
     features: {
       translate: {
-        providerId: 'microsoft-translate-default',
+        providerId: "microsoft-translate-default",
       },
       vocabularyInsight: {
-        providerId: 'openai-default',
+        providerId: "openai-default",
       },
     },
   },
@@ -98,16 +98,16 @@ export const DEFAULT_CONFIG: Config = {
   },
   inputTranslation: {
     enabled: true,
-    providerId: 'microsoft-translate-default',
-    fromLang: 'targetCode',
-    toLang: 'sourceCode',
+    providerId: "microsoft-translate-default",
+    fromLang: "targetCode",
+    toLang: "sourceCode",
     enableCycle: false,
     timeThreshold: 300,
   },
   videoSubtitles: {
     enabled: true,
     autoStart: false,
-    providerId: 'microsoft-translate-default',
+    providerId: "microsoft-translate-default",
     style: {
       displayMode: DEFAULT_DISPLAY_MODE,
       translationPosition: DEFAULT_TRANSLATION_POSITION,
@@ -139,7 +139,7 @@ export const DEFAULT_CONFIG: Config = {
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
   },
   siteControl: {
-    mode: 'all',
+    mode: "all",
     patterns: [],
   },
 }
@@ -148,6 +148,6 @@ export const PAGE_TRANSLATE_RANGE_ITEMS: Record<
   PageTranslateRange,
   { label: string }
 > = {
-  main: { label: 'Main' },
-  all: { label: 'All' },
+  main: { label: "Main" },
+  all: { label: "All" },
 }

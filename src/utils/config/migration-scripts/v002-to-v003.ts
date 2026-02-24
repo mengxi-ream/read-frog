@@ -1,4 +1,4 @@
-import { deepmerge } from 'deepmerge-ts'
+import { deepmerge } from "deepmerge-ts"
 
 export function migrate(oldConfig: any): any {
   const {
@@ -7,13 +7,13 @@ export function migrate(oldConfig: any): any {
     ...restConfig
   } = oldConfig
 
-  if (pageTranslate.range === 'mainContent') {
-    pageTranslate.range = 'main'
+  if (pageTranslate.range === "mainContent") {
+    pageTranslate.range = "main"
   }
 
   return deepmerge(restConfig, {
     translate: {
-      provider: 'microsoft',
+      provider: "microsoft",
       node: manualTranslate,
       page: pageTranslate,
     },

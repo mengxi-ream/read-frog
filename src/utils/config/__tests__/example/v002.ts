@@ -1,36 +1,36 @@
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
   default: {
-    description: 'Add pageTranslate config',
+    description: "Add pageTranslate config",
     config: {
       language: {
-        detectedCode: 'eng',
-        sourceCode: 'auto',
-        targetCode: 'jpn',
-        level: 'intermediate',
+        detectedCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+        level: "intermediate",
       },
-      provider: 'openai',
+      provider: "openai",
       providersConfig: {
         openai: {
-          apiKey: 'sk-1234567890',
-          model: 'gpt-4o-mini',
+          apiKey: "sk-1234567890",
+          model: "gpt-4o-mini",
           isCustomModel: true,
-          customModel: 'gpt-4.1-nano',
+          customModel: "gpt-4.1-nano",
         },
         deepseek: {
           apiKey: undefined,
-          model: 'deepseek-chat',
+          model: "deepseek-chat",
           isCustomModel: false,
-          customModel: '',
+          customModel: "",
         },
       },
       manualTranslate: {
         enabled: true,
-        hotkey: 'Control',
+        hotkey: "Control",
       },
       pageTranslate: {
-        range: 'mainContent',
+        range: "mainContent",
       },
       floatingButton: {
         enabled: true,

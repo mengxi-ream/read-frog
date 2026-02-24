@@ -1,6 +1,6 @@
-import { storage } from '#imports'
+import { storage } from "#imports"
 
-const LAST_VIEWED_SURVEY_KEY = 'lastViewedSurvey'
+const LAST_VIEWED_SURVEY_KEY = "lastViewedSurvey"
 
 /**
  * Saves the last viewed survey URL to storage

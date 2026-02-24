@@ -14,9 +14,9 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     inputTranslation: {
       enabled: true,
-      direction: 'normal',
+      direction: "normal",
       useCustomTarget: true,
-      targetCode: 'eng',
+      targetCode: "eng",
       timeThreshold: 300,
     },
   }

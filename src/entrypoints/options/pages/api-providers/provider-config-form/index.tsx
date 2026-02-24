@@ -1,30 +1,30 @@
-import type { ProvidersConfig } from '@/types/config/provider'
-import { i18n } from '#imports'
-import { useStore } from '@tanstack/react-form'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useEffect } from 'react'
-import { toast } from 'sonner'
-import { Button } from '@/components/ui/base-ui/button'
-import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvider } from '@/types/config/provider'
-import { configAtom, configFieldsAtomMap, writeConfigAtom } from '@/utils/atoms/config'
-import { providerConfigAtom } from '@/utils/atoms/provider'
-import { computeProviderFallbacksAfterDeletion, findFeatureMissingProvider } from '@/utils/config/helpers'
-import { buildFeatureProviderPatch } from '@/utils/constants/feature-providers'
-import { cn } from '@/utils/styles/utils'
-import { selectedProviderIdAtom } from '../atoms'
-import { APIKeyField } from './api-key-field'
-import { BaseURLField } from './base-url-field'
-import { AdvancedOptionsSection } from './components/advanced-options-section'
-import { ConfigHeader } from './config-header'
-import { FeatureProviderSection } from './feature-provider-section'
-import { formOpts, useAppForm } from './form'
-import { ProviderOptionsField } from './provider-options-field'
-import { TemperatureField } from './temperature-field'
-import { TranslateModelSelector } from './translate-model-selector'
+import type { ProvidersConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
+import { useStore } from "@tanstack/react-form"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useEffect } from "react"
+import { toast } from "sonner"
+import { Button } from "@/components/ui/base-ui/button"
+import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvider } from "@/types/config/provider"
+import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import { providerConfigAtom } from "@/utils/atoms/provider"
+import { computeProviderFallbacksAfterDeletion, findFeatureMissingProvider } from "@/utils/config/helpers"
+import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
+import { cn } from "@/utils/styles/utils"
+import { selectedProviderIdAtom } from "../atoms"
+import { APIKeyField } from "./api-key-field"
+import { BaseURLField } from "./base-url-field"
+import { AdvancedOptionsSection } from "./components/advanced-options-section"
+import { ConfigHeader } from "./config-header"
+import { FeatureProviderSection } from "./feature-provider-section"
+import { formOpts, useAppForm } from "./form"
+import { ProviderOptionsField } from "./provider-options-field"
+import { TemperatureField } from "./temperature-field"
+import { TranslateModelSelector } from "./translate-model-selector"
 
 export function ProviderConfigForm() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
-  const [providerConfig, setProviderConfig] = useAtom(providerConfigAtom(selectedProviderId ?? ''))
+  const [providerConfig, setProviderConfig] = useAtom(providerConfigAtom(selectedProviderId ?? ""))
   const [allProvidersConfig, setAllProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const setConfig = useSetAtom(writeConfigAtom)
   const config = useAtomValue(configAtom)
@@ -65,7 +65,7 @@ export function ProviderConfigForm() {
 
     const unsatisfied = findFeatureMissingProvider(updatedAllProviders)
     if (unsatisfied) {
-      toast.error(i18n.t('options.apiProviders.form.atLeastOneLLMProvider')) // TODO: make this word more general
+      toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider")) // TODO: make this word more general
       return
     }
 
@@ -80,7 +80,7 @@ export function ProviderConfigForm() {
 
   return (
     <form.AppForm>
-      <div className={cn('flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between', selectedProviderId !== providerConfig.id && 'hidden')}>
+      <div className={cn("flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between", selectedProviderId !== providerConfig.id && "hidden")}>
         <div className="flex flex-col gap-4">
           <ConfigHeader providerType={providerType} />
           <form.AppField
@@ -91,16 +91,16 @@ export function ProviderConfigForm() {
                   provider.name === value && provider.id !== providerConfig.id,
                 )
                 if (duplicateProvider) {
-                  return i18n.t('options.apiProviders.form.duplicateProviderName', [value])
+                  return i18n.t("options.apiProviders.form.duplicateProviderName", [value])
                 }
                 return undefined
               },
             }}
           >
-            {field => <field.InputField formForSubmit={form} label={i18n.t('options.apiProviders.form.fields.name')} />}
+            {field => <field.InputField formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.name")} />}
           </form.AppField>
           <form.AppField name="description">
-            {field => <field.InputField formForSubmit={form} label={i18n.t('options.apiProviders.form.fields.description')} />}
+            {field => <field.InputField formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.description")} />}
           </form.AppField>
 
           <APIKeyField form={form} />
@@ -118,7 +118,7 @@ export function ProviderConfigForm() {
         </div>
         <div className="flex justify-end mt-8">
           <Button type="button" variant="destructive" onClick={handleDelete}>
-            {i18n.t('options.apiProviders.form.delete')}
+            {i18n.t("options.apiProviders.form.delete")}
           </Button>
         </div>
       </div>

@@ -3,7 +3,7 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     translate: {
       ...oldConfig.translate,
-      customAutoTranslateShortcutKey: ['alt', 'q'],
+      customAutoTranslateShortcutKey: ["alt", "q"],
     },
   }
 }

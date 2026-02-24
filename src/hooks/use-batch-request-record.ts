@@ -1,5 +1,5 @@
-import { useQueries } from '@tanstack/react-query'
-import { getRangeBatchRequestRecords } from '@/utils/batch-request-record'
+import { useQueries } from "@tanstack/react-query"
+import { getRangeBatchRequestRecords } from "@/utils/batch-request-record"
 
 const RECENT_DAYS = [5, 7, 30, 60] as const
 
@@ -22,7 +22,7 @@ export function useBatchRequestRecords(currentDaysBack: number) {
       // The default end date is 0 days ago
       const daysBack = dayRange - 1
       return {
-        queryKey: ['current-period-records', daysBack],
+        queryKey: ["current-period-records", daysBack],
         queryFn: () => getRangeBatchRequestRecords(daysBack),
       }
     }),
@@ -32,7 +32,7 @@ export function useBatchRequestRecords(currentDaysBack: number) {
     queries: RECENT_DAYS.map((dayRange) => {
       const daysBack = dayRange - 1
       return {
-        queryKey: ['previous-period-records', daysBack],
+        queryKey: ["previous-period-records", daysBack],
         queryFn: () => getRangeBatchRequestRecords(
           previousPeriodStartDay(daysBack),
           previousPeriodEndDay(daysBack),

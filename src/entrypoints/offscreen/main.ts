@@ -1,5 +1,5 @@
-import type { TTSPlaybackStartResponse, TTSPlaybackStopReason } from '@/types/tts-playback'
-import { onMessage } from '@/utils/message'
+import type { TTSPlaybackStartResponse, TTSPlaybackStopReason } from "@/types/tts-playback"
+import { onMessage } from "@/utils/message"
 
 interface ActivePlayback {
   requestId: string
@@ -25,7 +25,7 @@ function cleanupPlayback(playback: ActivePlayback) {
   playback.audio.onended = null
   playback.audio.onerror = null
   playback.audio.pause()
-  playback.audio.removeAttribute('src')
+  playback.audio.removeAttribute("src")
   playback.audio.load()
   URL.revokeObjectURL(playback.audioUrl)
 }
@@ -71,8 +71,8 @@ function stopActivePlayback(reason: TTSPlaybackStopReason, requestId?: string): 
   return settlePlayback(playback, { ok: false, reason })
 }
 
-onMessage('ttsOffscreenPlay', async (message) => {
-  stopActivePlayback('interrupted')
+onMessage("ttsOffscreenPlay", async (message) => {
+  stopActivePlayback("interrupted")
 
   const { requestId, audioBase64, contentType } = message.data
 
@@ -100,19 +100,19 @@ onMessage('ttsOffscreenPlay', async (message) => {
     }
 
     audio.onerror = () => {
-      failPlayback(playback, new Error('Failed to play audio in offscreen document'))
+      failPlayback(playback, new Error("Failed to play audio in offscreen document"))
     }
 
     audio.play().catch((error) => {
       const normalizedError = error instanceof Error
         ? error
-        : new Error(typeof error === 'string' ? error : 'Unknown audio playback error')
+        : new Error(typeof error === "string" ? error : "Unknown audio playback error")
       failPlayback(playback, normalizedError)
     })
   })
 })
 
-onMessage('ttsOffscreenStop', async (message) => {
-  stopActivePlayback(message.data.reason ?? 'stopped', message.data.requestId)
+onMessage("ttsOffscreenStop", async (message) => {
+  stopActivePlayback(message.data.reason ?? "stopped", message.data.requestId)
   return { ok: true as const }
 })

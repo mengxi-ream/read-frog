@@ -1,7 +1,7 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
-import { dirname, resolve } from 'node:path'
-import process from 'node:process'
-import { JSDOM } from 'jsdom'
+import { mkdir, readFile, writeFile } from "node:fs/promises"
+import { dirname, resolve } from "node:path"
+import process from "node:process"
+import { JSDOM } from "jsdom"
 
 type CapabilityValue = boolean | string | null
 
@@ -37,7 +37,7 @@ interface ScrapedProvider extends ProviderLink {
 interface ErrorEntry {
   slug: string
   url: string
-  stage: 'discover' | 'fetch' | 'parse'
+  stage: "discover" | "fetch" | "parse"
   message: string
 }
 
@@ -72,7 +72,7 @@ class HttpError extends Error {
 
   constructor(status: number, url: string) {
     super(`Request failed (${status}) for ${url}`)
-    this.name = 'HttpError'
+    this.name = "HttpError"
     this.status = status
     this.url = url
   }
@@ -101,21 +101,21 @@ const NORMALIZATION_RULES: Record<keyof NormalizedCapabilities, RegExp[]> = {
 }
 
 function cleanText(value: string | null | undefined): string {
-  return (value ?? '').replace(/\s+/g, ' ').trim()
+  return (value ?? "").replace(/\s+/g, " ").trim()
 }
 
 function slugToName(slug: string): string {
   return slug
-    .split('-')
+    .split("-")
     .map(part => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ')
+    .join(" ")
 }
 
 function parseArgs(argv: string[]): ScrapeOptions {
   const options: ScrapeOptions = {
-    baseUrl: 'https://ai-sdk.dev',
-    indexPath: '/providers/ai-sdk-providers',
-    outPath: 'scripts/output/ai-sdk-provider-models.json',
+    baseUrl: "https://ai-sdk.dev",
+    indexPath: "/providers/ai-sdk-providers",
+    outPath: "scripts/output/ai-sdk-provider-models.json",
     providersHtmlFile: undefined,
     concurrency: 5,
     timeoutMs: 15000,
@@ -123,34 +123,34 @@ function parseArgs(argv: string[]): ScrapeOptions {
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i]
-    if (!arg.startsWith('--')) {
+    if (!arg.startsWith("--")) {
       throw new Error(`Unknown argument "${arg}". Expected flags like --out <path>.`)
     }
 
     const key = arg.slice(2)
     const value = argv[i + 1]
-    if (!value || value.startsWith('--')) {
+    if (!value || value.startsWith("--")) {
       throw new Error(`Missing value for --${key}`)
     }
     i++
 
     switch (key) {
-      case 'out':
+      case "out":
         options.outPath = value
         break
-      case 'baseUrl':
+      case "baseUrl":
         options.baseUrl = value
         break
-      case 'indexPath':
+      case "indexPath":
         options.indexPath = value
         break
-      case 'providersHtmlFile':
+      case "providersHtmlFile":
         options.providersHtmlFile = value
         break
-      case 'concurrency':
+      case "concurrency":
         options.concurrency = Number.parseInt(value, 10)
         break
-      case 'timeoutMs':
+      case "timeoutMs":
         options.timeoutMs = Number.parseInt(value, 10)
         break
       default:
@@ -165,8 +165,8 @@ function parseArgs(argv: string[]): ScrapeOptions {
     throw new Error(`--timeoutMs must be >= 1000. Received: ${options.timeoutMs}`)
   }
 
-  const normalizedBase = options.baseUrl.replace(/\/+$/, '')
-  const normalizedIndex = options.indexPath.startsWith('/') ? options.indexPath : `/${options.indexPath}`
+  const normalizedBase = options.baseUrl.replace(/\/+$/, "")
+  const normalizedIndex = options.indexPath.startsWith("/") ? options.indexPath : `/${options.indexPath}`
 
   return {
     ...options,
@@ -179,23 +179,23 @@ function parseArgs(argv: string[]): ScrapeOptions {
 
 function classNameValue(el: Element): string {
   const className = (el as Element & { className?: unknown }).className
-  if (typeof className === 'string') {
+  if (typeof className === "string") {
     return className
   }
   if (
     className
-    && typeof className === 'object'
-    && 'baseVal' in className
-    && typeof (className as { baseVal: unknown }).baseVal === 'string'
+    && typeof className === "object"
+    && "baseVal" in className
+    && typeof (className as { baseVal: unknown }).baseVal === "string"
   ) {
     return (className as { baseVal: string }).baseVal
   }
-  return ''
+  return ""
 }
 
 function collectClassTokens(root: Element): string[] {
   const set = new Set<string>()
-  const elements = [root, ...Array.from(root.querySelectorAll('*'))]
+  const elements = [root, ...Array.from(root.querySelectorAll("*"))]
   for (const element of elements) {
     const tokens = classNameValue(element).split(/\s+/).filter(Boolean)
     for (const token of tokens) {
@@ -221,24 +221,24 @@ function textToBoolean(value: string): boolean | null {
 
 function parseCapabilityCell(cell: HTMLTableCellElement): CapabilityValue {
   const text = cleanText(cell.textContent)
-  const hasSvg = Boolean(cell.querySelector('svg'))
+  const hasSvg = Boolean(cell.querySelector("svg"))
 
   if (hasSvg) {
     const classTokens = collectClassTokens(cell)
-    if (classTokens.some(token => token.startsWith('text-green'))) {
+    if (classTokens.some(token => token.startsWith("text-green"))) {
       return true
     }
-    if (classTokens.some(token => token.startsWith('text-gray') || token.startsWith('text-red'))) {
+    if (classTokens.some(token => token.startsWith("text-gray") || token.startsWith("text-red"))) {
       return false
     }
 
-    const pathValues = Array.from(cell.querySelectorAll('path'))
-      .map(path => path.getAttribute('d') ?? '')
-      .join(' ')
-    if (pathValues.includes('11.5303 6.53033')) {
+    const pathValues = Array.from(cell.querySelectorAll("path"))
+      .map(path => path.getAttribute("d") ?? "")
+      .join(" ")
+    if (pathValues.includes("11.5303 6.53033")) {
       return true
     }
-    if (pathValues.includes('12.4697 13.5303')) {
+    if (pathValues.includes("12.4697 13.5303")) {
       return false
     }
   }
@@ -252,10 +252,10 @@ function parseCapabilityCell(cell: HTMLTableCellElement): CapabilityValue {
 }
 
 function booleanFromCapability(value: CapabilityValue): boolean | null {
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     return value
   }
-  if (typeof value === 'string') {
+  if (typeof value === "string") {
     return textToBoolean(value)
   }
   return null
@@ -317,7 +317,7 @@ function extractHeadersAndRows(table: HTMLTableElement): ExtractedTableRows {
 
   const headRow = table.tHead?.rows.item(0)
   if (headRow) {
-    const headers = Array.from(headRow.cells).map(cell => cleanText(cell.textContent) || 'Column')
+    const headers = Array.from(headRow.cells).map(cell => cleanText(cell.textContent) || "Column")
     const bodyRows = table.tBodies.length > 0
       ? Array.from(table.tBodies).flatMap(body => Array.from(body.rows))
       : allRows.filter(row => row !== headRow)
@@ -325,9 +325,9 @@ function extractHeadersAndRows(table: HTMLTableElement): ExtractedTableRows {
   }
 
   const firstRow = allRows[0]
-  const headerLike = Array.from(firstRow.cells).every(cell => cell.tagName === 'TH')
+  const headerLike = Array.from(firstRow.cells).every(cell => cell.tagName === "TH")
   if (headerLike) {
-    const headers = Array.from(firstRow.cells).map(cell => cleanText(cell.textContent) || 'Column')
+    const headers = Array.from(firstRow.cells).map(cell => cleanText(cell.textContent) || "Column")
     return {
       headers,
       rows: allRows.slice(1),
@@ -341,10 +341,10 @@ function extractHeadersAndRows(table: HTMLTableElement): ExtractedTableRows {
 function extractModelCellText(row: HTMLTableRowElement, index: number): string {
   const cell = row.cells.item(index) ?? row.cells.item(0)
   if (!cell) {
-    return ''
+    return ""
   }
 
-  const codeText = cleanText(cell.querySelector('code')?.textContent)
+  const codeText = cleanText(cell.querySelector("code")?.textContent)
   if (codeText) {
     return codeText
   }
@@ -356,13 +356,13 @@ function tableLooksLikeModelTable(headers: string[], rows: HTMLTableRowElement[]
   if (hasModelHeader) {
     return true
   }
-  return rows.some(row => Boolean(row.querySelector('code')))
+  return rows.some(row => Boolean(row.querySelector("code")))
 }
 
 function extractModelTables(providerHtml: string): ProviderTable[] {
   const dom = new JSDOM(providerHtml)
   const document = dom.window.document
-  const tables = Array.from(document.querySelectorAll('table'))
+  const tables = Array.from(document.querySelectorAll("table"))
   const parsedTables: ProviderTable[] = []
 
   for (const table of tables) {
@@ -420,12 +420,12 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
 function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[] {
   const dom = new JSDOM(html)
   const document = dom.window.document
-  const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href]'))
+  const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]"))
 
   const providers = new Map<string, ProviderLink>()
 
   for (const anchor of anchors) {
-    const href = anchor.getAttribute('href')
+    const href = anchor.getAttribute("href")
     if (!href) {
       continue
     }
@@ -438,7 +438,7 @@ function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[
       continue
     }
 
-    const normalizedPath = url.pathname.replace(/\/+$/, '')
+    const normalizedPath = url.pathname.replace(/\/+$/, "")
     const match = normalizedPath.match(/^\/providers\/ai-sdk-providers\/([^/]+)$/)
     if (!match) {
       continue
@@ -465,7 +465,7 @@ function isRetryable(error: unknown): boolean {
   if (error instanceof HttpError) {
     return error.status === 429 || error.status >= 500
   }
-  if (error && typeof error === 'object' && 'name' in error && (error as { name?: string }).name === 'AbortError') {
+  if (error && typeof error === "object" && "name" in error && (error as { name?: string }).name === "AbortError") {
     return true
   }
   if (error instanceof Error) {
@@ -486,8 +486,8 @@ async function fetchText(url: string, timeoutMs: number): Promise<string> {
     const response = await fetch(url, {
       signal: controller.signal,
       headers: {
-        'accept': 'text/html,application/xhtml+xml',
-        'user-agent': 'read-frog-ai-sdk-provider-scraper/1.0',
+        "accept": "text/html,application/xhtml+xml",
+        "user-agent": "read-frog-ai-sdk-provider-scraper/1.0",
       },
     })
     if (!response.ok) {
@@ -554,12 +554,12 @@ async function main(): Promise<void> {
   const indexUrl = new URL(options.indexPath, `${options.baseUrl}/`).toString()
 
   const discoveryHtml = options.providersHtmlFile
-    ? await readFile(options.providersHtmlFile, 'utf8')
+    ? await readFile(options.providersHtmlFile, "utf8")
     : await fetchTextWithRetry(indexUrl, options.timeoutMs)
 
   const providers = discoverProvidersFromHtml(discoveryHtml, options.baseUrl)
   if (providers.length === 0) {
-    throw new Error('No provider pages were discovered from the index HTML.')
+    throw new Error("No provider pages were discovered from the index HTML.")
   }
 
   const providerResults: ScrapedProvider[] = []
@@ -577,7 +577,7 @@ async function main(): Promise<void> {
         error: {
           slug: provider.slug,
           url: provider.url,
-          stage: 'fetch' as const,
+          stage: "fetch" as const,
           message: error instanceof Error ? error.message : String(error),
         },
       }
@@ -612,7 +612,7 @@ async function main(): Promise<void> {
   }
 
   await mkdir(dirname(options.outPath), { recursive: true })
-  await writeFile(options.outPath, `${JSON.stringify(output, null, 2)}\n`, 'utf8')
+  await writeFile(options.outPath, `${JSON.stringify(output, null, 2)}\n`, "utf8")
 
   console.log(`Scrape completed.`)
   console.log(`Discovered providers: ${providers.length}`)

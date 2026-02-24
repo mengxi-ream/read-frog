@@ -1,8 +1,8 @@
-import { isDarkMode } from '../theme'
-import { cssRegistry } from './css-registry'
+import { isDarkMode } from "../theme"
+import { cssRegistry } from "./css-registry"
 
 interface ShadowHostOptions {
-  position: 'inline' | 'block'
+  position: "inline" | "block"
   cssContent?: string[]
   style?: Partial<CSSStyleDeclaration>
   inheritStyles?: boolean
@@ -31,7 +31,7 @@ export class ShadowHostBuilder {
   constructor(
     private shadowRoot: ShadowRoot,
     private opts: ShadowHostOptions = {
-      position: 'block',
+      position: "block",
     },
   ) {}
 
@@ -43,27 +43,27 @@ export class ShadowHostBuilder {
       css.push(resetCss)
     }
     if (cssContent)
-      css.push(...cssContent.map(css => css.replaceAll(':root', ':host')))
+      css.push(...cssContent.map(css => css.replaceAll(":root", ":host")))
 
-    const { shadowCss, documentCss } = this.splitShadowRootCss(css.join('\n'))
+    const { shadowCss, documentCss } = this.splitShadowRootCss(css.join("\n"))
     if (documentCss) {
       this.documentCssKey = cssRegistry.inject(documentCss)
     }
     if (shadowCss) {
-      const style = document.createElement('style')
+      const style = document.createElement("style")
       style.textContent = shadowCss
       this.shadowRoot.appendChild(style)
     }
 
     // add wrapper
-    const wrapper = document.createElement('div')
+    const wrapper = document.createElement("div")
     wrapper.style.display = position
     if (style) {
       Object.assign(wrapper.style, style)
     }
     if (isDarkMode()) {
-      wrapper.classList.add('dark')
-      wrapper.style.colorScheme = 'dark'
+      wrapper.classList.add("dark")
+      wrapper.style.colorScheme = "dark"
     }
     this.shadowRoot.appendChild(wrapper)
 
@@ -80,7 +80,7 @@ export class ShadowHostBuilder {
     shadowCss: string
   } {
     let shadowCss = css
-    let documentCss = ''
+    let documentCss = ""
 
     // Extract @property and @font-face rules that need to be in the document
     // Using a simpler, safer regex pattern to avoid backtracking issues
@@ -89,7 +89,7 @@ export class ShadowHostBuilder {
 
     for (const match of matches) {
       documentCss += `${match[1]}\n`
-      shadowCss = shadowCss.replace(match[1], '')
+      shadowCss = shadowCss.replace(match[1], "")
     }
 
     return {

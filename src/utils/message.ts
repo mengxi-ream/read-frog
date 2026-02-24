@@ -1,25 +1,25 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type {
   BackgroundGenerateTextPayload,
   BackgroundGenerateTextResponse,
-} from '@/types/background-generate-text'
-import type { Config } from '@/types/config/config'
-import type { ProviderConfig } from '@/types/config/provider'
-import type { BatchQueueConfig, RequestQueueConfig } from '@/types/config/translate'
+} from "@/types/background-generate-text"
+import type { Config } from "@/types/config/config"
+import type { ProviderConfig } from "@/types/config/provider"
+import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type {
   EdgeTTSHealthStatus,
   EdgeTTSSynthesizeRequest,
   EdgeTTSSynthesizeWireResponse,
-} from '@/types/edge-tts'
-import type { ProxyRequest, ProxyResponse } from '@/types/proxy-fetch'
+} from "@/types/edge-tts"
+import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import type {
   TTSOffscreenStopRequest,
   TTSPlaybackStartRequest,
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
-} from '@/types/tts-playback'
-import type { EdgeTTSVoice } from '@/utils/server/edge-tts/types'
-import { defineExtensionMessaging } from '@webext-core/messaging'
+} from "@/types/tts-playback"
+import type { EdgeTTSVoice } from "@/utils/server/edge-tts/types"
+import { defineExtensionMessaging } from "@webext-core/messaging"
 
 interface ProtocolMap {
   // navigation
@@ -35,7 +35,7 @@ interface ProtocolMap {
   setAndNotifyPageTranslationStateChangedByManager: (data: { enabled: boolean }) => void
   notifyTranslationStateChanged: (data: { enabled: boolean }) => void
   // for auto start page translation
-  checkAndAskAutoPageTranslation: (data: { url: string, detectedCodeOrUnd: LangCodeISO6393 | 'und' }) => void
+  checkAndAskAutoPageTranslation: (data: { url: string, detectedCodeOrUnd: LangCodeISO6393 | "und" }) => void
   // ask host to start page translation
   askManagerToTogglePageTranslation: (data: { enabled: boolean }) => void
   // user guide
@@ -43,8 +43,8 @@ interface ProtocolMap {
   getPinState: () => boolean
   returnPinState: (data: { isPinned: boolean }) => void
   // request
-  enqueueTranslateRequest: (data: { text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string, articleTitle?: string, articleTextContent?: string }) => Promise<string>
-  enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config['language'], providerConfig: ProviderConfig, scheduleAt: number, hash: string, videoTitle?: string, subtitlesContext?: string }) => Promise<string>
+  enqueueTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, articleTitle?: string, articleTextContent?: string }) => Promise<string>
+  enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, videoTitle?: string, subtitlesContext?: string }) => Promise<string>
   backgroundGenerateText: (data: BackgroundGenerateTextPayload) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
   aiSegmentSubtitles: (data: { jsonContent: string, providerId: string }) => Promise<string>

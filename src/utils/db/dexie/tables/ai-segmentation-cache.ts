@@ -1,4 +1,4 @@
-import { Entity } from 'dexie'
+import { Entity } from "dexie"
 
 export default class AiSegmentationCache extends Entity {
   key!: string // Sha256Hex(jsonContentHash, JSON.stringify(providerConfig))

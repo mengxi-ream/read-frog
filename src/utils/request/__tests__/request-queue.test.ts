@@ -1,5 +1,5 @@
-import { afterEach, describe, expect, it, vi } from 'vitest'
-import { RequestQueue } from '../request-queue'
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { RequestQueue } from "../request-queue"
 
 // Convenience helper: returns a thunk that resolves with <value>
 // after <delayMs> real / fake milliseconds.
@@ -29,14 +29,14 @@ afterEach(() => {
 })
 
 // 1. Happy‑path: single task resolves.
-describe('requestQueue – happy path', () => {
-  it('resolves a single task', async () => {
+describe("requestQueue – happy path", () => {
+  it("resolves a single task", async () => {
     const q = new RequestQueue(baseConfig)
-    const result = await q.enqueue(makeThunk('OK'), Date.now(), 'one')
-    expect(result).toBe('OK')
+    const result = await q.enqueue(makeThunk("OK"), Date.now(), "one")
+    expect(result).toBe("OK")
   })
 
-  it('works with fake timers', async () => {
+  it("works with fake timers", async () => {
     vi.useFakeTimers()
 
     const q = new RequestQueue({
@@ -46,19 +46,19 @@ describe('requestQueue – happy path', () => {
     let executed = false
     const thunk = () => {
       executed = true
-      return Promise.resolve('test')
+      return Promise.resolve("test")
     }
 
-    const promise = q.enqueue(thunk, Date.now(), 'test')
+    const promise = q.enqueue(thunk, Date.now(), "test")
 
     vi.advanceTimersByTime(0)
 
     expect(executed).toBe(true)
-    await expect(promise).resolves.toBe('test')
+    await expect(promise).resolves.toBe("test")
   })
 
   // 调试测试：检查带延迟的任务
-  it('works with delayed thunks', async () => {
+  it("works with delayed thunks", async () => {
     vi.useFakeTimers()
 
     const q = new RequestQueue({
@@ -72,12 +72,12 @@ describe('requestQueue – happy path', () => {
       return new Promise((resolve) => {
         setTimeout(() => {
           completed = true
-          resolve('delayed')
+          resolve("delayed")
         }, 1000)
       })
     }
 
-    const promise = q.enqueue(delayedThunk, Date.now(), 'delayed')
+    const promise = q.enqueue(delayedThunk, Date.now(), "delayed")
 
     vi.advanceTimersByTime(0)
     expect(executed).toBe(true)
@@ -85,31 +85,31 @@ describe('requestQueue – happy path', () => {
 
     vi.advanceTimersByTime(1000)
     expect(completed).toBe(true)
-    await expect(promise).resolves.toBe('delayed')
+    await expect(promise).resolves.toBe("delayed")
   })
 })
 
 // 2. Duplicate hash returns same promise instance & value.
-describe('requestQueue – de‑duplication', () => {
-  it('re‑uses the first task for identical hash', async () => {
+describe("requestQueue – de‑duplication", () => {
+  it("re‑uses the first task for identical hash", async () => {
     const q = new RequestQueue(baseConfig)
 
-    const p1 = q.enqueue(makeThunk('A'), Date.now(), 'dup')
-    const p2 = q.enqueue(makeThunk('B'), Date.now(), 'dup') // thunk should never run
+    const p1 = q.enqueue(makeThunk("A"), Date.now(), "dup")
+    const p2 = q.enqueue(makeThunk("B"), Date.now(), "dup") // thunk should never run
 
     // Same promise object (because enqueue now returns duplicateTask.promise directly)
     expect(p1).toBe(p2)
 
     const [v1, v2] = await Promise.all([p1, p2])
-    expect(v1).toBe('A')
-    expect(v2).toBe('A')
+    expect(v1).toBe("A")
+    expect(v2).toBe("A")
   })
 })
 
 // 3. Token‑bucket rate limiting.
 //    capacity = 1, rate = 1 token / sec → tasks should execute at t = 0s, 1s, 2s…
-describe('requestQueue – token bucket', () => {
-  it('executes tasks no faster than rate permits', async () => {
+describe("requestQueue – token bucket", () => {
+  it("executes tasks no faster than rate permits", async () => {
     vi.useFakeTimers()
 
     const q = new RequestQueue({
@@ -127,9 +127,9 @@ describe('requestQueue – token bucket', () => {
     }
 
     // enqueue 3 tasks immediately, each takes 1000ms to complete
-    void q.enqueue(trackingThunk(0), Date.now(), '0')
-    void q.enqueue(trackingThunk(1), Date.now(), '1')
-    void q.enqueue(trackingThunk(2), Date.now(), '2')
+    void q.enqueue(trackingThunk(0), Date.now(), "0")
+    void q.enqueue(trackingThunk(1), Date.now(), "1")
+    void q.enqueue(trackingThunk(2), Date.now(), "2")
 
     // t=1000ms: 第一个任务应该完成
     vi.advanceTimersByTime(1_000)
@@ -147,8 +147,8 @@ describe('requestQueue – token bucket', () => {
 })
 
 // 4. scheduleAt in the future should delay execution even when tokens are available.
-describe('requestQueue – respects scheduleAt', () => {
-  it('delays task until scheduleAt time', async () => {
+describe("requestQueue – respects scheduleAt", () => {
+  it("delays task until scheduleAt time", async () => {
     vi.useFakeTimers()
 
     const q = new RequestQueue({
@@ -165,30 +165,30 @@ describe('requestQueue – respects scheduleAt', () => {
 
     // Task A scheduled now, task B scheduled 2s later
     const now = Date.now()
-    void q.enqueue(trackingThunk('A'), now, 'A')
-    void q.enqueue(trackingThunk('B'), now + 2000, 'B')
+    void q.enqueue(trackingThunk("A"), now, "A")
+    void q.enqueue(trackingThunk("B"), now + 2000, "B")
 
     vi.advanceTimersByTime(0)
-    expect(completed).toEqual(['A'])
+    expect(completed).toEqual(["A"])
 
     vi.advanceTimersByTime(1999)
-    expect(completed).toEqual(['A'])
+    expect(completed).toEqual(["A"])
 
     vi.advanceTimersByTime(1)
-    expect(completed).toEqual(['A', 'B'])
+    expect(completed).toEqual(["A", "B"])
   })
 })
 
 // 5. Rejection propagates.
-describe('requestQueue – error propagation', () => {
-  it('rejects when thunk rejects', async () => {
+describe("requestQueue – error propagation", () => {
+  it("rejects when thunk rejects", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
     })
 
-    const err = new Error('boom')
-    const p = q.enqueue(rejectThunk(err, 1000), Date.now(), 'err')
+    const err = new Error("boom")
+    const p = q.enqueue(rejectThunk(err, 1000), Date.now(), "err")
 
     vi.advanceTimersByTime(1000)
     await expect(p).rejects.toBe(err)
@@ -196,8 +196,8 @@ describe('requestQueue – error propagation', () => {
 })
 
 // 6. High‑volume: 100 tasks should all resolve.
-describe('requestQueue – high volume', () => {
-  it('drains 100 tasks without starvation or leaks', async () => {
+describe("requestQueue – high volume", () => {
+  it("drains 100 tasks without starvation or leaks", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -226,8 +226,8 @@ describe('requestQueue – high volume', () => {
 })
 
 // 7. Bucket refills after idle period.
-describe('requestQueue – bucket refill while idle', () => {
-  it('restores capacity when queue sleeps', async () => {
+describe("requestQueue – bucket refill while idle", () => {
+  it("restores capacity when queue sleeps", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -244,24 +244,24 @@ describe('requestQueue – bucket refill while idle', () => {
     }
 
     // Use up both initial tokens
-    void q.enqueue(trackingThunk('x'), Date.now(), 'x')
-    void q.enqueue(trackingThunk('y'), Date.now(), 'y')
+    void q.enqueue(trackingThunk("x"), Date.now(), "x")
+    void q.enqueue(trackingThunk("y"), Date.now(), "y")
 
     vi.advanceTimersByTime(0)
-    expect(completed).toEqual(['x', 'y'])
+    expect(completed).toEqual(["x", "y"])
 
     // At this moment bucketTokens == 0. Wait 1500 ms (rate 2/s → add 3 tokens)
     vi.advanceTimersByTime(1500)
 
     // New task should run immediately because capacity refilled to ≥1
-    void q.enqueue(trackingThunk('z'), Date.now(), 'z')
-    expect(completed).toEqual(['x', 'y', 'z'])
+    void q.enqueue(trackingThunk("z"), Date.now(), "z")
+    expect(completed).toEqual(["x", "y", "z"])
   })
 })
 
 // 8. Timeout handling
-describe('requestQueue – timeout handling', () => {
-  it('rejects task when it exceeds timeout', async () => {
+describe("requestQueue – timeout handling", () => {
+  it("rejects task when it exceeds timeout", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -270,19 +270,19 @@ describe('requestQueue – timeout handling', () => {
 
     // Task that takes 3000ms (longer than 2000ms timeout)
     const slowThunk = () => new Promise(resolve =>
-      setTimeout(() => resolve('too-slow'), 3000),
+      setTimeout(() => resolve("too-slow"), 3000),
     )
 
-    const promise = q.enqueue(slowThunk, Date.now(), 'slow')
+    const promise = q.enqueue(slowThunk, Date.now(), "slow")
 
     // Advance to timeout
     vi.advanceTimersByTime(2000)
 
-    await expect(promise).rejects.toThrow('Task')
-    await expect(promise).rejects.toThrow('timed out after 2000ms')
+    await expect(promise).rejects.toThrow("Task")
+    await expect(promise).rejects.toThrow("timed out after 2000ms")
   })
 
-  it('resolves task when it completes before timeout', async () => {
+  it("resolves task when it completes before timeout", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -291,20 +291,20 @@ describe('requestQueue – timeout handling', () => {
 
     // Task that takes 1000ms (less than 2000ms timeout)
     const fastThunk = () => new Promise(resolve =>
-      setTimeout(() => resolve('fast'), 1000),
+      setTimeout(() => resolve("fast"), 1000),
     )
 
-    const promise = q.enqueue(fastThunk, Date.now(), 'fast')
+    const promise = q.enqueue(fastThunk, Date.now(), "fast")
 
     vi.advanceTimersByTime(1000)
 
-    await expect(promise).resolves.toBe('fast')
+    await expect(promise).resolves.toBe("fast")
   })
 })
 
 // 9. Retry functionality
-describe('requestQueue – retry functionality', () => {
-  it('succeeds when retry eventually works', async () => {
+describe("requestQueue – retry functionality", () => {
+  it("succeeds when retry eventually works", async () => {
     vi.useFakeTimers()
     let attempts = 0
 
@@ -319,19 +319,19 @@ describe('requestQueue – retry functionality', () => {
       if (attempts < 2) { // Change to succeed on second attempt
         return Promise.reject(new Error(`Attempt ${attempts} failed`))
       }
-      return Promise.resolve('success!')
+      return Promise.resolve("success!")
     }
 
-    const promise = q.enqueue(eventuallySucceedsThunk, Date.now(), 'eventual-success')
+    const promise = q.enqueue(eventuallySucceedsThunk, Date.now(), "eventual-success")
 
     // Wait for retries to happen
     await vi.advanceTimersByTimeAsync(1000)
 
     expect(attempts).toBe(2)
-    await expect(promise).resolves.toBe('success!')
+    await expect(promise).resolves.toBe("success!")
   })
 
-  it('does not retry when maxRetries is 0', async () => {
+  it("does not retry when maxRetries is 0", async () => {
     vi.useFakeTimers()
     let attempts = 0
 
@@ -343,10 +343,10 @@ describe('requestQueue – retry functionality', () => {
 
     const failingThunk = () => {
       attempts++
-      return Promise.reject(new Error('Always fails'))
+      return Promise.reject(new Error("Always fails"))
     }
 
-    const promise = q.enqueue(failingThunk, Date.now(), 'no-retry')
+    const promise = q.enqueue(failingThunk, Date.now(), "no-retry")
     promise.catch(() => {})
 
     await vi.advanceTimersByTimeAsync(0)
@@ -355,10 +355,10 @@ describe('requestQueue – retry functionality', () => {
     await vi.advanceTimersByTimeAsync(1000)
     expect(attempts).toBe(1) // Still only 1 attempt
 
-    await expect(promise).rejects.toThrow('Always fails')
+    await expect(promise).rejects.toThrow("Always fails")
   })
 
-  it('implements exponential backoff delays', async () => {
+  it("implements exponential backoff delays", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -369,10 +369,10 @@ describe('requestQueue – retry functionality', () => {
     let attempts = 0
     const failingThunk = () => {
       attempts++
-      return Promise.reject(new Error('fail'))
+      return Promise.reject(new Error("fail"))
     }
 
-    const promise = q.enqueue(failingThunk, Date.now(), 'backoff')
+    const promise = q.enqueue(failingThunk, Date.now(), "backoff")
     promise.catch(() => {})
 
     // Initial execution
@@ -395,13 +395,13 @@ describe('requestQueue – retry functionality', () => {
     await vi.advanceTimersByTimeAsync(1000)
     expect(attempts).toBe(3)
 
-    await expect(promise).rejects.toThrow('fail')
+    await expect(promise).rejects.toThrow("fail")
   })
 })
 
 // 10. Retry with timeout combined
-describe('requestQueue – retry with timeout combined', () => {
-  it('basic timeout functionality works', async () => {
+describe("requestQueue – retry with timeout combined", () => {
+  it("basic timeout functionality works", async () => {
     vi.useFakeTimers()
 
     const q = new RequestQueue({
@@ -412,23 +412,23 @@ describe('requestQueue – retry with timeout combined', () => {
 
     const timeoutThunk = () => {
       // Task takes 200ms, but timeout is 100ms
-      return new Promise(resolve => setTimeout(() => resolve('too slow'), 200))
+      return new Promise(resolve => setTimeout(() => resolve("too slow"), 200))
     }
 
-    const promise = q.enqueue(timeoutThunk, Date.now(), 'timeout-test')
+    const promise = q.enqueue(timeoutThunk, Date.now(), "timeout-test")
     promise.catch(() => {})
 
     // Let the timeout happen
     await vi.advanceTimersByTimeAsync(150)
 
     // Should reject with timeout error
-    await expect(promise).rejects.toThrow('timed out after 100ms')
+    await expect(promise).rejects.toThrow("timed out after 100ms")
   })
 })
 
 // 11. Reconfigure the request queue
-describe('requestQueue – reconfigure the request queue', () => {
-  it('increase the request rate', async () => {
+describe("requestQueue – reconfigure the request queue", () => {
+  it("increase the request rate", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -460,7 +460,7 @@ describe('requestQueue – reconfigure the request queue', () => {
     expect(completed).toHaveLength(count)
   })
 
-  it('decrease the request rate', async () => {
+  it("decrease the request rate", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -492,7 +492,7 @@ describe('requestQueue – reconfigure the request queue', () => {
     expect(completed).toHaveLength(count)
   })
 
-  it('increase the request capacity', async () => {
+  it("increase the request capacity", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -524,7 +524,7 @@ describe('requestQueue – reconfigure the request queue', () => {
     expect(completed).toHaveLength(count)
   })
 
-  it('decrease the request capacity', async () => {
+  it("decrease the request capacity", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -556,7 +556,7 @@ describe('requestQueue – reconfigure the request queue', () => {
     expect(completed).toHaveLength(count)
   })
 
-  it('update the request queue', async () => {
+  it("update the request queue", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
@@ -599,7 +599,7 @@ describe('requestQueue – reconfigure the request queue', () => {
     expect(completed).toHaveLength(count * 2)
   })
 
-  it('update rate when handle queue', () => {
+  it("update rate when handle queue", () => {
     const q = new RequestQueue({ ...baseConfig, rate: 5, capacity: 10 })
     vi.useFakeTimers()
     const count = 50
@@ -631,7 +631,7 @@ describe('requestQueue – reconfigure the request queue', () => {
     expect(completed).toHaveLength(count)
   })
 
-  it('update capacity when handle queue', () => {
+  it("update capacity when handle queue", () => {
     const q = new RequestQueue({ ...baseConfig, rate: 5, capacity: 10 })
     vi.useFakeTimers()
     const count = 50
@@ -665,7 +665,7 @@ describe('requestQueue – reconfigure the request queue', () => {
     expect(completed).toHaveLength(count)
   })
 
-  it('should throw error when options are invalid', () => {
+  it("should throw error when options are invalid", () => {
     const q = new RequestQueue({ ...baseConfig, rate: 5, capacity: 10 })
 
     expect(() => q.setQueueOptions({ rate: 0, capacity: 0 })).toThrow()

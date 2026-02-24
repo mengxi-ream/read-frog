@@ -1,5 +1,5 @@
-import type { LangLevel } from '@read-frog/definitions'
-import { syntacticCategoryAbbr } from '@/types/content'
+import type { LangLevel } from "@read-frog/definitions"
+import { syntacticCategoryAbbr } from "@/types/content"
 
 export function getExplainPrompt(sourceLang: string, targetLang: string, langLevel: LangLevel) {
   return `# Identity

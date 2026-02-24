@@ -1,5 +1,5 @@
-import type { StateData, SubtitlesFragment } from './types'
-import type { SubtitlesDisplayMode } from '@/types/config/subtitles'
+import type { StateData, SubtitlesFragment } from "./types"
+import type { SubtitlesDisplayMode } from "@/types/config/subtitles"
 
 export interface SubtitleDisplayDecision {
   hasRenderableSubtitle: boolean
@@ -13,7 +13,7 @@ export function hasRenderableSubtitleByMode(
   if (!subtitle)
     return false
 
-  if (displayMode === 'translationOnly')
+  if (displayMode === "translationOnly")
     return !!subtitle.translation
 
   return true
@@ -25,13 +25,13 @@ export function deriveSubtitleDisplayDecision(
   displayMode: SubtitlesDisplayMode,
 ): SubtitleDisplayDecision {
   const hasRenderable = hasRenderableSubtitleByMode(subtitle, displayMode)
-  const state = stateData?.state ?? 'idle'
+  const state = stateData?.state ?? "idle"
 
-  if (state === 'error') {
+  if (state === "error") {
     return { hasRenderableSubtitle: hasRenderable, showStateMessage: true }
   }
 
-  if (state === 'loading') {
+  if (state === "loading") {
     return { hasRenderableSubtitle: hasRenderable, showStateMessage: !hasRenderable }
   }
 

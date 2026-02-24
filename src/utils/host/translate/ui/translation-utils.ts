@@ -1,6 +1,6 @@
-import type { TransNode } from '@/types/dom'
-import { FORCE_INLINE_TRANSLATION_TAGS } from '../../../constants/dom-rules'
-import { isHTMLElement } from '../../dom/filter'
+import type { TransNode } from "@/types/dom"
+import { FORCE_INLINE_TRANSLATION_TAGS } from "../../../constants/dom-rules"
+import { isHTMLElement } from "../../dom/filter"
 
 // Helper function to check if content is purely numeric
 export function isNumericContent(text: string): boolean {
@@ -23,7 +23,7 @@ export function isNumericContent(text: string): boolean {
 export function isForceInlineTranslation(targetNode: TransNode): boolean {
   if (isHTMLElement(targetNode)) {
     const computedStyle = window.getComputedStyle(targetNode)
-    return FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName) || computedStyle.display.includes('flex')
+    return FORCE_INLINE_TRANSLATION_TAGS.has(targetNode.tagName) || computedStyle.display.includes("flex")
   }
   return false
 }

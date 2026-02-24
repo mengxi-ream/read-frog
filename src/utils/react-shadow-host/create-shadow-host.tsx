@@ -1,17 +1,17 @@
-import { createContext } from 'react'
-import ReactDOM from 'react-dom/client'
+import { createContext } from "react"
+import ReactDOM from "react-dom/client"
 
-import { ThemeProvider } from '@/components/providers/theme-provider'
-import { TooltipProvider } from '@/components/ui/base-ui/tooltip'
-import { REACT_SHADOW_HOST_CLASS } from '../constants/dom-labels'
-import { ShadowHostBuilder } from './shadow-host-builder'
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { REACT_SHADOW_HOST_CLASS } from "../constants/dom-labels"
+import { ShadowHostBuilder } from "./shadow-host-builder"
 
 export const ShadowWrapperContext = createContext<HTMLElement | null>(null)
 
 export function createReactShadowHost(
   component: React.ReactElement,
   options: {
-    position: 'inline' | 'block'
+    position: "inline" | "block"
     inheritStyles: boolean
     className?: string
     cssContent?: string[]
@@ -20,14 +20,14 @@ export function createReactShadowHost(
 ) {
   const { className, position, inheritStyles, cssContent, style } = options
 
-  const shadowHost = document.createElement('div')
+  const shadowHost = document.createElement("div")
   if (className)
     shadowHost.className = className
 
   shadowHost.classList.add(REACT_SHADOW_HOST_CLASS)
   shadowHost.style.display = position
 
-  const shadowRoot = shadowHost.attachShadow({ mode: 'open' })
+  const shadowRoot = shadowHost.attachShadow({ mode: "open" })
   const hostBuilder = new ShadowHostBuilder(shadowRoot, {
     position,
     cssContent,

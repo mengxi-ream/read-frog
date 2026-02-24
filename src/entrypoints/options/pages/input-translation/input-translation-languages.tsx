@@ -1,16 +1,16 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import type { InputTranslationLang } from '@/types/config/config'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { InputTranslationLang } from "@/types/config/config"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
   langCodeISO6393Schema,
-} from '@read-frog/definitions'
-import { useAtom } from 'jotai'
-import { Activity } from 'react'
-import { Checkbox } from '@/components/ui/base-ui/checkbox'
-import { Label } from '@/components/ui/base-ui/label'
+} from "@read-frog/definitions"
+import { useAtom } from "jotai"
+import { Activity } from "react"
+import { Checkbox } from "@/components/ui/base-ui/checkbox"
+import { Label } from "@/components/ui/base-ui/label"
 import {
   Select,
   SelectContent,
@@ -18,9 +18,9 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/base-ui/select'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../components/config-card'
+} from "@/components/ui/base-ui/select"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { ConfigCard } from "../../components/config-card"
 
 function langCodeLabel(langCode: LangCodeISO6393) {
   return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
@@ -43,10 +43,10 @@ function LangSelect({ value, onValueChange, getDisplayLabel }: LangSelectProps) 
       <SelectContent className="max-h-64" align="end">
         <SelectGroup>
           <SelectItem value="targetCode">
-            {getDisplayLabel('targetCode')}
+            {getDisplayLabel("targetCode")}
           </SelectItem>
           <SelectItem value="sourceCode">
-            {getDisplayLabel('sourceCode')}
+            {getDisplayLabel("sourceCode")}
           </SelectItem>
           {langCodeISO6393Schema.options.map(code => (
             <SelectItem key={code} value={code}>
@@ -64,15 +64,15 @@ export function InputTranslationLanguages() {
   const [language] = useAtom(configFieldsAtomMap.language)
 
   const getDisplayLabel = (value: InputTranslationLang) => {
-    if (value === 'sourceCode') {
-      const label = i18n.t('options.inputTranslation.languages.sourceCode')
-      if (language.sourceCode === 'auto') {
+    if (value === "sourceCode") {
+      const label = i18n.t("options.inputTranslation.languages.sourceCode")
+      if (language.sourceCode === "auto") {
         return `${label} (auto)`
       }
       return `${label} (${langCodeLabel(language.sourceCode)})`
     }
-    if (value === 'targetCode') {
-      const label = i18n.t('options.inputTranslation.languages.targetCode')
+    if (value === "targetCode") {
+      const label = i18n.t("options.inputTranslation.languages.targetCode")
       return `${label} (${langCodeLabel(language.targetCode)})`
     }
     return langCodeLabel(value)
@@ -92,8 +92,8 @@ export function InputTranslationLanguages() {
 
   return (
     <ConfigCard
-      title={i18n.t('options.inputTranslation.languages.title')}
-      description={i18n.t('options.inputTranslation.languages.description')}
+      title={i18n.t("options.inputTranslation.languages.title")}
+      description={i18n.t("options.inputTranslation.languages.description")}
     >
       <div className="flex flex-col gap-4 min-w-0 w-full">
         <div className="flex flex-col items-end gap-1 min-w-0 w-full">
@@ -104,13 +104,13 @@ export function InputTranslationLanguages() {
           />
 
           <div className="relative size-5 shrink-0 mx-auto my-2">
-            <Activity mode={inputTranslation.enableCycle ? 'visible' : 'hidden'}>
+            <Activity mode={inputTranslation.enableCycle ? "visible" : "hidden"}>
               <Icon
                 icon="fluent:arrow-sort-24-filled"
                 className="absolute inset-0 size-5 text-muted-foreground"
               />
             </Activity>
-            <Activity mode={inputTranslation.enableCycle ? 'hidden' : 'visible'}>
+            <Activity mode={inputTranslation.enableCycle ? "hidden" : "visible"}>
               <Icon
                 icon="tabler:arrow-narrow-down"
                 className="absolute inset-0 size-5 text-muted-foreground"
@@ -132,7 +132,7 @@ export function InputTranslationLanguages() {
             onCheckedChange={handleEnableCycleChange}
           />
           <Label htmlFor="enable-cycle" className="text-sm font-normal cursor-pointer">
-            {i18n.t('options.inputTranslation.languages.enableCycle')}
+            {i18n.t("options.inputTranslation.languages.enableCycle")}
           </Label>
         </div>
       </div>

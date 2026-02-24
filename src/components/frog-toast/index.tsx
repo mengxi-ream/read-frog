@@ -1,19 +1,19 @@
-import { kebabCase } from 'case-anything'
-import * as React from 'react'
+import { kebabCase } from "case-anything"
+import * as React from "react"
 
-import { Toaster } from 'sonner'
-import frogIcon from '@/assets/icons/read-frog.png'
-import { APP_NAME } from '@/utils/constants/app'
+import { Toaster } from "sonner"
+import frogIcon from "@/assets/icons/read-frog.png"
+import { APP_NAME } from "@/utils/constants/app"
 
 const frogIconElement = (
   <img
     src={frogIcon}
     alt="🐸"
     style={{
-      maxWidth: '100%',
-      height: 'auto',
-      minHeight: '20px',
-      minWidth: '20px',
+      maxWidth: "100%",
+      height: "auto",
+      minHeight: "20px",
+      minWidth: "20px",
     }}
   />
 )

@@ -1,23 +1,23 @@
-import type { UnresolvedConfigs } from '../atoms/google-drive-sync'
-import type { Config } from '@/types/config/config'
-import { dequal } from 'dequal'
-import { configSchema } from '@/types/config/config'
+import type { UnresolvedConfigs } from "../atoms/google-drive-sync"
+import type { Config } from "@/types/config/config"
+import { dequal } from "dequal"
+import { configSchema } from "@/types/config/config"
 import {
   getLastSyncedConfigAndMeta,
   getLocalConfigAndMeta,
   setLastSyncConfigAndMeta,
   setLocalConfigAndMeta,
-} from '../config/storage'
-import { CONFIG_SCHEMA_VERSION } from '../constants/config'
-import { logger } from '../logger'
-import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from './storage'
+} from "../config/storage"
+import { CONFIG_SCHEMA_VERSION } from "../constants/config"
+import { logger } from "../logger"
+import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "./storage"
 
-export type SyncAction = 'uploaded' | 'downloaded' | 'same-changes' | 'no-change'
+export type SyncAction = "uploaded" | "downloaded" | "same-changes" | "no-change"
 
 export type SyncResult
-  = | { status: 'success', action: SyncAction }
-    | { status: 'unresolved', data: UnresolvedConfigs }
-    | { status: 'error', error: Error }
+  = | { status: "success", action: SyncAction }
+    | { status: "unresolved", data: UnresolvedConfigs }
+    | { status: "error", error: Error }
 
 /**
  * Sync merged config after conflict resolution
@@ -32,8 +32,8 @@ export async function syncMergedConfig(mergedConfig: Config, email: string): Pro
     // Validate merged config
     const validatedConfigResult = configSchema.safeParse(mergedConfig)
     if (!validatedConfigResult.success) {
-      logger.error('Merged config is invalid, cannot sync merged config')
-      throw new Error('Merged config is invalid for syncing')
+      logger.error("Merged config is invalid, cannot sync merged config")
+      throw new Error("Merged config is invalid for syncing")
     }
 
     const validatedConfig = validatedConfigResult.data
@@ -53,10 +53,10 @@ export async function syncMergedConfig(mergedConfig: Config, email: string): Pro
       { schemaVersion: CONFIG_SCHEMA_VERSION, lastModifiedAt: now, email },
     )
 
-    logger.info('Synced config successfully')
+    logger.info("Synced config successfully")
   }
   catch (error) {
-    logger.error('Failed to sync config', error)
+    logger.error("Failed to sync config", error)
     throw error
   }
 }
@@ -71,22 +71,22 @@ export async function syncConfig(): Promise<SyncResult> {
 
     if (email !== lastSyncedConfigValueAndMeta?.meta.email) {
       if (remoteConfigValueAndMeta) {
-        logger.info('Remote config found, saving remote config')
+        logger.info("Remote config found, saving remote config")
         await setLocalConfigAndMeta(remoteConfigValueAndMeta.value, remoteConfigValueAndMeta.meta)
         await setLastSyncConfigAndMeta(
           remoteConfigValueAndMeta.value,
           { ...remoteConfigValueAndMeta.meta, email, lastSyncedAt: now },
         )
-        return { status: 'success', action: 'downloaded' }
+        return { status: "success", action: "downloaded" }
       }
       else {
-        logger.info('No remote config found, uploading local config')
+        logger.info("No remote config found, uploading local config")
         await setRemoteConfigAndMeta(localConfigValueAndMeta)
         await setLastSyncConfigAndMeta(
           localConfigValueAndMeta.value,
           { ...localConfigValueAndMeta.meta, email, lastSyncedAt: now },
         )
-        return { status: 'success', action: 'uploaded' }
+        return { status: "success", action: "uploaded" }
       }
     }
 
@@ -95,12 +95,12 @@ export async function syncConfig(): Promise<SyncResult> {
     const remoteChangedSinceSync = remoteConfigValueAndMeta && remoteConfigValueAndMeta.meta.lastModifiedAt > lastSyncedConfigValueAndMeta.meta.lastModifiedAt
 
     if (localChangedSinceSync && remoteChangedSinceSync) {
-      logger.info('Both local and remote changed since last sync, checking for conflicts')
+      logger.info("Both local and remote changed since last sync, checking for conflicts")
 
       const sameLocalAndRemote = dequal(localConfigValueAndMeta.value, remoteConfigValueAndMeta.value)
 
       if (sameLocalAndRemote) {
-        logger.info('Local and remote configurations are the same, no conflicts detected')
+        logger.info("Local and remote configurations are the same, no conflicts detected")
         const now = Date.now()
 
         // if the schemaVersion is different, use local config's schemaVersion
@@ -116,11 +116,11 @@ export async function syncConfig(): Promise<SyncResult> {
           { ...mergedConfigValueAndMeta.meta, email, lastSyncedAt: now },
         )
 
-        return { status: 'success', action: 'same-changes' }
+        return { status: "success", action: "same-changes" }
       }
 
       return {
-        status: 'unresolved',
+        status: "unresolved",
         data: {
           base: lastSyncedConfigValueAndMeta.value,
           local: localConfigValueAndMeta.value,
@@ -129,36 +129,36 @@ export async function syncConfig(): Promise<SyncResult> {
       }
     }
     else if (localChangedSinceSync) {
-      logger.info('Local config is newer, uploading local config')
+      logger.info("Local config is newer, uploading local config")
       await setRemoteConfigAndMeta(localConfigValueAndMeta)
       await setLastSyncConfigAndMeta(
         localConfigValueAndMeta.value,
         { ...localConfigValueAndMeta.meta, email, lastSyncedAt: now },
       )
-      return { status: 'success', action: 'uploaded' }
+      return { status: "success", action: "uploaded" }
     }
     else if (remoteChangedSinceSync) {
-      logger.info('Remote config is newer, downloading remote config')
+      logger.info("Remote config is newer, downloading remote config")
       await setLocalConfigAndMeta(remoteConfigValueAndMeta.value, remoteConfigValueAndMeta.meta)
       await setLastSyncConfigAndMeta(
         remoteConfigValueAndMeta.value,
         { ...remoteConfigValueAndMeta.meta, email, lastSyncedAt: now },
       )
-      return { status: 'success', action: 'downloaded' }
+      return { status: "success", action: "downloaded" }
     }
     else {
-      logger.info('No changes, skipping sync')
+      logger.info("No changes, skipping sync")
       await setLastSyncConfigAndMeta(
         localConfigValueAndMeta.value,
         { ...localConfigValueAndMeta.meta, email, lastSyncedAt: now },
       )
-      return { status: 'success', action: 'no-change' }
+      return { status: "success", action: "no-change" }
     }
   }
   catch (error) {
-    logger.error('Config sync failed', error)
+    logger.error("Config sync failed", error)
     return {
-      status: 'error',
+      status: "error",
       error: error instanceof Error ? error : new Error(String(error)),
     }
   }

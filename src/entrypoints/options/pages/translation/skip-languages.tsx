@@ -1,24 +1,24 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
-} from '@read-frog/definitions'
-import { deepmerge } from 'deepmerge-ts'
-import { useAtom, useAtomValue } from 'jotai'
-import { useMemo } from 'react'
-import { HelpTooltip } from '@/components/help-tooltip'
-import { LLMStatusIndicator } from '@/components/llm-status-indicator'
-import { MultiLanguageCombobox } from '@/components/multi-language-combobox'
-import { Button } from '@/components/ui/base-ui/button'
-import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
-import { Label } from '@/components/ui/base-ui/label'
-import { RadioGroup, RadioGroupItem } from '@/components/ui/base-ui/radio-group'
-import { isLLMProviderConfig } from '@/types/config/provider'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { getProviderConfigById } from '@/utils/config/helpers'
-import { ConfigCard } from '../../components/config-card'
+} from "@read-frog/definitions"
+import { deepmerge } from "deepmerge-ts"
+import { useAtom, useAtomValue } from "jotai"
+import { useMemo } from "react"
+import { HelpTooltip } from "@/components/help-tooltip"
+import { LLMStatusIndicator } from "@/components/llm-status-indicator"
+import { MultiLanguageCombobox } from "@/components/multi-language-combobox"
+import { Button } from "@/components/ui/base-ui/button"
+import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
+import { Label } from "@/components/ui/base-ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/base-ui/radio-group"
+import { isLLMProviderConfig } from "@/types/config/provider"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getProviderConfigById } from "@/utils/config/helpers"
+import { ConfigCard } from "../../components/config-card"
 
 export function SkipLanguages() {
   const translateConfig = useAtomValue(configFieldsAtomMap.translate)
@@ -32,11 +32,11 @@ export function SkipLanguages() {
   return (
     <div className="py-6 flex flex-col gap-y-4">
       <ConfigCard
-        title={i18n.t('options.translation.skipLanguages.title')}
+        title={i18n.t("options.translation.skipLanguages.title")}
         description={(
           <>
-            {i18n.t('options.translation.skipLanguages.description')}
-            <LLMStatusIndicator hasLLMProvider={hasLLMProvider} featureName={i18n.t('options.general.featureProviders.features.translate')} />
+            {i18n.t("options.translation.skipLanguages.description")}
+            <LLMStatusIndicator hasLLMProvider={hasLLMProvider} featureName={i18n.t("options.general.featureProviders.features.translate")} />
           </>
         )}
         className="py-0"
@@ -58,16 +58,16 @@ function SkipLanguagesLLMToggle() {
     <Field orientation="horizontal">
       <FieldContent className="self-center">
         <FieldLabel>
-          {i18n.t('options.translation.skipLanguages.detection.label')}
-          <HelpTooltip>{i18n.t('options.translation.skipLanguages.detection.description')}</HelpTooltip>
+          {i18n.t("options.translation.skipLanguages.detection.label")}
+          <HelpTooltip>{i18n.t("options.translation.skipLanguages.detection.description")}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <RadioGroup
-        value={translateConfig.page.enableSkipLanguagesLLMDetection ? 'llm' : 'basic'}
+        value={translateConfig.page.enableSkipLanguagesLLMDetection ? "llm" : "basic"}
         onValueChange={(value: string) => {
           void setTranslateConfig(
             deepmerge(translateConfig, {
-              page: { enableSkipLanguagesLLMDetection: value === 'llm' },
+              page: { enableSkipLanguagesLLMDetection: value === "llm" },
             }),
           )
         }}
@@ -75,11 +75,11 @@ function SkipLanguagesLLMToggle() {
       >
         <div className="flex items-center gap-2">
           <RadioGroupItem value="basic" id="skip-languages-detection-basic" />
-          <Label htmlFor="skip-languages-detection-basic">{i18n.t('options.translation.skipLanguages.detection.basic')}</Label>
+          <Label htmlFor="skip-languages-detection-basic">{i18n.t("options.translation.skipLanguages.detection.basic")}</Label>
         </div>
         <div className="flex items-center gap-2">
           <RadioGroupItem value="llm" id="skip-languages-detection-llm" />
-          <Label htmlFor="skip-languages-detection-llm">{i18n.t('options.translation.skipLanguages.detection.llm')}</Label>
+          <Label htmlFor="skip-languages-detection-llm">{i18n.t("options.translation.skipLanguages.detection.llm")}</Label>
         </div>
       </RadioGroup>
     </Field>
@@ -101,7 +101,7 @@ function SkipLanguagesSelector() {
               skipLanguages: languages,
             },
           })}
-        buttonLabel={i18n.t('options.translation.skipLanguages.selectLanguages')}
+        buttonLabel={i18n.t("options.translation.skipLanguages.selectLanguages")}
       />
     </div>
   )

@@ -1,7 +1,7 @@
 export function addStyleToShadow(shadow: ShadowRoot) {
-  document.head.querySelectorAll('style').forEach((styleEl) => {
-    if (styleEl.textContent?.includes('[data-sonner-toaster]')) {
-      const shadowHead = shadow.querySelector('head')
+  document.head.querySelectorAll("style").forEach((styleEl) => {
+    if (styleEl.textContent?.includes("[data-sonner-toaster]")) {
+      const shadowHead = shadow.querySelector("head")
       // Clone the style element instead of moving it to preserve the original
       // Otherwise, append api will move the style element to the shadow root and cause the bug
       const clonedStyle = styleEl.cloneNode(true)
@@ -19,15 +19,15 @@ function isInternalStyleElement(node: Node) {
   if (!node)
     return false
 
-  if (node instanceof HTMLStyleElement && node.attributes.getNamedItem('wxt-shadow-root-document-styles')) {
+  if (node instanceof HTMLStyleElement && node.attributes.getNamedItem("wxt-shadow-root-document-styles")) {
     return true
   }
 
-  if (node instanceof HTMLStyleElement && node.id === '_goober') {
+  if (node instanceof HTMLStyleElement && node.id === "_goober") {
     return true
   }
 
-  if (node instanceof HTMLStyleElement && node.textContent?.includes('[data-sonner-toaster]')) {
+  if (node instanceof HTMLStyleElement && node.textContent?.includes("[data-sonner-toaster]")) {
     return true
   }
 
@@ -46,7 +46,7 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
   // Check if adoptedStyleSheets is supported
   let supportsAdoptedStyleSheets = false
   try {
-    supportsAdoptedStyleSheets = 'adoptedStyleSheets' in shadowRoot
+    supportsAdoptedStyleSheets = "adoptedStyleSheets" in shadowRoot
       && shadowRoot.adoptedStyleSheets !== undefined
       && Array.isArray(shadowRoot.adoptedStyleSheets)
   }
@@ -71,8 +71,8 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
 
   if (!supportsAdoptedStyleSheets) {
     // Fallback for browsers that don't support adoptedStyleSheets
-    mirrorStyleElement = document.createElement('style')
-    mirrorStyleElement.setAttribute('data-mirror-styles', selector)
+    mirrorStyleElement = document.createElement("style")
+    mirrorStyleElement.setAttribute("data-mirror-styles", selector)
     shadowRoot.appendChild(mirrorStyleElement)
   }
 
@@ -110,14 +110,14 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
 
   const srcObserver = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
-      updateStyles(mutation.target.textContent ?? '')
+      updateStyles(mutation.target.textContent ?? "")
     })
   })
 
   // If src is found, observe it
   if (src) {
     srcObserver.observe(src, opts)
-    updateStyles(src.textContent ?? '')
+    updateStyles(src.textContent ?? "")
   }
 
   // Observe the head for added style elements
@@ -132,7 +132,7 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
               srcObserver.disconnect()
             }
             src = node
-            updateStyles(node.textContent ?? '')
+            updateStyles(node.textContent ?? "")
             srcObserver.observe(src, opts)
           }
         }

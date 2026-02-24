@@ -14,8 +14,8 @@ export function migrate(oldConfig: any): any {
     videoSubtitles: {
       ...oldConfig.videoSubtitles,
       style: {
-        displayMode: 'bilingual',
-        translationPosition: 'above',
+        displayMode: "bilingual",
+        translationPosition: "above",
       },
     },
   }

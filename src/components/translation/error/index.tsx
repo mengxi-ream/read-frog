@@ -1,6 +1,6 @@
-import type { APICallError } from 'ai'
-import { ErrorButton } from './error-button'
-import { RetryButton } from './retry-button'
+import type { APICallError } from "ai"
+import { ErrorButton } from "./error-button"
+import { RetryButton } from "./retry-button"
 
 export function TranslationError({ nodes, error }: { nodes: ChildNode[], error: APICallError }) {
   return (

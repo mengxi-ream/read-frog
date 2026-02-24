@@ -1,1 +1,1 @@
-export { useInputTranslation } from './use-input-translation'
+export { useInputTranslation } from "./use-input-translation"

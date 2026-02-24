@@ -1,12 +1,12 @@
-import type { SubtitlesFragment } from '../../../types'
-import type { YoutubeTimedText } from '../types'
-import { SENTENCE_END_PATTERN } from '@/utils/constants/subtitles'
-import { getMaxLength, getTextLength, isCJKLanguage } from '@/utils/subtitles/utils'
+import type { SubtitlesFragment } from "../../../types"
+import type { YoutubeTimedText } from "../types"
+import { SENTENCE_END_PATTERN } from "@/utils/constants/subtitles"
+import { getMaxLength, getTextLength, isCJKLanguage } from "@/utils/subtitles/utils"
 
 const ESTIMATED_WORD_DURATION_MS = 200
 
 function isSpecialTag(text: string): boolean {
-  return text.startsWith('[') && text.endsWith(']')
+  return text.startsWith("[") && text.endsWith("]")
 }
 
 function pushFragment(result: SubtitlesFragment[], fragment: SubtitlesFragment) {
@@ -44,12 +44,12 @@ export function parseScrollingAsrSubtitles(
   lang?: string,
 ): SubtitlesFragment[] {
   const result: SubtitlesFragment[] = []
-  const isSpaceSeparated = lang?.startsWith('en') || false
+  const isSpaceSeparated = lang?.startsWith("en") || false
   const isCJK = isCJKLanguage(lang)
   const maxLength = getMaxLength(isCJK, true)
 
   // Cross-event buffer
-  let currentText = ''
+  let currentText = ""
   let currentStart = 0
   let lastSegEnd = 0
   let isFirstSeg = true
@@ -63,7 +63,7 @@ export function parseScrollingAsrSubtitles(
 
         if (pendingSplit) {
           flushPendingFragment(result, currentText, currentStart, lastSegEnd)
-          currentText = ''
+          currentText = ""
           isFirstSeg = true
           pendingSplit = false
         }
@@ -77,7 +77,7 @@ export function parseScrollingAsrSubtitles(
     // If pending split and starting new event, output current fragment first
     if (pendingSplit && currentText) {
       flushPendingFragment(result, currentText, currentStart, lastSegEnd)
-      currentText = ''
+      currentText = ""
       isFirstSeg = true
       pendingSplit = false
     }
@@ -85,14 +85,14 @@ export function parseScrollingAsrSubtitles(
     const segs = event.segs
     for (let i = 0; i < segs.length; i++) {
       const seg = segs[i]
-      const text = seg.utf8 || ''
+      const text = seg.utf8 || ""
       const offsetMs = seg.tOffsetMs || 0
       const segStart = event.tStartMs + offsetMs
 
       // If pending split and this is a new seg, output current fragment first
       if (pendingSplit && currentText) {
         flushPendingFragment(result, currentText, currentStart, lastSegEnd)
-        currentText = ''
+        currentText = ""
         isFirstSeg = true
         pendingSplit = false
       }
@@ -104,9 +104,9 @@ export function parseScrollingAsrSubtitles(
 
       // For space-separated languages (English), add space when merging across events
       if (isSpaceSeparated && currentText && text && i === 0) {
-        const needsSpace = !currentText.endsWith(' ') && !text.startsWith(' ')
+        const needsSpace = !currentText.endsWith(" ") && !text.startsWith(" ")
         if (needsSpace) {
-          currentText += ' '
+          currentText += " "
         }
       }
 

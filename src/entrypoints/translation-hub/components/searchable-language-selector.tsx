@@ -1,10 +1,10 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import { LanguageCombobox } from '@/components/language-combobox'
-import { FieldLabel, FieldRoot } from '@/components/ui/base-ui/field'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import { LanguageCombobox } from "@/components/language-combobox"
+import { FieldLabel, FieldRoot } from "@/components/ui/base-ui/field"
 
 interface SearchableLanguageSelectorProps {
-  value: LangCodeISO6393 | 'auto'
-  onValueChange: (value: LangCodeISO6393 | 'auto') => void
+  value: LangCodeISO6393 | "auto"
+  onValueChange: (value: LangCodeISO6393 | "auto") => void
   detectedLangCode?: LangCodeISO6393
   label: string
   className?: string

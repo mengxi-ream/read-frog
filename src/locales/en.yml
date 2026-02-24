@@ -357,7 +357,7 @@ options:
             saved: All changes saved
     translationMode:
       title: Translation Mode
-      description: 'Choose how the translated text is displayed: bilingual or translation only.'
+      description: "Choose how the translated text is displayed: bilingual or translation only."
       mode:
         bilingual: Bilingual
         translationOnly: Translation Only
@@ -508,7 +508,7 @@ options:
           hasUnresolvedInChildren: ⚠ Contains unresolved changes
           item: item
           items: items
-          unresolvedPrompt: '[Unresolved - Please select]'
+          unresolvedPrompt: "[Unresolved - Please select]"
           localLatest: Local Latest
           remoteLatest: Remote Latest
           bothChanged: Both changed
@@ -519,7 +519,7 @@ options:
           resolveToContinue: Resolve conflicts to continue
           validationAlert:
             title: The merged config has validation errors.
-            description: 'Adjust the differences below to fix:'
+            description: "Adjust the differences below to fix:"
           moreErrors: ...and $1 more errors
     backup:
       title: Config Backup
@@ -532,8 +532,8 @@ options:
         title: No backups available yet
         description: Backups are created automatically every hour if the config is changed.
       item:
-        extensionVersion: 'Extension version:'
-        schemaVersion: 'Schema version:'
+        extensionVersion: "Extension version:"
+        schemaVersion: "Schema version:"
         restore: Restore
         export: Export
         delete: Delete

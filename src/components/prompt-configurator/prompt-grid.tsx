@@ -1,8 +1,8 @@
-import type { TranslatePromptObj } from '@/types/config/translate'
-import { i18n } from '#imports'
-import { useAtom, useAtomValue } from 'jotai'
-import { Activity, useId } from 'react'
-import { Badge } from '@/components/ui/base-ui/badge'
+import type { TranslatePromptObj } from "@/types/config/translate"
+import { i18n } from "#imports"
+import { useAtom, useAtomValue } from "jotai"
+import { Activity, useId } from "react"
+import { Badge } from "@/components/ui/base-ui/badge"
 import {
   Card,
   CardAction,
@@ -10,15 +10,15 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/base-ui/card'
-import { Checkbox } from '@/components/ui/base-ui/checkbox'
-import { Label } from '@/components/ui/base-ui/label'
-import { Separator } from '@/components/ui/base-ui/separator'
-import { DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT_ID, DEFAULT_TRANSLATE_SYSTEM_PROMPT } from '@/utils/constants/prompt'
-import { cn } from '@/utils/styles/utils'
-import { ConfigurePrompt } from './configure-prompt'
-import { usePromptAtoms } from './context'
-import { DeletePrompt } from './delete-prompt'
+} from "@/components/ui/base-ui/card"
+import { Checkbox } from "@/components/ui/base-ui/checkbox"
+import { Label } from "@/components/ui/base-ui/label"
+import { Separator } from "@/components/ui/base-ui/separator"
+import { DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT_ID, DEFAULT_TRANSLATE_SYSTEM_PROMPT } from "@/utils/constants/prompt"
+import { cn } from "@/utils/styles/utils"
+import { ConfigurePrompt } from "./configure-prompt"
+import { usePromptAtoms } from "./context"
+import { DeletePrompt } from "./delete-prompt"
 
 export function PromptGrid({
   currentPromptId,
@@ -38,7 +38,7 @@ export function PromptGrid({
   // Construct virtual default prompt object from code constant
   const defaultPrompt: TranslatePromptObj = {
     id: DEFAULT_TRANSLATE_PROMPT_ID,
-    name: i18n.t('options.translation.personalizedPrompts.default'),
+    name: i18n.t("options.translation.personalizedPrompts.default"),
     systemPrompt: DEFAULT_TRANSLATE_SYSTEM_PROMPT,
     prompt: DEFAULT_TRANSLATE_PROMPT,
   }
@@ -64,7 +64,7 @@ export function PromptGrid({
 
   return (
     <div
-      aria-label={i18n.t('options.translation.personalizedPrompts.title')}
+      aria-label={i18n.t("options.translation.personalizedPrompts.title")}
       className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-h-96 overflow-auto p-2 select-none"
     >
       {
@@ -75,9 +75,9 @@ export function PromptGrid({
           return (
             <Card
               className={cn(
-                'h-full gap-0 pb-2 py-0 cursor-pointer hover:scale-[1.02] transition-transform duration-30 ease-in-out',
+                "h-full gap-0 pb-2 py-0 cursor-pointer hover:scale-[1.02] transition-transform duration-30 ease-in-out",
                 // for highlight checked card in export mode
-                isExportMode ? 'has-aria-checked:border-primary has-aria-checked:bg-primary/5 dark:has-aria-checked:border-primary/70 dark:has-aria-checked:bg-primary/10' : '',
+                isExportMode ? "has-aria-checked:border-primary has-aria-checked:bg-primary/5 dark:has-aria-checked:border-primary/70 dark:has-aria-checked:bg-primary/10" : "",
               )}
               key={pattern.id}
             >
@@ -88,7 +88,7 @@ export function PromptGrid({
                 <CardTitle className="w-full min-w-0">
                   <div className="leading-relaxed gap-3 flex items-center w-full h-5">
                     {/* Checkbox: only show in export mode for custom prompts (not default) */}
-                    <Activity mode={isExportMode && !isDefault ? 'visible' : 'hidden'}>
+                    <Activity mode={isExportMode && !isDefault ? "visible" : "hidden"}>
                       <Checkbox
                         id={`${idPrefix}-check-${pattern.id}`}
                         checked={selectedPrompts.includes(pattern.id)}
@@ -109,9 +109,9 @@ export function PromptGrid({
                     >
                       {pattern.name}
                     </Label>
-                    <Activity mode={isActive ? 'visible' : 'hidden'}>
+                    <Activity mode={isActive ? "visible" : "hidden"}>
                       <Badge className="bg-primary">
-                        {i18n.t('options.translation.personalizedPrompts.current')}
+                        {i18n.t("options.translation.personalizedPrompts.current")}
                       </Badge>
                     </Activity>
                   </div>
@@ -129,12 +129,12 @@ export function PromptGrid({
               </CardContent>
               <Separator className="my-0" />
               <CardFooter className="w-full flex justify-between px-4 items-center py-2 cursor-default">
-                <Activity mode={isDefault ? 'visible' : 'hidden'}>
+                <Activity mode={isDefault ? "visible" : "hidden"}>
                   <CardAction>
                     <ConfigurePrompt originPrompt={pattern} />
                   </CardAction>
                 </Activity>
-                <Activity mode={isDefault ? 'hidden' : 'visible'}>
+                <Activity mode={isDefault ? "hidden" : "visible"}>
                   <CardAction>
                     <DeletePrompt originPrompt={pattern} />
                   </CardAction>

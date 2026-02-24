@@ -1,13 +1,13 @@
-import { browser, i18n } from '#imports'
-import { useAtom, useAtomValue } from 'jotai'
-import { Button } from '@/components/ui/base-ui/button'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { sendMessage } from '@/utils/message'
-import { formatHotkey } from '@/utils/os.ts'
-import { cn } from '@/utils/styles/utils'
-import { isPageTranslatedAtom } from '../atoms/auto-translate'
-import { isIgnoreTabAtom } from '../atoms/ignore'
-import { isCurrentSiteInWhitelistAtom, isWhitelistModeAtom } from '../atoms/site-control'
+import { browser, i18n } from "#imports"
+import { useAtom, useAtomValue } from "jotai"
+import { Button } from "@/components/ui/base-ui/button"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { sendMessage } from "@/utils/message"
+import { formatHotkey } from "@/utils/os.ts"
+import { cn } from "@/utils/styles/utils"
+import { isPageTranslatedAtom } from "../atoms/auto-translate"
+import { isIgnoreTabAtom } from "../atoms/ignore"
+import { isCurrentSiteInWhitelistAtom, isWhitelistModeAtom } from "../atoms/site-control"
 
 export default function TranslateButton({ className }: { className?: string }) {
   const [isPageTranslated, setIsPageTranslated] = useAtom(isPageTranslatedAtom)
@@ -23,7 +23,7 @@ export default function TranslateButton({ className }: { className?: string }) {
     })
 
     if (currentTab.id) {
-      void sendMessage('tryToSetEnablePageTranslationByTabId', {
+      void sendMessage("tryToSetEnablePageTranslationByTabId", {
         tabId: currentTab.id,
         enabled: !isPageTranslated,
       })
@@ -39,13 +39,13 @@ export default function TranslateButton({ className }: { className?: string }) {
       onClick={toggleTranslation}
       disabled={isDisabled}
       className={cn(
-        'block truncate',
+        "block truncate",
         className,
       )}
     >
       {isPageTranslated
-        ? i18n.t('popup.showOriginal')
-        : `${i18n.t('popup.translate')} (${formatHotkey(translateConfig.page.shortcut)})`}
+        ? i18n.t("popup.showOriginal")
+        : `${i18n.t("popup.translate")} (${formatHotkey(translateConfig.page.shortcut)})`}
     </Button>
   )
 }

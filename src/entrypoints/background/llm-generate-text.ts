@@ -1,11 +1,11 @@
 import type {
   BackgroundGenerateTextPayload,
   BackgroundGenerateTextResponse,
-} from '@/types/background-generate-text'
-import { generateText } from 'ai'
-import { logger } from '@/utils/logger'
-import { onMessage } from '@/utils/message'
-import { getModelById } from '@/utils/providers/model'
+} from "@/types/background-generate-text"
+import { generateText } from "ai"
+import { logger } from "@/utils/logger"
+import { onMessage } from "@/utils/message"
+import { getModelById } from "@/utils/providers/model"
 
 export async function runGenerateTextInBackground(
   payload: BackgroundGenerateTextPayload,
@@ -22,12 +22,12 @@ export async function runGenerateTextInBackground(
 }
 
 export function setupLLMGenerateTextMessageHandlers() {
-  onMessage('backgroundGenerateText', async (message) => {
+  onMessage("backgroundGenerateText", async (message) => {
     try {
       return await runGenerateTextInBackground(message.data)
     }
     catch (error) {
-      logger.error('[Background] backgroundGenerateText failed', error)
+      logger.error("[Background] backgroundGenerateText failed", error)
       throw error
     }
   })

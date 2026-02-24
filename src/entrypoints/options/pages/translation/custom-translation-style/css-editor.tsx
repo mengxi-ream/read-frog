@@ -7,23 +7,23 @@
  * - Save button with validation state
  */
 
-import { i18n } from '#imports'
-import { useAtom } from 'jotai'
-import { Activity, useMemo, useState } from 'react'
-import { Button } from '@/components/ui/base-ui/button'
-import { Field, FieldLabel } from '@/components/ui/base-ui/field'
-import { CSSCodeEditor } from '@/components/ui/css-code-editor'
-import { useDebouncedValue } from '@/hooks/use-debounced-value'
-import { MAX_CUSTOM_CSS_LENGTH } from '@/types/config/translate'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { WEBSITE_URL } from '@/utils/constants/url'
-import { lintCSS } from '@/utils/css/lint-css'
-import { cn } from '@/utils/styles/utils'
+import { i18n } from "#imports"
+import { useAtom } from "jotai"
+import { Activity, useMemo, useState } from "react"
+import { Button } from "@/components/ui/base-ui/button"
+import { Field, FieldLabel } from "@/components/ui/base-ui/field"
+import { CSSCodeEditor } from "@/components/ui/css-code-editor"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { MAX_CUSTOM_CSS_LENGTH } from "@/types/config/translate"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { WEBSITE_URL } from "@/utils/constants/url"
+import { lintCSS } from "@/utils/css/lint-css"
+import { cn } from "@/utils/styles/utils"
 
 export function CSSEditor() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const { translationNodeStyle } = translateConfig
-  const [cssInput, setCssInput] = useState(translateConfig.translationNodeStyle.customCSS ?? '')
+  const [cssInput, setCssInput] = useState(translateConfig.translationNodeStyle.customCSS ?? "")
 
   // Debounce CSS input for validation
   const debouncedCssInput = useDebouncedValue(cssInput, 500)
@@ -42,7 +42,7 @@ export function CSSEditor() {
 
   const hasSyntaxError = !syntaxCheck.valid
   const isValidating = cssInput !== debouncedCssInput
-  const hasChanges = cssInput !== (translateConfig.translationNodeStyle.customCSS ?? '')
+  const hasChanges = cssInput !== (translateConfig.translationNodeStyle.customCSS ?? "")
 
   const handleSave = () => {
     // Must pass syntax check and length check
@@ -61,21 +61,21 @@ export function CSSEditor() {
   }
 
   return (
-    <Activity mode={translationNodeStyle.isCustom ? 'visible' : 'hidden'}>
+    <Activity mode={translationNodeStyle.isCustom ? "visible" : "hidden"}>
       <Field>
         <div className="flex items-start justify-between">
           <FieldLabel htmlFor="css-editor" data-invalid>
-            {i18n.t('options.translation.translationStyle.cssEditor')}
+            {i18n.t("options.translation.translationStyle.cssEditor")}
           </FieldLabel>
           <a href={`${WEBSITE_URL}/tutorial/custom-css`} className="text-xs text-link hover:opacity-90" target="_blank" rel="noreferrer">
-            {i18n.t('options.apiProviders.howToConfigure')}
+            {i18n.t("options.apiProviders.howToConfigure")}
           </a>
         </div>
         <CSSCodeEditor
           value={cssInput}
           onChange={setCssInput}
           hasError={hasSyntaxError || hasLengthError}
-          placeholder={i18n.t('options.translation.translationStyle.customCSS.editor.placeholder')}
+          placeholder={i18n.t("options.translation.translationStyle.customCSS.editor.placeholder")}
           className="min-h-[200px] max-h-[400px] overflow-y-auto"
         />
         {/* Show syntax errors */}
@@ -109,13 +109,13 @@ export function CSSEditor() {
           </Alert>
         </Activity> */}
         <div className="flex items-center gap-2 justify-between">
-          <div className={cn('text-sm text-green-500', isValidating && 'text-muted-foreground', (hasSyntaxError || hasLengthError) && 'text-destructive')}>
-            {cssInput.trim().length > 0 ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError, hasChanges) : ''}
+          <div className={cn("text-sm text-green-500", isValidating && "text-muted-foreground", (hasSyntaxError || hasLengthError) && "text-destructive")}>
+            {cssInput.trim().length > 0 ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError, hasChanges) : ""}
           </div>
           <Button onClick={handleSave} disabled={isValidating || hasSyntaxError || hasLengthError || !hasChanges}>
             {hasChanges
-              ? i18n.t('options.translation.translationStyle.customCSS.editor.saveButton')
-              : i18n.t('options.translation.translationStyle.customCSS.editor.savedButton')}
+              ? i18n.t("options.translation.translationStyle.customCSS.editor.saveButton")
+              : i18n.t("options.translation.translationStyle.customCSS.editor.savedButton")}
           </Button>
         </div>
       </Field>
@@ -125,20 +125,20 @@ export function CSSEditor() {
 
 function getValidationMessage(isValidating: boolean, hasSyntaxError: boolean, hasLengthError: boolean, hasChanges: boolean) {
   if (isValidating) {
-    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.validating')
+    return i18n.t("options.translation.translationStyle.customCSS.editor.validation.validating")
   }
 
   if (hasSyntaxError) {
-    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.syntaxError')
+    return i18n.t("options.translation.translationStyle.customCSS.editor.validation.syntaxError")
   }
 
   if (hasLengthError) {
-    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.tooLong')
+    return i18n.t("options.translation.translationStyle.customCSS.editor.validation.tooLong")
   }
 
   if (!hasChanges) {
-    return i18n.t('options.translation.translationStyle.customCSS.editor.validation.saved')
+    return i18n.t("options.translation.translationStyle.customCSS.editor.validation.saved")
   }
 
-  return i18n.t('options.translation.translationStyle.customCSS.editor.validation.valid')
+  return i18n.t("options.translation.translationStyle.customCSS.editor.validation.valid")
 }

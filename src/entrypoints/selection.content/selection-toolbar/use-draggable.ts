@@ -1,5 +1,5 @@
-import type { CSSProperties } from 'react'
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import type { CSSProperties } from "react"
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
 
 interface Position {
   x: number
@@ -98,11 +98,11 @@ export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
 
   // Add/remove event listeners for drag
   useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
     }
   }, [handleMouseMove, handleMouseUp])
 
@@ -111,9 +111,9 @@ export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
     if (!element || !isVisible)
       return
 
-    element.addEventListener('mousedown', handleMouseDown)
+    element.addEventListener("mousedown", handleMouseDown)
     return () => {
-      element.removeEventListener('mousedown', handleMouseDown)
+      element.removeEventListener("mousedown", handleMouseDown)
     }
   }, [handleMouseDown, isVisible])
 
@@ -148,7 +148,7 @@ export function useDraggable(options: UseDraggableOptions): UseDraggableReturn {
     dragRef,
     containerRef,
     style: {
-      position: 'fixed',
+      position: "fixed",
       maxHeight: `calc(100vh - ${margin * 2}px)`,
     },
   }

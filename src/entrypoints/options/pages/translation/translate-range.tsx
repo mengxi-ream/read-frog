@@ -1,15 +1,15 @@
-import { i18n } from '#imports'
-import { deepmerge } from 'deepmerge-ts'
-import { useAtom } from 'jotai'
-import { Field, FieldLabel } from '@/components/ui/base-ui/field'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
-import { pageTranslateRangeSchema } from '@/types/config/translate'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../components/config-card'
+import { i18n } from "#imports"
+import { deepmerge } from "deepmerge-ts"
+import { useAtom } from "jotai"
+import { Field, FieldLabel } from "@/components/ui/base-ui/field"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
+import { pageTranslateRangeSchema } from "@/types/config/translate"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { ConfigCard } from "../../components/config-card"
 
 export function TranslateRange() {
   return (
-    <ConfigCard title={i18n.t('options.translation.translateRange.title')} description={i18n.t('options.translation.translateRange.description')}>
+    <ConfigCard title={i18n.t("options.translation.translateRange.title")} description={i18n.t("options.translation.translateRange.description")}>
       <TranslateRangeSelector />
     </ConfigCard>
   )
@@ -20,7 +20,7 @@ function TranslateRangeSelector() {
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
-        {i18n.t('options.translation.translateRange.title')}
+        {i18n.t("options.translation.translateRange.title")}
       </FieldLabel>
       <Select
         value={translateConfig.page.range}

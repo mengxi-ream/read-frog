@@ -1,22 +1,22 @@
-import type { TranslationNodeStylePreset } from '@/types/config/translate'
-import { i18n } from '#imports'
-import { deepmerge } from 'deepmerge-ts'
-import { useAtom } from 'jotai'
-import { Activity } from 'react'
-import { Field, FieldLabel } from '@/components/ui/base-ui/field'
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style'
+import type { TranslationNodeStylePreset } from "@/types/config/translate"
+import { i18n } from "#imports"
+import { deepmerge } from "deepmerge-ts"
+import { useAtom } from "jotai"
+import { Activity } from "react"
+import { Field, FieldLabel } from "@/components/ui/base-ui/field"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { TRANSLATION_NODE_STYLE } from "@/utils/constants/translation-node-style"
 
 export function PresetStyleSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const { translationNodeStyle } = translateConfig
 
   return (
-    <Activity mode={!translationNodeStyle.isCustom ? 'visible' : 'hidden'}>
+    <Activity mode={!translationNodeStyle.isCustom ? "visible" : "hidden"}>
       <Field>
         <FieldLabel htmlFor="preset-style-selector">
-          {i18n.t('options.translation.translationStyle.presetStyle')}
+          {i18n.t("options.translation.translationStyle.presetStyle")}
         </FieldLabel>
         <Select
           value={translationNodeStyle.preset}

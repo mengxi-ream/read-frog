@@ -1,4 +1,4 @@
-import type { EdgeTTSErrorCode, EdgeTTSErrorPayload } from '@/types/edge-tts'
+import type { EdgeTTSErrorCode, EdgeTTSErrorPayload } from "@/types/edge-tts"
 
 export class EdgeTTSError extends Error {
   code: EdgeTTSErrorCode
@@ -15,7 +15,7 @@ export class EdgeTTSError extends Error {
     },
   ) {
     super(message)
-    this.name = 'EdgeTTSError'
+    this.name = "EdgeTTSError"
     this.code = code
     this.retryable = options?.retryable ?? false
     this.status = options?.status
@@ -38,13 +38,13 @@ export function toEdgeTTSErrorPayload(error: unknown): EdgeTTSErrorPayload {
 
   if (error instanceof Error) {
     return {
-      code: 'UNKNOWN_ERROR',
+      code: "UNKNOWN_ERROR",
       message: error.message,
     }
   }
 
   return {
-    code: 'UNKNOWN_ERROR',
-    message: 'Unknown edge tts error',
+    code: "UNKNOWN_ERROR",
+    message: "Unknown edge tts error",
   }
 }

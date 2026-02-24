@@ -1,4 +1,4 @@
-export type TTSPlaybackStopReason = 'stopped' | 'interrupted'
+export type TTSPlaybackStopReason = "stopped" | "interrupted"
 
 export interface TTSPlaybackStartRequest {
   requestId: string

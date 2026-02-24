@@ -1,4 +1,4 @@
-import { LANG_CODE_TO_EN_NAME } from '@read-frog/definitions'
+import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 
 export function getAnalyzePrompt(targetLang: string) {
   return `# Identity

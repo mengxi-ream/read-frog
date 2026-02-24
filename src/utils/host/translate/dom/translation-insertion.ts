@@ -1,20 +1,20 @@
-import type { TranslationNodeStyleConfig } from '@/types/config/translate'
-import type { TransNode } from '@/types/dom'
-import { BLOCK_CONTENT_CLASS, INLINE_CONTENT_CLASS, NOTRANSLATE_CLASS } from '../../../constants/dom-labels'
-import { isBlockTransNode, isCustomForceBlockTranslation, isHTMLElement, isInlineTransNode } from '../../dom/filter'
-import { getOwnerDocument } from '../../dom/node'
-import { decorateTranslationNode } from '../ui/decorate-translation'
-import { isForceInlineTranslation } from '../ui/translation-utils'
+import type { TranslationNodeStyleConfig } from "@/types/config/translate"
+import type { TransNode } from "@/types/dom"
+import { BLOCK_CONTENT_CLASS, INLINE_CONTENT_CLASS, NOTRANSLATE_CLASS } from "../../../constants/dom-labels"
+import { isBlockTransNode, isCustomForceBlockTranslation, isHTMLElement, isInlineTransNode } from "../../dom/filter"
+import { getOwnerDocument } from "../../dom/node"
+import { decorateTranslationNode } from "../ui/decorate-translation"
+import { isForceInlineTranslation } from "../ui/translation-utils"
 
 export function addInlineTranslation(ownerDoc: Document, translatedWrapperNode: HTMLElement, translatedNode: HTMLElement): void {
-  const spaceNode = ownerDoc.createElement('span')
-  spaceNode.textContent = '  '
+  const spaceNode = ownerDoc.createElement("span")
+  spaceNode.textContent = "  "
   translatedWrapperNode.appendChild(spaceNode)
   translatedNode.className = `${NOTRANSLATE_CLASS} ${INLINE_CONTENT_CLASS}`
 }
 
 export function addBlockTranslation(ownerDoc: Document, translatedWrapperNode: HTMLElement, translatedNode: HTMLElement): void {
-  const brNode = ownerDoc.createElement('br')
+  const brNode = ownerDoc.createElement("br")
   translatedWrapperNode.appendChild(brNode)
   translatedNode.className = `${NOTRANSLATE_CLASS} ${BLOCK_CONTENT_CLASS}`
 }
@@ -28,7 +28,7 @@ export async function insertTranslatedNodeIntoWrapper(
 ): Promise<void> {
   // Use the wrapper's owner document
   const ownerDoc = getOwnerDocument(translatedWrapperNode)
-  const translatedNode = ownerDoc.createElement('span')
+  const translatedNode = ownerDoc.createElement("span")
   const forceInlineTranslation = isForceInlineTranslation(targetNode)
   const customForceBlock = isHTMLElement(targetNode) && isCustomForceBlockTranslation(targetNode)
 

@@ -1,9 +1,9 @@
-import type { Theme } from '@/components/providers/theme-provider'
-import type { ProviderConfig } from '@/types/config/provider'
-import type { FeatureKey } from '@/utils/constants/feature-providers'
-import { i18n } from '#imports'
-import { useAtomValue } from 'jotai'
-import ProviderIcon from '@/components/provider-icon'
+import type { Theme } from "@/components/providers/theme-provider"
+import type { ProviderConfig } from "@/types/config/provider"
+import type { FeatureKey } from "@/utils/constants/feature-providers"
+import { i18n } from "#imports"
+import { useAtomValue } from "jotai"
+import ProviderIcon from "@/components/provider-icon"
 import {
   Select,
   SelectContent,
@@ -12,13 +12,13 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/base-ui/select'
-import { NON_API_TRANSLATE_PROVIDERS } from '@/types/config/provider'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { filterEnabledProvidersConfig, getLLMProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig } from '@/utils/config/helpers'
-import { FEATURE_PROVIDER_DEFS } from '@/utils/constants/feature-providers'
-import { PROVIDER_ITEMS } from '@/utils/constants/providers'
-import { useTheme } from '../providers/theme-provider'
+} from "@/components/ui/base-ui/select"
+import { NON_API_TRANSLATE_PROVIDERS } from "@/types/config/provider"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { filterEnabledProvidersConfig, getLLMProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig } from "@/utils/config/helpers"
+import { FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { PROVIDER_ITEMS } from "@/utils/constants/providers"
+import { useTheme } from "../providers/theme-provider"
 
 interface ProviderSelectorProps {
   featureKey: FeatureKey
@@ -116,7 +116,7 @@ function TranslateGroupedSelect({
       </SelectTrigger>
       <SelectContent className="min-w-fit">
         <SelectGroup>
-          <SelectLabel>{i18n.t('translateService.aiTranslator')}</SelectLabel>
+          <SelectLabel>{i18n.t("translateService.aiTranslator")}</SelectLabel>
           {llmProviders.map(provider => (
             <SelectItem key={provider.id} value={provider}>
               <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
@@ -124,7 +124,7 @@ function TranslateGroupedSelect({
           ))}
         </SelectGroup>
         <SelectGroup>
-          <SelectLabel>{i18n.t('translateService.normalTranslator')}</SelectLabel>
+          <SelectLabel>{i18n.t("translateService.normalTranslator")}</SelectLabel>
           {nonAPIProviders.map(provider => (
             <SelectItem key={provider.id} value={provider}>
               <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />

@@ -1,89 +1,89 @@
-import type { TestSeriesObject } from './types'
-import { createDefaultTTSLanguageVoices, EDGE_TTS_FALLBACK_VOICE } from '@/types/config/tts'
+import type { TestSeriesObject } from "./types"
+import { createDefaultTTSLanguageVoices, EDGE_TTS_FALLBACK_VOICE } from "@/types/config/tts"
 
 export const testSeries: TestSeriesObject = {
-  'complex-config-from-v020': {
-    description: 'Adds customPromptsConfig to videoSubtitles',
+  "complex-config-from-v020": {
+    description: "Adds customPromptsConfig to videoSubtitles",
     config: {
       language: {
-        sourceCode: 'spa',
-        targetCode: 'eng',
-        level: 'advanced',
+        sourceCode: "spa",
+        targetCode: "eng",
+        level: "advanced",
       },
       providersConfig: [
         {
-          id: 'microsoft-translate-default',
+          id: "microsoft-translate-default",
           enabled: true,
-          name: 'Microsoft Translator',
-          provider: 'microsoft-translate',
+          name: "Microsoft Translator",
+          provider: "microsoft-translate",
         },
         {
-          id: 'google-translate-default',
+          id: "google-translate-default",
           enabled: true,
-          name: 'Google Translate',
-          provider: 'google-translate',
+          name: "Google Translate",
+          provider: "google-translate",
         },
         {
-          id: 'openai-default',
+          id: "openai-default",
           enabled: true,
-          name: 'OpenAI',
-          provider: 'openai',
-          apiKey: 'sk-custom-prompt-key',
-          baseURL: 'https://api.openai.com/v1',
+          name: "OpenAI",
+          provider: "openai",
+          apiKey: "sk-custom-prompt-key",
+          baseURL: "https://api.openai.com/v1",
           model: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'translate-gpt-custom',
+            customModel: "translate-gpt-custom",
           },
         },
         {
-          id: 'deepseek-default',
+          id: "deepseek-default",
           enabled: true,
-          name: 'DeepSeek',
-          provider: 'deepseek',
-          apiKey: 'ds-custom',
-          baseURL: 'https://api.custom.com/v1',
+          name: "DeepSeek",
+          provider: "deepseek",
+          apiKey: "ds-custom",
+          baseURL: "https://api.custom.com/v1",
           model: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
         {
-          id: 'google-default',
+          id: "google-default",
           enabled: true,
-          name: 'Gemini',
-          provider: 'google',
+          name: "Gemini",
+          provider: "google",
           apiKey: undefined,
           baseURL: undefined,
           model: {
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
         {
-          id: 'deeplx-default',
+          id: "deeplx-default",
           enabled: true,
-          name: 'DeepLX',
-          provider: 'deeplx',
+          name: "DeepLX",
+          provider: "deeplx",
           apiKey: undefined,
-          baseURL: 'https://deeplx.vercel.app',
+          baseURL: "https://deeplx.vercel.app",
         },
       ],
       translate: {
-        providerId: 'openai-default',
-        mode: 'translationOnly',
+        providerId: "openai-default",
+        mode: "translationOnly",
         enableAIContentAware: false,
         node: {
           enabled: true,
-          hotkey: 'alt',
+          hotkey: "alt",
         },
         page: {
-          range: 'all',
-          autoTranslatePatterns: ['spanish-news.com', 'elmundo.es'],
+          range: "all",
+          autoTranslatePatterns: ["spanish-news.com", "elmundo.es"],
           autoTranslateLanguages: [],
-          shortcut: ['alt', 'b'],
+          shortcut: ["alt", "b"],
           enableLLMDetection: false,
           preload: {
             margin: 1000,
@@ -95,13 +95,13 @@ export const testSeries: TestSeriesObject = {
           enableSkipLanguagesLLMDetection: false,
         },
         customPromptsConfig: {
-          promptId: '123e4567-e89b-12d3-a456-426614174000',
+          promptId: "123e4567-e89b-12d3-a456-426614174000",
           patterns: [
             {
-              id: '123e4567-e89b-12d3-a456-426614174000',
-              name: 'Technical Translation',
-              systemPrompt: '',
-              prompt: 'Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}',
+              id: "123e4567-e89b-12d3-a456-426614174000",
+              name: "Technical Translation",
+              systemPrompt: "",
+              prompt: "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
             },
           ],
         },
@@ -114,7 +114,7 @@ export const testSeries: TestSeriesObject = {
           maxItemsPerBatch: 4,
         },
         translationNodeStyle: {
-          preset: 'blur',
+          preset: "blur",
           isCustom: false,
           customCSS: null,
         },
@@ -129,8 +129,8 @@ export const testSeries: TestSeriesObject = {
       floatingButton: {
         enabled: true,
         position: 0.75,
-        disabledFloatingButtonPatterns: ['github.com'],
-        clickAction: 'panel',
+        disabledFloatingButtonPatterns: ["github.com"],
+        clickAction: "panel",
       },
       sideContent: {
         width: 700,
@@ -140,10 +140,10 @@ export const testSeries: TestSeriesObject = {
         disabledSelectionToolbarPatterns: [],
         features: {
           translate: {
-            providerId: 'openai-default',
+            providerId: "openai-default",
           },
           vocabularyInsight: {
-            providerId: 'deepseek-default',
+            providerId: "deepseek-default",
           },
         },
       },
@@ -156,20 +156,20 @@ export const testSeries: TestSeriesObject = {
       videoSubtitles: {
         enabled: false,
         autoStart: false,
-        providerId: 'openai-default',
+        providerId: "openai-default",
         style: {
-          displayMode: 'bilingual',
-          translationPosition: 'above',
+          displayMode: "bilingual",
+          translationPosition: "above",
           main: {
-            fontFamily: 'system',
+            fontFamily: "system",
             fontScale: 100,
-            color: '#FFFFFF',
+            color: "#FFFFFF",
             fontWeight: 400,
           },
           translation: {
-            fontFamily: 'system',
+            fontFamily: "system",
             fontScale: 100,
-            color: '#FFFFFF',
+            color: "#FFFFFF",
             fontWeight: 400,
           },
           container: {
@@ -192,63 +192,63 @@ export const testSeries: TestSeriesObject = {
       },
       inputTranslation: {
         enabled: true,
-        providerId: 'openai-default',
-        fromLang: 'targetCode',
-        toLang: 'sourceCode',
+        providerId: "openai-default",
+        fromLang: "targetCode",
+        toLang: "sourceCode",
         enableCycle: false,
         timeThreshold: 300,
       },
       siteControl: {
-        mode: 'all',
+        mode: "all",
         patterns: [],
       },
     },
   },
-  'config-with-no-default-openai-model': {
-    description: 'Adds customPromptsConfig to videoSubtitles',
+  "config-with-no-default-openai-model": {
+    description: "Adds customPromptsConfig to videoSubtitles",
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
         enabled: true,
         position: 0.66,
-        clickAction: 'panel',
+        clickAction: "panel",
       },
       language: {
-        level: 'intermediate',
-        sourceCode: 'auto',
-        targetCode: 'cmn',
+        level: "intermediate",
+        sourceCode: "auto",
+        targetCode: "cmn",
       },
       providersConfig: [
         {
-          id: 'microsoft-translate-default',
+          id: "microsoft-translate-default",
           enabled: true,
-          name: 'Microsoft Translator',
-          provider: 'microsoft-translate',
+          name: "Microsoft Translator",
+          provider: "microsoft-translate",
         },
         {
-          id: 'google-translate-default',
+          id: "google-translate-default",
           enabled: true,
-          name: 'Google Translate',
-          provider: 'google-translate',
+          name: "Google Translate",
+          provider: "google-translate",
         },
         {
-          id: 'google-default',
+          id: "google-default",
           enabled: true,
-          apiKey: '1',
+          apiKey: "1",
           model: {
-            customModel: 'gemini-1.5-pro',
+            customModel: "gemini-1.5-pro",
             isCustomModel: true,
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
           },
-          name: 'Gemini',
-          provider: 'google',
+          name: "Gemini",
+          provider: "google",
         },
         {
-          id: 'deeplx-default',
+          id: "deeplx-default",
           enabled: true,
-          apiKey: '11113',
-          name: 'DeepLX',
-          provider: 'deeplx',
+          apiKey: "11113",
+          name: "DeepLX",
+          provider: "deeplx",
         },
       ],
       selectionToolbar: {
@@ -256,10 +256,10 @@ export const testSeries: TestSeriesObject = {
         disabledSelectionToolbarPatterns: [],
         features: {
           translate: {
-            providerId: 'google-default',
+            providerId: "google-default",
           },
           vocabularyInsight: {
-            providerId: 'google-default',
+            providerId: "google-default",
           },
         },
       },
@@ -267,21 +267,21 @@ export const testSeries: TestSeriesObject = {
         width: 420,
       },
       translate: {
-        mode: 'translationOnly',
+        mode: "translationOnly",
         enableAIContentAware: false,
         node: {
           enabled: true,
-          hotkey: 'control',
+          hotkey: "control",
         },
         page: {
           autoTranslateLanguages: [],
           autoTranslatePatterns: [
-            'news.ycombinator.com',
+            "news.ycombinator.com",
           ],
-          range: 'all',
+          range: "all",
           shortcut: [
-            'alt',
-            'q',
+            "alt",
+            "q",
           ],
           enableLLMDetection: false,
           preload: {
@@ -297,7 +297,7 @@ export const testSeries: TestSeriesObject = {
           patterns: [],
           promptId: null,
         },
-        providerId: 'google-default',
+        providerId: "google-default",
         requestQueueConfig: {
           capacity: 200,
           rate: 2,
@@ -307,7 +307,7 @@ export const testSeries: TestSeriesObject = {
           maxItemsPerBatch: 4,
         },
         translationNodeStyle: {
-          preset: 'default',
+          preset: "default",
           isCustom: false,
           customCSS: null,
         },
@@ -328,20 +328,20 @@ export const testSeries: TestSeriesObject = {
       videoSubtitles: {
         enabled: false,
         autoStart: false,
-        providerId: 'google-default',
+        providerId: "google-default",
         style: {
-          displayMode: 'bilingual',
-          translationPosition: 'above',
+          displayMode: "bilingual",
+          translationPosition: "above",
           main: {
-            fontFamily: 'system',
+            fontFamily: "system",
             fontScale: 100,
-            color: '#FFFFFF',
+            color: "#FFFFFF",
             fontWeight: 400,
           },
           translation: {
-            fontFamily: 'system',
+            fontFamily: "system",
             fontScale: 100,
-            color: '#FFFFFF',
+            color: "#FFFFFF",
             fontWeight: 400,
           },
           container: {
@@ -364,14 +364,14 @@ export const testSeries: TestSeriesObject = {
       },
       inputTranslation: {
         enabled: true,
-        providerId: 'google-default',
-        fromLang: 'targetCode',
-        toLang: 'sourceCode',
+        providerId: "google-default",
+        fromLang: "targetCode",
+        toLang: "sourceCode",
         enableCycle: false,
         timeThreshold: 300,
       },
       siteControl: {
-        mode: 'all',
+        mode: "all",
         patterns: [],
       },
     },

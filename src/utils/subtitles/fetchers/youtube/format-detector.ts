@@ -1,6 +1,6 @@
-import type { YoutubeTimedText } from './types'
+import type { YoutubeTimedText } from "./types"
 
-export type SubtitleFormat = 'karaoke' | 'scrolling-asr' | 'standard'
+export type SubtitleFormat = "karaoke" | "scrolling-asr" | "standard"
 
 /**
  * Detect karaoke format subtitles
@@ -35,13 +35,13 @@ function isScrollingAsrFormat(events: YoutubeTimedText[]): boolean {
  */
 export function detectFormat(events: YoutubeTimedText[]): SubtitleFormat {
   if (!events || events.length === 0)
-    return 'standard'
+    return "standard"
 
   if (isKaraokeFormat(events))
-    return 'karaoke'
+    return "karaoke"
 
   if (isScrollingAsrFormat(events))
-    return 'scrolling-asr'
+    return "scrolling-asr"
 
-  return 'standard'
+  return "standard"
 }

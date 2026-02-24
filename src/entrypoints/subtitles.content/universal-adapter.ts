@@ -1,17 +1,17 @@
-import type { PlatformConfig } from '@/entrypoints/subtitles.content/platforms'
-import type { SubtitlesFetcher } from '@/utils/subtitles/fetchers/types'
-import type { SubtitlesFragment } from '@/utils/subtitles/types'
-import { i18n } from '#imports'
-import { toast } from 'sonner'
-import { getLocalConfig } from '@/utils/config/storage'
-import { DEFAULT_SUBTITLE_POSITION, HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
-import { waitForElement } from '@/utils/dom/wait-for-element'
-import { ToastSubtitlesError } from '@/utils/subtitles/errors'
-import { subtitlesPositionAtom, subtitlesStore } from './atoms'
-import { renderSubtitlesTranslateButton } from './renderer/render-translate-button'
-import { SegmentationPipeline } from './segmentation-pipeline'
-import { SubtitlesScheduler } from './subtitles-scheduler'
-import { TranslationCoordinator } from './translation-coordinator'
+import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
+import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
+import type { SubtitlesFragment } from "@/utils/subtitles/types"
+import { i18n } from "#imports"
+import { toast } from "sonner"
+import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_SUBTITLE_POSITION, HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
+import { waitForElement } from "@/utils/dom/wait-for-element"
+import { ToastSubtitlesError } from "@/utils/subtitles/errors"
+import { subtitlesPositionAtom, subtitlesStore } from "./atoms"
+import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
+import { SegmentationPipeline } from "./segmentation-pipeline"
+import { SubtitlesScheduler } from "./subtitles-scheduler"
+import { TranslationCoordinator } from "./translation-coordinator"
 
 export class UniversalVideoAdapter {
   private config: PlatformConfig
@@ -77,7 +77,7 @@ export class UniversalVideoAdapter {
     ) as HTMLVideoElement | null
 
     if (!video) {
-      toast.error(i18n.t('subtitles.errors.videoNotFound'))
+      toast.error(i18n.t("subtitles.errors.videoNotFound"))
       return
     }
 
@@ -117,7 +117,7 @@ export class UniversalVideoAdapter {
   private async renderTranslateButton() {
     const controlsBar = await waitForElement(this.config.selectors.controlsBar)
     if (!controlsBar) {
-      toast.error(i18n.t('subtitles.errors.controlsBarNotFound'))
+      toast.error(i18n.t("subtitles.errors.controlsBarNotFound"))
       return
     }
 
@@ -165,7 +165,7 @@ export class UniversalVideoAdapter {
       return
     }
 
-    const style = document.createElement('style')
+    const style = document.createElement("style")
     style.id = HIDE_NATIVE_CAPTIONS_STYLE_ID
     style.textContent = `
       ${this.config.selectors.nativeSubtitles},
@@ -181,7 +181,7 @@ export class UniversalVideoAdapter {
 
   private async startTranslation() {
     try {
-      const currentVideoId = this.config.getVideoId?.() ?? ''
+      const currentVideoId = this.config.getVideoId?.() ?? ""
       this.cachedVideoId = currentVideoId
 
       const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
@@ -201,16 +201,16 @@ export class UniversalVideoAdapter {
       this.subtitlesScheduler?.reset()
 
       if (!await this.subtitlesFetcher.hasAvailableSubtitles()) {
-        this.subtitlesScheduler?.setState('error', { message: i18n.t('subtitles.errors.noSubtitlesFound') })
+        this.subtitlesScheduler?.setState("error", { message: i18n.t("subtitles.errors.noSubtitlesFound") })
         return
       }
 
-      this.subtitlesScheduler?.setState('loading')
+      this.subtitlesScheduler?.setState("loading")
 
       this.originalSubtitles = await this.subtitlesFetcher.fetch()
 
       if (this.originalSubtitles.length === 0) {
-        this.subtitlesScheduler?.setState('error', { message: i18n.t('subtitles.errors.noSubtitlesFound') })
+        this.subtitlesScheduler?.setState("error", { message: i18n.t("subtitles.errors.noSubtitlesFound") })
         return
       }
 
@@ -223,20 +223,20 @@ export class UniversalVideoAdapter {
         toast.error(errorMessage)
       }
       else {
-        this.subtitlesScheduler?.setState('error', { message: errorMessage })
+        this.subtitlesScheduler?.setState("error", { message: errorMessage })
       }
     }
   }
 
   private async processSubtitles() {
-    this.subtitlesScheduler?.setState('loading')
+    this.subtitlesScheduler?.setState("loading")
     const config = await getLocalConfig()
 
     const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation
 
     const videoContext = {
-      videoTitle: document.title || '',
-      subtitlesTextContent: this.originalSubtitles.map(f => f.text).join(''),
+      videoTitle: document.title || "",
+      subtitlesTextContent: this.originalSubtitles.map(f => f.text).join(""),
     }
 
     if (useAiSegmentation) {

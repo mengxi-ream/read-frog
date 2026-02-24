@@ -355,7 +355,7 @@ options:
             saved: Tüm değişiklikler kaydedildi
     translationMode:
       title: Çeviri Modu
-      description: 'Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri.'
+      description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
       mode:
         bilingual: İki Dilli
         translationOnly: Yalnızca Çeviri
@@ -506,7 +506,7 @@ options:
           hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
           item: öğe
           items: öğe
-          unresolvedPrompt: '[Çözülmedi - Lütfen seçin]'
+          unresolvedPrompt: "[Çözülmedi - Lütfen seçin]"
           localLatest: En Son Yerel
           remoteLatest: En Son Uzak
           bothChanged: Her ikisi de değişti
@@ -517,7 +517,7 @@ options:
           resolveToContinue: Devam etmek için çakışmaları çözün
           validationAlert:
             title: Birleştirilmiş yapılandırmada doğrulama hataları var
-            description: 'Düzeltmek için aşağıdaki farklılıkları ayarlayın:'
+            description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
           moreErrors: ...ve $1 hata daha
     backup:
       title: Yapılandırma Yedekleme
@@ -530,8 +530,8 @@ options:
         title: Henüz yedekleme mevcut değil
         description: Yapılandırma değiştirilirse yedeklemeler her saat otomatik olarak oluşturulur.
       item:
-        extensionVersion: 'Uzantı sürümü:'
-        schemaVersion: 'Şema sürümü:'
+        extensionVersion: "Uzantı sürümü:"
+        schemaVersion: "Şema sürümü:"
         restore: Geri Yükle
         export: Dışa Aktar
         delete: Sil
@@ -652,7 +652,7 @@ noAPIKeyConfig:
   warningWithLink:
     youMust: Önce
     setTheAPIKey: API anahtarını ayarlamalısınız
-    firstOnThe: ''
+    firstOnThe: ""
     optionsPage: seçenekler
     page: sayfasında
 translation:

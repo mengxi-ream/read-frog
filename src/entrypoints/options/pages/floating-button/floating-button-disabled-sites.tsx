@@ -1,8 +1,8 @@
-import { i18n } from '#imports'
-import { useAtom } from 'jotai'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../components/config-card'
-import { DisabledPatternsTable } from '../../components/disabled-patterns-table'
+import { i18n } from "#imports"
+import { useAtom } from "jotai"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { ConfigCard } from "../../components/config-card"
+import { DisabledPatternsTable } from "../../components/disabled-patterns-table"
 
 export function FloatingButtonDisabledSites() {
   const [floatingButtonConfig, setFloatingButtonConfig] = useAtom(configFieldsAtomMap.floatingButton)
@@ -28,15 +28,15 @@ export function FloatingButtonDisabledSites() {
 
   return (
     <ConfigCard
-      title={i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.title')}
-      description={i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.description')}
+      title={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.title")}
+      description={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.description")}
     >
       <DisabledPatternsTable
         patterns={disabledFloatingButtonPatterns}
         onAddPattern={addPattern}
         onRemovePattern={removePattern}
-        placeholderText={i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.enterUrlPattern')}
-        tableHeaderText={i18n.t('options.floatingButtonAndToolbar.floatingButton.disabledSites.urlPattern')}
+        placeholderText={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.enterUrlPattern")}
+        tableHeaderText={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.urlPattern")}
       />
     </ConfigCard>
   )

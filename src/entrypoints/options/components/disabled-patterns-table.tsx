@@ -1,7 +1,7 @@
-import { Icon } from '@iconify/react'
-import { useState } from 'react'
-import { Button } from '@/components/ui/base-ui/button'
-import { Input } from '@/components/ui/base-ui/input'
+import { Icon } from "@iconify/react"
+import { useState } from "react"
+import { Button } from "@/components/ui/base-ui/button"
+import { Input } from "@/components/ui/base-ui/input"
 import {
   Table,
   TableBody,
@@ -9,8 +9,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/base-ui/table'
-import { cn } from '@/utils/styles/utils'
+} from "@/components/ui/base-ui/table"
+import { cn } from "@/utils/styles/utils"
 
 interface DisabledPatternsTableProps {
   patterns: string[]
@@ -29,22 +29,22 @@ export function DisabledPatternsTable({
   tableHeaderText,
   className,
 }: DisabledPatternsTableProps) {
-  const [inputValue, setInputValue] = useState('')
+  const [inputValue, setInputValue] = useState("")
 
   const handleAddPattern = () => {
     onAddPattern(inputValue)
-    setInputValue('')
+    setInputValue("")
   }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       onAddPattern(inputValue)
-      setInputValue('')
+      setInputValue("")
     }
   }
 
   return (
-    <div className={cn('flex flex-col gap-2', className)}>
+    <div className={cn("flex flex-col gap-2", className)}>
       <div className="flex items-center gap-2">
         <Input
           placeholder={placeholderText}

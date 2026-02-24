@@ -1,19 +1,19 @@
-import type { LangCodeISO6393, LangLevel } from '@read-frog/definitions'
-import type { Config } from '@/types/config/config'
-import type { ProviderConfig } from '@/types/config/provider'
-import { i18n } from '#imports'
-import { Readability } from '@mozilla/readability'
-import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from '@read-frog/definitions'
-import { franc } from 'franc'
-import { toast } from 'sonner'
-import { isAPIProviderConfig, isLLMProviderConfig } from '@/types/config/provider'
-import { getProviderConfigById } from '@/utils/config/helpers'
-import { detectLanguage } from '@/utils/content/language'
-import { removeDummyNodes } from '@/utils/content/utils'
-import { logger } from '@/utils/logger'
-import { getTranslatePrompt } from '@/utils/prompts/translate'
-import { Sha256Hex } from '../../hash'
-import { sendMessage } from '../../message'
+import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
+import type { Config } from "@/types/config/config"
+import type { ProviderConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
+import { Readability } from "@mozilla/readability"
+import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
+import { franc } from "franc"
+import { toast } from "sonner"
+import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
+import { getProviderConfigById } from "@/utils/config/helpers"
+import { detectLanguage } from "@/utils/content/language"
+import { removeDummyNodes } from "@/utils/content/utils"
+import { logger } from "@/utils/logger"
+import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { Sha256Hex } from "../../hash"
+import { sendMessage } from "../../message"
 
 const MIN_LENGTH_FOR_LANG_DETECTION = 50
 // Minimum text length for skip language detection (shorter than general detection
@@ -58,7 +58,7 @@ let cachedArticleData: {
 
 function getCachedArticleData(): typeof cachedArticleData {
   // Clear cache if URL has changed
-  if (typeof window !== 'undefined' && cachedArticleData?.url !== window.location.href) {
+  if (typeof window !== "undefined" && cachedArticleData?.url !== window.location.href) {
     cachedArticleData = null
   }
   return cachedArticleData
@@ -68,7 +68,7 @@ export async function getOrFetchArticleData(
   enableAIContentAware: boolean,
 ): Promise<{ title: string, textContent?: string } | null> {
   // Only works in browser context
-  if (typeof window === 'undefined' || typeof document === 'undefined') {
+  if (typeof window === "undefined" || typeof document === "undefined") {
     return null
   }
 
@@ -86,10 +86,10 @@ export async function getOrFetchArticleData(
   }
 
   // Always get title
-  const title = document.title || ''
+  const title = document.title || ""
 
   // Only extract textContent if needed
-  let textContent = ''
+  let textContent = ""
   if (enableAIContentAware) {
     // Try Readability first for cleaner content
     try {
@@ -102,12 +102,12 @@ export async function getOrFetchArticleData(
       }
     }
     catch (error) {
-      logger.warn('Readability parsing failed, falling back to body textContent:', error)
+      logger.warn("Readability parsing failed, falling back to body textContent:", error)
     }
 
     // Fallback to document.body if Readability failed
     if (!textContent) {
-      textContent = document.body?.textContent || ''
+      textContent = document.body?.textContent || ""
     }
   }
 
@@ -126,7 +126,7 @@ export async function getOrFetchArticleData(
 export async function buildHashComponents(
   text: string,
   providerConfig: ProviderConfig,
-  partialLangConfig: { sourceCode: LangCodeISO6393 | 'auto', targetCode: LangCodeISO6393 },
+  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
   articleContext?: { title?: string, textContent?: string },
 ): Promise<string[]> {
@@ -142,7 +142,7 @@ export async function buildHashComponents(
     const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
     const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, text, { isBatch: true })
     hashComponents.push(systemPrompt, prompt)
-    hashComponents.push(enableAIContentAware ? 'enableAIContentAware=true' : 'enableAIContentAware=false')
+    hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
 
     // Include article context in hash when AI Content Aware is enabled
     // to ensure when we get different content from the same url, we get different cache entries
@@ -162,7 +162,7 @@ export async function buildHashComponents(
 
 export interface TranslateTextOptions {
   text: string
-  langConfig: { sourceCode: LangCodeISO6393 | 'auto', targetCode: LangCodeISO6393, level: LangLevel }
+  langConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393, level: LangLevel }
   providerConfig: ProviderConfig
   enableAIContentAware?: boolean
   extraHashTags?: string[]
@@ -186,7 +186,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     const detectedLang = franc(text)
     if (detectedLang === langConfig.targetCode) {
       logger.info(`translateTextCore: skipping translation because text is already in target language. text: ${text}`)
-      return ''
+      return ""
     }
   }
 
@@ -213,7 +213,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // Add extra hash tags for cache differentiation
   hashComponents.push(...extraHashTags)
 
-  return await sendMessage('enqueueTranslateRequest', {
+  return await sendMessage("enqueueTranslateRequest", {
     text,
     langConfig,
     providerConfig,
@@ -225,7 +225,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
 }
 
 export function validateTranslationConfigAndToast(
-  config: Pick<Config, 'providersConfig' | 'translate' | 'language'>,
+  config: Pick<Config, "providersConfig" | "translate" | "language">,
   detectedCode: LangCodeISO6393,
 ): boolean {
   const { providersConfig, translate: translateConfig, language: languageConfig } = config
@@ -235,20 +235,20 @@ export function validateTranslationConfigAndToast(
   }
 
   if (languageConfig.sourceCode === languageConfig.targetCode) {
-    toast.error(i18n.t('translation.sameLanguage'))
-    logger.info('validateTranslationConfig: returning false (same language)')
+    toast.error(i18n.t("translation.sameLanguage"))
+    logger.info("validateTranslationConfig: returning false (same language)")
     return false
   }
-  else if (languageConfig.sourceCode === 'auto' && detectedCode === languageConfig.targetCode) {
-    toast.warning(i18n.t('translation.autoModeSameLanguage', [
+  else if (languageConfig.sourceCode === "auto" && detectedCode === languageConfig.targetCode) {
+    toast.warning(i18n.t("translation.autoModeSameLanguage", [
       LANG_CODE_TO_LOCALE_NAME[detectedCode] ?? detectedCode,
     ]))
   }
 
   // check if the API key is configured
-  if (isAPIProviderConfig(providerConfig) && !providerConfig.apiKey?.trim() && !['deeplx', 'ollama'].includes(providerConfig.provider)) {
-    toast.error(i18n.t('noAPIKeyConfig.warning'))
-    logger.info('validateTranslationConfig: returning false (no API key)')
+  if (isAPIProviderConfig(providerConfig) && !providerConfig.apiKey?.trim() && !["deeplx", "ollama"].includes(providerConfig.provider)) {
+    toast.error(i18n.t("noAPIKeyConfig.warning"))
+    logger.info("validateTranslationConfig: returning false (no API key)")
     return false
   }
 
