@@ -119,6 +119,9 @@ export function useTextToSpeech() {
       activeRequestIdRef.current = requestId
 
       const selectedVoice = await resolveVoiceForText(text, ttsConfig)
+      if (shouldStopRef.current || activeRequestIdRef.current !== requestId) {
+        return
+      }
       const chunks = splitTextByUtf8Bytes(text)
       setTotalChunks(chunks.length)
       await sendMessage('ttsPlaybackEnsureOffscreen')
