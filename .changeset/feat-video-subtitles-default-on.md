@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat(subtitles): enable video subtitles by default via config migration and remove beta labels in subtitles docs/ui
+feat(subtitles): enable video subtitles in default config and remove subtitle beta labels in ui/docs
