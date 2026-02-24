@@ -6,13 +6,14 @@
   "packageManager": "pnpm@10.30.2",
   "description": "Read Frog browser extension for language learning",
   "scripts": {
-    "build": "wxt build",
-    "build:firefox": "wxt build -b firefox",
+    "build": "DOTENV_CONFIG_QUIET=false wxt build",
+    "build:edge": "DOTENV_CONFIG_QUIET=false wxt build -b edge",
+    "build:firefox": "DOTENV_CONFIG_QUIET=false wxt build -b firefox --mv3",
     "build:analyze": "wxt build --analyze",
     "dev:local": "WXT_USE_LOCAL_PACKAGES=true wxt",
-    "dev": "wxt",
-    "dev:edge": "wxt -b edge",
-    "dev:firefox": "wxt -b firefox",
+    "dev": "DOTENV_CONFIG_QUIET=false wxt",
+    "dev:edge": "DOTENV_CONFIG_QUIET=false wxt -b edge",
+    "dev:firefox": "DOTENV_CONFIG_QUIET=false wxt -b firefox --mv3",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "postinstall": "wxt prepare",
@@ -21,10 +22,10 @@
     "test:watch": "vitest",
     "type-check": "tsc --noEmit",
     "scrape:ai-sdk-models": "npx tsx scripts/scrape-ai-sdk-provider-models.ts --out scripts/output/ai-sdk-provider-models.json",
-    "zip": "WXT_ZIP_MODE=true wxt zip",
-    "zip:edge": "WXT_ZIP_MODE=true wxt zip -b edge",
-    "zip:firefox": "WXT_ZIP_MODE=true wxt zip -b firefox",
-    "zip:all": "pnpm zip && pnpm zip:edge",
+    "zip": "DOTENV_CONFIG_QUIET=false WXT_ZIP_MODE=true wxt zip",
+    "zip:edge": "DOTENV_CONFIG_QUIET=false WXT_ZIP_MODE=true wxt zip -b edge",
+    "zip:firefox": "DOTENV_CONFIG_QUIET=false WXT_ZIP_MODE=true wxt zip -b firefox --mv3",
+    "zip:all": "DOTENV_CONFIG_QUIET=false pnpm zip && pnpm zip:edge && pnpm zip:firefox",
     "release": "changeset tag && git push origin --tags",
     "prepare": "husky"
   },
@@ -150,7 +151,7 @@
   "devEngines": {
     "runtime": {
       "name": "node",
-      "version": "^24.12.0",
+      "version": ">=22.0.0",
       "onFail": "download"
     }
   },

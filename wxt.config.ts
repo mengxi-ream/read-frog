@@ -47,6 +47,10 @@ export default defineConfig({
       },
     }),
   }),
+  zip: {
+    includeSources: ['.env.production'],
+    excludeSources: ['docs/**/*', 'assets/**/*', 'repos/**/*'],
+  },
   dev: {
     server: {
       port: 3333,
