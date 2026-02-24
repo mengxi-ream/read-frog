@@ -418,6 +418,11 @@ options:
   tts:
     title: Chuyển văn bản thành giọng nói
     description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.
+    detectLanguage:
+      label: Phát hiện ngôn ngữ
+      basic: Cơ bản
+      llm: LLM
+      description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API. Chế độ LLM sử dụng nhà cung cấp ở trang Dịch.
     voice:
       label: Giọng nói
       fallback: Dự phòng

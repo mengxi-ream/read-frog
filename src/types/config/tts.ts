@@ -216,6 +216,9 @@ export function isKnownEdgeTTSVoice(voice: string): boolean {
 }
 
 export const ttsVoiceSchema = z.string().trim().min(1)
+export const TTS_LANGUAGE_DETECTION_MODES = ['basic', 'llm'] as const
+export const ttsLanguageDetectionModeSchema = z.enum(TTS_LANGUAGE_DETECTION_MODES)
+export type TTSLanguageDetectionMode = z.infer<typeof ttsLanguageDetectionModeSchema>
 
 export const MIN_TTS_RATE = -100
 export const MAX_TTS_RATE = 100
@@ -231,6 +234,7 @@ export const ttsVolumeSchema = z.coerce.number().int().min(MIN_TTS_VOLUME).max(M
 export const ttsConfigSchema = z.object({
   defaultVoice: ttsVoiceSchema,
   languageVoices: z.record(langCodeISO6393Schema, ttsVoiceSchema),
+  detectLanguageMode: ttsLanguageDetectionModeSchema,
   rate: ttsRateSchema,
   pitch: ttsPitchSchema,
   volume: ttsVolumeSchema,

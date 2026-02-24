@@ -420,6 +420,11 @@ options:
   tts:
     title: 文字轉語音
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
+    detectLanguage:
+      label: 語言偵測
+      basic: 基礎
+      llm: LLM
+      description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。LLM 模式使用「翻譯」頁面的提供者。
     voice:
       label: 語音
       fallback: 後備

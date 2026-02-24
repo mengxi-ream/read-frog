@@ -1,9 +1,9 @@
 import type { TTSConfig } from '@/types/config/tts'
 import { i18n } from '#imports'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { franc } from 'franc'
 import { useRef, useState } from 'react'
 import { toast } from 'sonner'
+import { detectLanguage } from '@/utils/content/language'
 import { logger } from '@/utils/logger'
 import { sendMessage } from '@/utils/message'
 import { splitTextByUtf8Bytes } from '@/utils/server/edge-tts/chunk'
@@ -24,11 +24,18 @@ function toSignedValue(value: number, unit: '%' | 'Hz'): string {
   return `${value >= 0 ? '+' : ''}${value}${unit}`
 }
 
-function resolveVoiceForText(text: string, ttsConfig: TTSConfig): string {
-  const detectedLanguage = franc(text)
-  logger.info('[TextToSpeech] Resolving voice for text', { text, detectedLanguage })
+async function resolveVoiceForText(text: string, ttsConfig: TTSConfig): Promise<string> {
+  const detectedLanguage = await detectLanguage(text, {
+    minLength: 0,
+    enableLLM: ttsConfig.detectLanguageMode === 'llm',
+  })
+  logger.info('[TextToSpeech] Resolving voice for text', {
+    text,
+    detectedLanguage,
+    detectionMode: ttsConfig.detectLanguageMode,
+  })
 
-  if (detectedLanguage !== 'und' && detectedLanguage in ttsConfig.languageVoices) {
+  if (detectedLanguage && detectedLanguage in ttsConfig.languageVoices) {
     return ttsConfig.languageVoices[detectedLanguage as keyof typeof ttsConfig.languageVoices] ?? ttsConfig.defaultVoice
   }
 
@@ -111,7 +118,7 @@ export function useTextToSpeech() {
       const requestId = crypto.randomUUID()
       activeRequestIdRef.current = requestId
 
-      const selectedVoice = resolveVoiceForText(text, ttsConfig)
+      const selectedVoice = await resolveVoiceForText(text, ttsConfig)
       const chunks = splitTextByUtf8Bytes(text)
       setTotalChunks(chunks.length)
       await sendMessage('ttsPlaybackEnsureOffscreen')

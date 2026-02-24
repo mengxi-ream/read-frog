@@ -3,19 +3,24 @@ import type { FocusEvent } from 'react'
 import type { TTSVoice } from '@/types/config/tts'
 import { i18n } from '#imports'
 import { IconLoader2, IconPlayerPlayFilled } from '@tabler/icons-react'
-import { useAtom } from 'jotai'
-import { useState } from 'react'
+import { useAtom, useAtomValue } from 'jotai'
+import { useMemo, useState } from 'react'
+import { HelpTooltip } from '@/components/help-tooltip'
 import { LanguageCombobox } from '@/components/language-combobox'
+import { LLMStatusIndicator } from '@/components/llm-status-indicator'
 import { Badge } from '@/components/ui/base-ui/badge'
 import { Button } from '@/components/ui/base-ui/button'
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from '@/components/ui/base-ui/field'
 import { Input } from '@/components/ui/base-ui/input'
+import { Label } from '@/components/ui/base-ui/label'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/base-ui/radio-group'
 import {
   Select,
   SelectContent,
@@ -25,6 +30,7 @@ import {
   SelectValue,
 } from '@/components/ui/base-ui/select'
 import { useTextToSpeech } from '@/hooks/use-text-to-speech'
+import { isLLMProviderConfig } from '@/types/config/provider'
 import {
   EDGE_TTS_VOICES,
   getDefaultTTSVoiceForLanguage,
@@ -39,6 +45,7 @@ import {
   ttsVolumeSchema,
 } from '@/types/config/tts'
 import { configFieldsAtomMap } from '@/utils/atoms/config'
+import { getProviderConfigById } from '@/utils/config/helpers'
 import { ConfigCard } from '../../components/config-card'
 
 interface TtsNumberFieldProps {
@@ -65,6 +72,7 @@ export function TtsConfig() {
       description={i18n.t('options.tts.description')}
     >
       <FieldGroup>
+        <TtsLanguageDetectionField />
         <TtsLanguageVoiceField />
         <TtsDefaultVoiceField />
         <TtsRateField />
@@ -72,6 +80,52 @@ export function TtsConfig() {
         <TtsVolumeField />
       </FieldGroup>
     </ConfigCard>
+  )
+}
+
+function TtsLanguageDetectionField() {
+  const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
+  const translateConfig = useAtomValue(configFieldsAtomMap.translate)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+
+  const hasLLMProvider = useMemo(() => {
+    const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
+    return providerConfig ? isLLMProviderConfig(providerConfig) : false
+  }, [providersConfig, translateConfig.providerId])
+
+  return (
+    <Field orientation="horizontal">
+      <FieldContent className="self-center">
+        <FieldLabel>
+          {i18n.t('options.tts.detectLanguage.label')}
+          <HelpTooltip>{i18n.t('options.tts.detectLanguage.description')}</HelpTooltip>
+        </FieldLabel>
+        <LLMStatusIndicator
+          hasLLMProvider={hasLLMProvider}
+          featureName={i18n.t('options.general.featureProviders.features.translate')}
+        />
+      </FieldContent>
+      <RadioGroup
+        value={ttsConfig.detectLanguageMode}
+        onValueChange={(value: string) => {
+          if (value !== 'basic' && value !== 'llm') {
+            return
+          }
+
+          void setTtsConfig({ detectLanguageMode: value })
+        }}
+        className="flex flex-row gap-4 w-auto"
+      >
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="basic" id="tts-detection-basic" />
+          <Label htmlFor="tts-detection-basic">{i18n.t('options.tts.detectLanguage.basic')}</Label>
+        </div>
+        <div className="flex items-center gap-2">
+          <RadioGroupItem value="llm" id="tts-detection-llm" />
+          <Label htmlFor="tts-detection-llm">{i18n.t('options.tts.detectLanguage.llm')}</Label>
+        </div>
+      </RadioGroup>
+    </Field>
   )
 }
 

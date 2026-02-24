@@ -417,6 +417,11 @@ options:
   tts:
     title: テキスト読み上げ
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
+    detectLanguage:
+      label: 言語検出
+      basic: 基本
+      llm: LLM
+      description: 基本検出は高速かつ無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。LLM モードは「翻訳」ページのプロバイダーを使用します。
     voice:
       label: ボイス
       fallback: フォールバック

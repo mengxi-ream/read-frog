@@ -418,6 +418,11 @@ options:
   tts:
     title: Metinden Konuşmaya
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
+    detectLanguage:
+      label: Dil Algılama
+      basic: Temel
+      llm: LLM
+      description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. LLM modu Çeviri sayfasındaki sağlayıcıyı kullanır.
     voice:
       label: Ses
       fallback: Yedek

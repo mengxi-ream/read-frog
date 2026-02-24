@@ -11,6 +11,7 @@ import { initializeContextMenu, registerContextMenuListeners } from './context-m
 import { cleanupAllAiSegmentationCache, cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from './db-cleanup'
 import { setupEdgeTTSMessageHandlers } from './edge-tts'
 import { setupIframeInjection } from './iframe-injection'
+import { setupLLMGenerateTextMessageHandlers } from './llm-generate-text'
 import { initMockData } from './mock-data'
 import { newUserGuide } from './new-user-guide'
 import { proxyFetch } from './proxy-fetch'
@@ -93,6 +94,7 @@ export default defineBackground({
 
     proxyFetch()
     setupEdgeTTSMessageHandlers()
+    setupLLMGenerateTextMessageHandlers()
     setupTTSPlaybackMessageHandlers()
     void initMockData()
 

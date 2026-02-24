@@ -420,6 +420,11 @@ options:
   tts:
     title: Text to Speech
     description: Use Edge TTS voice settings for the Speak button.
+    detectLanguage:
+      label: Detect Language
+      basic: Basic
+      llm: LLM
+      description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs. LLM mode uses the Translate provider.
     voice:
       label: Voice
       fallback: Fallback
