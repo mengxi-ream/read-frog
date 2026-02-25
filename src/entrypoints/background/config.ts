@@ -1,7 +1,7 @@
-import type { Config } from '@/types/config/config'
-import { storage } from '#imports'
-import { initializeConfig } from '@/utils/config/init'
-import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
+import type { Config } from "@/types/config/config"
+import { storage } from "#imports"
+import { initializeConfig } from "@/utils/config/init"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 
 let configPromise: Promise<void> | null = null
 

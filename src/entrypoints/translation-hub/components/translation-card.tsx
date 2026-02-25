@@ -1,19 +1,19 @@
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useMutation } from '@tanstack/react-query'
-import { useAtom, useAtomValue } from 'jotai'
-import { useEffect, useEffectEvent, useRef } from 'react'
-import { toast } from 'sonner'
-import ProviderIcon from '@/components/provider-icon'
-import { useTheme } from '@/components/providers/theme-provider'
-import { Button } from '@/components/ui/base-ui/button'
-import { cn } from '@/lib/utils'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { getProviderConfigById } from '@/utils/config/helpers'
-import { PROVIDER_ITEMS } from '@/utils/constants/providers'
-import { executeTranslate } from '@/utils/host/translate/execute-translate'
-import { getTranslatePrompt } from '@/utils/prompts/translate'
-import { selectedProviderIdsAtom, translateRequestAtom } from '../atoms'
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useMutation } from "@tanstack/react-query"
+import { useAtom, useAtomValue } from "jotai"
+import { useEffect, useEffectEvent, useRef } from "react"
+import { toast } from "sonner"
+import ProviderIcon from "@/components/provider-icon"
+import { useTheme } from "@/components/providers/theme-provider"
+import { Button } from "@/components/ui/base-ui/button"
+import { cn } from "@/lib/utils"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getProviderConfigById } from "@/utils/config/helpers"
+import { PROVIDER_ITEMS } from "@/utils/constants/providers"
+import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { selectedProviderIdsAtom, translateRequestAtom } from "../atoms"
 
 interface TranslationCardProps {
   providerId: string
@@ -33,11 +33,11 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   const requestIdRef = useRef(0)
 
   const mutation = useMutation({
-    mutationKey: ['translate', providerId],
+    mutationKey: ["translate", providerId],
     meta: { suppressToast: true },
     mutationFn: async (req: NonNullable<typeof request>) => {
       if (!provider)
-        throw new Error('Provider not found')
+        throw new Error("Provider not found")
 
       const myRequestId = ++requestIdRef.current
       const result = await executeTranslate(req.inputText, {
@@ -71,7 +71,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   const handleCopy = () => {
     if (mutation.data) {
       void navigator.clipboard.writeText(mutation.data)
-      toast.success(i18n.t('translationHub.copiedToClipboard'))
+      toast.success(i18n.t("translationHub.copiedToClipboard"))
     }
   }
 
@@ -82,11 +82,11 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
   if (!provider)
     return null
 
-  const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== '')
+  const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
 
   return (
     <div className="border rounded-lg bg-card">
-      <div className={cn('flex items-center justify-between px-3 py-2', hasContent && 'border-b')}>
+      <div className={cn("flex items-center justify-between px-3 py-2", hasContent && "border-b")}>
         <div className="flex items-center space-x-2">
           {providerItem
             ? (
@@ -112,7 +112,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
               size="icon"
               onClick={requestTranslation}
               className="h-7 w-7"
-              title={i18n.t('translationHub.retryTranslation')}
+              title={i18n.t("translationHub.retryTranslation")}
             >
               <Icon icon="tabler:refresh" className="h-3.5 w-3.5" />
             </Button>
@@ -123,7 +123,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
               size="icon"
               onClick={handleCopy}
               className="h-7 w-7"
-              title={i18n.t('translationHub.copyTranslation')}
+              title={i18n.t("translationHub.copyTranslation")}
             >
               <Icon icon="tabler:copy" className="h-3.5 w-3.5" />
             </Button>
@@ -133,7 +133,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
             size="icon"
             onClick={handleRemove}
             className="h-7 w-7"
-            title={i18n.t('translationHub.deleteCard')}
+            title={i18n.t("translationHub.deleteCard")}
           >
             <Icon icon="tabler:x" className="h-3.5 w-3.5" />
           </Button>
@@ -147,10 +147,10 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
                 <div>
                   <div className="flex items-center space-x-2 text-destructive mb-1">
                     <Icon icon="tabler:alert-circle" className="h-4 w-4" />
-                    <span className="text-sm font-medium">{i18n.t('translationHub.translationFailed')}</span>
+                    <span className="text-sm font-medium">{i18n.t("translationHub.translationFailed")}</span>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    {mutation.error instanceof Error ? mutation.error.message : i18n.t('translationHub.translationFailedFallback')}
+                    {mutation.error instanceof Error ? mutation.error.message : i18n.t("translationHub.translationFailedFallback")}
                   </p>
                 </div>
               )

@@ -1,5 +1,5 @@
-import { i18n } from '#imports'
-import { useAtom } from 'jotai'
+import { i18n } from "#imports"
+import { useAtom } from "jotai"
 import {
   Select,
   SelectContent,
@@ -7,13 +7,13 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/base-ui/select'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../components/config-card'
+} from "@/components/ui/base-ui/select"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { ConfigCard } from "../../components/config-card"
 
 const items = [
-  { value: 'panel', label: i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.panel') },
-  { value: 'translate', label: i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.translate') },
+  { value: "panel", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.panel") },
+  { value: "translate", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.translate") },
 ]
 
 export function FloatingButtonClickAction() {
@@ -23,8 +23,8 @@ export function FloatingButtonClickAction() {
 
   return (
     <ConfigCard
-      title={i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.title')}
-      description={i18n.t('options.floatingButtonAndToolbar.floatingButton.clickAction.description')}
+      title={i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.title")}
+      description={i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.description")}
     >
       <div className="w-full flex justify-end">
         <Select
@@ -39,7 +39,7 @@ export function FloatingButtonClickAction() {
           <SelectTrigger className="w-[180px]">
             <SelectValue />
           </SelectTrigger>
-          <SelectContent align="end">
+          <SelectContent align="end" className="min-w-fit">
             <SelectGroup>
               {items.map(item => (
                 <SelectItem key={item.value} value={item.value}>

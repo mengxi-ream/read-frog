@@ -1,5 +1,5 @@
-import type { PageTranslationManager } from './page-translation'
-import type { Config } from '@/types/config/config'
+import type { PageTranslationManager } from "./page-translation"
+import type { Config } from "@/types/config/config"
 
 /**
  * Handles config changes and re-translates page when translation mode changes

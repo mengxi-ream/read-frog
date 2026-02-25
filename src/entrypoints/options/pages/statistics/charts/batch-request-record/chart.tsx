@@ -1,14 +1,14 @@
-import type { IAreaChartSpec } from '@visactor/react-vchart'
-import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
-import { i18n } from '#imports'
-import { VChart } from '@visactor/react-vchart'
-import { useAtomValue } from 'jotai'
-import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
-import { recentDayAtom } from './atom'
+import type { IAreaChartSpec } from "@visactor/react-vchart"
+import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-record"
+import { i18n } from "#imports"
+import { VChart } from "@visactor/react-vchart"
+import { useAtomValue } from "jotai"
+import { useBatchRequestRecords } from "@/hooks/use-batch-request-record"
+import { recentDayAtom } from "./atom"
 
 interface RequestRecordPoint {
   createdAt: string
-  type: 'originalRequest' | 'batchRequest'
+  type: "originalRequest" | "batchRequest"
   count: number
 }
 
@@ -17,25 +17,25 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
   const shouldShowPoints = uniqueDates <= 1
 
   return {
-    type: 'area',
+    type: "area",
     data: {
-      id: 'data',
+      id: "data",
       values: requestRecordPoints,
     },
-    xField: 'createdAt',
-    yField: 'count',
-    seriesField: 'type',
+    xField: "createdAt",
+    yField: "count",
+    seriesField: "type",
     point: {
       visible: shouldShowPoints,
     },
     legends: {
       visible: true,
-      type: 'discrete',
+      type: "discrete",
       item: {
         label: {
-          formatMethod: type => type === 'originalRequest'
-            ? i18n.t('options.statistics.batchRequest.originalRequestCount')
-            : i18n.t('options.statistics.batchRequest.batchRequestCount'),
+          formatMethod: type => type === "originalRequest"
+            ? i18n.t("options.statistics.batchRequest.originalRequestCount")
+            : i18n.t("options.statistics.batchRequest.batchRequestCount"),
         },
       },
     },
@@ -43,9 +43,9 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
       dimension: {
         content: [
           {
-            key: datum => datum?.type === 'originalRequest'
-              ? i18n.t('options.statistics.batchRequest.originalRequestCount')
-              : i18n.t('options.statistics.batchRequest.batchRequestCount'),
+            key: datum => datum?.type === "originalRequest"
+              ? i18n.t("options.statistics.batchRequest.originalRequestCount")
+              : i18n.t("options.statistics.batchRequest.batchRequestCount"),
             value: datum => datum?.count ?? 0,
           },
         ],
@@ -53,9 +53,9 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
       mark: {
         content: [
           {
-            key: datum => datum?.type === 'originalRequest'
-              ? i18n.t('options.statistics.batchRequest.originalRequestCount')
-              : i18n.t('options.statistics.batchRequest.batchRequestCount'),
+            key: datum => datum?.type === "originalRequest"
+              ? i18n.t("options.statistics.batchRequest.originalRequestCount")
+              : i18n.t("options.statistics.batchRequest.batchRequestCount"),
             value: datum => datum?.count ?? 0,
           },
         ],
@@ -63,20 +63,20 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
     },
     axes: [
       {
-        orient: 'left',
+        orient: "left",
         visible: false,
       },
     ],
     stack: false,
     color: {
-      type: 'ordinal',
-      domain: ['originalRequest', 'batchRequest'],
-      range: ['#dadada', '#46d6b0'],
+      type: "ordinal",
+      domain: ["originalRequest", "batchRequest"],
+      range: ["#dadada", "#46d6b0"],
     },
     area: {
       style: {
         fill: {
-          gradient: 'linear',
+          gradient: "linear",
           x0: 0.5,
           y0: 0,
           x1: 0.5,
@@ -96,7 +96,7 @@ function generateSpec(requestRecordPoints: RequestRecordPoint[]): IAreaChartSpec
     },
     line: {
       style: {
-        curveType: 'monotone',
+        curveType: "monotone",
       },
     },
     autoFit: true,
@@ -125,7 +125,7 @@ function transformBatchRequestRecordsToChartPoints(batchRequestRecords: BatchReq
   const requestTimesGroupByDay: Record<string, { originalRequestCount: number, batchRequestCount: number }> = {}
 
   for (const record of batchRequestRecords) {
-    const createdAt = record.createdAt.toLocaleDateString('en-CA')
+    const createdAt = record.createdAt.toLocaleDateString("en-CA")
     if (!requestTimesGroupByDay[createdAt]) {
       requestTimesGroupByDay[createdAt] = {
         originalRequestCount: 0,
@@ -142,12 +142,12 @@ function transformBatchRequestRecordsToChartPoints(batchRequestRecords: BatchReq
       [
         {
           createdAt,
-          type: 'originalRequest',
+          type: "originalRequest",
           count: originalRequestCount,
         },
         {
           createdAt,
-          type: 'batchRequest',
+          type: "batchRequest",
           count: batchRequestCount,
         },
       ]

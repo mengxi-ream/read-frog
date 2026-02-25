@@ -1,20 +1,20 @@
-import type { VersionTestData } from '../example/types'
-import { describe, expect, it } from 'vitest'
-import { configSchema } from '@/types/config/config'
-import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
-import { logger } from '@/utils/logger'
-import { LATEST_SCHEMA_VERSION, migrationScripts, runMigration } from '../../migration'
+import type { VersionTestData } from "../example/types"
+import { describe, expect, it } from "vitest"
+import { configSchema } from "@/types/config/config"
+import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
+import { logger } from "@/utils/logger"
+import { LATEST_SCHEMA_VERSION, migrationScripts, runMigration } from "../../migration"
 
-describe('all Config Migrations', () => {
-  it('should have the valid latest schema version', async () => {
+describe("all Config Migrations", () => {
+  it("should have the valid latest schema version", async () => {
     expect(LATEST_SCHEMA_VERSION).toBeDefined()
-    expect(typeof LATEST_SCHEMA_VERSION).toBe('number')
+    expect(typeof LATEST_SCHEMA_VERSION).toBe("number")
     expect(LATEST_SCHEMA_VERSION).toBe(CONFIG_SCHEMA_VERSION)
 
     const maxKey = Math.max(...Object.keys(migrationScripts).map(Number))
     expect(maxKey).toBe(LATEST_SCHEMA_VERSION)
 
-    const latestVersionStr = String(LATEST_SCHEMA_VERSION).padStart(3, '0')
+    const latestVersionStr = String(LATEST_SCHEMA_VERSION).padStart(3, "0")
     const latestExampleModule = await import(`../example/v${latestVersionStr}.ts`) as VersionTestData
 
     // Test all configs in the test series
@@ -27,10 +27,10 @@ describe('all Config Migrations', () => {
     }
   })
 
-  it('should have migration scripts for all versions', async () => {
+  it("should have migration scripts for all versions", async () => {
     for (let version = 2; version <= LATEST_SCHEMA_VERSION; version++) {
       expect(migrationScripts[version]).toBeDefined()
-      expect(typeof migrationScripts[version]).toBe('function')
+      expect(typeof migrationScripts[version]).toBe("function")
     }
   })
 
@@ -42,8 +42,8 @@ describe('all Config Migrations', () => {
     it(`should migrate config from v${fromVersion} to v${toVersion}`, async () => {
       try {
         // 动态导入对应版本的配置示例（明确指定 .ts 扩展名）
-        const fromVersionStr = String(fromVersion).padStart(3, '0')
-        const toVersionStr = String(toVersion).padStart(3, '0')
+        const fromVersionStr = String(fromVersion).padStart(3, "0")
+        const toVersionStr = String(toVersion).padStart(3, "0")
 
         const oldConfigModule = await import(`../example/v${fromVersionStr}.ts`) as VersionTestData
         const newConfigModule = await import(`../example/v${toVersionStr}.ts`) as VersionTestData
@@ -83,8 +83,8 @@ describe('all Config Migrations', () => {
       catch (error) {
         // 如果找不到对应的示例文件，标记为跳过
         if (error instanceof Error && (
-          error.message.includes('Cannot resolve module')
-          || error.message.includes('Failed to resolve import')
+          error.message.includes("Cannot resolve module")
+          || error.message.includes("Failed to resolve import")
         )) {
           console.warn(`⚠ Skipping migration test v${fromVersion} -> v${toVersion}: Missing example files`)
           // 使用 skip 而不是直接 return，这样测试报告会显示跳过的测试

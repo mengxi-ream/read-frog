@@ -4,7 +4,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - '.changeset/*.md'
+      - ".changeset/*.md"
 
 permissions:
   contents: read
@@ -26,13 +26,13 @@ jobs:
         id: changed-files
         uses: tj-actions/changed-files@v47
         with:
-          files: '.changeset/*.md'
+          files: ".changeset/*.md"
           files_ignore: .changeset/README.md
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: "22"
 
       - name: Check for major changes
         id: check-major

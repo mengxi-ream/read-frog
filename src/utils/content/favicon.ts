@@ -6,11 +6,11 @@
 export function getFaviconUrl(): string {
   // 优先级列表：常见 rel 属性
   const relList = [
-    'icon',
-    'shortcut icon',
-    'apple-touch-icon',
-    'apple-touch-icon-precomposed',
-    'mask-icon',
+    "icon",
+    "shortcut icon",
+    "apple-touch-icon",
+    "apple-touch-icon-precomposed",
+    "mask-icon",
   ]
 
   const candidates: { url: string, size: number, type: string } [] = []
@@ -29,7 +29,7 @@ export function getFaviconUrl(): string {
         candidates.push({
           url: link.href,
           size,
-          type: link.type || '',
+          type: link.type || "",
         })
       }
     })
@@ -42,13 +42,13 @@ export function getFaviconUrl(): string {
   candidates.sort((a, b) => {
     if (a.size !== b.size)
       return b.size - a.size
-    if (a.type === 'image/svg+xml' && b.type !== 'image/svg+xml')
+    if (a.type === "image/svg+xml" && b.type !== "image/svg+xml")
       return -1
-    if (b.type === 'image/svg+xml' && a.type !== 'image/svg+xml')
+    if (b.type === "image/svg+xml" && a.type !== "image/svg+xml")
       return 1
-    if (a.type === 'image/png' && b.type === 'image/x-icon')
+    if (a.type === "image/png" && b.type === "image/x-icon")
       return -1
-    if (b.type === 'image/png' && a.type === 'image/x-icon')
+    if (b.type === "image/png" && a.type === "image/x-icon")
       return 1
     return 0
   })

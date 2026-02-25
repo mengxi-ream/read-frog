@@ -1,8 +1,8 @@
-import type { TranslatePromptObj } from '@/types/config/translate'
-import { saveAs } from 'file-saver'
-import { APP_NAME } from '@/utils/constants/app'
+import type { TranslatePromptObj } from "@/types/config/translate"
+import { saveAs } from "file-saver"
+import { APP_NAME } from "@/utils/constants/app"
 
-export type PromptConfig = Omit<TranslatePromptObj, 'id'>
+export type PromptConfig = Omit<TranslatePromptObj, "id">
 export type PromptConfigList = PromptConfig[]
 
 const PROMPTS_FILE = `${APP_NAME}_prompts`
@@ -17,7 +17,7 @@ export function checkPromptConfig(list: PromptConfig[]) {
 
 export function downloadJSONFile(data: object) {
   const json = JSON.stringify(data, null, 2)
-  const blob = new Blob([json], { type: 'text/json' })
+  const blob = new Blob([json], { type: "text/json" })
   saveAs(blob, `${PROMPTS_FILE}.json`)
 }
 
@@ -27,14 +27,14 @@ export function analysisJSONFile(file: File): Promise<PromptConfigList> {
     reader.readAsText(file)
     reader.onload = (e) => {
       try {
-        const fileResult = e.target?.result ?? '[]'
-        if (typeof fileResult === 'string') {
+        const fileResult = e.target?.result ?? "[]"
+        if (typeof fileResult === "string") {
           const list = JSON.parse(fileResult)
           const checked = checkPromptConfig(list)
-          checked ? resolve(list) : reject(new Error('Prompt config is invalid'))
+          checked ? resolve(list) : reject(new Error("Prompt config is invalid"))
         }
         else {
-          reject(new Error('Prompt config is invalid'))
+          reject(new Error("Prompt config is invalid"))
         }
       }
       catch (e) {

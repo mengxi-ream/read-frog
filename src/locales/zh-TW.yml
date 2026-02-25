@@ -9,7 +9,6 @@ popup:
   autoLang: 自動偵測
   sourceLang: 來源語言
   targetLang: 目標語言
-  read: 閱讀文章
   translate: 翻譯
   showOriginal: 顯示原文
   enabledFloatingButton: 啟用懸浮按鈕
@@ -52,7 +51,7 @@ options:
     enabled: 啟用 Beta 體驗
   apiProviders:
     title: API 提供商
-    description: 配置用於翻譯和閱讀功能的 API 提供商。我們內置了 20 多個 API 提供商，並且支持任何 OpenAI 兼容的 API 提供商。
+    description: 配置用於翻譯和詞彙解析功能的 API 提供商。我們內建了 20 多個提供商，並支援任何 OpenAI 相容 API 提供商。
     promotion:
       ai302:
         description: 點擊右方鏈接註冊 302.AI 可以獲得 1 美元 API 額度
@@ -60,8 +59,7 @@ options:
         addProvider: 新增 302.AI 配置
     addProvider: 新增提供商
     badges:
-      translate: 翻譯
-      read: 閱讀
+      featureCount: $1 個功能
     dialog:
       title: 新增提供商
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: 可選
       delete: 刪除
-      atLeastOneProvider: 至少需要一個閱讀提供商和一個翻譯提供商。
+      atLeastOneLLMProvider: 至少需要一個 LLM 翻譯提供商。
       duplicateProviderName: '重複的提供商名稱 "$1"'
       defaultProvider:
         translate: 設為預設翻譯提供商
-        read: 設為預設閱讀提供商
       models:
-        read:
-          title: 閱讀模型
-          customTitle: 自定義閱讀模型
-          placeholder: 選擇一個模型
         translate:
           title: 翻譯模型
           customTitle: 自定義翻譯模型
@@ -104,6 +97,7 @@ options:
         apiKeyRequired: 請先添加 API 密鑰
         searchModels: 搜尋模型...
         noModelsFound: 未找到模型
+      featureProviders: 功能提供商
       advancedOptions: 進階選項
       temperature: 溫度
       temperatureHint: 控制回應的隨機性。較低的值（0）更具確定性，較高的值更具創造性。範圍因提供者而異。留空則使用提供者預設值。
@@ -146,25 +140,20 @@ options:
       testing: 測試中...
   general:
     title: 通用
-    readConfig:
-      title: 閱讀配置
-      description: 適用於所有高級 AI 功能，如深度文章解釋和關鍵詞提取。
-      provider: 提供商
-      model:
-        title: 模型
-        enterCustomModel: 輸入自定義模型名稱
+    featureProviders:
+      title: 功能提供商
+      description: 為每個功能選擇使用的提供商
+      features:
+        translate: 網頁翻譯
+        selectionToolbar_translate: 劃詞翻譯
+        selectionToolbar_vocabularyInsight: 劃詞詞彙解析
+        tts: 文字轉語音
+        inputTranslation: 輸入翻譯
+        videoSubtitles: 影片字幕
     translationConfig:
-      title: 翻譯配置
-      description: 僅用於網頁內的翻譯，如雙語段落翻譯。
-      provider: 提供商
       model:
         title: 模型
-        enterCustomModel: 輸入自定義模型名稱
-      translateRange:
-        title: 翻譯範圍
-        range:
-          main: 主要內容
-          all: 所有內容
+        enterCustomModel: 輸入自訂模型名稱
     clearCache:
       title: 清理快取
       description: 清理瀏覽器中的所有翻譯快取
@@ -198,6 +187,10 @@ options:
     inputTranslation:
       title: 輸入翻譯
   inputTranslation:
+    provider:
+      title: 翻譯服務
+      description: 選擇用於輸入翻譯的翻譯服務
+      label: 服務
     toggle:
       title: 啟用三連空格翻譯
       description: 在任意輸入框中快速按3次空格鍵即可翻譯其內容
@@ -237,7 +230,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 啟用選擇工具列
-        description: 在網頁上選擇文字時顯示工具列，快速翻譯和閱讀
+        description: 在網頁上選擇文字時顯示工具列，快速翻譯和詞彙解析
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
@@ -246,6 +239,21 @@ options:
         description: 設定需要停用選擇工具列的網站
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
+      features:
+        provider: 提供商
+        selectProvider: 選擇提供商
+        noProviderAvailable: 暫無可用提供商
+        useProviderDefaultModel: 使用提供商預設模型
+        useCustomModel: 使用自定義模型
+        customModel: 自定義模型
+        model: 模型
+        modelNotAvailableForNonLLM: 僅 LLM 提供商支援模型設定
+        translate:
+          title: 劃詞翻譯
+          description: 配置選擇工具列翻譯功能使用的提供商與模型
+        vocabularyInsight:
+          title: 詞彙解析
+          description: 配置選擇工具列詞彙/短語解析功能使用的提供商與模型
     contextMenu:
       title: 右鍵選單
       translate:
@@ -353,6 +361,12 @@ options:
       mode:
         bilingual: 雙語對照
         translationOnly: 僅顯示翻譯
+    translateRange:
+      title: 翻譯範圍
+      description: 選擇是僅翻譯主要內容還是翻譯頁面上的所有內容。
+      range:
+        main: 主要內容
+        all: 全部內容
     pageTranslationShortcut:
       title: 網頁翻譯快捷鍵
       description: 自訂翻譯整個網頁的快捷鍵
@@ -378,20 +392,26 @@ options:
     nodeTranslationHotkey:
       title: 懸停或長按翻譯快捷鍵
       description: 自訂懸停翻譯的修飾鍵，或使用滑鼠長按翻譯段落
-    llmProviderConfigured: 已設定 LLM 翻譯提供商
-    llmProviderNotConfigured: 未設定 LLM 翻譯提供商
+    llmProviderConfigured: 已為$1選擇 LLM 提供商
+    llmProviderNotConfigured: 沒有為$1選擇 LLM 提供商
     autoTranslateLanguages:
       title: 基於語言的自動翻譯
       description: 當檢測到特定語言時自動翻譯頁面內容
       selectLanguages: 選擇語言
-      enableLLMDetection: 使用 LLM 偵測語言
-      enableLLMDetectionDescription: 提高準確率，但會增加延遲和 API 費用。需要設定 LLM 翻譯提供商，並需配置自動翻譯語言。
+      detection:
+        label: 語言偵測
+        basic: 基礎
+        llm: LLM
+        description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。需配置自動翻譯語言。
     skipLanguages:
       title: 基於語言的自動跳過
       description: 當檢測到指定語言時自動跳過段落翻譯
       selectLanguages: 選擇語言
-      enableLLMDetection: 使用 LLM 偵測語言
-      enableLLMDetectionDescription: 提高準確率，但會增加延遲和 API 費用。需要設定 LLM 翻譯提供商。
+      detection:
+        label: 語言偵測
+        basic: 基礎
+        llm: LLM
+        description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。
     aiContentAware:
       title: AI 智慧上下文翻譯
       description: 透過向 AI 提供文章上下文來提高翻譯品質
@@ -399,21 +419,31 @@ options:
       enableDescription: AI 使用文章摘要來提高翻譯準確性。需要 LLM 翻譯提供商。剛開始翻譯頁面時會有延遲，並增加 API 費用。
   tts:
     title: 文字轉語音
-    description: 使用您偏好的 OpenAI 語音設定自訂「朗讀」按鈕。
-    provider:
-      label: 提供商
-      selectPlaceholder: 選擇提供商
-      noProvider: 請新增 OpenAI 提供商
-    model:
-      label: 模型
+    description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
+    detectLanguage:
+      label: 語言偵測
+      basic: 基礎
+      llm: LLM
+      description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。LLM 模式使用「翻譯」頁面的提供者。
     voice:
       label: 語音
+      fallback: 後備
       selectPlaceholder: 請選擇一個語音
       preview: 試聽
       previewSample: Read Frog 的問候！這是我朗讀時的語音。
-    speed:
-      label: 速度
-      hint: 可輸入 0.25 至 4.0 的數值
+    languageVoice:
+      label: 語言語音
+      reset: 重設為預設
+      description: 選擇一種語言，並指定當 TTS 偵測到該語言時要使用的語音。
+    rate:
+      label: 語速 (%)
+      hint: 支援 -100 到 100 的整數
+    pitch:
+      label: 音高 (Hz)
+      hint: 支援 -100 到 100 的整數
+    volume:
+      label: 音量 (%)
+      hint: 支援 -100 到 100 的整數
     betaDisabled: 啟用 Beta 體驗即可自訂文字轉語音設定。
   statistics:
     title: 統計
@@ -478,7 +508,7 @@ options:
           hasUnresolvedInChildren: ⚠ 包含待解決項
           item: 項
           items: 項
-          unresolvedPrompt: '[待解決 - 請選擇]'
+          unresolvedPrompt: "[待解決 - 請選擇]"
           localLatest: 本地最新
           remoteLatest: 遠端最新
           bothChanged: 雙方已變更
@@ -529,6 +559,10 @@ options:
   videoSubtitles:
     title: 影片字幕
     description: 目前僅支援 YouTube 影片字幕
+    provider:
+      title: 翻譯服務商
+      description: 選擇用於影片字幕翻譯的翻譯服務商
+      label: 服務商
     enable: 開啟影片字幕
     enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點擊即可開始翻譯字幕。
     autoStart: 自動開啟字幕
@@ -599,9 +633,6 @@ side:
   sourceLang: 來源語言
   targetLang: 目標語言
   fileExport: 文件導出
-readService:
-  title: 閱讀服務
-  description: 用於閱讀和解釋文章
 translateService:
   title: 翻譯服務
   description: 僅用於翻譯網頁內容
@@ -640,12 +671,7 @@ shortcutKeySelector:
   placeholder: 請輸入快捷鍵
 subtitles:
   state:
-    idle: 就緒
-    fetching: 字幕獲取中
-    fetchSuccess: 字幕載入成功
-    fetchFailed: 字幕獲取失敗
-    segmenting: AI 斷句中...
-    processing: 字幕翻譯中
+    loading: Read Frog 字幕載入中
     error: 發生錯誤
   errors:
     http429: 429 youtube 字幕介面請求次數過多，請稍後再試
@@ -657,7 +683,7 @@ subtitles:
     networkError: 取得字幕時發生網路錯誤
     fetchSubTimeout: 取得 youtube 字幕逾時
     buttonNotFound: 字幕按鈕未找到
-    noSubtitlesFound: 未找到字幕
+    noSubtitlesFound: 當前影片沒有字幕
     videoNotFound: 影片元素未找到
     controlsBarNotFound: 控制列未找到
     aiRateLimited: 請求過於頻繁，請稍後再試

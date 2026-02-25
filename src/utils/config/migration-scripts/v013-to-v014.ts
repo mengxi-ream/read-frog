@@ -6,9 +6,9 @@ export function migrate(oldConfig: any): any {
       models: {
         ...oldConfig.read.models,
         gemini: {
-          model: 'gemini-2.5-pro',
+          model: "gemini-2.5-pro",
           isCustomModel: false,
-          customModel: '',
+          customModel: "",
         },
       },
     },

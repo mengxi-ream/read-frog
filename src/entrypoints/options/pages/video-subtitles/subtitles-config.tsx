@@ -1,33 +1,26 @@
-import { i18n } from '#imports'
-import { deepmerge } from 'deepmerge-ts'
-import { useAtom } from 'jotai'
-import { Badge } from '@/components/ui/base-ui/badge'
-import { Field, FieldContent, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
-import { Switch } from '@/components/ui/base-ui/switch'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { ConfigCard } from '../../components/config-card'
+import { i18n } from "#imports"
+import { deepmerge } from "deepmerge-ts"
+import { useAtom } from "jotai"
+import { HelpTooltip } from "@/components/help-tooltip"
+import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
+import { Switch } from "@/components/ui/base-ui/switch"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { ConfigCard } from "../../components/config-card"
 
 export function SubtitlesConfig() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
 
   return (
     <ConfigCard
-      title={(
-        <>
-          {i18n.t('options.videoSubtitles.title')}
-          {' '}
-          <Badge variant="secondary" className="align-middle">Public Beta</Badge>
-        </>
-      )}
-      description={i18n.t('options.videoSubtitles.description')}
+      title={i18n.t("options.videoSubtitles.title")}
+      description={i18n.t("options.videoSubtitles.description")}
     >
       <div className="space-y-6">
         <Field orientation="horizontal">
           <FieldContent className="self-center">
             <FieldLabel htmlFor="video-subtitles-toggle">
-              {i18n.t('options.videoSubtitles.enable')}
-              <Hint content={i18n.t('options.videoSubtitles.enableDescription')} />
+              {i18n.t("options.videoSubtitles.enable")}
+              <HelpTooltip>{i18n.t("options.videoSubtitles.enableDescription")}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Switch
@@ -46,8 +39,8 @@ export function SubtitlesConfig() {
         <Field orientation="horizontal">
           <FieldContent className="self-center">
             <FieldLabel htmlFor="video-subtitles-autostart">
-              {i18n.t('options.videoSubtitles.autoStart')}
-              <Hint content={i18n.t('options.videoSubtitles.autoStartDescription')} />
+              {i18n.t("options.videoSubtitles.autoStart")}
+              <HelpTooltip>{i18n.t("options.videoSubtitles.autoStartDescription")}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Switch
@@ -66,8 +59,8 @@ export function SubtitlesConfig() {
         <Field orientation="horizontal">
           <FieldContent className="self-center">
             <FieldLabel htmlFor="video-subtitles-ai-segmentation">
-              {i18n.t('options.videoSubtitles.aiSegmentation.enable')}
-              <Hint content={i18n.t('options.videoSubtitles.aiSegmentation.enableDescription')} />
+              {i18n.t("options.videoSubtitles.aiSegmentation.enable")}
+              <HelpTooltip>{i18n.t("options.videoSubtitles.aiSegmentation.enableDescription")}</HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Switch

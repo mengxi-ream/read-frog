@@ -1,5 +1,5 @@
-import { browser, i18n } from '#imports'
-import { Icon } from '@iconify/react'
+import { browser, i18n } from "#imports"
+import { Icon } from "@iconify/react"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -7,18 +7,18 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from '@/components/ui/base-ui/sidebar'
+} from "@/components/ui/base-ui/sidebar"
 
 export function ToolsNav() {
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{i18n.t('options.sidebar.tools')}</SidebarGroupLabel>
+      <SidebarGroupLabel>{i18n.t("options.sidebar.tools")}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton render={<a href={browser.runtime.getURL('/translation-hub.html')} target="_blank" rel="noopener noreferrer" />}>
+            <SidebarMenuButton render={<a href={browser.runtime.getURL("/translation-hub.html")} target="_blank" rel="noopener noreferrer" />}>
               <Icon icon="tabler:language-hiragana" />
-              <span>{i18n.t('options.tools.translationHub')}</span>
+              <span>{i18n.t("options.tools.translationHub")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

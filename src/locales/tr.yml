@@ -9,7 +9,6 @@ popup:
   autoLang: Otomatik
   sourceLang: Kaynak
   targetLang: Hedef
-  read: Makaleyi Oku
   translate: Çevir
   showOriginal: Orijinali Göster
   enabledFloatingButton: Yüzen butonu etkinleştir
@@ -52,7 +51,7 @@ options:
     enabled: Beta Deneyimini Etkinleştir
   apiProviders:
     title: API Sağlayıcıları
-    description: Çeviri ve okuma işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik API sağlayıcımız var ve herhangi bir OpenAI uyumlu API sağlayıcısını destekliyoruz.
+    description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
     promotion:
       ai302:
         description: 302.AI'ye kaydolmak ve 1 USD API kredisi almak için sağdaki bağlantıya tıklayın
@@ -60,8 +59,7 @@ options:
         addProvider: 302.AI Yapılandırması Ekle
     addProvider: Sağlayıcı Ekle
     badges:
-      translate: Çeviri
-      read: Okuma
+      featureCount: $1 özellik
     dialog:
       title: Yeni Sağlayıcı Ekle
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: İsteğe Bağlı
       delete: Sil
-      atLeastOneProvider: En az bir okuma sağlayıcısı ve bir çeviri sağlayıcısı gereklidir.
+      atLeastOneLLMProvider: En az bir LLM çeviri sağlayıcısı gereklidir.
       duplicateProviderName: 'Yinelenen sağlayıcı adı "$1"'
       defaultProvider:
         translate: Varsayılan çeviri sağlayıcısı olarak ayarla
-        read: Varsayılan okuma sağlayıcısı olarak ayarla
       models:
-        read:
-          title: Okuma Modeli
-          customTitle: Özel Okuma Modeli
-          placeholder: Bir model seçin
         translate:
           title: Çeviri Modeli
           customTitle: Özel Çeviri Modeli
@@ -104,6 +97,7 @@ options:
         apiKeyRequired: Lütfen önce API anahtarı ekleyin
         searchModels: Model ara...
         noModelsFound: Model bulunamadı
+      featureProviders: Özellik Sağlayıcıları
       advancedOptions: Gelişmiş Seçenekler
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
@@ -146,26 +140,20 @@ options:
       testing: Test ediliyor...
   general:
     title: Genel
-    readConfig:
-      title: Okuma Yapılandırması
-      description:
-        Derinlemesine makale açıklamaları ve anahtar kelime çıkarma gibi tüm gelişmiş AI işlevleri için.
-      provider: Sağlayıcı
-      model:
-        title: Model
-        enterCustomModel: Özel model adını girin
+    featureProviders:
+      title: Özellik Sağlayıcıları
+      description: Her özellik için kullanılacak sağlayıcıyı seçin
+      features:
+        translate: Sayfa Çevirisi
+        selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
+        selectionToolbar_vocabularyInsight: Seçim Araç Çubuğu Kelime Analizi
+        tts: Metin Okuma
+        inputTranslation: Giriş Çevirisi
+        videoSubtitles: Video Altyazıları
     translationConfig:
-      title: Çeviri Yapılandırması
-      description: Yalnızca web sayfalarındaki çeviri için, örneğin iki dilli paragraf çevirisi.
-      provider: Sağlayıcı
       model:
         title: Model
         enterCustomModel: Özel model adını girin
-      translateRange:
-        title: Çeviri Kapsamı
-        range:
-          main: Ana İçerik
-          all: Tüm İçerik
     clearCache:
       title: Önbelleği Temizle
       description: Tarayıcınızdaki tüm çeviri önbelleğini temizleyin
@@ -199,6 +187,10 @@ options:
     inputTranslation:
       title: Giriş Çevirisi
   inputTranslation:
+    provider:
+      title: Çeviri Sağlayıcısı
+      description: Giriş çevirisi için kullanılacak çeviri sağlayıcısını seçin
+      label: Sağlayıcı
     toggle:
       title: Üçlü Boşluk Çevirisini Etkinleştir
       description: Herhangi bir giriş alanında boşluk tuşuna hızlıca 3 kez basarak içeriği çevirin
@@ -238,7 +230,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir
-        description: Hızlı çeviri ve okuma için web sayfalarında metin seçerken araç çubuğunu görüntüle
+        description: Hızlı çeviri ve kelime analizi için web sayfalarında metin seçerken araç çubuğunu görüntüle
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
@@ -247,6 +239,21 @@ options:
         description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
         enterUrlPattern: URL kalıbı girin
         urlPattern: URL Kalıbı
+      features:
+        provider: Sağlayıcı
+        selectProvider: Sağlayıcı seçin
+        noProviderAvailable: Kullanılabilir sağlayıcı yok
+        useProviderDefaultModel: Sağlayıcının varsayılan modelini kullan
+        useCustomModel: Özel model kullan
+        customModel: Özel model
+        model: Model
+        modelNotAvailableForNonLLM: Model ayarları yalnızca LLM sağlayıcılarında kullanılabilir
+        translate:
+          title: Seçim Çevirisi
+          description: Seçim araç çubuğu çeviri özelliği için sağlayıcı ve model yapılandırın
+        vocabularyInsight:
+          title: Kelime Analizi
+          description: Seçim araç çubuğunda kelime/ifade analizi için sağlayıcı ve model yapılandırın
     contextMenu:
       title: Bağlam Menüsü
       translate:
@@ -348,10 +355,16 @@ options:
             saved: Tüm değişiklikler kaydedildi
     translationMode:
       title: Çeviri Modu
-      description: 'Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri.'
+      description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
       mode:
         bilingual: İki Dilli
         translationOnly: Yalnızca Çeviri
+    translateRange:
+      title: Çeviri Kapsamı
+      description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.
+      range:
+        main: Ana İçerik
+        all: Tüm İçerik
     pageTranslationShortcut:
       title: Sayfa Çeviri Kısayolu
       description: Tüm web sayfalarını çevirmek için kısayol tuşunu özelleştirin
@@ -377,20 +390,26 @@ options:
     nodeTranslationHotkey:
       title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
       description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
-    llmProviderConfigured: LLM çeviri sağlayıcısı yapılandırıldı
-    llmProviderNotConfigured: LLM çeviri sağlayıcısı yapılandırılmadı
+    llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
+    llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
     autoTranslateLanguages:
       title: Dile Göre Otomatik Çevir
       description: Belirli diller algılandığında sayfa içeriğini otomatik olarak çevir
       selectLanguages: Dilleri seçin
-      enableLLMDetection: Dil algılama için LLM kullan
-      enableLLMDetectionDescription: Doğruluğu artırır ancak gecikme ve API maliyetleri ekler. LLM çeviri sağlayıcısı ve yapılandırılmış otomatik çeviri dilleri gerektirir.
+      detection:
+        label: Dil Algılama
+        basic: Temel
+        llm: LLM
+        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. Yapılandırılmış otomatik çeviri dilleri gerektirir.
     skipLanguages:
       title: Dile Göre Otomatik Atla
       description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
       selectLanguages: Dilleri seçin
-      enableLLMDetection: Dil algılama için LLM kullan
-      enableLLMDetectionDescription: Doğruluğu artırır ancak gecikme ve API maliyetleri ekler. LLM çeviri sağlayıcısı gerektirir.
+      detection:
+        label: Dil Algılama
+        basic: Temel
+        llm: LLM
+        description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
     aiContentAware:
       title: AI Akıllı Bağlam Çevirisi
       description: AI'ya makale bağlamı sağlayarak çeviri kalitesini artırın
@@ -398,21 +417,31 @@ options:
       enableDescription: AI, çeviri doğruluğunu artırmak için makale özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
   tts:
     title: Metinden Konuşmaya
-    description: Tercih ettiğiniz OpenAI ses ayarlarıyla Konuş butonunu özelleştirin.
-    provider:
-      label: Sağlayıcı
-      selectPlaceholder: Bir sağlayıcı seçin
-      noProvider: Lütfen OpenAI sağlayıcısı ekleyin
-    model:
-      label: Model
+    description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
+    detectLanguage:
+      label: Dil Algılama
+      basic: Temel
+      llm: LLM
+      description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. LLM modu Çeviri sayfasındaki sağlayıcıyı kullanır.
     voice:
       label: Ses
+      fallback: Yedek
       selectPlaceholder: Bir ses seçin
       preview: Önizleme
       previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
-    speed:
-      label: Hız
-      hint: 0.25 ile 4.0 arasında değerler kabul eder
+    languageVoice:
+      label: Dil Sesi
+      reset: Varsayılana Sıfırla
+      description: Bir dil seçin ve TTS bu dili algıladığında kullanılacak sesi atayın.
+    rate:
+      label: Hız (%)
+      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
+    pitch:
+      label: Perde (Hz)
+      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
+    volume:
+      label: Ses Düzeyi (%)
+      hint: -100 ile 100 arasında tam sayı değerleri kabul eder
     betaDisabled: Metinden konuşmaya ayarlarını özelleştirmek için Beta Deneyimini etkinleştirin.
   statistics:
     title: İstatistikler
@@ -477,7 +506,7 @@ options:
           hasUnresolvedInChildren: ⚠ Çözülmemiş değişiklikler içeriyor
           item: öğe
           items: öğe
-          unresolvedPrompt: '[Çözülmedi - Lütfen seçin]'
+          unresolvedPrompt: "[Çözülmedi - Lütfen seçin]"
           localLatest: En Son Yerel
           remoteLatest: En Son Uzak
           bothChanged: Her ikisi de değişti
@@ -488,7 +517,7 @@ options:
           resolveToContinue: Devam etmek için çakışmaları çözün
           validationAlert:
             title: Birleştirilmiş yapılandırmada doğrulama hataları var
-            description: 'Düzeltmek için aşağıdaki farklılıkları ayarlayın:'
+            description: "Düzeltmek için aşağıdaki farklılıkları ayarlayın:"
           moreErrors: ...ve $1 hata daha
     backup:
       title: Yapılandırma Yedekleme
@@ -501,8 +530,8 @@ options:
         title: Henüz yedekleme mevcut değil
         description: Yapılandırma değiştirilirse yedeklemeler her saat otomatik olarak oluşturulur.
       item:
-        extensionVersion: 'Uzantı sürümü:'
-        schemaVersion: 'Şema sürümü:'
+        extensionVersion: "Uzantı sürümü:"
+        schemaVersion: "Şema sürümü:"
         restore: Geri Yükle
         export: Dışa Aktar
         delete: Sil
@@ -528,6 +557,10 @@ options:
   videoSubtitles:
     title: Video Altyazıları
     description: Şu anda yalnızca YouTube video altyazılarını desteklemektedir
+    provider:
+      title: Çeviri Sağlayıcısı
+      description: Video altyazı çevirisi için kullanılacak çeviri sağlayıcısını seçin
+      label: Sağlayıcı
     enable: Video Altyazılarını Etkinleştir
     enableDescription: Etkinleştirildiğinde, YouTube oynatıcı kontrollerinde bir çeviri düğmesi görünecektir. Altyazıları çevirmeye başlamak için tıklayın.
     autoStart: Altyazıyı Otomatik Etkinleştir
@@ -598,9 +631,6 @@ side:
   sourceLang: Kaynak Dil
   targetLang: Hedef Dil
   fileExport: Dosya Dışa Aktarma
-readService:
-  title: Okuma Servisi
-  description: İçerik okuma ve açıklama için
 translateService:
   title: Çeviri Servisi
   description: Yalnızca web sayfası çevirisi için
@@ -622,7 +652,7 @@ noAPIKeyConfig:
   warningWithLink:
     youMust: Önce
     setTheAPIKey: API anahtarını ayarlamalısınız
-    firstOnThe: ''
+    firstOnThe: ""
     optionsPage: seçenekler
     page: sayfasında
 translation:
@@ -639,12 +669,7 @@ shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
   state:
-    idle: Hazır
-    fetching: Altyazılar alınıyor
-    fetchSuccess: Altyazılar yüklendi
-    fetchFailed: Altyazılar alınamadı
-    segmenting: AI bölümlendirmesi...
-    processing: Altyazılar çevriliyor
+    loading: Read Frog altyazılar yükleniyor
     error: Bir hata oluştu
   errors:
     http429: 429 YouTube altyazı API'sine çok fazla istek gönderildi. Lütfen biraz bekleyip tekrar deneyin.
@@ -656,7 +681,7 @@ subtitles:
     networkError: YouTube altyazılar alınırken ağ hatası oluştu.
     fetchSubTimeout: YouTube altyazılar alınırken zaman aşımı oluştu.
     buttonNotFound: Altyazı butonu bulunamadı
-    noSubtitlesFound: Altyazı bulunamadı
+    noSubtitlesFound: Bu video için altyazı bulunmuyor
     videoNotFound: Video öğesi bulunamadı
     controlsBarNotFound: Kontrol çubuğu bulunamadı
     aiRateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin

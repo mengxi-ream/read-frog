@@ -1,9 +1,9 @@
-import { batchQueueConfigSchema } from '@/types/config/translate'
+import { batchQueueConfigSchema } from "@/types/config/translate"
 
 export class BatchCountMismatchError extends Error {
   constructor(expected: number, got: number, results: unknown[]) {
-    super(`Batch result count mismatch: expected ${expected}, got ${got}.\nResults: ["${results.join('",\n"')}"]`)
-    this.name = 'BatchCountMismatchError'
+    super(`Batch result count mismatch: expected ${expected}, got ${got}.\nResults: ["${results.join("\",\n\"")}"]`)
+    this.name = "BatchCountMismatchError"
   }
 }
 
@@ -166,7 +166,7 @@ export class BatchQueue<T, R> {
       const results = await this.executeBatch(tasks.map(task => task.data))
 
       if (!results) {
-        throw new Error('Batch execution results are undefined')
+        throw new Error("Batch execution results are undefined")
       }
 
       if (results.length !== tasks.length) {
@@ -200,7 +200,7 @@ export class BatchQueue<T, R> {
       tasks.map(async (task) => {
         try {
           if (!this.executeIndividual) {
-            throw new Error('executeIndividual is not defined')
+            throw new Error("executeIndividual is not defined")
           }
           const result = await this.executeIndividual(task.data)
           task.resolve(result)
@@ -222,7 +222,7 @@ export class BatchQueue<T, R> {
     return new Promise(resolve => setTimeout(resolve, ms))
   }
 
-  setBatchConfig(config: Partial<Pick<BatchOptions<T, R>, 'maxCharactersPerBatch' | 'maxItemsPerBatch'>>) {
+  setBatchConfig(config: Partial<Pick<BatchOptions<T, R>, "maxCharactersPerBatch" | "maxItemsPerBatch">>) {
     const parseConfigStatus = batchQueueConfigSchema.partial().safeParse(config)
     if (parseConfigStatus.error) {
       throw new Error(parseConfigStatus.error.issues[0].message)

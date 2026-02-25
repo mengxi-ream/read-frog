@@ -1,12 +1,12 @@
-import { browser, i18n } from '#imports'
-import { Icon } from '@iconify/react'
+import { browser, i18n } from "#imports"
+import { Icon } from "@iconify/react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/base-ui/dropdown-menu'
-import { getReviewUrl } from '@/utils/utils'
+} from "@/components/ui/base-ui/dropdown-menu"
+import { getReviewUrl } from "@/utils/utils"
 
 export function MoreMenu() {
   return (
@@ -20,63 +20,63 @@ export function MoreMenu() {
         )}
       >
         <Icon icon="tabler:dots" className="size-4" strokeWidth={1.6} />
-        <span className="text-[13px] font-medium">{i18n.t('popup.more.title')}</span>
+        <span className="text-[13px] font-medium">{i18n.t("popup.more.title")}</span>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" side="top" className="w-fit">
         <DropdownMenuItem
-          onClick={() => window.open('https://discord.gg/ej45e3PezJ', '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open("https://discord.gg/ej45e3PezJ", "_blank", "noopener,noreferrer")}
           className="cursor-pointer"
         >
           <Icon icon="logos:discord-icon" className="size-4" strokeWidth={1.6} />
-          {i18n.t('popup.more.joinDiscord')}
+          {i18n.t("popup.more.joinDiscord")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => window.open('https://github.com/mengxi-ream/read-frog/blob/main/assets/wechat-account.jpg', '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open("https://github.com/mengxi-ream/read-frog/blob/main/assets/wechat-account.jpg", "_blank", "noopener,noreferrer")}
           className="cursor-pointer"
         >
           <Icon icon="streamline-logos:wechat-logo-solid" className="size-4" strokeWidth={1.6} />
-          {i18n.t('popup.more.joinWechat')}
+          {i18n.t("popup.more.joinWechat")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => window.open('https://github.com/mengxi-ream/read-frog', '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open("https://github.com/mengxi-ream/read-frog", "_blank", "noopener,noreferrer")}
           className="cursor-pointer"
         >
           <Icon icon="fa7-brands:github" className="size-4" strokeWidth={1.6} />
-          {i18n.t('popup.more.starGithub')}
+          {i18n.t("popup.more.starGithub")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => window.open(getReviewUrl('popup'), '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open(getReviewUrl("popup"), "_blank", "noopener,noreferrer")}
           className="cursor-pointer"
         >
           <Icon icon="tabler:star" className="size-4" strokeWidth={1.6} />
-          {i18n.t('popup.more.rateUs')}
+          {i18n.t("popup.more.rateUs")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => void browser.tabs.create({ url: browser.runtime.getURL('/translation-hub.html') })}
+          onClick={() => void browser.tabs.create({ url: browser.runtime.getURL("/translation-hub.html") })}
           className="cursor-pointer"
         >
           <Icon icon="tabler:language-hiragana" className="size-4" strokeWidth={1.6} />
-          {i18n.t('popup.more.translationHub')}
+          {i18n.t("popup.more.translationHub")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => window.open('https://www.neat-reader.com/webapp#/', '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open("https://www.neat-reader.com/webapp#/", "_blank", "noopener,noreferrer")}
           className="cursor-pointer"
         >
           <Icon icon="tabler:book" className="size-4" strokeWidth={1.6} />
-          {i18n.t('popup.more.ebook')}
+          {i18n.t("popup.more.ebook")}
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => window.open('https://readfrog.app/tutorial/', '_blank', 'noopener,noreferrer')}
+          onClick={() => window.open("https://readfrog.app/tutorial/", "_blank", "noopener,noreferrer")}
           className="cursor-pointer"
         >
           <Icon icon="tabler:help-circle" className="size-4" strokeWidth={1.6} />
-          {i18n.t('popup.more.tutorial')}
+          {i18n.t("popup.more.tutorial")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

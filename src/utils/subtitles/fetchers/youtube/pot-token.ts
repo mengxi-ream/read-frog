@@ -1,4 +1,4 @@
-import type { AudioCaptionTrack, CaptionTrack, PlayerData } from './types'
+import type { AudioCaptionTrack, CaptionTrack, PlayerData } from "./types"
 
 export interface PotToken {
   pot: string | null
@@ -35,8 +35,8 @@ export function extractPotToken(
 
     if (matchedTrack?.url) {
       const url = new URL(matchedTrack.url)
-      const pot = url.searchParams.get('pot')
-      const potc = url.searchParams.get('potc')
+      const pot = url.searchParams.get("pot")
+      const potc = url.searchParams.get("potc")
       if (pot) {
         return { pot, potc }
       }
@@ -45,8 +45,8 @@ export function extractPotToken(
 
   if (cachedTimedtextUrl) {
     const url = new URL(cachedTimedtextUrl)
-    const pot = url.searchParams.get('pot')
-    const potc = url.searchParams.get('potc')
+    const pot = url.searchParams.get("pot")
+    const potc = url.searchParams.get("potc")
     if (pot) {
       return { pot, potc }
     }

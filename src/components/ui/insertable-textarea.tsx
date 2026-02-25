@@ -1,14 +1,14 @@
-import * as React from 'react'
-import { Button } from '@/components/ui/base-ui/button'
-import { Textarea } from '@/components/ui/base-ui/textarea'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
-import { cn } from '@/utils/styles/utils'
+import * as React from "react"
+import { Button } from "@/components/ui/base-ui/button"
+import { Textarea } from "@/components/ui/base-ui/textarea"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { cn } from "@/utils/styles/utils"
 
 interface InsertableTextareaHandle extends HTMLTextAreaElement {
   insertTextAtCursor: (text: string) => void
 }
 
-interface InsertableTextareaProps extends Omit<React.ComponentProps<'textarea'>, 'ref'> {
+interface InsertableTextareaProps extends Omit<React.ComponentProps<"textarea">, "ref"> {
   ref?: React.Ref<InsertableTextareaHandle>
 }
 
@@ -17,7 +17,7 @@ interface InsertCell {
   description: string
 }
 
-interface QuickInsertableTextareaProps extends Omit<React.ComponentProps<'textarea'>, 'ref'> {
+interface QuickInsertableTextareaProps extends Omit<React.ComponentProps<"textarea">, "ref"> {
   ref?: React.Ref<InsertableTextareaHandle>
   insertCells?: InsertCell[]
   cellsClassName?: string
@@ -31,7 +31,7 @@ function InsertableTextarea({ className, ref, ...props }: InsertableTextareaProp
   React.useImperativeHandle(ref, () => {
     const textarea = textareaRef.current
     if (!textarea)
-      throw new Error('Textarea ref is null')
+      throw new Error("Textarea ref is null")
 
     return {
       ...textarea,
@@ -46,13 +46,13 @@ function InsertableTextarea({ className, ref, ...props }: InsertableTextareaProp
         // Get the native value setter to bypass React's control
         const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
           window.HTMLTextAreaElement.prototype,
-          'value',
+          "value",
         )?.set
 
         if (nativeInputValueSetter) {
           // Use the native setter to avoid React's internal tracking conflicts
           nativeInputValueSetter.call(textarea, newValue)
-          textarea.dispatchEvent(new Event('input', { bubbles: true }))
+          textarea.dispatchEvent(new Event("input", { bubbles: true }))
         }
 
         const newCursorPos = selectionStart + text.length
@@ -91,14 +91,14 @@ function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS
   }
 
   return (
-    <div className={cn('space-y-2 w-full min-w-0', containerClassName)}>
+    <div className={cn("space-y-2 w-full min-w-0", containerClassName)}>
       <InsertableTextarea
         ref={textareaRef}
         className={className}
         {...props}
       />
       <div className={cn(
-        'flex flex-wrap gap-2',
+        "flex flex-wrap gap-2",
         cellsClassName,
       )}
       >
@@ -111,7 +111,7 @@ function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS
                   variant="outline"
                   size="sm"
                   className={cn(
-                    'h-8 px-3 text-xs font-medium',
+                    "h-8 px-3 text-xs font-medium",
                     cellClassName,
                   )}
                   onClick={() => handleCellClick(cell.text)}

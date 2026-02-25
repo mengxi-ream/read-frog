@@ -3,8 +3,8 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     tts: {
       providerId: null,
-      model: 'tts-1',
-      voice: 'alloy',
+      model: "tts-1",
+      voice: "alloy",
       speed: 1,
     },
   }

@@ -1,4 +1,4 @@
-import type { YoutubeTimedText } from './types'
+import type { YoutubeTimedText } from "./types"
 
 /**
  * Patterns to filter out noise annotations from subtitles
@@ -15,7 +15,7 @@ const NOISE_PATTERNS = [
 function filterNoiseText(text: string): string {
   let result = text
   for (const pattern of NOISE_PATTERNS) {
-    result = result.replace(pattern, '')
+    result = result.replace(pattern, "")
   }
   return result
 }

@@ -4,15 +4,15 @@
  */
 export function extractTextContext(fullText: string, selection: string) {
   // Handle edge cases
-  if (selection === '' || fullText === '' || !fullText.includes(selection)) {
-    return { before: '', selection, after: '' }
+  if (selection === "" || fullText === "" || !fullText.includes(selection)) {
+    return { before: "", selection, after: "" }
   }
 
   const index = fullText.indexOf(selection)
 
   // If selection is the entire text, return it with no context
   if (index === 0 && selection.length === fullText.length) {
-    return { before: '', selection, after: '' }
+    return { before: "", selection, after: "" }
   }
 
   // Find sentence boundaries around the selection
@@ -42,7 +42,7 @@ export function extractTextContext(fullText: string, selection: string) {
 
   // If selection is at the beginning or end of sentence, return empty context
   if (relativeIndex === 0 || relativeIndex + selection.length === sentence.length) {
-    return { before: '', selection, after: '' }
+    return { before: "", selection, after: "" }
   }
 
   const before = sentence.slice(0, relativeIndex)
@@ -66,7 +66,7 @@ export function getContext(selectionRange: Range) {
     root = container
   }
 
-  const fullText = root?.textContent ?? ''
+  const fullText = root?.textContent ?? ""
   const selection = selectionRange.toString()
 
   return extractTextContext(fullText, selection)

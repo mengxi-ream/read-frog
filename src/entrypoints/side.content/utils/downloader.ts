@@ -1,16 +1,16 @@
-import type { ArticleExplanation, ArticleWord } from '@/types/content'
-import type { DOWNLOAD_FILE_ITEMS } from '@/utils/constants/side'
-import { saveAs } from 'file-saver'
-import { toast } from 'sonner'
-import { AST_TEMPLATE, MARKDOWN_TEMPLATE_TOKEN, PARAGRAPH_DEPTH, SENTENCE_TEMPLATE, WORDS_TEMPLATE } from '@/utils/constants/side'
+import type { ArticleExplanation, ArticleWord } from "@/types/content"
+import type { DOWNLOAD_FILE_ITEMS } from "@/utils/constants/side"
+import { saveAs } from "file-saver"
+import { toast } from "sonner"
+import { AST_TEMPLATE, MARKDOWN_TEMPLATE_TOKEN, PARAGRAPH_DEPTH, SENTENCE_TEMPLATE, WORDS_TEMPLATE } from "@/utils/constants/side"
 
 export type DOWNLOAD_FILE_TYPES = keyof typeof DOWNLOAD_FILE_ITEMS
 
-type ExplanationDataList = Array<ArticleExplanation['paragraphs']>
+type ExplanationDataList = Array<ArticleExplanation["paragraphs"]>
 type DOWNLOADER_MAP = Record<DOWNLOAD_FILE_TYPES, (explainDataList: ExplanationDataList, opts?: object) => void>
 
 class Downloader {
-  title = document.title ?? 'Untitled'
+  title = document.title ?? "Untitled"
   downloader: DOWNLOADER_MAP = {
     md: this.downloadMarkdown,
   }
@@ -24,7 +24,7 @@ class Downloader {
       const article = this.markdownParser(explainDataList)
 
       const blob = new Blob([article], {
-        type: 'text/plain',
+        type: "text/plain",
       })
 
       saveAs(blob, `${this.title}.md`)
@@ -34,7 +34,7 @@ class Downloader {
         toast.error(error.message)
       }
       else {
-        toast.error('Something went wrong when exporting...')
+        toast.error("Something went wrong when exporting...")
       }
     }
   }
@@ -58,7 +58,7 @@ class Downloader {
         .replace(MARKDOWN_TEMPLATE_TOKEN.words, this.parseWords(words))
         .replace(MARKDOWN_TEMPLATE_TOKEN.explanation, paragraph.explanation)
         .replace(MARKDOWN_TEMPLATE_TOKEN.globalIndex, (pIndex + 1).toString())
-    }, '')
+    }, "")
   }
 
   parseWords(words: ArticleWord[]) {
@@ -68,7 +68,7 @@ class Downloader {
         .replace(MARKDOWN_TEMPLATE_TOKEN.word, word.word)
         .replace(MARKDOWN_TEMPLATE_TOKEN.syntacticCategory, word.syntacticCategory)
         .replace(MARKDOWN_TEMPLATE_TOKEN.explanation, word.explanation)
-    }, '')
+    }, "")
   }
 }
 

@@ -1,20 +1,20 @@
-import { browser, storage } from '#imports'
-import { z } from 'zod'
-import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from '../constants/config'
-import { logger } from '../logger'
+import { browser, storage } from "#imports"
+import { z } from "zod"
+import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from "../constants/config"
+import { logger } from "../logger"
 
-const GOOGLE_CLIENT_ID = import.meta.env.WXT_GOOGLE_CLIENT_ID || 'YOUR_CLIENT_ID'
+const GOOGLE_CLIENT_ID = import.meta.env.WXT_GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID"
 const GOOGLE_REDIRECT_URI = browser.identity.getRedirectURL()
 const GOOGLE_SCOPES = [
-  'https://www.googleapis.com/auth/drive.appdata',
-  'https://www.googleapis.com/auth/userinfo.email',
+  "https://www.googleapis.com/auth/drive.appdata",
+  "https://www.googleapis.com/auth/userinfo.email",
 ]
 const TOKEN_EXPIRY_BUFFER_MS = 60000
 
 const googleAuthTokenSchema = z.object({
   access_token: z.string(),
   expires_at: z.number(),
-  token_type: z.string().default('Bearer'),
+  token_type: z.string().default("Bearer"),
 })
 
 const googleUserInfoSchema = z.object({
@@ -39,14 +39,14 @@ async function getTokenFromStorage(): Promise<GoogleAuthToken | null> {
 
     const parsed = googleAuthTokenSchema.safeParse(tokenData)
     if (!parsed.success) {
-      logger.warn('Invalid token data in storage', parsed.error)
+      logger.warn("Invalid token data in storage", parsed.error)
       return null
     }
 
     return parsed.data
   }
   catch (error) {
-    logger.error('Failed to get token from storage', error)
+    logger.error("Failed to get token from storage", error)
     return null
   }
 }
@@ -56,12 +56,12 @@ async function getTokenFromStorage(): Promise<GoogleAuthToken | null> {
  */
 export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<string> {
   try {
-    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth')
-    authUrl.searchParams.set('client_id', GOOGLE_CLIENT_ID)
-    authUrl.searchParams.set('response_type', 'token')
-    authUrl.searchParams.set('redirect_uri', GOOGLE_REDIRECT_URI)
-    authUrl.searchParams.set('scope', GOOGLE_SCOPES.join(' '))
-    authUrl.searchParams.set('prompt', 'select_account')
+    const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth")
+    authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID)
+    authUrl.searchParams.set("response_type", "token")
+    authUrl.searchParams.set("redirect_uri", GOOGLE_REDIRECT_URI)
+    authUrl.searchParams.set("scope", GOOGLE_SCOPES.join(" "))
+    authUrl.searchParams.set("prompt", "select_account")
 
     const responseUrl = await browser.identity.launchWebAuthFlow({
       url: authUrl.toString(),
@@ -69,16 +69,16 @@ export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<st
     })
 
     if (!responseUrl) {
-      throw new Error('No response URL from Google OAuth')
+      throw new Error("No response URL from Google OAuth")
     }
 
     const url = new URL(responseUrl)
     const params = new URLSearchParams(url.hash.slice(1))
-    const accessToken = params.get('access_token')
-    const expiresIn = params.get('expires_in')
+    const accessToken = params.get("access_token")
+    const expiresIn = params.get("expires_in")
 
     if (!accessToken) {
-      throw new Error('No access token in OAuth response')
+      throw new Error("No access token in OAuth response")
     }
 
     const expiresAt = Date.now() + (expiresIn ? Number.parseInt(expiresIn) * 1000 : 3600 * 1000)
@@ -86,7 +86,7 @@ export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<st
     const tokenData: GoogleAuthToken = {
       access_token: accessToken,
       expires_at: expiresAt,
-      token_type: 'Bearer',
+      token_type: "Bearer",
     }
 
     // Validate before storing
@@ -96,7 +96,7 @@ export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<st
     return accessToken
   }
   catch (error) {
-    logger.error('Google OAuth authentication failed', error)
+    logger.error("Google OAuth authentication failed", error)
     throw error
   }
 }
@@ -117,7 +117,7 @@ export async function getValidAccessToken(): Promise<string> {
     return tokenData.access_token
   }
   catch (error) {
-    logger.error('Failed to get valid access token', error)
+    logger.error("Failed to get valid access token", error)
     throw error
   }
 }
@@ -127,7 +127,7 @@ export async function clearAccessToken(): Promise<void> {
     await storage.removeItem(`local:${GOOGLE_DRIVE_TOKEN_STORAGE_KEY}`)
   }
   catch (error) {
-    logger.error('Failed to clear access token', error)
+    logger.error("Failed to clear access token", error)
     throw error
   }
 }
@@ -146,7 +146,7 @@ export async function getIsAuthenticated(): Promise<boolean> {
     return Date.now() < tokenData.expires_at - TOKEN_EXPIRY_BUFFER_MS
   }
   catch (error) {
-    logger.error('Failed to check authentication status', error)
+    logger.error("Failed to check authentication status", error)
     return false
   }
 }
@@ -155,7 +155,7 @@ export async function getIsAuthenticated(): Promise<boolean> {
  * Fetch Google user info using access token
  */
 export async function getGoogleUserInfo(accessToken: string): Promise<GoogleUserInfo> {
-  const res = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+  const res = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
     headers: { Authorization: `Bearer ${accessToken}` },
   })
 
@@ -167,8 +167,8 @@ export async function getGoogleUserInfo(accessToken: string): Promise<GoogleUser
   const parsed = googleUserInfoSchema.safeParse(data)
 
   if (!parsed.success) {
-    logger.error('Invalid user info response', parsed.error)
-    throw new Error('Invalid user info response')
+    logger.error("Invalid user info response", parsed.error)
+    throw new Error("Invalid user info response")
   }
 
   return parsed.data

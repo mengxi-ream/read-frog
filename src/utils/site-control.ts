@@ -1,5 +1,5 @@
-import type { Config } from '@/types/config/config'
-import { matchDomainPattern } from './url'
+import type { Config } from "@/types/config/config"
+import { matchDomainPattern } from "./url"
 
 export function isSiteEnabled(url: string, config: Config | null): boolean {
   if (!config)
@@ -7,7 +7,7 @@ export function isSiteEnabled(url: string, config: Config | null): boolean {
 
   const { mode, patterns } = config.siteControl
 
-  if (mode === 'all')
+  if (mode === "all")
     return true
 
   // whitelist mode: only enabled if matches a pattern

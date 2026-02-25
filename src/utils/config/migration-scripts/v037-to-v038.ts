@@ -14,7 +14,7 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     floatingButton: {
       ...oldConfig.floatingButton,
-      clickAction: 'panel',
+      clickAction: "panel",
     },
   }
 }

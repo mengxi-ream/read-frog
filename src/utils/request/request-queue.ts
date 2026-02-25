@@ -1,6 +1,6 @@
-import { deepmerge } from 'deepmerge-ts'
-import { requestQueueConfigSchema } from '@/types/config/translate'
-import { BinaryHeapPQ } from './priority-queue'
+import { deepmerge } from "deepmerge-ts"
+import { requestQueueConfigSchema } from "@/types/config/translate"
+import { BinaryHeapPQ } from "./priority-queue"
 
 export interface RequestTask {
   id: string

@@ -1,10 +1,10 @@
-export const TOKENS = ['targetLang', 'input', 'title', 'summary'] as const
+export const TOKENS = ["targetLang", "input", "title", "summary"] as const
 
 /**
  * Separator used to distinguish multiple text segments in batch translation.
  * It is used to differentiate different text paragraphs when merging multiple translation tasks into a single request.
  */
-export const BATCH_SEPARATOR = '%%'
+export const BATCH_SEPARATOR = "%%"
 
 export const TARGET_LANG = TOKENS[0]
 export const INPUT = TOKENS[1]
@@ -74,7 +74,7 @@ Direct translation without separators
  * NOTE: This is NOT stored in config - it's only used in UI components
  * Config stores `null` for default, this string is just for Select/UI compatibility
  */
-export const DEFAULT_TRANSLATE_PROMPT_ID = '__default__'
+export const DEFAULT_TRANSLATE_PROMPT_ID = "__default__"
 
 export const DEFAULT_TRANSLATE_PROMPTS_CONFIG = {
   promptId: null,

@@ -1,6 +1,6 @@
-import Aside from './aside'
-import Chart from './chart'
-import Metrics from './metrics'
+import Aside from "./aside"
+import Chart from "./chart"
+import Metrics from "./metrics"
 
 export default function BatchRequestRecord() {
   return (

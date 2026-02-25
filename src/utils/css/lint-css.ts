@@ -5,16 +5,16 @@
  * Can also be used standalone for validation outside the editor.
  */
 
-import type { Diagnostic } from '@codemirror/lint'
-import type { EditorView } from '@codemirror/view'
-import { linter } from '@codemirror/lint'
-import * as csstree from 'css-tree'
+import type { Diagnostic } from "@codemirror/lint"
+import type { EditorView } from "@codemirror/view"
+import { linter } from "@codemirror/lint"
+import * as csstree from "css-tree"
 
 export interface CSSLintError {
   message: string
   line: number
   column: number
-  severity: 'error' | 'warning'
+  severity: "error" | "warning"
 }
 
 export interface CSSLintResult {
@@ -46,7 +46,7 @@ export function lintCSS(css: string): CSSLintResult {
           message: error.message,
           line: err.line || 1,
           column: err.column || 1,
-          severity: 'error',
+          severity: "error",
         })
       },
     })
@@ -61,7 +61,7 @@ export function lintCSS(css: string): CSSLintResult {
       message: err.message || `Failed to parse CSS: ${(error as Error).message}`,
       line: err.line || 1,
       column: err.column || 1,
-      severity: 'error',
+      severity: "error",
     })
   }
 

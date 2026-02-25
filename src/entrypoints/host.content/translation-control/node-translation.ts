@@ -1,10 +1,10 @@
-import type { Point } from '@/types/dom'
-import { getLocalConfig } from '@/utils/config/storage'
-import { DEFAULT_CONFIG } from '@/utils/constants/config'
-import { HOTKEY_EVENT_KEYS } from '@/utils/constants/hotkeys'
-import { isEditable } from '@/utils/host/dom/filter'
-import { removeOrShowNodeTranslation } from '@/utils/host/translate/node-manipulation'
-import { logger } from '@/utils/logger'
+import type { Point } from "@/types/dom"
+import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
+import { isEditable } from "@/utils/host/dom/filter"
+import { removeOrShowNodeTranslation } from "@/utils/host/translate/node-manipulation"
+import { logger } from "@/utils/logger"
 
 export function registerNodeTranslationTriggers() {
   const CLICK_AND_HOLD_TRIGGER_MS = 1000
@@ -38,14 +38,14 @@ export function registerNodeTranslationTriggers() {
   }
 
   // Listen the hotkey means the user can't press or hold any other key during the hotkey is holding
-  document.addEventListener('keydown', async (e) => {
+  document.addEventListener("keydown", async (e) => {
     if (!await isEnabled())
       return
     if (e.target instanceof HTMLElement && isEditable(e.target))
       return
 
     const hotkey = await getHotkey()
-    if (hotkey === 'clickAndHold')
+    if (hotkey === "clickAndHold")
       return
     if (e.key === HOTKEY_EVENT_KEYS[hotkey]) {
       if (!isHotkeyPressed) {
@@ -55,7 +55,7 @@ export function registerNodeTranslationTriggers() {
           if (isHotkeySessionPure && isHotkeyPressed) {
             const config = await getLocalConfig()
             if (!config) {
-              logger.error('Global config is not initialized')
+              logger.error("Global config is not initialized")
               return
             }
             void removeOrShowNodeTranslation(mousePosition, config)
@@ -80,13 +80,13 @@ export function registerNodeTranslationTriggers() {
     }
   })
 
-  document.addEventListener('keyup', async (e) => {
+  document.addEventListener("keyup", async (e) => {
     if (!await isEnabled())
       return
     if (e.target instanceof HTMLElement && isEditable(e.target))
       return
     const hotkey = await getHotkey()
-    if (hotkey === 'clickAndHold')
+    if (hotkey === "clickAndHold")
       return
     if (e.key === HOTKEY_EVENT_KEYS[hotkey]) {
       // translate if user releases the hotkey and session is pure
@@ -98,7 +98,7 @@ export function registerNodeTranslationTriggers() {
         if (!actionTriggered) {
           const config = await getLocalConfig()
           if (!config) {
-            logger.error('Global config is not initialized')
+            logger.error("Global config is not initialized")
             return
           }
           void removeOrShowNodeTranslation(mousePosition, config)
@@ -110,7 +110,7 @@ export function registerNodeTranslationTriggers() {
     }
   })
 
-  document.addEventListener('mousedown', async (event) => {
+  document.addEventListener("mousedown", async (event) => {
     if (!await isEnabled())
       return
     if (event.button !== 0)
@@ -119,7 +119,7 @@ export function registerNodeTranslationTriggers() {
       return
 
     const hotkey = await getHotkey()
-    if (hotkey !== 'clickAndHold')
+    if (hotkey !== "clickAndHold")
       return
 
     isMousePressed = true
@@ -132,7 +132,7 @@ export function registerNodeTranslationTriggers() {
         return
       const config = await getLocalConfig()
       if (!config) {
-        logger.error('Global config is not initialized')
+        logger.error("Global config is not initialized")
         return
       }
       void removeOrShowNodeTranslation(mousePressPosition, config)
@@ -140,7 +140,7 @@ export function registerNodeTranslationTriggers() {
     }, CLICK_AND_HOLD_TRIGGER_MS)
   })
 
-  document.addEventListener('mouseup', (event) => {
+  document.addEventListener("mouseup", (event) => {
     if (event.button !== 0)
       return
     if (!isMousePressed && !clickAndHoldTimerId)
@@ -152,7 +152,7 @@ export function registerNodeTranslationTriggers() {
     clearClickAndHoldTimer()
   })
 
-  document.addEventListener('mousemove', (event) => {
+  document.addEventListener("mousemove", (event) => {
     mousePosition.x = event.clientX
     mousePosition.y = event.clientY
 

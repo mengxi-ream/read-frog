@@ -1,23 +1,23 @@
-import type { BatchQueueConfig } from '@/types/config/translate'
-import { i18n } from '#imports'
-import { useAtom } from 'jotai'
-import { toast } from 'sonner'
-import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
-import { Input } from '@/components/ui/base-ui/input'
-import { batchQueueConfigSchema } from '@/types/config/translate'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from '@/utils/constants/translate'
-import { sendMessage } from '@/utils/message'
-import { ConfigCard } from '../../components/config-card'
+import type { BatchQueueConfig } from "@/types/config/translate"
+import { i18n } from "#imports"
+import { useAtom } from "jotai"
+import { toast } from "sonner"
+import { HelpTooltip } from "@/components/help-tooltip"
+import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
+import { Input } from "@/components/ui/base-ui/input"
+import { batchQueueConfigSchema } from "@/types/config/translate"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from "@/utils/constants/translate"
+import { sendMessage } from "@/utils/message"
+import { ConfigCard } from "../../components/config-card"
 
 type KeyOfBatchQueueConfig = keyof BatchQueueConfig
 
 export function SubtitlesRequestBatch() {
   return (
     <ConfigCard
-      title={i18n.t('options.videoSubtitles.batchQueueConfig.title')}
-      description={i18n.t('options.videoSubtitles.batchQueueConfig.description')}
+      title={i18n.t("options.videoSubtitles.batchQueueConfig.title")}
+      description={i18n.t("options.videoSubtitles.batchQueueConfig.description")}
     >
       <FieldGroup>
         <SubtitlesBatchNumberSelector property="maxCharactersPerBatch" />
@@ -29,12 +29,12 @@ export function SubtitlesRequestBatch() {
 
 const propertyInfo = {
   maxCharactersPerBatch: {
-    label: i18n.t('options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.title'),
-    description: i18n.t('options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.description'),
+    label: i18n.t("options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.title"),
+    description: i18n.t("options.videoSubtitles.batchQueueConfig.maxCharactersPerBatch.description"),
   },
   maxItemsPerBatch: {
-    label: i18n.t('options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.title'),
-    description: i18n.t('options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.description'),
+    label: i18n.t("options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.title"),
+    description: i18n.t("options.videoSubtitles.batchQueueConfig.maxItemsPerBatch.description"),
   },
 }
 
@@ -57,7 +57,7 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
       <FieldContent className="self-center">
         <FieldLabel htmlFor={`subtitles-batch-${property}`}>
           {info.label}
-          <Hint content={info.description} />
+          <HelpTooltip>{info.description}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Input
@@ -77,7 +77,7 @@ function SubtitlesBatchNumberSelector({ property }: { property: KeyOfBatchQueueC
                 [property]: newConfigValue,
               },
             })
-            void sendMessage('setSubtitlesBatchQueueConfig', {
+            void sendMessage("setSubtitlesBatchQueueConfig", {
               [property]: newConfigValue,
             })
           }

@@ -5,7 +5,7 @@ export function migrate(oldConfig: any): any {
     ...oldProvidersConfig,
     ollama: {
       apiKey: undefined,
-      baseURL: 'http://127.0.0.1:11434/v1',
+      baseURL: "http://127.0.0.1:11434/v1",
     },
   }
 
@@ -14,9 +14,9 @@ export function migrate(oldConfig: any): any {
   const newTranslateModels = {
     ...oldTranslateModels,
     ollama: {
-      model: 'gemma3:1b',
+      model: "gemma3:1b",
       isCustomModel: false,
-      customModel: '',
+      customModel: "",
     },
   }
 

@@ -1,12 +1,12 @@
-import type { Config } from '@/types/config/config'
-import { browser, storage } from '#imports'
-import { addBackup, isSameAsLatestBackup } from '@/utils/backup/storage'
-import { EXTENSION_VERSION } from '@/utils/constants/app'
-import { BACKUP_INTERVAL_MINUTES } from '@/utils/constants/backup'
-import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { logger } from '@/utils/logger'
+import type { Config } from "@/types/config/config"
+import { browser, storage } from "#imports"
+import { addBackup, isSameAsLatestBackup } from "@/utils/backup/storage"
+import { EXTENSION_VERSION } from "@/utils/constants/app"
+import { BACKUP_INTERVAL_MINUTES } from "@/utils/constants/backup"
+import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY } from "@/utils/constants/config"
+import { logger } from "@/utils/logger"
 
-const CONFIG_BACKUP_ALARM = 'config-backup'
+const CONFIG_BACKUP_ALARM = "config-backup"
 
 export function setUpConfigBackup() {
   // Set up periodic alarm for config backup
@@ -22,7 +22,7 @@ export function setUpConfigBackup() {
     }
   })
 
-  logger.info('Config auto-backup scheduled every', BACKUP_INTERVAL_MINUTES, 'minutes')
+  logger.info("Config auto-backup scheduled every", BACKUP_INTERVAL_MINUTES, "minutes")
 }
 
 async function performAutoBackup() {
@@ -31,21 +31,21 @@ async function performAutoBackup() {
     const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
 
     if (!config) {
-      logger.warn('No config found to backup')
+      logger.warn("No config found to backup")
       return
     }
 
     if (await isSameAsLatestBackup(config, CONFIG_SCHEMA_VERSION)) {
-      logger.info('Skipping backup: config is identical to latest backup')
+      logger.info("Skipping backup: config is identical to latest backup")
       return
     }
 
     // Add backup
     await addBackup(config, EXTENSION_VERSION)
 
-    logger.info('Auto backup completed successfully')
+    logger.info("Auto backup completed successfully")
   }
   catch (error) {
-    logger.error('Failed to perform auto backup:', error)
+    logger.error("Failed to perform auto backup:", error)
   }
 }

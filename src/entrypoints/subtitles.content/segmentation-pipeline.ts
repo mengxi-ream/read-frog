@@ -1,8 +1,8 @@
-import type { SubtitlesFragment } from '@/utils/subtitles/types'
-import { getLocalConfig } from '@/utils/config/storage'
-import { PROCESS_LOOK_AHEAD_MS } from '@/utils/constants/subtitles'
-import { aiSegmentBlock } from '@/utils/subtitles/processor/ai-segmentation'
-import { optimizeSubtitles } from '@/utils/subtitles/processor/optimizer'
+import type { SubtitlesFragment } from "@/utils/subtitles/types"
+import { getLocalConfig } from "@/utils/config/storage"
+import { PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
+import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
+import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 
 export class SegmentationPipeline {
   // Segmented results, read by translation pipeline

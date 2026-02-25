@@ -1,9 +1,9 @@
-import { i18n } from '#imports'
-import { LanguageControlPanel } from './components/language-control-panel'
-import { PromptSelector } from './components/prompt-selector'
-import { TextInput } from './components/text-input'
-import { TranslationPanel } from './components/translation-panel'
-import { TranslationServiceDropdown } from './components/translation-service-dropdown'
+import { i18n } from "#imports"
+import { LanguageControlPanel } from "./components/language-control-panel"
+import { PromptSelector } from "./components/prompt-selector"
+import { TextInput } from "./components/text-input"
+import { TranslationPanel } from "./components/translation-panel"
+import { TranslationServiceDropdown } from "./components/translation-service-dropdown"
 
 export default function App() {
   return (
@@ -11,7 +11,7 @@ export default function App() {
       <div className="max-w-6xl mx-auto">
         <header className="px-6 py-4">
           <h1 className="text-2xl font-semibold text-foreground">
-            {i18n.t('translationHub.title')}
+            {i18n.t("translationHub.title")}
           </h1>
         </header>
 

@@ -1,12 +1,12 @@
-import type { Browser } from '#imports'
-import type { Config } from '@/types/config/config'
-import { browser, i18n, storage } from '#imports'
-import { CONFIG_STORAGE_KEY } from '@/utils/constants/config'
-import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from '@/utils/constants/storage-keys'
-import { sendMessage } from '@/utils/message'
-import { ensureInitializedConfig } from './config'
+import type { Browser } from "#imports"
+import type { Config } from "@/types/config/config"
+import { browser, i18n, storage } from "#imports"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
+import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
+import { sendMessage } from "@/utils/message"
+import { ensureInitializedConfig } from "./config"
 
-const MENU_ID_TRANSLATE = 'read-frog-translate'
+const MENU_ID_TRANSLATE = "read-frog-translate"
 
 /**
  * Register all context menu event listeners synchronously
@@ -28,7 +28,7 @@ export function registerContextMenuListeners() {
 
   // Listen for tab updates (e.g., navigation)
   browser.tabs.onUpdated.addListener(async (tabId, changeInfo) => {
-    if (changeInfo.status === 'complete') {
+    if (changeInfo.status === "complete") {
       await updateTranslateMenuTitle(tabId)
     }
   })
@@ -40,9 +40,9 @@ export function registerContextMenuListeners() {
   browser.storage.session.onChanged.addListener(async (changes) => {
     for (const [key, change] of Object.entries(changes)) {
       // Check if this is a translation state change
-      if (key.startsWith(TRANSLATION_STATE_KEY_PREFIX.replace('session:', ''))) {
+      if (key.startsWith(TRANSLATION_STATE_KEY_PREFIX.replace("session:", ""))) {
         // Extract tabId from key (format: "translationState.{tabId}")
-        const parts = key.split('.')
+        const parts = key.split(".")
         const tabId = Number.parseInt(parts[1])
 
         if (!Number.isNaN(tabId)) {
@@ -87,8 +87,8 @@ async function updateContextMenuItems(config: Config) {
   if (translateEnabled) {
     browser.contextMenus.create({
       id: MENU_ID_TRANSLATE,
-      title: i18n.t('contextMenu.translate'),
-      contexts: ['page'],
+      title: i18n.t("contextMenu.translate"),
+      contexts: ["page"],
     })
   }
 
@@ -124,8 +124,8 @@ async function updateTranslateMenuTitle(tabId: number, enabled?: boolean) {
 
     await browser.contextMenus.update(MENU_ID_TRANSLATE, {
       title: isTranslated
-        ? i18n.t('contextMenu.showOriginal')
-        : i18n.t('contextMenu.translate'),
+        ? i18n.t("contextMenu.showOriginal")
+        : i18n.t("contextMenu.translate"),
     })
   }
   catch {
@@ -163,7 +163,7 @@ async function handleTranslateClick(tabId: number) {
   await storage.setItem(getTranslationStateKey(tabId), { enabled: newState })
 
   // Notify content script in that specific tab
-  void sendMessage('askManagerToTogglePageTranslation', { enabled: newState }, tabId)
+  void sendMessage("askManagerToTogglePageTranslation", { enabled: newState }, tabId)
 
   // Update menu title immediately
   await updateTranslateMenuTitle(tabId)

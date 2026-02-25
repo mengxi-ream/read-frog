@@ -17,21 +17,21 @@
  */
 
 const PROVIDER_KEY_MIGRATION: Record<string, string> = {
-  gemini: 'google',
-  grok: 'xai',
-  amazonBedrock: 'bedrock',
-  openaiCompatible: 'openai-compatible',
-  google: 'google-translate',
-  microsoft: 'microsoft-translate',
+  gemini: "google",
+  grok: "xai",
+  amazonBedrock: "bedrock",
+  openaiCompatible: "openai-compatible",
+  google: "google-translate",
+  microsoft: "microsoft-translate",
 }
 
 const PROVIDER_ID_MIGRATION: Record<string, string> = {
-  'gemini-default': 'google-default',
-  'xai-default': 'xai-default',
-  'amazon-bedrock-default': 'bedrock-default',
-  'openai-compatible-default': 'openai-compatible-default',
-  'google-default': 'google-translate-default',
-  'microsoft-default': 'microsoft-translate-default',
+  "gemini-default": "google-default",
+  "xai-default": "xai-default",
+  "amazon-bedrock-default": "bedrock-default",
+  "openai-compatible-default": "openai-compatible-default",
+  "google-default": "google-translate-default",
+  "microsoft-default": "microsoft-translate-default",
 }
 
 export function migrate(oldConfig: any): any {

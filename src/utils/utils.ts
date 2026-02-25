@@ -1,4 +1,4 @@
-import { browser } from '#imports'
+import { browser } from "#imports"
 
 export function getActiveTabUrl() {
   return browser.tabs.query({ active: true, currentWindow: true }).then(tabs => tabs[0].url)
@@ -17,7 +17,7 @@ export function ensureKeyInMap<K, V>(map: Map<K, V>, key: K, factory: () => V): 
 }
 
 export function addThousandsSeparator(num: number) {
-  return num.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ',')
+  return num.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",")
 }
 
 export function numberToPercentage(num: number) {
@@ -30,9 +30,9 @@ export function getDateFromDaysBack(daysBack: number) {
   return date
 }
 
-export function getReviewUrl(utmSource: string = 'extension'): string {
-  if (import.meta.env.BROWSER === 'edge') {
-    return 'https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-i/cbcbomlgikfbdnoaohcjfledcoklcjbo?form=MA13IW'
+export function getReviewUrl(utmSource: string = "extension"): string {
+  if (import.meta.env.BROWSER === "edge") {
+    return "https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-i/cbcbomlgikfbdnoaohcjfledcoklcjbo?form=MA13IW"
   }
   return `https://chromewebstore.google.com/detail/read-frog-open-source-imm/modkelfkcfjpgbfmnbnllalkiogfofhb/reviews?utm_source=${utmSource}`
 }

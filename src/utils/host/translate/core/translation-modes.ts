@@ -1,25 +1,25 @@
-import type { Config } from '@/types/config/config'
-import type { TranslationMode } from '@/types/config/translate'
-import type { TransNode } from '@/types/dom'
+import type { Config } from "@/types/config/config"
+import type { TranslationMode } from "@/types/config/translate"
+import type { TransNode } from "@/types/dom"
 import {
   CONTENT_WRAPPER_CLASS,
   NOTRANSLATE_CLASS,
   TRANSLATION_MODE_ATTRIBUTE,
   WALKED_ATTRIBUTE,
-} from '../../../constants/dom-labels'
-import { batchDOMOperation } from '../../dom/batch-dom'
-import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from '../../dom/filter'
-import { unwrapDeepestOnlyHTMLChild } from '../../dom/find'
-import { getOwnerDocument } from '../../dom/node'
-import { extractTextContent } from '../../dom/traversal'
-import { removeTranslatedWrapperWithRestore } from '../dom/translation-cleanup'
-import { insertTranslatedNodeIntoWrapper } from '../dom/translation-insertion'
-import { findPreviousTranslatedWrapperInside } from '../dom/translation-wrapper'
-import { shouldFilterSmallParagraph } from '../filter-small-paragraph'
-import { setTranslationDirAndLang } from '../translation-attributes'
-import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from '../ui/spinner'
-import { isNumericContent } from '../ui/translation-utils'
-import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from './translation-state'
+} from "../../../constants/dom-labels"
+import { batchDOMOperation } from "../../dom/batch-dom"
+import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
+import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
+import { getOwnerDocument } from "../../dom/node"
+import { extractTextContent } from "../../dom/traversal"
+import { removeTranslatedWrapperWithRestore } from "../dom/translation-cleanup"
+import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
+import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
+import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
+import { setTranslationDirAndLang } from "../translation-attributes"
+import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
+import { isNumericContent } from "../ui/translation-utils"
+import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from "./translation-state"
 
 export async function translateNodes(
   nodes: ChildNode[],
@@ -29,10 +29,10 @@ export async function translateNodes(
   forceBlockTranslation: boolean = false,
 ): Promise<void> {
   const translationMode = config.translate.mode
-  if (translationMode === 'translationOnly') {
+  if (translationMode === "translationOnly") {
     await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
   }
-  else if (translationMode === 'bilingual') {
+  else if (translationMode === "bilingual") {
     await translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
   }
 }
@@ -74,7 +74,7 @@ export async function translateNodesBilingualMode(
       }
     }
 
-    const textContent = transNodes.map(node => extractTextContent(node, config)).join('').trim()
+    const textContent = transNodes.map(node => extractTextContent(node, config)).join("").trim()
     if (!textContent || isNumericContent(textContent))
       return
 
@@ -82,9 +82,9 @@ export async function translateNodesBilingualMode(
       return
 
     const ownerDoc = getOwnerDocument(targetNode)
-    const translatedWrapperNode = ownerDoc.createElement('span')
+    const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
-    translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, 'bilingual' satisfies TranslationMode)
+    translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "bilingual" satisfies TranslationMode)
     translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
     setTranslationDirAndLang(translatedWrapperNode, config)
     const spinner = createSpinnerInside(translatedWrapperNode)
@@ -105,12 +105,12 @@ export async function translateNodesBilingualMode(
 
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
 
-    const translatedText = realTranslatedText === textContent ? '' : realTranslatedText
+    const translatedText = realTranslatedText === textContent ? "" : realTranslatedText
 
     if (!translatedText) {
       // Only remove wrapper if translation returned empty (not needed),
       // but keep it for error display (undefined)
-      if (translatedText === '') {
+      if (translatedText === "") {
         // Batch the remove operation to execute remove operation after insert operation
         batchDOMOperation(() => translatedWrapperNode.remove())
       }
@@ -191,7 +191,7 @@ export async function translateNodeTranslationOnlyMode(
 
     const parentNode = targetNode.parentElement
     if (!parentNode) {
-      console.error('targetNode.parentElement is not HTMLElement', targetNode.parentElement)
+      console.error("targetNode.parentElement is not HTMLElement", targetNode.parentElement)
       return
     }
     const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode.parentElement, walkId)
@@ -216,7 +216,7 @@ export async function translateNodeTranslationOnlyMode(
       }
     }
 
-    const innerTextContent = transNodes.map(node => extractTextContent(node, config)).join('')
+    const innerTextContent = transNodes.map(node => extractTextContent(node, config)).join("")
     if (!innerTextContent.trim() || isNumericContent(innerTextContent))
       return
 
@@ -227,8 +227,8 @@ export async function translateNodeTranslationOnlyMode(
       if (!content)
         return content
 
-      let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, '')
-      cleanedContent = cleanedContent.replace(/<!--[\s\S]*?-->/g, ' ')
+      let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, "")
+      cleanedContent = cleanedContent.replace(/<!--[\s\S]*?-->/g, " ")
 
       return cleanedContent
     }
@@ -246,16 +246,16 @@ export async function translateNodeTranslationOnlyMode(
       return node.outerHTML
     }
 
-    const textContent = cleanTextContent(transNodes.map(getStringFormatFromNode).join(''))
+    const textContent = cleanTextContent(transNodes.map(getStringFormatFromNode).join(""))
     if (!textContent)
       return
 
     const ownerDoc = getOwnerDocument(targetNode)
-    const translatedWrapperNode = ownerDoc.createElement('span')
+    const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
-    translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, 'translationOnly' satisfies TranslationMode)
+    translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "translationOnly" satisfies TranslationMode)
     translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
-    translatedWrapperNode.style.display = 'contents'
+    translatedWrapperNode.style.display = "contents"
     setTranslationDirAndLang(translatedWrapperNode, config)
     const spinner = createSpinnerInside(translatedWrapperNode)
 

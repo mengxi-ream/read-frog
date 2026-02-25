@@ -1,91 +1,91 @@
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
-  'default': {
-    description: 'add empty autoTranslateLanguages',
+  "default": {
+    description: "add empty autoTranslateLanguages",
     config: {
       language: {
-        detectedCode: 'eng',
-        sourceCode: 'auto',
-        targetCode: 'jpn',
-        level: 'intermediate',
+        detectedCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+        level: "intermediate",
       },
       providersConfig: {
         openai: {
-          apiKey: 'sk-1234567890',
-          baseURL: 'https://api.openai.com/v1',
+          apiKey: "sk-1234567890",
+          baseURL: "https://api.openai.com/v1",
         },
         deepseek: {
           apiKey: undefined,
-          baseURL: 'https://api.deepseek.com/v1',
+          baseURL: "https://api.deepseek.com/v1",
         },
         gemini: {
           apiKey: undefined,
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
+          baseURL: "https://generativelanguage.googleapis.com/v1beta",
         },
         deeplx: {
           apiKey: undefined,
-          baseURL: 'https://deeplx.vercel.app',
+          baseURL: "https://deeplx.vercel.app",
         },
       },
       read: {
-        provider: 'openai',
+        provider: "openai",
         models: {
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           gemini: {
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
       },
       translate: {
-        provider: 'microsoft',
+        provider: "microsoft",
         models: {
           microsoft: null,
           google: null,
           deeplx: null,
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           gemini: {
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
-        mode: 'bilingual',
+        mode: "bilingual",
         node: {
           enabled: true,
-          hotkey: 'Control',
+          hotkey: "Control",
         },
         page: {
-          range: 'main',
-          autoTranslatePatterns: ['news.ycombinator.com'],
+          range: "main",
+          autoTranslatePatterns: ["news.ycombinator.com"],
           autoTranslateLanguages: [],
         },
         promptsConfig: {
-          prompt: 'default',
+          prompt: "default",
           patterns: [
             {
-              id: 'default',
-              name: 'default',
+              id: "default",
+              name: "default",
               prompt: `You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.
 
 ## Translation Rules
@@ -104,8 +104,8 @@ Translate to {{targetLang}}:
           capacity: 300,
           rate: 5,
         },
-        translationNodeStyle: 'default',
-        customAutoTranslateShortcutKey: ['alt', 'q'],
+        translationNodeStyle: "default",
+        customAutoTranslateShortcutKey: ["alt", "q"],
       },
       floatingButton: {
         enabled: true,
@@ -118,91 +118,91 @@ Translate to {{targetLang}}:
       selectionToolbar: { enabled: true },
     },
   },
-  'complex-config-from-v020': {
-    description: 'Add empty autoTranslateLanguages',
+  "complex-config-from-v020": {
+    description: "Add empty autoTranslateLanguages",
     config: {
       language: {
-        detectedCode: 'spa',
-        sourceCode: 'spa',
-        targetCode: 'eng',
-        level: 'advanced',
+        detectedCode: "spa",
+        sourceCode: "spa",
+        targetCode: "eng",
+        level: "advanced",
       },
       providersConfig: {
         openai: {
-          apiKey: 'sk-custom-prompt-key',
-          baseURL: 'https://api.openai.com/v1',
+          apiKey: "sk-custom-prompt-key",
+          baseURL: "https://api.openai.com/v1",
         },
         deepseek: {
-          apiKey: 'ds-custom',
-          baseURL: 'https://api.custom.com/v1',
+          apiKey: "ds-custom",
+          baseURL: "https://api.custom.com/v1",
         },
         gemini: {
           apiKey: undefined,
-          baseURL: '',
+          baseURL: "",
         },
         deeplx: {
           apiKey: undefined,
-          baseURL: 'https://deeplx.vercel.app',
+          baseURL: "https://deeplx.vercel.app",
         },
       },
       read: {
-        provider: 'deepseek',
+        provider: "deepseek",
         models: {
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-5-custom',
+            customModel: "gpt-5-custom",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: true,
-            customModel: 'deepseek-v4-pro',
+            customModel: "deepseek-v4-pro",
           },
           gemini: {
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
       },
       translate: {
-        provider: 'openai',
+        provider: "openai",
         models: {
           microsoft: null,
           google: null,
           deeplx: null,
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'translate-gpt-custom',
+            customModel: "translate-gpt-custom",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           gemini: {
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
-        mode: 'translationOnly',
+        mode: "translationOnly",
         node: {
           enabled: true,
-          hotkey: 'Alt',
+          hotkey: "Alt",
         },
         page: {
-          range: 'all',
-          autoTranslatePatterns: ['spanish-news.com', 'elmundo.es'],
+          range: "all",
+          autoTranslatePatterns: ["spanish-news.com", "elmundo.es"],
           autoTranslateLanguages: [],
         },
         promptsConfig: {
-          prompt: '123e4567-e89b-12d3-a456-426614174000',
+          prompt: "123e4567-e89b-12d3-a456-426614174000",
           patterns: [
             {
-              id: 'default',
-              name: 'default',
+              id: "default",
+              name: "default",
               prompt: `You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.
 
 ## Translation Rules
@@ -216,9 +216,9 @@ Translate to {{targetLang}}:
 `,
             },
             {
-              id: '123e4567-e89b-12d3-a456-426614174000',
-              name: 'Technical Translation',
-              prompt: 'Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}',
+              id: "123e4567-e89b-12d3-a456-426614174000",
+              name: "Technical Translation",
+              prompt: "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
             },
           ],
         },
@@ -226,13 +226,13 @@ Translate to {{targetLang}}:
           capacity: 400,
           rate: 8,
         },
-        translationNodeStyle: 'blur',
-        customAutoTranslateShortcutKey: ['alt', 'b'],
+        translationNodeStyle: "blur",
+        customAutoTranslateShortcutKey: ["alt", "b"],
       },
       floatingButton: {
         enabled: true,
         position: 0.75,
-        disabledFloatingButtonPatterns: ['github.com'],
+        disabledFloatingButtonPatterns: ["github.com"],
       },
       sideContent: {
         width: 700,

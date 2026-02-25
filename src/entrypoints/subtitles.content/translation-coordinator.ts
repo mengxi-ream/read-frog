@@ -1,9 +1,9 @@
-import type { SegmentationPipeline } from './segmentation-pipeline'
-import type { SubtitlesVideoContext } from '@/utils/subtitles/processor/translator'
-import type { SubtitlesFragment, SubtitlesState } from '@/utils/subtitles/types'
-import { getLocalConfig } from '@/utils/config/storage'
-import { TRANSLATE_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from '@/utils/constants/subtitles'
-import { translateSubtitles } from '@/utils/subtitles/processor/translator'
+import type { SegmentationPipeline } from "./segmentation-pipeline"
+import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
+import type { SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
+import { getLocalConfig } from "@/utils/config/storage"
+import { TRANSLATE_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
+import { translateSubtitles } from "@/utils/subtitles/processor/translator"
 
 export interface TranslationCoordinatorOptions {
   getFragments: () => SubtitlesFragment[]
@@ -18,7 +18,8 @@ export class TranslationCoordinator {
   private translatedStarts = new Set<number>()
   private failedStarts = new Set<number>()
   private isTranslating = false
-  private videoContext: SubtitlesVideoContext = { videoTitle: '', subtitlesTextContent: '' }
+  private lastEmittedState: SubtitlesState = "idle"
+  private videoContext: SubtitlesVideoContext = { videoTitle: "", subtitlesTextContent: "" }
 
   private getFragments: () => SubtitlesFragment[]
   private getVideoElement: () => HTMLVideoElement | null
@@ -43,11 +44,11 @@ export class TranslationCoordinator {
     if (!video)
       return
 
-    video.addEventListener('timeupdate', this.handleTranslationTick)
-    video.addEventListener('seeked', this.handleTranslationTick)
+    video.addEventListener("timeupdate", this.handleTranslationTick)
+    video.addEventListener("seeked", this.handleTranslationTick)
 
     if (this.segmentationPipeline) {
-      video.addEventListener('seeked', this.handleSeek)
+      video.addEventListener("seeked", this.handleSeek)
       this.segmentationPipeline.start()
     }
 
@@ -58,9 +59,9 @@ export class TranslationCoordinator {
     const video = this.getVideoElement()
     if (!video)
       return
-    video.removeEventListener('timeupdate', this.handleTranslationTick)
-    video.removeEventListener('seeked', this.handleTranslationTick)
-    video.removeEventListener('seeked', this.handleSeek)
+    video.removeEventListener("timeupdate", this.handleTranslationTick)
+    video.removeEventListener("seeked", this.handleTranslationTick)
+    video.removeEventListener("seeked", this.handleSeek)
     this.segmentationPipeline?.stop()
   }
 
@@ -69,7 +70,8 @@ export class TranslationCoordinator {
     this.translatedStarts.clear()
     this.failedStarts.clear()
     this.isTranslating = false
-    this.videoContext = { videoTitle: '', subtitlesTextContent: '' }
+    this.lastEmittedState = "idle"
+    this.videoContext = { videoTitle: "", subtitlesTextContent: "" }
   }
 
   clearFailed() {
@@ -81,21 +83,19 @@ export class TranslationCoordinator {
     if (!video)
       return
 
-    // Heartbeat: ensure segmentation loop keeps running
+    const currentTimeMs = video.currentTime * 1000
+    const fragments = this.getFragments()
+
+    this.updateLoadingStateAt(currentTimeMs, fragments)
+
     if (this.segmentationPipeline && !this.segmentationPipeline.isRunning
       && this.segmentationPipeline.hasUnprocessedChunks()) {
-      const currentTimeMs = video.currentTime * 1000
-      const fragments = this.segmentationPipeline.processedFragments
-      const currentSub = fragments.find(f => f.start <= currentTimeMs && f.end > currentTimeMs)
-      if (!currentSub || !this.translatedStarts.has(currentSub.start)) {
-        this.onStateChange('segmenting')
-      }
       this.segmentationPipeline.restart()
     }
 
     if (this.isTranslating)
       return
-    void this.translateNearby(video.currentTime * 1000)
+    void this.translateNearby(currentTimeMs)
   }
 
   private async translateNearby(currentTimeMs: number) {
@@ -109,13 +109,8 @@ export class TranslationCoordinator {
         && f.start <= currentTimeMs + TRANSLATE_LOOK_AHEAD_MS)
       .slice(0, TRANSLATION_BATCH_SIZE)
 
-    if (batch.length === 0)
+    if (batch.length === 0) {
       return
-
-    const currentSub = fragments.find(f => f.start <= currentTimeMs && f.end > currentTimeMs)
-
-    if (currentSub && !this.translatedStarts.has(currentSub.start)) {
-      this.onStateChange('processing')
     }
 
     this.isTranslating = true
@@ -128,7 +123,10 @@ export class TranslationCoordinator {
         this.translatedStarts.add(f.start)
       })
       this.onTranslated(translated)
-      this.onStateChange('idle')
+
+      const latestTimeMs = this.getCurrentVideoTimeMs(currentTimeMs)
+      const latestFragments = this.getFragments()
+      this.updateLoadingStateAt(latestTimeMs, latestFragments)
     }
     catch (error) {
       batch.forEach((f) => {
@@ -138,17 +136,47 @@ export class TranslationCoordinator {
 
       const config = await getLocalConfig()
       const displayMode = config?.videoSubtitles?.style.displayMode
-      const fallback = displayMode === 'translationOnly'
+      const fallback = displayMode === "translationOnly"
         ? batch.map(f => ({ ...f, translation: f.text }))
-        : batch.map(f => ({ ...f, translation: '' }))
+        : batch.map(f => ({ ...f, translation: "" }))
       this.onTranslated(fallback)
 
       const errorMessage = error instanceof Error ? error.message : String(error)
-      this.onStateChange('error', { message: errorMessage })
+      this.lastEmittedState = "error"
+      this.onStateChange("error", { message: errorMessage })
     }
     finally {
       this.isTranslating = false
     }
+  }
+
+  private getCurrentVideoTimeMs(fallbackTimeMs: number): number {
+    const video = this.getVideoElement()
+    if (!video) {
+      return fallbackTimeMs
+    }
+    return video.currentTime * 1000
+  }
+
+  private findActiveCue(
+    timeMs: number,
+    fragments: SubtitlesFragment[],
+  ): SubtitlesFragment | null {
+    return fragments.find(f => f.start <= timeMs && f.end > timeMs) ?? null
+  }
+
+  private updateLoadingStateAt(timeMs: number, fragments: SubtitlesFragment[]) {
+    const activeCue = this.findActiveCue(timeMs, fragments)
+
+    const nextState: SubtitlesState = activeCue && !this.translatedStarts.has(activeCue.start)
+      ? "loading"
+      : "idle"
+
+    if (nextState === this.lastEmittedState)
+      return
+
+    this.lastEmittedState = nextState
+    this.onStateChange(nextState)
   }
 
   private handleSeek = () => {

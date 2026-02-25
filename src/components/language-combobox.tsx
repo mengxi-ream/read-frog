@@ -1,11 +1,11 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import { i18n } from '#imports'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import { i18n } from "#imports"
 import {
   LANG_CODE_TO_LOCALE_NAME,
   langCodeISO6393Schema,
-} from '@read-frog/definitions'
-import { camelCase } from 'case-anything'
-import { useMemo } from 'react'
+} from "@read-frog/definitions"
+import { camelCase } from "case-anything"
+import { useMemo } from "react"
 import {
   Combobox,
   ComboboxContent,
@@ -13,10 +13,10 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '@/components/ui/base-ui/combobox'
+} from "@/components/ui/base-ui/combobox"
 
 interface LanguageItem {
-  value: LangCodeISO6393 | 'auto'
+  value: LangCodeISO6393 | "auto"
   label: string
 }
 
@@ -28,7 +28,7 @@ function getLanguageItems(detectedLangCode?: LangCodeISO6393): LanguageItem[] {
 
   if (detectedLangCode) {
     items.unshift({
-      value: 'auto',
+      value: "auto",
       label: `${i18n.t(`languages.${camelCase(detectedLangCode)}` as Parameters<typeof i18n.t>[0])} (${LANG_CODE_TO_LOCALE_NAME[detectedLangCode]})`,
     })
   }
@@ -47,8 +47,8 @@ function AutoBadge() {
 }
 
 interface LanguageComboboxProps {
-  value: LangCodeISO6393 | 'auto'
-  onValueChange: (value: LangCodeISO6393 | 'auto') => void
+  value: LangCodeISO6393 | "auto"
+  onValueChange: (value: LangCodeISO6393 | "auto") => void
   detectedLangCode?: LangCodeISO6393
   placeholder?: string
   className?: string
@@ -79,18 +79,18 @@ export function LanguageCombobox({
     >
       <ComboboxInput
         className={className}
-        placeholder={placeholder ?? i18n.t('translationHub.searchLanguages')}
+        placeholder={placeholder ?? i18n.t("translationHub.searchLanguages")}
       />
       <ComboboxContent className="w-fit">
         <ComboboxList>
           {(item: LanguageItem) => (
             <ComboboxItem key={item.value} value={item}>
               {item.label}
-              {item.value === 'auto' && <AutoBadge />}
+              {item.value === "auto" && <AutoBadge />}
             </ComboboxItem>
           )}
         </ComboboxList>
-        <ComboboxEmpty>{i18n.t('translationHub.noLanguagesFound')}</ComboboxEmpty>
+        <ComboboxEmpty>{i18n.t("translationHub.noLanguagesFound")}</ComboboxEmpty>
       </ComboboxContent>
     </Combobox>
   )

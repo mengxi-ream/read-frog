@@ -1,61 +1,61 @@
-import type { SubtitlesFragment } from '../types'
-import { PAUSE_TIMEOUT_MS, SENTENCE_END_PATTERN } from '@/utils/constants/subtitles'
-import { getMaxLength, getTextLength, isCJKLanguage } from '@/utils/subtitles/utils'
+import type { SubtitlesFragment } from "../types"
+import { PAUSE_TIMEOUT_MS, SENTENCE_END_PATTERN } from "@/utils/constants/subtitles"
+import { getMaxLength, getTextLength, isCJKLanguage } from "@/utils/subtitles/utils"
 
 const QUALITY_LENGTH_THRESHOLD = 250
 const QUALITY_PERCENTAGE_THRESHOLD = 0.2
 
 const PAUSE_WORDS = new Set([
-  'actually',
-  'also',
-  'although',
-  'and',
-  'anyway',
-  'as',
-  'basically',
-  'because',
-  'but',
-  'eventually',
-  'frankly',
-  'honestly',
-  'hopefully',
-  'however',
-  'if',
-  'instead',
-  'just',
-  'like',
-  'literally',
-  'maybe',
-  'meanwhile',
-  'nevertheless',
-  'nonetheless',
-  'now',
-  'okay',
-  'or',
-  'otherwise',
-  'perhaps',
-  'personally',
-  'probably',
-  'right',
-  'since',
-  'so',
-  'suddenly',
-  'then',
-  'therefore',
-  'though',
-  'thus',
-  'unless',
-  'until',
-  'well',
-  'while',
+  "actually",
+  "also",
+  "although",
+  "and",
+  "anyway",
+  "as",
+  "basically",
+  "because",
+  "but",
+  "eventually",
+  "frankly",
+  "honestly",
+  "hopefully",
+  "however",
+  "if",
+  "instead",
+  "just",
+  "like",
+  "literally",
+  "maybe",
+  "meanwhile",
+  "nevertheless",
+  "nonetheless",
+  "now",
+  "okay",
+  "or",
+  "otherwise",
+  "perhaps",
+  "personally",
+  "probably",
+  "right",
+  "since",
+  "so",
+  "suddenly",
+  "then",
+  "therefore",
+  "though",
+  "thus",
+  "unless",
+  "until",
+  "well",
+  "while",
 ])
 
 function cleanText(text: string): string {
-  return text.replace(/^>>\s*/, '').replace(/>>/g, ' ').trim()
+  return text.replace(/^>>\s*/, "").replace(/>>/g, " ").trim()
 }
 
 function getFirstWord(text: string): string {
-  return text.toLowerCase().split(/\s+/)[0] || ''
+  return text.toLowerCase().split(/\s+/)[0] || ""
 }
 
 function isQualityPoor(fragments: SubtitlesFragment[]): boolean {
@@ -80,7 +80,7 @@ function processSubtitles(
   const buffer: BufferSegment[] = []
   let bufferLength = 0
   const isCJK = isCJKLanguage(language)
-  const separator = isCJK ? '' : ' '
+  const separator = isCJK ? "" : " "
   const maxLength = getMaxLength(isCJK)
 
   const flushBuffer = () => {

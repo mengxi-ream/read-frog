@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react'
-import { useId } from 'react'
-import { cn } from '@/utils/styles/utils'
+import type { ReactNode } from "react"
+import { useId } from "react"
+import { cn } from "@/utils/styles/utils"
 
 interface GradientBackgroundProps {
   children: ReactNode
@@ -24,14 +24,14 @@ export function GradientBackground({ children, className }: GradientBackgroundPr
 
   return (
     <div
-      className={cn('w-full py-8 flex items-center justify-center rounded-xl my-8', className)}
+      className={cn("w-full py-8 flex items-center justify-center rounded-xl my-8", className)}
       style={{
         backgroundImage: [
-          'radial-gradient(circle at 70% 10%, rgba(7 240 139 / 0.15), transparent)',
-          'radial-gradient(circle at 0% 80%, rgba(233 246 54 / 0.1), transparent)',
-          'radial-gradient(circle at 50% 50%, rgba(235 183 51 / 0.08), transparent)',
+          "radial-gradient(circle at 70% 10%, rgba(7 240 139 / 0.15), transparent)",
+          "radial-gradient(circle at 0% 80%, rgba(233 246 54 / 0.1), transparent)",
+          "radial-gradient(circle at 50% 50%, rgba(235 183 51 / 0.08), transparent)",
           `url("data:image/svg+xml,${encodeURIComponent(svg)}")`,
-        ].join(', '),
+        ].join(", "),
       }}
     >
       {children}

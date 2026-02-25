@@ -3,7 +3,7 @@ export class SubtitlesError extends Error {
 
   constructor(code: string) {
     super(code)
-    this.name = 'SubtitlesError'
+    this.name = "SubtitlesError"
     this.code = code
   }
 }
@@ -11,13 +11,13 @@ export class SubtitlesError extends Error {
 export class ToastSubtitlesError extends SubtitlesError {
   constructor(code: string) {
     super(code)
-    this.name = 'ToastSubtitlesError'
+    this.name = "ToastSubtitlesError"
   }
 }
 
 export class OverlaySubtitlesError extends SubtitlesError {
   constructor(code: string) {
     super(code)
-    this.name = 'OverlaySubtitlesError'
+    this.name = "OverlaySubtitlesError"
   }
 }

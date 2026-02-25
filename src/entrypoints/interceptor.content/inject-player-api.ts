@@ -1,4 +1,4 @@
-import type { PlayerDataResponse } from './utils'
+import type { PlayerDataResponse } from "./utils"
 import {
   ENSURE_SUBTITLES_REQUEST_TYPE,
   ENSURE_SUBTITLES_RESPONSE_TYPE,
@@ -7,9 +7,9 @@ import {
   TIMEDTEXT_WAIT_TIMEOUT_MS,
   WAIT_TIMEDTEXT_REQUEST_TYPE,
   WAIT_TIMEDTEXT_RESPONSE_TYPE,
-} from '@/utils/constants/subtitles'
-import { getCachedTimedtextUrl, setupTimedtextObserver, waitForTimedtextUrl } from './timedtext-observer'
-import { errorResponse, normalizeTracks, parseAudioTracks } from './utils'
+} from "@/utils/constants/subtitles"
+import { getCachedTimedtextUrl, setupTimedtextObserver, waitForTimedtextUrl } from "./timedtext-observer"
+import { errorResponse, normalizeTracks, parseAudioTracks } from "./utils"
 
 interface PlayerDataRequest {
   type: typeof PLAYER_DATA_REQUEST_TYPE
@@ -36,13 +36,13 @@ declare global {
 
 function findYoutubePlayer(): YouTubePlayer | null {
   return document.querySelector(
-    '.html5-video-player.playing-mode, .html5-video-player.paused-mode',
+    ".html5-video-player.playing-mode, .html5-video-player.paused-mode",
   )
 }
 
 export function injectPlayerApi(): void {
   setupTimedtextObserver()
-  window.addEventListener('message', handleMessage)
+  window.addEventListener("message", handleMessage)
 }
 
 function handleMessage(event: MessageEvent): void {
@@ -83,13 +83,13 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
     const player = findYoutubePlayer()
 
     if (!player)
-      return errorResponse(requestId, 'PLAYER_NOT_FOUND')
+      return errorResponse(requestId, "PLAYER_NOT_FOUND")
 
     const playerResponse = player.getPlayerResponse?.()
     const videoId = playerResponse?.videoDetails?.videoId
 
     if (!videoId || videoId !== expectedVideoId)
-      return errorResponse(requestId, 'VIDEO_ID_MISMATCH')
+      return errorResponse(requestId, "VIDEO_ID_MISMATCH")
 
     return {
       type: PLAYER_DATA_RESPONSE_TYPE,
@@ -101,10 +101,10 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
           playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [],
         ),
         audioCaptionTracks: parseAudioTracks(player.getAudioTrack?.()?.captionTracks),
-        device: window.ytcfg?.get?.('DEVICE') ?? null,
+        device: window.ytcfg?.get?.("DEVICE") ?? null,
         cver: player.getWebPlayerContextConfig?.()?.innertubeContextClientVersion ?? null,
         playerState: player.getPlayerState?.() ?? -1,
-        selectedTrackLanguageCode: player.getOption?.('captions', 'track')?.languageCode ?? null,
+        selectedTrackLanguageCode: player.getOption?.("captions", "track")?.languageCode ?? null,
         cachedTimedtextUrl: getCachedTimedtextUrl(videoId),
       },
     }
@@ -115,11 +115,11 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
 }
 
 function ensureSubtitlesEnabled(): void {
-  const button = document.querySelector('.ytp-subtitles-button') as HTMLElement | null
+  const button = document.querySelector(".ytp-subtitles-button") as HTMLElement | null
   if (!button)
     return
 
-  if (button.getAttribute('aria-pressed') === 'true')
+  if (button.getAttribute("aria-pressed") === "true")
     return
 
   const player = findYoutubePlayer()

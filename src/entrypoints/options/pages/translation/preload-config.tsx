@@ -1,22 +1,22 @@
-import type { PreloadConfig as PreloadConfigType } from '@/types/config/translate'
-import { i18n } from '#imports'
-import { useAtom } from 'jotai'
-import { toast } from 'sonner'
-import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
-import { Hint } from '@/components/ui/base-ui/hint'
-import { Input } from '@/components/ui/base-ui/input'
-import { preloadConfigSchema } from '@/types/config/translate'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD } from '@/utils/constants/translate'
-import { ConfigCard } from '../../components/config-card'
+import type { PreloadConfig as PreloadConfigType } from "@/types/config/translate"
+import { i18n } from "#imports"
+import { useAtom } from "jotai"
+import { toast } from "sonner"
+import { HelpTooltip } from "@/components/help-tooltip"
+import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
+import { Input } from "@/components/ui/base-ui/input"
+import { preloadConfigSchema } from "@/types/config/translate"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD } from "@/utils/constants/translate"
+import { ConfigCard } from "../../components/config-card"
 
 type KeyOfPreloadConfig = keyof PreloadConfigType
 
 export function PreloadConfig() {
   return (
     <ConfigCard
-      title={i18n.t('options.translation.preloadConfig.title')}
-      description={i18n.t('options.translation.preloadConfig.description')}
+      title={i18n.t("options.translation.preloadConfig.title")}
+      description={i18n.t("options.translation.preloadConfig.description")}
     >
       <FieldGroup>
         <PreloadNumberSelector property="margin" />
@@ -28,12 +28,12 @@ export function PreloadConfig() {
 
 const propertyInfo = {
   margin: {
-    label: () => i18n.t('options.translation.preloadConfig.margin.title'),
-    description: () => i18n.t('options.translation.preloadConfig.margin.description'),
+    label: () => i18n.t("options.translation.preloadConfig.margin.title"),
+    description: () => i18n.t("options.translation.preloadConfig.margin.description"),
   },
   threshold: {
-    label: () => i18n.t('options.translation.preloadConfig.threshold.title'),
-    description: () => i18n.t('options.translation.preloadConfig.threshold.description'),
+    label: () => i18n.t("options.translation.preloadConfig.threshold.title"),
+    description: () => i18n.t("options.translation.preloadConfig.threshold.description"),
   },
 }
 
@@ -55,7 +55,7 @@ function PreloadNumberSelector({ property }: { property: KeyOfPreloadConfig }) {
       <FieldContent className="self-center">
         <FieldLabel htmlFor={`preload-${property}`}>
           {info.label()}
-          <Hint content={info.description()} />
+          <HelpTooltip>{info.description()}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Input

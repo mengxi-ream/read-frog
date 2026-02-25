@@ -1,11 +1,11 @@
-import type { Config } from '@/types/config/config'
-import type { APIProviderConfig, APIProviderTypes } from '@/types/config/provider'
-import { API_PROVIDER_ITEMS, DEFAULT_PROVIDER_CONFIG } from '@/utils/constants/providers'
+import type { Config } from "@/types/config/config"
+import type { APIProviderConfig, APIProviderTypes } from "@/types/config/provider"
+import { API_PROVIDER_ITEMS, DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 
 export async function addProvider(
   providerType: APIProviderTypes,
-  providersConfig: Config['providersConfig'],
-  setProvidersConfig: (config: Partial<Config['providersConfig']>) => Promise<void>,
+  providersConfig: Config["providersConfig"],
+  setProvidersConfig: (config: Partial<Config["providersConfig"]>) => Promise<void>,
   setSelectedProviderId?: (id: string) => void,
 ): Promise<string> {
   const existingProviderNameSet = new Set(providersConfig.map(p => p.name))

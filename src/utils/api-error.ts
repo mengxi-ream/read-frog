@@ -11,7 +11,7 @@ export async function extractErrorMessage(response: Response): Promise<string> {
 
   try {
     const json = JSON.parse(text)
-    if (typeof json === 'string')
+    if (typeof json === "string")
       return json
     if (json.error?.message)
       return json.error.message

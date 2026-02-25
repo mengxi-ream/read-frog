@@ -1,6 +1,6 @@
-import { atom } from 'jotai'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { getAPIProvidersConfig } from '@/utils/config/helpers'
+import { atom } from "jotai"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getAPIProvidersConfig } from "@/utils/config/helpers"
 
 const internalSelectedProviderIdAtom = atom<string | undefined>(undefined)
 

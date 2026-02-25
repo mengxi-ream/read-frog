@@ -1,2 +1,2 @@
-export * from './types'
-export { YoutubeSubtitlesFetcher } from './youtube'
+export * from "./types"
+export { YoutubeSubtitlesFetcher } from "./youtube"

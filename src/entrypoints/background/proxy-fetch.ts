@@ -1,11 +1,11 @@
-import type { ProxyResponse } from '@/types/proxy-fetch'
-import { browser } from '#imports'
-import { AUTH_COOKIE_PATTERNS, AUTH_DOMAINS } from '@read-frog/definitions'
-import { DEFAULT_PROXY_CACHE_TTL_MS } from '@/utils/constants/proxy-fetch'
+import type { ProxyResponse } from "@/types/proxy-fetch"
+import { browser } from "#imports"
+import { AUTH_COOKIE_PATTERNS, AUTH_DOMAINS } from "@read-frog/definitions"
+import { DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
 
-import { logger } from '@/utils/logger'
-import { onMessage } from '@/utils/message'
-import { SessionCacheGroupRegistry } from '../../utils/session-cache/session-cache-group-registry'
+import { logger } from "@/utils/logger"
+import { onMessage } from "@/utils/message"
+import { SessionCacheGroupRegistry } from "../../utils/session-cache/session-cache-group-registry"
 
 export function proxyFetch() {
   // Simplified: No need for in-memory Map, CacheRegistry handles everything
@@ -15,7 +15,7 @@ export function proxyFetch() {
 
   // Global cache invalidation function
   async function invalidateAllCache() {
-    logger.info('[ProxyFetch] Invalidating all cache')
+    logger.info("[ProxyFetch] Invalidating all cache")
     await SessionCacheGroupRegistry.clearAllCacheGroup()
   }
 
@@ -50,13 +50,13 @@ export function proxyFetch() {
               afterValue = cookie.value
             }
             catch (error) {
-              logger.warn('[ProxyFetch] Could not retrieve previous cookie value:', error)
-              beforeValue = 'unknown'
+              logger.warn("[ProxyFetch] Could not retrieve previous cookie value:", error)
+              beforeValue = "unknown"
               afterValue = cookie.value
             }
           }
 
-          logger.info('[ProxyFetch] Auth cookie changed, invalidating cache:', {
+          logger.info("[ProxyFetch] Auth cookie changed, invalidating cache:", {
             cookieName: cookie.name,
             domain: cookie.domain,
             removed,
@@ -64,7 +64,7 @@ export function proxyFetch() {
             afterValue,
           })
           invalidateAllCache().catch(error =>
-            logger.error('[ProxyFetch] Failed to invalidate cache:', error),
+            logger.error("[ProxyFetch] Failed to invalidate cache:", error),
           )
         }
       }
@@ -72,14 +72,14 @@ export function proxyFetch() {
   }
 
   // Proxy cross-origin fetches for content scripts and other contexts
-  onMessage('backgroundFetch', async (message): Promise<ProxyResponse> => {
-    logger.info('[ProxyFetch] Background fetch:', message.data)
+  onMessage("backgroundFetch", async (message): Promise<ProxyResponse> => {
+    logger.info("[ProxyFetch] Background fetch:", message.data)
 
     const { url, method, headers, body, credentials, cacheConfig } = message.data
 
     const {
       enabled: cacheEnabled = false,
-      groupKey: cacheGroupKey = 'default',
+      groupKey: cacheGroupKey = "default",
       ttl: cacheTtl = DEFAULT_PROXY_CACHE_TTL_MS,
     } = cacheConfig ?? {}
 
@@ -100,7 +100,7 @@ export function proxyFetch() {
     }
 
     async function invalidateCache(groupKey?: string): Promise<void> {
-      logger.info('[ProxyFetch] Invalidate cache:', { groupKey })
+      logger.info("[ProxyFetch] Invalidate cache:", { groupKey })
       if (groupKey) {
         const sessionCache = await getSessionCache(groupKey)
         await sessionCache.clear()
@@ -110,17 +110,17 @@ export function proxyFetch() {
       }
     }
 
-    const finalMethod = (method ?? 'GET').toUpperCase()
+    const finalMethod = (method ?? "GET").toUpperCase()
 
     // Check cache for GET requests
-    if (finalMethod === 'GET' && cacheEnabled) {
+    if (finalMethod === "GET" && cacheEnabled) {
       const cached = await getCached(finalMethod, url)
       if (cached)
         return cached
     }
 
     // Aggressive mode: pre-clear cache before mutations to avoid race with subsequent GETs
-    if (finalMethod !== 'GET') {
+    if (finalMethod !== "GET") {
       await invalidateCache(cacheGroupKey)
     }
 
@@ -128,7 +128,7 @@ export function proxyFetch() {
       method: finalMethod,
       headers: headers ? new Headers(headers) : undefined,
       body,
-      credentials: credentials ?? 'include',
+      credentials: credentials ?? "include",
     })
 
     const responseHeaders: [string, string][] = Array.from(response.headers.entries())
@@ -141,11 +141,11 @@ export function proxyFetch() {
       body: textBody,
     }
 
-    logger.info('[ProxyFetch] Response without cache:', result)
+    logger.info("[ProxyFetch] Response without cache:", result)
 
     // Handle caching based on response
     if (cacheEnabled) {
-      if (finalMethod === 'GET') {
+      if (finalMethod === "GET") {
         // For auth requests: 401/403 implies session invalid -> clear cache
         if (result.status === 401 || result.status === 403) {
           await invalidateCache(cacheGroupKey)

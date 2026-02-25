@@ -1,4 +1,4 @@
-import type { Config } from './config/config'
+import type { Config } from "./config/config"
 
 export interface ConfigBackup {
   schemaVersion: number

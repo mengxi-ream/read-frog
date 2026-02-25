@@ -17,6 +17,7 @@ Follow these steps:
 
 2. **Create branch if needed**
    - If no branch name is provided and we are on the main branch, create a branch based on the code changes
+   - If working on a worktree, create a branch based on the worktree branch, don't change the name
    - Otherwise, work on the current branch
 
 3. **Review commit history and code differences**

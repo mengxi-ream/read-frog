@@ -1,8 +1,8 @@
-import type { ZodError } from 'zod'
-import type { Config } from '@/types/config/config'
-import { dequal } from 'dequal'
-import { configSchema } from '@/types/config/config'
-import { logger } from '../logger'
+import type { ZodError } from "zod"
+import type { Config } from "@/types/config/config"
+import { dequal } from "dequal"
+import { configSchema } from "@/types/config/config"
+import { logger } from "../logger"
 
 export interface FieldConflict {
   path: string[] // ['language', 'targetCode']
@@ -28,7 +28,7 @@ export function detectConflicts(
   const conflicts: FieldConflict[] = []
 
   const isAtomicValue = (val: unknown) =>
-    val == null || typeof val !== 'object' || Array.isArray(val)
+    val == null || typeof val !== "object" || Array.isArray(val)
 
   function traverse(
     basePath: string[],
@@ -120,7 +120,7 @@ export function detectConflicts(
 function applyFieldResolution(
   result: any,
   conflict: FieldConflict,
-  resolution: 'local' | 'remote',
+  resolution: "local" | "remote",
 ): void {
   // Navigate to the parent object
   let current: any = result
@@ -130,7 +130,7 @@ function applyFieldResolution(
 
   // Set the resolved value
   const lastKey = conflict.path[conflict.path.length - 1]
-  current[lastKey] = resolution === 'local' ? conflict.localValue : conflict.remoteValue
+  current[lastKey] = resolution === "local" ? conflict.localValue : conflict.remoteValue
 }
 
 export interface ApplyResolutionsResult {
@@ -144,14 +144,14 @@ export interface ApplyResolutionsResult {
  */
 export function applyResolutions(
   diffConflictsResult: DiffConflictsResult,
-  resolutions: Record<string, 'local' | 'remote'>,
+  resolutions: Record<string, "local" | "remote">,
 ): ApplyResolutionsResult {
   // Deep clone the draft result to avoid mutating original
   const result = structuredClone(diffConflictsResult.draft)
 
   // Apply resolutions for conflicts
   for (const conflict of diffConflictsResult.conflicts) {
-    const pathKey = conflict.path.join('.')
+    const pathKey = conflict.path.join(".")
     const resolution = resolutions[pathKey]
 
     if (!resolution) {
@@ -163,7 +163,7 @@ export function applyResolutions(
 
   const validatedResult = configSchema.safeParse(result)
   if (!validatedResult.success) {
-    logger.error('Resolved config is invalid', validatedResult.error)
+    logger.error("Resolved config is invalid", validatedResult.error)
     return {
       config: result,
       validationError: validatedResult.error,

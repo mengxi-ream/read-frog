@@ -1,10 +1,10 @@
-import type { SubtitleTextStyle } from '@/types/config/subtitles'
-import { useAtomValue } from 'jotai'
-import { cn } from '@/lib/utils'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { SUBTITLE_FONT_FAMILIES } from '@/utils/constants/subtitles'
-import { getLanguageDirectionAndLang } from '@/utils/content/language-direction'
-import { currentSubtitleAtom } from '../atoms'
+import type { SubtitleTextStyle } from "@/types/config/subtitles"
+import { useAtomValue } from "jotai"
+import { cn } from "@/lib/utils"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
+import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
+import { currentSubtitleAtom } from "../atoms"
 
 interface SubtitleLineProps {
   content?: string
@@ -23,11 +23,11 @@ function getTextStyles(textStyle: SubtitleTextStyle) {
 export function MainSubtitle({ content, className }: SubtitleLineProps) {
   const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
-  const text = content ?? subtitle?.text ?? ''
+  const text = content ?? subtitle?.text ?? ""
 
   return (
     <div
-      className={cn('subtitles-main leading-tight text-xl', className)}
+      className={cn("subtitles-main leading-tight text-xl", className)}
       style={getTextStyles(style.main)}
     >
       {text}
@@ -39,12 +39,12 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
   const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const language = useAtomValue(configFieldsAtomMap.language)
-  const text = content ?? subtitle?.translation ?? ''
+  const text = content ?? subtitle?.translation ?? ""
   const { dir, lang } = getLanguageDirectionAndLang(language.targetCode)
 
   return (
     <div
-      className={cn('subtitles-translation leading-tight text-xl', className)}
+      className={cn("subtitles-translation leading-tight text-xl", className)}
       style={getTextStyles(style.translation)}
       dir={dir}
       lang={lang}

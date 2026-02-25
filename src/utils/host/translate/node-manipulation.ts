@@ -1,16 +1,16 @@
-import type { Config } from '@/types/config/config'
-import type { Point } from '@/types/dom'
-import { getDetectedCodeFromStorage } from '@/utils/config/languages'
-import { isHTMLElement } from '../dom/filter'
-import { findNearestAncestorBlockNodeAt } from '../dom/find'
-import { walkAndLabelElement } from '../dom/traversal'
-import { translateWalkedElement } from './core/translation-walker'
-import { validateTranslationConfigAndToast } from './translate-text'
+import type { Config } from "@/types/config/config"
+import type { Point } from "@/types/dom"
+import { getDetectedCodeFromStorage } from "@/utils/config/languages"
+import { isHTMLElement } from "../dom/filter"
+import { findNearestAncestorBlockNodeAt } from "../dom/find"
+import { walkAndLabelElement } from "../dom/traversal"
+import { translateWalkedElement } from "./core/translation-walker"
+import { validateTranslationConfigAndToast } from "./translate-text"
 
 // Re-export public APIs
-export { translateNodes, translateNodesBilingualMode, translateNodeTranslationOnlyMode } from './core/translation-modes'
-export { translateWalkedElement } from './core/translation-walker'
-export { removeAllTranslatedWrapperNodes } from './dom/translation-cleanup'
+export { translateNodes, translateNodesBilingualMode, translateNodeTranslationOnlyMode } from "./core/translation-modes"
+export { translateWalkedElement } from "./core/translation-walker"
+export { removeAllTranslatedWrapperNodes } from "./dom/translation-cleanup"
 
 // High-level orchestration function
 export async function removeOrShowNodeTranslation(point: Point, config: Config): Promise<void> {

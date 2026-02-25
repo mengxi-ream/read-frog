@@ -1,7 +1,7 @@
-import type { ArticleContent } from '@/types/content'
-import { getLocalConfig } from '@/utils/config/storage'
-import { DEFAULT_CONFIG } from '../constants/config'
-import { DEFAULT_BATCH_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_SYSTEM_PROMPT, getTokenCellText, INPUT, SUMMARY, TARGET_LANG, TITLE } from '../constants/prompt'
+import type { ArticleContent } from "@/types/content"
+import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_CONFIG } from "../constants/config"
+import { DEFAULT_BATCH_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_SYSTEM_PROMPT, getTokenCellText, INPUT, SUMMARY, TARGET_LANG, TITLE } from "../constants/prompt"
 
 export interface TranslatePromptOptions {
   isBatch?: boolean
@@ -46,8 +46,8 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   }
 
   // Build title and summary replacement values
-  const title = options?.content?.title || 'No title available'
-  const summary = options?.content?.summary || 'No summary available'
+  const title = options?.content?.title || "No title available"
+  const summary = options?.content?.summary || "No summary available"
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>
