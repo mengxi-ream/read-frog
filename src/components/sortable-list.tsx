@@ -1,4 +1,4 @@
-import type { DragEndEvent, DragStartEvent } from '@dnd-kit/core'
+import type { DragEndEvent, DragStartEvent } from "@dnd-kit/core"
 import {
   closestCenter,
   DndContext,
@@ -7,18 +7,18 @@ import {
   PointerSensor,
   useSensor,
   useSensors,
-} from '@dnd-kit/core'
-import { restrictToFirstScrollableAncestor, restrictToVerticalAxis } from '@dnd-kit/modifiers'
+} from "@dnd-kit/core"
+import { restrictToFirstScrollableAncestor, restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   arrayMove,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { useState } from 'react'
-import { cn } from '@/utils/styles/utils'
+} from "@dnd-kit/sortable"
+import { CSS } from "@dnd-kit/utilities"
+import { useState } from "react"
+import { cn } from "@/utils/styles/utils"
 
 export function SortableList<T extends { id: string }>({
   list,
@@ -88,7 +88,7 @@ export function SortableList<T extends { id: string }>({
         items={list.map(item => item.id)}
         strategy={verticalListSortingStrategy}
       >
-        <div className={className} style={{ overflowAnchor: 'none' }}>
+        <div className={className} style={{ overflowAnchor: "none" }}>
           {list.map(item => (
             <SortableItemWrapper key={item.id} id={item.id}>
               {renderItem(item)}
@@ -118,7 +118,7 @@ function SortableItemWrapper({ id, children }: { id: string, children: React.Rea
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    overflowAnchor: 'none' as const,
+    overflowAnchor: "none" as const,
   }
 
   return (
@@ -127,8 +127,8 @@ function SortableItemWrapper({ id, children }: { id: string, children: React.Rea
       data-sortable-id={id}
       style={style}
       className={cn(
-        'cursor-grab active:cursor-grabbing rounded-xl transition-all duration-200',
-        isDragging && 'opacity-50',
+        "cursor-grab active:cursor-grabbing rounded-xl transition-all duration-200",
+        isDragging && "opacity-50",
       )}
       {...attributes}
       {...listeners}
@@ -143,7 +143,7 @@ function findVerticalScrollContainer(element: HTMLElement | null): HTMLElement |
   while (current) {
     const style = window.getComputedStyle(current)
     const overflowY = style.overflowY
-    const isScrollable = overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay'
+    const isScrollable = overflowY === "auto" || overflowY === "scroll" || overflowY === "overlay"
     if (isScrollable && current.scrollHeight > current.clientHeight) {
       return current
     }

@@ -4,12 +4,11 @@ import type {
   StreamPortRequestMessage,
   StreamPortResponse,
   StreamPortStartMessage,
-  StreamTextModelRole,
-} from '@/types/background-stream'
-import { streamText } from 'ai'
-import { BACKGROUND_STREAM_PORTS } from '@/types/background-stream'
-import { logger } from '@/utils/logger'
-import { getReadModelById, getTranslateModelById } from '@/utils/providers/model'
+} from "@/types/background-stream"
+import { streamText } from "ai"
+import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
+import { logger } from "@/utils/logger"
+import { getModelById } from "@/utils/providers/model"
 
 export interface StreamOptions {
   signal?: AbortSignal
@@ -31,26 +30,18 @@ interface ExtensionPort {
 }
 
 type StreamPortResponseWithoutRequestId
-  = | { type: 'chunk', data: string }
-    | { type: 'done', data: string }
-    | { type: 'error', error: string }
+  = | { type: "chunk", data: string }
+    | { type: "done", data: string }
+    | { type: "error", error: string }
 
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message
   }
-  if (typeof error === 'string') {
+  if (typeof error === "string") {
     return error
   }
-  return 'Unexpected error occurred'
-}
-
-async function getModelByRole(providerId: string, modelRole: StreamTextModelRole = 'read') {
-  if (modelRole === 'translate') {
-    return getTranslateModelById(providerId)
-  }
-
-  return getReadModelById(providerId)
+  return "Unexpected error occurred"
 }
 
 function createStreamPortHandler<TPayload>(
@@ -77,7 +68,7 @@ function createStreamPortHandler<TPayload>(
         port.postMessage(message)
       }
       catch (error) {
-        logger.error('[Background] Stream port post failed', error)
+        logger.error("[Background] Stream port post failed", error)
       }
     }
 
@@ -101,7 +92,7 @@ function createStreamPortHandler<TPayload>(
 
     messageListener = async (rawMessage: unknown) => {
       const message = rawMessage as StreamPortRequestMessage<TPayload> | undefined
-      if (message?.type === 'ping') {
+      if (message?.type === "ping") {
         return
       }
 
@@ -120,17 +111,17 @@ function createStreamPortHandler<TPayload>(
         const result = await streamFn(message.payload, {
           signal: abortController.signal,
           onChunk: (_, fullResponse) => {
-            safePost({ type: 'chunk', data: fullResponse })
+            safePost({ type: "chunk", data: fullResponse })
           },
         })
 
         if (!abortController.signal.aborted) {
-          safePost({ type: 'done', data: result })
+          safePost({ type: "done", data: result })
         }
       }
       catch (error) {
         if (!abortController.signal.aborted) {
-          safePost({ type: 'error', error: getErrorMessage(error) })
+          safePost({ type: "error", error: getErrorMessage(error) })
         }
       }
       finally {
@@ -154,14 +145,14 @@ export async function runStreamTextInBackground(
   payload: BackgroundStreamTextPayload,
   options: StreamOptions = {},
 ) {
-  const { providerId, modelRole = 'read', ...streamTextParams } = payload
+  const { providerId, ...streamTextParams } = payload
   const { signal, onChunk } = options
 
   if (signal?.aborted) {
-    throw new DOMException('stream aborted', 'AbortError')
+    throw new DOMException("stream aborted", "AbortError")
   }
 
-  const model = await getModelByRole(providerId, modelRole)
+  const model = await getModelById(providerId)
 
   const result = await streamText({
     ...(streamTextParams as Parameters<typeof streamText>[0]),
@@ -169,10 +160,10 @@ export async function runStreamTextInBackground(
     abortSignal: signal,
   })
 
-  let fullResponse = ''
+  let fullResponse = ""
   for await (const delta of result.textStream) {
     if (signal?.aborted) {
-      throw new DOMException('stream aborted', 'AbortError')
+      throw new DOMException("stream aborted", "AbortError")
     }
 
     fullResponse += delta
@@ -186,12 +177,12 @@ export const handleStreamTextPort = createStreamPortHandler<BackgroundStreamText
   runStreamTextInBackground,
   (msg): msg is StreamPortStartMessage<BackgroundStreamTextPayload> => {
     const message = msg as StreamPortStartMessage<BackgroundStreamTextPayload> | undefined
-    if (message?.type !== 'start' || typeof message.requestId !== 'string' || !message.payload) {
+    if (message?.type !== "start" || typeof message.requestId !== "string" || !message.payload) {
       return false
     }
 
     const payload = message.payload as Partial<BackgroundStreamTextPayload>
-    return typeof payload.providerId === 'string'
+    return typeof payload.providerId === "string"
   },
 )
 

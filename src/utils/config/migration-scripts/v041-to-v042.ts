@@ -10,15 +10,15 @@
  */
 
 const HOTKEY_MIGRATION: Record<string, string> = {
-  'Control': 'control',
-  'Alt': 'alt',
-  'Shift': 'shift',
-  '`': 'backtick',
+  "Control": "control",
+  "Alt": "alt",
+  "Shift": "shift",
+  "`": "backtick",
 }
 
 export function migrate(oldConfig: any): any {
   const oldHotkey = oldConfig.translate?.node?.hotkey
-  const newHotkey = oldHotkey ? (HOTKEY_MIGRATION[oldHotkey] ?? 'control') : 'control'
+  const newHotkey = oldHotkey ? (HOTKEY_MIGRATION[oldHotkey] ?? "control") : "control"
 
   return {
     ...oldConfig,

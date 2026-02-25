@@ -1,13 +1,15 @@
-import type { Config } from '@/types/config/config'
-import type { APIProviderConfig, LLMTranslateProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, ReadProviderConfig, TranslateProviderConfig, TTSProviderConfig } from '@/types/config/provider'
-import { isAPIProviderConfig, isLLMTranslateProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isReadProviderConfig, isTranslateProviderConfig, isTTSProviderConfig } from '@/types/config/provider'
+import type { Config } from "@/types/config/config"
+import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
+import type { FeatureKey } from "@/utils/constants/feature-providers"
+import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 
 export function getProviderConfigById<T extends ProviderConfig>(providersConfig: T[], providerId: string): T | undefined {
   return providersConfig.find(p => p.id === providerId)
 }
 
-export function getLLMTranslateProvidersConfig(providersConfig: ProvidersConfig): LLMTranslateProviderConfig[] {
-  return providersConfig.filter(isLLMTranslateProviderConfig)
+export function getLLMProvidersConfig(providersConfig: ProvidersConfig): LLMProviderConfig[] {
+  return providersConfig.filter(isLLMProviderConfig)
 }
 
 export function getAPIProvidersConfig(providersConfig: ProvidersConfig): APIProviderConfig[] {
@@ -22,16 +24,8 @@ export function getNonAPIProvidersConfig(providersConfig: ProvidersConfig): NonA
   return providersConfig.filter(isNonAPIProviderConfig)
 }
 
-export function getReadProvidersConfig(providersConfig: ProvidersConfig): ReadProviderConfig[] {
-  return providersConfig.filter(isReadProviderConfig)
-}
-
 export function getTranslateProvidersConfig(providersConfig: ProvidersConfig): TranslateProviderConfig[] {
   return providersConfig.filter(isTranslateProviderConfig)
-}
-
-export function getTTSProvidersConfig(providersConfig: ProvidersConfig): TTSProviderConfig[] {
-  return providersConfig.filter(isTTSProviderConfig)
 }
 
 export function filterEnabledProvidersConfig(providersConfig: ProvidersConfig): ProvidersConfig {
@@ -43,18 +37,10 @@ export function getProviderKeyByName(providersConfig: ProvidersConfig, providerI
   return provider?.provider
 }
 
-export function getReadModelConfig(config: Config, providerId: string) {
-  const provider = getProviderConfigById(config.providersConfig, providerId)
-  if (provider && isReadProviderConfig(provider)) {
-    return provider.models.read
-  }
-  return undefined
-}
-
-export function getTranslateModelConfig(config: Config, providerId: string) {
+export function getProviderModelConfig(config: Config, providerId: string) {
   const providerConfig = getProviderConfigById(config.providersConfig, providerId)
-  if (providerConfig && isLLMTranslateProviderConfig(providerConfig)) {
-    return providerConfig.models.translate
+  if (providerConfig && isLLMProviderConfig(providerConfig)) {
+    return providerConfig.model
   }
   return undefined
 }
@@ -73,4 +59,37 @@ export function getProviderBaseURL(providersConfig: ProvidersConfig, providerId:
     return providerConfig.baseURL
   }
   return undefined
+}
+
+/**
+ * Compute fallback provider assignments when a provider is deleted.
+ * For each feature using the deleted provider, picks the first compatible remaining provider.
+ */
+export function computeProviderFallbacksAfterDeletion(
+  deletedProviderId: string,
+  config: Config,
+  remainingProviders: ProvidersConfig,
+): Partial<Record<FeatureKey, string>> {
+  const updates: Partial<Record<FeatureKey, string>> = {}
+  for (const key of FEATURE_KEYS) {
+    const def = FEATURE_PROVIDER_DEFS[key]
+    const currentId = def.getProviderId(config)
+    if (currentId !== deletedProviderId)
+      continue
+    const candidates = remainingProviders.filter(p => def.isProvider(p.provider))
+    if (candidates.length > 0)
+      updates[key] = candidates[0].id
+  }
+  return updates
+}
+
+export function findFeatureMissingProvider(
+  remainingProviders: ProvidersConfig,
+): FeatureKey | null {
+  for (const key of FEATURE_KEYS) {
+    const def = FEATURE_PROVIDER_DEFS[key]
+    if (!remainingProviders.some(p => def.isProvider(p.provider)))
+      return key
+  }
+  return null
 }

@@ -9,7 +9,6 @@ popup:
   autoLang: Tự động
   sourceLang: Nguồn
   targetLang: Đích
-  read: Đọc bài viết
   translate: Dịch
   showOriginal: Hiển thị bản gốc
   enabledFloatingButton: Bật nút nổi
@@ -52,7 +51,7 @@ options:
     enabled: Bật trải nghiệm Beta
   apiProviders:
     title: Nhà cung cấp API
-    description: Cấu hình các nhà cung cấp API cho chức năng dịch và đọc tại đây. Chúng tôi có hơn 20 nhà cung cấp API tích hợp sẵn và hỗ trợ bất kỳ nhà cung cấp API tương thích OpenAI nào.
+    description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
     promotion:
       ai302:
         description: Nhấp vào liên kết bên phải để đăng ký 302.AI và nhận 1 USD tín dụng API
@@ -60,8 +59,7 @@ options:
         addProvider: Thêm cấu hình 302.AI
     addProvider: Thêm nhà cung cấp
     badges:
-      translate: Dịch
-      read: Đọc
+      featureCount: $1 tính năng
     dialog:
       title: Thêm nhà cung cấp mới
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: Tùy chọn
       delete: Xóa
-      atLeastOneProvider: Cần ít nhất một nhà cung cấp đọc và một nhà cung cấp dịch.
+      atLeastOneLLMProvider: Cần ít nhất một nhà cung cấp dịch LLM.
       duplicateProviderName: 'Tên nhà cung cấp trùng lặp "$1"'
       defaultProvider:
         translate: Đặt làm nhà cung cấp dịch mặc định
-        read: Đặt làm nhà cung cấp đọc mặc định
       models:
-        read:
-          title: Mô hình đọc
-          customTitle: Mô hình đọc tùy chỉnh
-          placeholder: Chọn mô hình
         translate:
           title: Mô hình dịch
           customTitle: Mô hình dịch tùy chỉnh
@@ -104,6 +97,7 @@ options:
         apiKeyRequired: Vui lòng thêm khóa API trước
         searchModels: Tìm kiếm mô hình...
         noModelsFound: Không tìm thấy mô hình
+      featureProviders: Nhà cung cấp tính năng
       advancedOptions: Tùy chọn nâng cao
       temperature: Nhiệt độ
       temperatureHint: Kiểm soát tính ngẫu nhiên trong phản hồi. Giá trị thấp (0) mang tính xác định hơn, giá trị cao mang tính sáng tạo hơn. Phạm vi thay đổi theo nhà cung cấp. Để trống để sử dụng giá trị mặc định của nhà cung cấp.
@@ -146,26 +140,20 @@ options:
       testing: Đang kiểm tra...
   general:
     title: Chung
-    readConfig:
-      title: Cấu hình đọc
-      description:
-        Cho tất cả các chức năng AI nâng cao, như giải thích bài viết chi tiết và trích xuất từ khóa.
-      provider: Nhà cung cấp
-      model:
-        title: Mô hình
-        enterCustomModel: Nhập tên mô hình tùy chỉnh
+    featureProviders:
+      title: Nhà cung cấp tính năng
+      description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
+      features:
+        translate: Dịch trang
+        selectionToolbar_translate: Dịch thanh công cụ chọn
+        selectionToolbar_vocabularyInsight: Phân tích từ vựng thanh công cụ chọn
+        tts: Chuyển văn bản thành giọng nói
+        inputTranslation: Dịch đầu vào
+        videoSubtitles: Phụ đề video
     translationConfig:
-      title: Cấu hình dịch
-      description: Chỉ dùng cho dịch trong trang web, như dịch đoạn văn song ngữ.
-      provider: Nhà cung cấp
       model:
         title: Mô hình
         enterCustomModel: Nhập tên mô hình tùy chỉnh
-      translateRange:
-        title: Phạm vi dịch
-        range:
-          main: Nội dung chính
-          all: Tất cả nội dung
     clearCache:
       title: Xóa bộ nhớ đệm
       description: Xóa tất cả bộ nhớ đệm dịch trong trình duyệt của bạn
@@ -199,6 +187,10 @@ options:
     inputTranslation:
       title: Dịch đầu vào
   inputTranslation:
+    provider:
+      title: Nhà cung cấp dịch
+      description: Chọn nhà cung cấp dịch để sử dụng cho dịch đầu vào
+      label: Nhà cung cấp
     toggle:
       title: Bật dịch ba lần nhấn phím cách
       description: Nhấn phím cách nhanh 3 lần trong bất kỳ trường nhập nào để dịch nội dung
@@ -238,7 +230,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
-        description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch và đọc nhanh
+        description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch và phân tích từ vựng nhanh
       closeMenu:
         disableForSite: Tắt cho trang web này
         disableGlobally: Tắt toàn cục
@@ -247,6 +239,21 @@ options:
         description: Cấu hình các trang web mà thanh công cụ chọn văn bản nên bị tắt
         enterUrlPattern: Nhập mẫu URL
         urlPattern: Mẫu URL
+      features:
+        provider: Nhà cung cấp
+        selectProvider: Chọn nhà cung cấp
+        noProviderAvailable: Không có nhà cung cấp khả dụng
+        useProviderDefaultModel: Dùng model mặc định của nhà cung cấp
+        useCustomModel: Dùng model tùy chỉnh
+        customModel: Model tùy chỉnh
+        model: Model
+        modelNotAvailableForNonLLM: Cài đặt model chỉ khả dụng với nhà cung cấp LLM
+        translate:
+          title: Dịch văn bản chọn
+          description: Cấu hình nhà cung cấp và model cho tính năng dịch của selection toolbar
+        vocabularyInsight:
+          title: Phân tích từ vựng
+          description: Cấu hình nhà cung cấp và model cho tính năng phân tích từ/cụm từ của selection toolbar
     contextMenu:
       title: Menu ngữ cảnh
       translate:
@@ -348,10 +355,16 @@ options:
             saved: Tất cả thay đổi đã được lưu
     translationMode:
       title: Chế độ dịch
-      description: 'Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch.'
+      description: "Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch."
       mode:
         bilingual: Song ngữ
         translationOnly: Chỉ bản dịch
+    translateRange:
+      title: Phạm vi dịch
+      description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.
+      range:
+        main: Nội dung chính
+        all: Tất cả nội dung
     pageTranslationShortcut:
       title: Phím tắt dịch trang
       description: Tùy chỉnh phím tắt để dịch toàn bộ trang web
@@ -377,20 +390,26 @@ options:
     nodeTranslationHotkey:
       title: Phím tắt dịch khi di chuột hoặc nhấn giữ
       description: Tùy chỉnh phím bổ trợ khi di chuột hoặc dùng nhấn giữ để dịch đoạn văn
-    llmProviderConfigured: Đã cấu hình nhà cung cấp dịch LLM
-    llmProviderNotConfigured: Chưa cấu hình nhà cung cấp dịch LLM
+    llmProviderConfigured: Đã chọn nhà cung cấp LLM cho $1
+    llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
     autoTranslateLanguages:
       title: Tự động dịch theo ngôn ngữ
       description: Tự động dịch nội dung trang khi phát hiện các ngôn ngữ cụ thể
       selectLanguages: Chọn ngôn ngữ
-      enableLLMDetection: Sử dụng LLM để phát hiện ngôn ngữ
-      enableLLMDetectionDescription: Cải thiện độ chính xác nhưng thêm độ trễ và chi phí API. Yêu cầu nhà cung cấp dịch LLM và các ngôn ngữ tự động dịch đã cấu hình.
+      detection:
+        label: Phát hiện ngôn ngữ
+        basic: Cơ bản
+        llm: LLM
+        description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API. Yêu cầu các ngôn ngữ tự động dịch đã cấu hình.
     skipLanguages:
       title: Tự động bỏ qua theo ngôn ngữ
       description: Tự động bỏ qua dịch đoạn văn khi phát hiện các ngôn ngữ cụ thể
       selectLanguages: Chọn ngôn ngữ
-      enableLLMDetection: Sử dụng LLM để phát hiện ngôn ngữ
-      enableLLMDetectionDescription: Cải thiện độ chính xác nhưng thêm độ trễ và chi phí API. Yêu cầu nhà cung cấp dịch LLM.
+      detection:
+        label: Phát hiện ngôn ngữ
+        basic: Cơ bản
+        llm: LLM
+        description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API.
     aiContentAware:
       title: Dịch ngữ cảnh thông minh AI
       description: Nâng cao chất lượng dịch bằng cách cung cấp ngữ cảnh bài viết cho AI
@@ -398,21 +417,31 @@ options:
       enableDescription: AI sử dụng tóm tắt bài viết để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
   tts:
     title: Chuyển văn bản thành giọng nói
-    description: Tùy chỉnh nút Đọc với cài đặt giọng nói OpenAI ưa thích của bạn.
-    provider:
-      label: Nhà cung cấp
-      selectPlaceholder: Chọn nhà cung cấp
-      noProvider: Vui lòng thêm nhà cung cấp OpenAI
-    model:
-      label: Mô hình
+    description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.
+    detectLanguage:
+      label: Phát hiện ngôn ngữ
+      basic: Cơ bản
+      llm: LLM
+      description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API. Chế độ LLM sử dụng nhà cung cấp ở trang Dịch.
     voice:
       label: Giọng nói
+      fallback: Dự phòng
       selectPlaceholder: Chọn giọng nói
       preview: Xem trước
       previewSample: Xin chào từ Read Frog! Đây là cách tôi sẽ phát âm khi đọc to.
-    speed:
-      label: Tốc độ
-      hint: Chấp nhận giá trị từ 0.25 đến 4.0
+    languageVoice:
+      label: Giọng nói theo ngôn ngữ
+      reset: Đặt lại mặc định
+      description: Chọn một ngôn ngữ và gán giọng nói sẽ được dùng khi TTS phát hiện ngôn ngữ đó.
+    rate:
+      label: Tốc độ (%)
+      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
+    pitch:
+      label: Cao độ (Hz)
+      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
+    volume:
+      label: Âm lượng (%)
+      hint: Chấp nhận giá trị số nguyên từ -100 đến 100
     betaDisabled: Bật Trải nghiệm Beta để tùy chỉnh cài đặt chuyển văn bản thành giọng nói.
   statistics:
     title: Thống kê
@@ -477,7 +506,7 @@ options:
           hasUnresolvedInChildren: ⚠ Chứa thay đổi chưa giải quyết
           item: mục
           items: mục
-          unresolvedPrompt: '[Chưa giải quyết - Vui lòng chọn]'
+          unresolvedPrompt: "[Chưa giải quyết - Vui lòng chọn]"
           localLatest: Cục bộ mới nhất
           remoteLatest: Từ xa mới nhất
           bothChanged: Cả hai đã thay đổi
@@ -488,7 +517,7 @@ options:
           resolveToContinue: Giải quyết xung đột để tiếp tục
           validationAlert:
             title: Cấu hình đã hợp nhất có lỗi xác thực
-            description: 'Điều chỉnh các khác biệt bên dưới để sửa:'
+            description: "Điều chỉnh các khác biệt bên dưới để sửa:"
           moreErrors: ...và $1 lỗi nữa
     backup:
       title: Sao lưu cấu hình
@@ -501,8 +530,8 @@ options:
         title: Chưa có bản sao lưu nào
         description: Các bản sao lưu được tạo tự động mỗi giờ nếu cấu hình thay đổi.
       item:
-        extensionVersion: 'Phiên bản tiện ích:'
-        schemaVersion: 'Phiên bản schema:'
+        extensionVersion: "Phiên bản tiện ích:"
+        schemaVersion: "Phiên bản schema:"
         restore: Khôi phục
         export: Xuất
         delete: Xóa
@@ -528,6 +557,10 @@ options:
   videoSubtitles:
     title: Phụ đề video
     description: Hiện chỉ hỗ trợ phụ đề video YouTube
+    provider:
+      title: Nhà cung cấp dịch thuật
+      description: Chọn nhà cung cấp dịch thuật để sử dụng cho phụ đề video
+      label: Nhà cung cấp
     enable: Bật phụ đề video
     enableDescription: Khi bật, nút dịch sẽ xuất hiện trong thanh điều khiển YouTube. Nhấp để bắt đầu dịch phụ đề.
     autoStart: Tự động bật phụ đề
@@ -569,7 +602,7 @@ options:
     requestQueueConfig:
       title: Tốc độ dịch phụ đề
       firstOnDescription: Điều chỉnh tốc độ xử lý yêu cầu dịch phụ đề bằng thuật toán
-      lastOnDescription: ''
+      lastOnDescription: ""
       capacity:
         title: Số yêu cầu tối đa đồng thời
         description: Số lượng yêu cầu dịch phụ đề tối đa có thể xử lý đồng thời trong khoảng thời gian ngắn
@@ -598,9 +631,6 @@ side:
   sourceLang: Ngôn ngữ nguồn
   targetLang: Ngôn ngữ đích
   fileExport: Xuất tệp
-readService:
-  title: Dịch vụ đọc
-  description: Để đọc và giải thích nội dung
 translateService:
   title: Dịch vụ dịch thuật
   description: Chỉ để dịch trang web
@@ -624,7 +654,7 @@ noAPIKeyConfig:
     setTheAPIKey: đặt API key
     firstOnThe: trước trên trang
     optionsPage: tùy chọn
-    page: ''
+    page: ""
 translation:
   sameLanguage: Ngôn ngữ nguồn và đích phải khác nhau
   autoModeSameLanguage: Ngôn ngữ phát hiện '$1' giống với ngôn ngữ đích
@@ -639,12 +669,7 @@ shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
   state:
-    idle: Sẵn sàng
-    fetching: Đang lấy phụ đề
-    fetchSuccess: Đã tải phụ đề
-    fetchFailed: Lấy phụ đề thất bại
-    segmenting: AI đang phân đoạn...
-    processing: Đang dịch phụ đề
+    loading: Read Frog đang tải phụ đề
     error: Đã xảy ra lỗi
   errors:
     http429: 429 Đã gửi quá nhiều yêu cầu đến API phụ đề Youtube, vui lòng thử lại sau
@@ -656,7 +681,7 @@ subtitles:
     networkError: Xảy ra lỗi mạng khi lấy phụ đề
     fetchSubTimeout: Quá thời gian lấy phụ đề Youtube
     buttonNotFound: Không tìm thấy nút phụ đề
-    noSubtitlesFound: Không tìm thấy phụ đề
+    noSubtitlesFound: Video hiện tại không có phụ đề
     videoNotFound: Không tìm thấy phần tử video
     controlsBarNotFound: Không tìm thấy thanh điều khiển
     aiRateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau

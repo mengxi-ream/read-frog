@@ -2,12 +2,12 @@ import type {
   StreamPortRequestMessage,
   StreamPortResponse,
   StreamPortStartMessage,
-} from '@/types/background-stream'
-import { browser } from '#imports'
-import { generateUUIDv4 } from '@/utils/crypto-polyfill'
+} from "@/types/background-stream"
+import { browser } from "#imports"
+import { generateUUIDv4 } from "@/utils/crypto-polyfill"
 
 function createRequestId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return crypto.randomUUID()
   }
 
@@ -50,7 +50,7 @@ export function createPortStreamPromise<TResponse = string, TPayload = unknown>(
         port.onDisconnect.removeListener(disconnectListener)
       }
       if (abortListener && signal) {
-        signal.removeEventListener('abort', abortListener)
+        signal.removeEventListener("abort", abortListener)
       }
       if (keepAliveTimer) {
         clearInterval(keepAliveTimer)
@@ -81,27 +81,27 @@ export function createPortStreamPromise<TResponse = string, TPayload = unknown>(
         return
       }
 
-      if (event.type === 'chunk') {
+      if (event.type === "chunk") {
         onChunk?.(event.data)
         return
       }
 
-      if (event.type === 'done') {
+      if (event.type === "done") {
         finalize(() => resolve(event.data))
         return
       }
 
-      if (event.type === 'error') {
+      if (event.type === "error") {
         finalize(() => reject(new Error(event.error)))
       }
     }
 
     disconnectListener = () => {
-      finalize(() => reject(new Error('Stream disconnected unexpectedly')))
+      finalize(() => reject(new Error("Stream disconnected unexpectedly")))
     }
 
     abortListener = () => {
-      finalize(() => reject(new DOMException('aborted', 'AbortError')))
+      finalize(() => reject(new DOMException("aborted", "AbortError")))
     }
 
     if (signal?.aborted) {
@@ -113,11 +113,11 @@ export function createPortStreamPromise<TResponse = string, TPayload = unknown>(
     port.onDisconnect.addListener(disconnectListener)
 
     if (signal) {
-      signal.addEventListener('abort', abortListener)
+      signal.addEventListener("abort", abortListener)
     }
 
     const startMessage: StreamPortStartMessage<unknown> = {
-      type: 'start',
+      type: "start",
       requestId,
       payload,
     }
@@ -132,7 +132,7 @@ export function createPortStreamPromise<TResponse = string, TPayload = unknown>(
 
         try {
           const pingMessage: StreamPortRequestMessage<unknown> = {
-            type: 'ping',
+            type: "ping",
             requestId,
           }
           port.postMessage(pingMessage)

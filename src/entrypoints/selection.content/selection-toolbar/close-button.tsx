@@ -1,17 +1,17 @@
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useAtom } from 'jotai'
-import { useState } from 'react'
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useAtom } from "jotai"
+import { useState } from "react"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/base-ui/dropdown-menu'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { shadowWrapper } from '..'
+} from "@/components/ui/base-ui/dropdown-menu"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { shadowWrapper } from ".."
 
-export const DropEvent = 'rf-dropdown-change'
+export const DropEvent = "rf-dropdown-change"
 
 export function CloseButton() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
@@ -35,7 +35,7 @@ export function CloseButton() {
           <button
             type="button"
             title="Close selection toolbar"
-            className={`border-border absolute -top-1 -right-1 cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? 'block' : 'hidden group-hover:block'}`}
+            className={`border-border absolute -top-1 -right-1 cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? "block" : "hidden group-hover:block"}`}
             onMouseDown={handleMouseDown}
           />
         )}
@@ -54,7 +54,7 @@ export function CloseButton() {
             })
           }}
         >
-          {i18n.t('options.floatingButtonAndToolbar.selectionToolbar.closeMenu.disableForSite')}
+          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.closeMenu.disableForSite")}
         </DropdownMenuItem>
         <DropdownMenuItem
           onMouseDown={handleMouseDown}
@@ -62,7 +62,7 @@ export function CloseButton() {
             void setSelectionToolbar({ ...selectionToolbar, enabled: false })
           }}
         >
-          {i18n.t('options.floatingButtonAndToolbar.selectionToolbar.closeMenu.disableGlobally')}
+          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.closeMenu.disableGlobally")}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

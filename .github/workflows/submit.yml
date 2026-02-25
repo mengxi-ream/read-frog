@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to submit (e.g., v1.20.0)'
+        description: "Release tag to submit (e.g., v1.20.0)"
         required: true
         type: string
       dryRun:
@@ -29,7 +29,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: "24"
           cache: pnpm
 
       - name: Install Dependencies

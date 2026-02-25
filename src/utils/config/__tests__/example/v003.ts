@@ -1,38 +1,38 @@
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
   default: {
-    description: 'Refactor to translate config structure',
+    description: "Refactor to translate config structure",
     config: {
       language: {
-        detectedCode: 'eng',
-        sourceCode: 'auto',
-        targetCode: 'jpn',
-        level: 'intermediate',
+        detectedCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+        level: "intermediate",
       },
-      provider: 'openai',
+      provider: "openai",
       providersConfig: {
         openai: {
-          apiKey: 'sk-1234567890',
-          model: 'gpt-4o-mini',
+          apiKey: "sk-1234567890",
+          model: "gpt-4o-mini",
           isCustomModel: true,
-          customModel: 'gpt-4.1-nano',
+          customModel: "gpt-4.1-nano",
         },
         deepseek: {
           apiKey: undefined,
-          model: 'deepseek-chat',
+          model: "deepseek-chat",
           isCustomModel: false,
-          customModel: '',
+          customModel: "",
         },
       },
       translate: {
-        provider: 'microsoft',
+        provider: "microsoft",
         node: {
           enabled: true,
-          hotkey: 'Control',
+          hotkey: "Control",
         },
         page: {
-          range: 'main',
+          range: "main",
         },
       },
       floatingButton: {

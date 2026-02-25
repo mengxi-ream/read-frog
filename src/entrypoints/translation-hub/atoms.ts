@@ -1,11 +1,11 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import type { TranslateProviderConfig } from '@/types/config/provider'
-import { atom } from 'jotai'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { filterEnabledProvidersConfig, getTranslateProvidersConfig } from '@/utils/config/helpers'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { TranslateProviderConfig } from "@/types/config/provider"
+import { atom } from "jotai"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { filterEnabledProvidersConfig, getTranslateProvidersConfig } from "@/utils/config/helpers"
 
 // === LangCode Atoms (derive from config, local override) ===
-const sourceLangCodeOverrideAtom = atom<LangCodeISO6393 | 'auto' | null>(null)
+const sourceLangCodeOverrideAtom = atom<LangCodeISO6393 | "auto" | null>(null)
 const targetLangCodeOverrideAtom = atom<LangCodeISO6393 | null>(null)
 
 export const sourceLangCodeAtom = atom(
@@ -15,7 +15,7 @@ export const sourceLangCodeAtom = atom(
       return override
     return get(configFieldsAtomMap.language).sourceCode
   },
-  (_get, set, value: LangCodeISO6393 | 'auto') => set(sourceLangCodeOverrideAtom, value),
+  (_get, set, value: LangCodeISO6393 | "auto") => set(sourceLangCodeOverrideAtom, value),
 )
 
 export const targetLangCodeAtom = atom(
@@ -29,7 +29,7 @@ export const targetLangCodeAtom = atom(
 )
 
 // === Input Atom ===
-export const inputTextAtom = atom('')
+export const inputTextAtom = atom("")
 
 // === Detected Source LangCode (from input text) ===
 export const detectedSourceLangCodeAtom = atom<LangCodeISO6393 | null>(null)
@@ -62,7 +62,7 @@ export const selectedProvidersAtom = atom((get) => {
 // === Write-Only Action Atom (only for operations that touch multiple atoms) ===
 export const exchangeLangCodesAtom = atom(null, (get, set) => {
   const source = get(sourceLangCodeAtom)
-  if (source === 'auto')
+  if (source === "auto")
     return // Cannot exchange when source is auto
   const target = get(targetLangCodeAtom)
   set(sourceLangCodeAtom, target)
@@ -73,7 +73,7 @@ export const exchangeLangCodesAtom = atom(null, (get, set) => {
 // When translate button is clicked, store snapshot here. Cards watch timestamp to trigger.
 export interface TranslateRequest {
   inputText: string
-  sourceLanguage: LangCodeISO6393 | 'auto'
+  sourceLanguage: LangCodeISO6393 | "auto"
   targetLanguage: LangCodeISO6393
   timestamp: number
 }

@@ -8,10 +8,10 @@
  */
 
 // Ensure crypto.getRandomValues is available (required for this polyfill)
-if (typeof crypto === 'undefined' || typeof crypto.getRandomValues !== 'function') {
+if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function") {
   throw new TypeError(
-    '[crypto-polyfill] crypto.getRandomValues is required but not available. '
-    + 'This polyfill only works in browser environments.',
+    "[crypto-polyfill] crypto.getRandomValues is required but not available. "
+    + "This polyfill only works in browser environments.",
   )
 }
 
@@ -23,8 +23,8 @@ export function generateUUIDv4(): string {
   bytes[8] = (bytes[8]! & 0x3F) | 0x80 // Variant 1: set bits 6-7 to 10
 
   const hex = Array.from(bytes)
-    .map(byte => byte.toString(16).padStart(2, '0'))
-    .join('')
+    .map(byte => byte.toString(16).padStart(2, "0"))
+    .join("")
 
   // Format: xxxxxxxx-xxxx-4xxx-Nxxx-xxxxxxxxxxxx (8-4-4-4-12)
   return [
@@ -33,11 +33,11 @@ export function generateUUIDv4(): string {
     hex.slice(12, 16),
     hex.slice(16, 20),
     hex.slice(20, 32),
-  ].join('-')
+  ].join("-")
 }
 
 // Only polyfill if crypto.randomUUID is not available
-if (typeof crypto.randomUUID !== 'function') {
+if (typeof crypto.randomUUID !== "function") {
   // @ts-expect-error - polyfill signature mismatch (our function returns string, native returns `${string}-...`)
   crypto.randomUUID = generateUUIDv4
 }

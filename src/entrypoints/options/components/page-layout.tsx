@@ -1,11 +1,11 @@
-import Container from '@/components/container'
-import { Separator } from '@/components/ui/base-ui/separator'
-import { SidebarTrigger } from '@/components/ui/base-ui/sidebar'
-import { cn } from '@/utils/styles/utils'
+import Container from "@/components/container"
+import { Separator } from "@/components/ui/base-ui/separator"
+import { SidebarTrigger } from "@/components/ui/base-ui/sidebar"
+import { cn } from "@/utils/styles/utils"
 
 export function PageLayout({ title, children, className, innerClassName }: { title: React.ReactNode, children: React.ReactNode, className?: string, innerClassName?: string }) {
   return (
-    <div className={cn('w-full pb-8', className)}>
+    <div className={cn("w-full pb-8", className)}>
       <div className="border-b">
         <Container>
           <header className="flex h-14 -ml-1.5 shrink-0 items-center gap-2">
@@ -15,7 +15,7 @@ export function PageLayout({ title, children, className, innerClassName }: { tit
           </header>
         </Container>
       </div>
-      <Container className={cn('@container', innerClassName)}>
+      <Container className={cn("@container", innerClassName)}>
         {children}
       </Container>
     </div>

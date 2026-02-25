@@ -14,8 +14,8 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     inputTranslation: {
       enabled: old.enabled,
-      fromLang: 'targetCode',
-      toLang: 'sourceCode',
+      fromLang: "targetCode",
+      toLang: "sourceCode",
       enableCycle: false,
       timeThreshold: old.timeThreshold,
     },

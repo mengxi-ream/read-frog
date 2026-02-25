@@ -1,12 +1,12 @@
-import type { Config } from '@/types/config/config'
+import type { Config } from "@/types/config/config"
 import {
   BLOCK_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
   PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
-} from '../../../constants/dom-labels'
-import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from '../../dom/filter'
-import { translateNodes } from './translation-modes'
+} from "../../../constants/dom-labels"
+import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
+import { translateNodes } from "./translation-modes"
 
 export async function translateWalkedElement(
   element: HTMLElement,
@@ -34,7 +34,7 @@ export async function translateWalkedElement(
     }
 
     const computedStyle = window.getComputedStyle(element)
-    const isFlexParent = computedStyle.display.includes('flex')
+    const isFlexParent = computedStyle.display.includes("flex")
 
     if (!hasBlockNodeChild) {
       promises.push(translateNodes([element], walkId, toggle, config))

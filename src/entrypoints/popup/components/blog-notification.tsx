@@ -1,36 +1,36 @@
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react/dist/iconify.js'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Button } from '@/components/ui/base-ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
-import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from '@/utils/blog'
-import { WEBSITE_URL } from '@/utils/constants/url'
-import { version } from '../../../../package.json'
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react/dist/iconify.js"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { Button } from "@/components/ui/base-ui/button"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from "@/utils/blog"
+import { WEBSITE_URL } from "@/utils/constants/url"
+import { version } from "../../../../package.json"
 
 export default function BlogNotification() {
   const queryClient = useQueryClient()
 
   const { data: lastViewedDate } = useQuery({
-    queryKey: ['last-viewed-blog-date'],
+    queryKey: ["last-viewed-blog-date"],
     queryFn: getLastViewedBlogDate,
   })
 
   const { data: latestBlogPost } = useQuery({
-    queryKey: ['latest-blog-post'],
-    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, 'en', version),
+    queryKey: ["latest-blog-post"],
+    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, "en", version),
   })
 
   const handleClick = async () => {
     if (latestBlogPost) {
       await saveLastViewedBlogDate(latestBlogPost.date)
-      await queryClient.invalidateQueries({ queryKey: ['last-viewed-blog-date'] })
+      await queryClient.invalidateQueries({ queryKey: ["last-viewed-blog-date"] })
     }
     // Open the latest blog post URL directly, or fallback to /blog if not available
     // Convert relative URL to absolute URL
     const blogUrl = latestBlogPost?.url
       ? `${WEBSITE_URL}${latestBlogPost.url}`
       : `${WEBSITE_URL}/blog`
-    window.open(blogUrl, '_blank')
+    window.open(blogUrl, "_blank")
   }
 
   const showIndicator = hasNewBlogPost(
@@ -59,7 +59,7 @@ export default function BlogNotification() {
         )}
       </TooltipTrigger>
       <TooltipContent>
-        {i18n.t('popup.blog.notification')}
+        {i18n.t("popup.blog.notification")}
       </TooltipContent>
     </Tooltip>
   )

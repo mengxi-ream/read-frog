@@ -42,4 +42,4 @@ changelog:
         - build
         - i18n
     - title: Other Changes
-      labels: ['*']
+      labels: ["*"]

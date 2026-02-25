@@ -31,9 +31,9 @@ export function migrate(oldConfig: any): any {
   const newTranslateModelsConfig = {
     ...transferredModelsConfig,
     openrouter: {
-      model: 'meta-llama/llama-4-maverick:free',
+      model: "meta-llama/llama-4-maverick:free",
       isCustomModel: false,
-      customModel: '',
+      customModel: "",
     },
   }
 

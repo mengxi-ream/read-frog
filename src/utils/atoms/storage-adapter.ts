@@ -1,5 +1,5 @@
-import type { ZodSchema } from 'zod'
-import { storage } from '#imports'
+import type { ZodSchema } from "zod"
+import { storage } from "#imports"
 
 export const storageAdapter = {
   async get<T>(key: string, fallback: T, schema: ZodSchema<T>): Promise<T> {

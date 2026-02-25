@@ -1,6 +1,6 @@
-import type { ControlsConfig } from '@/entrypoints/subtitles.content/platforms'
-import { useEffect, useEffectEvent, useState } from 'react'
-import { getContainingShadowRoot } from '@/utils/host/dom/node'
+import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
+import { useEffect, useEffectEvent, useState } from "react"
+import { getContainingShadowRoot } from "@/utils/host/dom/node"
 
 interface ControlsInfo {
   controlsVisible: boolean
@@ -45,7 +45,7 @@ export function useControlsInfo(
 
     observer.observe(videoContainer, {
       attributes: true,
-      attributeFilter: ['class'],
+      attributeFilter: ["class"],
       subtree: true,
     })
 

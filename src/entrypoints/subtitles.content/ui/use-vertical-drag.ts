@@ -1,10 +1,10 @@
-import type { RefObject } from 'react'
-import type { SubtitlePosition } from '../atoms'
-import { useAtom } from 'jotai'
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
-import { DEFAULT_SUBTITLE_POSITION } from '@/utils/constants/subtitles'
-import { getContainingShadowRoot } from '@/utils/host/dom/node'
-import { subtitlesPositionAtom } from '../atoms'
+import type { RefObject } from "react"
+import type { SubtitlePosition } from "../atoms"
+import { useAtom } from "jotai"
+import { useEffect, useEffectEvent, useRef, useState } from "react"
+import { DEFAULT_SUBTITLE_POSITION } from "@/utils/constants/subtitles"
+import { getContainingShadowRoot } from "@/utils/host/dom/node"
+import { subtitlesPositionAtom } from "../atoms"
 
 const BASE_FONT_RATIO = 0.03
 
@@ -64,11 +64,11 @@ function calculateAnchorPosition(ctx: AnchorPositionContext): SubtitlePosition {
   const subtitleCenter = subtitleTop + containerRect.height / 2
   const midPoint = videoHeight / 2
 
-  const anchor = subtitleCenter < midPoint ? 'top' : 'bottom'
+  const anchor = subtitleCenter < midPoint ? "top" : "bottom"
 
-  if (anchor === 'top') {
+  if (anchor === "top") {
     const percent = (subtitleTop / videoHeight) * 100
-    return { percent: Math.max(0, percent), anchor: 'top' }
+    return { percent: Math.max(0, percent), anchor: "top" }
   }
 
   const subtitleBottom = videoHeight - (containerRect.bottom - videoRect.top)
@@ -76,7 +76,7 @@ function calculateAnchorPosition(ctx: AnchorPositionContext): SubtitlePosition {
   const controlsOffsetPercent = controlsVisible ? (controlsHeight / videoHeight) * 100 : 0
   const percent = subtitleBottomPercent - controlsOffsetPercent
 
-  return { percent: Math.max(0, percent), anchor: 'bottom' }
+  return { percent: Math.max(0, percent), anchor: "bottom" }
 }
 
 export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number) {
@@ -132,12 +132,12 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     const deltaPercent = (deltaY / videoHeight) * 100
 
     // Calculate new position based on current anchor
-    const isBottomAnchor = startPositionRef.current.anchor === 'bottom'
+    const isBottomAnchor = startPositionRef.current.anchor === "bottom"
     let newPercent = isBottomAnchor
       ? startPositionRef.current.percent - deltaPercent
       : startPositionRef.current.percent + deltaPercent
 
-    const reservedHeight = controlsVisible && startPositionRef.current.anchor === 'bottom'
+    const reservedHeight = controlsVisible && startPositionRef.current.anchor === "bottom"
       ? controlsHeight
       : 0
     const maxPercent = ((videoHeight - containerRect.height - reservedHeight) / videoHeight) * 100
@@ -191,9 +191,9 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
 
     const videoContainer = getVideoContainer(container)
 
-    handle.addEventListener('mousedown', onMouseDown)
-    window.addEventListener('mousemove', onMouseMove)
-    window.addEventListener('mouseup', onMouseUp)
+    handle.addEventListener("mousedown", onMouseDown)
+    window.addEventListener("mousemove", onMouseMove)
+    window.addEventListener("mouseup", onMouseUp)
 
     const resizeObserver = new ResizeObserver(() => {
       updateWindowStyle()
@@ -206,9 +206,9 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     }
 
     return () => {
-      handle.removeEventListener('mousedown', onMouseDown)
-      window.removeEventListener('mousemove', onMouseMove)
-      window.removeEventListener('mouseup', onMouseUp)
+      handle.removeEventListener("mousedown", onMouseDown)
+      window.removeEventListener("mousemove", onMouseMove)
+      window.removeEventListener("mouseup", onMouseUp)
       resizeObserver.disconnect()
     }
   })
@@ -217,13 +217,13 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
     return setupListeners()
   }, [])
 
-  const controlsOffsetPercent = controlsVisible && position.anchor === 'bottom' && windowStyle.height > 0
+  const controlsOffsetPercent = controlsVisible && position.anchor === "bottom" && windowStyle.height > 0
     ? (controlsHeight / windowStyle.height) * 100
     : 0
 
-  const positionStyle: SubtitlePositionStyle = position.anchor === 'top'
-    ? { top: `${position.percent}%`, bottom: 'unset' }
-    : { bottom: `${position.percent + controlsOffsetPercent}%`, top: 'unset' }
+  const positionStyle: SubtitlePositionStyle = position.anchor === "top"
+    ? { top: `${position.percent}%`, bottom: "unset" }
+    : { bottom: `${position.percent + controlsOffsetPercent}%`, top: "unset" }
 
   return {
     refs: { container: containerRef, handle: handleRef },

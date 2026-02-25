@@ -1,6 +1,6 @@
-import { i18n } from '#imports'
-import { deepmerge } from 'deepmerge-ts'
-import { useAtom } from 'jotai'
+import { i18n } from "#imports"
+import { deepmerge } from "deepmerge-ts"
+import { useAtom } from "jotai"
 import {
   Select,
   SelectContent,
@@ -8,10 +8,10 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/base-ui/select'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { HOTKEY_ICONS, HOTKEYS } from '@/utils/constants/hotkeys'
-import { ConfigCard } from '../../components/config-card'
+} from "@/components/ui/base-ui/select"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
+import { ConfigCard } from "../../components/config-card"
 
 export function NodeTranslationHotkey() {
   const [translateConfig, setTranslateConfig] = useAtom(
@@ -20,8 +20,8 @@ export function NodeTranslationHotkey() {
 
   return (
     <ConfigCard
-      title={i18n.t('options.translation.nodeTranslationHotkey.title')}
-      description={i18n.t('options.translation.nodeTranslationHotkey.description')}
+      title={i18n.t("options.translation.nodeTranslationHotkey.title")}
+      description={i18n.t("options.translation.nodeTranslationHotkey.description")}
     >
       <Select
         value={translateConfig.node.hotkey}
@@ -36,7 +36,7 @@ export function NodeTranslationHotkey() {
         <SelectTrigger className="w-full">
           <SelectValue render={<span />}>
             {HOTKEY_ICONS[translateConfig.node.hotkey]}
-            {' '}
+            {" "}
             {i18n.t(`hotkey.${translateConfig.node.hotkey}`)}
           </SelectValue>
         </SelectTrigger>
@@ -45,7 +45,7 @@ export function NodeTranslationHotkey() {
             {HOTKEYS.map(item => (
               <SelectItem key={item} value={item}>
                 {HOTKEY_ICONS[item]}
-                {' '}
+                {" "}
                 {i18n.t(`hotkey.${item}`)}
               </SelectItem>
             ))}

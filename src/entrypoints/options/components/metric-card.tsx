@@ -1,8 +1,8 @@
-import { Icon } from '@iconify/react'
-import { IconCircleArrowDownRightFilled, IconCircleArrowUpRightFilled, IconMinus } from '@tabler/icons-react'
-import { Activity } from 'react'
-import { Card, CardContent } from '@/components/ui/base-ui/card'
-import { addThousandsSeparator, numberToPercentage } from '@/utils/utils'
+import { Icon } from "@iconify/react"
+import { IconCircleArrowDownRightFilled, IconCircleArrowUpRightFilled, IconMinus } from "@tabler/icons-react"
+import { Activity } from "react"
+import { Card, CardContent } from "@/components/ui/base-ui/card"
+import { addThousandsSeparator, numberToPercentage } from "@/utils/utils"
 
 export function MetricCard(
   { title, metric, comparison, icon }:
@@ -36,18 +36,18 @@ function Comparison({ comparison }: { comparison?: number }) {
 
   return (
     <>
-      <Activity mode={comparison > 0 ? 'visible' : 'hidden'}>
+      <Activity mode={comparison > 0 ? "visible" : "hidden"}>
         <div className="h-full text-base flex items-center gap-1 text-primary-strong">
           <IconCircleArrowUpRightFilled className="size-5" />
           {comparisonText}
         </div>
       </Activity>
-      <Activity mode={comparison === 0 ? 'visible' : 'hidden'}>
+      <Activity mode={comparison === 0 ? "visible" : "hidden"}>
         <div className="h-full text-base flex items-center gap-1 text-foreground">
           <IconMinus className="size-5" />
         </div>
       </Activity>
-      <Activity mode={comparison < 0 ? 'visible' : 'hidden'}>
+      <Activity mode={comparison < 0 ? "visible" : "hidden"}>
         <div className="h-full text-base flex items-center gap-1 text-destructive">
           <IconCircleArrowDownRightFilled className="size-5" />
           {comparisonText}

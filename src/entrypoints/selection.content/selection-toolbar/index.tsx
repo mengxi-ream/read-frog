@@ -1,20 +1,20 @@
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { NOTRANSLATE_CLASS } from '@/utils/constants/dom-labels'
-import { MARGIN } from '@/utils/constants/selection'
-import { matchDomainPattern } from '@/utils/url'
-import { AiButton, AiPopover } from './ai-button'
-import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from './atom'
-import { CloseButton, DropEvent } from './close-button'
-import { SpeakButton } from './speak-button'
-import { TranslateButton, TranslatePopover } from './translate-button'
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
+import { MARGIN } from "@/utils/constants/selection"
+import { matchDomainPattern } from "@/utils/url"
+import { AiButton, AiPopover } from "./ai-button"
+import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atom"
+import { CloseButton, DropEvent } from "./close-button"
+import { SpeakButton } from "./speak-button"
+import { TranslateButton, TranslatePopover } from "./translate-button"
 
 enum SelectionDirection {
-  TOP_LEFT = 'TOP_LEFT',
-  TOP_RIGHT = 'TOP_RIGHT',
-  BOTTOM_LEFT = 'BOTTOM_LEFT',
-  BOTTOM_RIGHT = 'BOTTOM_RIGHT',
+  TOP_LEFT = "TOP_LEFT",
+  TOP_RIGHT = "TOP_RIGHT",
+  BOTTOM_LEFT = "BOTTOM_LEFT",
+  BOTTOM_RIGHT = "BOTTOM_RIGHT",
 }
 
 function getSelectionDirection(
@@ -128,7 +128,7 @@ export function SelectionToolbar() {
 
         // check if there is text selected
         const selection = window.getSelection()
-        const selectedText = selection?.toString().trim() || ''
+        const selectedText = selection?.toString().trim() || ""
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
@@ -208,16 +208,16 @@ export function SelectionToolbar() {
       animationFrameId = requestAnimationFrame(updatePosition)
     }
 
-    document.addEventListener('mouseup', handleMouseUp)
-    document.addEventListener('mousedown', handleMouseDown)
-    document.addEventListener('selectionchange', handleSelectionChange)
-    window.addEventListener('scroll', handleScroll, { passive: true })
+    document.addEventListener("mouseup", handleMouseUp)
+    document.addEventListener("mousedown", handleMouseDown)
+    document.addEventListener("selectionchange", handleSelectionChange)
+    window.addEventListener("scroll", handleScroll, { passive: true })
 
     return () => {
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.removeEventListener('mousedown', handleMouseDown)
-      document.removeEventListener('selectionchange', handleSelectionChange)
-      window.removeEventListener('scroll', handleScroll)
+      document.removeEventListener("mouseup", handleMouseUp)
+      document.removeEventListener("mousedown", handleMouseDown)
+      document.removeEventListener("selectionchange", handleSelectionChange)
+      window.removeEventListener("scroll", handleScroll)
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId)
       }

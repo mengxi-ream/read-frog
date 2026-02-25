@@ -1,7 +1,7 @@
-import type { Config } from '@/types/config/config'
-import type { ApplyResolutionsResult, DiffConflictsResult } from '@/utils/google-drive/conflict-merge'
-import { atom } from 'jotai'
-import { applyResolutions, detectConflicts } from '@/utils/google-drive/conflict-merge'
+import type { Config } from "@/types/config/config"
+import type { ApplyResolutionsResult, DiffConflictsResult } from "@/utils/google-drive/conflict-merge"
+import { atom } from "jotai"
+import { applyResolutions, detectConflicts } from "@/utils/google-drive/conflict-merge"
 
 export interface UnresolvedConfigs {
   base: Config
@@ -9,7 +9,7 @@ export interface UnresolvedConfigs {
   remote: Config
 }
 
-type Resolution = 'local' | 'remote'
+type Resolution = "local" | "remote"
 
 export const unresolvedConfigsAtom = atom<UnresolvedConfigs | null>(null)
 export const resolutionsAtom = atom<Record<string, Resolution>>({})
@@ -38,7 +38,7 @@ export const resolutionStatusAtom = atom((get) => {
 
   const conflictCount = diffConflictsResult?.conflicts.length ?? 0
   const resolvedCount = Object.keys(resolutions).length
-  const allResolved = diffConflictsResult?.conflicts.every(c => resolutions[c.path.join('.')]) ?? true
+  const allResolved = diffConflictsResult?.conflicts.every(c => resolutions[c.path.join(".")]) ?? true
 
   return {
     conflictCount,
@@ -71,7 +71,7 @@ export const selectAllLocalAtom = atom(null, (get, set) => {
     return
   const resolutions: Record<string, Resolution> = {}
   for (const c of diffConflictsResult.conflicts) {
-    resolutions[c.path.join('.')] = 'local'
+    resolutions[c.path.join(".")] = "local"
   }
   set(resolutionsAtom, resolutions)
 })
@@ -82,7 +82,7 @@ export const selectAllRemoteAtom = atom(null, (get, set) => {
     return
   const resolutions: Record<string, Resolution> = {}
   for (const c of diffResult.conflicts) {
-    resolutions[c.path.join('.')] = 'remote'
+    resolutions[c.path.join(".")] = "remote"
   }
   set(resolutionsAtom, resolutions)
 })

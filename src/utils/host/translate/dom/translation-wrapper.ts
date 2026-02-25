@@ -1,5 +1,5 @@
-import { CONTENT_WRAPPER_CLASS, WALKED_ATTRIBUTE } from '../../../constants/dom-labels'
-import { isHTMLElement } from '../../dom/filter'
+import { CONTENT_WRAPPER_CLASS, WALKED_ATTRIBUTE } from "../../../constants/dom-labels"
+import { isHTMLElement } from "../../dom/filter"
 
 export function findPreviousTranslatedWrapperInside(node: Element | Text, walkId: string): HTMLElement | null {
   if (isHTMLElement(node)) {

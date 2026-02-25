@@ -1,16 +1,16 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import type { Config } from '@/types/config/config'
-import { ISO6393_TO_6391 } from '@read-frog/definitions'
-import { getDetectedCodeFromStorage, getFinalSourceCode } from '@/utils/config/languages'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { Config } from "@/types/config/config"
+import { ISO6393_TO_6391 } from "@read-frog/definitions"
+import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 
 function countWords(text: string, sourceCode: LangCodeISO6393): number {
   // Convert ISO 639-3 (e.g., 'eng') to ISO 639-1 (e.g., 'en') for Intl.Segmenter
-  const locale = ISO6393_TO_6391[sourceCode] ?? 'en'
-  const segmenter = new Intl.Segmenter(locale, { granularity: 'word' })
+  const locale = ISO6393_TO_6391[sourceCode] ?? "en"
+  const segmenter = new Intl.Segmenter(locale, { granularity: "word" })
   return [...segmenter.segment(text)].filter(s => s.isWordLike).length
 }
 
-async function getSourceCode(configSourceCode: LangCodeISO6393 | 'auto'): Promise<LangCodeISO6393> {
+async function getSourceCode(configSourceCode: LangCodeISO6393 | "auto"): Promise<LangCodeISO6393> {
   const detectedCode = await getDetectedCodeFromStorage()
   return getFinalSourceCode(configSourceCode, detectedCode)
 }

@@ -1,28 +1,16 @@
-import { z } from 'zod'
-import { NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, PURE_TRANSLATE_PROVIDERS, READ_PROVIDER_MODELS, TRANSLATE_PROVIDER_MODELS } from '@/utils/constants/models'
+import { z } from "zod"
+import { LLM_PROVIDER_MODELS, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, PURE_TRANSLATE_PROVIDERS } from "@/utils/constants/models"
 
 // Re-export for external consumers
-export { NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, PURE_TRANSLATE_PROVIDERS, READ_PROVIDER_MODELS, TRANSLATE_PROVIDER_MODELS }
+export { LLM_PROVIDER_MODELS, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, PURE_TRANSLATE_PROVIDERS }
 
 /* ──────────────────────────────
   Derived provider names
   ────────────────────────────── */
 
-// read provider names
-export const READ_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (keyof typeof READ_PROVIDER_MODELS)[]
->
-export type ReadProviderTypes = typeof READ_PROVIDER_TYPES[number]
-export function isReadProvider(provider: string): provider is ReadProviderTypes {
-  return READ_PROVIDER_TYPES.includes(provider)
-}
-export function isReadProviderConfig(config: ProviderConfig): config is ReadProviderConfig {
-  return isReadProvider(config.provider)
-}
-
 // translate provider names
-export const TRANSLATE_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (keyof typeof TRANSLATE_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
+export const TRANSLATE_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "openai", "deepseek", "google", "anthropic", "xai", "openai-compatible", "siliconflow", "tensdaq", "ai302", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax"] as const satisfies Readonly<
+  (keyof typeof LLM_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
 >
 export type TranslateProviderTypes = typeof TRANSLATE_PROVIDER_TYPES[number]
 export function isTranslateProvider(provider: string): provider is TranslateProviderTypes {
@@ -32,20 +20,8 @@ export function isTranslateProviderConfig(config: ProviderConfig): config is Tra
   return isTranslateProvider(config.provider)
 }
 
-// translate provider names that support LLM
-export const LLM_TRANSLATE_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (keyof typeof TRANSLATE_PROVIDER_MODELS)[]
->
-export type LLMTranslateProviderTypes = typeof LLM_TRANSLATE_PROVIDER_TYPES[number]
-export function isLLMTranslateProvider(provider: string): provider is LLMTranslateProviderTypes {
-  return LLM_TRANSLATE_PROVIDER_TYPES.includes(provider)
-}
-export function isLLMTranslateProviderConfig(config: ProviderConfig): config is LLMTranslateProviderConfig {
-  return isLLMTranslateProvider(config.provider)
-}
-
-export const LLM_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'openai-compatible', 'siliconflow', 'tensdaq', 'ai302', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS)[]
+export const LLM_PROVIDER_TYPES = ["openai", "deepseek", "google", "anthropic", "xai", "openai-compatible", "siliconflow", "tensdaq", "ai302", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax"] as const satisfies Readonly<
+  (keyof typeof LLM_PROVIDER_MODELS)[]
 >
 export type LLMProviderTypes = typeof LLM_PROVIDER_TYPES[number]
 export function isLLMProvider(provider: string): provider is LLMProviderTypes {
@@ -55,8 +31,8 @@ export function isLLMProviderConfig(config: ProviderConfig): config is LLMProvid
   return isLLMProvider(config.provider)
 }
 
-export const CUSTOM_LLM_PROVIDER_TYPES = ['openai-compatible', 'tensdaq', 'siliconflow', 'ai302', 'volcengine'] as const satisfies Readonly<
-  (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS)[]
+export const CUSTOM_LLM_PROVIDER_TYPES = ["openai-compatible", "tensdaq", "siliconflow", "ai302", "volcengine"] as const satisfies Readonly<
+  (keyof typeof LLM_PROVIDER_MODELS)[]
 >
 export type CustomLLMProviderTypes = typeof CUSTOM_LLM_PROVIDER_TYPES[number]
 export function isCustomLLMProvider(provider: string): provider is CustomLLMProviderTypes {
@@ -66,8 +42,8 @@ export function isCustomLLMProviderConfig(config: ProviderConfig): config is Cus
   return isCustomLLMProvider(config.provider)
 }
 
-export const NON_CUSTOM_LLM_PROVIDER_TYPES = ['openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'minimax'] as const satisfies Readonly<
-  Exclude<keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS, CustomLLMProviderTypes>[]
+export const NON_CUSTOM_LLM_PROVIDER_TYPES = ["openai", "deepseek", "google", "anthropic", "xai", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "minimax"] as const satisfies Readonly<
+  Exclude<keyof typeof LLM_PROVIDER_MODELS, CustomLLMProviderTypes>[]
 >
 export type NonCustomLLMProviderTypes = typeof NON_CUSTOM_LLM_PROVIDER_TYPES[number]
 export function isNonCustomLLMProvider(provider: string): provider is NonCustomLLMProviderTypes {
@@ -77,8 +53,8 @@ export function isNonCustomLLMProviderConfig(config: ProviderConfig): config is 
   return isNonCustomLLMProvider(config.provider)
 }
 
-export const API_PROVIDER_TYPES = ['siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'deeplx', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (keyof typeof READ_PROVIDER_MODELS | keyof typeof TRANSLATE_PROVIDER_MODELS | 'deeplx')[]
+export const API_PROVIDER_TYPES = ["siliconflow", "tensdaq", "ai302", "openai-compatible", "openai", "deepseek", "google", "anthropic", "xai", "deeplx", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax"] as const satisfies Readonly<
+  (keyof typeof LLM_PROVIDER_MODELS | "deeplx")[]
 >
 export type APIProviderTypes = typeof API_PROVIDER_TYPES[number]
 export function isAPIProvider(provider: string): provider is APIProviderTypes {
@@ -88,8 +64,8 @@ export function isAPIProviderConfig(config: ProviderConfig): config is APIProvid
   return isAPIProvider(config.provider)
 }
 
-export const PURE_API_PROVIDER_TYPES = ['deeplx'] as const satisfies Readonly<
-  Exclude<APIProviderTypes, LLMTranslateProviderTypes>[]
+export const PURE_API_PROVIDER_TYPES = ["deeplx"] as const satisfies Readonly<
+  Exclude<APIProviderTypes, LLMProviderTypes>[]
 >
 export type PureAPIProviderTypes = typeof PURE_API_PROVIDER_TYPES[number]
 export function isPureAPIProvider(provider: string): provider is PureAPIProviderTypes {
@@ -107,20 +83,9 @@ export function isNonAPIProviderConfig(config: ProviderConfig): config is NonAPI
   return isNonAPIProvider(config.provider)
 }
 
-export const TTS_PROVIDER_TYPES = ['openai'] as const satisfies Readonly<
-  (keyof typeof READ_PROVIDER_MODELS)[]
->
-export type TTSProviderTypes = typeof TTS_PROVIDER_TYPES[number]
-export function isTTSProvider(provider: string): provider is TTSProviderTypes {
-  return TTS_PROVIDER_TYPES.includes(provider)
-}
-export function isTTSProviderConfig(config: ProviderConfig): config is TTSProviderConfig {
-  return isTTSProvider(config.provider)
-}
-
 // all provider names
-export const ALL_PROVIDER_TYPES = ['google-translate', 'microsoft-translate', 'deeplx', 'siliconflow', 'tensdaq', 'ai302', 'openai-compatible', 'openai', 'deepseek', 'google', 'anthropic', 'xai', 'bedrock', 'groq', 'deepinfra', 'mistral', 'togetherai', 'cohere', 'fireworks', 'cerebras', 'replicate', 'perplexity', 'vercel', 'openrouter', 'ollama', 'volcengine', 'minimax'] as const satisfies Readonly<
-  (typeof READ_PROVIDER_TYPES[number] | typeof TRANSLATE_PROVIDER_TYPES[number])[]
+export const ALL_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "siliconflow", "tensdaq", "ai302", "openai-compatible", "openai", "deepseek", "google", "anthropic", "xai", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax"] as const satisfies Readonly<
+  TranslateProviderTypes[]
 >
 export type AllProviderTypes = typeof ALL_PROVIDER_TYPES[number]
 
@@ -132,22 +97,13 @@ export function isPureTranslateProvider(provider: TranslateProviderTypes): provi
   Providers config schema
   ────────────────────────────── */
 
-// Helper function to create provider-specific models schema
-function createProviderModelsSchema<T extends LLMTranslateProviderTypes | ReadProviderTypes>(provider: T) {
-  const readModels = isReadProvider(provider) ? READ_PROVIDER_MODELS[provider] : []
-  const translateModels = isLLMTranslateProvider(provider) ? TRANSLATE_PROVIDER_MODELS[provider] : []
-
+// Helper function to create provider-specific model schema
+function createProviderModelSchema<T extends LLMProviderTypes>(provider: T) {
+  const models = LLM_PROVIDER_MODELS[provider]
   return z.object({
-    read: z.object({
-      model: z.enum(readModels),
-      isCustomModel: z.boolean(),
-      customModel: z.string().nullable(),
-    }),
-    translate: z.object({
-      model: z.enum(translateModels),
-      isCustomModel: z.boolean(),
-      customModel: z.string().nullable(),
-    }),
+    model: z.enum(models),
+    isCustomModel: provider === "openai-compatible" ? z.literal(true) : z.boolean(),
+    customModel: z.string().nullable(),
   })
 }
 
@@ -172,134 +128,123 @@ export const baseCustomLLMProviderConfigSchema = baseAPIProviderConfigSchema.ext
 
 const llmProviderConfigSchemaList = [
   baseCustomLLMProviderConfigSchema.extend({
-    provider: z.literal('siliconflow'),
-    models: createProviderModelsSchema<'siliconflow'>('siliconflow'),
+    provider: z.literal("siliconflow"),
+    model: createProviderModelSchema<"siliconflow">("siliconflow"),
   }),
   baseCustomLLMProviderConfigSchema.extend({
-    provider: z.literal('tensdaq'),
-    models: createProviderModelsSchema<'tensdaq'>('tensdaq'),
+    provider: z.literal("tensdaq"),
+    model: createProviderModelSchema<"tensdaq">("tensdaq"),
   }),
   baseCustomLLMProviderConfigSchema.extend({
-    provider: z.literal('ai302'),
-    models: createProviderModelsSchema<'ai302'>('ai302'),
+    provider: z.literal("ai302"),
+    model: createProviderModelSchema<"ai302">("ai302"),
   }),
   baseCustomLLMProviderConfigSchema.extend({
-    provider: z.literal('volcengine'),
-    models: createProviderModelsSchema<'volcengine'>('volcengine'),
+    provider: z.literal("volcengine"),
+    model: createProviderModelSchema<"volcengine">("volcengine"),
   }),
   baseCustomLLMProviderConfigSchema.extend({
-    provider: z.literal('openai-compatible'),
-    models: z.object({
-      read: z.object({
-        model: z.enum(READ_PROVIDER_MODELS['openai-compatible']),
-        isCustomModel: z.literal(true),
-        customModel: z.string().nullable(),
-      }),
-      translate: z.object({
-        model: z.enum(TRANSLATE_PROVIDER_MODELS['openai-compatible']),
-        isCustomModel: z.literal(true),
-        customModel: z.string().nullable(),
-      }),
-    }),
+    provider: z.literal("openai-compatible"),
+    model: createProviderModelSchema<"openai-compatible">("openai-compatible"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('openai'),
-    models: createProviderModelsSchema<'openai'>('openai'),
+    provider: z.literal("openai"),
+    model: createProviderModelSchema<"openai">("openai"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('deepseek'),
-    models: createProviderModelsSchema<'deepseek'>('deepseek'),
+    provider: z.literal("deepseek"),
+    model: createProviderModelSchema<"deepseek">("deepseek"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('google'),
-    models: createProviderModelsSchema<'google'>('google'),
+    provider: z.literal("google"),
+    model: createProviderModelSchema<"google">("google"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('anthropic'),
-    models: createProviderModelsSchema<'anthropic'>('anthropic'),
+    provider: z.literal("anthropic"),
+    model: createProviderModelSchema<"anthropic">("anthropic"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('xai'),
-    models: createProviderModelsSchema<'xai'>('xai'),
+    provider: z.literal("xai"),
+    model: createProviderModelSchema<"xai">("xai"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('bedrock'),
-    models: createProviderModelsSchema<'bedrock'>('bedrock'),
+    provider: z.literal("bedrock"),
+    model: createProviderModelSchema<"bedrock">("bedrock"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('groq'),
-    models: createProviderModelsSchema<'groq'>('groq'),
+    provider: z.literal("groq"),
+    model: createProviderModelSchema<"groq">("groq"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('deepinfra'),
-    models: createProviderModelsSchema<'deepinfra'>('deepinfra'),
+    provider: z.literal("deepinfra"),
+    model: createProviderModelSchema<"deepinfra">("deepinfra"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('mistral'),
-    models: createProviderModelsSchema<'mistral'>('mistral'),
+    provider: z.literal("mistral"),
+    model: createProviderModelSchema<"mistral">("mistral"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('togetherai'),
-    models: createProviderModelsSchema<'togetherai'>('togetherai'),
+    provider: z.literal("togetherai"),
+    model: createProviderModelSchema<"togetherai">("togetherai"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('cohere'),
-    models: createProviderModelsSchema<'cohere'>('cohere'),
+    provider: z.literal("cohere"),
+    model: createProviderModelSchema<"cohere">("cohere"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('fireworks'),
-    models: createProviderModelsSchema<'fireworks'>('fireworks'),
+    provider: z.literal("fireworks"),
+    model: createProviderModelSchema<"fireworks">("fireworks"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('cerebras'),
-    models: createProviderModelsSchema<'cerebras'>('cerebras'),
+    provider: z.literal("cerebras"),
+    model: createProviderModelSchema<"cerebras">("cerebras"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('replicate'),
-    models: createProviderModelsSchema<'replicate'>('replicate'),
+    provider: z.literal("replicate"),
+    model: createProviderModelSchema<"replicate">("replicate"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('perplexity'),
-    models: createProviderModelsSchema<'perplexity'>('perplexity'),
+    provider: z.literal("perplexity"),
+    model: createProviderModelSchema<"perplexity">("perplexity"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('vercel'),
-    models: createProviderModelsSchema<'vercel'>('vercel'),
+    provider: z.literal("vercel"),
+    model: createProviderModelSchema<"vercel">("vercel"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('openrouter'),
-    models: createProviderModelsSchema<'openrouter'>('openrouter'),
+    provider: z.literal("openrouter"),
+    model: createProviderModelSchema<"openrouter">("openrouter"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('ollama'),
-    models: createProviderModelsSchema<'ollama'>('ollama'),
+    provider: z.literal("ollama"),
+    model: createProviderModelSchema<"ollama">("ollama"),
   }),
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('minimax'),
-    models: createProviderModelsSchema<'minimax'>('minimax'),
+    provider: z.literal("minimax"),
+    model: createProviderModelSchema<"minimax">("minimax"),
   }),
 ] as const
 
 const apiProviderConfigSchemaList = [
   ...llmProviderConfigSchemaList,
   baseAPIProviderConfigSchema.extend({
-    provider: z.literal('deeplx'),
+    provider: z.literal("deeplx"),
   }),
 ] as const
 
 export const providerConfigSchemaList = [
   ...apiProviderConfigSchemaList,
   baseProviderConfigSchema.extend({
-    provider: z.literal('google-translate'),
+    provider: z.literal("google-translate"),
   }),
   baseProviderConfigSchema.extend({
-    provider: z.literal('microsoft-translate'),
+    provider: z.literal("microsoft-translate"),
   }),
 ] as const
 
-export const llmProviderConfigItemSchema = z.discriminatedUnion('provider', llmProviderConfigSchemaList)
-export const apiProviderConfigItemSchema = z.discriminatedUnion('provider', apiProviderConfigSchemaList)
-export const providerConfigItemSchema = z.discriminatedUnion('provider', providerConfigSchemaList)
+export const llmProviderConfigItemSchema = z.discriminatedUnion("provider", llmProviderConfigSchemaList)
+export const apiProviderConfigItemSchema = z.discriminatedUnion("provider", apiProviderConfigSchemaList)
+export const providerConfigItemSchema = z.discriminatedUnion("provider", providerConfigSchemaList)
 
 export const providersConfigSchema = z.array(providerConfigItemSchema).superRefine(
   (providers, ctx) => {
@@ -307,9 +252,9 @@ export const providersConfigSchema = z.array(providerConfigItemSchema).superRefi
     providers.forEach((provider, index) => {
       if (idSet.has(provider.id)) {
         ctx.addIssue({
-          code: 'custom',
+          code: "custom",
           message: `Duplicate provider id "${provider.id}"`,
-          path: [index, 'id'],
+          path: [index, "id"],
         })
       }
       idSet.add(provider.id)
@@ -319,9 +264,9 @@ export const providersConfigSchema = z.array(providerConfigItemSchema).superRefi
     providers.forEach((provider, index) => {
       if (nameSet.has(provider.name)) {
         ctx.addIssue({
-          code: 'custom',
+          code: "custom",
           message: `Duplicate provider name "${provider.name}"`,
-          path: [index, 'name'],
+          path: [index, "name"],
         })
       }
       nameSet.add(provider.name)
@@ -334,16 +279,13 @@ export type NonAPIProviderConfig = Extract<ProviderConfig, { provider: NonAPIPro
 export type PureProviderConfig = Extract<ProviderConfig, { provider: PureAPIProviderTypes }>
 export type APIProviderConfig = Extract<ProviderConfig, { provider: APIProviderTypes }>
 export type PureAPIProviderConfig = Extract<ProviderConfig, { provider: PureAPIProviderTypes }>
-export type LLMTranslateProviderConfig = Extract<ProviderConfig, { provider: LLMTranslateProviderTypes }>
 export type LLMProviderConfig = Extract<ProviderConfig, { provider: LLMProviderTypes }>
 export type TranslateProviderConfig = Extract<ProviderConfig, { provider: TranslateProviderTypes }>
-export type ReadProviderConfig = Extract<ProviderConfig, { provider: ReadProviderTypes }>
 export type NonCustomLLMProviderConfig = Extract<ProviderConfig, { provider: NonCustomLLMProviderTypes }>
 export type CustomLLMProviderConfig = Extract<ProviderConfig, { provider: CustomLLMProviderTypes }>
-export type TTSProviderConfig = Extract<ProviderConfig, { provider: TTSProviderTypes }>
 
 /* ──────────────────────────────
-  read or translate config helpers
+  unified llm model config helpers
   ────────────────────────────── */
 
 type ModelTuple = readonly [string, ...string[]] // 至少一个元素才能给 z.enum
@@ -355,13 +297,11 @@ function providerConfigSchema<T extends ModelTuple>(models: T) {
   })
 }
 
-type SchemaShape<M extends Record<string, ModelTuple>> = {
-  [K in keyof M]: ReturnType<typeof providerConfigSchema<M[K]>>;
-}
+type SchemaShape<M extends Record<string, ModelTuple>> = { [K in keyof M]: ReturnType<typeof providerConfigSchema<M[K]>> }
 
-function buildModelSchema<M extends Record<string, ModelTuple>>(models: M) {
+function buildProviderModelsSchema<M extends Record<string, ModelTuple>>(models: M) {
   return z.object(
-    // 用 reduce 而不用 Object.fromEntries ➙ 保留键名/类型
+    // Keep key names and types when building schema dynamically.
     (Object.keys(models) as (keyof M)[]).reduce((acc, key) => {
       acc[key] = providerConfigSchema(models[key])
       return acc
@@ -369,40 +309,17 @@ function buildModelSchema<M extends Record<string, ModelTuple>>(models: M) {
   )
 }
 
-/* ──────────────────────────────
-  read config
-  ────────────────────────────── */
-
-const { 'openai-compatible': _, ollama: _ollama, ...readModelsWithoutOpenaiCompatibleAndOllama } = READ_PROVIDER_MODELS
-export const readModelsSchema = buildModelSchema(readModelsWithoutOpenaiCompatibleAndOllama).extend({
-  'openai-compatible': z.object({
-    model: z.enum(READ_PROVIDER_MODELS['openai-compatible']),
+const { "openai-compatible": _, ollama: _ollama, ...modelsWithoutOpenaiCompatibleAndOllama } = LLM_PROVIDER_MODELS
+export const llmProviderModelsSchema = buildProviderModelsSchema(modelsWithoutOpenaiCompatibleAndOllama).extend({
+  "openai-compatible": z.object({
+    model: z.enum(LLM_PROVIDER_MODELS["openai-compatible"]),
     isCustomModel: z.literal(true),
     customModel: z.string().nullable(),
   }),
-  'ollama': z.object({
-    model: z.enum(READ_PROVIDER_MODELS.ollama),
+  "ollama": z.object({
+    model: z.enum(LLM_PROVIDER_MODELS.ollama),
     isCustomModel: z.boolean(),
     customModel: z.string().nullable(),
   }),
 })
-export type ReadModels = z.infer<typeof readModelsSchema>
-
-/* ──────────────────────────────
-  translate config
-  ────────────────────────────── */
-
-const { 'openai-compatible': __, ollama: _ollama2, ...translateModelsWithoutOpenaiCompatibleAndOllama } = TRANSLATE_PROVIDER_MODELS
-export const translateLLMModelsSchema = buildModelSchema(translateModelsWithoutOpenaiCompatibleAndOllama).extend({
-  'openai-compatible': z.object({
-    model: z.enum(TRANSLATE_PROVIDER_MODELS['openai-compatible']),
-    isCustomModel: z.literal(true),
-    customModel: z.string().nullable(),
-  }),
-  'ollama': z.object({
-    model: z.enum(TRANSLATE_PROVIDER_MODELS.ollama),
-    isCustomModel: z.boolean(),
-    customModel: z.string().nullable(),
-  }),
-})
-export type TranslateLLMModels = z.infer<typeof translateLLMModelsSchema>
+export type LLMProviderModels = z.infer<typeof llmProviderModelsSchema>

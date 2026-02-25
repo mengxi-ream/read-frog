@@ -1,8 +1,8 @@
-const valueParser = require('postcss-value-parser')
+const valueParser = require("postcss-value-parser")
 
 const DEFAULTS = {
-  fromPrefix: '--tw-',
-  toPrefix: '--rf-tw-',
+  fromPrefix: "--tw-",
+  toPrefix: "--rf-tw-",
 }
 
 function renameVarName(varName, fromPrefix, toPrefix) {
@@ -19,11 +19,11 @@ function rewriteValueVars(rawValue, fromPrefix, toPrefix) {
 
   const visit = (nodes) => {
     for (const node of nodes) {
-      if (node.type === 'function') {
+      if (node.type === "function") {
         // Only transform var() references
-        if (node.value.toLowerCase() === 'var' && node.nodes.length) {
+        if (node.value.toLowerCase() === "var" && node.nodes.length) {
           // The first "word" inside var() is the custom property name
-          const first = node.nodes.find(n => n.type === 'word')
+          const first = node.nodes.find(n => n.type === "word")
           if (first) {
             const newName = renameVarName(first.value, fromPrefix, toPrefix)
             first.value = newName
@@ -46,11 +46,11 @@ module.exports = (opts = {}) => {
   const { fromPrefix, toPrefix } = { ...DEFAULTS, ...opts }
 
   return {
-    postcssPlugin: 'postcss-rename-custom-props',
+    postcssPlugin: "postcss-rename-custom-props",
     Once(root) {
       // 1) Rename @property --tw-... rules
       root.walkAtRules((at) => {
-        if (at.name === 'property') {
+        if (at.name === "property") {
           const param = at.params.trim()
           if (param.startsWith(fromPrefix)) {
             at.params = renameVarName(param, fromPrefix, toPrefix)
@@ -66,7 +66,7 @@ module.exports = (opts = {}) => {
         }
 
         // 2b) Rewrite any var(--tw-...) references appearing in values
-        if (decl.value && decl.value.includes('var(') && decl.value.includes(fromPrefix)) {
+        if (decl.value && decl.value.includes("var(") && decl.value.includes(fromPrefix)) {
           decl.value = rewriteValueVars(decl.value, fromPrefix, toPrefix)
         }
       })

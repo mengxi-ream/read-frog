@@ -1,10 +1,10 @@
 export function printNodeStructure(node: Node, indent = 0): string {
-  const spacing = ' '.repeat(indent * 2)
-  let result = ''
+  const spacing = " ".repeat(indent * 2)
+  let result = ""
 
   if (node.nodeType === 3) {
     // 文本节点
-    const text = node.textContent?.trim() || ''
+    const text = node.textContent?.trim() || ""
     if (text) {
       result += `${spacing}"${text}"\n`
     }
@@ -15,9 +15,9 @@ export function printNodeStructure(node: Node, indent = 0): string {
     const tagName = elem.tagName.toLowerCase()
     const attrs = Array.from(elem.attributes)
       .map(attr => `${attr.name}="${attr.value}"`)
-      .join(' ')
+      .join(" ")
 
-    result += `${spacing}<${tagName}${attrs ? ` ${attrs}` : ''}>\n`
+    result += `${spacing}<${tagName}${attrs ? ` ${attrs}` : ""}>\n`
 
     // 递归处理子节点
     if (elem.childNodes.length > 0) {

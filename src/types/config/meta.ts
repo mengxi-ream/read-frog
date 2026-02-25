@@ -1,4 +1,4 @@
-import type { Config } from './config'
+import type { Config } from "./config"
 
 /**
  * Metadata stored with config via WXT storage.setMeta

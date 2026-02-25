@@ -1,15 +1,13 @@
-import type { streamText } from 'ai'
+import type { streamText } from "ai"
 
-export type StreamTextModelRole = 'read' | 'translate'
-export type BackgroundStreamTextParams = Omit<Parameters<typeof streamText>[0], 'model' | 'abortSignal'>
+export type BackgroundStreamTextParams = Omit<Parameters<typeof streamText>[0], "model" | "abortSignal">
 
 export type BackgroundStreamTextPayload = {
   providerId: string
-  modelRole?: StreamTextModelRole
 } & BackgroundStreamTextParams
 
 export const BACKGROUND_STREAM_PORTS = {
-  streamText: 'stream-text',
+  streamText: "stream-text",
 } as const
 
 export type BackgroundStreamChannel = keyof typeof BACKGROUND_STREAM_PORTS
@@ -24,18 +22,18 @@ export interface BackgroundStreamResponseMap {
 }
 
 export type StreamPortResponse<T = string>
-  = | { type: 'chunk', requestId: string, data: T }
-    | { type: 'done', requestId: string, data: T }
-    | { type: 'error', requestId: string, error: string }
+  = | { type: "chunk", requestId: string, data: T }
+    | { type: "done", requestId: string, data: T }
+    | { type: "error", requestId: string, error: string }
 
 export interface StreamPortStartMessage<TPayload> {
-  type: 'start'
+  type: "start"
   requestId: string
   payload: TPayload
 }
 
 export interface StreamPortPingMessage {
-  type: 'ping'
+  type: "ping"
   requestId: string
 }
 

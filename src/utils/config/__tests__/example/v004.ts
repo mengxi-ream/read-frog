@@ -1,18 +1,18 @@
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
   default: {
-    description: 'Add custom model configuration',
+    description: "Add custom model configuration",
     config: {
       language: {
-        detectedCode: 'eng',
-        sourceCode: 'auto',
-        targetCode: 'jpn',
-        level: 'intermediate',
+        detectedCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+        level: "intermediate",
       },
       providersConfig: {
         openai: {
-          apiKey: 'sk-1234567890',
+          apiKey: "sk-1234567890",
         },
         deepseek: {
           apiKey: undefined,
@@ -22,47 +22,47 @@ export const testSeries: TestSeriesObject = {
         },
       },
       read: {
-        provider: 'openai',
+        provider: "openai",
         models: {
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
       },
       translate: {
-        provider: 'microsoft',
+        provider: "microsoft",
         models: {
           microsoft: null,
           google: null,
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           openrouter: {
-            model: 'meta-llama/llama-4-maverick:free',
+            model: "meta-llama/llama-4-maverick:free",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
         node: {
           enabled: true,
-          hotkey: 'Control',
+          hotkey: "Control",
         },
         page: {
-          range: 'main',
+          range: "main",
         },
       },
       floatingButton: {

@@ -1,7 +1,7 @@
-import { YOUTUBE_NAVIGATE_EVENT, YOUTUBE_WATCH_URL_PATTERN } from '@/utils/constants/subtitles'
-import { setupYoutubeSubtitles } from './platforms/youtube'
-import { youtubeConfig } from './platforms/youtube/config'
-import { mountSubtitlesUI } from './renderer/mount-subtitles-ui'
+import { YOUTUBE_NAVIGATE_EVENT, YOUTUBE_WATCH_URL_PATTERN } from "@/utils/constants/subtitles"
+import { setupYoutubeSubtitles } from "./platforms/youtube"
+import { youtubeConfig } from "./platforms/youtube/config"
+import { mountSubtitlesUI } from "./renderer/mount-subtitles-ui"
 
 export function initYoutubeSubtitles() {
   let initialized = false

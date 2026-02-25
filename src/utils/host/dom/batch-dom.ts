@@ -46,7 +46,7 @@ class DOMBatcher {
         op()
       }
       catch (error) {
-        console.error('Error executing batched DOM operation:', error)
+        console.error("Error executing batched DOM operation:", error)
       }
     }
 

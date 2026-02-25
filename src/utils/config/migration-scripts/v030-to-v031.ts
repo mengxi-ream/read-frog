@@ -35,8 +35,8 @@ export function migrate(oldConfig: any): any {
       customPromptsConfig: {
         ...oldConfig.translate?.promptsConfig,
         prompt: undefined, // Remove old field
-        promptId: oldPromptValue === 'default' ? null : oldPromptValue,
-        patterns: oldPatterns.filter((p: any) => p.id !== 'default'),
+        promptId: oldPromptValue === "default" ? null : oldPromptValue,
+        patterns: oldPatterns.filter((p: any) => p.id !== "default"),
       },
     },
   }

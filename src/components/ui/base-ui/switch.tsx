@@ -1,12 +1,12 @@
-'use client'
+"use client"
 
-import { Switch as SwitchPrimitive } from '@base-ui/react/switch'
-import * as React from 'react'
+import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
+import * as React from "react"
 
-import { cn } from '@/utils/styles/utils'
+import { cn } from "@/utils/styles/utils"
 
-type SwitchProps = Omit<SwitchPrimitive.Root.Props, 'onCheckedChange'> & {
-  size?: 'sm' | 'default'
+type SwitchProps = Omit<SwitchPrimitive.Root.Props, "onCheckedChange"> & {
+  size?: "sm" | "default"
   /**
    * Callback fired when the checked state changes.
    * API compatible with old Radix-based shadcn Switch.
@@ -16,7 +16,7 @@ type SwitchProps = Omit<SwitchPrimitive.Root.Props, 'onCheckedChange'> & {
 
 function Switch({
   className,
-  size = 'default',
+  size = "default",
   onCheckedChange,
   ...props
 }: SwitchProps) {
@@ -32,7 +32,7 @@ function Switch({
       data-slot="switch"
       data-size={size}
       className={cn(
-        'data-checked:bg-primary data-unchecked:bg-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 dark:data-unchecked:bg-input/80 shrink-0 rounded-full border border-transparent shadow-xs focus-visible:ring-[3px] aria-invalid:ring-[3px] data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] peer group/switch relative inline-flex items-center transition-all outline-none after:absolute after:-inset-x-3 after:-inset-y-2 data-disabled:cursor-not-allowed data-disabled:opacity-50',
+        "data-checked:bg-primary data-unchecked:bg-input focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 dark:data-unchecked:bg-input/80 shrink-0 rounded-full border border-transparent shadow-xs focus-visible:ring-[3px] aria-invalid:ring-[3px] data-[size=default]:h-[18.4px] data-[size=default]:w-[32px] data-[size=sm]:h-[14px] data-[size=sm]:w-[24px] peer group/switch relative inline-flex items-center transition-all outline-none after:absolute after:-inset-x-3 after:-inset-y-2 data-disabled:cursor-not-allowed data-disabled:opacity-50",
         className,
       )}
       onCheckedChange={handleCheckedChange}

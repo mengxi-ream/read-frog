@@ -4,8 +4,8 @@ const timedtextUrlWaiters: Map<string, Array<(url: string) => void>> = new Map()
 function cacheTimedtextUrl(url: string): void {
   if (/api\/timedtext/.test(url)) {
     const parsedUrl = new URL(url)
-    const videoId = parsedUrl.searchParams.get('v')
-    const pot = parsedUrl.searchParams.get('pot')
+    const videoId = parsedUrl.searchParams.get("v")
+    const pot = parsedUrl.searchParams.get("pot")
     if (videoId && pot) {
       timedtextUrlCache.set(videoId, url)
 
@@ -52,7 +52,7 @@ export function setupTimedtextObserver(): void {
   }
 
   XMLHttpRequest.prototype.send = function (...args: any[]) {
-    this.addEventListener('load', function () {
+    this.addEventListener("load", function () {
       cacheTimedtextUrl(this.responseURL || (this as any)._url)
     })
     return originalXhrSend.apply(this, args as any)

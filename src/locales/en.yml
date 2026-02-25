@@ -9,7 +9,6 @@ popup:
   autoLang: Auto
   sourceLang: Source
   targetLang: Target
-  read: Read Article
   translate: Translate
   showOriginal: Show Original
   enabledFloatingButton: Enable floating button
@@ -52,7 +51,7 @@ options:
     enabled: Enable Beta Experience
   apiProviders:
     title: API Providers
-    description: Configure the API providers for translation and reading functions here. We have 20+ API providers built-in and support any OpenAI compatible API providers.
+    description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
     promotion:
       ai302:
         description: Click the link on the right to register 302.AI and get 1 USD API credit
@@ -60,8 +59,7 @@ options:
         addProvider: Add 302.AI Configuration
     addProvider: Add Provider
     badges:
-      translate: Translate
-      read: Read
+      featureCount: $1 features
     dialog:
       title: Add New Provider
       groups:
@@ -82,16 +80,11 @@ options:
         baseURL: Base URL
         optional: Optional
       delete: Delete
-      atLeastOneProvider: At least one read provider and one translation provider are required.
+      atLeastOneLLMProvider: At least one LLM translation provider is required.
       duplicateProviderName: 'Duplicate provider name "$1"'
       defaultProvider:
         translate: Set as default translate provider
-        read: Set as default read provider
       models:
-        read:
-          title: Read Model
-          customTitle: Read Custom Model
-          placeholder: Select a model
         translate:
           title: Translate Model
           customTitle: Translate Custom Model
@@ -104,6 +97,7 @@ options:
         apiKeyRequired: Please add API key first
         searchModels: Search models...
         noModelsFound: No models found
+      featureProviders: Feature Providers
       advancedOptions: Advanced Options
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
@@ -146,26 +140,20 @@ options:
       testing: Testing...
   general:
     title: General
-    readConfig:
-      title: Read Config
-      description:
-        For all advanced AI functions, such as in-depth article explanations and keyword extraction.
-      provider: Provider
-      model:
-        title: Model
-        enterCustomModel: Enter the name of the custom model
+    featureProviders:
+      title: Feature Providers
+      description: Choose which provider to use for each feature
+      features:
+        translate: Page Translation
+        selectionToolbar_translate: Selection Toolbar Translation
+        selectionToolbar_vocabularyInsight: Selection Toolbar Vocabulary Insight
+        tts: Text to Speech
+        inputTranslation: Input Translation
+        videoSubtitles: Video Subtitles
     translationConfig:
-      title: Translation Config
-      description: Only for translation within web pages, such as bilingual paragraph translation.
-      provider: Provider
       model:
         title: Model
         enterCustomModel: Enter the name of the custom model
-      translateRange:
-        title: Translate Range
-        range:
-          main: Main Content
-          all: All Content
     clearCache:
       title: Clear Cache
       description: Clear all translation cache in your browser
@@ -199,6 +187,10 @@ options:
     inputTranslation:
       title: Input Translation
   inputTranslation:
+    provider:
+      title: Translation Provider
+      description: Choose which translation provider to use for input translation
+      label: Provider
     toggle:
       title: Enable Triple-Space Translation
       description: Press spacebar 3 times quickly in any input field to translate its content
@@ -238,7 +230,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Enable Selection Toolbar
-        description: Display the toolbar when selecting text on web pages for quick translation and reading
+        description: Display the toolbar when selecting text on web pages for quick translation and vocabulary insights
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
@@ -247,6 +239,21 @@ options:
         description: Configure websites where the selection toolbar should be disabled
         enterUrlPattern: Enter URL pattern
         urlPattern: URL Pattern
+      features:
+        provider: Provider
+        selectProvider: Select a provider
+        noProviderAvailable: No available provider
+        useProviderDefaultModel: Use provider default model
+        useCustomModel: Use custom model
+        customModel: Custom model
+        model: Model
+        modelNotAvailableForNonLLM: Model settings are only available for LLM providers
+        translate:
+          title: Selection Translation
+          description: Configure provider and model for the selection toolbar translation feature
+        vocabularyInsight:
+          title: Vocabulary Insight
+          description: Configure provider and model for vocabulary/phrase analysis in the selection toolbar
     contextMenu:
       title: Context Menu
       translate:
@@ -350,10 +357,16 @@ options:
             saved: All changes saved
     translationMode:
       title: Translation Mode
-      description: 'Choose how the translated text is displayed: bilingual or translation only.'
+      description: "Choose how the translated text is displayed: bilingual or translation only."
       mode:
         bilingual: Bilingual
         translationOnly: Translation Only
+    translateRange:
+      title: Translate Range
+      description: Select whether to translate only the main content or all content on the page.
+      range:
+        main: Main Content
+        all: All Content
     pageTranslationShortcut:
       title: Page Translation Shortcut
       description: Customize the shortcut key for translating entire web pages
@@ -379,20 +392,26 @@ options:
     nodeTranslationHotkey:
       title: Hover or Long-Press Translation Shortcut
       description: Customize the hover modifier key or use long press to translate paragraphs
-    llmProviderConfigured: LLM translate provider configured
-    llmProviderNotConfigured: No LLM translate provider configured
+    llmProviderConfigured: LLM provider selected for $1
+    llmProviderNotConfigured: No LLM provider selected for $1
     autoTranslateLanguages:
       title: Auto Translate Based on Language
       description: Automatically translate page content when specific languages are detected
       selectLanguages: Select languages
-      enableLLMDetection: Use LLM for language detection
-      enableLLMDetectionDescription: Improves accuracy but adds latency and API costs. Requires LLM translate provider and configured auto-translate languages.
+      detection:
+        label: Language Detection
+        basic: Basic
+        llm: LLM
+        description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs. Requires configured auto-translate languages.
     skipLanguages:
       title: Auto Skip Based on Language
       description: Automatically skip paragraph translation when specific languages are detected
       selectLanguages: Select languages
-      enableLLMDetection: Use LLM for language detection
-      enableLLMDetectionDescription: Improves accuracy but adds latency and API costs. Requires LLM translate provider.
+      detection:
+        label: Language Detection
+        basic: Basic
+        llm: LLM
+        description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs.
     aiContentAware:
       title: AI Smart Context Translation
       description: Enhance translation quality by providing article context to the AI
@@ -400,21 +419,31 @@ options:
       enableDescription: AI uses article summary to improve translation accuracy. Requires LLM provider. Adds latency when starting to translate a page and increases API costs.
   tts:
     title: Text to Speech
-    description: Customize the Speak button with your preferred OpenAI voice settings.
-    provider:
-      label: Provider
-      selectPlaceholder: Select a provider
-      noProvider: Please add OpenAI provider
-    model:
-      label: Model
+    description: Use Edge TTS voice settings for the Speak button.
+    detectLanguage:
+      label: Detect Language
+      basic: Basic
+      llm: LLM
+      description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs. LLM mode uses the Translate provider.
     voice:
       label: Voice
+      fallback: Fallback
       selectPlaceholder: Select a voice
       preview: Preview
       previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
-    speed:
-      label: Speed
-      hint: Accepts values between 0.25 and 4.0
+    languageVoice:
+      label: Language Voice
+      reset: Reset to Default
+      description: Select a language and assign a voice used when TTS detects that language.
+    rate:
+      label: Rate (%)
+      hint: Accepts integer values between -100 and 100
+    pitch:
+      label: Pitch (Hz)
+      hint: Accepts integer values between -100 and 100
+    volume:
+      label: Volume (%)
+      hint: Accepts integer values between -100 and 100
     betaDisabled: Enable Beta Experience to customize text-to-speech settings.
   statistics:
     title: Statistics
@@ -479,7 +508,7 @@ options:
           hasUnresolvedInChildren: ⚠ Contains unresolved changes
           item: item
           items: items
-          unresolvedPrompt: '[Unresolved - Please select]'
+          unresolvedPrompt: "[Unresolved - Please select]"
           localLatest: Local Latest
           remoteLatest: Remote Latest
           bothChanged: Both changed
@@ -490,7 +519,7 @@ options:
           resolveToContinue: Resolve conflicts to continue
           validationAlert:
             title: The merged config has validation errors.
-            description: 'Adjust the differences below to fix:'
+            description: "Adjust the differences below to fix:"
           moreErrors: ...and $1 more errors
     backup:
       title: Config Backup
@@ -503,8 +532,8 @@ options:
         title: No backups available yet
         description: Backups are created automatically every hour if the config is changed.
       item:
-        extensionVersion: 'Extension version:'
-        schemaVersion: 'Schema version:'
+        extensionVersion: "Extension version:"
+        schemaVersion: "Schema version:"
         restore: Restore
         export: Export
         delete: Delete
@@ -530,6 +559,10 @@ options:
   videoSubtitles:
     title: Video Subtitles
     description: Currently only supports YouTube video subtitles
+    provider:
+      title: Translation Provider
+      description: Choose which translation provider to use for video subtitle translation
+      label: Provider
     enable: Enable Video Subtitles
     enableDescription: When enabled, a translation button will appear in the YouTube player controls. Click it to start translating subtitles.
     autoStart: Auto-Enable Subtitles
@@ -600,9 +633,6 @@ side:
   sourceLang: Source Language
   targetLang: Target Language
   fileExport: File Export
-readService:
-  title: Read Service
-  description: For read and explain content
 translateService:
   title: Translation Service
   description: For translate the webpage only
@@ -641,12 +671,7 @@ shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
   state:
-    idle: Ready
-    fetching: Fetching captions
-    fetchSuccess: Captions loaded
-    fetchFailed: Failed to fetch captions
-    segmenting: AI segmenting...
-    processing: Translating captions
+    loading: Read Frog loading captions
     error: Error occurred
   errors:
     http429: 429 Too many requests to youtube subtitle API, please try again later
@@ -658,7 +683,7 @@ subtitles:
     networkError: Network error occurred when fetching captions
     fetchSubTimeout: Fetching youtube captions timed out
     buttonNotFound: Subtitle button not found
-    noSubtitlesFound: No subtitles found
+    noSubtitlesFound: No subtitles available for this video
     videoNotFound: Video element not found
     controlsBarNotFound: Controls bar not found
     aiRateLimited: Too many requests, please try again later

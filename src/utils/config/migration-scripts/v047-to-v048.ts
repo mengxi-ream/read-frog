@@ -10,9 +10,9 @@
  */
 export function migrate(oldConfig: any): any {
   const subtitlesStyle = {
-    fontFamily: 'system',
+    fontFamily: "system",
     fontScale: 100,
-    color: '#FFFFFF',
+    color: "#FFFFFF",
     fontWeight: 400,
   }
 

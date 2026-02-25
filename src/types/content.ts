@@ -1,6 +1,6 @@
-import { langCodeISO6393Schema } from '@read-frog/definitions'
+import { langCodeISO6393Schema } from "@read-frog/definitions"
 
-import { z } from 'zod'
+import { z } from "zod"
 
 export interface ExtractedContent {
   article: {
@@ -19,27 +19,27 @@ export interface ExtractedContent {
 
 export const articleAnalysisSchema = z.object({
   isArticle: z.boolean(),
-  detectedLang: langCodeISO6393Schema.or(z.literal('und')),
+  detectedLang: langCodeISO6393Schema.or(z.literal("und")),
   summary: z.string(),
   introduction: z.string(),
   terms: z.array(z.string()),
 })
 
 export const partOfSpeechAbbr = z.enum([
-  'n.', // noun
-  'pron.', // pronoun
-  'v.', // verb
-  'adj.', // adjective
-  'adv.', // adverb
-  'prep.', // preposition
-  'conj.', // conjunction
-  'interj.', // interjection
-  'det.', // determiner
-  'num.', // numeral
-  'part.', // particle
+  "n.", // noun
+  "pron.", // pronoun
+  "v.", // verb
+  "adj.", // adjective
+  "adv.", // adverb
+  "prep.", // preposition
+  "conj.", // conjunction
+  "interj.", // interjection
+  "det.", // determiner
+  "num.", // numeral
+  "part.", // particle
 ])
 
-export const syntacticCategoryAbbr = partOfSpeechAbbr.or(z.enum(['ph.']))
+export const syntacticCategoryAbbr = partOfSpeechAbbr.or(z.enum(["ph."]))
 
 export const articleWordSchema = z.object({
   word: z.string(),

@@ -1,21 +1,21 @@
-import type { Config } from '@/types/config/config'
-import { browser } from '#imports'
-import { QueryClientProvider } from '@tanstack/react-query'
-import { Provider as JotaiProvider } from 'jotai'
-import { useHydrateAtoms } from 'jotai/utils'
-import * as React from 'react'
-import ReactDOM from 'react-dom/client'
-import { ThemeProvider } from '@/components/providers/theme-provider'
-import { TooltipProvider } from '@/components/ui/base-ui/tooltip'
-import { configAtom } from '@/utils/atoms/config'
-import { getLocalConfig } from '@/utils/config/storage'
-import { DEFAULT_CONFIG } from '@/utils/constants/config'
-import { sendMessage } from '@/utils/message'
-import { queryClient } from '@/utils/tanstack-query'
-import App from './app'
-import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from './atoms/auto-translate'
-import '@/assets/styles/text-small.css'
-import '@/assets/styles/theme.css'
+import type { Config } from "@/types/config/config"
+import { browser } from "#imports"
+import { QueryClientProvider } from "@tanstack/react-query"
+import { Provider as JotaiProvider } from "jotai"
+import { useHydrateAtoms } from "jotai/utils"
+import * as React from "react"
+import ReactDOM from "react-dom/client"
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { configAtom } from "@/utils/atoms/config"
+import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { sendMessage } from "@/utils/message"
+import { queryClient } from "@/utils/tanstack-query"
+import App from "./app"
+import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from "./atoms/auto-translate"
+import "@/assets/styles/text-small.css"
+import "@/assets/styles/theme.css"
 
 function HydrateAtoms({
   initialValues,
@@ -33,8 +33,8 @@ function HydrateAtoms({
 }
 
 async function initApp() {
-  const root = document.getElementById('root')!
-  root.className = 'text-base antialiased w-[320px] bg-background'
+  const root = document.getElementById("root")!
+  root.className = "text-base antialiased w-[320px] bg-background"
   const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
 
   const activeTab = await browser.tabs.query({
@@ -47,7 +47,7 @@ async function initApp() {
   let isPageTranslated: boolean = false
   if (tabId) {
     isPageTranslated
-      = (await sendMessage('getEnablePageTranslationByTabId', {
+      = (await sendMessage("getEnablePageTranslationByTabId", {
         tabId,
       })) ?? false
   }

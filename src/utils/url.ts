@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from "zod"
 
 export function matchDomainPattern(url: string, pattern: string): boolean {
   if (!z.url().safeParse(url).success) {

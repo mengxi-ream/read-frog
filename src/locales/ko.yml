@@ -8,7 +8,6 @@ popup:
   autoLang: 자동
   sourceLang: 원본
   targetLang: 대상
-  read: 기사 읽기
   translate: 번역
   showOriginal: 원문 보기
   enabledFloatingButton: 플로팅 버튼 활성화
@@ -51,7 +50,7 @@ options:
     enabled: Beta 체험 활성화
   apiProviders:
     title: API 제공업체
-    description: 번역 및 읽기 기능을 위한 API 제공업체 구성. 20개 이상의 API 제공업체와 모든 OpenAI 호환 API 제공업체를 지원합니다.
+    description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
     promotion:
       ai302:
         description: 오른쪽 링크를 클릭하여 302.AI에 등록하면 1달러 API 크레딧을 받을 수 있습니다
@@ -59,8 +58,7 @@ options:
         addProvider: 302.AI 구성 추가
     addProvider: 제공업체 추가
     badges:
-      translate: 번역
-      read: 읽기
+      featureCount: $1 개 기능
     dialog:
       title: 새 제공업체 추가
       groups:
@@ -81,16 +79,11 @@ options:
         baseURL: Base URL
         optional: 선택사항
       delete: 삭제
-      atLeastOneProvider: 최소 하나의 읽기 제공업체와 하나의 번역 제공업체가 필요합니다.
+      atLeastOneLLMProvider: 최소 하나의 LLM 번역 제공업체가 필요합니다.
       duplicateProviderName: '중복된 제공업체 이름 "$1"'
       defaultProvider:
         translate: 기본 번역 제공업체로 설정
-        read: 기본 읽기 제공업체로 설정
       models:
-        read:
-          title: 읽기 모델
-          customTitle: 사용자 정의 읽기 모델
-          placeholder: 모델을 선택하세요
         translate:
           title: 번역 모델
           customTitle: 사용자 정의 번역 모델
@@ -103,6 +96,7 @@ options:
         apiKeyRequired: 먼저 API 키를 추가하세요
         searchModels: 모델 검색...
         noModelsFound: 모델을 찾을 수 없습니다
+      featureProviders: 기능 제공업체
       advancedOptions: 고급 옵션
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
@@ -145,26 +139,20 @@ options:
       testing: 테스트 중...
   general:
     title: 일반
-    readConfig:
-      title: 읽기 설정
-      description:
-        심층 기사 설명 및 키워드 추출과 같은 모든 고급 AI 기능에 사용됩니다.
-      provider: 제공업체
-      model:
-        title: 모델
-        enterCustomModel: 사용자 정의 모델 이름 입력
+    featureProviders:
+      title: 기능 제공업체
+      description: 각 기능에 사용할 제공업체를 선택
+      features:
+        translate: 페이지 번역
+        selectionToolbar_translate: 선택 툴바 번역
+        selectionToolbar_vocabularyInsight: 선택 툴바 어휘 분석
+        tts: 텍스트 음성 변환
+        inputTranslation: 입력 번역
+        videoSubtitles: 비디오 자막
     translationConfig:
-      title: 번역 설정
-      description: 이중 언어 단락 번역과 같은 웹 페이지 내 번역에만 사용됩니다.
-      provider: 제공업체
       model:
         title: 모델
         enterCustomModel: 사용자 정의 모델 이름 입력
-      translateRange:
-        title: 번역 범위
-        range:
-          main: 주요 내용
-          all: 전체 내용
     clearCache:
       title: 캐시 지우기
       description: 브라우저의 모든 번역 캐시를 지웁니다
@@ -185,7 +173,7 @@ options:
     patterns:
       title: 활성화된 사이트
       description: 화이트리스트 모드에서는 확장 프로그램이 아래에 나열된 사이트에서만 활성화됩니다
-      enterUrlPattern: 'URL 패턴 입력 (예: example.com)'
+      enterUrlPattern: "URL 패턴 입력 (예: example.com)"
       urlPattern: URL 패턴
   overlayTools:
     title: 오버레이 도구
@@ -198,6 +186,10 @@ options:
     inputTranslation:
       title: 입력 번역
   inputTranslation:
+    provider:
+      title: 번역 제공자
+      description: 입력 번역에 사용할 번역 제공자 선택
+      label: 제공자
     toggle:
       title: 트리플 스페이스 번역 활성화
       description: 입력 필드에서 스페이스바를 빠르게 3번 누르면 내용이 번역됩니다
@@ -237,7 +229,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 선택 툴바 활성화
-        description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 읽기
+        description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 어휘 분석
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화
@@ -246,6 +238,21 @@ options:
         description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
         enterUrlPattern: URL 패턴 입력
         urlPattern: URL 패턴
+      features:
+        provider: 제공업체
+        selectProvider: 제공업체 선택
+        noProviderAvailable: 사용 가능한 제공업체가 없습니다
+        useProviderDefaultModel: 제공업체 기본 모델 사용
+        useCustomModel: 사용자 지정 모델 사용
+        customModel: 사용자 지정 모델
+        model: 모델
+        modelNotAvailableForNonLLM: 모델 설정은 LLM 제공업체에서만 사용할 수 있습니다
+        translate:
+          title: 선택 번역
+          description: 선택 툴바 번역 기능의 제공업체와 모델을 구성합니다
+        vocabularyInsight:
+          title: 어휘 분석
+          description: 선택 툴바에서 단어/구문 분석 기능의 제공업체와 모델을 구성합니다
     contextMenu:
       title: 컨텍스트 메뉴
       translate:
@@ -347,10 +354,16 @@ options:
             saved: 모든 변경사항이 저장되었습니다
     translationMode:
       title: 번역 모드
-      description: '번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만'
+      description: "번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만"
       mode:
         bilingual: 이중 언어
         translationOnly: 번역만
+    translateRange:
+      title: 번역 범위
+      description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.
+      range:
+        main: 주요 내용
+        all: 전체 내용
     pageTranslationShortcut:
       title: 페이지 번역 단축키
       description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
@@ -376,20 +389,26 @@ options:
     nodeTranslationHotkey:
       title: 호버 또는 길게 누르기 번역 단축키
       description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
-    llmProviderConfigured: LLM 번역 제공업체가 설정되었습니다
-    llmProviderNotConfigured: LLM 번역 제공업체가 설정되지 않았습니다
+    llmProviderConfigured: $1에 LLM 제공업체 선택됨
+    llmProviderNotConfigured: $1에 LLM 제공업체 미선택
     autoTranslateLanguages:
       title: 언어에 기반한 자동 번역
       description: 특정 언어가 감지되면 페이지 콘텐츠를 자동으로 번역합니다
       selectLanguages: 언어 선택
-      enableLLMDetection: LLM을 사용한 언어 감지
-      enableLLMDetectionDescription: 정확도가 향상되지만 지연 시간과 API 비용이 증가합니다. LLM 번역 제공업체와 자동 번역 언어 설정이 필요합니다.
+      detection:
+        label: 언어 감지
+        basic: 기본
+        llm: LLM
+        description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다. 자동 번역 언어 설정이 필요합니다.
     skipLanguages:
       title: 언어 기반 자동 건너뛰기
       description: 지정된 언어가 감지되면 단락 번역을 자동으로 건너뜁니다
       selectLanguages: 언어 선택
-      enableLLMDetection: LLM을 사용한 언어 감지
-      enableLLMDetectionDescription: 정확도가 향상되지만 지연 시간과 API 비용이 증가합니다. LLM 번역 제공업체가 필요합니다.
+      detection:
+        label: 언어 감지
+        basic: 기본
+        llm: LLM
+        description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다.
     aiContentAware:
       title: AI 스마트 컨텍스트 번역
       description: AI에 문서 컨텍스트를 제공하여 번역 품질을 향상시킵니다
@@ -397,21 +416,31 @@ options:
       enableDescription: AI가 문서 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
   tts:
     title: 텍스트 음성 변환
-    description: 선호하는 OpenAI 음성 설정으로 말하기 버튼을 사용자 지정하세요.
-    provider:
-      label: 제공업체
-      selectPlaceholder: 제공업체 선택
-      noProvider: OpenAI 제공업체를 추가하세요
-    model:
-      label: 모델
+    description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
+    detectLanguage:
+      label: 언어 감지
+      basic: 기본
+      llm: LLM
+      description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다. LLM 모드는 번역 페이지의 제공자를 사용합니다.
     voice:
       label: 음성
+      fallback: 대체
       selectPlaceholder: 음성을 선택하세요
       preview: 미리 듣기
       previewSample: Read Frog의 인사입니다! 제가 읽어 드릴 때 이렇게 들립니다.
-    speed:
-      label: 속도
-      hint: 0.25에서 4.0 사이의 값을 입력할 수 있습니다
+    languageVoice:
+      label: 언어별 음성
+      reset: 기본값으로 재설정
+      description: 언어를 선택하고 TTS가 해당 언어를 감지했을 때 사용할 음성을 지정합니다.
+    rate:
+      label: 속도 (%)
+      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
+    pitch:
+      label: 피치 (Hz)
+      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
+    volume:
+      label: 볼륨 (%)
+      hint: -100에서 100 사이 정수 값을 입력할 수 있습니다
     betaDisabled: 텍스트 음성 변환 설정을 사용자 지정하려면 Beta 체험을 활성화하세요.
   statistics:
     title: 통계
@@ -476,7 +505,7 @@ options:
           hasUnresolvedInChildren: ⚠ 미해결 변경 포함
           item: 항목
           items: 항목
-          unresolvedPrompt: '[미해결 - 선택하세요]'
+          unresolvedPrompt: "[미해결 - 선택하세요]"
           localLatest: 로컬 최신
           remoteLatest: 원격 최신
           bothChanged: 양쪽 모두 변경됨
@@ -487,7 +516,7 @@ options:
           resolveToContinue: 계속하려면 충돌을 해결하세요
           validationAlert:
             title: 병합된 구성에 유효성 검사 오류가 있습니다
-            description: '아래 차이점을 조정하여 수정하세요:'
+            description: "아래 차이점을 조정하여 수정하세요:"
           moreErrors: ...그리고 $1개의 오류가 더 있습니다
     backup:
       title: 설정 백업
@@ -527,6 +556,10 @@ options:
   videoSubtitles:
     title: 비디오 자막
     description: 현재 YouTube 비디오 자막만 지원
+    provider:
+      title: 번역 제공자
+      description: 비디오 자막 번역에 사용할 번역 제공자를 선택하세요
+      label: 제공자
     enable: 비디오 자막 활성화
     enableDescription: 활성화하면 YouTube 플레이어 컨트롤 바에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
     autoStart: 자막 자동 활성화
@@ -597,9 +630,6 @@ side:
   sourceLang: 원본 언어
   targetLang: 대상 언어
   fileExport: 파일 내보내기
-readService:
-  title: 읽기 서비스
-  description: 기사 읽기 및 설명
 translateService:
   title: 번역 서비스
   description: 웹페이지 번역 전용
@@ -638,12 +668,7 @@ shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
   state:
-    idle: 준비 완료
-    fetching: 자막 가져오는 중
-    fetchSuccess: 자막 로드 완료
-    fetchFailed: 자막 가져오기 실패
-    segmenting: AI 문장 구분 중...
-    processing: 자막 번역 중
+    loading: Read Frog 자막 로딩 중
     error: 오류 발생
   errors:
     http429: 429 유튜브 자막 인터페이스 요청이 너무 많습니다. 잠시 후 다시 시도해 주세요
@@ -655,7 +680,7 @@ subtitles:
     networkError: 자막을 가져오는 도중 네트워크 오류가 발생했습니다
     fetchSubTimeout: 유튜브 자막 가져오기 시간이 초과되었습니다
     buttonNotFound: 자막 버튼을 찾을 수 없습니다
-    noSubtitlesFound: 자막을 찾을 수 없습니다
+    noSubtitlesFound: 현재 영상에 자막이 없습니다
     videoNotFound: 비디오 요소를 찾을 수 없습니다
     controlsBarNotFound: 컨트롤 바를 찾을 수 없습니다
     aiRateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요

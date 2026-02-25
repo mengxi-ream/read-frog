@@ -1,11 +1,11 @@
-import type { Config } from '@/types/config/config'
-import { deepmergeCustom } from 'deepmerge-ts'
-import { atom } from 'jotai'
-import { selectAtom } from 'jotai/utils'
-import { configSchema } from '@/types/config/config'
-import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from '../constants/config'
-import { logger } from '../logger'
-import { storageAdapter } from './storage-adapter'
+import type { Config } from "@/types/config/config"
+import { deepmergeCustom } from "deepmerge-ts"
+import { atom } from "jotai"
+import { selectAtom } from "jotai/utils"
+import { configSchema } from "@/types/config/config"
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
+import { logger } from "../logger"
+import { storageAdapter } from "./storage-adapter"
 
 export const configAtom = atom<Config>(DEFAULT_CONFIG)
 
@@ -76,7 +76,7 @@ export const writeConfigAtom = atom(
         }
       }
       catch (error) {
-        console.error('Failed to set config to storage:', nextToPersist, error)
+        console.error("Failed to set config to storage:", nextToPersist, error)
 
         // Roll back to storage value on error, but only if we're still the latest write.
         if (currentWriteVersion === writeVersion) {
@@ -124,16 +124,16 @@ configAtom.onMount = (setAtom: (newValue: Config) => void) => {
   // so we reload from storage when the tab becomes visible again.
   // See: https://github.com/mengxi-ream/read-frog/issues/435
   const handleVisibilityChange = () => {
-    if (document.visibilityState === 'visible') {
-      logger.info('configAtom onMount handleVisibilityChange when: ', new Date())
+    if (document.visibilityState === "visible") {
+      logger.info("configAtom onMount handleVisibilityChange when: ", new Date())
       void storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema).then(setAtom)
     }
   }
-  document.addEventListener('visibilitychange', handleVisibilityChange)
+  document.addEventListener("visibilitychange", handleVisibilityChange)
 
   return () => {
     unwatch()
-    document.removeEventListener('visibilitychange', handleVisibilityChange)
+    document.removeEventListener("visibilitychange", handleVisibilityChange)
   }
 }
 

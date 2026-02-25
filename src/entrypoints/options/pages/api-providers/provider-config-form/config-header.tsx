@@ -1,9 +1,9 @@
-import type { APIProviderTypes } from '@/types/config/provider'
-import { i18n } from '#imports'
-import ProviderIcon from '@/components/provider-icon'
-import { useTheme } from '@/components/providers/theme-provider'
-import { PROVIDER_GROUPS, PROVIDER_ITEMS, SPECIFIC_TUTORIAL_PROVIDER_TYPES } from '@/utils/constants/providers'
-import { WEBSITE_URL } from '@/utils/constants/url'
+import type { APIProviderTypes } from "@/types/config/provider"
+import { i18n } from "#imports"
+import ProviderIcon from "@/components/provider-icon"
+import { useTheme } from "@/components/providers/theme-provider"
+import { PROVIDER_GROUPS, PROVIDER_ITEMS, SPECIFIC_TUTORIAL_PROVIDER_TYPES } from "@/utils/constants/providers"
+import { WEBSITE_URL } from "@/utils/constants/url"
 
 export function ConfigHeader({ providerType }: { providerType: APIProviderTypes }) {
   const tutorialUrl = getHowToConfigureURL(providerType)
@@ -22,7 +22,7 @@ export function ConfigHeader({ providerType }: { providerType: APIProviderTypes 
       </a>
       {tutorialUrl && (
         <a href={tutorialUrl} className="text-xs text-link hover:opacity-90" target="_blank" rel="noreferrer">
-          {i18n.t('options.apiProviders.howToConfigure')}
+          {i18n.t("options.apiProviders.howToConfigure")}
         </a>
       )}
     </div>

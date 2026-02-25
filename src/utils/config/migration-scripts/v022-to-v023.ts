@@ -1,10 +1,10 @@
 const ID_MAPPING = {
-  'OpenAI': 'openai-default',
-  'DeepSeek': 'deepseek-default',
-  'Gemini': 'gemini-default',
-  'DeepLX': 'deeplx-default',
-  'Microsoft Translator': 'microsoft-default',
-  'Google Translate': 'google-default',
+  "OpenAI": "openai-default",
+  "DeepSeek": "deepseek-default",
+  "Gemini": "gemini-default",
+  "DeepLX": "deeplx-default",
+  "Microsoft Translator": "microsoft-default",
+  "Google Translate": "google-default",
 }
 
 export function migrate(oldConfig: any): any {

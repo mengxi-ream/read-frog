@@ -1,5 +1,43 @@
 # @read-frog/extension
 
+## 1.26.0
+
+### Minor Changes
+
+- [#993](https://github.com/mengxi-ream/read-frog/pull/993) [`79827cd`](https://github.com/mengxi-ream/read-frog/commit/79827cda9d0f28403b3ac969c7e492c9328cfa65) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(tts): add Edge TTS as free text-to-speech provider with per-language voice config
+
+- [#982](https://github.com/mengxi-ream/read-frog/pull/982) [`d578d6a`](https://github.com/mengxi-ream/read-frog/commit/d578d6a4c486a4461c7ed565647f668852688ba4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: remove read provider and unify per-feature provider model
+
+### Patch Changes
+
+- [#988](https://github.com/mengxi-ream/read-frog/pull/988) [`e211d9c`](https://github.com/mengxi-ream/read-frog/commit/e211d9c4eaeb1edf40b9ce1fcad7f573471334b7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(api-providers): add feature provider toggles and badge refactor
+
+- [#997](https://github.com/mengxi-ream/read-frog/pull/997) [`d1ee33d`](https://github.com/mengxi-ream/read-frog/commit/d1ee33d9d51b084af72dbfd132e5e9a3f0b14820) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): enable video subtitles in default config and remove subtitle beta labels in ui/docs
+
+- [#957](https://github.com/mengxi-ream/read-frog/pull/957) [`d2ee3d6`](https://github.com/mengxi-ream/read-frog/commit/d2ee3d618d0cc05252d7a7b045a3c1d31e792340) Thanks [@ishiko732](https://github.com/ishiko732)! - fix: update website URL for custom provider to correct path
+
+- [#992](https://github.com/mengxi-ream/read-frog/pull/992) [`52b6bca`](https://github.com/mengxi-ream/read-frog/commit/52b6bca44bb3b5db52085c0ba09a1f4e72385d16) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): fast detect no-subtitles before fetching
+
+- [#998](https://github.com/mengxi-ream/read-frog/pull/998) [`a745724`](https://github.com/mengxi-ream/read-frog/commit/a745724f49a3953e60f14cb93528bc662a486614) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(tts): add offscreen audio playback and LLM language detection mode
+
+- [#954](https://github.com/mengxi-ream/read-frog/pull/954) [`306659f`](https://github.com/mengxi-ream/read-frog/commit/306659fad27d3e3c67ad2cdbd17e22bf0f33c0dd) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection): route selection stream requests through background to bypass CORS restrictions
+
+- [#961](https://github.com/mengxi-ream/read-frog/pull/961) [`6f24070`](https://github.com/mengxi-ream/read-frog/commit/6f240701899419c3be1b704b461075393ab6bdd1) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): enable text selection and copy in subtitle container
+
+- [#962](https://github.com/mengxi-ream/read-frog/pull/962) [`67b75c6`](https://github.com/mengxi-ream/read-frog/commit/67b75c6836519ed6dac39e4ac323fe12f25c2253) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): add RTL direction and lang attributes to translation subtitles
+
+- [#1004](https://github.com/mengxi-ream/read-frog/pull/1004) [`0126569`](https://github.com/mengxi-ream/read-frog/commit/012656911820ee56a79cb760673e086b28316c3a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: css size escape character
+
+- [#989](https://github.com/mengxi-ream/read-frog/pull/989) [`6c807ae`](https://github.com/mengxi-ream/read-frog/commit/6c807aee3f377e1a12f49d30ec575d1a6decaf77) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: merge site control settings into general page
+
+- [#1000](https://github.com/mengxi-ream/read-frog/pull/1000) [`1f3fc14`](https://github.com/mengxi-ream/read-frog/commit/1f3fc141ebce81c815a9d2f376298e89538b212e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore: upgrade deps
+
+- [#981](https://github.com/mengxi-ream/read-frog/pull/981) [`e0d68dd`](https://github.com/mengxi-ream/read-frog/commit/e0d68dd8011acca991659f34eac6377897162ff3) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor(subtitles): simplify state machine and improve loading display
+
+- [#1003](https://github.com/mengxi-ream/read-frog/pull/1003) [`7c99db6`](https://github.com/mengxi-ream/read-frog/commit/7c99db6a169d09a052ba8c9b2821149b43c62772) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - build: firefox build scripts and remove useless base ui fix
+
+- [#990](https://github.com/mengxi-ream/read-frog/pull/990) [`3df025f`](https://github.com/mengxi-ream/read-frog/commit/3df025f2fdf837da5789c624db52f9013ce765ed) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: refine UI components, extract shared MultiLanguageCombobox, and clean up unused components
+
 ## 1.25.1
 
 ### Patch Changes

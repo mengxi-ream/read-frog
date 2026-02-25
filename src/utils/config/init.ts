@@ -1,12 +1,12 @@
-import type { Config } from '@/types/config/config'
-import type { ConfigMeta } from '@/types/config/meta'
-import type { ProvidersConfig } from '@/types/config/provider'
-import { storage } from '#imports'
-import { configSchema } from '@/types/config/config'
-import { isAPIProviderConfig } from '@/types/config/provider'
-import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG, LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY } from '../constants/config'
-import { logger } from '../logger'
-import { runMigration } from './migration'
+import type { Config } from "@/types/config/config"
+import type { ConfigMeta } from "@/types/config/meta"
+import type { ProvidersConfig } from "@/types/config/provider"
+import { storage } from "#imports"
+import { configSchema } from "@/types/config/config"
+import { isAPIProviderConfig } from "@/types/config/provider"
+import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG, LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY } from "../constants/config"
+import { logger } from "../logger"
+import { runMigration } from "./migration"
 
 /**
  * Initialize the config, this function should only be called once in the background script
@@ -43,7 +43,7 @@ export async function initializeConfig() {
   }
 
   if (!configSchema.safeParse(config).success) {
-    logger.warn('Config is invalid, using default config')
+    logger.warn("Config is invalid, using default config")
     config = DEFAULT_CONFIG
     currentVersion = CONFIG_SCHEMA_VERSION
   }
