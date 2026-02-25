@@ -23,12 +23,21 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
     display: inline-block !important;
     width: 6px !important;
     height: 6px !important;
+    min-width: 6px !important;
+    min-height: 6px !important;
+    max-width: 6px !important;
+    max-height: 6px !important;
+    aspect-ratio: 1 / 1 !important;
     margin: 0 4px !important;
+    padding: 0 !important;
     vertical-align: middle !important;
     border: 3px solid var(--read-frog-muted) !important;
     border-top: 3px solid var(--read-frog-primary) !important;
     border-radius: 50% !important;
     box-sizing: content-box !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    align-self: center !important;
   `
 
   // Use Web Animations API instead of CSS keyframes - no DOM manipulation needed
