@@ -13,7 +13,7 @@
         "{projectRoot}/postcss.config.cjs",
         "{projectRoot}/vitest.setup.ts"
       ],
-      "outputs": ["{projectRoot}/.output", "{projectRoot}/.wxt"]
+      "outputs": ["{projectRoot}/.output/chrome-mv3", "{projectRoot}/.wxt"]
     },
     "build:firefox": {
       "cache": true,
@@ -27,7 +27,7 @@
         "{projectRoot}/postcss.config.cjs",
         "{projectRoot}/vitest.setup.ts"
       ],
-      "outputs": ["{projectRoot}/.output", "{projectRoot}/.wxt"]
+      "outputs": ["{projectRoot}/.output/firefox-mv3", "{projectRoot}/.wxt"]
     },
     "test": {
       "cache": true,
