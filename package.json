@@ -128,7 +128,6 @@
     "@vitejs/plugin-react": "^5.1.4",
     "@vitest/coverage-istanbul": "^4.0.18",
     "@wxt-dev/module-react": "^1.1.5",
-    "agentation": "^2.2.1",
     "autoprefixer": "^10.4.24",
     "eruda": "^3.4.3",
     "eslint": "9.39.3",

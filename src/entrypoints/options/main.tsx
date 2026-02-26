@@ -1,12 +1,12 @@
 import type { Config } from "@/types/config/config"
 import { QueryClientProvider } from "@tanstack/react-query"
-import { Agentation } from "agentation"
 import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import * as React from "react"
 import ReactDOM from "react-dom/client"
 import { HashRouter } from "react-router"
 import FrogToast from "@/components/frog-toast"
+import { HelpButton } from "@/components/help-button"
 import { ChartThemeProvider } from "@/components/providers/chart-theme-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { SidebarProvider } from "@/components/ui/base-ui/sidebar"
@@ -51,7 +51,7 @@ async function initApp() {
                     <AppSidebar />
                     <App />
                     <FrogToast />
-                    {import.meta.env.DEV && <Agentation />}
+                    <HelpButton />
                   </ChartThemeProvider>
                 </ThemeProvider>
               </SidebarProvider>
