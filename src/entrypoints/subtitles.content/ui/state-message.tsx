@@ -1,8 +1,6 @@
 import type { SubtitlesState } from "@/utils/subtitles/types"
 import { i18n } from "#imports"
-import { useAtomValue } from "jotai"
 import { STATE_MESSAGE_CLASS } from "@/utils/constants/subtitles"
-import { subtitlesStateAtom } from "../atoms"
 
 const STATE_CONFIG: Record<Exclude<SubtitlesState, "idle">, { color: string, getText: () => string }> = {
   loading: {
@@ -15,15 +13,18 @@ const STATE_CONFIG: Record<Exclude<SubtitlesState, "idle">, { color: string, get
   },
 }
 
-export function StateMessage() {
-  const stateData = useAtomValue(subtitlesStateAtom)
+interface StateMessageProps {
+  state?: Exclude<SubtitlesState, "idle">
+  message?: string
+}
 
-  if (!stateData || stateData.state === "idle") {
+export function StateMessage({ state, message }: StateMessageProps) {
+  if (!state)
     return null
-  }
 
-  const { color, getText } = STATE_CONFIG[stateData.state]
-  const message = stateData.message || getText()
+  const { color, getText } = STATE_CONFIG[state]
+
+  const text = state === "error" ? message : getText()
 
   return (
     <div
@@ -36,7 +37,7 @@ export function StateMessage() {
         className="flex items-center justify-center px-3 py-2 rounded-md text-base font-medium whitespace-nowrap leading-tight backdrop-blur-sm bg-black/85 shadow-[0_4px_16px_rgba(0,0,0,0.35)]"
         style={{ color }}
       >
-        {message}
+        {text}
       </div>
     </div>
   )

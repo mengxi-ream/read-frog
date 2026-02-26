@@ -168,13 +168,20 @@ export class TranslationCoordinator {
   private updateLoadingStateAt(timeMs: number, fragments: SubtitlesFragment[]) {
     const activeCue = this.findActiveCue(timeMs, fragments)
 
-    const nextState: SubtitlesState = activeCue && !this.translatedStarts.has(activeCue.start)
-      ? "loading"
-      : "idle"
+    if (activeCue) {
+      const nextState: SubtitlesState = this.translatedStarts.has(activeCue.start) ? "idle" : "loading"
+      if (nextState === this.lastEmittedState)
+        return
+      this.lastEmittedState = nextState
+      this.onStateChange(nextState)
+      return
+    }
 
+    // Gap: keep loading if next cue needs translation
+    const nextCue = fragments.find(f => f.start > timeMs)
+    const nextState: SubtitlesState = nextCue && !this.translatedStarts.has(nextCue.start) ? "loading" : "idle"
     if (nextState === this.lastEmittedState)
       return
-
     this.lastEmittedState = nextState
     this.onStateChange(nextState)
   }
