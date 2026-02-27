@@ -297,9 +297,6 @@ importers:
       '@wxt-dev/module-react':
         specifier: ^1.1.5
         version: 1.1.5(vite@7.2.2(@types/node@20.19.25)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.8.2))(wxt@0.20.18(@types/node@20.19.25)(eslint@9.39.3(jiti@2.6.1))(jiti@2.6.1)(lightningcss@1.31.1)(rollup@4.53.2)(yaml@2.8.2))
-      agentation:
-        specifier: ^2.2.1
-        version: 2.2.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       autoprefixer:
         specifier: ^10.4.24
         version: 10.4.24(postcss@8.5.6)
@@ -2896,17 +2893,6 @@ packages:
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
-
-  agentation@2.2.1:
-    resolution: {integrity: sha512-yV9P1DggI7M3SRaRwLwt+xqE5lXqg5l8xtqCr8KzEkbnH8Wa6eRATU97uKnD7cC8FrsJP62Mmw0Xf5Xi5KV50Q==}
-    peerDependencies:
-      react: '>=18.0.0'
-      react-dom: '>=18.0.0'
-    peerDependenciesMeta:
-      react:
-        optional: true
-      react-dom:
-        optional: true
 
   ai@6.0.97:
     resolution: {integrity: sha512-eZIAcBymwGhBwncRH/v9pillZNMeRCDkc4BwcvwXerXd7sxjVxRis3ZNCNCpP02pVH4NLs81ljm4cElC4vbNcQ==}
@@ -10009,11 +9995,6 @@ snapshots:
   adm-zip@0.5.16: {}
 
   agent-base@7.1.4: {}
-
-  agentation@2.2.1(react-dom@19.2.4(react@19.2.4))(react@19.2.4):
-    optionalDependencies:
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
 
   ai@6.0.97(zod@4.3.6):
     dependencies:
