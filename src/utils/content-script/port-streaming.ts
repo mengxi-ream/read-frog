@@ -17,9 +17,9 @@ function createRequestId() {
 /**
  * Handles cleanup, abort signals, and disconnection automatically
  */
-export function createPortStreamPromise<TResponse = string, TPayload = unknown>(
+export function createPortStreamPromise<TResponse = string, TSerializablePayload = unknown>(
   portName: string,
-  payload: TPayload,
+  serializablePayload: TSerializablePayload,
   options: {
     signal?: AbortSignal
     onChunk?: (data: TResponse) => void
@@ -92,7 +92,7 @@ export function createPortStreamPromise<TResponse = string, TPayload = unknown>(
       }
 
       if (event.type === "error") {
-        finalize(() => reject(new Error(event.error)))
+        finalize(() => reject(new Error(event.error.message)))
       }
     }
 
@@ -116,13 +116,13 @@ export function createPortStreamPromise<TResponse = string, TPayload = unknown>(
       signal.addEventListener("abort", abortListener)
     }
 
-    const startMessage: StreamPortStartMessage<unknown> = {
+    const startMessage: StreamPortStartMessage<TSerializablePayload> = {
       type: "start",
       requestId,
-      payload,
+      payload: serializablePayload,
     }
 
-    port.postMessage(startMessage as StreamPortRequestMessage<unknown>)
+    port.postMessage(startMessage)
 
     if (keepAliveIntervalMs > 0) {
       keepAliveTimer = setInterval(() => {

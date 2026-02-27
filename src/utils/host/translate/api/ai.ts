@@ -2,6 +2,7 @@ import type { LLMProviderConfig } from "@/types/config/provider"
 import type { ArticleContent } from "@/types/content"
 import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
 import { generateText } from "ai"
+import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { getModelById, resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 
@@ -25,16 +26,21 @@ export async function aiTranslate(
   const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, options)
 
-  const { text: translatedText } = await generateText({
-    model,
-    system: systemPrompt,
-    prompt,
-    temperature,
-    providerOptions,
-    maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
-  })
+  try {
+    const { text: translatedText } = await generateText({
+      model,
+      system: systemPrompt,
+      prompt,
+      temperature,
+      providerOptions,
+      maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
+    })
 
-  const [, finalTranslation = translatedText] = translatedText.match(/<\/think>([\s\S]*)/) || []
+    const [, finalTranslation = translatedText] = translatedText.match(/<\/think>([\s\S]*)/) || []
 
-  return finalTranslation
+    return finalTranslation
+  }
+  catch (error) {
+    throw new Error(extractAISDKErrorMessage(error))
+  }
 }
