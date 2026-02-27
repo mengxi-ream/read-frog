@@ -1,10 +1,10 @@
-import type { ReactNode } from 'react'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useState } from 'react'
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/base-ui/collapsible'
-import { FieldGroup } from '@/components/ui/base-ui/field'
-import { cn } from '@/utils/styles/utils'
+import type { ReactNode } from "react"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useState } from "react"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
+import { FieldGroup } from "@/components/ui/base-ui/field"
+import { cn } from "@/utils/styles/utils"
 
 interface AdvancedOptionsSectionProps {
   children: ReactNode
@@ -19,11 +19,11 @@ export function AdvancedOptionsSection({ children }: AdvancedOptionsSectionProps
         <Icon
           icon="tabler:chevron-right"
           className={cn(
-            'size-4 transition-transform duration-200',
-            isOpen && 'rotate-90',
+            "size-4 transition-transform duration-200",
+            isOpen && "rotate-90",
           )}
         />
-        <span>{i18n.t('options.apiProviders.form.advancedOptions')}</span>
+        <span>{i18n.t("options.apiProviders.form.advancedOptions")}</span>
       </CollapsibleTrigger>
       <CollapsibleContent>
         <FieldGroup className="pt-4">

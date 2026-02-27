@@ -1,9 +1,9 @@
-import { EDGE_TTS_MAX_CHUNK_BYTES, EDGE_TTS_MAX_CHUNKS } from './constants'
-import { EdgeTTSError } from './errors'
+import { EDGE_TTS_MAX_CHUNK_BYTES, EDGE_TTS_MAX_CHUNKS } from "./constants"
+import { EdgeTTSError } from "./errors"
 
 const SOFT_BOUNDARY_CHARS = /[\s。！？；.!?؛۔]/
-const ENTITY_START_CHAR = '&'
-const ENTITY_END_CHAR = ';'
+const ENTITY_START_CHAR = "&"
+const ENTITY_END_CHAR = ";"
 
 function measureBytes(text: string): number {
   return new TextEncoder().encode(text).length
@@ -100,7 +100,7 @@ export function splitTextByUtf8Bytes(
 ): string[] {
   const trimmed = text.trim()
   if (!trimmed) {
-    throw new EdgeTTSError('INVALID_TEXT', 'Text to speech input is empty')
+    throw new EdgeTTSError("INVALID_TEXT", "Text to speech input is empty")
   }
 
   const chunks: string[] = []
@@ -110,7 +110,7 @@ export function splitTextByUtf8Bytes(
     let splitAt = findLargestSliceByBytes(remaining, maxChunkBytes)
 
     if (splitAt <= 0) {
-      throw new EdgeTTSError('INVALID_TEXT', 'Unable to split input text safely')
+      throw new EdgeTTSError("INVALID_TEXT", "Unable to split input text safely")
     }
 
     splitAt = adjustBySoftBoundary(remaining, splitAt)
@@ -122,13 +122,13 @@ export function splitTextByUtf8Bytes(
 
     const chunk = remaining.slice(0, splitAt).trim()
     if (!chunk) {
-      throw new EdgeTTSError('INVALID_TEXT', 'Encountered an empty chunk while splitting text')
+      throw new EdgeTTSError("INVALID_TEXT", "Encountered an empty chunk while splitting text")
     }
 
     chunks.push(chunk)
     if (chunks.length > maxChunks) {
       throw new EdgeTTSError(
-        'TEXT_TOO_LONG',
+        "TEXT_TOO_LONG",
         `Text is too long for Edge TTS (max ${maxChunks} chunks at ${maxChunkBytes} bytes each)`,
       )
     }

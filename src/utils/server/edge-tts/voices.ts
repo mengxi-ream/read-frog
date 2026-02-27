@@ -1,6 +1,6 @@
-import type { EdgeTTSCachedVoices, EdgeTTSVoice } from './types'
-import { EDGE_TTS_USER_AGENT, EDGE_TTS_VOICES_CACHE_TTL_MS, getEdgeTTSVoicesUrl } from './constants'
-import { EdgeTTSError } from './errors'
+import type { EdgeTTSCachedVoices, EdgeTTSVoice } from "./types"
+import { EDGE_TTS_USER_AGENT, EDGE_TTS_VOICES_CACHE_TTL_MS, getEdgeTTSVoicesUrl } from "./constants"
+import { EdgeTTSError } from "./errors"
 
 let voicesCache: EdgeTTSCachedVoices | null = null
 
@@ -19,12 +19,12 @@ export async function listEdgeTTSVoices(): Promise<EdgeTTSVoice[]> {
   try {
     const response = await fetch(getEdgeTTSVoicesUrl(), {
       headers: {
-        'User-Agent': EDGE_TTS_USER_AGENT,
+        "User-Agent": EDGE_TTS_USER_AGENT,
       },
     })
 
     if (!response.ok) {
-      throw new EdgeTTSError('VOICES_FETCH_FAILED', `Failed to fetch voices: ${response.status}`, {
+      throw new EdgeTTSError("VOICES_FETCH_FAILED", `Failed to fetch voices: ${response.status}`, {
         status: response.status,
         retryable: response.status >= 500,
       })
@@ -32,7 +32,7 @@ export async function listEdgeTTSVoices(): Promise<EdgeTTSVoice[]> {
 
     const voices = await response.json()
     if (!Array.isArray(voices)) {
-      throw new EdgeTTSError('VOICES_FETCH_FAILED', 'Voices response is not an array')
+      throw new EdgeTTSError("VOICES_FETCH_FAILED", "Voices response is not an array")
     }
 
     voicesCache = {
@@ -51,7 +51,7 @@ export async function listEdgeTTSVoices(): Promise<EdgeTTSVoice[]> {
       throw error
     }
 
-    throw new EdgeTTSError('VOICES_FETCH_FAILED', 'Failed to fetch Edge TTS voices', {
+    throw new EdgeTTSError("VOICES_FETCH_FAILED", "Failed to fetch Edge TTS voices", {
       cause: error,
       retryable: true,
     })

@@ -1,7 +1,7 @@
 name: Report a bug
 description: Create a report to help us improve Read Frog
 labels: [bug]
-title: '[BUG] '
+title: "[BUG] "
 assignees: []
 body:
   - type: checkboxes
@@ -30,7 +30,7 @@ body:
         A clear and concise description of what happened (e.g., screenshots, logs, errors) and what you expected to happen.
 
         Skipping this / failure to provide complete information may result in the issue being closed.
-      placeholder: 'Following the steps from the previous section, I expected A to happen, but I observed B instead.'
+      placeholder: "Following the steps from the previous section, I expected A to happen, but I observed B instead."
     validations:
       required: true
   - type: textarea

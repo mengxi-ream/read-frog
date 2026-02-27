@@ -1,5 +1,5 @@
-import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query"
+import { toast } from "sonner"
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
@@ -8,7 +8,7 @@ export const queryClient = new QueryClient({
         return
 
       const errorDescription
-        = query.meta?.errorDescription || 'Something went wrong'
+        = query.meta?.errorDescription || "Something went wrong"
       toast.error(`${errorDescription}`, {
         description: error.message || undefined,
       })
@@ -20,7 +20,7 @@ export const queryClient = new QueryClient({
         return
 
       const errorDescription
-        = mutation.meta?.errorDescription || 'Something went wrong'
+        = mutation.meta?.errorDescription || "Something went wrong"
       toast.error(`${errorDescription}`, {
         description: error.message || undefined,
       })

@@ -1,10 +1,10 @@
-import type { ITheme } from '@visactor/react-vchart'
-import { ThemeManager } from '@visactor/vchart'
-import { createContext, use, useEffect, useMemo } from 'react'
-import { customDarkTheme, customLightTheme } from '@/utils/config/chart-theme'
-import { useTheme } from './theme-provider'
+import type { ITheme } from "@visactor/react-vchart"
+import { ThemeManager } from "@visactor/vchart"
+import { createContext, use, useEffect, useMemo } from "react"
+import { customDarkTheme, customLightTheme } from "@/utils/config/chart-theme"
+import { useTheme } from "./theme-provider"
 
-type ChartTheme = 'light' | 'dark'
+type ChartTheme = "light" | "dark"
 
 interface ChartThemeContextI {
   theme: ChartTheme
@@ -19,7 +19,7 @@ export function ChartThemeProvider({
 }) {
   const { theme } = useTheme()
 
-  const chartTheme = useMemo<ChartTheme>(() => theme === 'dark' ? 'dark' : 'light', [theme])
+  const chartTheme = useMemo<ChartTheme>(() => theme === "dark" ? "dark" : "light", [theme])
 
   useEffect(() => {
     registerTheme()
@@ -41,7 +41,7 @@ export function ChartThemeProvider({
 export function useChartTheme(): ChartThemeContextI {
   const context = use(ChartThemeContext)
   if (!context) {
-    throw new Error('useChartTheme must be used within a ChartThemeProvider')
+    throw new Error("useChartTheme must be used within a ChartThemeProvider")
   }
   return context
 }
@@ -53,6 +53,6 @@ function registerTheme() {
   const darkTheme: Partial<ITheme> = {
     ...customDarkTheme,
   }
-  ThemeManager.registerTheme('light', lightTheme)
-  ThemeManager.registerTheme('dark', darkTheme)
+  ThemeManager.registerTheme("light", lightTheme)
+  ThemeManager.registerTheme("dark", darkTheme)
 }

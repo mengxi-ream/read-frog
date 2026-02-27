@@ -1,17 +1,17 @@
-import { browser } from '#imports'
-import { db } from '@/utils/db/dexie/db'
-import { logger } from '@/utils/logger'
+import { browser } from "#imports"
+import { db } from "@/utils/db/dexie/db"
+import { logger } from "@/utils/logger"
 
 export const CHECK_INTERVAL_MINUTES = 24 * 60
 
-export const TRANSLATION_CACHE_CLEANUP_ALARM = 'cache-cleanup'
+export const TRANSLATION_CACHE_CLEANUP_ALARM = "cache-cleanup"
 export const TRANSLATION_CACHE_MAX_AGE_MINUTES = 7 * 24 * 60
 
-export const REQUEST_RECORD_CLEANUP_ALARM = 'request-record-cleanup'
+export const REQUEST_RECORD_CLEANUP_ALARM = "request-record-cleanup"
 export const REQUEST_RECORD_MAX_COUNT = 10000
 export const REQUEST_RECORD_MAX_AGE_DAYS = 120
 
-export const SUMMARY_CACHE_CLEANUP_ALARM = 'summary-cache-cleanup'
+export const SUMMARY_CACHE_CLEANUP_ALARM = "summary-cache-cleanup"
 export const SUMMARY_CACHE_MAX_AGE_MINUTES = 7 * 24 * 60
 
 export async function setUpDatabaseCleanup() {
@@ -55,15 +55,15 @@ export async function setUpDatabaseCleanup() {
 
   // Run cleanup immediately when background script starts
   cleanupOldTranslationCache().catch((error) => {
-    logger.error('Failed to run initial cache cleanup:', error)
+    logger.error("Failed to run initial cache cleanup:", error)
   })
 
   cleanupOldRequestRecords().catch((error) => {
-    logger.error('Failed to run initial request records cleanup:', error)
+    logger.error("Failed to run initial request records cleanup:", error)
   })
 
   cleanupOldSummaryCache().catch((error) => {
-    logger.error('Failed to run initial summary cache cleanup:', error)
+    logger.error("Failed to run initial summary cache cleanup:", error)
   })
 }
 
@@ -74,7 +74,7 @@ async function cleanupOldTranslationCache() {
 
     // Delete all cache entries older than the cutoff date
     const deletedCount = await db.translationCache
-      .where('createdAt')
+      .where("createdAt")
       .below(cutoffDate)
       .delete()
 
@@ -83,7 +83,7 @@ async function cleanupOldTranslationCache() {
     }
   }
   catch (error) {
-    logger.error('Failed to cleanup old cache:', error)
+    logger.error("Failed to cleanup old cache:", error)
   }
 }
 
@@ -95,7 +95,7 @@ export async function cleanupAllTranslationCache() {
     logger.info(`Cache cleanup: Deleted all translation cache entries`)
   }
   catch (error) {
-    logger.error('Failed to cleanup all cache:', error)
+    logger.error("Failed to cleanup all cache:", error)
     throw error
   }
 }
@@ -110,7 +110,7 @@ async function cleanupOldRequestRecords() {
 
       // Delete oldest records to bring count back to maximum
       const oldestRecords = await db.batchRequestRecord
-        .orderBy('createdAt')
+        .orderBy("createdAt")
         .limit(excessCount)
         .toArray()
 
@@ -125,7 +125,7 @@ async function cleanupOldRequestRecords() {
     cutoffDate.setDate(cutoffDate.getDate() - REQUEST_RECORD_MAX_AGE_DAYS)
 
     const deletedByAgeCount = await db.batchRequestRecord
-      .where('createdAt')
+      .where("createdAt")
       .below(cutoffDate)
       .delete()
 
@@ -134,7 +134,7 @@ async function cleanupOldRequestRecords() {
     }
   }
   catch (error) {
-    logger.error('Failed to cleanup old request records:', error)
+    logger.error("Failed to cleanup old request records:", error)
   }
 }
 
@@ -146,7 +146,7 @@ export async function cleanupAllRequestRecords() {
     logger.info(`Request records cleanup: Deleted all batch request records`)
   }
   catch (error) {
-    logger.error('Failed to cleanup all request records:', error)
+    logger.error("Failed to cleanup all request records:", error)
     throw error
   }
 }
@@ -158,7 +158,7 @@ async function cleanupOldSummaryCache() {
 
     // Delete all summary cache entries older than the cutoff date
     const deletedCount = await db.articleSummaryCache
-      .where('createdAt')
+      .where("createdAt")
       .below(cutoffDate)
       .delete()
 
@@ -167,7 +167,7 @@ async function cleanupOldSummaryCache() {
     }
   }
   catch (error) {
-    logger.error('Failed to cleanup old summary cache:', error)
+    logger.error("Failed to cleanup old summary cache:", error)
   }
 }
 
@@ -179,7 +179,7 @@ export async function cleanupAllSummaryCache() {
     logger.info(`Summary cache cleanup: Deleted all article summary cache entries`)
   }
   catch (error) {
-    logger.error('Failed to cleanup all summary cache:', error)
+    logger.error("Failed to cleanup all summary cache:", error)
     throw error
   }
 }
@@ -187,10 +187,10 @@ export async function cleanupAllSummaryCache() {
 export async function cleanupAllAiSegmentationCache() {
   try {
     await db.aiSegmentationCache.clear()
-    logger.info('AI segmentation cache cleanup: Deleted all entries')
+    logger.info("AI segmentation cache cleanup: Deleted all entries")
   }
   catch (error) {
-    logger.error('Failed to cleanup all AI segmentation cache:', error)
+    logger.error("Failed to cleanup all AI segmentation cache:", error)
     throw error
   }
 }

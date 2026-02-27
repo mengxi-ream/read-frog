@@ -1,23 +1,23 @@
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useAtom, useAtomValue } from 'jotai'
-import { useEffect, useRef, useState } from 'react'
-import readFrogLogo from '@/assets/icons/read-frog.png'
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useAtom, useAtomValue } from "jotai"
+import { useEffect, useRef, useState } from "react"
+import readFrogLogo from "@/assets/icons/read-frog.png"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from '@/components/ui/base-ui/dropdown-menu'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { APP_NAME } from '@/utils/constants/app'
-import { sendMessage } from '@/utils/message'
-import { cn } from '@/utils/styles/utils'
-import { matchDomainPattern } from '@/utils/url'
-import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from '../../atoms'
-import { shadowWrapper } from '../../index'
-import HiddenButton from './components/hidden-button'
-import TranslateButton from './translate-button'
+} from "@/components/ui/base-ui/dropdown-menu"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { APP_NAME } from "@/utils/constants/app"
+import { sendMessage } from "@/utils/message"
+import { cn } from "@/utils/styles/utils"
+import { matchDomainPattern } from "@/utils/url"
+import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from "../../atoms"
+import { shadowWrapper } from "../../index"
+import HiddenButton from "./components/hidden-button"
+import TranslateButton from "./translate-button"
 
 export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(
@@ -54,15 +54,15 @@ export default function FloatingButton() {
       setIsDraggingButton(false)
     }
 
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
 
-    document.body.style.userSelect = 'none'
+    document.body.style.userSelect = "none"
 
     return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.body.style.userSelect = ''
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
+      document.body.style.userSelect = ""
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraggingButton])
@@ -95,13 +95,13 @@ export default function FloatingButton() {
 
     // 在鼠标释放时，只有未移动才触发点击事件
     const handleMouseUp = () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
+      document.removeEventListener("mousemove", handleMouseMove)
+      document.removeEventListener("mouseup", handleMouseUp)
 
       // 只有未移动过才触发点击
       if (!hasMoved) {
-        if (floatingButton.clickAction === 'translate') {
-          void sendMessage('tryToSetEnablePageTranslationOnContentScript', { enabled: !translationState.enabled })
+        if (floatingButton.clickAction === "translate") {
+          void sendMessage("tryToSetEnablePageTranslationOnContentScript", { enabled: !translationState.enabled })
         }
         else {
           setIsSideOpen(o => !o)
@@ -109,11 +109,11 @@ export default function FloatingButton() {
       }
     }
 
-    document.addEventListener('mouseup', handleMouseUp)
-    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener("mouseup", handleMouseUp)
+    document.addEventListener("mousemove", handleMouseMove)
   }
 
-  const attachSideClassName = isDraggingButton || isSideOpen || isDropdownOpen ? 'translate-x-0' : ''
+  const attachSideClassName = isDraggingButton || isSideOpen || isDropdownOpen ? "translate-x-0" : ""
 
   if (!floatingButton.enabled || floatingButton.disabledFloatingButtonPatterns.some(pattern => matchDomainPattern(window.location.href, pattern))) {
     return null
@@ -125,17 +125,17 @@ export default function FloatingButton() {
       style={{
         right: isSideOpen
           ? `calc(${sideContent.width}px + var(--removed-body-scroll-bar-size, 0px))`
-          : 'var(--removed-body-scroll-bar-size, 0px)',
+          : "var(--removed-body-scroll-bar-size, 0px)",
         top: `${(dragPosition ?? floatingButton.position) * 100}vh`,
       }}
     >
       <TranslateButton className={attachSideClassName} />
       <div
         className={cn(
-          'border-border flex h-10 w-15 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900',
-          'translate-x-5 transition-transform duration-300 group-hover:translate-x-0',
-          (isSideOpen || isDropdownOpen) && 'opacity-100',
-          isDraggingButton ? 'cursor-move' : 'cursor-pointer',
+          "border-border flex h-10 w-15 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900",
+          "translate-x-5 transition-transform duration-300 group-hover:translate-x-0",
+          (isSideOpen || isDropdownOpen) && "opacity-100",
+          isDraggingButton ? "cursor-move" : "cursor-pointer",
           attachSideClassName,
         )}
         onMouseDown={handleButtonDragStart}
@@ -146,9 +146,9 @@ export default function FloatingButton() {
               <div
                 title="Close floating button"
                 className={cn(
-                  'border-border absolute -top-1 -left-1 hidden cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900',
-                  'group-hover:block',
-                  isDropdownOpen && 'block',
+                  "border-border absolute -top-1 -left-1 hidden cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900",
+                  "group-hover:block",
+                  isDropdownOpen && "block",
                 )}
                 onMouseDown={e => e.stopPropagation()} // 父级不会收到 mousedown
               />
@@ -168,7 +168,7 @@ export default function FloatingButton() {
                 })
               }}
             >
-              {i18n.t('options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite')}
+              {i18n.t("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite")}
             </DropdownMenuItem>
             <DropdownMenuItem
               onMouseDown={e => e.stopPropagation()}
@@ -176,7 +176,7 @@ export default function FloatingButton() {
                 void setFloatingButton({ ...floatingButton, enabled: false })
               }}
             >
-              {i18n.t('options.floatingButtonAndToolbar.floatingButton.closeMenu.disableGlobally')}
+              {i18n.t("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableGlobally")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -190,7 +190,7 @@ export default function FloatingButton() {
         className={attachSideClassName}
         icon="tabler:settings"
         onClick={() => {
-          void sendMessage('openOptionsPage', undefined)
+          void sendMessage("openOptionsPage", undefined)
         }}
       />
     </div>

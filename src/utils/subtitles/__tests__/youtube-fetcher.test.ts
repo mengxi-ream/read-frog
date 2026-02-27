@@ -1,31 +1,31 @@
 // @vitest-environment jsdom
-import { afterEach, describe, expect, it } from 'vitest'
-import { PLAYER_DATA_REQUEST_TYPE, PLAYER_DATA_RESPONSE_TYPE } from '@/utils/constants/subtitles'
-import { YoutubeSubtitlesFetcher } from '../fetchers/youtube'
+import { afterEach, describe, expect, it } from "vitest"
+import { PLAYER_DATA_REQUEST_TYPE, PLAYER_DATA_RESPONSE_TYPE } from "@/utils/constants/subtitles"
+import { YoutubeSubtitlesFetcher } from "../fetchers/youtube"
 
-describe('youtube subtitles fetcher', () => {
+describe("youtube subtitles fetcher", () => {
   afterEach(() => {
-    document.body.innerHTML = ''
+    document.body.innerHTML = ""
   })
 
-  it('ignores unrelated postMessage events while waiting', async () => {
+  it("ignores unrelated postMessage events while waiting", async () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
-    Object.defineProperty(window, 'location', {
-      value: { search: '?v=test123', origin: 'https://www.youtube.com', pathname: '/watch', hostname: 'www.youtube.com' },
+    Object.defineProperty(window, "location", {
+      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
       writable: true,
     })
 
     const promise = fetcher.fetch()
 
-    let settled: 'resolved' | 'rejected' | null = null
+    let settled: "resolved" | "rejected" | null = null
     void promise.then(
-      () => { settled = 'resolved' },
-      () => { settled = 'rejected' },
+      () => { settled = "resolved" },
+      () => { settled = "rejected" },
     )
 
-    window.dispatchEvent(new MessageEvent('message', {
-      data: { foo: 'bar' },
+    window.dispatchEvent(new MessageEvent("message", {
+      data: { foo: "bar" },
       origin: window.location.origin,
     }))
 
@@ -35,11 +35,11 @@ describe('youtube subtitles fetcher', () => {
     fetcher.cleanup()
   })
 
-  it('handles player data response correctly', async () => {
+  it("handles player data response correctly", async () => {
     const fetcher = new YoutubeSubtitlesFetcher()
 
-    Object.defineProperty(window, 'location', {
-      value: { search: '?v=test123', origin: 'https://www.youtube.com', pathname: '/watch', hostname: 'www.youtube.com' },
+    Object.defineProperty(window, "location", {
+      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
       writable: true,
     })
 
@@ -48,21 +48,21 @@ describe('youtube subtitles fetcher', () => {
       originalPostMessage(message, targetOrigin)
       if (message?.type === PLAYER_DATA_REQUEST_TYPE) {
         setTimeout(() => {
-          window.dispatchEvent(new MessageEvent('message', {
+          window.dispatchEvent(new MessageEvent("message", {
             origin: window.location.origin,
             data: {
               type: PLAYER_DATA_RESPONSE_TYPE,
               requestId: message.requestId,
               success: true,
               data: {
-                videoId: 'test123',
+                videoId: "test123",
                 captionTracks: [],
                 audioCaptionTracks: [],
                 device: null,
                 cver: null,
                 playerState: 1,
                 selectedTrackLanguageCode: null,
-                cachedTimedtextUrl: 'https://www.youtube.com/api/timedtext?v=test123&lang=en',
+                cachedTimedtextUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
               },
             },
           }))
@@ -70,7 +70,7 @@ describe('youtube subtitles fetcher', () => {
       }
     }
 
-    await expect(fetcher.fetch()).rejects.toThrow('subtitles.errors.noSubtitlesFound')
+    await expect(fetcher.fetch()).rejects.toThrow("subtitles.errors.noSubtitlesFound")
 
     fetcher.cleanup()
   })

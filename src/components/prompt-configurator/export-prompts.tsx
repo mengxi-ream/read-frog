@@ -1,9 +1,9 @@
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { Button } from '@/components/ui/base-ui/button'
-import { usePromptAtoms } from './context'
-import { downloadJSONFile } from './utils/prompt-file'
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { Button } from "@/components/ui/base-ui/button"
+import { usePromptAtoms } from "./context"
+import { downloadJSONFile } from "./utils/prompt-file"
 
 export function ExportPrompts() {
   const promptAtoms = usePromptAtoms()
@@ -30,7 +30,7 @@ export function ExportPrompts() {
       disabled={!selectedPrompts.length}
     >
       <Icon icon="tabler:check" className="size-4" />
-      {i18n.t('options.translation.personalizedPrompts.exportPrompt.exportSelected')}
+      {i18n.t("options.translation.personalizedPrompts.exportPrompt.exportSelected")}
     </Button>
   )
 }

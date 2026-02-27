@@ -1,5 +1,5 @@
-import customTranslationNodeCss from '@/assets/styles/custom-translation-node.css?raw'
-import hostThemeCss from '@/assets/styles/host-theme.css?raw'
+import customTranslationNodeCss from "@/assets/styles/custom-translation-node.css?raw"
+import hostThemeCss from "@/assets/styles/host-theme.css?raw"
 
 type StyleRoot = Document | ShadowRoot
 
@@ -7,7 +7,7 @@ type StyleRoot = Document | ShadowRoot
 
 function supportsAdoptedStyleSheets(root: StyleRoot): boolean {
   try {
-    return 'adoptedStyleSheets' in root
+    return "adoptedStyleSheets" in root
       && root.adoptedStyleSheets !== undefined
       && Array.isArray(root.adoptedStyleSheets)
   }
@@ -20,7 +20,7 @@ function injectStyleElement(root: StyleRoot, id: string, cssText: string): void 
   const container = root instanceof Document ? root.head : root
   let styleElement = root.querySelector(`#${id}`) as HTMLStyleElement | null
   if (!styleElement) {
-    styleElement = document.createElement('style')
+    styleElement = document.createElement("style")
     styleElement.id = id
     container.appendChild(styleElement)
   }
@@ -34,8 +34,8 @@ function injectStyleElement(root: StyleRoot, id: string, cssText: string): void 
 // Process CSS for shadow root context:
 // 1. host-theme.css: Replace :root with :host (shadow roots don't inherit :root variables)
 // 2. custom-translation-node.css: Remove @import line (already imported separately)
-const HOST_THEME_CSS = hostThemeCss.replace(/:root/g, ':host')
-const PRESET_STYLES_CSS = customTranslationNodeCss.replace(/@import[^;]+;/g, '')
+const HOST_THEME_CSS = hostThemeCss.replace(/:root/g, ":host")
+const PRESET_STYLES_CSS = customTranslationNodeCss.replace(/@import[^;]+;/g, "")
 const FULL_PRESET_CSS = HOST_THEME_CSS + PRESET_STYLES_CSS
 
 const injectedPresetRoots = new WeakSet<StyleRoot>()
@@ -65,7 +65,7 @@ export function ensurePresetStyles(root: StyleRoot): void {
     root.adoptedStyleSheets = [...root.adoptedStyleSheets, getPresetStyleSheet()]
   }
   else {
-    injectStyleElement(root, 'read-frog-preset-styles', FULL_PRESET_CSS)
+    injectStyleElement(root, "read-frog-preset-styles", FULL_PRESET_CSS)
   }
 }
 
@@ -95,7 +95,7 @@ export async function ensureCustomCSS(root: StyleRoot, cssText: string): Promise
     await sheet.replace(cssText)
   }
   else {
-    injectStyleElement(root, 'read-frog-custom-styles', cssText)
+    injectStyleElement(root, "read-frog-custom-styles", cssText)
   }
 
   if (root instanceof Document) {

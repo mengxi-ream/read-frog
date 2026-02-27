@@ -1,10 +1,10 @@
-import { logger } from '@/utils/logger'
-import { onMessage } from '@/utils/message'
-import { getEdgeTTSHealthStatus, listEdgeTTSVoices, synthesizeEdgeTTS } from '@/utils/server/edge-tts'
+import { logger } from "@/utils/logger"
+import { onMessage } from "@/utils/message"
+import { getEdgeTTSHealthStatus, listEdgeTTSVoices, synthesizeEdgeTTS } from "@/utils/server/edge-tts"
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer)
-  let binary = ''
+  let binary = ""
   for (let index = 0; index < bytes.length; index++) {
     binary += String.fromCharCode(bytes[index]!)
   }
@@ -12,10 +12,10 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 }
 
 export function setupEdgeTTSMessageHandlers() {
-  onMessage('edgeTtsSynthesize', async (message) => {
+  onMessage("edgeTtsSynthesize", async (message) => {
     const response = await synthesizeEdgeTTS(message.data)
     if (!response.ok) {
-      logger.warn('[Background][EdgeTTS] synthesize failed:', response.error)
+      logger.warn("[Background][EdgeTTS] synthesize failed:", response.error)
       return response
     }
 
@@ -26,11 +26,11 @@ export function setupEdgeTTSMessageHandlers() {
     }
   })
 
-  onMessage('edgeTtsListVoices', async () => {
+  onMessage("edgeTtsListVoices", async () => {
     return listEdgeTTSVoices()
   })
 
-  onMessage('edgeTtsHealthCheck', async () => {
+  onMessage("edgeTtsHealthCheck", async () => {
     return getEdgeTTSHealthStatus()
   })
 }

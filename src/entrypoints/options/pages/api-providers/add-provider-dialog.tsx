@@ -1,13 +1,13 @@
-import type { APIProviderTypes } from '@/types/config/provider'
-import { i18n } from '#imports'
-import { useAtom, useSetAtom } from 'jotai'
-import ProviderIcon from '@/components/provider-icon'
-import { useTheme } from '@/components/providers/theme-provider'
-import { DialogContent, DialogHeader, DialogTitle } from '@/components/ui/base-ui/dialog'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { API_PROVIDER_ITEMS, PROVIDER_GROUPS } from '@/utils/constants/providers'
-import { selectedProviderIdAtom } from './atoms'
-import { addProvider } from './utils'
+import type { APIProviderTypes } from "@/types/config/provider"
+import { i18n } from "#imports"
+import { useAtom, useSetAtom } from "jotai"
+import ProviderIcon from "@/components/provider-icon"
+import { useTheme } from "@/components/providers/theme-provider"
+import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { API_PROVIDER_ITEMS, PROVIDER_GROUPS } from "@/utils/constants/providers"
+import { selectedProviderIdAtom } from "./atoms"
+import { addProvider } from "./utils"
 
 export default function AddProviderDialog({ onClose }: { onClose: () => void }) {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
@@ -21,7 +21,7 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
   return (
     <DialogContent className="md:max-w-2xl lg:max-w-4xl xl:max-w-5xl max-h-[90vh] overflow-y-auto">
       <DialogHeader>
-        <DialogTitle>{i18n.t('options.apiProviders.dialog.title')}</DialogTitle>
+        <DialogTitle>{i18n.t("options.apiProviders.dialog.title")}</DialogTitle>
       </DialogHeader>
       {Object.entries(PROVIDER_GROUPS).map(([groupKey, group]) => (
         <ProviderButtonGroup

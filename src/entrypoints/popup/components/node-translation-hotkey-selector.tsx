@@ -1,44 +1,44 @@
-import { i18n } from '#imports'
-import { deepmerge } from 'deepmerge-ts'
-import { useAtom } from 'jotai'
+import { i18n } from "#imports"
+import { deepmerge } from "deepmerge-ts"
+import { useAtom } from "jotai"
 import {
   Select,
   SelectContent,
   SelectGroup,
   SelectItem,
   SelectTrigger,
-} from '@/components/ui/base-ui/select'
-import { Switch } from '@/components/ui/base-ui/switch'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { HOTKEY_ICONS, HOTKEYS } from '@/utils/constants/hotkeys'
+} from "@/components/ui/base-ui/select"
+import { Switch } from "@/components/ui/base-ui/switch"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
 
 function HotkeyDisplay({ hotkey }: { hotkey: typeof HOTKEYS[number] }) {
   const icon = HOTKEY_ICONS[hotkey]
   const label = i18n.t(`hotkey.${hotkey}`)
 
-  if (hotkey === 'clickAndHold') {
+  if (hotkey === "clickAndHold") {
     return (
       <>
         {icon}
-        {' '}
+        {" "}
         {label}
-        {' '}
-        {i18n.t('popup.translateParagraph')}
+        {" "}
+        {i18n.t("popup.translateParagraph")}
       </>
     )
   }
 
   return (
     <>
-      {i18n.t('popup.hover')}
-      {' '}
+      {i18n.t("popup.hover")}
+      {" "}
       +
-      {' '}
+      {" "}
       {icon}
-      {' '}
+      {" "}
       {label}
-      {' '}
-      {i18n.t('popup.translateParagraph')}
+      {" "}
+      {i18n.t("popup.translateParagraph")}
     </>
   )
 }

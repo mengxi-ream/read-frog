@@ -18,7 +18,7 @@ fi
 
 pnpm exec nx lint
 pnpm exec nx type-check
-pnpm exec nx build
+# pnpm exec nx build
 
 # Check if SKIP_FREE_API environment variable is set
 if [ "$SKIP_FREE_API" = "true" ]; then

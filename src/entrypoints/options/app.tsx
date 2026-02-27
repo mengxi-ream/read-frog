@@ -1,5 +1,5 @@
-import { Route, Routes } from 'react-router'
-import { ROUTE_CONFIG } from './app-sidebar/nav-items'
+import { Route, Routes } from "react-router"
+import { ROUTE_CONFIG } from "./app-sidebar/nav-items"
 
 export default function App() {
   return (

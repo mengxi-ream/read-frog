@@ -1,10 +1,10 @@
-import { storage } from '#imports'
-import { semanticVersionSchema } from '@read-frog/definitions'
-import { z } from 'zod'
-import { logger } from './logger'
-import { sendMessage } from './message'
+import { storage } from "#imports"
+import { semanticVersionSchema } from "@read-frog/definitions"
+import { z } from "zod"
+import { logger } from "./logger"
+import { sendMessage } from "./message"
 
-const LAST_VIEWED_BLOG_DATE_KEY = 'lastViewedBlogDate'
+const LAST_VIEWED_BLOG_DATE_KEY = "lastViewedBlogDate"
 const ONE_DAY_MS = 24 * 60 * 60 * 1000
 
 /**
@@ -70,25 +70,25 @@ export function hasNewBlogPost(
  * ```
  */
 export async function getLatestBlogDate(
-  apiUrl: string = 'https://readfrog.app/api/blog/latest',
-  locale: string = 'en',
+  apiUrl: string = "https://readfrog.app/api/blog/latest",
+  locale: string = "en",
   extensionVersion?: string,
   useCache: boolean = true,
 ): Promise<{ date: Date, url: string, extensionVersion?: string | null } | null> {
   try {
     const url = new URL(apiUrl)
-    url.searchParams.set('locale', locale)
+    url.searchParams.set("locale", locale)
     if (extensionVersion) {
-      url.searchParams.set('extensionVersion', extensionVersion)
+      url.searchParams.set("extensionVersion", extensionVersion)
     }
 
-    const response = await sendMessage('backgroundFetch', {
+    const response = await sendMessage("backgroundFetch", {
       url: url.toString(),
-      method: 'GET',
+      method: "GET",
       cacheConfig: useCache
         ? {
             enabled: true,
-            groupKey: 'blog-fetch',
+            groupKey: "blog-fetch",
             ttl: ONE_DAY_MS,
           }
         : undefined,
@@ -119,7 +119,7 @@ export async function getLatestBlogDate(
     }
   }
   catch (error) {
-    logger.error('Error fetching latest blog post:', error)
+    logger.error("Error fetching latest blog post:", error)
     return null
   }
 }

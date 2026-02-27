@@ -1,26 +1,26 @@
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { LANG_CODE_TO_EN_NAME } from '@read-frog/definitions'
-import { IconLoader2, IconVolume } from '@tabler/icons-react'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { useCallback, useEffect, useState } from 'react'
-import { toast } from 'sonner'
-import { useTextToSpeech } from '@/hooks/use-text-to-speech'
-import { isLLMProviderConfig } from '@/types/config/provider'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { featureProviderConfigAtom } from '@/utils/atoms/provider'
-import { streamBackgroundText } from '@/utils/content-script/background-stream-client'
-import { translateTextForSelection } from '@/utils/host/translate/translate-variants'
-import { getTranslatePrompt } from '@/utils/prompts/translate'
-import { resolveModelId } from '@/utils/providers/model'
-import { getProviderOptionsWithOverride } from '@/utils/providers/options'
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { IconLoader2, IconVolume } from "@tabler/icons-react"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useCallback, useEffect, useState } from "react"
+import { toast } from "sonner"
+import { useTextToSpeech } from "@/hooks/use-text-to-speech"
+import { isLLMProviderConfig } from "@/types/config/provider"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { featureProviderConfigAtom } from "@/utils/atoms/provider"
+import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
+import { translateTextForSelection } from "@/utils/host/translate/translate-variants"
+import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { resolveModelId } from "@/utils/providers/model"
+import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import {
   isSelectionToolbarVisibleAtom,
   isTranslatePopoverVisibleAtom,
   mouseClickPositionAtom,
   selectionContentAtom,
-} from './atom'
-import { PopoverWrapper } from './components/popover-wrapper'
+} from "./atom"
+import { PopoverWrapper } from "./components/popover-wrapper"
 
 export function TranslateButton() {
   // const selectionContent = useAtomValue(selectionContentAtom)
@@ -52,7 +52,7 @@ export function TranslateButton() {
 export function TranslatePopover() {
   const [isTranslating, setIsTranslating] = useState(false)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
-  const translateProviderConfig = useAtomValue(featureProviderConfigAtom('selectionToolbar.translate'))
+  const translateProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.translate"))
   const languageConfig = useAtomValue(configFieldsAtomMap.language)
   const selectionContent = useAtomValue(selectionContentAtom)
   const [isVisible, setIsVisible] = useAtom(isTranslatePopoverVisibleAtom)
@@ -64,7 +64,7 @@ export function TranslatePopover() {
   const handleCopy = useCallback(() => {
     if (translatedText) {
       void navigator.clipboard.writeText(translatedText)
-      toast.success('Translation copied to clipboard!')
+      toast.success("Translation copied to clipboard!")
     }
   }, [translatedText])
 
@@ -73,7 +73,7 @@ export function TranslatePopover() {
     let isCancelled = false
 
     const translate = async () => {
-      const cleanText = selectionContent?.replace(/\u200B/g, '').trim()
+      const cleanText = selectionContent?.replace(/\u200B/g, "").trim()
       if (!cleanText) {
         return
       }
@@ -83,7 +83,7 @@ export function TranslatePopover() {
 
       try {
         if (!translateProviderConfig) {
-          throw new Error('No provider config when translate text')
+          throw new Error("No provider config when translate text")
         }
 
         if (isLLMProviderConfig(translateProviderConfig)) {
@@ -95,7 +95,7 @@ export function TranslatePopover() {
             temperature,
           } = translateProviderConfig
           const modelName = resolveModelId(translateProviderConfig.model)
-          const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
+          const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
           const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
 
           const abortController = new AbortController()
@@ -124,7 +124,7 @@ export function TranslatePopover() {
           }
 
           const normalized = latestText.trim()
-          setTranslatedText(normalized === cleanText ? '' : normalized)
+          setTranslatedText(normalized === cleanText ? "" : normalized)
           return
         }
 
@@ -133,10 +133,10 @@ export function TranslatePopover() {
           return
         }
         const normalized = backgroundTranslation.trim()
-        setTranslatedText(normalized === cleanText ? '' : normalized)
+        setTranslatedText(normalized === cleanText ? "" : normalized)
       }
       catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
+        if (error instanceof DOMException && error.name === "AbortError") {
           return
         }
 
@@ -144,8 +144,8 @@ export function TranslatePopover() {
           return
         }
 
-        console.error('Translation error:', error)
-        toast.error('Translation failed')
+        console.error("Translation error:", error)
+        toast.error("Translation failed")
       }
       finally {
         cancelTranslation = undefined
@@ -185,7 +185,7 @@ export function TranslatePopover() {
           <p className="text-sm">
             {isTranslating && !translatedText && <Icon icon="svg-spinners:3-dots-bounce" />}
             {translatedText}
-            {isTranslating && translatedText && ' ●'}
+            {isTranslating && translatedText && " ●"}
           </p>
         </div>
       </div>
@@ -217,7 +217,7 @@ function SpeakOriginalButton() {
 
   const handleSpeak = useCallback(async () => {
     if (!selectionContent) {
-      toast.error(i18n.t('speak.noTextSelected'))
+      toast.error(i18n.t("speak.noTextSelected"))
       return
     }
 
@@ -230,7 +230,7 @@ function SpeakOriginalButton() {
       onClick={handleSpeak}
       disabled={isFetching || isPlaying}
       className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-      title={isFetching ? 'Fetching audio…' : isPlaying ? 'Playing audio…' : 'Speak original text'}
+      title={isFetching ? "Fetching audio…" : isPlaying ? "Playing audio…" : "Speak original text"}
     >
       {isFetching || isPlaying
         ? (

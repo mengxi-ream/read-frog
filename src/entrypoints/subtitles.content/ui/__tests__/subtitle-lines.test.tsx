@@ -1,19 +1,19 @@
 // @vitest-environment jsdom
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import { render, screen } from '@testing-library/react'
-import { createStore, Provider } from 'jotai'
-import { describe, expect, it, vi } from 'vitest'
-import { DEFAULT_CONFIG } from '@/utils/constants/config'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import { render, screen } from "@testing-library/react"
+import { createStore, Provider } from "jotai"
+import { describe, expect, it, vi } from "vitest"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
-import { MainSubtitle, TranslationSubtitle } from '../subtitle-lines'
+import { MainSubtitle, TranslationSubtitle } from "../subtitle-lines"
 
 const mockedAtoms = vi.hoisted(() => ({
   languageAtom: null as any,
   videoSubtitlesAtom: null as any,
 }))
 
-vi.mock('@/utils/atoms/config', async () => {
-  const { atom } = await import('jotai')
+vi.mock("@/utils/atoms/config", async () => {
+  const { atom } = await import("jotai")
   const languageAtom = atom(DEFAULT_CONFIG.language)
   const videoSubtitlesAtom = atom(DEFAULT_CONFIG.videoSubtitles)
 
@@ -38,9 +38,9 @@ function createStoreWithLanguage(targetCode: LangCodeISO6393) {
   return store
 }
 
-describe('subtitle lines', () => {
-  it('applies rtl attributes to translation subtitle for Arabic target language', () => {
-    const store = createStoreWithLanguage('arb')
+describe("subtitle lines", () => {
+  it("applies rtl attributes to translation subtitle for Arabic target language", () => {
+    const store = createStoreWithLanguage("arb")
 
     render(
       <Provider store={store}>
@@ -48,13 +48,13 @@ describe('subtitle lines', () => {
       </Provider>,
     )
 
-    const line = screen.getByText('مرحبًا')
-    expect(line).toHaveAttribute('dir', 'rtl')
-    expect(line).toHaveAttribute('lang', 'ar')
+    const line = screen.getByText("مرحبًا")
+    expect(line).toHaveAttribute("dir", "rtl")
+    expect(line).toHaveAttribute("lang", "ar")
   })
 
-  it('applies ltr attributes to translation subtitle for English target language', () => {
-    const store = createStoreWithLanguage('eng')
+  it("applies ltr attributes to translation subtitle for English target language", () => {
+    const store = createStoreWithLanguage("eng")
 
     render(
       <Provider store={store}>
@@ -62,13 +62,13 @@ describe('subtitle lines', () => {
       </Provider>,
     )
 
-    const line = screen.getByText('Hello world')
-    expect(line).toHaveAttribute('dir', 'ltr')
-    expect(line).toHaveAttribute('lang', 'en')
+    const line = screen.getByText("Hello world")
+    expect(line).toHaveAttribute("dir", "ltr")
+    expect(line).toHaveAttribute("lang", "en")
   })
 
-  it('keeps main subtitle line without forced dir/lang attributes', () => {
-    const store = createStoreWithLanguage('eng')
+  it("keeps main subtitle line without forced dir/lang attributes", () => {
+    const store = createStoreWithLanguage("eng")
 
     render(
       <Provider store={store}>
@@ -76,8 +76,8 @@ describe('subtitle lines', () => {
       </Provider>,
     )
 
-    const line = screen.getByText('Hello world')
-    expect(line).not.toHaveAttribute('dir')
-    expect(line).not.toHaveAttribute('lang')
+    const line = screen.getByText("Hello world")
+    expect(line).not.toHaveAttribute("dir")
+    expect(line).not.toHaveAttribute("lang")
   })
 })

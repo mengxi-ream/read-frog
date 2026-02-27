@@ -173,7 +173,7 @@ options:
     patterns:
       title: 활성화된 사이트
       description: 화이트리스트 모드에서는 확장 프로그램이 아래에 나열된 사이트에서만 활성화됩니다
-      enterUrlPattern: 'URL 패턴 입력 (예: example.com)'
+      enterUrlPattern: "URL 패턴 입력 (예: example.com)"
       urlPattern: URL 패턴
   overlayTools:
     title: 오버레이 도구
@@ -354,7 +354,7 @@ options:
             saved: 모든 변경사항이 저장되었습니다
     translationMode:
       title: 번역 모드
-      description: '번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만'
+      description: "번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만"
       mode:
         bilingual: 이중 언어
         translationOnly: 번역만
@@ -417,6 +417,11 @@ options:
   tts:
     title: 텍스트 음성 변환
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
+    detectLanguage:
+      label: 언어 감지
+      basic: 기본
+      llm: LLM
+      description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다. LLM 모드는 번역 페이지의 제공자를 사용합니다.
     voice:
       label: 음성
       fallback: 대체
@@ -500,7 +505,7 @@ options:
           hasUnresolvedInChildren: ⚠ 미해결 변경 포함
           item: 항목
           items: 항목
-          unresolvedPrompt: '[미해결 - 선택하세요]'
+          unresolvedPrompt: "[미해결 - 선택하세요]"
           localLatest: 로컬 최신
           remoteLatest: 원격 최신
           bothChanged: 양쪽 모두 변경됨
@@ -511,7 +516,7 @@ options:
           resolveToContinue: 계속하려면 충돌을 해결하세요
           validationAlert:
             title: 병합된 구성에 유효성 검사 오류가 있습니다
-            description: '아래 차이점을 조정하여 수정하세요:'
+            description: "아래 차이점을 조정하여 수정하세요:"
           moreErrors: ...그리고 $1개의 오류가 더 있습니다
     backup:
       title: 설정 백업

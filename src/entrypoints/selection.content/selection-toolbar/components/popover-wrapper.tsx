@@ -1,10 +1,10 @@
-import { Icon } from '@iconify/react'
-import { useAtomValue } from 'jotai'
-import { useCallback, useEffect, useImperativeHandle, useRef } from 'react'
-import { NOTRANSLATE_CLASS } from '@/utils/constants/dom-labels'
-import { MARGIN } from '@/utils/constants/selection'
-import { mouseClickPositionAtom, selectionContentAtom } from '../atom'
-import { useDraggable } from '../use-draggable'
+import { Icon } from "@iconify/react"
+import { useAtomValue } from "jotai"
+import { useCallback, useEffect, useImperativeHandle, useRef } from "react"
+import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
+import { MARGIN } from "@/utils/constants/selection"
+import { mouseClickPositionAtom, selectionContentAtom } from "../atom"
+import { useDraggable } from "../use-draggable"
 
 interface PopoverWrapperProps {
   title: string
@@ -58,10 +58,10 @@ export function PopoverWrapper({ title, icon, children, onClose, isVisible, setI
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside)
 
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener("mousedown", handleClickOutside)
     }
   }, [handleClose, popoverRef])
 
@@ -83,10 +83,10 @@ export function PopoverWrapper({ title, icon, children, onClose, isVisible, setI
     }
 
     // Add non-passive event listeners
-    contentElement.addEventListener('wheel', handleWheel, { passive: false })
+    contentElement.addEventListener("wheel", handleWheel, { passive: false })
 
     return () => {
-      contentElement.removeEventListener('wheel', handleWheel)
+      contentElement.removeEventListener("wheel", handleWheel)
     }
   }, [isVisible])
 
@@ -110,9 +110,9 @@ export function PopoverWrapper({ title, icon, children, onClose, isVisible, setI
       >
         {/* Drag icon positioned at top */}
         <div
-          className={`absolute top-0 left-1/2 transform -translate-x-1/2 p-1 transition-all duration-200 ${isDragging ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+          className={`absolute top-0 left-1/2 transform -translate-x-1/2 p-1 transition-all duration-200 ${isDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}
           style={{
-            color: isDragging ? 'var(--read-frog-primary)' : undefined,
+            color: isDragging ? "var(--read-frog-primary)" : undefined,
           }}
         >
           <Icon icon="tabler:grip-horizontal" className="size-4" />

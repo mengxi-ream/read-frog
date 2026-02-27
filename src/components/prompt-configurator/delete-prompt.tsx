@@ -1,11 +1,11 @@
-import type { TranslatePromptObj } from '@/types/config/translate'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react/dist/iconify.js'
-import { useAtom, useAtomValue } from 'jotai'
-import { useState } from 'react'
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/base-ui/alert-dialog'
-import { Button } from '@/components/ui/base-ui/button'
-import { usePromptAtoms } from './context'
+import type { TranslatePromptObj } from "@/types/config/translate"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react/dist/iconify.js"
+import { useAtom, useAtomValue } from "jotai"
+import { useState } from "react"
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/base-ui/alert-dialog"
+import { Button } from "@/components/ui/base-ui/button"
+import { usePromptAtoms } from "./context"
 
 export function DeletePrompt({
   originPrompt,
@@ -14,7 +14,7 @@ export function DeletePrompt({
 }: {
   originPrompt: TranslatePromptObj
   className?: string
-} & React.ComponentProps<'button'>) {
+} & React.ComponentProps<"button">) {
   const promptAtoms = usePromptAtoms()
   const isExportMode = useAtomValue(promptAtoms.exportMode)
   const [config, setConfig] = useAtom(promptAtoms.config)
@@ -40,21 +40,21 @@ export function DeletePrompt({
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>
-            {i18n.t('options.translation.personalizedPrompts.deletePrompt.title')}
-            {' '}
+            {i18n.t("options.translation.personalizedPrompts.deletePrompt.title")}
+            {" "}
             :
-            {' '}
+            {" "}
             {originPrompt.name}
           </AlertDialogTitle>
           <AlertDialogDescription>
-            {i18n.t('options.translation.personalizedPrompts.deletePrompt.description')}
-            {' '}
+            {i18n.t("options.translation.personalizedPrompts.deletePrompt.description")}
+            {" "}
             ?
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{i18n.t('options.translation.personalizedPrompts.deletePrompt.cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={deletePrompt}>{i18n.t('options.translation.personalizedPrompts.deletePrompt.confirm')}</AlertDialogAction>
+          <AlertDialogCancel>{i18n.t("options.translation.personalizedPrompts.deletePrompt.cancel")}</AlertDialogCancel>
+          <AlertDialogAction onClick={deletePrompt}>{i18n.t("options.translation.personalizedPrompts.deletePrompt.confirm")}</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

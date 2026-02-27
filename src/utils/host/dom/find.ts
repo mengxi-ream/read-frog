@@ -1,10 +1,10 @@
-import type { Point } from '@/types/dom'
+import type { Point } from "@/types/dom"
 
-import { getLocalConfig } from '@/utils/config/storage'
-import { DEFAULT_CONFIG } from '@/utils/constants/config'
-import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
-import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from './filter'
-import { smashTruncationStyle } from './style'
+import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from "./filter"
+import { smashTruncationStyle } from "./style"
 
 /**
  * Find the deepest element at the given point, including inside shadow roots

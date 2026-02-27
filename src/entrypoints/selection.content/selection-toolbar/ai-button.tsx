@@ -1,23 +1,23 @@
-import type { PopoverWrapperRef } from './components/popover-wrapper'
-import { useMemo, useRef, useState } from '#imports'
-import { Icon } from '@iconify/react'
-import { useQuery } from '@tanstack/react-query'
-import { useAtom, useAtomValue, useSetAtom } from 'jotai'
-import { Activity } from 'react'
-import { MarkdownRenderer } from '@/components/markdown-renderer'
-import { isLLMProviderConfig } from '@/types/config/provider'
-import { configAtom } from '@/utils/atoms/config'
-import { detectedCodeAtom } from '@/utils/atoms/detected-code'
-import { featureProviderConfigAtom } from '@/utils/atoms/provider'
-import { getFinalSourceCode } from '@/utils/config/languages'
-import { streamBackgroundText } from '@/utils/content-script/background-stream-client'
-import { logger } from '@/utils/logger'
-import { getWordExplainPrompt } from '@/utils/prompts/word-explain'
-import { resolveModelId } from '@/utils/providers/model'
-import { getProviderOptionsWithOverride } from '@/utils/providers/options'
-import { createHighlightData } from '../utils'
-import { isAiPopoverVisibleAtom, isSelectionToolbarVisibleAtom, mouseClickPositionAtom, selectionRangeAtom } from './atom'
-import { PopoverWrapper } from './components/popover-wrapper'
+import type { PopoverWrapperRef } from "./components/popover-wrapper"
+import { useMemo, useRef, useState } from "#imports"
+import { Icon } from "@iconify/react"
+import { useQuery } from "@tanstack/react-query"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { Activity } from "react"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
+import { isLLMProviderConfig } from "@/types/config/provider"
+import { configAtom } from "@/utils/atoms/config"
+import { detectedCodeAtom } from "@/utils/atoms/detected-code"
+import { featureProviderConfigAtom } from "@/utils/atoms/provider"
+import { getFinalSourceCode } from "@/utils/config/languages"
+import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
+import { logger } from "@/utils/logger"
+import { getWordExplainPrompt } from "@/utils/prompts/word-explain"
+import { resolveModelId } from "@/utils/providers/model"
+import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { createHighlightData } from "../utils"
+import { isAiPopoverVisibleAtom, isSelectionToolbarVisibleAtom, mouseClickPositionAtom, selectionRangeAtom } from "./atom"
+import { PopoverWrapper } from "./components/popover-wrapper"
 
 export function AiButton() {
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
@@ -45,16 +45,16 @@ export function AiPopover() {
   const selectionRange = useAtomValue(selectionRangeAtom)
   const config = useAtomValue(configAtom)
   const detectedCode = useAtomValue(detectedCodeAtom)
-  const vocabularyInsightProviderConfig = useAtomValue(featureProviderConfigAtom('selectionToolbar.vocabularyInsight'))
+  const vocabularyInsightProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.vocabularyInsight"))
   const popoverRef = useRef<PopoverWrapperRef>(null)
-  const [aiResponse, setAiResponse] = useState('')
+  const [aiResponse, setAiResponse] = useState("")
 
   const highlightData = useMemo(() => {
     if (!selectionRange || !isVisible) {
       return null
     }
     const data = createHighlightData(selectionRange)
-    logger.info('highlightData.context', '\n', data.context)
+    logger.info("highlightData.context", "\n", data.context)
     return data
   }, [selectionRange, isVisible])
 
@@ -63,20 +63,20 @@ export function AiPopover() {
     error,
   } = useQuery({
     queryKey: [
-      'analyzeSelection',
+      "analyzeSelection",
       highlightData,
       vocabularyInsightProviderConfig,
       config,
     ],
     queryFn: async ({ signal }) => {
       if (!highlightData || !vocabularyInsightProviderConfig || !config) {
-        throw new Error('No provider config for vocabulary insight or no selection')
+        throw new Error("No provider config for vocabulary insight or no selection")
       }
       if (!isLLMProviderConfig(vocabularyInsightProviderConfig)) {
-        throw new Error('Vocabulary insight requires an LLM provider')
+        throw new Error("Vocabulary insight requires an LLM provider")
       }
 
-      setAiResponse('')
+      setAiResponse("")
 
       try {
         if (signal?.aborted) {
@@ -93,7 +93,7 @@ export function AiPopover() {
           = `query: ${highlightData.context.selection}\n`
             + `context: ${highlightData.context.before} ${highlightData.context.selection} ${highlightData.context.after}`
 
-        const modelName = resolveModelId(vocabularyInsightProviderConfig.model) ?? ''
+        const modelName = resolveModelId(vocabularyInsightProviderConfig.model) ?? ""
         const providerOptions = getProviderOptionsWithOverride(
           modelName,
           vocabularyInsightProviderConfig.provider,
@@ -108,7 +108,7 @@ export function AiPopover() {
             system: systemPrompt,
             messages: [
               {
-                role: 'user',
+                role: "user",
                 content: userMessage,
               },
             ],
@@ -122,11 +122,11 @@ export function AiPopover() {
           },
         )
 
-        logger.log('aiResponse', '\n', finalResponse)
+        logger.log("aiResponse", "\n", finalResponse)
         return true
       }
       catch (error) {
-        if (error instanceof DOMException && error.name === 'AbortError') {
+        if (error instanceof DOMException && error.name === "AbortError") {
           return false
         }
         throw error
@@ -155,7 +155,7 @@ export function AiPopover() {
             {highlightData?.context.selection && (
               <span
                 className="font-medium"
-                style={{ color: 'var(--read-frog-primary)' }}
+                style={{ color: "var(--read-frog-primary)" }}
               >
                 {` ${highlightData.context.selection} `}
               </span>
@@ -168,20 +168,20 @@ export function AiPopover() {
           </div>
         </div>
         <div className="pt-4">
-          <Activity mode={isLoading && !aiResponse ? 'visible' : 'hidden'}>
+          <Activity mode={isLoading && !aiResponse ? "visible" : "hidden"}>
             <div className="flex items-center justify-center py-8">
               <div className="flex items-center space-x-3 text-slate-500">
                 <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
                 </div>
                 <span className="text-sm font-medium">词汇解析中...</span>
               </div>
             </div>
           </Activity>
 
-          <Activity mode={error ? 'visible' : 'hidden'}>
+          <Activity mode={error ? "visible" : "hidden"}>
             <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
               <div className="flex items-center space-x-2">
                 <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
@@ -195,7 +195,7 @@ export function AiPopover() {
             </div>
           </Activity>
 
-          <Activity mode={aiResponse ? 'visible' : 'hidden'}>
+          <Activity mode={aiResponse ? "visible" : "hidden"}>
             <div className="rounded-lg p-4 border border-slate-200 dark:border-slate-700">
               <MarkdownRenderer content={aiResponse} />
             </div>

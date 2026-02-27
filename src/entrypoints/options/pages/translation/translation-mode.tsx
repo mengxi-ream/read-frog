@@ -1,7 +1,7 @@
-import type { TranslationMode as TranslationModeType } from '@/types/config/translate'
-import { i18n } from '#imports'
-import { deepmerge } from 'deepmerge-ts'
-import { useAtom, useAtomValue } from 'jotai'
+import type { TranslationMode as TranslationModeType } from "@/types/config/translate"
+import { i18n } from "#imports"
+import { deepmerge } from "deepmerge-ts"
+import { useAtom, useAtomValue } from "jotai"
 import {
   Select,
   SelectContent,
@@ -9,15 +9,15 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/base-ui/select'
-import { TRANSLATION_MODES } from '@/types/config/translate'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { filterEnabledProvidersConfig, getLLMProvidersConfig, getProviderConfigById } from '@/utils/config/helpers'
-import { ConfigCard } from '../../components/config-card'
+} from "@/components/ui/base-ui/select"
+import { TRANSLATION_MODES } from "@/types/config/translate"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { filterEnabledProvidersConfig, getLLMProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
+import { ConfigCard } from "../../components/config-card"
 
 export function TranslationMode() {
   return (
-    <ConfigCard title={i18n.t('options.translation.translationMode.title')} description={i18n.t('options.translation.translationMode.description')}>
+    <ConfigCard title={i18n.t("options.translation.translationMode.title")} description={i18n.t("options.translation.translationMode.description")}>
       <TranslationModeSelector />
     </ConfigCard>
   )
@@ -33,10 +33,10 @@ function TranslationModeSelector() {
       return
     const currentProvider = getProviderConfigById(providersConfig, translateConfig.providerId)
 
-    if (mode === 'translationOnly' && currentProvider && currentProvider.provider === 'google-translate') {
+    if (mode === "translationOnly" && currentProvider && currentProvider.provider === "google-translate") {
       const enabledProviders = filterEnabledProvidersConfig(providersConfig)
 
-      const microsoftProvider = enabledProviders.find(p => p.provider === 'microsoft-translate')
+      const microsoftProvider = enabledProviders.find(p => p.provider === "microsoft-translate")
       if (microsoftProvider) {
         void setTranslateConfig(
           deepmerge(translateConfig, {

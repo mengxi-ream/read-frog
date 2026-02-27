@@ -1,10 +1,10 @@
-import type { Config } from '@/types/config/config'
-import { atom } from 'jotai'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { matchDomainPattern } from '@/utils/url'
-import { getActiveTabUrl } from '@/utils/utils'
+import type { Config } from "@/types/config/config"
+import { atom } from "jotai"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { matchDomainPattern } from "@/utils/url"
+import { getActiveTabUrl } from "@/utils/utils"
 
-type TranslateConfig = Config['translate']
+type TranslateConfig = Config["translate"]
 
 // Sync atom to store the checked state
 export const isCurrentSiteInPatternsAtom = atom<boolean>(false)

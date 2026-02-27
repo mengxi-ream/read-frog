@@ -1,4 +1,4 @@
-import { atom } from 'jotai'
+import { atom } from "jotai"
 
 export const selectionContentAtom = atom<string | null>(null)
 export const selectionRangeAtom = atom<Range | null>(null)

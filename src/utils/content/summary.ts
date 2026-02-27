@@ -1,9 +1,9 @@
-import type { LLMProviderConfig } from '@/types/config/provider'
-import { generateText } from 'ai'
-import { logger } from '@/utils/logger'
-import { getModelById, resolveModelId } from '@/utils/providers/model'
-import { getProviderOptionsWithOverride } from '@/utils/providers/options'
-import { cleanText } from './utils'
+import type { LLMProviderConfig } from "@/types/config/provider"
+import { generateText } from "ai"
+import { logger } from "@/utils/logger"
+import { getModelById, resolveModelId } from "@/utils/providers/model"
+import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { cleanText } from "./utils"
 
 /**
  * Generate a brief summary of article content for translation context
@@ -22,7 +22,7 @@ export async function generateArticleSummary(
   try {
     const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
     const modelName = resolveModelId(providerModel)
-    const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
+    const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
     const model = await getModelById(providerConfig.id)
 
     const prompt = `Summarize the following article in 2-3 sentences. Focus on the main topic and key points. Return ONLY the summary, no explanations or formatting.
@@ -40,12 +40,12 @@ ${preparedText}`
     })
 
     const cleanedSummary = summary.trim()
-    logger.info('Generated article summary:', `${cleanedSummary.slice(0, 100)}...`)
+    logger.info("Generated article summary:", `${cleanedSummary.slice(0, 100)}...`)
 
     return cleanedSummary
   }
   catch (error) {
-    logger.error('Failed to generate article summary:', error)
+    logger.error("Failed to generate article summary:", error)
     return null
   }
 }

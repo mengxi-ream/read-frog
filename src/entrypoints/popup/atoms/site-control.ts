@@ -1,11 +1,11 @@
-import type { Config } from '@/types/config/config'
-import { browser } from '#imports'
-import { atom } from 'jotai'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { matchDomainPattern } from '@/utils/url'
-import { getActiveTabUrl } from '@/utils/utils'
+import type { Config } from "@/types/config/config"
+import { browser } from "#imports"
+import { atom } from "jotai"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { matchDomainPattern } from "@/utils/url"
+import { getActiveTabUrl } from "@/utils/utils"
 
-type SiteControlConfig = Config['siteControl']
+type SiteControlConfig = Config["siteControl"]
 
 // Atom to track if whitelist mode is enabled
 export const isWhitelistModeAtom = atom<boolean>(false)
@@ -27,7 +27,7 @@ export const initSiteControlAtomsAtom = atom(
   null,
   async (get, set) => {
     const siteControlConfig = get(configFieldsAtomMap.siteControl)
-    set(isWhitelistModeAtom, siteControlConfig.mode === 'whitelist')
+    set(isWhitelistModeAtom, siteControlConfig.mode === "whitelist")
     set(isCurrentSiteInWhitelistAtom, await getIsInWhitelist(siteControlConfig))
   },
 )

@@ -1,7 +1,7 @@
-import { createContext, use, useEffect, useMemo, useState } from 'react'
-import { isDarkMode } from '@/utils/theme'
+import { createContext, use, useEffect, useMemo, useState } from "react"
+import { isDarkMode } from "@/utils/theme"
 
-export type Theme = 'light' | 'dark'
+export type Theme = "light" | "dark"
 
 interface ThemeContextI {
   theme: Theme
@@ -10,7 +10,7 @@ interface ThemeContextI {
 export const ThemeContext = createContext<ThemeContextI | undefined>(undefined)
 
 function getCurrentTheme(): Theme {
-  return isDarkMode() ? 'dark' : 'light'
+  return isDarkMode() ? "dark" : "light"
 }
 
 export function ThemeProvider({
@@ -25,19 +25,19 @@ export function ThemeProvider({
   // Apply theme to document or shadow root container
   useEffect(() => {
     const target = container ?? document.documentElement
-    target.classList.remove('light', 'dark')
+    target.classList.remove("light", "dark")
     target.classList.add(theme)
-    target.setAttribute('style', `color-scheme: ${theme}`)
+    target.setAttribute("style", `color-scheme: ${theme}`)
   }, [theme, container])
 
   // Listen for system theme changes
   useEffect(() => {
-    const mq = window.matchMedia?.('(prefers-color-scheme: dark)')
+    const mq = window.matchMedia?.("(prefers-color-scheme: dark)")
     if (!mq)
       return
-    const onChange = (e: MediaQueryListEvent) => setTheme(e.matches ? 'dark' : 'light')
-    mq.addEventListener?.('change', onChange)
-    return () => mq.removeEventListener?.('change', onChange)
+    const onChange = (e: MediaQueryListEvent) => setTheme(e.matches ? "dark" : "light")
+    mq.addEventListener?.("change", onChange)
+    return () => mq.removeEventListener?.("change", onChange)
   }, [])
 
   const contextValue = useMemo(() => ({ theme }), [theme])
@@ -52,7 +52,7 @@ export function ThemeProvider({
 export function useTheme(): ThemeContextI {
   const context = use(ThemeContext)
   if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider')
+    throw new Error("useTheme must be used within a ThemeProvider")
   }
   return context
 }

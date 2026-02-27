@@ -10,7 +10,7 @@
  *   { translate: { page: { ..., preload: { margin: 1000, threshold: 0 } } }, ... }
  */
 
-import { DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD } from '@/utils/constants/translate'
+import { DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD } from "@/utils/constants/translate"
 
 export function migrate(oldConfig: any): any {
   return {

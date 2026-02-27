@@ -1,20 +1,20 @@
 export function protectSelectAllShadowRoot(shadowHost: HTMLElement, wrapper: HTMLElement) {
   // ① 追踪鼠标是否在组件上
   let pointerInside = false
-  shadowHost.addEventListener('pointerenter', () => {
+  shadowHost.addEventListener("pointerenter", () => {
     pointerInside = true
   })
-  shadowHost.addEventListener('pointerleave', () => {
+  shadowHost.addEventListener("pointerleave", () => {
     pointerInside = false
   })
 
   window.addEventListener(
-    'keydown',
+    "keydown",
     (e) => {
       // 只处理 Ctrl+A (Windows/Linux) 或 Cmd+A (Mac)
       // metaKey 是 Mac 的 Command 键
       // ctrlKey 是 Windows 的 Ctrl 键
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a' && !e.shiftKey) {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a" && !e.shiftKey) {
         const active = document.activeElement
 
         /* --- 分四种情况 --- */
@@ -65,20 +65,20 @@ function isEditableElement(element: Element | null): boolean {
   const tagName = element.tagName.toLowerCase()
 
   // 检查 input 元素（排除非文本类型）
-  if (tagName === 'input') {
+  if (tagName === "input") {
     const inputType = (element as HTMLInputElement).type.toLowerCase()
-    const textInputTypes = ['text', 'password', 'search', 'tel', 'url', 'email']
+    const textInputTypes = ["text", "password", "search", "tel", "url", "email"]
     return textInputTypes.includes(inputType)
   }
 
   // 检查 textarea
-  if (tagName === 'textarea') {
+  if (tagName === "textarea") {
     return true
   }
 
   // 检查 contenteditable
-  const contentEditable = element.getAttribute('contenteditable')
-  if (contentEditable === 'true' || contentEditable === '') {
+  const contentEditable = element.getAttribute("contenteditable")
+  if (contentEditable === "true" || contentEditable === "") {
     return true
   }
 

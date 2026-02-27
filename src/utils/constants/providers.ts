@@ -1,133 +1,133 @@
-import type { Theme } from '@/components/providers/theme-provider'
-import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig } from '@/types/config/provider'
-import { i18n } from '#imports'
-import customProviderLogo from '@/assets/providers/custom-provider.svg'
-import deeplxLogoDark from '@/assets/providers/deeplx-dark.svg'
-import deeplxLogoLight from '@/assets/providers/deeplx-light.svg'
-import tensdaqLogoColor from '@/assets/providers/tensdaq-color.svg'
-import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, TRANSLATE_PROVIDER_TYPES } from '@/types/config/provider'
-import { omit, pick } from '@/types/utils'
-import { getLobeIconsCDNUrlFn } from '../logo'
-import { WEBSITE_URL } from './url'
+import type { Theme } from "@/components/providers/theme-provider"
+import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
+import customProviderLogo from "@/assets/providers/custom-provider.svg"
+import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg"
+import deeplxLogoLight from "@/assets/providers/deeplx-light.svg"
+import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg"
+import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, TRANSLATE_PROVIDER_TYPES } from "@/types/config/provider"
+import { omit, pick } from "@/types/utils"
+import { getLobeIconsCDNUrlFn } from "../logo"
+import { WEBSITE_URL } from "./url"
 
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
-  'openrouter': {
-    model: 'x-ai/grok-4-fast:free',
+  "openrouter": {
+    model: "x-ai/grok-4-fast:free",
     isCustomModel: false,
     customModel: null,
   },
-  'openai-compatible': {
-    model: 'use-custom-model',
+  "openai-compatible": {
+    model: "use-custom-model",
     isCustomModel: true,
     customModel: null,
   },
-  'openai': {
-    model: 'gpt-5-mini',
+  "openai": {
+    model: "gpt-5-mini",
     isCustomModel: false,
     customModel: null,
   },
-  'deepseek': {
-    model: 'deepseek-chat',
+  "deepseek": {
+    model: "deepseek-chat",
     isCustomModel: false,
     customModel: null,
   },
-  'google': {
-    model: 'gemini-2.5-flash',
+  "google": {
+    model: "gemini-2.5-flash",
     isCustomModel: false,
     customModel: null,
   },
-  'anthropic': {
-    model: 'claude-haiku-4-5',
+  "anthropic": {
+    model: "claude-haiku-4-5",
     isCustomModel: false,
     customModel: null,
   },
-  'xai': {
-    model: 'grok-4-fast-non-reasoning',
+  "xai": {
+    model: "grok-4-fast-non-reasoning",
     isCustomModel: false,
     customModel: null,
   },
-  'bedrock': {
-    model: 'us.meta.llama4-scout-17b-instruct-v1:0',
+  "bedrock": {
+    model: "us.meta.llama4-scout-17b-instruct-v1:0",
     isCustomModel: false,
     customModel: null,
   },
-  'groq': {
-    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+  "groq": {
+    model: "meta-llama/llama-4-scout-17b-16e-instruct",
     isCustomModel: false,
     customModel: null,
   },
-  'deepinfra': {
-    model: 'meta-llama/Llama-4-Scout-17B-16E-Instruct',
+  "deepinfra": {
+    model: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     isCustomModel: false,
     customModel: null,
   },
-  'mistral': {
-    model: 'magistral-small-2506',
+  "mistral": {
+    model: "magistral-small-2506",
     isCustomModel: false,
     customModel: null,
   },
-  'togetherai': {
-    model: 'deepseek-ai/DeepSeek-V3',
+  "togetherai": {
+    model: "deepseek-ai/DeepSeek-V3",
     isCustomModel: false,
     customModel: null,
   },
-  'cohere': {
-    model: 'command-a-reasoning-08-2025',
+  "cohere": {
+    model: "command-a-reasoning-08-2025",
     isCustomModel: false,
     customModel: null,
   },
-  'fireworks': {
-    model: 'accounts/fireworks/models/kimi-k2-instruct',
+  "fireworks": {
+    model: "accounts/fireworks/models/kimi-k2-instruct",
     isCustomModel: false,
     customModel: null,
   },
-  'cerebras': {
-    model: 'qwen-3-235b-a22b-instruct-2507',
+  "cerebras": {
+    model: "qwen-3-235b-a22b-instruct-2507",
     isCustomModel: false,
     customModel: null,
   },
-  'replicate': {
-    model: 'meta/meta-llama-3.1-70b-instruct',
+  "replicate": {
+    model: "meta/meta-llama-3.1-70b-instruct",
     isCustomModel: false,
     customModel: null,
   },
-  'perplexity': {
-    model: 'sonar',
+  "perplexity": {
+    model: "sonar",
     isCustomModel: false,
     customModel: null,
   },
-  'vercel': {
-    model: 'v0-1.5-md',
+  "vercel": {
+    model: "v0-1.5-md",
     isCustomModel: false,
     customModel: null,
   },
-  'ollama': {
-    model: 'gemma3:4b',
+  "ollama": {
+    model: "gemma3:4b",
     isCustomModel: false,
     customModel: null,
   },
-  'siliconflow': {
-    model: 'Qwen/Qwen3-Next-80B-A3B-Instruct',
+  "siliconflow": {
+    model: "Qwen/Qwen3-Next-80B-A3B-Instruct",
     isCustomModel: true,
     customModel: null,
   },
-  'tensdaq': {
-    model: 'Qwen3-30B-A3B-Instruct-2507',
+  "tensdaq": {
+    model: "Qwen3-30B-A3B-Instruct-2507",
     isCustomModel: true,
     customModel: null,
   },
-  'ai302': {
-    model: 'gpt-4.1-mini',
+  "ai302": {
+    model: "gpt-4.1-mini",
     isCustomModel: true,
     customModel: null,
   },
-  'volcengine': {
-    model: 'doubao-seed-1-6-flash-250828',
+  "volcengine": {
+    model: "doubao-seed-1-6-flash-250828",
     isCustomModel: true,
     customModel: null,
   },
-  'minimax': {
-    model: 'MiniMax-M2',
+  "minimax": {
+    model: "MiniMax-M2",
     isCustomModel: false,
     customModel: null,
   },
@@ -135,366 +135,366 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
 
 export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string }>
   = {
-    'microsoft-translate': {
-      logo: getLobeIconsCDNUrlFn('microsoft-color'),
-      name: NON_API_TRANSLATE_PROVIDERS_MAP['microsoft-translate'],
-      website: 'https://translator.microsoft.com',
+    "microsoft-translate": {
+      logo: getLobeIconsCDNUrlFn("microsoft-color"),
+      name: NON_API_TRANSLATE_PROVIDERS_MAP["microsoft-translate"],
+      website: "https://translator.microsoft.com",
     },
-    'google-translate': {
-      logo: getLobeIconsCDNUrlFn('google-color'),
-      name: NON_API_TRANSLATE_PROVIDERS_MAP['google-translate'],
-      website: 'https://translate.google.com',
+    "google-translate": {
+      logo: getLobeIconsCDNUrlFn("google-color"),
+      name: NON_API_TRANSLATE_PROVIDERS_MAP["google-translate"],
+      website: "https://translate.google.com",
     },
-    'deeplx': {
-      logo: (theme: Theme) => theme === 'light' ? deeplxLogoLight : deeplxLogoDark,
-      name: 'DeepLX',
-      website: 'https://deeplx.owo.network/',
+    "deeplx": {
+      logo: (theme: Theme) => theme === "light" ? deeplxLogoLight : deeplxLogoDark,
+      name: "DeepLX",
+      website: "https://deeplx.owo.network/",
     },
-    'siliconflow': {
-      logo: getLobeIconsCDNUrlFn('siliconcloud-color'),
-      name: 'SiliconFlow',
-      website: 'https://siliconflow.cn/',
+    "siliconflow": {
+      logo: getLobeIconsCDNUrlFn("siliconcloud-color"),
+      name: "SiliconFlow",
+      website: "https://siliconflow.cn/",
     },
-    'ai302': {
-      logo: getLobeIconsCDNUrlFn('ai302-color'),
-      name: '302.AI',
-      website: 'https://share.302.ai/8o2r7P',
+    "ai302": {
+      logo: getLobeIconsCDNUrlFn("ai302-color"),
+      name: "302.AI",
+      website: "https://share.302.ai/8o2r7P",
     },
-    'openrouter': {
-      logo: getLobeIconsCDNUrlFn('openrouter'),
-      name: 'OpenRouter',
-      website: 'https://openrouter.ai/',
+    "openrouter": {
+      logo: getLobeIconsCDNUrlFn("openrouter"),
+      name: "OpenRouter",
+      website: "https://openrouter.ai/",
     },
-    'openai-compatible': {
+    "openai-compatible": {
       logo: () => customProviderLogo,
-      name: 'Custom Provider',
+      name: "Custom Provider",
       website: `${WEBSITE_URL}/tutorial/providers/openai-compatible-providers`,
     },
-    'openai': {
-      logo: getLobeIconsCDNUrlFn('openai'),
-      name: 'OpenAI',
-      website: 'https://platform.openai.com',
+    "openai": {
+      logo: getLobeIconsCDNUrlFn("openai"),
+      name: "OpenAI",
+      website: "https://platform.openai.com",
     },
-    'deepseek': {
-      logo: getLobeIconsCDNUrlFn('deepseek-color'),
-      name: 'DeepSeek',
-      website: 'https://platform.deepseek.com',
+    "deepseek": {
+      logo: getLobeIconsCDNUrlFn("deepseek-color"),
+      name: "DeepSeek",
+      website: "https://platform.deepseek.com",
     },
-    'google': {
-      logo: getLobeIconsCDNUrlFn('gemini-color'),
-      name: 'Gemini',
-      website: 'https://aistudio.google.com',
+    "google": {
+      logo: getLobeIconsCDNUrlFn("gemini-color"),
+      name: "Gemini",
+      website: "https://aistudio.google.com",
     },
-    'anthropic': {
-      logo: getLobeIconsCDNUrlFn('anthropic'),
-      name: 'Anthropic',
-      website: 'https://console.anthropic.com',
+    "anthropic": {
+      logo: getLobeIconsCDNUrlFn("anthropic"),
+      name: "Anthropic",
+      website: "https://console.anthropic.com",
     },
-    'xai': {
-      logo: getLobeIconsCDNUrlFn('grok'),
-      name: 'Grok',
-      website: 'https://x.ai/api',
+    "xai": {
+      logo: getLobeIconsCDNUrlFn("grok"),
+      name: "Grok",
+      website: "https://x.ai/api",
     },
-    'bedrock': {
-      logo: getLobeIconsCDNUrlFn('bedrock-color'),
-      name: 'Amazon Bedrock',
-      website: 'https://aws.amazon.com/bedrock/',
+    "bedrock": {
+      logo: getLobeIconsCDNUrlFn("bedrock-color"),
+      name: "Amazon Bedrock",
+      website: "https://aws.amazon.com/bedrock/",
     },
-    'groq': {
-      logo: getLobeIconsCDNUrlFn('groq'),
-      name: 'Groq',
-      website: 'https://groq.com',
+    "groq": {
+      logo: getLobeIconsCDNUrlFn("groq"),
+      name: "Groq",
+      website: "https://groq.com",
     },
-    'deepinfra': {
-      logo: getLobeIconsCDNUrlFn('deepinfra-color'),
-      name: 'DeepInfra',
-      website: 'https://deepinfra.com',
+    "deepinfra": {
+      logo: getLobeIconsCDNUrlFn("deepinfra-color"),
+      name: "DeepInfra",
+      website: "https://deepinfra.com",
     },
-    'mistral': {
-      logo: getLobeIconsCDNUrlFn('mistral-color'),
-      name: 'Mistral AI',
-      website: 'https://mistral.ai',
+    "mistral": {
+      logo: getLobeIconsCDNUrlFn("mistral-color"),
+      name: "Mistral AI",
+      website: "https://mistral.ai",
     },
-    'togetherai': {
-      logo: getLobeIconsCDNUrlFn('together-color'),
-      name: 'Together.ai',
-      website: 'https://together.ai',
+    "togetherai": {
+      logo: getLobeIconsCDNUrlFn("together-color"),
+      name: "Together.ai",
+      website: "https://together.ai",
     },
-    'cohere': {
-      logo: getLobeIconsCDNUrlFn('cohere-color'),
-      name: 'Cohere',
-      website: 'https://cohere.com',
+    "cohere": {
+      logo: getLobeIconsCDNUrlFn("cohere-color"),
+      name: "Cohere",
+      website: "https://cohere.com",
     },
-    'fireworks': {
-      logo: getLobeIconsCDNUrlFn('fireworks-color'),
-      name: 'Fireworks AI',
-      website: 'https://fireworks.ai',
+    "fireworks": {
+      logo: getLobeIconsCDNUrlFn("fireworks-color"),
+      name: "Fireworks AI",
+      website: "https://fireworks.ai",
     },
-    'cerebras': {
-      logo: getLobeIconsCDNUrlFn('cerebras-color'),
-      name: 'Cerebras',
-      website: 'https://cerebras.ai',
+    "cerebras": {
+      logo: getLobeIconsCDNUrlFn("cerebras-color"),
+      name: "Cerebras",
+      website: "https://cerebras.ai",
     },
-    'replicate': {
-      logo: getLobeIconsCDNUrlFn('replicate'),
-      name: 'Replicate',
-      website: 'https://replicate.com',
+    "replicate": {
+      logo: getLobeIconsCDNUrlFn("replicate"),
+      name: "Replicate",
+      website: "https://replicate.com",
     },
-    'perplexity': {
-      logo: getLobeIconsCDNUrlFn('perplexity-color'),
-      name: 'Perplexity',
-      website: 'https://perplexity.ai',
+    "perplexity": {
+      logo: getLobeIconsCDNUrlFn("perplexity-color"),
+      name: "Perplexity",
+      website: "https://perplexity.ai",
     },
-    'vercel': {
-      logo: getLobeIconsCDNUrlFn('vercel'),
-      name: 'Vercel',
-      website: 'https://vercel.com',
+    "vercel": {
+      logo: getLobeIconsCDNUrlFn("vercel"),
+      name: "Vercel",
+      website: "https://vercel.com",
     },
-    'tensdaq': {
+    "tensdaq": {
       logo: () => tensdaqLogoColor,
-      name: 'Tensdaq',
-      website: 'https://dashboard.x-aio.com/zh/register?ref=c356c1daba9a4641a18e',
+      name: "Tensdaq",
+      website: "https://dashboard.x-aio.com/zh/register?ref=c356c1daba9a4641a18e",
     },
-    'ollama': {
-      logo: getLobeIconsCDNUrlFn('ollama'),
-      name: 'Ollama',
-      website: 'https://ollama.ai',
+    "ollama": {
+      logo: getLobeIconsCDNUrlFn("ollama"),
+      name: "Ollama",
+      website: "https://ollama.ai",
     },
-    'volcengine': {
-      logo: getLobeIconsCDNUrlFn('volcengine-color'),
-      name: 'Volcengine',
-      website: 'https://www.volcengine.com/product/doubao',
+    "volcengine": {
+      logo: getLobeIconsCDNUrlFn("volcengine-color"),
+      name: "Volcengine",
+      website: "https://www.volcengine.com/product/doubao",
     },
-    'minimax': {
-      logo: getLobeIconsCDNUrlFn('minimax-color'),
-      name: 'MiniMax',
-      website: 'https://platform.minimax.io',
+    "minimax": {
+      logo: getLobeIconsCDNUrlFn("minimax-color"),
+      name: "MiniMax",
+      website: "https://platform.minimax.io",
     },
   }
 
 export const DEFAULT_PROVIDER_CONFIG = {
-  'google-translate': {
-    id: 'google-translate-default',
-    name: PROVIDER_ITEMS['google-translate'].name,
+  "google-translate": {
+    id: "google-translate-default",
+    name: PROVIDER_ITEMS["google-translate"].name,
     enabled: true,
-    provider: 'google-translate',
+    provider: "google-translate",
   },
-  'microsoft-translate': {
-    id: 'microsoft-translate-default',
-    name: PROVIDER_ITEMS['microsoft-translate'].name,
+  "microsoft-translate": {
+    id: "microsoft-translate-default",
+    name: PROVIDER_ITEMS["microsoft-translate"].name,
     enabled: true,
-    provider: 'microsoft-translate',
+    provider: "microsoft-translate",
   },
-  'siliconflow': {
-    id: 'siliconflow-default',
+  "siliconflow": {
+    id: "siliconflow-default",
     name: PROVIDER_ITEMS.siliconflow.name,
-    description: i18n.t('options.apiProviders.providers.description.siliconflow'),
+    description: i18n.t("options.apiProviders.providers.description.siliconflow"),
     enabled: true,
-    provider: 'siliconflow',
-    baseURL: 'https://api.siliconflow.cn/v1',
+    provider: "siliconflow",
+    baseURL: "https://api.siliconflow.cn/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.siliconflow,
   },
-  'tensdaq': {
-    id: 'tensdaq-default',
+  "tensdaq": {
+    id: "tensdaq-default",
     name: PROVIDER_ITEMS.tensdaq.name,
-    description: i18n.t('options.apiProviders.providers.description.tensdaq'),
+    description: i18n.t("options.apiProviders.providers.description.tensdaq"),
     enabled: true,
-    provider: 'tensdaq',
-    baseURL: 'https://tensdaq-api.x-aio.com/v1',
+    provider: "tensdaq",
+    baseURL: "https://tensdaq-api.x-aio.com/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.tensdaq,
   },
-  'ai302': {
-    id: 'ai302-default',
+  "ai302": {
+    id: "ai302-default",
     name: PROVIDER_ITEMS.ai302.name,
-    description: i18n.t('options.apiProviders.providers.description.ai302'),
+    description: i18n.t("options.apiProviders.providers.description.ai302"),
     enabled: true,
-    provider: 'ai302',
-    baseURL: 'https://api.302.ai/v1',
+    provider: "ai302",
+    baseURL: "https://api.302.ai/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.ai302,
   },
-  'openai-compatible': {
-    id: 'openai-compatible-default',
-    name: PROVIDER_ITEMS['openai-compatible'].name,
-    description: i18n.t('options.apiProviders.providers.description.openaiCompatible'),
+  "openai-compatible": {
+    id: "openai-compatible-default",
+    name: PROVIDER_ITEMS["openai-compatible"].name,
+    description: i18n.t("options.apiProviders.providers.description.openaiCompatible"),
     enabled: true,
-    provider: 'openai-compatible',
-    baseURL: 'https://api.example.com/v1',
-    model: DEFAULT_LLM_PROVIDER_MODELS['openai-compatible'],
+    provider: "openai-compatible",
+    baseURL: "https://api.example.com/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS["openai-compatible"],
   },
-  'openai': {
-    id: 'openai-default',
+  "openai": {
+    id: "openai-default",
     name: PROVIDER_ITEMS.openai.name,
-    description: i18n.t('options.apiProviders.providers.description.openai'),
+    description: i18n.t("options.apiProviders.providers.description.openai"),
     enabled: true,
-    provider: 'openai',
+    provider: "openai",
     model: DEFAULT_LLM_PROVIDER_MODELS.openai,
   },
-  'deepseek': {
-    id: 'deepseek-default',
+  "deepseek": {
+    id: "deepseek-default",
     name: PROVIDER_ITEMS.deepseek.name,
-    description: i18n.t('options.apiProviders.providers.description.deepseek'),
+    description: i18n.t("options.apiProviders.providers.description.deepseek"),
     enabled: true,
-    provider: 'deepseek',
+    provider: "deepseek",
     model: DEFAULT_LLM_PROVIDER_MODELS.deepseek,
   },
-  'google': {
-    id: 'google-default',
+  "google": {
+    id: "google-default",
     name: PROVIDER_ITEMS.google.name,
-    description: i18n.t('options.apiProviders.providers.description.google'),
+    description: i18n.t("options.apiProviders.providers.description.google"),
     enabled: true,
-    provider: 'google',
+    provider: "google",
     model: DEFAULT_LLM_PROVIDER_MODELS.google,
   },
-  'anthropic': {
-    id: 'anthropic-default',
+  "anthropic": {
+    id: "anthropic-default",
     name: PROVIDER_ITEMS.anthropic.name,
-    description: i18n.t('options.apiProviders.providers.description.anthropic'),
+    description: i18n.t("options.apiProviders.providers.description.anthropic"),
     enabled: true,
-    provider: 'anthropic',
+    provider: "anthropic",
     model: DEFAULT_LLM_PROVIDER_MODELS.anthropic,
   },
-  'xai': {
-    id: 'xai-default',
+  "xai": {
+    id: "xai-default",
     name: PROVIDER_ITEMS.xai.name,
-    description: i18n.t('options.apiProviders.providers.description.xai'),
+    description: i18n.t("options.apiProviders.providers.description.xai"),
     enabled: true,
-    provider: 'xai',
+    provider: "xai",
     model: DEFAULT_LLM_PROVIDER_MODELS.xai,
   },
-  'deeplx': {
-    id: 'deeplx-default',
+  "deeplx": {
+    id: "deeplx-default",
     name: PROVIDER_ITEMS.deeplx.name,
-    description: i18n.t('options.apiProviders.providers.description.deeplx'),
+    description: i18n.t("options.apiProviders.providers.description.deeplx"),
     enabled: true,
-    provider: 'deeplx',
-    baseURL: 'https://api.deeplx.org',
+    provider: "deeplx",
+    baseURL: "https://api.deeplx.org",
   },
-  'bedrock': {
-    id: 'bedrock-default',
+  "bedrock": {
+    id: "bedrock-default",
     name: PROVIDER_ITEMS.bedrock.name,
-    description: i18n.t('options.apiProviders.providers.description.bedrock'),
+    description: i18n.t("options.apiProviders.providers.description.bedrock"),
     enabled: true,
-    provider: 'bedrock',
+    provider: "bedrock",
     model: DEFAULT_LLM_PROVIDER_MODELS.bedrock,
   },
-  'groq': {
-    id: 'groq-default',
+  "groq": {
+    id: "groq-default",
     name: PROVIDER_ITEMS.groq.name,
-    description: i18n.t('options.apiProviders.providers.description.groq'),
+    description: i18n.t("options.apiProviders.providers.description.groq"),
     enabled: true,
-    provider: 'groq',
+    provider: "groq",
     model: DEFAULT_LLM_PROVIDER_MODELS.groq,
   },
-  'deepinfra': {
-    id: 'deepinfra-default',
+  "deepinfra": {
+    id: "deepinfra-default",
     name: PROVIDER_ITEMS.deepinfra.name,
-    description: i18n.t('options.apiProviders.providers.description.deepinfra'),
+    description: i18n.t("options.apiProviders.providers.description.deepinfra"),
     enabled: true,
-    provider: 'deepinfra',
+    provider: "deepinfra",
     model: DEFAULT_LLM_PROVIDER_MODELS.deepinfra,
   },
-  'mistral': {
-    id: 'mistral-default',
+  "mistral": {
+    id: "mistral-default",
     name: PROVIDER_ITEMS.mistral.name,
-    description: i18n.t('options.apiProviders.providers.description.mistral'),
+    description: i18n.t("options.apiProviders.providers.description.mistral"),
     enabled: true,
-    provider: 'mistral',
+    provider: "mistral",
     model: DEFAULT_LLM_PROVIDER_MODELS.mistral,
   },
-  'togetherai': {
-    id: 'togetherai-default',
+  "togetherai": {
+    id: "togetherai-default",
     name: PROVIDER_ITEMS.togetherai.name,
-    description: i18n.t('options.apiProviders.providers.description.togetherai'),
+    description: i18n.t("options.apiProviders.providers.description.togetherai"),
     enabled: true,
-    provider: 'togetherai',
+    provider: "togetherai",
     model: DEFAULT_LLM_PROVIDER_MODELS.togetherai,
   },
-  'cohere': {
-    id: 'cohere-default',
+  "cohere": {
+    id: "cohere-default",
     name: PROVIDER_ITEMS.cohere.name,
-    description: i18n.t('options.apiProviders.providers.description.cohere'),
+    description: i18n.t("options.apiProviders.providers.description.cohere"),
     enabled: true,
-    provider: 'cohere',
+    provider: "cohere",
     model: DEFAULT_LLM_PROVIDER_MODELS.cohere,
   },
-  'fireworks': {
-    id: 'fireworks-default',
+  "fireworks": {
+    id: "fireworks-default",
     name: PROVIDER_ITEMS.fireworks.name,
-    description: i18n.t('options.apiProviders.providers.description.fireworks'),
+    description: i18n.t("options.apiProviders.providers.description.fireworks"),
     enabled: true,
-    provider: 'fireworks',
+    provider: "fireworks",
     model: DEFAULT_LLM_PROVIDER_MODELS.fireworks,
   },
-  'cerebras': {
-    id: 'cerebras-default',
+  "cerebras": {
+    id: "cerebras-default",
     name: PROVIDER_ITEMS.cerebras.name,
-    description: i18n.t('options.apiProviders.providers.description.cerebras'),
+    description: i18n.t("options.apiProviders.providers.description.cerebras"),
     enabled: true,
-    provider: 'cerebras',
+    provider: "cerebras",
     model: DEFAULT_LLM_PROVIDER_MODELS.cerebras,
   },
-  'replicate': {
-    id: 'replicate-default',
+  "replicate": {
+    id: "replicate-default",
     name: PROVIDER_ITEMS.replicate.name,
-    description: i18n.t('options.apiProviders.providers.description.replicate'),
+    description: i18n.t("options.apiProviders.providers.description.replicate"),
     enabled: true,
-    provider: 'replicate',
+    provider: "replicate",
     model: DEFAULT_LLM_PROVIDER_MODELS.replicate,
   },
-  'perplexity': {
-    id: 'perplexity-default',
+  "perplexity": {
+    id: "perplexity-default",
     name: PROVIDER_ITEMS.perplexity.name,
-    description: i18n.t('options.apiProviders.providers.description.perplexity'),
+    description: i18n.t("options.apiProviders.providers.description.perplexity"),
     enabled: true,
-    provider: 'perplexity',
+    provider: "perplexity",
     model: DEFAULT_LLM_PROVIDER_MODELS.perplexity,
   },
-  'vercel': {
-    id: 'vercel-default',
+  "vercel": {
+    id: "vercel-default",
     name: PROVIDER_ITEMS.vercel.name,
-    description: i18n.t('options.apiProviders.providers.description.vercel'),
+    description: i18n.t("options.apiProviders.providers.description.vercel"),
     enabled: true,
-    provider: 'vercel',
+    provider: "vercel",
     model: DEFAULT_LLM_PROVIDER_MODELS.vercel,
   },
-  'openrouter': {
-    id: 'openrouter-default',
+  "openrouter": {
+    id: "openrouter-default",
     name: PROVIDER_ITEMS.openrouter.name,
-    description: i18n.t('options.apiProviders.providers.description.openrouter'),
+    description: i18n.t("options.apiProviders.providers.description.openrouter"),
     enabled: true,
-    provider: 'openrouter',
+    provider: "openrouter",
     model: DEFAULT_LLM_PROVIDER_MODELS.openrouter,
   },
-  'ollama': {
-    id: 'ollama-default',
+  "ollama": {
+    id: "ollama-default",
     name: PROVIDER_ITEMS.ollama.name,
-    description: i18n.t('options.apiProviders.providers.description.ollama'),
+    description: i18n.t("options.apiProviders.providers.description.ollama"),
     enabled: true,
-    provider: 'ollama',
+    provider: "ollama",
     model: DEFAULT_LLM_PROVIDER_MODELS.ollama,
   },
-  'volcengine': {
-    id: 'volcengine-default',
+  "volcengine": {
+    id: "volcengine-default",
     name: PROVIDER_ITEMS.volcengine.name,
-    description: i18n.t('options.apiProviders.providers.description.volcengine'),
+    description: i18n.t("options.apiProviders.providers.description.volcengine"),
     enabled: true,
-    provider: 'volcengine',
-    baseURL: 'https://ark.cn-beijing.volces.com/api/v3',
+    provider: "volcengine",
+    baseURL: "https://ark.cn-beijing.volces.com/api/v3",
     model: DEFAULT_LLM_PROVIDER_MODELS.volcengine,
   },
-  'minimax': {
-    id: 'minimax-default',
+  "minimax": {
+    id: "minimax-default",
     name: PROVIDER_ITEMS.minimax.name,
-    description: i18n.t('options.apiProviders.providers.description.minimax'),
+    description: i18n.t("options.apiProviders.providers.description.minimax"),
     enabled: true,
-    provider: 'minimax',
+    provider: "minimax",
     model: DEFAULT_LLM_PROVIDER_MODELS.minimax,
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
-  DEFAULT_PROVIDER_CONFIG['microsoft-translate'],
-  DEFAULT_PROVIDER_CONFIG['google-translate'],
+  DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+  DEFAULT_PROVIDER_CONFIG["google-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.tensdaq,
   DEFAULT_PROVIDER_CONFIG.ai302,
@@ -545,16 +545,16 @@ export const API_PROVIDER_ITEMS = pick(
 export const PROVIDER_GROUPS = {
   builtInProviders: {
     types: NON_CUSTOM_LLM_PROVIDER_TYPES,
-    tutorialSlug: 'built-in-providers',
+    tutorialSlug: "built-in-providers",
   },
   openaiCompatibleProviders: {
     types: CUSTOM_LLM_PROVIDER_TYPES,
-    tutorialSlug: 'openai-compatible-providers',
+    tutorialSlug: "openai-compatible-providers",
   },
   pureTranslationProviders: {
     types: PURE_API_PROVIDER_TYPES,
-    tutorialSlug: 'pure-translation-providers',
+    tutorialSlug: "pure-translation-providers",
   },
 } as const satisfies Record<string, { types: readonly APIProviderTypes[], tutorialSlug: string }>
 
-export const SPECIFIC_TUTORIAL_PROVIDER_TYPES = ['ollama', 'deeplx'] as const satisfies readonly APIProviderTypes[]
+export const SPECIFIC_TUTORIAL_PROVIDER_TYPES = ["ollama", "deeplx"] as const satisfies readonly APIProviderTypes[]

@@ -1,9 +1,9 @@
-import { z } from 'zod'
-import { logger } from '../logger'
-import { clearAccessToken, getValidAccessToken } from './auth'
+import { z } from "zod"
+import { logger } from "../logger"
+import { clearAccessToken, getValidAccessToken } from "./auth"
 
-const GOOGLE_DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3'
-const GOOGLE_DRIVE_UPLOAD_API_BASE = 'https://www.googleapis.com/upload/drive/v3'
+const GOOGLE_DRIVE_API_BASE = "https://www.googleapis.com/drive/v3"
+const GOOGLE_DRIVE_UPLOAD_API_BASE = "https://www.googleapis.com/upload/drive/v3"
 
 const googleDriveFileSchema = z.object({
   id: z.string(),
@@ -29,9 +29,9 @@ export async function findFileInAppData(fileName: string): Promise<GoogleDriveFi
     const accessToken = await getValidAccessToken()
 
     const url = new URL(`${GOOGLE_DRIVE_API_BASE}/files`)
-    url.searchParams.set('spaces', 'appDataFolder')
-    url.searchParams.set('q', `name='${fileName}'`)
-    url.searchParams.set('fields', 'files(id, name, mimeType, modifiedTime, size)')
+    url.searchParams.set("spaces", "appDataFolder")
+    url.searchParams.set("q", `name='${fileName}'`)
+    url.searchParams.set("fields", "files(id, name, mimeType, modifiedTime, size)")
 
     const response = await fetch(url.toString(), {
       headers: {
@@ -56,7 +56,7 @@ export async function findFileInAppData(fileName: string): Promise<GoogleDriveFi
     return result.data.files.length > 0 ? result.data.files[0] : null
   }
   catch (error) {
-    logger.error('Failed to find file in appData', error)
+    logger.error("Failed to find file in appData", error)
     throw error
   }
 }
@@ -83,7 +83,7 @@ export async function downloadFile(fileId: string): Promise<string> {
     return await response.text()
   }
   catch (error) {
-    logger.error('Failed to download file', error)
+    logger.error("Failed to download file", error)
     throw error
   }
 }
@@ -101,11 +101,11 @@ export async function uploadFile(
 
     const metadata = {
       name: fileName,
-      mimeType: 'application/json',
-      ...(!fileId && { parents: ['appDataFolder'] }),
+      mimeType: "application/json",
+      ...(!fileId && { parents: ["appDataFolder"] }),
     }
 
-    const boundary = '-------314159265358979323846'
+    const boundary = "-------314159265358979323846"
     const delimiter = `\r\n--${boundary}\r\n`
     const closeDelimiter = `\r\n--${boundary}--`
 
@@ -116,7 +116,7 @@ export async function uploadFile(
         content
       }${closeDelimiter}`
 
-    const method = fileId ? 'PATCH' : 'POST'
+    const method = fileId ? "PATCH" : "POST"
     const url = fileId
       ? `${GOOGLE_DRIVE_UPLOAD_API_BASE}/files/${fileId}?uploadType=multipart&fields=id,name,mimeType,modifiedTime,size`
       : `${GOOGLE_DRIVE_UPLOAD_API_BASE}/files?uploadType=multipart&fields=id,name,mimeType,modifiedTime,size`
@@ -124,8 +124,8 @@ export async function uploadFile(
     const response = await fetch(url, {
       method,
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': `multipart/related; boundary=${boundary}`,
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": `multipart/related; boundary=${boundary}`,
       },
       body: multipartRequestBody,
     })
@@ -148,7 +148,7 @@ export async function uploadFile(
     return result.data
   }
   catch (error) {
-    logger.error('Failed to upload file', error)
+    logger.error("Failed to upload file", error)
     throw error
   }
 }
@@ -160,7 +160,7 @@ export async function deleteFile(fileId: string): Promise<void> {
     const url = `${GOOGLE_DRIVE_API_BASE}/files/${fileId}`
 
     const response = await fetch(url, {
-      method: 'DELETE',
+      method: "DELETE",
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
@@ -174,7 +174,7 @@ export async function deleteFile(fileId: string): Promise<void> {
     }
   }
   catch (error) {
-    logger.error('Failed to delete file', error)
+    logger.error("Failed to delete file", error)
     throw error
   }
 }

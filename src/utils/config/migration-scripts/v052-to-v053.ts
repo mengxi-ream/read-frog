@@ -9,36 +9,36 @@
  */
 
 const LLM_PROVIDER_TYPES = [
-  'openai',
-  'deepseek',
-  'google',
-  'anthropic',
-  'xai',
-  'openai-compatible',
-  'siliconflow',
-  'tensdaq',
-  'ai302',
-  'bedrock',
-  'groq',
-  'deepinfra',
-  'mistral',
-  'togetherai',
-  'cohere',
-  'fireworks',
-  'cerebras',
-  'replicate',
-  'perplexity',
-  'vercel',
-  'openrouter',
-  'ollama',
-  'volcengine',
-  'minimax',
+  "openai",
+  "deepseek",
+  "google",
+  "anthropic",
+  "xai",
+  "openai-compatible",
+  "siliconflow",
+  "tensdaq",
+  "ai302",
+  "bedrock",
+  "groq",
+  "deepinfra",
+  "mistral",
+  "togetherai",
+  "cohere",
+  "fireworks",
+  "cerebras",
+  "replicate",
+  "perplexity",
+  "vercel",
+  "openrouter",
+  "ollama",
+  "volcengine",
+  "minimax",
 ] as const
 
 const TRANSLATE_PROVIDER_TYPES = [
-  'google-translate',
-  'microsoft-translate',
-  'deeplx',
+  "google-translate",
+  "microsoft-translate",
+  "deeplx",
   ...LLM_PROVIDER_TYPES,
 ] as const
 
@@ -47,15 +47,15 @@ interface SelectionToolbarFeatureConfig {
 }
 
 function isObject(value: unknown): value is Record<string, any> {
-  return !!value && typeof value === 'object' && !Array.isArray(value)
+  return !!value && typeof value === "object" && !Array.isArray(value)
 }
 
 function isTranslateProviderName(providerName: unknown): boolean {
-  return typeof providerName === 'string' && TRANSLATE_PROVIDER_TYPES.includes(providerName as (typeof TRANSLATE_PROVIDER_TYPES)[number])
+  return typeof providerName === "string" && TRANSLATE_PROVIDER_TYPES.includes(providerName as (typeof TRANSLATE_PROVIDER_TYPES)[number])
 }
 
 function isLLMProviderName(providerName: unknown): boolean {
-  return typeof providerName === 'string' && LLM_PROVIDER_TYPES.includes(providerName as (typeof LLM_PROVIDER_TYPES)[number])
+  return typeof providerName === "string" && LLM_PROVIDER_TYPES.includes(providerName as (typeof LLM_PROVIDER_TYPES)[number])
 }
 
 function migrateProviderModel(provider: any): any {
@@ -93,7 +93,7 @@ function migrateProviderModels(providersConfig: unknown): any[] {
 function getTranslateProviderIds(providersConfig: any[]): string[] {
   return providersConfig
     .filter(provider => isObject(provider)
-      && typeof provider.id === 'string'
+      && typeof provider.id === "string"
       && isTranslateProviderName(provider.provider))
     .map(provider => provider.id)
 }
@@ -101,24 +101,24 @@ function getTranslateProviderIds(providersConfig: any[]): string[] {
 function getLLMProviderIds(providersConfig: any[]): string[] {
   return providersConfig
     .filter(provider => isObject(provider)
-      && typeof provider.id === 'string'
+      && typeof provider.id === "string"
       && isLLMProviderName(provider.provider))
     .map(provider => provider.id)
 }
 
 function resolveTranslateProviderId(oldConfig: any, translateProviderIds: string[]): string {
   const configuredProviderId = oldConfig?.translate?.providerId
-  if (typeof configuredProviderId === 'string' && translateProviderIds.includes(configuredProviderId)) {
+  if (typeof configuredProviderId === "string" && translateProviderIds.includes(configuredProviderId)) {
     return configuredProviderId
   }
 
-  return translateProviderIds[0] ?? 'microsoft-translate-default'
+  return translateProviderIds[0] ?? "microsoft-translate-default"
 }
 
 function resolveVocabularyInsightProviderId(oldConfig: any, fallbackProviderId: string, llmProviderIds: string[]): string {
   // Prefer legacy read provider (vocabulary insight is the successor to read)
   const readProviderId = oldConfig?.read?.providerId
-  if (typeof readProviderId === 'string' && llmProviderIds.includes(readProviderId)) {
+  if (typeof readProviderId === "string" && llmProviderIds.includes(readProviderId)) {
     return readProviderId
   }
 
@@ -134,7 +134,7 @@ function normalizeFeatureConfig(
   fallbackProviderId: string,
   allowedProviderIds: string[],
 ): SelectionToolbarFeatureConfig {
-  const providerId = isObject(rawFeatureConfig) && typeof rawFeatureConfig.providerId === 'string' && allowedProviderIds.includes(rawFeatureConfig.providerId)
+  const providerId = isObject(rawFeatureConfig) && typeof rawFeatureConfig.providerId === "string" && allowedProviderIds.includes(rawFeatureConfig.providerId)
     ? rawFeatureConfig.providerId
     : fallbackProviderId
 
@@ -176,8 +176,8 @@ function migrateSelectionToolbarFeatures(oldConfig: any, providersConfig: any[])
 }
 
 function reorderProviders(providersConfig: any[]): any[] {
-  const msIndex = providersConfig.findIndex(p => isObject(p) && p.provider === 'microsoft-translate')
-  const googleIndex = providersConfig.findIndex(p => isObject(p) && p.provider === 'google-translate')
+  const msIndex = providersConfig.findIndex(p => isObject(p) && p.provider === "microsoft-translate")
+  const googleIndex = providersConfig.findIndex(p => isObject(p) && p.provider === "google-translate")
 
   if (msIndex === -1 || googleIndex === -1 || msIndex < googleIndex) {
     return providersConfig
@@ -200,7 +200,7 @@ function removeReadConfig(oldConfig: any) {
 
 function migrateInputTranslation(oldConfig: any, translateProviderIds: string[]): any {
   const inputTranslation = isObject(oldConfig?.inputTranslation) ? oldConfig.inputTranslation : {}
-  if (typeof inputTranslation.providerId === 'string' && inputTranslation.providerId) {
+  if (typeof inputTranslation.providerId === "string" && inputTranslation.providerId) {
     return inputTranslation
   }
   const providerId = resolveTranslateProviderId(oldConfig, translateProviderIds)
@@ -209,7 +209,7 @@ function migrateInputTranslation(oldConfig: any, translateProviderIds: string[])
 
 function migrateVideoSubtitles(oldConfig: any, translateProviderIds: string[]): any {
   const videoSubtitles = isObject(oldConfig?.videoSubtitles) ? oldConfig.videoSubtitles : {}
-  if (typeof videoSubtitles.providerId === 'string' && videoSubtitles.providerId) {
+  if (typeof videoSubtitles.providerId === "string" && videoSubtitles.providerId) {
     return videoSubtitles
   }
   const providerId = resolveTranslateProviderId(oldConfig, translateProviderIds)

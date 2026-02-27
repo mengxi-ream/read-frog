@@ -1,12 +1,12 @@
-import type { Config } from '@/types/config/config'
-import type { TransNode } from '@/types/dom'
+import type { Config } from "@/types/config/config"
+import type { TransNode } from "@/types/dom"
 import {
   BLOCK_ATTRIBUTE,
   INLINE_ATTRIBUTE,
   PARAGRAPH_ATTRIBUTE,
   WALKED_ATTRIBUTE,
-} from '@/utils/constants/dom-labels'
-import { FORCE_BLOCK_TAGS } from '@/utils/constants/dom-rules'
+} from "@/utils/constants/dom-labels"
+import { FORCE_BLOCK_TAGS } from "@/utils/constants/dom-rules"
 import {
   isCustomForceBlockTranslation,
   isDontWalkIntoAndDontTranslateAsChildElement,
@@ -17,24 +17,24 @@ import {
   isShallowInlineHTMLElement,
   isShallowInlineTransNode,
   isTextNode,
-} from './filter'
+} from "./filter"
 
 export function extractTextContent(node: TransNode, config: Config): string {
   if (isTextNode(node)) {
-    const text = node.textContent ?? ''
+    const text = node.textContent ?? ""
     const trimmed = text.trim()
-    if (trimmed === '')
-      return ' '
+    if (trimmed === "")
+      return " "
     const leadingWs = text.slice(0, text.length - text.trimStart().length)
     const trailingWs = text.slice(text.trimEnd().length)
     const hasLeading = /[^\S\n]/.test(leadingWs)
     const hasTrailing = /[^\S\n]/.test(trailingWs)
-    return (hasLeading ? ' ' : '') + trimmed + (hasTrailing ? ' ' : '')
+    return (hasLeading ? " " : "") + trimmed + (hasTrailing ? " " : "")
   }
 
   // Handle <br> elements as line breaks
-  if (isHTMLElement(node) && node.tagName === 'BR') {
-    return '\n'
+  if (isHTMLElement(node) && node.tagName === "BR") {
+    return "\n"
   }
 
   // We already don't walk and label the element which isDontWalkIntoElement
@@ -46,7 +46,7 @@ export function extractTextContent(node: TransNode, config: Config): string {
   // }
 
   if (isDontWalkIntoAndDontTranslateAsChildElement(node, config)) {
-    return ''
+    return ""
   }
 
   const childNodes = Array.from(node.childNodes)
@@ -56,7 +56,7 @@ export function extractTextContent(node: TransNode, config: Config): string {
       return text + extractTextContent(child, config)
     }
     return text
-  }, '')
+  }, "")
 }
 
 export function walkAndLabelElement(
@@ -113,7 +113,7 @@ export function walkAndLabelElement(
   }
 
   if (hasInlineNodeChild) {
-    element.setAttribute(PARAGRAPH_ATTRIBUTE, '')
+    element.setAttribute(PARAGRAPH_ATTRIBUTE, "")
   }
 
   const translateChildCount = Array.from(validChildNodes).filter(child =>
@@ -126,7 +126,7 @@ export function walkAndLabelElement(
   // force block will force the current and ancestor elements to be block node
   forceBlock = forceBlock || (blockChildCount >= 1 && translateChildCount > 1) || FORCE_BLOCK_TAGS.has(element.tagName)
 
-  if (element.textContent?.trim() === '' && !forceBlock) {
+  if (element.textContent?.trim() === "" && !forceBlock) {
     return {
       forceBlock: false,
       isInlineNode: false,
@@ -136,10 +136,10 @@ export function walkAndLabelElement(
   const isInlineNode = isShallowInlineHTMLElement(element)
 
   if (isShallowBlockHTMLElement(element) || forceBlock || isCustomForceBlockTranslation(element)) {
-    element.setAttribute(BLOCK_ATTRIBUTE, '')
+    element.setAttribute(BLOCK_ATTRIBUTE, "")
   }
   else if (isInlineNode) {
-    element.setAttribute(INLINE_ATTRIBUTE, '')
+    element.setAttribute(INLINE_ATTRIBUTE, "")
   }
 
   return {

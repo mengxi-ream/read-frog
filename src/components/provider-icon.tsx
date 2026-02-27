@@ -1,75 +1,75 @@
-import type { VariantProps } from 'class-variance-authority'
-import { cva } from 'class-variance-authority'
-import { cn } from '@/utils/styles/utils'
+import type { VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
+import { cn } from "@/utils/styles/utils"
 
 const providerIconVariants = cva(
-  'flex items-center min-w-0',
+  "flex items-center min-w-0",
   {
     variants: {
       size: {
-        sm: 'gap-1.5',
-        base: 'gap-2',
-        md: 'gap-3',
-        lg: 'gap-4',
-        xl: 'gap-5',
+        sm: "gap-1.5",
+        base: "gap-2",
+        md: "gap-3",
+        lg: "gap-4",
+        xl: "gap-5",
       },
     },
     defaultVariants: {
-      size: 'base',
+      size: "base",
     },
   },
 )
 
 const iconContainerVariants = cva(
-  'rounded-full bg-white dark:bg-muted border border-border flex items-center justify-center flex-shrink-0',
+  "rounded-full bg-white dark:bg-muted border border-border flex items-center justify-center flex-shrink-0",
   {
     variants: {
       size: {
-        sm: 'size-5',
-        base: 'size-6',
-        md: 'size-8',
-        lg: 'size-10',
-        xl: 'size-12',
+        sm: "size-5",
+        base: "size-6",
+        md: "size-8",
+        lg: "size-10",
+        xl: "size-12",
       },
     },
     defaultVariants: {
-      size: 'base',
+      size: "base",
     },
   },
 )
 
 const iconVariants = cva(
-  '',
+  "",
   {
     variants: {
       size: {
-        sm: 'size-[11px]',
-        base: 'size-3.5',
-        md: 'size-5',
-        lg: 'size-6',
-        xl: 'size-7',
+        sm: "size-[11px]",
+        base: "size-3.5",
+        md: "size-5",
+        lg: "size-6",
+        xl: "size-7",
       },
     },
     defaultVariants: {
-      size: 'base',
+      size: "base",
     },
   },
 )
 
 const textVariants = cva(
-  'truncate',
+  "truncate",
   {
     variants: {
       size: {
-        sm: 'text-sm',
-        base: 'text-base',
-        md: 'text-md',
-        lg: 'text-lg',
-        xl: 'text-xl',
+        sm: "text-sm",
+        base: "text-base",
+        md: "text-md",
+        lg: "text-lg",
+        xl: "text-xl",
       },
     },
     defaultVariants: {
-      size: 'base',
+      size: "base",
     },
   },
 )

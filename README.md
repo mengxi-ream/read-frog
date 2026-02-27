@@ -42,7 +42,7 @@ Master languages effortlessly and deeply with AI, right in your browser.
   - [📝 Custom Prompts](#-custom-prompts)
   - [📦 Batch Requests](#-batch-requests)
   - [🤖 20+ AI Providers](#-20-ai-providers)
-  - [🎬 Subtitle Translation (Beta)](#-subtitle-translation-beta)
+  - [🎬 Subtitle Translation](#-subtitle-translation)
   - [🔊 Text-to-Speech (TTS)](#-text-to-speech-tts)
   - [📖 Read Article](#-read-article)
 - [🤝 Contribute](#-contribute)
@@ -198,7 +198,7 @@ Plus free translation options: Google Translate, Microsoft Translate, and DeepLX
 
 <!-- ![][image-feat-subtitle] -->
 
-### 🎬 [Subtitle Translation (Beta)][docs-tutorial]
+### 🎬 [Subtitle Translation][docs-tutorial]
 
 Translate YouTube subtitles directly in the video player. Watch foreign language content with translations displayed alongside the original subtitles, making video content accessible for language learning.
 
@@ -212,9 +212,9 @@ Translate YouTube subtitles directly in the video player. Watch foreign language
 
 ### 🔊 [Text-to-Speech (TTS)][docs-tutorial]
 
-Listen to any selected text with high-quality AI voices. Powered by OpenAI's TTS models, choose from multiple voices (Alloy, Ash, Coral, Echo, and more) and adjust playback speed from 0.25x to 4x.
+Listen to any selected text with high-quality AI voices. Powered by **Edge TTS** — completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
 
-Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
+Automatic language detection (basic or LLM-powered) with per-language voice mapping ensures the right voice for every language. Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
 
 <div align="right">
 

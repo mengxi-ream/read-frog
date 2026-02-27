@@ -4,10 +4,10 @@ export async function googleTranslate(
   toLang: string,
 ): Promise<string> {
   const params = {
-    client: 'gtx',
+    client: "gtx",
     sl: fromLang,
     tl: toLang,
-    dt: 't',
+    dt: "t",
     strip: 1,
     nonced: 1,
     q: encodeURIComponent(sourceText),
@@ -15,12 +15,12 @@ export async function googleTranslate(
 
   const queryString = Object.keys(params)
     .map(key => `${key}=${params[key as keyof typeof params]}`)
-    .join('&')
+    .join("&")
 
   const resp = await fetch(
     `https://translate.googleapis.com/translate_a/single?${queryString}`,
     {
-      method: 'GET',
+      method: "GET",
     },
   ).catch((error) => {
     throw new Error(`Network error during translation: ${error.message}`)
@@ -29,10 +29,10 @@ export async function googleTranslate(
   if (!resp.ok) {
     const errorText = await resp
       .text()
-      .catch(() => 'Unable to read error response')
+      .catch(() => "Unable to read error response")
     throw new Error(
       `Translation request failed: ${resp.status} ${resp.statusText}${
-        errorText ? ` - ${errorText}` : ''
+        errorText ? ` - ${errorText}` : ""
       }`,
     )
   }
@@ -41,14 +41,14 @@ export async function googleTranslate(
     const result = await resp.json()
 
     if (!Array.isArray(result) || !Array.isArray(result[0])) {
-      throw new TypeError('Unexpected response format from translation API')
+      throw new TypeError("Unexpected response format from translation API")
     }
 
     const translatedText = result[0]
       .filter(Array.isArray)
       .map(chunk => chunk[0])
       .filter(Boolean)
-      .join('')
+      .join("")
 
     return translatedText
   }

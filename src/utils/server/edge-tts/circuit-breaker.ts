@@ -2,7 +2,7 @@ import {
   EDGE_TTS_CIRCUIT_FAILURE_THRESHOLD,
   EDGE_TTS_CIRCUIT_OPEN_MS,
   EDGE_TTS_CIRCUIT_WINDOW_MS,
-} from './constants'
+} from "./constants"
 
 const failureTimestamps: number[] = []
 let circuitOpenUntil: number | null = null

@@ -2,7 +2,7 @@ export function migrate(oldConfig: any): any {
   const newPromptConfig = {
     ...oldConfig.translate.promptsConfig,
     patterns: oldConfig.translate.promptsConfig.patterns.map((pattern: any) => {
-      if (pattern.id === 'default') {
+      if (pattern.id === "default") {
         return {
           ...pattern,
           prompt: `You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.

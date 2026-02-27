@@ -3,18 +3,18 @@ export async function microsoftTranslate(
   fromLang: string,
   toLang: string,
 ): Promise<string> {
-  const effectiveFromLang = fromLang === 'auto' ? '' : fromLang
+  const effectiveFromLang = fromLang === "auto" ? "" : fromLang
 
   const token = await refreshMicrosoftToken()
 
   const resp = await fetch(
     `https://api-edge.cognitive.microsofttranslator.com/translate?from=${effectiveFromLang}&to=${toLang}&api-version=3.0&includeSentenceLength=true&textType=html`,
     {
-      method: 'POST',
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
-        'Ocp-Apim-Subscription-Key': token,
-        'Authorization': `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "Ocp-Apim-Subscription-Key": token,
+        "Authorization": `Bearer ${token}`,
       },
       body: JSON.stringify([{ Text: sourceText }]),
     },
@@ -27,10 +27,10 @@ export async function microsoftTranslate(
   if (!resp.ok) {
     const errorText = await resp
       .text()
-      .catch(() => 'Unable to read error response')
+      .catch(() => "Unable to read error response")
     throw new Error(
       `Microsoft translation request failed: ${resp.status} ${resp.statusText}${
-        errorText ? ` - ${errorText}` : ''
+        errorText ? ` - ${errorText}` : ""
       }`,
     )
   }
@@ -40,7 +40,7 @@ export async function microsoftTranslate(
 
     if (!Array.isArray(result) || !result[0]?.translations?.[0]?.text) {
       throw new Error(
-        'Unexpected response format from Microsoft translation API',
+        "Unexpected response format from Microsoft translation API",
       )
     }
 
@@ -55,7 +55,7 @@ export async function microsoftTranslate(
 
 async function refreshMicrosoftToken(): Promise<string> {
   try {
-    const resp = await fetch('https://edge.microsoft.com/translate/auth')
+    const resp = await fetch("https://edge.microsoft.com/translate/auth")
 
     if (!resp.ok) {
       throw new Error(

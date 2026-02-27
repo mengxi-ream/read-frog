@@ -1,6 +1,6 @@
-import type { WritableAtom } from 'jotai'
-import type { CustomPromptsConfig, PromptAtoms } from './context'
-import { atom } from 'jotai'
+import type { WritableAtom } from "jotai"
+import type { CustomPromptsConfig, PromptAtoms } from "./context"
+import { atom } from "jotai"
 
 interface ConfigWithCustomPrompts {
   customPromptsConfig: CustomPromptsConfig

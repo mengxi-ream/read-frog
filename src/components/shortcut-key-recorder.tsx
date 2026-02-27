@@ -1,16 +1,16 @@
-import { i18n } from '#imports'
-import hotkeys from 'hotkeys-js'
-import { useEffect, useRef, useState } from 'react'
-import { Input } from '@/components/ui/base-ui/input'
-import { formatHotkey } from '@/utils/os'
+import { i18n } from "#imports"
+import hotkeys from "hotkeys-js"
+import { useEffect, useRef, useState } from "react"
+import { Input } from "@/components/ui/base-ui/input"
+import { formatHotkey } from "@/utils/os"
 
-const MODIFIERS = ['shift', 'alt', 'ctrl', 'command'] as const
+const MODIFIERS = ["shift", "alt", "ctrl", "command"] as const
 
-const DISMISS_CODE = ['Space', 'Escape']
+const DISMISS_CODE = ["Space", "Escape"]
 
 const HOTKEYS_MODIFIERS = Object.keys(hotkeys.modifier)
 
-const SHORTCUT_KEY_SELECTOR_SCOPE = 'shortcut-key-selector'
+const SHORTCUT_KEY_SELECTOR_SCOPE = "shortcut-key-selector"
 
 export function ShortcutKeyRecorder(
   { shortcutKey: initialShortcutKey, onChange, className }:
@@ -21,7 +21,7 @@ export function ShortcutKeyRecorder(
 
   useEffect(() => {
     hotkeys.filter = (event: KeyboardEvent) => {
-      return (event.target as HTMLInputElement).tagName === 'INPUT'
+      return (event.target as HTMLInputElement).tagName === "INPUT"
     }
   }, [])
 
@@ -59,7 +59,7 @@ export function ShortcutKeyRecorder(
   }, [shortcutKey, inRecording, onChange])
 
   useEffect(() => {
-    hotkeys('*', { keyup: true, single: true, scope: SHORTCUT_KEY_SELECTOR_SCOPE }, (event: KeyboardEvent) => {
+    hotkeys("*", { keyup: true, single: true, scope: SHORTCUT_KEY_SELECTOR_SCOPE }, (event: KeyboardEvent) => {
       if (!inRecording)
         return
 
@@ -92,7 +92,7 @@ export function ShortcutKeyRecorder(
       onBlur={endRecord}
       onKeyUp={clearHotkeys}
       value={formatShortcut}
-      placeholder={i18n.t('shortcutKeySelector.placeholder')}
+      placeholder={i18n.t("shortcutKeySelector.placeholder")}
       readOnly
     />
   )

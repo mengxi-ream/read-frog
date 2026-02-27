@@ -1,18 +1,18 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import type { DetectionSource } from '@/utils/content/language'
-import { Readability } from '@mozilla/readability'
-import { flattenToParagraphs } from '@/entrypoints/side.content/utils/article'
-import { detectLanguageWithSource } from '@/utils/content/language'
-import { getLocalConfig } from '../config/storage'
-import { logger } from '../logger'
-import { removeDummyNodes } from './utils'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { DetectionSource } from "@/utils/content/language"
+import { Readability } from "@mozilla/readability"
+import { flattenToParagraphs } from "@/entrypoints/side.content/utils/article"
+import { detectLanguageWithSource } from "@/utils/content/language"
+import { getLocalConfig } from "../config/storage"
+import { logger } from "../logger"
+import { removeDummyNodes } from "./utils"
 
-export type { DetectionSource } from '@/utils/content/language'
+export type { DetectionSource } from "@/utils/content/language"
 
 export async function getDocumentInfo(): Promise<{
-  article: ReturnType<Readability<Node>['parse']>
+  article: ReturnType<Readability<Node>["parse"]>
   paragraphs: string[]
-  detectedCodeOrUnd: LangCodeISO6393 | 'und'
+  detectedCodeOrUnd: LangCodeISO6393 | "und"
   detectionSource: DetectionSource
 }> {
   const documentClone = document.cloneNode(true)
@@ -24,14 +24,14 @@ export async function getDocumentInfo(): Promise<{
     ? flattenToParagraphs(article.content)
     : []
 
-  logger.info('article', article)
+  logger.info("article", article)
 
   // Get config to check if LLM detection is enabled
   const config = await getLocalConfig()
 
   // Combine title and content for detection
-  const title = article?.title || ''
-  const content = article?.textContent || ''
+  const title = article?.title || ""
+  const content = article?.textContent || ""
   const textForDetection = `${title}\n\n${content}`
 
   // Detect language with optional LLM enhancement
@@ -41,8 +41,8 @@ export async function getDocumentInfo(): Promise<{
     maxLengthForLLM: 1500,
   })
 
-  logger.info('final detectionSource', detectionSource)
-  logger.info('final detectedCodeOrUnd', detectedCodeOrUnd)
+  logger.info("final detectionSource", detectionSource)
+  logger.info("final detectedCodeOrUnd", detectedCodeOrUnd)
 
   return {
     article,

@@ -1,106 +1,106 @@
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
-  'default': {
-    description: 'Allow arbitrary custom providers',
+  "default": {
+    description: "Allow arbitrary custom providers",
     config: {
       language: {
-        detectedCode: 'eng',
-        sourceCode: 'auto',
-        targetCode: 'jpn',
-        level: 'intermediate',
+        detectedCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+        level: "intermediate",
       },
       providersConfig: [
         {
-          name: 'Google Translate',
-          provider: 'google',
+          name: "Google Translate",
+          provider: "google",
         },
         {
-          name: 'Microsoft Translator',
-          provider: 'microsoft',
+          name: "Microsoft Translator",
+          provider: "microsoft",
         },
         {
-          name: 'OpenAI',
-          provider: 'openai',
-          apiKey: 'sk-1234567890',
-          baseURL: 'https://api.openai.com/v1',
+          name: "OpenAI",
+          provider: "openai",
+          apiKey: "sk-1234567890",
+          baseURL: "https://api.openai.com/v1",
           models: {
             read: {
-              model: 'gpt-4o-mini',
+              model: "gpt-4o-mini",
               isCustomModel: true,
-              customModel: 'gpt-4.1-nano',
+              customModel: "gpt-4.1-nano",
             },
             translate: {
-              model: 'gpt-4o-mini',
+              model: "gpt-4o-mini",
               isCustomModel: true,
-              customModel: 'gpt-4.1-nano',
+              customModel: "gpt-4.1-nano",
             },
           },
         },
         {
-          name: 'DeepSeek',
-          provider: 'deepseek',
+          name: "DeepSeek",
+          provider: "deepseek",
           apiKey: undefined,
-          baseURL: 'https://api.deepseek.com/v1',
+          baseURL: "https://api.deepseek.com/v1",
           models: {
             read: {
-              model: 'deepseek-chat',
+              model: "deepseek-chat",
               isCustomModel: false,
-              customModel: '',
+              customModel: "",
             },
             translate: {
-              model: 'deepseek-chat',
+              model: "deepseek-chat",
               isCustomModel: false,
-              customModel: '',
+              customModel: "",
             },
           },
         },
         {
-          name: 'Gemini',
-          provider: 'gemini',
+          name: "Gemini",
+          provider: "gemini",
           apiKey: undefined,
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
+          baseURL: "https://generativelanguage.googleapis.com/v1beta",
           models: {
             read: {
-              model: 'gemini-2.5-pro',
+              model: "gemini-2.5-pro",
               isCustomModel: false,
-              customModel: '',
+              customModel: "",
             },
             translate: {
-              model: 'gemini-2.5-pro',
+              model: "gemini-2.5-pro",
               isCustomModel: false,
-              customModel: '',
+              customModel: "",
             },
           },
         },
         {
-          name: 'DeepLX',
-          provider: 'deeplx',
+          name: "DeepLX",
+          provider: "deeplx",
           apiKey: undefined,
-          baseURL: 'https://deeplx.vercel.app',
+          baseURL: "https://deeplx.vercel.app",
         },
       ],
       read: {
-        providerName: 'OpenAI',
+        providerName: "OpenAI",
       },
       translate: {
-        providerName: 'Microsoft Translator',
-        mode: 'bilingual',
+        providerName: "Microsoft Translator",
+        mode: "bilingual",
         node: {
           enabled: true,
-          hotkey: 'Control',
+          hotkey: "Control",
         },
         page: {
-          range: 'main',
-          autoTranslatePatterns: ['news.ycombinator.com'],
+          range: "main",
+          autoTranslatePatterns: ["news.ycombinator.com"],
           autoTranslateLanguages: [],
         },
         promptsConfig: {
-          prompt: 'default',
+          prompt: "default",
           patterns: [
             {
-              id: 'default',
-              name: 'default',
+              id: "default",
+              name: "default",
               prompt: `You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.
 
 ## Translation Rules
@@ -119,8 +119,8 @@ Translate to {{targetLang}}:
           capacity: 300,
           rate: 5,
         },
-        translationNodeStyle: 'default',
-        customAutoTranslateShortcutKey: ['alt', 'q'],
+        translationNodeStyle: "default",
+        customAutoTranslateShortcutKey: ["alt", "q"],
       },
       floatingButton: {
         enabled: true,
@@ -133,106 +133,106 @@ Translate to {{targetLang}}:
       selectionToolbar: { enabled: true },
     },
   },
-  'complex-config-from-v020': {
-    description: 'Allow arbitrary custom providers',
+  "complex-config-from-v020": {
+    description: "Allow arbitrary custom providers",
     config: {
       language: {
-        detectedCode: 'spa',
-        sourceCode: 'spa',
-        targetCode: 'eng',
-        level: 'advanced',
+        detectedCode: "spa",
+        sourceCode: "spa",
+        targetCode: "eng",
+        level: "advanced",
       },
       providersConfig: [
         {
-          name: 'Google Translate',
-          provider: 'google',
+          name: "Google Translate",
+          provider: "google",
         },
         {
-          name: 'Microsoft Translator',
-          provider: 'microsoft',
+          name: "Microsoft Translator",
+          provider: "microsoft",
         },
         {
-          name: 'OpenAI',
-          provider: 'openai',
-          apiKey: 'sk-custom-prompt-key',
-          baseURL: 'https://api.openai.com/v1',
+          name: "OpenAI",
+          provider: "openai",
+          apiKey: "sk-custom-prompt-key",
+          baseURL: "https://api.openai.com/v1",
           models: {
             read: {
-              model: 'gpt-4o-mini',
+              model: "gpt-4o-mini",
               isCustomModel: true,
-              customModel: 'gpt-5-custom',
+              customModel: "gpt-5-custom",
             },
             translate: {
-              model: 'gpt-4o-mini',
+              model: "gpt-4o-mini",
               isCustomModel: true,
-              customModel: 'translate-gpt-custom',
+              customModel: "translate-gpt-custom",
             },
           },
         },
         {
-          name: 'DeepSeek',
-          provider: 'deepseek',
-          apiKey: 'ds-custom',
-          baseURL: 'https://api.custom.com/v1',
+          name: "DeepSeek",
+          provider: "deepseek",
+          apiKey: "ds-custom",
+          baseURL: "https://api.custom.com/v1",
           models: {
             read: {
-              model: 'deepseek-chat',
+              model: "deepseek-chat",
               isCustomModel: true,
-              customModel: 'deepseek-v4-pro',
+              customModel: "deepseek-v4-pro",
             },
             translate: {
-              model: 'deepseek-chat',
+              model: "deepseek-chat",
               isCustomModel: false,
-              customModel: '',
+              customModel: "",
             },
           },
         },
         {
-          name: 'Gemini',
-          provider: 'gemini',
+          name: "Gemini",
+          provider: "gemini",
           apiKey: undefined,
           baseURL: undefined,
           models: {
             read: {
-              model: 'gemini-2.5-pro',
+              model: "gemini-2.5-pro",
               isCustomModel: false,
-              customModel: '',
+              customModel: "",
             },
             translate: {
-              model: 'gemini-2.5-pro',
+              model: "gemini-2.5-pro",
               isCustomModel: false,
-              customModel: '',
+              customModel: "",
             },
           },
         },
         {
-          name: 'DeepLX',
-          provider: 'deeplx',
+          name: "DeepLX",
+          provider: "deeplx",
           apiKey: undefined,
-          baseURL: 'https://deeplx.vercel.app',
+          baseURL: "https://deeplx.vercel.app",
         },
       ],
       read: {
-        providerName: 'DeepSeek',
+        providerName: "DeepSeek",
       },
       translate: {
-        providerName: 'OpenAI',
-        mode: 'translationOnly',
+        providerName: "OpenAI",
+        mode: "translationOnly",
         node: {
           enabled: true,
-          hotkey: 'Alt',
+          hotkey: "Alt",
         },
         page: {
-          range: 'all',
-          autoTranslatePatterns: ['spanish-news.com', 'elmundo.es'],
+          range: "all",
+          autoTranslatePatterns: ["spanish-news.com", "elmundo.es"],
           autoTranslateLanguages: [],
         },
         promptsConfig: {
-          prompt: '123e4567-e89b-12d3-a456-426614174000',
+          prompt: "123e4567-e89b-12d3-a456-426614174000",
           patterns: [
             {
-              id: 'default',
-              name: 'default',
+              id: "default",
+              name: "default",
               prompt: `You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.
 
 ## Translation Rules
@@ -246,9 +246,9 @@ Translate to {{targetLang}}:
 `,
             },
             {
-              id: '123e4567-e89b-12d3-a456-426614174000',
-              name: 'Technical Translation',
-              prompt: 'Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}',
+              id: "123e4567-e89b-12d3-a456-426614174000",
+              name: "Technical Translation",
+              prompt: "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
             },
           ],
         },
@@ -256,13 +256,13 @@ Translate to {{targetLang}}:
           capacity: 400,
           rate: 8,
         },
-        translationNodeStyle: 'blur',
-        customAutoTranslateShortcutKey: ['alt', 'b'],
+        translationNodeStyle: "blur",
+        customAutoTranslateShortcutKey: ["alt", "b"],
       },
       floatingButton: {
         enabled: true,
         position: 0.75,
-        disabledFloatingButtonPatterns: ['github.com'],
+        disabledFloatingButtonPatterns: ["github.com"],
       },
       sideContent: {
         width: 700,
@@ -270,8 +270,8 @@ Translate to {{targetLang}}:
       selectionToolbar: { enabled: false },
     },
   },
-  'config-from-v022': {
-    description: 'Config from v022',
+  "config-from-v022": {
+    description: "Config from v022",
     config: {
       floatingButton: {
         disabledFloatingButtonPatterns: [],
@@ -279,79 +279,79 @@ Translate to {{targetLang}}:
         position: 0.66,
       },
       language: {
-        detectedCode: 'eng',
-        level: 'intermediate',
-        sourceCode: 'auto',
-        targetCode: 'cmn',
+        detectedCode: "eng",
+        level: "intermediate",
+        sourceCode: "auto",
+        targetCode: "cmn",
       },
       providersConfig: [
         {
-          name: 'Google Translate',
-          provider: 'google',
+          name: "Google Translate",
+          provider: "google",
         },
         {
-          name: 'Microsoft Translator',
-          provider: 'microsoft',
+          name: "Microsoft Translator",
+          provider: "microsoft",
         },
         {
-          apiKey: '123aqe',
-          baseURL: 'https://123',
+          apiKey: "123aqe",
+          baseURL: "https://123",
           models: {
             read: {
               customModel: null,
               isCustomModel: false,
-              model: 'gpt-4.1-mini',
+              model: "gpt-4.1-mini",
             },
             translate: {
-              customModel: 'gpt-4.1-m',
+              customModel: "gpt-4.1-m",
               isCustomModel: true,
-              model: 'gpt-4.1-mini',
+              model: "gpt-4.1-mini",
             },
           },
-          name: 'OpenAI',
-          provider: 'openai',
+          name: "OpenAI",
+          provider: "openai",
         },
         {
           models: {
             read: {
               customModel: null,
               isCustomModel: false,
-              model: 'deepseek-chat',
+              model: "deepseek-chat",
             },
             translate: {
               customModel: null,
               isCustomModel: false,
-              model: 'deepseek-chat',
+              model: "deepseek-chat",
             },
           },
-          name: 'DeepSeek',
-          provider: 'deepseek',
+          name: "DeepSeek",
+          provider: "deepseek",
         },
         {
-          apiKey: '1',
+          apiKey: "1",
           models: {
             read: {
               customModel: null,
               isCustomModel: false,
-              model: 'gemini-2.5-pro',
+              model: "gemini-2.5-pro",
             },
             translate: {
-              customModel: 'gemini-1.5-pro',
+              customModel: "gemini-1.5-pro",
               isCustomModel: true,
-              model: 'gemini-1.5-pro',
+              model: "gemini-1.5-pro",
             },
           },
-          name: 'Gemini',
-          provider: 'gemini',
+          name: "Gemini",
+          provider: "gemini",
         },
         {
-          apiKey: '11113',
-          name: 'DeepLX',
-          provider: 'deeplx',
+          apiKey: "11113",
+          name: "DeepLX",
+          provider: "deeplx",
         },
       ],
       read: {
-        providerName: 'DeepSeek',
+        providerName: "DeepSeek",
       },
       selectionToolbar: {
         enabled: true,
@@ -361,37 +361,37 @@ Translate to {{targetLang}}:
       },
       translate: {
         customAutoTranslateShortcutKey: [
-          'alt',
-          'q',
+          "alt",
+          "q",
         ],
-        mode: 'translationOnly',
+        mode: "translationOnly",
         node: {
           enabled: true,
-          hotkey: 'Control',
+          hotkey: "Control",
         },
         page: {
           autoTranslateLanguages: [],
           autoTranslatePatterns: [
-            'news.ycombinator.com',
+            "news.ycombinator.com",
           ],
-          range: 'all',
+          range: "all",
         },
         promptsConfig: {
           patterns: [
             {
-              id: 'default',
-              name: 'default',
-              prompt: 'You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.\n\n## Translation Rules\n1. Output only the translated content, without explanations or additional content (such as "Here\'s the translation:" or "Translation as follows:")\n2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.\n3. If the text contains HTML tags, consider where the tags should be placed in the translation while maintaining fluency.\n4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.\n\nTranslate to {{targetLang}}:\n{{input}}\n',
+              id: "default",
+              name: "default",
+              prompt: "You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.\n\n## Translation Rules\n1. Output only the translated content, without explanations or additional content (such as \"Here's the translation:\" or \"Translation as follows:\")\n2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.\n3. If the text contains HTML tags, consider where the tags should be placed in the translation while maintaining fluency.\n4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.\n\nTranslate to {{targetLang}}:\n{{input}}\n",
             },
           ],
-          prompt: 'default',
+          prompt: "default",
         },
-        providerName: 'Gemini',
+        providerName: "Gemini",
         requestQueueConfig: {
           capacity: 200,
           rate: 2,
         },
-        translationNodeStyle: 'default',
+        translationNodeStyle: "default",
       },
     },
   },

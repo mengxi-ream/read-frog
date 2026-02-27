@@ -1,12 +1,12 @@
-import type { LangCodeISO6393 } from '@read-frog/definitions'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
+import type { LangCodeISO6393 } from "@read-frog/definitions"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
   langCodeISO6393Schema,
-} from '@read-frog/definitions'
-import { useAtom, useAtomValue } from 'jotai'
+} from "@read-frog/definitions"
+import { useAtom, useAtomValue } from "jotai"
 import {
   Select,
   SelectContent,
@@ -14,23 +14,23 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/base-ui/select'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { detectedCodeAtom } from '@/utils/atoms/detected-code'
+} from "@/components/ui/base-ui/select"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { detectedCodeAtom } from "@/utils/atoms/detected-code"
 
 function langCodeLabel(langCode: LangCodeISO6393) {
   return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
 }
 
-const langSelectorTriggerClasses = '!h-14 w-30 rounded-lg shadow-xs pr-2 gap-1'
+const langSelectorTriggerClasses = "!h-14 w-30 rounded-lg shadow-xs pr-2 gap-1"
 
-const langSelectorContentClasses = 'flex flex-col items-start text-base font-medium min-w-0 flex-1'
+const langSelectorContentClasses = "flex flex-col items-start text-base font-medium min-w-0 flex-1"
 
 export default function LanguageOptionsSelector() {
   const [language, setLanguage] = useAtom(configFieldsAtomMap.language)
   const detectedCode = useAtomValue(detectedCodeAtom)
 
-  const handleSourceLangChange = (newLangCode: LangCodeISO6393 | 'auto' | null) => {
+  const handleSourceLangChange = (newLangCode: LangCodeISO6393 | "auto" | null) => {
     if (!newLangCode)
       return
     void setLanguage({ sourceCode: newLangCode })
@@ -43,7 +43,7 @@ export default function LanguageOptionsSelector() {
   }
 
   const sourceLangLabel
-    = language.sourceCode === 'auto'
+    = language.sourceCode === "auto"
       ? `${langCodeLabel(detectedCode)} (auto)`
       : langCodeLabel(language.sourceCode)
 
@@ -58,9 +58,9 @@ export default function LanguageOptionsSelector() {
               {sourceLangLabel}
             </SelectValue>
             <span className="text-sm text-neutral-500">
-              {language.sourceCode === 'auto'
-                ? i18n.t('popup.autoLang')
-                : i18n.t('popup.sourceLang')}
+              {language.sourceCode === "auto"
+                ? i18n.t("popup.autoLang")
+                : i18n.t("popup.sourceLang")}
             </span>
           </div>
         </SelectTrigger>
@@ -85,7 +85,7 @@ export default function LanguageOptionsSelector() {
             <SelectValue render={<span className="truncate w-full" />}>
               {targetLangLabel}
             </SelectValue>
-            <span className="text-sm text-neutral-500">{i18n.t('popup.targetLang')}</span>
+            <span className="text-sm text-neutral-500">{i18n.t("popup.targetLang")}</span>
           </div>
         </SelectTrigger>
         <SelectContent className="rounded-lg shadow-md w-72">

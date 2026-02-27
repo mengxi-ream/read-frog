@@ -1,9 +1,9 @@
 import type {
   BackgroundStreamResponseMap,
   BackgroundStreamTextPayload,
-} from '@/types/background-stream'
-import { BACKGROUND_STREAM_PORTS } from '@/types/background-stream'
-import { createPortStreamPromise } from './port-streaming'
+} from "@/types/background-stream"
+import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
+import { createPortStreamPromise } from "./port-streaming"
 
 export interface ContentScriptTextStreamOptions {
   signal?: AbortSignal
@@ -15,7 +15,7 @@ export function streamBackgroundText(
   payload: BackgroundStreamTextPayload,
   options: ContentScriptTextStreamOptions = {},
 ) {
-  return createPortStreamPromise<BackgroundStreamResponseMap['streamText']>(
+  return createPortStreamPromise<BackgroundStreamResponseMap["streamText"]>(
     BACKGROUND_STREAM_PORTS.streamText,
     payload,
     options,

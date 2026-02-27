@@ -17,6 +17,6 @@ export interface ProxyRequest {
   method?: string
   headers?: [string, string][]
   body?: string
-  credentials?: 'omit' | 'same-origin' | 'include'
+  credentials?: "omit" | "same-origin" | "include"
   cacheConfig?: CacheConfig
 }

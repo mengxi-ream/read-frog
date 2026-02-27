@@ -1,81 +1,81 @@
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
   default: {
-    description: 'Add autoTranslate config',
+    description: "Add autoTranslate config",
     config: {
       language: {
-        detectedCode: 'eng',
-        sourceCode: 'auto',
-        targetCode: 'jpn',
-        level: 'intermediate',
+        detectedCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+        level: "intermediate",
       },
       providersConfig: {
         openai: {
-          apiKey: 'sk-1234567890',
-          baseURL: 'https://api.openai.com/v1',
+          apiKey: "sk-1234567890",
+          baseURL: "https://api.openai.com/v1",
         },
         deepseek: {
           apiKey: undefined,
-          baseURL: 'https://api.deepseek.com/v1',
+          baseURL: "https://api.deepseek.com/v1",
         },
         openrouter: {
           apiKey: undefined,
-          baseURL: 'https://openrouter.ai/api/v1',
+          baseURL: "https://openrouter.ai/api/v1",
         },
         ollama: {
           apiKey: undefined,
-          baseURL: 'http://127.0.0.1:11434/v1',
+          baseURL: "http://127.0.0.1:11434/v1",
         },
       },
       read: {
-        provider: 'openai',
+        provider: "openai",
         models: {
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
       },
       translate: {
-        provider: 'microsoft',
+        provider: "microsoft",
         models: {
           microsoft: null,
           google: null,
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           openrouter: {
-            model: 'meta-llama/llama-4-maverick:free',
+            model: "meta-llama/llama-4-maverick:free",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           ollama: {
-            model: 'gemma3:1b',
+            model: "gemma3:1b",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
         node: {
           enabled: true,
-          hotkey: 'Control',
+          hotkey: "Control",
         },
         page: {
-          range: 'main',
-          autoTranslatePatterns: ['news.ycombinator.com'],
+          range: "main",
+          autoTranslatePatterns: ["news.ycombinator.com"],
         },
       },
       floatingButton: {

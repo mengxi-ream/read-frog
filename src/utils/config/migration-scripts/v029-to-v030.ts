@@ -14,7 +14,7 @@
  */
 
 export function migrate(oldConfig: any): any {
-  const oldStyle = oldConfig.translate?.translationNodeStyle ?? 'default'
+  const oldStyle = oldConfig.translate?.translationNodeStyle ?? "default"
 
   return {
     ...oldConfig,

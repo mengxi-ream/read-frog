@@ -3,21 +3,21 @@
  * 参考：docs/edge-tts 和 docs/tts 仓库
  */
 
-import type { EdgeTTSRequestParams } from './types'
-import type { EdgeTTSHealthStatus, EdgeTTSSynthesizeRequest, EdgeTTSSynthesizeResponse } from '@/types/edge-tts'
-import { assertEdgeTTSAvailable, isEdgeTTSBrowserSupported } from './browser'
-import { splitTextByUtf8Bytes } from './chunk'
+import type { EdgeTTSRequestParams } from "./types"
+import type { EdgeTTSHealthStatus, EdgeTTSSynthesizeRequest, EdgeTTSSynthesizeResponse } from "@/types/edge-tts"
+import { assertEdgeTTSAvailable, isEdgeTTSBrowserSupported } from "./browser"
+import { splitTextByUtf8Bytes } from "./chunk"
 import {
   getEdgeTTSCircuitOpenUntil,
   isEdgeTTSCircuitOpen,
   recordEdgeTTSFailure,
   recordEdgeTTSSuccess,
-} from './circuit-breaker'
-import { EDGE_TTS_HTTP_ENABLED, EDGE_TTS_MAX_CHUNK_BYTES, EDGE_TTS_MAX_CHUNKS } from './constants'
-import { getEdgeTTSEndpointToken } from './endpoint'
-import { EdgeTTSError, toEdgeTTSErrorPayload } from './errors'
-import { combineEdgeTTSAudioChunks } from './synthesize'
-import { filterEdgeTTSVoicesByLocale, listEdgeTTSVoices as listEdgeTTSVoicesRaw } from './voices'
+} from "./circuit-breaker"
+import { EDGE_TTS_HTTP_ENABLED, EDGE_TTS_MAX_CHUNK_BYTES, EDGE_TTS_MAX_CHUNKS } from "./constants"
+import { getEdgeTTSEndpointToken } from "./endpoint"
+import { EdgeTTSError, toEdgeTTSErrorPayload } from "./errors"
+import { combineEdgeTTSAudioChunks } from "./synthesize"
+import { filterEdgeTTSVoicesByLocale, listEdgeTTSVoices as listEdgeTTSVoicesRaw } from "./voices"
 
 function toChunkRequests(params: EdgeTTSRequestParams): EdgeTTSSynthesizeRequest[] {
   const chunks = splitTextByUtf8Bytes(params.text, EDGE_TTS_MAX_CHUNK_BYTES, EDGE_TTS_MAX_CHUNKS)
@@ -36,7 +36,7 @@ export async function synthesizeEdgeTTS(params: EdgeTTSRequestParams): Promise<E
     assertEdgeTTSAvailable()
 
     if (isEdgeTTSCircuitOpen()) {
-      throw new EdgeTTSError('CIRCUIT_OPEN', 'Edge TTS service is temporarily unavailable due to repeated failures')
+      throw new EdgeTTSError("CIRCUIT_OPEN", "Edge TTS service is temporarily unavailable due to repeated failures")
     }
 
     const requests = toChunkRequests(params)
@@ -51,7 +51,7 @@ export async function synthesizeEdgeTTS(params: EdgeTTSRequestParams): Promise<E
   }
   catch (error) {
     const payload = toEdgeTTSErrorPayload(error)
-    if (!['INVALID_TEXT', 'TEXT_TOO_LONG', 'UNSUPPORTED_BROWSER', 'FEATURE_DISABLED', 'CIRCUIT_OPEN'].includes(payload.code)) {
+    if (!["INVALID_TEXT", "TEXT_TOO_LONG", "UNSUPPORTED_BROWSER", "FEATURE_DISABLED", "CIRCUIT_OPEN"].includes(payload.code)) {
       recordEdgeTTSFailure()
     }
     return {
@@ -72,7 +72,7 @@ export async function getEdgeTTSHealthStatus(): Promise<EdgeTTSHealthStatus> {
   const circuitOpen = isEdgeTTSCircuitOpen()
   const circuitOpenUntil = getEdgeTTSCircuitOpenUntil()
   const baseStatus: EdgeTTSHealthStatus = {
-    provider: 'edge-tts',
+    provider: "edge-tts",
     available: false,
     browserSupported,
     featureEnabled,
@@ -84,16 +84,16 @@ export async function getEdgeTTSHealthStatus(): Promise<EdgeTTSHealthStatus> {
   if (!featureEnabled) {
     return {
       ...baseStatus,
-      reason: 'feature-disabled',
+      reason: "feature-disabled",
     }
   }
 
   if (!browserSupported) {
     return {
       ...baseStatus,
-      reason: 'unsupported-browser',
+      reason: "unsupported-browser",
       error: {
-        code: 'UNSUPPORTED_BROWSER',
+        code: "UNSUPPORTED_BROWSER",
         message: `Edge TTS is not supported in ${import.meta.env.BROWSER}`,
       },
     }
@@ -102,10 +102,10 @@ export async function getEdgeTTSHealthStatus(): Promise<EdgeTTSHealthStatus> {
   if (circuitOpen) {
     return {
       ...baseStatus,
-      reason: 'circuit-open',
+      reason: "circuit-open",
       error: {
-        code: 'CIRCUIT_OPEN',
-        message: 'Edge TTS is temporarily unavailable because the circuit breaker is open',
+        code: "CIRCUIT_OPEN",
+        message: "Edge TTS is temporarily unavailable because the circuit breaker is open",
       },
     }
   }
@@ -115,13 +115,13 @@ export async function getEdgeTTSHealthStatus(): Promise<EdgeTTSHealthStatus> {
     return {
       ...baseStatus,
       available: true,
-      reason: 'ok',
+      reason: "ok",
     }
   }
   catch (error) {
     return {
       ...baseStatus,
-      reason: 'endpoint-failed',
+      reason: "endpoint-failed",
       error: toEdgeTTSErrorPayload(error),
     }
   }

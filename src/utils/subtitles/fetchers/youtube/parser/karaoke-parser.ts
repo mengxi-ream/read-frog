@@ -1,5 +1,5 @@
-import type { SubtitlesFragment } from '../../../types'
-import type { YoutubeTimedText } from '../types'
+import type { SubtitlesFragment } from "../../../types"
+import type { YoutubeTimedText } from "../types"
 
 // YouTube uses wpWinPosId: 3 for the main kanji track in karaoke subtitles
 const KANJI_TRACK_ID = 3
@@ -9,8 +9,8 @@ const KANJI_TRACK_ID = 3
  */
 function cleanKaraokeText(text: string): string {
   return text
-    .replace(/\u200B/g, '')
-    .replace(/\s+/g, ' ')
+    .replace(/\u200B/g, "")
+    .replace(/\s+/g, " ")
     .trim()
 }
 
@@ -40,7 +40,7 @@ export function parseKaraokeSubtitles(events: YoutubeTimedText[]): SubtitlesFrag
     if (!event.segs || event.segs.length === 0)
       continue
 
-    const text = cleanKaraokeText(event.segs.map(s => s.utf8 || '').join(''))
+    const text = cleanKaraokeText(event.segs.map(s => s.utf8 || "").join(""))
     if (!text)
       continue
 

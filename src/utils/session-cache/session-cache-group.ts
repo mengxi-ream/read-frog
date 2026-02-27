@@ -1,7 +1,7 @@
-import type { ProxyResponse } from '@/types/proxy-fetch'
-import { storage } from '#imports'
-import { DEFAULT_PROXY_CACHE_TTL_MS } from '@/utils/constants/proxy-fetch'
-import { logger } from '@/utils/logger'
+import type { ProxyResponse } from "@/types/proxy-fetch"
+import { storage } from "#imports"
+import { DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
+import { logger } from "@/utils/logger"
 
 interface CacheMetadata extends Record<string, unknown> {
   timestamp: number
@@ -16,7 +16,7 @@ export class SessionCache {
   private keysListKey: `session:${string}`
   private isInitialized = false
 
-  constructor(groupKey: string = 'default') {
+  constructor(groupKey: string = "default") {
     this.prefix = `cache_${groupKey}`
     this.keysListKey = `session:${this.prefix}__meta_keys` as const
   }
@@ -56,11 +56,11 @@ export class SessionCache {
       // Update last accessed time
       await storage.setMeta(key, { lastAccessed: Date.now() })
 
-      logger.info('[SessionCache] Cache hit:', { reqMethod, targetUrl })
+      logger.info("[SessionCache] Cache hit:", { reqMethod, targetUrl })
       return item
     }
     catch (error) {
-      logger.error('[SessionCache] Get error:', error)
+      logger.error("[SessionCache] Get error:", error)
       return undefined
     }
   }
@@ -88,10 +88,10 @@ export class SessionCache {
         await storage.setItem(this.keysListKey, keysList)
       }
 
-      logger.info('[SessionCache] Cache set:', { reqMethod, targetUrl })
+      logger.info("[SessionCache] Cache set:", { reqMethod, targetUrl })
     }
     catch (error) {
-      logger.error('[SessionCache] Set error:', error)
+      logger.error("[SessionCache] Set error:", error)
     }
   }
 
@@ -113,7 +113,7 @@ export class SessionCache {
       await storage.setItem(this.keysListKey, updatedKeysList)
     }
     catch (error) {
-      logger.error('[SessionCache] Delete error:', error)
+      logger.error("[SessionCache] Delete error:", error)
     }
   }
 
@@ -138,10 +138,10 @@ export class SessionCache {
       await storage.removeItem(this.keysListKey)
       this.isInitialized = false // Reset initialization flag
 
-      logger.info('[SessionCache] Cleared cache:', { count: keysList.length })
+      logger.info("[SessionCache] Cleared cache:", { count: keysList.length })
     }
     catch (error) {
-      logger.error('[SessionCache] Clear error:', error)
+      logger.error("[SessionCache] Clear error:", error)
     }
   }
 }

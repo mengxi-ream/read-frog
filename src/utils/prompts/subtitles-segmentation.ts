@@ -3,7 +3,7 @@ import {
   DEFAULT_SUBTITLES_SEGMENTATION_SYSTEM_PROMPT,
   getTokenCellText,
   INPUT,
-} from '../constants/prompt'
+} from "../constants/prompt"
 
 export interface SubtitlesSegmentationPromptResult {
   systemPrompt: string

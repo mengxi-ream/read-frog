@@ -1,15 +1,15 @@
-import { getDetectedCodeFromStorage } from '@/utils/config/languages'
-import { getLocalConfig } from '@/utils/config/storage'
-import { CONTENT_WRAPPER_CLASS } from '@/utils/constants/dom-labels'
-import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from '@/utils/host/dom/filter'
-import { deepQueryTopLevelSelector } from '@/utils/host/dom/find'
-import { walkAndLabelElement } from '@/utils/host/dom/traversal'
-import { removeAllTranslatedWrapperNodes, translateWalkedElement } from '@/utils/host/translate/node-manipulation'
-import { validateTranslationConfigAndToast } from '@/utils/host/translate/translate-text'
-import { logger } from '@/utils/logger'
-import { sendMessage } from '@/utils/message'
+import { getDetectedCodeFromStorage } from "@/utils/config/languages"
+import { getLocalConfig } from "@/utils/config/storage"
+import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
+import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
+import { walkAndLabelElement } from "@/utils/host/dom/traversal"
+import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
+import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
+import { logger } from "@/utils/logger"
+import { sendMessage } from "@/utils/message"
 
-type SimpleIntersectionOptions = Omit<IntersectionObserverInit, 'threshold'> & {
+type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
   threshold?: number
 }
 
@@ -42,7 +42,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private static readonly MOVE_THRESHOLD = 30 * 30
   private static readonly DEFAULT_INTERSECTION_OPTIONS: SimpleIntersectionOptions = {
     root: null,
-    rootMargin: '600px',
+    rootMargin: "600px",
     threshold: 0.1,
   }
 
@@ -56,7 +56,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
     if (intersectionOptions.threshold !== undefined) {
       if (intersectionOptions.threshold < 0 || intersectionOptions.threshold > 1) {
-        throw new Error('IntersectionObserver threshold must be between 0 and 1')
+        throw new Error("IntersectionObserver threshold must be between 0 and 1")
       }
     }
 
@@ -72,13 +72,13 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   async start(): Promise<void> {
     if (this.isPageTranslating) {
-      console.warn('PageTranslationManager is already active')
+      console.warn("PageTranslationManager is already active")
       return
     }
 
     const config = await getLocalConfig()
     if (!config) {
-      console.warn('Config is not initialized')
+      console.warn("Config is not initialized")
       return
     }
 
@@ -92,7 +92,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    void sendMessage('setAndNotifyPageTranslationStateChangedByManager', {
+    void sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
       enabled: true,
     })
 
@@ -108,7 +108,7 @@ export class PageTranslationManager implements IPageTranslationManager {
             if (!entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
               const currentConfig = await getLocalConfig()
               if (!currentConfig) {
-                logger.error('Global config is not initialized')
+                logger.error("Global config is not initialized")
                 return
               }
               void translateWalkedElement(entry.target, walkId, currentConfig)
@@ -129,11 +129,11 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   stop(): void {
     if (!this.isPageTranslating) {
-      console.warn('AutoTranslationManager is already inactive')
+      console.warn("AutoTranslationManager is already inactive")
       return
     }
 
-    void sendMessage('setAndNotifyPageTranslationStateChangedByManager', {
+    void sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
       enabled: false,
     })
 
@@ -192,17 +192,17 @@ export class PageTranslationManager implements IPageTranslationManager {
       reset()
     }
 
-    document.addEventListener('touchstart', onStart, { passive: true })
-    document.addEventListener('touchmove', onMove, { passive: true })
-    document.addEventListener('touchend', onEnd, { passive: true })
-    document.addEventListener('touchcancel', reset, { passive: true })
+    document.addEventListener("touchstart", onStart, { passive: true })
+    document.addEventListener("touchmove", onMove, { passive: true })
+    document.addEventListener("touchend", onEnd, { passive: true })
+    document.addEventListener("touchcancel", reset, { passive: true })
 
     // 供调用方卸载
     return () => {
-      document.removeEventListener('touchstart', onStart)
-      document.removeEventListener('touchmove', onMove)
-      document.removeEventListener('touchend', onEnd)
-      document.removeEventListener('touchcancel', reset)
+      document.removeEventListener("touchstart", onStart)
+      document.removeEventListener("touchmove", onMove)
+      document.removeEventListener("touchend", onEnd)
+      document.removeEventListener("touchcancel", reset)
     }
   }
 
@@ -213,7 +213,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     const config = await getLocalConfig()
     if (!config) {
-      logger.error('Global config is not initialized')
+      logger.error("Global config is not initialized")
       return
     }
 
@@ -223,14 +223,14 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     walkAndLabelElement(container, this.walkId, config)
     // if container itself has paragraph and the id
-    if (container.hasAttribute('data-read-frog-paragraph') && container.getAttribute('data-read-frog-walked') === this.walkId) {
+    if (container.hasAttribute("data-read-frog-paragraph") && container.getAttribute("data-read-frog-walked") === this.walkId) {
       observer.observe(container)
       return
     }
 
     const paragraphs = this.collectParagraphElementsDeep(container, this.walkId)
     const topLevelParagraphs = paragraphs.filter((el) => {
-      const ancestor = el.parentElement?.closest('[data-read-frog-paragraph]')
+      const ancestor = el.parentElement?.closest("[data-read-frog-paragraph]")
       // keep it if either:
       //  • no paragraph ancestor at all, or
       //  • the ancestor is *not* inside container
@@ -309,7 +309,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private observeMutations(container: HTMLElement): void {
     const mutationObserver = new MutationObserver((records) => {
       for (const rec of records) {
-        if (rec.type === 'childList') {
+        if (rec.type === "childList") {
           rec.addedNodes.forEach((node) => {
             if (isHTMLElement(node)) {
               this.addDontWalkIntoElements(node)
@@ -319,8 +319,8 @@ export class PageTranslationManager implements IPageTranslationManager {
           })
         }
         else if (
-          rec.type === 'attributes'
-          && (rec.attributeName === 'style' || rec.attributeName === 'class')
+          rec.type === "attributes"
+          && (rec.attributeName === "style" || rec.attributeName === "class")
         ) {
           const el = rec.target
           if (isHTMLElement(el) && this.didChangeToWalkable(el)) {
@@ -334,7 +334,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ['style', 'class'],
+      attributeFilter: ["style", "class"],
     })
 
     this.mutationObservers.push(mutationObserver)

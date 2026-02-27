@@ -1,4 +1,4 @@
-export type SubtitlesState = 'idle' | 'loading' | 'error'
+export type SubtitlesState = "idle" | "loading" | "error"
 
 export interface StateData {
   state: SubtitlesState

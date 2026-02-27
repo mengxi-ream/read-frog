@@ -6,7 +6,7 @@ export function migrate(oldConfig: any): any {
       ...oldConfig.providersConfig,
       gemini: {
         apiKey: undefined,
-        baseURL: 'https://generativelanguage.googleapis.com/v1beta',
+        baseURL: "https://generativelanguage.googleapis.com/v1beta",
       },
     },
     translate: {
@@ -14,9 +14,9 @@ export function migrate(oldConfig: any): any {
       models: {
         ...oldConfig.translate?.models,
         gemini: {
-          model: 'gemini-2.5-pro',
+          model: "gemini-2.5-pro",
           isCustomModel: false,
-          customModel: '',
+          customModel: "",
         },
       },
     },

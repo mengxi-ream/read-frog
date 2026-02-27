@@ -1,4 +1,4 @@
-import { cn } from '@/utils/styles/utils'
+import { cn } from "@/utils/styles/utils"
 
 interface LoadingDotsProps {
   className?: string
@@ -7,7 +7,7 @@ interface LoadingDotsProps {
 export default function LoadingDots({ className }: LoadingDotsProps) {
   return (
     <div
-      className={cn('flex items-center justify-center gap-[3px]', className)}
+      className={cn("flex items-center justify-center gap-[3px]", className)}
     >
       {[...Array.from({ length: 3 })].map((_, i) => (
         <div

@@ -1,24 +1,24 @@
-import type { SubtitlesState } from '@/utils/subtitles/types'
-import { i18n } from '#imports'
-import { useAtomValue } from 'jotai'
-import { STATE_MESSAGE_CLASS } from '@/utils/constants/subtitles'
-import { subtitlesStateAtom } from '../atoms'
+import type { SubtitlesState } from "@/utils/subtitles/types"
+import { i18n } from "#imports"
+import { useAtomValue } from "jotai"
+import { STATE_MESSAGE_CLASS } from "@/utils/constants/subtitles"
+import { subtitlesStateAtom } from "../atoms"
 
-const STATE_CONFIG: Record<Exclude<SubtitlesState, 'idle'>, { color: string, getText: () => string }> = {
+const STATE_CONFIG: Record<Exclude<SubtitlesState, "idle">, { color: string, getText: () => string }> = {
   loading: {
-    color: 'oklch(70% 0.19 250)',
-    getText: () => i18n.t('subtitles.state.loading'),
+    color: "oklch(70% 0.19 250)",
+    getText: () => i18n.t("subtitles.state.loading"),
   },
   error: {
-    color: 'oklch(63% 0.24 25)',
-    getText: () => i18n.t('subtitles.state.error'),
+    color: "oklch(63% 0.24 25)",
+    getText: () => i18n.t("subtitles.state.error"),
   },
 }
 
 export function StateMessage() {
   const stateData = useAtomValue(subtitlesStateAtom)
 
-  if (!stateData || stateData.state === 'idle') {
+  if (!stateData || stateData.state === "idle") {
     return null
   }
 
@@ -29,7 +29,7 @@ export function StateMessage() {
     <div
       className={`${STATE_MESSAGE_CLASS} absolute left-1/2 -translate-x-1/2 bottom-1/6 pointer-events-auto`}
       style={{
-        fontFamily: 'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
+        fontFamily: "Roboto, \"Arial Unicode Ms\", Arial, Helvetica, Verdana, \"PT Sans Caption\", sans-serif",
       }}
     >
       <div

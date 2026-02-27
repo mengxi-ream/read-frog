@@ -1,24 +1,24 @@
-import type { Config } from '@/types/config/config'
-import type { LLMProviderConfig, ProviderConfig } from '@/types/config/provider'
-import type { BatchQueueConfig, RequestQueueConfig } from '@/types/config/translate'
-import type { ArticleContent } from '@/types/content'
-import type { PromptResolver } from '@/utils/host/translate/api/ai'
-import { isLLMProviderConfig } from '@/types/config/provider'
-import { putBatchRequestRecord } from '@/utils/batch-request-record'
-import { DEFAULT_CONFIG } from '@/utils/constants/config'
-import { BATCH_SEPARATOR } from '@/utils/constants/prompt'
-import { generateArticleSummary } from '@/utils/content/summary'
-import { cleanText } from '@/utils/content/utils'
-import { db } from '@/utils/db/dexie/db'
-import { Sha256Hex } from '@/utils/hash'
-import { executeTranslate } from '@/utils/host/translate/execute-translate'
-import { logger } from '@/utils/logger'
-import { onMessage } from '@/utils/message'
-import { getSubtitlesTranslatePrompt } from '@/utils/prompts/subtitles'
-import { getTranslatePrompt } from '@/utils/prompts/translate'
-import { BatchQueue } from '@/utils/request/batch-queue'
-import { RequestQueue } from '@/utils/request/request-queue'
-import { ensureInitializedConfig } from './config'
+import type { Config } from "@/types/config/config"
+import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
+import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
+import type { ArticleContent } from "@/types/content"
+import type { PromptResolver } from "@/utils/host/translate/api/ai"
+import { isLLMProviderConfig } from "@/types/config/provider"
+import { putBatchRequestRecord } from "@/utils/batch-request-record"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { BATCH_SEPARATOR } from "@/utils/constants/prompt"
+import { generateArticleSummary } from "@/utils/content/summary"
+import { cleanText } from "@/utils/content/utils"
+import { db } from "@/utils/db/dexie/db"
+import { Sha256Hex } from "@/utils/hash"
+import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { logger } from "@/utils/logger"
+import { onMessage } from "@/utils/message"
+import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
+import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { BatchQueue } from "@/utils/request/batch-queue"
+import { RequestQueue } from "@/utils/request/request-queue"
+import { ensureInitializedConfig } from "./config"
 
 export function parseBatchResult(result: string): string[] {
   return result.split(BATCH_SEPARATOR).map(t => t.trim())
@@ -40,7 +40,7 @@ async function getOrGenerateSummary(
 
   const cached = await db.articleSummaryCache.get(cacheKey)
   if (cached) {
-    logger.info('Using cached summary')
+    logger.info("Using cached summary")
     return cached.summary
   }
 
@@ -52,7 +52,7 @@ async function getOrGenerateSummary(
 
     const summary = await generateArticleSummary(title, textContent, providerConfig)
     if (!summary) {
-      return ''
+      return ""
     }
 
     await db.articleSummaryCache.put({
@@ -61,7 +61,7 @@ async function getOrGenerateSummary(
       createdAt: new Date(),
     })
 
-    logger.info('Generated and cached new summary')
+    logger.info("Generated and cached new summary")
     return summary
   }
 
@@ -70,14 +70,14 @@ async function getOrGenerateSummary(
     return summary || undefined
   }
   catch (error) {
-    logger.warn('Failed to get/generate summary:', error)
+    logger.warn("Failed to get/generate summary:", error)
     return undefined
   }
 }
 
 interface TranslateBatchData {
   text: string
-  langConfig: Config['language']
+  langConfig: Config["language"]
   providerConfig: ProviderConfig
   hash: string
   scheduleAt: number
@@ -137,7 +137,7 @@ async function createTranslationQueues(config: TranslationQueueSetupConfig) {
       return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
     onError: (error, context) => {
-      const errorType = context.isFallback ? 'Individual request' : 'Batch request'
+      const errorType = context.isFallback ? "Individual request" : "Batch request"
       logger.error(
         `${errorType} failed (batchKey: ${context.batchKey}, retry: ${context.retryCount}):`,
         error.message,
@@ -159,7 +159,7 @@ export async function setUpWebPageTranslationQueue() {
     promptResolver: getTranslatePrompt,
   })
 
-  onMessage('enqueueTranslateRequest', async (message) => {
+  onMessage("enqueueTranslateRequest", async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, articleTitle, articleTextContent } } = message
 
     // Check cache first
@@ -170,9 +170,9 @@ export async function setUpWebPageTranslationQueue() {
       }
     }
 
-    let result = ''
+    let result = ""
     const content: ArticleContent = {
-      title: articleTitle || '',
+      title: articleTitle || "",
     }
 
     if (isLLMProviderConfig(providerConfig)) {
@@ -203,12 +203,12 @@ export async function setUpWebPageTranslationQueue() {
     return result
   })
 
-  onMessage('setTranslateRequestQueueConfig', (message) => {
+  onMessage("setTranslateRequestQueueConfig", (message) => {
     const { data } = message
     requestQueue.setQueueOptions(data)
   })
 
-  onMessage('setTranslateBatchQueueConfig', (message) => {
+  onMessage("setTranslateBatchQueueConfig", (message) => {
     const { data } = message
     batchQueue.setBatchConfig(data)
   })
@@ -227,7 +227,7 @@ export async function setUpSubtitlesTranslationQueue() {
     promptResolver: getSubtitlesTranslatePrompt,
   })
 
-  onMessage('enqueueSubtitlesTranslateRequest', async (message) => {
+  onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, subtitlesContext } } = message
 
     if (hash) {
@@ -237,9 +237,9 @@ export async function setUpSubtitlesTranslationQueue() {
       }
     }
 
-    let result = ''
+    let result = ""
     const content: ArticleContent = {
-      title: videoTitle || '',
+      title: videoTitle || "",
     }
 
     if (isLLMProviderConfig(providerConfig)) {
@@ -267,12 +267,12 @@ export async function setUpSubtitlesTranslationQueue() {
     return result
   })
 
-  onMessage('setSubtitlesRequestQueueConfig', (message) => {
+  onMessage("setSubtitlesRequestQueueConfig", (message) => {
     const { data } = message
     requestQueue.setQueueOptions(data)
   })
 
-  onMessage('setSubtitlesBatchQueueConfig', (message) => {
+  onMessage("setSubtitlesBatchQueueConfig", (message) => {
     const { data } = message
     batchQueue.setBatchConfig(data)
   })

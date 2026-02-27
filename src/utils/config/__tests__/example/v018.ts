@@ -1,90 +1,90 @@
-import type { TestSeriesObject } from './types'
+import type { TestSeriesObject } from "./types"
 
 export const testSeries: TestSeriesObject = {
   default: {
-    description: 'Implement customize translation shortcut key',
+    description: "Implement customize translation shortcut key",
     config: {
       language: {
-        detectedCode: 'eng',
-        sourceCode: 'auto',
-        targetCode: 'jpn',
-        level: 'intermediate',
+        detectedCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+        level: "intermediate",
       },
       providersConfig: {
         openai: {
-          apiKey: 'sk-1234567890',
-          baseURL: 'https://api.openai.com/v1',
+          apiKey: "sk-1234567890",
+          baseURL: "https://api.openai.com/v1",
         },
         deepseek: {
           apiKey: undefined,
-          baseURL: 'https://api.deepseek.com/v1',
+          baseURL: "https://api.deepseek.com/v1",
         },
         gemini: {
           apiKey: undefined,
-          baseURL: 'https://generativelanguage.googleapis.com/v1beta',
+          baseURL: "https://generativelanguage.googleapis.com/v1beta",
         },
         deeplx: {
           apiKey: undefined,
-          baseURL: 'https://deeplx.vercel.app',
+          baseURL: "https://deeplx.vercel.app",
         },
       },
       read: {
-        provider: 'openai',
+        provider: "openai",
         models: {
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           gemini: {
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
       },
       translate: {
-        provider: 'microsoft',
+        provider: "microsoft",
         models: {
           microsoft: null,
           google: null,
           deeplx: null,
           openai: {
-            model: 'gpt-4o-mini',
+            model: "gpt-4o-mini",
             isCustomModel: true,
-            customModel: 'gpt-4.1-nano',
+            customModel: "gpt-4.1-nano",
           },
           deepseek: {
-            model: 'deepseek-chat',
+            model: "deepseek-chat",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
           gemini: {
-            model: 'gemini-2.5-pro',
+            model: "gemini-2.5-pro",
             isCustomModel: false,
-            customModel: '',
+            customModel: "",
           },
         },
-        mode: 'bilingual',
+        mode: "bilingual",
         node: {
           enabled: true,
-          hotkey: 'Control',
+          hotkey: "Control",
         },
         page: {
-          range: 'main',
-          autoTranslatePatterns: ['news.ycombinator.com'],
+          range: "main",
+          autoTranslatePatterns: ["news.ycombinator.com"],
         },
         promptsConfig: {
-          prompt: 'default',
+          prompt: "default",
           patterns: [
             {
-              id: 'default',
-              name: 'default',
+              id: "default",
+              name: "default",
               prompt: `You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.
 
 ## Translation Rules
@@ -105,8 +105,8 @@ Translate to {{targetLang}}:
           capacity: 300,
           rate: 5,
         },
-        translationNodeStyle: 'default',
-        customAutoTranslateShortcutKey: ['alt', 'q'],
+        translationNodeStyle: "default",
+        customAutoTranslateShortcutKey: ["alt", "q"],
       },
       floatingButton: {
         enabled: true,

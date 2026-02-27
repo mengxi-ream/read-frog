@@ -1,5 +1,5 @@
-import { atom, createStore } from 'jotai'
-import { createTranslationStateAtomForContentScript } from '@/utils/atoms/translation-state'
+import { atom, createStore } from "jotai"
+import { createTranslationStateAtomForContentScript } from "@/utils/atoms/translation-state"
 
 export const store = createStore()
 

@@ -1,29 +1,29 @@
-import type { BatchQueueConfig } from '@/types/config/translate'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react'
-import { useAtom } from 'jotai'
-import { Link } from 'react-router'
-import { toast } from 'sonner'
-import { HelpTooltip } from '@/components/help-tooltip'
-import { Field, FieldContent, FieldGroup, FieldLabel } from '@/components/ui/base-ui/field'
-import { Input } from '@/components/ui/base-ui/input'
-import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
-import { batchQueueConfigSchema } from '@/types/config/translate'
-import { configFieldsAtomMap } from '@/utils/atoms/config'
-import { calculateAverageSavePercentage } from '@/utils/batch-request-record'
-import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from '@/utils/constants/translate'
-import { sendMessage } from '@/utils/message'
-import { ConfigCard } from '../../components/config-card'
+import type { BatchQueueConfig } from "@/types/config/translate"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react"
+import { useAtom } from "jotai"
+import { Link } from "react-router"
+import { toast } from "sonner"
+import { HelpTooltip } from "@/components/help-tooltip"
+import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
+import { Input } from "@/components/ui/base-ui/input"
+import { useBatchRequestRecords } from "@/hooks/use-batch-request-record"
+import { batchQueueConfigSchema } from "@/types/config/translate"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { calculateAverageSavePercentage } from "@/utils/batch-request-record"
+import { MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS } from "@/utils/constants/translate"
+import { sendMessage } from "@/utils/message"
+import { ConfigCard } from "../../components/config-card"
 
 type KeyOfBatchQueueConfig = keyof BatchQueueConfig
 
 export function RequestBatch() {
   return (
     <ConfigCard
-      title={i18n.t('options.translation.batchQueueConfig.title')}
+      title={i18n.t("options.translation.batchQueueConfig.title")}
       description={(
         <div className="flex flex-col">
-          <span>{i18n.t('options.translation.batchQueueConfig.description')}</span>
+          <span>{i18n.t("options.translation.batchQueueConfig.description")}</span>
           <StatisticsLink />
         </div>
       )}
@@ -47,8 +47,8 @@ function StatisticsLink() {
       to="/statistics"
       target="_blank"
     >
-      {i18n.t('options.translation.batchQueueConfig.statisticsLink', [averageSavePercentage])}
-      {' '}
+      {i18n.t("options.translation.batchQueueConfig.statisticsLink", [averageSavePercentage])}
+      {" "}
       <Icon icon="tabler:external-link" className="inline w-3.5 h-3.5" />
     </Link>
   )
@@ -56,12 +56,12 @@ function StatisticsLink() {
 
 const propertyInfo = {
   maxCharactersPerBatch: {
-    label: i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.title'),
-    description: i18n.t('options.translation.batchQueueConfig.maxCharactersPerBatch.description'),
+    label: i18n.t("options.translation.batchQueueConfig.maxCharactersPerBatch.title"),
+    description: i18n.t("options.translation.batchQueueConfig.maxCharactersPerBatch.description"),
   },
   maxItemsPerBatch: {
-    label: i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.title'),
-    description: i18n.t('options.translation.batchQueueConfig.maxItemsPerBatch.description'),
+    label: i18n.t("options.translation.batchQueueConfig.maxItemsPerBatch.title"),
+    description: i18n.t("options.translation.batchQueueConfig.maxItemsPerBatch.description"),
   },
 }
 
@@ -104,7 +104,7 @@ function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) 
                 [property]: newConfigValue,
               },
             })
-            void sendMessage('setTranslateBatchQueueConfig', {
+            void sendMessage("setTranslateBatchQueueConfig", {
               [property]: newConfigValue,
             })
           }

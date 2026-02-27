@@ -1,8 +1,8 @@
-import { Icon } from '@iconify/react'
-import { useAtomValue } from 'jotai'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/base-ui/tooltip'
-import { configAtom } from '@/utils/atoms/config'
-import { translateNodesBilingualMode, translateNodeTranslationOnlyMode } from '@/utils/host/translate/node-manipulation'
+import { Icon } from "@iconify/react"
+import { useAtomValue } from "jotai"
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { configAtom } from "@/utils/atoms/config"
+import { translateNodesBilingualMode, translateNodeTranslationOnlyMode } from "@/utils/host/translate/node-manipulation"
 
 export function RetryButton({ nodes }: { nodes: ChildNode[] }) {
   const config = useAtomValue(configAtom)
@@ -10,10 +10,10 @@ export function RetryButton({ nodes }: { nodes: ChildNode[] }) {
 
   const handleRetry = async () => {
     const walkId = crypto.randomUUID()
-    if (translationMode === 'bilingual') {
+    if (translationMode === "bilingual") {
       await translateNodesBilingualMode(nodes, walkId, config)
     }
-    else if (translationMode === 'translationOnly') {
+    else if (translationMode === "translationOnly") {
       await translateNodeTranslationOnlyMode(nodes, walkId, config)
     }
   }

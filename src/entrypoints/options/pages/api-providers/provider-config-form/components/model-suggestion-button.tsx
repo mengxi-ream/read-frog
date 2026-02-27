@@ -1,9 +1,9 @@
-import { i18n } from '#imports'
-import { Combobox as ComboboxPrimitive } from '@base-ui/react'
-import { Icon } from '@iconify/react'
-import { useMutation } from '@tanstack/react-query'
-import LoadingDots from '@/components/loading-dots'
-import { Button } from '@/components/ui/base-ui/button'
+import { i18n } from "#imports"
+import { Combobox as ComboboxPrimitive } from "@base-ui/react"
+import { Icon } from "@iconify/react"
+import { useMutation } from "@tanstack/react-query"
+import LoadingDots from "@/components/loading-dots"
+import { Button } from "@/components/ui/base-ui/button"
 import {
   Combobox,
   ComboboxContent,
@@ -11,8 +11,8 @@ import {
   ComboboxInput,
   ComboboxItem,
   ComboboxList,
-} from '@/components/ui/base-ui/combobox'
-import { extractErrorMessage } from '@/utils/api-error'
+} from "@/components/ui/base-ui/combobox"
+import { extractErrorMessage } from "@/utils/api-error"
 
 interface ModelsResponse {
   object: string
@@ -33,13 +33,13 @@ export function ModelSuggestionButton({
   disabled,
 }: ModelSuggestionButtonProps) {
   const mutation = useMutation({
-    mutationKey: ['fetchModels', baseURL],
+    mutationKey: ["fetchModels", baseURL],
     meta: {
-      errorDescription: i18n.t('options.apiProviders.form.models.fetchError'),
+      errorDescription: i18n.t("options.apiProviders.form.models.fetchError"),
     },
     mutationFn: async () => {
       if (!apiKey) {
-        throw new Error(i18n.t('options.apiProviders.form.models.apiKeyRequired'))
+        throw new Error(i18n.t("options.apiProviders.form.models.apiKeyRequired"))
       }
 
       const response = await fetch(`${baseURL}/models`, {
@@ -74,7 +74,7 @@ export function ModelSuggestionButton({
         disabled={isDisabled}
       >
         <Icon icon="tabler:list-search" className="size-3.5" />
-        {i18n.t('options.apiProviders.form.models.fetchModels')}
+        {i18n.t("options.apiProviders.form.models.fetchModels")}
       </Button>
     )
   }
@@ -84,7 +84,7 @@ export function ModelSuggestionButton({
     return (
       <Button type="button" variant="outline" size="xs" disabled>
         <LoadingDots className="scale-75" />
-        {i18n.t('options.apiProviders.form.models.fetchModels')}
+        {i18n.t("options.apiProviders.form.models.fetchModels")}
       </Button>
     )
   }
@@ -100,7 +100,7 @@ export function ModelSuggestionButton({
         className="text-red-500 hover:text-red-500"
       >
         <Icon icon="tabler:alert-circle" className="size-3.5" />
-        {i18n.t('options.apiProviders.form.models.clickToRetry')}
+        {i18n.t("options.apiProviders.form.models.clickToRetry")}
       </Button>
     )
   }
@@ -118,7 +118,7 @@ export function ModelSuggestionButton({
           onClick={handleFetch}
         >
           <Icon icon="tabler:list" />
-          {i18n.t('options.apiProviders.form.models.noModels')}
+          {i18n.t("options.apiProviders.form.models.noModels")}
         </Button>
       )
     }
@@ -134,10 +134,10 @@ export function ModelSuggestionButton({
       >
         <ComboboxPrimitive.Trigger render={<Button type="button" variant="outline" size="xs" />}>
           <Icon icon="tabler:list" />
-          {i18n.t('options.apiProviders.form.models.selectModel')}
+          {i18n.t("options.apiProviders.form.models.selectModel")}
         </ComboboxPrimitive.Trigger>
         <ComboboxContent align="end" className="w-64">
-          <ComboboxInput showTrigger={false} placeholder={i18n.t('options.apiProviders.form.models.searchModels')} />
+          <ComboboxInput showTrigger={false} placeholder={i18n.t("options.apiProviders.form.models.searchModels")} />
           <ComboboxList>
             {(model: string) => (
               <ComboboxItem key={model} value={model}>
@@ -145,7 +145,7 @@ export function ModelSuggestionButton({
               </ComboboxItem>
             )}
           </ComboboxList>
-          <ComboboxEmpty>{i18n.t('options.apiProviders.form.models.noModelsFound')}</ComboboxEmpty>
+          <ComboboxEmpty>{i18n.t("options.apiProviders.form.models.noModelsFound")}</ComboboxEmpty>
         </ComboboxContent>
       </Combobox>
     )

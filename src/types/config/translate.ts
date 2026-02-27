@@ -1,8 +1,8 @@
-import { langCodeISO6393Schema } from '@read-frog/definitions'
-import { z } from 'zod'
-import { HOTKEYS } from '@/utils/constants/hotkeys'
-import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS, MIN_CHARACTERS_PER_NODE, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE, MIN_WORDS_PER_NODE } from '@/utils/constants/translate'
-import { TRANSLATION_NODE_STYLE } from '@/utils/constants/translation-node-style'
+import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { z } from "zod"
+import { HOTKEYS } from "@/utils/constants/hotkeys"
+import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS, MIN_CHARACTERS_PER_NODE, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE, MIN_WORDS_PER_NODE } from "@/utils/constants/translate"
+import { TRANSLATION_NODE_STYLE } from "@/utils/constants/translation-node-style"
 
 export const requestQueueConfigSchema = z.object({
   capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
@@ -14,10 +14,10 @@ export const batchQueueConfigSchema = z.object({
   maxItemsPerBatch: z.number().gte(MIN_BATCH_ITEMS),
 })
 
-export const TRANSLATION_MODES = ['bilingual', 'translationOnly'] as const
+export const TRANSLATION_MODES = ["bilingual", "translationOnly"] as const
 export const translationModeSchema = z.enum(TRANSLATION_MODES)
 
-export const pageTranslateRangeSchema = z.enum(['main', 'all'])
+export const pageTranslateRangeSchema = z.enum(["main", "all"])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
 
 export const preloadConfigSchema = z.object({
@@ -37,7 +37,7 @@ export const translationNodeStyleConfigSchema = z.object({
   preset: translationNodeStylePresetSchema,
   isCustom: z.boolean(),
   customCSS: z.string()
-    .max(MAX_CUSTOM_CSS_LENGTH, 'Custom CSS cannot exceed 8KB')
+    .max(MAX_CUSTOM_CSS_LENGTH, "Custom CSS cannot exceed 8KB")
     .nullable(),
 })
 
@@ -61,10 +61,10 @@ export const customPromptsConfigSchema = z.object({
     const patternIds = data.patterns.map(p => p.id)
     if (!patternIds.includes(data.promptId)) {
       ctx.addIssue({
-        code: 'invalid_value',
+        code: "invalid_value",
         values: patternIds,
         message: `promptId "${data.promptId}" must be null or match a pattern id`,
-        path: ['promptId'],
+        path: ["promptId"],
       })
     }
   }

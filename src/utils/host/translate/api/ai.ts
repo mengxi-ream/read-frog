@@ -1,9 +1,9 @@
-import type { LLMProviderConfig } from '@/types/config/provider'
-import type { ArticleContent } from '@/types/content'
-import type { TranslatePromptOptions, TranslatePromptResult } from '@/utils/prompts/translate'
-import { generateText } from 'ai'
-import { getModelById, resolveModelId } from '@/utils/providers/model'
-import { getProviderOptionsWithOverride } from '@/utils/providers/options'
+import type { LLMProviderConfig } from "@/types/config/provider"
+import type { ArticleContent } from "@/types/content"
+import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
+import { generateText } from "ai"
+import { getModelById, resolveModelId } from "@/utils/providers/model"
+import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 
 export type PromptResolver = (
   targetLang: string,
@@ -22,7 +22,7 @@ export async function aiTranslate(
   const modelName = resolveModelId(providerModel)
   const model = await getModelById(providerId)
 
-  const providerOptions = getProviderOptionsWithOverride(modelName ?? '', provider, userProviderOptions)
+  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, options)
 
   const { text: translatedText } = await generateText({

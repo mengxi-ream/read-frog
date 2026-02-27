@@ -1,9 +1,9 @@
-import type BatchRequestRecord from '@/utils/db/dexie/tables/batch-request-record'
-import { i18n } from '#imports'
-import { useAtomValue } from 'jotai'
-import { MetricCard } from '@/entrypoints/options/components/metric-card'
-import { useBatchRequestRecords } from '@/hooks/use-batch-request-record'
-import { recentDayAtom } from './atom'
+import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-record"
+import { i18n } from "#imports"
+import { useAtomValue } from "jotai"
+import { MetricCard } from "@/entrypoints/options/components/metric-card"
+import { useBatchRequestRecords } from "@/hooks/use-batch-request-record"
+import { recentDayAtom } from "./atom"
 
 export default function Metrics() {
   const recentDay = useAtomValue(recentDayAtom)
@@ -32,16 +32,16 @@ function transformRecordsToMetrics(currentPeriodRecords: BatchRequestRecord[], p
 
   return {
     originalRequestCount: {
-      title: i18n.t('options.statistics.batchRequest.originalRequestCount'),
+      title: i18n.t("options.statistics.batchRequest.originalRequestCount"),
       metric: originalRequestCount,
       comparison: originalRequestComparison,
-      icon: 'tabler:circle-filled',
+      icon: "tabler:circle-filled",
     },
     batchRequestCount: {
-      title: i18n.t('options.statistics.batchRequest.batchRequestCount'),
+      title: i18n.t("options.statistics.batchRequest.batchRequestCount"),
       metric: batchRequestCount,
       comparison: batchRequestComparison,
-      icon: 'tabler:squares-filled',
+      icon: "tabler:squares-filled",
     },
   }
 }

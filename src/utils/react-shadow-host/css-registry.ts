@@ -1,4 +1,4 @@
-import { Sha256Hex } from '../hash'
+import { Sha256Hex } from "../hash"
 
 export class CSSRegistry {
   private registry = new Map<string, { node: HTMLStyleElement, count: number }>()
@@ -16,9 +16,9 @@ export class CSSRegistry {
       return key
     }
 
-    const style = document.createElement('style')
+    const style = document.createElement("style")
     style.textContent = css
-    style.setAttribute('data-read-frog-react-shadow-css-key', key)
+    style.setAttribute("data-read-frog-react-shadow-css-key", key)
     document.head.appendChild(style)
     this.registry.set(key, { node: style, count: 1 })
 

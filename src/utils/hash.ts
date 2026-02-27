@@ -1,4 +1,4 @@
-import { sha256 } from 'js-sha256'
+import { sha256 } from "js-sha256"
 
 /**
  * Generate a SHA256 hash of multiple text parameters
@@ -11,10 +11,10 @@ import { sha256 } from 'js-sha256'
  */
 export function Sha256Hex(...texts: string[]): string {
   if (texts.length === 0) {
-    throw new Error('At least one text parameter is required')
+    throw new Error("At least one text parameter is required")
   }
 
   // prevent parameter boundary ambiguity, e.g. 'a|bc' and 'ab|c' are different
-  const combined = texts.join('|')
+  const combined = texts.join("|")
   return sha256(combined)
 }

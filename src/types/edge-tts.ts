@@ -1,20 +1,20 @@
-import type { EdgeTTSRequestParams, EdgeTTSVoice } from '@/utils/server/edge-tts/types'
+import type { EdgeTTSRequestParams, EdgeTTSVoice } from "@/utils/server/edge-tts/types"
 
 export const EDGE_TTS_ERROR_CODES = [
-  'UNSUPPORTED_BROWSER',
-  'FEATURE_DISABLED',
-  'CIRCUIT_OPEN',
-  'INVALID_TEXT',
-  'TEXT_TOO_LONG',
-  'SIGNATURE_GENERATION_FAILED',
-  'TOKEN_FETCH_FAILED',
-  'TOKEN_INVALID',
-  'SYNTH_RATE_LIMITED',
-  'SYNTH_SERVER_ERROR',
-  'SYNTH_REQUEST_FAILED',
-  'VOICES_FETCH_FAILED',
-  'NETWORK_ERROR',
-  'UNKNOWN_ERROR',
+  "UNSUPPORTED_BROWSER",
+  "FEATURE_DISABLED",
+  "CIRCUIT_OPEN",
+  "INVALID_TEXT",
+  "TEXT_TOO_LONG",
+  "SIGNATURE_GENERATION_FAILED",
+  "TOKEN_FETCH_FAILED",
+  "TOKEN_INVALID",
+  "SYNTH_RATE_LIMITED",
+  "SYNTH_SERVER_ERROR",
+  "SYNTH_REQUEST_FAILED",
+  "VOICES_FETCH_FAILED",
+  "NETWORK_ERROR",
+  "UNKNOWN_ERROR",
 ] as const
 
 export type EdgeTTSErrorCode = typeof EDGE_TTS_ERROR_CODES[number]
@@ -52,7 +52,7 @@ export interface EdgeTTSSynthesizeWireSuccess {
 export type EdgeTTSSynthesizeWireResponse = EdgeTTSSynthesizeWireSuccess | EdgeTTSSynthesizeFailure
 
 export interface EdgeTTSHealthStatus {
-  provider: 'edge-tts'
+  provider: "edge-tts"
   available: boolean
   browserSupported: boolean
   featureEnabled: boolean

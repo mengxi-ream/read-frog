@@ -1,10 +1,10 @@
-import type { ConfigBackup, ConfigBackupMetadata } from '@/types/backup'
-import { i18n } from '#imports'
-import { Icon } from '@iconify/react/dist/iconify.js'
-import { useMutation } from '@tanstack/react-query'
-import { useAtomValue, useSetAtom } from 'jotai'
-import { useState } from 'react'
-import { toast } from 'sonner'
+import type { ConfigBackup, ConfigBackupMetadata } from "@/types/backup"
+import { i18n } from "#imports"
+import { Icon } from "@iconify/react/dist/iconify.js"
+import { useMutation } from "@tanstack/react-query"
+import { useAtomValue, useSetAtom } from "jotai"
+import { useState } from "react"
+import { toast } from "sonner"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,20 +15,20 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from '@/components/ui/base-ui/alert-dialog'
-import { Button } from '@/components/ui/base-ui/button'
-import { ButtonGroup } from '@/components/ui/base-ui/button-group'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/base-ui/dropdown-menu'
-import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemTitle } from '@/components/ui/base-ui/item'
-import { Spinner } from '@/components/ui/base-ui/spinner'
-import { useExportConfig } from '@/hooks/use-export-config'
-import { configAtom, writeConfigAtom } from '@/utils/atoms/config'
-import { addBackup, isSameAsLatestBackup, removeBackup } from '@/utils/backup/storage'
-import { migrateConfig } from '@/utils/config/migration'
-import { EXTENSION_VERSION } from '@/utils/constants/app'
-import { CONFIG_SCHEMA_VERSION } from '@/utils/constants/config'
-import { queryClient } from '@/utils/tanstack-query'
-import { ViewConfig } from '../../components/view-config'
+} from "@/components/ui/base-ui/alert-dialog"
+import { Button } from "@/components/ui/base-ui/button"
+import { ButtonGroup } from "@/components/ui/base-ui/button-group"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/base-ui/dropdown-menu"
+import { Item, ItemActions, ItemContent, ItemDescription, ItemFooter, ItemTitle } from "@/components/ui/base-ui/item"
+import { Spinner } from "@/components/ui/base-ui/spinner"
+import { useExportConfig } from "@/hooks/use-export-config"
+import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
+import { addBackup, isSameAsLatestBackup, removeBackup } from "@/utils/backup/storage"
+import { migrateConfig } from "@/utils/config/migration"
+import { EXTENSION_VERSION } from "@/utils/constants/app"
+import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
+import { queryClient } from "@/utils/tanstack-query"
+import { ViewConfig } from "../../components/view-config"
 
 interface BackupConfigItemProps {
   backupId: string
@@ -47,13 +47,13 @@ export function BackupConfigItem({ backupId, backupMetadata, backup }: BackupCon
         <ItemTitle>{formatDate(backupMetadata.createdAt)}</ItemTitle>
         <ItemDescription className="text-xs flex flex-wrap items-center gap-x-4">
           <span>
-            {i18n.t('options.config.backup.item.extensionVersion')}
-            {' '}
+            {i18n.t("options.config.backup.item.extensionVersion")}
+            {" "}
             {backupMetadata.extensionVersion}
           </span>
           <span>
-            {i18n.t('options.config.backup.item.schemaVersion')}
-            {' '}
+            {i18n.t("options.config.backup.item.schemaVersion")}
+            {" "}
             {backup.schemaVersion}
           </span>
         </ItemDescription>
@@ -86,8 +86,8 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
       await setConfig(migratedBackup)
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['config-backups'] })
-      toast.success(i18n.t('options.config.backup.restoreSuccess'))
+      void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
+      toast.success(i18n.t("options.config.backup.restoreSuccess"))
     },
   })
 
@@ -95,19 +95,19 @@ function RestoreButton({ backup }: { backup: ConfigBackup }) {
     <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger render={<Button variant="outline" size="sm" disabled={isRestoring} />}>
         {isRestoring ? <Spinner /> : <Icon icon="tabler:restore" />}
-        {i18n.t('options.config.backup.item.restore')}
+        {i18n.t("options.config.backup.item.restore")}
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>{i18n.t('options.config.backup.restore.title')}</AlertDialogTitle>
+          <AlertDialogTitle>{i18n.t("options.config.backup.restore.title")}</AlertDialogTitle>
           <AlertDialogDescription>
-            {i18n.t('options.config.backup.restore.description')}
+            {i18n.t("options.config.backup.restore.description")}
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{i18n.t('options.config.backup.restore.cancel')}</AlertDialogCancel>
+          <AlertDialogCancel>{i18n.t("options.config.backup.restore.cancel")}</AlertDialogCancel>
           <AlertDialogAction onClick={() => restoreBackup(backup, { onSettled: () => setOpen(false) })} disabled={isRestoring}>
-            {i18n.t('options.config.backup.restore.confirm')}
+            {i18n.t("options.config.backup.restore.confirm")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
@@ -124,7 +124,7 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
       await removeBackup(backupId)
     },
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['config-backups'] })
+      void queryClient.invalidateQueries({ queryKey: ["config-backups"] })
     },
   })
 
@@ -142,11 +142,11 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
         <DropdownMenuContent className="w-40" align="end">
           <DropdownMenuItem onSelect={() => setShowExportDialog(true)} disabled={isExporting}>
             <Icon icon="tabler:file-export" />
-            {i18n.t('options.config.backup.item.export')}
+            {i18n.t("options.config.backup.item.export")}
           </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => setShowDeleteDialog(true)}>
             <Icon icon="tabler:trash" />
-            {i18n.t('options.config.backup.item.delete')}
+            {i18n.t("options.config.backup.item.delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
@@ -154,13 +154,13 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18n.t('options.config.backup.delete.title')}</AlertDialogTitle>
-            <AlertDialogDescription>{i18n.t('options.config.backup.delete.description')}</AlertDialogDescription>
+            <AlertDialogTitle>{i18n.t("options.config.backup.delete.title")}</AlertDialogTitle>
+            <AlertDialogDescription>{i18n.t("options.config.backup.delete.description")}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18n.t('options.config.backup.delete.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{i18n.t("options.config.backup.delete.cancel")}</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={() => deleteBackup(backupId, { onSettled: () => setShowDeleteDialog(false) })} disabled={isDeleting}>
-              {i18n.t('options.config.backup.delete.confirm')}
+              {i18n.t("options.config.backup.delete.confirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -169,19 +169,19 @@ function MoreOptions({ backupId, backup }: { backupId: string, backup: ConfigBac
       <AlertDialog open={showExportDialog} onOpenChange={setShowExportDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{i18n.t('options.config.sync.exportOptions.title')}</AlertDialogTitle>
+            <AlertDialogTitle>{i18n.t("options.config.sync.exportOptions.title")}</AlertDialogTitle>
             <AlertDialogDescription>
-              {i18n.t('options.config.sync.exportOptions.description')}
+              {i18n.t("options.config.sync.exportOptions.description")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="flex justify-between!">
-            <AlertDialogCancel>{i18n.t('options.config.sync.exportOptions.cancel')}</AlertDialogCancel>
+            <AlertDialogCancel>{i18n.t("options.config.sync.exportOptions.cancel")}</AlertDialogCancel>
             <div className="flex gap-2">
               <AlertDialogAction variant="secondary" onClick={() => exportConfig(true, { onSettled: () => setShowExportDialog(false) })} disabled={isExporting}>
-                {i18n.t('options.config.sync.exportOptions.includeAPIKeys')}
+                {i18n.t("options.config.sync.exportOptions.includeAPIKeys")}
               </AlertDialogAction>
               <AlertDialogAction onClick={() => exportConfig(false, { onSettled: () => setShowExportDialog(false) })} disabled={isExporting}>
-                {i18n.t('options.config.sync.exportOptions.excludeAPIKeys')}
+                {i18n.t("options.config.sync.exportOptions.excludeAPIKeys")}
               </AlertDialogAction>
             </div>
           </AlertDialogFooter>

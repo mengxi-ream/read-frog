@@ -1,8 +1,8 @@
-import * as React from 'react'
-import themeCSS from '@/assets/styles/theme.css?inline'
-import { TRANSLATE_BUTTON_CONTAINER_ID } from '@/utils/constants/subtitles'
-import { createReactShadowHost } from '@/utils/react-shadow-host/create-shadow-host'
-import { SubtitleToggleButton } from '../ui/subtitles-translate-button'
+import * as React from "react"
+import themeCSS from "@/assets/styles/theme.css?inline"
+import { TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
+import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
+import { SubtitleToggleButton } from "../ui/subtitles-translate-button"
 
 const wrapperCSS = `
   :host {
@@ -37,7 +37,7 @@ export function renderSubtitlesTranslateButton(
   })
 
   const shadowHost = createReactShadowHost(component, {
-    position: 'inline',
+    position: "inline",
     inheritStyles: false,
     cssContent: [themeCSS, wrapperCSS],
   }) as HTMLDivElement

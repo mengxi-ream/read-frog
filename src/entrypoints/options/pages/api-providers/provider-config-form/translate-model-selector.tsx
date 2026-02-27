@@ -1,14 +1,14 @@
-import type { APIProviderConfig } from '@/types/config/provider'
-import { i18n } from '#imports'
-import { useStore } from '@tanstack/react-form'
-import { useSetAtom } from 'jotai'
-import { toast } from 'sonner'
-import { Checkbox } from '@/components/ui/base-ui/checkbox'
-import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/base-ui/select'
-import { isCustomLLMProviderConfig, isLLMProviderConfig, LLM_PROVIDER_MODELS } from '@/types/config/provider'
-import { providerConfigAtom, updateLLMProviderConfig } from '@/utils/atoms/provider'
-import { ModelSuggestionButton } from './components/model-suggestion-button'
-import { withForm } from './form'
+import type { APIProviderConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
+import { useStore } from "@tanstack/react-form"
+import { useSetAtom } from "jotai"
+import { toast } from "sonner"
+import { Checkbox } from "@/components/ui/base-ui/checkbox"
+import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
+import { isCustomLLMProviderConfig, isLLMProviderConfig, LLM_PROVIDER_MODELS } from "@/types/config/provider"
+import { providerConfigAtom, updateLLMProviderConfig } from "@/utils/atoms/provider"
+import { ModelSuggestionButton } from "./components/model-suggestion-button"
+import { withForm } from "./form"
 
 export const TranslateModelSelector = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
@@ -28,7 +28,7 @@ export const TranslateModelSelector = withForm({
                 {field => (
                   <field.InputField
                     formForSubmit={form}
-                    label={i18n.t('options.general.translationConfig.model.title')}
+                    label={i18n.t("options.general.translationConfig.model.title")}
                     labelExtra={isCustomLLMProviderConfig(providerConfig) && (
                       <ModelSuggestionButton
                         baseURL={providerConfig.baseURL}
@@ -39,7 +39,7 @@ export const TranslateModelSelector = withForm({
                         }}
                       />
                     )}
-                    value={customModel ?? ''}
+                    value={customModel ?? ""}
                   />
                 )}
               </form.AppField>
@@ -47,9 +47,9 @@ export const TranslateModelSelector = withForm({
           : (
               <form.AppField name="model.model">
                 {field => (
-                  <field.SelectField formForSubmit={form} label={i18n.t('options.general.translationConfig.model.title')}>
+                  <field.SelectField formForSubmit={form} label={i18n.t("options.general.translationConfig.model.title")}>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder={i18n.t('options.apiProviders.form.models.translate.placeholder')} />
+                      <SelectValue placeholder={i18n.t("options.apiProviders.form.models.translate.placeholder")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
@@ -64,7 +64,7 @@ export const TranslateModelSelector = withForm({
                 )}
               </form.AppField>
             )}
-        {providerConfig.provider !== 'openai-compatible' && (
+        {providerConfig.provider !== "openai-compatible" && (
           <form.Field name="model.isCustomModel">
             {field => (
               <div className="mt-2.5 flex items-center space-x-2">
@@ -95,7 +95,7 @@ export const TranslateModelSelector = withForm({
                       }
                     }
                     catch (error) {
-                      toast.error(error instanceof Error ? error.message : 'Failed to update configuration')
+                      toast.error(error instanceof Error ? error.message : "Failed to update configuration")
                     }
                   }}
                 />
@@ -103,7 +103,7 @@ export const TranslateModelSelector = withForm({
                   htmlFor="isCustomModel-translate"
                   className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
-                  {i18n.t('options.general.translationConfig.model.enterCustomModel')}
+                  {i18n.t("options.general.translationConfig.model.enterCustomModel")}
                 </label>
               </div>
             )}

@@ -3,23 +3,23 @@ export const DEFAULT_SIDE_CONTENT_WIDTH = 420 // px
 
 export const DOWNLOAD_FILE_ITEMS = {
   md: {
-    label: 'Markdown',
+    label: "Markdown",
   },
 }
 
 export const PARAGRAPH_DEPTH = 3
 
 export enum MARKDOWN_TEMPLATE_TOKEN {
-  title = '{{ Read Frog: title }}',
-  sentence = '{{ Read Frog:sentence }}',
-  words = '{{ Read Frog:words }}',
-  explanation = '{{ Read Frog:explanation }}',
-  originalSentence = '{{ Read Frog:originalSentence }}',
-  translatedSentence = '{{ Read Frog:translatedSentence }}',
-  word = '{{ Read Frog:word }}',
-  syntacticCategory = '{{ Read Frog:syntacticCategory }}',
-  wIndex = '{{ Read Frog:wIndex }}',
-  globalIndex = '{{ Read Frog:globalIndex }}',
+  title = "{{ Read Frog: title }}",
+  sentence = "{{ Read Frog:sentence }}",
+  words = "{{ Read Frog:words }}",
+  explanation = "{{ Read Frog:explanation }}",
+  originalSentence = "{{ Read Frog:originalSentence }}",
+  translatedSentence = "{{ Read Frog:translatedSentence }}",
+  word = "{{ Read Frog:word }}",
+  syntacticCategory = "{{ Read Frog:syntacticCategory }}",
+  wIndex = "{{ Read Frog:wIndex }}",
+  globalIndex = "{{ Read Frog:globalIndex }}",
 }
 
 export const AST_TEMPLATE = `

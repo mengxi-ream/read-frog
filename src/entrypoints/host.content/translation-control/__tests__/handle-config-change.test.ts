@@ -1,9 +1,9 @@
-import type { PageTranslationManager } from '../page-translation'
-import type { Config } from '@/types/config/config'
-import { describe, expect, it, vi } from 'vitest'
-import { handleTranslationModeChange } from '../handle-config-change'
+import type { PageTranslationManager } from "../page-translation"
+import type { Config } from "@/types/config/config"
+import { describe, expect, it, vi } from "vitest"
+import { handleTranslationModeChange } from "../handle-config-change"
 
-function createMockConfig(mode: 'bilingual' | 'translationOnly'): Config {
+function createMockConfig(mode: "bilingual" | "translationOnly"): Config {
   return { translate: { mode } } as Config
 }
 
@@ -15,13 +15,13 @@ function createMockManager(isActive: boolean): PageTranslationManager {
   } as unknown as PageTranslationManager
 }
 
-describe('handleTranslationModeChange', () => {
-  it('should trigger re-translation when mode changes and manager is active', () => {
+describe("handleTranslationModeChange", () => {
+  it("should trigger re-translation when mode changes and manager is active", () => {
     const manager = createMockManager(true)
 
     handleTranslationModeChange(
-      createMockConfig('translationOnly'),
-      createMockConfig('bilingual'),
+      createMockConfig("translationOnly"),
+      createMockConfig("bilingual"),
       manager,
     )
 
@@ -29,24 +29,24 @@ describe('handleTranslationModeChange', () => {
     expect(manager.start).toHaveBeenCalled()
   })
 
-  it('should not trigger when mode stays the same', () => {
+  it("should not trigger when mode stays the same", () => {
     const manager = createMockManager(true)
 
     handleTranslationModeChange(
-      createMockConfig('bilingual'),
-      createMockConfig('bilingual'),
+      createMockConfig("bilingual"),
+      createMockConfig("bilingual"),
       manager,
     )
 
     expect(manager.stop).not.toHaveBeenCalled()
   })
 
-  it('should not trigger when manager is not active', () => {
+  it("should not trigger when manager is not active", () => {
     const manager = createMockManager(false)
 
     handleTranslationModeChange(
-      createMockConfig('translationOnly'),
-      createMockConfig('bilingual'),
+      createMockConfig("translationOnly"),
+      createMockConfig("bilingual"),
       manager,
     )
 
