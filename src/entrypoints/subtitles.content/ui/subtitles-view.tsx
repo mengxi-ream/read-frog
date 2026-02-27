@@ -11,7 +11,7 @@ import { useVerticalDrag } from "./use-vertical-drag"
 
 interface SubtitlesViewProps {
   controlsConfig?: ControlsConfig
-  isRenderable: boolean
+  showContent: boolean
 }
 
 function SubtitlesContent() {
@@ -44,7 +44,7 @@ function SubtitlesContent() {
   )
 }
 
-export function SubtitlesView({ controlsConfig, isRenderable }: SubtitlesViewProps) {
+export function SubtitlesView({ controlsConfig, showContent }: SubtitlesViewProps) {
   const windowRef = useRef<HTMLDivElement>(null)
   const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
   const { refs, windowStyle, positionStyle, isDragging } = useVerticalDrag(controlsVisible, controlsHeight)
@@ -68,7 +68,7 @@ export function SubtitlesView({ controlsConfig, isRenderable }: SubtitlesViewPro
         className={cn(
           "group flex flex-col items-center absolute w-full left-0 right-0",
           !isDragging && "transition-[top,bottom] duration-200",
-          !isRenderable && "invisible",
+          !showContent && "invisible",
         )}
         style={positionStyle}
       >
@@ -81,7 +81,7 @@ export function SubtitlesView({ controlsConfig, isRenderable }: SubtitlesViewPro
           </div>
         </div>
 
-        <Activity mode={isRenderable ? "visible" : "hidden"}>
+        <Activity mode={showContent ? "visible" : "hidden"}>
           <SubtitlesContent />
         </Activity>
       </div>

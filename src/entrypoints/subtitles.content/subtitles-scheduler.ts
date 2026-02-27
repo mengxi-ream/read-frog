@@ -67,6 +67,10 @@ export class SubtitlesScheduler {
     return this.videoElement
   }
 
+  getState(): SubtitlesState {
+    return this.currentState.state ?? "idle"
+  }
+
   stop() {
     this.isActive = false
     this.detachListeners()

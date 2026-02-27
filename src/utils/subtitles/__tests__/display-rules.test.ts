@@ -1,7 +1,6 @@
 import type { StateData, SubtitlesFragment } from "../types"
-import type { SubtitlesDisplayMode } from "@/types/config/subtitles"
 import { describe, expect, it } from "vitest"
-import { deriveSubtitleDisplayDecision, hasRenderableSubtitleByMode } from "../display-rules"
+import { hasRenderableSubtitleByMode, isAwaitingTranslation } from "../display-rules"
 
 function makeSubtitle(overrides?: Partial<SubtitlesFragment>): SubtitlesFragment {
   return {
@@ -34,38 +33,35 @@ describe("hasRenderableSubtitleByMode", () => {
   })
 })
 
-describe("deriveSubtitleDisplayDecision", () => {
-  const modes: SubtitlesDisplayMode[] = ["bilingual", "originalOnly", "translationOnly"]
-
-  it("idle: never shows state message", () => {
+describe("isAwaitingTranslation", () => {
+  it("has subtitle, untranslated → true", () => {
     const sub = makeSubtitle()
-    for (const mode of modes) {
-      const result = deriveSubtitleDisplayDecision(null, sub, mode)
-      expect(result.showStateMessage).toBe(false)
-    }
+    expect(isAwaitingTranslation(sub, null)).toBe(true)
   })
 
-  it("loading + has renderable content: hides loading", () => {
-    const state: StateData = { state: "loading" }
+  it("has subtitle, translated → false", () => {
     const sub = makeSubtitle({ translation: "你好" })
-    const result = deriveSubtitleDisplayDecision(state, sub, "bilingual")
-    expect(result.hasRenderableSubtitle).toBe(true)
-    expect(result.showStateMessage).toBe(false)
+    expect(isAwaitingTranslation(sub, null)).toBe(false)
   })
 
-  it("loading + translationOnly without translation: shows loading", () => {
+  it("gap, stateData loading → true", () => {
     const state: StateData = { state: "loading" }
-    const sub = makeSubtitle()
-    const result = deriveSubtitleDisplayDecision(state, sub, "translationOnly")
-    expect(result.hasRenderableSubtitle).toBe(false)
-    expect(result.showStateMessage).toBe(true)
+    expect(isAwaitingTranslation(null, state)).toBe(true)
   })
 
-  it("error: always shows state message", () => {
-    const state: StateData = { state: "error", message: "something went wrong" }
-    for (const mode of modes) {
-      const result = deriveSubtitleDisplayDecision(state, makeSubtitle({ translation: "你好" }), mode)
-      expect(result.showStateMessage).toBe(true)
-    }
+  it("gap, stateData idle → false", () => {
+    const state: StateData = { state: "idle" }
+    expect(isAwaitingTranslation(null, state)).toBe(false)
+  })
+
+  it("gap, stateData null → false", () => {
+    expect(isAwaitingTranslation(null, null)).toBe(false)
+  })
+
+  it("has subtitle, ignores stateData when determining loading", () => {
+    const sub = makeSubtitle()
+    const idleState: StateData = { state: "idle" }
+    // subtitle without translation → awaiting, regardless of stateData
+    expect(isAwaitingTranslation(sub, idleState)).toBe(true)
   })
 })
