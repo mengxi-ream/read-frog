@@ -254,6 +254,43 @@ options:
         vocabularyInsight:
           title: 詞彙解析
           description: 配置選擇工具列詞彙/短語解析功能使用的提供商與模型
+      customFeatures:
+        title: 自訂 AI 功能
+        description: 為劃詞新增你自己的結構化 AI 操作
+        add: 新增 AI 功能
+        edit: 編輯 AI 功能
+        empty: 暫無自訂 AI 功能
+        noEnabledLlmProvider: 請先啟用至少一個 LLM 提供商後再建立自訂 AI 功能
+        table:
+          name: 名稱
+          provider: 提供商
+          fields: 欄位數
+          actions: 操作
+        form:
+          name: 名稱
+          icon: 圖示 (Iconify)
+          provider: 提供商
+          selectProvider: 選擇提供商
+          systemPrompt: 系統提示詞
+          prompt: 提示詞
+          outputSchema: 輸出 Schema
+          addField: 新增欄位
+          fieldName: 欄位名
+          fieldType: 欄位類型
+          actions: 操作
+          cancel: 取消
+          save: 儲存
+          tokens:
+            selection: 選取的文字內容
+            context: 選取文字所在段落內容
+        errors:
+          nameRequired: 名稱不能為空
+          duplicateName: '重複的功能名稱 "$1"'
+          invalidIcon: Iconify 圖示字串格式無效
+          providerRequired: 請選擇一個已啟用的 LLM 提供商
+          outputSchemaRequired: 至少需要一個輸出欄位
+          fieldKeyRequired: 欄位名不能為空
+          duplicateFieldKey: 欄位名不能重複
     contextMenu:
       title: 右鍵選單
       translate:

@@ -92,6 +92,9 @@ export type AllProviderTypes = typeof ALL_PROVIDER_TYPES[number]
 export function isPureTranslateProvider(provider: TranslateProviderTypes): provider is typeof PURE_TRANSLATE_PROVIDERS[number] {
   return PURE_TRANSLATE_PROVIDERS.includes(provider)
 }
+export function isPureTranslateProviderConfig(config: ProviderConfig): boolean {
+  return isTranslateProvider(config.provider) && isPureTranslateProvider(config.provider)
+}
 
 /* ──────────────────────────────
   Providers config schema

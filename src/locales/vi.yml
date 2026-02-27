@@ -254,6 +254,43 @@ options:
         vocabularyInsight:
           title: Phân tích từ vựng
           description: Cấu hình nhà cung cấp và model cho tính năng phân tích từ/cụm từ của selection toolbar
+      customFeatures:
+        title: Tính năng AI tùy chỉnh
+        description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
+        add: Thêm tính năng AI
+        edit: Chỉnh sửa tính năng AI
+        empty: Chưa có tính năng AI tùy chỉnh
+        noEnabledLlmProvider: Hãy bật ít nhất một nhà cung cấp LLM trước khi tạo tính năng AI tùy chỉnh
+        table:
+          name: Tên
+          provider: Nhà cung cấp
+          fields: Trường
+          actions: Thao tác
+        form:
+          name: Tên
+          icon: Biểu tượng (Iconify)
+          provider: Nhà cung cấp
+          selectProvider: Chọn nhà cung cấp
+          systemPrompt: System Prompt
+          prompt: Prompt
+          outputSchema: Schema đầu ra
+          addField: Thêm trường
+          fieldName: Tên trường
+          fieldType: Loại trường
+          actions: Thao tác
+          cancel: Hủy
+          save: Lưu
+          tokens:
+            selection: Nội dung văn bản đã chọn
+            context: Nội dung đoạn văn chứa văn bản đã chọn
+        errors:
+          nameRequired: Tên là bắt buộc
+          duplicateName: 'Tên tính năng trùng lặp "$1"'
+          invalidIcon: Chuỗi biểu tượng Iconify không hợp lệ
+          providerRequired: Vui lòng chọn một nhà cung cấp LLM đã bật
+          outputSchemaRequired: Thêm ít nhất một trường đầu ra
+          fieldKeyRequired: Tên trường là bắt buộc
+          duplicateFieldKey: Tên trường phải là duy nhất
     contextMenu:
       title: Menu ngữ cảnh
       translate:

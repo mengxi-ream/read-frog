@@ -104,22 +104,17 @@ function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS
       >
         {insertCells.map(cell => (
           <Tooltip key={cell.text}>
-            <TooltipTrigger
-              render={(
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "h-8 px-3 text-xs font-medium",
-                    cellClassName,
-                  )}
-                  onClick={() => handleCellClick(cell.text)}
-                  disabled={props.disabled}
-                />
-              )}
-            >
-              {cell.text}
+            <TooltipTrigger>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={cellClassName}
+                onClick={() => handleCellClick(cell.text)}
+                disabled={props.disabled}
+              >
+                {cell.text}
+              </Button>
             </TooltipTrigger>
             <TooltipContent>
               <p>{cell.description}</p>

@@ -1,8 +1,6 @@
 import type { Theme } from "@/components/providers/theme-provider"
 import type { ProviderConfig } from "@/types/config/provider"
-import type { FeatureKey } from "@/utils/constants/feature-providers"
 import { i18n } from "#imports"
-import { useAtomValue } from "jotai"
 import ProviderIcon from "@/components/provider-icon"
 import {
   Select,
@@ -13,47 +11,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
-import { NON_API_TRANSLATE_PROVIDERS } from "@/types/config/provider"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { filterEnabledProvidersConfig, getLLMProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig } from "@/utils/config/helpers"
-import { FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { isLLMProviderConfig, isPureTranslateProviderConfig } from "@/types/config/provider"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { useTheme } from "../providers/theme-provider"
 
 interface ProviderSelectorProps {
-  featureKey: FeatureKey
+  providers: ProviderConfig[]
   value: string
   onChange: (id: string) => void
-  excludeProviderTypes?: string[]
   placeholder?: string
   className?: string
 }
 
 export default function ProviderSelector({
-  featureKey,
+  providers,
   value,
   onChange,
-  excludeProviderTypes,
   placeholder,
   className,
 }: ProviderSelectorProps) {
   const { theme } = useTheme()
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-  const enabledProvidersConfig = filterEnabledProvidersConfig(providersConfig)
+  const currentProvider = providers.find(p => p.id === value)
 
-  const def = FEATURE_PROVIDER_DEFS[featureKey]
-  const allProviders = enabledProvidersConfig
-    .filter(p => def.isProvider(p.provider))
-    .filter(p => !excludeProviderTypes?.includes(p.provider))
-
-  const currentProvider = allProviders.find(p => p.id === value)
-
-  const hasNonAPI = NON_API_TRANSLATE_PROVIDERS.some(t => def.isProvider(t))
-  if (hasNonAPI) {
+  const hasGrouping = providers.some(isPureTranslateProviderConfig)
+  if (hasGrouping) {
     return (
       <TranslateGroupedSelect
-        enabledProvidersConfig={enabledProvidersConfig}
-        excludeProviderTypes={excludeProviderTypes}
+        providers={providers}
         currentProvider={currentProvider}
         onChange={onChange}
         placeholder={placeholder}
@@ -65,7 +49,7 @@ export default function ProviderSelector({
 
   return (
     <FlatSelect
-      providers={allProviders}
+      providers={providers}
       currentProvider={currentProvider}
       onChange={onChange}
       placeholder={placeholder}
@@ -76,26 +60,22 @@ export default function ProviderSelector({
 }
 
 function TranslateGroupedSelect({
-  enabledProvidersConfig,
-  excludeProviderTypes,
+  providers,
   currentProvider,
   onChange,
   placeholder,
   className,
   theme,
 }: {
-  enabledProvidersConfig: ProviderConfig[]
-  excludeProviderTypes?: string[]
+  providers: ProviderConfig[]
   currentProvider: ProviderConfig | undefined
   onChange: (id: string) => void
   placeholder?: string
   className?: string
   theme: Theme
 }) {
-  const nonAPIProviders = getNonAPIProvidersConfig(enabledProvidersConfig)
-    .filter(p => !excludeProviderTypes?.includes(p.provider))
-  const llmProviders = getLLMProvidersConfig(enabledProvidersConfig)
-  const pureAPIProviders = getPureAPIProvidersConfig(enabledProvidersConfig)
+  const llmProviders = providers.filter(isLLMProviderConfig)
+  const pureTranslateProviders = providers.filter(isPureTranslateProviderConfig)
 
   return (
     <Select<ProviderConfig>
@@ -125,12 +105,7 @@ function TranslateGroupedSelect({
         </SelectGroup>
         <SelectGroup>
           <SelectLabel>{i18n.t("translateService.normalTranslator")}</SelectLabel>
-          {nonAPIProviders.map(provider => (
-            <SelectItem key={provider.id} value={provider}>
-              <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
-            </SelectItem>
-          ))}
-          {pureAPIProviders.map(provider => (
+          {pureTranslateProviders.map(provider => (
             <SelectItem key={provider.id} value={provider}>
               <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
             </SelectItem>

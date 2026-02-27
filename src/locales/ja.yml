@@ -253,6 +253,43 @@ options:
         vocabularyInsight:
           title: 語彙分析
           description: 選択ツールバーで単語/フレーズを分析するためのプロバイダーとモデルを設定
+      customFeatures:
+        title: カスタム AI 機能
+        description: 選択テキスト向けに独自の構造化 AI アクションを追加
+        add: AI 機能を追加
+        edit: AI 機能を編集
+        empty: カスタム AI 機能はまだありません
+        noEnabledLlmProvider: カスタム AI 機能を作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
+        table:
+          name: 名前
+          provider: プロバイダー
+          fields: フィールド
+          actions: 操作
+        form:
+          name: 名前
+          icon: アイコン (Iconify)
+          provider: プロバイダー
+          selectProvider: プロバイダーを選択
+          systemPrompt: システムプロンプト
+          prompt: プロンプト
+          outputSchema: 出力スキーマ
+          addField: フィールドを追加
+          fieldName: フィールド名
+          fieldType: フィールド型
+          actions: 操作
+          cancel: キャンセル
+          save: 保存
+          tokens:
+            selection: 選択したテキスト内容
+            context: 選択テキストが含まれる段落内容
+        errors:
+          nameRequired: 名前は必須です
+          duplicateName: '重複する機能名 "$1"'
+          invalidIcon: 無効な Iconify アイコン文字列です
+          providerRequired: 有効な LLM プロバイダーを選択してください
+          outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください
+          fieldKeyRequired: フィールド名は必須です
+          duplicateFieldKey: フィールド名は一意である必要があります
     contextMenu:
       title: コンテキストメニュー
       translate:

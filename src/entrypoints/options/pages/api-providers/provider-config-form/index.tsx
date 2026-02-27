@@ -1,3 +1,4 @@
+import type { Config } from "@/types/config/config"
 import type { ProvidersConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
@@ -8,7 +9,11 @@ import { Button } from "@/components/ui/base-ui/button"
 import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvider } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
-import { computeProviderFallbacksAfterDeletion, findFeatureMissingProvider } from "@/utils/config/helpers"
+import {
+  computeProviderFallbacksAfterDeletion,
+  computeSelectionToolbarCustomFeatureFallbacksAfterDeletion,
+  findFeatureMissingProvider,
+} from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdAtom } from "../atoms"
@@ -69,10 +74,34 @@ export function ProviderConfigForm() {
       return
     }
 
+    const updatedCustomFeatures = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+      providerConfig.id,
+      config,
+      updatedAllProviders,
+    )
+    const hasAffectedCustomFeatures = config.selectionToolbar.customFeatures
+      .some(feature => feature.providerId === providerConfig.id)
+
+    if (hasAffectedCustomFeatures && !updatedCustomFeatures) {
+      toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider"))
+      return
+    }
+
     const fallbacks = computeProviderFallbacksAfterDeletion(providerConfig.id, config, updatedAllProviders)
-    const patch = buildFeatureProviderPatch(fallbacks)
-    if (Object.keys(patch).length > 0)
+    let patch = buildFeatureProviderPatch(fallbacks)
+    if (updatedCustomFeatures) {
+      patch = {
+        ...patch,
+        selectionToolbar: {
+          ...(patch.selectionToolbar ?? {}),
+          customFeatures: updatedCustomFeatures,
+        },
+      } as Partial<Config>
+    }
+
+    if (Object.keys(patch).length > 0) {
       await setConfig(patch)
+    }
 
     await setAllProvidersConfig(updatedAllProviders)
     setSelectedProviderId(chooseNextProviderConfig(updatedAllProviders).id)

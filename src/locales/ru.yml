@@ -254,6 +254,43 @@ options:
         vocabularyInsight:
           title: Анализ слов
           description: Настройка провайдера и модели для анализа слов/фраз в панели выделения
+      customFeatures:
+        title: Пользовательские AI-функции
+        description: Добавляйте собственные структурированные AI-действия для выделенного текста
+        add: Добавить AI-функцию
+        edit: Редактировать AI-функцию
+        empty: Пока нет пользовательских AI-функций
+        noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-функций
+        table:
+          name: Название
+          provider: Провайдер
+          fields: Поля
+          actions: Действия
+        form:
+          name: Название
+          icon: Иконка (Iconify)
+          provider: Провайдер
+          selectProvider: Выберите провайдера
+          systemPrompt: Системный промпт
+          prompt: Промпт
+          outputSchema: Схема вывода
+          addField: Добавить поле
+          fieldName: Имя поля
+          fieldType: Тип поля
+          actions: Действия
+          cancel: Отмена
+          save: Сохранить
+          tokens:
+            selection: Содержимое выделенного текста
+            context: Текст абзаца, в котором находится выделение
+        errors:
+          nameRequired: Название обязательно
+          duplicateName: 'Дублирующееся имя функции "$1"'
+          invalidIcon: Неверная строка иконки Iconify
+          providerRequired: Выберите включённого LLM-провайдера
+          outputSchemaRequired: Добавьте хотя бы одно поле вывода
+          fieldKeyRequired: Имя поля обязательно
+          duplicateFieldKey: Имена полей должны быть уникальными
     contextMenu:
       title: Контекстное меню
       translate:

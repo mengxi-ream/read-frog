@@ -44,6 +44,13 @@ export function SettingsNav() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
+            <SidebarMenuButton render={<Link to="/custom-features" />} isActive={pathname === "/custom-features"}>
+              <Icon icon="tabler:sparkles" />
+              <span>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/translation" />} isActive={pathname === "/translation"}>
               <Icon icon="ri:translate" />
               <span>{i18n.t("options.translation.title")}</span>

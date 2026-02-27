@@ -253,6 +253,43 @@ options:
         vocabularyInsight:
           title: 어휘 분석
           description: 선택 툴바에서 단어/구문 분석 기능의 제공업체와 모델을 구성합니다
+      customFeatures:
+        title: 커스텀 AI 기능
+        description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
+        add: AI 기능 추가
+        edit: AI 기능 편집
+        empty: 아직 커스텀 AI 기능이 없습니다
+        noEnabledLlmProvider: 커스텀 AI 기능을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
+        table:
+          name: 이름
+          provider: 제공업체
+          fields: 필드
+          actions: 작업
+        form:
+          name: 이름
+          icon: 아이콘 (Iconify)
+          provider: 제공업체
+          selectProvider: 제공업체 선택
+          systemPrompt: 시스템 프롬프트
+          prompt: 프롬프트
+          outputSchema: 출력 스키마
+          addField: 필드 추가
+          fieldName: 필드 이름
+          fieldType: 필드 유형
+          actions: 작업
+          cancel: 취소
+          save: 저장
+          tokens:
+            selection: 선택한 텍스트 내용
+            context: 선택 텍스트가 포함된 문단 내용
+        errors:
+          nameRequired: 이름은 필수입니다
+          duplicateName: '중복된 기능 이름 "$1"'
+          invalidIcon: 올바르지 않은 Iconify 아이콘 문자열입니다
+          providerRequired: 활성화된 LLM 제공업체를 선택하세요
+          outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요
+          fieldKeyRequired: 필드 이름은 필수입니다
+          duplicateFieldKey: 필드 이름은 고유해야 합니다
     contextMenu:
       title: 컨텍스트 메뉴
       translate:

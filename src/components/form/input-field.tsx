@@ -1,7 +1,7 @@
 import { useStore } from "@tanstack/react-form"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
-import { useFieldContext } from "../form-context"
+import { useFieldContext } from "./form-context"
 
 export function InputField(
   { formForSubmit, label, labelExtra, type, ...props }:
@@ -15,7 +15,6 @@ export function InputField(
     const value = e.target.value
 
     if (type === "number") {
-      // For number inputs: empty string -> undefined, valid number -> number
       if (value === "") {
         field.handleChange(undefined)
       }

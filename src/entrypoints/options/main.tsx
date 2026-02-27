@@ -10,6 +10,7 @@ import { HelpButton } from "@/components/help-button"
 import { ChartThemeProvider } from "@/components/providers/chart-theme-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { SidebarProvider } from "@/components/ui/base-ui/sidebar"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { getLocalConfig } from "@/utils/config/storage"
 import { queryClient } from "@/utils/tanstack-query"
@@ -48,10 +49,12 @@ async function initApp() {
               <SidebarProvider>
                 <ThemeProvider>
                   <ChartThemeProvider>
-                    <AppSidebar />
-                    <App />
-                    <FrogToast />
-                    <HelpButton />
+                    <TooltipProvider>
+                      <AppSidebar />
+                      <App />
+                      <FrogToast />
+                      <HelpButton />
+                    </TooltipProvider>
                   </ChartThemeProvider>
                 </ThemeProvider>
               </SidebarProvider>

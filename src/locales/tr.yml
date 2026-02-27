@@ -254,6 +254,43 @@ options:
         vocabularyInsight:
           title: Kelime Analizi
           description: Seçim araç çubuğunda kelime/ifade analizi için sağlayıcı ve model yapılandırın
+      customFeatures:
+        title: Özel AI Özellikleri
+        description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
+        add: AI Özelliği Ekle
+        edit: AI Özelliğini Düzenle
+        empty: Henüz özel AI özelliği yok
+        noEnabledLlmProvider: Özel AI özellikleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
+        table:
+          name: Ad
+          provider: Sağlayıcı
+          fields: Alanlar
+          actions: İşlemler
+        form:
+          name: Ad
+          icon: Simge (Iconify)
+          provider: Sağlayıcı
+          selectProvider: Sağlayıcı seçin
+          systemPrompt: Sistem Promptu
+          prompt: Prompt
+          outputSchema: Çıkış Şeması
+          addField: Alan Ekle
+          fieldName: Alan Adı
+          fieldType: Alan Türü
+          actions: İşlemler
+          cancel: İptal
+          save: Kaydet
+          tokens:
+            selection: Seçilen metin içeriği
+            context: Seçilen metnin bulunduğu paragraf metni
+        errors:
+          nameRequired: Ad gerekli
+          duplicateName: 'Yinelenen özellik adı "$1"'
+          invalidIcon: Geçersiz Iconify simge metni
+          providerRequired: Etkin bir LLM sağlayıcısı seçin
+          outputSchemaRequired: En az bir çıktı alanı ekleyin
+          fieldKeyRequired: Alan adı gerekli
+          duplicateFieldKey: Alan adları benzersiz olmalıdır
     contextMenu:
       title: Bağlam Menüsü
       translate:
