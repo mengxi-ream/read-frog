@@ -7,10 +7,16 @@ import { CustomFeaturesConfig } from "../custom-features-config"
 
 const ADD_FEATURE_KEY = "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.add"
 const ADD_FIELD_KEY = "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.addField"
+const DEFAULT_FIELD_NAME_KEY = "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.defaultFieldName"
+const FIELD_NAME_PLACEHOLDER_KEY = "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.fieldNamePlaceholder"
 
 const mockedAtoms = vi.hoisted(() => ({
   providersConfigAtom: null as any,
   selectionToolbarAtom: null as any,
+}))
+
+vi.mock("@/components/providers/theme-provider", () => ({
+  useTheme: () => ({ theme: "light" }),
 }))
 
 vi.mock("@/utils/atoms/config", async () => {
@@ -77,7 +83,7 @@ describe("custom features config", () => {
     fireEvent.click(screen.getByRole("button", { name: ADD_FEATURE_KEY }))
 
     await waitFor(() => {
-      expect(screen.getByDisplayValue("result")).toBeInTheDocument()
+      expect(screen.getByDisplayValue(DEFAULT_FIELD_NAME_KEY)).toBeInTheDocument()
     })
 
     const errorOutput = consoleErrorSpy.mock.calls
@@ -99,13 +105,13 @@ describe("custom features config", () => {
     fireEvent.click(screen.getByRole("button", { name: ADD_FEATURE_KEY }))
 
     await waitFor(() => {
-      expect(screen.getAllByPlaceholderText("field_name")).toHaveLength(1)
+      expect(screen.getAllByPlaceholderText(FIELD_NAME_PLACEHOLDER_KEY)).toHaveLength(1)
     })
 
     fireEvent.click(screen.getByRole("button", { name: ADD_FIELD_KEY }))
 
     await waitFor(() => {
-      expect(screen.getAllByPlaceholderText("field_name")).toHaveLength(2)
+      expect(screen.getAllByPlaceholderText(FIELD_NAME_PLACEHOLDER_KEY)).toHaveLength(2)
     })
   })
 })

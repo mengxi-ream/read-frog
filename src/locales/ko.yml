@@ -1,6 +1,9 @@
 name: Read Frog
 extName: Read Frog - 오픈 소스 몰입형 번역
 extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 학습할 수 있도록 도와주는 오픈 소스 브라우저 확장 프로그램입니다.
+dataTypes:
+  string: 텍스트
+  number: 숫자
 contextMenu:
   translate: 번역
   showOriginal: 원문 보기
@@ -279,6 +282,9 @@ options:
           actions: 작업
           cancel: 취소
           save: 저장
+          defaultFieldName: 결과
+          fieldNamePlaceholder: 필드명
+          autoFieldPrefix: 필드
           tokens:
             selection: 선택한 텍스트 내용
             context: 선택 텍스트가 포함된 문단 내용

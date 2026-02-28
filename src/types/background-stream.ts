@@ -20,7 +20,7 @@ interface BaseBackgroundStreamSerializablePayload {
 export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerializablePayload
 
 export interface BackgroundStructuredObjectOutputField {
-  key: string
+  name: string
   type: SelectionToolbarCustomFeatureOutputType
 }
 

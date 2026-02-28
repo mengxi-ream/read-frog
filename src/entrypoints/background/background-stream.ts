@@ -30,7 +30,7 @@ const streamTextPayloadSchema = z.object({
 }).loose()
 
 const structuredObjectFieldSchema = z.object({
-  key: z.string().trim().min(1),
+  name: z.string().trim().min(1),
   type: z.enum(["string", "number"]),
 })
 
@@ -38,18 +38,18 @@ const structuredObjectPayloadSchema = z.object({
   providerId: z.string().trim().min(1),
   outputSchema: z.array(structuredObjectFieldSchema).min(1),
 }).loose().superRefine((payload, ctx) => {
-  const keySet = new Set<string>()
+  const nameSet = new Set<string>()
 
   payload.outputSchema.forEach((field, index) => {
-    if (keySet.has(field.key)) {
+    if (nameSet.has(field.name)) {
       ctx.addIssue({
         code: "custom",
-        message: `Duplicate output schema key "${field.key}".`,
-        path: ["outputSchema", index, "key"],
+        message: `Duplicate output schema name "${field.name}".`,
+        path: ["outputSchema", index, "name"],
       })
       return
     }
-    keySet.add(field.key)
+    nameSet.add(field.name)
   })
 })
 
@@ -259,7 +259,7 @@ export async function runStructuredObjectStreamInBackground(
 
   const schemaShape: Record<string, z.ZodTypeAny> = {}
   for (const field of outputSchema) {
-    schemaShape[field.key] = field.type === "number" ? z.number() : z.string()
+    schemaShape[field.name] = field.type === "number" ? z.number() : z.string()
   }
 
   const result = streamText({

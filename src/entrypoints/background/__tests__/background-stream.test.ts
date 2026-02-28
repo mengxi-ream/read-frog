@@ -103,8 +103,8 @@ describe("background-stream", () => {
         providerId: "openai-default",
         prompt: "Analyze selection",
         outputSchema: [
-          { key: "score", type: "number" },
-          { key: "summary", type: "string" },
+          { name: "score", type: "number" },
+          { name: "summary", type: "string" },
         ],
       },
       {
@@ -303,8 +303,8 @@ describe("background-stream", () => {
       payload: {
         providerId: "openai-default",
         outputSchema: [
-          { key: "score ", type: "number" },
-          { key: "score", type: "string" },
+          { name: "score ", type: "number" },
+          { name: "score", type: "string" },
         ],
       },
     })

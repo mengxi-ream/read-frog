@@ -2,6 +2,9 @@ name: Read Frog
 extName: Read Frog - Иммерсивный переводчик с открытым исходным кодом
 extDescription: Read Frog — расширение браузера с открытым исходным кодом, которое поможет вам глубоко изучать языки на любом веб-сайте.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: Текст
+  number: Число
 contextMenu:
   translate: Перевести
   showOriginal: Показать оригинал
@@ -280,6 +283,9 @@ options:
           actions: Действия
           cancel: Отмена
           save: Сохранить
+          defaultFieldName: результат
+          fieldNamePlaceholder: имя_поля
+          autoFieldPrefix: поле
           tokens:
             selection: Содержимое выделенного текста
             context: Текст абзаца, в котором находится выделение

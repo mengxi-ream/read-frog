@@ -2,6 +2,9 @@ name: 陪讀蛙
 extName: 陪讀蛙 - 開源沉浸式翻譯
 extDescription: 陪讀蛙是一款開放源代碼的瀏覽器插件，旨在幫助您從任何網站深入學習語言。
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
+dataTypes:
+  string: 文字
+  number: 數字
 contextMenu:
   translate: 翻譯
   showOriginal: 顯示原文
@@ -280,6 +283,9 @@ options:
           actions: 操作
           cancel: 取消
           save: 儲存
+          defaultFieldName: 結果
+          fieldNamePlaceholder: 欄位名
+          autoFieldPrefix: 欄位
           tokens:
             selection: 選取的文字內容
             context: 選取文字所在段落內容

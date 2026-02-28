@@ -14,25 +14,25 @@ export const DEFAULT_FEATURE_ICONS = [
 ] as const
 
 export function createOutputSchemaField(
-  key: string = "result",
+  name: string,
   type: SelectionToolbarCustomFeatureOutputType = "string",
 ): SelectionToolbarCustomFeatureOutputField {
   return {
     id: crypto.randomUUID(),
-    key,
+    name,
     type,
   }
 }
 
-export function getNextOutputFieldKey(fields: SelectionToolbarCustomFeatureOutputField[]): string {
-  const existingKeySet = new Set(fields.map(field => field.key))
+export function getNextOutputFieldName(fields: SelectionToolbarCustomFeatureOutputField[], prefix: string): string {
+  const existingNameSet = new Set(fields.map(field => field.name))
   for (let i = 1; i <= fields.length + 1; i++) {
-    const candidate = `field_${i}`
-    if (!existingKeySet.has(candidate)) {
+    const candidate = `${prefix}${i}`
+    if (!existingNameSet.has(candidate)) {
       return candidate
     }
   }
-  return `field_${fields.length + 1}`
+  return `${prefix}${fields.length + 1}`
 }
 
 export const SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS = ["selection", "context"] as const

@@ -1,6 +1,9 @@
 name: 読書カエル
 extName: 読書カエル - オープンソースインビジブル翻訳
 extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
+dataTypes:
+  string: テキスト
+  number: 数値
 contextMenu:
   translate: 翻訳
   showOriginal: 原文を表示
@@ -279,6 +282,9 @@ options:
           actions: 操作
           cancel: キャンセル
           save: 保存
+          defaultFieldName: 結果
+          fieldNamePlaceholder: フィールド名
+          autoFieldPrefix: フィールド
           tokens:
             selection: 選択したテキスト内容
             context: 選択テキストが含まれる段落内容

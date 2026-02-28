@@ -4,7 +4,7 @@ export const selectionToolbarCustomFeatureOutputTypeSchema = z.enum(["string", "
 
 export const selectionToolbarCustomFeatureOutputFieldSchema = z.object({
   id: z.string().nonempty(),
-  key: z.string().trim().min(1),
+  name: z.string().trim().min(1),
   type: selectionToolbarCustomFeatureOutputTypeSchema,
 })
 
@@ -18,18 +18,18 @@ export const selectionToolbarCustomFeatureSchema = z.object({
   prompt: z.string(),
   outputSchema: z.array(selectionToolbarCustomFeatureOutputFieldSchema).min(1),
 }).superRefine((feature, ctx) => {
-  const keySet = new Set<string>()
+  const nameSet = new Set<string>()
 
   feature.outputSchema.forEach((field, index) => {
-    if (keySet.has(field.key)) {
+    if (nameSet.has(field.name)) {
       ctx.addIssue({
         code: "custom",
-        message: `Duplicate output schema key "${field.key}".`,
-        path: ["outputSchema", index, "key"],
+        message: `Duplicate output schema name "${field.name}".`,
+        path: ["outputSchema", index, "name"],
       })
       return
     }
-    keySet.add(field.key)
+    nameSet.add(field.name)
   })
 })
 

@@ -2,6 +2,9 @@ name: Read Frog
 extName: Read Frog - Açık Kaynak Sürükleyici Çeviri
 extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine öğrenmenize yardımcı olmak için tasarlanmış açık kaynaklı bir tarayıcı uzantısıdır.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: Metin
+  number: Sayı
 contextMenu:
   translate: Çevir
   showOriginal: Orijinali Göster
@@ -280,6 +283,9 @@ options:
           actions: İşlemler
           cancel: İptal
           save: Kaydet
+          defaultFieldName: sonuç
+          fieldNamePlaceholder: alan_adı
+          autoFieldPrefix: alan
           tokens:
             selection: Seçilen metin içeriği
             context: Seçilen metnin bulunduğu paragraf metni

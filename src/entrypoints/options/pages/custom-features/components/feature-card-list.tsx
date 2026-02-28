@@ -46,7 +46,7 @@ export function CustomFeatureCardList() {
       providerId: llmProviders[0].id,
       systemPrompt: "",
       prompt: "",
-      outputSchema: [createOutputSchemaField("result")],
+      outputSchema: [createOutputSchemaField(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.defaultFieldName"))],
     }
 
     void setSelectionToolbarConfig({
