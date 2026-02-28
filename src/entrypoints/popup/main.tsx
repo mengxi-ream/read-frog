@@ -1,3 +1,4 @@
+import "@/utils/zod-config"
 import type { Config } from "@/types/config/config"
 import { browser } from "#imports"
 import { QueryClientProvider } from "@tanstack/react-query"

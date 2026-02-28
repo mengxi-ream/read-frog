@@ -1,3 +1,4 @@
+import "@/utils/zod-config"
 import { createShadowRootUi, defineContentScript } from "#imports"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { kebabCase } from "case-anything"

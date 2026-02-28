@@ -1,3 +1,4 @@
+import "@/utils/zod-config"
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import { createShadowRootUi, defineContentScript, storage } from "#imports"
