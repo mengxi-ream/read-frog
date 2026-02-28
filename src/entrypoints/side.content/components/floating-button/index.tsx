@@ -143,7 +143,8 @@ export default function FloatingButton() {
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
             render={(
-              <div
+              <button
+                type="button"
                 title="Close floating button"
                 className={cn(
                   "border-border absolute -top-1 -left-1 hidden cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900",
