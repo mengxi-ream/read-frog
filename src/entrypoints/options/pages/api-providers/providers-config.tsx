@@ -26,13 +26,15 @@ import { selectedProviderIdAtom } from "./atoms"
 import { ProviderConfigForm } from "./provider-config-form"
 
 export function ProvidersConfig() {
+  const selectedProviderId = useAtomValue(selectedProviderIdAtom)
+
   return (
     <ConfigCard
       title={i18n.t("options.apiProviders.title")}
       description={i18n.t("options.apiProviders.description")}
       className="lg:flex-col"
     >
-      <EntityEditorLayout list={<ProviderCardList />} editor={<ProviderConfigForm />} />
+      <EntityEditorLayout list={<ProviderCardList />} editor={<ProviderConfigForm key={selectedProviderId} />} />
     </ConfigCard>
   )
 }

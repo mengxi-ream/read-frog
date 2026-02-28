@@ -83,6 +83,11 @@ options:
         baseURL: Base URL
         optional: 可選
       delete: 刪除
+      deleteDialog:
+        title: 刪除提供商？
+        description: 此操作無法撤銷。使用此提供商的功能將自動重新分配到其他可用提供商。
+        confirm: 刪除
+        cancel: 取消
       atLeastOneLLMProvider: 至少需要一個 LLM 翻譯提供商。
       duplicateProviderName: '重複的提供商名稱 "$1"'
       defaultProvider:
@@ -289,6 +294,12 @@ options:
           tokens:
             selection: 選取的文字內容
             context: 選取文字所在段落內容
+          delete: 刪除
+          deleteDialog:
+            title: 刪除自訂功能？
+            description: 此操作無法撤銷。
+            confirm: 刪除
+            cancel: 取消
         errors:
           nameRequired: 名稱不能為空
           duplicateName: '重複的功能名稱 "$1"'

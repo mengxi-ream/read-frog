@@ -83,6 +83,11 @@ options:
         baseURL: Base URL
         optional: Tùy chọn
       delete: Xóa
+      deleteDialog:
+        title: Xóa nhà cung cấp?
+        description: Hành động này không thể hoàn tác. Các tính năng sử dụng nhà cung cấp này sẽ được tự động chuyển sang nhà cung cấp khả dụng khác.
+        confirm: Xóa
+        cancel: Hủy
       atLeastOneLLMProvider: Cần ít nhất một nhà cung cấp dịch LLM.
       duplicateProviderName: 'Tên nhà cung cấp trùng lặp "$1"'
       defaultProvider:
@@ -289,6 +294,12 @@ options:
           tokens:
             selection: Nội dung văn bản đã chọn
             context: Nội dung đoạn văn chứa văn bản đã chọn
+          delete: Xóa
+          deleteDialog:
+            title: Xóa tính năng tùy chỉnh?
+            description: Hành động này không thể hoàn tác.
+            confirm: Xóa
+            cancel: Hủy
         errors:
           nameRequired: Tên là bắt buộc
           duplicateName: 'Tên tính năng trùng lặp "$1"'

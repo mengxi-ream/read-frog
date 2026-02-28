@@ -83,6 +83,11 @@ options:
         baseURL: Base URL
         optional: İsteğe Bağlı
       delete: Sil
+      deleteDialog:
+        title: Sağlayıcıyı sil?
+        description: Bu işlem geri alınamaz. Bu sağlayıcıyı kullanan özellikler otomatik olarak başka bir mevcut sağlayıcıya yeniden atanacaktır.
+        confirm: Sil
+        cancel: İptal
       atLeastOneLLMProvider: En az bir LLM çeviri sağlayıcısı gereklidir.
       duplicateProviderName: 'Yinelenen sağlayıcı adı "$1"'
       defaultProvider:
@@ -289,6 +294,12 @@ options:
           tokens:
             selection: Seçilen metin içeriği
             context: Seçilen metnin bulunduğu paragraf metni
+          delete: Sil
+          deleteDialog:
+            title: Özel özelliği sil?
+            description: Bu işlem geri alınamaz.
+            confirm: Sil
+            cancel: İptal
         errors:
           nameRequired: Ad gerekli
           duplicateName: 'Yinelenen özellik adı "$1"'

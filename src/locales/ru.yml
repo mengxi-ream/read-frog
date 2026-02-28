@@ -83,6 +83,11 @@ options:
         baseURL: Base URL
         optional: Необязательно
       delete: Удалить
+      deleteDialog:
+        title: Удалить провайдера?
+        description: Это действие нельзя отменить. Функции, использующие этого провайдера, будут автоматически переназначены другому доступному провайдеру.
+        confirm: Удалить
+        cancel: Отмена
       atLeastOneLLMProvider: Требуется как минимум один LLM-провайдер перевода.
       duplicateProviderName: 'Дублирующееся имя провайдера "$1"'
       defaultProvider:
@@ -289,6 +294,12 @@ options:
           tokens:
             selection: Содержимое выделенного текста
             context: Текст абзаца, в котором находится выделение
+          delete: Удалить
+          deleteDialog:
+            title: Удалить пользовательскую функцию?
+            description: Это действие нельзя отменить.
+            confirm: Удалить
+            cancel: Отмена
         errors:
           nameRequired: Название обязательно
           duplicateName: 'Дублирующееся имя функции "$1"'

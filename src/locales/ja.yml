@@ -82,6 +82,11 @@ options:
         baseURL: ベースURL
         optional: オプション
       delete: 削除
+      deleteDialog:
+        title: プロバイダーを削除しますか？
+        description: この操作は元に戻せません。このプロバイダーを使用している機能は、他の利用可能なプロバイダーに自動的に再割り当てされます。
+        confirm: 削除
+        cancel: キャンセル
       atLeastOneLLMProvider: 最低1つのLLM翻訳プロバイダーが必要です。
       duplicateProviderName: '重複するプロバイダー名 "$1"'
       defaultProvider:
@@ -288,6 +293,12 @@ options:
           tokens:
             selection: 選択したテキスト内容
             context: 選択テキストが含まれる段落内容
+          delete: 削除
+          deleteDialog:
+            title: カスタム機能を削除しますか？
+            description: この操作は元に戻せません。
+            confirm: 削除
+            cancel: キャンセル
         errors:
           nameRequired: 名前は必須です
           duplicateName: '重複する機能名 "$1"'

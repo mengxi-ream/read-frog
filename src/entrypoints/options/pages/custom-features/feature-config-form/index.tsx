@@ -1,8 +1,19 @@
 import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { QuickInsertableTextareaField } from "@/components/form/quick-insertable-textarea-field"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
@@ -68,6 +79,8 @@ function CustomFeatureConfigEditor({ selectedFeature }: { selectedFeature: Selec
     description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.tokens.${token}`),
   }))
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
   const handleDeleteFeature = () => {
     const currentIndex = customFeatures.findIndex(feature => feature.id === selectedFeature.id)
     if (currentIndex < 0) {
@@ -119,9 +132,21 @@ function CustomFeatureConfigEditor({ selectedFeature }: { selectedFeature: Selec
           <OutputSchemaField form={form} />
         </div>
         <div className="flex justify-end mt-8">
-          <Button type="button" variant="destructive" onClick={handleDeleteFeature}>
-            {i18n.t("options.apiProviders.form.delete")}
-          </Button>
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogTrigger render={<Button type="button" variant="destructive" />}>
+              {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.delete")}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.deleteDialog.title")}</AlertDialogTitle>
+                <AlertDialogDescription>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.deleteDialog.description")}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.deleteDialog.cancel")}</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={handleDeleteFeature}>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.deleteDialog.confirm")}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </form.AppForm>
