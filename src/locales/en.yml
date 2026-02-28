@@ -294,6 +294,8 @@ options:
           tokens:
             selection: Selected text content
             context: Paragraph text where the selection appears
+            targetLang: "User's target language"
+            title: Webpage title
           delete: Delete
           deleteDialog:
             title: Delete Custom Feature?

@@ -294,6 +294,8 @@ options:
           tokens:
             selection: 选中的文本内容
             context: 选中文本所在段落内容
+            targetLang: 用户的目标语言
+            title: 网页标题
           delete: 删除
           deleteDialog:
             title: 删除自定义功能？

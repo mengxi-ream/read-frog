@@ -123,6 +123,9 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   const assignedFeatures = FEATURE_KEYS
     .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
+  const assignedCustomFeatures = config.selectionToolbar.customFeatures
+    .filter(f => f.providerId === id)
+  const totalAssigned = assignedFeatures.length + assignedCustomFeatures.length
 
   return (
     <div
@@ -132,7 +135,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       )}
       onClick={() => setSelectedProviderId(id)}
     >
-      {assignedFeatures.length > 0 && (
+      {totalAssigned > 0 && (
         <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
           <Tooltip>
             <TooltipTrigger
@@ -140,12 +143,15 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
                 <Badge className="bg-blue-500 cursor-default" size="sm" />
               )}
             >
-              {i18n.t("options.apiProviders.badges.featureCount", [assignedFeatures.length])}
+              {i18n.t("options.apiProviders.badges.featureCount", [totalAssigned])}
             </TooltipTrigger>
             <TooltipContent>
               <ul className="list-disc list-inside marker:text-green-500">
                 {assignedFeatures.map(key => (
                   <li key={key}>{i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[key]}`)}</li>
+                ))}
+                {assignedCustomFeatures.map(f => (
+                  <li key={f.id}>{f.name}</li>
                 ))}
               </ul>
             </TooltipContent>

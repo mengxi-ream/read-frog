@@ -294,6 +294,8 @@ options:
           tokens:
             selection: 選取的文字內容
             context: 選取文字所在段落內容
+            targetLang: 使用者的目標語言
+            title: 網頁標題
           delete: 刪除
           deleteDialog:
             title: 刪除自訂功能？

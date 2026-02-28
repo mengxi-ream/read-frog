@@ -294,6 +294,8 @@ options:
           tokens:
             selection: Nội dung văn bản đã chọn
             context: Nội dung đoạn văn chứa văn bản đã chọn
+            targetLang: Ngôn ngữ đích của người dùng
+            title: Tiêu đề trang web
           delete: Xóa
           deleteDialog:
             title: Xóa tính năng tùy chỉnh?

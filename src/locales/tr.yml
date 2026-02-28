@@ -294,6 +294,8 @@ options:
           tokens:
             selection: Seçilen metin içeriği
             context: Seçilen metnin bulunduğu paragraf metni
+            targetLang: Kullanıcının hedef dili
+            title: Web sayfası başlığı
           delete: Sil
           deleteDialog:
             title: Özel özelliği sil?

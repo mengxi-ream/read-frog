@@ -1,4 +1,5 @@
 import type {
+  SelectionToolbarCustomFeature,
   SelectionToolbarCustomFeatureOutputField,
   SelectionToolbarCustomFeatureOutputType,
 } from "@/types/config/selection-toolbar"
@@ -35,7 +36,25 @@ export function getNextOutputFieldName(fields: SelectionToolbarCustomFeatureOutp
   return `${prefix}${fields.length + 1}`
 }
 
-export const SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS = ["selection", "context"] as const
+export const DEFAULT_DICTIONARY_FEATURE = {
+  id: "default-dictionary",
+  name: "Dictionary",
+  enabled: true,
+  icon: "tabler:book-2",
+  providerId: "openai-default",
+  systemPrompt: "You are a dictionary assistant for language learners. Given a term and its surrounding context, provide a comprehensive and concise dictionary entry. When a term has multiple meanings, focus on the contextual meaning. Return the term in its base/canonical form. Respond in {{targetLang}}.",
+  prompt: "Term: {{selection}}\nContext: {{context}}\nTarget language: {{targetLang}}",
+  outputSchema: [
+    { id: "default-dictionary-term", name: "Term", type: "string" as const },
+    { id: "default-dictionary-definition", name: "Definition", type: "string" as const },
+    { id: "default-dictionary-context", name: "Context", type: "string" as const },
+    { id: "default-dictionary-examples", name: "Examples", type: "string" as const },
+    { id: "default-dictionary-synonyms", name: "Synonyms", type: "string" as const },
+    { id: "default-dictionary-antonyms", name: "Antonyms", type: "string" as const },
+  ],
+} satisfies SelectionToolbarCustomFeature
+
+export const SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS = ["selection", "context", "targetLang", "title"] as const
 
 export type SelectionToolbarCustomFeatureToken = (typeof SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS)[number]
 

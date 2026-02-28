@@ -293,6 +293,8 @@ options:
           tokens:
             selection: 선택한 텍스트 내용
             context: 선택 텍스트가 포함된 문단 내용
+            targetLang: 사용자의 대상 언어
+            title: 웹페이지 제목
           delete: 삭제
           deleteDialog:
             title: 사용자 정의 기능을 삭제하시겠습니까?

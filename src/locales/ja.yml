@@ -293,6 +293,8 @@ options:
           tokens:
             selection: 選択したテキスト内容
             context: 選択テキストが含まれる段落内容
+            targetLang: ユーザーのターゲット言語
+            title: ウェブページのタイトル
           delete: 削除
           deleteDialog:
             title: カスタム機能を削除しますか？
