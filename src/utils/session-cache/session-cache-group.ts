@@ -5,7 +5,6 @@ import { logger } from "@/utils/logger"
 
 interface CacheMetadata extends Record<string, unknown> {
   timestamp: number
-  lastAccessed?: number
 }
 
 type CachedItem = ProxyResponse
@@ -53,9 +52,6 @@ export class SessionCache {
         return undefined
       }
 
-      // Update last accessed time
-      await storage.setMeta(key, { lastAccessed: Date.now() })
-
       logger.info("[SessionCache] Cache hit:", { reqMethod, targetUrl })
       return item
     }
@@ -77,7 +73,6 @@ export class SessionCache {
         storage.setItem(key, response),
         storage.setMeta<CacheMetadata>(key, {
           timestamp: now,
-          lastAccessed: now,
         }),
       ])
 
