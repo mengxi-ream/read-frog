@@ -90,3 +90,76 @@ export function createHighlightData(selectionRange: Range): HighlightData {
     context: getContext(selectionRange),
   }
 }
+
+const PARAGRAPH_LIKE_TAGS = new Set([
+  "P",
+  "LI",
+  "TD",
+  "TH",
+  "DT",
+  "DD",
+  "BLOCKQUOTE",
+  "PRE",
+  "H1",
+  "H2",
+  "H3",
+  "H4",
+  "H5",
+  "H6",
+  "FIGCAPTION",
+])
+
+function isParagraphLikeElement(element: HTMLElement) {
+  if (element.tagName === "BODY") {
+    return false
+  }
+
+  if (PARAGRAPH_LIKE_TAGS.has(element.tagName)) {
+    return true
+  }
+
+  const display = window.getComputedStyle(element).display
+  return [
+    "block",
+    "list-item",
+    "table-cell",
+    "table-row",
+    "flex",
+    "grid",
+  ].includes(display)
+}
+
+function findNearestParagraphElement(node: Node | null) {
+  if (!node) {
+    return null
+  }
+
+  let current: HTMLElement | null = node instanceof HTMLElement
+    ? node
+    : node.parentElement
+
+  while (current) {
+    if (isParagraphLikeElement(current)) {
+      return current
+    }
+    current = current.parentElement
+  }
+
+  return null
+}
+
+function normalizeTextContent(text: string) {
+  return text.replace(/\s+/g, " ").trim()
+}
+
+export function getSelectionParagraphText(selectionRange: Range) {
+  const paragraph
+    = findNearestParagraphElement(selectionRange.startContainer)
+      ?? findNearestParagraphElement(selectionRange.commonAncestorContainer)
+
+  if (paragraph?.textContent) {
+    return normalizeTextContent(paragraph.textContent)
+  }
+
+  return normalizeTextContent(selectionRange.commonAncestorContainer.textContent ?? "")
+}

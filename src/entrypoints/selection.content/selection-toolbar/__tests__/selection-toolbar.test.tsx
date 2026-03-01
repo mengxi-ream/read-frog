@@ -21,6 +21,11 @@ vi.mock("../speak-button", () => ({
   SpeakButton: () => null,
 }))
 
+vi.mock("../custom-feature-button", () => ({
+  SelectionToolbarCustomFeatureButtons: () => null,
+  SelectionToolbarCustomFeaturePopover: () => null,
+}))
+
 // Mock atoms
 vi.mock("@/utils/atoms/config", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@/utils/atoms/config")>()
