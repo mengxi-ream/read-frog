@@ -67,12 +67,21 @@ function ImportConfig() {
         reader.readAsText(file)
       })
 
-      const parsed = JSON.parse(fileContent)
-      // TODO: Remove __configSchemaVersion fallback after all users have migrated to v38+
-      const importConfigSchemaVersion = parsed.schemaVersion ?? parsed.__configSchemaVersion
-      const importConfigData = parsed.config
+      const parsed = JSON.parse(fileContent) as {
+        schemaVersion?: unknown
+        config?: unknown
+      }
 
-      const newConfig = await migrateConfig(importConfigData, importConfigSchemaVersion)
+      const importConfigSchemaVersion = parsed.schemaVersion
+      if (typeof importConfigSchemaVersion !== "number" || !Number.isInteger(importConfigSchemaVersion)) {
+        throw new TypeError("Invalid config schemaVersion")
+      }
+
+      if (parsed.config === undefined) {
+        throw new TypeError("Missing config payload")
+      }
+
+      const newConfig = await migrateConfig(parsed.config, importConfigSchemaVersion)
       await addBackup(currentConfig, EXTENSION_VERSION)
       await setConfig(newConfig)
     },

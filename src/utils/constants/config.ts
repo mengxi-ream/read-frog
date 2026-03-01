@@ -12,10 +12,6 @@ export const CONFIG_STORAGE_KEY = "config"
 export const LAST_SYNCED_CONFIG_STORAGE_KEY = "lastSyncedConfig"
 export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
-// Legacy storage keys for migration only
-// TODO: Remove these after all users have migrated to v38+
-export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = "__configSchemaVersion"
-
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
 export const CONFIG_SCHEMA_VERSION = 55
