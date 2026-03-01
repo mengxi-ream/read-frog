@@ -12,10 +12,12 @@
 
 [![][extension-release-shield]][github-release-link]
 [![][chrome-version-shield]][chrome-store-link]
-[![][edge-version-shield]][edge-store-link]<br/>
+[![][edge-version-shield]][edge-store-link]
+[![][firefox-version-shield]][firefox-store-link]<br/>
 [![][discord-shield]][discord-link]
 [![][chrome-users-shield]][chrome-store-link]
-[![][edge-users-shield]][edge-store-link]<br/>
+[![][edge-users-shield]][edge-store-link]
+[![][firefox-users-shield]][firefox-store-link]<br/>
 [![][star-history-shield]][star-history-link]
 [![][contributors-shield]][contributors-link]
 ![][last-commit-shield]
@@ -70,10 +72,11 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 ### 下载
 
-| 浏览器 | 版本                                            | 下载                                                             |
-| ------ | ----------------------------------------------- | ---------------------------------------------------------------- |
-| Chrome | [![][chrome-version-shield]][chrome-store-link] | [Chrome 应用商店][chrome-store-link] 或 [中国镜像][crxsoso-link] |
-| Edge   | [![][edge-version-shield]][edge-store-link]     | [Microsoft Edge 插件商店][edge-store-link]                       |
+| 浏览器  | 版本                                              | 下载                                                             |
+| ------- | ------------------------------------------------- | ---------------------------------------------------------------- |
+| Chrome  | [![][chrome-version-shield]][chrome-store-link]   | [Chrome 应用商店][chrome-store-link] 或 [中国镜像][crxsoso-link] |
+| Edge    | [![][edge-version-shield]][edge-store-link]       | [Microsoft Edge 插件商店][edge-store-link]                       |
+| Firefox | [![][firefox-version-shield]][firefox-store-link] | [Firefox 附加组件][firefox-store-link]                           |
 
 ### 社区
 
@@ -298,8 +301,8 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 [back-to-top]: https://img.shields.io/badge/-回到顶部-151515?style=flat-square
 [chrome-store-link]: https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb
-[chrome-users-shield]: https://img.shields.io/chrome-web-store/users/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20用户&color=orange&labelColor=black
-[chrome-version-shield]: https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20版本&labelColor=black
+[chrome-users-shield]: https://img.shields.io/chrome-web-store/users/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20用户&color=yellow&labelColor=black
+[chrome-version-shield]: https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20版本&labelColor=black&color=yellow
 [contributors-link]: https://github.com/mengxi-ream/read-frog/graphs/contributors
 [contributors-shield]: https://img.shields.io/github/contributors/mengxi-ream/read-frog?style=flat-square&labelColor=black
 [crxsoso-link]: https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb
@@ -307,6 +310,9 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 [discord-shield]: https://img.shields.io/discord/1371229720942874646?style=flat-square&label=Discord&logo=discord&logoColor=white&color=5865F2&labelColor=black
 [discord-shield-badge]: https://img.shields.io/badge/聊天-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=black
 [edge-store-link]: https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo
+[firefox-store-link]: https://addons.mozilla.org/firefox/addon/read-frog-open-ai-translator/
+[firefox-version-shield]: https://img.shields.io/amo/v/read-frog-open-ai-translator?style=flat-square&label=Firefox%20版本&labelColor=black&color=orange
+[firefox-users-shield]: https://img.shields.io/amo/users/read-frog-open-ai-translator?style=flat-square&label=Firefox%20用户&color=orange&labelColor=black
 [edge-users-shield]: https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Edge%20用户&query=%24.activeInstallCount&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black
 [edge-version-shield]: https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Edge%20版本&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black&prefix=v
 [extension-release-shield]: https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=package.json&style=flat-square&label=最新版本&color=brightgreen&labelColor=black

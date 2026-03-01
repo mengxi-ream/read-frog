@@ -8,6 +8,7 @@ import { translateSubtitles } from "@/utils/subtitles/processor/translator"
 export interface TranslationCoordinatorOptions {
   getFragments: () => SubtitlesFragment[]
   getVideoElement: () => HTMLVideoElement | null
+  getCurrentState: () => SubtitlesState
   segmentationPipeline: SegmentationPipeline | null
   onTranslated: (fragments: SubtitlesFragment[]) => void
   onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
@@ -23,6 +24,7 @@ export class TranslationCoordinator {
 
   private getFragments: () => SubtitlesFragment[]
   private getVideoElement: () => HTMLVideoElement | null
+  private getCurrentState: () => SubtitlesState
   private segmentationPipeline: SegmentationPipeline | null
   private onTranslated: (fragments: SubtitlesFragment[]) => void
   private onStateChange: (state: SubtitlesState, data?: Record<string, string>) => void
@@ -30,6 +32,7 @@ export class TranslationCoordinator {
   constructor(options: TranslationCoordinatorOptions) {
     this.getFragments = options.getFragments
     this.getVideoElement = options.getVideoElement
+    this.getCurrentState = options.getCurrentState
     this.segmentationPipeline = options.segmentationPipeline
     this.onTranslated = options.onTranslated
     this.onStateChange = options.onStateChange
@@ -85,6 +88,9 @@ export class TranslationCoordinator {
 
     const currentTimeMs = video.currentTime * 1000
     const fragments = this.getFragments()
+
+    if (this.getCurrentState() === "error")
+      return
 
     this.updateLoadingStateAt(currentTimeMs, fragments)
 
@@ -165,16 +171,27 @@ export class TranslationCoordinator {
     return fragments.find(f => f.start <= timeMs && f.end > timeMs) ?? null
   }
 
+  private isCueResolved(startMs: number): boolean {
+    return this.translatedStarts.has(startMs) || this.failedStarts.has(startMs)
+  }
+
   private updateLoadingStateAt(timeMs: number, fragments: SubtitlesFragment[]) {
     const activeCue = this.findActiveCue(timeMs, fragments)
 
-    const nextState: SubtitlesState = activeCue && !this.translatedStarts.has(activeCue.start)
-      ? "loading"
-      : "idle"
+    if (activeCue) {
+      const nextState: SubtitlesState = this.isCueResolved(activeCue.start) ? "idle" : "loading"
+      if (nextState === this.lastEmittedState)
+        return
+      this.lastEmittedState = nextState
+      this.onStateChange(nextState)
+      return
+    }
 
+    // Gap: keep loading if next cue needs translation
+    const nextCue = fragments.find(f => f.start > timeMs)
+    const nextState: SubtitlesState = nextCue && !this.isCueResolved(nextCue.start) ? "loading" : "idle"
     if (nextState === this.lastEmittedState)
       return
-
     this.lastEmittedState = nextState
     this.onStateChange(nextState)
   }

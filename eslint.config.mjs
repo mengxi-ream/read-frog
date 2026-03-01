@@ -30,6 +30,30 @@ export default antfu({
     "unused-imports/no-unused-imports": "error",
     "no-inner-declarations": "error",
     "antfu/consistent-list-newline": "off",
+    "perfectionist/sort-imports": ["error", {
+      groups: [
+        "setup",
+        "type-import",
+        ["type-parent", "type-sibling", "type-index", "type-internal"],
+        "value-builtin",
+        "value-external",
+        "value-internal",
+        ["value-parent", "value-sibling", "value-index"],
+        "side-effect",
+        "ts-equals-import",
+        "unknown",
+      ],
+      customGroups: [
+        {
+          groupName: "setup",
+          elementNamePattern: "@/utils/zod-config",
+        },
+      ],
+      newlinesBetween: "ignore",
+      newlinesInside: "ignore",
+      order: "asc",
+      type: "natural",
+    }],
   },
   react: {
     overrides: {
