@@ -38,6 +38,22 @@ popup:
     rateUs: 好评支持
     ebook: 第三方电子书阅读器
     tutorial: 使用教程
+errorRecovery:
+  title: 应用发生异常
+  description: 已进入恢复模式。你可以先导出当前设置作为备份，再重置设置后重试。
+  backupTitle: 先备份当前设置（推荐）
+  exportWithApiKeys: 导出（包含 API Keys）
+  exportWithoutApiKeys: 导出（不包含 API Keys）
+  resetTitle: 重置设置
+  resetAction: 重置为默认设置
+  resetSuccess: 恢复完成，设置已重置
+  resetFailed: 恢复失败，无法重置设置
+  errorDetails: 错误详情
+  resetDialog:
+    title: 确认重置设置？
+    description: 这会用默认设置覆盖当前设置。
+    confirm: 重置
+    cancel: 取消
 options:
   sidebar:
     settings: 设置
@@ -89,6 +105,7 @@ options:
         confirm: 删除
         cancel: 取消
       atLeastOneLLMProvider: 至少需要一个 LLM 翻译提供商。
+      providerInUseCannotDisable: '无法禁用 "$1"，它当前正被 $2 个功能使用。'
       duplicateProviderName: '重复的提供商名称 "$1"'
       defaultProvider:
         translate: 设为默认翻译提供商
@@ -151,6 +168,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
+      customFeatures: 自定义 AI 功能
       features:
         translate: 网页翻译
         selectionToolbar_translate: 划词翻译

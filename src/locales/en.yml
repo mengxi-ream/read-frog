@@ -38,6 +38,22 @@ popup:
     rateUs: Rate Us
     ebook: Third-party E-book Reader
     tutorial: Tutorial
+errorRecovery:
+  title: Something went wrong
+  description: Recovery mode is active. You can export your current settings as a backup, then reset settings and try again.
+  backupTitle: Backup current settings first (recommended)
+  exportWithApiKeys: Export with API Keys
+  exportWithoutApiKeys: Export without API Keys
+  resetTitle: Reset settings
+  resetAction: Reset to default settings
+  resetSuccess: Recovery completed. Settings have been reset
+  resetFailed: Recovery failed. Unable to reset settings
+  errorDetails: Error details
+  resetDialog:
+    title: Reset settings?
+    description: This will replace your current settings with the default values.
+    confirm: Reset
+    cancel: Cancel
 options:
   sidebar:
     settings: Settings
@@ -89,6 +105,7 @@ options:
         confirm: Delete
         cancel: Cancel
       atLeastOneLLMProvider: At least one LLM translation provider is required.
+      providerInUseCannotDisable: 'Cannot disable "$1" because it is currently used by $2 feature(s).'
       duplicateProviderName: 'Duplicate provider name "$1"'
       defaultProvider:
         translate: Set as default translate provider
@@ -151,6 +168,7 @@ options:
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
+      customFeatures: Custom AI Features
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation

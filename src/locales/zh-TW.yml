@@ -38,6 +38,22 @@ popup:
     rateUs: 好評支持
     ebook: 第三方電子書閱讀器
     tutorial: 使用教程
+errorRecovery:
+  title: 應用發生異常
+  description: 已進入恢復模式。你可以先導出當前設定作為備份，再重置設定後重試。
+  backupTitle: 先備份當前設定（推薦）
+  exportWithApiKeys: 導出（包含 API Keys）
+  exportWithoutApiKeys: 導出（不包含 API Keys）
+  resetTitle: 重置設定
+  resetAction: 重置為預設設定
+  resetSuccess: 恢復完成，設定已重置
+  resetFailed: 恢復失敗，無法重置設定
+  errorDetails: 錯誤詳情
+  resetDialog:
+    title: 確認重置設定？
+    description: 這會用預設設定覆蓋當前設定。
+    confirm: 重置
+    cancel: 取消
 options:
   sidebar:
     settings: 設定
@@ -151,6 +167,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 為每個功能選擇使用的提供商
+      customFeatures: 自訂 AI 功能
       features:
         translate: 網頁翻譯
         selectionToolbar_translate: 劃詞翻譯

@@ -76,7 +76,7 @@ export function computeProviderFallbacksAfterDeletion(
     const currentId = def.getProviderId(config)
     if (currentId !== deletedProviderId)
       continue
-    const candidates = remainingProviders.filter(p => def.isProvider(p.provider))
+    const candidates = remainingProviders.filter(p => p.enabled && def.isProvider(p.provider))
     if (candidates.length > 0)
       updates[key] = candidates[0].id
   }
@@ -88,8 +88,45 @@ export function findFeatureMissingProvider(
 ): FeatureKey | null {
   for (const key of FEATURE_KEYS) {
     const def = FEATURE_PROVIDER_DEFS[key]
-    if (!remainingProviders.some(p => def.isProvider(p.provider)))
+    if (!remainingProviders.some(p => p.enabled && def.isProvider(p.provider)))
       return key
   }
   return null
+}
+
+/**
+ * Reassign selection toolbar custom features that reference the deleted provider.
+ * Fallback target must be the first enabled LLM provider.
+ * Returns null when no custom feature is affected or when no fallback exists.
+ */
+export function computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+  deletedProviderId: string,
+  config: Config,
+  remainingProviders: ProvidersConfig,
+): Config["selectionToolbar"]["customFeatures"] | null {
+  const hasAffectedCustomFeature = config.selectionToolbar.customFeatures
+    .some(feature => feature.providerId === deletedProviderId)
+
+  if (!hasAffectedCustomFeature) {
+    return null
+  }
+
+  const fallbackProvider = remainingProviders.find(
+    provider => provider.enabled && isLLMProviderConfig(provider),
+  )
+
+  if (!fallbackProvider) {
+    return null
+  }
+
+  return config.selectionToolbar.customFeatures.map((feature) => {
+    if (feature.providerId !== deletedProviderId) {
+      return feature
+    }
+
+    return {
+      ...feature,
+      providerId: fallbackProvider.id,
+    }
+  })
 }

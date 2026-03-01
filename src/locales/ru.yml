@@ -38,6 +38,22 @@ popup:
     rateUs: Оценить нас
     ebook: Сторонняя читалка электронных книг
     tutorial: Руководство
+errorRecovery:
+  title: Что-то пошло не так
+  description: Активирован режим восстановления. Вы можете экспортировать текущие настройки как резервную копию, затем сбросить настройки и попробовать снова.
+  backupTitle: Сначала сделайте резервную копию текущих настроек (рекомендуется)
+  exportWithApiKeys: Экспортировать с API-ключами
+  exportWithoutApiKeys: Экспортировать без API-ключей
+  resetTitle: Сбросить настройки
+  resetAction: Сбросить к настройкам по умолчанию
+  resetSuccess: Восстановление завершено. Настройки были сброшены
+  resetFailed: Восстановление не удалось. Не удалось сбросить настройки
+  errorDetails: Подробности ошибки
+  resetDialog:
+    title: Сбросить настройки?
+    description: Текущие настройки будут заменены значениями по умолчанию.
+    confirm: Сбросить
+    cancel: Отмена
 options:
   sidebar:
     settings: Настройки
@@ -151,6 +167,7 @@ options:
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
+      customFeatures: Пользовательские AI-функции
       features:
         translate: Перевод страницы
         selectionToolbar_translate: Перевод выделения
@@ -345,6 +362,8 @@ options:
     personalizedPrompts:
       title: Персонализированные промпты
       description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
+      communityPrompts: Получайте или делитесь промптами с сообществом
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Добавить промпт
       default: По умолчанию
       importSuccess: Импорт успешен

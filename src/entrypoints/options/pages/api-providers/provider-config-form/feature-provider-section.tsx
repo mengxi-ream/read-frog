@@ -28,6 +28,17 @@ export const FeatureProviderSection = withForm({
       ? config.selectionToolbar.customFeatures
       : []
 
+    const getEnableCurrentProviderPatch = () => {
+      const targetProvider = config.providersConfig.find(provider => provider.id === providerId)
+      if (!targetProvider || targetProvider.enabled) {
+        return null
+      }
+
+      return config.providersConfig.map(provider =>
+        provider.id === providerId ? { ...provider, enabled: true } : provider,
+      )
+    }
+
     if (compatibleFeatures.length === 0 && customFeatures.length === 0)
       return null
 
@@ -56,6 +67,14 @@ export const FeatureProviderSection = withForm({
                     onCheckedChange={(checked) => {
                       if (checked) {
                         const patch = buildFeatureProviderPatch({ [featureKey]: providerId })
+                        const providersConfigPatch = getEnableCurrentProviderPatch()
+                        if (providersConfigPatch) {
+                          void setConfig({
+                            ...patch,
+                            providersConfig: providersConfigPatch,
+                          })
+                          return
+                        }
                         void setConfig(patch)
                       }
                     }}
@@ -78,6 +97,14 @@ export const FeatureProviderSection = withForm({
                         const updatedCustomFeatures = config.selectionToolbar.customFeatures.map(f =>
                           f.id === feature.id ? { ...f, providerId } : f,
                         )
+                        const providersConfigPatch = getEnableCurrentProviderPatch()
+                        if (providersConfigPatch) {
+                          void setConfig({
+                            providersConfig: providersConfigPatch,
+                            selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures },
+                          })
+                          return
+                        }
                         void setConfig({ selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures } })
                       }
                     }}

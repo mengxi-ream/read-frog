@@ -5,7 +5,9 @@ import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import * as React from "react"
 import ReactDOM from "react-dom/client"
+import FrogToast from "@/components/frog-toast"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -69,7 +71,10 @@ async function initApp() {
           >
             <ThemeProvider>
               <TooltipProvider>
-                <App />
+                <FrogToast />
+                <RecoveryBoundary>
+                  <App />
+                </RecoveryBoundary>
               </TooltipProvider>
             </ThemeProvider>
           </HydrateAtoms>

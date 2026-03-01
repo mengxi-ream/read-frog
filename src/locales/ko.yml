@@ -1,6 +1,7 @@
 name: Read Frog
 extName: Read Frog - 오픈 소스 몰입형 번역
 extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 학습할 수 있도록 도와주는 오픈 소스 브라우저 확장 프로그램입니다.
+uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
   string: 텍스트
   number: 숫자
@@ -37,6 +38,22 @@ popup:
     rateUs: 리뷰 남기기
     ebook: 서드파티 전자책 리더
     tutorial: 사용 가이드
+errorRecovery:
+  title: 문제가 발생했습니다
+  description: 복구 모드가 활성화되었습니다. 현재 설정을 백업으로 내보낸 뒤 설정을 초기화하고 다시 시도하세요.
+  backupTitle: 현재 설정 먼저 백업(권장)
+  exportWithApiKeys: API Key 포함 내보내기
+  exportWithoutApiKeys: API Key 제외 내보내기
+  resetTitle: 설정 초기화
+  resetAction: 기본 설정으로 초기화
+  resetSuccess: 복구가 완료되었습니다. 설정이 초기화되었습니다
+  resetFailed: 복구에 실패했습니다. 설정을 초기화할 수 없습니다
+  errorDetails: 오류 세부 정보
+  resetDialog:
+    title: 설정을 초기화할까요?
+    description: 현재 설정이 기본값으로 덮어써집니다.
+    confirm: 초기화
+    cancel: 취소
 options:
   sidebar:
     settings: 설정
@@ -150,6 +167,7 @@ options:
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
+      customFeatures: 사용자 정의 AI 기능
       features:
         translate: 페이지 번역
         selectionToolbar_translate: 선택 툴바 번역
@@ -344,6 +362,8 @@ options:
     personalizedPrompts:
       title: 개인화된 프롬프트
       description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 나타내며.
+      communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: 프롬프트 추가
       default: 기본
       importSuccess: 가져오기 성공

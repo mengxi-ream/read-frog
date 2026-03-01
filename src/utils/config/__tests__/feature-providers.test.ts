@@ -112,6 +112,30 @@ describe("feature providers", () => {
 
       expect(fallbacks["selectionToolbar.vocabularyInsight"]).toBeUndefined()
     })
+
+    it("skips disabled providers when selecting fallbacks", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        selectionToolbar: {
+          ...DEFAULT_CONFIG.selectionToolbar,
+          features: {
+            ...DEFAULT_CONFIG.selectionToolbar.features,
+            vocabularyInsight: { providerId: "deleted-provider" },
+          },
+        },
+      }
+
+      const remainingProviders = [
+        {
+          ...getProviderById("openai-default"),
+          enabled: false,
+        },
+      ]
+
+      const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
+
+      expect(fallbacks["selectionToolbar.vocabularyInsight"]).toBeUndefined()
+    })
   })
 
   describe("findFeatureMissingProvider", () => {
@@ -129,6 +153,17 @@ describe("feature providers", () => {
       ]
 
       expect(findFeatureMissingProvider(remainingProviders)).toBeNull()
+    })
+
+    it("treats disabled providers as unavailable", () => {
+      const remainingProviders = [
+        {
+          ...getProviderById("openai-default"),
+          enabled: false,
+        },
+      ]
+
+      expect(findFeatureMissingProvider(remainingProviders)).toBe("translate")
     })
   })
 

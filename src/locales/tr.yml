@@ -38,6 +38,22 @@ popup:
     rateUs: Bizi Değerlendirin
     ebook: Üçüncü Taraf E-kitap Okuyucu
     tutorial: Rehber
+errorRecovery:
+  title: Bir sorun oluştu
+  description: Kurtarma modu etkin. Geçerli ayarlarınızı yedek olarak dışa aktarabilir, ardından ayarları sıfırlayıp tekrar deneyebilirsiniz.
+  backupTitle: Önce geçerli ayarları yedekleyin (önerilir)
+  exportWithApiKeys: API Anahtarlarıyla Dışa Aktar
+  exportWithoutApiKeys: API Anahtarları olmadan Dışa Aktar
+  resetTitle: Ayarları sıfırla
+  resetAction: Varsayılan ayarlara sıfırla
+  resetSuccess: Kurtarma tamamlandı. Ayarlar sıfırlandı
+  resetFailed: Kurtarma başarısız oldu. Ayarlar sıfırlanamadı
+  errorDetails: Hata ayrıntıları
+  resetDialog:
+    title: Ayarlar sıfırlansın mı?
+    description: Geçerli ayarlarınız varsayılan değerlerle değiştirilecektir.
+    confirm: Sıfırla
+    cancel: İptal
 options:
   sidebar:
     settings: Ayarlar
@@ -151,6 +167,7 @@ options:
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
+      customFeatures: Özel AI Özellikleri
       features:
         translate: Sayfa Çevirisi
         selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
@@ -345,6 +362,8 @@ options:
     personalizedPrompts:
       title: Kişiselleştirilmiş Promptlar
       description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
+      communityPrompts: Topluluktan prompt al veya paylaş
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Prompt Ekle
       default: Varsayılan
       importSuccess: İçe Aktarma Başarılı

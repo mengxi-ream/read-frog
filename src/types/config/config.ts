@@ -124,6 +124,14 @@ export const configSchema = z.object({
         path: [...def.configPath],
       })
     }
+
+    if (provider && !provider.enabled) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Provider "${providerId}" must be enabled for this feature.`,
+        path: [...def.configPath],
+      })
+    }
   }
 
   data.selectionToolbar.customFeatures.forEach((feature, index) => {
@@ -143,6 +151,15 @@ export const configSchema = z.object({
       ctx.addIssue({
         code: "custom",
         message: `Provider "${providerId}" is not an LLM provider.`,
+        path: ["selectionToolbar", "customFeatures", index, "providerId"],
+      })
+      return
+    }
+
+    if (provider && !provider.enabled) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Provider "${providerId}" must be enabled for this custom feature.`,
         path: ["selectionToolbar", "customFeatures", index, "providerId"],
       })
     }

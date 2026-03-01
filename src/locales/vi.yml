@@ -38,6 +38,22 @@ popup:
     rateUs: Đánh giá chúng tôi
     ebook: Trình đọc sách điện tử bên thứ ba
     tutorial: Hướng dẫn
+errorRecovery:
+  title: Đã xảy ra sự cố
+  description: Chế độ khôi phục đang hoạt động. Bạn có thể xuất cài đặt hiện tại để sao lưu, sau đó đặt lại cài đặt và thử lại.
+  backupTitle: Sao lưu cài đặt hiện tại trước (khuyến nghị)
+  exportWithApiKeys: Xuất kèm API Key
+  exportWithoutApiKeys: Xuất không kèm API Key
+  resetTitle: Đặt lại cài đặt
+  resetAction: Đặt lại về cài đặt mặc định
+  resetSuccess: Khôi phục hoàn tất. Cài đặt đã được đặt lại
+  resetFailed: Khôi phục thất bại. Không thể đặt lại cài đặt
+  errorDetails: Chi tiết lỗi
+  resetDialog:
+    title: Đặt lại cài đặt?
+    description: Cài đặt hiện tại sẽ bị thay thế bằng giá trị mặc định.
+    confirm: Đặt lại
+    cancel: Hủy
 options:
   sidebar:
     settings: Cài đặt
@@ -151,6 +167,7 @@ options:
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
+      customFeatures: Tính năng AI tùy chỉnh
       features:
         translate: Dịch trang
         selectionToolbar_translate: Dịch thanh công cụ chọn
@@ -345,6 +362,8 @@ options:
     personalizedPrompts:
       title: Prompt cá nhân hóa
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.
+      communityPrompts: Nhận hoặc chia sẻ prompt từ cộng đồng
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Thêm Prompt
       default: Mặc định
       importSuccess: Nhập thành công

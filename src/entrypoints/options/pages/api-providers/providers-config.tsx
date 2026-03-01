@@ -3,6 +3,7 @@ import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
@@ -127,6 +128,15 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
     .filter(f => f.providerId === id)
   const totalAssigned = assignedFeatures.length + assignedCustomFeatures.length
 
+  const handleProviderEnabledChange = (checked: boolean) => {
+    if (!checked && enabled && totalAssigned > 0) {
+      toast.error(i18n.t("options.apiProviders.form.providerInUseCannotDisable", [name, totalAssigned]))
+      return
+    }
+
+    void setProviderConfig({ ...providerConfig, enabled: checked })
+  }
+
   return (
     <div
       className={cn(
@@ -162,7 +172,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
         <ProviderIcon logo={API_PROVIDER_ITEMS[provider].logo(theme)} name={name} size="base" textClassName="text-sm" />
         <Switch
           checked={enabled}
-          onCheckedChange={checked => setProviderConfig({ ...providerConfig, enabled: checked })}
+          onCheckedChange={handleProviderEnabledChange}
           onPointerDown={e => e.stopPropagation()}
           onClick={e => e.stopPropagation()}
         />

@@ -98,6 +98,7 @@
     "ollama-ai-provider-v2": "^3.3.1",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
+    "react-error-boundary": "^6.1.1",
     "react-markdown": "^10.1.0",
     "react-router": "^7.13.1",
     "shadcn": "^3.8.5",
