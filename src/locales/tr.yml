@@ -294,7 +294,7 @@ options:
         form:
           name: Ad
           icon: Simge (Iconify)
-          provider: Sağlayıcı
+          provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
           selectProvider: Sağlayıcı seçin
           systemPrompt: Sistem Promptu
           prompt: Prompt

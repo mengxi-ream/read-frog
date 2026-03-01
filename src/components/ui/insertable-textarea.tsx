@@ -104,7 +104,9 @@ function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS
       >
         {insertCells.map(cell => (
           <Tooltip key={cell.text}>
-            <TooltipTrigger>
+            <TooltipTrigger
+              render={<div className="inline-flex" />}
+            >
               <Button
                 type="button"
                 variant="outline"

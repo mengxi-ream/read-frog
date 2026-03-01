@@ -294,7 +294,7 @@ options:
         form:
           name: 이름
           icon: 아이콘 (Iconify)
-          provider: 제공업체
+          provider: 제공업체(구조화 출력 지원 필요)
           selectProvider: 제공업체 선택
           systemPrompt: 시스템 프롬프트
           prompt: 프롬프트

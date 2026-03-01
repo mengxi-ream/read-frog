@@ -295,7 +295,7 @@ options:
         form:
           name: 名称
           icon: 图标 (Iconify)
-          provider: 提供商
+          provider: 提供商（需支持结构化输出）
           selectProvider: 选择提供商
           systemPrompt: 系统提示词
           prompt: 提示词

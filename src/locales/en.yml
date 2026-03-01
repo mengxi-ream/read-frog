@@ -295,7 +295,7 @@ options:
         form:
           name: Name
           icon: Icon (Iconify)
-          provider: Provider
+          provider: Provider (requires structured output support)
           selectProvider: Select a provider
           systemPrompt: System Prompt
           prompt: Prompt

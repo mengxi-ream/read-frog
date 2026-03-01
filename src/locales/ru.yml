@@ -294,7 +294,7 @@ options:
         form:
           name: Название
           icon: Иконка (Iconify)
-          provider: Провайдер
+          provider: Провайдер (требуется поддержка структурированного вывода)
           selectProvider: Выберите провайдера
           systemPrompt: Системный промпт
           prompt: Промпт

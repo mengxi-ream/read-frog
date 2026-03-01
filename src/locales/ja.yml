@@ -294,7 +294,7 @@ options:
         form:
           name: 名前
           icon: アイコン (Iconify)
-          provider: プロバイダー
+          provider: プロバイダー（構造化出力対応が必要）
           selectProvider: プロバイダーを選択
           systemPrompt: システムプロンプト
           prompt: プロンプト

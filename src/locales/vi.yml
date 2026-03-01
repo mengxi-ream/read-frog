@@ -294,7 +294,7 @@ options:
         form:
           name: Tên
           icon: Biểu tượng (Iconify)
-          provider: Nhà cung cấp
+          provider: Nhà cung cấp (yêu cầu hỗ trợ đầu ra có cấu trúc)
           selectProvider: Chọn nhà cung cấp
           systemPrompt: System Prompt
           prompt: Prompt

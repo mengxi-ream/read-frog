@@ -11,7 +11,7 @@ export function CustomFeaturesConfig() {
       description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.description")}
       className="lg:flex-col"
     >
-      <EntityEditorLayout list={<CustomFeatureCardList />} editor={<CustomFeatureConfigForm />} listClassName="w-48 lg:w-60" />
+      <EntityEditorLayout list={<CustomFeatureCardList />} editor={<CustomFeatureConfigForm />} />
     </ConfigCard>
   )
 }
