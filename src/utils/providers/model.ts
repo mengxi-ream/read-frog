@@ -107,6 +107,7 @@ async function getLanguageModelById(providerId: string) {
     ? CREATE_AI_MAPPER[providerConfig.provider]({
         name: providerConfig.provider,
         baseURL: providerConfig.baseURL ?? "",
+        supportsStructuredOutputs: true,
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
         ...(customHeaders && { headers: customHeaders }),
       })
