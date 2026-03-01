@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.27.0
+
+### Minor Changes
+
+- [#1020](https://github.com/mengxi-ream/read-frog/pull/1020) [`b63f28f`](https://github.com/mengxi-ream/read-frog/commit/b63f28f64d6488e8d71de3564d88007f9b3078cb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: users can define their own custom ai feature
+
+### Patch Changes
+
+- [#1020](https://github.com/mengxi-ream/read-frog/pull/1020) [`b63f28f`](https://github.com/mengxi-ream/read-frog/commit/b63f28f64d6488e8d71de3564d88007f9b3078cb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: recovery mode when the program crash
+
+- [#1012](https://github.com/mengxi-ream/read-frog/pull/1012) [`25d82c4`](https://github.com/mengxi-ream/read-frog/commit/25d82c42942d8b45ffbb2bdb6613124650f048eb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(floating-button): use button element for close trigger to improve accessibility
+
+- [#1018](https://github.com/mengxi-ream/read-frog/pull/1018) [`f6b8712`](https://github.com/mengxi-ream/read-frog/commit/f6b8712107bd6517367ab3a8a72b0cc2556acf3b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: reduce frequent storage reads and writes during config init and db cleanup
+
+- [#1014](https://github.com/mengxi-ream/read-frog/pull/1014) [`369b3ce`](https://github.com/mengxi-ream/read-frog/commit/369b3cee6a8923ea4627217fefc68b384ef74933) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: disable Zod JIT to avoid CSP eval violation in MV3 extensions
+
+- [#1020](https://github.com/mengxi-ream/read-frog/pull/1020) [`b63f28f`](https://github.com/mengxi-ream/read-frog/commit/b63f28f64d6488e8d71de3564d88007f9b3078cb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: better test connection error message
+
 ## 1.26.1
 
 ### Patch Changes
