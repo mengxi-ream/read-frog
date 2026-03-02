@@ -148,8 +148,8 @@ function mergeSegmentPair(
   separator: string,
 ): SubtitlesFragment {
   return {
+    ...left,
     text: `${left.text}${separator}${right.text}`.trim(),
-    start: left.start,
     end: right.end,
   }
 }
