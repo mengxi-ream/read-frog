@@ -1,5 +1,41 @@
 # @read-frog/extension
 
+## 1.27.0
+
+### Minor Changes
+
+- [#1020](https://github.com/mengxi-ream/read-frog/pull/1020) [`b63f28f`](https://github.com/mengxi-ream/read-frog/commit/b63f28f64d6488e8d71de3564d88007f9b3078cb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: users can define their own custom ai feature
+
+### Patch Changes
+
+- [#1020](https://github.com/mengxi-ream/read-frog/pull/1020) [`b63f28f`](https://github.com/mengxi-ream/read-frog/commit/b63f28f64d6488e8d71de3564d88007f9b3078cb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: recovery mode when the program crash
+
+- [#1012](https://github.com/mengxi-ream/read-frog/pull/1012) [`25d82c4`](https://github.com/mengxi-ream/read-frog/commit/25d82c42942d8b45ffbb2bdb6613124650f048eb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(floating-button): use button element for close trigger to improve accessibility
+
+- [#1018](https://github.com/mengxi-ream/read-frog/pull/1018) [`f6b8712`](https://github.com/mengxi-ream/read-frog/commit/f6b8712107bd6517367ab3a8a72b0cc2556acf3b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: reduce frequent storage reads and writes during config init and db cleanup
+
+- [#1014](https://github.com/mengxi-ream/read-frog/pull/1014) [`369b3ce`](https://github.com/mengxi-ream/read-frog/commit/369b3cee6a8923ea4627217fefc68b384ef74933) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: disable Zod JIT to avoid CSP eval violation in MV3 extensions
+
+- [#1020](https://github.com/mengxi-ream/read-frog/pull/1020) [`b63f28f`](https://github.com/mengxi-ream/read-frog/commit/b63f28f64d6488e8d71de3564d88007f9b3078cb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: better test connection error message
+
+## 1.26.1
+
+### Patch Changes
+
+- [`e1943f1`](https://github.com/mengxi-ream/read-frog/commit/e1943f1643fd70b035e583eaa75150d8cd10c416) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: firefox extension id
+
+- [#958](https://github.com/mengxi-ream/read-frog/pull/958) [`f74d826`](https://github.com/mengxi-ream/read-frog/commit/f74d8267839359851adb126809c4e35202f8380b) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix(extension): fix hidden elements being translated
+
+- [#995](https://github.com/mengxi-ream/read-frog/pull/995) [`59f9bac`](https://github.com/mengxi-ream/read-frog/commit/59f9bace3dcfe5a8964205a8143a0077665de49a) Thanks [@cesaryuan](https://github.com/cesaryuan)! - fix(api-providers): sync provider options editor when switching providers
+
+- [#1006](https://github.com/mengxi-ream/read-frog/pull/1006) [`74b8744`](https://github.com/mengxi-ream/read-frog/commit/74b8744843c797cf9b7e87c4ae5d6b52747709ab) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): prevent spinner from being distorted into ellipse by host page CSS
+
+- [#1009](https://github.com/mengxi-ream/read-frog/pull/1009) [`c942331`](https://github.com/mengxi-ream/read-frog/commit/c9423310a9f8e4d754478b744bb20463b69af402) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): fix subtitles flickering on Firefox by moving display decisions into Jotai atoms
+
+- [#1008](https://github.com/mengxi-ream/read-frog/pull/1008) [`7e822cb`](https://github.com/mengxi-ream/read-frog/commit/7e822cb73881715f248afcea955f76d59da8689e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: replace agentation dev toolbar with draggable help button
+
+- [#1007](https://github.com/mengxi-ream/read-frog/pull/1007) [`5ae4de0`](https://github.com/mengxi-ream/read-frog/commit/5ae4de063c18045b2b22cf5425046b39479f883c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: make comment in youtube as block
+
 ## 1.26.0
 
 ### Minor Changes

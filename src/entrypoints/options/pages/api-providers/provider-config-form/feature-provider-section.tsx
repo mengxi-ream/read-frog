@@ -6,6 +6,7 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
 import { Switch } from "@/components/ui/base-ui/switch"
+import { isLLMProvider } from "@/types/config/provider"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
 import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { cn } from "@/utils/styles/utils"
@@ -23,7 +24,22 @@ export const FeatureProviderSection = withForm({
     const compatibleFeatures = FEATURE_KEYS
       .filter(featureKey => FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType))
 
-    if (compatibleFeatures.length === 0)
+    const customFeatures = isLLMProvider(providerType)
+      ? config.selectionToolbar.customFeatures
+      : []
+
+    const getEnableCurrentProviderPatch = () => {
+      const targetProvider = config.providersConfig.find(provider => provider.id === providerId)
+      if (!targetProvider || targetProvider.enabled) {
+        return null
+      }
+
+      return config.providersConfig.map(provider =>
+        provider.id === providerId ? { ...provider, enabled: true } : provider,
+      )
+    }
+
+    if (compatibleFeatures.length === 0 && customFeatures.length === 0)
       return null
 
     return (
@@ -51,6 +67,14 @@ export const FeatureProviderSection = withForm({
                     onCheckedChange={(checked) => {
                       if (checked) {
                         const patch = buildFeatureProviderPatch({ [featureKey]: providerId })
+                        const providersConfigPatch = getEnableCurrentProviderPatch()
+                        if (providersConfigPatch) {
+                          void setConfig({
+                            ...patch,
+                            providersConfig: providersConfigPatch,
+                          })
+                          return
+                        }
                         void setConfig(patch)
                       }
                     }}
@@ -58,6 +82,34 @@ export const FeatureProviderSection = withForm({
                   <span className="text-sm">
                     {i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`)}
                   </span>
+                </div>
+              )
+            })}
+            {customFeatures.map((feature) => {
+              const isAssigned = feature.providerId === providerId
+              return (
+                <div key={feature.id} className="flex items-center gap-2">
+                  <Switch
+                    checked={isAssigned}
+                    disabled={isAssigned}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        const updatedCustomFeatures = config.selectionToolbar.customFeatures.map(f =>
+                          f.id === feature.id ? { ...f, providerId } : f,
+                        )
+                        const providersConfigPatch = getEnableCurrentProviderPatch()
+                        if (providersConfigPatch) {
+                          void setConfig({
+                            providersConfig: providersConfigPatch,
+                            selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures },
+                          })
+                          return
+                        }
+                        void setConfig({ selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures } })
+                      }
+                    }}
+                  />
+                  <span className="text-sm">{feature.name}</span>
                 </div>
               )
             })}

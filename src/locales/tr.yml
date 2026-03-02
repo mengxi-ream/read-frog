@@ -2,6 +2,9 @@ name: Read Frog
 extName: Read Frog - Açık Kaynak Sürükleyici Çeviri
 extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine öğrenmenize yardımcı olmak için tasarlanmış açık kaynaklı bir tarayıcı uzantısıdır.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: Metin
+  number: Sayı
 contextMenu:
   translate: Çevir
   showOriginal: Orijinali Göster
@@ -35,6 +38,22 @@ popup:
     rateUs: Bizi Değerlendirin
     ebook: Üçüncü Taraf E-kitap Okuyucu
     tutorial: Rehber
+errorRecovery:
+  title: Bir sorun oluştu
+  description: Kurtarma modu etkin. Geçerli ayarlarınızı yedek olarak dışa aktarabilir, ardından ayarları sıfırlayıp tekrar deneyebilirsiniz.
+  backupTitle: Önce geçerli ayarları yedekleyin (önerilir)
+  exportWithApiKeys: API Anahtarlarıyla Dışa Aktar
+  exportWithoutApiKeys: API Anahtarları olmadan Dışa Aktar
+  resetTitle: Ayarları sıfırla
+  resetAction: Varsayılan ayarlara sıfırla
+  resetSuccess: Kurtarma tamamlandı. Ayarlar sıfırlandı
+  resetFailed: Kurtarma başarısız oldu. Ayarlar sıfırlanamadı
+  errorDetails: Hata ayrıntıları
+  resetDialog:
+    title: Ayarlar sıfırlansın mı?
+    description: Geçerli ayarlarınız varsayılan değerlerle değiştirilecektir.
+    confirm: Sıfırla
+    cancel: İptal
 options:
   sidebar:
     settings: Ayarlar
@@ -80,6 +99,11 @@ options:
         baseURL: Base URL
         optional: İsteğe Bağlı
       delete: Sil
+      deleteDialog:
+        title: Sağlayıcıyı sil?
+        description: Bu işlem geri alınamaz. Bu sağlayıcıyı kullanan özellikler otomatik olarak başka bir mevcut sağlayıcıya yeniden atanacaktır.
+        confirm: Sil
+        cancel: İptal
       atLeastOneLLMProvider: En az bir LLM çeviri sağlayıcısı gereklidir.
       duplicateProviderName: 'Yinelenen sağlayıcı adı "$1"'
       defaultProvider:
@@ -143,6 +167,7 @@ options:
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
+      customFeatures: Özel AI Özellikleri
       features:
         translate: Sayfa Çevirisi
         selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
@@ -254,6 +279,54 @@ options:
         vocabularyInsight:
           title: Kelime Analizi
           description: Seçim araç çubuğunda kelime/ifade analizi için sağlayıcı ve model yapılandırın
+      customFeatures:
+        title: Özel AI Özellikleri
+        description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
+        add: AI Özelliği Ekle
+        edit: AI Özelliğini Düzenle
+        empty: Henüz özel AI özelliği yok
+        noEnabledLlmProvider: Özel AI özellikleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
+        table:
+          name: Ad
+          provider: Sağlayıcı
+          fields: Alanlar
+          actions: İşlemler
+        form:
+          name: Ad
+          icon: Simge (Iconify)
+          provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
+          selectProvider: Sağlayıcı seçin
+          systemPrompt: Sistem Promptu
+          prompt: Prompt
+          outputSchema: Çıkış Şeması
+          addField: Alan Ekle
+          fieldName: Alan Adı
+          fieldType: Alan Türü
+          actions: İşlemler
+          cancel: İptal
+          save: Kaydet
+          defaultFieldName: sonuç
+          fieldNamePlaceholder: alan_adı
+          autoFieldPrefix: alan
+          tokens:
+            selection: Seçilen metin içeriği
+            context: Seçilen metnin bulunduğu paragraf metni
+            targetLang: Kullanıcının hedef dili
+            title: Web sayfası başlığı
+          delete: Sil
+          deleteDialog:
+            title: Özel özelliği sil?
+            description: Bu işlem geri alınamaz.
+            confirm: Sil
+            cancel: İptal
+        errors:
+          nameRequired: Ad gerekli
+          duplicateName: 'Yinelenen özellik adı "$1"'
+          invalidIcon: Geçersiz Iconify simge metni
+          providerRequired: Etkin bir LLM sağlayıcısı seçin
+          outputSchemaRequired: En az bir çıktı alanı ekleyin
+          fieldKeyRequired: Alan adı gerekli
+          duplicateFieldKey: Alan adları benzersiz olmalıdır
     contextMenu:
       title: Bağlam Menüsü
       translate:
@@ -289,6 +362,8 @@ options:
     personalizedPrompts:
       title: Kişiselleştirilmiş Promptlar
       description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
+      communityPrompts: Topluluktan prompt al veya paylaş
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Prompt Ekle
       default: Varsayılan
       importSuccess: İçe Aktarma Başarılı

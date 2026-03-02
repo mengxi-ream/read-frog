@@ -2,6 +2,9 @@ name: Read Frog
 extName: Read Frog - Open Source Immersive Translate
 extDescription: Read Frog is an open source browser extension designed to help you learn languages deeply from any website.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: Text
+  number: Number
 contextMenu:
   translate: Translate
   showOriginal: Show Original
@@ -35,6 +38,22 @@ popup:
     rateUs: Rate Us
     ebook: Third-party E-book Reader
     tutorial: Tutorial
+errorRecovery:
+  title: Something went wrong
+  description: Recovery mode is active. You can export your current settings as a backup, then reset settings and try again.
+  backupTitle: Backup current settings first (recommended)
+  exportWithApiKeys: Export with API Keys
+  exportWithoutApiKeys: Export without API Keys
+  resetTitle: Reset settings
+  resetAction: Reset to default settings
+  resetSuccess: Recovery completed. Settings have been reset
+  resetFailed: Recovery failed. Unable to reset settings
+  errorDetails: Error details
+  resetDialog:
+    title: Reset settings?
+    description: This will replace your current settings with the default values.
+    confirm: Reset
+    cancel: Cancel
 options:
   sidebar:
     settings: Settings
@@ -80,7 +99,13 @@ options:
         baseURL: Base URL
         optional: Optional
       delete: Delete
+      deleteDialog:
+        title: Delete Provider?
+        description: This action cannot be undone. Features using this provider will be automatically reassigned to another available provider.
+        confirm: Delete
+        cancel: Cancel
       atLeastOneLLMProvider: At least one LLM translation provider is required.
+      providerInUseCannotDisable: 'Cannot disable "$1" because it is currently used by $2 feature(s).'
       duplicateProviderName: 'Duplicate provider name "$1"'
       defaultProvider:
         translate: Set as default translate provider
@@ -143,6 +168,7 @@ options:
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
+      customFeatures: Custom AI Features
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation
@@ -254,6 +280,54 @@ options:
         vocabularyInsight:
           title: Vocabulary Insight
           description: Configure provider and model for vocabulary/phrase analysis in the selection toolbar
+      customFeatures:
+        title: Custom AI Features
+        description: Add your own structured AI actions for selected text
+        add: Add AI Feature
+        edit: Edit AI Feature
+        empty: No custom AI features yet
+        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI features
+        table:
+          name: Name
+          provider: Provider
+          fields: Fields
+          actions: Actions
+        form:
+          name: Name
+          icon: Icon (Iconify)
+          provider: Provider (requires structured output support)
+          selectProvider: Select a provider
+          systemPrompt: System Prompt
+          prompt: Prompt
+          outputSchema: Output Schema
+          addField: Add Field
+          fieldName: Field Name
+          fieldType: Field Type
+          actions: Actions
+          cancel: Cancel
+          save: Save
+          defaultFieldName: Result
+          fieldNamePlaceholder: Field Name
+          autoFieldPrefix: Field
+          tokens:
+            selection: Selected text content
+            context: Paragraph text where the selection appears
+            targetLang: "User's target language"
+            title: Webpage title
+          delete: Delete
+          deleteDialog:
+            title: Delete Custom Feature?
+            description: This action cannot be undone.
+            confirm: Delete
+            cancel: Cancel
+        errors:
+          nameRequired: Name is required
+          duplicateName: 'Duplicate feature name "$1"'
+          invalidIcon: Invalid Iconify icon string
+          providerRequired: Please select an enabled LLM provider
+          outputSchemaRequired: Add at least one output field
+          fieldKeyRequired: Field name is required
+          duplicateFieldKey: Field names must be unique
     contextMenu:
       title: Context Menu
       translate:

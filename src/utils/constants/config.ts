@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { PageTranslateRange } from "@/types/config/translate"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
 import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
+import { DEFAULT_DICTIONARY_FEATURE } from "./selection-toolbar-custom-feature"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
 import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR, DEFAULT_TRANSLATION_POSITION } from "./subtitles"
 import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_MIN_WORDS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from "./translate"
@@ -12,13 +13,9 @@ export const CONFIG_STORAGE_KEY = "config"
 export const LAST_SYNCED_CONFIG_STORAGE_KEY = "lastSyncedConfig"
 export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
-// Legacy storage keys for migration only
-// TODO: Remove these after all users have migrated to v38+
-export const LEGACY_CONFIG_SCHEMA_VERSION_STORAGE_KEY = "__configSchemaVersion"
-
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 55
+export const CONFIG_SCHEMA_VERSION = 56
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -86,6 +83,7 @@ export const DEFAULT_CONFIG: Config = {
         providerId: "openai-default",
       },
     },
+    customFeatures: [DEFAULT_DICTIONARY_FEATURE],
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,

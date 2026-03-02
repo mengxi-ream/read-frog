@@ -1,14 +1,30 @@
+import type { Config } from "@/types/config/config"
 import type { ProvidersConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
 import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvider } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
-import { computeProviderFallbacksAfterDeletion, findFeatureMissingProvider } from "@/utils/config/helpers"
+import {
+  computeProviderFallbacksAfterDeletion,
+  computeSelectionToolbarCustomFeatureFallbacksAfterDeletion,
+  findFeatureMissingProvider,
+} from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdAtom } from "../atoms"
@@ -45,6 +61,8 @@ export function ProviderConfigForm() {
   const isTranslateProviderType = isTranslateProvider(providerType)
   const isLLM = isLLMProvider(providerType)
 
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+
   useEffect(() => {
     if (providerConfig && isAPIProviderConfig(providerConfig)) {
       form.reset(providerConfig)
@@ -69,10 +87,34 @@ export function ProviderConfigForm() {
       return
     }
 
+    const updatedCustomFeatures = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+      providerConfig.id,
+      config,
+      updatedAllProviders,
+    )
+    const hasAffectedCustomFeatures = config.selectionToolbar.customFeatures
+      .some(feature => feature.providerId === providerConfig.id)
+
+    if (hasAffectedCustomFeatures && !updatedCustomFeatures) {
+      toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider"))
+      return
+    }
+
     const fallbacks = computeProviderFallbacksAfterDeletion(providerConfig.id, config, updatedAllProviders)
-    const patch = buildFeatureProviderPatch(fallbacks)
-    if (Object.keys(patch).length > 0)
+    let patch = buildFeatureProviderPatch(fallbacks)
+    if (updatedCustomFeatures) {
+      patch = {
+        ...patch,
+        selectionToolbar: {
+          ...(patch.selectionToolbar ?? {}),
+          customFeatures: updatedCustomFeatures,
+        },
+      } as Partial<Config>
+    }
+
+    if (Object.keys(patch).length > 0) {
       await setConfig(patch)
+    }
 
     await setAllProvidersConfig(updatedAllProviders)
     setSelectedProviderId(chooseNextProviderConfig(updatedAllProviders).id)
@@ -117,9 +159,21 @@ export function ProviderConfigForm() {
           )}
         </div>
         <div className="flex justify-end mt-8">
-          <Button type="button" variant="destructive" onClick={handleDelete}>
-            {i18n.t("options.apiProviders.form.delete")}
-          </Button>
+          <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+            <AlertDialogTrigger render={<Button type="button" variant="destructive" />}>
+              {i18n.t("options.apiProviders.form.delete")}
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>{i18n.t("options.apiProviders.form.deleteDialog.title")}</AlertDialogTitle>
+                <AlertDialogDescription>{i18n.t("options.apiProviders.form.deleteDialog.description")}</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>{i18n.t("options.apiProviders.form.deleteDialog.cancel")}</AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={handleDelete}>{i18n.t("options.apiProviders.form.deleteDialog.confirm")}</AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
     </form.AppForm>

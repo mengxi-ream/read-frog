@@ -1,23 +1,38 @@
 import type {
   BackgroundStreamResponseMap,
-  BackgroundStreamTextPayload,
+  BackgroundStreamStructuredObjectSerializablePayload,
+  BackgroundStreamTextSerializablePayload,
 } from "@/types/background-stream"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { createPortStreamPromise } from "./port-streaming"
 
-export interface ContentScriptTextStreamOptions {
+export interface ContentScriptStreamOptions<TResponse = string> {
   signal?: AbortSignal
-  onChunk?: (data: string) => void
+  onChunk?: (data: TResponse) => void
   keepAliveIntervalMs?: number
 }
 
 export function streamBackgroundText(
-  payload: BackgroundStreamTextPayload,
-  options: ContentScriptTextStreamOptions = {},
+  serializablePayload: BackgroundStreamTextSerializablePayload,
+  options: ContentScriptStreamOptions<BackgroundStreamResponseMap["streamText"]> = {},
 ) {
-  return createPortStreamPromise<BackgroundStreamResponseMap["streamText"]>(
+  return createPortStreamPromise<BackgroundStreamResponseMap["streamText"], BackgroundStreamTextSerializablePayload>(
     BACKGROUND_STREAM_PORTS.streamText,
-    payload,
+    serializablePayload,
+    options,
+  )
+}
+
+export function streamBackgroundStructuredObject(
+  serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
+  options: ContentScriptStreamOptions<BackgroundStreamResponseMap["streamStructuredObject"]> = {},
+) {
+  return createPortStreamPromise<
+    BackgroundStreamResponseMap["streamStructuredObject"],
+    BackgroundStreamStructuredObjectSerializablePayload
+  >(
+    BACKGROUND_STREAM_PORTS.streamStructuredObject,
+    serializablePayload,
     options,
   )
 }

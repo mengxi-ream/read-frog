@@ -52,19 +52,6 @@ export async function setUpDatabaseCleanup() {
       await cleanupOldSummaryCache()
     }
   })
-
-  // Run cleanup immediately when background script starts
-  cleanupOldTranslationCache().catch((error) => {
-    logger.error("Failed to run initial cache cleanup:", error)
-  })
-
-  cleanupOldRequestRecords().catch((error) => {
-    logger.error("Failed to run initial request records cleanup:", error)
-  })
-
-  cleanupOldSummaryCache().catch((error) => {
-    logger.error("Failed to run initial summary cache cleanup:", error)
-  })
 }
 
 async function cleanupOldTranslationCache() {

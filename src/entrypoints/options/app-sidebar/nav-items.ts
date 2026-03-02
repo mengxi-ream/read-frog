@@ -1,6 +1,7 @@
 import { ApiProvidersPage } from "../pages/api-providers"
 import { ConfigPage } from "../pages/config"
 import { ContextMenuPage } from "../pages/context-menu"
+import { CustomFeaturesPage } from "../pages/custom-features"
 import { FloatingButtonPage } from "../pages/floating-button"
 import { GeneralPage } from "../pages/general"
 import { InputTranslationPage } from "../pages/input-translation"
@@ -13,6 +14,7 @@ import { VideoSubtitlesPage } from "../pages/video-subtitles"
 export const ROUTE_CONFIG = [
   { path: "/", component: GeneralPage },
   { path: "/api-providers", component: ApiProvidersPage },
+  { path: "/custom-features", component: CustomFeaturesPage },
   { path: "/translation", component: TranslationPage },
   { path: "/video-subtitles", component: VideoSubtitlesPage },
   { path: "/floating-button", component: FloatingButtonPage },

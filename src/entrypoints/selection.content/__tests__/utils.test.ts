@@ -1,5 +1,6 @@
+// @vitest-environment jsdom
 import { describe, expect, it } from "vitest"
-import { extractTextContext } from "../utils"
+import { extractTextContext, getSelectionParagraphText } from "../utils"
 
 describe("extractTextContext", () => {
   it("should extract context when selection is in the middle of a sentence", () => {
@@ -119,5 +120,50 @@ describe("extractTextContext", () => {
         after: "",
       })
     })
+  })
+})
+
+describe("getSelectionParagraphText", () => {
+  it("returns normalized text from the nearest paragraph-like element", () => {
+    document.body.innerHTML = `
+      <article>
+        <p id="paragraph">
+          Alpha text
+          <strong id="selection">Beta</strong>
+          gamma text
+        </p>
+      </article>
+    `
+
+    const selectionNode = document.getElementById("selection")?.firstChild
+    if (!selectionNode) {
+      throw new Error("selection node not found")
+    }
+
+    const range = document.createRange()
+    range.setStart(selectionNode, 0)
+    range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
+
+    expect(getSelectionParagraphText(range)).toBe("Alpha text Beta gamma text")
+  })
+
+  it("falls back to common ancestor text when no paragraph-like parent exists", () => {
+    document.body.innerHTML = `
+      <span id="wrapper">
+        <span>Alpha</span>
+        <span id="selection">Beta</span>
+      </span>
+    `
+
+    const selectionNode = document.getElementById("selection")?.firstChild
+    if (!selectionNode) {
+      throw new Error("selection node not found")
+    }
+
+    const range = document.createRange()
+    range.setStart(selectionNode, 0)
+    range.setEnd(selectionNode, selectionNode.textContent?.length ?? 0)
+
+    expect(getSelectionParagraphText(range)).toBe("Alpha Beta")
   })
 })

@@ -1,3 +1,4 @@
+import "@/utils/zod-config"
 import { browser, defineBackground } from "#imports"
 import { WEBSITE_URL } from "@/utils/constants/url"
 import { logger } from "@/utils/logger"

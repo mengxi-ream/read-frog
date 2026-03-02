@@ -12,7 +12,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/base-ui/combobox"
-import { extractErrorMessage } from "@/utils/api-error"
+import { extractErrorMessage } from "@/utils/error/extract-message"
 
 interface ModelsResponse {
   object: string

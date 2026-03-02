@@ -1,6 +1,10 @@
 name: Read Frog
 extName: Read Frog - 오픈 소스 몰입형 번역
 extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 학습할 수 있도록 도와주는 오픈 소스 브라우저 확장 프로그램입니다.
+uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: 텍스트
+  number: 숫자
 contextMenu:
   translate: 번역
   showOriginal: 원문 보기
@@ -34,6 +38,22 @@ popup:
     rateUs: 리뷰 남기기
     ebook: 서드파티 전자책 리더
     tutorial: 사용 가이드
+errorRecovery:
+  title: 문제가 발생했습니다
+  description: 복구 모드가 활성화되었습니다. 현재 설정을 백업으로 내보낸 뒤 설정을 초기화하고 다시 시도하세요.
+  backupTitle: 현재 설정 먼저 백업(권장)
+  exportWithApiKeys: API Key 포함 내보내기
+  exportWithoutApiKeys: API Key 제외 내보내기
+  resetTitle: 설정 초기화
+  resetAction: 기본 설정으로 초기화
+  resetSuccess: 복구가 완료되었습니다. 설정이 초기화되었습니다
+  resetFailed: 복구에 실패했습니다. 설정을 초기화할 수 없습니다
+  errorDetails: 오류 세부 정보
+  resetDialog:
+    title: 설정을 초기화할까요?
+    description: 현재 설정이 기본값으로 덮어써집니다.
+    confirm: 초기화
+    cancel: 취소
 options:
   sidebar:
     settings: 설정
@@ -79,6 +99,11 @@ options:
         baseURL: Base URL
         optional: 선택사항
       delete: 삭제
+      deleteDialog:
+        title: 제공업체를 삭제하시겠습니까?
+        description: 이 작업은 취소할 수 없습니다. 이 제공업체를 사용하는 기능은 다른 사용 가능한 제공업체로 자동 재할당됩니다.
+        confirm: 삭제
+        cancel: 취소
       atLeastOneLLMProvider: 최소 하나의 LLM 번역 제공업체가 필요합니다.
       duplicateProviderName: '중복된 제공업체 이름 "$1"'
       defaultProvider:
@@ -142,6 +167,7 @@ options:
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
+      customFeatures: 사용자 정의 AI 기능
       features:
         translate: 페이지 번역
         selectionToolbar_translate: 선택 툴바 번역
@@ -253,6 +279,54 @@ options:
         vocabularyInsight:
           title: 어휘 분석
           description: 선택 툴바에서 단어/구문 분석 기능의 제공업체와 모델을 구성합니다
+      customFeatures:
+        title: 커스텀 AI 기능
+        description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
+        add: AI 기능 추가
+        edit: AI 기능 편집
+        empty: 아직 커스텀 AI 기능이 없습니다
+        noEnabledLlmProvider: 커스텀 AI 기능을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
+        table:
+          name: 이름
+          provider: 제공업체
+          fields: 필드
+          actions: 작업
+        form:
+          name: 이름
+          icon: 아이콘 (Iconify)
+          provider: 제공업체(구조화 출력 지원 필요)
+          selectProvider: 제공업체 선택
+          systemPrompt: 시스템 프롬프트
+          prompt: 프롬프트
+          outputSchema: 출력 스키마
+          addField: 필드 추가
+          fieldName: 필드 이름
+          fieldType: 필드 유형
+          actions: 작업
+          cancel: 취소
+          save: 저장
+          defaultFieldName: 결과
+          fieldNamePlaceholder: 필드명
+          autoFieldPrefix: 필드
+          tokens:
+            selection: 선택한 텍스트 내용
+            context: 선택 텍스트가 포함된 문단 내용
+            targetLang: 사용자의 대상 언어
+            title: 웹페이지 제목
+          delete: 삭제
+          deleteDialog:
+            title: 사용자 정의 기능을 삭제하시겠습니까?
+            description: 이 작업은 취소할 수 없습니다.
+            confirm: 삭제
+            cancel: 취소
+        errors:
+          nameRequired: 이름은 필수입니다
+          duplicateName: '중복된 기능 이름 "$1"'
+          invalidIcon: 올바르지 않은 Iconify 아이콘 문자열입니다
+          providerRequired: 활성화된 LLM 제공업체를 선택하세요
+          outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요
+          fieldKeyRequired: 필드 이름은 필수입니다
+          duplicateFieldKey: 필드 이름은 고유해야 합니다
     contextMenu:
       title: 컨텍스트 메뉴
       translate:
@@ -288,6 +362,8 @@ options:
     personalizedPrompts:
       title: 개인화된 프롬프트
       description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 나타내며.
+      communityPrompts: 커뮤니티에서 프롬프트 가져오기 또는 공유
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: 프롬프트 추가
       default: 기본
       importSuccess: 가져오기 성공

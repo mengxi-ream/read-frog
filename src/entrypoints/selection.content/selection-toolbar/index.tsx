@@ -7,6 +7,7 @@ import { matchDomainPattern } from "@/utils/url"
 import { AiButton, AiPopover } from "./ai-button"
 import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atom"
 import { CloseButton, DropEvent } from "./close-button"
+import { SelectionToolbarCustomFeatureButtons, SelectionToolbarCustomFeaturePopover } from "./custom-feature-button"
 import { SpeakButton } from "./speak-button"
 import { TranslateButton, TranslatePopover } from "./translate-button"
 
@@ -244,16 +245,18 @@ export function SelectionToolbar() {
           ref={tooltipRef}
           className="group absolute z-2147483647 bg-zinc-200 dark:bg-zinc-800 rounded-sm shadow-lg overflow-visible flex items-center"
         >
-          <div className="flex items-center overflow-hidden rounded-sm">
+          <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-[420px] no-scrollbar">
             <AiButton />
             <TranslateButton />
             <SpeakButton />
+            <SelectionToolbarCustomFeatureButtons />
           </div>
           <CloseButton />
         </div>
       )}
       <AiPopover />
       <TranslatePopover />
+      <SelectionToolbarCustomFeaturePopover />
     </div>
   )
 }

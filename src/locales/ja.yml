@@ -1,6 +1,10 @@
 name: 読書カエル
 extName: 読書カエル - オープンソースインビジブル翻訳
 extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
+uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: テキスト
+  number: 数値
 contextMenu:
   translate: 翻訳
   showOriginal: 原文を表示
@@ -34,6 +38,22 @@ popup:
     rateUs: レビューを書く
     ebook: サードパーティ電子書籍リーダー
     tutorial: 使い方ガイド
+errorRecovery:
+  title: 問題が発生しました
+  description: 復旧モードが有効です。現在の設定をバックアップとしてエクスポートし、設定をリセットして再試行してください。
+  backupTitle: まず現在の設定をバックアップ（推奨）
+  exportWithApiKeys: APIキーを含めてエクスポート
+  exportWithoutApiKeys: APIキーを除外してエクスポート
+  resetTitle: 設定をリセット
+  resetAction: 設定をデフォルトにリセット
+  resetSuccess: 復旧が完了しました。設定はリセットされました
+  resetFailed: 復旧に失敗しました。設定をリセットできませんでした
+  errorDetails: エラー詳細
+  resetDialog:
+    title: 設定をリセットしますか？
+    description: 現在の設定はデフォルト値で上書きされます。
+    confirm: リセット
+    cancel: キャンセル
 options:
   sidebar:
     settings: 設定
@@ -79,6 +99,11 @@ options:
         baseURL: ベースURL
         optional: オプション
       delete: 削除
+      deleteDialog:
+        title: プロバイダーを削除しますか？
+        description: この操作は元に戻せません。このプロバイダーを使用している機能は、他の利用可能なプロバイダーに自動的に再割り当てされます。
+        confirm: 削除
+        cancel: キャンセル
       atLeastOneLLMProvider: 最低1つのLLM翻訳プロバイダーが必要です。
       duplicateProviderName: '重複するプロバイダー名 "$1"'
       defaultProvider:
@@ -142,6 +167,7 @@ options:
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
+      customFeatures: カスタムAI機能
       features:
         translate: ページ翻訳
         selectionToolbar_translate: 選択ツールバー翻訳
@@ -253,6 +279,54 @@ options:
         vocabularyInsight:
           title: 語彙分析
           description: 選択ツールバーで単語/フレーズを分析するためのプロバイダーとモデルを設定
+      customFeatures:
+        title: カスタム AI 機能
+        description: 選択テキスト向けに独自の構造化 AI アクションを追加
+        add: AI 機能を追加
+        edit: AI 機能を編集
+        empty: カスタム AI 機能はまだありません
+        noEnabledLlmProvider: カスタム AI 機能を作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
+        table:
+          name: 名前
+          provider: プロバイダー
+          fields: フィールド
+          actions: 操作
+        form:
+          name: 名前
+          icon: アイコン (Iconify)
+          provider: プロバイダー（構造化出力対応が必要）
+          selectProvider: プロバイダーを選択
+          systemPrompt: システムプロンプト
+          prompt: プロンプト
+          outputSchema: 出力スキーマ
+          addField: フィールドを追加
+          fieldName: フィールド名
+          fieldType: フィールド型
+          actions: 操作
+          cancel: キャンセル
+          save: 保存
+          defaultFieldName: 結果
+          fieldNamePlaceholder: フィールド名
+          autoFieldPrefix: フィールド
+          tokens:
+            selection: 選択したテキスト内容
+            context: 選択テキストが含まれる段落内容
+            targetLang: ユーザーのターゲット言語
+            title: ウェブページのタイトル
+          delete: 削除
+          deleteDialog:
+            title: カスタム機能を削除しますか？
+            description: この操作は元に戻せません。
+            confirm: 削除
+            cancel: キャンセル
+        errors:
+          nameRequired: 名前は必須です
+          duplicateName: '重複する機能名 "$1"'
+          invalidIcon: 無効な Iconify アイコン文字列です
+          providerRequired: 有効な LLM プロバイダーを選択してください
+          outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください
+          fieldKeyRequired: フィールド名は必須です
+          duplicateFieldKey: フィールド名は一意である必要があります
     contextMenu:
       title: コンテキストメニュー
       translate:
@@ -288,6 +362,8 @@ options:
     personalizedPrompts:
       title: 個人化プロンプト
       description: 異なるタイプのプロンプトをカスタマイズすることで、翻訳時にプロンプトタイプを自ら調整できます。プロンプトとは、ユーザーがLLMに送信するテキストを指します。
+      communityPrompts: コミュニティからプロンプトを取得・共有
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: プロンプトを追加
       default: デフォルト
       importSuccess: インポート成功

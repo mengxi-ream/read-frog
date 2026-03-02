@@ -2,7 +2,11 @@ import type { ProviderConfig } from "@/types/config/provider"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
-import { computeProviderFallbacksAfterDeletion, findFeatureMissingProvider } from "../helpers"
+import {
+  computeProviderFallbacksAfterDeletion,
+  computeSelectionToolbarCustomFeatureFallbacksAfterDeletion,
+  findFeatureMissingProvider,
+} from "../helpers"
 
 function getProviderById(id: string): ProviderConfig {
   const provider = DEFAULT_CONFIG.providersConfig.find(item => item.id === id)
@@ -108,6 +112,30 @@ describe("feature providers", () => {
 
       expect(fallbacks["selectionToolbar.vocabularyInsight"]).toBeUndefined()
     })
+
+    it("skips disabled providers when selecting fallbacks", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        selectionToolbar: {
+          ...DEFAULT_CONFIG.selectionToolbar,
+          features: {
+            ...DEFAULT_CONFIG.selectionToolbar.features,
+            vocabularyInsight: { providerId: "deleted-provider" },
+          },
+        },
+      }
+
+      const remainingProviders = [
+        {
+          ...getProviderById("openai-default"),
+          enabled: false,
+        },
+      ]
+
+      const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
+
+      expect(fallbacks["selectionToolbar.vocabularyInsight"]).toBeUndefined()
+    })
   })
 
   describe("findFeatureMissingProvider", () => {
@@ -125,6 +153,109 @@ describe("feature providers", () => {
       ]
 
       expect(findFeatureMissingProvider(remainingProviders)).toBeNull()
+    })
+
+    it("treats disabled providers as unavailable", () => {
+      const remainingProviders = [
+        {
+          ...getProviderById("openai-default"),
+          enabled: false,
+        },
+      ]
+
+      expect(findFeatureMissingProvider(remainingProviders)).toBe("translate")
+    })
+  })
+
+  describe("computeSelectionToolbarCustomFeatureFallbacksAfterDeletion", () => {
+    it("reassigns affected custom features to the first enabled llm provider", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        selectionToolbar: {
+          ...DEFAULT_CONFIG.selectionToolbar,
+          customFeatures: [
+            {
+              id: "feature-a",
+              name: "Feature A",
+              enabled: true,
+              icon: "tabler:sparkles",
+              providerId: "deleted-provider",
+              systemPrompt: "",
+              prompt: "{{selection}}",
+              outputSchema: [
+                {
+                  id: "field-a",
+                  name: "summary",
+                  type: "string" as const,
+                },
+              ],
+            },
+          ],
+        },
+      }
+
+      const remainingProviders = [
+        {
+          ...getProviderById("openai-default"),
+          enabled: false,
+        },
+        getProviderById("google-default"),
+      ]
+
+      const result = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+        "deleted-provider",
+        config,
+        remainingProviders,
+      )
+
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: "feature-a",
+          providerId: "google-default",
+        }),
+      ])
+    })
+
+    it("returns null when no enabled llm provider is available", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        selectionToolbar: {
+          ...DEFAULT_CONFIG.selectionToolbar,
+          customFeatures: [
+            {
+              id: "feature-a",
+              name: "Feature A",
+              enabled: true,
+              icon: "tabler:sparkles",
+              providerId: "deleted-provider",
+              systemPrompt: "",
+              prompt: "{{selection}}",
+              outputSchema: [
+                {
+                  id: "field-a",
+                  name: "summary",
+                  type: "string" as const,
+                },
+              ],
+            },
+          ],
+        },
+      }
+
+      const remainingProviders = [
+        {
+          ...getProviderById("openai-default"),
+          enabled: false,
+        },
+      ]
+
+      const result = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+        "deleted-provider",
+        config,
+        remainingProviders,
+      )
+
+      expect(result).toBeNull()
     })
   })
 })

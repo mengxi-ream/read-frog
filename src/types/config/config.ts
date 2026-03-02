@@ -3,7 +3,8 @@ import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
 import { z } from "zod"
 import { FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
-import { NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
+import { isLLMProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
+import { selectionToolbarCustomFeaturesSchema } from "./selection-toolbar"
 import { videoSubtitlesSchema } from "./subtitles"
 import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
@@ -34,6 +35,7 @@ const selectionToolbarSchema = z.object({
     translate: selectionToolbarFeatureSchema,
     vocabularyInsight: selectionToolbarFeatureSchema,
   }),
+  customFeatures: selectionToolbarCustomFeaturesSchema,
 })
 
 // side content schema
@@ -122,7 +124,46 @@ export const configSchema = z.object({
         path: [...def.configPath],
       })
     }
+
+    if (provider && !provider.enabled) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Provider "${providerId}" must be enabled for this feature.`,
+        path: [...def.configPath],
+      })
+    }
   }
+
+  data.selectionToolbar.customFeatures.forEach((feature, index) => {
+    const providerId = feature.providerId
+    if (!providerIdsSet.has(providerId)) {
+      ctx.addIssue({
+        code: "invalid_value",
+        values: Array.from(providerIdsSet),
+        message: `Invalid provider id "${providerId}".`,
+        path: ["selectionToolbar", "customFeatures", index, "providerId"],
+      })
+      return
+    }
+
+    const provider = data.providersConfig.find(p => p.id === providerId)
+    if (provider && !isLLMProvider(provider.provider)) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Provider "${providerId}" is not an LLM provider.`,
+        path: ["selectionToolbar", "customFeatures", index, "providerId"],
+      })
+      return
+    }
+
+    if (provider && !provider.enabled) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Provider "${providerId}" must be enabled for this custom feature.`,
+        path: ["selectionToolbar", "customFeatures", index, "providerId"],
+      })
+    }
+  })
 })
 
 export type Config = z.infer<typeof configSchema>

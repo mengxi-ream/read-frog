@@ -1,7 +1,7 @@
 import type { APIProviderConfig, LLMProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useEffectEvent, useMemo, useState } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { JSONCodeEditor } from "@/components/ui/json-code-editor"
@@ -29,11 +29,21 @@ export const ProviderOptionsField = withForm({
     const providerConfig = useStore(form.store, state => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
+    const toJson = (options: APIProviderConfig["providerOptions"]) =>
+      options ? JSON.stringify(options, null, 2) : ""
+
     // Local state for the JSON string input
-    const initialValue = providerConfig.providerOptions
-      ? JSON.stringify(providerConfig.providerOptions, null, 2)
-      : ""
-    const [jsonInput, setJsonInput] = useState(initialValue)
+    const [jsonInput, setJsonInput] = useState(() => toJson(providerConfig.providerOptions))
+
+    // Keep editor input in sync when switching to a different provider config.
+    const syncJsonInput = useEffectEvent(() => {
+      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      setJsonInput(toJson(providerConfig.providerOptions))
+    })
+
+    useEffect(() => {
+      syncJsonInput()
+    }, [providerConfig.id])
 
     // Debounce the input value
     const debouncedJsonInput = useDebouncedValue(jsonInput, 500)

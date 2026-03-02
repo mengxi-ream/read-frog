@@ -2,7 +2,8 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
@@ -19,21 +20,22 @@ import { FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/uti
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { cn } from "@/utils/styles/utils"
 import { ConfigCard } from "../../components/config-card"
+import { EntityEditorLayout } from "../../components/entity-editor-layout"
+import { EntityListRail } from "../../components/entity-list-rail"
 import AddProviderDialog from "./add-provider-dialog"
 import { selectedProviderIdAtom } from "./atoms"
 import { ProviderConfigForm } from "./provider-config-form"
 
 export function ProvidersConfig() {
+  const selectedProviderId = useAtomValue(selectedProviderIdAtom)
+
   return (
     <ConfigCard
       title={i18n.t("options.apiProviders.title")}
       description={i18n.t("options.apiProviders.description")}
       className="lg:flex-col"
     >
-      <div className="flex gap-4">
-        <ProviderCardList />
-        <ProviderConfigForm />
-      </div>
+      <EntityEditorLayout list={<ProviderCardList />} editor={<ProviderConfigForm key={selectedProviderId} />} />
     </ConfigCard>
   )
 }
@@ -43,10 +45,6 @@ function ProviderCardList() {
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const [canScroll, setCanScroll] = useState(false)
-  const [isScrolledToBottom, setIsScrolledToBottom] = useState(true)
-  const [isScrolledToTop, setIsScrolledToTop] = useState(true)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
   const didLockInitialSelectionRef = useRef(false)
 
   const handleReorder = (newList: APIProviderConfig[]) => {
@@ -84,62 +82,8 @@ function ProviderCardList() {
     }
   }, [selectedProviderId, setSelectedProviderId])
 
-  // Update scroll state when apiProvidersConfig changes
-  useLayoutEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const container = scrollContainerRef.current
-      if (container) {
-        const canScrollDown = container.scrollHeight > container.clientHeight
-        const isAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 2
-        const isAtTop = container.scrollTop < 2
-        setCanScroll(canScrollDown)
-        setIsScrolledToBottom(isAtBottom || !canScrollDown)
-        setIsScrolledToTop(isAtTop)
-      }
-    }, 100)
-
-    return () => clearTimeout(timeoutId)
-  }, [apiProvidersConfig])
-
-  // Add scroll listener and resize observer
-  useEffect(() => {
-    const handleScroll = () => {
-      const container = scrollContainerRef.current
-      if (container) {
-        const canScrollDown = container.scrollHeight > container.clientHeight
-        const isAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 2
-        const isAtTop = container.scrollTop < 2
-
-        setCanScroll(canScrollDown)
-        setIsScrolledToBottom(isAtBottom || !canScrollDown)
-        setIsScrolledToTop(isAtTop)
-      }
-    }
-
-    const container = scrollContainerRef.current
-    if (container) {
-      // Add scroll listener
-      container.addEventListener("scroll", handleScroll)
-
-      // Add resize observer to detect content changes
-      const resizeObserver = new ResizeObserver(() => {
-        handleScroll()
-      })
-      resizeObserver.observe(container)
-
-      // Call once to set initial state
-      const timeoutId = setTimeout(handleScroll, 50)
-
-      return () => {
-        clearTimeout(timeoutId)
-        container.removeEventListener("scroll", handleScroll)
-        resizeObserver.disconnect()
-      }
-    }
-  }, [])
-
   return (
-    <div className="w-40 lg:w-52 flex flex-col gap-4">
+    <div className="flex flex-col gap-4">
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogTrigger
           render={(
@@ -157,32 +101,16 @@ function ProviderCardList() {
         </DialogTrigger>
         <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
       </Dialog>
-      <div className="relative">
-        {canScroll && !isScrolledToTop && (
-          <div className="absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-background to-transparent flex items-center justify-center z-10 pointer-events-none">
-            <Icon icon="tabler:chevron-up" className="size-4 text-muted-foreground animate-bounce" />
-          </div>
-        )}
-        <div
-          ref={scrollContainerRef}
-          style={{ overflowAnchor: "none" }}
-          className="overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]"
-        >
-          <SortableList
-            list={apiProvidersConfig}
-            setList={handleReorder}
-            className="flex flex-col gap-4 pt-2"
-            renderItem={providerConfig => (
-              <ProviderCard providerConfig={providerConfig} />
-            )}
-          />
-        </div>
-        {canScroll && !isScrolledToBottom && (
-          <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
-            <Icon icon="tabler:chevron-down" className="size-4 text-muted-foreground animate-bounce" />
-          </div>
-        )}
-      </div>
+      <EntityListRail>
+        <SortableList
+          list={apiProvidersConfig}
+          setList={handleReorder}
+          className="flex flex-col gap-4 pt-2"
+          renderItem={providerConfig => (
+            <ProviderCard providerConfig={providerConfig} />
+          )}
+        />
+      </EntityListRail>
     </div>
   )
 }
@@ -196,6 +124,18 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   const assignedFeatures = FEATURE_KEYS
     .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
+  const assignedCustomFeatures = config.selectionToolbar.customFeatures
+    .filter(f => f.providerId === id)
+  const totalAssigned = assignedFeatures.length + assignedCustomFeatures.length
+
+  const handleProviderEnabledChange = (checked: boolean) => {
+    if (!checked && enabled && totalAssigned > 0) {
+      toast.error(i18n.t("options.apiProviders.form.providerInUseCannotDisable", [name, totalAssigned]))
+      return
+    }
+
+    void setProviderConfig({ ...providerConfig, enabled: checked })
+  }
 
   return (
     <div
@@ -205,7 +145,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       )}
       onClick={() => setSelectedProviderId(id)}
     >
-      {assignedFeatures.length > 0 && (
+      {totalAssigned > 0 && (
         <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
           <Tooltip>
             <TooltipTrigger
@@ -213,12 +153,15 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
                 <Badge className="bg-blue-500 cursor-default" size="sm" />
               )}
             >
-              {i18n.t("options.apiProviders.badges.featureCount", [assignedFeatures.length])}
+              {i18n.t("options.apiProviders.badges.featureCount", [totalAssigned])}
             </TooltipTrigger>
             <TooltipContent>
               <ul className="list-disc list-inside marker:text-green-500">
                 {assignedFeatures.map(key => (
                   <li key={key}>{i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[key]}`)}</li>
+                ))}
+                {assignedCustomFeatures.map(f => (
+                  <li key={f.id}>{f.name}</li>
                 ))}
               </ul>
             </TooltipContent>
@@ -229,7 +172,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
         <ProviderIcon logo={API_PROVIDER_ITEMS[provider].logo(theme)} name={name} size="base" textClassName="text-sm" />
         <Switch
           checked={enabled}
-          onCheckedChange={checked => setProviderConfig({ ...providerConfig, enabled: checked })}
+          onCheckedChange={handleProviderEnabledChange}
           onPointerDown={e => e.stopPropagation()}
           onClick={e => e.stopPropagation()}
         />

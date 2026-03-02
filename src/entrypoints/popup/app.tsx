@@ -2,7 +2,6 @@ import { browser, i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useSetAtom } from "jotai"
 import { useEffect } from "react"
-import FrogToast from "@/components/frog-toast"
 import { UserAccount } from "@/components/user-account"
 import { version } from "../../../package.json"
 import { initIsIgnoreTabAtom } from "./atoms/ignore"
@@ -69,7 +68,6 @@ function App() {
         </span>
         <MoreMenu />
       </div>
-      <FrogToast />
     </>
   )
 }

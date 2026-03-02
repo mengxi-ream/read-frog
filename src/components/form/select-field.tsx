@@ -3,7 +3,7 @@ import { useStore } from "@tanstack/react-form"
 import { useCallback } from "react"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select } from "@/components/ui/base-ui/select"
-import { useFieldContext } from "../form-context"
+import { useFieldContext } from "./form-context"
 
 type SelectFieldProps = React.ComponentProps<typeof Select> & {
   formForSubmit: { handleSubmit: () => void }
@@ -25,7 +25,7 @@ export function SelectField(
 
   return (
     <Field>
-      <FieldLabel htmlFor={field.name}>
+      <FieldLabel nativeLabel={false} render={<div />}>
         {label}
       </FieldLabel>
       <Select

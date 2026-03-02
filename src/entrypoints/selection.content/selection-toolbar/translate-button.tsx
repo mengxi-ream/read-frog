@@ -145,7 +145,9 @@ export function TranslatePopover() {
         }
 
         console.error("Translation error:", error)
-        toast.error("Translation failed")
+        toast.error(i18n.t("translationHub.translationFailed"), {
+          description: error instanceof Error ? error.message : String(error),
+        })
       }
       finally {
         cancelTranslation = undefined

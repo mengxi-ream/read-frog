@@ -2,6 +2,9 @@ name: Read Frog
 extName: Read Frog - Иммерсивный переводчик с открытым исходным кодом
 extDescription: Read Frog — расширение браузера с открытым исходным кодом, которое поможет вам глубоко изучать языки на любом веб-сайте.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: Текст
+  number: Число
 contextMenu:
   translate: Перевести
   showOriginal: Показать оригинал
@@ -35,6 +38,22 @@ popup:
     rateUs: Оценить нас
     ebook: Сторонняя читалка электронных книг
     tutorial: Руководство
+errorRecovery:
+  title: Что-то пошло не так
+  description: Активирован режим восстановления. Вы можете экспортировать текущие настройки как резервную копию, затем сбросить настройки и попробовать снова.
+  backupTitle: Сначала сделайте резервную копию текущих настроек (рекомендуется)
+  exportWithApiKeys: Экспортировать с API-ключами
+  exportWithoutApiKeys: Экспортировать без API-ключей
+  resetTitle: Сбросить настройки
+  resetAction: Сбросить к настройкам по умолчанию
+  resetSuccess: Восстановление завершено. Настройки были сброшены
+  resetFailed: Восстановление не удалось. Не удалось сбросить настройки
+  errorDetails: Подробности ошибки
+  resetDialog:
+    title: Сбросить настройки?
+    description: Текущие настройки будут заменены значениями по умолчанию.
+    confirm: Сбросить
+    cancel: Отмена
 options:
   sidebar:
     settings: Настройки
@@ -80,6 +99,11 @@ options:
         baseURL: Base URL
         optional: Необязательно
       delete: Удалить
+      deleteDialog:
+        title: Удалить провайдера?
+        description: Это действие нельзя отменить. Функции, использующие этого провайдера, будут автоматически переназначены другому доступному провайдеру.
+        confirm: Удалить
+        cancel: Отмена
       atLeastOneLLMProvider: Требуется как минимум один LLM-провайдер перевода.
       duplicateProviderName: 'Дублирующееся имя провайдера "$1"'
       defaultProvider:
@@ -143,6 +167,7 @@ options:
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
+      customFeatures: Пользовательские AI-функции
       features:
         translate: Перевод страницы
         selectionToolbar_translate: Перевод выделения
@@ -254,6 +279,54 @@ options:
         vocabularyInsight:
           title: Анализ слов
           description: Настройка провайдера и модели для анализа слов/фраз в панели выделения
+      customFeatures:
+        title: Пользовательские AI-функции
+        description: Добавляйте собственные структурированные AI-действия для выделенного текста
+        add: Добавить AI-функцию
+        edit: Редактировать AI-функцию
+        empty: Пока нет пользовательских AI-функций
+        noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-функций
+        table:
+          name: Название
+          provider: Провайдер
+          fields: Поля
+          actions: Действия
+        form:
+          name: Название
+          icon: Иконка (Iconify)
+          provider: Провайдер (требуется поддержка структурированного вывода)
+          selectProvider: Выберите провайдера
+          systemPrompt: Системный промпт
+          prompt: Промпт
+          outputSchema: Схема вывода
+          addField: Добавить поле
+          fieldName: Имя поля
+          fieldType: Тип поля
+          actions: Действия
+          cancel: Отмена
+          save: Сохранить
+          defaultFieldName: результат
+          fieldNamePlaceholder: имя_поля
+          autoFieldPrefix: поле
+          tokens:
+            selection: Содержимое выделенного текста
+            context: Текст абзаца, в котором находится выделение
+            targetLang: Целевой язык пользователя
+            title: Заголовок веб-страницы
+          delete: Удалить
+          deleteDialog:
+            title: Удалить пользовательскую функцию?
+            description: Это действие нельзя отменить.
+            confirm: Удалить
+            cancel: Отмена
+        errors:
+          nameRequired: Название обязательно
+          duplicateName: 'Дублирующееся имя функции "$1"'
+          invalidIcon: Неверная строка иконки Iconify
+          providerRequired: Выберите включённого LLM-провайдера
+          outputSchemaRequired: Добавьте хотя бы одно поле вывода
+          fieldKeyRequired: Имя поля обязательно
+          duplicateFieldKey: Имена полей должны быть уникальными
     contextMenu:
       title: Контекстное меню
       translate:
@@ -289,6 +362,8 @@ options:
     personalizedPrompts:
       title: Персонализированные промпты
       description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
+      communityPrompts: Получайте или делитесь промптами с сообществом
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Добавить промпт
       default: По умолчанию
       importSuccess: Импорт успешен

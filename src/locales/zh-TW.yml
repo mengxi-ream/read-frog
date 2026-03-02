@@ -2,6 +2,9 @@ name: 陪讀蛙
 extName: 陪讀蛙 - 開源沉浸式翻譯
 extDescription: 陪讀蛙是一款開放源代碼的瀏覽器插件，旨在幫助您從任何網站深入學習語言。
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
+dataTypes:
+  string: 文字
+  number: 數字
 contextMenu:
   translate: 翻譯
   showOriginal: 顯示原文
@@ -35,6 +38,22 @@ popup:
     rateUs: 好評支持
     ebook: 第三方電子書閱讀器
     tutorial: 使用教程
+errorRecovery:
+  title: 應用發生異常
+  description: 已進入恢復模式。你可以先導出當前設定作為備份，再重置設定後重試。
+  backupTitle: 先備份當前設定（推薦）
+  exportWithApiKeys: 導出（包含 API Keys）
+  exportWithoutApiKeys: 導出（不包含 API Keys）
+  resetTitle: 重置設定
+  resetAction: 重置為預設設定
+  resetSuccess: 恢復完成，設定已重置
+  resetFailed: 恢復失敗，無法重置設定
+  errorDetails: 錯誤詳情
+  resetDialog:
+    title: 確認重置設定？
+    description: 這會用預設設定覆蓋當前設定。
+    confirm: 重置
+    cancel: 取消
 options:
   sidebar:
     settings: 設定
@@ -80,6 +99,11 @@ options:
         baseURL: Base URL
         optional: 可選
       delete: 刪除
+      deleteDialog:
+        title: 刪除提供商？
+        description: 此操作無法撤銷。使用此提供商的功能將自動重新分配到其他可用提供商。
+        confirm: 刪除
+        cancel: 取消
       atLeastOneLLMProvider: 至少需要一個 LLM 翻譯提供商。
       duplicateProviderName: '重複的提供商名稱 "$1"'
       defaultProvider:
@@ -143,6 +167,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 為每個功能選擇使用的提供商
+      customFeatures: 自訂 AI 功能
       features:
         translate: 網頁翻譯
         selectionToolbar_translate: 劃詞翻譯
@@ -254,6 +279,54 @@ options:
         vocabularyInsight:
           title: 詞彙解析
           description: 配置選擇工具列詞彙/短語解析功能使用的提供商與模型
+      customFeatures:
+        title: 自訂 AI 功能
+        description: 為劃詞新增你自己的結構化 AI 操作
+        add: 新增 AI 功能
+        edit: 編輯 AI 功能
+        empty: 暫無自訂 AI 功能
+        noEnabledLlmProvider: 請先啟用至少一個 LLM 提供商後再建立自訂 AI 功能
+        table:
+          name: 名稱
+          provider: 提供商
+          fields: 欄位數
+          actions: 操作
+        form:
+          name: 名稱
+          icon: 圖示 (Iconify)
+          provider: 提供商（需支援結構化輸出）
+          selectProvider: 選擇提供商
+          systemPrompt: 系統提示詞
+          prompt: 提示詞
+          outputSchema: 輸出 Schema
+          addField: 新增欄位
+          fieldName: 欄位名
+          fieldType: 欄位類型
+          actions: 操作
+          cancel: 取消
+          save: 儲存
+          defaultFieldName: 結果
+          fieldNamePlaceholder: 欄位名
+          autoFieldPrefix: 欄位
+          tokens:
+            selection: 選取的文字內容
+            context: 選取文字所在段落內容
+            targetLang: 使用者的目標語言
+            title: 網頁標題
+          delete: 刪除
+          deleteDialog:
+            title: 刪除自訂功能？
+            description: 此操作無法撤銷。
+            confirm: 刪除
+            cancel: 取消
+        errors:
+          nameRequired: 名稱不能為空
+          duplicateName: '重複的功能名稱 "$1"'
+          invalidIcon: Iconify 圖示字串格式無效
+          providerRequired: 請選擇一個已啟用的 LLM 提供商
+          outputSchemaRequired: 至少需要一個輸出欄位
+          fieldKeyRequired: 欄位名不能為空
+          duplicateFieldKey: 欄位名不能重複
     contextMenu:
       title: 右鍵選單
       translate:

@@ -2,6 +2,9 @@ name: Read Frog
 extName: Read Frog - Dịch Nhúng Mã Nguồn Mở
 extDescription: Read Frog là tiện ích mở rộng trình duyệt mã nguồn mở được thiết kế để giúp bạn học ngôn ngữ sâu từ bất kỳ trang web nào.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: Văn bản
+  number: Số
 contextMenu:
   translate: Dịch
   showOriginal: Hiển thị bản gốc
@@ -35,6 +38,22 @@ popup:
     rateUs: Đánh giá chúng tôi
     ebook: Trình đọc sách điện tử bên thứ ba
     tutorial: Hướng dẫn
+errorRecovery:
+  title: Đã xảy ra sự cố
+  description: Chế độ khôi phục đang hoạt động. Bạn có thể xuất cài đặt hiện tại để sao lưu, sau đó đặt lại cài đặt và thử lại.
+  backupTitle: Sao lưu cài đặt hiện tại trước (khuyến nghị)
+  exportWithApiKeys: Xuất kèm API Key
+  exportWithoutApiKeys: Xuất không kèm API Key
+  resetTitle: Đặt lại cài đặt
+  resetAction: Đặt lại về cài đặt mặc định
+  resetSuccess: Khôi phục hoàn tất. Cài đặt đã được đặt lại
+  resetFailed: Khôi phục thất bại. Không thể đặt lại cài đặt
+  errorDetails: Chi tiết lỗi
+  resetDialog:
+    title: Đặt lại cài đặt?
+    description: Cài đặt hiện tại sẽ bị thay thế bằng giá trị mặc định.
+    confirm: Đặt lại
+    cancel: Hủy
 options:
   sidebar:
     settings: Cài đặt
@@ -80,6 +99,11 @@ options:
         baseURL: Base URL
         optional: Tùy chọn
       delete: Xóa
+      deleteDialog:
+        title: Xóa nhà cung cấp?
+        description: Hành động này không thể hoàn tác. Các tính năng sử dụng nhà cung cấp này sẽ được tự động chuyển sang nhà cung cấp khả dụng khác.
+        confirm: Xóa
+        cancel: Hủy
       atLeastOneLLMProvider: Cần ít nhất một nhà cung cấp dịch LLM.
       duplicateProviderName: 'Tên nhà cung cấp trùng lặp "$1"'
       defaultProvider:
@@ -143,6 +167,7 @@ options:
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
+      customFeatures: Tính năng AI tùy chỉnh
       features:
         translate: Dịch trang
         selectionToolbar_translate: Dịch thanh công cụ chọn
@@ -254,6 +279,54 @@ options:
         vocabularyInsight:
           title: Phân tích từ vựng
           description: Cấu hình nhà cung cấp và model cho tính năng phân tích từ/cụm từ của selection toolbar
+      customFeatures:
+        title: Tính năng AI tùy chỉnh
+        description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
+        add: Thêm tính năng AI
+        edit: Chỉnh sửa tính năng AI
+        empty: Chưa có tính năng AI tùy chỉnh
+        noEnabledLlmProvider: Hãy bật ít nhất một nhà cung cấp LLM trước khi tạo tính năng AI tùy chỉnh
+        table:
+          name: Tên
+          provider: Nhà cung cấp
+          fields: Trường
+          actions: Thao tác
+        form:
+          name: Tên
+          icon: Biểu tượng (Iconify)
+          provider: Nhà cung cấp (yêu cầu hỗ trợ đầu ra có cấu trúc)
+          selectProvider: Chọn nhà cung cấp
+          systemPrompt: System Prompt
+          prompt: Prompt
+          outputSchema: Schema đầu ra
+          addField: Thêm trường
+          fieldName: Tên trường
+          fieldType: Loại trường
+          actions: Thao tác
+          cancel: Hủy
+          save: Lưu
+          defaultFieldName: kết quả
+          fieldNamePlaceholder: tên_trường
+          autoFieldPrefix: trường
+          tokens:
+            selection: Nội dung văn bản đã chọn
+            context: Nội dung đoạn văn chứa văn bản đã chọn
+            targetLang: Ngôn ngữ đích của người dùng
+            title: Tiêu đề trang web
+          delete: Xóa
+          deleteDialog:
+            title: Xóa tính năng tùy chỉnh?
+            description: Hành động này không thể hoàn tác.
+            confirm: Xóa
+            cancel: Hủy
+        errors:
+          nameRequired: Tên là bắt buộc
+          duplicateName: 'Tên tính năng trùng lặp "$1"'
+          invalidIcon: Chuỗi biểu tượng Iconify không hợp lệ
+          providerRequired: Vui lòng chọn một nhà cung cấp LLM đã bật
+          outputSchemaRequired: Thêm ít nhất một trường đầu ra
+          fieldKeyRequired: Tên trường là bắt buộc
+          duplicateFieldKey: Tên trường phải là duy nhất
     contextMenu:
       title: Menu ngữ cảnh
       translate:
@@ -289,6 +362,8 @@ options:
     personalizedPrompts:
       title: Prompt cá nhân hóa
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.
+      communityPrompts: Nhận hoặc chia sẻ prompt từ cộng đồng
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
       addPrompt: Thêm Prompt
       default: Mặc định
       importSuccess: Nhập thành công

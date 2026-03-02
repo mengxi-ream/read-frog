@@ -1,11 +1,22 @@
 import { i18n } from "#imports"
-import { useAtom } from "jotai"
+import { useAtom, useAtomValue } from "jotai"
+import { useMemo } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
+import { isTranslateProvider } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 
 export default function TranslateProviderField() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+
+  const providers = useMemo(() => {
+    const exclude = translateConfig.mode === "translationOnly" ? ["google-translate"] : undefined
+    return filterEnabledProvidersConfig(providersConfig)
+      .filter(p => isTranslateProvider(p.provider))
+      .filter(p => !exclude?.includes(p.provider))
+  }, [providersConfig, translateConfig.mode])
 
   return (
     <div className="flex items-center justify-between gap-2">
@@ -16,10 +27,9 @@ export default function TranslateProviderField() {
         </HelpTooltip>
       </span>
       <ProviderSelector
-        featureKey="translate"
+        providers={providers}
         value={translateConfig.providerId}
         onChange={id => void setTranslateConfig({ providerId: id })}
-        excludeProviderTypes={translateConfig.mode === "translationOnly" ? ["google-translate"] : undefined}
         className="h-7! w-31 cursor-pointer pr-1.5 pl-2.5"
       />
     </div>

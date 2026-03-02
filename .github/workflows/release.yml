@@ -114,7 +114,7 @@ jobs:
         if: steps.changesets.outputs.published == 'true'
         run: |
           VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
-          gh release upload "v$VERSION" .output/*-chrome.zip .output/*-edge.zip .output/*-firefox.zip --clobber
+          gh release upload "v$VERSION" .output/*-chrome.zip .output/*-edge.zip .output/*-firefox.zip .output/*-sources.zip --clobber
         env:
           GH_TOKEN: ${{ github.token }}
 

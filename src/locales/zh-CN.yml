@@ -2,6 +2,9 @@ name: 陪读蛙
 extName: 陪读蛙 - 开源沉浸式翻译
 extDescription: 陪读蛙是一款开放源代码的浏览器插件，旨在帮助您从任何网站深入学习语言。
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
+dataTypes:
+  string: 文本
+  number: 数字
 contextMenu:
   translate: 翻译
   showOriginal: 显示原文
@@ -35,6 +38,22 @@ popup:
     rateUs: 好评支持
     ebook: 第三方电子书阅读器
     tutorial: 使用教程
+errorRecovery:
+  title: 应用发生异常
+  description: 已进入恢复模式。你可以先导出当前设置作为备份，再重置设置后重试。
+  backupTitle: 先备份当前设置（推荐）
+  exportWithApiKeys: 导出（包含 API Keys）
+  exportWithoutApiKeys: 导出（不包含 API Keys）
+  resetTitle: 重置设置
+  resetAction: 重置为默认设置
+  resetSuccess: 恢复完成，设置已重置
+  resetFailed: 恢复失败，无法重置设置
+  errorDetails: 错误详情
+  resetDialog:
+    title: 确认重置设置？
+    description: 这会用默认设置覆盖当前设置。
+    confirm: 重置
+    cancel: 取消
 options:
   sidebar:
     settings: 设置
@@ -80,7 +99,13 @@ options:
         baseURL: Base URL
         optional: 可选
       delete: 删除
+      deleteDialog:
+        title: 删除提供商？
+        description: 此操作无法撤销。使用此提供商的功能将自动重新分配到其他可用提供商。
+        confirm: 删除
+        cancel: 取消
       atLeastOneLLMProvider: 至少需要一个 LLM 翻译提供商。
+      providerInUseCannotDisable: '无法禁用 "$1"，它当前正被 $2 个功能使用。'
       duplicateProviderName: '重复的提供商名称 "$1"'
       defaultProvider:
         translate: 设为默认翻译提供商
@@ -143,6 +168,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
+      customFeatures: 自定义 AI 功能
       features:
         translate: 网页翻译
         selectionToolbar_translate: 划词翻译
@@ -254,6 +280,54 @@ options:
         vocabularyInsight:
           title: 词汇解析
           description: 配置选择工具栏词汇/短语解析功能使用的提供商与模型
+      customFeatures:
+        title: 自定义 AI 功能
+        description: 为划词添加你自己的结构化 AI 操作
+        add: 添加 AI 功能
+        edit: 编辑 AI 功能
+        empty: 暂无自定义 AI 功能
+        noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 功能
+        table:
+          name: 名称
+          provider: 提供商
+          fields: 字段数
+          actions: 操作
+        form:
+          name: 名称
+          icon: 图标 (Iconify)
+          provider: 提供商（需支持结构化输出）
+          selectProvider: 选择提供商
+          systemPrompt: 系统提示词
+          prompt: 提示词
+          outputSchema: 输出 Schema
+          addField: 添加字段
+          fieldName: 字段名
+          fieldType: 字段类型
+          actions: 操作
+          cancel: 取消
+          save: 保存
+          defaultFieldName: 结果
+          fieldNamePlaceholder: 字段名
+          autoFieldPrefix: 字段
+          tokens:
+            selection: 选中的文本内容
+            context: 选中文本所在段落内容
+            targetLang: 用户的目标语言
+            title: 网页标题
+          delete: 删除
+          deleteDialog:
+            title: 删除自定义功能？
+            description: 此操作无法撤销。
+            confirm: 删除
+            cancel: 取消
+        errors:
+          nameRequired: 名称不能为空
+          duplicateName: '重复的功能名称 "$1"'
+          invalidIcon: Iconify 图标字符串格式无效
+          providerRequired: 请选择一个已启用的 LLM 提供商
+          outputSchemaRequired: 至少需要一个输出字段
+          fieldKeyRequired: 字段名不能为空
+          duplicateFieldKey: 字段名不能重复
     contextMenu:
       title: 右键菜单
       translate:
