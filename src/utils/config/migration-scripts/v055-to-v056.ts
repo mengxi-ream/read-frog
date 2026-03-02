@@ -10,8 +10,7 @@ export function migrate(oldConfig: any): any {
     = oldConfig.selectionToolbar?.features?.vocabularyInsight?.providerId
 
   const customFeatures = dictionaryProviderId
-    ? []
-    : [
+    ? [
         {
           id: "default-dictionary",
           name: "Dictionary",
@@ -31,6 +30,7 @@ export function migrate(oldConfig: any): any {
           ],
         },
       ]
+    : []
 
   return {
     ...oldConfig,
