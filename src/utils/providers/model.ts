@@ -25,34 +25,7 @@ import { isCustomLLMProvider } from "@/types/config/provider"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
 
-interface ProviderFactoryMap {
-  "siliconflow": typeof createOpenAICompatible
-  "tensdaq": typeof createOpenAICompatible
-  "ai302": typeof createOpenAICompatible
-  "volcengine": typeof createOpenAICompatible
-  "openrouter": typeof createOpenRouter
-  "openai-compatible": typeof createOpenAICompatible
-  "openai": typeof createOpenAI
-  "deepseek": typeof createDeepSeek
-  "google": typeof createGoogleGenerativeAI
-  "anthropic": typeof createAnthropic
-  "xai": typeof createXai
-  "bedrock": typeof createAmazonBedrock
-  "groq": typeof createGroq
-  "deepinfra": typeof createDeepInfra
-  "mistral": typeof createMistral
-  "togetherai": typeof createTogetherAI
-  "cohere": typeof createCohere
-  "fireworks": typeof createFireworks
-  "cerebras": typeof createCerebras
-  "replicate": typeof createReplicate
-  "perplexity": typeof createPerplexity
-  "vercel": typeof createVercel
-  "ollama": typeof createOllama
-  "minimax": typeof createMinimax
-}
-
-const CREATE_AI_MAPPER: ProviderFactoryMap = {
+const CREATE_AI_MAPPER = {
   "siliconflow": createOpenAICompatible,
   "tensdaq": createOpenAICompatible,
   "ai302": createOpenAICompatible,
@@ -77,9 +50,9 @@ const CREATE_AI_MAPPER: ProviderFactoryMap = {
   "vercel": createVercel,
   "ollama": createOllama,
   "minimax": createMinimax,
-}
+} as const
 
-const CUSTOM_HEADER_MAP: Partial<Record<keyof ProviderFactoryMap, Record<string, string>>> = {
+const CUSTOM_HEADER_MAP: Partial<Record<keyof typeof CREATE_AI_MAPPER, Record<string, string>>> = {
   anthropic: { "anthropic-dangerous-direct-browser-access": "true" },
 }
 

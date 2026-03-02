@@ -12,7 +12,7 @@ Follow these steps:
    - Add schema configuration
 4. Update provider implementation in `src/utils/providers/model.ts`:
    - Import the provider's create function
-   - Add to ProviderFactoryMap interface and CREATE_AI_MAPPER
+   - Add to CREATE_AI_MAPPER
 5. Update constants in `src/utils/constants/providers.ts`:
    - Add default models configuration
    - Add provider config with name, description, baseURL (if needed)
