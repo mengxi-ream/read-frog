@@ -367,21 +367,16 @@ describe("youTube Subtitle Parsers", () => {
       expect(result[0].text).toBe("Hello world.")
     })
 
-    it("should split on sentence boundaries", () => {
+    it("should split on sentence boundaries when lines are long enough", () => {
       const fragments = [
-        { text: "First sentence.", start: 0, end: 1000 },
-        { text: "Second sentence.", start: 1000, end: 2000 },
+        { text: "This is the first complete sentence that really ends right here.", start: 0, end: 1000 },
+        { text: "And this is the second complete sentence that also ends right here.", start: 1000, end: 2000 },
       ]
-      const result = optimizeSubtitles(fragments, "en", {
-        minCjk: 1,
-        maxCjk: 25,
-        minNonCjk: 1,
-        maxNonCjk: 20,
-      })
+      const result = optimizeSubtitles(fragments, "en")
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("First sentence.")
-      expect(result[1].text).toBe("Second sentence.")
+      expect(result[0].text).toBe("This is the first complete sentence that really ends right here.")
+      expect(result[1].text).toBe("And this is the second complete sentence that also ends right here.")
     })
 
     it("should merge short English lines into target range", () => {
@@ -439,20 +434,17 @@ describe("youTube Subtitle Parsers", () => {
       expect(result[1].text.split(/\s+/).length).toBe(10)
     })
 
-    it("should treat Thai as CJK group in target range selection", () => {
+    it("should treat Thai as CJK group and merge short lines", () => {
       const fragments = [
-        { text: "สวัสดี。", start: 0, end: 500 },
-        { text: "ยินดีที่ได้พบ", start: 500, end: 1000 },
+        { text: "สวัสดี", start: 0, end: 500 },
+        { text: "ครับ", start: 500, end: 1000 },
       ]
 
-      const result = optimizeSubtitles(fragments, "th", {
-        minCjk: 1,
-        maxCjk: 25,
-        minNonCjk: 100,
-        maxNonCjk: 200,
-      })
+      const result = optimizeSubtitles(fragments, "th")
 
-      expect(result).toHaveLength(2)
+      // Both fragments are short (< 15 CJK min), should merge
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("สวัสดีครับ")
     })
 
     it("should split on timeout (gap > 1000ms)", () => {

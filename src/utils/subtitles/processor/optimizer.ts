@@ -6,20 +6,11 @@ const QUALITY_LENGTH_THRESHOLD = 250
 const QUALITY_PERCENTAGE_THRESHOLD = 0.2
 const STARTS_WITH_SIGN_PATTERN = /^[[(♪]/
 
-export interface SubtitlesTargetRange {
-  // Preferred range (best-effort), not a strict requirement.
-  minCjk: number
-  maxCjk: number
-  minNonCjk: number
-  maxNonCjk: number
-}
-
-const DEFAULT_TARGET_RANGE: SubtitlesTargetRange = {
-  minCjk: 15,
-  maxCjk: 25,
-  minNonCjk: 11,
-  maxNonCjk: 20,
-}
+// Preferred target range (best-effort) for rebalancing short lines.
+const TARGET_MIN_CJK = 15
+const TARGET_MAX_CJK = 25
+const TARGET_MIN_NON_CJK = 11
+const TARGET_MAX_NON_CJK = 20
 
 const PAUSE_WORDS = new Set([
   "actually",
@@ -145,21 +136,10 @@ function processSubtitles(
   return result
 }
 
-function getTargetBounds(
-  isCJK: boolean,
-  targetRange: SubtitlesTargetRange,
-): { min: number, max: number } {
-  if (isCJK) {
-    return {
-      min: targetRange.minCjk,
-      max: targetRange.maxCjk,
-    }
-  }
-
-  return {
-    min: targetRange.minNonCjk,
-    max: targetRange.maxNonCjk,
-  }
+function getTargetBounds(isCJK: boolean): { min: number, max: number } {
+  return isCJK
+    ? { min: TARGET_MIN_CJK, max: TARGET_MAX_CJK }
+    : { min: TARGET_MIN_NON_CJK, max: TARGET_MAX_NON_CJK }
 }
 
 function mergeSegmentPair(
@@ -183,7 +163,6 @@ function shouldKeepBoundary(left: SubtitlesFragment, right: SubtitlesFragment): 
 function rebalanceToTargetRange(
   fragments: SubtitlesFragment[],
   language: string,
-  targetRange: SubtitlesTargetRange,
 ): SubtitlesFragment[] {
   if (fragments.length <= 1) {
     return fragments
@@ -191,7 +170,7 @@ function rebalanceToTargetRange(
 
   const isCJK = isCJKLanguage(language)
   const separator = isCJK ? "" : " "
-  const { min, max } = getTargetBounds(isCJK, targetRange)
+  const { min, max } = getTargetBounds(isCJK)
 
   const result: SubtitlesFragment[] = []
 
@@ -241,7 +220,6 @@ function rebalanceToTargetRange(
 export function optimizeSubtitles(
   fragments: SubtitlesFragment[],
   language: string,
-  targetRange: SubtitlesTargetRange = DEFAULT_TARGET_RANGE,
 ): SubtitlesFragment[] {
   if (fragments.length === 0)
     return []
@@ -254,5 +232,5 @@ export function optimizeSubtitles(
     result = processSubtitles(fragments, language, true)
   }
 
-  return rebalanceToTargetRange(result, language, targetRange)
+  return rebalanceToTargetRange(result, language)
 }
