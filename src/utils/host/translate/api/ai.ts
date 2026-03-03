@@ -55,7 +55,7 @@ export async function aiTranslate(
         ? {
             promptTokens: usage.inputTokens,
             completionTokens: usage.outputTokens,
-            totalTokens: usage.totalTokens,
+            totalTokens: usage.totalTokens ?? (usage.inputTokens != null && usage.outputTokens != null ? usage.inputTokens + usage.outputTokens : undefined),
           }
         : undefined,
     }
