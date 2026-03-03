@@ -793,7 +793,7 @@
 
 - [#463](https://github.com/mengxi-ream/read-frog/pull/463) [`5bbe29e`](https://github.com/mengxi-ream/read-frog/commit/5bbe29e31fe81fe180ba105ca369a7d48986a5cd) Thanks [@sedationh](https://github.com/sedationh)! - feat: add drag feature
 
-- [#450](https://github.com/mengxi-ream/read-frog/pull/450) [`b87fa03`](https://github.com/mengxi-ream/read-frog/commit/b87fa03cc01b504aaa861bcb4cf8b52036d44196) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: allow arbitraty number of providers
+- [#450](https://github.com/mengxi-ream/read-frog/pull/450) [`b87fa03`](https://github.com/mengxi-ream/read-frog/commit/b87fa03cc01b504aaa861bcb4cf8b52036d44196) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: allow arbitrary number of providers
 
 ### Patch Changes
 
