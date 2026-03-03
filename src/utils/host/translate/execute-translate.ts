@@ -53,7 +53,8 @@ export async function executeTranslate(
   }
   else if (isLLMProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
-    return aiTranslate(text, targetLangName, providerConfig, promptResolver, options)
+    const result = await aiTranslate(text, targetLangName, providerConfig, promptResolver, options)
+    return { ...result, text: result.text.trim() }
   }
   else {
     throw new Error(`Unknown provider: ${provider}`)
