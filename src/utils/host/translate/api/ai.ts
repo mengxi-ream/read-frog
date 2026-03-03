@@ -13,9 +13,9 @@ export type PromptResolver = (
 ) => Promise<TranslatePromptResult>
 
 export interface TranslationUsage {
-  promptTokens: number
-  completionTokens: number
-  totalTokens: number
+  promptTokens?: number
+  completionTokens?: number
+  totalTokens?: number
 }
 
 export interface TranslationResult {
@@ -51,11 +51,11 @@ export async function aiTranslate(
 
     return {
       text: finalTranslation,
-      usage: usage?.inputTokens != null && usage?.outputTokens != null
+      usage: usage?.inputTokens != null || usage?.outputTokens != null || usage?.totalTokens != null
         ? {
             promptTokens: usage.inputTokens,
             completionTokens: usage.outputTokens,
-            totalTokens: usage.totalTokens ?? (usage.inputTokens + usage.outputTokens),
+            totalTokens: usage.totalTokens,
           }
         : undefined,
     }
