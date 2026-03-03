@@ -27,9 +27,9 @@ function mockTranslateSuccess(results: string[]) {
   mockExecuteTranslate.mockImplementation((text: string) => {
     const batchSeparator = `\n\n${BATCH_SEPARATOR}\n\n`
     if (text.includes(batchSeparator)) {
-      return Promise.resolve(results.join(batchSeparator))
+      return Promise.resolve({ text: results.join(batchSeparator) })
     }
-    return Promise.resolve(results[0] || "translated")
+    return Promise.resolve({ text: results[0] || "translated" })
   })
 }
 
@@ -103,7 +103,7 @@ function createBatchQueue(
 
       const batchThunk = async (): Promise<string[]> => {
         const result = await executeTranslate(batchText, langConfig, providerConfig, mockPromptResolver, { isBatch: true })
-        return parseBatchResult(result)
+        return parseBatchResult(result.text)
       }
 
       return requestQueue.enqueue(batchThunk, Date.now(), hash)
@@ -214,7 +214,7 @@ describe("batchQueue – batching logic", () => {
     let callCount = 0
     mockExecuteTranslate.mockImplementation(() => {
       callCount++
-      return Promise.resolve(callCount === 1 ? "first-batch" : "second-batch")
+      return Promise.resolve({ text: callCount === 1 ? "first-batch" : "second-batch" })
     })
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
@@ -250,7 +250,7 @@ describe("batchQueue – batching logic", () => {
     let callCount = 0
     mockExecuteTranslate.mockImplementation(() => {
       callCount++
-      return Promise.resolve(callCount === 1 ? "english-result" : "chinese-result")
+      return Promise.resolve({ text: callCount === 1 ? "english-result" : "chinese-result" })
     })
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
@@ -347,7 +347,7 @@ describe("batchQueue – error handling", () => {
 
   it("handles translation count mismatch (no retry)", async () => {
     vi.useFakeTimers()
-    mockExecuteTranslate.mockImplementation(() => Promise.resolve("single-result"))
+    mockExecuteTranslate.mockImplementation(() => Promise.resolve({ text: "single-result" }))
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
     const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
@@ -384,10 +384,10 @@ describe("batchQueue – error handling", () => {
       const batchSeparator = `\n\n${BATCH_SEPARATOR}\n\n`
       if (attemptCount <= 2) {
         // Return wrong count (1 result instead of 2)
-        return Promise.resolve("single-result")
+        return Promise.resolve({ text: "single-result" })
       }
       // Return correct count on 3rd attempt
-      return Promise.resolve(["result1", "result2"].join(batchSeparator))
+      return Promise.resolve({ text: ["result1", "result2"].join(batchSeparator) })
     })
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
@@ -461,10 +461,10 @@ describe("batchQueue – error handling", () => {
       if (text.includes(batchSeparator)) {
         batchAttemptCount++
         // Always return wrong count for batch
-        return Promise.resolve("single-result")
+        return Promise.resolve({ text: "single-result" })
       }
       // Individual requests succeed
-      return Promise.resolve(`individual-${text}`)
+      return Promise.resolve({ text: `individual-${text}` })
     })
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
@@ -473,7 +473,7 @@ describe("batchQueue – error handling", () => {
       enableFallbackToIndividual: true,
       executeIndividual: async (data) => {
         const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
-        return result
+        return result.text
       },
     })
 
@@ -518,7 +518,7 @@ describe("batchQueue – error handling", () => {
         return Promise.reject(new Error("API error"))
       }
       // Individual requests succeed
-      return Promise.resolve(`individual-${text}`)
+      return Promise.resolve({ text: `individual-${text}` })
     })
 
     const requestQueue = new RequestQueue(baseRequestQueueConfig)
@@ -527,7 +527,7 @@ describe("batchQueue – error handling", () => {
       enableFallbackToIndividual: true,
       executeIndividual: async (data) => {
         const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
-        return result
+        return result.text
       },
     })
 
@@ -557,7 +557,7 @@ describe("batchQueue – error handling", () => {
   it("calls onError for each retry attempt on BatchCountMismatchError", async () => {
     vi.useFakeTimers()
     // Always return wrong count to trigger retries
-    mockExecuteTranslate.mockImplementation(() => Promise.resolve("single-result"))
+    mockExecuteTranslate.mockImplementation(() => Promise.resolve({ text: "single-result" }))
 
     const onError = vi.fn()
     const requestQueue = new RequestQueue(baseRequestQueueConfig)

@@ -51,7 +51,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
         return undefined
       }
 
-      return result
+      return result.text
     },
   })
 

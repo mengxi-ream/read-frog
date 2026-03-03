@@ -526,6 +526,9 @@ options:
       description: 周期内批量翻译节省的请求百分比
       originalRequestCount: 原始请求数量
       batchRequestCount: 批量请求数量
+      promptTokens: 输入 Tokens
+      completionTokens: 输出 Tokens
+      totalTokens: 总 Tokens
   config:
     title: 配置
     sync:

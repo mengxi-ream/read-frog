@@ -526,6 +526,9 @@ options:
       description: Percentage of requests saved by batch translation in the period
       originalRequestCount: Original Request Count
       batchRequestCount: Batch Request Count
+      promptTokens: Prompt Tokens
+      completionTokens: Completion Tokens
+      totalTokens: Total Tokens
   config:
     title: Config
     sync:

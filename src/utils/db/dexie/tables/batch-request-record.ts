@@ -6,4 +6,7 @@ export default class BatchRequestRecord extends Entity {
   originalRequestCount!: number
   provider!: string
   model!: string
+  promptTokens?: number
+  completionTokens?: number
+  totalTokens?: number
 }

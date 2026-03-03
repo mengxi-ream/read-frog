@@ -1,3 +1,4 @@
+import type { TranslationUsage } from "./host/translate/api/ai"
 import type { ProviderConfig } from "@/types/config/provider"
 import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-record"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -19,8 +20,8 @@ export async function getRangeBatchRequestRecords(startDay: number, endDay?: num
 }
 
 export async function putBatchRequestRecord(
-  { originalRequestCount, providerConfig }:
-  { originalRequestCount: number, providerConfig: ProviderConfig },
+  { originalRequestCount, providerConfig, usage }:
+  { originalRequestCount: number, providerConfig: ProviderConfig, usage?: TranslationUsage },
 ) {
   if (!isLLMProviderConfig(providerConfig))
     return
@@ -35,6 +36,9 @@ export async function putBatchRequestRecord(
       originalRequestCount,
       provider,
       model: modelName ?? "",
+      promptTokens: usage?.promptTokens,
+      completionTokens: usage?.completionTokens,
+      totalTokens: usage?.totalTokens,
     })
   }
   catch (error) {

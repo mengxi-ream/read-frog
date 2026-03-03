@@ -1,4 +1,4 @@
-import type { PromptResolver } from "./api/ai"
+import type { PromptResolver, TranslationResult } from "./api/ai"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { ArticleContent } from "@/types/content"
@@ -19,10 +19,10 @@ export async function executeTranslate(
     isBatch?: boolean
     content?: ArticleContent
   },
-) {
+): Promise<TranslationResult> {
   const cleanText = text.replace(/\u200B/g, "").trim()
   if (cleanText === "") {
-    return ""
+    return { text: "" }
   }
 
   const { provider } = providerConfig
@@ -53,11 +53,11 @@ export async function executeTranslate(
   }
   else if (isLLMProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
-    translatedText = await aiTranslate(text, targetLangName, providerConfig, promptResolver, options)
+    return aiTranslate(text, targetLangName, providerConfig, promptResolver, options)
   }
   else {
     throw new Error(`Unknown provider: ${provider}`)
   }
 
-  return translatedText.trim()
+  return { text: translatedText.trim() }
 }

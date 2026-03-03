@@ -12,13 +12,24 @@ export type PromptResolver = (
   options?: TranslatePromptOptions,
 ) => Promise<TranslatePromptResult>
 
+export interface TranslationUsage {
+  promptTokens: number
+  completionTokens: number
+  totalTokens: number
+}
+
+export interface TranslationResult {
+  text: string
+  usage?: TranslationUsage
+}
+
 export async function aiTranslate(
   text: string,
   targetLangName: string,
   providerConfig: LLMProviderConfig,
   promptResolver: PromptResolver,
   options?: { isBatch?: boolean, content?: ArticleContent },
-) {
+): Promise<TranslationResult> {
   const { id: providerId, model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const modelName = resolveModelId(providerModel)
   const model = await getModelById(providerId)
@@ -27,7 +38,7 @@ export async function aiTranslate(
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, options)
 
   try {
-    const { text: translatedText } = await generateText({
+    const { text: translatedText, usage } = await generateText({
       model,
       system: systemPrompt,
       prompt,
@@ -38,7 +49,16 @@ export async function aiTranslate(
 
     const [, finalTranslation = translatedText] = translatedText.match(/<\/think>([\s\S]*)/) || []
 
-    return finalTranslation
+    return {
+      text: finalTranslation,
+      usage: usage
+        ? {
+            promptTokens: usage.inputTokens ?? 0,
+            completionTokens: usage.outputTokens ?? 0,
+            totalTokens: (usage.inputTokens ?? 0) + (usage.outputTokens ?? 0),
+          }
+        : undefined,
+    }
   }
   catch (error) {
     throw new Error(extractAISDKErrorMessage(error))

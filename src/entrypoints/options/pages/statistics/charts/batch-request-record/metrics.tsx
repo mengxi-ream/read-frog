@@ -30,6 +30,19 @@ function transformRecordsToMetrics(currentPeriodRecords: BatchRequestRecord[], p
   const originalRequestComparison = calculateComparison(originalRequestCount, previousOriginalRequestCount)
   const batchRequestComparison = calculateComparison(batchRequestCount, previousBatchRequestCount)
 
+  // Token statistics
+  const promptTokens = currentPeriodRecords.reduce((acc, record) => acc + (record.promptTokens ?? 0), 0)
+  const completionTokens = currentPeriodRecords.reduce((acc, record) => acc + (record.completionTokens ?? 0), 0)
+  const totalTokens = currentPeriodRecords.reduce((acc, record) => acc + (record.totalTokens ?? 0), 0)
+
+  const previousPromptTokens = previousPeriodRecords.reduce((acc, record) => acc + (record.promptTokens ?? 0), 0)
+  const previousCompletionTokens = previousPeriodRecords.reduce((acc, record) => acc + (record.completionTokens ?? 0), 0)
+  const previousTotalTokens = previousPeriodRecords.reduce((acc, record) => acc + (record.totalTokens ?? 0), 0)
+
+  const promptTokensComparison = calculateComparison(promptTokens, previousPromptTokens)
+  const completionTokensComparison = calculateComparison(completionTokens, previousCompletionTokens)
+  const totalTokensComparison = calculateComparison(totalTokens, previousTotalTokens)
+
   return {
     originalRequestCount: {
       title: i18n.t("options.statistics.batchRequest.originalRequestCount"),
@@ -43,6 +56,24 @@ function transformRecordsToMetrics(currentPeriodRecords: BatchRequestRecord[], p
       comparison: batchRequestComparison,
       icon: "tabler:squares-filled",
     },
+    promptTokens: {
+      title: i18n.t("options.statistics.batchRequest.promptTokens"),
+      metric: formatNumber(promptTokens),
+      comparison: promptTokensComparison,
+      icon: "tabler:input",
+    },
+    completionTokens: {
+      title: i18n.t("options.statistics.batchRequest.completionTokens"),
+      metric: formatNumber(completionTokens),
+      comparison: completionTokensComparison,
+      icon: "tabler:output",
+    },
+    totalTokens: {
+      title: i18n.t("options.statistics.batchRequest.totalTokens"),
+      metric: formatNumber(totalTokens),
+      comparison: totalTokensComparison,
+      icon: "tabler:coins",
+    },
   }
 }
 
@@ -51,4 +82,14 @@ function calculateComparison(currentPeriodValue: number, previousPeriodValue: nu
     return undefined
   }
   return (currentPeriodValue - previousPeriodValue) / previousPeriodValue
+}
+
+function formatNumber(num: number): string {
+  if (num >= 1000000) {
+    return `${(num / 1000000).toFixed(1)}M`
+  }
+  if (num >= 1000) {
+    return `${(num / 1000).toFixed(1)}K`
+  }
+  return num.toString()
 }

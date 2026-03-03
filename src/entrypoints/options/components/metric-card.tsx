@@ -6,8 +6,9 @@ import { addThousandsSeparator, numberToPercentage } from "@/utils/utils"
 
 export function MetricCard(
   { title, metric, comparison, icon }:
-  { title: string, metric: number, icon: string, comparison?: number },
+  { title: string, metric: string | number, icon: string, comparison?: number },
 ) {
+  const displayMetric = typeof metric === "number" ? addThousandsSeparator(metric) : metric
   return (
     <Card className="flex flex-row hover:scale-[1.01] hover:-translate-y-1/12 transition-all duration-200 shadow-xs">
       <CardContent className="flex gap-4 w-full">
@@ -19,7 +20,7 @@ export function MetricCard(
         <div className="h-full flex flex-col gap-3 w-full items-start">
           <div className="leading-none text-muted-foreground text-sm">{title}</div>
           <div className="leading-none text-lg font-semibold tabular-nums flex flex-wrap gap-x-3 items-center">
-            {addThousandsSeparator(metric)}
+            {displayMetric}
             <Comparison comparison={comparison} />
           </div>
         </div>
