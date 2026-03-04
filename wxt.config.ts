@@ -39,6 +39,11 @@ export default defineConfig({
     ],
     // Firefox-specific settings for MV3
     ...(browser === "firefox" && {
+      // Override default CSP to exclude `upgrade-insecure-requests` (Firefox MV3 default),
+      // which would upgrade custom provider HTTP URLs (e.g. LAN) to HTTPS.
+      content_security_policy: {
+        extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
+      },
       browser_specific_settings: {
         gecko: {
           id: "{bd311a81-4530-4fcc-9178-74006155461b}",

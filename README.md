@@ -49,6 +49,7 @@ Master languages effortlessly and deeply with AI, right in your browser.
   - [📖 Read Article](#-read-article)
 - [🤝 Contribute](#-contribute)
   - [Contribute Code](#contribute-code)
+- [📜 Commercial License Grant](#-commercial-license-grant)
 - [❤️ Sponsors](#️-sponsors)
 
 <br/>
@@ -255,6 +256,10 @@ Ask AI to understand the project: [Dosu](https://app.dosu.dev/29569286-71ba-47dd
 
 Check out the [Contribution Guide](https://readfrog.app/en/tutorial/code-contribution/contribution-guide) for more details.
 
+ReadFrog is dual-licensed under GPLv3 and a commercial license.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
+
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
   <table>
     <tr>
@@ -280,6 +285,16 @@ Check out the [Contribution Guide](https://readfrog.app/en/tutorial/code-contrib
     </tr> -->
   </table>
 </a>
+
+<div align="right">
+
+[![][back-to-top]](#readme-top)
+
+</div>
+
+## 📜 Commercial License Grant
+
+<img src="assets/tabbit.avif" alt="Tabbit" height="20" /> **Meituan Tabbit Browser Team**: Free license (at no cost) for closed-source commercial use, limited to v1.21.3 and earlier versions (commit [`724863f`](https://github.com/mengxi-ream/read-frog/commit/724863fdbc2d777766cada6c111235534ee03ca0)). Granted on March 3, 2025, 9:00 AM (Vancouver Time, UTC-8).
 
 <div align="right">
 
