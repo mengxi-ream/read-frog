@@ -164,7 +164,9 @@ describe("selectionToolbar custom feature popover", () => {
 
     const requestPayload = mockedDeps.streamBackgroundStructuredObject.mock.calls[0]?.[0]
     expect(requestPayload?.prompt).toBe("selection=Beta|context=Alpha Beta gamma")
-    expect(requestPayload?.system).toBe("system=Alpha Beta gamma")
+    expect(requestPayload?.prompt).not.toContain("## Structured Output Contract")
+    expect(requestPayload?.system).toContain("system=Alpha Beta gamma")
+    expect(requestPayload?.system).toContain("## Structured Output Contract")
   })
 
   it("falls back to selection text for paragraph and context when range is missing", async () => {
@@ -189,6 +191,8 @@ describe("selectionToolbar custom feature popover", () => {
 
     const requestPayload = mockedDeps.streamBackgroundStructuredObject.mock.calls[0]?.[0]
     expect(requestPayload?.prompt).toBe("selection=Beta|context=Beta")
-    expect(requestPayload?.system).toBe("system=Beta")
+    expect(requestPayload?.prompt).not.toContain("## Structured Output Contract")
+    expect(requestPayload?.system).toContain("system=Beta")
+    expect(requestPayload?.system).toContain("## Structured Output Contract")
   })
 })

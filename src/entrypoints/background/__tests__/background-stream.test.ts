@@ -136,6 +136,10 @@ describe("background-stream", () => {
       summary: "text",
     }).success).toBe(true)
     expect(schemaArg.safeParse({
+      score: null,
+      summary: null,
+    }).success).toBe(true)
+    expect(schemaArg.safeParse({
       score: "99",
       summary: "text",
     }).success).toBe(false)

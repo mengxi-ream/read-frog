@@ -19,7 +19,7 @@ import {
   selectionRangeAtom,
 } from "./atom"
 import { PopoverWrapper } from "./components/popover-wrapper"
-import { replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
+import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 
 function normalizeSelectedText(value: string | null) {
@@ -151,7 +151,11 @@ export function SelectionToolbarCustomFeaturePopover() {
         targetLang,
         title: pageTitle,
       }
-      const systemPrompt = replaceSelectionToolbarCustomFeaturePromptTokens(activeFeature.systemPrompt, promptTokens)
+      const systemPrompt = buildSelectionToolbarCustomFeatureSystemPrompt(
+        activeFeature.systemPrompt,
+        promptTokens,
+        activeFeature.outputSchema,
+      )
       const prompt = replaceSelectionToolbarCustomFeaturePromptTokens(activeFeature.prompt, promptTokens)
       const modelName = resolveModelId(providerConfig.model) ?? ""
       const providerOptions = getProviderOptionsWithOverride(
