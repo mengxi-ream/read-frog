@@ -292,7 +292,7 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 
 ## 📜 商业授权
 
-<img src="/assets/tabbit.avif" alt="Tabbit" height="20" /> **美团 Tabbit 浏览器团队**：**免费**授权闭源商业使用，授权范围限于 v1.21.3 及之前的版本（commit [`724863f`](https://github.com/mengxi-ream/read-frog/commit/724863fdbc2d777766cada6c111235534ee03ca0)）。授权日期：2025 年 3 月 3 日上午 9:00（温哥华时间，UTC-8）。
+<img src="/assets/tabbit.avif" alt="Tabbit" height="20" /> **美团 Tabbit 浏览器团队**：**免费**授权闭源商业使用，授权范围限于 v1.21.3 及之前的版本（commit [`724863f`](https://github.com/mengxi-ream/read-frog/commit/724863fdbc2d777766cada6c111235534ee03ca0)）。授权日期：2026 年 3 月 3 日上午 9:00（温哥华时间，UTC-8）。
 
 <div align="right">
 
