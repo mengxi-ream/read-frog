@@ -112,6 +112,7 @@ export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]
     "faceplate-screen-reader-content > *",
     "reddit-header-large *",
     "shreddit-comment-action-row > *",
+    "shreddit-post-flair",
   ],
   "www.youtube.com": [
     "#masthead-container *",
