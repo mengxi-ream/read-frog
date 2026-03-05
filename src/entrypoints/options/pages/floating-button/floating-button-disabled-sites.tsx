@@ -28,6 +28,7 @@ export function FloatingButtonDisabledSites() {
 
   return (
     <ConfigCard
+      id="floating-button-disabled-sites"
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.title")}
       description={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.description")}
     >

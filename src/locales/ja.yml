@@ -55,6 +55,10 @@ errorRecovery:
     confirm: リセット
     cancel: キャンセル
 options:
+  commandPalette:
+    placeholder: 設定を検索...
+    noResults: 設定が見つかりません
+    searchHint: 検索...  ⌘K
   sidebar:
     settings: 設定
     tools: ツール

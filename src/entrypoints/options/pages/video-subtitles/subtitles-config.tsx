@@ -12,6 +12,7 @@ export function SubtitlesConfig() {
 
   return (
     <ConfigCard
+      id="subtitles-config"
       title={i18n.t("options.videoSubtitles.title")}
       description={i18n.t("options.videoSubtitles.description")}
     >

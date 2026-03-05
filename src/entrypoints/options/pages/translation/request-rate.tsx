@@ -16,6 +16,7 @@ type KeyOfRequestQueueConfig = keyof RequestQueueConfig
 export function RequestRate() {
   return (
     <ConfigCard
+      id="request-rate"
       title={i18n.t("options.translation.requestQueueConfig.title")}
       description={(
         <div>

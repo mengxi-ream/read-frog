@@ -92,6 +92,7 @@ export function InputTranslationLanguages() {
 
   return (
     <ConfigCard
+      id="input-translation-languages"
       title={i18n.t("options.inputTranslation.languages.title")}
       description={i18n.t("options.inputTranslation.languages.description")}
     >

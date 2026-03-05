@@ -11,6 +11,7 @@ export function InputTranslationToggle() {
 
   return (
     <ConfigCard
+      id="input-translation-toggle"
       title={i18n.t("options.inputTranslation.toggle.title")}
       description={i18n.t("options.inputTranslation.toggle.description")}
     >

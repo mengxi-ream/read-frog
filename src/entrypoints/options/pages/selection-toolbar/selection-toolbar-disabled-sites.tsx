@@ -28,6 +28,7 @@ export function SelectionToolbarDisabledSites() {
 
   return (
     <ConfigCard
+      id="selection-toolbar-disabled-sites"
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.disabledSites.title")}
       description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.disabledSites.description")}
     >

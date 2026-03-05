@@ -9,7 +9,7 @@ import { ConfigCard } from "../../components/config-card"
 
 export function TranslateRange() {
   return (
-    <ConfigCard title={i18n.t("options.translation.translateRange.title")} description={i18n.t("options.translation.translateRange.description")}>
+    <ConfigCard id="translate-range" title={i18n.t("options.translation.translateRange.title")} description={i18n.t("options.translation.translateRange.description")}>
       <TranslateRangeSelector />
     </ConfigCard>
   )

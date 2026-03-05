@@ -55,6 +55,10 @@ errorRecovery:
     confirm: Reset
     cancel: Cancel
 options:
+  commandPalette:
+    placeholder: Search settings...
+    noResults: No settings found
+    searchHint: Search...  ⌘K
   sidebar:
     settings: Settings
     tools: Tools

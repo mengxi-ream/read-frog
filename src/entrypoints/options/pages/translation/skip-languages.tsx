@@ -32,6 +32,7 @@ export function SkipLanguages() {
   return (
     <div className="py-6 flex flex-col gap-y-4">
       <ConfigCard
+        id="skip-languages"
         title={i18n.t("options.translation.skipLanguages.title")}
         description={(
           <>

@@ -20,7 +20,7 @@ export function PageTranslationShortcut() {
   }
 
   return (
-    <ConfigCard title={i18n.t("options.translation.pageTranslationShortcut.title")} description={i18n.t("options.translation.pageTranslationShortcut.description")}>
+    <ConfigCard id="page-translation-shortcut" title={i18n.t("options.translation.pageTranslationShortcut.title")} description={i18n.t("options.translation.pageTranslationShortcut.description")}>
       <ShortcutKeyRecorder shortcutKey={shortcut} onChange={updateShortcut} />
     </ConfigCard>
   )

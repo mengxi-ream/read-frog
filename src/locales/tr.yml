@@ -55,6 +55,10 @@ errorRecovery:
     confirm: Sıfırla
     cancel: İptal
 options:
+  commandPalette:
+    placeholder: Ayarları ara...
+    noResults: Ayar bulunamadı
+    searchHint: Ara...  ⌘K
   sidebar:
     settings: Ayarlar
     tools: Araçlar

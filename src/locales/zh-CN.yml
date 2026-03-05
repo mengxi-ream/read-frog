@@ -55,6 +55,10 @@ errorRecovery:
     confirm: 重置
     cancel: 取消
 options:
+  commandPalette:
+    placeholder: 搜索设置...
+    noResults: 未找到设置
+    searchHint: 搜索...  ⌘K
   sidebar:
     settings: 设置
     tools: 工具

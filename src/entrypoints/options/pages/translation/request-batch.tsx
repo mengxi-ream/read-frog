@@ -20,6 +20,7 @@ type KeyOfBatchQueueConfig = keyof BatchQueueConfig
 export function RequestBatch() {
   return (
     <ConfigCard
+      id="request-batch"
       title={i18n.t("options.translation.batchQueueConfig.title")}
       description={(
         <div className="flex flex-col">

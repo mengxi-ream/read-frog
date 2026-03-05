@@ -8,6 +8,7 @@ import { CustomFeatureConfigForm } from "./feature-config-form"
 export function CustomFeaturesConfig() {
   return (
     <ConfigCard
+      id="custom-features"
       title={(
         <span className="inline-flex items-center gap-2">
           {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.title")}

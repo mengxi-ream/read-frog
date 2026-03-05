@@ -30,6 +30,7 @@ export default function SiteControlMode() {
 
   return (
     <ConfigCard
+      id="site-control-mode"
       title={i18n.t("options.siteControl.mode.title")}
       description={i18n.t("options.siteControl.mode.description")}
     >

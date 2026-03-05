@@ -31,7 +31,7 @@ export function AutoTranslateWebsitePatterns() {
   }
 
   return (
-    <ConfigCard title={i18n.t("options.translation.autoTranslateWebsite.title")} description={i18n.t("options.translation.autoTranslateWebsite.description")}>
+    <ConfigCard id="auto-translate-website" title={i18n.t("options.translation.autoTranslateWebsite.title")} description={i18n.t("options.translation.autoTranslateWebsite.description")}>
       <DisabledPatternsTable
         patterns={autoTranslatePatterns}
         onAddPattern={addPattern}
