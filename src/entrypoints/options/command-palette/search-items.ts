@@ -204,7 +204,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.overlayTools.inputTranslation.title",
   },
   {
-    sectionId: "input-translation-threshold",
+    sectionId: "input-translation-threshold-section",
     route: "/input-translation",
     titleKey: "options.inputTranslation.threshold.title",
     descriptionKey: "options.inputTranslation.threshold.description",
