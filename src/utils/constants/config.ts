@@ -20,15 +20,23 @@ export const CONFIG_SCHEMA_VERSION = 57
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
-function createDefaultDictionaryFeature(): SelectionToolbarCustomFeature {
-  const template = CUSTOM_FEATURE_TEMPLATES.find(t => t.id === "dictionary")!
+function createDefaultDictionaryFeature(): SelectionToolbarCustomFeature | null {
+  const template = CUSTOM_FEATURE_TEMPLATES.find(t => t.id === "dictionary")
+  if (!template)
+    return null
+
   const feature = template.createFeature("openai-default")
-  feature.id = "default-dictionary"
-  feature.outputSchema.forEach((field, i) => {
-    field.id = `default-dictionary-${i}`
-  })
-  return feature
+  return {
+    ...feature,
+    id: "default-dictionary",
+    outputSchema: feature.outputSchema.map((field, i) => ({
+      ...field,
+      id: `default-dictionary-${i}`,
+    })),
+  }
 }
+
+const defaultDictionaryFeature = createDefaultDictionaryFeature()
 
 export const DEFAULT_CONFIG: Config = {
   language: {
@@ -94,7 +102,7 @@ export const DEFAULT_CONFIG: Config = {
         providerId: "openai-default",
       },
     },
-    customFeatures: [createDefaultDictionaryFeature()],
+    customFeatures: defaultDictionaryFeature ? [defaultDictionaryFeature] : [],
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,
