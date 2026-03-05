@@ -1,6 +1,6 @@
 import { i18n } from "#imports"
 import { useAtom } from "jotai"
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 import { useLocation, useNavigate } from "react-router"
 import {
   Command,
@@ -13,11 +13,17 @@ import {
 } from "@/components/ui/base-ui/command"
 import { commandPaletteOpenAtom } from "./atoms"
 import { SEARCH_ITEMS } from "./search-items"
+import {
+  buildSectionSearch,
+  getSectionIdFromSearch,
+  scrollToSectionWhenReady,
+} from "./section-scroll"
 
 export function SettingsSearch() {
   const [open, setOpen] = useAtom(commandPaletteOpenAtom)
   const navigate = useNavigate()
-  const { pathname } = useLocation()
+  const { pathname, search, key: locationKey } = useLocation()
+  const lastHandledLocationRef = useRef<string | null>(null)
 
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
@@ -44,15 +50,34 @@ export function SettingsSearch() {
     return groups
   }, [])
 
+  useEffect(() => {
+    const sectionId = getSectionIdFromSearch(search)
+    if (!sectionId) {
+      return
+    }
+
+    const marker = `${locationKey}:${search}`
+    if (lastHandledLocationRef.current === marker) {
+      return
+    }
+    lastHandledLocationRef.current = marker
+
+    void scrollToSectionWhenReady(sectionId)
+  }, [locationKey, search])
+
   function handleSelect(item: (typeof SEARCH_ITEMS)[number]) {
     setOpen(false)
-    if (pathname === item.route) {
-      scrollToSection(item.sectionId)
+
+    const targetSearch = buildSectionSearch(item.sectionId)
+    if (pathname === item.route && search === targetSearch) {
+      void scrollToSectionWhenReady(item.sectionId)
+      return
     }
-    else {
-      void navigate(item.route)
-      setTimeout(() => scrollToSection(item.sectionId), 100)
-    }
+
+    void navigate({
+      pathname: item.route,
+      search: targetSearch,
+    })
   }
 
   return (
@@ -91,11 +116,4 @@ function buildSearchValue(item: (typeof SEARCH_ITEMS)[number]): string {
     parts.push(i18n.t(item.descriptionKey))
   }
   return parts.join(" ")
-}
-
-function scrollToSection(sectionId: string) {
-  const el = document.getElementById(sectionId)
-  if (el) {
-    el.scrollIntoView({ behavior: "smooth", block: "start" })
-  }
 }
