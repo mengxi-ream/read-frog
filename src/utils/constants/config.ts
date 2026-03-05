@@ -29,9 +29,11 @@ function createDefaultDictionaryFeature(): SelectionToolbarCustomFeature | null 
   return {
     ...feature,
     id: "default-dictionary",
-    outputSchema: feature.outputSchema.map((field, i) => ({
+    outputSchema: feature.outputSchema.map(field => ({
       ...field,
-      id: `default-dictionary-${i}`,
+      id: field.id.startsWith("dictionary-")
+        ? `default-${field.id}`
+        : `default-dictionary-${field.id}`,
     })),
   }
 }

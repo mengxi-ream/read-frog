@@ -10,9 +10,10 @@ export function createOutputSchemaField(
   name: string,
   type: SelectionToolbarCustomFeatureOutputType = "string",
   description = "",
+  id?: string,
 ): SelectionToolbarCustomFeatureOutputField {
   return {
-    id: crypto.randomUUID(),
+    id: id ?? crypto.randomUUID(),
     name,
     type,
     description,

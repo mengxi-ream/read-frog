@@ -65,7 +65,7 @@ ${fieldsAndTypes}
 3. Use the exact key names shown above.
 4. Output valid JSON only. Use double quotes for keys and string values.
 5. Do not wrap the JSON in markdown or code fences.
-6. If a value is unknown, use fallback defaults: string -> "", number -> 0.
+6. If a value is unknown, use null.
 7. Number fields must be JSON numbers, never quoted strings.
 `
 }
