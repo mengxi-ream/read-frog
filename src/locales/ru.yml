@@ -58,7 +58,6 @@ options:
   commandPalette:
     placeholder: Поиск настроек...
     noResults: Настройки не найдены
-    searchHint: Поиск...  ⌘K
   sidebar:
     settings: Настройки
     tools: Инструменты

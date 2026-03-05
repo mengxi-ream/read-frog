@@ -13,6 +13,7 @@ import {
   SidebarContent,
   SidebarHeader,
 } from "@/components/ui/base-ui/sidebar"
+import { getCommandPaletteShortcutHint } from "@/utils/os"
 import { version } from "../../../../package.json"
 import { commandPaletteOpenAtom } from "../command-palette/atoms"
 import { ProductNav } from "./product-nav"
@@ -21,6 +22,7 @@ import { ToolsNav } from "./tools-nav"
 
 export function AppSidebar() {
   const setCommandPaletteOpen = useSetAtom(commandPaletteOpenAtom)
+  const commandPaletteShortcutHint = getCommandPaletteShortcutHint()
 
   return (
     <Sidebar collapsible="icon">
@@ -44,7 +46,7 @@ export function AppSidebar() {
             <IconSearch className="size-4 text-muted-foreground" />
           </InputGroupAddon>
           <InputGroupAddon align="inline-end">
-            <Kbd>⌘K</Kbd>
+            <Kbd>{commandPaletteShortcutHint}</Kbd>
           </InputGroupAddon>
         </InputGroup>
       </SidebarHeader>

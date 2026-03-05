@@ -58,7 +58,6 @@ options:
   commandPalette:
     placeholder: Tìm kiếm cài đặt...
     noResults: Không tìm thấy cài đặt
-    searchHint: Tìm kiếm...  ⌘K
   sidebar:
     settings: Cài đặt
     tools: Công cụ
