@@ -46,7 +46,7 @@ import { selectionToolbarCustomFeatureOutputTypeSchema } from "@/types/config/se
 import {
   createOutputSchemaField,
   getNextOutputFieldName,
-} from "@/utils/constants/selection-toolbar-custom-feature"
+} from "@/utils/constants/custom-feature"
 import { withForm } from "./form"
 
 const t = (key: string) => i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.${key}`)

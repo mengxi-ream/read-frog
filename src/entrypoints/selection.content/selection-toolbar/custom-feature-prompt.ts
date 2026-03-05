@@ -1,5 +1,5 @@
 import type { SelectionToolbarCustomFeatureOutputField } from "@/types/config/selection-toolbar"
-import { getSelectionToolbarCustomFeatureTokenCellText } from "@/utils/constants/selection-toolbar-custom-feature"
+import { getSelectionToolbarCustomFeatureTokenCellText } from "@/utils/constants/custom-feature"
 
 export interface SelectionToolbarCustomFeaturePromptTokens {
   selection: string

@@ -19,7 +19,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   getSelectionToolbarCustomFeatureTokenCellText,
   SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS,
-} from "@/utils/constants/selection-toolbar-custom-feature"
+} from "@/utils/constants/custom-feature"
 import { cn } from "@/utils/styles/utils"
 import { selectedCustomFeatureIdAtom } from "../atoms"
 import { formOpts, useAppForm } from "./form"
