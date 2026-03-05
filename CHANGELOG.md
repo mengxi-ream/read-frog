@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.27.2
+
+### Patch Changes
+
+- [#1053](https://github.com/mengxi-ream/read-frog/pull/1053) [`4d27ada`](https://github.com/mengxi-ream/read-frog/commit/4d27ada6b7cd5c103e2fd6af369a8e1e8d747921) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add search command for config
+
+- [#1045](https://github.com/mengxi-ream/read-frog/pull/1045) [`77f1e48`](https://github.com/mengxi-ream/read-frog/commit/77f1e4809575f3a72e869dbfe0b5fb44c24bf531) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: override Firefox MV3 default CSP to prevent HTTP URLs from being upgraded to HTTPS
+
+- [#1027](https://github.com/mengxi-ream/read-frog/pull/1027) [`c44864c`](https://github.com/mengxi-ream/read-frog/commit/c44864c764e732ae2c41d1e138cd82e795933811) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): apply short line merge in all processing modes
+
+- [#1049](https://github.com/mengxi-ream/read-frog/pull/1049) [`5b4547f`](https://github.com/mengxi-ream/read-frog/commit/5b4547fd3684dc94320b335b68a303ec2cfbae85) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: fixed flair tag misalignment during Reddit translations.
+
+- [#1051](https://github.com/mengxi-ream/read-frog/pull/1051) [`2e58edc`](https://github.com/mengxi-ream/read-frog/commit/2e58edc682638d555b03163f74f4a04eec4d5470) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor(custom-feature): improve custom ai feature prompt setting
+
 ## 1.27.1
 
 ### Patch Changes
