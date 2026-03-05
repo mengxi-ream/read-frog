@@ -234,8 +234,6 @@ export function SelectionToolbarCustomFeaturePopover() {
         <div className="border-b pb-4">
           <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">Selection</p>
           <p className="text-sm whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">{selectionContent || "—"}</p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-3 mb-2">Paragraph</p>
-          <p className="text-sm whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">{paragraphText || "—"}</p>
         </div>
 
         {activeFeature && (
