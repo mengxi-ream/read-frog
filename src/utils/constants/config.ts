@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
+import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
-import { DEFAULT_DICTIONARY_FEATURE } from "./custom-feature"
+import { CUSTOM_FEATURE_TEMPLATES } from "./custom-feature-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
 import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
@@ -18,6 +19,16 @@ export const DEFAULT_DETECTED_CODE = "eng" as const
 export const CONFIG_SCHEMA_VERSION = 57
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
+
+function createDefaultDictionaryFeature(): SelectionToolbarCustomFeature {
+  const template = CUSTOM_FEATURE_TEMPLATES.find(t => t.id === "dictionary")!
+  const feature = template.createFeature("openai-default")
+  feature.id = "default-dictionary"
+  feature.outputSchema.forEach((field, i) => {
+    field.id = `default-dictionary-${i}`
+  })
+  return feature
+}
 
 export const DEFAULT_CONFIG: Config = {
   language: {
@@ -83,7 +94,7 @@ export const DEFAULT_CONFIG: Config = {
         providerId: "openai-default",
       },
     },
-    customFeatures: [DEFAULT_DICTIONARY_FEATURE],
+    customFeatures: [createDefaultDictionaryFeature()],
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,

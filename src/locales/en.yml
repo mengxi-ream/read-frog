@@ -332,6 +332,100 @@ options:
             description: This action cannot be undone.
             confirm: Delete
             cancel: Cancel
+        templates:
+          dialogTitle: Choose a Template
+          dialogDescription: Select a template to quickly create a new AI feature, or start from scratch.
+          dictionary:
+            name: Dictionary
+            description: Look up words with definitions, phonetics, and context translations
+            systemPrompt: |-
+              You are a dictionary assistant for language learners.
+
+              ## Goal
+              Given a term and its surrounding context, produce a concise dictionary entry that matches the required output object.
+
+              ## Rules
+              1. Focus on the meaning that best matches the provided context.
+              2. Normalize Term to its base/canonical form.
+              3. Keep Definition precise and learner-friendly.
+              4. Keep Context short and directly tied to the selected text.
+              5. Phonetic must use the standard notation for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
+              6. Part of Speech in English (noun, verb, adjective, etc.).
+              7. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
+              8. If a field is unknown, return an empty string instead of guessing.
+              9. Respond in {{targetLang}} for all textual fields unless source-form text is required for clarity.
+
+              ## Examples
+
+              ### Example 1
+              Input: Selection="blossoms", Context="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Target language=Chinese
+
+              Output:
+              - Term: blossom
+              - Phonetic: /ˈblɒs.əm/
+              - Part of Speech: noun
+              - Context: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - Definition: 花；花朵（尤指果树的花）
+              - Context Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
+              - Difficulty: B2
+
+              ### Example 2
+              Input: Selection="感動", Context="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
+
+              Output:
+              - Term: 感動
+              - Phonetic: kandou
+              - Part of Speech: noun
+              - Context: この映画はつまらないと思ったけど、最後は感動した。
+              - Definition: Being deeply moved; emotional touch
+              - Context Translation: I thought this movie was boring, but the ending was moving.
+              - Difficulty: B1
+            prompt: |-
+              ## Input
+              Selection: {{selection}}
+              Context: {{context}}
+              Target language: {{targetLang}}
+            fieldTerm: Term
+            fieldTermDescription: Base/canonical lemma of the selected term.
+            fieldPhonetic: Phonetic
+            fieldPhoneticDescription: Standard phonetic transcription for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
+            fieldPartOfSpeech: Part of Speech
+            fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
+            fieldContext: Context
+            fieldContextDescription: The context in the prompt above, don't change it.
+            fieldDefinition: Definition
+            fieldDefinitionDescription: One concise definition for the contextual sense.
+            fieldContextTranslation: Context Translation
+            fieldContextTranslationDescription: The translation of the context.
+            fieldDifficulty: Difficulty
+            fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
+          improveWriting:
+            name: Improve Writing
+            description: Analyze writing errors and suggest improvements
+            systemPrompt: |-
+              You are a writing assistant for language learners.
+
+              ## Goal
+              Given selected text and its surrounding context, analyze writing errors and produce an improved version.
+
+              ## Rules
+              1. Identify grammar, spelling, punctuation, and word choice errors.
+              2. Provide a corrected and improved version.
+              3. Keep improvements natural, preserve the author's intended meaning.
+              4. If the text has no errors, state that clearly.
+              5. Respond in {{targetLang}}.
+            prompt: |-
+              ## Input
+              Selection: {{selection}}
+              Context: {{context}}
+              Target language: {{targetLang}}
+            fieldErrorAnalysis: Error Analysis
+            fieldErrorAnalysisDescription: List of grammar, spelling, punctuation, and word choice errors found in the selected text.
+            fieldImprovedVersion: Improved Version
+            fieldImprovedVersionDescription: Corrected and improved version of the selected text.
+          blank:
+            name: Blank
+            description: Start from scratch with an empty feature
         errors:
           nameRequired: Name is required
           duplicateName: 'Duplicate feature name "$1"'

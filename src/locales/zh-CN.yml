@@ -332,6 +332,100 @@ options:
             description: 此操作无法撤销。
             confirm: 删除
             cancel: 取消
+        templates:
+          dialogTitle: 选择模板
+          dialogDescription: 选择模板快速创建新的 AI 功能，或从空白开始。
+          dictionary:
+            name: 词典
+            description: 查词释义，包含音标、词性和语境翻译
+            systemPrompt: |-
+              你是一个面向语言学习者的词典助手。
+
+              ## 目标
+              根据给定的词语及其上下文，生成简洁的词典条目，匹配所需的输出对象。
+
+              ## 规则
+              1. 聚焦于最匹配所提供上下文的含义。
+              2. 将词条规范化为其基本/标准形式。
+              3. 保持释义精确且适合学习者。
+              4. 保持语境简短，直接关联选中的文本。
+              5. 音标必须使用该语言的标准标注（如英语用 IPA，中文用拼音，日语用罗马字）。
+              6. 词性使用英文（noun, verb, adjective 等）。
+              7. 难度必须是 CEFR 等级（A1, A2, B1, B2, C1, 或 C2）。
+              8. 如果某个字段未知，返回空字符串而非猜测。
+              9. 除非需要保留原文形式，所有文本字段均使用 {{targetLang}} 作答。
+
+              ## 示例
+
+              ### 示例 1
+              输入：Selection="blossoms", Context="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", 目标语言=中文
+
+              输出：
+              - 词条：blossom
+              - 音标：/ˈblɒs.əm/
+              - 词性：noun
+              - 语境：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - 释义：花；花朵（尤指果树的花）
+              - 语境翻译：樱花短暂的美丽提醒我们珍惜每一刻。
+              - 难度：B2
+
+              ### 示例 2
+              输入：Selection="感動", Context="この映画はつまらないと思ったけど、最後は感動した。", 目标语言=英语
+
+              输出：
+              - 词条：感動
+              - 音标：kandou
+              - 词性：noun
+              - 语境：この映画はつまらないと思ったけど、最後は感動した。
+              - 释义：Being deeply moved; emotional touch
+              - 语境翻译：I thought this movie was boring, but the ending was moving.
+              - 难度：B1
+            prompt: |-
+              ## 输入
+              选中文本：{{selection}}
+              上下文：{{context}}
+              目标语言：{{targetLang}}
+            fieldTerm: 词条
+            fieldTermDescription: 选中词条的基本/标准词元形式。
+            fieldPhonetic: 音标
+            fieldPhoneticDescription: 该语言的标准音标（如英语用 IPA，中文用拼音，日语用罗马字）。
+            fieldPartOfSpeech: 词性
+            fieldPartOfSpeechDescription: 语法类别（如 noun、verb、adjective）。
+            fieldContext: 语境
+            fieldContextDescription: 上方提示词中的语境，请勿修改。
+            fieldDefinition: 释义
+            fieldDefinitionDescription: 针对语境含义的一条简洁释义。
+            fieldContextTranslation: 语境翻译
+            fieldContextTranslationDescription: 语境的翻译。
+            fieldDifficulty: 难度
+            fieldDifficultyDescription: 预估 CEFR 难度等级：A1、A2、B1、B2、C1 或 C2。
+          improveWriting:
+            name: 写作改进
+            description: 分析写作错误并提供改进建议
+            systemPrompt: |-
+              你是一个面向语言学习者的写作助手。
+
+              ## 目标
+              根据选中的文本及其上下文，分析写作错误并给出改进版本。
+
+              ## 规则
+              1. 识别语法、拼写、标点和用词错误。
+              2. 提供修正后的改进版本。
+              3. 保持改进自然，保留作者原意。
+              4. 如果文本没有错误，请明确说明。
+              5. 使用 {{targetLang}} 作答。
+            prompt: |-
+              ## 输入
+              选中文本：{{selection}}
+              上下文：{{context}}
+              目标语言：{{targetLang}}
+            fieldErrorAnalysis: 错误分析
+            fieldErrorAnalysisDescription: 选中文本中发现的语法、拼写、标点和用词错误列表。
+            fieldImprovedVersion: 改进版本
+            fieldImprovedVersionDescription: 选中文本的修正和改进版本。
+          blank:
+            name: 空白
+            description: 从空白模板开始创建
         errors:
           nameRequired: 名称不能为空
           duplicateName: '重复的功能名称 "$1"'
