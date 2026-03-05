@@ -46,7 +46,7 @@ export function parseScrollingAsrSubtitles(
   const result: SubtitlesFragment[] = []
   const isSpaceSeparated = lang?.startsWith("en") || false
   const isCJK = isCJKLanguage(lang)
-  const maxLength = getMaxLength(isCJK, true)
+  const maxLength = getMaxLength(isCJK)
 
   // Cross-event buffer
   let currentText = ""
