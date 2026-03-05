@@ -31,15 +31,14 @@ export function SettingsSearch() {
   }, [setOpen])
 
   const groupedItems = useMemo(() => {
-    const groups = new Map<string, typeof SEARCH_ITEMS>()
+    const groups = new Map<(typeof SEARCH_ITEMS)[number]["pageKey"], typeof SEARCH_ITEMS>()
     for (const item of SEARCH_ITEMS) {
-      const pageLabel = i18n.t(item.pageKey)
-      const existing = groups.get(pageLabel)
+      const existing = groups.get(item.pageKey)
       if (existing) {
         existing.push(item)
       }
       else {
-        groups.set(pageLabel, [item])
+        groups.set(item.pageKey, [item])
       }
     }
     return groups
@@ -67,8 +66,8 @@ export function SettingsSearch() {
         <CommandInput placeholder={i18n.t("options.commandPalette.placeholder")} />
         <CommandList>
           <CommandEmpty>{i18n.t("options.commandPalette.noResults")}</CommandEmpty>
-          {Array.from(groupedItems.entries()).map(([pageLabel, items]) => (
-            <CommandGroup key={pageLabel} heading={pageLabel}>
+          {Array.from(groupedItems.entries()).map(([pageKey, items]) => (
+            <CommandGroup key={pageKey} heading={i18n.t(pageKey)}>
               {items.map(item => (
                 <CommandItem
                   key={item.sectionId}
