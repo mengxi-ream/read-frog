@@ -6,14 +6,6 @@ import { getUniqueName } from "@/utils/name"
 
 export const ICON_PATTERN = /^[^:\s]+:[^:\s]+$/
 export const DEFAULT_FEATURE_NAME = "Custom AI Feature"
-export const DEFAULT_FEATURE_ICONS = [
-  "tabler:sparkles",
-  "tabler:bulb",
-  "tabler:book-2",
-  "tabler:brain",
-  "tabler:wand",
-] as const
-
 export function createOutputSchemaField(
   name: string,
   type: SelectionToolbarCustomFeatureOutputType = "string",
