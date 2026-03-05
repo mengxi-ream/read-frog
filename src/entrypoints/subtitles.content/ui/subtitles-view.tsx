@@ -1,6 +1,6 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import { Icon } from "@iconify/react"
-import { useAtomValue } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { Activity, useRef } from "react"
 import { cn } from "@/lib/utils"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -47,7 +47,13 @@ function SubtitlesContent() {
 export function SubtitlesView({ controlsConfig, showContent }: SubtitlesViewProps) {
   const windowRef = useRef<HTMLDivElement>(null)
   const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
-  const { refs, windowStyle, positionStyle, isDragging } = useVerticalDrag(controlsVisible, controlsHeight)
+  const setVideoSubtitles = useSetAtom(configFieldsAtomMap.videoSubtitles)
+
+  const { refs, windowStyle, positionStyle, isDragging } = useVerticalDrag({
+    controlsVisible,
+    controlsHeight,
+    onDragEnd: pos => void setVideoSubtitles({ position: pos }),
+  })
 
   return (
     <div
