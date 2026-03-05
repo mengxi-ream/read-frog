@@ -1,7 +1,7 @@
 import { i18n } from "#imports"
-import { Icon } from "@iconify/react"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
-import { IconLoader2, IconVolume } from "@tabler/icons-react"
+import { RiTranslate } from "@remixicon/react"
+import { IconCopy, IconLoader2, IconVolume } from "@tabler/icons-react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
@@ -44,7 +44,7 @@ export function TranslateButton() {
       className="size-6 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer"
       onClick={handleClick}
     >
-      <Icon icon="ri:translate" strokeWidth={0.8} className="size-4" />
+      <RiTranslate className="size-4" />
     </button>
   )
 }
@@ -174,7 +174,7 @@ export function TranslatePopover() {
   return (
     <PopoverWrapper
       title="Translation"
-      icon="ri:translate"
+      icon={<RiTranslate className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
       onClose={handleClose}
       isVisible={isVisible}
       setIsVisible={setIsVisible}
@@ -185,7 +185,7 @@ export function TranslatePopover() {
         </div>
         <div className="pt-4">
           <p className="text-sm">
-            {isTranslating && !translatedText && <Icon icon="svg-spinners:3-dots-bounce" />}
+            {isTranslating && !translatedText && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
             {translatedText}
             {isTranslating && translatedText && " ●"}
           </p>
@@ -200,11 +200,7 @@ export function TranslatePopover() {
             onClick={handleCopy}
             className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded"
           >
-            <Icon
-              icon="tabler:copy"
-              strokeWidth={1}
-              className="size-4 text-zinc-600 dark:text-zinc-400"
-            />
+            <IconCopy strokeWidth={1.6} className="size-4 text-zinc-600 dark:text-zinc-400" />
           </button>
         </div>
       </div>

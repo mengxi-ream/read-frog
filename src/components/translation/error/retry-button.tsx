@@ -1,4 +1,4 @@
-import { Icon } from "@iconify/react"
+import { IconReload } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
@@ -28,7 +28,7 @@ export function RetryButton({ nodes }: { nodes: ChildNode[] }) {
           />
         )}
       >
-        <Icon icon="tabler:reload" className="size-4 text-blue-500 hover:text-blue-600 dark:hover:text-blue-400" />
+        <IconReload className="size-4 text-blue-500 hover:text-blue-600 dark:hover:text-blue-400" />
       </TooltipTrigger>
       <TooltipContent side="bottom" className="notranslate">
         Retry translation

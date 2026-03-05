@@ -122,6 +122,9 @@ importers:
       '@read-frog/definitions':
         specifier: 0.1.1
         version: 0.1.1
+      '@remixicon/react':
+        specifier: ^4.9.0
+        version: 4.9.0(react@19.2.4)
       '@tabler/icons-react':
         specifier: ^3.37.1
         version: 3.37.1(react@19.2.4)
@@ -2176,6 +2179,11 @@ packages:
 
   '@read-frog/definitions@0.1.1':
     resolution: {integrity: sha512-ReERo89envbitR008OwPhZgSLYmyBv7lY92qKlu9s3xQqbemERXM0ru7Ygk37XNwqwvUShJ1at8VrmgrAwuevA==}
+
+  '@remixicon/react@4.9.0':
+    resolution: {integrity: sha512-5/jLDD4DtKxH2B4QVXTobvV1C2uL8ab9D5yAYNtFt+w80O0Ys1xFOrspqROL3fjrZi+7ElFUWE37hBfaAl6U+Q==}
+    peerDependencies:
+      react: '>=18.2.0'
 
   '@resvg/resvg-js-android-arm-eabi@2.4.1':
     resolution: {integrity: sha512-AA6f7hS0FAPpvQMhBCf6f1oD1LdlqNXKCxAAPpKh6tR11kqV0YIB9zOlIYgITM14mq2YooLFl6XIbbvmY+jwUw==}
@@ -9415,6 +9423,10 @@ snapshots:
   '@read-frog/definitions@0.1.1':
     dependencies:
       zod: 4.3.6
+
+  '@remixicon/react@4.9.0(react@19.2.4)':
+    dependencies:
+      react: 19.2.4
 
   '@resvg/resvg-js-android-arm-eabi@2.4.1':
     optional: true

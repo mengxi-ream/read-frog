@@ -1,5 +1,5 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
-import { Icon } from "@iconify/react"
+import { IconGripHorizontal } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { Activity, useRef } from "react"
 import { cn } from "@/lib/utils"
@@ -77,7 +77,7 @@ export function SubtitlesView({ controlsConfig, showContent }: SubtitlesViewProp
             ref={refs.handle}
             className="mb-0.5 px-2 py-1 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
           >
-            <Icon icon="tabler:grip-horizontal" className="size-4 text-white" />
+            <IconGripHorizontal className="size-4 text-white" />
           </div>
         </div>
 

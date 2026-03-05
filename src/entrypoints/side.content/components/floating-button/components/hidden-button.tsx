@@ -1,4 +1,3 @@
-import { Icon } from "@iconify/react"
 import { cn } from "@/utils/styles/utils"
 
 export default function HiddenButton({
@@ -7,7 +6,7 @@ export default function HiddenButton({
   children,
   className,
 }: {
-  icon: string
+  icon: React.ReactNode
   onClick: () => void
   children?: React.ReactNode
   className?: string
@@ -21,7 +20,7 @@ export default function HiddenButton({
       )}
       onClick={onClick}
     >
-      <Icon icon={icon} className="h-5 w-5" />
+      {icon}
       {children}
     </button>
   )
