@@ -303,12 +303,24 @@ options:
           addField: 添加字段
           fieldName: 字段名
           fieldType: 字段类型
+          fieldDescription: 描述
+          fieldDescriptionPlaceholder: 描述此字段应包含的内容...
           actions: 操作
           cancel: 取消
           save: 保存
           defaultFieldName: 结果
           fieldNamePlaceholder: 字段名
           autoFieldPrefix: 字段
+          addFieldDialog:
+            title: 添加输出字段
+          editFieldDialog:
+            title: 编辑输出字段
+            save: 保存
+          deleteFieldDialog:
+            title: 删除输出字段？
+            description: 此输出字段将被移除。
+            confirm: 删除
+            cancel: 取消
           tokens:
             selection: 选中的文本内容
             context: 选中文本所在段落内容

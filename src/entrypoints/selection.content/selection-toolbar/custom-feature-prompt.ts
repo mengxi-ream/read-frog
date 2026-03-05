@@ -19,11 +19,14 @@ export function replaceSelectionToolbarCustomFeaturePromptTokens(
     .replaceAll(getSelectionToolbarCustomFeatureTokenCellText("title"), tokens.title)
 }
 
-type StructuredOutputField = Pick<SelectionToolbarCustomFeatureOutputField, "name" | "type">
+type StructuredOutputField = Pick<SelectionToolbarCustomFeatureOutputField, "name" | "type" | "description">
 
 function buildStructuredOutputContract(outputSchema: StructuredOutputField[]) {
   const fieldsAndTypes = outputSchema
-    .map(field => `- ${JSON.stringify(field.name)}: ${field.type} (nullable)`)
+    .map((field) => {
+      const base = `- ${JSON.stringify(field.name)}: ${field.type} (nullable)`
+      return field.description ? `${base} — ${field.description}` : base
+    })
     .join("\n")
 
   return `## Structured Output Contract

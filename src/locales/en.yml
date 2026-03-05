@@ -303,12 +303,24 @@ options:
           addField: Add Field
           fieldName: Field Name
           fieldType: Field Type
+          fieldDescription: Description
+          fieldDescriptionPlaceholder: Describe what this field should contain...
           actions: Actions
           cancel: Cancel
           save: Save
           defaultFieldName: Result
           fieldNamePlaceholder: Field Name
           autoFieldPrefix: Field
+          addFieldDialog:
+            title: Add Output Field
+          editFieldDialog:
+            title: Edit Output Field
+            save: Save
+          deleteFieldDialog:
+            title: Delete Output Field?
+            description: This output field will be removed.
+            confirm: Delete
+            cancel: Cancel
           tokens:
             selection: Selected text content
             context: Paragraph text where the selection appears

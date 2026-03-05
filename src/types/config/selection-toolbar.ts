@@ -6,6 +6,7 @@ export const selectionToolbarCustomFeatureOutputFieldSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().trim().min(1),
   type: selectionToolbarCustomFeatureOutputTypeSchema,
+  description: z.string(),
 })
 
 export const selectionToolbarCustomFeatureSchema = z.object({

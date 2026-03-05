@@ -302,12 +302,24 @@ options:
           addField: 필드 추가
           fieldName: 필드 이름
           fieldType: 필드 유형
+          fieldDescription: 설명
+          fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
           actions: 작업
           cancel: 취소
           save: 저장
           defaultFieldName: 결과
           fieldNamePlaceholder: 필드명
           autoFieldPrefix: 필드
+          addFieldDialog:
+            title: 출력 필드 추가
+          editFieldDialog:
+            title: 출력 필드 편집
+            save: 저장
+          deleteFieldDialog:
+            title: 출력 필드를 삭제하시겠습니까?
+            description: 이 출력 필드가 제거됩니다.
+            confirm: 삭제
+            cancel: 취소
           tokens:
             selection: 선택한 텍스트 내용
             context: 선택 텍스트가 포함된 문단 내용

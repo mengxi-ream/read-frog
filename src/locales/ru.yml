@@ -302,12 +302,24 @@ options:
           addField: Добавить поле
           fieldName: Имя поля
           fieldType: Тип поля
+          fieldDescription: Описание
+          fieldDescriptionPlaceholder: Опишите, что должно содержать это поле...
           actions: Действия
           cancel: Отмена
           save: Сохранить
           defaultFieldName: результат
           fieldNamePlaceholder: имя_поля
           autoFieldPrefix: поле
+          addFieldDialog:
+            title: Добавить поле вывода
+          editFieldDialog:
+            title: Редактировать поле вывода
+            save: Сохранить
+          deleteFieldDialog:
+            title: Удалить поле вывода?
+            description: Это поле вывода будет удалено.
+            confirm: Удалить
+            cancel: Отмена
           tokens:
             selection: Содержимое выделенного текста
             context: Текст абзаца, в котором находится выделение

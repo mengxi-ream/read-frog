@@ -302,12 +302,24 @@ options:
           addField: 新增欄位
           fieldName: 欄位名
           fieldType: 欄位類型
+          fieldDescription: 描述
+          fieldDescriptionPlaceholder: 描述此欄位應包含的內容...
           actions: 操作
           cancel: 取消
           save: 儲存
           defaultFieldName: 結果
           fieldNamePlaceholder: 欄位名
           autoFieldPrefix: 欄位
+          addFieldDialog:
+            title: 新增輸出欄位
+          editFieldDialog:
+            title: 編輯輸出欄位
+            save: 儲存
+          deleteFieldDialog:
+            title: 刪除輸出欄位？
+            description: 此輸出欄位將被移除。
+            confirm: 刪除
+            cancel: 取消
           tokens:
             selection: 選取的文字內容
             context: 選取文字所在段落內容

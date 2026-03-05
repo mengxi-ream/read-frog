@@ -50,8 +50,8 @@ describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
       "system={{context}}",
       baseTokens,
       [
-        { name: "Definition", type: "string" },
-        { name: "Score", type: "number" },
+        { name: "Definition", type: "string", description: "" },
+        { name: "Score", type: "number", description: "" },
       ],
     )
 
@@ -59,15 +59,28 @@ describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
     expect(result).toContain("## Structured Output Contract")
     expect(result).toContain("\"Definition\": string (nullable)")
     expect(result).toContain("\"Score\": number (nullable)")
-    expect(result).toContain("\"Definition\": null")
-    expect(result).toContain("\"Score\": null")
+  })
+
+  it("includes description in contract when provided", () => {
+    const result = buildSelectionToolbarCustomFeatureSystemPrompt(
+      "system={{context}}",
+      baseTokens,
+      [
+        { name: "Term", type: "string", description: "Base/canonical lemma" },
+        { name: "Score", type: "number", description: "" },
+      ],
+    )
+
+    expect(result).toContain("\"Term\": string (nullable) — Base/canonical lemma")
+    expect(result).toContain("\"Score\": number (nullable)")
+    expect(result).not.toContain("\"Score\": number (nullable) —")
   })
 
   it("returns contract when prompt content is empty", () => {
     const result = buildSelectionToolbarCustomFeatureSystemPrompt(
       "   ",
       baseTokens,
-      [{ name: "Definition", type: "string" }],
+      [{ name: "Definition", type: "string", description: "" }],
     )
 
     expect(result).toContain("## Structured Output Contract")

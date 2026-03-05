@@ -17,11 +17,13 @@ export const DEFAULT_FEATURE_ICONS = [
 export function createOutputSchemaField(
   name: string,
   type: SelectionToolbarCustomFeatureOutputType = "string",
+  description = "",
 ): SelectionToolbarCustomFeatureOutputField {
   return {
     id: crypto.randomUUID(),
     name,
     type,
+    description,
   }
 }
 
@@ -55,17 +57,7 @@ Given a term and its surrounding context, produce a concise dictionary entry tha
 5. Examples should be natural and use the same sense as the context.
 6. Synonyms and Antonyms should match the same sense.
 7. If a field is unknown, return an empty string instead of guessing.
-8. Respond in {{targetLang}} for all textual fields unless source-form text is required for clarity.`,
-  prompt: `## Input
-Selection: {{selection}}
-Context: {{context}}
-Target language: {{targetLang}}
-
-## Field Guidance
-- Term: Base/canonical lemma of the selected term.
-- Context: The context in the prompt above, don't change it.
-- Definition: One concise definition for the contextual sense.
-- Context Translation: The translation of the context.
+8. Respond in {{targetLang}} for all textual fields unless source-form text is required for clarity.
 
 ## Examples
 
@@ -85,13 +77,16 @@ Output:
 - Term: つまらない
 - Context: この映画はつまらないと思ったけど、最後は感動した。
 - Definition: Boring; dull; uninteresting
-- Context Translation: I thought this movie was boring, but the ending was moving.
-`,
+- Context Translation: I thought this movie was boring, but the ending was moving.`,
+  prompt: `## Input
+Selection: {{selection}}
+Context: {{context}}
+Target language: {{targetLang}}`,
   outputSchema: [
-    { id: "default-dictionary-term", name: "Term", type: "string" as const },
-    { id: "default-dictionary-context", name: "Context", type: "string" as const },
-    { id: "default-dictionary-definition", name: "Definition", type: "string" as const },
-    { id: "default-dictionary-context-translation", name: "Context Translation", type: "string" as const },
+    { id: "default-dictionary-term", name: "Term", type: "string" as const, description: "Base/canonical lemma of the selected term." },
+    { id: "default-dictionary-context", name: "Context", type: "string" as const, description: "The context in the prompt above, don't change it." },
+    { id: "default-dictionary-definition", name: "Definition", type: "string" as const, description: "One concise definition for the contextual sense." },
+    { id: "default-dictionary-context-translation", name: "Context Translation", type: "string" as const, description: "The translation of the context." },
   ],
 } satisfies SelectionToolbarCustomFeature
 
