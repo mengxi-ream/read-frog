@@ -56,6 +56,9 @@ errorRecovery:
     confirm: Sıfırla
     cancel: İptal
 options:
+  commandPalette:
+    placeholder: Ayarları ara...
+    noResults: Ayar bulunamadı
   sidebar:
     settings: Ayarlar
     tools: Araçlar

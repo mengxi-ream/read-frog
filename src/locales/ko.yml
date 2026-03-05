@@ -56,6 +56,9 @@ errorRecovery:
     confirm: 초기화
     cancel: 취소
 options:
+  commandPalette:
+    placeholder: 설정 검색...
+    noResults: 설정을 찾을 수 없습니다
   sidebar:
     settings: 설정
     tools: 도구

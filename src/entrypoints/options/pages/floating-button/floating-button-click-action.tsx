@@ -23,6 +23,7 @@ export function FloatingButtonClickAction() {
 
   return (
     <ConfigCard
+      id="floating-button-click-action"
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.title")}
       description={i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.description")}
     >

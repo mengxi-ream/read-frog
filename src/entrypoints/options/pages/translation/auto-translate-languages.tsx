@@ -32,6 +32,7 @@ export function AutoTranslateLanguages() {
   return (
     <div className="py-6 flex flex-col gap-y-4">
       <ConfigCard
+        id="auto-translate-languages"
         title={i18n.t("options.translation.autoTranslateLanguages.title")}
         description={(
           <>

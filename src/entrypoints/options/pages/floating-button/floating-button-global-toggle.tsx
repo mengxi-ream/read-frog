@@ -11,6 +11,7 @@ export function FloatingButtonGlobalToggle() {
 
   return (
     <ConfigCard
+      id="floating-button-toggle"
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.globalToggle.title")}
       description={i18n.t("options.floatingButtonAndToolbar.floatingButton.globalToggle.description")}
     >

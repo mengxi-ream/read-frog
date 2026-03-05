@@ -36,6 +36,7 @@ export function ClearAiSegmentationCache() {
 
   return (
     <ConfigCard
+      id="clear-ai-segmentation-cache"
       title={i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.title")}
       description={i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.description")}
     >

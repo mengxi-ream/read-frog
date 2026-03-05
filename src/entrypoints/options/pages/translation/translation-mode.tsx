@@ -17,7 +17,7 @@ import { ConfigCard } from "../../components/config-card"
 
 export function TranslationMode() {
   return (
-    <ConfigCard title={i18n.t("options.translation.translationMode.title")} description={i18n.t("options.translation.translationMode.description")}>
+    <ConfigCard id="translation-mode" title={i18n.t("options.translation.translationMode.title")} description={i18n.t("options.translation.translationMode.description")}>
       <TranslationModeSelector />
     </ConfigCard>
   )

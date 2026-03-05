@@ -9,6 +9,7 @@ export function BetaExperienceConfig() {
 
   return (
     <ConfigCard
+      id="beta-experience"
       title={i18n.t("options.betaExperience.title")}
       description={i18n.t("options.betaExperience.description")}
     >

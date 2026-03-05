@@ -31,6 +31,7 @@ export function ProvidersConfig() {
 
   return (
     <ConfigCard
+      id="api-providers"
       title={i18n.t("options.apiProviders.title")}
       description={i18n.t("options.apiProviders.description")}
       className="lg:flex-col"

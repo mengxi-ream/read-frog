@@ -62,6 +62,7 @@ interface TtsNumberFieldProps {
 export function TtsConfig() {
   return (
     <ConfigCard
+      id="tts-config"
       title={(
         <>
           {i18n.t("options.tts.title")}

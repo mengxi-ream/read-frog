@@ -11,6 +11,7 @@ export function SelectionToolbarGlobalToggle() {
 
   return (
     <ConfigCard
+      id="selection-toolbar-toggle"
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.globalToggle.title")}
       description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.globalToggle.description")}
     >

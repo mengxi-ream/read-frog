@@ -21,6 +21,7 @@ export function ConfigBackup() {
 
   return (
     <ConfigCard
+      id="config-backup"
       title={i18n.t("options.config.backup.title")}
       description={i18n.t("options.config.backup.description", [MAX_BACKUPS_COUNT])}
     >

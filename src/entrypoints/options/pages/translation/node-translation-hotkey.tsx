@@ -20,6 +20,7 @@ export function NodeTranslationHotkey() {
 
   return (
     <ConfigCard
+      id="node-translation-hotkey"
       title={i18n.t("options.translation.nodeTranslationHotkey.title")}
       description={i18n.t("options.translation.nodeTranslationHotkey.description")}
     >

@@ -1,16 +1,29 @@
 import { i18n } from "#imports"
+import { IconSearch } from "@tabler/icons-react"
+import { useSetAtom } from "jotai"
 import readFrogLogo from "@/assets/icons/read-frog.png"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/base-ui/input-group"
+import { Kbd } from "@/components/ui/base-ui/kbd"
 import {
   Sidebar,
   SidebarContent,
   SidebarHeader,
 } from "@/components/ui/base-ui/sidebar"
+import { getCommandPaletteShortcutHint } from "@/utils/os"
 import { version } from "../../../../package.json"
+import { commandPaletteOpenAtom } from "../command-palette/atoms"
 import { ProductNav } from "./product-nav"
 import { SettingsNav } from "./settings-nav"
 import { ToolsNav } from "./tools-nav"
 
 export function AppSidebar() {
+  const setCommandPaletteOpen = useSetAtom(commandPaletteOpenAtom)
+  const commandPaletteShortcutHint = getCommandPaletteShortcutHint()
+
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader className="group-data-[state=expanded]:px-5 group-data-[state=expanded]:pt-4 transition-all">
@@ -21,6 +34,21 @@ export function AppSidebar() {
             {`v${version}`}
           </span>
         </a>
+        <InputGroup
+          onClick={() => setCommandPaletteOpen(true)}
+        >
+          <InputGroupInput
+            readOnly
+            placeholder={i18n.t("options.commandPalette.placeholder")}
+            className="cursor-pointer"
+          />
+          <InputGroupAddon>
+            <IconSearch className="size-4 text-muted-foreground" />
+          </InputGroupAddon>
+          <InputGroupAddon align="inline-end">
+            <Kbd>{commandPaletteShortcutHint}</Kbd>
+          </InputGroupAddon>
+        </InputGroup>
       </SidebarHeader>
       <SidebarContent className="group-data-[state=expanded]:px-2 transition-all">
         <SettingsNav />

@@ -22,6 +22,7 @@ export function AIContentAware() {
 
   return (
     <ConfigCard
+      id="ai-content-aware"
       title={i18n.t("options.translation.aiContentAware.title")}
       description={(
         <>

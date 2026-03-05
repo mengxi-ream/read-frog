@@ -115,6 +115,7 @@ export default function FeatureProvidersConfig() {
 
   return (
     <ConfigCard
+      id="feature-providers"
       title={i18n.t("options.general.featureProviders.title")}
       description={i18n.t("options.general.featureProviders.description")}
     >

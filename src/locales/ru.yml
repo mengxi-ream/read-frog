@@ -56,6 +56,9 @@ errorRecovery:
     confirm: Сбросить
     cancel: Отмена
 options:
+  commandPalette:
+    placeholder: Поиск настроек...
+    noResults: Настройки не найдены
   sidebar:
     settings: Настройки
     tools: Инструменты

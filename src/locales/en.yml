@@ -56,6 +56,9 @@ errorRecovery:
     confirm: Reset
     cancel: Cancel
 options:
+  commandPalette:
+    placeholder: Search settings...
+    noResults: No settings found
   sidebar:
     settings: Settings
     tools: Tools

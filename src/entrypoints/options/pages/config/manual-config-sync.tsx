@@ -32,6 +32,7 @@ export function ManualConfigSync() {
   const config = useAtomValue(configAtom)
   return (
     <ConfigCard
+      id="manual-config-sync"
       title={i18n.t("options.config.sync.title")}
       description={i18n.t("options.config.sync.description")}
     >
