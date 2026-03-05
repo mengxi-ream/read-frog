@@ -44,7 +44,8 @@ errorRecovery:
   backupTitle: 先備份當前設定（推薦）
   exportWithApiKeys: 導出（包含 API Keys）
   exportWithoutApiKeys: 導出（不包含 API Keys）
-  resetTitle: 重置設定
+  recoveryTitle: 恢復選項
+  refreshPage: 重新整理頁面
   resetAction: 重置為預設設定
   resetSuccess: 恢復完成，設定已重置
   resetFailed: 恢復失敗，無法重置設定

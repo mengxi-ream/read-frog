@@ -44,7 +44,8 @@ errorRecovery:
   backupTitle: Sao lưu cài đặt hiện tại trước (khuyến nghị)
   exportWithApiKeys: Xuất kèm API Key
   exportWithoutApiKeys: Xuất không kèm API Key
-  resetTitle: Đặt lại cài đặt
+  recoveryTitle: Tùy chọn khôi phục
+  refreshPage: Tải lại trang
   resetAction: Đặt lại về cài đặt mặc định
   resetSuccess: Khôi phục hoàn tất. Cài đặt đã được đặt lại
   resetFailed: Khôi phục thất bại. Không thể đặt lại cài đặt

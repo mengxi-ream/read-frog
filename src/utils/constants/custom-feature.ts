@@ -33,6 +33,41 @@ export function getNextOutputFieldName(fields: SelectionToolbarCustomFeatureOutp
   return getUniqueName(prefix, existingNames, "")
 }
 
+export function normalizeOutputSchemaFieldName(name: string) {
+  return name.trim()
+}
+
+export function isOutputSchemaFieldNameBlank(name: string) {
+  return normalizeOutputSchemaFieldName(name).length === 0
+}
+
+export function isDuplicateOutputSchemaFieldName(
+  name: string,
+  fields: SelectionToolbarCustomFeatureOutputField[],
+  currentFieldId?: string,
+) {
+  const normalizedName = normalizeOutputSchemaFieldName(name)
+  return fields.some(field =>
+    field.id !== currentFieldId && normalizeOutputSchemaFieldName(field.name) === normalizedName,
+  )
+}
+
+export function getOutputSchemaFieldNameError(
+  name: string,
+  fields: SelectionToolbarCustomFeatureOutputField[],
+  currentFieldId?: string,
+): "blank" | "duplicate" | undefined {
+  if (isOutputSchemaFieldNameBlank(name)) {
+    return "blank"
+  }
+
+  if (isDuplicateOutputSchemaFieldName(name, fields, currentFieldId)) {
+    return "duplicate"
+  }
+
+  return undefined
+}
+
 export const SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS = ["selection", "context", "targetLang", "title"] as const
 
 export type SelectionToolbarCustomFeatureToken = (typeof SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS)[number]

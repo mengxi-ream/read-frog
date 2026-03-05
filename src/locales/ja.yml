@@ -44,7 +44,8 @@ errorRecovery:
   backupTitle: まず現在の設定をバックアップ（推奨）
   exportWithApiKeys: APIキーを含めてエクスポート
   exportWithoutApiKeys: APIキーを除外してエクスポート
-  resetTitle: 設定をリセット
+  recoveryTitle: 復旧オプション
+  refreshPage: ページを再読み込み
   resetAction: 設定をデフォルトにリセット
   resetSuccess: 復旧が完了しました。設定はリセットされました
   resetFailed: 復旧に失敗しました。設定をリセットできませんでした

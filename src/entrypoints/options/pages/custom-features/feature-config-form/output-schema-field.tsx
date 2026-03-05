@@ -4,7 +4,12 @@ import type {
 } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
-import { useEffect, useEffectEvent, useState } from "react"
+import { useForm } from "@tanstack/react-form"
+import { useEffect, useState } from "react"
+import { fieldContext as FieldContext } from "@/components/form/form-context"
+import { InputField } from "@/components/form/input-field"
+import { QuickInsertableTextareaField } from "@/components/form/quick-insertable-textarea-field"
+import { SelectField } from "@/components/form/select-field"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,10 +28,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/base-ui/dialog"
-import { Field, FieldGroup, FieldLabel, FieldTitle } from "@/components/ui/base-ui/field"
-import { Input } from "@/components/ui/base-ui/input"
+import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import {
-  Select,
   SelectContent,
   SelectGroup,
   SelectItem,
@@ -41,11 +44,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/base-ui/table"
-import { Textarea } from "@/components/ui/base-ui/textarea"
 import { selectionToolbarCustomFeatureOutputTypeSchema } from "@/types/config/selection-toolbar"
 import {
   createOutputSchemaField,
   getNextOutputFieldName,
+  getOutputSchemaFieldNameError,
+  getSelectionToolbarCustomFeatureTokenCellText,
+  normalizeOutputSchemaFieldName,
+  SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS,
 } from "@/utils/constants/custom-feature"
 import { withForm } from "./form"
 
@@ -53,92 +59,133 @@ const t = (key: string) => i18n.t(`options.floatingButtonAndToolbar.selectionToo
 
 function FieldDialog({
   field: outputField,
+  existingFields,
   title,
   open,
   onOpenChange,
   onSave,
 }: {
   field: SelectionToolbarCustomFeatureOutputField
+  existingFields: SelectionToolbarCustomFeatureOutputField[]
   title: string
   open: boolean
   onOpenChange: (open: boolean) => void
   onSave: (updated: SelectionToolbarCustomFeatureOutputField) => void
 }) {
-  const [draft, setDraft] = useState<SelectionToolbarCustomFeatureOutputField>(() => outputField)
-
-  const resetDraft = useEffectEvent(() => {
-    setDraft(outputField)
+  const form = useForm({
+    defaultValues: outputField,
+    onSubmit: ({ value }) => {
+      onSave({
+        ...value,
+        name: normalizeOutputSchemaFieldName(value.name),
+      })
+      onOpenChange(false)
+    },
   })
 
+  const validateNameField = (value: string) => {
+    const errorType = getOutputSchemaFieldNameError(value, existingFields, outputField.id)
+    if (errorType === "blank") {
+      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.fieldKeyRequired")
+    }
+    if (errorType === "duplicate") {
+      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.duplicateFieldKey")
+    }
+    return undefined
+  }
+
+  const customFeatureInsertCells = SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS.map(token => ({
+    text: getSelectionToolbarCustomFeatureTokenCellText(token),
+    description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.tokens.${token}`),
+  }))
+
   useEffect(() => {
-    if (open)
-      resetDraft()
-  }, [open, outputField.id])
+    if (open) {
+      form.reset(outputField)
+    }
+  }, [form, open, outputField])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-        <FieldGroup>
-          <Field>
-            <FieldTitle>{t("fieldName")}</FieldTitle>
-            <Input
-              value={draft.name}
-              onChange={e => setDraft(prev => ({ ...prev, name: e.target.value }))}
-              placeholder={t("fieldNamePlaceholder")}
-            />
-          </Field>
-          <Field>
-            <FieldTitle>{t("fieldType")}</FieldTitle>
-            <Select
-              items={selectionToolbarCustomFeatureOutputTypeSchema.options.map(type => ({
-                value: type,
-                label: i18n.t(`dataTypes.${type}`),
-              }))}
-              value={draft.type}
-              onValueChange={(value) => {
-                if (value) {
-                  setDraft(prev => ({ ...prev, type: value }))
-                }
+        <form
+          className="grid w-full gap-4"
+          onSubmit={(e) => {
+            e.preventDefault()
+            e.stopPropagation()
+            void form.handleSubmit()
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle>{title}</DialogTitle>
+          </DialogHeader>
+          <FieldGroup>
+            <form.Field
+              name="name"
+              validators={{
+                onChange: ({ value }) => validateNameField(value),
+                onSubmit: ({ value }) => validateNameField(value),
               }}
             >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {selectionToolbarCustomFeatureOutputTypeSchema.options.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {i18n.t(`dataTypes.${type}`)}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-          <Field>
-            <FieldTitle>{t("fieldDescription")}</FieldTitle>
-            <Textarea
-              value={draft.description}
-              onChange={e => setDraft(prev => ({ ...prev, description: e.target.value }))}
-              placeholder={t("fieldDescriptionPlaceholder")}
-              className="min-h-20"
+              {nameField => (
+                <FieldContext value={nameField}>
+                  <InputField
+                    label={t("fieldName")}
+                    placeholder={t("fieldNamePlaceholder")}
+                  />
+                </FieldContext>
+              )}
+            </form.Field>
+            <form.Field name="type">
+              {typeField => (
+                <FieldContext value={typeField}>
+                  <SelectField
+                    label={t("fieldType")}
+                    items={selectionToolbarCustomFeatureOutputTypeSchema.options.map(type => ({
+                      value: type,
+                      label: i18n.t(`dataTypes.${type}`),
+                    }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectGroup>
+                        {selectionToolbarCustomFeatureOutputTypeSchema.options.map(type => (
+                          <SelectItem key={type} value={type}>
+                            {i18n.t(`dataTypes.${type}`)}
+                          </SelectItem>
+                        ))}
+                      </SelectGroup>
+                    </SelectContent>
+                  </SelectField>
+                </FieldContext>
+              )}
+            </form.Field>
+            <form.Field name="description">
+              {descriptionField => (
+                <FieldContext value={descriptionField}>
+                  <QuickInsertableTextareaField
+                    label={t("fieldDescription")}
+                    placeholder={t("fieldDescriptionPlaceholder")}
+                    className="min-h-20"
+                    insertCells={customFeatureInsertCells}
+                  />
+                </FieldContext>
+              )}
+            </form.Field>
+          </FieldGroup>
+          <DialogFooter>
+            <form.Subscribe
+              selector={state => [state.canSubmit, state.isSubmitting]}
+              children={([canSubmit, isSubmitting]) => (
+                <Button type="submit" disabled={!canSubmit || isSubmitting}>
+                  {t("editFieldDialog.save")}
+                </Button>
+              )}
             />
-          </Field>
-        </FieldGroup>
-        <DialogFooter>
-          <Button
-            type="button"
-            onClick={() => {
-              onSave(draft)
-              onOpenChange(false)
-            }}
-          >
-            {t("editFieldDialog.save")}
-          </Button>
-        </DialogFooter>
+          </DialogFooter>
+        </form>
       </DialogContent>
     </Dialog>
   )
@@ -186,16 +233,14 @@ export const OutputSchemaField = withForm({
               return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.outputSchemaRequired")
             }
 
-            const nameSet = new Set<string>()
             for (const outputField of outputSchema) {
-              const name = outputField.name.trim()
-              if (!name) {
+              const errorType = getOutputSchemaFieldNameError(outputField.name, outputSchema, outputField.id)
+              if (errorType === "blank") {
                 return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.fieldKeyRequired")
               }
-              if (nameSet.has(name)) {
+              if (errorType === "duplicate") {
                 return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.duplicateFieldKey")
               }
-              nameSet.add(name)
             }
 
             return undefined
@@ -271,6 +316,7 @@ export const OutputSchemaField = withForm({
               {addingField && (
                 <FieldDialog
                   field={addingField}
+                  existingFields={outputSchema}
                   title={t("addFieldDialog.title")}
                   open={!!addingField}
                   onOpenChange={(open) => {
@@ -288,6 +334,7 @@ export const OutputSchemaField = withForm({
               {editingField && (
                 <FieldDialog
                   field={editingField}
+                  existingFields={outputSchema}
                   title={t("editFieldDialog.title")}
                   open={!!editingField}
                   onOpenChange={(open) => {

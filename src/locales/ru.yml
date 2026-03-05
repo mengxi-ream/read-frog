@@ -44,7 +44,8 @@ errorRecovery:
   backupTitle: Сначала сделайте резервную копию текущих настроек (рекомендуется)
   exportWithApiKeys: Экспортировать с API-ключами
   exportWithoutApiKeys: Экспортировать без API-ключей
-  resetTitle: Сбросить настройки
+  recoveryTitle: Варианты восстановления
+  refreshPage: Обновить страницу
   resetAction: Сбросить к настройкам по умолчанию
   resetSuccess: Восстановление завершено. Настройки были сброшены
   resetFailed: Восстановление не удалось. Не удалось сбросить настройки

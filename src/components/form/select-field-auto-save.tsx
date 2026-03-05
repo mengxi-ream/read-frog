@@ -5,12 +5,13 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select } from "@/components/ui/base-ui/select"
 import { useFieldContext } from "./form-context"
 
-type SelectFieldProps = React.ComponentProps<typeof Select> & {
+type SelectFieldAutoSaveProps = React.ComponentProps<typeof Select> & {
+  formForSubmit: { handleSubmit: () => void }
   label: React.ReactNode
 }
 
-export function SelectField(
-  { label, ...props }: SelectFieldProps,
+export function SelectFieldAutoSave(
+  { formForSubmit, label, ...props }: SelectFieldAutoSaveProps,
 ) {
   const field = useFieldContext<string | undefined>()
   const errors = useStore(field.store, state => state.meta.errors)
@@ -20,7 +21,8 @@ export function SelectField(
     if (typeof value !== "string")
       return
     field.handleChange(value)
-  }, [field])
+    void formForSubmit.handleSubmit()
+  }, [field, formForSubmit])
 
   return (
     <Field invalid={hasError}>

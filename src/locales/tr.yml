@@ -44,7 +44,8 @@ errorRecovery:
   backupTitle: Önce geçerli ayarları yedekleyin (önerilir)
   exportWithApiKeys: API Anahtarlarıyla Dışa Aktar
   exportWithoutApiKeys: API Anahtarları olmadan Dışa Aktar
-  resetTitle: Ayarları sıfırla
+  recoveryTitle: Kurtarma seçenekleri
+  refreshPage: Sayfayı yenile
   resetAction: Varsayılan ayarlara sıfırla
   resetSuccess: Kurtarma tamamlandı. Ayarlar sıfırlandı
   resetFailed: Kurtarma başarısız oldu. Ayarlar sıfırlanamadı

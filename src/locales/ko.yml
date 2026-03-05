@@ -44,7 +44,8 @@ errorRecovery:
   backupTitle: 현재 설정 먼저 백업(권장)
   exportWithApiKeys: API Key 포함 내보내기
   exportWithoutApiKeys: API Key 제외 내보내기
-  resetTitle: 설정 초기화
+  recoveryTitle: 복구 옵션
+  refreshPage: 페이지 새로고침
   resetAction: 기본 설정으로 초기화
   resetSuccess: 복구가 완료되었습니다. 설정이 초기화되었습니다
   resetFailed: 복구에 실패했습니다. 설정을 초기화할 수 없습니다

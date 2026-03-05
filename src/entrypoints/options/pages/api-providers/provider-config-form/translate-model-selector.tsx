@@ -26,7 +26,7 @@ export const TranslateModelSelector = withForm({
           ? (
               <form.AppField name="model.customModel">
                 {field => (
-                  <field.InputField
+                  <field.InputFieldAutoSave
                     formForSubmit={form}
                     label={i18n.t("options.general.translationConfig.model.title")}
                     labelExtra={isCustomLLMProviderConfig(providerConfig) && (
@@ -47,7 +47,7 @@ export const TranslateModelSelector = withForm({
           : (
               <form.AppField name="model.model">
                 {field => (
-                  <field.SelectField formForSubmit={form} label={i18n.t("options.general.translationConfig.model.title")}>
+                  <field.SelectFieldAutoSave formForSubmit={form} label={i18n.t("options.general.translationConfig.model.title")}>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder={i18n.t("options.apiProviders.form.models.translate.placeholder")} />
                     </SelectTrigger>
@@ -60,7 +60,7 @@ export const TranslateModelSelector = withForm({
                         ))}
                       </SelectGroup>
                     </SelectContent>
-                  </field.SelectField>
+                  </field.SelectFieldAutoSave>
                 )}
               </form.AppField>
             )}

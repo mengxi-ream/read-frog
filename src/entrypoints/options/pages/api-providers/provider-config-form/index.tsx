@@ -139,10 +139,10 @@ export function ProviderConfigForm() {
               },
             }}
           >
-            {field => <field.InputField formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.name")} />}
+            {field => <field.InputFieldAutoSave formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.name")} />}
           </form.AppField>
           <form.AppField name="description">
-            {field => <field.InputField formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.description")} />}
+            {field => <field.InputFieldAutoSave formForSubmit={form} label={i18n.t("options.apiProviders.form.fields.description")} />}
           </form.AppField>
 
           <APIKeyField form={form} />

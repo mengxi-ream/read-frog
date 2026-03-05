@@ -21,12 +21,36 @@ export function replaceSelectionToolbarCustomFeaturePromptTokens(
 
 type StructuredOutputField = Pick<SelectionToolbarCustomFeatureOutputField, "name" | "type" | "description">
 
-function buildStructuredOutputContract(outputSchema: StructuredOutputField[]) {
+function formatYamlMultiline(value: string) {
+  return value
+    .split("\n")
+    .map(line => `    ${line}`)
+    .join("\n")
+}
+
+function formatStructuredOutputField(
+  field: StructuredOutputField,
+  tokens: SelectionToolbarCustomFeaturePromptTokens,
+) {
+  const resolvedDescription = replaceSelectionToolbarCustomFeaturePromptTokens(field.description, tokens).trim()
+  const descriptionBlock = resolvedDescription
+    ? `  description: |-\n${formatYamlMultiline(resolvedDescription)}`
+    : "  description: \"\""
+
+  return [
+    `- key: ${JSON.stringify(field.name)}`,
+    `  type: ${field.type}`,
+    "  nullable: true",
+    descriptionBlock,
+  ].join("\n")
+}
+
+function buildStructuredOutputContract(
+  outputSchema: StructuredOutputField[],
+  tokens: SelectionToolbarCustomFeaturePromptTokens,
+) {
   const fieldsAndTypes = outputSchema
-    .map((field) => {
-      const base = `- ${JSON.stringify(field.name)}: ${field.type} (nullable)`
-      return field.description ? `${base} — ${field.description}` : base
-    })
+    .map(field => formatStructuredOutputField(field, tokens))
     .join("\n")
 
   return `## Structured Output Contract
@@ -52,7 +76,7 @@ export function buildSelectionToolbarCustomFeatureSystemPrompt(
   outputSchema: StructuredOutputField[],
 ) {
   const resolvedPrompt = replaceSelectionToolbarCustomFeaturePromptTokens(prompt, tokens).trim()
-  const contract = buildStructuredOutputContract(outputSchema)
+  const contract = buildStructuredOutputContract(outputSchema, tokens)
 
   return resolvedPrompt
     ? `${resolvedPrompt}\n\n${contract}`

@@ -22,7 +22,7 @@ export const APIKeyField = withForm({
       <form.AppField name="apiKey">
         {field => (
           <div className="flex flex-col gap-2">
-            <field.InputField
+            <field.InputFieldAutoSave
               formForSubmit={form}
               label="API Key"
               labelExtra={(

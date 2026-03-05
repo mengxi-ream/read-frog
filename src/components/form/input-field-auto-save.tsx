@@ -3,9 +3,9 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { useFieldContext } from "./form-context"
 
-export function InputField(
-  { label, labelExtra, type, ...props }:
-  { label: React.ReactNode, labelExtra?: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>,
+export function InputFieldAutoSave(
+  { formForSubmit, label, labelExtra, type, ...props }:
+  { formForSubmit: { handleSubmit: () => void }, label: React.ReactNode, labelExtra?: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>,
 ) {
   const field = useFieldContext<string | number | undefined>()
   const errors = useStore(field.store, state => state.meta.errors)
@@ -28,6 +28,8 @@ export function InputField(
     else {
       field.handleChange(value)
     }
+
+    void formForSubmit.handleSubmit()
   }
 
   return (
