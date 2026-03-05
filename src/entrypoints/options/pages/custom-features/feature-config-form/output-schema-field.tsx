@@ -4,7 +4,7 @@ import type {
 } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
-import { useState } from "react"
+import { useEffect, useEffectEvent, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -64,7 +64,16 @@ function FieldDialog({
   onOpenChange: (open: boolean) => void
   onSave: (updated: SelectionToolbarCustomFeatureOutputField) => void
 }) {
-  const [draft, setDraft] = useState(outputField)
+  const [draft, setDraft] = useState<SelectionToolbarCustomFeatureOutputField>(() => outputField)
+
+  const resetDraft = useEffectEvent(() => {
+    setDraft(outputField)
+  })
+
+  useEffect(() => {
+    if (open)
+      resetDraft()
+  }, [open, outputField.id])
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
