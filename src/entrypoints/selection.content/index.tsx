@@ -6,6 +6,7 @@ import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app.ts"
+import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
@@ -14,6 +15,8 @@ import { queryClient } from "@/utils/tanstack-query"
 import App from "./app"
 import "@/assets/styles/theme.css"
 import "@/assets/styles/text-small.css"
+
+ensureIconifyBackgroundFetch()
 
 // eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null

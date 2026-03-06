@@ -1,5 +1,5 @@
 import { i18n } from "#imports"
-import { Icon } from "@iconify/react"
+import { IconX } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import { useState } from "react"
 import {
@@ -40,7 +40,7 @@ export function CloseButton() {
           />
         )}
       >
-        <Icon icon="tabler:x" className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
+        <IconX className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
       </DropdownMenuTrigger>
       <DropdownMenuContent container={shadowWrapper} align="start" side="right" className="z-2147483647 w-fit! whitespace-nowrap">
         <DropdownMenuItem

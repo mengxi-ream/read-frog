@@ -1,6 +1,6 @@
 import type { PopoverWrapperRef } from "./components/popover-wrapper"
 import { useMemo, useRef, useState } from "#imports"
-import { Icon } from "@iconify/react"
+import { IconSparkles, IconZoomScan } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { Activity } from "react"
@@ -35,7 +35,7 @@ export function AiButton() {
 
   return (
     <button type="button" className="size-6 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer" onClick={handleClick}>
-      <Icon icon="tabler:zoom-scan" strokeWidth={0.8} className="size-4" />
+      <IconZoomScan className="size-4" />
     </button>
   )
 }
@@ -139,7 +139,7 @@ export function AiPopover() {
     <PopoverWrapper
       ref={popoverRef}
       title="Vocabulary Insight"
-      icon="hugeicons:ai-innovation-02"
+      icon={<IconSparkles strokeWidth={1.2} className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
       isVisible={isVisible}
       setIsVisible={setIsVisible}
     >

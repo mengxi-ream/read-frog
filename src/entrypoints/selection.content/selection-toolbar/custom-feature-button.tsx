@@ -225,7 +225,7 @@ export function SelectionToolbarCustomFeaturePopover() {
     <PopoverWrapper
       ref={popoverRef}
       title={activeFeature?.name ?? "Custom AI Feature"}
-      icon={activeFeature?.icon ?? "tabler:sparkles"}
+      icon={<Icon icon={activeFeature?.icon ?? "tabler:sparkles"} strokeWidth={0.8} className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
       isVisible={isVisible}
       setIsVisible={setIsVisible}
       onClose={handleClose}

@@ -25,6 +25,11 @@ export const subtitlesStyleSchema = z.object({
   container: subtitleContainerStyleSchema,
 })
 
+export const subtitlePositionSchema = z.object({
+  percent: z.number().min(0).max(100),
+  anchor: z.enum(["top", "bottom"]),
+})
+
 export const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
   autoStart: z.boolean(),
@@ -34,6 +39,7 @@ export const videoSubtitlesSchema = z.object({
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,
   customPromptsConfig: customPromptsConfigSchema,
+  position: subtitlePositionSchema,
 })
 
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>
@@ -42,4 +48,5 @@ export type SubtitlesFontFamily = z.infer<typeof subtitlesFontFamilySchema>
 export type SubtitleTextStyle = z.infer<typeof subtitleTextStyleSchema>
 export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema>
 export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>
+export type SubtitlePosition = z.infer<typeof subtitlePositionSchema>
 export type VideoSubtitles = z.infer<typeof videoSubtitlesSchema>

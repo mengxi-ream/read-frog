@@ -1,13 +1,16 @@
+import { browser } from "#imports"
 import { kebabCase } from "case-anything"
 import * as React from "react"
 
 import { Toaster } from "sonner"
-import frogIcon from "@/assets/icons/read-frog.png"
+import frogIcon from "@/assets/icons/read-frog.png?url&no-inline"
 import { APP_NAME } from "@/utils/constants/app"
+
+const frogIconUrl = new URL(frogIcon, browser.runtime.getURL("/")).href
 
 const frogIconElement = (
   <img
-    src={frogIcon}
+    src={frogIconUrl}
     alt="🐸"
     style={{
       maxWidth: "100%",
