@@ -6,6 +6,8 @@ export interface SearchItem {
   pageKey: string
 }
 
+const IS_FIREFOX = import.meta.env.BROWSER === "firefox"
+
 export const SEARCH_ITEMS: SearchItem[] = [
   // General page
   {
@@ -262,13 +264,15 @@ export const SEARCH_ITEMS: SearchItem[] = [
   },
 
   // Text to Speech page
-  {
-    sectionId: "tts-config",
-    route: "/tts",
-    titleKey: "options.tts.title",
-    descriptionKey: "options.tts.description",
-    pageKey: "options.tts.title",
-  },
+  ...(!IS_FIREFOX
+    ? [{
+        sectionId: "tts-config",
+        route: "/tts",
+        titleKey: "options.tts.title",
+        descriptionKey: "options.tts.description",
+        pageKey: "options.tts.title",
+      }]
+    : []),
 
   // Config page
   {

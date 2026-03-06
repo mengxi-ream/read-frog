@@ -21,7 +21,7 @@ export const ROUTE_CONFIG = [
   { path: "/selection-toolbar", component: SelectionToolbarPage },
   { path: "/context-menu", component: ContextMenuPage },
   { path: "/input-translation", component: InputTranslationPage },
-  { path: "/tts", component: TextToSpeechPage },
+  ...(import.meta.env.BROWSER === "firefox" ? [] : [{ path: "/tts", component: TextToSpeechPage }]),
   { path: "/statistics", component: StatisticsPage },
   { path: "/config", component: ConfigPage },
 ] as const

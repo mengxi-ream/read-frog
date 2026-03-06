@@ -58,6 +58,7 @@ function applyDirectionOffset(
 }
 
 export function SelectionToolbar() {
+  const isFirefox = import.meta.env.BROWSER === "firefox"
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
   const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position (base position without direction offset)
@@ -248,7 +249,7 @@ export function SelectionToolbar() {
           <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-[420px] no-scrollbar">
             <AiButton />
             <TranslateButton />
-            <SpeakButton />
+            {!isFirefox && <SpeakButton />}
             <SelectionToolbarCustomFeatureButtons />
           </div>
           <CloseButton />
