@@ -5,13 +5,14 @@ import { kebabCase } from "case-anything"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { getLocalConfig } from "@/utils/config/storage"
-import { APP_NAME } from "@/utils/constants/app.ts"
+import { APP_NAME } from "@/utils/constants/app"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
 import { addStyleToShadow } from "@/utils/styles"
 import { queryClient } from "@/utils/tanstack-query"
+import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
 import "@/assets/styles/theme.css"
 import "@/assets/styles/text-small.css"
@@ -43,13 +44,15 @@ export default defineContentScript({
       return
     }
 
+    const themeMode = await getLocalThemeMode()
+
     const ui = await createShadowRootUi(ctx, {
       name: `${kebabCase(APP_NAME)}-selection`,
       position: "overlay",
       anchor: "body",
       onMount: (container, shadow, shadowHost) => {
         // Container is a body, and React warns when creating a root on the body, so create a wrapper div
-        const wrapper = insertShadowRootUIWrapperInto(container)
+        const wrapper = insertShadowRootUIWrapperInto(container, themeMode)
         shadowWrapper = wrapper
         addStyleToShadow(shadow)
         protectSelectAllShadowRoot(shadowHost, wrapper)

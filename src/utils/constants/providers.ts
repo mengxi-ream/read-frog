@@ -1,5 +1,5 @@
-import type { Theme } from "@/components/providers/theme-provider"
 import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig } from "@/types/config/provider"
+import type { Theme } from "@/types/config/theme"
 import { i18n } from "#imports"
 import customProviderLogo from "@/assets/providers/custom-provider.svg"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg"

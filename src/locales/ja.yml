@@ -9,6 +9,7 @@ contextMenu:
   translate: 翻訳
   showOriginal: 原文を表示
 popup:
+  theme: テーマ
   autoLang: 自動検出
   sourceLang: ソース言語
   targetLang: 翻訳言語
@@ -168,6 +169,12 @@ options:
       testing: テスト中...
   general:
     title: 一般
+    appearance:
+      title: 外観
+      theme: テーマ
+      system: システム
+      light: ライト
+      dark: ダーク
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択

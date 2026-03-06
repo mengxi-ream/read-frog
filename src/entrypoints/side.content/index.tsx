@@ -17,6 +17,7 @@ import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
 import { queryClient } from "@/utils/tanstack-query"
+import { getLocalThemeMode } from "@/utils/theme"
 import { addStyleToShadow, mirrorDynamicStyles, protectInternalStyles } from "../../utils/styles"
 import App from "./app"
 import { store } from "./atoms"
@@ -37,6 +38,8 @@ export default defineContentScript({
       return
     }
 
+    const themeMode = await getLocalThemeMode()
+
     const ui = await createShadowRootUi(ctx, {
       name: kebabCase(APP_NAME),
       position: "overlay",
@@ -44,7 +47,7 @@ export default defineContentScript({
       append: "last",
       onMount: (container, shadow, shadowHost) => {
         // Store shadow root reference
-        const wrapper = insertShadowRootUIWrapperInto(container)
+        const wrapper = insertShadowRootUIWrapperInto(container, themeMode)
         shadowWrapper = wrapper
 
         addStyleToShadow(shadow)

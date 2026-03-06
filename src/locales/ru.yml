@@ -9,6 +9,7 @@ contextMenu:
   translate: Перевести
   showOriginal: Показать оригинал
 popup:
+  theme: Тема
   autoLang: Авто
   sourceLang: Исходный
   targetLang: Целевой
@@ -168,6 +169,12 @@ options:
       testing: Тестирование...
   general:
     title: Общие
+    appearance:
+      title: Внешний вид
+      theme: Тема
+      system: Системная
+      light: Светлая
+      dark: Тёмная
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции

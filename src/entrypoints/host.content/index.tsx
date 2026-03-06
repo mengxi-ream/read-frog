@@ -15,6 +15,7 @@ import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
 import { addStyleToShadow } from "@/utils/styles"
+import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { handleTranslationModeChange } from "./translation-control/handle-config-change"
@@ -48,13 +49,15 @@ export default defineContentScript({
 
     // eruda.init()
 
+    const themeMode = await getLocalThemeMode()
+
     const ui = await createShadowRootUi(ctx, {
       name: `${kebabCase(APP_NAME)}-selection`,
       position: "overlay",
       anchor: "body",
       onMount: (container, shadow, shadowHost) => {
         // Container is a body, and React warns when creating a root on the body, so create a wrapper div
-        const wrapper = insertShadowRootUIWrapperInto(container)
+        const wrapper = insertShadowRootUIWrapperInto(container, themeMode)
         addStyleToShadow(shadow)
         protectSelectAllShadowRoot(shadowHost, wrapper)
 

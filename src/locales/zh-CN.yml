@@ -9,6 +9,7 @@ contextMenu:
   translate: 翻译
   showOriginal: 显示原文
 popup:
+  theme: 主题
   autoLang: 自动检测
   sourceLang: 来源语言
   targetLang: 目标语言
@@ -169,6 +170,12 @@ options:
       testing: 测试中...
   general:
     title: 通用
+    appearance:
+      title: 外观
+      theme: 主题
+      system: 跟随系统
+      light: 浅色
+      dark: 深色
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商

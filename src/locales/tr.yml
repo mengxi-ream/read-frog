@@ -9,6 +9,7 @@ contextMenu:
   translate: Çevir
   showOriginal: Orijinali Göster
 popup:
+  theme: Tema
   autoLang: Otomatik
   sourceLang: Kaynak
   targetLang: Hedef
@@ -168,6 +169,12 @@ options:
       testing: Test ediliyor...
   general:
     title: Genel
+    appearance:
+      title: Görünüm
+      theme: Tema
+      system: Sistem
+      light: Açık
+      dark: Koyu
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin

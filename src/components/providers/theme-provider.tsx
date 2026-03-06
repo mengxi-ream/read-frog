@@ -1,17 +1,15 @@
-import { createContext, use, useEffect, useMemo, useState } from "react"
-import { isDarkMode } from "@/utils/theme"
-
-export type Theme = "light" | "dark"
+import type { Theme, ThemeMode } from "@/types/config/theme"
+import { useAtomValue, useSetAtom } from "jotai"
+import { createContext, use, useCallback, useEffect, useMemo, useSyncExternalStore } from "react"
+import { themeModeAtom, writeThemeModeAtom } from "@/utils/atoms/theme"
 
 interface ThemeContextI {
   theme: Theme
+  themeMode: ThemeMode
+  setThemeMode: (mode: ThemeMode) => void
 }
 
 export const ThemeContext = createContext<ThemeContextI | undefined>(undefined)
-
-function getCurrentTheme(): Theme {
-  return isDarkMode() ? "dark" : "light"
-}
 
 export function ThemeProvider({
   children,
@@ -20,7 +18,32 @@ export function ThemeProvider({
   children: React.ReactNode
   container?: HTMLElement
 }) {
-  const [theme, setTheme] = useState<Theme>(() => getCurrentTheme())
+  const themeMode = useAtomValue(themeModeAtom)
+  const setThemeModeAtom = useSetAtom(writeThemeModeAtom)
+
+  const prefersDark = useSyncExternalStore(
+    (cb) => {
+      const mq = window?.matchMedia?.("(prefers-color-scheme: dark)")
+      if (!mq) {
+        return () => {}
+      }
+
+      mq.addEventListener("change", cb)
+      return () => mq.removeEventListener("change", cb)
+    },
+    () => !!window?.matchMedia?.("(prefers-color-scheme: dark)")?.matches,
+  )
+
+  const theme: Theme = themeMode === "system"
+    ? (prefersDark ? "dark" : "light")
+    : themeMode
+
+  const setThemeMode = useCallback(
+    (mode: ThemeMode) => {
+      void setThemeModeAtom(mode)
+    },
+    [setThemeModeAtom],
+  )
 
   // Apply theme to document or shadow root container
   useEffect(() => {
@@ -30,17 +53,10 @@ export function ThemeProvider({
     target.setAttribute("style", `color-scheme: ${theme}`)
   }, [theme, container])
 
-  // Listen for system theme changes
-  useEffect(() => {
-    const mq = window.matchMedia?.("(prefers-color-scheme: dark)")
-    if (!mq)
-      return
-    const onChange = (e: MediaQueryListEvent) => setTheme(e.matches ? "dark" : "light")
-    mq.addEventListener?.("change", onChange)
-    return () => mq.removeEventListener?.("change", onChange)
-  }, [])
-
-  const contextValue = useMemo(() => ({ theme }), [theme])
+  const contextValue = useMemo(
+    () => ({ theme, themeMode, setThemeMode }),
+    [theme, themeMode, setThemeMode],
+  )
 
   return (
     <ThemeContext value={contextValue}>

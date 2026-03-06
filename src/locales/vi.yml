@@ -9,6 +9,7 @@ contextMenu:
   translate: Dịch
   showOriginal: Hiển thị bản gốc
 popup:
+  theme: Chủ đề
   autoLang: Tự động
   sourceLang: Nguồn
   targetLang: Đích
@@ -168,6 +169,12 @@ options:
       testing: Đang kiểm tra...
   general:
     title: Chung
+    appearance:
+      title: Giao diện
+      theme: Chủ đề
+      system: Hệ thống
+      light: Sáng
+      dark: Tối
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng

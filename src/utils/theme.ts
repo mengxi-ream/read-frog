@@ -1,10 +1,39 @@
-export function isDarkMode() {
-  return (
-    // TODO: change this to storage API for browser extension
-    localStorage.theme === "dark"
-    || (!("theme" in localStorage)
-      && typeof window !== "undefined"
-      && window.matchMedia
-      && window.matchMedia("(prefers-color-scheme: dark)").matches)
-  )
+import type { Theme, ThemeMode } from "@/types/config/theme"
+import { storage } from "#imports"
+import { DEFAULT_THEME_MODE } from "@/types/config/theme"
+import { THEME_STORAGE_KEY } from "./constants/config"
+
+export function isDarkMode(themeMode: ThemeMode = "system"): boolean {
+  if (themeMode === "system") {
+    return typeof window !== "undefined"
+      && !!window.matchMedia?.("(prefers-color-scheme: dark)")?.matches
+  }
+  return themeMode === "dark"
+}
+
+export function applyTheme(wrapper: HTMLElement, theme: Theme) {
+  wrapper.classList.remove("light", "dark")
+  wrapper.classList.add(theme)
+  wrapper.style.colorScheme = theme
+}
+
+export async function getLocalThemeMode(): Promise<ThemeMode> {
+  const themeMode = await storage.getItem<ThemeMode>(`local:${THEME_STORAGE_KEY}`)
+  return themeMode ?? DEFAULT_THEME_MODE
+}
+
+/**
+ * Re-apply theme from storage when the tab becomes visible.
+ * Returns a cleanup function to remove the listener.
+ */
+export function syncThemeOnVisibility(wrapper: HTMLElement): () => void {
+  const handler = () => {
+    if (document.visibilityState === "visible") {
+      void getLocalThemeMode().then((mode) => {
+        applyTheme(wrapper, isDarkMode(mode) ? "dark" : "light")
+      })
+    }
+  }
+  document.addEventListener("visibilitychange", handler)
+  return () => document.removeEventListener("visibilitychange", handler)
 }

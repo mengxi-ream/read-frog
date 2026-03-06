@@ -9,6 +9,7 @@ contextMenu:
   translate: 번역
   showOriginal: 원문 보기
 popup:
+  theme: 테마
   autoLang: 자동
   sourceLang: 원본
   targetLang: 대상
@@ -168,6 +169,12 @@ options:
       testing: 테스트 중...
   general:
     title: 일반
+    appearance:
+      title: 외관
+      theme: 테마
+      system: 시스템
+      light: 라이트
+      dark: 다크
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택

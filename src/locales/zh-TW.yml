@@ -9,6 +9,7 @@ contextMenu:
   translate: 翻譯
   showOriginal: 顯示原文
 popup:
+  theme: 主題
   autoLang: 自動偵測
   sourceLang: 來源語言
   targetLang: 目標語言
@@ -168,6 +169,12 @@ options:
       testing: 測試中...
   general:
     title: 通用
+    appearance:
+      title: 外觀
+      theme: 主題
+      system: 跟隨系統
+      light: 淺色
+      dark: 深色
     featureProviders:
       title: 功能提供商
       description: 為每個功能選擇使用的提供商

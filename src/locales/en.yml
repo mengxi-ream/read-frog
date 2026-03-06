@@ -9,6 +9,7 @@ contextMenu:
   translate: Translate
   showOriginal: Show Original
 popup:
+  theme: Theme
   autoLang: Auto
   sourceLang: Source
   targetLang: Target
@@ -169,6 +170,12 @@ options:
       testing: Testing...
   general:
     title: General
+    appearance:
+      title: Appearance
+      theme: Theme
+      system: System
+      light: Light
+      dark: Dark
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
