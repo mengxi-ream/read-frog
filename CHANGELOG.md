@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.27.3
+
+### Patch Changes
+
+- [#1057](https://github.com/mengxi-ream/read-frog/pull/1057) [`72ac190`](https://github.com/mengxi-ream/read-frog/commit/72ac19072202a01555230f9ca6e2eaa3cfd39c2c) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): optimize subtitle single-line display by widening container and reducing max word count
+
+- [#1058](https://github.com/mengxi-ream/read-frog/pull/1058) [`2e943d2`](https://github.com/mengxi-ream/read-frog/commit/2e943d26eb3a295b4b7c63f46009064694e34d99) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): persist subtitle drag position across navigations
+
+- [#1060](https://github.com/mengxi-ream/read-frog/pull/1060) [`76f73ec`](https://github.com/mengxi-ream/read-frog/commit/76f73ecdddf6677bf7bc71db5e31e83243d663be) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(firefox): icon and image csp restriction
+
 ## 1.27.2
 
 ### Patch Changes
