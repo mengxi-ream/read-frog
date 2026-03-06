@@ -1,4 +1,5 @@
 import { Icon } from "@iconify/react"
+import { IconGripHorizontal, IconX } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useImperativeHandle, useRef } from "react"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
@@ -8,7 +9,7 @@ import { useDraggable } from "../use-draggable"
 
 interface PopoverWrapperProps {
   title: string
-  icon: string
+  icon: React.ReactNode | string
   children: React.ReactNode
   onClose?: () => void
   isVisible: boolean
@@ -115,11 +116,17 @@ export function PopoverWrapper({ title, icon, children, onClose, isVisible, setI
             color: isDragging ? "var(--read-frog-primary)" : undefined,
           }}
         >
-          <Icon icon="tabler:grip-horizontal" className="size-4" />
+          <IconGripHorizontal className="size-4" />
         </div>
 
         <div className="flex items-center gap-2">
-          <Icon icon={icon} strokeWidth={0.8} className="size-4.5 text-zinc-600 dark:text-zinc-400" />
+          {typeof icon === "string"
+            ? (
+                <Icon icon={icon} strokeWidth={0.8} className="size-4.5 text-zinc-600 dark:text-zinc-400" />
+              )
+            : (
+                icon
+              )}
           <h2 className="text-base font-medium text-zinc-900 dark:text-zinc-100">{title}</h2>
         </div>
         <button
@@ -127,7 +134,7 @@ export function PopoverWrapper({ title, icon, children, onClose, isVisible, setI
           onClick={handleClose}
           className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded"
         >
-          <Icon icon="tabler:x" strokeWidth={1} className="size-4 text-zinc-600 dark:text-zinc-400" />
+          <IconX strokeWidth={1} className="size-4 text-zinc-600 dark:text-zinc-400" />
         </button>
       </div>
       <div
