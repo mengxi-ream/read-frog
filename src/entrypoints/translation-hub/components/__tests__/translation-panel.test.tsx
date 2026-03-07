@@ -64,7 +64,7 @@ describe("translationPanel", () => {
   it("toggles a single card without affecting other cards", () => {
     renderTranslationPanel()
 
-    fireEvent.click(screen.getByRole("button", { name: "toggle-provider-a" }))
+    fireEvent.click(screen.getByRole("button", { name: /toggle-\s*provider-a/ }))
 
     expect(screen.getByTestId("card-provider-a")).toHaveAttribute("data-expanded", "false")
     expect(screen.getByTestId("card-provider-b")).toHaveAttribute("data-expanded", "true")
