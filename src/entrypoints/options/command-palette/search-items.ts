@@ -230,6 +230,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.overlayTools.floatingButton.title",
   },
   {
+    sectionId: "floating-button-anchor",
+    route: "/floating-button",
+    titleKey: "options.floatingButtonAndToolbar.floatingButton.anchor.title",
+    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.anchor.description",
+    pageKey: "options.overlayTools.floatingButton.title",
+  },
+  {
     sectionId: "floating-button-disabled-sites",
     route: "/floating-button",
     titleKey: "options.floatingButtonAndToolbar.floatingButton.disabledSites.title",

@@ -279,6 +279,11 @@ options:
         description: Choose the action when clicking the floating button
         panel: Open Panel
         translate: Toggle Page Translation
+      anchor:
+        title: Dock Side
+        description: Choose whether the floating button docks to the left or right side. You can also drag it across the screen to switch sides.
+        left: Left
+        right: Right
     selectionToolbar:
       globalToggle:
         title: Enable Selection Toolbar

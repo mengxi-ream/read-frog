@@ -4,18 +4,21 @@ export default function HiddenButton({
   icon,
   onClick,
   children,
+  side,
   className,
 }: {
   icon: React.ReactNode
   onClick: () => void
   children?: React.ReactNode
+  side: "left" | "right"
   className?: string
 }) {
   return (
     <button
       type="button"
       className={cn(
-        "border-border mr-2 translate-x-12 cursor-pointer rounded-full border bg-white p-1.5 text-neutral-600 dark:text-neutral-400 transition-transform duration-300 group-hover:translate-x-0 hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800",
+        "border-border cursor-pointer rounded-full border bg-white p-1.5 text-neutral-600 dark:text-neutral-400 transition-transform duration-300 group-hover:translate-x-0 hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800",
+        side === "left" ? "ml-2 -translate-x-12" : "mr-2 translate-x-12",
         className,
       )}
       onClick={onClick}

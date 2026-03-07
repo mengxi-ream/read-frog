@@ -278,6 +278,11 @@ options:
         description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
         panel: 패널 열기
         translate: 페이지 번역 전환
+      anchor:
+        title: 고정 위치
+        description: 플로팅 버튼을 왼쪽 또는 오른쪽 어느 쪽에 붙일지 선택합니다. 드래그해서 바꿀 수도 있습니다.
+        left: 왼쪽
+        right: 오른쪽
     selectionToolbar:
       globalToggle:
         title: 선택 툴바 활성화

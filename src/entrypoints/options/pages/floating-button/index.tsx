@@ -2,6 +2,7 @@ import { i18n } from "#imports"
 import floatingButtonDemoImage from "@/assets/demo/floating-button.png"
 import { GradientBackground } from "@/components/gradient-background"
 import { PageLayout } from "../../components/page-layout"
+import { FloatingButtonAnchor } from "./floating-button-anchor"
 import { FloatingButtonClickAction } from "./floating-button-click-action"
 import { FloatingButtonDisabledSites } from "./floating-button-disabled-sites"
 import { FloatingButtonGlobalToggle } from "./floating-button-global-toggle"
@@ -18,6 +19,7 @@ export function FloatingButtonPage() {
       </GradientBackground>
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <FloatingButtonGlobalToggle />
+        <FloatingButtonAnchor />
         <FloatingButtonClickAction />
         <FloatingButtonDisabledSites />
       </div>

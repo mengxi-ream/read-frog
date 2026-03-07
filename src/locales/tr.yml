@@ -278,6 +278,11 @@ options:
         description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
         panel: Paneli Aç
         translate: Sayfa Çevirisini Aç/Kapat
+      anchor:
+        title: Sabitleme Tarafı
+        description: Yüzen butonun sol ya da sağ tarafa sabitlenmesini seçin. Sürükleyerek de taraf değiştirebilirsiniz.
+        left: Sol
+        right: Sağ
     selectionToolbar:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir

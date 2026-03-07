@@ -24,6 +24,7 @@ const languageSchema = z.object({
 const floatingButtonSchema = z.object({
   enabled: z.boolean(),
   position: z.number().min(0).max(1),
+  anchor: z.enum(["left", "right"]).optional().default("right"),
   disabledFloatingButtonPatterns: z.array(z.string()),
   clickAction: z.enum(["panel", "translate"]),
 })

@@ -278,6 +278,11 @@ options:
         description: Chọn hành động khi nhấn vào nút nổi
         panel: Mở bảng điều khiển
         translate: Bật/tắt dịch trang
+      anchor:
+        title: Cạnh neo
+        description: Chọn nút nổi bám vào bên trái hay bên phải. Bạn cũng có thể kéo để đổi bên.
+        left: Bên trái
+        right: Bên phải
     selectionToolbar:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản

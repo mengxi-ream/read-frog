@@ -18,9 +18,10 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 export const THEME_STORAGE_KEY = "theme"
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 65
+export const CONFIG_SCHEMA_VERSION = 66
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
+export const DEFAULT_FLOATING_BUTTON_ANCHOR = "right" as const
 
 function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
   const template = CUSTOM_ACTION_TEMPLATES.find(t => t.id === "dictionary")
@@ -93,6 +94,7 @@ export const DEFAULT_CONFIG: Config = {
   floatingButton: {
     enabled: true,
     position: DEFAULT_FLOATING_BUTTON_POSITION,
+    anchor: DEFAULT_FLOATING_BUTTON_ANCHOR,
     disabledFloatingButtonPatterns: [],
     clickAction: "translate",
   },
