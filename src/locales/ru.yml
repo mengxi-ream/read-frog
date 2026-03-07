@@ -796,6 +796,10 @@ translationHub:
   translate: Перевести
   copiedToClipboard: Перевод скопирован в буфер обмена!
   copyTranslation: Копировать перевод
+  expandCard: Развернуть карточку
+  collapseCard: Свернуть карточку
+  expandAllCards: Развернуть все
+  collapseAllCards: Свернуть все
   deleteCard: Удалить карточку
   translationFailed: Ошибка перевода
   translationFailedFallback: Ошибка перевода

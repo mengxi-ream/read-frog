@@ -17,9 +17,11 @@ import { selectedProviderIdsAtom, translateRequestAtom } from "../atoms"
 
 interface TranslationCardProps {
   providerId: string
+  isExpanded: boolean
+  onExpandedChange: (expanded: boolean) => void
 }
 
-export function TranslationCard({ providerId }: TranslationCardProps) {
+export function TranslationCard({ providerId, isExpanded, onExpandedChange }: TranslationCardProps) {
   const { theme } = useTheme()
   const request = useAtomValue(translateRequestAtom)
   const language = useAtomValue(configFieldsAtomMap.language)
@@ -86,7 +88,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
 
   return (
     <div className="border rounded-lg bg-card">
-      <div className={cn("flex items-center justify-between px-3 py-2", hasContent && "border-b")}>
+      <div className={cn("flex items-center justify-between px-3 py-2", hasContent && isExpanded && "border-b")}>
         <div className="flex items-center space-x-2">
           {providerItem
             ? (
@@ -128,6 +130,19 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
               <Icon icon="tabler:copy" className="h-3.5 w-3.5" />
             </Button>
           )}
+          {hasContent && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onExpandedChange(!isExpanded)}
+              className="h-7 w-7"
+              title={i18n.t(isExpanded ? "translationHub.collapseCard" : "translationHub.expandCard")}
+              aria-label={i18n.t(isExpanded ? "translationHub.collapseCard" : "translationHub.expandCard")}
+              aria-expanded={isExpanded}
+            >
+              <Icon icon={isExpanded ? "tabler:chevron-up" : "tabler:chevron-down"} className="h-3.5 w-3.5" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -140,7 +155,7 @@ export function TranslationCard({ providerId }: TranslationCardProps) {
         </div>
       </div>
 
-      {hasContent && (
+      {hasContent && isExpanded && (
         <div className="p-3">
           {mutation.isError
             ? (

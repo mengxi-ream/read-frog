@@ -796,6 +796,10 @@ translationHub:
   translate: Çevir
   copiedToClipboard: Çeviri panoya kopyalandı!
   copyTranslation: Çeviriyi kopyala
+  expandCard: Kartı genişlet
+  collapseCard: Kartı daralt
+  expandAllCards: Tümünü genişlet
+  collapseAllCards: Tümünü daralt
   deleteCard: Kartı sil
   translationFailed: Çeviri Başarısız
   translationFailedFallback: Çeviri başarısız

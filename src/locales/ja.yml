@@ -796,6 +796,10 @@ translationHub:
   translate: 翻訳
   copiedToClipboard: 翻訳をクリップボードにコピーしました！
   copyTranslation: 翻訳をコピー
+  expandCard: カードを展開
+  collapseCard: カードを折りたたむ
+  expandAllCards: すべて展開
+  collapseAllCards: すべて折りたたむ
   deleteCard: カードを削除
   translationFailed: 翻訳に失敗しました
   translationFailedFallback: 翻訳に失敗しました
