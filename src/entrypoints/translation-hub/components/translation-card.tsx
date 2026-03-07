@@ -1,7 +1,7 @@
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useMutation } from "@tanstack/react-query"
-import { useAtom, useAtomValue } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef } from "react"
 import { toast } from "sonner"
 import ProviderIcon from "@/components/provider-icon"
@@ -13,7 +13,7 @@ import { getProviderConfigById } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
-import { selectedProviderIdsAtom, translateRequestAtom } from "../atoms"
+import { selectedProviderIdsAtom, translateRequestAtom, translationCardExpandedStateAtom } from "../atoms"
 
 interface TranslationCardProps {
   providerId: string
@@ -27,6 +27,7 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
   const language = useAtomValue(configFieldsAtomMap.language)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const [selectedProviderIds, setSelectedProviderIds] = useAtom(selectedProviderIdsAtom)
+  const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
 
   const provider = getProviderConfigById(providersConfig, providerId)
   const providerItem = provider ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS] : undefined
@@ -79,6 +80,14 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
 
   const handleRemove = () => {
     setSelectedProviderIds(selectedProviderIds.filter(id => id !== providerId))
+    setExpandedById((prev) => {
+      if (!(providerId in prev))
+        return prev
+
+      const next = { ...prev }
+      delete next[providerId]
+      return next
+    })
   }
 
   if (!provider)
