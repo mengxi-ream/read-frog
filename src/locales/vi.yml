@@ -199,8 +199,8 @@ options:
     mode:
       title: Chế độ kích hoạt tiện ích mở rộng
       description: Sử dụng chế độ danh sách đen để tắt tiện ích trên các trang web cụ thể, hoặc chế độ danh sách trắng để giới hạn chỉ các trang web cụ thể.
-      blacklist: Chỉ tắt trên các trang web được liệt kê (Danh sách đen)
-      whitelist: Chỉ chạy trên các trang web được liệt kê (Danh sách trắng)
+      blacklist: Chỉ tắt trên các trang web được liệt kê
+      whitelist: Chỉ chạy trên các trang web được liệt kê
     patterns:
       enterUrlPattern: Nhập mẫu URL (ví dụ example.com)
       urlPattern: Mẫu URL

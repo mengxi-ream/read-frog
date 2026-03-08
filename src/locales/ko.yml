@@ -199,8 +199,8 @@ options:
     mode:
       title: 확장 프로그램 활성화 모드
       description: 블랙리스트 모드를 사용하여 특정 사이트에서 확장 프로그램을 비활성화하거나, 화이트리스트 모드를 사용하여 특정 사이트에서만 실행되도록 제한할 수 있습니다.
-      blacklist: 나열된 사이트에서만 비활성화 (블랙리스트)
-      whitelist: 나열된 사이트에서만 실행 (화이트리스트)
+      blacklist: 나열된 사이트에서만 비활성화
+      whitelist: 나열된 사이트에서만 실행
     patterns:
       enterUrlPattern: "URL 패턴 입력 (예: example.com)"
       urlPattern: URL 패턴

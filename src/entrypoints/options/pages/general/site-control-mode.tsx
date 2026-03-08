@@ -43,7 +43,7 @@ export default function SiteControlMode() {
         onValueChange={async (value) => {
           await setSiteControl({
             ...siteControl,
-            mode: value as "blacklist" | "whitelist",
+            mode: value,
           })
         }}
         className="flex flex-col gap-2"

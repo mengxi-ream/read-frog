@@ -199,8 +199,8 @@ options:
     mode:
       title: 拡張機能の有効化モード
       description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
-      blacklist: リストされたサイトでのみ無効（ブラックリスト）
-      whitelist: リストされたサイトでのみ実行（ホワイトリスト）
+      blacklist: リストされたサイトでのみ無効
+      whitelist: リストされたサイトでのみ実行
     patterns:
       enterUrlPattern: URLパターンを入力（例：example.com）
       urlPattern: URLパターン

@@ -199,8 +199,8 @@ options:
     mode:
       title: Uzantı Etkinleştirme Modu
       description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
-      blacklist: Yalnızca listelenen sitelerde devre dışı bırak (Kara Liste)
-      whitelist: Yalnızca listelenen sitelerde çalıştır (Beyaz Liste)
+      blacklist: Yalnızca listelenen sitelerde devre dışı bırak
+      whitelist: Yalnızca listelenen sitelerde çalıştır
     patterns:
       enterUrlPattern: URL deseni girin (örn. example.com)
       urlPattern: URL Deseni

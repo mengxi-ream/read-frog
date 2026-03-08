@@ -199,8 +199,8 @@ options:
     mode:
       title: 擴充功能啟動模式
       description: 使用黑名單模式可以在特定網站上停用擴充功能，或使用白名單模式限制擴充功能僅在特定網站上執行。
-      blacklist: 僅在列出的站點禁止（黑名單）
-      whitelist: 僅在列出的站點執行（白名單）
+      blacklist: 僅在列出的站點禁止
+      whitelist: 僅在列出的站點執行
     patterns:
       enterUrlPattern: 輸入 URL 模式（例如 example.com）
       urlPattern: URL 模式

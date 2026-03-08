@@ -200,8 +200,8 @@ options:
     mode:
       title: Extension Activation Mode
       description: Use blacklist mode to disable the extension on specific sites, or whitelist mode to limit it to specific sites only.
-      blacklist: Only disable on listed sites (Blacklist)
-      whitelist: Only run on listed sites (Whitelist)
+      blacklist: Only disable on listed sites
+      whitelist: Only run on listed sites
     patterns:
       enterUrlPattern: Enter URL pattern (e.g., example.com)
       urlPattern: URL Pattern
