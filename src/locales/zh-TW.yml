@@ -480,6 +480,7 @@ options:
     nodeTranslationHotkey:
       title: 懸停或長按翻譯快捷鍵
       description: 自訂懸停翻譯的修飾鍵，或使用滑鼠長按翻譯段落
+      enable: 啟用
     llmProviderConfigured: 已為$1選擇 LLM 提供商
     llmProviderNotConfigured: 沒有為$1選擇 LLM 提供商
     autoTranslateLanguages:

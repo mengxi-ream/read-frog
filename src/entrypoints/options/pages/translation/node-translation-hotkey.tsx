@@ -1,6 +1,7 @@
 import { i18n } from "#imports"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
+import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import {
   Select,
   SelectContent,
@@ -26,8 +27,14 @@ export function NodeTranslationHotkey() {
       description={i18n.t("options.translation.nodeTranslationHotkey.description")}
     >
       <div className="flex flex-col gap-4">
-        <div className="w-full flex justify-end">
+        <Field orientation="horizontal">
+          <FieldContent className="self-center">
+            <FieldLabel htmlFor="node-translation-hotkey-toggle">
+              {i18n.t("options.translation.nodeTranslationHotkey.enable")}
+            </FieldLabel>
+          </FieldContent>
           <Switch
+            id="node-translation-hotkey-toggle"
             checked={translateConfig.node.enabled}
             onCheckedChange={(checked) => {
               void setTranslateConfig(
@@ -35,7 +42,7 @@ export function NodeTranslationHotkey() {
               )
             }}
           />
-        </div>
+        </Field>
         <Select
           value={translateConfig.node.hotkey}
           onValueChange={(value: typeof HOTKEYS[number] | null) => {

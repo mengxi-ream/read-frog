@@ -38,6 +38,30 @@ function isLargeInitialFloatingLetter(element: HTMLElement): boolean {
   return computedStyle.float === "left" && !!element.nextSibling && isShallowInlineTransNode(element.nextSibling)
 }
 
+function isInlineDisplay(display: string): boolean {
+  const normalizedDisplay = display.trim().toLowerCase()
+
+  if (!normalizedDisplay) {
+    return false
+  }
+
+  if (normalizedDisplay === "contents") {
+    return true
+  }
+
+  if (normalizedDisplay.startsWith("inline")) {
+    return true
+  }
+
+  return [
+    "ruby",
+    "ruby-base",
+    "ruby-text",
+    "ruby-base-container",
+    "ruby-text-container",
+  ].includes(normalizedDisplay)
+}
+
 export function isShallowInlineHTMLElement(element: HTMLElement): boolean {
   // to prevent too many inline nodes that make <body> as a paragraph node
   if (!element.textContent?.trim()) {
@@ -54,9 +78,7 @@ export function isShallowInlineHTMLElement(element: HTMLElement): boolean {
     return true
   }
 
-  const isInlineDisplay = ["inline", "contents"].some(display => computedStyle.display.includes(display))
-
-  return isInlineDisplay
+  return isInlineDisplay(computedStyle.display)
 }
 
 // Note: !(inline node) != block node because of `notranslate` class and all cases not in the if else block
@@ -81,9 +103,7 @@ export function isShallowBlockHTMLElement(element: HTMLElement): boolean {
     return false
   }
 
-  const isInlineDisplay = ["inline", "contents"].some(display => computedStyle.display.includes(display))
-
-  return !isInlineDisplay
+  return !isInlineDisplay(computedStyle.display)
 }
 
 export function isCustomDontWalkIntoElement(element: HTMLElement): boolean {

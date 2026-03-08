@@ -13,9 +13,7 @@ import {
   isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
   isShallowBlockHTMLElement,
-  isShallowBlockTransNode,
   isShallowInlineHTMLElement,
-  isShallowInlineTransNode,
   isTextNode,
 } from "./filter"
 
@@ -116,15 +114,8 @@ export function walkAndLabelElement(
     element.setAttribute(PARAGRAPH_ATTRIBUTE, "")
   }
 
-  const translateChildCount = Array.from(validChildNodes).filter(child =>
-    isShallowBlockTransNode(child) || isShallowInlineTransNode(child),
-  ).length
-  const blockChildCount = Array.from(validChildNodes).filter(child =>
-    isShallowBlockTransNode(child),
-  ).length
-
   // force block will force the current and ancestor elements to be block node
-  forceBlock = forceBlock || (blockChildCount >= 1 && translateChildCount > 1) || FORCE_BLOCK_TAGS.has(element.tagName)
+  forceBlock = forceBlock || FORCE_BLOCK_TAGS.has(element.tagName)
 
   if (element.textContent?.trim() === "" && !forceBlock) {
     return {

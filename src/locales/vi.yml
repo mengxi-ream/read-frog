@@ -480,6 +480,7 @@ options:
     nodeTranslationHotkey:
       title: Phím tắt dịch khi di chuột hoặc nhấn giữ
       description: Tùy chỉnh phím bổ trợ khi di chuột hoặc dùng nhấn giữ để dịch đoạn văn
+      enable: Bật
     llmProviderConfigured: Đã chọn nhà cung cấp LLM cho $1
     llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
     autoTranslateLanguages:
