@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 import { browser, i18n } from "#imports"
 import { IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
   DropdownMenu,
@@ -46,6 +46,24 @@ export default function FloatingButton() {
   const [dragPosition, setDragPosition] = useState<number | null>(null)
   const [dragAnchor, setDragAnchor] = useState<FloatingButtonAnchor | null>(null)
   const [dragPreview, setDragPreview] = useState<{ x: number, y: number } | null>(null)
+  const dragMoveHandlerRef = useRef<((event: MouseEvent) => void) | null>(null)
+  const dragUpHandlerRef = useRef<(() => void) | null>(null)
+
+  const cleanupDragListeners = () => {
+    if (dragMoveHandlerRef.current) {
+      document.removeEventListener("mousemove", dragMoveHandlerRef.current)
+      dragMoveHandlerRef.current = null
+    }
+
+    if (dragUpHandlerRef.current) {
+      document.removeEventListener("mouseup", dragUpHandlerRef.current)
+      dragUpHandlerRef.current = null
+    }
+
+    document.body.style.userSelect = ""
+  }
+
+  useEffect(() => cleanupDragListeners, [])
 
   // 拖拽结束时写入 storage
   useEffect(() => {
@@ -77,6 +95,7 @@ export default function FloatingButton() {
     let hasMoved = false // 标记是否发生了移动
 
     e.preventDefault()
+    cleanupDragListeners()
     document.body.style.userSelect = "none"
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
@@ -92,11 +111,14 @@ export default function FloatingButton() {
         hasMoved = true
         setIsDraggingButton(true)
       }
-
+      const maxTop = Math.max(
+        FLOATING_BUTTON_MIN_TOP,
+        window.innerHeight - FLOATING_BUTTON_MAX_TOP_OFFSET,
+      )
       const newY = clamp(
         initialY + moveEvent.clientY - initialPointer.y,
         FLOATING_BUTTON_MIN_TOP,
-        window.innerHeight - FLOATING_BUTTON_MAX_TOP_OFFSET,
+        maxTop,
       )
       const newPosition = newY / window.innerHeight
       const availableWidth = window.innerWidth - (isSideOpen ? sideContent.width : 0)
@@ -118,9 +140,7 @@ export default function FloatingButton() {
     }
 
     const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
-      document.body.style.userSelect = ""
+      cleanupDragListeners()
 
       if (!hasMoved) {
         if (floatingButton.clickAction === "translate") {
@@ -141,6 +161,8 @@ export default function FloatingButton() {
       }
     }
 
+    dragMoveHandlerRef.current = handleMouseMove
+    dragUpHandlerRef.current = handleMouseUp
     document.addEventListener("mouseup", handleMouseUp)
     document.addEventListener("mousemove", handleMouseMove)
   }
