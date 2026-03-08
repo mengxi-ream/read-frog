@@ -4,9 +4,24 @@ import { DEFAULT_THEME_MODE, themeModeSchema } from "@/types/config/theme"
 import { THEME_STORAGE_KEY } from "../constants/config"
 import { storageAdapter } from "./storage-adapter"
 
-export const themeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
+const baseThemeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
 
-themeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
+export const themeModeAtom = atom(
+  get => get(baseThemeModeAtom),
+  async (get, set, newValue: ThemeMode) => {
+    const prev = get(baseThemeModeAtom)
+    set(baseThemeModeAtom, newValue)
+    try {
+      await storageAdapter.set(THEME_STORAGE_KEY, newValue, themeModeSchema)
+    }
+    catch (error) {
+      console.error("Failed to set themeMode to storage:", newValue, error)
+      set(baseThemeModeAtom, prev)
+    }
+  },
+)
+
+baseThemeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
   let didReceiveStorageUpdate = false
 
   void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then((value) => {
@@ -35,11 +50,3 @@ themeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
     document.removeEventListener("visibilitychange", handleVisibilityChange)
   }
 }
-
-export const writeThemeModeAtom = atom(
-  null,
-  async (_get, set, mode: ThemeMode) => {
-    set(themeModeAtom, mode)
-    await storageAdapter.set(THEME_STORAGE_KEY, mode, themeModeSchema)
-  },
-)

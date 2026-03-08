@@ -1,7 +1,7 @@
 import type { Theme, ThemeMode } from "@/types/config/theme"
-import { useAtomValue, useSetAtom } from "jotai"
-import { createContext, use, useCallback, useEffect, useMemo, useSyncExternalStore } from "react"
-import { themeModeAtom, writeThemeModeAtom } from "@/utils/atoms/theme"
+import { useAtom } from "jotai"
+import { createContext, use, useEffect, useMemo, useSyncExternalStore } from "react"
+import { themeModeAtom } from "@/utils/atoms/theme"
 
 interface ThemeContextI {
   theme: Theme
@@ -18,8 +18,7 @@ export function ThemeProvider({
   children: React.ReactNode
   container?: HTMLElement
 }) {
-  const themeMode = useAtomValue(themeModeAtom)
-  const setThemeModeAtom = useSetAtom(writeThemeModeAtom)
+  const [themeMode, setThemeMode] = useAtom(themeModeAtom)
 
   const prefersDark = useSyncExternalStore(
     (cb) => {
@@ -37,13 +36,6 @@ export function ThemeProvider({
   const theme: Theme = themeMode === "system"
     ? (prefersDark ? "dark" : "light")
     : themeMode
-
-  const setThemeMode = useCallback(
-    (mode: ThemeMode) => {
-      void setThemeModeAtom(mode)
-    },
-    [setThemeModeAtom],
-  )
 
   // Apply theme to document or shadow root container
   useEffect(() => {
