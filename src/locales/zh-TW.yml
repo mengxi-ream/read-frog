@@ -796,6 +796,10 @@ translationHub:
   translate: 翻譯
   copiedToClipboard: 翻譯已複製到剪貼簿！
   copyTranslation: 複製翻譯
+  expandCard: 展開卡片
+  collapseCard: 摺疊卡片
+  expandAllCards: 全部展開
+  collapseAllCards: 全部摺疊
   deleteCard: 刪除卡片
   translationFailed: 翻譯失敗
   translationFailedFallback: 翻譯失敗

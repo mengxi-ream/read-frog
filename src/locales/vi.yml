@@ -796,6 +796,10 @@ translationHub:
   translate: Dịch
   copiedToClipboard: Đã sao chép bản dịch vào bộ nhớ tạm!
   copyTranslation: Sao chép bản dịch
+  expandCard: Mở rộng thẻ
+  collapseCard: Thu gọn thẻ
+  expandAllCards: Mở rộng tất cả
+  collapseAllCards: Thu gọn tất cả
   deleteCard: Xóa thẻ
   translationFailed: Dịch Thất Bại
   translationFailedFallback: Dịch thất bại

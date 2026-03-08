@@ -3,6 +3,7 @@ import { LanguageControlPanel } from "./components/language-control-panel"
 import { PromptSelector } from "./components/prompt-selector"
 import { TextInput } from "./components/text-input"
 import { TranslationPanel } from "./components/translation-panel"
+import { TranslationPanelActions } from "./components/translation-panel-actions"
 import { TranslationServiceDropdown } from "./components/translation-service-dropdown"
 
 export default function App() {
@@ -25,6 +26,7 @@ export default function App() {
               <div className="flex items-center gap-2">
                 <PromptSelector />
                 <TranslationServiceDropdown />
+                <TranslationPanelActions />
               </div>
             </div>
 

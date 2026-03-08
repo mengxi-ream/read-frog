@@ -908,6 +908,10 @@ translationHub:
   translate: Translate
   copiedToClipboard: Translation copied to clipboard!
   copyTranslation: Copy translation
+  expandCard: Expand card
+  collapseCard: Collapse card
+  expandAllCards: Expand all
+  collapseAllCards: Collapse all
   deleteCard: Delete card
   translationFailed: Translation Failed
   translationFailedFallback: Translation failed

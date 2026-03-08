@@ -796,6 +796,10 @@ translationHub:
   translate: 번역
   copiedToClipboard: 번역이 클립보드에 복사되었습니다!
   copyTranslation: 번역 복사
+  expandCard: 카드 펼치기
+  collapseCard: 카드 접기
+  expandAllCards: 모두 펼치기
+  collapseAllCards: 모두 접기
   deleteCard: 카드 삭제
   translationFailed: 번역 실패
   translationFailedFallback: 번역 실패

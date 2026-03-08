@@ -276,8 +276,12 @@ export async function translateNodeTranslationOnlyMode(
     const translatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
 
     if (!translatedText) {
-      // Batch the remove operation to execute remove operation after insert operation
-      batchDOMOperation(() => translatedWrapperNode.remove())
+      // Keep the wrapper when translation failed so the injected error UI remains visible.
+      // Only remove the wrapper when translation returned an empty string.
+      if (translatedText === "") {
+        // Batch the remove operation to execute remove operation after insert operation
+        batchDOMOperation(() => translatedWrapperNode.remove())
+      }
       return
     }
 

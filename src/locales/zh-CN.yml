@@ -908,6 +908,10 @@ translationHub:
   translate: 翻译
   copiedToClipboard: 翻译已复制到剪贴板！
   copyTranslation: 复制翻译
+  expandCard: 展开卡片
+  collapseCard: 折叠卡片
+  expandAllCards: 全部展开
+  collapseAllCards: 全部折叠
   deleteCard: 删除卡片
   translationFailed: 翻译失败
   translationFailedFallback: 翻译失败
