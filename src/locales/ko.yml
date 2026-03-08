@@ -488,6 +488,7 @@ options:
     nodeTranslationHotkey:
       title: 호버 또는 길게 누르기 번역 단축키
       description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
+      enable: 활성화
     llmProviderConfigured: $1에 LLM 제공업체 선택됨
     llmProviderNotConfigured: $1에 LLM 제공업체 미선택
     autoTranslateLanguages:

@@ -471,6 +471,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.ollama"),
     enabled: true,
     provider: "ollama",
+    baseURL: "http://127.0.0.1:11434/api",
     model: DEFAULT_LLM_PROVIDER_MODELS.ollama,
   },
   "volcengine": {

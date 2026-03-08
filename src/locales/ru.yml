@@ -488,6 +488,7 @@ options:
     nodeTranslationHotkey:
       title: Горячая клавиша перевода при наведении или долгом нажатии
       description: Настройте клавишу-модификатор для перевода при наведении или используйте долгое нажатие для перевода абзацев
+      enable: Включить
     llmProviderConfigured: LLM-провайдер выбран для $1
     llmProviderNotConfigured: LLM-провайдер не выбран для $1
     autoTranslateLanguages:

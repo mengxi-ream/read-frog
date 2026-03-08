@@ -600,6 +600,7 @@ options:
     nodeTranslationHotkey:
       title: Hover or Long-Press Translation Shortcut
       description: Customize the hover modifier key or use long press to translate paragraphs
+      enable: Enable
     llmProviderConfigured: LLM provider selected for $1
     llmProviderNotConfigured: No LLM provider selected for $1
     autoTranslateLanguages:

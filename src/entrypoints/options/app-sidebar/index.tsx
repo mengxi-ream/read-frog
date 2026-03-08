@@ -36,6 +36,7 @@ export function AppSidebar() {
         </a>
         <InputGroup
           onClick={() => setCommandPaletteOpen(true)}
+          className="bg-background"
         >
           <InputGroupInput
             readOnly

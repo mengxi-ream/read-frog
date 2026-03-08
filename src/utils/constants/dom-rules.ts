@@ -81,6 +81,8 @@ export const DONT_WALK_AND_TRANSLATE_TAGS = new Set([
   "NOSCRIPT",
   "STYLE",
   "LINK",
+  "RT",
+  "RP",
   "PRE",
   "svg",
   ...MATH_TAGS,
@@ -91,6 +93,7 @@ export const DONT_WALK_BUT_TRANSLATE_TAGS = new Set([
   "TIME",
 ])
 
+// force translation style as inline node, but not force the node as inline node
 export const FORCE_INLINE_TRANSLATION_TAGS = new Set([
   "A",
   "BUTTON",

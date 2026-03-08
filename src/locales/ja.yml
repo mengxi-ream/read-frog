@@ -488,6 +488,7 @@ options:
     nodeTranslationHotkey:
       title: ホバーまたは長押し翻訳ショートカットキー
       description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
+      enable: 有効化
     llmProviderConfigured: $1の LLM プロバイダー選択済み
     llmProviderNotConfigured: $1の LLM プロバイダー未選択
     autoTranslateLanguages:

@@ -488,6 +488,7 @@ options:
     nodeTranslationHotkey:
       title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
       description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
+      enable: Etkinleştir
     llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
     llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
     autoTranslateLanguages:
