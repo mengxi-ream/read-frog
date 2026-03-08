@@ -19,6 +19,7 @@ popup:
   enabledSelectionToolbar: Enable selection toolbar
   alwaysTranslate: Always translate this site
   addToWhitelist: Enable extension on this site
+  addToBlacklist: Disable extension on this site
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
@@ -205,12 +206,10 @@ options:
     title: Site Control
     mode:
       title: Extension Activation Mode
-      description: By default, the extension runs on all websites. Use whitelist mode to limit it to specific sites only.
-      all: Run on all sites
-      whitelist: Only run on listed sites (Whitelist)
+      description: Use blacklist mode to disable the extension on specific sites, or whitelist mode to limit it to specific sites only.
+      blacklist: Only disable on listed sites
+      whitelist: Only run on listed sites
     patterns:
-      title: Enabled Sites
-      description: When in whitelist mode, the extension will only be active on the sites listed below
       enterUrlPattern: Enter URL pattern (e.g., example.com)
       urlPattern: URL Pattern
   overlayTools:
@@ -916,6 +915,10 @@ translationHub:
   translate: Translate
   copiedToClipboard: Translation copied to clipboard!
   copyTranslation: Copy translation
+  expandCard: Expand card
+  collapseCard: Collapse card
+  expandAllCards: Expand all
+  collapseAllCards: Collapse all
   deleteCard: Delete card
   translationFailed: Translation Failed
   translationFailedFallback: Translation failed

@@ -19,6 +19,7 @@ popup:
   enabledSelectionToolbar: Включить панель выделения
   alwaysTranslate: Всегда переводить этот сайт
   addToWhitelist: Включить расширение на этом сайте
+  addToBlacklist: Отключить расширение на этом сайте
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца
@@ -204,12 +205,10 @@ options:
     title: Управление сайтами
     mode:
       title: Режим активации расширения
-      description: По умолчанию расширение работает на всех сайтах. Используйте режим белого списка, чтобы ограничить работу только указанными сайтами.
-      all: Работать на всех сайтах
-      whitelist: Работать только на указанных сайтах (белый список)
+      description: Используйте режим чёрного списка для отключения расширения на определённых сайтах или режим белого списка для ограничения работы только указанными сайтами.
+      blacklist: Отключить только на указанных сайтах
+      whitelist: Работать только на указанных сайтах
     patterns:
-      title: Активные сайты
-      description: В режиме белого списка расширение будет активно только на сайтах, перечисленных ниже
       enterUrlPattern: Введите шаблон URL (например, example.com)
       urlPattern: Шаблон URL
   overlayTools:
@@ -804,6 +803,10 @@ translationHub:
   translate: Перевести
   copiedToClipboard: Перевод скопирован в буфер обмена!
   copyTranslation: Копировать перевод
+  expandCard: Развернуть карточку
+  collapseCard: Свернуть карточку
+  expandAllCards: Развернуть все
+  collapseAllCards: Свернуть все
   deleteCard: Удалить карточку
   translationFailed: Ошибка перевода
   translationFailedFallback: Ошибка перевода

@@ -2,7 +2,7 @@ import { i18n } from "#imports"
 import { useAtom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { ConfigCard } from "../../components/config-card"
-import { DisabledPatternsTable } from "../../components/disabled-patterns-table"
+import { PatternsTable } from "../../components/patterns-table"
 
 export function AutoTranslateWebsitePatterns() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
@@ -32,7 +32,7 @@ export function AutoTranslateWebsitePatterns() {
 
   return (
     <ConfigCard id="auto-translate-website" title={i18n.t("options.translation.autoTranslateWebsite.title")} description={i18n.t("options.translation.autoTranslateWebsite.description")}>
-      <DisabledPatternsTable
+      <PatternsTable
         patterns={autoTranslatePatterns}
         onAddPattern={addPattern}
         onRemovePattern={removePattern}

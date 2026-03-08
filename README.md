@@ -308,6 +308,8 @@ Every donation helps us build a better language learning experience. Thank you f
 
 [![][sponsor-image]][sponsor-link]
 
+(will support Afdian in the future)
+
 <div align="right">
 
 [![][back-to-top]](#readme-top)

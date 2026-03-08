@@ -50,6 +50,9 @@ export const selectedProviderIdsAtom = atom(
   (_get, set, ids: string[]) => set(selectedProviderIdsOverrideAtom, ids),
 )
 
+// === Translation Card UI State ===
+export const translationCardExpandedStateAtom = atom<Record<string, boolean>>({})
+
 // === Derived: Selected Provider Configs (read-only) ===
 export const selectedProvidersAtom = atom((get) => {
   const ids = get(selectedProviderIdsAtom)

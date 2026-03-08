@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/base-ui/table"
 import { cn } from "@/utils/styles/utils"
 
-interface DisabledPatternsTableProps {
+interface PatternsTableProps {
   patterns: string[]
   onAddPattern: (pattern: string) => void
   onRemovePattern: (pattern: string) => void
@@ -21,14 +21,14 @@ interface DisabledPatternsTableProps {
   className?: string
 }
 
-export function DisabledPatternsTable({
+export function PatternsTable({
   patterns,
   onAddPattern,
   onRemovePattern,
   placeholderText,
   tableHeaderText,
   className,
-}: DisabledPatternsTableProps) {
+}: PatternsTableProps) {
   const [inputValue, setInputValue] = useState("")
 
   const handleAddPattern = () => {

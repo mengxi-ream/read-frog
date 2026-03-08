@@ -4,27 +4,31 @@ import { Label } from "@/components/ui/base-ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/base-ui/radio-group"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { ConfigCard } from "../../components/config-card"
-import { DisabledPatternsTable } from "../../components/disabled-patterns-table"
+import { PatternsTable } from "../../components/patterns-table"
 
 export default function SiteControlMode() {
   const [siteControl, setSiteControl] = useAtom(configFieldsAtomMap.siteControl)
-  const { patterns = [] } = siteControl
 
-  const addPattern = (pattern: string) => {
+  const patternsKey = siteControl.mode === "blacklist"
+    ? "blacklistPatterns" as const
+    : "whitelistPatterns" as const
+  const patterns = siteControl[patternsKey] ?? []
+
+  const addPattern = async (pattern: string) => {
     const cleanedPattern = pattern.trim()
     if (!cleanedPattern || patterns.includes(cleanedPattern))
       return
 
-    void setSiteControl({
+    await setSiteControl({
       ...siteControl,
-      patterns: [...patterns, cleanedPattern],
+      [patternsKey]: [...patterns, cleanedPattern],
     })
   }
 
-  const removePattern = (pattern: string) => {
-    void setSiteControl({
+  const removePattern = async (pattern: string) => {
+    await setSiteControl({
       ...siteControl,
-      patterns: patterns.filter(p => p !== pattern),
+      [patternsKey]: patterns.filter(p => p !== pattern),
     })
   }
 
@@ -36,18 +40,18 @@ export default function SiteControlMode() {
     >
       <RadioGroup
         value={siteControl.mode}
-        onValueChange={(value) => {
-          void setSiteControl({
+        onValueChange={async (value) => {
+          await setSiteControl({
             ...siteControl,
-            mode: value as "all" | "whitelist",
+            mode: value,
           })
         }}
         className="flex flex-col gap-2"
       >
         <div className="flex items-center space-x-2">
-          <RadioGroupItem value="all" id="mode-all" />
-          <Label htmlFor="mode-all" className="cursor-pointer">
-            {i18n.t("options.siteControl.mode.all")}
+          <RadioGroupItem value="blacklist" id="mode-blacklist" />
+          <Label htmlFor="mode-blacklist" className="cursor-pointer">
+            {i18n.t("options.siteControl.mode.blacklist")}
           </Label>
         </div>
         <div className="flex items-center space-x-2">
@@ -57,16 +61,14 @@ export default function SiteControlMode() {
           </Label>
         </div>
       </RadioGroup>
-      {siteControl.mode === "whitelist" && (
-        <DisabledPatternsTable
-          patterns={patterns}
-          onAddPattern={addPattern}
-          onRemovePattern={removePattern}
-          placeholderText={i18n.t("options.siteControl.patterns.enterUrlPattern")}
-          tableHeaderText={i18n.t("options.siteControl.patterns.urlPattern")}
-          className="mt-6"
-        />
-      )}
+      <PatternsTable
+        patterns={patterns}
+        onAddPattern={addPattern}
+        onRemovePattern={removePattern}
+        placeholderText={i18n.t("options.siteControl.patterns.enterUrlPattern")}
+        tableHeaderText={i18n.t("options.siteControl.patterns.urlPattern")}
+        className="mt-6"
+      />
     </ConfigCard>
   )
 }

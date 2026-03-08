@@ -1,13 +1,21 @@
 import type { APICallError } from "ai"
 import { IconAlertCircle } from "@tabler/icons-react"
+import { use } from "react"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/base-ui/hover-card"
+import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 
 export function ErrorButton({ error }: { error: APICallError }) {
+  const shadowWrapper = use(ShadowWrapperContext)
+
   return (
     <HoverCard>
-      <HoverCardTrigger render={<IconAlertCircle className="size-4 text-destructive hover:text-destructive/90 cursor-pointer" />} />
-      <HoverCardContent className="w-64 notranslate" render={<Alert />}>
+      <HoverCardTrigger
+        delay={0}
+        closeDelay={0}
+        render={<IconAlertCircle className="size-4 text-destructive hover:text-destructive/90 cursor-pointer" />}
+      />
+      <HoverCardContent container={shadowWrapper} className="w-64 notranslate" render={<Alert />}>
         <IconAlertCircle className="size-4 text-red-500!" />
         <AlertTitle>Translation Error</AlertTitle>
         <AlertDescription className="break-all">

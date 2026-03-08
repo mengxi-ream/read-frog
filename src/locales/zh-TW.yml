@@ -19,6 +19,7 @@ popup:
   enabledSelectionToolbar: 啟用選擇工具列
   alwaysTranslate: 總是翻譯這個網站
   addToWhitelist: 在此網站啟用擴充功能
+  addToBlacklist: 在此網站停用擴充功能
   options: 選項
   hover: 滑鼠懸停
   translateParagraph: 來翻譯段落
@@ -204,12 +205,10 @@ options:
     title: 站點控制
     mode:
       title: 擴充功能啟動模式
-      description: 預設情況下，擴充功能在所有網站上執行。使用白名單模式可以限制擴充功能僅在特定網站上執行。
-      all: 在所有站點執行
-      whitelist: 僅在列出的站點執行（白名單）
+      description: 使用黑名單模式可以在特定網站上停用擴充功能，或使用白名單模式限制擴充功能僅在特定網站上執行。
+      blacklist: 僅在列出的站點禁止
+      whitelist: 僅在列出的站點執行
     patterns:
-      title: 啟用的站點
-      description: 在白名單模式下，擴充功能僅在下方列出的網站上啟動
       enterUrlPattern: 輸入 URL 模式（例如 example.com）
       urlPattern: URL 模式
   overlayTools:
@@ -804,6 +803,10 @@ translationHub:
   translate: 翻譯
   copiedToClipboard: 翻譯已複製到剪貼簿！
   copyTranslation: 複製翻譯
+  expandCard: 展開卡片
+  collapseCard: 摺疊卡片
+  expandAllCards: 全部展開
+  collapseAllCards: 全部摺疊
   deleteCard: 刪除卡片
   translationFailed: 翻譯失敗
   translationFailedFallback: 翻譯失敗

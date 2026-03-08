@@ -17,6 +17,8 @@ import { sendMessage } from "@/utils/message"
 import { queryClient } from "@/utils/tanstack-query"
 import App from "./app"
 import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from "./atoms/auto-translate"
+import { isIgnoreTabAtom, isIgnoreUrl } from "./atoms/ignore"
+import { isCurrentSiteInBlacklistAtom, isCurrentSiteInWhitelistAtom, isInSiteControlList } from "./atoms/site-control"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
 
@@ -28,6 +30,9 @@ function HydrateAtoms({
     [typeof configAtom, Config],
     [typeof isPageTranslatedAtom, boolean],
     [typeof isCurrentSiteInPatternsAtom, boolean],
+    [typeof isIgnoreTabAtom, boolean],
+    [typeof isCurrentSiteInWhitelistAtom, boolean],
+    [typeof isCurrentSiteInBlacklistAtom, boolean],
   ]
   children: React.ReactNode
 }) {
@@ -59,6 +64,15 @@ async function initApp() {
     ? await getIsInPatterns(config.translate)
     : false
 
+  const activeTabUrl = activeTab[0]?.url || ""
+  const isIgnoreTab = isIgnoreUrl(activeTabUrl)
+  const isInWhitelist = activeTabUrl
+    ? isInSiteControlList(config.siteControl.whitelistPatterns, activeTabUrl)
+    : false
+  const isInBlacklist = activeTabUrl
+    ? isInSiteControlList(config.siteControl.blacklistPatterns, activeTabUrl)
+    : false
+
   ReactDOM.createRoot(root).render(
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
@@ -68,6 +82,9 @@ async function initApp() {
               [configAtom, config],
               [isPageTranslatedAtom, isPageTranslated],
               [isCurrentSiteInPatternsAtom, isInPatterns],
+              [isIgnoreTabAtom, isIgnoreTab],
+              [isCurrentSiteInWhitelistAtom, isInWhitelist],
+              [isCurrentSiteInBlacklistAtom, isInBlacklist],
             ]}
           >
             <ThemeProvider>

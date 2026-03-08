@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
 // @vitest-environment jsdom
 import type { TranslationMode } from "@/types/config/translate"
-import { act, render, screen } from "@testing-library/react"
+import { act, render, screen, waitFor } from "@testing-library/react"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
@@ -11,6 +11,7 @@ import {
   INLINE_ATTRIBUTE,
   INLINE_CONTENT_CLASS,
   PARAGRAPH_ATTRIBUTE,
+  TRANSLATION_ERROR_CONTAINER_CLASS,
 } from "@/utils/constants/dom-labels"
 import { flushBatchedOperations } from "@/utils/host/dom/batch-dom"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
@@ -83,6 +84,12 @@ describe("translate", () => {
       await translateWalkedElement(document.body, id, translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG, toggle)
       // Flush batched DOM operations to ensure all changes are applied before assertions
       flushBatchedOperations()
+    })
+  }
+
+  async function waitForTranslationError(wrapper: Element | null) {
+    await waitFor(() => {
+      expect(wrapper?.querySelector(`.${TRANSLATION_ERROR_CONTAINER_CLASS}`)).toBeTruthy()
     })
   }
 
@@ -1211,6 +1218,55 @@ describe("translate", () => {
       const node = screen.getByTestId("test-node")
       await removeOrShowPageTranslation("translationOnly", true)
       await removeOrShowPageTranslation("bilingual", true)
+
+      expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+      expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)
+    })
+  })
+
+  describe("translation errors", () => {
+    it("bilingual mode: should keep original text and show inline error UI when translation fails", async () => {
+      vi.mocked(translateTextForPage).mockRejectedValueOnce(new Error("Translation failed"))
+
+      render(
+        <div data-testid="test-node">
+          {MOCK_ORIGINAL_TEXT}
+        </div>,
+      )
+      const node = screen.getByTestId("test-node")
+      await removeOrShowPageTranslation("bilingual", true)
+
+      const wrapper = expectTranslationWrapper(node, "bilingual")
+      expect(node.textContent).toContain(MOCK_ORIGINAL_TEXT)
+      await waitForTranslationError(wrapper)
+    })
+
+    it("translationOnly mode: should keep original text and show inline error UI when translation fails", async () => {
+      vi.mocked(translateTextForPage).mockRejectedValueOnce(new Error("Translation failed"))
+
+      render(
+        <div data-testid="test-node">
+          {MOCK_ORIGINAL_TEXT}
+        </div>,
+      )
+      const node = screen.getByTestId("test-node")
+      await removeOrShowPageTranslation("translationOnly", true)
+
+      const wrapper = expectTranslationWrapper(node, "translationOnly")
+      expect(node.textContent).toContain(MOCK_ORIGINAL_TEXT)
+      await waitForTranslationError(wrapper)
+    })
+
+    it("translationOnly mode: should still remove the wrapper when translation returns an empty string", async () => {
+      vi.mocked(translateTextForPage).mockResolvedValueOnce("")
+
+      render(
+        <div data-testid="test-node">
+          {MOCK_ORIGINAL_TEXT}
+        </div>,
+      )
+      const node = screen.getByTestId("test-node")
+      await removeOrShowPageTranslation("translationOnly", true)
 
       expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
       expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT)

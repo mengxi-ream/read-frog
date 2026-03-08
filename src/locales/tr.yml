@@ -19,6 +19,7 @@ popup:
   enabledSelectionToolbar: Seçim araç çubuğunu etkinleştir
   alwaysTranslate: Bu siteyi her zaman çevir
   addToWhitelist: Bu sitede uzantıyı etkinleştir
+  addToBlacklist: Bu sitede uzantıyı devre dışı bırak
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için
@@ -204,12 +205,10 @@ options:
     title: Site Kontrolü
     mode:
       title: Uzantı Etkinleştirme Modu
-      description: Varsayılan olarak uzantı tüm web sitelerinde çalışır. Beyaz liste modunu kullanarak uzantıyı yalnızca belirli sitelerle sınırlayabilirsiniz.
-      all: Tüm sitelerde çalıştır
-      whitelist: Yalnızca listelenen sitelerde çalıştır (Beyaz Liste)
+      description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
+      blacklist: Yalnızca listelenen sitelerde devre dışı bırak
+      whitelist: Yalnızca listelenen sitelerde çalıştır
     patterns:
-      title: Etkin Siteler
-      description: Beyaz liste modunda uzantı yalnızca aşağıda listelenen sitelerde etkin olacaktır
       enterUrlPattern: URL deseni girin (örn. example.com)
       urlPattern: URL Deseni
   overlayTools:
@@ -804,6 +803,10 @@ translationHub:
   translate: Çevir
   copiedToClipboard: Çeviri panoya kopyalandı!
   copyTranslation: Çeviriyi kopyala
+  expandCard: Kartı genişlet
+  collapseCard: Kartı daralt
+  expandAllCards: Tümünü genişlet
+  collapseAllCards: Tümünü daralt
   deleteCard: Kartı sil
   translationFailed: Çeviri Başarısız
   translationFailedFallback: Çeviri başarısız

@@ -19,6 +19,7 @@ popup:
   enabledSelectionToolbar: 選択ツールバーを有効化
   alwaysTranslate: このサイトを常に翻訳する
   addToWhitelist: このサイトで拡張機能を有効にする
+  addToBlacklist: このサイトで拡張機能を無効にする
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
@@ -204,12 +205,10 @@ options:
     title: サイト制御
     mode:
       title: 拡張機能の有効化モード
-      description: デフォルトでは、拡張機能はすべてのウェブサイトで実行されます。ホワイトリストモードを使用すると、特定のサイトのみに制限できます。
-      all: すべてのサイトで実行
-      whitelist: リストされたサイトでのみ実行（ホワイトリスト）
+      description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
+      blacklist: リストされたサイトでのみ無効
+      whitelist: リストされたサイトでのみ実行
     patterns:
-      title: 有効なサイト
-      description: ホワイトリストモードでは、拡張機能は以下にリストされたサイトでのみ有効になります
       enterUrlPattern: URLパターンを入力（例：example.com）
       urlPattern: URLパターン
   overlayTools:
@@ -804,6 +803,10 @@ translationHub:
   translate: 翻訳
   copiedToClipboard: 翻訳をクリップボードにコピーしました！
   copyTranslation: 翻訳をコピー
+  expandCard: カードを展開
+  collapseCard: カードを折りたたむ
+  expandAllCards: すべて展開
+  collapseAllCards: すべて折りたたむ
   deleteCard: カードを削除
   translationFailed: 翻訳に失敗しました
   translationFailedFallback: 翻訳に失敗しました

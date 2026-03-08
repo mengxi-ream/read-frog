@@ -5,11 +5,10 @@ export function isSiteEnabled(url: string, config: Config | null): boolean {
   if (!config)
     return true
 
-  const { mode, patterns } = config.siteControl
+  const { mode, blacklistPatterns, whitelistPatterns } = config.siteControl
 
-  if (mode === "all")
-    return true
+  if (mode === "blacklist")
+    return !blacklistPatterns.some(pattern => matchDomainPattern(url, pattern))
 
-  // whitelist mode: only enabled if matches a pattern
-  return patterns.some(pattern => matchDomainPattern(url, pattern))
+  return whitelistPatterns.some(pattern => matchDomainPattern(url, pattern))
 }

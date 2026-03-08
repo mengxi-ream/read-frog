@@ -7,14 +7,15 @@ import { formatHotkey } from "@/utils/os.ts"
 import { cn } from "@/utils/styles/utils"
 import { isPageTranslatedAtom } from "../atoms/auto-translate"
 import { isIgnoreTabAtom } from "../atoms/ignore"
-import { isCurrentSiteInWhitelistAtom, isWhitelistModeAtom } from "../atoms/site-control"
+import { isCurrentSiteInBlacklistAtom, isCurrentSiteInWhitelistAtom } from "../atoms/site-control"
 
 export default function TranslateButton({ className }: { className?: string }) {
   const [isPageTranslated, setIsPageTranslated] = useAtom(isPageTranslatedAtom)
   const isIgnoreTab = useAtomValue(isIgnoreTabAtom)
   const translateConfig = useAtomValue(configFieldsAtomMap.translate)
-  const isWhitelistMode = useAtomValue(isWhitelistModeAtom)
+  const { mode } = useAtomValue(configFieldsAtomMap.siteControl)
   const isCurrentSiteInWhitelist = useAtomValue(isCurrentSiteInWhitelistAtom)
+  const isCurrentSiteInBlacklist = useAtomValue(isCurrentSiteInBlacklistAtom)
 
   const toggleTranslation = async () => {
     const [currentTab] = await browser.tabs.query({
@@ -32,7 +33,8 @@ export default function TranslateButton({ className }: { className?: string }) {
     }
   }
 
-  const isDisabled = isIgnoreTab || (isWhitelistMode && !isCurrentSiteInWhitelist)
+  const isSiteBlocked = mode === "whitelist" ? !isCurrentSiteInWhitelist : isCurrentSiteInBlacklist
+  const isDisabled = isIgnoreTab || isSiteBlocked
 
   return (
     <Button
