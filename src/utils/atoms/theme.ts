@@ -1,11 +1,8 @@
 import type { ThemeMode } from "@/types/config/theme"
 import { atom } from "jotai"
-import { z } from "zod"
-import { DEFAULT_THEME_MODE, themeModes } from "@/types/config/theme"
+import { DEFAULT_THEME_MODE, themeModeSchema } from "@/types/config/theme"
 import { THEME_STORAGE_KEY } from "../constants/config"
 import { storageAdapter } from "./storage-adapter"
-
-const themeModeSchema = z.enum(themeModes)
 
 export const themeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
 
