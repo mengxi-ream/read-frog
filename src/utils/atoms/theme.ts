@@ -4,8 +4,8 @@ import { DEFAULT_THEME_MODE, themeModeSchema } from "@/types/config/theme"
 import { THEME_STORAGE_KEY } from "../constants/config"
 import { storageAdapter } from "./storage-adapter"
 
-// Private base atom - not exported to prevent direct writes
-const baseThemeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
+// Private base atom. Only export this for top-level hydration before ThemeProvider mounts.
+export const baseThemeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
 
 // Public atom with read/write - write always goes through storageAdapter
 export const themeModeAtom = atom(

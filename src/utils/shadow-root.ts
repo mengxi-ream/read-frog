@@ -1,15 +1,6 @@
-import type { ThemeMode } from "@/types/config/theme"
-import { cn } from "@/utils/styles/utils"
-import { isDarkMode } from "./theme"
-
-export function insertShadowRootUIWrapperInto(container: HTMLElement, themeMode: ThemeMode = "system") {
-  const isDark = isDarkMode(themeMode)
+export function insertShadowRootUIWrapperInto(container: HTMLElement) {
   const wrapper = document.createElement("div")
-  wrapper.className = cn(
-    "text-base antialiased font-sans z-[2147483647]",
-    isDark && "dark",
-  )
-  wrapper.style.colorScheme = isDark ? "dark" : "light"
+  wrapper.className = "text-base antialiased font-sans z-[2147483647]"
   container.append(wrapper)
 
   return wrapper

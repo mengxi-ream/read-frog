@@ -1,10 +1,15 @@
 import "@/utils/zod-config"
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
+import type { ThemeMode } from "@/types/config/theme"
 import { createShadowRootUi, defineContentScript, storage } from "#imports"
 import { kebabCase } from "case-anything"
+import { Provider as JotaiProvider } from "jotai"
+import { useHydrateAtoms } from "jotai/utils"
 import ReactDOM from "react-dom/client"
 // import eruda from 'eruda'
+import { ThemeProvider } from "@/components/providers/theme-provider"
+import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from "@/utils/constants/config"
@@ -22,8 +27,20 @@ import { handleTranslationModeChange } from "./translation-control/handle-config
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
 import "@/utils/crypto-polyfill"
+import "@/assets/styles/theme.css"
 import "./listen"
 import "./style.css"
+
+function HydrateAtoms({
+  initialValues,
+  children,
+}: {
+  initialValues: [[typeof baseThemeModeAtom, ThemeMode]]
+  children: React.ReactNode
+}) {
+  useHydrateAtoms(initialValues)
+  return children
+}
 
 declare global {
   interface Window {
@@ -57,14 +74,20 @@ export default defineContentScript({
       anchor: "body",
       onMount: (container, shadow, shadowHost) => {
         // Container is a body, and React warns when creating a root on the body, so create a wrapper div
-        const wrapper = insertShadowRootUIWrapperInto(container, themeMode)
+        const wrapper = insertShadowRootUIWrapperInto(container)
         addStyleToShadow(shadow)
         protectSelectAllShadowRoot(shadowHost, wrapper)
 
         // Create a root on the UI container and render a component
         const root = ReactDOM.createRoot(wrapper)
         root.render(
-          <App />,
+          <JotaiProvider>
+            <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
+              <ThemeProvider container={wrapper}>
+                <App />
+              </ThemeProvider>
+            </HydrateAtoms>
+          </JotaiProvider>,
         )
         return root
       },

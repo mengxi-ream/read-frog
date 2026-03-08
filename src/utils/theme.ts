@@ -11,6 +11,12 @@ export function isDarkMode(themeMode: ThemeMode = "system"): boolean {
   return themeMode === "dark"
 }
 
+export function applyTheme(target: HTMLElement, theme: "light" | "dark") {
+  target.classList.remove("light", "dark")
+  target.classList.add(theme)
+  target.style.colorScheme = theme
+}
+
 export async function getLocalThemeMode(): Promise<ThemeMode> {
   const themeMode = await storage.getItem<ThemeMode>(`local:${THEME_STORAGE_KEY}`)
   return themeMode ?? DEFAULT_THEME_MODE

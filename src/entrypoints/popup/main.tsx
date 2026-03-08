@@ -1,5 +1,6 @@
 import "@/utils/zod-config"
 import type { Config } from "@/types/config/config"
+import type { ThemeMode } from "@/types/config/theme"
 import { browser } from "#imports"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { Provider as JotaiProvider } from "jotai"
@@ -11,10 +12,12 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
+import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { sendMessage } from "@/utils/message"
 import { queryClient } from "@/utils/tanstack-query"
+import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
 import { getIsInPatterns, isCurrentSiteInPatternsAtom, isPageTranslatedAtom } from "./atoms/auto-translate"
 import { isIgnoreTabAtom, isIgnoreUrl } from "./atoms/ignore"
@@ -33,6 +36,7 @@ function HydrateAtoms({
     [typeof isIgnoreTabAtom, boolean],
     [typeof isCurrentSiteInWhitelistAtom, boolean],
     [typeof isCurrentSiteInBlacklistAtom, boolean],
+    [typeof baseThemeModeAtom, ThemeMode],
   ]
   children: React.ReactNode
 }) {
@@ -43,12 +47,16 @@ function HydrateAtoms({
 async function initApp() {
   const root = document.getElementById("root")!
   root.className = "text-base antialiased w-[320px] bg-background"
-  const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
 
-  const activeTab = await browser.tabs.query({
-    active: true,
-    currentWindow: true,
-  })
+  const [configValue, themeMode, activeTab] = await Promise.all([
+    getLocalConfig(),
+    getLocalThemeMode(),
+    browser.tabs.query({
+      active: true,
+      currentWindow: true,
+    }),
+  ])
+  const config = configValue ?? DEFAULT_CONFIG
 
   const tabId = activeTab[0].id
 
@@ -85,6 +93,7 @@ async function initApp() {
               [isIgnoreTabAtom, isIgnoreTab],
               [isCurrentSiteInWhitelistAtom, isInWhitelist],
               [isCurrentSiteInBlacklistAtom, isInBlacklist],
+              [baseThemeModeAtom, themeMode],
             ]}
           >
             <ThemeProvider>

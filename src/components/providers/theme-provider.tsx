@@ -1,7 +1,8 @@
 import type { Theme, ThemeMode } from "@/types/config/theme"
 import { useAtom } from "jotai"
-import { createContext, use, useEffect, useMemo, useSyncExternalStore } from "react"
+import { createContext, use, useLayoutEffect, useMemo, useSyncExternalStore } from "react"
 import { themeModeAtom } from "@/utils/atoms/theme"
+import { applyTheme } from "@/utils/theme"
 
 interface ThemeContextI {
   theme: Theme
@@ -38,11 +39,9 @@ export function ThemeProvider({
     : themeMode
 
   // Apply theme to document or shadow root container
-  useEffect(() => {
+  useLayoutEffect(() => {
     const target = container ?? document.documentElement
-    target.classList.remove("light", "dark")
-    target.classList.add(theme)
-    target.setAttribute("style", `color-scheme: ${theme}`)
+    applyTheme(target, theme)
   }, [theme, container])
 
   const contextValue = useMemo(

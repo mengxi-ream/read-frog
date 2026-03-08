@@ -1,9 +1,13 @@
 import "@/utils/zod-config"
+import type { ThemeMode } from "@/types/config/theme"
 import { createShadowRootUi, defineContentScript } from "#imports"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { kebabCase } from "case-anything"
+import { Provider as JotaiProvider } from "jotai"
+import { useHydrateAtoms } from "jotai/utils"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
@@ -18,6 +22,17 @@ import "@/assets/styles/theme.css"
 import "@/assets/styles/text-small.css"
 
 ensureIconifyBackgroundFetch()
+
+function HydrateAtoms({
+  initialValues,
+  children,
+}: {
+  initialValues: [[typeof baseThemeModeAtom, ThemeMode]]
+  children: React.ReactNode
+}) {
+  useHydrateAtoms(initialValues)
+  return children
+}
 
 // eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null
@@ -52,7 +67,7 @@ export default defineContentScript({
       anchor: "body",
       onMount: (container, shadow, shadowHost) => {
         // Container is a body, and React warns when creating a root on the body, so create a wrapper div
-        const wrapper = insertShadowRootUIWrapperInto(container, themeMode)
+        const wrapper = insertShadowRootUIWrapperInto(container)
         shadowWrapper = wrapper
         addStyleToShadow(shadow)
         protectSelectAllShadowRoot(shadowHost, wrapper)
@@ -61,9 +76,13 @@ export default defineContentScript({
         const root = ReactDOM.createRoot(wrapper)
         root.render(
           <QueryClientProvider client={queryClient}>
-            <ThemeProvider container={wrapper}>
-              <App />
-            </ThemeProvider>
+            <JotaiProvider>
+              <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
+                <ThemeProvider container={wrapper}>
+                  <App />
+                </ThemeProvider>
+              </HydrateAtoms>
+            </JotaiProvider>
           </QueryClientProvider>,
         )
         return root
