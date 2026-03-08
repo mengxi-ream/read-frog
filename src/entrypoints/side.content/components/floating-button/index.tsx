@@ -61,6 +61,7 @@ export default function FloatingButton() {
     }
 
     document.body.style.userSelect = ""
+    setDragPreview(null)
     setIsDraggingButton(false)
   }, [setIsDraggingButton])
 
@@ -81,12 +82,7 @@ export default function FloatingButton() {
       // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
       setDragAnchor(null)
     }
-
-    if (dragPreview !== null) {
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setDragPreview(null)
-    }
-  }, [dragAnchor, dragPosition, dragPreview, isDraggingButton, setFloatingButton])
+  }, [dragAnchor, dragPosition, isDraggingButton, setFloatingButton])
 
   const handleButtonDragStart = (e: React.MouseEvent) => {
     if (isDropdownOpen) {
@@ -124,7 +120,18 @@ export default function FloatingButton() {
         maxTop,
       )
       const newPosition = newY / window.innerHeight
-      const availableWidth = window.innerWidth - (isSideOpen ? sideContent.width : 0)
+      const viewportWidth = document.documentElement.clientWidth
+      const unavailableWidth = isSideOpen
+        ? sideContent.width
+        : 0
+      const availableWidth = Math.max(
+        DRAG_PREVIEW_SIZE,
+        viewportWidth - unavailableWidth,
+      )
+      const maxPreviewX = Math.max(
+        DRAG_PREVIEW_SIZE / 2,
+        availableWidth - DRAG_PREVIEW_SIZE / 2,
+      )
 
       setDragPosition(newPosition)
       setDragAnchor(moveEvent.clientX < availableWidth / 2 ? "left" : "right")
@@ -132,7 +139,7 @@ export default function FloatingButton() {
         x: clamp(
           moveEvent.clientX,
           DRAG_PREVIEW_SIZE / 2,
-          window.innerWidth - DRAG_PREVIEW_SIZE / 2,
+          maxPreviewX,
         ),
         y: clamp(
           moveEvent.clientY,
