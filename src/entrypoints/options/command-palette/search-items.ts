@@ -11,13 +11,6 @@ const IS_FIREFOX = import.meta.env.BROWSER === "firefox"
 export const SEARCH_ITEMS: SearchItem[] = [
   // General page
   {
-    sectionId: "appearance",
-    route: "/",
-    titleKey: "options.general.appearance.title",
-    descriptionKey: "options.general.appearance.theme",
-    pageKey: "options.general.title",
-  },
-  {
     sectionId: "feature-providers",
     route: "/",
     titleKey: "options.general.featureProviders.title",
@@ -29,6 +22,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/",
     titleKey: "options.siteControl.mode.title",
     descriptionKey: "options.siteControl.mode.description",
+    pageKey: "options.general.title",
+  },
+  {
+    sectionId: "appearance",
+    route: "/",
+    titleKey: "options.general.appearance.title",
+    descriptionKey: "options.general.appearance.theme",
     pageKey: "options.general.title",
   },
 
