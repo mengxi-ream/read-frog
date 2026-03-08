@@ -5,29 +5,13 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { matchDomainPattern } from "@/utils/url"
 import { getActiveTabUrl } from "@/utils/utils"
 
+export function isInSiteControlList(patterns: string[], url: string): boolean {
+  return patterns.some(p => matchDomainPattern(url, p))
+}
+
 // Atom to track if current site is in patterns
 export const isCurrentSiteInWhitelistAtom = atom<boolean>(false)
 export const isCurrentSiteInBlacklistAtom = atom<boolean>(false)
-
-// Async atom to initialize the site control state
-export const initSiteControlAtomsAtom = atom(
-  null,
-  async (get, set) => {
-    const siteControlConfig = get(configFieldsAtomMap.siteControl)
-    const activeTabUrl = await getActiveTabUrl()
-
-    if (activeTabUrl) {
-      const inWhitelist = siteControlConfig.whitelistPatterns.some(p => matchDomainPattern(activeTabUrl, p))
-      const inBlacklist = siteControlConfig.blacklistPatterns.some(p => matchDomainPattern(activeTabUrl, p))
-      set(isCurrentSiteInWhitelistAtom, inWhitelist)
-      set(isCurrentSiteInBlacklistAtom, inBlacklist)
-    }
-    else {
-      set(isCurrentSiteInWhitelistAtom, false)
-      set(isCurrentSiteInBlacklistAtom, false)
-    }
-  },
-)
 
 async function toggleSiteInPatterns(
   get: Getter,

@@ -1,11 +1,7 @@
 import { browser, i18n } from "#imports"
 import { Icon } from "@iconify/react"
-import { useSetAtom } from "jotai"
-import { useEffect } from "react"
 import { UserAccount } from "@/components/user-account"
 import { version } from "../../../package.json"
-import { initIsIgnoreTabAtom } from "./atoms/ignore"
-import { initSiteControlAtomsAtom } from "./atoms/site-control"
 import { AISmartContext } from "./components/ai-smart-context"
 import { AlwaysTranslate } from "./components/always-translate"
 import BlogNotification from "./components/blog-notification"
@@ -21,14 +17,6 @@ import { TranslationHubButton } from "./components/translation-hub-button"
 import TranslationModeSelector from "./components/translation-mode-selector"
 
 function App() {
-  const initIsIgnoreTab = useSetAtom(initIsIgnoreTabAtom)
-  const initSiteControlAtoms = useSetAtom(initSiteControlAtomsAtom)
-
-  useEffect(() => {
-    void initIsIgnoreTab()
-    void initSiteControlAtoms()
-  }, [initIsIgnoreTab, initSiteControlAtoms])
-
   return (
     <>
       <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
