@@ -2,7 +2,6 @@ import type { ThemeMode } from "@/types/config/theme"
 import { atom } from "jotai"
 import { DEFAULT_THEME_MODE, themeModeSchema } from "@/types/config/theme"
 import { THEME_STORAGE_KEY } from "../constants/config"
-import { logger } from "../logger"
 import { storageAdapter } from "./storage-adapter"
 
 // Private base atom - not exported to prevent direct writes
@@ -28,16 +27,5 @@ baseThemeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
   void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
   const unwatch = storageAdapter.watch<ThemeMode>(THEME_STORAGE_KEY, setAtom)
 
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === "visible") {
-      logger.info("themeModeAtom onMount handleVisibilityChange when: ", new Date())
-      void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
-    }
-  }
-  document.addEventListener("visibilitychange", handleVisibilityChange)
-
-  return () => {
-    unwatch()
-    document.removeEventListener("visibilitychange", handleVisibilityChange)
-  }
+  return unwatch
 }
