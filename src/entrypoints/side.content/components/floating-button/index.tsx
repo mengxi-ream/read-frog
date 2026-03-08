@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 import { browser, i18n } from "#imports"
 import { IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
   DropdownMenu,
@@ -49,7 +49,7 @@ export default function FloatingButton() {
   const dragMoveHandlerRef = useRef<((event: MouseEvent) => void) | null>(null)
   const dragUpHandlerRef = useRef<(() => void) | null>(null)
 
-  const cleanupDragListeners = () => {
+  const cleanupDragListeners = useCallback(() => {
     if (dragMoveHandlerRef.current) {
       document.removeEventListener("mousemove", dragMoveHandlerRef.current)
       dragMoveHandlerRef.current = null
@@ -61,9 +61,12 @@ export default function FloatingButton() {
     }
 
     document.body.style.userSelect = ""
-  }
+    setIsDraggingButton(false)
+  }, [setIsDraggingButton])
 
-  useEffect(() => cleanupDragListeners, [])
+  useEffect(() => {
+    return cleanupDragListeners
+  }, [cleanupDragListeners])
 
   // 拖拽结束时写入 storage
   useEffect(() => {
@@ -155,9 +158,6 @@ export default function FloatingButton() {
         else {
           setIsSideOpen(o => !o)
         }
-      }
-      else {
-        setIsDraggingButton(false)
       }
     }
 
