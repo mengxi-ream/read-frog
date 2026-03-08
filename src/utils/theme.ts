@@ -21,19 +21,3 @@ export async function getLocalThemeMode(): Promise<ThemeMode> {
   const themeMode = await storage.getItem<ThemeMode>(`local:${THEME_STORAGE_KEY}`)
   return themeMode ?? DEFAULT_THEME_MODE
 }
-
-/**
- * Re-apply theme from storage when the tab becomes visible.
- * Returns a cleanup function to remove the listener.
- */
-export function syncThemeOnVisibility(wrapper: HTMLElement): () => void {
-  const handler = () => {
-    if (document.visibilityState === "visible") {
-      void getLocalThemeMode().then((mode) => {
-        applyTheme(wrapper, isDarkMode(mode) ? "dark" : "light")
-      })
-    }
-  }
-  document.addEventListener("visibilitychange", handler)
-  return () => document.removeEventListener("visibilitychange", handler)
-}

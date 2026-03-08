@@ -1,6 +1,6 @@
 import type { ThemeMode } from "@/types/config/theme"
 import { cn } from "@/utils/styles/utils"
-import { isDarkMode, syncThemeOnVisibility } from "./theme"
+import { isDarkMode } from "./theme"
 
 export function insertShadowRootUIWrapperInto(container: HTMLElement, themeMode: ThemeMode = "system") {
   const isDark = isDarkMode(themeMode)
@@ -11,8 +11,6 @@ export function insertShadowRootUIWrapperInto(container: HTMLElement, themeMode:
   )
   wrapper.style.colorScheme = isDark ? "dark" : "light"
   container.append(wrapper)
-
-  syncThemeOnVisibility(wrapper)
 
   return wrapper
 }
