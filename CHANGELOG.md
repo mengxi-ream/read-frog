@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.28.0
+
+### Minor Changes
+
+- [#1061](https://github.com/mengxi-ream/read-frog/pull/1061) [`57c0887`](https://github.com/mengxi-ream/read-frog/commit/57c08871315cfca1411d557754a3696a90ccf3cb) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat: add blacklist mode to disable extension on specific sites
+
+### Patch Changes
+
+- [#1065](https://github.com/mengxi-ream/read-frog/pull/1065) [`1a4082c`](https://github.com/mengxi-ream/read-frog/commit/1a4082cb083a4e8fc470d3ec412bbb7f10674892) Thanks [@ishiko732](https://github.com/ishiko732)! - feat(theme): add manual theme mode switching (system/light/dark) with popup toggle button and options page selector
+
+- [#1075](https://github.com/mengxi-ream/read-frog/pull/1075) [`3e14d7e`](https://github.com/mengxi-ream/read-frog/commit/3e14d7e23eec95538717bce7faced8c4e0e0801a) Thanks [@Sufyr](https://github.com/Sufyr)! - feat: add expand and collapse controls to translation hub cards
+
+- [#1068](https://github.com/mengxi-ream/read-frog/pull/1068) [`f95f116`](https://github.com/mengxi-ream/read-frog/commit/f95f1166ad81209f5bc3f09f74e600b7226d981a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add disable hover translation option in option page
+
+- [#1078](https://github.com/mengxi-ream/read-frog/pull/1078) [`bddf26a`](https://github.com/mengxi-ream/read-frog/commit/bddf26adde88dda2b8c8e909a17f0d0880fa7616) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: restore translation error UI in bilingual and translation-only modes
+
+- [#1071](https://github.com/mengxi-ream/read-frog/pull/1071) [`c3a7fe9`](https://github.com/mengxi-ream/read-frog/commit/c3a7fe93f65922aba4720aaaf4f52e37d1f5ddbb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add default ollama base url
+
 ## 1.27.3
 
 ### Patch Changes
