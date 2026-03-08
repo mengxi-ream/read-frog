@@ -2,10 +2,13 @@ import type { ThemeMode } from "@/types/config/theme"
 import { atom } from "jotai"
 import { DEFAULT_THEME_MODE, themeModeSchema } from "@/types/config/theme"
 import { THEME_STORAGE_KEY } from "../constants/config"
+import { logger } from "../logger"
 import { storageAdapter } from "./storage-adapter"
 
+// Private base atom - not exported to prevent direct writes
 const baseThemeModeAtom = atom<ThemeMode>(DEFAULT_THEME_MODE)
 
+// Public atom with read/write - write always goes through storageAdapter
 export const themeModeAtom = atom(
   get => get(baseThemeModeAtom),
   async (get, set, newValue: ThemeMode) => {
@@ -22,24 +25,12 @@ export const themeModeAtom = atom(
 )
 
 baseThemeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
-  let didReceiveStorageUpdate = false
+  void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
+  const unwatch = storageAdapter.watch<ThemeMode>(THEME_STORAGE_KEY, setAtom)
 
-  void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then((value) => {
-    if (!didReceiveStorageUpdate) {
-      setAtom(value)
-    }
-  })
-
-  const unwatch = storageAdapter.watch<ThemeMode>(THEME_STORAGE_KEY, (value) => {
-    didReceiveStorageUpdate = true
-    setAtom(value)
-  })
-
-  // Sync atom state on tab re-focus (React contexts use this atom).
-  // Note: syncThemeOnVisibility in theme.ts handles direct DOM updates
-  // for non-React wrappers (e.g. host.content) separately.
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
+      logger.info("themeModeAtom onMount handleVisibilityChange when: ", new Date())
       void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
     }
   }
