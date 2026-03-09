@@ -151,6 +151,59 @@ describe("PageTranslationManager", () => {
     expect(document.title).toBe("Updated title")
   })
 
+  it("does not enqueue duplicate title translations for unrelated head mutations while a request is pending", async () => {
+    const pendingTranslation = createDeferred<string>()
+    translateTextForPageMock.mockImplementation(() => pendingTranslation.promise)
+
+    const { PageTranslationManager } = await import("../page-translation")
+    const manager = new PageTranslationManager()
+
+    await manager.start()
+
+    expect(translateTextForPageMock).toHaveBeenCalledTimes(1)
+    expect(translateTextForPageMock).toHaveBeenCalledWith("Original title")
+
+    const meta = document.createElement("meta")
+    meta.name = "description"
+    meta.content = "unrelated"
+    document.head.append(meta)
+
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(translateTextForPageMock).toHaveBeenCalledTimes(1)
+
+    pendingTranslation.resolve("Original title translated")
+    await vi.waitFor(() => {
+      expect(document.title).toBe("Original title translated")
+    })
+  })
+
+  it("does not retry the same source title on unrelated head mutations after a no-op title translation", async () => {
+    translateTextForPageMock.mockResolvedValue("")
+
+    const { PageTranslationManager } = await import("../page-translation")
+    const manager = new PageTranslationManager()
+
+    await manager.start()
+
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(document.title).toBe("Original title")
+    expect(translateTextForPageMock).toHaveBeenCalledTimes(1)
+
+    const meta = document.createElement("meta")
+    meta.name = "keywords"
+    meta.content = "still unrelated"
+    document.head.append(meta)
+
+    await Promise.resolve()
+    await Promise.resolve()
+
+    expect(translateTextForPageMock).toHaveBeenCalledTimes(1)
+  })
+
   it("does not overwrite a newer page title when stopped during a pending title translation", async () => {
     const pendingTranslation = createDeferred<string>()
     translateTextForPageMock

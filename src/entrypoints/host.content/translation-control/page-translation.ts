@@ -54,6 +54,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private intersectionOptions: IntersectionObserverInit
   private dontWalkIntoElementsCache = new WeakSet<HTMLElement>()
   private titleObserver: MutationObserver | null = null
+  private lastObservedTitle = ""
   private sourceTitle = ""
   private translatedTitle: string | null = null
   private titleTranslationRequestId = 0
@@ -312,6 +313,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   private startTitleTranslation(): void {
     this.sourceTitle = document.title
+    this.lastObservedTitle = this.sourceTitle
     this.translatedTitle = null
     this.observeTitleMutations()
     void this.translateCurrentTitle(this.sourceTitle)
@@ -330,6 +332,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
 
     this.sourceTitle = ""
+    this.lastObservedTitle = ""
     this.translatedTitle = null
   }
 
@@ -347,9 +350,10 @@ export class PageTranslationManager implements IPageTranslationManager {
         return
 
       const nextTitle = document.title
-      if (!nextTitle || nextTitle === this.translatedTitle)
+      if (!nextTitle || nextTitle === this.lastObservedTitle)
         return
 
+      this.lastObservedTitle = nextTitle
       this.sourceTitle = nextTitle
       void this.translateCurrentTitle(nextTitle)
     })
@@ -395,6 +399,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     if (document.title !== translatedTitle) {
       document.title = translatedTitle
+      this.lastObservedTitle = translatedTitle
     }
   }
 
