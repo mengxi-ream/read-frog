@@ -51,11 +51,11 @@ function SelectionToolbarCustomFeatureButton({ feature }: { feature: SelectionTo
   return (
     <button
       type="button"
-      className="size-6 shrink-0 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer"
+      className="px-2 h-7 shrink-0 flex items-center justify-center hover:bg-accent cursor-pointer"
       onClick={handleClick}
       title={feature.name}
     >
-      <Icon icon={feature.icon} strokeWidth={0.8} className="size-4" />
+      <Icon icon={feature.icon} strokeWidth={0.8} className="size-4.5" />
     </button>
   )
 }

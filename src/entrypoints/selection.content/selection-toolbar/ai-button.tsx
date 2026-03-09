@@ -34,8 +34,8 @@ export function AiButton() {
   }
 
   return (
-    <button type="button" className="size-6 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer" onClick={handleClick}>
-      <IconZoomScan className="size-4" />
+    <button type="button" className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer" onClick={handleClick}>
+      <IconZoomScan className="size-4.5" />
     </button>
   )
 }

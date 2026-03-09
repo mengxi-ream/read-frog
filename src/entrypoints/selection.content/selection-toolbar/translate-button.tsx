@@ -41,10 +41,10 @@ export function TranslateButton() {
   return (
     <button
       type="button"
-      className="size-6 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer"
+      className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer"
       onClick={handleClick}
     >
-      <RiTranslate className="size-4" />
+      <RiTranslate className="size-4.5" />
     </button>
   )
 }
