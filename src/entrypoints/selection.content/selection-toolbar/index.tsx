@@ -247,7 +247,7 @@ export function SelectionToolbar() {
       {isSelectionToolbarVisible && selectionToolbar.enabled && !isSiteDisabled && (
         <div
           ref={tooltipRef}
-          className="group absolute z-2147483647 bg-zinc-200 dark:bg-zinc-800 rounded-sm shadow-lg overflow-visible flex items-center"
+          className="group absolute z-2147483647 bg-background rounded-sm shadow-floating border border-border/25 overflow-visible flex items-center"
         >
           <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-[420px] no-scrollbar">
             <AiButton />

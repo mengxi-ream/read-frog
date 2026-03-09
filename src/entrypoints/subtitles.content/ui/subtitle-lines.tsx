@@ -1,9 +1,9 @@
 import type { SubtitleTextStyle } from "@/types/config/subtitles"
 import { useAtomValue } from "jotai"
-import { cn } from "@/lib/utils"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
 import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
+import { cn } from "@/utils/styles/utils"
 import { currentSubtitleAtom } from "../atoms"
 
 interface SubtitleLineProps {

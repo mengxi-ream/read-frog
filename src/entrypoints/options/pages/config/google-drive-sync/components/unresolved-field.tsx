@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react"
 import { dequal } from "dequal"
 import { Button } from "@/components/ui/base-ui/button"
 import { useConflictField } from "@/hooks/use-unresolved-field"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/styles/utils"
 import { FieldOptionRow, STYLE_MAP } from "./field-option-row"
 import { isMeaningfulFieldKey } from "./utils"
 

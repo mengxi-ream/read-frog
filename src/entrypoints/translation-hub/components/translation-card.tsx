@@ -7,12 +7,12 @@ import { toast } from "sonner"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
-import { cn } from "@/lib/utils"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdsAtom, translateRequestAtom, translationCardExpandedStateAtom } from "../atoms"
 
 interface TranslationCardProps {

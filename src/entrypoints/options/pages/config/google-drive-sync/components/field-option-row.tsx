@@ -1,6 +1,6 @@
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/styles/utils"
 import { formatValue } from "./utils"
 
 type Resolution = "local" | "remote"
