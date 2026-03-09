@@ -1,46 +1,21 @@
 import "@/utils/zod-config"
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
-import type { ThemeMode } from "@/types/config/theme"
-import { createShadowRootUi, defineContentScript, storage } from "#imports"
-import { kebabCase } from "case-anything"
-import { Provider as JotaiProvider } from "jotai"
-import { useHydrateAtoms } from "jotai/utils"
-import ReactDOM from "react-dom/client"
+import { defineContentScript, storage } from "#imports"
 // import eruda from 'eruda'
-import { ThemeProvider } from "@/components/providers/theme-provider"
-import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
-import { APP_NAME } from "@/utils/constants/app"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from "@/utils/constants/config"
 import { getDocumentInfo } from "@/utils/content/analyze"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
-import { protectSelectAllShadowRoot } from "@/utils/select-all"
-import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
-import { addStyleToShadow } from "@/utils/styles"
-import { getLocalThemeMode } from "@/utils/theme"
-import App from "./app"
+import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { handleTranslationModeChange } from "./translation-control/handle-config-change"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
 import "@/utils/crypto-polyfill"
-import "@/assets/styles/theme.css"
 import "./listen"
-import "./style.css"
-
-function HydrateAtoms({
-  initialValues,
-  children,
-}: {
-  initialValues: [[typeof baseThemeModeAtom, ThemeMode]]
-  children: React.ReactNode
-}) {
-  useHydrateAtoms(initialValues)
-  return children
-}
 
 declare global {
   interface Window {
@@ -65,40 +40,11 @@ export default defineContentScript({
     }
 
     // eruda.init()
-
-    const themeMode = await getLocalThemeMode()
-
-    const ui = await createShadowRootUi(ctx, {
-      name: `${kebabCase(APP_NAME)}-selection`,
-      position: "overlay",
-      anchor: "body",
-      onMount: (container, shadow, shadowHost) => {
-        // Container is a body, and React warns when creating a root on the body, so create a wrapper div
-        const wrapper = insertShadowRootUIWrapperInto(container)
-        addStyleToShadow(shadow)
-        protectSelectAllShadowRoot(shadowHost, wrapper)
-
-        // Create a root on the UI container and render a component
-        const root = ReactDOM.createRoot(wrapper)
-        root.render(
-          <JotaiProvider>
-            <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
-              <ThemeProvider container={wrapper}>
-                <App />
-              </ThemeProvider>
-            </HydrateAtoms>
-          </JotaiProvider>,
-        )
-        return root
-      },
-      onRemove: (root) => {
-        // Unmount the root when the UI is removed
-        root?.unmount()
-      },
+    const removeHostToast = mountHostToast()
+    ctx.onInvalidated(() => {
+      removeHostToast()
+      window.__READ_FROG_HOST_INJECTED__ = false
     })
-
-    // 4. Mount the UI
-    ui.mount()
 
     void registerNodeTranslationTriggers()
 

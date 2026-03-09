@@ -1,5 +1,3 @@
-@import "@/assets/styles/custom-translation-node.css";
-
 .read-frog-translated-content-wrapper,
 .read-frog-translated-content-wrapper * {
   overflow-wrap: anywhere;
@@ -10,8 +8,8 @@
 
 .read-frog-translated-block-content {
   display: inline-block;
-  margin: 8px 0 !important; /* 上下边距设置为8px，并强制覆盖其他样式 */
-  color: inherit; /* 保持文本颜色与周围文本一致 */
+  margin: 8px 0 !important;
+  color: inherit;
   font-family: inherit;
 }
 
