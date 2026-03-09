@@ -1,5 +1,16 @@
 # @read-frog/extension
 
+## 1.28.1
+
+### Patch Changes
+
+- [#1084](https://github.com/mengxi-ream/read-frog/pull/1084) [`f93dcc2`](https://github.com/mengxi-ream/read-frog/commit/f93dcc2f0c998468435d36eeb73e49e2cd597be9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - Refine selection toolbar styling and fix Firefox stylesheet fallback
+
+  - Enlarge toolbar button icons and use theme-aware hover/shadow tokens
+  - Handle Firefox Xray wrapper issues with constructable stylesheets
+  - Extract host toast into dedicated mount module
+  - Unify cn helper location under utils/styles
+
 ## 1.28.0
 
 ### Minor Changes
