@@ -5,6 +5,7 @@ import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElem
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
+import { translateTextForPage } from "@/utils/host/translate/translate-variants"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
@@ -52,6 +53,10 @@ export class PageTranslationManager implements IPageTranslationManager {
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private dontWalkIntoElementsCache = new WeakSet<HTMLElement>()
+  private titleObserver: MutationObserver | null = null
+  private sourceTitle = ""
+  private translatedTitle: string | null = null
+  private titleTranslationRequestId = 0
 
   constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
     if (intersectionOptions.threshold !== undefined) {
@@ -97,6 +102,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     })
 
     this.isPageTranslating = true
+    this.startTitleTranslation()
 
     // Listen to existing elements when they enter the viewpoint
     const walkId = crypto.randomUUID()
@@ -140,6 +146,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.isPageTranslating = false
     this.walkId = null
     this.dontWalkIntoElementsCache = new WeakSet()
+    this.stopTitleTranslation()
 
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect()
@@ -301,6 +308,94 @@ export class PageTranslationManager implements IPageTranslationManager {
   private addDontWalkIntoElements(element: HTMLElement): void {
     const dontWalkIntoElements = deepQueryTopLevelSelector(element, isDontWalkIntoButTranslateAsChildElement)
     dontWalkIntoElements.forEach(el => this.dontWalkIntoElementsCache.add(el))
+  }
+
+  private startTitleTranslation(): void {
+    this.sourceTitle = document.title
+    this.translatedTitle = null
+    this.observeTitleMutations()
+    void this.translateCurrentTitle(this.sourceTitle)
+  }
+
+  private stopTitleTranslation(): void {
+    this.titleTranslationRequestId++
+
+    if (this.titleObserver) {
+      this.titleObserver.disconnect()
+      this.titleObserver = null
+    }
+
+    if (this.translatedTitle && document.title === this.translatedTitle) {
+      document.title = this.sourceTitle
+    }
+
+    this.sourceTitle = ""
+    this.translatedTitle = null
+  }
+
+  private observeTitleMutations(): void {
+    const target = document.head ?? document.documentElement
+    if (!target)
+      return
+
+    if (this.titleObserver) {
+      this.titleObserver.disconnect()
+    }
+
+    this.titleObserver = new MutationObserver(() => {
+      if (!this.isPageTranslating)
+        return
+
+      const nextTitle = document.title
+      if (!nextTitle || nextTitle === this.translatedTitle)
+        return
+
+      this.sourceTitle = nextTitle
+      void this.translateCurrentTitle(nextTitle)
+    })
+
+    this.titleObserver.observe(target, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    })
+  }
+
+  private async translateCurrentTitle(sourceTitle: string): Promise<void> {
+    const trimmedTitle = sourceTitle.trim()
+    if (!trimmedTitle) {
+      this.translatedTitle = null
+      return
+    }
+
+    const requestId = ++this.titleTranslationRequestId
+    let translatedTitle = ""
+
+    try {
+      translatedTitle = (await translateTextForPage(trimmedTitle)).trim()
+    }
+    catch (error) {
+      if (requestId === this.titleTranslationRequestId) {
+        this.translatedTitle = null
+      }
+      logger.warn("Failed to translate page title:", error)
+      return
+    }
+
+    if (!this.isPageTranslating || requestId !== this.titleTranslationRequestId) {
+      return
+    }
+
+    if (!translatedTitle || translatedTitle === trimmedTitle) {
+      this.translatedTitle = null
+      return
+    }
+
+    this.translatedTitle = translatedTitle
+
+    if (document.title !== translatedTitle) {
+      document.title = translatedTitle
+    }
   }
 
   /**
