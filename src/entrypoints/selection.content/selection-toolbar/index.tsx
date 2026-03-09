@@ -24,8 +24,10 @@ function getSelectionDirection(
   endX: number,
   endY: number,
 ): SelectionDirection {
-  const isRightward = endX >= startX
-  const isDownward = endY >= startY
+  const DOWNWARD_TOLERANCE = 8
+
+  const isRightward = startX <= endX
+  const isDownward = startY - DOWNWARD_TOLERANCE <= endY
 
   if (isRightward && isDownward)
     return SelectionDirection.BOTTOM_RIGHT
@@ -43,17 +45,18 @@ function applyDirectionOffset(
   tooltipWidth: number,
   tooltipHeight: number,
 ): { x: number, y: number } {
+  const MARGIN = 12
   switch (direction) {
     case SelectionDirection.BOTTOM_RIGHT:
-      return { x: baseX, y: baseY }
+      return { x: baseX - MARGIN, y: baseY + MARGIN }
     case SelectionDirection.BOTTOM_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY }
+      return { x: baseX - tooltipWidth + MARGIN, y: baseY + MARGIN }
     case SelectionDirection.TOP_RIGHT:
-      return { x: baseX, y: baseY - tooltipHeight }
+      return { x: baseX - MARGIN, y: baseY - tooltipHeight - MARGIN }
     case SelectionDirection.TOP_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY - tooltipHeight }
+      return { x: baseX - tooltipWidth + MARGIN, y: baseY - tooltipHeight - MARGIN }
     default:
-      return { x: baseX, y: baseY }
+      return { x: baseX - MARGIN, y: baseY + MARGIN }
   }
 }
 
