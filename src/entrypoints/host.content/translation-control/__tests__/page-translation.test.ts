@@ -88,6 +88,8 @@ function createDeferred<T>() {
 }
 
 describe("PageTranslationManager", () => {
+  const managers: Array<{ isActive: boolean, stop: () => void }> = []
+
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
@@ -108,12 +110,19 @@ describe("PageTranslationManager", () => {
   })
 
   afterEach(() => {
+    managers.forEach((manager) => {
+      if (manager.isActive) {
+        manager.stop()
+      }
+    })
+    managers.length = 0
     vi.unstubAllGlobals()
   })
 
   it("translates the current document title and restores it on stop", async () => {
     const { PageTranslationManager } = await import("../page-translation")
     const manager = new PageTranslationManager()
+    managers.push(manager)
 
     await manager.start()
 
@@ -132,6 +141,7 @@ describe("PageTranslationManager", () => {
   it("re-translates the document title when the page updates it", async () => {
     const { PageTranslationManager } = await import("../page-translation")
     const manager = new PageTranslationManager()
+    managers.push(manager)
 
     await manager.start()
 
@@ -157,6 +167,7 @@ describe("PageTranslationManager", () => {
 
     const { PageTranslationManager } = await import("../page-translation")
     const manager = new PageTranslationManager()
+    managers.push(manager)
 
     await manager.start()
 
@@ -184,6 +195,7 @@ describe("PageTranslationManager", () => {
 
     const { PageTranslationManager } = await import("../page-translation")
     const manager = new PageTranslationManager()
+    managers.push(manager)
 
     await manager.start()
 
@@ -212,6 +224,7 @@ describe("PageTranslationManager", () => {
 
     const { PageTranslationManager } = await import("../page-translation")
     const manager = new PageTranslationManager()
+    managers.push(manager)
 
     await manager.start()
 
