@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
-import { getCachedConfig } from "@/utils/config/cached-config"
+import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
 import { isEditable } from "@/utils/host/dom/filter"
 import { removeOrShowNodeTranslation } from "@/utils/host/translate/node-manipulation"
@@ -14,17 +15,12 @@ const MOUSEMOVE_DISTANCE_THRESHOLD = 3
  * Registers node translation triggers based on the current config.
  * Returns a teardown function to remove all listeners.
  *
- * When config changes, the caller should teardown and re-register.
- * If node translation is disabled, returns a no-op teardown.
+ * Config is read on demand when the interaction fires so long-lived content
+ * scripts don't drift if the page was frozen and missed storage events.
  */
-export function registerNodeTranslationTriggers(config: Config): () => void {
-  if (!config.translate.node.enabled) {
-    return () => {}
-  }
-
+export function registerNodeTranslationTriggers(): () => void {
   const ac = new AbortController()
   const { signal } = ac
-  const hotkey = config.translate.node.hotkey
 
   const mousePosition: Point = { x: 0, y: 0 }
 
@@ -44,6 +40,13 @@ export function registerNodeTranslationTriggers(config: Config): () => void {
       clearTimeout(clickAndHoldTimerId)
       clickAndHoldTimerId = null
     }
+  }
+
+  const getCurrentConfig = async (): Promise<Config | null> => {
+    const config = await getLocalConfig()
+    if (signal.aborted)
+      return null
+    return config ?? DEFAULT_CONFIG
   }
 
   // Mousemove handler with throttle + distance threshold
@@ -81,12 +84,32 @@ export function registerNodeTranslationTriggers(config: Config): () => void {
     lastMoveY = event.clientY
   }, { signal })
 
-  if (hotkey === "clickAndHold") {
-    // --- Click-and-hold mode ---
-    document.addEventListener("mousedown", (event) => {
+  let isHotkeyPressed = false
+  let isHotkeySessionPure = true
+  let timerId: ReturnType<typeof setTimeout> | null = null
+  let actionTriggered = false
+  let activeHotkeyEventKey: string | null = null
+
+  const resetHotkeySession = () => {
+    if (timerId) {
+      clearTimeout(timerId)
+      timerId = null
+    }
+    isHotkeyPressed = false
+    isHotkeySessionPure = true
+    actionTriggered = false
+    activeHotkeyEventKey = null
+  }
+
+  document.addEventListener("mousedown", (event) => {
+    void (async () => {
       if (event.button !== 0)
         return
       if (event.target instanceof HTMLElement && isEditable(event.target))
+        return
+
+      const config = await getCurrentConfig()
+      if (!config || !config.translate.node.enabled || config.translate.node.hotkey !== "clickAndHold")
         return
 
       isMousePressed = true
@@ -95,50 +118,73 @@ export function registerNodeTranslationTriggers(config: Config): () => void {
 
       clearClickAndHoldTimer()
       clickAndHoldTimerId = setTimeout(() => {
-        if (!isMousePressed || !mousePressPosition || clickAndHoldTriggered)
-          return
-        const currentConfig = getCachedConfig()
-        void removeOrShowNodeTranslation(mousePressPosition, currentConfig)
-        clickAndHoldTriggered = true
+        void (async () => {
+          if (!isMousePressed || !mousePressPosition || clickAndHoldTriggered)
+            return
+
+          const currentConfig = await getCurrentConfig()
+          if (!currentConfig || !currentConfig.translate.node.enabled || currentConfig.translate.node.hotkey !== "clickAndHold")
+            return
+
+          void removeOrShowNodeTranslation(mousePressPosition, currentConfig)
+          clickAndHoldTriggered = true
+        })()
       }, CLICK_AND_HOLD_TRIGGER_MS)
-    }, { signal })
+    })()
+  }, { signal })
 
-    document.addEventListener("mouseup", (event) => {
-      if (event.button !== 0)
-        return
-      if (!isMousePressed && !clickAndHoldTimerId)
-        return
+  document.addEventListener("mouseup", (event) => {
+    if (event.button !== 0)
+      return
+    if (!isMousePressed && !clickAndHoldTimerId)
+      return
 
-      isMousePressed = false
-      clickAndHoldTriggered = false
-      mousePressPosition = null
-      clearClickAndHoldTimer()
-    }, { signal })
-  }
-  else {
-    // --- Hotkey mode ---
-    const hotkeyEventKey = HOTKEY_EVENT_KEYS[hotkey]
-    let isHotkeyPressed = false
-    let isHotkeySessionPure = true
-    let timerId: ReturnType<typeof setTimeout> | null = null
-    let actionTriggered = false
+    isMousePressed = false
+    clickAndHoldTriggered = false
+    mousePressPosition = null
+    clearClickAndHoldTimer()
+  }, { signal })
 
-    document.addEventListener("keydown", (e) => {
-      if (e.target instanceof HTMLElement && isEditable(e.target))
+  document.addEventListener("keydown", (event) => {
+    void (async () => {
+      if (event.target instanceof HTMLElement && isEditable(event.target))
         return
 
-      if (e.key === hotkeyEventKey) {
+      const config = await getCurrentConfig()
+      if (!config || !config.translate.node.enabled || config.translate.node.hotkey === "clickAndHold") {
+        resetHotkeySession()
+        return
+      }
+
+      const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
+
+      if (event.key === hotkeyEventKey) {
         if (!isHotkeyPressed) {
           isHotkeyPressed = true
+          activeHotkeyEventKey = hotkeyEventKey
           timerId = setTimeout(() => {
-            if (isHotkeySessionPure && isHotkeyPressed) {
-              const currentConfig = getCachedConfig()
+            void (async () => {
+              if (!isHotkeySessionPure || !isHotkeyPressed) {
+                timerId = null
+                return
+              }
+
+              const currentConfig = await getCurrentConfig()
+              if (!currentConfig || !currentConfig.translate.node.enabled || currentConfig.translate.node.hotkey === "clickAndHold") {
+                timerId = null
+                return
+              }
+              if (HOTKEY_EVENT_KEYS[currentConfig.translate.node.hotkey] !== activeHotkeyEventKey) {
+                timerId = null
+                return
+              }
+
               void removeOrShowNodeTranslation(mousePosition, currentConfig)
               actionTriggered = true
-            }
-            timerId = null
+              timerId = null
+            })()
           }, 1000)
-          // Cancel timer immediately if session is already impure
+
           if (!isHotkeySessionPure && timerId) {
             clearTimeout(timerId)
             timerId = null
@@ -146,40 +192,52 @@ export function registerNodeTranslationTriggers(config: Config): () => void {
         }
       }
       else {
-        // Any other key press marks the session as impure
         isHotkeySessionPure = false
         if (isHotkeyPressed && timerId) {
           clearTimeout(timerId)
           timerId = null
         }
       }
-    }, { signal })
+    })()
+  }, { signal })
 
-    document.addEventListener("keyup", (e) => {
-      if (e.target instanceof HTMLElement && isEditable(e.target))
+  document.addEventListener("keyup", (event) => {
+    void (async () => {
+      if (event.target instanceof HTMLElement && isEditable(event.target))
         return
 
-      if (e.key === hotkeyEventKey) {
+      const config = await getCurrentConfig()
+      if (!config || !config.translate.node.enabled || config.translate.node.hotkey === "clickAndHold") {
+        if (event.key === activeHotkeyEventKey)
+          resetHotkeySession()
+        return
+      }
+
+      const hotkeyEventKey = HOTKEY_EVENT_KEYS[config.translate.node.hotkey]
+
+      if (event.key === hotkeyEventKey || event.key === activeHotkeyEventKey) {
         if (isHotkeyPressed && isHotkeySessionPure) {
           if (timerId) {
             clearTimeout(timerId)
             timerId = null
           }
           if (!actionTriggered) {
-            const currentConfig = getCachedConfig()
+            const currentConfig = await getCurrentConfig()
+            if (!currentConfig || !currentConfig.translate.node.enabled || currentConfig.translate.node.hotkey === "clickAndHold")
+              return
+
             void removeOrShowNodeTranslation(mousePosition, currentConfig)
           }
         }
-        actionTriggered = false
-        isHotkeyPressed = false
-        isHotkeySessionPure = true
+        resetHotkeySession()
       }
-    }, { signal })
-  }
+    })()
+  }, { signal })
 
   // Teardown: abort all listeners + cancel pending timers
   return () => {
     ac.abort()
+    resetHotkeySession()
     if (moveThrottleTimer) {
       clearTimeout(moveThrottleTimer)
       moveThrottleTimer = null

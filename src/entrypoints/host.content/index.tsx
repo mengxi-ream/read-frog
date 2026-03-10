@@ -1,7 +1,7 @@
 import "@/utils/zod-config"
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { defineContentScript, storage } from "#imports"
-import { getCachedConfig, initConfigCache, onConfigChange } from "@/utils/config/cached-config"
+import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from "@/utils/constants/config"
 import { getDocumentInfo } from "@/utils/content/analyze"
 import { logger } from "@/utils/logger"
@@ -10,7 +10,6 @@ import { isSiteEnabled } from "@/utils/site-control"
 import { setupUrlChangeListener } from "./listen"
 import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
-import { handleTranslationModeChange } from "./translation-control/handle-config-change"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
 import "@/utils/crypto-polyfill"
@@ -31,9 +30,9 @@ export default defineContentScript({
       return
     window.__READ_FROG_HOST_INJECTED__ = true
 
-    // Initialize config cache (single async read + Zod parse, then sync forever)
-    const initialConfig = await initConfigCache()
+    const initialConfig = await getLocalConfig()
     if (!isSiteEnabled(window.location.href, initialConfig)) {
+      window.__READ_FROG_HOST_INJECTED__ = false
       return
     }
 
@@ -41,15 +40,7 @@ export default defineContentScript({
 
     const removeHostToast = window === window.top ? mountHostToast() : () => {}
 
-    // --- Node translation: teardown/rebuild on config change ---
-    let teardownNodeTranslation = registerNodeTranslationTriggers(getCachedConfig())
-
-    ctx.onInvalidated(() => {
-      removeHostToast()
-      cleanupUrlListener()
-      teardownNodeTranslation()
-      window.__READ_FROG_HOST_INJECTED__ = false
-    })
+    const teardownNodeTranslation = registerNodeTranslationTriggers()
 
     const preloadConfig = initialConfig?.translate.page.preload ?? DEFAULT_CONFIG.translate.page.preload
     const manager = new PageTranslationManager({
@@ -58,10 +49,9 @@ export default defineContentScript({
       threshold: preloadConfig.threshold,
     })
 
-    manager.registerPageTranslationTriggers()
+    const cleanupPageTranslationTriggers = manager.registerPageTranslationTriggers()
 
-    // Bind shortcut key (sync — config already cached)
-    bindTranslationShortcutKey(getCachedConfig(), manager)
+    void bindTranslationShortcutKey(manager)
 
     // For late-loading iframes: check if translation is already enabled for this tab
     let translationEnabled = false
@@ -93,30 +83,28 @@ export default defineContentScript({
       }
     }
 
-    window.addEventListener("extension:URLChange", (e: any) => {
+    const handleExtensionUrlChange = (e: any) => {
       const { from, to } = e.detail
       void handleUrlChange(from, to)
-    })
-
-    // React to config changes: rebuild node translation listeners + rebind shortcut
-    onConfigChange((newConfig, oldConfig) => {
-      // Teardown old node translation listeners and rebuild with new config
-      teardownNodeTranslation()
-      teardownNodeTranslation = registerNodeTranslationTriggers(newConfig)
-
-      // Rebind shortcut key
-      bindTranslationShortcutKey(newConfig, manager)
-
-      // Auto re-translate when translation mode changes while page translation is active
-      handleTranslationModeChange(newConfig, oldConfig, manager)
-    })
+    }
+    window.addEventListener("extension:URLChange", handleExtensionUrlChange)
 
     // Listen for translation state changes from background
-    onMessage("askManagerToTogglePageTranslation", (msg) => {
+    const cleanupTranslationStateListener = onMessage("askManagerToTogglePageTranslation", (msg) => {
       const { enabled } = msg.data
       if (enabled === manager.isActive)
         return
       enabled ? void manager.start() : manager.stop()
+    })
+
+    ctx.onInvalidated(() => {
+      removeHostToast()
+      cleanupUrlListener()
+      teardownNodeTranslation()
+      cleanupPageTranslationTriggers()
+      cleanupTranslationStateListener()
+      window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
+      window.__READ_FROG_HOST_INJECTED__ = false
     })
 
     // Only the top frame should detect and set language to avoid race conditions from iframes

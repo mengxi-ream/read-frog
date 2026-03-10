@@ -96,20 +96,6 @@ export default defineContentScript({
       return
     }
 
-    // Lazy-mount: mount the full React app on first mousedown.
-    // By the time the user finishes selecting (mouseup), the React app is mounted and listening.
-    let mounted = false
-    const mountOnFirstInteraction = () => {
-      if (mounted)
-        return
-      mounted = true
-      document.removeEventListener("mousedown", mountOnFirstInteraction)
-      void mountSelectionUI(ctx)
-    }
-    document.addEventListener("mousedown", mountOnFirstInteraction)
-
-    ctx.onInvalidated(() => {
-      document.removeEventListener("mousedown", mountOnFirstInteraction)
-    })
+    void mountSelectionUI(ctx)
   },
 })
