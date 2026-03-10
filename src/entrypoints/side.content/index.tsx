@@ -3,10 +3,10 @@ import type { Config } from "@/types/config/config"
 import type { ThemeMode } from "@/types/config/theme"
 import { createShadowRootUi, defineContentScript } from "#imports"
 import { QueryClientProvider } from "@tanstack/react-query"
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools"
 import { kebabCase } from "case-anything"
 import { Provider as JotaiProvider } from "jotai/react"
 import { useHydrateAtoms } from "jotai/utils"
+import { lazy, Suspense } from "react"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
@@ -25,6 +25,10 @@ import App from "./app"
 import { store } from "./atoms"
 import "@/assets/styles/theme.css"
 import "@/assets/styles/text-small.css"
+
+const ReactQueryDevtools = import.meta.env.DEV
+  ? lazy(() => import("@tanstack/react-query-devtools").then(m => ({ default: m.ReactQueryDevtools })))
+  : null
 
 // eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null
@@ -99,10 +103,14 @@ export default defineContentScript({
                 </ThemeProvider>
               </HydrateAtoms>
             </JotaiProvider>
-            <ReactQueryDevtools
-              initialIsOpen={false}
-              buttonPosition="bottom-right"
-            />
+            {ReactQueryDevtools && (
+              <Suspense>
+                <ReactQueryDevtools
+                  initialIsOpen={false}
+                  buttonPosition="bottom-right"
+                />
+              </Suspense>
+            )}
           </QueryClientProvider>,
         )
         return { root, wrapper }

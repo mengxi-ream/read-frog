@@ -1,4 +1,5 @@
 import "@/utils/zod-config"
+import type { ContentScriptContext } from "#imports"
 import type { ThemeMode } from "@/types/config/theme"
 import { createShadowRootUi, defineContentScript } from "#imports"
 import { QueryClientProvider } from "@tanstack/react-query"
@@ -21,8 +22,6 @@ import App from "./app"
 import "@/assets/styles/theme.css"
 import "@/assets/styles/text-small.css"
 
-ensureIconifyBackgroundFetch()
-
 function HydrateAtoms({
   initialValues,
   children,
@@ -43,6 +42,44 @@ declare global {
   }
 }
 
+async function mountSelectionUI(ctx: ContentScriptContext) {
+  ensureIconifyBackgroundFetch()
+
+  const themeMode = await getLocalThemeMode()
+
+  const ui = await createShadowRootUi(ctx, {
+    name: `${kebabCase(APP_NAME)}-selection`,
+    position: "overlay",
+    anchor: "body",
+    onMount: (container, shadow, shadowHost) => {
+      const wrapper = insertShadowRootUIWrapperInto(container)
+      shadowWrapper = wrapper
+      addStyleToShadow(shadow)
+      protectSelectAllShadowRoot(shadowHost, wrapper)
+
+      const root = ReactDOM.createRoot(wrapper)
+      root.render(
+        <QueryClientProvider client={queryClient}>
+          <JotaiProvider>
+            <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
+              <ThemeProvider container={wrapper}>
+                <App />
+              </ThemeProvider>
+            </HydrateAtoms>
+          </JotaiProvider>
+        </QueryClientProvider>,
+      )
+      return root
+    },
+    onRemove: (root) => {
+      root?.unmount()
+      shadowWrapper = null
+    },
+  })
+
+  ui.mount()
+}
+
 export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   cssInjectionMode: "ui",
@@ -59,42 +96,20 @@ export default defineContentScript({
       return
     }
 
-    const themeMode = await getLocalThemeMode()
+    // Lazy-mount: mount the full React app on first mousedown.
+    // By the time the user finishes selecting (mouseup), the React app is mounted and listening.
+    let mounted = false
+    const mountOnFirstInteraction = () => {
+      if (mounted)
+        return
+      mounted = true
+      document.removeEventListener("mousedown", mountOnFirstInteraction)
+      void mountSelectionUI(ctx)
+    }
+    document.addEventListener("mousedown", mountOnFirstInteraction)
 
-    const ui = await createShadowRootUi(ctx, {
-      name: `${kebabCase(APP_NAME)}-selection`,
-      position: "overlay",
-      anchor: "body",
-      onMount: (container, shadow, shadowHost) => {
-        // Container is a body, and React warns when creating a root on the body, so create a wrapper div
-        const wrapper = insertShadowRootUIWrapperInto(container)
-        shadowWrapper = wrapper
-        addStyleToShadow(shadow)
-        protectSelectAllShadowRoot(shadowHost, wrapper)
-
-        // Create a root on the UI container and render a component
-        const root = ReactDOM.createRoot(wrapper)
-        root.render(
-          <QueryClientProvider client={queryClient}>
-            <JotaiProvider>
-              <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
-                <ThemeProvider container={wrapper}>
-                  <App />
-                </ThemeProvider>
-              </HydrateAtoms>
-            </JotaiProvider>
-          </QueryClientProvider>,
-        )
-        return root
-      },
-      onRemove: (root) => {
-        // Unmount the root when the UI is removed
-        root?.unmount()
-        shadowWrapper = null
-      },
+    ctx.onInvalidated(() => {
+      document.removeEventListener("mousedown", mountOnFirstInteraction)
     })
-
-    // 4. Mount the UI
-    ui.mount()
   },
 })

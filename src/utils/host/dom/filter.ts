@@ -160,11 +160,12 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElemen
   const dontWalkCSS
     = window.getComputedStyle(element).display === "none"
       || window.getComputedStyle(element).visibility === "hidden"
+  const dontWalkHidden = element.hidden
   const dontWalkAriaHidden = element.getAttribute("aria-hidden") === "true"
   const dontWalkVisuallyHidden = ["sr-only", "visually-hidden"].some(cls =>
     element.classList.contains(cls),
   )
-  return dontWalkCustomElement || dontWalkContent || dontWalkInvalidTag || dontWalkCSS || dontWalkAriaHidden || dontWalkVisuallyHidden
+  return dontWalkCustomElement || dontWalkContent || dontWalkInvalidTag || dontWalkCSS || dontWalkHidden || dontWalkAriaHidden || dontWalkVisuallyHidden
 }
 
 export function isInlineTransNode(node: TransNode): boolean {

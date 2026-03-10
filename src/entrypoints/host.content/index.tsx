@@ -9,13 +9,13 @@ import { getDocumentInfo } from "@/utils/content/analyze"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { isSiteEnabled } from "@/utils/site-control"
+import { setupUrlChangeListener } from "./listen"
 import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { handleTranslationModeChange } from "./translation-control/handle-config-change"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
 import "@/utils/crypto-polyfill"
-import "./listen"
 
 declare global {
   interface Window {
@@ -38,6 +38,8 @@ export default defineContentScript({
     if (!isSiteEnabled(window.location.href, initialConfig)) {
       return
     }
+
+    setupUrlChangeListener()
 
     // eruda.init()
     const removeHostToast = mountHostToast()

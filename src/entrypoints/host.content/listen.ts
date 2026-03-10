@@ -1,4 +1,4 @@
-(() => {
+export function setupUrlChangeListener() {
   const EVENT_NAME = "extension:URLChange"
 
   const isSamePage = (from: string, to: string) => {
@@ -68,4 +68,4 @@
       }
     }, 1000)
   }
-})()
+}
