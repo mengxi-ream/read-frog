@@ -150,6 +150,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       name: "DeepLX",
       website: "https://deeplx.owo.network/",
     },
+    "deepl": {
+      logo: (theme: Theme) => theme === "light" ? deeplxLogoLight : deeplxLogoDark,
+      name: "DeepL",
+      website: "https://www.deepl.com/pro-api",
+    },
     "siliconflow": {
       logo: getLobeIconsCDNUrlFn("siliconcloud-color"),
       name: "SiliconFlow",
@@ -369,6 +374,13 @@ export const DEFAULT_PROVIDER_CONFIG = {
     provider: "deeplx",
     baseURL: "https://api.deeplx.org",
   },
+  "deepl": {
+    id: "deepl-default",
+    name: PROVIDER_ITEMS.deepl.name,
+    description: i18n.t("options.apiProviders.providers.description.deepl"),
+    enabled: true,
+    provider: "deepl",
+  },
   "bedrock": {
     id: "bedrock-default",
     name: PROVIDER_ITEMS.bedrock.name,
@@ -558,4 +570,4 @@ export const PROVIDER_GROUPS = {
   },
 } as const satisfies Record<string, { types: readonly APIProviderTypes[], tutorialSlug: string }>
 
-export const SPECIFIC_TUTORIAL_PROVIDER_TYPES = ["ollama", "deeplx"] as const satisfies readonly APIProviderTypes[]
+export const SPECIFIC_TUTORIAL_PROVIDER_TYPES = ["ollama", "deeplx", "deepl"] as const satisfies readonly APIProviderTypes[]

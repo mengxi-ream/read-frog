@@ -149,6 +149,7 @@ options:
         ai302: Cung cấp các mô hình mới nhất và toàn diện nhất với API trả theo lần sử dụng
         openaiCompatible: Bên thứ ba và tương thích API OpenAI
         deeplx: API DeepL không chính thức
+        deepl: API DeepL chính thức
         bedrock: Dịch vụ được quản lý bởi AWS cho các mô hình nền tảng cấp doanh nghiệp
         groq: Phần cứng chuyên dụng cho tốc độ suy luận LLM siêu nhanh
         deepinfra: Suy luận đám mây hiệu quả chi phí cho các mô hình mã nguồn mở phổ biến

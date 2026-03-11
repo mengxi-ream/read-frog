@@ -149,6 +149,7 @@ options:
         ai302: Kullandıkça öde API ile en son ve en kapsamlı modelleri sağlar
         openaiCompatible: Üçüncü taraf ve OpenAI API uyumlu
         deeplx: Resmi olmayan DeepL API
+        deepl: Resmi DeepL API
         bedrock: Kurumsal düzeyde temel modeller için AWS yönetilen hizmeti
         groq: Ultra hızlı LLM çıkarım hızları için özel donanım
         deepinfra: Popüler açık kaynak modelleri için uygun maliyetli bulut çıkarımı

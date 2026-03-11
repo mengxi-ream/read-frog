@@ -149,6 +149,7 @@ options:
         ai302: 최신의 포괄적인 모델과 종량제 API를 제공
         openaiCompatible: OpenAI API 호환 서드파티
         deeplx: 비공식 DeepL API
+        deepl: 공식 DeepL API
         bedrock: 엔터프라이즈급 파운데이션 모델을 위한 AWS 관리 서비스
         groq: 초고속 LLM 추론 속도에 특화된 하드웨어
         deepinfra: 인기 있는 오픈소스 모델을 위한 비용 효율적인 클라우드 추론

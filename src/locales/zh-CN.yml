@@ -150,6 +150,7 @@ options:
         ai302: 提供最新、全面的模型和按量付费 API
         openaiCompatible: OpenAI API 兼容的第三方
         deeplx: 非官方 DeepL API
+        deepl: 官方 DeepL API
         bedrock: 面向企业级基础模型的 AWS 托管服务
         groq: 专注于超高速 LLM 推理速度的专用硬件
         deepinfra: 面向热门开源模型的经济高效云推理

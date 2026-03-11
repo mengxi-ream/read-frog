@@ -3,6 +3,7 @@ import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { ArticleContent } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
+import { ISO6393_TO_6391 } from "@read-frog/definitions"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -11,6 +12,7 @@ import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
+import { deeplTranslateBatch } from "@/utils/host/translate/api/deepl"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
@@ -22,6 +24,33 @@ import { ensureInitializedConfig } from "./config"
 
 export function parseBatchResult(result: string): string[] {
   return result.split(BATCH_SEPARATOR).map(t => t.trim())
+}
+
+export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
+  return isLLMProviderConfig(providerConfig) || providerConfig.provider === "deepl"
+}
+
+export async function executeBatchTranslation(
+  dataList: TranslateBatchData[],
+  promptResolver: PromptResolver,
+): Promise<string[]> {
+  const { langConfig, providerConfig, content } = dataList[0]
+  const texts = dataList.map(d => d.text)
+
+  if (providerConfig.provider === "deepl") {
+    const sourceLang = langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
+    const targetLang = ISO6393_TO_6391[langConfig.targetCode]
+
+    if (!targetLang) {
+      throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
+    }
+
+    return await deeplTranslateBatch(texts, sourceLang, targetLang, providerConfig)
+  }
+
+  const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
+  const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })
+  return parseBatchResult(result)
 }
 
 async function getOrGenerateSummary(
@@ -75,7 +104,7 @@ async function getOrGenerateSummary(
   }
 }
 
-interface TranslateBatchData {
+export interface TranslateBatchData {
   text: string
   langConfig: Config["language"]
   providerConfig: ProviderConfig
@@ -114,16 +143,13 @@ async function createTranslationQueues(config: TranslationQueueSetupConfig) {
     },
     getCharacters: data => data.text.length,
     executeBatch: async (dataList) => {
-      const { langConfig, providerConfig, content } = dataList[0]
-      const texts = dataList.map(d => d.text)
-      const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
+      const { providerConfig } = dataList[0]
       const hash = Sha256Hex(...dataList.map(d => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map(d => d.scheduleAt))
 
       const batchThunk = async (): Promise<string[]> => {
         await putBatchRequestRecord({ originalRequestCount: dataList.length, providerConfig })
-        const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })
-        return parseBatchResult(result)
+        return await executeBatchTranslation(dataList, promptResolver)
       }
 
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash)
@@ -175,10 +201,15 @@ export async function setUpWebPageTranslationQueue() {
       title: articleTitle ?? "",
     }
 
-    if (isLLMProviderConfig(providerConfig)) {
+    if (shouldUseBatchQueue(providerConfig)) {
       // Generate or fetch cached summary if AI Content Aware is enabled
       const config = await ensureInitializedConfig()
-      if (config?.translate.enableAIContentAware && articleTitle != null && articleTextContent != null) {
+      if (
+        isLLMProviderConfig(providerConfig)
+        && config?.translate.enableAIContentAware
+        && articleTitle != null
+        && articleTextContent != null
+      ) {
         content.summary = await getOrGenerateSummary(articleTitle, articleTextContent, providerConfig, requestQueue)
       }
 
@@ -242,9 +273,14 @@ export async function setUpSubtitlesTranslationQueue() {
       title: videoTitle || "",
     }
 
-    if (isLLMProviderConfig(providerConfig)) {
+    if (shouldUseBatchQueue(providerConfig)) {
       const runtimeConfig = await ensureInitializedConfig()
-      if (runtimeConfig?.translate.enableAIContentAware && videoTitle && subtitlesContext) {
+      if (
+        isLLMProviderConfig(providerConfig)
+        && runtimeConfig?.translate.enableAIContentAware
+        && videoTitle
+        && subtitlesContext
+      ) {
         content.summary = await getOrGenerateSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
       }
 
