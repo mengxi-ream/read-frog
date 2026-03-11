@@ -99,7 +99,15 @@ vi.mock("react-rnd", async () => {
         ref={elementRef}
         data-testid="mock-rnd"
         className={props.className}
-        style={props.style}
+        style={{
+          width: "auto",
+          height: "auto",
+          display: "inline-block",
+          position: "absolute",
+          top: 0,
+          left: 0,
+          ...props.style,
+        }}
         onWheel={props.onWheel}
       >
         {props.children}
@@ -270,6 +278,13 @@ describe("popoverWrapper", () => {
       bottomLeft: true,
       topLeft: true,
     })
+  })
+
+  it("keeps the popover content area shrinkable so overflow can scroll after viewport changes", () => {
+    const { element } = renderPopover()
+
+    expect(element).toHaveStyle({ display: "flex" })
+    expect(screen.getByText("Popover content").parentElement).toHaveClass("min-h-0", "flex-1", "overflow-y-auto")
   })
 
   it("closes the popover when clicking outside", () => {

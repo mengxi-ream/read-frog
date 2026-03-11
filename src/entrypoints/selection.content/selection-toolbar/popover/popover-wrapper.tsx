@@ -96,6 +96,7 @@ export function PopoverWrapper({ title, icon, children, onClose, isVisible, setI
         resizeHandleStyles={POPOVER_RESIZE_HANDLE_STYLES}
         className={`pointer-events-auto overflow-hidden rounded-lg border bg-white shadow-lg dark:bg-zinc-800 flex flex-col ${NOTRANSLATE_CLASS}`}
         style={{
+          display: "flex",
           maxWidth: "100vw",
           maxHeight: "100vh",
         }}
@@ -119,7 +120,7 @@ export function PopoverWrapper({ title, icon, children, onClose, isVisible, setI
         />
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto"
+          className="min-h-0 flex-1 overflow-y-auto"
         >
           {children}
         </div>
