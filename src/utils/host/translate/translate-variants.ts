@@ -4,6 +4,7 @@ import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/l
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
+import { getOrFetchArticleData } from "./article-context"
 import { MIN_LENGTH_FOR_SKIP_LLM_DETECTION, shouldSkipByLanguage, translateTextCore } from "./translate-text"
 
 async function getConfigOrThrow(): Promise<Config> {
@@ -14,12 +15,14 @@ async function getConfigOrThrow(): Promise<Config> {
   return config
 }
 
-/**
- * Page translation — uses FEATURE_PROVIDER_DEFS['translate'].
- * Includes skip-language logic (page translation only).
- */
-export async function translateTextForPage(text: string): Promise<string> {
-  const config = await getConfigOrThrow()
+async function translateTextUsingPageConfig(
+  config: Config,
+  text: string,
+  options: {
+    extraHashTags?: string[]
+    articleContext?: { title?: string | null, textContent?: string | null }
+  } = {},
+): Promise<string> {
   const providerConfig = resolveProviderConfig(config, "translate")
 
   // Skip translation if text is in skipLanguages list (page translation only)
@@ -42,6 +45,37 @@ export async function translateTextForPage(text: string): Promise<string> {
     langConfig: config.language,
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
+    extraHashTags: options.extraHashTags,
+    articleContext: options.articleContext,
+  })
+}
+
+/**
+ * Page translation — uses FEATURE_PROVIDER_DEFS['translate'].
+ * Includes skip-language logic (page translation only).
+ */
+export async function translateTextForPage(text: string): Promise<string> {
+  const config = await getConfigOrThrow()
+  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
+  return translateTextUsingPageConfig(config, text, {
+    articleContext: articleData ?? undefined,
+  })
+}
+
+/**
+ * Page title translation — uses page translation settings, but always treats the
+ * current source title as the article title context.
+ */
+export async function translateTextForPageTitle(text: string): Promise<string> {
+  const config = await getConfigOrThrow()
+  const articleContext = await getOrFetchArticleData(config.translate.enableAIContentAware)
+
+  return translateTextUsingPageConfig(config, text, {
+    extraHashTags: ["pageTitleTranslation"],
+    articleContext: {
+      title: text,
+      textContent: articleContext?.textContent,
+    },
   })
 }
 
@@ -51,6 +85,7 @@ export async function translateTextForPage(text: string): Promise<string> {
 export async function translateTextForSelection(text: string): Promise<string> {
   const config = await getConfigOrThrow()
   const providerConfig = resolveProviderConfig(config, "selectionToolbar.translate")
+  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
 
   return translateTextCore({
     text,
@@ -58,6 +93,7 @@ export async function translateTextForSelection(text: string): Promise<string> {
     extraHashTags: ["selectionTranslation"],
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
+    articleContext: articleData ?? undefined,
   })
 }
 
@@ -93,6 +129,8 @@ export async function translateTextForInput(
     return ""
   }
 
+  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
+
   return translateTextCore({
     text,
     langConfig: {
@@ -103,5 +141,6 @@ export async function translateTextForInput(
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
+    articleContext: articleData ?? undefined,
   })
 }

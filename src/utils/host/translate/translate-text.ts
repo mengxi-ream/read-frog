@@ -2,14 +2,12 @@ import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
-import { Readability } from "@mozilla/readability"
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
 import { franc } from "franc"
 import { toast } from "sonner"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { detectLanguage } from "@/utils/content/language"
-import { removeDummyNodes } from "@/utils/content/utils"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { Sha256Hex } from "../../hash"
@@ -49,86 +47,12 @@ export async function shouldSkipByLanguage(
   return skipLanguages.includes(detectedLang)
 }
 
-// Module-level cache for article data (only meaningful in content script context)
-let cachedArticleData: {
-  url: string
-  title: string
-  textContent: string
-} | null = null
-
-function getCachedArticleData(): typeof cachedArticleData {
-  // Clear cache if URL has changed
-  if (typeof window !== "undefined" && cachedArticleData?.url !== window.location.href) {
-    cachedArticleData = null
-  }
-  return cachedArticleData
-}
-
-export async function getOrFetchArticleData(
-  enableAIContentAware: boolean,
-): Promise<{ title: string, textContent?: string } | null> {
-  // Only works in browser context
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    return null
-  }
-
-  // When our extension add content to the page, we don't want the cache to be invalidated
-  // so our cache here will always live unless the page is refreshed
-  const cached = getCachedArticleData()
-
-  // Cache should only be reused when the stored entry already includes text content
-  // otherwise the feature never obtains article text after being enabled mid-session.
-  if (cached && (!enableAIContentAware || cached.textContent)) {
-    return {
-      title: cached.title,
-      textContent: enableAIContentAware ? cached.textContent : undefined,
-    }
-  }
-
-  // Always get title
-  const title = document.title || ""
-
-  // Only extract textContent if needed
-  let textContent = ""
-  if (enableAIContentAware) {
-    // Try Readability first for cleaner content
-    try {
-      const documentClone = document.cloneNode(true) as Document
-      await removeDummyNodes(documentClone)
-      const article = new Readability(documentClone, { serializer: el => el }).parse()
-
-      if (article?.textContent) {
-        textContent = article.textContent
-      }
-    }
-    catch (error) {
-      logger.warn("Readability parsing failed, falling back to body textContent:", error)
-    }
-
-    // Fallback to document.body if Readability failed
-    if (!textContent) {
-      textContent = document.body?.textContent || ""
-    }
-  }
-
-  cachedArticleData = {
-    url: window.location.href,
-    title,
-    textContent,
-  }
-
-  return {
-    title,
-    textContent: enableAIContentAware ? textContent : undefined,
-  }
-}
-
 export async function buildHashComponents(
   text: string,
   providerConfig: ProviderConfig,
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
-  articleContext?: { title?: string, textContent?: string },
+  articleContext?: { title?: string | null, textContent?: string | null },
 ): Promise<string[]> {
   const hashComponents = [
     text,
@@ -150,7 +74,7 @@ export async function buildHashComponents(
       if (articleContext.title) {
         hashComponents.push(`title:${articleContext.title}`)
       }
-      if (articleContext.textContent) {
+      if (articleContext.textContent !== undefined && articleContext.textContent !== null) {
         // Use a substring hash to avoid huge hash inputs while still differentiating articles
         hashComponents.push(`content:${articleContext.textContent.slice(0, 1000)}`)
       }
@@ -166,6 +90,7 @@ export interface TranslateTextOptions {
   providerConfig: ProviderConfig
   enableAIContentAware?: boolean
   extraHashTags?: string[]
+  articleContext?: { title?: string | null, textContent?: string | null }
 }
 
 /**
@@ -179,6 +104,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     providerConfig,
     enableAIContentAware = false,
     extraHashTags = [],
+    articleContext,
   } = options
 
   // Skip translation if text is already in target language
@@ -191,15 +117,12 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   }
 
   // Get article data for LLM providers (needed for both hash and request)
-  let articleTitle: string | undefined
-  let articleTextContent: string | undefined
+  let articleTitle: string | null | undefined
+  let articleTextContent: string | null | undefined
 
-  if (isLLMProviderConfig(providerConfig)) {
-    const articleData = await getOrFetchArticleData(enableAIContentAware)
-    if (articleData) {
-      articleTitle = articleData.title
-      articleTextContent = articleData.textContent
-    }
+  if (isLLMProviderConfig(providerConfig) && articleContext) {
+    articleTitle = articleContext.title
+    articleTextContent = articleContext.textContent
   }
 
   const hashComponents = await buildHashComponents(
