@@ -15,6 +15,8 @@ interface DeepLLanguagePair {
   target: string
 }
 
+const DEEPL_MAX_TEXTS_PER_REQUEST = 50
+
 export async function deeplTranslate(
   sourceText: string,
   fromLang: LangCodeISO6391 | "auto",
@@ -48,13 +50,30 @@ export async function deeplTranslateBatch(
     return []
   }
 
-  return await requestDeepLTranslations(
-    sourceTexts,
-    fromLang,
-    toLang,
-    providerConfig,
-    options,
-  )
+  if (sourceTexts.length <= DEEPL_MAX_TEXTS_PER_REQUEST) {
+    return await requestDeepLTranslations(
+      sourceTexts,
+      fromLang,
+      toLang,
+      providerConfig,
+      options,
+    )
+  }
+
+  const results: string[] = []
+  for (let index = 0; index < sourceTexts.length; index += DEEPL_MAX_TEXTS_PER_REQUEST) {
+    const chunk = sourceTexts.slice(index, index + DEEPL_MAX_TEXTS_PER_REQUEST)
+    const chunkResults = await requestDeepLTranslations(
+      chunk,
+      fromLang,
+      toLang,
+      providerConfig,
+      options,
+    )
+    results.push(...chunkResults)
+  }
+
+  return results
 }
 
 async function requestDeepLTranslations(
@@ -192,7 +211,7 @@ function formatDeepLLanguageCode(
   }
 
   if (formattedLang === "ZH-TW") {
-    return "ZH-HANT"
+    return direction === "target" ? "ZH-HANT" : "ZH"
   }
 
   return formattedLang

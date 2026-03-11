@@ -82,6 +82,75 @@ describe("deepl translate adapter", () => {
     })
   })
 
+  it("normalizes zh-TW source language to ZH", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      statusText: "OK",
+      json: vi.fn().mockResolvedValue({
+        translations: [{ text: "A" }],
+      }),
+      text: vi.fn().mockResolvedValue(""),
+    })
+
+    await deeplTranslate("甲", "zh-TW", "en", {
+      id: "deepl-default",
+      enabled: true,
+      name: "DeepL",
+      provider: "deepl",
+      apiKey: "test-key",
+    })
+
+    const [, requestInit] = fetchMock.mock.calls[0]
+    expect(JSON.parse(requestInit.body)).toEqual({
+      text: ["甲"],
+      source_lang: "ZH",
+      target_lang: "EN",
+    })
+  })
+
+  it("splits requests into chunks of 50 texts when batch size exceeds DeepL limits", async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: vi.fn().mockResolvedValue({
+          translations: Array.from({ length: 50 }, (_, index) => ({ text: `chunk1-${index}` })),
+        }),
+        text: vi.fn().mockResolvedValue(""),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: vi.fn().mockResolvedValue({
+          translations: Array.from({ length: 5 }, (_, index) => ({ text: `chunk2-${index}` })),
+        }),
+        text: vi.fn().mockResolvedValue(""),
+      })
+
+    const result = await deeplTranslateBatch(
+      Array.from({ length: 55 }, (_, index) => `Text ${index}`),
+      "en",
+      "de",
+      {
+        id: "deepl-default",
+        enabled: true,
+        name: "DeepL",
+        provider: "deepl",
+        apiKey: "test-key",
+      },
+    )
+
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(JSON.parse(fetchMock.mock.calls[0][1].body).text).toHaveLength(50)
+    expect(JSON.parse(fetchMock.mock.calls[1][1].body).text).toHaveLength(5)
+    expect(result).toHaveLength(55)
+    expect(result[0]).toBe("chunk1-0")
+    expect(result[54]).toBe("chunk2-4")
+  })
+
   it("throws when the response count does not match the request count", async () => {
     fetchMock.mockResolvedValue({
       ok: true,
