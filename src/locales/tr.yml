@@ -190,6 +190,7 @@ options:
         tts: Metin Okuma
         inputTranslation: Giriş Çevirisi
         videoSubtitles: Video Altyazıları
+        aiContentAware: AI Akıllı Bağlam
     translationConfig:
       model:
         title: Model

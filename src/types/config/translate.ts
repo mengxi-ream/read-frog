@@ -87,7 +87,10 @@ export const translateConfigSchema = z.object({
     minWordsPerNode: z.number().min(MIN_WORDS_PER_NODE),
     skipLanguages: z.array(langCodeISO6393Schema),
   }),
-  enableAIContentAware: z.boolean(),
+  aiContentAware: z.object({
+    enabled: z.boolean(),
+    providerId: z.string().nonempty(),
+  }),
   customPromptsConfig: customPromptsConfigSchema,
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,

@@ -64,7 +64,7 @@ async function translateTextUsingPageConfig(
     text: preparedText,
     langConfig: config.language,
     providerConfig,
-    enableAIContentAware: config.translate.enableAIContentAware,
+    enableAIContentAware: config.translate.aiContentAware.enabled,
     extraHashTags: options.extraHashTags,
     articleContext: options.articleContext,
   })
@@ -76,7 +76,7 @@ async function translateTextUsingPageConfig(
  */
 export async function translateTextForPage(text: string): Promise<string> {
   const config = await getConfigOrThrow()
-  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
+  const articleData = await getOrFetchArticleData(config.translate.aiContentAware.enabled)
   return translateTextUsingPageConfig(config, text, {
     articleContext: articleData ?? undefined,
   })
@@ -88,7 +88,7 @@ export async function translateTextForPage(text: string): Promise<string> {
  */
 export async function translateTextForPageTitle(text: string): Promise<string> {
   const config = await getConfigOrThrow()
-  const articleContext = await getOrFetchArticleData(config.translate.enableAIContentAware)
+  const articleContext = await getOrFetchArticleData(config.translate.aiContentAware.enabled)
 
   return translateTextUsingPageConfig(config, text, {
     extraHashTags: ["pageTitleTranslation"],
@@ -131,7 +131,7 @@ export async function translateTextForInput(
     return ""
   }
 
-  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
+  const articleData = await getOrFetchArticleData(config.translate.aiContentAware.enabled)
 
   return translateTextCore({
     text,
@@ -142,7 +142,7 @@ export async function translateTextForInput(
     },
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
     providerConfig,
-    enableAIContentAware: config.translate.enableAIContentAware,
+    enableAIContentAware: config.translate.aiContentAware.enabled,
     articleContext: articleData ?? undefined,
   })
 }

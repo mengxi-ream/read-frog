@@ -190,6 +190,7 @@ options:
         tts: Chuyển văn bản thành giọng nói
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
+        aiContentAware: Ngữ cảnh thông minh AI
     translationConfig:
       model:
         title: Mô hình

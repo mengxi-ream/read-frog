@@ -1,10 +1,11 @@
 import type { Config } from "@/types/config/config"
-import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
+import type { ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { ArticleContent } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
+import { getProviderConfigById } from "@/utils/config/helpers"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BATCH_SEPARATOR } from "@/utils/constants/prompt"
 import { generateArticleSummary } from "@/utils/content/summary"
@@ -27,11 +28,25 @@ export function parseBatchResult(result: string): string[] {
 async function getOrGenerateSummary(
   title: string,
   textContent: string,
-  providerConfig: LLMProviderConfig,
   requestQueue: RequestQueue,
 ): Promise<string | undefined> {
   const preparedText = cleanText(textContent)
   if (!preparedText) {
+    return undefined
+  }
+
+  const runtimeConfig = await ensureInitializedConfig() ?? DEFAULT_CONFIG
+  if (!runtimeConfig.translate.aiContentAware.enabled) {
+    return undefined
+  }
+
+  const providerConfig = getProviderConfigById(
+    runtimeConfig.providersConfig,
+    runtimeConfig.translate.aiContentAware.providerId,
+  )
+
+  if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
+    logger.warn("AI Content Aware provider is missing or not an LLM provider, skipping summary generation. This should not happen. Please submit an issue to report this.")
     return undefined
   }
 
@@ -176,10 +191,8 @@ export async function setUpWebPageTranslationQueue() {
     }
 
     if (isLLMProviderConfig(providerConfig)) {
-      // Generate or fetch cached summary if AI Content Aware is enabled
-      const config = await ensureInitializedConfig()
-      if (config?.translate.enableAIContentAware && articleTitle != null && articleTextContent != null) {
-        content.summary = await getOrGenerateSummary(articleTitle, articleTextContent, providerConfig, requestQueue)
+      if (articleTitle != null && articleTextContent != null) {
+        content.summary = await getOrGenerateSummary(articleTitle, articleTextContent, requestQueue)
       }
 
       const data = { text, langConfig, providerConfig, hash, scheduleAt, content }
@@ -243,9 +256,8 @@ export async function setUpSubtitlesTranslationQueue() {
     }
 
     if (isLLMProviderConfig(providerConfig)) {
-      const runtimeConfig = await ensureInitializedConfig()
-      if (runtimeConfig?.translate.enableAIContentAware && videoTitle && subtitlesContext) {
-        content.summary = await getOrGenerateSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
+      if (videoTitle && subtitlesContext) {
+        content.summary = await getOrGenerateSummary(videoTitle, subtitlesContext, requestQueue)
       }
 
       const data = { text, langConfig, providerConfig, hash, scheduleAt, content }

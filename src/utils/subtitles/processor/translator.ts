@@ -80,7 +80,7 @@ export async function translateSubtitles(
   }
 
   const langConfig = config.language
-  const enableAIContentAware = !!config.translate.enableAIContentAware
+  const enableAIContentAware = !!config.translate.aiContentAware.enabled
 
   const translationPromises = fragments.map(fragment =>
     translateSingleSubtitle(fragment.text, langConfig, providerConfig, enableAIContentAware, videoContext),

@@ -190,6 +190,7 @@ options:
         tts: 텍스트 음성 변환
         inputTranslation: 입력 번역
         videoSubtitles: 비디오 자막
+        aiContentAware: AI 스마트 컨텍스트
     translationConfig:
       model:
         title: 모델

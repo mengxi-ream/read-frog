@@ -190,6 +190,7 @@ options:
         tts: テキスト読み上げ
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
+        aiContentAware: AI スマートコンテキスト
     translationConfig:
       model:
         title: モデル

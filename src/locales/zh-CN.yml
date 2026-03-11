@@ -191,6 +191,7 @@ options:
         tts: 文本转语音
         inputTranslation: 输入翻译
         videoSubtitles: 视频字幕
+        aiContentAware: AI 智能上下文
     translationConfig:
       model:
         title: 模型

@@ -40,11 +40,13 @@ export function AIContentAware() {
         </FieldContent>
         <Switch
           id="ai-content-aware-toggle"
-          checked={translateConfig.enableAIContentAware}
+          checked={translateConfig.aiContentAware.enabled}
           onCheckedChange={(checked) => {
             void setTranslateConfig(
               deepmerge(translateConfig, {
-                enableAIContentAware: checked,
+                aiContentAware: {
+                  enabled: checked,
+                },
               }),
             )
           }}

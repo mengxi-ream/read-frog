@@ -190,6 +190,7 @@ options:
         tts: Озвучивание текста
         inputTranslation: Перевод ввода
         videoSubtitles: Субтитры видео
+        aiContentAware: Умный контекст ИИ
     translationConfig:
       model:
         title: Модель

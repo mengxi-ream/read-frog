@@ -17,9 +17,9 @@ export function AISmartContext() {
         </HelpTooltip>
       </span>
       <Switch
-        checked={translateConfig.enableAIContentAware}
+        checked={translateConfig.aiContentAware.enabled}
         onCheckedChange={checked =>
-          setTranslateConfig(deepmerge(translateConfig, { enableAIContentAware: checked }))}
+          setTranslateConfig(deepmerge(translateConfig, { aiContentAware: { enabled: checked } }))}
       />
     </div>
   )

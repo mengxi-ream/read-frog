@@ -128,6 +128,7 @@ export default function FeatureProvidersConfig() {
         <FeatureProviderField featureKey="selectionToolbar.translate" />
         <FeatureProviderField featureKey="selectionToolbar.vocabularyInsight" />
         <FeatureProviderField featureKey="inputTranslation" />
+        <FeatureProviderField featureKey="translate.aiContentAware" />
         <CustomActionProviderFields />
       </div>
     </ConfigCard>

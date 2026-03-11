@@ -191,6 +191,7 @@ options:
         tts: Text to Speech
         inputTranslation: Input Translation
         videoSubtitles: Video Subtitles
+        aiContentAware: AI Smart Context
     translationConfig:
       model:
         title: Model

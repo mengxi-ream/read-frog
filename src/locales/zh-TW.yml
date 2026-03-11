@@ -190,6 +190,7 @@ options:
         tts: 文字轉語音
         inputTranslation: 輸入翻譯
         videoSubtitles: 影片字幕
+        aiContentAware: AI 智慧上下文
     translationConfig:
       model:
         title: 模型
