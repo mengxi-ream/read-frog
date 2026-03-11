@@ -20,7 +20,7 @@ import {
   mouseClickPositionAtom,
   selectionContentAtom,
 } from "./atom"
-import { PopoverWrapper } from "./components/popover-wrapper"
+import { PopoverWrapper } from "./popover/popover-wrapper"
 
 export function TranslateButton() {
   // const selectionContent = useAtomValue(selectionContentAtom)

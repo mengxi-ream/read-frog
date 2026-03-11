@@ -1,4 +1,4 @@
-import type { PopoverWrapperRef } from "./components/popover-wrapper"
+import type { PopoverWrapperRef } from "./popover/popover-wrapper"
 import { useMemo, useRef, useState } from "#imports"
 import { IconSparkles, IconZoomScan } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
@@ -17,7 +17,7 @@ import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { createHighlightData } from "../utils"
 import { isAiPopoverVisibleAtom, isSelectionToolbarVisibleAtom, mouseClickPositionAtom, selectionRangeAtom } from "./atom"
-import { PopoverWrapper } from "./components/popover-wrapper"
+import { PopoverWrapper } from "./popover/popover-wrapper"
 
 export function AiButton() {
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)

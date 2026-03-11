@@ -1,4 +1,4 @@
-import type { PopoverWrapperRef } from "./components/popover-wrapper"
+import type { PopoverWrapperRef } from "./popover/popover-wrapper"
 import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
 import { Icon } from "@iconify/react"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -18,8 +18,8 @@ import {
   selectionContentAtom,
   selectionRangeAtom,
 } from "./atom"
-import { PopoverWrapper } from "./components/popover-wrapper"
 import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
+import { PopoverWrapper } from "./popover/popover-wrapper"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 
 function normalizeSelectedText(value: string | null) {
