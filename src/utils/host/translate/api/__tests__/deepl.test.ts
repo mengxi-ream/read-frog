@@ -3,7 +3,7 @@ import { deeplTranslate, deeplTranslateBatch, getDeepLBaseURL } from "../deepl"
 
 const fetchMock = vi.fn()
 
-describe("DeepL translate adapter", () => {
+describe("deepl translate adapter", () => {
   beforeEach(() => {
     fetchMock.mockReset()
     vi.stubGlobal("fetch", fetchMock)

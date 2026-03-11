@@ -185,7 +185,7 @@ function formatDeepLLanguageCode(
   lang: LangCodeISO6391,
   direction: "source" | "target",
 ): string {
-  let formattedLang = lang.toUpperCase()
+  const formattedLang = lang.toUpperCase()
 
   if (formattedLang === "ZH") {
     return direction === "target" ? "ZH-HANS" : "ZH"
