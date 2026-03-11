@@ -52,7 +52,7 @@ export const DEFAULT_CONFIG: Config = {
     providerId: "microsoft-translate-default",
     mode: "bilingual",
     node: {
-      enabled: true,
+      enabled: false,
       hotkey: "control",
     },
     page: {
