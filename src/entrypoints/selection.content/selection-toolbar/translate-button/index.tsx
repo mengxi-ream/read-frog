@@ -15,7 +15,8 @@ import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from "../.."
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
-import { isSelectionToolbarVisibleAtom, selectionContentAtom } from "../atom"
+import { isSelectionToolbarVisibleAtom } from "../atom"
+import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 import { TranslationContent } from "./translation-content"
 
 export function TranslateButton() {
@@ -24,15 +25,25 @@ export function TranslateButton() {
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
   const translateProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.translate"))
   const languageConfig = useAtomValue(configFieldsAtomMap.language)
-  const selectionContent = useAtomValue(selectionContentAtom)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const {
+    selectionContentSnapshot,
+    popoverSessionKey,
+    captureSelectionSnapshot,
+    clearSelectionSnapshot,
+  } = useSelectionPopoverSnapshot()
+
+  const resetSessionState = useCallback(() => {
+    setIsTranslating(false)
+    setTranslatedText(undefined)
+  }, [])
 
   useEffect(() => {
     let cancelTranslation: (() => void) | undefined
     let isCancelled = false
 
     const translate = async () => {
-      const cleanText = selectionContent?.replace(/\u200B/g, "").trim()
+      const cleanText = selectionContentSnapshot?.replace(/\u200B/g, "").trim()
       if (!cleanText) {
         return
       }
@@ -127,20 +138,27 @@ export function TranslateButton() {
   }, [
     languageConfig.targetCode,
     open,
-    selectionContent,
+    popoverSessionKey,
+    selectionContentSnapshot,
     translateProviderConfig,
   ])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
+    if (nextOpen) {
+      captureSelectionSnapshot()
+      resetSessionState()
+    }
+    else {
+      clearSelectionSnapshot()
+      resetSessionState()
+    }
+
     setOpen(nextOpen)
 
     if (nextOpen) {
       setIsSelectionToolbarVisible(false)
-      return
     }
-
-    setTranslatedText(undefined)
-  }, [setIsSelectionToolbarVisible])
+  }, [captureSelectionSnapshot, clearSelectionSnapshot, resetSessionState, setIsSelectionToolbarVisible])
 
   return (
     <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
@@ -148,18 +166,21 @@ export function TranslateButton() {
         <RiTranslate className="size-4.5" />
       </SelectionPopover.Trigger>
 
-      <SelectionPopover.Content container={shadowWrapper ?? document.body}>
+      <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
         <SelectionPopover.Header className="border-b">
           <SelectionToolbarTitleContent
             title="Translation"
             icon="ri:translate"
           />
-          <SelectionPopover.Close />
+          <div className="flex items-center gap-1">
+            <SelectionPopover.Pin />
+            <SelectionPopover.Close />
+          </div>
         </SelectionPopover.Header>
 
         <SelectionPopover.Body>
           <TranslationContent
-            selectionContent={selectionContent}
+            selectionContent={selectionContentSnapshot}
             translatedText={translatedText}
             isTranslating={isTranslating}
           />

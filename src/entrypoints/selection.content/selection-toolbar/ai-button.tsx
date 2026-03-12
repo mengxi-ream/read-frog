@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "#imports"
+import { useCallback, useMemo, useRef, useState } from "#imports"
 import { IconZoomScan } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useAtomValue, useSetAtom } from "jotai"
@@ -18,7 +18,8 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { createHighlightData } from "../utils"
-import { isSelectionToolbarVisibleAtom, selectionRangeAtom } from "./atom"
+import { isSelectionToolbarVisibleAtom } from "./atom"
+import { useSelectionPopoverSnapshot } from "./use-selection-popover-snapshot"
 
 function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement | null>) {
   requestAnimationFrame(() => {
@@ -30,23 +31,32 @@ function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement 
 
 export function AiButton() {
   const [open, setOpen] = useState(false)
-  const selectionRange = useAtomValue(selectionRangeAtom)
   const config = useAtomValue(configAtom)
   const detectedCode = useAtomValue(detectedCodeAtom)
   const vocabularyInsightProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.vocabularyInsight"))
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const [aiResponse, setAiResponse] = useState("")
+  const {
+    popoverSessionKey,
+    selectionRangeSnapshot,
+    captureSelectionSnapshot,
+    clearSelectionSnapshot,
+  } = useSelectionPopoverSnapshot()
+
+  const resetSessionState = useCallback(() => {
+    setAiResponse("")
+  }, [])
 
   const highlightData = useMemo(() => {
-    if (!selectionRange || !open) {
+    if (!selectionRangeSnapshot || !open) {
       return null
     }
 
-    const data = createHighlightData(selectionRange)
+    const data = createHighlightData(selectionRangeSnapshot)
     logger.info("highlightData.context", "\n", data.context)
     return data
-  }, [open, selectionRange])
+  }, [open, selectionRangeSnapshot])
 
   const {
     isLoading,
@@ -54,6 +64,7 @@ export function AiButton() {
   } = useQuery({
     queryKey: [
       "analyzeSelection",
+      popoverSessionKey,
       highlightData,
       vocabularyInsightProviderConfig,
       config,
@@ -126,6 +137,15 @@ export function AiButton() {
   })
 
   const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      captureSelectionSnapshot()
+      resetSessionState()
+    }
+    else {
+      clearSelectionSnapshot()
+      resetSessionState()
+    }
+
     setOpen(nextOpen)
 
     if (nextOpen) {
@@ -139,13 +159,16 @@ export function AiButton() {
         <IconZoomScan className="size-4.5" />
       </SelectionPopover.Trigger>
 
-      <SelectionPopover.Content container={shadowWrapper ?? document.body}>
+      <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
         <SelectionPopover.Header className="border-b">
           <SelectionToolbarTitleContent
             title="Vocabulary Insight"
             icon="tabler:sparkles"
           />
-          <SelectionPopover.Close />
+          <div className="flex items-center gap-1">
+            <SelectionPopover.Pin />
+            <SelectionPopover.Close />
+          </div>
         </SelectionPopover.Header>
 
         <SelectionPopover.Body ref={bodyRef}>

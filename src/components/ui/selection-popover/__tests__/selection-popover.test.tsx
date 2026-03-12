@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from "@testing-library/react"
+import * as React from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SelectionPopover } from ".."
 
@@ -151,18 +152,46 @@ function mockRect(element: HTMLElement, rect: Partial<DOMRect>) {
   })
 }
 
-function renderPopover({ customTrigger = false } = {}) {
+function buildTriggerRect({
+  left = 120,
+  top = 140,
+  width = 40,
+  height = 32,
+}: Partial<DOMRect> = {}) {
+  return {
+    x: left,
+    y: top,
+    left,
+    top,
+    right: left + width,
+    bottom: top + height,
+    width,
+    height,
+    toJSON: () => ({}),
+  } as DOMRect
+}
+
+function renderPopover({
+  customTrigger = false,
+  triggerLabel = "Open popover",
+  title = "Test Popover",
+  onOpenChange = onOpenChangeSpy,
+  triggerRect = buildTriggerRect(),
+} = {}) {
   render(
-    <SelectionPopover.Root onOpenChange={onOpenChangeSpy}>
+    <SelectionPopover.Root onOpenChange={onOpenChange}>
       <SelectionPopover.Trigger
         render={customTrigger ? <button data-testid="custom-trigger" className="custom-trigger" /> : undefined}
       >
-        Open popover
+        {triggerLabel}
       </SelectionPopover.Trigger>
       <SelectionPopover.Content>
         <SelectionPopover.Header className="border-b">
-          <SelectionPopover.Title>Test Popover</SelectionPopover.Title>
-          <SelectionPopover.Close />
+          <SelectionPopover.Title>{title}</SelectionPopover.Title>
+          <div className="flex items-center gap-1">
+            <SelectionPopover.Pin />
+            <SelectionPopover.Close />
+          </div>
         </SelectionPopover.Header>
         <SelectionPopover.Body>
           <div>Popover content</div>
@@ -171,18 +200,8 @@ function renderPopover({ customTrigger = false } = {}) {
     </SelectionPopover.Root>,
   )
 
-  const trigger = screen.getByRole("button", { name: /open popover/i })
-  vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue({
-    x: 120,
-    y: 140,
-    left: 120,
-    top: 140,
-    right: 160,
-    bottom: 172,
-    width: 40,
-    height: 32,
-    toJSON: () => ({}),
-  } as DOMRect)
+  const trigger = screen.getByRole("button", { name: triggerLabel })
+  vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(triggerRect)
 
   fireEvent.click(trigger)
   flushRaf()
@@ -191,6 +210,103 @@ function renderPopover({ customTrigger = false } = {}) {
     trigger,
     element: screen.getByTestId("mock-rnd"),
   }
+}
+
+function renderTwoPopovers() {
+  const firstOnOpenChange = vi.fn()
+  const secondOnOpenChange = vi.fn()
+
+  render(
+    <>
+      <SelectionPopover.Root onOpenChange={firstOnOpenChange}>
+        <SelectionPopover.Trigger>Open first popover</SelectionPopover.Trigger>
+        <SelectionPopover.Content>
+          <SelectionPopover.Header className="border-b">
+            <SelectionPopover.Title>First Popover</SelectionPopover.Title>
+            <div className="flex items-center gap-1">
+              <SelectionPopover.Pin />
+              <SelectionPopover.Close />
+            </div>
+          </SelectionPopover.Header>
+          <SelectionPopover.Body>
+            <div>First content</div>
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>
+
+      <SelectionPopover.Root onOpenChange={secondOnOpenChange}>
+        <SelectionPopover.Trigger>Open second popover</SelectionPopover.Trigger>
+        <SelectionPopover.Content>
+          <SelectionPopover.Header className="border-b">
+            <SelectionPopover.Title>Second Popover</SelectionPopover.Title>
+            <div className="flex items-center gap-1">
+              <SelectionPopover.Pin />
+              <SelectionPopover.Close />
+            </div>
+          </SelectionPopover.Header>
+          <SelectionPopover.Body>
+            <div>Second content</div>
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>
+    </>,
+  )
+
+  const firstTrigger = screen.getByRole("button", { name: "Open first popover" })
+  const secondTrigger = screen.getByRole("button", { name: "Open second popover" })
+
+  vi.spyOn(firstTrigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect({ left: 120, top: 140 }))
+  vi.spyOn(secondTrigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect({ left: 320, top: 240 }))
+
+  return {
+    firstOnOpenChange,
+    secondOnOpenChange,
+    firstTrigger,
+    secondTrigger,
+  }
+}
+
+function ReopenablePopoverHarness() {
+  const [open, setOpen] = React.useState(false)
+  const [sourceSelection, setSourceSelection] = React.useState("First selection")
+  const [snapshotSelection, setSnapshotSelection] = React.useState<string | null>(null)
+  const [sessionKey, setSessionKey] = React.useState(0)
+
+  const handleOpenChange = React.useCallback((nextOpen: boolean) => {
+    if (nextOpen) {
+      setSnapshotSelection(sourceSelection)
+      setSessionKey(prev => prev + 1)
+      setOpen(true)
+      return
+    }
+
+    setSnapshotSelection(null)
+    setOpen(false)
+  }, [sourceSelection])
+
+  return (
+    <div>
+      <button type="button" onClick={() => setSourceSelection("Second selection")}>
+        Switch selection
+      </button>
+
+      <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
+        <SelectionPopover.Trigger>Open popover</SelectionPopover.Trigger>
+        <SelectionPopover.Content key={sessionKey}>
+          <SelectionPopover.Header className="border-b">
+            <SelectionPopover.Title>Session Popover</SelectionPopover.Title>
+            <div className="flex items-center gap-1">
+              <SelectionPopover.Pin />
+              <SelectionPopover.Close />
+            </div>
+          </SelectionPopover.Header>
+          <SelectionPopover.Body>
+            <div>{snapshotSelection ?? "empty"}</div>
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>
+    </div>
+  )
 }
 
 describe("selectionPopover", () => {
@@ -294,6 +410,83 @@ describe("selectionPopover", () => {
 
     expect(onOpenChangeSpy).toHaveBeenLastCalledWith(false)
     expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
+  })
+
+  it("keeps a pinned popover open when clicking outside", () => {
+    renderPopover()
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    const event = new MouseEvent("mousedown", { bubbles: true })
+    Object.defineProperty(event, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+
+    act(() => {
+      document.dispatchEvent(event)
+    })
+
+    expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+    expect(onOpenChangeSpy).not.toHaveBeenCalledWith(false)
+  })
+
+  it("resets the pinned state after closing and reopening", () => {
+    const { trigger } = renderPopover()
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }))
+    expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute("aria-pressed", "false")
+  })
+
+  it("closes a pinned popover when another popover opens", () => {
+    const { firstOnOpenChange, secondOnOpenChange, firstTrigger, secondTrigger } = renderTwoPopovers()
+
+    fireEvent.click(firstTrigger)
+    flushRaf()
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+
+    fireEvent.click(secondTrigger)
+    flushRaf()
+
+    expect(firstOnOpenChange).toHaveBeenCalledWith(false)
+    expect(secondOnOpenChange).toHaveBeenLastCalledWith(true)
+    expect(screen.queryByText("First content")).not.toBeInTheDocument()
+    expect(screen.getByText("Second content")).toBeInTheDocument()
+  })
+
+  it("restarts the same popover session when clicking the same trigger again", () => {
+    render(<ReopenablePopoverHarness />)
+
+    const trigger = screen.getByRole("button", { name: "Open popover" })
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect())
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    expect(screen.getByText("First selection")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+
+    const firstElement = screen.getByTestId("mock-rnd")
+
+    fireEvent.click(screen.getByRole("button", { name: "Switch selection" }))
+    expect(screen.getByText("First selection")).toBeInTheDocument()
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    expect(screen.getByText("Second selection")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute("aria-pressed", "false")
+    expect(screen.getByTestId("mock-rnd")).not.toBe(firstElement)
   })
 
   it("reduces left and top space before shrinking a manually resized popover", () => {

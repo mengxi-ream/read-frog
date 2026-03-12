@@ -2,7 +2,7 @@
 
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
-import { IconGripHorizontal, IconX } from "@tabler/icons-react"
+import { IconGripHorizontal, IconPin, IconPinnedFilled, IconX } from "@tabler/icons-react"
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { Rnd } from "react-rnd"
@@ -29,16 +29,21 @@ interface SelectionPopoverRootContextValue {
   setOpen: (value: boolean | ((value: boolean) => boolean)) => void
   anchor: SelectionPopoverPosition | null
   setAnchor: (value: SelectionPopoverPosition | null) => void
+  pinned: boolean
+  setPinned: React.Dispatch<React.SetStateAction<boolean>>
 }
 
 interface SelectionPopoverContentContextValue {
   close: () => void
   isDragging: boolean
+  pinned: boolean
+  togglePinned: () => void
   setBodyElement: (node: HTMLDivElement | null) => void
 }
 
 const SelectionPopoverRootContext = React.createContext<SelectionPopoverRootContextValue | null>(null)
 const SelectionPopoverContentContext = React.createContext<SelectionPopoverContentContextValue | null>(null)
+const SELECTION_POPOVER_OPEN_EVENT = "read-frog:selection-popover-open"
 
 function useSelectionPopoverRootContext() {
   const context = React.use(SelectionPopoverRootContext)
@@ -69,12 +74,18 @@ function SelectionPopoverRoot({
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }) {
+  const instanceId = React.useId()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
   const [anchor, setAnchor] = React.useState<SelectionPopoverPosition | null>(null)
+  const [pinned, setPinned] = React.useState(false)
   const open = openProp ?? uncontrolledOpen
 
   const setOpen = React.useCallback((value: boolean | ((value: boolean) => boolean)) => {
     const nextOpen = typeof value === "function" ? value(open) : value
+
+    if (!nextOpen) {
+      setPinned(false)
+    }
 
     if (openProp === undefined) {
       setUncontrolledOpen(nextOpen)
@@ -83,12 +94,36 @@ function SelectionPopoverRoot({
     onOpenChange?.(nextOpen)
   }, [onOpenChange, open, openProp])
 
+  React.useEffect(() => {
+    if (!open) {
+      return
+    }
+
+    const handlePeerPopoverOpen = (event: Event) => {
+      const customEvent = event as CustomEvent<{ instanceId?: string }>
+      if (customEvent.detail?.instanceId && customEvent.detail.instanceId !== instanceId) {
+        setOpen(false)
+      }
+    }
+
+    window.addEventListener(SELECTION_POPOVER_OPEN_EVENT, handlePeerPopoverOpen)
+    window.dispatchEvent(new CustomEvent(SELECTION_POPOVER_OPEN_EVENT, {
+      detail: { instanceId },
+    }))
+
+    return () => {
+      window.removeEventListener(SELECTION_POPOVER_OPEN_EVENT, handlePeerPopoverOpen)
+    }
+  }, [instanceId, open, setOpen])
+
   const contextValue = React.useMemo(() => ({
     open,
     setOpen,
     anchor,
     setAnchor,
-  }), [anchor, open, setOpen])
+    pinned,
+    setPinned,
+  }), [anchor, open, pinned, setOpen])
 
   return (
     <SelectionPopoverRootContext value={contextValue}>
@@ -103,13 +138,14 @@ function SelectionPopoverTrigger({
   render,
   ...props
 }: useRender.ComponentProps<"button"> & React.ComponentProps<"button">) {
-  const { open, setOpen, setAnchor } = useSelectionPopoverRootContext()
+  const { setOpen, setAnchor, setPinned } = useSelectionPopoverRootContext()
 
   const handleClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect()
+    setPinned(false)
     setAnchor({ x: rect.left, y: rect.top })
     setOpen(true)
-  }, [setAnchor, setOpen])
+  }, [setAnchor, setOpen, setPinned])
 
   return useRender({
     defaultTagName: "button",
@@ -139,11 +175,14 @@ function SelectionPopoverContent({
 }: useRender.ComponentProps<"div"> & React.ComponentProps<"div"> & {
   container?: Element | ShadowRoot | DocumentFragment | null
 }) {
-  const { open, setOpen, anchor } = useSelectionPopoverRootContext()
+  const { open, setOpen, anchor, pinned, setPinned } = useSelectionPopoverRootContext()
   const bodyElementRef = React.useRef<HTMLDivElement | null>(null)
   const setBodyElement = React.useCallback((node: HTMLDivElement | null) => {
     bodyElementRef.current = node
   }, [])
+  const togglePinned = React.useCallback(() => {
+    setPinned(prev => !prev)
+  }, [setPinned])
 
   const {
     rndRef,
@@ -166,7 +205,7 @@ function SelectionPopoverContent({
   }, [setOpen])
 
   useDismissOnOutsideMousedown({
-    isEnabled: open,
+    isEnabled: open && !pinned,
     getElement: () => rndRef.current?.getSelfElement() ?? null,
     onDismiss: handleClose,
   })
@@ -179,8 +218,10 @@ function SelectionPopoverContent({
   const contentContextValue = React.useMemo(() => ({
     close: handleClose,
     isDragging,
+    pinned,
+    togglePinned,
     setBodyElement,
-  }), [handleClose, isDragging, setBodyElement])
+  }), [handleClose, isDragging, pinned, setBodyElement, togglePinned])
 
   const shell = useRender({
     defaultTagName: "div",
@@ -356,6 +397,36 @@ function SelectionPopoverDescription({
   )
 }
 
+function SelectionPopoverPin({
+  children,
+  className,
+  ...props
+}: React.ComponentProps<typeof Button>) {
+  const { pinned, togglePinned } = useSelectionPopoverContentContext()
+  const label = pinned ? "Unpin popover" : "Pin popover"
+
+  return (
+    <Button
+      variant="ghost-secondary"
+      size="icon-sm"
+      className={className}
+      onClick={togglePinned}
+      aria-label={label}
+      aria-pressed={pinned}
+      title={label}
+      data-rf-no-drag
+      {...props}
+    >
+      {children ?? (
+        <>
+          {pinned ? <IconPinnedFilled /> : <IconPin />}
+          <span className="sr-only">{label}</span>
+        </>
+      )}
+    </Button>
+  )
+}
+
 function SelectionPopoverClose({
   children,
   className,
@@ -391,6 +462,7 @@ const SelectionPopover = {
   Footer: SelectionPopoverFooter,
   Title: SelectionPopoverTitle,
   Description: SelectionPopoverDescription,
+  Pin: SelectionPopoverPin,
   Close: SelectionPopoverClose,
 } as const
 
@@ -402,6 +474,7 @@ export {
   SelectionPopoverDescription,
   SelectionPopoverFooter,
   SelectionPopoverHeader,
+  SelectionPopoverPin,
   SelectionPopoverRoot,
   SelectionPopoverTitle,
   SelectionPopoverTrigger,

@@ -12,9 +12,10 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { getSelectionParagraphText } from "../utils"
-import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atom"
+import { isSelectionToolbarVisibleAtom } from "./atom"
 import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
+import { useSelectionPopoverSnapshot } from "./use-selection-popover-snapshot"
 
 function normalizeSelectedText(value: string | null) {
   return value?.replace(/\u200B/g, "").trim() ?? ""
@@ -41,31 +42,42 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
   const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const languageConfig = useAtomValue(configFieldsAtomMap.language)
-  const selectionContent = useAtomValue(selectionContentAtom)
-  const selectionRange = useAtomValue(selectionRangeAtom)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
+  const {
+    selectionContentSnapshot,
+    selectionRangeSnapshot,
+    popoverSessionKey,
+    captureSelectionSnapshot,
+    clearSelectionSnapshot,
+  } = useSelectionPopoverSnapshot()
 
   const [isRunning, setIsRunning] = useState(false)
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const resetSessionState = useCallback(() => {
+    setIsRunning(false)
+    setResult(null)
+    setErrorMessage(null)
+  }, [])
 
   const activeFeature = useMemo(
     () => selectionToolbarConfig.customFeatures?.find(candidate => candidate.enabled !== false && candidate.id === feature.id) ?? null,
     [feature.id, selectionToolbarConfig.customFeatures],
   )
   const cleanSelection = useMemo(
-    () => normalizeSelectedText(selectionContent),
-    [selectionContent],
+    () => normalizeSelectedText(selectionContentSnapshot),
+    [selectionContentSnapshot],
   )
   const paragraphText = useMemo(() => {
     if (!cleanSelection) {
       return ""
     }
 
-    const paragraphCandidate = selectionRange ? getSelectionParagraphText(selectionRange) : cleanSelection
+    const paragraphCandidate = selectionRangeSnapshot ? getSelectionParagraphText(selectionRangeSnapshot) : cleanSelection
     return paragraphCandidate || cleanSelection
-  }, [cleanSelection, selectionRange])
+  }, [cleanSelection, selectionRangeSnapshot])
 
   useEffect(() => {
     if (!open || !activeFeature) {
@@ -180,20 +192,24 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
       isCancelled = true
       abortController.abort()
     }
-  }, [activeFeature, cleanSelection, languageConfig.targetCode, open, paragraphText, providersConfig])
+  }, [activeFeature, cleanSelection, languageConfig.targetCode, open, paragraphText, popoverSessionKey, providersConfig])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
+    if (nextOpen) {
+      captureSelectionSnapshot()
+      resetSessionState()
+    }
+    else {
+      clearSelectionSnapshot()
+      resetSessionState()
+    }
+
     setOpen(nextOpen)
 
     if (nextOpen) {
       setIsSelectionToolbarVisible(false)
-      return
     }
-
-    setIsRunning(false)
-    setResult(null)
-    setErrorMessage(null)
-  }, [setIsSelectionToolbarVisible])
+  }, [captureSelectionSnapshot, clearSelectionSnapshot, resetSessionState, setIsSelectionToolbarVisible])
 
   if (!activeFeature) {
     return null
@@ -205,17 +221,20 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
         <Icon icon={activeFeature.icon} strokeWidth={0.8} className="size-4.5" />
       </SelectionPopover.Trigger>
 
-      <SelectionPopover.Content container={shadowWrapper ?? document.body}>
+      <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
         <SelectionPopover.Header className="border-b">
           <SelectionToolbarTitleContent title={activeFeature.name} icon={activeFeature.icon} />
-          <SelectionPopover.Close />
+          <div className="flex items-center gap-1">
+            <SelectionPopover.Pin />
+            <SelectionPopover.Close />
+          </div>
         </SelectionPopover.Header>
 
         <SelectionPopover.Body ref={bodyRef}>
           <div className="p-4 space-y-4">
             <div className="border-b pb-4">
               <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">Selection</p>
-              <p className="text-sm whitespace-pre-wrap wrap-break-words text-zinc-700 dark:text-zinc-300">{selectionContent || "—"}</p>
+              <p className="text-sm whitespace-pre-wrap wrap-break-words text-zinc-700 dark:text-zinc-300">{selectionContentSnapshot || "—"}</p>
             </div>
 
             <StructuredObjectRenderer
