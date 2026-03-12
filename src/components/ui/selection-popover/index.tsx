@@ -6,6 +6,7 @@ import { IconGripHorizontal, IconX } from "@tabler/icons-react"
 import * as React from "react"
 import { createPortal } from "react-dom"
 import { Rnd } from "react-rnd"
+import { Button } from "@/components/ui/base-ui/button"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { cn } from "@/utils/styles/utils"
 import { useDismissOnOutsideMousedown } from "./use-dismiss-on-outside-mousedown"
@@ -210,7 +211,7 @@ function SelectionPopoverContent({
   }
 
   const floatingContent = (
-    <div className="fixed inset-0 z-[2147483647] pointer-events-none">
+    <div className="fixed inset-0 z-2147483647 pointer-events-none">
       <Rnd
         ref={rndRef}
         bounds="parent"
@@ -223,7 +224,7 @@ function SelectionPopoverContent({
         cancel={SELECTION_POPOVER_NO_DRAG_SELECTOR}
         enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
         resizeHandleStyles={SELECTION_POPOVER_RESIZE_HANDLE_STYLES}
-        className={`pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-white shadow-floating dark:bg-zinc-800 ${NOTRANSLATE_CLASS}`}
+        className={`pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-floating ${NOTRANSLATE_CLASS}`}
         style={{
           display: "flex",
           maxWidth: "100vw",
@@ -276,9 +277,6 @@ function SelectionPopoverHeader({
                 "absolute left-1/2 top-0 -translate-x-1/2 p-1 transition-all duration-200",
                 isDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100",
               )}
-              style={{
-                color: isDragging ? "var(--read-frog-primary)" : undefined,
-              }}
             >
               <IconGripHorizontal className="size-4" />
             </div>
@@ -324,93 +322,64 @@ function SelectionPopoverBody({
 
 function SelectionPopoverFooter({
   className,
-  render,
   ...props
-}: useRender.ComponentProps<"div"> & React.ComponentProps<"div">) {
-  return useRender({
-    defaultTagName: "div",
-    props: mergeProps<"div">(
-      {
-        className: cn("flex items-center gap-2 p-4", className),
-      },
-      props,
-    ),
-    render,
-    state: {
-      slot: "selection-popover-footer",
-    },
-  })
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      className={cn("flex items-center gap-2 p-4", className)}
+      {...props}
+    />
+  )
 }
 
 function SelectionPopoverTitle({
   className,
-  render,
   ...props
-}: useRender.ComponentProps<"h2"> & React.ComponentProps<"h2">) {
-  return useRender({
-    defaultTagName: "h2",
-    props: mergeProps<"h2">(
-      {
-        className: cn("text-base font-medium text-zinc-900 dark:text-zinc-100", className),
-      },
-      props,
-    ),
-    render,
-    state: {
-      slot: "selection-popover-title",
-    },
-  })
+}: React.ComponentProps<"h2">) {
+  return (
+    <h2
+      className={cn("text-base font-medium text-zinc-900 dark:text-zinc-100", className)}
+      {...props}
+    />
+  )
 }
 
 function SelectionPopoverDescription({
   className,
-  render,
   ...props
-}: useRender.ComponentProps<"p"> & React.ComponentProps<"p">) {
-  return useRender({
-    defaultTagName: "p",
-    props: mergeProps<"p">(
-      {
-        className: cn("text-sm text-zinc-600 dark:text-zinc-400", className),
-      },
-      props,
-    ),
-    render,
-    state: {
-      slot: "selection-popover-description",
-    },
-  })
+}: React.ComponentProps<"p">) {
+  return (
+    <p
+      className={cn("text-sm text-zinc-600 dark:text-zinc-400", className)}
+      {...props}
+    />
+  )
 }
 
 function SelectionPopoverClose({
   children,
   className,
-  render,
   ...props
-}: useRender.ComponentProps<"button"> & React.ComponentProps<"button">) {
+}: React.ComponentProps<typeof Button>) {
   const { close } = useSelectionPopoverContentContext()
 
-  const closeButtonProps = {
-    "type": "button",
-    "className": cn("rounded p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700", className),
-    "children": children ?? (
-      <>
-        <IconX strokeWidth={1} className="size-4 text-zinc-600 dark:text-zinc-400" />
-        <span className="sr-only">Close</span>
-      </>
-    ),
-    "onClick": close,
-    "data-rf-no-drag": true,
-  } as unknown as React.ComponentProps<"button">
-
-  return useRender({
-    defaultTagName: "button",
-    props: mergeProps<"button">(closeButtonProps, props),
-    render,
-    state: {
-      slot: "selection-popover-close",
-    },
-  })
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      className={cn("text-muted-foreground", className)}
+      onClick={close}
+      data-rf-no-drag
+      {...props}
+    >
+      {children ?? (
+        <>
+          <IconX />
+          <span className="sr-only">Close</span>
+        </>
+      )}
+    </Button>
+  )
 }
 
 const SelectionPopover = {

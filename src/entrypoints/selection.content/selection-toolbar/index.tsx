@@ -250,11 +250,11 @@ export function SelectionToolbar() {
           ref={tooltipRef}
           aria-hidden={!isSelectionToolbarVisible}
           className={cn(
-            "group absolute z-2147483647 bg-background rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity",
+            "group absolute z-2147483647 bg-popover rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity",
             isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
           )}
         >
-          <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-[420px] no-scrollbar">
+          <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
             <AiButton />
             <TranslateButton />
             {!isFirefox && <SpeakButton />}
