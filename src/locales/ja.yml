@@ -9,6 +9,7 @@ contextMenu:
   translate: 翻訳
   showOriginal: 原文を表示
 popup:
+  theme: テーマ
   autoLang: 自動検出
   sourceLang: ソース言語
   targetLang: 翻訳言語
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: 選択ツールバーを有効化
   alwaysTranslate: このサイトを常に翻訳する
   addToWhitelist: このサイトで拡張機能を有効にする
+  addToBlacklist: このサイトで拡張機能を無効にする
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: まず現在の設定をバックアップ（推奨）
   exportWithApiKeys: APIキーを含めてエクスポート
   exportWithoutApiKeys: APIキーを除外してエクスポート
-  resetTitle: 設定をリセット
+  recoveryTitle: 復旧オプション
+  refreshPage: ページを再読み込み
   resetAction: 設定をデフォルトにリセット
   resetSuccess: 復旧が完了しました。設定はリセットされました
   resetFailed: 復旧に失敗しました。設定をリセットできませんでした
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: リセット
     cancel: キャンセル
 options:
+  commandPalette:
+    placeholder: 設定を検索...
+    noResults: 設定が見つかりません
   sidebar:
     settings: 設定
     tools: ツール
@@ -164,6 +170,12 @@ options:
       testing: テスト中...
   general:
     title: 一般
+    appearance:
+      title: 外観
+      theme: テーマ
+      system: システム
+      light: ライト
+      dark: ダーク
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
@@ -193,12 +205,10 @@ options:
     title: サイト制御
     mode:
       title: 拡張機能の有効化モード
-      description: デフォルトでは、拡張機能はすべてのウェブサイトで実行されます。ホワイトリストモードを使用すると、特定のサイトのみに制限できます。
-      all: すべてのサイトで実行
-      whitelist: リストされたサイトでのみ実行（ホワイトリスト）
+      description: ブラックリストモードを使用して特定のサイトで拡張機能を無効にするか、ホワイトリストモードを使用して特定のサイトのみに制限できます。
+      blacklist: リストされたサイトでのみ無効
+      whitelist: リストされたサイトでのみ実行
     patterns:
-      title: 有効なサイト
-      description: ホワイトリストモードでは、拡張機能は以下にリストされたサイトでのみ有効になります
       enterUrlPattern: URLパターンを入力（例：example.com）
       urlPattern: URLパターン
   overlayTools:
@@ -302,12 +312,24 @@ options:
           addField: フィールドを追加
           fieldName: フィールド名
           fieldType: フィールド型
+          fieldDescription: 説明
+          fieldDescriptionPlaceholder: このフィールドに含めるべき内容を説明してください...
           actions: 操作
           cancel: キャンセル
           save: 保存
           defaultFieldName: 結果
           fieldNamePlaceholder: フィールド名
           autoFieldPrefix: フィールド
+          addFieldDialog:
+            title: 出力フィールドを追加
+          editFieldDialog:
+            title: 出力フィールドを編集
+            save: 保存
+          deleteFieldDialog:
+            title: 出力フィールドを削除しますか？
+            description: この出力フィールドは削除されます。
+            confirm: 削除
+            cancel: キャンセル
           tokens:
             selection: 選択したテキスト内容
             context: 選択テキストが含まれる段落内容
@@ -465,6 +487,7 @@ options:
     nodeTranslationHotkey:
       title: ホバーまたは長押し翻訳ショートカットキー
       description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
+      enable: 有効化
     llmProviderConfigured: $1の LLM プロバイダー選択済み
     llmProviderNotConfigured: $1の LLM プロバイダー未選択
     autoTranslateLanguages:
@@ -780,6 +803,10 @@ translationHub:
   translate: 翻訳
   copiedToClipboard: 翻訳をクリップボードにコピーしました！
   copyTranslation: 翻訳をコピー
+  expandCard: カードを展開
+  collapseCard: カードを折りたたむ
+  expandAllCards: すべて展開
+  collapseAllCards: すべて折りたたむ
   deleteCard: カードを削除
   translationFailed: 翻訳に失敗しました
   translationFailedFallback: 翻訳に失敗しました

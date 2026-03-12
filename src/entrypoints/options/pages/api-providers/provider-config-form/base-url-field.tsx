@@ -18,7 +18,7 @@ export const BaseURLField = withForm({
     return (
       <form.AppField name="baseURL">
         {field => (
-          <field.InputField
+          <field.InputFieldAutoSave
             formForSubmit={form}
             label={labelText}
             labelExtra={providerType === "ollama" && (

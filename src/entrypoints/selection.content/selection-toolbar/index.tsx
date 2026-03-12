@@ -24,8 +24,10 @@ function getSelectionDirection(
   endX: number,
   endY: number,
 ): SelectionDirection {
-  const isRightward = endX >= startX
-  const isDownward = endY >= startY
+  const DOWNWARD_TOLERANCE = 8
+
+  const isRightward = startX <= endX
+  const isDownward = startY - DOWNWARD_TOLERANCE <= endY
 
   if (isRightward && isDownward)
     return SelectionDirection.BOTTOM_RIGHT
@@ -43,21 +45,23 @@ function applyDirectionOffset(
   tooltipWidth: number,
   tooltipHeight: number,
 ): { x: number, y: number } {
+  const MARGIN = 12
   switch (direction) {
     case SelectionDirection.BOTTOM_RIGHT:
-      return { x: baseX, y: baseY }
+      return { x: baseX - MARGIN, y: baseY + MARGIN }
     case SelectionDirection.BOTTOM_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY }
+      return { x: baseX - tooltipWidth + MARGIN, y: baseY + MARGIN }
     case SelectionDirection.TOP_RIGHT:
-      return { x: baseX, y: baseY - tooltipHeight }
+      return { x: baseX - MARGIN, y: baseY - tooltipHeight - MARGIN }
     case SelectionDirection.TOP_LEFT:
-      return { x: baseX - tooltipWidth, y: baseY - tooltipHeight }
+      return { x: baseX - tooltipWidth + MARGIN, y: baseY - tooltipHeight - MARGIN }
     default:
-      return { x: baseX, y: baseY }
+      return { x: baseX - MARGIN, y: baseY + MARGIN }
   }
 }
 
 export function SelectionToolbar() {
+  const isFirefox = import.meta.env.BROWSER === "firefox"
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
   const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position (base position without direction offset)
@@ -243,12 +247,12 @@ export function SelectionToolbar() {
       {isSelectionToolbarVisible && selectionToolbar.enabled && !isSiteDisabled && (
         <div
           ref={tooltipRef}
-          className="group absolute z-2147483647 bg-zinc-200 dark:bg-zinc-800 rounded-sm shadow-lg overflow-visible flex items-center"
+          className="group absolute z-2147483647 bg-background rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center"
         >
           <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-[420px] no-scrollbar">
             <AiButton />
             <TranslateButton />
-            <SpeakButton />
+            {!isFirefox && <SpeakButton />}
             <SelectionToolbarCustomFeatureButtons />
           </div>
           <CloseButton />

@@ -1,4 +1,4 @@
-import type { Theme } from "@/components/providers/theme-provider"
+import type { Theme } from "@/types/config/theme"
 
 export function getLobeIconsCDNUrlFn(iconSlug: string) {
   return (theme: Theme = "light") => {

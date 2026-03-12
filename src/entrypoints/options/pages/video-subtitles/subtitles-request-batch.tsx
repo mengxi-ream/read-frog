@@ -16,6 +16,7 @@ type KeyOfBatchQueueConfig = keyof BatchQueueConfig
 export function SubtitlesRequestBatch() {
   return (
     <ConfigCard
+      id="subtitles-request-batch"
       title={i18n.t("options.videoSubtitles.batchQueueConfig.title")}
       description={i18n.t("options.videoSubtitles.batchQueueConfig.description")}
     >

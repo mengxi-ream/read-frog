@@ -60,3 +60,8 @@ export function formatHotkey(keys: string[]): string {
 
   return parts.join(" + ")
 }
+
+export function getCommandPaletteShortcutHint(): string {
+  const os = detectOS()
+  return (os === "MacOS" || os === "iOS") ? "⌘K" : "Ctrl+K"
+}

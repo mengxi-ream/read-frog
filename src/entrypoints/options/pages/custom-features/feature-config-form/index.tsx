@@ -2,7 +2,7 @@ import type { SelectionToolbarCustomFeature } from "@/types/config/selection-too
 import { i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useState } from "react"
-import { QuickInsertableTextareaField } from "@/components/form/quick-insertable-textarea-field"
+import { QuickInsertableTextareaFieldAutoSave } from "@/components/form/quick-insertable-textarea-field-auto-save"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,7 +19,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   getSelectionToolbarCustomFeatureTokenCellText,
   SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS,
-} from "@/utils/constants/selection-toolbar-custom-feature"
+} from "@/utils/constants/custom-feature"
 import { cn } from "@/utils/styles/utils"
 import { selectedCustomFeatureIdAtom } from "../atoms"
 import { formOpts, useAppForm } from "./form"
@@ -109,7 +109,7 @@ function CustomFeatureConfigEditor({ selectedFeature }: { selectedFeature: Selec
 
           <form.AppField name="systemPrompt">
             {() => (
-              <QuickInsertableTextareaField
+              <QuickInsertableTextareaFieldAutoSave
                 formForSubmit={form}
                 label={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.systemPrompt")}
                 className="min-h-36 max-h-80"
@@ -120,7 +120,7 @@ function CustomFeatureConfigEditor({ selectedFeature }: { selectedFeature: Selec
 
           <form.AppField name="prompt">
             {() => (
-              <QuickInsertableTextareaField
+              <QuickInsertableTextareaFieldAutoSave
                 formForSubmit={form}
                 label={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.prompt")}
                 className="min-h-28 max-h-80"

@@ -7,7 +7,6 @@ export const PAUSE_TIMEOUT_MS = 1_000
 
 // Segmentation constants
 export const MAX_WORDS = 15
-export const MAX_WORDS_EXTENDED = 25
 export const MAX_CHARS_CJK = 30
 export const SENTENCE_END_PATTERN = /[,.。?？！!；;…؟۔\n]$/
 

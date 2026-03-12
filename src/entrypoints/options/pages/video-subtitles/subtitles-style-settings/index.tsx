@@ -8,6 +8,7 @@ import { TranslationSubtitlesStyle } from "./components/translation-subtitles-st
 export function SubtitlesStyleSettings() {
   return (
     <ConfigCard
+      id="subtitles-style"
       className="lg:flex-col"
       title={i18n.t("options.videoSubtitles.style.title")}
       description={i18n.t("options.videoSubtitles.style.description")}

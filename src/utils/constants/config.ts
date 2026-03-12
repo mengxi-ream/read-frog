@@ -1,10 +1,11 @@
 import type { Config } from "@/types/config/config"
+import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
+import { CUSTOM_FEATURE_TEMPLATES } from "./custom-feature-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
 import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
-import { DEFAULT_DICTIONARY_FEATURE } from "./selection-toolbar-custom-feature"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
-import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR, DEFAULT_TRANSLATION_POSITION } from "./subtitles"
+import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR, DEFAULT_SUBTITLE_POSITION, DEFAULT_TRANSLATION_POSITION } from "./subtitles"
 import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_MIN_WORDS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE } from "./translate"
 import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from "./translation-node-style"
 import { DEFAULT_TTS_CONFIG } from "./tts"
@@ -13,11 +14,32 @@ export const CONFIG_STORAGE_KEY = "config"
 export const LAST_SYNCED_CONFIG_STORAGE_KEY = "lastSyncedConfig"
 export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
+export const THEME_STORAGE_KEY = "theme"
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 56
+export const CONFIG_SCHEMA_VERSION = 59
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
+
+function createDefaultDictionaryFeature(): SelectionToolbarCustomFeature | null {
+  const template = CUSTOM_FEATURE_TEMPLATES.find(t => t.id === "dictionary")
+  if (!template)
+    return null
+
+  const feature = template.createFeature("openai-default")
+  return {
+    ...feature,
+    id: "default-dictionary",
+    outputSchema: feature.outputSchema.map(field => ({
+      ...field,
+      id: field.id.startsWith("dictionary-")
+        ? `default-${field.id}`
+        : `default-dictionary-${field.id}`,
+    })),
+  }
+}
+
+const defaultDictionaryFeature = createDefaultDictionaryFeature()
 
 export const DEFAULT_CONFIG: Config = {
   language: {
@@ -30,7 +52,7 @@ export const DEFAULT_CONFIG: Config = {
     providerId: "microsoft-translate-default",
     mode: "bilingual",
     node: {
-      enabled: true,
+      enabled: false,
       hotkey: "control",
     },
     page: {
@@ -83,7 +105,7 @@ export const DEFAULT_CONFIG: Config = {
         providerId: "openai-default",
       },
     },
-    customFeatures: [DEFAULT_DICTIONARY_FEATURE],
+    customFeatures: defaultDictionaryFeature ? [defaultDictionaryFeature] : [],
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,
@@ -135,10 +157,12 @@ export const DEFAULT_CONFIG: Config = {
       maxItemsPerBatch: DEFAULT_BATCH_CONFIG.maxItemsPerBatch,
     },
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
+    position: DEFAULT_SUBTITLE_POSITION,
   },
   siteControl: {
-    mode: "all",
-    patterns: [],
+    mode: "blacklist",
+    blacklistPatterns: [],
+    whitelistPatterns: [],
   },
 }
 

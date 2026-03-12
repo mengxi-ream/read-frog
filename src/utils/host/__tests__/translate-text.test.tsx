@@ -1,7 +1,9 @@
+// @vitest-environment jsdom
+
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
-import { translateTextForPage } from "@/utils/host/translate/translate-variants"
+import { translateTextForPage, translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 
 // Mock dependencies
@@ -21,24 +23,38 @@ vi.mock("@/utils/prompts/translate", () => ({
   getTranslatePrompt: vi.fn(),
 }))
 
+vi.mock("@/utils/host/translate/article-context", () => ({
+  getOrFetchArticleData: vi.fn(),
+}))
+
 let mockSendMessage: any
 let mockMicrosoftTranslate: any
 let mockGetConfigFromStorage: any
 let mockGetTranslatePrompt: any
+let mockGetOrFetchArticleData: any
 
 describe("translate-text", () => {
   beforeEach(async () => {
     vi.clearAllMocks()
+    document.title = "Document Title"
+    document.body.innerHTML = "<main>Body content</main>"
     mockSendMessage = vi.mocked((await import("@/utils/message")).sendMessage)
     mockMicrosoftTranslate = vi.mocked((await import("@/utils/host/translate/api/microsoft")).microsoftTranslate)
     mockGetConfigFromStorage = vi.mocked((await import("@/utils/config/storage")).getLocalConfig)
     mockGetTranslatePrompt = vi.mocked((await import("@/utils/prompts/translate")).getTranslatePrompt)
+    mockGetOrFetchArticleData = vi.mocked((await import("@/utils/host/translate/article-context")).getOrFetchArticleData)
+
+    // Mock getOrFetchArticleData to return document.title
+    mockGetOrFetchArticleData.mockImplementation(() => Promise.resolve({ title: document.title }))
 
     // Mock getConfigFromStorage to return DEFAULT_CONFIG
     mockGetConfigFromStorage.mockResolvedValue(DEFAULT_CONFIG)
 
-    // Mock getTranslatePrompt to return a simple prompt
-    mockGetTranslatePrompt.mockResolvedValue("Translate to {{targetLang}}: {{input}}")
+    // Mock getTranslatePrompt to return a simple prompt pair
+    mockGetTranslatePrompt.mockResolvedValue({
+      systemPrompt: "Translate to {{targetLang}}",
+      prompt: "{{input}}",
+    })
   })
 
   describe("translateTextForPage", () => {
@@ -54,6 +70,64 @@ describe("translate-text", () => {
         providerConfig: expect.any(Object),
         scheduleAt: expect.any(Number),
         hash: expect.any(String),
+      }))
+    })
+  })
+
+  describe("translateTextForPageTitle", () => {
+    it("should use the latest original title instead of document.title when building article context", async () => {
+      const llmConfig = {
+        ...DEFAULT_CONFIG,
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          providerId: "openai-default",
+          enableAIContentAware: false,
+        },
+      }
+
+      mockGetConfigFromStorage.mockResolvedValue(llmConfig)
+      mockSendMessage.mockImplementation(async (type: string) => {
+        if (type === "enqueueTranslateRequest") {
+          return "translated page title"
+        }
+        return undefined
+      })
+      document.title = "Translated Browser Title"
+
+      const result = await translateTextForPageTitle("Source Title To Translate")
+
+      expect(result).toBe("translated page title")
+      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
+        text: "Source Title To Translate",
+        articleTitle: "Source Title To Translate",
+      }))
+    })
+
+    it("should forward document.title to regular page translations", async () => {
+      const llmConfig = {
+        ...DEFAULT_CONFIG,
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          providerId: "openai-default",
+          enableAIContentAware: false,
+        },
+      }
+
+      mockGetConfigFromStorage.mockResolvedValue(llmConfig)
+      mockSendMessage.mockImplementation(async (type: string) => {
+        if (type === "enqueueTranslateRequest") {
+          return "translated body text"
+        }
+        return undefined
+      })
+      document.title = "Translated Browser Title"
+
+      const result = await translateTextForPage("Body text")
+
+      expect(result).toBe("translated body text")
+      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
+        text: "Body text",
+        articleTitle: "Translated Browser Title",
       }))
     })
   })

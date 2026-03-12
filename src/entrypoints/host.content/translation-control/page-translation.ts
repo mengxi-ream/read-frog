@@ -4,8 +4,10 @@ import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
+import { getOrFetchArticleData } from "@/utils/host/translate/article-context"
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
+import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 
@@ -52,6 +54,10 @@ export class PageTranslationManager implements IPageTranslationManager {
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private dontWalkIntoElementsCache = new WeakSet<HTMLElement>()
+  private titleObserver: MutationObserver | null = null
+  private lastSourceTitle: string | null = null
+  private lastAppliedTranslatedTitle: string | null = null
+  private titleRequestVersion = 0
 
   constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
     if (intersectionOptions.threshold !== undefined) {
@@ -92,11 +98,13 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    void sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
+    await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
       enabled: true,
     })
 
     this.isPageTranslating = true
+    await this.primeDocumentTitleContext(config.translate.enableAIContentAware)
+    this.startDocumentTitleTracking()
 
     // Listen to existing elements when they enter the viewpoint
     const walkId = crypto.randomUUID()
@@ -140,6 +148,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.isPageTranslating = false
     this.walkId = null
     this.dontWalkIntoElementsCache = new WeakSet()
+    this.stopDocumentTitleTracking()
 
     if (this.intersectionObserver) {
       this.intersectionObserver.disconnect()
@@ -203,6 +212,129 @@ export class PageTranslationManager implements IPageTranslationManager {
       document.removeEventListener("touchmove", onMove)
       document.removeEventListener("touchend", onEnd)
       document.removeEventListener("touchcancel", reset)
+    }
+  }
+
+  private shouldManageDocumentTitle(): boolean {
+    return window === window.top
+  }
+
+  private async primeDocumentTitleContext(enableAIContentAware: boolean): Promise<void> {
+    if (!this.shouldManageDocumentTitle()) {
+      return
+    }
+
+    try {
+      await getOrFetchArticleData(enableAIContentAware)
+    }
+    catch (error) {
+      logger.warn("Failed to prime article context before translating document title:", error)
+    }
+  }
+
+  private startDocumentTitleTracking(): void {
+    if (!this.shouldManageDocumentTitle()) {
+      return
+    }
+
+    this.lastSourceTitle = document.title || ""
+    this.lastAppliedTranslatedTitle = null
+    this.titleRequestVersion = 0
+
+    this.observeDocumentTitle()
+    void this.syncDocumentTitle(this.lastSourceTitle)
+  }
+
+  private stopDocumentTitleTracking(): void {
+    if (!this.shouldManageDocumentTitle()) {
+      return
+    }
+
+    const currentTitle = document.title || ""
+    if (currentTitle !== this.lastAppliedTranslatedTitle) {
+      this.lastSourceTitle = currentTitle
+    }
+
+    if (this.titleObserver) {
+      this.titleObserver.disconnect()
+      this.titleObserver = null
+    }
+
+    this.titleRequestVersion++
+
+    if (this.lastSourceTitle !== null && document.title !== this.lastSourceTitle) {
+      document.title = this.lastSourceTitle
+    }
+
+    this.lastSourceTitle = null
+    this.lastAppliedTranslatedTitle = null
+  }
+
+  private observeDocumentTitle(): void {
+    if (!document.head) {
+      return
+    }
+
+    if (this.titleObserver) {
+      this.titleObserver.disconnect()
+    }
+
+    this.titleObserver = new MutationObserver(() => {
+      this.handleDocumentTitleMutation()
+    })
+
+    this.titleObserver.observe(document.head, {
+      childList: true,
+      subtree: true,
+      characterData: true,
+    })
+  }
+
+  private handleDocumentTitleMutation(): void {
+    if (!this.isPageTranslating || !this.shouldManageDocumentTitle()) {
+      return
+    }
+
+    const currentTitle = document.title || ""
+
+    if (currentTitle === this.lastSourceTitle) {
+      return
+    }
+
+    if (currentTitle === this.lastAppliedTranslatedTitle) {
+      return
+    }
+
+    this.lastSourceTitle = currentTitle
+    void this.syncDocumentTitle(currentTitle)
+  }
+
+  private async syncDocumentTitle(sourceTitle: string): Promise<void> {
+    if (!sourceTitle.trim() || !this.isPageTranslating || !this.shouldManageDocumentTitle()) {
+      return
+    }
+
+    const requestVersion = ++this.titleRequestVersion
+
+    try {
+      const translatedTitle = await translateTextForPageTitle(sourceTitle)
+      if (!this.isPageTranslating || requestVersion !== this.titleRequestVersion) {
+        return
+      }
+
+      const nextTitle = translatedTitle || sourceTitle
+      this.lastAppliedTranslatedTitle = nextTitle
+
+      if (document.title === nextTitle) {
+        return
+      }
+
+      document.title = nextTitle
+    }
+    catch (error) {
+      if (requestVersion === this.titleRequestVersion) {
+        logger.warn("Failed to translate document title:", error)
+      }
     }
   }
 

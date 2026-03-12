@@ -9,6 +9,7 @@ contextMenu:
   translate: Çevir
   showOriginal: Orijinali Göster
 popup:
+  theme: Tema
   autoLang: Otomatik
   sourceLang: Kaynak
   targetLang: Hedef
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: Seçim araç çubuğunu etkinleştir
   alwaysTranslate: Bu siteyi her zaman çevir
   addToWhitelist: Bu sitede uzantıyı etkinleştir
+  addToBlacklist: Bu sitede uzantıyı devre dışı bırak
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: Önce geçerli ayarları yedekleyin (önerilir)
   exportWithApiKeys: API Anahtarlarıyla Dışa Aktar
   exportWithoutApiKeys: API Anahtarları olmadan Dışa Aktar
-  resetTitle: Ayarları sıfırla
+  recoveryTitle: Kurtarma seçenekleri
+  refreshPage: Sayfayı yenile
   resetAction: Varsayılan ayarlara sıfırla
   resetSuccess: Kurtarma tamamlandı. Ayarlar sıfırlandı
   resetFailed: Kurtarma başarısız oldu. Ayarlar sıfırlanamadı
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: Sıfırla
     cancel: İptal
 options:
+  commandPalette:
+    placeholder: Ayarları ara...
+    noResults: Ayar bulunamadı
   sidebar:
     settings: Ayarlar
     tools: Araçlar
@@ -164,6 +170,12 @@ options:
       testing: Test ediliyor...
   general:
     title: Genel
+    appearance:
+      title: Görünüm
+      theme: Tema
+      system: Sistem
+      light: Açık
+      dark: Koyu
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
@@ -193,12 +205,10 @@ options:
     title: Site Kontrolü
     mode:
       title: Uzantı Etkinleştirme Modu
-      description: Varsayılan olarak uzantı tüm web sitelerinde çalışır. Beyaz liste modunu kullanarak uzantıyı yalnızca belirli sitelerle sınırlayabilirsiniz.
-      all: Tüm sitelerde çalıştır
-      whitelist: Yalnızca listelenen sitelerde çalıştır (Beyaz Liste)
+      description: Kara liste modunu kullanarak uzantıyı belirli sitelerde devre dışı bırakabilir veya beyaz liste modunu kullanarak yalnızca belirli sitelerle sınırlayabilirsiniz.
+      blacklist: Yalnızca listelenen sitelerde devre dışı bırak
+      whitelist: Yalnızca listelenen sitelerde çalıştır
     patterns:
-      title: Etkin Siteler
-      description: Beyaz liste modunda uzantı yalnızca aşağıda listelenen sitelerde etkin olacaktır
       enterUrlPattern: URL deseni girin (örn. example.com)
       urlPattern: URL Deseni
   overlayTools:
@@ -302,12 +312,24 @@ options:
           addField: Alan Ekle
           fieldName: Alan Adı
           fieldType: Alan Türü
+          fieldDescription: Açıklama
+          fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
           actions: İşlemler
           cancel: İptal
           save: Kaydet
           defaultFieldName: sonuç
           fieldNamePlaceholder: alan_adı
           autoFieldPrefix: alan
+          addFieldDialog:
+            title: Çıktı Alanı Ekle
+          editFieldDialog:
+            title: Çıktı Alanını Düzenle
+            save: Kaydet
+          deleteFieldDialog:
+            title: Çıktı Alanı Silinsin mi?
+            description: Bu çıktı alanı kaldırılacaktır.
+            confirm: Sil
+            cancel: İptal
           tokens:
             selection: Seçilen metin içeriği
             context: Seçilen metnin bulunduğu paragraf metni
@@ -465,6 +487,7 @@ options:
     nodeTranslationHotkey:
       title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
       description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
+      enable: Etkinleştir
     llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
     llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
     autoTranslateLanguages:
@@ -780,6 +803,10 @@ translationHub:
   translate: Çevir
   copiedToClipboard: Çeviri panoya kopyalandı!
   copyTranslation: Çeviriyi kopyala
+  expandCard: Kartı genişlet
+  collapseCard: Kartı daralt
+  expandAllCards: Tümünü genişlet
+  collapseAllCards: Tümünü daralt
   deleteCard: Kartı sil
   translationFailed: Çeviri Başarısız
   translationFailedFallback: Çeviri başarısız

@@ -1,5 +1,5 @@
-import type { Theme } from "@/components/providers/theme-provider"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { Theme } from "@/types/config/theme"
 import { i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
 import {

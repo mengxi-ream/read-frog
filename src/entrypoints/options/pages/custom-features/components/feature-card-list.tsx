@@ -1,21 +1,25 @@
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { CustomFeatureTemplate } from "@/utils/constants/custom-feature-templates"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
-import { useMemo } from "react"
+import { useMemo, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { createOutputSchemaField, DEFAULT_FEATURE_ICONS, DEFAULT_FEATURE_NAME } from "@/utils/constants/selection-toolbar-custom-feature"
+import { DEFAULT_FEATURE_NAME } from "@/utils/constants/custom-feature"
+import { getUniqueName } from "@/utils/name"
 import { cn } from "@/utils/styles/utils"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import { selectedCustomFeatureIdAtom } from "../atoms"
+import { AddFeatureDialog } from "./add-feature-dialog"
 
 export function CustomFeatureCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
   const [selectedCustomFeatureId, setSelectedCustomFeatureId] = useAtom(selectedCustomFeatureIdAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   const customFeatures = selectionToolbarConfig.customFeatures ?? []
   const llmProviders = useMemo(
@@ -23,47 +27,39 @@ export function CustomFeatureCardList() {
     [providersConfig],
   )
 
-  const handleAddFeature = () => {
-    if (llmProviders.length === 0) {
+  const handleTemplateSelect = (template: CustomFeatureTemplate) => {
+    if (llmProviders.length === 0)
       return
-    }
 
-    const existingFeatureNameSet = new Set(customFeatures.map(feature => feature.name))
-    let featureName = DEFAULT_FEATURE_NAME
-    for (let i = 0; i <= customFeatures.length; i++) {
-      const currentFeatureName = i === 0 ? DEFAULT_FEATURE_NAME : `${DEFAULT_FEATURE_NAME} ${i}`
-      if (!existingFeatureNameSet.has(currentFeatureName)) {
-        featureName = currentFeatureName
-        break
-      }
-    }
+    const newFeature = template.createFeature(llmProviders[0].id)
 
-    const newFeature: SelectionToolbarCustomFeature = {
-      id: crypto.randomUUID(),
-      name: featureName,
-      enabled: true,
-      icon: DEFAULT_FEATURE_ICONS[customFeatures.length % DEFAULT_FEATURE_ICONS.length],
-      providerId: llmProviders[0].id,
-      systemPrompt: "",
-      prompt: "",
-      outputSchema: [createOutputSchemaField(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.defaultFieldName"))],
-    }
+    const existingNames = new Set(customFeatures.map(f => f.name))
+    const baseName = template.id === "blank" ? DEFAULT_FEATURE_NAME : newFeature.name
+    newFeature.name = getUniqueName(baseName, existingNames)
 
     void setSelectionToolbarConfig({
       ...selectionToolbarConfig,
       customFeatures: [...customFeatures, newFeature],
     })
     setSelectedCustomFeatureId(newFeature.id)
+    setDialogOpen(false)
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <Button variant="outline" className="h-auto p-3 border-dashed rounded-xl" onClick={handleAddFeature} disabled={llmProviders.length === 0}>
-        <div className="flex items-center justify-center gap-2 w-full">
-          <Icon icon="tabler:plus" className="size-4" />
-          <span className="text-sm">{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.add")}</span>
-        </div>
-      </Button>
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger
+          render={(
+            <Button variant="outline" className="h-auto p-3 border-dashed rounded-xl" disabled={llmProviders.length === 0}>
+              <div className="flex items-center justify-center gap-2 w-full">
+                <Icon icon="tabler:plus" className="size-4" />
+                <span className="text-sm">{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.add")}</span>
+              </div>
+            </Button>
+          )}
+        />
+        <AddFeatureDialog onSelect={handleTemplateSelect} />
+      </Dialog>
 
       {llmProviders.length === 0 && (
         <div className="text-sm text-amber-600 dark:text-amber-400">

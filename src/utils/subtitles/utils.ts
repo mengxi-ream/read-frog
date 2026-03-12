@@ -1,4 +1,4 @@
-import { MAX_CHARS_CJK, MAX_WORDS, MAX_WORDS_EXTENDED } from "@/utils/constants/subtitles"
+import { MAX_CHARS_CJK, MAX_WORDS } from "@/utils/constants/subtitles"
 
 export function isCJKLanguage(lang?: string): boolean {
   if (!lang)
@@ -13,9 +13,9 @@ export function getTextLength(text: string, isCJK: boolean): number {
   return text.split(/\s+/).filter(Boolean).length
 }
 
-export function getMaxLength(isCJK: boolean, extended: boolean = false): number {
+export function getMaxLength(isCJK: boolean): number {
   if (isCJK) {
     return MAX_CHARS_CJK
   }
-  return extended ? MAX_WORDS_EXTENDED : MAX_WORDS
+  return MAX_WORDS
 }

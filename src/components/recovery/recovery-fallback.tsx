@@ -87,7 +87,10 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
         </div>
 
         <div className="flex flex-col gap-2">
-          <p className="text-sm font-medium">{i18n.t("errorRecovery.resetTitle")}</p>
+          <p className="text-sm font-medium">{i18n.t("errorRecovery.recoveryTitle")}</p>
+          <Button onClick={() => window.location.reload()}>
+            {i18n.t("errorRecovery.refreshPage")}
+          </Button>
           <AlertDialog>
             <AlertDialogTrigger render={<Button variant="destructive" disabled={isExporting || isResetting} />}>
               {i18n.t("errorRecovery.resetAction")}

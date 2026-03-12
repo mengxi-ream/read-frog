@@ -79,7 +79,13 @@ function calculateAnchorPosition(ctx: AnchorPositionContext): SubtitlePosition {
   return { percent: Math.max(0, percent), anchor: "bottom" }
 }
 
-export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number) {
+interface UseVerticalDragOptions {
+  controlsVisible: boolean
+  controlsHeight: number
+  onDragEnd?: (position: SubtitlePosition) => void
+}
+
+export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: UseVerticalDragOptions) {
   const containerRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
@@ -167,6 +173,8 @@ export function useVerticalDrag(controlsVisible: boolean, controlsHeight: number
       return
     isDraggingRef.current = false
     setIsDragging(false)
+
+    onDragEnd?.(position)
   })
 
   const clampPosition = useEffectEvent(() => {

@@ -4,7 +4,7 @@ import { Icon } from "@iconify/react"
 import { useStore } from "@tanstack/react-form"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
-import { ICON_PATTERN } from "@/utils/constants/selection-toolbar-custom-feature"
+import { ICON_PATTERN } from "@/utils/constants/custom-feature"
 import { withForm } from "./form"
 
 export const IconField = withForm({

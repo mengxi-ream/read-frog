@@ -9,6 +9,7 @@ contextMenu:
   translate: 번역
   showOriginal: 원문 보기
 popup:
+  theme: 테마
   autoLang: 자동
   sourceLang: 원본
   targetLang: 대상
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: 선택 툴바 활성화
   alwaysTranslate: 이 사이트 항상 번역
   addToWhitelist: 이 사이트에서 확장 프로그램 활성화
+  addToBlacklist: 이 사이트에서 확장 프로그램 비활성화
   options: 옵션
   hover: 마우스 오버
   translateParagraph: 단락 번역
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: 현재 설정 먼저 백업(권장)
   exportWithApiKeys: API Key 포함 내보내기
   exportWithoutApiKeys: API Key 제외 내보내기
-  resetTitle: 설정 초기화
+  recoveryTitle: 복구 옵션
+  refreshPage: 페이지 새로고침
   resetAction: 기본 설정으로 초기화
   resetSuccess: 복구가 완료되었습니다. 설정이 초기화되었습니다
   resetFailed: 복구에 실패했습니다. 설정을 초기화할 수 없습니다
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: 초기화
     cancel: 취소
 options:
+  commandPalette:
+    placeholder: 설정 검색...
+    noResults: 설정을 찾을 수 없습니다
   sidebar:
     settings: 설정
     tools: 도구
@@ -164,6 +170,12 @@ options:
       testing: 테스트 중...
   general:
     title: 일반
+    appearance:
+      title: 외관
+      theme: 테마
+      system: 시스템
+      light: 라이트
+      dark: 다크
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
@@ -193,12 +205,10 @@ options:
     title: 사이트 제어
     mode:
       title: 확장 프로그램 활성화 모드
-      description: 기본적으로 확장 프로그램은 모든 웹사이트에서 실행됩니다. 화이트리스트 모드를 사용하면 특정 사이트에서만 실행되도록 제한할 수 있습니다.
-      all: 모든 사이트에서 실행
-      whitelist: 나열된 사이트에서만 실행 (화이트리스트)
+      description: 블랙리스트 모드를 사용하여 특정 사이트에서 확장 프로그램을 비활성화하거나, 화이트리스트 모드를 사용하여 특정 사이트에서만 실행되도록 제한할 수 있습니다.
+      blacklist: 나열된 사이트에서만 비활성화
+      whitelist: 나열된 사이트에서만 실행
     patterns:
-      title: 활성화된 사이트
-      description: 화이트리스트 모드에서는 확장 프로그램이 아래에 나열된 사이트에서만 활성화됩니다
       enterUrlPattern: "URL 패턴 입력 (예: example.com)"
       urlPattern: URL 패턴
   overlayTools:
@@ -302,12 +312,24 @@ options:
           addField: 필드 추가
           fieldName: 필드 이름
           fieldType: 필드 유형
+          fieldDescription: 설명
+          fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
           actions: 작업
           cancel: 취소
           save: 저장
           defaultFieldName: 결과
           fieldNamePlaceholder: 필드명
           autoFieldPrefix: 필드
+          addFieldDialog:
+            title: 출력 필드 추가
+          editFieldDialog:
+            title: 출력 필드 편집
+            save: 저장
+          deleteFieldDialog:
+            title: 출력 필드를 삭제하시겠습니까?
+            description: 이 출력 필드가 제거됩니다.
+            confirm: 삭제
+            cancel: 취소
           tokens:
             selection: 선택한 텍스트 내용
             context: 선택 텍스트가 포함된 문단 내용
@@ -465,6 +487,7 @@ options:
     nodeTranslationHotkey:
       title: 호버 또는 길게 누르기 번역 단축키
       description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
+      enable: 활성화
     llmProviderConfigured: $1에 LLM 제공업체 선택됨
     llmProviderNotConfigured: $1에 LLM 제공업체 미선택
     autoTranslateLanguages:
@@ -780,6 +803,10 @@ translationHub:
   translate: 번역
   copiedToClipboard: 번역이 클립보드에 복사되었습니다!
   copyTranslation: 번역 복사
+  expandCard: 카드 펼치기
+  collapseCard: 카드 접기
+  expandAllCards: 모두 펼치기
+  collapseAllCards: 모두 접기
   deleteCard: 카드 삭제
   translationFailed: 번역 실패
   translationFailedFallback: 번역 실패

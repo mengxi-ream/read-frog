@@ -9,6 +9,7 @@ contextMenu:
   translate: 翻译
   showOriginal: 显示原文
 popup:
+  theme: 主题
   autoLang: 自动检测
   sourceLang: 来源语言
   targetLang: 目标语言
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: 启用选择工具栏
   alwaysTranslate: 总是翻译这个网站
   addToWhitelist: 在此网站启用扩展
+  addToBlacklist: 在此网站禁用扩展
   options: 选项
   hover: 鼠标悬停
   translateParagraph: 来翻译段落
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: 先备份当前设置（推荐）
   exportWithApiKeys: 导出（包含 API Keys）
   exportWithoutApiKeys: 导出（不包含 API Keys）
-  resetTitle: 重置设置
+  recoveryTitle: 恢复选项
+  refreshPage: 刷新页面
   resetAction: 重置为默认设置
   resetSuccess: 恢复完成，设置已重置
   resetFailed: 恢复失败，无法重置设置
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: 重置
     cancel: 取消
 options:
+  commandPalette:
+    placeholder: 搜索设置...
+    noResults: 未找到设置
   sidebar:
     settings: 设置
     tools: 工具
@@ -165,6 +171,12 @@ options:
       testing: 测试中...
   general:
     title: 通用
+    appearance:
+      title: 外观
+      theme: 主题
+      system: 跟随系统
+      light: 浅色
+      dark: 深色
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
@@ -194,12 +206,10 @@ options:
     title: 站点控制
     mode:
       title: 扩展激活模式
-      description: 默认情况下，扩展在所有网站上运行。使用白名单模式可以限制扩展仅在特定网站上运行。
-      all: 在所有站点运行
-      whitelist: 仅在列出的站点运行（白名单）
+      description: 使用黑名单模式可以在特定网站上禁用扩展，或使用白名单模式限制扩展仅在特定网站上运行。
+      blacklist: 仅在列出的站点禁止
+      whitelist: 仅在列出的站点运行
     patterns:
-      title: 启用的站点
-      description: 在白名单模式下，扩展仅在下方列出的网站上激活
       enterUrlPattern: 输入 URL 模式（例如 example.com）
       urlPattern: URL 模式
   overlayTools:
@@ -303,12 +313,24 @@ options:
           addField: 添加字段
           fieldName: 字段名
           fieldType: 字段类型
+          fieldDescription: 描述
+          fieldDescriptionPlaceholder: 描述此字段应包含的内容...
           actions: 操作
           cancel: 取消
           save: 保存
           defaultFieldName: 结果
           fieldNamePlaceholder: 字段名
           autoFieldPrefix: 字段
+          addFieldDialog:
+            title: 添加输出字段
+          editFieldDialog:
+            title: 编辑输出字段
+            save: 保存
+          deleteFieldDialog:
+            title: 删除输出字段？
+            description: 此输出字段将被移除。
+            confirm: 删除
+            cancel: 取消
           tokens:
             selection: 选中的文本内容
             context: 选中文本所在段落内容
@@ -320,6 +342,117 @@ options:
             description: 此操作无法撤销。
             confirm: 删除
             cancel: 取消
+        templates:
+          dialogTitle: 选择模板
+          dialogDescription: 选择模板快速创建新的 AI 功能，或从空白开始。
+          dictionary:
+            name: 词典
+            description: 查词释义，包含音标、词性和语境翻译
+            systemPrompt: |-
+              你是一个面向语言学习者的词典助手。
+
+              ## 目标
+              根据给定的词语及其上下文，生成简洁的词典条目，匹配所需的输出对象。
+
+              ## 规则
+              1. 聚焦于最匹配所提供上下文的含义。
+              2. 将词条规范化为其基本/标准形式。
+              3. 保持释义精确且适合学习者。
+              4. 保持语境简短，直接关联选中的文本。
+              5. 音标必须使用该语言的标准标注（如英语用 IPA，中文用拼音，日语用罗马字）。
+              6. 词性使用英文（noun, verb, adjective 等）。
+              7. 难度必须是 CEFR 等级（A1, A2, B1, B2, C1, 或 C2）。
+              8. 如果某个字段未知，返回空字符串而非猜测。
+              9. 除非需要保留原文形式，所有文本字段均使用 {{targetLang}} 作答。
+
+              ## 示例
+
+              ### 示例 1
+              输入：Selection="blossoms", Context="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", 目标语言=中文
+
+              输出：
+              - 词条：blossom
+              - 音标：/ˈblɒs.əm/
+              - 词性：noun
+              - 语境：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - 释义：花；花朵（尤指果树的花）
+              - 语境翻译：樱花短暂的美丽提醒我们珍惜每一刻。
+              - 难度：B2
+
+              ### 示例 2
+              输入：Selection="感動", Context="この映画はつまらないと思ったけど、最後は感動した。", 目标语言=英语
+
+              输出：
+              - 词条：感動
+              - 音标：kandou
+              - 词性：noun
+              - 语境：この映画はつまらないと思ったけど、最後は感動した。
+              - 释义：Being deeply moved; emotional touch
+              - 语境翻译：I thought this movie was boring, but the ending was moving.
+              - 难度：B1
+            prompt: |-
+              ## 输入
+              选中文本：{{selection}}
+              上下文：{{context}}
+              目标语言：{{targetLang}}
+            fieldTerm: 词条
+            fieldTermDescription: 选中词条的基本/标准词元形式。
+            fieldPhonetic: 音标
+            fieldPhoneticDescription: 该语言的标准音标（如英语用 IPA，中文用拼音，日语用罗马字）。
+            fieldPartOfSpeech: 词性
+            fieldPartOfSpeechDescription: 语法类别（如 noun、verb、adjective）。
+            fieldContext: 语境
+            fieldContextDescription: 上方提示词中的语境，请勿修改。
+            fieldDefinition: 释义
+            fieldDefinitionDescription: 针对语境含义的一条简洁释义。
+            fieldContextTranslation: 语境翻译
+            fieldContextTranslationDescription: 语境的翻译。
+            fieldDifficulty: 难度
+            fieldDifficultyDescription: 预估 CEFR 难度等级：A1、A2、B1、B2、C1 或 C2。
+          improveWriting:
+            name: 写作改进
+            description: 分析写作错误并提供改进建议
+            systemPrompt: |-
+              你是一个面向语言学习者的写作助手。
+
+              ## 目标
+              根据选中的文本及其上下文，分析写作问题并给出改进版本。
+
+              ## 语言规则（必须遵守）
+              1. “错误分析”字段必须使用 {{targetLang}}。
+              2. “改进版本”字段必须保持 Selection 的原文语言。
+              3. 除非 Selection 本身就是 {{targetLang}}，否则不要把“改进版本”翻译成 {{targetLang}}。
+
+              ## 写作规则
+              1. 识别语法、拼写、标点和用词错误。
+              2. 保持改写自然，尽量保留作者原意和语气。
+              3. 如果没有明显错误，请在“错误分析”中明确说明，并给出轻度润色后的“改进版本”。
+              4. “改进版本”应简洁、可直接使用。
+
+              ## 示例
+              示例 A：
+              - Selection（英文）: "He go to school yesterday, and he don't finish his homework."
+              - targetLang: 中文
+              - 错误分析（中文）: 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+              - 改进版本（英文）: He went to school yesterday, and he didn't finish his homework.
+
+              示例 B：
+              - Selection（英文）: "The service attitude of this store is very good."
+              - targetLang: 日文
+              - 错误分析（日文）: 文法はほぼ正しいですが、「service attitude」は不自然な直訳です。英語ではスタッフの対応を直接表現する方が自然です。
+              - 改进版本（英文）: The staff at this store are very friendly.
+            prompt: |-
+              ## 输入
+              选中文本：{{selection}}
+              上下文：{{context}}
+              目标语言：{{targetLang}}
+            fieldErrorAnalysis: 错误分析
+            fieldErrorAnalysisDescription: 用 {{targetLang}} 解释选中文本中的语法、拼写、标点和用词问题。
+            fieldImprovedVersion: 改进版本
+            fieldImprovedVersionDescription: 基于原文语言给出的选中文本修正与改进版本。
+          blank:
+            name: 空白
+            description: 从空白模板开始创建
         errors:
           nameRequired: 名称不能为空
           duplicateName: '重复的功能名称 "$1"'
@@ -466,6 +599,7 @@ options:
     nodeTranslationHotkey:
       title: 悬停或长按翻译快捷键
       description: 自定义悬停翻译的修饰键，或使用鼠标长按翻译段落
+      enable: 启用
     llmProviderConfigured: 已为$1选择 LLM 提供商
     llmProviderNotConfigured: 没有为$1选择 LLM 提供商
     autoTranslateLanguages:
@@ -781,6 +915,10 @@ translationHub:
   translate: 翻译
   copiedToClipboard: 翻译已复制到剪贴板！
   copyTranslation: 复制翻译
+  expandCard: 展开卡片
+  collapseCard: 折叠卡片
+  expandAllCards: 全部展开
+  collapseAllCards: 全部折叠
   deleteCard: 删除卡片
   translationFailed: 翻译失败
   translationFailedFallback: 翻译失败

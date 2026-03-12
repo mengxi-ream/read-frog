@@ -73,6 +73,7 @@ export function GoogleDriveSyncCard() {
   return (
     <>
       <ConfigCard
+        id="google-drive-sync"
         title={i18n.t("options.config.sync.googleDrive.title")}
         description={(
           <div className="flex flex-col gap-2">

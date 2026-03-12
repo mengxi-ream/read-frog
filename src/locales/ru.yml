@@ -9,6 +9,7 @@ contextMenu:
   translate: Перевести
   showOriginal: Показать оригинал
 popup:
+  theme: Тема
   autoLang: Авто
   sourceLang: Исходный
   targetLang: Целевой
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: Включить панель выделения
   alwaysTranslate: Всегда переводить этот сайт
   addToWhitelist: Включить расширение на этом сайте
+  addToBlacklist: Отключить расширение на этом сайте
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: Сначала сделайте резервную копию текущих настроек (рекомендуется)
   exportWithApiKeys: Экспортировать с API-ключами
   exportWithoutApiKeys: Экспортировать без API-ключей
-  resetTitle: Сбросить настройки
+  recoveryTitle: Варианты восстановления
+  refreshPage: Обновить страницу
   resetAction: Сбросить к настройкам по умолчанию
   resetSuccess: Восстановление завершено. Настройки были сброшены
   resetFailed: Восстановление не удалось. Не удалось сбросить настройки
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: Сбросить
     cancel: Отмена
 options:
+  commandPalette:
+    placeholder: Поиск настроек...
+    noResults: Настройки не найдены
   sidebar:
     settings: Настройки
     tools: Инструменты
@@ -164,6 +170,12 @@ options:
       testing: Тестирование...
   general:
     title: Общие
+    appearance:
+      title: Внешний вид
+      theme: Тема
+      system: Системная
+      light: Светлая
+      dark: Тёмная
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
@@ -193,12 +205,10 @@ options:
     title: Управление сайтами
     mode:
       title: Режим активации расширения
-      description: По умолчанию расширение работает на всех сайтах. Используйте режим белого списка, чтобы ограничить работу только указанными сайтами.
-      all: Работать на всех сайтах
-      whitelist: Работать только на указанных сайтах (белый список)
+      description: Используйте режим чёрного списка для отключения расширения на определённых сайтах или режим белого списка для ограничения работы только указанными сайтами.
+      blacklist: Отключить только на указанных сайтах
+      whitelist: Работать только на указанных сайтах
     patterns:
-      title: Активные сайты
-      description: В режиме белого списка расширение будет активно только на сайтах, перечисленных ниже
       enterUrlPattern: Введите шаблон URL (например, example.com)
       urlPattern: Шаблон URL
   overlayTools:
@@ -302,12 +312,24 @@ options:
           addField: Добавить поле
           fieldName: Имя поля
           fieldType: Тип поля
+          fieldDescription: Описание
+          fieldDescriptionPlaceholder: Опишите, что должно содержать это поле...
           actions: Действия
           cancel: Отмена
           save: Сохранить
           defaultFieldName: результат
           fieldNamePlaceholder: имя_поля
           autoFieldPrefix: поле
+          addFieldDialog:
+            title: Добавить поле вывода
+          editFieldDialog:
+            title: Редактировать поле вывода
+            save: Сохранить
+          deleteFieldDialog:
+            title: Удалить поле вывода?
+            description: Это поле вывода будет удалено.
+            confirm: Удалить
+            cancel: Отмена
           tokens:
             selection: Содержимое выделенного текста
             context: Текст абзаца, в котором находится выделение
@@ -465,6 +487,7 @@ options:
     nodeTranslationHotkey:
       title: Горячая клавиша перевода при наведении или долгом нажатии
       description: Настройте клавишу-модификатор для перевода при наведении или используйте долгое нажатие для перевода абзацев
+      enable: Включить
     llmProviderConfigured: LLM-провайдер выбран для $1
     llmProviderNotConfigured: LLM-провайдер не выбран для $1
     autoTranslateLanguages:
@@ -780,6 +803,10 @@ translationHub:
   translate: Перевести
   copiedToClipboard: Перевод скопирован в буфер обмена!
   copyTranslation: Копировать перевод
+  expandCard: Развернуть карточку
+  collapseCard: Свернуть карточку
+  expandAllCards: Развернуть все
+  collapseAllCards: Свернуть все
   deleteCard: Удалить карточку
   translationFailed: Ошибка перевода
   translationFailedFallback: Ошибка перевода

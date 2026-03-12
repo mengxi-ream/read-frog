@@ -94,4 +94,14 @@ describe("isCustomDontWalkIntoElement", () => {
     expect(isDontWalkIntoAndDontTranslateAsChildElement(proseMirror, DEFAULT_CONFIG)).toBe(false)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(other, DEFAULT_CONFIG)).toBe(false)
   })
+
+  it("matches shreddit-post-flair element on www.reddit.com", () => {
+    setHost("www.reddit.com")
+
+    const postFlair = document.createElement("shreddit-post-flair")
+    document.body.appendChild(postFlair)
+
+    expect(isCustomDontWalkIntoElement(postFlair)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(postFlair, DEFAULT_CONFIG)).toBe(true)
+  })
 })

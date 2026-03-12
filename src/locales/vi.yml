@@ -9,6 +9,7 @@ contextMenu:
   translate: Dịch
   showOriginal: Hiển thị bản gốc
 popup:
+  theme: Chủ đề
   autoLang: Tự động
   sourceLang: Nguồn
   targetLang: Đích
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: Bật thanh công cụ chọn văn bản
   alwaysTranslate: Luôn dịch trang web này
   addToWhitelist: Bật tiện ích trên trang web này
+  addToBlacklist: Tắt tiện ích trên trang web này
   options: Tùy chọn
   hover: Di chuột
   translateParagraph: để dịch đoạn văn
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: Sao lưu cài đặt hiện tại trước (khuyến nghị)
   exportWithApiKeys: Xuất kèm API Key
   exportWithoutApiKeys: Xuất không kèm API Key
-  resetTitle: Đặt lại cài đặt
+  recoveryTitle: Tùy chọn khôi phục
+  refreshPage: Tải lại trang
   resetAction: Đặt lại về cài đặt mặc định
   resetSuccess: Khôi phục hoàn tất. Cài đặt đã được đặt lại
   resetFailed: Khôi phục thất bại. Không thể đặt lại cài đặt
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: Đặt lại
     cancel: Hủy
 options:
+  commandPalette:
+    placeholder: Tìm kiếm cài đặt...
+    noResults: Không tìm thấy cài đặt
   sidebar:
     settings: Cài đặt
     tools: Công cụ
@@ -164,6 +170,12 @@ options:
       testing: Đang kiểm tra...
   general:
     title: Chung
+    appearance:
+      title: Giao diện
+      theme: Chủ đề
+      system: Hệ thống
+      light: Sáng
+      dark: Tối
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng
@@ -193,12 +205,10 @@ options:
     title: Kiểm soát trang web
     mode:
       title: Chế độ kích hoạt tiện ích mở rộng
-      description: Theo mặc định, tiện ích mở rộng chạy trên tất cả các trang web. Sử dụng chế độ danh sách trắng để giới hạn chỉ các trang web cụ thể.
-      all: Chạy trên tất cả các trang web
-      whitelist: Chỉ chạy trên các trang web được liệt kê (Danh sách trắng)
+      description: Sử dụng chế độ danh sách đen để tắt tiện ích trên các trang web cụ thể, hoặc chế độ danh sách trắng để giới hạn chỉ các trang web cụ thể.
+      blacklist: Chỉ tắt trên các trang web được liệt kê
+      whitelist: Chỉ chạy trên các trang web được liệt kê
     patterns:
-      title: Các trang web đã bật
-      description: Trong chế độ danh sách trắng, tiện ích mở rộng chỉ hoạt động trên các trang web được liệt kê bên dưới
       enterUrlPattern: Nhập mẫu URL (ví dụ example.com)
       urlPattern: Mẫu URL
   overlayTools:
@@ -302,12 +312,24 @@ options:
           addField: Thêm trường
           fieldName: Tên trường
           fieldType: Loại trường
+          fieldDescription: Mô tả
+          fieldDescriptionPlaceholder: Mô tả nội dung mà trường này nên chứa...
           actions: Thao tác
           cancel: Hủy
           save: Lưu
           defaultFieldName: kết quả
           fieldNamePlaceholder: tên_trường
           autoFieldPrefix: trường
+          addFieldDialog:
+            title: Thêm trường đầu ra
+          editFieldDialog:
+            title: Chỉnh sửa trường đầu ra
+            save: Lưu
+          deleteFieldDialog:
+            title: Xóa trường đầu ra?
+            description: Trường đầu ra này sẽ bị xóa.
+            confirm: Xóa
+            cancel: Hủy
           tokens:
             selection: Nội dung văn bản đã chọn
             context: Nội dung đoạn văn chứa văn bản đã chọn
@@ -465,6 +487,7 @@ options:
     nodeTranslationHotkey:
       title: Phím tắt dịch khi di chuột hoặc nhấn giữ
       description: Tùy chỉnh phím bổ trợ khi di chuột hoặc dùng nhấn giữ để dịch đoạn văn
+      enable: Bật
     llmProviderConfigured: Đã chọn nhà cung cấp LLM cho $1
     llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
     autoTranslateLanguages:
@@ -780,6 +803,10 @@ translationHub:
   translate: Dịch
   copiedToClipboard: Đã sao chép bản dịch vào bộ nhớ tạm!
   copyTranslation: Sao chép bản dịch
+  expandCard: Mở rộng thẻ
+  collapseCard: Thu gọn thẻ
+  expandAllCards: Mở rộng tất cả
+  collapseAllCards: Thu gọn tất cả
   deleteCard: Xóa thẻ
   translationFailed: Dịch Thất Bại
   translationFailedFallback: Dịch thất bại

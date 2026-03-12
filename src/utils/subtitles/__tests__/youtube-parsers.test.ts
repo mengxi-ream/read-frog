@@ -367,16 +367,84 @@ describe("youTube Subtitle Parsers", () => {
       expect(result[0].text).toBe("Hello world.")
     })
 
-    it("should split on sentence boundaries", () => {
+    it("should split on sentence boundaries when lines are long enough", () => {
       const fragments = [
-        { text: "First sentence.", start: 0, end: 1000 },
-        { text: "Second sentence.", start: 1000, end: 2000 },
+        { text: "This is the first complete sentence that really ends right here.", start: 0, end: 1000 },
+        { text: "And this is the second complete sentence that also ends right here.", start: 1000, end: 2000 },
       ]
       const result = optimizeSubtitles(fragments, "en")
 
       expect(result).toHaveLength(2)
-      expect(result[0].text).toBe("First sentence.")
-      expect(result[1].text).toBe("Second sentence.")
+      expect(result[0].text).toBe("This is the first complete sentence that really ends right here.")
+      expect(result[1].text).toBe("And this is the second complete sentence that also ends right here.")
+    })
+
+    it("should merge short English lines into target range", () => {
+      const fragments = [
+        { text: "I agree.", start: 0, end: 500 },
+        { text: "It is true.", start: 500, end: 1000 },
+        { text: "We can do this.", start: 1000, end: 1500 },
+        { text: "Let's ship now.", start: 1500, end: 2000 },
+      ]
+
+      const result = optimizeSubtitles(fragments, "en")
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("I agree. It is true. We can do this. Let's ship now.")
+    })
+
+    it("should merge short non-English lines into target range", () => {
+      const fragments = [
+        { text: "我们走吧。", start: 0, end: 500 },
+        { text: "现在开始。", start: 500, end: 1000 },
+        { text: "马上出发。", start: 1000, end: 1500 },
+      ]
+
+      const result = optimizeSubtitles(fragments, "zh")
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("我们走吧。现在开始。马上出发。")
+    })
+
+    it("should stop merging when exceeding English upper bound", () => {
+      const fragments = [
+        { text: "one two three four five six seven eight nine ten.", start: 0, end: 500 },
+        { text: "eleven twelve thirteen fourteen fifteen sixteen seventeen eighteen nineteen twenty.", start: 500, end: 1000 },
+        { text: "extra words.", start: 1000, end: 1500 },
+      ]
+
+      const result = optimizeSubtitles(fragments, "en")
+
+      expect(result).toHaveLength(2)
+      expect(result[0].text.split(/\s+/).length).toBe(20)
+      expect(result[1].text).toBe("extra words.")
+    })
+
+    it("should use non-CJK range for French text", () => {
+      const fragments = [
+        { text: "one two three four five six seven.", start: 0, end: 500 },
+        { text: "eight nine ten eleven twelve thirteen.", start: 500, end: 1000 },
+        { text: "fourteen fifteen sixteen seventeen eighteen nineteen twenty twenty-one twenty-two twenty-three.", start: 1000, end: 1500 },
+      ]
+
+      const result = optimizeSubtitles(fragments, "fr")
+
+      expect(result).toHaveLength(2)
+      expect(result[0].text.split(/\s+/).length).toBe(13)
+      expect(result[1].text.split(/\s+/).length).toBe(10)
+    })
+
+    it("should treat Thai as CJK group and merge short lines", () => {
+      const fragments = [
+        { text: "สวัสดี", start: 0, end: 500 },
+        { text: "ครับ", start: 500, end: 1000 },
+      ]
+
+      const result = optimizeSubtitles(fragments, "th")
+
+      // Both fragments are short (< 15 CJK min), should merge
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("สวัสดีครับ")
     })
 
     it("should split on timeout (gap > 1000ms)", () => {

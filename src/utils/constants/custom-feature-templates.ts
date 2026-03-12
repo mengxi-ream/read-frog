@@ -1,0 +1,77 @@
+import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import { i18n } from "#imports"
+import { createOutputSchemaField } from "./custom-feature"
+
+const T_PREFIX = "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.templates"
+
+export interface CustomFeatureTemplate {
+  id: string
+  nameKey: string
+  descriptionKey: string
+  icon: string
+  createFeature: (providerId: string) => SelectionToolbarCustomFeature
+}
+
+export const CUSTOM_FEATURE_TEMPLATES: CustomFeatureTemplate[] = [
+  {
+    id: "dictionary",
+    nameKey: `${T_PREFIX}.dictionary.name`,
+    descriptionKey: `${T_PREFIX}.dictionary.description`,
+    icon: "tabler:book-2",
+    createFeature: (providerId: string): SelectionToolbarCustomFeature => ({
+      id: crypto.randomUUID(),
+      name: i18n.t(`${T_PREFIX}.dictionary.name`),
+      enabled: true,
+      icon: "tabler:book-2",
+      providerId,
+      systemPrompt: i18n.t(`${T_PREFIX}.dictionary.systemPrompt`),
+      prompt: i18n.t(`${T_PREFIX}.dictionary.prompt`),
+      outputSchema: [
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldTerm`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldTermDescription`), "dictionary-term"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldPhonetic`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldPhoneticDescription`), "dictionary-phonetic"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeech`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeechDescription`), "dictionary-part-of-speech"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldDefinition`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldDefinitionDescription`), "dictionary-definition"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldContext`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldContextDescription`), "dictionary-context"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldContextTranslation`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldContextTranslationDescription`), "dictionary-context-translation"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldDifficulty`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldDifficultyDescription`), "dictionary-difficulty"),
+      ],
+    }),
+  },
+  {
+    id: "improve-writing",
+    nameKey: `${T_PREFIX}.improveWriting.name`,
+    descriptionKey: `${T_PREFIX}.improveWriting.description`,
+    icon: "tabler:pencil-check",
+    createFeature: (providerId: string): SelectionToolbarCustomFeature => ({
+      id: crypto.randomUUID(),
+      name: i18n.t(`${T_PREFIX}.improveWriting.name`),
+      enabled: true,
+      icon: "tabler:pencil-check",
+      providerId,
+      systemPrompt: i18n.t(`${T_PREFIX}.improveWriting.systemPrompt`),
+      prompt: i18n.t(`${T_PREFIX}.improveWriting.prompt`),
+      outputSchema: [
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysis`), "string", i18n.t(`${T_PREFIX}.improveWriting.fieldErrorAnalysisDescription`)),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersion`), "string", i18n.t(`${T_PREFIX}.improveWriting.fieldImprovedVersionDescription`)),
+      ],
+    }),
+  },
+  {
+    id: "blank",
+    nameKey: `${T_PREFIX}.blank.name`,
+    descriptionKey: `${T_PREFIX}.blank.description`,
+    icon: "tabler:sparkles",
+    createFeature: (providerId: string): SelectionToolbarCustomFeature => ({
+      id: crypto.randomUUID(),
+      name: i18n.t(`${T_PREFIX}.blank.name`),
+      enabled: true,
+      icon: "tabler:sparkles",
+      providerId,
+      systemPrompt: "",
+      prompt: "",
+      outputSchema: [
+        createOutputSchemaField(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.defaultFieldName")),
+      ],
+    }),
+  },
+]

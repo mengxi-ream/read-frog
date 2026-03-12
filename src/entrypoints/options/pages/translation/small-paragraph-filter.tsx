@@ -14,6 +14,7 @@ export function SmallParagraphFilter() {
 
   return (
     <ConfigCard
+      id="small-paragraph-filter"
       title={i18n.t("options.translation.smallParagraphFilter.title")}
       description={i18n.t("options.translation.smallParagraphFilter.description")}
     >

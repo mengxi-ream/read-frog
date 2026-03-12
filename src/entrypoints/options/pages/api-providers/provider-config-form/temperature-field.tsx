@@ -18,7 +18,7 @@ export const TemperatureField = withForm({
     return (
       <form.AppField name="temperature">
         {field => (
-          <field.InputField
+          <field.InputFieldAutoSave
             formForSubmit={form}
             label={(
               <div className="flex items-center gap-1.5">

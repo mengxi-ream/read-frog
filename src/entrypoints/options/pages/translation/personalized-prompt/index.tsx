@@ -5,6 +5,7 @@ import { promptAtoms } from "./atoms"
 export function PersonalizedPrompts() {
   return (
     <PromptConfigurator
+      id="personalized-prompts"
       promptAtoms={promptAtoms}
       title={i18n.t("options.translation.personalizedPrompts.title")}
       description={(

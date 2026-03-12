@@ -30,7 +30,7 @@ export const NameField = withForm({
           },
         }}
       >
-        {field => <field.InputField formForSubmit={form} label={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.name")} />}
+        {field => <field.InputFieldAutoSave formForSubmit={form} label={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.name")} />}
       </form.AppField>
     )
   },

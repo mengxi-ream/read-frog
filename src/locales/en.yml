@@ -9,6 +9,7 @@ contextMenu:
   translate: Translate
   showOriginal: Show Original
 popup:
+  theme: Theme
   autoLang: Auto
   sourceLang: Source
   targetLang: Target
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: Enable selection toolbar
   alwaysTranslate: Always translate this site
   addToWhitelist: Enable extension on this site
+  addToBlacklist: Disable extension on this site
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: Backup current settings first (recommended)
   exportWithApiKeys: Export with API Keys
   exportWithoutApiKeys: Export without API Keys
-  resetTitle: Reset settings
+  recoveryTitle: Recovery options
+  refreshPage: Refresh the page
   resetAction: Reset to default settings
   resetSuccess: Recovery completed. Settings have been reset
   resetFailed: Recovery failed. Unable to reset settings
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: Reset
     cancel: Cancel
 options:
+  commandPalette:
+    placeholder: Search settings...
+    noResults: No settings found
   sidebar:
     settings: Settings
     tools: Tools
@@ -165,6 +171,12 @@ options:
       testing: Testing...
   general:
     title: General
+    appearance:
+      title: Appearance
+      theme: Theme
+      system: System
+      light: Light
+      dark: Dark
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
@@ -194,12 +206,10 @@ options:
     title: Site Control
     mode:
       title: Extension Activation Mode
-      description: By default, the extension runs on all websites. Use whitelist mode to limit it to specific sites only.
-      all: Run on all sites
-      whitelist: Only run on listed sites (Whitelist)
+      description: Use blacklist mode to disable the extension on specific sites, or whitelist mode to limit it to specific sites only.
+      blacklist: Only disable on listed sites
+      whitelist: Only run on listed sites
     patterns:
-      title: Enabled Sites
-      description: When in whitelist mode, the extension will only be active on the sites listed below
       enterUrlPattern: Enter URL pattern (e.g., example.com)
       urlPattern: URL Pattern
   overlayTools:
@@ -303,12 +313,24 @@ options:
           addField: Add Field
           fieldName: Field Name
           fieldType: Field Type
+          fieldDescription: Description
+          fieldDescriptionPlaceholder: Describe what this field should contain...
           actions: Actions
           cancel: Cancel
           save: Save
           defaultFieldName: Result
           fieldNamePlaceholder: Field Name
           autoFieldPrefix: Field
+          addFieldDialog:
+            title: Add Output Field
+          editFieldDialog:
+            title: Edit Output Field
+            save: Save
+          deleteFieldDialog:
+            title: Delete Output Field?
+            description: This output field will be removed.
+            confirm: Delete
+            cancel: Cancel
           tokens:
             selection: Selected text content
             context: Paragraph text where the selection appears
@@ -320,6 +342,117 @@ options:
             description: This action cannot be undone.
             confirm: Delete
             cancel: Cancel
+        templates:
+          dialogTitle: Choose a Template
+          dialogDescription: Select a template to quickly create a new AI feature, or start from scratch.
+          dictionary:
+            name: Dictionary
+            description: Look up words with definitions, phonetics, and context translations
+            systemPrompt: |-
+              You are a dictionary assistant for language learners.
+
+              ## Goal
+              Given a term and its surrounding context, produce a concise dictionary entry that matches the required output object.
+
+              ## Rules
+              1. Focus on the meaning that best matches the provided context.
+              2. Normalize Term to its base/canonical form.
+              3. Keep Definition precise and learner-friendly.
+              4. Keep Context short and directly tied to the selected text.
+              5. Phonetic must use the standard notation for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
+              6. Part of Speech in English (noun, verb, adjective, etc.).
+              7. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
+              8. If a field is unknown, return an empty string instead of guessing.
+              9. Respond in {{targetLang}} for all textual fields unless source-form text is required for clarity.
+
+              ## Examples
+
+              ### Example 1
+              Input: Selection="blossoms", Context="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Target language=Chinese
+
+              Output:
+              - Term: blossom
+              - Phonetic: /ˈblɒs.əm/
+              - Part of Speech: noun
+              - Context: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - Definition: 花；花朵（尤指果树的花）
+              - Context Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
+              - Difficulty: B2
+
+              ### Example 2
+              Input: Selection="感動", Context="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
+
+              Output:
+              - Term: 感動
+              - Phonetic: kandou
+              - Part of Speech: noun
+              - Context: この映画はつまらないと思ったけど、最後は感動した。
+              - Definition: Being deeply moved; emotional touch
+              - Context Translation: I thought this movie was boring, but the ending was moving.
+              - Difficulty: B1
+            prompt: |-
+              ## Input
+              Selection: {{selection}}
+              Context: {{context}}
+              Target language: {{targetLang}}
+            fieldTerm: Term
+            fieldTermDescription: Base/canonical lemma of the selected term.
+            fieldPhonetic: Phonetic
+            fieldPhoneticDescription: Standard phonetic transcription for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
+            fieldPartOfSpeech: Part of Speech
+            fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
+            fieldContext: Context
+            fieldContextDescription: The context in the prompt above, don't change it.
+            fieldDefinition: Definition
+            fieldDefinitionDescription: One concise definition for the contextual sense.
+            fieldContextTranslation: Context Translation
+            fieldContextTranslationDescription: The translation of the context.
+            fieldDifficulty: Difficulty
+            fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
+          improveWriting:
+            name: Improve Writing
+            description: Analyze writing errors and suggest improvements
+            systemPrompt: |-
+              You are a writing assistant for language learners.
+
+              ## Goal
+              Given selected text and its surrounding context, analyze writing issues and produce an improved version.
+
+              ## Language Policy (critical)
+              1. The "Error Analysis" field must be written in {{targetLang}}.
+              2. The "Improved Version" field must stay in the original language of Selection.
+              3. Never translate "Improved Version" into {{targetLang}} unless Selection is already in {{targetLang}}.
+
+              ## Writing Rules
+              1. Identify grammar, spelling, punctuation, and word choice errors.
+              2. Keep edits natural and preserve the author's intent and tone.
+              3. If there are no major errors, state that clearly in "Error Analysis" and return a lightly polished "Improved Version".
+              4. Keep "Improved Version" concise and directly usable.
+
+              ## Examples
+              Example A:
+              - Selection (English): "He go to school yesterday, and he don't finish his homework."
+              - targetLang: Chinese
+              - Error Analysis (Chinese): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+              - Improved Version (English): He went to school yesterday, and he didn't finish his homework.
+
+              Example B:
+              - Selection (English): "The service attitude of this store is very good."
+              - targetLang: Japanese
+              - Error Analysis (Japanese): 文法はほぼ正しいですが、「service attitude」は不自然な直訳です。英語ではスタッフの対応を直接表現する方が自然です。
+              - Improved Version (English): The staff at this store are very friendly.
+            prompt: |-
+              ## Input
+              Selection: {{selection}}
+              Context: {{context}}
+              Target language: {{targetLang}}
+            fieldErrorAnalysis: Error Analysis
+            fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLang}}.
+            fieldImprovedVersion: Improved Version
+            fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
+          blank:
+            name: Blank
+            description: Start from scratch with an empty feature
         errors:
           nameRequired: Name is required
           duplicateName: 'Duplicate feature name "$1"'
@@ -466,6 +599,7 @@ options:
     nodeTranslationHotkey:
       title: Hover or Long-Press Translation Shortcut
       description: Customize the hover modifier key or use long press to translate paragraphs
+      enable: Enable
     llmProviderConfigured: LLM provider selected for $1
     llmProviderNotConfigured: No LLM provider selected for $1
     autoTranslateLanguages:
@@ -781,6 +915,10 @@ translationHub:
   translate: Translate
   copiedToClipboard: Translation copied to clipboard!
   copyTranslation: Copy translation
+  expandCard: Expand card
+  collapseCard: Collapse card
+  expandAllCards: Expand all
+  collapseAllCards: Collapse all
   deleteCard: Delete card
   translationFailed: Translation Failed
   translationFailedFallback: Translation failed

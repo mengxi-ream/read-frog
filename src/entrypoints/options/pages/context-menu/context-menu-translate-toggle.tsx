@@ -11,6 +11,7 @@ export function ContextMenuTranslateToggle() {
 
   return (
     <ConfigCard
+      id="context-menu-translate"
       title={i18n.t("options.floatingButtonAndToolbar.contextMenu.translate.title")}
       description={i18n.t("options.floatingButtonAndToolbar.contextMenu.translate.description")}
     >

@@ -172,13 +172,13 @@ export async function setUpWebPageTranslationQueue() {
 
     let result = ""
     const content: ArticleContent = {
-      title: articleTitle || "",
+      title: articleTitle ?? "",
     }
 
     if (isLLMProviderConfig(providerConfig)) {
       // Generate or fetch cached summary if AI Content Aware is enabled
       const config = await ensureInitializedConfig()
-      if (config?.translate.enableAIContentAware && articleTitle !== undefined && articleTextContent !== undefined) {
+      if (config?.translate.enableAIContentAware && articleTitle != null && articleTextContent != null) {
         content.summary = await getOrGenerateSummary(articleTitle, articleTextContent, providerConfig, requestQueue)
       }
 

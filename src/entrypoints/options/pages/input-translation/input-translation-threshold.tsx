@@ -17,6 +17,7 @@ export function InputTranslationThreshold() {
 
   return (
     <ConfigCard
+      id="input-translation-threshold-section"
       title={i18n.t("options.inputTranslation.threshold.title")}
       description={i18n.t("options.inputTranslation.threshold.description")}
     >

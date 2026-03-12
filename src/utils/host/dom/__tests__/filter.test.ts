@@ -9,7 +9,13 @@ import {
   NOTRANSLATE_CLASS,
 } from "@/utils/constants/dom-labels"
 
-import { isDontWalkIntoAndDontTranslateAsChildElement, isDontWalkIntoButTranslateAsChildElement, isTranslatedContentNode } from "../filter"
+import {
+  isDontWalkIntoAndDontTranslateAsChildElement,
+  isDontWalkIntoButTranslateAsChildElement,
+  isShallowBlockHTMLElement,
+  isShallowInlineHTMLElement,
+  isTranslatedContentNode,
+} from "../filter"
 
 describe("isTranslatedContentNode", () => {
   it("should return true for block translated content", () => {
@@ -69,6 +75,26 @@ describe("isDontWalkIntoButTranslateAsChildElement", () => {
   it("should return false for regular elements", () => {
     const element = document.createElement("div")
     expect(isDontWalkIntoButTranslateAsChildElement(element)).toBe(false)
+  })
+})
+
+describe("inline/block display detection", () => {
+  it("should treat ruby as inline", () => {
+    const ruby = document.createElement("ruby")
+    ruby.textContent = "大阪"
+
+    expect(isShallowInlineHTMLElement(ruby)).toBe(true)
+    expect(isShallowBlockHTMLElement(ruby)).toBe(false)
+  })
+
+  it("should not treat block ruby as inline", () => {
+    const element = document.createElement("div")
+    element.textContent = "大阪"
+    element.style.display = "block ruby"
+
+    expect(window.getComputedStyle(element).display).toBe("block ruby")
+    expect(isShallowInlineHTMLElement(element)).toBe(false)
+    expect(isShallowBlockHTMLElement(element)).toBe(true)
   })
 })
 

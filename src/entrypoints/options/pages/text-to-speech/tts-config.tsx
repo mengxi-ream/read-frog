@@ -62,6 +62,7 @@ interface TtsNumberFieldProps {
 export function TtsConfig() {
   return (
     <ConfigCard
+      id="tts-config"
       title={(
         <>
           {i18n.t("options.tts.title")}
@@ -178,7 +179,7 @@ function TtsDefaultVoiceField() {
         <Button
           type="button"
           variant="outline"
-          className="h-9 sm:w-auto"
+          className="sm:w-auto"
           onClick={handlePreview}
           disabled={isFetchingOrPlaying}
         >
@@ -260,7 +261,7 @@ function TtsLanguageVoiceField() {
           <Button
             type="button"
             variant="outline"
-            className="h-9 sm:w-auto"
+            className="sm:w-auto"
             onClick={resetLanguageVoice}
             disabled={selectedLanguageVoice === defaultLanguageVoice}
           >

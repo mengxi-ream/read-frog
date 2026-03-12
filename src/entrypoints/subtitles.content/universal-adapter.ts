@@ -4,9 +4,10 @@ import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { i18n } from "#imports"
 import { toast } from "sonner"
 import { getLocalConfig } from "@/utils/config/storage"
-import { DEFAULT_SUBTITLE_POSITION, HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
+import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { ToastSubtitlesError } from "@/utils/subtitles/errors"
+import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import { subtitlesPositionAtom, subtitlesStore } from "./atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
@@ -46,9 +47,18 @@ export class UniversalVideoAdapter {
   }
 
   initialize() {
+    void this.restorePosition()
     void this.initializeScheduler()
     void this.renderTranslateButton()
     this.setupNavigationListener()
+  }
+
+  private async restorePosition() {
+    const config = await getLocalConfig()
+    const position = config?.videoSubtitles?.position
+    if (position) {
+      subtitlesStore.set(subtitlesPositionAtom, { ...position })
+    }
   }
 
   private resetForNavigation() {
@@ -61,7 +71,7 @@ export class UniversalVideoAdapter {
     this.cachedVideoId = null
     this.subtitlesFetcher.cleanup()
     this.showNativeSubtitles()
-    subtitlesStore.set(subtitlesPositionAtom, DEFAULT_SUBTITLE_POSITION)
+    void this.restorePosition()
   }
 
   private destroyScheduler() {
@@ -245,12 +255,15 @@ export class UniversalVideoAdapter {
     if (useAiSegmentation) {
       this.segmentationPipeline = new SegmentationPipeline({
         rawFragments: this.originalSubtitles,
-        getVideoElement: () => scheduler?.getVideoElement() ?? null,
+        getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
         getSourceLanguage: () => this.subtitlesFetcher.getSourceLanguage(),
       })
     }
     else {
-      this.processedFragments = this.originalSubtitles
+      this.processedFragments = optimizeSubtitles(
+        this.originalSubtitles,
+        this.subtitlesFetcher.getSourceLanguage(),
+      )
     }
 
     this.translationCoordinator = new TranslationCoordinator({

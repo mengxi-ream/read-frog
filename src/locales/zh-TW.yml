@@ -9,6 +9,7 @@ contextMenu:
   translate: 翻譯
   showOriginal: 顯示原文
 popup:
+  theme: 主題
   autoLang: 自動偵測
   sourceLang: 來源語言
   targetLang: 目標語言
@@ -18,6 +19,7 @@ popup:
   enabledSelectionToolbar: 啟用選擇工具列
   alwaysTranslate: 總是翻譯這個網站
   addToWhitelist: 在此網站啟用擴充功能
+  addToBlacklist: 在此網站停用擴充功能
   options: 選項
   hover: 滑鼠懸停
   translateParagraph: 來翻譯段落
@@ -44,7 +46,8 @@ errorRecovery:
   backupTitle: 先備份當前設定（推薦）
   exportWithApiKeys: 導出（包含 API Keys）
   exportWithoutApiKeys: 導出（不包含 API Keys）
-  resetTitle: 重置設定
+  recoveryTitle: 恢復選項
+  refreshPage: 重新整理頁面
   resetAction: 重置為預設設定
   resetSuccess: 恢復完成，設定已重置
   resetFailed: 恢復失敗，無法重置設定
@@ -55,6 +58,9 @@ errorRecovery:
     confirm: 重置
     cancel: 取消
 options:
+  commandPalette:
+    placeholder: 搜尋設定...
+    noResults: 找不到設定
   sidebar:
     settings: 設定
     tools: 工具
@@ -164,6 +170,12 @@ options:
       testing: 測試中...
   general:
     title: 通用
+    appearance:
+      title: 外觀
+      theme: 主題
+      system: 跟隨系統
+      light: 淺色
+      dark: 深色
     featureProviders:
       title: 功能提供商
       description: 為每個功能選擇使用的提供商
@@ -193,12 +205,10 @@ options:
     title: 站點控制
     mode:
       title: 擴充功能啟動模式
-      description: 預設情況下，擴充功能在所有網站上執行。使用白名單模式可以限制擴充功能僅在特定網站上執行。
-      all: 在所有站點執行
-      whitelist: 僅在列出的站點執行（白名單）
+      description: 使用黑名單模式可以在特定網站上停用擴充功能，或使用白名單模式限制擴充功能僅在特定網站上執行。
+      blacklist: 僅在列出的站點禁止
+      whitelist: 僅在列出的站點執行
     patterns:
-      title: 啟用的站點
-      description: 在白名單模式下，擴充功能僅在下方列出的網站上啟動
       enterUrlPattern: 輸入 URL 模式（例如 example.com）
       urlPattern: URL 模式
   overlayTools:
@@ -302,12 +312,24 @@ options:
           addField: 新增欄位
           fieldName: 欄位名
           fieldType: 欄位類型
+          fieldDescription: 描述
+          fieldDescriptionPlaceholder: 描述此欄位應包含的內容...
           actions: 操作
           cancel: 取消
           save: 儲存
           defaultFieldName: 結果
           fieldNamePlaceholder: 欄位名
           autoFieldPrefix: 欄位
+          addFieldDialog:
+            title: 新增輸出欄位
+          editFieldDialog:
+            title: 編輯輸出欄位
+            save: 儲存
+          deleteFieldDialog:
+            title: 刪除輸出欄位？
+            description: 此輸出欄位將被移除。
+            confirm: 刪除
+            cancel: 取消
           tokens:
             selection: 選取的文字內容
             context: 選取文字所在段落內容
@@ -465,6 +487,7 @@ options:
     nodeTranslationHotkey:
       title: 懸停或長按翻譯快捷鍵
       description: 自訂懸停翻譯的修飾鍵，或使用滑鼠長按翻譯段落
+      enable: 啟用
     llmProviderConfigured: 已為$1選擇 LLM 提供商
     llmProviderNotConfigured: 沒有為$1選擇 LLM 提供商
     autoTranslateLanguages:
@@ -780,6 +803,10 @@ translationHub:
   translate: 翻譯
   copiedToClipboard: 翻譯已複製到剪貼簿！
   copyTranslation: 複製翻譯
+  expandCard: 展開卡片
+  collapseCard: 摺疊卡片
+  expandAllCards: 全部展開
+  collapseAllCards: 全部摺疊
   deleteCard: 刪除卡片
   translationFailed: 翻譯失敗
   translationFailedFallback: 翻譯失敗

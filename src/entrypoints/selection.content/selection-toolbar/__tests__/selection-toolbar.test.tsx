@@ -500,8 +500,8 @@ describe("selectionToolbar - positioning logic", () => {
       const leftValue = Number.parseInt(toolbar.style.left)
       const topValue = Number.parseInt(toolbar.style.top)
       const toolbarWidth = toolbar.offsetWidth || 0
-      // Left should be endX - tooltipWidth, clamped to boundaries
-      expect(leftValue).toBeLessThanOrEqual(100) // Should be left of mouseUp X position
+      // Left should be near endX - tooltipWidth, with direction offset margin
+      expect(leftValue).toBeLessThanOrEqual(125) // Should be near mouseUp X position (offset by direction margin)
       expect(leftValue + toolbarWidth).toBeGreaterThanOrEqual(75) // Toolbar should extend near mouseUp position
       expect(topValue).toBeGreaterThanOrEqual(175) // Top should be near mouseUp Y (200)
       expect(topValue).toBeLessThanOrEqual(225) // Allow some margin
@@ -560,8 +560,8 @@ describe("selectionToolbar - positioning logic", () => {
       const topValue = Number.parseInt(toolbar.style.top)
       const toolbarWidth = toolbar.offsetWidth || 0
       const toolbarHeight = toolbar.offsetHeight || 0
-      // Left should be less than mouseUp X (100) minus tooltip width
-      expect(leftValue).toBeLessThanOrEqual(100) // Should be left of mouseUp X position
+      // Left should be near mouseUp X (100) minus tooltip width, with direction offset margin
+      expect(leftValue).toBeLessThanOrEqual(125) // Should be near mouseUp X position (offset by direction margin)
       expect(leftValue + toolbarWidth).toBeGreaterThanOrEqual(75) // Toolbar should extend near mouseUp position
       // Top should be less than mouseUp Y (100) minus tooltip height
       expect(topValue).toBeLessThanOrEqual(100) // Should be above or at mouseUp Y position

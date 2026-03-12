@@ -257,9 +257,14 @@ export async function runStructuredObjectStreamInBackground(
 
   const model = await getModelById(providerId)
 
+  const fieldTypeToZodSchema: Record<string, z.ZodTypeAny> = {
+    string: z.string().nullable(),
+    number: z.number().nullable(),
+  }
+
   const schemaShape: Record<string, z.ZodTypeAny> = {}
   for (const field of outputSchema) {
-    schemaShape[field.name] = field.type === "number" ? z.number() : z.string()
+    schemaShape[field.name] = fieldTypeToZodSchema[field.type] ?? z.string().nullable()
   }
 
   const result = streamText({

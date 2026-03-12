@@ -29,20 +29,20 @@ export function SpeakButton() {
   return (
     <button
       type="button"
-      className="size-6 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer"
+      className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer"
       onClick={handleClick}
       title={isFetching ? "Fetching audio… Click to stop" : isPlaying ? "Playing audio… Click to stop" : "Speak selected text"}
     >
       {isFetching
         ? (
-            <IconLoader2 className="size-4 animate-spin" strokeWidth={1.6} />
+            <IconLoader2 className="size-4.5 animate-spin" strokeWidth={1.6} />
           )
         : isPlaying
           ? (
-              <IconPlayerStopFilled className="size-4" strokeWidth={1.6} />
+              <IconPlayerStopFilled className="size-4.5" strokeWidth={1.6} />
             )
           : (
-              <IconVolume className="size-4" strokeWidth={1.6} />
+              <IconVolume className="size-4.5" strokeWidth={1.6} />
             )}
     </button>
   )

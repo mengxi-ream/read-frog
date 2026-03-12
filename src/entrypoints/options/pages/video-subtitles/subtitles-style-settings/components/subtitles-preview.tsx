@@ -4,8 +4,8 @@ import { Activity } from "react"
 import { GradientBackground } from "@/components/gradient-background"
 import { Label } from "@/components/ui/base-ui/label"
 import { MainSubtitle, TranslationSubtitle } from "@/entrypoints/subtitles.content/ui/subtitle-lines"
-import { cn } from "@/lib/utils"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { cn } from "@/utils/styles/utils"
 
 export function SubtitlesPreview() {
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)

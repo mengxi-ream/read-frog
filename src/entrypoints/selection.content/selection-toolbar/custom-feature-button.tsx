@@ -19,7 +19,7 @@ import {
   selectionRangeAtom,
 } from "./atom"
 import { PopoverWrapper } from "./components/popover-wrapper"
-import { replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
+import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 
 function normalizeSelectedText(value: string | null) {
@@ -51,11 +51,11 @@ function SelectionToolbarCustomFeatureButton({ feature }: { feature: SelectionTo
   return (
     <button
       type="button"
-      className="size-6 shrink-0 flex items-center justify-center hover:bg-zinc-300 dark:hover:bg-zinc-700 cursor-pointer"
+      className="px-2 h-7 shrink-0 flex items-center justify-center hover:bg-accent cursor-pointer"
       onClick={handleClick}
       title={feature.name}
     >
-      <Icon icon={feature.icon} strokeWidth={0.8} className="size-4" />
+      <Icon icon={feature.icon} strokeWidth={0.8} className="size-4.5" />
     </button>
   )
 }
@@ -151,7 +151,11 @@ export function SelectionToolbarCustomFeaturePopover() {
         targetLang,
         title: pageTitle,
       }
-      const systemPrompt = replaceSelectionToolbarCustomFeaturePromptTokens(activeFeature.systemPrompt, promptTokens)
+      const systemPrompt = buildSelectionToolbarCustomFeatureSystemPrompt(
+        activeFeature.systemPrompt,
+        promptTokens,
+        activeFeature.outputSchema,
+      )
       const prompt = replaceSelectionToolbarCustomFeaturePromptTokens(activeFeature.prompt, promptTokens)
       const modelName = resolveModelId(providerConfig.model) ?? ""
       const providerOptions = getProviderOptionsWithOverride(
@@ -221,7 +225,7 @@ export function SelectionToolbarCustomFeaturePopover() {
     <PopoverWrapper
       ref={popoverRef}
       title={activeFeature?.name ?? "Custom AI Feature"}
-      icon={activeFeature?.icon ?? "tabler:sparkles"}
+      icon={<Icon icon={activeFeature?.icon ?? "tabler:sparkles"} strokeWidth={0.8} className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
       isVisible={isVisible}
       setIsVisible={setIsVisible}
       onClose={handleClose}
@@ -230,8 +234,6 @@ export function SelectionToolbarCustomFeaturePopover() {
         <div className="border-b pb-4">
           <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">Selection</p>
           <p className="text-sm whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">{selectionContent || "—"}</p>
-          <p className="text-xs text-zinc-500 dark:text-zinc-500 mt-3 mb-2">Paragraph</p>
-          <p className="text-sm whitespace-pre-wrap break-words text-zinc-700 dark:text-zinc-300">{paragraphText || "—"}</p>
         </div>
 
         {activeFeature && (

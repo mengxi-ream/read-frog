@@ -1,9 +1,9 @@
 import { useAtomValue } from "jotai"
 import { useEffect, useEffectEvent } from "react"
 import logo from "@/assets/icons/original/read-frog.png"
-import { cn } from "@/lib/utils"
 import { getLocalConfig } from "@/utils/config/storage"
 import { TRANSLATE_BUTTON_CLASS } from "@/utils/constants/subtitles"
+import { cn } from "@/utils/styles/utils"
 import { subtitlesStore, subtitlesVisibleAtom } from "../atoms"
 
 export function SubtitleToggleButton(

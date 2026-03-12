@@ -37,8 +37,21 @@ export default defineConfig({
     host_permissions: [
       "*://*/*", // Required for scripting.executeScript in any frame
     ],
+    // Allow images/SVGs referenced by content-script UI <img> tags to be loaded from
+    // moz-extension:// URLs on regular pages. Firefox enforces this more strictly.
+    web_accessible_resources: [
+      {
+        resources: ["assets/*.png", "assets/*.svg", "assets/*.webp"],
+        matches: ["*://*/*", "file:///*"],
+      },
+    ],
     // Firefox-specific settings for MV3
     ...(browser === "firefox" && {
+      // Override default CSP to exclude `upgrade-insecure-requests` (Firefox MV3 default),
+      // which would upgrade custom provider HTTP URLs (e.g. LAN) to HTTPS.
+      content_security_policy: {
+        extension_pages: "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';",
+      },
       browser_specific_settings: {
         gecko: {
           id: "{bd311a81-4530-4fcc-9178-74006155461b}",

@@ -5,7 +5,7 @@ import { Slot } from "@radix-ui/react-slot"
 import { IconChevronDown, IconSquareMinus, IconSquarePlus } from "@tabler/icons-react"
 import * as React from "react"
 import { useMemo } from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "@/utils/styles/utils"
 
 type ToggleIconType = "chevron" | "plus-minus"
 

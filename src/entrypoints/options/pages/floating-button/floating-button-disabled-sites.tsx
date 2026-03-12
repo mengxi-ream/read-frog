@@ -2,7 +2,7 @@ import { i18n } from "#imports"
 import { useAtom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { ConfigCard } from "../../components/config-card"
-import { DisabledPatternsTable } from "../../components/disabled-patterns-table"
+import { PatternsTable } from "../../components/patterns-table"
 
 export function FloatingButtonDisabledSites() {
   const [floatingButtonConfig, setFloatingButtonConfig] = useAtom(configFieldsAtomMap.floatingButton)
@@ -28,10 +28,11 @@ export function FloatingButtonDisabledSites() {
 
   return (
     <ConfigCard
+      id="floating-button-disabled-sites"
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.title")}
       description={i18n.t("options.floatingButtonAndToolbar.floatingButton.disabledSites.description")}
     >
-      <DisabledPatternsTable
+      <PatternsTable
         patterns={disabledFloatingButtonPatterns}
         onAddPattern={addPattern}
         onRemovePattern={removePattern}

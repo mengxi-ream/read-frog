@@ -1,5 +1,58 @@
 # @read-frog/extension
 
+## 1.28.1
+
+### Patch Changes
+
+- [#1084](https://github.com/mengxi-ream/read-frog/pull/1084) [`f93dcc2`](https://github.com/mengxi-ream/read-frog/commit/f93dcc2f0c998468435d36eeb73e49e2cd597be9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - Refine selection toolbar styling and fix Firefox stylesheet fallback
+
+  - Enlarge toolbar button icons and use theme-aware hover/shadow tokens
+  - Handle Firefox Xray wrapper issues with constructable stylesheets
+  - Extract host toast into dedicated mount module
+  - Unify cn helper location under utils/styles
+
+## 1.28.0
+
+### Minor Changes
+
+- [#1061](https://github.com/mengxi-ream/read-frog/pull/1061) [`57c0887`](https://github.com/mengxi-ream/read-frog/commit/57c08871315cfca1411d557754a3696a90ccf3cb) Thanks [@Yukiniro](https://github.com/Yukiniro)! - feat: add blacklist mode to disable extension on specific sites
+
+### Patch Changes
+
+- [#1065](https://github.com/mengxi-ream/read-frog/pull/1065) [`1a4082c`](https://github.com/mengxi-ream/read-frog/commit/1a4082cb083a4e8fc470d3ec412bbb7f10674892) Thanks [@ishiko732](https://github.com/ishiko732)! - feat(theme): add manual theme mode switching (system/light/dark) with popup toggle button and options page selector
+
+- [#1075](https://github.com/mengxi-ream/read-frog/pull/1075) [`3e14d7e`](https://github.com/mengxi-ream/read-frog/commit/3e14d7e23eec95538717bce7faced8c4e0e0801a) Thanks [@Sufyr](https://github.com/Sufyr)! - feat: add expand and collapse controls to translation hub cards
+
+- [#1068](https://github.com/mengxi-ream/read-frog/pull/1068) [`f95f116`](https://github.com/mengxi-ream/read-frog/commit/f95f1166ad81209f5bc3f09f74e600b7226d981a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add disable hover translation option in option page
+
+- [#1078](https://github.com/mengxi-ream/read-frog/pull/1078) [`bddf26a`](https://github.com/mengxi-ream/read-frog/commit/bddf26adde88dda2b8c8e909a17f0d0880fa7616) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: restore translation error UI in bilingual and translation-only modes
+
+- [#1071](https://github.com/mengxi-ream/read-frog/pull/1071) [`c3a7fe9`](https://github.com/mengxi-ream/read-frog/commit/c3a7fe93f65922aba4720aaaf4f52e37d1f5ddbb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add default ollama base url
+
+## 1.27.3
+
+### Patch Changes
+
+- [#1057](https://github.com/mengxi-ream/read-frog/pull/1057) [`72ac190`](https://github.com/mengxi-ream/read-frog/commit/72ac19072202a01555230f9ca6e2eaa3cfd39c2c) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): optimize subtitle single-line display by widening container and reducing max word count
+
+- [#1058](https://github.com/mengxi-ream/read-frog/pull/1058) [`2e943d2`](https://github.com/mengxi-ream/read-frog/commit/2e943d26eb3a295b4b7c63f46009064694e34d99) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): persist subtitle drag position across navigations
+
+- [#1060](https://github.com/mengxi-ream/read-frog/pull/1060) [`76f73ec`](https://github.com/mengxi-ream/read-frog/commit/76f73ecdddf6677bf7bc71db5e31e83243d663be) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(firefox): icon and image csp restriction
+
+## 1.27.2
+
+### Patch Changes
+
+- [#1053](https://github.com/mengxi-ream/read-frog/pull/1053) [`4d27ada`](https://github.com/mengxi-ream/read-frog/commit/4d27ada6b7cd5c103e2fd6af369a8e1e8d747921) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add search command for config
+
+- [#1045](https://github.com/mengxi-ream/read-frog/pull/1045) [`77f1e48`](https://github.com/mengxi-ream/read-frog/commit/77f1e4809575f3a72e869dbfe0b5fb44c24bf531) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: override Firefox MV3 default CSP to prevent HTTP URLs from being upgraded to HTTPS
+
+- [#1027](https://github.com/mengxi-ream/read-frog/pull/1027) [`c44864c`](https://github.com/mengxi-ream/read-frog/commit/c44864c764e732ae2c41d1e138cd82e795933811) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): apply short line merge in all processing modes
+
+- [#1049](https://github.com/mengxi-ream/read-frog/pull/1049) [`5b4547f`](https://github.com/mengxi-ream/read-frog/commit/5b4547fd3684dc94320b335b68a303ec2cfbae85) Thanks [@Yukiniro](https://github.com/Yukiniro)! - fix: fixed flair tag misalignment during Reddit translations.
+
+- [#1051](https://github.com/mengxi-ream/read-frog/pull/1051) [`2e58edc`](https://github.com/mengxi-ream/read-frog/commit/2e58edc682638d555b03163f74f4a04eec4d5470) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor(custom-feature): improve custom ai feature prompt setting
+
 ## 1.27.1
 
 ### Patch Changes

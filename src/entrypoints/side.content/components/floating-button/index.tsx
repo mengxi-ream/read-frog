@@ -1,8 +1,8 @@
-import { i18n } from "#imports"
-import { Icon } from "@iconify/react"
+import { browser, i18n } from "#imports"
+import { IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
-import readFrogLogo from "@/assets/icons/read-frog.png"
+import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,8 @@ import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from 
 import { shadowWrapper } from "../../index"
 import HiddenButton from "./components/hidden-button"
 import TranslateButton from "./translate-button"
+
+const readFrogLogoUrl = new URL(readFrogLogo, browser.runtime.getURL("/")).href
 
 export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(
@@ -155,7 +157,7 @@ export default function FloatingButton() {
               />
             )}
           >
-            <Icon icon="tabler:x" className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
+            <IconX className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
           </DropdownMenuTrigger>
           <DropdownMenuContent container={shadowWrapper} align="start" side="left" className="z-2147483647 w-fit! whitespace-nowrap">
             <DropdownMenuItem
@@ -182,14 +184,14 @@ export default function FloatingButton() {
           </DropdownMenuContent>
         </DropdownMenu>
         <img
-          src={readFrogLogo}
+          src={readFrogLogoUrl}
           alt={APP_NAME}
           className="ml-[5px] h-8 w-8 rounded-full"
         />
       </div>
       <HiddenButton
         className={attachSideClassName}
-        icon="tabler:settings"
+        icon={<IconSettings className="h-5 w-5" />}
         onClick={() => {
           void sendMessage("openOptionsPage", undefined)
         }}

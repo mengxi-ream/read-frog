@@ -1,4 +1,3 @@
-import { isDarkMode } from "../theme"
 import { cssRegistry } from "./css-registry"
 
 interface ShadowHostOptions {
@@ -60,10 +59,6 @@ export class ShadowHostBuilder {
     wrapper.style.display = position
     if (style) {
       Object.assign(wrapper.style, style)
-    }
-    if (isDarkMode()) {
-      wrapper.classList.add("dark")
-      wrapper.style.colorScheme = "dark"
     }
     this.shadowRoot.appendChild(wrapper)
 

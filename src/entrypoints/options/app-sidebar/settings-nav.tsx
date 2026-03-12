@@ -23,6 +23,7 @@ const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context
 export function SettingsNav() {
   const { pathname } = useLocation()
   const isOverlayToolsActive = OVERLAY_TOOLS_PATHS.includes(pathname)
+  const isFirefox = import.meta.env.BROWSER === "firefox"
 
   return (
     <SidebarGroup>
@@ -103,12 +104,14 @@ export function SettingsNav() {
             </SidebarMenuItem>
           </Collapsible>
 
-          <SidebarMenuItem>
-            <SidebarMenuButton render={<Link to="/tts" />} isActive={pathname === "/tts"}>
-              <Icon icon="tabler:speakerphone" />
-              <span>{i18n.t("options.tts.title")}</span>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
+          {!isFirefox && (
+            <SidebarMenuItem>
+              <SidebarMenuButton render={<Link to="/tts" />} isActive={pathname === "/tts"}>
+                <Icon icon="tabler:speakerphone" />
+                <span>{i18n.t("options.tts.title")}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )}
 
           <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/statistics" />} isActive={pathname === "/statistics"}>

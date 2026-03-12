@@ -35,7 +35,7 @@ export function ClearCacheConfig() {
   }
 
   return (
-    <ConfigCard title={i18n.t("options.general.clearCache.title")} description={i18n.t("options.general.clearCache.description")}>
+    <ConfigCard id="clear-cache" title={i18n.t("options.general.clearCache.title")} description={i18n.t("options.general.clearCache.description")}>
       <AlertDialog open={open} onOpenChange={setOpen}>
         <div className="w-full flex justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>

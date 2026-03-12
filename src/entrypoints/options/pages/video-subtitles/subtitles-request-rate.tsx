@@ -16,6 +16,7 @@ type KeyOfRequestQueueConfig = keyof RequestQueueConfig
 export function SubtitlesRequestRate() {
   return (
     <ConfigCard
+      id="subtitles-request-rate"
       title={i18n.t("options.videoSubtitles.requestQueueConfig.title")}
       description={(
         <div>
