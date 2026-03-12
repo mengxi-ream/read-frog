@@ -152,7 +152,7 @@ export function TranslateButton() {
         <SelectionPopover.Header className="border-b">
           <SelectionToolbarTitleContent
             title="Translation"
-            icon={<RiTranslate className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
+            icon="ri:translate"
           />
           <SelectionPopover.Close />
         </SelectionPopover.Header>

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "#imports"
-import { IconSparkles, IconZoomScan } from "@tabler/icons-react"
+import { IconZoomScan } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity } from "react"
@@ -143,7 +143,7 @@ export function AiButton() {
         <SelectionPopover.Header className="border-b">
           <SelectionToolbarTitleContent
             title="Vocabulary Insight"
-            icon={<IconSparkles strokeWidth={1.2} className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
+            icon="tabler:sparkles"
           />
           <SelectionPopover.Close />
         </SelectionPopover.Header>
