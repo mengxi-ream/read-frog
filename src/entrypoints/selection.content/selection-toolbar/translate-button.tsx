@@ -2,9 +2,10 @@ import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { RiTranslate } from "@remixicon/react"
 import { IconCopy, IconLoader2, IconVolume } from "@tabler/icons-react"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
+import { SelectionPopover } from "@/components/ui/selection-popover"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -14,52 +15,18 @@ import { translateTextForSelection } from "@/utils/host/translate/translate-vari
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
-import {
-  isSelectionToolbarVisibleAtom,
-  isTranslatePopoverVisibleAtom,
-  mouseClickPositionAtom,
-  selectionContentAtom,
-} from "./atom"
-import { PopoverWrapper } from "./popover/popover-wrapper"
+import { shadowWrapper } from ".."
+import { isSelectionToolbarVisibleAtom, selectionContentAtom } from "./atom"
+import { SelectionToolbarTitleContent } from "./selection-toolbar-title-content"
 
 export function TranslateButton() {
-  // const selectionContent = useAtomValue(selectionContentAtom)
-  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
-  const setIsTranslatePopoverVisible = useSetAtom(isTranslatePopoverVisibleAtom)
-  const setMousePosition = useSetAtom(mouseClickPositionAtom)
-
-  const handleClick = async (event: React.MouseEvent) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    const x = rect.left
-    const y = rect.top
-
-    setMousePosition({ x, y })
-    setIsSelectionToolbarVisible(false)
-    setIsTranslatePopoverVisible(true)
-  }
-
-  return (
-    <button
-      type="button"
-      className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer"
-      onClick={handleClick}
-    >
-      <RiTranslate className="size-4.5" />
-    </button>
-  )
-}
-
-export function TranslatePopover() {
+  const [open, setOpen] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
   const translateProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.translate"))
   const languageConfig = useAtomValue(configFieldsAtomMap.language)
   const selectionContent = useAtomValue(selectionContentAtom)
-  const [isVisible, setIsVisible] = useAtom(isTranslatePopoverVisibleAtom)
-
-  const handleClose = useCallback(() => {
-    setTranslatedText(undefined)
-  }, [])
+  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
 
   const handleCopy = useCallback(() => {
     if (translatedText) {
@@ -132,6 +99,7 @@ export function TranslatePopover() {
         if (isCancelled) {
           return
         }
+
         const normalized = backgroundTranslation.trim()
         setTranslatedText(normalized === cleanText ? "" : normalized)
       }
@@ -155,7 +123,7 @@ export function TranslatePopover() {
       }
     }
 
-    if (isVisible) {
+    if (open) {
       void translate()
     }
 
@@ -165,46 +133,68 @@ export function TranslatePopover() {
       cancelTranslation = undefined
     }
   }, [
-    isVisible,
-    selectionContent,
     languageConfig.targetCode,
+    open,
+    selectionContent,
     translateProviderConfig,
   ])
 
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    setOpen(nextOpen)
+
+    if (nextOpen) {
+      setIsSelectionToolbarVisible(false)
+      return
+    }
+
+    setTranslatedText(undefined)
+  }, [setIsSelectionToolbarVisible])
+
   return (
-    <PopoverWrapper
-      title="Translation"
-      icon={<RiTranslate className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
-      onClose={handleClose}
-      isVisible={isVisible}
-      setIsVisible={setIsVisible}
-    >
-      <div className="p-4 border-b">
-        <div className="border-b pb-4">
-          <p className="text-sm text-zinc-600 dark:text-zinc-400">{selectionContent}</p>
-        </div>
-        <div className="pt-4">
-          <p className="text-sm">
-            {isTranslating && !translatedText && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
-            {translatedText}
-            {isTranslating && translatedText && " ●"}
-          </p>
-        </div>
-      </div>
-      <div className="p-4 flex justify-between items-center">
-        <div></div>
-        <div className="flex items-center gap-2">
-          <SpeakOriginalButton />
-          <button
-            type="button"
-            onClick={handleCopy}
-            className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded"
-          >
-            <IconCopy strokeWidth={1.6} className="size-4 text-zinc-600 dark:text-zinc-400" />
-          </button>
-        </div>
-      </div>
-    </PopoverWrapper>
+    <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
+      <SelectionPopover.Trigger title="Translation">
+        <RiTranslate className="size-4.5" />
+      </SelectionPopover.Trigger>
+
+      <SelectionPopover.Content container={shadowWrapper ?? document.body}>
+        <SelectionPopover.Header className="border-b">
+          <SelectionToolbarTitleContent
+            title="Translation"
+            icon={<RiTranslate className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
+          />
+          <SelectionPopover.Close />
+        </SelectionPopover.Header>
+
+        <SelectionPopover.Body>
+          <div className="p-4 border-b">
+            <div className="border-b pb-4">
+              <p className="text-sm text-zinc-600 dark:text-zinc-400">{selectionContent}</p>
+            </div>
+            <div className="pt-4">
+              <p className="text-sm">
+                {isTranslating && !translatedText && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
+                {translatedText}
+                {isTranslating && translatedText && " ●"}
+              </p>
+            </div>
+          </div>
+        </SelectionPopover.Body>
+
+        <SelectionPopover.Footer className="justify-between">
+          <div></div>
+          <div className="flex items-center gap-2">
+            <SpeakOriginalButton />
+            <button
+              type="button"
+              onClick={handleCopy}
+              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded"
+            >
+              <IconCopy strokeWidth={1.6} className="size-4 text-zinc-600 dark:text-zinc-400" />
+            </button>
+          </div>
+        </SelectionPopover.Footer>
+      </SelectionPopover.Content>
+    </SelectionPopover.Root>
   )
 }
 

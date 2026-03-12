@@ -1,19 +1,12 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import { createStore, Provider, useAtomValue } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import {
-  isSelectionToolbarVisibleAtom,
-  isTranslatePopoverVisibleAtom,
-  mouseClickPositionAtom,
-  selectionContentAtom,
-} from "../../atom"
-import { TranslateButton } from "../../translate-button"
-import { PopoverWrapper } from "../popover-wrapper"
+import { SelectionPopover } from ".."
 
 let latestRndProps: Record<string, any> | null = null
 const updatePositionSpy = vi.fn()
 const updateSizeSpy = vi.fn()
+const onOpenChangeSpy = vi.fn()
 let rafCallbacks = new Map<number, FrameRequestCallback>()
 let nextRafId = 1
 let mockRndRect = {
@@ -139,50 +132,6 @@ function triggerResizeObserver() {
   })
 }
 
-function AtomSnapshot() {
-  const isToolbarVisible = useAtomValue(isSelectionToolbarVisibleAtom)
-  const isTranslatePopoverVisible = useAtomValue(isTranslatePopoverVisibleAtom)
-  const mousePosition = useAtomValue(mouseClickPositionAtom)
-
-  return (
-    <div>
-      <span data-testid="toolbar-visible">{String(isToolbarVisible)}</span>
-      <span data-testid="translate-visible">{String(isTranslatePopoverVisible)}</span>
-      <span data-testid="mouse-position">{mousePosition ? `${mousePosition.x},${mousePosition.y}` : "null"}</span>
-    </div>
-  )
-}
-
-function renderPopover() {
-  const store = createStore()
-  store.set(selectionContentAtom, "Selected text")
-  store.set(mouseClickPositionAtom, { x: 120, y: 140 })
-  const setIsVisible = vi.fn()
-  const onClose = vi.fn()
-
-  render(
-    <Provider store={store}>
-      <PopoverWrapper
-        title="Test Popover"
-        icon="tabler:star"
-        isVisible
-        setIsVisible={setIsVisible}
-        onClose={onClose}
-      >
-        <div>Popover content</div>
-      </PopoverWrapper>
-    </Provider>,
-  )
-
-  flushRaf()
-
-  return {
-    element: screen.getByTestId("mock-rnd"),
-    onClose,
-    setIsVisible,
-  }
-}
-
 function mockRect(element: HTMLElement, rect: Partial<DOMRect>) {
   updateMockRect(rect)
   Object.defineProperty(element, "getBoundingClientRect", {
@@ -202,7 +151,49 @@ function mockRect(element: HTMLElement, rect: Partial<DOMRect>) {
   })
 }
 
-describe("popoverWrapper", () => {
+function renderPopover({ customTrigger = false } = {}) {
+  render(
+    <SelectionPopover.Root onOpenChange={onOpenChangeSpy}>
+      <SelectionPopover.Trigger
+        render={customTrigger ? <button data-testid="custom-trigger" className="custom-trigger" /> : undefined}
+      >
+        Open popover
+      </SelectionPopover.Trigger>
+      <SelectionPopover.Content>
+        <SelectionPopover.Header className="border-b">
+          <SelectionPopover.Title>Test Popover</SelectionPopover.Title>
+          <SelectionPopover.Close />
+        </SelectionPopover.Header>
+        <SelectionPopover.Body>
+          <div>Popover content</div>
+        </SelectionPopover.Body>
+      </SelectionPopover.Content>
+    </SelectionPopover.Root>,
+  )
+
+  const trigger = screen.getByRole("button", { name: /open popover/i })
+  vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue({
+    x: 120,
+    y: 140,
+    left: 120,
+    top: 140,
+    right: 160,
+    bottom: 172,
+    width: 40,
+    height: 32,
+    toJSON: () => ({}),
+  } as DOMRect)
+
+  fireEvent.click(trigger)
+  flushRaf()
+
+  return {
+    trigger,
+    element: screen.getByTestId("mock-rnd"),
+  }
+}
+
+describe("selectionPopover", () => {
   const originalResizeObserver = globalThis.ResizeObserver
   const originalRequestAnimationFrame = window.requestAnimationFrame
   const originalCancelAnimationFrame = window.cancelAnimationFrame
@@ -211,6 +202,7 @@ describe("popoverWrapper", () => {
 
   beforeEach(() => {
     latestRndProps = null
+    onOpenChangeSpy.mockReset()
     rafCallbacks = new Map()
     nextRafId = 1
     resizeObservers = []
@@ -267,7 +259,7 @@ describe("popoverWrapper", () => {
     mockRect(element, { left: 120, top: 140, width: 500, height: 220 })
 
     expect(screen.getByText("Test Popover")).toBeInTheDocument()
-    expect(latestRndProps?.dragHandleClassName).toBe("rf-selection-toolbar-popover-drag-handle")
+    expect(latestRndProps?.dragHandleClassName).toBe("rf-selection-popover-drag-handle")
     expect(latestRndProps?.enableResizing).toEqual({
       top: true,
       right: true,
@@ -280,25 +272,28 @@ describe("popoverWrapper", () => {
     })
   })
 
-  it("keeps the popover content area shrinkable so overflow can scroll after viewport changes", () => {
+  it("keeps the body shrinkable so overflow can scroll after viewport changes", () => {
     const { element } = renderPopover()
 
     expect(element).toHaveStyle({ display: "flex" })
+    expect(screen.getByText("Test Popover").parentElement?.parentElement).toHaveClass("flex-1", "h-full", "min-h-0")
     expect(screen.getByText("Popover content").parentElement).toHaveClass("min-h-0", "flex-1", "overflow-y-auto")
   })
 
   it("closes the popover when clicking outside", () => {
-    const { onClose, setIsVisible } = renderPopover()
+    renderPopover()
 
     const event = new MouseEvent("mousedown", { bubbles: true })
     Object.defineProperty(event, "composedPath", {
       value: () => [document.body, document, window],
     })
 
-    document.dispatchEvent(event)
+    act(() => {
+      document.dispatchEvent(event)
+    })
 
-    expect(setIsVisible).toHaveBeenCalledWith(false)
-    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onOpenChangeSpy).toHaveBeenLastCalledWith(false)
+    expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
   })
 
   it("reduces left and top space before shrinking a manually resized popover", () => {
@@ -427,78 +422,11 @@ describe("popoverWrapper", () => {
     expect(updateSizeSpy).not.toHaveBeenCalled()
   })
 
-  it("reclamps drag movement using the current grown height before mouseup", () => {
-    const { element } = renderPopover()
-    mockRect(element, { left: 120, top: 500, width: 500, height: 400 })
+  it("merges Base UI render props into a custom trigger element", () => {
+    renderPopover({ customTrigger: true })
 
-    act(() => {
-      latestRndProps?.onDragStart?.()
-      latestRndProps?.onDrag?.(new MouseEvent("mousemove"), {
-        x: 120,
-        y: 620,
-        deltaX: 0,
-        deltaY: 120,
-        lastX: 120,
-        lastY: 500,
-        node: element,
-      })
-    })
-
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 500 })
-    expect(updateSizeSpy).not.toHaveBeenCalled()
-  })
-
-  it("uses the dropped position as the new growth anchor after dragging to a lower free area", () => {
-    const { element } = renderPopover()
-    mockRect(element, { left: 120, top: 620, width: 500, height: 360 })
-
-    act(() => {
-      latestRndProps?.onDragStart?.()
-      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 120, y: 400 })
-    })
-    flushRaf()
-
-    updatePositionSpy.mockReset()
-    updateSizeSpy.mockReset()
-
-    mockRect(element, { left: 120, top: 400, width: 500, height: 420 })
-    triggerResizeObserver()
-    flushRaf()
-
-    expect(updatePositionSpy).not.toHaveBeenCalled()
-    expect(updateSizeSpy).not.toHaveBeenCalled()
-  })
-})
-
-describe("translateButton", () => {
-  it("hides the toolbar and opens the translate popover state on click", () => {
-    const store = createStore()
-    store.set(isSelectionToolbarVisibleAtom, true)
-
-    render(
-      <Provider store={store}>
-        <TranslateButton />
-        <AtomSnapshot />
-      </Provider>,
-    )
-
-    const button = screen.getByRole("button")
-    vi.spyOn(button, "getBoundingClientRect").mockReturnValue({
-      x: 140,
-      y: 90,
-      left: 140,
-      top: 90,
-      right: 180,
-      bottom: 120,
-      width: 40,
-      height: 30,
-      toJSON: () => ({}),
-    } as DOMRect)
-
-    fireEvent.click(button)
-
-    expect(screen.getByTestId("toolbar-visible")).toHaveTextContent("false")
-    expect(screen.getByTestId("translate-visible")).toHaveTextContent("true")
-    expect(screen.getByTestId("mouse-position")).toHaveTextContent("140,90")
+    const customTrigger = screen.getByTestId("custom-trigger")
+    expect(customTrigger).toHaveClass("custom-trigger", "px-2", "h-7")
+    expect(onOpenChangeSpy).toHaveBeenCalledWith(true)
   })
 })

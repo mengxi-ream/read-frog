@@ -3,13 +3,14 @@ import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { MARGIN } from "@/utils/constants/selection"
+import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
-import { AiButton, AiPopover } from "./ai-button"
+import { AiButton } from "./ai-button"
 import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atom"
 import { CloseButton, DropEvent } from "./close-button"
-import { SelectionToolbarCustomFeatureButtons, SelectionToolbarCustomFeaturePopover } from "./custom-feature-button"
+import { SelectionToolbarCustomFeatureButtons } from "./custom-feature-button"
 import { SpeakButton } from "./speak-button"
-import { TranslateButton, TranslatePopover } from "./translate-button"
+import { TranslateButton } from "./translate-button"
 
 enum SelectionDirection {
   TOP_LEFT = "TOP_LEFT",
@@ -244,10 +245,14 @@ export function SelectionToolbar() {
 
   return (
     <div ref={tooltipContainerRef} className={NOTRANSLATE_CLASS}>
-      {isSelectionToolbarVisible && selectionToolbar.enabled && !isSiteDisabled && (
+      {selectionToolbar.enabled && !isSiteDisabled && (
         <div
           ref={tooltipRef}
-          className="group absolute z-2147483647 bg-background rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center"
+          aria-hidden={!isSelectionToolbarVisible}
+          className={cn(
+            "group absolute z-2147483647 bg-background rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity",
+            isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+          )}
         >
           <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-[420px] no-scrollbar">
             <AiButton />
@@ -258,9 +263,6 @@ export function SelectionToolbar() {
           <CloseButton />
         </div>
       )}
-      <AiPopover />
-      <TranslatePopover />
-      <SelectionToolbarCustomFeaturePopover />
     </div>
   )
 }

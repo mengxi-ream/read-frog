@@ -32,5 +32,5 @@ export function useDismissOnOutsideMousedown({
     return () => {
       document.removeEventListener("mousedown", handlePointerDown)
     }
-  }, [handlePointerDown, isEnabled])
+  }, [isEnabled])
 }

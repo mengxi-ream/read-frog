@@ -1,5 +1,5 @@
 import type { Rnd } from "react-rnd"
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from "react"
 
 interface Position {
   x: number
@@ -16,12 +16,12 @@ interface LayoutMemory {
   manualSize: Size | null
 }
 
-interface UsePopoverLayoutOptions {
+interface UseSelectionPopoverLayoutOptions {
   anchor: Position | null
   isVisible: boolean
 }
 
-interface UsePopoverLayoutResult {
+interface UseSelectionPopoverLayoutResult {
   rndRef: React.RefObject<Rnd | null>
   isDragging: boolean
   defaultLayout: Position & { width: number, height: "auto" }
@@ -38,9 +38,9 @@ const DEFAULT_WIDTH = 500
 const MIN_WIDTH = 320
 const MIN_HEIGHT = 180
 
-export const POPOVER_DRAG_HANDLE_CLASS = "rf-selection-toolbar-popover-drag-handle"
-export const POPOVER_NO_DRAG_SELECTOR = "button, input, textarea, select, option, a, [role=\"button\"], [data-rf-no-drag=\"true\"]"
-export const POPOVER_RESIZE_HANDLES = {
+export const SELECTION_POPOVER_DRAG_HANDLE_CLASS = "rf-selection-popover-drag-handle"
+export const SELECTION_POPOVER_NO_DRAG_SELECTOR = "button, input, textarea, select, option, a, [role=\"button\"], [data-rf-no-drag=\"true\"]"
+export const SELECTION_POPOVER_RESIZE_HANDLES = {
   top: true,
   right: true,
   bottom: true,
@@ -51,7 +51,7 @@ export const POPOVER_RESIZE_HANDLES = {
   topLeft: true,
 } as const
 
-export const POPOVER_RESIZE_HANDLE_STYLES = {
+export const SELECTION_POPOVER_RESIZE_HANDLE_STYLES = {
   top: { top: -5, height: 10, left: 8, right: 8 },
   right: { right: -5, width: 10, top: 8, bottom: 8 },
   bottom: { bottom: -5, height: 10, left: 8, right: 8 },
@@ -130,7 +130,10 @@ function getPopoverRect(rndRef: React.RefObject<Rnd | null>) {
   }
 }
 
-export function usePopoverLayout({ anchor, isVisible }: UsePopoverLayoutOptions): UsePopoverLayoutResult {
+export function useSelectionPopoverLayout({
+  anchor,
+  isVisible,
+}: UseSelectionPopoverLayoutOptions): UseSelectionPopoverLayoutResult {
   const rndRef = useRef<Rnd | null>(null)
   const resizeFrameRef = useRef<number | null>(null)
   const preferredLayoutRef = useRef<LayoutMemory>({
@@ -139,7 +142,7 @@ export function usePopoverLayout({ anchor, isVisible }: UsePopoverLayoutOptions)
   })
   const suppressResizeObserverRef = useRef(false)
   const isDraggingRef = useRef(false)
-  const [isDragging, setIsDragging] = useState(false)
+  const [isDragging, setDragging] = useReducer((_state: boolean, next: boolean) => next, false)
 
   const cancelScheduledViewportLayout = useCallback(() => {
     if (resizeFrameRef.current === null) {
@@ -276,12 +279,12 @@ export function usePopoverLayout({ anchor, isVisible }: UsePopoverLayoutOptions)
   const handleDragStart = useCallback(() => {
     isDraggingRef.current = true
     cancelScheduledViewportLayout()
-    setIsDragging(true)
+    setDragging(true)
   }, [cancelScheduledViewportLayout])
 
   const handleDragStop = useCallback((position: Position) => {
     isDraggingRef.current = false
-    setIsDragging(false)
+    setDragging(false)
 
     const popoverRect = getPopoverRect(rndRef)
     const nextPosition = getBoundedPosition(
@@ -326,7 +329,7 @@ export function usePopoverLayout({ anchor, isVisible }: UsePopoverLayoutOptions)
     }
     suppressResizeObserverRef.current = false
     isDraggingRef.current = false
-    setIsDragging(false)
+    setDragging(false)
   }, [cancelScheduledViewportLayout, isVisible])
 
   useLayoutEffect(() => {

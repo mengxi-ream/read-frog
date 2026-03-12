@@ -40,5 +40,5 @@ export function usePreventScrollThrough({
     return () => {
       element.removeEventListener("wheel", handleWheel)
     }
-  }, [elementRef, handleWheel, isEnabled])
+  }, [elementRef, isEnabled])
 }
