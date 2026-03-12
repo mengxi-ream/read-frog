@@ -10,10 +10,10 @@ import { streamBackgroundStructuredObject } from "@/utils/content-script/backgro
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
+import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { getSelectionParagraphText } from "../utils"
 import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atom"
 import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
-import { SelectionToolbarTitleContent } from "./selection-toolbar-title-content"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 
 function normalizeSelectedText(value: string | null) {

@@ -16,9 +16,9 @@ import { getWordExplainPrompt } from "@/utils/prompts/word-explain"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
+import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { createHighlightData } from "../utils"
 import { isSelectionToolbarVisibleAtom, selectionRangeAtom } from "./atom"
-import { SelectionToolbarTitleContent } from "./selection-toolbar-title-content"
 
 function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement | null>) {
   requestAnimationFrame(() => {

@@ -14,8 +14,8 @@ import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from "../.."
+import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
 import { isSelectionToolbarVisibleAtom, selectionContentAtom } from "../atom"
-import { SelectionToolbarTitleContent } from "../selection-toolbar-title-content"
 import { TranslationContent } from "./translation-content"
 
 export function TranslateButton() {
