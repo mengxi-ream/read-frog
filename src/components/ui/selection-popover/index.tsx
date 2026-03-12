@@ -267,7 +267,7 @@ function SelectionPopoverHeader({
     props: mergeProps<"div">(
       {
         className: cn(
-          `${SELECTION_POPOVER_DRAG_HANDLE_CLASS} group relative flex items-center justify-between gap-3 p-4 select-none hover:cursor-grab active:cursor-grabbing`,
+          `${SELECTION_POPOVER_DRAG_HANDLE_CLASS} group relative flex items-center justify-between gap-3 py-2 px-4 select-none hover:cursor-grab active:cursor-grabbing`,
           className,
         ),
         children: (
@@ -338,7 +338,7 @@ function SelectionPopoverTitle({
 }: React.ComponentProps<"h2">) {
   return (
     <h2
-      className={cn("text-base font-medium text-zinc-900 dark:text-zinc-100", className)}
+      className={cn("text-base font-semibold", className)}
       {...props}
     />
   )
@@ -366,7 +366,7 @@ function SelectionPopoverClose({
   return (
     <Button
       variant="ghost-secondary"
-      size="icon"
+      size="icon-sm"
       className={className}
       onClick={close}
       data-rf-no-drag

@@ -20,7 +20,6 @@ import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
 import "@/assets/styles/theme.css"
-import "@/assets/styles/text-small.css"
 
 function HydrateAtoms({
   initialValues,

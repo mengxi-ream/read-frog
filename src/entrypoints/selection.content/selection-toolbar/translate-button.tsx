@@ -1,10 +1,12 @@
 import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { RiTranslate } from "@remixicon/react"
-import { IconCopy, IconLoader2, IconVolume } from "@tabler/icons-react"
+import { IconChevronDown, IconChevronUp, IconCopy, IconLoader2, IconVolume } from "@tabler/icons-react"
 import { useAtomValue, useSetAtom } from "jotai"
-import { useCallback, useEffect, useState } from "react"
+import { Activity, useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
+import { Button } from "@/components/ui/base-ui/button"
+import { Separator } from "@/components/ui/base-ui/separator"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -166,35 +168,68 @@ export function TranslateButton() {
         </SelectionPopover.Header>
 
         <SelectionPopover.Body>
-          <div className="p-4 border-b">
-            <div className="border-b pb-4">
-              <p className="text-sm text-zinc-600 dark:text-zinc-400">{selectionContent}</p>
-            </div>
-            <div className="pt-4">
-              <p className="text-sm">
-                {isTranslating && !translatedText && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
-                {translatedText}
-                {isTranslating && translatedText && " ●"}
-              </p>
-            </div>
-          </div>
+          <TranslationContent
+            selectionContent={selectionContent}
+            translatedText={translatedText}
+            isTranslating={isTranslating}
+            onCopy={handleCopy}
+          />
         </SelectionPopover.Body>
-
-        <SelectionPopover.Footer className="justify-between">
-          <div></div>
-          <div className="flex items-center gap-2">
-            <SpeakOriginalButton />
-            <button
-              type="button"
-              onClick={handleCopy}
-              className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded"
-            >
-              <IconCopy strokeWidth={1.6} className="size-4 text-zinc-600 dark:text-zinc-400" />
-            </button>
-          </div>
-        </SelectionPopover.Footer>
       </SelectionPopover.Content>
     </SelectionPopover.Root>
+  )
+}
+
+interface TranslationContentProps {
+  selectionContent: string | null | undefined
+  translatedText: string | undefined
+  isTranslating: boolean
+  onCopy: () => void
+}
+
+function TranslationContent({ selectionContent, translatedText, isTranslating, onCopy }: TranslationContentProps) {
+  const [actionsExpanded, setActionsExpanded] = useState(false)
+
+  return (
+    <div className="p-4">
+      <div>
+        <div className="flex items-start justify-between gap-2">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">{selectionContent}</p>
+          <Button
+            variant="ghost-secondary"
+            size="icon-sm"
+            onClick={() => setActionsExpanded(prev => !prev)}
+          >
+            <Activity mode={actionsExpanded ? "visible" : "hidden"}>
+              <IconChevronUp />
+            </Activity>
+            <Activity mode={actionsExpanded ? "hidden" : "visible"}>
+              <IconChevronDown />
+            </Activity>
+          </Button>
+        </div>
+        <Activity mode={actionsExpanded ? "visible" : "hidden"}>
+          <div className="flex items-center gap-1 mt-1">
+            <Button
+              variant="ghost-secondary"
+              size="icon-sm"
+              onClick={onCopy}
+            >
+              <IconCopy />
+            </Button>
+            <SpeakOriginalButton />
+          </div>
+        </Activity>
+      </div>
+      <Separator className="h-[0.5px] my-2" />
+      <div>
+        <p className="text-sm">
+          {isTranslating && !translatedText && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
+          {translatedText}
+          {isTranslating && translatedText && " ●"}
+        </p>
+      </div>
+    </div>
   )
 }
 
@@ -213,8 +248,9 @@ function SpeakOriginalButton() {
   }, [selectionContent, ttsConfig, play])
 
   return (
-    <button
-      type="button"
+    <Button
+      variant="ghost-secondary"
+      size="icon-sm"
       onClick={handleSpeak}
       disabled={isFetching || isPlaying}
       className="p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-700 rounded disabled:opacity-50 disabled:cursor-not-allowed"
@@ -230,6 +266,6 @@ function SpeakOriginalButton() {
         : (
             <IconVolume className="size-4 text-zinc-600 dark:text-zinc-400" strokeWidth={1.6} />
           )}
-    </button>
+    </Button>
   )
 }
