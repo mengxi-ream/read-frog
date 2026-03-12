@@ -878,6 +878,7 @@ speak:
 action:
   copy: Copy
   copied: Copied
+  regenerate: Regenerate
   speak: Speak
   playing: Playing
 shortcutKeySelector:

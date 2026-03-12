@@ -4,10 +4,13 @@ import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { RiTranslate } from "@remixicon/react"
 import { useAtomValue, useSetAtom } from "jotai"
-import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
 import { SelectionPopover } from "@/components/ui/selection-popover"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
+import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { getOrFetchArticleData } from "@/utils/host/translate/article-context"
 import { translateTextCore } from "@/utils/host/translate/translate-text"
@@ -15,6 +18,7 @@ import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from "../.."
+import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
 import {
   isSelectionToolbarVisibleAtom,
@@ -25,6 +29,12 @@ import { TranslationContent } from "./translation-content"
 
 function normalizeSelectedText(value: string | null) {
   return value?.replace(/\u200B/g, "").trim() ?? ""
+}
+
+function normalizeTranslatedText(cleanText: string, translatedText: string) {
+  return cleanText === normalizeSelectedText(translatedText)
+    ? ""
+    : translatedText
 }
 
 function isAbortError(error: unknown) {
@@ -114,9 +124,12 @@ async function translateWithStandardProvider({
 export function TranslateButton() {
   const [open, setOpen] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
+  const [rerunNonce, setRerunNonce] = useState(0)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
   const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const setConfig = useSetAtom(writeConfigAtom)
   const abortControllerRef = useRef<AbortController | null>(null)
   const runIdRef = useRef(0)
   const {
@@ -125,6 +138,10 @@ export function TranslateButton() {
     captureSelectionSnapshot,
     clearSelectionSnapshot,
   } = useSelectionPopoverSnapshot()
+  const translateProviders = useMemo(
+    () => filterEnabledProvidersConfig(providersConfig).filter(isTranslateProviderConfig),
+    [providersConfig],
+  )
 
   const resetSessionState = useCallback(() => {
     setIsTranslating(false)
@@ -182,7 +199,7 @@ export function TranslateButton() {
       }
 
       if (runIdRef.current === runId) {
-        setTranslatedText(nextTranslatedText)
+        setTranslatedText(normalizeTranslatedText(cleanText, nextTranslatedText))
       }
     }
     catch (error) {
@@ -205,6 +222,15 @@ export function TranslateButton() {
     void runTranslation(runId)
   })
 
+  const handleProviderChange = useCallback((providerId: string) => {
+    void setConfig(buildFeatureProviderPatch({ "selectionToolbar.translate": providerId }))
+  }, [setConfig])
+
+  const handleRegenerate = useCallback(() => {
+    cancelCurrentTranslation()
+    setRerunNonce(prev => prev + 1)
+  }, [cancelCurrentTranslation])
+
   useEffect(() => {
     if (!open) {
       return
@@ -218,7 +244,7 @@ export function TranslateButton() {
     return () => {
       cancelCurrentTranslation(runId)
     }
-  }, [cancelCurrentTranslation, open, popoverSessionKey, selectionContentSnapshot, translateRequest])
+  }, [cancelCurrentTranslation, open, popoverSessionKey, rerunNonce, selectionContentSnapshot, translateRequest])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     cancelCurrentTranslation()
@@ -263,6 +289,12 @@ export function TranslateButton() {
             isTranslating={isTranslating}
           />
         </SelectionPopover.Body>
+        <SelectionToolbarFooterContent
+          providers={translateProviders}
+          value={translateRequest.providerConfig?.id ?? ""}
+          onProviderChange={handleProviderChange}
+          onRegenerate={handleRegenerate}
+        />
       </SelectionPopover.Content>
     </SelectionPopover.Root>
   )

@@ -766,6 +766,7 @@ speak:
 action:
   copy: コピー
   copied: コピー済み
+  regenerate: 再生成
   speak: 読み上げ
   playing: 再生中
 shortcutKeySelector:

@@ -878,6 +878,7 @@ speak:
 action:
   copy: 复制
   copied: 已复制
+  regenerate: 重新生成
   speak: 朗读
   playing: 播放中
 shortcutKeySelector:

@@ -766,6 +766,7 @@ speak:
 action:
   copy: 複製
   copied: 已複製
+  regenerate: 重新生成
   speak: 朗讀
   playing: 播放中
 shortcutKeySelector:

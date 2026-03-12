@@ -105,6 +105,10 @@ vi.mock("@/components/ui/selection-popover", async () => {
     return <button type="button">Pin</button>
   }
 
+  function Footer({ children }: { children: React.ReactNode }) {
+    return <div>{children}</div>
+  }
+
   return {
     SelectionPopover: {
       Root,
@@ -112,6 +116,7 @@ vi.mock("@/components/ui/selection-popover", async () => {
       Content,
       Header: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
       Body,
+      Footer,
       Pin,
       Close,
     },
@@ -120,6 +125,42 @@ vi.mock("@/components/ui/selection-popover", async () => {
 
 vi.mock("../../components/selection-toolbar-title-content", () => ({
   SelectionToolbarTitleContent: ({ title }: { title: string }) => <div>{title}</div>,
+}))
+
+vi.mock("../../components/selection-toolbar-footer-content", () => ({
+  SelectionToolbarFooterContent: ({
+    onProviderChange,
+    onRegenerate,
+    providers,
+    value,
+  }: {
+    onProviderChange: (id: string) => void
+    onRegenerate: () => void
+    providers: Array<{ id: string }>
+    value: string
+  }) => {
+    const nextProvider = providers.find(provider => provider.id !== value)
+
+    return (
+      <div>
+        <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
+          Regenerate
+        </button>
+        <button
+          type="button"
+          aria-label="Change provider"
+          disabled={!nextProvider}
+          onClick={() => {
+            if (nextProvider) {
+              onProviderChange(nextProvider.id)
+            }
+          }}
+        >
+          Change provider
+        </button>
+      </div>
+    )
+  },
 }))
 
 vi.mock("../translate-button/translation-content", () => ({
@@ -309,7 +350,7 @@ describe("selection toolbar requests", () => {
     })
   })
 
-  it("ignores stale standard translation results from older runs", async () => {
+  it("reruns standard translation from the footer and ignores stale results from older runs", async () => {
     const firstRun = createDeferredPromise<string>()
     const secondRun = createDeferredPromise<string>()
 
@@ -329,11 +370,7 @@ describe("selection toolbar requests", () => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
     })
 
-    const updatedConfig = cloneConfig(store.get(configAtom))
-    setSelectionToolbarTranslateProvider(updatedConfig, "google-translate-default")
-    act(() => {
-      store.set(configAtom, updatedConfig)
-    })
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
 
     await waitFor(() => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
@@ -471,6 +508,60 @@ describe("selection toolbar requests", () => {
     })
   })
 
+  it("reruns vocabulary insight from the footer and aborts the previous run", async () => {
+    const firstRun = createDeferredPromise<string>()
+    const secondRun = createDeferredPromise<string>()
+    const signals: AbortSignal[] = []
+
+    streamBackgroundTextMock
+      .mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
+        signals.push(options.signal as AbortSignal)
+        options.signal?.addEventListener("abort", () => {
+          firstRun.reject(new DOMException("aborted", "AbortError"))
+        })
+        return firstRun.promise
+      })
+      .mockImplementationOnce((_payload, options: { onChunk?: (data: string) => void, signal?: AbortSignal }) => {
+        signals.push(options.signal as AbortSignal)
+        return secondRun.promise.then((value) => {
+          options.onChunk?.(value)
+          return value
+        })
+      })
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Before selected text after."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionRangeAtom, createRangeFor(paragraph))
+    renderWithProviders(<AiButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "Vocabulary insight" }))
+
+    await waitFor(() => {
+      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
+
+    await waitFor(() => {
+      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(signals[0]?.aborted).toBe(true)
+
+    await act(async () => {
+      secondRun.resolve("Fresh insight")
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText("Fresh insight")).toBeInTheDocument()
+    })
+  })
+
   it("does not rerun custom feature requests on passive config refresh, but reruns when request values change", async () => {
     streamBackgroundStructuredObjectMock.mockResolvedValue({ summary: "done" })
 
@@ -522,6 +613,63 @@ describe("selection toolbar requests", () => {
 
     await waitFor(() => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it("reruns custom feature requests from the footer and aborts the previous run", async () => {
+    const firstRun = createDeferredPromise<Record<string, unknown>>()
+    const secondRun = createDeferredPromise<Record<string, unknown>>()
+    const signals: AbortSignal[] = []
+
+    streamBackgroundStructuredObjectMock
+      .mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
+        signals.push(options.signal as AbortSignal)
+        options.signal?.addEventListener("abort", () => {
+          firstRun.reject(new DOMException("aborted", "AbortError"))
+        })
+        return firstRun.promise
+      })
+      .mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
+        signals.push(options.signal as AbortSignal)
+        return secondRun.promise
+      })
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    store.set(selectionRangeAtom, createRangeFor(paragraph))
+    renderWithProviders(<SelectionToolbarCustomFeatureButtons />, store)
+
+    const featureName = DEFAULT_CONFIG.selectionToolbar.customFeatures[0]?.name
+    if (!featureName) {
+      throw new Error("Default custom feature is missing")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: featureName }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(signals[0]?.aborted).toBe(true)
+
+    await act(async () => {
+      secondRun.resolve({ summary: "fresh" })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText("{\"summary\":\"fresh\"}")).toBeInTheDocument()
     })
   })
 })

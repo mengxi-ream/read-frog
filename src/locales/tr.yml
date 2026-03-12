@@ -766,6 +766,7 @@ speak:
 action:
   copy: Kopyala
   copied: Kopyalandı
+  regenerate: Yeniden oluştur
   speak: Oku
   playing: Çalınıyor
 shortcutKeySelector:

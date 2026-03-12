@@ -766,6 +766,7 @@ speak:
 action:
   copy: 복사
   copied: 복사됨
+  regenerate: 다시 생성
   speak: 읽기
   playing: 재생 중
 shortcutKeySelector:

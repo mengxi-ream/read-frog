@@ -5,11 +5,13 @@ import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
+import { SelectionToolbarFooterContent } from "../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { getSelectionParagraphText } from "../utils"
 import {
@@ -42,8 +44,12 @@ function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement 
 
 function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionToolbarCustomFeature }) {
   const [open, setOpen] = useState(false)
+  const [rerunNonce, setRerunNonce] = useState(0)
   const customFeatureRequest = useAtomValue(selectionToolbarCustomFeatureRequestAtomFamily(feature.id))
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const setConfig = useSetAtom(writeConfigAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const {
     selectionContentSnapshot,
@@ -76,6 +82,30 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
     const paragraphCandidate = selectionRangeSnapshot ? getSelectionParagraphText(selectionRangeSnapshot) : cleanSelection
     return paragraphCandidate || cleanSelection
   }, [cleanSelection, selectionRangeSnapshot])
+
+  const llmProviders = useMemo(
+    () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
+    [providersConfig],
+  )
+
+  const handleProviderChange = useCallback((providerId: string) => {
+    const updatedCustomFeatures = selectionToolbarConfig.customFeatures.map(item =>
+      item.id === feature.id
+        ? { ...item, providerId }
+        : item,
+    )
+
+    void setConfig({
+      selectionToolbar: {
+        ...selectionToolbarConfig,
+        customFeatures: updatedCustomFeatures,
+      },
+    })
+  }, [feature.id, selectionToolbarConfig, setConfig])
+
+  const handleRegenerate = useCallback(() => {
+    setRerunNonce(prev => prev + 1)
+  }, [])
 
   useEffect(() => {
     if (!open) {
@@ -203,6 +233,7 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
     open,
     paragraphText,
     popoverSessionKey,
+    rerunNonce,
   ])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
@@ -267,6 +298,12 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
             )}
           </div>
         </SelectionPopover.Body>
+        <SelectionToolbarFooterContent
+          providers={llmProviders}
+          value={customFeatureRequest.providerConfig?.id ?? ""}
+          onProviderChange={handleProviderChange}
+          onRegenerate={handleRegenerate}
+        />
       </SelectionPopover.Content>
     </SelectionPopover.Root>
   )

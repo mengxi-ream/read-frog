@@ -766,6 +766,7 @@ speak:
 action:
   copy: Копировать
   copied: Скопировано
+  regenerate: Сгенерировать заново
   speak: Озвучить
   playing: Воспроизведение
 shortcutKeySelector:

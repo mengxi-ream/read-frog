@@ -6,14 +6,18 @@ import { Activity } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { detectedCodeAtom } from "@/utils/atoms/detected-code"
+import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { getFinalSourceCode } from "@/utils/config/languages"
+import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { logger } from "@/utils/logger"
 import { getWordExplainPrompt } from "@/utils/prompts/word-explain"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
+import { SelectionToolbarFooterContent } from "../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { createHighlightData } from "../utils"
 import {
@@ -32,9 +36,12 @@ function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement 
 
 export function AiButton() {
   const [open, setOpen] = useState(false)
+  const [rerunNonce, setRerunNonce] = useState(0)
   const detectedCode = useAtomValue(detectedCodeAtom)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const vocabularyInsightRequest = useAtomValue(selectionToolbarVocabularyInsightRequestAtom)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const setConfig = useSetAtom(writeConfigAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const [aiResponse, setAiResponse] = useState("")
   const {
@@ -57,6 +64,10 @@ export function AiButton() {
     logger.info("highlightData.context", "\n", data.context)
     return data
   }, [open, selectionRangeSnapshot])
+  const llmProviders = useMemo(
+    () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
+    [providersConfig],
+  )
 
   const {
     isLoading,
@@ -65,6 +76,7 @@ export function AiButton() {
     queryKey: [
       "analyzeSelection",
       popoverSessionKey,
+      rerunNonce,
       highlightData,
       vocabularyInsightRequest,
       detectedCode,
@@ -139,6 +151,14 @@ export function AiButton() {
     refetchOnReconnect: false,
     refetchOnWindowFocus: false,
   })
+
+  const handleProviderChange = useCallback((providerId: string) => {
+    void setConfig(buildFeatureProviderPatch({ "selectionToolbar.vocabularyInsight": providerId }))
+  }, [setConfig])
+
+  const handleRegenerate = useCallback(() => {
+    setRerunNonce(prev => prev + 1)
+  }, [])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     if (nextOpen) {
@@ -236,6 +256,12 @@ export function AiButton() {
             </div>
           </div>
         </SelectionPopover.Body>
+        <SelectionToolbarFooterContent
+          providers={llmProviders}
+          value={vocabularyInsightRequest.providerConfig?.id ?? ""}
+          onProviderChange={handleProviderChange}
+          onRegenerate={handleRegenerate}
+        />
       </SelectionPopover.Content>
     </SelectionPopover.Root>
   )

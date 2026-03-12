@@ -367,7 +367,7 @@ function SelectionPopoverFooter({
 }: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn("flex items-center gap-2 p-4", className)}
+      className={cn("flex items-center gap-2 py-2 px-4", className)}
       {...props}
     />
   )

@@ -766,6 +766,7 @@ speak:
 action:
   copy: Sao chép
   copied: Đã sao chép
+  regenerate: Tạo lại
   speak: Đọc
   playing: Đang phát
 shortcutKeySelector:
