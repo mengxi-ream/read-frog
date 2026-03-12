@@ -763,6 +763,11 @@ speak:
   noTextSelected: Текст не выделен
   openaiNotConfigured: Провайдер OpenAI не настроен или не включён
   openaiApiKeyNotConfigured: API-ключ OpenAI не настроен
+action:
+  copy: Копировать
+  copied: Скопировано
+  speak: Озвучить
+  playing: Воспроизведение
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:

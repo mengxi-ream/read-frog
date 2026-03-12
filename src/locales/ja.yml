@@ -763,6 +763,11 @@ speak:
   noTextSelected: テキストが選択されていません
   openaiNotConfigured: OpenAIプロバイダーが設定されていないか有効になっていません
   openaiApiKeyNotConfigured: OpenAI APIキーが設定されていません
+action:
+  copy: コピー
+  copied: コピー済み
+  speak: 読み上げ
+  playing: 再生中
 shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:

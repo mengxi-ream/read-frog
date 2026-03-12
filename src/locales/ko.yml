@@ -763,6 +763,11 @@ speak:
   noTextSelected: 텍스트가 선택되지 않았습니다
   openaiNotConfigured: OpenAI 공급자가 구성되지 않았거나 활성화되지 않았습니다
   openaiApiKeyNotConfigured: OpenAI API 키가 구성되지 않았습니다
+action:
+  copy: 복사
+  copied: 복사됨
+  speak: 읽기
+  playing: 재생 중
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:

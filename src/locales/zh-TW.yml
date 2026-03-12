@@ -763,6 +763,11 @@ speak:
   noTextSelected: 未選擇文字
   openaiNotConfigured: OpenAI 提供商未配置或未啟用
   openaiApiKeyNotConfigured: OpenAI API Key 未配置
+action:
+  copy: 複製
+  copied: 已複製
+  speak: 朗讀
+  playing: 播放中
 shortcutKeySelector:
   placeholder: 請輸入快捷鍵
 subtitles:

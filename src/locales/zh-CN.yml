@@ -875,6 +875,11 @@ speak:
   noTextSelected: 未选择文本
   openaiNotConfigured: OpenAI 提供商未配置或未启用
   openaiApiKeyNotConfigured: OpenAI API Key 未配置
+action:
+  copy: 复制
+  copied: 已复制
+  speak: 朗读
+  playing: 播放中
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:

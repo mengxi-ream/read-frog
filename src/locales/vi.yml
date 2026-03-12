@@ -763,6 +763,11 @@ speak:
   noTextSelected: Không có văn bản nào được chọn
   openaiNotConfigured: Nhà cung cấp OpenAI chưa được cấu hình hoặc chưa được bật
   openaiApiKeyNotConfigured: API key OpenAI chưa được cấu hình
+action:
+  copy: Sao chép
+  copied: Đã sao chép
+  speak: Đọc
+  playing: Đang phát
 shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
