@@ -6,25 +6,30 @@ import { useCallback, useEffect, useState } from "react"
 import { toast } from "sonner"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { featureProviderConfigAtom } from "@/utils/atoms/provider"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
-import { translateTextForSelection } from "@/utils/host/translate/translate-variants"
-import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { getOrFetchArticleData } from "@/utils/host/translate/article-context"
+import { translateTextCore } from "@/utils/host/translate/translate-text"
+import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from "../.."
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
-import { isSelectionToolbarVisibleAtom } from "../atom"
+import {
+  isSelectionToolbarVisibleAtom,
+  selectionToolbarTranslateRequestAtom,
+} from "../atom"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 import { TranslationContent } from "./translation-content"
+
+function normalizeSelectedText(value: string | null) {
+  return value?.replace(/\u200B/g, "").trim() ?? ""
+}
 
 export function TranslateButton() {
   const [open, setOpen] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
-  const translateProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.translate"))
-  const languageConfig = useAtomValue(configFieldsAtomMap.language)
+  const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const {
     selectionContentSnapshot,
@@ -43,7 +48,7 @@ export function TranslateButton() {
     let isCancelled = false
 
     const translate = async () => {
-      const cleanText = selectionContentSnapshot?.replace(/\u200B/g, "").trim()
+      const cleanText = normalizeSelectedText(selectionContentSnapshot)
       if (!cleanText) {
         return
       }
@@ -52,12 +57,15 @@ export function TranslateButton() {
       cancelTranslation = undefined
 
       try {
+        const articleData = await getOrFetchArticleData(translateRequest.enableAIContentAware)
+        const translateProviderConfig = translateRequest.providerConfig
+
         if (!translateProviderConfig) {
           throw new Error("No provider config when translate text")
         }
 
         if (isLLMProviderConfig(translateProviderConfig)) {
-          const targetLangName = LANG_CODE_TO_EN_NAME[languageConfig.targetCode]
+          const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
           const {
             id: providerId,
             provider,
@@ -66,7 +74,11 @@ export function TranslateButton() {
           } = translateProviderConfig
           const modelName = resolveModelId(translateProviderConfig.model)
           const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
-          const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, cleanText)
+          const { systemPrompt, prompt } = getTranslatePromptFromConfig(
+            { customPromptsConfig: translateRequest.customPromptsConfig },
+            targetLangName,
+            cleanText,
+          )
 
           const abortController = new AbortController()
           cancelTranslation = () => abortController.abort()
@@ -98,7 +110,14 @@ export function TranslateButton() {
           return
         }
 
-        const backgroundTranslation = await translateTextForSelection(cleanText)
+        const backgroundTranslation = await translateTextCore({
+          text: cleanText,
+          langConfig: translateRequest.language,
+          providerConfig: translateProviderConfig,
+          enableAIContentAware: translateRequest.enableAIContentAware,
+          extraHashTags: ["selectionTranslation"],
+          articleContext: articleData ?? undefined,
+        })
         if (isCancelled) {
           return
         }
@@ -136,11 +155,10 @@ export function TranslateButton() {
       cancelTranslation = undefined
     }
   }, [
-    languageConfig.targetCode,
     open,
     popoverSessionKey,
     selectionContentSnapshot,
-    translateProviderConfig,
+    translateRequest,
   ])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {

@@ -79,24 +79,6 @@ export async function translateTextForPageTitle(text: string): Promise<string> {
   })
 }
 
-/**
- * Selection toolbar translation — uses FEATURE_PROVIDER_DEFS['selectionToolbar.translate'].
- */
-export async function translateTextForSelection(text: string): Promise<string> {
-  const config = await getConfigOrThrow()
-  const providerConfig = resolveProviderConfig(config, "selectionToolbar.translate")
-  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
-
-  return translateTextCore({
-    text,
-    langConfig: config.language,
-    extraHashTags: ["selectionTranslation"],
-    providerConfig,
-    enableAIContentAware: config.translate.enableAIContentAware,
-    articleContext: articleData ?? undefined,
-  })
-}
-
 async function resolveInputLang(
   lang: InputTranslationLang,
   globalLangConfig: Config["language"],

@@ -1,3 +1,4 @@
+import type { Config } from "@/types/config/config"
 import type { ArticleContent } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "../constants/config"
@@ -13,13 +14,13 @@ export interface TranslatePromptResult {
   prompt: string
 }
 
-export async function getTranslatePrompt(
+export function getTranslatePromptFromConfig(
+  translateConfig: Pick<Config["translate"], "customPromptsConfig">,
   targetLang: string,
   input: string,
   options?: TranslatePromptOptions,
-): Promise<TranslatePromptResult> {
-  const config = await getLocalConfig() ?? DEFAULT_CONFIG
-  const customPromptsConfig = config.translate.customPromptsConfig
+): TranslatePromptResult {
+  const customPromptsConfig = translateConfig.customPromptsConfig
   const { patterns = [], promptId } = customPromptsConfig
 
   // Resolve system prompt and user prompt
@@ -61,4 +62,13 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
     systemPrompt: replaceTokens(systemPrompt),
     prompt: replaceTokens(prompt),
   }
+}
+
+export async function getTranslatePrompt(
+  targetLang: string,
+  input: string,
+  options?: TranslatePromptOptions,
+): Promise<TranslatePromptResult> {
+  const config = await getLocalConfig() ?? DEFAULT_CONFIG
+  return getTranslatePromptFromConfig(config.translate, targetLang, input, options)
 }

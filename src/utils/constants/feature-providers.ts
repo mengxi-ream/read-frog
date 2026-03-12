@@ -1,4 +1,5 @@
 import type { Config } from "@/types/config/config"
+import type { ProviderConfig } from "@/types/config/provider"
 import { isLLMProvider, isTranslateProvider } from "@/types/config/provider"
 import { mergeWithArrayOverwrite } from "../atoms/config"
 import { getProviderConfigById } from "../config/helpers"
@@ -57,13 +58,21 @@ export const FEATURE_KEY_I18N_MAP: Record<FeatureKey, string> = {
 }
 
 export function resolveProviderConfig(config: Config, featureKey: FeatureKey) {
-  const def = FEATURE_PROVIDER_DEFS[featureKey]
-  const providerId = def.getProviderId(config)
-  const providerConfig = getProviderConfigById(config.providersConfig, providerId)
+  const providerConfig = resolveProviderConfigOrNull(config, featureKey)
   if (!providerConfig) {
+    const providerId = FEATURE_PROVIDER_DEFS[featureKey].getProviderId(config)
     throw new Error(`No provider config for id "${providerId}" (feature "${featureKey}")`)
   }
   return providerConfig
+}
+
+export function resolveProviderConfigOrNull(
+  config: Config,
+  featureKey: FeatureKey,
+): ProviderConfig | null {
+  const def = FEATURE_PROVIDER_DEFS[featureKey]
+  const providerId = def.getProviderId(config)
+  return getProviderConfigById(config.providersConfig, providerId) ?? null
 }
 
 /**

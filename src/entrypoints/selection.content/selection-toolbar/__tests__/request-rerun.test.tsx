@@ -1,0 +1,385 @@
+// @vitest-environment jsdom
+import type { ReactElement } from "react"
+import type { Config } from "@/types/config/config"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { createStore, Provider } from "jotai"
+import { afterEach, describe, expect, it, vi } from "vitest"
+import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { configAtom } from "@/utils/atoms/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { AiButton } from "../ai-button"
+import {
+  selectionContentAtom,
+  selectionRangeAtom,
+} from "../atom"
+import { SelectionToolbarCustomFeatureButtons } from "../custom-feature-button"
+import { TranslateButton } from "../translate-button"
+
+const streamBackgroundTextMock = vi.fn()
+const streamBackgroundStructuredObjectMock = vi.fn()
+const translateTextCoreMock = vi.fn()
+const getOrFetchArticleDataMock = vi.fn()
+
+vi.mock("@/components/ui/selection-popover", async () => {
+  const React = await import("react")
+
+  interface PopoverContextValue {
+    open: boolean
+    onOpenChange?: (open: boolean) => void
+  }
+
+  const PopoverContext = React.createContext<PopoverContextValue | null>(null)
+
+  function usePopoverContext() {
+    const context = React.use(PopoverContext)
+    if (!context) {
+      throw new Error("SelectionPopover components must be used within SelectionPopover.Root.")
+    }
+    return context
+  }
+
+  function Root({
+    children,
+    open,
+    onOpenChange,
+  }: {
+    children: React.ReactNode
+    open: boolean
+    onOpenChange?: (open: boolean) => void
+  }) {
+    return (
+      <PopoverContext value={{ open, onOpenChange }}>
+        {children}
+      </PopoverContext>
+    )
+  }
+
+  function Trigger({
+    children,
+    title,
+  }: {
+    children: React.ReactNode
+    title?: string
+  }) {
+    const { onOpenChange } = usePopoverContext()
+    return (
+      <button
+        type="button"
+        aria-label={title}
+        onClick={() => onOpenChange?.(true)}
+      >
+        {children}
+      </button>
+    )
+  }
+
+  function Content({ children }: { children: React.ReactNode }) {
+    const { open } = usePopoverContext()
+    return open ? <div data-testid="selection-popover-content">{children}</div> : null
+  }
+
+  function Body({
+    children,
+    ref,
+    ...props
+  }: React.ComponentProps<"div"> & { ref?: React.Ref<HTMLDivElement> }) {
+    return (
+      <div ref={ref} {...props}>
+        {children}
+      </div>
+    )
+  }
+
+  function Close() {
+    const { onOpenChange } = usePopoverContext()
+    return (
+      <button type="button" aria-label="Close" onClick={() => onOpenChange?.(false)}>
+        Close
+      </button>
+    )
+  }
+
+  function Pin() {
+    return <button type="button">Pin</button>
+  }
+
+  return {
+    SelectionPopover: {
+      Root,
+      Trigger,
+      Content,
+      Header: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+      Body,
+      Pin,
+      Close,
+    },
+  }
+})
+
+vi.mock("../../components/selection-toolbar-title-content", () => ({
+  SelectionToolbarTitleContent: ({ title }: { title: string }) => <div>{title}</div>,
+}))
+
+vi.mock("../translate-button/translation-content", () => ({
+  TranslationContent: ({
+    selectionContent,
+    translatedText,
+    isTranslating,
+  }: {
+    selectionContent: string | null | undefined
+    translatedText: string | undefined
+    isTranslating: boolean
+  }) => (
+    <div data-testid="translation-content">
+      <span>{selectionContent}</span>
+      <span>{translatedText}</span>
+      <span>{String(isTranslating)}</span>
+    </div>
+  ),
+}))
+
+vi.mock("@/components/markdown-renderer", () => ({
+  MarkdownRenderer: ({ content }: { content: string }) => <div>{content}</div>,
+}))
+
+vi.mock("../structured-object-renderer", () => ({
+  StructuredObjectRenderer: ({ value }: { value: Record<string, unknown> | null }) => (
+    <pre>{JSON.stringify(value)}</pre>
+  ),
+}))
+
+vi.mock("@/utils/content-script/background-stream-client", () => ({
+  streamBackgroundText: (...args: unknown[]) => streamBackgroundTextMock(...args),
+  streamBackgroundStructuredObject: (...args: unknown[]) => streamBackgroundStructuredObjectMock(...args),
+}))
+
+vi.mock("@/utils/host/translate/translate-text", () => ({
+  translateTextCore: (...args: unknown[]) => translateTextCoreMock(...args),
+}))
+
+vi.mock("@/utils/host/translate/article-context", () => ({
+  getOrFetchArticleData: (...args: unknown[]) => getOrFetchArticleDataMock(...args),
+}))
+
+vi.mock("@/utils/logger", () => ({
+  logger: {
+    info: vi.fn(),
+    log: vi.fn(),
+    error: vi.fn(),
+  },
+}))
+
+function cloneConfig(config: Config): Config {
+  return JSON.parse(JSON.stringify(config)) as Config
+}
+
+function createRangeFor(node: Node) {
+  const range = document.createRange()
+  range.selectNodeContents(node)
+  return range
+}
+
+function findAlternateTranslateProviderId(config: Config, currentProviderId: string) {
+  return config.providersConfig.find(provider =>
+    provider.id !== currentProviderId && isTranslateProviderConfig(provider),
+  )?.id
+}
+
+function findAlternateLLMProviderId(config: Config, currentProviderId: string) {
+  return config.providersConfig.find(provider =>
+    provider.id !== currentProviderId && isLLMProviderConfig(provider),
+  )?.id
+}
+
+function renderWithProviders(ui: ReactElement, store = createStore()) {
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
+
+  const view = render(
+    <QueryClientProvider client={queryClient}>
+      <Provider store={store}>
+        {ui}
+      </Provider>
+    </QueryClientProvider>,
+  )
+
+  return {
+    ...view,
+    queryClient,
+    store,
+  }
+}
+
+describe("selection toolbar requests", () => {
+  afterEach(() => {
+    cleanup()
+    document.body.innerHTML = ""
+    vi.clearAllMocks()
+  })
+
+  it("does not rerun translation on passive config refresh, but reruns when request values change", async () => {
+    translateTextCoreMock.mockResolvedValue("translated once")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    const view = renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    const refreshedConfig = cloneConfig(store.get(configAtom))
+    act(() => {
+      store.set(configAtom, refreshedConfig)
+    })
+    view.rerender(
+      <QueryClientProvider client={view.queryClient}>
+        <Provider store={store}>
+          <TranslateButton />
+        </Provider>
+      </QueryClientProvider>,
+    )
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+
+    const updatedConfig = cloneConfig(store.get(configAtom))
+    const nextProviderId = findAlternateTranslateProviderId(
+      updatedConfig,
+      updatedConfig.selectionToolbar.features.translate.providerId,
+    )
+    if (!nextProviderId) {
+      throw new Error("No alternate translate provider available for test")
+    }
+    updatedConfig.selectionToolbar.features.translate.providerId = nextProviderId
+
+    act(() => {
+      store.set(configAtom, updatedConfig)
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
+      providerConfig: expect.objectContaining({
+        id: nextProviderId,
+      }),
+    })
+  })
+
+  it("does not refetch vocabulary insight on focus, but reruns when request values change", async () => {
+    streamBackgroundTextMock.mockResolvedValue("Insight response")
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Before selected text after."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionRangeAtom, createRangeFor(paragraph))
+    renderWithProviders(<AiButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "Vocabulary insight" }))
+
+    await waitFor(() => {
+      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      window.dispatchEvent(new Event("focus"))
+      document.dispatchEvent(new Event("visibilitychange"))
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
+
+    const updatedConfig = cloneConfig(store.get(configAtom))
+    const nextProviderId = findAlternateLLMProviderId(
+      updatedConfig,
+      updatedConfig.selectionToolbar.features.vocabularyInsight.providerId,
+    )
+    if (!nextProviderId) {
+      throw new Error("No alternate LLM provider available for test")
+    }
+    updatedConfig.selectionToolbar.features.vocabularyInsight.providerId = nextProviderId
+
+    act(() => {
+      store.set(configAtom, updatedConfig)
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(2)
+    })
+  })
+
+  it("does not rerun custom feature requests on passive config refresh, but reruns when request values change", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue({ summary: "done" })
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    store.set(selectionRangeAtom, createRangeFor(paragraph))
+    renderWithProviders(<SelectionToolbarCustomFeatureButtons />, store)
+
+    const featureName = DEFAULT_CONFIG.selectionToolbar.customFeatures[0]?.name
+    if (!featureName) {
+      throw new Error("Default custom feature is missing")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: featureName }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      store.set(configAtom, cloneConfig(store.get(configAtom)))
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+
+    const updatedConfig = cloneConfig(store.get(configAtom))
+    const currentProviderId = updatedConfig.selectionToolbar.customFeatures[0]?.providerId ?? ""
+    const nextProviderId = findAlternateLLMProviderId(updatedConfig, currentProviderId)
+    if (!nextProviderId) {
+      throw new Error("No alternate LLM provider available for custom feature test")
+    }
+    updatedConfig.selectionToolbar.customFeatures[0] = {
+      ...updatedConfig.selectionToolbar.customFeatures[0]!,
+      providerId: nextProviderId,
+    }
+
+    act(() => {
+      store.set(configAtom, updatedConfig)
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
+    })
+  })
+})

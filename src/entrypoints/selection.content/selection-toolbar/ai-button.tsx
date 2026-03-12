@@ -6,9 +6,7 @@ import { Activity } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { configAtom } from "@/utils/atoms/config"
 import { detectedCodeAtom } from "@/utils/atoms/detected-code"
-import { featureProviderConfigAtom } from "@/utils/atoms/provider"
 import { getFinalSourceCode } from "@/utils/config/languages"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { logger } from "@/utils/logger"
@@ -18,7 +16,10 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { createHighlightData } from "../utils"
-import { isSelectionToolbarVisibleAtom } from "./atom"
+import {
+  isSelectionToolbarVisibleAtom,
+  selectionToolbarVocabularyInsightRequestAtom,
+} from "./atom"
 import { useSelectionPopoverSnapshot } from "./use-selection-popover-snapshot"
 
 function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement | null>) {
@@ -31,9 +32,8 @@ function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement 
 
 export function AiButton() {
   const [open, setOpen] = useState(false)
-  const config = useAtomValue(configAtom)
   const detectedCode = useAtomValue(detectedCodeAtom)
-  const vocabularyInsightProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.vocabularyInsight"))
+  const vocabularyInsightRequest = useAtomValue(selectionToolbarVocabularyInsightRequestAtom)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const [aiResponse, setAiResponse] = useState("")
@@ -66,14 +66,16 @@ export function AiButton() {
       "analyzeSelection",
       popoverSessionKey,
       highlightData,
-      vocabularyInsightProviderConfig,
-      config,
+      vocabularyInsightRequest,
+      detectedCode,
     ],
     queryFn: async ({ signal }) => {
-      if (!highlightData || !vocabularyInsightProviderConfig || !config) {
+      if (!highlightData) {
         throw new Error("No provider config for vocabulary insight or no selection")
       }
-      if (!isLLMProviderConfig(vocabularyInsightProviderConfig)) {
+      const vocabularyInsightProviderConfig = vocabularyInsightRequest.providerConfig
+
+      if (!vocabularyInsightProviderConfig || !isLLMProviderConfig(vocabularyInsightProviderConfig)) {
         throw new Error("Vocabulary insight requires an LLM provider")
       }
 
@@ -84,11 +86,11 @@ export function AiButton() {
           return false
         }
 
-        const actualSourceCode = getFinalSourceCode(config.language.sourceCode, detectedCode)
+        const actualSourceCode = getFinalSourceCode(vocabularyInsightRequest.language.sourceCode, detectedCode)
         const systemPrompt = getWordExplainPrompt(
           actualSourceCode,
-          config.language.targetCode,
-          config.language.level,
+          vocabularyInsightRequest.language.targetCode,
+          vocabularyInsightRequest.language.level,
         )
         const userMessage
           = `query: ${highlightData.context.selection}\n`
@@ -134,9 +136,11 @@ export function AiButton() {
       }
     },
     enabled: !!highlightData,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
   })
 
-  const handleOpenChange = (nextOpen: boolean) => {
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
     if (nextOpen) {
       captureSelectionSnapshot()
       resetSessionState()
@@ -151,7 +155,7 @@ export function AiButton() {
     if (nextOpen) {
       setIsSelectionToolbarVisible(false)
     }
-  }
+  }, [captureSelectionSnapshot, clearSelectionSnapshot, resetSessionState, setIsSelectionToolbarVisible])
 
   return (
     <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>

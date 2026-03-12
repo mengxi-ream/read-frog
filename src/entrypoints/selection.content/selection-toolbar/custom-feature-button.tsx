@@ -12,7 +12,10 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { getSelectionParagraphText } from "../utils"
-import { isSelectionToolbarVisibleAtom } from "./atom"
+import {
+  isSelectionToolbarVisibleAtom,
+  selectionToolbarCustomFeatureRequestAtomFamily,
+} from "./atom"
 import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "./custom-feature-prompt"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 import { useSelectionPopoverSnapshot } from "./use-selection-popover-snapshot"
@@ -39,9 +42,7 @@ function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement 
 
 function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionToolbarCustomFeature }) {
   const [open, setOpen] = useState(false)
-  const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-  const languageConfig = useAtomValue(configFieldsAtomMap.language)
+  const customFeatureRequest = useAtomValue(selectionToolbarCustomFeatureRequestAtomFamily(feature.id))
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const {
@@ -62,10 +63,7 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
     setErrorMessage(null)
   }, [])
 
-  const activeFeature = useMemo(
-    () => selectionToolbarConfig.customFeatures?.find(candidate => candidate.enabled !== false && candidate.id === feature.id) ?? null,
-    [feature.id, selectionToolbarConfig.customFeatures],
-  )
+  const activeFeature = customFeatureRequest.feature
   const cleanSelection = useMemo(
     () => normalizeSelectedText(selectionContentSnapshot),
     [selectionContentSnapshot],
@@ -80,7 +78,7 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
   }, [cleanSelection, selectionRangeSnapshot])
 
   useEffect(() => {
-    if (!open || !activeFeature) {
+    if (!open) {
       return
     }
 
@@ -103,7 +101,14 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
         return
       }
 
-      const providerConfig = providersConfig.find(provider => provider.id === activeFeature.providerId)
+      const currentFeature = customFeatureRequest.feature
+
+      if (!currentFeature) {
+        setRequestError("Selected feature is unavailable")
+        return
+      }
+
+      const providerConfig = customFeatureRequest.providerConfig
       if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
         setRequestError("Selected provider is unavailable for this feature")
         return
@@ -114,7 +119,7 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
         return
       }
 
-      const targetLang = LANG_CODE_TO_EN_NAME[languageConfig.targetCode]
+      const targetLang = LANG_CODE_TO_EN_NAME[customFeatureRequest.language.targetCode]
       const pageTitle = document.title
 
       const promptTokens = {
@@ -124,11 +129,11 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
         title: pageTitle,
       }
       const systemPrompt = buildSelectionToolbarCustomFeatureSystemPrompt(
-        activeFeature.systemPrompt,
+        currentFeature.systemPrompt,
         promptTokens,
-        activeFeature.outputSchema,
+        currentFeature.outputSchema,
       )
-      const prompt = replaceSelectionToolbarCustomFeaturePromptTokens(activeFeature.prompt, promptTokens)
+      const prompt = replaceSelectionToolbarCustomFeaturePromptTokens(currentFeature.prompt, promptTokens)
       const modelName = resolveModelId(providerConfig.model) ?? ""
       const providerOptions = getProviderOptionsWithOverride(
         modelName,
@@ -146,7 +151,7 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
             providerId: providerConfig.id,
             system: systemPrompt,
             prompt,
-            outputSchema: activeFeature.outputSchema.map(({ name, type }) => ({ name, type })),
+            outputSchema: currentFeature.outputSchema.map(({ name, type }) => ({ name, type })),
             providerOptions,
             temperature: providerConfig.temperature,
           },
@@ -192,7 +197,13 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
       isCancelled = true
       abortController.abort()
     }
-  }, [activeFeature, cleanSelection, languageConfig.targetCode, open, paragraphText, popoverSessionKey, providersConfig])
+  }, [
+    cleanSelection,
+    customFeatureRequest,
+    open,
+    paragraphText,
+    popoverSessionKey,
+  ])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     if (nextOpen) {
