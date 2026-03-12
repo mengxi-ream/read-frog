@@ -20,6 +20,7 @@ const streamBackgroundTextMock = vi.fn()
 const streamBackgroundStructuredObjectMock = vi.fn()
 const translateTextCoreMock = vi.fn()
 const getOrFetchArticleDataMock = vi.fn()
+const toastErrorMock = vi.fn()
 
 vi.mock("@/components/ui/selection-popover", async () => {
   const React = await import("react")
@@ -132,9 +133,9 @@ vi.mock("../translate-button/translation-content", () => ({
     isTranslating: boolean
   }) => (
     <div data-testid="translation-content">
-      <span>{selectionContent}</span>
-      <span>{translatedText}</span>
-      <span>{String(isTranslating)}</span>
+      <span data-testid="translation-selection">{selectionContent}</span>
+      <span data-testid="translation-result">{translatedText ?? ""}</span>
+      <span data-testid="translation-status">{String(isTranslating)}</span>
     </div>
   ),
 }))
@@ -162,6 +163,13 @@ vi.mock("@/utils/host/translate/article-context", () => ({
   getOrFetchArticleData: (...args: unknown[]) => getOrFetchArticleDataMock(...args),
 }))
 
+vi.mock("sonner", () => ({
+  toast: {
+    error: (...args: unknown[]) => toastErrorMock(...args),
+    success: vi.fn(),
+  },
+}))
+
 vi.mock("@/utils/logger", () => ({
   logger: {
     info: vi.fn(),
@@ -180,6 +188,18 @@ function createRangeFor(node: Node) {
   return range
 }
 
+function createDeferredPromise<T>() {
+  let resolve!: (value: T) => void
+  let reject!: (reason?: unknown) => void
+
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+
+  return { promise, resolve, reject }
+}
+
 function findAlternateTranslateProviderId(config: Config, currentProviderId: string) {
   return config.providersConfig.find(provider =>
     provider.id !== currentProviderId && isTranslateProviderConfig(provider),
@@ -190,6 +210,10 @@ function findAlternateLLMProviderId(config: Config, currentProviderId: string) {
   return config.providersConfig.find(provider =>
     provider.id !== currentProviderId && isLLMProviderConfig(provider),
   )?.id
+}
+
+function setSelectionToolbarTranslateProvider(config: Config, providerId: string) {
+  config.selectionToolbar.features.translate.providerId = providerId
 }
 
 function renderWithProviders(ui: ReactElement, store = createStore()) {
@@ -220,7 +244,7 @@ describe("selection toolbar requests", () => {
   afterEach(() => {
     cleanup()
     document.body.innerHTML = ""
-    vi.clearAllMocks()
+    vi.resetAllMocks()
   })
 
   it("does not rerun translation on passive config refresh, but reruns when request values change", async () => {
@@ -279,6 +303,124 @@ describe("selection toolbar requests", () => {
         id: nextProviderId,
       }),
     })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-status").textContent).toBe("false")
+    })
+  })
+
+  it("ignores stale standard translation results from older runs", async () => {
+    const firstRun = createDeferredPromise<string>()
+    const secondRun = createDeferredPromise<string>()
+
+    translateTextCoreMock
+      .mockImplementationOnce(() => firstRun.promise)
+      .mockImplementationOnce(() => secondRun.promise)
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    const updatedConfig = cloneConfig(store.get(configAtom))
+    setSelectionToolbarTranslateProvider(updatedConfig, "google-translate-default")
+    act(() => {
+      store.set(configAtom, updatedConfig)
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+
+    await act(async () => {
+      firstRun.resolve("stale result")
+      await Promise.resolve()
+    })
+
+    expect(screen.getByTestId("translation-result").textContent).toBe("")
+    expect(screen.getByTestId("translation-status").textContent).toBe("true")
+
+    await act(async () => {
+      secondRun.resolve("fresh result")
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("fresh result")
+    })
+    expect(screen.getByTestId("translation-status").textContent).toBe("false")
+  })
+
+  it("aborts llm translations when the popover closes without surfacing an error", async () => {
+    const streamCalls: Array<{ signal?: AbortSignal, onChunk?: (data: string) => void }> = []
+    translateTextCoreMock.mockResolvedValue("")
+
+    streamBackgroundTextMock.mockImplementation((_payload, options: { signal?: AbortSignal, onChunk?: (data: string) => void }) => {
+      streamCalls.push({ signal: options.signal, onChunk: options.onChunk })
+
+      return new Promise<string>((_resolve, reject) => {
+        options.signal?.addEventListener("abort", () => {
+          reject(new DOMException("aborted", "AbortError"))
+        })
+      })
+    })
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    renderWithProviders(<TranslateButton />, store)
+
+    const updatedConfig = cloneConfig(store.get(configAtom))
+    setSelectionToolbarTranslateProvider(updatedConfig, "openai-default")
+    act(() => {
+      store.set(configAtom, updatedConfig)
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+
+    await waitFor(() => {
+      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }))
+
+    expect(streamCalls[0]?.signal?.aborted).toBe(true)
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(screen.queryByTestId("translation-content")).toBeNull()
+  })
+
+  it("normalizes translations identical to the original text", async () => {
+    translateTextCoreMock.mockResolvedValue("Selected text")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-status").textContent).toBe("false")
+    })
+
+    expect(screen.getByTestId("translation-result").textContent).toBe("")
   })
 
   it("does not refetch vocabulary insight on focus, but reruns when request values change", async () => {
