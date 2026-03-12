@@ -365,9 +365,9 @@ function SelectionPopoverClose({
 
   return (
     <Button
-      variant="ghost"
+      variant="ghost-secondary"
       size="icon"
-      className={cn("text-muted-foreground", className)}
+      className={className}
       onClick={close}
       data-rf-no-drag
       {...props}
