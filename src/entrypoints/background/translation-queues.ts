@@ -3,7 +3,6 @@ import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { ArticleContent } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
-import { ISO6393_TO_6391 } from "@read-frog/definitions"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -12,7 +11,6 @@ import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
-import { deeplTranslateBatch } from "@/utils/host/translate/api/deepl"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
@@ -27,7 +25,7 @@ export function parseBatchResult(result: string): string[] {
 }
 
 export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
-  return isLLMProviderConfig(providerConfig) || providerConfig.provider === "deepl"
+  return isLLMProviderConfig(providerConfig)
 }
 
 export async function executeBatchTranslation(
@@ -36,17 +34,6 @@ export async function executeBatchTranslation(
 ): Promise<string[]> {
   const { langConfig, providerConfig, content } = dataList[0]
   const texts = dataList.map(d => d.text)
-
-  if (providerConfig.provider === "deepl") {
-    const sourceLang = langConfig.sourceCode === "auto" ? "auto" : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
-    const targetLang = ISO6393_TO_6391[langConfig.targetCode]
-
-    if (!targetLang) {
-      throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
-    }
-
-    return await deeplTranslateBatch(texts, sourceLang, targetLang, providerConfig)
-  }
 
   const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
   const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })

@@ -125,6 +125,12 @@ export const baseAPIProviderConfigSchema = baseProviderConfigSchema.extend({
   providerOptions: z.record(z.string(), z.any()).optional(),
 })
 
+const baseAPIProviderConfigWithoutBaseURLSchema = baseProviderConfigSchema.extend({
+  apiKey: z.string().optional(),
+  temperature: z.number().min(0).optional(),
+  providerOptions: z.record(z.string(), z.any()).optional(),
+})
+
 export const baseCustomLLMProviderConfigSchema = baseAPIProviderConfigSchema.extend({
   baseURL: z.string(),
 })
@@ -233,7 +239,7 @@ const apiProviderConfigSchemaList = [
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("deeplx"),
   }),
-  baseAPIProviderConfigSchema.extend({
+  baseAPIProviderConfigWithoutBaseURLSchema.extend({
     provider: z.literal("deepl"),
   }),
 ] as const

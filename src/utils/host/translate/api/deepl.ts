@@ -1,6 +1,8 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
-import type { PureAPIProviderConfig } from "@/types/config/provider"
+import type { ProviderConfig } from "@/types/config/provider"
 import { sendMessage } from "@/utils/message"
+
+type DeepLProviderConfig = Extract<ProviderConfig, { provider: "deepl" }>
 
 interface DeepLFetchResponse {
   ok: boolean
@@ -15,13 +17,11 @@ interface DeepLLanguagePair {
   target: string
 }
 
-const DEEPL_MAX_TEXTS_PER_REQUEST = 50
-
 export async function deeplTranslate(
   sourceText: string,
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
-  providerConfig: PureAPIProviderConfig,
+  providerConfig: DeepLProviderConfig,
   options?: { forceBackgroundFetch?: boolean },
 ): Promise<string> {
   const [translatedText] = await requestDeepLTranslations(
@@ -39,48 +39,11 @@ export async function deeplTranslate(
   return translatedText
 }
 
-export async function deeplTranslateBatch(
-  sourceTexts: string[],
-  fromLang: LangCodeISO6391 | "auto",
-  toLang: LangCodeISO6391,
-  providerConfig: PureAPIProviderConfig,
-  options?: { forceBackgroundFetch?: boolean },
-): Promise<string[]> {
-  if (sourceTexts.length === 0) {
-    return []
-  }
-
-  if (sourceTexts.length <= DEEPL_MAX_TEXTS_PER_REQUEST) {
-    return await requestDeepLTranslations(
-      sourceTexts,
-      fromLang,
-      toLang,
-      providerConfig,
-      options,
-    )
-  }
-
-  const results: string[] = []
-  for (let index = 0; index < sourceTexts.length; index += DEEPL_MAX_TEXTS_PER_REQUEST) {
-    const chunk = sourceTexts.slice(index, index + DEEPL_MAX_TEXTS_PER_REQUEST)
-    const chunkResults = await requestDeepLTranslations(
-      chunk,
-      fromLang,
-      toLang,
-      providerConfig,
-      options,
-    )
-    results.push(...chunkResults)
-  }
-
-  return results
-}
-
 async function requestDeepLTranslations(
   sourceTexts: string[],
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
-  providerConfig: PureAPIProviderConfig,
+  providerConfig: DeepLProviderConfig,
   options?: { forceBackgroundFetch?: boolean },
 ): Promise<string[]> {
   const apiKey = providerConfig.apiKey?.trim()
@@ -88,7 +51,7 @@ async function requestDeepLTranslations(
     throw new Error("DeepL API key is not configured")
   }
 
-  const baseURL = getDeepLBaseURL(apiKey, providerConfig.baseURL)
+  const baseURL = getDeepLBaseURL(apiKey)
   const url = `${baseURL}/v2/translate`
   const normalizedLanguages = normalizeDeepLLanguages(fromLang, toLang)
 
@@ -179,12 +142,7 @@ async function parseDeepLResponse(resp: DeepLFetchResponse, expectedCount: numbe
   }
 }
 
-export function getDeepLBaseURL(apiKey: string, configBaseURL?: string): string {
-  const trimmedBaseURL = configBaseURL?.trim()
-  if (trimmedBaseURL) {
-    return trimmedBaseURL.replace(/\/+$/, "")
-  }
-
+export function getDeepLBaseURL(apiKey: string): string {
   return apiKey.endsWith(":fx")
     ? "https://api-free.deepl.com"
     : "https://api.deepl.com"
