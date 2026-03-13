@@ -11,8 +11,13 @@ interface Size {
   height: number
 }
 
+type VerticalLayoutMemory
+  = | { mode: "top", offset: number }
+    | { mode: "bottom", offset: number }
+
 interface LayoutMemory {
-  position: Position | null
+  x: number | null
+  vertical: VerticalLayoutMemory | null
   manualSize: Size | null
 }
 
@@ -37,6 +42,7 @@ interface UseSelectionPopoverLayoutResult {
 const DEFAULT_WIDTH = 500
 const MIN_WIDTH = 320
 const MIN_HEIGHT = 180
+const BOTTOM_EDGE_TOLERANCE = 1
 
 export const SELECTION_POPOVER_DRAG_HANDLE_CLASS = "rf-selection-popover-drag-handle"
 export const SELECTION_POPOVER_NO_DRAG_SELECTOR = "button, input, textarea, select, option, a, [role=\"button\"], [data-rf-no-drag=\"true\"]"
@@ -118,6 +124,54 @@ function getViewportAxisLayout(preferredOffset: number, preferredSize: number, v
   }
 }
 
+function createTopVerticalLayoutMemory(offset: number): VerticalLayoutMemory {
+  return {
+    mode: "top",
+    offset: Math.max(offset, 0),
+  }
+}
+
+function isAtViewportBottom(bottom: number) {
+  return bottom >= window.innerHeight - BOTTOM_EDGE_TOLERANCE
+}
+
+function getVerticalLayoutMemoryForPosition(top: number, height: number): VerticalLayoutMemory {
+  const bottomGap = window.innerHeight - (top + height)
+
+  if (bottomGap <= BOTTOM_EDGE_TOLERANCE) {
+    return {
+      mode: "bottom",
+      offset: Math.max(bottomGap, 0),
+    }
+  }
+
+  return createTopVerticalLayoutMemory(top)
+}
+
+function getBottomAnchoredLayoutMemory(rect: DOMRect): VerticalLayoutMemory | null {
+  if (!isAtViewportBottom(rect.bottom)) {
+    return null
+  }
+
+  return {
+    mode: "bottom",
+    offset: Math.max(window.innerHeight - rect.bottom, 0),
+  }
+}
+
+function getViewportVerticalLayout(preferredLayout: VerticalLayoutMemory, preferredSize: number, viewportSize: number) {
+  const size = Math.min(preferredSize, viewportSize)
+  const maxOffset = Math.max(viewportSize - size, 0)
+  const preferredOffset = preferredLayout.mode === "bottom"
+    ? viewportSize - size - preferredLayout.offset
+    : preferredLayout.offset
+
+  return {
+    offset: clamp(preferredOffset, 0, maxOffset),
+    size,
+  }
+}
+
 function getPopoverRect(rndRef: React.RefObject<Rnd | null>) {
   const element = rndRef.current?.getSelfElement()
   if (!element) {
@@ -136,8 +190,12 @@ export function useSelectionPopoverLayout({
 }: UseSelectionPopoverLayoutOptions): UseSelectionPopoverLayoutResult {
   const rndRef = useRef<Rnd | null>(null)
   const resizeFrameRef = useRef<number | null>(null)
+  const resizeObserverFrameRef = useRef<number | null>(null)
+  const resizeObserverRef = useRef<ResizeObserver | null>(null)
+  const observedElementRef = useRef<HTMLElement | null>(null)
   const preferredLayoutRef = useRef<LayoutMemory>({
-    position: null,
+    x: null,
+    vertical: null,
     manualSize: null,
   })
   const suppressResizeObserverRef = useRef(false)
@@ -153,6 +211,16 @@ export function useSelectionPopoverLayout({
     resizeFrameRef.current = null
   }, [])
 
+  const disconnectResizeObserver = useCallback(() => {
+    if (resizeObserverFrameRef.current !== null) {
+      cancelAnimationFrame(resizeObserverFrameRef.current)
+      resizeObserverFrameRef.current = null
+    }
+
+    resizeObserverRef.current?.disconnect()
+    observedElementRef.current = null
+  }, [])
+
   const updatePositionIfNeeded = useCallback((nextPosition: Position, currentRect: DOMRect) => {
     if (nextPosition.x !== currentRect.left || nextPosition.y !== currentRect.top) {
       rndRef.current?.updatePosition(nextPosition)
@@ -165,7 +233,8 @@ export function useSelectionPopoverLayout({
       return
     }
 
-    preferredLayoutRef.current.position = { x: popoverRect.rect.left, y: popoverRect.rect.top }
+    preferredLayoutRef.current.x = popoverRect.rect.left
+    preferredLayoutRef.current.vertical = createTopVerticalLayoutMemory(popoverRect.rect.top)
   }, [])
 
   const clampCurrentPositionToViewport = useCallback(() => {
@@ -212,28 +281,29 @@ export function useSelectionPopoverLayout({
       return
     }
 
-    if (!preferredLayoutRef.current.position) {
-      preferredLayoutRef.current.position = {
-        x: popoverRect.rect.left,
-        y: popoverRect.rect.top,
-      }
+    if (preferredLayoutRef.current.x === null) {
+      preferredLayoutRef.current.x = popoverRect.rect.left
     }
 
-    const preferredPosition = preferredLayoutRef.current.position ?? {
-      x: popoverRect.rect.left,
-      y: popoverRect.rect.top,
+    if (!preferredLayoutRef.current.vertical) {
+      preferredLayoutRef.current.vertical = createTopVerticalLayoutMemory(popoverRect.rect.top)
     }
+
+    const preferredX = preferredLayoutRef.current.x ?? popoverRect.rect.left
+    const preferredVertical = getBottomAnchoredLayoutMemory(popoverRect.rect)
+      ?? preferredLayoutRef.current.vertical
+      ?? createTopVerticalLayoutMemory(popoverRect.rect.top)
     const manualSize = preferredLayoutRef.current.manualSize
     const preferredWidth = manualSize?.width ?? popoverRect.rect.width
     const preferredHeight = manualSize?.height ?? popoverRect.rect.height
 
     const nextHorizontal = getViewportAxisLayout(
-      preferredPosition.x,
+      preferredX,
       preferredWidth,
       window.innerWidth,
     )
-    const nextVertical = getViewportAxisLayout(
-      preferredPosition.y,
+    const nextVertical = getViewportVerticalLayout(
+      preferredVertical,
       preferredHeight,
       window.innerHeight,
     )
@@ -276,6 +346,49 @@ export function useSelectionPopoverLayout({
     })
   }, [applyViewportLayout, clampCurrentPositionToViewport])
 
+  const ensureResizeObserver = useCallback(() => {
+    if (!isVisible || typeof ResizeObserver === "undefined") {
+      return
+    }
+
+    const popoverRect = getPopoverRect(rndRef)
+    if (!popoverRect) {
+      if (resizeObserverFrameRef.current !== null) {
+        return
+      }
+
+      resizeObserverFrameRef.current = requestAnimationFrame(() => {
+        resizeObserverFrameRef.current = null
+        ensureResizeObserver()
+      })
+      return
+    }
+
+    if (observedElementRef.current === popoverRect.element) {
+      return
+    }
+
+    resizeObserverRef.current?.disconnect()
+    if (!resizeObserverRef.current) {
+      resizeObserverRef.current = new ResizeObserver(() => {
+        if (suppressResizeObserverRef.current) {
+          return
+        }
+
+        if (isDraggingRef.current) {
+          return
+        }
+
+        if (!preferredLayoutRef.current.manualSize) {
+          scheduleViewportLayout()
+        }
+      })
+    }
+
+    resizeObserverRef.current.observe(popoverRect.element)
+    observedElementRef.current = popoverRect.element
+  }, [isVisible, scheduleViewportLayout])
+
   const handleDragStart = useCallback(() => {
     isDraggingRef.current = true
     cancelScheduledViewportLayout()
@@ -294,7 +407,11 @@ export function useSelectionPopoverLayout({
       popoverRect?.rect.height ?? 0,
     )
 
-    preferredLayoutRef.current.position = nextPosition
+    preferredLayoutRef.current.x = nextPosition.x
+    preferredLayoutRef.current.vertical = getVerticalLayoutMemoryForPosition(
+      nextPosition.y,
+      popoverRect?.rect.height ?? 0,
+    )
     rndRef.current?.updatePosition(nextPosition)
     scheduleViewportLayout()
   }, [scheduleViewportLayout])
@@ -304,11 +421,21 @@ export function useSelectionPopoverLayout({
       width: element.offsetWidth,
       height: element.offsetHeight,
     }
+    const nextPosition = getBoundedPosition(
+      position.x,
+      position.y,
+      manualSize.width,
+      manualSize.height,
+    )
 
-    preferredLayoutRef.current.position = position
+    preferredLayoutRef.current.x = nextPosition.x
+    preferredLayoutRef.current.vertical = getVerticalLayoutMemoryForPosition(
+      nextPosition.y,
+      manualSize.height,
+    )
     preferredLayoutRef.current.manualSize = manualSize
 
-    rndRef.current?.updatePosition(position)
+    rndRef.current?.updatePosition(nextPosition)
     rndRef.current?.updateSize(manualSize)
     scheduleViewportLayout()
   }, [scheduleViewportLayout])
@@ -323,25 +450,28 @@ export function useSelectionPopoverLayout({
     }
 
     cancelScheduledViewportLayout()
+    disconnectResizeObserver()
     preferredLayoutRef.current = {
-      position: null,
+      x: null,
+      vertical: null,
       manualSize: null,
     }
     suppressResizeObserverRef.current = false
     isDraggingRef.current = false
     setDragging(false)
-  }, [cancelScheduledViewportLayout, isVisible])
+  }, [cancelScheduledViewportLayout, disconnectResizeObserver, isVisible])
 
   useLayoutEffect(() => {
     if (!isVisible) {
       return
     }
 
+    ensureResizeObserver()
     scheduleViewportLayout()
     requestAnimationFrame(() => {
       syncPreferredPositionFromElement()
     })
-  }, [anchor, isVisible, scheduleViewportLayout, syncPreferredPositionFromElement])
+  }, [anchor, ensureResizeObserver, isVisible, scheduleViewportLayout, syncPreferredPositionFromElement])
 
   useEffect(() => {
     if (!isVisible) {
@@ -359,36 +489,11 @@ export function useSelectionPopoverLayout({
   }, [isVisible, scheduleViewportLayout])
 
   useEffect(() => {
-    if (!isVisible || typeof ResizeObserver === "undefined") {
-      return
-    }
-
-    const popoverRect = getPopoverRect(rndRef)
-    if (!popoverRect) {
-      return
-    }
-
-    const resizeObserver = new ResizeObserver(() => {
-      if (suppressResizeObserverRef.current) {
-        return
-      }
-
-      if (isDraggingRef.current || !preferredLayoutRef.current.manualSize) {
-        scheduleViewportLayout()
-      }
-    })
-
-    resizeObserver.observe(popoverRect.element)
-    return () => {
-      resizeObserver.disconnect()
-    }
-  }, [isVisible, scheduleViewportLayout])
-
-  useEffect(() => {
     return () => {
       cancelScheduledViewportLayout()
+      disconnectResizeObserver()
     }
-  }, [cancelScheduledViewportLayout])
+  }, [cancelScheduledViewportLayout, disconnectResizeObserver])
 
   return {
     rndRef,

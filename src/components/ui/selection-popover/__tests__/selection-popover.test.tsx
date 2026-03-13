@@ -557,6 +557,75 @@ describe("selectionPopover", () => {
     expect(screen.getByTestId("mock-rnd")).not.toBe(firstElement)
   })
 
+  it("keeps growing downward until streamed content reaches the viewport bottom", async () => {
+    const { element } = renderPopover()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    mockRect(element, { left: 120, top: 500, width: 500, height: 280 })
+
+    act(() => {
+      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 120, y: 500 })
+    })
+    flushRaf()
+
+    updatePositionSpy.mockReset()
+
+    mockRect(element, { left: 120, top: 500, width: 500, height: 320 })
+    triggerResizeObserver()
+    flushRaf()
+
+    expect(updatePositionSpy).not.toHaveBeenCalled()
+  })
+
+  it("grows upward once streamed content reaches the viewport bottom", async () => {
+    const { element } = renderPopover()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    mockRect(element, { left: 120, top: 500, width: 500, height: 280 })
+
+    act(() => {
+      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 120, y: 500 })
+    })
+    flushRaf()
+
+    updatePositionSpy.mockReset()
+
+    mockRect(element, { left: 120, top: 500, width: 500, height: 420 })
+    triggerResizeObserver()
+    flushRaf()
+
+    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 480 })
+  })
+
+  it("keeps a dragged popover bottom-anchored while streamed content keeps growing", async () => {
+    const { element } = renderPopover()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    mockRect(element, { left: 120, top: 620, width: 500, height: 280 })
+
+    act(() => {
+      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 120, y: 620 })
+    })
+    flushRaf()
+
+    updatePositionSpy.mockReset()
+
+    mockRect(element, { left: 120, top: 620, width: 500, height: 360 })
+    triggerResizeObserver()
+    flushRaf()
+
+    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 540 })
+  })
+
   it("reduces left and top space before shrinking a manually resized popover", () => {
     const { element } = renderPopover()
     mockRect(element, { left: 100, top: 80, width: 680, height: 480 })
