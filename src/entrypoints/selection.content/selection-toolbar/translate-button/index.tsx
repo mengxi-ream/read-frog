@@ -14,6 +14,7 @@ import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { getOrFetchArticleData } from "@/utils/host/translate/article-context"
+import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { translateTextCore } from "@/utils/host/translate/translate-text"
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model"
@@ -30,16 +31,6 @@ import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
 
-function normalizeSelectedText(value: string | null) {
-  return value?.replace(/\u200B/g, "").trim() ?? ""
-}
-
-function normalizeTranslatedText(cleanText: string, translatedText: string) {
-  return cleanText === normalizeSelectedText(translatedText)
-    ? ""
-    : translatedText
-}
-
 function isAbortError(error: unknown) {
   return error instanceof DOMException && error.name === "AbortError"
 }
@@ -55,13 +46,13 @@ function getProviderConfigOrThrow(translateRequest: SelectionToolbarTranslateReq
 }
 
 async function translateWithLlm({
-  cleanText,
+  preparedText,
   providerConfig,
   translateRequest,
   onChunk,
   registerAbortController,
 }: {
-  cleanText: string
+  preparedText: string
   providerConfig: LLMProviderConfig
   translateRequest: SelectionToolbarTranslateRequestSlice
   onChunk: (data: BackgroundTextStreamSnapshot) => void
@@ -79,7 +70,7 @@ async function translateWithLlm({
   const { systemPrompt, prompt } = getTranslatePromptFromConfig(
     { customPromptsConfig: translateRequest.customPromptsConfig },
     targetLangName,
-    cleanText,
+    preparedText,
   )
 
   const abortController = new AbortController()
@@ -103,17 +94,17 @@ async function translateWithLlm({
 }
 
 async function translateWithStandardProvider({
-  cleanText,
+  text,
   providerConfig,
   translateRequest,
 }: {
-  cleanText: string
+  text: string
   providerConfig: ProviderConfig
   translateRequest: SelectionToolbarTranslateRequestSlice
 }) {
   const articleData = await getOrFetchArticleData(translateRequest.enableAIContentAware)
   const translatedText = await translateTextCore({
-    text: cleanText,
+    text,
     langConfig: translateRequest.language,
     providerConfig,
     enableAIContentAware: translateRequest.enableAIContentAware,
@@ -165,9 +156,9 @@ export function TranslateButton() {
   }, [])
 
   const runTranslation = useCallback(async (runId: number) => {
-    const cleanText = normalizeSelectedText(selectionContentSnapshot)
+    const preparedText = prepareTranslationText(selectionContentSnapshot)
 
-    if (cleanText === "") {
+    if (preparedText === "") {
       if (runIdRef.current === runId) {
         resetSessionState()
       }
@@ -189,7 +180,7 @@ export function TranslateButton() {
         })
 
         const nextSnapshot = await translateWithLlm({
-          cleanText,
+          preparedText,
           providerConfig,
           translateRequest,
           onChunk: (data) => {
@@ -211,14 +202,14 @@ export function TranslateButton() {
       else {
         setThinking(null)
         nextTranslatedText = await translateWithStandardProvider({
-          cleanText,
+          text: preparedText,
           providerConfig,
           translateRequest,
         })
       }
 
       if (runIdRef.current === runId) {
-        setTranslatedText(normalizeTranslatedText(cleanText, nextTranslatedText))
+        setTranslatedText(nextTranslatedText)
       }
     }
     catch (error) {

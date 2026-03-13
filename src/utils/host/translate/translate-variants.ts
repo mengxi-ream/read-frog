@@ -1,11 +1,15 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
+import { franc } from "franc"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
 import { getOrFetchArticleData } from "./article-context"
+import { prepareTranslationText } from "./text-preparation"
 import { MIN_LENGTH_FOR_SKIP_LLM_DETECTION, shouldSkipByLanguage, translateTextCore } from "./translate-text"
+
+const MIN_LENGTH_FOR_TARGET_LANG_DETECTION = 50
 
 async function getConfigOrThrow(): Promise<Config> {
   const config = await getLocalConfig()
@@ -13,6 +17,10 @@ async function getConfigOrThrow(): Promise<Config> {
     throw new Error("No global config when translate text")
   }
   return config
+}
+
+function isTextAlreadyInTargetLanguage(text: string, targetCode: LangCodeISO6393) {
+  return text.length >= MIN_LENGTH_FOR_TARGET_LANG_DETECTION && franc(text) === targetCode
 }
 
 async function translateTextUsingPageConfig(
@@ -23,25 +31,35 @@ async function translateTextUsingPageConfig(
     articleContext?: { title?: string | null, textContent?: string | null }
   } = {},
 ): Promise<string> {
+  const preparedText = prepareTranslationText(text)
+  if (preparedText === "") {
+    return ""
+  }
+
   const providerConfig = resolveProviderConfig(config, "translate")
+
+  if (isTextAlreadyInTargetLanguage(preparedText, config.language.targetCode)) {
+    logger.info(`translateTextForPage: skipping translation because text is already in target language. text: ${preparedText}`)
+    return ""
+  }
 
   // Skip translation if text is in skipLanguages list (page translation only)
   const { skipLanguages, enableSkipLanguagesLLMDetection } = config.translate.page
-  if (skipLanguages.length > 0 && text.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
+  if (skipLanguages.length > 0 && preparedText.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
     const shouldSkip = await shouldSkipByLanguage(
-      text,
+      preparedText,
       skipLanguages,
       enableSkipLanguagesLLMDetection,
       providerConfig,
     )
     if (shouldSkip) {
-      logger.info(`translateTextForPage: skipping translation because text is in skip language list. text: ${text}`)
+      logger.info(`translateTextForPage: skipping translation because text is in skip language list. text: ${preparedText}`)
       return ""
     }
   }
 
   return translateTextCore({
-    text,
+    text: preparedText,
     langConfig: config.language,
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,

@@ -472,7 +472,7 @@ describe("selection toolbar requests", () => {
     expect(screen.queryByTestId("translation-content")).toBeNull()
   })
 
-  it("normalizes translations identical to the original text", async () => {
+  it("shows translations identical to the original text", async () => {
     translateTextCoreMock.mockResolvedValue("Selected text")
     getOrFetchArticleDataMock.mockResolvedValue(null)
 
@@ -491,7 +491,7 @@ describe("selection toolbar requests", () => {
       expect(screen.getByTestId("translation-status").textContent).toBe("false")
     })
 
-    expect(screen.getByTestId("translation-result").textContent).toBe("")
+    expect(screen.getByTestId("translation-result").textContent).toBe("Selected text")
   })
 
   it("does not refetch vocabulary insight on focus, but reruns when request values change", async () => {

@@ -8,6 +8,7 @@ import { aiTranslate } from "./api/ai"
 import { deeplxTranslate } from "./api/deeplx"
 import { googleTranslate } from "./api/google"
 import { microsoftTranslate } from "./api/microsoft"
+import { prepareTranslationText } from "./text-preparation"
 
 export async function executeTranslate(
   text: string,
@@ -20,8 +21,8 @@ export async function executeTranslate(
     content?: ArticleContent
   },
 ) {
-  const cleanText = text.replace(/\u200B/g, "").trim()
-  if (cleanText === "") {
+  const preparedText = prepareTranslationText(text)
+  if (preparedText === "") {
     return ""
   }
 
@@ -35,10 +36,10 @@ export async function executeTranslate(
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "google-translate") {
-      translatedText = await googleTranslate(text, sourceLang, targetLang)
+      translatedText = await googleTranslate(preparedText, sourceLang, targetLang)
     }
     else if (provider === "microsoft-translate") {
-      translatedText = await microsoftTranslate(text, sourceLang, targetLang)
+      translatedText = await microsoftTranslate(preparedText, sourceLang, targetLang)
     }
   }
   else if (isPureAPIProvider(provider)) {
@@ -48,12 +49,12 @@ export async function executeTranslate(
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "deeplx") {
-      translatedText = await deeplxTranslate(text, sourceLang, targetLang, providerConfig, options)
+      translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig, options)
     }
   }
   else if (isLLMProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[langConfig.targetCode]
-    translatedText = await aiTranslate(text, targetLangName, providerConfig, promptResolver, options)
+    translatedText = await aiTranslate(preparedText, targetLangName, providerConfig, promptResolver, options)
   }
   else {
     throw new Error(`Unknown provider: ${provider}`)
