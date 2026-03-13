@@ -31,7 +31,7 @@ export function SpeakButton() {
 
     setTooltipOpen(true)
     void play(selectionContent, ttsConfig)
-  }, [isBusy, play, selectionContent, stop, toast, ttsConfig])
+  }, [isBusy, play, selectionContent, stop, ttsConfig])
 
   const handleTooltipOpenChange = useCallback((nextOpen: boolean, eventDetails: { reason: string }) => {
     if (!nextOpen && eventDetails.reason === TOOLTIP_TRIGGER_PRESS_REASON) {
