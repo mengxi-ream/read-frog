@@ -275,6 +275,13 @@ options:
         description: Configure websites where the selection toolbar should be disabled
         enterUrlPattern: Enter URL pattern
         urlPattern: URL Pattern
+      errors:
+        customActionFailed: Custom Action Failed
+        customActionFailedFallback: Custom action request failed
+        actionUnavailable: Selected action is unavailable
+        missingSelection: No selected text available
+        providerDisabled: Selected provider is disabled
+        providerUnavailable: Selected provider is unavailable
       features:
         provider: Provider
         selectProvider: Select a provider

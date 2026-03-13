@@ -469,7 +469,60 @@ describe("selection toolbar requests", () => {
     })
 
     expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(screen.queryByRole("alert")).toBeNull()
     expect(screen.queryByTestId("translation-content")).toBeNull()
+  })
+
+  it("renders translate errors inline and clears them after a successful rerun", async () => {
+    translateTextCoreMock
+      .mockRejectedValueOnce(new Error("Standard translation failed"))
+      .mockResolvedValueOnce("Recovered translation")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("translationHub.translationFailed")
+    expect(alert).toHaveTextContent("Standard translation failed")
+    expect(toastErrorMock).not.toHaveBeenCalled()
+
+    const translationContent = screen.getByTestId("translation-content")
+    expect(translationContent.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    expect(alert.compareDocumentPosition(screen.getByRole("button", { name: "Change provider" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("Recovered translation")
+    })
+    expect(screen.queryByRole("alert")).toBeNull()
+  })
+
+  it("shows a precheck alert when the translate provider is unavailable", async () => {
+    const store = createStore()
+    const updatedConfig = cloneConfig(DEFAULT_CONFIG)
+    updatedConfig.selectionToolbar.features.translate.providerId = "missing-provider-id"
+
+    store.set(configAtom, updatedConfig)
+    store.set(selectionContentAtom, "Selected text")
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("translationHub.translationFailed")
+    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.providerUnavailable")
+    expect(translateTextCoreMock).not.toHaveBeenCalled()
+    expect(streamBackgroundTextMock).not.toHaveBeenCalled()
   })
 
   it("shows translations identical to the original text", async () => {
@@ -708,5 +761,67 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(screen.getByText("{\"summary\":\"fresh\"}")).toBeInTheDocument()
     })
+  })
+
+  it("shows a precheck alert when a custom action has no selected text", async () => {
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "   ")
+    store.set(selectionRangeAtom, createRangeFor(paragraph))
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
+    if (!actionName) {
+      throw new Error("Default custom action is missing")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: actionName }))
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed")
+    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection")
+    expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
+  })
+
+  it("renders custom action errors inline and clears them after a successful rerun", async () => {
+    streamBackgroundStructuredObjectMock
+      .mockRejectedValueOnce(new Error("Structured output failed"))
+      .mockResolvedValueOnce(createStructuredObjectSnapshot({ summary: "fresh" }))
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    store.set(selectionContentAtom, "Selected text")
+    store.set(selectionRangeAtom, createRangeFor(paragraph))
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
+    if (!actionName) {
+      throw new Error("Default custom action is missing")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: actionName }))
+
+    const alert = await screen.findByRole("alert")
+    expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed")
+    expect(alert).toHaveTextContent("Structured output failed")
+
+    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText("{\"summary\":\"fresh\"}")).toBeInTheDocument()
+    })
+    expect(screen.queryByRole("alert")).toBeNull()
   })
 })

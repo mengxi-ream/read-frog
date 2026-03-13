@@ -7,6 +7,7 @@ import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { shadowWrapper } from "../.."
+import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
 import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
@@ -65,7 +66,7 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
   const {
     isRunning,
     result,
-    errorMessage,
+    error,
     resetSessionState,
     thinking,
   } = useCustomActionExecution({
@@ -76,7 +77,7 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
     rerunNonce,
   })
   const displayedResult = executionPlan.executionContext ? result : null
-  const displayedErrorMessage = errorMessage ?? executionPlan.errorMessage
+  const displayedError = error ?? executionPlan.error
   const displayedIsRunning = executionPlan.executionContext ? isRunning : false
   const displayedThinking = executionPlan.executionContext ? thinking : null
 
@@ -139,13 +140,13 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
 
         <SelectionPopover.Body ref={bodyRef}>
           <CustomActionContent
-            errorMessage={displayedErrorMessage}
             isRunning={displayedIsRunning}
             outputSchema={activeAction.outputSchema}
             selectionContent={selectionContentSnapshot}
             value={displayedResult}
             thinking={displayedThinking}
           />
+          <SelectionToolbarErrorAlert error={displayedError} />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
           providers={llmProviders}

@@ -4,7 +4,6 @@ import { SelectionSourceContent } from "../../components/selection-source-conten
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 
 interface CustomActionContentProps {
-  errorMessage: string | null
   isRunning: boolean
   outputSchema: SelectionToolbarCustomActionOutputField[]
   selectionContent: string | null | undefined
@@ -13,7 +12,6 @@ interface CustomActionContentProps {
 }
 
 export function CustomActionContent({
-  errorMessage,
   isRunning,
   outputSchema,
   selectionContent,
@@ -35,12 +33,6 @@ export function CustomActionContent({
           isStreaming={isRunning}
           thinking={thinking}
         />
-
-        {errorMessage && (
-          <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
-            {errorMessage}
-          </div>
-        )}
       </div>
     </div>
   )

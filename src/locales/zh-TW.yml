@@ -274,6 +274,13 @@ options:
         description: 設定需要停用選擇工具列的網站
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
+      errors:
+        customActionFailed: 自訂操作失敗
+        customActionFailedFallback: 自訂操作請求失敗
+        actionUnavailable: 所選操作不可用
+        missingSelection: 沒有可用的選取文字
+        providerDisabled: 所選提供商已被停用
+        providerUnavailable: 所選提供商不可用
       features:
         provider: 提供商
         selectProvider: 選擇提供商

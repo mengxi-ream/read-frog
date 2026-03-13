@@ -274,6 +274,13 @@ options:
         description: Cấu hình các trang web mà thanh công cụ chọn văn bản nên bị tắt
         enterUrlPattern: Nhập mẫu URL
         urlPattern: Mẫu URL
+      errors:
+        customActionFailed: Hành động tuỳ chỉnh thất bại
+        customActionFailedFallback: Yêu cầu hành động tuỳ chỉnh thất bại
+        actionUnavailable: Hành động đã chọn không khả dụng
+        missingSelection: Không có văn bản được chọn
+        providerDisabled: Nhà cung cấp đã chọn bị tắt
+        providerUnavailable: Nhà cung cấp đã chọn không khả dụng
       features:
         provider: Nhà cung cấp
         selectProvider: Chọn nhà cung cấp

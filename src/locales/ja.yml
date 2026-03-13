@@ -274,6 +274,13 @@ options:
         description: 選択ツールバーを無効化するウェブサイトを設定します
         enterUrlPattern: URL パターンを入力
         urlPattern: URL パターン
+      errors:
+        customActionFailed: カスタムアクションに失敗しました
+        customActionFailedFallback: カスタムアクションのリクエストに失敗しました
+        actionUnavailable: 選択したアクションは利用できません
+        missingSelection: 選択されたテキストがありません
+        providerDisabled: 選択したプロバイダーは無効です
+        providerUnavailable: 選択したプロバイダーは利用できません
       features:
         provider: プロバイダー
         selectProvider: プロバイダーを選択

@@ -275,6 +275,13 @@ options:
         description: 配置需要禁用选择工具栏的网站
         enterUrlPattern: 输入网址模式
         urlPattern: 网址模式
+      errors:
+        customActionFailed: 自定义操作失败
+        customActionFailedFallback: 自定义操作请求失败
+        actionUnavailable: 所选操作不可用
+        missingSelection: 没有可用的选中文本
+        providerDisabled: 所选提供商已被禁用
+        providerUnavailable: 所选提供商不可用
       features:
         provider: 提供商
         selectProvider: 选择提供商

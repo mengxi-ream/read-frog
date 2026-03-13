@@ -274,6 +274,13 @@ options:
         description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
         enterUrlPattern: URL kalıbı girin
         urlPattern: URL Kalıbı
+      errors:
+        customActionFailed: Özel eylem başarısız oldu
+        customActionFailedFallback: Özel eylem isteği başarısız oldu
+        actionUnavailable: Seçilen eylem kullanılamıyor
+        missingSelection: Seçili metin yok
+        providerDisabled: Seçilen sağlayıcı devre dışı
+        providerUnavailable: Seçilen sağlayıcı kullanılamıyor
       features:
         provider: Sağlayıcı
         selectProvider: Sağlayıcı seçin

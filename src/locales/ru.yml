@@ -274,6 +274,13 @@ options:
         description: Настройте веб-сайты, где панель выделения должна быть отключена
         enterUrlPattern: Введите URL-шаблон
         urlPattern: URL-шаблон
+      errors:
+        customActionFailed: Не удалось выполнить пользовательское действие
+        customActionFailedFallback: Запрос пользовательского действия не удался
+        actionUnavailable: Выбранное действие недоступно
+        missingSelection: Нет выделенного текста
+        providerDisabled: Выбранный провайдер отключен
+        providerUnavailable: Выбранный провайдер недоступен
       features:
         provider: Провайдер
         selectProvider: Выберите провайдера

@@ -1,5 +1,6 @@
 import type { RefObject } from "react"
 import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
+import type { SelectionToolbarInlineError } from "../inline-error"
 import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
@@ -10,6 +11,11 @@ import { streamBackgroundStructuredObject } from "@/utils/content-script/backgro
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
+import {
+  createSelectionToolbarPrecheckError,
+  createSelectionToolbarRuntimeError,
+  isAbortError,
+} from "../inline-error"
 
 export interface CustomActionExecutionContext {
   action: SelectionToolbarCustomAction
@@ -23,16 +29,8 @@ export interface CustomActionExecutionContext {
 }
 
 interface CustomActionExecutionPlan {
-  errorMessage: string | null
+  error: SelectionToolbarInlineError | null
   executionContext: CustomActionExecutionContext | null
-}
-
-function getCustomActionErrorMessage(error: unknown) {
-  if (error instanceof Error) {
-    return error.message
-  }
-
-  return "Custom action request failed"
 }
 
 function scrollSelectionPopoverBodyToBottom(ref: RefObject<HTMLDivElement | null>) {
@@ -52,14 +50,14 @@ export function buildCustomActionExecutionPlan(
 
   if (!action) {
     return {
-      errorMessage: "Selected action is unavailable",
+      error: createSelectionToolbarPrecheckError("customAction", "actionUnavailable"),
       executionContext: null,
     }
   }
 
   if (!cleanSelection) {
     return {
-      errorMessage: "No selected text available",
+      error: createSelectionToolbarPrecheckError("customAction", "missingSelection"),
       executionContext: null,
     }
   }
@@ -67,20 +65,20 @@ export function buildCustomActionExecutionPlan(
   const providerConfig = customActionRequest.providerConfig
   if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
     return {
-      errorMessage: "Selected provider is unavailable for this action",
+      error: createSelectionToolbarPrecheckError("customAction", "providerUnavailable"),
       executionContext: null,
     }
   }
 
   if (!providerConfig.enabled) {
     return {
-      errorMessage: "Selected provider is disabled",
+      error: createSelectionToolbarPrecheckError("customAction", "providerDisabled"),
       executionContext: null,
     }
   }
 
   return {
-    errorMessage: null,
+    error: null,
     executionContext: {
       action,
       providerConfig,
@@ -109,13 +107,13 @@ export function useCustomActionExecution({
 }) {
   const [isRunning, setIsRunning] = useState(false)
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
-  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [error, setError] = useState<SelectionToolbarInlineError | null>(null)
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
 
   const resetSessionState = useCallback(() => {
     setIsRunning(false)
     setResult(null)
-    setErrorMessage(null)
+    setError(null)
     setThinking(null)
   }, [])
 
@@ -144,7 +142,7 @@ export function useCustomActionExecution({
 
       setIsRunning(true)
       setResult(null)
-      setErrorMessage(null)
+      setError(null)
       setThinking({
         status: "thinking",
         text: "",
@@ -182,7 +180,7 @@ export function useCustomActionExecution({
         setThinking(finalResult.thinking)
       }
       catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
+        if (isAbortError(error)) {
           return
         }
 
@@ -191,7 +189,7 @@ export function useCustomActionExecution({
         }
 
         setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
-        setErrorMessage(getCustomActionErrorMessage(error))
+        setError(createSelectionToolbarRuntimeError("customAction", error))
       }
       finally {
         if (!isCancelled) {
@@ -209,7 +207,7 @@ export function useCustomActionExecution({
   }, [bodyRef, executionContext, open, popoverSessionKey, rerunNonce])
 
   return {
-    errorMessage,
+    error,
     isRunning,
     resetSessionState,
     result,

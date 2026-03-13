@@ -1,4 +1,5 @@
 import type { SelectionToolbarTranslateRequestSlice } from "../atoms"
+import type { SelectionToolbarInlineError } from "../inline-error"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
@@ -6,7 +7,6 @@ import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { RiTranslate } from "@remixicon/react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
-import { toast } from "sonner"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
@@ -20,6 +20,7 @@ import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from "../.."
+import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
 import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
@@ -27,23 +28,14 @@ import {
   isSelectionToolbarVisibleAtom,
   selectionToolbarTranslateRequestAtom,
 } from "../atoms"
+import {
+  createSelectionToolbarPrecheckError,
+  createSelectionToolbarRuntimeError,
+  isAbortError,
+} from "../inline-error"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
-
-function isAbortError(error: unknown) {
-  return error instanceof DOMException && error.name === "AbortError"
-}
-
-function getProviderConfigOrThrow(translateRequest: SelectionToolbarTranslateRequestSlice): ProviderConfig {
-  const providerConfig = translateRequest.providerConfig
-
-  if (!providerConfig) {
-    throw new Error("No provider config when translate text")
-  }
-
-  return providerConfig
-}
 
 async function translateWithLlm({
   preparedText,
@@ -121,6 +113,7 @@ export function TranslateButton() {
   const [rerunNonce, setRerunNonce] = useState(0)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
+  const [error, setError] = useState<SelectionToolbarInlineError | null>(null)
   const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
@@ -143,6 +136,7 @@ export function TranslateButton() {
     setIsTranslating(false)
     setTranslatedText(undefined)
     setThinking(null)
+    setError(null)
   }, [])
 
   const cancelCurrentTranslation = useCallback((runId?: number) => {
@@ -168,10 +162,26 @@ export function TranslateButton() {
     setIsTranslating(true)
     setTranslatedText(undefined)
     setThinking(null)
+    setError(null)
+
+    const providerConfig = translateRequest.providerConfig
+    if (!providerConfig || !isTranslateProviderConfig(providerConfig)) {
+      if (runIdRef.current === runId) {
+        setIsTranslating(false)
+        setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
+      }
+      return
+    }
+
+    if (!providerConfig.enabled) {
+      if (runIdRef.current === runId) {
+        setIsTranslating(false)
+        setError(createSelectionToolbarPrecheckError("translate", "providerDisabled"))
+      }
+      return
+    }
 
     try {
-      const providerConfig = getProviderConfigOrThrow(translateRequest)
-
       let nextTranslatedText = ""
       if (isLLMProviderConfig(providerConfig)) {
         setThinking({
@@ -216,9 +226,7 @@ export function TranslateButton() {
       if (!isAbortError(error) && runIdRef.current === runId) {
         setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
         console.error("Translation error:", error)
-        toast.error(i18n.t("translationHub.translationFailed"), {
-          description: error instanceof Error ? error.message : String(error),
-        })
+        setError(createSelectionToolbarRuntimeError("translate", error))
       }
     }
     finally {
@@ -304,6 +312,7 @@ export function TranslateButton() {
             isTranslating={isTranslating}
             thinking={thinking}
           />
+          <SelectionToolbarErrorAlert error={error} className="-mt-3" />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
           providers={translateProviders}

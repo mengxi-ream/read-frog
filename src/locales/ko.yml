@@ -274,6 +274,13 @@ options:
         description: 선택 툴바를 비활성화할 웹사이트를 설정합니다
         enterUrlPattern: URL 패턴 입력
         urlPattern: URL 패턴
+      errors:
+        customActionFailed: 사용자 지정 작업 실패
+        customActionFailedFallback: 사용자 지정 작업 요청에 실패했습니다
+        actionUnavailable: 선택한 작업을 사용할 수 없습니다
+        missingSelection: 선택된 텍스트가 없습니다
+        providerDisabled: 선택한 제공업체가 비활성화되었습니다
+        providerUnavailable: 선택한 제공업체를 사용할 수 없습니다
       features:
         provider: 제공업체
         selectProvider: 제공업체 선택
