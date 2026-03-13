@@ -1,3 +1,4 @@
+import type { BackgroundStructuredObjectStreamSnapshot } from "@/types/background-stream"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const streamTextMock = vi.fn()
@@ -97,7 +98,7 @@ describe("background-stream", () => {
       fullStream: (async function* () {})(),
     })
 
-    const chunkSnapshots: Record<string, unknown>[] = []
+    const chunkSnapshots: BackgroundStructuredObjectStreamSnapshot[] = []
     const { runStructuredObjectStreamInBackground } = await import("../background-stream")
     const result = await runStructuredObjectStreamInBackground(
       {
