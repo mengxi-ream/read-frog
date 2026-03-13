@@ -41,7 +41,7 @@ export function TranslationContent({ selectionContent, translatedText, isTransla
           </div>
         </Activity>
       </div>
-      <Separator className={cn("h-[0.5px] mb-3", actionsExpanded ? "mt-1.5" : "mt-3")} />
+      <Separator className={cn("mb-3 opacity-60", actionsExpanded ? "mt-1.5" : "mt-3")} />
       <div className="space-y-2">
         <p className="text-sm">
           {isTranslating && !translatedText && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
