@@ -80,7 +80,7 @@ export function SelectionToolbarFooterContent({
           providers={providers}
           value={value}
           onChange={onProviderChange}
-          className="w-60"
+          className="max-w-60"
           selectContentProps={popoverOverlay}
         />
       </div>
