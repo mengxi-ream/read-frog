@@ -42,9 +42,7 @@ interface SelectionPopoverRootContextValue {
 interface SelectionPopoverContentContextValue {
   close: () => void
   isDragging: boolean
-  pinned: boolean
   portalContainer: SelectionPopoverPortalContainer
-  togglePinned: () => void
   setBodyElement: (node: HTMLDivElement | null) => void
 }
 
@@ -211,11 +209,11 @@ function SelectionPopoverTrigger({
   })
 }
 
-// eslint-disable-next-line react/no-forward-ref
-const SelectionPopoverShell = React.forwardRef<
-  HTMLDivElement,
-  Omit<React.ComponentProps<"div">, "onDrag" | "onDragStart"> & ReturnType<typeof useSelectionPopoverLayout>
->(({
+type SelectionPopoverShellProps = Omit<React.ComponentProps<"div">, "onDrag" | "onDragStart" | "ref"> & ReturnType<typeof useSelectionPopoverLayout> & {
+  ref?: React.Ref<HTMLDivElement>
+}
+
+function SelectionPopoverShell({
   children,
   className,
   defaultLayout,
@@ -230,9 +228,10 @@ const SelectionPopoverShell = React.forwardRef<
   onMouseDown,
   onMouseUp,
   rndRef,
+  ref: forwardedRef,
   style,
   ...props
-}, forwardedRef) => {
+}: SelectionPopoverShellProps) {
   const assignRndRef = React.useCallback((instance: Rnd | null) => {
     rndRef.current = instance
     const element = instance?.getSelfElement() as HTMLDivElement | null
@@ -294,7 +293,7 @@ const SelectionPopoverShell = React.forwardRef<
       {children}
     </Rnd>
   )
-})
+}
 
 function SelectionPopoverContent({
   className,
@@ -305,14 +304,11 @@ function SelectionPopoverContent({
 }: useRender.ComponentProps<"div"> & React.ComponentProps<"div"> & {
   container?: SelectionPopoverPortalContainer
 }) {
-  const { open, setOpen, anchor, pinned, setPinned, triggerElement } = useSelectionPopoverRootContext()
+  const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
   const bodyElementRef = React.useRef<HTMLDivElement | null>(null)
   const setBodyElement = React.useCallback((node: HTMLDivElement | null) => {
     bodyElementRef.current = node
   }, [])
-  const togglePinned = React.useCallback(() => {
-    setPinned(prev => !prev)
-  }, [setPinned])
 
   const {
     rndRef,
@@ -342,11 +338,9 @@ function SelectionPopoverContent({
   const contentContextValue = React.useMemo(() => ({
     close: handleClose,
     isDragging,
-    pinned,
     portalContainer: container ?? null,
-    togglePinned,
     setBodyElement,
-  }), [container, handleClose, isDragging, pinned, setBodyElement, togglePinned])
+  }), [container, handleClose, isDragging, setBodyElement])
 
   const shell = useRender({
     defaultTagName: "div",
@@ -509,7 +503,10 @@ function SelectionPopoverPin({
   className,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { pinned, togglePinned } = useSelectionPopoverContentContext()
+  const { pinned, setPinned } = useSelectionPopoverRootContext()
+  const togglePinned = React.useCallback(() => {
+    setPinned(prev => !prev)
+  }, [setPinned])
   const label = pinned ? "Unpin popover" : "Pin popover"
 
   return (
