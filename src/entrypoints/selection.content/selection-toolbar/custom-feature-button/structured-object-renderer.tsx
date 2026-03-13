@@ -1,7 +1,10 @@
-import type { ComponentRegistry, Spec } from "@json-render/react"
+import type { Spec } from "@json-render/react"
 import type { SelectionToolbarCustomFeatureOutputField } from "@/types/config/selection-toolbar"
-import { JSONUIProvider, Renderer } from "@json-render/react"
+import { defineCatalog } from "@json-render/core"
+import { defineRegistry, JSONUIProvider, Renderer } from "@json-render/react"
+import { schema as reactSchema } from "@json-render/react/schema"
 import { useMemo } from "react"
+import { z } from "zod"
 
 interface StructuredObjectRendererProps {
   outputSchema: SelectionToolbarCustomFeatureOutputField[]
@@ -66,29 +69,46 @@ function buildStructuredObjectSpec(
   }
 }
 
-const STRUCTURED_OBJECT_REGISTRY: ComponentRegistry = {
-  ObjectContainer: ({ children }) => (
-    <div className="overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-700">
-      {children}
-    </div>
-  ),
-  FieldRow: ({ element }) => {
-    const { label, value, pending } = element.props as {
-      label: string
-      value: string
-      pending?: boolean
-    }
-
-    return (
-      <div className="grid grid-cols-[minmax(120px,1fr)_2fr] gap-3 border-b border-zinc-200 p-3 last:border-b-0 dark:border-zinc-700">
-        <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</div>
-        <div className="text-sm whitespace-pre-wrap break-words text-zinc-900 dark:text-zinc-100">
-          {pending ? "…" : value || "—"}
-        </div>
-      </div>
-    )
+const structuredObjectCatalog = defineCatalog(reactSchema, {
+  components: {
+    ObjectContainer: {
+      props: z.object({}),
+      slots: ["default"],
+      description: "Container for a rendered structured object",
+    },
+    FieldRow: {
+      props: z.object({
+        label: z.string(),
+        value: z.string(),
+        pending: z.boolean(),
+      }),
+      description: "Single row in a structured object output",
+    },
   },
-}
+  actions: {},
+})
+
+const { registry: STRUCTURED_OBJECT_REGISTRY } = defineRegistry(structuredObjectCatalog, {
+  components: {
+    ObjectContainer: ({ children }) => (
+      <div className="overflow-hidden rounded-md border border-zinc-200 dark:border-zinc-700">
+        {children}
+      </div>
+    ),
+    FieldRow: ({ props }) => {
+      const { label, value, pending } = props
+
+      return (
+        <div className="grid grid-cols-[minmax(120px,1fr)_2fr] gap-3 border-b border-zinc-200 p-3 last:border-b-0 dark:border-zinc-700">
+          <div className="text-xs font-medium text-zinc-500 dark:text-zinc-400">{label}</div>
+          <div className="text-sm whitespace-pre-wrap break-words text-zinc-900 dark:text-zinc-100">
+            {pending ? "…" : value || "—"}
+          </div>
+        </div>
+      )
+    },
+  },
+})
 
 export function StructuredObjectRenderer({
   outputSchema,
