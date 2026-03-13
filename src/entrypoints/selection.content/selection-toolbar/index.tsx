@@ -256,9 +256,9 @@ export function SelectionToolbar() {
           )}
         >
           <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
-            <AiButton />
             <TranslateButton />
             {!isFirefox && <SpeakButton />}
+            <AiButton />
             <SelectionToolbarCustomFeatureButtons />
           </div>
           <CloseButton />
