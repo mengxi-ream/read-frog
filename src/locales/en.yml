@@ -879,8 +879,10 @@ action:
   copy: Copy
   copied: Copied
   regenerate: Regenerate
+  translation: Translation
   speak: Speak
   playing: Playing
+  vocabularyInsight: Vocabulary Insight
 shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:

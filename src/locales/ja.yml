@@ -767,8 +767,10 @@ action:
   copy: コピー
   copied: コピー済み
   regenerate: 再生成
+  translation: 翻訳
   speak: 読み上げ
   playing: 再生中
+  vocabularyInsight: 語彙解析
 shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:

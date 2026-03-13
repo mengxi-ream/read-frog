@@ -767,8 +767,10 @@ action:
   copy: Sao chép
   copied: Đã sao chép
   regenerate: Tạo lại
+  translation: Dịch
   speak: Đọc
   playing: Đang phát
+  vocabularyInsight: Phân tích từ vựng
 shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:

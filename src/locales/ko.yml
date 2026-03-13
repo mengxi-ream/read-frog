@@ -767,8 +767,10 @@ action:
   copy: 복사
   copied: 복사됨
   regenerate: 다시 생성
+  translation: 번역
   speak: 읽기
   playing: 재생 중
+  vocabularyInsight: 어휘 분석
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:

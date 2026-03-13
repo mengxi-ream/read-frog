@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from "#imports"
+import { i18n, useCallback, useMemo, useRef, useState } from "#imports"
 import { IconZoomScan } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useAtomValue, useSetAtom } from "jotai"
@@ -19,6 +19,7 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
 import { SelectionToolbarFooterContent } from "../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
+import { SelectionToolbarTooltip } from "../components/selection-tooltip"
 import { createHighlightData } from "../utils"
 import {
   isSelectionToolbarVisibleAtom,
@@ -68,6 +69,7 @@ export function AiButton() {
     () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
     [providersConfig],
   )
+  const triggerLabel = i18n.t("action.vocabularyInsight")
 
   const {
     isLoading,
@@ -179,9 +181,12 @@ export function AiButton() {
 
   return (
     <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
-      <SelectionPopover.Trigger title="Vocabulary insight">
+      <SelectionToolbarTooltip
+        content={triggerLabel}
+        render={<SelectionPopover.Trigger aria-label={triggerLabel} />}
+      >
         <IconZoomScan className="size-4.5" />
-      </SelectionPopover.Trigger>
+      </SelectionToolbarTooltip>
 
       <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
         <SelectionPopover.Header className="border-b">

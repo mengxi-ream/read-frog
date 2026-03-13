@@ -20,6 +20,7 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from "../.."
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
+import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
 import {
   isSelectionToolbarVisibleAtom,
   selectionToolbarTranslateRequestAtom,
@@ -143,6 +144,7 @@ export function TranslateButton() {
     () => filterEnabledProvidersConfig(providersConfig).filter(isTranslateProviderConfig),
     [providersConfig],
   )
+  const triggerLabel = i18n.t("action.translation")
 
   const resetSessionState = useCallback(() => {
     setIsTranslating(false)
@@ -267,9 +269,12 @@ export function TranslateButton() {
 
   return (
     <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
-      <SelectionPopover.Trigger title="Translation">
+      <SelectionToolbarTooltip
+        content={triggerLabel}
+        render={<SelectionPopover.Trigger aria-label={triggerLabel} />}
+      >
         <RiTranslate className="size-4.5" />
-      </SelectionPopover.Trigger>
+      </SelectionToolbarTooltip>
 
       <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
         <SelectionPopover.Header className="border-b">

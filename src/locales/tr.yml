@@ -767,8 +767,10 @@ action:
   copy: Kopyala
   copied: Kopyalandı
   regenerate: Yeniden oluştur
+  translation: Çeviri
   speak: Oku
   playing: Çalınıyor
+  vocabularyInsight: Kelime analizi
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:

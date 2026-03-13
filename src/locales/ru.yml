@@ -767,8 +767,10 @@ action:
   copy: Копировать
   copied: Скопировано
   regenerate: Сгенерировать заново
+  translation: Перевод
   speak: Озвучить
   playing: Воспроизведение
+  vocabularyInsight: Разбор слов
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:

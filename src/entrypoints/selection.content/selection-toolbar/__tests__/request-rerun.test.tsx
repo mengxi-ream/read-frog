@@ -58,17 +58,20 @@ vi.mock("@/components/ui/selection-popover", async () => {
 
   function Trigger({
     children,
-    title,
-  }: {
+    onClick,
+    ...props
+  }: React.ComponentProps<"button"> & {
     children: React.ReactNode
-    title?: string
   }) {
     const { onOpenChange } = usePopoverContext()
     return (
       <button
+        {...props}
         type="button"
-        aria-label={title}
-        onClick={() => onOpenChange?.(true)}
+        onClick={(event) => {
+          onClick?.(event)
+          onOpenChange?.(true)
+        }}
       >
         {children}
       </button>
@@ -301,7 +304,7 @@ describe("selection toolbar requests", () => {
     store.set(selectionContentAtom, "Selected text")
     const view = renderWithProviders(<TranslateButton />, store)
 
-    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
 
     await waitFor(() => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
@@ -368,7 +371,7 @@ describe("selection toolbar requests", () => {
     store.set(selectionContentAtom, "Selected text")
     renderWithProviders(<TranslateButton />, store)
 
-    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
 
     await waitFor(() => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
@@ -424,7 +427,7 @@ describe("selection toolbar requests", () => {
       store.set(configAtom, updatedConfig)
     })
 
-    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
 
     await waitFor(() => {
       expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
@@ -451,7 +454,7 @@ describe("selection toolbar requests", () => {
     store.set(selectionContentAtom, "Selected text")
     renderWithProviders(<TranslateButton />, store)
 
-    fireEvent.click(screen.getByRole("button", { name: "Translation" }))
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
 
     await waitFor(() => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
@@ -476,7 +479,7 @@ describe("selection toolbar requests", () => {
     store.set(selectionRangeAtom, createRangeFor(paragraph))
     renderWithProviders(<AiButton />, store)
 
-    fireEvent.click(screen.getByRole("button", { name: "Vocabulary insight" }))
+    fireEvent.click(screen.getByRole("button", { name: "action.vocabularyInsight" }))
 
     await waitFor(() => {
       expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
@@ -542,7 +545,7 @@ describe("selection toolbar requests", () => {
     store.set(selectionRangeAtom, createRangeFor(paragraph))
     renderWithProviders(<AiButton />, store)
 
-    fireEvent.click(screen.getByRole("button", { name: "Vocabulary insight" }))
+    fireEvent.click(screen.getByRole("button", { name: "action.vocabularyInsight" }))
 
     await waitFor(() => {
       expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)

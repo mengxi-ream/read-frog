@@ -1,3 +1,5 @@
+import type { SelectionToolbarCustomFeatureRequestSlice } from "./atom"
+import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
 import { Icon } from "@iconify/react"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -13,6 +15,7 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
 import { SelectionToolbarFooterContent } from "../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
+import { SelectionToolbarTooltip } from "../components/selection-tooltip"
 import { getSelectionParagraphText } from "../utils"
 import {
   isSelectionToolbarVisibleAtom,
@@ -42,23 +45,86 @@ function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement 
   })
 }
 
-function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionToolbarCustomFeature }) {
-  const [open, setOpen] = useState(false)
-  const [rerunNonce, setRerunNonce] = useState(0)
-  const customFeatureRequest = useAtomValue(selectionToolbarCustomFeatureRequestAtomFamily(feature.id))
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-  const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
-  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
-  const setConfig = useSetAtom(writeConfigAtom)
-  const bodyRef = useRef<HTMLDivElement>(null)
-  const {
-    selectionContentSnapshot,
-    selectionRangeSnapshot,
-    popoverSessionKey,
-    captureSelectionSnapshot,
-    clearSelectionSnapshot,
-  } = useSelectionPopoverSnapshot()
+interface CustomFeatureExecutionContext {
+  feature: SelectionToolbarCustomFeature
+  providerConfig: LLMProviderConfig
+  promptTokens: {
+    selection: string
+    context: string
+    targetLang: string
+    title: string
+  }
+}
 
+interface CustomFeatureExecutionPlan {
+  errorMessage: string | null
+  executionContext: CustomFeatureExecutionContext | null
+}
+
+function buildCustomFeatureExecutionPlan(
+  customFeatureRequest: SelectionToolbarCustomFeatureRequestSlice,
+  cleanSelection: string,
+  paragraphText: string,
+): CustomFeatureExecutionPlan {
+  const feature = customFeatureRequest.feature
+
+  if (!feature) {
+    return {
+      errorMessage: "Selected feature is unavailable",
+      executionContext: null,
+    }
+  }
+
+  if (!cleanSelection) {
+    return {
+      errorMessage: "No selected text available",
+      executionContext: null,
+    }
+  }
+
+  const providerConfig = customFeatureRequest.providerConfig
+  if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
+    return {
+      errorMessage: "Selected provider is unavailable for this feature",
+      executionContext: null,
+    }
+  }
+
+  if (!providerConfig.enabled) {
+    return {
+      errorMessage: "Selected provider is disabled",
+      executionContext: null,
+    }
+  }
+
+  return {
+    errorMessage: null,
+    executionContext: {
+      feature,
+      providerConfig,
+      promptTokens: {
+        selection: cleanSelection,
+        context: paragraphText,
+        targetLang: LANG_CODE_TO_EN_NAME[customFeatureRequest.language.targetCode],
+        title: document.title,
+      },
+    },
+  }
+}
+
+function useCustomFeatureExecution({
+  bodyRef,
+  executionContext,
+  open,
+  popoverSessionKey,
+  rerunNonce,
+}: {
+  bodyRef: React.RefObject<HTMLDivElement | null>
+  executionContext: CustomFeatureExecutionContext | null
+  open: boolean
+  popoverSessionKey: number
+  rerunNonce: number
+}) {
   const [isRunning, setIsRunning] = useState(false)
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -69,101 +135,26 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
     setErrorMessage(null)
   }, [])
 
-  const activeFeature = customFeatureRequest.feature
-  const cleanSelection = useMemo(
-    () => normalizeSelectedText(selectionContentSnapshot),
-    [selectionContentSnapshot],
-  )
-  const paragraphText = useMemo(() => {
-    if (!cleanSelection) {
-      return ""
-    }
-
-    const paragraphCandidate = selectionRangeSnapshot ? getSelectionParagraphText(selectionRangeSnapshot) : cleanSelection
-    return paragraphCandidate || cleanSelection
-  }, [cleanSelection, selectionRangeSnapshot])
-
-  const llmProviders = useMemo(
-    () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
-    [providersConfig],
-  )
-
-  const handleProviderChange = useCallback((providerId: string) => {
-    const updatedCustomFeatures = selectionToolbarConfig.customFeatures.map(item =>
-      item.id === feature.id
-        ? { ...item, providerId }
-        : item,
-    )
-
-    void setConfig({
-      selectionToolbar: {
-        ...selectionToolbarConfig,
-        customFeatures: updatedCustomFeatures,
-      },
-    })
-  }, [feature.id, selectionToolbarConfig, setConfig])
-
-  const handleRegenerate = useCallback(() => {
-    setRerunNonce(prev => prev + 1)
-  }, [])
-
   useEffect(() => {
     if (!open) {
       return
     }
 
+    if (!executionContext) {
+      return
+    }
+
     let isCancelled = false
     const abortController = new AbortController()
+    const { feature, providerConfig, promptTokens } = executionContext
 
     const run = async () => {
-      const setRequestError = (message: string) => {
-        if (isCancelled) {
-          return
-        }
-
-        setIsRunning(false)
-        setResult(null)
-        setErrorMessage(message)
-      }
-
-      if (!cleanSelection) {
-        setRequestError("No selected text available")
-        return
-      }
-
-      const currentFeature = customFeatureRequest.feature
-
-      if (!currentFeature) {
-        setRequestError("Selected feature is unavailable")
-        return
-      }
-
-      const providerConfig = customFeatureRequest.providerConfig
-      if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
-        setRequestError("Selected provider is unavailable for this feature")
-        return
-      }
-
-      if (!providerConfig.enabled) {
-        setRequestError("Selected provider is disabled")
-        return
-      }
-
-      const targetLang = LANG_CODE_TO_EN_NAME[customFeatureRequest.language.targetCode]
-      const pageTitle = document.title
-
-      const promptTokens = {
-        selection: cleanSelection,
-        context: paragraphText,
-        targetLang,
-        title: pageTitle,
-      }
       const systemPrompt = buildSelectionToolbarCustomFeatureSystemPrompt(
-        currentFeature.systemPrompt,
+        feature.systemPrompt,
         promptTokens,
-        currentFeature.outputSchema,
+        feature.outputSchema,
       )
-      const prompt = replaceSelectionToolbarCustomFeaturePromptTokens(currentFeature.prompt, promptTokens)
+      const prompt = replaceSelectionToolbarCustomFeaturePromptTokens(feature.prompt, promptTokens)
       const modelName = resolveModelId(providerConfig.model) ?? ""
       const providerOptions = getProviderOptionsWithOverride(
         modelName,
@@ -181,7 +172,7 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
             providerId: providerConfig.id,
             system: systemPrompt,
             prompt,
-            outputSchema: currentFeature.outputSchema.map(({ name, type }) => ({ name, type })),
+            outputSchema: feature.outputSchema.map(({ name, type }) => ({ name, type })),
             providerOptions,
             temperature: providerConfig.temperature,
           },
@@ -208,6 +199,7 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
         if (error instanceof DOMException && error.name === "AbortError") {
           return
         }
+
         if (isCancelled) {
           return
         }
@@ -227,25 +219,99 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
       isCancelled = true
       abortController.abort()
     }
-  }, [
-    cleanSelection,
-    customFeatureRequest,
+  }, [bodyRef, executionContext, open, popoverSessionKey, rerunNonce])
+
+  return {
+    errorMessage,
+    isRunning,
+    resetSessionState,
+    result,
+  }
+}
+
+function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionToolbarCustomFeature }) {
+  const [open, setOpen] = useState(false)
+  const [rerunNonce, setRerunNonce] = useState(0)
+  const customFeatureRequest = useAtomValue(selectionToolbarCustomFeatureRequestAtomFamily(feature.id))
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
+  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const setConfig = useSetAtom(writeConfigAtom)
+  const bodyRef = useRef<HTMLDivElement>(null)
+  const {
+    selectionContentSnapshot,
+    selectionRangeSnapshot,
+    popoverSessionKey,
+    captureSelectionSnapshot,
+    clearSelectionSnapshot,
+  } = useSelectionPopoverSnapshot()
+
+  const activeFeature = customFeatureRequest.feature
+  const cleanSelection = useMemo(
+    () => normalizeSelectedText(selectionContentSnapshot),
+    [selectionContentSnapshot],
+  )
+  const paragraphText = useMemo(() => {
+    if (!cleanSelection) {
+      return ""
+    }
+
+    const paragraphCandidate = selectionRangeSnapshot ? getSelectionParagraphText(selectionRangeSnapshot) : cleanSelection
+    return paragraphCandidate || cleanSelection
+  }, [cleanSelection, selectionRangeSnapshot])
+
+  const llmProviders = useMemo(
+    () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
+    [providersConfig],
+  )
+  const executionPlan = useMemo(
+    () => buildCustomFeatureExecutionPlan(customFeatureRequest, cleanSelection, paragraphText),
+    [cleanSelection, customFeatureRequest, paragraphText],
+  )
+  const {
+    isRunning,
+    result,
+    errorMessage,
+    resetSessionState,
+  } = useCustomFeatureExecution({
+    bodyRef,
+    executionContext: executionPlan.executionContext,
     open,
-    paragraphText,
     popoverSessionKey,
     rerunNonce,
-  ])
+  })
+  const displayedResult = executionPlan.executionContext ? result : null
+  const displayedErrorMessage = errorMessage ?? executionPlan.errorMessage
+  const displayedIsRunning = executionPlan.executionContext ? isRunning : false
+
+  const handleProviderChange = useCallback((providerId: string) => {
+    const updatedCustomFeatures = selectionToolbarConfig.customFeatures.map(item =>
+      item.id === feature.id
+        ? { ...item, providerId }
+        : item,
+    )
+
+    void setConfig({
+      selectionToolbar: {
+        ...selectionToolbarConfig,
+        customFeatures: updatedCustomFeatures,
+      },
+    })
+  }, [feature.id, selectionToolbarConfig, setConfig])
+
+  const handleRegenerate = useCallback(() => {
+    setRerunNonce(prev => prev + 1)
+  }, [])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     if (nextOpen) {
       captureSelectionSnapshot()
-      resetSessionState()
     }
     else {
       clearSelectionSnapshot()
-      resetSessionState()
     }
 
+    resetSessionState()
     setOpen(nextOpen)
 
     if (nextOpen) {
@@ -259,9 +325,12 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
 
   return (
     <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
-      <SelectionPopover.Trigger title={activeFeature.name}>
+      <SelectionToolbarTooltip
+        content={activeFeature.name}
+        render={<SelectionPopover.Trigger aria-label={activeFeature.name} />}
+      >
         <Icon icon={activeFeature.icon} strokeWidth={0.8} className="size-4.5" />
-      </SelectionPopover.Trigger>
+      </SelectionToolbarTooltip>
 
       <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
         <SelectionPopover.Header className="border-b">
@@ -281,18 +350,18 @@ function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionTo
 
             <StructuredObjectRenderer
               outputSchema={activeFeature.outputSchema}
-              value={result}
-              isStreaming={isRunning}
+              value={displayedResult}
+              isStreaming={displayedIsRunning}
             />
 
-            {isRunning && (
+            {displayedIsRunning && (
               <p className="text-xs text-zinc-500 dark:text-zinc-500">Streaming structured output…</p>
             )}
 
-            {errorMessage && (
+            {displayedErrorMessage && (
               <div className="space-y-2">
                 <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
-                  {errorMessage}
+                  {displayedErrorMessage}
                 </div>
               </div>
             )}
