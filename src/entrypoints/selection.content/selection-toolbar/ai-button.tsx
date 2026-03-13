@@ -201,7 +201,7 @@ export function AiButton() {
         </SelectionPopover.Header>
 
         <SelectionPopover.Body ref={bodyRef}>
-          <div className="p-4 pt-0 border-b">
+          <div className="p-4 pt-0">
             <div className="border-b pb-4 sticky pt-4 top-0 bg-white dark:bg-zinc-800 z-10">
               <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">上下文:</p>
               <div className="text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 p-3 rounded leading-relaxed">
