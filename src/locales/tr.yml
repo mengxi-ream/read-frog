@@ -771,6 +771,11 @@ action:
   speak: Oku
   playing: Çalınıyor
   vocabularyInsight: Kelime analizi
+thinking:
+  label: Düşünüyor
+  complete: Düşünme tamamlandı
+  expand: Düşünmeyi genişlet
+  collapse: Düşünmeyi daralt
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:

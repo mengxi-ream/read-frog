@@ -771,6 +771,11 @@ action:
   speak: 朗讀
   playing: 播放中
   vocabularyInsight: 詞彙解析
+thinking:
+  label: 思考中
+  complete: 思考完成
+  expand: 展開思考
+  collapse: 收起思考
 shortcutKeySelector:
   placeholder: 請輸入快捷鍵
 subtitles:

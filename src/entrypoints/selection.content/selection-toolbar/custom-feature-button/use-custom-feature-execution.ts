@@ -1,5 +1,6 @@
 import type { RefObject } from "react"
 import type { SelectionToolbarCustomFeatureRequestSlice } from "../atom"
+import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -109,11 +110,13 @@ export function useCustomFeatureExecution({
   const [isRunning, setIsRunning] = useState(false)
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
 
   const resetSessionState = useCallback(() => {
     setIsRunning(false)
     setResult(null)
     setErrorMessage(null)
+    setThinking(null)
   }, [])
 
   useEffect(() => {
@@ -142,6 +145,10 @@ export function useCustomFeatureExecution({
       setIsRunning(true)
       setResult(null)
       setErrorMessage(null)
+      setThinking({
+        status: "thinking",
+        text: "",
+      })
 
       try {
         const finalResult = await streamBackgroundStructuredObject(
@@ -155,12 +162,13 @@ export function useCustomFeatureExecution({
           },
           {
             signal: abortController.signal,
-            onChunk: (partial) => {
+            onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
               if (isCancelled) {
                 return
               }
 
-              setResult(prev => ({ ...(prev ?? {}), ...partial }))
+              setResult(partial.output)
+              setThinking(partial.thinking)
               scrollSelectionPopoverBodyToBottom(bodyRef)
             },
           },
@@ -170,7 +178,8 @@ export function useCustomFeatureExecution({
           return
         }
 
-        setResult(finalResult)
+        setResult(finalResult.output)
+        setThinking(finalResult.thinking)
       }
       catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
@@ -181,6 +190,7 @@ export function useCustomFeatureExecution({
           return
         }
 
+        setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
         setErrorMessage(getCustomFeatureErrorMessage(error))
       }
       finally {
@@ -203,5 +213,6 @@ export function useCustomFeatureExecution({
     isRunning,
     resetSessionState,
     result,
+    thinking,
   }
 }

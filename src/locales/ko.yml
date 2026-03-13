@@ -771,6 +771,11 @@ action:
   speak: 읽기
   playing: 재생 중
   vocabularyInsight: 어휘 분석
+thinking:
+  label: 사고 중
+  complete: 사고 완료
+  expand: 사고 펼치기
+  collapse: 사고 접기
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:

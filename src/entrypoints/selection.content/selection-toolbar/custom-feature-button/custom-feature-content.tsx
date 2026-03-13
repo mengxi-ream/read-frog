@@ -1,3 +1,4 @@
+import type { ThinkingSnapshot } from "@/types/background-stream"
 import type { SelectionToolbarCustomFeatureOutputField } from "@/types/config/selection-toolbar"
 import { SelectionSourceContent } from "../../components/selection-source-content"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
@@ -8,6 +9,7 @@ interface CustomFeatureContentProps {
   outputSchema: SelectionToolbarCustomFeatureOutputField[]
   selectionContent: string | null | undefined
   value: Record<string, unknown> | null
+  thinking: ThinkingSnapshot | null
 }
 
 export function CustomFeatureContent({
@@ -16,6 +18,7 @@ export function CustomFeatureContent({
   outputSchema,
   selectionContent,
   value,
+  thinking,
 }: CustomFeatureContentProps) {
   return (
     <div className="p-4">
@@ -30,11 +33,8 @@ export function CustomFeatureContent({
           outputSchema={outputSchema}
           value={value}
           isStreaming={isRunning}
+          thinking={thinking}
         />
-
-        {isRunning && (
-          <p className="text-xs text-zinc-500 dark:text-zinc-500">Streaming structured output…</p>
-        )}
 
         {errorMessage && (
           <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">

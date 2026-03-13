@@ -771,6 +771,11 @@ action:
   speak: Озвучить
   playing: Воспроизведение
   vocabularyInsight: Разбор слов
+thinking:
+  label: Размышление
+  complete: Размышление завершено
+  expand: Развернуть размышление
+  collapse: Свернуть размышление
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:

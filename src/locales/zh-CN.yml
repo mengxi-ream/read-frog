@@ -883,6 +883,11 @@ action:
   speak: 朗读
   playing: 播放中
   vocabularyInsight: 词汇解析
+thinking:
+  label: 思考中
+  complete: 思考完成
+  expand: 展开思考
+  collapse: 收起思考
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:

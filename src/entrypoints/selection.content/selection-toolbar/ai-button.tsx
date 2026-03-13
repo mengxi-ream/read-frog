@@ -133,13 +133,13 @@ export function AiButton() {
           {
             signal,
             onChunk: (data) => {
-              setAiResponse(data)
+              setAiResponse(data.output)
               scrollSelectionPopoverBodyToBottom(bodyRef)
             },
           },
         )
 
-        logger.log("aiResponse", "\n", finalResponse)
+        logger.log("aiResponse", "\n", finalResponse.output)
         return true
       }
       catch (error) {

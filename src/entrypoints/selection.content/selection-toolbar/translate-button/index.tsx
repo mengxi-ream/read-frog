@@ -1,4 +1,5 @@
 import type { SelectionToolbarTranslateRequestSlice } from "../atom"
+import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
@@ -63,7 +64,7 @@ async function translateWithLlm({
   cleanText: string
   providerConfig: LLMProviderConfig
   translateRequest: SelectionToolbarTranslateRequestSlice
-  onChunk: (data: string) => void
+  onChunk: (data: BackgroundTextStreamSnapshot) => void
   registerAbortController: (abortController: AbortController) => void
 }) {
   const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
@@ -128,6 +129,7 @@ export function TranslateButton() {
   const [isTranslating, setIsTranslating] = useState(false)
   const [rerunNonce, setRerunNonce] = useState(0)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
+  const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
   const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
@@ -149,6 +151,7 @@ export function TranslateButton() {
   const resetSessionState = useCallback(() => {
     setIsTranslating(false)
     setTranslatedText(undefined)
+    setThinking(null)
   }, [])
 
   const cancelCurrentTranslation = useCallback((runId?: number) => {
@@ -173,27 +176,40 @@ export function TranslateButton() {
 
     setIsTranslating(true)
     setTranslatedText(undefined)
+    setThinking(null)
 
     try {
       const providerConfig = getProviderConfigOrThrow(translateRequest)
 
       let nextTranslatedText = ""
       if (isLLMProviderConfig(providerConfig)) {
-        nextTranslatedText = await translateWithLlm({
+        setThinking({
+          status: "thinking",
+          text: "",
+        })
+
+        const nextSnapshot = await translateWithLlm({
           cleanText,
           providerConfig,
           translateRequest,
           onChunk: (data) => {
             if (runIdRef.current === runId) {
-              setTranslatedText(data)
+              setTranslatedText(data.output)
+              setThinking(data.thinking)
             }
           },
           registerAbortController: (abortController) => {
             abortControllerRef.current = abortController
           },
         })
+
+        nextTranslatedText = nextSnapshot.output
+        if (runIdRef.current === runId) {
+          setThinking(nextSnapshot.thinking)
+        }
       }
       else {
+        setThinking(null)
         nextTranslatedText = await translateWithStandardProvider({
           cleanText,
           providerConfig,
@@ -207,6 +223,7 @@ export function TranslateButton() {
     }
     catch (error) {
       if (!isAbortError(error) && runIdRef.current === runId) {
+        setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
         console.error("Translation error:", error)
         toast.error(i18n.t("translationHub.translationFailed"), {
           description: error instanceof Error ? error.message : String(error),
@@ -294,6 +311,7 @@ export function TranslateButton() {
             selectionContent={selectionContentSnapshot}
             translatedText={translatedText}
             isTranslating={isTranslating}
+            thinking={thinking}
           />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent

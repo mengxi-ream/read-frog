@@ -1,4 +1,5 @@
 import type { Spec } from "@json-render/react"
+import type { ThinkingSnapshot } from "@/types/background-stream"
 import type {
   SelectionToolbarCustomFeatureOutputField,
   SelectionToolbarCustomFeatureOutputType,
@@ -9,11 +10,13 @@ import { schema as reactSchema } from "@json-render/react/schema"
 import { IconHash, IconTypography } from "@tabler/icons-react"
 import { useMemo } from "react"
 import { z } from "zod"
+import { Thinking } from "@/components/thinking"
 
 interface StructuredObjectRendererProps {
   outputSchema: SelectionToolbarCustomFeatureOutputField[]
   value: Record<string, unknown> | null
   isStreaming?: boolean
+  thinking: ThinkingSnapshot | null
 }
 
 function formatFieldValue(value: unknown, type: SelectionToolbarCustomFeatureOutputField["type"]) {
@@ -127,6 +130,7 @@ export function StructuredObjectRenderer({
   outputSchema,
   value,
   isStreaming = false,
+  thinking,
 }: StructuredObjectRendererProps) {
   const spec = useMemo(
     () => buildStructuredObjectSpec(outputSchema, value, isStreaming),
@@ -134,8 +138,13 @@ export function StructuredObjectRenderer({
   )
 
   return (
-    <JSONUIProvider registry={STRUCTURED_OBJECT_REGISTRY} initialState={{}}>
-      <Renderer spec={spec} registry={STRUCTURED_OBJECT_REGISTRY} loading={isStreaming} />
-    </JSONUIProvider>
+    <div className="space-y-2">
+      {thinking && (
+        <Thinking status={thinking.status} content={thinking.text} />
+      )}
+      <JSONUIProvider registry={STRUCTURED_OBJECT_REGISTRY} initialState={{}}>
+        <Renderer spec={spec} registry={STRUCTURED_OBJECT_REGISTRY} loading={isStreaming} />
+      </JSONUIProvider>
+    </div>
   )
 }

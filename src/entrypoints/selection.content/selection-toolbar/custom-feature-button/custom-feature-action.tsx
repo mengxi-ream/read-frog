@@ -67,6 +67,7 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
     result,
     errorMessage,
     resetSessionState,
+    thinking,
   } = useCustomFeatureExecution({
     bodyRef,
     executionContext: executionPlan.executionContext,
@@ -77,6 +78,7 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
   const displayedResult = executionPlan.executionContext ? result : null
   const displayedErrorMessage = errorMessage ?? executionPlan.errorMessage
   const displayedIsRunning = executionPlan.executionContext ? isRunning : false
+  const displayedThinking = executionPlan.executionContext ? thinking : null
 
   const handleProviderChange = useCallback((providerId: string) => {
     const updatedCustomFeatures = selectionToolbarConfig.customFeatures.map(item =>
@@ -142,6 +144,7 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
             outputSchema={activeFeature.outputSchema}
             selectionContent={selectionContentSnapshot}
             value={displayedResult}
+            thinking={displayedThinking}
           />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent

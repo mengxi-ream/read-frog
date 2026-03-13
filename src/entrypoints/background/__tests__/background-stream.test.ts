@@ -94,6 +94,7 @@ describe("background-stream", () => {
         score: 97,
         summary: "Strong argument structure",
       }),
+      fullStream: (async function* () {})(),
     })
 
     const chunkSnapshots: Record<string, unknown>[] = []
@@ -108,8 +109,8 @@ describe("background-stream", () => {
         ],
       },
       {
-        onChunk: (_chunk, cumulativeResponse) => {
-          chunkSnapshots.push(cumulativeResponse)
+        onChunk: (snapshot) => {
+          chunkSnapshots.push(snapshot)
         },
       },
     )
@@ -120,12 +121,30 @@ describe("background-stream", () => {
       prompt: "Analyze selection",
     }))
     expect(result).toEqual({
-      score: 97,
-      summary: "Strong argument structure",
+      output: {
+        score: 97,
+        summary: "Strong argument structure",
+      },
+      thinking: {
+        status: "complete",
+        text: "",
+      },
     })
     expect(chunkSnapshots).toEqual([
-      { score: 97 },
-      { score: 97, summary: "Strong argument structure" },
+      {
+        output: { score: 97 },
+        thinking: {
+          status: "thinking",
+          text: "",
+        },
+      },
+      {
+        output: { score: 97, summary: "Strong argument structure" },
+        thinking: {
+          status: "thinking",
+          text: "",
+        },
+      },
     ])
 
     const schemaArg = outputObjectMock.mock.calls[0][0].schema as {
@@ -148,9 +167,9 @@ describe("background-stream", () => {
   it("streams text via background stream port handler", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      textStream: (async function* () {
-        yield "Hello"
-        yield " world"
+      fullStream: (async function* () {
+        yield { type: "text-delta", text: "Hello" }
+        yield { type: "text-delta", text: " world" }
       })(),
       output: Promise.resolve("Hello world"),
     })
@@ -172,17 +191,35 @@ describe("background-stream", () => {
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(1, {
       type: "chunk",
       requestId: "req-text-1",
-      data: "Hello",
+      data: {
+        output: "Hello",
+        thinking: {
+          status: "thinking",
+          text: "",
+        },
+      },
     })
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(2, {
       type: "chunk",
       requestId: "req-text-1",
-      data: "Hello world",
+      data: {
+        output: "Hello world",
+        thinking: {
+          status: "thinking",
+          text: "",
+        },
+      },
     })
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(3, {
       type: "done",
       requestId: "req-text-1",
-      data: "Hello world",
+      data: {
+        output: "Hello world",
+        thinking: {
+          status: "complete",
+          text: "",
+        },
+      },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
   })
@@ -198,7 +235,7 @@ describe("background-stream", () => {
     }) => {
       options.onError?.({ error: rootCause })
       return {
-        textStream: (async function* () {})(),
+        fullStream: (async function* () {})(),
         output: Promise.reject(new MockNoOutputGeneratedError("No output generated. Check the stream for errors.")),
       }
     })
