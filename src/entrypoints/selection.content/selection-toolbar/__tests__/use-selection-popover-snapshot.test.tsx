@@ -3,7 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { useState } from "react"
 import { afterEach, describe, expect, it } from "vitest"
-import { selectionContentAtom, selectionRangeAtom } from "../atom"
+import { selectionContentAtom, selectionRangeAtom } from "../atoms"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 
 function createRangeFor(node: Node) {

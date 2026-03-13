@@ -1,5 +1,5 @@
 import type { RefObject } from "react"
-import type { SelectionToolbarCustomFeatureRequestSlice } from "../atom"
+import type { SelectionToolbarCustomFeatureRequestSlice } from "../atoms"
 import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"

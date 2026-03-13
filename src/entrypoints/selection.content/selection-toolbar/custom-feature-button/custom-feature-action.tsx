@@ -14,7 +14,7 @@ import { getSelectionParagraphText } from "../../utils"
 import {
   isSelectionToolbarVisibleAtom,
   selectionToolbarCustomFeatureRequestAtomFamily,
-} from "../atom"
+} from "../atoms"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 import { CustomFeatureContent } from "./custom-feature-content"
 import { buildCustomFeatureExecutionPlan, useCustomFeatureExecution } from "./use-custom-feature-execution"

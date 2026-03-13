@@ -1,6 +1,6 @@
 import { useAtomValue } from "jotai"
 import { useCallback, useState } from "react"
-import { selectionContentAtom, selectionRangeAtom } from "./atom"
+import { selectionContentAtom, selectionRangeAtom } from "./atoms"
 
 interface SelectionPopoverSnapshot {
   selectionContentSnapshot: string | null

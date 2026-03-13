@@ -1,4 +1,4 @@
-import type { SelectionToolbarTranslateRequestSlice } from "../atom"
+import type { SelectionToolbarTranslateRequestSlice } from "../atoms"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
@@ -25,7 +25,7 @@ import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
 import {
   isSelectionToolbarVisibleAtom,
   selectionToolbarTranslateRequestAtom,
-} from "../atom"
+} from "../atoms"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"

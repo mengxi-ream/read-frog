@@ -24,7 +24,7 @@ import { createHighlightData } from "../utils"
 import {
   isSelectionToolbarVisibleAtom,
   selectionToolbarVocabularyInsightRequestAtom,
-} from "./atom"
+} from "./atoms"
 import { useSelectionPopoverSnapshot } from "./use-selection-popover-snapshot"
 
 function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement | null>) {

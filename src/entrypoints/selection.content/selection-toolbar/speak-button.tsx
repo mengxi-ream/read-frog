@@ -6,7 +6,7 @@ import { toast } from "sonner"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SelectionToolbarTooltip } from "../components/selection-tooltip"
-import { selectionContentAtom } from "./atom"
+import { selectionContentAtom } from "./atoms"
 
 const TOOLTIP_TRIGGER_PRESS_REASON = "trigger-press"
 

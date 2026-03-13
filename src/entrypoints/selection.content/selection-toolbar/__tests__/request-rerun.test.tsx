@@ -16,7 +16,7 @@ import { AiButton } from "../ai-button"
 import {
   selectionContentAtom,
   selectionRangeAtom,
-} from "../atom"
+} from "../atoms"
 import { SelectionToolbarCustomFeatureButtons } from "../custom-feature-button"
 import { TranslateButton } from "../translate-button"
 
