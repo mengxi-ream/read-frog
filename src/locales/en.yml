@@ -891,6 +891,8 @@ action:
   speak: Speak
   playing: Playing
   vocabularyInsight: Vocabulary Insight
+  vocabularyInsightDeprecation: This feature will be replaced by Custom AI Action's Dictionary feature in 2 weeks. Dictionary Action offers a more flexible and powerful experience.
+  vocabularyInsightDeprecationLink: Set up Dictionary Action
 thinking:
   label: Thinking
   complete: Thinking complete

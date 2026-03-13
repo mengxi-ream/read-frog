@@ -779,6 +779,8 @@ action:
   speak: 朗讀
   playing: 播放中
   vocabularyInsight: 詞彙解析
+  vocabularyInsightDeprecation: 此功能將在 2 週後被自訂 AI 動作的詞典功能取代。詞典動作提供更靈活和強大的體驗。
+  vocabularyInsightDeprecationLink: 設定詞典動作
 thinking:
   label: 思考中
   complete: 思考完成

@@ -779,6 +779,8 @@ action:
   speak: Озвучить
   playing: Воспроизведение
   vocabularyInsight: Разбор слов
+  vocabularyInsightDeprecation: Эта функция будет заменена функцией словаря в пользовательских AI-действиях через 2 недели. Словарное действие обеспечивает более гибкий и мощный опыт.
+  vocabularyInsightDeprecationLink: Настроить словарное действие
 thinking:
   label: Размышление
   complete: Размышление завершено

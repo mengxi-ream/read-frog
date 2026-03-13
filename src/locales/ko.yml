@@ -779,6 +779,8 @@ action:
   speak: 읽기
   playing: 재생 중
   vocabularyInsight: 어휘 분석
+  vocabularyInsightDeprecation: 이 기능은 2주 후에 사용자 정의 AI 액션의 사전 기능으로 대체됩니다. 사전 액션은 더 유연하고 강력한 경험을 제공합니다.
+  vocabularyInsightDeprecationLink: 사전 액션 설정
 thinking:
   label: 사고 중
   complete: 사고 완료

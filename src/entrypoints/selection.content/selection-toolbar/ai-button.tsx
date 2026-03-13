@@ -1,9 +1,10 @@
-import { i18n, useCallback, useMemo, useRef, useState } from "#imports"
-import { IconZoomScan } from "@tabler/icons-react"
+import { browser, i18n, useCallback, useMemo, useRef, useState } from "#imports"
+import { IconAlertTriangle, IconZoomScan } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
+import { Alert, AlertDescription } from "@/components/ui/base-ui/alert"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
@@ -13,6 +14,7 @@ import { getFinalSourceCode } from "@/utils/config/languages"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { logger } from "@/utils/logger"
+import { sendMessage } from "@/utils/message"
 import { getWordExplainPrompt } from "@/utils/prompts/word-explain"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -162,6 +164,11 @@ export function AiButton() {
     setRerunNonce(prev => prev + 1)
   }, [])
 
+  const handleOpenDictionarySetup = useCallback(() => {
+    const url = browser.runtime.getURL("/options.html#/custom-actions?addAction=dictionary")
+    void sendMessage("openPage", { url, active: true })
+  }, [])
+
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     if (nextOpen) {
       captureSelectionSnapshot()
@@ -202,6 +209,16 @@ export function AiButton() {
 
         <SelectionPopover.Body ref={bodyRef}>
           <div className="p-4 pt-0">
+            <Alert className="mb-3 mt-4 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+              <IconAlertTriangle className="size-4" />
+              <AlertDescription>
+                {i18n.t("action.vocabularyInsightDeprecation")}
+                {" "}
+                <button type="button" className="cursor-pointer underline underline-offset-2 font-medium" onClick={handleOpenDictionarySetup}>
+                  {i18n.t("action.vocabularyInsightDeprecationLink")}
+                </button>
+              </AlertDescription>
+            </Alert>
             <div className="border-b pb-4 sticky pt-4 top-0 bg-white dark:bg-zinc-800 z-10">
               <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">上下文:</p>
               <div className="text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 p-3 rounded leading-relaxed">

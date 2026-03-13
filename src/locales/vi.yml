@@ -779,6 +779,8 @@ action:
   speak: Đọc
   playing: Đang phát
   vocabularyInsight: Phân tích từ vựng
+  vocabularyInsightDeprecation: Tính năng này sẽ được thay thế bằng tính năng Từ điển của Hành động AI tùy chỉnh sau 2 tuần. Hành động Từ điển mang đến trải nghiệm linh hoạt và mạnh mẽ hơn.
+  vocabularyInsightDeprecationLink: Thiết lập Hành động Từ điển
 thinking:
   label: Đang suy luận
   complete: Suy luận hoàn tất

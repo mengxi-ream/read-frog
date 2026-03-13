@@ -891,6 +891,8 @@ action:
   speak: 朗读
   playing: 播放中
   vocabularyInsight: 词汇解析
+  vocabularyInsightDeprecation: 此功能将在 2 周后被自定义 AI 动作的词典功能替代。词典动作提供更灵活和强大的体验。
+  vocabularyInsightDeprecationLink: 设置词典动作
 thinking:
   label: 思考中
   complete: 思考完成

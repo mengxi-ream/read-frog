@@ -2,7 +2,8 @@ import type { CustomActionTemplate } from "@/utils/constants/custom-action-templ
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import { useLocation, useNavigate } from "react-router"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
@@ -19,7 +20,15 @@ export function CustomActionCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
   const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-  const [dialogOpen, setDialogOpen] = useState(false)
+  const { search } = useLocation()
+  const navigate = useNavigate()
+  const [dialogOpen, setDialogOpen] = useState(() => new URLSearchParams(search).get("addAction") === "dictionary")
+
+  useEffect(() => {
+    if (new URLSearchParams(search).get("addAction") === "dictionary") {
+      void navigate({ search: "" }, { replace: true })
+    }
+  }, [search, navigate])
 
   const customActions = selectionToolbarConfig.customActions ?? []
   const llmProviders = useMemo(
