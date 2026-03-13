@@ -30,7 +30,6 @@ export interface ThinkingSnapshot {
 }
 
 export interface BackgroundStreamSnapshot<TOutput> {
-  [key: string]: unknown
   output: TOutput
   thinking: ThinkingSnapshot
 }

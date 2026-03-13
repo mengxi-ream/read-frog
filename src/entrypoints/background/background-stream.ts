@@ -218,8 +218,10 @@ function createStreamSnapshot<TOutput>(
   thinking: ThinkingSnapshot,
 ): BackgroundStreamSnapshot<TOutput> {
   return {
-    output: structuredClone(output),
-    thinking: structuredClone(thinking),
+    output: output !== null && typeof output === "object"
+      ? { ...output } as TOutput
+      : output,
+    thinking: { ...thinking },
   }
 }
 
