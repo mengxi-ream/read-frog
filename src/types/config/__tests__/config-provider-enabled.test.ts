@@ -28,7 +28,7 @@ describe("config provider enabled validation", () => {
     expect(issuePaths).toContain("translate.providerId")
   })
 
-  it("fails when a custom feature uses a disabled provider", () => {
+  it("fails when a custom action uses a disabled provider", () => {
     const providersConfig = DEFAULT_CONFIG.providersConfig.map((provider) => {
       if (provider.id === "openai-default") {
         return { ...provider, enabled: false }
@@ -47,13 +47,13 @@ describe("config provider enabled validation", () => {
             providerId: "google-default",
           },
         },
-        customFeatures: DEFAULT_CONFIG.selectionToolbar.customFeatures.map(feature => ({
-          ...feature,
+        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map(action => ({
+          ...action,
           providerId: "openai-default",
         })),
       },
     })
 
-    expect(issuePaths).toContain("selectionToolbar.customFeatures.0.providerId")
+    expect(issuePaths).toContain("selectionToolbar.customActions.0.providerId")
   })
 })

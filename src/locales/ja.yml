@@ -179,7 +179,7 @@ options:
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
-      customFeatures: カスタムAI機能
+      customActions: カスタムAIアクション
       features:
         translate: ページ翻訳
         selectionToolbar_translate: 選択ツールバー翻訳
@@ -289,13 +289,13 @@ options:
         vocabularyInsight:
           title: 語彙分析
           description: 選択ツールバーで単語/フレーズを分析するためのプロバイダーとモデルを設定
-      customFeatures:
-        title: カスタム AI 機能
+      customActions:
+        title: カスタム AI アクション
         description: 選択テキスト向けに独自の構造化 AI アクションを追加
-        add: AI 機能を追加
-        edit: AI 機能を編集
-        empty: カスタム AI 機能はまだありません
-        noEnabledLlmProvider: カスタム AI 機能を作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
+        add: AI アクションを追加
+        edit: AI アクションを編集
+        empty: カスタム AI アクションはまだありません
+        noEnabledLlmProvider: カスタム AI アクションを作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
         table:
           name: 名前
           provider: プロバイダー
@@ -337,13 +337,13 @@ options:
             title: ウェブページのタイトル
           delete: 削除
           deleteDialog:
-            title: カスタム機能を削除しますか？
+            title: カスタムアクションを削除しますか？
             description: この操作は元に戻せません。
             confirm: 削除
             cancel: キャンセル
         errors:
           nameRequired: 名前は必須です
-          duplicateName: '重複する機能名 "$1"'
+          duplicateName: '重複するアクション名 "$1"'
           invalidIcon: 無効な Iconify アイコン文字列です
           providerRequired: 有効な LLM プロバイダーを選択してください
           outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください

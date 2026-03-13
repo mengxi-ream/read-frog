@@ -17,7 +17,7 @@ import {
   selectionContentAtom,
   selectionRangeAtom,
 } from "../atoms"
-import { SelectionToolbarCustomFeatureButtons } from "../custom-feature-button"
+import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
 import { TranslateButton } from "../translate-button"
 
 const streamBackgroundTextMock = vi.fn()
@@ -196,7 +196,7 @@ vi.mock("@/components/markdown-renderer", () => ({
   MarkdownRenderer: ({ content }: { content: string }) => <div>{content}</div>,
 }))
 
-vi.mock("../custom-feature-button/structured-object-renderer", () => ({
+vi.mock("../custom-action-button/structured-object-renderer", () => ({
   StructuredObjectRenderer: ({ value }: { value: Record<string, unknown> | null }) => (
     <pre>{JSON.stringify(value)}</pre>
   ),
@@ -599,7 +599,7 @@ describe("selection toolbar requests", () => {
     })
   })
 
-  it("does not rerun custom feature requests on passive config refresh, but reruns when request values change", async () => {
+  it("does not rerun custom action requests on passive config refresh, but reruns when request values change", async () => {
     streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "done" }))
 
     const paragraph = document.createElement("p")
@@ -610,14 +610,14 @@ describe("selection toolbar requests", () => {
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     store.set(selectionContentAtom, "Selected text")
     store.set(selectionRangeAtom, createRangeFor(paragraph))
-    renderWithProviders(<SelectionToolbarCustomFeatureButtons />, store)
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const featureName = DEFAULT_CONFIG.selectionToolbar.customFeatures[0]?.name
-    if (!featureName) {
-      throw new Error("Default custom feature is missing")
+    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
+    if (!actionName) {
+      throw new Error("Default custom action is missing")
     }
 
-    fireEvent.click(screen.getByRole("button", { name: featureName }))
+    fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     await waitFor(() => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
@@ -634,13 +634,13 @@ describe("selection toolbar requests", () => {
     expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
 
     const updatedConfig = cloneConfig(store.get(configAtom))
-    const currentProviderId = updatedConfig.selectionToolbar.customFeatures[0]?.providerId ?? ""
+    const currentProviderId = updatedConfig.selectionToolbar.customActions[0]?.providerId ?? ""
     const nextProviderId = findAlternateLLMProviderId(updatedConfig, currentProviderId)
     if (!nextProviderId) {
-      throw new Error("No alternate LLM provider available for custom feature test")
+      throw new Error("No alternate LLM provider available for custom action test")
     }
-    updatedConfig.selectionToolbar.customFeatures[0] = {
-      ...updatedConfig.selectionToolbar.customFeatures[0]!,
+    updatedConfig.selectionToolbar.customActions[0] = {
+      ...updatedConfig.selectionToolbar.customActions[0]!,
       providerId: nextProviderId,
     }
 
@@ -653,7 +653,7 @@ describe("selection toolbar requests", () => {
     })
   })
 
-  it("reruns custom feature requests from the footer and aborts the previous run", async () => {
+  it("reruns custom action requests from the footer and aborts the previous run", async () => {
     const firstRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
     const secondRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
     const signals: AbortSignal[] = []
@@ -679,14 +679,14 @@ describe("selection toolbar requests", () => {
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     store.set(selectionContentAtom, "Selected text")
     store.set(selectionRangeAtom, createRangeFor(paragraph))
-    renderWithProviders(<SelectionToolbarCustomFeatureButtons />, store)
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
 
-    const featureName = DEFAULT_CONFIG.selectionToolbar.customFeatures[0]?.name
-    if (!featureName) {
-      throw new Error("Default custom feature is missing")
+    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
+    if (!actionName) {
+      throw new Error("Default custom action is missing")
     }
 
-    fireEvent.click(screen.getByRole("button", { name: featureName }))
+    fireEvent.click(screen.getByRole("button", { name: actionName }))
 
     await waitFor(() => {
       expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)

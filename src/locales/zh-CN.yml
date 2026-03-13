@@ -180,7 +180,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
-      customFeatures: 自定义 AI 功能
+      customActions: 自定义 AI 指令
       features:
         translate: 网页翻译
         selectionToolbar_translate: 划词翻译
@@ -290,13 +290,13 @@ options:
         vocabularyInsight:
           title: 词汇解析
           description: 配置选择工具栏词汇/短语解析功能使用的提供商与模型
-      customFeatures:
-        title: 自定义 AI 功能
+      customActions:
+        title: 自定义 AI 指令
         description: 为划词添加你自己的结构化 AI 操作
-        add: 添加 AI 功能
-        edit: 编辑 AI 功能
-        empty: 暂无自定义 AI 功能
-        noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 功能
+        add: 添加 AI 指令
+        edit: 编辑 AI 指令
+        empty: 暂无自定义 AI 指令
+        noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 指令
         table:
           name: 名称
           provider: 提供商
@@ -338,13 +338,13 @@ options:
             title: 网页标题
           delete: 删除
           deleteDialog:
-            title: 删除自定义功能？
+            title: 删除自定义 AI 指令？
             description: 此操作无法撤销。
             confirm: 删除
             cancel: 取消
         templates:
           dialogTitle: 选择模板
-          dialogDescription: 选择模板快速创建新的 AI 功能，或从空白开始。
+          dialogDescription: 选择模板快速创建新的 AI 指令，或从空白开始。
           dictionary:
             name: 词典
             description: 查词释义，包含音标、词性和语境翻译
@@ -452,10 +452,10 @@ options:
             fieldImprovedVersionDescription: 基于原文语言给出的选中文本修正与改进版本。
           blank:
             name: 空白
-            description: 从空白模板开始创建
+            description: 从空白模板开始创建指令
         errors:
           nameRequired: 名称不能为空
-          duplicateName: '重复的功能名称 "$1"'
+          duplicateName: '重复的指令名称 "$1"'
           invalidIcon: Iconify 图标字符串格式无效
           providerRequired: 请选择一个已启用的 LLM 提供商
           outputSchemaRequired: 至少需要一个输出字段

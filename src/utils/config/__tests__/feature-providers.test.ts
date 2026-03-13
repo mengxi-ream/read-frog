@@ -4,7 +4,7 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import {
   computeProviderFallbacksAfterDeletion,
-  computeSelectionToolbarCustomFeatureFallbacksAfterDeletion,
+  computeSelectionToolbarCustomActionFallbacksAfterDeletion,
   findFeatureMissingProvider,
 } from "../helpers"
 
@@ -167,16 +167,16 @@ describe("feature providers", () => {
     })
   })
 
-  describe("computeSelectionToolbarCustomFeatureFallbacksAfterDeletion", () => {
-    it("reassigns affected custom features to the first enabled llm provider", () => {
+  describe("computeSelectionToolbarCustomActionFallbacksAfterDeletion", () => {
+    it("reassigns affected custom actions to the first enabled llm provider", () => {
       const config = {
         ...DEFAULT_CONFIG,
         selectionToolbar: {
           ...DEFAULT_CONFIG.selectionToolbar,
-          customFeatures: [
+          customActions: [
             {
-              id: "feature-a",
-              name: "Feature A",
+              id: "action-a",
+              name: "Action A",
               enabled: true,
               icon: "tabler:sparkles",
               providerId: "deleted-provider",
@@ -203,7 +203,7 @@ describe("feature providers", () => {
         getProviderById("google-default"),
       ]
 
-      const result = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+      const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
         "deleted-provider",
         config,
         remainingProviders,
@@ -211,7 +211,7 @@ describe("feature providers", () => {
 
       expect(result).toEqual([
         expect.objectContaining({
-          id: "feature-a",
+          id: "action-a",
           providerId: "google-default",
         }),
       ])
@@ -222,10 +222,10 @@ describe("feature providers", () => {
         ...DEFAULT_CONFIG,
         selectionToolbar: {
           ...DEFAULT_CONFIG.selectionToolbar,
-          customFeatures: [
+          customActions: [
             {
-              id: "feature-a",
-              name: "Feature A",
+              id: "action-a",
+              name: "Action A",
               enabled: true,
               icon: "tabler:sparkles",
               providerId: "deleted-provider",
@@ -251,7 +251,7 @@ describe("feature providers", () => {
         },
       ]
 
-      const result = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+      const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
         "deleted-provider",
         config,
         remainingProviders,

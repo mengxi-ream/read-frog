@@ -1,4 +1,4 @@
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
@@ -10,7 +10,7 @@ import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { withForm } from "./form"
 
 export const ProviderField = withForm({
-  ...{ defaultValues: {} as SelectionToolbarCustomFeature },
+  ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
     const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
@@ -29,7 +29,7 @@ export const ProviderField = withForm({
         validators={{
           onChange: ({ value }) => {
             if (!llmProviderIds.includes(value)) {
-              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.providerRequired")
+              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.providerRequired")
             }
             return undefined
           },
@@ -38,7 +38,7 @@ export const ProviderField = withForm({
         {field => (
           <Field>
             <FieldLabel nativeLabel={false} render={<div />}>
-              {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.provider")}
+              {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.provider")}
             </FieldLabel>
             <ProviderSelector
               providers={llmProviders}
@@ -47,7 +47,7 @@ export const ProviderField = withForm({
                 field.handleChange(id)
                 void form.handleSubmit()
               }}
-              placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.selectProvider")}
+              placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider")}
             />
             {field.state.meta.errors.length > 0 && (
               <span className="text-sm font-normal text-destructive">

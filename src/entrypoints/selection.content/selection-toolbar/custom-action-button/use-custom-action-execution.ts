@@ -1,18 +1,18 @@
 import type { RefObject } from "react"
-import type { SelectionToolbarCustomFeatureRequestSlice } from "../atoms"
+import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig } from "@/types/config/provider"
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { useCallback, useEffect, useState } from "react"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
-import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "../custom-feature-prompt"
+import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
 
-export interface CustomFeatureExecutionContext {
-  feature: SelectionToolbarCustomFeature
+export interface CustomActionExecutionContext {
+  action: SelectionToolbarCustomAction
   providerConfig: LLMProviderConfig
   promptTokens: {
     selection: string
@@ -22,17 +22,17 @@ export interface CustomFeatureExecutionContext {
   }
 }
 
-interface CustomFeatureExecutionPlan {
+interface CustomActionExecutionPlan {
   errorMessage: string | null
-  executionContext: CustomFeatureExecutionContext | null
+  executionContext: CustomActionExecutionContext | null
 }
 
-function getCustomFeatureErrorMessage(error: unknown) {
+function getCustomActionErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message
   }
 
-  return "Custom feature request failed"
+  return "Custom action request failed"
 }
 
 function scrollSelectionPopoverBodyToBottom(ref: RefObject<HTMLDivElement | null>) {
@@ -43,16 +43,16 @@ function scrollSelectionPopoverBodyToBottom(ref: RefObject<HTMLDivElement | null
   })
 }
 
-export function buildCustomFeatureExecutionPlan(
-  customFeatureRequest: SelectionToolbarCustomFeatureRequestSlice,
+export function buildCustomActionExecutionPlan(
+  customActionRequest: SelectionToolbarCustomActionRequestSlice,
   cleanSelection: string,
   paragraphText: string,
-): CustomFeatureExecutionPlan {
-  const feature = customFeatureRequest.feature
+): CustomActionExecutionPlan {
+  const action = customActionRequest.action
 
-  if (!feature) {
+  if (!action) {
     return {
-      errorMessage: "Selected feature is unavailable",
+      errorMessage: "Selected action is unavailable",
       executionContext: null,
     }
   }
@@ -64,10 +64,10 @@ export function buildCustomFeatureExecutionPlan(
     }
   }
 
-  const providerConfig = customFeatureRequest.providerConfig
+  const providerConfig = customActionRequest.providerConfig
   if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
     return {
-      errorMessage: "Selected provider is unavailable for this feature",
+      errorMessage: "Selected provider is unavailable for this action",
       executionContext: null,
     }
   }
@@ -82,19 +82,19 @@ export function buildCustomFeatureExecutionPlan(
   return {
     errorMessage: null,
     executionContext: {
-      feature,
+      action,
       providerConfig,
       promptTokens: {
         selection: cleanSelection,
         context: paragraphText,
-        targetLang: LANG_CODE_TO_EN_NAME[customFeatureRequest.language.targetCode],
+        targetLang: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
         title: document.title,
       },
     },
   }
 }
 
-export function useCustomFeatureExecution({
+export function useCustomActionExecution({
   bodyRef,
   executionContext,
   open,
@@ -102,7 +102,7 @@ export function useCustomFeatureExecution({
   rerunNonce,
 }: {
   bodyRef: RefObject<HTMLDivElement | null>
-  executionContext: CustomFeatureExecutionContext | null
+  executionContext: CustomActionExecutionContext | null
   open: boolean
   popoverSessionKey: number
   rerunNonce: number
@@ -126,15 +126,15 @@ export function useCustomFeatureExecution({
 
     let isCancelled = false
     const abortController = new AbortController()
-    const { feature, providerConfig, promptTokens } = executionContext
+    const { action, providerConfig, promptTokens } = executionContext
 
     const run = async () => {
-      const systemPrompt = buildSelectionToolbarCustomFeatureSystemPrompt(
-        feature.systemPrompt,
+      const systemPrompt = buildSelectionToolbarCustomActionSystemPrompt(
+        action.systemPrompt,
         promptTokens,
-        feature.outputSchema,
+        action.outputSchema,
       )
-      const prompt = replaceSelectionToolbarCustomFeaturePromptTokens(feature.prompt, promptTokens)
+      const prompt = replaceSelectionToolbarCustomActionPromptTokens(action.prompt, promptTokens)
       const modelName = resolveModelId(providerConfig.model) ?? ""
       const providerOptions = getProviderOptionsWithOverride(
         modelName,
@@ -156,7 +156,7 @@ export function useCustomFeatureExecution({
             providerId: providerConfig.id,
             system: systemPrompt,
             prompt,
-            outputSchema: feature.outputSchema.map(({ name, type }) => ({ name, type })),
+            outputSchema: action.outputSchema.map(({ name, type }) => ({ name, type })),
             providerOptions,
             temperature: providerConfig.temperature,
           },
@@ -191,7 +191,7 @@ export function useCustomFeatureExecution({
         }
 
         setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
-        setErrorMessage(getCustomFeatureErrorMessage(error))
+        setErrorMessage(getCustomActionErrorMessage(error))
       }
       finally {
         if (!isCancelled) {

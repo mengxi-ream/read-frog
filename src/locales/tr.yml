@@ -179,7 +179,7 @@ options:
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
-      customFeatures: Özel AI Özellikleri
+      customActions: Özel AI Eylemleri
       features:
         translate: Sayfa Çevirisi
         selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
@@ -289,13 +289,13 @@ options:
         vocabularyInsight:
           title: Kelime Analizi
           description: Seçim araç çubuğunda kelime/ifade analizi için sağlayıcı ve model yapılandırın
-      customFeatures:
-        title: Özel AI Özellikleri
+      customActions:
+        title: Özel AI Eylemleri
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
-        add: AI Özelliği Ekle
-        edit: AI Özelliğini Düzenle
-        empty: Henüz özel AI özelliği yok
-        noEnabledLlmProvider: Özel AI özellikleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
+        add: AI Eylemi Ekle
+        edit: AI Eylemini Düzenle
+        empty: Henüz özel AI eylemi yok
+        noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
         table:
           name: Ad
           provider: Sağlayıcı
@@ -337,13 +337,13 @@ options:
             title: Web sayfası başlığı
           delete: Sil
           deleteDialog:
-            title: Özel özelliği sil?
+            title: Özel eylem silinsin mi?
             description: Bu işlem geri alınamaz.
             confirm: Sil
             cancel: İptal
         errors:
           nameRequired: Ad gerekli
-          duplicateName: 'Yinelenen özellik adı "$1"'
+          duplicateName: 'Yinelenen eylem adı "$1"'
           invalidIcon: Geçersiz Iconify simge metni
           providerRequired: Etkin bir LLM sağlayıcısı seçin
           outputSchemaRequired: En az bir çıktı alanı ekleyin

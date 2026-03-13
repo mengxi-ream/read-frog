@@ -1,25 +1,25 @@
 import type { ThinkingSnapshot } from "@/types/background-stream"
-import type { SelectionToolbarCustomFeatureOutputField } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
 import { SelectionSourceContent } from "../../components/selection-source-content"
 import { StructuredObjectRenderer } from "./structured-object-renderer"
 
-interface CustomFeatureContentProps {
+interface CustomActionContentProps {
   errorMessage: string | null
   isRunning: boolean
-  outputSchema: SelectionToolbarCustomFeatureOutputField[]
+  outputSchema: SelectionToolbarCustomActionOutputField[]
   selectionContent: string | null | undefined
   value: Record<string, unknown> | null
   thinking: ThinkingSnapshot | null
 }
 
-export function CustomFeatureContent({
+export function CustomActionContent({
   errorMessage,
   isRunning,
   outputSchema,
   selectionContent,
   value,
   thinking,
-}: CustomFeatureContentProps) {
+}: CustomActionContentProps) {
   return (
     <div className="p-4">
       <SelectionSourceContent

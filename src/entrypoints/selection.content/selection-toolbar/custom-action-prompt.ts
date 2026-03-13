@@ -1,25 +1,25 @@
-import type { SelectionToolbarCustomFeatureOutputField } from "@/types/config/selection-toolbar"
-import { getSelectionToolbarCustomFeatureTokenCellText } from "@/utils/constants/custom-feature"
+import type { SelectionToolbarCustomActionOutputField } from "@/types/config/selection-toolbar"
+import { getSelectionToolbarCustomActionTokenCellText } from "@/utils/constants/custom-action"
 
-export interface SelectionToolbarCustomFeaturePromptTokens {
+export interface SelectionToolbarCustomActionPromptTokens {
   selection: string
   context: string
   targetLang: string
   title: string
 }
 
-export function replaceSelectionToolbarCustomFeaturePromptTokens(
+export function replaceSelectionToolbarCustomActionPromptTokens(
   prompt: string,
-  tokens: SelectionToolbarCustomFeaturePromptTokens,
+  tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
   return prompt
-    .replaceAll(getSelectionToolbarCustomFeatureTokenCellText("selection"), tokens.selection)
-    .replaceAll(getSelectionToolbarCustomFeatureTokenCellText("context"), tokens.context)
-    .replaceAll(getSelectionToolbarCustomFeatureTokenCellText("targetLang"), tokens.targetLang)
-    .replaceAll(getSelectionToolbarCustomFeatureTokenCellText("title"), tokens.title)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("selection"), tokens.selection)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("context"), tokens.context)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("targetLang"), tokens.targetLang)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("title"), tokens.title)
 }
 
-type StructuredOutputField = Pick<SelectionToolbarCustomFeatureOutputField, "name" | "type" | "description">
+type StructuredOutputField = Pick<SelectionToolbarCustomActionOutputField, "name" | "type" | "description">
 
 function formatYamlMultiline(value: string) {
   return value
@@ -30,9 +30,9 @@ function formatYamlMultiline(value: string) {
 
 function formatStructuredOutputField(
   field: StructuredOutputField,
-  tokens: SelectionToolbarCustomFeaturePromptTokens,
+  tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
-  const resolvedDescription = replaceSelectionToolbarCustomFeaturePromptTokens(field.description, tokens).trim()
+  const resolvedDescription = replaceSelectionToolbarCustomActionPromptTokens(field.description, tokens).trim()
   const descriptionBlock = resolvedDescription
     ? `  description: |-\n${formatYamlMultiline(resolvedDescription)}`
     : "  description: \"\""
@@ -47,7 +47,7 @@ function formatStructuredOutputField(
 
 function buildStructuredOutputContract(
   outputSchema: StructuredOutputField[],
-  tokens: SelectionToolbarCustomFeaturePromptTokens,
+  tokens: SelectionToolbarCustomActionPromptTokens,
 ) {
   const fieldsAndTypes = outputSchema
     .map(field => formatStructuredOutputField(field, tokens))
@@ -70,12 +70,12 @@ ${fieldsAndTypes}
 `
 }
 
-export function buildSelectionToolbarCustomFeatureSystemPrompt(
+export function buildSelectionToolbarCustomActionSystemPrompt(
   prompt: string,
-  tokens: SelectionToolbarCustomFeaturePromptTokens,
+  tokens: SelectionToolbarCustomActionPromptTokens,
   outputSchema: StructuredOutputField[],
 ) {
-  const resolvedPrompt = replaceSelectionToolbarCustomFeaturePromptTokens(prompt, tokens).trim()
+  const resolvedPrompt = replaceSelectionToolbarCustomActionPromptTokens(prompt, tokens).trim()
   const contract = buildStructuredOutputContract(outputSchema, tokens)
 
   return resolvedPrompt

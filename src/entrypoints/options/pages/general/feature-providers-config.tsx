@@ -54,7 +54,7 @@ function FeatureProviderField({ featureKey, excludeProviderTypes }: {
   )
 }
 
-function CustomFeatureProviderFields() {
+function CustomActionProviderFields() {
   const config = useAtomValue(configAtom)
   const setConfig = useSetAtom(writeConfigAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
@@ -64,31 +64,31 @@ function CustomFeatureProviderFields() {
     [providersConfig],
   )
 
-  const customFeatures = config.selectionToolbar.customFeatures
+  const customActions = config.selectionToolbar.customActions
 
-  if (customFeatures.length === 0) {
+  if (customActions.length === 0) {
     return null
   }
 
   return (
     <>
       <p className="text-sm font-medium text-muted-foreground">
-        {i18n.t("options.general.featureProviders.customFeatures")}
+        {i18n.t("options.general.featureProviders.customActions")}
       </p>
-      {customFeatures.map((feature) => {
-        const currentProviderConfig = getProviderConfigById(providersConfig, feature.providerId) ?? null
+      {customActions.map((action) => {
+        const currentProviderConfig = getProviderConfigById(providersConfig, action.providerId) ?? null
         return (
-          <Field key={feature.id}>
+          <Field key={action.id}>
             <FieldLabel nativeLabel={false} render={<div />}>
-              {feature.name}
+              {action.name}
               {needsApiKeyWarning(currentProviderConfig) && <SetApiKeyWarning />}
             </FieldLabel>
             <ProviderSelector
               providers={llmProviders}
-              value={feature.providerId}
+              value={action.providerId}
               onChange={(id) => {
-                const updatedCustomFeatures = config.selectionToolbar.customFeatures.map(item =>
-                  item.id === feature.id
+                const updatedCustomActions = config.selectionToolbar.customActions.map(item =>
+                  item.id === action.id
                     ? { ...item, providerId: id }
                     : item,
                 )
@@ -96,12 +96,12 @@ function CustomFeatureProviderFields() {
                 void setConfig({
                   selectionToolbar: {
                     ...config.selectionToolbar,
-                    customFeatures: updatedCustomFeatures,
+                    customActions: updatedCustomActions,
                   },
                 })
               }}
               className="w-full"
-              placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.selectProvider")}
+              placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider")}
             />
           </Field>
         )
@@ -128,7 +128,7 @@ export default function FeatureProvidersConfig() {
         <FeatureProviderField featureKey="selectionToolbar.translate" />
         <FeatureProviderField featureKey="selectionToolbar.vocabularyInsight" />
         <FeatureProviderField featureKey="inputTranslation" />
-        <CustomFeatureProviderFields />
+        <CustomActionProviderFields />
       </div>
     </ConfigCard>
   )

@@ -179,7 +179,7 @@ options:
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
-      customFeatures: Пользовательские AI-функции
+      customActions: Пользовательские AI-действия
       features:
         translate: Перевод страницы
         selectionToolbar_translate: Перевод выделения
@@ -289,13 +289,13 @@ options:
         vocabularyInsight:
           title: Анализ слов
           description: Настройка провайдера и модели для анализа слов/фраз в панели выделения
-      customFeatures:
-        title: Пользовательские AI-функции
+      customActions:
+        title: Пользовательские AI-действия
         description: Добавляйте собственные структурированные AI-действия для выделенного текста
-        add: Добавить AI-функцию
-        edit: Редактировать AI-функцию
-        empty: Пока нет пользовательских AI-функций
-        noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-функций
+        add: Добавить AI-действие
+        edit: Редактировать AI-действие
+        empty: Пока нет пользовательских AI-действий
+        noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-действий
         table:
           name: Название
           provider: Провайдер
@@ -337,13 +337,13 @@ options:
             title: Заголовок веб-страницы
           delete: Удалить
           deleteDialog:
-            title: Удалить пользовательскую функцию?
+            title: Удалить пользовательское действие?
             description: Это действие нельзя отменить.
             confirm: Удалить
             cancel: Отмена
         errors:
           nameRequired: Название обязательно
-          duplicateName: 'Дублирующееся имя функции "$1"'
+          duplicateName: 'Дублирующееся имя действия "$1"'
           invalidIcon: Неверная строка иконки Iconify
           providerRequired: Выберите включённого LLM-провайдера
           outputSchemaRequired: Добавьте хотя бы одно поле вывода

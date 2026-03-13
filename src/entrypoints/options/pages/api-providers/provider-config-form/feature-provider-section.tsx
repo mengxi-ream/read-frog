@@ -24,8 +24,8 @@ export const FeatureProviderSection = withForm({
     const compatibleFeatures = FEATURE_KEYS
       .filter(featureKey => FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType))
 
-    const customFeatures = isLLMProvider(providerType)
-      ? config.selectionToolbar.customFeatures
+    const customActions = isLLMProvider(providerType)
+      ? config.selectionToolbar.customActions
       : []
 
     const getEnableCurrentProviderPatch = () => {
@@ -39,7 +39,7 @@ export const FeatureProviderSection = withForm({
       )
     }
 
-    if (compatibleFeatures.length === 0 && customFeatures.length === 0)
+    if (compatibleFeatures.length === 0 && customActions.length === 0)
       return null
 
     return (
@@ -85,31 +85,31 @@ export const FeatureProviderSection = withForm({
                 </div>
               )
             })}
-            {customFeatures.map((feature) => {
-              const isAssigned = feature.providerId === providerId
+            {customActions.map((action) => {
+              const isAssigned = action.providerId === providerId
               return (
-                <div key={feature.id} className="flex items-center gap-2">
+                <div key={action.id} className="flex items-center gap-2">
                   <Switch
                     checked={isAssigned}
                     disabled={isAssigned}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        const updatedCustomFeatures = config.selectionToolbar.customFeatures.map(f =>
-                          f.id === feature.id ? { ...f, providerId } : f,
+                        const updatedCustomActions = config.selectionToolbar.customActions.map(currentAction =>
+                          currentAction.id === action.id ? { ...currentAction, providerId } : currentAction,
                         )
                         const providersConfigPatch = getEnableCurrentProviderPatch()
                         if (providersConfigPatch) {
                           void setConfig({
                             providersConfig: providersConfigPatch,
-                            selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures },
+                            selectionToolbar: { ...config.selectionToolbar, customActions: updatedCustomActions },
                           })
                           return
                         }
-                        void setConfig({ selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures } })
+                        void setConfig({ selectionToolbar: { ...config.selectionToolbar, customActions: updatedCustomActions } })
                       }
                     }}
                   />
-                  <span className="text-sm">{feature.name}</span>
+                  <span className="text-sm">{action.name}</span>
                 </div>
               )
             })}

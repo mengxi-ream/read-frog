@@ -1,17 +1,17 @@
 import type {
-  SelectionToolbarCustomFeatureOutputField,
-  SelectionToolbarCustomFeatureOutputType,
+  SelectionToolbarCustomActionOutputField,
+  SelectionToolbarCustomActionOutputType,
 } from "@/types/config/selection-toolbar"
 import { getUniqueName } from "@/utils/name"
 
 export const ICON_PATTERN = /^[^:\s]+:[^:\s]+$/
-export const DEFAULT_FEATURE_NAME = "Custom AI Feature"
+export const DEFAULT_ACTION_NAME = "Custom AI Action"
 export function createOutputSchemaField(
   name: string,
-  type: SelectionToolbarCustomFeatureOutputType = "string",
+  type: SelectionToolbarCustomActionOutputType = "string",
   description = "",
   id?: string,
-): SelectionToolbarCustomFeatureOutputField {
+): SelectionToolbarCustomActionOutputField {
   return {
     id: id ?? crypto.randomUUID(),
     name,
@@ -20,7 +20,7 @@ export function createOutputSchemaField(
   }
 }
 
-export function getNextOutputFieldName(fields: SelectionToolbarCustomFeatureOutputField[], prefix: string): string {
+export function getNextOutputFieldName(fields: SelectionToolbarCustomActionOutputField[], prefix: string): string {
   const existingNames = new Set(fields.map(f => f.name))
   existingNames.add(prefix)
   return getUniqueName(prefix, existingNames, "")
@@ -36,7 +36,7 @@ export function isOutputSchemaFieldNameBlank(name: string) {
 
 export function isDuplicateOutputSchemaFieldName(
   name: string,
-  fields: SelectionToolbarCustomFeatureOutputField[],
+  fields: SelectionToolbarCustomActionOutputField[],
   currentFieldId?: string,
 ) {
   const normalizedName = normalizeOutputSchemaFieldName(name)
@@ -47,7 +47,7 @@ export function isDuplicateOutputSchemaFieldName(
 
 export function getOutputSchemaFieldNameError(
   name: string,
-  fields: SelectionToolbarCustomFeatureOutputField[],
+  fields: SelectionToolbarCustomActionOutputField[],
   currentFieldId?: string,
 ): "blank" | "duplicate" | undefined {
   if (isOutputSchemaFieldNameBlank(name)) {
@@ -61,10 +61,10 @@ export function getOutputSchemaFieldNameError(
   return undefined
 }
 
-export const SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS = ["selection", "context", "targetLang", "title"] as const
+export const SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS = ["selection", "context", "targetLang", "title"] as const
 
-export type SelectionToolbarCustomFeatureToken = (typeof SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS)[number]
+export type SelectionToolbarCustomActionToken = (typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]
 
-export function getSelectionToolbarCustomFeatureTokenCellText(token: SelectionToolbarCustomFeatureToken) {
+export function getSelectionToolbarCustomActionTokenCellText(token: SelectionToolbarCustomActionToken) {
   return `{{${token}}}`
 }

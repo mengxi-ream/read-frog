@@ -1,22 +1,22 @@
-import type { CustomFeatureTemplate } from "@/utils/constants/custom-feature-templates"
+import type { CustomActionTemplate } from "@/utils/constants/custom-action-templates"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
-import { CUSTOM_FEATURE_TEMPLATES } from "@/utils/constants/custom-feature-templates"
+import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
 
-export function AddFeatureDialog({ onSelect }: { onSelect: (template: CustomFeatureTemplate) => void }) {
+export function AddActionDialog({ onSelect }: { onSelect: (template: CustomActionTemplate) => void }) {
   return (
     <DialogContent className="sm:max-w-md">
       <DialogHeader>
         <DialogTitle>
-          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.templates.dialogTitle")}
+          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.templates.dialogTitle")}
         </DialogTitle>
         <DialogDescription>
-          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.templates.dialogDescription")}
+          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.templates.dialogDescription")}
         </DialogDescription>
       </DialogHeader>
       <div className="grid gap-2">
-        {CUSTOM_FEATURE_TEMPLATES.map(template => (
+        {CUSTOM_ACTION_TEMPLATES.map(template => (
           <button
             key={template.id}
             type="button"

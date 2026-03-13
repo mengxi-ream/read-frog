@@ -1,14 +1,14 @@
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useStore } from "@tanstack/react-form"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
-import { ICON_PATTERN } from "@/utils/constants/custom-feature"
+import { ICON_PATTERN } from "@/utils/constants/custom-action"
 import { withForm } from "./form"
 
 export const IconField = withForm({
-  ...{ defaultValues: {} as SelectionToolbarCustomFeature },
+  ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
     const iconValue = useStore(form.store, state => state.values.icon)
 
@@ -18,7 +18,7 @@ export const IconField = withForm({
         validators={{
           onChange: ({ value }) => {
             if (!ICON_PATTERN.test(value.trim())) {
-              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.invalidIcon")
+              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.invalidIcon")
             }
             return undefined
           },

@@ -1,15 +1,15 @@
 import { z } from "zod"
 
-export const selectionToolbarCustomFeatureOutputTypeSchema = z.enum(["string", "number"])
+export const selectionToolbarCustomActionOutputTypeSchema = z.enum(["string", "number"])
 
-export const selectionToolbarCustomFeatureOutputFieldSchema = z.object({
+export const selectionToolbarCustomActionOutputFieldSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().trim().min(1),
-  type: selectionToolbarCustomFeatureOutputTypeSchema,
+  type: selectionToolbarCustomActionOutputTypeSchema,
   description: z.string(),
 })
 
-export const selectionToolbarCustomFeatureSchema = z.object({
+export const selectionToolbarCustomActionSchema = z.object({
   id: z.string().nonempty(),
   name: z.string().nonempty(),
   enabled: z.boolean().optional(),
@@ -17,11 +17,11 @@ export const selectionToolbarCustomFeatureSchema = z.object({
   providerId: z.string().nonempty(),
   systemPrompt: z.string(),
   prompt: z.string(),
-  outputSchema: z.array(selectionToolbarCustomFeatureOutputFieldSchema).min(1),
-}).superRefine((feature, ctx) => {
+  outputSchema: z.array(selectionToolbarCustomActionOutputFieldSchema).min(1),
+}).superRefine((action, ctx) => {
   const nameSet = new Set<string>()
 
-  feature.outputSchema.forEach((field, index) => {
+  action.outputSchema.forEach((field, index) => {
     if (nameSet.has(field.name)) {
       ctx.addIssue({
         code: "custom",
@@ -34,34 +34,34 @@ export const selectionToolbarCustomFeatureSchema = z.object({
   })
 })
 
-export const selectionToolbarCustomFeaturesSchema = z.array(selectionToolbarCustomFeatureSchema).superRefine(
-  (features, ctx) => {
+export const selectionToolbarCustomActionsSchema = z.array(selectionToolbarCustomActionSchema).superRefine(
+  (actions, ctx) => {
     const idSet = new Set<string>()
-    features.forEach((feature, index) => {
-      if (idSet.has(feature.id)) {
+    actions.forEach((action, index) => {
+      if (idSet.has(action.id)) {
         ctx.addIssue({
           code: "custom",
-          message: `Duplicate feature id "${feature.id}"`,
+          message: `Duplicate action id "${action.id}"`,
           path: [index, "id"],
         })
       }
-      idSet.add(feature.id)
+      idSet.add(action.id)
     })
 
     const nameSet = new Set<string>()
-    features.forEach((feature, index) => {
-      if (nameSet.has(feature.name)) {
+    actions.forEach((action, index) => {
+      if (nameSet.has(action.name)) {
         ctx.addIssue({
           code: "custom",
-          message: `Duplicate feature name "${feature.name}"`,
+          message: `Duplicate action name "${action.name}"`,
           path: [index, "name"],
         })
       }
-      nameSet.add(feature.name)
+      nameSet.add(action.name)
     })
   },
 )
 
-export type SelectionToolbarCustomFeatureOutputType = z.infer<typeof selectionToolbarCustomFeatureOutputTypeSchema>
-export type SelectionToolbarCustomFeatureOutputField = z.infer<typeof selectionToolbarCustomFeatureOutputFieldSchema>
-export type SelectionToolbarCustomFeature = z.infer<typeof selectionToolbarCustomFeatureSchema>
+export type SelectionToolbarCustomActionOutputType = z.infer<typeof selectionToolbarCustomActionOutputTypeSchema>
+export type SelectionToolbarCustomActionOutputField = z.infer<typeof selectionToolbarCustomActionOutputFieldSchema>
+export type SelectionToolbarCustomAction = z.infer<typeof selectionToolbarCustomActionSchema>

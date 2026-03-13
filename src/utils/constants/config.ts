@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
-import { CUSTOM_FEATURE_TEMPLATES } from "./custom-feature-templates"
+import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
 import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
@@ -17,20 +17,20 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 export const THEME_STORAGE_KEY = "theme"
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 59
+export const CONFIG_SCHEMA_VERSION = 60
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
-function createDefaultDictionaryFeature(): SelectionToolbarCustomFeature | null {
-  const template = CUSTOM_FEATURE_TEMPLATES.find(t => t.id === "dictionary")
+function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
+  const template = CUSTOM_ACTION_TEMPLATES.find(t => t.id === "dictionary")
   if (!template)
     return null
 
-  const feature = template.createFeature("openai-default")
+  const action = template.createAction("openai-default")
   return {
-    ...feature,
+    ...action,
     id: "default-dictionary",
-    outputSchema: feature.outputSchema.map(field => ({
+    outputSchema: action.outputSchema.map(field => ({
       ...field,
       id: field.id.startsWith("dictionary-")
         ? `default-${field.id}`
@@ -39,7 +39,7 @@ function createDefaultDictionaryFeature(): SelectionToolbarCustomFeature | null 
   }
 }
 
-const defaultDictionaryFeature = createDefaultDictionaryFeature()
+const defaultDictionaryAction = createDefaultDictionaryAction()
 
 export const DEFAULT_CONFIG: Config = {
   language: {
@@ -105,7 +105,7 @@ export const DEFAULT_CONFIG: Config = {
         providerId: "openai-default",
       },
     },
-    customFeatures: defaultDictionaryFeature ? [defaultDictionaryFeature] : [],
+    customActions: defaultDictionaryAction ? [defaultDictionaryAction] : [],
   },
   sideContent: {
     width: DEFAULT_SIDE_CONTENT_WIDTH,

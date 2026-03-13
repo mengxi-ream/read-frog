@@ -1,24 +1,24 @@
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
-import { createOutputSchemaField } from "./custom-feature"
+import { createOutputSchemaField } from "./custom-action"
 
-const T_PREFIX = "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.templates"
+const T_PREFIX = "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates"
 
-export interface CustomFeatureTemplate {
+export interface CustomActionTemplate {
   id: string
   nameKey: string
   descriptionKey: string
   icon: string
-  createFeature: (providerId: string) => SelectionToolbarCustomFeature
+  createAction: (providerId: string) => SelectionToolbarCustomAction
 }
 
-export const CUSTOM_FEATURE_TEMPLATES: CustomFeatureTemplate[] = [
+export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
   {
     id: "dictionary",
     nameKey: `${T_PREFIX}.dictionary.name`,
     descriptionKey: `${T_PREFIX}.dictionary.description`,
     icon: "tabler:book-2",
-    createFeature: (providerId: string): SelectionToolbarCustomFeature => ({
+    createAction: (providerId: string): SelectionToolbarCustomAction => ({
       id: crypto.randomUUID(),
       name: i18n.t(`${T_PREFIX}.dictionary.name`),
       enabled: true,
@@ -42,7 +42,7 @@ export const CUSTOM_FEATURE_TEMPLATES: CustomFeatureTemplate[] = [
     nameKey: `${T_PREFIX}.improveWriting.name`,
     descriptionKey: `${T_PREFIX}.improveWriting.description`,
     icon: "tabler:pencil-check",
-    createFeature: (providerId: string): SelectionToolbarCustomFeature => ({
+    createAction: (providerId: string): SelectionToolbarCustomAction => ({
       id: crypto.randomUUID(),
       name: i18n.t(`${T_PREFIX}.improveWriting.name`),
       enabled: true,
@@ -61,7 +61,7 @@ export const CUSTOM_FEATURE_TEMPLATES: CustomFeatureTemplate[] = [
     nameKey: `${T_PREFIX}.blank.name`,
     descriptionKey: `${T_PREFIX}.blank.description`,
     icon: "tabler:sparkles",
-    createFeature: (providerId: string): SelectionToolbarCustomFeature => ({
+    createAction: (providerId: string): SelectionToolbarCustomAction => ({
       id: crypto.randomUUID(),
       name: i18n.t(`${T_PREFIX}.blank.name`),
       enabled: true,
@@ -70,7 +70,7 @@ export const CUSTOM_FEATURE_TEMPLATES: CustomFeatureTemplate[] = [
       systemPrompt: "",
       prompt: "",
       outputSchema: [
-        createOutputSchemaField(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.defaultFieldName")),
+        createOutputSchemaField(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.defaultFieldName")),
       ],
     }),
   },

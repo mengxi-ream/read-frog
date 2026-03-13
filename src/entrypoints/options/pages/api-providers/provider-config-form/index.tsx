@@ -22,7 +22,7 @@ import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import {
   computeProviderFallbacksAfterDeletion,
-  computeSelectionToolbarCustomFeatureFallbacksAfterDeletion,
+  computeSelectionToolbarCustomActionFallbacksAfterDeletion,
   findFeatureMissingProvider,
 } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
@@ -87,27 +87,27 @@ export function ProviderConfigForm() {
       return
     }
 
-    const updatedCustomFeatures = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+    const updatedCustomActions = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
       providerConfig.id,
       config,
       updatedAllProviders,
     )
-    const hasAffectedCustomFeatures = config.selectionToolbar.customFeatures
-      .some(feature => feature.providerId === providerConfig.id)
+    const hasAffectedCustomActions = config.selectionToolbar.customActions
+      .some(action => action.providerId === providerConfig.id)
 
-    if (hasAffectedCustomFeatures && !updatedCustomFeatures) {
+    if (hasAffectedCustomActions && !updatedCustomActions) {
       toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider"))
       return
     }
 
     const fallbacks = computeProviderFallbacksAfterDeletion(providerConfig.id, config, updatedAllProviders)
     let patch = buildFeatureProviderPatch(fallbacks)
-    if (updatedCustomFeatures) {
+    if (updatedCustomActions) {
       patch = {
         ...patch,
         selectionToolbar: {
           ...(patch.selectionToolbar ?? {}),
-          customFeatures: updatedCustomFeatures,
+          customActions: updatedCustomActions,
         },
       } as Partial<Config>
     }

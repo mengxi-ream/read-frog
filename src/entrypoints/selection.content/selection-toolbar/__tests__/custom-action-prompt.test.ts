@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest"
-import { buildSelectionToolbarCustomFeatureSystemPrompt, replaceSelectionToolbarCustomFeaturePromptTokens } from "../custom-feature-prompt"
+import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
 
-describe("replaceSelectionToolbarCustomFeaturePromptTokens", () => {
+describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
   const baseTokens = {
     selection: "hello",
     context: "hello world paragraph",
@@ -10,7 +10,7 @@ describe("replaceSelectionToolbarCustomFeaturePromptTokens", () => {
   }
 
   it("replaces selection and context tokens", () => {
-    const result = replaceSelectionToolbarCustomFeaturePromptTokens(
+    const result = replaceSelectionToolbarCustomActionPromptTokens(
       "selection={{selection}}, context={{context}}",
       baseTokens,
     )
@@ -19,7 +19,7 @@ describe("replaceSelectionToolbarCustomFeaturePromptTokens", () => {
   })
 
   it("replaces targetLang and title tokens", () => {
-    const result = replaceSelectionToolbarCustomFeaturePromptTokens(
+    const result = replaceSelectionToolbarCustomActionPromptTokens(
       "Target language: {{targetLang}}, Page: {{title}}",
       baseTokens,
     )
@@ -28,7 +28,7 @@ describe("replaceSelectionToolbarCustomFeaturePromptTokens", () => {
   })
 
   it("leaves unrelated text unchanged", () => {
-    const result = replaceSelectionToolbarCustomFeaturePromptTokens(
+    const result = replaceSelectionToolbarCustomActionPromptTokens(
       "plain text",
       baseTokens,
     )
@@ -37,7 +37,7 @@ describe("replaceSelectionToolbarCustomFeaturePromptTokens", () => {
   })
 })
 
-describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
+describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
   const baseTokens = {
     selection: "hello",
     context: "hello world paragraph",
@@ -46,7 +46,7 @@ describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
   }
 
   it("appends structured output contract with resolved fields and defaults", () => {
-    const result = buildSelectionToolbarCustomFeatureSystemPrompt(
+    const result = buildSelectionToolbarCustomActionSystemPrompt(
       "system={{context}}",
       baseTokens,
       [
@@ -66,7 +66,7 @@ describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
   })
 
   it("includes description in contract when provided", () => {
-    const result = buildSelectionToolbarCustomFeatureSystemPrompt(
+    const result = buildSelectionToolbarCustomActionSystemPrompt(
       "system={{context}}",
       baseTokens,
       [
@@ -83,7 +83,7 @@ describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
   })
 
   it("resolves tokens in field description but keeps key names unchanged", () => {
-    const result = buildSelectionToolbarCustomFeatureSystemPrompt(
+    const result = buildSelectionToolbarCustomActionSystemPrompt(
       "system={{context}}",
       baseTokens,
       [
@@ -100,7 +100,7 @@ describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
   })
 
   it("preserves multiline field description in yaml block", () => {
-    const result = buildSelectionToolbarCustomFeatureSystemPrompt(
+    const result = buildSelectionToolbarCustomActionSystemPrompt(
       "system={{context}}",
       baseTokens,
       [
@@ -118,7 +118,7 @@ describe("buildSelectionToolbarCustomFeatureSystemPrompt", () => {
   })
 
   it("returns contract when prompt content is empty", () => {
-    const result = buildSelectionToolbarCustomFeatureSystemPrompt(
+    const result = buildSelectionToolbarCustomActionSystemPrompt(
       "   ",
       baseTokens,
       [{ name: "Definition", type: "string", description: "" }],

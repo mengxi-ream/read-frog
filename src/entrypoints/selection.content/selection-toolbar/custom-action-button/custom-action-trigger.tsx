@@ -1,4 +1,4 @@
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { Icon } from "@iconify/react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useMemo, useRef, useState } from "react"
@@ -13,20 +13,20 @@ import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
 import { getSelectionParagraphText } from "../../utils"
 import {
   isSelectionToolbarVisibleAtom,
-  selectionToolbarCustomFeatureRequestAtomFamily,
+  selectionToolbarCustomActionRequestAtomFamily,
 } from "../atoms"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
-import { CustomFeatureContent } from "./custom-feature-content"
-import { buildCustomFeatureExecutionPlan, useCustomFeatureExecution } from "./use-custom-feature-execution"
+import { CustomActionContent } from "./custom-action-content"
+import { buildCustomActionExecutionPlan, useCustomActionExecution } from "./use-custom-action-execution"
 
 function normalizeSelectedText(value: string | null) {
   return value?.replace(/\u200B/g, "").trim() ?? ""
 }
 
-export function SelectionToolbarCustomFeatureAction({ feature }: { feature: SelectionToolbarCustomFeature }) {
+export function SelectionToolbarCustomActionTrigger({ action }: { action: SelectionToolbarCustomAction }) {
   const [open, setOpen] = useState(false)
   const [rerunNonce, setRerunNonce] = useState(0)
-  const customFeatureRequest = useAtomValue(selectionToolbarCustomFeatureRequestAtomFamily(feature.id))
+  const customActionRequest = useAtomValue(selectionToolbarCustomActionRequestAtomFamily(action.id))
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const selectionToolbarConfig = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
@@ -40,7 +40,7 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
     clearSelectionSnapshot,
   } = useSelectionPopoverSnapshot()
 
-  const activeFeature = customFeatureRequest.feature
+  const activeAction = customActionRequest.action
   const cleanSelection = useMemo(
     () => normalizeSelectedText(selectionContentSnapshot),
     [selectionContentSnapshot],
@@ -59,8 +59,8 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
     [providersConfig],
   )
   const executionPlan = useMemo(
-    () => buildCustomFeatureExecutionPlan(customFeatureRequest, cleanSelection, paragraphText),
-    [cleanSelection, customFeatureRequest, paragraphText],
+    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, paragraphText),
+    [cleanSelection, customActionRequest, paragraphText],
   )
   const {
     isRunning,
@@ -68,7 +68,7 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
     errorMessage,
     resetSessionState,
     thinking,
-  } = useCustomFeatureExecution({
+  } = useCustomActionExecution({
     bodyRef,
     executionContext: executionPlan.executionContext,
     open,
@@ -81,8 +81,8 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
   const displayedThinking = executionPlan.executionContext ? thinking : null
 
   const handleProviderChange = useCallback((providerId: string) => {
-    const updatedCustomFeatures = selectionToolbarConfig.customFeatures.map(item =>
-      item.id === feature.id
+    const updatedCustomActions = selectionToolbarConfig.customActions.map(item =>
+      item.id === action.id
         ? { ...item, providerId }
         : item,
     )
@@ -90,10 +90,10 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
     void setConfig({
       selectionToolbar: {
         ...selectionToolbarConfig,
-        customFeatures: updatedCustomFeatures,
+        customActions: updatedCustomActions,
       },
     })
-  }, [feature.id, selectionToolbarConfig, setConfig])
+  }, [action.id, selectionToolbarConfig, setConfig])
 
   const handleRegenerate = useCallback(() => {
     setRerunNonce(prev => prev + 1)
@@ -115,22 +115,22 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
     }
   }, [captureSelectionSnapshot, clearSelectionSnapshot, resetSessionState, setIsSelectionToolbarVisible])
 
-  if (!activeFeature) {
+  if (!activeAction) {
     return null
   }
 
   return (
     <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
       <SelectionToolbarTooltip
-        content={activeFeature.name}
-        render={<SelectionPopover.Trigger aria-label={activeFeature.name} />}
+        content={activeAction.name}
+        render={<SelectionPopover.Trigger aria-label={activeAction.name} />}
       >
-        <Icon icon={activeFeature.icon} strokeWidth={0.8} className="size-4.5" />
+        <Icon icon={activeAction.icon} strokeWidth={0.8} className="size-4.5" />
       </SelectionToolbarTooltip>
 
       <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
         <SelectionPopover.Header className="border-b">
-          <SelectionToolbarTitleContent title={activeFeature.name} icon={activeFeature.icon} />
+          <SelectionToolbarTitleContent title={activeAction.name} icon={activeAction.icon} />
           <div className="flex items-center gap-1">
             <SelectionPopover.Pin />
             <SelectionPopover.Close />
@@ -138,10 +138,10 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
         </SelectionPopover.Header>
 
         <SelectionPopover.Body ref={bodyRef}>
-          <CustomFeatureContent
+          <CustomActionContent
             errorMessage={displayedErrorMessage}
             isRunning={displayedIsRunning}
-            outputSchema={activeFeature.outputSchema}
+            outputSchema={activeAction.outputSchema}
             selectionContent={selectionContentSnapshot}
             value={displayedResult}
             thinking={displayedThinking}
@@ -149,7 +149,7 @@ export function SelectionToolbarCustomFeatureAction({ feature }: { feature: Sele
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
           providers={llmProviders}
-          value={customFeatureRequest.providerConfig?.id ?? ""}
+          value={customActionRequest.providerConfig?.id ?? ""}
           onProviderChange={handleProviderChange}
           onRegenerate={handleRegenerate}
         />

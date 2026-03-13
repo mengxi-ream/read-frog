@@ -9,7 +9,7 @@ import { matchDomainPattern } from "@/utils/url"
 import { AiButton } from "./ai-button"
 import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
-import { SelectionToolbarCustomFeatureButtons } from "./custom-feature-button"
+import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
 import { SpeakButton } from "./speak-button"
 import { TranslateButton } from "./translate-button"
 
@@ -259,7 +259,7 @@ export function SelectionToolbar() {
             <TranslateButton />
             {!isFirefox && <SpeakButton />}
             <AiButton />
-            <SelectionToolbarCustomFeatureButtons />
+            <SelectionToolbarCustomActionButtons />
           </div>
           <CloseButton />
         </div>

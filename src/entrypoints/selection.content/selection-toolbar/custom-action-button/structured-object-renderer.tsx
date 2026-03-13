@@ -1,8 +1,8 @@
 import type { Spec } from "@json-render/react"
 import type { ThinkingSnapshot } from "@/types/background-stream"
 import type {
-  SelectionToolbarCustomFeatureOutputField,
-  SelectionToolbarCustomFeatureOutputType,
+  SelectionToolbarCustomActionOutputField,
+  SelectionToolbarCustomActionOutputType,
 } from "@/types/config/selection-toolbar"
 import { defineCatalog } from "@json-render/core"
 import { defineRegistry, JSONUIProvider, Renderer } from "@json-render/react"
@@ -13,13 +13,13 @@ import { z } from "zod"
 import { Thinking } from "@/components/thinking"
 
 interface StructuredObjectRendererProps {
-  outputSchema: SelectionToolbarCustomFeatureOutputField[]
+  outputSchema: SelectionToolbarCustomActionOutputField[]
   value: Record<string, unknown> | null
   isStreaming?: boolean
   thinking: ThinkingSnapshot | null
 }
 
-function formatFieldValue(value: unknown, type: SelectionToolbarCustomFeatureOutputField["type"]) {
+function formatFieldValue(value: unknown, type: SelectionToolbarCustomActionOutputField["type"]) {
   if (value === null || value === undefined) {
     return ""
   }
@@ -37,7 +37,7 @@ function formatFieldValue(value: unknown, type: SelectionToolbarCustomFeatureOut
 }
 
 function buildStructuredObjectSpec(
-  outputSchema: SelectionToolbarCustomFeatureOutputField[],
+  outputSchema: SelectionToolbarCustomActionOutputField[],
   value: Record<string, unknown> | null,
   isStreaming: boolean,
 ): Spec {
@@ -77,7 +77,7 @@ function buildStructuredObjectSpec(
   }
 }
 
-function getFieldTypeIcon(type: SelectionToolbarCustomFeatureOutputType) {
+function getFieldTypeIcon(type: SelectionToolbarCustomActionOutputType) {
   if (type === "number") {
     return <IconHash className="size-3 shrink-0" strokeWidth={1.8} />
   }

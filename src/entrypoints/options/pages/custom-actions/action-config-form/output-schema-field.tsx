@@ -1,6 +1,6 @@
 import type {
-  SelectionToolbarCustomFeature,
-  SelectionToolbarCustomFeatureOutputField,
+  SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
@@ -44,18 +44,18 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/base-ui/table"
-import { selectionToolbarCustomFeatureOutputTypeSchema } from "@/types/config/selection-toolbar"
+import { selectionToolbarCustomActionOutputTypeSchema } from "@/types/config/selection-toolbar"
 import {
   createOutputSchemaField,
   getNextOutputFieldName,
   getOutputSchemaFieldNameError,
-  getSelectionToolbarCustomFeatureTokenCellText,
+  getSelectionToolbarCustomActionTokenCellText,
   normalizeOutputSchemaFieldName,
-  SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS,
-} from "@/utils/constants/custom-feature"
+  SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
+} from "@/utils/constants/custom-action"
 import { withForm } from "./form"
 
-const t = (key: string) => i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.${key}`)
+const t = (key: string) => i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}`)
 
 function FieldDialog({
   field: outputField,
@@ -65,12 +65,12 @@ function FieldDialog({
   onOpenChange,
   onSave,
 }: {
-  field: SelectionToolbarCustomFeatureOutputField
-  existingFields: SelectionToolbarCustomFeatureOutputField[]
+  field: SelectionToolbarCustomActionOutputField
+  existingFields: SelectionToolbarCustomActionOutputField[]
   title: string
   open: boolean
   onOpenChange: (open: boolean) => void
-  onSave: (updated: SelectionToolbarCustomFeatureOutputField) => void
+  onSave: (updated: SelectionToolbarCustomActionOutputField) => void
 }) {
   const form = useForm({
     defaultValues: outputField,
@@ -86,17 +86,17 @@ function FieldDialog({
   const validateNameField = (value: string) => {
     const errorType = getOutputSchemaFieldNameError(value, existingFields, outputField.id)
     if (errorType === "blank") {
-      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.fieldKeyRequired")
+      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired")
     }
     if (errorType === "duplicate") {
-      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.duplicateFieldKey")
+      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey")
     }
     return undefined
   }
 
-  const customFeatureInsertCells = SELECTION_TOOLBAR_CUSTOM_FEATURE_TOKENS.map(token => ({
-    text: getSelectionToolbarCustomFeatureTokenCellText(token),
-    description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customFeatures.form.tokens.${token}`),
+  const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map(token => ({
+    text: getSelectionToolbarCustomActionTokenCellText(token),
+    description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}`),
   }))
 
   useEffect(() => {
@@ -141,7 +141,7 @@ function FieldDialog({
                 <FieldContext value={typeField}>
                   <SelectField
                     label={t("fieldType")}
-                    items={selectionToolbarCustomFeatureOutputTypeSchema.options.map(type => ({
+                    items={selectionToolbarCustomActionOutputTypeSchema.options.map(type => ({
                       value: type,
                       label: i18n.t(`dataTypes.${type}`),
                     }))}
@@ -151,7 +151,7 @@ function FieldDialog({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {selectionToolbarCustomFeatureOutputTypeSchema.options.map(type => (
+                        {selectionToolbarCustomActionOutputTypeSchema.options.map(type => (
                           <SelectItem key={type} value={type}>
                             {i18n.t(`dataTypes.${type}`)}
                           </SelectItem>
@@ -169,7 +169,7 @@ function FieldDialog({
                     label={t("fieldDescription")}
                     placeholder={t("fieldDescriptionPlaceholder")}
                     className="min-h-20"
-                    insertCells={customFeatureInsertCells}
+                    insertCells={customActionInsertCells}
                   />
                 </FieldContext>
               )}
@@ -217,10 +217,10 @@ function DeleteFieldDialog({
 }
 
 export const OutputSchemaField = withForm({
-  ...{ defaultValues: {} as SelectionToolbarCustomFeature },
+  ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
-    const [editingField, setEditingField] = useState<SelectionToolbarCustomFeatureOutputField | null>(null)
-    const [addingField, setAddingField] = useState<SelectionToolbarCustomFeatureOutputField | null>(null)
+    const [editingField, setEditingField] = useState<SelectionToolbarCustomActionOutputField | null>(null)
+    const [addingField, setAddingField] = useState<SelectionToolbarCustomActionOutputField | null>(null)
     const [deletingFieldId, setDeletingFieldId] = useState<string | null>(null)
 
     return (
@@ -230,16 +230,16 @@ export const OutputSchemaField = withForm({
           onChange: ({ value }) => {
             const outputSchema = Array.isArray(value) ? value : []
             if (outputSchema.length === 0) {
-              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.outputSchemaRequired")
+              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.outputSchemaRequired")
             }
 
             for (const outputField of outputSchema) {
               const errorType = getOutputSchemaFieldNameError(outputField.name, outputSchema, outputField.id)
               if (errorType === "blank") {
-                return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.fieldKeyRequired")
+                return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired")
               }
               if (errorType === "duplicate") {
-                return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.errors.duplicateFieldKey")
+                return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey")
               }
             }
 

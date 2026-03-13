@@ -179,7 +179,7 @@ options:
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택
-      customFeatures: 사용자 정의 AI 기능
+      customActions: 사용자 정의 AI 액션
       features:
         translate: 페이지 번역
         selectionToolbar_translate: 선택 툴바 번역
@@ -289,13 +289,13 @@ options:
         vocabularyInsight:
           title: 어휘 분석
           description: 선택 툴바에서 단어/구문 분석 기능의 제공업체와 모델을 구성합니다
-      customFeatures:
-        title: 커스텀 AI 기능
+      customActions:
+        title: 커스텀 AI 액션
         description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
-        add: AI 기능 추가
-        edit: AI 기능 편집
-        empty: 아직 커스텀 AI 기능이 없습니다
-        noEnabledLlmProvider: 커스텀 AI 기능을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
+        add: AI 액션 추가
+        edit: AI 액션 편집
+        empty: 아직 커스텀 AI 액션이 없습니다
+        noEnabledLlmProvider: 커스텀 AI 액션을 만들기 전에 최소 하나의 LLM 제공업체를 활성화하세요
         table:
           name: 이름
           provider: 제공업체
@@ -337,13 +337,13 @@ options:
             title: 웹페이지 제목
           delete: 삭제
           deleteDialog:
-            title: 사용자 정의 기능을 삭제하시겠습니까?
+            title: 사용자 정의 액션을 삭제하시겠습니까?
             description: 이 작업은 취소할 수 없습니다.
             confirm: 삭제
             cancel: 취소
         errors:
           nameRequired: 이름은 필수입니다
-          duplicateName: '중복된 기능 이름 "$1"'
+          duplicateName: '중복된 액션 이름 "$1"'
           invalidIcon: 올바르지 않은 Iconify 아이콘 문자열입니다
           providerRequired: 활성화된 LLM 제공업체를 선택하세요
           outputSchemaRequired: 최소 하나의 출력 필드를 추가하세요

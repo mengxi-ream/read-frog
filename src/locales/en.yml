@@ -180,7 +180,7 @@ options:
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
-      customFeatures: Custom AI Features
+      customActions: Custom AI Actions
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation
@@ -290,13 +290,13 @@ options:
         vocabularyInsight:
           title: Vocabulary Insight
           description: Configure provider and model for vocabulary/phrase analysis in the selection toolbar
-      customFeatures:
-        title: Custom AI Features
+      customActions:
+        title: Custom AI Actions
         description: Add your own structured AI actions for selected text
-        add: Add AI Feature
-        edit: Edit AI Feature
-        empty: No custom AI features yet
-        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI features
+        add: Add AI Action
+        edit: Edit AI Action
+        empty: No custom AI actions yet
+        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
         table:
           name: Name
           provider: Provider
@@ -338,13 +338,13 @@ options:
             title: Webpage title
           delete: Delete
           deleteDialog:
-            title: Delete Custom Feature?
+            title: Delete Custom Action?
             description: This action cannot be undone.
             confirm: Delete
             cancel: Cancel
         templates:
           dialogTitle: Choose a Template
-          dialogDescription: Select a template to quickly create a new AI feature, or start from scratch.
+          dialogDescription: Select a template to quickly create a new AI action, or start from scratch.
           dictionary:
             name: Dictionary
             description: Look up words with definitions, phonetics, and context translations
@@ -452,10 +452,10 @@ options:
             fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
           blank:
             name: Blank
-            description: Start from scratch with an empty feature
+            description: Start from scratch with an empty action
         errors:
           nameRequired: Name is required
-          duplicateName: 'Duplicate feature name "$1"'
+          duplicateName: 'Duplicate action name "$1"'
           invalidIcon: Invalid Iconify icon string
           providerRequired: Please select an enabled LLM provider
           outputSchemaRequired: Add at least one output field

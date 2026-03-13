@@ -95,19 +95,19 @@ export function findFeatureMissingProvider(
 }
 
 /**
- * Reassign selection toolbar custom features that reference the deleted provider.
+ * Reassign selection toolbar custom actions that reference the deleted provider.
  * Fallback target must be the first enabled LLM provider.
- * Returns null when no custom feature is affected or when no fallback exists.
+ * Returns null when no custom action is affected or when no fallback exists.
  */
-export function computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
   deletedProviderId: string,
   config: Config,
   remainingProviders: ProvidersConfig,
-): Config["selectionToolbar"]["customFeatures"] | null {
-  const hasAffectedCustomFeature = config.selectionToolbar.customFeatures
-    .some(feature => feature.providerId === deletedProviderId)
+): Config["selectionToolbar"]["customActions"] | null {
+  const hasAffectedCustomAction = config.selectionToolbar.customActions
+    .some(action => action.providerId === deletedProviderId)
 
-  if (!hasAffectedCustomFeature) {
+  if (!hasAffectedCustomAction) {
     return null
   }
 
@@ -119,13 +119,13 @@ export function computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
     return null
   }
 
-  return config.selectionToolbar.customFeatures.map((feature) => {
-    if (feature.providerId !== deletedProviderId) {
-      return feature
+  return config.selectionToolbar.customActions.map((action) => {
+    if (action.providerId !== deletedProviderId) {
+      return action
     }
 
     return {
-      ...feature,
+      ...action,
       providerId: fallbackProvider.id,
     }
   })

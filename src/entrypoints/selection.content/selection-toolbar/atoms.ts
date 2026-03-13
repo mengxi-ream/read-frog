@@ -1,6 +1,6 @@
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
-import type { SelectionToolbarCustomFeature } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { dequal } from "dequal"
 import { atom } from "jotai"
 import { atomFamily } from "jotai-family"
@@ -54,24 +54,24 @@ export const selectionToolbarVocabularyInsightRequestAtom = createSelectionToolb
   }),
 )
 
-export interface SelectionToolbarCustomFeatureRequestSlice {
+export interface SelectionToolbarCustomActionRequestSlice {
   language: Config["language"]
-  feature: SelectionToolbarCustomFeature | null
+  action: SelectionToolbarCustomAction | null
   providerConfig: ProviderConfig | null
 }
 
-export const selectionToolbarCustomFeatureRequestAtomFamily = atomFamily((featureId: string) =>
+export const selectionToolbarCustomActionRequestAtomFamily = atomFamily((actionId: string) =>
   selectAtom(
     configAtom,
-    (config): SelectionToolbarCustomFeatureRequestSlice => {
-      const feature = config.selectionToolbar.customFeatures
-        .find(candidate => candidate.enabled !== false && candidate.id === featureId) ?? null
+    (config): SelectionToolbarCustomActionRequestSlice => {
+      const action = config.selectionToolbar.customActions
+        .find(candidate => candidate.enabled !== false && candidate.id === actionId) ?? null
 
       return {
         language: config.language,
-        feature,
-        providerConfig: feature
-          ? getProviderConfigById(config.providersConfig, feature.providerId) ?? null
+        action,
+        providerConfig: action
+          ? getProviderConfigById(config.providersConfig, action.providerId) ?? null
           : null,
       }
     },

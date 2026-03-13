@@ -1,4 +1,4 @@
-import type { CustomFeatureTemplate } from "@/utils/constants/custom-feature-templates"
+import type { CustomActionTemplate } from "@/utils/constants/custom-action-templates"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
@@ -8,40 +8,40 @@ import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_FEATURE_NAME } from "@/utils/constants/custom-feature"
+import { DEFAULT_ACTION_NAME } from "@/utils/constants/custom-action"
 import { getUniqueName } from "@/utils/name"
 import { cn } from "@/utils/styles/utils"
 import { EntityListRail } from "../../../components/entity-list-rail"
-import { selectedCustomFeatureIdAtom } from "../atoms"
-import { AddFeatureDialog } from "./add-feature-dialog"
+import { selectedCustomActionIdAtom } from "../atoms"
+import { AddActionDialog } from "./add-action-dialog"
 
-export function CustomFeatureCardList() {
+export function CustomActionCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const [selectedCustomFeatureId, setSelectedCustomFeatureId] = useAtom(selectedCustomFeatureIdAtom)
+  const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const [dialogOpen, setDialogOpen] = useState(false)
 
-  const customFeatures = selectionToolbarConfig.customFeatures ?? []
+  const customActions = selectionToolbarConfig.customActions ?? []
   const llmProviders = useMemo(
     () => providersConfig.filter(provider => provider.enabled && isLLMProviderConfig(provider)),
     [providersConfig],
   )
 
-  const handleTemplateSelect = (template: CustomFeatureTemplate) => {
+  const handleTemplateSelect = (template: CustomActionTemplate) => {
     if (llmProviders.length === 0)
       return
 
-    const newFeature = template.createFeature(llmProviders[0].id)
+    const newAction = template.createAction(llmProviders[0].id)
 
-    const existingNames = new Set(customFeatures.map(f => f.name))
-    const baseName = template.id === "blank" ? DEFAULT_FEATURE_NAME : newFeature.name
-    newFeature.name = getUniqueName(baseName, existingNames)
+    const existingNames = new Set(customActions.map(action => action.name))
+    const baseName = template.id === "blank" ? DEFAULT_ACTION_NAME : newAction.name
+    newAction.name = getUniqueName(baseName, existingNames)
 
     void setSelectionToolbarConfig({
       ...selectionToolbarConfig,
-      customFeatures: [...customFeatures, newFeature],
+      customActions: [...customActions, newAction],
     })
-    setSelectedCustomFeatureId(newFeature.id)
+    setSelectedCustomActionId(newAction.id)
     setDialogOpen(false)
   }
 
@@ -53,47 +53,47 @@ export function CustomFeatureCardList() {
             <Button variant="outline" className="h-auto p-3 border-dashed rounded-xl" disabled={llmProviders.length === 0}>
               <div className="flex items-center justify-center gap-2 w-full">
                 <Icon icon="tabler:plus" className="size-4" />
-                <span className="text-sm">{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.add")}</span>
+                <span className="text-sm">{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.add")}</span>
               </div>
             </Button>
           )}
         />
-        <AddFeatureDialog onSelect={handleTemplateSelect} />
+        <AddActionDialog onSelect={handleTemplateSelect} />
       </Dialog>
 
       {llmProviders.length === 0 && (
         <div className="text-sm text-amber-600 dark:text-amber-400">
-          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.noEnabledLlmProvider")}
+          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.noEnabledLlmProvider")}
         </div>
       )}
 
-      {customFeatures.length > 0 && (
+      {customActions.length > 0 && (
         <EntityListRail>
           <div className="flex flex-col gap-3 pt-2">
-            {customFeatures.map(feature => (
+            {customActions.map(action => (
               <div
-                key={feature.id}
+                key={action.id}
                 className={cn(
                   "rounded-xl border p-3 bg-card transition-colors cursor-pointer",
-                  selectedCustomFeatureId === feature.id && "border-primary",
-                  feature.enabled === false && "opacity-70",
+                  selectedCustomActionId === action.id && "border-primary",
+                  action.enabled === false && "opacity-70",
                 )}
-                onClick={() => setSelectedCustomFeatureId(feature.id)}
+                onClick={() => setSelectedCustomActionId(action.id)}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <div className="size-4">
-                      <Icon icon={feature.icon} className="size-4 text-zinc-600 dark:text-zinc-300 shrink-0" />
+                      <Icon icon={action.icon} className="size-4 text-zinc-600 dark:text-zinc-300 shrink-0" />
                     </div>
-                    <span className="text-sm font-medium truncate">{feature.name}</span>
+                    <span className="text-sm font-medium truncate">{action.name}</span>
                   </div>
                   <Switch
-                    checked={feature.enabled !== false}
+                    checked={action.enabled !== false}
                     onCheckedChange={(checked) => {
                       void setSelectionToolbarConfig({
                         ...selectionToolbarConfig,
-                        customFeatures: customFeatures.map(item =>
-                          item.id === feature.id ? { ...item, enabled: checked } : item,
+                        customActions: customActions.map(item =>
+                          item.id === action.id ? { ...item, enabled: checked } : item,
                         ),
                       })
                     }}
