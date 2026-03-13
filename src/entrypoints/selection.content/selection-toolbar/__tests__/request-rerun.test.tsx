@@ -192,7 +192,7 @@ vi.mock("@/components/markdown-renderer", () => ({
   MarkdownRenderer: ({ content }: { content: string }) => <div>{content}</div>,
 }))
 
-vi.mock("../structured-object-renderer", () => ({
+vi.mock("../custom-feature-button/structured-object-renderer", () => ({
   StructuredObjectRenderer: ({ value }: { value: Record<string, unknown> | null }) => (
     <pre>{JSON.stringify(value)}</pre>
   ),
