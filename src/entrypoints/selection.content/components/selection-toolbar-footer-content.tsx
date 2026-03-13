@@ -5,9 +5,8 @@ import { useCallback, useState } from "react"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { buttonVariants } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
-import { SelectionPopover } from "@/components/ui/selection-popover"
+import { SelectionPopover, useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
 import { cn } from "@/utils/styles/utils"
-import { shadowWrapper } from ".."
 
 const TOOLTIP_TRIGGER_PRESS_REASON = "trigger-press"
 
@@ -18,6 +17,7 @@ export function RegenerateButton({
   className?: string
   onRegenerate: () => void
 }) {
+  const popoverOverlay = useSelectionPopoverOverlayProps()
   const [tooltipOpen, setTooltipOpen] = useState(false)
 
   const handleClick = useCallback(() => {
@@ -48,7 +48,10 @@ export function RegenerateButton({
       >
         <IconRefresh />
       </TooltipTrigger>
-      <TooltipContent container={shadowWrapper ?? undefined} positionerClassName="z-2147483647">
+      <TooltipContent
+        container={popoverOverlay.container}
+        positionerClassName={popoverOverlay.positionerClassName}
+      >
         {i18n.t("action.regenerate")}
       </TooltipContent>
     </Tooltip>
@@ -68,6 +71,8 @@ export function SelectionToolbarFooterContent({
   providers: ProviderConfig[]
   value: string
 }) {
+  const popoverOverlay = useSelectionPopoverOverlayProps()
+
   return (
     <SelectionPopover.Footer className={cn("justify-between gap-3 border-t", className)}>
       <div className="min-w-0 max-w-52 flex-1">
@@ -76,6 +81,7 @@ export function SelectionToolbarFooterContent({
           value={value}
           onChange={onProviderChange}
           className="w-60"
+          selectContentProps={popoverOverlay}
         />
       </div>
       <RegenerateButton onRegenerate={onRegenerate} />

@@ -74,7 +74,7 @@ describe("selection action tooltips", () => {
     const { tooltip, positioner } = await openTooltip(trigger!)
 
     expect(tooltip).toHaveTextContent("action.copy")
-    expect(positioner).toHaveClass("z-2147483647")
+    expect(positioner).toHaveClass("z-50")
   })
 
   it("keeps the copy tooltip open after click and updates its text", async () => {
@@ -104,7 +104,7 @@ describe("selection action tooltips", () => {
     const { tooltip, positioner } = await openTooltip(trigger!)
 
     expect(tooltip).toHaveTextContent("action.speak")
-    expect(positioner).toHaveClass("z-2147483647")
+    expect(positioner).toHaveClass("z-50")
   })
 
   it("renders the regenerate tooltip above selection popovers", async () => {
@@ -116,7 +116,7 @@ describe("selection action tooltips", () => {
     const { tooltip, positioner } = await openTooltip(trigger!)
 
     expect(tooltip).toHaveTextContent("action.regenerate")
-    expect(positioner).toHaveClass("z-2147483647")
+    expect(positioner).toHaveClass("z-50")
   })
 
   it("keeps the speak tooltip open after click", async () => {

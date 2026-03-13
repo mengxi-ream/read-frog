@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import * as React from "react"
+import { createPortal } from "react-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SelectionPopover } from ".."
 
@@ -266,6 +267,15 @@ function renderTwoPopovers() {
   }
 }
 
+function PortalledBoundary() {
+  return createPortal(
+    <div data-testid="portalled-boundary">
+      Portalled boundary
+    </div>,
+    document.body,
+  )
+}
+
 function ReopenablePopoverHarness() {
   const [open, setOpen] = React.useState(false)
   const [sourceSelection, setSourceSelection] = React.useState("First selection")
@@ -396,30 +406,89 @@ describe("selectionPopover", () => {
     expect(screen.getByText("Popover content").parentElement).toHaveClass("min-h-0", "flex-1", "overflow-y-auto")
   })
 
-  it("closes the popover when clicking outside", () => {
+  it("closes the popover when clicking outside", async () => {
     renderPopover()
 
-    const event = new MouseEvent("mousedown", { bubbles: true })
-    Object.defineProperty(event, "composedPath", {
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const mouseDownEvent = new MouseEvent("mousedown", { bubbles: true })
+    Object.defineProperty(mouseDownEvent, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+    const clickEvent = new MouseEvent("click", { bubbles: true })
+    Object.defineProperty(clickEvent, "composedPath", {
       value: () => [document.body, document, window],
     })
 
     act(() => {
-      document.dispatchEvent(event)
+      document.body.dispatchEvent(mouseDownEvent)
+      document.body.dispatchEvent(clickEvent)
     })
 
     expect(onOpenChangeSpy).toHaveBeenLastCalledWith(false)
     expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
   })
 
-  it("keeps a pinned popover open when clicking outside", () => {
+  it("keeps a pinned popover open when clicking outside", async () => {
     renderPopover()
 
     fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
 
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const mouseDownEvent = new MouseEvent("mousedown", { bubbles: true })
+    Object.defineProperty(mouseDownEvent, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+    const clickEvent = new MouseEvent("click", { bubbles: true })
+    Object.defineProperty(clickEvent, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+
+    act(() => {
+      document.body.dispatchEvent(mouseDownEvent)
+      document.body.dispatchEvent(clickEvent)
+    })
+
+    expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+    expect(onOpenChangeSpy).not.toHaveBeenCalledWith(false)
+  })
+
+  it("keeps the popover open when clicking a registered portal boundary", () => {
+    render(
+      <SelectionPopover.Root onOpenChange={onOpenChangeSpy}>
+        <SelectionPopover.Trigger>Open popover</SelectionPopover.Trigger>
+        <SelectionPopover.Content>
+          <SelectionPopover.Header className="border-b">
+            <SelectionPopover.Title>Test Popover</SelectionPopover.Title>
+            <div className="flex items-center gap-1">
+              <SelectionPopover.Pin />
+              <SelectionPopover.Close />
+            </div>
+          </SelectionPopover.Header>
+          <SelectionPopover.Body>
+            <div>Popover content</div>
+            <PortalledBoundary />
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>,
+    )
+
+    const trigger = screen.getByRole("button", { name: "Open popover" })
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect())
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    const boundary = screen.getByTestId("portalled-boundary")
     const event = new MouseEvent("mousedown", { bubbles: true })
     Object.defineProperty(event, "composedPath", {
-      value: () => [document.body, document, window],
+      value: () => [boundary, document.body, document, window],
     })
 
     act(() => {
@@ -427,7 +496,6 @@ describe("selectionPopover", () => {
     })
 
     expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
     expect(onOpenChangeSpy).not.toHaveBeenCalledWith(false)
   })
 
@@ -586,8 +654,13 @@ describe("selectionPopover", () => {
     expect(updatePositionSpy).toHaveBeenCalledWith({ x: 100, y: 80 })
   })
 
-  it("cancels stale auto-layout on drag start and reclamps when drag height grows past the viewport", () => {
+  it("cancels stale auto-layout on drag start and reclamps once dragging stops", async () => {
     const { element } = renderPopover()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
     mockRect(element, { left: 120, top: 620, width: 500, height: 280 })
 
     act(() => {
@@ -611,8 +684,14 @@ describe("selectionPopover", () => {
     triggerResizeObserver()
     flushRaf()
 
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 500 })
+    expect(updatePositionSpy).not.toHaveBeenCalled()
     expect(updateSizeSpy).not.toHaveBeenCalled()
+
+    act(() => {
+      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 120, y: 620 })
+    })
+
+    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 500 })
   })
 
   it("merges Base UI render props into a custom trigger element", () => {

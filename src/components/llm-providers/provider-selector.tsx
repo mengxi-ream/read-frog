@@ -1,3 +1,4 @@
+import type { ComponentProps } from "react"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import { i18n } from "#imports"
@@ -21,6 +22,7 @@ interface ProviderSelectorProps {
   onChange: (id: string) => void
   placeholder?: string
   className?: string
+  selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
 }
 
 export default function ProviderSelector({
@@ -29,6 +31,7 @@ export default function ProviderSelector({
   onChange,
   placeholder,
   className,
+  selectContentProps,
 }: ProviderSelectorProps) {
   const { theme } = useTheme()
   const currentProvider = providers.find(p => p.id === value)
@@ -42,6 +45,7 @@ export default function ProviderSelector({
         onChange={onChange}
         placeholder={placeholder}
         className={className}
+        selectContentProps={selectContentProps}
         theme={theme}
       />
     )
@@ -54,6 +58,7 @@ export default function ProviderSelector({
       onChange={onChange}
       placeholder={placeholder}
       className={className}
+      selectContentProps={selectContentProps}
       theme={theme}
     />
   )
@@ -66,12 +71,14 @@ function TranslateGroupedSelect({
   placeholder,
   className,
   theme,
+  selectContentProps,
 }: {
   providers: ProviderConfig[]
   currentProvider: ProviderConfig | undefined
   onChange: (id: string) => void
   placeholder?: string
   className?: string
+  selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
   theme: Theme
 }) {
   const llmProviders = providers.filter(isLLMProviderConfig)
@@ -94,7 +101,7 @@ function TranslateGroupedSelect({
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="min-w-fit">
+      <SelectContent className="min-w-fit" {...selectContentProps}>
         <SelectGroup>
           <SelectLabel>{i18n.t("translateService.aiTranslator")}</SelectLabel>
           {llmProviders.map(provider => (
@@ -123,12 +130,14 @@ function FlatSelect({
   placeholder,
   className,
   theme,
+  selectContentProps,
 }: {
   providers: ProviderConfig[]
   currentProvider: ProviderConfig | undefined
   onChange: (id: string) => void
   placeholder?: string
   className?: string
+  selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
   theme: Theme
 }) {
   return (
@@ -149,7 +158,7 @@ function FlatSelect({
           )}
         </SelectValue>
       </SelectTrigger>
-      <SelectContent className="min-w-fit">
+      <SelectContent className="min-w-fit" {...selectContentProps}>
         <SelectGroup>
           {providers.map(provider => (
             <SelectItem key={provider.id} value={provider}>

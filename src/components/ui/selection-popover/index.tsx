@@ -1,15 +1,17 @@
 "use client"
 
+import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { IconGripHorizontal, IconPin, IconPinnedFilled, IconX } from "@tabler/icons-react"
 import * as React from "react"
-import { createPortal } from "react-dom"
 import { Rnd } from "react-rnd"
 import { Button } from "@/components/ui/base-ui/button"
+import {
+  SELECTION_CONTENT_OVERLAY_LAYERS,
+} from "@/entrypoints/selection.content/overlay-layers"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { cn } from "@/utils/styles/utils"
-import { useDismissOnOutsideMousedown } from "./use-dismiss-on-outside-mousedown"
 import { usePreventScrollThrough } from "./use-prevent-scroll-through"
 import {
   SELECTION_POPOVER_DRAG_HANDLE_CLASS,
@@ -24,6 +26,8 @@ interface SelectionPopoverPosition {
   y: number
 }
 
+type SelectionPopoverPortalContainer = HTMLElement | ShadowRoot | React.RefObject<HTMLElement | ShadowRoot | null> | null
+
 interface SelectionPopoverRootContextValue {
   open: boolean
   setOpen: (value: boolean | ((value: boolean) => boolean)) => void
@@ -31,12 +35,15 @@ interface SelectionPopoverRootContextValue {
   setAnchor: (value: SelectionPopoverPosition | null) => void
   pinned: boolean
   setPinned: React.Dispatch<React.SetStateAction<boolean>>
+  triggerElement: HTMLElement | null
+  setTriggerElement: React.Dispatch<React.SetStateAction<HTMLElement | null>>
 }
 
 interface SelectionPopoverContentContextValue {
   close: () => void
   isDragging: boolean
   pinned: boolean
+  portalContainer: SelectionPopoverPortalContainer
   togglePinned: () => void
   setBodyElement: (node: HTMLDivElement | null) => void
 }
@@ -63,6 +70,15 @@ function useSelectionPopoverContentContext() {
   return context
 }
 
+export function useSelectionPopoverOverlayProps() {
+  const context = React.use(SelectionPopoverContentContext)
+
+  return {
+    container: context?.portalContainer,
+    positionerClassName: context ? SELECTION_CONTENT_OVERLAY_LAYERS.popoverOverlay : undefined,
+  }
+}
+
 function SelectionPopoverRoot({
   children,
   defaultOpen = false,
@@ -78,6 +94,7 @@ function SelectionPopoverRoot({
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
   const [anchor, setAnchor] = React.useState<SelectionPopoverPosition | null>(null)
   const [pinned, setPinned] = React.useState(false)
+  const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null)
   const open = openProp ?? uncontrolledOpen
 
   const setOpen = React.useCallback((value: boolean | ((value: boolean) => boolean)) => {
@@ -123,11 +140,22 @@ function SelectionPopoverRoot({
     setAnchor,
     pinned,
     setPinned,
-  }), [anchor, open, pinned, setOpen])
+    triggerElement,
+    setTriggerElement,
+  }), [anchor, open, pinned, setOpen, triggerElement])
 
   return (
     <SelectionPopoverRootContext value={contextValue}>
-      {children}
+      <DialogPrimitive.Root
+        open={open}
+        onOpenChange={(nextOpen) => {
+          setOpen(nextOpen)
+        }}
+        disablePointerDismissal={pinned}
+        modal={false}
+      >
+        {children}
+      </DialogPrimitive.Root>
     </SelectionPopoverRootContext>
   )
 }
@@ -138,14 +166,31 @@ function SelectionPopoverTrigger({
   render,
   ...props
 }: useRender.ComponentProps<"button"> & React.ComponentProps<"button">) {
-  const { setOpen, setAnchor, setPinned } = useSelectionPopoverRootContext()
+  const { open, setAnchor, setOpen, setPinned, setTriggerElement } = useSelectionPopoverRootContext()
+
+  const restartPopoverSession = React.useCallback(() => {
+    // Reopen on the next frame so controlled consumers observe a full close/open
+    // cycle and can refresh session-scoped state from the current selection.
+    // Example: a pinned popover keeps showing the original selection until the
+    // user clicks the same trigger again after selecting different text.
+    setOpen(false)
+    requestAnimationFrame(() => {
+      setOpen(true)
+    })
+  }, [setOpen])
 
   const handleClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     const rect = event.currentTarget.getBoundingClientRect()
     setPinned(false)
+    setTriggerElement(event.currentTarget)
     setAnchor({ x: rect.left, y: rect.top })
-    setOpen(true)
-  }, [setAnchor, setOpen, setPinned])
+    if (open) {
+      restartPopoverSession()
+    }
+    else {
+      setOpen(true)
+    }
+  }, [open, restartPopoverSession, setAnchor, setOpen, setPinned, setTriggerElement])
 
   return useRender({
     defaultTagName: "button",
@@ -166,6 +211,91 @@ function SelectionPopoverTrigger({
   })
 }
 
+// eslint-disable-next-line react/no-forward-ref
+const SelectionPopoverShell = React.forwardRef<
+  HTMLDivElement,
+  Omit<React.ComponentProps<"div">, "onDrag" | "onDragStart"> & ReturnType<typeof useSelectionPopoverLayout>
+>(({
+  children,
+  className,
+  defaultLayout,
+  handleDrag,
+  handleDragStart,
+  handleDragStop,
+  handleResizeStop,
+  handleWheel,
+  isDragging: _isDragging,
+  minHeight,
+  minWidth,
+  onMouseDown,
+  onMouseUp,
+  rndRef,
+  style,
+  ...props
+}, forwardedRef) => {
+  const assignRndRef = React.useCallback((instance: Rnd | null) => {
+    rndRef.current = instance
+    const element = instance?.getSelfElement() as HTMLDivElement | null
+
+    if (typeof forwardedRef === "function") {
+      forwardedRef(element)
+      return
+    }
+
+    if (forwardedRef) {
+      forwardedRef.current = element
+    }
+  }, [forwardedRef, rndRef])
+
+  return (
+    <Rnd
+      ref={assignRndRef}
+      bounds="window"
+      default={defaultLayout}
+      minWidth={minWidth}
+      minHeight={minHeight}
+      maxWidth="100vw"
+      maxHeight="100vh"
+      dragHandleClassName={SELECTION_POPOVER_DRAG_HANDLE_CLASS}
+      cancel={SELECTION_POPOVER_NO_DRAG_SELECTOR}
+      enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
+      resizeHandleStyles={SELECTION_POPOVER_RESIZE_HANDLE_STYLES}
+      onMouseDown={onMouseDown
+        ? e => onMouseDown(e as unknown as React.MouseEvent<HTMLDivElement>)
+        : undefined}
+      onMouseUp={onMouseUp
+        ? e => onMouseUp(e as unknown as React.MouseEvent<HTMLDivElement>)
+        : undefined}
+      {...props}
+      className={cn(
+        `pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-floating ${NOTRANSLATE_CLASS}`,
+        className,
+      )}
+      style={{
+        display: "flex",
+        ...style,
+        maxWidth: "100vw",
+        maxHeight: "100vh",
+      }}
+      onDragStart={() => {
+        handleDragStart()
+      }}
+      onDrag={(_, data) => {
+        handleDrag({ x: data.x, y: data.y })
+      }}
+      onDragStop={(_, data) => {
+        handleDragStop({ x: data.x, y: data.y })
+      }}
+      onResizeStop={(_, __, elementRef, ___, position) => {
+        handleResizeStop(elementRef, { x: position.x, y: position.y })
+      }}
+      onWheel={handleWheel}
+    >
+      {children}
+    </Rnd>
+  )
+})
+
 function SelectionPopoverContent({
   className,
   children,
@@ -173,9 +303,9 @@ function SelectionPopoverContent({
   render,
   ...props
 }: useRender.ComponentProps<"div"> & React.ComponentProps<"div"> & {
-  container?: Element | ShadowRoot | DocumentFragment | null
+  container?: SelectionPopoverPortalContainer
 }) {
-  const { open, setOpen, anchor, pinned, setPinned } = useSelectionPopoverRootContext()
+  const { open, setOpen, anchor, pinned, setPinned, triggerElement } = useSelectionPopoverRootContext()
   const bodyElementRef = React.useRef<HTMLDivElement | null>(null)
   const setBodyElement = React.useCallback((node: HTMLDivElement | null) => {
     bodyElementRef.current = node
@@ -204,12 +334,6 @@ function SelectionPopoverContent({
     setOpen(false)
   }, [setOpen])
 
-  useDismissOnOutsideMousedown({
-    isEnabled: open && !pinned,
-    getElement: () => rndRef.current?.getSelfElement() ?? null,
-    onDismiss: handleClose,
-  })
-
   usePreventScrollThrough({
     isEnabled: open,
     elementRef: bodyElementRef,
@@ -219,9 +343,10 @@ function SelectionPopoverContent({
     close: handleClose,
     isDragging,
     pinned,
+    portalContainer: container ?? null,
     togglePinned,
     setBodyElement,
-  }), [handleClose, isDragging, pinned, setBodyElement, togglePinned])
+  }), [container, handleClose, isDragging, pinned, setBodyElement, togglePinned])
 
   const shell = useRender({
     defaultTagName: "div",
@@ -247,52 +372,34 @@ function SelectionPopoverContent({
     },
   })
 
-  if (!open || !anchor) {
+  if (!anchor) {
     return null
   }
 
-  const floatingContent = (
-    <div className="fixed inset-0 z-2147483647 pointer-events-none">
-      <Rnd
-        ref={rndRef}
-        bounds="parent"
-        default={defaultLayout}
-        minWidth={minWidth}
-        minHeight={minHeight}
-        maxWidth="100vw"
-        maxHeight="100vh"
-        dragHandleClassName={SELECTION_POPOVER_DRAG_HANDLE_CLASS}
-        cancel={SELECTION_POPOVER_NO_DRAG_SELECTOR}
-        enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
-        resizeHandleStyles={SELECTION_POPOVER_RESIZE_HANDLE_STYLES}
-        className={`pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-floating ${NOTRANSLATE_CLASS}`}
-        style={{
-          display: "flex",
-          maxWidth: "100vw",
-          maxHeight: "100vh",
-        }}
-        onDragStart={handleDragStart}
-        onDrag={(_, data) => {
-          handleDrag({ x: data.x, y: data.y })
-        }}
-        onDragStop={(_, data) => {
-          handleDragStop({ x: data.x, y: data.y })
-        }}
-        onResizeStop={(_, __, elementRef, ___, position) => {
-          handleResizeStop(elementRef, { x: position.x, y: position.y })
-        }}
-        onWheel={handleWheel}
+  return (
+    <DialogPrimitive.Portal container={container}>
+      <DialogPrimitive.Popup
+        render={(
+          <SelectionPopoverShell
+            rndRef={rndRef}
+            isDragging={isDragging}
+            defaultLayout={defaultLayout}
+            minWidth={minWidth}
+            minHeight={minHeight}
+            handleDragStart={handleDragStart}
+            handleDrag={handleDrag}
+            handleDragStop={handleDragStop}
+            handleResizeStop={handleResizeStop}
+            handleWheel={handleWheel}
+          />
+        )}
+        className={cn("focus:outline-none", SELECTION_CONTENT_OVERLAY_LAYERS.popover)}
+        finalFocus={triggerElement ? { current: triggerElement } : false}
       >
         {shell}
-      </Rnd>
-    </div>
+      </DialogPrimitive.Popup>
+    </DialogPrimitive.Portal>
   )
-
-  if (!container) {
-    return floatingContent
-  }
-
-  return createPortal(floatingContent, container)
 }
 
 function SelectionPopoverHeader({
@@ -378,7 +485,7 @@ function SelectionPopoverTitle({
   ...props
 }: React.ComponentProps<"h2">) {
   return (
-    <h2
+    <DialogPrimitive.Title
       className={cn("text-base font-semibold", className)}
       {...props}
     />
@@ -390,7 +497,7 @@ function SelectionPopoverDescription({
   ...props
 }: React.ComponentProps<"p">) {
   return (
-    <p
+    <DialogPrimitive.Description
       className={cn("text-sm text-zinc-600 dark:text-zinc-400", className)}
       {...props}
     />
@@ -432,15 +539,16 @@ function SelectionPopoverClose({
   className,
   ...props
 }: React.ComponentProps<typeof Button>) {
-  const { close } = useSelectionPopoverContentContext()
-
   return (
-    <Button
-      variant="ghost-secondary"
-      size="icon-sm"
-      className={className}
-      onClick={close}
-      data-rf-no-drag
+    <DialogPrimitive.Close
+      render={(
+        <Button
+          variant="ghost-secondary"
+          size="icon-sm"
+          className={className}
+          data-rf-no-drag
+        />
+      )}
       {...props}
     >
       {children ?? (
@@ -449,7 +557,7 @@ function SelectionPopoverClose({
           <span className="sr-only">Close</span>
         </>
       )}
-    </Button>
+    </DialogPrimitive.Close>
   )
 }
 

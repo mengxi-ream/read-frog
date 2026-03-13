@@ -3,12 +3,13 @@ import { IconCheck, IconCopy } from "@tabler/icons-react"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { buttonVariants } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
 import { cn } from "@/utils/styles/utils"
-import { shadowWrapper } from ".."
 
 const TOOLTIP_TRIGGER_PRESS_REASON = "trigger-press"
 
 export function CopyButton({ text }: { text: string | undefined }) {
+  const popoverOverlay = useSelectionPopoverOverlayProps()
   const [copied, setCopied] = useState(false)
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined)
@@ -54,7 +55,10 @@ export function CopyButton({ text }: { text: string | undefined }) {
           ? <IconCheck className="text-green-500" />
           : <IconCopy />}
       </TooltipTrigger>
-      <TooltipContent container={shadowWrapper ?? undefined} positionerClassName="z-2147483647">
+      <TooltipContent
+        container={popoverOverlay.container}
+        positionerClassName={popoverOverlay.positionerClassName}
+      >
         {copied ? i18n.t("action.copied") : i18n.t("action.copy")}
       </TooltipContent>
     </Tooltip>

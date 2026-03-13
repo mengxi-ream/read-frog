@@ -1,5 +1,6 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { MARGIN } from "@/utils/constants/selection"
@@ -250,7 +251,7 @@ export function SelectionToolbar() {
           ref={tooltipRef}
           aria-hidden={!isSelectionToolbarVisible}
           className={cn(
-            "group absolute z-2147483647 bg-popover rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity",
+            `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} bg-popover rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity`,
             isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
           )}
         >
