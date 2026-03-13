@@ -1,5 +1,6 @@
 import type { Rnd } from "react-rnd"
-import { useCallback, useEffect, useLayoutEffect, useReducer, useRef } from "react"
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from "react"
+import { flushSync } from "react-dom"
 
 interface Position {
   x: number
@@ -29,6 +30,7 @@ interface UseSelectionPopoverLayoutOptions {
 interface UseSelectionPopoverLayoutResult {
   rndRef: React.RefObject<Rnd | null>
   isDragging: boolean
+  position: Position
   defaultLayout: Position & { width: number, height: "auto" }
   minWidth: number
   minHeight: number
@@ -200,6 +202,7 @@ export function useSelectionPopoverLayout({
   })
   const suppressResizeObserverRef = useRef(false)
   const isDraggingRef = useRef(false)
+  const [position, setPosition] = useState<Position | null>(null)
   const [isDragging, setDragging] = useReducer((_state: boolean, next: boolean) => next, false)
 
   const cancelScheduledViewportLayout = useCallback(() => {
@@ -221,9 +224,31 @@ export function useSelectionPopoverLayout({
     observedElementRef.current = null
   }, [])
 
-  const updatePositionIfNeeded = useCallback((nextPosition: Position, currentRect: DOMRect) => {
+  const resetLayoutState = useCallback(() => {
+    preferredLayoutRef.current = {
+      x: null,
+      vertical: null,
+      manualSize: null,
+    }
+    suppressResizeObserverRef.current = false
+    isDraggingRef.current = false
+    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    setPosition(null)
+    setDragging(false)
+  }, [])
+
+  const updatePositionState = useCallback((nextPosition: Position, currentRect: DOMRect, immediate = false) => {
     if (nextPosition.x !== currentRect.left || nextPosition.y !== currentRect.top) {
-      rndRef.current?.updatePosition(nextPosition)
+      if (immediate) {
+        // ResizeObserver fires after layout; flush to avoid a visible overflow frame.
+        // eslint-disable-next-line react-dom/no-flush-sync
+        flushSync(() => {
+          setPosition(nextPosition)
+        })
+        return
+      }
+
+      setPosition(nextPosition)
     }
   }, [])
 
@@ -250,8 +275,8 @@ export function useSelectionPopoverLayout({
       popoverRect.rect.height,
     )
 
-    updatePositionIfNeeded(nextPosition, popoverRect.rect)
-  }, [updatePositionIfNeeded])
+    updatePositionState(nextPosition, popoverRect.rect)
+  }, [updatePositionState])
 
   const handleDrag = useCallback((position: Position) => {
     const popoverRect = getPopoverRect(rndRef)
@@ -267,11 +292,11 @@ export function useSelectionPopoverLayout({
     )
 
     if (nextPosition.x !== position.x || nextPosition.y !== position.y) {
-      rndRef.current?.updatePosition(nextPosition)
+      setPosition(nextPosition)
     }
   }, [])
 
-  const applyViewportLayout = useCallback(() => {
+  const applyViewportLayout = useCallback((options?: { immediate?: boolean }) => {
     if (isDraggingRef.current) {
       return
     }
@@ -326,8 +351,8 @@ export function useSelectionPopoverLayout({
       nextVertical.size,
     )
 
-    updatePositionIfNeeded(nextPosition, popoverRect.rect)
-  }, [updatePositionIfNeeded])
+    updatePositionState(nextPosition, popoverRect.rect, options?.immediate)
+  }, [updatePositionState])
 
   const scheduleViewportLayout = useCallback(() => {
     if (resizeFrameRef.current !== null) {
@@ -380,6 +405,13 @@ export function useSelectionPopoverLayout({
         }
 
         if (!preferredLayoutRef.current.manualSize) {
+          const popoverRect = getPopoverRect(rndRef)
+          if (popoverRect?.rect.bottom && popoverRect.rect.bottom > window.innerHeight + BOTTOM_EDGE_TOLERANCE) {
+            cancelScheduledViewportLayout()
+            applyViewportLayout({ immediate: true })
+            return
+          }
+
           scheduleViewportLayout()
         }
       })
@@ -387,7 +419,7 @@ export function useSelectionPopoverLayout({
 
     resizeObserverRef.current.observe(popoverRect.element)
     observedElementRef.current = popoverRect.element
-  }, [isVisible, scheduleViewportLayout])
+  }, [applyViewportLayout, cancelScheduledViewportLayout, isVisible, scheduleViewportLayout])
 
   const handleDragStart = useCallback(() => {
     isDraggingRef.current = true
@@ -412,7 +444,7 @@ export function useSelectionPopoverLayout({
       nextPosition.y,
       popoverRect?.rect.height ?? 0,
     )
-    rndRef.current?.updatePosition(nextPosition)
+    setPosition(nextPosition)
     scheduleViewportLayout()
   }, [scheduleViewportLayout])
 
@@ -435,7 +467,7 @@ export function useSelectionPopoverLayout({
     )
     preferredLayoutRef.current.manualSize = manualSize
 
-    rndRef.current?.updatePosition(nextPosition)
+    setPosition(nextPosition)
     rndRef.current?.updateSize(manualSize)
     scheduleViewportLayout()
   }, [scheduleViewportLayout])
@@ -451,15 +483,8 @@ export function useSelectionPopoverLayout({
 
     cancelScheduledViewportLayout()
     disconnectResizeObserver()
-    preferredLayoutRef.current = {
-      x: null,
-      vertical: null,
-      manualSize: null,
-    }
-    suppressResizeObserverRef.current = false
-    isDraggingRef.current = false
-    setDragging(false)
-  }, [cancelScheduledViewportLayout, disconnectResizeObserver, isVisible])
+    resetLayoutState()
+  }, [cancelScheduledViewportLayout, disconnectResizeObserver, isVisible, resetLayoutState])
 
   useLayoutEffect(() => {
     if (!isVisible) {
@@ -498,6 +523,7 @@ export function useSelectionPopoverLayout({
   return {
     rndRef,
     isDragging,
+    position: position ?? getInitialPosition(anchor),
     defaultLayout: {
       ...getInitialPosition(anchor),
       width: getInitialWidth(getViewportMaxWidth()),

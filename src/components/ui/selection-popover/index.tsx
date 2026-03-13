@@ -227,6 +227,7 @@ function SelectionPopoverShell({
   minWidth,
   onMouseDown,
   onMouseUp,
+  position,
   rndRef,
   ref: forwardedRef,
   style,
@@ -251,6 +252,7 @@ function SelectionPopoverShell({
       ref={assignRndRef}
       bounds="window"
       default={defaultLayout}
+      position={position}
       minWidth={minWidth}
       minHeight={minHeight}
       maxWidth="100vw"
@@ -313,6 +315,7 @@ function SelectionPopoverContent({
   const {
     rndRef,
     isDragging,
+    position,
     defaultLayout,
     minWidth,
     minHeight,
@@ -377,6 +380,7 @@ function SelectionPopoverContent({
           <SelectionPopoverShell
             rndRef={rndRef}
             isDragging={isDragging}
+            position={position}
             defaultLayout={defaultLayout}
             minWidth={minWidth}
             minHeight={minHeight}

@@ -11,6 +11,7 @@ const updateSizeSpy = vi.fn()
 const onOpenChangeSpy = vi.fn()
 let rafCallbacks = new Map<number, FrameRequestCallback>()
 let nextRafId = 1
+let mockRndOffset = { left: 0, top: 0 }
 let mockRndRect = {
   x: 120,
   y: 140,
@@ -54,11 +55,15 @@ vi.mock("react-rnd", async () => {
   function MockRnd({ ref, ...props }: any) {
     latestRndProps = props
     const elementRef = React.useRef<HTMLDivElement>(null)
+    const appliedDefaultRef = React.useRef(false)
 
     React.useImperativeHandle(ref, () => ({
       updatePosition: (position: { x: number, y: number }) => {
         updatePositionSpy(position)
-        updateMockRect({ left: position.x, top: position.y })
+        updateMockRect({
+          left: position.x + mockRndOffset.left,
+          top: position.y + mockRndOffset.top,
+        })
       },
       updateSize: (size: { width: number, height: number }) => {
         updateSizeSpy(size)
@@ -70,6 +75,18 @@ vi.mock("react-rnd", async () => {
     React.useLayoutEffect(() => {
       if (!elementRef.current) {
         return
+      }
+
+      if (props.position) {
+        updateMockRect({ left: props.position.x, top: props.position.y })
+      }
+      else if (!appliedDefaultRef.current && props.default) {
+        appliedDefaultRef.current = true
+        updateMockRect({
+          left: props.default.x,
+          top: props.default.y,
+          width: typeof props.default.width === "number" ? props.default.width : undefined,
+        })
       }
 
       Object.defineProperty(elementRef.current, "getBoundingClientRect", {
@@ -170,6 +187,12 @@ function buildTriggerRect({
     height,
     toJSON: () => ({}),
   } as DOMRect
+}
+
+function expectLatestPosition(position: { x: number, y: number }) {
+  expect(latestRndProps?.position).toEqual(position)
+  expect(mockRndRect.left).toBe(position.x)
+  expect(mockRndRect.top).toBe(position.y)
 }
 
 function renderPopover({
@@ -331,6 +354,7 @@ describe("selectionPopover", () => {
     onOpenChangeSpy.mockReset()
     rafCallbacks = new Map()
     nextRafId = 1
+    mockRndOffset = { left: 0, top: 0 }
     resizeObservers = []
     updateMockRect({
       left: 120,
@@ -578,6 +602,7 @@ describe("selectionPopover", () => {
     flushRaf()
 
     expect(updatePositionSpy).not.toHaveBeenCalled()
+    expectLatestPosition({ x: 120, y: 500 })
   })
 
   it("grows upward once streamed content reaches the viewport bottom", async () => {
@@ -598,9 +623,8 @@ describe("selectionPopover", () => {
 
     mockRect(element, { left: 120, top: 500, width: 500, height: 420 })
     triggerResizeObserver()
-    flushRaf()
 
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 480 })
+    expectLatestPosition({ x: 120, y: 480 })
   })
 
   it("keeps a dragged popover bottom-anchored while streamed content keeps growing", async () => {
@@ -621,22 +645,42 @@ describe("selectionPopover", () => {
 
     mockRect(element, { left: 120, top: 620, width: 500, height: 360 })
     triggerResizeObserver()
-    flushRaf()
 
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 540 })
+    expectLatestPosition({ x: 120, y: 540 })
+  })
+
+  it("keeps dragging aligned to viewport coordinates when the rnd parent has a vertical offset", async () => {
+    mockRndOffset = { left: 0, top: 80 }
+
+    const { element } = renderPopover()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    mockRect(element, { left: 120, top: 140, width: 500, height: 220 })
+
+    act(() => {
+      latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 120, y: 620 })
+    })
+
+    expectLatestPosition({ x: 120, y: 620 })
+    expect(updatePositionSpy).not.toHaveBeenCalled()
   })
 
   it("reduces left and top space before shrinking a manually resized popover", () => {
     const { element } = renderPopover()
     mockRect(element, { left: 100, top: 80, width: 680, height: 480 })
 
-    latestRndProps?.onResizeStop?.(
-      new MouseEvent("mouseup"),
-      "bottomRight",
-      element,
-      { width: 180, height: 180 },
-      { x: 100, y: 80 },
-    )
+    act(() => {
+      latestRndProps?.onResizeStop?.(
+        new MouseEvent("mouseup"),
+        "bottomRight",
+        element,
+        { width: 180, height: 180 },
+        { x: 100, y: 80 },
+      )
+    })
 
     flushRaf()
 
@@ -660,20 +704,22 @@ describe("selectionPopover", () => {
     flushRaf()
 
     expect(updateSizeSpy).not.toHaveBeenCalled()
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 20, y: 20 })
+    expectLatestPosition({ x: 20, y: 20 })
   })
 
   it("restores the remembered offset and size after the viewport grows again", () => {
     const { element } = renderPopover()
     mockRect(element, { left: 100, top: 80, width: 680, height: 480 })
 
-    latestRndProps?.onResizeStop?.(
-      new MouseEvent("mouseup"),
-      "bottomRight",
-      element,
-      { width: 180, height: 180 },
-      { x: 100, y: 80 },
-    )
+    act(() => {
+      latestRndProps?.onResizeStop?.(
+        new MouseEvent("mouseup"),
+        "bottomRight",
+        element,
+        { width: 180, height: 180 },
+        { x: 100, y: 80 },
+      )
+    })
 
     flushRaf()
 
@@ -697,7 +743,7 @@ describe("selectionPopover", () => {
     flushRaf()
 
     expect(updateSizeSpy).toHaveBeenCalledWith({ width: 600, height: 400 })
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 0, y: 0 })
+    expectLatestPosition({ x: 0, y: 0 })
 
     updatePositionSpy.mockReset()
     updateSizeSpy.mockReset()
@@ -720,7 +766,7 @@ describe("selectionPopover", () => {
     flushRaf()
 
     expect(updateSizeSpy).toHaveBeenCalledWith({ width: 680, height: 480 })
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 100, y: 80 })
+    expectLatestPosition({ x: 100, y: 80 })
   })
 
   it("cancels stale auto-layout on drag start and reclamps once dragging stops", async () => {
@@ -738,29 +784,29 @@ describe("selectionPopover", () => {
     updatePositionSpy.mockReset()
     updateSizeSpy.mockReset()
 
-    mockRect(element, { left: 120, top: 620, width: 500, height: 360 })
-    triggerResizeObserver()
-
     act(() => {
       latestRndProps?.onDragStart?.()
     })
-    flushRaf()
+
+    mockRect(element, { left: 120, top: 620, width: 500, height: 360 })
+    triggerResizeObserver()
 
     expect(updatePositionSpy).not.toHaveBeenCalled()
     expect(updateSizeSpy).not.toHaveBeenCalled()
+    expectLatestPosition({ x: 120, y: 620 })
 
     mockRect(element, { left: 120, top: 620, width: 500, height: 400 })
     triggerResizeObserver()
-    flushRaf()
 
     expect(updatePositionSpy).not.toHaveBeenCalled()
     expect(updateSizeSpy).not.toHaveBeenCalled()
+    expectLatestPosition({ x: 120, y: 620 })
 
     act(() => {
       latestRndProps?.onDragStop?.(new MouseEvent("mouseup"), { x: 120, y: 620 })
     })
 
-    expect(updatePositionSpy).toHaveBeenCalledWith({ x: 120, y: 500 })
+    expectLatestPosition({ x: 120, y: 500 })
   })
 
   it("merges Base UI render props into a custom trigger element", () => {
