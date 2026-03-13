@@ -120,6 +120,10 @@ vi.mock("@/components/ui/selection-popover", async () => {
       Pin,
       Close,
     },
+    useSelectionPopoverOverlayProps: () => ({
+      container: undefined,
+      positionerClassName: undefined,
+    }),
   }
 })
 
