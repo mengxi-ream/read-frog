@@ -25,6 +25,7 @@ import {
   selectionToolbarTranslateRequestAtom,
 } from "../atom"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
+import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
 
 function normalizeSelectedText(value: string | null) {
@@ -277,6 +278,7 @@ export function TranslateButton() {
             icon="ri:translate"
           />
           <div className="flex items-center gap-1">
+            <TargetLanguageSelector />
             <SelectionPopover.Pin />
             <SelectionPopover.Close />
           </div>
