@@ -22,10 +22,10 @@ export function CustomActionCardList() {
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const { search } = useLocation()
   const navigate = useNavigate()
-  const [dialogOpen, setDialogOpen] = useState(() => new URLSearchParams(search).get("addAction") === "dictionary")
+  const [dialogOpen, setDialogOpen] = useState(() => new URLSearchParams(search).has("addAction"))
 
   useEffect(() => {
-    if (new URLSearchParams(search).get("addAction") === "dictionary") {
+    if (new URLSearchParams(search).has("addAction")) {
       void navigate({ search: "" }, { replace: true })
     }
   }, [search, navigate])
