@@ -321,6 +321,7 @@ options:
           fieldType: 欄位類型
           fieldDescription: 描述
           fieldDescriptionPlaceholder: 描述此欄位應包含的內容...
+          fieldSpeaking: 啟用朗讀
           actions: 操作
           cancel: 取消
           save: 儲存

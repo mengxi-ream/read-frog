@@ -321,6 +321,7 @@ options:
           fieldType: Loại trường
           fieldDescription: Mô tả
           fieldDescriptionPlaceholder: Mô tả nội dung mà trường này nên chứa...
+          fieldSpeaking: Bật đọc thành tiếng
           actions: Thao tác
           cancel: Hủy
           save: Lưu

@@ -322,6 +322,7 @@ options:
           fieldType: 字段类型
           fieldDescription: 描述
           fieldDescriptionPlaceholder: 描述此字段应包含的内容...
+          fieldSpeaking: 启用朗读
           actions: 操作
           cancel: 取消
           save: 保存

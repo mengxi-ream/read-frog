@@ -7,6 +7,7 @@ export const selectionToolbarCustomActionOutputFieldSchema = z.object({
   name: z.string().trim().min(1),
   type: selectionToolbarCustomActionOutputTypeSchema,
   description: z.string(),
+  speaking: z.boolean(),
 })
 
 export const selectionToolbarCustomActionSchema = z.object({

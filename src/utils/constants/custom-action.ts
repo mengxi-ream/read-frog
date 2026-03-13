@@ -11,12 +11,14 @@ export function createOutputSchemaField(
   type: SelectionToolbarCustomActionOutputType = "string",
   description = "",
   id?: string,
+  speaking = false,
 ): SelectionToolbarCustomActionOutputField {
   return {
     id: id ?? crypto.randomUUID(),
     name,
     type,
     description,
+    speaking,
   }
 }
 

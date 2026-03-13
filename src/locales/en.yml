@@ -322,6 +322,7 @@ options:
           fieldType: Field Type
           fieldDescription: Description
           fieldDescriptionPlaceholder: Describe what this field should contain...
+          fieldSpeaking: Enable speaking
           actions: Actions
           cancel: Cancel
           save: Save

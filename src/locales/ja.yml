@@ -321,6 +321,7 @@ options:
           fieldType: フィールド型
           fieldDescription: 説明
           fieldDescriptionPlaceholder: このフィールドに含めるべき内容を説明してください...
+          fieldSpeaking: 読み上げを有効にする
           actions: 操作
           cancel: キャンセル
           save: 保存

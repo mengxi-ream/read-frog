@@ -321,6 +321,7 @@ options:
           fieldType: Alan Türü
           fieldDescription: Açıklama
           fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
+          fieldSpeaking: Sesli okumayı etkinleştir
           actions: İşlemler
           cancel: İptal
           save: Kaydet

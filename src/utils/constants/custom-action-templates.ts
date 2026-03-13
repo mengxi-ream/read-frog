@@ -27,11 +27,11 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
       systemPrompt: i18n.t(`${T_PREFIX}.dictionary.systemPrompt`),
       prompt: i18n.t(`${T_PREFIX}.dictionary.prompt`),
       outputSchema: [
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldTerm`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldTermDescription`), "dictionary-term"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldTerm`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldTermDescription`), "dictionary-term", true),
         createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldPhonetic`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldPhoneticDescription`), "dictionary-phonetic"),
         createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeech`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldPartOfSpeechDescription`), "dictionary-part-of-speech"),
         createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldDefinition`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldDefinitionDescription`), "dictionary-definition"),
-        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldContext`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldContextDescription`), "dictionary-context"),
+        createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldContext`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldContextDescription`), "dictionary-context", true),
         createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldContextTranslation`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldContextTranslationDescription`), "dictionary-context-translation"),
         createOutputSchemaField(i18n.t(`${T_PREFIX}.dictionary.fieldDifficulty`), "string", i18n.t(`${T_PREFIX}.dictionary.fieldDifficultyDescription`), "dictionary-difficulty"),
       ],

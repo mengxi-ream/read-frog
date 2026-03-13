@@ -321,6 +321,7 @@ options:
           fieldType: 필드 유형
           fieldDescription: 설명
           fieldDescriptionPlaceholder: 이 필드에 포함할 내용을 설명하세요...
+          fieldSpeaking: 음성 읽기 사용
           actions: 작업
           cancel: 취소
           save: 저장

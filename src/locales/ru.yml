@@ -321,6 +321,7 @@ options:
           fieldType: Тип поля
           fieldDescription: Описание
           fieldDescriptionPlaceholder: Опишите, что должно содержать это поле...
+          fieldSpeaking: Включить озвучивание
           actions: Действия
           cancel: Отмена
           save: Сохранить

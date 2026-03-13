@@ -21,6 +21,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -173,6 +174,22 @@ function FieldDialog({
                   />
                 </FieldContext>
               )}
+            </form.Field>
+            <form.Field name="speaking">
+              {(speakingField) => {
+                const checkboxId = `custom-action-field-speaking-${outputField.id}`
+
+                return (
+                  <Field orientation="horizontal" className="items-center">
+                    <Checkbox
+                      id={checkboxId}
+                      checked={speakingField.state.value}
+                      onCheckedChange={checked => speakingField.handleChange(checked)}
+                    />
+                    <FieldLabel htmlFor={checkboxId}>{t("fieldSpeaking")}</FieldLabel>
+                  </Field>
+                )
+              }}
             </form.Field>
           </FieldGroup>
           <DialogFooter>
