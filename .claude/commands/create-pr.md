@@ -38,6 +38,7 @@ Follow these steps:
    - Use `gh pr create` with:
      - A descriptive title following commit convention
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
+     - Search if there is relevant issue to this PR, if yes, include it in the PR description and link it using `Closes #<issue-number>` to automatically close the issue when the PR is merged
 
 8. **Return the PR URL for easy access**
 
