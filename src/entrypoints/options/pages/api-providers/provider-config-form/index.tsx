@@ -21,6 +21,7 @@ import { isAPIProviderConfig, isLLMProvider, isNonAPIProvider, isTranslateProvid
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import {
+  computeLanguageDetectionFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
   computeSelectionToolbarCustomActionFallbacksAfterDeletion,
   findFeatureMissingProvider,
@@ -108,6 +109,17 @@ export function ProviderConfigForm() {
         selectionToolbar: {
           ...(patch.selectionToolbar ?? {}),
           customActions: updatedCustomActions,
+        },
+      } as Partial<Config>
+    }
+
+    const ldFallback = computeLanguageDetectionFallbackAfterDeletion(providerConfig.id, config, updatedAllProviders)
+    if (ldFallback !== null) {
+      patch = {
+        ...patch,
+        languageDetection: {
+          ...config.languageDetection,
+          providerId: ldFallback,
         },
       } as Partial<Config>
     }

@@ -201,6 +201,19 @@ options:
         confirm: 確認
         cancel: 取消
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
+    languageDetection:
+      title: 語言偵測
+      description: 影響自動翻譯語言偵測、跳過語言偵測和朗讀語音選擇的準確性。
+      mode:
+        basic: 基礎
+        llm: LLM
+      provider:
+        label: 偵測提供者
+        placeholder: 選擇提供者
+      status:
+        noProviders: 請先設定 LLM 提供者
+        basicRecommend: 建議啟用 LLM
+        llmEnabled: LLM 偵測已啟用
   siteControl:
     title: 站點控制
     mode:
@@ -524,11 +537,6 @@ options:
   tts:
     title: 文字轉語音
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
-    detectLanguage:
-      label: 語言偵測
-      basic: 基礎
-      llm: LLM
-      description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。LLM 模式使用「翻譯」頁面的提供者。
     voice:
       label: 語音
       fallback: 後備
@@ -761,6 +769,8 @@ noAPIKeyConfig:
     firstOnThe: 在
     optionsPage: 選項
     page: 頁
+languageDetection:
+  llmFailed: LLM 語言偵測失敗，已回退到基礎偵測
 translation:
   sameLanguage: 源語言和目標語言必須不同
   autoModeSameLanguage: 檢測到的語言 '$1' 與目標語言相同

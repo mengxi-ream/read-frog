@@ -1,4 +1,5 @@
 import type { Config } from "@/types/config/config"
+import type { LanguageDetectionMode } from "@/types/config/language-detection"
 import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, ProviderConfig, ProvidersConfig, PureAPIProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
@@ -32,6 +33,10 @@ export function filterEnabledProvidersConfig(providersConfig: ProvidersConfig): 
   return providersConfig.filter(p => p.enabled)
 }
 
+export function getEnabledLLMProvidersConfig(providersConfig: ProvidersConfig): LLMProviderConfig[] {
+  return filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig)
+}
+
 export function getProviderKeyByName(providersConfig: ProvidersConfig, providerId: string): string | undefined {
   const provider = getProviderConfigById(providersConfig, providerId)
   return provider?.provider
@@ -59,6 +64,27 @@ export function getProviderBaseURL(providersConfig: ProvidersConfig, providerId:
     return providerConfig.baseURL
   }
   return undefined
+}
+
+export function resolveLanguageDetectionConfigForModeChange(
+  currentConfig: Config["languageDetection"],
+  nextMode: LanguageDetectionMode,
+  providersConfig: ProvidersConfig,
+): Partial<Config["languageDetection"]> | null {
+  if (nextMode === "basic") {
+    return { mode: "basic" }
+  }
+
+  const enabledLLMProviders = getEnabledLLMProvidersConfig(providersConfig)
+  if (enabledLLMProviders.length === 0) {
+    return null
+  }
+
+  const hasSelectedProvider = enabledLLMProviders.some(provider => provider.id === currentConfig.providerId)
+  return {
+    mode: "llm",
+    providerId: hasSelectedProvider ? currentConfig.providerId : enabledLLMProviders[0].id,
+  }
 }
 
 /**
@@ -111,9 +137,7 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
     return null
   }
 
-  const fallbackProvider = remainingProviders.find(
-    provider => provider.enabled && isLLMProviderConfig(provider),
-  )
+  const fallbackProvider = getEnabledLLMProvidersConfig(remainingProviders)[0]
 
   if (!fallbackProvider) {
     return null
@@ -129,4 +153,24 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
       providerId: fallbackProvider.id,
     }
   })
+}
+
+/**
+ * Compute languageDetection fallback when a provider is deleted.
+ * Only applies when mode is "llm" and the deleted provider is the current one.
+ * Returns the new providerId (first enabled LLM), or undefined if none available.
+ * Returns null when no change is needed.
+ */
+export function computeLanguageDetectionFallbackAfterDeletion(
+  deletedProviderId: string,
+  config: Config,
+  remainingProviders: ProvidersConfig,
+): string | undefined | null {
+  if (config.languageDetection.mode !== "llm")
+    return null
+  if (config.languageDetection.providerId !== deletedProviderId)
+    return null
+
+  const fallback = getEnabledLLMProvidersConfig(remainingProviders)[0]
+  return fallback?.id
 }

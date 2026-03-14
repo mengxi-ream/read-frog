@@ -202,6 +202,19 @@ options:
         confirm: 确认
         cancel: 取消
         description: 此操作将清理所有翻译缓存。此操作无法撤销。
+    languageDetection:
+      title: 语言检测
+      description: 影响自动翻译语言检测、跳过语言检测和朗读语音选择的准确性。
+      mode:
+        basic: 基础
+        llm: LLM
+      provider:
+        label: 检测提供商
+        placeholder: 选择提供商
+      status:
+        noProviders: 请先配置 LLM 提供商
+        basicRecommend: 建议启用 LLM
+        llmEnabled: LLM 检测已启用
   siteControl:
     title: 站点控制
     mode:
@@ -636,11 +649,6 @@ options:
   tts:
     title: 文本转语音
     description: 使用 Edge TTS 语音参数来自定义朗读按钮。
-    detectLanguage:
-      label: 语言检测
-      basic: 基础
-      llm: LLM
-      description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。LLM 模式使用「翻译」页面的提供商。
     voice:
       label: 声音
       fallback: 兜底
@@ -873,6 +881,8 @@ noAPIKeyConfig:
     firstOnThe: 在
     optionsPage: 选项
     page: 页
+languageDetection:
+  llmFailed: LLM 语言检测失败，已回退到基础检测
 translation:
   sameLanguage: 源语言和目标语言必须不同
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同

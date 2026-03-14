@@ -127,7 +127,9 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
     .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
   const assignedCustomActions = config.selectionToolbar.customActions
     .filter(action => action.providerId === id)
-  const totalAssigned = assignedFeatures.length + assignedCustomActions.length
+  const isLanguageDetectionProvider = config.languageDetection.mode === "llm"
+    && config.languageDetection.providerId === id
+  const totalAssigned = assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
 
   const handleProviderEnabledChange = (checked: boolean) => {
     if (!checked && enabled && totalAssigned > 0) {
@@ -161,6 +163,9 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
                 {assignedFeatures.map(key => (
                   <li key={key}>{i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[key]}`)}</li>
                 ))}
+                {isLanguageDetectionProvider && (
+                  <li>{i18n.t("options.general.languageDetection.title")}</li>
+                )}
                 {assignedCustomActions.map(action => (
                   <li key={action.id}>{action.name}</li>
                 ))}

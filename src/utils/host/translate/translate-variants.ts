@@ -1,8 +1,8 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
-import { franc } from "franc"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
+import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
 import { getOrFetchArticleData } from "./article-context"
@@ -19,8 +19,11 @@ async function getConfigOrThrow(): Promise<Config> {
   return config
 }
 
-function isTextAlreadyInTargetLanguage(text: string, targetCode: LangCodeISO6393) {
-  return text.length >= MIN_LENGTH_FOR_TARGET_LANG_DETECTION && franc(text) === targetCode
+async function isTextAlreadyInTargetLanguage(text: string, targetCode: LangCodeISO6393) {
+  if (text.length < MIN_LENGTH_FOR_TARGET_LANG_DETECTION)
+    return false
+  const detected = await detectLanguage(text, { enableLLM: false })
+  return detected === targetCode
 }
 
 async function translateTextUsingPageConfig(
@@ -38,19 +41,18 @@ async function translateTextUsingPageConfig(
 
   const providerConfig = resolveProviderConfig(config, "translate")
 
-  if (isTextAlreadyInTargetLanguage(preparedText, config.language.targetCode)) {
+  if (await isTextAlreadyInTargetLanguage(preparedText, config.language.targetCode)) {
     logger.info(`translateTextForPage: skipping translation because text is already in target language. text: ${preparedText}`)
     return ""
   }
 
   // Skip translation if text is in skipLanguages list (page translation only)
-  const { skipLanguages, enableSkipLanguagesLLMDetection } = config.translate.page
+  const { skipLanguages } = config.translate.page
   if (skipLanguages.length > 0 && preparedText.length >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION) {
     const shouldSkip = await shouldSkipByLanguage(
       preparedText,
       skipLanguages,
-      enableSkipLanguagesLLMDetection,
-      providerConfig,
+      config.languageDetection.mode === "llm",
     )
     if (shouldSkip) {
       logger.info(`translateTextForPage: skipping translation because text is in skip language list. text: ${preparedText}`)

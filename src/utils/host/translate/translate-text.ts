@@ -6,6 +6,7 @@ import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/defin
 import { toast } from "sonner"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
+
 import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
@@ -22,21 +23,17 @@ export const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
  * Uses LLM detection if enabled, falls back to franc library.
  * @param text - Text to detect language for
  * @param skipLanguages - List of languages to skip translation for
- * @param enableLLMDetection - Whether to use LLM for language detection
- * @param providerConfig - Provider configuration for LLM detection
+ * @param enableLLM - Whether to use LLM for language detection
  * @returns true if text language is in skipLanguages list (should skip translation)
  */
 export async function shouldSkipByLanguage(
   text: string,
   skipLanguages: LangCodeISO6393[],
-  enableLLMDetection: boolean,
-  providerConfig: ProviderConfig,
+  enableLLM: boolean,
 ): Promise<boolean> {
-  const isLLMProvider = isLLMProviderConfig(providerConfig)
   const detectedLang = await detectLanguage(text, {
     minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
-    enableLLM: enableLLMDetection && isLLMProvider,
-    providerConfig: isLLMProvider ? providerConfig : undefined,
+    enableLLM,
   })
 
   if (!detectedLang) {

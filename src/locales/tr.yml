@@ -201,6 +201,19 @@ options:
         confirm: Onayla
         cancel: İptal
         description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
+    languageDetection:
+      title: Dil Algılama
+      description: Otomatik çeviri dil algılama, atlama dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
+      mode:
+        basic: Temel
+        llm: LLM
+      provider:
+        label: Algılama Sağlayıcısı
+        placeholder: Bir sağlayıcı seçin
+      status:
+        noProviders: Önce bir LLM sağlayıcısı yapılandırın
+        basicRecommend: LLM etkinleştirmesi önerilir
+        llmEnabled: LLM algılama etkin
   siteControl:
     title: Site Kontrolü
     mode:
@@ -524,11 +537,6 @@ options:
   tts:
     title: Metinden Konuşmaya
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
-    detectLanguage:
-      label: Dil Algılama
-      basic: Temel
-      llm: LLM
-      description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. LLM modu Çeviri sayfasındaki sağlayıcıyı kullanır.
     voice:
       label: Ses
       fallback: Yedek
@@ -761,6 +769,8 @@ noAPIKeyConfig:
     firstOnThe: ""
     optionsPage: seçenekler
     page: sayfasında
+languageDetection:
+  llmFailed: LLM dil algılama başarısız oldu, temel algılamaya geri dönüldü
 translation:
   sameLanguage: Kaynak ve hedef diller farklı olmalıdır
   autoModeSameLanguage: Algılanan dil '$1' hedef dille aynı

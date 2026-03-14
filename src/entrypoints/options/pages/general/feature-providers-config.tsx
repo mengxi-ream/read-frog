@@ -40,7 +40,7 @@ function FeatureProviderField({ featureKey, excludeProviderTypes }: {
 
   return (
     <Field>
-      <FieldLabel nativeLabel={false} render={<div />}>
+      <FieldLabel nativeLabel={false} render={<div className="flex flex-wrap" />}>
         {i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`)}
         {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>

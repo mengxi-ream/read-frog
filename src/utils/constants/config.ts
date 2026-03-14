@@ -17,7 +17,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 export const THEME_STORAGE_KEY = "theme"
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 61
+export const CONFIG_SCHEMA_VERSION = 62
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -61,7 +61,6 @@ export const DEFAULT_CONFIG: Config = {
       autoTranslatePatterns: ["news.ycombinator.com"],
       autoTranslateLanguages: [],
       shortcut: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
-      enableLLMDetection: false,
       preload: {
         margin: DEFAULT_PRELOAD_MARGIN,
         threshold: DEFAULT_PRELOAD_THRESHOLD,
@@ -69,7 +68,6 @@ export const DEFAULT_CONFIG: Config = {
       minCharactersPerNode: DEFAULT_MIN_CHARACTERS_PER_NODE,
       minWordsPerNode: DEFAULT_MIN_WORDS_PER_NODE,
       skipLanguages: [],
-      enableSkipLanguagesLLMDetection: false,
     },
     enableAIContentAware: false,
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
@@ -86,6 +84,9 @@ export const DEFAULT_CONFIG: Config = {
       isCustom: false,
       customCSS: null,
     },
+  },
+  languageDetection: {
+    mode: "basic",
   },
   tts: DEFAULT_TTS_CONFIG,
   floatingButton: {

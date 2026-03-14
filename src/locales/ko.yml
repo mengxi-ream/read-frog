@@ -201,6 +201,19 @@ options:
         confirm: 확인
         cancel: 취소
         description: 이 작업은 모든 번역 캐시를 지웁니다. 이 작업은 되돌릴 수 없습니다.
+    languageDetection:
+      title: 언어 감지
+      description: 자동 번역 언어 감지, 건너뛰기 언어 감지 및 읽기 음성 선택 정확도에 영향을 줍니다.
+      mode:
+        basic: 기본
+        llm: LLM
+      provider:
+        label: 감지 제공자
+        placeholder: 제공자 선택
+      status:
+        noProviders: LLM 제공자를 먼저 구성하세요
+        basicRecommend: LLM 활성화 권장
+        llmEnabled: LLM 감지 활성화됨
   siteControl:
     title: 사이트 제어
     mode:
@@ -524,11 +537,6 @@ options:
   tts:
     title: 텍스트 음성 변환
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
-    detectLanguage:
-      label: 언어 감지
-      basic: 기본
-      llm: LLM
-      description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다. LLM 모드는 번역 페이지의 제공자를 사용합니다.
     voice:
       label: 음성
       fallback: 대체
@@ -761,6 +769,8 @@ noAPIKeyConfig:
     firstOnThe: 먼저
     optionsPage: 옵션
     page: 페이지에서
+languageDetection:
+  llmFailed: LLM 언어 감지 실패, 기본 감지로 대체되었습니다
 translation:
   sameLanguage: 원본 언어와 대상 언어는 달라야 합니다
   autoModeSameLanguage: 감지된 언어 '$1'은(는) 대상 언어와 같습니다

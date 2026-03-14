@@ -3,6 +3,7 @@ import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
 import { z } from "zod"
 import { FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
+import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
 import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
 import { videoSubtitlesSchema } from "./subtitles"
@@ -85,6 +86,7 @@ export const configSchema = z.object({
   language: languageSchema,
   providersConfig: providersConfigSchema,
   translate: translateConfigSchema,
+  languageDetection: languageDetectionConfigSchema,
   tts: ttsConfigSchema,
   floatingButton: floatingButtonSchema,
   selectionToolbar: selectionToolbarSchema,
@@ -132,6 +134,44 @@ export const configSchema = z.object({
         message: `Provider "${providerId}" must be enabled for this feature.`,
         path: [...def.configPath],
       })
+    }
+  }
+
+  // Validate languageDetection: when mode is "llm", providerId must be a valid enabled LLM provider
+  if (data.languageDetection.mode === "llm") {
+    const ldProviderId = data.languageDetection.providerId
+    if (!ldProviderId) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Language detection mode is "llm" but no providerId is configured.`,
+        path: ["languageDetection", "providerId"],
+      })
+    }
+    else {
+      const ldProvider = data.providersConfig.find(p => p.id === ldProviderId)
+      if (!ldProvider) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Language detection provider "${ldProviderId}" not found in providersConfig.`,
+          path: ["languageDetection", "providerId"],
+        })
+      }
+      else {
+        if (!isLLMProvider(ldProvider.provider)) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Language detection provider "${ldProviderId}" is not an LLM provider.`,
+            path: ["languageDetection", "providerId"],
+          })
+        }
+        if (!ldProvider.enabled) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Language detection provider "${ldProviderId}" must be enabled.`,
+            path: ["languageDetection", "providerId"],
+          })
+        }
+      }
     }
   }
 

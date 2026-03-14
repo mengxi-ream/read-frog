@@ -84,7 +84,6 @@ export const testSeries: TestSeriesObject = {
           autoTranslatePatterns: ["spanish-news.com", "elmundo.es"],
           autoTranslateLanguages: [],
           shortcut: ["alt", "b"],
-          enableLLMDetection: false,
           preload: {
             margin: 1000,
             threshold: 0,
@@ -92,7 +91,6 @@ export const testSeries: TestSeriesObject = {
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
           skipLanguages: [],
-          enableSkipLanguagesLLMDetection: false,
         },
         customPromptsConfig: {
           promptId: "123e4567-e89b-12d3-a456-426614174000",
@@ -122,7 +120,6 @@ export const testSeries: TestSeriesObject = {
       tts: {
         defaultVoice: EDGE_TTS_FALLBACK_VOICE,
         languageVoices: createDefaultTTSLanguageVoices(),
-        detectLanguageMode: "basic",
         rate: 0,
         pitch: 0,
         volume: 0,
@@ -225,6 +222,10 @@ export const testSeries: TestSeriesObject = {
         blacklistPatterns: [],
         whitelistPatterns: [],
       },
+      languageDetection: {
+        mode: "basic",
+        providerId: "openai-default",
+      },
     },
   },
   "config-with-non-llm-translate-provider": {
@@ -269,7 +270,6 @@ export const testSeries: TestSeriesObject = {
           autoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: ["alt", "b"],
-          enableLLMDetection: false,
           preload: {
             margin: 1000,
             threshold: 0,
@@ -277,7 +277,6 @@ export const testSeries: TestSeriesObject = {
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
           skipLanguages: [],
-          enableSkipLanguagesLLMDetection: false,
         },
         customPromptsConfig: {
           promptId: null,
@@ -300,7 +299,6 @@ export const testSeries: TestSeriesObject = {
       tts: {
         defaultVoice: EDGE_TTS_FALLBACK_VOICE,
         languageVoices: createDefaultTTSLanguageVoices(),
-        detectLanguageMode: "basic",
         rate: 0,
         pitch: 0,
         volume: 0,
@@ -402,6 +400,10 @@ export const testSeries: TestSeriesObject = {
         mode: "blacklist",
         blacklistPatterns: [],
         whitelistPatterns: [],
+      },
+      languageDetection: {
+        mode: "basic",
+        providerId: "deepseek-default",
       },
     },
   },
@@ -440,7 +442,6 @@ export const testSeries: TestSeriesObject = {
           autoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: ["alt", "b"],
-          enableLLMDetection: true,
           preload: {
             margin: 1000,
             threshold: 0,
@@ -448,7 +449,6 @@ export const testSeries: TestSeriesObject = {
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
           skipLanguages: [],
-          enableSkipLanguagesLLMDetection: false,
         },
         customPromptsConfig: {
           promptId: null,
@@ -471,7 +471,6 @@ export const testSeries: TestSeriesObject = {
       tts: {
         defaultVoice: EDGE_TTS_FALLBACK_VOICE,
         languageVoices: createDefaultTTSLanguageVoices(),
-        detectLanguageMode: "llm",
         rate: 0,
         pitch: 0,
         volume: 0,
@@ -573,6 +572,10 @@ export const testSeries: TestSeriesObject = {
         mode: "blacklist",
         blacklistPatterns: [],
         whitelistPatterns: [],
+      },
+      languageDetection: {
+        mode: "llm",
+        providerId: "google-default",
       },
     },
   },
@@ -675,7 +678,6 @@ export const testSeries: TestSeriesObject = {
             "alt",
             "q",
           ],
-          enableLLMDetection: false,
           preload: {
             margin: 1000,
             threshold: 0,
@@ -683,7 +685,6 @@ export const testSeries: TestSeriesObject = {
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
           skipLanguages: [],
-          enableSkipLanguagesLLMDetection: false,
         },
         customPromptsConfig: {
           patterns: [],
@@ -707,7 +708,6 @@ export const testSeries: TestSeriesObject = {
       tts: {
         defaultVoice: EDGE_TTS_FALLBACK_VOICE,
         languageVoices: createDefaultTTSLanguageVoices(),
-        detectLanguageMode: "basic",
         rate: 0,
         pitch: 0,
         volume: 0,
@@ -768,6 +768,10 @@ export const testSeries: TestSeriesObject = {
         mode: "blacklist",
         blacklistPatterns: [],
         whitelistPatterns: [],
+      },
+      languageDetection: {
+        mode: "basic",
+        providerId: "google-default",
       },
     },
   },

@@ -201,6 +201,19 @@ options:
         confirm: Подтвердить
         cancel: Отмена
         description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
+    languageDetection:
+      title: Определение языка
+      description: Влияет на точность определения языка для автоперевода, пропуска языков и выбора голоса озвучивания.
+      mode:
+        basic: Базовый
+        llm: LLM
+      provider:
+        label: Провайдер определения
+        placeholder: Выберите провайдера
+      status:
+        noProviders: Сначала настройте LLM-провайдер
+        basicRecommend: Рекомендуется включить LLM
+        llmEnabled: LLM-определение включено
   siteControl:
     title: Управление сайтами
     mode:
@@ -524,11 +537,6 @@ options:
   tts:
     title: Синтез речи
     description: Настройте кнопку озвучивания с параметрами голоса Edge TTS.
-    detectLanguage:
-      label: Определение языка
-      basic: Базовое
-      llm: LLM
-      description: Базовое определение быстрое и бесплатное. LLM-определение точнее, но добавляет задержку и затраты на API. Режим LLM использует провайдера со страницы перевода.
     voice:
       label: Голос
       fallback: Резервный
@@ -761,6 +769,8 @@ noAPIKeyConfig:
     firstOnThe: сначала на странице
     optionsPage: настроек
     page: ""
+languageDetection:
+  llmFailed: Определение языка через LLM не удалось, выполнен откат к базовому определению
 translation:
   sameLanguage: Исходный и целевой языки должны различаться
   autoModeSameLanguage: Обнаруженный язык '$1' совпадает с целевым языком

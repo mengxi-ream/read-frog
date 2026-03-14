@@ -201,6 +201,19 @@ options:
         confirm: 確認
         cancel: キャンセル
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
+    languageDetection:
+      title: 言語検出
+      description: 自動翻訳の言語検出、スキップ言語検出、読み上げの音声選択精度に影響します。
+      mode:
+        basic: 基本
+        llm: LLM
+      provider:
+        label: 検出プロバイダー
+        placeholder: プロバイダーを選択
+      status:
+        noProviders: LLMプロバイダーを設定してください
+        basicRecommend: LLM有効化を推奨
+        llmEnabled: LLM検出が有効
   siteControl:
     title: サイト制御
     mode:
@@ -524,11 +537,6 @@ options:
   tts:
     title: テキスト読み上げ
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
-    detectLanguage:
-      label: 言語検出
-      basic: 基本
-      llm: LLM
-      description: 基本検出は高速かつ無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。LLM モードは「翻訳」ページのプロバイダーを使用します。
     voice:
       label: ボイス
       fallback: フォールバック
@@ -761,6 +769,8 @@ noAPIKeyConfig:
     firstOnThe: する必要があります（
     optionsPage: オプションページ
     page: ）
+languageDetection:
+  llmFailed: LLM言語検出に失敗しました。基本検出にフォールバックしました
 translation:
   sameLanguage: ソース言語とターゲット言語は異なる必要があります
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
