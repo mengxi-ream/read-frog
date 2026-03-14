@@ -786,6 +786,8 @@ action:
   copied: Kopyalandı
   regenerate: Yeniden oluştur
   viewContextDetails: Bağlam
+  contextDetailsTitleLabel: Başlık
+  contextDetailsContextLabel: Bağlam
   translation: Çeviri
   speak: Oku
   playing: Çalınıyor

@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import type { ProviderConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
@@ -76,8 +77,8 @@ describe("selectionToolbarFooterContent", () => {
     })
 
     expect(onProviderChange).toHaveBeenCalledWith("microsoft-translate-default")
-    expect(screen.getByText("Title")).toBeInTheDocument()
-    expect(screen.getByText("Context")).toBeInTheDocument()
+    expect(screen.getByText(i18n.t("action.contextDetailsTitleLabel"))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t("action.contextDetailsContextLabel"))).toBeInTheDocument()
     expect(screen.getByText("Page Title")).toBeInTheDocument()
     expect(screen.getByText("Context text")).toBeInTheDocument()
     expect(

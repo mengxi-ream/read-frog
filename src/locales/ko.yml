@@ -786,6 +786,8 @@ action:
   copied: 복사됨
   regenerate: 다시 생성
   viewContextDetails: 컨텍스트
+  contextDetailsTitleLabel: 제목
+  contextDetailsContextLabel: 컨텍스트
   translation: 번역
   speak: 읽기
   playing: 재생 중

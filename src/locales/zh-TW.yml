@@ -786,6 +786,8 @@ action:
   copied: 已複製
   regenerate: 重新生成
   viewContextDetails: 上下文
+  contextDetailsTitleLabel: 標題
+  contextDetailsContextLabel: 上下文
   translation: 翻譯
   speak: 朗讀
   playing: 播放中

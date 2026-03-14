@@ -898,6 +898,8 @@ action:
   copied: 已复制
   regenerate: 重新生成
   viewContextDetails: 上下文
+  contextDetailsTitleLabel: 标题
+  contextDetailsContextLabel: 上下文
   translation: 翻译
   speak: 朗读
   playing: 播放中

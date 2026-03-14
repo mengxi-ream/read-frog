@@ -786,6 +786,8 @@ action:
   copied: コピー済み
   regenerate: 再生成
   viewContextDetails: コンテキスト
+  contextDetailsTitleLabel: タイトル
+  contextDetailsContextLabel: コンテキスト
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中

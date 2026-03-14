@@ -786,6 +786,8 @@ action:
   copied: Đã sao chép
   regenerate: Tạo lại
   viewContextDetails: Ngữ cảnh
+  contextDetailsTitleLabel: Tiêu đề
+  contextDetailsContextLabel: Ngữ cảnh
   translation: Dịch
   speak: Đọc
   playing: Đang phát

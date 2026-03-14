@@ -898,6 +898,8 @@ action:
   copied: Copied
   regenerate: Regenerate
   viewContextDetails: Context
+  contextDetailsTitleLabel: Title
+  contextDetailsContextLabel: Context
   translation: Translation
   speak: Speak
   playing: Playing

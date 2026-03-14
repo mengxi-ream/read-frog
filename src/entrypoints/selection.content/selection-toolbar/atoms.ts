@@ -9,95 +9,12 @@ import { selectAtom } from "jotai/utils"
 import { configAtom } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { resolveProviderConfigOrNull } from "@/utils/constants/feature-providers"
-import {
-  buildContextSnapshot,
-  createRangeSnapshot,
-  normalizeSelectedText,
-  toLiveRange,
-} from "../utils"
 
 export const selectionAtom = atom<SelectionSnapshot | null>(null)
 export const contextAtom = atom<ContextSnapshot | null>(null)
 export const isSelectionToolbarVisibleAtom = atom<boolean>(false)
 
-export const selectionContentAtom = atom(
-  get => get(selectionAtom)?.text ?? null,
-  (get, set, nextSelectionContent: string | null) => {
-    if (nextSelectionContent === null) {
-      set(selectionAtom, null)
-      set(contextAtom, null)
-      return
-    }
-
-    const normalizedText = normalizeSelectedText(nextSelectionContent)
-    const currentSelection = get(selectionAtom)
-    const nextSelection: SelectionSnapshot = currentSelection
-      ? { ...currentSelection, text: normalizedText }
-      : {
-          text: normalizedText,
-          ranges: [],
-        }
-
-    set(selectionAtom, nextSelection)
-    set(contextAtom, nextSelection.ranges.length > 0 ? buildContextSnapshot(nextSelection) : null)
-  },
-)
-
-export const selectionRangeAtom = atom(
-  (get) => {
-    const rangeSnapshot = get(selectionAtom)?.ranges[0]
-    if (!rangeSnapshot) {
-      return null
-    }
-
-    try {
-      return toLiveRange(rangeSnapshot)
-    }
-    catch {
-      return null
-    }
-  },
-  (get, set, nextRange: Range | null) => {
-    if (!nextRange) {
-      const currentSelection = get(selectionAtom)
-      if (!currentSelection?.text) {
-        set(selectionAtom, null)
-        set(contextAtom, null)
-        return
-      }
-
-      set(selectionAtom, { ...currentSelection, ranges: [] })
-      set(contextAtom, null)
-      return
-    }
-
-    const rangeSnapshot = createRangeSnapshot({
-      startContainer: nextRange.startContainer,
-      startOffset: nextRange.startOffset,
-      endContainer: nextRange.endContainer,
-      endOffset: nextRange.endOffset,
-    })
-    const currentSelection = get(selectionAtom)
-    const text = currentSelection ? currentSelection.text : normalizeSelectedText(nextRange.toString())
-
-    if (text === "") {
-      set(contextAtom, null)
-      set(selectionAtom, {
-        text,
-        ranges: [rangeSnapshot],
-      })
-      return
-    }
-
-    const nextSelection: SelectionSnapshot = {
-      text,
-      ranges: [rangeSnapshot],
-    }
-
-    set(selectionAtom, nextSelection)
-    set(contextAtom, buildContextSnapshot(nextSelection))
-  },
-)
+export const selectionContentAtom = atom(get => get(selectionAtom)?.text ?? null)
 
 export const setSelectionStateAtom = atom(
   null,

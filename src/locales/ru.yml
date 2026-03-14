@@ -786,6 +786,8 @@ action:
   copied: Скопировано
   regenerate: Сгенерировать заново
   viewContextDetails: Контекст
+  contextDetailsTitleLabel: Заголовок
+  contextDetailsContextLabel: Контекст
   translation: Перевод
   speak: Озвучить
   playing: Воспроизведение

@@ -109,8 +109,8 @@ export function ContextDetailsButton({
         className="w-80 max-w-[calc(100vw-2rem)] p-3"
       >
         <FieldGroup className="gap-3">
-          <PreviewField field="title" label="Title" value={titleText} />
-          <PreviewField field="context" label="Context" value={contextText} />
+          <PreviewField field="title" label={i18n.t("action.contextDetailsTitleLabel")} value={titleText} />
+          <PreviewField field="context" label={i18n.t("action.contextDetailsContextLabel")} value={contextText} />
         </FieldGroup>
       </PopoverContent>
     </Popover>
