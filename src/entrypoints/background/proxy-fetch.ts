@@ -7,6 +7,19 @@ import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { SessionCacheGroupRegistry } from "../../utils/session-cache/session-cache-group-registry"
 
+function encodeArrayBufferToBase64(buffer: ArrayBuffer) {
+  const bytes = new Uint8Array(buffer)
+  let binary = ""
+  const chunkSize = 0x8000
+
+  for (let index = 0; index < bytes.length; index += chunkSize) {
+    const chunk = bytes.subarray(index, index + chunkSize)
+    binary += String.fromCharCode(...chunk)
+  }
+
+  return btoa(binary)
+}
+
 export function proxyFetch() {
   // Simplified: No need for in-memory Map, CacheRegistry handles everything
   async function getSessionCache(groupKey: string) {
@@ -75,7 +88,15 @@ export function proxyFetch() {
   onMessage("backgroundFetch", async (message): Promise<ProxyResponse> => {
     logger.info("[ProxyFetch] Background fetch:", message.data)
 
-    const { url, method, headers, body, credentials, cacheConfig } = message.data
+    const {
+      url,
+      method,
+      headers,
+      body,
+      credentials,
+      cacheConfig,
+      responseType = "text",
+    } = message.data
 
     const {
       enabled: cacheEnabled = false,
@@ -132,13 +153,16 @@ export function proxyFetch() {
     })
 
     const responseHeaders: [string, string][] = Array.from(response.headers.entries())
-    const textBody = await response.text()
+    const responseBody = responseType === "base64"
+      ? encodeArrayBufferToBase64(await response.arrayBuffer())
+      : await response.text()
 
     const result = {
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
-      body: textBody,
+      body: responseBody,
+      bodyEncoding: responseType,
     }
 
     logger.info("[ProxyFetch] Response without cache:", result)

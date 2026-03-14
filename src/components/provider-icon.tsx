@@ -1,5 +1,7 @@
 import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
+import { useEffect, useReducer } from "react"
+import { resolveContentScriptAssetUrl, shouldProxyAssetUrl } from "@/utils/content-script/background-asset-url"
 import { cn } from "@/utils/styles/utils"
 
 const providerIconVariants = cva(
@@ -81,15 +83,50 @@ interface ProviderIconProps extends VariantProps<typeof providerIconVariants> {
   textClassName?: string
 }
 
+function getInitialLogoSrc(logo: string) {
+  return shouldProxyAssetUrl(logo) ? null : logo
+}
+
 export default function ProviderIcon({ logo, name, size, className, textClassName }: ProviderIconProps) {
+  const [resolvedLogo, setResolvedLogo] = useReducer(
+    (_current: string | null, next: string | null) => next,
+    getInitialLogoSrc(logo),
+  )
+
+  useEffect(() => {
+    let isCancelled = false
+
+    if (!shouldProxyAssetUrl(logo)) {
+      setResolvedLogo(logo)
+      return () => {
+        isCancelled = true
+      }
+    }
+
+    setResolvedLogo(null)
+
+    void resolveContentScriptAssetUrl(logo).then((nextLogo) => {
+      if (!isCancelled) {
+        setResolvedLogo(nextLogo)
+      }
+    })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [logo])
+
   return (
     <div className={cn(providerIconVariants({ size }), className)}>
       <div className={iconContainerVariants({ size })}>
-        <img
-          src={logo}
-          alt={name}
-          className={iconVariants({ size })}
-        />
+        {resolvedLogo && (
+          <img
+            src={resolvedLogo}
+            alt={name}
+            className={iconVariants({ size })}
+            onError={() => setResolvedLogo(null)}
+          />
+        )}
       </div>
       {name && <span className={cn(textVariants({ size }), textClassName)}>{name}</span>}
     </div>

@@ -3,6 +3,7 @@ export interface ProxyResponse {
   statusText: string
   headers: [string, string][]
   body: string
+  bodyEncoding?: "text" | "base64"
 }
 
 export interface CacheConfig {
@@ -19,4 +20,5 @@ export interface ProxyRequest {
   body?: string
   credentials?: "omit" | "same-origin" | "include"
   cacheConfig?: CacheConfig
+  responseType?: "text" | "base64"
 }
