@@ -198,6 +198,13 @@ function readSelectionRangeSnapshots(selection: Selection | null) {
     return snapshots
   }
 
+  try {
+    snapshots.push(createRangeSnapshot(selection.getRangeAt(0)))
+  }
+  catch {
+    return snapshots
+  }
+
   return snapshots
 }
 
