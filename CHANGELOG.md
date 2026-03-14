@@ -1,5 +1,37 @@
 # @read-frog/extension
 
+## 1.29.0
+
+### Minor Changes
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: refactor the selection popover and add pin support for selection toolbar popovers
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add a target language selector to the selection toolbar translation popover
+
+- [#1098](https://github.com/mengxi-ream/read-frog/pull/1098) [`0e2b1f6`](https://github.com/mengxi-ream/read-frog/commit/0e2b1f6b40913064052c0c9bbfc61fdfd3324d88) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: translate browser tab title during page translation with automatic tracking and restoration
+
+### Patch Changes
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: avoid re-fetching vocabulary, dictionary, and translation resources after page navigation (#1064)
+
+- [#1108](https://github.com/mengxi-ream/read-frog/pull/1108) [`2fe15c9`](https://github.com/mengxi-ream/read-frog/commit/2fe15c957d6f8b435b866fd149d449d0e124e0bb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: rename custom ai feature
+
+- [#1095](https://github.com/mengxi-ream/read-frog/pull/1095) [`14de454`](https://github.com/mengxi-ream/read-frog/commit/14de4540aab2b81fe8696af549ed89ef653840de) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: optimize content script with sync config cache, lazy selection UI mounting, and proper teardown
+
+- [#1111](https://github.com/mengxi-ream/read-frog/pull/1111) [`66d1cf8`](https://github.com/mengxi-ream/read-frog/commit/66d1cf8e2840e7b0a863b410db988dd995606e64) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: support tts in dictionary
+
+- [#1109](https://github.com/mengxi-ream/read-frog/pull/1109) [`1ac2000`](https://github.com/mengxi-ream/read-frog/commit/1ac2000e08e5d0ab8a89d908751f611eb30aa05a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: unify inline error handling for selection toolbar translate and custom actions
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: simplify the selection toolbar translation flow and harden stale-request cancellation handling
+
+- [#1107](https://github.com/mengxi-ream/read-frog/pull/1107) [`4250c2b`](https://github.com/mengxi-ream/read-frog/commit/4250c2bb8c8d8819f2468746ceea061753ea3529) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style: add thinking indicator
+
+- [#1113](https://github.com/mengxi-ream/read-frog/pull/1113) [`d9af305`](https://github.com/mengxi-ream/read-frog/commit/d9af305d82a7ef47325200a6929f5f615839fa15) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: load css before spin
+
+- [#1039](https://github.com/mengxi-ream/read-frog/pull/1039) [`8abcd34`](https://github.com/mengxi-ream/read-frog/commit/8abcd345154d8d1c351d1dc597ea11dd1e5980d9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): optimize loading state message position and visual effect
+
+- [#1112](https://github.com/mengxi-ream/read-frog/pull/1112) [`0f06a67`](https://github.com/mengxi-ream/read-frog/commit/0f06a674304fd8e8f556a315b74e7e611b8733be) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: algorithm to get context
+
 ## 1.28.1
 
 ### Patch Changes
