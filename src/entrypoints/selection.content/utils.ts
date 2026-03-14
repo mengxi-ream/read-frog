@@ -117,30 +117,50 @@ function getNearestParentElement(node: Node | null) {
   return parentNode instanceof Element ? parentNode : null
 }
 
-function collectOpenShadowRoots(root: ParentNode) {
-  const shadowRoots: ShadowRoot[] = []
-  const queue: ParentNode[] = [root]
+function collectSelectionBoundaryNodes(selection: Selection) {
+  const boundaryNodes = new Set<Node>()
 
-  while (queue.length > 0) {
-    const currentRoot = queue.shift()
-    if (!currentRoot) {
-      continue
+  if (selection.anchorNode) {
+    boundaryNodes.add(selection.anchorNode)
+  }
+  if (selection.focusNode) {
+    boundaryNodes.add(selection.focusNode)
+  }
+
+  const rangeCount = typeof selection.rangeCount === "number" ? selection.rangeCount : 0
+
+  for (let index = 0; index < rangeCount; index += 1) {
+    try {
+      const range = selection.getRangeAt(index)
+      boundaryNodes.add(range.startContainer)
+      boundaryNodes.add(range.endContainer)
     }
-
-    const walker = document.createTreeWalker(currentRoot, NodeFilter.SHOW_ELEMENT)
-    let currentNode = walker.nextNode()
-
-    while (currentNode) {
-      if (currentNode instanceof Element && currentNode.shadowRoot) {
-        shadowRoots.push(currentNode.shadowRoot)
-        queue.push(currentNode.shadowRoot)
-      }
-
-      currentNode = walker.nextNode()
+    catch {
+      break
     }
   }
 
-  return shadowRoots
+  return Array.from(boundaryNodes)
+}
+
+function collectSelectionShadowRoots(selection: Selection) {
+  const shadowRoots = new Set<ShadowRoot>()
+
+  for (const boundaryNode of collectSelectionBoundaryNodes(selection)) {
+    let current: Node | null = boundaryNode
+
+    while (current) {
+      const root = current.getRootNode()
+      if (!(root instanceof ShadowRoot)) {
+        break
+      }
+
+      shadowRoots.add(root)
+      current = root.host
+    }
+  }
+
+  return Array.from(shadowRoots)
 }
 
 function readSelectionRangeSnapshots(selection: Selection | null) {
@@ -154,7 +174,7 @@ function readSelectionRangeSnapshots(selection: Selection | null) {
 
   if (typeof composedSelection.getComposedRanges === "function") {
     const composedRanges = composedSelection.getComposedRanges({
-      shadowRoots: collectOpenShadowRoots(document),
+      shadowRoots: collectSelectionShadowRoots(selection),
     })
 
     if (composedRanges.length > 0) {
