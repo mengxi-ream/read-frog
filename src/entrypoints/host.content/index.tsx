@@ -4,6 +4,7 @@ import { defineContentScript, storage } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from "@/utils/constants/config"
 import { getDocumentInfo } from "@/utils/content/analyze"
+import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { isSiteEnabled } from "@/utils/site-control"
@@ -35,6 +36,8 @@ export default defineContentScript({
       window.__READ_FROG_HOST_INJECTED__ = false
       return
     }
+
+    ensurePresetStyles(document)
 
     const cleanupUrlListener = setupUrlChangeListener()
 
