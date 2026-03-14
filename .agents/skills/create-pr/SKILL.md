@@ -1,6 +1,6 @@
 ---
 name: create-pr
-description: Create a pull request for the issue provided as argument
+description: Create a pull request, optionally for the issue provided as argument
 metadata:
   author: read-frog
   version: "1.0.0"
@@ -8,7 +8,7 @@ metadata:
 
 # Create Pull Request
 
-Create a pull request for the issue: $ARGUMENTS.
+Create a pull request. If an issue number is provided in $ARGUMENTS, use it. If no issue is provided, continue without requiring one.
 
 ## Workflow
 
@@ -58,7 +58,8 @@ Follow these steps:
    - Use `gh pr create` with:
      - A descriptive title following commit convention
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
-     - Search if there is relevant issue to this PR, if yes, include it in the PR description and link it using `Closes #<issue-number>` to automatically close the issue when the PR is merged
+     - If an issue number was provided, include it in the PR description using `Closes #<issue-number>`
+     - If no issue number was provided, search for a relevant issue only if it is easy to identify; otherwise leave the issue field empty instead of blocking the workflow
 
 8. **Return the PR URL for easy access**
 
