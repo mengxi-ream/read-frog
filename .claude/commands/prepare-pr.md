@@ -1,12 +1,12 @@
 ---
-description: Create a pull request for the issue provided as argument
+description: Prepare all work before creating a pull request for the issue provided as argument
 allowed-tools: Bash(git:*), Bash(gh:*), Read, Glob, Write, Edit
 argument-hint: [issue-number]
 ---
 
 # Create Pull Request
 
-Create a pull request for the issue: $ARGUMENTS.
+Prepare all work before creating a pull request for the issue: $ARGUMENTS.
 
 ## Workflow
 
@@ -52,13 +52,10 @@ Follow these steps:
 6. **Push the branch to remote**
    - Run `git push -u origin <branch-name>` if needed
 
-7. **Create PR with GitHub CLI**
-   - Use `gh pr create` with:
-     - A descriptive title following commit convention
+7. **Create Markdown for PR Description**
+   - Create a markdown file in docs/ folder which only contains the description of the PR and for me later to copy paste:
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
      - Search if there is relevant issue to this PR, if yes, include it in the PR description and link it using `Closes #<issue-number>` to automatically close the issue when the PR is merged
-
-8. **Return the PR URL for easy access**
 
 ## Commit Convention
 

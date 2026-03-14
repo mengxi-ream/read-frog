@@ -1,7 +1,9 @@
 ---
+name: create-pr
 description: Create a pull request for the issue provided as argument
-allowed-tools: Bash(git:*), Bash(gh:*), Read, Glob, Write, Edit
-argument-hint: [issue-number]
+metadata:
+  author: read-frog
+  version: "1.0.0"
 ---
 
 # Create Pull Request
