@@ -3,24 +3,37 @@ import { act, fireEvent, render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { useState } from "react"
 import { afterEach, describe, expect, it } from "vitest"
-import { selectionContentAtom, selectionRangeAtom } from "../atoms"
+import { buildContextSnapshot, createRangeSnapshot } from "../../utils"
+import { contextAtom, selectionAtom } from "../atoms"
 import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 
-function createRangeFor(node: Node) {
+function createSelectionSnapshot(node: Node, text: string) {
   const range = document.createRange()
   range.selectNodeContents(node)
-  return range
+
+  return {
+    text,
+    ranges: [
+      createRangeSnapshot({
+        startContainer: range.startContainer,
+        startOffset: range.startOffset,
+        endContainer: range.endContainer,
+        endOffset: range.endOffset,
+      }),
+    ],
+  }
 }
 
 function SnapshotProbe() {
   const [open, setOpen] = useState(false)
   const {
+    contextSnapshot,
     popoverSessionKey,
-    selectionContentSnapshot,
-    selectionRangeSnapshot,
+    selectionSnapshot,
     captureSelectionSnapshot,
     clearSelectionSnapshot,
   } = useSelectionPopoverSnapshot()
+  const selectionText = selectionSnapshot?.text ?? null
 
   return (
     <div>
@@ -42,8 +55,8 @@ function SnapshotProbe() {
         Refresh
       </button>
       <div data-testid="session-key">{popoverSessionKey}</div>
-      <div data-testid="selection-content">{selectionContentSnapshot ?? "empty"}</div>
-      <div data-testid="selection-range">{selectionRangeSnapshot?.toString() ?? "empty"}</div>
+      <div data-testid="selection-content">{selectionText ?? "empty"}</div>
+      <div data-testid="context-text">{contextSnapshot?.text ?? "empty"}</div>
     </div>
   )
 }
@@ -53,18 +66,18 @@ describe("useSelectionPopoverSnapshot", () => {
     document.body.innerHTML = ""
   })
 
-  it("keeps the captured selection stable until the popover is reopened", () => {
-    const firstNode = document.createElement("span")
-    firstNode.textContent = "First selection"
-    const secondNode = document.createElement("span")
-    secondNode.textContent = "Second selection"
-    document.body.append(firstNode, secondNode)
+  it("keeps the captured selection and context stable until the popover is reopened", () => {
+    const firstParagraph = document.createElement("p")
+    firstParagraph.textContent = "First selection paragraph"
+    const secondParagraph = document.createElement("p")
+    secondParagraph.textContent = "Second selection paragraph"
+    document.body.append(firstParagraph, secondParagraph)
 
-    const firstRange = createRangeFor(firstNode)
-    const secondRange = createRangeFor(secondNode)
+    const firstSelection = createSelectionSnapshot(firstParagraph, "First selection paragraph")
+    const secondSelection = createSelectionSnapshot(secondParagraph, "Second selection paragraph")
     const store = createStore()
-    store.set(selectionContentAtom, "First selection")
-    store.set(selectionRangeAtom, firstRange)
+    store.set(selectionAtom, firstSelection)
+    store.set(contextAtom, buildContextSnapshot(firstSelection))
 
     render(
       <Provider store={store}>
@@ -74,29 +87,29 @@ describe("useSelectionPopoverSnapshot", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Open" }))
     expect(screen.getByTestId("session-key")).toHaveTextContent("1")
-    expect(screen.getByTestId("selection-content")).toHaveTextContent("First selection")
-    expect(screen.getByTestId("selection-range")).toHaveTextContent("First selection")
+    expect(screen.getByTestId("selection-content")).toHaveTextContent("First selection paragraph")
+    expect(screen.getByTestId("context-text")).toHaveTextContent("First selection paragraph")
 
     act(() => {
-      store.set(selectionContentAtom, "Second selection")
-      store.set(selectionRangeAtom, secondRange)
+      store.set(selectionAtom, secondSelection)
+      store.set(contextAtom, buildContextSnapshot(secondSelection))
     })
 
-    expect(screen.getByTestId("selection-content")).toHaveTextContent("First selection")
-    expect(screen.getByTestId("selection-range")).toHaveTextContent("First selection")
+    expect(screen.getByTestId("selection-content")).toHaveTextContent("First selection paragraph")
+    expect(screen.getByTestId("context-text")).toHaveTextContent("First selection paragraph")
 
     fireEvent.click(screen.getByRole("button", { name: "Refresh" }))
     expect(screen.getByTestId("session-key")).toHaveTextContent("2")
-    expect(screen.getByTestId("selection-content")).toHaveTextContent("Second selection")
-    expect(screen.getByTestId("selection-range")).toHaveTextContent("Second selection")
+    expect(screen.getByTestId("selection-content")).toHaveTextContent("Second selection paragraph")
+    expect(screen.getByTestId("context-text")).toHaveTextContent("Second selection paragraph")
 
     fireEvent.click(screen.getByRole("button", { name: "Close" }))
     expect(screen.getByTestId("selection-content")).toHaveTextContent("empty")
-    expect(screen.getByTestId("selection-range")).toHaveTextContent("empty")
+    expect(screen.getByTestId("context-text")).toHaveTextContent("empty")
 
     fireEvent.click(screen.getByRole("button", { name: "Open" }))
     expect(screen.getByTestId("session-key")).toHaveTextContent("3")
-    expect(screen.getByTestId("selection-content")).toHaveTextContent("Second selection")
-    expect(screen.getByTestId("selection-range")).toHaveTextContent("Second selection")
+    expect(screen.getByTestId("selection-content")).toHaveTextContent("Second selection paragraph")
+    expect(screen.getByTestId("context-text")).toHaveTextContent("Second selection paragraph")
   })
 })

@@ -353,7 +353,7 @@ options:
             cancel: 취소
           tokens:
             selection: 선택한 텍스트 내용
-            context: 선택 텍스트가 포함된 문단 내용
+            context: 선택 영역과 겹치는 문단 내용이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
             targetLang: 사용자의 대상 언어
             title: 웹페이지 제목
           delete: 삭제
@@ -785,6 +785,7 @@ action:
   copy: 복사
   copied: 복사됨
   regenerate: 다시 생성
+  viewContextDetails: 컨텍스트
   translation: 번역
   speak: 읽기
   playing: 재생 중

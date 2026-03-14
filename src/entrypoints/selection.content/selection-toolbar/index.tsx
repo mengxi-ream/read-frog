@@ -6,8 +6,13 @@ import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { MARGIN } from "@/utils/constants/selection"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
+import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
 import { AiButton } from "./ai-button"
-import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atoms"
+import {
+  clearSelectionStateAtom,
+  isSelectionToolbarVisibleAtom,
+  setSelectionStateAtom,
+} from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
 import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
 import { SpeakButton } from "./speak-button"
@@ -71,8 +76,8 @@ export function SelectionToolbar() {
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
   const isDraggingFromTooltipRef = useRef(false) // track if dragging started from tooltip
   const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(isSelectionToolbarVisibleAtom)
-  const setSelectionContent = useSetAtom(selectionContentAtom)
-  const setSelectionRange = useSetAtom(selectionRangeAtom)
+  const setSelectionState = useSetAtom(setSelectionStateAtom)
+  const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const dropdownOpenRef = useRef(false)
 
@@ -135,7 +140,7 @@ export function SelectionToolbar() {
 
         // check if there is text selected
         const selection = window.getSelection()
-        const selectedText = selection?.toString().trim() || ""
+        const selectionSnapshot = readSelectionSnapshot(selection)
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
@@ -143,9 +148,11 @@ export function SelectionToolbar() {
           return
         }
 
-        if (selection && selectedText.length > 0) {
-          setSelectionContent(selectedText)
-          setSelectionRange(selection.getRangeAt(0))
+        if (selectionSnapshot) {
+          setSelectionState({
+            selection: selectionSnapshot,
+            context: buildContextSnapshot(selectionSnapshot),
+          })
           // calculate the position relative to the document
           const scrollY = window.scrollY
           const scrollX = window.scrollX
@@ -191,6 +198,7 @@ export function SelectionToolbar() {
       // Record selection start position
       selectionStartRef.current = { x: e.clientX, y: e.clientY }
 
+      clearSelectionState()
       setIsSelectionToolbarVisible(false)
     }
 
@@ -198,6 +206,7 @@ export function SelectionToolbar() {
       // if the selected content is cleared, hide the tooltip
       const selection = window.getSelection()
       if (!selection || selection.toString().trim().length === 0) {
+        clearSelectionState()
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
         if (!dropdownOpenRef.current)
@@ -229,7 +238,7 @@ export function SelectionToolbar() {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [isSelectionToolbarVisible, setSelectionContent, setIsSelectionToolbarVisible, setSelectionRange, updatePosition])
+  }, [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible, setSelectionState, updatePosition])
 
   useEffect(() => {
     const handler = (e: Event) => {

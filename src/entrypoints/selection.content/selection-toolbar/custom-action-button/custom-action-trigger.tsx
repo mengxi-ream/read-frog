@@ -11,7 +11,6 @@ import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-e
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
 import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
-import { getSelectionParagraphText } from "../../utils"
 import {
   isSelectionToolbarVisibleAtom,
   selectionToolbarCustomActionRequestAtomFamily,
@@ -34,34 +33,35 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
   const setConfig = useSetAtom(writeConfigAtom)
   const bodyRef = useRef<HTMLDivElement>(null)
   const {
-    selectionContentSnapshot,
-    selectionRangeSnapshot,
+    contextSnapshot,
+    selectionSnapshot,
     popoverSessionKey,
     captureSelectionSnapshot,
     clearSelectionSnapshot,
   } = useSelectionPopoverSnapshot()
+  const selectionText = selectionSnapshot?.text ?? null
+  const titleText = document.title || null
 
   const activeAction = customActionRequest.action
   const cleanSelection = useMemo(
-    () => normalizeSelectedText(selectionContentSnapshot),
-    [selectionContentSnapshot],
+    () => normalizeSelectedText(selectionText),
+    [selectionText],
   )
-  const paragraphText = useMemo(() => {
+  const contextText = useMemo(() => {
     if (!cleanSelection) {
       return ""
     }
 
-    const paragraphCandidate = selectionRangeSnapshot ? getSelectionParagraphText(selectionRangeSnapshot) : cleanSelection
-    return paragraphCandidate || cleanSelection
-  }, [cleanSelection, selectionRangeSnapshot])
+    return contextSnapshot?.text || cleanSelection
+  }, [cleanSelection, contextSnapshot?.text])
 
   const llmProviders = useMemo(
     () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
     [providersConfig],
   )
   const executionPlan = useMemo(
-    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, paragraphText),
-    [cleanSelection, customActionRequest, paragraphText],
+    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, contextText),
+    [cleanSelection, contextText, customActionRequest],
   )
   const {
     isRunning,
@@ -142,14 +142,16 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
           <CustomActionContent
             isRunning={displayedIsRunning}
             outputSchema={activeAction.outputSchema}
-            selectionContent={selectionContentSnapshot}
+            selectionContent={selectionText}
             value={displayedResult}
             thinking={displayedThinking}
           />
           <SelectionToolbarErrorAlert error={displayedError} />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
+          contextText={contextText}
           providers={llmProviders}
+          titleText={titleText}
           value={customActionRequest.providerConfig?.id ?? ""}
           onProviderChange={handleProviderChange}
           onRegenerate={handleRegenerate}

@@ -354,7 +354,7 @@ options:
             cancel: Cancel
           tokens:
             selection: Selected text content
-            context: Paragraph text where the selection appears
+            context: Intersecting paragraph text, truncated to the first 2000 characters when sent to custom AI actions
             targetLang: "User's target language"
             title: Webpage title
           delete: Delete
@@ -897,6 +897,7 @@ action:
   copy: Copy
   copied: Copied
   regenerate: Regenerate
+  viewContextDetails: Context
   translation: Translation
   speak: Speak
   playing: Playing

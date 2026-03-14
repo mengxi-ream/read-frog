@@ -19,10 +19,10 @@ import { getWordExplainPrompt } from "@/utils/prompts/word-explain"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
+import { SelectionSourceContent } from "../components/selection-source-content"
 import { SelectionToolbarFooterContent } from "../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
 import { SelectionToolbarTooltip } from "../components/selection-tooltip"
-import { createHighlightData } from "../utils"
 import {
   isSelectionToolbarVisibleAtom,
   selectionToolbarVocabularyInsightRequestAtom,
@@ -48,8 +48,9 @@ export function AiButton() {
   const bodyRef = useRef<HTMLDivElement>(null)
   const [aiResponse, setAiResponse] = useState("")
   const {
+    contextSnapshot,
     popoverSessionKey,
-    selectionRangeSnapshot,
+    selectionSnapshot,
     captureSelectionSnapshot,
     clearSelectionSnapshot,
   } = useSelectionPopoverSnapshot()
@@ -57,16 +58,22 @@ export function AiButton() {
   const resetSessionState = useCallback(() => {
     setAiResponse("")
   }, [])
+  const selectionText = selectionSnapshot?.text ?? null
+  const contextText = contextSnapshot?.text ?? selectionText
+  const titleText = document.title || null
 
   const highlightData = useMemo(() => {
-    if (!selectionRangeSnapshot || !open) {
+    if (!selectionSnapshot || !open) {
       return null
     }
 
-    const data = createHighlightData(selectionRangeSnapshot)
+    const data = {
+      selection: selectionSnapshot.text,
+      context: contextSnapshot?.text || selectionSnapshot.text,
+    }
     logger.info("highlightData.context", "\n", data.context)
     return data
-  }, [open, selectionRangeSnapshot])
+  }, [contextSnapshot?.text, open, selectionSnapshot])
   const llmProviders = useMemo(
     () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
     [providersConfig],
@@ -109,8 +116,8 @@ export function AiButton() {
           vocabularyInsightRequest.language.level,
         )
         const userMessage
-          = `query: ${highlightData.context.selection}\n`
-            + `context: ${highlightData.context.before} ${highlightData.context.selection} ${highlightData.context.after}`
+          = `query: ${highlightData.selection}\n`
+            + `context: ${highlightData.context}`
 
         const modelName = resolveModelId(vocabularyInsightProviderConfig.model) ?? ""
         const providerOptions = getProviderOptionsWithOverride(
@@ -220,26 +227,11 @@ export function AiButton() {
               </AlertDescription>
             </Alert>
             <div className="border-b pb-4 sticky pt-4 top-0 bg-white dark:bg-zinc-800 z-10">
-              <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">上下文:</p>
-              <div className="text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 p-3 rounded leading-relaxed">
-                {highlightData?.context.before && (
-                  <span>
-                    {highlightData.context.before}
-                  </span>
-                )}
-                {highlightData?.context.selection && (
-                  <span
-                    className="font-medium"
-                    style={{ color: "var(--read-frog-primary)" }}
-                  >
-                    {` ${highlightData.context.selection} `}
-                  </span>
-                )}
-                {highlightData?.context.after && (
-                  <span>
-                    {highlightData.context.after}
-                  </span>
-                )}
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">Selected text:</p>
+              <SelectionSourceContent text={selectionSnapshot?.text} separatorClassName="mb-4" />
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">Context:</p>
+              <div className="text-sm whitespace-pre-wrap wrap-break-words text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 p-3 rounded leading-relaxed">
+                {highlightData?.context ?? ""}
               </div>
             </div>
             <div className="pt-4">
@@ -279,7 +271,9 @@ export function AiButton() {
           </div>
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
+          contextText={contextText}
           providers={llmProviders}
+          titleText={titleText}
           value={vocabularyInsightRequest.providerConfig?.id ?? ""}
           onProviderChange={handleProviderChange}
           onRegenerate={handleRegenerate}

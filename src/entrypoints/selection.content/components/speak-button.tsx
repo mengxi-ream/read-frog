@@ -63,6 +63,7 @@ export function SpeakButton({ text }: { text: string | undefined }) {
         {icon}
       </TooltipTrigger>
       <TooltipContent
+        className="whitespace-nowrap"
         container={popoverOverlay.container}
         positionerClassName={popoverOverlay.positionerClassName}
       >

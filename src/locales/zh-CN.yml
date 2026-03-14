@@ -354,7 +354,7 @@ options:
             cancel: 取消
           tokens:
             selection: 选中的文本内容
-            context: 选中文本所在段落内容
+            context: 与选区相交的段落内容，传给自定义 AI 指令时会截断到前 2000 个字符
             targetLang: 用户的目标语言
             title: 网页标题
           delete: 删除
@@ -897,6 +897,7 @@ action:
   copy: 复制
   copied: 已复制
   regenerate: 重新生成
+  viewContextDetails: 上下文
   translation: 翻译
   speak: 朗读
   playing: 播放中

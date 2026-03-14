@@ -1,5 +1,6 @@
 import type { ReactNode } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { cn } from "@/utils/styles/utils"
 import { shadowWrapper } from ".."
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "../overlay-layers"
 
@@ -34,7 +35,7 @@ function SelectionTooltip({
       <TooltipContent
         align={align}
         alignOffset={alignOffset}
-        className={className}
+        className={cn("whitespace-nowrap", className)}
         container={container}
         positionerClassName={positionerClassName}
         side={side}

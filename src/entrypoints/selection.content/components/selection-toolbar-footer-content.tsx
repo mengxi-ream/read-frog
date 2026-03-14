@@ -1,14 +1,121 @@
 import type { ProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
-import { IconRefresh } from "@tabler/icons-react"
+import { IconAspectRatio, IconRefresh } from "@tabler/icons-react"
 import { useCallback, useState } from "react"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { buttonVariants } from "@/components/ui/base-ui/button"
+import {
+  Field,
+  FieldContent,
+  FieldGroup,
+  FieldTitle,
+} from "@/components/ui/base-ui/field"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/base-ui/popover"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { SelectionPopover, useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
 import { cn } from "@/utils/styles/utils"
 
 const TOOLTIP_TRIGGER_PRESS_REASON = "trigger-press"
+
+function PreviewField({
+  field,
+  label,
+  value,
+}: {
+  field: "title" | "context"
+  label: string
+  value: string | null | undefined
+}) {
+  const displayValue = value?.trim() ? value : "—"
+
+  return (
+    <Field>
+      <FieldContent>
+        <FieldTitle>{label}</FieldTitle>
+        <div
+          data-slot="selection-toolbar-footer-preview-value"
+          data-field={field}
+          className="max-h-36 overflow-y-auto rounded-md border bg-muted/40 px-2 py-1 text-sm whitespace-pre-wrap wrap-break-words text-muted-foreground"
+        >
+          {displayValue}
+        </div>
+      </FieldContent>
+    </Field>
+  )
+}
+
+export function ContextDetailsButton({
+  className,
+  contextText,
+  titleText,
+}: {
+  className?: string
+  contextText: string | null | undefined
+  titleText: string | null | undefined
+}) {
+  const popoverOverlay = useSelectionPopoverOverlayProps()
+  const buttonLabel = i18n.t("action.viewContextDetails")
+  const [tooltipOpen, setTooltipOpen] = useState(false)
+
+  const handleClick = useCallback(() => {
+    setTooltipOpen(true)
+  }, [])
+
+  const handleTooltipOpenChange = useCallback((nextOpen: boolean, eventDetails: { reason: string }) => {
+    if (!nextOpen && eventDetails.reason === TOOLTIP_TRIGGER_PRESS_REASON) {
+      return
+    }
+
+    setTooltipOpen(nextOpen)
+  }, [])
+
+  return (
+    <Popover>
+      <Tooltip open={tooltipOpen} onOpenChange={handleTooltipOpenChange}>
+        <TooltipTrigger
+          render={(
+            <PopoverTrigger
+              render={(
+                <button
+                  type="button"
+                  className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }), className)}
+                  onClick={handleClick}
+                  aria-label={buttonLabel}
+                  title={buttonLabel}
+                />
+              )}
+            />
+          )}
+        >
+          <IconAspectRatio />
+        </TooltipTrigger>
+        <TooltipContent
+          className="whitespace-nowrap"
+          container={popoverOverlay.container}
+          positionerClassName={popoverOverlay.positionerClassName}
+        >
+          {buttonLabel}
+        </TooltipContent>
+      </Tooltip>
+      <PopoverContent
+        container={popoverOverlay.container}
+        positionerClassName={popoverOverlay.positionerClassName}
+        side="top"
+        align="end"
+        className="w-80 max-w-[calc(100vw-2rem)] p-3"
+      >
+        <FieldGroup className="gap-3">
+          <PreviewField field="title" label="Title" value={titleText} />
+          <PreviewField field="context" label="Context" value={contextText} />
+        </FieldGroup>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 export function RegenerateButton({
   className,
@@ -49,6 +156,7 @@ export function RegenerateButton({
         <IconRefresh />
       </TooltipTrigger>
       <TooltipContent
+        className="whitespace-nowrap"
         container={popoverOverlay.container}
         positionerClassName={popoverOverlay.positionerClassName}
       >
@@ -60,15 +168,19 @@ export function RegenerateButton({
 
 export function SelectionToolbarFooterContent({
   className,
+  contextText,
   onProviderChange,
   onRegenerate,
   providers,
+  titleText,
   value,
 }: {
   className?: string
+  contextText: string | null | undefined
   onProviderChange: (id: string) => void
   onRegenerate: () => void
   providers: ProviderConfig[]
+  titleText: string | null | undefined
   value: string
 }) {
   const popoverOverlay = useSelectionPopoverOverlayProps()
@@ -84,7 +196,10 @@ export function SelectionToolbarFooterContent({
           selectContentProps={popoverOverlay}
         />
       </div>
-      <RegenerateButton onRegenerate={onRegenerate} />
+      <div className="flex items-center gap-1">
+        <ContextDetailsButton titleText={titleText} contextText={contextText} />
+        <RegenerateButton onRegenerate={onRegenerate} />
+      </div>
     </SelectionPopover.Footer>
   )
 }

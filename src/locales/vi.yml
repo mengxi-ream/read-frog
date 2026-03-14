@@ -353,7 +353,7 @@ options:
             cancel: Hủy
           tokens:
             selection: Nội dung văn bản đã chọn
-            context: Nội dung đoạn văn chứa văn bản đã chọn
+            context: Nội dung đoạn văn giao với vùng chọn, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
             targetLang: Ngôn ngữ đích của người dùng
             title: Tiêu đề trang web
           delete: Xóa
@@ -785,6 +785,7 @@ action:
   copy: Sao chép
   copied: Đã sao chép
   regenerate: Tạo lại
+  viewContextDetails: Ngữ cảnh
   translation: Dịch
   speak: Đọc
   playing: Đang phát

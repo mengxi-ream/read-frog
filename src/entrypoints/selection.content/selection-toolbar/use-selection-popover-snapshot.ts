@@ -1,32 +1,55 @@
+import type { ContextSnapshot, SelectionSnapshot } from "../utils"
 import { useAtomValue } from "jotai"
 import { useCallback, useState } from "react"
-import { selectionContentAtom, selectionRangeAtom } from "./atoms"
+import { contextAtom, selectionAtom } from "./atoms"
 
 interface SelectionPopoverSnapshot {
-  selectionContentSnapshot: string | null
-  selectionRangeSnapshot: Range | null
+  selectionSnapshot: SelectionSnapshot | null
+  contextSnapshot: ContextSnapshot | null
 }
 
 function createEmptySnapshot(): SelectionPopoverSnapshot {
   return {
-    selectionContentSnapshot: null,
-    selectionRangeSnapshot: null,
+    selectionSnapshot: null,
+    contextSnapshot: null,
+  }
+}
+
+function cloneSelectionSnapshot(snapshot: SelectionSnapshot | null): SelectionSnapshot | null {
+  if (!snapshot) {
+    return null
+  }
+
+  return {
+    ...snapshot,
+    ranges: snapshot.ranges.map(range => ({ ...range })),
+  }
+}
+
+function cloneContextSnapshot(snapshot: ContextSnapshot | null): ContextSnapshot | null {
+  if (!snapshot) {
+    return null
+  }
+
+  return {
+    ...snapshot,
+    paragraphs: [...snapshot.paragraphs],
   }
 }
 
 export function useSelectionPopoverSnapshot() {
-  const selectionContent = useAtomValue(selectionContentAtom)
-  const selectionRange = useAtomValue(selectionRangeAtom)
+  const selection = useAtomValue(selectionAtom)
+  const context = useAtomValue(contextAtom)
   const [snapshot, setSnapshot] = useState<SelectionPopoverSnapshot>(createEmptySnapshot)
   const [popoverSessionKey, setPopoverSessionKey] = useState(0)
 
   const captureSelectionSnapshot = useCallback(() => {
     setSnapshot({
-      selectionContentSnapshot: selectionContent,
-      selectionRangeSnapshot: selectionRange?.cloneRange() ?? null,
+      selectionSnapshot: cloneSelectionSnapshot(selection),
+      contextSnapshot: cloneContextSnapshot(context),
     })
     setPopoverSessionKey(prev => prev + 1)
-  }, [selectionContent, selectionRange])
+  }, [context, selection])
 
   const clearSelectionSnapshot = useCallback(() => {
     setSnapshot(createEmptySnapshot())

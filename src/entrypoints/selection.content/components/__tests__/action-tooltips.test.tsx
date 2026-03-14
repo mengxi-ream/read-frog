@@ -7,7 +7,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CopyButton } from "../copy-button"
-import { RegenerateButton } from "../selection-toolbar-footer-content"
+import { ContextDetailsButton, RegenerateButton } from "../selection-toolbar-footer-content"
 import { SpeakButton } from "../speak-button"
 
 vi.mock("@/hooks/use-text-to-speech", () => ({
@@ -119,6 +119,20 @@ describe("selection action tooltips", () => {
     expect(positioner).toHaveClass("z-50")
   })
 
+  it("renders the context details tooltip above selection popovers", async () => {
+    const { container } = renderWithProviders(
+      <ContextDetailsButton titleText="Title" contextText="Context" />,
+    )
+    const trigger = container.querySelector("[data-slot='tooltip-trigger']")
+
+    expect(trigger).toBeTruthy()
+
+    const { tooltip, positioner } = await openTooltip(trigger!)
+
+    expect(tooltip).toHaveTextContent("action.viewContextDetails")
+    expect(positioner).toHaveClass("z-50")
+  })
+
   it("keeps the speak tooltip open after click", async () => {
     const { container } = renderWithProviders(<SpeakButton text="Speak text" />)
     const trigger = container.querySelector("[data-slot='tooltip-trigger']")
@@ -152,5 +166,23 @@ describe("selection action tooltips", () => {
     })
 
     expect(onRegenerate).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps the context details tooltip open after click", async () => {
+    const { container } = renderWithProviders(
+      <ContextDetailsButton titleText="Title" contextText="Context" />,
+    )
+    const trigger = container.querySelector("[data-slot='tooltip-trigger']")
+
+    expect(trigger).toBeTruthy()
+
+    const { tooltip: initialTooltip } = await openTooltip(trigger!)
+    expect(initialTooltip).toHaveTextContent("action.viewContextDetails")
+
+    fireEvent.click(trigger!)
+
+    await waitFor(() => {
+      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent("action.viewContextDetails")
+    })
   })
 })

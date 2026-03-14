@@ -121,11 +121,15 @@ export function TranslateButton() {
   const abortControllerRef = useRef<AbortController | null>(null)
   const runIdRef = useRef(0)
   const {
-    selectionContentSnapshot,
+    contextSnapshot,
+    selectionSnapshot,
     popoverSessionKey,
     captureSelectionSnapshot,
     clearSelectionSnapshot,
   } = useSelectionPopoverSnapshot()
+  const selectionText = selectionSnapshot?.text ?? null
+  const contextText = contextSnapshot?.text ?? selectionText
+  const titleText = document.title || null
   const translateProviders = useMemo(
     () => filterEnabledProvidersConfig(providersConfig).filter(isTranslateProviderConfig),
     [providersConfig],
@@ -150,7 +154,7 @@ export function TranslateButton() {
   }, [])
 
   const runTranslation = useCallback(async (runId: number) => {
-    const preparedText = prepareTranslationText(selectionContentSnapshot)
+    const preparedText = prepareTranslationText(selectionText)
 
     if (preparedText === "") {
       if (runIdRef.current === runId) {
@@ -235,7 +239,7 @@ export function TranslateButton() {
         setIsTranslating(false)
       }
     }
-  }, [resetSessionState, selectionContentSnapshot, translateRequest])
+  }, [resetSessionState, selectionText, translateRequest])
 
   const startTranslation = useEffectEvent((runId: number) => {
     void runTranslation(runId)
@@ -263,7 +267,7 @@ export function TranslateButton() {
     return () => {
       cancelCurrentTranslation(runId)
     }
-  }, [cancelCurrentTranslation, open, popoverSessionKey, rerunNonce, selectionContentSnapshot, translateRequest])
+  }, [cancelCurrentTranslation, open, popoverSessionKey, rerunNonce, selectionText, translateRequest])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     cancelCurrentTranslation()
@@ -307,7 +311,7 @@ export function TranslateButton() {
 
         <SelectionPopover.Body>
           <TranslationContent
-            selectionContent={selectionContentSnapshot}
+            selectionContent={selectionText}
             translatedText={translatedText}
             isTranslating={isTranslating}
             thinking={thinking}
@@ -315,7 +319,9 @@ export function TranslateButton() {
           <SelectionToolbarErrorAlert error={error} className="-mt-3" />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
+          contextText={contextText}
           providers={translateProviders}
+          titleText={titleText}
           value={translateRequest.providerConfig?.id ?? ""}
           onProviderChange={handleProviderChange}
           onRegenerate={handleRegenerate}

@@ -140,20 +140,26 @@ vi.mock("../../components/selection-toolbar-title-content", () => ({
 
 vi.mock("../../components/selection-toolbar-footer-content", () => ({
   SelectionToolbarFooterContent: ({
+    contextText,
     onProviderChange,
     onRegenerate,
     providers,
+    titleText,
     value,
   }: {
+    contextText: string | null | undefined
     onProviderChange: (id: string) => void
     onRegenerate: () => void
     providers: Array<{ id: string }>
+    titleText: string | null | undefined
     value: string
   }) => {
     const nextProvider = providers.find(provider => provider.id !== value)
 
     return (
       <div>
+        <span data-testid="footer-title">{titleText}</span>
+        <span data-testid="footer-context">{contextText}</span>
         <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
           Regenerate
         </button>
@@ -474,37 +480,49 @@ describe("selection toolbar requests", () => {
   })
 
   it("renders translate errors inline and clears them after a successful rerun", async () => {
+    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {})
+
     translateTextCoreMock
       .mockRejectedValueOnce(new Error("Standard translation failed"))
       .mockResolvedValueOnce("Recovered translation")
     getOrFetchArticleDataMock.mockResolvedValue(null)
 
-    const store = createStore()
-    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
-    store.set(selectionContentAtom, "Selected text")
-    renderWithProviders(<TranslateButton />, store)
+    try {
+      const store = createStore()
+      store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+      store.set(selectionContentAtom, "Selected text")
+      renderWithProviders(<TranslateButton />, store)
 
-    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+      fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
 
-    const alert = await screen.findByRole("alert")
-    expect(alert).toHaveTextContent("translationHub.translationFailed")
-    expect(alert).toHaveTextContent("Standard translation failed")
-    expect(toastErrorMock).not.toHaveBeenCalled()
+      const alert = await screen.findByRole("alert")
+      expect(alert).toHaveTextContent("translationHub.translationFailed")
+      expect(alert).toHaveTextContent("Standard translation failed")
+      expect(toastErrorMock).not.toHaveBeenCalled()
 
-    const translationContent = screen.getByTestId("translation-content")
-    expect(translationContent.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    expect(alert.compareDocumentPosition(screen.getByRole("button", { name: "Change provider" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      const translationContent = screen.getByTestId("translation-content")
+      expect(translationContent.compareDocumentPosition(alert) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+      expect(alert.compareDocumentPosition(screen.getByRole("button", { name: "Change provider" })) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
 
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Translation error:",
+        expect.objectContaining({ message: "Standard translation failed" }),
+      )
 
-    await waitFor(() => {
-      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
-    })
+      fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
 
-    await waitFor(() => {
-      expect(screen.getByTestId("translation-result").textContent).toBe("Recovered translation")
-    })
-    expect(screen.queryByRole("alert")).toBeNull()
+      await waitFor(() => {
+        expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+      })
+
+      await waitFor(() => {
+        expect(screen.getByTestId("translation-result").textContent).toBe("Recovered translation")
+      })
+      expect(screen.queryByRole("alert")).toBeNull()
+    }
+    finally {
+      consoleErrorSpy.mockRestore()
+    }
   })
 
   it("shows a precheck alert when the translate provider is unavailable", async () => {

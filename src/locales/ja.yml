@@ -353,7 +353,7 @@ options:
             cancel: キャンセル
           tokens:
             selection: 選択したテキスト内容
-            context: 選択テキストが含まれる段落内容
+            context: 選択範囲と交差する段落内容。カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
             targetLang: ユーザーのターゲット言語
             title: ウェブページのタイトル
           delete: 削除
@@ -785,6 +785,7 @@ action:
   copy: コピー
   copied: コピー済み
   regenerate: 再生成
+  viewContextDetails: コンテキスト
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中

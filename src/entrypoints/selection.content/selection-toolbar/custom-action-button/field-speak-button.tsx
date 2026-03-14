@@ -74,6 +74,7 @@ export function FieldSpeakButton({
         {icon}
       </TooltipTrigger>
       <TooltipContent
+        className="whitespace-nowrap"
         container={popoverOverlay.container}
         positionerClassName={popoverOverlay.positionerClassName}
       >

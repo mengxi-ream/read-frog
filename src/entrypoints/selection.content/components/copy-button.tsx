@@ -56,6 +56,7 @@ export function CopyButton({ text }: { text: string | undefined }) {
           : <IconCopy />}
       </TooltipTrigger>
       <TooltipContent
+        className="whitespace-nowrap"
         container={popoverOverlay.container}
         positionerClassName={popoverOverlay.positionerClassName}
       >

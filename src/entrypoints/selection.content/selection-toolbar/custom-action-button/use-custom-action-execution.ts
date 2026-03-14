@@ -10,6 +10,7 @@ import { isLLMProviderConfig } from "@/types/config/provider"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { truncateContextTextForCustomAction } from "../../utils"
 import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
 import {
   createSelectionToolbarPrecheckError,
@@ -44,7 +45,7 @@ function scrollSelectionPopoverBodyToBottom(ref: RefObject<HTMLDivElement | null
 export function buildCustomActionExecutionPlan(
   customActionRequest: SelectionToolbarCustomActionRequestSlice,
   cleanSelection: string,
-  paragraphText: string,
+  contextText: string,
 ): CustomActionExecutionPlan {
   const action = customActionRequest.action
 
@@ -84,7 +85,7 @@ export function buildCustomActionExecutionPlan(
       providerConfig,
       promptTokens: {
         selection: cleanSelection,
-        context: paragraphText,
+        context: truncateContextTextForCustomAction(contextText || cleanSelection),
         targetLang: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
         title: document.title,
       },

@@ -1,96 +1,27 @@
-/**
- * Extract context sentences from text based on selection
- * This function handles pure text processing without DOM dependencies
- */
-export function extractTextContext(fullText: string, selection: string) {
-  // Handle edge cases
-  if (selection === "" || fullText === "" || !fullText.includes(selection)) {
-    return { before: "", selection, after: "" }
-  }
-
-  const index = fullText.indexOf(selection)
-
-  // If selection is the entire text, return it with no context
-  if (index === 0 && selection.length === fullText.length) {
-    return { before: "", selection, after: "" }
-  }
-
-  // Find sentence boundaries around the selection
-  const sentenceEndings = /[.!?。！？]/
-
-  // Find the start of the current sentence (before the selection)
-  let sentenceStart = 0
-  for (let i = index - 1; i >= 0; i--) {
-    if (sentenceEndings.test(fullText[i])) {
-      sentenceStart = i + 1
-      break
-    }
-  }
-
-  // Find the end of the current sentence (after the selection)
-  let sentenceEnd = fullText.length
-  for (let i = index + selection.length; i < fullText.length; i++) {
-    if (sentenceEndings.test(fullText[i])) {
-      sentenceEnd = i + 1
-      break
-    }
-  }
-
-  // Extract the sentence containing the selection
-  const sentence = fullText.slice(sentenceStart, sentenceEnd)
-  const relativeIndex = sentence.indexOf(selection)
-
-  // If selection is at the beginning or end of sentence, return empty context
-  if (relativeIndex === 0 || relativeIndex + selection.length === sentence.length) {
-    return { before: "", selection, after: "" }
-  }
-
-  const before = sentence.slice(0, relativeIndex)
-  const after = sentence.slice(relativeIndex + selection.length)
-
-  return { before, selection, after }
+export interface SelectionRangeSnapshot {
+  startContainer: Node
+  startOffset: number
+  endContainer: Node
+  endOffset: number
 }
 
-/**
- * Get the context sentences for the selected text
- * TODO: this is a simple version, need to improve
- */
-export function getContext(selectionRange: Range) {
-  const container = selectionRange.commonAncestorContainer
-  let root: Node | null = null
-
-  if (container.nodeType === Node.TEXT_NODE) {
-    root = container.parentElement
-  }
-  else {
-    root = container
-  }
-
-  const fullText = root?.textContent ?? ""
-  const selection = selectionRange.toString()
-
-  return extractTextContext(fullText, selection)
+export interface SelectionSnapshot {
+  text: string
+  ranges: SelectionRangeSnapshot[]
 }
 
-interface Context {
-  before: string
-  selection: string
-  after: string
+export interface ContextSnapshot {
+  text: string
+  paragraphs: string[]
 }
 
-export interface HighlightData {
-  context: Context
-}
+type SelectionRangeSource = SelectionRangeSnapshot
 
-/**
- * Create highlight data
- */
-export function createHighlightData(selectionRange: Range): HighlightData {
-  return {
-    context: getContext(selectionRange),
-  }
-}
+type ParagraphOwner = Element | ShadowRoot
 
+const ZERO_WIDTH_CHAR_REGEX = /\u200B/g
+const WHITESPACE_REGEX = /\s+/g
+const PARAGRAPH_SEPARATOR = "\n\n"
 const PARAGRAPH_LIKE_TAGS = new Set([
   "P",
   "LI",
@@ -108,58 +39,370 @@ const PARAGRAPH_LIKE_TAGS = new Set([
   "H6",
   "FIGCAPTION",
 ])
+const SEMANTIC_CONTAINER_TAGS = new Set([
+  "ARTICLE",
+  "ASIDE",
+  "BODY",
+  "MAIN",
+  "NAV",
+  "SECTION",
+])
+const PARAGRAPH_DISPLAY_VALUES = new Set([
+  "block",
+  "list-item",
+])
 
-function isParagraphLikeElement(element: HTMLElement) {
-  if (element.tagName === "BODY") {
-    return false
-  }
+export const CUSTOM_ACTION_CONTEXT_CHAR_LIMIT = 2000
 
-  if (PARAGRAPH_LIKE_TAGS.has(element.tagName)) {
-    return true
-  }
-
-  const display = window.getComputedStyle(element).display
-  return [
-    "block",
-    "list-item",
-    "table-cell",
-    "table-row",
-    "flex",
-    "grid",
-  ].includes(display)
+export function normalizeSelectedText(value: string | null | undefined) {
+  return value?.replace(ZERO_WIDTH_CHAR_REGEX, "").trim() ?? ""
 }
 
-function findNearestParagraphElement(node: Node | null) {
+function normalizeParagraphText(value: string) {
+  return value.replace(ZERO_WIDTH_CHAR_REGEX, "").replace(WHITESPACE_REGEX, " ").trim()
+}
+
+export function createRangeSnapshot(rangeSource: SelectionRangeSource): SelectionRangeSnapshot {
+  return {
+    startContainer: rangeSource.startContainer,
+    startOffset: rangeSource.startOffset,
+    endContainer: rangeSource.endContainer,
+    endOffset: rangeSource.endOffset,
+  }
+}
+
+export function toLiveRange(rangeSnapshot: SelectionRangeSnapshot) {
+  const range = document.createRange()
+  range.setStart(rangeSnapshot.startContainer, rangeSnapshot.startOffset)
+  range.setEnd(rangeSnapshot.endContainer, rangeSnapshot.endOffset)
+  return range
+}
+
+function getParentNodeAcrossShadow(node: Node | null) {
   if (!node) {
     return null
   }
 
-  let current: HTMLElement | null = node instanceof HTMLElement
-    ? node
-    : node.parentElement
+  if (node.parentNode) {
+    return node.parentNode
+  }
+
+  const root = node.getRootNode()
+  return root instanceof ShadowRoot ? root.host : null
+}
+
+function getParentElementAcrossShadow(element: Element | null) {
+  if (!element) {
+    return null
+  }
+
+  if (element.parentElement) {
+    return element.parentElement
+  }
+
+  const root = element.getRootNode()
+  return root instanceof ShadowRoot ? root.host : null
+}
+
+function getNearestParentElement(node: Node | null) {
+  if (!node) {
+    return null
+  }
+
+  if (node instanceof Element) {
+    return node
+  }
+
+  const parentNode = getParentNodeAcrossShadow(node)
+  return parentNode instanceof Element ? parentNode : null
+}
+
+function collectOpenShadowRoots(root: ParentNode) {
+  const shadowRoots: ShadowRoot[] = []
+  const queue: ParentNode[] = [root]
+
+  while (queue.length > 0) {
+    const currentRoot = queue.shift()
+    if (!currentRoot) {
+      continue
+    }
+
+    const walker = document.createTreeWalker(currentRoot, NodeFilter.SHOW_ELEMENT)
+    let currentNode = walker.nextNode()
+
+    while (currentNode) {
+      if (currentNode instanceof Element && currentNode.shadowRoot) {
+        shadowRoots.push(currentNode.shadowRoot)
+        queue.push(currentNode.shadowRoot)
+      }
+
+      currentNode = walker.nextNode()
+    }
+  }
+
+  return shadowRoots
+}
+
+function readSelectionRangeSnapshots(selection: Selection | null) {
+  if (!selection) {
+    return []
+  }
+
+  const composedSelection = selection as Selection & {
+    getComposedRanges?: (options?: { shadowRoots?: ShadowRoot[] }) => SelectionRangeSource[]
+  }
+
+  if (typeof composedSelection.getComposedRanges === "function") {
+    const composedRanges = composedSelection.getComposedRanges({
+      shadowRoots: collectOpenShadowRoots(document),
+    })
+
+    if (composedRanges.length > 0) {
+      return composedRanges.map(createRangeSnapshot)
+    }
+  }
+
+  const snapshots: SelectionRangeSnapshot[] = []
+  const rangeCount = typeof selection.rangeCount === "number" ? selection.rangeCount : 0
+
+  if (rangeCount > 0) {
+    for (let index = 0; index < rangeCount; index += 1) {
+      try {
+        snapshots.push(createRangeSnapshot(selection.getRangeAt(index)))
+      }
+      catch {
+        return snapshots
+      }
+    }
+
+    return snapshots
+  }
+
+  try {
+    snapshots.push(createRangeSnapshot(selection.getRangeAt(0)))
+  }
+  catch {
+    return snapshots
+  }
+
+  return snapshots
+}
+
+export function readSelectionSnapshot(selection: Selection | null): SelectionSnapshot | null {
+  const text = normalizeSelectedText(selection?.toString())
+  if (text === "") {
+    return null
+  }
+
+  const ranges = readSelectionRangeSnapshots(selection)
+  if (ranges.length === 0) {
+    return null
+  }
+
+  return {
+    text,
+    ranges,
+  }
+}
+
+function getCommonAncestorNode(startContainer: Node, endContainer: Node) {
+  const startAncestors = new Set<Node>()
+  let current: Node | null = startContainer
 
   while (current) {
-    if (isParagraphLikeElement(current)) {
+    startAncestors.add(current)
+    current = getParentNodeAcrossShadow(current)
+  }
+
+  current = endContainer
+  while (current) {
+    if (startAncestors.has(current)) {
       return current
     }
-    current = current.parentElement
+
+    current = getParentNodeAcrossShadow(current)
   }
 
-  return null
+  return startContainer.ownerDocument?.body ?? startContainer
 }
 
-function normalizeTextContent(text: string) {
-  return text.replace(/\s+/g, " ").trim()
-}
+function getTraversalRoot(rangeSnapshot: SelectionRangeSnapshot) {
+  const commonAncestor = getCommonAncestorNode(
+    rangeSnapshot.startContainer,
+    rangeSnapshot.endContainer,
+  )
 
-export function getSelectionParagraphText(selectionRange: Range) {
-  const paragraph
-    = findNearestParagraphElement(selectionRange.startContainer)
-      ?? findNearestParagraphElement(selectionRange.commonAncestorContainer)
-
-  if (paragraph?.textContent) {
-    return normalizeTextContent(paragraph.textContent)
+  if (commonAncestor instanceof Text) {
+    return commonAncestor.parentNode ?? commonAncestor
   }
 
-  return normalizeTextContent(selectionRange.commonAncestorContainer.textContent ?? "")
+  return commonAncestor
+}
+
+function doesRangeIntersectNode(range: Range, node: Node) {
+  if (typeof range.intersectsNode === "function") {
+    return range.intersectsNode(node)
+  }
+
+  const nodeRange = document.createRange()
+  if (node instanceof Text) {
+    nodeRange.selectNodeContents(node)
+  }
+  else {
+    nodeRange.selectNode(node)
+  }
+
+  return !(
+    range.compareBoundaryPoints(Range.END_TO_START, nodeRange) <= 0
+    || range.compareBoundaryPoints(Range.START_TO_END, nodeRange) >= 0
+  )
+}
+
+function isParagraphLikeDisplay(element: Element) {
+  if (SEMANTIC_CONTAINER_TAGS.has(element.tagName)) {
+    return false
+  }
+
+  return PARAGRAPH_DISPLAY_VALUES.has(window.getComputedStyle(element).display)
+}
+
+function findParagraphOwner(node: Node | null): ParagraphOwner | null {
+  let current = getNearestParentElement(node)
+  let semanticFallback: ParagraphOwner | null = null
+
+  while (current) {
+    if (PARAGRAPH_LIKE_TAGS.has(current.tagName)) {
+      return current
+    }
+
+    if (SEMANTIC_CONTAINER_TAGS.has(current.tagName)) {
+      semanticFallback ??= current
+    }
+    else if (isParagraphLikeDisplay(current)) {
+      return current
+    }
+
+    const parentElement = getParentElementAcrossShadow(current)
+    if (!parentElement) {
+      const root = current.getRootNode()
+      if (root instanceof ShadowRoot) {
+        return semanticFallback ?? root
+      }
+    }
+
+    current = parentElement
+  }
+
+  return semanticFallback
+}
+
+function extractOwnerText(owner: ParagraphOwner) {
+  const textParts: string[] = []
+  const walker = document.createTreeWalker(owner, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      return normalizeParagraphText(node.textContent ?? "") === ""
+        ? NodeFilter.FILTER_REJECT
+        : NodeFilter.FILTER_ACCEPT
+    },
+  })
+
+  let currentNode = walker.nextNode()
+  while (currentNode) {
+    textParts.push(currentNode.textContent ?? "")
+    currentNode = walker.nextNode()
+  }
+
+  return normalizeParagraphText(textParts.join(""))
+}
+
+function compareNodesInDocumentOrder(left: ParagraphOwner, right: ParagraphOwner) {
+  if (left === right) {
+    return 0
+  }
+
+  const position = left.compareDocumentPosition(right)
+  if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+    return -1
+  }
+  if (position & Node.DOCUMENT_POSITION_PRECEDING) {
+    return 1
+  }
+
+  return 0
+}
+
+function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
+  const paragraphOwners = new Set<ParagraphOwner>()
+
+  for (const rangeSnapshot of rangeSnapshots) {
+    let hasIntersectedTextNode = false
+    let liveRange: Range
+
+    try {
+      liveRange = toLiveRange(rangeSnapshot)
+    }
+    catch {
+      continue
+    }
+
+    const traversalRoot = getTraversalRoot(rangeSnapshot)
+    const walker = document.createTreeWalker(traversalRoot, NodeFilter.SHOW_TEXT, {
+      acceptNode(node) {
+        return normalizeParagraphText(node.textContent ?? "") === ""
+          ? NodeFilter.FILTER_REJECT
+          : NodeFilter.FILTER_ACCEPT
+      },
+    })
+
+    let currentNode = walker.nextNode()
+    while (currentNode) {
+      if (currentNode instanceof Text && doesRangeIntersectNode(liveRange, currentNode)) {
+        const owner = findParagraphOwner(currentNode)
+        if (owner) {
+          paragraphOwners.add(owner)
+          hasIntersectedTextNode = true
+        }
+      }
+
+      currentNode = walker.nextNode()
+    }
+
+    if (!hasIntersectedTextNode) {
+      const owner = findParagraphOwner(rangeSnapshot.startContainer)
+      if (owner) {
+        paragraphOwners.add(owner)
+      }
+    }
+  }
+
+  return Array.from(paragraphOwners).sort(compareNodesInDocumentOrder)
+}
+
+export function buildContextSnapshot(selection: SelectionSnapshot | null): ContextSnapshot | null {
+  if (!selection || selection.text === "") {
+    return null
+  }
+
+  const paragraphs = collectParagraphOwners(selection.ranges)
+    .map(extractOwnerText)
+    .filter(Boolean)
+
+  if (paragraphs.length === 0) {
+    return {
+      text: selection.text,
+      paragraphs: [selection.text],
+    }
+  }
+
+  return {
+    text: paragraphs.join(PARAGRAPH_SEPARATOR),
+    paragraphs,
+  }
+}
+
+export function truncateContextTextForCustomAction(
+  contextText: string,
+  limit = CUSTOM_ACTION_CONTEXT_CHAR_LIMIT,
+) {
+  return contextText.slice(0, limit)
 }
