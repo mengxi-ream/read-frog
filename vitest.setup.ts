@@ -1,6 +1,15 @@
 import { vi } from "vitest"
 import "@testing-library/jest-dom"
 
+// Keep test output quiet by default. Individual tests can still spy on these
+// methods when they need to assert logging behavior.
+// eslint-disable-next-line no-console
+console.log = () => {}
+// eslint-disable-next-line no-console
+console.info = () => {}
+console.warn = () => {}
+console.error = () => {}
+
 class MemoryStorage implements Storage {
   #store = new Map<string, string>()
 
