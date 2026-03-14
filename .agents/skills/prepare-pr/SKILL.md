@@ -49,6 +49,8 @@ Follow these steps:
 
 5. **Ensure all changes are committed**
    - Stage and commit any uncommitted changes
+   - Do **not** commit the PR description markdown created under `docs/`; it is for local copy/paste only
+   - If a `docs/pr-*.md` file was accidentally staged, remove it from the index before committing while keeping the local file
    - Branch should be ready for PR
 
 6. **Push the branch to remote**
@@ -59,6 +61,7 @@ Follow these steps:
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
      - If an issue number was provided, include it in the PR description using `Closes #<issue-number>`
      - If no issue number was provided, search for a relevant issue only if it is easy to identify; otherwise leave the issue field empty instead of blocking the workflow
+     - Leave the file uncommitted; it should stay local even after the branch is pushed
 
 ## Commit Convention
 

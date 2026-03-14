@@ -1,12 +1,12 @@
 ---
-description: Prepare all work before creating a pull request for the issue provided as argument
+description: Prepare all work before creating a pull request, optionally for the issue provided as argument
 allowed-tools: Bash(git:*), Bash(gh:*), Read, Glob, Write, Edit
 argument-hint: [issue-number]
 ---
 
-# Create Pull Request
+# Prepare Pull Request
 
-Prepare all work before creating a pull request for the issue: $ARGUMENTS.
+Prepare all work before creating a pull request. If an issue number is provided in $ARGUMENTS, use it. If no issue is provided, continue without requiring one.
 
 ## Workflow
 
@@ -47,6 +47,8 @@ Follow these steps:
 
 5. **Ensure all changes are committed**
    - Stage and commit any uncommitted changes
+   - Do **not** commit the PR description markdown created under `docs/`; it is for local copy/paste only
+   - If a `docs/pr-*.md` file was accidentally staged, remove it from the index before committing while keeping the local file
    - Branch should be ready for PR
 
 6. **Push the branch to remote**
@@ -55,7 +57,9 @@ Follow these steps:
 7. **Create Markdown for PR Description**
    - Create a markdown file in docs/ folder which only contains the description of the PR and for me later to copy paste:
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
-     - Search if there is relevant issue to this PR, if yes, include it in the PR description and link it using `Closes #<issue-number>` to automatically close the issue when the PR is merged
+     - If an issue number was provided, include it in the PR description using `Closes #<issue-number>`
+     - If no issue number was provided, search for a relevant issue only if it is easy to identify; otherwise leave the issue field empty instead of blocking the workflow
+     - Leave the file uncommitted; it should stay local even after the branch is pushed
 
 ## Commit Convention
 
