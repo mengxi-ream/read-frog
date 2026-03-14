@@ -41,13 +41,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.apiProviders.title",
   },
 
-  // Custom Features page
+  // Custom Actions page
   {
-    sectionId: "custom-features",
-    route: "/custom-features",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.description",
-    pageKey: "options.floatingButtonAndToolbar.selectionToolbar.customFeatures.title",
+    sectionId: "custom-actions",
+    route: "/custom-actions",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.title",
+    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.description",
+    pageKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.title",
   },
 
   // Translation page

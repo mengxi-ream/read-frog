@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
+import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { shadowWrapper } from ".."
 
@@ -42,7 +43,7 @@ export function CloseButton() {
       >
         <IconX className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent container={shadowWrapper} align="start" side="right" className="z-2147483647 w-fit! whitespace-nowrap">
+      <DropdownMenuContent container={shadowWrapper} align="start" side="right" className={`${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} w-fit! whitespace-nowrap`}>
         <DropdownMenuItem
           onMouseDown={handleMouseDown}
           onClick={() => {

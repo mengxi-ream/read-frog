@@ -16,10 +16,21 @@ import { removeTranslatedWrapperWithRestore } from "../dom/translation-cleanup"
 import { insertTranslatedNodeIntoWrapper } from "../dom/translation-insertion"
 import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
+import { prepareTranslationText } from "../text-preparation"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
 import { isNumericContent } from "../ui/translation-utils"
 import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from "./translation-state"
+
+function getDisplayTranslation(sourceText: string, translatedText: string | undefined) {
+  if (translatedText === undefined) {
+    return undefined
+  }
+
+  return prepareTranslationText(sourceText) === prepareTranslationText(translatedText)
+    ? ""
+    : translatedText
+}
 
 export async function translateNodes(
   nodes: ChildNode[],
@@ -105,7 +116,7 @@ export async function translateNodesBilingualMode(
 
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
 
-    const translatedText = realTranslatedText === textContent ? "" : realTranslatedText
+    const translatedText = getDisplayTranslation(textContent, realTranslatedText)
 
     if (!translatedText) {
       // Only remove wrapper if translation returned empty (not needed),
@@ -273,7 +284,8 @@ export async function translateNodeTranslationOnlyMode(
     }
     batchDOMOperation(insertOperation)
 
-    const translatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
+    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
+    const translatedText = realTranslatedText ? getDisplayTranslation(textContent, realTranslatedText) : realTranslatedText
 
     if (!translatedText) {
       // Keep the wrapper when translation failed so the injected error UI remains visible.

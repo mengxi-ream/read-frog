@@ -1,6 +1,6 @@
 import type { Browser } from "#imports"
 import type { JSONValue, StreamTextOnErrorCallback } from "ai"
-import type { SelectionToolbarCustomFeatureOutputType } from "@/types/config/selection-toolbar"
+import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
 
 interface BaseBackgroundStreamSerializablePayload {
   providerId: string
@@ -21,8 +21,22 @@ export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerial
 
 export interface BackgroundStructuredObjectOutputField {
   name: string
-  type: SelectionToolbarCustomFeatureOutputType
+  type: SelectionToolbarCustomActionOutputType
 }
+
+export interface ThinkingSnapshot {
+  status: "thinking" | "complete"
+  text: string
+}
+
+export interface BackgroundStreamSnapshot<TOutput> {
+  output: TOutput
+  thinking: ThinkingSnapshot
+}
+
+export type BackgroundTextStreamSnapshot = BackgroundStreamSnapshot<string>
+
+export type BackgroundStructuredObjectStreamSnapshot = BackgroundStreamSnapshot<Record<string, unknown>>
 
 export type BackgroundStreamStructuredObjectSerializablePayload = BaseBackgroundStreamSerializablePayload & {
   outputSchema: BackgroundStructuredObjectOutputField[]
@@ -37,8 +51,8 @@ export type BackgroundStreamChannel = keyof typeof BACKGROUND_STREAM_PORTS
 export type BackgroundStreamPortName = (typeof BACKGROUND_STREAM_PORTS)[BackgroundStreamChannel]
 
 export interface BackgroundStreamResponseMap {
-  streamText: string
-  streamStructuredObject: Record<string, unknown>
+  streamText: BackgroundTextStreamSnapshot
+  streamStructuredObject: BackgroundStructuredObjectStreamSnapshot
 }
 
 export interface StreamPortErrorPayload {
@@ -74,9 +88,9 @@ export type StartMessageParseResult<TSerializablePayload>
 
 type AISDKStreamTextError = Parameters<StreamTextOnErrorCallback>[0]["error"]
 
-export interface StreamRuntimeOptions<TChunk = unknown, TResponse = unknown> {
+export interface StreamRuntimeOptions<TResponse = unknown> {
   signal?: AbortSignal
-  onChunk?: (chunk: TChunk, cumulativeResponse: TResponse) => void
+  onChunk?: (snapshot: TResponse) => void
   onError?: (error: AISDKStreamTextError) => void
 }
 

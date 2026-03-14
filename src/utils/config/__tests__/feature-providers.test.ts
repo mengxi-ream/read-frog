@@ -3,9 +3,11 @@ import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import {
+  computeLanguageDetectionFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
-  computeSelectionToolbarCustomFeatureFallbacksAfterDeletion,
+  computeSelectionToolbarCustomActionFallbacksAfterDeletion,
   findFeatureMissingProvider,
+  resolveLanguageDetectionConfigForModeChange,
 } from "../helpers"
 
 function getProviderById(id: string): ProviderConfig {
@@ -167,16 +169,16 @@ describe("feature providers", () => {
     })
   })
 
-  describe("computeSelectionToolbarCustomFeatureFallbacksAfterDeletion", () => {
-    it("reassigns affected custom features to the first enabled llm provider", () => {
+  describe("computeSelectionToolbarCustomActionFallbacksAfterDeletion", () => {
+    it("reassigns affected custom actions to the first enabled llm provider", () => {
       const config = {
         ...DEFAULT_CONFIG,
         selectionToolbar: {
           ...DEFAULT_CONFIG.selectionToolbar,
-          customFeatures: [
+          customActions: [
             {
-              id: "feature-a",
-              name: "Feature A",
+              id: "action-a",
+              name: "Action A",
               enabled: true,
               icon: "tabler:sparkles",
               providerId: "deleted-provider",
@@ -188,6 +190,7 @@ describe("feature providers", () => {
                   name: "summary",
                   type: "string" as const,
                   description: "",
+                  speaking: false,
                 },
               ],
             },
@@ -203,7 +206,7 @@ describe("feature providers", () => {
         getProviderById("google-default"),
       ]
 
-      const result = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+      const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
         "deleted-provider",
         config,
         remainingProviders,
@@ -211,7 +214,7 @@ describe("feature providers", () => {
 
       expect(result).toEqual([
         expect.objectContaining({
-          id: "feature-a",
+          id: "action-a",
           providerId: "google-default",
         }),
       ])
@@ -222,10 +225,10 @@ describe("feature providers", () => {
         ...DEFAULT_CONFIG,
         selectionToolbar: {
           ...DEFAULT_CONFIG.selectionToolbar,
-          customFeatures: [
+          customActions: [
             {
-              id: "feature-a",
-              name: "Feature A",
+              id: "action-a",
+              name: "Action A",
               enabled: true,
               icon: "tabler:sparkles",
               providerId: "deleted-provider",
@@ -237,6 +240,7 @@ describe("feature providers", () => {
                   name: "summary",
                   type: "string" as const,
                   description: "",
+                  speaking: false,
                 },
               ],
             },
@@ -251,13 +255,89 @@ describe("feature providers", () => {
         },
       ]
 
-      const result = computeSelectionToolbarCustomFeatureFallbacksAfterDeletion(
+      const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
         "deleted-provider",
         config,
         remainingProviders,
       )
 
       expect(result).toBeNull()
+    })
+  })
+
+  describe("resolveLanguageDetectionConfigForModeChange", () => {
+    it("assigns the first enabled llm provider when switching from basic to llm", () => {
+      const result = resolveLanguageDetectionConfigForModeChange(
+        DEFAULT_CONFIG.languageDetection,
+        "llm",
+        DEFAULT_CONFIG.providersConfig,
+      )
+
+      expect(result).toEqual({
+        mode: "llm",
+        providerId: "openai-default",
+      })
+    })
+
+    it("keeps the current provider when it is already an enabled llm provider", () => {
+      const result = resolveLanguageDetectionConfigForModeChange(
+        {
+          mode: "basic",
+          providerId: "google-default",
+        },
+        "llm",
+        DEFAULT_CONFIG.providersConfig,
+      )
+
+      expect(result).toEqual({
+        mode: "llm",
+        providerId: "google-default",
+      })
+    })
+
+    it("returns null when there is no enabled llm provider", () => {
+      const result = resolveLanguageDetectionConfigForModeChange(
+        DEFAULT_CONFIG.languageDetection,
+        "llm",
+        [
+          {
+            ...getProviderById("openai-default"),
+            enabled: false,
+          },
+          {
+            ...getProviderById("google-default"),
+            enabled: false,
+          },
+        ],
+      )
+
+      expect(result).toBeNull()
+    })
+  })
+
+  describe("computeLanguageDetectionFallbackAfterDeletion", () => {
+    it("reassigns language detection to the first enabled llm provider", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        languageDetection: {
+          mode: "llm" as const,
+          providerId: "deleted-provider",
+        },
+      }
+
+      const result = computeLanguageDetectionFallbackAfterDeletion(
+        "deleted-provider",
+        config,
+        [
+          {
+            ...getProviderById("openai-default"),
+            enabled: false,
+          },
+          getProviderById("google-default"),
+        ],
+      )
+
+      expect(result).toBe("google-default")
     })
   })
 })

@@ -1,10 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageItem } from "./language-combobox-options"
 import { i18n } from "#imports"
-import {
-  LANG_CODE_TO_LOCALE_NAME,
-  langCodeISO6393Schema,
-} from "@read-frog/definitions"
-import { camelCase } from "case-anything"
 import { useMemo } from "react"
 import {
   Combobox,
@@ -14,33 +10,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/base-ui/combobox"
-
-interface LanguageItem {
-  value: LangCodeISO6393 | "auto"
-  label: string
-}
-
-function getLanguageItems(detectedLangCode?: LangCodeISO6393): LanguageItem[] {
-  const items: LanguageItem[] = langCodeISO6393Schema.options.map(code => ({
-    value: code,
-    label: `${i18n.t(`languages.${camelCase(code)}` as Parameters<typeof i18n.t>[0])} (${LANG_CODE_TO_LOCALE_NAME[code]})`,
-  }))
-
-  if (detectedLangCode) {
-    items.unshift({
-      value: "auto",
-      label: `${i18n.t(`languages.${camelCase(detectedLangCode)}` as Parameters<typeof i18n.t>[0])} (${LANG_CODE_TO_LOCALE_NAME[detectedLangCode]})`,
-    })
-  }
-
-  return items
-}
-
-function filterLanguage(item: LanguageItem, query: string): boolean {
-  const searchLower = query.toLowerCase()
-  return item.label.toLowerCase().includes(searchLower)
-    || item.value.toLowerCase().includes(searchLower)
-}
+import { filterLanguage, getLanguageItems } from "./language-combobox-options"
 
 function AutoBadge() {
   return <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">auto</span>

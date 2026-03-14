@@ -5,85 +5,25 @@ import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
 } from "@read-frog/definitions"
-import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { useMemo } from "react"
-import { HelpTooltip } from "@/components/help-tooltip"
 import { MultiLanguageCombobox } from "@/components/multi-language-combobox"
 import { Button } from "@/components/ui/base-ui/button"
-import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
-import { Label } from "@/components/ui/base-ui/label"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/base-ui/radio-group"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { getProviderConfigById } from "@/utils/config/helpers"
-import { LLMStatusIndicator } from "../../../../components/llm-status-indicator"
 import { ConfigCard } from "../../components/config-card"
 
 export function AutoTranslateLanguages() {
-  const [translateConfig] = useAtom(configFieldsAtomMap.translate)
-  const [providersConfig] = useAtom(configFieldsAtomMap.providersConfig)
-
-  const hasLLMProvider = useMemo(() => {
-    const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
-    return providerConfig ? isLLMProviderConfig(providerConfig) : false
-  }, [providersConfig, translateConfig.providerId])
-
   return (
     <div className="py-6 flex flex-col gap-y-4">
       <ConfigCard
         id="auto-translate-languages"
         title={i18n.t("options.translation.autoTranslateLanguages.title")}
-        description={(
-          <>
-            {i18n.t("options.translation.autoTranslateLanguages.description")}
-            <LLMStatusIndicator hasLLMProvider={hasLLMProvider} featureName={i18n.t("options.general.featureProviders.features.translate")} />
-          </>
-        )}
+        description={i18n.t("options.translation.autoTranslateLanguages.description")}
         className="py-0"
       >
-        <div className="flex flex-col gap-y-4">
-          <LLMDetectionToggle />
-          <AutoTranslateLanguagesSelector />
-        </div>
+        <AutoTranslateLanguagesSelector />
       </ConfigCard>
       <SelectedLanguageCells />
     </div>
-  )
-}
-
-function LLMDetectionToggle() {
-  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
-
-  return (
-    <Field orientation="horizontal">
-      <FieldContent className="self-center">
-        <FieldLabel>
-          {i18n.t("options.translation.autoTranslateLanguages.detection.label")}
-          <HelpTooltip>{i18n.t("options.translation.autoTranslateLanguages.detection.description")}</HelpTooltip>
-        </FieldLabel>
-      </FieldContent>
-      <RadioGroup
-        value={translateConfig.page.enableLLMDetection ? "llm" : "basic"}
-        onValueChange={(value: string) => {
-          void setTranslateConfig(
-            deepmerge(translateConfig, {
-              page: { enableLLMDetection: value === "llm" },
-            }),
-          )
-        }}
-        className="flex flex-row gap-4 w-auto"
-      >
-        <div className="flex items-center gap-2">
-          <RadioGroupItem value="basic" id="auto-translate-detection-basic" />
-          <Label htmlFor="auto-translate-detection-basic">{i18n.t("options.translation.autoTranslateLanguages.detection.basic")}</Label>
-        </div>
-        <div className="flex items-center gap-2">
-          <RadioGroupItem value="llm" id="auto-translate-detection-llm" />
-          <Label htmlFor="auto-translate-detection-llm">{i18n.t("options.translation.autoTranslateLanguages.detection.llm")}</Label>
-        </div>
-      </RadioGroup>
-    </Field>
   )
 }
 

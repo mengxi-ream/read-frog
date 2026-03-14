@@ -125,9 +125,11 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   const assignedFeatures = FEATURE_KEYS
     .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
-  const assignedCustomFeatures = config.selectionToolbar.customFeatures
-    .filter(f => f.providerId === id)
-  const totalAssigned = assignedFeatures.length + assignedCustomFeatures.length
+  const assignedCustomActions = config.selectionToolbar.customActions
+    .filter(action => action.providerId === id)
+  const isLanguageDetectionProvider = config.languageDetection.mode === "llm"
+    && config.languageDetection.providerId === id
+  const totalAssigned = assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
 
   const handleProviderEnabledChange = (checked: boolean) => {
     if (!checked && enabled && totalAssigned > 0) {
@@ -161,8 +163,11 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
                 {assignedFeatures.map(key => (
                   <li key={key}>{i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[key]}`)}</li>
                 ))}
-                {assignedCustomFeatures.map(f => (
-                  <li key={f.id}>{f.name}</li>
+                {isLanguageDetectionProvider && (
+                  <li>{i18n.t("options.general.languageDetection.title")}</li>
+                )}
+                {assignedCustomActions.map(action => (
+                  <li key={action.id}>{action.name}</li>
                 ))}
               </ul>
             </TooltipContent>

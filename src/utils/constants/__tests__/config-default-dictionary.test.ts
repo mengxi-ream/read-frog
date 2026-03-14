@@ -11,14 +11,14 @@ const DEFAULT_DICTIONARY_FIELD_IDS = [
   "default-dictionary-difficulty",
 ] as const
 
-describe("dEFAULT_CONFIG default dictionary feature", () => {
+describe("default config default dictionary action", () => {
   it("uses stable semantic IDs for outputSchema fields", () => {
-    const dictionaryFeature = DEFAULT_CONFIG.selectionToolbar.customFeatures.find(
-      feature => feature.id === "default-dictionary",
+    const dictionaryAction = DEFAULT_CONFIG.selectionToolbar.customActions.find(
+      action => action.id === "default-dictionary",
     )
 
-    expect(dictionaryFeature).toBeDefined()
-    expect(dictionaryFeature?.outputSchema.map(field => field.id)).toEqual(DEFAULT_DICTIONARY_FIELD_IDS)
-    expect(dictionaryFeature?.outputSchema.some(field => /^default-dictionary-\d+$/.test(field.id))).toBe(false)
+    expect(dictionaryAction).toBeDefined()
+    expect(dictionaryAction?.outputSchema.map(field => field.id)).toEqual(DEFAULT_DICTIONARY_FIELD_IDS)
+    expect(dictionaryAction?.outputSchema.some(field => /^default-dictionary-\d+$/.test(field.id))).toBe(false)
   })
 })

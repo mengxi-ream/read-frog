@@ -180,7 +180,7 @@ options:
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
-      customFeatures: Custom AI Features
+      customActions: Custom AI Actions
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation
@@ -202,6 +202,19 @@ options:
         confirm: Confirm
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
+    languageDetection:
+      title: Language Detection
+      description: Affects auto-translate language detection, skip-language detection, and Speaking voice selection accuracy.
+      mode:
+        basic: Basic
+        llm: LLM
+      provider:
+        label: Detection Provider
+        placeholder: Select a provider
+      status:
+        noProviders: Configure an LLM provider first
+        basicRecommend: Recommend enabling LLM
+        llmEnabled: LLM detection enabled
   siteControl:
     title: Site Control
     mode:
@@ -275,6 +288,13 @@ options:
         description: Configure websites where the selection toolbar should be disabled
         enterUrlPattern: Enter URL pattern
         urlPattern: URL Pattern
+      errors:
+        customActionFailed: Custom Action Failed
+        customActionFailedFallback: Custom action request failed
+        actionUnavailable: Selected action is unavailable
+        missingSelection: No selected text available
+        providerDisabled: Selected provider is disabled
+        providerUnavailable: Selected provider is unavailable
       features:
         provider: Provider
         selectProvider: Select a provider
@@ -290,13 +310,13 @@ options:
         vocabularyInsight:
           title: Vocabulary Insight
           description: Configure provider and model for vocabulary/phrase analysis in the selection toolbar
-      customFeatures:
-        title: Custom AI Features
+      customActions:
+        title: Custom AI Actions
         description: Add your own structured AI actions for selected text
-        add: Add AI Feature
-        edit: Edit AI Feature
-        empty: No custom AI features yet
-        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI features
+        add: Add AI Action
+        edit: Edit AI Action
+        empty: No custom AI actions yet
+        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
         table:
           name: Name
           provider: Provider
@@ -315,6 +335,7 @@ options:
           fieldType: Field Type
           fieldDescription: Description
           fieldDescriptionPlaceholder: Describe what this field should contain...
+          fieldSpeaking: Enable speaking
           actions: Actions
           cancel: Cancel
           save: Save
@@ -338,13 +359,13 @@ options:
             title: Webpage title
           delete: Delete
           deleteDialog:
-            title: Delete Custom Feature?
+            title: Delete Custom Action?
             description: This action cannot be undone.
             confirm: Delete
             cancel: Cancel
         templates:
           dialogTitle: Choose a Template
-          dialogDescription: Select a template to quickly create a new AI feature, or start from scratch.
+          dialogDescription: Select a template to quickly create a new AI action, or start from scratch.
           dictionary:
             name: Dictionary
             description: Look up words with definitions, phonetics, and context translations
@@ -452,10 +473,10 @@ options:
             fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
           blank:
             name: Blank
-            description: Start from scratch with an empty feature
+            description: Start from scratch with an empty action
         errors:
           nameRequired: Name is required
-          duplicateName: 'Duplicate feature name "$1"'
+          duplicateName: 'Duplicate action name "$1"'
           invalidIcon: Invalid Iconify icon string
           providerRequired: Please select an enabled LLM provider
           outputSchemaRequired: Add at least one output field
@@ -628,11 +649,6 @@ options:
   tts:
     title: Text to Speech
     description: Use Edge TTS voice settings for the Speak button.
-    detectLanguage:
-      label: Detect Language
-      basic: Basic
-      llm: LLM
-      description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs. LLM mode uses the Translate provider.
     voice:
       label: Voice
       fallback: Fallback
@@ -865,6 +881,8 @@ noAPIKeyConfig:
     firstOnThe: first on the
     optionsPage: options
     page: page
+languageDetection:
+  llmFailed: LLM language detection failed, fell back to basic detection
 translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language
@@ -875,6 +893,21 @@ speak:
   noTextSelected: No text selected
   openaiNotConfigured: OpenAI provider is not configured or enabled
   openaiApiKeyNotConfigured: OpenAI API key is not configured
+action:
+  copy: Copy
+  copied: Copied
+  regenerate: Regenerate
+  translation: Translation
+  speak: Speak
+  playing: Playing
+  vocabularyInsight: Vocabulary Insight
+  vocabularyInsightDeprecation: This feature will be replaced by Custom AI Action's Dictionary feature in 2 weeks. Dictionary Action offers a more flexible and powerful experience.
+  vocabularyInsightDeprecationLink: Set up Dictionary Action
+thinking:
+  label: Thinking
+  complete: Thinking complete
+  expand: Expand thinking
+  collapse: Collapse thinking
 shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:

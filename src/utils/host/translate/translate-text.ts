@@ -3,17 +3,17 @@ import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
-import { franc } from "franc"
 import { toast } from "sonner"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
+
 import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
+import { prepareTranslationText } from "./text-preparation"
 
-const MIN_LENGTH_FOR_LANG_DETECTION = 50
 // Minimum text length for skip language detection (shorter than general detection
 // to catch short phrases like "Bonjour!" or "こんにちは")
 export const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
@@ -23,21 +23,17 @@ export const MIN_LENGTH_FOR_SKIP_LLM_DETECTION = 10
  * Uses LLM detection if enabled, falls back to franc library.
  * @param text - Text to detect language for
  * @param skipLanguages - List of languages to skip translation for
- * @param enableLLMDetection - Whether to use LLM for language detection
- * @param providerConfig - Provider configuration for LLM detection
+ * @param enableLLM - Whether to use LLM for language detection
  * @returns true if text language is in skipLanguages list (should skip translation)
  */
 export async function shouldSkipByLanguage(
   text: string,
   skipLanguages: LangCodeISO6393[],
-  enableLLMDetection: boolean,
-  providerConfig: ProviderConfig,
+  enableLLM: boolean,
 ): Promise<boolean> {
-  const isLLMProvider = isLLMProviderConfig(providerConfig)
   const detectedLang = await detectLanguage(text, {
     minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
-    enableLLM: enableLLMDetection && isLLMProvider,
-    providerConfig: isLLMProvider ? providerConfig : undefined,
+    enableLLM,
   })
 
   if (!detectedLang) {
@@ -54,8 +50,9 @@ export async function buildHashComponents(
   enableAIContentAware: boolean,
   articleContext?: { title?: string | null, textContent?: string | null },
 ): Promise<string[]> {
+  const preparedText = prepareTranslationText(text)
   const hashComponents = [
-    text,
+    preparedText,
     JSON.stringify(providerConfig),
     // don't include detectedCode because it may change after the page is translated, i.e. it's not accurate
     partialLangConfig.sourceCode,
@@ -64,7 +61,7 @@ export async function buildHashComponents(
 
   if (isLLMProviderConfig(providerConfig)) {
     const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
-    const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, text, { isBatch: true })
+    const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, { isBatch: true })
     hashComponents.push(systemPrompt, prompt)
     hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
 
@@ -107,13 +104,9 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     articleContext,
   } = options
 
-  // Skip translation if text is already in target language
-  if (text.length >= MIN_LENGTH_FOR_LANG_DETECTION) {
-    const detectedLang = franc(text)
-    if (detectedLang === langConfig.targetCode) {
-      logger.info(`translateTextCore: skipping translation because text is already in target language. text: ${text}`)
-      return ""
-    }
+  const preparedText = prepareTranslationText(text)
+  if (preparedText === "") {
+    return ""
   }
 
   // Get article data for LLM providers (needed for both hash and request)
@@ -126,7 +119,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   }
 
   const hashComponents = await buildHashComponents(
-    text,
+    preparedText,
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
@@ -137,7 +130,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   hashComponents.push(...extraHashTags)
 
   return await sendMessage("enqueueTranslateRequest", {
-    text,
+    text: preparedText,
     langConfig,
     providerConfig,
     scheduleAt: Date.now(),

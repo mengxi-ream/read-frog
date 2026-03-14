@@ -180,7 +180,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
-      customFeatures: 自定义 AI 功能
+      customActions: 自定义 AI 指令
       features:
         translate: 网页翻译
         selectionToolbar_translate: 划词翻译
@@ -202,6 +202,19 @@ options:
         confirm: 确认
         cancel: 取消
         description: 此操作将清理所有翻译缓存。此操作无法撤销。
+    languageDetection:
+      title: 语言检测
+      description: 影响自动翻译语言检测、跳过语言检测和朗读语音选择的准确性。
+      mode:
+        basic: 基础
+        llm: LLM
+      provider:
+        label: 检测提供商
+        placeholder: 选择提供商
+      status:
+        noProviders: 请先配置 LLM 提供商
+        basicRecommend: 建议启用 LLM
+        llmEnabled: LLM 检测已启用
   siteControl:
     title: 站点控制
     mode:
@@ -275,6 +288,13 @@ options:
         description: 配置需要禁用选择工具栏的网站
         enterUrlPattern: 输入网址模式
         urlPattern: 网址模式
+      errors:
+        customActionFailed: 自定义操作失败
+        customActionFailedFallback: 自定义操作请求失败
+        actionUnavailable: 所选操作不可用
+        missingSelection: 没有可用的选中文本
+        providerDisabled: 所选提供商已被禁用
+        providerUnavailable: 所选提供商不可用
       features:
         provider: 提供商
         selectProvider: 选择提供商
@@ -290,13 +310,13 @@ options:
         vocabularyInsight:
           title: 词汇解析
           description: 配置选择工具栏词汇/短语解析功能使用的提供商与模型
-      customFeatures:
-        title: 自定义 AI 功能
+      customActions:
+        title: 自定义 AI 指令
         description: 为划词添加你自己的结构化 AI 操作
-        add: 添加 AI 功能
-        edit: 编辑 AI 功能
-        empty: 暂无自定义 AI 功能
-        noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 功能
+        add: 添加 AI 指令
+        edit: 编辑 AI 指令
+        empty: 暂无自定义 AI 指令
+        noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 指令
         table:
           name: 名称
           provider: 提供商
@@ -315,6 +335,7 @@ options:
           fieldType: 字段类型
           fieldDescription: 描述
           fieldDescriptionPlaceholder: 描述此字段应包含的内容...
+          fieldSpeaking: 启用朗读
           actions: 操作
           cancel: 取消
           save: 保存
@@ -338,13 +359,13 @@ options:
             title: 网页标题
           delete: 删除
           deleteDialog:
-            title: 删除自定义功能？
+            title: 删除自定义 AI 指令？
             description: 此操作无法撤销。
             confirm: 删除
             cancel: 取消
         templates:
           dialogTitle: 选择模板
-          dialogDescription: 选择模板快速创建新的 AI 功能，或从空白开始。
+          dialogDescription: 选择模板快速创建新的 AI 指令，或从空白开始。
           dictionary:
             name: 词典
             description: 查词释义，包含音标、词性和语境翻译
@@ -452,10 +473,10 @@ options:
             fieldImprovedVersionDescription: 基于原文语言给出的选中文本修正与改进版本。
           blank:
             name: 空白
-            description: 从空白模板开始创建
+            description: 从空白模板开始创建指令
         errors:
           nameRequired: 名称不能为空
-          duplicateName: '重复的功能名称 "$1"'
+          duplicateName: '重复的指令名称 "$1"'
           invalidIcon: Iconify 图标字符串格式无效
           providerRequired: 请选择一个已启用的 LLM 提供商
           outputSchemaRequired: 至少需要一个输出字段
@@ -628,11 +649,6 @@ options:
   tts:
     title: 文本转语音
     description: 使用 Edge TTS 语音参数来自定义朗读按钮。
-    detectLanguage:
-      label: 语言检测
-      basic: 基础
-      llm: LLM
-      description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。LLM 模式使用「翻译」页面的提供商。
     voice:
       label: 声音
       fallback: 兜底
@@ -865,6 +881,8 @@ noAPIKeyConfig:
     firstOnThe: 在
     optionsPage: 选项
     page: 页
+languageDetection:
+  llmFailed: LLM 语言检测失败，已回退到基础检测
 translation:
   sameLanguage: 源语言和目标语言必须不同
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同
@@ -875,6 +893,21 @@ speak:
   noTextSelected: 未选择文本
   openaiNotConfigured: OpenAI 提供商未配置或未启用
   openaiApiKeyNotConfigured: OpenAI API Key 未配置
+action:
+  copy: 复制
+  copied: 已复制
+  regenerate: 重新生成
+  translation: 翻译
+  speak: 朗读
+  playing: 播放中
+  vocabularyInsight: 词汇解析
+  vocabularyInsightDeprecation: 此功能将在 2 周后被自定义 AI 动作的词典功能替代。词典动作提供更灵活和强大的体验。
+  vocabularyInsightDeprecationLink: 设置词典动作
+thinking:
+  label: 思考中
+  complete: 思考完成
+  expand: 展开思考
+  collapse: 收起思考
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:

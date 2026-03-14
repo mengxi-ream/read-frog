@@ -1,62 +1,77 @@
-import type { PopoverWrapperRef } from "./components/popover-wrapper"
-import { useMemo, useRef, useState } from "#imports"
-import { IconSparkles, IconZoomScan } from "@tabler/icons-react"
+import { browser, i18n, useCallback, useMemo, useRef, useState } from "#imports"
+import { IconAlertTriangle, IconZoomScan } from "@tabler/icons-react"
 import { useQuery } from "@tanstack/react-query"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { Activity } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
+import { Alert, AlertDescription } from "@/components/ui/base-ui/alert"
+import { SelectionPopover } from "@/components/ui/selection-popover"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { configAtom } from "@/utils/atoms/config"
+import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { detectedCodeAtom } from "@/utils/atoms/detected-code"
-import { featureProviderConfigAtom } from "@/utils/atoms/provider"
+import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { getFinalSourceCode } from "@/utils/config/languages"
+import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { logger } from "@/utils/logger"
+import { sendMessage } from "@/utils/message"
 import { getWordExplainPrompt } from "@/utils/prompts/word-explain"
 import { resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { shadowWrapper } from ".."
+import { SelectionToolbarFooterContent } from "../components/selection-toolbar-footer-content"
+import { SelectionToolbarTitleContent } from "../components/selection-toolbar-title-content"
+import { SelectionToolbarTooltip } from "../components/selection-tooltip"
 import { createHighlightData } from "../utils"
-import { isAiPopoverVisibleAtom, isSelectionToolbarVisibleAtom, mouseClickPositionAtom, selectionRangeAtom } from "./atom"
-import { PopoverWrapper } from "./components/popover-wrapper"
+import {
+  isSelectionToolbarVisibleAtom,
+  selectionToolbarVocabularyInsightRequestAtom,
+} from "./atoms"
+import { useSelectionPopoverSnapshot } from "./use-selection-popover-snapshot"
 
-export function AiButton() {
-  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
-  const setIsAiPopoverVisible = useSetAtom(isAiPopoverVisibleAtom)
-  const setMousePosition = useSetAtom(mouseClickPositionAtom)
-  const handleClick = async (event: React.MouseEvent) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    const x = rect.left
-    const y = rect.top
-
-    setMousePosition({ x, y })
-    setIsSelectionToolbarVisible(false)
-    setIsAiPopoverVisible(true)
-  }
-
-  return (
-    <button type="button" className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer" onClick={handleClick}>
-      <IconZoomScan className="size-4.5" />
-    </button>
-  )
+function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement | null>) {
+  requestAnimationFrame(() => {
+    if (ref.current) {
+      ref.current.scrollTop = ref.current.scrollHeight
+    }
+  })
 }
 
-export function AiPopover() {
-  const [isVisible, setIsVisible] = useAtom(isAiPopoverVisibleAtom)
-  const selectionRange = useAtomValue(selectionRangeAtom)
-  const config = useAtomValue(configAtom)
+export function AiButton() {
+  const [open, setOpen] = useState(false)
+  const [rerunNonce, setRerunNonce] = useState(0)
   const detectedCode = useAtomValue(detectedCodeAtom)
-  const vocabularyInsightProviderConfig = useAtomValue(featureProviderConfigAtom("selectionToolbar.vocabularyInsight"))
-  const popoverRef = useRef<PopoverWrapperRef>(null)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const vocabularyInsightRequest = useAtomValue(selectionToolbarVocabularyInsightRequestAtom)
+  const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
+  const setConfig = useSetAtom(writeConfigAtom)
+  const bodyRef = useRef<HTMLDivElement>(null)
   const [aiResponse, setAiResponse] = useState("")
+  const {
+    popoverSessionKey,
+    selectionRangeSnapshot,
+    captureSelectionSnapshot,
+    clearSelectionSnapshot,
+  } = useSelectionPopoverSnapshot()
+
+  const resetSessionState = useCallback(() => {
+    setAiResponse("")
+  }, [])
 
   const highlightData = useMemo(() => {
-    if (!selectionRange || !isVisible) {
+    if (!selectionRangeSnapshot || !open) {
       return null
     }
-    const data = createHighlightData(selectionRange)
+
+    const data = createHighlightData(selectionRangeSnapshot)
     logger.info("highlightData.context", "\n", data.context)
     return data
-  }, [selectionRange, isVisible])
+  }, [open, selectionRangeSnapshot])
+  const llmProviders = useMemo(
+    () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
+    [providersConfig],
+  )
+  const triggerLabel = i18n.t("action.vocabularyInsight")
 
   const {
     isLoading,
@@ -64,15 +79,19 @@ export function AiPopover() {
   } = useQuery({
     queryKey: [
       "analyzeSelection",
+      popoverSessionKey,
+      rerunNonce,
       highlightData,
-      vocabularyInsightProviderConfig,
-      config,
+      vocabularyInsightRequest,
+      detectedCode,
     ],
     queryFn: async ({ signal }) => {
-      if (!highlightData || !vocabularyInsightProviderConfig || !config) {
+      if (!highlightData) {
         throw new Error("No provider config for vocabulary insight or no selection")
       }
-      if (!isLLMProviderConfig(vocabularyInsightProviderConfig)) {
+      const vocabularyInsightProviderConfig = vocabularyInsightRequest.providerConfig
+
+      if (!vocabularyInsightProviderConfig || !isLLMProviderConfig(vocabularyInsightProviderConfig)) {
         throw new Error("Vocabulary insight requires an LLM provider")
       }
 
@@ -83,11 +102,11 @@ export function AiPopover() {
           return false
         }
 
-        const actualSourceCode = getFinalSourceCode(config.language.sourceCode, detectedCode)
+        const actualSourceCode = getFinalSourceCode(vocabularyInsightRequest.language.sourceCode, detectedCode)
         const systemPrompt = getWordExplainPrompt(
           actualSourceCode,
-          config.language.targetCode,
-          config.language.level,
+          vocabularyInsightRequest.language.targetCode,
+          vocabularyInsightRequest.language.level,
         )
         const userMessage
           = `query: ${highlightData.context.selection}\n`
@@ -116,13 +135,13 @@ export function AiPopover() {
           {
             signal,
             onChunk: (data) => {
-              setAiResponse(data)
-              popoverRef.current?.scrollToBottom()
+              setAiResponse(data.output)
+              scrollSelectionPopoverBodyToBottom(bodyRef)
             },
           },
         )
 
-        logger.log("aiResponse", "\n", finalResponse)
+        logger.log("aiResponse", "\n", finalResponse.output)
         return true
       }
       catch (error) {
@@ -133,75 +152,139 @@ export function AiPopover() {
       }
     },
     enabled: !!highlightData,
+    refetchOnReconnect: false,
+    refetchOnWindowFocus: false,
   })
 
+  const handleProviderChange = useCallback((providerId: string) => {
+    void setConfig(buildFeatureProviderPatch({ "selectionToolbar.vocabularyInsight": providerId }))
+  }, [setConfig])
+
+  const handleRegenerate = useCallback(() => {
+    setRerunNonce(prev => prev + 1)
+  }, [])
+
+  const handleOpenDictionarySetup = useCallback(() => {
+    const url = browser.runtime.getURL("/options.html#/custom-actions?addAction=dictionary")
+    void sendMessage("openPage", { url, active: true })
+  }, [])
+
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    if (nextOpen) {
+      captureSelectionSnapshot()
+      resetSessionState()
+    }
+    else {
+      clearSelectionSnapshot()
+      resetSessionState()
+    }
+
+    setOpen(nextOpen)
+
+    if (nextOpen) {
+      setIsSelectionToolbarVisible(false)
+    }
+  }, [captureSelectionSnapshot, clearSelectionSnapshot, resetSessionState, setIsSelectionToolbarVisible])
+
   return (
-    <PopoverWrapper
-      ref={popoverRef}
-      title="Vocabulary Insight"
-      icon={<IconSparkles strokeWidth={1.2} className="size-4.5 text-zinc-600 dark:text-zinc-400" />}
-      isVisible={isVisible}
-      setIsVisible={setIsVisible}
-    >
-      <div className="p-4 border-b pt-0">
-        <div className="border-b pb-4 sticky pt-4 top-0 bg-white dark:bg-zinc-800 z-10">
-          <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">上下文:</p>
-          <div className="text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 p-3 rounded leading-relaxed">
-            {highlightData?.context.before && (
-              <span>
-                {highlightData.context.before}
-              </span>
-            )}
-            {highlightData?.context.selection && (
-              <span
-                className="font-medium"
-                style={{ color: "var(--read-frog-primary)" }}
-              >
-                {` ${highlightData.context.selection} `}
-              </span>
-            )}
-            {highlightData?.context.after && (
-              <span>
-                {highlightData.context.after}
-              </span>
-            )}
+    <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
+      <SelectionToolbarTooltip
+        content={triggerLabel}
+        render={<SelectionPopover.Trigger aria-label={triggerLabel} />}
+      >
+        <IconZoomScan className="size-4.5" />
+      </SelectionToolbarTooltip>
+
+      <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
+        <SelectionPopover.Header className="border-b">
+          <SelectionToolbarTitleContent
+            title="Vocabulary Insight"
+            icon="tabler:sparkles"
+          />
+          <div className="flex items-center gap-1">
+            <SelectionPopover.Pin />
+            <SelectionPopover.Close />
           </div>
-        </div>
-        <div className="pt-4">
-          <Activity mode={isLoading && !aiResponse ? "visible" : "hidden"}>
-            <div className="flex items-center justify-center py-8">
-              <div className="flex items-center space-x-3 text-slate-500">
-                <div className="flex space-x-1">
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
-                  <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
-                </div>
-                <span className="text-sm font-medium">词汇解析中...</span>
+        </SelectionPopover.Header>
+
+        <SelectionPopover.Body ref={bodyRef}>
+          <div className="p-4 pt-0">
+            <Alert className="mb-3 mt-4 border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-900 dark:bg-amber-950 dark:text-amber-50">
+              <IconAlertTriangle className="size-4" />
+              <AlertDescription>
+                {i18n.t("action.vocabularyInsightDeprecation")}
+                {" "}
+                <button type="button" className="cursor-pointer underline underline-offset-2 font-medium" onClick={handleOpenDictionarySetup}>
+                  {i18n.t("action.vocabularyInsightDeprecationLink")}
+                </button>
+              </AlertDescription>
+            </Alert>
+            <div className="border-b pb-4 sticky pt-4 top-0 bg-white dark:bg-zinc-800 z-10">
+              <p className="text-xs text-zinc-500 dark:text-zinc-500 mb-2">上下文:</p>
+              <div className="text-sm text-zinc-700 dark:text-zinc-300 bg-zinc-100 dark:bg-zinc-800 p-3 rounded leading-relaxed">
+                {highlightData?.context.before && (
+                  <span>
+                    {highlightData.context.before}
+                  </span>
+                )}
+                {highlightData?.context.selection && (
+                  <span
+                    className="font-medium"
+                    style={{ color: "var(--read-frog-primary)" }}
+                  >
+                    {` ${highlightData.context.selection} `}
+                  </span>
+                )}
+                {highlightData?.context.after && (
+                  <span>
+                    {highlightData.context.after}
+                  </span>
+                )}
               </div>
             </div>
-          </Activity>
-
-          <Activity mode={error ? "visible" : "hidden"}>
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
-              <div className="flex items-center space-x-2">
-                <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
-                  <span className="text-white text-xs">!</span>
+            <div className="pt-4">
+              <Activity mode={isLoading && !aiResponse ? "visible" : "hidden"}>
+                <div className="flex items-center justify-center py-8">
+                  <div className="flex items-center space-x-3 text-slate-500">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "0ms" }}></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "150ms" }}></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{ animationDelay: "300ms" }}></div>
+                    </div>
+                    <span className="text-sm font-medium">词汇解析中...</span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm font-medium text-red-800 dark:text-red-200">分析失败</p>
-                  <p className="text-xs text-red-600 dark:text-red-400 mt-1">{error?.message}</p>
-                </div>
-              </div>
-            </div>
-          </Activity>
+              </Activity>
 
-          <Activity mode={aiResponse ? "visible" : "hidden"}>
-            <div className="rounded-lg p-4 border border-slate-200 dark:border-slate-700">
-              <MarkdownRenderer content={aiResponse} />
+              <Activity mode={error ? "visible" : "hidden"}>
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-4">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-5 h-5 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">!</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-red-800 dark:text-red-200">分析失败</p>
+                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">{error?.message}</p>
+                    </div>
+                  </div>
+                </div>
+              </Activity>
+
+              <Activity mode={aiResponse ? "visible" : "hidden"}>
+                <div className="rounded-lg p-4 border border-slate-200 dark:border-slate-700">
+                  <MarkdownRenderer content={aiResponse} />
+                </div>
+              </Activity>
             </div>
-          </Activity>
-        </div>
-      </div>
-    </PopoverWrapper>
+          </div>
+        </SelectionPopover.Body>
+        <SelectionToolbarFooterContent
+          providers={llmProviders}
+          value={vocabularyInsightRequest.providerConfig?.id ?? ""}
+          onProviderChange={handleProviderChange}
+          onRegenerate={handleRegenerate}
+        />
+      </SelectionPopover.Content>
+    </SelectionPopover.Root>
   )
 }

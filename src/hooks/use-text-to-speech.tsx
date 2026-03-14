@@ -1,8 +1,10 @@
 import type { TTSConfig } from "@/types/config/tts"
 import { i18n } from "#imports"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useAtomValue } from "jotai"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
@@ -24,15 +26,15 @@ function toSignedValue(value: number, unit: "%" | "Hz"): string {
   return `${value >= 0 ? "+" : ""}${value}${unit}`
 }
 
-async function resolveVoiceForText(text: string, ttsConfig: TTSConfig): Promise<string> {
+async function resolveVoiceForText(text: string, ttsConfig: TTSConfig, enableLLM: boolean): Promise<string> {
   const detectedLanguage = await detectLanguage(text, {
     minLength: 0,
-    enableLLM: ttsConfig.detectLanguageMode === "llm",
+    enableLLM,
   })
   logger.info("[TextToSpeech] Resolving voice for text", {
     text,
     detectedLanguage,
-    detectionMode: ttsConfig.detectLanguageMode,
+    enableLLM,
   })
 
   if (detectedLanguage && detectedLanguage in ttsConfig.languageVoices) {
@@ -87,6 +89,7 @@ async function synthesizeEdgeTTSAudioChunk(
 
 export function useTextToSpeech() {
   const queryClient = useQueryClient()
+  const languageDetection = useAtomValue(configFieldsAtomMap.languageDetection)
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentChunk, setCurrentChunk] = useState(0)
   const [totalChunks, setTotalChunks] = useState(0)
@@ -118,7 +121,7 @@ export function useTextToSpeech() {
       const requestId = crypto.randomUUID()
       activeRequestIdRef.current = requestId
 
-      const selectedVoice = await resolveVoiceForText(text, ttsConfig)
+      const selectedVoice = await resolveVoiceForText(text, ttsConfig, languageDetection.mode === "llm")
       if (shouldStopRef.current || activeRequestIdRef.current !== requestId) {
         return
       }

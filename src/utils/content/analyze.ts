@@ -35,7 +35,11 @@ export async function getDocumentInfo(): Promise<{
   const textForDetection = `${title}\n\n${content}`
 
   // Detect language with optional LLM enhancement
-  const enableLLM = !!(config?.translate.page.enableLLMDetection && config?.translate.page.autoTranslateLanguages?.length > 0)
+  // Only use LLM when user has configured auto-translate or skip languages,
+  // otherwise detecting page language with LLM is wasteful since nothing depends on the result.
+  const hasAutoTranslateOrSkip = (config?.translate.page.autoTranslateLanguages?.length ?? 0) > 0
+    || (config?.translate.page.skipLanguages?.length ?? 0) > 0
+  const enableLLM = config?.languageDetection.mode === "llm" && hasAutoTranslateOrSkip
   const { code: detectedCodeOrUnd, source: detectionSource } = await detectLanguageWithSource(textForDetection, {
     enableLLM,
     maxLengthForLLM: 1500,
