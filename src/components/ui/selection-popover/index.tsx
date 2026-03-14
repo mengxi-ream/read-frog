@@ -376,25 +376,27 @@ function SelectionPopoverContent({
   return (
     <DialogPrimitive.Portal container={container}>
       <DialogPrimitive.Popup
-        render={(
-          <SelectionPopoverShell
-            rndRef={rndRef}
-            isDragging={isDragging}
-            position={position}
-            defaultLayout={defaultLayout}
-            minWidth={minWidth}
-            minHeight={minHeight}
-            handleDragStart={handleDragStart}
-            handleDrag={handleDrag}
-            handleDragStop={handleDragStop}
-            handleResizeStop={handleResizeStop}
-            handleWheel={handleWheel}
-          />
+        className={cn(
+          "fixed inset-0 pointer-events-none focus:outline-none",
+          SELECTION_CONTENT_OVERLAY_LAYERS.popover,
         )}
-        className={cn("focus:outline-none", SELECTION_CONTENT_OVERLAY_LAYERS.popover)}
         finalFocus={triggerElement ? { current: triggerElement } : false}
       >
-        {shell}
+        <SelectionPopoverShell
+          rndRef={rndRef}
+          isDragging={isDragging}
+          position={position}
+          defaultLayout={defaultLayout}
+          minWidth={minWidth}
+          minHeight={minHeight}
+          handleDragStart={handleDragStart}
+          handleDrag={handleDrag}
+          handleDragStop={handleDragStop}
+          handleResizeStop={handleResizeStop}
+          handleWheel={handleWheel}
+        >
+          {shell}
+        </SelectionPopoverShell>
       </DialogPrimitive.Popup>
     </DialogPrimitive.Portal>
   )

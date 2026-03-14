@@ -430,6 +430,23 @@ describe("selectionPopover", () => {
     expect(screen.getByText("Popover content").parentElement).toHaveClass("min-h-0", "flex-1", "overflow-y-auto")
   })
 
+  it("renders the popover inside a fixed viewport host so page scroll does not move it", () => {
+    const { element } = renderPopover()
+    const viewportHost = element.parentElement
+
+    expect(viewportHost).toHaveClass("fixed", "inset-0", "pointer-events-none")
+    expectLatestPosition({ x: 120, y: 140 })
+
+    updatePositionSpy.mockReset()
+
+    act(() => {
+      window.dispatchEvent(new Event("scroll"))
+    })
+
+    expect(updatePositionSpy).not.toHaveBeenCalled()
+    expectLatestPosition({ x: 120, y: 140 })
+  })
+
   it("closes the popover when clicking outside", async () => {
     renderPopover()
 
