@@ -1,10 +1,8 @@
 import { Buffer } from "node:buffer"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
-const { sendMessageMock, createObjectURLMock, revokeObjectURLMock } = vi.hoisted(() => ({
+const { sendMessageMock } = vi.hoisted(() => ({
   sendMessageMock: vi.fn(),
-  createObjectURLMock: vi.fn(() => "blob:provider-logo"),
-  revokeObjectURLMock: vi.fn(),
 }))
 
 vi.mock("@/utils/message", () => ({
@@ -16,13 +14,8 @@ describe("resolveContentScriptAssetUrl", () => {
     vi.resetModules()
     vi.clearAllMocks()
 
-    vi.stubGlobal("URL", class extends URL {
-      static createObjectURL = createObjectURLMock
-      static revokeObjectURL = revokeObjectURLMock
-    })
-
-    const { clearResolvedContentScriptAssetUrls } = await import("../background-asset-url")
-    clearResolvedContentScriptAssetUrls()
+    const { clearResolvedContentScriptAssetBlobs } = await import("../background-asset-url")
+    clearResolvedContentScriptAssetBlobs()
   })
 
   it("proxies remote logos through backgroundFetch on page contexts", async () => {
@@ -34,8 +27,8 @@ describe("resolveContentScriptAssetUrl", () => {
       bodyEncoding: "base64",
     })
 
-    const { resolveContentScriptAssetUrl } = await import("../background-asset-url")
-    const assetUrl = await resolveContentScriptAssetUrl("https://cdn.example.com/logo.webp")
+    const { resolveContentScriptAssetBlob } = await import("../background-asset-url")
+    const assetBlob = await resolveContentScriptAssetBlob("https://cdn.example.com/logo.webp")
 
     expect(sendMessageMock).toHaveBeenCalledWith("backgroundFetch", {
       url: "https://cdn.example.com/logo.webp",
@@ -46,15 +39,16 @@ describe("resolveContentScriptAssetUrl", () => {
       cacheConfig: undefined,
       responseType: "base64",
     })
-    expect(createObjectURLMock).toHaveBeenCalledTimes(1)
-    expect(assetUrl).toBe("blob:provider-logo")
+    expect(assetBlob).toBeInstanceOf(Blob)
+    expect(assetBlob?.type).toBe("image/webp")
+    expect(Array.from(new Uint8Array(await assetBlob!.arrayBuffer()))).toEqual([1, 2, 3])
   })
 
   it("bypasses proxying for non-remote and extension asset URLs", async () => {
-    const { resolveContentScriptAssetUrl, shouldProxyAssetUrl } = await import("../background-asset-url")
+    const { resolveContentScriptAssetBlob, shouldProxyAssetUrl } = await import("../background-asset-url")
 
-    await expect(resolveContentScriptAssetUrl("data:image/svg+xml;base64,AAA")).resolves.toBe("data:image/svg+xml;base64,AAA")
-    await expect(resolveContentScriptAssetUrl("moz-extension://abc/assets/provider.png")).resolves.toBe("moz-extension://abc/assets/provider.png")
+    await expect(resolveContentScriptAssetBlob("data:image/svg+xml;base64,AAA")).resolves.toBeNull()
+    await expect(resolveContentScriptAssetBlob("moz-extension://abc/assets/provider.png")).resolves.toBeNull()
     expect(shouldProxyAssetUrl("https://cdn.example.com/logo.webp", "moz-extension://abc/options.html")).toBe(false)
     expect(sendMessageMock).not.toHaveBeenCalled()
   })
@@ -73,9 +67,9 @@ describe("resolveContentScriptAssetUrl", () => {
       resolveFetch = resolve
     }))
 
-    const { resolveContentScriptAssetUrl } = await import("../background-asset-url")
-    const firstRequest = resolveContentScriptAssetUrl("https://cdn.example.com/logo.webp")
-    const secondRequest = resolveContentScriptAssetUrl("https://cdn.example.com/logo.webp")
+    const { resolveContentScriptAssetBlob } = await import("../background-asset-url")
+    const firstRequest = resolveContentScriptAssetBlob("https://cdn.example.com/logo.webp")
+    const secondRequest = resolveContentScriptAssetBlob("https://cdn.example.com/logo.webp")
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1)
 
@@ -87,18 +81,16 @@ describe("resolveContentScriptAssetUrl", () => {
       bodyEncoding: "base64",
     })
 
-    await expect(Promise.all([firstRequest, secondRequest])).resolves.toEqual([
-      "blob:provider-logo",
-      "blob:provider-logo",
-    ])
+    const [firstBlob, secondBlob] = await Promise.all([firstRequest, secondRequest])
+    expect(firstBlob).toBeInstanceOf(Blob)
+    expect(secondBlob).toBe(firstBlob)
   })
 
   it("returns null when background asset loading fails", async () => {
     sendMessageMock.mockRejectedValue(new Error("network error"))
 
-    const { resolveContentScriptAssetUrl } = await import("../background-asset-url")
+    const { resolveContentScriptAssetBlob } = await import("../background-asset-url")
 
-    await expect(resolveContentScriptAssetUrl("https://cdn.example.com/logo.webp")).resolves.toBeNull()
-    expect(createObjectURLMock).not.toHaveBeenCalled()
+    await expect(resolveContentScriptAssetBlob("https://cdn.example.com/logo.webp")).resolves.toBeNull()
   })
 })

@@ -6,8 +6,8 @@ const EXTENSION_PROTOCOLS = new Set([
   "safari-web-extension:",
 ])
 
-const resolvedAssetUrlCache = new Map<string, string>()
-const pendingAssetUrlCache = new Map<string, Promise<string | null>>()
+const resolvedAssetBlobCache = new Map<string, Blob>()
+const pendingAssetBlobCache = new Map<string, Promise<Blob | null>>()
 
 function isRemoteHttpUrl(value: string) {
   return /^https?:\/\//i.test(value)
@@ -31,22 +31,22 @@ export function shouldProxyAssetUrl(resourceUrl: string, pageUrl = getCurrentPag
   }
 }
 
-export async function resolveContentScriptAssetUrl(resourceUrl: string) {
+export async function resolveContentScriptAssetBlob(resourceUrl: string) {
   if (!shouldProxyAssetUrl(resourceUrl)) {
-    return resourceUrl
+    return null
   }
 
-  const cachedAssetUrl = resolvedAssetUrlCache.get(resourceUrl)
-  if (cachedAssetUrl) {
-    return cachedAssetUrl
+  const cachedAssetBlob = resolvedAssetBlobCache.get(resourceUrl)
+  if (cachedAssetBlob) {
+    return cachedAssetBlob
   }
 
-  const pendingAssetUrl = pendingAssetUrlCache.get(resourceUrl)
-  if (pendingAssetUrl) {
-    return pendingAssetUrl
+  const pendingAssetBlob = pendingAssetBlobCache.get(resourceUrl)
+  if (pendingAssetBlob) {
+    return pendingAssetBlob
   }
 
-  const assetUrlPromise = (async () => {
+  const assetBlobPromise = (async () => {
     try {
       const response = await backgroundFetch(resourceUrl, undefined, {
         credentials: "omit",
@@ -56,32 +56,27 @@ export async function resolveContentScriptAssetUrl(resourceUrl: string) {
         return null
       }
 
-      const blob = await response.blob()
-      if (blob.size === 0) {
+      const assetBlob = await response.blob()
+      if (assetBlob.size === 0) {
         return null
       }
 
-      const objectUrl = URL.createObjectURL(blob)
-      resolvedAssetUrlCache.set(resourceUrl, objectUrl)
-      return objectUrl
+      resolvedAssetBlobCache.set(resourceUrl, assetBlob)
+      return assetBlob
     }
     catch {
       return null
     }
     finally {
-      pendingAssetUrlCache.delete(resourceUrl)
+      pendingAssetBlobCache.delete(resourceUrl)
     }
   })()
 
-  pendingAssetUrlCache.set(resourceUrl, assetUrlPromise)
-  return assetUrlPromise
+  pendingAssetBlobCache.set(resourceUrl, assetBlobPromise)
+  return assetBlobPromise
 }
 
-export function clearResolvedContentScriptAssetUrls() {
-  for (const assetUrl of resolvedAssetUrlCache.values()) {
-    URL.revokeObjectURL(assetUrl)
-  }
-
-  resolvedAssetUrlCache.clear()
-  pendingAssetUrlCache.clear()
+export function clearResolvedContentScriptAssetBlobs() {
+  resolvedAssetBlobCache.clear()
+  pendingAssetBlobCache.clear()
 }
