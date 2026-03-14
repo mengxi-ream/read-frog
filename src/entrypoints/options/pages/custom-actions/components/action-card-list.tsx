@@ -1,9 +1,11 @@
+import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { CustomActionTemplate } from "@/utils/constants/custom-action-templates"
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate } from "react-router"
+import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
@@ -18,7 +20,7 @@ import { AddActionDialog } from "./add-action-dialog"
 
 export function CustomActionCardList() {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
+  const [, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const { search } = useLocation()
   const navigate = useNavigate()
@@ -54,6 +56,13 @@ export function CustomActionCardList() {
     setDialogOpen(false)
   }
 
+  const handleReorder = (newList: SelectionToolbarCustomAction[]) => {
+    void setSelectionToolbarConfig({
+      ...selectionToolbarConfig,
+      customActions: newList,
+    })
+  }
+
   return (
     <div className="flex flex-col gap-4">
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -78,43 +87,55 @@ export function CustomActionCardList() {
 
       {customActions.length > 0 && (
         <EntityListRail>
-          <div className="flex flex-col gap-3 pt-2">
-            {customActions.map(action => (
-              <div
-                key={action.id}
-                className={cn(
-                  "rounded-xl border p-3 bg-card transition-colors cursor-pointer",
-                  selectedCustomActionId === action.id && "border-primary",
-                  action.enabled === false && "opacity-70",
-                )}
-                onClick={() => setSelectedCustomActionId(action.id)}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="size-4">
-                      <Icon icon={action.icon} className="size-4 text-zinc-600 dark:text-zinc-300 shrink-0" />
-                    </div>
-                    <span className="text-sm font-medium truncate">{action.name}</span>
-                  </div>
-                  <Switch
-                    checked={action.enabled !== false}
-                    onCheckedChange={(checked) => {
-                      void setSelectionToolbarConfig({
-                        ...selectionToolbarConfig,
-                        customActions: customActions.map(item =>
-                          item.id === action.id ? { ...item, enabled: checked } : item,
-                        ),
-                      })
-                    }}
-                    onPointerDown={event => event.stopPropagation()}
-                    onClick={event => event.stopPropagation()}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
+          <SortableList
+            list={customActions}
+            setList={handleReorder}
+            className="flex flex-col gap-3 pt-2"
+            renderItem={action => (
+              <CustomActionCard action={action} />
+            )}
+          />
         </EntityListRail>
       )}
+    </div>
+  )
+}
+
+function CustomActionCard({ action }: { action: SelectionToolbarCustomAction }) {
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
+  const customActions = selectionToolbarConfig.customActions ?? []
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl border p-3 bg-card transition-colors cursor-pointer",
+        selectedCustomActionId === action.id && "border-primary",
+        action.enabled === false && "opacity-70",
+      )}
+      onClick={() => setSelectedCustomActionId(action.id)}
+    >
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          <div className="size-4">
+            <Icon icon={action.icon} className="size-4 text-zinc-600 dark:text-zinc-300 shrink-0" />
+          </div>
+          <span className="text-sm font-medium truncate">{action.name}</span>
+        </div>
+        <Switch
+          checked={action.enabled !== false}
+          onCheckedChange={(checked) => {
+            void setSelectionToolbarConfig({
+              ...selectionToolbarConfig,
+              customActions: customActions.map(item =>
+                item.id === action.id ? { ...item, enabled: checked } : item,
+              ),
+            })
+          }}
+          onPointerDown={event => event.stopPropagation()}
+          onClick={event => event.stopPropagation()}
+        />
+      </div>
     </div>
   )
 }

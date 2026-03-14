@@ -10,6 +10,7 @@ import { fieldContext as FieldContext } from "@/components/form/form-context"
 import { InputField } from "@/components/form/input-field"
 import { QuickInsertableTextareaField } from "@/components/form/quick-insertable-textarea-field"
 import { SelectField } from "@/components/form/select-field"
+import { SortableList } from "@/components/sortable-list"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +21,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/base-ui/alert-dialog"
+import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
@@ -37,14 +39,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/base-ui/table"
 import { selectionToolbarCustomActionOutputTypeSchema } from "@/types/config/selection-toolbar"
 import {
   createOutputSchemaField,
@@ -285,50 +279,47 @@ export const OutputSchemaField = withForm({
                 </Button>
               </div>
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>{t("fieldName")}</TableHead>
-                    <TableHead>{t("fieldType")}</TableHead>
-                    <TableHead>{t("fieldDescription")}</TableHead>
-                    <TableHead className="text-right">{t("actions")}</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {outputSchema.map(outputField => (
-                    <TableRow key={outputField.id}>
-                      <TableCell className="font-medium">{outputField.name}</TableCell>
-                      <TableCell>{i18n.t(`dataTypes.${outputField.type}`)}</TableCell>
-                      <TableCell>
-                        <span className="block max-w-[200px] truncate">
-                          {outputField.description || "—"}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-1">
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setEditingField(outputField)}
-                          >
-                            <Icon icon="tabler:pencil" className="size-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="icon"
-                            onClick={() => setDeletingFieldId(outputField.id)}
-                            disabled={outputSchema.length === 1}
-                          >
-                            <Icon icon="tabler:trash" className="size-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <SortableList
+                list={outputSchema}
+                setList={(newList) => {
+                  field.handleChange(newList)
+                  void form.handleSubmit()
+                }}
+                className="flex flex-col gap-2"
+                renderItem={outputField => (
+                  <div className="flex items-center gap-2 rounded-lg border bg-card p-2">
+                    <Icon icon="tabler:grip-vertical" className="size-4 text-muted-foreground shrink-0" />
+                    <span className="text-sm font-medium shrink-0">{outputField.name}</span>
+                    <Badge variant="secondary" className="shrink-0">{i18n.t(`dataTypes.${outputField.type}`)}</Badge>
+                    <span className="text-sm text-muted-foreground truncate min-w-0 flex-1">
+                      {outputField.description || "—"}
+                    </span>
+                    <div className="flex gap-1 shrink-0">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="size-7"
+                        onClick={() => setEditingField(outputField)}
+                        onPointerDown={e => e.stopPropagation()}
+                      >
+                        <Icon icon="tabler:pencil" className="size-3.5" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="size-7"
+                        onClick={() => setDeletingFieldId(outputField.id)}
+                        onPointerDown={e => e.stopPropagation()}
+                        disabled={outputSchema.length === 1}
+                      >
+                        <Icon icon="tabler:trash" className="size-3.5" />
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              />
 
               {addingField && (
                 <FieldDialog
