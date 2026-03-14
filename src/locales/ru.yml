@@ -279,6 +279,12 @@ options:
       globalToggle:
         title: Включить панель выделения
         description: Отображать панель при выделении текста на веб-страницах для быстрого перевода и анализа слов
+      featureToggles:
+        title: Переключатели функций
+        description: Выберите, какие встроенные функции показывать в панели выделения
+        translate: Перевод
+        speak: Озвучивание
+        vocabularyInsight: Анализ слов
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально

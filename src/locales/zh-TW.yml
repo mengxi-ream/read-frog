@@ -279,6 +279,12 @@ options:
       globalToggle:
         title: 啟用選擇工具列
         description: 在網頁上選擇文字時顯示工具列，快速翻譯和詞彙解析
+      featureToggles:
+        title: 功能開關
+        description: 選擇在選擇工具列中顯示哪些內建功能
+        translate: 翻譯
+        speak: 朗讀
+        vocabularyInsight: 詞彙解析
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用

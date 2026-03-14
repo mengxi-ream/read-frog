@@ -279,6 +279,12 @@ options:
       globalToggle:
         title: 선택 툴바 활성화
         description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 어휘 분석
+      featureToggles:
+        title: 기능 토글
+        description: 선택 툴바에 표시할 기본 제공 기능 선택
+        translate: 번역
+        speak: 읽기
+        vocabularyInsight: 어휘 분석
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화

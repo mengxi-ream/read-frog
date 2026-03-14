@@ -280,6 +280,12 @@ options:
       globalToggle:
         title: 启用选择工具栏
         description: 在网页上选择文本时显示工具栏，快速翻译和词汇解析
+      featureToggles:
+        title: 功能开关
+        description: 选择在选择工具栏中显示哪些内置功能
+        translate: 翻译
+        speak: 朗读
+        vocabularyInsight: 词汇解析
       closeMenu:
         disableForSite: 禁用此网站
         disableGlobally: 全局禁用

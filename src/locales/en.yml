@@ -280,6 +280,12 @@ options:
       globalToggle:
         title: Enable Selection Toolbar
         description: Display the toolbar when selecting text on web pages for quick translation and vocabulary insights
+      featureToggles:
+        title: Feature Toggles
+        description: Choose which built-in features to show in the selection toolbar
+        translate: Translate
+        speak: Speak
+        vocabularyInsight: Vocabulary Insight
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally

@@ -253,9 +253,16 @@ export function SelectionToolbar() {
     matchDomainPattern(window.location.href, pattern),
   )
 
+  const { features } = selectionToolbar
+  const hasAnyEnabledFeature
+    = features.translate.enabled
+      || (!isFirefox && features.speak.enabled)
+      || features.vocabularyInsight.enabled
+      || selectionToolbar.customActions.some(a => a.enabled !== false)
+
   return (
     <div ref={tooltipContainerRef} className={NOTRANSLATE_CLASS}>
-      {selectionToolbar.enabled && !isSiteDisabled && (
+      {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
         <div
           ref={tooltipRef}
           aria-hidden={!isSelectionToolbarVisible}
@@ -265,9 +272,9 @@ export function SelectionToolbar() {
           )}
         >
           <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
-            <TranslateButton />
-            {!isFirefox && <SpeakButton />}
-            <AiButton />
+            {features.translate.enabled && <TranslateButton />}
+            {!isFirefox && features.speak.enabled && <SpeakButton />}
+            {features.vocabularyInsight.enabled && <AiButton />}
             <SelectionToolbarCustomActionButtons />
           </div>
           <CloseButton />

@@ -25,7 +25,12 @@ const floatingButtonSchema = z.object({
 })
 
 const selectionToolbarFeatureSchema = z.object({
+  enabled: z.boolean(),
   providerId: z.string().nonempty(),
+})
+
+const selectionToolbarSpeakFeatureSchema = z.object({
+  enabled: z.boolean(),
 })
 
 // Text selection toolbar schema
@@ -34,6 +39,7 @@ const selectionToolbarSchema = z.object({
   disabledSelectionToolbarPatterns: z.array(z.string()),
   features: z.object({
     translate: selectionToolbarFeatureSchema,
+    speak: selectionToolbarSpeakFeatureSchema,
     vocabularyInsight: selectionToolbarFeatureSchema,
   }),
   customActions: selectionToolbarCustomActionsSchema,

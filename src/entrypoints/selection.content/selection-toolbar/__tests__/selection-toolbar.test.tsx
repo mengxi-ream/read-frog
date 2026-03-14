@@ -30,7 +30,16 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
     ...actual,
     configFieldsAtomMap: {
       ...actual.configFieldsAtomMap,
-      selectionToolbar: atom({ enabled: true }),
+      selectionToolbar: atom({
+        enabled: true,
+        disabledSelectionToolbarPatterns: [],
+        features: {
+          translate: { enabled: true, providerId: "microsoft-translate-default" },
+          speak: { enabled: true },
+          vocabularyInsight: { enabled: true, providerId: "openai-default" },
+        },
+        customActions: [],
+      }),
     },
   }
 })

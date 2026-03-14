@@ -44,6 +44,7 @@ describe("config provider enabled validation", () => {
         features: {
           ...DEFAULT_CONFIG.selectionToolbar.features,
           vocabularyInsight: {
+            enabled: true,
             providerId: "google-default",
           },
         },

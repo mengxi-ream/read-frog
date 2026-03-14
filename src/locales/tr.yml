@@ -279,6 +279,12 @@ options:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir
         description: Hızlı çeviri ve kelime analizi için web sayfalarında metin seçerken araç çubuğunu görüntüle
+      featureToggles:
+        title: Özellik Açma/Kapama
+        description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
+        translate: Çeviri
+        speak: Sesli Okuma
+        vocabularyInsight: Kelime Analizi
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak

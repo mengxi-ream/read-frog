@@ -68,8 +68,8 @@ describe("feature providers", () => {
           ...DEFAULT_CONFIG.selectionToolbar,
           features: {
             ...DEFAULT_CONFIG.selectionToolbar.features,
-            translate: { providerId: "deleted-provider" },
-            vocabularyInsight: { providerId: "deleted-provider" },
+            translate: { enabled: true, providerId: "deleted-provider" },
+            vocabularyInsight: { enabled: true, providerId: "deleted-provider" },
           },
         },
         inputTranslation: {
@@ -101,7 +101,7 @@ describe("feature providers", () => {
           ...DEFAULT_CONFIG.selectionToolbar,
           features: {
             ...DEFAULT_CONFIG.selectionToolbar.features,
-            vocabularyInsight: { providerId: "deleted-provider" },
+            vocabularyInsight: { enabled: true, providerId: "deleted-provider" },
           },
         },
       }
@@ -122,7 +122,7 @@ describe("feature providers", () => {
           ...DEFAULT_CONFIG.selectionToolbar,
           features: {
             ...DEFAULT_CONFIG.selectionToolbar.features,
-            vocabularyInsight: { providerId: "deleted-provider" },
+            vocabularyInsight: { enabled: true, providerId: "deleted-provider" },
           },
         },
       }

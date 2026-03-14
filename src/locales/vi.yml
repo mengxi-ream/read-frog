@@ -279,6 +279,12 @@ options:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
         description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch và phân tích từ vựng nhanh
+      featureToggles:
+        title: Bật/tắt tính năng
+        description: Chọn các tính năng tích hợp để hiển thị trên thanh công cụ chọn văn bản
+        translate: Dịch
+        speak: Đọc
+        vocabularyInsight: Phân tích từ vựng
       closeMenu:
         disableForSite: Tắt cho trang web này
         disableGlobally: Tắt toàn cục

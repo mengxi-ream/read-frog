@@ -279,6 +279,12 @@ options:
       globalToggle:
         title: 選択ツールバーを有効化
         description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と語彙分析
+      featureToggles:
+        title: 機能トグル
+        description: 選択ツールバーに表示する組み込み機能を選択
+        translate: 翻訳
+        speak: 読み上げ
+        vocabularyInsight: 語彙分析
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
