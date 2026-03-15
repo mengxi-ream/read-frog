@@ -359,9 +359,9 @@ options:
             cancel: İptal
           tokens:
             selection: Seçilen metin içeriği
-            context: Seçimle kesişen paragraf metni; özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
-            targetLang: Kullanıcının hedef dili
-            title: Web sayfası başlığı
+            paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
+            targetLanguage: Kullanıcının hedef dili
+            webTitle: Web sayfası başlığı
           delete: Sil
           deleteDialog:
             title: Özel eylem silinsin mi?
@@ -426,9 +426,9 @@ options:
         prompt: Prompt
         promptCellInput:
           input: Çevrilecek metin içeriği
-          targetLang: Hedef dil
-          title: Web sayfası başlığı
-          summary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
+          targetLanguage: Hedef dil
+          webTitle: Web sayfası başlığı
+          webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
         save: Değişiklikleri Kaydet
         close: İptal
       deletePrompt:
@@ -793,7 +793,7 @@ action:
   regenerate: Yeniden oluştur
   viewContextDetails: Bağlam
   contextDetailsTitleLabel: Başlık
-  contextDetailsContextLabel: Bağlam
+  contextDetailsParagraphsLabel: Paragraflar
   translation: Çeviri
   speak: Oku
   playing: Çalınıyor

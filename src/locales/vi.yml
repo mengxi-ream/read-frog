@@ -359,9 +359,9 @@ options:
             cancel: Hủy
           tokens:
             selection: Nội dung văn bản đã chọn
-            context: Nội dung đoạn văn giao với vùng chọn, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
-            targetLang: Ngôn ngữ đích của người dùng
-            title: Tiêu đề trang web
+            paragraphs: Nội dung các đoạn giao với vùng chọn, được nối bằng dòng trống, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
+            targetLanguage: Ngôn ngữ đích của người dùng
+            webTitle: Tiêu đề trang web
           delete: Xóa
           deleteDialog:
             title: Xóa hành động tùy chỉnh?
@@ -426,9 +426,9 @@ options:
         prompt: Prompt
         promptCellInput:
           input: Nội dung văn bản để dịch
-          targetLang: Ngôn ngữ đích
-          title: Tiêu đề trang web
-          summary: Tóm tắt trang web (yêu cầu Ngữ cảnh thông minh AI)
+          targetLanguage: Ngôn ngữ đích
+          webTitle: Tiêu đề trang web
+          webSummary: Tóm tắt trang web (yêu cầu Ngữ cảnh thông minh AI)
         save: Lưu thay đổi
         close: Hủy
       deletePrompt:
@@ -793,7 +793,7 @@ action:
   regenerate: Tạo lại
   viewContextDetails: Ngữ cảnh
   contextDetailsTitleLabel: Tiêu đề
-  contextDetailsContextLabel: Ngữ cảnh
+  contextDetailsParagraphsLabel: Các đoạn văn
   translation: Dịch
   speak: Đọc
   playing: Đang phát

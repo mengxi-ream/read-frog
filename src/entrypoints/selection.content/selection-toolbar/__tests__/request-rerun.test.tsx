@@ -142,14 +142,14 @@ vi.mock("../../components/selection-toolbar-title-content", () => ({
 
 vi.mock("../../components/selection-toolbar-footer-content", () => ({
   SelectionToolbarFooterContent: ({
-    contextText,
+    paragraphsText,
     onProviderChange,
     onRegenerate,
     providers,
     titleText,
     value,
   }: {
-    contextText: string | null | undefined
+    paragraphsText: string | null | undefined
     onProviderChange: (id: string) => void
     onRegenerate: () => void
     providers: Array<{ id: string }>
@@ -161,7 +161,7 @@ vi.mock("../../components/selection-toolbar-footer-content", () => ({
     return (
       <div>
         <span data-testid="footer-title">{titleText}</span>
-        <span data-testid="footer-context">{contextText}</span>
+        <span data-testid="footer-paragraphs">{paragraphsText}</span>
         <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
           Regenerate
         </button>

@@ -60,7 +60,7 @@ describe("selectionToolbarFooterContent", () => {
     render(
       <TooltipProvider>
         <SelectionToolbarFooterContent
-          contextText="Context text"
+          paragraphsText="Context text"
           providers={providers}
           titleText="Page Title"
           value="google-translate-default"
@@ -78,7 +78,7 @@ describe("selectionToolbarFooterContent", () => {
 
     expect(onProviderChange).toHaveBeenCalledWith("microsoft-translate-default")
     expect(screen.getByText(i18n.t("action.contextDetailsTitleLabel"))).toBeInTheDocument()
-    expect(screen.getByText(i18n.t("action.contextDetailsContextLabel"))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t("action.contextDetailsParagraphsLabel"))).toBeInTheDocument()
     expect(screen.getByText("Page Title")).toBeInTheDocument()
     expect(screen.getByText("Context text")).toBeInTheDocument()
     expect(
@@ -97,7 +97,7 @@ describe("selectionToolbarFooterContent", () => {
     render(
       <TooltipProvider>
         <SelectionToolbarFooterContent
-          contextText={null}
+          paragraphsText={null}
           providers={providers}
           titleText=""
           value="google-translate-default"

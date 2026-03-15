@@ -59,7 +59,7 @@ export function AiButton() {
     setAiResponse("")
   }, [])
   const selectionText = selectionSnapshot?.text ?? null
-  const contextText = contextSnapshot?.text ?? selectionText
+  const paragraphsText = contextSnapshot?.text ?? selectionText
   const titleText = document.title || null
 
   const highlightData = useMemo(() => {
@@ -271,7 +271,7 @@ export function AiButton() {
           </div>
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
-          contextText={contextText}
+          paragraphsText={paragraphsText}
           providers={llmProviders}
           titleText={titleText}
           value={vocabularyInsightRequest.providerConfig?.id ?? ""}

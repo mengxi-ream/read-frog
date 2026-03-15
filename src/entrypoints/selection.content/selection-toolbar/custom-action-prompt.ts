@@ -3,9 +3,9 @@ import { getSelectionToolbarCustomActionTokenCellText } from "@/utils/constants/
 
 export interface SelectionToolbarCustomActionPromptTokens {
   selection: string
-  context: string
-  targetLang: string
-  title: string
+  paragraphs: string
+  targetLanguage: string
+  webTitle: string
 }
 
 export function replaceSelectionToolbarCustomActionPromptTokens(
@@ -14,9 +14,9 @@ export function replaceSelectionToolbarCustomActionPromptTokens(
 ) {
   return prompt
     .replaceAll(getSelectionToolbarCustomActionTokenCellText("selection"), tokens.selection)
-    .replaceAll(getSelectionToolbarCustomActionTokenCellText("context"), tokens.context)
-    .replaceAll(getSelectionToolbarCustomActionTokenCellText("targetLang"), tokens.targetLang)
-    .replaceAll(getSelectionToolbarCustomActionTokenCellText("title"), tokens.title)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("paragraphs"), tokens.paragraphs)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("targetLanguage"), tokens.targetLanguage)
+    .replaceAll(getSelectionToolbarCustomActionTokenCellText("webTitle"), tokens.webTitle)
 }
 
 type StructuredOutputField = Pick<SelectionToolbarCustomActionOutputField, "name" | "type" | "description">

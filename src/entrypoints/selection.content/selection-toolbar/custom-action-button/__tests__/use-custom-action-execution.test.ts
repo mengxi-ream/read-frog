@@ -36,7 +36,7 @@ describe("buildCustomActionExecutionPlan", () => {
     )
 
     expect(plan.error).toBeNull()
-    expect(plan.executionContext?.promptTokens.context).toBe(
+    expect(plan.executionContext?.promptTokens.paragraphs).toBe(
       contextText.slice(0, CUSTOM_ACTION_CONTEXT_CHAR_LIMIT),
     )
     expect(plan.executionContext?.promptTokens.selection).toBe("Selected text")

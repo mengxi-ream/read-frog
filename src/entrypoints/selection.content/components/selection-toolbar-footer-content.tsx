@@ -26,7 +26,7 @@ function PreviewField({
   label,
   value,
 }: {
-  field: "title" | "context"
+  field: "title" | "paragraphs"
   label: string
   value: string | null | undefined
 }) {
@@ -50,11 +50,11 @@ function PreviewField({
 
 export function ContextDetailsButton({
   className,
-  contextText,
+  paragraphsText,
   titleText,
 }: {
   className?: string
-  contextText: string | null | undefined
+  paragraphsText: string | null | undefined
   titleText: string | null | undefined
 }) {
   const popoverOverlay = useSelectionPopoverOverlayProps()
@@ -110,7 +110,7 @@ export function ContextDetailsButton({
       >
         <FieldGroup className="gap-3">
           <PreviewField field="title" label={i18n.t("action.contextDetailsTitleLabel")} value={titleText} />
-          <PreviewField field="context" label={i18n.t("action.contextDetailsContextLabel")} value={contextText} />
+          <PreviewField field="paragraphs" label={i18n.t("action.contextDetailsParagraphsLabel")} value={paragraphsText} />
         </FieldGroup>
       </PopoverContent>
     </Popover>
@@ -168,7 +168,7 @@ export function RegenerateButton({
 
 export function SelectionToolbarFooterContent({
   className,
-  contextText,
+  paragraphsText,
   onProviderChange,
   onRegenerate,
   providers,
@@ -176,7 +176,7 @@ export function SelectionToolbarFooterContent({
   value,
 }: {
   className?: string
-  contextText: string | null | undefined
+  paragraphsText: string | null | undefined
   onProviderChange: (id: string) => void
   onRegenerate: () => void
   providers: ProviderConfig[]
@@ -197,7 +197,7 @@ export function SelectionToolbarFooterContent({
         />
       </div>
       <div className="flex items-center gap-1">
-        <ContextDetailsButton titleText={titleText} contextText={contextText} />
+        <ContextDetailsButton titleText={titleText} paragraphsText={paragraphsText} />
         <RegenerateButton onRegenerate={onRegenerate} />
       </div>
     </SelectionPopover.Footer>

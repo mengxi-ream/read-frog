@@ -360,9 +360,9 @@ options:
             cancel: Cancel
           tokens:
             selection: Selected text content
-            context: Intersecting paragraph text, truncated to the first 2000 characters when sent to custom AI actions
-            targetLang: "User's target language"
-            title: Webpage title
+            paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
+            targetLanguage: "User's target language"
+            webTitle: Webpage title
           delete: Delete
           deleteDialog:
             title: Delete Custom Action?
@@ -374,66 +374,66 @@ options:
           dialogDescription: Select a template to quickly create a new AI action, or start from scratch.
           dictionary:
             name: Dictionary
-            description: Look up words with definitions, phonetics, and context translations
+            description: Look up words with definitions, phonetics, and paragraph translations
             systemPrompt: |-
               You are a dictionary assistant for language learners.
 
               ## Goal
-              Given a term and its surrounding context, produce a concise dictionary entry that matches the required output object.
+              Given a term and its surrounding paragraphs, produce a concise dictionary entry that matches the required output object.
 
               ## Rules
-              1. Focus on the meaning that best matches the provided context.
+              1. Focus on the meaning that best matches the provided paragraphs.
               2. Normalize Term to its base/canonical form.
               3. Keep Definition precise and learner-friendly.
-              4. Keep Context short and directly tied to the selected text.
+              4. Keep Paragraphs exactly as provided in the prompt.
               5. Phonetic must use the standard notation for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
               6. Part of Speech in English (noun, verb, adjective, etc.).
               7. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
               8. If a field is unknown, return an empty string instead of guessing.
-              9. Respond in {{targetLang}} for all textual fields unless source-form text is required for clarity.
+              9. Respond in {{targetLanguage}} for all textual fields unless source-form text is required for clarity.
 
               ## Examples
 
               ### Example 1
-              Input: Selection="blossoms", Context="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Target language=Chinese
+              Input: Selection="blossoms", Paragraphs="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Target language=Chinese
 
               Output:
               - Term: blossom
               - Phonetic: /ˈblɒs.əm/
               - Part of Speech: noun
-              - Context: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - Paragraphs: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
               - Definition: 花；花朵（尤指果树的花）
-              - Context Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
+              - Paragraphs Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
               - Difficulty: B2
 
               ### Example 2
-              Input: Selection="感動", Context="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
+              Input: Selection="感動", Paragraphs="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
 
               Output:
               - Term: 感動
               - Phonetic: kandou
               - Part of Speech: noun
-              - Context: この映画はつまらないと思ったけど、最後は感動した。
+              - Paragraphs: この映画はつまらないと思ったけど、最後は感動した。
               - Definition: Being deeply moved; emotional touch
-              - Context Translation: I thought this movie was boring, but the ending was moving.
+              - Paragraphs Translation: I thought this movie was boring, but the ending was moving.
               - Difficulty: B1
             prompt: |-
               ## Input
               Selection: {{selection}}
-              Context: {{context}}
-              Target language: {{targetLang}}
+              Paragraphs: {{paragraphs}}
+              Target language: {{targetLanguage}}
             fieldTerm: Term
             fieldTermDescription: Base/canonical lemma of the selected term.
             fieldPhonetic: Phonetic
             fieldPhoneticDescription: Standard phonetic transcription for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
             fieldPartOfSpeech: Part of Speech
             fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
-            fieldContext: Context
-            fieldContextDescription: The context in the prompt above, don't change it.
+            fieldParagraphs: Paragraphs
+            fieldParagraphsDescription: The paragraphs from the prompt above. Do not rewrite them.
             fieldDefinition: Definition
             fieldDefinitionDescription: One concise definition for the contextual sense.
-            fieldContextTranslation: Context Translation
-            fieldContextTranslationDescription: The translation of the context.
+            fieldParagraphsTranslation: Paragraphs Translation
+            fieldParagraphsTranslationDescription: The translation of the paragraphs.
             fieldDifficulty: Difficulty
             fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
           improveWriting:
@@ -443,12 +443,12 @@ options:
               You are a writing assistant for language learners.
 
               ## Goal
-              Given selected text and its surrounding context, analyze writing issues and produce an improved version.
+              Given selected text and its surrounding paragraphs, analyze writing issues and produce an improved version.
 
               ## Language Policy (critical)
-              1. The "Error Analysis" field must be written in {{targetLang}}.
+              1. The "Error Analysis" field must be written in {{targetLanguage}}.
               2. The "Improved Version" field must stay in the original language of Selection.
-              3. Never translate "Improved Version" into {{targetLang}} unless Selection is already in {{targetLang}}.
+              3. Never translate "Improved Version" into {{targetLanguage}} unless Selection is already in {{targetLanguage}}.
 
               ## Writing Rules
               1. Identify grammar, spelling, punctuation, and word choice errors.
@@ -459,22 +459,22 @@ options:
               ## Examples
               Example A:
               - Selection (English): "He go to school yesterday, and he don't finish his homework."
-              - targetLang: Chinese
+              - targetLanguage: Chinese
               - Error Analysis (Chinese): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
               - Improved Version (English): He went to school yesterday, and he didn't finish his homework.
 
               Example B:
               - Selection (English): "The service attitude of this store is very good."
-              - targetLang: Japanese
+              - targetLanguage: Japanese
               - Error Analysis (Japanese): 文法はほぼ正しいですが、「service attitude」は不自然な直訳です。英語ではスタッフの対応を直接表現する方が自然です。
               - Improved Version (English): The staff at this store are very friendly.
             prompt: |-
               ## Input
               Selection: {{selection}}
-              Context: {{context}}
-              Target language: {{targetLang}}
+              Paragraphs: {{paragraphs}}
+              Target language: {{targetLanguage}}
             fieldErrorAnalysis: Error Analysis
-            fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLang}}.
+            fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLanguage}}.
             fieldImprovedVersion: Improved Version
             fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
           blank:
@@ -538,9 +538,9 @@ options:
         prompt: Prompt
         promptCellInput:
           input: Text content to translate
-          targetLang: Target language
-          title: Webpage title
-          summary: Webpage summary (requires AI Smart Context)
+          targetLanguage: Target language
+          webTitle: Webpage title
+          webSummary: Webpage summary (requires AI Smart Context)
         save: Save Changes
         close: Cancel
       deletePrompt:
@@ -905,7 +905,7 @@ action:
   regenerate: Regenerate
   viewContextDetails: Context
   contextDetailsTitleLabel: Title
-  contextDetailsContextLabel: Context
+  contextDetailsParagraphsLabel: Paragraphs
   translation: Translation
   speak: Speak
   playing: Playing

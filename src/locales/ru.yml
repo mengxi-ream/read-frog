@@ -359,9 +359,9 @@ options:
             cancel: Отмена
           tokens:
             selection: Содержимое выделенного текста
-            context: Текст абзацев, пересекающихся с выделением; при отправке в пользовательские AI-действия обрезается до первых 2000 символов
-            targetLang: Целевой язык пользователя
-            title: Заголовок веб-страницы
+            paragraphs: Текст абзацев, пересекающихся с выделением, объединённый пустыми строками; при отправке в пользовательские AI-действия обрезается до первых 2000 символов
+            targetLanguage: Целевой язык пользователя
+            webTitle: Заголовок веб-страницы
           delete: Удалить
           deleteDialog:
             title: Удалить пользовательское действие?
@@ -426,9 +426,9 @@ options:
         prompt: Промпт
         promptCellInput:
           input: Текстовое содержимое для перевода
-          targetLang: Целевой язык
-          title: Заголовок веб-страницы
-          summary: Резюме веб-страницы (требуется умный контекст ИИ)
+          targetLanguage: Целевой язык
+          webTitle: Заголовок веб-страницы
+          webSummary: Резюме веб-страницы (требуется умный контекст ИИ)
         save: Сохранить изменения
         close: Отмена
       deletePrompt:
@@ -793,7 +793,7 @@ action:
   regenerate: Сгенерировать заново
   viewContextDetails: Контекст
   contextDetailsTitleLabel: Заголовок
-  contextDetailsContextLabel: Контекст
+  contextDetailsParagraphsLabel: Абзацы
   translation: Перевод
   speak: Озвучить
   playing: Воспроизведение

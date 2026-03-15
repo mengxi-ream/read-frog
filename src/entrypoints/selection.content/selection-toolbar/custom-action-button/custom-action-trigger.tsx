@@ -47,7 +47,7 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
     () => normalizeSelectedText(selectionText),
     [selectionText],
   )
-  const contextText = useMemo(() => {
+  const paragraphsText = useMemo(() => {
     if (!cleanSelection) {
       return ""
     }
@@ -60,8 +60,8 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
     [providersConfig],
   )
   const executionPlan = useMemo(
-    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, contextText),
-    [cleanSelection, contextText, customActionRequest],
+    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, paragraphsText),
+    [cleanSelection, paragraphsText, customActionRequest],
   )
   const {
     isRunning,
@@ -149,7 +149,7 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
           <SelectionToolbarErrorAlert error={displayedError} />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
-          contextText={contextText}
+          paragraphsText={paragraphsText}
           providers={llmProviders}
           titleText={titleText}
           value={customActionRequest.providerConfig?.id ?? ""}

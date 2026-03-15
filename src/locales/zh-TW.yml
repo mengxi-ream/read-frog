@@ -359,9 +359,9 @@ options:
             cancel: 取消
           tokens:
             selection: 選取的文字內容
-            context: 與選取範圍相交的段落內容，傳給自訂 AI 指令時會截斷到前 2000 個字元
-            targetLang: 使用者的目標語言
-            title: 網頁標題
+            paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
+            targetLanguage: 使用者的目標語言
+            webTitle: 網頁標題
           delete: 刪除
           deleteDialog:
             title: 刪除自訂 AI 指令？
@@ -426,9 +426,9 @@ options:
         prompt: 提示詞
         promptCellInput:
           input: 需要翻譯的文字內容
-          targetLang: 目標語言
-          title: 網頁標題
-          summary: 網頁摘要（需啟用 AI 智慧上下文）
+          targetLanguage: 目標語言
+          webTitle: 網頁標題
+          webSummary: 網頁摘要（需啟用 AI 智慧上下文）
         save: 保存
         close: 取消
       deletePrompt:
@@ -793,7 +793,7 @@ action:
   regenerate: 重新生成
   viewContextDetails: 上下文
   contextDetailsTitleLabel: 標題
-  contextDetailsContextLabel: 上下文
+  contextDetailsParagraphsLabel: 段落內容
   translation: 翻譯
   speak: 朗讀
   playing: 播放中

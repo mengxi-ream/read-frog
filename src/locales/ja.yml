@@ -359,9 +359,9 @@ options:
             cancel: キャンセル
           tokens:
             selection: 選択したテキスト内容
-            context: 選択範囲と交差する段落内容。カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
-            targetLang: ユーザーのターゲット言語
-            title: ウェブページのタイトル
+            paragraphs: 選択範囲と交差する段落内容。空行で連結され、カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
+            targetLanguage: ユーザーのターゲット言語
+            webTitle: ウェブページのタイトル
           delete: 削除
           deleteDialog:
             title: カスタムアクションを削除しますか？
@@ -426,9 +426,9 @@ options:
         prompt: プロンプト
         promptCellInput:
           input: 翻訳するテキスト内容
-          targetLang: 目標言語
-          title: ウェブページタイトル
-          summary: ウェブページ要約（AI スマートコンテキストが必要）
+          targetLanguage: 目標言語
+          webTitle: ウェブページタイトル
+          webSummary: ウェブページ要約（AI スマートコンテキストが必要）
         save: 保存
         close: キャンセル
       deletePrompt:
@@ -793,7 +793,7 @@ action:
   regenerate: 再生成
   viewContextDetails: コンテキスト
   contextDetailsTitleLabel: タイトル
-  contextDetailsContextLabel: コンテキスト
+  contextDetailsParagraphsLabel: 段落内容
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中

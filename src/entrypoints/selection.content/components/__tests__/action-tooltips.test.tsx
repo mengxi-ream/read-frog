@@ -121,7 +121,7 @@ describe("selection action tooltips", () => {
 
   it("renders the context details tooltip above selection popovers", async () => {
     const { container } = renderWithProviders(
-      <ContextDetailsButton titleText="Title" contextText="Context" />,
+      <ContextDetailsButton titleText="Title" paragraphsText="Context" />,
     )
     const trigger = container.querySelector("[data-slot='tooltip-trigger']")
 
@@ -170,7 +170,7 @@ describe("selection action tooltips", () => {
 
   it("keeps the context details tooltip open after click", async () => {
     const { container } = renderWithProviders(
-      <ContextDetailsButton titleText="Title" contextText="Context" />,
+      <ContextDetailsButton titleText="Title" paragraphsText="Context" />,
     )
     const trigger = container.querySelector("[data-slot='tooltip-trigger']")
 

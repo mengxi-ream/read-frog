@@ -128,7 +128,7 @@ export function TranslateButton() {
     clearSelectionSnapshot,
   } = useSelectionPopoverSnapshot()
   const selectionText = selectionSnapshot?.text ?? null
-  const contextText = contextSnapshot?.text ?? selectionText
+  const paragraphsText = contextSnapshot?.text ?? selectionText
   const titleText = document.title || null
   const translateProviders = useMemo(
     () => filterEnabledProvidersConfig(providersConfig).filter(isTranslateProviderConfig),
@@ -319,7 +319,7 @@ export function TranslateButton() {
           <SelectionToolbarErrorAlert error={error} className="-mt-3" />
         </SelectionPopover.Body>
         <SelectionToolbarFooterContent
-          contextText={contextText}
+          paragraphsText={paragraphsText}
           providers={translateProviders}
           titleText={titleText}
           value={translateRequest.providerConfig?.id ?? ""}

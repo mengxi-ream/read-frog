@@ -359,9 +359,9 @@ options:
             cancel: 취소
           tokens:
             selection: 선택한 텍스트 내용
-            context: 선택 영역과 겹치는 문단 내용이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
-            targetLang: 사용자의 대상 언어
-            title: 웹페이지 제목
+            paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
+            targetLanguage: 사용자의 대상 언어
+            webTitle: 웹페이지 제목
           delete: 삭제
           deleteDialog:
             title: 사용자 정의 액션을 삭제하시겠습니까?
@@ -426,9 +426,9 @@ options:
         prompt: 프롬프트
         promptCellInput:
           input: 번역할 텍스트 내용
-          targetLang: 목표 언어
-          title: 웹페이지 제목
-          summary: 웹페이지 요약 (AI 스마트 컨텍스트 필요)
+          targetLanguage: 목표 언어
+          webTitle: 웹페이지 제목
+          webSummary: 웹페이지 요약 (AI 스마트 컨텍스트 필요)
         save: 저장
         close: 취소
       deletePrompt:
@@ -793,7 +793,7 @@ action:
   regenerate: 다시 생성
   viewContextDetails: 컨텍스트
   contextDetailsTitleLabel: 제목
-  contextDetailsContextLabel: 컨텍스트
+  contextDetailsParagraphsLabel: 문단 내용
   translation: 번역
   speak: 읽기
   playing: 재생 중

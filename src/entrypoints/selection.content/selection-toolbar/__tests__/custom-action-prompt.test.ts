@@ -4,23 +4,23 @@ import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarC
 describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
   const baseTokens = {
     selection: "hello",
-    context: "hello world paragraph",
-    targetLang: "English",
-    title: "Test Page",
+    paragraphs: "hello world paragraph",
+    targetLanguage: "English",
+    webTitle: "Test Page",
   }
 
-  it("replaces selection and context tokens", () => {
+  it("replaces selection and paragraphs tokens", () => {
     const result = replaceSelectionToolbarCustomActionPromptTokens(
-      "selection={{selection}}, context={{context}}",
+      "selection={{selection}}, paragraphs={{paragraphs}}",
       baseTokens,
     )
 
-    expect(result).toBe("selection=hello, context=hello world paragraph")
+    expect(result).toBe("selection=hello, paragraphs=hello world paragraph")
   })
 
-  it("replaces targetLang and title tokens", () => {
+  it("replaces targetLanguage and webTitle tokens", () => {
     const result = replaceSelectionToolbarCustomActionPromptTokens(
-      "Target language: {{targetLang}}, Page: {{title}}",
+      "Target language: {{targetLanguage}}, Page: {{webTitle}}",
       baseTokens,
     )
 
@@ -40,14 +40,14 @@ describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
 describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
   const baseTokens = {
     selection: "hello",
-    context: "hello world paragraph",
-    targetLang: "English",
-    title: "Test Page",
+    paragraphs: "hello world paragraph",
+    targetLanguage: "English",
+    webTitle: "Test Page",
   }
 
   it("appends structured output contract with resolved fields and defaults", () => {
     const result = buildSelectionToolbarCustomActionSystemPrompt(
-      "system={{context}}",
+      "system={{paragraphs}}",
       baseTokens,
       [
         { name: "Definition", type: "string", description: "" },
@@ -67,7 +67,7 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
 
   it("includes description in contract when provided", () => {
     const result = buildSelectionToolbarCustomActionSystemPrompt(
-      "system={{context}}",
+      "system={{paragraphs}}",
       baseTokens,
       [
         { name: "Term", type: "string", description: "Base/canonical lemma" },
@@ -84,30 +84,30 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
 
   it("resolves tokens in field description but keeps key names unchanged", () => {
     const result = buildSelectionToolbarCustomActionSystemPrompt(
-      "system={{context}}",
+      "system={{paragraphs}}",
       baseTokens,
       [
         {
-          name: "{{title}}",
+          name: "{{webTitle}}",
           type: "string",
-          description: "Explain in {{targetLang}} based on {{context}}",
+          description: "Explain in {{targetLanguage}} based on {{paragraphs}}",
         },
       ],
     )
 
-    expect(result).toContain("- key: \"{{title}}\"")
+    expect(result).toContain("- key: \"{{webTitle}}\"")
     expect(result).toContain("    Explain in English based on hello world paragraph")
   })
 
   it("preserves multiline field description in yaml block", () => {
     const result = buildSelectionToolbarCustomActionSystemPrompt(
-      "system={{context}}",
+      "system={{paragraphs}}",
       baseTokens,
       [
         {
           name: "Notes",
           type: "string",
-          description: "First line\nSecond line in {{targetLang}}",
+          description: "First line\nSecond line in {{targetLanguage}}",
         },
       ],
     )

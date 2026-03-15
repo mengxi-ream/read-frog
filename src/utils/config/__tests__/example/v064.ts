@@ -99,7 +99,7 @@ export const testSeries: TestSeriesObject = {
               id: "123e4567-e89b-12d3-a456-426614174000",
               name: "Technical Translation",
               systemPrompt: "",
-              prompt: "Technical translation from Spanish to {{targetLang}}. Preserve technical terms and accuracy:\n{{input}}",
+              prompt: "Technical translation from Spanish to {{targetLanguage}}. Preserve technical terms and accuracy:\n{{input}}",
             },
           ],
         },
@@ -144,12 +144,12 @@ export const testSeries: TestSeriesObject = {
             icon: "tabler:book-2",
             providerId: "deepseek-default",
             systemPrompt:
-          "You are a dictionary assistant for language learners. Given a term and its surrounding context, provide a comprehensive and concise dictionary entry. When a term has multiple meanings, focus on the contextual meaning. Return the term in its base/canonical form. Respond in {{targetLang}}.",
-            prompt: "Term: {{selection}}\nContext: {{context}}\nTarget language: {{targetLang}}",
+          "You are a dictionary assistant for language learners. Given a term and its surrounding paragraphs, provide a comprehensive and concise dictionary entry. When a term has multiple meanings, focus on the contextual meaning. Return the term in its base/canonical form. Respond in {{targetLanguage}}.",
+            prompt: "Term: {{selection}}\nParagraphs: {{paragraphs}}\nTarget language: {{targetLanguage}}",
             outputSchema: [
               { id: "default-dictionary-term", name: "Term", type: "string", description: "", speaking: true },
               { id: "default-dictionary-definition", name: "Definition", type: "string", description: "", speaking: false },
-              { id: "default-dictionary-context", name: "Context", type: "string", description: "", speaking: true },
+              { id: "default-dictionary-context", name: "Paragraphs", type: "string", description: "", speaking: true },
               { id: "default-dictionary-examples", name: "Examples", type: "string", description: "", speaking: false },
               { id: "default-dictionary-synonyms", name: "Synonyms", type: "string", description: "", speaking: false },
               { id: "default-dictionary-antonyms", name: "Antonyms", type: "string", description: "", speaking: false },
@@ -321,12 +321,12 @@ export const testSeries: TestSeriesObject = {
             icon: "tabler:book-2",
             providerId: "google-default",
             systemPrompt:
-          "You are a dictionary assistant for language learners. Given a term and its surrounding context, provide a comprehensive and concise dictionary entry. When a term has multiple meanings, focus on the contextual meaning. Return the term in its base/canonical form. Respond in {{targetLang}}.",
-            prompt: "Term: {{selection}}\nContext: {{context}}\nTarget language: {{targetLang}}",
+          "You are a dictionary assistant for language learners. Given a term and its surrounding paragraphs, provide a comprehensive and concise dictionary entry. When a term has multiple meanings, focus on the contextual meaning. Return the term in its base/canonical form. Respond in {{targetLanguage}}.",
+            prompt: "Term: {{selection}}\nParagraphs: {{paragraphs}}\nTarget language: {{targetLanguage}}",
             outputSchema: [
               { id: "default-dictionary-term", name: "Term", type: "string", description: "", speaking: true },
               { id: "default-dictionary-definition", name: "Definition", type: "string", description: "", speaking: false },
-              { id: "default-dictionary-context", name: "Context", type: "string", description: "", speaking: true },
+              { id: "default-dictionary-context", name: "Paragraphs", type: "string", description: "", speaking: true },
               { id: "default-dictionary-examples", name: "Examples", type: "string", description: "", speaking: false },
               { id: "default-dictionary-synonyms", name: "Synonyms", type: "string", description: "", speaking: false },
               { id: "default-dictionary-antonyms", name: "Antonyms", type: "string", description: "", speaking: false },
@@ -459,8 +459,8 @@ export const testSeries: TestSeriesObject = {
             {
               id: "legacy-translate-prompt",
               name: "Legacy Translate Prompt",
-              systemPrompt: "Translate into {{targetLang}} with title {{title}} and summary {{summary}}.",
-              prompt: "Title: {{title}}\nSummary: {{summary}}\nTranslate to {{targetLang}}:\n{{input}}",
+              systemPrompt: "Translate into {{targetLanguage}} with title {{webTitle}} and summary {{webSummary}}.",
+              prompt: "Title: {{webTitle}}\nSummary: {{webSummary}}\nTranslate to {{targetLanguage}}:\n{{input}}",
             },
           ],
         },
@@ -504,13 +504,13 @@ export const testSeries: TestSeriesObject = {
             enabled: true,
             icon: "tabler:book-2",
             providerId: "google-default",
-            systemPrompt: "Answer in {{targetLang}} and use {{title}} as metadata.",
-            prompt: "Selection: {{selection}}\nContext: {{context}}\nTitle: {{title}}\nTarget language: {{targetLang}}",
+            systemPrompt: "Answer in {{targetLanguage}} and use {{webTitle}} as metadata.",
+            prompt: "Selection: {{selection}}\nContext: {{paragraphs}}\nTitle: {{webTitle}}\nTarget language: {{targetLanguage}}",
             outputSchema: [
               { id: "coverage-term", name: "Term", type: "string", description: "Focus on {{selection}}.", speaking: true },
-              { id: "coverage-definition", name: "Definition", type: "string", description: "Explain it in {{targetLang}}.", speaking: false },
-              { id: "coverage-context", name: "Context", type: "string", description: "Reuse {{context}} exactly.", speaking: true },
-              { id: "coverage-notes", name: "Notes", type: "string", description: "Mention {{title}} when relevant.", speaking: false },
+              { id: "coverage-definition", name: "Definition", type: "string", description: "Explain it in {{targetLanguage}}.", speaking: false },
+              { id: "coverage-context", name: "Context", type: "string", description: "Reuse {{paragraphs}} exactly.", speaking: true },
+              { id: "coverage-notes", name: "Notes", type: "string", description: "Mention {{webTitle}} when relevant.", speaking: false },
             ],
           },
         ],
@@ -572,8 +572,8 @@ export const testSeries: TestSeriesObject = {
             {
               id: "legacy-subtitles-prompt",
               name: "Legacy Subtitles Prompt",
-              systemPrompt: "Translate subtitles into {{targetLang}} with {{title}} and {{summary}} as context.",
-              prompt: "Title: {{title}}\nSummary: {{summary}}\nTranslate to {{targetLang}}:\n{{input}}",
+              systemPrompt: "Translate subtitles into {{targetLanguage}} with {{webTitle}} and {{webSummary}} as context.",
+              prompt: "Title: {{webTitle}}\nSummary: {{webSummary}}\nTranslate to {{targetLanguage}}:\n{{input}}",
             },
           ],
         },
@@ -599,7 +599,7 @@ export const testSeries: TestSeriesObject = {
     },
   },
   "default-dictionary-wording": {
-    description: "Current default dictionary template wording before paragraphs rename",
+    description: "Renames dictionary wording from context to paragraphs",
     config: {
       language: {
         sourceCode: "eng",
@@ -688,13 +688,13 @@ export const testSeries: TestSeriesObject = {
             systemPrompt: `You are a dictionary assistant for language learners.
 
 ## Goal
-Given a term and its surrounding context, produce a concise dictionary entry that matches the required output object.
+Given a term and its surrounding paragraphs, produce a concise dictionary entry that matches the required output object.
 
 ## Rules
-1. Focus on the meaning that best matches the provided context.
+1. Focus on the meaning that best matches the provided paragraphs.
 2. Normalize Term to its base/canonical form.
 3. Keep Definition precise and learner-friendly.
-4. Keep Context short and directly tied to the selected text.
+4. Keep Paragraphs exactly as provided in the prompt.
 5. Phonetic must use the standard notation for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
 6. Part of Speech in English (noun, verb, adjective, etc.).
 7. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
@@ -710,9 +710,9 @@ Output:
 - Term: blossom
 - Phonetic: /ˈblɒs.əm/
 - Part of Speech: noun
-- Context: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+- Paragraphs: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
 - Definition: 花；花朵（尤指果树的花）
-- Context Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
+- Paragraphs Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
 - Difficulty: B2
 
 ### Example 2
@@ -722,9 +722,9 @@ Output:
 - Term: 感動
 - Phonetic: kandou
 - Part of Speech: noun
-- Context: この映画はつまらないと思ったけど、最後は感動した。
+- Paragraphs: この映画はつまらないと思ったけど、最後は感動した。
 - Definition: Being deeply moved; emotional touch
-- Context Translation: I thought this movie was boring, but the ending was moving.
+- Paragraphs Translation: I thought this movie was boring, but the ending was moving.
 - Difficulty: B1`,
             prompt: `## Input
 Selection: {{selection}}
@@ -735,8 +735,8 @@ Target language: {{targetLanguage}}`,
               { id: "default-dictionary-phonetic", name: "Phonetic", type: "string", description: "Standard phonetic transcription for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).", speaking: false },
               { id: "default-dictionary-part-of-speech", name: "Part of Speech", type: "string", description: "Grammatical category (e.g., noun, verb, adjective).", speaking: false },
               { id: "default-dictionary-definition", name: "Definition", type: "string", description: "One concise definition for the contextual sense.", speaking: false },
-              { id: "default-dictionary-context", name: "Context", type: "string", description: "The paragraphs in the prompt above, don't change them.", speaking: true },
-              { id: "default-dictionary-context-translation", name: "Context Translation", type: "string", description: "The translation of the context.", speaking: false },
+              { id: "default-dictionary-context", name: "Paragraphs", type: "string", description: "The paragraphs from the prompt above. Do not rewrite them.", speaking: true },
+              { id: "default-dictionary-context-translation", name: "Paragraphs Translation", type: "string", description: "The translation of the paragraphs.", speaking: false },
               { id: "default-dictionary-difficulty", name: "Difficulty", type: "string", description: "Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.", speaking: false },
             ],
           },

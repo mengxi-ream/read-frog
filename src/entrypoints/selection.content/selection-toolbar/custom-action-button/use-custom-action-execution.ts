@@ -23,9 +23,9 @@ export interface CustomActionExecutionContext {
   providerConfig: LLMProviderConfig
   promptTokens: {
     selection: string
-    context: string
-    targetLang: string
-    title: string
+    paragraphs: string
+    targetLanguage: string
+    webTitle: string
   }
 }
 
@@ -85,9 +85,9 @@ export function buildCustomActionExecutionPlan(
       providerConfig,
       promptTokens: {
         selection: cleanSelection,
-        context: truncateContextTextForCustomAction(contextText || cleanSelection),
-        targetLang: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
-        title: document.title,
+        paragraphs: truncateContextTextForCustomAction(contextText || cleanSelection),
+        targetLanguage: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
+        webTitle: document.title,
       },
     },
   }
