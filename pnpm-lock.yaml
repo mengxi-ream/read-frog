@@ -38,9 +38,15 @@ importers:
       '@ai-sdk/groq':
         specifier: ^3.0.24
         version: 3.0.24(zod@4.3.6)
+      '@ai-sdk/huggingface':
+        specifier: ^1.0.37
+        version: 1.0.37(zod@4.3.6)
       '@ai-sdk/mistral':
         specifier: ^3.0.20
         version: 3.0.20(zod@4.3.6)
+      '@ai-sdk/moonshotai':
+        specifier: ^2.0.10
+        version: 2.0.10(zod@4.3.6)
       '@ai-sdk/openai':
         specifier: ^3.0.31
         version: 3.0.31(zod@4.3.6)
@@ -459,8 +465,20 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
+  '@ai-sdk/huggingface@1.0.37':
+    resolution: {integrity: sha512-BZFu9/dSfiwDHXcbYjY8YRmaameTMW/XCMI7x+ftB0AUF2hXw4w6H6n3I0h8cu7a+rpSPjZdZ8F4Qdvo4oSDTA==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4
+
   '@ai-sdk/mistral@3.0.20':
     resolution: {integrity: sha512-oZcx2pE6nJ+Qj/U6HFV5mJ52jXJPBSpvki/NtIocZkI/rKxphKBaecOH1h0Y7yK3HIbBxsMqefB1pb72cAHGVg==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/moonshotai@2.0.10':
+    resolution: {integrity: sha512-XtBqVQHb6069XQQARtjOq1MxbrA56Ox2hTP3tmsnFVUlXMvS+SINCL6mU7Lq3oFQKADXjjEQibq49e7Gee9n1A==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -7599,10 +7617,24 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
       zod: 4.3.6
 
+  '@ai-sdk/huggingface@1.0.37(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 2.0.35(zod@4.3.6)
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
+      zod: 4.3.6
+
   '@ai-sdk/mistral@3.0.20(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.15(zod@4.3.6)
+      zod: 4.3.6
+
+  '@ai-sdk/moonshotai@2.0.10(zod@4.3.6)':
+    dependencies:
+      '@ai-sdk/openai-compatible': 2.0.35(zod@4.3.6)
+      '@ai-sdk/provider': 3.0.8
+      '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
       zod: 4.3.6
 
   '@ai-sdk/openai-compatible@2.0.30(zod@4.3.6)':

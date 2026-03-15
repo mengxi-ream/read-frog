@@ -11,7 +11,9 @@ import { createDeepSeek } from "@ai-sdk/deepseek"
 import { createFireworks } from "@ai-sdk/fireworks"
 import { createGoogleGenerativeAI } from "@ai-sdk/google"
 import { createGroq } from "@ai-sdk/groq"
+import { createHuggingFace } from "@ai-sdk/huggingface"
 import { createMistral } from "@ai-sdk/mistral"
+import { createMoonshotAI } from "@ai-sdk/moonshotai"
 import { createOpenAI } from "@ai-sdk/openai"
 import { createOpenAICompatible } from "@ai-sdk/openai-compatible"
 import { createPerplexity } from "@ai-sdk/perplexity"
@@ -52,6 +54,8 @@ const CREATE_AI_MAPPER = {
   "ollama": createOllama,
   "minimax": createMinimax,
   "alibaba": createAlibaba,
+  "moonshotai": createMoonshotAI,
+  "huggingface": createHuggingFace,
 } as const
 
 const CUSTOM_HEADER_MAP: Partial<Record<keyof typeof CREATE_AI_MAPPER, Record<string, string>>> = {
