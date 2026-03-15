@@ -15,7 +15,7 @@ export const LATEST_SCHEMA_VERSION = CONFIG_SCHEMA_VERSION
  * migrationScripts : key: version number value: migrate function
  */
 const modules = import.meta.glob<MigrationFunction>(["./migration-scripts/v*-to-v*.ts"], { eager: true, import: "migrate" })
-const migrationScripts: Record<number, MigrationFunction> = Object.fromEntries(
+export const migrationScripts: Record<number, MigrationFunction> = Object.fromEntries(
   Object.entries(
     modules,
   ).map(([path, migrate]) => {
