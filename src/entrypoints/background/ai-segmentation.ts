@@ -9,6 +9,10 @@ import { getModelById, resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { ensureInitializedConfig } from "./config"
 
+const VTT_CODE_BLOCK_RE = /```vtt\n?/g
+const CODE_BLOCK_RE = /```\n?/g
+const THINK_TAG_RE = /<\/think>([\s\S]*)/
+
 interface AiSegmentSubtitlesData {
   jsonContent: string
   providerId: string
@@ -21,10 +25,10 @@ function cleanVttResponse(text: string): string {
   let cleaned = text.trim()
 
   // Remove markdown code blocks
-  cleaned = cleaned.replace(/```vtt\n?/g, "").replace(/```\n?/g, "")
+  cleaned = cleaned.replace(VTT_CODE_BLOCK_RE, "").replace(CODE_BLOCK_RE, "")
 
   // Handle thinking model output (strip <think> tags)
-  const [, afterThink = cleaned] = cleaned.match(/<\/think>([\s\S]*)/) || []
+  const [, afterThink = cleaned] = cleaned.match(THINK_TAG_RE) || []
   cleaned = afterThink.trim()
 
   // Ensure starts with WEBVTT

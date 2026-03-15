@@ -1,6 +1,8 @@
 import type { SubtitlesFragment } from "../../../types"
 import type { YoutubeTimedText } from "../types"
 
+const WHITESPACE_PATTERN = /\s+/g
+
 /**
  * Parse standard format subtitles
  */
@@ -10,7 +12,7 @@ export function parseStandardSubtitles(events: YoutubeTimedText[] = []): Subtitl
 
   events.forEach(({ segs = [], tStartMs = 0, dDurationMs = 0 }) => {
     segs.forEach(({ utf8 = "", tOffsetMs = 0 }, segIndex) => {
-      const text = utf8.trim().replace(/\s+/g, " ")
+      const text = utf8.trim().replace(WHITESPACE_PATTERN, " ")
       const start = tStartMs + tOffsetMs
 
       if (buffer) {

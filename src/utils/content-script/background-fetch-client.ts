@@ -21,7 +21,7 @@ function getRequestHeaders(input: RequestInfo | URL, init?: RequestInit): [strin
     return undefined
   }
 
-  const entries = Array.from(new Headers(headers).entries())
+  const entries = [...new Headers(headers).entries()]
   return entries.length > 0 ? entries : undefined
 }
 

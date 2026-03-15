@@ -17,6 +17,8 @@ import {
   isTextNode,
 } from "./filter"
 
+const NON_NEWLINE_WHITESPACE_RE = /[^\S\n]/
+
 export function extractTextContent(node: TransNode, config: Config): string {
   if (isTextNode(node)) {
     const text = node.textContent ?? ""
@@ -25,8 +27,8 @@ export function extractTextContent(node: TransNode, config: Config): string {
       return " "
     const leadingWs = text.slice(0, text.length - text.trimStart().length)
     const trailingWs = text.slice(text.trimEnd().length)
-    const hasLeading = /[^\S\n]/.test(leadingWs)
-    const hasTrailing = /[^\S\n]/.test(trailingWs)
+    const hasLeading = NON_NEWLINE_WHITESPACE_RE.test(leadingWs)
+    const hasTrailing = NON_NEWLINE_WHITESPACE_RE.test(trailingWs)
     return (hasLeading ? " " : "") + trimmed + (hasTrailing ? " " : "")
   }
 
@@ -47,7 +49,7 @@ export function extractTextContent(node: TransNode, config: Config): string {
     return ""
   }
 
-  const childNodes = Array.from(node.childNodes)
+  const childNodes = [...node.childNodes]
   return childNodes.reduce((text: string, child: Node): string => {
     // TODO: support SVGElement in the future
     if (isTextNode(child) || isHTMLElement(child)) {
@@ -82,7 +84,7 @@ export function walkAndLabelElement(
   let hasInlineNodeChild = false
   let forceBlock = false
 
-  const validChildNodes = Array.from(element.childNodes).filter((child: ChildNode) => {
+  const validChildNodes = [...element.childNodes].filter((child: ChildNode) => {
     if (child.nodeType === Node.TEXT_NODE)
       return true
     if (isHTMLElement(child)) {

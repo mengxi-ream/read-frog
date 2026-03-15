@@ -379,7 +379,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     const collectFromContainer = (root: HTMLElement | Document | ShadowRoot) => {
       const elements = root.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(walkId)}"]`)
-      result.push(...Array.from(elements))
+      result.push(...[...elements])
     }
 
     const traverseElement = (element: HTMLElement) => {

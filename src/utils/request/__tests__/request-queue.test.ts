@@ -5,13 +5,13 @@ import { RequestQueue } from "../request-queue"
 // after <delayMs> real / fake milliseconds.
 function makeThunk<T>(value: T, delayMs = 0) {
   return () =>
-    new Promise<T>(res => setTimeout(() => res(value), delayMs))
+    new Promise<T>(res => setTimeout(res, delayMs, value))
 }
 
 // rejectThunk – rejects after delayMs
 function rejectThunk(error: any, delayMs = 0) {
   return () =>
-    new Promise((_, rej) => setTimeout(() => rej(error), delayMs))
+    new Promise((_, rej) => setTimeout(rej, delayMs, error))
 }
 
 // A basic queue config we reuse (easy to tweak per‑test)
@@ -270,7 +270,7 @@ describe("requestQueue – timeout handling", () => {
 
     // Task that takes 3000ms (longer than 2000ms timeout)
     const slowThunk = () => new Promise(resolve =>
-      setTimeout(() => resolve("too-slow"), 3000),
+      setTimeout(resolve, 3000, "too-slow"),
     )
 
     const promise = q.enqueue(slowThunk, Date.now(), "slow")
@@ -291,7 +291,7 @@ describe("requestQueue – timeout handling", () => {
 
     // Task that takes 1000ms (less than 2000ms timeout)
     const fastThunk = () => new Promise(resolve =>
-      setTimeout(() => resolve("fast"), 1000),
+      setTimeout(resolve, 1000, "fast"),
     )
 
     const promise = q.enqueue(fastThunk, Date.now(), "fast")
@@ -412,7 +412,7 @@ describe("requestQueue – retry with timeout combined", () => {
 
     const timeoutThunk = () => {
       // Task takes 200ms, but timeout is 100ms
-      return new Promise(resolve => setTimeout(() => resolve("too slow"), 200))
+      return new Promise(resolve => setTimeout(resolve, 200, "too slow"))
     }
 
     const promise = q.enqueue(timeoutThunk, Date.now(), "timeout-test")

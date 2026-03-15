@@ -11,6 +11,10 @@ import {
 import { EdgeTTSError } from "./errors"
 import { generateTranslatorSignature } from "./signature"
 
+const BASE64_URL_SAFE_HYPHEN_PATTERN = /-/g
+const BASE64_URL_SAFE_UNDERSCORE_PATTERN = /_/g
+const HYPHEN_PATTERN = /-/g
+
 let tokenInfo: EdgeTTSTokenInfo | null = null
 
 function decodeJwtExpiryMs(token: string): number | null {
@@ -20,7 +24,7 @@ function decodeJwtExpiryMs(token: string): number | null {
   }
 
   try {
-    const normalized = payloadBase64.replace(/-/g, "+").replace(/_/g, "/")
+    const normalized = payloadBase64.replace(BASE64_URL_SAFE_HYPHEN_PATTERN, "+").replace(BASE64_URL_SAFE_UNDERSCORE_PATTERN, "/")
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=")
     const payload = JSON.parse(atob(padded)) as { exp?: number }
     if (typeof payload.exp !== "number") {
@@ -69,7 +73,7 @@ export async function getEdgeTTSEndpointToken(): Promise<EdgeTTSTokenInfo> {
 
   try {
     const signature = await generateTranslatorSignature(EDGE_TTS_ENDPOINT_URL)
-    const traceId = crypto.randomUUID().replace(/-/g, "")
+    const traceId = crypto.randomUUID().replace(HYPHEN_PATTERN, "")
 
     const response = await fetch(EDGE_TTS_ENDPOINT_URL, {
       method: "POST",

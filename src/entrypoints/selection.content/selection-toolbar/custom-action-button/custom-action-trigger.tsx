@@ -19,8 +19,10 @@ import { useSelectionPopoverSnapshot } from "../use-selection-popover-snapshot"
 import { CustomActionContent } from "./custom-action-content"
 import { buildCustomActionExecutionPlan, useCustomActionExecution } from "./use-custom-action-execution"
 
+const ZERO_WIDTH_SPACE_RE = /\u200B/g
+
 function normalizeSelectedText(value: string | null) {
-  return value?.replace(/\u200B/g, "").trim() ?? ""
+  return value?.replace(ZERO_WIDTH_SPACE_RE, "").trim() ?? ""
 }
 
 export function SelectionToolbarCustomActionTrigger({ action }: { action: SelectionToolbarCustomAction }) {

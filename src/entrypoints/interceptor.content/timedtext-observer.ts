@@ -1,8 +1,10 @@
+const TIMEDTEXT_API_RE = /api\/timedtext/
+
 const timedtextUrlCache: Map<string, string> = new Map()
 const timedtextUrlWaiters: Map<string, Array<(url: string) => void>> = new Map()
 
 function cacheTimedtextUrl(url: string): void {
-  if (/api\/timedtext/.test(url)) {
+  if (TIMEDTEXT_API_RE.test(url)) {
     const parsedUrl = new URL(url)
     const videoId = parsedUrl.searchParams.get("v")
     const pot = parsedUrl.searchParams.get("pot")

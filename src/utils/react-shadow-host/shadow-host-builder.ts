@@ -1,5 +1,7 @@
 import { cssRegistry } from "./css-registry"
 
+const PROPERTY_AND_FONT_FACE_RULES_PATTERN = /(@(?:property|font-face)[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g
+
 interface ShadowHostOptions {
   position: "inline" | "block"
   cssContent?: string[]
@@ -79,8 +81,7 @@ export class ShadowHostBuilder {
 
     // Extract @property and @font-face rules that need to be in the document
     // Using a simpler, safer regex pattern to avoid backtracking issues
-    const rulesRegex = /(@(?:property|font-face)[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g
-    const matches = css.matchAll(rulesRegex)
+    const matches = css.matchAll(PROPERTY_AND_FONT_FACE_RULES_PATTERN)
 
     for (const match of matches) {
       documentCss += `${match[1]}\n`

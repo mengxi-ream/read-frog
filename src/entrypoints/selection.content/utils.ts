@@ -140,7 +140,7 @@ function collectSelectionBoundaryNodes(selection: Selection) {
     }
   }
 
-  return Array.from(boundaryNodes)
+  return [...boundaryNodes]
 }
 
 function collectSelectionShadowRoots(selection: Selection) {
@@ -160,7 +160,7 @@ function collectSelectionShadowRoots(selection: Selection) {
     }
   }
 
-  return Array.from(shadowRoots)
+  return [...shadowRoots]
 }
 
 function readSelectionRangeSnapshots(selection: Selection | null) {
@@ -395,7 +395,7 @@ function collectParagraphOwners(rangeSnapshots: SelectionRangeSnapshot[]) {
     }
   }
 
-  return Array.from(paragraphOwners).sort(compareNodesInDocumentOrder)
+  return [...paragraphOwners].sort(compareNodesInDocumentOrder)
 }
 
 export function buildContextSnapshot(selection: SelectionSnapshot | null): ContextSnapshot | null {

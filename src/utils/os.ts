@@ -1,5 +1,11 @@
 type OS = "Windows" | "MacOS" | "Linux" | "iOS" | "Android" | "Unknown"
 
+const WINDOWS_PATTERN = /Win/i
+const MACOS_PATTERN = /Mac/i
+const LINUX_PATTERN = /Linux/i
+const IOS_PATTERN = /iPhone|iPad|iPod|iOS/i
+const ANDROID_PATTERN = /Android/i
+
 function detectOS(): OS {
   if (typeof navigator === "undefined")
     return "Unknown"
@@ -7,15 +13,15 @@ function detectOS(): OS {
   // Modern browsers expose navigator.userAgentData.platform
   const platform = (navigator as any).userAgentData?.platform || navigator.platform || navigator.userAgent || ""
 
-  if (/Win/i.test(platform))
+  if (WINDOWS_PATTERN.test(platform))
     return "Windows"
-  if (/Mac/i.test(platform))
+  if (MACOS_PATTERN.test(platform))
     return "MacOS"
-  if (/Linux/i.test(platform))
+  if (LINUX_PATTERN.test(platform))
     return "Linux"
-  if (/iPhone|iPad|iPod|iOS/i.test(platform))
+  if (IOS_PATTERN.test(platform))
     return "iOS"
-  if (/Android/i.test(platform))
+  if (ANDROID_PATTERN.test(platform))
     return "Android"
   return "Unknown"
 }

@@ -22,6 +22,8 @@ import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/sp
 import { isNumericContent } from "../ui/translation-utils"
 import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from "./translation-state"
 
+const HTML_COMMENT_RE = /<!--[\s\S]*?-->/g
+
 function getDisplayTranslation(sourceText: string, translatedText: string | undefined) {
   if (translatedText === undefined) {
     return undefined
@@ -66,7 +68,7 @@ export async function translateNodesBilingualMode(
     }
     transNodes.forEach(node => translatingNodes.add(node))
 
-    const lastNode = transNodes[transNodes.length - 1]
+    const lastNode = transNodes.at(-1)!
     const targetNode
       = transNodes.length === 1 && isBlockTransNode(lastNode) && isHTMLElement(lastNode)
         ? await unwrapDeepestOnlyHTMLChild(lastNode)
@@ -180,7 +182,7 @@ export async function translateNodeTranslationOnlyMode(
   let allChildNodes: ChildNode[] = []
   if (outerTransNodes.length === 1 && isHTMLElement(outerTransNodes[0])) {
     const unwrappedHTMLChild = await unwrapDeepestOnlyHTMLChild(outerTransNodes[0])
-    allChildNodes = Array.from(unwrappedHTMLChild.childNodes)
+    allChildNodes = [...unwrappedHTMLChild.childNodes]
     transNodes = allChildNodes.filter(isTransNodeAndNotTranslatedWrapper)
   }
   else {
@@ -198,7 +200,7 @@ export async function translateNodeTranslationOnlyMode(
     }
     nodes.forEach(node => translatingNodes.add(node))
 
-    const targetNode = transNodes[transNodes.length - 1]
+    const targetNode = transNodes.at(-1)!
 
     const parentNode = targetNode.parentElement
     if (!parentNode) {
@@ -239,7 +241,7 @@ export async function translateNodeTranslationOnlyMode(
         return content
 
       let cleanedContent = content.replace(MARK_ATTRIBUTES_REGEX, "")
-      cleanedContent = cleanedContent.replace(/<!--[\s\S]*?-->/g, " ")
+      cleanedContent = cleanedContent.replace(HTML_COMMENT_RE, " ")
 
       return cleanedContent
     }
@@ -302,7 +304,7 @@ export async function translateNodeTranslationOnlyMode(
     // Batch final DOM mutations to reduce layout thrashing
     batchDOMOperation(() => {
       // Insert translated content after the last node
-      const lastChildNode = allChildNodes[allChildNodes.length - 1]
+      const lastChildNode = allChildNodes.at(-1)!
       lastChildNode.parentNode?.insertBefore(translatedWrapperNode, lastChildNode.nextSibling)
 
       // Remove all original nodes

@@ -2,11 +2,15 @@ import type { SubtitlesFragment } from "../types"
 import type { Config } from "@/types/config/config"
 import { sendMessage } from "@/utils/message"
 
+const NEWLINE_PATTERN = /\n/g
+const WHITESPACE_PATTERN = /\s+/g
+const VTT_TIMESTAMP_PATTERN = /^(\d+)\s*-->\s*(\d+)$/
+
 export function cleanFragmentsForAi(fragments: SubtitlesFragment[]): SubtitlesFragment[] {
   return fragments
     .map(fragment => ({
       ...fragment,
-      text: fragment.text.replace(/\n/g, " ").replace(/\s+/g, " ").trim(),
+      text: fragment.text.replace(NEWLINE_PATTERN, " ").replace(WHITESPACE_PATTERN, " ").trim(),
     }))
     .filter(fragment => fragment.text.length > 0)
 }
@@ -44,7 +48,7 @@ export function parseSimplifiedVttToFragments(vtt: string): SubtitlesFragment[] 
     const line = lines[lineIndex].trim()
 
     // Match timestamp line: "1000 --> 1500" (milliseconds format)
-    const match = line.match(/^(\d+)\s*-->\s*(\d+)$/)
+    const match = line.match(VTT_TIMESTAMP_PATTERN)
     if (match) {
       const start = Number.parseInt(match[1], 10)
       const end = Number.parseInt(match[2], 10)
