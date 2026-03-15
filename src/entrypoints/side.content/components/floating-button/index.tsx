@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 import { browser, i18n } from "#imports"
 import { IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
   DropdownMenu,
@@ -49,7 +49,7 @@ export default function FloatingButton() {
   const dragMoveHandlerRef = useRef<((event: MouseEvent) => void) | null>(null)
   const dragUpHandlerRef = useRef<(() => void) | null>(null)
 
-  const cleanupDragListeners = useCallback(() => {
+  const cleanupDragListeners = () => {
     if (dragMoveHandlerRef.current) {
       document.removeEventListener("mousemove", dragMoveHandlerRef.current)
       dragMoveHandlerRef.current = null
@@ -63,11 +63,25 @@ export default function FloatingButton() {
     document.body.style.userSelect = ""
     setDragPreview(null)
     setIsDraggingButton(false)
-  }, [setIsDraggingButton])
+  }
 
   useEffect(() => {
-    return cleanupDragListeners
-  }, [cleanupDragListeners])
+    return () => {
+      if (dragMoveHandlerRef.current) {
+        document.removeEventListener("mousemove", dragMoveHandlerRef.current)
+        dragMoveHandlerRef.current = null
+      }
+
+      if (dragUpHandlerRef.current) {
+        document.removeEventListener("mouseup", dragUpHandlerRef.current)
+        dragUpHandlerRef.current = null
+      }
+
+      document.body.style.userSelect = ""
+      setDragPreview(null)
+      setIsDraggingButton(false)
+    }
+  }, [setIsDraggingButton])
 
   // 拖拽结束时写入 storage
   useEffect(() => {
@@ -94,7 +108,6 @@ export default function FloatingButton() {
     let hasMoved = false // 标记是否发生了移动
 
     e.preventDefault()
-    cleanupDragListeners()
     document.body.style.userSelect = "none"
 
     const handleMouseMove = (moveEvent: MouseEvent) => {
