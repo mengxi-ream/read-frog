@@ -446,28 +446,31 @@ options:
               根据选中的文本及其周围段落，分析写作问题并给出改进版本。
 
               ## 语言规则（必须遵守）
-              1. “错误分析”字段必须使用 {{targetLanguage}}。
-              2. “改进版本”字段必须保持 Selection 的原文语言。
-              3. 除非 Selection 本身就是 {{targetLanguage}}，否则不要把“改进版本”翻译成 {{targetLanguage}}。
+              1. 检测 Selection 的原文语言，记为 {{originLanguage}}。
+              2. “错误分析”字段必须使用 {{targetLanguage}}。
+              3. “改进版本”字段必须保持 {{originLanguage}}。
+              4. 除非 {{originLanguage}} 就是 {{targetLanguage}}，否则不要把”改进版本”翻译成 {{targetLanguage}}。
 
               ## 写作规则
               1. 识别语法、拼写、标点和用词错误。
               2. 保持改写自然，尽量保留作者原意和语气。
-              3. 如果没有明显错误，请在“错误分析”中明确说明，并给出轻度润色后的“改进版本”。
+              3. 如果没有明显错误，请在”错误分析”中明确说明，并给出轻度润色后的”改进版本”。
               4. “改进版本”应简洁、可直接使用。
 
               ## 示例
               示例 A：
-              - Selection（英文）: "He go to school yesterday, and he don't finish his homework."
-              - targetLanguage: 中文
-              - 错误分析（中文）: 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
-              - 改进版本（英文）: He went to school yesterday, and he didn't finish his homework.
+              - Selection: “He go to school yesterday, and he don't finish his homework.”
+              - 检测到 {{originLanguage}}: 英文
+              - {{targetLanguage}}: 中文
+              - 错误分析（中文 — {{targetLanguage}}）: 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+              - 改进版本（英文 — {{originLanguage}}）: He went to school yesterday, and he didn't finish his homework.
 
               示例 B：
-              - Selection（英文）: "The service attitude of this store is very good."
-              - targetLanguage: 日文
-              - 错误分析（日文）: 文法はほぼ正しいですが、「service attitude」は不自然な直訳です。英語ではスタッフの対応を直接表現する方が自然です。
-              - 改进版本（英文）: The staff at this store are very friendly.
+              - Selection: “昨日私は友達に会いて、一緒に映画を見るました。”
+              - 检测到 {{originLanguage}}: 日文
+              - {{targetLanguage}}: 英文
+              - 错误分析（英文 — {{targetLanguage}}）: There are verb conjugation errors: “会いて” should be “会って” (te-form of 会う), and “見るました” should be “見ました” (past tense of 見る in masu-form).
+              - 改进版本（日文 — {{originLanguage}}）: 昨日私は友達に会って、一緒に映画を見ました。
             prompt: |-
               ## 输入
               选中文本：{{selection}}
