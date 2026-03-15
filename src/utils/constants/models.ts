@@ -28,6 +28,7 @@ export const LLM_PROVIDER_MODELS = {
   "ollama": ["gemma3:4b", "llama3.2:3b"],
   "volcengine": ["doubao-seed-1-6-flash-250828", "doubao-seed-1-6-lite-251015", "doubao-seed-1-6-251015"],
   "minimax": ["MiniMax-M2", "MiniMax-M2-Stable"],
+  "alibaba": ["qwen3-max", "qwen3.5-plus", "qwen3.5-flash", "qwen-plus", "qwen-flash", "qwen-turbo", "qwq-plus", "qwen3-coder-plus", "deepseek-v3.2", "deepseek-v3.1", "deepseek-r1", "deepseek-v3", "kimi-k2.5", "MiniMax-M2.5", "glm-5"],
 } as const
 
 export const NON_API_TRANSLATE_PROVIDERS = ["google-translate", "microsoft-translate"] as const
@@ -102,5 +103,11 @@ export const LLM_MODEL_OPTIONS: Array<{
   {
     pattern: /^GLM-/i,
     options: { thinking: { type: "disabled" } },
+  },
+
+  // Qwen/QwQ models - disable thinking
+  {
+    pattern: /^qwen/,
+    options: { enableThinking: false },
   },
 ]

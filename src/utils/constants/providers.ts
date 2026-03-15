@@ -131,6 +131,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     isCustomModel: false,
     customModel: null,
   },
+  "alibaba": {
+    model: "qwen3.5-flash",
+    isCustomModel: false,
+    customModel: null,
+  },
 }
 
 export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string }>
@@ -269,6 +274,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn("minimax-color"),
       name: "MiniMax",
       website: "https://platform.minimax.io",
+    },
+    "alibaba": {
+      logo: getLobeIconsCDNUrlFn("bailian-color"),
+      name: "Alibaba Cloud",
+      website: "https://modelstudio.alibabacloud.com/",
     },
   }
 
@@ -490,6 +500,14 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "minimax",
     model: DEFAULT_LLM_PROVIDER_MODELS.minimax,
+  },
+  "alibaba": {
+    id: "alibaba-default",
+    name: PROVIDER_ITEMS.alibaba.name,
+    description: i18n.t("options.apiProviders.providers.description.alibaba"),
+    enabled: true,
+    provider: "alibaba",
+    model: DEFAULT_LLM_PROVIDER_MODELS.alibaba,
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 
