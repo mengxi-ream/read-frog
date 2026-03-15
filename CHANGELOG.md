@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.29.1
+
+### Patch Changes
+
+- [#1120](https://github.com/mengxi-ream/read-frog/pull/1120) [`aaa71e1`](https://github.com/mengxi-ream/read-frog/commit/aaa71e19e2e473194674e59426469a0dfd2b96f1) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: rename prompt tokens for clarity (`targetLang`→`targetLanguage`, `title`→`webTitle`, `summary`→`webSummary`, `context`→`paragraphs`) with config migration v064
+
+- [#1117](https://github.com/mengxi-ream/read-frog/pull/1117) [`fe211bd`](https://github.com/mengxi-ream/read-frog/commit/fe211bd68f85fcadd078986364f60971de3a1291) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(custom-actions): add drag-and-drop reordering to custom action list and output schema fields
+
+- [#1119](https://github.com/mengxi-ream/read-frog/pull/1119) [`91f9a40`](https://github.com/mengxi-ream/read-frog/commit/91f9a40925289a8866f98b4f830b327ca8c5c79a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(provider-icon): proxy remote logos through background fetch
+
+- [#1118](https://github.com/mengxi-ream/read-frog/pull/1118) [`dafb8f2`](https://github.com/mengxi-ream/read-frog/commit/dafb8f2c85c5227f9605727cc44f515a961a151c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-popover): keep the popover fixed while the page scrolls
+
+- [#1115](https://github.com/mengxi-ream/read-frog/pull/1115) [`3a02d50`](https://github.com/mengxi-ream/read-frog/commit/3a02d50dd09d6d9d94fd5388191c51ad17e3f6b2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(selection-toolbar): add individual toggles for built-in features (translate, speak, vocabulary insight)
+
 ## 1.29.0
 
 ### Minor Changes
