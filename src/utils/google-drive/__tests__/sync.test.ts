@@ -3,10 +3,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ConfigVersionTooNewError } from "@/utils/config/errors"
 import {
   getLocalConfigAndMeta,
-  setLastSyncConfigAndMeta,
   setLocalConfigAndMeta,
 } from "@/utils/config/storage"
-import { getLastSyncedConfigAndMeta } from "@/utils/config/sync"
+import {
+  getLastSyncedConfigAndMeta,
+  setLastSyncConfigAndMeta,
+} from "@/utils/config/sync"
 import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "../storage"
 import { syncConfig } from "../sync"
 
@@ -14,11 +16,11 @@ import { syncConfig } from "../sync"
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfigAndMeta: vi.fn(),
   setLocalConfigAndMeta: vi.fn(),
-  setLastSyncConfigAndMeta: vi.fn(),
 }))
 
 vi.mock("@/utils/config/sync", () => ({
   getLastSyncedConfigAndMeta: vi.fn(),
+  setLastSyncConfigAndMeta: vi.fn(),
 }))
 
 vi.mock("../storage", () => ({

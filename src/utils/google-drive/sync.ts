@@ -4,10 +4,12 @@ import { dequal } from "dequal"
 import { configSchema } from "@/types/config/config"
 import {
   getLocalConfigAndMeta,
-  setLastSyncConfigAndMeta,
   setLocalConfigAndMeta,
 } from "../config/storage"
-import { getLastSyncedConfigAndMeta } from "../config/sync"
+import {
+  getLastSyncedConfigAndMeta,
+  setLastSyncConfigAndMeta,
+} from "../config/sync"
 import { CONFIG_SCHEMA_VERSION } from "../constants/config"
 import { logger } from "../logger"
 import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "./storage"
