@@ -9,8 +9,10 @@ const EXTENSION_PROTOCOLS = new Set([
 const resolvedAssetBlobCache = new Map<string, Blob>()
 const pendingAssetBlobCache = new Map<string, Promise<Blob | null>>()
 
+const HTTP_URL_RE = /^https?:\/\//i
+
 function isRemoteHttpUrl(value: string) {
-  return /^https?:\/\//i.test(value)
+  return HTTP_URL_RE.test(value)
 }
 
 function getCurrentPageUrl() {

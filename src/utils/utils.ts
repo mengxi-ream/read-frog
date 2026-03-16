@@ -1,5 +1,7 @@
 import { browser } from "#imports"
 
+const THOUSANDS_SEPARATOR_PATTERN = /\B(?=(?:\d{3})+(?!\d))/g
+
 export function getActiveTabUrl() {
   return browser.tabs.query({ active: true, currentWindow: true }).then(tabs => tabs[0].url)
 }
@@ -17,7 +19,7 @@ export function ensureKeyInMap<K, V>(map: Map<K, V>, key: K, factory: () => V): 
 }
 
 export function addThousandsSeparator(num: number) {
-  return num.toString().replace(/\B(?=(?:\d{3})+(?!\d))/g, ",")
+  return num.toString().replace(THOUSANDS_SEPARATOR_PATTERN, ",")
 }
 
 export function numberToPercentage(num: number) {

@@ -41,7 +41,7 @@ describe("resolveContentScriptAssetUrl", () => {
     })
     expect(assetBlob).toBeInstanceOf(Blob)
     expect(assetBlob?.type).toBe("image/webp")
-    expect(Array.from(new Uint8Array(await assetBlob!.arrayBuffer()))).toEqual([1, 2, 3])
+    expect([...new Uint8Array(await assetBlob!.arrayBuffer())]).toEqual([1, 2, 3])
   })
 
   it("bypasses proxying for non-remote and extension asset URLs", async () => {

@@ -131,7 +131,7 @@ export async function unwrapDeepestOnlyHTMLChild(element: HTMLElement) {
       return isHTMLElement(child) && !isDontWalkIntoAndDontTranslateAsChildElement(child, config)
     }
 
-    const effectiveChildNodes = Array.from(currentElement.childNodes).filter(shouldKeepNode)
+    const effectiveChildNodes = [...currentElement.childNodes].filter(shouldKeepNode)
     const effectiveChildren = effectiveChildNodes.filter(child => child.nodeType === Node.ELEMENT_NODE)
 
     // Only have one HTML child and no Text Child

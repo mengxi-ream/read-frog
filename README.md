@@ -1,6 +1,6 @@
 <div align="center"><a name="readme-top"></a>
 
-[![][image-banner]][website]
+[![Read Frog banner][image-banner]][website]
 
 An open-source AI-powered language learning extension for browsers.<br/>
 Supports immersive translation, article analysis, multiple AI models, and more.<br/>
@@ -10,19 +10,19 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 <!-- SHIELD GROUP -->
 
-[![][extension-release-shield]][github-release-link]
-[![][chrome-version-shield]][chrome-store-link]
-[![][edge-version-shield]][edge-store-link]
-[![][firefox-version-shield]][firefox-store-link]<br/>
-[![][discord-shield]][discord-link]
-[![][chrome-users-shield]][chrome-store-link]
-[![][edge-users-shield]][edge-store-link]
-[![][firefox-users-shield]][firefox-store-link]<br/>
-[![][star-history-shield]][star-history-link]
-[![][contributors-shield]][contributors-link]
-![][last-commit-shield]
-[![][issues-shield]][issues-link]<br/>
-[![][sponsor-shield]][sponsor-link]
+[![Latest Version badge][extension-release-shield]][github-release-link]
+[![Chrome Version badge][chrome-version-shield]][chrome-store-link]
+[![Edge Version badge][edge-version-shield]][edge-store-link]
+[![Firefox Version badge][firefox-version-shield]][firefox-store-link]<br/>
+[![Discord badge][discord-shield]][discord-link]
+[![Chrome Users badge][chrome-users-shield]][chrome-store-link]
+[![Edge Users badge][edge-users-shield]][edge-store-link]
+[![Firefox Users badge][firefox-users-shield]][firefox-store-link]<br/>
+[![Stars badge][star-history-shield]][star-history-link]
+[![Contributors badge][contributors-shield]][contributors-link]
+![Last Commit badge][last-commit-shield]
+[![Issues badge][issues-shield]][issues-link]<br/>
+[![Sponsor badge][sponsor-shield]][sponsor-link]
 
 </div>
 
@@ -73,23 +73,23 @@ Whether you are a user or a developer, Read Frog will be an important part of yo
 
 ### Download
 
-| Browser | Version                                           | Download                                                          |
-| ------- | ------------------------------------------------- | ----------------------------------------------------------------- |
-| Chrome  | [![][chrome-version-shield]][chrome-store-link]   | [Chrome Web Store][chrome-store-link] or [中国镜像][crxsoso-link] |
-| Edge    | [![][edge-version-shield]][edge-store-link]       | [Microsoft Edge Addons][edge-store-link]                          |
-| Firefox | [![][firefox-version-shield]][firefox-store-link] | [Firefox Add-ons][firefox-store-link]                             |
+| Browser | Version                                                                | Download                                                          |
+| ------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| Chrome  | [![Chrome Version badge][chrome-version-shield]][chrome-store-link]    | [Chrome Web Store][chrome-store-link] or [中国镜像][crxsoso-link] |
+| Edge    | [![Edge Version badge][edge-version-shield]][edge-store-link]          | [Microsoft Edge Addons][edge-store-link]                          |
+| Firefox | [![Firefox Version badge][firefox-version-shield]][firefox-store-link] | [Firefox Add-ons][firefox-store-link]                             |
 
 ### Community
 
-| [![][discord-shield-badge]][discord-link] | In Discord ask questions, and connect with developers.                                 |
-| :---------------------------------------- | :------------------------------------------------------------------------------------- |
-| [![][wechat-shield-badge]][wechat-link]   | If you are in mainland China, you can add the WeChat account to join the WeChat group. |
+| [![Discord badge][discord-shield-badge]][discord-link] | In Discord ask questions, and connect with developers.                                 |
+| :----------------------------------------------------- | :------------------------------------------------------------------------------------- |
+| [![WeChat badge][wechat-shield-badge]][wechat-link]    | If you are in mainland China, you can add the WeChat account to join the WeChat group. |
 
 > \[!IMPORTANT]
 >
 > **⭐️ Star Us**, You will receive all release notifications from GitHub without any delay \~
 
-[![][image-star]][github-star-link]
+[![Star Read Frog on GitHub][image-star]][github-star-link]
 
 <details>
 <summary>
@@ -108,7 +108,7 @@ Whether you are a user or a developer, Read Frog will be an important part of yo
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -126,7 +126,7 @@ The extension automatically re-translates all visible content when you switch mo
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -140,7 +140,7 @@ This means technical terms get translated correctly within their domain, literar
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -154,7 +154,7 @@ The toolbar intelligently positions itself to stay within the viewport, supports
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -168,7 +168,7 @@ Save multiple prompt patterns and switch between them based on what you're readi
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -182,7 +182,7 @@ The system includes smart retry logic with exponential backoff and automatic fal
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -196,7 +196,7 @@ Plus free translation options: Google Translate, Microsoft Translate, and DeepLX
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -208,7 +208,7 @@ Translate YouTube subtitles directly in the video player. Watch foreign language
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -222,7 +222,7 @@ Automatic language detection (basic or LLM-powered) with per-language voice mapp
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -236,7 +236,7 @@ Then it provides sentence-by-sentence translations with vocabulary explanations 
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -265,7 +265,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
     <tr>
       <th colspan="2">
         <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog"><br>
+        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
         <br>
       </th>
     </tr>
@@ -288,7 +288,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -298,7 +298,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
@@ -306,19 +306,18 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
 
 Every donation helps us build a better language learning experience. Thank you for supporting our mission!
 
-[![][sponsor-image]][sponsor-link]
+[![Sponsors][sponsor-image]][sponsor-link]
 
 (will support Afdian in the future)
 
 <div align="right">
 
-[![][back-to-top]](#readme-top)
+[![Back to top][back-to-top]](#readme-top)
 
 </div>
 
 <!-- LINK GROUP -->
 
-[2025-recap]: /assets/2025-recap.png
 [back-to-top]: https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square
 [chrome-store-link]: https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb
 [chrome-users-shield]: https://img.shields.io/chrome-web-store/users/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20Users&color=yellow&labelColor=black
@@ -351,18 +350,6 @@ Every donation helps us build a better language learning experience. Thank you f
 [website]: https://readfrog.app
 [wechat-link]: ./assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
-
-<!-- Feature images (placeholders) -->
-
-[image-feat-bilingual]: /assets/features/bilingual.png
-[image-feat-context]: /assets/features/context-aware.png
-[image-feat-selection]: /assets/features/selection.png
-[image-feat-prompts]: /assets/features/prompts.png
-[image-feat-batch]: /assets/features/batch.png
-[image-feat-providers]: /assets/features/providers.png
-[image-feat-subtitle]: /assets/features/subtitle.png
-[image-feat-tts]: /assets/features/tts.png
-[image-feat-read]: /assets/features/read.png
 
 <!-- Feature docs link -->
 

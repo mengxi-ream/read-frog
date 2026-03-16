@@ -162,6 +162,9 @@ options:
         vercel: 針對網頁內容翻譯和分析優化的 AI 模型
         volcengine: 字節跳動旗下雲平台，提供豆包系列大模型
         minimax: MiniMax AI平台，提供先進的MiniMax-M2系列大模型
+        alibaba: 阿里雲通義千問系列模型，具備先進的推理和多語言能力
+        moonshotai: 月之暗面Kimi系列模型，具備強大的推理和長上下文能力
+        huggingface: Hugging Face推理API，提供數千種開源模型存取
     apiKey:
       showAPIKey: 顯示 API Key
     howToConfigure: 如何配置?

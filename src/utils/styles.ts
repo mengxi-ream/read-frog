@@ -78,7 +78,7 @@ export function mirrorDynamicStyles(selector: string, shadowRoot: ShadowRoot, co
 
   // Find all elements matching selector, then filter by content if contentMatch is provided
   const findMatchingElement = () => {
-    const elements = Array.from(document.querySelectorAll(selector))
+    const elements = [...document.querySelectorAll(selector)]
     if (contentMatch) {
       return elements.find(
         el =>

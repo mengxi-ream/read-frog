@@ -122,7 +122,7 @@ describe("style-injector", () => {
     await ensureCustomCSS(document, ".custom-translation-style { color: blue; }")
 
     expect(document.adoptedStyleSheets).toHaveLength(2)
-    expect(Array.from(document.adoptedStyleSheets[1]?.cssRules ?? []).map(rule => rule.cssText).join("\n")).toContain("color: blue")
+    expect(Array.from(document.adoptedStyleSheets[1]?.cssRules ?? [], rule => rule.cssText).join("\n")).toContain("color: blue")
     expect(document.head.querySelector("#read-frog-custom-styles")).toBeNull()
   })
 })

@@ -117,5 +117,5 @@ function isValidShortcut(hotkeys: string[]) {
 
 function collectModifiers() {
   const ownModifiers = MODIFIERS.filter(modifier => hotkeys[modifier])
-  return Array.from(new Set(ownModifiers))
+  return [...new Set(ownModifiers)]
 }

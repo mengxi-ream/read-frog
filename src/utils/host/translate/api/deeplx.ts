@@ -3,6 +3,9 @@ import type { PureAPIProviderConfig } from "@/types/config/provider"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { sendMessage } from "@/utils/message"
 
+const TRAILING_SLASHES_RE = /\/+$/
+const API_KEY_PLACEHOLDER_RE = /\{\{apiKey\}\}/g
+
 export async function deeplxTranslate(
   sourceText: string,
   fromLang: LangCodeISO6391 | "auto",
@@ -96,14 +99,14 @@ async function parseDeepLXResponse(resp: { ok: boolean, status: number, statusTe
 
 export function buildDeepLXUrl(baseURL: string, apiKey?: string): string {
   // Remove trailing slash from baseURL
-  const cleanBaseURL = baseURL.replace(/\/+$/, "")
+  const cleanBaseURL = baseURL.replace(TRAILING_SLASHES_RE, "")
 
   // If baseURL contains {{apiKey}} placeholder, replace it with the API key
   if (cleanBaseURL.includes("{{apiKey}}")) {
     if (!apiKey) {
       throw new Error("API key is required when using {{apiKey}} placeholder in DeepLX baseURL")
     }
-    return cleanBaseURL.replace(/\{\{apiKey\}\}/g, apiKey)
+    return cleanBaseURL.replace(API_KEY_PLACEHOLDER_RE, apiKey)
   }
 
   // Special logic for api.deeplx.org: insert token between .org and /translate

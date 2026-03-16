@@ -41,7 +41,7 @@ export async function translateWalkedElement(
     }
     else {
       // prevent children change during iteration
-      const children = Array.from(element.childNodes)
+      const children = [...element.childNodes]
       let consecutiveInlineNodes: ChildNode[] = []
       for (const child of children) {
         if (isTransNode(child) && isBlockTransNode(child) && !isTextNode(child)) {

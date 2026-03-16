@@ -117,7 +117,7 @@ export const configSchema = z.object({
     if (!validIds.has(providerId)) {
       ctx.addIssue({
         code: "invalid_value",
-        values: Array.from(validIds),
+        values: [...validIds],
         message: `Invalid provider id "${providerId}".`,
         path: [...def.configPath],
       })
@@ -128,7 +128,7 @@ export const configSchema = z.object({
     if (provider && !def.isProvider(provider.provider)) {
       ctx.addIssue({
         code: "invalid_value",
-        values: Array.from(validIds),
+        values: [...validIds],
         message: `Provider "${providerId}" is not a valid provider for this feature.`,
         path: [...def.configPath],
       })
@@ -186,7 +186,7 @@ export const configSchema = z.object({
     if (!providerIdsSet.has(providerId)) {
       ctx.addIssue({
         code: "invalid_value",
-        values: Array.from(providerIdsSet),
+        values: [...providerIdsSet],
         message: `Invalid provider id "${providerId}".`,
         path: ["selectionToolbar", "customActions", index, "providerId"],
       })

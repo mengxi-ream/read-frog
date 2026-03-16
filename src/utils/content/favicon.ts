@@ -23,7 +23,7 @@ export function getFaviconUrl(): string {
     links.forEach((link) => {
       if (link.href) {
         const size = link.sizes.length > 0
-          ? Math.max(...Array.from(link.sizes).map(s => Number.parseInt(s) || 0))
+          ? Math.max(...Array.from(link.sizes, s => Number.parseInt(s) || 0))
           : 0
 
         candidates.push({

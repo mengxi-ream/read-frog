@@ -208,7 +208,7 @@ const EDGE_TTS_VOICE_OPTIONS = [
   ...EDGE_TTS_EXTRA_VOICES,
 ].filter((voice): voice is TTSVoice => !!voice)
 
-export const EDGE_TTS_VOICES: TTSVoice[] = Array.from(new Set(EDGE_TTS_VOICE_OPTIONS))
+export const EDGE_TTS_VOICES: TTSVoice[] = [...new Set(EDGE_TTS_VOICE_OPTIONS)]
   .sort((a, b) => a.localeCompare(b))
 
 export function isKnownEdgeTTSVoice(voice: string): boolean {

@@ -91,7 +91,7 @@ export function SettingsSearch() {
         <CommandInput placeholder={i18n.t("options.commandPalette.placeholder")} />
         <CommandList>
           <CommandEmpty>{i18n.t("options.commandPalette.noResults")}</CommandEmpty>
-          {Array.from(groupedItems.entries()).map(([pageKey, items]) => (
+          {Array.from(groupedItems.entries(), ([pageKey, items]) => (
             <CommandGroup key={pageKey} heading={i18n.t(pageKey)}>
               {items.map(item => (
                 <CommandItem

@@ -29,7 +29,7 @@ export function CopyButton({ text }: { text: string | undefined }) {
     setTooltipOpen(true)
     if (timerRef.current)
       clearTimeout(timerRef.current)
-    timerRef.current = setTimeout(() => setCopied(false), 1500)
+    timerRef.current = setTimeout(setCopied, 1500, false)
   }, [text])
 
   const handleTooltipOpenChange = useCallback((nextOpen: boolean, eventDetails: { reason: string }) => {

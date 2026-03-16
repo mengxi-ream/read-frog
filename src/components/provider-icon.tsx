@@ -86,6 +86,9 @@ interface ProviderIconProps extends VariantProps<typeof providerIconVariants> {
 
 type ResolvedLogo = { kind: "src", src: string } | { kind: "bitmap", bitmap: ImageBitmap } | null
 
+const PROTOCOL_RELATIVE_URL_RE = /^(?:[a-z][a-z\d+\-.]*:)?\/\//i
+const SCHEME_URL_RE = /^[a-z][a-z\d+\-.]*:/i
+
 const iconPixelSizeMap = {
   sm: 11,
   base: 14,
@@ -95,7 +98,7 @@ const iconPixelSizeMap = {
 } as const
 
 function normalizeLogoUrl(logo: string) {
-  if (/^(?:[a-z][a-z\d+\-.]*:)?\/\//i.test(logo) || /^[a-z][a-z\d+\-.]*:/i.test(logo)) {
+  if (PROTOCOL_RELATIVE_URL_RE.test(logo) || SCHEME_URL_RE.test(logo)) {
     return logo
   }
 

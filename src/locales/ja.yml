@@ -162,6 +162,9 @@ options:
         vercel: ウェブコンテンツの翻訳と分析に最適化されたAIモデル
         volcengine: ByteDanceのクラウドAIプラットフォーム、Doubaoモデルを提供
         minimax: MiniMax AIプラットフォーム、先進的なMiniMax-M2モデルを提供
+        alibaba: アリババクラウドのQwenモデルシリーズ、高度な推論と多言語機能を備える
+        moonshotai: Moonshot AIのKimiモデルシリーズ、優れた推論と長コンテキスト能力
+        huggingface: Hugging Face推論API、数千のオープンソースモデルへのアクセスを提供
     apiKey:
       showAPIKey: APIキーを表示
     howToConfigure: 設定方法は?

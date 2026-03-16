@@ -26,7 +26,7 @@ class MemoryStorage implements Storage {
   }
 
   key(index: number) {
-    return Array.from(this.#store.keys())[index] ?? null
+    return [...this.#store.keys()][index] ?? null
   }
 
   removeItem(key: string) {

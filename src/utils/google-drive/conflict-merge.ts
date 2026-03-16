@@ -129,7 +129,7 @@ function applyFieldResolution(
   }
 
   // Set the resolved value
-  const lastKey = conflict.path[conflict.path.length - 1]
+  const lastKey = conflict.path.at(-1)!
   current[lastKey] = resolution === "local" ? conflict.localValue : conflict.remoteValue
 }
 

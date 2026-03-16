@@ -152,7 +152,7 @@ export function proxyFetch() {
       credentials: credentials ?? "include",
     })
 
-    const responseHeaders: [string, string][] = Array.from(response.headers.entries())
+    const responseHeaders: [string, string][] = [...response.headers.entries()]
     const responseBody = responseType === "base64"
       ? encodeArrayBufferToBase64(await response.arrayBuffer())
       : await response.text()

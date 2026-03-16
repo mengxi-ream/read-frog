@@ -78,6 +78,16 @@ class HttpError extends Error {
   }
 }
 
+const WHITESPACE_RE = /\s+/g
+const TRAILING_SLASHES_RE = /\/+$/
+const WHITESPACE_SPLIT_RE = /\s+/
+const BOOLEAN_TRUE_RE = /^(?:yes|y|true|supported|available|enabled|check|checked)$/i
+const BOOLEAN_FALSE_RE = /^(?:no|n|false|unsupported|disabled|none|x|cross)$/i
+const MODEL_HEADER_RE = /\bmodel\b/i
+const MODEL_CELL_TEXT_RE = /^model$/i
+const PROVIDER_PATH_RE = /^\/providers\/ai-sdk-providers\/([^/]+)$/
+const RETRYABLE_ERROR_RE = /network|fetch|timeout/i
+
 const NORMALIZATION_RULES: Record<keyof NormalizedCapabilities, RegExp[]> = {
   imageInput: [
     /\bimage\b/i,
@@ -101,7 +111,7 @@ const NORMALIZATION_RULES: Record<keyof NormalizedCapabilities, RegExp[]> = {
 }
 
 function cleanText(value: string | null | undefined): string {
-  return (value ?? "").replace(/\s+/g, " ").trim()
+  return (value ?? "").replace(WHITESPACE_RE, " ").trim()
 }
 
 function slugToName(slug: string): string {
@@ -165,7 +175,7 @@ function parseArgs(argv: string[]): ScrapeOptions {
     throw new Error(`--timeoutMs must be >= 1000. Received: ${options.timeoutMs}`)
   }
 
-  const normalizedBase = options.baseUrl.replace(/\/+$/, "")
+  const normalizedBase = options.baseUrl.replace(TRAILING_SLASHES_RE, "")
   const normalizedIndex = options.indexPath.startsWith("/") ? options.indexPath : `/${options.indexPath}`
 
   return {
@@ -195,9 +205,9 @@ function classNameValue(el: Element): string {
 
 function collectClassTokens(root: Element): string[] {
   const set = new Set<string>()
-  const elements = [root, ...Array.from(root.querySelectorAll("*"))]
+  const elements = [root, ...[...root.querySelectorAll("*")]]
   for (const element of elements) {
-    const tokens = classNameValue(element).split(/\s+/).filter(Boolean)
+    const tokens = classNameValue(element).split(WHITESPACE_SPLIT_RE).filter(Boolean)
     for (const token of tokens) {
       set.add(token)
     }
@@ -210,10 +220,10 @@ function textToBoolean(value: string): boolean | null {
   if (!text) {
     return null
   }
-  if (/^(?:yes|y|true|supported|available|enabled|check|checked)$/i.test(text)) {
+  if (BOOLEAN_TRUE_RE.test(text)) {
     return true
   }
-  if (/^(?:no|n|false|unsupported|disabled|none|x|cross)$/i.test(text)) {
+  if (BOOLEAN_FALSE_RE.test(text)) {
     return false
   }
   return null
@@ -232,8 +242,7 @@ function parseCapabilityCell(cell: HTMLTableCellElement): CapabilityValue {
       return false
     }
 
-    const pathValues = Array.from(cell.querySelectorAll("path"))
-      .map(path => path.getAttribute("d") ?? "")
+    const pathValues = Array.from(cell.querySelectorAll("path"), path => path.getAttribute("d") ?? "")
       .join(" ")
     if (pathValues.includes("11.5303 6.53033")) {
       return true
@@ -310,31 +319,31 @@ interface ExtractedTableRows {
 }
 
 function extractHeadersAndRows(table: HTMLTableElement): ExtractedTableRows {
-  const allRows = Array.from(table.rows)
+  const allRows = [...table.rows]
   if (allRows.length === 0) {
     return { headers: [], rows: [] }
   }
 
   const headRow = table.tHead?.rows.item(0)
   if (headRow) {
-    const headers = Array.from(headRow.cells).map(cell => cleanText(cell.textContent) || "Column")
+    const headers = Array.from(headRow.cells, cell => cleanText(cell.textContent) || "Column")
     const bodyRows = table.tBodies.length > 0
-      ? Array.from(table.tBodies).flatMap(body => Array.from(body.rows))
+      ? [...table.tBodies].flatMap(body => [...body.rows])
       : allRows.filter(row => row !== headRow)
     return { headers, rows: bodyRows }
   }
 
   const firstRow = allRows[0]
-  const headerLike = Array.from(firstRow.cells).every(cell => cell.tagName === "TH")
+  const headerLike = [...firstRow.cells].every(cell => cell.tagName === "TH")
   if (headerLike) {
-    const headers = Array.from(firstRow.cells).map(cell => cleanText(cell.textContent) || "Column")
+    const headers = Array.from(firstRow.cells, cell => cleanText(cell.textContent) || "Column")
     return {
       headers,
       rows: allRows.slice(1),
     }
   }
 
-  const headers = Array.from(firstRow.cells).map((_cell, index) => `Column ${index + 1}`)
+  const headers = Array.from(firstRow.cells, (_cell, index) => `Column ${index + 1}`)
   return { headers, rows: allRows }
 }
 
@@ -352,7 +361,7 @@ function extractModelCellText(row: HTMLTableRowElement, index: number): string {
 }
 
 function tableLooksLikeModelTable(headers: string[], rows: HTMLTableRowElement[]): boolean {
-  const hasModelHeader = headers.some(header => /\bmodel\b/i.test(header))
+  const hasModelHeader = headers.some(header => MODEL_HEADER_RE.test(header))
   if (hasModelHeader) {
     return true
   }
@@ -362,7 +371,7 @@ function tableLooksLikeModelTable(headers: string[], rows: HTMLTableRowElement[]
 function extractModelTables(providerHtml: string): ProviderTable[] {
   const dom = new JSDOM(providerHtml)
   const document = dom.window.document
-  const tables = Array.from(document.querySelectorAll("table"))
+  const tables = [...document.querySelectorAll("table")]
   const parsedTables: ProviderTable[] = []
 
   for (const table of tables) {
@@ -374,7 +383,7 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
       continue
     }
 
-    const modelColumnIndex = headers.findIndex(header => /\bmodel\b/i.test(header))
+    const modelColumnIndex = headers.findIndex(header => MODEL_HEADER_RE.test(header))
     const resolvedModelColumnIndex = modelColumnIndex >= 0 ? modelColumnIndex : 0
 
     const models: ModelRow[] = []
@@ -384,7 +393,7 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
       }
 
       const model = extractModelCellText(row, resolvedModelColumnIndex)
-      if (!model || /^model$/i.test(model)) {
+      if (!model || MODEL_CELL_TEXT_RE.test(model)) {
         continue
       }
 
@@ -420,7 +429,7 @@ function extractModelTables(providerHtml: string): ProviderTable[] {
 function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[] {
   const dom = new JSDOM(html)
   const document = dom.window.document
-  const anchors = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]"))
+  const anchors = [...document.querySelectorAll<HTMLAnchorElement>("a[href]")]
 
   const providers = new Map<string, ProviderLink>()
 
@@ -438,8 +447,8 @@ function discoverProvidersFromHtml(html: string, baseUrl: string): ProviderLink[
       continue
     }
 
-    const normalizedPath = url.pathname.replace(/\/+$/, "")
-    const match = normalizedPath.match(/^\/providers\/ai-sdk-providers\/([^/]+)$/)
+    const normalizedPath = url.pathname.replace(TRAILING_SLASHES_RE, "")
+    const match = normalizedPath.match(PROVIDER_PATH_RE)
     if (!match) {
       continue
     }
@@ -469,7 +478,7 @@ function isRetryable(error: unknown): boolean {
     return true
   }
   if (error instanceof Error) {
-    return /network|fetch|timeout/i.test(error.message)
+    return RETRYABLE_ERROR_RE.test(error.message)
   }
   return false
 }

@@ -57,12 +57,17 @@ const PAUSE_WORDS = new Set([
   "while",
 ])
 
+const LEADING_CHEVRON_PATTERN = /^>>\s*/
+const CHEVRON_PATTERN = />>/g
+
 function cleanText(text: string): string {
-  return text.replace(/^>>\s*/, "").replace(/>>/g, " ").trim()
+  return text.replace(LEADING_CHEVRON_PATTERN, "").replace(CHEVRON_PATTERN, " ").trim()
 }
 
+const WHITESPACE_PATTERN = /\s+/
+
 function getFirstWord(text: string): string {
-  return text.toLowerCase().split(/\s+/)[0] || ""
+  return text.toLowerCase().split(WHITESPACE_PATTERN)[0] || ""
 }
 
 function isQualityPoor(fragments: SubtitlesFragment[]): boolean {
@@ -96,7 +101,7 @@ function processSubtitles(
     result.push({
       text: buffer.map(s => s.text).join(separator).trim(),
       start: buffer[0].start,
-      end: buffer[buffer.length - 1].end,
+      end: buffer.at(-1)!.end,
     })
     buffer.length = 0
     bufferLength = 0
@@ -111,7 +116,7 @@ function processSubtitles(
     if (!text)
       continue
     const fragLength = getTextLength(text, isCJK)
-    const lastSegment = buffer[buffer.length - 1]
+    const lastSegment = buffer.at(-1)
 
     if (lastSegment) {
       const isEndOfSentence = SENTENCE_END_PATTERN.test(lastSegment.text)

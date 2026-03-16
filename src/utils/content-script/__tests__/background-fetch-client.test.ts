@@ -66,6 +66,6 @@ describe("backgroundFetch", () => {
       responseType: "base64",
     })
     expect(response.headers.get("content-type")).toBe("image/webp")
-    expect(Array.from(new Uint8Array(await response.arrayBuffer()))).toEqual([0, 1, 2, 3])
+    expect([...new Uint8Array(await response.arrayBuffer())]).toEqual([0, 1, 2, 3])
   })
 })

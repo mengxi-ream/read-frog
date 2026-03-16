@@ -45,6 +45,16 @@
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",
       "computedHash": "a6a44d5498f7e8f68289902f3dedfc6f38ae0cee1e96527c80724cf27f727c2a"
+    },
+    "webext-core": {
+      "source": "Timeraa/skills",
+      "sourceType": "github",
+      "computedHash": "c18c57922445cd7341a244b1d16afafa8b22cf149c0ce6ff60b5d585c3a898a2"
+    },
+    "wxt": {
+      "source": "Timeraa/skills",
+      "sourceType": "github",
+      "computedHash": "af1574a7278f8e19086520e96e7354b113ffff29773dd68031bfc3699854b713"
     }
   }
 }

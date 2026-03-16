@@ -6,6 +6,8 @@ import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { getModelById, resolveModelId } from "@/utils/providers/model"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 
+const THINK_TAG_RE = /<\/think>([\s\S]*)/
+
 export type PromptResolver = (
   targetLang: string,
   input: string,
@@ -36,7 +38,7 @@ export async function aiTranslate(
       maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
     })
 
-    const [, finalTranslation = translatedText] = translatedText.match(/<\/think>([\s\S]*)/) || []
+    const [, finalTranslation = translatedText] = translatedText.match(THINK_TAG_RE) || []
 
     return finalTranslation
   }

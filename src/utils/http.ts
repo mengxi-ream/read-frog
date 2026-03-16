@@ -2,7 +2,7 @@ export function normalizeHeaders(headersInit?: HeadersInit): [string, string][] 
   if (!headersInit)
     return []
   if (headersInit instanceof Headers)
-    return Array.from(headersInit.entries())
+    return [...headersInit.entries()]
   if (Array.isArray(headersInit))
     return headersInit.map(([k, v]) => [k, String(v)])
   // plain object shape

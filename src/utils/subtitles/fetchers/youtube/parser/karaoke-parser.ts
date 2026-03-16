@@ -4,13 +4,16 @@ import type { YoutubeTimedText } from "../types"
 // YouTube uses wpWinPosId: 3 for the main kanji track in karaoke subtitles
 const KANJI_TRACK_ID = 3
 
+const ZERO_WIDTH_SPACE_PATTERN = /\u200B/g
+const WHITESPACE_PATTERN = /\s+/g
+
 /**
  * Clean karaoke text: remove zero-width spaces and extra whitespace
  */
 function cleanKaraokeText(text: string): string {
   return text
-    .replace(/\u200B/g, "")
-    .replace(/\s+/g, " ")
+    .replace(ZERO_WIDTH_SPACE_PATTERN, "")
+    .replace(WHITESPACE_PATTERN, " ")
     .trim()
 }
 
@@ -45,7 +48,7 @@ export function parseKaraokeSubtitles(events: YoutubeTimedText[]): SubtitlesFrag
       continue
 
     // Fix previous fragment's end time to avoid overlap
-    const last = merged[merged.length - 1]
+    const last = merged.at(-1)
     if (last && last.end > event.tStartMs) {
       last.end = event.tStartMs
     }
@@ -60,7 +63,7 @@ export function parseKaraokeSubtitles(events: YoutubeTimedText[]): SubtitlesFrag
   // Deduplicate: merge time ranges for adjacent identical text
   const result: SubtitlesFragment[] = []
   for (const fragment of merged) {
-    const last = result[result.length - 1]
+    const last = result.at(-1)
     if (last && last.text === fragment.text) {
       last.end = fragment.end
     }

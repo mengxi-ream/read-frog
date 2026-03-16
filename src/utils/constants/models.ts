@@ -28,6 +28,9 @@ export const LLM_PROVIDER_MODELS = {
   "ollama": ["gemma3:4b", "llama3.2:3b"],
   "volcengine": ["doubao-seed-1-6-flash-250828", "doubao-seed-1-6-lite-251015", "doubao-seed-1-6-251015"],
   "minimax": ["MiniMax-M2", "MiniMax-M2-Stable"],
+  "alibaba": ["qwen3-max", "qwen3.5-plus", "qwen3.5-flash", "qwen-plus", "qwen-flash", "qwen-turbo", "qwq-plus", "qwen3-coder-plus", "deepseek-v3.2", "deepseek-v3.1", "deepseek-r1", "deepseek-v3", "kimi-k2.5", "MiniMax-M2.5", "glm-5"],
+  "moonshotai": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k", "kimi-k2", "kimi-k2.5", "kimi-k2-thinking", "kimi-k2-thinking-turbo", "kimi-k2-turbo"],
+  "huggingface": ["meta-llama/Llama-3.1-8B-Instruct", "meta-llama/Llama-3.1-70B-Instruct", "meta-llama/Llama-3.3-70B-Instruct", "meta-llama/Llama-4-Maverick-17B-128E-Instruct", "deepseek-ai/DeepSeek-V3.1", "deepseek-ai/DeepSeek-V3-0324", "deepseek-ai/DeepSeek-R1", "deepseek-ai/DeepSeek-R1-Distill-Llama-70B", "Qwen/Qwen3-32B", "Qwen/Qwen3-Coder-480B-A35B-Instruct", "Qwen/Qwen2.5-VL-7B-Instruct", "google/gemma-3-27b-it", "moonshotai/Kimi-K2-Instruct"],
 } as const
 
 export const NON_API_TRANSLATE_PROVIDERS = ["google-translate", "microsoft-translate"] as const
@@ -102,5 +105,11 @@ export const LLM_MODEL_OPTIONS: Array<{
   {
     pattern: /^GLM-/i,
     options: { thinking: { type: "disabled" } },
+  },
+
+  // Qwen/QwQ models - disable thinking
+  {
+    pattern: /^qwen/,
+    options: { enableThinking: false },
   },
 ]

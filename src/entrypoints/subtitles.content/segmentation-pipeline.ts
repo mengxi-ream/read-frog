@@ -91,7 +91,7 @@ export class SegmentationPipeline {
         const segmented = await aiSegmentBlock(chunk, config)
         const optimized = optimizeSubtitles(segmented, this.getSourceLanguage())
         const chunkStart = chunk[0].start
-        const chunkEnd = chunk[chunk.length - 1].end
+        const chunkEnd = chunk.at(-1)!.end
         this.processedFragments = this.processedFragments.filter(
           f => f.start < chunkStart || f.start > chunkEnd,
         )

@@ -26,7 +26,7 @@ function buildTreeData(data: Config): {
 
   function traverse(value: Config, path: string[]) {
     const pathKey = path.join(".")
-    const key = path[path.length - 1] || "root"
+    const key = path.at(-1) || "root"
     const itemId = pathKey || "root"
 
     items.set(itemId, { key, value, pathKey, isArrayItem: !Number.isNaN(Number(key)) })
@@ -68,7 +68,7 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
         expanded.add(parts.slice(0, i).join("."))
       }
     }
-    return Array.from(expanded)
+    return [...expanded]
   }, [conflictPaths])
 
   const tree = useTree<JsonNodeData>({

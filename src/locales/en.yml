@@ -163,6 +163,9 @@ options:
         vercel: Optimized AI models for web content translation and analysis
         volcengine: ByteDance's cloud AI platform offering Doubao models for translation and reading
         minimax: MiniMax AI platform offering advanced MiniMax-M2 models for text generation
+        alibaba: Alibaba Cloud's Qwen model series with advanced reasoning and multilingual capabilities
+        moonshotai: Moonshot AI's Kimi model series with strong reasoning and long-context capabilities
+        huggingface: Hugging Face Inference API providing access to thousands of open-source models
     apiKey:
       showAPIKey: Show API Key
     howToConfigure: How to configure?

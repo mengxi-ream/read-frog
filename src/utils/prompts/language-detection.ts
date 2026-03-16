@@ -2,6 +2,8 @@ import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { LANG_CODE_TO_EN_NAME, langCodeISO6393Schema } from "@read-frog/definitions"
 import z from "zod"
 
+const PUNCTUATION_AND_WHITESPACE_PATTERN = /['"`,.\s]/g
+
 const supportedLanguageList = Object.entries(LANG_CODE_TO_EN_NAME)
   .map(([code, name]) => `- ${code}: ${name}`)
   .join("\n")
@@ -19,7 +21,7 @@ ${supportedLanguageList}`
 }
 
 export function normalizeLanguageDetectionOutput(rawOutput: string): string {
-  return rawOutput.trim().toLowerCase().replace(/['"`,.\s]/g, "")
+  return rawOutput.trim().toLowerCase().replace(PUNCTUATION_AND_WHITESPACE_PATTERN, "")
 }
 
 export function parseDetectedLanguageCode(rawOutput: string): LangCodeISO6393 | "und" | null {
