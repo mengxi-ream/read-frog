@@ -1,3 +1,7 @@
+import type { GeneratedI18nStructure } from "#i18n"
+
+type I18nKey = keyof GeneratedI18nStructure
+
 export interface SearchItem {
   sectionId: string
   route: string
@@ -7,6 +11,60 @@ export interface SearchItem {
 }
 
 const IS_FIREFOX = import.meta.env.BROWSER === "firefox"
+
+type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pageKey"> & {
+  titleKey: I18nKey
+  descriptionKey?: I18nKey
+  pageKey: I18nKey
+}
+
+const TTS_SEARCH_ITEMS: SearchItemDefinition[] = !IS_FIREFOX
+  ? [{
+      sectionId: "tts-config",
+      route: "/tts",
+      titleKey: "options.tts.title",
+      descriptionKey: "options.tts.description",
+      pageKey: "options.tts.title",
+    }]
+  : []
+
+const CONFIG_SEARCH_ITEMS = [
+  {
+    sectionId: "beta-experience",
+    route: "/config",
+    titleKey: "options.betaExperience.title",
+    descriptionKey: "options.betaExperience.description",
+    pageKey: "options.config.title",
+  },
+  {
+    sectionId: "google-drive-sync",
+    route: "/config",
+    titleKey: "options.config.sync.googleDrive.title",
+    descriptionKey: "options.config.sync.googleDrive.description",
+    pageKey: "options.config.title",
+  },
+  {
+    sectionId: "manual-config-sync",
+    route: "/config",
+    titleKey: "options.config.sync.title",
+    descriptionKey: "options.config.sync.description",
+    pageKey: "options.config.title",
+  },
+  {
+    sectionId: "config-backup",
+    route: "/config",
+    titleKey: "options.config.backup.title",
+    descriptionKey: "options.config.backup.description",
+    pageKey: "options.config.title",
+  },
+  {
+    sectionId: "reset-config",
+    route: "/config",
+    titleKey: "options.config.resetConfig.title",
+    descriptionKey: "options.config.resetConfig.description",
+    pageKey: "options.config.title",
+  },
+] satisfies SearchItemDefinition[]
 
 export const SEARCH_ITEMS: SearchItem[] = [
   // General page
@@ -271,50 +329,8 @@ export const SEARCH_ITEMS: SearchItem[] = [
   },
 
   // Text to Speech page
-  ...(!IS_FIREFOX
-    ? [{
-        sectionId: "tts-config",
-        route: "/tts",
-        titleKey: "options.tts.title",
-        descriptionKey: "options.tts.description",
-        pageKey: "options.tts.title",
-      }]
-    : []),
+  ...TTS_SEARCH_ITEMS,
 
   // Config page
-  {
-    sectionId: "beta-experience",
-    route: "/config",
-    titleKey: "options.betaExperience.title",
-    descriptionKey: "options.betaExperience.description",
-    pageKey: "options.config.title",
-  },
-  {
-    sectionId: "google-drive-sync",
-    route: "/config",
-    titleKey: "options.config.sync.googleDrive.title",
-    descriptionKey: "options.config.sync.googleDrive.description",
-    pageKey: "options.config.title",
-  },
-  {
-    sectionId: "manual-config-sync",
-    route: "/config",
-    titleKey: "options.config.sync.title",
-    descriptionKey: "options.config.sync.description",
-    pageKey: "options.config.title",
-  },
-  {
-    sectionId: "config-backup",
-    route: "/config",
-    titleKey: "options.config.backup.title",
-    descriptionKey: "options.config.backup.description",
-    pageKey: "options.config.title",
-  },
-  {
-    sectionId: "reset-config",
-    route: "/config",
-    titleKey: "options.config.resetConfig.title",
-    descriptionKey: "options.config.resetConfig.description",
-    pageKey: "options.config.title",
-  },
-]
+  ...CONFIG_SEARCH_ITEMS,
+] satisfies SearchItemDefinition[]

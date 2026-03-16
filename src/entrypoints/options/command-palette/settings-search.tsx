@@ -19,6 +19,12 @@ import {
   scrollToSectionWhenReady,
 } from "./section-scroll"
 
+type SearchI18nKey = Parameters<typeof i18n.t>[0]
+
+function tSearchKey(key: string) {
+  return i18n.t(key as SearchI18nKey)
+}
+
 export function SettingsSearch() {
   const [open, setOpen] = useAtom(commandPaletteOpenAtom)
   const navigate = useNavigate()
@@ -92,14 +98,14 @@ export function SettingsSearch() {
         <CommandList>
           <CommandEmpty>{i18n.t("options.commandPalette.noResults")}</CommandEmpty>
           {Array.from(groupedItems.entries(), ([pageKey, items]) => (
-            <CommandGroup key={pageKey} heading={i18n.t(pageKey)}>
+            <CommandGroup key={pageKey} heading={tSearchKey(pageKey)}>
               {items.map(item => (
                 <CommandItem
                   key={item.sectionId}
                   value={buildSearchValue(item)}
                   onSelect={() => handleSelect(item)}
                 >
-                  <span>{i18n.t(item.titleKey)}</span>
+                  <span>{tSearchKey(item.titleKey)}</span>
                 </CommandItem>
               ))}
             </CommandGroup>
@@ -111,9 +117,9 @@ export function SettingsSearch() {
 }
 
 function buildSearchValue(item: (typeof SEARCH_ITEMS)[number]): string {
-  const parts = [i18n.t(item.titleKey)]
+  const parts = [tSearchKey(item.titleKey)]
   if (item.descriptionKey) {
-    parts.push(i18n.t(item.descriptionKey))
+    parts.push(tSearchKey(item.descriptionKey))
   }
   return parts.join(" ")
 }

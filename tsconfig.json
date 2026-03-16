@@ -1,11 +1,9 @@
 {
   "extends": "./.wxt/tsconfig.json",
   "compilerOptions": {
+    "incremental": true,
+    "tsBuildInfoFile": "./.wxt/tsconfig.typecheck.tsbuildinfo",
     "jsx": "react-jsx",
-    "paths": {
-      "@": ["./src"],
-      "@/*": ["./src/*"]
-    },
     "allowImportingTsExtensions": true
   },
   "exclude": ["repos"]

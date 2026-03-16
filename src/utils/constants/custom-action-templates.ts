@@ -1,8 +1,10 @@
+import type { GeneratedI18nStructure } from "#i18n"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
 import { createOutputSchemaField } from "./custom-action"
 
 const T_PREFIX = "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates"
+type I18nKey = keyof GeneratedI18nStructure
 
 export interface CustomActionTemplate {
   id: string
@@ -10,6 +12,11 @@ export interface CustomActionTemplate {
   descriptionKey: string
   icon: string
   createAction: (providerId: string) => SelectionToolbarCustomAction
+}
+
+type CustomActionTemplateDefinition = Omit<CustomActionTemplate, "nameKey" | "descriptionKey"> & {
+  nameKey: I18nKey
+  descriptionKey: I18nKey
 }
 
 export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
@@ -74,4 +81,4 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
       ],
     }),
   },
-]
+] satisfies CustomActionTemplateDefinition[]
