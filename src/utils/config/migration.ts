@@ -8,6 +8,8 @@ import { ConfigVersionTooNewError } from "./errors"
 
 export const LATEST_SCHEMA_VERSION = CONFIG_SCHEMA_VERSION
 
+const MIGRATION_FILENAME_RE = /v\d+-to-v(\d+)\.ts$/
+
 /**
  * Loads migration scripts from the "migration-scripts" directory and runs them sequentially to migrate the configuration
  * from the original schema version to the latest schema version.
@@ -19,7 +21,7 @@ export const migrationScripts: Record<number, MigrationFunction> = Object.fromEn
   Object.entries(
     modules,
   ).map(([path, migrate]) => {
-    const match = path.match(/v\d+-to-v(\d+)\.ts$/)
+    const match = path.match(MIGRATION_FILENAME_RE)
     if (!match) {
       throw new Error(`Invalid migration filename: ${path}`)
     }
