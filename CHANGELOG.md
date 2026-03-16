@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.30.0
+
+### Minor Changes
+
+- [#1127](https://github.com/mengxi-ream/read-frog/pull/1127) [`52a70ff`](https://github.com/mengxi-ream/read-frog/commit/52a70ff89a77669d6487a10dc7793c907feddf1c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add Alibaba Cloud (Bailian) as AI provider with Qwen, DeepSeek, Kimi, MiniMax, and GLM models
+
+- [#1127](https://github.com/mengxi-ream/read-frog/pull/1127) [`52a70ff`](https://github.com/mengxi-ream/read-frog/commit/52a70ff89a77669d6487a10dc7793c907feddf1c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add Moonshot AI and Hugging Face as AI providers
+
+### Patch Changes
+
+- [#1128](https://github.com/mengxi-ream/read-frog/pull/1128) [`c7b7bcc`](https://github.com/mengxi-ream/read-frog/commit/c7b7bcc68dd9bae2ebada9a23aec9258ce7a3eae) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: resolve dark mode flash (FOUC) on options and translation-hub pages
+
+- [#1121](https://github.com/mengxi-ream/read-frog/pull/1121) [`aad6b5e`](https://github.com/mengxi-ream/read-frog/commit/aad6b5e13639d31635e12b67107e9f47bb9fc30a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - ai: improve writing prompt with language detection and diverse examples
+
+- [#1125](https://github.com/mengxi-ream/read-frog/pull/1125) [`781180c`](https://github.com/mengxi-ream/read-frog/commit/781180c1f6bceb5d6db0fb7423d0479dae921395) Thanks [@ishiko732](https://github.com/ishiko732)! - perf: avoid bundling config migrations in content scripts
+
+- [#1125](https://github.com/mengxi-ream/read-frog/pull/1125) [`781180c`](https://github.com/mengxi-ream/read-frog/commit/781180c1f6bceb5d6db0fb7423d0479dae921395) Thanks [@ishiko732](https://github.com/ishiko732)! - refactor: enhance config migration loading to auto-discover scripts
+
 ## 1.29.1
 
 ### Patch Changes
