@@ -3,6 +3,7 @@ import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
 import type { ArticleContent } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
+import { ISO6393_TO_6391 } from "@read-frog/definitions"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -11,6 +12,7 @@ import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
+import { microsoftTranslateBatch } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
@@ -22,6 +24,19 @@ import { ensureInitializedConfig } from "./config"
 
 export function parseBatchResult(result: string): string[] {
   return result.split(BATCH_SEPARATOR).map(t => t.trim())
+}
+
+function resolveTranslateLanguageCodes(langConfig: Config["language"]) {
+  const sourceLang = langConfig.sourceCode === "auto"
+    ? "auto"
+    : (ISO6393_TO_6391[langConfig.sourceCode] ?? "auto")
+
+  const targetLang = ISO6393_TO_6391[langConfig.targetCode]
+  if (!targetLang) {
+    throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
+  }
+
+  return { sourceLang, targetLang }
 }
 
 async function getOrGenerateSummary(
@@ -148,6 +163,55 @@ async function createTranslationQueues(config: TranslationQueueSetupConfig) {
   return { requestQueue, batchQueue }
 }
 
+function createMicrosoftTranslateBatchQueue(
+  config: Pick<BatchQueueConfig, "maxCharactersPerBatch" | "maxItemsPerBatch">,
+  requestQueue: RequestQueue,
+) {
+  // The global batch config is tuned for LLM providers (to reduce token usage and
+  // keep outputs stable). Microsoft Translate supports true multi-item batching,
+  // so using a larger minimum here dramatically reduces request count without
+  // increasing latency (flush still happens after `batchDelay`).
+  const effectiveMaxCharactersPerBatch = Math.max(config.maxCharactersPerBatch, 5000)
+  const effectiveMaxItemsPerBatch = Math.max(config.maxItemsPerBatch, 10)
+
+  return new BatchQueue<TranslateBatchData, string>({
+    maxCharactersPerBatch: effectiveMaxCharactersPerBatch,
+    maxItemsPerBatch: effectiveMaxItemsPerBatch,
+    batchDelay: 100,
+    maxRetries: 0,
+    enableFallbackToIndividual: true,
+    getBatchKey: data => `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`,
+    getCharacters: data => data.text.length,
+    executeBatch: async (dataList) => {
+      const { langConfig } = dataList[0]
+      const texts = dataList.map(d => d.text)
+      const batchHash = Sha256Hex(...dataList.map(d => d.hash))
+      const earliestScheduleAt = Math.min(...dataList.map(d => d.scheduleAt))
+
+      const { sourceLang, targetLang } = resolveTranslateLanguageCodes(langConfig)
+      const batchThunk = () => microsoftTranslateBatch(texts, sourceLang, targetLang)
+
+      return requestQueue.enqueue(batchThunk, earliestScheduleAt, batchHash)
+    },
+    executeIndividual: async (data) => {
+      const { text, langConfig, hash, scheduleAt } = data
+      const { sourceLang, targetLang } = resolveTranslateLanguageCodes(langConfig)
+      const thunk = async () => {
+        const results = await microsoftTranslateBatch([text], sourceLang, targetLang)
+        return results[0] ?? ""
+      }
+      return requestQueue.enqueue(thunk, scheduleAt, hash)
+    },
+    onError: (error, context) => {
+      const errorType = context.isFallback ? "Individual request" : "Batch request"
+      logger.error(
+        `${errorType} failed (batchKey: ${context.batchKey}, retry: ${context.retryCount}):`,
+        error.message,
+      )
+    },
+  })
+}
+
 export async function setUpWebPageTranslationQueue() {
   const config = await ensureInitializedConfig()
 
@@ -158,6 +222,8 @@ export async function setUpWebPageTranslationQueue() {
     batchQueueConfig,
     promptResolver: getTranslatePrompt,
   })
+
+  const microsoftBatchQueue = createMicrosoftTranslateBatchQueue(batchQueueConfig, requestQueue)
 
   onMessage("enqueueTranslateRequest", async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, articleTitle, articleTextContent } } = message
@@ -184,6 +250,10 @@ export async function setUpWebPageTranslationQueue() {
 
       const data = { text, langConfig, providerConfig, hash, scheduleAt, content }
       result = await batchQueue.enqueue(data)
+    }
+    else if (providerConfig.provider === "microsoft-translate") {
+      const data = { text, langConfig, providerConfig, hash, scheduleAt }
+      result = await microsoftBatchQueue.enqueue(data)
     }
     else {
       // Create thunk based on type and params
@@ -227,6 +297,8 @@ export async function setUpSubtitlesTranslationQueue() {
     promptResolver: getSubtitlesTranslatePrompt,
   })
 
+  const microsoftBatchQueue = createMicrosoftTranslateBatchQueue(batchQueueConfig, requestQueue)
+
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, subtitlesContext } } = message
 
@@ -250,6 +322,10 @@ export async function setUpSubtitlesTranslationQueue() {
 
       const data = { text, langConfig, providerConfig, hash, scheduleAt, content }
       result = await batchQueue.enqueue(data)
+    }
+    else if (providerConfig.provider === "microsoft-translate") {
+      const data = { text, langConfig, providerConfig, hash, scheduleAt }
+      result = await microsoftBatchQueue.enqueue(data)
     }
     else {
       const thunk = () => executeTranslate(text, langConfig, providerConfig, getSubtitlesTranslatePrompt)
