@@ -3,6 +3,9 @@ import process from "node:process"
 import { defineConfig } from "wxt"
 
 const WXT_API_KEY_PATTERN = /^WXT_.*API_KEY/
+const ALLOWED_BUNDLED_API_KEYS = new Set([
+  "WXT_POSTHOG_API_KEY",
+])
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -79,6 +82,7 @@ export default defineConfig({
             buildStart() {
               const apiKeyVars = Object.keys(process.env)
                 .filter(key => WXT_API_KEY_PATTERN.test(key))
+                .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
 
               if (apiKeyVars.length > 0) {
                 throw new Error(

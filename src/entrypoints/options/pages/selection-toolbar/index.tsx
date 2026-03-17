@@ -5,6 +5,7 @@ import { PageLayout } from "../../components/page-layout"
 import { SelectionToolbarDisabledSites } from "./selection-toolbar-disabled-sites"
 import { SelectionToolbarFeatureToggles } from "./selection-toolbar-feature-toggles"
 import { SelectionToolbarGlobalToggle } from "./selection-toolbar-global-toggle"
+import { SelectionToolbarOpacity } from "./selection-toolbar-opacity"
 
 export function SelectionToolbarPage() {
   return (
@@ -18,6 +19,7 @@ export function SelectionToolbarPage() {
       </GradientBackground>
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <SelectionToolbarGlobalToggle />
+        <SelectionToolbarOpacity />
         <SelectionToolbarFeatureToggles />
         <SelectionToolbarDisabledSites />
       </div>

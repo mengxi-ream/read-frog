@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.30.2
+
+### Patch Changes
+
+- [`f563623`](https://github.com/mengxi-ream/read-frog/commit/f563623b67b62d025c2cc66a36477d612c172723) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore: release ci fix
+
+## 1.30.1
+
+### Patch Changes
+
+- [#1126](https://github.com/mengxi-ream/read-frog/pull/1126) [`c533428`](https://github.com/mengxi-ream/read-frog/commit/c5334289807d43cffe93658b6c2d22ab19ad2579) Thanks [@Sufyr](https://github.com/Sufyr)! - feat: add an opacity setting for the selection toolbar and its popover UI.
+
 ## 1.30.0
 
 ### Minor Changes
