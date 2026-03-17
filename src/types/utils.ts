@@ -21,3 +21,12 @@ export function omit<
   }
   return res as Omit<T, K[number]>
 }
+
+/**
+ * Remove entries with empty string, null, or undefined values from an object.
+ */
+export function compactObject<T extends Record<string, unknown>>(obj: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(obj).filter(([, v]) => v !== "" && v != null),
+  ) as Partial<T>
+}

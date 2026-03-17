@@ -33,6 +33,7 @@ import { APIKeyField } from "./api-key-field"
 import { BaseURLField } from "./base-url-field"
 import { AdvancedOptionsSection } from "./components/advanced-options-section"
 import { ConfigHeader } from "./config-header"
+import { ConnectionOptionsField } from "./connection-options-field"
 import { FeatureProviderSection } from "./feature-provider-section"
 import { formOpts, useAppForm } from "./form"
 import { ProviderOptionsField } from "./provider-options-field"
@@ -162,6 +163,7 @@ export function ProviderConfigForm() {
           {isTranslateProviderType && (
             <TranslateModelSelector form={form} />
           )}
+          <ConnectionOptionsField form={form} />
           <FeatureProviderSection form={form} />
           {isLLM && (
             <AdvancedOptionsSection>
