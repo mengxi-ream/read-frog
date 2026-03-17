@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.30.2
+
+### Patch Changes
+
+- [`f563623`](https://github.com/mengxi-ream/read-frog/commit/f563623b67b62d025c2cc66a36477d612c172723) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - chore: release ci fix
+
 ## 1.30.1
 
 ### Patch Changes
