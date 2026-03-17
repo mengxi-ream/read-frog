@@ -1,13 +1,15 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
-import type { PureAPIProviderConfig } from "@/types/config/provider"
+import type { ProviderConfig } from "@/types/config/provider"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { sendMessage } from "@/utils/message"
+
+type DeepLXProviderConfig = Extract<ProviderConfig, { provider: "deeplx" }>
 
 export async function deeplxTranslate(
   sourceText: string,
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
-  providerConfig: PureAPIProviderConfig,
+  providerConfig: DeepLXProviderConfig,
   options?: { forceBackgroundFetch?: boolean },
 ): Promise<string> {
   const baseURL = providerConfig.baseURL || DEFAULT_PROVIDER_CONFIG.deeplx.baseURL
