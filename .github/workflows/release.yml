@@ -4,6 +4,12 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing release tag to rebuild assets for (e.g., v1.30.1)"
+        required: true
+        type: string
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -16,7 +22,14 @@ jobs:
       HUSKY: 0
     steps:
       - name: Checkout Repo
+        if: github.event_name != 'workflow_dispatch'
         uses: actions/checkout@v4
+
+      - name: Checkout Release Tag
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.tag }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -31,6 +44,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Create Release Pull Request or Tag
+        if: github.event_name != 'workflow_dispatch'
         id: changesets
         uses: changesets/action@v1
         with:
@@ -105,16 +119,24 @@ jobs:
           fi
 
       - name: Build and Zip Extension
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
         run: pnpm zip:all
         env:
-          WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID }}
+          WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID || vars.WXT_GOOGLE_CLIENT_ID }}
+          WXT_POSTHOG_API_KEY: ${{ secrets.WXT_POSTHOG_API_KEY || vars.WXT_POSTHOG_API_KEY }}
+          WXT_POSTHOG_HOST: ${{ secrets.WXT_POSTHOG_HOST || vars.WXT_POSTHOG_HOST }}
 
       - name: Upload Extension Zip to Release
-        if: steps.changesets.outputs.published == 'true'
+        if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
         run: |
-          VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
-          gh release upload "v$VERSION" .output/*-chrome.zip .output/*-edge.zip .output/*-firefox.zip .output/*-sources.zip --clobber
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ github.event.inputs.tag }}"
+          else
+            VERSION=$(echo '${{ steps.changesets.outputs.publishedPackages }}' | jq -r '.[0].version')
+            TAG="v$VERSION"
+          fi
+
+          gh release upload "$TAG" .output/*-chrome.zip .output/*-edge.zip .output/*-firefox.zip .output/*-sources.zip --clobber
         env:
           GH_TOKEN: ${{ github.token }}
 

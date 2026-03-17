@@ -41,7 +41,9 @@ jobs:
       - name: Build and Zip Extension
         run: pnpm zip
         env:
-          WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID }}
+          WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID || vars.WXT_GOOGLE_CLIENT_ID }}
+          WXT_POSTHOG_API_KEY: ${{ secrets.WXT_POSTHOG_API_KEY || vars.WXT_POSTHOG_API_KEY }}
+          WXT_POSTHOG_HOST: ${{ secrets.WXT_POSTHOG_HOST || vars.WXT_POSTHOG_HOST }}
 
       - name: Upload Extension Zip to Release
         run: gh release upload "${{ inputs.tag }}" .output/*-chrome.zip --clobber
