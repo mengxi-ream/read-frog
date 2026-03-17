@@ -211,6 +211,12 @@ function createMicrosoftTranslateBatchQueue(
       const batchThunk = () => microsoftTranslateBatch(textsToTranslate, sourceLang, targetLang)
       const translations = await requestQueue.enqueue(batchThunk, earliestScheduleAt, batchHash)
 
+      if (translations.length !== textsToTranslate.length) {
+        throw new Error(
+          `Microsoft batch translation count mismatch: expected ${textsToTranslate.length}, got ${translations.length}`,
+        )
+      }
+
       const results = dataList.map(() => "")
       for (let i = 0; i < indexMap.length; i++) {
         const originalIndex = indexMap[i]
@@ -255,6 +261,7 @@ export async function setUpWebPageTranslationQueue() {
   })
 
   const microsoftBatchQueue = createMicrosoftTranslateBatchQueue(batchQueueConfig, requestQueue)
+  const inflightMicrosoftTranslations = new Map<string, Promise<string>>()
 
   onMessage("enqueueTranslateRequest", async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, articleTitle, articleTextContent } } = message
@@ -284,7 +291,18 @@ export async function setUpWebPageTranslationQueue() {
     }
     else if (providerConfig.provider === "microsoft-translate") {
       const data = { text, langConfig, providerConfig, hash, scheduleAt }
-      result = await microsoftBatchQueue.enqueue(data)
+      const inflight = hash ? inflightMicrosoftTranslations.get(hash) : undefined
+      if (inflight) {
+        return inflight
+      }
+
+      const promise = microsoftBatchQueue.enqueue(data)
+      if (hash) {
+        inflightMicrosoftTranslations.set(hash, promise)
+        promise.finally(() => inflightMicrosoftTranslations.delete(hash)).catch(() => {})
+      }
+
+      result = await promise
     }
     else {
       // Create thunk based on type and params
@@ -337,6 +355,7 @@ export async function setUpSubtitlesTranslationQueue() {
   })
 
   const microsoftBatchQueue = createMicrosoftTranslateBatchQueue(batchQueueConfig, requestQueue)
+  const inflightMicrosoftTranslations = new Map<string, Promise<string>>()
 
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, subtitlesContext } } = message
@@ -364,7 +383,18 @@ export async function setUpSubtitlesTranslationQueue() {
     }
     else if (providerConfig.provider === "microsoft-translate") {
       const data = { text, langConfig, providerConfig, hash, scheduleAt }
-      result = await microsoftBatchQueue.enqueue(data)
+      const inflight = hash ? inflightMicrosoftTranslations.get(hash) : undefined
+      if (inflight) {
+        return inflight
+      }
+
+      const promise = microsoftBatchQueue.enqueue(data)
+      if (hash) {
+        inflightMicrosoftTranslations.set(hash, promise)
+        promise.finally(() => inflightMicrosoftTranslations.delete(hash)).catch(() => {})
+      }
+
+      result = await promise
     }
     else {
       const thunk = () => executeTranslate(text, langConfig, providerConfig, getSubtitlesTranslatePrompt)

@@ -77,6 +77,34 @@ describe("microsoftTranslateBatch", () => {
     expect(translateCalls).toBe(2)
   })
 
+  it("throws on unexpected response length", async () => {
+    const fetchMock = vi.fn(async (url: any, init?: any) => {
+      if (url === "https://edge.microsoft.com/translate/auth") {
+        return new Response("test-token", { status: 200 })
+      }
+
+      if (typeof url === "string" && url.startsWith("https://api-edge.cognitive.microsofttranslator.com/translate?")) {
+        expect(init?.method).toBe("POST")
+        return new Response(JSON.stringify([
+          { translations: [{ text: "only-one" }] },
+        ]), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`)
+    })
+
+    vi.stubGlobal("fetch", fetchMock as any)
+
+    const { microsoftTranslateBatch } = await import("../../api/microsoft")
+
+    await expect(
+      microsoftTranslateBatch(["a", "b"], "en", "zh"),
+    ).rejects.toThrow(/response length mismatch/i)
+  })
+
   it("refreshes the auth token and retries once on 401/403", async () => {
     let authCalls = 0
     let translateCalls = 0
@@ -116,6 +144,56 @@ describe("microsoftTranslateBatch", () => {
 
     expect(authCalls).toBe(2)
     expect(translateCalls).toBe(2)
+  })
+
+  it("deduplicates concurrent token refresh after 401/403", async () => {
+    let authCalls = 0
+    let translateCalls = 0
+
+    const fetchMock = vi.fn(async (url: any, init?: any) => {
+      if (url === "https://edge.microsoft.com/translate/auth") {
+        authCalls++
+        return new Response(authCalls === 1 ? "token-1" : "token-2", { status: 200 })
+      }
+
+      if (typeof url === "string" && url.startsWith("https://api-edge.cognitive.microsofttranslator.com/translate?")) {
+        translateCalls++
+
+        const authHeader = init?.headers?.Authorization
+        if (translateCalls <= 2) {
+          expect(authHeader).toBe("Bearer token-1")
+          return new Response("Unauthorized", { status: 401, statusText: "Unauthorized" })
+        }
+
+        expect(authHeader).toBe("Bearer token-2")
+        const body = JSON.parse(init?.body as string)
+        const sourceText = body?.[0]?.Text as string
+
+        return new Response(JSON.stringify([
+          { translations: [{ text: `translated:${sourceText}` }] },
+        ]), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        })
+      }
+
+      throw new Error(`Unexpected fetch: ${String(url)}`)
+    })
+
+    vi.stubGlobal("fetch", fetchMock as any)
+
+    const { microsoftTranslate } = await import("../../api/microsoft")
+
+    const p1 = microsoftTranslate("first", "en", "zh")
+    const p2 = microsoftTranslate("second", "en", "zh")
+
+    await expect(Promise.all([p1, p2])).resolves.toEqual([
+      "translated:first",
+      "translated:second",
+    ])
+
+    expect(authCalls).toBe(2)
+    expect(translateCalls).toBe(4)
   })
 
   it("deduplicates concurrent token refresh requests", async () => {

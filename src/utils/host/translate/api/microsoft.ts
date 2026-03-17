@@ -12,9 +12,8 @@ const MICROSOFT_TOKEN_TTL_MS = 9 * 60 * 1000
 let cachedMicrosoftToken: { token: string, expiresAt: number } | null = null
 let inflightMicrosoftToken: Promise<string> | null = null
 
-function resetMicrosoftTokenCache() {
+function invalidateMicrosoftTokenCache() {
   cachedMicrosoftToken = null
-  inflightMicrosoftToken = null
 }
 
 async function getMicrosoftToken(): Promise<string> {
@@ -103,6 +102,12 @@ async function translateWithMicrosoftToken(
       return text
     })
 
+    if (translations.length !== sourceTexts.length) {
+      throw new Error(
+        `Microsoft translation response length mismatch: expected ${sourceTexts.length}, got ${translations.length}`,
+      )
+    }
+
     return translations
   }
   catch (error) {
@@ -130,7 +135,7 @@ export async function microsoftTranslateBatch(
     const err = error as MicrosoftTranslationError
     // The free token occasionally expires; refresh and retry once for auth failures.
     if (err.status === 401 || err.status === 403) {
-      resetMicrosoftTokenCache()
+      invalidateMicrosoftTokenCache()
       const refreshedToken = await getMicrosoftToken()
       return await translateWithMicrosoftToken(sourceTexts, fromLang, toLang, refreshedToken)
     }
