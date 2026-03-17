@@ -62,7 +62,7 @@ export default defineConfig({
           id: "{bd311a81-4530-4fcc-9178-74006155461b}",
           strict_min_version: "112.0",
           data_collection_permissions: {
-            required: [],
+            required: ["none"],
             optional: ["technicalAndInteraction"],
           },
         },

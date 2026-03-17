@@ -21,10 +21,11 @@ const frogIconElement = (
   />
 )
 
-function FrogToast(props: React.ComponentProps<typeof Toaster>) {
+function FrogToast({ position = "bottom-left", toastOptions, ...props }: React.ComponentProps<typeof Toaster>) {
   return (
     <Toaster
       {...props}
+      position={position}
       richColors
       icons={{
         warning: frogIconElement,
@@ -34,7 +35,8 @@ function FrogToast(props: React.ComponentProps<typeof Toaster>) {
         loading: frogIconElement,
       }}
       toastOptions={{
-        className: `${kebabCase(APP_NAME)}-toaster`,
+        ...toastOptions,
+        className: [`${kebabCase(APP_NAME)}-toaster`, toastOptions?.className].filter(Boolean).join(" "),
       }}
       className="z-[2147483647] notranslate"
     />
