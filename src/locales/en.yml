@@ -283,6 +283,9 @@ options:
       globalToggle:
         title: Enable Selection Toolbar
         description: Display the toolbar when selecting text on web pages for quick translation and vocabulary insights
+      opacity:
+        title: Opacity
+        description: Adjust the opacity of the selection toolbar and the expanded window opened from it
       featureToggles:
         title: Feature Toggles
         description: Choose which built-in features to show in the selection toolbar

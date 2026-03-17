@@ -246,6 +246,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.overlayTools.selectionToolbar.title",
   },
   {
+    sectionId: "selection-toolbar-opacity",
+    route: "/selection-toolbar",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.title",
+    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.description",
+    pageKey: "options.overlayTools.selectionToolbar.title",
+  },
+  {
     sectionId: "selection-toolbar-disabled-sites",
     route: "/selection-toolbar",
     titleKey: "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.title",

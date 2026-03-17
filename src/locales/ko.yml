@@ -282,6 +282,9 @@ options:
       globalToggle:
         title: 선택 툴바 활성화
         description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 어휘 분석
+      opacity:
+        title: 투명도
+        description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
       featureToggles:
         title: 기능 토글
         description: 선택 툴바에 표시할 기본 제공 기능 선택

@@ -2,6 +2,10 @@ import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
 
 import { z } from "zod"
 import { FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import {
+  MAX_SELECTION_OVERLAY_OPACITY,
+  MIN_SELECTION_OVERLAY_OPACITY,
+} from "@/utils/constants/selection"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
 import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
@@ -37,6 +41,9 @@ const selectionToolbarSpeakFeatureSchema = z.object({
 const selectionToolbarSchema = z.object({
   enabled: z.boolean(),
   disabledSelectionToolbarPatterns: z.array(z.string()),
+  opacity: z.number()
+    .min(MIN_SELECTION_OVERLAY_OPACITY)
+    .max(MAX_SELECTION_OVERLAY_OPACITY),
   features: z.object({
     translate: selectionToolbarFeatureSchema,
     speak: selectionToolbarSpeakFeatureSchema,

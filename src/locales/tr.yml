@@ -282,6 +282,9 @@ options:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir
         description: Hızlı çeviri ve kelime analizi için web sayfalarında metin seçerken araç çubuğunu görüntüle
+      opacity:
+        title: Opaklık
+        description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
       featureToggles:
         title: Özellik Açma/Kapama
         description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin

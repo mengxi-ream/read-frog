@@ -33,6 +33,7 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
       selectionToolbar: atom({
         enabled: true,
         disabledSelectionToolbarPatterns: [],
+        opacity: 100,
         features: {
           translate: { enabled: true, providerId: "microsoft-translate-default" },
           speak: { enabled: true },

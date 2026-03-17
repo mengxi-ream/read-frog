@@ -283,6 +283,9 @@ options:
       globalToggle:
         title: 启用选择工具栏
         description: 在网页上选择文本时显示工具栏，快速翻译和词汇解析
+      opacity:
+        title: 透明度
+        description: 调整选择工具栏及其展开内容窗的透明度
       featureToggles:
         title: 功能开关
         description: 选择在选择工具栏中显示哪些内置功能

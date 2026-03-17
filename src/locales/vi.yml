@@ -282,6 +282,9 @@ options:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
         description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch và phân tích từ vựng nhanh
+      opacity:
+        title: Độ mờ
+        description: Điều chỉnh độ mờ của thanh công cụ chọn văn bản và cửa sổ mở rộng mở từ đó
       featureToggles:
         title: Bật/tắt tính năng
         description: Chọn các tính năng tích hợp để hiển thị trên thanh công cụ chọn văn bản

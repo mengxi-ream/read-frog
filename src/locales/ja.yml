@@ -282,6 +282,9 @@ options:
       globalToggle:
         title: 選択ツールバーを有効化
         description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と語彙分析
+      opacity:
+        title: 透明度
+        description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します
       featureToggles:
         title: 機能トグル
         description: 選択ツールバーに表示する組み込み機能を選択

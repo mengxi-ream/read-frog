@@ -33,6 +33,12 @@ function HydrateAtoms({
   return children
 }
 
+const selectionContentCss = `
+  body {
+    opacity: var(--rf-selection-opacity, 1);
+  }
+`
+
 // eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null
 
@@ -51,6 +57,7 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
     name: `${kebabCase(APP_NAME)}-selection`,
     position: "overlay",
     anchor: "body",
+    css: selectionContentCss,
     onMount: (container, shadow, shadowHost) => {
       const wrapper = insertShadowRootUIWrapperInto(container)
       shadowWrapper = wrapper
@@ -64,7 +71,7 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
             <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
               <ThemeProvider container={wrapper}>
                 <TooltipProvider>
-                  <App />
+                  <App uiContainer={container} />
                 </TooltipProvider>
               </ThemeProvider>
             </HydrateAtoms>

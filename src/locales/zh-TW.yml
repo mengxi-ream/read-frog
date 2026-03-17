@@ -282,6 +282,9 @@ options:
       globalToggle:
         title: 啟用選擇工具列
         description: 在網頁上選擇文字時顯示工具列，快速翻譯和詞彙解析
+      opacity:
+        title: 透明度
+        description: 調整選擇工具列及其展開內容視窗的透明度
       featureToggles:
         title: 功能開關
         description: 選擇在選擇工具列中顯示哪些內建功能
