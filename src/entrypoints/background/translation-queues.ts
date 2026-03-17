@@ -14,6 +14,7 @@ import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { microsoftTranslateBatch } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
@@ -184,24 +185,51 @@ function createMicrosoftTranslateBatchQueue(
     maxRetries: 0,
     enableFallbackToIndividual: true,
     getBatchKey: data => `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`,
-    getCharacters: data => data.text.length,
+    getCharacters: data => prepareTranslationText(data.text).length,
     executeBatch: async (dataList) => {
       const { langConfig } = dataList[0]
-      const texts = dataList.map(d => d.text)
       const batchHash = Sha256Hex(...dataList.map(d => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map(d => d.scheduleAt))
 
       const { sourceLang, targetLang } = resolveTranslateLanguageCodes(langConfig)
-      const batchThunk = () => microsoftTranslateBatch(texts, sourceLang, targetLang)
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, batchHash)
+      const indexMap: number[] = []
+      const textsToTranslate: string[] = []
+      for (let i = 0; i < dataList.length; i++) {
+        const preparedText = prepareTranslationText(dataList[i].text)
+        if (!preparedText) {
+          continue
+        }
+        indexMap.push(i)
+        textsToTranslate.push(preparedText)
+      }
+
+      if (!textsToTranslate.length) {
+        return dataList.map(() => "")
+      }
+
+      const batchThunk = () => microsoftTranslateBatch(textsToTranslate, sourceLang, targetLang)
+      const translations = await requestQueue.enqueue(batchThunk, earliestScheduleAt, batchHash)
+
+      const results = dataList.map(() => "")
+      for (let i = 0; i < indexMap.length; i++) {
+        const originalIndex = indexMap[i]
+        results[originalIndex] = (translations[i] ?? "").trim()
+      }
+
+      return results
     },
     executeIndividual: async (data) => {
       const { text, langConfig, hash, scheduleAt } = data
+      const preparedText = prepareTranslationText(text)
+      if (!preparedText) {
+        return ""
+      }
+
       const { sourceLang, targetLang } = resolveTranslateLanguageCodes(langConfig)
       const thunk = async () => {
-        const results = await microsoftTranslateBatch([text], sourceLang, targetLang)
-        return results[0] ?? ""
+        const results = await microsoftTranslateBatch([preparedText], sourceLang, targetLang)
+        return (results[0] ?? "").trim()
       }
       return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
