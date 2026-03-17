@@ -129,6 +129,11 @@ options:
         noModelsFound: Модели не найдены
       featureProviders: Поставщики функций
       advancedOptions: Расширенные настройки
+      connectionOptions: Настройки подключения
+      connectionOptionLabels:
+        region: Регион
+        organization: Организация
+        project: Проект
       temperature: Температура
       temperatureHint: Контролирует случайность ответов. Низкие значения (0) более детерминированы, высокие — более креативны. Диапазон зависит от провайдера. Оставьте пустым для использования значения по умолчанию.
       providerOptions: Параметры провайдера

@@ -129,6 +129,11 @@ options:
         noModelsFound: Model bulunamadı
       featureProviders: Özellik Sağlayıcıları
       advancedOptions: Gelişmiş Seçenekler
+      connectionOptions: Bağlantı Ayarları
+      connectionOptionLabels:
+        region: Bölge
+        organization: Organizasyon
+        project: Proje
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
       providerOptions: Sağlayıcı Seçenekleri
