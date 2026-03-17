@@ -26,6 +26,9 @@ export function parseBatchResult(result: string): string[] {
   return result.split(BATCH_SEPARATOR).map(t => t.trim())
 }
 
+const MICROSOFT_TRANSLATE_MIN_BATCH_CHARACTERS = 5000
+const MICROSOFT_TRANSLATE_MIN_BATCH_ITEMS = 10
+
 function resolveTranslateLanguageCodes(langConfig: Config["language"]) {
   const sourceLang = langConfig.sourceCode === "auto"
     ? "auto"
@@ -171,8 +174,8 @@ function createMicrosoftTranslateBatchQueue(
   // keep outputs stable). Microsoft Translate supports true multi-item batching,
   // so using a larger minimum here dramatically reduces request count without
   // increasing latency (flush still happens after `batchDelay`).
-  const effectiveMaxCharactersPerBatch = Math.max(config.maxCharactersPerBatch, 5000)
-  const effectiveMaxItemsPerBatch = Math.max(config.maxItemsPerBatch, 10)
+  const effectiveMaxCharactersPerBatch = Math.max(config.maxCharactersPerBatch, MICROSOFT_TRANSLATE_MIN_BATCH_CHARACTERS)
+  const effectiveMaxItemsPerBatch = Math.max(config.maxItemsPerBatch, MICROSOFT_TRANSLATE_MIN_BATCH_ITEMS)
 
   return new BatchQueue<TranslateBatchData, string>({
     maxCharactersPerBatch: effectiveMaxCharactersPerBatch,
@@ -281,6 +284,14 @@ export async function setUpWebPageTranslationQueue() {
   onMessage("setTranslateBatchQueueConfig", (message) => {
     const { data } = message
     batchQueue.setBatchConfig(data)
+    const microsoftConfig: Partial<BatchQueueConfig> = { ...data }
+    if (data.maxCharactersPerBatch != null) {
+      microsoftConfig.maxCharactersPerBatch = Math.max(data.maxCharactersPerBatch, MICROSOFT_TRANSLATE_MIN_BATCH_CHARACTERS)
+    }
+    if (data.maxItemsPerBatch != null) {
+      microsoftConfig.maxItemsPerBatch = Math.max(data.maxItemsPerBatch, MICROSOFT_TRANSLATE_MIN_BATCH_ITEMS)
+    }
+    microsoftBatchQueue.setBatchConfig(microsoftConfig)
   })
 }
 
@@ -351,5 +362,13 @@ export async function setUpSubtitlesTranslationQueue() {
   onMessage("setSubtitlesBatchQueueConfig", (message) => {
     const { data } = message
     batchQueue.setBatchConfig(data)
+    const microsoftConfig: Partial<BatchQueueConfig> = { ...data }
+    if (data.maxCharactersPerBatch != null) {
+      microsoftConfig.maxCharactersPerBatch = Math.max(data.maxCharactersPerBatch, MICROSOFT_TRANSLATE_MIN_BATCH_CHARACTERS)
+    }
+    if (data.maxItemsPerBatch != null) {
+      microsoftConfig.maxItemsPerBatch = Math.max(data.maxItemsPerBatch, MICROSOFT_TRANSLATE_MIN_BATCH_ITEMS)
+    }
+    microsoftBatchQueue.setBatchConfig(microsoftConfig)
   })
 }
