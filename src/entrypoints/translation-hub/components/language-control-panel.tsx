@@ -4,8 +4,7 @@ import debounce from "debounce"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useMemo } from "react"
 import { Button } from "@/components/ui/base-ui/button"
-import { isLLMProviderConfig } from "@/types/config/provider"
-import { featureProviderConfigAtom } from "@/utils/atoms/provider"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { detectedSourceLangCodeAtom, exchangeLangCodesAtom, inputTextAtom, sourceLangCodeAtom, targetLangCodeAtom } from "../atoms"
 import { SearchableLanguageSelector } from "./searchable-language-selector"
@@ -16,20 +15,19 @@ export function LanguageControlPanel() {
   const exchangeLangCodes = useSetAtom(exchangeLangCodesAtom)
   const inputText = useAtomValue(inputTextAtom)
   const [detectedSourceLangCode, setDetectedSourceLangCode] = useAtom(detectedSourceLangCodeAtom)
-  const translateProviderConfig = useAtomValue(featureProviderConfigAtom("translate"))
+  const languageDetection = useAtomValue(configFieldsAtomMap.languageDetection)
 
   // Debounced language detection from input text
-  const isLLMProvider = !!translateProviderConfig && isLLMProviderConfig(translateProviderConfig)
+  const enableLLM = languageDetection.mode === "llm"
   const debouncedDetect = useMemo(
     () => debounce(async (text: string) => {
       const detected = await detectLanguage(text, {
         minLength: 1,
-        enableLLM: isLLMProvider,
-        providerConfig: isLLMProvider ? translateProviderConfig : undefined,
+        enableLLM,
       })
       setDetectedSourceLangCode(detected)
     }, 1000),
-    [setDetectedSourceLangCode, translateProviderConfig, isLLMProvider],
+    [setDetectedSourceLangCode, enableLLM],
   )
 
   useEffect(() => {

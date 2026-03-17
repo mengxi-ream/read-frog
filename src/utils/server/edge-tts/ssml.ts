@@ -1,13 +1,19 @@
 import type { EdgeTTSRequestParams } from "./types"
 import { EdgeTTSError } from "./errors"
 
+const AMPERSAND_PATTERN = /&/g
+const LESS_THAN_PATTERN = /</g
+const GREATER_THAN_PATTERN = />/g
+const DOUBLE_QUOTE_PATTERN = /"/g
+const SINGLE_QUOTE_PATTERN = /'/g
+
 function escapeXml(text: string): string {
   return text
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;")
+    .replace(AMPERSAND_PATTERN, "&amp;")
+    .replace(LESS_THAN_PATTERN, "&lt;")
+    .replace(GREATER_THAN_PATTERN, "&gt;")
+    .replace(DOUBLE_QUOTE_PATTERN, "&quot;")
+    .replace(SINGLE_QUOTE_PATTERN, "&apos;")
 }
 
 function sanitizeInputText(text: string): string {

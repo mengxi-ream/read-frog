@@ -2,6 +2,8 @@ import path from "node:path"
 import process from "node:process"
 import { defineConfig } from "wxt"
 
+const WXT_API_KEY_PATTERN = /^WXT_.*API_KEY/
+
 // See https://wxt.dev/api/config.html
 export default defineConfig({
   srcDir: "src",
@@ -76,7 +78,7 @@ export default defineConfig({
             name: "check-api-key-env",
             buildStart() {
               const apiKeyVars = Object.keys(process.env)
-                .filter(key => /^WXT_.*API_KEY/.test(key))
+                .filter(key => WXT_API_KEY_PATTERN.test(key))
 
               if (apiKeyVars.length > 0) {
                 throw new Error(
@@ -88,7 +90,11 @@ export default defineConfig({
 
               // Check required env vars only for zip builds
               if (process.env.WXT_ZIP_MODE) {
-                const requiredEnvVars = ["WXT_GOOGLE_CLIENT_ID"]
+                const requiredEnvVars = [
+                  "WXT_GOOGLE_CLIENT_ID",
+                  "WXT_POSTHOG_API_KEY",
+                  "WXT_POSTHOG_HOST",
+                ]
                 const missing = requiredEnvVars.filter(key => !process.env[key])
 
                 if (missing.length > 0) {

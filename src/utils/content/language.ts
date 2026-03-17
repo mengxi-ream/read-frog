@@ -1,7 +1,9 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { BackgroundGenerateTextPayload } from "@/types/background-generate-text"
 import type { LLMProviderConfig } from "@/types/config/provider"
+import { i18n } from "#imports"
 import { franc } from "franc"
+import { toast } from "sonner"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -14,6 +16,7 @@ import { cleanText } from "./utils"
 
 const DEFAULT_MIN_LENGTH = 10
 const DEFAULT_MAX_LENGTH_FOR_LLM = 500
+const LLM_DETECTION_FALLBACK_TOAST_ID = "llm-detection-fallback"
 
 export type DetectionSource = "llm" | "franc" | "fallback"
 
@@ -66,6 +69,9 @@ export async function detectLanguageWithSource(
     }
     catch (error) {
       logger.warn("LLM detection failed, falling back to franc:", error)
+      toast.warning(i18n.t("languageDetection.llmFailed"), {
+        id: LLM_DETECTION_FALLBACK_TOAST_ID,
+      })
     }
   }
 
@@ -118,9 +124,14 @@ export async function detectLanguageWithLLM(
         logger.warn("No config found for language detection")
         return null
       }
+      const ldProviderId = globalConfig.languageDetection.providerId
+      if (!ldProviderId) {
+        logger.info("No LLM provider configured for language detection")
+        return null
+      }
       const globalProvider = getProviderConfigById(
         globalConfig.providersConfig,
-        globalConfig.translate.providerId,
+        ldProviderId,
       )
       if (!globalProvider || !isLLMProviderConfig(globalProvider)) {
         logger.info("No LLM provider configured for page translation")

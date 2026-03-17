@@ -8,6 +8,7 @@ import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
@@ -20,7 +21,6 @@ import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
 import "@/assets/styles/theme.css"
-import "@/assets/styles/text-small.css"
 
 function HydrateAtoms({
   initialValues,
@@ -63,7 +63,9 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
           <JotaiProvider>
             <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
               <ThemeProvider container={wrapper}>
-                <App />
+                <TooltipProvider>
+                  <App />
+                </TooltipProvider>
               </ThemeProvider>
             </HydrateAtoms>
           </JotaiProvider>

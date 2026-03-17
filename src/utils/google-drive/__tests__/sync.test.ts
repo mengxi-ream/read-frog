@@ -2,19 +2,24 @@ import type { ConfigMeta, ConfigValueAndMeta, LastSyncedConfigMeta, LastSyncedCo
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ConfigVersionTooNewError } from "@/utils/config/errors"
 import {
-  getLastSyncedConfigAndMeta,
   getLocalConfigAndMeta,
-  setLastSyncConfigAndMeta,
   setLocalConfigAndMeta,
 } from "@/utils/config/storage"
+import {
+  getLastSyncedConfigAndMeta,
+  setLastSyncConfigAndMeta,
+} from "@/utils/config/sync"
 import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "../storage"
 import { syncConfig } from "../sync"
 
 // Mock the storage modules
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfigAndMeta: vi.fn(),
-  getLastSyncedConfigAndMeta: vi.fn(),
   setLocalConfigAndMeta: vi.fn(),
+}))
+
+vi.mock("@/utils/config/sync", () => ({
+  getLastSyncedConfigAndMeta: vi.fn(),
   setLastSyncConfigAndMeta: vi.fn(),
 }))
 

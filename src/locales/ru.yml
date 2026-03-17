@@ -163,6 +163,9 @@ options:
         vercel: Оптимизированные ИИ-модели для перевода и анализа веб-контента
         volcengine: Облачная ИИ-платформа ByteDance, предлагающая модели Doubao для перевода и чтения
         minimax: ИИ-платформа MiniMax, предлагающая передовые модели MiniMax-M2
+        alibaba: Серия моделей Qwen от Alibaba Cloud с продвинутыми возможностями рассуждения и многоязычности
+        moonshotai: Серия моделей Kimi от Moonshot AI с мощными возможностями рассуждения и длинного контекста
+        huggingface: API вывода Hugging Face с доступом к тысячам моделей с открытым кодом
     apiKey:
       showAPIKey: Показать API-ключ
     howToConfigure: Как настроить?
@@ -180,7 +183,7 @@ options:
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
-      customFeatures: Пользовательские AI-функции
+      customActions: Пользовательские AI-действия
       features:
         translate: Перевод страницы
         selectionToolbar_translate: Перевод выделения
@@ -202,6 +205,19 @@ options:
         confirm: Подтвердить
         cancel: Отмена
         description: Эта операция очистит весь кэш перевода. Это действие нельзя отменить.
+    languageDetection:
+      title: Определение языка
+      description: Влияет на точность определения языка для автоперевода, пропуска языков и выбора голоса озвучивания.
+      mode:
+        basic: Базовый
+        llm: LLM
+      provider:
+        label: Провайдер определения
+        placeholder: Выберите провайдера
+      status:
+        noProviders: Сначала настройте LLM-провайдер
+        basicRecommend: Рекомендуется включить LLM
+        llmEnabled: LLM-определение включено
   siteControl:
     title: Управление сайтами
     mode:
@@ -267,6 +283,12 @@ options:
       globalToggle:
         title: Включить панель выделения
         description: Отображать панель при выделении текста на веб-страницах для быстрого перевода и анализа слов
+      featureToggles:
+        title: Переключатели функций
+        description: Выберите, какие встроенные функции показывать в панели выделения
+        translate: Перевод
+        speak: Озвучивание
+        vocabularyInsight: Анализ слов
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
@@ -275,6 +297,13 @@ options:
         description: Настройте веб-сайты, где панель выделения должна быть отключена
         enterUrlPattern: Введите URL-шаблон
         urlPattern: URL-шаблон
+      errors:
+        customActionFailed: Не удалось выполнить пользовательское действие
+        customActionFailedFallback: Запрос пользовательского действия не удался
+        actionUnavailable: Выбранное действие недоступно
+        missingSelection: Нет выделенного текста
+        providerDisabled: Выбранный провайдер отключен
+        providerUnavailable: Выбранный провайдер недоступен
       features:
         provider: Провайдер
         selectProvider: Выберите провайдера
@@ -290,13 +319,13 @@ options:
         vocabularyInsight:
           title: Анализ слов
           description: Настройка провайдера и модели для анализа слов/фраз в панели выделения
-      customFeatures:
-        title: Пользовательские AI-функции
+      customActions:
+        title: Пользовательские AI-действия
         description: Добавляйте собственные структурированные AI-действия для выделенного текста
-        add: Добавить AI-функцию
-        edit: Редактировать AI-функцию
-        empty: Пока нет пользовательских AI-функций
-        noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-функций
+        add: Добавить AI-действие
+        edit: Редактировать AI-действие
+        empty: Пока нет пользовательских AI-действий
+        noEnabledLlmProvider: Включите хотя бы одного LLM-провайдера перед созданием пользовательских AI-действий
         table:
           name: Название
           provider: Провайдер
@@ -315,6 +344,7 @@ options:
           fieldType: Тип поля
           fieldDescription: Описание
           fieldDescriptionPlaceholder: Опишите, что должно содержать это поле...
+          fieldSpeaking: Включить озвучивание
           actions: Действия
           cancel: Отмена
           save: Сохранить
@@ -333,18 +363,18 @@ options:
             cancel: Отмена
           tokens:
             selection: Содержимое выделенного текста
-            context: Текст абзаца, в котором находится выделение
-            targetLang: Целевой язык пользователя
-            title: Заголовок веб-страницы
+            paragraphs: Текст абзацев, пересекающихся с выделением, объединённый пустыми строками; при отправке в пользовательские AI-действия обрезается до первых 2000 символов
+            targetLanguage: Целевой язык пользователя
+            webTitle: Заголовок веб-страницы
           delete: Удалить
           deleteDialog:
-            title: Удалить пользовательскую функцию?
+            title: Удалить пользовательское действие?
             description: Это действие нельзя отменить.
             confirm: Удалить
             cancel: Отмена
         errors:
           nameRequired: Название обязательно
-          duplicateName: 'Дублирующееся имя функции "$1"'
+          duplicateName: 'Дублирующееся имя действия "$1"'
           invalidIcon: Неверная строка иконки Iconify
           providerRequired: Выберите включённого LLM-провайдера
           outputSchemaRequired: Добавьте хотя бы одно поле вывода
@@ -400,9 +430,9 @@ options:
         prompt: Промпт
         promptCellInput:
           input: Текстовое содержимое для перевода
-          targetLang: Целевой язык
-          title: Заголовок веб-страницы
-          summary: Резюме веб-страницы (требуется умный контекст ИИ)
+          targetLanguage: Целевой язык
+          webTitle: Заголовок веб-страницы
+          webSummary: Резюме веб-страницы (требуется умный контекст ИИ)
         save: Сохранить изменения
         close: Отмена
       deletePrompt:
@@ -517,11 +547,6 @@ options:
   tts:
     title: Синтез речи
     description: Настройте кнопку озвучивания с параметрами голоса Edge TTS.
-    detectLanguage:
-      label: Определение языка
-      basic: Базовое
-      llm: LLM
-      description: Базовое определение быстрое и бесплатное. LLM-определение точнее, но добавляет задержку и затраты на API. Режим LLM использует провайдера со страницы перевода.
     voice:
       label: Голос
       fallback: Резервный
@@ -551,6 +576,13 @@ options:
       batchRequestCount: Количество пакетных запросов
   config:
     title: Конфигурация
+    about:
+      title: О приложении
+      description: Read Frog появился в апреле 2025 года
+      mission: Read Frog стремится расширить равный доступ к качественному образованию в эпоху ИИ, делая обучение, максимально похожее на занятия с настоящим преподавателем, доступным по цене в языках, медицине и других знанияемких областях.
+      analytics:
+        title: Помочь улучшить пользовательский опыт
+        tooltip: Когда параметр включен, Read Frog отправляет анонимные сигналы об использовании продукта, чтобы мы могли проверять надежность функций, улучшать производительность и UX-детали, а также понимать, что развивать дальше в первую очередь.
     sync:
       title: Ручная синхронизация конфигурации
       description: Ручной импорт и экспорт настроек конфигурации
@@ -754,6 +786,8 @@ noAPIKeyConfig:
     firstOnThe: сначала на странице
     optionsPage: настроек
     page: ""
+languageDetection:
+  llmFailed: Определение языка через LLM не удалось, выполнен откат к базовому определению
 translation:
   sameLanguage: Исходный и целевой языки должны различаться
   autoModeSameLanguage: Обнаруженный язык '$1' совпадает с целевым языком
@@ -764,6 +798,24 @@ speak:
   noTextSelected: Текст не выделен
   openaiNotConfigured: Провайдер OpenAI не настроен или не включён
   openaiApiKeyNotConfigured: API-ключ OpenAI не настроен
+action:
+  copy: Копировать
+  copied: Скопировано
+  regenerate: Сгенерировать заново
+  viewContextDetails: Контекст
+  contextDetailsTitleLabel: Заголовок
+  contextDetailsParagraphsLabel: Абзацы
+  translation: Перевод
+  speak: Озвучить
+  playing: Воспроизведение
+  vocabularyInsight: Разбор слов
+  vocabularyInsightDeprecation: Эта функция будет заменена функцией словаря в пользовательских AI-действиях через 2 недели. Словарное действие обеспечивает более гибкий и мощный опыт.
+  vocabularyInsightDeprecationLink: Настроить словарное действие
+thinking:
+  label: Размышление
+  complete: Размышление завершено
+  expand: Развернуть размышление
+  collapse: Свернуть размышление
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:

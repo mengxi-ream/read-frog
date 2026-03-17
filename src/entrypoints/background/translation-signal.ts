@@ -1,6 +1,8 @@
 import type { Config } from "@/types/config/config"
 import type { TranslationState } from "@/types/translation-state"
 import { browser, storage } from "#imports"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { getTranslationStateKey } from "@/utils/constants/storage-keys"
 import { shouldEnableAutoTranslation } from "@/utils/host/translate/auto-translation"
@@ -23,16 +25,16 @@ export function translationMessage() {
   })
 
   onMessage("tryToSetEnablePageTranslationByTabId", async (msg) => {
-    const { tabId, enabled } = msg.data
-    void sendMessage("askManagerToTogglePageTranslation", { enabled }, tabId)
+    const { tabId, enabled, analyticsContext } = msg.data
+    void sendMessage("askManagerToTogglePageTranslation", { enabled, analyticsContext }, tabId)
   })
 
   onMessage("tryToSetEnablePageTranslationOnContentScript", async (msg) => {
     const tabId = msg.sender?.tab?.id
-    const { enabled } = msg.data
+    const { enabled, analyticsContext } = msg.data
     if (typeof tabId === "number") {
       logger.info("sending tryToSetEnablePageTranslationOnContentScript to manager", { enabled, tabId })
-      await sendMessage("askManagerToTogglePageTranslation", { enabled }, tabId)
+      await sendMessage("askManagerToTogglePageTranslation", { enabled, analyticsContext }, tabId)
     }
     else {
       logger.error("tabId is not a number", msg)
@@ -48,7 +50,10 @@ export function translationMessage() {
         return
       const shouldEnable = await shouldEnableAutoTranslation(url, detectedCodeOrUnd, config)
       if (shouldEnable) {
-        void sendMessage("askManagerToTogglePageTranslation", { enabled: true }, tabId)
+        void sendMessage("askManagerToTogglePageTranslation", {
+          enabled: true,
+          analyticsContext: createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.PAGE_AUTO),
+        }, tabId)
       }
     }
   })

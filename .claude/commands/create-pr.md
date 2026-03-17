@@ -1,12 +1,12 @@
 ---
-description: Create a pull request for the issue provided as argument
+description: Create a pull request, optionally for the issue provided as argument
 allowed-tools: Bash(git:*), Bash(gh:*), Read, Glob, Write, Edit
 argument-hint: [issue-number]
 ---
 
 # Create Pull Request
 
-Create a pull request for the issue: $ARGUMENTS.
+Create a pull request. If an issue number is provided in $ARGUMENTS, use it. If no issue is provided, continue without requiring one.
 
 ## Workflow
 
@@ -26,6 +26,24 @@ Follow these steps:
 4. **Add changeset record if necessary**
    - Manually add a file in `.changeset/` directory following changeset convention
    - Changeset record should match the descriptive PR title following commit convention
+   - **Versioning rules:**
+     - `patch` (0.0.x) — Users barely notice
+       - Bug fixes
+       - Small feature enhancements (e.g., drag-and-drop reordering)
+       - UI tweaks, performance optimizations
+       - Refactors, code cleanup
+       - i18n additions
+       - Adding a single config toggle
+     - `minor` (0.x.0) — Users can clearly perceive "something new"
+       - Independent, complete new features (e.g., subtitle translation, TTS)
+       - New AI provider support
+       - Major UI overhaul (new pages/panels)
+       - New user-facing configuration system (not just a single toggle)
+     - `major` (x.0.0) — Users need to pay attention / adapt. **Almost never use. Must ask user for explicit approval before using.**
+       - Config format incompatibility (cannot auto-migrate)
+       - Removal of existing features
+       - API/storage structure breaking changes
+       - Fundamental migrations (e.g., Manifest V2 → V3)
 
 5. **Ensure all changes are committed**
    - Stage and commit any uncommitted changes
@@ -38,6 +56,8 @@ Follow these steps:
    - Use `gh pr create` with:
      - A descriptive title following commit convention
      - Comprehensive PR description following the template at `.github/PULL_REQUEST_TEMPLATE.md`
+     - If an issue number was provided, include it in the PR description using `Closes #<issue-number>`
+     - If no issue number was provided, search for a relevant issue only if it is easy to identify; otherwise leave the issue field empty instead of blocking the workflow
 
 8. **Return the PR URL for easy access**
 

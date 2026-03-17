@@ -9,21 +9,18 @@ const MOCK_SELECTED_TEXT = "Selected Text"
 // Mock child components
 vi.mock("../ai-button", () => ({
   AiButton: () => null,
-  AiPopover: () => null,
 }))
 
 vi.mock("../translate-button", () => ({
   TranslateButton: () => null,
-  TranslatePopover: () => null,
 }))
 
 vi.mock("../speak-button", () => ({
   SpeakButton: () => null,
 }))
 
-vi.mock("../custom-feature-button", () => ({
-  SelectionToolbarCustomFeatureButtons: () => null,
-  SelectionToolbarCustomFeaturePopover: () => null,
+vi.mock("../custom-action-button", () => ({
+  SelectionToolbarCustomActionButtons: () => null,
 }))
 
 // Mock atoms
@@ -33,7 +30,16 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
     ...actual,
     configFieldsAtomMap: {
       ...actual.configFieldsAtomMap,
-      selectionToolbar: atom({ enabled: true }),
+      selectionToolbar: atom({
+        enabled: true,
+        disabledSelectionToolbarPatterns: [],
+        features: {
+          translate: { enabled: true, providerId: "microsoft-translate-default" },
+          speak: { enabled: true },
+          vocabularyInsight: { enabled: true, providerId: "openai-default" },
+        },
+        customActions: [],
+      }),
     },
   }
 })
@@ -121,11 +127,11 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
   }
 
   const expectToolbarVisible = () => {
-    expect(document.querySelector(".absolute.z-2147483647")).toBeTruthy()
+    expect(document.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-100")
   }
 
   const expectToolbarHidden = () => {
-    expect(document.querySelector(".absolute.z-2147483647")).toBeFalsy()
+    expect(document.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-0")
   }
 
   it("should show toolbar when selecting text in a normal div element", async () => {

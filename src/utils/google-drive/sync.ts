@@ -3,11 +3,13 @@ import type { Config } from "@/types/config/config"
 import { dequal } from "dequal"
 import { configSchema } from "@/types/config/config"
 import {
-  getLastSyncedConfigAndMeta,
   getLocalConfigAndMeta,
-  setLastSyncConfigAndMeta,
   setLocalConfigAndMeta,
 } from "../config/storage"
+import {
+  getLastSyncedConfigAndMeta,
+  setLastSyncConfigAndMeta,
+} from "../config/sync"
 import { CONFIG_SCHEMA_VERSION } from "../constants/config"
 import { logger } from "../logger"
 import { getRemoteConfigAndMetaWithUserEmail, setRemoteConfigAndMeta } from "./storage"

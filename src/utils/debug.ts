@@ -13,15 +13,14 @@ export function printNodeStructure(node: Node, indent = 0): string {
     // 元素节点
     const elem = node as HTMLElement
     const tagName = elem.tagName.toLowerCase()
-    const attrs = Array.from(elem.attributes)
-      .map(attr => `${attr.name}="${attr.value}"`)
+    const attrs = Array.from(elem.attributes, attr => `${attr.name}="${attr.value}"`)
       .join(" ")
 
     result += `${spacing}<${tagName}${attrs ? ` ${attrs}` : ""}>\n`
 
     // 递归处理子节点
     if (elem.childNodes.length > 0) {
-      Array.from(elem.childNodes).forEach((child) => {
+      [...elem.childNodes].forEach((child) => {
         result += printNodeStructure(child, indent + 1)
       })
     }

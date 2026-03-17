@@ -5,6 +5,7 @@ import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
+import { setupAnalyticsMessageHandlers } from "./analytics"
 import { dispatchBackgroundStreamPort } from "./background-stream"
 import { ensureInitializedConfig } from "./config"
 import { setUpConfigBackup } from "./config-backup"
@@ -78,6 +79,7 @@ export default defineBackground({
     })
 
     newUserGuide()
+    setupAnalyticsMessageHandlers()
     translationMessage()
 
     // Register context menu listeners synchronously

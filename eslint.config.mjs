@@ -76,6 +76,13 @@ export default antfu({
   },
 ], [
   {
+    files: ["**/*.md"],
+    rules: {
+      "perfectionist/sort-imports": "off",
+    },
+  },
+], [
+  {
     ignores: ["**/*.md/**", ".agents/**/*", ".claude/**/*", ".codex/**/*", ".cursor/**/*"],
   },
 ]).append({

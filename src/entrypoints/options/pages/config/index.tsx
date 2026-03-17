@@ -1,5 +1,6 @@
 import { i18n } from "#imports"
 import { PageLayout } from "../../components/page-layout"
+import { AboutCard } from "./about-card"
 import { BetaExperienceConfig } from "./beta-experience"
 import { ConfigBackup } from "./config-backup"
 import { GoogleDriveSyncCard } from "./google-drive-sync"
@@ -13,6 +14,7 @@ export function ConfigPage() {
       <GoogleDriveSyncCard />
       <ManualConfigSync />
       <ConfigBackup />
+      <AboutCard />
       <ResetConfig />
     </PageLayout>
   )

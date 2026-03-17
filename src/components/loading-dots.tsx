@@ -9,9 +9,9 @@ export default function LoadingDots({ className }: LoadingDotsProps) {
     <div
       className={cn("flex items-center justify-center gap-[3px]", className)}
     >
-      {[...Array.from({ length: 3 })].map((_, i) => (
+      {Array.from(Array.from({ length: 3 }), (_, i) => (
         <div
-          // eslint-disable-next-line react/no-array-index-key
+
           key={i}
           className="h-1.5 w-1 animate-bounce rounded-full bg-black dark:bg-white"
           style={{

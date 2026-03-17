@@ -16,7 +16,7 @@ import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import { getAPIProvidersConfig } from "@/utils/config/helpers"
-import { FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { cn } from "@/utils/styles/utils"
 import { ConfigCard } from "../../components/config-card"
@@ -125,9 +125,11 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
 
   const assignedFeatures = FEATURE_KEYS
     .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
-  const assignedCustomFeatures = config.selectionToolbar.customFeatures
-    .filter(f => f.providerId === id)
-  const totalAssigned = assignedFeatures.length + assignedCustomFeatures.length
+  const assignedCustomActions = config.selectionToolbar.customActions
+    .filter(action => action.providerId === id)
+  const isLanguageDetectionProvider = config.languageDetection.mode === "llm"
+    && config.languageDetection.providerId === id
+  const totalAssigned = assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
 
   const handleProviderEnabledChange = (checked: boolean) => {
     if (!checked && enabled && totalAssigned > 0) {
@@ -159,10 +161,13 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
             <TooltipContent>
               <ul className="list-disc list-inside marker:text-green-500">
                 {assignedFeatures.map(key => (
-                  <li key={key}>{i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[key]}`)}</li>
+                  <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
                 ))}
-                {assignedCustomFeatures.map(f => (
-                  <li key={f.id}>{f.name}</li>
+                {isLanguageDetectionProvider && (
+                  <li>{i18n.t("options.general.languageDetection.title")}</li>
+                )}
+                {assignedCustomActions.map(action => (
+                  <li key={action.id}>{action.name}</li>
                 ))}
               </ul>
             </TooltipContent>

@@ -1,4 +1,4 @@
-export const TOKENS = ["targetLang", "input", "title", "summary"] as const
+export const TOKENS = ["targetLanguage", "input", "webTitle", "webSummary"] as const
 
 /**
  * Separator used to distinguish multiple text segments in batch translation.
@@ -6,14 +6,14 @@ export const TOKENS = ["targetLang", "input", "title", "summary"] as const
  */
 export const BATCH_SEPARATOR = "%%"
 
-export const TARGET_LANG = TOKENS[0]
+export const TARGET_LANGUAGE = TOKENS[0]
 export const INPUT = TOKENS[1]
-export const TITLE = TOKENS[2]
-export const SUMMARY = TOKENS[3]
+export const WEB_TITLE = TOKENS[2]
+export const WEB_SUMMARY = TOKENS[3]
 
 export const getTokenCellText = (token: string) => `{{${token}}}`
 
-export const DEFAULT_TRANSLATE_SYSTEM_PROMPT = `You are a professional ${getTokenCellText(TARGET_LANG)} native translator who needs to fluently translate text into ${getTokenCellText(TARGET_LANG)}.
+export const DEFAULT_TRANSLATE_SYSTEM_PROMPT = `You are a professional ${getTokenCellText(TARGET_LANGUAGE)} native translator who needs to fluently translate text into ${getTokenCellText(TARGET_LANGUAGE)}.
 
 ## Translation Rules
 1. Output only the translated content, without explanations or additional content (such as "Here's the translation:" or "Translation as follows:")
@@ -22,10 +22,10 @@ export const DEFAULT_TRANSLATE_SYSTEM_PROMPT = `You are a professional ${getToke
 4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.
 
 ## Document Metadata for Context Awareness
-Title: ${getTokenCellText(TITLE)}
-Summary: ${getTokenCellText(SUMMARY)}`
+Webpage title: ${getTokenCellText(WEB_TITLE)}
+Webpage summary: ${getTokenCellText(WEB_SUMMARY)}`
 
-export const DEFAULT_TRANSLATE_PROMPT = `Translate to ${getTokenCellText(TARGET_LANG)}:
+export const DEFAULT_TRANSLATE_PROMPT = `Translate to ${getTokenCellText(TARGET_LANGUAGE)}:
 
 
 ${getTokenCellText(INPUT)}`

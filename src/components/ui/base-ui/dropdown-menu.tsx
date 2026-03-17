@@ -22,17 +22,21 @@ function DropdownMenuContent({
   sideOffset = 4,
   className,
   container,
+  positionerClassName,
   ...props
 }: MenuPrimitive.Popup.Props
   & Pick<
     MenuPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
   >
-  & Pick<MenuPrimitive.Portal.Props, "container">) {
+  & Pick<MenuPrimitive.Portal.Props, "container">
+  & {
+    positionerClassName?: string
+  }) {
   return (
     <MenuPrimitive.Portal container={container}>
       <MenuPrimitive.Positioner
-        className="isolate z-50 outline-none"
+        className={cn("isolate z-50 outline-none", positionerClassName)}
         align={align}
         alignOffset={alignOffset}
         side={side}

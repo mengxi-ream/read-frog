@@ -1,7 +1,17 @@
+import type { Config } from "@/types/config/config"
 import type { ArticleContent } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "../constants/config"
-import { DEFAULT_BATCH_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_SYSTEM_PROMPT, getTokenCellText, INPUT, SUMMARY, TARGET_LANG, TITLE } from "../constants/prompt"
+import {
+  DEFAULT_BATCH_TRANSLATE_PROMPT,
+  DEFAULT_TRANSLATE_PROMPT,
+  DEFAULT_TRANSLATE_SYSTEM_PROMPT,
+  getTokenCellText,
+  INPUT,
+  TARGET_LANGUAGE,
+  WEB_SUMMARY,
+  WEB_TITLE,
+} from "../constants/prompt"
 
 export interface TranslatePromptOptions {
   isBatch?: boolean
@@ -13,13 +23,13 @@ export interface TranslatePromptResult {
   prompt: string
 }
 
-export async function getTranslatePrompt(
+export function getTranslatePromptFromConfig(
+  translateConfig: Pick<Config["translate"], "customPromptsConfig">,
   targetLang: string,
   input: string,
   options?: TranslatePromptOptions,
-): Promise<TranslatePromptResult> {
-  const config = await getLocalConfig() ?? DEFAULT_CONFIG
-  const customPromptsConfig = config.translate.customPromptsConfig
+): TranslatePromptResult {
+  const customPromptsConfig = translateConfig.customPromptsConfig
   const { patterns = [], promptId } = customPromptsConfig
 
   // Resolve system prompt and user prompt
@@ -52,13 +62,22 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>
     text
-      .replaceAll(getTokenCellText(TARGET_LANG), targetLang)
+      .replaceAll(getTokenCellText(TARGET_LANGUAGE), targetLang)
       .replaceAll(getTokenCellText(INPUT), input)
-      .replaceAll(getTokenCellText(TITLE), title)
-      .replaceAll(getTokenCellText(SUMMARY), summary)
+      .replaceAll(getTokenCellText(WEB_TITLE), title)
+      .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
 
   return {
     systemPrompt: replaceTokens(systemPrompt),
     prompt: replaceTokens(prompt),
   }
+}
+
+export async function getTranslatePrompt(
+  targetLang: string,
+  input: string,
+  options?: TranslatePromptOptions,
+): Promise<TranslatePromptResult> {
+  const config = await getLocalConfig() ?? DEFAULT_CONFIG
+  return getTranslatePromptFromConfig(config.translate, targetLang, input, options)
 }

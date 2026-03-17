@@ -5,6 +5,9 @@ import {
 } from "./constants"
 import { EdgeTTSError } from "./errors"
 
+const GMT_SUFFIX_PATTERN = /GMT/
+const HYPHEN_PATTERN = /-/g
+
 function base64ToBytes(base64: string): Uint8Array {
   const binaryString = atob(base64)
   const bytes = new Uint8Array(binaryString.length)
@@ -42,7 +45,7 @@ async function hmacSha256(key: Uint8Array, data: string): Promise<Uint8Array> {
 }
 
 export function buildSignatureDate(date = new Date()): string {
-  return `${date.toUTCString().replace(/GMT/, "").trim().toLowerCase()} GMT`
+  return `${date.toUTCString().replace(GMT_SUFFIX_PATTERN, "").trim().toLowerCase()} GMT`
 }
 
 export async function generateTranslatorSignature(
@@ -51,7 +54,7 @@ export async function generateTranslatorSignature(
 ): Promise<string> {
   try {
     const encodedUrl = encodeURIComponent(url.split("://")[1] ?? "")
-    const requestId = crypto.randomUUID().replace(/-/g, "")
+    const requestId = crypto.randomUUID().replace(HYPHEN_PATTERN, "")
     const formattedDate = buildSignatureDate(now)
 
     const payload = `${EDGE_TTS_SIGNATURE_APP_ID}${encodedUrl}${formattedDate}${requestId}`.toLowerCase()

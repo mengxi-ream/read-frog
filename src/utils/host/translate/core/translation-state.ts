@@ -5,4 +5,4 @@ export const translatingNodes = new WeakSet<ChildNode>()
 export const originalContentMap = new Map<Element, string>()
 
 // Pre-compiled regex for better performance - removes all mark attributes
-export const MARK_ATTRIBUTES_REGEX = new RegExp(`\\s*(?:${Array.from(MARK_ATTRIBUTES).join("|")})(?:=['""][^'"]*['""]|=[^\\s>]*)?`, "g")
+export const MARK_ATTRIBUTES_REGEX = new RegExp(`\\s*(?:${[...MARK_ATTRIBUTES].join("|")})(?:=['""][^'"]*['""]|=[^\\s>]*)?`, "g")

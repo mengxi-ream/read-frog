@@ -11,7 +11,7 @@ function isSpecialTag(text: string): boolean {
 
 function pushFragment(result: SubtitlesFragment[], fragment: SubtitlesFragment) {
   // Fix previous fragment's end time to avoid overlap
-  const last = result[result.length - 1]
+  const last = result.at(-1)
   if (last && last.end > fragment.start) {
     last.end = fragment.start
   }

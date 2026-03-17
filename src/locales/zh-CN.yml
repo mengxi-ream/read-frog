@@ -164,6 +164,9 @@ options:
         vercel: 针对网页内容翻译和分析优化的 AI 模型
         volcengine: 字节跳动旗下云平台，提供豆包系列大模型
         minimax: MiniMax AI平台，提供先进的MiniMax-M2系列大模型
+        alibaba: 阿里云通义千问系列模型，具备先进的推理和多语言能力
+        moonshotai: 月之暗面Kimi系列模型，具备强大的推理和长上下文能力
+        huggingface: Hugging Face推理API，提供数千种开源模型访问
     apiKey:
       showAPIKey: 显示 API Key
     howToConfigure: 如何配置?
@@ -181,7 +184,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
-      customFeatures: 自定义 AI 功能
+      customActions: 自定义 AI 指令
       features:
         translate: 网页翻译
         selectionToolbar_translate: 划词翻译
@@ -203,6 +206,19 @@ options:
         confirm: 确认
         cancel: 取消
         description: 此操作将清理所有翻译缓存。此操作无法撤销。
+    languageDetection:
+      title: 语言检测
+      description: 影响自动翻译语言检测、跳过语言检测和朗读语音选择的准确性。
+      mode:
+        basic: 基础
+        llm: LLM
+      provider:
+        label: 检测提供商
+        placeholder: 选择提供商
+      status:
+        noProviders: 请先配置 LLM 提供商
+        basicRecommend: 建议启用 LLM
+        llmEnabled: LLM 检测已启用
   siteControl:
     title: 站点控制
     mode:
@@ -268,6 +284,12 @@ options:
       globalToggle:
         title: 启用选择工具栏
         description: 在网页上选择文本时显示工具栏，快速翻译和词汇解析
+      featureToggles:
+        title: 功能开关
+        description: 选择在选择工具栏中显示哪些内置功能
+        translate: 翻译
+        speak: 朗读
+        vocabularyInsight: 词汇解析
       closeMenu:
         disableForSite: 禁用此网站
         disableGlobally: 全局禁用
@@ -276,6 +298,13 @@ options:
         description: 配置需要禁用选择工具栏的网站
         enterUrlPattern: 输入网址模式
         urlPattern: 网址模式
+      errors:
+        customActionFailed: 自定义操作失败
+        customActionFailedFallback: 自定义操作请求失败
+        actionUnavailable: 所选操作不可用
+        missingSelection: 没有可用的选中文本
+        providerDisabled: 所选提供商已被禁用
+        providerUnavailable: 所选提供商不可用
       features:
         provider: 提供商
         selectProvider: 选择提供商
@@ -291,13 +320,13 @@ options:
         vocabularyInsight:
           title: 词汇解析
           description: 配置选择工具栏词汇/短语解析功能使用的提供商与模型
-      customFeatures:
-        title: 自定义 AI 功能
+      customActions:
+        title: 自定义 AI 指令
         description: 为划词添加你自己的结构化 AI 操作
-        add: 添加 AI 功能
-        edit: 编辑 AI 功能
-        empty: 暂无自定义 AI 功能
-        noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 功能
+        add: 添加 AI 指令
+        edit: 编辑 AI 指令
+        empty: 暂无自定义 AI 指令
+        noEnabledLlmProvider: 请先启用至少一个 LLM 提供商后再创建自定义 AI 指令
         table:
           name: 名称
           provider: 提供商
@@ -316,6 +345,7 @@ options:
           fieldType: 字段类型
           fieldDescription: 描述
           fieldDescriptionPlaceholder: 描述此字段应包含的内容...
+          fieldSpeaking: 启用朗读
           actions: 操作
           cancel: 取消
           save: 保存
@@ -334,80 +364,80 @@ options:
             cancel: 取消
           tokens:
             selection: 选中的文本内容
-            context: 选中文本所在段落内容
-            targetLang: 用户的目标语言
-            title: 网页标题
+            paragraphs: 与选区相交的段落内容，会以空行拼接，传给自定义 AI 指令时会截断到前 2000 个字符
+            targetLanguage: 用户的目标语言
+            webTitle: 网页标题
           delete: 删除
           deleteDialog:
-            title: 删除自定义功能？
+            title: 删除自定义 AI 指令？
             description: 此操作无法撤销。
             confirm: 删除
             cancel: 取消
         templates:
           dialogTitle: 选择模板
-          dialogDescription: 选择模板快速创建新的 AI 功能，或从空白开始。
+          dialogDescription: 选择模板快速创建新的 AI 指令，或从空白开始。
           dictionary:
             name: 词典
-            description: 查词释义，包含音标、词性和语境翻译
+            description: 查词释义，包含音标、词性和段落翻译
             systemPrompt: |-
               你是一个面向语言学习者的词典助手。
 
               ## 目标
-              根据给定的词语及其上下文，生成简洁的词典条目，匹配所需的输出对象。
+              根据给定的词语及其周围段落，生成简洁的词典条目，匹配所需的输出对象。
 
               ## 规则
-              1. 聚焦于最匹配所提供上下文的含义。
+              1. 聚焦于最匹配所提供段落内容的含义。
               2. 将词条规范化为其基本/标准形式。
               3. 保持释义精确且适合学习者。
-              4. 保持语境简短，直接关联选中的文本。
+              4. 保持段落内容与提示词一致，不要改写。
               5. 音标必须使用该语言的标准标注（如英语用 IPA，中文用拼音，日语用罗马字）。
               6. 词性使用英文（noun, verb, adjective 等）。
               7. 难度必须是 CEFR 等级（A1, A2, B1, B2, C1, 或 C2）。
               8. 如果某个字段未知，返回空字符串而非猜测。
-              9. 除非需要保留原文形式，所有文本字段均使用 {{targetLang}} 作答。
+              9. 除非需要保留原文形式，所有文本字段均使用 {{targetLanguage}} 作答。
 
               ## 示例
 
               ### 示例 1
-              输入：Selection="blossoms", Context="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", 目标语言=中文
+              输入：Selection="blossoms", Paragraphs="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", 目标语言=中文
 
               输出：
               - 词条：blossom
               - 音标：/ˈblɒs.əm/
               - 词性：noun
-              - 语境：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - 段落内容：The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
               - 释义：花；花朵（尤指果树的花）
-              - 语境翻译：樱花短暂的美丽提醒我们珍惜每一刻。
+              - 段落翻译：樱花短暂的美丽提醒我们珍惜每一刻。
               - 难度：B2
 
               ### 示例 2
-              输入：Selection="感動", Context="この映画はつまらないと思ったけど、最後は感動した。", 目标语言=英语
+              输入：Selection="感動", Paragraphs="この映画はつまらないと思ったけど、最後は感動した。", 目标语言=英语
 
               输出：
               - 词条：感動
               - 音标：kandou
               - 词性：noun
-              - 语境：この映画はつまらないと思ったけど、最後は感動した。
+              - 段落内容：この映画はつまらないと思ったけど、最後は感動した。
               - 释义：Being deeply moved; emotional touch
-              - 语境翻译：I thought this movie was boring, but the ending was moving.
+              - 段落翻译：I thought this movie was boring, but the ending was moving.
               - 难度：B1
             prompt: |-
               ## 输入
               选中文本：{{selection}}
-              上下文：{{context}}
-              目标语言：{{targetLang}}
+              段落内容：{{paragraphs}}
+              目标语言：{{targetLanguage}}
             fieldTerm: 词条
             fieldTermDescription: 选中词条的基本/标准词元形式。
             fieldPhonetic: 音标
             fieldPhoneticDescription: 该语言的标准音标（如英语用 IPA，中文用拼音，日语用罗马字）。
             fieldPartOfSpeech: 词性
             fieldPartOfSpeechDescription: 语法类别（如 noun、verb、adjective）。
-            fieldContext: 语境
-            fieldContextDescription: 上方提示词中的语境，请勿修改。
+            fieldParagraphs: 段落内容
+            fieldParagraphsDescription: 使用上方提示词中的原始段落内容，不要改写。
             fieldDefinition: 释义
             fieldDefinitionDescription: 针对语境含义的一条简洁释义。
-            fieldContextTranslation: 语境翻译
-            fieldContextTranslationDescription: 语境的翻译。
+            fieldParagraphsTranslation: 段落翻译
+            fieldParagraphsTranslationDescription: 段落内容的翻译。
             fieldDifficulty: 难度
             fieldDifficultyDescription: 预估 CEFR 难度等级：A1、A2、B1、B2、C1 或 C2。
           improveWriting:
@@ -417,46 +447,49 @@ options:
               你是一个面向语言学习者的写作助手。
 
               ## 目标
-              根据选中的文本及其上下文，分析写作问题并给出改进版本。
+              根据选中的文本及其周围段落，分析写作问题并给出改进版本。
 
               ## 语言规则（必须遵守）
-              1. “错误分析”字段必须使用 {{targetLang}}。
-              2. “改进版本”字段必须保持 Selection 的原文语言。
-              3. 除非 Selection 本身就是 {{targetLang}}，否则不要把“改进版本”翻译成 {{targetLang}}。
+              1. 检测 Selection 的原文语言，记为 {{originLanguage}}。
+              2. “错误分析”字段必须使用 {{targetLanguage}}。
+              3. “改进版本”字段必须保持 {{originLanguage}}。
+              4. 除非 {{originLanguage}} 就是 {{targetLanguage}}，否则不要把”改进版本”翻译成 {{targetLanguage}}。
 
               ## 写作规则
               1. 识别语法、拼写、标点和用词错误。
               2. 保持改写自然，尽量保留作者原意和语气。
-              3. 如果没有明显错误，请在“错误分析”中明确说明，并给出轻度润色后的“改进版本”。
+              3. 如果没有明显错误，请在”错误分析”中明确说明，并给出轻度润色后的”改进版本”。
               4. “改进版本”应简洁、可直接使用。
 
               ## 示例
               示例 A：
-              - Selection（英文）: "He go to school yesterday, and he don't finish his homework."
-              - targetLang: 中文
-              - 错误分析（中文）: 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
-              - 改进版本（英文）: He went to school yesterday, and he didn't finish his homework.
+              - Selection: “He go to school yesterday, and he don't finish his homework.”
+              - 检测到 {{originLanguage}}: 英文
+              - {{targetLanguage}}: 中文
+              - 错误分析（中文 — {{targetLanguage}}）: 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+              - 改进版本（英文 — {{originLanguage}}）: He went to school yesterday, and he didn't finish his homework.
 
               示例 B：
-              - Selection（英文）: "The service attitude of this store is very good."
-              - targetLang: 日文
-              - 错误分析（日文）: 文法はほぼ正しいですが、「service attitude」は不自然な直訳です。英語ではスタッフの対応を直接表現する方が自然です。
-              - 改进版本（英文）: The staff at this store are very friendly.
+              - Selection: “昨日私は友達に会いて、一緒に映画を見るました。”
+              - 检测到 {{originLanguage}}: 日文
+              - {{targetLanguage}}: 英文
+              - 错误分析（英文 — {{targetLanguage}}）: There are verb conjugation errors: “会いて” should be “会って” (te-form of 会う), and “見るました” should be “見ました” (past tense of 見る in masu-form).
+              - 改进版本（日文 — {{originLanguage}}）: 昨日私は友達に会って、一緒に映画を見ました。
             prompt: |-
               ## 输入
               选中文本：{{selection}}
-              上下文：{{context}}
-              目标语言：{{targetLang}}
+              段落内容：{{paragraphs}}
+              目标语言：{{targetLanguage}}
             fieldErrorAnalysis: 错误分析
-            fieldErrorAnalysisDescription: 用 {{targetLang}} 解释选中文本中的语法、拼写、标点和用词问题。
+            fieldErrorAnalysisDescription: 用 {{targetLanguage}} 解释选中文本中的语法、拼写、标点和用词问题。
             fieldImprovedVersion: 改进版本
             fieldImprovedVersionDescription: 基于原文语言给出的选中文本修正与改进版本。
           blank:
             name: 空白
-            description: 从空白模板开始创建
+            description: 从空白模板开始创建指令
         errors:
           nameRequired: 名称不能为空
-          duplicateName: '重复的功能名称 "$1"'
+          duplicateName: '重复的指令名称 "$1"'
           invalidIcon: Iconify 图标字符串格式无效
           providerRequired: 请选择一个已启用的 LLM 提供商
           outputSchemaRequired: 至少需要一个输出字段
@@ -512,9 +545,9 @@ options:
         prompt: 提示词
         promptCellInput:
           input: 需要翻译的文本内容
-          targetLang: 目标语言
-          title: 网页标题
-          summary: 网页摘要（需启用 AI 智能上下文）
+          targetLanguage: 目标语言
+          webTitle: 网页标题
+          webSummary: 网页摘要（需启用 AI 智能上下文）
         save: 保存
         close: 取消
       deletePrompt:
@@ -629,11 +662,6 @@ options:
   tts:
     title: 文本转语音
     description: 使用 Edge TTS 语音参数来自定义朗读按钮。
-    detectLanguage:
-      label: 语言检测
-      basic: 基础
-      llm: LLM
-      description: 基础检测快速且免费。LLM 检测更准确，但会增加延迟和 API 费用。LLM 模式使用「翻译」页面的提供商。
     voice:
       label: 声音
       fallback: 兜底
@@ -663,6 +691,13 @@ options:
       batchRequestCount: 批量请求数量
   config:
     title: 配置
+    about:
+      title: 关于
+      description: Read Frog 出生于 2025 年 4 月
+      mission: Read Frog 致力于在 AI 时代扩大高质量教育机会的平等可及性，通过更低成本地提供尽可能接近真人教师的学习体验，覆盖语言学习、医学以及其他知识密集型领域。
+      analytics:
+        title: 帮助改进用户体验
+        tooltip: 开启后，Read Frog 会发送匿名的产品使用信号，用于验证功能是否稳定、优化性能与交互细节，并帮助我们决定接下来优先投入的方向。
     sync:
       title: 手动配置同步
       description: 手动导入和导出您的配置设置
@@ -866,6 +901,8 @@ noAPIKeyConfig:
     firstOnThe: 在
     optionsPage: 选项
     page: 页
+languageDetection:
+  llmFailed: LLM 语言检测失败，已回退到基础检测
 translation:
   sameLanguage: 源语言和目标语言必须不同
   autoModeSameLanguage: 检测到的语言 '$1' 与目标语言相同
@@ -876,6 +913,24 @@ speak:
   noTextSelected: 未选择文本
   openaiNotConfigured: OpenAI 提供商未配置或未启用
   openaiApiKeyNotConfigured: OpenAI API Key 未配置
+action:
+  copy: 复制
+  copied: 已复制
+  regenerate: 重新生成
+  viewContextDetails: 上下文
+  contextDetailsTitleLabel: 标题
+  contextDetailsParagraphsLabel: 段落内容
+  translation: 翻译
+  speak: 朗读
+  playing: 播放中
+  vocabularyInsight: 词汇解析
+  vocabularyInsightDeprecation: 此功能将在 2 周后被自定义 AI 动作的词典功能替代。词典动作提供更灵活和强大的体验。
+  vocabularyInsightDeprecationLink: 设置词典动作
+thinking:
+  label: 思考中
+  complete: 思考完成
+  expand: 展开思考
+  collapse: 收起思考
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:

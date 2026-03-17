@@ -163,6 +163,9 @@ options:
         vercel: Web içeriği çevirisi ve analizi için optimize edilmiş AI modelleri
         volcengine: Çeviri ve okuma için Doubao modelleri sunan ByteDance'ın bulut AI platformu
         minimax: Gelişmiş MiniMax-M2 modelleri sunan MiniMax AI platformu
+        alibaba: Alibaba Cloud'un Qwen model serisi, gelişmiş muhakeme ve çok dilli yeteneklerle
+        moonshotai: Moonshot AI'ın güçlü muhakeme ve uzun bağlam yeteneklerine sahip Kimi model serisi
+        huggingface: Binlerce açık kaynak modele erişim sağlayan Hugging Face Çıkarım API'si
     apiKey:
       showAPIKey: API Anahtarını Göster
     howToConfigure: Nasıl yapılandırılır?
@@ -180,7 +183,7 @@ options:
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
-      customFeatures: Özel AI Özellikleri
+      customActions: Özel AI Eylemleri
       features:
         translate: Sayfa Çevirisi
         selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
@@ -202,6 +205,19 @@ options:
         confirm: Onayla
         cancel: İptal
         description: Bu işlem tüm çeviri önbelleğini temizleyecektir. Bu işlem geri alınamaz.
+    languageDetection:
+      title: Dil Algılama
+      description: Otomatik çeviri dil algılama, atlama dil algılama ve Konuşma ses seçimi doğruluğunu etkiler.
+      mode:
+        basic: Temel
+        llm: LLM
+      provider:
+        label: Algılama Sağlayıcısı
+        placeholder: Bir sağlayıcı seçin
+      status:
+        noProviders: Önce bir LLM sağlayıcısı yapılandırın
+        basicRecommend: LLM etkinleştirmesi önerilir
+        llmEnabled: LLM algılama etkin
   siteControl:
     title: Site Kontrolü
     mode:
@@ -267,6 +283,12 @@ options:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir
         description: Hızlı çeviri ve kelime analizi için web sayfalarında metin seçerken araç çubuğunu görüntüle
+      featureToggles:
+        title: Özellik Açma/Kapama
+        description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
+        translate: Çeviri
+        speak: Sesli Okuma
+        vocabularyInsight: Kelime Analizi
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
@@ -275,6 +297,13 @@ options:
         description: Seçim araç çubuğunun devre dışı bırakılması gereken web sitelerini yapılandırın
         enterUrlPattern: URL kalıbı girin
         urlPattern: URL Kalıbı
+      errors:
+        customActionFailed: Özel eylem başarısız oldu
+        customActionFailedFallback: Özel eylem isteği başarısız oldu
+        actionUnavailable: Seçilen eylem kullanılamıyor
+        missingSelection: Seçili metin yok
+        providerDisabled: Seçilen sağlayıcı devre dışı
+        providerUnavailable: Seçilen sağlayıcı kullanılamıyor
       features:
         provider: Sağlayıcı
         selectProvider: Sağlayıcı seçin
@@ -290,13 +319,13 @@ options:
         vocabularyInsight:
           title: Kelime Analizi
           description: Seçim araç çubuğunda kelime/ifade analizi için sağlayıcı ve model yapılandırın
-      customFeatures:
-        title: Özel AI Özellikleri
+      customActions:
+        title: Özel AI Eylemleri
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
-        add: AI Özelliği Ekle
-        edit: AI Özelliğini Düzenle
-        empty: Henüz özel AI özelliği yok
-        noEnabledLlmProvider: Özel AI özellikleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
+        add: AI Eylemi Ekle
+        edit: AI Eylemini Düzenle
+        empty: Henüz özel AI eylemi yok
+        noEnabledLlmProvider: Özel AI eylemleri oluşturmadan önce en az bir LLM sağlayıcısını etkinleştirin
         table:
           name: Ad
           provider: Sağlayıcı
@@ -315,6 +344,7 @@ options:
           fieldType: Alan Türü
           fieldDescription: Açıklama
           fieldDescriptionPlaceholder: Bu alanın ne içermesi gerektiğini açıklayın...
+          fieldSpeaking: Sesli okumayı etkinleştir
           actions: İşlemler
           cancel: İptal
           save: Kaydet
@@ -333,18 +363,18 @@ options:
             cancel: İptal
           tokens:
             selection: Seçilen metin içeriği
-            context: Seçilen metnin bulunduğu paragraf metni
-            targetLang: Kullanıcının hedef dili
-            title: Web sayfası başlığı
+            paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
+            targetLanguage: Kullanıcının hedef dili
+            webTitle: Web sayfası başlığı
           delete: Sil
           deleteDialog:
-            title: Özel özelliği sil?
+            title: Özel eylem silinsin mi?
             description: Bu işlem geri alınamaz.
             confirm: Sil
             cancel: İptal
         errors:
           nameRequired: Ad gerekli
-          duplicateName: 'Yinelenen özellik adı "$1"'
+          duplicateName: 'Yinelenen eylem adı "$1"'
           invalidIcon: Geçersiz Iconify simge metni
           providerRequired: Etkin bir LLM sağlayıcısı seçin
           outputSchemaRequired: En az bir çıktı alanı ekleyin
@@ -400,9 +430,9 @@ options:
         prompt: Prompt
         promptCellInput:
           input: Çevrilecek metin içeriği
-          targetLang: Hedef dil
-          title: Web sayfası başlığı
-          summary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
+          targetLanguage: Hedef dil
+          webTitle: Web sayfası başlığı
+          webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
         save: Değişiklikleri Kaydet
         close: İptal
       deletePrompt:
@@ -517,11 +547,6 @@ options:
   tts:
     title: Metinden Konuşmaya
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
-    detectLanguage:
-      label: Dil Algılama
-      basic: Temel
-      llm: LLM
-      description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler. LLM modu Çeviri sayfasındaki sağlayıcıyı kullanır.
     voice:
       label: Ses
       fallback: Yedek
@@ -551,6 +576,13 @@ options:
       batchRequestCount: Toplu İstek Sayısı
   config:
     title: Yapılandırma
+    about:
+      title: Hakkında
+      description: Read Frog Nisan 2025'te doğdu
+      mission: Read Frog, yapay zeka çağında yüksek kaliteli eğitime daha eşit erişimi genişletmek için, dil öğrenimi, tıp ve bilgi yoğun diğer alanlarda gerçek bir öğretmene daha yakın hissettiren öğrenme deneyimlerini daha ulaşılabilir maliyetlerle sunmayı hedefler.
+      analytics:
+        title: Kullanıcı deneyimini geliştirmemize yardımcı ol
+        tooltip: Açık olduğunda Read Frog, özelliklerin güvenilir çalıştığını doğrulamak, performansı ve UX ayrıntılarını iyileştirmek ve sıradaki önceliklerimizi belirlemek için anonim kullanım sinyalleri gönderir.
     sync:
       title: Manuel Yapılandırma Senkronizasyonu
       description: Yapılandırma ayarlarınızı manuel olarak içe ve dışa aktarın
@@ -754,6 +786,8 @@ noAPIKeyConfig:
     firstOnThe: ""
     optionsPage: seçenekler
     page: sayfasında
+languageDetection:
+  llmFailed: LLM dil algılama başarısız oldu, temel algılamaya geri dönüldü
 translation:
   sameLanguage: Kaynak ve hedef diller farklı olmalıdır
   autoModeSameLanguage: Algılanan dil '$1' hedef dille aynı
@@ -764,6 +798,24 @@ speak:
   noTextSelected: Metin seçilmedi
   openaiNotConfigured: OpenAI sağlayıcısı yapılandırılmadı veya etkinleştirilmedi
   openaiApiKeyNotConfigured: OpenAI API anahtarı yapılandırılmadı
+action:
+  copy: Kopyala
+  copied: Kopyalandı
+  regenerate: Yeniden oluştur
+  viewContextDetails: Bağlam
+  contextDetailsTitleLabel: Başlık
+  contextDetailsParagraphsLabel: Paragraflar
+  translation: Çeviri
+  speak: Oku
+  playing: Çalınıyor
+  vocabularyInsight: Kelime analizi
+  vocabularyInsightDeprecation: Bu özellik, 2 hafta içinde Özel AI Eyleminin Sözlük özelliği ile değiştirilecektir. Sözlük Eylemi daha esnek ve güçlü bir deneyim sunar.
+  vocabularyInsightDeprecationLink: Sözlük Eylemini Ayarla
+thinking:
+  label: Düşünüyor
+  complete: Düşünme tamamlandı
+  expand: Düşünmeyi genişlet
+  collapse: Düşünmeyi daralt
 shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:

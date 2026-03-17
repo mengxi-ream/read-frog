@@ -1,5 +1,69 @@
 # @read-frog/extension
 
+## 1.30.0
+
+### Minor Changes
+
+- [#1127](https://github.com/mengxi-ream/read-frog/pull/1127) [`52a70ff`](https://github.com/mengxi-ream/read-frog/commit/52a70ff89a77669d6487a10dc7793c907feddf1c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add Alibaba Cloud (Bailian) as AI provider with Qwen, DeepSeek, Kimi, MiniMax, and GLM models
+
+- [#1127](https://github.com/mengxi-ream/read-frog/pull/1127) [`52a70ff`](https://github.com/mengxi-ream/read-frog/commit/52a70ff89a77669d6487a10dc7793c907feddf1c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add Moonshot AI and Hugging Face as AI providers
+
+### Patch Changes
+
+- [#1128](https://github.com/mengxi-ream/read-frog/pull/1128) [`c7b7bcc`](https://github.com/mengxi-ream/read-frog/commit/c7b7bcc68dd9bae2ebada9a23aec9258ce7a3eae) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: resolve dark mode flash (FOUC) on options and translation-hub pages
+
+- [#1121](https://github.com/mengxi-ream/read-frog/pull/1121) [`aad6b5e`](https://github.com/mengxi-ream/read-frog/commit/aad6b5e13639d31635e12b67107e9f47bb9fc30a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - ai: improve writing prompt with language detection and diverse examples
+
+- [#1125](https://github.com/mengxi-ream/read-frog/pull/1125) [`781180c`](https://github.com/mengxi-ream/read-frog/commit/781180c1f6bceb5d6db0fb7423d0479dae921395) Thanks [@ishiko732](https://github.com/ishiko732)! - perf: avoid bundling config migrations in content scripts
+
+- [#1125](https://github.com/mengxi-ream/read-frog/pull/1125) [`781180c`](https://github.com/mengxi-ream/read-frog/commit/781180c1f6bceb5d6db0fb7423d0479dae921395) Thanks [@ishiko732](https://github.com/ishiko732)! - refactor: enhance config migration loading to auto-discover scripts
+
+## 1.29.1
+
+### Patch Changes
+
+- [#1120](https://github.com/mengxi-ream/read-frog/pull/1120) [`aaa71e1`](https://github.com/mengxi-ream/read-frog/commit/aaa71e19e2e473194674e59426469a0dfd2b96f1) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor: rename prompt tokens for clarity (`targetLang`→`targetLanguage`, `title`→`webTitle`, `summary`→`webSummary`, `context`→`paragraphs`) with config migration v064
+
+- [#1117](https://github.com/mengxi-ream/read-frog/pull/1117) [`fe211bd`](https://github.com/mengxi-ream/read-frog/commit/fe211bd68f85fcadd078986364f60971de3a1291) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(custom-actions): add drag-and-drop reordering to custom action list and output schema fields
+
+- [#1119](https://github.com/mengxi-ream/read-frog/pull/1119) [`91f9a40`](https://github.com/mengxi-ream/read-frog/commit/91f9a40925289a8866f98b4f830b327ca8c5c79a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(provider-icon): proxy remote logos through background fetch
+
+- [#1118](https://github.com/mengxi-ream/read-frog/pull/1118) [`dafb8f2`](https://github.com/mengxi-ream/read-frog/commit/dafb8f2c85c5227f9605727cc44f515a961a151c) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-popover): keep the popover fixed while the page scrolls
+
+- [#1115](https://github.com/mengxi-ream/read-frog/pull/1115) [`3a02d50`](https://github.com/mengxi-ream/read-frog/commit/3a02d50dd09d6d9d94fd5388191c51ad17e3f6b2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(selection-toolbar): add individual toggles for built-in features (translate, speak, vocabulary insight)
+
+## 1.29.0
+
+### Minor Changes
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: refactor the selection popover and add pin support for selection toolbar popovers
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add a target language selector to the selection toolbar translation popover
+
+- [#1098](https://github.com/mengxi-ream/read-frog/pull/1098) [`0e2b1f6`](https://github.com/mengxi-ream/read-frog/commit/0e2b1f6b40913064052c0c9bbfc61fdfd3324d88) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: translate browser tab title during page translation with automatic tracking and restoration
+
+### Patch Changes
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: avoid re-fetching vocabulary, dictionary, and translation resources after page navigation (#1064)
+
+- [#1108](https://github.com/mengxi-ream/read-frog/pull/1108) [`2fe15c9`](https://github.com/mengxi-ream/read-frog/commit/2fe15c957d6f8b435b866fd149d449d0e124e0bb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: rename custom ai feature
+
+- [#1095](https://github.com/mengxi-ream/read-frog/pull/1095) [`14de454`](https://github.com/mengxi-ream/read-frog/commit/14de4540aab2b81fe8696af549ed89ef653840de) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: optimize content script with sync config cache, lazy selection UI mounting, and proper teardown
+
+- [#1111](https://github.com/mengxi-ream/read-frog/pull/1111) [`66d1cf8`](https://github.com/mengxi-ream/read-frog/commit/66d1cf8e2840e7b0a863b410db988dd995606e64) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: support tts in dictionary
+
+- [#1109](https://github.com/mengxi-ream/read-frog/pull/1109) [`1ac2000`](https://github.com/mengxi-ream/read-frog/commit/1ac2000e08e5d0ab8a89d908751f611eb30aa05a) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: unify inline error handling for selection toolbar translate and custom actions
+
+- [#1105](https://github.com/mengxi-ream/read-frog/pull/1105) [`fa9ca52`](https://github.com/mengxi-ream/read-frog/commit/fa9ca52eb41f624726322221d47232c674a9036d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: simplify the selection toolbar translation flow and harden stale-request cancellation handling
+
+- [#1107](https://github.com/mengxi-ream/read-frog/pull/1107) [`4250c2b`](https://github.com/mengxi-ream/read-frog/commit/4250c2bb8c8d8819f2468746ceea061753ea3529) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - style: add thinking indicator
+
+- [#1113](https://github.com/mengxi-ream/read-frog/pull/1113) [`d9af305`](https://github.com/mengxi-ream/read-frog/commit/d9af305d82a7ef47325200a6929f5f615839fa15) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: load css before spin
+
+- [#1039](https://github.com/mengxi-ream/read-frog/pull/1039) [`8abcd34`](https://github.com/mengxi-ream/read-frog/commit/8abcd345154d8d1c351d1dc597ea11dd1e5980d9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): optimize loading state message position and visual effect
+
+- [#1112](https://github.com/mengxi-ream/read-frog/pull/1112) [`0f06a67`](https://github.com/mengxi-ream/read-frog/commit/0f06a674304fd8e8f556a315b74e7e611b8733be) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: algorithm to get context
+
 ## 1.28.1
 
 ### Patch Changes

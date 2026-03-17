@@ -163,6 +163,9 @@ options:
         vercel: ウェブコンテンツの翻訳と分析に最適化されたAIモデル
         volcengine: ByteDanceのクラウドAIプラットフォーム、Doubaoモデルを提供
         minimax: MiniMax AIプラットフォーム、先進的なMiniMax-M2モデルを提供
+        alibaba: アリババクラウドのQwenモデルシリーズ、高度な推論と多言語機能を備える
+        moonshotai: Moonshot AIのKimiモデルシリーズ、優れた推論と長コンテキスト能力
+        huggingface: Hugging Face推論API、数千のオープンソースモデルへのアクセスを提供
     apiKey:
       showAPIKey: APIキーを表示
     howToConfigure: 設定方法は?
@@ -180,7 +183,7 @@ options:
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
-      customFeatures: カスタムAI機能
+      customActions: カスタムAIアクション
       features:
         translate: ページ翻訳
         selectionToolbar_translate: 選択ツールバー翻訳
@@ -202,6 +205,19 @@ options:
         confirm: 確認
         cancel: キャンセル
         description: この操作により、すべての翻訳キャッシュがクリアされます。この操作は元に戻せません。
+    languageDetection:
+      title: 言語検出
+      description: 自動翻訳の言語検出、スキップ言語検出、読み上げの音声選択精度に影響します。
+      mode:
+        basic: 基本
+        llm: LLM
+      provider:
+        label: 検出プロバイダー
+        placeholder: プロバイダーを選択
+      status:
+        noProviders: LLMプロバイダーを設定してください
+        basicRecommend: LLM有効化を推奨
+        llmEnabled: LLM検出が有効
   siteControl:
     title: サイト制御
     mode:
@@ -267,6 +283,12 @@ options:
       globalToggle:
         title: 選択ツールバーを有効化
         description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と語彙分析
+      featureToggles:
+        title: 機能トグル
+        description: 選択ツールバーに表示する組み込み機能を選択
+        translate: 翻訳
+        speak: 読み上げ
+        vocabularyInsight: 語彙分析
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
@@ -275,6 +297,13 @@ options:
         description: 選択ツールバーを無効化するウェブサイトを設定します
         enterUrlPattern: URL パターンを入力
         urlPattern: URL パターン
+      errors:
+        customActionFailed: カスタムアクションに失敗しました
+        customActionFailedFallback: カスタムアクションのリクエストに失敗しました
+        actionUnavailable: 選択したアクションは利用できません
+        missingSelection: 選択されたテキストがありません
+        providerDisabled: 選択したプロバイダーは無効です
+        providerUnavailable: 選択したプロバイダーは利用できません
       features:
         provider: プロバイダー
         selectProvider: プロバイダーを選択
@@ -290,13 +319,13 @@ options:
         vocabularyInsight:
           title: 語彙分析
           description: 選択ツールバーで単語/フレーズを分析するためのプロバイダーとモデルを設定
-      customFeatures:
-        title: カスタム AI 機能
+      customActions:
+        title: カスタム AI アクション
         description: 選択テキスト向けに独自の構造化 AI アクションを追加
-        add: AI 機能を追加
-        edit: AI 機能を編集
-        empty: カスタム AI 機能はまだありません
-        noEnabledLlmProvider: カスタム AI 機能を作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
+        add: AI アクションを追加
+        edit: AI アクションを編集
+        empty: カスタム AI アクションはまだありません
+        noEnabledLlmProvider: カスタム AI アクションを作成する前に、少なくとも1つのLLMプロバイダーを有効化してください
         table:
           name: 名前
           provider: プロバイダー
@@ -315,6 +344,7 @@ options:
           fieldType: フィールド型
           fieldDescription: 説明
           fieldDescriptionPlaceholder: このフィールドに含めるべき内容を説明してください...
+          fieldSpeaking: 読み上げを有効にする
           actions: 操作
           cancel: キャンセル
           save: 保存
@@ -333,18 +363,18 @@ options:
             cancel: キャンセル
           tokens:
             selection: 選択したテキスト内容
-            context: 選択テキストが含まれる段落内容
-            targetLang: ユーザーのターゲット言語
-            title: ウェブページのタイトル
+            paragraphs: 選択範囲と交差する段落内容。空行で連結され、カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
+            targetLanguage: ユーザーのターゲット言語
+            webTitle: ウェブページのタイトル
           delete: 削除
           deleteDialog:
-            title: カスタム機能を削除しますか？
+            title: カスタムアクションを削除しますか？
             description: この操作は元に戻せません。
             confirm: 削除
             cancel: キャンセル
         errors:
           nameRequired: 名前は必須です
-          duplicateName: '重複する機能名 "$1"'
+          duplicateName: '重複するアクション名 "$1"'
           invalidIcon: 無効な Iconify アイコン文字列です
           providerRequired: 有効な LLM プロバイダーを選択してください
           outputSchemaRequired: 少なくとも1つの出力フィールドを追加してください
@@ -400,9 +430,9 @@ options:
         prompt: プロンプト
         promptCellInput:
           input: 翻訳するテキスト内容
-          targetLang: 目標言語
-          title: ウェブページタイトル
-          summary: ウェブページ要約（AI スマートコンテキストが必要）
+          targetLanguage: 目標言語
+          webTitle: ウェブページタイトル
+          webSummary: ウェブページ要約（AI スマートコンテキストが必要）
         save: 保存
         close: キャンセル
       deletePrompt:
@@ -517,11 +547,6 @@ options:
   tts:
     title: テキスト読み上げ
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
-    detectLanguage:
-      label: 言語検出
-      basic: 基本
-      llm: LLM
-      description: 基本検出は高速かつ無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。LLM モードは「翻訳」ページのプロバイダーを使用します。
     voice:
       label: ボイス
       fallback: フォールバック
@@ -551,6 +576,13 @@ options:
       batchRequestCount: バッチリクエスト数
   config:
     title: 設定
+    about:
+      title: Read Frog について
+      description: Read Frog は 2025 年 4 月に生まれました
+      mission: Read Frog は、AI 時代における質の高い教育機会への平等なアクセスを広げるため、語学学習、医学、その他の知識集約型分野で、実際の教師に近い学習体験を手頃な価格で提供することを目指しています。
+      analytics:
+        title: ユーザー体験の改善に協力する
+        tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
     sync:
       title: 手動設定同期
       description: 手動で設定をインポート・エクスポート
@@ -754,6 +786,8 @@ noAPIKeyConfig:
     firstOnThe: する必要があります（
     optionsPage: オプションページ
     page: ）
+languageDetection:
+  llmFailed: LLM言語検出に失敗しました。基本検出にフォールバックしました
 translation:
   sameLanguage: ソース言語とターゲット言語は異なる必要があります
   autoModeSameLanguage: 検出された言語 '$1' はターゲット言語と同じです
@@ -764,6 +798,24 @@ speak:
   noTextSelected: テキストが選択されていません
   openaiNotConfigured: OpenAIプロバイダーが設定されていないか有効になっていません
   openaiApiKeyNotConfigured: OpenAI APIキーが設定されていません
+action:
+  copy: コピー
+  copied: コピー済み
+  regenerate: 再生成
+  viewContextDetails: コンテキスト
+  contextDetailsTitleLabel: タイトル
+  contextDetailsParagraphsLabel: 段落内容
+  translation: 翻訳
+  speak: 読み上げ
+  playing: 再生中
+  vocabularyInsight: 語彙解析
+  vocabularyInsightDeprecation: この機能は2週間後にカスタムAIアクションの辞書機能に置き換えられます。辞書アクションはより柔軟で強力な体験を提供します。
+  vocabularyInsightDeprecationLink: 辞書アクションを設定
+thinking:
+  label: 思考中
+  complete: 思考完了
+  expand: 思考を展開
+  collapse: 思考を折りたたむ
 shortcutKeySelector:
   placeholder: ショートカットを入力してください
 subtitles:

@@ -163,6 +163,9 @@ options:
         vercel: 針對網頁內容翻譯和分析優化的 AI 模型
         volcengine: 字節跳動旗下雲平台，提供豆包系列大模型
         minimax: MiniMax AI平台，提供先進的MiniMax-M2系列大模型
+        alibaba: 阿里雲通義千問系列模型，具備先進的推理和多語言能力
+        moonshotai: 月之暗面Kimi系列模型，具備強大的推理和長上下文能力
+        huggingface: Hugging Face推理API，提供數千種開源模型存取
     apiKey:
       showAPIKey: 顯示 API Key
     howToConfigure: 如何配置?
@@ -180,7 +183,7 @@ options:
     featureProviders:
       title: 功能提供商
       description: 為每個功能選擇使用的提供商
-      customFeatures: 自訂 AI 功能
+      customActions: 自訂 AI 指令
       features:
         translate: 網頁翻譯
         selectionToolbar_translate: 劃詞翻譯
@@ -202,6 +205,19 @@ options:
         confirm: 確認
         cancel: 取消
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
+    languageDetection:
+      title: 語言偵測
+      description: 影響自動翻譯語言偵測、跳過語言偵測和朗讀語音選擇的準確性。
+      mode:
+        basic: 基礎
+        llm: LLM
+      provider:
+        label: 偵測提供者
+        placeholder: 選擇提供者
+      status:
+        noProviders: 請先設定 LLM 提供者
+        basicRecommend: 建議啟用 LLM
+        llmEnabled: LLM 偵測已啟用
   siteControl:
     title: 站點控制
     mode:
@@ -267,6 +283,12 @@ options:
       globalToggle:
         title: 啟用選擇工具列
         description: 在網頁上選擇文字時顯示工具列，快速翻譯和詞彙解析
+      featureToggles:
+        title: 功能開關
+        description: 選擇在選擇工具列中顯示哪些內建功能
+        translate: 翻譯
+        speak: 朗讀
+        vocabularyInsight: 詞彙解析
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
@@ -275,6 +297,13 @@ options:
         description: 設定需要停用選擇工具列的網站
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
+      errors:
+        customActionFailed: 自訂操作失敗
+        customActionFailedFallback: 自訂操作請求失敗
+        actionUnavailable: 所選操作不可用
+        missingSelection: 沒有可用的選取文字
+        providerDisabled: 所選提供商已被停用
+        providerUnavailable: 所選提供商不可用
       features:
         provider: 提供商
         selectProvider: 選擇提供商
@@ -290,13 +319,13 @@ options:
         vocabularyInsight:
           title: 詞彙解析
           description: 配置選擇工具列詞彙/短語解析功能使用的提供商與模型
-      customFeatures:
-        title: 自訂 AI 功能
+      customActions:
+        title: 自訂 AI 指令
         description: 為劃詞新增你自己的結構化 AI 操作
-        add: 新增 AI 功能
-        edit: 編輯 AI 功能
-        empty: 暫無自訂 AI 功能
-        noEnabledLlmProvider: 請先啟用至少一個 LLM 提供商後再建立自訂 AI 功能
+        add: 新增 AI 指令
+        edit: 編輯 AI 指令
+        empty: 暫無自訂 AI 指令
+        noEnabledLlmProvider: 請先啟用至少一個 LLM 提供商後再建立自訂 AI 指令
         table:
           name: 名稱
           provider: 提供商
@@ -315,6 +344,7 @@ options:
           fieldType: 欄位類型
           fieldDescription: 描述
           fieldDescriptionPlaceholder: 描述此欄位應包含的內容...
+          fieldSpeaking: 啟用朗讀
           actions: 操作
           cancel: 取消
           save: 儲存
@@ -333,18 +363,18 @@ options:
             cancel: 取消
           tokens:
             selection: 選取的文字內容
-            context: 選取文字所在段落內容
-            targetLang: 使用者的目標語言
-            title: 網頁標題
+            paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
+            targetLanguage: 使用者的目標語言
+            webTitle: 網頁標題
           delete: 刪除
           deleteDialog:
-            title: 刪除自訂功能？
+            title: 刪除自訂 AI 指令？
             description: 此操作無法撤銷。
             confirm: 刪除
             cancel: 取消
         errors:
           nameRequired: 名稱不能為空
-          duplicateName: '重複的功能名稱 "$1"'
+          duplicateName: '重複的指令名稱 "$1"'
           invalidIcon: Iconify 圖示字串格式無效
           providerRequired: 請選擇一個已啟用的 LLM 提供商
           outputSchemaRequired: 至少需要一個輸出欄位
@@ -400,9 +430,9 @@ options:
         prompt: 提示詞
         promptCellInput:
           input: 需要翻譯的文字內容
-          targetLang: 目標語言
-          title: 網頁標題
-          summary: 網頁摘要（需啟用 AI 智慧上下文）
+          targetLanguage: 目標語言
+          webTitle: 網頁標題
+          webSummary: 網頁摘要（需啟用 AI 智慧上下文）
         save: 保存
         close: 取消
       deletePrompt:
@@ -517,11 +547,6 @@ options:
   tts:
     title: 文字轉語音
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
-    detectLanguage:
-      label: 語言偵測
-      basic: 基礎
-      llm: LLM
-      description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。LLM 模式使用「翻譯」頁面的提供者。
     voice:
       label: 語音
       fallback: 後備
@@ -551,6 +576,13 @@ options:
       batchRequestCount: 批量請求數量
   config:
     title: 設定
+    about:
+      title: 關於
+      description: Read Frog 誕生於 2025 年 4 月
+      mission: Read Frog 致力於在 AI 時代擴大高品質教育機會的平等可及性，透過更低成本地提供盡可能接近真人教師的學習體驗，涵蓋語言學習、醫學以及其他知識密集型領域。
+      analytics:
+        title: 幫助改進使用者體驗
+        tooltip: 開啟後，Read Frog 會傳送匿名的產品使用訊號，用於驗證功能是否穩定、優化效能與互動細節，並幫助我們決定接下來優先投入的方向。
     sync:
       title: 手動設定同步
       description: 手動匯入和匯出您的設定
@@ -754,6 +786,8 @@ noAPIKeyConfig:
     firstOnThe: 在
     optionsPage: 選項
     page: 頁
+languageDetection:
+  llmFailed: LLM 語言偵測失敗，已回退到基礎偵測
 translation:
   sameLanguage: 源語言和目標語言必須不同
   autoModeSameLanguage: 檢測到的語言 '$1' 與目標語言相同
@@ -764,6 +798,24 @@ speak:
   noTextSelected: 未選擇文字
   openaiNotConfigured: OpenAI 提供商未配置或未啟用
   openaiApiKeyNotConfigured: OpenAI API Key 未配置
+action:
+  copy: 複製
+  copied: 已複製
+  regenerate: 重新生成
+  viewContextDetails: 上下文
+  contextDetailsTitleLabel: 標題
+  contextDetailsParagraphsLabel: 段落內容
+  translation: 翻譯
+  speak: 朗讀
+  playing: 播放中
+  vocabularyInsight: 詞彙解析
+  vocabularyInsightDeprecation: 此功能將在 2 週後被自訂 AI 動作的詞典功能取代。詞典動作提供更靈活和強大的體驗。
+  vocabularyInsightDeprecationLink: 設定詞典動作
+thinking:
+  label: 思考中
+  complete: 思考完成
+  expand: 展開思考
+  collapse: 收起思考
 shortcutKeySelector:
   placeholder: 請輸入快捷鍵
 subtitles:

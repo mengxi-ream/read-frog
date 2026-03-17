@@ -45,9 +45,9 @@ export function SettingsNav() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
-            <SidebarMenuButton render={<Link to="/custom-features" />} isActive={pathname === "/custom-features"}>
+            <SidebarMenuButton render={<Link to="/custom-actions" />} isActive={pathname === "/custom-actions"}>
               <Icon icon="tabler:sparkles" />
-              <span>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customFeatures.title")}</span>
+              <span>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.title")}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 

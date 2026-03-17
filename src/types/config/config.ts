@@ -3,8 +3,9 @@ import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
 import { z } from "zod"
 import { FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
+import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
-import { selectionToolbarCustomFeaturesSchema } from "./selection-toolbar"
+import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
 import { videoSubtitlesSchema } from "./subtitles"
 import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
@@ -24,7 +25,12 @@ const floatingButtonSchema = z.object({
 })
 
 const selectionToolbarFeatureSchema = z.object({
+  enabled: z.boolean(),
   providerId: z.string().nonempty(),
+})
+
+const selectionToolbarSpeakFeatureSchema = z.object({
+  enabled: z.boolean(),
 })
 
 // Text selection toolbar schema
@@ -33,9 +39,10 @@ const selectionToolbarSchema = z.object({
   disabledSelectionToolbarPatterns: z.array(z.string()),
   features: z.object({
     translate: selectionToolbarFeatureSchema,
+    speak: selectionToolbarSpeakFeatureSchema,
     vocabularyInsight: selectionToolbarFeatureSchema,
   }),
-  customFeatures: selectionToolbarCustomFeaturesSchema,
+  customActions: selectionToolbarCustomActionsSchema,
 })
 
 // side content schema
@@ -85,6 +92,7 @@ export const configSchema = z.object({
   language: languageSchema,
   providersConfig: providersConfigSchema,
   translate: translateConfigSchema,
+  languageDetection: languageDetectionConfigSchema,
   tts: ttsConfigSchema,
   floatingButton: floatingButtonSchema,
   selectionToolbar: selectionToolbarSchema,
@@ -109,7 +117,7 @@ export const configSchema = z.object({
     if (!validIds.has(providerId)) {
       ctx.addIssue({
         code: "invalid_value",
-        values: Array.from(validIds),
+        values: [...validIds],
         message: `Invalid provider id "${providerId}".`,
         path: [...def.configPath],
       })
@@ -120,7 +128,7 @@ export const configSchema = z.object({
     if (provider && !def.isProvider(provider.provider)) {
       ctx.addIssue({
         code: "invalid_value",
-        values: Array.from(validIds),
+        values: [...validIds],
         message: `Provider "${providerId}" is not a valid provider for this feature.`,
         path: [...def.configPath],
       })
@@ -135,14 +143,52 @@ export const configSchema = z.object({
     }
   }
 
-  data.selectionToolbar.customFeatures.forEach((feature, index) => {
-    const providerId = feature.providerId
+  // Validate languageDetection: when mode is "llm", providerId must be a valid enabled LLM provider
+  if (data.languageDetection.mode === "llm") {
+    const ldProviderId = data.languageDetection.providerId
+    if (!ldProviderId) {
+      ctx.addIssue({
+        code: "custom",
+        message: `Language detection mode is "llm" but no providerId is configured.`,
+        path: ["languageDetection", "providerId"],
+      })
+    }
+    else {
+      const ldProvider = data.providersConfig.find(p => p.id === ldProviderId)
+      if (!ldProvider) {
+        ctx.addIssue({
+          code: "custom",
+          message: `Language detection provider "${ldProviderId}" not found in providersConfig.`,
+          path: ["languageDetection", "providerId"],
+        })
+      }
+      else {
+        if (!isLLMProvider(ldProvider.provider)) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Language detection provider "${ldProviderId}" is not an LLM provider.`,
+            path: ["languageDetection", "providerId"],
+          })
+        }
+        if (!ldProvider.enabled) {
+          ctx.addIssue({
+            code: "custom",
+            message: `Language detection provider "${ldProviderId}" must be enabled.`,
+            path: ["languageDetection", "providerId"],
+          })
+        }
+      }
+    }
+  }
+
+  data.selectionToolbar.customActions.forEach((action, index) => {
+    const providerId = action.providerId
     if (!providerIdsSet.has(providerId)) {
       ctx.addIssue({
         code: "invalid_value",
-        values: Array.from(providerIdsSet),
+        values: [...providerIdsSet],
         message: `Invalid provider id "${providerId}".`,
-        path: ["selectionToolbar", "customFeatures", index, "providerId"],
+        path: ["selectionToolbar", "customActions", index, "providerId"],
       })
       return
     }
@@ -152,7 +198,7 @@ export const configSchema = z.object({
       ctx.addIssue({
         code: "custom",
         message: `Provider "${providerId}" is not an LLM provider.`,
-        path: ["selectionToolbar", "customFeatures", index, "providerId"],
+        path: ["selectionToolbar", "customActions", index, "providerId"],
       })
       return
     }
@@ -160,8 +206,8 @@ export const configSchema = z.object({
     if (provider && !provider.enabled) {
       ctx.addIssue({
         code: "custom",
-        message: `Provider "${providerId}" must be enabled for this custom feature.`,
-        path: ["selectionToolbar", "customFeatures", index, "providerId"],
+        message: `Provider "${providerId}" must be enabled for this custom action.`,
+        path: ["selectionToolbar", "customActions", index, "providerId"],
       })
     }
   })

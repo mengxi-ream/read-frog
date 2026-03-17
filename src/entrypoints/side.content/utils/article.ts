@@ -1,3 +1,6 @@
+const TRAILING_PUNCTUATION_RE = /[.!?,:;'"…)}\]]$/
+const WHITESPACE_RUN_RE = /\s+/g
+
 /**
  * 扁平化提取"块级叶子"中的文本段落，并返回扁平化后的文本数组。
  * @param {Node} root - 文章主体容器
@@ -76,7 +79,7 @@ export function flattenToParagraphs(root: Node) {
       if (
         text.length > 0
         && !text.endsWith(" ")
-        && !/[.!?,:;'"…)}\]]$/.test(childText)
+        && !TRAILING_PUNCTUATION_RE.test(childText)
       ) {
         text += " "
       }
@@ -115,7 +118,7 @@ export function flattenToParagraphs(root: Node) {
       // 如果它是一个"块级叶子"，就提取成段落；否则下降
       if (isBlockLevel(element) && !hasBlockDescendant(element)) {
         // 使用新的方法获取文本，保留内联元素之间的空格
-        const raw = getTextWithSpaces(element).replace(/\s+/g, " ").trim()
+        const raw = getTextWithSpaces(element).replace(WHITESPACE_RUN_RE, " ").trim()
         if (raw?.length && raw.length > 20) {
           // 可根据需求调整最小长度过滤
           paragraphs.push(raw)
@@ -130,7 +133,7 @@ export function flattenToParagraphs(root: Node) {
     }
     // 如果是文本节点，且其父容器也不是"块级叶子"时，可以视作一个独立段落
     else if (node.nodeType === Node.TEXT_NODE) {
-      const txt = node.textContent?.replace(/\s+/g, " ").trim()
+      const txt = node.textContent?.replace(WHITESPACE_RUN_RE, " ").trim()
       if (txt?.length && txt.length > 20) {
         paragraphs.push(txt)
       }
@@ -171,12 +174,8 @@ export function extractSeoInfo(doc: Document) {
       doc
         .querySelector("meta[name=\"twitter:title\"]")
         ?.getAttribute("content") || "",
-    h1Tags: Array.from(doc.querySelectorAll("h1")).map(
-      h => h.textContent?.trim() || "",
-    ),
-    structuredData: Array.from(
-      doc.querySelectorAll("script[type=\"application/ld+json\"]"),
-    ).map((script) => {
+    h1Tags: Array.from(doc.querySelectorAll("h1"), h => h.textContent?.trim() || ""),
+    structuredData: Array.from(doc.querySelectorAll("script[type=\"application/ld+json\"]"), (script) => {
       try {
         return JSON.parse(script.textContent || "{}")
       }

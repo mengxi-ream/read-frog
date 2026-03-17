@@ -36,6 +36,7 @@ describe("ensureIconifyBackgroundFetch", () => {
       statusText: "OK",
       headers: [["content-type", "application/json"]],
       body: JSON.stringify({ icons: { sparkles: { body: "<path />" } } }),
+      bodyEncoding: "text",
     })
 
     const { ensureIconifyBackgroundFetch } = await import("../setup-background-fetch")
@@ -50,6 +51,8 @@ describe("ensureIconifyBackgroundFetch", () => {
       headers: undefined,
       body: undefined,
       credentials: "omit",
+      cacheConfig: undefined,
+      responseType: "text",
     })
     await expect(response.json()).resolves.toEqual({
       icons: {

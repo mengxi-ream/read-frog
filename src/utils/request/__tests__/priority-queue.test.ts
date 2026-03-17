@@ -111,7 +111,7 @@ describe("binaryHeapPQ", () => {
       items.reverse().forEach(item => pq.push(item.value, item.priority))
 
       // Should come out in priority order (lowest priority number first)
-      const sortedItems = [...items].sort((a, b) => a.priority - b.priority)
+      const sortedItems = items.toSorted((a, b) => a.priority - b.priority)
       sortedItems.forEach((item) => {
         expect(pq.pop()).toBe(item.value)
       })
@@ -303,7 +303,7 @@ describe("binaryHeapPQ", () => {
       }
 
       // Remove items - should come out in ascending priority order
-      const sortedPriorities = [...priorities].sort((a, b) => a - b)
+      const sortedPriorities = priorities.toSorted((a, b) => a - b)
       for (const expectedPriority of sortedPriorities) {
         const item = pq.pop()
         expect(item).toBe(`item${expectedPriority}`)

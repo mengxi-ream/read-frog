@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProvider } from "@/types/config/provider"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
-import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { buildFeatureProviderPatch, FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { cn } from "@/utils/styles/utils"
 import { withForm } from "./form"
 
@@ -23,9 +23,10 @@ export const FeatureProviderSection = withForm({
 
     const compatibleFeatures = FEATURE_KEYS
       .filter(featureKey => FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType))
+    const supportsLanguageDetection = isLLMProvider(providerType)
 
-    const customFeatures = isLLMProvider(providerType)
-      ? config.selectionToolbar.customFeatures
+    const customActions = isLLMProvider(providerType)
+      ? config.selectionToolbar.customActions
       : []
 
     const getEnableCurrentProviderPatch = () => {
@@ -39,7 +40,7 @@ export const FeatureProviderSection = withForm({
       )
     }
 
-    if (compatibleFeatures.length === 0 && customFeatures.length === 0)
+    if (compatibleFeatures.length === 0 && customActions.length === 0 && !supportsLanguageDetection)
       return null
 
     return (
@@ -80,36 +81,69 @@ export const FeatureProviderSection = withForm({
                     }}
                   />
                   <span className="text-sm">
-                    {i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`)}
+                    {i18n.t(getFeatureLabelI18nKey(featureKey))}
                   </span>
                 </div>
               )
             })}
-            {customFeatures.map((feature) => {
-              const isAssigned = feature.providerId === providerId
+            {supportsLanguageDetection && (
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={config.languageDetection.mode === "llm" && config.languageDetection.providerId === providerId}
+                  disabled={config.languageDetection.mode === "llm" && config.languageDetection.providerId === providerId}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      const providersConfigPatch = getEnableCurrentProviderPatch()
+                      if (providersConfigPatch) {
+                        void setConfig({
+                          providersConfig: providersConfigPatch,
+                          languageDetection: {
+                            mode: "llm",
+                            providerId,
+                          },
+                        })
+                        return
+                      }
+
+                      void setConfig({
+                        languageDetection: {
+                          mode: "llm",
+                          providerId,
+                        },
+                      })
+                    }
+                  }}
+                />
+                <span className="text-sm">
+                  {i18n.t("options.general.languageDetection.title")}
+                </span>
+              </div>
+            )}
+            {customActions.map((action) => {
+              const isAssigned = action.providerId === providerId
               return (
-                <div key={feature.id} className="flex items-center gap-2">
+                <div key={action.id} className="flex items-center gap-2">
                   <Switch
                     checked={isAssigned}
                     disabled={isAssigned}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        const updatedCustomFeatures = config.selectionToolbar.customFeatures.map(f =>
-                          f.id === feature.id ? { ...f, providerId } : f,
+                        const updatedCustomActions = config.selectionToolbar.customActions.map(currentAction =>
+                          currentAction.id === action.id ? { ...currentAction, providerId } : currentAction,
                         )
                         const providersConfigPatch = getEnableCurrentProviderPatch()
                         if (providersConfigPatch) {
                           void setConfig({
                             providersConfig: providersConfigPatch,
-                            selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures },
+                            selectionToolbar: { ...config.selectionToolbar, customActions: updatedCustomActions },
                           })
                           return
                         }
-                        void setConfig({ selectionToolbar: { ...config.selectionToolbar, customFeatures: updatedCustomFeatures } })
+                        void setConfig({ selectionToolbar: { ...config.selectionToolbar, customActions: updatedCustomActions } })
                       }
                     }}
                   />
-                  <span className="text-sm">{feature.name}</span>
+                  <span className="text-sm">{action.name}</span>
                 </div>
               )
             })}

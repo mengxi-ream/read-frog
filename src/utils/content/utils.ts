@@ -4,6 +4,9 @@ import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement } from "../
 
 export const MAX_TEXT_LENGTH = 3000
 
+const ZERO_WIDTH_CHARS_RE = /[\u200B-\u200D\uFEFF]/g
+const WHITESPACE_RUN_RE = /\s+/g
+
 export async function removeDummyNodes(root: Document) {
   const elements = root.querySelectorAll("*")
   const config = await getLocalConfig() ?? DEFAULT_CONFIG
@@ -20,8 +23,8 @@ export async function removeDummyNodes(root: Document) {
  */
 export function cleanText(textContent: string, maxLength: number = MAX_TEXT_LENGTH): string {
   const cleaned = textContent
-    .replace(/[\u200B-\u200D\uFEFF]/g, "") // 零宽字符
-    .replace(/\s+/g, " ")
+    .replace(ZERO_WIDTH_CHARS_RE, "") // 零宽字符
+    .replace(WHITESPACE_RUN_RE, " ")
     .trim()
 
   return cleaned.length <= maxLength ? cleaned : cleaned.slice(0, maxLength)

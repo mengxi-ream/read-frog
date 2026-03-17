@@ -1,10 +1,10 @@
 import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import { i18n } from "#imports"
-import customProviderLogo from "@/assets/providers/custom-provider.svg"
-import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg"
-import deeplxLogoLight from "@/assets/providers/deeplx-light.svg"
-import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg"
+import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
+import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
+import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
+import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, TRANSLATE_PROVIDER_TYPES } from "@/types/config/provider"
 import { omit, pick } from "@/types/utils"
 import { getLobeIconsCDNUrlFn } from "../logo"
@@ -128,6 +128,21 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   },
   "minimax": {
     model: "MiniMax-M2",
+    isCustomModel: false,
+    customModel: null,
+  },
+  "alibaba": {
+    model: "qwen3.5-flash",
+    isCustomModel: false,
+    customModel: null,
+  },
+  "moonshotai": {
+    model: "kimi-k2",
+    isCustomModel: false,
+    customModel: null,
+  },
+  "huggingface": {
+    model: "Qwen/Qwen3-32B",
     isCustomModel: false,
     customModel: null,
   },
@@ -274,6 +289,21 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn("minimax-color"),
       name: "MiniMax",
       website: "https://platform.minimax.io",
+    },
+    "alibaba": {
+      logo: getLobeIconsCDNUrlFn("bailian-color"),
+      name: "Alibaba Cloud",
+      website: "https://modelstudio.alibabacloud.com/",
+    },
+    "moonshotai": {
+      logo: getLobeIconsCDNUrlFn("moonshot"),
+      name: "Moonshot AI",
+      website: "https://platform.moonshot.cn/",
+    },
+    "huggingface": {
+      logo: getLobeIconsCDNUrlFn("huggingface-color"),
+      name: "Hugging Face",
+      website: "https://huggingface.co/",
     },
   }
 
@@ -502,6 +532,30 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "minimax",
     model: DEFAULT_LLM_PROVIDER_MODELS.minimax,
+  },
+  "alibaba": {
+    id: "alibaba-default",
+    name: PROVIDER_ITEMS.alibaba.name,
+    description: i18n.t("options.apiProviders.providers.description.alibaba"),
+    enabled: true,
+    provider: "alibaba",
+    model: DEFAULT_LLM_PROVIDER_MODELS.alibaba,
+  },
+  "moonshotai": {
+    id: "moonshotai-default",
+    name: PROVIDER_ITEMS.moonshotai.name,
+    description: i18n.t("options.apiProviders.providers.description.moonshotai"),
+    enabled: true,
+    provider: "moonshotai",
+    model: DEFAULT_LLM_PROVIDER_MODELS.moonshotai,
+  },
+  "huggingface": {
+    id: "huggingface-default",
+    name: PROVIDER_ITEMS.huggingface.name,
+    description: i18n.t("options.apiProviders.providers.description.huggingface"),
+    enabled: true,
+    provider: "huggingface",
+    model: DEFAULT_LLM_PROVIDER_MODELS.huggingface,
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 

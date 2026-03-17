@@ -26,6 +26,7 @@ function TooltipTrigger({ ...props }: TooltipPrimitive.Trigger.Props) {
 function TooltipContent({
   container,
   className,
+  positionerClassName,
   side = "top",
   sideOffset = 4,
   align = "center",
@@ -34,6 +35,9 @@ function TooltipContent({
   ...props
 }: TooltipPrimitive.Popup.Props
   & Pick<TooltipPrimitive.Portal.Props, "container">
+  & {
+    positionerClassName?: string
+  }
   & Pick<
     TooltipPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset"
@@ -45,7 +49,7 @@ function TooltipContent({
         alignOffset={alignOffset}
         side={side}
         sideOffset={sideOffset}
-        className="isolate z-50"
+        className={cn("isolate z-50", positionerClassName)}
       >
         <TooltipPrimitive.Popup
           data-slot="tooltip-content"

@@ -1,6 +1,56 @@
 import { vi } from "vitest"
 import "@testing-library/jest-dom"
 
+// Keep test output quiet by default. Individual tests can still spy on these
+// methods when they need to assert logging behavior.
+// eslint-disable-next-line no-console
+console.log = () => {}
+// eslint-disable-next-line no-console
+console.info = () => {}
+console.warn = () => {}
+console.error = () => {}
+
+class MemoryStorage implements Storage {
+  #store = new Map<string, string>()
+
+  get length() {
+    return this.#store.size
+  }
+
+  clear() {
+    this.#store.clear()
+  }
+
+  getItem(key: string) {
+    return this.#store.get(key) ?? null
+  }
+
+  key(index: number) {
+    return [...this.#store.keys()][index] ?? null
+  }
+
+  removeItem(key: string) {
+    this.#store.delete(key)
+  }
+
+  setItem(key: string, value: string) {
+    this.#store.set(key, value)
+  }
+}
+
+// Node 22 exposes built-in Web Storage. In worker processes without a configured
+// backing file, reading it emits `--localstorage-file` warnings. Replace it with
+// an in-memory test double before app modules import Jotai utils.
+Object.defineProperty(globalThis, "localStorage", {
+  configurable: true,
+  value: new MemoryStorage(),
+})
+
+Object.defineProperty(globalThis, "sessionStorage", {
+  configurable: true,
+  value: new MemoryStorage(),
+})
+
 // Mock @wxt-dev/i18n module to avoid browser.i18n.getMessage not implemented error
 vi.mock("#i18n", () => ({
   i18n: {

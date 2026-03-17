@@ -164,6 +164,9 @@ options:
         vercel: Optimized AI models for web content translation and analysis
         volcengine: ByteDance's cloud AI platform offering Doubao models for translation and reading
         minimax: MiniMax AI platform offering advanced MiniMax-M2 models for text generation
+        alibaba: Alibaba Cloud's Qwen model series with advanced reasoning and multilingual capabilities
+        moonshotai: Moonshot AI's Kimi model series with strong reasoning and long-context capabilities
+        huggingface: Hugging Face Inference API providing access to thousands of open-source models
     apiKey:
       showAPIKey: Show API Key
     howToConfigure: How to configure?
@@ -181,7 +184,7 @@ options:
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature
-      customFeatures: Custom AI Features
+      customActions: Custom AI Actions
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation
@@ -203,6 +206,19 @@ options:
         confirm: Confirm
         cancel: Cancel
         description: This operation will clear all translation cache. This action cannot be undone.
+    languageDetection:
+      title: Language Detection
+      description: Affects auto-translate language detection, skip-language detection, and Speaking voice selection accuracy.
+      mode:
+        basic: Basic
+        llm: LLM
+      provider:
+        label: Detection Provider
+        placeholder: Select a provider
+      status:
+        noProviders: Configure an LLM provider first
+        basicRecommend: Recommend enabling LLM
+        llmEnabled: LLM detection enabled
   siteControl:
     title: Site Control
     mode:
@@ -268,6 +284,12 @@ options:
       globalToggle:
         title: Enable Selection Toolbar
         description: Display the toolbar when selecting text on web pages for quick translation and vocabulary insights
+      featureToggles:
+        title: Feature Toggles
+        description: Choose which built-in features to show in the selection toolbar
+        translate: Translate
+        speak: Speak
+        vocabularyInsight: Vocabulary Insight
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
@@ -276,6 +298,13 @@ options:
         description: Configure websites where the selection toolbar should be disabled
         enterUrlPattern: Enter URL pattern
         urlPattern: URL Pattern
+      errors:
+        customActionFailed: Custom Action Failed
+        customActionFailedFallback: Custom action request failed
+        actionUnavailable: Selected action is unavailable
+        missingSelection: No selected text available
+        providerDisabled: Selected provider is disabled
+        providerUnavailable: Selected provider is unavailable
       features:
         provider: Provider
         selectProvider: Select a provider
@@ -291,13 +320,13 @@ options:
         vocabularyInsight:
           title: Vocabulary Insight
           description: Configure provider and model for vocabulary/phrase analysis in the selection toolbar
-      customFeatures:
-        title: Custom AI Features
+      customActions:
+        title: Custom AI Actions
         description: Add your own structured AI actions for selected text
-        add: Add AI Feature
-        edit: Edit AI Feature
-        empty: No custom AI features yet
-        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI features
+        add: Add AI Action
+        edit: Edit AI Action
+        empty: No custom AI actions yet
+        noEnabledLlmProvider: Enable at least one LLM provider before creating custom AI actions
         table:
           name: Name
           provider: Provider
@@ -316,6 +345,7 @@ options:
           fieldType: Field Type
           fieldDescription: Description
           fieldDescriptionPlaceholder: Describe what this field should contain...
+          fieldSpeaking: Enable speaking
           actions: Actions
           cancel: Cancel
           save: Save
@@ -334,80 +364,80 @@ options:
             cancel: Cancel
           tokens:
             selection: Selected text content
-            context: Paragraph text where the selection appears
-            targetLang: "User's target language"
-            title: Webpage title
+            paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
+            targetLanguage: "User's target language"
+            webTitle: Webpage title
           delete: Delete
           deleteDialog:
-            title: Delete Custom Feature?
+            title: Delete Custom Action?
             description: This action cannot be undone.
             confirm: Delete
             cancel: Cancel
         templates:
           dialogTitle: Choose a Template
-          dialogDescription: Select a template to quickly create a new AI feature, or start from scratch.
+          dialogDescription: Select a template to quickly create a new AI action, or start from scratch.
           dictionary:
             name: Dictionary
-            description: Look up words with definitions, phonetics, and context translations
+            description: Look up words with definitions, phonetics, and paragraph translations
             systemPrompt: |-
               You are a dictionary assistant for language learners.
 
               ## Goal
-              Given a term and its surrounding context, produce a concise dictionary entry that matches the required output object.
+              Given a term and its surrounding paragraphs, produce a concise dictionary entry that matches the required output object.
 
               ## Rules
-              1. Focus on the meaning that best matches the provided context.
+              1. Focus on the meaning that best matches the provided paragraphs.
               2. Normalize Term to its base/canonical form.
               3. Keep Definition precise and learner-friendly.
-              4. Keep Context short and directly tied to the selected text.
+              4. Keep Paragraphs exactly as provided in the prompt.
               5. Phonetic must use the standard notation for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
               6. Part of Speech in English (noun, verb, adjective, etc.).
               7. Difficulty must be a CEFR level (A1, A2, B1, B2, C1, or C2).
               8. If a field is unknown, return an empty string instead of guessing.
-              9. Respond in {{targetLang}} for all textual fields unless source-form text is required for clarity.
+              9. Respond in {{targetLanguage}} for all textual fields unless source-form text is required for clarity.
 
               ## Examples
 
               ### Example 1
-              Input: Selection="blossoms", Context="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Target language=Chinese
+              Input: Selection="blossoms", Paragraphs="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Target language=Chinese
 
               Output:
               - Term: blossom
               - Phonetic: /ˈblɒs.əm/
               - Part of Speech: noun
-              - Context: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - Paragraphs: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
               - Definition: 花；花朵（尤指果树的花）
-              - Context Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
+              - Paragraphs Translation: 樱花短暂的美丽提醒我们珍惜每一刻。
               - Difficulty: B2
 
               ### Example 2
-              Input: Selection="感動", Context="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
+              Input: Selection="感動", Paragraphs="この映画はつまらないと思ったけど、最後は感動した。", Target language=English
 
               Output:
               - Term: 感動
               - Phonetic: kandou
               - Part of Speech: noun
-              - Context: この映画はつまらないと思ったけど、最後は感動した。
+              - Paragraphs: この映画はつまらないと思ったけど、最後は感動した。
               - Definition: Being deeply moved; emotional touch
-              - Context Translation: I thought this movie was boring, but the ending was moving.
+              - Paragraphs Translation: I thought this movie was boring, but the ending was moving.
               - Difficulty: B1
             prompt: |-
               ## Input
               Selection: {{selection}}
-              Context: {{context}}
-              Target language: {{targetLang}}
+              Paragraphs: {{paragraphs}}
+              Target language: {{targetLanguage}}
             fieldTerm: Term
             fieldTermDescription: Base/canonical lemma of the selected term.
             fieldPhonetic: Phonetic
             fieldPhoneticDescription: Standard phonetic transcription for the term's language (e.g., IPA for English, pinyin for Mandarin, romaji for Japanese).
             fieldPartOfSpeech: Part of Speech
             fieldPartOfSpeechDescription: Grammatical category (e.g., noun, verb, adjective).
-            fieldContext: Context
-            fieldContextDescription: The context in the prompt above, don't change it.
+            fieldParagraphs: Paragraphs
+            fieldParagraphsDescription: The paragraphs from the prompt above. Do not rewrite them.
             fieldDefinition: Definition
             fieldDefinitionDescription: One concise definition for the contextual sense.
-            fieldContextTranslation: Context Translation
-            fieldContextTranslationDescription: The translation of the context.
+            fieldParagraphsTranslation: Paragraphs Translation
+            fieldParagraphsTranslationDescription: The translation of the paragraphs.
             fieldDifficulty: Difficulty
             fieldDifficultyDescription: Estimated CEFR difficulty level A1, A2, B1, B2, C1, or C2.
           improveWriting:
@@ -417,12 +447,13 @@ options:
               You are a writing assistant for language learners.
 
               ## Goal
-              Given selected text and its surrounding context, analyze writing issues and produce an improved version.
+              Given selected text and its surrounding paragraphs, analyze writing issues and produce an improved version.
 
               ## Language Policy (critical)
-              1. The "Error Analysis" field must be written in {{targetLang}}.
-              2. The "Improved Version" field must stay in the original language of Selection.
-              3. Never translate "Improved Version" into {{targetLang}} unless Selection is already in {{targetLang}}.
+              1. Detect the original language of Selection as {{originLanguage}}.
+              2. The "Error Analysis" field must be written in {{targetLanguage}}.
+              3. The "Improved Version" field must stay in {{originLanguage}}.
+              4. Never translate "Improved Version" into {{targetLanguage}} unless {{originLanguage}} is already {{targetLanguage}}.
 
               ## Writing Rules
               1. Identify grammar, spelling, punctuation, and word choice errors.
@@ -432,31 +463,33 @@ options:
 
               ## Examples
               Example A:
-              - Selection (English): "He go to school yesterday, and he don't finish his homework."
-              - targetLang: Chinese
-              - Error Analysis (Chinese): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
-              - Improved Version (English): He went to school yesterday, and he didn't finish his homework.
+              - Selection: "He go to school yesterday, and he don't finish his homework."
+              - Detected {{originLanguage}}: English
+              - {{targetLanguage}}: Chinese
+              - Error Analysis (Chinese — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+              - Improved Version (English — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
 
               Example B:
-              - Selection (English): "The service attitude of this store is very good."
-              - targetLang: Japanese
-              - Error Analysis (Japanese): 文法はほぼ正しいですが、「service attitude」は不自然な直訳です。英語ではスタッフの対応を直接表現する方が自然です。
-              - Improved Version (English): The staff at this store are very friendly.
+              - Selection: "昨日私は友達に会いて、一緒に映画を見るました。"
+              - Detected {{originLanguage}}: Japanese
+              - {{targetLanguage}}: English
+              - Error Analysis (English — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
+              - Improved Version (Japanese — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
             prompt: |-
               ## Input
               Selection: {{selection}}
-              Context: {{context}}
-              Target language: {{targetLang}}
+              Paragraphs: {{paragraphs}}
+              Target language: {{targetLanguage}}
             fieldErrorAnalysis: Error Analysis
-            fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLang}}.
+            fieldErrorAnalysisDescription: Explain grammar, spelling, punctuation, and word-choice issues in {{targetLanguage}}.
             fieldImprovedVersion: Improved Version
             fieldImprovedVersionDescription: Corrected and improved version of the selected text in its original language.
           blank:
             name: Blank
-            description: Start from scratch with an empty feature
+            description: Start from scratch with an empty action
         errors:
           nameRequired: Name is required
-          duplicateName: 'Duplicate feature name "$1"'
+          duplicateName: 'Duplicate action name "$1"'
           invalidIcon: Invalid Iconify icon string
           providerRequired: Please select an enabled LLM provider
           outputSchemaRequired: Add at least one output field
@@ -512,9 +545,9 @@ options:
         prompt: Prompt
         promptCellInput:
           input: Text content to translate
-          targetLang: Target language
-          title: Webpage title
-          summary: Webpage summary (requires AI Smart Context)
+          targetLanguage: Target language
+          webTitle: Webpage title
+          webSummary: Webpage summary (requires AI Smart Context)
         save: Save Changes
         close: Cancel
       deletePrompt:
@@ -629,11 +662,6 @@ options:
   tts:
     title: Text to Speech
     description: Use Edge TTS voice settings for the Speak button.
-    detectLanguage:
-      label: Detect Language
-      basic: Basic
-      llm: LLM
-      description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs. LLM mode uses the Translate provider.
     voice:
       label: Voice
       fallback: Fallback
@@ -663,6 +691,13 @@ options:
       batchRequestCount: Batch Request Count
   config:
     title: Config
+    about:
+      title: About
+      description: Read Frog was born in April 2025
+      mission: Read Frog aims to expand equal access to high-quality education in the AI era by making learning experiences that feel closer to a real teacher affordable across language learning, medicine, and other knowledge-heavy fields.
+      analytics:
+        title: Help improve user experience
+        tooltip: When enabled, Read Frog sends anonymous product usage signals so we can verify feature reliability, improve performance and UX polish, and prioritize future work.
     sync:
       title: Manual Config Sync
       description: Manually import and export your configuration settings
@@ -866,6 +901,8 @@ noAPIKeyConfig:
     firstOnThe: first on the
     optionsPage: options
     page: page
+languageDetection:
+  llmFailed: LLM language detection failed, fell back to basic detection
 translation:
   sameLanguage: Source and target languages must be different
   autoModeSameLanguage: Detected language '$1' is the same as target language
@@ -876,6 +913,24 @@ speak:
   noTextSelected: No text selected
   openaiNotConfigured: OpenAI provider is not configured or enabled
   openaiApiKeyNotConfigured: OpenAI API key is not configured
+action:
+  copy: Copy
+  copied: Copied
+  regenerate: Regenerate
+  viewContextDetails: Context
+  contextDetailsTitleLabel: Title
+  contextDetailsParagraphsLabel: Paragraphs
+  translation: Translation
+  speak: Speak
+  playing: Playing
+  vocabularyInsight: Vocabulary Insight
+  vocabularyInsightDeprecation: This feature will be replaced by Custom AI Action's Dictionary feature in 2 weeks. Dictionary Action offers a more flexible and powerful experience.
+  vocabularyInsightDeprecationLink: Set up Dictionary Action
+thinking:
+  label: Thinking
+  complete: Thinking complete
+  expand: Expand thinking
+  collapse: Collapse thinking
 shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:

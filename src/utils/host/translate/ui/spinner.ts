@@ -5,8 +5,9 @@ import themeCSS from "@/assets/styles/theme.css?inline"
 import { TranslationError } from "@/components/translation/error"
 import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { TRANSLATION_ERROR_CONTAINER_CLASS } from "../../../constants/dom-labels"
-import { getOwnerDocument } from "../../dom/node"
+import { getContainingShadowRoot, getOwnerDocument } from "../../dom/node"
 import { translateTextForPage } from "../translate-variants"
+import { ensurePresetStyles } from "./style-injector"
 
 /**
  * Create a lightweight spinner element without React/Shadow DOM overhead
@@ -68,6 +69,8 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
 
 export function createSpinnerInside(translatedWrapperNode: HTMLElement): HTMLElement {
   const ownerDoc = getOwnerDocument(translatedWrapperNode)
+  const root = getContainingShadowRoot(translatedWrapperNode) ?? ownerDoc
+  ensurePresetStyles(root)
   const spinner = createLightweightSpinner(ownerDoc)
   translatedWrapperNode.appendChild(spinner)
   return spinner

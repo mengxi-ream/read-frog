@@ -166,8 +166,8 @@ describe("translate-text", () => {
       mockMicrosoftTranslate.mockResolvedValue("你好")
       const result = await executeTranslate("\u200B hello \u200B", langConfig, providerConfig, getTranslatePrompt)
       expect(result).toBe("你好")
-      // Microsoft translate should receive the original text
-      expect(mockMicrosoftTranslate).toHaveBeenCalledWith("\u200B hello \u200B", "en", "zh")
+      // Shared translation core should send minimally prepared text to the provider
+      expect(mockMicrosoftTranslate).toHaveBeenCalledWith("hello", "en", "zh")
     })
 
     it("should trim translation result", async () => {

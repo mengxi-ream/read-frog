@@ -1,14 +1,18 @@
 import type { Browser } from "#imports"
 import type {
   BackgroundStreamPortName,
+  BackgroundStreamSnapshot,
   BackgroundStreamStructuredObjectSerializablePayload,
   BackgroundStreamTextSerializablePayload,
+  BackgroundStructuredObjectStreamSnapshot,
+  BackgroundTextStreamSnapshot,
   StartMessageParseResult,
   StreamPortHandler,
   StreamPortRequestMessage,
   StreamPortResponse,
   StreamPortResponseWithoutRequestId,
   StreamRuntimeOptions,
+  ThinkingSnapshot,
 } from "@/types/background-stream"
 import { Output, streamText } from "ai"
 import { z } from "zod"
@@ -79,10 +83,10 @@ function createStartMessageParser<TSerializablePayload>(payloadSchema: z.ZodType
   }
 }
 
-function createStreamPortHandler<TSerializablePayload, TResponse, TChunk = unknown>(
+function createStreamPortHandler<TSerializablePayload, TResponse>(
   streamFn: (
     serializablePayload: TSerializablePayload,
-    options: StreamRuntimeOptions<TChunk, TResponse>,
+    options: StreamRuntimeOptions<TResponse>,
   ) => Promise<TResponse>,
   startMessageParser: (msg: unknown) => StartMessageParseResult<TSerializablePayload>,
 ) {
@@ -167,8 +171,8 @@ function createStreamPortHandler<TSerializablePayload, TResponse, TChunk = unkno
       try {
         const result = await streamFn(startMessage.payload, {
           signal: abortController.signal,
-          onChunk: (_chunk, cumulativeResponse) => {
-            safePost({ type: "chunk", data: cumulativeResponse })
+          onChunk: (snapshot) => {
+            safePost({ type: "chunk", data: snapshot })
           },
           onError: (error) => {
             if (streamError === undefined) {
@@ -209,10 +213,22 @@ function createStreamPortHandler<TSerializablePayload, TResponse, TChunk = unkno
   }
 }
 
+function createStreamSnapshot<TOutput>(
+  output: TOutput,
+  thinking: ThinkingSnapshot,
+): BackgroundStreamSnapshot<TOutput> {
+  return {
+    output: output !== null && typeof output === "object"
+      ? { ...output } as TOutput
+      : output,
+    thinking: { ...thinking },
+  }
+}
+
 export async function runStreamTextInBackground(
   serializablePayload: BackgroundStreamTextSerializablePayload,
-  options: StreamRuntimeOptions<string, string> = {},
-): Promise<string> {
+  options: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {},
+): Promise<BackgroundTextStreamSnapshot> {
   const { providerId, ...streamTextParams } = serializablePayload
   const { signal, onChunk, onError } = options
 
@@ -221,6 +237,11 @@ export async function runStreamTextInBackground(
   }
 
   const model = await getModelById(providerId)
+  let cumulativeText = ""
+  let thinking: ThinkingSnapshot = {
+    status: "thinking",
+    text: "",
+  }
 
   const result = streamText({
     ...(streamTextParams as Parameters<typeof streamText>[0]),
@@ -231,23 +252,49 @@ export async function runStreamTextInBackground(
     },
   })
 
-  let cumulativeResponse = ""
-  for await (const delta of result.textStream) {
+  for await (const part of result.fullStream) {
     if (signal?.aborted) {
       throw new DOMException("stream aborted", "AbortError")
     }
 
-    cumulativeResponse += delta
-    onChunk?.(delta, cumulativeResponse)
+    switch (part.type) {
+      case "text-delta": {
+        cumulativeText += part.text
+        onChunk?.(createStreamSnapshot(cumulativeText, thinking))
+        break
+      }
+      case "reasoning-delta": {
+        thinking = {
+          status: "thinking",
+          text: thinking.text + part.text,
+        }
+        onChunk?.(createStreamSnapshot(cumulativeText, thinking))
+        break
+      }
+      case "reasoning-end": {
+        thinking = {
+          ...thinking,
+          status: "complete",
+        }
+        onChunk?.(createStreamSnapshot(cumulativeText, thinking))
+        break
+      }
+    }
   }
 
-  return await result.output
+  const finalText = await result.output
+  thinking = {
+    ...thinking,
+    status: "complete",
+  }
+
+  return createStreamSnapshot(finalText, thinking)
 }
 
 export async function runStructuredObjectStreamInBackground(
   serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
-  options: StreamRuntimeOptions<Partial<Record<string, unknown>>, Record<string, unknown>> = {},
-): Promise<Record<string, unknown>> {
+  options: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot> = {},
+): Promise<BackgroundStructuredObjectStreamSnapshot> {
   const { providerId, outputSchema, ...streamParams } = serializablePayload
   const { signal, onChunk, onError } = options
 
@@ -256,6 +303,11 @@ export async function runStructuredObjectStreamInBackground(
   }
 
   const model = await getModelById(providerId)
+  let cumulativeValue: Record<string, unknown> = {}
+  let thinking: ThinkingSnapshot = {
+    status: "thinking",
+    text: "",
+  }
 
   const fieldTypeToZodSchema: Record<string, z.ZodTypeAny> = {
     string: z.string().nullable(),
@@ -279,33 +331,75 @@ export async function runStructuredObjectStreamInBackground(
     },
   })
 
-  for await (const partial of result.partialOutputStream) {
-    if (signal?.aborted) {
-      throw new DOMException("stream aborted", "AbortError")
-    }
+  const consumePartialOutput = async () => {
+    for await (const partial of result.partialOutputStream) {
+      if (signal?.aborted) {
+        throw new DOMException("stream aborted", "AbortError")
+      }
 
-    if (partial && typeof partial === "object" && !Array.isArray(partial)) {
-      // partialOutputStream returns the partial as the cumulative object so far
-      onChunk?.(partial, partial)
+      if (partial && typeof partial === "object" && !Array.isArray(partial)) {
+        cumulativeValue = { ...cumulativeValue, ...partial }
+        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+      }
     }
   }
 
-  return await result.output
+  const consumeFullStream = async () => {
+    for await (const part of result.fullStream) {
+      if (signal?.aborted) {
+        throw new DOMException("stream aborted", "AbortError")
+      }
+
+      switch (part.type) {
+        case "reasoning-delta": {
+          thinking = {
+            status: "thinking",
+            text: thinking.text + part.text,
+          }
+          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+          break
+        }
+        case "reasoning-end": {
+          thinking = {
+            ...thinking,
+            status: "complete",
+          }
+          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+          break
+        }
+      }
+    }
+  }
+
+  const [finalValue] = await Promise.all([
+    result.output,
+    consumePartialOutput(),
+    consumeFullStream(),
+  ])
+
+  thinking = {
+    ...thinking,
+    status: "complete",
+  }
+
+  return createStreamSnapshot(finalValue, thinking)
 }
 
 const parseStreamTextStartMessage = createStartMessageParser<BackgroundStreamTextSerializablePayload>(streamTextPayloadSchema)
 const parseStructuredObjectStartMessage
   = createStartMessageParser<BackgroundStreamStructuredObjectSerializablePayload>(structuredObjectPayloadSchema)
 
-export const handleStreamTextPort = createStreamPortHandler<BackgroundStreamTextSerializablePayload, string, string>(
+export const handleStreamTextPort = createStreamPortHandler<
+  BackgroundStreamTextSerializablePayload,
+  BackgroundTextStreamSnapshot
+>(
   runStreamTextInBackground,
   parseStreamTextStartMessage,
 )
 
 export const handleStreamStructuredObjectPort = createStreamPortHandler<
   BackgroundStreamStructuredObjectSerializablePayload,
-  Record<string, unknown>,
-  Partial<Record<string, unknown>>
+  BackgroundStructuredObjectStreamSnapshot
 >(
   runStructuredObjectStreamInBackground,
   parseStructuredObjectStartMessage,

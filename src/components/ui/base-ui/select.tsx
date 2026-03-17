@@ -58,6 +58,7 @@ function SelectContent({
   container,
   className,
   children,
+  positionerClassName,
   side = "bottom",
   sideOffset = 4,
   align = "center",
@@ -66,6 +67,9 @@ function SelectContent({
   ...props
 }: SelectPrimitive.Popup.Props
   & Pick<SelectPrimitive.Portal.Props, "container">
+  & {
+    positionerClassName?: string
+  }
   & Pick<
     SelectPrimitive.Positioner.Props,
     "align" | "alignOffset" | "side" | "sideOffset" | "alignItemWithTrigger"
@@ -78,7 +82,7 @@ function SelectContent({
         align={align}
         alignOffset={alignOffset}
         alignItemWithTrigger={alignItemWithTrigger}
-        className="isolate z-50"
+        className={cn("isolate z-50", positionerClassName)}
       >
         <SelectPrimitive.Popup
           data-slot="select-content"

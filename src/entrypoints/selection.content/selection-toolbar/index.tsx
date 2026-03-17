@@ -1,15 +1,22 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
+import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { MARGIN } from "@/utils/constants/selection"
+import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
-import { AiButton, AiPopover } from "./ai-button"
-import { isSelectionToolbarVisibleAtom, selectionContentAtom, selectionRangeAtom } from "./atom"
+import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
+import { AiButton } from "./ai-button"
+import {
+  clearSelectionStateAtom,
+  isSelectionToolbarVisibleAtom,
+  setSelectionStateAtom,
+} from "./atoms"
 import { CloseButton, DropEvent } from "./close-button"
-import { SelectionToolbarCustomFeatureButtons, SelectionToolbarCustomFeaturePopover } from "./custom-feature-button"
+import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
 import { SpeakButton } from "./speak-button"
-import { TranslateButton, TranslatePopover } from "./translate-button"
+import { TranslateButton } from "./translate-button"
 
 enum SelectionDirection {
   TOP_LEFT = "TOP_LEFT",
@@ -69,8 +76,8 @@ export function SelectionToolbar() {
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
   const isDraggingFromTooltipRef = useRef(false) // track if dragging started from tooltip
   const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(isSelectionToolbarVisibleAtom)
-  const setSelectionContent = useSetAtom(selectionContentAtom)
-  const setSelectionRange = useSetAtom(selectionRangeAtom)
+  const setSelectionState = useSetAtom(setSelectionStateAtom)
+  const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const dropdownOpenRef = useRef(false)
 
@@ -133,7 +140,7 @@ export function SelectionToolbar() {
 
         // check if there is text selected
         const selection = window.getSelection()
-        const selectedText = selection?.toString().trim() || ""
+        const selectionSnapshot = readSelectionSnapshot(selection)
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
@@ -141,9 +148,11 @@ export function SelectionToolbar() {
           return
         }
 
-        if (selection && selectedText.length > 0) {
-          setSelectionContent(selectedText)
-          setSelectionRange(selection.getRangeAt(0))
+        if (selectionSnapshot) {
+          setSelectionState({
+            selection: selectionSnapshot,
+            context: buildContextSnapshot(selectionSnapshot),
+          })
           // calculate the position relative to the document
           const scrollY = window.scrollY
           const scrollX = window.scrollX
@@ -189,6 +198,7 @@ export function SelectionToolbar() {
       // Record selection start position
       selectionStartRef.current = { x: e.clientX, y: e.clientY }
 
+      clearSelectionState()
       setIsSelectionToolbarVisible(false)
     }
 
@@ -196,6 +206,7 @@ export function SelectionToolbar() {
       // if the selected content is cleared, hide the tooltip
       const selection = window.getSelection()
       if (!selection || selection.toString().trim().length === 0) {
+        clearSelectionState()
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
         if (!dropdownOpenRef.current)
@@ -227,7 +238,7 @@ export function SelectionToolbar() {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [isSelectionToolbarVisible, setSelectionContent, setIsSelectionToolbarVisible, setSelectionRange, updatePosition])
+  }, [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible, setSelectionState, updatePosition])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -242,25 +253,33 @@ export function SelectionToolbar() {
     matchDomainPattern(window.location.href, pattern),
   )
 
+  const { features } = selectionToolbar
+  const hasAnyEnabledFeature
+    = features.translate.enabled
+      || (!isFirefox && features.speak.enabled)
+      || features.vocabularyInsight.enabled
+      || selectionToolbar.customActions.some(a => a.enabled !== false)
+
   return (
     <div ref={tooltipContainerRef} className={NOTRANSLATE_CLASS}>
-      {isSelectionToolbarVisible && selectionToolbar.enabled && !isSiteDisabled && (
+      {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
         <div
           ref={tooltipRef}
-          className="group absolute z-2147483647 bg-background rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center"
+          aria-hidden={!isSelectionToolbarVisible}
+          className={cn(
+            `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} bg-popover rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity`,
+            isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+          )}
         >
-          <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-[420px] no-scrollbar">
-            <AiButton />
-            <TranslateButton />
-            {!isFirefox && <SpeakButton />}
-            <SelectionToolbarCustomFeatureButtons />
+          <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
+            {features.translate.enabled && <TranslateButton />}
+            {!isFirefox && features.speak.enabled && <SpeakButton />}
+            {features.vocabularyInsight.enabled && <AiButton />}
+            <SelectionToolbarCustomActionButtons />
           </div>
           <CloseButton />
         </div>
       )}
-      <AiPopover />
-      <TranslatePopover />
-      <SelectionToolbarCustomFeaturePopover />
     </div>
   )
 }

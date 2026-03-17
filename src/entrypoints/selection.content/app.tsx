@@ -1,16 +1,15 @@
 import { Toaster } from "sonner"
-import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
-import { cn } from "@/utils/styles/utils"
 import { useInputTranslation } from "./input-translation"
+import { SELECTION_CONTENT_OVERLAY_LAYERS } from "./overlay-layers"
 import { SelectionToolbar } from "./selection-toolbar"
 
 export default function App() {
   useInputTranslation()
 
   return (
-    <div className={cn("text-black dark:text-white", NOTRANSLATE_CLASS)}>
+    <>
       <SelectionToolbar />
-      <Toaster richColors className="z-2147483647 notranslate" />
-    </div>
+      <Toaster richColors className={`${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} notranslate`} />
+    </>
   )
 }
