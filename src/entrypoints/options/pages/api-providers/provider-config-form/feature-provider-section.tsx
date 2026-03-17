@@ -8,7 +8,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/component
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProvider } from "@/types/config/provider"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
-import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { buildFeatureProviderPatch, FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { cn } from "@/utils/styles/utils"
 import { withForm } from "./form"
 
@@ -81,7 +81,7 @@ export const FeatureProviderSection = withForm({
                     }}
                   />
                   <span className="text-sm">
-                    {i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`)}
+                    {i18n.t(getFeatureLabelI18nKey(featureKey))}
                   </span>
                 </div>
               )

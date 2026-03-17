@@ -51,7 +51,7 @@ export const IconField = withForm({
             </div>
             {field.state.meta.errors.length > 0 && (
               <span className="text-sm font-normal text-destructive">
-                {field.state.meta.errors.map(error => typeof error === "string" ? error : error?.message).join(", ")}
+                {field.state.meta.errors.join(", ")}
               </span>
             )}
           </Field>

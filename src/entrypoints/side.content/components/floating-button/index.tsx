@@ -9,6 +9,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { APP_NAME } from "@/utils/constants/app"
 import { sendMessage } from "@/utils/message"
@@ -103,7 +105,13 @@ export default function FloatingButton() {
       // 只有未移动过才触发点击
       if (!hasMoved) {
         if (floatingButton.clickAction === "translate") {
-          void sendMessage("tryToSetEnablePageTranslationOnContentScript", { enabled: !translationState.enabled })
+          const nextEnabled = !translationState.enabled
+          void sendMessage("tryToSetEnablePageTranslationOnContentScript", {
+            enabled: nextEnabled,
+            analyticsContext: nextEnabled
+              ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.FLOATING_BUTTON)
+              : undefined,
+          })
         }
         else {
           setIsSideOpen(o => !o)

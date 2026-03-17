@@ -690,6 +690,13 @@ options:
       batchRequestCount: Batch Request Count
   config:
     title: Config
+    about:
+      title: About
+      description: Read Frog was born in April 2025
+      mission: Read Frog aims to expand equal access to high-quality education in the AI era by making learning experiences that feel closer to a real teacher affordable across language learning, medicine, and other knowledge-heavy fields.
+      analytics:
+        title: Help improve user experience
+        tooltip: When enabled, Read Frog sends anonymous product usage signals so we can verify feature reliability, improve performance and UX polish, and prioritize future work.
     sync:
       title: Manual Config Sync
       description: Manually import and export your configuration settings

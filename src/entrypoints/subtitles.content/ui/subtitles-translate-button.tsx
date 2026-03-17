@@ -1,6 +1,9 @@
+import type { FeatureUsageContext } from "@/types/analytics"
 import { useAtomValue } from "jotai"
 import { useEffect, useEffectEvent } from "react"
 import logo from "@/assets/icons/original/read-frog.png"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 import { TRANSLATE_BUTTON_CLASS } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
@@ -9,7 +12,7 @@ import { subtitlesStore, subtitlesVisibleAtom } from "../atoms"
 export function SubtitleToggleButton(
   { onToggle }:
   {
-    onToggle: (enabled: boolean) => void
+    onToggle: (enabled: boolean, analyticsContext?: FeatureUsageContext) => void
   },
 ) {
   const isVisible = useAtomValue(subtitlesVisibleAtom, { store: subtitlesStore })
@@ -18,7 +21,13 @@ export function SubtitleToggleButton(
     const config = await getLocalConfig()
     const autoStart = config?.videoSubtitles?.autoStart ?? false
     if (autoStart) {
-      onToggle(true)
+      onToggle(
+        true,
+        createFeatureUsageContext(
+          ANALYTICS_FEATURE.VIDEO_SUBTITLES,
+          ANALYTICS_SURFACE.VIDEO_SUBTITLES_AUTO,
+        ),
+      )
     }
   })
 
@@ -27,7 +36,16 @@ export function SubtitleToggleButton(
   }, [])
 
   const handleClick = () => {
-    onToggle(!isVisible)
+    const nextEnabled = !isVisible
+    onToggle(
+      nextEnabled,
+      nextEnabled
+        ? createFeatureUsageContext(
+            ANALYTICS_FEATURE.VIDEO_SUBTITLES,
+            ANALYTICS_SURFACE.VIDEO_SUBTITLES,
+          )
+        : undefined,
+    )
   }
 
   return (

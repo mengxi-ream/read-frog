@@ -8,7 +8,9 @@ import { RiTranslate } from "@remixicon/react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
 import { SelectionPopover } from "@/components/ui/selection-popover"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
@@ -163,6 +165,11 @@ export function TranslateButton() {
       return
     }
 
+    const analyticsContext = createFeatureUsageContext(
+      ANALYTICS_FEATURE.SELECTION_TRANSLATION,
+      ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+    )
+
     setIsTranslating(true)
     setTranslatedText(undefined)
     setThinking(null)
@@ -174,6 +181,10 @@ export function TranslateButton() {
         setIsTranslating(false)
         setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
       }
+      void trackFeatureUsed({
+        ...analyticsContext,
+        outcome: "failure",
+      })
       return
     }
 
@@ -182,6 +193,10 @@ export function TranslateButton() {
         setIsTranslating(false)
         setError(createSelectionToolbarPrecheckError("translate", "providerDisabled"))
       }
+      void trackFeatureUsed({
+        ...analyticsContext,
+        outcome: "failure",
+      })
       return
     }
 
@@ -225,12 +240,24 @@ export function TranslateButton() {
       if (runIdRef.current === runId) {
         setTranslatedText(nextTranslatedText)
       }
+
+      void trackFeatureUsed({
+        ...analyticsContext,
+        outcome: "success",
+      })
     }
     catch (error) {
       if (!isAbortError(error) && runIdRef.current === runId) {
         setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
         console.error("Translation error:", error)
         setError(createSelectionToolbarRuntimeError("translate", error))
+      }
+
+      if (!isAbortError(error)) {
+        void trackFeatureUsed({
+          ...analyticsContext,
+          outcome: "failure",
+        })
       }
     }
     finally {

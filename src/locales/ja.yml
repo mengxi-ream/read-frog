@@ -575,6 +575,13 @@ options:
       batchRequestCount: バッチリクエスト数
   config:
     title: 設定
+    about:
+      title: Read Frog について
+      description: Read Frog は 2025 年 4 月に生まれました
+      mission: Read Frog は、AI 時代における質の高い教育機会への平等なアクセスを広げるため、語学学習、医学、その他の知識集約型分野で、実際の教師に近い学習体験を手頃な価格で提供することを目指しています。
+      analytics:
+        title: ユーザー体験の改善に協力する
+        tooltip: 有効にすると、Read Frog は匿名の利用シグナルを送信し、機能の安定性確認、性能や UX の改善、今後優先すべき機能の判断に役立てます。
     sync:
       title: 手動設定同期
       description: 手動で設定をインポート・エクスポート

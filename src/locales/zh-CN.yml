@@ -690,6 +690,13 @@ options:
       batchRequestCount: 批量请求数量
   config:
     title: 配置
+    about:
+      title: 关于
+      description: Read Frog 出生于 2025 年 4 月
+      mission: Read Frog 致力于在 AI 时代扩大高质量教育机会的平等可及性，通过更低成本地提供尽可能接近真人教师的学习体验，覆盖语言学习、医学以及其他知识密集型领域。
+      analytics:
+        title: 帮助改进用户体验
+        tooltip: 开启后，Read Frog 会发送匿名的产品使用信号，用于验证功能是否稳定、优化性能与交互细节，并帮助我们决定接下来优先投入的方向。
     sync:
       title: 手动配置同步
       description: 手动导入和导出您的配置设置

@@ -25,6 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
+import { ANALYTICS_SURFACE } from "@/types/analytics"
 import {
   EDGE_TTS_VOICES,
   getDefaultTTSVoiceForLanguage,
@@ -78,7 +79,7 @@ export function TtsConfig() {
 
 function TtsDefaultVoiceField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
-  const { play, isFetching, isPlaying } = useTextToSpeech()
+  const { play, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TTS_SETTINGS)
   const isFetchingOrPlaying = isFetching || isPlaying
 
   const handlePreview = async () => {

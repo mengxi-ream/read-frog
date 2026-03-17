@@ -1,3 +1,6 @@
+import type { FeatureUsageContext } from "@/types/analytics"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getDetectedCodeFromStorage } from "@/utils/config/languages"
 import { getLocalConfig } from "@/utils/config/storage"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
@@ -25,7 +28,7 @@ interface IPageTranslationManager {
    * Starts the automatic page translation functionality
    * Registers observers, touch triggers and set storage
    */
-  start: () => Promise<void>
+  start: (analyticsContext?: FeatureUsageContext) => Promise<void>
 
   /**
    * Stops the automatic page translation functionality
@@ -76,15 +79,23 @@ export class PageTranslationManager implements IPageTranslationManager {
     return this.isPageTranslating
   }
 
-  async start(): Promise<void> {
+  async start(analyticsContext?: FeatureUsageContext): Promise<void> {
     if (this.isPageTranslating) {
       console.warn("PageTranslationManager is already active")
       return
     }
 
+    const trackedContext = window === window.top ? analyticsContext : undefined
+
     const config = await getLocalConfig()
     if (!config) {
       console.warn("Config is not initialized")
+      if (trackedContext) {
+        void trackFeatureUsed({
+          ...trackedContext,
+          outcome: "failure",
+        })
+      }
       return
     }
 
@@ -95,44 +106,68 @@ export class PageTranslationManager implements IPageTranslationManager {
       translate: config.translate,
       language: config.language,
     }, detectedCode)) {
+      if (trackedContext) {
+        void trackFeatureUsed({
+          ...trackedContext,
+          outcome: "failure",
+        })
+      }
       return
     }
 
-    await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
-      enabled: true,
-    })
+    try {
+      await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
+        enabled: true,
+      })
 
-    this.isPageTranslating = true
-    await this.primeDocumentTitleContext(config.translate.enableAIContentAware)
-    this.startDocumentTitleTracking()
+      this.isPageTranslating = true
+      await this.primeDocumentTitleContext(config.translate.enableAIContentAware)
+      this.startDocumentTitleTracking()
 
-    // Listen to existing elements when they enter the viewpoint
-    const walkId = crypto.randomUUID()
-    this.walkId = walkId
-    this.intersectionObserver = new IntersectionObserver(async (entries, observer) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting) {
-          if (isHTMLElement(entry.target)) {
-            if (!entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
-              const currentConfig = await getLocalConfig()
-              if (!currentConfig) {
-                logger.error("Global config is not initialized")
-                return
+      // Listen to existing elements when they enter the viewpoint
+      const walkId = crypto.randomUUID()
+      this.walkId = walkId
+      this.intersectionObserver = new IntersectionObserver(async (entries, observer) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (isHTMLElement(entry.target)) {
+              if (!entry.target.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
+                const currentConfig = await getLocalConfig()
+                if (!currentConfig) {
+                  logger.error("Global config is not initialized")
+                  return
+                }
+                void translateWalkedElement(entry.target, walkId, currentConfig)
               }
-              void translateWalkedElement(entry.target, walkId, currentConfig)
             }
+            observer.unobserve(entry.target)
           }
-          observer.unobserve(entry.target)
         }
+      }, this.intersectionOptions)
+
+      // Initialize walkability state for existing elements
+      this.addDontWalkIntoElements(document.body)
+      await this.observerTopLevelParagraphs(document.body)
+
+      // Start observing mutations from document.body and all shadow roots
+      this.observeMutations(document.body)
+
+      if (trackedContext) {
+        void trackFeatureUsed({
+          ...trackedContext,
+          outcome: "success",
+        })
       }
-    }, this.intersectionOptions)
-
-    // Initialize walkability state for existing elements
-    this.addDontWalkIntoElements(document.body)
-    await this.observerTopLevelParagraphs(document.body)
-
-    // Start observing mutations from document.body and all shadow roots
-    this.observeMutations(document.body)
+    }
+    catch (error) {
+      if (trackedContext) {
+        void trackFeatureUsed({
+          ...trackedContext,
+          outcome: "failure",
+        })
+      }
+      throw error
+    }
   }
 
   stop(): void {
@@ -196,8 +231,14 @@ export class PageTranslationManager implements IPageTranslationManager {
     const onEnd = () => {
       if (!startTouches)
         return
-      if (performance.now() - startTime < PageTranslationManager.MAX_DURATION)
-        this.isPageTranslating ? this.stop() : void this.start()
+      if (performance.now() - startTime < PageTranslationManager.MAX_DURATION) {
+        this.isPageTranslating
+          ? this.stop()
+          : void this.start(createFeatureUsageContext(
+            ANALYTICS_FEATURE.PAGE_TRANSLATION,
+            ANALYTICS_SURFACE.TOUCH_GESTURE,
+          ))
+      }
       reset()
     }
 

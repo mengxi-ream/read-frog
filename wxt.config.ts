@@ -90,7 +90,11 @@ export default defineConfig({
 
               // Check required env vars only for zip builds
               if (process.env.WXT_ZIP_MODE) {
-                const requiredEnvVars = ["WXT_GOOGLE_CLIENT_ID"]
+                const requiredEnvVars = [
+                  "WXT_GOOGLE_CLIENT_ID",
+                  "WXT_POSTHOG_API_KEY",
+                  "WXT_POSTHOG_HOST",
+                ]
                 const missing = requiredEnvVars.filter(key => !process.env[key])
 
                 if (missing.length > 0) {

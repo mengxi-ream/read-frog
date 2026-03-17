@@ -1,6 +1,8 @@
 import type { Browser } from "#imports"
 import type { Config } from "@/types/config/config"
 import { browser, i18n, storage } from "#imports"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
 import { sendMessage } from "@/utils/message"
@@ -163,7 +165,12 @@ async function handleTranslateClick(tabId: number) {
   await storage.setItem(getTranslationStateKey(tabId), { enabled: newState })
 
   // Notify content script in that specific tab
-  void sendMessage("askManagerToTogglePageTranslation", { enabled: newState }, tabId)
+  void sendMessage("askManagerToTogglePageTranslation", {
+    enabled: newState,
+    analyticsContext: newState
+      ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.CONTEXT_MENU)
+      : undefined,
+  }, tabId)
 
   // Update menu title immediately
   await updateTranslateMenuTitle(tabId)

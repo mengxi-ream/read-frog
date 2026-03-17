@@ -9,7 +9,7 @@ import { isAPIProviderConfig, isLLMProviderConfig, isPureAPIProvider } from "@/t
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { featureProviderConfigAtom } from "@/utils/atoms/provider"
 import { filterEnabledProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
-import { buildFeatureProviderPatch, FEATURE_KEY_I18N_MAP, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { buildFeatureProviderPatch, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { ConfigCard } from "../../components/config-card"
 import { SetApiKeyWarning } from "../../components/set-api-key-warning"
 
@@ -41,7 +41,7 @@ function FeatureProviderField({ featureKey, excludeProviderTypes }: {
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div className="flex flex-wrap" />}>
-        {i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[featureKey]}`)}
+        {i18n.t(getFeatureLabelI18nKey(featureKey))}
         {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
       </FieldLabel>
       <ProviderSelector

@@ -50,7 +50,29 @@ import {
 } from "@/utils/constants/custom-action"
 import { withForm } from "./form"
 
-const t = (key: string) => i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}`)
+type CustomActionFormKey = "fieldName"
+  | "fieldNamePlaceholder"
+  | "fieldType"
+  | "fieldDescription"
+  | "fieldDescriptionPlaceholder"
+  | "fieldSpeaking"
+  | "editFieldDialog.save"
+  | "deleteFieldDialog.title"
+  | "deleteFieldDialog.description"
+  | "deleteFieldDialog.cancel"
+  | "deleteFieldDialog.confirm"
+  | "outputSchema"
+  | "autoFieldPrefix"
+  | "addField"
+  | "addFieldDialog.title"
+  | "editFieldDialog.title"
+
+type CustomActionFormI18nKey = `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${CustomActionFormKey}`
+type CustomActionTokenI18nKey = `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${(typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]}`
+
+function t(key: CustomActionFormKey) {
+  return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}` as CustomActionFormI18nKey)
+}
 
 function FieldDialog({
   field: outputField,
@@ -91,7 +113,7 @@ function FieldDialog({
 
   const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map(token => ({
     text: getSelectionToolbarCustomActionTokenCellText(token),
-    description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}`),
+    description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}` as CustomActionTokenI18nKey),
   }))
 
   useEffect(() => {
@@ -377,7 +399,7 @@ export const OutputSchemaField = withForm({
 
               {field.state.meta.errors.length > 0 && (
                 <span className="text-sm font-normal text-destructive">
-                  {field.state.meta.errors.map(error => typeof error === "string" ? error : error?.message).join(", ")}
+                  {field.state.meta.errors.join(", ")}
                 </span>
               )}
             </Field>

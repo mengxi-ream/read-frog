@@ -94,10 +94,10 @@ export default defineContentScript({
 
     // Listen for translation state changes from background
     const cleanupTranslationStateListener = onMessage("askManagerToTogglePageTranslation", (msg) => {
-      const { enabled } = msg.data
+      const { enabled, analyticsContext } = msg.data
       if (enabled === manager.isActive)
         return
-      enabled ? void manager.start() : manager.stop()
+      enabled ? void manager.start(window === window.top ? analyticsContext : undefined) : manager.stop()
     })
 
     ctx.onInvalidated(() => {

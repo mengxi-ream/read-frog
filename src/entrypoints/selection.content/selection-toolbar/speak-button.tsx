@@ -4,6 +4,7 @@ import { useAtomValue } from "jotai"
 import { useCallback, useState } from "react"
 import { toast } from "sonner"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
+import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SelectionToolbarTooltip } from "../components/selection-tooltip"
 import { selectionContentAtom } from "./atoms"
@@ -13,7 +14,7 @@ const TOOLTIP_TRIGGER_PRESS_REASON = "trigger-press"
 export function SpeakButton() {
   const selectionContent = useAtomValue(selectionContentAtom)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
-  const { play, stop, isFetching, isPlaying } = useTextToSpeech()
+  const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const isBusy = isFetching || isPlaying
   const [tooltipOpen, setTooltipOpen] = useState(false)
 

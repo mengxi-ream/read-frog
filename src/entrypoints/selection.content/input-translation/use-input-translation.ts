@@ -1,5 +1,7 @@
 import { useAtom } from "jotai"
 import { useCallback, useEffect, useRef } from "react"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { translateTextForInput } from "@/utils/host/translate/translate-variants"
 
@@ -189,7 +191,13 @@ export function useInputTranslation() {
     const originalText = text
 
     try {
-      const translatedText = await translateTextForInput(text, fromLang, toLang)
+      const translatedText = await trackFeatureAttempt(
+        createFeatureUsageContext(
+          ANALYTICS_FEATURE.INPUT_TRANSLATION,
+          ANALYTICS_SURFACE.INPUT_TRANSLATION,
+        ),
+        () => translateTextForInput(text, fromLang, toLang),
+      )
 
       // Check if element content changed during translation (user input)
       let currentText: string

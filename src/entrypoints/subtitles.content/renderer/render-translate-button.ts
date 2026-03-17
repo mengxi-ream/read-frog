@@ -1,3 +1,4 @@
+import type { FeatureUsageContext } from "@/types/analytics"
 import * as React from "react"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
@@ -24,7 +25,7 @@ const wrapperCSS = `
 `
 
 export function renderSubtitlesTranslateButton(
-  onToggle: (enabled: boolean) => void,
+  onToggle: (enabled: boolean, analyticsContext?: FeatureUsageContext) => void,
 ): HTMLDivElement {
   const existingContainer = document.querySelector<HTMLDivElement>(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
 

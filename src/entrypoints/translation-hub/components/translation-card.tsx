@@ -7,6 +7,8 @@ import { toast } from "sonner"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
@@ -39,22 +41,30 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
     mutationKey: ["translate", providerId],
     meta: { suppressToast: true },
     mutationFn: async (req: NonNullable<typeof request>) => {
-      if (!provider)
-        throw new Error("Provider not found")
+      return await trackFeatureAttempt(
+        createFeatureUsageContext(
+          ANALYTICS_FEATURE.TRANSLATION_HUB,
+          ANALYTICS_SURFACE.TRANSLATION_HUB,
+        ),
+        async () => {
+          if (!provider)
+            throw new Error("Provider not found")
 
-      const myRequestId = ++requestIdRef.current
-      const result = await executeTranslate(req.inputText, {
-        sourceCode: req.sourceLanguage,
-        targetCode: req.targetLanguage,
-        level: language.level,
-      }, provider, getTranslatePrompt)
+          const myRequestId = ++requestIdRef.current
+          const result = await executeTranslate(req.inputText, {
+            sourceCode: req.sourceLanguage,
+            targetCode: req.targetLanguage,
+            level: language.level,
+          }, provider, getTranslatePrompt)
 
-      // Ignore stale responses - return undefined to silently discard
-      if (requestIdRef.current !== myRequestId) {
-        return undefined
-      }
+          // Ignore stale responses - return undefined to silently discard
+          if (requestIdRef.current !== myRequestId) {
+            return undefined
+          }
 
-      return result
+          return result
+        },
+      )
     },
   })
 

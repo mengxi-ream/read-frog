@@ -6,6 +6,7 @@ import { buttonVariants } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
+import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { cn } from "@/utils/styles/utils"
 
@@ -21,7 +22,7 @@ export function FieldSpeakButton({
   const popoverOverlay = useSelectionPopoverOverlayProps()
   const [tooltipOpen, setTooltipOpen] = useState(false)
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
-  const { play, stop, isFetching, isPlaying } = useTextToSpeech()
+  const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
 
   const handleClick = useCallback(() => {
     if (disabled) {

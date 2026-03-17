@@ -1,5 +1,7 @@
 import type { PageTranslationManager } from "./page-translation"
 import hotkeys from "hotkeys-js"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
 
 /**
@@ -21,7 +23,9 @@ export async function bindTranslationShortcutKey(pageTranslationManager: PageTra
       pageTranslationManager.stop()
     }
     else {
-      void pageTranslationManager.start()
+      void pageTranslationManager.start(
+        createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.SHORTCUT),
+      )
     }
     return false
   })

@@ -101,6 +101,7 @@
     "jotai-family": "^1.0.1",
     "js-sha256": "^0.11.1",
     "ollama-ai-provider-v2": "^3.4.0",
+    "posthog-js": "^1.360.2",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-error-boundary": "^6.1.1",
@@ -154,7 +155,7 @@
     "type-fest": "^5.4.4",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0",
-    "wxt": "0.20.18"
+    "wxt": "0.20.19"
   },
   "devEngines": {
     "runtime": {

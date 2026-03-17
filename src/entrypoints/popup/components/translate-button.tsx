@@ -1,6 +1,8 @@
 import { browser, i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
 import { Button } from "@/components/ui/base-ui/button"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { sendMessage } from "@/utils/message"
 import { formatHotkey } from "@/utils/os.ts"
@@ -24,9 +26,13 @@ export default function TranslateButton({ className }: { className?: string }) {
     })
 
     if (currentTab.id) {
+      const nextEnabled = !isPageTranslated
       void sendMessage("tryToSetEnablePageTranslationByTabId", {
         tabId: currentTab.id,
-        enabled: !isPageTranslated,
+        enabled: nextEnabled,
+        analyticsContext: nextEnabled
+          ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.POPUP)
+          : undefined,
       })
 
       setIsPageTranslated(prev => !prev)

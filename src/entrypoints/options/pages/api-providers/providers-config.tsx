@@ -16,7 +16,7 @@ import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import { getAPIProvidersConfig } from "@/utils/config/helpers"
-import { FEATURE_KEY_I18N_MAP, FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { cn } from "@/utils/styles/utils"
 import { ConfigCard } from "../../components/config-card"
@@ -161,7 +161,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
             <TooltipContent>
               <ul className="list-disc list-inside marker:text-green-500">
                 {assignedFeatures.map(key => (
-                  <li key={key}>{i18n.t(`options.general.featureProviders.features.${FEATURE_KEY_I18N_MAP[key]}`)}</li>
+                  <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
                 ))}
                 {isLanguageDetectionProvider && (
                   <li>{i18n.t("options.general.languageDetection.title")}</li>
