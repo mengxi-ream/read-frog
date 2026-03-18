@@ -101,4 +101,18 @@ describe("getRandomUUID", () => {
     expect(uuid).toMatch(UUID_V4_PATTERN)
     expect(getRandomValues).toHaveBeenCalledTimes(1)
   })
+
+  it("should not patch crypto.randomUUID when the module is imported", async () => {
+    Object.defineProperty(globalThis, "crypto", {
+      configurable: true,
+      value: {
+        getRandomValues: originalCrypto.getRandomValues.bind(originalCrypto),
+      } as unknown as Crypto,
+    })
+
+    vi.resetModules()
+    await import("@/utils/crypto-polyfill")
+
+    expect(globalThis.crypto.randomUUID).toBeUndefined()
+  })
 })

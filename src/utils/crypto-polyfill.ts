@@ -42,13 +42,3 @@ export function getRandomUUID(): string {
 
   return generateUUIDv4()
 }
-
-// Only polyfill if crypto.randomUUID is not available
-if (
-  typeof crypto !== "undefined"
-  && typeof crypto.randomUUID !== "function"
-  && typeof crypto.getRandomValues === "function"
-) {
-  // @ts-expect-error - polyfill signature mismatch (our function returns string, native returns `${string}-...`)
-  crypto.randomUUID = generateUUIDv4
-}
