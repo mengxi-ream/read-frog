@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.30.4
+
+### Patch Changes
+
+- [#1139](https://github.com/mengxi-ream/read-frog/pull/1139) [`341adba`](https://github.com/mengxi-ream/read-frog/commit/341adba45228666e64337affa06cbe23463932c3) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): add required Firefox consent field
+
+## 1.30.3
+
+### Patch Changes
+
+- [#1136](https://github.com/mengxi-ream/read-frog/pull/1136) [`0decdba`](https://github.com/mengxi-ream/read-frog/commit/0decdba82f8622fe20807be92a6535ccae781b07) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): add Firefox data collection consent metadata
+
 ## 1.30.2
 
 ### Patch Changes
