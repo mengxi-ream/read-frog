@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
 import { getDetectedCodeFromStorage } from "@/utils/config/languages"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { isHTMLElement } from "../dom/filter"
 import { findNearestAncestorBlockNodeAt } from "../dom/find"
 import { walkAndLabelElement } from "../dom/traversal"
@@ -29,7 +30,7 @@ export async function removeOrShowNodeTranslation(point: Point, config: Config):
     return
   }
 
-  const id = crypto.randomUUID()
+  const id = getRandomUUID()
   walkAndLabelElement(node, id, config)
   await translateWalkedElement(node, id, config, true)
 }

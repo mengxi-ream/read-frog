@@ -4,13 +4,14 @@ import { storage } from "#imports"
 import { dequal } from "dequal"
 import { BACKUP_ID_PREFIX, MAX_BACKUPS_COUNT } from "@/utils/constants/backup"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { logger } from "@/utils/logger"
 
 /**
  * Generate a unique ID for a backup based on timestamp
  */
 function generateBackupId(timestamp: number): string {
-  const uuid = crypto.randomUUID()
+  const uuid = getRandomUUID()
   return `${BACKUP_ID_PREFIX}_${timestamp}_${uuid}`
 }
 

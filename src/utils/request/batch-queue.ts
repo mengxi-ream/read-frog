@@ -1,4 +1,5 @@
 import { batchQueueConfigSchema } from "@/types/config/translate"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 
 export class BatchCountMismatchError extends Error {
   constructor(expected: number, got: number, results: unknown[]) {
@@ -137,7 +138,7 @@ export class BatchQueue<T, R> {
   }
 
   private createNewPendingBatch(task: BatchTask<T, R>, batchKey: string) {
-    const batchId = crypto.randomUUID()
+    const batchId = getRandomUUID()
 
     const pendingBatch: PendingBatch<T, R> = {
       id: batchId,

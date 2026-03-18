@@ -4,15 +4,7 @@ import type {
   StreamPortStartMessage,
 } from "@/types/background-stream"
 import { browser } from "#imports"
-import { generateUUIDv4 } from "@/utils/crypto-polyfill"
-
-function createRequestId() {
-  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
-    return crypto.randomUUID()
-  }
-
-  return generateUUIDv4()
-}
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 
 /**
  * Handles cleanup, abort signals, and disconnection automatically
@@ -33,7 +25,7 @@ export function createPortStreamPromise<TResponse = string, TSerializablePayload
       keepAliveIntervalMs = 20_000,
     } = options
 
-    const requestId = createRequestId()
+    const requestId = getRandomUUID()
     const port = browser.runtime.connect({ name: portName })
 
     let settled = false

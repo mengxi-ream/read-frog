@@ -9,6 +9,7 @@ import {
   DEFAULT_ANALYTICS_ENABLED,
 } from "@/utils/constants/analytics"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 
@@ -36,7 +37,7 @@ function createDefaultRuntime(): BackgroundAnalyticsRuntime {
   return {
     apiHost: import.meta.env.WXT_POSTHOG_HOST,
     apiKey: import.meta.env.WXT_POSTHOG_API_KEY,
-    createDistinctId: () => crypto.randomUUID(),
+    createDistinctId: () => getRandomUUID(),
     defaultAnalyticsEnabled: DEFAULT_ANALYTICS_ENABLED,
     distinctIdOverride: import.meta.env.WXT_POSTHOG_TEST_UUID,
     extensionVersion: EXTENSION_VERSION,

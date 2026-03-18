@@ -1,4 +1,5 @@
 import type { EdgeTTSEndpointResponse, EdgeTTSTokenInfo } from "./types"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import {
   EDGE_TTS_CLIENT_VERSION,
   EDGE_TTS_DEFAULT_TOKEN_TTL_MS,
@@ -73,7 +74,7 @@ export async function getEdgeTTSEndpointToken(): Promise<EdgeTTSTokenInfo> {
 
   try {
     const signature = await generateTranslatorSignature(EDGE_TTS_ENDPOINT_URL)
-    const traceId = crypto.randomUUID().replace(HYPHEN_PATTERN, "")
+    const traceId = getRandomUUID().replace(HYPHEN_PATTERN, "")
 
     const response = await fetch(EDGE_TTS_ENDPOINT_URL, {
       method: "POST",
