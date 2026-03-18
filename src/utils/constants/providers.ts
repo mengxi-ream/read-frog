@@ -553,7 +553,6 @@ export interface ConnectionOptionFieldDef {
   labelKey: string
   type: "text" | "password"
   placeholder?: string
-  required?: boolean
 }
 
 // https://ai-sdk.dev/providers/ai-sdk-providers
@@ -561,11 +560,7 @@ export const PROVIDER_CONNECTION_OPTIONS_FIELDS: Partial<
   Record<LLMProviderTypes, ConnectionOptionFieldDef[]>
 > = {
   bedrock: [
-    { key: "region", labelKey: "region", type: "text", placeholder: "us-east-1", required: true },
-  ],
-  openai: [
-    { key: "organization", labelKey: "organization", type: "text" },
-    { key: "project", labelKey: "project", type: "text" },
+    { key: "region", labelKey: "region", type: "text", placeholder: "us-east-1" },
   ],
 }
 

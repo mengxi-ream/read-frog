@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat: add provider connection options
+feat: add connection options field to provider config, support bedrock region
