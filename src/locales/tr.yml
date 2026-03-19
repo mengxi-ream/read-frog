@@ -129,6 +129,8 @@ options:
         noModelsFound: Model bulunamadı
       featureProviders: Özellik Sağlayıcıları
       advancedOptions: Gelişmiş Seçenekler
+      connectionOptionLabels:
+        region: Bölge
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
       providerOptions: Sağlayıcı Seçenekleri

@@ -129,6 +129,8 @@ options:
         noModelsFound: 모델을 찾을 수 없습니다
       featureProviders: 기능 제공업체
       advancedOptions: 고급 옵션
+      connectionOptionLabels:
+        region: 리전
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
       providerOptions: 제공자 옵션

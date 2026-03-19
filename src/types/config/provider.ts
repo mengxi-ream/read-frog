@@ -123,6 +123,7 @@ export const baseAPIProviderConfigSchema = baseProviderConfigSchema.extend({
   baseURL: z.string().optional(),
   temperature: z.number().min(0).optional(),
   providerOptions: z.record(z.string(), z.any()).optional(),
+  connectionOptions: z.record(z.string(), z.any()).optional(),
 })
 
 export const baseCustomLLMProviderConfigSchema = baseAPIProviderConfigSchema.extend({

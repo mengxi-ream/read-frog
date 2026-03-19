@@ -1,4 +1,4 @@
-import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig } from "@/types/config/provider"
+import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, LLMProviderTypes, ProviderConfig, ProvidersConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import { i18n } from "#imports"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
@@ -418,6 +418,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "bedrock",
     model: DEFAULT_LLM_PROVIDER_MODELS.bedrock,
+    connectionOptions: { region: "us-east-1" },
   },
   "groq": {
     id: "groq-default",
@@ -558,6 +559,22 @@ export const DEFAULT_PROVIDER_CONFIG = {
     model: DEFAULT_LLM_PROVIDER_MODELS.huggingface,
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
+
+export interface ConnectionOptionFieldDef {
+  key: string
+  labelKey: string
+  type: "text" | "password"
+  placeholder?: string
+}
+
+// https://ai-sdk.dev/providers/ai-sdk-providers
+export const PROVIDER_CONNECTION_OPTIONS_FIELDS: Partial<
+  Record<LLMProviderTypes, ConnectionOptionFieldDef[]>
+> = {
+  bedrock: [
+    { key: "region", labelKey: "region", type: "text", placeholder: "us-east-1" },
+  ],
+}
 
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],

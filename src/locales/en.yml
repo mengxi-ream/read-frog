@@ -130,6 +130,8 @@ options:
         noModelsFound: No models found
       featureProviders: Feature Providers
       advancedOptions: Advanced Options
+      connectionOptionLabels:
+        region: Region
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
       providerOptions: Provider Options

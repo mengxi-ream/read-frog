@@ -25,6 +25,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { createOllama } from "ollama-ai-provider-v2"
 import { createMinimax } from "vercel-minimax-ai-provider"
 import { isCustomLLMProvider } from "@/types/config/provider"
+import { compactObject } from "@/types/utils"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
 
@@ -81,9 +82,11 @@ async function getLanguageModelById(providerId: string) {
   }
 
   const customHeaders = CUSTOM_HEADER_MAP[providerConfig.provider]
+  const connectionOptions = compactObject(providerConfig.connectionOptions ?? {})
 
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
+        ...connectionOptions,
         name: providerConfig.provider,
         baseURL: providerConfig.baseURL ?? "",
         supportsStructuredOutputs: true,
@@ -91,6 +94,7 @@ async function getLanguageModelById(providerId: string) {
         ...(customHeaders && { headers: customHeaders }),
       })
     : CREATE_AI_MAPPER[providerConfig.provider]({
+        ...connectionOptions,
         ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
         ...(customHeaders && { headers: customHeaders }),
