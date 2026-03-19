@@ -1,3 +1,4 @@
+import type { ChartConfig } from "@/components/ui/base-ui/chart"
 import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-record"
 import { i18n } from "#imports"
 import { useAtomValue } from "jotai"
@@ -8,15 +9,15 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
+import { Card, CardContent } from "@/components/ui/base-ui/card"
 import {
-  type ChartConfig,
+
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/base-ui/chart"
-import { Card, CardContent } from "@/components/ui/base-ui/card"
 import { useBatchRequestRecords } from "@/hooks/use-batch-request-record"
 import { addThousandsSeparator } from "@/utils/utils"
 import { recentDayAtom } from "./atom"

@@ -37,6 +37,11 @@ function scrollSelectionPopoverBodyToBottom(ref: React.RefObject<HTMLDivElement 
   })
 }
 
+interface AiButtonQueryMeta {
+  bodyRef: React.RefObject<HTMLDivElement | null>
+  setAiResponse: React.Dispatch<React.SetStateAction<string>>
+}
+
 export function AiButton() {
   const [open, setOpen] = useState(false)
   const [rerunNonce, setRerunNonce] = useState(0)
@@ -92,7 +97,15 @@ export function AiButton() {
       vocabularyInsightRequest,
       detectedCode,
     ],
-    queryFn: async ({ signal }) => {
+    meta: {
+      bodyRef,
+      setAiResponse,
+    } satisfies AiButtonQueryMeta,
+    queryFn: async ({ signal, meta }) => {
+      if (!meta) {
+        throw new Error("Missing vocabulary insight query metadata")
+      }
+
       if (!highlightData) {
         throw new Error("No provider config for vocabulary insight or no selection")
       }
@@ -102,7 +115,7 @@ export function AiButton() {
         throw new Error("Vocabulary insight requires an LLM provider")
       }
 
-      setAiResponse("")
+      meta.setAiResponse("")
 
       try {
         if (signal?.aborted) {
@@ -142,8 +155,8 @@ export function AiButton() {
           {
             signal,
             onChunk: (data) => {
-              setAiResponse(data.output)
-              scrollSelectionPopoverBodyToBottom(bodyRef)
+              meta.setAiResponse(data.output)
+              scrollSelectionPopoverBodyToBottom(meta.bodyRef)
             },
           },
         )

@@ -4,6 +4,7 @@ import { cn } from "@/utils/styles/utils"
 
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
+const CHART_ID_SANITIZER_REGEX = /:/g
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
@@ -37,7 +38,7 @@ function ChartContainer({
   >["children"]
 }) {
   const uniqueId = React.useId()
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`
+  const chartId = `chart-${id || uniqueId.replace(CHART_ID_SANITIZER_REGEX, "")}`
   return (
     <ChartContext value={{ config }}>
       <div
@@ -66,6 +67,7 @@ function ChartStyle({ id, config }: { id: string, config: ChartConfig }) {
   }
   return (
     <style
+      // eslint-disable-next-line react-dom/no-dangerously-set-innerhtml
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(
