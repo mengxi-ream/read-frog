@@ -1,7 +1,6 @@
 import "@/utils/zod-config"
 import { defineContentScript } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
-import { initYoutubeSubtitles } from "./init-youtube-subtitles"
 
 declare global {
   interface Window {
@@ -12,16 +11,22 @@ declare global {
 export default defineContentScript({
   matches: ["*://*.youtube.com/*"],
   cssInjectionMode: "manifest",
-  async main() {
+  async main(ctx) {
     if (window.__READ_FROG_SUBTITLES_INJECTED__)
       return
     window.__READ_FROG_SUBTITLES_INJECTED__ = true
 
     const config = await getLocalConfig()
     if (!config?.videoSubtitles?.enabled) {
+      window.__READ_FROG_SUBTITLES_INJECTED__ = false
       return
     }
 
-    initYoutubeSubtitles()
+    ctx.onInvalidated(() => {
+      window.__READ_FROG_SUBTITLES_INJECTED__ = false
+    })
+
+    const { bootstrapSubtitlesRuntime } = await import("./runtime")
+    await bootstrapSubtitlesRuntime()
   },
 })

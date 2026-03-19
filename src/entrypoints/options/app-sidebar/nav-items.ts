@@ -1,27 +1,14 @@
-import { ApiProvidersPage } from "../pages/api-providers"
-import { ConfigPage } from "../pages/config"
-import { ContextMenuPage } from "../pages/context-menu"
-import { CustomActionsPage } from "../pages/custom-actions"
-import { FloatingButtonPage } from "../pages/floating-button"
-import { GeneralPage } from "../pages/general"
-import { InputTranslationPage } from "../pages/input-translation"
-import { SelectionToolbarPage } from "../pages/selection-toolbar"
-import { StatisticsPage } from "../pages/statistics"
-import { TextToSpeechPage } from "../pages/text-to-speech"
-import { TranslationPage } from "../pages/translation"
-import { VideoSubtitlesPage } from "../pages/video-subtitles"
-
-export const ROUTE_CONFIG = [
-  { path: "/", component: GeneralPage },
-  { path: "/api-providers", component: ApiProvidersPage },
-  { path: "/custom-actions", component: CustomActionsPage },
-  { path: "/translation", component: TranslationPage },
-  { path: "/video-subtitles", component: VideoSubtitlesPage },
-  { path: "/floating-button", component: FloatingButtonPage },
-  { path: "/selection-toolbar", component: SelectionToolbarPage },
-  { path: "/context-menu", component: ContextMenuPage },
-  { path: "/input-translation", component: InputTranslationPage },
-  ...(import.meta.env.BROWSER === "firefox" ? [] : [{ path: "/tts", component: TextToSpeechPage }]),
-  { path: "/statistics", component: StatisticsPage },
-  { path: "/config", component: ConfigPage },
+export const ROUTE_DEFS = [
+  { path: "/" },
+  { path: "/api-providers" },
+  { path: "/custom-actions" },
+  { path: "/translation" },
+  { path: "/video-subtitles" },
+  { path: "/floating-button" },
+  { path: "/selection-toolbar" },
+  { path: "/context-menu" },
+  { path: "/input-translation" },
+  ...(import.meta.env.BROWSER === "firefox" ? [] : [{ path: "/tts" }]),
+  { path: "/statistics" },
+  { path: "/config" },
 ] as const

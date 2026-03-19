@@ -1,7 +1,8 @@
 import type { LLMProviderConfig } from "@/types/config/provider"
 import { generateText } from "ai"
 import { logger } from "@/utils/logger"
-import { getModelById, resolveModelId } from "@/utils/providers/model"
+import { getModelById } from "@/utils/providers/model"
+import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { cleanText } from "./utils"
 

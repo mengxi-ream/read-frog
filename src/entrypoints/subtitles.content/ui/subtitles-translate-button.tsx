@@ -1,7 +1,7 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import { useAtomValue } from "jotai"
 import { useEffect, useEffectEvent } from "react"
-import logo from "@/assets/icons/original/read-frog.png"
+import logo from "@/assets/icons/read-frog.png"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"

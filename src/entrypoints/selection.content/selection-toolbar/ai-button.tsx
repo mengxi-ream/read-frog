@@ -16,7 +16,7 @@ import { streamBackgroundText } from "@/utils/content-script/background-stream-c
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { getWordExplainPrompt } from "@/utils/prompts/word-explain"
-import { resolveModelId } from "@/utils/providers/model"
+import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { shadowWrapper } from ".."
 import { SelectionSourceContent } from "../components/selection-source-content"
