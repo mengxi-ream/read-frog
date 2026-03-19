@@ -39,7 +39,7 @@ export const NON_API_TRANSLATE_PROVIDERS_MAP: Record<typeof NON_API_TRANSLATE_PR
   "microsoft-translate": "Microsoft Translator",
 }
 
-export const PURE_TRANSLATE_PROVIDERS = ["google-translate", "microsoft-translate", "deeplx"] as const
+export const PURE_TRANSLATE_PROVIDERS = ["google-translate", "microsoft-translate", "deeplx", "deepl"] as const
 
 /**
  * Model options configuration.
@@ -109,7 +109,7 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // Qwen/QwQ models - disable thinking
   {
-    pattern: /^qwen/,
+    pattern: /^(Qwen|qwen)/,
     options: { enableThinking: false },
   },
 ]

@@ -9,6 +9,7 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { splitTextByUtf8Bytes } from "@/utils/server/edge-tts/chunk"
@@ -122,7 +123,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       stop()
       shouldStopRef.current = false
 
-      const requestId = crypto.randomUUID()
+      const requestId = getRandomUUID()
       activeRequestIdRef.current = requestId
       let didStartPlayback = false
 

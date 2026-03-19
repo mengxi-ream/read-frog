@@ -7,6 +7,7 @@ import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import { Label } from "@/components/ui/base-ui/label"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { usePromptAtoms } from "./context"
 import { analysisJSONFile } from "./utils/prompt-file"
 
@@ -19,7 +20,7 @@ export function ImportPrompts() {
     const originPatterns = config.patterns
     const patterns = list.map(item => ({
       ...item,
-      id: crypto.randomUUID(),
+      id: getRandomUUID(),
       // Backwards compatibility: add systemPrompt if missing from imported file
       systemPrompt: item.systemPrompt ?? "",
     }))

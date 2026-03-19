@@ -1,14 +1,12 @@
-import type { APIProviderConfig, LLMProviderConfig } from "@/types/config/provider"
+import type { APIProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
-import { useEffect, useEffectEvent, useMemo, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { JSONCodeEditor } from "@/components/ui/json-code-editor"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { resolveModelId } from "@/utils/providers/model"
-import { getProviderOptions } from "@/utils/providers/options"
 import { withForm } from "./form"
 
 function parseJson(input: string): { valid: true, value: Record<string, unknown> | undefined } | { valid: false, error: string } {
@@ -29,21 +27,50 @@ export const ProviderOptionsField = withForm({
     const providerConfig = useStore(form.store, state => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
-    const toJson = (options: APIProviderConfig["providerOptions"]) =>
-      options ? JSON.stringify(options, null, 2) : ""
+    const toJson = useCallback(
+      (options: APIProviderConfig["providerOptions"]) => options ? JSON.stringify(options, null, 2) : "",
+      [],
+    )
+    const placeholderText = JSON.stringify({ field: "value" }, null, 2)
+    const externalJson = toJson(providerConfig.providerOptions)
 
     // Local state for the JSON string input
-    const [jsonInput, setJsonInput] = useState(() => toJson(providerConfig.providerOptions))
+    const [jsonInput, setJsonInput] = useState(() => externalJson)
+    const lastCommittedJsonRef = useRef(externalJson)
+    const pendingEditorCommitRef = useRef(false)
 
-    // Keep editor input in sync when switching to a different provider config.
-    const syncJsonInput = useEffectEvent(() => {
+    const syncJsonInput = useEffectEvent((nextJson: string) => {
       // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
-      setJsonInput(toJson(providerConfig.providerOptions))
+      setJsonInput(nextJson)
+    })
+
+    const resetSyncStateForProvider = useEffectEvent(() => {
+      lastCommittedJsonRef.current = externalJson
+      pendingEditorCommitRef.current = false
+      syncJsonInput(externalJson)
+    })
+
+    const readJsonInput = useEffectEvent(() => {
+      return jsonInput
     })
 
     useEffect(() => {
-      syncJsonInput()
+      resetSyncStateForProvider()
     }, [providerConfig.id])
+
+    useEffect(() => {
+      if (pendingEditorCommitRef.current && externalJson === lastCommittedJsonRef.current) {
+        pendingEditorCommitRef.current = false
+        return
+      }
+
+      pendingEditorCommitRef.current = false
+      lastCommittedJsonRef.current = externalJson
+
+      if (readJsonInput() !== externalJson) {
+        syncJsonInput(externalJson)
+      }
+    }, [providerConfig.providerOptions, externalJson])
 
     // Debounce the input value
     const debouncedJsonInput = useDebouncedValue(jsonInput, 500)
@@ -54,33 +81,17 @@ export const ProviderOptionsField = withForm({
     // Submit when debounced value changes and is valid
     useEffect(() => {
       if (parseResult.valid) {
+        const normalizedJson = toJson(parseResult.value)
+        if (normalizedJson === lastCommittedJsonRef.current) {
+          return
+        }
+
+        lastCommittedJsonRef.current = normalizedJson
+        pendingEditorCommitRef.current = true
         form.setFieldValue("providerOptions", parseResult.value)
         void form.handleSubmit()
       }
-    }, [parseResult, form])
-
-    const translateModel = useMemo(() => {
-      if (!isLLMProvider) {
-        return null
-      }
-      const llmConfig = providerConfig as LLMProviderConfig
-      return resolveModelId(llmConfig.model)
-    }, [isLLMProvider, providerConfig])
-
-    const defaultOptions = useMemo(() => {
-      if (!isLLMProvider || !translateModel) {
-        return {}
-      }
-      const options = getProviderOptions(translateModel, providerConfig.provider)
-      return options[providerConfig.provider] || {}
-    }, [isLLMProvider, translateModel, providerConfig.provider])
-
-    const placeholderText = useMemo(() => {
-      if (Object.keys(defaultOptions).length === 0) {
-        return "{\n  \n}"
-      }
-      return JSON.stringify(defaultOptions, null, 2)
-    }, [defaultOptions])
+    }, [parseResult, form, toJson])
 
     if (!isLLMProvider) {
       return null

@@ -136,6 +136,11 @@ options:
       providerOptions: Параметры провайдера
       providerOptionsHint: Специфические параметры провайдера для нестандартных функций API, таких как режим размышления/рассуждения. Подробнее см. документацию Vercel AI SDK или официальную документацию вашего провайдера.
       providerOptionsDocsLink: Документация провайдера
+      providerOptionsRecommendationTrigger: Показать рекомендуемые параметры провайдера
+      providerOptionsRecommendationTitle: Обнаружены рекомендуемые параметры провайдера
+      providerOptionsRecommendationDescription: Проверьте рекомендованную конфигурацию и примените её вручную.
+      providerOptionsRecommendationApply: Применить
+      providerOptionsRecommendationApplied: Применено
       invalidJson: Неверный формат JSON
     providers:
       description:
@@ -151,6 +156,7 @@ options:
         ai302: Предоставляет новейшие и наиболее полные модели с оплатой по мере использования API
         openaiCompatible: Сторонние и OpenAI API-совместимые
         deeplx: Неофициальный DeepL API
+        deepl: Официальный DeepL API
         bedrock: Управляемый AWS сервис для корпоративных базовых моделей
         groq: Специализированное оборудование для сверхбыстрого вывода LLM
         deepinfra: Экономичный облачный вывод для популярных моделей с открытым исходным кодом

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/base-ui/sheet"
 import { QuickInsertableTextarea } from "@/components/ui/insertable-textarea"
 import { DEFAULT_TRANSLATE_PROMPT_ID, getTokenCellText, TOKENS } from "@/utils/constants/prompt"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { cn } from "@/utils/styles/utils"
 import { usePromptAtoms } from "./context"
 
@@ -35,7 +36,7 @@ export function ConfigurePrompt({
   const inEdit = !!originPrompt
   const isDefault = originPrompt?.id === DEFAULT_TRANSLATE_PROMPT_ID
 
-  const defaultPrompt = { id: crypto.randomUUID(), name: "", systemPrompt: "", prompt: "" }
+  const defaultPrompt = { id: getRandomUUID(), name: "", systemPrompt: "", prompt: "" }
   const initialPrompt = originPrompt ?? defaultPrompt
 
   const [prompt, setPrompt] = useState<TranslatePromptObj>(initialPrompt)
@@ -52,7 +53,7 @@ export function ConfigurePrompt({
 
   const clearCachePrompt = () => {
     setPrompt({
-      id: crypto.randomUUID(),
+      id: getRandomUUID(),
       name: "",
       systemPrompt: "",
       prompt: "",

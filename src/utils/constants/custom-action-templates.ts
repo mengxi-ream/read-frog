@@ -1,6 +1,7 @@
 import type { GeneratedI18nStructure } from "#i18n"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { i18n } from "#imports"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { createOutputSchemaField } from "./custom-action"
 
 const T_PREFIX = "options.floatingButtonAndToolbar.selectionToolbar.customActions.templates"
@@ -26,7 +27,7 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
     descriptionKey: `${T_PREFIX}.dictionary.description`,
     icon: "tabler:book-2",
     createAction: (providerId: string): SelectionToolbarCustomAction => ({
-      id: crypto.randomUUID(),
+      id: getRandomUUID(),
       name: i18n.t(`${T_PREFIX}.dictionary.name`),
       enabled: true,
       icon: "tabler:book-2",
@@ -50,7 +51,7 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
     descriptionKey: `${T_PREFIX}.improveWriting.description`,
     icon: "tabler:pencil-check",
     createAction: (providerId: string): SelectionToolbarCustomAction => ({
-      id: crypto.randomUUID(),
+      id: getRandomUUID(),
       name: i18n.t(`${T_PREFIX}.improveWriting.name`),
       enabled: true,
       icon: "tabler:pencil-check",
@@ -69,7 +70,7 @@ export const CUSTOM_ACTION_TEMPLATES: CustomActionTemplate[] = [
     descriptionKey: `${T_PREFIX}.blank.description`,
     icon: "tabler:sparkles",
     createAction: (providerId: string): SelectionToolbarCustomAction => ({
-      id: crypto.randomUUID(),
+      id: getRandomUUID(),
       name: i18n.t(`${T_PREFIX}.blank.name`),
       enabled: true,
       icon: "tabler:sparkles",

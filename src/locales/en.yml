@@ -137,6 +137,11 @@ options:
       providerOptions: Provider Options
       providerOptionsHint: Provider-specific options for non-standard API features like thinking/reasoning mode. See the Vercel AI SDK docs or your provider's official documentation for configuration details.
       providerOptionsDocsLink: View Provider Docs
+      providerOptionsRecommendationTrigger: View recommended provider options
+      providerOptionsRecommendationTitle: Recommended provider options detected
+      providerOptionsRecommendationDescription: Review and manually apply the recommended configuration.
+      providerOptionsRecommendationApply: Apply
+      providerOptionsRecommendationApplied: Applied
       invalidJson: Invalid JSON format
     providers:
       description:
@@ -152,6 +157,7 @@ options:
         ai302: Provides the latest and most comprehensive models with pay-as-you-go API
         openaiCompatible: Third-party and OpenAI API compatible
         deeplx: Unofficial DeepL API
+        deepl: Official DeepL API
         bedrock: AWS managed service for enterprise-grade foundation models
         groq: Specialized hardware for ultra-fast LLM inference speeds
         deepinfra: Cost-effective cloud inference for popular open-source models

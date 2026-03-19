@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest"
-import { getProviderOptions } from "../../providers/options"
+import {
+  getProviderOptions,
+  getProviderOptionsWithOverride,
+  getRecommendedProviderOptionsMatch,
+} from "../../providers/options"
 
 describe("getProviderOptions", () => {
   describe("model pattern matching", () => {
@@ -99,6 +103,38 @@ describe("getProviderOptions", () => {
 
       const end = getProviderOptions("model-GLM", "openai-compatible")
       expect(end.openaiCompatible).toBeUndefined()
+    })
+  })
+
+  describe("user provider option overrides", () => {
+    it("should treat an explicit empty object as cleared provider options", () => {
+      const options = getProviderOptionsWithOverride("qwen3-max", "alibaba", {})
+      expect(options).toBeUndefined()
+    })
+
+    it("should not fall back to recommendations when user options are undefined", () => {
+      const options = getProviderOptionsWithOverride("qwen3-max", "alibaba")
+      expect(options).toBeUndefined()
+    })
+
+    it("should use user options as-is without merging matched defaults", () => {
+      const options = getProviderOptionsWithOverride("qwen3-max", "alibaba", { foo: "bar" })
+      expect(options).toEqual({ alibaba: { foo: "bar" } })
+    })
+  })
+
+  describe("recommendation metadata", () => {
+    it("should expose the matched rule index for UI suggestion state", () => {
+      const gpt5Match = getRecommendedProviderOptionsMatch("gpt-5-mini")
+      const gpt51Match = getRecommendedProviderOptionsMatch("gpt-5.1")
+
+      expect(gpt5Match?.matchIndex).toBeTypeOf("number")
+      expect(gpt51Match?.matchIndex).toBeTypeOf("number")
+      expect(gpt5Match?.matchIndex).not.toBe(gpt51Match?.matchIndex)
+    })
+
+    it("should return undefined for models without recommendations", () => {
+      expect(getRecommendedProviderOptionsMatch("plain-model")).toBeUndefined()
     })
   })
 })

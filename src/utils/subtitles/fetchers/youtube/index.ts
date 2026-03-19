@@ -18,6 +18,7 @@ import {
   WAIT_TIMEDTEXT_REQUEST_TYPE,
   WAIT_TIMEDTEXT_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
@@ -37,7 +38,7 @@ function postMessageRequest(
   message: Record<string, unknown>,
 ): Promise<any> {
   return new Promise((resolve) => {
-    const requestId = crypto.randomUUID()
+    const requestId = getRandomUUID()
 
     const handler = (event: MessageEvent) => {
       if (

@@ -136,6 +136,11 @@ options:
       providerOptions: Tùy chọn nhà cung cấp
       providerOptionsHint: Các tùy chọn dành riêng cho nhà cung cấp cho các tính năng API không chuẩn như chế độ suy nghĩ/lập luận. Xem tài liệu Vercel AI SDK hoặc tài liệu chính thức của nhà cung cấp để biết chi tiết cấu hình.
       providerOptionsDocsLink: Xem Tài liệu Nhà cung cấp
+      providerOptionsRecommendationTrigger: Xem tùy chọn nhà cung cấp được đề xuất
+      providerOptionsRecommendationTitle: Đã phát hiện tùy chọn nhà cung cấp được đề xuất
+      providerOptionsRecommendationDescription: Hãy xem lại và tự áp dụng cấu hình được đề xuất.
+      providerOptionsRecommendationApply: Áp dụng
+      providerOptionsRecommendationApplied: Đã áp dụng
       invalidJson: Định dạng JSON không hợp lệ
     providers:
       description:
@@ -151,6 +156,7 @@ options:
         ai302: Cung cấp các mô hình mới nhất và toàn diện nhất với API trả theo lần sử dụng
         openaiCompatible: Bên thứ ba và tương thích API OpenAI
         deeplx: API DeepL không chính thức
+        deepl: API DeepL chính thức
         bedrock: Dịch vụ được quản lý bởi AWS cho các mô hình nền tảng cấp doanh nghiệp
         groq: Phần cứng chuyên dụng cho tốc độ suy luận LLM siêu nhanh
         deepinfra: Suy luận đám mây hiệu quả chi phí cho các mô hình mã nguồn mở phổ biến

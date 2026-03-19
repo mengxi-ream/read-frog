@@ -1,3 +1,4 @@
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import {
   EDGE_TTS_ENDPOINT_URL,
   EDGE_TTS_SIGNATURE_APP_ID,
@@ -54,7 +55,7 @@ export async function generateTranslatorSignature(
 ): Promise<string> {
   try {
     const encodedUrl = encodeURIComponent(url.split("://")[1] ?? "")
-    const requestId = crypto.randomUUID().replace(HYPHEN_PATTERN, "")
+    const requestId = getRandomUUID().replace(HYPHEN_PATTERN, "")
     const formattedDate = buildSignatureDate(now)
 
     const payload = `${EDGE_TTS_SIGNATURE_APP_ID}${encodedUrl}${formattedDate}${requestId}`.toLowerCase()

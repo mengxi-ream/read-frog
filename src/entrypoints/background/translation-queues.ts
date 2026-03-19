@@ -24,6 +24,22 @@ export function parseBatchResult(result: string): string[] {
   return result.split(BATCH_SEPARATOR).map(t => t.trim())
 }
 
+export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
+  return isLLMProviderConfig(providerConfig)
+}
+
+export async function executeBatchTranslation(
+  dataList: TranslateBatchData[],
+  promptResolver: PromptResolver,
+): Promise<string[]> {
+  const { langConfig, providerConfig, content } = dataList[0]
+  const texts = dataList.map(d => d.text)
+
+  const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
+  const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })
+  return parseBatchResult(result)
+}
+
 async function getOrGenerateSummary(
   title: string,
   textContent: string,
@@ -75,7 +91,7 @@ async function getOrGenerateSummary(
   }
 }
 
-interface TranslateBatchData {
+export interface TranslateBatchData {
   text: string
   langConfig: Config["language"]
   providerConfig: ProviderConfig
@@ -114,16 +130,13 @@ async function createTranslationQueues(config: TranslationQueueSetupConfig) {
     },
     getCharacters: data => data.text.length,
     executeBatch: async (dataList) => {
-      const { langConfig, providerConfig, content } = dataList[0]
-      const texts = dataList.map(d => d.text)
-      const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
+      const { providerConfig } = dataList[0]
       const hash = Sha256Hex(...dataList.map(d => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map(d => d.scheduleAt))
 
       const batchThunk = async (): Promise<string[]> => {
         await putBatchRequestRecord({ originalRequestCount: dataList.length, providerConfig })
-        const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })
-        return parseBatchResult(result)
+        return await executeBatchTranslation(dataList, promptResolver)
       }
 
       return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash)
@@ -175,10 +188,15 @@ export async function setUpWebPageTranslationQueue() {
       title: articleTitle ?? "",
     }
 
-    if (isLLMProviderConfig(providerConfig)) {
+    if (shouldUseBatchQueue(providerConfig)) {
       // Generate or fetch cached summary if AI Content Aware is enabled
       const config = await ensureInitializedConfig()
-      if (config?.translate.enableAIContentAware && articleTitle != null && articleTextContent != null) {
+      if (
+        isLLMProviderConfig(providerConfig)
+        && config?.translate.enableAIContentAware
+        && articleTitle != null
+        && articleTextContent != null
+      ) {
         content.summary = await getOrGenerateSummary(articleTitle, articleTextContent, providerConfig, requestQueue)
       }
 
@@ -242,9 +260,14 @@ export async function setUpSubtitlesTranslationQueue() {
       title: videoTitle || "",
     }
 
-    if (isLLMProviderConfig(providerConfig)) {
+    if (shouldUseBatchQueue(providerConfig)) {
       const runtimeConfig = await ensureInitializedConfig()
-      if (runtimeConfig?.translate.enableAIContentAware && videoTitle && subtitlesContext) {
+      if (
+        isLLMProviderConfig(providerConfig)
+        && runtimeConfig?.translate.enableAIContentAware
+        && videoTitle
+        && subtitlesContext
+      ) {
         content.summary = await getOrGenerateSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
       }
 

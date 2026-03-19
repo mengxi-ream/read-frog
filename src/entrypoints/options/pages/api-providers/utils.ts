@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { APIProviderConfig, APIProviderTypes } from "@/types/config/provider"
 import { API_PROVIDER_ITEMS, DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { getUniqueName } from "@/utils/name"
 
 export async function addProvider(
@@ -14,7 +15,7 @@ export async function addProvider(
 
   const newProvider: APIProviderConfig = {
     ...structuredClone(DEFAULT_PROVIDER_CONFIG[providerType]),
-    id: crypto.randomUUID(),
+    id: getRandomUUID(),
     name: providerName,
   }
 

@@ -136,6 +136,11 @@ options:
       providerOptions: 提供者選項
       providerOptionsHint: 用於非標準 API 功能（如思考/推理模式）的提供者特定選項。詳情請參閱 Vercel AI SDK 文件或您的提供者官方文件。
       providerOptionsDocsLink: 查看提供者文件
+      providerOptionsRecommendationTrigger: 查看推薦的提供者選項
+      providerOptionsRecommendationTitle: 偵測到推薦的提供者選項
+      providerOptionsRecommendationDescription: 請先檢查，再手動套用推薦設定。
+      providerOptionsRecommendationApply: 套用
+      providerOptionsRecommendationApplied: 已套用
       invalidJson: JSON 格式無效
     providers:
       description:
@@ -151,6 +156,7 @@ options:
         ai302: 提供最新、全面的模型和按量付費 API
         openaiCompatible: OpenAI API 相容的第三方
         deeplx: 非官方 DeepL API
+        deepl: 官方 DeepL API
         bedrock: 面向企業級基礎模型的 AWS 託管服務
         groq: 專注於超高速 LLM 推理速度的專用硬體
         deepinfra: 面向熱門開源模型的經濟高效雲端推理

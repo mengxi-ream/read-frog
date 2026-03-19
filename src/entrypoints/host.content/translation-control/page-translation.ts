@@ -4,6 +4,7 @@ import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getDetectedCodeFromStorage } from "@/utils/config/languages"
 import { getLocalConfig } from "@/utils/config/storage"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
@@ -125,7 +126,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.startDocumentTitleTracking()
 
       // Listen to existing elements when they enter the viewpoint
-      const walkId = crypto.randomUUID()
+      const walkId = getRandomUUID()
       this.walkId = walkId
       this.intersectionObserver = new IntersectionObserver(async (entries, observer) => {
         for (const entry of entries) {

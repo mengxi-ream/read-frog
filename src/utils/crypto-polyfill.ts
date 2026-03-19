@@ -1,24 +1,24 @@
 /**
- * Polyfill for crypto.randomUUID() in non-secure contexts (HTTP extensions)
- *
- * Background:
- * - crypto.randomUUID() is only available in secure contexts (HTTPS)
- * - crypto.getRandomValues() is available in ALL modern browsers (including HTTP)
- * - This polyfill uses getRandomValues() to implement randomUUID()
+ * Compatibility helpers for runtimes that expose crypto.getRandomValues()
+ * without crypto.randomUUID(), which some extension environments still do.
  */
 
-// Ensure crypto.getRandomValues is available (required for this polyfill)
-if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function") {
-  throw new TypeError(
-    "[crypto-polyfill] crypto.getRandomValues is required but not available. "
-    + "This polyfill only works in browser environments.",
-  )
+function getCryptoWithRandomValues(): Crypto {
+  if (typeof crypto === "undefined" || typeof crypto.getRandomValues !== "function") {
+    throw new TypeError(
+      "[crypto-polyfill] crypto.getRandomValues is required but not available. "
+      + "This polyfill only works in browser environments.",
+    )
+  }
+
+  return crypto
 }
 
 // UUIDv4 implementation using crypto.getRandomValues (works in non-secure context)
 export function generateUUIDv4(): string {
+  const cryptoWithRandomValues = getCryptoWithRandomValues()
   const bytes = new Uint8Array(16)
-  crypto.getRandomValues(bytes)
+  cryptoWithRandomValues.getRandomValues(bytes)
   bytes[6] = (bytes[6]! & 0x0F) | 0x40 // Version 4: set bits 12-15 to 0100
   bytes[8] = (bytes[8]! & 0x3F) | 0x80 // Variant 1: set bits 6-7 to 10
 
@@ -35,8 +35,10 @@ export function generateUUIDv4(): string {
   ].join("-")
 }
 
-// Only polyfill if crypto.randomUUID is not available
-if (typeof crypto.randomUUID !== "function") {
-  // @ts-expect-error - polyfill signature mismatch (our function returns string, native returns `${string}-...`)
-  crypto.randomUUID = generateUUIDv4
+export function getRandomUUID(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID()
+  }
+
+  return generateUUIDv4()
 }

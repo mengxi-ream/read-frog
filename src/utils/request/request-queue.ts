@@ -1,5 +1,6 @@
 import { deepmerge } from "deepmerge-ts"
 import { requestQueueConfigSchema } from "@/types/config/translate"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { BinaryHeapPQ } from "./priority-queue"
 
 export interface RequestTask {
@@ -53,7 +54,7 @@ export class RequestQueue {
     })
 
     const task: RequestTask = {
-      id: crypto.randomUUID(),
+      id: getRandomUUID(),
       thunk,
       promise,
       resolve,

@@ -136,6 +136,11 @@ options:
       providerOptions: プロバイダーオプション
       providerOptionsHint: 思考/推論モードなどの非標準API機能のためのプロバイダー固有オプション。詳細はVercel AI SDKドキュメントまたはプロバイダーの公式ドキュメントをご覧ください。
       providerOptionsDocsLink: プロバイダードキュメントを見る
+      providerOptionsRecommendationTrigger: 推奨プロバイダーオプションを表示
+      providerOptionsRecommendationTitle: 推奨プロバイダーオプションが見つかりました
+      providerOptionsRecommendationDescription: 推奨設定を確認し、手動で適用してください。
+      providerOptionsRecommendationApply: 適用
+      providerOptionsRecommendationApplied: 適用済み
       invalidJson: 無効なJSON形式
     providers:
       description:
@@ -151,6 +156,7 @@ options:
         ai302: 最新かつ包括的なモデルと従量課金制APIを提供
         openaiCompatible: OpenAI API互換のサードパーティー
         deeplx: 非公式 DeepL API
+        deepl: 公式 DeepL API
         bedrock: エンタープライズグレードの基盤モデル向けAWSマネージドサービス
         groq: 超高速LLM推論速度に特化したハードウェア
         deepinfra: 人気のオープンソースモデル向けコスト効率的なクラウド推論

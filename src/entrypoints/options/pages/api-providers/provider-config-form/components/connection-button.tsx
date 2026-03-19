@@ -38,7 +38,8 @@ const ConnectionTestResultIconMap = {
 }
 
 export function ConnectionTestButton({ providerConfig }: { providerConfig: APIProviderConfig }) {
-  const { apiKey, baseURL, provider, connectionOptions } = providerConfig
+  const { apiKey, provider, connectionOptions } = providerConfig
+  const baseURL = "baseURL" in providerConfig ? providerConfig.baseURL : undefined
 
   const mutation = useMutation({
     // for safety, we should not include apiKey in the mutationKey

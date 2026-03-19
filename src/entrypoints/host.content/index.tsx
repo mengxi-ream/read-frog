@@ -13,7 +13,6 @@ import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
-import "@/utils/crypto-polyfill"
 
 declare global {
   interface Window {

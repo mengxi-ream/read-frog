@@ -11,7 +11,13 @@ export const BaseURLField = withForm({
   render: function Render({ form }) {
     const providerConfig = useStore(form.store, state => state.values)
     const providerType = providerConfig.provider
-    const labelText = `${i18n.t("options.apiProviders.form.fields.baseURL")}${isNonCustomLLMProvider(providerType)
+
+    if (providerType === "deepl") {
+      return null
+    }
+
+    const isOptionalBaseURL = isNonCustomLLMProvider(providerType)
+    const labelText = `${i18n.t("options.apiProviders.form.fields.baseURL")}${isOptionalBaseURL
       ? ` (${i18n.t("options.apiProviders.form.fields.optional")})`
       : ""}`
 

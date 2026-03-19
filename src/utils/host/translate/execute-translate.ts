@@ -5,6 +5,7 @@ import type { ArticleContent } from "@/types/content"
 import { ISO6393_TO_6391, LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { isLLMProviderConfig, isNonAPIProvider, isPureAPIProvider } from "@/types/config/provider"
 import { aiTranslate } from "./api/ai"
+import { deeplTranslate } from "./api/deepl"
 import { deeplxTranslate } from "./api/deeplx"
 import { googleTranslate } from "./api/google"
 import { microsoftTranslate } from "./api/microsoft"
@@ -50,6 +51,9 @@ export async function executeTranslate(
     }
     if (provider === "deeplx") {
       translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig, options)
+    }
+    else if (provider === "deepl") {
+      translatedText = await deeplTranslate(text, sourceLang, targetLang, providerConfig, options)
     }
   }
   else if (isLLMProviderConfig(providerConfig)) {

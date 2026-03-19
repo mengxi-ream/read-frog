@@ -60,7 +60,7 @@ export function getProviderApiKey(providersConfig: ProvidersConfig, providerId: 
 
 export function getProviderBaseURL(providersConfig: ProvidersConfig, providerId: string): string | undefined {
   const providerConfig = getProviderConfigById(providersConfig, providerId)
-  if (providerConfig && isAPIProviderConfig(providerConfig)) {
+  if (providerConfig && isAPIProviderConfig(providerConfig) && "baseURL" in providerConfig) {
     return providerConfig.baseURL
   }
   return undefined

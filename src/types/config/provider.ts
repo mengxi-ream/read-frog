@@ -9,7 +9,7 @@ export { LLM_PROVIDER_MODELS, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PRO
   ────────────────────────────── */
 
 // translate provider names
-export const TRANSLATE_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "openai", "deepseek", "google", "anthropic", "xai", "openai-compatible", "siliconflow", "tensdaq", "ai302", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+export const TRANSLATE_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "deepl", "openai", "deepseek", "google", "anthropic", "xai", "openai-compatible", "siliconflow", "tensdaq", "ai302", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
   (keyof typeof LLM_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
 >
 export type TranslateProviderTypes = typeof TRANSLATE_PROVIDER_TYPES[number]
@@ -53,8 +53,8 @@ export function isNonCustomLLMProviderConfig(config: ProviderConfig): config is 
   return isNonCustomLLMProvider(config.provider)
 }
 
-export const API_PROVIDER_TYPES = ["siliconflow", "tensdaq", "ai302", "openai-compatible", "openai", "deepseek", "google", "anthropic", "xai", "deeplx", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
-  (keyof typeof LLM_PROVIDER_MODELS | "deeplx")[]
+export const API_PROVIDER_TYPES = ["siliconflow", "tensdaq", "ai302", "openai-compatible", "openai", "deepseek", "google", "anthropic", "xai", "deeplx", "deepl", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+  (keyof typeof LLM_PROVIDER_MODELS | "deeplx" | "deepl")[]
 >
 export type APIProviderTypes = typeof API_PROVIDER_TYPES[number]
 export function isAPIProvider(provider: string): provider is APIProviderTypes {
@@ -64,7 +64,7 @@ export function isAPIProviderConfig(config: ProviderConfig): config is APIProvid
   return isAPIProvider(config.provider)
 }
 
-export const PURE_API_PROVIDER_TYPES = ["deeplx"] as const satisfies Readonly<
+export const PURE_API_PROVIDER_TYPES = ["deeplx", "deepl"] as const satisfies Readonly<
   Exclude<APIProviderTypes, LLMProviderTypes>[]
 >
 export type PureAPIProviderTypes = typeof PURE_API_PROVIDER_TYPES[number]
@@ -84,7 +84,7 @@ export function isNonAPIProviderConfig(config: ProviderConfig): config is NonAPI
 }
 
 // all provider names
-export const ALL_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "siliconflow", "tensdaq", "ai302", "openai-compatible", "openai", "deepseek", "google", "anthropic", "xai", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+export const ALL_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "deepl", "siliconflow", "tensdaq", "ai302", "openai-compatible", "openai", "deepseek", "google", "anthropic", "xai", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
   TranslateProviderTypes[]
 >
 export type AllProviderTypes = typeof ALL_PROVIDER_TYPES[number]
@@ -245,6 +245,9 @@ const apiProviderConfigSchemaList = [
   ...llmProviderConfigSchemaList,
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("deeplx"),
+  }),
+  baseAPIProviderConfigSchema.extend({
+    provider: z.literal("deepl"),
   }),
 ] as const
 
