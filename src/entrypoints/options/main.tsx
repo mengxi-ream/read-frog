@@ -9,7 +9,6 @@ import ReactDOM from "react-dom/client"
 import { HashRouter } from "react-router"
 import FrogToast from "@/components/frog-toast"
 import { HelpButton } from "@/components/help-button"
-import { ChartThemeProvider } from "@/components/providers/chart-theme-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { SidebarProvider } from "@/components/ui/base-ui/sidebar"
@@ -60,17 +59,15 @@ async function initApp() {
             <HashRouter>
               <SidebarProvider>
                 <ThemeProvider>
-                  <ChartThemeProvider>
-                    <TooltipProvider>
-                      <FrogToast />
-                      <RecoveryBoundary>
-                        <AppSidebar />
-                        <App />
-                        <HelpButton />
-                        <SettingsSearch />
-                      </RecoveryBoundary>
-                    </TooltipProvider>
-                  </ChartThemeProvider>
+                  <TooltipProvider>
+                    <FrogToast />
+                    <RecoveryBoundary>
+                      <AppSidebar />
+                      <App />
+                      <HelpButton />
+                      <SettingsSearch />
+                    </RecoveryBoundary>
+                  </TooltipProvider>
                 </ThemeProvider>
               </SidebarProvider>
             </HashRouter>
