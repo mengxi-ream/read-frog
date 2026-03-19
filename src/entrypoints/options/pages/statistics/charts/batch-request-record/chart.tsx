@@ -141,7 +141,7 @@ function transformBatchRequestRecordsToChartPoints(batchRequestRecords: BatchReq
     }))
 }
 
-function getChartConfig(): ChartConfig {
+function getChartConfig() {
   return {
     originalRequest: {
       color: "var(--color-chart-2)",
@@ -151,7 +151,7 @@ function getChartConfig(): ChartConfig {
       color: "var(--color-chart-1)",
       label: i18n.t("options.statistics.batchRequest.batchRequestCount"),
     },
-  }
+  } satisfies ChartConfig
 }
 
 function formatTooltipValue(value: string | number | ReadonlyArray<string | number> | undefined) {

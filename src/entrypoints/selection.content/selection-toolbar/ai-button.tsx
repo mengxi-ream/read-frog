@@ -42,6 +42,18 @@ interface AiButtonQueryMeta {
   setAiResponse: React.Dispatch<React.SetStateAction<string>>
 }
 
+function isAiButtonQueryMeta(meta: unknown): meta is AiButtonQueryMeta {
+  if (!meta || typeof meta !== "object") {
+    return false
+  }
+
+  const candidate = meta as Partial<AiButtonQueryMeta>
+  return typeof candidate.setAiResponse === "function"
+    && typeof candidate.bodyRef === "object"
+    && candidate.bodyRef !== null
+    && "current" in candidate.bodyRef
+}
+
 export function AiButton() {
   const [open, setOpen] = useState(false)
   const [rerunNonce, setRerunNonce] = useState(0)
@@ -102,7 +114,7 @@ export function AiButton() {
       setAiResponse,
     } satisfies AiButtonQueryMeta,
     queryFn: async ({ signal, meta }) => {
-      if (!meta) {
+      if (!isAiButtonQueryMeta(meta)) {
         throw new Error("Missing vocabulary insight query metadata")
       }
 
