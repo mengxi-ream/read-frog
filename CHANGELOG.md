@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.31.0
+
+### Minor Changes
+
+- [#1099](https://github.com/mengxi-ream/read-frog/pull/1099) [`73a0347`](https://github.com/mengxi-ream/read-frog/commit/73a03470cab4342f9348075da63a309c0e97daa8) Thanks [@iykon](https://github.com/iykon)! - feat: add official DeepL API provider with automatic free/pro endpoint selection
+
+### Patch Changes
+
+- [#1152](https://github.com/mengxi-ream/read-frog/pull/1152) [`d3dc6bd`](https://github.com/mengxi-ream/read-frog/commit/d3dc6bdc8bc46eec2bf89a9ffce0d77027e47c00) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(provider-options): stop auto applying recommended provider options
+
+- [#1158](https://github.com/mengxi-ream/read-frog/pull/1158) [`18c10b6`](https://github.com/mengxi-ream/read-frog/commit/18c10b6b3e9a74823106ed30693f6f108737e00f) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix: fall back to getRandomValues when crypto.randomUUID is unavailable
+
+- [#1144](https://github.com/mengxi-ream/read-frog/pull/1144) [`9c32b7b`](https://github.com/mengxi-ream/read-frog/commit/9c32b7b69a77061683ebef2f3604ce41446d8003) Thanks [@ishiko732](https://github.com/ishiko732)! - feat: add connection options field to provider config, support bedrock region
+
+- [#1142](https://github.com/mengxi-ream/read-frog/pull/1142) [`5aeb842`](https://github.com/mengxi-ream/read-frog/commit/5aeb84232c0cbaee8ac475385b750d7c3a4b3ac3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style: preset FrogToast default position to bottom-left to avoid covering top-page controls
+
 ## 1.30.4
 
 ### Patch Changes
