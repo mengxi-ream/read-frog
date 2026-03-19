@@ -15,7 +15,7 @@ import { APP_NAME } from "@/utils/constants/app"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
-import { isSiteEnabled } from "@/utils/site-control"
+import { clearEffectiveSiteControlUrl, getEffectiveSiteControlUrl, isSiteEnabled } from "@/utils/site-control"
 import { addStyleToShadow } from "@/utils/styles"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
@@ -99,9 +99,17 @@ export default defineContentScript({
       return
     window.__READ_FROG_SELECTION_INJECTED__ = true
 
+    ctx.onInvalidated(() => {
+      window.__READ_FROG_SELECTION_INJECTED__ = false
+      clearEffectiveSiteControlUrl()
+    })
+
     // Check global site control
     const config = await getLocalConfig()
-    if (!isSiteEnabled(window.location.href, config)) {
+    const siteControlUrl = getEffectiveSiteControlUrl(window.location.href)
+    if (!isSiteEnabled(siteControlUrl, config)) {
+      window.__READ_FROG_SELECTION_INJECTED__ = false
+      clearEffectiveSiteControlUrl()
       return
     }
 
