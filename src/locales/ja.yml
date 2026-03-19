@@ -194,7 +194,6 @@ options:
       features:
         translate: ページ翻訳
         selectionToolbar_translate: 選択ツールバー翻訳
-        selectionToolbar_vocabularyInsight: 選択ツールバー語彙解析
         tts: テキスト読み上げ
         inputTranslation: 入力翻訳
         videoSubtitles: 動画字幕
@@ -289,7 +288,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 選択ツールバーを有効化
-        description: ウェブページでテキストを選択したときにツールバーを表示し、素早く翻訳と語彙分析
+        description: ウェブページでテキストを選択したときにツールバーを表示し、すばやく翻訳・読み上げ・AIアクションを実行します
       opacity:
         title: 透明度
         description: 選択ツールバーとそこから開く展開ウィンドウの透明度を調整します
@@ -298,7 +297,6 @@ options:
         description: 選択ツールバーに表示する組み込み機能を選択
         translate: 翻訳
         speak: 読み上げ
-        vocabularyInsight: 語彙分析
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
@@ -326,9 +324,6 @@ options:
         translate:
           title: 選択翻訳
           description: 選択ツールバー翻訳機能のプロバイダーとモデルを設定
-        vocabularyInsight:
-          title: 語彙分析
-          description: 選択ツールバーで単語/フレーズを分析するためのプロバイダーとモデルを設定
       customActions:
         title: カスタム AI アクション
         description: 選択テキスト向けに独自の構造化 AI アクションを追加
@@ -818,9 +813,6 @@ action:
   translation: 翻訳
   speak: 読み上げ
   playing: 再生中
-  vocabularyInsight: 語彙解析
-  vocabularyInsightDeprecation: この機能は2週間後にカスタムAIアクションの辞書機能に置き換えられます。辞書アクションはより柔軟で強力な体験を提供します。
-  vocabularyInsightDeprecationLink: 辞書アクションを設定
 thinking:
   label: 思考中
   complete: 思考完了

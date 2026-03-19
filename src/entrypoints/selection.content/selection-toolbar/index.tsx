@@ -7,7 +7,6 @@ import { MARGIN } from "@/utils/constants/selection"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
 import { buildContextSnapshot, readSelectionSnapshot } from "../utils"
-import { AiButton } from "./ai-button"
 import {
   clearSelectionStateAtom,
   isSelectionToolbarVisibleAtom,
@@ -257,7 +256,6 @@ export function SelectionToolbar() {
   const hasAnyEnabledFeature
     = features.translate.enabled
       || (!isFirefox && features.speak.enabled)
-      || features.vocabularyInsight.enabled
       || selectionToolbar.customActions.some(a => a.enabled !== false)
 
   return (
@@ -274,7 +272,6 @@ export function SelectionToolbar() {
           <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
             {features.translate.enabled && <TranslateButton />}
             {!isFirefox && features.speak.enabled && <SpeakButton />}
-            {features.vocabularyInsight.enabled && <AiButton />}
             <SelectionToolbarCustomActionButtons />
           </div>
           <CloseButton />

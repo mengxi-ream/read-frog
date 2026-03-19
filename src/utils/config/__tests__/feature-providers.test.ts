@@ -34,7 +34,7 @@ describe("feature providers", () => {
     it("builds patch for multiple feature assignments", () => {
       const patch = buildFeatureProviderPatch({
         "translate": "microsoft-translate-default",
-        "selectionToolbar.vocabularyInsight": "openai-default",
+        "selectionToolbar.translate": "openai-default",
       })
 
       expect(patch).toEqual({
@@ -43,7 +43,7 @@ describe("feature providers", () => {
         },
         selectionToolbar: {
           features: {
-            vocabularyInsight: {
+            translate: {
               providerId: "openai-default",
             },
           },
@@ -69,7 +69,6 @@ describe("feature providers", () => {
           features: {
             ...DEFAULT_CONFIG.selectionToolbar.features,
             translate: { enabled: true, providerId: "deleted-provider" },
-            vocabularyInsight: { enabled: true, providerId: "deleted-provider" },
           },
         },
         inputTranslation: {
@@ -89,7 +88,6 @@ describe("feature providers", () => {
         "translate": "microsoft-translate-default",
         "videoSubtitles": "microsoft-translate-default",
         "selectionToolbar.translate": "microsoft-translate-default",
-        "selectionToolbar.vocabularyInsight": "openai-default",
         "inputTranslation": "microsoft-translate-default",
       })
     })
@@ -97,33 +95,25 @@ describe("feature providers", () => {
     it("skips features that have no compatible remaining provider", () => {
       const config = {
         ...DEFAULT_CONFIG,
-        selectionToolbar: {
-          ...DEFAULT_CONFIG.selectionToolbar,
-          features: {
-            ...DEFAULT_CONFIG.selectionToolbar.features,
-            vocabularyInsight: { enabled: true, providerId: "deleted-provider" },
-          },
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          providerId: "deleted-provider",
         },
       }
 
-      const remainingProviders = [
-        getProviderById("microsoft-translate-default"),
-      ]
+      const remainingProviders: ProviderConfig[] = []
 
       const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
 
-      expect(fallbacks["selectionToolbar.vocabularyInsight"]).toBeUndefined()
+      expect(fallbacks.translate).toBeUndefined()
     })
 
     it("skips disabled providers when selecting fallbacks", () => {
       const config = {
         ...DEFAULT_CONFIG,
-        selectionToolbar: {
-          ...DEFAULT_CONFIG.selectionToolbar,
-          features: {
-            ...DEFAULT_CONFIG.selectionToolbar.features,
-            vocabularyInsight: { enabled: true, providerId: "deleted-provider" },
-          },
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          providerId: "deleted-provider",
         },
       }
 
@@ -136,22 +126,20 @@ describe("feature providers", () => {
 
       const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
 
-      expect(fallbacks["selectionToolbar.vocabularyInsight"]).toBeUndefined()
+      expect(fallbacks.translate).toBeUndefined()
     })
   })
 
   describe("findFeatureMissingProvider", () => {
     it("returns the first missing feature key when providers are insufficient", () => {
-      const remainingProviders = [
-        getProviderById("microsoft-translate-default"),
-      ]
+      const remainingProviders: ProviderConfig[] = []
 
-      expect(findFeatureMissingProvider(remainingProviders)).toBe("selectionToolbar.vocabularyInsight")
+      expect(findFeatureMissingProvider(remainingProviders)).toBe("translate")
     })
 
     it("returns null when all features have at least one compatible provider", () => {
       const remainingProviders = [
-        getProviderById("openai-default"),
+        getProviderById("microsoft-translate-default"),
       ]
 
       expect(findFeatureMissingProvider(remainingProviders)).toBeNull()

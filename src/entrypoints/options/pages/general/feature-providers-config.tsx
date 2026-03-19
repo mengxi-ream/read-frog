@@ -126,7 +126,6 @@ export default function FeatureProvidersConfig() {
         />
         <FeatureProviderField featureKey="videoSubtitles" />
         <FeatureProviderField featureKey="selectionToolbar.translate" />
-        <FeatureProviderField featureKey="selectionToolbar.vocabularyInsight" />
         <FeatureProviderField featureKey="inputTranslation" />
         <CustomActionProviderFields />
       </div>

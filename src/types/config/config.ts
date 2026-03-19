@@ -47,7 +47,6 @@ const selectionToolbarSchema = z.object({
   features: z.object({
     translate: selectionToolbarFeatureSchema,
     speak: selectionToolbarSpeakFeatureSchema,
-    vocabularyInsight: selectionToolbarFeatureSchema,
   }),
   customActions: selectionToolbarCustomActionsSchema,
 })

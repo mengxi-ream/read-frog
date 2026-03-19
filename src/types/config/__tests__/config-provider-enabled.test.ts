@@ -41,13 +41,6 @@ describe("config provider enabled validation", () => {
       providersConfig,
       selectionToolbar: {
         ...DEFAULT_CONFIG.selectionToolbar,
-        features: {
-          ...DEFAULT_CONFIG.selectionToolbar.features,
-          vocabularyInsight: {
-            enabled: true,
-            providerId: "google-default",
-          },
-        },
         customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map(action => ({
           ...action,
           providerId: "openai-default",

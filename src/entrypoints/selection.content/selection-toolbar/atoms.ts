@@ -33,7 +33,7 @@ export const clearSelectionStateAtom = atom(
 )
 
 function createSelectionToolbarFeatureRequestAtom<T>(
-  featureKey: "selectionToolbar.translate" | "selectionToolbar.vocabularyInsight", // TODO: make these string in const map
+  featureKey: "selectionToolbar.translate", // TODO: make these string in const map
   buildSlice: (config: Config, providerConfig: ProviderConfig | null) => T,
 ) {
   return selectAtom(
@@ -56,19 +56,6 @@ export const selectionToolbarTranslateRequestAtom = createSelectionToolbarFeatur
     language: config.language,
     enableAIContentAware: config.translate.enableAIContentAware,
     customPromptsConfig: config.translate.customPromptsConfig,
-    providerConfig,
-  }),
-)
-
-export interface SelectionToolbarVocabularyInsightRequestSlice {
-  language: Config["language"]
-  providerConfig: ProviderConfig | null
-}
-
-export const selectionToolbarVocabularyInsightRequestAtom = createSelectionToolbarFeatureRequestAtom(
-  "selectionToolbar.vocabularyInsight",
-  (config, providerConfig): SelectionToolbarVocabularyInsightRequestSlice => ({
-    language: config.language,
     providerConfig,
   }),
 )

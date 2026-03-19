@@ -1,6 +1,6 @@
 import { i18n } from "#imports"
 import { RiTranslate } from "@remixicon/react"
-import { IconVolume, IconZoomScan } from "@tabler/icons-react"
+import { IconVolume } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -15,7 +15,7 @@ export function SelectionToolbarFeatureToggles() {
   const { features } = selectionToolbar
 
   const setFeatureEnabled = (
-    key: "translate" | "speak" | "vocabularyInsight",
+    key: "translate" | "speak",
     enabled: boolean,
   ) => {
     void setSelectionToolbar({
@@ -56,16 +56,6 @@ export function SelectionToolbarFeatureToggles() {
             />
           </div>
         )}
-        <div className="flex items-center justify-between">
-          <span className="flex items-center gap-2 text-sm">
-            <IconZoomScan className="size-4 text-muted-foreground" />
-            {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.featureToggles.vocabularyInsight")}
-          </span>
-          <Switch
-            checked={features.vocabularyInsight.enabled}
-            onCheckedChange={checked => setFeatureEnabled("vocabularyInsight", checked)}
-          />
-        </div>
       </div>
     </ConfigCard>
   )

@@ -18,7 +18,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 export const THEME_STORAGE_KEY = "theme"
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 65
+export const CONFIG_SCHEMA_VERSION = 66
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 
@@ -107,10 +107,6 @@ export const DEFAULT_CONFIG: Config = {
       },
       speak: {
         enabled: true,
-      },
-      vocabularyInsight: {
-        enabled: true,
-        providerId: "openai-default",
       },
     },
     customActions: defaultDictionaryAction ? [defaultDictionaryAction] : [],

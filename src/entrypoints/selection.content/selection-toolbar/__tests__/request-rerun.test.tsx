@@ -17,7 +17,6 @@ import {
   createRangeSnapshot,
   normalizeSelectedText,
 } from "../../utils"
-import { AiButton } from "../ai-button"
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
 import { TranslateButton } from "../translate-button"
@@ -200,10 +199,6 @@ vi.mock("../translate-button/translation-content", () => ({
   ),
 }))
 
-vi.mock("@/components/markdown-renderer", () => ({
-  MarkdownRenderer: ({ content }: { content: string }) => <div>{content}</div>,
-}))
-
 vi.mock("../custom-action-button/structured-object-renderer", () => ({
   StructuredObjectRenderer: ({ value }: { value: Record<string, unknown> | null }) => (
     <pre>{JSON.stringify(value)}</pre>
@@ -291,16 +286,6 @@ function createDeferredPromise<T>() {
   })
 
   return { promise, resolve, reject }
-}
-
-function createTextSnapshot(output: string): BackgroundTextStreamSnapshot {
-  return {
-    output,
-    thinking: {
-      status: "complete",
-      text: "",
-    },
-  }
 }
 
 function createStructuredObjectSnapshot(output: Record<string, unknown>): BackgroundStructuredObjectStreamSnapshot {
@@ -586,111 +571,6 @@ describe("selection toolbar requests", () => {
     })
 
     expect(screen.getByTestId("translation-result").textContent).toBe("Selected text")
-  })
-
-  it("does not refetch vocabulary insight on focus, but reruns when request values change", async () => {
-    streamBackgroundTextMock.mockResolvedValue(createTextSnapshot("Insight response"))
-
-    const paragraph = document.createElement("p")
-    paragraph.textContent = "Before selected text after."
-    document.body.appendChild(paragraph)
-
-    const store = createStore()
-    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
-    setSelectionState(store, { range: createRangeFor(paragraph) })
-    renderWithProviders(<AiButton />, store)
-
-    fireEvent.click(screen.getByRole("button", { name: "action.vocabularyInsight" }))
-
-    await waitFor(() => {
-      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
-    })
-
-    act(() => {
-      window.dispatchEvent(new Event("focus"))
-      document.dispatchEvent(new Event("visibilitychange"))
-    })
-
-    await act(async () => {
-      await Promise.resolve()
-    })
-
-    expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
-
-    const updatedConfig = cloneConfig(store.get(configAtom))
-    const nextProviderId = findAlternateLLMProviderId(
-      updatedConfig,
-      updatedConfig.selectionToolbar.features.vocabularyInsight.providerId,
-    )
-    if (!nextProviderId) {
-      throw new Error("No alternate LLM provider available for test")
-    }
-    updatedConfig.selectionToolbar.features.vocabularyInsight.providerId = nextProviderId
-
-    act(() => {
-      store.set(configAtom, updatedConfig)
-    })
-
-    await waitFor(() => {
-      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(2)
-    })
-  })
-
-  it("reruns vocabulary insight from the footer and aborts the previous run", async () => {
-    const firstRun = createDeferredPromise<BackgroundTextStreamSnapshot>()
-    const secondRun = createDeferredPromise<BackgroundTextStreamSnapshot>()
-    const signals: AbortSignal[] = []
-
-    streamBackgroundTextMock
-      .mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
-        signals.push(options.signal as AbortSignal)
-        options.signal?.addEventListener("abort", () => {
-          firstRun.reject(new DOMException("aborted", "AbortError"))
-        })
-        return firstRun.promise
-      })
-      .mockImplementationOnce((_payload, options: {
-        onChunk?: (data: BackgroundTextStreamSnapshot) => void
-        signal?: AbortSignal
-      }) => {
-        signals.push(options.signal as AbortSignal)
-        return secondRun.promise.then((value) => {
-          options.onChunk?.(value)
-          return value
-        })
-      })
-
-    const paragraph = document.createElement("p")
-    paragraph.textContent = "Before selected text after."
-    document.body.appendChild(paragraph)
-
-    const store = createStore()
-    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
-    setSelectionState(store, { range: createRangeFor(paragraph) })
-    renderWithProviders(<AiButton />, store)
-
-    fireEvent.click(screen.getByRole("button", { name: "action.vocabularyInsight" }))
-
-    await waitFor(() => {
-      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(1)
-    })
-
-    fireEvent.click(screen.getByRole("button", { name: "Regenerate" }))
-
-    await waitFor(() => {
-      expect(streamBackgroundTextMock).toHaveBeenCalledTimes(2)
-    })
-
-    expect(signals[0]?.aborted).toBe(true)
-
-    await act(async () => {
-      secondRun.resolve(createTextSnapshot("Fresh insight"))
-      await Promise.resolve()
-    })
-
-    await waitFor(() => {
-      expect(screen.getByText("Fresh insight")).toBeInTheDocument()
-    })
   })
 
   it("does not rerun custom action requests on passive config refresh, but reruns when request values change", async () => {
