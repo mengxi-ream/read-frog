@@ -1,4 +1,5 @@
 import { i18n } from "#imports"
+import { supportsGoogleDriveSync } from "@/utils/platform"
 import { PageLayout } from "../../components/page-layout"
 import { AboutCard } from "./about-card"
 import { BetaExperienceConfig } from "./beta-experience"
@@ -11,7 +12,7 @@ export function ConfigPage() {
   return (
     <PageLayout title={i18n.t("options.config.title")} innerClassName="*:border-b [&>*:last-child]:border-b-0">
       <BetaExperienceConfig />
-      <GoogleDriveSyncCard />
+      {supportsGoogleDriveSync && <GoogleDriveSyncCard />}
       <ManualConfigSync />
       <ConfigBackup />
       <AboutCard />

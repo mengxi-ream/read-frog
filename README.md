@@ -256,6 +256,12 @@ Ask AI to understand the project: [Dosu](https://app.dosu.dev/29569286-71ba-47dd
 
 Check out the [Contribution Guide](https://readfrog.app/en/tutorial/code-contribution/contribution-guide) for more details.
 
+#### Firefox Android local debug
+
+- Run `pnpm dev:firefox-android` for a local Firefox Android development build.
+- Run `pnpm build:firefox-android` to generate a locally installable Android-targeted package.
+- This target enables `browser_specific_settings.gecko_android` and removes `identity` and `contextMenus`, so Google Drive Sync and Context Menu are intentionally unavailable.
+
 ReadFrog is dual-licensed under GPLv3 and a commercial license.
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.

@@ -3,6 +3,7 @@ import { browser, defineBackground } from "#imports"
 import { WEBSITE_URL } from "@/utils/constants/url"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
+import { supportsContextMenu } from "@/utils/platform"
 import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-group-registry"
 import { runAiSegmentSubtitles } from "./ai-segmentation"
 import { setupAnalyticsMessageHandlers } from "./analytics"
@@ -21,6 +22,25 @@ import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
 import { setupUninstallSurvey } from "./uninstall-survey"
+
+interface OptionalContextMenuDependencies {
+  initializeContextMenu: () => Promise<void>
+  registerContextMenuListeners: () => void
+  supportsContextMenu: boolean
+}
+
+export function setupOptionalContextMenu({
+  initializeContextMenu,
+  registerContextMenuListeners,
+  supportsContextMenu,
+}: OptionalContextMenuDependencies) {
+  if (!supportsContextMenu) {
+    return
+  }
+
+  registerContextMenuListeners()
+  void initializeContextMenu()
+}
 
 export default defineBackground({
   type: "module",
@@ -82,12 +102,12 @@ export default defineBackground({
     setupAnalyticsMessageHandlers()
     translationMessage()
 
-    // Register context menu listeners synchronously
-    // This ensures listeners are registered before Chrome completes initialization
-    registerContextMenuListeners()
-
-    // Initialize context menu items asynchronously
-    void initializeContextMenu()
+    // Register optional browser features only when the target supports them.
+    setupOptionalContextMenu({
+      initializeContextMenu,
+      registerContextMenuListeners,
+      supportsContextMenu,
+    })
 
     void setUpWebPageTranslationQueue()
     void setUpSubtitlesTranslationQueue()

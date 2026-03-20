@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect } from "react"
 import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from "@/utils/constants/config"
 import { getGoogleUserInfo, getIsAuthenticated, getValidAccessToken } from "@/utils/google-drive/auth"
+import { supportsGoogleDriveSync } from "@/utils/platform"
 
 interface GoogleDriveAuthData {
   isAuthenticated: boolean
@@ -17,6 +18,7 @@ export function useGoogleDriveAuth() {
 
   const query = useQuery({
     queryKey: QUERY_KEY,
+    enabled: supportsGoogleDriveSync,
     queryFn: async (): Promise<GoogleDriveAuthData> => {
       const authenticated = await getIsAuthenticated()
       if (!authenticated) {

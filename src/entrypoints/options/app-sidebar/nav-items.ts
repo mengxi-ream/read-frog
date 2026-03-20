@@ -1,3 +1,4 @@
+import { supportsContextMenu } from "@/utils/platform"
 import { ApiProvidersPage } from "../pages/api-providers"
 import { ConfigPage } from "../pages/config"
 import { ContextMenuPage } from "../pages/context-menu"
@@ -19,7 +20,7 @@ export const ROUTE_CONFIG = [
   { path: "/video-subtitles", component: VideoSubtitlesPage },
   { path: "/floating-button", component: FloatingButtonPage },
   { path: "/selection-toolbar", component: SelectionToolbarPage },
-  { path: "/context-menu", component: ContextMenuPage },
+  ...(supportsContextMenu ? [{ path: "/context-menu", component: ContextMenuPage }] : []),
   { path: "/input-translation", component: InputTranslationPage },
   ...(import.meta.env.BROWSER === "firefox" ? [] : [{ path: "/tts", component: TextToSpeechPage }]),
   { path: "/statistics", component: StatisticsPage },

@@ -1,4 +1,5 @@
 import type { GeneratedI18nStructure } from "#i18n"
+import { supportsContextMenu, supportsGoogleDriveSync } from "@/utils/platform"
 
 type I18nKey = keyof GeneratedI18nStructure
 
@@ -28,6 +29,26 @@ const TTS_SEARCH_ITEMS: SearchItemDefinition[] = !IS_FIREFOX
     }]
   : []
 
+const GOOGLE_DRIVE_SEARCH_ITEMS: SearchItemDefinition[] = supportsGoogleDriveSync
+  ? [{
+      sectionId: "google-drive-sync",
+      route: "/config",
+      titleKey: "options.config.sync.googleDrive.title",
+      descriptionKey: "options.config.sync.googleDrive.description",
+      pageKey: "options.config.title",
+    }]
+  : []
+
+const CONTEXT_MENU_SEARCH_ITEMS: SearchItemDefinition[] = supportsContextMenu
+  ? [{
+      sectionId: "context-menu-translate",
+      route: "/context-menu",
+      titleKey: "options.floatingButtonAndToolbar.contextMenu.translate.title",
+      descriptionKey: "options.floatingButtonAndToolbar.contextMenu.translate.description",
+      pageKey: "options.overlayTools.contextMenu.title",
+    }]
+  : []
+
 const CONFIG_SEARCH_ITEMS = [
   {
     sectionId: "beta-experience",
@@ -36,13 +57,7 @@ const CONFIG_SEARCH_ITEMS = [
     descriptionKey: "options.betaExperience.description",
     pageKey: "options.config.title",
   },
-  {
-    sectionId: "google-drive-sync",
-    route: "/config",
-    titleKey: "options.config.sync.googleDrive.title",
-    descriptionKey: "options.config.sync.googleDrive.description",
-    pageKey: "options.config.title",
-  },
+  ...GOOGLE_DRIVE_SEARCH_ITEMS,
   {
     sectionId: "manual-config-sync",
     route: "/config",
@@ -261,13 +276,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
   },
 
   // Context Menu page
-  {
-    sectionId: "context-menu-translate",
-    route: "/context-menu",
-    titleKey: "options.floatingButtonAndToolbar.contextMenu.translate.title",
-    descriptionKey: "options.floatingButtonAndToolbar.contextMenu.translate.description",
-    pageKey: "options.overlayTools.contextMenu.title",
-  },
+  ...CONTEXT_MENU_SEARCH_ITEMS,
 
   // Input Translation page
   {

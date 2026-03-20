@@ -1,15 +1,16 @@
 import { browser, storage } from "#imports"
 import { z } from "zod"
+import { supportsGoogleDriveSync } from "@/utils/platform"
 import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from "../constants/config"
 import { logger } from "../logger"
 
 const GOOGLE_CLIENT_ID = import.meta.env.WXT_GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID"
-const GOOGLE_REDIRECT_URI = browser.identity.getRedirectURL()
 const GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/drive.appdata",
   "https://www.googleapis.com/auth/userinfo.email",
 ]
 const TOKEN_EXPIRY_BUFFER_MS = 60000
+export const GOOGLE_DRIVE_PLATFORM_UNSUPPORTED_ERROR_CODE = "PLATFORM_NOT_SUPPORTED"
 
 const googleAuthTokenSchema = z.object({
   access_token: z.string(),
@@ -26,6 +27,44 @@ const googleUserInfoSchema = z.object({
 
 export type GoogleAuthToken = z.infer<typeof googleAuthTokenSchema>
 export type GoogleUserInfo = z.infer<typeof googleUserInfoSchema>
+
+export class GoogleDrivePlatformUnsupportedError extends Error {
+  code = GOOGLE_DRIVE_PLATFORM_UNSUPPORTED_ERROR_CODE
+
+  constructor(message = "Google Drive sync is not supported on this platform.") {
+    super(message)
+    this.name = "GoogleDrivePlatformUnsupportedError"
+  }
+}
+
+export function isGoogleDrivePlatformUnsupportedError(
+  error: unknown,
+): error is GoogleDrivePlatformUnsupportedError {
+  return error instanceof GoogleDrivePlatformUnsupportedError
+    || (
+      typeof error === "object"
+      && error !== null
+      && "code" in error
+      && error.code === GOOGLE_DRIVE_PLATFORM_UNSUPPORTED_ERROR_CODE
+    )
+}
+
+function createPlatformUnsupportedError(): GoogleDrivePlatformUnsupportedError {
+  return new GoogleDrivePlatformUnsupportedError()
+}
+
+function getIdentityApi() {
+  if (!supportsGoogleDriveSync) {
+    throw createPlatformUnsupportedError()
+  }
+
+  const identity = browser.identity
+  if (!identity?.getRedirectURL || !identity.launchWebAuthFlow) {
+    throw createPlatformUnsupportedError()
+  }
+
+  return identity
+}
 
 /**
  * Get token from storage with validation
@@ -56,14 +95,15 @@ async function getTokenFromStorage(): Promise<GoogleAuthToken | null> {
  */
 export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<string> {
   try {
+    const identity = getIdentityApi()
     const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth")
     authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID)
     authUrl.searchParams.set("response_type", "token")
-    authUrl.searchParams.set("redirect_uri", GOOGLE_REDIRECT_URI)
+    authUrl.searchParams.set("redirect_uri", identity.getRedirectURL())
     authUrl.searchParams.set("scope", GOOGLE_SCOPES.join(" "))
     authUrl.searchParams.set("prompt", "select_account")
 
-    const responseUrl = await browser.identity.launchWebAuthFlow({
+    const responseUrl = await identity.launchWebAuthFlow({
       url: authUrl.toString(),
       interactive: true,
     })
@@ -106,6 +146,10 @@ export async function authenticateGoogleDriveAndSaveTokenToStorage(): Promise<st
  */
 export async function getValidAccessToken(): Promise<string> {
   try {
+    if (!supportsGoogleDriveSync) {
+      throw createPlatformUnsupportedError()
+    }
+
     const tokenData = await getTokenFromStorage()
 
     // Re-authenticate if token not found or expiring soon (within 1 minute)
@@ -137,6 +181,10 @@ export async function clearAccessToken(): Promise<void> {
  */
 export async function getIsAuthenticated(): Promise<boolean> {
   try {
+    if (!supportsGoogleDriveSync) {
+      throw createPlatformUnsupportedError()
+    }
+
     const tokenData = await getTokenFromStorage()
 
     if (!tokenData) {
@@ -147,6 +195,10 @@ export async function getIsAuthenticated(): Promise<boolean> {
   }
   catch (error) {
     logger.error("Failed to check authentication status", error)
+    if (isGoogleDrivePlatformUnsupportedError(error)) {
+      throw error
+    }
+
     return false
   }
 }
@@ -155,6 +207,10 @@ export async function getIsAuthenticated(): Promise<boolean> {
  * Fetch Google user info using access token
  */
 export async function getGoogleUserInfo(accessToken: string): Promise<GoogleUserInfo> {
+  if (!supportsGoogleDriveSync) {
+    throw createPlatformUnsupportedError()
+  }
+
   const res = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
     headers: { Authorization: `Bearer ${accessToken}` },
   })

@@ -254,6 +254,12 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 查看[贡献指南](https://readfrog.app/zh/tutorial/code-contribution/contribution-guide)了解更多详情。
 
+#### Firefox Android 本地调试
+
+- 使用 `pnpm dev:firefox-android` 启动 Firefox Android 本地开发构建。
+- 使用 `pnpm build:firefox-android` 生成可本地安装调试的 Android 定向产物。
+- 该目标会启用 `browser_specific_settings.gecko_android`，并移除 `identity` 与 `contextMenus`，因此 Google Drive Sync 和 Context Menu 会按预期不可用。
+
 ReadFrog 采用 GPLv3 和商业许可双重授权。
 
 贡献者许可条款请参阅 [CONTRIBUTING.md](./CONTRIBUTING.md)。

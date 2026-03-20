@@ -10,6 +10,7 @@ import { lastSyncTimeAtom } from "@/utils/atoms/last-sync-time"
 import { clearAccessToken } from "@/utils/google-drive/auth"
 import { syncConfig } from "@/utils/google-drive/sync"
 import { logger } from "@/utils/logger"
+import { supportsGoogleDriveSync } from "@/utils/platform"
 import { ConfigCard } from "../../../components/config-card"
 import { UnresolvedDialog } from "./components/unresolved-dialog"
 
@@ -20,6 +21,10 @@ export function GoogleDriveSyncCard() {
   const setUnresolvedData = useSetAtom(unresolvedConfigsAtom)
   const setResolutions = useSetAtom(resolutionsAtom)
   const lastSyncTime = useAtomValue(lastSyncTimeAtom)
+
+  if (!supportsGoogleDriveSync) {
+    return null
+  }
 
   const handleSync = async () => {
     setIsSyncing(true)
