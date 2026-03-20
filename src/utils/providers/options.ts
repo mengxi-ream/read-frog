@@ -41,17 +41,23 @@ export function getProviderOptions(
 }
 
 /**
- * Get provider options for AI SDK generateText calls using only user-saved overrides.
- * Recommendations stay in the UI until the user explicitly applies and saves them.
+ * Get provider options for AI SDK calls.
+ * - If the user has saved provider options (including `{}`), use them as-is.
+ * - Otherwise fall back to the recommended defaults for the current model.
  */
 export function getProviderOptionsWithOverride(
-  _model: string,
+  model: string,
   provider: string,
   userOptions?: Record<string, JSONValue>,
 ): Record<string, Record<string, JSONValue>> | undefined {
-  if (!userOptions || Object.keys(userOptions).length === 0) {
+  if (userOptions !== undefined) {
+    return { [provider]: userOptions }
+  }
+
+  const recommendedOptions = getRecommendedProviderOptions(model)
+  if (!recommendedOptions) {
     return undefined
   }
 
-  return { [provider]: userOptions }
+  return { [provider]: recommendedOptions }
 }
