@@ -83,7 +83,7 @@ export const testSeries: TestSeriesObject = {
           range: "all",
           autoTranslatePatterns: ["spanish-news.com", "elmundo.es"],
           autoTranslateLanguages: [],
-          shortcut: ["alt", "b"],
+          shortcut: "Alt+B",
           preload: {
             margin: 1000,
             threshold: 0,
@@ -264,7 +264,7 @@ export const testSeries: TestSeriesObject = {
           range: "all",
           autoTranslatePatterns: [],
           autoTranslateLanguages: [],
-          shortcut: ["alt", "b"],
+          shortcut: "Alt+B",
           preload: {
             margin: 1000,
             threshold: 0,
@@ -438,7 +438,7 @@ export const testSeries: TestSeriesObject = {
           range: "all",
           autoTranslatePatterns: [],
           autoTranslateLanguages: [],
-          shortcut: ["alt", "b"],
+          shortcut: "Alt+B",
           preload: {
             margin: 1000,
             threshold: 0,
@@ -623,7 +623,7 @@ export const testSeries: TestSeriesObject = {
           range: "all",
           autoTranslatePatterns: [],
           autoTranslateLanguages: [],
-          shortcut: ["alt", "b"],
+          shortcut: "Alt+B",
           preload: {
             margin: 1000,
             threshold: 0,

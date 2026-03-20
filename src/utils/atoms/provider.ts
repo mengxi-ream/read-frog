@@ -50,6 +50,7 @@ export function updateProviderConfig(
   config: ProviderConfig,
   updates: PartialDeep<ProviderConfig>,
 ): ProviderConfig {
-  const result = deepmerge(config, updates)
+  // Keep the merge input shallow enough for TypeScript, then validate the result with Zod.
+  const result = deepmerge(config, updates as Partial<ProviderConfig>) as ProviderConfig
   return providerConfigItemSchema.parse(result)
 }

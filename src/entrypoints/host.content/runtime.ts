@@ -32,7 +32,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   const cleanupPageTranslationTriggers = manager.registerPageTranslationTriggers()
 
-  void bindTranslationShortcutKey(manager)
+  const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
 
   // For late-loading iframes: check if translation is already enabled for this tab
   let translationEnabled = false
@@ -83,6 +83,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     cleanupUrlListener()
     teardownNodeTranslation()
     cleanupPageTranslationTriggers()
+    cleanupTranslationShortcut()
     cleanupTranslationStateListener()
     window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
     window.__READ_FROG_HOST_INJECTED__ = false
