@@ -7,6 +7,7 @@ dataTypes:
   number: Sayı
 contextMenu:
   translate: Çevir
+  translateSelection: '"%s" Çevir'
   showOriginal: Orijinali Göster
 popup:
   theme: Tema
@@ -389,7 +390,7 @@ options:
       title: Bağlam Menüsü
       translate:
         title: Bağlam Menüsü Çevirisini Etkinleştir
-        description: Hızlı sayfa çevirisi için tarayıcı sağ tıklama menüsüne çeviri seçeneği ekle
+        description: Sayfa veya seçili metni hızlıca çevirmek için tarayıcı sağ tıklama menüsüne çeviri seçenekleri ekle
   translation:
     title: Çeviri
     requestQueueConfig:

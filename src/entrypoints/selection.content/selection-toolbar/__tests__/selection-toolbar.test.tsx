@@ -250,6 +250,31 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     await waitFor(expectToolbarVisible)
   })
 
+  it("should keep the toolbar visible on right-click so context menu translation can reuse the selection", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId("test-element")
+
+    await triggerMouseUpWithSelection(target)
+    await waitFor(expectToolbarVisible)
+
+    await act(async () => {
+      target.dispatchEvent(new MouseEvent("mousedown", {
+        bubbles: true,
+        button: 2,
+        clientX: 100,
+        clientY: 100,
+      }))
+    })
+
+    expectToolbarVisible()
+  })
+
   it("should not show toolbar when selection does not contain the click target when click target is a button", async () => {
     render(
       <div>

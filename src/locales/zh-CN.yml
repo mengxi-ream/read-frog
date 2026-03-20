@@ -7,6 +7,7 @@ dataTypes:
   number: 数字
 contextMenu:
   translate: 翻译
+  translateSelection: 翻译“%s”
   showOriginal: 显示原文
 popup:
   theme: 主题
@@ -504,7 +505,7 @@ options:
       title: 右键菜单
       translate:
         title: 启用右键翻译
-        description: 在浏览器右键菜单中添加翻译选项，快速翻译页面
+        description: 在浏览器右键菜单中添加翻译选项，快速翻译页面或所选文本
   translation:
     title: 翻译
     requestQueueConfig:

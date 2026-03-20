@@ -181,6 +181,10 @@ export function SelectionToolbar() {
     }
 
     const handleMouseDown = (e: MouseEvent) => {
+      if (e.button === 2) {
+        return
+      }
+
       // Check if dragging started from within the tooltip container
       if (tooltipContainerRef.current) {
         const eventPath = e.composedPath()

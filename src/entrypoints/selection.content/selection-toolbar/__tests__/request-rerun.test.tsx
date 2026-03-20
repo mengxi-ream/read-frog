@@ -20,12 +20,14 @@ import {
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
 import { TranslateButton } from "../translate-button"
+import { SelectionTranslationProvider } from "../translate-button/provider"
 
 const streamBackgroundTextMock = vi.fn()
 const streamBackgroundStructuredObjectMock = vi.fn()
 const translateTextCoreMock = vi.fn()
 const getOrFetchArticleDataMock = vi.fn()
 const toastErrorMock = vi.fn()
+const onMessageMock = vi.fn()
 
 vi.mock("@/components/ui/selection-popover", async () => {
   const React = await import("react")
@@ -233,6 +235,11 @@ vi.mock("@/utils/logger", () => ({
   },
 }))
 
+vi.mock("@/utils/message", () => ({
+  onMessage: (...args: unknown[]) => onMessageMock(...args),
+  sendMessage: vi.fn(),
+}))
+
 function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config
 }
@@ -240,6 +247,16 @@ function cloneConfig(config: Config): Config {
 function createRangeFor(node: Node) {
   const range = document.createRange()
   range.selectNodeContents(node)
+  return range
+}
+
+function createRangeAcrossNodes(
+  startNode: Text,
+  endNode: Text,
+) {
+  const range = document.createRange()
+  range.setStart(startNode, 0)
+  range.setEnd(endNode, endNode.textContent?.length ?? 0)
   return range
 }
 
@@ -288,6 +305,15 @@ function createDeferredPromise<T>() {
   return { promise, resolve, reject }
 }
 
+function getRegisteredMessageHandler(name: string) {
+  const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+  if (!registration) {
+    throw new Error(`Message handler not registered: ${name}`)
+  }
+
+  return registration[1] as (message: { data: { selectionText: string } }) => void
+}
+
 function createStructuredObjectSnapshot(output: Record<string, unknown>): BackgroundStructuredObjectStreamSnapshot {
   return {
     output,
@@ -326,7 +352,9 @@ function renderWithProviders(ui: ReactElement, store = createStore()) {
   const view = render(
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        {ui}
+        <SelectionTranslationProvider>
+          {ui}
+        </SelectionTranslationProvider>
       </Provider>
     </QueryClientProvider>,
   )
@@ -367,7 +395,9 @@ describe("selection toolbar requests", () => {
     view.rerender(
       <QueryClientProvider client={view.queryClient}>
         <Provider store={store}>
-          <TranslateButton />
+          <SelectionTranslationProvider>
+            <TranslateButton />
+          </SelectionTranslationProvider>
         </Provider>
       </QueryClientProvider>,
     )
@@ -571,6 +601,129 @@ describe("selection toolbar requests", () => {
     })
 
     expect(screen.getByTestId("translation-result").textContent).toBe("Selected text")
+  })
+
+  it("opens selection translation from the context menu and tracks the context-menu surface", async () => {
+    translateTextCoreMock.mockResolvedValue("Context menu result")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    act(() => {
+      paragraph.dispatchEvent(new MouseEvent("contextmenu", {
+        bubbles: true,
+        button: 2,
+        clientX: 140,
+        clientY: 180,
+      }))
+    })
+
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
+
+    await act(async () => {
+      handler({ data: { selectionText: "Selected text" } })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("Context menu result")
+    })
+
+    const { sendMessage } = await import("@/utils/message")
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "selection_translation",
+        surface: "context_menu",
+        outcome: "success",
+      }),
+    )
+  })
+
+  it("reuses the same captured session for cross-node context-menu translation", async () => {
+    translateTextCoreMock.mockResolvedValue("Cross-node result")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const container = document.createElement("div")
+    const firstBlock = document.createElement("div")
+    firstBlock.textContent = "As long as you're alive,"
+    const secondBlock = document.createElement("div")
+    secondBlock.textContent = "there's no bad ending."
+    container.append(firstBlock, secondBlock)
+    document.body.appendChild(container)
+
+    const startNode = firstBlock.firstChild
+    const endNode = secondBlock.firstChild
+    if (!(startNode instanceof Text) || !(endNode instanceof Text)) {
+      throw new TypeError("Expected text nodes for cross-node selection test")
+    }
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, {
+      text: "As long as you're alive, there's no bad ending.",
+      range: createRangeAcrossNodes(startNode, endNode),
+    })
+    renderWithProviders(<TranslateButton />, store)
+
+    act(() => {
+      container.dispatchEvent(new MouseEvent("contextmenu", {
+        bubbles: true,
+        button: 2,
+        clientX: 180,
+        clientY: 220,
+      }))
+    })
+
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
+
+    await act(async () => {
+      handler({
+        data: {
+          selectionText: "As long as you're alive,\nthere's no bad ending.",
+        },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByTestId("translation-selection").textContent).toBe(
+      "As long as you're alive, there's no bad ending.",
+    )
+    expect(screen.getByTestId("footer-paragraphs").textContent).toContain("As long as you're alive,")
+    expect(screen.getByTestId("footer-paragraphs").textContent).toContain("there's no bad ending.")
+    expect(toastErrorMock).not.toHaveBeenCalled()
+  })
+
+  it("shows a toast when the context menu request cannot recover a selection snapshot", async () => {
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    renderWithProviders(<TranslateButton />, store)
+
+    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
+
+    act(() => {
+      handler({ data: { selectionText: "Missing selection" } })
+    })
+
+    expect(toastErrorMock).toHaveBeenCalledWith(
+      "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+    )
+    expect(translateTextCoreMock).not.toHaveBeenCalled()
   })
 
   it("does not rerun custom action requests on passive config refresh, but reruns when request values change", async () => {

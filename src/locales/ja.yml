@@ -7,6 +7,7 @@ dataTypes:
   number: 数値
 contextMenu:
   translate: 翻訳
+  translateSelection: 「%s」を翻訳
   showOriginal: 原文を表示
 popup:
   theme: テーマ
@@ -389,7 +390,7 @@ options:
       title: コンテキストメニュー
       translate:
         title: 右クリック翻訳を有効化
-        description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページを素早く翻訳
+        description: ブラウザの右クリックメニューに翻訳オプションを追加し、ページや選択テキストを素早く翻訳
   translation:
     title: 翻訳
     requestQueueConfig:

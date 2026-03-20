@@ -7,6 +7,7 @@ dataTypes:
   number: 數字
 contextMenu:
   translate: 翻譯
+  translateSelection: 翻譯「%s」
   showOriginal: 顯示原文
 popup:
   theme: 主題
@@ -389,7 +390,7 @@ options:
       title: 右鍵選單
       translate:
         title: 啟用右鍵翻譯
-        description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面
+        description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或所選文字
   translation:
     title: 翻譯
     requestQueueConfig:

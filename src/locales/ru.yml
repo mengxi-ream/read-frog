@@ -7,6 +7,7 @@ dataTypes:
   number: Число
 contextMenu:
   translate: Перевести
+  translateSelection: Перевести "%s"
   showOriginal: Показать оригинал
 popup:
   theme: Тема
@@ -389,7 +390,7 @@ options:
       title: Контекстное меню
       translate:
         title: Включить перевод в контекстном меню
-        description: Добавить опцию перевода в контекстное меню браузера для быстрого перевода страницы
+        description: Добавить опцию перевода в контекстное меню браузера для быстрого перевода страницы и выделенного текста
   translation:
     title: Перевод
     requestQueueConfig:

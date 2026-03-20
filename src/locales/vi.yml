@@ -7,6 +7,7 @@ dataTypes:
   number: Số
 contextMenu:
   translate: Dịch
+  translateSelection: Dịch "%s"
   showOriginal: Hiển thị bản gốc
 popup:
   theme: Chủ đề
@@ -389,7 +390,7 @@ options:
       title: Menu ngữ cảnh
       translate:
         title: Bật dịch menu ngữ cảnh
-        description: Thêm tùy chọn dịch vào menu chuột phải của trình duyệt để dịch trang nhanh
+        description: Thêm các tùy chọn dịch vào menu chuột phải của trình duyệt để dịch nhanh trang hoặc văn bản đã chọn
   translation:
     title: Dịch thuật
     requestQueueConfig:

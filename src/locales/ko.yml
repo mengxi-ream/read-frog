@@ -7,6 +7,7 @@ dataTypes:
   number: 숫자
 contextMenu:
   translate: 번역
+  translateSelection: '"%s" 번역'
   showOriginal: 원문 보기
 popup:
   theme: 테마
@@ -389,7 +390,7 @@ options:
       title: 컨텍스트 메뉴
       translate:
         title: 우클릭 번역 활성화
-        description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 빠른 페이지 번역
+        description: 브라우저 우클릭 메뉴에 번역 옵션을 추가하여 페이지나 선택한 텍스트를 빠르게 번역
   translation:
     title: 번역
     requestQueueConfig:

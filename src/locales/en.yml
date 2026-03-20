@@ -7,6 +7,7 @@ dataTypes:
   number: Number
 contextMenu:
   translate: Translate
+  translateSelection: Translate "%s"
   showOriginal: Show Original
 popup:
   theme: Theme
@@ -504,7 +505,7 @@ options:
       title: Context Menu
       translate:
         title: Enable Context Menu Translate
-        description: Add a translate option to the browser right-click menu for quick page translation
+        description: Add translate options to the browser right-click menu for quick page and selection translation
   translation:
     title: Translation
     requestQueueConfig:

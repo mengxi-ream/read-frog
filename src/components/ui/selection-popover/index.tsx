@@ -78,22 +78,27 @@ export function useSelectionPopoverOverlayProps() {
 }
 
 function SelectionPopoverRoot({
+  anchor: anchorProp,
   children,
   defaultOpen = false,
   open: openProp,
+  onAnchorChange,
   onOpenChange,
 }: {
+  anchor?: SelectionPopoverPosition | null
   children: React.ReactNode
   defaultOpen?: boolean
   open?: boolean
+  onAnchorChange?: (anchor: SelectionPopoverPosition | null) => void
   onOpenChange?: (open: boolean) => void
 }) {
   const instanceId = React.useId()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
-  const [anchor, setAnchor] = React.useState<SelectionPopoverPosition | null>(null)
+  const [uncontrolledAnchor, setUncontrolledAnchor] = React.useState<SelectionPopoverPosition | null>(null)
   const [pinned, setPinned] = React.useState(false)
   const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null)
   const open = openProp ?? uncontrolledOpen
+  const anchor = anchorProp ?? uncontrolledAnchor
 
   const setOpen = React.useCallback((value: boolean | ((value: boolean) => boolean)) => {
     const nextOpen = typeof value === "function" ? value(open) : value
@@ -108,6 +113,14 @@ function SelectionPopoverRoot({
 
     onOpenChange?.(nextOpen)
   }, [onOpenChange, open, openProp])
+
+  const setAnchor = React.useCallback((value: SelectionPopoverPosition | null) => {
+    if (anchorProp === undefined) {
+      setUncontrolledAnchor(value)
+    }
+
+    onAnchorChange?.(value)
+  }, [anchorProp, onAnchorChange])
 
   React.useEffect(() => {
     if (!open) {
