@@ -19,6 +19,7 @@ import {
 } from "../../utils"
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
+import { SelectionCustomActionProvider } from "../custom-action-button/provider"
 import { TranslateButton } from "../translate-button"
 import { SelectionTranslationProvider } from "../translate-button/provider"
 
@@ -305,13 +306,13 @@ function createDeferredPromise<T>() {
   return { promise, resolve, reject }
 }
 
-function getRegisteredMessageHandler(name: string) {
+function getRegisteredMessageHandler<T>(name: string) {
   const registration = onMessageMock.mock.calls.find(call => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
 
-  return registration[1] as (message: { data: { selectionText: string } }) => void
+  return registration[1] as (message: { data: T }) => void
 }
 
 function createStructuredObjectSnapshot(output: Record<string, unknown>): BackgroundStructuredObjectStreamSnapshot {
@@ -353,7 +354,9 @@ function renderWithProviders(ui: ReactElement, store = createStore()) {
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <SelectionTranslationProvider>
-          {ui}
+          <SelectionCustomActionProvider>
+            {ui}
+          </SelectionCustomActionProvider>
         </SelectionTranslationProvider>
       </Provider>
     </QueryClientProvider>,
@@ -396,7 +399,9 @@ describe("selection toolbar requests", () => {
       <QueryClientProvider client={view.queryClient}>
         <Provider store={store}>
           <SelectionTranslationProvider>
-            <TranslateButton />
+            <SelectionCustomActionProvider>
+              <TranslateButton />
+            </SelectionCustomActionProvider>
           </SelectionTranslationProvider>
         </Provider>
       </QueryClientProvider>,
@@ -714,7 +719,7 @@ describe("selection toolbar requests", () => {
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
     renderWithProviders(<TranslateButton />, store)
 
-    const handler = getRegisteredMessageHandler("openSelectionTranslationFromContextMenu")
+    const handler = getRegisteredMessageHandler<{ selectionText: string }>("openSelectionTranslationFromContextMenu")
 
     act(() => {
       handler({ data: { selectionText: "Missing selection" } })
@@ -724,6 +729,111 @@ describe("selection toolbar requests", () => {
       "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
     )
     expect(translateTextCoreMock).not.toHaveBeenCalled()
+  })
+
+  it("opens a custom action from the context menu with the captured selection session", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "Context menu result" }))
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
+    if (!action) {
+      throw new Error("Default custom action is missing")
+    }
+
+    act(() => {
+      paragraph.dispatchEvent(new MouseEvent("contextmenu", {
+        bubbles: true,
+        button: 2,
+        clientX: 140,
+        clientY: 180,
+      }))
+    })
+
+    const handler = getRegisteredMessageHandler<{ actionId: string, selectionText: string }>(
+      "openSelectionCustomActionFromContextMenu",
+    )
+
+    await act(async () => {
+      handler({
+        data: {
+          actionId: action.id,
+          selectionText: "Selected text",
+        },
+      })
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText("{\"summary\":\"Context menu result\"}")).toBeInTheDocument()
+    })
+
+    expect(screen.getByTestId("footer-paragraphs").textContent).toContain("Selected text inside a paragraph.")
+    expect(toastErrorMock).not.toHaveBeenCalled()
+
+    const { sendMessage } = await import("@/utils/message")
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "custom_ai_action",
+        surface: "context_menu",
+        outcome: "success",
+        action_id: action.id,
+        action_name: action.name,
+      }),
+    )
+  })
+
+  it("shows a toast when a custom action context menu request cannot recover a selection snapshot", async () => {
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
+    if (!action) {
+      throw new Error("Default custom action is missing")
+    }
+
+    const handler = getRegisteredMessageHandler<{ actionId: string, selectionText: string }>(
+      "openSelectionCustomActionFromContextMenu",
+    )
+
+    act(() => {
+      handler({
+        data: {
+          actionId: action.id,
+          selectionText: "Missing selection",
+        },
+      })
+    })
+
+    expect(toastErrorMock).toHaveBeenCalledWith(
+      "options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection",
+    )
+    expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
+
+    const { sendMessage } = await import("@/utils/message")
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "custom_ai_action",
+        surface: "context_menu",
+        outcome: "failure",
+        action_id: action.id,
+        action_name: action.name,
+      }),
+    )
   })
 
   it("does not rerun custom action requests on passive config refresh, but reruns when request values change", async () => {
@@ -856,6 +966,18 @@ describe("selection toolbar requests", () => {
     expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.customActionFailed")
     expect(alert).toHaveTextContent("options.floatingButtonAndToolbar.selectionToolbar.errors.missingSelection")
     expect(streamBackgroundStructuredObjectMock).not.toHaveBeenCalled()
+
+    const { sendMessage } = await import("@/utils/message")
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "custom_ai_action",
+        surface: "selection_toolbar",
+        outcome: "failure",
+        action_id: DEFAULT_CONFIG.selectionToolbar.customActions[0]?.id,
+        action_name: DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name,
+      }),
+    )
   })
 
   it("renders custom action errors inline and clears them after a successful rerun", async () => {

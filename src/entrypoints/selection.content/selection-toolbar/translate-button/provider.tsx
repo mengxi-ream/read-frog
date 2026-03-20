@@ -1,5 +1,4 @@
 import type { ReactNode } from "react"
-import type { SelectionRangeSnapshot } from "../../utils"
 import type { SelectionSession, SelectionToolbarTranslateRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
@@ -27,7 +26,6 @@ import { shadowWrapper } from "../.."
 import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
-import { toLiveRange } from "../../utils"
 import {
   isSelectionToolbarVisibleAtom,
   selectionSessionAtom,
@@ -38,6 +36,7 @@ import {
   createSelectionToolbarRuntimeError,
   isAbortError,
 } from "../inline-error"
+import { useSelectionContextMenuRequestResolver } from "../use-selection-context-menu-request"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
 
@@ -46,12 +45,6 @@ interface SelectionTranslatePendingOpenRequest {
   session: SelectionSession
   surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
 }
-
-interface CachedContextMenuSnapshot extends SelectionTranslatePendingOpenRequest {
-  capturedAt: number
-}
-
-const CONTEXT_MENU_SNAPSHOT_TTL_MS = 10_000
 
 async function translateWithLlm({
   preparedText,
@@ -123,49 +116,6 @@ async function translateWithStandardProvider({
   return translatedText
 }
 
-function getSelectionAnchorFromRange(rangeSnapshot: SelectionRangeSnapshot) {
-  try {
-    const range = toLiveRange(rangeSnapshot)
-    const clientRects = [...range.getClientRects()]
-    const targetRect = clientRects.toReversed().find(rect => rect.width > 0 || rect.height > 0)
-      ?? range.getBoundingClientRect()
-
-    if (targetRect.width === 0 && targetRect.height === 0) {
-      return null
-    }
-
-    return {
-      x: Math.max(targetRect.left, targetRect.right),
-      y: Math.max(targetRect.top, targetRect.bottom),
-    }
-  }
-  catch {
-    return null
-  }
-}
-
-function getSelectionAnchor(session: SelectionSession | null) {
-  if (!session) {
-    return null
-  }
-
-  for (const rangeSnapshot of session.selectionSnapshot.ranges.toReversed()) {
-    const anchor = getSelectionAnchorFromRange(rangeSnapshot)
-    if (anchor) {
-      return anchor
-    }
-  }
-
-  return null
-}
-
-function getViewportCenterAnchor() {
-  return {
-    x: window.innerWidth / 2,
-    y: window.innerHeight / 2,
-  }
-}
-
 interface SelectionTranslationContextValue {
   prepareToolbarOpen: () => void
 }
@@ -208,11 +158,11 @@ export function SelectionTranslationProvider({
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const setConfig = useSetAtom(writeConfigAtom)
   const abortControllerRef = useRef<AbortController | null>(null)
-  const contextMenuSnapshotRef = useRef<CachedContextMenuSnapshot | null>(null)
   const pendingOpenRequestRef = useRef<SelectionTranslatePendingOpenRequest | null>(null)
   const reopenFrameRef = useRef<number | null>(null)
   const lastTranslationRunKeyRef = useRef<string | null>(null)
   const runIdRef = useRef(0)
+  const { resolveContextMenuSelectionRequest } = useSelectionContextMenuRequestResolver(selectionSession)
   const selectionText = activeSession?.selectionSnapshot.text ?? null
   const paragraphsText = activeSession?.contextSnapshot.text ?? selectionText
   const titleText = document.title || null
@@ -446,26 +396,17 @@ export function SelectionTranslationProvider({
   }, [commitOpenRequest, selectionSession])
 
   const resolveContextMenuRequest = useCallback((): SelectionTranslatePendingOpenRequest | null => {
-    const cachedSnapshot = contextMenuSnapshotRef.current
-    if (cachedSnapshot && Date.now() - cachedSnapshot.capturedAt <= CONTEXT_MENU_SNAPSHOT_TTL_MS) {
-      return {
-        anchor: cachedSnapshot.anchor,
-        session: cachedSnapshot.session,
-        surface: ANALYTICS_SURFACE.CONTEXT_MENU,
-      }
-    }
-
-    if (!selectionSession) {
+    const request = resolveContextMenuSelectionRequest()
+    if (!request) {
       return null
     }
 
     return {
-      anchor: getSelectionAnchor(selectionSession)
-        ?? getViewportCenterAnchor(),
-      session: selectionSession,
+      anchor: request.anchor,
+      session: request.session,
       surface: ANALYTICS_SURFACE.CONTEXT_MENU,
     }
-  }, [selectionSession])
+  }, [resolveContextMenuSelectionRequest])
 
   const openFromContextMenu = useCallback(() => {
     const request = resolveContextMenuRequest()
@@ -493,27 +434,6 @@ export function SelectionTranslationProvider({
     commitOpenRequest(request)
     handleOpenChange(true)
   }, [commitOpenRequest, handleOpenChange, isOpen, resolveContextMenuRequest])
-
-  useEffect(() => {
-    const handleContextMenu = (event: MouseEvent) => {
-      if (!selectionSession) {
-        contextMenuSnapshotRef.current = null
-        return
-      }
-
-      contextMenuSnapshotRef.current = {
-        anchor: { x: event.clientX, y: event.clientY },
-        session: selectionSession,
-        surface: ANALYTICS_SURFACE.CONTEXT_MENU,
-        capturedAt: Date.now(),
-      }
-    }
-
-    document.addEventListener("contextmenu", handleContextMenu)
-    return () => {
-      document.removeEventListener("contextmenu", handleContextMenu)
-    }
-  }, [selectionSession])
 
   useEffect(() => {
     return onMessage("openSelectionTranslationFromContextMenu", () => {

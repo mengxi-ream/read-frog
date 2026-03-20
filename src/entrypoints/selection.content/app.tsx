@@ -5,6 +5,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { useInputTranslation } from "./input-translation"
 import { SELECTION_CONTENT_OVERLAY_LAYERS } from "./overlay-layers"
 import { SelectionToolbar } from "./selection-toolbar"
+import { SelectionCustomActionProvider } from "./selection-toolbar/custom-action-button/provider"
 import { SelectionTranslationProvider } from "./selection-toolbar/translate-button/provider"
 
 export default function App({
@@ -26,7 +27,9 @@ export default function App({
   return (
     <>
       <SelectionTranslationProvider>
-        <SelectionToolbar />
+        <SelectionCustomActionProvider>
+          <SelectionToolbar />
+        </SelectionCustomActionProvider>
       </SelectionTranslationProvider>
       <Toaster richColors className={`${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} notranslate`} />
     </>

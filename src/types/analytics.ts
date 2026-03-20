@@ -1,6 +1,7 @@
 export const ANALYTICS_FEATURE = {
   PAGE_TRANSLATION: "page_translation",
   SELECTION_TRANSLATION: "selection_translation",
+  CUSTOM_AI_ACTION: "custom_ai_action",
   INPUT_TRANSLATION: "input_translation",
   TRANSLATION_HUB: "translation_hub",
   VIDEO_SUBTITLES: "video_subtitles",
@@ -34,6 +35,8 @@ export interface FeatureUsageContext {
   feature: AnalyticsFeature
   surface: AnalyticsSurface
   startedAt: number
+  action_id?: string
+  action_name?: string
 }
 
 export interface FeatureUsedEventProperties {
@@ -41,4 +44,6 @@ export interface FeatureUsedEventProperties {
   surface: AnalyticsSurface
   outcome: AnalyticsOutcome
   latency_ms: number
+  action_id?: string
+  action_name?: string
 }

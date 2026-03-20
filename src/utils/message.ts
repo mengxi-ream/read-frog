@@ -40,6 +40,7 @@ interface ProtocolMap {
   // ask host to start page translation
   askManagerToTogglePageTranslation: (data: { enabled: boolean, analyticsContext?: FeatureUsageContext }) => void
   openSelectionTranslationFromContextMenu: (data: { selectionText: string }) => void
+  openSelectionCustomActionFromContextMenu: (data: { actionId: string, selectionText: string }) => void
   // analytics
   trackFeatureUsedEvent: (data: FeatureUsedEventProperties) => void
   // user guide

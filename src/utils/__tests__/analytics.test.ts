@@ -52,6 +52,25 @@ describe("analytics helpers", () => {
     })
   })
 
+  it("includes optional custom action metadata when provided", () => {
+    expect(buildFeatureUsedEventProperties({
+      feature: ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
+      surface: ANALYTICS_SURFACE.CONTEXT_MENU,
+      outcome: "success",
+      startedAt: 100,
+      finishedAt: 600,
+      action_id: "dictionary",
+      action_name: "Dictionary",
+    })).toEqual({
+      feature: ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
+      surface: ANALYTICS_SURFACE.CONTEXT_MENU,
+      outcome: "success",
+      latency_ms: 500,
+      action_id: "dictionary",
+      action_name: "Dictionary",
+    })
+  })
+
   it("tracks feature usage with the expected event payload", async () => {
     sendMessageMock.mockResolvedValue(undefined)
 

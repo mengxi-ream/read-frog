@@ -15,11 +15,14 @@ vi.mock("../config", () => ({
 }))
 
 function createConfig(enabled: boolean): Config {
-  return {
+  return ({
     contextMenu: {
       enabled,
     },
-  } as Config
+    selectionToolbar: {
+      customActions: [],
+    },
+  } as unknown) as Config
 }
 
 describe("background context menu", () => {
@@ -73,6 +76,34 @@ describe("background context menu", () => {
     })
   })
 
+  it("creates custom action items inline for enabled custom actions", async () => {
+    const config = createConfig(true)
+    config.selectionToolbar.customActions = [
+      { id: "dictionary", name: "Dictionary", enabled: true },
+      { id: "disabled", name: "Disabled", enabled: false },
+      { id: "rewrite", name: "Rewrite", enabled: true },
+    ] as Config["selectionToolbar"]["customActions"]
+    ensureInitializedConfigMock.mockResolvedValue(config)
+
+    const {
+      initializeContextMenu,
+      MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
+    } = await import("../context-menu")
+
+    await initializeContextMenu()
+
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(3, {
+      id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}dictionary`,
+      title: "Dictionary",
+      contexts: ["selection"],
+    })
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(4, {
+      id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}rewrite`,
+      title: "Rewrite",
+      contexts: ["selection"],
+    })
+  })
+
   it("removes menu items without recreating them when the context menu is disabled", async () => {
     ensureInitializedConfigMock.mockResolvedValue(createConfig(false))
 
@@ -106,6 +137,34 @@ describe("background context menu", () => {
     expect(sendMessageMock).toHaveBeenCalledWith(
       "openSelectionTranslationFromContextMenu",
       { selectionText: "Selected text" },
+      { tabId: 5, frameId: 7 },
+    )
+  })
+
+  it("routes custom action menu clicks to the matching tab and frame", async () => {
+    const {
+      MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX,
+      registerContextMenuListeners,
+    } = await import("../context-menu")
+
+    registerContextMenuListeners()
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    await clickHandler({
+      menuItemId: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}dictionary`,
+      selectionText: "Selected text",
+      frameId: 7,
+    }, {
+      id: 5,
+    })
+
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "openSelectionCustomActionFromContextMenu",
+      { actionId: "dictionary", selectionText: "Selected text" },
       { tabId: 5, frameId: 7 },
     )
   })

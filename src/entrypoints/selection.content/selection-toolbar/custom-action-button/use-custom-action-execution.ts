@@ -1,12 +1,15 @@
 import type { RefObject } from "react"
 import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
+import type { AnalyticsSurface } from "@/types/analytics"
 import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -94,12 +97,14 @@ export function buildCustomActionExecutionPlan(
 }
 
 export function useCustomActionExecution({
+  analyticsSurface,
   bodyRef,
   executionContext,
   open,
   popoverSessionKey,
   rerunNonce,
 }: {
+  analyticsSurface: AnalyticsSurface
   bodyRef: RefObject<HTMLDivElement | null>
   executionContext: CustomActionExecutionContext | null
   open: boolean
@@ -110,6 +115,7 @@ export function useCustomActionExecution({
   const [result, setResult] = useState<Record<string, unknown> | null>(null)
   const [error, setError] = useState<SelectionToolbarInlineError | null>(null)
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
+  const lastRunKeyRef = useRef<string | null>(null)
 
   const resetSessionState = useCallback(() => {
     setIsRunning(false)
@@ -123,9 +129,33 @@ export function useCustomActionExecution({
       return
     }
 
+    const nextRunKey = JSON.stringify({
+      actionId: executionContext.action.id,
+      paragraphs: executionContext.promptTokens.paragraphs,
+      popoverSessionKey,
+      providerId: executionContext.providerConfig.id,
+      rerunNonce,
+      selection: executionContext.promptTokens.selection,
+      targetLanguage: executionContext.promptTokens.targetLanguage,
+      webTitle: executionContext.promptTokens.webTitle,
+    })
+    if (lastRunKeyRef.current === nextRunKey) {
+      return
+    }
+    lastRunKeyRef.current = nextRunKey
+
     let isCancelled = false
     const abortController = new AbortController()
     const { action, providerConfig, promptTokens } = executionContext
+    const analyticsContext = createFeatureUsageContext(
+      ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
+      analyticsSurface,
+      Date.now(),
+      {
+        action_id: action.id,
+        action_name: action.name,
+      },
+    )
 
     const run = async () => {
       const systemPrompt = buildSelectionToolbarCustomActionSystemPrompt(
@@ -179,6 +209,10 @@ export function useCustomActionExecution({
 
         setResult(finalResult.output)
         setThinking(finalResult.thinking)
+        void trackFeatureUsed({
+          ...analyticsContext,
+          outcome: "success",
+        })
       }
       catch (error) {
         if (isAbortError(error)) {
@@ -191,6 +225,10 @@ export function useCustomActionExecution({
 
         setThinking(prev => prev?.text ? { ...prev, status: "complete" } : null)
         setError(createSelectionToolbarRuntimeError("customAction", error))
+        void trackFeatureUsed({
+          ...analyticsContext,
+          outcome: "failure",
+        })
       }
       finally {
         if (!isCancelled) {
@@ -205,7 +243,13 @@ export function useCustomActionExecution({
       isCancelled = true
       abortController.abort()
     }
-  }, [bodyRef, executionContext, open, popoverSessionKey, rerunNonce])
+  }, [analyticsSurface, bodyRef, executionContext, open, popoverSessionKey, rerunNonce])
+
+  useEffect(() => {
+    if (!open) {
+      lastRunKeyRef.current = null
+    }
+  }, [open])
 
   return {
     error,

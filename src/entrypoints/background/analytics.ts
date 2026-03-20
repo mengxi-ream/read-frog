@@ -71,6 +71,8 @@ export function filterAnalyticsCaptureResult(data: CaptureResult): CaptureResult
   setPropertyIfDefined(filteredProperties, "surface", properties.surface)
   setPropertyIfDefined(filteredProperties, "outcome", properties.outcome)
   setPropertyIfDefined(filteredProperties, "latency_ms", properties.latency_ms)
+  setPropertyIfDefined(filteredProperties, "action_id", properties.action_id)
+  setPropertyIfDefined(filteredProperties, "action_name", properties.action_name)
   setPropertyIfDefined(filteredProperties, "$browser", properties.$browser)
   setPropertyIfDefined(filteredProperties, "$browser_version", properties.$browser_version)
   setPropertyIfDefined(filteredProperties, "$insert_id", properties.$insert_id)
