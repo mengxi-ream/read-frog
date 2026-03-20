@@ -240,7 +240,7 @@ export default function FloatingButton() {
         top: `${(dragPosition ?? floatingButton.position) * 100}vh`,
       }}
     >
-      <TranslateButton className={attachSideClassName} onClick={revealMobileActions} />
+      <TranslateButton className={attachSideClassName} onClick={() => revealMobileActions()} />
       <div
         className={cn(
           "border-border flex h-10 w-15 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900",
@@ -267,7 +267,7 @@ export default function FloatingButton() {
                   shouldRevealSideActions && "block",
                   isDropdownOpen && "block",
                 )}
-                onClick={revealMobileActions}
+                onClick={() => revealMobileActions()}
                 onPointerDown={e => e.stopPropagation()}
               />
             )}
