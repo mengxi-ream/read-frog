@@ -3,6 +3,7 @@ import { z } from "zod"
 import { HOTKEYS } from "@/utils/constants/hotkeys"
 import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_BATCH_CHARACTERS, MIN_BATCH_ITEMS, MIN_CHARACTERS_PER_NODE, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE, MIN_WORDS_PER_NODE } from "@/utils/constants/translate"
 import { TRANSLATION_NODE_STYLE } from "@/utils/constants/translation-node-style"
+import { isPageTranslationShortcutEmpty, isValidConfiguredPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 
 export const requestQueueConfigSchema = z.object({
   capacity: z.number().gte(MIN_TRANSLATE_CAPACITY),
@@ -70,6 +71,19 @@ export const customPromptsConfigSchema = z.object({
   }
 })
 
+export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, ctx) => {
+  if (isPageTranslationShortcutEmpty(shortcut)) {
+    return
+  }
+
+  if (!isValidConfiguredPageTranslationShortcut(shortcut)) {
+    ctx.addIssue({
+      code: "custom",
+      message: "Page translation shortcut must include at least one modifier key and one non-modifier key.",
+    })
+  }
+})
+
 export const translateConfigSchema = z.object({
   providerId: z.string().nonempty(),
   mode: translationModeSchema,
@@ -81,7 +95,7 @@ export const translateConfigSchema = z.object({
     range: pageTranslateRangeSchema,
     autoTranslatePatterns: z.array(z.string()),
     autoTranslateLanguages: z.array(langCodeISO6393Schema),
-    shortcut: z.array(z.string()),
+    shortcut: pageTranslationShortcutSchema,
     preload: preloadConfigSchema,
     minCharactersPerNode: z.number().min(MIN_CHARACTERS_PER_NODE),
     minWordsPerNode: z.number().min(MIN_WORDS_PER_NODE),

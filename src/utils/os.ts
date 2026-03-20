@@ -1,3 +1,5 @@
+import { formatPageTranslationShortcut } from "./page-translation-shortcut"
+
 type OS = "Windows" | "MacOS" | "Linux" | "iOS" | "Android" | "Unknown"
 
 const WINDOWS_PATTERN = /Win/i
@@ -26,45 +28,11 @@ function detectOS(): OS {
   return "Unknown"
 }
 
-export function formatHotkey(keys: string[]): string {
+export function formatHotkey(hotkey: string): string {
   const os = detectOS()
+  const platform = os === "MacOS" ? "mac" : os === "Windows" ? "windows" : "linux"
 
-  // Define your mappings per platform
-  const keyMap: Record<string, string>
-    = os === "MacOS"
-      ? {
-          // Option is the Mac equivalent of Alt
-          alt: "⌥",
-          ctrl: "⌃",
-          shift: "⇧",
-          enter: "↩︎",
-          command: "⌘",
-          backspace: "⌫",
-          up: "↑",
-          down: "↓",
-          right: "→",
-          left: "←",
-        }
-      : {
-          alt: "Alt",
-          ctrl: "Ctrl",
-          shift: "Shift",
-          enter: "Enter",
-          command: "Command",
-          backspace: "Backspace",
-          up: "↑",
-          down: "↓",
-          right: "→",
-          left: "←",
-        }
-
-  // Map each key, fall back to uppercase raw if unknown
-  const parts = keys.map((k) => {
-    const key = k.toLowerCase()
-    return keyMap[key] ?? k.toUpperCase()
-  })
-
-  return parts.join(" + ")
+  return formatPageTranslationShortcut(hotkey, platform)
 }
 
 export function getCommandPaletteShortcutHint(): string {

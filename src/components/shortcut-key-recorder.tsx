@@ -1,121 +1,124 @@
 import { i18n } from "#imports"
-import hotkeys from "hotkeys-js"
-import { useEffect, useRef, useState } from "react"
+import { isModifierKey } from "@tanstack/hotkeys"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Input } from "@/components/ui/base-ui/input"
-import { formatHotkey } from "@/utils/os"
+import { formatPageTranslationShortcut, isValidConfiguredPageTranslationShortcut, keyboardEventToPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 
-const MODIFIERS = ["shift", "alt", "ctrl", "command"] as const
-
-const DISMISS_CODE = ["Space", "Escape"]
-
-const HOTKEYS_MODIFIERS = Object.keys(hotkeys.modifier)
-
-const SHORTCUT_KEY_SELECTOR_SCOPE = "shortcut-key-selector"
+const CLEAR_KEYS = new Set(["Backspace", "Delete"])
 
 export function ShortcutKeyRecorder(
   { shortcutKey: initialShortcutKey, onChange, className }:
-  { shortcutKey: string[], onChange?: (shortcutKey: string[]) => void, className?: string },
+  { shortcutKey: string, onChange?: (shortcutKey: string) => void, className?: string },
 ) {
   const [inRecording, setInRecording] = useState(false)
-  const [shortcutKey, setShortcutKey] = useState(initialShortcutKey)
+  const [draftShortcut, setDraftShortcut] = useState("")
+  const [optimisticShortcut, setOptimisticShortcut] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const isRecordingRef = useRef(false)
 
-  useEffect(() => {
-    hotkeys.filter = (event: KeyboardEvent) => {
-      return (event.target as HTMLInputElement).tagName === "INPUT"
+  const endRecording = useCallback((nextShortcut: string | null) => {
+    isRecordingRef.current = false
+    setInRecording(false)
+
+    if (nextShortcut !== null) {
+      setDraftShortcut(nextShortcut)
+      setOptimisticShortcut(nextShortcut)
+      onChange?.(nextShortcut)
     }
-  }, [])
+    else {
+      setDraftShortcut("")
+    }
 
-  const formatShortcut = formatHotkey(shortcutKey)
+    queueMicrotask(() => {
+      inputRef.current?.blur()
+    })
+  }, [onChange])
 
-  const recordDomRef = useRef<HTMLInputElement>(null)
+  const cancelRecording = useCallback(() => {
+    endRecording(null)
+  }, [endRecording])
 
-  const clearHotkeys = () => setShortcutKey([])
+  const clearShortcut = useCallback(() => {
+    endRecording("")
+  }, [endRecording])
 
-  const resetShortcutKey = () => {
-    setShortcutKey(initialShortcutKey)
-    onChange?.(initialShortcutKey)
-  }
+  const commitShortcut = useCallback((nextShortcut: string) => {
+    endRecording(nextShortcut)
+  }, [endRecording])
 
   const startRecord = () => {
-    hotkeys.setScope(SHORTCUT_KEY_SELECTOR_SCOPE)
+    if (isRecordingRef.current) {
+      return
+    }
+
+    isRecordingRef.current = true
     setInRecording(true)
-    setShortcutKey([])
+    setDraftShortcut("")
   }
 
-  const endRecord = () => {
-    // reset scope to all
-    hotkeys.deleteScope(SHORTCUT_KEY_SELECTOR_SCOPE)
-    setInRecording(false)
-    if (shortcutKey.length === 0) {
-      resetShortcutKey()
+  const handleBlur = () => {
+    if (!isRecordingRef.current) {
+      return
     }
+
+    cancelRecording()
   }
 
   useEffect(() => {
-    if (isValidShortcut(shortcutKey) && inRecording) {
-      recordDomRef.current?.blur()
-      onChange?.(shortcutKey)
+    if (!inRecording) {
+      return
     }
-  }, [shortcutKey, inRecording, onChange])
 
-  useEffect(() => {
-    hotkeys("*", { keyup: true, single: true, scope: SHORTCUT_KEY_SELECTOR_SCOPE }, (event: KeyboardEvent) => {
-      if (!inRecording)
+    const handleKeydown = (event: KeyboardEvent) => {
+      if (!isRecordingRef.current) {
         return
+      }
 
-      if (DISMISS_CODE.includes(event.code))
+      event.preventDefault()
+      event.stopPropagation()
+
+      if (event.key === "Escape") {
+        cancelRecording()
         return
+      }
 
-      const ownModifiers = collectModifiers()
-
-      if (!ownModifiers.length)
+      if (CLEAR_KEYS.has(event.key) && !event.ctrlKey && !event.altKey && !event.shiftKey && !event.metaKey) {
+        clearShortcut()
         return
+      }
 
-      const pressedKeyString = hotkeys.getPressedKeyString()
+      if (isModifierKey(event)) {
+        return
+      }
 
-      const normalKey = getNormalKey(pressedKeyString)
+      const normalizedHotkey = keyboardEventToPageTranslationShortcut(event)
 
-      const targetHotkeys = [...ownModifiers, ...normalKey]
+      if (!normalizedHotkey || !isValidConfiguredPageTranslationShortcut(normalizedHotkey)) {
+        return
+      }
 
-      setShortcutKey(targetHotkeys)
+      commitShortcut(normalizedHotkey)
+    }
 
-      // Returning false stops the event and prevents default browser events
-      return false
-    })
-  }, [inRecording])
+    document.addEventListener("keydown", handleKeydown, true)
+    return () => {
+      document.removeEventListener("keydown", handleKeydown, true)
+    }
+  }, [cancelRecording, clearShortcut, commitShortcut, inRecording])
+
+  const shortcutKey = optimisticShortcut !== null && optimisticShortcut !== initialShortcutKey
+    ? optimisticShortcut
+    : initialShortcutKey
 
   return (
     <Input
-      ref={recordDomRef}
+      ref={inputRef}
       className={className}
       onFocus={startRecord}
-      onBlur={endRecord}
-      onKeyUp={clearHotkeys}
-      value={formatShortcut}
+      onBlur={handleBlur}
+      value={formatPageTranslationShortcut(inRecording ? draftShortcut : shortcutKey)}
       placeholder={i18n.t("shortcutKeySelector.placeholder")}
       readOnly
     />
   )
-}
-
-function getNormalKey(pressedKeyString: string[]) {
-  return pressedKeyString.filter(key => !HOTKEYS_MODIFIERS.includes(key))
-}
-
-function getModifiers(pressedKeyString: string[]) {
-  return pressedKeyString.filter(key => HOTKEYS_MODIFIERS.includes(key))
-}
-
-function isValidShortcut(hotkeys: string[]) {
-  const modifiers = getModifiers(hotkeys)
-  const hasModifiers = !!modifiers.length
-
-  const normalKey = getNormalKey(hotkeys)
-  const onlyHasOneNormalKey = normalKey.length === 1
-  return hasModifiers && onlyHasOneNormalKey
-}
-
-function collectModifiers() {
-  const ownModifiers = MODIFIERS.filter(modifier => hotkeys[modifier])
-  return [...new Set(ownModifiers)]
 }
