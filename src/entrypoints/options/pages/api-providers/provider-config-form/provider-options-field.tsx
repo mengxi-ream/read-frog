@@ -7,7 +7,7 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { JSONCodeEditor } from "@/components/ui/json-code-editor"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { resolveModelId } from "@/utils/providers/model-id"
+import { resolveModelId } from "@/utils/providers/model"
 import { getRecommendedProviderOptions } from "@/utils/providers/options"
 import { withForm } from "./form"
 
