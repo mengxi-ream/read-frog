@@ -19,9 +19,22 @@ import { matchDomainPattern } from "@/utils/url"
 import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from "../../atoms"
 import { shadowWrapper } from "../../index"
 import HiddenButton from "./components/hidden-button"
+import { requestPageTranslationToggle } from "./request-page-translation-toggle"
 import TranslateButton from "./translate-button"
 
 const readFrogLogoUrl = new URL(readFrogLogo, browser.runtime.getURL("/")).href
+const DRAG_THRESHOLD = 6
+const DRAG_THRESHOLD_SQUARED = DRAG_THRESHOLD * DRAG_THRESHOLD
+const LONG_PRESS_DURATION = 450
+
+interface PointerInteraction {
+  pointerId: number
+  startX: number
+  startY: number
+  startPosition: number
+  isDragging: boolean
+  longPressTriggered: boolean
+}
 
 export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(
@@ -33,42 +46,15 @@ export default function FloatingButton() {
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [dragPosition, setDragPosition] = useState<number | null>(null)
-  const initialClientYRef = useRef<number | null>(null)
+  const pointerInteractionRef = useRef<PointerInteraction | null>(null)
+  const longPressTimerRef = useRef<number | null>(null)
 
-  // 按钮拖动处理
   useEffect(() => {
-    const initialClientY = initialClientYRef.current
-    if (!isDraggingButton || !initialClientY || !floatingButton)
-      return
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const initialY = floatingButton.position * window.innerHeight
-      const newY = Math.max(
-        30,
-        Math.min(
-          window.innerHeight - 200,
-          initialY + e.clientY - initialClientY,
-        ),
-      )
-      const newPosition = newY / window.innerHeight
-      setDragPosition(newPosition)
-    }
-
-    const handleMouseUp = () => {
-      setIsDraggingButton(false)
-    }
-
-    document.addEventListener("mousemove", handleMouseMove)
-    document.addEventListener("mouseup", handleMouseUp)
-
-    document.body.style.userSelect = "none"
+    document.body.style.userSelect = isDraggingButton ? "none" : ""
 
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
       document.body.style.userSelect = ""
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isDraggingButton])
 
   // 拖拽结束时写入 storage
@@ -80,47 +66,138 @@ export default function FloatingButton() {
     }
   }, [isDraggingButton, dragPosition, setFloatingButton])
 
-  const handleButtonDragStart = (e: React.MouseEvent) => {
-    // 记录初始位置，用于后续判断是点击还是拖动
-    initialClientYRef.current = e.clientY
-    let hasMoved = false // 标记是否发生了移动
+  useEffect(() => {
+    return () => {
+      if (longPressTimerRef.current !== null) {
+        window.clearTimeout(longPressTimerRef.current)
+      }
+    }
+  }, [])
+
+  const clearLongPressTimer = () => {
+    if (longPressTimerRef.current !== null) {
+      window.clearTimeout(longPressTimerRef.current)
+      longPressTimerRef.current = null
+    }
+  }
+
+  const shouldOpenMenuByLongPress = (pointerType: string) => {
+    if (pointerType === "touch") {
+      return true
+    }
+
+    return typeof window.matchMedia === "function"
+      && window.matchMedia("(pointer: coarse)").matches
+  }
+
+  const handlePrimaryAction = () => {
+    if (floatingButton.clickAction === "translate") {
+      const nextEnabled = !translationState.enabled
+      void requestPageTranslationToggle(
+        nextEnabled,
+        nextEnabled
+          ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.FLOATING_BUTTON)
+          : undefined,
+      )
+      return
+    }
+
+    setIsSideOpen(open => !open)
+  }
+
+  const finishPointerInteraction = (
+    e: React.PointerEvent<HTMLDivElement>,
+    shouldTriggerClick: boolean,
+  ) => {
+    const interaction = pointerInteractionRef.current
+    if (!interaction || interaction.pointerId !== e.pointerId) {
+      return
+    }
+
+    clearLongPressTimer()
+    pointerInteractionRef.current = null
+    e.currentTarget.releasePointerCapture?.(e.pointerId)
+
+    if (interaction.isDragging) {
+      setIsDraggingButton(false)
+      return
+    }
+
+    setIsDraggingButton(false)
+
+    if (!shouldTriggerClick || interaction.longPressTriggered) {
+      return
+    }
+
+    handlePrimaryAction()
+  }
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "mouse" && e.button !== 0) {
+      return
+    }
 
     e.preventDefault()
-    setIsDraggingButton(true)
+    pointerInteractionRef.current = {
+      pointerId: e.pointerId,
+      startX: e.clientX,
+      startY: e.clientY,
+      startPosition: dragPosition ?? floatingButton.position,
+      isDragging: false,
+      longPressTriggered: false,
+    }
 
-    // 创建一个监听器检测移动
-    const handleMouseMove = (moveEvent: MouseEvent) => {
-      const moveDistance = Math.abs(moveEvent.clientY - e.clientY)
-      // 如果移动距离大于阈值，标记为已移动
-      if (moveDistance > 5) {
-        hasMoved = true
+    e.currentTarget.setPointerCapture?.(e.pointerId)
+    clearLongPressTimer()
+
+    if (!shouldOpenMenuByLongPress(e.pointerType)) {
+      return
+    }
+
+    longPressTimerRef.current = window.setTimeout(() => {
+      const interaction = pointerInteractionRef.current
+      if (!interaction || interaction.pointerId !== e.pointerId || interaction.isDragging) {
+        return
+      }
+
+      interaction.longPressTriggered = true
+      setIsDropdownOpen(true)
+    }, LONG_PRESS_DURATION)
+  }
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const interaction = pointerInteractionRef.current
+    if (!interaction || interaction.pointerId !== e.pointerId) {
+      return
+    }
+
+    const dx = e.clientX - interaction.startX
+    const dy = e.clientY - interaction.startY
+
+    if (!interaction.isDragging && dx * dx + dy * dy > DRAG_THRESHOLD_SQUARED) {
+      interaction.isDragging = true
+      clearLongPressTimer()
+      setIsDraggingButton(true)
+
+      if (interaction.longPressTriggered) {
+        setIsDropdownOpen(false)
       }
     }
 
-    // 在鼠标释放时，只有未移动才触发点击事件
-    const handleMouseUp = () => {
-      document.removeEventListener("mousemove", handleMouseMove)
-      document.removeEventListener("mouseup", handleMouseUp)
-
-      // 只有未移动过才触发点击
-      if (!hasMoved) {
-        if (floatingButton.clickAction === "translate") {
-          const nextEnabled = !translationState.enabled
-          void sendMessage("tryToSetEnablePageTranslationOnContentScript", {
-            enabled: nextEnabled,
-            analyticsContext: nextEnabled
-              ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.FLOATING_BUTTON)
-              : undefined,
-          })
-        }
-        else {
-          setIsSideOpen(o => !o)
-        }
-      }
+    if (!interaction.isDragging) {
+      return
     }
 
-    document.addEventListener("mouseup", handleMouseUp)
-    document.addEventListener("mousemove", handleMouseMove)
+    const initialY = interaction.startPosition * window.innerHeight
+    const newY = Math.max(
+      30,
+      Math.min(
+        window.innerHeight - 200,
+        initialY + dy,
+      ),
+    )
+
+    setDragPosition(newY / window.innerHeight)
   }
 
   const attachSideClassName = isDraggingButton || isSideOpen || isDropdownOpen ? "translate-x-0" : ""
@@ -145,10 +222,14 @@ export default function FloatingButton() {
           "border-border flex h-10 w-15 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900",
           "translate-x-5 transition-transform duration-300 group-hover:translate-x-0",
           (isSideOpen || isDropdownOpen) && "opacity-100",
+          "touch-none",
           isDraggingButton ? "cursor-move" : "cursor-pointer",
           attachSideClassName,
         )}
-        onMouseDown={handleButtonDragStart}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
+        onPointerUp={e => finishPointerInteraction(e, true)}
+        onPointerCancel={e => finishPointerInteraction(e, false)}
       >
         <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
           <DropdownMenuTrigger
@@ -161,7 +242,7 @@ export default function FloatingButton() {
                   "group-hover:block",
                   isDropdownOpen && "block",
                 )}
-                onMouseDown={e => e.stopPropagation()} // 父级不会收到 mousedown
+                onPointerDown={e => e.stopPropagation()}
               />
             )}
           >
@@ -169,7 +250,7 @@ export default function FloatingButton() {
           </DropdownMenuTrigger>
           <DropdownMenuContent container={shadowWrapper} align="start" side="left" className="z-2147483647 w-fit! whitespace-nowrap">
             <DropdownMenuItem
-              onMouseDown={e => e.stopPropagation()}
+              onPointerDown={e => e.stopPropagation()}
               onClick={() => {
                 const currentDomain = window.location.hostname
                 const currentPatterns = floatingButton.disabledFloatingButtonPatterns || []
@@ -182,7 +263,7 @@ export default function FloatingButton() {
               {i18n.t("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite")}
             </DropdownMenuItem>
             <DropdownMenuItem
-              onMouseDown={e => e.stopPropagation()}
+              onPointerDown={e => e.stopPropagation()}
               onClick={() => {
                 void setFloatingButton({ ...floatingButton, enabled: false })
               }}

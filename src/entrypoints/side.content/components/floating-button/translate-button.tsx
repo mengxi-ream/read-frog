@@ -1,10 +1,10 @@
 import { RiTranslate } from "@remixicon/react"
 import { IconCheck } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
-import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { enablePageTranslationAtom } from "../../atoms"
 import HiddenButton from "./components/hidden-button"
+import { requestPageTranslationToggle } from "./request-page-translation-toggle"
 
 export default function TranslateButton({ className }: { className: string }) {
   const translationState = useAtomValue(enablePageTranslationAtom)
@@ -15,7 +15,7 @@ export default function TranslateButton({ className }: { className: string }) {
       icon={<RiTranslate className="h-5 w-5" />}
       className={className}
       onClick={() => {
-        void sendMessage("tryToSetEnablePageTranslationOnContentScript", { enabled: !isEnabled })
+        void requestPageTranslationToggle(!isEnabled)
       }}
     >
       <IconCheck

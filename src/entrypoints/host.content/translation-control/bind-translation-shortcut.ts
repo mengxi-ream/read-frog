@@ -19,14 +19,10 @@ export async function bindTranslationShortcutKey(pageTranslationManager: PageTra
   const shortcut = config.translate.page.shortcut.join("+")
 
   hotkeys(shortcut, () => {
-    if (pageTranslationManager.isActive) {
-      pageTranslationManager.stop()
-    }
-    else {
-      void pageTranslationManager.start(
-        createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.SHORTCUT),
-      )
-    }
+    void pageTranslationManager.setEnabled(
+      !pageTranslationManager.isActive,
+      createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.SHORTCUT),
+    )
     return false
   })
 }

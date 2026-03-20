@@ -65,14 +65,14 @@ export default defineContentScript({
       logger.error("Failed to check translation state:", error)
     }
     if (translationEnabled) {
-      void manager.start()
+      void manager.setEnabled(true)
     }
 
     const handleUrlChange = async (from: string, to: string) => {
       if (from !== to) {
         logger.info("URL changed from", from, "to", to)
         if (manager.isActive) {
-          manager.stop()
+          void manager.setEnabled(false)
         }
         // Only the top frame should detect and set language to avoid race conditions from iframes
         if (window === window.top) {
@@ -94,9 +94,7 @@ export default defineContentScript({
     // Listen for translation state changes from background
     const cleanupTranslationStateListener = onMessage("askManagerToTogglePageTranslation", (msg) => {
       const { enabled, analyticsContext } = msg.data
-      if (enabled === manager.isActive)
-        return
-      enabled ? void manager.start(window === window.top ? analyticsContext : undefined) : manager.stop()
+      return manager.setEnabled(enabled, window === window.top ? analyticsContext : undefined)
     })
 
     ctx.onInvalidated(() => {

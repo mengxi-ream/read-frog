@@ -26,6 +26,13 @@ interface IPageTranslationManager {
   readonly isActive: boolean
 
   /**
+   * Serializes page translation state transitions.
+   * Repeated requests with the same target state are coalesced and the latest
+   * requested state wins after the current transition finishes.
+   */
+  setEnabled: (enabled: boolean, analyticsContext?: FeatureUsageContext) => Promise<void>
+
+  /**
    * Starts the automatic page translation functionality
    * Registers observers, touch triggers and set storage
    */
@@ -62,6 +69,9 @@ export class PageTranslationManager implements IPageTranslationManager {
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
   private titleRequestVersion = 0
+  private desiredEnabled = false
+  private transitionPromise: Promise<void> | null = null
+  private pendingEnableAnalyticsContext: FeatureUsageContext | undefined
 
   constructor(intersectionOptions: SimpleIntersectionOptions = {}) {
     if (intersectionOptions.threshold !== undefined) {
@@ -80,48 +90,79 @@ export class PageTranslationManager implements IPageTranslationManager {
     return this.isPageTranslating
   }
 
+  async setEnabled(enabled: boolean, analyticsContext?: FeatureUsageContext): Promise<void> {
+    this.desiredEnabled = enabled
+
+    if (enabled) {
+      this.pendingEnableAnalyticsContext = window === window.top
+        ? analyticsContext
+        : undefined
+    }
+
+    if (this.transitionPromise) {
+      return this.transitionPromise
+    }
+
+    this.transitionPromise = this.runTransitionLoop()
+
+    try {
+      await this.transitionPromise
+    }
+    finally {
+      this.transitionPromise = null
+    }
+  }
+
   async start(analyticsContext?: FeatureUsageContext): Promise<void> {
     if (this.isPageTranslating) {
       console.warn("PageTranslationManager is already active")
       return
     }
 
+    this.desiredEnabled = true
     const trackedContext = window === window.top ? analyticsContext : undefined
+    let didNotifyEnabled = false
 
-    const config = await getLocalConfig()
-    if (!config) {
-      console.warn("Config is not initialized")
-      if (trackedContext) {
-        void trackFeatureUsed({
-          ...trackedContext,
-          outcome: "failure",
-        })
-      }
-      return
-    }
-
-    const detectedCode = await getDetectedCodeFromStorage()
-
-    if (!validateTranslationConfigAndToast({
-      providersConfig: config.providersConfig,
-      translate: config.translate,
-      language: config.language,
-    }, detectedCode)) {
-      if (trackedContext) {
-        void trackFeatureUsed({
-          ...trackedContext,
-          outcome: "failure",
-        })
-      }
-      return
-    }
+    // Occupy the active slot before the first async boundary so concurrent
+    // enable requests cannot enter a second startup flow.
+    this.isPageTranslating = true
 
     try {
+      const config = await getLocalConfig()
+      if (!config) {
+        this.handleStartFailure()
+        console.warn("Config is not initialized")
+        if (trackedContext) {
+          void trackFeatureUsed({
+            ...trackedContext,
+            outcome: "failure",
+          })
+        }
+        return
+      }
+
+      const detectedCode = await getDetectedCodeFromStorage()
+
+      if (!validateTranslationConfigAndToast({
+        providersConfig: config.providersConfig,
+        translate: config.translate,
+        language: config.language,
+      }, detectedCode)) {
+        this.handleStartFailure()
+        if (trackedContext) {
+          void trackFeatureUsed({
+            ...trackedContext,
+            outcome: "failure",
+          })
+        }
+        return
+      }
+
       await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
         enabled: true,
       })
+      didNotifyEnabled = true
 
-      this.isPageTranslating = true
       await this.primeDocumentTitleContext(config.translate.enableAIContentAware)
       this.startDocumentTitleTracking()
 
@@ -161,6 +202,12 @@ export class PageTranslationManager implements IPageTranslationManager {
       }
     }
     catch (error) {
+      this.handleStartFailure()
+      if (didNotifyEnabled) {
+        await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
+          enabled: false,
+        })
+      }
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
@@ -172,6 +219,8 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   stop(): void {
+    this.desiredEnabled = false
+
     if (!this.isPageTranslating) {
       console.warn("AutoTranslationManager is already inactive")
       return
@@ -233,12 +282,13 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (!startTouches)
         return
       if (performance.now() - startTime < PageTranslationManager.MAX_DURATION) {
-        this.isPageTranslating
-          ? this.stop()
-          : void this.start(createFeatureUsageContext(
+        void this.setEnabled(
+          !this.isPageTranslating,
+          createFeatureUsageContext(
             ANALYTICS_FEATURE.PAGE_TRANSLATION,
             ANALYTICS_SURFACE.TOUCH_GESTURE,
-          ))
+          ),
+        )
       }
       reset()
     }
@@ -259,6 +309,36 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   private shouldManageDocumentTitle(): boolean {
     return window === window.top
+  }
+
+  private async runTransitionLoop(): Promise<void> {
+    while (this.isPageTranslating !== this.desiredEnabled) {
+      if (this.desiredEnabled) {
+        const analyticsContext = this.pendingEnableAnalyticsContext
+        this.pendingEnableAnalyticsContext = undefined
+        await this.start(analyticsContext)
+        continue
+      }
+
+      this.stop()
+      await Promise.resolve()
+    }
+  }
+
+  private handleStartFailure(): void {
+    this.desiredEnabled = false
+    this.isPageTranslating = false
+    this.walkId = null
+    this.dontWalkIntoElementsCache = new WeakSet()
+    this.stopDocumentTitleTracking()
+
+    if (this.intersectionObserver) {
+      this.intersectionObserver.disconnect()
+      this.intersectionObserver = null
+    }
+
+    this.mutationObservers.forEach(observer => observer.disconnect())
+    this.mutationObservers = []
   }
 
   private async primeDocumentTitleContext(enableAIContentAware: boolean): Promise<void> {
