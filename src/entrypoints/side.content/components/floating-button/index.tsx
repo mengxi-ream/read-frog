@@ -25,7 +25,7 @@ import TranslateButton from "./translate-button"
 const readFrogLogoUrl = new URL(readFrogLogo, browser.runtime.getURL("/")).href
 const DRAG_THRESHOLD = 6
 const DRAG_THRESHOLD_SQUARED = DRAG_THRESHOLD * DRAG_THRESHOLD
-const LONG_PRESS_DURATION = 450
+const MOBILE_ACTIONS_AUTO_HIDE_DELAY = 3000
 
 interface PointerInteraction {
   pointerId: number
@@ -33,7 +33,7 @@ interface PointerInteraction {
   startY: number
   startPosition: number
   isDragging: boolean
-  longPressTriggered: boolean
+  isMobilePointer: boolean
 }
 
 export default function FloatingButton() {
@@ -45,9 +45,10 @@ export default function FloatingButton() {
   const [isSideOpen, setIsSideOpen] = useAtom(isSideOpenAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
+  const [isMobileActionsOpen, setIsMobileActionsOpen] = useState(false)
   const [dragPosition, setDragPosition] = useState<number | null>(null)
   const pointerInteractionRef = useRef<PointerInteraction | null>(null)
-  const longPressTimerRef = useRef<number | null>(null)
+  const mobileActionsTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     document.body.style.userSelect = isDraggingButton ? "none" : ""
@@ -68,26 +69,63 @@ export default function FloatingButton() {
 
   useEffect(() => {
     return () => {
-      if (longPressTimerRef.current !== null) {
-        window.clearTimeout(longPressTimerRef.current)
+      if (mobileActionsTimerRef.current !== null) {
+        window.clearTimeout(mobileActionsTimerRef.current)
       }
     }
   }, [])
 
-  const clearLongPressTimer = () => {
-    if (longPressTimerRef.current !== null) {
-      window.clearTimeout(longPressTimerRef.current)
-      longPressTimerRef.current = null
+  const isCoarsePointer = () => {
+    return typeof window.matchMedia === "function"
+      && window.matchMedia("(pointer: coarse)").matches
+  }
+
+  const clearMobileActionsTimer = () => {
+    if (mobileActionsTimerRef.current !== null) {
+      window.clearTimeout(mobileActionsTimerRef.current)
+      mobileActionsTimerRef.current = null
     }
   }
 
-  const shouldOpenMenuByLongPress = (pointerType: string) => {
-    if (pointerType === "touch") {
-      return true
+  const startMobileActionsTimer = () => {
+    clearMobileActionsTimer()
+    mobileActionsTimerRef.current = window.setTimeout(() => {
+      setIsMobileActionsOpen(false)
+      mobileActionsTimerRef.current = null
+    }, MOBILE_ACTIONS_AUTO_HIDE_DELAY)
+  }
+
+  const closeMobileActions = () => {
+    clearMobileActionsTimer()
+    setIsMobileActionsOpen(false)
+  }
+
+  const revealMobileActions = (forceOpen = false) => {
+    if (!forceOpen && !isCoarsePointer()) {
+      return
     }
 
-    return typeof window.matchMedia === "function"
-      && window.matchMedia("(pointer: coarse)").matches
+    setIsMobileActionsOpen(true)
+
+    if (isDropdownOpen) {
+      clearMobileActionsTimer()
+      return
+    }
+
+    startMobileActionsTimer()
+  }
+
+  const handleDropdownOpenChange = (open: boolean) => {
+    setIsDropdownOpen(open)
+
+    if (open) {
+      clearMobileActionsTimer()
+      return
+    }
+
+    if (isMobileActionsOpen) {
+      startMobileActionsTimer()
+    }
   }
 
   const handlePrimaryAction = () => {
@@ -114,7 +152,6 @@ export default function FloatingButton() {
       return
     }
 
-    clearLongPressTimer()
     pointerInteractionRef.current = null
     e.currentTarget.releasePointerCapture?.(e.pointerId)
 
@@ -125,11 +162,15 @@ export default function FloatingButton() {
 
     setIsDraggingButton(false)
 
-    if (!shouldTriggerClick || interaction.longPressTriggered) {
+    if (!shouldTriggerClick) {
       return
     }
 
     handlePrimaryAction()
+
+    if (interaction.isMobilePointer) {
+      revealMobileActions(true)
+    }
   }
 
   const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -144,25 +185,10 @@ export default function FloatingButton() {
       startY: e.clientY,
       startPosition: dragPosition ?? floatingButton.position,
       isDragging: false,
-      longPressTriggered: false,
+      isMobilePointer: e.pointerType === "touch" || isCoarsePointer(),
     }
 
     e.currentTarget.setPointerCapture?.(e.pointerId)
-    clearLongPressTimer()
-
-    if (!shouldOpenMenuByLongPress(e.pointerType)) {
-      return
-    }
-
-    longPressTimerRef.current = window.setTimeout(() => {
-      const interaction = pointerInteractionRef.current
-      if (!interaction || interaction.pointerId !== e.pointerId || interaction.isDragging) {
-        return
-      }
-
-      interaction.longPressTriggered = true
-      setIsDropdownOpen(true)
-    }, LONG_PRESS_DURATION)
   }
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -176,12 +202,9 @@ export default function FloatingButton() {
 
     if (!interaction.isDragging && dx * dx + dy * dy > DRAG_THRESHOLD_SQUARED) {
       interaction.isDragging = true
-      clearLongPressTimer()
+      closeMobileActions()
+      setIsDropdownOpen(false)
       setIsDraggingButton(true)
-
-      if (interaction.longPressTriggered) {
-        setIsDropdownOpen(false)
-      }
     }
 
     if (!interaction.isDragging) {
@@ -200,7 +223,8 @@ export default function FloatingButton() {
     setDragPosition(newY / window.innerHeight)
   }
 
-  const attachSideClassName = isDraggingButton || isSideOpen || isDropdownOpen ? "translate-x-0" : ""
+  const shouldRevealSideActions = isMobileActionsOpen || isSideOpen || isDropdownOpen
+  const attachSideClassName = shouldRevealSideActions ? "translate-x-0" : ""
 
   if (!floatingButton.enabled || floatingButton.disabledFloatingButtonPatterns.some(pattern => matchDomainPattern(window.location.href, pattern))) {
     return null
@@ -216,12 +240,12 @@ export default function FloatingButton() {
         top: `${(dragPosition ?? floatingButton.position) * 100}vh`,
       }}
     >
-      <TranslateButton className={attachSideClassName} />
+      <TranslateButton className={attachSideClassName} onClick={revealMobileActions} />
       <div
         className={cn(
           "border-border flex h-10 w-15 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900",
           "translate-x-5 transition-transform duration-300 group-hover:translate-x-0",
-          (isSideOpen || isDropdownOpen) && "opacity-100",
+          shouldRevealSideActions && "opacity-100",
           "touch-none",
           isDraggingButton ? "cursor-move" : "cursor-pointer",
           attachSideClassName,
@@ -231,7 +255,7 @@ export default function FloatingButton() {
         onPointerUp={e => finishPointerInteraction(e, true)}
         onPointerCancel={e => finishPointerInteraction(e, false)}
       >
-        <DropdownMenu open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
+        <DropdownMenu open={isDropdownOpen} onOpenChange={handleDropdownOpenChange}>
           <DropdownMenuTrigger
             render={(
               <button
@@ -240,8 +264,10 @@ export default function FloatingButton() {
                 className={cn(
                   "border-border absolute -top-1 -left-1 hidden cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900",
                   "group-hover:block",
+                  shouldRevealSideActions && "block",
                   isDropdownOpen && "block",
                 )}
+                onClick={revealMobileActions}
                 onPointerDown={e => e.stopPropagation()}
               />
             )}
@@ -281,7 +307,9 @@ export default function FloatingButton() {
       <HiddenButton
         className={attachSideClassName}
         icon={<IconSettings className="h-5 w-5" />}
+        title="Open extension settings"
         onClick={() => {
+          revealMobileActions()
           void sendMessage("openOptionsPage", undefined)
         }}
       />

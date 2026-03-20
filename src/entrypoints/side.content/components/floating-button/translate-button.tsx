@@ -6,7 +6,13 @@ import { enablePageTranslationAtom } from "../../atoms"
 import HiddenButton from "./components/hidden-button"
 import { requestPageTranslationToggle } from "./request-page-translation-toggle"
 
-export default function TranslateButton({ className }: { className: string }) {
+export default function TranslateButton({
+  className,
+  onClick,
+}: {
+  className: string
+  onClick?: () => void
+}) {
   const translationState = useAtomValue(enablePageTranslationAtom)
   const isEnabled = translationState.enabled
 
@@ -14,8 +20,10 @@ export default function TranslateButton({ className }: { className: string }) {
     <HiddenButton
       icon={<RiTranslate className="h-5 w-5" />}
       className={className}
+      title="Toggle page translation"
       onClick={() => {
         void requestPageTranslationToggle(!isEnabled)
+        onClick?.()
       }}
     >
       <IconCheck

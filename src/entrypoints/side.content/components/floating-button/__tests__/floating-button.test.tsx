@@ -200,6 +200,32 @@ function renderFloatingButton(options?: {
   return { store, mainBall }
 }
 
+async function tapMainBall(
+  mainBall: Element,
+  options?: {
+    pointerId?: number
+    pointerType?: "mouse" | "touch"
+    clientX?: number
+    clientY?: number
+  },
+) {
+  await act(async () => {
+    fireEvent.pointerDown(mainBall, {
+      button: 0,
+      clientX: options?.clientX ?? 30,
+      clientY: options?.clientY ?? 240,
+      pointerId: options?.pointerId ?? 1,
+      pointerType: options?.pointerType ?? "touch",
+    })
+    fireEvent.pointerUp(mainBall, {
+      clientX: options?.clientX ?? 30,
+      clientY: options?.clientY ?? 240,
+      pointerId: options?.pointerId ?? 1,
+      pointerType: options?.pointerType ?? "touch",
+    })
+  })
+}
+
 describe("floating button interactions", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -236,6 +262,8 @@ describe("floating button interactions", () => {
       clickAction: "translate",
       translationEnabled: false,
     })
+    const translateButton = screen.getByTitle("Toggle page translation")
+    const closeTrigger = screen.getByTitle("Close floating button")
 
     await act(async () => {
       fireEvent.pointerDown(mainBall, {
@@ -260,14 +288,15 @@ describe("floating button interactions", () => {
     })
 
     expect(sendMessageMock).not.toHaveBeenCalled()
+    expect(translateButton).not.toHaveClass("translate-x-0")
+    expect(closeTrigger).not.toHaveClass("block")
     await waitFor(() => {
       const floatingButtonState = store.get(atomRefs.floatingButtonBaseAtom) as { position: number }
       expect(floatingButtonState.position).not.toBe(0.5)
     })
   })
 
-  it("opens the menu on touch long press without triggering translation or panel actions", async () => {
-    vi.useFakeTimers()
+  it("executes the panel action and reveals the side actions on touch tap", async () => {
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
       writable: true,
@@ -278,16 +307,77 @@ describe("floating button interactions", () => {
       clickAction: "panel",
       translationEnabled: false,
     })
+    const translateButton = screen.getByTitle("Toggle page translation")
+    const settingsButton = screen.getByTitle("Open extension settings")
+    const closeTrigger = screen.getByTitle("Close floating button")
+
+    await tapMainBall(mainBall, { pointerId: 2, pointerType: "touch", clientX: 24, clientY: 220 })
+
+    expect(store.get(isSideOpenAtom)).toBe(true)
+    expect(sendMessageMock).not.toHaveBeenCalled()
+    expect(translateButton).toHaveClass("translate-x-0")
+    expect(settingsButton).toHaveClass("translate-x-0")
+    expect(closeTrigger).toHaveClass("block")
+  })
+
+  it("keeps the side actions visible after a touch tap and auto-hides them after 3000ms", async () => {
+    vi.useFakeTimers()
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: createMatchMedia(true),
+    })
+
+    const { mainBall } = renderFloatingButton({
+      clickAction: "translate",
+      translationEnabled: false,
+    })
+    const translateButton = screen.getByTitle("Toggle page translation")
+    const settingsButton = screen.getByTitle("Open extension settings")
+    const closeTrigger = screen.getByTitle("Close floating button")
+
+    await tapMainBall(mainBall, { pointerId: 3, pointerType: "touch" })
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1)
+    expect(translateButton).toHaveClass("translate-x-0")
+    expect(settingsButton).toHaveClass("translate-x-0")
+    expect(closeTrigger).toHaveClass("block")
 
     await act(async () => {
-      fireEvent.pointerDown(mainBall, {
-        button: 0,
-        clientX: 24,
-        clientY: 220,
-        pointerId: 2,
-        pointerType: "touch",
-      })
-      vi.advanceTimersByTime(450)
+      vi.advanceTimersByTime(2999)
+    })
+
+    expect(translateButton).toHaveClass("translate-x-0")
+    expect(settingsButton).toHaveClass("translate-x-0")
+    expect(closeTrigger).toHaveClass("block")
+
+    await act(async () => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(translateButton).not.toHaveClass("translate-x-0")
+    expect(settingsButton).not.toHaveClass("translate-x-0")
+    expect(closeTrigger).not.toHaveClass("block")
+  })
+
+  it("pauses auto-hide while the close menu is open and restarts it after closing", async () => {
+    vi.useFakeTimers()
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: createMatchMedia(true),
+    })
+
+    const { mainBall } = renderFloatingButton({
+      clickAction: "translate",
+      translationEnabled: false,
+    })
+    const closeTrigger = screen.getByTitle("Close floating button")
+
+    await tapMainBall(mainBall, { pointerId: 4, pointerType: "touch" })
+
+    await act(async () => {
+      fireEvent.click(closeTrigger)
     })
 
     expect(
@@ -295,55 +385,75 @@ describe("floating button interactions", () => {
     ).toBeInTheDocument()
 
     await act(async () => {
-      fireEvent.pointerUp(mainBall, {
-        clientX: 24,
-        clientY: 220,
-        pointerId: 2,
-        pointerType: "touch",
-      })
+      vi.advanceTimersByTime(5000)
     })
 
-    expect(sendMessageMock).not.toHaveBeenCalled()
-    expect(store.get(isSideOpenAtom)).toBe(false)
+    expect(closeTrigger).toHaveClass("block")
+    expect(
+      screen.getByText("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite"),
+    ).toBeInTheDocument()
+
+    await act(async () => {
+      fireEvent.click(closeTrigger)
+    })
+
+    expect(
+      screen.queryByText("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite"),
+    ).not.toBeInTheDocument()
+
+    await act(async () => {
+      vi.advanceTimersByTime(2999)
+    })
+
+    expect(closeTrigger).toHaveClass("block")
+
+    await act(async () => {
+      vi.advanceTimersByTime(1)
+    })
+
+    expect(closeTrigger).not.toHaveClass("block")
   })
 
-  it("sends only one translate toggle request while a previous toggle is still pending", async () => {
-    const toggleDeferred = createDeferred<void>()
-    sendMessageMock.mockImplementation(() => toggleDeferred.promise)
-
+  it("does not enter the mobile expanded state on mouse click", async () => {
     const { mainBall } = renderFloatingButton({
       clickAction: "translate",
       translationEnabled: false,
     })
+    const translateButton = screen.getByTitle("Toggle page translation")
+    const settingsButton = screen.getByTitle("Open extension settings")
+    const closeTrigger = screen.getByTitle("Close floating button")
+
+    await tapMainBall(mainBall, { pointerId: 5, pointerType: "mouse" })
+
+    expect(sendMessageMock).toHaveBeenCalledTimes(1)
+    expect(translateButton).not.toHaveClass("translate-x-0")
+    expect(settingsButton).not.toHaveClass("translate-x-0")
+    expect(closeTrigger).not.toHaveClass("block")
+  })
+
+  it("sends only one translate toggle request while pending and renews the mobile auto-hide timer", async () => {
+    vi.useFakeTimers()
+    Object.defineProperty(window, "matchMedia", {
+      configurable: true,
+      writable: true,
+      value: createMatchMedia(true),
+    })
+
+    const toggleDeferred = createDeferred<void>()
+    sendMessageMock.mockImplementation(() => toggleDeferred.promise)
+    const { mainBall } = renderFloatingButton({
+      clickAction: "translate",
+      translationEnabled: false,
+    })
+    const translateButton = screen.getByTitle("Toggle page translation")
+
+    await tapMainBall(mainBall, { pointerId: 6, pointerType: "touch" })
 
     await act(async () => {
-      fireEvent.pointerDown(mainBall, {
-        button: 0,
-        clientX: 30,
-        clientY: 240,
-        pointerId: 3,
-        pointerType: "mouse",
-      })
-      fireEvent.pointerUp(mainBall, {
-        clientX: 30,
-        clientY: 240,
-        pointerId: 3,
-        pointerType: "mouse",
-      })
-      fireEvent.pointerDown(mainBall, {
-        button: 0,
-        clientX: 30,
-        clientY: 240,
-        pointerId: 4,
-        pointerType: "mouse",
-      })
-      fireEvent.pointerUp(mainBall, {
-        clientX: 30,
-        clientY: 240,
-        pointerId: 4,
-        pointerType: "mouse",
-      })
+      vi.advanceTimersByTime(2000)
     })
+
+    await tapMainBall(mainBall, { pointerId: 7, pointerType: "touch" })
 
     expect(sendMessageMock).toHaveBeenCalledTimes(1)
     expect(sendMessageMock).toHaveBeenCalledWith(
@@ -357,6 +467,19 @@ describe("floating button interactions", () => {
         },
       },
     )
+    expect(translateButton).toHaveClass("translate-x-0")
+
+    await act(async () => {
+      vi.advanceTimersByTime(1500)
+    })
+
+    expect(translateButton).toHaveClass("translate-x-0")
+
+    await act(async () => {
+      vi.advanceTimersByTime(1500)
+    })
+
+    expect(translateButton).not.toHaveClass("translate-x-0")
 
     toggleDeferred.resolve()
     await act(async () => {
