@@ -194,7 +194,6 @@ options:
       features:
         translate: 網頁翻譯
         selectionToolbar_translate: 劃詞翻譯
-        selectionToolbar_vocabularyInsight: 劃詞詞彙解析
         tts: 文字轉語音
         inputTranslation: 輸入翻譯
         videoSubtitles: 影片字幕
@@ -289,7 +288,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 啟用選擇工具列
-        description: 在網頁上選擇文字時顯示工具列，快速翻譯和詞彙解析
+        description: 在網頁上選取文字時顯示工具列，快速翻譯、朗讀和使用 AI 指令
       opacity:
         title: 透明度
         description: 調整選擇工具列及其展開內容視窗的透明度
@@ -298,7 +297,6 @@ options:
         description: 選擇在選擇工具列中顯示哪些內建功能
         translate: 翻譯
         speak: 朗讀
-        vocabularyInsight: 詞彙解析
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
@@ -326,9 +324,6 @@ options:
         translate:
           title: 劃詞翻譯
           description: 配置選擇工具列翻譯功能使用的提供商與模型
-        vocabularyInsight:
-          title: 詞彙解析
-          description: 配置選擇工具列詞彙/短語解析功能使用的提供商與模型
       customActions:
         title: 自訂 AI 指令
         description: 為劃詞新增你自己的結構化 AI 操作
@@ -818,9 +813,6 @@ action:
   translation: 翻譯
   speak: 朗讀
   playing: 播放中
-  vocabularyInsight: 詞彙解析
-  vocabularyInsightDeprecation: 此功能將在 2 週後被自訂 AI 動作的詞典功能取代。詞典動作提供更靈活和強大的體驗。
-  vocabularyInsightDeprecationLink: 設定詞典動作
 thinking:
   label: 思考中
   complete: 思考完成

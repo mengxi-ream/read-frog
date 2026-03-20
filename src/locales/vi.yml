@@ -194,7 +194,6 @@ options:
       features:
         translate: Dịch trang
         selectionToolbar_translate: Dịch thanh công cụ chọn
-        selectionToolbar_vocabularyInsight: Phân tích từ vựng thanh công cụ chọn
         tts: Chuyển văn bản thành giọng nói
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
@@ -289,7 +288,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
-        description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch và phân tích từ vựng nhanh
+        description: Hiển thị thanh công cụ khi chọn văn bản trên trang web để dịch nhanh, đọc to và dùng các hành động AI
       opacity:
         title: Độ mờ
         description: Điều chỉnh độ mờ của thanh công cụ chọn văn bản và cửa sổ mở rộng mở từ đó
@@ -298,7 +297,6 @@ options:
         description: Chọn các tính năng tích hợp để hiển thị trên thanh công cụ chọn văn bản
         translate: Dịch
         speak: Đọc
-        vocabularyInsight: Phân tích từ vựng
       closeMenu:
         disableForSite: Tắt cho trang web này
         disableGlobally: Tắt toàn cục
@@ -326,9 +324,6 @@ options:
         translate:
           title: Dịch văn bản chọn
           description: Cấu hình nhà cung cấp và model cho tính năng dịch của selection toolbar
-        vocabularyInsight:
-          title: Phân tích từ vựng
-          description: Cấu hình nhà cung cấp và model cho tính năng phân tích từ/cụm từ của selection toolbar
       customActions:
         title: Hành động AI tùy chỉnh
         description: Thêm các hành động AI có cấu trúc của riêng bạn cho văn bản được chọn
@@ -818,9 +813,6 @@ action:
   translation: Dịch
   speak: Đọc
   playing: Đang phát
-  vocabularyInsight: Phân tích từ vựng
-  vocabularyInsightDeprecation: Tính năng này sẽ được thay thế bằng tính năng Từ điển của Hành động AI tùy chỉnh sau 2 tuần. Hành động Từ điển mang đến trải nghiệm linh hoạt và mạnh mẽ hơn.
-  vocabularyInsightDeprecationLink: Thiết lập Hành động Từ điển
 thinking:
   label: Đang suy luận
   complete: Suy luận hoàn tất

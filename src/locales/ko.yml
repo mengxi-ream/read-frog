@@ -194,7 +194,6 @@ options:
       features:
         translate: 페이지 번역
         selectionToolbar_translate: 선택 툴바 번역
-        selectionToolbar_vocabularyInsight: 선택 툴바 어휘 분석
         tts: 텍스트 음성 변환
         inputTranslation: 입력 번역
         videoSubtitles: 비디오 자막
@@ -289,7 +288,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: 선택 툴바 활성화
-        description: 웹 페이지에서 텍스트를 선택할 때 툴바를 표시하여 빠른 번역 및 어휘 분석
+        description: 웹 페이지에서 텍스트를 선택할 때 도구 모음을 표시하여 빠르게 번역, 읽기, AI 액션을 사용할 수 있습니다
       opacity:
         title: 투명도
         description: 선택 툴바와 여기서 열리는 확장 창의 투명도를 조절합니다
@@ -298,7 +297,6 @@ options:
         description: 선택 툴바에 표시할 기본 제공 기능 선택
         translate: 번역
         speak: 읽기
-        vocabularyInsight: 어휘 분석
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화
@@ -326,9 +324,6 @@ options:
         translate:
           title: 선택 번역
           description: 선택 툴바 번역 기능의 제공업체와 모델을 구성합니다
-        vocabularyInsight:
-          title: 어휘 분석
-          description: 선택 툴바에서 단어/구문 분석 기능의 제공업체와 모델을 구성합니다
       customActions:
         title: 커스텀 AI 액션
         description: 선택한 텍스트에 대한 구조화된 AI 작업을 직접 추가하세요
@@ -818,9 +813,6 @@ action:
   translation: 번역
   speak: 읽기
   playing: 재생 중
-  vocabularyInsight: 어휘 분석
-  vocabularyInsightDeprecation: 이 기능은 2주 후에 사용자 정의 AI 액션의 사전 기능으로 대체됩니다. 사전 액션은 더 유연하고 강력한 경험을 제공합니다.
-  vocabularyInsightDeprecationLink: 사전 액션 설정
 thinking:
   label: 사고 중
   complete: 사고 완료

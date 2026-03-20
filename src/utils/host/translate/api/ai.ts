@@ -3,7 +3,8 @@ import type { ArticleContent } from "@/types/content"
 import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
 import { generateText } from "ai"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
-import { getModelById, resolveModelId } from "@/utils/providers/model"
+import { getModelById } from "@/utils/providers/model"
+import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 
 const THINK_TAG_RE = /<\/think>([\s\S]*)/

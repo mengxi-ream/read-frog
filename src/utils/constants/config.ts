@@ -108,10 +108,6 @@ export const DEFAULT_CONFIG: Config = {
       speak: {
         enabled: true,
       },
-      vocabularyInsight: {
-        enabled: true,
-        providerId: "openai-default",
-      },
     },
     customActions: defaultDictionaryAction ? [defaultDictionaryAction] : [],
   },

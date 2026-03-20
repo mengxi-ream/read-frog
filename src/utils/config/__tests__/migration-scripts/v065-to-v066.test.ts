@@ -1,13 +1,20 @@
 import { describe, expect, it } from "vitest"
 import { migrate } from "../../migration-scripts/v065-to-v066"
 
-function createConfig(shortcut: unknown) {
+function createConfig(shortcut: unknown, features?: Record<string, unknown>) {
   return {
     translate: {
       page: {
         shortcut,
       },
     },
+    ...(features
+      ? {
+          selectionToolbar: {
+            features,
+          },
+        }
+      : {}),
   }
 }
 
@@ -37,5 +44,28 @@ describe("v065-to-v066 migration", () => {
     expect(migrate(createConfig(["shift"])).translate.page.shortcut).toBe("Alt+E")
     expect(migrate(createConfig(["alt", "e", "x"])).translate.page.shortcut).toBe("Alt+E")
     expect(migrate(createConfig([""])).translate.page.shortcut).toBe("Alt+E")
+  })
+
+  it("preserves already migrated shortcut strings when rerun", () => {
+    expect(migrate(createConfig("Mod+E")).translate.page.shortcut).toBe("Mod+E")
+    expect(migrate(createConfig("  Alt+K  ")).translate.page.shortcut).toBe("Alt+K")
+  })
+
+  it("removes deprecated vocabulary insight config", () => {
+    const migrated = migrate(createConfig(["alt", "e"], {
+      speak: {
+        enabled: true,
+      },
+      vocabularyInsight: {
+        enabled: true,
+        providerId: "google-default",
+      },
+    }))
+
+    expect(migrated.selectionToolbar.features).toEqual({
+      speak: {
+        enabled: true,
+      },
+    })
   })
 })

@@ -165,10 +165,6 @@ export const testSeries: TestSeriesObject = {
           speak: {
             enabled: true,
           },
-          vocabularyInsight: {
-            enabled: true,
-            providerId: "deepseek-default",
-          },
         },
       },
       betaExperience: {
@@ -342,10 +338,6 @@ export const testSeries: TestSeriesObject = {
           },
           speak: {
             enabled: true,
-          },
-          vocabularyInsight: {
-            enabled: true,
-            providerId: "google-default",
           },
         },
       },
@@ -524,10 +516,6 @@ export const testSeries: TestSeriesObject = {
           },
           speak: {
             enabled: true,
-          },
-          vocabularyInsight: {
-            enabled: true,
-            providerId: "google-default",
           },
         },
       },
@@ -752,10 +740,6 @@ Target language: {{targetLanguage}}`,
           },
           speak: {
             enabled: true,
-          },
-          vocabularyInsight: {
-            enabled: true,
-            providerId: "google-default",
           },
         },
       },

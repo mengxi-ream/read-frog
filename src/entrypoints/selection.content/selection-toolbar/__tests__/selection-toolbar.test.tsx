@@ -7,10 +7,6 @@ import { SelectionToolbar } from "../index"
 const MOCK_SELECTED_TEXT = "Selected Text"
 
 // Mock child components
-vi.mock("../ai-button", () => ({
-  AiButton: () => null,
-}))
-
 vi.mock("../translate-button", () => ({
   TranslateButton: () => null,
 }))
@@ -37,7 +33,6 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
         features: {
           translate: { enabled: true, providerId: "microsoft-translate-default" },
           speak: { enabled: true },
-          vocabularyInsight: { enabled: true, providerId: "openai-default" },
         },
         customActions: [],
       }),

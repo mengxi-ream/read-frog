@@ -1,5 +1,6 @@
 /**
  * Migration script from v065 to v066
+ * - Removes the deprecated selectionToolbar.features.vocabularyInsight config
  * - Converts `translate.page.shortcut` from string[] to portable hotkey string
  *
  * IMPORTANT: All values are hardcoded inline. Migration scripts are frozen
@@ -42,6 +43,11 @@ function normalizeLegacyHotkeyKey(key: string): string {
 }
 
 function migrateLegacyShortcut(legacyShortcut: unknown): string {
+  if (typeof legacyShortcut === "string") {
+    const trimmedShortcut = legacyShortcut.trim()
+    return trimmedShortcut || FALLBACK_SHORTCUT
+  }
+
   if (!Array.isArray(legacyShortcut) || legacyShortcut.length === 0) {
     return FALLBACK_SHORTCUT
   }
@@ -95,16 +101,35 @@ function migrateLegacyShortcut(legacyShortcut: unknown): string {
   ].filter(Boolean).join("+")
 }
 
+function removeVocabularyInsightFeature(oldFeatures: any): any {
+  const { vocabularyInsight: _removedVocabularyInsight, ...features } = oldFeatures ?? {}
+  return features
+}
+
 export function migrate(oldConfig: any): any {
+  const migratedConfig: any = {
+    ...oldConfig,
+  }
+
+  const oldSelectionToolbar = oldConfig?.selectionToolbar
+  if (oldSelectionToolbar) {
+    migratedConfig.selectionToolbar = oldSelectionToolbar.features
+      ? {
+          ...oldSelectionToolbar,
+          features: removeVocabularyInsightFeature(oldSelectionToolbar.features),
+        }
+      : oldSelectionToolbar
+  }
+
   const translate = oldConfig.translate
   const page = translate?.page
 
   if (!page) {
-    return oldConfig
+    return migratedConfig
   }
 
   return {
-    ...oldConfig,
+    ...migratedConfig,
     translate: {
       ...translate,
       page: {

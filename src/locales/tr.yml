@@ -194,7 +194,6 @@ options:
       features:
         translate: Sayfa Çevirisi
         selectionToolbar_translate: Seçim Araç Çubuğu Çevirisi
-        selectionToolbar_vocabularyInsight: Seçim Araç Çubuğu Kelime Analizi
         tts: Metin Okuma
         inputTranslation: Giriş Çevirisi
         videoSubtitles: Video Altyazıları
@@ -289,7 +288,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir
-        description: Hızlı çeviri ve kelime analizi için web sayfalarında metin seçerken araç çubuğunu görüntüle
+        description: Web sayfalarında metin seçtiğinizde araç çubuğunu göstererek hızlı çeviri, seslendirme ve AI eylemleri sunar
       opacity:
         title: Opaklık
         description: Seçim araç çubuğunun ve buradan açılan genişletilmiş pencerenin opaklığını ayarlayın
@@ -298,7 +297,6 @@ options:
         description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
         translate: Çeviri
         speak: Sesli Okuma
-        vocabularyInsight: Kelime Analizi
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
@@ -326,9 +324,6 @@ options:
         translate:
           title: Seçim Çevirisi
           description: Seçim araç çubuğu çeviri özelliği için sağlayıcı ve model yapılandırın
-        vocabularyInsight:
-          title: Kelime Analizi
-          description: Seçim araç çubuğunda kelime/ifade analizi için sağlayıcı ve model yapılandırın
       customActions:
         title: Özel AI Eylemleri
         description: Seçilen metin için kendi yapılandırılmış AI eylemlerinizi ekleyin
@@ -818,9 +813,6 @@ action:
   translation: Çeviri
   speak: Oku
   playing: Çalınıyor
-  vocabularyInsight: Kelime analizi
-  vocabularyInsightDeprecation: Bu özellik, 2 hafta içinde Özel AI Eyleminin Sözlük özelliği ile değiştirilecektir. Sözlük Eylemi daha esnek ve güçlü bir deneyim sunar.
-  vocabularyInsightDeprecationLink: Sözlük Eylemini Ayarla
 thinking:
   label: Düşünüyor
   complete: Düşünme tamamlandı

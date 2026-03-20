@@ -194,7 +194,6 @@ options:
       features:
         translate: Перевод страницы
         selectionToolbar_translate: Перевод выделения
-        selectionToolbar_vocabularyInsight: Анализ слов выделения
         tts: Озвучивание текста
         inputTranslation: Перевод ввода
         videoSubtitles: Субтитры видео
@@ -289,7 +288,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Включить панель выделения
-        description: Отображать панель при выделении текста на веб-страницах для быстрого перевода и анализа слов
+        description: Показывать панель при выделении текста на веб-страницах для быстрого перевода, озвучивания и AI-действий
       opacity:
         title: Прозрачность
         description: Настройте прозрачность панели выделения и раскрытого окна, которое открывается из неё
@@ -298,7 +297,6 @@ options:
         description: Выберите, какие встроенные функции показывать в панели выделения
         translate: Перевод
         speak: Озвучивание
-        vocabularyInsight: Анализ слов
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
@@ -326,9 +324,6 @@ options:
         translate:
           title: Перевод выделения
           description: Настройка провайдера и модели для перевода в панели выделения
-        vocabularyInsight:
-          title: Анализ слов
-          description: Настройка провайдера и модели для анализа слов/фраз в панели выделения
       customActions:
         title: Пользовательские AI-действия
         description: Добавляйте собственные структурированные AI-действия для выделенного текста
@@ -818,9 +813,6 @@ action:
   translation: Перевод
   speak: Озвучить
   playing: Воспроизведение
-  vocabularyInsight: Разбор слов
-  vocabularyInsightDeprecation: Эта функция будет заменена функцией словаря в пользовательских AI-действиях через 2 недели. Словарное действие обеспечивает более гибкий и мощный опыт.
-  vocabularyInsightDeprecationLink: Настроить словарное действие
 thinking:
   label: Размышление
   complete: Размышление завершено

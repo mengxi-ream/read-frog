@@ -1,5 +1,4 @@
 import type { Config } from "@/types/config/config"
-import type { LLMProviderConfig } from "@/types/config/provider"
 import { storage } from "#imports"
 import { createAlibaba } from "@ai-sdk/alibaba"
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock"
@@ -28,6 +27,7 @@ import { isCustomLLMProvider } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
+import { resolveModelId } from "./model-id"
 
 const CREATE_AI_MAPPER = {
   "siliconflow": createOpenAICompatible,
@@ -61,12 +61,6 @@ const CREATE_AI_MAPPER = {
 
 const CUSTOM_HEADER_MAP: Partial<Record<keyof typeof CREATE_AI_MAPPER, Record<string, string>>> = {
   anthropic: { "anthropic-dangerous-direct-browser-access": "true" },
-}
-
-export function resolveModelId(providerModel: LLMProviderConfig["model"]) {
-  return providerModel.isCustomModel
-    ? providerModel.customModel?.trim()
-    : providerModel.model?.trim()
 }
 
 async function getLanguageModelById(providerId: string) {

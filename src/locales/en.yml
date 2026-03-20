@@ -195,7 +195,6 @@ options:
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation
-        selectionToolbar_vocabularyInsight: Selection Toolbar Vocabulary Insight
         tts: Text to Speech
         inputTranslation: Input Translation
         videoSubtitles: Video Subtitles
@@ -290,7 +289,7 @@ options:
     selectionToolbar:
       globalToggle:
         title: Enable Selection Toolbar
-        description: Display the toolbar when selecting text on web pages for quick translation and vocabulary insights
+        description: Display the toolbar when selecting text on web pages for quick translation, speech, and AI actions
       opacity:
         title: Opacity
         description: Adjust the opacity of the selection toolbar and the expanded window opened from it
@@ -299,7 +298,6 @@ options:
         description: Choose which built-in features to show in the selection toolbar
         translate: Translate
         speak: Speak
-        vocabularyInsight: Vocabulary Insight
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
@@ -327,9 +325,6 @@ options:
         translate:
           title: Selection Translation
           description: Configure provider and model for the selection toolbar translation feature
-        vocabularyInsight:
-          title: Vocabulary Insight
-          description: Configure provider and model for vocabulary/phrase analysis in the selection toolbar
       customActions:
         title: Custom AI Actions
         description: Add your own structured AI actions for selected text
@@ -933,9 +928,6 @@ action:
   translation: Translation
   speak: Speak
   playing: Playing
-  vocabularyInsight: Vocabulary Insight
-  vocabularyInsightDeprecation: This feature will be replaced by Custom AI Action's Dictionary feature in 2 weeks. Dictionary Action offers a more flexible and powerful experience.
-  vocabularyInsightDeprecationLink: Set up Dictionary Action
 thinking:
   label: Thinking
   complete: Thinking complete
