@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat(context-menu): add selection translation and custom AI action right-click entries, and track custom action usage analytics.
+feat(context-menu): add selection translation and custom AI action right-click entries.
