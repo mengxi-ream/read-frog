@@ -24,6 +24,45 @@ enum SelectionDirection {
   BOTTOM_RIGHT = "BOTTOM_RIGHT",
 }
 
+const SELECTION_GUARD_INTERACTIVE_SELECTOR = [
+  "button",
+  "[role=\"button\"]",
+  "a[href]",
+  "input",
+  "textarea",
+  "select",
+  "summary",
+].join(", ")
+
+function getInteractiveGuardTarget(event: MouseEvent) {
+  const eventPath = event.composedPath()
+
+  for (const node of eventPath) {
+    if (!(node instanceof Element)) {
+      continue
+    }
+
+    if (node.matches(SELECTION_GUARD_INTERACTIVE_SELECTOR)) {
+      return node
+    }
+
+    const closestInteractive = node.closest(SELECTION_GUARD_INTERACTIVE_SELECTOR)
+    if (closestInteractive) {
+      return closestInteractive
+    }
+  }
+
+  if (!(event.target instanceof Element)) {
+    return null
+  }
+
+  if (event.target.matches(SELECTION_GUARD_INTERACTIVE_SELECTOR)) {
+    return event.target
+  }
+
+  return event.target.closest(SELECTION_GUARD_INTERACTIVE_SELECTOR)
+}
+
 function getSelectionDirection(
   startX: number,
   startY: number,
@@ -128,6 +167,8 @@ export function SelectionToolbar() {
         return
       }
 
+      const interactiveTarget = getInteractiveGuardTarget(e)
+
       // Use requestAnimationFrame to delay selection check
       // This ensures selectionchange event fires first if text selection was cleared
       requestAnimationFrame(() => {
@@ -143,7 +184,7 @@ export function SelectionToolbar() {
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
-        if (!isInputOrTextarea && !selection?.containsNode(e.target as Node, true) && e.target instanceof HTMLButtonElement) {
+        if (!isInputOrTextarea && interactiveTarget && !selection?.containsNode(interactiveTarget, true)) {
           return
         }
 

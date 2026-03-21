@@ -303,6 +303,90 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expectToolbarHidden()
   })
 
+  it("should not show toolbar when selection does not contain the clicked button ancestor", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="selected-element">{MOCK_SELECTED_TEXT}</div>
+        <button data-testid="click-button" type="button">
+          <span data-testid="click-button-label">Click target</span>
+        </button>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const clickButton = screen.getByTestId("click-button")
+    const clickTarget = screen.getByTestId("click-button-label")
+
+    window.getSelection = vi.fn(() => ({
+      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 1,
+      }),
+      containsNode: vi.fn((node: Node) => node !== clickButton),
+    })) as unknown as typeof window.getSelection
+
+    await triggerMouseUpWithSelection(clickTarget)
+    expectToolbarHidden()
+  })
+
+  it("should not show toolbar when shadow DOM retargets button clicks to the host element", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="selected-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const shadowHost = document.createElement("read-frog-selection")
+    const shadowButton = document.createElement("button")
+    shadowButton.type = "button"
+    let dispatchComplete = false
+
+    window.getSelection = vi.fn(() => ({
+      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 1,
+      }),
+      containsNode: vi.fn((node: Node) => node !== shadowButton),
+    })) as unknown as typeof window.getSelection
+
+    const mouseUpEvent = new MouseEvent("mouseup", {
+      bubbles: true,
+      clientX: 100,
+      clientY: 100,
+      composed: true,
+    })
+
+    Object.defineProperty(mouseUpEvent, "target", {
+      value: shadowHost,
+      writable: false,
+    })
+
+    Object.defineProperty(mouseUpEvent, "composedPath", {
+      value: () => dispatchComplete ? [] : [shadowButton, shadowHost, document.body, document, window],
+    })
+
+    await act(async () => {
+      document.dispatchEvent(mouseUpEvent)
+      dispatchComplete = true
+      const callbacks = [...rafCallbacks]
+      rafCallbacks = []
+      callbacks.forEach(cb => cb(0))
+    })
+
+    expectToolbarHidden()
+  })
+
   it("should show toolbar when selection contains the click target", async () => {
     render(
       <div>
@@ -327,6 +411,36 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     })) as unknown as typeof window.getSelection
 
     await triggerMouseUpWithSelection(element)
+    await waitFor(expectToolbarVisible)
+  })
+
+  it("should show toolbar when selection contains the clicked button ancestor", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <button data-testid="click-button" type="button">
+          <span data-testid="click-button-label">Selected button text</span>
+        </button>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const clickButton = screen.getByTestId("click-button")
+    const clickTarget = screen.getByTestId("click-button-label")
+
+    window.getSelection = vi.fn(() => ({
+      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+      getRangeAt: () => ({
+        startContainer: document.body,
+        startOffset: 0,
+        endContainer: document.body,
+        endOffset: 1,
+      }),
+      containsNode: vi.fn((node: Node) => node === clickButton || clickButton.contains(node)),
+    })) as unknown as typeof window.getSelection
+
+    await triggerMouseUpWithSelection(clickTarget)
     await waitFor(expectToolbarVisible)
   })
 
