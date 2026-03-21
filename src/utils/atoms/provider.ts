@@ -37,12 +37,15 @@ export const providerConfigAtom = atomFamily((id: string) =>
   ),
 )
 
+function mergeUnknown(base: unknown, updates: unknown): unknown {
+  return (deepmerge as (base: unknown, updates: unknown) => unknown)(base, updates)
+}
+
 export function updateLLMProviderConfig(
   config: LLMProviderConfig,
   updates: PartialDeep<LLMProviderConfig>,
 ): LLMProviderConfig {
-  // @ts-expect-error - Type instantiation too deep due to complex provider union types
-  const result = deepmerge(config, updates)
+  const result = mergeUnknown(config, updates) as LLMProviderConfig
   return llmProviderConfigItemSchema.parse(result)
 }
 
@@ -50,7 +53,6 @@ export function updateProviderConfig(
   config: ProviderConfig,
   updates: PartialDeep<ProviderConfig>,
 ): ProviderConfig {
-  // Keep the merge input shallow enough for TypeScript, then validate the result with Zod.
-  const result = deepmerge(config, updates as Partial<ProviderConfig>) as ProviderConfig
+  const result = mergeUnknown(config, updates) as ProviderConfig
   return providerConfigItemSchema.parse(result)
 }
