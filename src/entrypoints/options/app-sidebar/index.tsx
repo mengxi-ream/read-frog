@@ -11,6 +11,7 @@ import { Kbd } from "@/components/ui/base-ui/kbd"
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/base-ui/sidebar"
 import { getCommandPaletteShortcutHint } from "@/utils/os"
@@ -19,6 +20,7 @@ import { commandPaletteOpenAtom } from "../command-palette/atoms"
 import { ProductNav } from "./product-nav"
 import { SettingsNav } from "./settings-nav"
 import { ToolsNav } from "./tools-nav"
+import { WhatsNewFooter } from "./whats-new-footer"
 
 export function AppSidebar() {
   const setCommandPaletteOpen = useSetAtom(commandPaletteOpenAtom)
@@ -44,9 +46,12 @@ export function AppSidebar() {
             className="cursor-pointer"
           />
           <InputGroupAddon>
-            <IconSearch className="size-4 text-muted-foreground" />
+            <IconSearch className="size-4 text-muted-foreground group-data-[state=collapsed]:-mx-px" />
           </InputGroupAddon>
-          <InputGroupAddon align="inline-end">
+          <InputGroupAddon
+            align="inline-end"
+            className="group-data-[state=collapsed]:hidden"
+          >
             <Kbd>{commandPaletteShortcutHint}</Kbd>
           </InputGroupAddon>
         </InputGroup>
@@ -56,6 +61,9 @@ export function AppSidebar() {
         <ToolsNav />
         <ProductNav />
       </SidebarContent>
+      <SidebarFooter className="group-data-[state=expanded]:px-2 transition-all">
+        <WhatsNewFooter />
+      </SidebarFooter>
     </Sidebar>
   )
 }
