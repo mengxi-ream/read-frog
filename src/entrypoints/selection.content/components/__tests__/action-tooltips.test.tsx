@@ -65,6 +65,18 @@ describe("selection action tooltips", () => {
 
     return { tooltip, positioner }
   }
+
+  async function expectTooltipClosesOnHoverLeave(trigger: Element) {
+    await openTooltip(trigger)
+
+    fireEvent.mouseLeave(trigger)
+    fireEvent.blur(trigger)
+
+    await waitFor(() => {
+      expect(document.querySelector("[data-slot='tooltip-content']")).toBeNull()
+    })
+  }
+
   it("renders the copy tooltip above selection popovers", async () => {
     const { container } = renderWithProviders(<CopyButton text="Copied text" />)
     const trigger = container.querySelector("[data-slot='tooltip-trigger']")
@@ -184,5 +196,43 @@ describe("selection action tooltips", () => {
     await waitFor(() => {
       expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent("action.viewContextDetails")
     })
+  })
+
+  it("closes the copy tooltip after hover leave", async () => {
+    const { container } = renderWithProviders(<CopyButton text="Copied text" />)
+    const trigger = container.querySelector("[data-slot='tooltip-trigger']")
+
+    expect(trigger).toBeTruthy()
+
+    await expectTooltipClosesOnHoverLeave(trigger!)
+  })
+
+  it("closes the speak tooltip after hover leave", async () => {
+    const { container } = renderWithProviders(<SpeakButton text="Speak text" />)
+    const trigger = container.querySelector("[data-slot='tooltip-trigger']")
+
+    expect(trigger).toBeTruthy()
+
+    await expectTooltipClosesOnHoverLeave(trigger!)
+  })
+
+  it("closes the regenerate tooltip after hover leave", async () => {
+    const { container } = renderWithProviders(<RegenerateButton onRegenerate={vi.fn()} />)
+    const trigger = container.querySelector("[data-slot='tooltip-trigger']")
+
+    expect(trigger).toBeTruthy()
+
+    await expectTooltipClosesOnHoverLeave(trigger!)
+  })
+
+  it("closes the context details tooltip after hover leave", async () => {
+    const { container } = renderWithProviders(
+      <ContextDetailsButton titleText="Title" paragraphsText="Context" />,
+    )
+    const trigger = container.querySelector("[data-slot='tooltip-trigger']")
+
+    expect(trigger).toBeTruthy()
+
+    await expectTooltipClosesOnHoverLeave(trigger!)
   })
 })

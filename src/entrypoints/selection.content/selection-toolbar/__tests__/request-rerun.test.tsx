@@ -9,6 +9,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -353,11 +354,13 @@ function renderWithProviders(ui: ReactElement, store = createStore()) {
   const view = render(
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
-        <SelectionTranslationProvider>
-          <SelectionCustomActionProvider>
-            {ui}
-          </SelectionCustomActionProvider>
-        </SelectionTranslationProvider>
+        <TooltipProvider>
+          <SelectionTranslationProvider>
+            <SelectionCustomActionProvider>
+              {ui}
+            </SelectionCustomActionProvider>
+          </SelectionTranslationProvider>
+        </TooltipProvider>
       </Provider>
     </QueryClientProvider>,
   )
@@ -367,6 +370,15 @@ function renderWithProviders(ui: ReactElement, store = createStore()) {
     queryClient,
     store,
   }
+}
+
+async function openTooltip(trigger: HTMLElement) {
+  fireEvent.mouseEnter(trigger)
+  fireEvent.focus(trigger)
+
+  await waitFor(() => {
+    expect(document.querySelector("[data-slot='tooltip-content']")).toBeTruthy()
+  })
 }
 
 describe("selection toolbar requests", () => {
@@ -398,11 +410,13 @@ describe("selection toolbar requests", () => {
     view.rerender(
       <QueryClientProvider client={view.queryClient}>
         <Provider store={store}>
-          <SelectionTranslationProvider>
-            <SelectionCustomActionProvider>
-              <TranslateButton />
-            </SelectionCustomActionProvider>
-          </SelectionTranslationProvider>
+          <TooltipProvider>
+            <SelectionTranslationProvider>
+              <SelectionCustomActionProvider>
+                <TranslateButton />
+              </SelectionCustomActionProvider>
+            </SelectionTranslationProvider>
+          </TooltipProvider>
         </Provider>
       </QueryClientProvider>,
     )
@@ -439,6 +453,29 @@ describe("selection toolbar requests", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("translation-status").textContent).toBe("false")
+    })
+  })
+
+  it("renders the translation tooltip as non-interactive and closes it on hover leave", async () => {
+    translateTextCoreMock.mockResolvedValue("translated once")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<TranslateButton />, store)
+
+    const trigger = screen.getByRole("button", { name: "action.translation" })
+    await openTooltip(trigger)
+
+    const tooltip = document.querySelector("[data-slot='tooltip-content']")
+    expect(tooltip).toHaveTextContent("action.translation")
+    expect(tooltip).toHaveClass("pointer-events-none")
+
+    fireEvent.mouseLeave(trigger)
+    fireEvent.blur(trigger)
+    await waitFor(() => {
+      expect(document.querySelector("[data-slot='tooltip-content']")).toBeNull()
     })
   })
 
@@ -793,6 +830,35 @@ describe("selection toolbar requests", () => {
         action_name: action.name,
       }),
     )
+  })
+
+  it("renders the custom action tooltip as non-interactive and closes it on hover leave", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(
+      createStructuredObjectSnapshot({ summary: "done" }),
+    )
+
+    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
+    if (!actionName) {
+      throw new Error("Default custom action is missing")
+    }
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const trigger = screen.getByRole("button", { name: actionName })
+    await openTooltip(trigger)
+
+    const tooltip = document.querySelector("[data-slot='tooltip-content']")
+    expect(tooltip).toHaveTextContent(actionName)
+    expect(tooltip).toHaveClass("pointer-events-none")
+
+    fireEvent.mouseLeave(trigger)
+    fireEvent.blur(trigger)
+    await waitFor(() => {
+      expect(document.querySelector("[data-slot='tooltip-content']")).toBeNull()
+    })
   })
 
   it("shows a toast when a custom action context menu request cannot recover a selection snapshot", async () => {

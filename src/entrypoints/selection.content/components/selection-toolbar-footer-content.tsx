@@ -1,7 +1,7 @@
 import type { ProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { IconAspectRatio, IconRefresh } from "@tabler/icons-react"
-import { useCallback, useState } from "react"
+import { useCallback } from "react"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { buttonVariants } from "@/components/ui/base-ui/button"
 import {
@@ -15,11 +15,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/base-ui/popover"
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { SelectionPopover, useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
 import { cn } from "@/utils/styles/utils"
-
-const TOOLTIP_TRIGGER_PRESS_REASON = "trigger-press"
+import { SelectionPopoverTooltip, useSelectionTooltipState } from "./selection-tooltip"
 
 function PreviewField({
   field,
@@ -59,48 +57,34 @@ export function ContextDetailsButton({
 }) {
   const popoverOverlay = useSelectionPopoverOverlayProps()
   const buttonLabel = i18n.t("action.viewContextDetails")
-  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
 
   const handleClick = useCallback(() => {
-    setTooltipOpen(true)
-  }, [])
-
-  const handleTooltipOpenChange = useCallback((nextOpen: boolean, eventDetails: { reason: string }) => {
-    if (!nextOpen && eventDetails.reason === TOOLTIP_TRIGGER_PRESS_REASON) {
-      return
-    }
-
-    setTooltipOpen(nextOpen)
-  }, [])
+    handlePress()
+  }, [handlePress])
 
   return (
     <Popover>
-      <Tooltip open={tooltipOpen} onOpenChange={handleTooltipOpenChange}>
-        <TooltipTrigger
-          render={(
-            <PopoverTrigger
-              render={(
-                <button
-                  type="button"
-                  className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }), className)}
-                  onClick={handleClick}
-                  aria-label={buttonLabel}
-                  title={buttonLabel}
-                />
-              )}
-            />
-          )}
-        >
-          <IconAspectRatio />
-        </TooltipTrigger>
-        <TooltipContent
-          className="whitespace-nowrap"
-          container={popoverOverlay.container}
-          positionerClassName={popoverOverlay.positionerClassName}
-        >
-          {buttonLabel}
-        </TooltipContent>
-      </Tooltip>
+      <SelectionPopoverTooltip
+        content={buttonLabel}
+        open={tooltipOpen}
+        onOpenChange={handleTooltipOpenChange}
+        render={(
+          <PopoverTrigger
+            render={(
+              <button
+                type="button"
+                className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }), className)}
+                onClick={handleClick}
+                aria-label={buttonLabel}
+                title={buttonLabel}
+              />
+            )}
+          />
+        )}
+      >
+        <IconAspectRatio />
+      </SelectionPopoverTooltip>
       <PopoverContent
         container={popoverOverlay.container}
         positionerClassName={popoverOverlay.positionerClassName}
@@ -124,45 +108,30 @@ export function RegenerateButton({
   className?: string
   onRegenerate: () => void
 }) {
-  const popoverOverlay = useSelectionPopoverOverlayProps()
-  const [tooltipOpen, setTooltipOpen] = useState(false)
+  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
 
   const handleClick = useCallback(() => {
-    setTooltipOpen(true)
+    handlePress()
     onRegenerate()
-  }, [onRegenerate])
-
-  const handleTooltipOpenChange = useCallback((nextOpen: boolean, eventDetails: { reason: string }) => {
-    if (!nextOpen && eventDetails.reason === TOOLTIP_TRIGGER_PRESS_REASON) {
-      return
-    }
-
-    setTooltipOpen(nextOpen)
-  }, [])
+  }, [handlePress, onRegenerate])
 
   return (
-    <Tooltip open={tooltipOpen} onOpenChange={handleTooltipOpenChange}>
-      <TooltipTrigger
-        render={(
-          <button
-            type="button"
-            className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }), className)}
-            onClick={handleClick}
-            aria-label={i18n.t("action.regenerate")}
-            title={i18n.t("action.regenerate")}
-          />
-        )}
-      >
-        <IconRefresh />
-      </TooltipTrigger>
-      <TooltipContent
-        className="whitespace-nowrap"
-        container={popoverOverlay.container}
-        positionerClassName={popoverOverlay.positionerClassName}
-      >
-        {i18n.t("action.regenerate")}
-      </TooltipContent>
-    </Tooltip>
+    <SelectionPopoverTooltip
+      content={i18n.t("action.regenerate")}
+      open={tooltipOpen}
+      onOpenChange={handleTooltipOpenChange}
+      render={(
+        <button
+          type="button"
+          className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }), className)}
+          onClick={handleClick}
+          aria-label={i18n.t("action.regenerate")}
+          title={i18n.t("action.regenerate")}
+        />
+      )}
+    >
+      <IconRefresh />
+    </SelectionPopoverTooltip>
   )
 }
 
