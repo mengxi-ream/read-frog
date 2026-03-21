@@ -1,6 +1,6 @@
 import type { FeatureUsedEventProperties } from "@/types/analytics"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { createBackgroundAnalytics, filterAnalyticsCaptureResult } from "../analytics"
+import { createBackgroundAnalytics, filterAnalyticsCaptureResult, resolveDistinctIdOverride } from "../analytics"
 
 type RegisteredMessageHandler = (message: {
   data: FeatureUsedEventProperties
@@ -164,6 +164,20 @@ describe("background analytics", () => {
     )
   })
 
+  it("uses the dev default test UUID when no explicit override is configured", () => {
+    expect(resolveDistinctIdOverride("   ", true)).toBe("00000000-0000-0000-0000-000000000001")
+  })
+
+  it("prefers an explicit test UUID over the dev default", () => {
+    expect(resolveDistinctIdOverride("11111111-1111-1111-1111-111111111111", true)).toBe(
+      "11111111-1111-1111-1111-111111111111",
+    )
+  })
+
+  it("falls back to undefined outside dev mode when no override is configured", () => {
+    expect(resolveDistinctIdOverride("   ", false)).toBeUndefined()
+  })
+
   it("uses the test UUID override without touching install ID storage", async () => {
     storageGetItemMock.mockResolvedValueOnce(true)
 
@@ -182,6 +196,32 @@ describe("background analytics", () => {
       expect.objectContaining({
         bootstrap: {
           distinctID: "00000000-0000-0000-0000-000000000001",
+        },
+      }),
+    )
+    expect(storageSetItemMock).not.toHaveBeenCalled()
+  })
+
+  it("treats blank distinct ID overrides as unset", async () => {
+    storageGetItemMock
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics({
+      distinctIdOverride: "   ",
+    })
+    await captureFeatureUsedEventInBackground({
+      feature: "page_translation",
+      surface: "popup",
+      outcome: "success",
+      latency_ms: 100,
+    })
+
+    expect(posthogInitMock).toHaveBeenCalledWith(
+      "phc_test",
+      expect.objectContaining({
+        bootstrap: {
+          distinctID: "install-123",
         },
       }),
     )

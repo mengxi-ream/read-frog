@@ -33,13 +33,39 @@ interface BackgroundAnalyticsRuntime {
   warn: typeof logger.warn
 }
 
+const DEV_POSTHOG_TEST_UUID = "00000000-0000-0000-0000-000000000001"
+
+function normalizeDistinctIdOverride(value: string | undefined): string | undefined {
+  if (typeof value !== "string") {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+  return trimmed.length > 0 ? trimmed : undefined
+}
+
+export function resolveDistinctIdOverride(
+  explicitOverrideValue: string | undefined,
+  isDev: boolean,
+): string | undefined {
+  const explicitOverride = normalizeDistinctIdOverride(explicitOverrideValue)
+  if (explicitOverride) {
+    return explicitOverride
+  }
+
+  return isDev ? DEV_POSTHOG_TEST_UUID : undefined
+}
+
 function createDefaultRuntime(): BackgroundAnalyticsRuntime {
   return {
     apiHost: import.meta.env.WXT_POSTHOG_HOST,
     apiKey: import.meta.env.WXT_POSTHOG_API_KEY,
     createDistinctId: () => getRandomUUID(),
     defaultAnalyticsEnabled: DEFAULT_ANALYTICS_ENABLED,
-    distinctIdOverride: import.meta.env.WXT_POSTHOG_TEST_UUID,
+    distinctIdOverride: resolveDistinctIdOverride(
+      import.meta.env.WXT_POSTHOG_TEST_UUID,
+      import.meta.env.DEV,
+    ),
     extensionVersion: EXTENSION_VERSION,
     getStorageItem: key => storage.getItem(key as `local:${string}`),
     onMessage,
@@ -100,8 +126,9 @@ export function createBackgroundAnalytics(
   }
 
   async function getAnalyticsInstallId(): Promise<string> {
-    if (typeof runtime.distinctIdOverride === "string" && runtime.distinctIdOverride.length > 0) {
-      return runtime.distinctIdOverride
+    const distinctIdOverride = normalizeDistinctIdOverride(runtime.distinctIdOverride)
+    if (distinctIdOverride) {
+      return distinctIdOverride
     }
 
     const storageKey = `local:${ANALYTICS_INSTALL_ID_STORAGE_KEY}`
