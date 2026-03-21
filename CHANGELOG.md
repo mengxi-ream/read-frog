@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.31.2
+
+### Patch Changes
+
+- [#1175](https://github.com/mengxi-ream/read-frog/pull/1175) [`cca465a`](https://github.com/mengxi-ream/read-frog/commit/cca465ad040a940beacb09dd8158671de4e4efba) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(translation): skip GitHub PR review diff tables during page translation
+
+- [#1180](https://github.com/mengxi-ream/read-frog/pull/1180) [`c430e6e`](https://github.com/mengxi-ream/read-frog/commit/c430e6e178f39fec44d4964e6c35bf5cd561a7ca) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): force block translation for Reddit post text body
+
+- [#1183](https://github.com/mengxi-ream/read-frog/pull/1183) [`7119d1b`](https://github.com/mengxi-ream/read-frog/commit/7119d1b746a245042457eb4ae5b4bfd87af61146) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-tooltip): close selection popover tooltips after hover leave
+
+- [#1181](https://github.com/mengxi-ream/read-frog/pull/1181) [`940bea1`](https://github.com/mengxi-ream/read-frog/commit/940bea12844af64917fbcbcfbe3c31a6348bbc71) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): align subtitle style controls in options panel
+
 ## 1.31.1
 
 ### Patch Changes
