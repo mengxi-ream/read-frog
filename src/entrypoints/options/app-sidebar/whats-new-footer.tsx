@@ -1,7 +1,7 @@
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useEffectEvent, useState } from "react"
 import {
   Popover,
   PopoverContent,
@@ -27,6 +27,7 @@ import { version } from "../../../../package.json"
 
 export function WhatsNewFooter() {
   const queryClient = useQueryClient()
+  const [open, setOpen] = useState(false)
 
   const { data: lastViewedDate, isFetched: isLastViewedDateFetched } = useQuery({
     queryKey: ["last-viewed-blog-date"],
@@ -38,8 +39,12 @@ export function WhatsNewFooter() {
     queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, "en", version),
   })
 
-  const markLatestBlogPostViewed = useCallback(async () => {
+  const markLatestBlogPostViewed = useEffectEvent(async () => {
     if (!latestBlogPost) {
+      return
+    }
+
+    if (!isLastViewedDateFetched) {
       return
     }
 
@@ -49,27 +54,42 @@ export function WhatsNewFooter() {
 
     await saveLastViewedBlogDate(latestBlogPost.date)
     await queryClient.invalidateQueries({ queryKey: ["last-viewed-blog-date"] })
-  }, [lastViewedDate, latestBlogPost, queryClient])
+  })
 
-  const handleOpenChange = useCallback((open: boolean) => {
-    if (open) {
-      void markLatestBlogPostViewed()
-    }
-  }, [markLatestBlogPostViewed])
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    setOpen(nextOpen)
+  }, [])
+
+  const openPopover = useEffectEvent(() => {
+    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    setOpen(true)
+  })
 
   const latestBlogPostDate = latestBlogPost?.date ?? null
+  const latestBlogPostKey = latestBlogPost
+    ? `${latestBlogPost.url}:${latestBlogPost.date.toISOString()}`
+    : null
+  const lastViewedDateTimestamp = lastViewedDate?.getTime() ?? null
   const shouldAutoOpenPopover = isLastViewedDateFetched
     && isLatestBlogPostFetched
     && hasNewBlogPost(lastViewedDate ?? null, latestBlogPostDate)
 
-  // Persist the auto-opened post so it doesn't reopen on the next visit.
   useEffect(() => {
     if (!shouldAutoOpenPopover) {
       return
     }
 
+    openPopover()
+  }, [shouldAutoOpenPopover])
+
+  // Persist the visible post so it doesn't reopen on the next visit.
+  useEffect(() => {
+    if (!open) {
+      return
+    }
+
     void markLatestBlogPostViewed()
-  }, [markLatestBlogPostViewed, shouldAutoOpenPopover])
+  }, [isLastViewedDateFetched, lastViewedDateTimestamp, latestBlogPostKey, open])
 
   if (!latestBlogPost) {
     return null
@@ -80,8 +100,8 @@ export function WhatsNewFooter() {
 
   return (
     <Popover
-      key={`${latestBlogPost.url}:${latestBlogPost.date.toISOString()}`}
-      defaultOpen={shouldAutoOpenPopover}
+      key={latestBlogPostKey}
+      open={open}
       onOpenChange={handleOpenChange}
     >
       <SidebarMenu>
