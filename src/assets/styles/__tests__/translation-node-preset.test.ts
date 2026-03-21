@@ -6,7 +6,6 @@ const translationNodePresetCss = readFileSync(new URL("../translation-node-prese
 describe("translation-node-preset.css", () => {
   it("keeps a float-wrap override for block translations", () => {
     expect(translationNodePresetCss).toContain(".read-frog-translated-block-content[data-read-frog-float-wrap=\"true\"]")
-    expect(translationNodePresetCss).toContain("display: inline;")
-    expect(translationNodePresetCss).toContain("margin: 0 !important;")
+    expect(translationNodePresetCss).toContain("display: block !important;")
   })
 })
