@@ -106,6 +106,20 @@ describe("getProviderOptions", () => {
       expect(alibabaOptions.alibaba?.enableThinking).toBe(false)
     })
 
+    it("should apply Moonshot defaults to kimi-k2-turbo", () => {
+      const options = getProviderOptions("kimi-k2-turbo", "moonshotai")
+      expect(options.moonshotai?.thinking).toEqual({ type: "disabled" })
+      expect(options.moonshotai?.reasoningHistory).toBe("disabled")
+    })
+
+    it("should apply Alibaba defaults to qwen3.5 flash and plus models", () => {
+      const flashOptions = getProviderOptions("qwen3.5-flash", "alibaba")
+      expect(flashOptions.alibaba?.enableThinking).toBe(false)
+
+      const plusOptions = getProviderOptions("qwen3.5-plus", "alibaba")
+      expect(plusOptions.alibaba?.enableThinking).toBe(false)
+    })
+
     it("should return low/default-compatible reasoning settings for gpt-oss models", () => {
       const groqOptions = getProviderOptions("openai/gpt-oss-120b", "groq")
       expect(groqOptions.groq?.reasoningEffort).toBe("none")
@@ -178,6 +192,17 @@ describe("getProviderOptions", () => {
 
     it("should return undefined for models without recommendations", () => {
       expect(getRecommendedProviderOptionsMatch("plain-model")).toBeUndefined()
+    })
+
+    it("should expose recommendation matches for newly covered defaults", () => {
+      expect(getRecommendedProviderOptionsMatch("kimi-k2-turbo")?.options).toEqual({
+        thinking: { type: "disabled" },
+        reasoningHistory: "disabled",
+      })
+
+      expect(getRecommendedProviderOptionsMatch("qwen3.5-flash")?.options).toEqual({
+        enableThinking: false,
+      })
     })
   })
 })

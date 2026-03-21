@@ -128,14 +128,14 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // MoonshotAI Kimi K2 models - disable thinking/history by default
   {
-    pattern: /^kimi-k2(?:\.5|-0905|-thinking(?:-turbo)?)?$/,
+    pattern: /^kimi-k2(?:\.5|-0905|-turbo|-thinking(?:-turbo)?)?$/,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" } satisfies MoonshotAIProviderOptions as Record<string, JSONValue>,
   },
 
   // Alibaba hybrid-thinking Qwen models - disable thinking by default.
   // Keep explicit thinking-only models (for example `qwq-*` and `*-thinking`) untouched.
   {
-    pattern: /^(?:qwen3-(?:max(?:-preview)?|235b-a22b|32b|30b-a3b|14b|coder-plus|coder-flash)|qwen-(?:plus(?:-latest)?|flash|turbo(?:-latest)?|coder))$/,
+    pattern: /^(?:qwen3(?:\.5-(?:plus|flash)|-(?:max(?:-preview)?|235b-a22b|32b|30b-a3b|14b|coder-plus|coder-flash))|qwen-(?:plus(?:-latest)?|flash|turbo(?:-latest)?|coder))$/,
     options: { enableThinking: false } satisfies AlibabaProviderOptions as Record<string, JSONValue>,
   },
 
