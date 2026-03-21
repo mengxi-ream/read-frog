@@ -27,7 +27,7 @@ Follow these steps:
 
 4. **Add changeset record if necessary**
    - Manually add a file in `.changeset/` directory following changeset convention
-   - Changeset record should match the descriptive PR title following commit convention
+   - Changeset summary should use conventional commit style and should match the descriptive PR title
    - **Versioning rules:**
      - `patch` (0.0.x) — Users barely notice
        - Bug fixes

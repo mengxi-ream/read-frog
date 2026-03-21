@@ -10,21 +10,24 @@ describe("getProviderOptions", () => {
     it("should return options for gemini models", () => {
       const options = getProviderOptions("gemini-2.5-pro", "google")
       expect(options.google).toBeDefined()
-      expect(options.google?.thinkingConfig).toMatchObject({ thinkingBudget: 128, includeThoughts: false })
+      expect(options.google?.thinkingConfig).toMatchObject({ thinkingBudget: 0, includeThoughts: false })
     })
 
     it("should handle thinking models correctly", () => {
       const thinkingOptions = getProviderOptions("gemini-2.5-pro", "google")
-      expect(thinkingOptions.google?.thinkingConfig).toMatchObject({ thinkingBudget: 128 })
+      expect(thinkingOptions.google?.thinkingConfig).toMatchObject({ thinkingBudget: 0 })
 
       const nonThinkingOptions = getProviderOptions("gemini-2.5-flash", "google")
       expect(nonThinkingOptions.google?.thinkingConfig).toMatchObject({ thinkingBudget: 0 })
 
       const thinkingLevelFlashOptions = getProviderOptions("gemini-3-flash-preview", "google")
-      expect(thinkingLevelFlashOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "low", includeThoughts: false })
+      expect(thinkingLevelFlashOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
 
       const thinkingLevelProOptions = getProviderOptions("gemini-3-pro-preview", "google")
-      expect(thinkingLevelProOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "low", includeThoughts: false })
+      expect(thinkingLevelProOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
+
+      const thinkingLevel31ProOptions = getProviderOptions("gemini-3.1-pro-preview", "google")
+      expect(thinkingLevel31ProOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
     })
 
     it("should return options for claude models", () => {
@@ -33,31 +36,27 @@ describe("getProviderOptions", () => {
       expect(options.anthropic?.thinking).toEqual({ type: "disabled" })
     })
 
-    it("should return options for OpenAI o1/o3 reasoning models", () => {
+    it("should return options for OpenAI o1/o3/o4 reasoning models", () => {
       const o1Options = getProviderOptions("o1-preview", "openai")
       expect(o1Options.openai?.reasoningEffort).toBe("minimal")
 
       const o3Options = getProviderOptions("o3-mini", "openai")
       expect(o3Options.openai?.reasoningEffort).toBe("minimal")
-    })
 
-    it("should return medium for gpt-5.x-chat-latest and gpt-5.2-pro", () => {
-      const gpt52ProOptions = getProviderOptions("gpt-5.2-pro", "openai")
-      expect(gpt52ProOptions.openai?.reasoningEffort).toBe("medium")
-
-      const gpt52ChatLatestOptions = getProviderOptions("gpt-5.2-chat-latest", "openai")
-      expect(gpt52ChatLatestOptions.openai?.reasoningEffort).toBe("medium")
-
-      const gpt51ChatLatestOptions = getProviderOptions("gpt-5.1-chat-latest", "openai")
-      expect(gpt51ChatLatestOptions.openai?.reasoningEffort).toBe("medium")
-    })
-
-    it("should return high for gpt-5-pro", () => {
-      const gpt5ProOptions = getProviderOptions("gpt-5-pro", "openai")
-      expect(gpt5ProOptions.openai?.reasoningEffort).toBe("high")
+      const o4MiniOptions = getProviderOptions("o4-mini", "openai")
+      expect(o4MiniOptions.openai?.reasoningEffort).toBe("minimal")
     })
 
     it("should return none for GPT-5.1+ models", () => {
+      const gpt52ProOptions = getProviderOptions("gpt-5.2-pro", "openai")
+      expect(gpt52ProOptions.openai?.reasoningEffort).toBe("none")
+
+      const gpt52ChatLatestOptions = getProviderOptions("gpt-5.2-chat-latest", "openai")
+      expect(gpt52ChatLatestOptions.openai?.reasoningEffort).toBe("none")
+
+      const gpt51ChatLatestOptions = getProviderOptions("gpt-5.1-chat-latest", "openai")
+      expect(gpt51ChatLatestOptions.openai?.reasoningEffort).toBe("none")
+
       const gpt51Options = getProviderOptions("gpt-5.1", "openai")
       expect(gpt51Options.openai?.reasoningEffort).toBe("none")
 
@@ -68,7 +67,7 @@ describe("getProviderOptions", () => {
       expect(gpt51CodexOptions.openai?.reasoningEffort).toBe("none")
     })
 
-    it("should return minimal for GPT-5 models before 5.1 (none not supported)", () => {
+    it("should return minimal for GPT-5 models that do not support reasoningEffort=none", () => {
       const gpt5Options = getProviderOptions("gpt-5", "openai")
       expect(gpt5Options.openai?.reasoningEffort).toBe("minimal")
 
@@ -77,6 +76,64 @@ describe("getProviderOptions", () => {
 
       const gpt5NanoOptions = getProviderOptions("gpt-5-nano", "openai")
       expect(gpt5NanoOptions.openai?.reasoningEffort).toBe("minimal")
+
+      const gpt5ProOptions = getProviderOptions("gpt-5-pro", "openai")
+      expect(gpt5ProOptions.openai?.reasoningEffort).toBe("minimal")
+
+      const gpt5ChatLatestOptions = getProviderOptions("gpt-5-chat-latest", "openai")
+      expect(gpt5ChatLatestOptions.openai?.reasoningEffort).toBe("minimal")
+    })
+
+    it("should return low/disabled defaults for more mainstream reasoning providers", () => {
+      const grokOptions = getProviderOptions("grok-4-fast-reasoning", "xai")
+      expect(grokOptions.xai?.reasoningEffort).toBe("low")
+
+      const deepseekReasonerOptions = getProviderOptions("deepseek-reasoner", "deepseek")
+      expect(deepseekReasonerOptions.deepseek?.thinking).toEqual({ type: "disabled" })
+
+      const cohereReasoningOptions = getProviderOptions("command-a-reasoning-08-2025", "cohere")
+      expect(cohereReasoningOptions.cohere?.thinking).toEqual({ type: "disabled" })
+
+      const moonshotOptions = getProviderOptions("kimi-k2.5", "moonshotai")
+      expect(moonshotOptions.moonshotai?.thinking).toEqual({ type: "disabled" })
+      expect(moonshotOptions.moonshotai?.reasoningHistory).toBe("disabled")
+
+      const fireworksOptions = getProviderOptions("accounts/fireworks/models/kimi-k2p5", "fireworks")
+      expect(fireworksOptions.fireworks?.thinking).toEqual({ type: "disabled" })
+      expect(fireworksOptions.fireworks?.reasoningHistory).toBe("disabled")
+
+      const alibabaOptions = getProviderOptions("qwen3-max", "alibaba")
+      expect(alibabaOptions.alibaba?.enableThinking).toBe(false)
+    })
+
+    it("should apply Moonshot defaults to kimi-k2-turbo", () => {
+      const options = getProviderOptions("kimi-k2-turbo", "moonshotai")
+      expect(options.moonshotai?.thinking).toEqual({ type: "disabled" })
+      expect(options.moonshotai?.reasoningHistory).toBe("disabled")
+    })
+
+    it("should apply Alibaba defaults to qwen3.5 flash and plus models", () => {
+      const flashOptions = getProviderOptions("qwen3.5-flash", "alibaba")
+      expect(flashOptions.alibaba?.enableThinking).toBe(false)
+
+      const plusOptions = getProviderOptions("qwen3.5-plus", "alibaba")
+      expect(plusOptions.alibaba?.enableThinking).toBe(false)
+    })
+
+    it("should return low/default-compatible reasoning settings for gpt-oss models", () => {
+      const groqOptions = getProviderOptions("openai/gpt-oss-120b", "groq")
+      expect(groqOptions.groq?.reasoningEffort).toBe("none")
+
+      const cerebrasOptions = getProviderOptions("gpt-oss-120b", "cerebras")
+      expect(cerebrasOptions.cerebras?.reasoningEffort).toBe("none")
+    })
+
+    it("should not apply Alibaba-only enableThinking defaults to non-Alibaba Qwen model names", () => {
+      const groqOptions = getProviderOptions("qwen/qwen3-32b", "groq")
+      expect(groqOptions).toEqual({})
+
+      const deepinfraOptions = getProviderOptions("Qwen/Qwen2.5-72B-Instruct", "deepinfra")
+      expect(deepinfraOptions).toEqual({})
     })
 
     it("should return empty object for non-matching models", () => {
@@ -107,14 +164,14 @@ describe("getProviderOptions", () => {
   })
 
   describe("user provider option overrides", () => {
-    it("should treat an explicit empty object as cleared provider options", () => {
+    it("should treat an explicit empty object as a user override", () => {
       const options = getProviderOptionsWithOverride("qwen3-max", "alibaba", {})
-      expect(options).toBeUndefined()
+      expect(options).toEqual({ alibaba: {} })
     })
 
-    it("should not fall back to recommendations when user options are undefined", () => {
+    it("should fall back to recommendations when user options are undefined", () => {
       const options = getProviderOptionsWithOverride("qwen3-max", "alibaba")
-      expect(options).toBeUndefined()
+      expect(options).toEqual({ alibaba: { enableThinking: false } })
     })
 
     it("should use user options as-is without merging matched defaults", () => {
@@ -135,6 +192,17 @@ describe("getProviderOptions", () => {
 
     it("should return undefined for models without recommendations", () => {
       expect(getRecommendedProviderOptionsMatch("plain-model")).toBeUndefined()
+    })
+
+    it("should expose recommendation matches for newly covered defaults", () => {
+      expect(getRecommendedProviderOptionsMatch("kimi-k2-turbo")?.options).toEqual({
+        thinking: { type: "disabled" },
+        reasoningHistory: "disabled",
+      })
+
+      expect(getRecommendedProviderOptionsMatch("qwen3.5-flash")?.options).toEqual({
+        enableThinking: false,
+      })
     })
   })
 })

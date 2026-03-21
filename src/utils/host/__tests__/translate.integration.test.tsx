@@ -43,6 +43,14 @@ const TRANSLATION_ONLY_CONFIG: Config = {
   },
 }
 
+function setHost(host: string) {
+  Object.defineProperty(window, "location", {
+    value: new URL(`https://${host}/some/path`),
+    writable: true,
+    configurable: true,
+  })
+}
+
 describe("translate", () => {
   // Setup and teardown for getComputedStyle mock
   const originalGetComputedStyle = window.getComputedStyle
@@ -1317,6 +1325,41 @@ describe("translate", () => {
 
         expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
         expect(node.textContent).toBe(codeContent)
+      })
+    })
+
+    describe("github diff table - should not translate review code snippets", () => {
+      it("bilingual mode: should skip github diff-table content entirely", async () => {
+        const originalLocation = window.location
+        setHost("github.com")
+        vi.mocked(translateTextForPage).mockClear()
+
+        try {
+          render(
+            <div data-testid="test-node">
+              <table className="diff-table">
+                <tbody>
+                  <tr>
+                    <td>const foo = 1</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>,
+          )
+          const node = screen.getByTestId("test-node")
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+          expect(node.textContent).toBe("const foo = 1")
+          expect(translateTextForPage).not.toHaveBeenCalled()
+        }
+        finally {
+          Object.defineProperty(window, "location", {
+            value: originalLocation,
+            writable: true,
+            configurable: true,
+          })
+        }
       })
     })
 

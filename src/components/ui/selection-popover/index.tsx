@@ -153,7 +153,7 @@ function SelectionPopoverRoot({
     setPinned,
     triggerElement,
     setTriggerElement,
-  }), [anchor, open, pinned, setOpen, triggerElement])
+  }), [anchor, open, pinned, setAnchor, setOpen, triggerElement])
 
   return (
     <SelectionPopoverRootContext value={contextValue}>

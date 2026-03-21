@@ -115,6 +115,36 @@ describe("providerOptionsField", () => {
     expect(screen.getByLabelText("provider-options-editor")).toHaveValue("{\"reasoningEffort\":\"minimal\"}")
   })
 
+  it("shows the matched recommended provider options as the placeholder when the value is empty", () => {
+    render(<ProviderOptionsFieldHarness initialConfig={baseProviderConfig} />)
+
+    expect(screen.getByLabelText("provider-options-editor")).toHaveAttribute(
+      "placeholder",
+      JSON.stringify({ reasoningEffort: "minimal" }, null, 2),
+    )
+  })
+
+  it("uses the current model recommendation for the placeholder", () => {
+    render(
+      <ProviderOptionsFieldHarness
+        initialConfig={{
+          ...baseProviderConfig,
+          provider: "alibaba",
+          model: {
+            model: "qwen3-max",
+            isCustomModel: false,
+            customModel: null,
+          },
+        }}
+      />,
+    )
+
+    expect(screen.getByLabelText("provider-options-editor")).toHaveAttribute(
+      "placeholder",
+      JSON.stringify({ enableThinking: false }, null, 2),
+    )
+  })
+
   it("syncs the editor when an external update arrives, even if the saved value is unchanged", async () => {
     const externalProviderOptions = { enableThinking: false }
 
@@ -136,5 +166,19 @@ describe("providerOptionsField", () => {
     })
 
     expect(screen.getByLabelText("provider-options-editor")).toHaveValue(JSON.stringify(externalProviderOptions, null, 2))
+  })
+
+  it("keeps an explicit empty object instead of falling back to the placeholder value", async () => {
+    render(<ProviderOptionsFieldHarness initialConfig={baseProviderConfig} />)
+
+    const editor = screen.getByLabelText("provider-options-editor")
+    fireEvent.change(editor, { target: { value: "{}" } })
+
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+      await Promise.resolve()
+    })
+
+    expect(screen.getByLabelText("provider-options-editor")).toHaveValue("{}")
   })
 })

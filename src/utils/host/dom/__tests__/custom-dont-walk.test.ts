@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { isCustomDontWalkIntoElement, isDontWalkIntoAndDontTranslateAsChildElement } from "../filter"
+import { hasNoWalkAncestor, isCustomDontWalkIntoElement, isDontWalkIntoAndDontTranslateAsChildElement } from "../filter"
 
 function setHost(host: string) {
   // jsdom exposes location as read-only; override via defineProperty
@@ -103,5 +103,26 @@ describe("isCustomDontWalkIntoElement", () => {
 
     expect(isCustomDontWalkIntoElement(postFlair)).toBe(true)
     expect(isDontWalkIntoAndDontTranslateAsChildElement(postFlair, DEFAULT_CONFIG)).toBe(true)
+  })
+
+  it("matches github review diff table and blocks its descendants", () => {
+    setHost("github.com")
+
+    const diffTable = document.createElement("table")
+    diffTable.classList.add("diff-table")
+
+    const tbody = document.createElement("tbody")
+    const tr = document.createElement("tr")
+    const td = document.createElement("td")
+    td.textContent = "const foo = 1"
+
+    tr.appendChild(td)
+    tbody.appendChild(tr)
+    diffTable.appendChild(tbody)
+    document.body.appendChild(diffTable)
+
+    expect(isCustomDontWalkIntoElement(diffTable)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(diffTable, DEFAULT_CONFIG)).toBe(true)
+    expect(hasNoWalkAncestor(td, DEFAULT_CONFIG)).toBe(true)
   })
 })

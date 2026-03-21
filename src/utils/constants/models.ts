@@ -1,6 +1,13 @@
+import type { AlibabaProviderOptions } from "@ai-sdk/alibaba"
 import type { AnthropicProviderOptions } from "@ai-sdk/anthropic"
+import type { CohereLanguageModelOptions } from "@ai-sdk/cohere"
+import type { DeepSeekLanguageModelOptions } from "@ai-sdk/deepseek"
+import type { FireworksProviderOptions } from "@ai-sdk/fireworks"
 import type { GoogleGenerativeAIProviderOptions } from "@ai-sdk/google"
+import type { GroqProviderOptions } from "@ai-sdk/groq"
+import type { MoonshotAIProviderOptions } from "@ai-sdk/moonshotai"
 import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai"
+import type { XaiProviderOptions } from "@ai-sdk/xai"
 import type { JSONValue } from "ai"
 
 export const LLM_PROVIDER_MODELS = {
@@ -52,12 +59,12 @@ export const LLM_MODEL_OPTIONS: Array<{
 }> = [
   // Gemini - specific patterns first
   {
-    pattern: /^gemini-3-.*-preview$/,
-    options: { thinkingConfig: { thinkingLevel: "low", includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
+    pattern: /^gemini-3(?:\.1)?-.*-preview(?:-customtools)?$/,
+    options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
   },
   {
-    pattern: /^gemini-2\.5-pro/,
-    options: { thinkingConfig: { thinkingBudget: 128, includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
+    pattern: /^gemini-2\.5-/,
+    options: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
   },
   {
     // Default for all other Gemini models
@@ -71,45 +78,70 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { thinking: { type: "disabled" } } satisfies AnthropicProviderOptions as Record<string, JSONValue>,
   },
 
-  // OpenAI o1/o3 reasoning models - use 'minimal'
+  // OpenAI reasoning models - use the lowest supported reasoning effort
   {
-    pattern: /^(o1-|o3-)/,
+    pattern: /^(?:o1|o3|o4-mini)(?:-|$)/,
     options: { reasoningEffort: "minimal" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
   },
 
-  // OpenAI gpt-5.x-chat-latest and gpt-5.2-pro - use 'medium'
+  // OpenAI GPT-5.1+ models support disabling reasoning entirely
   {
-    pattern: /^gpt-5(\.\d-chat-latest|\.2-pro)/,
-    options: { reasoningEffort: "medium" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
-  },
-
-  // OpenAI gpt-5-pro - use 'high'
-  {
-    pattern: /^gpt-5-pro/,
-    options: { reasoningEffort: "high" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
-  },
-
-  // OpenAI GPT-5.1+ - use 'none' (minimal not supported)
-  {
-    pattern: /^gpt-5\.\d/,
+    pattern: /^gpt-5\.(?:1|2)(?:-|$)/,
     options: { reasoningEffort: "none" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
   },
 
-  // OpenAI GPT-5 models (before 5.1) - use 'minimal' (none not supported)
+  // OpenAI GPT-5 models before 5.1 only support minimal as the lowest effort
   {
     pattern: /^gpt-5/,
     options: { reasoningEffort: "minimal" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
+  },
+
+  // xAI Grok reasoning-capable text models - keep effort at the lowest supported level
+  {
+    pattern: /^grok-(?:4(?:-1)?(?:-fast-reasoning)?|4(?:-latest|-0709)?|3(?:-mini)?(?:-latest)?)$/,
+    options: { reasoningEffort: "low" } satisfies XaiProviderOptions as Record<string, JSONValue>,
+  },
+
+  // OpenAI-compatible reasoning models exposed by Groq/Cerebras and similar providers
+  {
+    pattern: /^(?:openai\/)?gpt-oss-(?:20|120)b$/i,
+    options: { reasoningEffort: "none" } satisfies GroqProviderOptions as Record<string, JSONValue>,
+  },
+
+  // DeepSeek reasoning model - disable thinking by default
+  {
+    pattern: /^deepseek-reasoner$/,
+    options: { thinking: { type: "disabled" } } satisfies DeepSeekLanguageModelOptions as Record<string, JSONValue>,
+  },
+
+  // Cohere reasoning models - disable thinking by default
+  {
+    pattern: /^command-a-reasoning(?:-.+)?$/,
+    options: { thinking: { type: "disabled" } } satisfies CohereLanguageModelOptions as Record<string, JSONValue>,
+  },
+
+  // Fireworks reasoning-focused models - disable thinking/history by default
+  {
+    pattern: /^accounts\/fireworks\/models\/(?:kimi-k2p5|minimax-m2)$/,
+    options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" } satisfies FireworksProviderOptions as Record<string, JSONValue>,
+  },
+
+  // MoonshotAI Kimi K2 models - disable thinking/history by default
+  {
+    pattern: /^kimi-k2(?:\.5|-0905|-turbo|-thinking(?:-turbo)?)?$/,
+    options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" } satisfies MoonshotAIProviderOptions as Record<string, JSONValue>,
+  },
+
+  // Alibaba hybrid-thinking Qwen models - disable thinking by default.
+  // Keep explicit thinking-only models (for example `qwq-*` and `*-thinking`) untouched.
+  {
+    pattern: /^(?:qwen3(?:\.5-(?:plus|flash)|-(?:max(?:-preview)?|235b-a22b|32b|30b-a3b|14b|coder-plus|coder-flash))|qwen-(?:plus(?:-latest)?|flash|turbo(?:-latest)?|coder))$/,
+    options: { enableThinking: false } satisfies AlibabaProviderOptions as Record<string, JSONValue>,
   },
 
   // GLM models - disable thinking (compatibility issues)
   {
     pattern: /^GLM-/i,
     options: { thinking: { type: "disabled" } },
-  },
-
-  // Qwen/QwQ models - disable thinking
-  {
-    pattern: /^(Qwen|qwen)/,
-    options: { enableThinking: false },
   },
 ]

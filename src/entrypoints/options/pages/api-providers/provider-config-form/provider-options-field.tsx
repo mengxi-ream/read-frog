@@ -7,6 +7,8 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { JSONCodeEditor } from "@/components/ui/json-code-editor"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { resolveModelId } from "@/utils/providers/model-id"
+import { getRecommendedProviderOptions } from "@/utils/providers/options"
 import { withForm } from "./form"
 
 function parseJson(input: string): { valid: true, value: Record<string, unknown> | undefined } | { valid: false, error: string } {
@@ -31,7 +33,6 @@ export const ProviderOptionsField = withForm({
       (options: APIProviderConfig["providerOptions"]) => options ? JSON.stringify(options, null, 2) : "",
       [],
     )
-    const placeholderText = JSON.stringify({ field: "value" }, null, 2)
     const externalJson = toJson(providerConfig.providerOptions)
 
     // Local state for the JSON string input
@@ -97,6 +98,13 @@ export const ProviderOptionsField = withForm({
       return null
     }
 
+    const modelId = resolveModelId(providerConfig.model)
+    const placeholderText = (() => {
+      const recommendedOptions = getRecommendedProviderOptions(modelId ?? "")
+      return recommendedOptions
+        ? JSON.stringify(recommendedOptions, null, 2)
+        : JSON.stringify({ field: "value" }, null, 2)
+    })()
     const jsonError = !parseResult.valid ? parseResult.error : null
 
     return (

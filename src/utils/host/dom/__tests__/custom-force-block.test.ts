@@ -33,6 +33,15 @@ describe("isCustomForceBlockTranslation", () => {
     expect(isCustomForceBlockTranslation(taskLists)).toBe(false)
   })
 
+  it("matches shreddit-post-text-body element on www.reddit.com", () => {
+    setHost("www.reddit.com")
+
+    const postTextBody = document.createElement("shreddit-post-text-body")
+    document.body.appendChild(postTextBody)
+
+    expect(isCustomForceBlockTranslation(postTextBody)).toBe(true)
+  })
+
   it("does not match element outside configured parent on configured host", () => {
     setHost("github.com")
 
