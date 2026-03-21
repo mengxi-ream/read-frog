@@ -13,6 +13,10 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MIN_BACKGROUND_OPACITY } from "@/utils/constants/subtitles"
 
+const SLIDER_ROW_CLASS_NAME = "gap-0"
+const SLIDER_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
+const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w-0"
+
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = videoSubtitlesConfig.style
@@ -110,21 +114,25 @@ export function GeneralSettings() {
           </Field>
         )}
 
-        <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldLabel>
-          <div className="flex flex-1 min-w-0 items-center gap-2">
-            <Slider
-              min={MIN_BACKGROUND_OPACITY}
-              max={MAX_BACKGROUND_OPACITY}
-              step={5}
-              value={container.backgroundOpacity}
-              onValueChange={value => handleContainerChange({ backgroundOpacity: value as number })}
-              className="flex-1"
-            />
-            <span className="w-10 text-sm text-right">
-              {container.backgroundOpacity}
-              %
-            </span>
+        <Field className={SLIDER_ROW_CLASS_NAME}>
+          <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
+            <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldLabel>
+            <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
+              <div className="flex min-w-0 items-center gap-2">
+                <Slider
+                  min={MIN_BACKGROUND_OPACITY}
+                  max={MAX_BACKGROUND_OPACITY}
+                  step={5}
+                  value={container.backgroundOpacity}
+                  onValueChange={value => handleContainerChange({ backgroundOpacity: value as number })}
+                  className="flex-1"
+                />
+                <span className="w-10 text-sm text-right">
+                  {container.backgroundOpacity}
+                  %
+                </span>
+              </div>
+            </div>
           </div>
         </Field>
       </FieldGroup>
