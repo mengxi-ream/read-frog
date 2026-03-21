@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.31.1
+
+### Patch Changes
+
+- [#1171](https://github.com/mengxi-ream/read-frog/pull/1171) [`05f49c1`](https://github.com/mengxi-ream/read-frog/commit/05f49c1448a2a2107204f1b0880701880f766957) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(context-menu): add selection translation and custom AI action right-click entries.
+
+- [#1161](https://github.com/mengxi-ream/read-frog/pull/1161) [`fc167d6`](https://github.com/mengxi-ream/read-frog/commit/fc167d6e9bc93f2801d28bd80871dbc71fc7fc8b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor(chart): migrate the batch request statistics chart to Recharts and remove the old VChart theme provider.
+
+- [#1166](https://github.com/mengxi-ream/read-frog/pull/1166) [`eb150b7`](https://github.com/mengxi-ream/read-frog/commit/eb150b751f6c4f42bf73ca60547eb074ea89128f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - Remove the deprecated Selection Toolbar AI button / Vocabulary Insight feature and keep Dictionary custom actions as the supported replacement.
+
+- [#1170](https://github.com/mengxi-ream/read-frog/pull/1170) [`20004ed`](https://github.com/mengxi-ream/read-frog/commit/20004edcd4ccf660010aee9930a039c6e31c6569) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(provider-options): apply runtime defaults and placeholders
+
+- [#1164](https://github.com/mengxi-ream/read-frog/pull/1164) [`eb33ec6`](https://github.com/mengxi-ream/read-frog/commit/eb33ec6c555e7eddcd9f902537255a26c7fb1163) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(shortcut): migrate page translation hotkeys to TanStack and store them as portable shortcut strings.
+
+- [#1172](https://github.com/mengxi-ream/read-frog/pull/1172) [`288cc2c`](https://github.com/mengxi-ream/read-frog/commit/288cc2c43a8b5d0059ffbd40d723d445dc2ca880) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(sidebar): move What's New into a footer popover with blog previews.
+
 ## 1.31.0
 
 ### Minor Changes
