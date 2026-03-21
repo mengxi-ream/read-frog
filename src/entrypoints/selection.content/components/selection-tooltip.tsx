@@ -65,14 +65,26 @@ function SelectionTooltip({
       <TooltipContent
         align={align}
         alignOffset={alignOffset}
-        // Base UI moves tooltips through a closed -> unmounted transition. In
-        // the selection-content shadow DOM, we observed closed tooltips remain
-        // visually visible unless the closed state is hidden explicitly.
+        // This wrapper is only for selection-content overlays. In this path we
+        // observed two separate real-browser failures:
+        // 1) hover-leave could land on the tooltip overlay itself, so the
+        //    browser never considered the pointer fully "back on the page";
+        // 2) even after Base UI set the tooltip to the closed state, the node
+        //    could remain visually visible until unmount.
+        //
+        // The CSS here intentionally addresses both layers:
+        // - `pointer-events-none`: make the tooltip body mouse-transparent so
+        //   it cannot become the hover target after leaving the trigger.
+        // - `data-closed:hidden data-closed:opacity-0`: Base UI guarantees the
+        //   `data-closed` attribute, but not an immediate visual hide. In the
+        //   selection-content shadow DOM we saw `data-closed` nodes remain
+        //   `display:block`/`opacity:1`, so we force the closed state to render
+        //   as invisible before unmount finishes.
         className={cn("data-closed:hidden data-closed:opacity-0 pointer-events-none whitespace-nowrap", className)}
         container={container}
-        // Ignore pointer hits on the positioning wrapper too, otherwise moving
-        // off the trigger can land on the tooltip overlay itself instead of the
-        // underlying page, which dirties the hover-leave path in real browsers.
+        // The positioner is a separate overlay box around the popup. Making the
+        // popup itself transparent is not enough if the pointer can still land
+        // on this wrapper during hover leave.
         positionerClassName={cn("pointer-events-none", positionerClassName)}
         side={side}
         sideOffset={sideOffset}
