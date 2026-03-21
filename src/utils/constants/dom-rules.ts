@@ -151,6 +151,7 @@ export const CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP: Record<string, string[]
     "header *",
     "#repository-container-header *",
     "[class*=\"OverviewContent-module__Box_1--\"] *",
+    "table.diff-table", // https://github.com/mengxi-ream/read-frog/issues/1174
   ],
 }
 
