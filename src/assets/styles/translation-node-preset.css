@@ -13,6 +13,11 @@
   font-family: inherit;
 }
 
+.read-frog-translated-block-content[data-read-frog-float-wrap="true"] {
+  display: inline;
+  margin: 0 !important;
+}
+
 .read-frog-translated-inline-content {
   display: inline;
   color: inherit;
