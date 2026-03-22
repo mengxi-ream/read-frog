@@ -136,6 +136,7 @@ export function RegenerateButton({
 }
 
 export function SelectionToolbarFooterContent({
+  children,
   className,
   paragraphsText,
   onProviderChange,
@@ -144,6 +145,7 @@ export function SelectionToolbarFooterContent({
   titleText,
   value,
 }: {
+  children?: React.ReactNode
   className?: string
   paragraphsText: string | null | undefined
   onProviderChange: (id: string) => void
@@ -166,6 +168,7 @@ export function SelectionToolbarFooterContent({
         />
       </div>
       <div className="flex items-center gap-1">
+        {children}
         <ContextDetailsButton titleText={titleText} paragraphsText={paragraphsText} />
         <RegenerateButton onRegenerate={onRegenerate} />
       </div>

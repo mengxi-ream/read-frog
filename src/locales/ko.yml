@@ -367,6 +367,40 @@ options:
             description: 이 출력 필드가 제거됩니다.
             confirm: 삭제
             cancel: 취소
+          notebase:
+            title: Notebase 연결
+            description: 이 액션의 구조화된 결과를 원격 Notebase에 저장합니다.
+            loginRequiredTitle: Notebase를 설정하려면 로그인하세요
+            loginRequiredDescription: notebase를 선택하거나 매핑을 편집하기 전에 readfrog.app에 로그인하세요.
+            loginAction: 로그인
+            tableLabel: Notebase
+            tablePlaceholder: notebase 선택
+            tableClearOption: notebase 연결 안 함
+            refreshAction: 새로고침
+            emptyTitle: 아직 Notebase가 없습니다
+            emptyDescription: readfrog.app에서 notebase를 만든 뒤 여기로 돌아와 필드를 매핑하세요.
+            openNotebaseAction: Notebase 열기
+            tableUnavailableTitle: 선택한 notebase를 더 이상 사용할 수 없습니다
+            tableUnavailableDescription: 다시 저장하기 전에 새로고침하거나 다른 notebase를 선택하세요.
+            tableUnavailableOption: 사용 불가
+            schemaErrorTitle: notebase 스키마를 불러오지 못했습니다
+            schemaErrorDescription: 잠시 후 다시 새로고침해 보세요.
+            schemaLoading: notebase 스키마를 불러오는 중...
+            mappingsLabel: 필드 매핑
+            mappingsEmpty: 아직 매핑이 없습니다. 필드를 저장할 준비가 되면 추가하세요.
+            addMappingAction: 매핑 추가
+            removeMappingAction: 매핑 제거
+            localFieldLabel: 액션 필드
+            localFieldPlaceholder: 액션 필드 선택
+            remoteFieldLabel: Notebase 필드
+            remoteFieldPlaceholder: notebase 필드 선택
+            columnUnavailableOption: 삭제됨
+            invalidMappingsTitle: 일부 매핑을 확인해야 합니다
+            invalidMappingsDescription: 잘못된 매핑은 유지되지만, 수정하기 전까지 Save to Notebase는 비활성화됩니다.
+            mappingMissingLocal: 매핑된 액션 필드가 더 이상 존재하지 않습니다.
+            mappingMissingRemote: 매핑된 notebase 필드가 더 이상 존재하지 않습니다.
+            mappingMissingSchema: 이 매핑을 검증하려면 notebase 스키마를 새로고침하세요.
+            mappingIncompatible: 필드 타입이 더 이상 맞지 않습니다.
           tokens:
             selection: 선택한 텍스트 내용
             paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
@@ -809,6 +843,14 @@ action:
   copied: 복사됨
   regenerate: 다시 생성
   viewContextDetails: 컨텍스트
+  saveToNotebase: Notebase에 저장
+  saveToNotebaseSaving: 저장 중...
+  saveToNotebaseSuccess: Notebase에 저장했습니다
+  saveToNotebaseFailed: Notebase에 저장하지 못했습니다
+  saveToNotebaseLoginRequired: Notebase에 저장하려면 readfrog.app에 로그인하세요
+  saveToNotebaseTableUnavailable: 선택한 Notebase를 더 이상 사용할 수 없습니다
+  saveToNotebaseConnectionInvalid: 현재 Notebase 연결이 오래되었습니다. Custom AI Actions에서 새로고침하고 매핑을 수정하세요.
+  saveToNotebaseNoMappings: 저장하기 전에 유효한 매핑을 하나 이상 추가하세요
   contextDetailsTitleLabel: 제목
   contextDetailsParagraphsLabel: 문단 내용
   translation: 번역

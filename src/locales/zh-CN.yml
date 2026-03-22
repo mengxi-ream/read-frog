@@ -368,6 +368,40 @@ options:
             description: 此输出字段将被移除。
             confirm: 删除
             cancel: 取消
+          notebase:
+            title: 笔记库连接
+            description: 将这个指令的结构化结果保存到远程笔记库。
+            loginRequiredTitle: 登录后才能配置笔记库
+            loginRequiredDescription: 先在 readfrog.app 登录，然后再选择笔记库和编辑映射。
+            loginAction: 去登录
+            tableLabel: 笔记库
+            tablePlaceholder: 选择一个笔记库
+            tableClearOption: 不连接笔记库
+            refreshAction: 刷新
+            emptyTitle: 还没有笔记库
+            emptyDescription: 先去 readfrog.app 创建一个笔记库，再回来映射字段。
+            openNotebaseAction: 打开笔记库
+            tableUnavailableTitle: 选中的笔记库已不可用
+            tableUnavailableDescription: 请刷新，或重新选择一个笔记库后再保存。
+            tableUnavailableOption: 不可用
+            schemaErrorTitle: 加载笔记库 schema 失败
+            schemaErrorDescription: 请稍后再试一次刷新。
+            schemaLoading: 正在加载笔记库 schema...
+            mappingsLabel: 字段映射
+            mappingsEmpty: 还没有映射，准备好后可以添加。
+            addMappingAction: 添加映射
+            removeMappingAction: 删除映射
+            localFieldLabel: 指令字段
+            localFieldPlaceholder: 选择一个指令字段
+            remoteFieldLabel: 笔记库字段
+            remoteFieldPlaceholder: 选择一个笔记库字段
+            columnUnavailableOption: 已删除
+            invalidMappingsTitle: 有些映射需要处理
+            invalidMappingsDescription: 无效映射会被保留，但在修复前会禁用“保存到笔记库”。
+            mappingMissingLocal: 映射的指令字段已经不存在。
+            mappingMissingRemote: 映射的笔记库字段已经不存在。
+            mappingMissingSchema: 刷新笔记库 schema 后才能校验这个映射。
+            mappingIncompatible: 字段类型已经不匹配。
           tokens:
             selection: 选中的文本内容
             paragraphs: 与选区相交的段落内容，会以空行拼接，传给自定义 AI 指令时会截断到前 2000 个字符
@@ -924,6 +958,14 @@ action:
   copied: 已复制
   regenerate: 重新生成
   viewContextDetails: 上下文
+  saveToNotebase: 保存到笔记库
+  saveToNotebaseSaving: 保存中...
+  saveToNotebaseSuccess: 已保存到笔记库
+  saveToNotebaseFailed: 保存到笔记库失败
+  saveToNotebaseLoginRequired: 请先在 readfrog.app 登录后再保存到笔记库
+  saveToNotebaseTableUnavailable: 选中的笔记库已不可用
+  saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom AI Actions 中刷新并修复映射
+  saveToNotebaseNoMappings: 至少添加一个有效映射后才能保存
   contextDetailsTitleLabel: 标题
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻译

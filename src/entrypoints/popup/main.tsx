@@ -6,7 +6,6 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import * as React from "react"
-import ReactDOM from "react-dom/client"
 import FrogToast from "@/components/frog-toast"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
@@ -16,6 +15,7 @@ import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { sendMessage } from "@/utils/message"
+import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
 import App from "./app"
@@ -81,7 +81,7 @@ async function initApp() {
     ? isInSiteControlList(config.siteControl.blacklistPatterns, activeTabUrl)
     : false
 
-  ReactDOM.createRoot(root).render(
+  renderPersistentReactRoot(root, (
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <JotaiProvider>
@@ -107,8 +107,8 @@ async function initApp() {
           </HydrateAtoms>
         </JotaiProvider>
       </QueryClientProvider>
-    </React.StrictMode>,
-  )
+    </React.StrictMode>
+  ))
 }
 
 void initApp()

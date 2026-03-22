@@ -367,6 +367,40 @@ options:
             description: 此輸出欄位將被移除。
             confirm: 刪除
             cancel: 取消
+          notebase:
+            title: 筆記庫連線
+            description: 將這個指令的結構化結果儲存到遠端筆記庫。
+            loginRequiredTitle: 登入後才能設定筆記庫
+            loginRequiredDescription: 先到 readfrog.app 登入，再選擇筆記庫與編輯映射。
+            loginAction: 前往登入
+            tableLabel: 筆記庫
+            tablePlaceholder: 選擇一個筆記庫
+            tableClearOption: 不連接筆記庫
+            refreshAction: 重新整理
+            emptyTitle: 還沒有筆記庫
+            emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來映射欄位。
+            openNotebaseAction: 開啟筆記庫
+            tableUnavailableTitle: 選取的筆記庫已不可用
+            tableUnavailableDescription: 請重新整理，或改選其他筆記庫後再儲存。
+            tableUnavailableOption: 不可用
+            schemaErrorTitle: 載入筆記庫 schema 失敗
+            schemaErrorDescription: 請稍後再試一次重新整理。
+            schemaLoading: 正在載入筆記庫 schema...
+            mappingsLabel: 欄位映射
+            mappingsEmpty: 尚未建立映射，準備好後即可新增。
+            addMappingAction: 新增映射
+            removeMappingAction: 移除映射
+            localFieldLabel: 指令欄位
+            localFieldPlaceholder: 選擇一個指令欄位
+            remoteFieldLabel: 筆記庫欄位
+            remoteFieldPlaceholder: 選擇一個筆記庫欄位
+            columnUnavailableOption: 已刪除
+            invalidMappingsTitle: 有些映射需要處理
+            invalidMappingsDescription: 無效映射會被保留，但在修復前會停用「儲存到筆記庫」。
+            mappingMissingLocal: 映射的指令欄位已不存在。
+            mappingMissingRemote: 映射的筆記庫欄位已不存在。
+            mappingMissingSchema: 重新整理筆記庫 schema 後才能驗證這個映射。
+            mappingIncompatible: 欄位類型已不相容。
           tokens:
             selection: 選取的文字內容
             paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
@@ -809,6 +843,14 @@ action:
   copied: 已複製
   regenerate: 重新生成
   viewContextDetails: 上下文
+  saveToNotebase: 儲存到筆記庫
+  saveToNotebaseSaving: 儲存中...
+  saveToNotebaseSuccess: 已儲存到筆記庫
+  saveToNotebaseFailed: 儲存到筆記庫失敗
+  saveToNotebaseLoginRequired: 請先到 readfrog.app 登入後再儲存到筆記庫
+  saveToNotebaseTableUnavailable: 選取的筆記庫已不可用
+  saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到 Custom AI Actions 重新整理並修復映射
+  saveToNotebaseNoMappings: 至少新增一個有效映射後才能儲存
   contextDetailsTitleLabel: 標題
   contextDetailsParagraphsLabel: 段落內容
   translation: 翻譯

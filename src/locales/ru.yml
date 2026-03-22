@@ -367,6 +367,40 @@ options:
             description: Это поле вывода будет удалено.
             confirm: Удалить
             cancel: Отмена
+          notebase:
+            title: Подключение Notebase
+            description: Сохранить структурированные результаты этого действия в удалённую Notebase.
+            loginRequiredTitle: Войдите, чтобы настроить Notebase
+            loginRequiredDescription: Войдите на readfrog.app, прежде чем выбирать notebase или редактировать сопоставления.
+            loginAction: Войти
+            tableLabel: Notebase
+            tablePlaceholder: Выберите notebase
+            tableClearOption: Не подключать notebase
+            refreshAction: Обновить
+            emptyTitle: Notebase пока нет
+            emptyDescription: Создайте notebase на readfrog.app, затем вернитесь сюда и сопоставьте поля.
+            openNotebaseAction: Открыть Notebase
+            tableUnavailableTitle: Выбранная notebase больше недоступна
+            tableUnavailableDescription: Обновите список или выберите другую notebase перед следующим сохранением.
+            tableUnavailableOption: недоступно
+            schemaErrorTitle: Не удалось загрузить схему notebase
+            schemaErrorDescription: Попробуйте обновить схему ещё раз чуть позже.
+            schemaLoading: Загрузка схемы notebase...
+            mappingsLabel: Сопоставления полей
+            mappingsEmpty: Сопоставлений пока нет. Добавьте хотя бы одно, когда будете готовы сохранять поля.
+            addMappingAction: Добавить сопоставление
+            removeMappingAction: Удалить сопоставление
+            localFieldLabel: Поле действия
+            localFieldPlaceholder: Выберите поле действия
+            remoteFieldLabel: Поле Notebase
+            remoteFieldPlaceholder: Выберите поле notebase
+            columnUnavailableOption: удалено
+            invalidMappingsTitle: Некоторые сопоставления требуют внимания
+            invalidMappingsDescription: Некорректные сопоставления сохраняются, но кнопка Save to Notebase остаётся отключённой, пока вы их не исправите.
+            mappingMissingLocal: Сопоставленное поле действия больше не существует.
+            mappingMissingRemote: Сопоставленное поле notebase больше не существует.
+            mappingMissingSchema: Обновите схему notebase, чтобы проверить это сопоставление.
+            mappingIncompatible: Типы полей больше не совпадают.
           tokens:
             selection: Содержимое выделенного текста
             paragraphs: Текст абзацев, пересекающихся с выделением, объединённый пустыми строками; при отправке в пользовательские AI-действия обрезается до первых 2000 символов
@@ -809,6 +843,14 @@ action:
   copied: Скопировано
   regenerate: Сгенерировать заново
   viewContextDetails: Контекст
+  saveToNotebase: Сохранить в Notebase
+  saveToNotebaseSaving: Сохранение...
+  saveToNotebaseSuccess: Сохранено в Notebase
+  saveToNotebaseFailed: Не удалось сохранить в Notebase
+  saveToNotebaseLoginRequired: Войдите на readfrog.app, чтобы сохранить в Notebase
+  saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
+  saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
+  saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением
   contextDetailsTitleLabel: Заголовок
   contextDetailsParagraphsLabel: Абзацы
   translation: Перевод

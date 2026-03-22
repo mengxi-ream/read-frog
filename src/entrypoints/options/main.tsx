@@ -5,7 +5,6 @@ import { QueryClientProvider } from "@tanstack/react-query"
 import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import * as React from "react"
-import ReactDOM from "react-dom/client"
 import { HashRouter } from "react-router"
 import FrogToast from "@/components/frog-toast"
 import { HelpButton } from "@/components/help-button"
@@ -17,6 +16,7 @@ import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
 import App from "./app"
@@ -51,7 +51,7 @@ async function initApp() {
 
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 
-  ReactDOM.createRoot(root).render(
+  renderPersistentReactRoot(root, (
     <React.StrictMode>
       <JotaiProvider>
         <HydrateAtoms initialValues={[[configAtom, config], [baseThemeModeAtom, themeMode]]}>
@@ -74,8 +74,8 @@ async function initApp() {
           </QueryClientProvider>
         </HydrateAtoms>
       </JotaiProvider>
-    </React.StrictMode>,
-  )
+    </React.StrictMode>
+  ))
 }
 
 void initApp()

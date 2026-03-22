@@ -367,6 +367,40 @@ options:
             description: この出力フィールドは削除されます。
             confirm: 削除
             cancel: キャンセル
+          notebase:
+            title: Notebase 接続
+            description: このアクションの構造化された結果をリモート Notebase に保存します。
+            loginRequiredTitle: Notebase を設定するにはログインが必要です
+            loginRequiredDescription: notebase を選択したりマッピングを編集したりする前に、readfrog.app にログインしてください。
+            loginAction: ログイン
+            tableLabel: Notebase
+            tablePlaceholder: notebase を選択
+            tableClearOption: notebase を接続しない
+            refreshAction: 更新
+            emptyTitle: Notebase がまだありません
+            emptyDescription: readfrog.app で notebase を作成してから、ここに戻ってフィールドをマッピングしてください。
+            openNotebaseAction: Notebase を開く
+            tableUnavailableTitle: 選択した notebase は利用できなくなりました
+            tableUnavailableDescription: もう一度保存する前に、更新するか別の notebase を選択してください。
+            tableUnavailableOption: 利用不可
+            schemaErrorTitle: notebase スキーマの読み込みに失敗しました
+            schemaErrorDescription: 少し待ってからもう一度更新してください。
+            schemaLoading: notebase スキーマを読み込み中...
+            mappingsLabel: フィールドマッピング
+            mappingsEmpty: まだマッピングはありません。フィールドを保存する準備ができたら追加してください。
+            addMappingAction: マッピングを追加
+            removeMappingAction: マッピングを削除
+            localFieldLabel: アクションフィールド
+            localFieldPlaceholder: アクションフィールドを選択
+            remoteFieldLabel: Notebase フィールド
+            remoteFieldPlaceholder: notebase フィールドを選択
+            columnUnavailableOption: 削除済み
+            invalidMappingsTitle: 一部のマッピングに対応が必要です
+            invalidMappingsDescription: 無効なマッピングは保持されますが、修正するまで Save to Notebase は無効のままです。
+            mappingMissingLocal: マッピングされたアクションフィールドは存在しなくなりました。
+            mappingMissingRemote: マッピングされた notebase フィールドは存在しなくなりました。
+            mappingMissingSchema: このマッピングを検証するには、notebase スキーマを更新してください。
+            mappingIncompatible: フィールドの型が一致しなくなりました。
           tokens:
             selection: 選択したテキスト内容
             paragraphs: 選択範囲と交差する段落内容。空行で連結され、カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
@@ -809,6 +843,14 @@ action:
   copied: コピー済み
   regenerate: 再生成
   viewContextDetails: コンテキスト
+  saveToNotebase: Notebase に保存
+  saveToNotebaseSaving: 保存中...
+  saveToNotebaseSuccess: Notebase に保存しました
+  saveToNotebaseFailed: Notebase への保存に失敗しました
+  saveToNotebaseLoginRequired: Notebase に保存するには readfrog.app にログインしてください
+  saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
+  saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
+  saveToNotebaseNoMappings: 保存する前に、少なくとも1つの有効なマッピングを追加してください
   contextDetailsTitleLabel: タイトル
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻訳

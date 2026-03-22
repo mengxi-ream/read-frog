@@ -368,6 +368,40 @@ options:
             description: This output field will be removed.
             confirm: Delete
             cancel: Cancel
+          notebase:
+            title: Notebase Connection
+            description: Save this action's structured results to a remote notebase.
+            loginRequiredTitle: Log in to configure Notebase
+            loginRequiredDescription: Sign in on readfrog.app before choosing a notebase or editing mappings.
+            loginAction: Log in
+            tableLabel: Notebase
+            tablePlaceholder: Select a notebase
+            tableClearOption: Disconnect notebase
+            refreshAction: Refresh
+            emptyTitle: No notebases yet
+            emptyDescription: Create a notebase on readfrog.app, then come back here to map fields.
+            openNotebaseAction: Open Notebase
+            tableUnavailableTitle: Selected notebase is no longer available
+            tableUnavailableDescription: Refresh or choose another notebase before saving again.
+            tableUnavailableOption: unavailable
+            schemaErrorTitle: Failed to load notebase schema
+            schemaErrorDescription: Try refreshing the schema again in a moment.
+            schemaLoading: Loading notebase schema...
+            mappingsLabel: Field Mappings
+            mappingsEmpty: No mappings yet. Add one when you are ready to save fields.
+            addMappingAction: Add Mapping
+            removeMappingAction: Remove mapping
+            localFieldLabel: Action field
+            localFieldPlaceholder: Select an action field
+            remoteFieldLabel: Notebase field
+            remoteFieldPlaceholder: Select a notebase field
+            columnUnavailableOption: removed
+            invalidMappingsTitle: Some mappings need attention
+            invalidMappingsDescription: Invalid mappings are preserved, but Save to Notebase stays disabled until you fix them.
+            mappingMissingLocal: The mapped action field no longer exists.
+            mappingMissingRemote: The mapped notebase field no longer exists.
+            mappingMissingSchema: Refresh the notebase schema to validate this mapping.
+            mappingIncompatible: The field types no longer match.
           tokens:
             selection: Selected text content
             paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
@@ -924,6 +958,14 @@ action:
   copied: Copied
   regenerate: Regenerate
   viewContextDetails: Context
+  saveToNotebase: Save to Notebase
+  saveToNotebaseSaving: Saving...
+  saveToNotebaseSuccess: Saved to Notebase
+  saveToNotebaseFailed: Failed to save to Notebase
+  saveToNotebaseLoginRequired: Log in on readfrog.app to save to Notebase
+  saveToNotebaseTableUnavailable: The selected Notebase is no longer available
+  saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
+  saveToNotebaseNoMappings: Add at least one valid mapping before saving
   contextDetailsTitleLabel: Title
   contextDetailsParagraphsLabel: Paragraphs
   translation: Translation

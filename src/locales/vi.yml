@@ -367,6 +367,40 @@ options:
             description: Trường đầu ra này sẽ bị xóa.
             confirm: Xóa
             cancel: Hủy
+          notebase:
+            title: Kết nối Notebase
+            description: Lưu kết quả có cấu trúc của hành động này vào Notebase từ xa.
+            loginRequiredTitle: Đăng nhập để cấu hình Notebase
+            loginRequiredDescription: Hãy đăng nhập trên readfrog.app trước khi chọn notebase hoặc chỉnh sửa ánh xạ.
+            loginAction: Đăng nhập
+            tableLabel: Notebase
+            tablePlaceholder: Chọn một notebase
+            tableClearOption: Không kết nối notebase
+            refreshAction: Làm mới
+            emptyTitle: Chưa có Notebase nào
+            emptyDescription: Hãy tạo một notebase trên readfrog.app rồi quay lại đây để ánh xạ các trường.
+            openNotebaseAction: Mở Notebase
+            tableUnavailableTitle: Notebase đã chọn không còn khả dụng
+            tableUnavailableDescription: Hãy làm mới hoặc chọn một notebase khác trước khi lưu lại.
+            tableUnavailableOption: không khả dụng
+            schemaErrorTitle: Không tải được schema notebase
+            schemaErrorDescription: Hãy thử làm mới lại sau ít phút nữa.
+            schemaLoading: Đang tải schema notebase...
+            mappingsLabel: Ánh xạ trường
+            mappingsEmpty: Chưa có ánh xạ nào. Hãy thêm một ánh xạ khi bạn sẵn sàng lưu các trường.
+            addMappingAction: Thêm ánh xạ
+            removeMappingAction: Xóa ánh xạ
+            localFieldLabel: Trường của hành động
+            localFieldPlaceholder: Chọn một trường của hành động
+            remoteFieldLabel: Trường Notebase
+            remoteFieldPlaceholder: Chọn một trường notebase
+            columnUnavailableOption: đã xóa
+            invalidMappingsTitle: Một số ánh xạ cần được xử lý
+            invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại, nhưng Save to Notebase sẽ bị vô hiệu hóa cho đến khi bạn sửa chúng.
+            mappingMissingLocal: Trường của hành động đã ánh xạ không còn tồn tại.
+            mappingMissingRemote: Trường notebase đã ánh xạ không còn tồn tại.
+            mappingMissingSchema: Hãy làm mới schema notebase để xác thực ánh xạ này.
+            mappingIncompatible: Kiểu trường không còn khớp nữa.
           tokens:
             selection: Nội dung văn bản đã chọn
             paragraphs: Nội dung các đoạn giao với vùng chọn, được nối bằng dòng trống, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
@@ -809,6 +843,14 @@ action:
   copied: Đã sao chép
   regenerate: Tạo lại
   viewContextDetails: Ngữ cảnh
+  saveToNotebase: Lưu vào Notebase
+  saveToNotebaseSaving: Đang lưu...
+  saveToNotebaseSuccess: Đã lưu vào Notebase
+  saveToNotebaseFailed: Không thể lưu vào Notebase
+  saveToNotebaseLoginRequired: Hãy đăng nhập trên readfrog.app để lưu vào Notebase
+  saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
+  saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
+  saveToNotebaseNoMappings: Hãy thêm ít nhất một ánh xạ hợp lệ trước khi lưu
   contextDetailsTitleLabel: Tiêu đề
   contextDetailsParagraphsLabel: Các đoạn văn
   translation: Dịch
