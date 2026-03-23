@@ -3,12 +3,13 @@ import { Icon } from "@iconify/react/dist/iconify.js"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
-import { getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from "@/utils/blog"
+import { getBlogLocaleFromUILanguage, getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from "@/utils/blog"
 import { WEBSITE_URL } from "@/utils/constants/url"
 import { version } from "../../../../package.json"
 
 export default function BlogNotification() {
   const queryClient = useQueryClient()
+  const blogLocale = getBlogLocaleFromUILanguage()
 
   const { data: lastViewedDate } = useQuery({
     queryKey: ["last-viewed-blog-date"],
@@ -16,8 +17,8 @@ export default function BlogNotification() {
   })
 
   const { data: latestBlogPost } = useQuery({
-    queryKey: ["latest-blog-post"],
-    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, "en", version),
+    queryKey: ["latest-blog-post", blogLocale],
+    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, blogLocale, version),
   })
 
   const handleClick = async () => {
