@@ -54,8 +54,8 @@ importers:
         specifier: ^2.0.37
         version: 2.0.37(zod@4.3.6)
       '@ai-sdk/perplexity':
-        specifier: ^3.0.25
-        version: 3.0.25(zod@4.3.6)
+        specifier: ^3.0.26
+        version: 3.0.26(zod@4.3.6)
       '@ai-sdk/react':
         specifier: ^3.0.136
         version: 3.0.136(react@19.2.4)(zod@4.3.6)
@@ -69,8 +69,8 @@ importers:
         specifier: ^2.0.39
         version: 2.0.39(zod@4.3.6)
       '@ai-sdk/xai':
-        specifier: ^3.0.72
-        version: 3.0.72(zod@4.3.6)
+        specifier: ^3.0.73
+        version: 3.0.73(zod@4.3.6)
       '@base-ui/react':
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -350,7 +350,7 @@ importers:
         version: 16.4.0
       node:
         specifier: runtime:>=22.0.0
-        version: runtime:25.8.0
+        version: runtime:25.8.1
       nx:
         specifier: ^22.6.1
         version: 22.6.1
@@ -492,8 +492,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/perplexity@3.0.25':
-    resolution: {integrity: sha512-erDa0VXNX9MlOepZLeJXpLsZeM5Sc6rBalPnEsXV8WnOBhYkN+lAUpa278KdE5rxaalthQFOG0C6B3I4crFR/Q==}
+  '@ai-sdk/perplexity@3.0.26':
+    resolution: {integrity: sha512-dXzrVsLR5f6tr+U04jq4AXoRroGFBTvODnLgss0SWbzNjGGQg3XqtQ9j7rCLo6o8qbYGuAHvqUrIpUCuiscuFg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -558,8 +558,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/xai@3.0.72':
-    resolution: {integrity: sha512-A941gcmDwWRBIj2R5UoWk2javUe/bq7JYkXc2odNE1fvRxxpS9QozvtJNhz9SC7j24ZcEdvJtchtqiH8audvKg==}
+  '@ai-sdk/xai@3.0.73':
+    resolution: {integrity: sha512-iU1QPlQVaVY1pUmAty32u2E8lCeXv0FGQd/0JjRFVzFyT/uQMmcIZtlSduIhLrXFH9RaxyYNHenQGmwzhRARRg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -790,6 +790,11 @@ packages:
 
   '@babel/parser@7.29.0':
     resolution: {integrity: sha512-IyDgFV5GeDUVX4YdF/3CPULtVGSXXMLh1xVIgdCgxApktqnQV0r7/8Nqthg+8YLGaAtdyIlo2qIdZrbCv4+7ww==}
+    engines: {node: '>=6.0.0'}
+    hasBin: true
+
+  '@babel/parser@7.29.2':
+    resolution: {integrity: sha512-4GgRzy/+fsBa72/RZVJmGKPmZu9Byn8o4MoLpmNe1m8ZfYnz5emHLQz3U4gLud6Zwl0RZIcgiLD7Uq7ySFuDLA==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -1024,6 +1029,9 @@ packages:
 
   '@codemirror/commands@6.10.2':
     resolution: {integrity: sha512-vvX1fsih9HledO1c9zdotZYUZnE4xV0m6i3m25s5DIfXofuprk6cRcLUZvSk3CASUbwjQX21tOGbkY2BH8TpnQ==}
+
+  '@codemirror/commands@6.10.3':
+    resolution: {integrity: sha512-JFRiqhKu+bvSkDLI+rUhJwSxQxYb759W5GBezE8Uc8mHLqC9aV/9aTC7yJSqCtB3F00pylrLCwnyS91Ap5ej4Q==}
 
   '@codemirror/lang-css@6.3.1':
     resolution: {integrity: sha512-kr5fwBGiGtmz6l0LSJIbno9QrifNMUusivHbnA1H6Dmqy4HZFte3UAICix1VuKo0lMPKQr2rqB+0BkKi/S3Ejg==}
@@ -6007,94 +6015,94 @@ packages:
   node-releases@2.0.27:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
 
-  node@runtime:25.8.0:
+  node@runtime:25.8.1:
     resolution:
       type: variations
       variants:
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-CvdPBOzSuTnXWuW6tF52zYxbaEx5bHy8bEl0gWE9h6A=
+            integrity: sha256-Sxx72cFkjP51EIjkXR8jO+C8ABOaZHMSpicbWlTbH3A=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-aix-ppc64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-aix-ppc64.tar.gz
           targets:
             - cpu: ppc64
               os: aix
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-df9v0H4KhftNJSn2GJyZYBSx09gxgMMeZf6ys+ruxdk=
+            integrity: sha256-xmdikjbjITYW8JF7hOtScG4hPA6KIxJAIzX/9vx0Y8Q=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-darwin-arm64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-darwin-arm64.tar.gz
           targets:
             - cpu: arm64
               os: darwin
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-A/tVlgDD7eAijYtYisati3ss0LrJQitW5+Lvf1wRtnw=
+            integrity: sha256-Hl6/aZVeASFvXGC5yYnRvdqOUCLi9gx14brzCcW/9Q4=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-darwin-x64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-darwin-x64.tar.gz
           targets:
             - cpu: x64
               os: darwin
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-VMEo9ShqQ5Kh/Rx2VymwdKaHOr/4pPm7PWPVccKFXkE=
+            integrity: sha256-2ZDsPCHOi9tvdu1OHIddbj5LdaAtAY6F3wZiwLrYO1M=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-linux-arm64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-arm64.tar.gz
           targets:
             - cpu: arm64
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-Ps0JyjApZ8hYKB5JRyglfbIm3WI7Rk8rnY3Yj9q6FuY=
+            integrity: sha256-sUxD+6n9080s7t9VgjNQKh5vx6YEx7xjMBjW1h2SvR0=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-linux-ppc64le.tar.gz
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-ppc64le.tar.gz
           targets:
             - cpu: ppc64le
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-xIM4STuYskwKhmWptdUnyVkl12n+CFLmyFc7LgJkwSI=
+            integrity: sha256-fHgm+ah50Rcg0caKyjasPR2e7Gl5ghOea0X0LiYNA5E=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-linux-s390x.tar.gz
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-s390x.tar.gz
           targets:
             - cpu: s390x
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-Kub3DXSkWcCpZFbkhtxg8+fmXXdSrTAncYNOWLJ1AK8=
+            integrity: sha256-b+O4+kSFefco96Dlu7OrajUtLGMH4TrjeoYQaj5Mmq8=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-linux-x64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-x64.tar.gz
           targets:
             - cpu: x64
               os: linux
         - resolution:
             archive: zip
             bin: node.exe
-            integrity: sha256-79rdlolG9Yvnm82kPPJwS1v67F20jIxQJYOyD3la8pg=
-            prefix: node-v25.8.0-win-arm64
+            integrity: sha256-DFvnk6Fp2wgS+FSbNn/BWRvT5MQBpccA3YuLLMLnTF4=
+            prefix: node-v25.8.1-win-arm64
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-win-arm64.zip
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-win-arm64.zip
           targets:
             - cpu: arm64
               os: win32
         - resolution:
             archive: zip
             bin: node.exe
-            integrity: sha256-V0R0Y3GkFxeacBBEc5tforMWTpQ6pX+GBZ+zEvgDLoY=
-            prefix: node-v25.8.0-win-x64
+            integrity: sha256-CaWg27L0zvqACIABKBDi36rAAWpi518GTEq382BrLXg=
+            prefix: node-v25.8.1-win-x64
             type: binary
-            url: https://nodejs.org/download/release/v25.8.0/node-v25.8.0-win-x64.zip
+            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-win-x64.zip
           targets:
             - cpu: x64
               os: win32
-    version: 25.8.0
+    version: 25.8.1
     hasBin: true
 
   normalize-path@3.0.0:
@@ -7841,7 +7849,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/perplexity@3.0.25(zod@4.3.6)':
+  '@ai-sdk/perplexity@3.0.26(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
@@ -7917,7 +7925,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/xai@3.0.72(zod@4.3.6)':
+  '@ai-sdk/xai@3.0.73(zod@4.3.6)':
     dependencies:
       '@ai-sdk/openai-compatible': 2.0.37(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
@@ -8219,6 +8227,10 @@ snapshots:
       '@babel/types': 7.28.5
 
   '@babel/parser@7.29.0':
+    dependencies:
+      '@babel/types': 7.29.0
+
+  '@babel/parser@7.29.2':
     dependencies:
       '@babel/types': 7.29.0
 
@@ -8565,6 +8577,13 @@ snapshots:
       '@lezer/common': 1.3.0
 
   '@codemirror/commands@6.10.2':
+    dependencies:
+      '@codemirror/language': 6.11.3
+      '@codemirror/state': 6.6.0
+      '@codemirror/view': 6.40.0
+      '@lezer/common': 1.5.1
+
+  '@codemirror/commands@6.10.3':
     dependencies:
       '@codemirror/language': 6.11.3
       '@codemirror/state': 6.6.0
@@ -10615,7 +10634,7 @@ snapshots:
 
   '@vue/compiler-core@3.5.24':
     dependencies:
-      '@babel/parser': 7.29.0
+      '@babel/parser': 7.29.2
       '@vue/shared': 3.5.24
       entities: 4.5.0
       estree-walker: 2.0.2
@@ -10628,7 +10647,7 @@ snapshots:
 
   '@vue/compiler-sfc@3.5.24':
     dependencies:
-      '@babel/parser': 7.29.0
+      '@babel/parser': 7.29.2
       '@vue/compiler-core': 3.5.24
       '@vue/compiler-dom': 3.5.24
       '@vue/compiler-ssr': 3.5.24
@@ -11130,7 +11149,7 @@ snapshots:
   codemirror@6.0.2:
     dependencies:
       '@codemirror/autocomplete': 6.19.1
-      '@codemirror/commands': 6.10.2
+      '@codemirror/commands': 6.10.3
       '@codemirror/language': 6.11.3
       '@codemirror/lint': 6.9.5
       '@codemirror/search': 6.5.11
@@ -13536,7 +13555,7 @@ snapshots:
 
   node-releases@2.0.27: {}
 
-  node@runtime:25.8.0: {}
+  node@runtime:25.8.1: {}
 
   normalize-path@3.0.0: {}
 
