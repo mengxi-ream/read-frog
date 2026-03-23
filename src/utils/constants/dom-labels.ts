@@ -1,6 +1,7 @@
 export const CONTENT_WRAPPER_CLASS = "read-frog-translated-content-wrapper"
 export const INLINE_CONTENT_CLASS = "read-frog-translated-inline-content"
 export const BLOCK_CONTENT_CLASS = "read-frog-translated-block-content"
+export const FLOAT_WRAP_ATTRIBUTE = "data-read-frog-float-wrap"
 
 export const WALKED_ATTRIBUTE = "data-read-frog-walked"
 // paragraph means you need to trigger translation on this element (i.e. we have inline children in it)
