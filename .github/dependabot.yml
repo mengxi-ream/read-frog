@@ -9,6 +9,10 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: "@eslint-react/eslint-plugin"
+        update-types:
+          - "version-update:semver-major"
     labels:
       - chore
     commit-message:
