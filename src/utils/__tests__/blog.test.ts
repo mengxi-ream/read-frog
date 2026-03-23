@@ -1,7 +1,7 @@
 import { semanticVersionSchema } from "@read-frog/definitions"
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
-import { buildBilibiliEmbedUrl, extractBilibiliVideoId, hasNewBlogPost } from "../blog"
+import { buildBilibiliEmbedUrl, extractBilibiliVideoId, hasNewBlogPost, resolveBlogLocale } from "../blog"
 
 describe("hasNewBlogPost", () => {
   const baseDate = new Date("2025-01-01")
@@ -174,5 +174,37 @@ describe("bilibili helpers", () => {
 
   it("returns null when the URL is not hosted on bilibili", () => {
     expect(extractBilibiliVideoId("https://readfrog.app/blog?bvid=BV1JoAszwEfF")).toBeNull()
+  })
+})
+
+describe("resolveBlogLocale", () => {
+  it("maps simplified Chinese locales to zh", () => {
+    expect(resolveBlogLocale("zh")).toBe("zh")
+    expect(resolveBlogLocale("zh-CN")).toBe("zh")
+    expect(resolveBlogLocale("zh_Hans")).toBe("zh")
+  })
+
+  it("maps traditional Chinese locales to zh", () => {
+    expect(resolveBlogLocale("zh-TW")).toBe("zh")
+    expect(resolveBlogLocale("zh_Hant")).toBe("zh")
+    expect(resolveBlogLocale("zh-HK")).toBe("zh")
+  })
+
+  it("keeps English as en", () => {
+    expect(resolveBlogLocale("en")).toBe("en")
+    expect(resolveBlogLocale("en-US")).toBe("en")
+  })
+
+  it("falls back unsupported locales to en", () => {
+    expect(resolveBlogLocale("ja")).toBe("en")
+    expect(resolveBlogLocale("vi")).toBe("en")
+    expect(resolveBlogLocale("pt-BR")).toBe("en")
+  })
+
+  it("falls back empty locale values to en", () => {
+    expect(resolveBlogLocale("")).toBe("en")
+    expect(resolveBlogLocale("   ")).toBe("en")
+    expect(resolveBlogLocale(null)).toBe("en")
+    expect(resolveBlogLocale(undefined)).toBe("en")
   })
 })
