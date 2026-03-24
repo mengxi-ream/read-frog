@@ -4,6 +4,7 @@ import {
   getProviderOptionsWithOverride,
   getRecommendedProviderOptionsMatch,
 } from "../../providers/options"
+import { LLM_PROVIDER_MODELS } from "../models"
 
 describe("getProviderOptions", () => {
   describe("model pattern matching", () => {
@@ -47,27 +48,49 @@ describe("getProviderOptions", () => {
       expect(o4MiniOptions.openai?.reasoningEffort).toBe("minimal")
     })
 
-    it("should return none for GPT-5.1+ models", () => {
+    it("should expose the supported OpenAI GPT-5.4 model ids", () => {
+      expect(LLM_PROVIDER_MODELS.openai).toEqual(expect.arrayContaining([
+        "gpt-5.4-pro",
+        "gpt-5.4",
+        "gpt-5.4-mini",
+        "gpt-5.4-nano",
+        "gpt-5.3-chat-latest",
+      ]))
+    })
+
+    it("should return the documented floor for GPT-5 model-specific reasoning", () => {
+      const gpt54ProOptions = getProviderOptions("gpt-5.4-pro", "openai")
+      expect(gpt54ProOptions.openai?.reasoningEffort).toBe("medium")
+
       const gpt52ProOptions = getProviderOptions("gpt-5.2-pro", "openai")
-      expect(gpt52ProOptions.openai?.reasoningEffort).toBe("none")
+      expect(gpt52ProOptions.openai?.reasoningEffort).toBe("medium")
 
-      const gpt52ChatLatestOptions = getProviderOptions("gpt-5.2-chat-latest", "openai")
-      expect(gpt52ChatLatestOptions.openai?.reasoningEffort).toBe("none")
+      const gpt5ProOptions = getProviderOptions("gpt-5-pro", "openai")
+      expect(gpt5ProOptions.openai?.reasoningEffort).toBe("high")
 
-      const gpt51ChatLatestOptions = getProviderOptions("gpt-5.1-chat-latest", "openai")
-      expect(gpt51ChatLatestOptions.openai?.reasoningEffort).toBe("none")
+      const gpt54Options = getProviderOptions("gpt-5.4", "openai")
+      expect(gpt54Options.openai?.reasoningEffort).toBe("none")
 
-      const gpt51Options = getProviderOptions("gpt-5.1", "openai")
-      expect(gpt51Options.openai?.reasoningEffort).toBe("none")
+      const gpt54MiniOptions = getProviderOptions("gpt-5.4-mini", "openai")
+      expect(gpt54MiniOptions.openai?.reasoningEffort).toBe("none")
+
+      const gpt54NanoOptions = getProviderOptions("gpt-5.4-nano", "openai")
+      expect(gpt54NanoOptions.openai?.reasoningEffort).toBe("none")
 
       const gpt52Options = getProviderOptions("gpt-5.2", "openai")
       expect(gpt52Options.openai?.reasoningEffort).toBe("none")
 
+      const gpt51Options = getProviderOptions("gpt-5.1", "openai")
+      expect(gpt51Options.openai?.reasoningEffort).toBe("none")
+
       const gpt51CodexOptions = getProviderOptions("gpt-5.1-codex", "openai")
       expect(gpt51CodexOptions.openai?.reasoningEffort).toBe("none")
+
+      const gpt51CodexMiniOptions = getProviderOptions("gpt-5.1-codex-mini", "openai")
+      expect(gpt51CodexMiniOptions.openai?.reasoningEffort).toBe("none")
     })
 
-    it("should return minimal for GPT-5 models that do not support reasoningEffort=none", () => {
+    it("should return minimal for legacy GPT-5 models", () => {
       const gpt5Options = getProviderOptions("gpt-5", "openai")
       expect(gpt5Options.openai?.reasoningEffort).toBe("minimal")
 
@@ -77,11 +100,15 @@ describe("getProviderOptions", () => {
       const gpt5NanoOptions = getProviderOptions("gpt-5-nano", "openai")
       expect(gpt5NanoOptions.openai?.reasoningEffort).toBe("minimal")
 
-      const gpt5ProOptions = getProviderOptions("gpt-5-pro", "openai")
-      expect(gpt5ProOptions.openai?.reasoningEffort).toBe("minimal")
+      const gpt5CodexOptions = getProviderOptions("gpt-5-codex", "openai")
+      expect(gpt5CodexOptions.openai?.reasoningEffort).toBe("minimal")
+    })
 
-      const gpt5ChatLatestOptions = getProviderOptions("gpt-5-chat-latest", "openai")
-      expect(gpt5ChatLatestOptions.openai?.reasoningEffort).toBe("minimal")
+    it("should omit recommendations for GPT-5 chat-latest models", () => {
+      expect(getProviderOptions("gpt-5-chat-latest", "openai")).toEqual({})
+      expect(getProviderOptions("gpt-5.1-chat-latest", "openai")).toEqual({})
+      expect(getProviderOptions("gpt-5.2-chat-latest", "openai")).toEqual({})
+      expect(getProviderOptions("gpt-5.3-chat-latest", "openai")).toEqual({})
     })
 
     it("should return low/disabled defaults for more mainstream reasoning providers", () => {
@@ -177,6 +204,52 @@ describe("getProviderOptions", () => {
     it("should use user options as-is without merging matched defaults", () => {
       const options = getProviderOptionsWithOverride("qwen3-max", "alibaba", { foo: "bar" })
       expect(options).toEqual({ alibaba: { foo: "bar" } })
+    })
+
+    it("should sanitize unsupported OpenAI reasoningEffort overrides to the model floor", () => {
+      const gpt54MiniOptions = getProviderOptionsWithOverride("gpt-5.4-mini", "openai", {
+        reasoningEffort: "minimal",
+      })
+      expect(gpt54MiniOptions).toEqual({ openai: { reasoningEffort: "none" } })
+
+      const gpt54ProOptions = getProviderOptionsWithOverride("gpt-5.4-pro", "openai", {
+        reasoningEffort: "low",
+      })
+      expect(gpt54ProOptions).toEqual({ openai: { reasoningEffort: "medium" } })
+
+      const gpt5ProOptions = getProviderOptionsWithOverride("gpt-5-pro", "openai", {
+        reasoningEffort: "medium",
+      })
+      expect(gpt5ProOptions).toEqual({ openai: { reasoningEffort: "high" } })
+    })
+
+    it("should remove reasoningEffort overrides for chat-latest OpenAI models", () => {
+      const options = getProviderOptionsWithOverride("gpt-5.3-chat-latest", "openai", {
+        foo: "bar",
+        reasoningEffort: "minimal",
+      })
+      expect(options).toEqual({ openai: { foo: "bar" } })
+    })
+
+    it("should preserve valid OpenAI reasoningEffort overrides", () => {
+      const gpt54Options = getProviderOptionsWithOverride("gpt-5.4", "openai", {
+        reasoningEffort: "high",
+      })
+      expect(gpt54Options).toEqual({ openai: { reasoningEffort: "high" } })
+
+      const gpt5Options = getProviderOptionsWithOverride("gpt-5", "openai", {
+        reasoningEffort: "minimal",
+      })
+      expect(gpt5Options).toEqual({ openai: { reasoningEffort: "minimal" } })
+    })
+
+    it("should leave non-OpenAI provider options untouched", () => {
+      const options = getProviderOptionsWithOverride("gpt-5.4-mini", "openai-compatible", {
+        reasoningEffort: "minimal",
+      })
+      expect(options).toEqual({
+        "openai-compatible": { reasoningEffort: "minimal" },
+      })
     })
   })
 

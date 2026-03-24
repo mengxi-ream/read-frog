@@ -47,6 +47,20 @@ describe("providerOptionsRecommendationTrigger", () => {
     })).not.toBeInTheDocument()
   })
 
+  it("does not render a trigger for GPT-5 chat-latest models", () => {
+    render(
+      <ProviderOptionsRecommendationTrigger
+        providerId="provider-1"
+        modelId="gpt-5.3-chat-latest"
+        onApply={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByRole("button", {
+      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+    })).not.toBeInTheDocument()
+  })
+
   it("flashes once when the model starts matching a new recommendation rule", () => {
     const { rerender } = render(
       <ProviderOptionsRecommendationTrigger
@@ -64,7 +78,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     rerender(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
-        modelId="gpt-5.1"
+        modelId="gpt-5.4-mini"
         onApply={vi.fn()}
       />,
     )
@@ -84,7 +98,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     render(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
-        modelId="gpt-5-mini"
+        modelId="gpt-5.4-mini"
         onApply={onApply}
       />,
     )
@@ -94,12 +108,12 @@ describe("providerOptionsRecommendationTrigger", () => {
     }))
 
     expect(screen.getByText("options.apiProviders.form.providerOptionsRecommendationTitle")).toBeInTheDocument()
-    expect(screen.getByTestId("provider-options-preview")).toHaveTextContent("\"reasoningEffort\": \"minimal\"")
+    expect(screen.getByTestId("provider-options-preview")).toHaveTextContent("\"reasoningEffort\": \"none\"")
 
     fireEvent.click(screen.getByRole("button", {
       name: "options.apiProviders.form.providerOptionsRecommendationApply",
     }))
 
-    expect(onApply).toHaveBeenCalledWith({ reasoningEffort: "minimal" })
+    expect(onApply).toHaveBeenCalledWith({ reasoningEffort: "none" })
   })
 })

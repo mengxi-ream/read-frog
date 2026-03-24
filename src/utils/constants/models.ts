@@ -10,8 +10,16 @@ import type { OpenAIResponsesProviderOptions } from "@ai-sdk/openai"
 import type { XaiProviderOptions } from "@ai-sdk/xai"
 import type { JSONValue } from "ai"
 
+type OpenAIReasoningEffort = Exclude<OpenAIResponsesProviderOptions["reasoningEffort"], undefined>
+
+interface OpenAIGPT5ReasoningEffortPolicy {
+  pattern: RegExp
+  supportedValues: readonly OpenAIReasoningEffort[]
+  recommendedValue?: OpenAIReasoningEffort
+}
+
 export const LLM_PROVIDER_MODELS = {
-  "openai": ["gpt-5.2-chat-latest", "gpt-5.2", "gpt-5.2-pro", "gpt-5.1-chat-latest", "gpt-5.1-codex-mini", "gpt-5.1", "gpt-5.1-codex", "gpt-5-chat-latest", "gpt-5-nano", "gpt-5-mini", "gpt-5", "gpt-5-codex", "gpt-5-pro", "gpt-4.1-nano", "gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o"],
+  "openai": ["gpt-5.4-pro", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.3-chat-latest", "gpt-5.2-pro", "gpt-5.2", "gpt-5.2-chat-latest", "gpt-5.1-codex-mini", "gpt-5.1-codex", "gpt-5.1", "gpt-5.1-chat-latest", "gpt-5-pro", "gpt-5-codex", "gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-5-chat-latest", "gpt-4.1-nano", "gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o"],
   "deepseek": ["deepseek-chat", "deepseek-reasoner"],
   "google": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3-pro-preview", "gemini-2.5-flash-lite", "gemini-2.5-flash-lite-preview-06-17", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-flash-8b", "gemini-1.5-flash-8b-latest", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-1.5-pro-latest"],
   "anthropic": ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5", "claude-opus-4-1", "claude-sonnet-4-0", "claude-opus-4-0", "claude-3-7-sonnet-latest", "claude-3-5-haiku-latest"],
@@ -47,6 +55,66 @@ export const NON_API_TRANSLATE_PROVIDERS_MAP: Record<typeof NON_API_TRANSLATE_PR
 }
 
 export const PURE_TRANSLATE_PROVIDERS = ["google-translate", "microsoft-translate", "deeplx", "deepl"] as const
+
+const OPENAI_GPT5_REASONING_EFFORT_POLICIES: OpenAIGPT5ReasoningEffortPolicy[] = [
+  {
+    pattern: /^gpt-5\.4-pro$/,
+    supportedValues: ["medium", "high", "xhigh"],
+    recommendedValue: "medium",
+  },
+  {
+    pattern: /^gpt-5\.2-pro$/,
+    supportedValues: ["medium", "high", "xhigh"],
+    recommendedValue: "medium",
+  },
+  {
+    pattern: /^gpt-5-pro$/,
+    supportedValues: ["high"],
+    recommendedValue: "high",
+  },
+  {
+    pattern: /^(?:gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano)$/,
+    supportedValues: ["none", "low", "medium", "high", "xhigh"],
+    recommendedValue: "none",
+  },
+  {
+    pattern: /^gpt-5\.2$/,
+    supportedValues: ["none", "low", "medium", "high", "xhigh"],
+    recommendedValue: "none",
+  },
+  {
+    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/,
+    supportedValues: ["none", "low", "medium", "high"],
+    recommendedValue: "none",
+  },
+  {
+    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/,
+    supportedValues: ["minimal", "low", "medium", "high"],
+    recommendedValue: "minimal",
+  },
+  {
+    pattern: /^(?:gpt-5-chat-latest|gpt-5\.1-chat-latest|gpt-5\.2-chat-latest|gpt-5\.3-chat-latest)$/,
+    supportedValues: [],
+  },
+]
+
+const OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS: Array<{
+  pattern: RegExp
+  options: Record<string, JSONValue>
+}> = OPENAI_GPT5_REASONING_EFFORT_POLICIES.flatMap(({ pattern, recommendedValue }) => {
+  if (recommendedValue === undefined) {
+    return []
+  }
+
+  return [{
+    pattern,
+    options: { reasoningEffort: recommendedValue } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
+  }]
+})
+
+export function getOpenAIGPT5ReasoningEffortPolicy(model: string): OpenAIGPT5ReasoningEffortPolicy | undefined {
+  return OPENAI_GPT5_REASONING_EFFORT_POLICIES.find(({ pattern }) => pattern.test(model))
+}
 
 /**
  * Model options configuration.
@@ -84,17 +152,9 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { reasoningEffort: "minimal" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
   },
 
-  // OpenAI GPT-5.1+ models support disabling reasoning entirely
-  {
-    pattern: /^gpt-5\.(?:1|2)(?:-|$)/,
-    options: { reasoningEffort: "none" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
-  },
-
-  // OpenAI GPT-5 models before 5.1 only support minimal as the lowest effort
-  {
-    pattern: /^gpt-5/,
-    options: { reasoningEffort: "minimal" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
-  },
+  // OpenAI GPT-5 defaults use the lowest supported reasoning effort per model.
+  // GPT-5 chat-latest variants are intentionally omitted because their docs do not advertise reasoning.effort.
+  ...OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS,
 
   // xAI Grok reasoning-capable text models - keep effort at the lowest supported level
   {
