@@ -1,5 +1,5 @@
 import type { JSONValue } from "ai"
-import { getOpenAIGPT5ReasoningEffortPolicy, LLM_MODEL_OPTIONS } from "../constants/models"
+import { LLM_MODEL_OPTIONS } from "../constants/models"
 
 export interface RecommendedProviderOptionsMatch {
   matchIndex: number
@@ -25,40 +25,6 @@ export function getRecommendedProviderOptions(model: string): Record<string, JSO
   return getRecommendedProviderOptionsMatch(model)?.options
 }
 
-function sanitizeOpenAIProviderOptions(model: string, options: Record<string, JSONValue>): Record<string, JSONValue> {
-  const policy = getOpenAIGPT5ReasoningEffortPolicy(model)
-  if (!policy || !Object.hasOwn(options, "reasoningEffort")) {
-    return options
-  }
-
-  const reasoningEffort = options.reasoningEffort
-  if (typeof reasoningEffort !== "string" || policy.supportedValues.includes(reasoningEffort)) {
-    return options
-  }
-
-  const sanitizedOptions = { ...options }
-  if (policy.recommendedValue === undefined) {
-    delete sanitizedOptions.reasoningEffort
-  }
-  else {
-    sanitizedOptions.reasoningEffort = policy.recommendedValue
-  }
-
-  return sanitizedOptions
-}
-
-function sanitizeProviderOptions(
-  model: string,
-  provider: string,
-  options: Record<string, JSONValue>,
-): Record<string, JSONValue> {
-  if (provider !== "openai") {
-    return options
-  }
-
-  return sanitizeOpenAIProviderOptions(model, options)
-}
-
 /**
  * Wrap a recommendation for the AI SDK request shape.
  */
@@ -71,13 +37,12 @@ export function getProviderOptions(
     return {}
   }
 
-  return { [provider]: sanitizeProviderOptions(model, provider, options) }
+  return { [provider]: options }
 }
 
 /**
  * Get provider options for AI SDK calls.
- * - If the user has saved provider options (including `{}`), use them as-is,
- *   except for known-invalid OpenAI reasoningEffort values that must be coerced.
+ * - If the user has saved provider options (including `{}`), use them as-is.
  * - Otherwise fall back to the recommended defaults for the current model.
  */
 export function getProviderOptionsWithOverride(
@@ -86,7 +51,7 @@ export function getProviderOptionsWithOverride(
   userOptions?: Record<string, JSONValue>,
 ): Record<string, Record<string, JSONValue>> | undefined {
   if (userOptions !== undefined) {
-    return { [provider]: sanitizeProviderOptions(model, provider, userOptions) }
+    return { [provider]: userOptions }
   }
 
   const recommendedOptions = getRecommendedProviderOptions(model)
@@ -94,5 +59,5 @@ export function getProviderOptionsWithOverride(
     return undefined
   }
 
-  return { [provider]: sanitizeProviderOptions(model, provider, recommendedOptions) }
+  return { [provider]: recommendedOptions }
 }

@@ -205,52 +205,6 @@ describe("getProviderOptions", () => {
       const options = getProviderOptionsWithOverride("qwen3-max", "alibaba", { foo: "bar" })
       expect(options).toEqual({ alibaba: { foo: "bar" } })
     })
-
-    it("should sanitize unsupported OpenAI reasoningEffort overrides to the model floor", () => {
-      const gpt54MiniOptions = getProviderOptionsWithOverride("gpt-5.4-mini", "openai", {
-        reasoningEffort: "minimal",
-      })
-      expect(gpt54MiniOptions).toEqual({ openai: { reasoningEffort: "none" } })
-
-      const gpt54ProOptions = getProviderOptionsWithOverride("gpt-5.4-pro", "openai", {
-        reasoningEffort: "low",
-      })
-      expect(gpt54ProOptions).toEqual({ openai: { reasoningEffort: "medium" } })
-
-      const gpt5ProOptions = getProviderOptionsWithOverride("gpt-5-pro", "openai", {
-        reasoningEffort: "medium",
-      })
-      expect(gpt5ProOptions).toEqual({ openai: { reasoningEffort: "high" } })
-    })
-
-    it("should remove reasoningEffort overrides for chat-latest OpenAI models", () => {
-      const options = getProviderOptionsWithOverride("gpt-5.3-chat-latest", "openai", {
-        foo: "bar",
-        reasoningEffort: "minimal",
-      })
-      expect(options).toEqual({ openai: { foo: "bar" } })
-    })
-
-    it("should preserve valid OpenAI reasoningEffort overrides", () => {
-      const gpt54Options = getProviderOptionsWithOverride("gpt-5.4", "openai", {
-        reasoningEffort: "high",
-      })
-      expect(gpt54Options).toEqual({ openai: { reasoningEffort: "high" } })
-
-      const gpt5Options = getProviderOptionsWithOverride("gpt-5", "openai", {
-        reasoningEffort: "minimal",
-      })
-      expect(gpt5Options).toEqual({ openai: { reasoningEffort: "minimal" } })
-    })
-
-    it("should leave non-OpenAI provider options untouched", () => {
-      const options = getProviderOptionsWithOverride("gpt-5.4-mini", "openai-compatible", {
-        reasoningEffort: "minimal",
-      })
-      expect(options).toEqual({
-        "openai-compatible": { reasoningEffort: "minimal" },
-      })
-    })
   })
 
   describe("recommendation metadata", () => {
