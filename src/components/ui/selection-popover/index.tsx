@@ -9,6 +9,7 @@ import { Rnd } from "react-rnd"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   SELECTION_CONTENT_OVERLAY_LAYERS,
+  SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
 } from "@/entrypoints/selection.content/overlay-layers"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { cn } from "@/utils/styles/utils"
@@ -285,6 +286,7 @@ function SelectionPopoverShell({
         `pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-floating ${NOTRANSLATE_CLASS}`,
         className,
       )}
+      {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
       style={{
         display: "flex",
         ...style,
