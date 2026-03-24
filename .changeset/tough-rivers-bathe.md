@@ -1,3 +1,4 @@
+---
 "@read-frog/extension": patch
 ---
 
