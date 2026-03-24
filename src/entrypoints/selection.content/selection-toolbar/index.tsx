@@ -1,6 +1,9 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useCallback, useEffect, useLayoutEffect, useRef } from "react"
-import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.content/overlay-layers"
+import {
+  SELECTION_CONTENT_OVERLAY_LAYERS,
+  SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE,
+} from "@/entrypoints/selection.content/overlay-layers"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { NOTRANSLATE_CLASS } from "@/utils/constants/dom-labels"
 import { MARGIN } from "@/utils/constants/selection"
@@ -34,6 +37,8 @@ const SELECTION_GUARD_INTERACTIVE_SELECTOR = [
   "summary",
 ].join(", ")
 
+const SELECTION_OVERLAY_ROOT_SELECTOR = `[${SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE}]`
+
 function getInteractiveGuardTarget(event: MouseEvent) {
   const eventPath = event.composedPath()
 
@@ -61,6 +66,110 @@ function getInteractiveGuardTarget(event: MouseEvent) {
   }
 
   return event.target.closest(SELECTION_GUARD_INTERACTIVE_SELECTOR)
+}
+
+function getSelectionOverlayShadowRoot(overlayContainer: HTMLElement | null) {
+  const root = overlayContainer?.getRootNode()
+  return root instanceof ShadowRoot ? root : null
+}
+
+function getNearestSelectionOverlayElement(node: Node | null) {
+  let current: Node | null = node
+
+  while (current) {
+    if (current instanceof Element) {
+      return current
+    }
+
+    const root = current.getRootNode()
+    current = current.parentNode ?? (root instanceof ShadowRoot ? root.host : null)
+  }
+
+  return null
+}
+
+function isNodeInsideSelectionOverlay(
+  node: Node | null,
+  overlayContainer: HTMLElement | null,
+  overlayShadowRoot: ShadowRoot | null,
+) {
+  if (!node) {
+    return false
+  }
+
+  if (overlayContainer?.contains(node)) {
+    return true
+  }
+
+  const overlayElement = getNearestSelectionOverlayElement(node)
+  if (overlayElement?.closest(SELECTION_OVERLAY_ROOT_SELECTOR)) {
+    return true
+  }
+
+  if (!overlayShadowRoot) {
+    return false
+  }
+
+  return node === overlayShadowRoot || node.getRootNode() === overlayShadowRoot
+}
+
+function collectSelectionBoundaryNodes(selection: Selection) {
+  const boundaryNodes = new Set<Node>()
+
+  if (selection.anchorNode) {
+    boundaryNodes.add(selection.anchorNode)
+  }
+
+  if (selection.focusNode) {
+    boundaryNodes.add(selection.focusNode)
+  }
+
+  for (let index = 0; index < selection.rangeCount; index += 1) {
+    try {
+      const range = selection.getRangeAt(index)
+      boundaryNodes.add(range.startContainer)
+      boundaryNodes.add(range.endContainer)
+    }
+    catch {
+      break
+    }
+  }
+
+  return [...boundaryNodes]
+}
+
+function isSelectionInsideSelectionOverlay(
+  selection: Selection | null,
+  overlayContainer: HTMLElement | null,
+  overlayShadowRoot: ShadowRoot | null,
+) {
+  if (!selection) {
+    return false
+  }
+
+  return collectSelectionBoundaryNodes(selection).some(node =>
+    isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot),
+  )
+}
+
+function isMouseEventInsideSelectionOverlay(
+  event: MouseEvent,
+  overlayContainer: HTMLElement | null,
+  overlayShadowRoot: ShadowRoot | null,
+) {
+  const eventPath = event.composedPath()
+
+  for (const node of eventPath) {
+    if (node instanceof Node && isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot)) {
+      return true
+    }
+  }
+
+  return isNodeInsideSelectionOverlay(
+    event.target instanceof Node ? event.target : null,
+    overlayContainer,
+    overlayShadowRoot,
+  )
 }
 
 function getSelectionDirection(
@@ -112,7 +221,8 @@ export function SelectionToolbar() {
   const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position (base position without direction offset)
   const selectionStartRef = useRef<{ x: number, y: number } | null>(null) // store selection start position
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
-  const isDraggingFromTooltipRef = useRef(false) // track if dragging started from tooltip
+  const isPointerDownInsideOverlayRef = useRef(false)
+  const preserveSelectionStateRef = useRef(false)
   const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(isSelectionToolbarVisibleAtom)
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
@@ -161,9 +271,9 @@ export function SelectionToolbar() {
     let animationFrameId: number
 
     const handleMouseUp = (e: MouseEvent) => {
-      // If dragging started from tooltip, don't hide it
-      if (isDraggingFromTooltipRef.current) {
-        isDraggingFromTooltipRef.current = false // reset state
+      if (isPointerDownInsideOverlayRef.current) {
+        isPointerDownInsideOverlayRef.current = false
+        preserveSelectionStateRef.current = true
         return
       }
 
@@ -180,6 +290,13 @@ export function SelectionToolbar() {
 
         // check if there is text selected
         const selection = window.getSelection()
+        const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
+
+        if (isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)) {
+          preserveSelectionStateRef.current = true
+          return
+        }
+
         const selectionSnapshot = readSelectionSnapshot(selection)
 
         // https://github.com/mengxi-ream/read-frog/issues/547
@@ -189,6 +306,7 @@ export function SelectionToolbar() {
         }
 
         if (selectionSnapshot) {
+          preserveSelectionStateRef.current = false
           setSelectionState({
             selection: selectionSnapshot,
             context: buildContextSnapshot(selectionSnapshot),
@@ -226,18 +344,19 @@ export function SelectionToolbar() {
         return
       }
 
-      // Check if dragging started from within the tooltip container
-      if (tooltipContainerRef.current) {
-        const eventPath = e.composedPath()
-        isDraggingFromTooltipRef.current = eventPath.includes(tooltipContainerRef.current)
-      }
-      else {
-        isDraggingFromTooltipRef.current = false
-      }
+      const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
+      isPointerDownInsideOverlayRef.current = isMouseEventInsideSelectionOverlay(
+        e,
+        tooltipContainerRef.current,
+        overlayShadowRoot,
+      )
 
-      if (isDraggingFromTooltipRef.current) {
+      if (isPointerDownInsideOverlayRef.current) {
+        preserveSelectionStateRef.current = true
         return
       }
+
+      preserveSelectionStateRef.current = false
 
       // Record selection start position
       selectionStartRef.current = { x: e.clientX, y: e.clientY }
@@ -247,9 +366,20 @@ export function SelectionToolbar() {
     }
 
     const handleSelectionChange = () => {
-      // if the selected content is cleared, hide the tooltip
       const selection = window.getSelection()
+      const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
+
+      if (isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)) {
+        preserveSelectionStateRef.current = true
+        return
+      }
+
+      // if the selected content is cleared, hide the tooltip
       if (!selection || selection.toString().trim().length === 0) {
+        if (preserveSelectionStateRef.current) {
+          return
+        }
+
         clearSelectionState()
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
@@ -304,7 +434,11 @@ export function SelectionToolbar() {
       || selectionToolbar.customActions.some(a => a.enabled !== false)
 
   return (
-    <div ref={tooltipContainerRef} className={NOTRANSLATE_CLASS}>
+    <div
+      ref={tooltipContainerRef}
+      className={NOTRANSLATE_CLASS}
+      {...{ [SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE]: "" }}
+    >
       {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
         <div
           ref={tooltipRef}

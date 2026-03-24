@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.31.3
+
+### Patch Changes
+
+- [#1207](https://github.com/mengxi-ream/read-frog/pull/1207) [`8df06c3`](https://github.com/mengxi-ream/read-frog/commit/8df06c3a8c73f8a9deaaac3948738781f600fa61) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(i18n): use the UI locale for latest blog content
+
+- [#1188](https://github.com/mengxi-ream/read-frog/pull/1188) [`234998a`](https://github.com/mengxi-ream/read-frog/commit/234998aca50e4f373482ae09960baec3274f15fe) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: keep float-wrapped bilingual translations in flow beside floated content
+
+- [#1190](https://github.com/mengxi-ream/read-frog/pull/1190) [`f13e50e`](https://github.com/mengxi-ream/read-frog/commit/f13e50e882ebe7db3c0a48b540acdb877da9719d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(url): support caddy localhost URLs in dev mode
+
+- [#1185](https://github.com/mengxi-ream/read-frog/pull/1185) [`01b38b5`](https://github.com/mengxi-ream/read-frog/commit/01b38b5822ccc9eb1218833315e98d8c27eafa0a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): ignore retargeted interactive clicks
+
+- [#1214](https://github.com/mengxi-ream/read-frog/pull/1214) [`7376421`](https://github.com/mengxi-ream/read-frog/commit/73764212e6aeef148b4cc79c56aa97df71e00960) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - build(typescript): upgrade to TypeScript 6 compatibility
+
+- [#1207](https://github.com/mengxi-ream/read-frog/pull/1207) [`8df06c3`](https://github.com/mengxi-ream/read-frog/commit/8df06c3a8c73f8a9deaaac3948738781f600fa61) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(config-sync): widen the Google Drive conflict resolution dialog for large config diffs
+
 ## 1.31.2
 
 ### Patch Changes

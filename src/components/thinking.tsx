@@ -119,7 +119,7 @@ export function Thinking({
         className="max-h-32 overflow-y-auto px-3 pb-2.5"
         onScroll={handleContentScroll}
       >
-        <p className="text-xs whitespace-pre-wrap wrap-break-words text-muted-foreground">
+        <p className="text-xs whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-muted-foreground">
           {trimmedContent}
         </p>
       </CollapsibleContent>

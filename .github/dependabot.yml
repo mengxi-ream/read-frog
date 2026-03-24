@@ -1,0 +1,40 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/code-security/dependabot/dependabot-version-updates/configuration-options-for-the-dependabot.yml-file
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: "@eslint-react/eslint-plugin"
+        update-types:
+          - "version-update:semver-major"
+    labels:
+      - chore
+    commit-message:
+      prefix: chore
+    groups:
+      ai-sdk:
+        patterns:
+          - "@ai-sdk/*"
+          - ai
+      production-dependencies:
+        dependency-type: production
+        exclude-patterns:
+          - "@ai-sdk/*"
+          - ai
+      development-dependencies:
+        dependency-type: development
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    labels:
+      - chore
+    commit-message:
+      prefix: chore

@@ -1,4 +1,4 @@
-import { storage } from "#imports"
+import { browser, storage } from "#imports"
 import { semanticVersionSchema } from "@read-frog/definitions"
 import { z } from "zod"
 import { logger } from "./logger"
@@ -9,6 +9,9 @@ const ONE_DAY_MS = 24 * 60 * 60 * 1000
 const BILIBILI_EMBED_HOSTNAME = "player.bilibili.com"
 const BILIBILI_HOSTNAME_PATTERN = /(?:^|\.)bilibili\.com$/i
 const BILIBILI_VIDEO_ID_PATTERN = /^BV[0-9A-Z]+$/i
+const DEFAULT_BLOG_LOCALE = "en"
+
+export type BlogLocale = "en" | "zh"
 
 function getBilibiliVideoIdFromParsedUrl(parsedUrl: URL): string | null {
   if (!BILIBILI_HOSTNAME_PATTERN.test(parsedUrl.hostname)) {
@@ -105,6 +108,28 @@ export function buildBilibiliEmbedUrl(url: string): string | null {
   embedUrl.searchParams.set("muted", "1")
   embedUrl.searchParams.set("danmaku", "0")
   return embedUrl.toString()
+}
+
+export function resolveBlogLocale(uiLocale?: string | null): BlogLocale {
+  const normalizedLocale = uiLocale?.trim().toLowerCase()
+  if (!normalizedLocale) {
+    return DEFAULT_BLOG_LOCALE
+  }
+
+  if (normalizedLocale.startsWith("zh")) {
+    return "zh"
+  }
+
+  return DEFAULT_BLOG_LOCALE
+}
+
+export function getBlogLocaleFromUILanguage(): BlogLocale {
+  const uiLocale = browser.i18n.getUILanguage?.()
+    || browser.i18n.getMessage?.("@@ui_locale")
+    || globalThis.navigator?.language
+    || DEFAULT_BLOG_LOCALE
+
+  return resolveBlogLocale(uiLocale)
 }
 
 /**

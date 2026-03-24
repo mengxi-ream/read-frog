@@ -126,7 +126,7 @@ const { registry: STRUCTURED_OBJECT_REGISTRY } = defineRegistry(structuredObject
               <FieldSpeakButton text={value} disabled={speakButtonDisabled} />
             )}
           </div>
-          <div className="text-sm whitespace-pre-wrap wrap-break-words">
+          <div className="text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
             {pending ? "…" : value || "—"}
           </div>
         </div>

@@ -21,6 +21,7 @@ import {
 import { setSelectionStateAtom } from "../atoms"
 import { SelectionToolbarCustomActionButtons } from "../custom-action-button"
 import { SelectionCustomActionProvider } from "../custom-action-button/provider"
+import { SelectionToolbar } from "../index"
 import { TranslateButton } from "../translate-button"
 import { SelectionTranslationProvider } from "../translate-button/provider"
 
@@ -30,6 +31,7 @@ const translateTextCoreMock = vi.fn()
 const getOrFetchArticleDataMock = vi.fn()
 const toastErrorMock = vi.fn()
 const onMessageMock = vi.fn()
+const originalGetSelection = window.getSelection
 
 vi.mock("@/components/ui/selection-popover", async () => {
   const React = await import("react")
@@ -89,7 +91,13 @@ vi.mock("@/components/ui/selection-popover", async () => {
 
   function Content({ children }: { children: React.ReactNode }) {
     const { open } = usePopoverContext()
-    return open ? <div data-testid="selection-popover-content">{children}</div> : null
+    return open
+      ? (
+          <div data-testid="selection-popover-content" data-rf-selection-overlay-root="">
+            {children}
+          </div>
+        )
+      : null
   }
 
   function Body({
@@ -307,6 +315,23 @@ function createDeferredPromise<T>() {
   return { promise, resolve, reject }
 }
 
+function mockWindowSelection(range: Range | null) {
+  window.getSelection = vi.fn(() => {
+    if (!range) {
+      return null
+    }
+
+    return {
+      anchorNode: range.startContainer,
+      focusNode: range.endContainer,
+      rangeCount: 1,
+      toString: () => range.toString(),
+      getRangeAt: () => range,
+      containsNode: vi.fn(() => false),
+    } as unknown as Selection
+  }) as unknown as typeof window.getSelection
+}
+
 function getRegisteredMessageHandler<T>(name: string) {
   const registration = onMessageMock.mock.calls.find(call => call[0] === name)
   if (!registration) {
@@ -385,6 +410,7 @@ describe("selection toolbar requests", () => {
   afterEach(() => {
     cleanup()
     document.body.innerHTML = ""
+    window.getSelection = originalGetSelection
     vi.resetAllMocks()
   })
 
@@ -522,6 +548,74 @@ describe("selection toolbar requests", () => {
       expect(screen.getByTestId("translation-result").textContent).toBe("fresh result")
     })
     expect(screen.getByTestId("translation-status").textContent).toBe("false")
+  })
+
+  it("keeps the original page selection session when selecting text inside the translation popover", async () => {
+    translateTextCoreMock.mockResolvedValue("Overlay panel content")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Original page paragraph with surrounding context."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, {
+      text: "Original page selection",
+      range: createRangeFor(paragraph),
+    })
+    renderWithProviders(<SelectionToolbar />, store)
+
+    const toolbarTranslateButton = document.querySelector<HTMLButtonElement>("button[aria-label='action.translation']")
+    if (!toolbarTranslateButton) {
+      throw new Error("Selection toolbar translate trigger is missing")
+    }
+
+    fireEvent.click(toolbarTranslateButton)
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("Overlay panel content")
+    })
+    expect(screen.getByTestId("footer-paragraphs").textContent).toBe("Original page paragraph with surrounding context.")
+
+    const overlayText = screen.getByTestId("translation-result")
+    const overlaySelectionRange = createRangeFor(overlayText)
+    const requestAnimationFrameSpy = vi
+      .spyOn(window, "requestAnimationFrame")
+      .mockImplementation((callback: FrameRequestCallback) => {
+        callback(0)
+        return 0
+      })
+
+    mockWindowSelection(overlaySelectionRange)
+
+    fireEvent.mouseDown(overlayText)
+    document.dispatchEvent(new Event("selectionchange"))
+    fireEvent.mouseUp(overlayText)
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    requestAnimationFrameSpy.mockRestore()
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }))
+    fireEvent.click(toolbarTranslateButton)
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(translateTextCoreMock.mock.calls[0]?.[0]).toMatchObject({
+      text: "Original page selection",
+    })
+    expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
+      text: "Original page selection",
+    })
+    expect(screen.getByTestId("footer-paragraphs").textContent).toBe("Original page paragraph with surrounding context.")
   })
 
   it("aborts llm translations when the popover closes without surfacing an error", async () => {

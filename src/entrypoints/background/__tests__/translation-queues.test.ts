@@ -23,36 +23,40 @@ describe("translation queue helpers", () => {
     vi.clearAllMocks()
   })
 
-  it("routes only llm providers through the batch queue", async () => {
-    const { shouldUseBatchQueue } = await import("../translation-queues")
+  it(
+    "routes only llm providers through the batch queue",
+    async () => {
+      const { shouldUseBatchQueue } = await import("../translation-queues")
 
-    const deeplProvider: ProviderConfig = {
-      id: "deepl",
-      name: "DeepL",
-      provider: "deepl",
-      enabled: true,
-      apiKey: "key",
-    }
+      const deeplProvider: ProviderConfig = {
+        id: "deepl",
+        name: "DeepL",
+        provider: "deepl",
+        enabled: true,
+        apiKey: "key",
+      }
 
-    const deeplxProvider: ProviderConfig = {
-      id: "deeplx",
-      name: "DeepLX",
-      provider: "deeplx",
-      enabled: true,
-      baseURL: "https://api.deeplx.org",
-    }
+      const deeplxProvider: ProviderConfig = {
+        id: "deeplx",
+        name: "DeepLX",
+        provider: "deeplx",
+        enabled: true,
+        baseURL: "https://api.deeplx.org",
+      }
 
-    const llmProvider: ProviderConfig = {
-      id: "openai",
-      name: "OpenAI",
-      provider: "openai",
-      enabled: true,
-      apiKey: "sk-test",
-      model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
-    }
+      const llmProvider: ProviderConfig = {
+        id: "openai",
+        name: "OpenAI",
+        provider: "openai",
+        enabled: true,
+        apiKey: "sk-test",
+        model: { model: "gpt-5-mini", isCustomModel: false, customModel: null },
+      }
 
-    expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
-    expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
-    expect(shouldUseBatchQueue(llmProvider)).toBe(true)
-  })
+      expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
+      expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
+      expect(shouldUseBatchQueue(llmProvider)).toBe(true)
+    },
+    15_000,
+  )
 })

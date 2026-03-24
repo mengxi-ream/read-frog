@@ -26,7 +26,7 @@ export function SelectionSourceContent({
     <>
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <p className="min-w-0 flex-1 text-sm whitespace-pre-wrap wrap-break-words text-zinc-600 dark:text-zinc-400">
+          <p className="min-w-0 flex-1 text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-zinc-600 dark:text-zinc-400">
             {displayText}
           </p>
           <Button
