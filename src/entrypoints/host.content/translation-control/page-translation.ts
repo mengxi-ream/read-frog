@@ -3,9 +3,9 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getDetectedCodeFromStorage } from "@/utils/config/languages"
 import { getLocalConfig } from "@/utils/config/storage"
-import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { CONTENT_WRAPPER_CLASS, PARAGRAPH_ATTRIBUTE } from "@/utils/constants/dom-labels"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
+import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement, isTextNode } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import { getOrFetchArticleData } from "@/utils/host/translate/article-context"
@@ -477,18 +477,41 @@ export class PageTranslationManager implements IPageTranslationManager {
     dontWalkIntoElements.forEach(el => this.dontWalkIntoElementsCache.add(el))
   }
 
+  private getObservationTargetForMutation(node: Node): HTMLElement | null {
+    const element = isHTMLElement(node)
+      ? node
+      : isTextNode(node)
+        ? node.parentElement
+        : null
+
+    if (!element || element.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
+      return null
+    }
+
+    return element.closest<HTMLElement>(`[${PARAGRAPH_ATTRIBUTE}]`) ?? element
+  }
+
   /**
    * Start observing mutations for a container and all its shadow roots
    */
   private observeMutations(container: HTMLElement): void {
     const mutationObserver = new MutationObserver((records) => {
+      const elementsToObserve = new Set<HTMLElement>()
+      const isolatedDescendantsToObserve = new Set<HTMLElement>()
+
       for (const rec of records) {
         if (rec.type === "childList") {
           rec.addedNodes.forEach((node) => {
             if (isHTMLElement(node)) {
               this.addDontWalkIntoElements(node)
-              void this.observerTopLevelParagraphs(node)
-              this.observeIsolatedDescendantsMutations(node)
+              elementsToObserve.add(node)
+              isolatedDescendantsToObserve.add(node)
+            }
+            else {
+              const target = this.getObservationTargetForMutation(node)
+              if (target) {
+                elementsToObserve.add(target)
+              }
             }
           })
         }
@@ -498,15 +521,25 @@ export class PageTranslationManager implements IPageTranslationManager {
         ) {
           const el = rec.target
           if (isHTMLElement(el) && this.didChangeToWalkable(el)) {
-            void this.observerTopLevelParagraphs(el)
+            elementsToObserve.add(el)
+          }
+        }
+        else if (rec.type === "characterData") {
+          const target = this.getObservationTargetForMutation(rec.target)
+          if (target) {
+            elementsToObserve.add(target)
           }
         }
       }
+
+      isolatedDescendantsToObserve.forEach(element => this.observeIsolatedDescendantsMutations(element))
+      elementsToObserve.forEach(element => void this.observerTopLevelParagraphs(element))
     })
 
     mutationObserver.observe(container, {
       childList: true,
       subtree: true,
+      characterData: true,
       attributes: true,
       attributeFilter: ["style", "class"],
     })
