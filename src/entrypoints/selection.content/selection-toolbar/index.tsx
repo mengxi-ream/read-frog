@@ -73,6 +73,21 @@ function getSelectionOverlayShadowRoot(overlayContainer: HTMLElement | null) {
   return root instanceof ShadowRoot ? root : null
 }
 
+function getNearestSelectionOverlayElement(node: Node | null) {
+  let current: Node | null = node
+
+  while (current) {
+    if (current instanceof Element) {
+      return current
+    }
+
+    const root = current.getRootNode()
+    current = current.parentNode ?? (root instanceof ShadowRoot ? root.host : null)
+  }
+
+  return null
+}
+
 function isNodeInsideSelectionOverlay(
   node: Node | null,
   overlayContainer: HTMLElement | null,
@@ -86,7 +101,8 @@ function isNodeInsideSelectionOverlay(
     return true
   }
 
-  if (node instanceof Element && node.closest(SELECTION_OVERLAY_ROOT_SELECTOR)) {
+  const overlayElement = getNearestSelectionOverlayElement(node)
+  if (overlayElement?.closest(SELECTION_OVERLAY_ROOT_SELECTOR)) {
     return true
   }
 
