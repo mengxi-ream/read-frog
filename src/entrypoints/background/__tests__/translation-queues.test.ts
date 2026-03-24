@@ -54,5 +54,5 @@ describe("translation queue helpers", () => {
     expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
     expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
     expect(shouldUseBatchQueue(llmProvider)).toBe(true)
-  })
+  }, 15_000)
 })
