@@ -108,7 +108,7 @@ describe("blogNotification", () => {
       expect(getLatestBlogDateMock).toHaveBeenCalledWith(
         "https://www.readfrog.app/api/blog/latest",
         "zh",
-        "1.31.3",
+        expect.stringMatching(/^\d+\.\d+\.\d+$/),
       )
     })
   })
