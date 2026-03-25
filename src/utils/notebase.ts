@@ -1,3 +1,8 @@
+import type {
+  CustomTableGetSchemaOutput,
+  RowAddInput,
+  TableColumn,
+} from "@read-frog/api-contract"
 import type { ColumnConfig } from "@read-frog/definitions"
 import type {
   SelectionToolbarCustomAction,
@@ -8,48 +13,15 @@ import type {
 } from "@/types/config/selection-toolbar"
 import { ORPCError } from "@orpc/client"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { orpc } from "@/utils/orpc/client"
-
-export interface NotebaseListItem {
-  id: string
-  name: string
-}
-
-export interface NotebaseColumnSchema {
-  id: string
-  tableId: string
-  name: string
-  config: ColumnConfig
-  position: number
-  isPrimary: boolean
-  width: number | null
-  createdAt: Date
-  updatedAt: Date
-}
-
-export interface NotebaseTableSchema {
-  id: string
-  name: string
-  updatedAt: Date
-  columns: NotebaseColumnSchema[]
-}
 
 export type ResolvedNotebaseMappingStatus = "valid" | "missing_local" | "missing_remote" | "missing_schema" | "incompatible"
 
 export interface ResolvedNotebaseMapping {
   localField: SelectionToolbarCustomActionOutputField | null
   mapping: SelectionToolbarCustomActionNotebaseMapping
-  remoteColumn: NotebaseColumnSchema | null
+  remoteColumn: TableColumn | null
   status: ResolvedNotebaseMappingStatus
 }
-
-interface ExtensionNotebaseClient {
-  customTable: {
-    getSchema: (input: { id: string }) => Promise<NotebaseTableSchema>
-  }
-}
-
-const notebaseOrpc = orpc as typeof orpc & ExtensionNotebaseClient
 
 export function createNotebaseMapping(
   localFieldId: string,
@@ -135,7 +107,7 @@ export function sanitizeSelectionToolbarCustomAction(action: SelectionToolbarCus
 
 export function resolveNotebaseMappings(
   action: SelectionToolbarCustomAction,
-  schema: NotebaseTableSchema | null | undefined,
+  schema: CustomTableGetSchemaOutput | null | undefined,
 ): ResolvedNotebaseMapping[] {
   const connection = sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema)
   if (!connection) {
@@ -171,10 +143,10 @@ export function resolveNotebaseMappings(
 
 export function buildNotebaseRowCells(
   action: SelectionToolbarCustomAction,
-  schema: NotebaseTableSchema,
+  schema: CustomTableGetSchemaOutput,
   result: Record<string, unknown> | null,
 ) {
-  const cells: Record<string, unknown> = {}
+  const cells: RowAddInput["data"]["cells"] = {}
   const resolvedMappings = resolveNotebaseMappings(action, schema)
 
   for (const resolvedMapping of resolvedMappings) {
@@ -189,23 +161,6 @@ export function buildNotebaseRowCells(
     cells,
     resolvedMappings,
   }
-}
-
-export async function listNotebases() {
-  return await orpc.customTable.list({})
-}
-
-export async function getNotebaseSchema(tableId: string) {
-  return await notebaseOrpc.customTable.getSchema({ id: tableId })
-}
-
-export async function addNotebaseRow(tableId: string, cells: Record<string, unknown>) {
-  return await orpc.row.add({
-    tableId,
-    data: {
-      cells,
-    },
-  })
 }
 
 export function isORPCUnauthorizedError(error: unknown) {

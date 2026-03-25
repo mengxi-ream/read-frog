@@ -1,6 +1,7 @@
 import type { ORPCRouterClient } from "@read-frog/api-contract"
 import { createORPCClient } from "@orpc/client"
 import { RPCLink } from "@orpc/client/fetch"
+import { createTanstackQueryUtils } from "@orpc/tanstack-query"
 import { WEBSITE_URL } from "../constants/url"
 import { normalizeHeaders } from "../http"
 import { sendMessage } from "../message"
@@ -37,4 +38,5 @@ const link = new RPCLink({
   },
 })
 
-export const orpc: ORPCRouterClient = createORPCClient(link)
+export const orpcClient: ORPCRouterClient = createORPCClient(link)
+export const orpc = createTanstackQueryUtils(orpcClient)

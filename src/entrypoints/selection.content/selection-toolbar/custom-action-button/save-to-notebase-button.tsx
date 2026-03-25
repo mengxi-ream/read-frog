@@ -7,14 +7,13 @@ import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
 import {
-  addNotebaseRow,
   buildNotebaseRowCells,
-  getNotebaseSchema,
   isORPCNotFoundError,
   isORPCUnauthorizedError,
   isORPCValidationError,
   sanitizeCustomActionNotebaseConnection,
 } from "@/utils/notebase"
+import { orpc } from "@/utils/orpc/client"
 
 export function SaveToNotebaseButton({
   action,
@@ -53,34 +52,16 @@ function SaveToNotebaseButtonEnabled({
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const isAuthenticated = !!session?.user
 
-  const schemaQuery = useQuery({
-    queryKey: ["notebase", "schema", "selection-toolbar", session?.user.id ?? "guest", connection?.tableId ?? "none"],
-    queryFn: () => getNotebaseSchema(connection!.tableId),
+  const schemaQuery = useQuery(orpc.customTable.getSchema.queryOptions({
+    input: { id: connection?.tableId ?? "" },
     enabled: isAuthenticated && !!connection?.tableId,
     retry: false,
     meta: {
       suppressToast: true,
     },
-  })
+  }))
 
-  const saveMutation = useMutation({
-    mutationFn: async () => {
-      if (!connection || !schemaQuery.data) {
-        throw new Error("Notebase connection is unavailable")
-      }
-
-      const { cells, resolvedMappings } = buildNotebaseRowCells(action, schemaQuery.data, result)
-      const validMappingCount = resolvedMappings.filter(mapping => mapping.status === "valid").length
-      if (validMappingCount === 0) {
-        throw new Error(i18n.t("action.saveToNotebaseNoMappings"))
-      }
-
-      if (resolvedMappings.some(mapping => mapping.status !== "valid")) {
-        throw new Error(i18n.t("action.saveToNotebaseConnectionInvalid"))
-      }
-
-      return await addNotebaseRow(connection.tableId, cells)
-    },
+  const saveMutation = useMutation(orpc.row.add.mutationOptions({
     meta: {
       suppressToast: true,
     },
@@ -109,7 +90,7 @@ function SaveToNotebaseButtonEnabled({
         description: error instanceof Error ? error.message : undefined,
       })
     },
-  })
+  }))
 
   if (!connection) {
     return null
@@ -120,6 +101,32 @@ function SaveToNotebaseButtonEnabled({
     : []
   const hasInvalidMappings = resolvedMappings.some(mapping => mapping.status !== "valid")
   const hasValidMappings = resolvedMappings.some(mapping => mapping.status === "valid")
+
+  const handleSave = () => {
+    if (!connection || !schemaQuery.data) {
+      return
+    }
+
+    const { cells, resolvedMappings } = buildNotebaseRowCells(action, schemaQuery.data, result)
+    const validMappingCount = resolvedMappings.filter(mapping => mapping.status === "valid").length
+    if (validMappingCount === 0) {
+      toast.error(i18n.t("action.saveToNotebaseNoMappings"))
+      return
+    }
+
+    if (resolvedMappings.some(mapping => mapping.status !== "valid")) {
+      toast.error(i18n.t("action.saveToNotebaseConnectionInvalid"))
+      return
+    }
+
+    saveMutation.mutate({
+      tableId: connection.tableId,
+      data: {
+        cells,
+      },
+    })
+  }
+
   const isDisabled = isSessionPending
     || !isAuthenticated
     || isRunning
@@ -137,7 +144,7 @@ function SaveToNotebaseButtonEnabled({
       size="sm"
       variant="outline"
       disabled={isDisabled}
-      onClick={() => saveMutation.mutate()}
+      onClick={handleSave}
     >
       {saveMutation.isPending ? i18n.t("action.saveToNotebaseSaving") : i18n.t("action.saveToNotebase")}
     </Button>

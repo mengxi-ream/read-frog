@@ -1,4 +1,8 @@
 import type {
+  CustomTableGetSchemaOutput,
+  CustomTableListOutput,
+} from "@read-frog/api-contract"
+import type {
   SelectionToolbarCustomAction,
   SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionNotebaseMapping,
@@ -29,17 +33,18 @@ import { authClient } from "@/utils/auth/auth-client"
 import { WEBSITE_URL } from "@/utils/constants/url"
 import {
   createNotebaseMapping,
-  getNotebaseSchema,
   isNotebaseMappingCompatible,
   isORPCNotFoundError,
   isSupportedNotebaseColumnConfig,
-  listNotebases,
   resolveNotebaseMappings,
   sanitizeCustomActionNotebaseConnection,
 } from "@/utils/notebase"
+import { orpc } from "@/utils/orpc/client"
 import { withForm } from "./form"
 
 type NotebaseI18nKey = Parameters<typeof i18n.t>[0]
+type NotebaseTableItem = CustomTableListOutput[number]
+type NotebaseColumn = CustomTableGetSchemaOutput["columns"][number]
 
 interface SelectItemData<T> {
   value: T
@@ -85,7 +90,7 @@ function getSelectableRemoteColumns(
   connection: SelectionToolbarCustomActionNotebaseConnection,
   currentLocalField: SelectionToolbarCustomActionOutputField | null,
   currentMapping: SelectionToolbarCustomActionNotebaseMapping,
-  schemaColumns: Awaited<ReturnType<typeof getNotebaseSchema>>["columns"],
+  schemaColumns: CustomTableGetSchemaOutput["columns"],
 ) {
   const usedRemoteColumnIds = new Set(
     connection.mappings
@@ -114,7 +119,7 @@ function getSelectableRemoteColumns(
 function getNextDefaultMapping(
   connection: SelectionToolbarCustomActionNotebaseConnection,
   outputSchema: SelectionToolbarCustomActionOutputField[],
-  schemaColumns: Awaited<ReturnType<typeof getNotebaseSchema>>["columns"],
+  schemaColumns: CustomTableGetSchemaOutput["columns"],
 ) {
   const usedLocalFieldIds = new Set(connection.mappings.map(mapping => mapping.localFieldId))
   const usedRemoteColumnIds = new Set(connection.mappings.map(mapping => mapping.remoteColumnId))
@@ -140,7 +145,7 @@ function getNextDefaultMapping(
 
 function getTableSelectItems(
   connection: SelectionToolbarCustomActionNotebaseConnection | undefined,
-  tables: Awaited<ReturnType<typeof listNotebases>> | undefined,
+  tables: CustomTableListOutput | undefined,
 ) {
   if (!connection?.tableId) {
     return tables ?? []
@@ -168,7 +173,7 @@ function getLocalFieldSelectItems(fields: SelectionToolbarCustomActionOutputFiel
 
 function getRemoteFieldSelectItems(
   mapping: SelectionToolbarCustomActionNotebaseMapping,
-  remoteOptions: Awaited<ReturnType<typeof getNotebaseSchema>>["columns"],
+  remoteOptions: CustomTableGetSchemaOutput["columns"],
   currentRemoteMissing: boolean,
 ): SelectItemData<string>[] {
   return [
@@ -194,25 +199,23 @@ export const NotebaseConnectionField = withForm({
     const { data: session, isPending: isSessionPending } = authClient.useSession()
     const isAuthenticated = !!session?.user
 
-    const listQuery = useQuery({
-      queryKey: ["notebase", "list", session?.user.id ?? "guest"],
-      queryFn: listNotebases,
+    const listQuery = useQuery(orpc.customTable.list.queryOptions({
+      input: {},
       enabled: isAuthenticated,
       staleTime: 60_000,
       meta: {
         suppressToast: true,
       },
-    })
+    }))
 
-    const schemaQuery = useQuery({
-      queryKey: ["notebase", "schema", session?.user.id ?? "guest", connection?.tableId ?? "none"],
-      queryFn: () => getNotebaseSchema(connection!.tableId),
+    const schemaQuery = useQuery(orpc.customTable.getSchema.queryOptions({
+      input: { id: connection?.tableId ?? "" },
       enabled: isAuthenticated && !!connection?.tableId,
       retry: false,
       meta: {
         suppressToast: true,
       },
-    })
+    }))
 
     const sanitizedConnection = useMemo(
       () => sanitizeCustomActionNotebaseConnection(connection, outputSchema),
@@ -253,7 +256,7 @@ export const NotebaseConnectionField = withForm({
         return
       }
 
-      const table = listQuery.data?.find(item => item.id === tableId)
+      const table = listQuery.data?.find((item: NotebaseTableItem) => item.id === tableId)
       updateConnection({
         tableId,
         tableNameSnapshot: table?.name ?? sanitizedConnection?.tableNameSnapshot ?? tableId,
@@ -272,8 +275,10 @@ export const NotebaseConnectionField = withForm({
         tableNameSnapshot: refreshResult.data.name,
         mappings: sanitizedConnection.mappings.map(mapping => ({
           ...mapping,
-          remoteColumnNameSnapshot: refreshResult.data.columns.find(column => column.id === mapping.remoteColumnId)?.name
-            ?? mapping.remoteColumnNameSnapshot,
+          remoteColumnNameSnapshot:
+            refreshResult.data.columns.find(
+              (column: NotebaseColumn) => column.id === mapping.remoteColumnId,
+            )?.name ?? mapping.remoteColumnNameSnapshot,
         })),
       })
     }
@@ -465,7 +470,7 @@ export const NotebaseConnectionField = withForm({
                         schemaQuery.data.columns,
                       )
                       const currentRemoteMissing = !schemaQuery.data.columns.some(
-                        column => column.id === mapping.remoteColumnId,
+                        (column: NotebaseColumn) => column.id === mapping.remoteColumnId,
                       )
                       const localSelectItems = getLocalFieldSelectItems(localOptions)
                       const remoteSelectItems = getRemoteFieldSelectItems(mapping, remoteOptions, currentRemoteMissing)
@@ -517,7 +522,9 @@ export const NotebaseConnectionField = withForm({
                                   return
                                 }
 
-                                const nextRemoteColumn = schemaQuery.data.columns.find(column => column.id === value)
+                                const nextRemoteColumn = schemaQuery.data.columns.find(
+                                  (column: NotebaseColumn) => column.id === value,
+                                )
                                 updateConnection({
                                   ...sanitizedConnection,
                                   mappings: sanitizedConnection.mappings.map(item =>
