@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.31.4
+
+### Patch Changes
+
+- [#1224](https://github.com/mengxi-ream/read-frog/pull/1224) [`64931e3`](https://github.com/mengxi-ream/read-frog/commit/64931e3307564760cc1ff67291380146be2fcbf7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): ignore overlay text selections
+
+- [#1225](https://github.com/mengxi-ream/read-frog/pull/1225) [`8774215`](https://github.com/mengxi-ream/read-frog/commit/8774215468c00ad3b9a325a20e2c0aad88d79100) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(openai): sync GPT-5.4 model defaults and reasoning floors
+
+- [#1217](https://github.com/mengxi-ream/read-frog/pull/1217) [`d97ce8c`](https://github.com/mengxi-ream/read-frog/commit/d97ce8c9b89090954d400634da7b73343975e3b3) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(selection-toolbar): wrap long text in selection popovers
+
 ## 1.31.3
 
 ### Patch Changes
