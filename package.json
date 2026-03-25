@@ -70,7 +70,7 @@
     "@orpc/client": "^1.13.10",
     "@orpc/tanstack-query": "^1.13.10",
     "@radix-ui/react-slot": "^1.2.4",
-    "@read-frog/api-contract": "0.2.1",
+    "@read-frog/api-contract": "0.2.2",
     "@read-frog/definitions": "0.1.2",
     "@remixicon/react": "^4.9.0",
     "@tabler/icons-react": "^3.40.0",

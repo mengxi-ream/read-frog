@@ -381,6 +381,8 @@ options:
             emptyTitle: 还没有笔记库
             emptyDescription: 先去 readfrog.app 创建一个笔记库，再回来映射字段。
             openNotebaseAction: 打开笔记库
+            betaLockedTitle: 当前账号尚未加入 Notebase Beta
+            betaLockedDescription: 你可以继续保留当前 action 配置，但选择笔记库和同步结果目前仅对部分 Beta 账号开放。
             tableUnavailableTitle: 选中的笔记库已不可用
             tableUnavailableDescription: 请刷新，或重新选择一个笔记库后再保存。
             tableUnavailableOption: 不可用
@@ -963,6 +965,7 @@ action:
   saveToNotebaseSuccess: 已保存到笔记库
   saveToNotebaseFailed: 保存到笔记库失败
   saveToNotebaseLoginRequired: 请先在 readfrog.app 登录后再保存到笔记库
+  saveToNotebaseBetaRequired: 当前账号尚未加入 Notebase Beta
   saveToNotebaseTableUnavailable: 选中的笔记库已不可用
   saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom AI Actions 中刷新并修复映射
   saveToNotebaseNoMappings: 至少添加一个有效映射后才能保存

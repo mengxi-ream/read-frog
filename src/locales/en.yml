@@ -381,6 +381,8 @@ options:
             emptyTitle: No notebases yet
             emptyDescription: Create a notebase on readfrog.app, then come back here to map fields.
             openNotebaseAction: Open Notebase
+            betaLockedTitle: This account is not in the Notebase beta
+            betaLockedDescription: You can keep this action configured, but choosing notebases and syncing results is limited to selected beta accounts for now.
             tableUnavailableTitle: Selected notebase is no longer available
             tableUnavailableDescription: Refresh or choose another notebase before saving again.
             tableUnavailableOption: unavailable
@@ -963,6 +965,7 @@ action:
   saveToNotebaseSuccess: Saved to Notebase
   saveToNotebaseFailed: Failed to save to Notebase
   saveToNotebaseLoginRequired: Log in on readfrog.app to save to Notebase
+  saveToNotebaseBetaRequired: This account is not enrolled in the Notebase beta yet
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
   saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
   saveToNotebaseNoMappings: Add at least one valid mapping before saving

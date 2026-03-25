@@ -380,6 +380,8 @@ options:
             emptyTitle: Notebase がまだありません
             emptyDescription: readfrog.app で notebase を作成してから、ここに戻ってフィールドをマッピングしてください。
             openNotebaseAction: Notebase を開く
+            betaLockedTitle: このアカウントは Notebase ベータ対象外です
+            betaLockedDescription: このアクション設定は保持できますが、Notebase の選択と結果の同期は現在一部のベータアカウントのみに提供されています。
             tableUnavailableTitle: 選択した notebase は利用できなくなりました
             tableUnavailableDescription: もう一度保存する前に、更新するか別の notebase を選択してください。
             tableUnavailableOption: 利用不可
@@ -848,6 +850,7 @@ action:
   saveToNotebaseSuccess: Notebase に保存しました
   saveToNotebaseFailed: Notebase への保存に失敗しました
   saveToNotebaseLoginRequired: Notebase に保存するには readfrog.app にログインしてください
+  saveToNotebaseBetaRequired: このアカウントはまだ Notebase ベータに参加していません
   saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
   saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
   saveToNotebaseNoMappings: 保存する前に、少なくとも1つの有効なマッピングを追加してください

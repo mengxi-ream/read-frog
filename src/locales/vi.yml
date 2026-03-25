@@ -380,6 +380,8 @@ options:
             emptyTitle: Chưa có Notebase nào
             emptyDescription: Hãy tạo một notebase trên readfrog.app rồi quay lại đây để ánh xạ các trường.
             openNotebaseAction: Mở Notebase
+            betaLockedTitle: Tài khoản này chưa nằm trong beta Notebase
+            betaLockedDescription: Bạn vẫn có thể giữ cấu hình action hiện tại, nhưng việc chọn Notebase và đồng bộ kết quả hiện chỉ mở cho một số tài khoản beta.
             tableUnavailableTitle: Notebase đã chọn không còn khả dụng
             tableUnavailableDescription: Hãy làm mới hoặc chọn một notebase khác trước khi lưu lại.
             tableUnavailableOption: không khả dụng
@@ -848,6 +850,7 @@ action:
   saveToNotebaseSuccess: Đã lưu vào Notebase
   saveToNotebaseFailed: Không thể lưu vào Notebase
   saveToNotebaseLoginRequired: Hãy đăng nhập trên readfrog.app để lưu vào Notebase
+  saveToNotebaseBetaRequired: Tài khoản này chưa được mở quyền beta Notebase
   saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
   saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
   saveToNotebaseNoMappings: Hãy thêm ít nhất một ánh xạ hợp lệ trước khi lưu

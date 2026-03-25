@@ -13,6 +13,7 @@ import {
   isORPCValidationError,
   sanitizeCustomActionNotebaseConnection,
 } from "@/utils/notebase"
+import { isORPCForbiddenError, useNotebaseBetaStatus } from "@/utils/notebase-beta"
 import { orpc } from "@/utils/orpc/client"
 
 export function SaveToNotebaseButton({
@@ -51,10 +52,12 @@ function SaveToNotebaseButtonEnabled({
   const connection = sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema)
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const isAuthenticated = !!session?.user
+  const betaStatusQuery = useNotebaseBetaStatus(isAuthenticated)
+  const isBetaAllowed = betaStatusQuery.data?.allowed === true
 
   const schemaQuery = useQuery(orpc.customTable.getSchema.queryOptions({
     input: { id: connection?.tableId ?? "" },
-    enabled: isAuthenticated && !!connection?.tableId,
+    enabled: isAuthenticated && isBetaAllowed && !!connection?.tableId,
     retry: false,
     meta: {
       suppressToast: true,
@@ -73,6 +76,11 @@ function SaveToNotebaseButtonEnabled({
     onError: (error) => {
       if (isORPCUnauthorizedError(error)) {
         toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+        return
+      }
+
+      if (isORPCForbiddenError(error)) {
+        toast.error(i18n.t("action.saveToNotebaseBetaRequired"))
         return
       }
 
@@ -131,12 +139,18 @@ function SaveToNotebaseButtonEnabled({
     || !isAuthenticated
     || isRunning
     || !result
+    || betaStatusQuery.isPending
+    || !!betaStatusQuery.error
+    || !isBetaAllowed
     || !schemaQuery.data
     || schemaQuery.isPending
     || schemaQuery.isFetching
     || saveMutation.isPending
     || hasInvalidMappings
     || !hasValidMappings
+  const disabledTitle = !betaStatusQuery.isPending && !isBetaAllowed
+    ? i18n.t("action.saveToNotebaseBetaRequired")
+    : undefined
 
   return (
     <Button
@@ -144,6 +158,7 @@ function SaveToNotebaseButtonEnabled({
       size="sm"
       variant="outline"
       disabled={isDisabled}
+      title={disabledTitle}
       onClick={handleSave}
     >
       {saveMutation.isPending ? i18n.t("action.saveToNotebaseSaving") : i18n.t("action.saveToNotebase")}

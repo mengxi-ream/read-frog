@@ -380,6 +380,8 @@ options:
             emptyTitle: Notebase пока нет
             emptyDescription: Создайте notebase на readfrog.app, затем вернитесь сюда и сопоставьте поля.
             openNotebaseAction: Открыть Notebase
+            betaLockedTitle: Этот аккаунт ещё не участвует в beta Notebase
+            betaLockedDescription: Вы можете сохранить текущую настройку action, но выбор Notebase и синхронизация результатов пока доступны только выбранным beta-аккаунтам.
             tableUnavailableTitle: Выбранная notebase больше недоступна
             tableUnavailableDescription: Обновите список или выберите другую notebase перед следующим сохранением.
             tableUnavailableOption: недоступно
@@ -848,6 +850,7 @@ action:
   saveToNotebaseSuccess: Сохранено в Notebase
   saveToNotebaseFailed: Не удалось сохранить в Notebase
   saveToNotebaseLoginRequired: Войдите на readfrog.app, чтобы сохранить в Notebase
+  saveToNotebaseBetaRequired: Для этого аккаунта beta-доступ к Notebase пока не включён
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением

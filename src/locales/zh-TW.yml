@@ -380,6 +380,8 @@ options:
             emptyTitle: 還沒有筆記庫
             emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來映射欄位。
             openNotebaseAction: 開啟筆記庫
+            betaLockedTitle: 目前帳號尚未加入 Notebase Beta
+            betaLockedDescription: 你可以保留目前的 action 設定，但選擇筆記庫與同步結果目前僅對部分 Beta 帳號開放。
             tableUnavailableTitle: 選取的筆記庫已不可用
             tableUnavailableDescription: 請重新整理，或改選其他筆記庫後再儲存。
             tableUnavailableOption: 不可用
@@ -848,6 +850,7 @@ action:
   saveToNotebaseSuccess: 已儲存到筆記庫
   saveToNotebaseFailed: 儲存到筆記庫失敗
   saveToNotebaseLoginRequired: 請先到 readfrog.app 登入後再儲存到筆記庫
+  saveToNotebaseBetaRequired: 目前帳號尚未加入 Notebase Beta
   saveToNotebaseTableUnavailable: 選取的筆記庫已不可用
   saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到 Custom AI Actions 重新整理並修復映射
   saveToNotebaseNoMappings: 至少新增一個有效映射後才能儲存

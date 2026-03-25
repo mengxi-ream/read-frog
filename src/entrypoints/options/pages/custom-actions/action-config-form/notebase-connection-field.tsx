@@ -39,6 +39,7 @@ import {
   resolveNotebaseMappings,
   sanitizeCustomActionNotebaseConnection,
 } from "@/utils/notebase"
+import { isORPCForbiddenError, useNotebaseBetaStatus } from "@/utils/notebase-beta"
 import { orpc } from "@/utils/orpc/client"
 import { withForm } from "./form"
 
@@ -198,10 +199,13 @@ export const NotebaseConnectionField = withForm({
     const connection = action.notebaseConnection
     const { data: session, isPending: isSessionPending } = authClient.useSession()
     const isAuthenticated = !!session?.user
+    const betaStatusQuery = useNotebaseBetaStatus(isAuthenticated)
+    const isBetaAllowed = betaStatusQuery.data?.allowed === true
+    const isBetaLocked = betaStatusQuery.data?.allowed === false
 
     const listQuery = useQuery(orpc.customTable.list.queryOptions({
       input: {},
-      enabled: isAuthenticated,
+      enabled: isAuthenticated && isBetaAllowed,
       staleTime: 60_000,
       meta: {
         suppressToast: true,
@@ -210,7 +214,7 @@ export const NotebaseConnectionField = withForm({
 
     const schemaQuery = useQuery(orpc.customTable.getSchema.queryOptions({
       input: { id: connection?.tableId ?? "" },
-      enabled: isAuthenticated && !!connection?.tableId,
+      enabled: isAuthenticated && isBetaAllowed && !!connection?.tableId,
       retry: false,
       meta: {
         suppressToast: true,
@@ -332,6 +336,30 @@ export const NotebaseConnectionField = withForm({
 
         {isAuthenticated && (
           <FieldGroup className="gap-4">
+            {!!betaStatusQuery.error && (
+              <Alert variant="destructive">
+                <AlertTitle>{t("schemaErrorTitle")}</AlertTitle>
+                <AlertDescription>{t("schemaErrorDescription")}</AlertDescription>
+              </Alert>
+            )}
+
+            {isBetaLocked && (
+              <Alert>
+                <AlertTitle>{t("betaLockedTitle")}</AlertTitle>
+                <AlertDescription>{t("betaLockedDescription")}</AlertDescription>
+                <AlertAction>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={() => window.open(`${WEBSITE_URL}/notebase`, "_blank")}
+                  >
+                    {t("openNotebaseAction")}
+                  </Button>
+                </AlertAction>
+              </Alert>
+            )}
+
             <Field>
               <div className="flex items-center justify-between gap-3">
                 <FieldLabel nativeLabel={false} render={<div />}>
@@ -342,7 +370,7 @@ export const NotebaseConnectionField = withForm({
                   variant="outline"
                   size="sm"
                   onClick={handleRefresh}
-                  disabled={!sanitizedConnection?.tableId || schemaQuery.isFetching}
+                  disabled={!isBetaAllowed || !sanitizedConnection?.tableId || schemaQuery.isFetching}
                 >
                   <IconRefresh className={schemaQuery.isFetching ? "animate-spin" : undefined} />
                   {t("refreshAction")}
@@ -362,6 +390,7 @@ export const NotebaseConnectionField = withForm({
                   })) ?? []),
                 ]}
                 onValueChange={handleTableChange}
+                disabled={!isBetaAllowed}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t("tablePlaceholder")} />
@@ -381,7 +410,7 @@ export const NotebaseConnectionField = withForm({
               </Select>
             </Field>
 
-            {!listQuery.isPending && !listQuery.error && listQuery.data?.length === 0 && (
+            {isBetaAllowed && !listQuery.isPending && !listQuery.error && listQuery.data?.length === 0 && (
               <Alert>
                 <AlertTitle>{t("emptyTitle")}</AlertTitle>
                 <AlertDescription>{t("emptyDescription")}</AlertDescription>
@@ -398,7 +427,7 @@ export const NotebaseConnectionField = withForm({
               </Alert>
             )}
 
-            {!!listQuery.error && (
+            {!!listQuery.error && !isORPCForbiddenError(listQuery.error) && (
               <Alert variant="destructive">
                 <AlertTitle>{t("schemaErrorTitle")}</AlertTitle>
                 <AlertDescription>{t("schemaErrorDescription")}</AlertDescription>
