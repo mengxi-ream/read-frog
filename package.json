@@ -121,7 +121,7 @@
     "@commitlint/cli": "^20.5.0",
     "@commitlint/config-conventional": "^20.5.0",
     "@eslint-react/eslint-plugin": "^2.13.0",
-    "@faker-js/faker": "^10.3.0",
+    "@faker-js/faker": "^10.4.0",
     "@iconify/react": "^6.0.2",
     "@tailwindcss/postcss": "^4.2.2",
     "@tanstack/eslint-plugin-query": "^5.95.2",
@@ -153,7 +153,7 @@
     "tailwindcss": "^4.2.2",
     "type-fest": "^5.5.0",
     "typescript": "^6.0.2",
-    "vite": "^8.0.2",
+    "vite": "^8.0.3",
     "vitest": "^4.1.1",
     "wxt": "0.20.20"
   },
