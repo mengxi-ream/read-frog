@@ -28,6 +28,10 @@ export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
 }
 
+function shouldDetectLanguage(providerConfig: ProviderConfig): boolean {
+  return !isLLMProviderConfig(providerConfig)
+}
+
 export async function executeBatchTranslation(
   dataList: TranslateBatchData[],
   promptResolver: PromptResolver,
@@ -36,7 +40,11 @@ export async function executeBatchTranslation(
   const texts = dataList.map(d => d.text)
 
   const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
-  const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })
+  const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, {
+    isBatch: true,
+    content,
+    shouldDetectLanguage: shouldDetectLanguage(providerConfig),
+  })
   return parseBatchResult(result)
 }
 
@@ -145,7 +153,10 @@ async function createTranslationQueues(config: TranslationQueueSetupConfig) {
       const { text, langConfig, providerConfig, hash, scheduleAt, content } = data
       const thunk = async () => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
-        return executeTranslate(text, langConfig, providerConfig, promptResolver, { content })
+        return executeTranslate(text, langConfig, providerConfig, promptResolver, {
+          content,
+          shouldDetectLanguage: shouldDetectLanguage(providerConfig),
+        })
       }
       return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
