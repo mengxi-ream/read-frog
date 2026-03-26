@@ -12,11 +12,11 @@ importers:
         specifier: ^1.0.13
         version: 1.0.13(zod@4.3.6)
       '@ai-sdk/amazon-bedrock':
-        specifier: ^4.0.82
-        version: 4.0.82(zod@4.3.6)
+        specifier: ^4.0.83
+        version: 4.0.83(zod@4.3.6)
       '@ai-sdk/anthropic':
-        specifier: ^3.0.63
-        version: 3.0.63(zod@4.3.6)
+        specifier: ^3.0.64
+        version: 3.0.64(zod@4.3.6)
       '@ai-sdk/cerebras':
         specifier: ^2.0.41
         version: 2.0.41(zod@4.3.6)
@@ -57,8 +57,8 @@ importers:
         specifier: ^3.0.26
         version: 3.0.26(zod@4.3.6)
       '@ai-sdk/react':
-        specifier: ^3.0.139
-        version: 3.0.139(react@19.2.4)(zod@4.3.6)
+        specifier: ^3.0.140
+        version: 3.0.140(react@19.2.4)(zod@4.3.6)
       '@ai-sdk/replicate':
         specifier: ^2.0.26
         version: 2.0.26(zod@4.3.6)
@@ -118,7 +118,7 @@ importers:
         version: 0.6.0
       '@openrouter/ai-sdk-provider':
         specifier: ^2.3.3
-        version: 2.3.3(ai@6.0.137(zod@4.3.6))(zod@4.3.6)
+        version: 2.3.3(ai@6.0.138(zod@4.3.6))(zod@4.3.6)
       '@orpc/client':
         specifier: ^1.13.10
         version: 1.13.10(@opentelemetry/api@1.9.0)
@@ -165,8 +165,8 @@ importers:
         specifier: ^0.2.5
         version: 0.2.5(wxt@0.20.20(@types/node@25.5.0)(eslint@10.1.0(jiti@2.6.1))(jiti@2.6.1)(lightningcss@1.32.0)(rollup@4.53.2)(yaml@2.8.2))
       ai:
-        specifier: ^6.0.137
-        version: 6.0.137(zod@4.3.6)
+        specifier: ^6.0.138
+        version: 6.0.138(zod@4.3.6)
       better-auth:
         specifier: ^1.5.6
         version: 1.5.6(@opentelemetry/api@1.9.0)(mongodb@7.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vitest@4.1.1(@opentelemetry/api@1.9.0)(@types/node@25.5.0)(jsdom@29.0.1(@noble/hashes@2.0.1))(msw@2.12.10(@types/node@25.5.0)(typescript@6.0.2))(vite@8.0.2(@types/node@25.5.0)(esbuild@0.27.2)(jiti@2.6.1)(yaml@2.8.2)))
@@ -214,7 +214,7 @@ importers:
         version: 0.11.1
       ollama-ai-provider-v2:
         specifier: ^3.5.0
-        version: 3.5.0(ai@6.0.137(zod@4.3.6))(zod@4.3.6)
+        version: 3.5.0(ai@6.0.138(zod@4.3.6))(zod@4.3.6)
       posthog-js:
         specifier: ^1.363.3
         version: 1.363.3
@@ -353,7 +353,7 @@ importers:
         version: 16.4.0
       node:
         specifier: runtime:>=22.0.0
-        version: runtime:25.8.1
+        version: runtime:25.8.2
       nx:
         specifier: ^22.6.1
         version: 22.6.1
@@ -399,8 +399,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/amazon-bedrock@4.0.82':
-    resolution: {integrity: sha512-pvXyXy62xt7Auiv2f8dGuTPqSxUaRZ3Pxpe6VtyUvj+zm2T5GWToXMn1xySAwZzhK7r1kAA9fzxamNKCy7Y3/Q==}
+  '@ai-sdk/amazon-bedrock@4.0.83':
+    resolution: {integrity: sha512-DoRpvIWGU/r83UeJAM9L93Lca8Kf/yP5fIhfEOltMPGP/PXrGe0BZaz0maLSRn8djJ6+HzWIsgu5ZI6bZqXEXg==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -411,8 +411,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/anthropic@3.0.63':
-    resolution: {integrity: sha512-SiLosFr0FfKfrNpAAj8mD/i3S5YBB/z5orb1DH3pN1yATuBNjjPMLnRE4P3Dn7Y5cQsro0uzw5g5117hkShWoQ==}
+  '@ai-sdk/anthropic@3.0.64':
+    resolution: {integrity: sha512-rwLi/Rsuj2pYniQXIrvClHvXDzgM4UQHHnvHTWEF14efnlKclG/1ghpNC+adsRujAbCTr6gRsSbDE2vEqriV7g==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -447,8 +447,8 @@ packages:
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
 
-  '@ai-sdk/gateway@3.0.79':
-    resolution: {integrity: sha512-Wk2QJpqd0em5YcR49uoMCy9msyANAYgjXdlRcqqRt2fz4rNLnMMrKOlLwAXoFzR1ElR3bj4e/k6hscRfjpzSGA==}
+  '@ai-sdk/gateway@3.0.80':
+    resolution: {integrity: sha512-uM7kpZB5l977lW7+2X1+klBUxIZQ78+1a9jHlaHFEzcOcmmslTl3sdP0QqfuuBcO0YBM2gwOiqVdp8i4TRQYcw==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -537,8 +537,8 @@ packages:
     resolution: {integrity: sha512-oGMAgGoQdBXbZqNG0Ze56CHjDZ1IDYOwGYxYjO5KLSlz5HiNQ9udIXsPZ61VWaHGZ5XW/jyjmr6t2xz2jGVwbQ==}
     engines: {node: '>=18'}
 
-  '@ai-sdk/react@3.0.139':
-    resolution: {integrity: sha512-gTZR2r9pl2vKFIxuxWgEv71qJmwJaSc8ZiiXKoGal4pNtaszwjVIaxMGmq0lVb0HkOjYFtOyETTrDpOsCeyc4A==}
+  '@ai-sdk/react@3.0.140':
+    resolution: {integrity: sha512-wCL9iTrzoW8ppYVrz7BFCurCEqW6hjCoFFyxkrS3us2pSbUlQpXHmrprFQevzfa2PJXiF5hss7ZN8ZNdiZW//A==}
     engines: {node: '>=18'}
     peerDependencies:
       react: ^18 || ~19.0.1 || ~19.1.2 || ^19.2.1
@@ -666,9 +666,9 @@ packages:
   '@aws-crypto/util@5.2.0':
     resolution: {integrity: sha512-4RkU9EsI6ZpBve5fseQlGNUWKMa1RLPQ1dnjnQoe07ldfIzcsGb5hC5W0Dm7u423KWzawlrpbjXBrXCEv9zazQ==}
 
-  '@aws-sdk/types@3.922.0':
-    resolution: {integrity: sha512-eLA6XjVobAUAMivvM7DBL79mnHyrm+32TkXNWZua5mnxF+6kQCfblKKJvxMZLGosO53/Ex46ogim8IY5Nbqv2w==}
-    engines: {node: '>=18.0.0'}
+  '@aws-sdk/types@3.973.6':
+    resolution: {integrity: sha512-Atfcy4E++beKtwJHiDln2Nby8W/mam64opFPTiHEqgsthqeydFS1pY+OUlN1ouNOmf8ArPU/6cDS65anOP3KQw==}
+    engines: {node: '>=20.0.0'}
 
   '@babel/code-frame@7.27.1':
     resolution: {integrity: sha512-cjQ7ZlQ0Mv3b47hABuTevyTuYN4i+loJKGeV9flcCgIK37cCXRh+L1bd3iBHlynerhQ7BhCkn2BPbQUL+rGqFg==}
@@ -2738,40 +2738,40 @@ packages:
     resolution: {integrity: sha512-tlqY9xq5ukxTUZBmoOp+m61cqwQD5pHJtFY3Mn8CA8ps6yghLH/Hw8UPdqg4OLmFW3IFlcXnQNmo/dh8HzXYIQ==}
     engines: {node: '>=18'}
 
-  '@smithy/eventstream-codec@4.2.5':
-    resolution: {integrity: sha512-Ogt4Zi9hEbIP17oQMd68qYOHUzmH47UkK7q7Gl55iIm9oKt27MUGrC5JfpMroeHjdkOliOA4Qt3NQ1xMq/nrlA==}
+  '@smithy/eventstream-codec@4.2.12':
+    resolution: {integrity: sha512-FE3bZdEl62ojmy8x4FHqxq2+BuOHlcxiH5vaZ6aqHJr3AIZzwF5jfx8dEiU/X0a8RboyNDjmXjlbr8AdEyLgiA==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/is-array-buffer@2.2.0':
     resolution: {integrity: sha512-GGP3O9QFD24uGeAXYUjwSTXARoqpZykHadOmA8G5vfJPK0/DC67qa//0qvqrJzL1xc8WQWX7/yc7fwudjPHPhA==}
     engines: {node: '>=14.0.0'}
 
-  '@smithy/is-array-buffer@4.2.0':
-    resolution: {integrity: sha512-DZZZBvC7sjcYh4MazJSGiWMI2L7E0oCiRHREDzIxi/M2LY79/21iXt6aPLHge82wi5LsuRF5A06Ds3+0mlh6CQ==}
+  '@smithy/is-array-buffer@4.2.2':
+    resolution: {integrity: sha512-n6rQ4N8Jj4YTQO3YFrlgZuwKodf4zUFs7EJIWH86pSCWBaAtAGBFfCM7Wx6D2bBJ2xqFNxGBSrUWswT3M0VJow==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/types@4.9.0':
-    resolution: {integrity: sha512-MvUbdnXDTwykR8cB1WZvNNwqoWVaTRA0RLlLmf/cIFNMM2cKWz01X4Ly6SMC4Kks30r8tT3Cty0jmeWfiuyHTA==}
+  '@smithy/types@4.13.1':
+    resolution: {integrity: sha512-787F3yzE2UiJIQ+wYW1CVg2odHjmaWLGksnKQHUrK/lYZSEcy1msuLVvxaR/sI2/aDe9U+TBuLsXnr3vod1g0g==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-buffer-from@2.2.0':
     resolution: {integrity: sha512-IJdWBbTcMQ6DA0gdNhh/BwrLkDR+ADW5Kr1aZmd4k3DIF6ezMV4R2NIAmT08wQJ3yUK82thHWmC/TnK/wpMMIA==}
     engines: {node: '>=14.0.0'}
 
-  '@smithy/util-buffer-from@4.2.0':
-    resolution: {integrity: sha512-kAY9hTKulTNevM2nlRtxAG2FQ3B2OR6QIrPY3zE5LqJy1oxzmgBGsHLWTcNhWXKchgA0WHW+mZkQrng/pgcCew==}
+  '@smithy/util-buffer-from@4.2.2':
+    resolution: {integrity: sha512-FDXD7cvUoFWwN6vtQfEta540Y/YBe5JneK3SoZg9bThSoOAC/eGeYEua6RkBgKjGa/sz6Y+DuBZj3+YEY21y4Q==}
     engines: {node: '>=18.0.0'}
 
-  '@smithy/util-hex-encoding@4.2.0':
-    resolution: {integrity: sha512-CCQBwJIvXMLKxVbO88IukazJD9a4kQ9ZN7/UMGBjBcJYvatpWk+9g870El4cB8/EJxfe+k+y0GmR9CAzkF+Nbw==}
+  '@smithy/util-hex-encoding@4.2.2':
+    resolution: {integrity: sha512-Qcz3W5vuHK4sLQdyT93k/rfrUwdJ8/HZ+nMUOyGdpeGA1Wxt65zYwi3oEl9kOM+RswvYq90fzkNDahPS8K0OIg==}
     engines: {node: '>=18.0.0'}
 
   '@smithy/util-utf8@2.3.0':
     resolution: {integrity: sha512-R8Rdn8Hy72KKcebgLiv8jQcQkXoLMOGGv5uI1/k0l+snqkOzQ1R0ChUBCxWMlBsFMekWjq0wRudIweFs7sKT5A==}
     engines: {node: '>=14.0.0'}
 
-  '@smithy/util-utf8@4.2.0':
-    resolution: {integrity: sha512-zBPfuzoI8xyBtR2P6WQj63Rz8i3AmfAaJLuNG8dWsfvPe8lO4aCPYLn879mEgHndZH1zQ2oXmG8O1GGzzaoZiw==}
+  '@smithy/util-utf8@4.2.2':
+    resolution: {integrity: sha512-75MeYpjdWRe8M5E3AW0O4Cx3UadweS+cwdXjwYGBW5h/gxxnbeZ877sLPX/ZJA9GVTlL/qG0dXP29JWFCD1Ayw==}
     engines: {node: '>=18.0.0'}
 
   '@standard-schema/spec@1.1.0':
@@ -3362,8 +3362,8 @@ packages:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
     engines: {node: '>= 14'}
 
-  ai@6.0.137:
-    resolution: {integrity: sha512-9e/mNMTmXmMkmldEJPIumy9FFBuUWHUyj2yF8EglC3VVOhVVBwlnpeHYSFKdNc13Jj6Hso3EJcZioMaofgCs4A==}
+  ai@6.0.138:
+    resolution: {integrity: sha512-49OfPe0f5uxJ6jUdA5BBXjIinP6+ZdYfAtpF2aEH64GA5wPcxH2rf/TBUQQ0bbamBz/D+TLMV18xilZqOC+zaA==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -5995,94 +5995,94 @@ packages:
   node-releases@2.0.27:
     resolution: {integrity: sha512-nmh3lCkYZ3grZvqcCH+fjmQ7X+H0OeZgP40OierEaAptX4XofMh5kwNbWh7lBduUzCcV/8kZ+NDLCwm2iorIlA==}
 
-  node@runtime:25.8.1:
+  node@runtime:25.8.2:
     resolution:
       type: variations
       variants:
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-Sxx72cFkjP51EIjkXR8jO+C8ABOaZHMSpicbWlTbH3A=
+            integrity: sha256-2f1dy/qVcnvzDu0boVh8u5VqnlNkzygOC+4s+nJTgC8=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-aix-ppc64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-aix-ppc64.tar.gz
           targets:
             - cpu: ppc64
               os: aix
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-xmdikjbjITYW8JF7hOtScG4hPA6KIxJAIzX/9vx0Y8Q=
+            integrity: sha256-+42r/aMjLvkNmS5kOYJPwyNzVsBNGC8/qIO+vu8x6HE=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-darwin-arm64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-darwin-arm64.tar.gz
           targets:
             - cpu: arm64
               os: darwin
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-Hl6/aZVeASFvXGC5yYnRvdqOUCLi9gx14brzCcW/9Q4=
+            integrity: sha256-Uw/7QZeJ+EMhU3WmW4/PTPAQc16ZJ29RKiQaMbqOXhM=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-darwin-x64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-darwin-x64.tar.gz
           targets:
             - cpu: x64
               os: darwin
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-2ZDsPCHOi9tvdu1OHIddbj5LdaAtAY6F3wZiwLrYO1M=
+            integrity: sha256-L4I+zU+TMdZJL+2+UMWmEL4whFIfOlrxRodeAKUvLmM=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-arm64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-linux-arm64.tar.gz
           targets:
             - cpu: arm64
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-sUxD+6n9080s7t9VgjNQKh5vx6YEx7xjMBjW1h2SvR0=
+            integrity: sha256-iRDLMhd7aJYgKChZzhmiwCheVe7t70hU/5rz2ju1S14=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-ppc64le.tar.gz
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-linux-ppc64le.tar.gz
           targets:
             - cpu: ppc64le
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-fHgm+ah50Rcg0caKyjasPR2e7Gl5ghOea0X0LiYNA5E=
+            integrity: sha256-ca9Z2aLkDO5nQAhMQK4oE47/TV+/G6gdvHKd/8XHH3w=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-s390x.tar.gz
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-linux-s390x.tar.gz
           targets:
             - cpu: s390x
               os: linux
         - resolution:
             archive: tarball
             bin: bin/node
-            integrity: sha256-b+O4+kSFefco96Dlu7OrajUtLGMH4TrjeoYQaj5Mmq8=
+            integrity: sha256-4GxwaQEtQJFMV7MRV8adTOg+of6dY7u30m4FCaRTXSE=
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-linux-x64.tar.gz
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-linux-x64.tar.gz
           targets:
             - cpu: x64
               os: linux
         - resolution:
             archive: zip
             bin: node.exe
-            integrity: sha256-DFvnk6Fp2wgS+FSbNn/BWRvT5MQBpccA3YuLLMLnTF4=
-            prefix: node-v25.8.1-win-arm64
+            integrity: sha256-oI6BfTyobgZYmMfZJvnAyabYEqyYiPf3z9jBR+6Muyk=
+            prefix: node-v25.8.2-win-arm64
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-win-arm64.zip
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-win-arm64.zip
           targets:
             - cpu: arm64
               os: win32
         - resolution:
             archive: zip
             bin: node.exe
-            integrity: sha256-CaWg27L0zvqACIABKBDi36rAAWpi518GTEq382BrLXg=
-            prefix: node-v25.8.1-win-x64
+            integrity: sha256-UYFdWwJWuUfSfWFN4EBg/P29uDDSyG5j5vM9v3lkzKc=
+            prefix: node-v25.8.2-win-x64
             type: binary
-            url: https://nodejs.org/download/release/v25.8.1/node-v25.8.1-win-x64.zip
+            url: https://nodejs.org/download/release/v25.8.2/node-v25.8.2-win-x64.zip
           targets:
             - cpu: x64
               os: win32
-    version: 25.8.1
+    version: 25.8.2
     hasBin: true
 
   normalize-path@3.0.0:
@@ -7720,13 +7720,13 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/amazon-bedrock@4.0.82(zod@4.3.6)':
+  '@ai-sdk/amazon-bedrock@4.0.83(zod@4.3.6)':
     dependencies:
-      '@ai-sdk/anthropic': 3.0.63(zod@4.3.6)
+      '@ai-sdk/anthropic': 3.0.64(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
-      '@smithy/eventstream-codec': 4.2.5
-      '@smithy/util-utf8': 4.2.0
+      '@smithy/eventstream-codec': 4.2.12
+      '@smithy/util-utf8': 4.2.2
       aws4fetch: 1.0.20
       zod: 4.3.6
 
@@ -7736,7 +7736,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.3(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/anthropic@3.0.63(zod@4.3.6)':
+  '@ai-sdk/anthropic@3.0.64(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
@@ -7775,7 +7775,7 @@ snapshots:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       zod: 4.3.6
 
-  '@ai-sdk/gateway@3.0.79(zod@4.3.6)':
+  '@ai-sdk/gateway@3.0.80(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
@@ -7872,10 +7872,10 @@ snapshots:
     dependencies:
       json-schema: 0.4.0
 
-  '@ai-sdk/react@3.0.139(react@19.2.4)(zod@4.3.6)':
+  '@ai-sdk/react@3.0.140(react@19.2.4)(zod@4.3.6)':
     dependencies:
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
-      ai: 6.0.137(zod@4.3.6)
+      ai: 6.0.138(zod@4.3.6)
       react: 19.2.4
       swr: 2.4.1(react@19.2.4)
       throttleit: 2.1.0
@@ -8001,18 +8001,18 @@ snapshots:
   '@aws-crypto/crc32@5.2.0':
     dependencies:
       '@aws-crypto/util': 5.2.0
-      '@aws-sdk/types': 3.922.0
+      '@aws-sdk/types': 3.973.6
       tslib: 2.8.1
 
   '@aws-crypto/util@5.2.0':
     dependencies:
-      '@aws-sdk/types': 3.922.0
+      '@aws-sdk/types': 3.973.6
       '@smithy/util-utf8': 2.3.0
       tslib: 2.8.1
 
-  '@aws-sdk/types@3.922.0':
+  '@aws-sdk/types@3.973.6':
     dependencies:
-      '@smithy/types': 4.9.0
+      '@smithy/types': 4.13.1
       tslib: 2.8.1
 
   '@babel/code-frame@7.27.1':
@@ -9454,9 +9454,9 @@ snapshots:
 
   '@open-draft/until@2.1.0': {}
 
-  '@openrouter/ai-sdk-provider@2.3.3(ai@6.0.137(zod@4.3.6))(zod@4.3.6)':
+  '@openrouter/ai-sdk-provider@2.3.3(ai@6.0.138(zod@4.3.6))(zod@4.3.6)':
     dependencies:
-      ai: 6.0.137(zod@4.3.6)
+      ai: 6.0.138(zod@4.3.6)
       zod: 4.3.6
 
   '@opentelemetry/api-logs@0.208.0':
@@ -10010,22 +10010,22 @@ snapshots:
 
   '@sindresorhus/merge-streams@4.0.0': {}
 
-  '@smithy/eventstream-codec@4.2.5':
+  '@smithy/eventstream-codec@4.2.12':
     dependencies:
       '@aws-crypto/crc32': 5.2.0
-      '@smithy/types': 4.9.0
-      '@smithy/util-hex-encoding': 4.2.0
+      '@smithy/types': 4.13.1
+      '@smithy/util-hex-encoding': 4.2.2
       tslib: 2.8.1
 
   '@smithy/is-array-buffer@2.2.0':
     dependencies:
       tslib: 2.8.1
 
-  '@smithy/is-array-buffer@4.2.0':
+  '@smithy/is-array-buffer@4.2.2':
     dependencies:
       tslib: 2.8.1
 
-  '@smithy/types@4.9.0':
+  '@smithy/types@4.13.1':
     dependencies:
       tslib: 2.8.1
 
@@ -10034,12 +10034,12 @@ snapshots:
       '@smithy/is-array-buffer': 2.2.0
       tslib: 2.8.1
 
-  '@smithy/util-buffer-from@4.2.0':
+  '@smithy/util-buffer-from@4.2.2':
     dependencies:
-      '@smithy/is-array-buffer': 4.2.0
+      '@smithy/is-array-buffer': 4.2.2
       tslib: 2.8.1
 
-  '@smithy/util-hex-encoding@4.2.0':
+  '@smithy/util-hex-encoding@4.2.2':
     dependencies:
       tslib: 2.8.1
 
@@ -10048,9 +10048,9 @@ snapshots:
       '@smithy/util-buffer-from': 2.2.0
       tslib: 2.8.1
 
-  '@smithy/util-utf8@4.2.0':
+  '@smithy/util-utf8@4.2.2':
     dependencies:
-      '@smithy/util-buffer-from': 4.2.0
+      '@smithy/util-buffer-from': 4.2.2
       tslib: 2.8.1
 
   '@standard-schema/spec@1.1.0': {}
@@ -10704,9 +10704,9 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ai@6.0.137(zod@4.3.6):
+  ai@6.0.138(zod@4.3.6):
     dependencies:
-      '@ai-sdk/gateway': 3.0.79(zod@4.3.6)
+      '@ai-sdk/gateway': 3.0.80(zod@4.3.6)
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.21(zod@4.3.6)
       '@opentelemetry/api': 1.9.0
@@ -13504,7 +13504,7 @@ snapshots:
 
   node-releases@2.0.27: {}
 
-  node@runtime:25.8.1: {}
+  node@runtime:25.8.2: {}
 
   normalize-path@3.0.0: {}
 
@@ -13597,11 +13597,11 @@ snapshots:
 
   ohash@2.0.11: {}
 
-  ollama-ai-provider-v2@3.5.0(ai@6.0.137(zod@4.3.6))(zod@4.3.6):
+  ollama-ai-provider-v2@3.5.0(ai@6.0.138(zod@4.3.6))(zod@4.3.6):
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@ai-sdk/provider-utils': 4.0.19(zod@4.3.6)
-      ai: 6.0.137(zod@4.3.6)
+      ai: 6.0.138(zod@4.3.6)
       zod: 4.3.6
 
   on-exit-leak-free@2.1.2: {}
