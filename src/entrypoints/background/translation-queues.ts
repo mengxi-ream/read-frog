@@ -28,16 +28,63 @@ export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
 }
 
+interface LatexProtectionResult {
+  text: string
+  segments: string[]
+}
+
+function shouldProtectLatex(text: string): boolean {
+  return /\\\(|\\\[|\\begin\{|\$\$|\$[^$\n]+\$/.test(text)
+}
+
+function protectLatex(text: string): LatexProtectionResult {
+  if (!shouldProtectLatex(text)) {
+    return { text, segments: [] }
+  }
+
+  const segments: string[] = []
+  const patterns = [
+    /\$\$[\s\S]*?\$\$/g,
+    /\\\[[\s\S]*?\\\]/g,
+    /\\\([\s\S]*?\\\)/g,
+    /\\begin\{([^\n{}]+)\}[\s\S]*?\\end\{\1\}/g,
+    /\$[^$\n]+?\$/g,
+  ]
+
+  let protectedText = text
+  for (const pattern of patterns) {
+    protectedText = protectedText.replace(pattern, (match) => {
+      const index = segments.push(match) - 1
+      return `__READ_FROG_LATEX_${index}__`
+    })
+  }
+
+  return { text: protectedText, segments }
+}
+
+function restoreLatex(text: string, segments: string[]): string {
+  if (segments.length === 0) {
+    return text
+  }
+
+  return text.replace(/__READ_FROG_LATEX_(\d+)__/g, (match, index) => {
+    const segment = segments[Number(index)]
+    return segment ?? match
+  })
+}
+
 export async function executeBatchTranslation(
   dataList: TranslateBatchData[],
   promptResolver: PromptResolver,
 ): Promise<string[]> {
   const { langConfig, providerConfig, content } = dataList[0]
-  const texts = dataList.map(d => d.text)
+  const protectedTexts = dataList.map(d => protectLatex(d.text))
 
-  const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
+  const batchText = protectedTexts.map(d => d.text).join(`\n\n${BATCH_SEPARATOR}\n\n`)
   const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, content })
-  return parseBatchResult(result)
+  const translatedTexts = parseBatchResult(result)
+
+  return protectedTexts.map((item, index) => restoreLatex(translatedTexts[index] ?? "", item.segments))
 }
 
 async function getOrGenerateSummary(
@@ -145,7 +192,9 @@ async function createTranslationQueues(config: TranslationQueueSetupConfig) {
       const { text, langConfig, providerConfig, hash, scheduleAt, content } = data
       const thunk = async () => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
-        return executeTranslate(text, langConfig, providerConfig, promptResolver, { content })
+        const protectedText = protectLatex(text)
+        const translated = await executeTranslate(protectedText.text, langConfig, providerConfig, promptResolver, { content })
+        return restoreLatex(translated, protectedText.segments)
       }
       return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
