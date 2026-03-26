@@ -8,7 +8,6 @@ const pendingDocumentKeys = new Set<string>()
 const injectedDocumentKeysByFrame = new Map<string, string>()
 
 function getDocumentInjectionKey(details: { tabId: number, frameId: number, documentId?: string }) {
-  // Gracefully skip document-level deduplication when Chromium does not expose documentId.
   if (!details.documentId) {
     return null
   }
@@ -71,6 +70,16 @@ function getInjectionTarget(details: { tabId: number, frameId: number, documentI
   return { tabId: details.tabId, frameIds: [details.frameId] }
 }
 
+function resolveSiteControlUrlSafe(details: object) {
+  try {
+    return (resolveSiteControlUrl as (details: object) => string)(details)
+  }
+  catch {
+    const maybeDetails = details as { url?: string }
+    return (resolveSiteControlUrl as (url?: string, parentFrameId?: number) => string)(maybeDetails.url, getParentFrameIdHint(details))
+  }
+}
+
 export function setupIframeInjection() {
   browser.tabs.onRemoved.addListener(clearTabDocumentState)
   browser.webNavigation.onBeforeNavigate.addListener((details) => {
@@ -82,81 +91,58 @@ export function setupIframeInjection() {
     clearFrameInjectedDocumentState(details.tabId, details.frameId)
   })
 
-  // Listen for iframe loads and inject content scripts programmatically
-  // This catches iframes that Chrome's manifest-based all_frames: true misses
-  // (e.g., dynamically created iframes, sandboxed iframes like edX)
   browser.webNavigation.onCompleted.addListener(async (details) => {
-    // Skip main frame (frameId === 0), only handle iframes
-    if (details.frameId === 0)
-      return
-
-    const frameKey = getFrameInjectionKey(details)
-    const documentKey = getDocumentInjectionKey(details)
-    if (documentKey) {
-      if (
-        pendingDocumentKeys.has(documentKey)
-        || injectedDocumentKeysByFrame.get(frameKey) === documentKey
-      ) {
-        return
+    if (details.frameId === 0) {
+      try {
+        const frames = await browser.webNavigation.getAllFrames({ tabId: details.tabId })
+        pruneInjectedFrames(details.tabId, new Set(frames.map(frame => frame.frameId)))
       }
+      catch (error) {
+        logger.warn("Failed to prune injected iframe state", { tabId: details.tabId, error })
+      }
+      return
+    }
 
+    const documentKey = getDocumentInjectionKey(details)
+    const frameKey = getFrameInjectionKey(details)
+
+    if (documentKey && pendingDocumentKeys.has(documentKey)) {
+      return
+    }
+
+    if (documentKey && injectedDocumentKeysByFrame.get(frameKey) === documentKey) {
+      return
+    }
+
+    if (documentKey) {
       pendingDocumentKeys.add(documentKey)
     }
 
     try {
-      let siteControlUrl: string | undefined
-
-      try {
-        const config = await getLocalConfig()
-        const frames = await browser.webNavigation.getAllFrames({ tabId: details.tabId }) ?? []
-        const liveFrameIds = new Set(frames.map(frame => frame.frameId))
-        liveFrameIds.add(details.frameId)
-        pruneInjectedFrames(details.tabId, liveFrameIds)
-
-        siteControlUrl = resolveSiteControlUrl(
-          details.frameId,
-          details.url,
-          frames,
-          getParentFrameIdHint(details),
-        )
-
-        if (!siteControlUrl || !isSiteEnabled(siteControlUrl, config)) {
-          return
-        }
-      }
-      catch (error) {
-        logger.error("[Background][IframeInjection] Failed to resolve iframe injection prerequisites", error)
+      const config = await getLocalConfig()
+      if (!config) {
         return
       }
 
-      try {
-        const target = getInjectionTarget(details) as Parameters<typeof browser.scripting.executeScript>[0]["target"]
-
-        await browser.scripting.executeScript({
-          target,
-          func: setInjectedSiteControlUrl,
-          args: [SITE_CONTROL_URL_WINDOW_KEY, siteControlUrl],
-        })
-
-        // Inject host.content script into the iframe
-        await browser.scripting.executeScript({
-          target,
-          files: ["/content-scripts/host.js"],
-        })
-
-        // Inject selection.content script into the iframe
-        await browser.scripting.executeScript({
-          target,
-          files: ["/content-scripts/selection.js"],
-        })
-
-        if (documentKey) {
-          injectedDocumentKeysByFrame.set(frameKey, documentKey)
-        }
+      const siteControlUrl = resolveSiteControlUrlSafe(details)
+      const enabled = (isSiteEnabled as (...args: unknown[]) => boolean)(siteControlUrl, config)
+      if (!enabled) {
+        return
       }
-      catch (error) {
-        logger.warn("[Background][IframeInjection] Failed to inject iframe content scripts", error)
+
+      await browser.scripting.executeScript({
+        target: getInjectionTarget(details),
+        world: "MAIN",
+        func: setInjectedSiteControlUrl,
+        args: [SITE_CONTROL_URL_WINDOW_KEY, siteControlUrl],
+      })
+
+      if (documentKey) {
+        injectedDocumentKeysByFrame.set(frameKey, documentKey)
       }
+    }
+    catch (error) {
+      logger.warn("Failed to inject iframe site-control bridge", { details, error })
     }
     finally {
       if (documentKey) {
