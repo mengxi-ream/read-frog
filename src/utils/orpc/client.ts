@@ -1,7 +1,7 @@
 import type { ORPCRouterClient } from "@read-frog/api-contract"
 import { createORPCClient } from "@orpc/client"
 import { RPCLink } from "@orpc/client/fetch"
-import { BatchLinkPlugin } from "@orpc/client/plugins"
+import { createTanstackQueryUtils } from "@orpc/tanstack-query"
 import { WEBSITE_URL } from "../constants/url"
 import { normalizeHeaders } from "../http"
 import { sendMessage } from "../message"
@@ -12,16 +12,6 @@ const link = new RPCLink({
   headers: {
     "x-orpc-source": "extension",
   },
-  plugins: [
-    new BatchLinkPlugin({
-      groups: [
-        {
-          condition: () => true,
-          context: {},
-        },
-      ],
-    }),
-  ],
   // Proxy fetch through background to avoid CORS in content scripts
   fetch: async (request) => {
     // request is already a Request object with method, headers, body
@@ -48,4 +38,5 @@ const link = new RPCLink({
   },
 })
 
-export const orpc: ORPCRouterClient = createORPCClient(link)
+export const orpcClient: ORPCRouterClient = createORPCClient(link)
+export const orpc = createTanstackQueryUtils(orpcClient)

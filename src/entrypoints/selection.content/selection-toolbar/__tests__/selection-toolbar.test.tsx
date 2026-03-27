@@ -2,6 +2,7 @@
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react"
 import { atom } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE } from "@/entrypoints/selection.content/overlay-layers"
 import { SelectionToolbar } from "../index"
 
 const MOCK_SELECTED_TEXT = "Selected Text"
@@ -384,6 +385,46 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       callbacks.forEach(cb => cb(0))
     })
 
+    expectToolbarHidden()
+  })
+
+  it("should not show toolbar when selection boundaries are text nodes inside an overlay root", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="selected-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    await clearToolbarState()
+
+    const overlayRoot = document.createElement("div")
+    overlayRoot.setAttribute(SELECTION_CONTENT_OVERLAY_ROOT_ATTRIBUTE, "")
+    const overlayTextElement = document.createElement("span")
+    overlayTextElement.textContent = MOCK_SELECTED_TEXT
+    overlayRoot.appendChild(overlayTextElement)
+    document.body.appendChild(overlayRoot)
+
+    const textNode = overlayTextElement.firstChild
+    if (!textNode) {
+      throw new Error("Missing overlay text node")
+    }
+
+    window.getSelection = vi.fn(() => ({
+      anchorNode: textNode,
+      focusNode: textNode,
+      rangeCount: 1,
+      toString: vi.fn(() => MOCK_SELECTED_TEXT),
+      getRangeAt: () => ({
+        startContainer: textNode,
+        startOffset: 0,
+        endContainer: textNode,
+        endOffset: MOCK_SELECTED_TEXT.length,
+      }),
+      containsNode: vi.fn(() => true),
+    })) as unknown as typeof window.getSelection
+
+    await triggerMouseUpWithSelection(overlayTextElement)
     expectToolbarHidden()
   })
 

@@ -37,7 +37,7 @@ function PreviewField({
         <div
           data-slot="selection-toolbar-footer-preview-value"
           data-field={field}
-          className="max-h-36 overflow-y-auto rounded-md border bg-muted/40 px-2 py-1 text-sm whitespace-pre-wrap wrap-break-words text-muted-foreground"
+          className="max-h-36 overflow-y-auto rounded-md border bg-muted/40 px-2 py-1 text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-muted-foreground"
         >
           {displayValue}
         </div>
@@ -136,6 +136,7 @@ export function RegenerateButton({
 }
 
 export function SelectionToolbarFooterContent({
+  children,
   className,
   paragraphsText,
   onProviderChange,
@@ -144,6 +145,7 @@ export function SelectionToolbarFooterContent({
   titleText,
   value,
 }: {
+  children?: React.ReactNode
   className?: string
   paragraphsText: string | null | undefined
   onProviderChange: (id: string) => void
@@ -166,6 +168,7 @@ export function SelectionToolbarFooterContent({
         />
       </div>
       <div className="flex items-center gap-1">
+        {children}
         <ContextDetailsButton titleText={titleText} paragraphsText={paragraphsText} />
         <RegenerateButton onRegenerate={onRegenerate} />
       </div>

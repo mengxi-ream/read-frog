@@ -96,29 +96,33 @@ describe("translation queue helpers", () => {
     translationCachePutMock.mockResolvedValue(undefined)
   })
 
-  it("routes only llm providers through the batch queue", async () => {
-    const { shouldUseBatchQueue } = await import("../translation-queues")
+  it(
+    "routes only llm providers through the batch queue",
+    async () => {
+      const { shouldUseBatchQueue } = await import("../translation-queues")
 
-    const deeplProvider: ProviderConfig = {
-      id: "deepl",
-      name: "DeepL",
-      provider: "deepl",
-      enabled: true,
-      apiKey: "key",
-    }
+      const deeplProvider: ProviderConfig = {
+        id: "deepl",
+        name: "DeepL",
+        provider: "deepl",
+        enabled: true,
+        apiKey: "key",
+      }
 
-    const deeplxProvider: ProviderConfig = {
-      id: "deeplx",
-      name: "DeepLX",
-      provider: "deeplx",
-      enabled: true,
-      baseURL: "https://api.deeplx.org",
-    }
+      const deeplxProvider: ProviderConfig = {
+        id: "deeplx",
+        name: "DeepLX",
+        provider: "deeplx",
+        enabled: true,
+        baseURL: "https://api.deeplx.org",
+      }
 
-    expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
-    expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
-    expect(shouldUseBatchQueue(llmProvider)).toBe(true)
-  })
+      expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
+      expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
+      expect(shouldUseBatchQueue(llmProvider)).toBe(true)
+    },
+    15_000,
+  )
 
   it("passes subtitle summary through the translation queue without generating a new summary", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")

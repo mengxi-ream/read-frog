@@ -20,11 +20,13 @@ import {
   getSelectionToolbarCustomActionTokenCellText,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
+import { sanitizeSelectionToolbarCustomAction } from "@/utils/notebase"
 import { cn } from "@/utils/styles/utils"
 import { selectedCustomActionIdAtom } from "../atoms"
 import { formOpts, useAppForm } from "./form"
 import { IconField } from "./icon-field"
 import { NameField } from "./name-field"
+import { NotebaseConnectionField } from "./notebase-connection-field"
 import { OutputSchemaField } from "./output-schema-field"
 import { ProviderField } from "./provider-field"
 
@@ -51,6 +53,7 @@ export function CustomActionConfigForm() {
 
 function CustomActionConfigEditor({ selectedAction }: { selectedAction: SelectionToolbarCustomAction }) {
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const betaExperienceConfig = useAtomValue(configFieldsAtomMap.betaExperience)
   const [, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
 
   const customActions = selectionToolbarConfig.customActions ?? []
@@ -59,8 +62,9 @@ function CustomActionConfigEditor({ selectedAction }: { selectedAction: Selectio
     ...formOpts,
     defaultValues: selectedAction,
     onSubmit: async ({ value }) => {
+      const nextValue = sanitizeSelectionToolbarCustomAction(value)
       const updatedCustomActions = customActions.map(action =>
-        action.id === selectedAction.id ? value : action,
+        action.id === selectedAction.id ? nextValue : action,
       )
 
       await setSelectionToolbarConfig({
@@ -130,6 +134,8 @@ function CustomActionConfigEditor({ selectedAction }: { selectedAction: Selectio
           </form.AppField>
 
           <OutputSchemaField form={form} />
+
+          {betaExperienceConfig.enabled && <NotebaseConnectionField form={form} />}
         </div>
         <div className="flex justify-end mt-8">
           <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>

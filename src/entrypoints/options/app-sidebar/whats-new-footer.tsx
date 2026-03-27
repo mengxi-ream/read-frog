@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/base-ui/sidebar"
 import {
   buildBilibiliEmbedUrl,
+  getBlogLocaleFromUILanguage,
   getLastViewedBlogDate,
   getLatestBlogDate,
   hasNewBlogPost,
@@ -28,6 +29,7 @@ import { version } from "../../../../package.json"
 export function WhatsNewFooter() {
   const queryClient = useQueryClient()
   const [open, setOpen] = useState(false)
+  const blogLocale = getBlogLocaleFromUILanguage()
 
   const { data: lastViewedDate, isFetched: isLastViewedDateFetched } = useQuery({
     queryKey: ["last-viewed-blog-date"],
@@ -35,8 +37,8 @@ export function WhatsNewFooter() {
   })
 
   const { data: latestBlogPost, isFetched: isLatestBlogPostFetched } = useQuery({
-    queryKey: ["latest-blog-post"],
-    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, "en", version),
+    queryKey: ["latest-blog-post", blogLocale],
+    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, blogLocale, version),
   })
 
   const markLatestBlogPostViewed = useEffectEvent(async () => {

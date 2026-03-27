@@ -66,7 +66,9 @@ describe("selectionToolbarFooterContent", () => {
           value="google-translate-default"
           onProviderChange={onProviderChange}
           onRegenerate={onRegenerate}
-        />
+        >
+          <button type="button">Save to Notebase</button>
+        </SelectionToolbarFooterContent>
       </TooltipProvider>,
     )
 
@@ -81,9 +83,11 @@ describe("selectionToolbarFooterContent", () => {
     expect(screen.getByText(i18n.t("action.contextDetailsParagraphsLabel"))).toBeInTheDocument()
     expect(screen.getByText("Page Title")).toBeInTheDocument()
     expect(screen.getByText("Context text")).toBeInTheDocument()
-    expect(
-      screen.getByText("Context text").closest("[data-slot='selection-toolbar-footer-preview-value']"),
-    ).toHaveClass("max-h-36", "overflow-y-auto")
+    expect(screen.getByRole("button", { name: "Save to Notebase" })).toBeInTheDocument()
+    const contextPreview = screen.getByText("Context text").closest("[data-slot='selection-toolbar-footer-preview-value']")
+
+    expect(contextPreview).toHaveClass("max-h-36", "overflow-y-auto", "break-words")
+    expect(contextPreview?.className).toContain("[overflow-wrap:anywhere]")
 
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "action.regenerate" }))

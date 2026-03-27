@@ -28,7 +28,7 @@ export function TranslationContent({
         {thinking && (
           <Thinking status={thinking.status} content={thinking.text} />
         )}
-        <p className="text-sm whitespace-pre-wrap wrap-break-words">
+        <p className="text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
           {showLoadingIndicator && <IconLoader2 className="inline size-4 animate-spin" strokeWidth={1.6} />}
           {translatedText}
           {showStreamingIndicator && " ●"}

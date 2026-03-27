@@ -1,5 +1,31 @@
 # @read-frog/extension
 
+## 1.31.4
+
+### Patch Changes
+
+- [#1224](https://github.com/mengxi-ream/read-frog/pull/1224) [`64931e3`](https://github.com/mengxi-ream/read-frog/commit/64931e3307564760cc1ff67291380146be2fcbf7) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): ignore overlay text selections
+
+- [#1225](https://github.com/mengxi-ream/read-frog/pull/1225) [`8774215`](https://github.com/mengxi-ream/read-frog/commit/8774215468c00ad3b9a325a20e2c0aad88d79100) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(openai): sync GPT-5.4 model defaults and reasoning floors
+
+- [#1217](https://github.com/mengxi-ream/read-frog/pull/1217) [`d97ce8c`](https://github.com/mengxi-ream/read-frog/commit/d97ce8c9b89090954d400634da7b73343975e3b3) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(selection-toolbar): wrap long text in selection popovers
+
+## 1.31.3
+
+### Patch Changes
+
+- [#1207](https://github.com/mengxi-ream/read-frog/pull/1207) [`8df06c3`](https://github.com/mengxi-ream/read-frog/commit/8df06c3a8c73f8a9deaaac3948738781f600fa61) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(i18n): use the UI locale for latest blog content
+
+- [#1188](https://github.com/mengxi-ream/read-frog/pull/1188) [`234998a`](https://github.com/mengxi-ream/read-frog/commit/234998aca50e4f373482ae09960baec3274f15fe) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: keep float-wrapped bilingual translations in flow beside floated content
+
+- [#1190](https://github.com/mengxi-ream/read-frog/pull/1190) [`f13e50e`](https://github.com/mengxi-ream/read-frog/commit/f13e50e882ebe7db3c0a48b540acdb877da9719d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(url): support caddy localhost URLs in dev mode
+
+- [#1185](https://github.com/mengxi-ream/read-frog/pull/1185) [`01b38b5`](https://github.com/mengxi-ream/read-frog/commit/01b38b5822ccc9eb1218833315e98d8c27eafa0a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): ignore retargeted interactive clicks
+
+- [#1214](https://github.com/mengxi-ream/read-frog/pull/1214) [`7376421`](https://github.com/mengxi-ream/read-frog/commit/73764212e6aeef148b4cc79c56aa97df71e00960) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - build(typescript): upgrade to TypeScript 6 compatibility
+
+- [#1207](https://github.com/mengxi-ream/read-frog/pull/1207) [`8df06c3`](https://github.com/mengxi-ream/read-frog/commit/8df06c3a8c73f8a9deaaac3948738781f600fa61) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(config-sync): widen the Google Drive conflict resolution dialog for large config diffs
+
 ## 1.31.2
 
 ### Patch Changes

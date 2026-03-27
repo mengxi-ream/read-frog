@@ -115,23 +115,26 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
   }
 })
 
-vi.mock("@/utils/blog", () => ({
-  buildBilibiliEmbedUrl: vi.fn(() => null),
-  getLastViewedBlogDate: (...args: unknown[]) => getLastViewedBlogDateMock(...args),
-  getLatestBlogDate: (...args: unknown[]) => getLatestBlogDateMock(...args),
-  hasNewBlogPost: (latestViewedDate: Date | null, latestDate: Date | null) => {
-    if (!latestDate) {
-      return false
-    }
+vi.mock("@/utils/blog", async () => {
+  return {
+    buildBilibiliEmbedUrl: vi.fn(() => null),
+    getBlogLocaleFromUILanguage: vi.fn(() => "zh"),
+    getLastViewedBlogDate: (...args: unknown[]) => getLastViewedBlogDateMock(...args),
+    getLatestBlogDate: (...args: unknown[]) => getLatestBlogDateMock(...args),
+    hasNewBlogPost: (latestViewedDate: Date | null, latestDate: Date | null) => {
+      if (!latestDate) {
+        return false
+      }
 
-    if (!latestViewedDate) {
-      return true
-    }
+      if (!latestViewedDate) {
+        return true
+      }
 
-    return latestDate > latestViewedDate
-  },
-  saveLastViewedBlogDate: (...args: unknown[]) => saveLastViewedBlogDateMock(...args),
-}))
+      return latestDate > latestViewedDate
+    },
+    saveLastViewedBlogDate: (...args: unknown[]) => saveLastViewedBlogDateMock(...args),
+  }
+})
 
 function createDeferred<T>() {
   let resolve!: (value: T) => void
@@ -192,6 +195,14 @@ describe("whatsNewFooter", () => {
     saveLastViewedBlogDateMock.mockResolvedValue(undefined)
 
     renderWhatsNewFooter()
+
+    await waitFor(() => {
+      expect(getLatestBlogDateMock).toHaveBeenCalledWith(
+        "https://www.readfrog.app/api/blog/latest",
+        "zh",
+        expect.stringMatching(/^\d+\.\d+\.\d+$/),
+      )
+    })
 
     await act(async () => {
       latestBlogPostDeferred.resolve(latestBlogPost)

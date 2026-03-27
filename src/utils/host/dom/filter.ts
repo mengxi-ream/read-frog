@@ -165,7 +165,12 @@ export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElemen
   const dontWalkVisuallyHidden = ["sr-only", "visually-hidden"].some(cls =>
     element.classList.contains(cls),
   )
-  return dontWalkCustomElement || dontWalkContent || dontWalkInvalidTag || dontWalkCSS || dontWalkHidden || dontWalkAriaHidden || dontWalkVisuallyHidden
+
+  if (dontWalkCustomElement || dontWalkContent || dontWalkInvalidTag || dontWalkCSS || dontWalkHidden || dontWalkAriaHidden || dontWalkVisuallyHidden) {
+    return true
+  }
+
+  return false
 }
 
 export function isInlineTransNode(node: TransNode): boolean {
