@@ -127,7 +127,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "minimax": {
-    model: "MiniMax-M2",
+    model: "MiniMax-M2.7",
     isCustomModel: false,
     customModel: null,
   },
