@@ -72,15 +72,10 @@ function SelectionTooltip({
         // 2) even after Base UI set the tooltip to the closed state, the node
         //    could remain visually visible until unmount.
         //
-        // The CSS here intentionally addresses both layers:
-        // - `pointer-events-none`: make the tooltip body mouse-transparent so
-        //   it cannot become the hover target after leaving the trigger.
-        // - `data-closed:hidden data-closed:opacity-0`: Base UI guarantees the
-        //   `data-closed` attribute, but not an immediate visual hide. In the
-        //   selection-content shadow DOM we saw `data-closed` nodes remain
-        //   `display:block`/`opacity:1`, so we force the closed state to render
-        //   as invisible before unmount finishes.
-        className={cn("data-closed:hidden data-closed:opacity-0 pointer-events-none whitespace-nowrap", className)}
+        // This path keeps the popup mouse-transparent while open so
+        // hover-leave cannot land on the tooltip itself and contaminate the
+        // hover chain.
+        className={cn("pointer-events-none whitespace-nowrap", className)}
         container={container}
         // The positioner is a separate overlay box around the popup. Making the
         // popup itself transparent is not enough if the pointer can still land

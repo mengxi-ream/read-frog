@@ -17,7 +17,10 @@ import {
 } from "@/components/ui/base-ui/popover"
 import { SelectionPopover, useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
 import { cn } from "@/utils/styles/utils"
-import { SelectionPopoverTooltip, useSelectionTooltipState } from "./selection-tooltip"
+import {
+  SelectionPopoverTooltip,
+  useSelectionTooltipState,
+} from "./selection-tooltip"
 
 function PreviewField({
   field,
