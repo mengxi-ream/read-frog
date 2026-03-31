@@ -532,6 +532,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.minimax"),
     enabled: true,
     provider: "minimax",
+    baseURL: "https://api.minimaxi.com/anthropic/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.minimax,
   },
   "alibaba": {
@@ -540,6 +541,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.alibaba"),
     enabled: true,
     provider: "alibaba",
+    baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.alibaba,
   },
   "moonshotai": {
