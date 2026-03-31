@@ -1,5 +1,23 @@
 # @read-frog/extension
 
+## 1.32.0
+
+### Minor Changes
+
+- [#1215](https://github.com/mengxi-ream/read-frog/pull/1215) [`dc6fe8e`](https://github.com/mengxi-ream/read-frog/commit/dc6fe8efcd170e4d07e209736bc30236e0b4b23f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(extension): add save to notebase workflow
+
+### Patch Changes
+
+- [#1242](https://github.com/mengxi-ream/read-frog/pull/1242) [`c253982`](https://github.com/mengxi-ream/read-frog/commit/c2539821fba5acc399e4cc056a67765e5d28b84d) Thanks [@kilidoc](https://github.com/kilidoc)! - fix: storage false value reset and backup delete dialog not showing
+
+- [#1195](https://github.com/mengxi-ream/read-frog/pull/1195) [`ce61cc9`](https://github.com/mengxi-ream/read-frog/commit/ce61cc9daa43dd60792951c784cc2d8ba1bf3e84) Thanks [@taiiiyang](https://github.com/taiiiyang)! - perf(subtitles): decouple AI smart context summary from translation
+
+- [#1253](https://github.com/mengxi-ream/read-frog/pull/1253) [`aacbe36`](https://github.com/mengxi-ream/read-frog/commit/aacbe367a1241982ffa9e88ddc09bab00703ab2f) Thanks [@pooneyy](https://github.com/pooneyy)! - feat(models): update minimax model list and default model
+
+- [#1257](https://github.com/mengxi-ream/read-frog/pull/1257) [`8d3baa8`](https://github.com/mengxi-ream/read-frog/commit/8d3baa88dee92081b8467eda89b93e43cd10c4f9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): preserve shared popup close-state behavior in builds
+
+- [#1230](https://github.com/mengxi-ream/read-frog/pull/1230) [`b2173e8`](https://github.com/mengxi-ream/read-frog/commit/b2173e8efa6c3d2307fcd06168879c9e81662096) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): guard notebase beta access
+
 ## 1.31.4
 
 ### Patch Changes
