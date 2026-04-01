@@ -205,6 +205,38 @@ describe("getProviderOptions", () => {
       const options = getProviderOptionsWithOverride("qwen3-max", "alibaba", { foo: "bar" })
       expect(options).toEqual({ alibaba: { foo: "bar" } })
     })
+
+    it("should normalize common OpenAI-compatible snake_case aliases", () => {
+      const options = getProviderOptionsWithOverride("glm-4-flash", "openai-compatible", {
+        reasoning_effort: "minimal",
+        verbosity: "low",
+        foo: "bar",
+      })
+
+      expect(options).toEqual({
+        "openai-compatible": {
+          reasoningEffort: "minimal",
+          textVerbosity: "low",
+          foo: "bar",
+        },
+      })
+    })
+
+    it("should prefer canonical OpenAI-compatible keys when both forms are present", () => {
+      const options = getProviderOptionsWithOverride("glm-4-flash", "volcengine", {
+        reasoning_effort: "high",
+        reasoningEffort: "minimal",
+        verbosity: "high",
+        textVerbosity: "low",
+      })
+
+      expect(options).toEqual({
+        volcengine: {
+          reasoningEffort: "minimal",
+          textVerbosity: "low",
+        },
+      })
+    })
   })
 
   describe("recommendation metadata", () => {
