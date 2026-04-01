@@ -145,6 +145,27 @@ describe("providerOptionsField", () => {
     )
   })
 
+  it("matches recommendations by model name even when the provider differs", () => {
+    render(
+      <ProviderOptionsFieldHarness
+        initialConfig={{
+          ...baseProviderConfig,
+          provider: "groq",
+          model: {
+            model: "qwen/qwen3-32b",
+            isCustomModel: false,
+            customModel: null,
+          },
+        }}
+      />,
+    )
+
+    expect(screen.getByLabelText("provider-options-editor")).toHaveAttribute(
+      "placeholder",
+      JSON.stringify({ enableThinking: false }, null, 2),
+    )
+  })
+
   it("syncs the editor when an external update arrives, even if the saved value is unchanged", async () => {
     const externalProviderOptions = { enableThinking: false }
 

@@ -133,18 +133,44 @@ describe("getProviderOptions", () => {
       expect(alibabaOptions.alibaba?.enableThinking).toBe(false)
     })
 
-    it("should apply Moonshot defaults to kimi-k2-turbo", () => {
-      const options = getProviderOptions("kimi-k2-turbo", "moonshotai")
-      expect(options.moonshotai?.thinking).toEqual({ type: "disabled" })
-      expect(options.moonshotai?.reasoningHistory).toBe("disabled")
+    it("should apply broader Kimi defaults for Moonshot and Fireworks variants", () => {
+      const moonshotTurboOptions = getProviderOptions("kimi-k2-turbo", "moonshotai")
+      expect(moonshotTurboOptions.moonshotai?.thinking).toEqual({ type: "disabled" })
+      expect(moonshotTurboOptions.moonshotai?.reasoningHistory).toBe("disabled")
+
+      const moonshotInstructOptions = getProviderOptions("kimi-k2-instruct-0905", "moonshotai")
+      expect(moonshotInstructOptions.moonshotai?.thinking).toEqual({ type: "disabled" })
+      expect(moonshotInstructOptions.moonshotai?.reasoningHistory).toBe("disabled")
+
+      const fireworksThinkingOptions = getProviderOptions("accounts/fireworks/models/kimi-k2-thinking", "fireworks")
+      expect(fireworksThinkingOptions.fireworks?.thinking).toEqual({ type: "disabled" })
+      expect(fireworksThinkingOptions.fireworks?.reasoningHistory).toBe("disabled")
+
+      const fireworksInstructOptions = getProviderOptions("accounts/fireworks/models/kimi-k2-instruct", "fireworks")
+      expect(fireworksInstructOptions.fireworks?.thinking).toEqual({ type: "disabled" })
+      expect(fireworksInstructOptions.fireworks?.reasoningHistory).toBe("disabled")
     })
 
-    it("should apply Alibaba defaults to qwen3.5 flash and plus models", () => {
+    it("should apply broader Alibaba defaults to Qwen variants", () => {
       const flashOptions = getProviderOptions("qwen3.5-flash", "alibaba")
       expect(flashOptions.alibaba?.enableThinking).toBe(false)
 
       const plusOptions = getProviderOptions("qwen3.5-plus", "alibaba")
       expect(plusOptions.alibaba?.enableThinking).toBe(false)
+
+      const maxOptions = getProviderOptions("qwen-max-latest", "alibaba")
+      expect(maxOptions.alibaba?.enableThinking).toBe(false)
+
+      const vlOptions = getProviderOptions("qwen2.5-vl-72b-instruct", "alibaba")
+      expect(vlOptions.alibaba?.enableThinking).toBe(false)
+
+      const nextOptions = getProviderOptions("Qwen/Qwen3-Next-80B-A3B-Instruct", "alibaba")
+      expect(nextOptions.alibaba?.enableThinking).toBe(false)
+    })
+
+    it("should keep explicit Alibaba thinking-only Qwen variants untouched", () => {
+      const options = getProviderOptions("qwen3-thinking-2507", "alibaba")
+      expect(options).toEqual({})
     })
 
     it("should return low/default-compatible reasoning settings for gpt-oss models", () => {
@@ -155,12 +181,18 @@ describe("getProviderOptions", () => {
       expect(cerebrasOptions.cerebras?.reasoningEffort).toBe("none")
     })
 
-    it("should not apply Alibaba-only enableThinking defaults to non-Alibaba Qwen model names", () => {
+    it("should apply broadened Qwen defaults to provider-prefixed model ids", () => {
       const groqOptions = getProviderOptions("qwen/qwen3-32b", "groq")
-      expect(groqOptions).toEqual({})
+      expect(groqOptions.groq?.enableThinking).toBe(false)
 
       const deepinfraOptions = getProviderOptions("Qwen/Qwen2.5-72B-Instruct", "deepinfra")
-      expect(deepinfraOptions).toEqual({})
+      expect(deepinfraOptions.deepinfra?.enableThinking).toBe(false)
+    })
+
+    it("should apply broadened Kimi defaults to provider-prefixed model ids", () => {
+      const huggingfaceOptions = getProviderOptions("moonshotai/Kimi-K2-Instruct", "huggingface")
+      expect(huggingfaceOptions.huggingface?.thinking).toEqual({ type: "disabled" })
+      expect(huggingfaceOptions.huggingface?.reasoningHistory).toBe("disabled")
     })
 
     it("should return empty object for non-matching models", () => {

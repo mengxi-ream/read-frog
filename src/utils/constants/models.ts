@@ -182,20 +182,22 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // Fireworks reasoning-focused models - disable thinking/history by default
   {
-    pattern: /^accounts\/fireworks\/models\/(?:kimi-k2p5|minimax-m2)$/,
+    pattern: /^accounts\/fireworks\/models\/(?:kimi-k2(?:[a-z0-9.-].*)?|minimax-m2(?:[.-].*)?)$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" } satisfies FireworksProviderOptions as Record<string, JSONValue>,
   },
 
-  // MoonshotAI Kimi K2 models - disable thinking/history by default
+  // Kimi K2 models - disable thinking/history by default.
+  // Keep this broad because recommendation matching is model-name based rather than provider-scoped.
   {
-    pattern: /^kimi-k2(?:\.5|-0905|-turbo|-thinking(?:-turbo)?)?$/,
+    pattern: /(?:^|\/)kimi-k2(?:[a-z0-9.-].*)?$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" } satisfies MoonshotAIProviderOptions as Record<string, JSONValue>,
   },
 
-  // Alibaba hybrid-thinking Qwen models - disable thinking by default.
-  // Keep explicit thinking-only models (for example `qwq-*` and `*-thinking`) untouched.
+  // Qwen models - disable thinking by default.
+  // Keep this broad because recommendation matching is model-name based rather than provider-scoped.
+  // Keep explicit thinking-only variants (for example `qwq-*` and `*-thinking`) untouched.
   {
-    pattern: /^(?:qwen3(?:\.5-(?:plus|flash)|-(?:max(?:-preview)?|235b-a22b|32b|30b-a3b|14b|coder-plus|coder-flash))|qwen-(?:plus(?:-latest)?|flash|turbo(?:-latest)?|coder))$/,
+    pattern: /(?:^|\/)qwen(?!.*[/.-](?:thinking|qwq)(?:[/.-]|$)).*$/i,
     options: { enableThinking: false } satisfies AlibabaProviderOptions as Record<string, JSONValue>,
   },
 

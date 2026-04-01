@@ -116,4 +116,18 @@ describe("providerOptionsRecommendationTrigger", () => {
 
     expect(onApply).toHaveBeenCalledWith({ reasoningEffort: "none" })
   })
+
+  it("renders Kimi recommendations based on model name alone", () => {
+    render(
+      <ProviderOptionsRecommendationTrigger
+        providerId="provider-1"
+        modelId="moonshotai/Kimi-K2-Instruct"
+        onApply={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole("button", {
+      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+    })).toBeInTheDocument()
+  })
 })
