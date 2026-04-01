@@ -316,10 +316,12 @@ function SelectionPopoverContent({
   className,
   children,
   container,
+  finalFocus,
   render,
   ...props
 }: useRender.ComponentProps<"div"> & React.ComponentProps<"div"> & {
   container?: SelectionPopoverPortalContainer
+  finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
 }) {
   const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
   const bodyElementRef = React.useRef<HTMLDivElement | null>(null)
@@ -388,6 +390,8 @@ function SelectionPopoverContent({
     return null
   }
 
+  const resolvedFinalFocus = finalFocus ?? (triggerElement ? { current: triggerElement } : false)
+
   return (
     <DialogPrimitive.Portal container={container}>
       <DialogPrimitive.Popup
@@ -395,7 +399,7 @@ function SelectionPopoverContent({
           "fixed inset-0 pointer-events-none focus:outline-none",
           SELECTION_CONTENT_OVERLAY_LAYERS.popover,
         )}
-        finalFocus={triggerElement ? { current: triggerElement } : false}
+        finalFocus={resolvedFinalFocus}
       >
         <SelectionPopoverShell
           rndRef={rndRef}

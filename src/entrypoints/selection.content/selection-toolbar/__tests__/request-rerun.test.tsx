@@ -89,11 +89,21 @@ vi.mock("@/components/ui/selection-popover", async () => {
     )
   }
 
-  function Content({ children }: { children: React.ReactNode }) {
+  function Content({
+    children,
+    finalFocus,
+  }: {
+    children: React.ReactNode
+    finalFocus?: boolean
+  }) {
     const { open } = usePopoverContext()
     return open
       ? (
-          <div data-testid="selection-popover-content" data-rf-selection-overlay-root="">
+          <div
+            data-testid="selection-popover-content"
+            data-final-focus={finalFocus === false ? "false" : undefined}
+            data-rf-selection-overlay-root=""
+          >
             {children}
           </div>
         )
@@ -502,6 +512,22 @@ describe("selection toolbar requests", () => {
     fireEvent.blur(trigger)
     await waitFor(() => {
       expect(document.querySelector("[data-slot='tooltip-content']")).toBeNull()
+    })
+  })
+
+  it("opts out of focus restoration when closing the translation popover", async () => {
+    translateTextCoreMock.mockResolvedValue("translated once")
+    getOrFetchArticleDataMock.mockResolvedValue(null)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(screen.getByTestId("selection-popover-content")).toHaveAttribute("data-final-focus", "false")
     })
   })
 

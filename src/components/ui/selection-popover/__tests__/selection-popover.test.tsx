@@ -201,6 +201,14 @@ function renderPopover({
   title = "Test Popover",
   onOpenChange = onOpenChangeSpy,
   triggerRect = buildTriggerRect(),
+  contentProps,
+}: {
+  customTrigger?: boolean
+  triggerLabel?: string
+  title?: string
+  onOpenChange?: typeof onOpenChangeSpy
+  triggerRect?: DOMRect
+  contentProps?: Partial<React.ComponentProps<typeof SelectionPopover.Content>>
 } = {}) {
   render(
     <SelectionPopover.Root onOpenChange={onOpenChange}>
@@ -209,7 +217,7 @@ function renderPopover({
       >
         {triggerLabel}
       </SelectionPopover.Trigger>
-      <SelectionPopover.Content>
+      <SelectionPopover.Content {...contentProps}>
         <SelectionPopover.Header className="border-b">
           <SelectionPopover.Title>{title}</SelectionPopover.Title>
           <div className="flex items-center gap-1">
@@ -553,6 +561,42 @@ describe("selectionPopover", () => {
     flushRaf()
 
     expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute("aria-pressed", "false")
+  })
+
+  it("restores focus to the trigger by default when closing", async () => {
+    const { trigger } = renderPopover()
+    const closeButton = screen.getByRole("button", { name: "Close" })
+
+    closeButton.focus()
+    expect(closeButton).toHaveFocus()
+
+    fireEvent.click(closeButton)
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(trigger).toHaveFocus()
+  })
+
+  it("supports opting out of trigger focus restoration on close", async () => {
+    const { trigger } = renderPopover({
+      contentProps: {
+        finalFocus: false,
+      },
+    })
+    const closeButton = screen.getByRole("button", { name: "Close" })
+
+    closeButton.focus()
+    expect(closeButton).toHaveFocus()
+
+    fireEvent.click(closeButton)
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(document.activeElement).not.toBe(trigger)
   })
 
   it("closes a pinned popover when another popover opens", () => {

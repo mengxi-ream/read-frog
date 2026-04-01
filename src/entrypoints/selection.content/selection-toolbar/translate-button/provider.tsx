@@ -462,7 +462,11 @@ export function SelectionTranslationProvider({
         onAnchorChange={setAnchor}
       >
         {children}
-        <SelectionPopover.Content key={popoverSessionKey} container={shadowWrapper ?? document.body}>
+        <SelectionPopover.Content
+          key={popoverSessionKey}
+          container={shadowWrapper ?? document.body}
+          finalFocus={false}
+        >
           <SelectionPopover.Header className="border-b">
             <SelectionToolbarTitleContent
               title="Translation"

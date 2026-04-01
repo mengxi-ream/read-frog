@@ -11,7 +11,15 @@ export function TranslateButton() {
   return (
     <SelectionToolbarTooltip
       content={triggerLabel}
-      render={<SelectionPopover.Trigger aria-label={triggerLabel} onClick={prepareToolbarOpen} />}
+      render={(
+        <SelectionPopover.Trigger
+          aria-label={triggerLabel}
+          onClick={(event) => {
+            event.currentTarget.blur()
+            prepareToolbarOpen()
+          }}
+        />
+      )}
     >
       <RiTranslate className="size-4.5" />
     </SelectionToolbarTooltip>

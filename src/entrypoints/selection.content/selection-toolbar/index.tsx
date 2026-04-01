@@ -442,7 +442,7 @@ export function SelectionToolbar() {
       {selectionToolbar.enabled && !isSiteDisabled && hasAnyEnabledFeature && (
         <div
           ref={tooltipRef}
-          aria-hidden={!isSelectionToolbarVisible}
+          inert={!isSelectionToolbarVisible}
           className={cn(
             `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} bg-popover rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity`,
             isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",

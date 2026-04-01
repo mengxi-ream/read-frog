@@ -514,6 +514,27 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     spy.mockRestore()
   })
+
+  it("keeps aria-hidden off the toolbar in both hidden and visible states", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">{MOCK_SELECTED_TEXT}</div>
+      </div>,
+    )
+
+    const toolbar = document.querySelector(".absolute.z-2147483647") as HTMLElement | null
+    if (!toolbar) {
+      throw new Error("Selection toolbar is missing")
+    }
+
+    expect(toolbar).not.toHaveAttribute("aria-hidden")
+
+    await triggerMouseUpWithSelection(screen.getByTestId("test-element"))
+    await waitFor(expectToolbarVisible)
+
+    expect(toolbar).not.toHaveAttribute("aria-hidden")
+  })
 })
 
 describe("selectionToolbar - positioning logic", () => {

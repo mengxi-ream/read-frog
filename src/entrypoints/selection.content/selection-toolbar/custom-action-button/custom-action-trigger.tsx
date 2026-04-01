@@ -9,6 +9,7 @@ export function SelectionToolbarCustomActionTrigger({ action }: { action: Select
   const { openToolbarCustomAction } = useSelectionCustomActionPopover()
 
   const handleClick = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    event.currentTarget.blur()
     openToolbarCustomAction(action.id, event.currentTarget)
   }, [action.id, openToolbarCustomAction])
 
