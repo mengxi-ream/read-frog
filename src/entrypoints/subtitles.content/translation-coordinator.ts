@@ -81,6 +81,10 @@ export class TranslationCoordinator {
     this.failedStarts.clear()
   }
 
+  triggerTranslationTick() {
+    this.handleTranslationTick()
+  }
+
   private handleTranslationTick = () => {
     const video = this.getVideoElement()
     if (!video)
