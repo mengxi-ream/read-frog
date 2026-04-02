@@ -7,7 +7,7 @@ import {
   TRANSLATION_MODE_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
-import { batchDOMOperation } from "../../dom/batch-dom"
+import { batchDOMOperation, flushBatchedOperations } from "../../dom/batch-dom"
 import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
@@ -77,13 +77,13 @@ export async function translateNodesBilingualMode(
     const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode, walkId)
     if (existedTranslatedWrapper) {
       removeTranslatedWrapperWithRestore(existedTranslatedWrapper)
+      flushBatchedOperations()
       if (toggle) {
         return
       }
       else {
         nodes.forEach(node => translatingNodes.delete(node))
-        void translateNodesBilingualMode(nodes, walkId, config, toggle)
-        return
+        return await translateNodesBilingualMode(nodes, walkId, config, toggle)
       }
     }
 
@@ -212,20 +212,30 @@ export async function translateNodeTranslationOnlyMode(
 
     const finalTranslatedWrapper = existedTranslatedWrapperOutside ?? existedTranslatedWrapper
     if (finalTranslatedWrapper && isHTMLElement(finalTranslatedWrapper)) {
+      // Find the ancestor that will have its innerHTML restored, before removal detaches references
+      let restoredParent: HTMLElement | null = null
+      let ancestor = finalTranslatedWrapper.parentNode
+      while (ancestor && isHTMLElement(ancestor)) {
+        if (originalContentMap.has(ancestor)) {
+          restoredParent = ancestor
+          break
+        }
+        ancestor = ancestor.parentNode
+      }
+
       removeTranslatedWrapperWithRestore(finalTranslatedWrapper)
+      flushBatchedOperations()
       if (toggle) {
         return
       }
       else {
-        // In translationOnly mode, removeTranslatedWrapperWithRestore uses innerHTML to restore content,
-        // which destroys the original DOM nodes and creates new ones. The 'nodes' array still references
-        // the old detached nodes, and targetNode can't reference to the new dom added by innerHTML anymore.
-        // Therefore, by recursively calling translateNodeTranslationOnlyMode here with the
-        // same nodes array, we ensure the translation uses the newly created DOM elements since the
-        // function will re-query and find the correct parent and child nodes from the restored DOM.
         nodes.forEach(node => translatingNodes.delete(node))
-        void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
-        return
+        // In translationOnly mode, removeTranslatedWrapperWithRestore restores innerHTML,
+        // which destroys the original DOM nodes. Get fresh nodes from the restored parent.
+        const freshNodes = restoredParent
+          ? [...restoredParent.childNodes]
+          : nodes
+        return await translateNodeTranslationOnlyMode(freshNodes, walkId, config, toggle)
       }
     }
 
