@@ -39,8 +39,14 @@ export function useControlsInfo(
 
     updateInfo(videoContainer)
 
+    let rafId: number | null = null
     const observer = new MutationObserver(() => {
-      updateInfo(videoContainer)
+      if (rafId !== null)
+        return
+      rafId = requestAnimationFrame(() => {
+        rafId = null
+        updateInfo(videoContainer)
+      })
     })
 
     observer.observe(videoContainer, {
@@ -49,7 +55,12 @@ export function useControlsInfo(
       subtree: true,
     })
 
-    return () => observer.disconnect()
+    return () => {
+      observer.disconnect()
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId)
+      }
+    }
   })
 
   useEffect(() => {
