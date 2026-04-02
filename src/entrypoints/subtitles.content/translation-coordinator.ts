@@ -18,7 +18,7 @@ export class TranslationCoordinator {
   private translatingStarts = new Set<number>()
   private translatedStarts = new Set<number>()
   private failedStarts = new Set<number>()
-  private isTranslating = false
+  private activeTranslations = 0
   private stopped = false
   private lastEmittedState: SubtitlesState = "idle"
   private videoContext: SubtitlesVideoContext = { videoTitle: "", subtitlesTextContent: "" }
@@ -75,7 +75,7 @@ export class TranslationCoordinator {
     this.translatingStarts.clear()
     this.translatedStarts.clear()
     this.failedStarts.clear()
-    this.isTranslating = false
+    this.activeTranslations = 0
     this.lastEmittedState = "idle"
     this.videoContext = { videoTitle: "", subtitlesTextContent: "" }
   }
@@ -109,7 +109,7 @@ export class TranslationCoordinator {
       this.segmentationPipeline.restart()
     }
 
-    if (this.isTranslating)
+    if (this.activeTranslations >= 2)
       return
     void this.translateNearby(currentTimeMs)
   }
@@ -129,7 +129,7 @@ export class TranslationCoordinator {
       return
     }
 
-    this.isTranslating = true
+    this.activeTranslations++
     batch.forEach(f => this.translatingStarts.add(f.start))
 
     try {
@@ -162,7 +162,8 @@ export class TranslationCoordinator {
       this.onStateChange("error", { message: errorMessage })
     }
     finally {
-      this.isTranslating = false
+      this.activeTranslations--
+      this.handleTranslationTick()
     }
   }
 
