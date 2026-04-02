@@ -317,13 +317,15 @@ export class UniversalVideoAdapter {
       onTranslated: fragments => scheduler.supplementSubtitles(fragments),
       onStateChange: (state, data) => scheduler.setState(state, data),
     })
-    this.translationCoordinator.start(videoContext)
     const summaryContextHash = buildSubtitlesSummaryContextHash(videoContext, providerConfig)
     this.subtitlesSummaryContextHash = summaryContextHash ?? null
 
-    // Snapshot which fragments were translated before summary arrived so we
-    // can retrigger them with full context once the summary is ready.
+    // Start translations immediately; snapshot current state so we can
+    // retrigger any fragments translated before the summary arrives.
     const coordinator = this.translationCoordinator
+    const translatedBeforeSummaryFetch = new Set(coordinator.getTranslatedStarts())
+    coordinator.start(videoContext)
+
     void fetchSubtitlesSummary(videoContext).then((summary) => {
       if (!summary || !summaryContextHash) {
         return
@@ -333,7 +335,12 @@ export class UniversalVideoAdapter {
         return
       }
 
-      const translatedBeforeSummary = new Set(coordinator.getTranslatedStarts())
+      // Collect all fragments translated between start and summary arrival
+      const currentTranslated = coordinator.getTranslatedStarts()
+      const translatedBeforeSummary = new Set(
+        [...currentTranslated].filter(start => !translatedBeforeSummaryFetch.has(start)),
+      )
+
       videoContext.summary = summary
 
       if (translatedBeforeSummary.size > 0) {
