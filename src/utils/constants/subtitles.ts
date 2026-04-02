@@ -17,7 +17,6 @@ export const PROCESS_LOOK_AHEAD_MS = 60_000
 
 // AI segmentation concurrency constants
 export const MAX_CONCURRENT_SEGMENTS = 3
-export const MAX_FRAGMENTS_PER_CHUNK = 50
 
 // DOM IDs
 export const TRANSLATE_BUTTON_CONTAINER_ID = "read-frog-subtitles-translate-button-container"
