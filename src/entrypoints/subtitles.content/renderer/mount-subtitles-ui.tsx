@@ -1,4 +1,5 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
+import { browser } from "#imports"
 import { Provider as JotaiProvider } from "jotai"
 import ReactDOM from "react-dom/client"
 import { Toaster } from "sonner"
