@@ -1,6 +1,6 @@
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { getLocalConfig } from "@/utils/config/storage"
-import { MAX_CONCURRENT_SEGMENTS, MAX_FRAGMENTS_PER_CHUNK, PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
+import { MAX_CONCURRENT_SEGMENTS, PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles, rebalanceToTargetRange } from "@/utils/subtitles/processor/optimizer"
 
@@ -147,6 +147,6 @@ export class SegmentationPipeline {
     return this.rawFragments.filter(
       f => f.start >= firstUnprocessed.start && f.start < windowEnd
         && !this.segmentedRawStarts.has(f.start) && !claimed.has(f.start),
-    ).slice(0, MAX_FRAGMENTS_PER_CHUNK)
+    )
   }
 }
