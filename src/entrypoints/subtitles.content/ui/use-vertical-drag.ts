@@ -2,7 +2,7 @@ import type { RefObject } from "react"
 import type { SubtitlePosition } from "../atoms"
 import { useAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef, useState } from "react"
-import { DEFAULT_SUBTITLE_POSITION } from "@/utils/constants/subtitles"
+import { DEFAULT_SUBTITLE_POSITION, MAX_CONTROLS_OFFSET_PERCENT } from "@/utils/constants/subtitles"
 import { getContainingShadowRoot } from "@/utils/host/dom/node"
 import { subtitlesPositionAtom } from "../atoms"
 
@@ -226,7 +226,7 @@ export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: 
   }, [])
 
   const controlsOffsetPercent = controlsVisible && position.anchor === "bottom" && windowStyle.height > 0
-    ? (controlsHeight / windowStyle.height) * 100
+    ? Math.min((controlsHeight / windowStyle.height) * 100, MAX_CONTROLS_OFFSET_PERCENT)
     : 0
 
   const positionStyle: SubtitlePositionStyle = position.anchor === "top"

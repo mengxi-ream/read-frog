@@ -1,6 +1,6 @@
 import { REACT_SHADOW_HOST_CLASS, TRANSLATION_MODE_ATTRIBUTE } from "../../../constants/dom-labels"
 import { removeReactShadowHost } from "../../../react-shadow-host/create-shadow-host"
-import { batchDOMOperation } from "../../dom/batch-dom"
+import { batchDOMOperation, flushBatchedOperations } from "../../dom/batch-dom"
 import { isHTMLElement, isTranslatedWrapperNode } from "../../dom/filter"
 import { deepQueryTopLevelSelector } from "../../dom/find"
 import { originalContentMap } from "../core/translation-state"
@@ -57,4 +57,5 @@ export function removeAllTranslatedWrapperNodes(
   translatedNodes.forEach((contentWrapperNode) => {
     removeTranslatedWrapperWithRestore(contentWrapperNode)
   })
+  flushBatchedOperations()
 }

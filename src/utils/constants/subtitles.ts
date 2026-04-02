@@ -15,6 +15,9 @@ export const TRANSLATION_BATCH_SIZE = 5
 export const TRANSLATE_LOOK_AHEAD_MS = 30_000
 export const PROCESS_LOOK_AHEAD_MS = 60_000
 
+// AI segmentation concurrency constants
+export const MAX_CONCURRENT_SEGMENTS = 3
+
 // DOM IDs
 export const TRANSLATE_BUTTON_CONTAINER_ID = "read-frog-subtitles-translate-button-container"
 export const HIDE_NATIVE_CAPTIONS_STYLE_ID = "read-frog-hide-native-captions"
@@ -62,6 +65,10 @@ export const DEFAULT_SUBTITLE_COLOR = "#FFFFFF"
 export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
 export const DEFAULT_CONTROLS_HEIGHT = 60
+// Cap the upward shift when player controls appear so subtitles don't jump
+// excessively on players with tall control bars (e.g. YouTube Theatre mode).
+// 15% keeps the shift visually comfortable across common viewport sizes.
+export const MAX_CONTROLS_OFFSET_PERCENT = 15
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 
 // Font family mapping

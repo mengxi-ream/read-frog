@@ -1,7 +1,9 @@
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
+import { browser } from "#imports"
 import { Provider as JotaiProvider } from "jotai"
 import ReactDOM from "react-dom/client"
 import { Toaster } from "sonner"
+import rawKatexCSS from "@/assets/styles/katex.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
@@ -10,6 +12,18 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
+
+// Derive the extension base URL for katex font assets.  We call getURL with a
+// known public font path, then use URL to robustly strip the filename.
+const katexFontFullURL = new URL(browser.runtime.getURL("/fonts/katex/KaTeX_Main-Regular.woff2"))
+const katexFontBaseURL = katexFontFullURL.href.slice(0, katexFontFullURL.href.lastIndexOf("/") + 1)
+
+// Rewrite root-relative font URLs to extension-resolved URLs so they load
+// correctly inside shadow DOM on arbitrary webpages.
+const katexCSS = rawKatexCSS.replace(
+  /url\(\/fonts\/katex\//g,
+  `url(${katexFontBaseURL}`,
+)
 
 export async function mountSubtitlesUI(config: PlatformConfig): Promise<void> {
   const videoContainer = await waitForElement(config.selectors.playerContainer)
@@ -29,17 +43,16 @@ export async function mountSubtitlesUI(config: PlatformConfig): Promise<void> {
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 0 !important;
     pointer-events: none;
     z-index: 9999;
-    transition: bottom 0.2s ease-out;
     overflow: hidden;
   `
 
   const shadowRoot = shadowHost.attachShadow({ mode: "open" })
   const hostBuilder = new ShadowHostBuilder(shadowRoot, {
     position: "block",
-    cssContent: [themeCSS],
+    cssContent: [themeCSS, katexCSS],
     inheritStyles: false,
     style: {
       position: "absolute",

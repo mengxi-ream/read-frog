@@ -165,7 +165,7 @@ function shouldKeepBoundary(left: SubtitlesFragment, right: SubtitlesFragment): 
   return isTimeout || startsWithSign
 }
 
-function rebalanceToTargetRange(
+export function rebalanceToTargetRange(
   fragments: SubtitlesFragment[],
   language: string,
 ): SubtitlesFragment[] {
