@@ -43,8 +43,8 @@ function scoreCommunityStanding(input) {
   const followers = toNumber(input.followers)
   score += followers < 10 ? 1 : followers < 50 ? 3 : followers < 200 ? 5 : followers < 1000 ? 7 : 10
 
-  const publicRepos = toNumber(input.publicRepos)
-  score += publicRepos === 0 ? 0 : publicRepos <= 5 ? 2 : publicRepos <= 20 ? 4 : publicRepos <= 50 ? 7 : 10
+  if (POLICY.repoFamiliarityBonusPermissions.includes(input.repoPermission ?? ""))
+    score += 10
 
   return Math.min(score, 25)
 }
@@ -87,19 +87,6 @@ export function getTrustBucket(total) {
 }
 
 export function computeContributorScore(input) {
-  if (input.isAdmin) {
-    return {
-      total: 100,
-      repoFamiliarity: 35,
-      communityStanding: 25,
-      ossInfluence: 20,
-      prTrackRecord: 20,
-      bucket: TRUST_BUCKETS.HIGHLY_TRUSTED,
-      exemptReason: "admin",
-      lowScoreThreshold: POLICY.lowScoreThreshold,
-    }
-  }
-
   const repoFamiliarity = scoreRepoFamiliarity(input)
   const communityStanding = scoreCommunityStanding(input)
   const ossInfluence = scoreOSSInfluence(input)
@@ -113,7 +100,6 @@ export function computeContributorScore(input) {
     ossInfluence,
     prTrackRecord,
     bucket: getTrustBucket(total),
-    exemptReason: null,
     lowScoreThreshold: POLICY.lowScoreThreshold,
   }
 }

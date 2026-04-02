@@ -38,11 +38,7 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
   const trustLabel = plan.targetTrustLabel ?? "none"
   const reviewStatus = plan.needsMaintainerReview ? "required" : "not required"
   const includedRepositories = summarizeTopRepositories(metrics.topRepositories)
-  const excludedForkRepositories = formatRepositoryList(metrics.excludedForkRepositories)
-
-  const intro = score.exemptReason === "admin"
-    ? "This author has repository admin access, so the admin exemption applies in trust policy v1."
-    : `This score estimates contributor familiarity with \`${owner}/${repo}\` using public GitHub signals. It is advisory only and does not block merges automatically.`
+  const intro = `This score estimates contributor familiarity with \`${owner}/${repo}\` using public GitHub signals. It is advisory only and does not block merges automatically.`
 
   return [
     "## Contributor trust score",
@@ -63,18 +59,17 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
     "| Dimension | Score | Signals |",
     "| --- | ---: | --- |",
     `| Repo familiarity | ${score.repoFamiliarity}/35 | merged PRs, resolved PR history, reviews |`,
-    `| Community standing | ${score.communityStanding}/25 | account age, followers, public repos |`,
-    `| OSS influence | ${score.ossInfluence}/20 | stars on top non-fork repositories |`,
+    `| Community standing | ${score.communityStanding}/25 | account age, followers, repo role |`,
+    `| OSS influence | ${score.ossInfluence}/20 | stars on owned non-fork repositories |`,
     `| PR track record | ${score.prTrackRecord}/20 | merge rate across resolved PRs in this repo |`,
     "",
     "**Signals used**",
     `- Repo PR history: merged ${metrics.mergedPrs}, open ${metrics.openPrs}, closed-unmerged ${metrics.closedPrs}`,
     `- Repo reviews: ${metrics.reviews}`,
+    `- Repo permission: ${metrics.repoPermission ?? "none"}`,
     `- Followers: ${metrics.followers}`,
-    `- Public repos: ${metrics.publicRepos}`,
     `- Account age: ${formatMonths(metrics.accountCreated)}`,
-    `- Top non-fork repos considered: max ${includedRepositories.max}, total ${includedRepositories.total} (${includedRepositories.list})`,
-    `- Fork repos excluded from OSS influence: ${excludedForkRepositories}`,
+    `- Owned non-fork repos considered: max ${includedRepositories.max}, total ${includedRepositories.total} (${includedRepositories.list})`,
     "",
     "**Policy**",
     `- Low-score review threshold: < ${POLICY.lowScoreThreshold}`,

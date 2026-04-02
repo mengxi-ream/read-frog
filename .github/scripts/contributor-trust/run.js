@@ -51,7 +51,7 @@ function resolvePullNumber(eventName, payload) {
   return null
 }
 
-function buildScoreInput({ isAdmin, metrics }) {
+function buildScoreInput({ metrics, repoPermission }) {
   const contributionCount = metrics.mergedPrs + metrics.reviews
 
   return {
@@ -60,13 +60,12 @@ function buildScoreInput({ isAdmin, metrics }) {
     contributionCount,
     followers: metrics.followers,
     isContributor: contributionCount > 0,
-    isAdmin,
     prsInRepo: [
       ...Array.from({ length: metrics.mergedPrs }).fill({ state: "merged" }),
       ...Array.from({ length: metrics.closedPrs }).fill({ state: "closed" }),
       ...Array.from({ length: metrics.openPrs }).fill({ state: "open" }),
     ],
-    publicRepos: metrics.publicRepos,
+    repoPermission,
     reviewsInRepo: metrics.reviews,
     topRepoStars: metrics.topRepositories.map(repository => repository.stargazerCount),
   }
@@ -176,18 +175,16 @@ async function main() {
   const permission = await getCollaboratorPermission(token, owner, repo, pullRequest.user.login)
   const authorMetrics = await getAuthorMetrics(token, owner, repo, pullRequest.user.login)
   const scoreInput = buildScoreInput({
-    isAdmin: POLICY.adminPermissions.includes(permission ?? ""),
     metrics: {
       accountCreated: authorMetrics.author.createdAt,
       closedPrs: authorMetrics.repoHistory.closedPrs,
-      excludedForkRepositories: authorMetrics.repoHistory.excludedForkRepositories,
       followers: authorMetrics.author.followers,
       mergedPrs: authorMetrics.repoHistory.mergedPrs,
       openPrs: authorMetrics.repoHistory.openPrs,
-      publicRepos: authorMetrics.author.publicRepos,
       reviews: authorMetrics.repoHistory.reviews,
       topRepositories: authorMetrics.repoHistory.topRepositories,
     },
+    repoPermission: permission ?? null,
   })
 
   const score = computeContributorScore(scoreInput)
@@ -202,11 +199,10 @@ async function main() {
     metrics: {
       accountCreated: authorMetrics.author.createdAt,
       closedPrs: authorMetrics.repoHistory.closedPrs,
-      excludedForkRepositories: authorMetrics.repoHistory.excludedForkRepositories,
       followers: authorMetrics.author.followers,
       mergedPrs: authorMetrics.repoHistory.mergedPrs,
       openPrs: authorMetrics.repoHistory.openPrs,
-      publicRepos: authorMetrics.author.publicRepos,
+      repoPermission: permission ?? "none",
       reviews: authorMetrics.repoHistory.reviews,
       topRepositories: authorMetrics.repoHistory.topRepositories,
     },

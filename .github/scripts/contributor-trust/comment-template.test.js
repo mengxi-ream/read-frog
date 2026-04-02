@@ -14,18 +14,10 @@ describe("buildTrustComment", () => {
       metrics: {
         accountCreated: "2019-01-01T00:00:00Z",
         closedPrs: 0,
-        excludedForkRepositories: [
-          {
-            isFork: true,
-            nameWithOwner: "kilidoc/read-frog",
-            parentNameWithOwner: "mengxi-ream/read-frog",
-            stargazerCount: 5040,
-          },
-        ],
         followers: 3,
         mergedPrs: 1,
         openPrs: 0,
-        publicRepos: 31,
+        repoPermission: "write",
         reviews: 1,
         topRepositories: [
           {
@@ -58,8 +50,10 @@ describe("buildTrustComment", () => {
       },
     })
 
-    expect(comment.body).toContain("stars on top non-fork repositories")
-    expect(comment.body).toContain("Top non-fork repos considered: max 42, total 42 (kilidoc/browser-tools (42))")
-    expect(comment.body).toContain("Fork repos excluded from OSS influence: kilidoc/read-frog (5040)")
+    expect(comment.body).toContain("stars on owned non-fork repositories")
+    expect(comment.body).toContain("Repo permission: write")
+    expect(comment.body).toContain("Owned non-fork repos considered: max 42, total 42 (kilidoc/browser-tools (42))")
+    expect(comment.body).not.toContain("Fork repos excluded from OSS influence")
+    expect(comment.body).not.toContain("Public repos:")
   })
 })

@@ -43,22 +43,22 @@ describe("planTrustActions", () => {
     })
   })
 
-  it("uses the admin label for exempt scores", () => {
+  it("cleans up the legacy admin trust label when recomputing a score", () => {
     const plan = planTrustActions({
-      currentLabels: ["contrib-trust:new"],
+      currentLabels: ["contrib-trust:new", POLICY.adminLabel],
       score: {
         bucket: "highly-trusted",
-        exemptReason: "admin",
-        total: 100,
+        exemptReason: null,
+        total: 82,
       },
     })
 
     expect(plan).toMatchObject({
-      labelsToAdd: [POLICY.adminLabel],
-      labelsToRemove: ["contrib-trust:new"],
+      labelsToAdd: ["contrib-trust:highly-trusted"],
+      labelsToRemove: [POLICY.adminLabel, "contrib-trust:new"].sort(),
       needsMaintainerReview: false,
       skipAutomation: false,
-      targetTrustLabel: POLICY.adminLabel,
+      targetTrustLabel: "contrib-trust:highly-trusted",
     })
   })
 

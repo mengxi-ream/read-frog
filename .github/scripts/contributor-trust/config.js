@@ -11,7 +11,7 @@ export const POLICY = Object.freeze({
   overrideLabel: "trust-check:skip",
   needsMaintainerReviewLabel: "needs-maintainer-review",
   adminLabel: `${TRUST_LABEL_PREFIX}admin`,
-  adminPermissions: ["admin"],
+  repoFamiliarityBonusPermissions: ["admin", "maintain", "write"],
 })
 
 export const TRUST_BUCKETS = Object.freeze({
@@ -54,7 +54,7 @@ export const LABEL_DEFINITIONS = Object.freeze({
   },
   [POLICY.adminLabel]: {
     color: "5319e7",
-    description: "PR author has repository admin access.",
+    description: "Legacy trust label kept for cleanup of old automation runs.",
   },
   [POLICY.needsMaintainerReviewLabel]: {
     color: "b60205",

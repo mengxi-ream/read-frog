@@ -203,39 +203,35 @@ export async function ensureRepositoryLabels(token, owner, repo, labelDefinition
   }
 }
 
-function normalizeTopRepository(node) {
-  if (!node?.nameWithOwner)
+function normalizeOwnedRepository(node, ownerLogin) {
+  if (!node?.nameWithOwner || !ownerLogin)
+    return null
+
+  const repositoryOwner = node.owner?.login?.toLowerCase()
+  if (repositoryOwner !== ownerLogin.toLowerCase())
+    return null
+
+  if (node.isFork === true)
     return null
 
   return {
-    isFork: node.isFork === true,
     nameWithOwner: node.nameWithOwner,
-    parentNameWithOwner: node.parent?.nameWithOwner ?? null,
     stargazerCount: Number(node.stargazerCount) || 0,
   }
 }
 
-export function splitTopRepositories(nodes) {
+export function selectOwnedNonForkRepositories(nodes, ownerLogin) {
   const topRepositories = []
-  const excludedForkRepositories = []
 
   for (const node of nodes ?? []) {
-    const repository = normalizeTopRepository(node)
+    const repository = normalizeOwnedRepository(node, ownerLogin)
     if (!repository)
       continue
-
-    if (repository.isFork) {
-      excludedForkRepositories.push(repository)
-      continue
-    }
 
     topRepositories.push(repository)
   }
 
-  return {
-    excludedForkRepositories,
-    topRepositories,
-  }
+  return topRepositories
 }
 
 export async function getAuthorMetrics(token, owner, repo, authorLogin) {
@@ -265,12 +261,17 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
         repositories {
           totalCount
         }
-        topRepositories(first: 20, orderBy: { field: STARGAZERS, direction: DESC }) {
+        ownedNonForkRepositories: repositories(
+          first: 20
+          ownerAffiliations: [OWNER]
+          isFork: false
+          orderBy: { field: STARGAZERS, direction: DESC }
+        ) {
           nodes {
             isFork
             nameWithOwner
-            parent {
-              nameWithOwner
+            owner {
+              login
             }
             stargazerCount
           }
@@ -301,7 +302,7 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
 
   const data = await graphqlRequest(token, query, variables)
   const user = data.user ?? await getUserFallback(token, authorLogin)
-  const topRepositoryBuckets = splitTopRepositories(data.user?.topRepositories?.nodes ?? [])
+  const topRepositories = selectOwnedNonForkRepositories(data.user?.ownedNonForkRepositories?.nodes ?? [], authorLogin)
 
   return {
     author: {
@@ -316,11 +317,10 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
     rateLimit: data.rateLimit ?? null,
     repoHistory: {
       closedPrs: data.closedPrs?.issueCount ?? 0,
-      excludedForkRepositories: topRepositoryBuckets.excludedForkRepositories,
       mergedPrs: data.mergedPrs?.issueCount ?? 0,
       openPrs: data.openPrs?.issueCount ?? 0,
       reviews: data.reviews?.issueCount ?? 0,
-      topRepositories: topRepositoryBuckets.topRepositories,
+      topRepositories,
     },
   }
 }

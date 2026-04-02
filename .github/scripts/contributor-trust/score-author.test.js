@@ -9,10 +9,9 @@ function createBaseInput() {
     commitsInRepo: 0,
     contributionCount: 0,
     followers: 0,
-    isAdmin: false,
     isContributor: false,
     prsInRepo: [],
-    publicRepos: 0,
+    repoPermission: null,
     reviewsInRepo: 0,
     topRepoStars: [],
   }
@@ -30,20 +29,18 @@ describe("getTrustBucket", () => {
 })
 
 describe("computeContributorScore", () => {
-  it("gives repo admins a full trust exemption", () => {
+  it("does not grant any direct trust exemption to repo admins", () => {
     const score = computeContributorScore({
       ...createBaseInput(),
-      isAdmin: true,
+      repoPermission: "admin",
     })
 
     expect(score).toMatchObject({
-      bucket: TRUST_BUCKETS.HIGHLY_TRUSTED,
-      communityStanding: 25,
-      exemptReason: "admin",
-      ossInfluence: 20,
-      prTrackRecord: 20,
-      repoFamiliarity: 35,
-      total: 100,
+      bucket: TRUST_BUCKETS.NEW,
+      communityStanding: 15,
+      prTrackRecord: 5,
+      repoFamiliarity: 0,
+      total: 20,
     })
   })
 
@@ -79,18 +76,17 @@ describe("computeContributorScore", () => {
         ...Array.from({ length: 9 }).fill({ state: "merged" }),
         { state: "closed" },
       ],
-      publicRepos: 34,
       reviewsInRepo: 12,
       topRepoStars: [520, 40, 12],
     })
 
     expect(score).toMatchObject({
-      bucket: TRUST_BUCKETS.HIGHLY_TRUSTED,
-      communityStanding: 18,
+      bucket: TRUST_BUCKETS.TRUSTED,
+      communityStanding: 11,
       ossInfluence: 17,
       prTrackRecord: 17,
       repoFamiliarity: 32,
-      total: 84,
+      total: 77,
     })
   })
 
@@ -102,9 +98,19 @@ describe("computeContributorScore", () => {
       followers: 12,
       isContributor: true,
       prsInRepo: Array.from({ length: 10 }).fill({ state: "merged" }),
-      publicRepos: 6,
     })
 
     expect(score.prTrackRecord).toBe(18)
+  })
+
+  it("adds the full community standing bonus for admin, maintain, and write access", () => {
+    for (const repoPermission of ["admin", "maintain", "write"]) {
+      const score = computeContributorScore({
+        ...createBaseInput(),
+        repoPermission,
+      })
+
+      expect(score.communityStanding).toBe(15)
+    }
   })
 })
