@@ -3,6 +3,7 @@ import process from "node:process"
 import { defineConfig } from "wxt"
 
 const WXT_API_KEY_PATTERN = /^WXT_.*API_KEY/
+const UNICODE_NONCHARACTER_RE = /[\uFDD0-\uFDEF\uFFFE\uFFFF]/g
 const ALLOWED_BUNDLED_API_KEYS = new Set([
   "WXT_POSTHOG_API_KEY",
 ])
@@ -46,7 +47,7 @@ export default defineConfig({
     // moz-extension:// URLs on regular pages. Firefox enforces this more strictly.
     web_accessible_resources: [
       {
-        resources: ["assets/*.png", "assets/*.svg", "assets/*.webp"],
+        resources: ["assets/*.png", "assets/*.svg", "assets/*.webp", "fonts/katex/*.woff2"],
         matches: ["*://*/*", "file:///*"],
       },
     ],
@@ -79,43 +80,60 @@ export default defineConfig({
     },
   },
   vite: configEnv => ({
-    plugins: configEnv.mode === "production"
-      ? [
-          {
-            name: "check-api-key-env",
-            buildStart() {
-              const apiKeyVars = Object.keys(process.env)
-                .filter(key => WXT_API_KEY_PATTERN.test(key))
-                .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
+    plugins: [
+      {
+        name: "escape-unicode-noncharacters",
+        enforce: "post",
+        generateBundle(_options, bundle) {
+          // Re-escape Unicode noncharacters that Vite's minifier inlined.
+          // These cause Chrome to reject content scripts as "not UTF-8".
+          for (const [, asset] of Object.entries(bundle)) {
+            if (asset.type === "chunk") {
+              asset.code = asset.code.replace(UNICODE_NONCHARACTER_RE, (ch) => {
+                return `\\u${ch.codePointAt(0)!.toString(16).toUpperCase().padStart(4, "0")}`
+              })
+            }
+          }
+        },
+      },
+      ...(configEnv.mode === "production"
+        ? [
+            {
+              name: "check-api-key-env",
+              buildStart() {
+                const apiKeyVars = Object.keys(process.env)
+                  .filter(key => WXT_API_KEY_PATTERN.test(key))
+                  .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
 
-              if (apiKeyVars.length > 0) {
-                throw new Error(
-                  `\n\nFound WXT_*_API_KEY environment variables that may be bundled:\n`
-                  + `${apiKeyVars.map(k => `   - ${k}`).join("\n")}\n\n`
-                  + `Please unset these variables before building for production.\n`,
-                )
-              }
-
-              // Check required env vars only for zip builds
-              if (process.env.WXT_ZIP_MODE) {
-                const requiredEnvVars = [
-                  "WXT_GOOGLE_CLIENT_ID",
-                  "WXT_POSTHOG_API_KEY",
-                  "WXT_POSTHOG_HOST",
-                ]
-                const missing = requiredEnvVars.filter(key => !process.env[key])
-
-                if (missing.length > 0) {
+                if (apiKeyVars.length > 0) {
                   throw new Error(
-                    `\n\nMissing required environment variables for zip:\n`
-                    + `${missing.map(k => `   - ${k}`).join("\n")}\n\n`
-                    + `Set them in .env.production or your environment.\n`,
+                    `\n\nFound WXT_*_API_KEY environment variables that may be bundled:\n`
+                    + `${apiKeyVars.map(k => `   - ${k}`).join("\n")}\n\n`
+                    + `Please unset these variables before building for production.\n`,
                   )
                 }
-              }
+
+                // Check required env vars only for zip builds
+                if (process.env.WXT_ZIP_MODE) {
+                  const requiredEnvVars = [
+                    "WXT_GOOGLE_CLIENT_ID",
+                    "WXT_POSTHOG_API_KEY",
+                    "WXT_POSTHOG_HOST",
+                  ]
+                  const missing = requiredEnvVars.filter(key => !process.env[key])
+
+                  if (missing.length > 0) {
+                    throw new Error(
+                      `\n\nMissing required environment variables for zip:\n`
+                      + `${missing.map(k => `   - ${k}`).join("\n")}\n\n`
+                      + `Set them in .env.production or your environment.\n`,
+                    )
+                  }
+                }
+              },
             },
-          },
-        ]
-      : [],
+          ]
+        : []),
+    ],
   }),
 })

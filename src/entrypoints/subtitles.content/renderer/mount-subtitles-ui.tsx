@@ -2,7 +2,7 @@ import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import { Provider as JotaiProvider } from "jotai"
 import ReactDOM from "react-dom/client"
 import { Toaster } from "sonner"
-import katexCSS from "@/assets/styles/katex.css?inline"
+import rawKatexCSS from "@/assets/styles/katex.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
@@ -11,6 +11,13 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
+
+// Rewrite root-relative font URLs to extension-resolved URLs so they load
+// correctly inside shadow DOM on arbitrary webpages.
+const katexCSS = rawKatexCSS.replace(
+  /url\(\/fonts\/katex\//g,
+  `url(${browser.runtime.getURL("/fonts/katex/")}`,
+)
 
 export async function mountSubtitlesUI(config: PlatformConfig): Promise<void> {
   const videoContainer = await waitForElement(config.selectors.playerContainer)
