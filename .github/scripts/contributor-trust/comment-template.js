@@ -14,19 +14,31 @@ function formatMonths(createdAt) {
   return `${months} month${months === 1 ? "" : "s"}`
 }
 
-function formatList(values) {
-  if (values.length === 0)
+function formatRepositoryList(repositories) {
+  if (repositories.length === 0)
     return "none"
-  return values.join(", ")
+
+  return repositories
+    .map(repository => `${repository.nameWithOwner} (${repository.stargazerCount})`)
+    .join(", ")
+}
+
+function summarizeTopRepositories(repositories) {
+  const stars = repositories.map(repository => repository.stargazerCount)
+
+  return {
+    list: formatRepositoryList(repositories),
+    max: stars.length > 0 ? Math.max(...stars) : 0,
+    total: stars.reduce((sum, starCount) => sum + starCount, 0),
+  }
 }
 
 function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }) {
   const bucketTitle = BUCKET_TITLES[score.bucket]
-  const topRepoStars = metrics.topRepoStars.map(stars => String(stars))
-  const topRepoStarsMax = metrics.topRepoStars.length > 0 ? Math.max(...metrics.topRepoStars) : 0
-  const topRepoStarsTotal = metrics.topRepoStars.reduce((sum, stars) => sum + stars, 0)
   const trustLabel = plan.targetTrustLabel ?? "none"
   const reviewStatus = plan.needsMaintainerReview ? "required" : "not required"
+  const includedRepositories = summarizeTopRepositories(metrics.topRepositories)
+  const excludedForkRepositories = formatRepositoryList(metrics.excludedForkRepositories)
 
   const intro = score.exemptReason === "admin"
     ? "This author has repository admin access, so the admin exemption applies in trust policy v1."
@@ -51,8 +63,8 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
     "| Dimension | Score | Signals |",
     "| --- | ---: | --- |",
     `| Repo familiarity | ${score.repoFamiliarity}/35 | merged PRs, resolved PR history, reviews |`,
-    `| Community standing | ${score.communityStanding}/25 | account age, followers |`,
-    `| OSS influence | ${score.ossInfluence}/20 | stars on top repositories |`,
+    `| Community standing | ${score.communityStanding}/25 | account age, followers, public repos |`,
+    `| OSS influence | ${score.ossInfluence}/20 | stars on top non-fork repositories |`,
     `| PR track record | ${score.prTrackRecord}/20 | merge rate across resolved PRs in this repo |`,
     "",
     "**Signals used**",
@@ -61,7 +73,8 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
     `- Followers: ${metrics.followers}`,
     `- Public repos: ${metrics.publicRepos}`,
     `- Account age: ${formatMonths(metrics.accountCreated)}`,
-    `- Top repo stars: max ${topRepoStarsMax}, total ${topRepoStarsTotal} (${formatList(topRepoStars)})`,
+    `- Top non-fork repos considered: max ${includedRepositories.max}, total ${includedRepositories.total} (${includedRepositories.list})`,
+    `- Fork repos excluded from OSS influence: ${excludedForkRepositories}`,
     "",
     "**Policy**",
     `- Low-score review threshold: < ${POLICY.lowScoreThreshold}`,

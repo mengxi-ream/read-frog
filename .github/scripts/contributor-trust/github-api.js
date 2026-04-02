@@ -203,6 +203,41 @@ export async function ensureRepositoryLabels(token, owner, repo, labelDefinition
   }
 }
 
+function normalizeTopRepository(node) {
+  if (!node?.nameWithOwner)
+    return null
+
+  return {
+    isFork: node.isFork === true,
+    nameWithOwner: node.nameWithOwner,
+    parentNameWithOwner: node.parent?.nameWithOwner ?? null,
+    stargazerCount: Number(node.stargazerCount) || 0,
+  }
+}
+
+export function splitTopRepositories(nodes) {
+  const topRepositories = []
+  const excludedForkRepositories = []
+
+  for (const node of nodes ?? []) {
+    const repository = normalizeTopRepository(node)
+    if (!repository)
+      continue
+
+    if (repository.isFork) {
+      excludedForkRepositories.push(repository)
+      continue
+    }
+
+    topRepositories.push(repository)
+  }
+
+  return {
+    excludedForkRepositories,
+    topRepositories,
+  }
+}
+
 export async function getAuthorMetrics(token, owner, repo, authorLogin) {
   const slug = `${owner}/${repo}`
   const query = `
@@ -230,8 +265,13 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
         repositories {
           totalCount
         }
-        topRepositories(first: 6, orderBy: { field: STARGAZERS, direction: DESC }) {
+        topRepositories(first: 20, orderBy: { field: STARGAZERS, direction: DESC }) {
           nodes {
+            isFork
+            nameWithOwner
+            parent {
+              nameWithOwner
+            }
             stargazerCount
           }
         }
@@ -261,6 +301,7 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
 
   const data = await graphqlRequest(token, query, variables)
   const user = data.user ?? await getUserFallback(token, authorLogin)
+  const topRepositoryBuckets = splitTopRepositories(data.user?.topRepositories?.nodes ?? [])
 
   return {
     author: {
@@ -275,11 +316,11 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
     rateLimit: data.rateLimit ?? null,
     repoHistory: {
       closedPrs: data.closedPrs?.issueCount ?? 0,
+      excludedForkRepositories: topRepositoryBuckets.excludedForkRepositories,
       mergedPrs: data.mergedPrs?.issueCount ?? 0,
       openPrs: data.openPrs?.issueCount ?? 0,
       reviews: data.reviews?.issueCount ?? 0,
-      topRepoStars: (data.user?.topRepositories?.nodes ?? [])
-        .map(node => node?.stargazerCount ?? 0),
+      topRepositories: topRepositoryBuckets.topRepositories,
     },
   }
 }

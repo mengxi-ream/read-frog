@@ -1,6 +1,7 @@
 export const COMMENT_MARKER = "contributor-trust-score:v1"
 export const COMMENT_MARKER_HTML = `<!-- ${COMMENT_MARKER} -->`
 export const FINGERPRINT_MARKER_PREFIX = "contributor-trust-fingerprint:"
+export const MANAGED_COMMENT_AUTHOR = "github-actions[bot]"
 export const TRUST_LABEL_PREFIX = "contrib-trust:"
 
 export const POLICY = Object.freeze({

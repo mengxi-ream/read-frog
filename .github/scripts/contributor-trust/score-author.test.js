@@ -55,6 +55,19 @@ describe("computeContributorScore", () => {
     expect(score.bucket).toBe(TRUST_BUCKETS.NEW)
   })
 
+  it("does not over-reward a single merged PR", () => {
+    const score = computeContributorScore({
+      ...createBaseInput(),
+      commitsInRepo: 1,
+      contributionCount: 1,
+      isContributor: true,
+      prsInRepo: [{ state: "merged" }],
+    })
+
+    expect(score.prTrackRecord).toBe(4)
+    expect(score.repoFamiliarity).toBe(11)
+  })
+
   it("accumulates the better-hub style dimensions for experienced contributors", () => {
     const score = computeContributorScore({
       ...createBaseInput(),
@@ -66,17 +79,32 @@ describe("computeContributorScore", () => {
         ...Array.from({ length: 9 }).fill({ state: "merged" }),
         { state: "closed" },
       ],
+      publicRepos: 34,
       reviewsInRepo: 12,
       topRepoStars: [520, 40, 12],
     })
 
     expect(score).toMatchObject({
       bucket: TRUST_BUCKETS.HIGHLY_TRUSTED,
-      communityStanding: 11,
+      communityStanding: 18,
       ossInfluence: 17,
-      prTrackRecord: 20,
+      prTrackRecord: 17,
       repoFamiliarity: 32,
-      total: 80,
+      total: 84,
     })
+  })
+
+  it("approaches a high track record score only after enough resolved PRs", () => {
+    const score = computeContributorScore({
+      ...createBaseInput(),
+      commitsInRepo: 10,
+      contributionCount: 10,
+      followers: 12,
+      isContributor: true,
+      prsInRepo: Array.from({ length: 10 }).fill({ state: "merged" }),
+      publicRepos: 6,
+    })
+
+    expect(score.prTrackRecord).toBe(18)
   })
 })
