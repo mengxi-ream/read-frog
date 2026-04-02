@@ -2,7 +2,9 @@ import ReactMarkdown from "react-markdown"
 import rehypeKatex from "rehype-katex"
 import remarkMath from "remark-math"
 
-const remarkPlugins = [remarkMath]
+// Disable single-dollar math so currency like "$5" isn't parsed as LaTeX.
+// Block math ($$...$$) still works for real equations.
+const remarkPlugins = [[remarkMath, { singleDollarTextMath: false }] as [typeof remarkMath, { singleDollarTextMath: boolean }]]
 const rehypePlugins = [rehypeKatex]
 
 interface MarkdownRendererProps {

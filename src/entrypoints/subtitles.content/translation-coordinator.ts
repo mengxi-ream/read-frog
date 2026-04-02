@@ -84,6 +84,21 @@ export class TranslationCoordinator {
     this.failedStarts.clear()
   }
 
+  /**
+   * Invalidate early translations that were made before the summary was
+   * available, and retrigger so they are re-translated with full context.
+   */
+  retriggerEarlyTranslations(translatedBeforeSummary: Set<number>) {
+    for (const start of translatedBeforeSummary) {
+      this.translatedStarts.delete(start)
+    }
+    this.handleTranslationTick()
+  }
+
+  getTranslatedStarts(): ReadonlySet<number> {
+    return this.translatedStarts
+  }
+
   triggerTranslationTick() {
     this.handleTranslationTick()
   }

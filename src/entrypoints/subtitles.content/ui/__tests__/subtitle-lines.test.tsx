@@ -67,18 +67,33 @@ describe("subtitle lines", () => {
     expect(line).toHaveAttribute("lang", "en")
   })
 
-  it("renders inline math via KaTeX in translation subtitles", () => {
+  it("renders block math via KaTeX in translation subtitles", () => {
     const store = createStoreWithLanguage("eng")
 
     const { container } = render(
       <Provider store={store}>
-        <TranslationSubtitle content="Energy is $E=mc^2$ here" />
+        <TranslationSubtitle content="Energy is $$E=mc^2$$" />
       </Provider>,
     )
 
     // KaTeX wraps rendered math in elements with class "katex"
     const katexEl = container.querySelector(".katex")
     expect(katexEl).not.toBeNull()
+  })
+
+  it("preserves dollar signs as currency instead of parsing as math", () => {
+    const store = createStoreWithLanguage("eng")
+
+    const { container } = render(
+      <Provider store={store}>
+        <TranslationSubtitle content="It costs $5 to $10" />
+      </Provider>,
+    )
+
+    // Single-dollar math is disabled, so no KaTeX rendering should occur
+    expect(container.querySelector(".katex")).toBeNull()
+    expect(container.textContent).toContain("$5")
+    expect(container.textContent).toContain("$10")
   })
 
   it("keeps main subtitle line without forced dir/lang attributes", () => {
