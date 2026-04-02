@@ -13,11 +13,15 @@ import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder
 import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 
+// Derive the extension base URL for katex font assets.  We call getURL with a
+// known public font path, then strip the filename to get the directory prefix.
+const katexFontBaseURL = browser.runtime.getURL("/fonts/katex/KaTeX_Main-Regular.woff2").replace("KaTeX_Main-Regular.woff2", "")
+
 // Rewrite root-relative font URLs to extension-resolved URLs so they load
 // correctly inside shadow DOM on arbitrary webpages.
 const katexCSS = rawKatexCSS.replace(
   /url\(\/fonts\/katex\//g,
-  `url(${browser.runtime.getURL("/fonts/katex/")}`,
+  `url(${katexFontBaseURL}`,
 )
 
 export async function mountSubtitlesUI(config: PlatformConfig): Promise<void> {
