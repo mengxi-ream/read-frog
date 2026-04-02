@@ -48,7 +48,7 @@ describe("subtitle lines", () => {
       </Provider>,
     )
 
-    const line = screen.getByText("مرحبًا")
+    const line = screen.getByText("مرحبًا").closest(".subtitles-translation")!
     expect(line).toHaveAttribute("dir", "rtl")
     expect(line).toHaveAttribute("lang", "ar")
   })
@@ -62,7 +62,7 @@ describe("subtitle lines", () => {
       </Provider>,
     )
 
-    const line = screen.getByText("Hello world")
+    const line = screen.getByText("Hello world").closest(".subtitles-translation")!
     expect(line).toHaveAttribute("dir", "ltr")
     expect(line).toHaveAttribute("lang", "en")
   })

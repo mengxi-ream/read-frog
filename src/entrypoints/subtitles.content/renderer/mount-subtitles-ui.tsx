@@ -2,6 +2,7 @@ import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import { Provider as JotaiProvider } from "jotai"
 import ReactDOM from "react-dom/client"
 import { Toaster } from "sonner"
+import katexCSS from "@/assets/styles/katex.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
@@ -38,7 +39,7 @@ export async function mountSubtitlesUI(config: PlatformConfig): Promise<void> {
   const shadowRoot = shadowHost.attachShadow({ mode: "open" })
   const hostBuilder = new ShadowHostBuilder(shadowRoot, {
     position: "block",
-    cssContent: [themeCSS],
+    cssContent: [themeCSS, katexCSS],
     inheritStyles: false,
     style: {
       position: "absolute",

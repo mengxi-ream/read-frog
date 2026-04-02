@@ -1,0 +1,6 @@
+@import "katex/dist/katex.min.css";
+
+/* Inherit text color so KaTeX respects subtitle color settings and dark mode */
+.katex {
+  color: inherit;
+}

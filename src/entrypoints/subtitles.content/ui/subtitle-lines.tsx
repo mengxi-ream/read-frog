@@ -1,5 +1,6 @@
 import type { SubtitleTextStyle } from "@/types/config/subtitles"
 import { useAtomValue } from "jotai"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
 import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
@@ -49,7 +50,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
       dir={dir}
       lang={lang}
     >
-      {text}
+      <MarkdownRenderer content={text} />
     </div>
   )
 }
