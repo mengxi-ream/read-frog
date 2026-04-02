@@ -4,13 +4,20 @@ import { sendMessage } from "@/utils/message"
 
 const NEWLINE_PATTERN = /\n/g
 const WHITESPACE_PATTERN = /\s+/g
+const LEADING_CHEVRON_PATTERN = /^>>\s*/
+const CHEVRON_PATTERN = />>/g
 const VTT_TIMESTAMP_PATTERN = /^(\d+)\s*-->\s*(\d+)$/
 
 export function cleanFragmentsForAi(fragments: SubtitlesFragment[]): SubtitlesFragment[] {
   return fragments
     .map(fragment => ({
       ...fragment,
-      text: fragment.text.replace(NEWLINE_PATTERN, " ").replace(WHITESPACE_PATTERN, " ").trim(),
+      text: fragment.text
+        .replace(LEADING_CHEVRON_PATTERN, "")
+        .replace(CHEVRON_PATTERN, " ")
+        .replace(NEWLINE_PATTERN, " ")
+        .replace(WHITESPACE_PATTERN, " ")
+        .trim(),
     }))
     .filter(fragment => fragment.text.length > 0)
 }
