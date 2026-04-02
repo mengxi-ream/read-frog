@@ -2,7 +2,7 @@ import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { getLocalConfig } from "@/utils/config/storage"
 import { MAX_CONCURRENT_SEGMENTS, MAX_FRAGMENTS_PER_CHUNK, PROCESS_LOOK_AHEAD_MS } from "@/utils/constants/subtitles"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
-import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
+import { optimizeSubtitles, rebalanceToTargetRange } from "@/utils/subtitles/processor/optimizer"
 
 export class SegmentationPipeline {
   // Segmented results, read by translation pipeline
@@ -93,7 +93,8 @@ export class SegmentationPipeline {
       const config = await getLocalConfig()
       if (config) {
         const segmented = await aiSegmentBlock(chunk, config)
-        this.mergeFragments(segmented, chunk)
+        const rebalanced = rebalanceToTargetRange(segmented, this.getSourceLanguage())
+        this.mergeFragments(rebalanced, chunk)
       }
     }
     catch {
