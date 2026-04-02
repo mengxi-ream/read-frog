@@ -67,6 +67,20 @@ describe("subtitle lines", () => {
     expect(line).toHaveAttribute("lang", "en")
   })
 
+  it("renders inline math via KaTeX in translation subtitles", () => {
+    const store = createStoreWithLanguage("eng")
+
+    const { container } = render(
+      <Provider store={store}>
+        <TranslationSubtitle content="Energy is $E=mc^2$ here" />
+      </Provider>,
+    )
+
+    // KaTeX wraps rendered math in elements with class "katex"
+    const katexEl = container.querySelector(".katex")
+    expect(katexEl).not.toBeNull()
+  })
+
   it("keeps main subtitle line without forced dir/lang attributes", () => {
     const store = createStoreWithLanguage("eng")
 

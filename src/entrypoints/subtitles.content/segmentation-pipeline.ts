@@ -64,6 +64,10 @@ export class SegmentationPipeline {
     this.running = true
 
     try {
+      // Cache config once per run loop to avoid redundant storage reads
+      // across concurrent chunks
+      const config = await getLocalConfig()
+
       while (!this.stopped && this.hasUnprocessedChunks()) {
         const video = this.getVideoElement()
         if (!video)
@@ -79,8 +83,8 @@ export class SegmentationPipeline {
           chunk.forEach(f => this.segmentedRawStarts.add(f.start))
         }
 
-        // Process chunks concurrently
-        await Promise.all(chunks.map(chunk => this.processChunk(chunk)))
+        // Process chunks concurrently with shared config
+        await Promise.all(chunks.map(chunk => this.processChunk(chunk, config)))
       }
     }
     finally {
@@ -88,9 +92,8 @@ export class SegmentationPipeline {
     }
   }
 
-  private async processChunk(chunk: SubtitlesFragment[]): Promise<void> {
+  private async processChunk(chunk: SubtitlesFragment[], config: Awaited<ReturnType<typeof getLocalConfig>>): Promise<void> {
     try {
-      const config = await getLocalConfig()
       if (config) {
         const segmented = await aiSegmentBlock(chunk, config)
         const rebalanced = rebalanceToTargetRange(segmented, this.getSourceLanguage())

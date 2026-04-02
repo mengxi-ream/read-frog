@@ -65,6 +65,10 @@ export const DEFAULT_SUBTITLE_COLOR = "#FFFFFF"
 export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
 export const DEFAULT_CONTROLS_HEIGHT = 60
+// Cap the upward shift when player controls appear so subtitles don't jump
+// excessively on players with tall control bars (e.g. YouTube Theatre mode).
+// 15% keeps the shift visually comfortable across common viewport sizes.
+export const MAX_CONTROLS_OFFSET_PERCENT = 15
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 
 // Font family mapping

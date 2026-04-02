@@ -14,8 +14,9 @@ import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 
 // Derive the extension base URL for katex font assets.  We call getURL with a
-// known public font path, then strip the filename to get the directory prefix.
-const katexFontBaseURL = browser.runtime.getURL("/fonts/katex/KaTeX_Main-Regular.woff2").replace("KaTeX_Main-Regular.woff2", "")
+// known public font path, then use URL to robustly strip the filename.
+const katexFontFullURL = new URL(browser.runtime.getURL("/fonts/katex/KaTeX_Main-Regular.woff2"))
+const katexFontBaseURL = katexFontFullURL.href.slice(0, katexFontFullURL.href.lastIndexOf("/") + 1)
 
 // Rewrite root-relative font URLs to extension-resolved URLs so they load
 // correctly inside shadow DOM on arbitrary webpages.
