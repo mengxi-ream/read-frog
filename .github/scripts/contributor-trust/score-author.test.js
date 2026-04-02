@@ -9,8 +9,8 @@ function createBaseInput() {
     commitsInRepo: 0,
     contributionCount: 0,
     followers: 0,
+    isAdmin: false,
     isContributor: false,
-    isMaintainer: false,
     prsInRepo: [],
     publicRepos: 0,
     reviewsInRepo: 0,
@@ -30,16 +30,16 @@ describe("getTrustBucket", () => {
 })
 
 describe("computeContributorScore", () => {
-  it("gives maintainers a full trust exemption", () => {
+  it("gives repo admins a full trust exemption", () => {
     const score = computeContributorScore({
       ...createBaseInput(),
-      isMaintainer: true,
+      isAdmin: true,
     })
 
     expect(score).toMatchObject({
       bucket: TRUST_BUCKETS.HIGHLY_TRUSTED,
       communityStanding: 25,
-      exemptReason: "maintainer",
+      exemptReason: "admin",
       ossInfluence: 20,
       prTrackRecord: 20,
       repoFamiliarity: 35,

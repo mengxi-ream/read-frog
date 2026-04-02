@@ -22,8 +22,8 @@ export function planTrustActions({ currentLabels = [], score }) {
     }
   }
 
-  const targetTrustLabel = score.exemptReason === "maintainer"
-    ? POLICY.maintainerLabel
+  const targetTrustLabel = score.exemptReason === "admin"
+    ? POLICY.adminLabel
     : bucketToLabel(score.bucket)
   const needsMaintainerReview = !score.exemptReason && score.total < POLICY.lowScoreThreshold
 

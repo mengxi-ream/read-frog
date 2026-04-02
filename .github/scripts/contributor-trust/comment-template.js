@@ -28,8 +28,8 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
   const trustLabel = plan.targetTrustLabel ?? "none"
   const reviewStatus = plan.needsMaintainerReview ? "required" : "not required"
 
-  const intro = score.exemptReason === "maintainer"
-    ? "This author has repository write access or higher, so the maintainer exemption applies in trust policy v1."
+  const intro = score.exemptReason === "admin"
+    ? "This author has repository admin access, so the admin exemption applies in trust policy v1."
     : `This score estimates contributor familiarity with \`${owner}/${repo}\` using public GitHub signals. It is advisory only and does not block merges automatically.`
 
   return [

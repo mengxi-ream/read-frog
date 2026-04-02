@@ -50,7 +50,7 @@ function resolvePullNumber(eventName, payload) {
   return null
 }
 
-function buildScoreInput({ isMaintainer, metrics }) {
+function buildScoreInput({ isAdmin, metrics }) {
   const contributionCount = metrics.mergedPrs + metrics.reviews
 
   return {
@@ -59,7 +59,7 @@ function buildScoreInput({ isMaintainer, metrics }) {
     contributionCount,
     followers: metrics.followers,
     isContributor: contributionCount > 0,
-    isMaintainer,
+    isAdmin,
     prsInRepo: [
       ...Array.from({ length: metrics.mergedPrs }).fill({ state: "merged" }),
       ...Array.from({ length: metrics.closedPrs }).fill({ state: "closed" }),
@@ -175,7 +175,7 @@ async function main() {
   const permission = await getCollaboratorPermission(token, owner, repo, pullRequest.user.login)
   const authorMetrics = await getAuthorMetrics(token, owner, repo, pullRequest.user.login)
   const scoreInput = buildScoreInput({
-    isMaintainer: POLICY.maintainerPermissions.includes(permission ?? ""),
+    isAdmin: POLICY.adminPermissions.includes(permission ?? ""),
     metrics: {
       accountCreated: authorMetrics.author.createdAt,
       closedPrs: authorMetrics.repoHistory.closedPrs,

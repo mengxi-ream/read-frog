@@ -82,7 +82,7 @@ export function getTrustBucket(total) {
 }
 
 export function computeContributorScore(input) {
-  if (input.isMaintainer) {
+  if (input.isAdmin) {
     return {
       total: 100,
       repoFamiliarity: 35,
@@ -90,7 +90,7 @@ export function computeContributorScore(input) {
       ossInfluence: 20,
       prTrackRecord: 20,
       bucket: TRUST_BUCKETS.HIGHLY_TRUSTED,
-      exemptReason: "maintainer",
+      exemptReason: "admin",
       lowScoreThreshold: POLICY.lowScoreThreshold,
     }
   }
