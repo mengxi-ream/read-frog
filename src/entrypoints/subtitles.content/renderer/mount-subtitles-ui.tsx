@@ -29,10 +29,9 @@ export async function mountSubtitlesUI(config: PlatformConfig): Promise<void> {
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
+    bottom: 0 !important;
     pointer-events: none;
     z-index: 9999;
-    transition: bottom 0.2s ease-out;
     overflow: hidden;
   `
 
