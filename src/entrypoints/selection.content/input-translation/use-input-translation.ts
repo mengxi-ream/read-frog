@@ -76,8 +76,9 @@ function showSpinner(element: HTMLElement): () => void {
     )
   }
   else {
-    // For reduced motion, show static spinner with muted color
-    spinner.style.borderTopColor = "#a3a3a3"
+    // For reduced motion, keep the spinner static but preserve the primary
+    // segment so the loading state remains visible without animation.
+    spinner.style.borderTopColor = "#4ade80"
   }
 
   // Calculate position - vertically centered relative to the element

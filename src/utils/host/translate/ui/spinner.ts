@@ -60,8 +60,10 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
     )
   }
   else {
-    // For reduced motion or when Web Animations API isn't available, show static spinner with muted color
-    spinner.style.borderTopColor = "var(--read-frog-muted)"
+    // For reduced motion or when Web Animations API isn't available,
+    // keep a static spinner while preserving the primary segment so the
+    // loading state stays visible without requiring animation.
+    spinner.style.borderTopColor = "var(--read-frog-primary)"
   }
 
   return spinner
