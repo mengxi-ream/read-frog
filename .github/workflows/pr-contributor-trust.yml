@@ -35,9 +35,10 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
+            // workflow_dispatch inputs live on the event payload, not as github-script action inputs.
             const prNumber = context.eventName === "pull_request_target"
               ? context.payload.pull_request?.number
-              : Number(core.getInput("pr_number", { required: true }));
+              : Number(context.payload.inputs?.pr_number ?? "");
 
             if (!Number.isInteger(prNumber) || prNumber <= 0)
               throw new Error(`Unable to resolve a valid pull request number for event ${context.eventName}.`);
