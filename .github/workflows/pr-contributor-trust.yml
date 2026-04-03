@@ -19,8 +19,63 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    name: Preflight
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      author_login: ${{ steps.inspect.outputs.author_login }}
+      pr_number: ${{ steps.inspect.outputs.pr_number }}
+      should_skip: ${{ steps.inspect.outputs.should_skip }}
+      skip_reason: ${{ steps.inspect.outputs.skip_reason }}
+    steps:
+      - name: Resolve PR metadata
+        id: inspect
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumber = context.eventName === "pull_request_target"
+              ? context.payload.pull_request?.number
+              : Number(core.getInput("pr_number", { required: true }));
+
+            if (!Number.isInteger(prNumber) || prNumber <= 0)
+              throw new Error(`Unable to resolve a valid pull request number for event ${context.eventName}.`);
+
+            const { data: pullRequest } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+
+            const authorLogin = pullRequest.user?.login ?? "";
+            const authorType = pullRequest.user?.type ?? "";
+            const shouldSkip = authorType === "Bot" || authorLogin.toLowerCase().endsWith("[bot]");
+
+            core.setOutput("author_login", authorLogin);
+            core.setOutput("pr_number", String(prNumber));
+            core.setOutput("should_skip", shouldSkip ? "true" : "false");
+            core.setOutput(
+              "skip_reason",
+              shouldSkip ? `bot-authored PR by @${authorLogin}` : "",
+            );
+
+      - name: Write skip summary
+        if: steps.inspect.outputs.should_skip == 'true'
+        run: |
+          cat >> "$GITHUB_STEP_SUMMARY" <<'EOF'
+          ## Contributor trust automation
+
+          - Event: `${{ github.event_name }}`
+          - PR: #${{ steps.inspect.outputs.pr_number }}
+          - Author: @${{ steps.inspect.outputs.author_login }}
+          - Result: skipped ${{ steps.inspect.outputs.skip_reason }}
+          EOF
+
   trust-score:
     name: Score contributor trust
+    needs: preflight
+    if: needs.preflight.outputs.should_skip != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -42,5 +97,5 @@ jobs:
       - name: Score contributor and sync trust state
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TRUST_PR_NUMBER: ${{ inputs.pr_number || '' }}
+          TRUST_PR_NUMBER: ${{ needs.preflight.outputs.pr_number }}
         run: node .github/scripts/contributor-trust/run.js

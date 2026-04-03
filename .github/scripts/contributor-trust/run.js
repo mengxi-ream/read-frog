@@ -1,6 +1,9 @@
 import { appendFile, readFile } from "node:fs/promises"
+import { resolve } from "node:path"
 import process from "node:process"
+import { fileURLToPath } from "node:url"
 
+import { getBotAuthorSkipReason } from "./bot-author.js"
 import { buildTrustComment } from "./comment-template.js"
 import { LABEL_DEFINITIONS, POLICY } from "./config.js"
 import {
@@ -130,7 +133,7 @@ async function upsertComment({ body, issueNumber, owner, repo, token }) {
   return { action: "created", commentId: createdComment.id }
 }
 
-async function main() {
+export async function main() {
   const token = getRequiredEnv("GITHUB_TOKEN")
   const eventName = getRequiredEnv("GITHUB_EVENT_NAME")
   const payload = await getEventPayload()
@@ -151,6 +154,13 @@ async function main() {
     `- State: ${pullRequest.state}${pullRequest.draft ? " (draft)" : ""}`,
     `- Author: @${pullRequest.user.login}`,
   ]
+
+  const botSkipReason = getBotAuthorSkipReason(pullRequest.user)
+  if (botSkipReason) {
+    summaryLines.push(`- Result: skipped ${botSkipReason}`)
+    await writeJobSummary(summaryLines)
+    return
+  }
 
   if (eventName === "pull_request_target" && pullRequest.draft) {
     summaryLines.push("- Result: skipped automatic trust checks for a draft PR")
@@ -262,13 +272,18 @@ async function main() {
   await writeJobSummary(summaryLines)
 }
 
-main().catch(async (error) => {
-  console.error(error)
-  await writeJobSummary([
-    "## Contributor trust automation",
-    "",
-    `- Result: failed`,
-    `- Error: ${error instanceof Error ? error.message : String(error)}`,
-  ])
-  process.exitCode = 1
-})
+const isDirectExecution = process.argv[1]
+  && resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+
+if (isDirectExecution) {
+  main().catch(async (error) => {
+    console.error(error)
+    await writeJobSummary([
+      "## Contributor trust automation",
+      "",
+      `- Result: failed`,
+      `- Error: ${error instanceof Error ? error.message : String(error)}`,
+    ])
+    process.exitCode = 1
+  })
+}
