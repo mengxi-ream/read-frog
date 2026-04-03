@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  countAuthorCommitsInRepo,
   countReviewsOnOthersPullRequestsInRepo,
   createContributorMetrics,
   createPullRequestStateList,
@@ -82,6 +83,7 @@ describe("createContributorMetrics", () => {
       permission: "write",
       repoHistory: {
         closedPrs: 1,
+        commitsInRepo: 14,
         mergedPrs: 2,
         openPrs: 0,
         reviews: 3,
@@ -91,6 +93,7 @@ describe("createContributorMetrics", () => {
       },
     })).toEqual({
       accountCreated: "2020-01-01T00:00:00Z",
+      commitsInRepo: 14,
       contributionCount: 5,
       followers: 12,
       isContributor: true,
@@ -103,6 +106,55 @@ describe("createContributorMetrics", () => {
       reviewsInRepo: 3,
       topRepoStars: [42],
     })
+  })
+})
+
+describe("countAuthorCommitsInRepo", () => {
+  it("derives the commit count from the paginated repo commits API", async () => {
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = async () => new Response(JSON.stringify([{ sha: "head" }]), {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "Link": "<https://api.github.com/repositories/1/commits?author=Sufyr&per_page=1&page=2>; rel=\"next\", <https://api.github.com/repositories/1/commits?author=Sufyr&per_page=1&page=37>; rel=\"last\"",
+      },
+    })
+
+    try {
+      const count = await countAuthorCommitsInRepo(
+        "token",
+        "mengxi-ream",
+        "read-frog",
+        "Sufyr",
+      )
+
+      expect(count).toBe(37)
+    }
+    finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+
+  it("falls back to payload length when the response fits on one page", async () => {
+    const originalFetch = globalThis.fetch
+    globalThis.fetch = async () => new Response(JSON.stringify([{ sha: "only" }]), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    })
+
+    try {
+      const count = await countAuthorCommitsInRepo(
+        "token",
+        "mengxi-ream",
+        "read-frog",
+        "Sufyr",
+      )
+
+      expect(count).toBe(1)
+    }
+    finally {
+      globalThis.fetch = originalFetch
+    }
   })
 })
 

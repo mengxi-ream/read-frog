@@ -5,9 +5,10 @@ export const MANAGED_COMMENT_AUTHOR = "github-actions[bot]"
 export const TRUST_LABEL_PREFIX = "contrib-trust:"
 
 export const POLICY = Object.freeze({
-  version: "v1",
+  version: "v1.1",
   lowScoreThreshold: 30,
-  autoCloseBelowScore: null,
+  autoCloseBelowScore: 20,
+  autoCloseAboveChangedLines: 1000,
   overrideLabel: "trust-check:skip",
   needsMaintainerReviewLabel: "needs-maintainer-review",
   adminLabel: `${TRUST_LABEL_PREFIX}admin`,

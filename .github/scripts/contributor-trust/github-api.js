@@ -1,6 +1,7 @@
 import { POLICY } from "./config.js"
 
 const API_BASE_URL = "https://api.github.com"
+const LINK_HEADER_ENTRY_PATTERN = /^<([^>]+)>;\s*rel="([^"]+)"$/
 
 class GitHubApiError extends Error {
   constructor(message, details = {}) {
@@ -178,6 +179,50 @@ export async function getCollaboratorPermission(token, owner, repo, username) {
   }
 }
 
+function getPageNumberFromLinkHeader(linkHeader, relation) {
+  if (!linkHeader)
+    return null
+
+  for (const entry of linkHeader.split(",")) {
+    const match = entry.trim().match(LINK_HEADER_ENTRY_PATTERN)
+    if (!match || match[2] !== relation)
+      continue
+
+    const page = new URL(match[1]).searchParams.get("page")
+    const parsedPage = Number.parseInt(page ?? "", 10)
+    return Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : null
+  }
+
+  return null
+}
+
+export async function countAuthorCommitsInRepo(token, owner, repo, authorLogin) {
+  const url = new URL(`${API_BASE_URL}/repos/${owner}/${repo}/commits`)
+  url.searchParams.set("author", authorLogin)
+  url.searchParams.set("per_page", "1")
+
+  const response = await fetch(url, {
+    headers: buildHeaders(token),
+  })
+  const payload = await parseResponse(response)
+
+  if (!response.ok) {
+    throw new GitHubApiError(buildErrorMessage("GET", `${url.pathname}${url.search}`, response, payload), {
+      payload,
+      response,
+    })
+  }
+
+  if (!Array.isArray(payload))
+    throw new GitHubApiError(`Expected array payload from ${url.pathname}`, { payload })
+
+  const lastPage = getPageNumberFromLinkHeader(response.headers.get("link"), "last")
+  if (lastPage !== null)
+    return lastPage
+
+  return payload.length
+}
+
 export async function listRepositoryLabels(token, owner, repo) {
   return paginate(token, `/repos/${owner}/${repo}/labels`)
 }
@@ -309,6 +354,7 @@ export function createContributorMetrics({ author, permission, repoHistory }) {
 
   return {
     accountCreated: author.createdAt,
+    commitsInRepo: repoHistory.commitsInRepo,
     contributionCount,
     followers: author.followers,
     isContributor: contributionCount > 0,
@@ -408,19 +454,23 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
   const data = await graphqlRequest(token, query, variables)
   const fallbackUser = data.user ? null : await getUserFallback(token, authorLogin)
   const author = coalesceAuthorUser(data.user, fallbackUser, authorLogin)
-  const reviews = await countReviewsOnOthersPullRequestsInRepo(
-    token,
-    owner,
-    repo,
-    authorLogin,
-    POLICY.reviewQueryPageSize,
-  )
+  const [commitsInRepo, reviews] = await Promise.all([
+    countAuthorCommitsInRepo(token, owner, repo, authorLogin),
+    countReviewsOnOthersPullRequestsInRepo(
+      token,
+      owner,
+      repo,
+      authorLogin,
+      POLICY.reviewQueryPageSize,
+    ),
+  ])
   const topRepositories = selectOwnedNonForkRepositories(data.user?.ownedNonForkRepositories?.nodes ?? [], authorLogin)
 
   return {
     author,
     repoHistory: {
       closedPrs: data.closedPrs?.issueCount ?? 0,
+      commitsInRepo,
       mergedPrs: data.mergedPrs?.issueCount ?? 0,
       openPrs: data.openPrs?.issueCount ?? 0,
       reviews,

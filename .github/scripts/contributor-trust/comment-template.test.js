@@ -14,6 +14,7 @@ describe("buildTrustComment", () => {
       metrics: {
         accountCreated: "2019-01-01T00:00:00Z",
         closedPrs: 0,
+        commitsInRepo: 14,
         followers: 3,
         mergedPrs: 1,
         openPrs: 0,
@@ -34,6 +35,8 @@ describe("buildTrustComment", () => {
         targetTrustLabel: "contrib-trust:trusted",
       },
       pullRequest: {
+        additions: 820,
+        deletions: 245,
         number: 1242,
         state: "open",
         title: "fix: storage false value reset and backup delete dialog not showing",
@@ -51,7 +54,10 @@ describe("buildTrustComment", () => {
     })
 
     expect(comment.body).toContain("stars on owned non-fork repositories")
+    expect(comment.body).toContain("Repo commits: 14")
+    expect(comment.body).toContain("PR changed lines: 1065 (+820 / -245)")
     expect(comment.body).toContain("Repo permission: write")
+    expect(comment.body).toContain("Auto-close: score < 20 and changed lines > 1000")
     expect(comment.body).toContain("Owned non-fork repos considered: max 42, total 42 (kilidoc/browser-tools (42))")
     expect(comment.body).not.toContain("Fork repos excluded from OSS influence")
     expect(comment.body).not.toContain("Public repos:")

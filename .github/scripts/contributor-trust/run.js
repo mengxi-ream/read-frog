@@ -60,6 +60,41 @@ async function writeJobSummary(lines) {
   await appendFile(summaryPath, `${lines.join("\n")}\n`)
 }
 
+function buildScoreBreakdownSummary(score) {
+  const { communityStanding, ossInfluence, prTrackRecord, repoFamiliarity } = score.breakdown
+
+  return [
+    "",
+    "### Score details",
+    `- Repo familiarity: ${score.repoFamiliarity}/35`,
+    `  - Commits in repo: ${repoFamiliarity.commitsInRepo.count} -> ${repoFamiliarity.commitsInRepo.points}/10`,
+    `  - Merged PRs: ${repoFamiliarity.mergedPrs.count} -> ${repoFamiliarity.mergedPrs.points}/12`,
+    `  - Reviews in repo: ${repoFamiliarity.reviewsInRepo.count} -> ${repoFamiliarity.reviewsInRepo.points}/8`,
+    `  - Contributor bonus: ${repoFamiliarity.contributorBonus.eligible ? "yes" : "no"} -> ${repoFamiliarity.contributorBonus.points}/5`,
+    `- Community standing: ${score.communityStanding}/25`,
+    `  - Account age: ${communityStanding.accountAge.months} months -> ${communityStanding.accountAge.points}/5`,
+    `  - Followers: ${communityStanding.followers.count} -> ${communityStanding.followers.points}/10`,
+    `  - Repo permission (${communityStanding.repoPermission.permission}) -> ${communityStanding.repoPermission.points}/10`,
+    `- OSS influence: ${score.ossInfluence}/20`,
+    `  - Max owned repo stars: ${ossInfluence.maxOwnedRepoStars.count} -> ${ossInfluence.maxOwnedRepoStars.points}/15`,
+    `  - Total owned repo stars: ${ossInfluence.totalOwnedRepoStars.count} -> ${ossInfluence.totalOwnedRepoStars.points}/5`,
+    `- PR track record: ${score.prTrackRecord}/20`,
+    `  - Merged PRs: ${prTrackRecord.mergedPrs}`,
+    `  - Resolved PRs: ${prTrackRecord.resolvedPrs}`,
+    `  - Smoothed merge rate: ${prTrackRecord.smoothedRate}`,
+    `  - Confidence: ${prTrackRecord.confidence}`,
+  ]
+}
+
+function logScoreBreakdown(score) {
+  console.log("Contributor trust score breakdown:")
+  console.log(JSON.stringify({
+    bucket: score.bucket,
+    breakdown: score.breakdown,
+    total: score.total,
+  }, null, 2))
+}
+
 async function syncLabels({ currentLabels, issueNumber, labelsToAdd, labelsToRemove, owner, repo, token }) {
   for (const label of labelsToRemove) {
     if (!currentLabels.includes(label))
@@ -128,6 +163,7 @@ async function main() {
 
   const overridePlan = planTrustActions({
     currentLabels,
+    pullRequest,
     score: {
       bucket: "new",
       exemptReason: null,
@@ -162,7 +198,7 @@ async function main() {
   })
 
   const score = computeContributorScore(scoreInput)
-  const plan = planTrustActions({ currentLabels, score })
+  const plan = planTrustActions({ currentLabels, pullRequest, score })
   const comment = buildTrustComment({
     author: {
       login: authorMetrics.author.login,
@@ -173,6 +209,7 @@ async function main() {
     metrics: {
       accountCreated: authorMetrics.author.createdAt,
       closedPrs: authorMetrics.repoHistory.closedPrs,
+      commitsInRepo: authorMetrics.repoHistory.commitsInRepo,
       followers: authorMetrics.author.followers,
       mergedPrs: authorMetrics.repoHistory.mergedPrs,
       openPrs: authorMetrics.repoHistory.openPrs,
@@ -209,12 +246,18 @@ async function main() {
     console.log(`Closed PR #${pullRequest.number}: ${plan.closeReason}`)
   }
 
+  logScoreBreakdown(score)
+
   summaryLines.push(`- Trust score: **${score.total}/100**`)
+  summaryLines.push(`- PR changed lines: ${plan.changedLines}`)
   summaryLines.push(`- Bucket: \`${score.bucket}\``)
   summaryLines.push(`- Target label: \`${plan.targetTrustLabel}\``)
   summaryLines.push(`- Maintainer review: ${plan.needsMaintainerReview ? "required" : "not required"}`)
+  if (plan.closeReason)
+    summaryLines.push(`- Auto-close: ${plan.closeReason}`)
   summaryLines.push(`- Comment: ${commentResult.action}`)
   summaryLines.push(`- Fingerprint: \`${comment.fingerprint}\``)
+  summaryLines.push(...buildScoreBreakdownSummary(score))
 
   await writeJobSummary(summaryLines)
 }
