@@ -12,6 +12,7 @@ export const POLICY = Object.freeze({
   needsMaintainerReviewLabel: "needs-maintainer-review",
   adminLabel: `${TRUST_LABEL_PREFIX}admin`,
   repoFamiliarityBonusPermissions: ["admin", "maintain", "write"],
+  reviewQueryPageSize: 50,
 })
 
 export const TRUST_BUCKETS = Object.freeze({

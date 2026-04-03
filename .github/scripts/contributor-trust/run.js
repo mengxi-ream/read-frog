@@ -6,6 +6,7 @@ import { LABEL_DEFINITIONS, POLICY } from "./config.js"
 import {
   addLabelsToIssue,
   closePullRequestIssue,
+  createContributorMetrics,
   createIssueComment,
   ensureRepositoryLabels,
   getAuthorMetrics,
@@ -49,26 +50,6 @@ function resolvePullNumber(eventName, payload) {
     return payload.pull_request?.number
 
   return null
-}
-
-function buildScoreInput({ metrics, repoPermission }) {
-  const contributionCount = metrics.mergedPrs + metrics.reviews
-
-  return {
-    accountCreated: metrics.accountCreated,
-    commitsInRepo: metrics.mergedPrs,
-    contributionCount,
-    followers: metrics.followers,
-    isContributor: contributionCount > 0,
-    prsInRepo: [
-      ...Array.from({ length: metrics.mergedPrs }).fill({ state: "merged" }),
-      ...Array.from({ length: metrics.closedPrs }).fill({ state: "closed" }),
-      ...Array.from({ length: metrics.openPrs }).fill({ state: "open" }),
-    ],
-    repoPermission,
-    reviewsInRepo: metrics.reviews,
-    topRepoStars: metrics.topRepositories.map(repository => repository.stargazerCount),
-  }
 }
 
 async function writeJobSummary(lines) {
@@ -174,17 +155,10 @@ async function main() {
 
   const permission = await getCollaboratorPermission(token, owner, repo, pullRequest.user.login)
   const authorMetrics = await getAuthorMetrics(token, owner, repo, pullRequest.user.login)
-  const scoreInput = buildScoreInput({
-    metrics: {
-      accountCreated: authorMetrics.author.createdAt,
-      closedPrs: authorMetrics.repoHistory.closedPrs,
-      followers: authorMetrics.author.followers,
-      mergedPrs: authorMetrics.repoHistory.mergedPrs,
-      openPrs: authorMetrics.repoHistory.openPrs,
-      reviews: authorMetrics.repoHistory.reviews,
-      topRepositories: authorMetrics.repoHistory.topRepositories,
-    },
-    repoPermission: permission ?? null,
+  const scoreInput = createContributorMetrics({
+    author: authorMetrics.author,
+    permission,
+    repoHistory: authorMetrics.repoHistory,
   })
 
   const score = computeContributorScore(scoreInput)
@@ -241,10 +215,6 @@ async function main() {
   summaryLines.push(`- Maintainer review: ${plan.needsMaintainerReview ? "required" : "not required"}`)
   summaryLines.push(`- Comment: ${commentResult.action}`)
   summaryLines.push(`- Fingerprint: \`${comment.fingerprint}\``)
-
-  if (authorMetrics.rateLimit) {
-    summaryLines.push(`- GraphQL rate limit: remaining ${authorMetrics.rateLimit.remaining}, cost ${authorMetrics.rateLimit.cost}, resets ${authorMetrics.rateLimit.resetAt}`)
-  }
 
   await writeJobSummary(summaryLines)
 }

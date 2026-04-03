@@ -1,3 +1,5 @@
+import { POLICY } from "./config.js"
+
 const API_BASE_URL = "https://api.github.com"
 
 class GitHubApiError extends Error {
@@ -176,30 +178,144 @@ export async function getCollaboratorPermission(token, owner, repo, username) {
   }
 }
 
-export async function ensureRepositoryLabels(token, owner, repo, labelDefinitions) {
-  for (const [name, definition] of Object.entries(labelDefinitions)) {
-    try {
-      await apiRequest(token, `/repos/${owner}/${repo}/labels/${encodeURIComponent(name)}`)
-    }
-    catch (error) {
-      if (!(error instanceof GitHubApiError) || error.details.response?.status !== 404)
-        throw error
+export async function listRepositoryLabels(token, owner, repo) {
+  return paginate(token, `/repos/${owner}/${repo}/labels`)
+}
 
-      try {
-        await apiRequest(token, `/repos/${owner}/${repo}/labels`, {
-          body: {
-            color: definition.color,
-            description: definition.description,
-            name,
-          },
-          method: "POST",
-        })
-      }
-      catch (createError) {
-        if (!(createError instanceof GitHubApiError) || createError.details.response?.status !== 422)
-          throw createError
-      }
+export async function ensureRepositoryLabels(token, owner, repo, labelDefinitions) {
+  const existingLabels = new Set(
+    (await listRepositoryLabels(token, owner, repo)).map(label => label.name),
+  )
+
+  for (const [name, definition] of Object.entries(labelDefinitions)) {
+    if (existingLabels.has(name))
+      continue
+
+    try {
+      await apiRequest(token, `/repos/${owner}/${repo}/labels`, {
+        body: {
+          color: definition.color,
+          description: definition.description,
+          name,
+        },
+        method: "POST",
+      })
     }
+    catch (createError) {
+      if (!(createError instanceof GitHubApiError) || createError.details.response?.status !== 422)
+        throw createError
+    }
+  }
+}
+
+function countReviewsOnOthersPullRequests(nodes, authorLogin) {
+  const normalizedAuthorLogin = authorLogin.toLowerCase()
+  let reviews = 0
+
+  for (const node of nodes ?? []) {
+    const pullRequestAuthor = node?.author?.login?.toLowerCase()
+    if (!pullRequestAuthor || pullRequestAuthor === normalizedAuthorLogin)
+      continue
+
+    reviews += 1
+  }
+
+  return reviews
+}
+
+function getReviewSearchPageInfo(searchResult) {
+  return {
+    endCursor: searchResult?.pageInfo?.endCursor ?? null,
+    hasNextPage: searchResult?.pageInfo?.hasNextPage === true,
+  }
+}
+
+function normalizeReviewSearchNodes(searchResult) {
+  return (searchResult?.nodes ?? []).filter(node => node?.__typename === "PullRequest")
+}
+
+export async function countReviewsOnOthersPullRequestsInRepo(token, owner, repo, authorLogin, pageSize) {
+  let reviews = 0
+  let cursor = null
+
+  while (true) {
+    const data = await graphqlRequest(token, `
+      query ReviewsOnOthersPullRequests(
+        $cursor: String
+        $pageSize: Int!
+        $reviewsQuery: String!
+      ) {
+        search(query: $reviewsQuery, type: ISSUE, first: $pageSize, after: $cursor) {
+          nodes {
+            __typename
+            ... on PullRequest {
+              author {
+                login
+              }
+            }
+          }
+          pageInfo {
+            endCursor
+            hasNextPage
+          }
+        }
+      }
+    `, {
+      cursor,
+      pageSize,
+      reviewsQuery: `repo:${owner}/${repo} reviewed-by:${authorLogin} type:pr`,
+    })
+
+    const searchResult = data.search
+    reviews += countReviewsOnOthersPullRequests(
+      normalizeReviewSearchNodes(searchResult),
+      authorLogin,
+    )
+
+    const pageInfo = getReviewSearchPageInfo(searchResult)
+    if (!pageInfo.hasNextPage)
+      break
+
+    cursor = pageInfo.endCursor
+    if (!cursor)
+      break
+  }
+
+  return reviews
+}
+
+function coalesceAuthorUser(user, fallbackUser, authorLogin) {
+  return {
+    avatarUrl: user?.avatarUrl ?? fallbackUser?.avatar_url ?? null,
+    createdAt: user?.createdAt ?? fallbackUser?.created_at ?? null,
+    followers: user?.followers?.totalCount ?? fallbackUser?.followers ?? 0,
+    login: user?.login ?? fallbackUser?.login ?? authorLogin,
+    name: user?.name ?? fallbackUser?.name ?? null,
+    publicRepos: user?.repositories?.totalCount ?? fallbackUser?.public_repos ?? 0,
+    url: user?.url ?? fallbackUser?.html_url ?? `https://github.com/${authorLogin}`,
+  }
+}
+
+export function createPullRequestStateList({ closedPrs, mergedPrs, openPrs }) {
+  return [
+    ...Array.from({ length: mergedPrs }).fill({ state: "merged" }),
+    ...Array.from({ length: closedPrs }).fill({ state: "closed" }),
+    ...Array.from({ length: openPrs }).fill({ state: "open" }),
+  ]
+}
+
+export function createContributorMetrics({ author, permission, repoHistory }) {
+  const contributionCount = repoHistory.mergedPrs + repoHistory.reviews
+
+  return {
+    accountCreated: author.createdAt,
+    contributionCount,
+    followers: author.followers,
+    isContributor: contributionCount > 0,
+    prsInRepo: createPullRequestStateList(repoHistory),
+    repoPermission: permission ?? null,
+    reviewsInRepo: repoHistory.reviews,
+    topRepoStars: repoHistory.topRepositories.map(repository => repository.stargazerCount),
   }
 }
 
@@ -235,20 +351,13 @@ export function selectOwnedNonForkRepositories(nodes, ownerLogin) {
 }
 
 export async function getAuthorMetrics(token, owner, repo, authorLogin) {
-  const slug = `${owner}/${repo}`
   const query = `
     query ContributorTrust(
       $login: String!
       $openPrsQuery: String!
       $mergedPrsQuery: String!
       $closedPrsQuery: String!
-      $reviewsQuery: String!
     ) {
-      rateLimit {
-        cost
-        remaining
-        resetAt
-      }
       user(login: $login) {
         login
         name
@@ -286,40 +395,35 @@ export async function getAuthorMetrics(token, owner, repo, authorLogin) {
       closedPrs: search(query: $closedPrsQuery, type: ISSUE, first: 1) {
         issueCount
       }
-      reviews: search(query: $reviewsQuery, type: ISSUE, first: 1) {
-        issueCount
-      }
     }
   `
 
   const variables = {
     login: authorLogin,
-    openPrsQuery: `repo:${slug} author:${authorLogin} type:pr is:open`,
-    mergedPrsQuery: `repo:${slug} author:${authorLogin} type:pr is:merged`,
-    closedPrsQuery: `repo:${slug} author:${authorLogin} type:pr is:closed is:unmerged`,
-    reviewsQuery: `repo:${slug} reviewed-by:${authorLogin} type:pr`,
+    openPrsQuery: `repo:${owner}/${repo} author:${authorLogin} type:pr is:open`,
+    mergedPrsQuery: `repo:${owner}/${repo} author:${authorLogin} type:pr is:merged`,
+    closedPrsQuery: `repo:${owner}/${repo} author:${authorLogin} type:pr is:closed is:unmerged`,
   }
 
   const data = await graphqlRequest(token, query, variables)
-  const user = data.user ?? await getUserFallback(token, authorLogin)
+  const fallbackUser = data.user ? null : await getUserFallback(token, authorLogin)
+  const author = coalesceAuthorUser(data.user, fallbackUser, authorLogin)
+  const reviews = await countReviewsOnOthersPullRequestsInRepo(
+    token,
+    owner,
+    repo,
+    authorLogin,
+    POLICY.reviewQueryPageSize,
+  )
   const topRepositories = selectOwnedNonForkRepositories(data.user?.ownedNonForkRepositories?.nodes ?? [], authorLogin)
 
   return {
-    author: {
-      avatarUrl: user?.avatarUrl ?? user?.avatar_url ?? null,
-      createdAt: user?.createdAt ?? user?.created_at ?? null,
-      followers: user?.followers?.totalCount ?? user?.followers ?? 0,
-      login: user?.login ?? authorLogin,
-      name: user?.name ?? null,
-      publicRepos: user?.repositories?.totalCount ?? user?.public_repos ?? 0,
-      url: user?.url ?? user?.html_url ?? `https://github.com/${authorLogin}`,
-    },
-    rateLimit: data.rateLimit ?? null,
+    author,
     repoHistory: {
       closedPrs: data.closedPrs?.issueCount ?? 0,
       mergedPrs: data.mergedPrs?.issueCount ?? 0,
       openPrs: data.openPrs?.issueCount ?? 0,
-      reviews: data.reviews?.issueCount ?? 0,
+      reviews,
       topRepositories,
     },
   }

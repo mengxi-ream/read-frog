@@ -19,9 +19,6 @@ function accountAgeMonths(createdAt) {
 function scoreRepoFamiliarity(input) {
   let score = 0
 
-  const commitsInRepo = toNumber(input.commitsInRepo)
-  score += commitsInRepo === 0 ? 0 : commitsInRepo <= 5 ? 3 : commitsInRepo <= 20 ? 7 : 10
-
   const mergedPrs = input.prsInRepo.filter(pr => pr.state === "merged").length
   score += mergedPrs === 0 ? 0 : mergedPrs === 1 ? 3 : mergedPrs <= 5 ? 6 : mergedPrs <= 15 ? 9 : 12
 

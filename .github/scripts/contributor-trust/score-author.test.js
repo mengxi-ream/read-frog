@@ -6,7 +6,6 @@ import { computeContributorScore, getTrustBucket } from "./score-author.js"
 function createBaseInput() {
   return {
     accountCreated: "2020-01-01T00:00:00Z",
-    commitsInRepo: 0,
     contributionCount: 0,
     followers: 0,
     isContributor: false,
@@ -55,20 +54,18 @@ describe("computeContributorScore", () => {
   it("does not over-reward a single merged PR", () => {
     const score = computeContributorScore({
       ...createBaseInput(),
-      commitsInRepo: 1,
       contributionCount: 1,
       isContributor: true,
       prsInRepo: [{ state: "merged" }],
     })
 
     expect(score.prTrackRecord).toBe(4)
-    expect(score.repoFamiliarity).toBe(11)
+    expect(score.repoFamiliarity).toBe(8)
   })
 
   it("accumulates the better-hub style dimensions for experienced contributors", () => {
     const score = computeContributorScore({
       ...createBaseInput(),
-      commitsInRepo: 24,
       contributionCount: 18,
       followers: 230,
       isContributor: true,
@@ -85,15 +82,14 @@ describe("computeContributorScore", () => {
       communityStanding: 11,
       ossInfluence: 17,
       prTrackRecord: 17,
-      repoFamiliarity: 32,
-      total: 77,
+      repoFamiliarity: 22,
+      total: 67,
     })
   })
 
   it("approaches a high track record score only after enough resolved PRs", () => {
     const score = computeContributorScore({
       ...createBaseInput(),
-      commitsInRepo: 10,
       contributionCount: 10,
       followers: 12,
       isContributor: true,
