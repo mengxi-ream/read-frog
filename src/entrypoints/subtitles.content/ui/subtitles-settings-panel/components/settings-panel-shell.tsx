@@ -6,13 +6,13 @@ import { subtitlesSettingsPanelOpenAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { useControlsInfo } from "../../use-controls-visible"
 
-interface SubtitlesSettingsPanelShellProps {
+interface SettingsPanelShellProps {
   children: React.ReactNode
 }
 
-export function SubtitlesSettingsPanelShell({
+export function SettingsPanelShell({
   children,
-}: SubtitlesSettingsPanelShellProps) {
+}: SettingsPanelShellProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const [isOpen, setPanelOpen] = useAtom(subtitlesSettingsPanelOpenAtom)
