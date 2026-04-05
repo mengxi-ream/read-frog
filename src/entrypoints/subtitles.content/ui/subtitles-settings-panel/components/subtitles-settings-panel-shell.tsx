@@ -1,23 +1,22 @@
-import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import { useAtom } from "jotai"
 import { Activity, useEffect, useEffectEvent, useMemo, useRef } from "react"
 import { TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
 import { subtitlesSettingsPanelOpenAtom } from "../../../atoms"
+import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { useControlsInfo } from "../../use-controls-visible"
 
 interface SubtitlesSettingsPanelShellProps {
-  controlsConfig?: ControlsConfig
   children: React.ReactNode
 }
 
 export function SubtitlesSettingsPanelShell({
-  controlsConfig,
   children,
 }: SubtitlesSettingsPanelShellProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const [isOpen, setPanelOpen] = useAtom(subtitlesSettingsPanelOpenAtom)
+  const { controlsConfig } = useSubtitlesUI()
   const { controlsHeight, controlsVisible } = useControlsInfo(rootRef, controlsConfig)
 
   const bottomOffset = useMemo(
@@ -65,7 +64,7 @@ export function SubtitlesSettingsPanelShell({
   return (
     <div
       ref={rootRef}
-      className="absolute inset-0 z-40 pointer-events-none overflow-visible"
+      className="absolute inset-0 z-40 pointer-events-none overflow-visible font-light"
     >
       <Activity mode={isOpen ? "visible" : "hidden"}>
         <div
@@ -78,11 +77,11 @@ export function SubtitlesSettingsPanelShell({
           <div
             ref={panelRef}
             data-slot="subtitles-settings-panel"
-            className="pointer-events-auto relative isolate z-40 w-[min(20rem,calc(100vw-2rem))] overflow-hidden rounded-[18px] border border-white/12 bg-[linear-gradient(180deg,rgba(24,25,29,0.96)_0%,rgba(13,14,18,0.94)_100%)] text-white shadow-[0_18px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl"
+            className="pointer-events-auto relative isolate z-40 w-[min(17rem,calc(100vw-2rem))] overflow-hidden rounded-[14px] border border-white/12 bg-[linear-gradient(180deg,rgba(24,25,29,0.96)_0%,rgba(13,14,18,0.94)_100%)] text-white shadow-[0_18px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl"
           >
             <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/18" />
             <div className="pointer-events-none absolute -right-12 -bottom-14 size-32 rounded-full bg-[#d8a94b]/9 blur-3xl" />
-            <div className="px-2 py-2">
+            <div>
               {children}
             </div>
           </div>

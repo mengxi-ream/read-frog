@@ -1,16 +1,10 @@
-import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import { useAtomValue } from "jotai"
 import { subtitlesDisplayAtom, subtitlesShowContentAtom, subtitlesShowStateAtom } from "../atoms"
 import { StateMessage } from "./state-message"
 import { SubtitlesSettingsPanel } from "./subtitles-settings-panel"
 import { SubtitlesView } from "./subtitles-view"
 
-interface SubtitlesContainerProps {
-  controlsConfig?: ControlsConfig
-  onToggleSubtitles: (enabled: boolean) => void
-}
-
-export function SubtitlesContainer({ controlsConfig, onToggleSubtitles }: SubtitlesContainerProps) {
+export function SubtitlesContainer() {
   const { stateData, isVisible } = useAtomValue(subtitlesDisplayAtom)
   const showState = useAtomValue(subtitlesShowStateAtom)
   const showContent = useAtomValue(subtitlesShowContentAtom)
@@ -20,17 +14,14 @@ export function SubtitlesContainer({ controlsConfig, onToggleSubtitles }: Subtit
       <div className="absolute inset-0 z-10 overflow-visible">
         {isVisible && (
           <>
-            <SubtitlesView controlsConfig={controlsConfig} showContent={showContent} />
+            <SubtitlesView showContent={showContent} />
             <StateMessage state={showState} message={stateData?.state === "error" ? stateData.message : undefined} />
           </>
         )}
       </div>
 
       <div className="absolute inset-0 z-40 overflow-visible">
-        <SubtitlesSettingsPanel
-          controlsConfig={controlsConfig}
-          onToggleSubtitles={onToggleSubtitles}
-        />
+        <SubtitlesSettingsPanel />
       </div>
     </div>
   )

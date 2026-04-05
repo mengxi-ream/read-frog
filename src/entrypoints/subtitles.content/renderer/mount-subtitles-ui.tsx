@@ -10,10 +10,15 @@ import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-ho
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
+import { SubtitlesUIContext } from "../ui/subtitles-ui-context"
+
+interface MountSubtitlesUIOptions {
+  config: PlatformConfig
+  onToggleSubtitles: (enabled: boolean) => void
+}
 
 export async function mountSubtitlesUI(
-  config: PlatformConfig,
-  onToggleSubtitles: (enabled: boolean) => void,
+  { config, onToggleSubtitles }: MountSubtitlesUIOptions,
 ): Promise<void> {
   const videoContainer = await waitForElement(config.selectors.playerContainer)
   if (!videoContainer)
@@ -69,11 +74,15 @@ export async function mountSubtitlesUI(
     <JotaiProvider store={subtitlesStore}>
       <ShadowWrapperContext value={reactContainer}>
         <ThemeProvider container={reactContainer}>
-          <SubtitlesContainer
-            controlsConfig={config.controls}
-            onToggleSubtitles={onToggleSubtitles}
-          />
-          <Toaster richColors className="z-2147483647 notranslate" />
+          <SubtitlesUIContext
+            value={{
+              toggleSubtitles: onToggleSubtitles,
+              controlsConfig: config.controls,
+            }}
+          >
+            <SubtitlesContainer />
+            <Toaster richColors className="z-2147483647 notranslate" />
+          </SubtitlesUIContext>
         </ThemeProvider>
       </ShadowWrapperContext>
     </JotaiProvider>

@@ -63,7 +63,7 @@ export class UniversalVideoAdapter {
     this.setupNavigationListener()
   }
 
-  toggleSubtitles = (enabled: boolean) => {
+  toggleSubtitlesManually = (enabled: boolean) => {
     this.toggleSubtitlesWithSource(enabled, "manual")
   }
 
