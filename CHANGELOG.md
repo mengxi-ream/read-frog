@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.32.1
+
+### Patch Changes
+
+- [#1279](https://github.com/mengxi-ream/read-frog/pull/1279) [`b88746d`](https://github.com/mengxi-ream/read-frog/commit/b88746d79b41c7bff0a3dca0739dbf836ca16a08) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(translation): keep reduced-motion spinners visibly active without animation
+
+- [#1262](https://github.com/mengxi-ream/read-frog/pull/1262) [`0e98d55`](https://github.com/mengxi-ream/read-frog/commit/0e98d55f6e3db8a4db7c42814a97dbaa65fc3bac) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(models): broaden Qwen and Kimi model matching
+
+- [#1261](https://github.com/mengxi-ream/read-frog/pull/1261) [`7ea0609`](https://github.com/mengxi-ream/read-frog/commit/7ea06092a9c59e401904fb4353f10f4a3fc70de6) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(provider-options): normalize openai-compatible option aliases
+
+- [#1258](https://github.com/mengxi-ream/read-frog/pull/1258) [`714e44e`](https://github.com/mengxi-ream/read-frog/commit/714e44ed0d81b7a5dafe17b6cadf431aea195bd1) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(providers): set domestic base URLs for minimax and alibaba
+
+- [#1263](https://github.com/mengxi-ream/read-frog/pull/1263) [`e0e78c2`](https://github.com/mengxi-ream/read-frog/commit/e0e78c29ad4ff5cbeeacb8c9eb833b6559be25d5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(selection-toolbar): avoid hiding focused triggers behind overlays
+
 ## 1.32.0
 
 ### Minor Changes
