@@ -225,8 +225,9 @@ export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: 
     return setupListeners()
   }, [])
 
+  const MAX_CONTROLS_OFFSET_PERCENT = 15
   const controlsOffsetPercent = controlsVisible && position.anchor === "bottom" && windowStyle.height > 0
-    ? (controlsHeight / windowStyle.height) * 100
+    ? Math.min((controlsHeight / windowStyle.height) * 100, MAX_CONTROLS_OFFSET_PERCENT)
     : 0
 
   const positionStyle: SubtitlePositionStyle = position.anchor === "top"

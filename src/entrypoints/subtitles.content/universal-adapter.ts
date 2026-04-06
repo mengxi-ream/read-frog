@@ -297,6 +297,7 @@ export class UniversalVideoAdapter {
         rawFragments: this.originalSubtitles,
         getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
         getSourceLanguage: () => this.subtitlesFetcher.getSourceLanguage(),
+        onChunkProcessed: () => this.translationCoordinator?.triggerTranslationTick(),
       })
     }
     else {
