@@ -27,11 +27,16 @@ vi.mock("@/utils/host/translate/article-context", () => ({
   getOrFetchArticleData: vi.fn(),
 }))
 
+vi.mock("@/utils/content/language", () => ({
+  detectLanguage: vi.fn(),
+}))
+
 let mockSendMessage: any
 let mockMicrosoftTranslate: any
 let mockGetConfigFromStorage: any
 let mockGetTranslatePrompt: any
 let mockGetOrFetchArticleData: any
+let mockDetectLanguage: any
 
 describe("translate-text", () => {
   beforeEach(async () => {
@@ -43,6 +48,7 @@ describe("translate-text", () => {
     mockGetConfigFromStorage = vi.mocked((await import("@/utils/config/storage")).getLocalConfig)
     mockGetTranslatePrompt = vi.mocked((await import("@/utils/prompts/translate")).getTranslatePrompt)
     mockGetOrFetchArticleData = vi.mocked((await import("@/utils/host/translate/article-context")).getOrFetchArticleData)
+    mockDetectLanguage = vi.mocked((await import("@/utils/content/language")).detectLanguage)
 
     // Mock getOrFetchArticleData to return document.title
     mockGetOrFetchArticleData.mockImplementation(() => Promise.resolve({ title: document.title }))
@@ -129,6 +135,50 @@ describe("translate-text", () => {
         text: "Body text",
         articleTitle: "Translated Browser Title",
       }))
+    })
+  })
+
+  describe("skip language detection with LLM translation provider", () => {
+    // Text is 14 chars: >= MIN_LENGTH_FOR_SKIP_LLM_DETECTION(10), < MIN_LENGTH_FOR_TARGET_LANG_DETECTION(50)
+    // so only shouldSkipByLanguage triggers detectLanguage, not isTextAlreadyInTargetLanguage
+    const japaneseText = "これは日本語のテキスト。"
+
+    it("should not use LLM detection when translation provider is LLM-based", async () => {
+      const llmConfig = {
+        ...DEFAULT_CONFIG,
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          providerId: "openai-default",
+          page: { ...DEFAULT_CONFIG.translate.page, skipLanguages: ["jpn"] as any },
+        },
+        languageDetection: { mode: "llm" as const },
+      }
+      mockGetConfigFromStorage.mockResolvedValue(llmConfig)
+      mockDetectLanguage.mockResolvedValue("jpn")
+      mockSendMessage.mockResolvedValue("")
+
+      await translateTextForPage(japaneseText)
+
+      expect(mockDetectLanguage).toHaveBeenCalledWith(japaneseText, expect.objectContaining({ enableLLM: false }))
+    })
+
+    it("should use LLM detection when translation provider is non-LLM and mode is llm", async () => {
+      const nonLlmConfig = {
+        ...DEFAULT_CONFIG,
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          providerId: "microsoft-translate-default",
+          page: { ...DEFAULT_CONFIG.translate.page, skipLanguages: ["jpn"] as any },
+        },
+        languageDetection: { mode: "llm" as const },
+      }
+      mockGetConfigFromStorage.mockResolvedValue(nonLlmConfig)
+      mockDetectLanguage.mockResolvedValue("jpn")
+      mockSendMessage.mockResolvedValue("")
+
+      await translateTextForPage(japaneseText)
+
+      expect(mockDetectLanguage).toHaveBeenCalledWith(japaneseText, expect.objectContaining({ enableLLM: true }))
     })
   })
 

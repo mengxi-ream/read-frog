@@ -2,6 +2,7 @@ import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
@@ -52,7 +53,7 @@ async function translateTextUsingPageConfig(
     const shouldSkip = await shouldSkipByLanguage(
       preparedText,
       skipLanguages,
-      config.languageDetection.mode === "llm",
+      config.languageDetection.mode === "llm" && !isLLMProviderConfig(providerConfig),
     )
     if (shouldSkip) {
       logger.info(`translateTextForPage: skipping translation because text is in skip language list. text: ${preparedText}`)
