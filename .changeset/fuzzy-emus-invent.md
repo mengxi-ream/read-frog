@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix: improve selection preview scrolling in the selection toolbar
+style: improve selection preview scrolling in the selection toolbar
