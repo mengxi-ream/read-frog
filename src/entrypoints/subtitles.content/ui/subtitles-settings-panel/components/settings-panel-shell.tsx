@@ -77,9 +77,9 @@ export function SettingsPanelShell({
           <div
             ref={panelRef}
             data-slot="subtitles-settings-panel"
-            className="pointer-events-auto relative isolate z-40 w-[min(17rem,calc(100vw-2rem))] overflow-hidden rounded-[14px] border border-white/12 bg-[linear-gradient(180deg,rgba(24,25,29,0.96)_0%,rgba(13,14,18,0.94)_100%)] text-white shadow-[0_18px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl"
+            className="pointer-events-auto relative isolate z-40 w-[min(17rem,calc(100vw-2rem))] overflow-hidden rounded-[14px] border border-white/10 bg-[linear-gradient(180deg,rgba(24,25,29,0.82)_0%,rgba(13,14,18,0.78)_100%)] text-white shadow-[0_18px_44px_rgba(0,0,0,0.42),inset_0_1px_0_rgba(255,255,255,0.07)] backdrop-blur-xl"
           >
-            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/18" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-white/14" />
             <div className="pointer-events-none absolute -right-12 -bottom-14 size-32 rounded-full bg-[#d8a94b]/9 blur-3xl" />
             <div>
               {children}
