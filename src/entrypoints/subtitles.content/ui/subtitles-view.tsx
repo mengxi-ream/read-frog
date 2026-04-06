@@ -1,4 +1,3 @@
-import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
 import { IconGripHorizontal } from "@tabler/icons-react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity, useRef } from "react"
@@ -6,11 +5,11 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLES_VIEW_CLASS } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
 import { MainSubtitle, TranslationSubtitle } from "./subtitle-lines"
+import { useSubtitlesUI } from "./subtitles-ui-context"
 import { useControlsInfo } from "./use-controls-visible"
 import { useVerticalDrag } from "./use-vertical-drag"
 
 interface SubtitlesViewProps {
-  controlsConfig?: ControlsConfig
   showContent: boolean
 }
 
@@ -44,8 +43,9 @@ function SubtitlesContent() {
   )
 }
 
-export function SubtitlesView({ controlsConfig, showContent }: SubtitlesViewProps) {
+export function SubtitlesView({ showContent }: SubtitlesViewProps) {
   const windowRef = useRef<HTMLDivElement>(null)
+  const { controlsConfig } = useSubtitlesUI()
   const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
   const setVideoSubtitles = useSetAtom(configFieldsAtomMap.videoSubtitles)
 

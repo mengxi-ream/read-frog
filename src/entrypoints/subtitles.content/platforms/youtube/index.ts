@@ -5,10 +5,8 @@ import { youtubeConfig } from "./config"
 export function setupYoutubeSubtitles() {
   const subtitlesFetcher = new YoutubeSubtitlesFetcher()
 
-  const adapter = new UniversalVideoAdapter({
+  return new UniversalVideoAdapter({
     config: youtubeConfig,
     subtitlesFetcher,
   })
-
-  void adapter.initialize()
 }

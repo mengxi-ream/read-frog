@@ -1,9 +1,8 @@
-import type { FeatureUsageContext } from "@/types/analytics"
 import * as React from "react"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
-import { SubtitleToggleButton } from "../ui/subtitles-translate-button"
+import { SubtitlesTranslateButton } from "../ui/subtitles-translate-button"
 
 const wrapperCSS = `
   :host {
@@ -24,18 +23,14 @@ const wrapperCSS = `
   }
 `
 
-export function renderSubtitlesTranslateButton(
-  onToggle: (enabled: boolean, analyticsContext?: FeatureUsageContext) => void,
-): HTMLDivElement {
+export function renderSubtitlesTranslateButton(): HTMLDivElement {
   const existingContainer = document.querySelector<HTMLDivElement>(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
 
   if (existingContainer) {
     return existingContainer
   }
 
-  const component = React.createElement(SubtitleToggleButton, {
-    onToggle,
-  })
+  const component = React.createElement(SubtitlesTranslateButton)
 
   const shadowHost = createReactShadowHost(component, {
     position: "inline",

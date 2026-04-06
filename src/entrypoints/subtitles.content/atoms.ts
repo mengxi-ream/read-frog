@@ -14,6 +14,8 @@ export const subtitlesStateAtom = atom<StateData | null>(null)
 
 export const subtitlesVisibleAtom = atom<boolean>(false)
 
+export const subtitlesSettingsPanelOpenAtom = atom<boolean>(false)
+
 export interface SubtitlePosition {
   percent: number
   anchor: "top" | "bottom"

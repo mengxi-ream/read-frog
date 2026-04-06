@@ -4,7 +4,8 @@ import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { i18n } from "#imports"
 import { toast } from "sonner"
-import { trackFeatureUsed } from "@/utils/analytics"
+import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
@@ -12,11 +13,13 @@ import { waitForElement } from "@/utils/dom/wait-for-element"
 import { ToastSubtitlesError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary } from "@/utils/subtitles/processor/translator"
-import { subtitlesPositionAtom, subtitlesStore } from "./atoms"
+import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesStore } from "./atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
 import { TranslationCoordinator } from "./translation-coordinator"
+
+type SubtitlesToggleSource = "manual" | "auto"
 
 export class UniversalVideoAdapter {
   private config: PlatformConfig
@@ -51,11 +54,17 @@ export class UniversalVideoAdapter {
     this.subtitlesFetcher = subtitlesFetcher
   }
 
-  initialize() {
+  async initialize() {
     void this.restorePosition()
-    void this.initializeScheduler()
     void this.renderTranslateButton()
+
+    await this.initializeScheduler()
+    await this.tryAutoStartSubtitles()
     this.setupNavigationListener()
+  }
+
+  toggleSubtitlesManually = (enabled: boolean) => {
+    this.toggleSubtitlesWithSource(enabled, "manual")
   }
 
   private async restorePosition() {
@@ -76,6 +85,7 @@ export class UniversalVideoAdapter {
     this.cachedVideoId = null
     this.subtitlesSummaryContextHash = null
     this.subtitlesFetcher.cleanup()
+    subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
     this.showNativeSubtitles()
     void this.restorePosition()
   }
@@ -125,8 +135,10 @@ export class UniversalVideoAdapter {
   private async handleNavigation() {
     if (this.videoIdChanged) {
       this.resetForNavigation()
-      await this.initializeScheduler()
       void this.renderTranslateButton()
+
+      await this.initializeScheduler()
+      await this.tryAutoStartSubtitles()
     }
   }
 
@@ -140,11 +152,34 @@ export class UniversalVideoAdapter {
     const existingButton = controlsBar.querySelector(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
     existingButton?.remove()
 
-    const toggleButton = renderSubtitlesTranslateButton(
-      (enabled, analyticsContext) => this.handleToggleSubtitles(enabled, analyticsContext),
-    )
+    const toggleButton = renderSubtitlesTranslateButton()
 
     controlsBar.insertBefore(toggleButton, controlsBar.firstChild)
+  }
+
+  private async tryAutoStartSubtitles() {
+    const config = await getLocalConfig()
+    const autoStart = config?.videoSubtitles?.autoStart ?? false
+
+    if (!autoStart) {
+      return
+    }
+
+    this.toggleSubtitlesWithSource(true, "auto")
+  }
+
+  private toggleSubtitlesWithSource(enabled: boolean, source: SubtitlesToggleSource) {
+    this.handleToggleSubtitles(
+      enabled,
+      enabled
+        ? createFeatureUsageContext(
+            ANALYTICS_FEATURE.VIDEO_SUBTITLES,
+            source === "auto"
+              ? ANALYTICS_SURFACE.VIDEO_SUBTITLES_AUTO
+              : ANALYTICS_SURFACE.VIDEO_SUBTITLES,
+          )
+        : undefined,
+    )
   }
 
   private handleToggleSubtitles(enabled: boolean, analyticsContext?: FeatureUsageContext) {
