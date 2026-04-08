@@ -80,8 +80,8 @@ describe("translate prompt tokens", () => {
             {
               id: "subtitle-prompt",
               name: "Subtitles",
-              systemPrompt: "Use {{targetLanguage}} with {{webTitle}} and {{webSummary}}",
-              prompt: "{{input}} => {{targetLanguage}} / {{webTitle}} / {{webSummary}}",
+              systemPrompt: "Use {{targetLanguage}} with {{videoTitle}} and {{videoSummary}}",
+              prompt: "{{input}} => {{targetLanguage}} / {{videoTitle}} / {{videoSummary}}",
             },
           ],
         },
@@ -90,12 +90,26 @@ describe("translate prompt tokens", () => {
 
     const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
       context: {
-        webTitle: "Video Title",
-        webSummary: "Video Summary",
+        videoTitle: "Video Title",
+        videoSummary: "Video Summary",
       },
     })
 
     expect(result.systemPrompt).toBe("Use Japanese with Video Title and Video Summary")
     expect(result.prompt).toBe("Hello world => Japanese / Video Title / Video Summary")
+  })
+
+  it("falls back when subtitle prompt context is null or undefined", async () => {
+    mockGetLocalConfig.mockResolvedValue(DEFAULT_CONFIG)
+
+    const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
+      context: {
+        videoTitle: null,
+        videoSummary: undefined,
+      },
+    })
+
+    expect(result.systemPrompt).toContain("Video title: No title available")
+    expect(result.systemPrompt).toContain("Video summary: No summary available")
   })
 })

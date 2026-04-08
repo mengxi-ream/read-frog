@@ -151,8 +151,8 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         isBatch: true,
         context: {
-          webTitle: "Video title",
-          webSummary: "Ready summary",
+          videoTitle: "Video title",
+          videoSummary: "Ready summary",
         },
       }),
     )
@@ -235,7 +235,7 @@ describe("translation queue helpers", () => {
     )
   })
 
-  it("returns an empty string for invalid subtitle summary requests", async () => {
+  it("returns null for invalid subtitle summary requests", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
     await setUpSubtitlesTranslationQueue()
 
@@ -248,11 +248,11 @@ describe("translation queue helpers", () => {
       },
     })
 
-    expect(result).toBe("")
+    expect(result).toBeNull()
     expect(generateArticleSummaryMock).not.toHaveBeenCalled()
   })
 
-  it("returns an empty string when subtitle summary generation has no result", async () => {
+  it("returns null when subtitle summary generation has no result", async () => {
     generateArticleSummaryMock.mockResolvedValue(null)
 
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
@@ -267,7 +267,7 @@ describe("translation queue helpers", () => {
       },
     })
 
-    expect(result).toBe("")
+    expect(result).toBeNull()
   })
 
   it("deduplicates concurrent subtitle summary generation requests", async () => {

@@ -795,7 +795,13 @@ options:
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
     customPrompts:
       title: カスタム字幕プロンプト
-      description: 字幕翻訳用のプロンプトテンプレートをカスタマイズ（ウェブページ翻訳プロンプトとは独立）
+      description: 字幕翻訳用のプロンプトテンプレートをカスタマイズします（ウェブページ翻訳プロンプトとは別です）
+      editPrompt:
+        promptCellInput:
+          input: 翻訳する字幕テキスト
+          targetLanguage: 対象言語
+          videoTitle: 動画タイトル
+          videoSummary: 動画要約（AI スマートコンテキストが必要）
   whatsNew:
     title: 新機能
   survey:

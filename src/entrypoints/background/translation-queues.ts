@@ -1,7 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import type { BatchQueueConfig, RequestQueueConfig } from "@/types/config/translate"
-import type { WebPageContext } from "@/types/content"
+import type { SubtitlePromptContext, WebPagePromptContext } from "@/types/content"
 import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
@@ -12,6 +12,7 @@ import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
@@ -28,9 +29,9 @@ export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
 }
 
-export async function executeBatchTranslation(
-  dataList: TranslateBatchData[],
-  promptResolver: PromptResolver,
+export async function executeBatchTranslation<TContext>(
+  dataList: TranslateBatchData<TContext>[],
+  promptResolver: PromptResolver<TContext>,
 ): Promise<string[]> {
   const { langConfig, providerConfig, context } = dataList[0]
   const texts = dataList.map(d => d.text)
@@ -96,10 +97,10 @@ async function getOrGenerateSubtitleSummary(
   subtitlesContext: string,
   providerConfig: LLMProviderConfig,
   requestQueue: RequestQueue,
-): Promise<string | undefined> {
+): Promise<string | null> {
   const preparedText = cleanText(subtitlesContext)
   if (!preparedText) {
-    return undefined
+    return null
   }
 
   const textHash = Sha256Hex(preparedText)
@@ -134,30 +135,30 @@ async function getOrGenerateSubtitleSummary(
 
   try {
     const summary = await requestQueue.enqueue(thunk, Date.now(), cacheKey)
-    return summary || undefined
+    return summary || null
   }
   catch (error) {
     logger.warn("Failed to get/generate summary:", error)
-    return undefined
+    return null
   }
 }
 
-export interface TranslateBatchData {
+export interface TranslateBatchData<TContext = unknown> {
   text: string
   langConfig: Config["language"]
   providerConfig: ProviderConfig
   hash: string
   scheduleAt: number
-  context?: WebPageContext
+  context?: TContext
 }
 
-interface TranslationQueueSetupConfig {
+interface TranslationQueueSetupConfig<TContext = unknown> {
   requestQueueConfig: RequestQueueConfig
   batchQueueConfig: BatchQueueConfig
-  promptResolver: PromptResolver
+  promptResolver: PromptResolver<TContext>
 }
 
-async function createTranslationQueues(config: TranslationQueueSetupConfig) {
+async function createTranslationQueues<TContext>(config: TranslationQueueSetupConfig<TContext>) {
   const { rate, capacity } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
   const { promptResolver } = config
@@ -170,7 +171,7 @@ async function createTranslationQueues(config: TranslationQueueSetupConfig) {
     baseRetryDelayMs: 1_000,
   })
 
-  const batchQueue = new BatchQueue<TranslateBatchData, string>({
+  const batchQueue = new BatchQueue<TranslateBatchData<TContext>, string>({
     maxCharactersPerBatch,
     maxItemsPerBatch,
     batchDelay: 100,
@@ -235,10 +236,10 @@ export async function setUpWebPageTranslationQueue() {
     }
 
     let result = ""
-    const context: WebPageContext = {
-      webTitle: webTitle ?? "",
-      webContent: webContent ?? undefined,
-      webSummary: webSummary ?? undefined,
+    const context: WebPagePromptContext = {
+      webTitle: normalizePromptContextValue(webTitle),
+      webContent: normalizePromptContextValue(webContent),
+      webSummary: normalizePromptContextValue(webSummary),
     }
 
     if (shouldUseBatchQueue(providerConfig)) {
@@ -308,9 +309,9 @@ export async function setUpSubtitlesTranslationQueue() {
     }
 
     let result = ""
-    const context: WebPageContext = {
-      webTitle: videoTitle || "",
-      webSummary: summary || "",
+    const context: SubtitlePromptContext = {
+      videoTitle: normalizePromptContextValue(videoTitle),
+      videoSummary: normalizePromptContextValue(summary),
     }
 
     if (shouldUseBatchQueue(providerConfig)) {
@@ -337,10 +338,10 @@ export async function setUpSubtitlesTranslationQueue() {
     const { videoTitle, subtitlesContext, providerConfig } = message.data
 
     if (!isLLMProviderConfig(providerConfig) || !videoTitle || !subtitlesContext) {
-      return ""
+      return null
     }
 
-    return await getOrGenerateSubtitleSummary(videoTitle, subtitlesContext, providerConfig, requestQueue) ?? ""
+    return await getOrGenerateSubtitleSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
   })
 
   onMessage("setSubtitlesRequestQueueConfig", (message) => {

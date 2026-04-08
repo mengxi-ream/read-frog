@@ -1,6 +1,7 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { WebPagePromptContext } from "@/types/content"
 import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
@@ -43,51 +44,23 @@ export async function shouldSkipByLanguage(
   return skipLanguages.includes(detectedLang)
 }
 
-export async function buildHashComponents(
-  text: string,
-  providerConfig: ProviderConfig,
-  partialLangConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393 },
-  enableAIContentAware: boolean,
-  promptContext?: { title?: string | null, textContent?: string | null, summary?: string | null },
-): Promise<string[]> {
-  const preparedText = prepareTranslationText(text)
-  const hashComponents = [
-    preparedText,
-    JSON.stringify(providerConfig),
-    // don't include detectedCode because it may change after the page is translated, i.e. it's not accurate
-    partialLangConfig.sourceCode,
-    partialLangConfig.targetCode,
-  ]
-
-  if (isLLMProviderConfig(providerConfig)) {
-    const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
-    const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, { isBatch: true })
-    hashComponents.push(systemPrompt, prompt)
-    hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
-
-    // Include prompt context in hash when AI Content Aware is enabled
-    // to ensure when we get different content from the same url, we get different cache entries
-    if (enableAIContentAware && promptContext) {
-      if (promptContext.title) {
-        hashComponents.push(`title:${promptContext.title}`)
-      }
-      if (promptContext.textContent !== undefined && promptContext.textContent !== null) {
-        // Use a substring hash to avoid huge hash inputs while still differentiating contexts
-        hashComponents.push(`content:${promptContext.textContent.slice(0, 1000)}`)
-      }
-      if (promptContext.summary) {
-        hashComponents.push(`summary:${promptContext.summary}`)
-      }
-    }
+export function normalizePromptContextValue(value: string | null | undefined): string | null | undefined {
+  if (value == null) {
+    return value
   }
-
-  return hashComponents
+  return value.trim() === "" ? null : value
 }
 
-export interface WebPagePromptContext {
-  webTitle?: string | null
-  webContent?: string | null
-  webSummary?: string | null
+function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): WebPagePromptContext | undefined {
+  if (!webPageContext) {
+    return undefined
+  }
+
+  return {
+    webTitle: normalizePromptContextValue(webPageContext.webTitle),
+    webContent: normalizePromptContextValue(webPageContext.webContent),
+    webSummary: normalizePromptContextValue(webPageContext.webSummary),
+  }
 }
 
 async function buildWebPageHashComponents(
@@ -98,6 +71,7 @@ async function buildWebPageHashComponents(
   webPageContext?: WebPagePromptContext,
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
+  const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
   const hashComponents = [
     preparedText,
     JSON.stringify(providerConfig),
@@ -109,28 +83,24 @@ async function buildWebPageHashComponents(
     return hashComponents
   }
 
-  const promptContext = {
-    webTitle: webPageContext?.webTitle ?? "",
-    webContent: webPageContext?.webContent ?? undefined,
-    webSummary: webPageContext?.webSummary ?? undefined,
-  }
   const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
   const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, {
     isBatch: true,
-    context: promptContext,
+    context: normalizedWebPageContext,
   })
   hashComponents.push(systemPrompt, prompt)
   hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
 
-  if (enableAIContentAware && webPageContext) {
-    if (webPageContext.webTitle) {
-      hashComponents.push(`webTitle:${webPageContext.webTitle}`)
+  if (enableAIContentAware && normalizedWebPageContext) {
+    if (normalizedWebPageContext.webTitle) {
+      hashComponents.push(`webTitle:${normalizedWebPageContext.webTitle}`)
     }
-    if (webPageContext.webContent !== undefined && webPageContext.webContent !== null) {
-      hashComponents.push(`webContent:${webPageContext.webContent}`)
+    if (normalizedWebPageContext.webContent) {
+      // Use a substring hash to avoid huge hash inputs while still differentiating contexts.
+      hashComponents.push(`webContent:${normalizedWebPageContext.webContent.slice(0, 1000)}`)
     }
-    if (webPageContext.webSummary) {
-      hashComponents.push(`webSummary:${webPageContext.webSummary}`)
+    if (normalizedWebPageContext.webSummary) {
+      hashComponents.push(`webSummary:${normalizedWebPageContext.webSummary}`)
     }
   }
 
@@ -165,12 +135,14 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     return ""
   }
 
+  const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
+
   const hashComponents = await buildWebPageHashComponents(
     preparedText,
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
-    webPageContext,
+    normalizedWebPageContext,
   )
 
   // Add extra hash tags for cache differentiation
@@ -182,9 +154,9 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
-    webTitle: webPageContext?.webTitle,
-    webContent: webPageContext?.webContent,
-    webSummary: webPageContext?.webSummary,
+    webTitle: normalizedWebPageContext?.webTitle,
+    webContent: normalizedWebPageContext?.webContent,
+    webSummary: normalizedWebPageContext?.webSummary,
   })
 }
 

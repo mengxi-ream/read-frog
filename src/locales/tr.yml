@@ -795,7 +795,13 @@ options:
         description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
     customPrompts:
       title: Özel Altyazı İstemleri
-      description: Altyazı çevirisi için istem şablonlarını özelleştirin (web sayfası çeviri istemlerinden bağımsız)
+      description: Altyazı çevirisi için istem şablonlarını özelleştirin (web sayfası çeviri istemlerinden ayrı)
+      editPrompt:
+        promptCellInput:
+          input: Çevrilecek altyazı metni
+          targetLanguage: Hedef dil
+          videoTitle: Video başlığı
+          videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
   whatsNew:
     title: Yenilikler
   survey:

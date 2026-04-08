@@ -911,6 +911,12 @@ options:
     customPrompts:
       title: Custom Subtitle Prompts
       description: Customize prompt templates for subtitle translation (separate from webpage translation prompts)
+      editPrompt:
+        promptCellInput:
+          input: Subtitle text to translate
+          targetLanguage: Target language
+          videoTitle: Video title
+          videoSummary: Video summary (requires AI Smart Context)
   whatsNew:
     title: What's New
   survey:
