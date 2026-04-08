@@ -867,6 +867,8 @@ thinking:
 shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
+  actions:
+    downloadSource: Tai phu de goc
   state:
     loading: Read Frog đang tải phụ đề
     error: Đã xảy ra lỗi

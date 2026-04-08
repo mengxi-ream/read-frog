@@ -1,4 +1,4 @@
-import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
+import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
@@ -10,9 +10,10 @@ import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
-import { ToastSubtitlesError } from "@/utils/subtitles/errors"
-import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
+import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
+import { processFetchedSourceSubtitles } from "@/utils/subtitles/processor/post-fetch"
 import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary } from "@/utils/subtitles/processor/translator"
+import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesStore } from "./atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
@@ -63,8 +64,21 @@ export class UniversalVideoAdapter {
     this.setupNavigationListener()
   }
 
+  getControlsConfig(): ControlsConfig | undefined {
+    return this.config.controls
+  }
+
   toggleSubtitlesManually = (enabled: boolean) => {
     this.toggleSubtitlesWithSource(enabled, "manual")
+  }
+
+  downloadSourceSubtitles = async () => {
+    const subtitles = this.getProcessedSourceSubtitles(await this.getSourceSubtitles())
+    await downloadSubtitlesAsSrt({
+      subtitles,
+      pageTitle: document.title || "",
+      videoId: this.config.getVideoId?.(),
+    })
   }
 
   private async restorePosition() {
@@ -110,6 +124,45 @@ export class UniversalVideoAdapter {
     this.subtitlesScheduler = new SubtitlesScheduler({ videoElement: video })
     this.subtitlesScheduler.start()
     this.subtitlesScheduler.hide()
+  }
+
+  private async getSourceSubtitles({
+    verifyAvailable = true,
+  }: {
+    verifyAvailable?: boolean
+  } = {}): Promise<SubtitlesFragment[]> {
+    this.cachedVideoId = this.config.getVideoId?.() ?? null
+
+    const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
+    if (useSameTrack && this.originalSubtitles.length > 0) {
+      return this.originalSubtitles
+    }
+
+    if (verifyAvailable && !await this.subtitlesFetcher.hasAvailableSubtitles()) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+    }
+
+    const subtitles = await this.subtitlesFetcher.fetch()
+    if (subtitles.length === 0) {
+      throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
+    }
+
+    this.originalSubtitles = subtitles
+    return subtitles
+  }
+
+  private getProcessedSourceSubtitles(rawSubtitles: SubtitlesFragment[]): SubtitlesFragment[] {
+    if (this.processedFragments.length > 0) {
+      return this.processedFragments
+    }
+
+    const processedFragments = processFetchedSourceSubtitles(
+      rawSubtitles,
+      this.subtitlesFetcher.getSourceLanguage(),
+    )
+    this.processedFragments = processedFragments
+
+    return processedFragments
   }
 
   private setupNavigationListener() {
@@ -270,18 +323,7 @@ export class UniversalVideoAdapter {
 
       this.subtitlesScheduler?.setState("loading")
 
-      this.originalSubtitles = await this.subtitlesFetcher.fetch()
-
-      if (this.originalSubtitles.length === 0) {
-        this.subtitlesScheduler?.setState("error", { message: i18n.t("subtitles.errors.noSubtitlesFound") })
-        if (analyticsContext) {
-          void trackFeatureUsed({
-            ...analyticsContext,
-            outcome: "failure",
-          })
-        }
-        return
-      }
+      this.originalSubtitles = await this.getSourceSubtitles({ verifyAvailable: false })
 
       await this.processSubtitles()
       if (analyticsContext) {
@@ -335,10 +377,7 @@ export class UniversalVideoAdapter {
       })
     }
     else {
-      this.processedFragments = optimizeSubtitles(
-        this.originalSubtitles,
-        this.subtitlesFetcher.getSourceLanguage(),
-      )
+      this.processedFragments = this.getProcessedSourceSubtitles(this.originalSubtitles)
     }
 
     this.translationCoordinator = new TranslationCoordinator({

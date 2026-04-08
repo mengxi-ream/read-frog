@@ -1,3 +1,4 @@
+import type { UniversalVideoAdapter } from "../universal-adapter"
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import { Provider as JotaiProvider } from "jotai"
 import ReactDOM from "react-dom/client"
@@ -12,13 +13,18 @@ import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 import { SubtitlesUIContext } from "../ui/subtitles-ui-context"
 
+type MountSubtitlesUIAdapter = Pick<
+  UniversalVideoAdapter,
+  "downloadSourceSubtitles" | "getControlsConfig" | "toggleSubtitlesManually"
+>
+
 interface MountSubtitlesUIOptions {
-  config: PlatformConfig
-  onToggleSubtitles: (enabled: boolean) => void
+  adapter: MountSubtitlesUIAdapter
+  config: Pick<PlatformConfig, "selectors">
 }
 
 export async function mountSubtitlesUI(
-  { config, onToggleSubtitles }: MountSubtitlesUIOptions,
+  { adapter, config }: MountSubtitlesUIOptions,
 ): Promise<void> {
   const videoContainer = await waitForElement(config.selectors.playerContainer)
   if (!videoContainer)
@@ -76,8 +82,9 @@ export async function mountSubtitlesUI(
         <ThemeProvider container={reactContainer}>
           <SubtitlesUIContext
             value={{
-              toggleSubtitles: onToggleSubtitles,
-              controlsConfig: config.controls,
+              toggleSubtitles: adapter.toggleSubtitlesManually,
+              downloadSourceSubtitles: adapter.downloadSourceSubtitles,
+              controlsConfig: adapter.getControlsConfig(),
             }}
           >
             <SubtitlesContainer />

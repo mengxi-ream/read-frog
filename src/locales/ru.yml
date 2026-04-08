@@ -867,6 +867,8 @@ thinking:
 shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
+  actions:
+    downloadSource: Скачать исходные субтитры
   state:
     loading: Read Frog загрузка субтитров
     error: Произошла ошибка

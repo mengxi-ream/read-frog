@@ -867,6 +867,8 @@ thinking:
 shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
+  actions:
+    downloadSource: 원본 자막 다운로드
   state:
     loading: Read Frog 자막 로딩 중
     error: 오류 발생

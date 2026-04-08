@@ -3,6 +3,7 @@ import { createContext, use } from "react"
 
 interface SubtitlesUIContextValue {
   toggleSubtitles: (enabled: boolean) => void
+  downloadSourceSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
 }
 

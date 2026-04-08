@@ -982,6 +982,8 @@ thinking:
 shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
+  actions:
+    downloadSource: Download source subtitles
   state:
     loading: Read Frog loading captions
     error: Error occurred

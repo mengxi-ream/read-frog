@@ -982,6 +982,8 @@ thinking:
 shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
+  actions:
+    downloadSource: 下载源字幕
   state:
     loading: Read Frog 字幕加载中
     error: 发生错误
