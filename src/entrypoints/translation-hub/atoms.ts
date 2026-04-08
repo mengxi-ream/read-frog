@@ -42,12 +42,24 @@ export const selectedProviderIdsAtom = atom(
     const override = get(selectedProviderIdsOverrideAtom)
     if (override !== null)
       return override
-    // Default: all enabled translate providers' IDs
+    // Default: empty. Users must explicitly enable translation providers.
     const providersConfig = get(configFieldsAtomMap.providersConfig)
     const translateProviders = getTranslateProvidersConfig(providersConfig)
-    return filterEnabledProvidersConfig(translateProviders).map(p => p.id)
+    const translateEnabledProviders = filterEnabledProvidersConfig(translateProviders).map(p => p.id)
+    const translateConfig = get(configFieldsAtomMap.translate)
+    const selectedIds = translateConfig.translationHubConfig.selectedIds
+    return translateEnabledProviders.filter(id => selectedIds.includes(id))
   },
-  (_get, set, ids: string[]) => set(selectedProviderIdsOverrideAtom, ids),
+  (get, set, ids: string[]) => {
+    set(selectedProviderIdsOverrideAtom, ids)
+    const translateConfig = get(configFieldsAtomMap.translate)
+    void set(configFieldsAtomMap.translate, {
+      translationHubConfig: {
+        ...translateConfig.translationHubConfig,
+        selectedIds: ids,
+      },
+    })
+  },
 )
 
 // === Translation Card UI State ===

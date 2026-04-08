@@ -84,6 +84,10 @@ export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, c
   }
 })
 
+export const translationHubConfigSchema = z.object({
+  selectedIds: z.array(z.string()),
+})
+
 export const translateConfigSchema = z.object({
   providerId: z.string().nonempty(),
   mode: translationModeSchema,
@@ -106,6 +110,7 @@ export const translateConfigSchema = z.object({
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,
   translationNodeStyle: translationNodeStyleConfigSchema,
+  translationHubConfig: translationHubConfigSchema,
 })
 
 export type RequestQueueConfig = z.infer<typeof requestQueueConfigSchema>
