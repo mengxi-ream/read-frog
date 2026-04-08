@@ -3,7 +3,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
-import { translateTextForPage, translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
+import { translateTextForInput, translateTextForPage, translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 
 // Mock dependencies
@@ -140,6 +140,44 @@ describe("translate-text", () => {
       expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
         text: "Body text",
         webTitle: "Translated Browser Title",
+      }))
+    })
+  })
+
+  describe("translateTextForInput", () => {
+    it("includes webpage summary for AI-aware llm input translations", async () => {
+      const llmConfig = {
+        ...DEFAULT_CONFIG,
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          enableAIContentAware: true,
+        },
+        inputTranslation: {
+          ...DEFAULT_CONFIG.inputTranslation,
+          providerId: "openai-default",
+        },
+      }
+
+      mockGetConfigFromStorage.mockResolvedValue(llmConfig)
+      mockSendMessage.mockImplementation(async (type: string) => {
+        if (type === "enqueueTranslateRequest") {
+          return "translated input"
+        }
+        if (type === "getOrGenerateWebPageSummary") {
+          return "Generated summary"
+        }
+        return undefined
+      })
+
+      const result = await translateTextForInput("hello", "eng", "cmn")
+
+      expect(result).toBe("translated input")
+      expect(mockGetOrGenerateWebPageSummary).toHaveBeenCalledTimes(1)
+      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
+        text: "hello",
+        webTitle: "Document Title",
+        webContent: "Body content",
+        webSummary: "Generated summary",
       }))
     })
   })

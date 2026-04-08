@@ -157,7 +157,11 @@ export async function translateTextForInput(
     return ""
   }
 
-  const webPageContext = await getOrCreateWebPageContext()
+  const webPageContext = await getWebPagePromptContext(
+    providerConfig,
+    config.translate.enableAIContentAware,
+    true,
+  )
 
   return translateTextCore({
     text,
@@ -169,11 +173,6 @@ export async function translateTextForInput(
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
-    webPageContext: webPageContext
-      ? {
-          webTitle: webPageContext.webTitle,
-          webContent: webPageContext.webContent,
-        }
-      : undefined,
+    webPageContext,
   })
 }
