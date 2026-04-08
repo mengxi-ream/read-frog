@@ -86,7 +86,17 @@ async function translateWithLlm({
   } = providerConfig
   const modelName = resolveModelId(providerConfig.model)
   const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
+  const abortController = new AbortController()
+  registerAbortController(abortController)
+
+  const throwIfAborted = () => {
+    if (abortController.signal.aborted) {
+      throw new DOMException("aborted", "AbortError")
+    }
+  }
+
   const webPageContext = await getSelectionWebPagePromptContext(providerConfig, translateRequest.enableAIContentAware)
+  throwIfAborted()
   const { systemPrompt, prompt } = getTranslatePromptFromConfig(
     { customPromptsConfig: translateRequest.customPromptsConfig },
     targetLangName,
@@ -101,9 +111,6 @@ async function translateWithLlm({
         }
       : undefined,
   )
-
-  const abortController = new AbortController()
-  registerAbortController(abortController)
 
   const translatedText = await streamBackgroundText(
     {

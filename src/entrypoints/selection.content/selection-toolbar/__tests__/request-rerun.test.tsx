@@ -701,6 +701,52 @@ describe("selection toolbar requests", () => {
     expect(screen.queryByTestId("translation-content")).toBeNull()
   })
 
+  it("does not start llm streaming after the popover closes while webpage context is still loading", async () => {
+    const pendingContext = createDeferredPromise<{
+      url: string
+      webTitle: string
+      webContent: string
+    } | null>()
+
+    getOrCreateWebPageContextMock.mockImplementation(() => pendingContext.promise)
+    streamBackgroundTextMock.mockResolvedValue({
+      output: "Should not stream",
+      thinking: {
+        status: "complete",
+        text: "",
+      },
+    })
+
+    const store = createStore()
+    const updatedConfig = cloneConfig(DEFAULT_CONFIG)
+    setSelectionToolbarTranslateProvider(updatedConfig, "openai-default")
+    store.set(configAtom, updatedConfig)
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(getOrCreateWebPageContextMock).toHaveBeenCalled()
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }))
+
+    await act(async () => {
+      pendingContext.resolve({
+        url: "https://example.com/article",
+        webTitle: "Article title",
+        webContent: "Article body",
+      })
+      await Promise.resolve()
+    })
+
+    expect(streamBackgroundTextMock).not.toHaveBeenCalled()
+    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(screen.queryByRole("alert")).toBeNull()
+    expect(screen.queryByTestId("translation-content")).toBeNull()
+  })
+
   it("renders translate errors inline and clears them after a successful rerun", async () => {
     translateTextCoreMock
       .mockRejectedValueOnce(new Error("Standard translation failed"))
