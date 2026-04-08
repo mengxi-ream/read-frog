@@ -24,22 +24,23 @@ describe("translate prompt tokens", () => {
           {
             id: "custom-prompt",
             name: "Custom",
-            systemPrompt: "Target {{targetLanguage}} | Title {{webTitle}} | Summary {{webSummary}}",
-            prompt: "Translate {{input}} for {{targetLanguage}} with {{webTitle}} / {{webSummary}}",
+            systemPrompt: "Target {{targetLanguage}} | Title {{webTitle}} | Content {{webContent}} | Summary {{webSummary}}",
+            prompt: "Translate {{input}} for {{targetLanguage}} with {{webTitle}} / {{webContent}} / {{webSummary}}",
           },
         ],
       },
     }
 
     const result = getTranslatePromptFromConfig(config, "English", "Hola", {
-      content: {
-        title: "Article Title",
-        summary: "Article Summary",
+      context: {
+        webTitle: "Article Title",
+        webContent: "Article Content",
+        webSummary: "Article Summary",
       },
     })
 
-    expect(result.systemPrompt).toBe("Target English | Title Article Title | Summary Article Summary")
-    expect(result.prompt).toBe("Translate Hola for English with Article Title / Article Summary")
+    expect(result.systemPrompt).toBe("Target English | Title Article Title | Content Article Content | Summary Article Summary")
+    expect(result.prompt).toBe("Translate Hola for English with Article Title / Article Content / Article Summary")
   })
 
   it("does not replace legacy translate prompt tokens at runtime", () => {
@@ -58,9 +59,9 @@ describe("translate prompt tokens", () => {
     }
 
     const result = getTranslatePromptFromConfig(config, "English", "Hola", {
-      content: {
-        title: "Article Title",
-        summary: "Article Summary",
+      context: {
+        webTitle: "Article Title",
+        webSummary: "Article Summary",
       },
     })
 
@@ -88,9 +89,9 @@ describe("translate prompt tokens", () => {
     })
 
     const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
-      content: {
-        title: "Video Title",
-        summary: "Video Summary",
+      context: {
+        webTitle: "Video Title",
+        webSummary: "Video Summary",
       },
     })
 

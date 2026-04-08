@@ -23,15 +23,20 @@ vi.mock("@/utils/prompts/translate", () => ({
   getTranslatePrompt: vi.fn(),
 }))
 
-vi.mock("@/utils/host/translate/article-context", () => ({
-  getOrFetchArticleData: vi.fn(),
+vi.mock("@/utils/host/translate/webpage-context", () => ({
+  getOrCreateWebPageContext: vi.fn(),
+}))
+
+vi.mock("@/utils/host/translate/webpage-summary", () => ({
+  getOrGenerateWebPageSummary: vi.fn(),
 }))
 
 let mockSendMessage: any
 let mockMicrosoftTranslate: any
 let mockGetConfigFromStorage: any
 let mockGetTranslatePrompt: any
-let mockGetOrFetchArticleData: any
+let mockGetOrCreateWebPageContext: any
+let mockGetOrGenerateWebPageSummary: any
 
 describe("translate-text", () => {
   beforeEach(async () => {
@@ -42,10 +47,16 @@ describe("translate-text", () => {
     mockMicrosoftTranslate = vi.mocked((await import("@/utils/host/translate/api/microsoft")).microsoftTranslate)
     mockGetConfigFromStorage = vi.mocked((await import("@/utils/config/storage")).getLocalConfig)
     mockGetTranslatePrompt = vi.mocked((await import("@/utils/prompts/translate")).getTranslatePrompt)
-    mockGetOrFetchArticleData = vi.mocked((await import("@/utils/host/translate/article-context")).getOrFetchArticleData)
+    mockGetOrCreateWebPageContext = vi.mocked((await import("@/utils/host/translate/webpage-context")).getOrCreateWebPageContext)
+    mockGetOrGenerateWebPageSummary = vi.mocked((await import("@/utils/host/translate/webpage-summary")).getOrGenerateWebPageSummary)
 
-    // Mock getOrFetchArticleData to return document.title
-    mockGetOrFetchArticleData.mockImplementation(() => Promise.resolve({ title: document.title }))
+    // Mock getOrCreateWebPageContext to return stable webpage metadata
+    mockGetOrCreateWebPageContext.mockImplementation(() => Promise.resolve({
+      url: window.location.href,
+      webTitle: document.title,
+      webContent: document.body.textContent || "",
+    }))
+    mockGetOrGenerateWebPageSummary.mockResolvedValue("Generated summary")
 
     // Mock getConfigFromStorage to return DEFAULT_CONFIG
     mockGetConfigFromStorage.mockResolvedValue(DEFAULT_CONFIG)
@@ -75,7 +86,7 @@ describe("translate-text", () => {
   })
 
   describe("translateTextForPageTitle", () => {
-    it("should use the latest original title instead of document.title when building article context", async () => {
+    it("should use the latest original title instead of document.title when building webpage context", async () => {
       const llmConfig = {
         ...DEFAULT_CONFIG,
         translate: {
@@ -99,8 +110,9 @@ describe("translate-text", () => {
       expect(result).toBe("translated page title")
       expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
         text: "Source Title To Translate",
-        articleTitle: "Source Title To Translate",
+        webTitle: "Source Title To Translate",
       }))
+      expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
     })
 
     it("should forward document.title to regular page translations", async () => {
@@ -127,7 +139,7 @@ describe("translate-text", () => {
       expect(result).toBe("translated body text")
       expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
         text: "Body text",
-        articleTitle: "Translated Browser Title",
+        webTitle: "Translated Browser Title",
       }))
     })
   })

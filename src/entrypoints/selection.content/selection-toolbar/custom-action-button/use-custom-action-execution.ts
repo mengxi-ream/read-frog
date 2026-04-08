@@ -5,12 +5,14 @@ import type { AnalyticsSurface } from "@/types/analytics"
 import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { ANALYTICS_FEATURE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
+import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { truncateContextTextForCustomAction } from "../../utils"
@@ -29,6 +31,7 @@ export interface CustomActionExecutionContext {
     paragraphs: string
     targetLanguage: string
     webTitle: string
+    webContent: string
   }
 }
 
@@ -49,6 +52,7 @@ export function buildCustomActionExecutionPlan(
   customActionRequest: SelectionToolbarCustomActionRequestSlice,
   cleanSelection: string,
   contextText: string,
+  webPageContext?: CachedWebPageContext | null,
 ): CustomActionExecutionPlan {
   const action = customActionRequest.action
 
@@ -81,6 +85,13 @@ export function buildCustomActionExecutionPlan(
     }
   }
 
+  if (webPageContext === undefined) {
+    return {
+      error: null,
+      executionContext: null,
+    }
+  }
+
   return {
     error: null,
     executionContext: {
@@ -90,10 +101,42 @@ export function buildCustomActionExecutionPlan(
         selection: cleanSelection,
         paragraphs: truncateContextTextForCustomAction(contextText || cleanSelection),
         targetLanguage: LANG_CODE_TO_EN_NAME[customActionRequest.language.targetCode],
-        webTitle: document.title,
+        webTitle: webPageContext?.webTitle ?? document.title,
+        webContent: webPageContext?.webContent || "",
       },
     },
   }
+}
+
+export function useCustomActionWebPageContext(open: boolean) {
+  const [webPageContext, setWebPageContext] = useState<CachedWebPageContext | null | undefined>(undefined)
+
+  useEffect(() => {
+    if (!open) {
+      setWebPageContext(undefined)
+      return
+    }
+
+    let isCancelled = false
+
+    void getOrCreateWebPageContext()
+      .then((nextContext) => {
+        if (!isCancelled) {
+          setWebPageContext(nextContext)
+        }
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setWebPageContext(null)
+        }
+      })
+
+    return () => {
+      isCancelled = true
+    }
+  }, [open])
+
+  return webPageContext
 }
 
 export function useCustomActionExecution({
@@ -137,6 +180,7 @@ export function useCustomActionExecution({
       rerunNonce,
       selection: executionContext.promptTokens.selection,
       targetLanguage: executionContext.promptTokens.targetLanguage,
+      webContent: executionContext.promptTokens.webContent,
       webTitle: executionContext.promptTokens.webTitle,
     })
     if (lastRunKeyRef.current === nextRunKey) {

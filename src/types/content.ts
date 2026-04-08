@@ -67,7 +67,8 @@ export type ArticleAnalysis = z.infer<typeof articleAnalysisSchema>
 export type ArticleExplanation = z.infer<typeof articleExplanationSchema>
 export type SyntacticCategoryAbbr = z.infer<typeof syntacticCategoryAbbr>
 
-export interface ArticleContent {
-  title: string
-  summary?: string
+export interface WebPageContext {
+  webTitle: string
+  webContent?: string
+  webSummary?: string
 }

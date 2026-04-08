@@ -1,5 +1,5 @@
 import type { Config } from "@/types/config/config"
-import type { ArticleContent } from "@/types/content"
+import type { WebPageContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
@@ -9,13 +9,14 @@ import {
   getTokenCellText,
   INPUT,
   TARGET_LANGUAGE,
+  WEB_CONTENT,
   WEB_SUMMARY,
   WEB_TITLE,
 } from "../constants/prompt"
 
 export interface TranslatePromptOptions {
   isBatch?: boolean
-  content?: ArticleContent
+  context?: WebPageContext
 }
 
 export interface TranslatePromptResult {
@@ -56,8 +57,9 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   }
 
   // Build title and summary replacement values
-  const title = options?.content?.title || "No title available"
-  const summary = options?.content?.summary || "No summary available"
+  const title = options?.context?.webTitle || "No title available"
+  const contentText = options?.context?.webContent || "No content available"
+  const summary = options?.context?.webSummary || "No summary available"
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>
@@ -65,6 +67,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
       .replaceAll(getTokenCellText(TARGET_LANGUAGE), targetLang)
       .replaceAll(getTokenCellText(INPUT), input)
       .replaceAll(getTokenCellText(WEB_TITLE), title)
+      .replaceAll(getTokenCellText(WEB_CONTENT), contentText)
       .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
 
   return {

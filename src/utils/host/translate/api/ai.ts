@@ -1,5 +1,5 @@
 import type { LLMProviderConfig } from "@/types/config/provider"
-import type { ArticleContent } from "@/types/content"
+import type { WebPageContext } from "@/types/content"
 import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
 import { generateText } from "ai"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
@@ -20,7 +20,7 @@ export async function aiTranslate(
   targetLangName: string,
   providerConfig: LLMProviderConfig,
   promptResolver: PromptResolver,
-  options?: { isBatch?: boolean, content?: ArticleContent },
+  options?: { isBatch?: boolean, context?: WebPageContext },
 ) {
   const { id: providerId, model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const modelName = resolveModelId(providerModel)

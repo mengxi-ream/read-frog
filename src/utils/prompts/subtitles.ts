@@ -45,8 +45,8 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   }
 
   // Build title and summary replacement values
-  const title = options?.content?.title || "No title available"
-  const summary = options?.content?.summary || "No summary available"
+  const title = options?.context?.webTitle || "No title available"
+  const summary = options?.context?.webSummary || "No summary available"
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>

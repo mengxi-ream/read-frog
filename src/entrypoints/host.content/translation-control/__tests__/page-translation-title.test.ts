@@ -8,7 +8,7 @@ const {
   mockDeepQueryTopLevelSelector,
   mockGetDetectedCodeFromStorage,
   mockGetLocalConfig,
-  mockGetOrFetchArticleData,
+  mockGetOrCreateWebPageContext,
   mockRemoveAllTranslatedWrapperNodes,
   mockSendMessage,
   mockTranslateTextForPageTitle,
@@ -23,7 +23,7 @@ const {
   mockRemoveAllTranslatedWrapperNodes: vi.fn(),
   mockTranslateWalkedElement: vi.fn(),
   mockTranslateTextForPageTitle: vi.fn(),
-  mockGetOrFetchArticleData: vi.fn(),
+  mockGetOrCreateWebPageContext: vi.fn(),
   mockValidateTranslationConfigAndToast: vi.fn(),
   mockSendMessage: vi.fn(),
 }))
@@ -59,8 +59,8 @@ vi.mock("@/utils/host/translate/translate-variants", () => ({
   translateTextForPageTitle: mockTranslateTextForPageTitle,
 }))
 
-vi.mock("@/utils/host/translate/article-context", () => ({
-  getOrFetchArticleData: mockGetOrFetchArticleData,
+vi.mock("@/utils/host/translate/webpage-context", () => ({
+  getOrCreateWebPageContext: mockGetOrCreateWebPageContext,
 }))
 
 vi.mock("@/utils/host/translate/translate-text", () => ({
@@ -115,7 +115,11 @@ describe("pageTranslationManager title handling", () => {
     mockGetDetectedCodeFromStorage.mockResolvedValue("eng")
     mockGetLocalConfig.mockResolvedValue(DEFAULT_CONFIG)
     mockDeepQueryTopLevelSelector.mockReturnValue([])
-    mockGetOrFetchArticleData.mockResolvedValue({ title: "Original Title" })
+    mockGetOrCreateWebPageContext.mockResolvedValue({
+      url: window.location.href,
+      webTitle: "Original Title",
+      webContent: "Article body",
+    })
     mockValidateTranslationConfigAndToast.mockReturnValue(true)
     mockSendMessage.mockResolvedValue(undefined)
   })

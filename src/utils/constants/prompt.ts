@@ -1,4 +1,4 @@
-export const TOKENS = ["targetLanguage", "input", "webTitle", "webSummary"] as const
+export const TOKENS = ["targetLanguage", "input", "webTitle", "webContent", "webSummary"] as const
 
 /**
  * Separator used to distinguish multiple text segments in batch translation.
@@ -9,7 +9,8 @@ export const BATCH_SEPARATOR = "%%"
 export const TARGET_LANGUAGE = TOKENS[0]
 export const INPUT = TOKENS[1]
 export const WEB_TITLE = TOKENS[2]
-export const WEB_SUMMARY = TOKENS[3]
+export const WEB_CONTENT = TOKENS[3]
+export const WEB_SUMMARY = TOKENS[4]
 
 export const getTokenCellText = (token: string) => `{{${token}}}`
 

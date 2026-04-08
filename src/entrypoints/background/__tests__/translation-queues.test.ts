@@ -150,11 +150,67 @@ describe("translation queue helpers", () => {
       expect.any(Function),
       expect.objectContaining({
         isBatch: true,
-        content: {
-          title: "Video title",
-          summary: "Ready summary",
+        context: {
+          webTitle: "Video title",
+          webSummary: "Ready summary",
         },
       }),
+    )
+  })
+
+  it("passes webpage context through the translation queue without generating a new summary", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        webTitle: "Page title",
+        webContent: "Page body",
+        webSummary: "Ready summary",
+      },
+    })
+
+    expect(result).toBe("translated subtitle")
+    expect(generateArticleSummaryMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      "hello",
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({
+        context: {
+          webTitle: "Page title",
+          webContent: "Page body",
+          webSummary: "Ready summary",
+        },
+      }),
+    )
+  })
+
+  it("exposes webpage summary generation as a separate background handler", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("getOrGenerateWebPageSummary")
+    const result = await handler({
+      data: {
+        webTitle: "Page title",
+        webContent: "page body",
+        providerConfig: llmProvider,
+      },
+    })
+
+    expect(result).toBe("Generated summary")
+    expect(generateArticleSummaryMock).toHaveBeenCalledWith(
+      "Page title",
+      "page body",
+      llmProvider,
     )
   })
 
