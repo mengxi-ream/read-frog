@@ -64,7 +64,18 @@ describe("spinner", () => {
     expect(spinner.className).toBe("read-frog-spinner")
   })
 
-  it("keeps the primary segment visible when reduced motion is enabled", async () => {
+  it("uses a thin gray spinner arc without a background ring", async () => {
+    const { createLightweightSpinner } = await import("../spinner")
+    const spinner = createLightweightSpinner(document)
+
+    expect(spinner.style.borderTopColor).toBe("var(--read-frog-muted-foreground)")
+    expect(spinner.style.borderRightColor).toBe("transparent")
+    expect(spinner.style.borderBottomColor).toBe("transparent")
+    expect(spinner.style.borderLeftColor).toBe("transparent")
+    expect(spinner.style.borderTopWidth).toBe("1.5px")
+  })
+
+  it("keeps the gray segment visible when reduced motion is enabled", async () => {
     Object.defineProperty(window, "matchMedia", {
       value: vi.fn().mockReturnValue({
         matches: true,
@@ -91,6 +102,6 @@ describe("spinner", () => {
     const spinner = createLightweightSpinner(document)
 
     expect(animateMock).not.toHaveBeenCalled()
-    expect(spinner.style.borderTopColor).toBe("var(--read-frog-primary)")
+    expect(spinner.style.borderTopColor).toBe("var(--read-frog-muted-foreground)")
   })
 })
