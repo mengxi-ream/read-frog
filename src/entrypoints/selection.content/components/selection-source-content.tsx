@@ -1,6 +1,7 @@
 import { IconChevronDown, IconChevronUp } from "@tabler/icons-react"
 import { Activity, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
+import { ScrollArea } from "@/components/ui/base-ui/scroll-area"
 import { Separator } from "@/components/ui/base-ui/separator"
 import { cn } from "@/utils/styles/utils"
 import { CopyButton } from "./copy-button"
@@ -26,9 +27,11 @@ export function SelectionSourceContent({
     <>
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <p className="min-w-0 flex-1 text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-zinc-600 dark:text-zinc-400">
-            {displayText}
-          </p>
+          <ScrollArea className={cn("min-w-0 flex-1", actionsExpanded && "h-18 overflow-hidden")}>
+            <p className={cn("text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-zinc-600 dark:text-zinc-400", !actionsExpanded && "line-clamp-3")}>
+              {displayText}
+            </p>
+          </ScrollArea>
           <Button
             variant="ghost-secondary"
             size="icon-xs"
