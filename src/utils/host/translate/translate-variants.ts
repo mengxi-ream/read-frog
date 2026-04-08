@@ -1,5 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { detectLanguage } from "@/utils/content/language"
@@ -32,6 +33,10 @@ async function getWebPagePromptContext(
   enableAIContentAware: boolean,
   includeSummary: boolean,
 ): Promise<{ webTitle: string, webContent: string, webSummary?: string } | undefined> {
+  if (!isLLMProviderConfig(providerConfig)) {
+    return undefined
+  }
+
   const webPageContext = await getOrCreateWebPageContext()
   if (!webPageContext) {
     return undefined

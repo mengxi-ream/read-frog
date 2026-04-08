@@ -82,6 +82,8 @@ describe("translate-text", () => {
         scheduleAt: expect.any(Number),
         hash: expect.any(String),
       }))
+      expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
+      expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
     })
   })
 
@@ -145,6 +147,22 @@ describe("translate-text", () => {
   })
 
   describe("translateTextForInput", () => {
+    it("skips webpage context loading for non-llm input translations", async () => {
+      mockSendMessage.mockResolvedValue("translated input")
+
+      const result = await translateTextForInput("hello", "eng", "cmn")
+
+      expect(result).toBe("translated input")
+      expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
+      expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
+      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
+        text: "hello",
+        webTitle: undefined,
+        webContent: undefined,
+        webSummary: undefined,
+      }))
+    })
+
     it("includes webpage summary for AI-aware llm input translations", async () => {
       const llmConfig = {
         ...DEFAULT_CONFIG,
