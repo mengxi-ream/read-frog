@@ -79,12 +79,6 @@ export function TtsConfig() {
 
 function TtsDefaultVoiceField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
-  const { play, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TTS_SETTINGS)
-  const isFetchingOrPlaying = isFetching || isPlaying
-
-  const handlePreview = async () => {
-    void play(i18n.t("options.tts.voice.previewSample"), ttsConfig)
-  }
 
   return (
     <Field>
@@ -123,18 +117,6 @@ function TtsDefaultVoiceField() {
             </SelectContent>
           </Select>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          className="sm:w-auto"
-          onClick={handlePreview}
-          disabled={isFetchingOrPlaying}
-        >
-          {isFetchingOrPlaying
-            ? <IconLoader2 className="mr-2 size-4 animate-spin" />
-            : <IconPlayerPlayFilled className="mr-2 size-4" />}
-          {i18n.t("options.tts.voice.preview")}
-        </Button>
       </div>
     </Field>
   )
@@ -143,6 +125,8 @@ function TtsDefaultVoiceField() {
 function TtsLanguageVoiceField() {
   const [ttsConfig, setTtsConfig] = useAtom(configFieldsAtomMap.tts)
   const [selectedLanguage, setSelectedLanguage] = useState<LangCodeISO6393>("eng")
+  const { play, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.TTS_SETTINGS)
+  const isFetchingOrPlaying = isFetching || isPlaying
 
   const selectedLanguageVoice = ttsConfig.languageVoices[selectedLanguage] ?? ttsConfig.defaultVoice
   const defaultLanguageVoice = getDefaultTTSVoiceForLanguage(selectedLanguage, ttsConfig.defaultVoice)
@@ -153,6 +137,12 @@ function TtsLanguageVoiceField() {
         ...ttsConfig.languageVoices,
         [selectedLanguage]: voice,
       },
+    })
+  }
+
+  const handlePreview = async () => {
+    void play(i18n.t("options.tts.voice.previewSample"), ttsConfig, {
+      forcedVoice: selectedLanguageVoice,
     })
   }
 
@@ -205,15 +195,29 @@ function TtsLanguageVoiceField() {
               </SelectContent>
             </Select>
           </div>
-          <Button
-            type="button"
-            variant="outline"
-            className="sm:w-auto"
-            onClick={resetLanguageVoice}
-            disabled={selectedLanguageVoice === defaultLanguageVoice}
-          >
-            {i18n.t("options.tts.languageVoice.reset")}
-          </Button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              variant="outline"
+              className="sm:w-auto"
+              onClick={handlePreview}
+              disabled={isFetchingOrPlaying}
+            >
+              {isFetchingOrPlaying
+                ? <IconLoader2 className="mr-2 size-4 animate-spin" />
+                : <IconPlayerPlayFilled className="mr-2 size-4" />}
+              {i18n.t("options.tts.voice.preview")}
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              className="sm:w-auto"
+              onClick={resetLanguageVoice}
+              disabled={selectedLanguageVoice === defaultLanguageVoice}
+            >
+              {i18n.t("options.tts.languageVoice.reset")}
+            </Button>
+          </div>
         </div>
       </div>
       <FieldDescription>
