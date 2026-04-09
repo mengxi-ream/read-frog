@@ -11,7 +11,7 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
-import { processFetchedSourceSubtitles } from "@/utils/subtitles/processor/post-fetch"
+import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesStore } from "./atoms"
@@ -93,7 +93,7 @@ export class UniversalVideoAdapter {
     this.destroyScheduler()
     this.translationCoordinator?.stop()
     this.translationCoordinator = null
-    this.processedFragments = []
+    this.clearProcessedSourceSubtitles()
     this.segmentationPipeline = null
     this.originalSubtitles = []
     this.cachedVideoId = null
@@ -147,6 +147,7 @@ export class UniversalVideoAdapter {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
 
+    this.clearProcessedSourceSubtitles()
     this.originalSubtitles = subtitles
     return subtitles
   }
@@ -156,13 +157,17 @@ export class UniversalVideoAdapter {
       return this.processedFragments
     }
 
-    const processedFragments = processFetchedSourceSubtitles(
+    const processedFragments = optimizeSubtitles(
       rawSubtitles,
       this.subtitlesFetcher.getSourceLanguage(),
     )
     this.processedFragments = processedFragments
 
     return processedFragments
+  }
+
+  private clearProcessedSourceSubtitles() {
+    this.processedFragments = []
   }
 
   private setupNavigationListener() {
@@ -306,7 +311,7 @@ export class UniversalVideoAdapter {
 
       this.translationCoordinator?.stop()
       this.translationCoordinator = null
-      this.processedFragments = []
+      this.clearProcessedSourceSubtitles()
       this.segmentationPipeline = null
       this.subtitlesScheduler?.reset()
 
