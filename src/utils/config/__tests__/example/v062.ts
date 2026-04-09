@@ -1,5 +1,5 @@
 import type { TestSeriesObject } from "./types"
-import { createDefaultTTSLanguageVoices, EDGE_TTS_FALLBACK_VOICE } from "@/types/config/tts"
+import { createLegacyDefaultTTSLanguageVoices, LEGACY_EDGE_TTS_FALLBACK_VOICE } from "./legacy-tts-v054"
 
 export const testSeries: TestSeriesObject = {
   "complex-config-from-v020": {
@@ -118,8 +118,8 @@ export const testSeries: TestSeriesObject = {
         },
       },
       tts: {
-        defaultVoice: EDGE_TTS_FALLBACK_VOICE,
-        languageVoices: createDefaultTTSLanguageVoices(),
+        defaultVoice: LEGACY_EDGE_TTS_FALLBACK_VOICE,
+        languageVoices: createLegacyDefaultTTSLanguageVoices(),
         rate: 0,
         pitch: 0,
         volume: 0,
@@ -297,8 +297,8 @@ export const testSeries: TestSeriesObject = {
         },
       },
       tts: {
-        defaultVoice: EDGE_TTS_FALLBACK_VOICE,
-        languageVoices: createDefaultTTSLanguageVoices(),
+        defaultVoice: LEGACY_EDGE_TTS_FALLBACK_VOICE,
+        languageVoices: createLegacyDefaultTTSLanguageVoices(),
         rate: 0,
         pitch: 0,
         volume: 0,
@@ -469,8 +469,8 @@ export const testSeries: TestSeriesObject = {
         },
       },
       tts: {
-        defaultVoice: EDGE_TTS_FALLBACK_VOICE,
-        languageVoices: createDefaultTTSLanguageVoices(),
+        defaultVoice: LEGACY_EDGE_TTS_FALLBACK_VOICE,
+        languageVoices: createLegacyDefaultTTSLanguageVoices(),
         rate: 0,
         pitch: 0,
         volume: 0,
@@ -706,8 +706,8 @@ export const testSeries: TestSeriesObject = {
         },
       },
       tts: {
-        defaultVoice: EDGE_TTS_FALLBACK_VOICE,
-        languageVoices: createDefaultTTSLanguageVoices(),
+        defaultVoice: LEGACY_EDGE_TTS_FALLBACK_VOICE,
+        languageVoices: createLegacyDefaultTTSLanguageVoices(),
         rate: 0,
         pitch: 0,
         volume: 0,
