@@ -113,8 +113,41 @@ describe("translate-text", () => {
       expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
         text: "Source Title To Translate",
         webTitle: "Source Title To Translate",
+        webContent: undefined,
       }))
+      expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
       expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
+    })
+
+    it("should include webpage content for AI-aware title translation", async () => {
+      const llmConfig = {
+        ...DEFAULT_CONFIG,
+        translate: {
+          ...DEFAULT_CONFIG.translate,
+          providerId: "openai-default",
+          enableAIContentAware: true,
+        },
+      }
+
+      mockGetConfigFromStorage.mockResolvedValue(llmConfig)
+      mockSendMessage.mockImplementation(async (type: string) => {
+        if (type === "enqueueTranslateRequest") {
+          return "translated page title"
+        }
+        return undefined
+      })
+
+      const result = await translateTextForPageTitle("Source Title To Translate")
+
+      expect(result).toBe("translated page title")
+      expect(mockGetOrCreateWebPageContext).toHaveBeenCalledTimes(1)
+      expect(mockGetOrGenerateWebPageSummary).not.toHaveBeenCalled()
+      expect(mockSendMessage).toHaveBeenCalledWith("enqueueTranslateRequest", expect.objectContaining({
+        text: "Source Title To Translate",
+        webTitle: "Source Title To Translate",
+        webContent: "Body content",
+        webSummary: undefined,
+      }))
     })
 
     it("should forward document.title to regular page translations", async () => {

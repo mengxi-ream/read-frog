@@ -118,7 +118,9 @@ export async function translateTextForPage(text: string): Promise<string> {
 export async function translateTextForPageTitle(text: string): Promise<string> {
   const config = await getConfigOrThrow()
   const providerConfig = resolveProviderConfig(config, "translate")
-  const webPageContext = await getWebPagePromptContext(providerConfig, config.translate.enableAIContentAware, false)
+  const webPageContext = config.translate.enableAIContentAware
+    ? await getWebPagePromptContext(providerConfig, true, false)
+    : undefined
 
   return translateTextUsingPageConfig(config, text, {
     extraHashTags: ["pageTitleTranslation"],
