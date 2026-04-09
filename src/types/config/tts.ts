@@ -9,7 +9,7 @@ import { z } from "zod"
 export type TTSVoice = string
 
 const EDGE_TTS_VOICE_BY_ISO6391: Partial<Record<LangCodeISO6391, TTSVoice>> = {
-  "en": "en-US-GuyNeural",
+  "en": "en-US-DavisNeural",
   "zh": "zh-CN-YunxiNeural",
   "zh-TW": "zh-TW-YunJheNeural",
   "es": "es-ES-AlvaroNeural",
@@ -180,7 +180,7 @@ const EDGE_TTS_EXTRA_VOICES: TTSVoice[] = [
   "ko-KR-SunHiNeural",
 ]
 
-export const EDGE_TTS_FALLBACK_VOICE: TTSVoice = "en-US-GuyNeural"
+export const EDGE_TTS_FALLBACK_VOICE: TTSVoice = "en-US-DavisNeural"
 
 export function getDefaultTTSVoiceForLanguage(
   langCode: LangCodeISO6393,
