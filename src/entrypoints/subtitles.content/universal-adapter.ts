@@ -122,18 +122,14 @@ export class UniversalVideoAdapter {
     this.subtitlesScheduler.hide()
   }
 
-  private async getSourceSubtitles({
-    verifyAvailable = true,
-  }: {
-    verifyAvailable?: boolean
-  } = {}): Promise<SubtitlesFragment[]> {
+  private async getSourceSubtitles(): Promise<SubtitlesFragment[]> {
     const currentVideoId = this.config.getVideoId?.() ?? null
     const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
     if (useSameTrack && this.sourceVideoId === currentVideoId && this.sourceSubtitles.length > 0) {
       return this.sourceSubtitles
     }
 
-    if (verifyAvailable && !await this.subtitlesFetcher.hasAvailableSubtitles()) {
+    if (!await this.subtitlesFetcher.hasAvailableSubtitles()) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
 
