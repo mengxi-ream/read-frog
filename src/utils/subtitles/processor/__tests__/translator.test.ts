@@ -4,7 +4,7 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
 const getLocalConfigMock = vi.fn()
 const sendMessageMock = vi.fn()
-const getTranslatePromptMock = vi.fn()
+const getSubtitlesTranslatePromptMock = vi.fn()
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,
@@ -14,8 +14,8 @@ vi.mock("@/utils/message", () => ({
   sendMessage: sendMessageMock,
 }))
 
-vi.mock("@/utils/prompts/translate", () => ({
-  getTranslatePrompt: getTranslatePromptMock,
+vi.mock("@/utils/prompts/subtitles", () => ({
+  getSubtitlesTranslatePrompt: getSubtitlesTranslatePromptMock,
 }))
 
 describe("subtitles translator", () => {
@@ -35,7 +35,7 @@ describe("subtitles translator", () => {
       },
     })
 
-    getTranslatePromptMock.mockResolvedValue({
+    getSubtitlesTranslatePromptMock.mockResolvedValue({
       systemPrompt: "system",
       prompt: "prompt",
     })
@@ -106,16 +106,16 @@ describe("subtitles translator", () => {
     }))
   })
 
-  it("returns an empty string when subtitle summary is unavailable", async () => {
+  it("returns null when subtitle summary is unavailable", async () => {
     const { fetchSubtitlesSummary } = await import("../translator")
 
-    sendMessageMock.mockResolvedValueOnce(undefined)
+    sendMessageMock.mockResolvedValueOnce(null)
     const emptyFromBackground = await fetchSubtitlesSummary({
       videoTitle: "Video title",
       subtitlesTextContent: "subtitle transcript",
     })
 
-    expect(emptyFromBackground).toBe("")
+    expect(emptyFromBackground).toBeNull()
 
     getLocalConfigMock.mockResolvedValueOnce({
       ...DEFAULT_CONFIG,
@@ -134,7 +134,21 @@ describe("subtitles translator", () => {
       subtitlesTextContent: "subtitle transcript",
     })
 
-    expect(disabledResult).toBe("")
+    expect(disabledResult).toBeNull()
+  })
+
+  it("preserves null summary once the subtitle summary fetch completes without data", async () => {
+    const { translateSubtitles } = await import("../translator")
+
+    await translateSubtitles([{ text: "hello", start: 0, end: 1_000 }], {
+      videoTitle: "Video title",
+      subtitlesTextContent: "subtitle transcript",
+      summary: null,
+    })
+
+    const request = sendMessageMock.mock.calls[0][1]
+    expect(request.videoTitle).toBe("Video title")
+    expect(request.summary).toBeNull()
   })
 
   it("builds subtitle summary context hashes from subtitles text and provider config", async () => {

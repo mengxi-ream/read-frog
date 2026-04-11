@@ -408,6 +408,7 @@ options:
             paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
             targetLanguage: 使用者的目標語言
             webTitle: 網頁標題
+            webContent: 從目前頁面擷取的網頁正文內容（截斷到前 2000 個字元）
           delete: 刪除
           deleteDialog:
             title: 刪除自訂 AI 指令？
@@ -474,6 +475,7 @@ options:
           input: 需要翻譯的文字內容
           targetLanguage: 目標語言
           webTitle: 網頁標題
+          webContent: 網頁正文內容（截斷到前 2000 個字元）
           webSummary: 網頁摘要（需啟用 AI 智慧上下文）
         save: 保存
         close: 取消
@@ -583,9 +585,9 @@ options:
         description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。
     aiContentAware:
       title: AI 智慧上下文翻譯
-      description: 透過向 AI 提供文章上下文來提高翻譯品質
+      description: 透過向 AI 提供網頁上下文來提高翻譯品質
       enable: 啟用 AI 智慧上下文翻譯
-      enableDescription: AI 使用文章摘要來提高翻譯準確性。需要 LLM 翻譯提供商。剛開始翻譯頁面時會有延遲，並增加 API 費用。
+      enableDescription: AI 使用網頁摘要來提高翻譯準確性。需要 LLM 翻譯提供商。剛開始翻譯頁面時會有延遲，並增加 API 費用。
   tts:
     title: 文字轉語音
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
@@ -793,7 +795,13 @@ options:
         description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量
     customPrompts:
       title: 自訂字幕提示詞
-      description: 自訂字幕翻譯的提示詞模板（與網頁翻譯提示詞獨立）
+      description: 自訂字幕翻譯的提示詞模板（與網頁翻譯提示詞分離）
+      editPrompt:
+        promptCellInput:
+          input: 要翻譯的字幕文字
+          targetLanguage: 目標語言
+          videoTitle: 影片標題
+          videoSummary: 影片摘要（需啟用 AI 智慧上下文）
   whatsNew:
     title: 最近更新
   survey:

@@ -1,5 +1,4 @@
 import type { LLMProviderConfig } from "@/types/config/provider"
-import type { ArticleContent } from "@/types/content"
 import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
 import { generateText } from "ai"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
@@ -9,18 +8,18 @@ import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 
 const THINK_TAG_RE = /<\/think>([\s\S]*)/
 
-export type PromptResolver = (
+export type PromptResolver<TContext = unknown> = (
   targetLang: string,
   input: string,
-  options?: TranslatePromptOptions,
+  options?: TranslatePromptOptions<TContext>,
 ) => Promise<TranslatePromptResult>
 
-export async function aiTranslate(
+export async function aiTranslate<TContext>(
   text: string,
   targetLangName: string,
   providerConfig: LLMProviderConfig,
-  promptResolver: PromptResolver,
-  options?: { isBatch?: boolean, content?: ArticleContent },
+  promptResolver: PromptResolver<TContext>,
+  options?: { isBatch?: boolean, context?: TContext },
 ) {
   const { id: providerId, model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const modelName = resolveModelId(providerModel)

@@ -1,21 +1,23 @@
 import type { TranslatePromptOptions, TranslatePromptResult } from "./translate"
+import type { SubtitlePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
   DEFAULT_BATCH_TRANSLATE_PROMPT,
+  DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT,
   DEFAULT_TRANSLATE_PROMPT,
-  DEFAULT_TRANSLATE_SYSTEM_PROMPT,
   getTokenCellText,
   INPUT,
   TARGET_LANGUAGE,
-  WEB_SUMMARY,
-  WEB_TITLE,
+  VIDEO_SUMMARY,
+  VIDEO_TITLE,
 } from "../constants/prompt"
+import { resolvePromptReplacementValue } from "./translate"
 
 export async function getSubtitlesTranslatePrompt(
   targetLang: string,
   input: string,
-  options?: TranslatePromptOptions,
+  options?: TranslatePromptOptions<SubtitlePromptContext>,
 ): Promise<TranslatePromptResult> {
   const config = await getLocalConfig() ?? DEFAULT_CONFIG
   const customPromptsConfig = config.videoSubtitles.customPromptsConfig
@@ -27,13 +29,13 @@ export async function getSubtitlesTranslatePrompt(
 
   if (!promptId) {
     // Use default prompts from constants
-    systemPrompt = DEFAULT_TRANSLATE_SYSTEM_PROMPT
+    systemPrompt = DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT
     prompt = DEFAULT_TRANSLATE_PROMPT
   }
   else {
     // Find custom prompt, fallback to default
     const customPrompt = patterns.find(pattern => pattern.id === promptId)
-    systemPrompt = customPrompt?.systemPrompt ?? DEFAULT_TRANSLATE_SYSTEM_PROMPT
+    systemPrompt = customPrompt?.systemPrompt ?? DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT
     prompt = customPrompt?.prompt ?? DEFAULT_TRANSLATE_PROMPT
   }
 
@@ -45,16 +47,16 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   }
 
   // Build title and summary replacement values
-  const title = options?.content?.title || "No title available"
-  const summary = options?.content?.summary || "No summary available"
+  const title = resolvePromptReplacementValue(options?.context?.videoTitle, "No title available")
+  const summary = resolvePromptReplacementValue(options?.context?.videoSummary, "No summary available")
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>
     text
       .replaceAll(getTokenCellText(TARGET_LANGUAGE), targetLang)
       .replaceAll(getTokenCellText(INPUT), input)
-      .replaceAll(getTokenCellText(WEB_TITLE), title)
-      .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
+      .replaceAll(getTokenCellText(VIDEO_TITLE), title)
+      .replaceAll(getTokenCellText(VIDEO_SUMMARY), summary)
 
   return {
     systemPrompt: replaceTokens(systemPrompt),

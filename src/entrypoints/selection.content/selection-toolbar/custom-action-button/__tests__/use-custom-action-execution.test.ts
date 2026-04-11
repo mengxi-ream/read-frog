@@ -1,3 +1,4 @@
+import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -27,17 +28,26 @@ function createCustomActionRequest() {
 }
 
 describe("buildCustomActionExecutionPlan", () => {
-  it("truncates long context tokens before passing them into custom action prompts", () => {
+  it("truncates paragraph context tokens and trusts the canonical webpage content", () => {
     const contextText = "x".repeat(CUSTOM_ACTION_CONTEXT_CHAR_LIMIT + 128)
+    const webPageContext: CachedWebPageContext = {
+      url: "https://example.com/article",
+      webTitle: "Example page",
+      webContent: "y".repeat(CUSTOM_ACTION_CONTEXT_CHAR_LIMIT),
+    }
     const plan = buildCustomActionExecutionPlan(
       createCustomActionRequest(),
       "Selected text",
       contextText,
+      webPageContext,
     )
 
     expect(plan.error).toBeNull()
     expect(plan.executionContext?.promptTokens.paragraphs).toBe(
       contextText.slice(0, CUSTOM_ACTION_CONTEXT_CHAR_LIMIT),
+    )
+    expect(plan.executionContext?.promptTokens.webContent).toBe(
+      webPageContext.webContent,
     )
     expect(plan.executionContext?.promptTokens.selection).toBe("Selected text")
   })

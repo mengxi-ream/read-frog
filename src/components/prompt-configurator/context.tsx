@@ -4,6 +4,10 @@ import type { customPromptsConfigSchema } from "@/types/config/translate"
 import { createContext, use } from "react"
 
 export type CustomPromptsConfig = z.infer<typeof customPromptsConfigSchema>
+export interface PromptInsertCell {
+  text: string
+  description: string
+}
 
 export interface PromptAtoms {
   config: WritableAtom<CustomPromptsConfig, [CustomPromptsConfig], void>
@@ -11,12 +15,25 @@ export interface PromptAtoms {
   selectedPrompts: PrimitiveAtom<string[]>
 }
 
-export const PromptConfiguratorContext = createContext<PromptAtoms | null>(null)
+export interface PromptConfiguratorContextValue {
+  promptAtoms: PromptAtoms
+  insertCells: PromptInsertCell[]
+}
+
+export const PromptConfiguratorContext = createContext<PromptConfiguratorContextValue | null>(null)
 
 export function usePromptAtoms() {
-  const promptAtoms = use(PromptConfiguratorContext)
-  if (!promptAtoms) {
+  const promptConfigurator = use(PromptConfiguratorContext)
+  if (!promptConfigurator) {
     throw new Error("usePromptAtoms must be used within PromptConfigurator")
   }
-  return promptAtoms
+  return promptConfigurator.promptAtoms
+}
+
+export function usePromptInsertCells() {
+  const promptConfigurator = use(PromptConfiguratorContext)
+  if (!promptConfigurator) {
+    throw new Error("usePromptInsertCells must be used within PromptConfigurator")
+  }
+  return promptConfigurator.insertCells
 }

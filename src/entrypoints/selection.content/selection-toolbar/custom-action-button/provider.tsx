@@ -28,6 +28,7 @@ import { SaveToNotebaseButton } from "./save-to-notebase-button"
 import {
   buildCustomActionExecutionPlan,
   useCustomActionExecution,
+  useCustomActionWebPageContext,
 } from "./use-custom-action-execution"
 
 interface SelectionCustomActionPendingOpenRequest {
@@ -96,7 +97,8 @@ export function SelectionCustomActionProvider({
 
     return activeSession?.contextSnapshot.text || cleanSelection
   }, [activeSession?.contextSnapshot.text, cleanSelection])
-  const titleText = document.title || null
+  const webPageContext = useCustomActionWebPageContext(isOpen)
+  const titleText = (webPageContext?.webTitle ?? document.title) || null
   const activeAction = useMemo(
     () => selectionToolbarConfig.customActions.find(action =>
       action.enabled !== false && action.id === activeActionId,
@@ -115,8 +117,8 @@ export function SelectionCustomActionProvider({
     [providersConfig],
   )
   const executionPlan = useMemo(
-    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, paragraphsText),
-    [cleanSelection, customActionRequest, paragraphsText],
+    () => buildCustomActionExecutionPlan(customActionRequest, cleanSelection, paragraphsText, webPageContext),
+    [cleanSelection, customActionRequest, paragraphsText, webPageContext],
   )
   const {
     error,
@@ -134,7 +136,7 @@ export function SelectionCustomActionProvider({
   })
   const displayedResult = executionPlan.executionContext ? result : null
   const displayedError = error ?? executionPlan.error
-  const displayedIsRunning = executionPlan.executionContext ? isRunning : false
+  const displayedIsRunning = (isOpen && webPageContext === undefined) || (executionPlan.executionContext ? isRunning : false)
   const displayedThinking = executionPlan.executionContext ? thinking : null
 
   const resetPopoverSession = useCallback((options?: { clearAnchor?: boolean }) => {

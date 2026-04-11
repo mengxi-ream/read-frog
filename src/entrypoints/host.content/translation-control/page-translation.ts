@@ -1,17 +1,19 @@
 import type { FeatureUsageContext } from "@/types/analytics"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getDetectedCodeFromStorage } from "@/utils/config/languages"
 import { getLocalConfig } from "@/utils/config/storage"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
-import { getOrFetchArticleData } from "@/utils/host/translate/article-context"
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
 import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
+import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 
@@ -117,12 +119,16 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
 
     try {
+      const providerConfig = resolveProviderConfig(config, "translate")
+
       await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
         enabled: true,
       })
 
       this.isPageTranslating = true
-      await this.primeDocumentTitleContext(config.translate.enableAIContentAware)
+      await this.primeDocumentTitleContext(
+        config.translate.enableAIContentAware && isLLMProviderConfig(providerConfig),
+      )
       this.startDocumentTitleTracking()
 
       // Listen to existing elements when they enter the viewpoint
@@ -261,16 +267,16 @@ export class PageTranslationManager implements IPageTranslationManager {
     return window === window.top
   }
 
-  private async primeDocumentTitleContext(enableAIContentAware: boolean): Promise<void> {
-    if (!this.shouldManageDocumentTitle()) {
+  private async primeDocumentTitleContext(shouldPrimeWebPageContext: boolean): Promise<void> {
+    if (!this.shouldManageDocumentTitle() || !shouldPrimeWebPageContext) {
       return
     }
 
     try {
-      await getOrFetchArticleData(enableAIContentAware)
+      await getOrCreateWebPageContext()
     }
     catch (error) {
-      logger.warn("Failed to prime article context before translating document title:", error)
+      logger.warn("Failed to prime webpage context before translating document title:", error)
     }
   }
 

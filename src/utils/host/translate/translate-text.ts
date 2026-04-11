@@ -1,6 +1,7 @@
 import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
+import type { WebPagePromptContext } from "@/types/content"
 import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
@@ -43,38 +44,63 @@ export async function shouldSkipByLanguage(
   return skipLanguages.includes(detectedLang)
 }
 
-export async function buildHashComponents(
+export function normalizePromptContextValue(value: string | null | undefined): string | null | undefined {
+  if (value == null) {
+    return value
+  }
+  return value.trim() === "" ? null : value
+}
+
+function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): WebPagePromptContext | undefined {
+  if (!webPageContext) {
+    return undefined
+  }
+
+  return {
+    webTitle: normalizePromptContextValue(webPageContext.webTitle),
+    webContent: normalizePromptContextValue(webPageContext.webContent),
+    webSummary: normalizePromptContextValue(webPageContext.webSummary),
+  }
+}
+
+async function buildWebPageHashComponents(
   text: string,
   providerConfig: ProviderConfig,
   partialLangConfig: { sourceCode: LangCodeISO6393 | "auto", targetCode: LangCodeISO6393 },
   enableAIContentAware: boolean,
-  articleContext?: { title?: string | null, textContent?: string | null },
+  webPageContext?: WebPagePromptContext,
 ): Promise<string[]> {
   const preparedText = prepareTranslationText(text)
+  const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
   const hashComponents = [
     preparedText,
     JSON.stringify(providerConfig),
-    // don't include detectedCode because it may change after the page is translated, i.e. it's not accurate
     partialLangConfig.sourceCode,
     partialLangConfig.targetCode,
   ]
 
-  if (isLLMProviderConfig(providerConfig)) {
-    const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
-    const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, { isBatch: true })
-    hashComponents.push(systemPrompt, prompt)
-    hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
+  if (!isLLMProviderConfig(providerConfig)) {
+    return hashComponents
+  }
 
-    // Include article context in hash when AI Content Aware is enabled
-    // to ensure when we get different content from the same url, we get different cache entries
-    if (enableAIContentAware && articleContext) {
-      if (articleContext.title) {
-        hashComponents.push(`title:${articleContext.title}`)
-      }
-      if (articleContext.textContent !== undefined && articleContext.textContent !== null) {
-        // Use a substring hash to avoid huge hash inputs while still differentiating articles
-        hashComponents.push(`content:${articleContext.textContent.slice(0, 1000)}`)
-      }
+  const targetLangName = LANG_CODE_TO_EN_NAME[partialLangConfig.targetCode]
+  const { systemPrompt, prompt } = await getTranslatePrompt(targetLangName, preparedText, {
+    isBatch: true,
+    context: normalizedWebPageContext,
+  })
+  hashComponents.push(systemPrompt, prompt)
+  hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
+
+  if (enableAIContentAware && normalizedWebPageContext) {
+    if (normalizedWebPageContext.webTitle) {
+      hashComponents.push(`webTitle:${normalizedWebPageContext.webTitle}`)
+    }
+    if (normalizedWebPageContext.webContent) {
+      // Use a substring hash to avoid huge hash inputs while still differentiating contexts.
+      hashComponents.push(`webContent:${normalizedWebPageContext.webContent.slice(0, 1000)}`)
+    }
+    if (normalizedWebPageContext.webSummary) {
+      hashComponents.push(`webSummary:${normalizedWebPageContext.webSummary}`)
     }
   }
 
@@ -87,7 +113,7 @@ export interface TranslateTextOptions {
   providerConfig: ProviderConfig
   enableAIContentAware?: boolean
   extraHashTags?: string[]
-  articleContext?: { title?: string | null, textContent?: string | null }
+  webPageContext?: WebPagePromptContext
 }
 
 /**
@@ -101,7 +127,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     providerConfig,
     enableAIContentAware = false,
     extraHashTags = [],
-    articleContext,
+    webPageContext,
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -109,21 +135,14 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     return ""
   }
 
-  // Get article data for LLM providers (needed for both hash and request)
-  let articleTitle: string | null | undefined
-  let articleTextContent: string | null | undefined
+  const normalizedWebPageContext = normalizeWebPagePromptContext(webPageContext)
 
-  if (isLLMProviderConfig(providerConfig) && articleContext) {
-    articleTitle = articleContext.title
-    articleTextContent = articleContext.textContent
-  }
-
-  const hashComponents = await buildHashComponents(
+  const hashComponents = await buildWebPageHashComponents(
     preparedText,
     providerConfig,
     { sourceCode: langConfig.sourceCode, targetCode: langConfig.targetCode },
     enableAIContentAware,
-    { title: articleTitle, textContent: articleTextContent },
+    normalizedWebPageContext,
   )
 
   // Add extra hash tags for cache differentiation
@@ -135,8 +154,9 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
-    articleTitle,
-    articleTextContent,
+    webTitle: normalizedWebPageContext?.webTitle,
+    webContent: normalizedWebPageContext?.webContent,
+    webSummary: normalizedWebPageContext?.webSummary,
   })
 }
 

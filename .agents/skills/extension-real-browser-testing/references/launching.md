@@ -1,8 +1,8 @@
 # Browser Launching
 
-## Chromium-Family Browsers
+## Chromium-family browsers
 
-Prefer Chrome, Edge, Chromium, or Brave when DevTools Protocol automation is needed.
+Prefer Edge, Chrome, Chromium, or Brave when extension automation or DevTools Protocol access is needed.
 
 ### Discovery
 
@@ -19,9 +19,49 @@ Typical Linux commands:
 - `chromium`
 - `brave-browser`
 
-### Launch Pattern
+## Preferred path here: Edge + Playwright
 
-Use a fresh profile and load the unpacked build artifact directly.
+Preferred browser for this workflow in this environment.
+
+```js
+import fs from 'node:fs';
+import { chromium } from '/Users/frog/.hermes/hermes-agent/node_modules/playwright/index.mjs';
+
+const extensionPath = '/ABS/PATH/TO/.output/chrome-mv3';
+const userDataDir = '/tmp/extension-edge-profile';
+fs.rmSync(userDataDir, { recursive: true, force: true });
+
+const context = await chromium.launchPersistentContext(userDataDir, {
+  executablePath: '/Applications/Microsoft Edge.app/Contents/MacOS/Microsoft Edge',
+  headless: false,
+  viewport: { width: 1440, height: 1200 },
+  args: [
+    '--no-first-run',
+    '--no-default-browser-check',
+    `--disable-extensions-except=${extensionPath}`,
+    `--load-extension=${extensionPath}`,
+  ],
+});
+```
+
+## Verify the MV3 worker
+
+```js
+let worker = context.serviceWorkers()[0];
+if (!worker) {
+  worker = await context.waitForEvent('serviceworker', { timeout: 30000 });
+}
+const extensionId = new URL(worker.url()).host;
+```
+
+Good signals:
+- the content page is present in `context.pages()`
+- the MV3 service worker is present in `context.serviceWorkers()`
+- the worker URL resolves to your extension ID
+
+## Alternative manual launch
+
+Useful when you want a browser window plus a remote debugging port for manual inspection:
 
 ```bash
 open -na '/Applications/Microsoft Edge.app' --args \
@@ -29,40 +69,26 @@ open -na '/Applications/Microsoft Edge.app' --args \
   --user-data-dir=/tmp/ext-test-edge-profile \
   --no-first-run \
   --no-default-browser-check \
-  --disable-background-networking \
-  --disable-sync \
-  --disable-extensions-except='/abs/path/.output/edge-mv3' \
-  --load-extension='/abs/path/.output/edge-mv3' \
+  --disable-extensions-except='/abs/path/.output/chrome-mv3' \
+  --load-extension='/abs/path/.output/chrome-mv3' \
   http://127.0.0.1:8123/
 ```
 
-Use the same pattern for Chrome, Chromium, or Brave by swapping the app path.
-
-### Verify the Extension Loaded
-
-Query the DevTools target list:
+Then inspect targets with:
 
 ```bash
 curl -s http://127.0.0.1:9226/json/list
 ```
 
-Good signals:
-- target for your test page
-- service worker target like `chrome-extension://<id>/background.js`
+## Why not Browserbase/browser tool?
 
-## Firefox
+The browser tool cannot load a local unpacked extension, so it is not suitable for this workflow.
 
-Firefox may not expose the same DevTools Protocol workflow. Prefer:
-- manual repro with a fresh profile
-- Playwright or browser-native debugging if the environment already supports it
+## Why not Chrome first?
 
-Still follow the same core principles:
-- fresh profile
-- built artifact
-- verify the extension actually loaded
-- collect DOM evidence, not only screenshots
+Chrome can be fine in general, but on this machine Edge was more reliable for fresh-profile unpacked-extension testing. If Chrome behaves inconsistently, switch to Edge instead of brute-forcing it.
 
-## Local Repro Pages
+## Local repro pages
 
 When the bug does not require a production site, prefer a minimal local page.
 
@@ -72,8 +98,8 @@ Examples:
 
 Benefits:
 - removes third-party page variables
-- makes selection and hover coordinates deterministic
-- avoids network flakiness
+- makes reproduction coordinates deterministic
+- avoids unnecessary network flakiness
 
 ## Cleanup
 

@@ -408,6 +408,7 @@ options:
             paragraphs: 선택 영역과 겹치는 문단 내용을 빈 줄로 이어 붙인 값이며, 사용자 정의 AI 액션에 전달될 때는 앞의 2000자로 잘립니다
             targetLanguage: 사용자의 대상 언어
             webTitle: 웹페이지 제목
+            webContent: 현재 페이지에서 추출한 웹페이지 본문(앞의 2000자로 잘린 버전)
           delete: 삭제
           deleteDialog:
             title: 사용자 정의 액션을 삭제하시겠습니까?
@@ -474,6 +475,7 @@ options:
           input: 번역할 텍스트 내용
           targetLanguage: 목표 언어
           webTitle: 웹페이지 제목
+          webContent: 웹페이지 본문(앞의 2000자로 잘림)
           webSummary: 웹페이지 요약 (AI 스마트 컨텍스트 필요)
         save: 저장
         close: 취소
@@ -583,9 +585,9 @@ options:
         description: 기본 감지는 빠르고 무료입니다. LLM 감지는 더 정확하지만 지연 시간과 API 비용이 증가합니다.
     aiContentAware:
       title: AI 스마트 컨텍스트 번역
-      description: AI에 문서 컨텍스트를 제공하여 번역 품질을 향상시킵니다
+      description: AI에 웹페이지 컨텍스트를 제공하여 번역 품질을 향상시킵니다
       enable: AI 스마트 컨텍스트 번역 활성화
-      enableDescription: AI가 문서 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
+      enableDescription: AI가 웹페이지 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
   tts:
     title: 텍스트 음성 변환
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.
@@ -793,7 +795,13 @@ options:
         description: 각 배치 번역의 최대 단락 수로 각 번역의 콘텐츠 양을 제어합니다
     customPrompts:
       title: 사용자 정의 자막 프롬프트
-      description: 자막 번역용 프롬프트 템플릿 사용자 정의 (웹페이지 번역 프롬프트와 독립)
+      description: 자막 번역용 프롬프트 템플릿을 사용자 정의합니다 (웹페이지 번역 프롬프트와 별도)
+      editPrompt:
+        promptCellInput:
+          input: 번역할 자막 텍스트
+          targetLanguage: 대상 언어
+          videoTitle: 동영상 제목
+          videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
   whatsNew:
     title: 새로운 기능
   survey:

@@ -1,13 +1,15 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
-import { getOrFetchArticleData } from "./article-context"
 import { prepareTranslationText } from "./text-preparation"
 import { MIN_LENGTH_FOR_SKIP_LLM_DETECTION, shouldSkipByLanguage, translateTextCore } from "./translate-text"
+import { getOrCreateWebPageContext } from "./webpage-context"
+import { getOrGenerateWebPageSummary } from "./webpage-summary"
 
 const MIN_LENGTH_FOR_TARGET_LANG_DETECTION = 50
 
@@ -26,12 +28,37 @@ async function isTextAlreadyInTargetLanguage(text: string, targetCode: LangCodeI
   return detected === targetCode
 }
 
+async function getWebPagePromptContext(
+  providerConfig: ReturnType<typeof resolveProviderConfig>,
+  enableAIContentAware: boolean,
+  includeSummary: boolean,
+): Promise<{ webTitle: string, webContent: string, webSummary?: string } | undefined> {
+  if (!isLLMProviderConfig(providerConfig)) {
+    return undefined
+  }
+
+  const webPageContext = await getOrCreateWebPageContext()
+  if (!webPageContext) {
+    return undefined
+  }
+
+  const webSummary = includeSummary
+    ? await getOrGenerateWebPageSummary(webPageContext, providerConfig, enableAIContentAware)
+    : undefined
+
+  return {
+    webTitle: webPageContext.webTitle,
+    webContent: webPageContext.webContent,
+    webSummary: webSummary ?? undefined,
+  }
+}
+
 async function translateTextUsingPageConfig(
   config: Config,
   text: string,
   options: {
     extraHashTags?: string[]
-    articleContext?: { title?: string | null, textContent?: string | null }
+    webPageContext?: { webTitle?: string | null, webContent?: string | null, webSummary?: string | null }
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
@@ -66,7 +93,7 @@ async function translateTextUsingPageConfig(
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
     extraHashTags: options.extraHashTags,
-    articleContext: options.articleContext,
+    webPageContext: options.webPageContext,
   })
 }
 
@@ -76,25 +103,31 @@ async function translateTextUsingPageConfig(
  */
 export async function translateTextForPage(text: string): Promise<string> {
   const config = await getConfigOrThrow()
-  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
+  const providerConfig = resolveProviderConfig(config, "translate")
+  const webPageContext = await getWebPagePromptContext(providerConfig, config.translate.enableAIContentAware, true)
+
   return translateTextUsingPageConfig(config, text, {
-    articleContext: articleData ?? undefined,
+    webPageContext,
   })
 }
 
 /**
  * Page title translation — uses page translation settings, but always treats the
- * current source title as the article title context.
+ * current source title as the webpage title context.
  */
 export async function translateTextForPageTitle(text: string): Promise<string> {
   const config = await getConfigOrThrow()
-  const articleContext = await getOrFetchArticleData(config.translate.enableAIContentAware)
+  const providerConfig = resolveProviderConfig(config, "translate")
+  const webPageContext = config.translate.enableAIContentAware
+    ? await getWebPagePromptContext(providerConfig, true, false)
+    : undefined
 
   return translateTextUsingPageConfig(config, text, {
     extraHashTags: ["pageTitleTranslation"],
-    articleContext: {
-      title: text,
-      textContent: articleContext?.textContent,
+    webPageContext: {
+      webTitle: text,
+      webContent: webPageContext?.webContent,
+      webSummary: webPageContext?.webSummary,
     },
   })
 }
@@ -131,7 +164,11 @@ export async function translateTextForInput(
     return ""
   }
 
-  const articleData = await getOrFetchArticleData(config.translate.enableAIContentAware)
+  const webPageContext = await getWebPagePromptContext(
+    providerConfig,
+    config.translate.enableAIContentAware,
+    true,
+  )
 
   return translateTextCore({
     text,
@@ -143,6 +180,6 @@ export async function translateTextForInput(
     extraHashTags: [`inputTranslation:${fromLang}->${toLang}`],
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
-    articleContext: articleData ?? undefined,
+    webPageContext,
   })
 }

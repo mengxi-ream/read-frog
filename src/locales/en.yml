@@ -409,6 +409,7 @@ options:
             paragraphs: Intersecting paragraph text joined with blank lines, truncated to the first 2000 characters when sent to custom AI actions
             targetLanguage: "User's target language"
             webTitle: Webpage title
+            webContent: Webpage content extracted from the current page, truncated to the first 2000 characters
           delete: Delete
           deleteDialog:
             title: Delete Custom Action?
@@ -589,6 +590,7 @@ options:
           input: Text content to translate
           targetLanguage: Target language
           webTitle: Webpage title
+          webContent: Webpage content (truncated to the first 2000 characters)
           webSummary: Webpage summary (requires AI Smart Context)
         save: Save Changes
         close: Cancel
@@ -698,9 +700,9 @@ options:
         description: Basic detection is fast and free. LLM detection is more accurate but adds latency and API costs.
     aiContentAware:
       title: AI Smart Context Translation
-      description: Enhance translation quality by providing article context to the AI
+      description: Enhance translation quality by providing webpage context to the AI
       enable: Enable AI Smart Context Translation
-      enableDescription: AI uses article summary to improve translation accuracy. Requires LLM provider. Adds latency when starting to translate a page and increases API costs.
+      enableDescription: AI uses webpage summary to improve translation accuracy. Requires LLM provider. Adds latency when starting to translate a page and increases API costs.
   tts:
     title: Text to Speech
     description: Use Edge TTS voice settings for the Speak button.
@@ -909,6 +911,12 @@ options:
     customPrompts:
       title: Custom Subtitle Prompts
       description: Customize prompt templates for subtitle translation (separate from webpage translation prompts)
+      editPrompt:
+        promptCellInput:
+          input: Subtitle text to translate
+          targetLanguage: Target language
+          videoTitle: Video title
+          videoSummary: Video summary (requires AI Smart Context)
   whatsNew:
     title: What's New
   survey:

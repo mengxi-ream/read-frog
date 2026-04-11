@@ -1,10 +1,17 @@
+import type { WebPageContext } from "@/types/content"
 import { Readability } from "@mozilla/readability"
 import { removeDummyNodes } from "@/utils/content/utils"
 import { logger } from "@/utils/logger"
+import { truncateWebPageContent } from "./webpage-content"
 
-let cachedTextContent: { url: string, textContent: string } | null = null
+export interface CachedWebPageContext extends WebPageContext {
+  url: string
+  webContent: string
+}
 
-async function fetchPageTextContent(): Promise<string> {
+let cachedWebPageContext: CachedWebPageContext | null = null
+
+async function extractWebpageContent(): Promise<string> {
   try {
     const documentClone = document.cloneNode(true) as Document
     await removeDummyNodes(documentClone)
@@ -18,23 +25,19 @@ async function fetchPageTextContent(): Promise<string> {
   return document.body?.textContent || ""
 }
 
-export async function getOrFetchArticleData(
-  enableAIContentAware: boolean,
-): Promise<{ title: string, textContent?: string } | null> {
+export async function getOrCreateWebPageContext(): Promise<CachedWebPageContext | null> {
   if (typeof window === "undefined" || typeof document === "undefined")
     return null
 
-  const title = document.title || ""
-  if (!enableAIContentAware)
-    return { title }
-
   const currentUrl = window.location.href
-  if (cachedTextContent?.url === currentUrl) {
-    return { title, textContent: cachedTextContent.textContent }
+  if (cachedWebPageContext?.url === currentUrl) {
+    return cachedWebPageContext
   }
 
-  const textContent = await fetchPageTextContent()
-  cachedTextContent = { url: currentUrl, textContent }
-
-  return { title, textContent }
+  cachedWebPageContext = {
+    url: currentUrl,
+    webTitle: document.title || "",
+    webContent: truncateWebPageContent(await extractWebpageContent()),
+  }
+  return cachedWebPageContext
 }

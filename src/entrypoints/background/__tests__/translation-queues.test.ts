@@ -150,11 +150,67 @@ describe("translation queue helpers", () => {
       expect.any(Function),
       expect.objectContaining({
         isBatch: true,
-        content: {
-          title: "Video title",
-          summary: "Ready summary",
+        context: {
+          videoTitle: "Video title",
+          videoSummary: "Ready summary",
         },
       }),
+    )
+  })
+
+  it("passes webpage context through the translation queue without generating a new summary", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        webTitle: "Page title",
+        webContent: "Page body",
+        webSummary: "Ready summary",
+      },
+    })
+
+    expect(result).toBe("translated subtitle")
+    expect(generateArticleSummaryMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      "hello",
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({
+        context: {
+          webTitle: "Page title",
+          webContent: "Page body",
+          webSummary: "Ready summary",
+        },
+      }),
+    )
+  })
+
+  it("exposes webpage summary generation as a separate background handler", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("getOrGenerateWebPageSummary")
+    const result = await handler({
+      data: {
+        webTitle: "Page title",
+        webContent: "page body",
+        providerConfig: llmProvider,
+      },
+    })
+
+    expect(result).toBe("Generated summary")
+    expect(generateArticleSummaryMock).toHaveBeenCalledWith(
+      "Page title",
+      "page body",
+      llmProvider,
     )
   })
 
@@ -179,7 +235,7 @@ describe("translation queue helpers", () => {
     )
   })
 
-  it("returns an empty string for invalid subtitle summary requests", async () => {
+  it("returns null for invalid subtitle summary requests", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
     await setUpSubtitlesTranslationQueue()
 
@@ -192,11 +248,11 @@ describe("translation queue helpers", () => {
       },
     })
 
-    expect(result).toBe("")
+    expect(result).toBeNull()
     expect(generateArticleSummaryMock).not.toHaveBeenCalled()
   })
 
-  it("returns an empty string when subtitle summary generation has no result", async () => {
+  it("returns null when subtitle summary generation has no result", async () => {
     generateArticleSummaryMock.mockResolvedValue(null)
 
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
@@ -211,7 +267,7 @@ describe("translation queue helpers", () => {
       },
     })
 
-    expect(result).toBe("")
+    expect(result).toBeNull()
   })
 
   it("deduplicates concurrent subtitle summary generation requests", async () => {

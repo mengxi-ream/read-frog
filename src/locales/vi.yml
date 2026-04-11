@@ -408,6 +408,7 @@ options:
             paragraphs: Nội dung các đoạn giao với vùng chọn, được nối bằng dòng trống, sẽ bị cắt còn 2000 ký tự đầu khi gửi vào hành động AI tùy chỉnh
             targetLanguage: Ngôn ngữ đích của người dùng
             webTitle: Tiêu đề trang web
+            webContent: Nội dung trang web được trích xuất từ trang hiện tại (bị cắt còn 2000 ký tự đầu)
           delete: Xóa
           deleteDialog:
             title: Xóa hành động tùy chỉnh?
@@ -474,6 +475,7 @@ options:
           input: Nội dung văn bản để dịch
           targetLanguage: Ngôn ngữ đích
           webTitle: Tiêu đề trang web
+          webContent: Nội dung trang web (bị cắt còn 2000 ký tự đầu)
           webSummary: Tóm tắt trang web (yêu cầu Ngữ cảnh thông minh AI)
         save: Lưu thay đổi
         close: Hủy
@@ -583,9 +585,9 @@ options:
         description: Phát hiện cơ bản nhanh và miễn phí. Phát hiện LLM chính xác hơn nhưng thêm độ trễ và chi phí API.
     aiContentAware:
       title: Dịch ngữ cảnh thông minh AI
-      description: Nâng cao chất lượng dịch bằng cách cung cấp ngữ cảnh bài viết cho AI
+      description: Nâng cao chất lượng dịch bằng cách cung cấp ngữ cảnh trang web cho AI
       enable: Bật dịch ngữ cảnh thông minh AI
-      enableDescription: AI sử dụng tóm tắt bài viết để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
+      enableDescription: AI sử dụng tóm tắt trang web để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
   tts:
     title: Chuyển văn bản thành giọng nói
     description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.
@@ -792,8 +794,14 @@ options:
         title: Số đoạn văn tối đa
         description: Số đoạn văn tối đa cho mỗi bản dịch lô để kiểm soát khối lượng nội dung của mỗi bản dịch
     customPrompts:
-      title: Tùy chỉnh Prompt phụ đề
-      description: Tùy chỉnh mẫu prompt cho dịch phụ đề (độc lập với prompt dịch trang web)
+      title: Lời nhắc phụ đề tùy chỉnh
+      description: Tùy chỉnh mẫu lời nhắc cho dịch phụ đề (tách biệt với lời nhắc dịch trang web)
+      editPrompt:
+        promptCellInput:
+          input: Văn bản phụ đề cần dịch
+          targetLanguage: Ngôn ngữ đích
+          videoTitle: Tiêu đề video
+          videoSummary: Tóm tắt video (yêu cầu Ngữ cảnh thông minh AI)
   whatsNew:
     title: Có gì mới
   survey:

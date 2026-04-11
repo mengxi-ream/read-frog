@@ -408,6 +408,7 @@ options:
             paragraphs: Seçimle kesişen paragraf metni; boş satırlarla birleştirilir ve özel AI eylemlerine gönderilirken ilk 2000 karaktere kısaltılır
             targetLanguage: Kullanıcının hedef dili
             webTitle: Web sayfası başlığı
+            webContent: Geçerli sayfadan çıkarılan ve ilk 2000 karaktere kısaltılan web sayfası içeriği
           delete: Sil
           deleteDialog:
             title: Özel eylem silinsin mi?
@@ -474,6 +475,7 @@ options:
           input: Çevrilecek metin içeriği
           targetLanguage: Hedef dil
           webTitle: Web sayfası başlığı
+          webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
           webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
         save: Değişiklikleri Kaydet
         close: İptal
@@ -583,9 +585,9 @@ options:
         description: Temel algılama hızlı ve ücretsizdir. LLM algılama daha doğrudur ancak gecikme ve API maliyetleri ekler.
     aiContentAware:
       title: AI Akıllı Bağlam Çevirisi
-      description: AI'ya makale bağlamı sağlayarak çeviri kalitesini artırın
+      description: AI'ya web sayfası bağlamı sağlayarak çeviri kalitesini artırın
       enable: AI Akıllı Bağlam Çevirisini Etkinleştir
-      enableDescription: AI, çeviri doğruluğunu artırmak için makale özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
+      enableDescription: AI, çeviri doğruluğunu artırmak için web sayfası özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
   tts:
     title: Metinden Konuşmaya
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.
@@ -793,7 +795,13 @@ options:
         description: Her çevirinin içerik hacmini kontrol etmek için her toplu çeviri için maksimum paragraf sayısı
     customPrompts:
       title: Özel Altyazı İstemleri
-      description: Altyazı çevirisi için istem şablonlarını özelleştirin (web sayfası çeviri istemlerinden bağımsız)
+      description: Altyazı çevirisi için istem şablonlarını özelleştirin (web sayfası çeviri istemlerinden ayrı)
+      editPrompt:
+        promptCellInput:
+          input: Çevrilecek altyazı metni
+          targetLanguage: Hedef dil
+          videoTitle: Video başlığı
+          videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
   whatsNew:
     title: Yenilikler
   survey:

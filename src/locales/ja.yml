@@ -408,6 +408,7 @@ options:
             paragraphs: 選択範囲と交差する段落内容。空行で連結され、カスタム AI アクションに送信する際は先頭 2000 文字に切り詰められます
             targetLanguage: ユーザーのターゲット言語
             webTitle: ウェブページのタイトル
+            webContent: 現在のページから抽出されたウェブページ本文（先頭 2000 文字に切り詰め）
           delete: 削除
           deleteDialog:
             title: カスタムアクションを削除しますか？
@@ -474,6 +475,7 @@ options:
           input: 翻訳するテキスト内容
           targetLanguage: 目標言語
           webTitle: ウェブページタイトル
+          webContent: ウェブページ本文（先頭 2000 文字に切り詰め）
           webSummary: ウェブページ要約（AI スマートコンテキストが必要）
         save: 保存
         close: キャンセル
@@ -583,9 +585,9 @@ options:
         description: 基本検出は高速で無料です。LLM 検出はより正確ですが、遅延と API コストが増加します。
     aiContentAware:
       title: AI スマートコンテキスト翻訳
-      description: 記事のコンテキストを AI に提供して翻訳品質を向上させます
+      description: ウェブページのコンテキストを AI に提供して翻訳品質を向上させます
       enable: AI スマートコンテキスト翻訳を有効にする
-      enableDescription: AI は記事の要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
+      enableDescription: AI はウェブページの要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
   tts:
     title: テキスト読み上げ
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。
@@ -793,7 +795,13 @@ options:
         description: 各バッチ翻訳の最大段落数、各翻訳のコンテンツ量を制御します
     customPrompts:
       title: カスタム字幕プロンプト
-      description: 字幕翻訳用のプロンプトテンプレートをカスタマイズ（ウェブページ翻訳プロンプトとは独立）
+      description: 字幕翻訳用のプロンプトテンプレートをカスタマイズします（ウェブページ翻訳プロンプトとは別です）
+      editPrompt:
+        promptCellInput:
+          input: 翻訳する字幕テキスト
+          targetLanguage: 対象言語
+          videoTitle: 動画タイトル
+          videoSummary: 動画要約（AI スマートコンテキストが必要）
   whatsNew:
     title: 新機能
   survey:

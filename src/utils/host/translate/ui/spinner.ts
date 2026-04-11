@@ -17,9 +17,9 @@ import { ensurePresetStyles } from "./style-injector"
 export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
   const spinner = ownerDoc.createElement("span")
   spinner.className = "read-frog-spinner"
-  // Inline styles to match the original spinner design
-  // add important to make the styles don't get overridden by the host page styles,
-  // Otherwise, in some page like https://www.reddit.com/r/canadaexpressentry/, some spinners size will be overridden by the host page styles.
+  // Inline styles keep the spinner resilient against host page CSS overrides.
+  // Use a thin muted arc with transparent sides so bulk page translation does
+  // not paint a dense field of high-contrast rings across the screen.
   spinner.style.cssText = `
     display: inline-block !important;
     width: 6px !important;
@@ -32,8 +32,8 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
     margin: 0 4px !important;
     padding: 0 !important;
     vertical-align: middle !important;
-    border: 3px solid var(--read-frog-muted) !important;
-    border-top: 3px solid var(--read-frog-primary) !important;
+    border: 1.5px solid transparent !important;
+    border-top: 1.5px solid var(--read-frog-muted-foreground) !important;
     border-radius: 50% !important;
     box-sizing: content-box !important;
     flex-shrink: 0 !important;
@@ -61,9 +61,9 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
   }
   else {
     // For reduced motion or when Web Animations API isn't available,
-    // keep a static spinner while preserving the primary segment so the
-    // loading state stays visible without requiring animation.
-    spinner.style.borderTopColor = "var(--read-frog-primary)"
+    // keep a static muted segment so the loading state stays visible
+    // without requiring animation.
+    spinner.style.borderTopColor = "var(--read-frog-muted-foreground)"
   }
 
   return spinner

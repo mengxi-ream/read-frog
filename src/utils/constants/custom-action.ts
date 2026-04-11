@@ -64,7 +64,7 @@ export function getOutputSchemaFieldNameError(
   return undefined
 }
 
-export const SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS = ["selection", "paragraphs", "targetLanguage", "webTitle"] as const
+export const SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS = ["selection", "paragraphs", "targetLanguage", "webTitle", "webContent"] as const
 
 export type SelectionToolbarCustomActionToken = (typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]
 

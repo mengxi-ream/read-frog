@@ -1,6 +1,7 @@
 import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
+import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { i18n } from "#imports"
 import { toast } from "sonner"
@@ -365,10 +366,9 @@ export class UniversalVideoAdapter {
       ? getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
       : undefined
 
-    const videoContext = {
+    const videoContext: SubtitlesVideoContext = {
       videoTitle: document.title || "",
       subtitlesTextContent: this.sessionSubtitles.map(f => f.text).join(""),
-      summary: "",
     }
 
     if (useAiSegmentation) {
@@ -397,7 +397,7 @@ export class UniversalVideoAdapter {
     this.subtitlesSummaryContextHash = summaryContextHash ?? null
 
     void fetchSubtitlesSummary(videoContext).then((summary) => {
-      if (!summary || !summaryContextHash) {
+      if (!summaryContextHash) {
         return
       }
 

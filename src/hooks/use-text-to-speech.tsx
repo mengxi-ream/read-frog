@@ -18,6 +18,7 @@ interface PlayAudioParams {
   text: string
   ttsConfig: TTSConfig
   analyticsContext: FeatureUsageContext
+  forcedVoice?: string
 }
 
 interface SynthesizedAudioChunk {
@@ -31,7 +32,36 @@ function toSignedValue(value: number, unit: "%" | "Hz"): string {
   return `${value >= 0 ? "+" : ""}${value}${unit}`
 }
 
-async function resolveVoiceForText(text: string, ttsConfig: TTSConfig, enableLLM: boolean): Promise<string> {
+export function selectTTSVoice(
+  ttsConfig: TTSConfig,
+  detectedLanguage?: string | null,
+  forcedVoice?: string,
+): string {
+  if (forcedVoice) {
+    return forcedVoice
+  }
+
+  if (detectedLanguage && detectedLanguage in ttsConfig.languageVoices) {
+    return ttsConfig.languageVoices[detectedLanguage as keyof typeof ttsConfig.languageVoices] ?? ttsConfig.defaultVoice
+  }
+
+  return ttsConfig.defaultVoice
+}
+
+async function resolveVoiceForText(
+  text: string,
+  ttsConfig: TTSConfig,
+  enableLLM: boolean,
+  forcedVoice?: string,
+): Promise<string> {
+  if (forcedVoice) {
+    logger.info("[TextToSpeech] Using forced voice for text", {
+      text,
+      forcedVoice,
+    })
+    return forcedVoice
+  }
+
   const detectedLanguage = await detectLanguage(text, {
     minLength: 0,
     enableLLM,
@@ -42,11 +72,7 @@ async function resolveVoiceForText(text: string, ttsConfig: TTSConfig, enableLLM
     enableLLM,
   })
 
-  if (detectedLanguage && detectedLanguage in ttsConfig.languageVoices) {
-    return ttsConfig.languageVoices[detectedLanguage as keyof typeof ttsConfig.languageVoices] ?? ttsConfig.defaultVoice
-  }
-
-  return ttsConfig.defaultVoice
+  return selectTTSVoice(ttsConfig, detectedLanguage)
 }
 
 function getTTSFriendlyErrorDescription(error: Error): string | undefined {
@@ -119,7 +145,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
     meta: {
       suppressToast: true,
     },
-    mutationFn: async ({ text, ttsConfig, analyticsContext }) => {
+    mutationFn: async ({ text, ttsConfig, analyticsContext, forcedVoice }) => {
       stop()
       shouldStopRef.current = false
 
@@ -127,7 +153,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       activeRequestIdRef.current = requestId
       let didStartPlayback = false
 
-      const selectedVoice = await resolveVoiceForText(text, ttsConfig, languageDetection.mode === "llm")
+      const selectedVoice = await resolveVoiceForText(text, ttsConfig, languageDetection.mode === "llm", forcedVoice)
       if (shouldStopRef.current || activeRequestIdRef.current !== requestId) {
         return
       }
@@ -219,10 +245,11 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
     },
   })
 
-  const play = (text: string, ttsConfig: TTSConfig) => {
+  const play = (text: string, ttsConfig: TTSConfig, options?: { forcedVoice?: string }) => {
     return playMutation.mutateAsync({
       text,
       ttsConfig,
+      forcedVoice: options?.forcedVoice,
       analyticsContext: createFeatureUsageContext(
         ANALYTICS_FEATURE.TEXT_TO_SPEECH,
         surface,

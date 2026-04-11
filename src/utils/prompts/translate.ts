@@ -1,5 +1,5 @@
 import type { Config } from "@/types/config/config"
-import type { ArticleContent } from "@/types/content"
+import type { WebPagePromptContext } from "@/types/content"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "../constants/config"
 import {
@@ -9,13 +9,14 @@ import {
   getTokenCellText,
   INPUT,
   TARGET_LANGUAGE,
+  WEB_CONTENT,
   WEB_SUMMARY,
   WEB_TITLE,
 } from "../constants/prompt"
 
-export interface TranslatePromptOptions {
+export interface TranslatePromptOptions<TContext = unknown> {
   isBatch?: boolean
-  content?: ArticleContent
+  context?: TContext
 }
 
 export interface TranslatePromptResult {
@@ -23,11 +24,15 @@ export interface TranslatePromptResult {
   prompt: string
 }
 
+export function resolvePromptReplacementValue(value: string | null | undefined, fallback: string): string {
+  return typeof value === "string" && value.trim() !== "" ? value : fallback
+}
+
 export function getTranslatePromptFromConfig(
   translateConfig: Pick<Config["translate"], "customPromptsConfig">,
   targetLang: string,
   input: string,
-  options?: TranslatePromptOptions,
+  options?: TranslatePromptOptions<WebPagePromptContext>,
 ): TranslatePromptResult {
   const customPromptsConfig = translateConfig.customPromptsConfig
   const { patterns = [], promptId } = customPromptsConfig
@@ -56,8 +61,9 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   }
 
   // Build title and summary replacement values
-  const title = options?.content?.title || "No title available"
-  const summary = options?.content?.summary || "No summary available"
+  const title = resolvePromptReplacementValue(options?.context?.webTitle, "No title available")
+  const contentText = resolvePromptReplacementValue(options?.context?.webContent, "No content available")
+  const summary = resolvePromptReplacementValue(options?.context?.webSummary, "No summary available")
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>
@@ -65,6 +71,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
       .replaceAll(getTokenCellText(TARGET_LANGUAGE), targetLang)
       .replaceAll(getTokenCellText(INPUT), input)
       .replaceAll(getTokenCellText(WEB_TITLE), title)
+      .replaceAll(getTokenCellText(WEB_CONTENT), contentText)
       .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
 
   return {
@@ -76,7 +83,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
 export async function getTranslatePrompt(
   targetLang: string,
   input: string,
-  options?: TranslatePromptOptions,
+  options?: TranslatePromptOptions<WebPagePromptContext>,
 ): Promise<TranslatePromptResult> {
   const config = await getLocalConfig() ?? DEFAULT_CONFIG
   return getTranslatePromptFromConfig(config.translate, targetLang, input, options)

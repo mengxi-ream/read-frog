@@ -7,6 +7,7 @@ describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
     paragraphs: "hello world paragraph",
     targetLanguage: "English",
     webTitle: "Test Page",
+    webContent: "Test page content",
   }
 
   it("replaces selection and paragraphs tokens", () => {
@@ -18,13 +19,13 @@ describe("replaceSelectionToolbarCustomActionPromptTokens", () => {
     expect(result).toBe("selection=hello, paragraphs=hello world paragraph")
   })
 
-  it("replaces targetLanguage and webTitle tokens", () => {
+  it("replaces targetLanguage, webTitle, and webContent tokens", () => {
     const result = replaceSelectionToolbarCustomActionPromptTokens(
-      "Target language: {{targetLanguage}}, Page: {{webTitle}}",
+      "Target language: {{targetLanguage}}, Page: {{webTitle}}, Content: {{webContent}}",
       baseTokens,
     )
 
-    expect(result).toBe("Target language: English, Page: Test Page")
+    expect(result).toBe("Target language: English, Page: Test Page, Content: Test page content")
   })
 
   it("leaves unrelated text unchanged", () => {
@@ -43,6 +44,7 @@ describe("buildSelectionToolbarCustomActionSystemPrompt", () => {
     paragraphs: "hello world paragraph",
     targetLanguage: "English",
     webTitle: "Test Page",
+    webContent: "Test page content",
   }
 
   it("appends structured output contract with resolved fields and defaults", () => {

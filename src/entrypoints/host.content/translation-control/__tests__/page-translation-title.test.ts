@@ -8,7 +8,7 @@ const {
   mockDeepQueryTopLevelSelector,
   mockGetDetectedCodeFromStorage,
   mockGetLocalConfig,
-  mockGetOrFetchArticleData,
+  mockGetOrCreateWebPageContext,
   mockRemoveAllTranslatedWrapperNodes,
   mockSendMessage,
   mockTranslateTextForPageTitle,
@@ -23,7 +23,7 @@ const {
   mockRemoveAllTranslatedWrapperNodes: vi.fn(),
   mockTranslateWalkedElement: vi.fn(),
   mockTranslateTextForPageTitle: vi.fn(),
-  mockGetOrFetchArticleData: vi.fn(),
+  mockGetOrCreateWebPageContext: vi.fn(),
   mockValidateTranslationConfigAndToast: vi.fn(),
   mockSendMessage: vi.fn(),
 }))
@@ -59,8 +59,8 @@ vi.mock("@/utils/host/translate/translate-variants", () => ({
   translateTextForPageTitle: mockTranslateTextForPageTitle,
 }))
 
-vi.mock("@/utils/host/translate/article-context", () => ({
-  getOrFetchArticleData: mockGetOrFetchArticleData,
+vi.mock("@/utils/host/translate/webpage-context", () => ({
+  getOrCreateWebPageContext: mockGetOrCreateWebPageContext,
 }))
 
 vi.mock("@/utils/host/translate/translate-text", () => ({
@@ -115,9 +115,45 @@ describe("pageTranslationManager title handling", () => {
     mockGetDetectedCodeFromStorage.mockResolvedValue("eng")
     mockGetLocalConfig.mockResolvedValue(DEFAULT_CONFIG)
     mockDeepQueryTopLevelSelector.mockReturnValue([])
-    mockGetOrFetchArticleData.mockResolvedValue({ title: "Original Title" })
+    mockGetOrCreateWebPageContext.mockResolvedValue({
+      url: window.location.href,
+      webTitle: "Original Title",
+      webContent: "Article body",
+    })
     mockValidateTranslationConfigAndToast.mockReturnValue(true)
     mockSendMessage.mockResolvedValue(undefined)
+  })
+
+  it("does not prime webpage context on start for non-llm translation", async () => {
+    mockTranslateTextForPageTitle.mockResolvedValue("Translated Title")
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    expect(mockGetOrCreateWebPageContext).not.toHaveBeenCalled()
+
+    manager.stop()
+  })
+
+  it("primes webpage context on start for AI-aware llm translation", async () => {
+    mockGetLocalConfig.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        providerId: "openai-default",
+        enableAIContentAware: true,
+      },
+    })
+    mockTranslateTextForPageTitle.mockResolvedValue("Translated Title")
+
+    const manager = new PageTranslationManager()
+    await manager.start()
+    await flushDomUpdates()
+
+    expect(mockGetOrCreateWebPageContext).toHaveBeenCalledTimes(1)
+
+    manager.stop()
   })
 
   it("translates the tab title on start and restores the latest source title on stop", async () => {

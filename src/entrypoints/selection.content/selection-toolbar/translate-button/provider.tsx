@@ -15,9 +15,10 @@ import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
-import { getOrFetchArticleData } from "@/utils/host/translate/article-context"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { translateTextCore } from "@/utils/host/translate/translate-text"
+import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
+import { getOrGenerateWebPageSummary } from "@/utils/host/translate/webpage-summary"
 import { onMessage } from "@/utils/message"
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model-id"
@@ -46,6 +47,23 @@ interface SelectionTranslatePendingOpenRequest {
   surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
 }
 
+async function getSelectionWebPagePromptContext(
+  providerConfig: ProviderConfig,
+  enableAIContentAware: boolean,
+) {
+  const webPageContext = await getOrCreateWebPageContext()
+  if (!webPageContext) {
+    return undefined
+  }
+
+  const webSummary = await getOrGenerateWebPageSummary(webPageContext, providerConfig, enableAIContentAware)
+  return {
+    webTitle: webPageContext.webTitle,
+    webContent: webPageContext.webContent,
+    webSummary: webSummary ?? undefined,
+  }
+}
+
 async function translateWithLlm({
   preparedText,
   providerConfig,
@@ -68,14 +86,31 @@ async function translateWithLlm({
   } = providerConfig
   const modelName = resolveModelId(providerConfig.model)
   const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
+  const abortController = new AbortController()
+  registerAbortController(abortController)
+
+  const throwIfAborted = () => {
+    if (abortController.signal.aborted) {
+      throw new DOMException("aborted", "AbortError")
+    }
+  }
+
+  const webPageContext = await getSelectionWebPagePromptContext(providerConfig, translateRequest.enableAIContentAware)
+  throwIfAborted()
   const { systemPrompt, prompt } = getTranslatePromptFromConfig(
     { customPromptsConfig: translateRequest.customPromptsConfig },
     targetLangName,
     preparedText,
+    webPageContext
+      ? {
+          context: {
+            webTitle: webPageContext.webTitle,
+            webContent: webPageContext.webContent,
+            webSummary: webPageContext.webSummary,
+          },
+        }
+      : undefined,
   )
-
-  const abortController = new AbortController()
-  registerAbortController(abortController)
 
   const translatedText = await streamBackgroundText(
     {
@@ -103,14 +138,14 @@ async function translateWithStandardProvider({
   providerConfig: ProviderConfig
   translateRequest: SelectionToolbarTranslateRequestSlice
 }) {
-  const articleData = await getOrFetchArticleData(translateRequest.enableAIContentAware)
+  const webPageContext = await getSelectionWebPagePromptContext(providerConfig, translateRequest.enableAIContentAware)
   const translatedText = await translateTextCore({
     text,
     langConfig: translateRequest.language,
     providerConfig,
     enableAIContentAware: translateRequest.enableAIContentAware,
     extraHashTags: ["selectionTranslation"],
-    articleContext: articleData ?? undefined,
+    webPageContext,
   })
 
   return translatedText

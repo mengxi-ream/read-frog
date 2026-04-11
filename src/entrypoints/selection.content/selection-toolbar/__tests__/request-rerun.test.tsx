@@ -8,7 +8,7 @@ import type { Config } from "@/types/config/config"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
@@ -28,7 +28,8 @@ import { SelectionTranslationProvider } from "../translate-button/provider"
 const streamBackgroundTextMock = vi.fn()
 const streamBackgroundStructuredObjectMock = vi.fn()
 const translateTextCoreMock = vi.fn()
-const getOrFetchArticleDataMock = vi.fn()
+const getOrCreateWebPageContextMock = vi.fn().mockResolvedValue(null)
+const getOrGenerateWebPageSummaryMock = vi.fn()
 const toastErrorMock = vi.fn()
 const onMessageMock = vi.fn()
 const originalGetSelection = window.getSelection
@@ -236,8 +237,12 @@ vi.mock("@/utils/host/translate/translate-text", () => ({
   translateTextCore: (...args: unknown[]) => translateTextCoreMock(...args),
 }))
 
-vi.mock("@/utils/host/translate/article-context", () => ({
-  getOrFetchArticleData: (...args: unknown[]) => getOrFetchArticleDataMock(...args),
+vi.mock("@/utils/host/translate/webpage-context", () => ({
+  getOrCreateWebPageContext: (...args: unknown[]) => getOrCreateWebPageContextMock(...args),
+}))
+
+vi.mock("@/utils/host/translate/webpage-summary", () => ({
+  getOrGenerateWebPageSummary: (...args: unknown[]) => getOrGenerateWebPageSummaryMock(...args),
 }))
 
 vi.mock("sonner", () => ({
@@ -417,6 +422,11 @@ async function openTooltip(trigger: HTMLElement) {
 }
 
 describe("selection toolbar requests", () => {
+  beforeEach(() => {
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+    getOrGenerateWebPageSummaryMock.mockResolvedValue(undefined)
+  })
+
   afterEach(() => {
     cleanup()
     document.body.innerHTML = ""
@@ -426,7 +436,7 @@ describe("selection toolbar requests", () => {
 
   it("does not rerun translation on passive config refresh, but reruns when request values change", async () => {
     translateTextCoreMock.mockResolvedValue("translated once")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -494,7 +504,7 @@ describe("selection toolbar requests", () => {
 
   it("renders the translation tooltip as non-interactive and closes it on hover leave", async () => {
     translateTextCoreMock.mockResolvedValue("translated once")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -517,7 +527,7 @@ describe("selection toolbar requests", () => {
 
   it("opts out of focus restoration when closing the translation popover", async () => {
     translateTextCoreMock.mockResolvedValue("translated once")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -538,7 +548,7 @@ describe("selection toolbar requests", () => {
     translateTextCoreMock
       .mockImplementationOnce(() => firstRun.promise)
       .mockImplementationOnce(() => secondRun.promise)
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -578,7 +588,7 @@ describe("selection toolbar requests", () => {
 
   it("keeps the original page selection session when selecting text inside the translation popover", async () => {
     translateTextCoreMock.mockResolvedValue("Overlay panel content")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const paragraph = document.createElement("p")
     paragraph.textContent = "Original page paragraph with surrounding context."
@@ -691,11 +701,57 @@ describe("selection toolbar requests", () => {
     expect(screen.queryByTestId("translation-content")).toBeNull()
   })
 
+  it("does not start llm streaming after the popover closes while webpage context is still loading", async () => {
+    const pendingContext = createDeferredPromise<{
+      url: string
+      webTitle: string
+      webContent: string
+    } | null>()
+
+    getOrCreateWebPageContextMock.mockImplementation(() => pendingContext.promise)
+    streamBackgroundTextMock.mockResolvedValue({
+      output: "Should not stream",
+      thinking: {
+        status: "complete",
+        text: "",
+      },
+    })
+
+    const store = createStore()
+    const updatedConfig = cloneConfig(DEFAULT_CONFIG)
+    setSelectionToolbarTranslateProvider(updatedConfig, "openai-default")
+    store.set(configAtom, updatedConfig)
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<TranslateButton />, store)
+
+    fireEvent.click(screen.getByRole("button", { name: "action.translation" }))
+
+    await waitFor(() => {
+      expect(getOrCreateWebPageContextMock).toHaveBeenCalled()
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Close" }))
+
+    await act(async () => {
+      pendingContext.resolve({
+        url: "https://example.com/article",
+        webTitle: "Article title",
+        webContent: "Article body",
+      })
+      await Promise.resolve()
+    })
+
+    expect(streamBackgroundTextMock).not.toHaveBeenCalled()
+    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(screen.queryByRole("alert")).toBeNull()
+    expect(screen.queryByTestId("translation-content")).toBeNull()
+  })
+
   it("renders translate errors inline and clears them after a successful rerun", async () => {
     translateTextCoreMock
       .mockRejectedValueOnce(new Error("Standard translation failed"))
       .mockResolvedValueOnce("Recovered translation")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -745,7 +801,7 @@ describe("selection toolbar requests", () => {
 
   it("shows translations identical to the original text", async () => {
     translateTextCoreMock.mockResolvedValue("Selected text")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const store = createStore()
     store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
@@ -767,7 +823,7 @@ describe("selection toolbar requests", () => {
 
   it("opens selection translation from the context menu and tracks the context-menu surface", async () => {
     translateTextCoreMock.mockResolvedValue("Context menu result")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const paragraph = document.createElement("p")
     paragraph.textContent = "Selected text inside a paragraph."
@@ -815,7 +871,7 @@ describe("selection toolbar requests", () => {
 
   it("reuses the same captured session for cross-node context-menu translation", async () => {
     translateTextCoreMock.mockResolvedValue("Cross-node result")
-    getOrFetchArticleDataMock.mockResolvedValue(null)
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
 
     const container = document.createElement("div")
     const firstBlock = document.createElement("div")
