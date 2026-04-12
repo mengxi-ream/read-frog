@@ -97,7 +97,7 @@ export function SelectionCustomActionProvider({
 
     return activeSession?.contextSnapshot.text || cleanSelection
   }, [activeSession?.contextSnapshot.text, cleanSelection])
-  const webPageContext = useCustomActionWebPageContext(isOpen)
+  const webPageContext = useCustomActionWebPageContext(isOpen, popoverSessionKey)
   const titleText = (webPageContext?.webTitle ?? document.title) || null
   const activeAction = useMemo(
     () => selectionToolbarConfig.customActions.find(action =>

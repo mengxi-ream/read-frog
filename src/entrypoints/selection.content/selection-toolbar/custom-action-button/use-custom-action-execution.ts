@@ -40,6 +40,11 @@ interface CustomActionExecutionPlan {
   executionContext: CustomActionExecutionContext | null
 }
 
+interface ResolvedWebPageContext {
+  popoverSessionKey: number
+  value: CachedWebPageContext | null
+}
+
 function scrollSelectionPopoverBodyToBottom(ref: RefObject<HTMLDivElement | null>) {
   requestAnimationFrame(() => {
     if (ref.current) {
@@ -108,12 +113,11 @@ export function buildCustomActionExecutionPlan(
   }
 }
 
-export function useCustomActionWebPageContext(open: boolean) {
-  const [webPageContext, setWebPageContext] = useState<CachedWebPageContext | null | undefined>(undefined)
+export function useCustomActionWebPageContext(open: boolean, popoverSessionKey: number) {
+  const [resolvedWebPageContext, setResolvedWebPageContext] = useState<ResolvedWebPageContext | null>(null)
 
   useEffect(() => {
     if (!open) {
-      setWebPageContext(undefined)
       return
     }
 
@@ -122,21 +126,31 @@ export function useCustomActionWebPageContext(open: boolean) {
     void getOrCreateWebPageContext()
       .then((nextContext) => {
         if (!isCancelled) {
-          setWebPageContext(nextContext)
+          setResolvedWebPageContext({
+            popoverSessionKey,
+            value: nextContext,
+          })
         }
       })
       .catch(() => {
         if (!isCancelled) {
-          setWebPageContext(null)
+          setResolvedWebPageContext({
+            popoverSessionKey,
+            value: null,
+          })
         }
       })
 
     return () => {
       isCancelled = true
     }
-  }, [open])
+  }, [open, popoverSessionKey])
 
-  return webPageContext
+  if (!open || resolvedWebPageContext?.popoverSessionKey !== popoverSessionKey) {
+    return undefined
+  }
+
+  return resolvedWebPageContext.value
 }
 
 export function useCustomActionExecution({
