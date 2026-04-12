@@ -142,8 +142,8 @@ export default function FloatingButton() {
       <TranslateButton className={attachSideClassName} />
       <div
         className={cn(
-          "border-border flex h-10 w-15 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900",
-          "translate-x-5 transition-transform duration-300 group-hover:translate-x-0",
+          "border-border flex h-10 w-11 items-center rounded-l-full border border-r-0 bg-white opacity-60 shadow-lg group-hover:opacity-100 dark:bg-neutral-900",
+          "translate-x-6 transition-transform duration-300 group-hover:translate-x-0",
           (isSideOpen || isDropdownOpen) && "opacity-100",
           isDraggingButton ? "cursor-move" : "cursor-pointer",
           attachSideClassName,
@@ -194,7 +194,7 @@ export default function FloatingButton() {
         <img
           src={readFrogLogoUrl}
           alt={APP_NAME}
-          className="ml-[5px] h-8 w-8 rounded-full"
+          className="ml-1 h-8 w-8 rounded-full"
         />
       </div>
       <HiddenButton
