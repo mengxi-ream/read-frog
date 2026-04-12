@@ -1,5 +1,35 @@
 # @read-frog/extension
 
+## 1.32.2
+
+### Patch Changes
+
+- [#1317](https://github.com/mengxi-ream/read-frog/pull/1317) [`3500802`](https://github.com/mengxi-ream/read-frog/commit/35008023c6adcabc60903787282c0906873dc107) Thanks [@taiiiyang](https://github.com/taiiiyang)! - i18n(subtitles): rename zh-CN source subtitle download label
+
+- [#1283](https://github.com/mengxi-ream/read-frog/pull/1283) [`219a8d2`](https://github.com/mengxi-ream/read-frog/commit/219a8d29c6a093b822a56cec43e1c3336778e4c9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add a settings toggle menu for video subtitles
+
+- [#1295](https://github.com/mengxi-ream/read-frog/pull/1295) [`75fafc5`](https://github.com/mengxi-ream/read-frog/commit/75fafc5a3e198667094bdbffa6b77858ce49d499) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - refactor: unify webpage translation context and prompt flow
+
+- [#1287](https://github.com/mengxi-ream/read-frog/pull/1287) [`4a56faa`](https://github.com/mengxi-ream/read-frog/commit/4a56faa44c47f8157528fb9bd734a0e51712004c) Thanks [@ishiko732](https://github.com/ishiko732)! - style: improve selection preview scrolling in the selection toolbar
+
+- [#1297](https://github.com/mengxi-ream/read-frog/pull/1297) [`acdd296`](https://github.com/mengxi-ream/read-frog/commit/acdd296e19681b4d2987f2edc2dbdbedd6cd57c8) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(extension): soften page translation loading spinner with a thinner muted-gray arc
+
+- [#1312](https://github.com/mengxi-ream/read-frog/pull/1312) [`f344e0d`](https://github.com/mengxi-ream/read-frog/commit/f344e0d7dd297d62b33d363ce710ee5ff8fccf1f) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor(subtitles): reuse prefetched source subtitles across download and translation
+
+- [#1300](https://github.com/mengxi-ream/read-frog/pull/1300) [`da8d937`](https://github.com/mengxi-ream/read-frog/commit/da8d9376e77939b2ac7be6e85653e467bbcb8019) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(extension): namespace theme tokens to avoid shadow-root css collisions
+
+- [#1299](https://github.com/mengxi-ream/read-frog/pull/1299) [`1464d77`](https://github.com/mengxi-ream/read-frog/commit/1464d774fddc34c950cf7f44852388af65e3e503) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - docs(extension): document the real-browser Edge extension testing workflow for UI verification
+
+- [#1303](https://github.com/mengxi-ream/read-frog/pull/1303) [`3e9f374`](https://github.com/mengxi-ream/read-frog/commit/3e9f374770841d0c03aa66d817958aa5f8035485) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(page-translation): only prime webpage context for AI-aware title translation
+
+- [#1314](https://github.com/mengxi-ream/read-frog/pull/1314) [`788edfb`](https://github.com/mengxi-ream/read-frog/commit/788edfb5ce8ce09f6865726e65f1f67ee68f5433) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(extension): allow the page pre-translate preload distance to be set up to 10000px
+
+- [#1302](https://github.com/mengxi-ream/read-frog/pull/1302) [`f1d9256`](https://github.com/mengxi-ream/read-frog/commit/f1d92569ba224571fae5b221f0432804f1af9f1e) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(tts): change default English voice to Davis and colocate preview button
+
+- [#1313](https://github.com/mengxi-ream/read-frog/pull/1313) [`1951736`](https://github.com/mengxi-ream/read-frog/commit/19517361ceb546989d707bec5fe2675ba1840fb9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - Optimize YouTube subtitle fetching by trying a fast timedtext fetch from the initial player data snapshot before falling back to the slower POT/wait flow.
+
+- [#1307](https://github.com/mengxi-ream/read-frog/pull/1307) [`38be1ed`](https://github.com/mengxi-ream/read-frog/commit/38be1edea97040ecda6753bb557711a76c08aa35) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add source subtitle download as SRT
+
 ## 1.32.1
 
 ### Patch Changes
