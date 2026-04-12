@@ -74,13 +74,13 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.videoNotFound"))
     }
 
-    const fastPathResult = await this.tryFastFetch(videoId)
-    const currentHash = fastPathResult.currentHash
+    const currentHash = await this.computeTrackHash()
 
     if (currentHash && this.subtitles.length > 0 && this.cachedTrackHash === currentHash) {
       return this.subtitles
     }
 
+    const fastPathResult = await this.tryFastFetch(videoId)
     let resolvedTrack = fastPathResult.track
     let events = fastPathResult.events
 
@@ -96,7 +96,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     this.sourceLanguage = resolvedTrack.languageCode
     this.subtitles = await this.processRawEvents(events)
-    this.cachedTrackHash = currentHash
+    this.cachedTrackHash = this.buildTrackHash(videoId, resolvedTrack)
 
     return this.subtitles
   }
@@ -149,12 +149,11 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     }
 
     const track = this.selectTrack(response.data.captionTracks, response.data.selectedTrackLanguageCode)
-    return this.computeTrackHashFromPlayerData(videoId, response.data, track)
+    return this.buildTrackHash(videoId, track)
   }
 
-  private computeTrackHashFromPlayerData(
+  private buildTrackHash(
     videoId: string,
-    _playerData: PlayerData,
     track: CaptionTrack | null,
   ): string | null {
     if (!track) {
@@ -180,7 +179,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     const playerData = response.data
     const track = this.selectTrack(playerData.captionTracks, playerData.selectedTrackLanguageCode)
-    const currentHash = this.computeTrackHashFromPlayerData(videoId, playerData, track)
+    const currentHash = this.buildTrackHash(videoId, track)
 
     if (!track) {
       return {
@@ -218,8 +217,8 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     await this.waitForPlayerState(videoId)
 
     const playerData = await this.getPlayerDataWithPot(videoId)
-    const track = preferredTrack
-      ?? this.selectTrack(playerData.captionTracks, playerData.selectedTrackLanguageCode)
+    const track = this.selectTrack(playerData.captionTracks, playerData.selectedTrackLanguageCode)
+      ?? preferredTrack
 
     if (!track) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
