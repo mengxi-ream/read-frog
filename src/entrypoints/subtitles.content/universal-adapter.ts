@@ -62,6 +62,7 @@ export class UniversalVideoAdapter {
     void this.renderTranslateButton()
 
     await this.initializeScheduler()
+    void this.getOrLoadSourceSubtitles().catch(() => {})
     await this.tryAutoStartSubtitles()
     this.setupNavigationListener()
   }
@@ -75,9 +76,10 @@ export class UniversalVideoAdapter {
   }
 
   downloadSourceSubtitles = async () => {
-    const subtitles = this.getProcessedSourceSubtitles(await this.getSourceSubtitles())
+    await this.getOrLoadSourceSubtitles()
+
     await downloadSubtitlesAsSrt({
-      subtitles,
+      subtitles: this.sourceProcessedSubtitles,
       pageTitle: document.title || "",
       videoId: this.config.getVideoId?.(),
     })
@@ -123,9 +125,10 @@ export class UniversalVideoAdapter {
     this.subtitlesScheduler.hide()
   }
 
-  private async getSourceSubtitles(): Promise<SubtitlesFragment[]> {
+  private async getOrLoadSourceSubtitles(): Promise<SubtitlesFragment[]> {
     const currentVideoId = this.config.getVideoId?.() ?? null
     const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
+
     if (useSameTrack && this.sourceVideoId === currentVideoId && this.sourceSubtitles.length > 0) {
       return this.sourceSubtitles
     }
@@ -140,23 +143,15 @@ export class UniversalVideoAdapter {
     }
 
     this.sourceVideoId = currentVideoId
-    this.clearSourceProcessedSubtitles()
     this.sourceSubtitles = subtitles
+    this.sourceProcessedSubtitles = this.buildSourceProcessedSubtitles(subtitles)
+
     return subtitles
   }
 
-  private getProcessedSourceSubtitles(rawSubtitles: SubtitlesFragment[]): SubtitlesFragment[] {
-    if (this.sourceProcessedSubtitles.length > 0) {
-      return this.sourceProcessedSubtitles
-    }
-
-    const processedFragments = optimizeSubtitles(
-      rawSubtitles,
-      this.subtitlesFetcher.getSourceLanguage(),
-    )
-    this.sourceProcessedSubtitles = processedFragments
-
-    return processedFragments
+  private buildSourceProcessedSubtitles(rawSubtitles: SubtitlesFragment[]): SubtitlesFragment[] {
+    const sourceLanguage = this.subtitlesFetcher.getSourceLanguage()
+    return optimizeSubtitles(rawSubtitles, sourceLanguage)
   }
 
   private clearSourceProcessedSubtitles() {
@@ -206,6 +201,7 @@ export class UniversalVideoAdapter {
       void this.renderTranslateButton()
 
       await this.initializeScheduler()
+      void this.getOrLoadSourceSubtitles().catch(() => {})
       await this.tryAutoStartSubtitles()
     }
   }
@@ -326,7 +322,8 @@ export class UniversalVideoAdapter {
 
       this.subtitlesScheduler?.setState("loading")
 
-      this.sessionSubtitles = await this.getSourceSubtitles()
+      await this.getOrLoadSourceSubtitles()
+      this.sessionSubtitles = this.sourceSubtitles
 
       await this.processSubtitles()
       if (analyticsContext) {
@@ -372,14 +369,16 @@ export class UniversalVideoAdapter {
     }
 
     if (useAiSegmentation) {
+      this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
       this.segmentationPipeline = new SegmentationPipeline({
+        baselineFragments: this.sourceProcessedSubtitles,
         rawFragments: this.sessionSubtitles,
         getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
         getSourceLanguage: () => this.subtitlesFetcher.getSourceLanguage(),
       })
     }
     else {
-      this.sessionProcessedFragments = this.getProcessedSourceSubtitles(this.sessionSubtitles)
+      this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
     }
 
     this.translationCoordinator = new TranslationCoordinator({
