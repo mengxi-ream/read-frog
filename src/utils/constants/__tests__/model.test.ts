@@ -189,6 +189,11 @@ describe("getProviderOptions", () => {
       expect(deepinfraOptions.deepinfra?.enableThinking).toBe(false)
     })
 
+    it("should skip Alibaba-style Qwen defaults for Cerebras models", () => {
+      const options = getProviderOptions("qwen-3-235b-a22b-instruct-2507", "cerebras")
+      expect(options).toEqual({})
+    })
+
     it("should apply broadened Kimi defaults to provider-prefixed model ids", () => {
       const huggingfaceOptions = getProviderOptions("moonshotai/Kimi-K2-Instruct", "huggingface")
       expect(huggingfaceOptions.huggingface?.thinking).toEqual({ type: "disabled" })
@@ -231,6 +236,11 @@ describe("getProviderOptions", () => {
     it("should fall back to recommendations when user options are undefined", () => {
       const options = getProviderOptionsWithOverride("qwen3-max", "alibaba")
       expect(options).toEqual({ alibaba: { enableThinking: false } })
+    })
+
+    it("should not auto-apply unsupported Cerebras Qwen defaults when user options are undefined", () => {
+      const options = getProviderOptionsWithOverride("qwen-3-235b-a22b-instruct-2507", "cerebras")
+      expect(options).toBeUndefined()
     })
 
     it("should use user options as-is without merging matched defaults", () => {
@@ -292,6 +302,13 @@ describe("getProviderOptions", () => {
       })
 
       expect(getRecommendedProviderOptionsMatch("qwen3.5-flash")?.options).toEqual({
+        enableThinking: false,
+      })
+    })
+
+    it("should suppress unsupported Qwen recommendations for Cerebras only", () => {
+      expect(getRecommendedProviderOptionsMatch("qwen-3-235b-a22b-instruct-2507", "cerebras")).toBeUndefined()
+      expect(getRecommendedProviderOptionsMatch("qwen/qwen3-32b", "groq")?.options).toEqual({
         enableThinking: false,
       })
     })
