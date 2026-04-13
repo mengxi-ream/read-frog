@@ -157,9 +157,9 @@ export default function FloatingButton() {
                 type="button"
                 title="Close floating button"
                 className={cn(
-                  "border-border absolute -top-1 -left-1 hidden cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900",
-                  "group-hover:block",
-                  isDropdownOpen && "block",
+                  "border-border absolute -top-1 -left-1 invisible cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900",
+                  "group-hover:visible",
+                  isDropdownOpen && "visible",
                 )}
                 onMouseDown={e => e.stopPropagation()} // 父级不会收到 mousedown
               />
