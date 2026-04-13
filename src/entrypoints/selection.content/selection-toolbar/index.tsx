@@ -199,18 +199,18 @@ function applyDirectionOffset(
   tooltipWidth: number,
   tooltipHeight: number,
 ): { x: number, y: number } {
-  const MARGIN = 12
+  const CURSOR_CLEARANCE = 20
   switch (direction) {
     case SelectionDirection.BOTTOM_RIGHT:
-      return { x: baseX - MARGIN, y: baseY + MARGIN }
+      return { x: baseX, y: baseY + CURSOR_CLEARANCE }
     case SelectionDirection.BOTTOM_LEFT:
-      return { x: baseX - tooltipWidth + MARGIN, y: baseY + MARGIN }
+      return { x: baseX - tooltipWidth, y: baseY + CURSOR_CLEARANCE }
     case SelectionDirection.TOP_RIGHT:
-      return { x: baseX - MARGIN, y: baseY - tooltipHeight - MARGIN }
+      return { x: baseX, y: baseY - tooltipHeight - CURSOR_CLEARANCE }
     case SelectionDirection.TOP_LEFT:
-      return { x: baseX - tooltipWidth + MARGIN, y: baseY - tooltipHeight - MARGIN }
+      return { x: baseX - tooltipWidth, y: baseY - tooltipHeight - CURSOR_CLEARANCE }
     default:
-      return { x: baseX - MARGIN, y: baseY + MARGIN }
+      return { x: baseX, y: baseY + CURSOR_CLEARANCE }
   }
 }
 

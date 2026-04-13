@@ -682,6 +682,27 @@ describe("selectionToolbar - positioning logic", () => {
     })
   })
 
+  it("should keep the bottom-right toolbar below the cursor to reduce accidental clicks", async () => {
+    render(
+      <div>
+        <SelectionToolbar />
+        <div data-testid="test-element">Test content</div>
+      </div>,
+    )
+
+    const target = screen.getByTestId("test-element")
+    const toolbar = getToolbarElement()
+    mockToolbarDimensions(toolbar, 200, 50)
+
+    await triggerMouseDownAndUp(target, 100, 100, 200, 200)
+
+    await waitFor(() => {
+      const topValue = Number.parseInt(toolbar.style.top)
+
+      expect(topValue - 200).toBeGreaterThanOrEqual(20)
+    })
+  })
+
   it("should position toolbar at bottom-left when selecting from top-right to bottom-left", async () => {
     render(
       <div>
