@@ -36,7 +36,7 @@ describe("providerOptionsRecommendationTrigger", () => {
   it("does not render a trigger when the current model has no recommendation", () => {
     render(
       <ProviderOptionsRecommendationTrigger
-        providerId="provider-1"
+        provider="openai"
         modelId="plain-model"
         onApply={vi.fn()}
       />,
@@ -50,7 +50,7 @@ describe("providerOptionsRecommendationTrigger", () => {
   it("does not render a trigger for GPT-5 chat-latest models", () => {
     render(
       <ProviderOptionsRecommendationTrigger
-        providerId="provider-1"
+        provider="openai"
         modelId="gpt-5.3-chat-latest"
         onApply={vi.fn()}
       />,
@@ -64,7 +64,7 @@ describe("providerOptionsRecommendationTrigger", () => {
   it("flashes once when the model starts matching a new recommendation rule", () => {
     const { rerender } = render(
       <ProviderOptionsRecommendationTrigger
-        providerId="provider-1"
+        provider="openai"
         modelId="gpt-5-mini"
         onApply={vi.fn()}
       />,
@@ -77,7 +77,7 @@ describe("providerOptionsRecommendationTrigger", () => {
 
     rerender(
       <ProviderOptionsRecommendationTrigger
-        providerId="provider-1"
+        provider="openai"
         modelId="gpt-5.4-mini"
         onApply={vi.fn()}
       />,
@@ -97,7 +97,7 @@ describe("providerOptionsRecommendationTrigger", () => {
 
     render(
       <ProviderOptionsRecommendationTrigger
-        providerId="provider-1"
+        provider="openai"
         modelId="gpt-5.4-mini"
         onApply={onApply}
       />,
@@ -120,7 +120,7 @@ describe("providerOptionsRecommendationTrigger", () => {
   it("renders Kimi recommendations based on model name alone", () => {
     render(
       <ProviderOptionsRecommendationTrigger
-        providerId="provider-1"
+        provider="huggingface"
         modelId="moonshotai/Kimi-K2-Instruct"
         onApply={vi.fn()}
       />,
@@ -129,5 +129,55 @@ describe("providerOptionsRecommendationTrigger", () => {
     expect(screen.getByRole("button", {
       name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
     })).toBeInTheDocument()
+  })
+
+  it("does not render unsupported Cerebras Qwen recommendations", () => {
+    const onApply = vi.fn()
+
+    render(
+      <ProviderOptionsRecommendationTrigger
+        provider="cerebras"
+        modelId="qwen-3-235b-a22b-instruct-2507"
+        onApply={onApply}
+      />,
+    )
+
+    expect(screen.queryByRole("button", {
+      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+    })).not.toBeInTheDocument()
+    expect(onApply).not.toHaveBeenCalled()
+  })
+
+  it("removes unsupported Cerebras Qwen recommendations when the provider changes", () => {
+    const onApply = vi.fn()
+    const { rerender } = render(
+      <ProviderOptionsRecommendationTrigger
+        provider="alibaba"
+        modelId="qwen-3-32b"
+        onApply={onApply}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole("button", {
+      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+    }))
+
+    expect(screen.getByTestId("provider-options-preview")).toHaveTextContent("\"enableThinking\": false")
+
+    rerender(
+      <ProviderOptionsRecommendationTrigger
+        provider="cerebras"
+        modelId="qwen-3-32b"
+        onApply={onApply}
+      />,
+    )
+
+    expect(screen.queryByRole("button", {
+      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+    })).not.toBeInTheDocument()
+    expect(screen.queryByRole("button", {
+      name: "options.apiProviders.form.providerOptionsRecommendationApply",
+    })).not.toBeInTheDocument()
+    expect(onApply).not.toHaveBeenCalled()
   })
 })

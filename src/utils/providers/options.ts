@@ -8,11 +8,45 @@ export interface RecommendedProviderOptionsMatch {
 }
 
 const OPENAI_COMPATIBLE_PROVIDER_TYPES = new Set<string>(CUSTOM_LLM_PROVIDER_TYPES)
+const UNSUPPORTED_RECOMMENDED_OPTION_KEYS: Partial<Record<string, readonly string[]>> = {
+  cerebras: ["enableThinking"],
+}
 
 const OPENAI_COMPATIBLE_OPTION_ALIASES = {
   reasoning_effort: "reasoningEffort",
   verbosity: "textVerbosity",
 } as const satisfies Record<string, string>
+
+function filterUnsupportedRecommendedOptions(
+  provider: string | undefined,
+  options: Record<string, JSONValue>,
+): Record<string, JSONValue> | undefined {
+  if (!provider) {
+    return options
+  }
+
+  const unsupportedKeys = UNSUPPORTED_RECOMMENDED_OPTION_KEYS[provider]
+  if (!unsupportedKeys?.length) {
+    return options
+  }
+
+  let filteredOptions: Record<string, JSONValue> | undefined
+
+  for (const unsupportedKey of unsupportedKeys) {
+    if (!(unsupportedKey in options)) {
+      continue
+    }
+
+    filteredOptions ??= { ...options }
+    delete filteredOptions[unsupportedKey]
+  }
+
+  if (!filteredOptions) {
+    return options
+  }
+
+  return Object.keys(filteredOptions).length > 0 ? filteredOptions : undefined
+}
 
 function normalizeUserProviderOptions(
   provider: string,
@@ -45,10 +79,18 @@ function normalizeUserProviderOptions(
  * Detect the recommended provider options for a given model.
  * First match wins - more specific patterns should be placed first in MODEL_OPTIONS.
  */
-export function getRecommendedProviderOptionsMatch(model: string): RecommendedProviderOptionsMatch | undefined {
+export function getRecommendedProviderOptionsMatch(
+  model: string,
+  provider?: string,
+): RecommendedProviderOptionsMatch | undefined {
   for (const [matchIndex, { pattern, options }] of LLM_MODEL_OPTIONS.entries()) {
     if (pattern.test(model)) {
-      return { matchIndex, options }
+      const filteredOptions = filterUnsupportedRecommendedOptions(provider, options)
+      if (!filteredOptions) {
+        return undefined
+      }
+
+      return { matchIndex, options: filteredOptions }
     }
   }
 }
@@ -56,8 +98,11 @@ export function getRecommendedProviderOptionsMatch(model: string): RecommendedPr
 /**
  * Get the recommended provider options payload without wrapping it by provider id.
  */
-export function getRecommendedProviderOptions(model: string): Record<string, JSONValue> | undefined {
-  return getRecommendedProviderOptionsMatch(model)?.options
+export function getRecommendedProviderOptions(
+  model: string,
+  provider?: string,
+): Record<string, JSONValue> | undefined {
+  return getRecommendedProviderOptionsMatch(model, provider)?.options
 }
 
 /**
@@ -67,7 +112,7 @@ export function getProviderOptions(
   model: string,
   provider: string,
 ): Record<string, Record<string, JSONValue>> {
-  const options = getRecommendedProviderOptions(model)
+  const options = getRecommendedProviderOptions(model, provider)
   if (!options) {
     return {}
   }
@@ -89,7 +134,7 @@ export function getProviderOptionsWithOverride(
     return { [provider]: normalizeUserProviderOptions(provider, userOptions) }
   }
 
-  const recommendedOptions = getRecommendedProviderOptions(model)
+  const recommendedOptions = getRecommendedProviderOptions(model, provider)
   if (!recommendedOptions) {
     return undefined
   }

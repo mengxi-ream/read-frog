@@ -166,6 +166,27 @@ describe("providerOptionsField", () => {
     )
   })
 
+  it("does not suggest unsupported Cerebras Qwen provider options", () => {
+    render(
+      <ProviderOptionsFieldHarness
+        initialConfig={{
+          ...baseProviderConfig,
+          provider: "cerebras",
+          model: {
+            model: "qwen-3-235b-a22b-instruct-2507",
+            isCustomModel: false,
+            customModel: null,
+          },
+        }}
+      />,
+    )
+
+    expect(screen.getByLabelText("provider-options-editor")).toHaveAttribute(
+      "placeholder",
+      JSON.stringify({ field: "value" }, null, 2),
+    )
+  })
+
   it("syncs the editor when an external update arrives, even if the saved value is unchanged", async () => {
     const externalProviderOptions = { enableThinking: false }
 

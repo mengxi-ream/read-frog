@@ -17,7 +17,7 @@ import { getRecommendedProviderOptionsMatch } from "@/utils/providers/options"
 import { cn } from "@/utils/styles/utils"
 
 interface ProviderOptionsRecommendationTriggerProps {
-  providerId: string
+  provider: string
   modelId?: string | null
   currentProviderOptions?: Record<string, JSONValue>
   onApply: (options: Record<string, JSONValue>) => void
@@ -26,7 +26,7 @@ interface ProviderOptionsRecommendationTriggerProps {
 const FLASH_DURATION_MS = 1400
 
 export function ProviderOptionsRecommendationTrigger({
-  providerId,
+  provider,
   modelId,
   currentProviderOptions,
   onApply,
@@ -34,7 +34,7 @@ export function ProviderOptionsRecommendationTrigger({
   const [open, setOpen] = useState(false)
   const [isFlashing, setIsFlashing] = useState(false)
   const hasMountedRef = useRef(false)
-  const previousProviderIdRef = useRef(providerId)
+  const previousProviderRef = useRef(provider)
   const previousMatchIndexRef = useRef<number | undefined>(undefined)
 
   const closePopover = useEffectEvent(() => {
@@ -56,8 +56,8 @@ export function ProviderOptionsRecommendationTrigger({
     if (!modelId?.trim()) {
       return undefined
     }
-    return getRecommendedProviderOptionsMatch(modelId.trim())
-  }, [modelId])
+    return getRecommendedProviderOptionsMatch(modelId.trim(), provider)
+  }, [modelId, provider])
 
   const recommendationJson = useMemo(() => {
     if (!recommendation) {
@@ -82,13 +82,13 @@ export function ProviderOptionsRecommendationTrigger({
   useEffect(() => {
     if (!hasMountedRef.current) {
       hasMountedRef.current = true
-      previousProviderIdRef.current = providerId
+      previousProviderRef.current = provider
       previousMatchIndexRef.current = recommendation?.matchIndex
       return
     }
 
-    if (previousProviderIdRef.current !== providerId) {
-      previousProviderIdRef.current = providerId
+    if (previousProviderRef.current !== provider) {
+      previousProviderRef.current = provider
       previousMatchIndexRef.current = recommendation?.matchIndex
       stopFlashing()
       return
@@ -110,7 +110,7 @@ export function ProviderOptionsRecommendationTrigger({
 
       stopFlashing()
     }
-  }, [providerId, recommendation])
+  }, [provider, recommendation])
 
   if (!recommendation) {
     return null

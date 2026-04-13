@@ -168,6 +168,14 @@ describe("getProviderOptions", () => {
       expect(nextOptions.alibaba?.enableThinking).toBe(false)
     })
 
+    it("should skip unsupported Cerebras Qwen enableThinking defaults", () => {
+      const instructOptions = getProviderOptions("qwen-3-235b-a22b-instruct-2507", "cerebras")
+      expect(instructOptions).toEqual({})
+
+      const qwen32bOptions = getProviderOptions("qwen-3-32b", "cerebras")
+      expect(qwen32bOptions).toEqual({})
+    })
+
     it("should keep explicit Alibaba thinking-only Qwen variants untouched", () => {
       const options = getProviderOptions("qwen3-thinking-2507", "alibaba")
       expect(options).toEqual({})
@@ -233,6 +241,11 @@ describe("getProviderOptions", () => {
       expect(options).toEqual({ alibaba: { enableThinking: false } })
     })
 
+    it("should not fall back to unsupported Cerebras Qwen recommendations", () => {
+      const options = getProviderOptionsWithOverride("qwen-3-235b-a22b-instruct-2507", "cerebras")
+      expect(options).toBeUndefined()
+    })
+
     it("should use user options as-is without merging matched defaults", () => {
       const options = getProviderOptionsWithOverride("qwen3-max", "alibaba", { foo: "bar" })
       expect(options).toEqual({ alibaba: { foo: "bar" } })
@@ -294,6 +307,10 @@ describe("getProviderOptions", () => {
       expect(getRecommendedProviderOptionsMatch("qwen3.5-flash")?.options).toEqual({
         enableThinking: false,
       })
+    })
+
+    it("should omit provider-specific recommendations when the provider does not support them", () => {
+      expect(getRecommendedProviderOptionsMatch("qwen-3-235b-a22b-instruct-2507", "cerebras")).toBeUndefined()
     })
   })
 })
