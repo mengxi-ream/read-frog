@@ -6,6 +6,24 @@ const WXT_API_KEY_PATTERN = /^WXT_.*API_KEY/
 const ALLOWED_BUNDLED_API_KEYS = new Set([
   "WXT_POSTHOG_API_KEY",
 ])
+const PROBLEMATIC_EXTENSION_CODE_POINTS = /[\u2028\u2029\uFEFF\uFFFF]/g
+
+function escapeProblematicExtensionCodePoints(code: string) {
+  return code.replace(PROBLEMATIC_EXTENSION_CODE_POINTS, (char) => {
+    switch (char) {
+      case "\u2028":
+        return "\\u2028"
+      case "\u2029":
+        return "\\u2029"
+      case "\uFEFF":
+        return "\\uFEFF"
+      case "\uFFFF":
+        return "\\uFFFF"
+      default:
+        return char
+    }
+  })
+}
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -75,47 +93,66 @@ export default defineConfig({
   },
   dev: {
     server: {
+      // Prefer 3333 over WXT's default 3000 while still allowing WXT to pick
+      // another open port when 3333 is already taken.
       port: 3333,
+      strictPort: false,
     },
   },
   vite: configEnv => ({
-    plugins: configEnv.mode === "production"
-      ? [
-          {
-            name: "check-api-key-env",
-            buildStart() {
-              const apiKeyVars = Object.keys(process.env)
-                .filter(key => WXT_API_KEY_PATTERN.test(key))
-                .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
+    plugins: [
+      {
+        // WXT 0.20.22 skips `esbuild.charset = "ascii"` on Vite 8, so keep a
+        // bundle-phase safety net for extension-hostile code points.
+        name: "escape-problematic-extension-code-points",
+        generateBundle(_, bundle) {
+          for (const [fileName, output] of Object.entries(bundle)) {
+            if (output.type !== "chunk" || !fileName.endsWith(".js")) {
+              continue
+            }
 
-              if (apiKeyVars.length > 0) {
-                throw new Error(
-                  `\n\nFound WXT_*_API_KEY environment variables that may be bundled:\n`
-                  + `${apiKeyVars.map(k => `   - ${k}`).join("\n")}\n\n`
-                  + `Please unset these variables before building for production.\n`,
-                )
-              }
+            output.code = escapeProblematicExtensionCodePoints(output.code)
+          }
+        },
+      },
+      ...(configEnv.mode === "production"
+        ? [
+            {
+              name: "check-api-key-env",
+              buildStart() {
+                const apiKeyVars = Object.keys(process.env)
+                  .filter(key => WXT_API_KEY_PATTERN.test(key))
+                  .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
 
-              // Check required env vars only for zip builds
-              if (process.env.WXT_ZIP_MODE) {
-                const requiredEnvVars = [
-                  "WXT_GOOGLE_CLIENT_ID",
-                  "WXT_POSTHOG_API_KEY",
-                  "WXT_POSTHOG_HOST",
-                ]
-                const missing = requiredEnvVars.filter(key => !process.env[key])
-
-                if (missing.length > 0) {
+                if (apiKeyVars.length > 0) {
                   throw new Error(
-                    `\n\nMissing required environment variables for zip:\n`
-                    + `${missing.map(k => `   - ${k}`).join("\n")}\n\n`
-                    + `Set them in .env.production or your environment.\n`,
+                    `\n\nFound WXT_*_API_KEY environment variables that may be bundled:\n`
+                    + `${apiKeyVars.map(k => `   - ${k}`).join("\n")}\n\n`
+                    + `Please unset these variables before building for production.\n`,
                   )
                 }
-              }
+
+                // Check required env vars only for zip builds
+                if (process.env.WXT_ZIP_MODE) {
+                  const requiredEnvVars = [
+                    "WXT_GOOGLE_CLIENT_ID",
+                    "WXT_POSTHOG_API_KEY",
+                    "WXT_POSTHOG_HOST",
+                  ]
+                  const missing = requiredEnvVars.filter(key => !process.env[key])
+
+                  if (missing.length > 0) {
+                    throw new Error(
+                      `\n\nMissing required environment variables for zip:\n`
+                      + `${missing.map(k => `   - ${k}`).join("\n")}\n\n`
+                      + `Set them in .env.production or your environment.\n`,
+                    )
+                  }
+                }
+              },
             },
-          },
-        ]
-      : [],
+          ]
+        : []),
+    ],
   }),
 })
