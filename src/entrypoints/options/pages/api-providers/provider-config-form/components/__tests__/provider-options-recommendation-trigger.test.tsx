@@ -37,6 +37,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     render(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
+        provider="openai"
         modelId="plain-model"
         onApply={vi.fn()}
       />,
@@ -51,6 +52,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     render(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
+        provider="openai"
         modelId="gpt-5.3-chat-latest"
         onApply={vi.fn()}
       />,
@@ -65,6 +67,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     const { rerender } = render(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
+        provider="openai"
         modelId="gpt-5-mini"
         onApply={vi.fn()}
       />,
@@ -78,6 +81,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     rerender(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
+        provider="openai"
         modelId="gpt-5.4-mini"
         onApply={vi.fn()}
       />,
@@ -98,6 +102,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     render(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
+        provider="openai"
         modelId="gpt-5.4-mini"
         onApply={onApply}
       />,
@@ -121,6 +126,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     render(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
+        provider="huggingface"
         modelId="moonshotai/Kimi-K2-Instruct"
         onApply={vi.fn()}
       />,
@@ -129,5 +135,20 @@ describe("providerOptionsRecommendationTrigger", () => {
     expect(screen.getByRole("button", {
       name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
     })).toBeInTheDocument()
+  })
+
+  it("does not render a trigger when a Cerebras recommendation prunes to nothing", () => {
+    render(
+      <ProviderOptionsRecommendationTrigger
+        providerId="provider-1"
+        provider="cerebras"
+        modelId="qwen-3-235b-a22b-instruct-2507"
+        onApply={vi.fn()}
+      />,
+    )
+
+    expect(screen.queryByRole("button", {
+      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+    })).not.toBeInTheDocument()
   })
 })

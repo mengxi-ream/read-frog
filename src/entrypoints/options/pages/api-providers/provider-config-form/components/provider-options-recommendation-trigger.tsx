@@ -18,6 +18,7 @@ import { cn } from "@/utils/styles/utils"
 
 interface ProviderOptionsRecommendationTriggerProps {
   providerId: string
+  provider: string
   modelId?: string | null
   currentProviderOptions?: Record<string, JSONValue>
   onApply: (options: Record<string, JSONValue>) => void
@@ -27,6 +28,7 @@ const FLASH_DURATION_MS = 1400
 
 export function ProviderOptionsRecommendationTrigger({
   providerId,
+  provider,
   modelId,
   currentProviderOptions,
   onApply,
@@ -56,8 +58,8 @@ export function ProviderOptionsRecommendationTrigger({
     if (!modelId?.trim()) {
       return undefined
     }
-    return getRecommendedProviderOptionsMatch(modelId.trim())
-  }, [modelId])
+    return getRecommendedProviderOptionsMatch(modelId.trim(), provider)
+  }, [modelId, provider])
 
   const recommendationJson = useMemo(() => {
     if (!recommendation) {

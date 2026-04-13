@@ -100,7 +100,7 @@ export const ProviderOptionsField = withForm({
 
     const modelId = resolveModelId(providerConfig.model)
     const placeholderText = (() => {
-      const recommendedOptions = getRecommendedProviderOptions(modelId ?? "")
+      const recommendedOptions = getRecommendedProviderOptions(modelId ?? "", providerConfig.provider)
       return recommendedOptions
         ? JSON.stringify(recommendedOptions, null, 2)
         : JSON.stringify({ field: "value" }, null, 2)

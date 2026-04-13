@@ -31,6 +31,7 @@ export const TranslateModelSelector = withForm({
     const recommendationTrigger = (
       <ProviderOptionsRecommendationTrigger
         providerId={providerConfig.id}
+        provider={providerConfig.provider}
         modelId={modelId}
         currentProviderOptions={providerConfig.providerOptions}
         onApply={applyRecommendedProviderOptions}
