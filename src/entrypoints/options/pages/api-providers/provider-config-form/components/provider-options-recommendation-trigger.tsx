@@ -38,17 +38,17 @@ export function ProviderOptionsRecommendationTrigger({
   const previousMatchIndexRef = useRef<number | undefined>(undefined)
 
   const closePopover = useEffectEvent(() => {
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line react/set-state-in-effect
     setOpen(false)
   })
 
   const startFlashing = useEffectEvent(() => {
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line react/set-state-in-effect
     setIsFlashing(true)
   })
 
   const stopFlashing = useEffectEvent(() => {
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line react/set-state-in-effect
     setIsFlashing(false)
   })
 

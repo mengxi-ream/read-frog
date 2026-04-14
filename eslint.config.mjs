@@ -98,4 +98,16 @@ export default antfu({
     "test/no-identical-title": "error",
     "test/prefer-hooks-on-top": "error",
   },
+}).append({
+  files: [
+    "**/__tests__/**/*.ts",
+    "**/__tests__/**/*.tsx",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/*.spec.tsx",
+  ],
+  rules: {
+    "react/component-hook-factories": "off",
+  },
 })

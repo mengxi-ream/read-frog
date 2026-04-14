@@ -55,7 +55,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
 
   useEffect(() => {
     mutation.reset()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react/exhaustive-deps
   }, [provider, apiKey, baseURL, connectionOptions])
 
   const testResult = mutation.isSuccess ? "success" : mutation.isError ? "error" : null

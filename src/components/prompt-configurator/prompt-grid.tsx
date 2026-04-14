@@ -33,7 +33,7 @@ export function PromptGrid({
   const isExportMode = useAtomValue(promptAtoms.exportMode)
 
   const patterns = config.patterns
-  const idPrefix = useId()
+  const checkboxBaseId = useId()
 
   // Construct virtual default prompt object from code constant
   const defaultPrompt: TranslatePromptObj = {
@@ -90,7 +90,7 @@ export function PromptGrid({
                     {/* Checkbox: only show in export mode for custom prompts (not default) */}
                     <Activity mode={isExportMode && !isDefault ? "visible" : "hidden"}>
                       <Checkbox
-                        id={`${idPrefix}-check-${pattern.id}`}
+                        id={`${checkboxBaseId}-check-${pattern.id}`}
                         checked={selectedPrompts.includes(pattern.id)}
                         onClick={e => e.stopPropagation()}
                         onCheckedChange={(checked) => {
@@ -103,7 +103,7 @@ export function PromptGrid({
                       />
                     </Activity>
                     <Label
-                      htmlFor={`${idPrefix}-check-${pattern.id}`}
+                      htmlFor={`${checkboxBaseId}-check-${pattern.id}`}
                       className="flex-1 min-w-0 block truncate cursor-pointer"
                       title={pattern.name}
                     >
