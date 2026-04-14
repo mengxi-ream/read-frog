@@ -6,24 +6,6 @@ const WXT_API_KEY_PATTERN = /^WXT_.*API_KEY/
 const ALLOWED_BUNDLED_API_KEYS = new Set([
   "WXT_POSTHOG_API_KEY",
 ])
-const PROBLEMATIC_EXTENSION_CODE_POINTS = /[\u2028\u2029\uFEFF\uFFFF]/g
-
-function escapeProblematicExtensionCodePoints(code: string) {
-  return code.replace(PROBLEMATIC_EXTENSION_CODE_POINTS, (char) => {
-    switch (char) {
-      case "\u2028":
-        return "\\u2028"
-      case "\u2029":
-        return "\\u2029"
-      case "\uFEFF":
-        return "\\uFEFF"
-      case "\uFFFF":
-        return "\\uFFFF"
-      default:
-        return char
-    }
-  })
-}
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -101,20 +83,6 @@ export default defineConfig({
   },
   vite: configEnv => ({
     plugins: [
-      {
-        // WXT 0.20.22 skips `esbuild.charset = "ascii"` on Vite 8, so keep a
-        // bundle-phase safety net for extension-hostile code points.
-        name: "escape-problematic-extension-code-points",
-        generateBundle(_, bundle) {
-          for (const [fileName, output] of Object.entries(bundle)) {
-            if (output.type !== "chunk" || !fileName.endsWith(".js")) {
-              continue
-            }
-
-            output.code = escapeProblematicExtensionCodePoints(output.code)
-          }
-        },
-      },
       ...(configEnv.mode === "production"
         ? [
             {
