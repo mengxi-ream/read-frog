@@ -133,14 +133,13 @@ describe("getProviderOptions", () => {
       expect(alibabaOptions.alibaba?.enableThinking).toBe(false)
     })
 
-    it("should apply broader Kimi defaults for Moonshot and Fireworks variants", () => {
+    it("should apply broader Kimi defaults for non-instruct Moonshot and Fireworks variants", () => {
       const moonshotTurboOptions = getProviderOptions("kimi-k2-turbo", "moonshotai")
       expect(moonshotTurboOptions.moonshotai?.thinking).toEqual({ type: "disabled" })
       expect(moonshotTurboOptions.moonshotai?.reasoningHistory).toBe("disabled")
 
       const moonshotInstructOptions = getProviderOptions("kimi-k2-instruct-0905", "moonshotai")
-      expect(moonshotInstructOptions.moonshotai?.thinking).toEqual({ type: "disabled" })
-      expect(moonshotInstructOptions.moonshotai?.reasoningHistory).toBe("disabled")
+      expect(moonshotInstructOptions).toEqual({})
 
       const fireworksThinkingOptions = getProviderOptions("accounts/fireworks/models/kimi-k2-thinking", "fireworks")
       expect(fireworksThinkingOptions.fireworks?.thinking).toEqual({ type: "disabled" })
@@ -173,6 +172,11 @@ describe("getProviderOptions", () => {
       expect(options).toEqual({})
     })
 
+    it("should not apply Alibaba Qwen defaults to Cerebras qwen-3 model ids", () => {
+      expect(getProviderOptions("qwen-3-235b-a22b-instruct-2507", "cerebras")).toEqual({})
+      expect(getProviderOptions("qwen-3-32b", "cerebras")).toEqual({})
+    })
+
     it("should return low/default-compatible reasoning settings for gpt-oss models", () => {
       const groqOptions = getProviderOptions("openai/gpt-oss-120b", "groq")
       expect(groqOptions.groq?.reasoningEffort).toBe("none")
@@ -189,10 +193,9 @@ describe("getProviderOptions", () => {
       expect(deepinfraOptions.deepinfra?.enableThinking).toBe(false)
     })
 
-    it("should apply broadened Kimi defaults to provider-prefixed model ids", () => {
+    it("should keep provider-prefixed Kimi instruct model ids untouched", () => {
       const huggingfaceOptions = getProviderOptions("moonshotai/Kimi-K2-Instruct", "huggingface")
-      expect(huggingfaceOptions.huggingface?.thinking).toEqual({ type: "disabled" })
-      expect(huggingfaceOptions.huggingface?.reasoningHistory).toBe("disabled")
+      expect(huggingfaceOptions).toEqual({})
     })
 
     it("should return empty object for non-matching models", () => {
