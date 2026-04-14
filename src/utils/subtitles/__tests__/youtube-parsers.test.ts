@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { detectFormat } from "../fetchers/youtube/format-detector"
 import { parseKaraokeSubtitles } from "../fetchers/youtube/parser/karaoke-parser"
 import { parseScrollingAsrSubtitles } from "../fetchers/youtube/parser/scrolling-asr-parser"
+import { parseStylizedKaraokeSubtitles } from "../fetchers/youtube/parser/stylized-karaoke-parser"
 import { optimizeSubtitles } from "../processor/optimizer"
 
 describe("youTube Subtitle Parsers", () => {
@@ -13,6 +14,17 @@ describe("youTube Subtitle Parsers", () => {
         { tStartMs: 1000, dDurationMs: 2000, wpWinPosId: 2, segs: [{ utf8: "a" }] },
       ]
       expect(detectFormat(events)).toBe("karaoke")
+    })
+
+    it("should detect stylized karaoke format with repeated identical text on same track", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the wor/\u200Bst person" }] },
+        { tStartMs: 1200, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the worst /\u200Bperson" }] },
+        { tStartMs: 1400, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the worst per/\u200Bson" }] },
+        { tStartMs: 1600, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the worst person/" }] },
+      ]
+
+      expect(detectFormat(events)).toBe("karaoke-stylized")
     })
 
     it("should detect scrolling-asr format (wWinId + aAppend: 1)", () => {
@@ -132,6 +144,66 @@ describe("youTube Subtitle Parsers", () => {
 
       expect(result).toHaveLength(1)
       expect(result[0].text).toBe("Valid")
+    })
+  })
+
+  describe("stylized karaoke Parser", () => {
+    it("should select the dense main track and ignore sparse overlay tracks", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the wor/\u200Bst person" }] },
+        { tStartMs: 1200, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the worst /\u200Bperson" }] },
+        { tStartMs: 1400, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the worst person/" }] },
+        { tStartMs: 1500, dDurationMs: 200, wpWinPosId: 3, segs: [{ utf8: "Sparse overlay" }] },
+      ]
+
+      const result = parseStylizedKaraokeSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("Do you think even the worst person")
+    })
+
+    it("should merge slash-shifted variants into one clean sentence", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BCan /\u200Bchange...?" }] },
+        { tStartMs: 1200, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BCan chan/\u200Bge...?" }] },
+        { tStartMs: 1400, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BCan change...?/" }] },
+      ]
+
+      const result = parseStylizedKaraokeSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("Can change...?")
+      expect(result[0].start).toBe(1000)
+      expect(result[0].end).toBe(1600)
+    })
+
+    it("should merge progressive redraws across the same sentence family", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BThat /\u200Beverybody can be a good persons..." }] },
+        { tStartMs: 1200, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BThat e/\u200Bverybody can be a good persons..." }] },
+        { tStartMs: 1400, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BThat everybody can /\u200Bbe a good persons..." }] },
+        { tStartMs: 1600, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BThat everybody can be /\u200Ba good persons..." }] },
+      ]
+
+      const result = parseStylizedKaraokeSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("That everybody can be a good persons...")
+    })
+
+    it("should split when the sentence really changes", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the worst /\u200Bperson" }] },
+        { tStartMs: 1200, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BDo you think even the worst person/" }] },
+        { tStartMs: 2300, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BCan /\u200Bchange...?" }] },
+        { tStartMs: 2500, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "\u200BCan change...?/" }] },
+      ]
+
+      const result = parseStylizedKaraokeSubtitles(events)
+
+      expect(result).toHaveLength(2)
+      expect(result[0].text).toBe("Do you think even the worst person")
+      expect(result[1].text).toBe("Can change...?")
     })
   })
 

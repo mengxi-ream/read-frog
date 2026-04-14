@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest"
+import * as configStorage from "@/utils/config/storage"
 import { PLAYER_DATA_REQUEST_TYPE, PLAYER_DATA_RESPONSE_TYPE } from "@/utils/constants/subtitles"
 import { YoutubeSubtitlesFetcher } from "../fetchers/youtube"
 
@@ -248,5 +249,49 @@ describe("youtube subtitles fetcher", () => {
     expect(processRawEventsSpy).toHaveBeenCalledTimes(1)
     expect(waitForPlayerStateSpy).toHaveBeenCalledTimes(1)
     expect(getPlayerDataWithPotSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it("returns raw parser fragments for non-AI standard subtitles", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    ;(fetcher as any).sourceLanguage = "en"
+    vi.spyOn(configStorage, "getLocalConfig").mockResolvedValue({
+      videoSubtitles: {
+        aiSegmentation: false,
+      },
+    } as any)
+
+    const result = await (fetcher as any).processRawEvents([
+      { tStartMs: 0, dDurationMs: 500, segs: [{ utf8: "I agree." }] },
+      { tStartMs: 500, dDurationMs: 500, segs: [{ utf8: "It is true." }] },
+      { tStartMs: 1000, dDurationMs: 500, segs: [{ utf8: "We can do this." }] },
+      { tStartMs: 1500, dDurationMs: 500, segs: [{ utf8: "Let's ship now." }] },
+    ])
+
+    expect(result).toEqual([
+      { text: "I agree.", start: 0, end: 500 },
+      { text: "It is true.", start: 500, end: 1000 },
+      { text: "We can do this.", start: 1000, end: 1500 },
+      { text: "Let's ship now.", start: 1500, end: 2000 },
+    ])
+  })
+
+  it("keeps raw standard fragments when AI segmentation is enabled", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+    ;(fetcher as any).sourceLanguage = "en"
+    vi.spyOn(configStorage, "getLocalConfig").mockResolvedValue({
+      videoSubtitles: {
+        aiSegmentation: true,
+      },
+    } as any)
+
+    const result = await (fetcher as any).processRawEvents([
+      { tStartMs: 0, dDurationMs: 500, segs: [{ utf8: "I agree." }] },
+      { tStartMs: 500, dDurationMs: 500, segs: [{ utf8: "It is true." }] },
+    ])
+
+    expect(result).toEqual([
+      { text: "I agree.", start: 0, end: 500 },
+      { text: "It is true.", start: 500, end: 1000 },
+    ])
   })
 })
