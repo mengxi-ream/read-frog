@@ -28,6 +28,16 @@
     // Add other languages as needed
   },
   "lsp": {
+    "vtsls": {
+      "settings": {
+        "typescript": {
+          "tsdk": "./node_modules/typescript/lib"
+        },
+        "vtsls": {
+          "autoUseWorkspaceTsdk": true
+        }
+      }
+    },
     "eslint": {
       "settings": {
         // Remove after https://github.com/zed-industries/zed/issues/49387
