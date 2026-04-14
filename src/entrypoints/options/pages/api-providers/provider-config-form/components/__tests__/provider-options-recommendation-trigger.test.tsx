@@ -117,7 +117,7 @@ describe("providerOptionsRecommendationTrigger", () => {
     expect(onApply).toHaveBeenCalledWith({ reasoningEffort: "none" })
   })
 
-  it("renders Kimi recommendations based on model name alone", () => {
+  it("does not render Kimi instruct recommendations based on model name alone", () => {
     render(
       <ProviderOptionsRecommendationTrigger
         providerId="provider-1"
@@ -126,8 +126,8 @@ describe("providerOptionsRecommendationTrigger", () => {
       />,
     )
 
-    expect(screen.getByRole("button", {
+    expect(screen.queryByRole("button", {
       name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    })).toBeInTheDocument()
+    })).not.toBeInTheDocument()
   })
 })

@@ -187,17 +187,19 @@ export const LLM_MODEL_OPTIONS: Array<{
   },
 
   // Kimi K2 models - disable thinking/history by default.
+  // Keep instruct variants untouched; they should not receive Moonshot's `thinking` options.
   // Keep this broad because recommendation matching is model-name based rather than provider-scoped.
   {
-    pattern: /(?:^|\/)kimi-k2(?:[a-z0-9.-].*)?$/i,
+    pattern: /(?:^|\/)kimi-k2(?!-instruct(?:[a-z0-9.-].*)?$)(?:[a-z0-9.-].*)?$/i,
     options: { thinking: { type: "disabled" }, reasoningHistory: "disabled" } satisfies MoonshotAIProviderOptions as Record<string, JSONValue>,
   },
 
   // Qwen models - disable thinking by default.
   // Keep this broad because recommendation matching is model-name based rather than provider-scoped.
+  // Exclude Cerebras-style `qwen-3-*` ids; they do not support Alibaba's `enableThinking`.
   // Keep explicit thinking-only variants (for example `qwq-*` and `*-thinking`) untouched.
   {
-    pattern: /(?:^|\/)qwen(?!.*[/.-](?:thinking|qwq)(?:[/.-]|$)).*$/i,
+    pattern: /(?:^|\/)qwen(?!-3-)(?!.*[/.-](?:thinking|qwq)(?:[/.-]|$)).*$/i,
     options: { enableThinking: false } satisfies AlibabaProviderOptions as Record<string, JSONValue>,
   },
 
