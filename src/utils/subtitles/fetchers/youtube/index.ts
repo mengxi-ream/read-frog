@@ -23,7 +23,7 @@ import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 import { detectFormat } from "./format-detector"
 import { filterNoiseFromEvents } from "./noise-filter"
-import { parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles } from "./parser"
+import { parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles, parseStylizedKaraokeSubtitles } from "./parser"
 import { extractPotToken } from "./pot-token"
 import { youtubeSubtitlesResponseSchema } from "./types"
 import { buildSubtitleUrl } from "./url-builder"
@@ -420,6 +420,10 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     if (format === "karaoke") {
       return parseKaraokeSubtitles(filteredEvents)
+    }
+
+    if (format === "karaoke-stylized") {
+      return parseStylizedKaraokeSubtitles(filteredEvents)
     }
 
     if (enableAISegmentation) {
