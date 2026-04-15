@@ -13,6 +13,8 @@ import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 import { SubtitlesUIContext } from "../ui/subtitles-ui-context"
 
+const SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
+
 type MountSubtitlesUIAdapter = Pick<
   UniversalVideoAdapter,
   "downloadSourceSubtitles" | "getControlsConfig" | "toggleSubtitlesManually"
@@ -36,7 +38,18 @@ export async function mountSubtitlesUI(
     parentEl.style.position = "relative"
   }
 
+  const existingHost = document.getElementById(SUBTITLES_UI_HOST_ID) as HTMLDivElement | null
+  if (existingHost) {
+    if (existingHost.parentElement === parentEl) {
+      return
+    }
+
+    ;(existingHost as any).__reactShadowContainerCleanup?.()
+    existingHost.remove()
+  }
+
   const shadowHost = document.createElement("div")
+  shadowHost.id = SUBTITLES_UI_HOST_ID
   shadowHost.classList.add(REACT_SHADOW_HOST_CLASS)
   shadowHost.style.cssText = `
     position: absolute;

@@ -12,7 +12,8 @@ export interface PlatformConfig {
   }
 
   events: {
-    navigate?: string
+    navigateStart?: string
+    navigateFinish?: string
   }
 
   controls?: ControlsConfig

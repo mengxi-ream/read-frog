@@ -27,6 +27,8 @@ export class UniversalVideoAdapter {
   private config: PlatformConfig
   private subtitlesScheduler: SubtitlesScheduler | null = null
   private subtitlesFetcher: SubtitlesFetcher
+  private navigationReinitTimeoutId: ReturnType<typeof setTimeout> | null = null
+  private hasPendingNavigationReset = false
 
   private sourceSubtitles: SubtitlesFragment[] = []
   private sourceProcessedSubtitles: SubtitlesFragment[] = []
@@ -64,7 +66,7 @@ export class UniversalVideoAdapter {
     await this.initializeScheduler()
     void this.getOrLoadSourceSubtitles().catch(() => {})
     await this.tryAutoStartSubtitles()
-    this.setupNavigationListener()
+    this.setupNavigationListeners()
   }
 
   getControlsConfig(): ControlsConfig | undefined {
@@ -94,6 +96,7 @@ export class UniversalVideoAdapter {
   }
 
   private resetForNavigation() {
+    this.clearNavigationReinitTimeout()
     this.destroyScheduler()
     this.clearRuntimeSession()
     this.clearSourceCache()
@@ -175,35 +178,67 @@ export class UniversalVideoAdapter {
     this.subtitlesSummaryContextHash = null
   }
 
-  private setupNavigationListener() {
-    const { events } = this.config
+  private clearVisibleStateForNavigation() {
+    this.clearNavigationReinitTimeout()
+    this.destroyScheduler()
+    this.translationCoordinator?.stop()
+    this.segmentationPipeline?.stop()
+    subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
+    this.showNativeSubtitles()
+  }
 
-    if (events.navigate) {
-      const navigationListener = () => {
-        if (!this.videoIdChanged) {
-          return
-        }
-
-        this.subtitlesScheduler?.reset()
-
-        setTimeout(() => {
-          void this.handleNavigation()
-        }, NAVIGATION_HANDLER_DELAY)
-      }
-
-      window.addEventListener(events.navigate, navigationListener)
+  private clearNavigationReinitTimeout() {
+    if (this.navigationReinitTimeoutId !== null) {
+      clearTimeout(this.navigationReinitTimeoutId)
+      this.navigationReinitTimeoutId = null
     }
   }
 
-  private async handleNavigation() {
-    if (this.videoIdChanged) {
-      this.resetForNavigation()
-      void this.renderTranslateButton()
+  private setupNavigationListeners() {
+    const { events } = this.config
 
-      await this.initializeScheduler()
-      void this.getOrLoadSourceSubtitles().catch(() => {})
-      await this.tryAutoStartSubtitles()
+    if (events.navigateStart) {
+      window.addEventListener(events.navigateStart, this.handleNavigationStart)
     }
+
+    if (events.navigateFinish) {
+      window.addEventListener(events.navigateFinish, this.handleNavigationFinish)
+    }
+  }
+
+  private handleNavigationStart = () => {
+    if (!this.videoIdChanged) {
+      return
+    }
+
+    this.hasPendingNavigationReset = true
+    this.clearVisibleStateForNavigation()
+  }
+
+  private handleNavigationFinish = () => {
+    if (!this.hasPendingNavigationReset) {
+      return
+    }
+
+    this.clearNavigationReinitTimeout()
+    this.navigationReinitTimeoutId = setTimeout(() => {
+      this.navigationReinitTimeoutId = null
+      void this.handleNavigation()
+    }, NAVIGATION_HANDLER_DELAY)
+  }
+
+  private async handleNavigation() {
+    if (!this.hasPendingNavigationReset || !this.videoIdChanged) {
+      return
+    }
+
+    this.hasPendingNavigationReset = false
+    this.resetForNavigation()
+    void this.renderTranslateButton()
+
+    await this.initializeScheduler()
+    void this.getOrLoadSourceSubtitles().catch(() => {})
+    await this.tryAutoStartSubtitles()
   }
 
   private async renderTranslateButton() {

@@ -26,7 +26,8 @@ export const TRANSLATE_BUTTON_CLASS = "read-frog-subtitles-translate-button"
 
 // YouTube specific
 export const YOUTUBE_WATCH_URL_PATTERN = "youtube.com/watch"
-export const YOUTUBE_NAVIGATE_EVENT = "yt-navigate-finish"
+export const YOUTUBE_NAVIGATE_START_EVENT = "yt-navigate-start"
+export const YOUTUBE_NAVIGATE_FINISH_EVENT = "yt-navigate-finish"
 export const YOUTUBE_NATIVE_SUBTITLES_CLASS = ".ytp-caption-window-container"
 export const PLAYER_DATA_REQUEST_TYPE = "READ_FROG_GET_PLAYER_DATA"
 export const PLAYER_DATA_RESPONSE_TYPE = "READ_FROG_PLAYER_DATA"
