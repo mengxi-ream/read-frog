@@ -63,7 +63,7 @@ export function WhatsNewFooter() {
   }, [])
 
   const openPopover = useEffectEvent(() => {
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line react/set-state-in-effect
     setOpen(true)
   })
 

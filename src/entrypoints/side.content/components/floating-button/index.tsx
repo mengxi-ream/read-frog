@@ -68,14 +68,14 @@ export default function FloatingButton() {
       document.removeEventListener("mouseup", handleMouseUp)
       document.body.style.userSelect = ""
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+  // eslint-disable-next-line react/exhaustive-deps
   }, [isDraggingButton])
 
   // 拖拽结束时写入 storage
   useEffect(() => {
     if (!isDraggingButton && dragPosition !== null) {
       void setFloatingButton({ position: dragPosition })
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      // eslint-disable-next-line react/set-state-in-effect
       setDragPosition(null)
     }
   }, [isDraggingButton, dragPosition, setFloatingButton])

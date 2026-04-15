@@ -232,7 +232,7 @@ export function useSelectionPopoverLayout({
     }
     suppressResizeObserverRef.current = false
     isDraggingRef.current = false
-    // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+    // eslint-disable-next-line react/set-state-in-effect
     setPosition(null)
     setDragging(false)
   }, [])

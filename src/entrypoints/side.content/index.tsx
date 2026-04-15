@@ -30,6 +30,20 @@ const ReactQueryDevtools = import.meta.env.DEV
   ? lazy(() => import("@tanstack/react-query-devtools").then(m => ({ default: m.ReactQueryDevtools })))
   : null
 
+function HydrateAtoms({
+  initialValues,
+  children,
+}: {
+  initialValues: [
+    [typeof configAtom, Config],
+    [typeof baseThemeModeAtom, ThemeMode],
+  ]
+  children: React.ReactNode
+}) {
+  useHydrateAtoms(initialValues)
+  return children
+}
+
 // eslint-disable-next-line import/no-mutable-exports
 export let shadowWrapper: HTMLElement | null = null
 
@@ -68,20 +82,6 @@ export default defineContentScript({
         protectInternalStyles()
 
         protectSelectAllShadowRoot(shadowHost, wrapper)
-
-        const HydrateAtoms = ({
-          initialValues,
-          children,
-        }: {
-          initialValues: [
-            [typeof configAtom, Config],
-            [typeof baseThemeModeAtom, ThemeMode],
-          ]
-          children: React.ReactNode
-        }) => {
-          useHydrateAtoms(initialValues)
-          return children
-        }
 
         // Translation state is now synced automatically via enablePageTranslationAtom
         // which uses session storage with the createTabSessionAtom pattern

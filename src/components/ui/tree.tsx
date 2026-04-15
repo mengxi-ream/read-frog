@@ -118,8 +118,13 @@ function TreeItemLabel<T = any>({ item: propItem, children, className, ...props 
   const { currentItem, toggleIconType } = useTreeContext<T>()
   const item = propItem || currentItem
 
+  React.useEffect(() => {
+    if (!item) {
+      console.warn("TreeItemLabel: No item provided via props or context")
+    }
+  }, [item])
+
   if (!item) {
-    console.warn("TreeItemLabel: No item provided via props or context")
     return null
   }
 
@@ -154,8 +159,13 @@ function TreeItemLabel<T = any>({ item: propItem, children, className, ...props 
 function TreeDragLine({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   const { tree } = useTreeContext()
 
+  React.useEffect(() => {
+    if (!tree || typeof tree.getDragLineStyle !== "function") {
+      console.warn("TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method")
+    }
+  }, [tree])
+
   if (!tree || typeof tree.getDragLineStyle !== "function") {
-    console.warn("TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method")
     return null
   }
 

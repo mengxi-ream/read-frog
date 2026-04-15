@@ -22,7 +22,7 @@ export const ConnectionOptionsField = withForm({
 
     // Sync local state when switching provider
     const syncLocalOptions = useEffectEvent(() => {
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      // eslint-disable-next-line react/set-state-in-effect
       setLocalOptions(providerConfig.connectionOptions ?? {})
     })
 

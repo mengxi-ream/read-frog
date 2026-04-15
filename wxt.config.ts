@@ -75,47 +75,52 @@ export default defineConfig({
   },
   dev: {
     server: {
+      // Prefer 3333 over WXT's default 3000 while still allowing WXT to pick
+      // another open port when 3333 is already taken.
       port: 3333,
+      strictPort: false,
     },
   },
   vite: configEnv => ({
-    plugins: configEnv.mode === "production"
-      ? [
-          {
-            name: "check-api-key-env",
-            buildStart() {
-              const apiKeyVars = Object.keys(process.env)
-                .filter(key => WXT_API_KEY_PATTERN.test(key))
-                .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
+    plugins: [
+      ...(configEnv.mode === "production"
+        ? [
+            {
+              name: "check-api-key-env",
+              buildStart() {
+                const apiKeyVars = Object.keys(process.env)
+                  .filter(key => WXT_API_KEY_PATTERN.test(key))
+                  .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
 
-              if (apiKeyVars.length > 0) {
-                throw new Error(
-                  `\n\nFound WXT_*_API_KEY environment variables that may be bundled:\n`
-                  + `${apiKeyVars.map(k => `   - ${k}`).join("\n")}\n\n`
-                  + `Please unset these variables before building for production.\n`,
-                )
-              }
-
-              // Check required env vars only for zip builds
-              if (process.env.WXT_ZIP_MODE) {
-                const requiredEnvVars = [
-                  "WXT_GOOGLE_CLIENT_ID",
-                  "WXT_POSTHOG_API_KEY",
-                  "WXT_POSTHOG_HOST",
-                ]
-                const missing = requiredEnvVars.filter(key => !process.env[key])
-
-                if (missing.length > 0) {
+                if (apiKeyVars.length > 0) {
                   throw new Error(
-                    `\n\nMissing required environment variables for zip:\n`
-                    + `${missing.map(k => `   - ${k}`).join("\n")}\n\n`
-                    + `Set them in .env.production or your environment.\n`,
+                    `\n\nFound WXT_*_API_KEY environment variables that may be bundled:\n`
+                    + `${apiKeyVars.map(k => `   - ${k}`).join("\n")}\n\n`
+                    + `Please unset these variables before building for production.\n`,
                   )
                 }
-              }
+
+                // Check required env vars only for zip builds
+                if (process.env.WXT_ZIP_MODE) {
+                  const requiredEnvVars = [
+                    "WXT_GOOGLE_CLIENT_ID",
+                    "WXT_POSTHOG_API_KEY",
+                    "WXT_POSTHOG_HOST",
+                  ]
+                  const missing = requiredEnvVars.filter(key => !process.env[key])
+
+                  if (missing.length > 0) {
+                    throw new Error(
+                      `\n\nMissing required environment variables for zip:\n`
+                      + `${missing.map(k => `   - ${k}`).join("\n")}\n\n`
+                      + `Set them in .env.production or your environment.\n`,
+                    )
+                  }
+                }
+              },
             },
-          },
-        ]
-      : [],
+          ]
+        : []),
+    ],
   }),
 })

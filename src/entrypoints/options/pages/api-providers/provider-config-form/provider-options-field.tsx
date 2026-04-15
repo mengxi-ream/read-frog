@@ -41,7 +41,7 @@ export const ProviderOptionsField = withForm({
     const pendingEditorCommitRef = useRef(false)
 
     const syncJsonInput = useEffectEvent((nextJson: string) => {
-      // eslint-disable-next-line react-hooks-extra/no-direct-set-state-in-use-effect
+      // eslint-disable-next-line react/set-state-in-effect
       setJsonInput(nextJson)
     })
 
