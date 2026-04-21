@@ -444,16 +444,22 @@ export function SelectionToolbar() {
           ref={tooltipRef}
           inert={!isSelectionToolbarVisible}
           className={cn(
-            `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} bg-popover rounded-sm shadow-floating border border-border/50 overflow-visible flex items-center transition-opacity`,
+            `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} overflow-visible transition-opacity`,
             isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
           )}
         >
-          <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
-            {features.translate.enabled && <TranslateButton />}
-            {!isFirefox && features.speak.enabled && <SpeakButton />}
-            <SelectionToolbarCustomActionButtons />
+          <div
+            data-slot="selection-toolbar-surface"
+            className="bg-popover rounded-sm shadow-floating border border-border/50 flex items-center"
+            style={{ opacity: "var(--rf-selection-opacity, 1)" }}
+          >
+            <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
+              {features.translate.enabled && <TranslateButton />}
+              {!isFirefox && features.speak.enabled && <SpeakButton />}
+              <SelectionToolbarCustomActionButtons />
+            </div>
+            <CloseButton />
           </div>
-          <CloseButton />
         </div>
       )}
     </div>

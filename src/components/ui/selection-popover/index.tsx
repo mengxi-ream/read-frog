@@ -290,6 +290,7 @@ function SelectionPopoverShell({
       style={{
         display: "flex",
         ...style,
+        opacity: "var(--rf-selection-opacity, 1)",
         maxWidth: "100vw",
         maxHeight: "100vh",
       }}

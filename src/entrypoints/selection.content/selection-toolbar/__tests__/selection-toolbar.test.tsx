@@ -131,6 +131,17 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     expect(document.querySelector(".absolute.z-2147483647")).toHaveClass("opacity-0")
   }
 
+  const getToolbar = () => document.querySelector(".absolute.z-2147483647") as HTMLElement | null
+
+  const getToolbarSurface = () => document.querySelector("[data-slot='selection-toolbar-surface']") as HTMLElement | null
+
+  it("applies configured opacity on the toolbar surface instead of the overlay host", () => {
+    render(<SelectionToolbar />)
+
+    expect(getToolbar()?.style.opacity).toBe("")
+    expect(getToolbarSurface()?.style.opacity).toBe("var(--rf-selection-opacity, 1)")
+  })
+
   it("should show toolbar when selecting text in a normal div element", async () => {
     render(
       <div>

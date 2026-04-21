@@ -430,6 +430,13 @@ describe("selectionPopover", () => {
     })
   })
 
+  it("applies configured opacity on the popover surface instead of the viewport host", () => {
+    const { element } = renderPopover()
+
+    expect(element.parentElement?.style.opacity).toBe("")
+    expect(element.style.opacity).toBe("var(--rf-selection-opacity, 1)")
+  })
+
   it("keeps the body shrinkable so overflow can scroll after viewport changes", () => {
     const { element } = renderPopover()
 
