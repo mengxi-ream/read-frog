@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  WXT_SKIP_ENV_VALIDATION: true
+
 jobs:
   test-and-build:
     name: Test & Build
@@ -49,8 +52,6 @@ jobs:
 
       - name: Build
         run: pnpm build
-        env:
-          WXT_SKIP_ENV_VALIDATION: true
 
       - name: Run tests
         run: pnpm test --exclude="**/free-api.test.ts"

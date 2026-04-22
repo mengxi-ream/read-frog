@@ -11,6 +11,11 @@ on:
         required: true
         type: string
 
+env:
+  WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID || vars.WXT_GOOGLE_CLIENT_ID }}
+  WXT_POSTHOG_API_KEY: ${{ secrets.WXT_POSTHOG_API_KEY || vars.WXT_POSTHOG_API_KEY }}
+  WXT_POSTHOG_HOST: ${{ secrets.WXT_POSTHOG_HOST || vars.WXT_POSTHOG_HOST }}
+
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
@@ -121,10 +126,6 @@ jobs:
       - name: Build and Zip Extension
         if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
         run: pnpm zip:all
-        env:
-          WXT_GOOGLE_CLIENT_ID: ${{ secrets.WXT_GOOGLE_CLIENT_ID || vars.WXT_GOOGLE_CLIENT_ID }}
-          WXT_POSTHOG_API_KEY: ${{ secrets.WXT_POSTHOG_API_KEY || vars.WXT_POSTHOG_API_KEY }}
-          WXT_POSTHOG_HOST: ${{ secrets.WXT_POSTHOG_HOST || vars.WXT_POSTHOG_HOST }}
 
       - name: Upload Extension Zip to Release
         if: steps.changesets.outputs.published == 'true' || github.event_name == 'workflow_dispatch'
