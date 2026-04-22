@@ -1,4 +1,4 @@
-import type { RowAddInput } from "@read-frog/api-contract"
+import type { RowCreateInput } from "@read-frog/api-contract"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
 import {
@@ -150,7 +150,7 @@ describe("notebase utils", () => {
       score: 9,
     })
 
-    const typedCells: RowAddInput["data"]["cells"] = cells
+    const typedCells: RowCreateInput["data"]["cells"] = cells
 
     expect(cells).toEqual({
       "column-summary": "A short summary",
