@@ -9,6 +9,7 @@ const ALLOWED_BUNDLED_API_KEYS = new Set([
   "WXT_POSTHOG_API_KEY",
 ])
 const useLocalPackages = isLocalPackagesEnabled(process.env)
+const shouldSkipEnvValidation = process.env.WXT_SKIP_ENV_VALIDATION === "true"
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -91,7 +92,10 @@ export default defineConfig({
             {
               name: "check-api-key-env",
               buildStart() {
-                z.object(createExtensionClientEnvSchema(configEnv.mode === "production"))
+                z.object(createExtensionClientEnvSchema(
+                  configEnv.mode === "production",
+                  shouldSkipEnvValidation,
+                ))
                   .parse(resolveExtensionEnv(process.env))
 
                 const apiKeyVars = Object.keys(process.env)

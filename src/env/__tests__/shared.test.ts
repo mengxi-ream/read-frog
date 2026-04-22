@@ -13,8 +13,12 @@ const PRODUCTION_REQUIRED_ENV = {
   WXT_POSTHOG_API_KEY: "phc_test",
 } as const
 
-function parseResolvedExtensionEnv(rawEnv: Record<string, string | boolean | undefined>, isProd = false) {
-  return z.object(createExtensionClientEnvSchema(isProd)).parse(resolveExtensionEnv(rawEnv))
+function parseResolvedExtensionEnv(
+  rawEnv: Record<string, string | boolean | undefined>,
+  isProd = false,
+  skipRequiredProductionEnv = false,
+) {
+  return z.object(createExtensionClientEnvSchema(isProd, skipRequiredProductionEnv)).parse(resolveExtensionEnv(rawEnv))
 }
 
 describe("extension env resolution", () => {
@@ -126,6 +130,21 @@ describe("extension env parsing", () => {
       WXT_GOOGLE_CLIENT_ID: PRODUCTION_REQUIRED_ENV.WXT_GOOGLE_CLIENT_ID,
       WXT_POSTHOG_HOST: PRODUCTION_REQUIRED_ENV.WXT_POSTHOG_HOST,
       WXT_POSTHOG_API_KEY: PRODUCTION_REQUIRED_ENV.WXT_POSTHOG_API_KEY,
+      WXT_POSTHOG_TEST_UUID: undefined,
+    })
+  })
+
+  it("lets production parsing skip only the required Google and PostHog env vars", () => {
+    expect(parseResolvedExtensionEnv({
+      WXT_OFFICIAL_SITE_ORIGINS: "https://readfrog.app,https://www.readfrog.app",
+    }, true, true)).toEqual({
+      WXT_API_URL: PRODUCTION_EXTENSION_ENV_DEFAULTS.WXT_API_URL,
+      WXT_WEBSITE_URL: PRODUCTION_EXTENSION_ENV_DEFAULTS.WXT_WEBSITE_URL,
+      WXT_OFFICIAL_SITE_ORIGINS: ["https://readfrog.app", "https://www.readfrog.app"],
+      WXT_AUTH_COOKIE_DOMAINS: ["readfrog.app"],
+      WXT_GOOGLE_CLIENT_ID: undefined,
+      WXT_POSTHOG_HOST: undefined,
+      WXT_POSTHOG_API_KEY: undefined,
       WXT_POSTHOG_TEST_UUID: undefined,
     })
   })
