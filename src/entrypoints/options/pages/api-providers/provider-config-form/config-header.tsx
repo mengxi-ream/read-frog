@@ -2,8 +2,8 @@ import type { APIProviderTypes } from "@/types/config/provider"
 import { i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
+import { env } from "@/env"
 import { PROVIDER_GROUPS, PROVIDER_ITEMS, SPECIFIC_TUTORIAL_PROVIDER_TYPES } from "@/utils/constants/providers"
-import { WEBSITE_URL } from "@/utils/constants/url"
 
 export function ConfigHeader({ providerType }: { providerType: APIProviderTypes }) {
   const tutorialUrl = getHowToConfigureURL(providerType)
@@ -31,13 +31,13 @@ export function ConfigHeader({ providerType }: { providerType: APIProviderTypes 
 
 function getHowToConfigureURL(providerType: APIProviderTypes): string | undefined {
   if (SPECIFIC_TUTORIAL_PROVIDER_TYPES.includes(providerType as any)) {
-    return `${WEBSITE_URL}/tutorial/providers/${providerType}`
+    return `${env.WXT_WEBSITE_URL}/tutorial/providers/${providerType}`
   }
   const groupSlug = getProviderGroupSlug(providerType)
   if (!groupSlug)
     return undefined
 
-  return `${WEBSITE_URL}/tutorial/providers/${groupSlug}`
+  return `${env.WXT_WEBSITE_URL}/tutorial/providers/${groupSlug}`
 }
 
 function getProviderGroupSlug(providerType: APIProviderTypes): string | undefined {

@@ -1,14 +1,14 @@
 import type { Config } from "@/types/config/config"
 import { defineContentScript, storage } from "#imports"
 import { kebabCase } from "case-anything"
+import { env } from "@/env"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
-import { OFFICIAL_SITE_URL_PATTERNS } from "@/utils/constants/url"
 import { onMessage, sendMessage } from "@/utils/message"
 
 export default defineContentScript({
-  matches: OFFICIAL_SITE_URL_PATTERNS,
+  matches: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`),
   async main() {
     onMessage("pinStateChanged", (msg) => {
       window.postMessage({ source: `${kebabCase(APP_NAME)}-ext`, ...msg }, "*")

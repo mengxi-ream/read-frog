@@ -29,8 +29,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
+import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
-import { WEBSITE_URL } from "@/utils/constants/url"
 import {
   createNotebaseMapping,
   isNotebaseMappingCompatible,
@@ -326,7 +326,7 @@ export const NotebaseConnectionField = withForm({
                 type="button"
                 size="sm"
                 variant="outline"
-                onClick={() => window.open(`${WEBSITE_URL}/log-in`, "_blank")}
+                onClick={() => window.open(`${env.WXT_WEBSITE_URL}/log-in`, "_blank")}
               >
                 {t("loginAction")}
               </Button>
@@ -352,7 +352,7 @@ export const NotebaseConnectionField = withForm({
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(`${WEBSITE_URL}/notebase`, "_blank")}
+                    onClick={() => window.open(`${env.WXT_WEBSITE_URL}/notebase`, "_blank")}
                   >
                     {t("openNotebaseAction")}
                   </Button>
@@ -419,7 +419,7 @@ export const NotebaseConnectionField = withForm({
                     type="button"
                     size="sm"
                     variant="outline"
-                    onClick={() => window.open(`${WEBSITE_URL}/notebase`, "_blank")}
+                    onClick={() => window.open(`${env.WXT_WEBSITE_URL}/notebase`, "_blank")}
                   >
                     {t("openNotebaseAction")}
                   </Button>

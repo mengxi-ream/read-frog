@@ -1,5 +1,5 @@
 import { browser } from "#imports"
-import { OFFICIAL_SITE_URL_PATTERNS } from "@/utils/constants/url"
+import { env } from "@/env"
 import { onMessage, sendMessage } from "@/utils/message"
 
 let lastIsPinned = false
@@ -30,7 +30,7 @@ async function checkPinnedAndNotify() {
     return
   lastIsPinned = isOnToolbar
 
-  browser.tabs.query({ url: OFFICIAL_SITE_URL_PATTERNS }, (tabs) => {
+  browser.tabs.query({ url: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`) }, (tabs) => {
     for (const tab of tabs) {
       void sendMessage("pinStateChanged", { isPinned: isOnToolbar }, tab.id)
     }
