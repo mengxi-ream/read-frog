@@ -8,4 +8,5 @@ export const env = createEnv({
   client: extensionClientEnvSchema,
   runtimeEnv: resolveExtensionEnv(import.meta.env),
   emptyStringAsUndefined: true,
+  skipValidation: import.meta.env.WXT_SKIP_ENV_VALIDATION === "true",
 })
