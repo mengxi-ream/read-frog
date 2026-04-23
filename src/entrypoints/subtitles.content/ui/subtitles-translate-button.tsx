@@ -4,21 +4,27 @@ import { TRANSLATE_BUTTON_CLASS } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
 import {
   subtitlesSettingsPanelOpenAtom,
+  subtitlesSettingsPanelViewAtom,
   subtitlesStore,
   subtitlesVisibleAtom,
 } from "../atoms"
+import { ROOT_VIEW } from "./subtitles-settings-panel/views"
 
 export function SubtitlesTranslateButton() {
   const isVisible = useAtomValue(subtitlesVisibleAtom, { store: subtitlesStore })
   const panelOpen = useAtomValue(subtitlesSettingsPanelOpenAtom, { store: subtitlesStore })
   const setPanelOpen = useSetAtom(subtitlesSettingsPanelOpenAtom, { store: subtitlesStore })
+  const setPanelView = useSetAtom(subtitlesSettingsPanelViewAtom, { store: subtitlesStore })
 
   return (
     <button
       type="button"
       aria-label="Subtitle Translation Panel"
       aria-pressed={panelOpen}
-      onClick={() => setPanelOpen(prev => !prev)}
+      onClick={() => {
+        setPanelView(ROOT_VIEW)
+        setPanelOpen(prev => !prev)
+      }}
       className={cn(
         `${TRANSLATE_BUTTON_CLASS} w-12 h-full flex items-center justify-center relative border-none p-0 m-0 cursor-pointer rounded-[14px] transition-all duration-200`,
         panelOpen

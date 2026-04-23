@@ -1,8 +1,10 @@
+import type { ViewId } from "./ui/subtitles-settings-panel/views"
 import type { StateData, SubtitlesFragment, SubtitlesState } from "@/utils/subtitles/types"
 import { atom, createStore } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_SUBTITLE_POSITION } from "@/utils/constants/subtitles"
 import { hasRenderableSubtitleByMode, isAwaitingTranslation } from "@/utils/subtitles/display-rules"
+import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
 export const subtitlesStore = createStore()
 
@@ -15,6 +17,8 @@ export const subtitlesStateAtom = atom<StateData | null>(null)
 export const subtitlesVisibleAtom = atom<boolean>(false)
 
 export const subtitlesSettingsPanelOpenAtom = atom<boolean>(false)
+
+export const subtitlesSettingsPanelViewAtom = atom<ViewId>(ROOT_VIEW)
 
 export interface SubtitlePosition {
   percent: number
