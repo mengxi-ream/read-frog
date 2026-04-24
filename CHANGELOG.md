@@ -1,5 +1,33 @@
 # @read-frog/extension
 
+## 1.32.3
+
+### Patch Changes
+
+- [#1323](https://github.com/mengxi-ream/read-frog/pull/1323) [`da2e94b`](https://github.com/mengxi-ream/read-frog/commit/da2e94bb151e1dca2ca2ac31d777df28210452af) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): add more cursor clearance after text selection
+
+- [#1318](https://github.com/mengxi-ream/read-frog/pull/1318) [`74f4219`](https://github.com/mengxi-ream/read-frog/commit/74f42196158be314dc65dc6e9c00b78ab021be23) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): derive custom action webpage context by popover session
+
+- [#1336](https://github.com/mengxi-ream/read-frog/pull/1336) [`74f16a9`](https://github.com/mengxi-ream/read-frog/commit/74f16a98d8d8e390ecf8aadc1a5a1db7990310e9) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): support stylized YouTube karaoke parsing and source export
+
+- [#1324](https://github.com/mengxi-ream/read-frog/pull/1324) [`08b40e8`](https://github.com/mengxi-ream/read-frog/commit/08b40e82cd2c8d7b46e2cac8e1d87672c813fe0b) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix: keep floating button close menu aligned after reopening
+
+- [#1335](https://github.com/mengxi-ream/read-frog/pull/1335) [`fe2eedd`](https://github.com/mengxi-ream/read-frog/commit/fe2eeddc3d49a5554d26454271a8ca27ea16245b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(models): skip unsupported thinking options for instruct variants
+
+- [#1373](https://github.com/mengxi-ream/read-frog/pull/1373) [`d2c75ac`](https://github.com/mengxi-ream/read-frog/commit/d2c75ace5a4c5c8b6241a4211ac65f443c375c92) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: open options page in Dia browser
+
+- [#1345](https://github.com/mengxi-ream/read-frog/pull/1345) [`a49ab27`](https://github.com/mengxi-ream/read-frog/commit/a49ab2790bbb39112d67c08a1c8c5f8b22e4a1c8) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): stabilize YouTube subtitle navigation and popup mounting
+
+- [#1360](https://github.com/mengxi-ream/read-frog/pull/1360) [`01ccdd1`](https://github.com/mengxi-ream/read-frog/commit/01ccdd17a226361eb436ab4fc498c6ac3aeb44c8) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - refactor(env): simplify extension env wiring
+
+- [#1325](https://github.com/mengxi-ream/read-frog/pull/1325) [`0f6bf63`](https://github.com/mengxi-ream/read-frog/commit/0f6bf631ad61088f9c2c8fc27517754ef3dfe565) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - chore(deps): upgrade WXT to 0.20.22 and preserve extension-safe bundle output
+
+- [#1321](https://github.com/mengxi-ream/read-frog/pull/1321) [`fb1937c`](https://github.com/mengxi-ream/read-frog/commit/fb1937c437bcba8ae1eacb181f367e61cc26c3db) Thanks [@yioulii](https://github.com/yioulii)! - fix: floating button style
+
+- [#1372](https://github.com/mengxi-ream/read-frog/pull/1372) [`090463d`](https://github.com/mengxi-ream/read-frog/commit/090463d5887640df1fe4de83b1d40fd3a2175f94) Thanks [@ishiko732](https://github.com/ishiko732)! - docs: update `/tutorial` references to `/docs` to match the website
+
+- [#1368](https://github.com/mengxi-ream/read-frog/pull/1368) [`26b06af`](https://github.com/mengxi-ream/read-frog/commit/26b06af8702ae32420d912666cd66d3348e26e4a) Thanks [@taiiiyang](https://github.com/taiiiyang)! - refactor(subtitles): replace route-based navigation with flat panel navigator
+
 ## 1.32.2
 
 ### Patch Changes
