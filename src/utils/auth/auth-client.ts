@@ -38,6 +38,7 @@ export const authClient = createAuthClient({
   baseURL: env.WXT_API_URL,
   basePath: AUTH_BASE_PATH,
   fetchOptions: {
+    credentials: "include",
     customFetchImpl: createCustomFetch({
       enabled: true,
       groupKey: "auth",
