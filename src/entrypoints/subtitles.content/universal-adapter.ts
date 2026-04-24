@@ -15,11 +15,12 @@ import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/er
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
 import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
-import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesStore } from "./atoms"
+import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesSettingsPanelViewAtom, subtitlesStore } from "./atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
 import { TranslationCoordinator } from "./translation-coordinator"
+import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
 type SubtitlesToggleSource = "manual" | "auto"
 
@@ -102,6 +103,7 @@ export class UniversalVideoAdapter {
     this.clearSourceCache()
     this.subtitlesFetcher.cleanup()
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
+    subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
     this.showNativeSubtitles()
     void this.restorePosition()
   }
@@ -184,6 +186,7 @@ export class UniversalVideoAdapter {
     this.translationCoordinator?.stop()
     this.segmentationPipeline?.stop()
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
+    subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
     this.showNativeSubtitles()
   }
 

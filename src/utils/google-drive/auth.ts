@@ -1,9 +1,10 @@
 import { browser, storage } from "#imports"
 import { z } from "zod"
+import { env } from "@/env"
 import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from "../constants/config"
 import { logger } from "../logger"
 
-const GOOGLE_CLIENT_ID = import.meta.env.WXT_GOOGLE_CLIENT_ID || "YOUR_CLIENT_ID"
+const GOOGLE_CLIENT_ID = env.WXT_GOOGLE_CLIENT_ID ?? "YOUR_CLIENT_ID"
 const GOOGLE_REDIRECT_URI = browser.identity.getRedirectURL()
 const GOOGLE_SCOPES = [
   "https://www.googleapis.com/auth/drive.appdata",

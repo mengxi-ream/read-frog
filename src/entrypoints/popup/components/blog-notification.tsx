@@ -3,8 +3,8 @@ import { Icon } from "@iconify/react/dist/iconify.js"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import { env } from "@/env"
 import { getBlogLocaleFromUILanguage, getLastViewedBlogDate, getLatestBlogDate, hasNewBlogPost, saveLastViewedBlogDate } from "@/utils/blog"
-import { WEBSITE_URL } from "@/utils/constants/url"
 import { version } from "../../../../package.json"
 
 export default function BlogNotification() {
@@ -18,7 +18,7 @@ export default function BlogNotification() {
 
   const { data: latestBlogPost } = useQuery({
     queryKey: ["latest-blog-post", blogLocale],
-    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, blogLocale, version),
+    queryFn: () => getLatestBlogDate(`${env.WXT_WEBSITE_URL}/api/blog/latest`, blogLocale, version),
   })
 
   const handleClick = async () => {
@@ -29,8 +29,8 @@ export default function BlogNotification() {
     // Open the latest blog post URL directly, or fallback to /blog if not available
     // Convert relative URL to absolute URL
     const blogUrl = latestBlogPost?.url
-      ? `${WEBSITE_URL}${latestBlogPost.url}`
-      : `${WEBSITE_URL}/blog`
+      ? `${env.WXT_WEBSITE_URL}${latestBlogPost.url}`
+      : `${env.WXT_WEBSITE_URL}/blog`
     window.open(blogUrl, "_blank")
   }
 

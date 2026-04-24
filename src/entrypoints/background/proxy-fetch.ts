@@ -1,6 +1,7 @@
 import type { ProxyResponse } from "@/types/proxy-fetch"
 import { browser } from "#imports"
-import { AUTH_COOKIE_PATTERNS, AUTH_DOMAINS } from "@read-frog/definitions"
+import { AUTH_COOKIE_PATTERNS } from "@read-frog/definitions"
+import { env } from "@/env"
 import { DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
 
 import { logger } from "@/utils/logger"
@@ -37,7 +38,7 @@ export function proxyFetch() {
     browser.cookies.onChanged.addListener(async (changeInfo) => {
       const { cookie, removed } = changeInfo
       // Check if it's an auth-related cookie for monitored domains
-      if (cookie.domain && AUTH_DOMAINS.some(domain => cookie.domain.includes(domain))) {
+      if (cookie.domain && env.WXT_AUTH_COOKIE_DOMAINS.some((domain: string) => cookie.domain.includes(domain))) {
         // Check against defined auth cookie patterns
         if (AUTH_COOKIE_PATTERNS.some(name => cookie.name.includes(name))) {
           // Get current cookie value for before/after comparison

@@ -1,7 +1,7 @@
 import guest from "@/assets/icons/avatars/guest.svg"
 import { Button } from "@/components/ui/base-ui/button"
+import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
-import { WEBSITE_URL } from "@/utils/constants/url"
 import { cn } from "@/utils/styles/utils"
 
 export function UserAccount() {
@@ -19,7 +19,7 @@ export function UserAccount() {
           size="xs"
           variant="outline"
           onClick={() =>
-            window.open(`${WEBSITE_URL}/log-in`, "_blank")}
+            window.open(`${env.WXT_WEBSITE_URL}/log-in`, "_blank")}
         >
           Log in
         </Button>

@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  WXT_SKIP_ENV_VALIDATION: true
+
 jobs:
   test-and-build:
     name: Test & Build

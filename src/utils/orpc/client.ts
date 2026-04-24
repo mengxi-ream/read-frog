@@ -2,13 +2,13 @@ import type { ORPCRouterClient } from "@read-frog/api-contract"
 import { createORPCClient } from "@orpc/client"
 import { RPCLink } from "@orpc/client/fetch"
 import { createTanstackQueryUtils } from "@orpc/tanstack-query"
-import { WEBSITE_URL } from "../constants/url"
+import { ORPC_PREFIX } from "@read-frog/definitions"
+import { env } from "@/env"
 import { normalizeHeaders } from "../http"
 import { sendMessage } from "../message"
 
 const link = new RPCLink({
-  // TODO: add and use ORPC_PREFIX from @read-frog/definitions
-  url: `${WEBSITE_URL}/api/rpc`,
+  url: `${env.WXT_API_URL}${ORPC_PREFIX}`,
   headers: {
     "x-orpc-source": "extension",
   },

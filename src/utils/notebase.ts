@@ -1,6 +1,6 @@
 import type {
   CustomTableGetSchemaOutput,
-  RowAddInput,
+  RowCreateInput,
   TableColumn,
 } from "@read-frog/api-contract"
 import type { ColumnConfig } from "@read-frog/definitions"
@@ -146,7 +146,7 @@ export function buildNotebaseRowCells(
   schema: CustomTableGetSchemaOutput,
   result: Record<string, unknown> | null,
 ) {
-  const cells: RowAddInput["data"]["cells"] = {}
+  const cells: RowCreateInput["data"]["cells"] = {}
   const resolvedMappings = resolveNotebaseMappings(action, schema)
 
   for (const resolvedMapping of resolvedMappings) {

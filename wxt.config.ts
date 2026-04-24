@@ -1,11 +1,15 @@
 import path from "node:path"
 import process from "node:process"
 import { defineConfig } from "wxt"
+import { z } from "zod"
+import { createExtensionClientEnvSchema, isLocalPackagesEnabled, resolveExtensionEnv } from "./src/env/shared"
 
 const WXT_API_KEY_PATTERN = /^WXT_.*API_KEY/
 const ALLOWED_BUNDLED_API_KEYS = new Set([
   "WXT_POSTHOG_API_KEY",
 ])
+const useLocalPackages = isLocalPackagesEnabled(process.env)
+const shouldSkipEnvValidation = process.env.WXT_SKIP_ENV_VALIDATION === "true"
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -14,7 +18,7 @@ export default defineConfig({
   modules: ["@wxt-dev/module-react", "@wxt-dev/i18n/module"],
   manifestVersion: 3,
   // WXT top level alias - will be automatically synced to tsconfig.json paths and Vite alias
-  alias: process.env.WXT_USE_LOCAL_PACKAGES === "true"
+  alias: useLocalPackages
     ? {
         "@read-frog/definitions": path.resolve(__dirname, "../read-frog-monorepo/packages/definitions/src"),
         "@read-frog/api-contract": path.resolve(__dirname, "../read-frog-monorepo/packages/api-contract/src"),
@@ -88,6 +92,12 @@ export default defineConfig({
             {
               name: "check-api-key-env",
               buildStart() {
+                z.object(createExtensionClientEnvSchema(
+                  configEnv.mode === "production",
+                  shouldSkipEnvValidation,
+                ))
+                  .parse(resolveExtensionEnv(process.env))
+
                 const apiKeyVars = Object.keys(process.env)
                   .filter(key => WXT_API_KEY_PATTERN.test(key))
                   .filter(key => !ALLOWED_BUNDLED_API_KEYS.has(key))
@@ -98,24 +108,6 @@ export default defineConfig({
                     + `${apiKeyVars.map(k => `   - ${k}`).join("\n")}\n\n`
                     + `Please unset these variables before building for production.\n`,
                   )
-                }
-
-                // Check required env vars only for zip builds
-                if (process.env.WXT_ZIP_MODE) {
-                  const requiredEnvVars = [
-                    "WXT_GOOGLE_CLIENT_ID",
-                    "WXT_POSTHOG_API_KEY",
-                    "WXT_POSTHOG_HOST",
-                  ]
-                  const missing = requiredEnvVars.filter(key => !process.env[key])
-
-                  if (missing.length > 0) {
-                    throw new Error(
-                      `\n\nMissing required environment variables for zip:\n`
-                      + `${missing.map(k => `   - ${k}`).join("\n")}\n\n`
-                      + `Set them in .env.production or your environment.\n`,
-                    )
-                  }
                 }
               },
             },

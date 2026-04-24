@@ -15,6 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/base-ui/sidebar"
+import { env } from "@/env"
 import {
   buildBilibiliEmbedUrl,
   getBlogLocaleFromUILanguage,
@@ -23,7 +24,6 @@ import {
   hasNewBlogPost,
   saveLastViewedBlogDate,
 } from "@/utils/blog"
-import { WEBSITE_URL } from "@/utils/constants/url"
 import { version } from "../../../../package.json"
 
 export function WhatsNewFooter() {
@@ -38,7 +38,7 @@ export function WhatsNewFooter() {
 
   const { data: latestBlogPost, isFetched: isLatestBlogPostFetched } = useQuery({
     queryKey: ["latest-blog-post", blogLocale],
-    queryFn: () => getLatestBlogDate(`${WEBSITE_URL}/api/blog/latest`, blogLocale, version),
+    queryFn: () => getLatestBlogDate(`${env.WXT_WEBSITE_URL}/api/blog/latest`, blogLocale, version),
   })
 
   const markLatestBlogPostViewed = useEffectEvent(async () => {
@@ -97,7 +97,7 @@ export function WhatsNewFooter() {
     return null
   }
 
-  const blogUrl = new URL(latestBlogPost.url, WEBSITE_URL).toString()
+  const blogUrl = new URL(latestBlogPost.url, env.WXT_WEBSITE_URL).toString()
   const embedUrl = latestBlogPost.videoUrl ? buildBilibiliEmbedUrl(latestBlogPost.videoUrl) : null
 
   return (

@@ -2,6 +2,7 @@ import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type { FeatureUsedEventProperties } from "@/types/analytics"
 import { storage } from "#imports"
 import posthog from "posthog-js/dist/module.no-external"
+import { env } from "@/env"
 import {
   ANALYTICS_ENABLED_STORAGE_KEY,
   ANALYTICS_FEATURE_USED_EVENT,
@@ -58,12 +59,12 @@ export function resolveDistinctIdOverride(
 
 function createDefaultRuntime(): BackgroundAnalyticsRuntime {
   return {
-    apiHost: import.meta.env.WXT_POSTHOG_HOST,
-    apiKey: import.meta.env.WXT_POSTHOG_API_KEY,
+    apiHost: env.WXT_POSTHOG_HOST,
+    apiKey: env.WXT_POSTHOG_API_KEY,
     createDistinctId: () => getRandomUUID(),
     defaultAnalyticsEnabled: DEFAULT_ANALYTICS_ENABLED,
     distinctIdOverride: resolveDistinctIdOverride(
-      import.meta.env.WXT_POSTHOG_TEST_UUID,
+      env.WXT_POSTHOG_TEST_UUID,
       import.meta.env.DEV,
     ),
     extensionVersion: EXTENSION_VERSION,

@@ -64,7 +64,7 @@ function SaveToNotebaseButtonEnabled({
     },
   }))
 
-  const saveMutation = useMutation(orpc.row.add.mutationOptions({
+  const saveMutation = useMutation(orpc.row.create.mutationOptions({
     meta: {
       suppressToast: true,
     },
@@ -73,7 +73,7 @@ function SaveToNotebaseButtonEnabled({
         description: connection?.tableNameSnapshot,
       })
     },
-    onError: (error) => {
+    onError: (error: unknown) => {
       if (isORPCUnauthorizedError(error)) {
         toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
         return

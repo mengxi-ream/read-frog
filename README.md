@@ -6,7 +6,7 @@ An open-source AI-powered language learning extension for browsers.<br/>
 Supports immersive translation, article analysis, multiple AI models, and more.<br/>
 Master languages effortlessly and deeply with AI, right in your browser.
 
-**English** · [简体中文](./README.zh-CN.md) · [Official Website](https://readfrog.app) · [Tutorial](https://www.readfrog.app/tutorial) · [Changelog](https://www.readfrog.app/changelog) · [Blog](https://www.readfrog.app/blog)
+**English** · [简体中文](./README.zh-CN.md) · [Official Website](https://readfrog.app) · [Tutorial](https://www.readfrog.app/docs) · [Changelog](https://www.readfrog.app/changelog) · [Blog](https://www.readfrog.app/blog)
 
 <!-- SHIELD GROUP -->
 
@@ -254,7 +254,7 @@ Project Structure: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
 
 Ask AI to understand the project: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
 
-Check out the [Contribution Guide](https://readfrog.app/en/tutorial/code-contribution/contribution-guide) for more details.
+Check out the [Contribution Guide](https://readfrog.app/en/docs/code-contribution/contribution-guide) for more details.
 
 ReadFrog is dual-licensed under GPLv3 and a commercial license.
 
@@ -351,4 +351,4 @@ Every donation helps us build a better language learning experience. Thank you f
 
 <!-- Feature docs link -->
 
-[docs-tutorial]: https://readfrog.app/tutorial
+[docs-tutorial]: https://readfrog.app/docs
