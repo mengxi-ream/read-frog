@@ -2,6 +2,7 @@ import type { SubtitlesFontFamily, SubtitleTextStyle } from "@/types/config/subt
 import { i18n } from "#imports"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
+import { useEffect, useState } from "react"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
@@ -26,6 +27,18 @@ interface SubtitlesTextStyleFormProps {
 export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
   const textStyle = videoSubtitlesConfig.style[type]
+  const [draftFontScale, setDraftFontScale] = useState(textStyle.fontScale)
+  const [draftFontWeight, setDraftFontWeight] = useState(textStyle.fontWeight)
+
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    setDraftFontScale(textStyle.fontScale)
+  }, [textStyle.fontScale])
+
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    setDraftFontWeight(textStyle.fontWeight)
+  }, [textStyle.fontWeight])
 
   const handleChange = (style: Partial<SubtitleTextStyle>) => {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { [type]: style } }))
@@ -71,12 +84,13 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
               min={MIN_FONT_SCALE}
               max={MAX_FONT_SCALE}
               step={10}
-              value={textStyle.fontScale}
-              onValueChange={value => handleChange({ fontScale: value as number })}
+              value={draftFontScale}
+              onValueChange={value => setDraftFontScale(value as number)}
+              onValueCommitted={value => handleChange({ fontScale: value as number })}
               className="flex-1"
             />
             <span className="w-10 text-sm text-right">
-              {textStyle.fontScale}
+              {draftFontScale}
               %
             </span>
           </div>
@@ -91,11 +105,12 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
               min={MIN_FONT_WEIGHT}
               max={MAX_FONT_WEIGHT}
               step={100}
-              value={textStyle.fontWeight}
-              onValueChange={value => handleChange({ fontWeight: value as number })}
+              value={draftFontWeight}
+              onValueChange={value => setDraftFontWeight(value as number)}
+              onValueCommitted={value => handleChange({ fontWeight: value as number })}
               className="flex-1"
             />
-            <span className="w-10 text-sm text-right">{textStyle.fontWeight}</span>
+            <span className="w-10 text-sm text-right">{draftFontWeight}</span>
           </div>
         </div>
       </Field>

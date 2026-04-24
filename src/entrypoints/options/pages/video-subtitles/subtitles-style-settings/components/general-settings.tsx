@@ -3,6 +3,7 @@ import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Card } from "@/components/ui/base-ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
@@ -20,6 +21,12 @@ const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = videoSubtitlesConfig.style
+  const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
+
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    setDraftBackgroundOpacity(container.backgroundOpacity)
+  }, [container.backgroundOpacity])
 
   const handleDisplayModeChange = (value: SubtitlesDisplayMode | null) => {
     if (!value)
@@ -123,12 +130,13 @@ export function GeneralSettings() {
                   min={MIN_BACKGROUND_OPACITY}
                   max={MAX_BACKGROUND_OPACITY}
                   step={5}
-                  value={container.backgroundOpacity}
-                  onValueChange={value => handleContainerChange({ backgroundOpacity: value as number })}
+                  value={draftBackgroundOpacity}
+                  onValueChange={value => setDraftBackgroundOpacity(value as number)}
+                  onValueCommitted={value => handleContainerChange({ backgroundOpacity: value as number })}
                   className="flex-1"
                 />
                 <span className="w-10 text-sm text-right">
-                  {container.backgroundOpacity}
+                  {draftBackgroundOpacity}
                   %
                 </span>
               </div>
