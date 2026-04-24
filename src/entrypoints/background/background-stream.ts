@@ -14,7 +14,7 @@ import type {
   StreamRuntimeOptions,
   ThinkingSnapshot,
 } from "@/types/background-stream"
-import { Output, streamText } from "ai"
+import { Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
@@ -22,6 +22,15 @@ import { logger } from "@/utils/logger"
 import { getModelById } from "@/utils/providers/model"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
+
+function createStreamAbortError(message: string) {
+  return new DOMException(message, "AbortError")
+}
+
+function isAbortLikeError(error: unknown) {
+  return (error instanceof DOMException && error.name === "AbortError")
+    || (error instanceof Error && error.name === "AbortError")
+}
 
 const streamPortStartEnvelopeSchema = z.object({
   type: z.literal("start"),
@@ -128,7 +137,7 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
     }
 
     disconnectListener = () => {
-      abortController.abort()
+      abortController.abort(createStreamAbortError("stream port disconnected"))
       cleanup()
     }
 
@@ -191,10 +200,12 @@ function createStreamPortHandler<TSerializablePayload, TResponse>(
       }
       catch (error) {
         const finalError = streamError ?? error
-        logger.error("[Background] Stream Function failed", finalError)
-        if (!abortController.signal.aborted) {
-          safePost({ type: "error", error: { message: extractAISDKErrorMessage(finalError) } })
+        if (abortController.signal.aborted || isAbortLikeError(finalError)) {
+          return
         }
+
+        logger.error("[Background] Stream Function failed", finalError)
+        safePost({ type: "error", error: { message: extractAISDKErrorMessage(finalError) } })
       }
       finally {
         cleanup()
@@ -223,6 +234,10 @@ function createStreamSnapshot<TOutput>(
       : output,
     thinking: { ...thinking },
   }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === "object" && !Array.isArray(value)
 }
 
 export async function runStreamTextInBackground(
@@ -279,16 +294,18 @@ export async function runStreamTextInBackground(
         onChunk?.(createStreamSnapshot(cumulativeText, thinking))
         break
       }
+      case "error": {
+        throw part.error
+      }
     }
   }
 
-  const finalText = await result.output
   thinking = {
     ...thinking,
     status: "complete",
   }
 
-  return createStreamSnapshot(finalText, thinking)
+  return createStreamSnapshot(cumulativeText, thinking)
 }
 
 export async function runStructuredObjectStreamInBackground(
@@ -318,64 +335,60 @@ export async function runStructuredObjectStreamInBackground(
   for (const field of outputSchema) {
     schemaShape[field.name] = fieldTypeToZodSchema[field.type] ?? z.string().nullable()
   }
+  const objectSchema = z.object(schemaShape).strict()
 
   const result = streamText({
     ...(streamParams as Parameters<typeof streamText>[0]),
     model,
     output: Output.object({
-      schema: z.object(schemaShape).strict(),
+      schema: objectSchema,
     }),
     abortSignal: signal,
     onError: ({ error }) => {
       onError?.(error)
     },
   })
+  let cumulativeText = ""
 
-  const consumePartialOutput = async () => {
-    for await (const partial of result.partialOutputStream) {
-      if (signal?.aborted) {
-        throw new DOMException("stream aborted", "AbortError")
+  for await (const part of result.fullStream) {
+    if (signal?.aborted) {
+      throw new DOMException("stream aborted", "AbortError")
+    }
+
+    switch (part.type) {
+      case "text-delta": {
+        cumulativeText += part.text
+        const partial = await parsePartialJson(cumulativeText)
+        if (isRecord(partial.value)) {
+          cumulativeValue = { ...cumulativeValue, ...partial.value }
+          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+        }
+        break
       }
-
-      if (partial && typeof partial === "object" && !Array.isArray(partial)) {
-        cumulativeValue = { ...cumulativeValue, ...partial }
+      case "reasoning-delta": {
+        thinking = {
+          status: "thinking",
+          text: thinking.text + part.text,
+        }
         onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+        break
+      }
+      case "reasoning-end": {
+        thinking = {
+          ...thinking,
+          status: "complete",
+        }
+        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+        break
+      }
+      case "error": {
+        throw part.error
       }
     }
   }
 
-  const consumeFullStream = async () => {
-    for await (const part of result.fullStream) {
-      if (signal?.aborted) {
-        throw new DOMException("stream aborted", "AbortError")
-      }
-
-      switch (part.type) {
-        case "reasoning-delta": {
-          thinking = {
-            status: "thinking",
-            text: thinking.text + part.text,
-          }
-          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
-          break
-        }
-        case "reasoning-end": {
-          thinking = {
-            ...thinking,
-            status: "complete",
-          }
-          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
-          break
-        }
-      }
-    }
-  }
-
-  const [finalValue] = await Promise.all([
-    result.output,
-    consumePartialOutput(),
-    consumeFullStream(),
-  ])
+  const finalJson = await parsePartialJson(cumulativeText)
+  const finalValue = objectSchema.parse(finalJson.value)
 
   thinking = {
     ...thinking,

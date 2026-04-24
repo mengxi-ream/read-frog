@@ -1131,6 +1131,56 @@ describe("selection toolbar requests", () => {
     })
   })
 
+  it("keeps a pending custom action request alive across a passive config refresh", async () => {
+    const pendingRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
+    const signals: AbortSignal[] = []
+
+    streamBackgroundStructuredObjectMock.mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
+      signals.push(options.signal as AbortSignal)
+      return pendingRun.promise
+    })
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const actionName = DEFAULT_CONFIG.selectionToolbar.customActions[0]?.name
+    if (!actionName) {
+      throw new Error("Default custom action is missing")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: actionName }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      store.set(configAtom, cloneConfig(store.get(configAtom)))
+    })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    expect(signals[0]?.aborted).toBe(false)
+
+    await act(async () => {
+      pendingRun.resolve(createStructuredObjectSnapshot({ summary: "still alive" }))
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText("{\"summary\":\"still alive\"}")).toBeInTheDocument()
+    })
+  })
+
   it("reruns custom action requests from the footer and aborts the previous run", async () => {
     const firstRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
     const secondRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
@@ -1185,6 +1235,79 @@ describe("selection toolbar requests", () => {
     await waitFor(() => {
       expect(screen.getByText("{\"summary\":\"fresh\"}")).toBeInTheDocument()
     })
+  })
+
+  it("switches a custom action provider from the footer without aborting the replacement request", async () => {
+    const firstRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
+    const secondRun = createDeferredPromise<BackgroundStructuredObjectStreamSnapshot>()
+    const signals: AbortSignal[] = []
+
+    streamBackgroundStructuredObjectMock
+      .mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
+        signals.push(options.signal as AbortSignal)
+        options.signal?.addEventListener("abort", () => {
+          firstRun.reject(new DOMException("aborted", "AbortError"))
+        })
+        return firstRun.promise
+      })
+      .mockImplementationOnce((_payload, options: { signal?: AbortSignal }) => {
+        signals.push(options.signal as AbortSignal)
+        return secondRun.promise
+      })
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
+    if (!action) {
+      throw new Error("Default custom action is missing")
+    }
+    const nextProviderId = findAlternateLLMProviderId(store.get(configAtom), action.providerId)
+    if (!nextProviderId) {
+      throw new Error("No alternate LLM provider available for custom action provider switch test")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: action.name }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "Change provider" }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(2)
+    })
+
+    expect(streamBackgroundStructuredObjectMock.mock.calls[1]?.[0]).toMatchObject({
+      providerId: nextProviderId,
+    })
+    expect(signals[0]?.aborted).toBe(true)
+
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(signals[1]?.aborted).toBe(false)
+
+    await act(async () => {
+      secondRun.resolve(createStructuredObjectSnapshot({ summary: "provider switched" }))
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(screen.getByText("{\"summary\":\"provider switched\"}")).toBeInTheDocument()
+    })
+    expect(screen.queryByRole("alert")).toBeNull()
+    expect(store.get(configAtom).selectionToolbar.customActions[0]?.providerId).toBe(nextProviderId)
   })
 
   it("shows a precheck alert when a custom action has no selected text", async () => {

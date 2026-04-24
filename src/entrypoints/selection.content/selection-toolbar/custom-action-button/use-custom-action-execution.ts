@@ -1,3 +1,4 @@
+import type { JSONValue } from "ai"
 import type { RefObject } from "react"
 import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
@@ -45,12 +46,50 @@ interface ResolvedWebPageContext {
   value: CachedWebPageContext | null
 }
 
+interface CustomActionExecutionRequest {
+  analytics: {
+    actionId: string
+    actionName: string
+    surface: AnalyticsSurface
+  }
+  key: string
+  payload: {
+    outputSchema: Array<{ name: string, type: SelectionToolbarCustomAction["outputSchema"][number]["type"] }>
+    prompt: string
+    providerId: string
+    providerOptions?: Record<string, Record<string, JSONValue>>
+    system: string
+    temperature?: number
+  }
+}
+
 function scrollSelectionPopoverBodyToBottom(ref: RefObject<HTMLDivElement | null>) {
   requestAnimationFrame(() => {
     if (ref.current) {
       ref.current.scrollTop = ref.current.scrollHeight
     }
   })
+}
+
+function normalizeExecutionKeyValue(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(normalizeExecutionKeyValue)
+  }
+
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>)
+        .filter(([, nestedValue]) => nestedValue !== undefined)
+        .sort(([leftKey], [rightKey]) => leftKey.localeCompare(rightKey))
+        .map(([key, nestedValue]) => [key, normalizeExecutionKeyValue(nestedValue)]),
+    )
+  }
+
+  return value
+}
+
+function stringifyExecutionRequestKey(value: Record<string, unknown>) {
+  return JSON.stringify(normalizeExecutionKeyValue(value))
 }
 
 export function buildCustomActionExecutionPlan(
@@ -153,6 +192,64 @@ export function useCustomActionWebPageContext(open: boolean, popoverSessionKey: 
   return resolvedWebPageContext.value
 }
 
+function buildCustomActionExecutionRequest({
+  analyticsSurface,
+  executionContext,
+  popoverSessionKey,
+  rerunNonce,
+}: {
+  analyticsSurface: AnalyticsSurface
+  executionContext: CustomActionExecutionContext
+  popoverSessionKey: number
+  rerunNonce: number
+}): CustomActionExecutionRequest {
+  const { action, providerConfig, promptTokens } = executionContext
+  const systemPrompt = buildSelectionToolbarCustomActionSystemPrompt(
+    action.systemPrompt,
+    promptTokens,
+    action.outputSchema,
+  )
+  const prompt = replaceSelectionToolbarCustomActionPromptTokens(action.prompt, promptTokens)
+  const modelName = resolveModelId(providerConfig.model) ?? ""
+  const providerOptions = getProviderOptionsWithOverride(
+    modelName,
+    providerConfig.provider,
+    providerConfig.providerOptions,
+  )
+  const outputSchema = action.outputSchema.map(({ name, type }) => ({ name, type }))
+
+  return {
+    analytics: {
+      actionId: action.id,
+      actionName: action.name,
+      surface: analyticsSurface,
+    },
+    key: stringifyExecutionRequestKey({
+      actionId: action.id,
+      analyticsSurface,
+      model: providerConfig.model,
+      outputSchema: action.outputSchema.map(({ description, name, type }) => ({ description, name, type })),
+      popoverSessionKey,
+      prompt,
+      promptTokens,
+      provider: providerConfig.provider,
+      providerId: providerConfig.id,
+      providerOptions,
+      rerunNonce,
+      system: systemPrompt,
+      temperature: providerConfig.temperature,
+    }),
+    payload: {
+      providerId: providerConfig.id,
+      system: systemPrompt,
+      prompt,
+      outputSchema,
+      providerOptions,
+      temperature: providerConfig.temperature,
+    },
+  }
+}
+
 export function useCustomActionExecution({
   analyticsSurface,
   bodyRef,
@@ -173,6 +270,19 @@ export function useCustomActionExecution({
   const [error, setError] = useState<SelectionToolbarInlineError | null>(null)
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
   const lastRunKeyRef = useRef<string | null>(null)
+  const bodyRefRef = useRef(bodyRef)
+  bodyRefRef.current = bodyRef
+  const executionRequest = executionContext
+    ? buildCustomActionExecutionRequest({
+        analyticsSurface,
+        executionContext,
+        popoverSessionKey,
+        rerunNonce,
+      })
+    : null
+  const executionRequestRef = useRef<CustomActionExecutionRequest | null>(null)
+  executionRequestRef.current = executionRequest
+  const executionRequestKey = executionRequest?.key ?? null
 
   const resetSessionState = useCallback(() => {
     setIsRunning(false)
@@ -182,53 +292,34 @@ export function useCustomActionExecution({
   }, [])
 
   useEffect(() => {
-    if (!open || !executionContext) {
+    if (!open || !executionRequestKey) {
       return
     }
 
-    const nextRunKey = JSON.stringify({
-      actionId: executionContext.action.id,
-      paragraphs: executionContext.promptTokens.paragraphs,
-      popoverSessionKey,
-      providerId: executionContext.providerConfig.id,
-      rerunNonce,
-      selection: executionContext.promptTokens.selection,
-      targetLanguage: executionContext.promptTokens.targetLanguage,
-      webContent: executionContext.promptTokens.webContent,
-      webTitle: executionContext.promptTokens.webTitle,
-    })
-    if (lastRunKeyRef.current === nextRunKey) {
+    const request = executionRequestRef.current
+    if (!request || request.key !== executionRequestKey) {
       return
     }
-    lastRunKeyRef.current = nextRunKey
+
+    if (lastRunKeyRef.current === executionRequestKey) {
+      return
+    }
+    lastRunKeyRef.current = executionRequestKey
 
     let isCancelled = false
     const abortController = new AbortController()
-    const { action, providerConfig, promptTokens } = executionContext
+
     const analyticsContext = createFeatureUsageContext(
       ANALYTICS_FEATURE.CUSTOM_AI_ACTION,
-      analyticsSurface,
+      request.analytics.surface,
       Date.now(),
       {
-        action_id: action.id,
-        action_name: action.name,
+        action_id: request.analytics.actionId,
+        action_name: request.analytics.actionName,
       },
     )
 
     const run = async () => {
-      const systemPrompt = buildSelectionToolbarCustomActionSystemPrompt(
-        action.systemPrompt,
-        promptTokens,
-        action.outputSchema,
-      )
-      const prompt = replaceSelectionToolbarCustomActionPromptTokens(action.prompt, promptTokens)
-      const modelName = resolveModelId(providerConfig.model) ?? ""
-      const providerOptions = getProviderOptionsWithOverride(
-        modelName,
-        providerConfig.provider,
-        providerConfig.providerOptions,
-      )
-
       setIsRunning(true)
       setResult(null)
       setError(null)
@@ -239,14 +330,7 @@ export function useCustomActionExecution({
 
       try {
         const finalResult = await streamBackgroundStructuredObject(
-          {
-            providerId: providerConfig.id,
-            system: systemPrompt,
-            prompt,
-            outputSchema: action.outputSchema.map(({ name, type }) => ({ name, type })),
-            providerOptions,
-            temperature: providerConfig.temperature,
-          },
+          request.payload,
           {
             signal: abortController.signal,
             onChunk: (partial: BackgroundStructuredObjectStreamSnapshot) => {
@@ -256,7 +340,7 @@ export function useCustomActionExecution({
 
               setResult(partial.output)
               setThinking(partial.thinking)
-              scrollSelectionPopoverBodyToBottom(bodyRef)
+              scrollSelectionPopoverBodyToBottom(bodyRefRef.current)
             },
           },
         )
@@ -301,7 +385,7 @@ export function useCustomActionExecution({
       isCancelled = true
       abortController.abort()
     }
-  }, [analyticsSurface, bodyRef, executionContext, open, popoverSessionKey, rerunNonce])
+  }, [executionRequestKey, open])
 
   useEffect(() => {
     if (!open) {

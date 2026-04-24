@@ -4,6 +4,24 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 const streamTextMock = vi.fn()
 const outputObjectMock = vi.fn((params: Record<string, unknown>) => params)
 const getModelByIdMock = vi.fn()
+const loggerErrorMock = vi.fn()
+const parsePartialJsonMock = vi.fn(async (text: string | undefined) => {
+  if (!text) {
+    return { state: "undefined-input", value: undefined }
+  }
+
+  try {
+    return { state: "successful-parse", value: JSON.parse(text) }
+  }
+  catch {
+    try {
+      return { state: "repaired-parse", value: JSON.parse(`${text}}`) }
+    }
+    catch {
+      return { state: "failed-parse", value: undefined }
+    }
+  }
+})
 
 class MockNoOutputGeneratedError extends Error {
   static isInstance(error: unknown): error is MockNoOutputGeneratedError {
@@ -13,6 +31,7 @@ class MockNoOutputGeneratedError extends Error {
 
 vi.mock("ai", () => ({
   streamText: streamTextMock,
+  parsePartialJson: parsePartialJsonMock,
   NoOutputGeneratedError: MockNoOutputGeneratedError,
   Output: {
     object: outputObjectMock,
@@ -25,7 +44,7 @@ vi.mock("@/utils/providers/model", () => ({
 
 vi.mock("@/utils/logger", () => ({
   logger: {
-    error: vi.fn(),
+    error: loggerErrorMock,
   },
 }))
 
@@ -87,15 +106,16 @@ describe("background-stream", () => {
   it("streams structured object output from background", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      partialOutputStream: (async function* () {
-        yield { score: 97 }
-        yield { score: 97, summary: "Strong argument structure" }
+      fullStream: (async function* () {
+        yield { type: "text-delta", text: "{\"score\":97" }
+        yield { type: "text-delta", text: ",\"summary\":\"Strong argument structure\"}" }
       })(),
-      output: Promise.resolve({
-        score: 97,
-        summary: "Strong argument structure",
-      }),
-      fullStream: (async function* () {})(),
+      get output() {
+        throw new Error("structured stream should not consume output separately")
+      },
+      get partialOutputStream() {
+        throw new Error("structured stream should not consume partialOutputStream separately")
+      },
     })
 
     const chunkSnapshots: BackgroundStructuredObjectStreamSnapshot[] = []
@@ -237,7 +257,9 @@ describe("background-stream", () => {
       options.onError?.({ error: rootCause })
       return {
         fullStream: (async function* () {})(),
-        output: Promise.reject(new MockNoOutputGeneratedError("No output generated. Check the stream for errors.")),
+        get output() {
+          throw new Error("text stream should not consume output separately")
+        },
       }
     })
 
@@ -292,6 +314,50 @@ describe("background-stream", () => {
       },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
+  })
+
+  it("treats stream port disconnect aborts as expected cancellation", async () => {
+    getModelByIdMock.mockResolvedValue("mock-model")
+    let streamSignal: AbortSignal | undefined
+
+    streamTextMock.mockImplementation((options: { abortSignal?: AbortSignal }) => {
+      streamSignal = options.abortSignal
+      return {
+        fullStream: (async function* () {
+          await new Promise<void>((_resolve, reject) => {
+            options.abortSignal?.addEventListener("abort", () => {
+              reject(options.abortSignal?.reason ?? new DOMException("aborted", "AbortError"))
+            })
+          })
+        })(),
+        output: new Promise<string>(() => {}),
+      }
+    })
+
+    const { handleStreamTextPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-text")
+
+    handleStreamTextPort(mockPort.port as never)
+    const startPromise = mockPort.emitMessage({
+      type: "start",
+      requestId: "req-text-abort",
+      payload: {
+        providerId: "openai-default",
+        prompt: "Say hello",
+      },
+    })
+
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(streamTextMock).toHaveBeenCalledTimes(1)
+
+    mockPort.emitDisconnect()
+    await startPromise
+
+    expect(streamSignal?.aborted).toBe(true)
+    expect(loggerErrorMock).not.toHaveBeenCalled()
+    expect(mockPort.postMessage).not.toHaveBeenCalledWith(expect.objectContaining({
+      type: "error",
+    }))
   })
 
   it("returns error for invalid text start payload and disconnects", async () => {
