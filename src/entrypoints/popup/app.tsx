@@ -1,6 +1,7 @@
-import { browser, i18n } from "#imports"
+import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { UserAccount } from "@/components/user-account"
+import { openOptionsPage } from "@/utils/navigation"
 import { version } from "../../../package.json"
 import { AISmartContext } from "./components/ai-smart-context"
 import { AlwaysTranslate } from "./components/always-translate"
@@ -44,7 +45,9 @@ function App() {
         <button
           type="button"
           className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-300 dark:hover:bg-neutral-700"
-          onClick={() => browser.runtime.openOptionsPage()}
+          onClick={() => {
+            void openOptionsPage()
+          }}
         >
           <Icon icon="tabler:settings" className="size-4" strokeWidth={1.6} />
           <span className="text-[13px] font-medium">

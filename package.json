@@ -16,7 +16,7 @@
     "dev:firefox": "wxt -b firefox --mv3",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "postinstall": "wxt prepare",
+    "postinstall": "WXT_SKIP_ENV_VALIDATION=true wxt prepare",
     "test": "vitest run",
     "test:cov": "vitest run --coverage",
     "test:watch": "vitest",
