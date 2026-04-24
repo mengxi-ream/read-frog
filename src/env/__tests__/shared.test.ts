@@ -96,7 +96,7 @@ describe("extension env parsing", () => {
     })).toThrowError("must be an origin without a trailing slash or path")
 
     expect(() => parseResolvedExtensionEnv({
-      WXT_OFFICIAL_SITE_ORIGINS: "https://readfrog.app/tutorial",
+      WXT_OFFICIAL_SITE_ORIGINS: "https://readfrog.app/docs",
     })).toThrowError("must be an origin without a trailing slash or path")
   })
 

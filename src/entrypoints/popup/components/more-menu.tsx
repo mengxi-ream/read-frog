@@ -72,7 +72,7 @@ export function MoreMenu() {
         </DropdownMenuItem>
 
         <DropdownMenuItem
-          onClick={() => window.open("https://readfrog.app/tutorial/", "_blank", "noopener,noreferrer")}
+          onClick={() => window.open("https://readfrog.app/docs/", "_blank", "noopener,noreferrer")}
           className="cursor-pointer"
         >
           <Icon icon="tabler:help-circle" className="size-4" strokeWidth={1.6} />

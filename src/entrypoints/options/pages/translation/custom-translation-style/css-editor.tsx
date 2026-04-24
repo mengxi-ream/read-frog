@@ -67,7 +67,7 @@ export function CSSEditor() {
           <FieldLabel htmlFor="css-editor" data-invalid>
             {i18n.t("options.translation.translationStyle.cssEditor")}
           </FieldLabel>
-          <a href={`${env.WXT_WEBSITE_URL}/tutorial/custom-css`} className="text-xs text-link hover:opacity-90" target="_blank" rel="noreferrer">
+          <a href={`${env.WXT_WEBSITE_URL}/docs/custom-css`} className="text-xs text-link hover:opacity-90" target="_blank" rel="noreferrer">
             {i18n.t("options.apiProviders.howToConfigure")}
           </a>
         </div>
