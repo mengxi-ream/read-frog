@@ -51,6 +51,7 @@
     "@ai-sdk/togetherai": "^2.0.45",
     "@ai-sdk/vercel": "^2.0.43",
     "@ai-sdk/xai": "^3.0.83",
+    "@babel/runtime": "^7.29.2",
     "@base-ui/react": "^1.4.1",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-json": "^6.0.2",

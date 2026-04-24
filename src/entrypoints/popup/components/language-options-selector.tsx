@@ -1,20 +1,26 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
+import type { LanguageItem } from "@/components/language-combobox-options"
 import { i18n } from "#imports"
+import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
   langCodeISO6393Schema,
 } from "@read-frog/definitions"
+import { IconChevronDown } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
+import { useMemo } from "react"
+import { filterLanguage } from "@/components/language-combobox-options"
+import { Button } from "@/components/ui/base-ui/button"
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/base-ui/select"
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/base-ui/combobox"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectedCodeAtom } from "@/utils/atoms/detected-code"
 
@@ -22,82 +28,154 @@ function langCodeLabel(langCode: LangCodeISO6393) {
   return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
 }
 
-const langSelectorTriggerClasses = "!h-14 w-30 rounded-lg shadow-xs pr-2 gap-1"
+function createLanguageItem(code: LangCodeISO6393): LanguageItem<LangCodeISO6393> {
+  return {
+    value: code,
+    label: langCodeLabel(code),
+    name: LANG_CODE_TO_EN_NAME[code],
+  }
+}
+
+const langSelectorTriggerClasses = "!h-14 w-30 rounded-lg shadow-xs pr-2 gap-1 justify-between bg-transparent"
 
 const langSelectorContentClasses = "flex flex-col items-start text-base font-medium min-w-0 flex-1"
+
+function LanguageComboboxTrigger({
+  label,
+  subtitle,
+  ariaLabel,
+}: {
+  label: string
+  subtitle: string
+  ariaLabel: string
+}) {
+  return (
+    <ComboboxPrimitive.Trigger
+      render={(
+        <Button
+          type="button"
+          variant="outline"
+          className={langSelectorTriggerClasses}
+          aria-label={ariaLabel}
+          title={label}
+        />
+      )}
+    >
+      <div className={langSelectorContentClasses}>
+        <span className="truncate w-full text-left">{label}</span>
+        <span className="text-sm text-neutral-500">{subtitle}</span>
+      </div>
+      <IconChevronDown className="size-4 text-muted-foreground" />
+    </ComboboxPrimitive.Trigger>
+  )
+}
 
 export default function LanguageOptionsSelector() {
   const [language, setLanguage] = useAtom(configFieldsAtomMap.language)
   const detectedCode = useAtomValue(detectedCodeAtom)
+  const targetLanguageItems = useMemo(
+    () => langCodeISO6393Schema.options.map(createLanguageItem),
+    [],
+  )
+  const sourceLanguageItems = useMemo<LanguageItem[]>(
+    () => [
+      {
+        value: "auto",
+        label: langCodeLabel(detectedCode),
+        name: LANG_CODE_TO_EN_NAME[detectedCode],
+      },
+      ...targetLanguageItems,
+    ],
+    [detectedCode, targetLanguageItems],
+  )
+  const currentSourceItem = useMemo(
+    () => sourceLanguageItems.find(item => item.value === language.sourceCode) ?? sourceLanguageItems[0] ?? null,
+    [language.sourceCode, sourceLanguageItems],
+  )
+  const currentTargetItem = useMemo(
+    () => targetLanguageItems.find(item => item.value === language.targetCode) ?? null,
+    [language.targetCode, targetLanguageItems],
+  )
 
-  const handleSourceLangChange = (newLangCode: LangCodeISO6393 | "auto" | null) => {
-    if (!newLangCode)
+  const handleSourceLangChange = (item: LanguageItem | null) => {
+    if (!item || item.value === language.sourceCode)
       return
-    void setLanguage({ sourceCode: newLangCode })
+    void setLanguage({ sourceCode: item.value })
   }
 
-  const handleTargetLangChange = (newLangCode: LangCodeISO6393 | null) => {
-    if (!newLangCode)
+  const handleTargetLangChange = (item: LanguageItem | null) => {
+    if (!item || item.value === "auto" || item.value === language.targetCode)
       return
-    void setLanguage({ targetCode: newLangCode })
+    void setLanguage({ targetCode: item.value })
   }
 
   const sourceLangLabel
     = language.sourceCode === "auto"
-      ? `${langCodeLabel(detectedCode)} (auto)`
-      : langCodeLabel(language.sourceCode)
+      ? `${currentSourceItem?.label ?? langCodeLabel(detectedCode)} (auto)`
+      : currentSourceItem?.label ?? langCodeLabel(language.sourceCode)
 
-  const targetLangLabel = langCodeLabel(language.targetCode)
+  const targetLangLabel = currentTargetItem?.label ?? langCodeLabel(language.targetCode)
 
   return (
     <div className="flex items-center justify-between">
-      <Select value={language.sourceCode} onValueChange={handleSourceLangChange}>
-        <SelectTrigger className={langSelectorTriggerClasses}>
-          <div className={langSelectorContentClasses}>
-            <SelectValue render={<span className="truncate w-full" />}>
-              {sourceLangLabel}
-            </SelectValue>
-            <span className="text-sm text-neutral-500">
-              {language.sourceCode === "auto"
-                ? i18n.t("popup.autoLang")
-                : i18n.t("popup.sourceLang")}
-            </span>
-          </div>
-        </SelectTrigger>
-        <SelectContent className="rounded-lg shadow-md w-72">
-          <SelectGroup>
-            <SelectItem value="auto">
-              {langCodeLabel(detectedCode)}
-              <AutoLangCell />
-            </SelectItem>
-            {langCodeISO6393Schema.options.map(key => (
-              <SelectItem key={key} value={key}>
-                {langCodeLabel(key)}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <Combobox
+        value={currentSourceItem}
+        onValueChange={handleSourceLangChange}
+        items={sourceLanguageItems}
+        filter={filterLanguage}
+        autoHighlight
+      >
+        <LanguageComboboxTrigger
+          label={sourceLangLabel}
+          subtitle={language.sourceCode === "auto"
+            ? i18n.t("popup.autoLang")
+            : i18n.t("popup.sourceLang")}
+          ariaLabel={i18n.t("popup.sourceLang")}
+        />
+        <ComboboxContent className="rounded-lg shadow-md w-72">
+          <ComboboxInput
+            showTrigger={false}
+            placeholder={i18n.t("translationHub.searchLanguages")}
+          />
+          <ComboboxList>
+            {(item: LanguageItem) => (
+              <ComboboxItem key={item.value} value={item}>
+                {item.label}
+                {item.value === "auto" && <AutoLangCell />}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+          <ComboboxEmpty>{i18n.t("translationHub.noLanguagesFound")}</ComboboxEmpty>
+        </ComboboxContent>
+      </Combobox>
       <Icon icon="tabler:arrow-right" className="h-4 w-4 text-neutral-500" />
-      <Select value={language.targetCode} onValueChange={handleTargetLangChange}>
-        <SelectTrigger className={langSelectorTriggerClasses}>
-          <div className={langSelectorContentClasses}>
-            <SelectValue render={<span className="truncate w-full" />}>
-              {targetLangLabel}
-            </SelectValue>
-            <span className="text-sm text-neutral-500">{i18n.t("popup.targetLang")}</span>
-          </div>
-        </SelectTrigger>
-        <SelectContent className="rounded-lg shadow-md w-72">
-          <SelectGroup>
-            {langCodeISO6393Schema.options.map(key => (
-              <SelectItem key={key} value={key}>
-                {langCodeLabel(key)}
-              </SelectItem>
-            ))}
-          </SelectGroup>
-        </SelectContent>
-      </Select>
+      <Combobox
+        value={currentTargetItem}
+        onValueChange={handleTargetLangChange}
+        items={targetLanguageItems}
+        filter={filterLanguage}
+        autoHighlight
+      >
+        <LanguageComboboxTrigger
+          label={targetLangLabel}
+          subtitle={i18n.t("popup.targetLang")}
+          ariaLabel={i18n.t("popup.targetLang")}
+        />
+        <ComboboxContent className="rounded-lg shadow-md w-72">
+          <ComboboxInput
+            showTrigger={false}
+            placeholder={i18n.t("translationHub.searchLanguages")}
+          />
+          <ComboboxList>
+            {(item: LanguageItem<LangCodeISO6393>) => (
+              <ComboboxItem key={item.value} value={item}>
+                {item.label}
+              </ComboboxItem>
+            )}
+          </ComboboxList>
+          <ComboboxEmpty>{i18n.t("translationHub.noLanguagesFound")}</ComboboxEmpty>
+        </ComboboxContent>
+      </Combobox>
     </div>
   )
 }
