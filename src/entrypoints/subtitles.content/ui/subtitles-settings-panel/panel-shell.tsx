@@ -66,7 +66,7 @@ export function PanelShell({
   return (
     <div
       ref={rootRef}
-      className="absolute inset-0 z-40 pointer-events-none overflow-visible font-light"
+      className="absolute inset-0 z-40 pointer-events-none overflow-visible font-light [container-type:size]"
     >
       <Activity mode={open ? "visible" : "hidden"}>
         <div
@@ -79,7 +79,8 @@ export function PanelShell({
           <div
             ref={panelRef}
             data-slot="subtitles-settings-panel"
-            className="bg-popover text-popover-foreground border-border pointer-events-auto relative isolate z-40 w-[min(17rem,calc(100vw-2rem))] overflow-hidden rounded-[20px] border shadow-floating backdrop-blur-2xl"
+            className="bg-popover text-popover-foreground border-border pointer-events-auto relative isolate z-40 flex w-[min(19rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-[20px] border shadow-floating backdrop-blur-2xl"
+            style={{ maxHeight: `calc(100cqh - ${bottomOffset}px - 1rem)` }}
           >
             {header && (
               <div className="border-border flex items-center gap-3 border-b px-4 pt-3 pb-3">
@@ -94,13 +95,13 @@ export function PanelShell({
                   <IconChevronLeft className="size-4" />
                 </Button>
 
-                <div className="min-w-0 truncate text-sm font-medium">
+                <div className="min-w-0 truncate text-xs font-medium">
                   {header.title}
                 </div>
               </div>
             )}
 
-            <div className="min-h-0 overflow-hidden">
+            <div className="min-h-0 flex-1 overflow-y-auto">
               {transition
                 ? (
                     <TransitionContent direction={transition.direction} transitionKey={transition.key}>

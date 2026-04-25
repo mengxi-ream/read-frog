@@ -20,7 +20,6 @@ export const SUBPAGES: SubpageConfig[] = [
     title: i18n.t("options.videoSubtitles.style.title"),
     icon: <IconAdjustmentsHorizontal className="size-4" />,
     component: StyleView,
-    hidden: true,
   },
 ]
 
