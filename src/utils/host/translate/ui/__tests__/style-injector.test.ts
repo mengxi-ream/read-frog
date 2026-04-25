@@ -9,7 +9,7 @@ async function loadStyleInjector() {
     default: "@import '@/assets/styles/host-theme.css';\n[data-read-frog-custom-translation-style='blur'] { opacity: 0.75; }",
   }))
   vi.doMock("@/assets/styles/host-theme.css?raw", () => ({
-    default: ":root { --rf-brand: oklch(76.034% 0.12361 82.191); --read-frog-primary: var(--rf-brand); }",
+    default: ":root { --read-frog-primary: oklch(0.205 0 0); --read-frog-brand: oklch(76.034% 0.12361 82.191); }",
   }))
   vi.doMock("@/assets/styles/translation-node-preset.css?raw", () => ({
     default: ".read-frog-translated-content-wrapper { display: inline; }",
@@ -53,7 +53,7 @@ describe("style-injector", () => {
     ensurePresetStyles(document)
 
     expect(document.adoptedStyleSheets).toHaveLength(1)
-    expect(document.adoptedStyleSheets[0]?.cssRules[0]?.cssText).toContain("--rf-brand")
+    expect(document.adoptedStyleSheets[0]?.cssRules[0]?.cssText).toContain("--read-frog-brand")
     expect(document.head.querySelector("#read-frog-preset-styles")).toBeNull()
   })
 
