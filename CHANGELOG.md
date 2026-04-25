@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.32.4
+
+### Patch Changes
+
+- [#1382](https://github.com/mengxi-ream/read-frog/pull/1382) [`068bdec`](https://github.com/mengxi-ream/read-frog/commit/068bdecc8a3336f2e208a2caeb33412ae4fa45b1) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: replace startup Readability parsing with lightweight page detection
+
+- [#1379](https://github.com/mengxi-ream/read-frog/pull/1379) [`396dd0d`](https://github.com/mengxi-ream/read-frog/commit/396dd0d36b53e67d4815b83bd25418c99f67dac0) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(auth): include credentials for API auth client
+
+- [#1381](https://github.com/mengxi-ream/read-frog/pull/1381) [`810623b`](https://github.com/mengxi-ream/read-frog/commit/810623ba029911b7ab7d1e4db22a5ea3d6867cc5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(popup): search languages in popup selectors
+
+- [#1377](https://github.com/mengxi-ream/read-frog/pull/1377) [`5b56df8`](https://github.com/mengxi-ream/read-frog/commit/5b56df819abb0e921e8426af97d26e6981b69d29) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf(options): persist slider settings after drag commit
+
+- [#1356](https://github.com/mengxi-ream/read-frog/pull/1356) [`4667e3e`](https://github.com/mengxi-ream/read-frog/commit/4667e3eb406fa414cdb6d807682aea28368e548b) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix(selection-toolbar): keep modal selections visible when opacity is below 100%
+
+- [#1378](https://github.com/mengxi-ream/read-frog/pull/1378) [`adfc89a`](https://github.com/mengxi-ream/read-frog/commit/adfc89add6f8b0b7d2f6adda5f232d2024e36e94) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection-toolbar): keep custom AI action provider switches stable
+
 ## 1.32.3
 
 ### Patch Changes
