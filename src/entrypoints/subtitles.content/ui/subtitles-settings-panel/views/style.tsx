@@ -227,7 +227,6 @@ export function StyleView() {
       </SettingsGroup>
 
       <TextStyleGroup
-        type="main"
         icon={<IconSubtitles className="size-3.5" />}
         title={i18n.t("options.videoSubtitles.style.mainSubtitle")}
         textStyle={config.style.main}
@@ -237,7 +236,6 @@ export function StyleView() {
       />
 
       <TextStyleGroup
-        type="translation"
         icon={<IconLanguage className="size-3.5" />}
         title={i18n.t("options.videoSubtitles.style.translationSubtitle")}
         textStyle={config.style.translation}
