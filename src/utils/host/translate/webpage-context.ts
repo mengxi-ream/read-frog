@@ -1,6 +1,4 @@
 import type { WebPageContext } from "@/types/content"
-import { Readability } from "@mozilla/readability"
-import { removeDummyNodes } from "@/utils/content/utils"
 import { logger } from "@/utils/logger"
 import { truncateWebPageContent } from "./webpage-content"
 
@@ -13,14 +11,19 @@ let cachedWebPageContext: CachedWebPageContext | null = null
 
 async function extractWebpageContent(): Promise<string> {
   try {
-    const documentClone = document.cloneNode(true) as Document
-    await removeDummyNodes(documentClone)
-    const article = new Readability(documentClone, { serializer: el => el }).parse()
-    if (article?.textContent)
-      return article.textContent
+    const { default: Defuddle } = await import("defuddle")
+    const result = new Defuddle(document, {
+      markdown: true,
+      url: window.location.href,
+      useAsync: false,
+    }).parse()
+
+    const markdownContent = result.contentMarkdown || result.content
+    if (markdownContent)
+      return markdownContent
   }
   catch (error) {
-    logger.warn("Readability parsing failed, falling back to body textContent:", error)
+    logger.warn("Defuddle parsing failed, falling back to body text:", error)
   }
   return document.body?.textContent || ""
 }

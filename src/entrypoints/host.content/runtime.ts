@@ -3,7 +3,7 @@ import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import { storage } from "#imports"
 import { DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from "@/utils/constants/config"
-import { getDocumentInfo } from "@/utils/content/analyze"
+import { detectPageLanguageLightweight } from "@/utils/content/page-language"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
@@ -55,7 +55,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
       }
       // Only the top frame should detect and set language to avoid race conditions from iframes
       if (window === window.top) {
-        const { detectedCodeOrUnd } = await getDocumentInfo()
+        const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
         const detectedCode: LangCodeISO6393 = detectedCodeOrUnd === "und" ? "eng" : detectedCodeOrUnd
         await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, detectedCode)
         // Notify background script that URL has changed, let it decide whether to automatically enable translation
@@ -92,7 +92,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   // Only the top frame should detect and set language to avoid race conditions from iframes
   if (window === window.top) {
-    const { detectedCodeOrUnd } = await getDocumentInfo()
+    const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
     const initialDetectedCode: LangCodeISO6393 = detectedCodeOrUnd === "und" ? "eng" : detectedCodeOrUnd
     await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, initialDetectedCode)
 

@@ -46,7 +46,6 @@ Master languages effortlessly and deeply with AI, right in your browser.
   - [🤖 20+ AI Providers](#-20-ai-providers)
   - [🎬 Subtitle Translation](#-subtitle-translation)
   - [🔊 Text-to-Speech (TTS)](#-text-to-speech-tts)
-  - [📖 Read Article](#-read-article)
 - [🤝 Contribute](#-contribute)
   - [Contribute Code](#contribute-code)
 - [📜 Commercial License Grant](#-commercial-license-grant)
@@ -134,7 +133,7 @@ The extension automatically re-translates all visible content when you switch mo
 
 ### 🧠 [Context-Aware Translation][docs-tutorial]
 
-Enable AI to understand the full context of what you're reading. When activated, Read Frog uses Mozilla's Readability library to extract the article's title and content, providing this context to the AI for more accurate, contextually-appropriate translations.
+Enable AI to understand the full context of what you're reading. When activated, Read Frog extracts the page title and a concise Markdown version of the page content, providing this context to the AI for more accurate, contextually-appropriate translations.
 
 This means technical terms get translated correctly within their domain, literary expressions maintain their nuance, and ambiguous phrases are interpreted based on the surrounding content rather than in isolation.
 
@@ -219,20 +218,6 @@ Translate YouTube subtitles directly in the video player. Watch foreign language
 Listen to any selected text with high-quality AI voices. Powered by **Edge TTS** — completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
 
 Automatic language detection (basic or LLM-powered) with per-language voice mapping ensures the right voice for every language. Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
-<!-- ![][image-feat-read] -->
-
-### 📖 [Read Article][docs-tutorial]
-
-One-click deep article analysis. Read Frog extracts the main content using Mozilla's Readability, detects the source language, and generates a summary and introduction in your target language.
-
-Then it provides sentence-by-sentence translations with vocabulary explanations tailored to your language level (beginner, intermediate, or advanced). Each sentence includes key word definitions, grammatical analysis, and contextual explanations. It's like having a personal language tutor analyze every article you read.
 
 <div align="right">
 
