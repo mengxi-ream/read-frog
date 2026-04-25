@@ -14,8 +14,8 @@ const selectTriggerVariants = cva(
   {
     variants: {
       variant: {
-        default: "shadow-xs border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 focus-visible:ring-3 aria-invalid:ring-3",
-        dark: "border-white/10 bg-white/6 text-white/92 hover:bg-white/10 focus-visible:border-white/18 focus-visible:ring-white/18 focus-visible:ring-1",
+        default: "shadow-xs border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 focus-visible:ring-3 aria-invalid:ring-3 [&_[data-slot=select-icon]]:text-muted-foreground",
+        dark: "border-white/10 bg-white/6 text-white/92 hover:bg-white/10 focus-visible:border-white/18 focus-visible:ring-white/18 focus-visible:ring-1 [&_[data-slot=select-icon]]:text-white/62",
       },
       size: {
         default: "h-8",
@@ -94,8 +94,9 @@ function SelectTrigger({
     >
       {children}
       <SelectPrimitive.Icon
+        data-slot="select-icon"
         render={
-          <IconChevronDown className={cn("size-4 pointer-events-none", variant === "dark" ? "text-white/62" : "text-muted-foreground")} />
+          <IconChevronDown className="size-4 pointer-events-none" />
         }
       />
     </SelectPrimitive.Trigger>
