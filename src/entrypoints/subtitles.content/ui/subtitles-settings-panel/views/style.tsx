@@ -30,7 +30,7 @@ import { subtitlesStore } from "../../../atoms"
 
 const SELECT_TRIGGER_CLASS = "min-w-[5.5rem] text-[13px] [&_[data-slot=select-value]]:text-white/92"
 const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-[13px]"
-const SLIDER_CLASS = "[&_[role=slider]]:bg-[#d8a94b] [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-[0_2px_4px_rgba(0,0,0,0.3)] [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:bg-[#d8a94b]"
+const SLIDER_CLASS = "[&_[role=slider]]:bg-white [&_[role=slider]]:border-0 [&_[role=slider]]:shadow-[0_2px_4px_rgba(0,0,0,0.3)] [&_[data-slot=slider-track]]:bg-white/10 [&_[data-slot=slider-range]]:bg-white/60"
 
 const FONT_FAMILY_OPTIONS = Object.keys(SUBTITLE_FONT_FAMILIES) as SubtitlesFontFamily[]
 
