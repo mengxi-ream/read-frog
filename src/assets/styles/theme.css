@@ -124,11 +124,11 @@
   --rf-border: oklch(1 0 0 / 10%);
   --rf-input: oklch(1 0 0 / 15%);
   --rf-ring: oklch(0.552 0.016 285.938);
-  --rf-chart-1: oklch(89.215% 0.05562 82.191);
-  --rf-chart-2: oklch(82.026% 0.09271 82.191);
+  --rf-chart-1: oklch(38.017% 0.06181 82.191);
+  --rf-chart-2: oklch(57.026% 0.09271 82.191);
   --rf-chart-3: oklch(76.034% 0.12361 82.191);
-  --rf-chart-4: oklch(57.026% 0.09271 82.191);
-  --rf-chart-5: oklch(38.017% 0.06181 82.191);
+  --rf-chart-4: oklch(82.026% 0.09271 82.191);
+  --rf-chart-5: oklch(89.215% 0.05562 82.191);
   --rf-sidebar: oklch(0.21 0.006 285.885);
   --rf-sidebar-foreground: oklch(0.985 0 0);
   --rf-sidebar-primary: oklch(0.922 0 0);
