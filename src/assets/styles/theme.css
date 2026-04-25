@@ -72,7 +72,7 @@
   --rf-primary: oklch(0.205 0 0);
   --rf-primary-foreground: oklch(0.985 0 0);
   --rf-brand: oklch(76.034% 0.12361 82.191);
-  --rf-brand-foreground: var(--rf-primary-foreground);
+  --rf-brand-foreground: oklch(0.985 0 0);
   --rf-secondary: oklch(0.967 0.001 286.375);
   --rf-secondary-foreground: oklch(0.47 0.006 285.885);
   --rf-muted: oklch(0.967 0.001 286.375);
@@ -91,8 +91,8 @@
   --rf-radius: 0.625rem;
   --rf-sidebar: oklch(0.985 0 0);
   --rf-sidebar-foreground: oklch(0.141 0.005 285.823);
-  --rf-sidebar-primary: var(--rf-primary);
-  --rf-sidebar-primary-foreground: var(--rf-primary-foreground);
+  --rf-sidebar-primary: oklch(0.205 0 0);
+  --rf-sidebar-primary-foreground: oklch(0.985 0 0);
   --rf-sidebar-accent: oklch(0.967 0.001 286.375);
   --rf-sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --rf-sidebar-border: oklch(0.92 0.004 286.32);
@@ -113,7 +113,7 @@
   --rf-primary: oklch(0.922 0 0);
   --rf-primary-foreground: oklch(0.205 0 0);
   --rf-brand: oklch(76.034% 0.12361 82.191);
-  --rf-brand-foreground: var(--rf-primary-foreground);
+  --rf-brand-foreground: oklch(0.205 0 0);
   --rf-secondary: oklch(0.274 0.006 286.033);
   --rf-secondary-foreground: oklch(0.775 0 0);
   --rf-muted: oklch(0.274 0.006 286.033);
@@ -131,8 +131,8 @@
   --rf-chart-5: oklch(0.51 0.1 166);
   --rf-sidebar: oklch(0.21 0.006 285.885);
   --rf-sidebar-foreground: oklch(0.985 0 0);
-  --rf-sidebar-primary: var(--rf-primary);
-  --rf-sidebar-primary-foreground: var(--rf-primary-foreground);
+  --rf-sidebar-primary: oklch(0.922 0 0);
+  --rf-sidebar-primary-foreground: oklch(0.205 0 0);
   --rf-sidebar-accent: oklch(0.274 0.006 286.033);
   --rf-sidebar-accent-foreground: oklch(0.985 0 0);
   --rf-sidebar-border: oklch(1 0 0 / 10%);
