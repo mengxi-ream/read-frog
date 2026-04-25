@@ -25,7 +25,6 @@ export function SubtitlesToggle() {
         checked={isVisible}
         onCheckedChange={checked => toggleSubtitles(checked)}
         aria-label={title}
-        className="data-checked:bg-[#d8a94b] data-unchecked:bg-white/14 border-white/12 shadow-none"
       />
     </SubtitlesSettingsItem>
   )

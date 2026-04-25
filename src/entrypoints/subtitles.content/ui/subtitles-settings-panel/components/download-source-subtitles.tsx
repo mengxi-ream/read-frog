@@ -43,11 +43,10 @@ export function DownloadSourceSubtitles() {
         size="icon-sm"
         onClick={downloadSubtitles}
         disabled={isDownloading}
-        className="border border-white/10 bg-white/6 text-white/88 hover:bg-white/10 focus-visible:border-white/18 focus-visible:ring-white/18"
       >
         {isDownloading
-          ? <IconLoader2 className="size-3.5 animate-spin text-white/80" />
-          : <IconDownload className="size-3.5 text-white/72" />}
+          ? <IconLoader2 className="size-3.5 animate-spin" />
+          : <IconDownload className="size-3.5" />}
       </Button>
     </SubtitlesSettingsItem>
   )

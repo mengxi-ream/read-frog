@@ -44,14 +44,15 @@ function showSpinner(element: HTMLElement): () => void {
   spinner.id = SPINNER_ID
 
   // Use the same border spinner style as page translation
-  // Colors: primary green (#4ade80 / oklch(76.5% 0.177 163.223)) and muted gray
+  // Colors: brand yellow (oklch(76.034% 0.12361 82.191)) and muted gray
   spinner.style.cssText = `
+    --rf-brand: oklch(76.034% 0.12361 82.191);
     position: absolute !important;
     display: inline-block !important;
     width: 10px !important;
     height: 10px !important;
     border: 3px solid #e5e5e5 !important;
-    border-top: 3px solid #4ade80 !important;
+    border-top: 3px solid var(--rf-brand) !important;
     border-radius: 50% !important;
     box-sizing: content-box !important;
     z-index: 999999 !important;
@@ -76,9 +77,9 @@ function showSpinner(element: HTMLElement): () => void {
     )
   }
   else {
-    // For reduced motion, keep the spinner static but preserve the primary
+    // For reduced motion, keep the spinner static but preserve the brand
     // segment so the loading state remains visible without animation.
-    spinner.style.borderTopColor = "#4ade80"
+    spinner.style.borderTopColor = "var(--rf-brand)"
   }
 
   // Calculate position - vertically centered relative to the element

@@ -28,7 +28,7 @@ export function SubtitlesTranslateButton() {
       className={cn(
         `${TRANSLATE_BUTTON_CLASS} w-12 h-full flex items-center justify-center relative border-none p-0 m-0 cursor-pointer rounded-[14px] transition-all duration-200`,
         panelOpen
-          ? "bg-white/10 shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+          ? "bg-accent shadow-inner"
           : "bg-transparent",
       )}
     >
@@ -45,8 +45,8 @@ export function SubtitlesTranslateButton() {
         className={cn(
           "absolute bottom-1 right-0 min-w-7 px-1 py-0.5 rounded-md text-[8px] font-semibold leading-none tracking-[0.08em] text-center transition-colors duration-200",
           isVisible
-            ? "bg-[#d8a94b] text-[#24190a] shadow-[0_2px_8px_rgba(216,169,75,0.35)]"
-            : "bg-white/18 text-white/92",
+            ? "bg-primary text-primary-foreground shadow-sm"
+            : "bg-secondary text-secondary-foreground",
         )}
       >
         {isVisible ? "ON" : "OFF"}

@@ -14,12 +14,12 @@ export function SubtitlesSettingsItem({
   children,
 }: SubtitlesSettingsItemProps) {
   return (
-    <div className="flex items-center gap-3 rounded-[14px] px-2 py-2 transition-colors hover:bg-white/4.5">
+    <div className="hover:bg-muted/50 flex items-center gap-3 rounded-[14px] px-2 py-2 transition-colors">
       <Label
         htmlFor={labelFor}
-        className="font-light! flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-0.5 text-left text-[13px] leading-5 text-white/96 transition-colors hover:text-white"
+        className="font-light! flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-0.5 text-left text-[13px] leading-5 transition-colors"
       >
-        <div className="shrink-0 text-white/82">
+        <div className="text-muted-foreground shrink-0">
           {icon}
         </div>
         <div className="min-w-0 flex-1">
