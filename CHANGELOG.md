@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.33.0
+
+### Minor Changes
+
+- [#1388](https://github.com/mengxi-ream/read-frog/pull/1388) [`6922155`](https://github.com/mengxi-ream/read-frog/commit/69221554ff0a4db662ce9dff3304ea8923f46c8e) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add subtitle style settings panel with Trancy-inspired UI
+
+- [#1392](https://github.com/mengxi-ream/read-frog/pull/1392) [`596bcf7`](https://github.com/mengxi-ream/read-frog/commit/596bcf7248ddeea7bea843143bcdab52b41a5048) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(extension): support YouTube embed subtitles on third-party sites
+
+### Patch Changes
+
+- [#1385](https://github.com/mengxi-ream/read-frog/pull/1385) [`746a3c5`](https://github.com/mengxi-ream/read-frog/commit/746a3c5c3b71d83a4404db7c26a37c44acc031ae) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): ensure Defuddle webpage context returns Markdown
+
+- [#1391](https://github.com/mengxi-ream/read-frog/pull/1391) [`afa7dee`](https://github.com/mengxi-ream/read-frog/commit/afa7dee1b0b8fcd26559d8a8590e51649166c3a9) Thanks [@li-yiou](https://github.com/li-yiou)! - feat: add floating button controls
+
+- [#1389](https://github.com/mengxi-ream/read-frog/pull/1389) [`c25b299`](https://github.com/mengxi-ream/read-frog/commit/c25b299ca474f3c2baccf9e4a629d6e042dcfbcc) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style(extension): align primary theme tokens and translation brand colors
+
 ## 1.32.4
 
 ### Patch Changes
