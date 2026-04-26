@@ -28,12 +28,9 @@ export function useControlsInfo(
       return
 
     const element = elementRef.current
-    if (!element)
-      return
-
-    const shadowRoot = getContainingShadowRoot(element)
+    const shadowRoot = element ? getContainingShadowRoot(element) : null
     const shadowHost = shadowRoot?.host as HTMLElement | undefined
-    const videoContainer = shadowHost?.parentElement
+    const videoContainer = shadowHost?.parentElement ?? controlsConfig.findVideoContainer?.()
     if (!videoContainer)
       return
 

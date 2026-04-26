@@ -1,4 +1,3 @@
-import type { RefObject } from "react"
 import { IconChevronLeft } from "@tabler/icons-react"
 import { Activity, useMemo, useRef } from "react"
 import { Button } from "@/components/ui/base-ui/button"
@@ -48,7 +47,7 @@ function PanelContent({
   maxHeight,
 }: {
   children: React.ReactNode
-  panelRef: RefObject<HTMLDivElement | null>
+  panelRef: React.RefObject<HTMLDivElement | null>
   header?: PanelShellProps["header"]
   transition?: PanelShellProps["transition"]
   maxHeight?: string
@@ -102,7 +101,7 @@ export function PanelShell({
   const rootRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const { controlsConfig, embedded } = useSubtitlesUI()
-  const { controlsHeight, controlsVisible } = useControlsInfo(rootRef as RefObject<HTMLElement>, controlsConfig)
+  const { controlsHeight, controlsVisible } = useControlsInfo(rootRef, controlsConfig)
 
   const bottomOffset = useMemo(
     () => (controlsVisible ? controlsHeight + 18 : 22),
@@ -116,16 +115,22 @@ export function PanelShell({
   })
 
   const rootClassName = embedded
-    ? "relative z-40 pointer-events-none font-light"
+    ? "relative z-40 pointer-events-none font-light h-full"
     : "absolute inset-0 z-40 pointer-events-none overflow-visible font-light [container-type:size]"
 
   const positionClassName = cn(
     "absolute z-40 transition-[bottom,opacity,transform] duration-200 ease-out",
-    embedded ? "bottom-full right-0 mb-2" : "right-4",
+    embedded ? "bottom-full right-0" : "right-4",
     open ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
   )
 
-  const positionStyle = embedded ? undefined : { bottom: `${bottomOffset}px` }
+  const positionStyle = embedded
+    ? { marginBottom: `${bottomOffset}px` }
+    : { bottom: `${bottomOffset}px` }
+
+  const maxHeight = embedded
+    ? "min(24rem, 60vh)"
+    : `calc(100cqh - ${bottomOffset}px - 1rem)`
 
   return (
     <div ref={rootRef} className={rootClassName}>
@@ -135,7 +140,7 @@ export function PanelShell({
             panelRef={panelRef}
             header={header}
             transition={transition}
-            maxHeight={`calc(100cqh - ${bottomOffset}px - 1rem)`}
+            maxHeight={maxHeight}
           >
             {children}
           </PanelContent>

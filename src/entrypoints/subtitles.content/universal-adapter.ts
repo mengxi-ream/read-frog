@@ -75,8 +75,6 @@ export class UniversalVideoAdapter {
   }
 
   getControlsConfig(): ControlsConfig | undefined {
-    if (this.config.embedded)
-      return undefined
     return this.config.controls
   }
 
