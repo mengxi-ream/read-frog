@@ -1,3 +1,4 @@
+import type { Theme } from "@/types/config/theme"
 import { createContext } from "react"
 import ReactDOM from "react-dom/client"
 
@@ -16,9 +17,10 @@ export function createReactShadowHost(
     className?: string
     cssContent?: string[]
     style?: Partial<CSSStyleDeclaration>
+    forcedTheme?: Theme
   },
 ) {
-  const { className, position, inheritStyles, cssContent, style } = options
+  const { className, position, inheritStyles, cssContent, style, forcedTheme } = options
 
   const shadowHost = document.createElement("div")
   if (className)
@@ -39,7 +41,7 @@ export function createReactShadowHost(
   const root = ReactDOM.createRoot(innerReactContainer)
   const wrappedComponent = (
     <ShadowWrapperContext value={innerReactContainer}>
-      <ThemeProvider container={innerReactContainer}>
+      <ThemeProvider container={innerReactContainer} forcedTheme={forcedTheme}>
         <TooltipProvider>
           {component}
         </TooltipProvider>

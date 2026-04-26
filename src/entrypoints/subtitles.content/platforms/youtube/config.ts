@@ -20,7 +20,7 @@ export function getYoutubeConfig(options: YoutubeConfigOptions = {}): PlatformCo
     selectors: {
       video: "video.html5-main-video",
       playerContainer: "#movie_player.html5-video-player",
-      controlsBar: "#movie_player .ytp-right-controls",
+      controlsBar: embedded ? ".quick-actions-wrapper" : "#movie_player .ytp-right-controls",
       nativeSubtitles: YOUTUBE_NATIVE_SUBTITLES_CLASS,
     },
 

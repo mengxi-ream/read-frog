@@ -1,6 +1,5 @@
-import type { UniversalVideoAdapter } from "../universal-adapter"
+import type { SubtitlesProvidersAdapter } from "../ui/subtitles-ui-context"
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
-import { Provider as JotaiProvider } from "jotai"
 import ReactDOM from "react-dom/client"
 import { Toaster } from "sonner"
 import themeCSS from "@/assets/styles/theme.css?inline"
@@ -9,19 +8,13 @@ import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
-import { subtitlesStore } from "../atoms"
 import { SubtitlesContainer } from "../ui/subtitles-container"
-import { SubtitlesUIContext } from "../ui/subtitles-ui-context"
+import { SubtitlesProviders } from "../ui/subtitles-ui-context"
 
 const SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
 
-type MountSubtitlesUIAdapter = Pick<
-  UniversalVideoAdapter,
-  "downloadSourceSubtitles" | "getControlsConfig" | "toggleSubtitlesManually"
->
-
 interface MountSubtitlesUIOptions {
-  adapter: MountSubtitlesUIAdapter
+  adapter: SubtitlesProvidersAdapter
   config: Pick<PlatformConfig, "selectors">
 }
 
@@ -90,22 +83,14 @@ export async function mountSubtitlesUI(
   parentEl.appendChild(shadowHost)
 
   const app = (
-    <JotaiProvider store={subtitlesStore}>
-      <ShadowWrapperContext value={reactContainer}>
-        <ThemeProvider container={reactContainer}>
-          <SubtitlesUIContext
-            value={{
-              toggleSubtitles: adapter.toggleSubtitlesManually,
-              downloadSourceSubtitles: adapter.downloadSourceSubtitles,
-              controlsConfig: adapter.getControlsConfig(),
-            }}
-          >
-            <SubtitlesContainer />
-            <Toaster richColors className="z-2147483647 notranslate" />
-          </SubtitlesUIContext>
-        </ThemeProvider>
-      </ShadowWrapperContext>
-    </JotaiProvider>
+    <ShadowWrapperContext value={reactContainer}>
+      <ThemeProvider container={reactContainer}>
+        <SubtitlesProviders adapter={adapter}>
+          <SubtitlesContainer />
+          <Toaster richColors className="z-2147483647 notranslate" />
+        </SubtitlesProviders>
+      </ThemeProvider>
+    </ShadowWrapperContext>
   )
 
   reactRoot.render(app)
