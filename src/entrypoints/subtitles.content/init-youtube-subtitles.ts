@@ -1,22 +1,33 @@
-import { YOUTUBE_NAVIGATE_FINISH_EVENT, YOUTUBE_WATCH_URL_PATTERN } from "@/utils/constants/subtitles"
+import { YOUTUBE_EMBED_PATH_PATTERN, YOUTUBE_NAVIGATE_FINISH_EVENT, YOUTUBE_WATCH_URL_PATTERN } from "@/utils/constants/subtitles"
 import { setupYoutubeSubtitles } from "./platforms/youtube"
-import { youtubeConfig } from "./platforms/youtube/config"
+import { getYoutubeConfig } from "./platforms/youtube/config"
 import { mountSubtitlesUI } from "./renderer/mount-subtitles-ui"
+
+function isYoutubeWatch(): boolean {
+  return window.location.href.includes(YOUTUBE_WATCH_URL_PATTERN)
+}
+
+function isYoutubeEmbed(): boolean {
+  return YOUTUBE_EMBED_PATH_PATTERN.test(window.location.pathname)
+}
 
 export function initYoutubeSubtitles() {
   let initialized = false
   let mountedAdapter: ReturnType<typeof setupYoutubeSubtitles> | null = null
 
+  const embedded = isYoutubeEmbed()
+  const config = getYoutubeConfig({ embedded })
+
   const tryInit = async () => {
-    if (!window.location.href.includes(YOUTUBE_WATCH_URL_PATTERN)) {
+    if (!isYoutubeWatch() && !embedded) {
       return
     }
 
     if (!mountedAdapter) {
-      mountedAdapter = setupYoutubeSubtitles()
+      mountedAdapter = setupYoutubeSubtitles(config)
     }
 
-    await mountSubtitlesUI({ adapter: mountedAdapter, config: youtubeConfig })
+    await mountSubtitlesUI({ adapter: mountedAdapter, config })
 
     if (initialized) {
       return
@@ -28,5 +39,7 @@ export function initYoutubeSubtitles() {
 
   void tryInit()
 
-  window.addEventListener(YOUTUBE_NAVIGATE_FINISH_EVENT, () => void tryInit())
+  if (!embedded) {
+    window.addEventListener(YOUTUBE_NAVIGATE_FINISH_EVENT, () => void tryInit())
+  }
 }

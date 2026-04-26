@@ -4,6 +4,8 @@ export interface ControlsConfig {
 }
 
 export interface PlatformConfig {
+  embedded?: boolean
+
   selectors: {
     video: string
     playerContainer: string

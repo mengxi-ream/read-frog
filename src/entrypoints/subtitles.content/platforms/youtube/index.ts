@@ -1,12 +1,12 @@
+import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import { YoutubeSubtitlesFetcher } from "@/utils/subtitles/fetchers"
 import { UniversalVideoAdapter } from "../../universal-adapter"
-import { youtubeConfig } from "./config"
 
-export function setupYoutubeSubtitles() {
+export function setupYoutubeSubtitles(config: PlatformConfig) {
   const subtitlesFetcher = new YoutubeSubtitlesFetcher()
 
   return new UniversalVideoAdapter({
-    config: youtubeConfig,
+    config,
     subtitlesFetcher,
   })
 }

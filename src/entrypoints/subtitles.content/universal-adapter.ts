@@ -62,7 +62,9 @@ export class UniversalVideoAdapter {
 
   async initialize() {
     void this.restorePosition()
-    void this.renderTranslateButton()
+    if (!this.config.embedded) {
+      void this.renderTranslateButton()
+    }
 
     await this.initializeScheduler()
     void this.getOrLoadSourceSubtitles().catch(() => {})
@@ -263,7 +265,25 @@ export class UniversalVideoAdapter {
     const config = await getLocalConfig()
     const autoStart = config?.videoSubtitles?.autoStart ?? false
 
-    if (!autoStart) {
+    if (!autoStart)
+      return
+
+    if (this.config.embedded) {
+      const video = this.subtitlesScheduler?.getVideoElement()
+      if (!video)
+        return
+
+      const start = () => {
+        video.removeEventListener("playing", start)
+        this.toggleSubtitlesWithSource(true, "auto")
+      }
+
+      if (!video.paused) {
+        this.toggleSubtitlesWithSource(true, "auto")
+      }
+      else {
+        video.addEventListener("playing", start)
+      }
       return
     }
 

@@ -2,7 +2,8 @@ import { defineContentScript } from "#imports"
 import { injectPlayerApi } from "./inject-player-api"
 
 export default defineContentScript({
-  matches: ["*://*.youtube.com/*"],
+  matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
+  allFrames: true,
   world: "MAIN",
   runAt: "document_start",
   main() {

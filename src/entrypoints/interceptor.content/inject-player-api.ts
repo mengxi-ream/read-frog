@@ -37,10 +37,15 @@ declare global {
 function findYoutubePlayer(): YouTubePlayer | null {
   return document.querySelector(
     ".html5-video-player.playing-mode, .html5-video-player.paused-mode",
-  )
+  ) ?? document.querySelector(".html5-video-player")
 }
 
 export function injectPlayerApi(): void {
+  if ((window as any).__READ_FROG_INTERCEPTOR_INJECTED__) {
+    return
+  }
+  ;(window as any).__READ_FROG_INTERCEPTOR_INJECTED__ = true
+
   setupTimedtextObserver()
   window.addEventListener("message", handleMessage)
 }
