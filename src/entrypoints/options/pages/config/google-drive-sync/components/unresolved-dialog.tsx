@@ -94,7 +94,7 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const canConfirm = status.isValid && !isConfirming
 
   return (
-    <AlertDialogContent className="w-[min(80rem,calc(100vw-2rem))] max-w-none max-h-[90vh] flex flex-col overflow-hidden">
+    <AlertDialogContent className="data-[size=default]:max-w-[calc(100vw-2rem)] data-[size=default]:md:max-w-2xl data-[size=default]:lg:max-w-4xl data-[size=default]:xl:max-w-5xl max-h-[90vh] flex flex-col overflow-hidden">
       <AlertDialogHeader>
         <AlertDialogTitle className="flex items-center gap-2">
           <Icon icon="mdi:alert" className="size-5 text-yellow-500" />
