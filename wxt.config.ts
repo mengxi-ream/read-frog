@@ -46,6 +46,26 @@ export default defineConfig({
     host_permissions: [
       "*://*/*", // Required for scripting.executeScript in any frame
     ],
+    commands: {
+      "toggle-split-translator": {
+        suggested_key: {
+          default: "Alt+S",
+        },
+        description: "Open Split Translator",
+      },
+    },
+    ...(browser !== "firefox"
+      ? {
+          side_panel: {
+            default_path: "split-translator.html",
+          },
+        }
+      : {
+          sidebar_action: {
+            default_panel: "split-translator.html",
+            default_title: "Read Frog Split Translator",
+          },
+        }),
     // Allow images/SVGs referenced by content-script UI <img> tags to be loaded from
     // moz-extension:// URLs on regular pages. Firefox enforces this more strictly.
     web_accessible_resources: [
