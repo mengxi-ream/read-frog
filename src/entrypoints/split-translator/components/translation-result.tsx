@@ -14,7 +14,7 @@ export function TranslationResult({
   state: SplitTextTranslationState
 }) {
   const liveRegionProps = {
-    role: "status" as const,
+    "role": "status" as const,
     "aria-live": "polite" as const,
     "aria-busy": state.status === "loading",
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest"
-import { createSplitTranslatorCommandHandler, setupSplitTranslatorCommandHandler, SPLIT_TRANSLATOR_COMMAND } from "../split-translator-command"
 import { createSidePanelWindowState, createToggleSidePanelHandler } from "../side-panel"
+import { createSplitTranslatorCommandHandler, setupSplitTranslatorCommandHandler, SPLIT_TRANSLATOR_COMMAND } from "../split-translator-command"
 
 function createLogger() {
   return {
