@@ -677,6 +677,11 @@ options:
     pageTranslationShortcut:
       title: 网页翻译快捷键
       description: 自定义翻译整个网页的快捷键
+    splitTranslatorShortcut:
+      title: 分屏翻译快捷键
+      description: 默认快捷键是 $1。如需自定义，请打开浏览器的扩展快捷键设置。
+      openSettings: 打开快捷键设置
+      openFailed: 无法打开浏览器快捷键设置。
     preloadConfig:
       title: 预翻译范围
       description: 控制视口下方多少内容会被预先翻译，以节省 API 费用

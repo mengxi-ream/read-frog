@@ -562,6 +562,11 @@ options:
     pageTranslationShortcut:
       title: ページ翻訳ショートカットキー
       description: ウェブページ全体を翻訳するショートカットキーをカスタマイズします
+    splitTranslatorShortcut:
+      title: Split Translator Shortcut
+      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      openSettings: Open shortcut settings
+      openFailed: Unable to open browser shortcut settings.
     preloadConfig:
       title: 事前翻訳範囲
       description: ビューポート下のコンテンツをどれだけ事前翻訳するかを制御し、API コストを節約します

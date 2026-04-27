@@ -562,6 +562,11 @@ options:
     pageTranslationShortcut:
       title: Sayfa Çeviri Kısayolu
       description: Tüm web sayfalarını çevirmek için kısayol tuşunu özelleştirin
+    splitTranslatorShortcut:
+      title: Split Translator Shortcut
+      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      openSettings: Open shortcut settings
+      openFailed: Unable to open browser shortcut settings.
     preloadConfig:
       title: Ön Çeviri Aralığı
       description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin

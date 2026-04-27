@@ -562,6 +562,11 @@ options:
     pageTranslationShortcut:
       title: 페이지 번역 단축키
       description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
+    splitTranslatorShortcut:
+      title: Split Translator Shortcut
+      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      openSettings: Open shortcut settings
+      openFailed: Unable to open browser shortcut settings.
     preloadConfig:
       title: 사전 번역 범위
       description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다

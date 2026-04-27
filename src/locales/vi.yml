@@ -562,6 +562,11 @@ options:
     pageTranslationShortcut:
       title: Phím tắt dịch trang
       description: Tùy chỉnh phím tắt để dịch toàn bộ trang web
+    splitTranslatorShortcut:
+      title: Split Translator Shortcut
+      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      openSettings: Open shortcut settings
+      openFailed: Unable to open browser shortcut settings.
     preloadConfig:
       title: Phạm vi dịch trước
       description: Kiểm soát lượng nội dung bên dưới vùng nhìn được dịch trước để tiết kiệm chi phí API

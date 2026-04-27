@@ -677,6 +677,11 @@ options:
     pageTranslationShortcut:
       title: Page Translation Shortcut
       description: Customize the shortcut key for translating entire web pages
+    splitTranslatorShortcut:
+      title: Split Translator Shortcut
+      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      openSettings: Open shortcut settings
+      openFailed: Unable to open browser shortcut settings.
     preloadConfig:
       title: Pre-translate Range
       description: Control how much content below the viewport gets pre-translated to save API costs

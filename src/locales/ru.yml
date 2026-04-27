@@ -562,6 +562,11 @@ options:
     pageTranslationShortcut:
       title: Горячая клавиша перевода страницы
       description: Настройте горячую клавишу для перевода всей веб-страницы
+    splitTranslatorShortcut:
+      title: Split Translator Shortcut
+      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      openSettings: Open shortcut settings
+      openFailed: Unable to open browser shortcut settings.
     preloadConfig:
       title: Диапазон предварительного перевода
       description: Управляйте количеством контента ниже области просмотра, который будет предварительно переведён для экономии затрат на API
