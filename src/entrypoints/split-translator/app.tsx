@@ -11,6 +11,7 @@ export default function App() {
   const config = useAtomValue(configAtom)
   const [input, setInput] = useState("")
   const [selectedTargetLanguage, setSelectedTargetLanguage] = useState<LangCodeISO6393>()
+  const [pendingExternalTargetLanguage, setPendingExternalTargetLanguage] = useState<LangCodeISO6393>()
   const { state, translate } = useSplitTextTranslation()
   const isTranslating = state.status === "loading"
   const targetLanguage = selectedTargetLanguage ?? config.language.targetCode
@@ -30,10 +31,31 @@ export default function App() {
       return
     }
 
+    if (isTranslating) {
+      setPendingExternalTargetLanguage(nextConfigTargetLanguage)
+      return
+    }
+
+    setPendingExternalTargetLanguage(undefined)
     void translate(input, nextConfigTargetLanguage)
-  }, [config.language.targetCode, input, selectedTargetLanguage, translate])
+  }, [config.language.targetCode, input, isTranslating, selectedTargetLanguage, translate])
+
+  useEffect(() => {
+    if (pendingExternalTargetLanguage === undefined || isTranslating) {
+      return
+    }
+
+    if (selectedTargetLanguage !== undefined || !input.trim()) {
+      setPendingExternalTargetLanguage(undefined)
+      return
+    }
+
+    setPendingExternalTargetLanguage(undefined)
+    void translate(input, pendingExternalTargetLanguage)
+  }, [input, isTranslating, pendingExternalTargetLanguage, selectedTargetLanguage, translate])
 
   const handleTargetLanguageChange = (nextTargetLanguage: LangCodeISO6393) => {
+    setPendingExternalTargetLanguage(undefined)
     setSelectedTargetLanguage(nextTargetLanguage)
     if (input.trim()) {
       void translate(input, nextTargetLanguage)

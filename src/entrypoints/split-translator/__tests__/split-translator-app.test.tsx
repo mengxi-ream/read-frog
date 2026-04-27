@@ -189,18 +189,50 @@ describe("split translator app", () => {
     await expectTargetLanguage("eng")
   })
 
-  it("keeps a user-selected target language local after later config updates", async () => {
-    translateTextCoreMock.mockResolvedValueOnce("Hello")
+  it("keeps a user-selected target language local after queued external target updates", async () => {
+    let resolveInitialTranslation: (value: string) => void
+    translateTextCoreMock
+      .mockReturnValueOnce(new Promise<string>((resolve) => {
+        resolveInitialTranslation = resolve
+      }))
+      .mockResolvedValueOnce("Hello")
+      .mockResolvedValueOnce("こんにちは")
     const { store } = renderApp()
 
-    await selectTargetLanguage("eng")
     fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
     fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
 
     await waitFor(() => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
-      expect(translateTextCoreMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
+    })
+
+    act(() => {
+      store.set(configAtom, {
+        ...DEFAULT_CONFIG,
+        language: {
+          ...DEFAULT_CONFIG.language,
+          targetCode: "eng",
+        },
+      })
+    })
+
+    resolveInitialTranslation!("Bonjour")
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
         langConfig: expect.objectContaining({ targetCode: "eng" }),
+        text: "你好",
+      }))
+    })
+
+    await screen.findByText("Hello")
+    await selectTargetLanguage("jpn")
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(3)
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "jpn" }),
         text: "你好",
       }))
     })
@@ -210,14 +242,14 @@ describe("split translator app", () => {
         ...DEFAULT_CONFIG,
         language: {
           ...DEFAULT_CONFIG.language,
-          targetCode: "jpn",
+          targetCode: "fra",
         },
       })
     })
 
-    await expectTargetLanguage("eng")
+    await expectTargetLanguage("jpn")
     await waitFor(() => {
-      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(3)
     })
   })
 
@@ -284,6 +316,48 @@ describe("split translator app", () => {
       expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
         langConfig: expect.objectContaining({ targetCode: "eng" }),
         text: "Hello",
+      }))
+    })
+  })
+
+  it("defers external target-language retranslation until the current request finishes", async () => {
+    let resolveFirstTranslation: (value: string) => void
+    translateTextCoreMock
+      .mockReturnValueOnce(new Promise<string>((resolve) => {
+        resolveFirstTranslation = resolve
+      }))
+      .mockResolvedValueOnce("Hello")
+    const { store } = renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      store.set(configAtom, {
+        ...DEFAULT_CONFIG,
+        language: {
+          ...DEFAULT_CONFIG.language,
+          targetCode: "eng",
+        },
+      })
+    })
+
+    await expectTargetLanguage("eng")
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    resolveFirstTranslation!("Bonjour")
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "eng" }),
+        text: "你好",
       }))
     })
   })
