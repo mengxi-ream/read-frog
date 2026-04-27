@@ -131,6 +131,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
+    sectionId: "split-translator-shortcut",
+    route: "/translation",
+    titleKey: "options.translation.splitTranslatorShortcut.title",
+    descriptionKey: "options.translation.splitTranslatorShortcut.description",
+    pageKey: "options.translation.title",
+  },
+  {
     sectionId: "node-translation-hotkey",
     route: "/translation",
     titleKey: "options.translation.nodeTranslationHotkey.title",

@@ -7,6 +7,7 @@ import { ClearCacheConfig } from "./clear-cache-config"
 import { CustomTranslationStyle } from "./custom-translation-style"
 import { NodeTranslationHotkey } from "./node-translation-hotkey"
 import { PageTranslationShortcut } from "./page-translation-shortcut"
+import { SplitTranslatorShortcut } from "./split-translator-shortcut"
 import { PersonalizedPrompts } from "./personalized-prompt"
 import { PreloadConfig } from "./preload-config"
 import { RequestBatch } from "./request-batch"
@@ -22,6 +23,7 @@ export function TranslationPage() {
       <TranslationMode />
       <TranslateRange />
       <PageTranslationShortcut />
+      <SplitTranslatorShortcut />
       <NodeTranslationHotkey />
       <CustomTranslationStyle />
       <AIContentAware />
