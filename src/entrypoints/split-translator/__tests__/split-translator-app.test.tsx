@@ -127,7 +127,7 @@ describe("split translator app", () => {
   })
 
   it("shows a retryable error state when translation fails", async () => {
-    translateTextCoreMock.mockRejectedValue(new Error("Network failed"))
+    translateTextCoreMock.mockRejectedValueOnce(new Error("Network failed"))
     renderApp()
 
     fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
@@ -138,6 +138,14 @@ describe("split translator app", () => {
     })
     expect(screen.getByLabelText("splitTranslator.inputLabel")).toHaveValue("Hello")
     expect(screen.getByRole("button", { name: "splitTranslator.retry" })).toBeEnabled()
+
+    translateTextCoreMock.mockResolvedValueOnce("Bonjour")
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.retry" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+      expect(screen.getByText("Bonjour")).toBeInTheDocument()
+    })
   })
 
   it("copies translated result and reports success", async () => {

@@ -13,9 +13,15 @@ export function TranslationResult({
   onRetry: (input: string) => void
   state: SplitTextTranslationState
 }) {
+  const liveRegionProps = {
+    role: "status" as const,
+    "aria-live": "polite" as const,
+    "aria-busy": state.status === "loading",
+  }
+
   if (state.status === "idle") {
     return (
-      <Card>
+      <Card {...liveRegionProps}>
         <CardHeader>
           <CardTitle>{i18n.t("splitTranslator.resultTitle")}</CardTitle>
         </CardHeader>
@@ -28,7 +34,7 @@ export function TranslationResult({
 
   if (state.status === "loading") {
     return (
-      <Card>
+      <Card {...liveRegionProps}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Icon icon="tabler:loader-2" className="size-4 animate-spin" />
@@ -54,7 +60,7 @@ export function TranslationResult({
   }
 
   return (
-    <Card>
+    <Card {...liveRegionProps}>
       <CardHeader>
         <CardTitle>{i18n.t("splitTranslator.resultTitle")}</CardTitle>
       </CardHeader>
