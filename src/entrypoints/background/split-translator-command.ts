@@ -10,6 +10,10 @@ interface SplitTranslatorCommandLogger {
   warn: (...args: any[]) => void
 }
 
+interface CommandTabLike {
+  windowId?: number
+}
+
 export function createSplitTranslatorCommandHandler({
   currentWindowId,
   logger,
@@ -19,15 +23,16 @@ export function createSplitTranslatorCommandHandler({
   logger: SplitTranslatorCommandLogger
   toggleSidePanel: ToggleSidePanel
 }) {
-  return (command: string) => {
+  return (command: string, tab?: CommandTabLike) => {
     if (command !== SPLIT_TRANSLATOR_COMMAND) {
       return
     }
 
+    const windowId = typeof tab?.windowId === "number" ? tab.windowId : currentWindowId
     const result = toggleSidePanel({
       data: {
         source: "extension-user-action",
-        windowId: currentWindowId,
+        windowId,
       },
     })
 
