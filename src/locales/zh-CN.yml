@@ -54,6 +54,10 @@ popup:
     notification: 陪读蛙更新动态
   aiSmartContext: AI 智能上下文
   aiSmartContextDescription: 结合网页上下文提升翻译效果。需要配置 LLM 翻译服务商。
+  splitTranslator:
+    open: 打开分屏翻译
+    openFailed: 无法打开分屏翻译。
+    firefoxSidebarHint: 在 Firefox 中，请从浏览器侧边栏打开陪读蛙。
   more:
     title: 更多
     translationHub: 翻译中心

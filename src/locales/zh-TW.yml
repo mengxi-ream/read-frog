@@ -54,6 +54,10 @@ popup:
     notification: 陪讀蛙更新動態
   aiSmartContext: AI 智慧上下文
   aiSmartContextDescription: 結合網頁上下文提升翻譯效果。需要配置 LLM 翻譯服務商。
+  splitTranslator:
+    open: Open Split Translator
+    openFailed: Unable to open Split Translator.
+    firefoxSidebarHint: In Firefox, open Read Frog from the browser sidebar.
   more:
     title: 更多
     translationHub: 翻譯中心

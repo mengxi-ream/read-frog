@@ -54,6 +54,10 @@ popup:
     notification: Read Frog의 새로운 소식
   aiSmartContext: AI 스마트 컨텍스트
   aiSmartContextDescription: 웹페이지 컨텍스트를 사용하여 번역 품질을 향상시킵니다. LLM 번역 제공자가 필요합니다.
+  splitTranslator:
+    open: Open Split Translator
+    openFailed: Unable to open Split Translator.
+    firefoxSidebarHint: In Firefox, open Read Frog from the browser sidebar.
   more:
     title: 더보기
     translationHub: 번역 허브

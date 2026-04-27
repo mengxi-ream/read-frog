@@ -54,6 +54,10 @@ popup:
     notification: Read Frog'da yenilikler
   aiSmartContext: AI Akıllı Bağlam
   aiSmartContextDescription: Çeviri kalitesini artırmak için web sayfası bağlamını kullanır. LLM çeviri sağlayıcısı gerektirir.
+  splitTranslator:
+    open: Open Split Translator
+    openFailed: Unable to open Split Translator.
+    firefoxSidebarHint: In Firefox, open Read Frog from the browser sidebar.
   more:
     title: Daha Fazla
     translationHub: Çeviri Merkezi

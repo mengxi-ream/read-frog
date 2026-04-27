@@ -11,6 +11,7 @@ import LanguageOptionsSelector from "./components/language-options-selector"
 import { MoreMenu } from "./components/more-menu"
 import Hotkey from "./components/node-translation-hotkey-selector"
 import { SiteControlToggle } from "./components/site-control-toggle"
+import { SplitTranslatorButton } from "./components/split-translator-button"
 import TranslateButton from "./components/translate-button"
 import TranslatePromptSelector from "./components/translate-prompt-selector"
 import TranslateProviderField from "./components/translate-provider-field"
@@ -33,8 +34,9 @@ function App() {
         <TranslationModeSelector />
         <TranslateProviderField />
         <TranslatePromptSelector />
-        <div className="w-full">
+        <div className="grid w-full grid-cols-2 gap-2">
           <TranslateButton className="w-full" />
+          <SplitTranslatorButton className="w-full" />
         </div>
         <SiteControlToggle />
         <AlwaysTranslate />

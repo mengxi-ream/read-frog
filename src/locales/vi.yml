@@ -54,6 +54,10 @@ popup:
     notification: Có gì mới trong Read Frog
   aiSmartContext: Ngữ cảnh thông minh AI
   aiSmartContextDescription: Sử dụng ngữ cảnh trang web để cải thiện chất lượng dịch. Yêu cầu nhà cung cấp dịch LLM.
+  splitTranslator:
+    open: Open Split Translator
+    openFailed: Unable to open Split Translator.
+    firefoxSidebarHint: In Firefox, open Read Frog from the browser sidebar.
   more:
     title: Thêm
     translationHub: Trung tâm Dịch thuật

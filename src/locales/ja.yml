@@ -54,6 +54,10 @@ popup:
     notification: 読書カエルの最新情報
   aiSmartContext: AI スマートコンテキスト
   aiSmartContextDescription: ウェブページのコンテキストを使用して翻訳品質を向上させます。LLM翻訳プロバイダーが必要です。
+  splitTranslator:
+    open: Open Split Translator
+    openFailed: Unable to open Split Translator.
+    firefoxSidebarHint: In Firefox, open Read Frog from the browser sidebar.
   more:
     title: その他
     translationHub: 翻訳ハブ
