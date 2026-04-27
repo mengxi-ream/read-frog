@@ -11,16 +11,14 @@ export function SplitTranslatorButton({ className }: { className?: string }) {
       windowId: browser.windows.WINDOW_ID_CURRENT,
     })
       .then((result) => {
-        if (result?.ok !== false) {
-          return
-        }
+        if (result?.ok === false) {
+          if (result.reason === "requires-extension-user-action") {
+            toast.info(i18n.t("popup.splitTranslator.firefoxSidebarHint"))
+            return
+          }
 
-        if (result.reason === "requires-extension-user-action") {
-          toast.info(i18n.t("popup.splitTranslator.firefoxSidebarHint"))
-          return
+          toast.error(i18n.t("popup.splitTranslator.openFailed"))
         }
-
-        toast.error(i18n.t("popup.splitTranslator.openFailed"))
       })
       .catch(() => {
         toast.error(i18n.t("popup.splitTranslator.openFailed"))
