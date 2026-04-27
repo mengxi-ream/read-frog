@@ -29,6 +29,8 @@ export interface DetectLanguageOptions {
   providerConfig?: LLMProviderConfig
   /** Max text length for LLM detection (default: 500) */
   maxLengthForLLM?: number
+  /** Suppress the warning toast when LLM detection fails and falls back to franc. */
+  suppressFallbackToast?: boolean
 }
 
 export interface DetectLanguageResult {
@@ -69,9 +71,11 @@ export async function detectLanguageWithSource(
     }
     catch (error) {
       logger.warn("LLM detection failed, falling back to franc:", error)
-      toast.warning(i18n.t("languageDetection.llmFailed"), {
-        id: LLM_DETECTION_FALLBACK_TOAST_ID,
-      })
+      if (!options?.suppressFallbackToast) {
+        toast.warning(i18n.t("languageDetection.llmFailed"), {
+          id: LLM_DETECTION_FALLBACK_TOAST_ID,
+        })
+      }
     }
   }
 

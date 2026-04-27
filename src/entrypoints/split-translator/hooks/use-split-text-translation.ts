@@ -50,6 +50,7 @@ export function useSplitTextTranslation() {
         ? (await detectLanguage(input, {
             enableLLM: config.languageDetection.mode === "llm",
             minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
+            suppressFallbackToast: true,
           })) ?? DEFAULT_DETECTED_CODE
         : config.language.sourceCode
 
