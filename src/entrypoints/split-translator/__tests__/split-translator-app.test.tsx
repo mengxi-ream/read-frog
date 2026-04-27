@@ -148,6 +148,31 @@ describe("split translator app", () => {
     })
   })
 
+  it("retries with the current textarea value after editing failed input", async () => {
+    translateTextCoreMock
+      .mockRejectedValueOnce(new Error("Network failed"))
+      .mockResolvedValueOnce("Bonjour")
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(screen.getByText("Network failed")).toBeInTheDocument()
+    })
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello!" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.retry" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        extraHashTags: ["splitTranslator"],
+        text: "Hello!",
+      }))
+      expect(screen.getByText("Bonjour")).toBeInTheDocument()
+    })
+  })
+
   it("copies translated result and reports success", async () => {
     translateTextCoreMock.mockResolvedValue("Bonjour")
     renderApp()

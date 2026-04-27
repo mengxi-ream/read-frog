@@ -10,7 +10,7 @@ export function TranslationResult({
   onRetry,
   state,
 }: {
-  onRetry: (input: string) => void
+  onRetry: () => void
   state: SplitTextTranslationState
 }) {
   const liveRegionProps = {
@@ -51,7 +51,7 @@ export function TranslationResult({
         <AlertTitle>{i18n.t("splitTranslator.translationFailed")}</AlertTitle>
         <AlertDescription className="space-y-3">
           <p>{state.error}</p>
-          <Button type="button" variant="outline" size="sm" onClick={() => onRetry(state.input)}>
+          <Button type="button" variant="outline" size="sm" onClick={onRetry}>
             {i18n.t("splitTranslator.retry")}
           </Button>
         </AlertDescription>

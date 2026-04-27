@@ -31,7 +31,7 @@ export default function App() {
 
         <TranslationResult
           state={state}
-          onRetry={value => void translate(value)}
+          onRetry={() => void translate(input)}
         />
       </main>
     </div>
