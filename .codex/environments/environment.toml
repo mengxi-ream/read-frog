@@ -27,5 +27,22 @@ copy_env() {
   fi
 }
 
+copy_source_file() {
+  rel="$1"
+
+  src="$CODEX_SOURCE_TREE_PATH/$rel"
+  dst="$CODEX_WORKTREE_PATH/$rel"
+
+  mkdir -p "$(dirname "$dst")"
+
+  if [ -f "$src" ]; then
+    cp "$src" "$dst"
+    echo "copied $rel from source tree"
+  else
+    echo "skipped $rel (no source found)"
+  fi
+}
+
 copy_env ".env.development" ".env.example"
+copy_source_file "web-ext.config.ts"
 '''

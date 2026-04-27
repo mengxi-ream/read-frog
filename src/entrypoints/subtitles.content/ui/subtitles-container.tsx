@@ -1,13 +1,16 @@
 import { useAtomValue } from "jotai"
+import { use } from "react"
 import { subtitlesDisplayAtom, subtitlesShowContentAtom, subtitlesShowStateAtom } from "../atoms"
 import { StateMessage } from "./state-message"
 import { SubtitlesSettingsPanel } from "./subtitles-settings-panel"
+import { SubtitlesUIContext } from "./subtitles-ui-context"
 import { SubtitlesView } from "./subtitles-view"
 
 export function SubtitlesContainer() {
   const { stateData, isVisible } = useAtomValue(subtitlesDisplayAtom)
   const showState = useAtomValue(subtitlesShowStateAtom)
   const showContent = useAtomValue(subtitlesShowContentAtom)
+  const ui = use(SubtitlesUIContext)
 
   return (
     <div className="absolute inset-0 pointer-events-none overflow-visible">
@@ -20,9 +23,11 @@ export function SubtitlesContainer() {
         )}
       </div>
 
-      <div className="absolute inset-0 z-40 overflow-visible">
-        <SubtitlesSettingsPanel />
-      </div>
+      {!ui?.embedded && (
+        <div className="absolute inset-0 z-40 overflow-visible">
+          <SubtitlesSettingsPanel />
+        </div>
+      )}
     </div>
   )
 }

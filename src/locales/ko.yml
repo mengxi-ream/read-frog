@@ -9,6 +9,10 @@ contextMenu:
   translate: 번역
   translateSelection: '"%s" 번역'
   showOriginal: 원문 보기
+sidePanel:
+  firefoxUserActionHint: Firefox에서는 브라우저 사이드바에서 Read Frog를 열어 주세요.
+  firefoxUserActionHelpText: Firefox 사이드바 여는 방법 보기
+  firefoxUserActionHelpUrl: https://support.mozilla.org/ko/kb/use-sidebar-access-tools-and-vertical-tabs
 popup:
   theme: 테마
   autoLang: 자동
@@ -284,7 +288,7 @@ options:
       clickAction:
         title: 클릭 동작
         description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
-        panel: 패널 열기
+        panel: 사이드 패널 열기
         translate: 페이지 번역 전환
     selectionToolbar:
       globalToggle:

@@ -44,6 +44,10 @@ export class UniversalVideoAdapter {
   private translationCoordinator: TranslationCoordinator | null = null
   private subtitlesSummaryContextHash: string | null = null
 
+  get embedded() {
+    return this.config.embedded
+  }
+
   get videoIdChanged() {
     const currentVideoId = this.config.getVideoId?.()
     return !!(this.sessionVideoId && currentVideoId && currentVideoId !== this.sessionVideoId)
@@ -62,9 +66,7 @@ export class UniversalVideoAdapter {
 
   async initialize() {
     void this.restorePosition()
-    if (!this.config.embedded) {
-      void this.renderTranslateButton()
-    }
+    void this.renderTranslateButton()
 
     await this.initializeScheduler()
     void this.getOrLoadSourceSubtitles().catch(() => {})
@@ -247,18 +249,24 @@ export class UniversalVideoAdapter {
   }
 
   private async renderTranslateButton() {
-    const controlsBar = await waitForElement(this.config.selectors.controlsBar)
-    if (!controlsBar) {
-      toast.error(i18n.t("subtitles.errors.controlsBarNotFound"))
+    const container = await waitForElement(this.config.selectors.controlsBar)
+    if (!container) {
+      if (!this.config.embedded)
+        toast.error(i18n.t("subtitles.errors.controlsBarNotFound"))
       return
     }
 
-    const existingButton = controlsBar.querySelector(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
+    const existingButton = container.querySelector(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
     existingButton?.remove()
 
-    const toggleButton = renderSubtitlesTranslateButton()
+    const toggleButton = renderSubtitlesTranslateButton(this)
 
-    controlsBar.insertBefore(toggleButton, controlsBar.firstChild)
+    if (this.config.embedded) {
+      container.appendChild(toggleButton)
+    }
+    else {
+      container.insertBefore(toggleButton, container.firstChild)
+    }
   }
 
   private async tryAutoStartSubtitles() {

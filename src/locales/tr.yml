@@ -9,6 +9,10 @@ contextMenu:
   translate: Çevir
   translateSelection: '"%s" Çevir'
   showOriginal: Orijinali Göster
+sidePanel:
+  firefoxUserActionHint: Firefox'ta Read Frog'u tarayıcının kenar çubuğundan açın.
+  firefoxUserActionHelpText: Firefox kenar çubuğunu açmayı öğrenin
+  firefoxUserActionHelpUrl: https://support.mozilla.org/tr/kb/use-sidebar-access-tools-and-vertical-tabs
 popup:
   theme: Tema
   autoLang: Otomatik
@@ -284,7 +288,7 @@ options:
       clickAction:
         title: Tıklama Eylemi
         description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
-        panel: Paneli Aç
+        panel: Yan Paneli Aç
         translate: Sayfa Çevirisini Aç/Kapat
     selectionToolbar:
       globalToggle:

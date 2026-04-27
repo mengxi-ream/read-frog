@@ -1,4 +1,5 @@
 export interface ControlsConfig {
+  findVideoContainer?: () => HTMLElement | null
   measureHeight: (container: HTMLElement) => number
   checkVisibility: (container: HTMLElement) => boolean
 }

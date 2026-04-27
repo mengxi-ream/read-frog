@@ -9,6 +9,10 @@ contextMenu:
   translate: 翻訳
   translateSelection: 「%s」を翻訳
   showOriginal: 原文を表示
+sidePanel:
+  firefoxUserActionHint: Firefox では、ブラウザーのサイドバーから Read Frog を開いてください。
+  firefoxUserActionHelpText: Firefox サイドバーの開き方を見る
+  firefoxUserActionHelpUrl: https://support.mozilla.org/ja/kb/use-sidebar-access-tools-and-vertical-tabs
 popup:
   theme: テーマ
   autoLang: 自動検出
@@ -284,7 +288,7 @@ options:
       clickAction:
         title: クリック動作
         description: フローティングボタンをクリックしたときの動作を選択
-        panel: パネルを開く
+        panel: サイドパネルを開く
         translate: ページ翻訳を切り替え
     selectionToolbar:
       globalToggle:
