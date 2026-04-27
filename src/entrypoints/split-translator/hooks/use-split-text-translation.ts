@@ -54,6 +54,10 @@ export function useSplitTextTranslation() {
         : config.language.sourceCode
 
       if (!validateTranslationConfigAndToast(config, detectedCode)) {
+        if (runIdRef.current !== runId) {
+          return
+        }
+
         setState({
           status: "error",
           input: rawInput,
