@@ -2,7 +2,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-const i18nTMock = vi.hoisted(() => vi.fn((key: string, values?: unknown[]) => values ? `${key}:${values.join(",")}` : key))
+const i18nTMock = vi.hoisted(() => vi.fn((key: string) => key))
+const getExtensionCommandShortcutMock = vi.fn()
 const openExtensionShortcutSettingsMock = vi.fn()
 const toastErrorMock = vi.fn()
 
@@ -26,6 +27,14 @@ vi.mock("@/components/ui/base-ui/button", () => ({
   ),
 }))
 
+vi.mock("@/components/ui/base-ui/input", () => ({
+  Input: (props: React.ComponentProps<"input">) => <input {...props} />,
+}))
+
+vi.mock("@/utils/extension-command-shortcut", () => ({
+  getExtensionCommandShortcut: (...args: unknown[]) => getExtensionCommandShortcutMock(...args),
+}))
+
 vi.mock("@/utils/navigation", () => ({
   openExtensionShortcutSettings: (...args: unknown[]) => openExtensionShortcutSettingsMock(...args),
 }))
@@ -46,16 +55,35 @@ async function renderSplitTranslatorShortcut() {
 }
 
 describe("splitTranslatorShortcut", () => {
-  it("renders the split translator shortcut settings card", async () => {
+  it("renders the current split translator shortcut when one is configured", async () => {
+    getExtensionCommandShortcutMock.mockResolvedValue("Alt+S")
+
     await renderSplitTranslatorShortcut()
 
     expect(screen.getByText("options.translation.splitTranslatorShortcut.title")).toBeInTheDocument()
-    expect(screen.getByText("options.translation.splitTranslatorShortcut.description:Alt+S")).toBeInTheDocument()
+    expect(screen.getByText("options.translation.splitTranslatorShortcut.description")).toBeInTheDocument()
+    expect(await screen.findByDisplayValue("Alt+S")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "options.translation.splitTranslatorShortcut.openSettings" })).toBeInTheDocument()
-    expect(i18nTMock).toHaveBeenCalledWith("options.translation.splitTranslatorShortcut.description", ["Alt+S"])
+  })
+
+  it("renders an unset label when the browser command has no shortcut", async () => {
+    getExtensionCommandShortcutMock.mockResolvedValue("")
+
+    await renderSplitTranslatorShortcut()
+
+    expect(await screen.findByDisplayValue("options.translation.splitTranslatorShortcut.unset")).toBeInTheDocument()
+  })
+
+  it("falls back to the unset label when reading the browser command fails", async () => {
+    getExtensionCommandShortcutMock.mockRejectedValue(new Error("blocked"))
+
+    await renderSplitTranslatorShortcut()
+
+    expect(await screen.findByDisplayValue("options.translation.splitTranslatorShortcut.unset")).toBeInTheDocument()
   })
 
   it("opens browser shortcut settings when clicked", async () => {
+    getExtensionCommandShortcutMock.mockResolvedValue("Alt+S")
     openExtensionShortcutSettingsMock.mockResolvedValue(undefined)
 
     await renderSplitTranslatorShortcut()
@@ -68,6 +96,7 @@ describe("splitTranslatorShortcut", () => {
   })
 
   it("shows an error toast when browser shortcut settings cannot be opened", async () => {
+    getExtensionCommandShortcutMock.mockResolvedValue("Alt+S")
     openExtensionShortcutSettingsMock.mockRejectedValue(new Error("blocked"))
 
     await renderSplitTranslatorShortcut()
