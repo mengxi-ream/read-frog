@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { i18n } from "#imports"
+import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { SplitTranslatorShortcut } from "../split-translator-shortcut"
 
@@ -30,7 +30,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe("SplitTranslatorShortcut", () => {
+describe("splitTranslatorShortcut", () => {
   it("renders the split translator shortcut settings card", () => {
     render(<SplitTranslatorShortcut />)
 
