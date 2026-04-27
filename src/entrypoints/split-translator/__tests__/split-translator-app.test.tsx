@@ -110,6 +110,15 @@ describe("split translator app", () => {
     expect(screen.getByRole("button", { name: "splitTranslator.translate" })).toBeDisabled()
   })
 
+  it("lets the panel content fill the available split width", () => {
+    const { container } = renderApp()
+
+    const main = container.querySelector("main")
+
+    expect(main).toHaveClass("w-full")
+    expect(main).not.toHaveClass("max-w-xl")
+  })
+
   it("submits text and renders the translated result", async () => {
     translateTextCoreMock.mockResolvedValue("Bonjour")
     renderApp()
