@@ -29,6 +29,24 @@ describe("navigation", () => {
     })
   })
 
+  it("opens the Edge shortcut settings URL in an active tab", async () => {
+    await openExtensionShortcutSettings("Mozilla/5.0 Chrome/120.0.0.0 Safari/537.36 Edg/120.0.0.0")
+
+    expect(browser.tabs.create).toHaveBeenCalledWith({
+      active: true,
+      url: "edge://extensions/shortcuts",
+    })
+  })
+
+  it("opens the Firefox shortcut settings URL in an active tab", async () => {
+    await openExtensionShortcutSettings("Mozilla/5.0 Firefox/121.0")
+
+    expect(browser.tabs.create).toHaveBeenCalledWith({
+      active: true,
+      url: "about:addons",
+    })
+  })
+
   it("opens the options page as an extension tab", async () => {
     await openOptionsPage()
 
