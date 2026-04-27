@@ -49,6 +49,19 @@ describe("splitTranslatorButton", () => {
     expect(toastInfoMock).not.toHaveBeenCalled()
   })
 
+  it("is silent when the side panel is closed via toggle", async () => {
+    sendMessageMock.mockResolvedValue({ ok: true, action: "closed" })
+
+    render(<SplitTranslatorButton />)
+    fireEvent.click(screen.getByRole("button", { name: "popup.splitTranslator.open" }))
+
+    await waitFor(() => {
+      expect(sendMessageMock).toHaveBeenCalled()
+    })
+    expect(toastErrorMock).not.toHaveBeenCalled()
+    expect(toastInfoMock).not.toHaveBeenCalled()
+  })
+
   it("shows a Firefox sidebar hint when Firefox requires a browser user action", async () => {
     sendMessageMock.mockResolvedValue({ ok: false, reason: "requires-extension-user-action" })
 
@@ -82,9 +95,7 @@ describe("splitTranslatorButton", () => {
     })
   })
 
-  it("uses localized labels and messages", async () => {
-    sendMessageMock.mockResolvedValue({ ok: true, action: "opened" })
-
+  it("renders with a localized label", () => {
     render(<SplitTranslatorButton />)
 
     expect(i18nTMock).toHaveBeenCalledWith("popup.splitTranslator.open")
