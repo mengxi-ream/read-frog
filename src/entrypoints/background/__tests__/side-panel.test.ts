@@ -224,6 +224,26 @@ describe("background side panel", () => {
     await expect(result).resolves.toEqual({ ok: true, action: "opened" })
   })
 
+  it("uses an explicit window id from extension user actions", async () => {
+    const logger = createLogger()
+    const sidePanel = {
+      open: vi.fn().mockResolvedValue(undefined),
+    }
+    const handler = createToggleSidePanelHandler({
+      getApi: () => chromiumSidePanel(sidePanel),
+      logger,
+    })
+
+    await expect(handler({
+      data: {
+        source: "extension-user-action",
+        windowId: 789,
+      },
+    })).resolves.toEqual({ ok: true, action: "opened" })
+
+    expect(sidePanel.open).toHaveBeenCalledWith({ windowId: 789 })
+  })
+
   it("returns a missing-window result when the sender window id is unavailable", async () => {
     const logger = createLogger()
     const handler = createToggleSidePanelHandler({

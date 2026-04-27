@@ -29,6 +29,7 @@ interface SidePanelStateInfo {
 interface ToggleSidePanelMessage {
   data?: {
     source?: "content-script" | "extension-user-action"
+    windowId?: number
   }
   sender?: {
     tab?: {
@@ -69,6 +70,12 @@ export function createSidePanelWindowState() {
 
 function getToggleSource(message: ToggleSidePanelMessage) {
   return message.data?.source ?? "content-script"
+}
+
+function getToggleWindowId(message: ToggleSidePanelMessage) {
+  return typeof message.data?.windowId === "number"
+    ? message.data.windowId
+    : message.sender?.tab?.windowId
 }
 
 function toChromiumSidePanelApi(api: Partial<ChromiumSidePanelApi> | undefined): BrowserSidePanelApi | null {
@@ -186,7 +193,7 @@ export function createToggleSidePanelHandler({
       })
     }
 
-    const windowId = message.sender?.tab?.windowId
+    const windowId = getToggleWindowId(message)
     if (typeof windowId !== "number") {
       logger.warn("Cannot toggle side panel without a sender window", message)
       return Promise.resolve({ ok: false, reason: "missing-window" } as const)
@@ -251,26 +258,22 @@ export function setupSidePanelMessageHandler({
   registerMessageHandler: typeof onMessage
 }) {
   const windowState = createSidePanelWindowState()
-  const sidePanel = getSidePanelApi(extensionBrowser)
-  if (sidePanel?.kind !== "chromium-side-panel") {
-    registerMessageHandler("toggleSidePanel", createToggleSidePanelHandler({
-      getApi: () => getSidePanelApi(extensionBrowser),
-      logger,
-      windowState,
-    }))
-    return
-  }
-
-  sidePanel.api.onOpened?.addListener((info) => {
-    windowState.markOpened(info)
-  })
-  sidePanel.api.onClosed?.addListener((info) => {
-    windowState.markClosed(info)
-  })
-
-  registerMessageHandler("toggleSidePanel", createToggleSidePanelHandler({
+  const toggleSidePanel = createToggleSidePanelHandler({
     getApi: () => getSidePanelApi(extensionBrowser),
     logger,
     windowState,
-  }))
+  })
+  const sidePanel = getSidePanelApi(extensionBrowser)
+
+  if (sidePanel?.kind === "chromium-side-panel") {
+    sidePanel.api.onOpened?.addListener((info) => {
+      windowState.markOpened(info)
+    })
+    sidePanel.api.onClosed?.addListener((info) => {
+      windowState.markClosed(info)
+    })
+  }
+
+  registerMessageHandler("toggleSidePanel", toggleSidePanel)
+  return toggleSidePanel
 }

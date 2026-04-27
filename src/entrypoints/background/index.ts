@@ -18,6 +18,7 @@ import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
 import { proxyFetch } from "./proxy-fetch"
+import { setupSplitTranslatorCommandHandler } from "./split-translator-command"
 import { setupSidePanelMessageHandler } from "./side-panel"
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./translation-queues"
 import { translationMessage } from "./translation-signal"
@@ -57,10 +58,17 @@ export default defineBackground({
       await openOptionsPage()
     })
 
-    setupSidePanelMessageHandler({
+    const toggleSidePanel = setupSidePanelMessageHandler({
       extensionBrowser: browser,
       logger,
       registerMessageHandler: onMessage,
+    })
+
+    setupSplitTranslatorCommandHandler({
+      currentWindowId: browser.windows.WINDOW_ID_CURRENT,
+      extensionBrowser: browser,
+      logger,
+      toggleSidePanel,
     })
 
     onMessage("aiSegmentSubtitles", async (message) => {
