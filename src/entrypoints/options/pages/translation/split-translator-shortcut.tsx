@@ -17,7 +17,7 @@ export function SplitTranslatorShortcut() {
     <ConfigCard
       id="split-translator-shortcut"
       title={i18n.t("options.translation.splitTranslatorShortcut.title")}
-      description={`${i18n.t("options.translation.splitTranslatorShortcut.description")}:${DEFAULT_SPLIT_TRANSLATOR_SHORTCUT}`}
+      description={i18n.t("options.translation.splitTranslatorShortcut.description", [DEFAULT_SPLIT_TRANSLATOR_SHORTCUT])}
     >
       <Button type="button" variant="outline" onClick={handleOpenShortcutSettings}>
         {i18n.t("options.translation.splitTranslatorShortcut.openSettings")}
