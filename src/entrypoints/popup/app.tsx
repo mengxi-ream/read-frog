@@ -16,51 +16,53 @@ import TranslatePromptSelector from "./components/translate-prompt-selector"
 import TranslateProviderField from "./components/translate-provider-field"
 import { TranslationHubButton } from "./components/translation-hub-button"
 import TranslationModeSelector from "./components/translation-mode-selector"
+import { TranslationStatusIndicator } from "./components/translation-status-indicator"
 
 function App() {
-  return (
-    <>
-      <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
-        <div className="flex items-center justify-between">
-          <UserAccount />
-          <div className="flex items-center">
-            <TranslationHubButton />
-            <DiscordButton />
-            <BlogNotification />
-          </div>
-        </div>
-        <LanguageOptionsSelector />
-        <TranslationModeSelector />
-        <TranslateProviderField />
-        <TranslatePromptSelector />
-        <div className="w-full">
-          <TranslateButton className="w-full" />
-        </div>
-        <SiteControlToggle />
-        <AlwaysTranslate />
-        <Hotkey />
-        <AISmartContext />
-      </div>
-      <div className="flex items-center justify-between bg-neutral-200 px-2 py-1 dark:bg-neutral-800">
-        <button
-          type="button"
-          className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-300 dark:hover:bg-neutral-700"
-          onClick={() => {
-            void openOptionsPage()
-          }}
-        >
-          <Icon icon="tabler:settings" className="size-4" strokeWidth={1.6} />
-          <span className="text-[13px] font-medium">
-            {i18n.t("popup.options")}
-          </span>
-        </button>
-        <span className="text-sm text-neutral-500 dark:text-neutral-400">
-          {version}
-        </span>
-        <MoreMenu />
-      </div>
-    </>
-  )
+ return (
+ <>
+ <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
+ <div className="flex items-center justify-between">
+ <UserAccount />
+ <div className="flex items-center gap-2">
+ <TranslationStatusIndicator />
+ <TranslationHubButton />
+ <DiscordButton />
+ <BlogNotification />
+ </div>
+ </div>
+ <LanguageOptionsSelector />
+ <TranslationModeSelector />
+ <TranslateProviderField />
+ <TranslatePromptSelector />
+ <div className="w-full">
+ <TranslateButton className="w-full" />
+ </div>
+ <SiteControlToggle />
+ <AlwaysTranslate />
+ <Hotkey />
+ <AISmartContext />
+ </div>
+ <div className="flex items-center justify-between bg-neutral-200 px-2 py-1 dark:bg-neutral-800">
+ <button
+ type="button"
+ className="flex cursor-pointer items-center gap-1 rounded-md px-2 py-1 hover:bg-neutral-300 dark:hover:bg-neutral-700"
+ onClick={() => {
+ void openOptionsPage()
+ }}
+ >
+ <Icon icon="tabler:settings" className="size-4" strokeWidth={1.6} />
+ <span className="text-[13px] font-medium">
+ {i18n.t("popup.options")}
+ </span>
+ </button>
+ <span className="text-sm text-neutral-500 dark:text-neutral-400">
+ {version}
+ </span>
+ <MoreMenu />
+ </div>
+ </>
+ )
 }
 
 export default App
