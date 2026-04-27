@@ -1,7 +1,7 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { i18n } from "#imports"
 import { useAtomValue } from "jotai"
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { configAtom } from "@/utils/atoms/config"
 import { TextInputForm } from "./components/text-input-form"
 import { TranslationResult } from "./components/translation-result"
@@ -14,6 +14,24 @@ export default function App() {
   const { state, translate } = useSplitTextTranslation()
   const isTranslating = state.status === "loading"
   const targetLanguage = selectedTargetLanguage ?? config.language.targetCode
+  const previousConfigTargetLanguageRef = useRef(config.language.targetCode)
+
+  useEffect(() => {
+    const previousConfigTargetLanguage = previousConfigTargetLanguageRef.current
+    const nextConfigTargetLanguage = config.language.targetCode
+
+    if (previousConfigTargetLanguage === nextConfigTargetLanguage) {
+      return
+    }
+
+    previousConfigTargetLanguageRef.current = nextConfigTargetLanguage
+
+    if (selectedTargetLanguage !== undefined || !input.trim()) {
+      return
+    }
+
+    void translate(input, nextConfigTargetLanguage)
+  }, [config.language.targetCode, input, selectedTargetLanguage, translate])
 
   const handleTargetLanguageChange = (nextTargetLanguage: LangCodeISO6393) => {
     setSelectedTargetLanguage(nextTargetLanguage)

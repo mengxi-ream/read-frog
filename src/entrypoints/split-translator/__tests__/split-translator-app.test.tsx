@@ -190,9 +190,20 @@ describe("split translator app", () => {
   })
 
   it("keeps a user-selected target language local after later config updates", async () => {
+    translateTextCoreMock.mockResolvedValueOnce("Hello")
     const { store } = renderApp()
 
     await selectTargetLanguage("eng")
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "eng" }),
+        text: "你好",
+      }))
+    })
 
     act(() => {
       store.set(configAtom, {
@@ -205,6 +216,9 @@ describe("split translator app", () => {
     })
 
     await expectTargetLanguage("eng")
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
   })
 
   it("submits text with the currently selected target language", async () => {
@@ -235,6 +249,36 @@ describe("split translator app", () => {
 
     await selectTargetLanguage("eng")
 
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "eng" }),
+        text: "Hello",
+      }))
+    })
+  })
+
+  it("automatically retranslates non-empty input when the global target language changes without a local override", async () => {
+    translateTextCoreMock
+      .mockResolvedValueOnce("你好")
+      .mockResolvedValueOnce("Hello")
+    const { store } = renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+    await screen.findByText("你好")
+
+    act(() => {
+      store.set(configAtom, {
+        ...DEFAULT_CONFIG,
+        language: {
+          ...DEFAULT_CONFIG.language,
+          targetCode: "eng",
+        },
+      })
+    })
+
+    await expectTargetLanguage("eng")
     await waitFor(() => {
       expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
       expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
