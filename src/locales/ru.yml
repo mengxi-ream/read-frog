@@ -284,7 +284,7 @@ options:
       clickAction:
         title: Действие по клику
         description: Выберите действие при нажатии на плавающую кнопку
-        panel: Открыть панель
+        panel: Открыть боковую панель
         translate: Переключить перевод страницы
     selectionToolbar:
       globalToggle:

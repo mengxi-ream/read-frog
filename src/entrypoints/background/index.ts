@@ -18,6 +18,7 @@ import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
 import { proxyFetch } from "./proxy-fetch"
+import { setupSidePanelMessageHandler } from "./side-panel"
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./translation-queues"
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
@@ -54,6 +55,12 @@ export default defineBackground({
     onMessage("openOptionsPage", async () => {
       logger.info("openOptionsPage")
       await openOptionsPage()
+    })
+
+    setupSidePanelMessageHandler({
+      extensionBrowser: browser,
+      logger,
+      registerMessageHandler: onMessage,
     })
 
     onMessage("aiSegmentSubtitles", async (message) => {

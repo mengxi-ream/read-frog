@@ -284,7 +284,7 @@ options:
       clickAction:
         title: Tıklama Eylemi
         description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
-        panel: Paneli Aç
+        panel: Yan Paneli Aç
         translate: Sayfa Çevirisini Aç/Kapat
     selectionToolbar:
       globalToggle:

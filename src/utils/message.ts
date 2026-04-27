@@ -26,6 +26,7 @@ interface ProtocolMap {
   // navigation
   openPage: (data: { url: string, active?: boolean }) => void
   openOptionsPage: () => void
+  toggleSidePanel: () => Promise<{ ok: true, action: "opened" | "closed" } | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" }>
   // config
   getInitialConfig: () => Config | null
   // translation state

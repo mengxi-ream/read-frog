@@ -284,7 +284,7 @@ options:
       clickAction:
         title: クリック動作
         description: フローティングボタンをクリックしたときの動作を選択
-        panel: パネルを開く
+        panel: サイドパネルを開く
         translate: ページ翻訳を切り替え
     selectionToolbar:
       globalToggle:

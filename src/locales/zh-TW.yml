@@ -284,7 +284,7 @@ options:
       clickAction:
         title: 點擊行為
         description: 選擇點擊懸浮按鈕時執行的操作
-        panel: 開啟面板
+        panel: 開啟側邊欄
         translate: 切換頁面翻譯
     selectionToolbar:
       globalToggle:

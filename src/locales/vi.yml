@@ -284,7 +284,7 @@ options:
       clickAction:
         title: Hành động khi nhấn
         description: Chọn hành động khi nhấn vào nút nổi
-        panel: Mở bảng điều khiển
+        panel: Mở bảng điều khiển bên
         translate: Bật/tắt dịch trang
     selectionToolbar:
       globalToggle:

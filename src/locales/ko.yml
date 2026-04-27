@@ -284,7 +284,7 @@ options:
       clickAction:
         title: 클릭 동작
         description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
-        panel: 패널 열기
+        panel: 사이드 패널 열기
         translate: 페이지 번역 전환
     selectionToolbar:
       globalToggle:
