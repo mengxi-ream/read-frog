@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen, waitFor } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { Provider as JotaiProvider } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import { beforeEach, describe, expect, it, vi } from "vitest"
@@ -124,6 +124,25 @@ describe("split translator app", () => {
       extraHashTags: ["splitTranslator"],
       text: "Hello",
     }))
+  })
+
+  it("marks the result region busy while translation is loading", async () => {
+    let resolveTranslation: (value: string) => void
+    translateTextCoreMock.mockReturnValue(new Promise<string>((resolve) => {
+      resolveTranslation = resolve
+    }))
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    const resultRegion = await screen.findByRole("status")
+    expect(resultRegion).toHaveAttribute("aria-live", "polite")
+    expect(resultRegion).toHaveAttribute("aria-busy", "true")
+    expect(within(resultRegion).getByText("splitTranslator.translating")).toBeInTheDocument()
+
+    resolveTranslation!("Bonjour")
+    await screen.findByText("Bonjour")
   })
 
   it("shows a retryable error state when translation fails", async () => {
