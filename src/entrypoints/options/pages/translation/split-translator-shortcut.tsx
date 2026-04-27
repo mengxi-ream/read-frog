@@ -10,7 +10,6 @@ import { formatPageTranslationShortcut } from "@/utils/page-translation-shortcut
 import { ConfigCard } from "../../components/config-card"
 
 export function SplitTranslatorShortcut() {
-  const t = i18n.t as (key: string) => string
   const [shortcut, setShortcut] = useState<string | null>(null)
 
   useEffect(() => {
@@ -35,7 +34,7 @@ export function SplitTranslatorShortcut() {
 
   const handleOpenShortcutSettings = () => {
     void openExtensionShortcutSettings().catch(() => {
-      toast.error(t("options.translation.splitTranslatorShortcut.openFailed"))
+      toast.error(i18n.t("options.translation.splitTranslatorShortcut.openFailed"))
     })
   }
 
@@ -43,22 +42,22 @@ export function SplitTranslatorShortcut() {
     ? ""
     : shortcut
       ? formatPageTranslationShortcut(shortcut)
-      : t("options.translation.splitTranslatorShortcut.unset")
+      : i18n.t("options.translation.splitTranslatorShortcut.unset")
 
   return (
     <ConfigCard
       id="split-translator-shortcut"
-      title={t("options.translation.splitTranslatorShortcut.title")}
-      description={t("options.translation.splitTranslatorShortcut.description")}
+      title={i18n.t("options.translation.splitTranslatorShortcut.title")}
+      description={i18n.t("options.translation.splitTranslatorShortcut.description")}
     >
       <div className="flex max-w-sm flex-col gap-3">
         <Input
-          aria-label={t("options.translation.splitTranslatorShortcut.title")}
+          aria-label={i18n.t("options.translation.splitTranslatorShortcut.title")}
           readOnly
           value={displayShortcut}
         />
         <Button type="button" variant="outline" onClick={handleOpenShortcutSettings}>
-          {t("options.translation.splitTranslatorShortcut.openSettings")}
+          {i18n.t("options.translation.splitTranslatorShortcut.openSettings")}
         </Button>
       </div>
     </ConfigCard>

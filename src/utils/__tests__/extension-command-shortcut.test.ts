@@ -49,4 +49,16 @@ describe("getExtensionCommandShortcut", () => {
 
     expect(shortcut).toBe("")
   })
+
+  it("propagates getAll rejection to the caller", async () => {
+    const error = new Error("failed to load commands")
+
+    await expect(
+      getExtensionCommandShortcut("toggle-split-translator", {
+        commands: {
+          getAll: vi.fn().mockRejectedValue(error),
+        },
+      }),
+    ).rejects.toThrow(error)
+  })
 })
