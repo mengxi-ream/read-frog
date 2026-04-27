@@ -136,6 +136,7 @@ describe("split translator app", () => {
     await waitFor(() => {
       expect(screen.getByText("Network failed")).toBeInTheDocument()
     })
+    expect(screen.getByLabelText("splitTranslator.inputLabel")).toHaveValue("Hello")
     expect(screen.getByRole("button", { name: "splitTranslator.retry" })).toBeEnabled()
   })
 
