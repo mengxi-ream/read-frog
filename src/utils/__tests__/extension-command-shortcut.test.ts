@@ -26,6 +26,18 @@ describe("getExtensionCommandShortcut", () => {
     expect(shortcut).toBe("")
   })
 
+  it("returns an empty string when the matching command omits shortcut", async () => {
+    const shortcut = await getExtensionCommandShortcut("toggle-split-translator", {
+      commands: {
+        getAll: vi.fn().mockResolvedValue([
+          { name: "toggle-split-translator" },
+        ]),
+      },
+    })
+
+    expect(shortcut).toBe("")
+  })
+
   it("returns an empty string when the command is not found", async () => {
     const shortcut = await getExtensionCommandShortcut("toggle-split-translator", {
       commands: {

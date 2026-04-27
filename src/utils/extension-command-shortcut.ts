@@ -11,6 +11,9 @@ interface ExtensionCommandsBrowserLike {
   }
 }
 
+/**
+ * Returns the trimmed shortcut for a command and lets getAll() errors bubble up.
+ */
 export async function getExtensionCommandShortcut(
   commandName: string,
   extensionBrowser: ExtensionCommandsBrowserLike = browser,
