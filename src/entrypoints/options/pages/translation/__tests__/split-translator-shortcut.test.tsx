@@ -1,12 +1,22 @@
 // @vitest-environment jsdom
-import { i18n } from "#imports"
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { SplitTranslatorShortcut } from "../split-translator-shortcut"
 
+const i18nTMock = vi.hoisted(() => vi.fn((key: string, values?: unknown[]) => values ? `${key}:${values.join(",")}` : key))
 const openExtensionShortcutSettingsMock = vi.fn()
 const toastErrorMock = vi.fn()
-const i18nTMock = vi.spyOn(i18n, "t").mockImplementation((key: string, values?: unknown[]) => values ? `${key}:${values.join(",")}` : key)
+
+vi.mock("#imports", () => ({
+  i18n: {
+    t: i18nTMock,
+  },
+}))
+
+vi.mock("#i18n", () => ({
+  i18n: {
+    t: i18nTMock,
+  },
+}))
 
 vi.mock("@/components/ui/base-ui/button", () => ({
   Button: ({ children, ...props }: React.ComponentProps<"button">) => (
@@ -30,9 +40,14 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
+async function renderSplitTranslatorShortcut() {
+  const { SplitTranslatorShortcut } = await import("../split-translator-shortcut")
+  return render(<SplitTranslatorShortcut />)
+}
+
 describe("splitTranslatorShortcut", () => {
-  it("renders the split translator shortcut settings card", () => {
-    render(<SplitTranslatorShortcut />)
+  it("renders the split translator shortcut settings card", async () => {
+    await renderSplitTranslatorShortcut()
 
     expect(screen.getByText("options.translation.splitTranslatorShortcut.title")).toBeInTheDocument()
     expect(screen.getByText("options.translation.splitTranslatorShortcut.description:Alt+S")).toBeInTheDocument()
@@ -43,7 +58,7 @@ describe("splitTranslatorShortcut", () => {
   it("opens browser shortcut settings when clicked", async () => {
     openExtensionShortcutSettingsMock.mockResolvedValue(undefined)
 
-    render(<SplitTranslatorShortcut />)
+    await renderSplitTranslatorShortcut()
     fireEvent.click(screen.getByRole("button", { name: "options.translation.splitTranslatorShortcut.openSettings" }))
 
     await waitFor(() => {
@@ -55,7 +70,7 @@ describe("splitTranslatorShortcut", () => {
   it("shows an error toast when browser shortcut settings cannot be opened", async () => {
     openExtensionShortcutSettingsMock.mockRejectedValue(new Error("blocked"))
 
-    render(<SplitTranslatorShortcut />)
+    await renderSplitTranslatorShortcut()
     fireEvent.click(screen.getByRole("button", { name: "options.translation.splitTranslatorShortcut.openSettings" }))
 
     await waitFor(() => {

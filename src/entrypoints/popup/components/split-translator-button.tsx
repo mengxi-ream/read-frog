@@ -6,10 +6,10 @@ import { cn } from "@/utils/styles/utils"
 
 export function SplitTranslatorButton({ className }: { className?: string }) {
   const handleOpenSplitTranslator = () => {
-    void sendMessage("toggleSidePanel", {
+    void Promise.resolve(sendMessage("toggleSidePanel", {
       source: "extension-user-action",
       windowId: browser.windows.WINDOW_ID_CURRENT,
-    })
+    }))
       .then((result) => {
         if (result?.ok === false) {
           if (result.reason === "requires-extension-user-action") {
