@@ -118,6 +118,12 @@ describe("getProviderOptions", () => {
       const deepseekReasonerOptions = getProviderOptions("deepseek-reasoner", "deepseek")
       expect(deepseekReasonerOptions.deepseek?.thinking).toEqual({ type: "disabled" })
 
+      const deepseekV4FlashOptions = getProviderOptions("deepseek-v4-flash", "deepseek")
+      expect(deepseekV4FlashOptions.deepseek?.thinking).toEqual({ type: "disabled" })
+
+      const deepseekV4ProOptions = getProviderOptions("deepseek-v4-pro", "deepseek")
+      expect(deepseekV4ProOptions.deepseek?.thinking).toEqual({ type: "disabled" })
+
       const cohereReasoningOptions = getProviderOptions("command-a-reasoning-08-2025", "cohere")
       expect(cohereReasoningOptions.cohere?.thinking).toEqual({ type: "disabled" })
 

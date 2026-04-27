@@ -7,6 +7,7 @@ import {
   MIN_SELECTION_OVERLAY_OPACITY,
 } from "@/utils/constants/selection"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
+import { floatingButtonSchema } from "./floating-button"
 import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
 import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
@@ -18,15 +19,6 @@ const languageSchema = z.object({
   sourceCode: langCodeISO6393Schema.or(z.literal("auto")),
   targetCode: langCodeISO6393Schema,
   level: langLevel,
-})
-
-// Floating button schema
-const floatingButtonSchema = z.object({
-  enabled: z.boolean(),
-  position: z.number().min(0).max(1),
-  disabledFloatingButtonPatterns: z.array(z.string()),
-  clickAction: z.enum(["panel", "translate"]),
-  locked: z.boolean(),
 })
 
 const selectionToolbarFeatureSchema = z.object({

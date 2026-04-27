@@ -1,4 +1,5 @@
 import type { Config } from "@/types/config/config"
+import type { FloatingButtonSide } from "@/types/config/floating-button"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
@@ -19,9 +20,10 @@ export const THEME_STORAGE_KEY = "theme"
 export const APP_LOCALE_STORAGE_KEY = "appLocale"
 export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 68
+export const CONFIG_SCHEMA_VERSION = 69
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
+export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
 
 function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
   const template = CUSTOM_ACTION_TEMPLATES.find(t => t.id === "dictionary")
@@ -94,6 +96,7 @@ export const DEFAULT_CONFIG: Config = {
   floatingButton: {
     enabled: true,
     position: DEFAULT_FLOATING_BUTTON_POSITION,
+    side: DEFAULT_FLOATING_BUTTON_SIDE,
     disabledFloatingButtonPatterns: [],
     clickAction: "translate",
     locked: false,

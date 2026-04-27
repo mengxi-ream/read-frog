@@ -1,3 +1,4 @@
+import type { FloatingButtonClickAction as FloatingButtonClickActionValue } from "@/types/config/floating-button"
 import { i18n } from "#imports"
 import { useAtom } from "jotai"
 import {
@@ -8,13 +9,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/base-ui/select"
+import { floatingButtonClickActionSchema } from "@/types/config/floating-button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { ConfigCard } from "../../components/config-card"
 
 const items = [
   { value: "panel", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.panel") },
   { value: "translate", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.translate") },
-]
+] satisfies Array<{ value: FloatingButtonClickActionValue, label: string }>
 
 export function FloatingButtonClickAction() {
   const [floatingButton, setFloatingButton] = useAtom(
@@ -32,9 +34,10 @@ export function FloatingButtonClickAction() {
           items={items}
           value={floatingButton.clickAction}
           onValueChange={(value) => {
-            if (!value)
+            const parsedValue = floatingButtonClickActionSchema.safeParse(value)
+            if (!parsedValue.success)
               return
-            void setFloatingButton({ ...floatingButton, clickAction: value })
+            void setFloatingButton({ ...floatingButton, clickAction: parsedValue.data })
           }}
         >
           <SelectTrigger className="w-[180px]">
