@@ -5,6 +5,7 @@ import { SPLIT_TRANSLATOR_COMMAND } from "@/entrypoints/background/split-transla
 
 const i18nTMock = vi.hoisted(() => vi.fn((key: string) => key))
 const getExtensionCommandShortcutMock = vi.fn()
+const formatPageTranslationShortcutMock = vi.fn((shortcut: string) => shortcut)
 const openExtensionShortcutSettingsMock = vi.fn()
 const toastErrorMock = vi.fn()
 
@@ -37,7 +38,7 @@ vi.mock("@/utils/extension-command-shortcut", () => ({
 }))
 
 vi.mock("@/utils/page-translation-shortcut", () => ({
-  formatPageTranslationShortcut: (shortcut: string) => shortcut,
+  formatPageTranslationShortcut: (...args: unknown[]) => formatPageTranslationShortcutMock(...args),
 }))
 
 vi.mock("@/utils/navigation", () => ({
@@ -70,6 +71,24 @@ describe("splitTranslatorShortcut", () => {
     expect(await screen.findByDisplayValue("Alt+S")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "options.translation.splitTranslatorShortcut.openSettings" })).toBeInTheDocument()
     expect(getExtensionCommandShortcutMock).toHaveBeenCalledWith(SPLIT_TRANSLATOR_COMMAND)
+  })
+
+  it("normalizes browser command modifier names before formatting", async () => {
+    getExtensionCommandShortcutMock.mockResolvedValue("MacCtrl+A")
+
+    await renderSplitTranslatorShortcut()
+
+    expect(await screen.findByDisplayValue("Control+A")).toBeInTheDocument()
+    expect(formatPageTranslationShortcutMock).toHaveBeenCalledWith("Control+A")
+  })
+
+  it("falls back to the raw browser shortcut when formatting returns an empty string", async () => {
+    getExtensionCommandShortcutMock.mockResolvedValue("Command+A")
+    formatPageTranslationShortcutMock.mockReturnValueOnce("")
+
+    await renderSplitTranslatorShortcut()
+
+    expect(await screen.findByDisplayValue("Command+A")).toBeInTheDocument()
   })
 
   it("renders an unset label when the browser command has no shortcut", async () => {

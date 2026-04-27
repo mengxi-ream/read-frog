@@ -9,6 +9,19 @@ import { openExtensionShortcutSettings } from "@/utils/navigation"
 import { formatPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 import { ConfigCard } from "../../components/config-card"
 
+const BROWSER_COMMAND_SHORTCUT_MODIFIER_MAP: Record<string, string> = {
+  Command: "Meta",
+  Ctrl: "Control",
+  MacCtrl: "Control",
+}
+
+function normalizeBrowserCommandShortcut(shortcut: string): string {
+  return shortcut
+    .split("+")
+    .map(part => BROWSER_COMMAND_SHORTCUT_MODIFIER_MAP[part] ?? part)
+    .join("+")
+}
+
 export function SplitTranslatorShortcut() {
   const [shortcut, setShortcut] = useState<string | null>(null)
 
@@ -41,7 +54,7 @@ export function SplitTranslatorShortcut() {
   const displayShortcut = shortcut === null
     ? ""
     : shortcut
-      ? formatPageTranslationShortcut(shortcut)
+      ? formatPageTranslationShortcut(normalizeBrowserCommandShortcut(shortcut)) || shortcut
       : i18n.t("options.translation.splitTranslatorShortcut.unset")
 
   return (
