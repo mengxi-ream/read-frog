@@ -13,6 +13,23 @@ sidePanel:
   firefoxUserActionHint: Firefox에서는 브라우저 사이드바에서 Read Frog를 열어 주세요.
   firefoxUserActionHelpText: Firefox 사이드바 여는 방법 보기
   firefoxUserActionHelpUrl: https://support.mozilla.org/ko/kb/use-sidebar-access-tools-and-vertical-tabs
+splitTranslator:
+  title: Split Translator
+  description: Enter text, translate it with your current Read Frog settings, and copy the result.
+  inputLabel: Text to translate
+  inputPlaceholder: Enter text to translate...
+  translate: Translate
+  translating: Translating...
+  resultTitle: Result
+  emptyResult: The translation result will appear here.
+  translationFailed: Translation failed
+  translationFailedFallback: Unable to translate this text.
+  invalidConfiguration: Check your translation provider, API key, and language settings.
+  providerNotFound: Translation provider not found.
+  retry: Retry
+  copyResult: Copy result
+  copied: Copied to clipboard
+  copyFailed: Failed to copy result
 popup:
   theme: 테마
   autoLang: 자동

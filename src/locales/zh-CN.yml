@@ -13,6 +13,23 @@ sidePanel:
   firefoxUserActionHint: 在 Firefox 中，请从浏览器侧边栏打开陪读蛙。
   firefoxUserActionHelpText: 查看 Firefox 侧边栏说明
   firefoxUserActionHelpUrl: https://support.mozilla.org/zh-CN/kb/use-sidebar-access-tools-and-vertical-tabs
+splitTranslator:
+  title: 分屏翻译
+  description: 输入文本，使用当前陪读蛙设置翻译，并复制结果。
+  inputLabel: 要翻译的文本
+  inputPlaceholder: 输入要翻译的文本...
+  translate: 翻译
+  translating: 翻译中...
+  resultTitle: 结果
+  emptyResult: 翻译结果会显示在这里。
+  translationFailed: 翻译失败
+  translationFailedFallback: 无法翻译这段文本。
+  invalidConfiguration: 请检查翻译提供商、API Key 和语言设置。
+  providerNotFound: 未找到翻译提供商。
+  retry: 重试
+  copyResult: 复制结果
+  copied: 已复制到剪贴板
+  copyFailed: 复制结果失败
 popup:
   theme: 主题
   autoLang: 自动检测

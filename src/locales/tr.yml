@@ -13,6 +13,23 @@ sidePanel:
   firefoxUserActionHint: Firefox'ta Read Frog'u tarayıcının kenar çubuğundan açın.
   firefoxUserActionHelpText: Firefox kenar çubuğunu açmayı öğrenin
   firefoxUserActionHelpUrl: https://support.mozilla.org/tr/kb/use-sidebar-access-tools-and-vertical-tabs
+splitTranslator:
+  title: Split Translator
+  description: Enter text, translate it with your current Read Frog settings, and copy the result.
+  inputLabel: Text to translate
+  inputPlaceholder: Enter text to translate...
+  translate: Translate
+  translating: Translating...
+  resultTitle: Result
+  emptyResult: The translation result will appear here.
+  translationFailed: Translation failed
+  translationFailedFallback: Unable to translate this text.
+  invalidConfiguration: Check your translation provider, API key, and language settings.
+  providerNotFound: Translation provider not found.
+  retry: Retry
+  copyResult: Copy result
+  copied: Copied to clipboard
+  copyFailed: Failed to copy result
 popup:
   theme: Tema
   autoLang: Otomatik

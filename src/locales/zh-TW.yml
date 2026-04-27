@@ -13,6 +13,23 @@ sidePanel:
   firefoxUserActionHint: 在 Firefox 中，請從瀏覽器側邊欄開啟陪讀蛙。
   firefoxUserActionHelpText: 查看 Firefox 側邊欄說明
   firefoxUserActionHelpUrl: https://support.mozilla.org/zh-TW/kb/use-sidebar-access-tools-and-vertical-tabs
+splitTranslator:
+  title: 分割翻譯
+  description: 輸入文字，使用目前 Read Frog 設定翻譯，並複製結果。
+  inputLabel: 要翻譯的文字
+  inputPlaceholder: 輸入要翻譯的文字...
+  translate: 翻譯
+  translating: 翻譯中...
+  resultTitle: 結果
+  emptyResult: 翻譯結果會顯示在這裡。
+  translationFailed: 翻譯失敗
+  translationFailedFallback: 無法翻譯這段文字。
+  invalidConfiguration: 請檢查翻譯提供商、API Key 和語言設定。
+  providerNotFound: 找不到翻譯提供商。
+  retry: 重試
+  copyResult: 複製結果
+  copied: 已複製到剪貼簿
+  copyFailed: 複製結果失敗
 popup:
   theme: 主題
   autoLang: 自動偵測
