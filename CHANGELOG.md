@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.33.1
+
+### Patch Changes
+
+- [#1394](https://github.com/mengxi-ream/read-frog/pull/1394) [`619c83d`](https://github.com/mengxi-ream/read-frog/commit/619c83defd417ad2c68c8e0c6258afe5e5d79b04) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add embed translate button and settings panel injection
+
+- [#1402](https://github.com/mengxi-ream/read-frog/pull/1402) [`0bd869f`](https://github.com/mengxi-ream/read-frog/commit/0bd869fd935738adcddae76f84c1232313168099) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(extension): guard popup account avatar session state
+
+- [#1397](https://github.com/mengxi-ream/read-frog/pull/1397) [`466c1ce`](https://github.com/mengxi-ream/read-frog/commit/466c1cefdb78726fd870d979ec90c41beafbaa38) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(extension): open native side panel from floating button
+
+- [#1400](https://github.com/mengxi-ream/read-frog/pull/1400) [`c3debfb`](https://github.com/mengxi-ream/read-frog/commit/c3debfbc0c2fe3ebf6c53937c63ca3d745ee4c0e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style(options): widen Google Drive sync conflict dialog
+
 ## 1.33.0
 
 ### Minor Changes
