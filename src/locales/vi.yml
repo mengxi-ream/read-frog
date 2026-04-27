@@ -9,6 +9,10 @@ contextMenu:
   translate: Dịch
   translateSelection: Dịch "%s"
   showOriginal: Hiển thị bản gốc
+sidePanel:
+  firefoxUserActionHint: Trong Firefox, hãy mở Read Frog từ thanh bên của trình duyệt.
+  firefoxUserActionHelpText: Xem cách mở thanh bên Firefox
+  firefoxUserActionHelpUrl: https://support.mozilla.org/vi/kb/use-sidebar-access-tools-and-vertical-tabs
 popup:
   theme: Chủ đề
   autoLang: Tự động

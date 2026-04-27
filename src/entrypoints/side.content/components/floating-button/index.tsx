@@ -3,6 +3,7 @@ import { browser, i18n } from "#imports"
 import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
   DropdownMenu,
@@ -63,6 +64,23 @@ const floatingButtonControlOffsetClassNames = {
     expanded: "-right-6",
   },
 } satisfies Record<FloatingButtonSide, { collapsed: string, expanded: string }>
+
+function FirefoxSidebarHelpToast() {
+  return (
+    <span>
+      {i18n.t("sidePanel.firefoxUserActionHint")}
+      {" "}
+      <a
+        href={i18n.t("sidePanel.firefoxUserActionHelpUrl")}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="text-primary underline underline-offset-2"
+      >
+        {i18n.t("sidePanel.firefoxUserActionHelpText")}
+      </a>
+    </span>
+  )
+}
 
 function getFloatingButtonSide(side: string | undefined): FloatingButtonSide {
   return side === "left" ? "left" : "right"
@@ -159,7 +177,11 @@ export default function FloatingButton() {
       return
     }
 
-    void sendMessage("toggleSidePanel", undefined)
+    void Promise.resolve(sendMessage("toggleSidePanel", undefined)).then((result) => {
+      if (result?.ok === false && result.reason === "requires-extension-user-action") {
+        toast.info(<FirefoxSidebarHelpToast />)
+      }
+    })
   }
 
   const startActiveDrag = () => {

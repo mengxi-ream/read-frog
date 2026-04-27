@@ -17,6 +17,20 @@ const senderWindowMessage = {
   },
 }
 
+function chromiumSidePanel<TApi>(api: TApi) {
+  return {
+    kind: "chromium-side-panel" as const,
+    api,
+  }
+}
+
+function firefoxSidebarAction<TApi>(api: TApi) {
+  return {
+    kind: "firefox-sidebar-action" as const,
+    api,
+  }
+}
+
 describe("background side panel", () => {
   afterEach(() => {
     vi.unstubAllGlobals()
@@ -36,7 +50,7 @@ describe("background side panel", () => {
     }
 
     const handler = createToggleSidePanelHandler({
-      getApi: () => sidePanel,
+      getApi: () => chromiumSidePanel(sidePanel),
       logger,
     })
 
@@ -66,7 +80,7 @@ describe("background side panel", () => {
     windowState.markOpened({ windowId: 456 })
 
     const handler = createToggleSidePanelHandler({
-      getApi: () => sidePanel,
+      getApi: () => chromiumSidePanel(sidePanel),
       logger,
       windowState,
     })
@@ -131,7 +145,7 @@ describe("background side panel", () => {
     windowState.markOpened({ windowId: 456 })
 
     const handler = createToggleSidePanelHandler({
-      getApi: () => sidePanel,
+      getApi: () => chromiumSidePanel(sidePanel),
       logger,
       windowState,
     })
@@ -152,7 +166,7 @@ describe("background side panel", () => {
     windowState.markOpened({ windowId: 456 })
 
     const handler = createToggleSidePanelHandler({
-      getApi: () => sidePanel,
+      getApi: () => chromiumSidePanel(sidePanel),
       logger,
       windowState,
     })
@@ -176,10 +190,44 @@ describe("background side panel", () => {
     expect(logger.warn).toHaveBeenCalledWith("Side panel API is unavailable in this browser")
   })
 
+  it("does not open the Firefox sidebar from a content-script message", async () => {
+    const logger = createLogger()
+    const sidebarAction = {
+      open: vi.fn(),
+    }
+    const handler = createToggleSidePanelHandler({
+      getApi: () => firefoxSidebarAction(sidebarAction),
+      logger,
+    })
+
+    await expect(handler(senderWindowMessage)).resolves.toEqual({
+      ok: false,
+      reason: "requires-extension-user-action",
+    })
+    expect(sidebarAction.open).not.toHaveBeenCalled()
+    expect(logger.warn).toHaveBeenCalledWith("Firefox sidebar requires an extension user action")
+  })
+
+  it("opens the Firefox sidebar when called from an extension user action", async () => {
+    const logger = createLogger()
+    const sidebarAction = {
+      open: vi.fn().mockResolvedValue(undefined),
+    }
+    const handler = createToggleSidePanelHandler({
+      getApi: () => firefoxSidebarAction(sidebarAction),
+      logger,
+    })
+
+    const result = handler({ data: { source: "extension-user-action" } })
+
+    expect(sidebarAction.open).toHaveBeenCalled()
+    await expect(result).resolves.toEqual({ ok: true, action: "opened" })
+  })
+
   it("returns a missing-window result when the sender window id is unavailable", async () => {
     const logger = createLogger()
     const handler = createToggleSidePanelHandler({
-      getApi: () => ({ open: vi.fn() }),
+      getApi: () => chromiumSidePanel({ open: vi.fn() }),
       logger,
     })
 
@@ -194,7 +242,7 @@ describe("background side panel", () => {
     const logger = createLogger()
     const error = new Error("sidePanel.open() may only be called in response to a user gesture")
     const handler = createToggleSidePanelHandler({
-      getApi: () => ({
+      getApi: () => chromiumSidePanel({
         open: vi.fn().mockRejectedValue(error),
       }),
       logger,
@@ -212,6 +260,20 @@ describe("background side panel", () => {
       sidePanel,
     })
 
-    expect(getSidePanelApi({} as any)).toBe(sidePanel)
+    expect(getSidePanelApi({} as any)).toEqual({
+      kind: "chromium-side-panel",
+      api: sidePanel,
+    })
+  })
+
+  it("finds the Firefox sidebarAction API from the WXT browser wrapper", () => {
+    const sidebarAction = {
+      open: vi.fn(),
+    }
+
+    expect(getSidePanelApi({ sidebarAction } as any)).toEqual({
+      kind: "firefox-sidebar-action",
+      api: sidebarAction,
+    })
   })
 })

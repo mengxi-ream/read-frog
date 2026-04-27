@@ -7,6 +7,8 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { sendMessage } from "@/utils/message"
 import FloatingButton from ".."
 
+const toastInfoMock = vi.fn()
+
 vi.mock("#imports", () => ({
   browser: {
     runtime: {
@@ -59,6 +61,12 @@ vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn(),
 }))
 
+vi.mock("sonner", () => ({
+  toast: {
+    info: (...args: unknown[]) => toastInfoMock(...args),
+  },
+}))
+
 beforeAll(() => {
   class ResizeObserverMock {
     observe() {}
@@ -72,7 +80,8 @@ beforeAll(() => {
 afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
-  vi.clearAllMocks()
+  vi.mocked(sendMessage).mockReset()
+  toastInfoMock.mockReset()
   setViewport(1024, 768)
 })
 
@@ -225,6 +234,38 @@ describe("floatingButton controls", () => {
     fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
 
     expect(sendMessage).toHaveBeenCalledWith("toggleSidePanel", undefined)
+  })
+
+  it("shows a Firefox sidebar help link when the browser requires an extension user action", async () => {
+    vi.useFakeTimers()
+    vi.mocked(sendMessage).mockResolvedValue({
+      ok: false,
+      reason: "requires-extension-user-action",
+    })
+    renderFloatingButton({ clickAction: "panel" })
+
+    const mainButton = getMainButton()
+
+    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    vi.advanceTimersByTime(349)
+    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const toastContent = toastInfoMock.mock.calls[0]?.[0]
+    expect(toastContent).toBeDefined()
+    render(<>{toastContent}</>)
+
+    expect(screen.getByText("sidePanel.firefoxUserActionHint")).toBeInTheDocument()
+    const link = screen.getByRole("link", { name: "sidePanel.firefoxUserActionHelpText" })
+    expect(link).toHaveAttribute(
+      "href",
+      "sidePanel.firefoxUserActionHelpUrl",
+    )
+    expect(link).toHaveAttribute("target", "_blank")
+    expect(link).toHaveAttribute("rel", "noopener noreferrer")
   })
 
   it("keeps translate as a normal click action", () => {
