@@ -16,6 +16,7 @@ sidePanel:
 splitTranslator:
   title: 分屏翻译
   description: 输入文本，使用当前陪读蛙设置翻译，并复制结果。
+  targetLanguageLabel: 目标语言
   inputLabel: 要翻译的文本
   inputPlaceholder: 输入要翻译的文本...
   translate: 翻译

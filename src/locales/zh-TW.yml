@@ -16,6 +16,7 @@ sidePanel:
 splitTranslator:
   title: 分割翻譯
   description: 輸入文字，使用目前 Read Frog 設定翻譯，並複製結果。
+  targetLanguageLabel: 目標語言
   inputLabel: 要翻譯的文字
   inputPlaceholder: 輸入要翻譯的文字...
   translate: 翻譯

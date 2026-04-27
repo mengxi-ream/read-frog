@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import type { ReactNode } from "react"
+import type { Config } from "@/types/config/config"
+import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import { Provider as JotaiProvider } from "jotai"
@@ -16,6 +18,10 @@ const toastSuccessMock = vi.fn()
 const toastErrorMock = vi.fn()
 const toastWarningMock = vi.fn()
 
+function langCodeLabel(langCode: Config["language"]["targetCode"]) {
+  return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
+}
+
 vi.mock("#imports", () => ({
   i18n: {
     t: (key: string) => key,
@@ -25,6 +31,96 @@ vi.mock("#imports", () => ({
 vi.mock("@iconify/react", () => ({
   Icon: ({ icon }: { icon: string }) => <span data-icon={icon} />,
 }))
+
+vi.mock("@/components/ui/base-ui/select", async () => {
+  const React = await vi.importActual<typeof import("react")>("react")
+
+  function SelectItem({ value, children }: { value: string, children: ReactNode }) {
+    return null
+  }
+
+  function collectOptions(children: ReactNode): ReactNode[] {
+    const options: ReactNode[] = []
+
+    React.Children.forEach(children, (child) => {
+      if (!React.isValidElement(child)) {
+        return
+      }
+
+      const props = child.props as {
+        children?: ReactNode
+        value?: string
+      }
+
+      if (child.type === SelectItem) {
+        options.push(
+          <option key={props.value} value={props.value}>
+            {props.children}
+          </option>,
+        )
+        return
+      }
+
+      if (props.children) {
+        options.push(...collectOptions(props.children))
+      }
+    })
+
+    return options
+  }
+
+  const SelectContext = React.createContext<{
+    children: ReactNode
+    onValueChange: (value: string) => void
+    value: string
+  } | null>(null)
+
+  function Select({
+    children,
+    onValueChange,
+    value,
+  }: {
+    children: ReactNode
+    onValueChange: (value: string) => void
+    value: string
+  }) {
+    return (
+      <SelectContext.Provider value={{ children, onValueChange, value }}>
+        {children}
+      </SelectContext.Provider>
+    )
+  }
+
+  function SelectTrigger({
+    "aria-label": ariaLabel,
+  }: {
+    "aria-label"?: string
+  }) {
+    const context = React.useContext(SelectContext)
+    if (!context) {
+      throw new Error("SelectTrigger must be used within Select")
+    }
+
+    return (
+      <select
+        aria-label={ariaLabel}
+        value={context.value}
+        onChange={event => context.onValueChange(event.target.value)}
+      >
+        {collectOptions(context.children)}
+      </select>
+    )
+  }
+
+  return {
+    Select,
+    SelectContent: () => null,
+    SelectGroup: () => null,
+    SelectItem,
+    SelectTrigger,
+    SelectValue: () => null,
+  }
+})
 
 vi.mock("@/utils/content/language", () => ({
   detectLanguage: (...args: unknown[]) => detectLanguageMock(...args),
@@ -46,12 +142,18 @@ vi.mock("sonner", () => ({
   },
 }))
 
-function TestHydrateAtoms({ children }: { children: ReactNode }) {
-  useHydrateAtoms([[configAtom, DEFAULT_CONFIG]])
+function TestHydrateAtoms({
+  children,
+  config = DEFAULT_CONFIG,
+}: {
+  children: ReactNode
+  config?: Config
+}) {
+  useHydrateAtoms([[configAtom, config]])
   return children
 }
 
-function renderApp() {
+function renderApp(config: Config = DEFAULT_CONFIG) {
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -62,7 +164,7 @@ function renderApp() {
   return render(
     <QueryClientProvider client={queryClient}>
       <JotaiProvider>
-        <TestHydrateAtoms>
+        <TestHydrateAtoms config={config}>
           <ThemeProvider>
             <App />
           </ThemeProvider>
@@ -70,6 +172,15 @@ function renderApp() {
       </JotaiProvider>
     </QueryClientProvider>,
   )
+}
+
+async function selectTargetLanguage(langCode: Config["language"]["targetCode"]) {
+  const combobox = screen.getByRole("combobox", { name: "splitTranslator.targetLanguageLabel" })
+  fireEvent.change(combobox, { target: { value: langCode } })
+
+  await waitFor(() => {
+    expect(screen.getByRole("option", { name: langCodeLabel(langCode), selected: true })).toBeInTheDocument()
+  })
 }
 
 describe("split translator app", () => {
@@ -117,6 +228,76 @@ describe("split translator app", () => {
 
     expect(main).toHaveClass("w-full")
     expect(main).not.toHaveClass("max-w-xl")
+  })
+
+  it("renders a target language selector that defaults to the global target language", () => {
+    renderApp()
+
+    expect(screen.getByText("splitTranslator.targetLanguageLabel")).toBeInTheDocument()
+    expect(screen.getByRole("combobox", { name: "splitTranslator.targetLanguageLabel" })).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: langCodeLabel(DEFAULT_CONFIG.language.targetCode), selected: true })).toBeInTheDocument()
+  })
+
+  it("submits text with the currently selected target language", async () => {
+    translateTextCoreMock.mockResolvedValue("Hello")
+    renderApp()
+
+    await selectTargetLanguage("eng")
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledWith(expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "eng" }),
+        text: "你好",
+      }))
+    })
+  })
+
+  it("automatically retranslates non-empty input when the target language changes", async () => {
+    translateTextCoreMock
+      .mockResolvedValueOnce("你好")
+      .mockResolvedValueOnce("Hello")
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+    await screen.findByText("你好")
+
+    await selectTargetLanguage("eng")
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(2)
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "eng" }),
+        text: "Hello",
+      }))
+    })
+  })
+
+  it("retries with the current selected target language", async () => {
+    translateTextCoreMock
+      .mockRejectedValueOnce(new Error("Network failed"))
+      .mockResolvedValueOnce("Hello")
+    renderApp()
+
+    await selectTargetLanguage("eng")
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(screen.getByText("Network failed")).toBeInTheDocument()
+    })
+
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.retry" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "eng" }),
+        text: "你好",
+      }))
+      expect(screen.getByText("Hello")).toBeInTheDocument()
+    })
   })
 
   it("submits text and renders the translated result", async () => {

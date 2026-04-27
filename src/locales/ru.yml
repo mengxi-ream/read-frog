@@ -16,6 +16,7 @@ sidePanel:
 splitTranslator:
   title: Split Translator
   description: Enter text, translate it with your current Read Frog settings, and copy the result.
+  targetLanguageLabel: Целевой язык
   inputLabel: Text to translate
   inputPlaceholder: Enter text to translate...
   translate: Translate

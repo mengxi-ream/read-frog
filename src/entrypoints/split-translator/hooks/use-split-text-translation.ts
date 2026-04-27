@@ -30,7 +30,10 @@ export function useSplitTextTranslation() {
   const [state, setState] = useState<SplitTextTranslationState>({ status: "idle" })
   const runIdRef = useRef(0)
 
-  const translate = useCallback(async (rawInput: string) => {
+  const translate = useCallback(async (
+    rawInput: string,
+    targetCode: LangCodeISO6393 = config.language.targetCode,
+  ) => {
     const input = rawInput.trim()
     if (!input) {
       return
@@ -41,24 +44,32 @@ export function useSplitTextTranslation() {
     setState({ status: "loading", input: rawInput })
 
     try {
+      const languageConfig = {
+        ...config.language,
+        targetCode,
+      }
+      const translationConfig = {
+        ...config,
+        language: languageConfig,
+      }
       const providerConfig = getProviderConfigById(config.providersConfig, config.translate.providerId)
       if (!providerConfig) {
         throw new Error(i18n.t("splitTranslator.providerNotFound"))
       }
 
-      const detectedCode: LangCodeISO6393 = config.language.sourceCode === "auto"
+      const detectedCode: LangCodeISO6393 = languageConfig.sourceCode === "auto"
         ? (await detectLanguage(input, {
             enableLLM: config.languageDetection.mode === "llm",
             minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
             suppressFallbackToast: true,
           })) ?? DEFAULT_DETECTED_CODE
-        : config.language.sourceCode
+        : languageConfig.sourceCode
 
       if (runIdRef.current !== runId) {
         return
       }
 
-      if (!validateTranslationConfigAndToast(config, detectedCode)) {
+      if (!validateTranslationConfigAndToast(translationConfig, detectedCode)) {
         setState({
           status: "error",
           input: rawInput,
@@ -69,7 +80,7 @@ export function useSplitTextTranslation() {
 
       const result = await translateTextCore({
         text: input,
-        langConfig: config.language,
+        langConfig: languageConfig,
         providerConfig,
         enableAIContentAware: config.translate.enableAIContentAware,
         extraHashTags: ["splitTranslator"],
