@@ -188,6 +188,10 @@ options:
       system: 跟隨系統
       light: 淺色
       dark: 深色
+    appLanguage:
+      title: 介面語言
+      description: 選擇 Read Frog 的顯示語言
+      system: 跟隨瀏覽器語言
     featureProviders:
       title: 功能提供商
       description: 為每個功能選擇使用的提供商

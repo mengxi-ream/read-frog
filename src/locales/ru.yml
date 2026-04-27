@@ -188,6 +188,10 @@ options:
       system: Системная
       light: Светлая
       dark: Тёмная
+    appLanguage:
+      title: Язык приложения
+      description: Выберите язык интерфейса Read Frog
+      system: Язык браузера
     featureProviders:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции

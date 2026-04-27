@@ -188,6 +188,10 @@ options:
       system: 시스템
       light: 라이트
       dark: 다크
+    appLanguage:
+      title: 앱 언어
+      description: Read Frog의 표시 언어 선택
+      system: 브라우저 언어 따르기
     featureProviders:
       title: 기능 제공업체
       description: 각 기능에 사용할 제공업체를 선택

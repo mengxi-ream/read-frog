@@ -188,6 +188,10 @@ options:
       system: Hệ thống
       light: Sáng
       dark: Tối
+    appLanguage:
+      title: Ngôn ngữ ứng dụng
+      description: Chọn ngôn ngữ hiển thị cho Read Frog
+      system: Theo ngôn ngữ trình duyệt
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng

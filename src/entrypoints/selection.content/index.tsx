@@ -9,6 +9,7 @@ import { useHydrateAtoms } from "jotai/utils"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { initializeAppLocale } from "@/utils/app-locale"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
@@ -45,7 +46,10 @@ declare global {
 async function mountSelectionUI(ctx: ContentScriptContext) {
   ensureIconifyBackgroundFetch()
 
-  const themeMode = await getLocalThemeMode()
+  const [, themeMode] = await Promise.all([
+    initializeAppLocale(),
+    getLocalThemeMode(),
+  ])
 
   const ui = await createShadowRootUi(ctx, {
     name: `${kebabCase(APP_NAME)}-selection`,

@@ -188,6 +188,10 @@ options:
       system: システム
       light: ライト
       dark: ダーク
+    appLanguage:
+      title: アプリの言語
+      description: Read Frog の表示言語を選択
+      system: ブラウザーの言語に従う
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択

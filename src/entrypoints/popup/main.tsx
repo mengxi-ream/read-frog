@@ -10,6 +10,7 @@ import FrogToast from "@/components/frog-toast"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { initializeAppLocale } from "@/utils/app-locale"
 import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -48,7 +49,8 @@ async function initApp() {
   const root = document.getElementById("root")!
   root.className = "text-base antialiased w-[320px] bg-background"
 
-  const [configValue, themeMode, activeTab] = await Promise.all([
+  const [, configValue, themeMode, activeTab] = await Promise.all([
+    initializeAppLocale(),
     getLocalConfig(),
     getLocalThemeMode(),
     browser.tabs.query({

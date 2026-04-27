@@ -189,6 +189,10 @@ options:
       system: System
       light: Light
       dark: Dark
+    appLanguage:
+      title: App Language
+      description: Choose the display language for Read Frog
+      system: Follow browser language
     featureProviders:
       title: Feature Providers
       description: Choose which provider to use for each feature

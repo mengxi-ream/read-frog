@@ -188,6 +188,10 @@ options:
       system: Sistem
       light: Açık
       dark: Koyu
+    appLanguage:
+      title: Uygulama dili
+      description: Read Frog arayüz dilini seçin
+      system: Tarayıcı dilini kullan
     featureProviders:
       title: Özellik Sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin

@@ -10,6 +10,7 @@ import { lazy, Suspense } from "react"
 import ReactDOM from "react-dom/client"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { initializeAppLocale } from "@/utils/app-locale"
 import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -51,7 +52,11 @@ export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   cssInjectionMode: "ui",
   async main(ctx) {
-    const config = await getLocalConfig() ?? DEFAULT_CONFIG
+    const [, configValue] = await Promise.all([
+      initializeAppLocale(),
+      getLocalConfig(),
+    ])
+    const config = configValue ?? DEFAULT_CONFIG
 
     // Check global site control
     if (!isSiteEnabled(window.location.href, config)) {

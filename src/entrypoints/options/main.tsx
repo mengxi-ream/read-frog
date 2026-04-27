@@ -12,6 +12,7 @@ import { ThemeProvider } from "@/components/providers/theme-provider"
 import { RecoveryBoundary } from "@/components/recovery/recovery-boundary"
 import { SidebarProvider } from "@/components/ui/base-ui/sidebar"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
+import { initializeAppLocale } from "@/utils/app-locale"
 import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -43,7 +44,8 @@ async function initApp() {
   const root = document.getElementById("root")!
   root.className = "antialiased bg-background"
 
-  const [configValue, themeMode] = await Promise.all([
+  const [, configValue, themeMode] = await Promise.all([
+    initializeAppLocale(),
     getLocalConfig(),
     getLocalThemeMode(),
   ])
