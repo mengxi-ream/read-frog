@@ -9,6 +9,10 @@ contextMenu:
   translate: Перевести
   translateSelection: Перевести "%s"
   showOriginal: Показать оригинал
+sidePanel:
+  firefoxUserActionHint: В Firefox откройте Read Frog из боковой панели браузера.
+  firefoxUserActionHelpText: Как открыть боковую панель Firefox
+  firefoxUserActionHelpUrl: https://support.mozilla.org/ru/kb/ispolzovanije-bokovoi-paneli-dostup-instrumenty-i-vertikalnyje-vkladki
 popup:
   theme: Тема
   autoLang: Авто
@@ -284,7 +288,7 @@ options:
       clickAction:
         title: Действие по клику
         description: Выберите действие при нажатии на плавающую кнопку
-        panel: Открыть панель
+        panel: Открыть боковую панель
         translate: Переключить перевод страницы
     selectionToolbar:
       globalToggle:

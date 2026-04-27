@@ -9,6 +9,10 @@ contextMenu:
   translate: 翻譯
   translateSelection: 翻譯「%s」
   showOriginal: 顯示原文
+sidePanel:
+  firefoxUserActionHint: 在 Firefox 中，請從瀏覽器側邊欄開啟陪讀蛙。
+  firefoxUserActionHelpText: 查看 Firefox 側邊欄說明
+  firefoxUserActionHelpUrl: https://support.mozilla.org/zh-TW/kb/use-sidebar-access-tools-and-vertical-tabs
 popup:
   theme: 主題
   autoLang: 自動偵測
@@ -284,7 +288,7 @@ options:
       clickAction:
         title: 點擊行為
         description: 選擇點擊懸浮按鈕時執行的操作
-        panel: 開啟面板
+        panel: 開啟側邊欄
         translate: 切換頁面翻譯
     selectionToolbar:
       globalToggle:

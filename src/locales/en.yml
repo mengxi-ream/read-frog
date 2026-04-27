@@ -9,6 +9,10 @@ contextMenu:
   translate: Translate
   translateSelection: Translate "%s"
   showOriginal: Show Original
+sidePanel:
+  firefoxUserActionHint: In Firefox, open Read Frog from the browser sidebar.
+  firefoxUserActionHelpText: Learn how to open the Firefox sidebar
+  firefoxUserActionHelpUrl: https://support.mozilla.org/en-US/kb/use-sidebar-access-tools-and-vertical-tabs
 popup:
   theme: Theme
   autoLang: Auto
@@ -285,7 +289,7 @@ options:
       clickAction:
         title: Click Action
         description: Choose the action when clicking the floating button
-        panel: Open Panel
+        panel: Open Side Panel
         translate: Toggle Page Translation
     selectionToolbar:
       globalToggle:
