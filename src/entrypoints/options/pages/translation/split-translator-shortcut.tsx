@@ -10,7 +10,7 @@ import { formatPageTranslationShortcut } from "@/utils/page-translation-shortcut
 import { ConfigCard } from "../../components/config-card"
 
 export function SplitTranslatorShortcut() {
-  const t = i18n.t as (key: string, values?: string[]) => string
+  const t = i18n.t as (key: string) => string
   const [shortcut, setShortcut] = useState<string | null>(null)
 
   useEffect(() => {

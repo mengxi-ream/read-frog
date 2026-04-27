@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { afterEach, describe, expect, it, vi } from "vitest"
+import { SPLIT_TRANSLATOR_COMMAND } from "@/entrypoints/background/split-translator-command"
 
 const i18nTMock = vi.hoisted(() => vi.fn((key: string) => key))
 const getExtensionCommandShortcutMock = vi.fn()
@@ -35,6 +36,10 @@ vi.mock("@/utils/extension-command-shortcut", () => ({
   getExtensionCommandShortcut: (...args: unknown[]) => getExtensionCommandShortcutMock(...args),
 }))
 
+vi.mock("@/utils/page-translation-shortcut", () => ({
+  formatPageTranslationShortcut: (shortcut: string) => shortcut,
+}))
+
 vi.mock("@/utils/navigation", () => ({
   openExtensionShortcutSettings: (...args: unknown[]) => openExtensionShortcutSettingsMock(...args),
 }))
@@ -64,6 +69,7 @@ describe("splitTranslatorShortcut", () => {
     expect(screen.getByText("options.translation.splitTranslatorShortcut.description")).toBeInTheDocument()
     expect(await screen.findByDisplayValue("Alt+S")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "options.translation.splitTranslatorShortcut.openSettings" })).toBeInTheDocument()
+    expect(getExtensionCommandShortcutMock).toHaveBeenCalledWith(SPLIT_TRANSLATOR_COMMAND)
   })
 
   it("renders an unset label when the browser command has no shortcut", async () => {
