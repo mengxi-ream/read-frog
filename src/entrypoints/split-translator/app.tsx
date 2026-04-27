@@ -10,12 +10,13 @@ import { useSplitTextTranslation } from "./hooks/use-split-text-translation"
 export default function App() {
   const config = useAtomValue(configAtom)
   const [input, setInput] = useState("")
-  const [targetLanguage, setTargetLanguage] = useState<LangCodeISO6393>(config.language.targetCode)
+  const [selectedTargetLanguage, setSelectedTargetLanguage] = useState<LangCodeISO6393>()
   const { state, translate } = useSplitTextTranslation()
   const isTranslating = state.status === "loading"
+  const targetLanguage = selectedTargetLanguage ?? config.language.targetCode
 
   const handleTargetLanguageChange = (nextTargetLanguage: LangCodeISO6393) => {
-    setTargetLanguage(nextTargetLanguage)
+    setSelectedTargetLanguage(nextTargetLanguage)
     if (input.trim()) {
       void translate(input, nextTargetLanguage)
     }

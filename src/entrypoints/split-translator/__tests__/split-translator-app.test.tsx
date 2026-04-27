@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
-import type { ReactNode } from "react"
 import type { Config } from "@/types/config/config"
 import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
-import { Provider as JotaiProvider } from "jotai"
-import { useHydrateAtoms } from "jotai/utils"
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
+import { createStore, Provider as JotaiProvider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { configAtom } from "@/utils/atoms/config"
@@ -17,6 +15,9 @@ const detectLanguageMock = vi.fn()
 const toastSuccessMock = vi.fn()
 const toastErrorMock = vi.fn()
 const toastWarningMock = vi.fn()
+const getItemMock = vi.fn()
+const setItemMock = vi.fn()
+const setMetaMock = vi.fn()
 
 function langCodeLabel(langCode: Config["language"]["targetCode"]) {
   return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
@@ -26,101 +27,17 @@ vi.mock("#imports", () => ({
   i18n: {
     t: (key: string) => key,
   },
+  storage: {
+    getItem: getItemMock,
+    setItem: setItemMock,
+    setMeta: setMetaMock,
+    watch: vi.fn(() => vi.fn()),
+  },
 }))
 
 vi.mock("@iconify/react", () => ({
   Icon: ({ icon }: { icon: string }) => <span data-icon={icon} />,
 }))
-
-vi.mock("@/components/ui/base-ui/select", async () => {
-  const React = await vi.importActual<typeof import("react")>("react")
-
-  function SelectItem({ value, children }: { value: string, children: ReactNode }) {
-    return null
-  }
-
-  function collectOptions(children: ReactNode): ReactNode[] {
-    const options: ReactNode[] = []
-
-    React.Children.forEach(children, (child) => {
-      if (!React.isValidElement(child)) {
-        return
-      }
-
-      const props = child.props as {
-        children?: ReactNode
-        value?: string
-      }
-
-      if (child.type === SelectItem) {
-        options.push(
-          <option key={props.value} value={props.value}>
-            {props.children}
-          </option>,
-        )
-        return
-      }
-
-      if (props.children) {
-        options.push(...collectOptions(props.children))
-      }
-    })
-
-    return options
-  }
-
-  const SelectContext = React.createContext<{
-    children: ReactNode
-    onValueChange: (value: string) => void
-    value: string
-  } | null>(null)
-
-  function Select({
-    children,
-    onValueChange,
-    value,
-  }: {
-    children: ReactNode
-    onValueChange: (value: string) => void
-    value: string
-  }) {
-    return (
-      <SelectContext.Provider value={{ children, onValueChange, value }}>
-        {children}
-      </SelectContext.Provider>
-    )
-  }
-
-  function SelectTrigger({
-    "aria-label": ariaLabel,
-  }: {
-    "aria-label"?: string
-  }) {
-    const context = React.useContext(SelectContext)
-    if (!context) {
-      throw new Error("SelectTrigger must be used within Select")
-    }
-
-    return (
-      <select
-        aria-label={ariaLabel}
-        value={context.value}
-        onChange={event => context.onValueChange(event.target.value)}
-      >
-        {collectOptions(context.children)}
-      </select>
-    )
-  }
-
-  return {
-    Select,
-    SelectContent: () => null,
-    SelectGroup: () => null,
-    SelectItem,
-    SelectTrigger,
-    SelectValue: () => null,
-  }
-})
 
 vi.mock("@/utils/content/language", () => ({
   detectLanguage: (...args: unknown[]) => detectLanguageMock(...args),
@@ -142,18 +59,11 @@ vi.mock("sonner", () => ({
   },
 }))
 
-function TestHydrateAtoms({
-  children,
-  config = DEFAULT_CONFIG,
-}: {
-  children: ReactNode
-  config?: Config
-}) {
-  useHydrateAtoms([[configAtom, config]])
-  return children
-}
-
 function renderApp(config: Config = DEFAULT_CONFIG) {
+  getItemMock.mockResolvedValue(config)
+  const store = createStore()
+  store.set(configAtom, config)
+
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: { retry: false },
@@ -161,26 +71,42 @@ function renderApp(config: Config = DEFAULT_CONFIG) {
     },
   })
 
-  return render(
+  const renderResult = render(
     <QueryClientProvider client={queryClient}>
-      <JotaiProvider>
-        <TestHydrateAtoms config={config}>
-          <ThemeProvider>
-            <App />
-          </ThemeProvider>
-        </TestHydrateAtoms>
+      <JotaiProvider store={store}>
+        <ThemeProvider>
+          <App />
+        </ThemeProvider>
       </JotaiProvider>
     </QueryClientProvider>,
   )
+
+  return {
+    store,
+    ...renderResult,
+  }
+}
+
+function getTargetLanguageSelector() {
+  return screen.getByRole("combobox", { name: "splitTranslator.targetLanguageLabel" })
+}
+
+async function expectTargetLanguage(langCode: Config["language"]["targetCode"]) {
+  await waitFor(() => {
+    expect(getTargetLanguageSelector()).toHaveTextContent(langCodeLabel(langCode))
+  })
 }
 
 async function selectTargetLanguage(langCode: Config["language"]["targetCode"]) {
-  const combobox = screen.getByRole("combobox", { name: "splitTranslator.targetLanguageLabel" })
-  fireEvent.change(combobox, { target: { value: langCode } })
+  fireEvent.click(getTargetLanguageSelector())
+  const option = await screen.findByRole("option", { name: langCodeLabel(langCode) })
+  fireEvent.pointerMove(option, { pointerType: "mouse" })
+  fireEvent.mouseMove(option)
+  fireEvent.pointerDown(option, { pointerType: "mouse" })
+  fireEvent.mouseDown(option)
+  fireEvent.click(option)
 
-  await waitFor(() => {
-    expect(screen.getByRole("option", { name: langCodeLabel(langCode), selected: true })).toBeInTheDocument()
-  })
+  await expectTargetLanguage(langCode)
 }
 
 describe("split translator app", () => {
@@ -190,7 +116,13 @@ describe("split translator app", () => {
     toastSuccessMock.mockReset()
     toastErrorMock.mockReset()
     toastWarningMock.mockReset()
+    getItemMock.mockReset()
+    setItemMock.mockReset()
+    setMetaMock.mockReset()
     detectLanguageMock.mockResolvedValue("eng")
+    getItemMock.mockResolvedValue(DEFAULT_CONFIG)
+    setItemMock.mockResolvedValue(undefined)
+    setMetaMock.mockResolvedValue(undefined)
 
     Object.defineProperty(window, "matchMedia", {
       configurable: true,
@@ -234,8 +166,45 @@ describe("split translator app", () => {
     renderApp()
 
     expect(screen.getByText("splitTranslator.targetLanguageLabel")).toBeInTheDocument()
-    expect(screen.getByRole("combobox", { name: "splitTranslator.targetLanguageLabel" })).toBeInTheDocument()
-    expect(screen.getByRole("option", { name: langCodeLabel(DEFAULT_CONFIG.language.targetCode), selected: true })).toBeInTheDocument()
+    expect(getTargetLanguageSelector()).toBeInTheDocument()
+    expect(getTargetLanguageSelector()).toHaveTextContent(langCodeLabel(DEFAULT_CONFIG.language.targetCode))
+  })
+
+  it("syncs the selector with config updates after mount until the user chooses a local target language", async () => {
+    const persistedConfig: Config = {
+      ...DEFAULT_CONFIG,
+      language: {
+        ...DEFAULT_CONFIG.language,
+        targetCode: "eng",
+      },
+    }
+    const { store } = renderApp()
+
+    await expectTargetLanguage(DEFAULT_CONFIG.language.targetCode)
+
+    act(() => {
+      store.set(configAtom, persistedConfig)
+    })
+
+    await expectTargetLanguage("eng")
+  })
+
+  it("keeps a user-selected target language local after later config updates", async () => {
+    const { store } = renderApp()
+
+    await selectTargetLanguage("eng")
+
+    act(() => {
+      store.set(configAtom, {
+        ...DEFAULT_CONFIG,
+        language: {
+          ...DEFAULT_CONFIG.language,
+          targetCode: "jpn",
+        },
+      })
+    })
+
+    await expectTargetLanguage("eng")
   })
 
   it("submits text with the currently selected target language", async () => {
