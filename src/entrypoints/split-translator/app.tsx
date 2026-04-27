@@ -1,7 +1,7 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { i18n } from "#imports"
 import { useAtomValue } from "jotai"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { configAtom } from "@/utils/atoms/config"
 import { TextInputForm } from "./components/text-input-form"
 import { TranslationResult } from "./components/translation-result"
@@ -16,6 +16,17 @@ export default function App() {
   const isTranslating = state.status === "loading"
   const targetLanguage = selectedTargetLanguage ?? config.language.targetCode
   const previousConfigTargetLanguageRef = useRef(config.language.targetCode)
+  const lastRequestedTargetLanguageRef = useRef(targetLanguage)
+
+  const runTranslation = useCallback((rawInput: string, nextTargetLanguage: LangCodeISO6393) => {
+    const trimmedInput = rawInput.trim()
+    if (!trimmedInput) {
+      return Promise.resolve()
+    }
+
+    lastRequestedTargetLanguageRef.current = nextTargetLanguage
+    return translate(rawInput, nextTargetLanguage)
+  }, [translate])
 
   useEffect(() => {
     const previousConfigTargetLanguage = previousConfigTargetLanguageRef.current
@@ -37,8 +48,8 @@ export default function App() {
     }
 
     setPendingExternalTargetLanguage(undefined)
-    void translate(input, nextConfigTargetLanguage)
-  }, [config.language.targetCode, input, isTranslating, selectedTargetLanguage, translate])
+    void runTranslation(input, nextConfigTargetLanguage)
+  }, [config.language.targetCode, input, isTranslating, runTranslation, selectedTargetLanguage])
 
   useEffect(() => {
     if (pendingExternalTargetLanguage === undefined || isTranslating) {
@@ -50,15 +61,20 @@ export default function App() {
       return
     }
 
+    if (pendingExternalTargetLanguage === lastRequestedTargetLanguageRef.current) {
+      setPendingExternalTargetLanguage(undefined)
+      return
+    }
+
     setPendingExternalTargetLanguage(undefined)
-    void translate(input, pendingExternalTargetLanguage)
-  }, [input, isTranslating, pendingExternalTargetLanguage, selectedTargetLanguage, translate])
+    void runTranslation(input, pendingExternalTargetLanguage)
+  }, [input, isTranslating, pendingExternalTargetLanguage, runTranslation, selectedTargetLanguage])
 
   const handleTargetLanguageChange = (nextTargetLanguage: LangCodeISO6393) => {
     setPendingExternalTargetLanguage(undefined)
     setSelectedTargetLanguage(nextTargetLanguage)
     if (input.trim()) {
-      void translate(input, nextTargetLanguage)
+      void runTranslation(input, nextTargetLanguage)
     }
   }
 
@@ -77,7 +93,7 @@ export default function App() {
         <TextInputForm
           value={input}
           onChange={setInput}
-          onSubmit={() => void translate(input, targetLanguage)}
+          onSubmit={() => void runTranslation(input, targetLanguage)}
           onTargetLanguageChange={handleTargetLanguageChange}
           targetLanguage={targetLanguage}
           disabled={!input.trim()}
@@ -86,7 +102,7 @@ export default function App() {
 
         <TranslationResult
           state={state}
-          onRetry={() => void translate(input, targetLanguage)}
+          onRetry={() => void runTranslation(input, targetLanguage)}
         />
       </main>
     </div>

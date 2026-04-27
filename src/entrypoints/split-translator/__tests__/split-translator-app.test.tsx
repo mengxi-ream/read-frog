@@ -362,6 +362,56 @@ describe("split translator app", () => {
     })
   })
 
+  it("does not replay a deferred external target-language change when it returns to the active request target", async () => {
+    let resolveFirstTranslation: (value: string) => void
+    translateTextCoreMock.mockReturnValueOnce(new Promise<string>((resolve) => {
+      resolveFirstTranslation = resolve
+    }))
+    const { store } = renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+      expect(translateTextCoreMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
+        langConfig: expect.objectContaining({ targetCode: "cmn" }),
+        text: "你好",
+      }))
+    })
+
+    act(() => {
+      store.set(configAtom, {
+        ...DEFAULT_CONFIG,
+        language: {
+          ...DEFAULT_CONFIG.language,
+          targetCode: "eng",
+        },
+      })
+    })
+
+    await expectTargetLanguage("eng")
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    act(() => {
+      store.set(configAtom, DEFAULT_CONFIG)
+    })
+
+    await expectTargetLanguage("cmn")
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    resolveFirstTranslation!("你好")
+
+    await screen.findByText("你好")
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+  })
+
   it("retries with the current selected target language", async () => {
     translateTextCoreMock
       .mockRejectedValueOnce(new Error("Network failed"))
