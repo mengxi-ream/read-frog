@@ -51,8 +51,12 @@ export function TextInputForm({
         <span className="text-sm font-medium">
           {targetLanguageLabel}
         </span>
-        <Select value={targetLanguage} onValueChange={value => onTargetLanguageChange(value as LangCodeISO6393)}>
-          <SelectTrigger aria-label={targetLanguageLabel} className="w-full min-w-0">
+        <Select
+          value={targetLanguage}
+          disabled={isTranslating}
+          onValueChange={value => onTargetLanguageChange(value as LangCodeISO6393)}
+        >
+          <SelectTrigger aria-label={targetLanguageLabel} className="w-full min-w-0" disabled={isTranslating}>
             <SelectValue render={<span className="flex-1 min-w-0" />}>
               <span className="block min-w-0 truncate">{langCodeLabel(targetLanguage)}</span>
             </SelectValue>

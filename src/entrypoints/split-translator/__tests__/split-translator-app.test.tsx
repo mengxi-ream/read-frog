@@ -348,6 +348,50 @@ describe("split translator app", () => {
     await screen.findByText("Bonjour")
   })
 
+  it("disables the target language selector while translation is loading", async () => {
+    let resolveTranslation: (value: string) => void
+    translateTextCoreMock.mockReturnValue(new Promise<string>((resolve) => {
+      resolveTranslation = resolve
+    }))
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(getTargetLanguageSelector()).toBeDisabled()
+    })
+
+    resolveTranslation!("Bonjour")
+    await screen.findByText("Bonjour")
+  })
+
+  it("does not start a second translation when users try to change target language while loading", async () => {
+    let resolveTranslation: (value: string) => void
+    translateTextCoreMock.mockReturnValue(new Promise<string>((resolve) => {
+      resolveTranslation = resolve
+    }))
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+      expect(getTargetLanguageSelector()).toBeDisabled()
+    })
+
+    fireEvent.click(getTargetLanguageSelector())
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+    expect(screen.queryByRole("option", { name: langCodeLabel("eng") })).not.toBeInTheDocument()
+
+    resolveTranslation!("Bonjour")
+    await screen.findByText("Bonjour")
+  })
+
   it("shows a retryable error state when translation fails", async () => {
     translateTextCoreMock.mockRejectedValueOnce(new Error("Network failed"))
     renderApp()
