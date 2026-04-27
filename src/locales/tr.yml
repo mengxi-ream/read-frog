@@ -568,7 +568,8 @@ options:
       description: Tüm web sayfalarını çevirmek için kısayol tuşunu özelleştirin
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      description: Split Translator'u açmak için kullanılan tarayıcı kısayolunu gösterir. Değiştirmek için tarayıcınızın uzantı kısayol ayarlarını açın.
+      unset: Ayarlanmadı
       openSettings: Open shortcut settings
       openFailed: Unable to open browser shortcut settings.
     preloadConfig:

@@ -568,7 +568,8 @@ options:
       description: ウェブページ全体を翻訳するショートカットキーをカスタマイズします
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      description: Split Translator を開くブラウザーのショートカットキーを表示します。変更するには、ブラウザーの拡張機能ショートカット設定を開いてください。
+      unset: 未設定
       openSettings: Open shortcut settings
       openFailed: Unable to open browser shortcut settings.
     preloadConfig:

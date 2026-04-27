@@ -683,7 +683,8 @@ options:
       description: Customize the shortcut key for translating entire web pages
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      description: View the browser shortcut used to open Split Translator. To change it, open your browser's extension shortcut settings.
+      unset: Not set
       openSettings: Open shortcut settings
       openFailed: Unable to open browser shortcut settings.
     preloadConfig:

@@ -568,7 +568,8 @@ options:
       description: Tùy chỉnh phím tắt để dịch toàn bộ trang web
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      description: Hiển thị phím tắt trên trình duyệt dùng để mở Split Translator. Để thay đổi, hãy mở phần cài đặt phím tắt tiện ích của trình duyệt.
+      unset: Chưa đặt
       openSettings: Open shortcut settings
       openFailed: Unable to open browser shortcut settings.
     preloadConfig:

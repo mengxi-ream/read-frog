@@ -568,7 +568,8 @@ options:
       description: 自訂翻譯整個網頁的快捷鍵
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      description: 查看用於開啟 Split Translator 的瀏覽器快捷鍵。如需修改，請開啟瀏覽器的擴充功能快捷鍵設定。
+      unset: 未設定
       openSettings: Open shortcut settings
       openFailed: Unable to open browser shortcut settings.
     preloadConfig:

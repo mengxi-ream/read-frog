@@ -568,7 +568,8 @@ options:
       description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: The default shortcut is $1. To customize it, open your browser's extension shortcut settings.
+      description: Split Translator를 여는 브라우저 단축키를 표시합니다. 변경하려면 브라우저의 확장 프로그램 단축키 설정을 여세요.
+      unset: 설정 안 됨
       openSettings: Open shortcut settings
       openFailed: Unable to open browser shortcut settings.
     preloadConfig:
