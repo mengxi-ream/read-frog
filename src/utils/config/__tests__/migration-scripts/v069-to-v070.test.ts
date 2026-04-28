@@ -32,4 +32,23 @@ describe("v069-to-v070 migration", () => {
       shortcut: "Mod+Shift+S",
     })
   })
+
+  it("preserves other existing split translator config fields", () => {
+    const migrated = migrate({
+      translate: {
+        page: {
+          shortcut: "Alt+E",
+        },
+        splitTranslator: {
+          shortcut: "Mod+Shift+S",
+          enabled: true,
+        },
+      },
+    })
+
+    expect(migrated.translate.splitTranslator).toEqual({
+      shortcut: "Mod+Shift+S",
+      enabled: true,
+    })
+  })
 })

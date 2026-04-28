@@ -12,6 +12,7 @@ export function migrate(oldConfig: any): any {
     translate: {
       ...oldConfig?.translate,
       splitTranslator: {
+        ...oldConfig?.translate?.splitTranslator,
         shortcut: oldConfig?.translate?.splitTranslator?.shortcut ?? "Alt+S",
       },
     },
