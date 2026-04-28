@@ -1,4 +1,5 @@
 import type { FeatureUsageContext } from "@/types/analytics"
+import type { Config } from "@/types/config/config"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
@@ -7,7 +8,7 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { hasNoWalkAncestor, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
+import { hasNoWalkAncestor, isDontWalkIntoAndDontTranslateAsChildElement, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
@@ -59,7 +60,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private mutationObservers: MutationObserver[] = []
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
-  private dontWalkIntoElementsCache = new WeakSet<HTMLElement>()
+  private walkBlockedElementsCache = new WeakSet<HTMLElement>()
   private titleObserver: MutationObserver | null = null
   private lastSourceTitle: string | null = null
   private lastAppliedTranslatedTitle: string | null = null
@@ -153,8 +154,8 @@ export class PageTranslationManager implements IPageTranslationManager {
       }, this.intersectionOptions)
 
       // Initialize walkability state for existing elements
-      this.addDontWalkIntoElements(document.body)
-      await this.observerTopLevelParagraphs(document.body)
+      this.addWalkBlockedElements(document.body, config)
+      await this.observerTopLevelParagraphs(document.body, config)
 
       // Start observing mutations from document.body and all shadow roots
       this.observeMutations(document.body)
@@ -189,7 +190,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     this.isPageTranslating = false
     this.walkId = null
-    this.dontWalkIntoElementsCache = new WeakSet()
+    this.walkBlockedElementsCache = new WeakSet()
     this.stopDocumentTitleTracking()
 
     if (this.intersectionObserver) {
@@ -386,12 +387,12 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
   }
 
-  private async observerTopLevelParagraphs(container: HTMLElement): Promise<void> {
+  private async observerTopLevelParagraphs(container: HTMLElement, existingConfig?: Config): Promise<void> {
     const observer = this.intersectionObserver
     if (!this.walkId || !observer)
       return
 
-    const config = await getLocalConfig()
+    const config = existingConfig ?? await getLocalConfig()
     if (!config) {
       logger.error("Global config is not initialized")
       return
@@ -454,33 +455,39 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   /**
-   * Handle style/class attribute changes and only trigger observation
-   * when element transitions from "don't walk into" to "walkable"
+   * Track the same blocked states that the traversal skips, so hidden accordion
+   * panels can be re-walked when the site reveals an existing subtree.
    */
-  private didChangeToWalkable(element: HTMLElement): boolean {
-    const wasDontWalkInto = this.dontWalkIntoElementsCache.has(element)
-    const isDontWalkIntoNow = isDontWalkIntoButTranslateAsChildElement(element)
+  private isWalkBlockedElement(element: HTMLElement, config: Config): boolean {
+    return isDontWalkIntoButTranslateAsChildElement(element)
+      || isDontWalkIntoAndDontTranslateAsChildElement(element, config)
+  }
+
+  /**
+   * Handle attribute changes and only trigger observation
+   * when element transitions from blocked to walkable.
+   */
+  private didChangeToWalkable(element: HTMLElement, config: Config): boolean {
+    const wasWalkBlocked = this.walkBlockedElementsCache.has(element)
+    const isWalkBlockedNow = this.isWalkBlockedElement(element, config)
 
     // Update cache with current state
-    if (isDontWalkIntoNow) {
-      this.dontWalkIntoElementsCache.add(element)
+    if (isWalkBlockedNow) {
+      this.walkBlockedElementsCache.add(element)
     }
     else {
-      this.dontWalkIntoElementsCache.delete(element)
+      this.walkBlockedElementsCache.delete(element)
     }
 
-    // Only trigger observation if element transitioned from "don't walk into" to "walkable"
-    // wasDontWalkInto === true means it was previously not walkable
-    // isDontWalkIntoNow === false means it's now walkable
-    return wasDontWalkInto === true && isDontWalkIntoNow === false
+    return wasWalkBlocked === true && isWalkBlockedNow === false
   }
 
   /**
    * Initialize walkability state for an element and its descendants
    */
-  private addDontWalkIntoElements(element: HTMLElement): void {
-    const dontWalkIntoElements = deepQueryTopLevelSelector(element, isDontWalkIntoButTranslateAsChildElement)
-    dontWalkIntoElements.forEach(el => this.dontWalkIntoElementsCache.add(el))
+  private addWalkBlockedElements(element: HTMLElement, config: Config): void {
+    const walkBlockedElements = deepQueryTopLevelSelector(element, el => this.isWalkBlockedElement(el, config))
+    walkBlockedElements.forEach(el => this.walkBlockedElementsCache.add(el))
   }
 
   /**
@@ -488,37 +495,52 @@ export class PageTranslationManager implements IPageTranslationManager {
    */
   private observeMutations(container: HTMLElement): void {
     const mutationObserver = new MutationObserver((records) => {
-      for (const rec of records) {
-        if (rec.type === "childList") {
-          rec.addedNodes.forEach((node) => {
-            if (isHTMLElement(node)) {
-              this.addDontWalkIntoElements(node)
-              void this.observerTopLevelParagraphs(node)
-              this.observeIsolatedDescendantsMutations(node)
-            }
-          })
-        }
-        else if (
-          rec.type === "attributes"
-          && (rec.attributeName === "style" || rec.attributeName === "class")
-        ) {
-          const el = rec.target
-          if (isHTMLElement(el) && this.didChangeToWalkable(el)) {
-            void this.observerTopLevelParagraphs(el)
-          }
-        }
-      }
+      void this.handleMutationRecords(records)
     })
 
     mutationObserver.observe(container, {
       childList: true,
       subtree: true,
       attributes: true,
-      attributeFilter: ["style", "class"],
+      attributeFilter: ["style", "class", "hidden", "aria-hidden"],
     })
 
     this.mutationObservers.push(mutationObserver)
     this.observeIsolatedDescendantsMutations(container)
+  }
+
+  private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
+    const config = await getLocalConfig()
+    if (!config) {
+      logger.error("Global config is not initialized")
+      return
+    }
+
+    for (const rec of records) {
+      if (rec.type === "childList") {
+        rec.addedNodes.forEach((node) => {
+          if (isHTMLElement(node)) {
+            this.addWalkBlockedElements(node, config)
+            void this.observerTopLevelParagraphs(node, config)
+            this.observeIsolatedDescendantsMutations(node)
+          }
+        })
+      }
+      else if (this.isWalkabilityAttributeMutation(rec)) {
+        const el = rec.target
+        if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
+          void this.observerTopLevelParagraphs(el, config)
+        }
+      }
+    }
+  }
+
+  private isWalkabilityAttributeMutation(record: MutationRecord): boolean {
+    return record.type === "attributes"
+      && (record.attributeName === "style"
+        || record.attributeName === "class"
+        || record.attributeName === "hidden"
+        || record.attributeName === "aria-hidden")
   }
 
   /**
