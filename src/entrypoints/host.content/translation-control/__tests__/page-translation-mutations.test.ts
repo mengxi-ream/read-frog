@@ -156,7 +156,7 @@ function deepQueryTopLevelSelectorImpl(
 }
 
 function isBlockedForTraversal(element: HTMLElement): boolean {
-  return element.hidden
+  return Boolean(element.hidden)
     || element.getAttribute("aria-hidden") === "true"
     || element.classList.contains("closed")
 }
