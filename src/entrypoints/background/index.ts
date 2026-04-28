@@ -19,7 +19,6 @@ import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
 import { proxyFetch } from "./proxy-fetch"
 import { setupSidePanelMessageHandler } from "./side-panel"
-import { setupSplitTranslatorCommandHandler } from "./split-translator-command"
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./translation-queues"
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
@@ -58,17 +57,10 @@ export default defineBackground({
       await openOptionsPage()
     })
 
-    const toggleSidePanel = setupSidePanelMessageHandler({
+    setupSidePanelMessageHandler({
       extensionBrowser: browser,
       logger,
       registerMessageHandler: onMessage,
-    })
-
-    setupSplitTranslatorCommandHandler({
-      currentWindowId: browser.windows.WINDOW_ID_CURRENT,
-      extensionBrowser: browser,
-      logger,
-      toggleSidePanel,
     })
 
     onMessage("aiSegmentSubtitles", async (message) => {

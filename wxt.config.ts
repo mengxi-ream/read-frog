@@ -46,14 +46,6 @@ export default defineConfig({
     host_permissions: [
       "*://*/*", // Required for scripting.executeScript in any frame
     ],
-    commands: {
-      "toggle-split-translator": {
-        suggested_key: {
-          default: "Alt+S",
-        },
-        description: "Open Split Translator",
-      },
-    },
     ...(browser !== "firefox"
       ? {
           side_panel: {
