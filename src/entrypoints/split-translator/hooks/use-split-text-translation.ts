@@ -25,6 +25,12 @@ function toErrorMessage(error: unknown) {
     : i18n.t("splitTranslator.translationFailedFallback")
 }
 
+const HAN_SCRIPT_RE = /[\u3400-\u9FFF\uF900-\uFAFF]/u
+
+function detectSplitTranslatorShortTextLanguage(text: string): LangCodeISO6393 | null {
+  return HAN_SCRIPT_RE.test(text) ? "cmn" : null
+}
+
 export function useSplitTextTranslation() {
   const config = useAtomValue(configAtom)
   const [state, setState] = useState<SplitTextTranslationState>({ status: "idle" })
@@ -58,11 +64,13 @@ export function useSplitTextTranslation() {
       }
 
       const detectedCode: LangCodeISO6393 = languageConfig.sourceCode === "auto"
-        ? (await detectLanguage(input, {
+        ? detectSplitTranslatorShortTextLanguage(input)
+          ?? (await detectLanguage(input, {
             enableLLM: config.languageDetection.mode === "llm",
             minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
             suppressFallbackToast: true,
-          })) ?? DEFAULT_DETECTED_CODE
+          }))
+          ?? DEFAULT_DETECTED_CODE
         : languageConfig.sourceCode
 
       if (runIdRef.current !== runId) {

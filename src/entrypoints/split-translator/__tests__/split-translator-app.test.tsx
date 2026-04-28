@@ -269,6 +269,38 @@ describe("split translator app", () => {
     })
   })
 
+  it("detects short Chinese input locally before translating to English", async () => {
+    detectLanguageMock.mockResolvedValue("eng")
+    translateTextCoreMock.mockResolvedValue("Hello")
+    renderApp()
+
+    await selectTargetLanguage("eng")
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledWith(expect.objectContaining({
+        extraHashTags: ["splitTranslator"],
+        text: "你好",
+      }))
+    })
+    expect(detectLanguageMock).not.toHaveBeenCalled()
+    expect(toastWarningMock).not.toHaveBeenCalledWith("translation.autoModeSameLanguage")
+  })
+
+  it("still warns when short Chinese input targets Chinese", async () => {
+    translateTextCoreMock.mockResolvedValue("你好")
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "你好" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(toastWarningMock).toHaveBeenCalledWith("translation.autoModeSameLanguage")
+    })
+    expect(detectLanguageMock).not.toHaveBeenCalled()
+  })
+
   it("automatically retranslates non-empty input when the target language changes", async () => {
     translateTextCoreMock
       .mockResolvedValueOnce("你好")
