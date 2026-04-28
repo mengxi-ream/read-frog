@@ -155,7 +155,7 @@ describe("background side panel", () => {
     expect(sidePanel.open).not.toHaveBeenCalled()
   })
 
-  it("clears stale open state when Chrome rejects close", async () => {
+  it("clears stale open state without surfacing a close rejection as a toggle failure", async () => {
     const logger = createLogger()
     const windowState = createSidePanelWindowState()
     const error = new Error("No active global side panel")
@@ -171,8 +171,8 @@ describe("background side panel", () => {
       windowState,
     })
 
-    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: false, reason: "toggle-failed" })
-    expect(logger.error).toHaveBeenCalledWith("Failed to close side panel", error)
+    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: true, action: "closed" })
+    expect(logger.warn).toHaveBeenCalledWith("Failed to close side panel; cleared stale open state", error)
     expect(windowState.isOpen(456)).toBe(false)
 
     await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: true, action: "opened" })

@@ -216,14 +216,14 @@ export function createToggleSidePanelHandler({
           })
           .catch((error) => {
             windowState.markClosed({ windowId })
-            logger.error("Failed to close side panel", error)
-            return { ok: false, reason: "toggle-failed" } as const
+            logger.warn("Failed to close side panel; cleared stale open state", error)
+            return { ok: true, action: "closed" } as const
           })
       }
       catch (error) {
         windowState.markClosed({ windowId })
-        logger.error("Failed to close side panel", error)
-        return Promise.resolve({ ok: false, reason: "toggle-failed" } as const)
+        logger.warn("Failed to close side panel; cleared stale open state", error)
+        return Promise.resolve({ ok: true, action: "closed" } as const)
       }
     }
 
