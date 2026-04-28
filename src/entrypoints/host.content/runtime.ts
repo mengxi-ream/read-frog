@@ -10,6 +10,7 @@ import { onMessage, sendMessage } from "@/utils/message"
 import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
 import { setupUrlChangeListener } from "./listen"
 import { mountHostToast } from "./mount-host-toast"
+import { bindSplitTranslatorShortcutKey } from "./translation-control/bind-split-translator-shortcut"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
@@ -33,6 +34,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
   const cleanupPageTranslationTriggers = manager.registerPageTranslationTriggers()
 
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
+  const cleanupSplitTranslatorShortcut = await bindSplitTranslatorShortcutKey()
 
   // For late-loading iframes: check if translation is already enabled for this tab
   let translationEnabled = false
@@ -84,6 +86,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     teardownNodeTranslation()
     cleanupPageTranslationTriggers()
     cleanupTranslationShortcut()
+    cleanupSplitTranslatorShortcut()
     cleanupTranslationStateListener()
     window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
     window.__READ_FROG_HOST_INJECTED__ = false
