@@ -66,12 +66,12 @@ export function useSplitTextTranslation() {
 
       const detectedCode: LangCodeISO6393 = languageConfig.sourceCode === "auto"
         ? detectSplitTranslatorShortTextLanguage(input)
-          ?? (await detectLanguage(input, {
-            enableLLM: config.languageDetection.mode === "llm",
-            minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
-            suppressFallbackToast: true,
-          }))
-          ?? DEFAULT_DETECTED_CODE
+        ?? (await detectLanguage(input, {
+          enableLLM: config.languageDetection.mode === "llm",
+          minLength: MIN_LENGTH_FOR_SKIP_LLM_DETECTION,
+          suppressFallbackToast: true,
+        }))
+        ?? DEFAULT_DETECTED_CODE
         : languageConfig.sourceCode
 
       if (runIdRef.current !== runId) {
