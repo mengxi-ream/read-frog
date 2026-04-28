@@ -568,10 +568,7 @@ options:
       description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: Split Translator를 여는 브라우저 단축키를 표시합니다. 변경하려면 브라우저의 확장 프로그램 단축키 설정을 여세요.
-      unset: 설정 안 됨
-      openSettings: Open shortcut settings
-      openFailed: Unable to open browser shortcut settings.
+      description: 웹 페이지에서 Split Translator를 여는 단축키를 사용자 지정합니다
     preloadConfig:
       title: 사전 번역 범위
       description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다

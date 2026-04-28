@@ -683,10 +683,7 @@ options:
       description: Customize the shortcut key for translating entire web pages
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: View the browser shortcut used to open Split Translator. To change it, open your browser's extension shortcut settings.
-      unset: Not set
-      openSettings: Open shortcut settings
-      openFailed: Unable to open browser shortcut settings.
+      description: Customize the shortcut key for opening Split Translator on web pages
     preloadConfig:
       title: Pre-translate Range
       description: Control how much content below the viewport gets pre-translated to save API costs

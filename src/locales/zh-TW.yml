@@ -568,10 +568,7 @@ options:
       description: 自訂翻譯整個網頁的快捷鍵
     splitTranslatorShortcut:
       title: Split Translator Shortcut
-      description: 查看用於開啟 Split Translator 的瀏覽器快捷鍵。如需修改，請開啟瀏覽器的擴充功能快捷鍵設定。
-      unset: 未設定
-      openSettings: Open shortcut settings
-      openFailed: Unable to open browser shortcut settings.
+      description: 自訂在網頁中開啟 Split Translator 的快捷鍵
     preloadConfig:
       title: 預翻譯範圍
       description: 控制視窗下方多少內容會被預先翻譯，以節省 API 費用
