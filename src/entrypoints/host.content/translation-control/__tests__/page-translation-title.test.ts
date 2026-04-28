@@ -38,6 +38,7 @@ vi.mock("@/utils/config/storage", () => ({
 
 vi.mock("@/utils/host/dom/filter", () => ({
   hasNoWalkAncestor: vi.fn().mockReturnValue(false),
+  isDontWalkIntoAndDontTranslateAsChildElement: vi.fn().mockReturnValue(false),
   isDontWalkIntoButTranslateAsChildElement: vi.fn().mockReturnValue(false),
   isHTMLElement: (node: unknown) => node instanceof HTMLElement,
 }))
