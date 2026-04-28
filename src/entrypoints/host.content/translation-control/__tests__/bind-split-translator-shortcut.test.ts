@@ -3,11 +3,13 @@ import { bindSplitTranslatorShortcutKey } from "../bind-split-translator-shortcu
 
 const {
   mockGetLocalConfig,
+  mockLoggerError,
   mockRegister,
   mockSendMessage,
   mockUnregister,
 } = vi.hoisted(() => ({
   mockGetLocalConfig: vi.fn(),
+  mockLoggerError: vi.fn(),
   mockRegister: vi.fn(),
   mockSendMessage: vi.fn(),
   mockUnregister: vi.fn(),
@@ -32,6 +34,12 @@ vi.mock("@/utils/config/storage", () => ({
 
 vi.mock("@/utils/message", () => ({
   sendMessage: (...args: unknown[]) => mockSendMessage(...args),
+}))
+
+vi.mock("@/utils/logger", () => ({
+  logger: {
+    error: mockLoggerError,
+  },
 }))
 
 describe("bindSplitTranslatorShortcutKey", () => {
@@ -82,6 +90,25 @@ describe("bindSplitTranslatorShortcutKey", () => {
     callback?.({} as KeyboardEvent, { hotkey: "Alt+S" })
 
     expect(mockSendMessage).toHaveBeenCalledWith("toggleSidePanel", undefined)
+  })
+
+  it("logs sendMessage rejections from the registered callback", async () => {
+    const error = new Error("Extension context invalidated")
+    mockGetLocalConfig.mockResolvedValue({
+      translate: {
+        splitTranslator: {
+          shortcut: "Alt+S",
+        },
+      },
+    })
+    mockSendMessage.mockRejectedValue(error)
+
+    await bindSplitTranslatorShortcutKey()
+    const callback = mockRegister.mock.calls[0]?.[1]
+    callback?.({} as KeyboardEvent, { hotkey: "Alt+S" })
+    await new Promise(resolve => setTimeout(resolve, 0))
+
+    expect(mockLoggerError).toHaveBeenCalledWith("Failed to toggle split translator from shortcut", error)
   })
 
   it("skips registration when the split translator shortcut is empty", async () => {

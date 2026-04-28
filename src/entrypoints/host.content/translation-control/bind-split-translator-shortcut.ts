@@ -1,6 +1,7 @@
 import type { Hotkey } from "@tanstack/hotkeys"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { getLocalConfig } from "@/utils/config/storage"
+import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import { isPageTranslationShortcutEmpty, isValidConfiguredPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 
@@ -21,7 +22,9 @@ export async function bindSplitTranslatorShortcutKey() {
   const registration = HotkeyManager.getInstance().register(
     shortcut as Hotkey,
     () => {
-      void sendMessage("toggleSidePanel", undefined)
+      void sendMessage("toggleSidePanel", undefined).catch((error) => {
+        logger.error("Failed to toggle split translator from shortcut", error)
+      })
     },
     {
       ignoreInputs: true,
