@@ -1,3 +1,4 @@
+import { browser, storage } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 
@@ -6,38 +7,11 @@ const webNavigationOnBeforeNavigateAddListenerMock = vi.fn()
 const webNavigationOnCompletedAddListenerMock = vi.fn()
 const getAllFramesMock = vi.fn()
 const executeScriptMock = vi.fn()
+const storageGetItemMock = vi.fn()
 
 const getLocalConfigMock = vi.fn()
 const loggerErrorMock = vi.fn()
 const loggerWarnMock = vi.fn()
-
-const browserMock = {
-  tabs: {
-    onRemoved: {
-      addListener: tabsOnRemovedAddListenerMock,
-    },
-  },
-  webNavigation: {
-    onBeforeNavigate: {
-      addListener: webNavigationOnBeforeNavigateAddListenerMock,
-    },
-    onCompleted: {
-      addListener: webNavigationOnCompletedAddListenerMock,
-    },
-    getAllFrames: getAllFramesMock,
-  },
-  scripting: {
-    executeScript: executeScriptMock,
-  },
-}
-
-vi.mock("#imports", () => ({
-  browser: browserMock,
-}))
-
-vi.mock("wxt/browser", () => ({
-  browser: browserMock,
-}))
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: getLocalConfigMock,
@@ -109,12 +83,30 @@ describe("setupIframeInjection", () => {
     vi.clearAllMocks()
     currentTabId += 1
 
+    browser.tabs.onRemoved.addListener = tabsOnRemovedAddListenerMock
+    browser.webNavigation.onBeforeNavigate.addListener = webNavigationOnBeforeNavigateAddListenerMock
+    browser.webNavigation.onCompleted.addListener = webNavigationOnCompletedAddListenerMock
+    browser.webNavigation.getAllFrames = getAllFramesMock
+    browser.scripting.executeScript = executeScriptMock
+    storage.getItem = storageGetItemMock
+
     getLocalConfigMock.mockResolvedValue(null)
     getAllFramesMock.mockResolvedValue([
       createFrame(0, "https://example.com/app", -1),
       createFrame(2, "https://example.com/frame"),
     ])
+    storageGetItemMock.mockResolvedValue({ enabled: true })
     executeScriptMock.mockResolvedValue(undefined)
+  })
+
+  it("skips iframe injection when page translation is not enabled", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+
+    await onCompleted(createDetails())
+
+    expect(getAllFramesMock).not.toHaveBeenCalled()
+    expect(executeScriptMock).not.toHaveBeenCalled()
   })
 
   it("injects each document once and targets documentIds when available", async () => {
@@ -124,7 +116,7 @@ describe("setupIframeInjection", () => {
     await onCompleted(details)
     await onCompleted(details)
 
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
       target: { tabId: currentTabId, documentIds: ["doc-1"] },
       func: expect.any(Function),
@@ -141,7 +133,7 @@ describe("setupIframeInjection", () => {
 
     await onCompleted(createDetails({ documentId: undefined }))
 
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
     for (const [call] of executeScriptMock.mock.calls) {
       expect(call.target).toEqual({ tabId: currentTabId, frameIds: [2] })
     }
@@ -153,12 +145,12 @@ describe("setupIframeInjection", () => {
 
     await onCompleted(details)
     await onCompleted(details)
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
 
     onBeforeNavigate({ tabId: currentTabId, frameId: 2 })
     await onCompleted(details)
 
-    expect(executeScriptMock).toHaveBeenCalledTimes(6)
+    expect(executeScriptMock).toHaveBeenCalledTimes(4)
   })
 
   it("prunes injected records for frames that are no longer live", async () => {
@@ -194,10 +186,10 @@ describe("setupIframeInjection", () => {
       url: "https://example.com/old-frame",
     }))
 
-    expect(executeScriptMock).toHaveBeenCalledTimes(9)
+    expect(executeScriptMock).toHaveBeenCalledTimes(6)
     expect(executeScriptMock).toHaveBeenLastCalledWith(expect.objectContaining({
       target: { tabId: currentTabId, documentIds: ["doc-stale"] },
-      files: ["/content-scripts/selection.js"],
+      files: ["/content-scripts/host.js"],
     }))
   })
 
@@ -207,14 +199,14 @@ describe("setupIframeInjection", () => {
 
     await onCompleted(details)
     await onCompleted(details)
-    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
 
     onBeforeNavigate({ tabId: currentTabId, frameId: 0 })
     await onCompleted(details)
-    expect(executeScriptMock).toHaveBeenCalledTimes(6)
+    expect(executeScriptMock).toHaveBeenCalledTimes(4)
 
     onRemoved(currentTabId)
     await onCompleted(details)
-    expect(executeScriptMock).toHaveBeenCalledTimes(9)
+    expect(executeScriptMock).toHaveBeenCalledTimes(6)
   })
 })

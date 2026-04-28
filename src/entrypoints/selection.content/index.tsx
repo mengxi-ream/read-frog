@@ -85,7 +85,6 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
 export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   cssInjectionMode: "ui",
-  allFrames: true,
   async main(ctx) {
     // Prevent double injection (manifest-based + programmatic injection)
     if (window.__READ_FROG_SELECTION_INJECTED__)
