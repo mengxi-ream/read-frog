@@ -71,7 +71,7 @@ export const customPromptsConfigSchema = z.object({
   }
 })
 
-export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, ctx) => {
+export const translationShortcutSchema = z.string().superRefine((shortcut, ctx) => {
   if (isPageTranslationShortcutEmpty(shortcut)) {
     return
   }
@@ -79,10 +79,13 @@ export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, c
   if (!isValidConfiguredPageTranslationShortcut(shortcut)) {
     ctx.addIssue({
       code: "custom",
-      message: "Page translation shortcut must include at least one modifier key and one non-modifier key.",
+      message: "Translation shortcut must include at least one modifier key and one non-modifier key.",
     })
   }
 })
+
+export const pageTranslationShortcutSchema = translationShortcutSchema
+export const splitTranslatorShortcutSchema = translationShortcutSchema
 
 export const translateConfigSchema = z.object({
   providerId: z.string().nonempty(),
@@ -100,6 +103,9 @@ export const translateConfigSchema = z.object({
     minCharactersPerNode: z.number().min(MIN_CHARACTERS_PER_NODE),
     minWordsPerNode: z.number().min(MIN_WORDS_PER_NODE),
     skipLanguages: z.array(langCodeISO6393Schema),
+  }),
+  splitTranslator: z.object({
+    shortcut: splitTranslatorShortcutSchema,
   }),
   enableAIContentAware: z.boolean(),
   customPromptsConfig: customPromptsConfigSchema,
