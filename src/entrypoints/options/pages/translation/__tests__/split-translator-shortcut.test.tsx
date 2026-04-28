@@ -1,11 +1,21 @@
 // @vitest-environment jsdom
 import { fireEvent, render, screen } from "@testing-library/react"
-import { afterEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const i18nTMock = vi.hoisted(() => vi.fn((key: string) => key))
 const setTranslateConfigMock = vi.fn()
+const useAtomMock = vi.fn()
+const translateAtomMock = Symbol("translate")
+const defaultSplitTranslatorShortcutMock = "Alt+S"
 
-let translateConfigMock = {
+let translateConfigMock: {
+  page: {
+    shortcut: string
+  }
+  splitTranslator: {
+    shortcut?: string
+  }
+} = {
   page: {
     shortcut: "Alt+E",
   },
@@ -21,13 +31,17 @@ vi.mock("#imports", () => ({
 }))
 
 vi.mock("jotai", () => ({
-  useAtom: () => [translateConfigMock, setTranslateConfigMock],
+  useAtom: (atom: unknown) => useAtomMock(atom),
 }))
 
 vi.mock("@/utils/atoms/config", () => ({
   configFieldsAtomMap: {
-    translate: Symbol("translate"),
+    translate: translateAtomMock,
   },
+}))
+
+vi.mock("@/utils/constants/translate", () => ({
+  DEFAULT_SPLIT_TRANSLATOR_SHORTCUT_KEY: defaultSplitTranslatorShortcutMock,
 }))
 
 vi.mock("@/components/shortcut-key-recorder", () => ({
@@ -52,6 +66,7 @@ vi.mock("../../components/config-card", () => ({
 
 afterEach(() => {
   vi.clearAllMocks()
+  useAtomMock.mockImplementation(() => [translateConfigMock, setTranslateConfigMock])
   translateConfigMock = {
     page: {
       shortcut: "Alt+E",
@@ -68,12 +83,28 @@ async function renderSplitTranslatorShortcut() {
 }
 
 describe("splitTranslatorShortcut", () => {
+  beforeEach(() => {
+    useAtomMock.mockImplementation(() => [translateConfigMock, setTranslateConfigMock])
+  })
+
   it("renders the configured split translator shortcut", async () => {
     await renderSplitTranslatorShortcut()
 
+    expect(useAtomMock).toHaveBeenCalledWith(translateAtomMock)
     expect(screen.getByText("options.translation.splitTranslatorShortcut.title")).toBeInTheDocument()
     expect(screen.getByText("options.translation.splitTranslatorShortcut.description")).toBeInTheDocument()
     expect(screen.getByLabelText("split-shortcut-recorder")).toHaveValue("Alt+S")
+  })
+
+  it("falls back to the default split translator shortcut when none is configured", async () => {
+    translateConfigMock = {
+      ...translateConfigMock,
+      splitTranslator: {},
+    }
+
+    await renderSplitTranslatorShortcut()
+
+    expect(screen.getByLabelText("split-shortcut-recorder")).toHaveValue(defaultSplitTranslatorShortcutMock)
   })
 
   it("writes recorded shortcuts to translate.splitTranslator.shortcut", async () => {
@@ -82,9 +113,7 @@ describe("splitTranslatorShortcut", () => {
     fireEvent.click(screen.getByRole("button", { name: "record shortcut" }))
 
     expect(setTranslateConfigMock).toHaveBeenCalledWith({
-      ...translateConfigMock,
       splitTranslator: {
-        ...translateConfigMock.splitTranslator,
         shortcut: "Mod+Shift+S",
       },
     })
@@ -96,9 +125,7 @@ describe("splitTranslatorShortcut", () => {
     fireEvent.click(screen.getByRole("button", { name: "clear shortcut" }))
 
     expect(setTranslateConfigMock).toHaveBeenCalledWith({
-      ...translateConfigMock,
       splitTranslator: {
-        ...translateConfigMock.splitTranslator,
         shortcut: "",
       },
     })

@@ -11,9 +11,7 @@ export function SplitTranslatorShortcut() {
 
   const updateShortcut = (shortcut: string) => {
     void setTranslateConfig({
-      ...translateConfig,
       splitTranslator: {
-        ...translateConfig.splitTranslator,
         shortcut,
       },
     })
