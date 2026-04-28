@@ -78,6 +78,31 @@ function getToggleWindowId(message: ToggleSidePanelMessage) {
     : message.sender?.tab?.windowId
 }
 
+function isStaleSidePanelCloseError(error: unknown) {
+  return error instanceof Error && error.message.includes("No active global side panel")
+}
+
+function handleCloseFailure({
+  error,
+  logger,
+  windowId,
+  windowState,
+}: {
+  error: unknown
+  logger: SidePanelLogger
+  windowId: number
+  windowState: ReturnType<typeof createSidePanelWindowState>
+}): ToggleSidePanelResult {
+  if (isStaleSidePanelCloseError(error)) {
+    windowState.markClosed({ windowId })
+    logger.warn("Failed to close side panel; cleared stale open state", error)
+    return { ok: true, action: "closed" }
+  }
+
+  logger.error("Failed to close side panel", error)
+  return { ok: false, reason: "toggle-failed" }
+}
+
 function toChromiumSidePanelApi(api: Partial<ChromiumSidePanelApi> | undefined): BrowserSidePanelApi | null {
   if (typeof api?.open !== "function") {
     return null
@@ -215,15 +240,11 @@ export function createToggleSidePanelHandler({
             return { ok: true, action: "closed" } as const
           })
           .catch((error) => {
-            windowState.markClosed({ windowId })
-            logger.warn("Failed to close side panel; cleared stale open state", error)
-            return { ok: true, action: "closed" } as const
+            return handleCloseFailure({ error, logger, windowId, windowState })
           })
       }
       catch (error) {
-        windowState.markClosed({ windowId })
-        logger.warn("Failed to close side panel; cleared stale open state", error)
-        return Promise.resolve({ ok: true, action: "closed" } as const)
+        return Promise.resolve(handleCloseFailure({ error, logger, windowId, windowState }))
       }
     }
 

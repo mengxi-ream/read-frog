@@ -179,6 +179,50 @@ describe("background side panel", () => {
     expect(sidePanel.open).toHaveBeenCalledWith({ windowId: 456 })
   })
 
+  it("clears stale open state when close throws synchronously", async () => {
+    const logger = createLogger()
+    const windowState = createSidePanelWindowState()
+    const error = new Error("No active global side panel")
+    const sidePanel = {
+      close: vi.fn(() => {
+        throw error
+      }),
+      open: vi.fn().mockResolvedValue(undefined),
+    }
+    windowState.markOpened({ windowId: 456 })
+
+    const handler = createToggleSidePanelHandler({
+      getApi: () => chromiumSidePanel(sidePanel),
+      logger,
+      windowState,
+    })
+
+    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: true, action: "closed" })
+    expect(logger.warn).toHaveBeenCalledWith("Failed to close side panel; cleared stale open state", error)
+    expect(windowState.isOpen(456)).toBe(false)
+  })
+
+  it("preserves open state when close fails for a non-stale reason", async () => {
+    const logger = createLogger()
+    const windowState = createSidePanelWindowState()
+    const error = new Error("Permission denied")
+    const sidePanel = {
+      close: vi.fn().mockRejectedValue(error),
+      open: vi.fn().mockResolvedValue(undefined),
+    }
+    windowState.markOpened({ windowId: 456 })
+
+    const handler = createToggleSidePanelHandler({
+      getApi: () => chromiumSidePanel(sidePanel),
+      logger,
+      windowState,
+    })
+
+    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: false, reason: "toggle-failed" })
+    expect(logger.error).toHaveBeenCalledWith("Failed to close side panel", error)
+    expect(windowState.isOpen(456)).toBe(true)
+  })
+
   it("returns an unsupported result when the side panel API is unavailable", async () => {
     const logger = createLogger()
     const handler = createToggleSidePanelHandler({
