@@ -28,7 +28,8 @@ function toErrorMessage(error: unknown) {
 const HAN_SCRIPT_RE = /[\u3400-\u9FFF\uF900-\uFAFF]/u
 
 function detectSplitTranslatorShortTextLanguage(text: string): LangCodeISO6393 | null {
-  return HAN_SCRIPT_RE.test(text) ? "cmn" : null
+  const trimmedText = text.trim()
+  return trimmedText.length < MIN_LENGTH_FOR_SKIP_LLM_DETECTION && HAN_SCRIPT_RE.test(trimmedText) ? "cmn" : null
 }
 
 export function useSplitTextTranslation() {

@@ -301,6 +301,42 @@ describe("split translator app", () => {
     expect(detectLanguageMock).not.toHaveBeenCalled()
   })
 
+  it("uses shared language detection for longer Chinese input", async () => {
+    translateTextCoreMock.mockResolvedValue("Long Chinese text")
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "这是一个足够长的中文句子" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(detectLanguageMock).toHaveBeenCalledWith("这是一个足够长的中文句子", expect.objectContaining({
+        minLength: 10,
+        suppressFallbackToast: true,
+      }))
+      expect(translateTextCoreMock).toHaveBeenCalledWith(expect.objectContaining({
+        text: "这是一个足够长的中文句子",
+      }))
+    })
+  })
+
+  it("falls back to shared language detection when local Chinese detection misses", async () => {
+    translateTextCoreMock.mockResolvedValue("你好")
+    renderApp()
+
+    fireEvent.change(screen.getByLabelText("splitTranslator.inputLabel"), { target: { value: "Hello" } })
+    fireEvent.click(screen.getByRole("button", { name: "splitTranslator.translate" }))
+
+    await waitFor(() => {
+      expect(detectLanguageMock).toHaveBeenCalledWith("Hello", expect.objectContaining({
+        minLength: 10,
+        suppressFallbackToast: true,
+      }))
+      expect(translateTextCoreMock).toHaveBeenCalledWith(expect.objectContaining({
+        text: "Hello",
+      }))
+    })
+  })
+
   it("automatically retranslates non-empty input when the target language changes", async () => {
     translateTextCoreMock
       .mockResolvedValueOnce("你好")
