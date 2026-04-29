@@ -14,6 +14,16 @@ const OPENAI_COMPATIBLE_OPTION_ALIASES = {
   verbosity: "textVerbosity",
 } as const satisfies Record<string, string>
 
+/**
+ * Kimi's /coding endpoint speaks the Anthropic Messages protocol but has its own
+ * server-side reasoning semantics. Sending `thinking` or `reasoningHistory`
+ * causes HTTP 400. Strip them entirely for this provider.
+ */
+function filterKimiCodingOptions(options: Record<string, JSONValue>): Record<string, JSONValue> {
+  const { thinking, reasoningHistory, ...rest } = options
+  return rest
+}
+
 function normalizeUserProviderOptions(
   provider: string,
   userOptions: Record<string, JSONValue>,
@@ -72,7 +82,8 @@ export function getProviderOptions(
     return {}
   }
 
-  return { [provider]: options }
+  const filtered = provider === "kimi-coding" ? filterKimiCodingOptions(options) : options
+  return { [provider]: filtered }
 }
 
 /**
@@ -86,7 +97,9 @@ export function getProviderOptionsWithOverride(
   userOptions?: Record<string, JSONValue>,
 ): Record<string, Record<string, JSONValue>> | undefined {
   if (userOptions !== undefined) {
-    return { [provider]: normalizeUserProviderOptions(provider, userOptions) }
+    const normalized = normalizeUserProviderOptions(provider, userOptions)
+    const filtered = provider === "kimi-coding" ? filterKimiCodingOptions(normalized) : normalized
+    return { [provider]: filtered }
   }
 
   const recommendedOptions = getRecommendedProviderOptions(model)
@@ -94,5 +107,6 @@ export function getProviderOptionsWithOverride(
     return undefined
   }
 
-  return { [provider]: recommendedOptions }
+  const filtered = provider === "kimi-coding" ? filterKimiCodingOptions(recommendedOptions) : recommendedOptions
+  return { [provider]: filtered }
 }

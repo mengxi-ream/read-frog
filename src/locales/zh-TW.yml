@@ -177,6 +177,7 @@ options:
         minimax: MiniMax AI平台，提供先進的MiniMax-M2系列大模型
         alibaba: 阿里雲通義千問系列模型，具備先進的推理和多語言能力
         moonshotai: 月之暗面Kimi系列模型，具備強大的推理和長上下文能力
+        kimiCoding: Kimi Coding Plan 編程端點（api.kimi.com/coding），基於 Anthropic 協定，伺服器端驅動推理
         huggingface: Hugging Face推理API，提供數千種開源模型存取
     apiKey:
       showAPIKey: 顯示 API Key

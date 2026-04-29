@@ -204,6 +204,22 @@ describe("getProviderOptions", () => {
       expect(huggingfaceOptions).toEqual({})
     })
 
+    it("should strip thinking and reasoningHistory for kimi-coding provider", () => {
+      const options = getProviderOptions("kimi-k2.5", "kimi-coding")
+      expect(options["kimi-coding"]).toBeDefined()
+      expect(options["kimi-coding"]).not.toHaveProperty("thinking")
+      expect(options["kimi-coding"]).not.toHaveProperty("reasoningHistory")
+    })
+
+    it("should strip thinking and reasoningHistory from user overrides for kimi-coding", () => {
+      const options = getProviderOptionsWithOverride("kimi-k2.5", "kimi-coding", {
+        thinking: { type: "enabled" },
+        reasoningHistory: "interleaved",
+        temperature: 0.5,
+      })
+      expect(options?.["kimi-coding"]).toEqual({ temperature: 0.5 })
+    })
+
     it("should return empty object for non-matching models", () => {
       const options = getProviderOptions("some-random-model", "openai")
       expect(options).toEqual({})

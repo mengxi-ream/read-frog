@@ -177,6 +177,7 @@ options:
         minimax: ИИ-платформа MiniMax, предлагающая передовые модели MiniMax-M2
         alibaba: Серия моделей Qwen от Alibaba Cloud с продвинутыми возможностями рассуждения и многоязычности
         moonshotai: Серия моделей Kimi от Moonshot AI с мощными возможностями рассуждения и длинного контекста
+        kimiCoding: Конечная точка Kimi Coding Plan (api.kimi.com/coding) через протокол Anthropic с серверным рассуждением
         huggingface: API вывода Hugging Face с доступом к тысячам моделей с открытым кодом
     apiKey:
       showAPIKey: Показать API-ключ

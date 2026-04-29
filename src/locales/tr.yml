@@ -177,6 +177,7 @@ options:
         minimax: Gelişmiş MiniMax-M2 modelleri sunan MiniMax AI platformu
         alibaba: Alibaba Cloud'un Qwen model serisi, gelişmiş muhakeme ve çok dilli yeteneklerle
         moonshotai: Moonshot AI'ın güçlü muhakeme ve uzun bağlam yeteneklerine sahip Kimi model serisi
+        kimiCoding: Kimi Coding Plan uç noktası (api.kimi.com/coding), Anthropic protokolü üzerinden, sunucu tarafı akıl yürütme
         huggingface: Binlerce açık kaynak modele erişim sağlayan Hugging Face Çıkarım API'si
     apiKey:
       showAPIKey: API Anahtarını Göster

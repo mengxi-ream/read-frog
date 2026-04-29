@@ -137,7 +137,12 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "moonshotai": {
-    model: "kimi-k2",
+    model: "kimi-k2.5",
+    isCustomModel: false,
+    customModel: null,
+  },
+  "kimi-coding": {
+    model: "kimi-k2.5",
     isCustomModel: false,
     customModel: null,
   },
@@ -298,6 +303,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
     "moonshotai": {
       logo: getLobeIconsCDNUrlFn("moonshot"),
       name: "Moonshot AI",
+      website: "https://platform.moonshot.cn/",
+    },
+    "kimi-coding": {
+      logo: getLobeIconsCDNUrlFn("moonshot"),
+      name: "Kimi Coding Plan",
       website: "https://platform.moonshot.cn/",
     },
     "huggingface": {
@@ -551,6 +561,15 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "moonshotai",
     model: DEFAULT_LLM_PROVIDER_MODELS.moonshotai,
+  },
+  "kimi-coding": {
+    id: "kimi-coding-default",
+    name: PROVIDER_ITEMS["kimi-coding"].name,
+    description: i18n.t("options.apiProviders.providers.description.kimiCoding"),
+    enabled: true,
+    provider: "kimi-coding",
+    baseURL: "https://api.kimi.com/coding/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS["kimi-coding"],
   },
   "huggingface": {
     id: "huggingface-default",

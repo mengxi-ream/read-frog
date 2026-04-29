@@ -56,11 +56,13 @@ const CREATE_AI_MAPPER = {
   "minimax": createMinimax,
   "alibaba": createAlibaba,
   "moonshotai": createMoonshotAI,
+  "kimi-coding": createAnthropic,
   "huggingface": createHuggingFace,
 } as const
 
 const CUSTOM_HEADER_MAP: Partial<Record<keyof typeof CREATE_AI_MAPPER, Record<string, string>>> = {
-  anthropic: { "anthropic-dangerous-direct-browser-access": "true" },
+  "anthropic": { "anthropic-dangerous-direct-browser-access": "true" },
+  "kimi-coding": { "User-Agent": "claude-code/0.1.0" },
 }
 
 async function getLanguageModelById(providerId: string) {
@@ -78,21 +80,30 @@ async function getLanguageModelById(providerId: string) {
   const customHeaders = CUSTOM_HEADER_MAP[providerConfig.provider]
   const connectionOptions = compactObject(providerConfig.connectionOptions ?? {})
 
+  const baseOptions: Record<string, unknown> = {
+    ...connectionOptions,
+    ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
+    ...(customHeaders && { headers: customHeaders }),
+  }
+
+  if (providerConfig.apiKey) {
+    // Kimi Coding endpoint expects Authorization: Bearer instead of x-api-key
+    if (providerConfig.provider === "kimi-coding") {
+      baseOptions.authToken = providerConfig.apiKey
+    }
+    else {
+      baseOptions.apiKey = providerConfig.apiKey
+    }
+  }
+
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
-        ...connectionOptions,
+        ...baseOptions,
         name: providerConfig.provider,
         baseURL: providerConfig.baseURL ?? "",
         supportsStructuredOutputs: true,
-        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
-        ...(customHeaders && { headers: customHeaders }),
       })
-    : CREATE_AI_MAPPER[providerConfig.provider]({
-        ...connectionOptions,
-        ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
-        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
-        ...(customHeaders && { headers: customHeaders }),
-      })
+    : CREATE_AI_MAPPER[providerConfig.provider](baseOptions)
 
   const modelId = resolveModelId(providerConfig.model)
 

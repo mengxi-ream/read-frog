@@ -178,6 +178,7 @@ options:
         minimax: MiniMax AI platform offering advanced MiniMax-M2 models for text generation
         alibaba: Alibaba Cloud's Qwen model series with advanced reasoning and multilingual capabilities
         moonshotai: Moonshot AI's Kimi model series with strong reasoning and long-context capabilities
+        kimiCoding: Kimi Coding Plan endpoint (api.kimi.com/coding) via Anthropic protocol with server-side reasoning
         huggingface: Hugging Face Inference API providing access to thousands of open-source models
     apiKey:
       showAPIKey: Show API Key

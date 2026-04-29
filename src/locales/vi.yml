@@ -177,6 +177,7 @@ options:
         minimax: Nền tảng AI MiniMax cung cấp các mô hình MiniMax-M2 tiên tiến
         alibaba: Dòng mô hình Qwen của Alibaba Cloud với khả năng suy luận và đa ngôn ngữ tiên tiến
         moonshotai: Dòng mô hình Kimi của Moonshot AI với khả năng suy luận mạnh mẽ và ngữ cảnh dài
+        kimiCoding: Điểm cuối Kimi Coding Plan (api.kimi.com/coding) qua giao thức Anthropic, lập luận phía máy chủ
         huggingface: API suy luận Hugging Face cung cấp quyền truy cập hàng nghìn mô hình mã nguồn mở
     apiKey:
       showAPIKey: Hiển thị API Key
