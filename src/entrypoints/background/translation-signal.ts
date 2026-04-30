@@ -40,6 +40,16 @@ export function translationMessage() {
     return false
   })
 
+  onMessage("ensureIframeHostContentInjected", async (msg) => {
+    const tabId = msg.data?.tabId ?? msg.sender?.tab?.id
+    if (typeof tabId === "number") {
+      await injectHostContentIntoTabIframes(tabId)
+      return
+    }
+
+    logger.error("Invalid tabId in ensureIframeHostContentInjected", msg)
+  })
+
   onMessage("tryToSetEnablePageTranslationByTabId", async (msg) => {
     const { tabId, enabled, analyticsContext } = msg.data
     if (!enabled) {

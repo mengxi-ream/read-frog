@@ -1,3 +1,4 @@
+import type { Config } from "@/types/config/config"
 import { browser, storage } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
@@ -55,6 +56,21 @@ function createDetails(overrides: Partial<NavigationDetails> = {}): NavigationDe
   }
 }
 
+function createConfig({ nodeTranslationEnabled = false }: { nodeTranslationEnabled?: boolean } = {}): Config {
+  return {
+    translate: {
+      node: {
+        enabled: nodeTranslationEnabled,
+      },
+    },
+    siteControl: {
+      mode: "blacklist",
+      blacklistPatterns: [],
+      whitelistPatterns: [],
+    },
+  } as unknown as Config
+}
+
 async function setupSubject() {
   const { setupIframeInjection } = await import("../iframe-injection")
   setupIframeInjection()
@@ -99,14 +115,29 @@ describe("setupIframeInjection", () => {
     executeScriptMock.mockResolvedValue(undefined)
   })
 
-  it("skips iframe injection when page translation is not enabled", async () => {
+  it("skips iframe injection when page translation and node translation are not enabled", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
 
     await onCompleted(createDetails())
 
     expect(getAllFramesMock).not.toHaveBeenCalled()
     expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("injects host content when node translation is enabled without page translation", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: true }))
+
+    await onCompleted(createDetails())
+
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
+    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      target: { tabId: currentTabId, documentIds: ["doc-1"] },
+      files: ["/content-scripts/host.js"],
+    }))
   })
 
   it("injects each document once and targets documentIds when available", async () => {

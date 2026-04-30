@@ -83,6 +83,21 @@ async function getFrameSnapshot(tabId: number): Promise<FrameInfoForSiteControl[
   return await browser.webNavigation.getAllFrames({ tabId }) ?? []
 }
 
+async function getShouldInjectHostContentIntoTabIframes(
+  tabId: number,
+  existingConfig?: Config | null,
+): Promise<{ config: Config | null, shouldInject: boolean }> {
+  const [isPageTranslationEnabled, config] = await Promise.all([
+    getPageTranslationEnabled(tabId),
+    existingConfig === undefined ? getLocalConfig() : Promise.resolve(existingConfig),
+  ])
+
+  return {
+    config,
+    shouldInject: isPageTranslationEnabled || Boolean(config?.translate.node.enabled),
+  }
+}
+
 async function injectHostContentIntoFrame(
   details: FrameInjectionDetails,
   frames?: FrameInfoForSiteControl[],
@@ -154,25 +169,22 @@ async function injectHostContentIntoFrame(
 }
 
 export async function injectHostContentIntoTabIframes(tabId: number) {
-  let isEnabled: boolean
+  let config: Config | null
+  let shouldInject: boolean
   try {
-    isEnabled = await getPageTranslationEnabled(tabId)
+    ({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(tabId))
   }
   catch (error) {
-    logger.warn("[Background][IframeInjection] Failed to read page translation state", error)
+    logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
     return
   }
 
-  if (!isEnabled)
+  if (!shouldInject)
     return
 
-  let config: Config | null
   let frames: FrameInfoForSiteControl[]
   try {
-    [config, frames] = await Promise.all([
-      getLocalConfig(),
-      getFrameSnapshot(tabId),
-    ])
+    frames = await getFrameSnapshot(tabId)
   }
   catch (error) {
     logger.error("[Background][IframeInjection] Failed to resolve tab iframe injection prerequisites", error)
@@ -203,7 +215,8 @@ export function setupIframeInjection() {
     clearFrameInjectedDocumentState(details.tabId, details.frameId)
   })
 
-  // Only inject into subframes after page translation is enabled for the tab.
+  // Only inject into subframes after page translation or hover/node translation
+  // is enabled for the tab.
   // This keeps iframe-heavy pages and benchmarks from paying content-script cost
   // before the feature is actually used.
   browser.webNavigation.onCompleted.addListener(async (details) => {
@@ -211,16 +224,18 @@ export function setupIframeInjection() {
     if (details.frameId === 0)
       return
 
+    let config: Config | null
+    let shouldInject: boolean
     try {
-      const isEnabled = await getPageTranslationEnabled(details.tabId)
-      if (!isEnabled)
+      ({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(details.tabId))
+      if (!shouldInject)
         return
     }
     catch (error) {
-      logger.warn("[Background][IframeInjection] Failed to read page translation state", error)
+      logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
       return
     }
 
-    await injectHostContentIntoFrame(details)
+    await injectHostContentIntoFrame(details, undefined, config)
   })
 }
