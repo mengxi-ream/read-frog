@@ -719,6 +719,39 @@ describe("requestQueue – retry policy and queue fail-fast drain", () => {
     await expect(firstPromise).rejects.toBe(error)
     await expect(secondPromise).rejects.toBe(error)
   })
+
+  it.each([408, 409])("retries transient %s errors before resolving", async (statusCode) => {
+    vi.useFakeTimers()
+    let attempts = 0
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const error = Object.assign(new Error(`HTTP ${statusCode}`), {
+      statusCode,
+    })
+
+    const promise = q.enqueue(() => {
+      attempts++
+      if (attempts === 1) {
+        return Promise.reject(error)
+      }
+      return Promise.resolve("success")
+    }, Date.now(), `transient-${statusCode}`)
+
+    await vi.advanceTimersByTimeAsync(0)
+    expect(attempts).toBe(1)
+
+    await vi.advanceTimersByTimeAsync(200)
+
+    expect(attempts).toBe(2)
+    await expect(promise).resolves.toBe("success")
+  })
 })
 
 // 12. Reconfigure the request queue

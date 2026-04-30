@@ -256,6 +256,14 @@ function inferRequestErrorKind({ statusCode, message }: { statusCode?: number, m
     return "rate-limit"
   }
 
+  if (statusCode === 408) {
+    return "timeout"
+  }
+
+  if (statusCode === 409) {
+    return "unknown"
+  }
+
   if (statusCode !== undefined && statusCode >= 400 && statusCode < 500) {
     return "bad-request"
   }
