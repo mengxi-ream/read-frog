@@ -34,6 +34,10 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
 
+  if (window === window.top && initialConfig?.translate.node.enabled) {
+    void sendMessage("ensureIframeHostContentInjected", {})
+  }
+
   // For late-loading iframes: check if translation is already enabled for this tab
   let translationEnabled = false
   try {
@@ -78,6 +82,15 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     enabled ? void manager.start(window === window.top ? analyticsContext : undefined) : manager.stop()
   })
 
+  const cleanupFrameTranslationStateListener = window === window.top
+    ? () => {}
+    : onMessage("notifyTranslationStateChanged", (msg) => {
+        const { enabled } = msg.data
+        if (enabled === manager.isActive)
+          return
+        enabled ? void manager.start() : manager.stop()
+      })
+
   ctx.onInvalidated(() => {
     removeHostToast()
     cleanupUrlListener()
@@ -85,6 +98,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     cleanupPageTranslationTriggers()
     cleanupTranslationShortcut()
     cleanupTranslationStateListener()
+    cleanupFrameTranslationStateListener()
     window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
     window.__READ_FROG_HOST_INJECTED__ = false
     clearEffectiveSiteControlUrl()

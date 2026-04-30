@@ -5,6 +5,7 @@ import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { getModelById } from "@/utils/providers/model"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { attachRequestErrorMeta, getRequestErrorMeta } from "@/utils/request/retry-policy"
 
 const THINK_TAG_RE = /<\/think>([\s\S]*)/
 
@@ -43,6 +44,13 @@ export async function aiTranslate<TContext>(
     return finalTranslation
   }
   catch (error) {
-    throw new Error(extractAISDKErrorMessage(error))
+    const message = extractAISDKErrorMessage(error)
+    const meta = getRequestErrorMeta(error)
+    if (error instanceof Error) {
+      error.message = message
+      throw attachRequestErrorMeta(error, meta)
+    }
+
+    throw attachRequestErrorMeta(new Error(message), meta)
   }
 }

@@ -16,17 +16,20 @@ export class SegmentationPipeline {
 
   private getVideoElement: () => HTMLVideoElement | null
   private getSourceLanguage: () => string
+  private preSegmented: boolean
 
   constructor(options: {
     baselineFragments?: SubtitlesFragment[]
     rawFragments: SubtitlesFragment[]
     getVideoElement: () => HTMLVideoElement | null
     getSourceLanguage: () => string
+    preSegmented?: boolean
   }) {
     this.rawFragments = options.rawFragments
     this.processedFragments = [...(options.baselineFragments ?? [])]
     this.getVideoElement = options.getVideoElement
     this.getSourceLanguage = options.getSourceLanguage
+    this.preSegmented = options.preSegmented ?? false
   }
 
   get isRunning(): boolean {
@@ -86,6 +89,11 @@ export class SegmentationPipeline {
       return false
 
     chunk.forEach(f => this.segmentedRawStarts.add(f.start))
+
+    if (this.preSegmented) {
+      this.replaceProcessedChunk(chunk, chunk)
+      return true
+    }
 
     try {
       const config = await getLocalConfig()
