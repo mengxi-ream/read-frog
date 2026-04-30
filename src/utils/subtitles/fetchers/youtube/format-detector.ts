@@ -1,6 +1,6 @@
 import type { YoutubeTimedText } from "./types"
 
-export type SubtitleFormat = "karaoke" | "karaoke-stylized" | "scrolling-asr" | "standard"
+export type SubtitleFormat = "animated" | "karaoke" | "karaoke-stylized" | "scrolling-asr" | "standard"
 
 const ZERO_WIDTH_SPACE_PATTERN = /\u200B/g
 const WHITESPACE_PATTERN = /\s+/g
@@ -124,12 +124,41 @@ function isScrollingAsrFormat(events: YoutubeTimedText[]): boolean {
   return events.some(event => event.wWinId !== undefined && event.aAppend === 1)
 }
 
+const ANIMATED_DURATION_THRESHOLD_MS = 100
+const ANIMATED_MIN_EVENTS = 50
+const ANIMATED_SHORT_DURATION_RATIO = 0.5
+
+/**
+ * Detect animated/kinetic typography subtitles.
+ * Feature: most events are ultra-short animation frames (< 100ms) with wpWinPosId.
+ * Used in music videos where text bounces/scrolls across the screen.
+ */
+function isAnimatedFormat(events: YoutubeTimedText[]): boolean {
+  if (events.length < ANIMATED_MIN_EVENTS)
+    return false
+
+  let shortWithPos = 0
+  for (const event of events) {
+    if (
+      event.wpWinPosId !== undefined
+      && (event.dDurationMs ?? 0) <= ANIMATED_DURATION_THRESHOLD_MS
+    ) {
+      shortWithPos += 1
+    }
+  }
+
+  return shortWithPos / events.length >= ANIMATED_SHORT_DURATION_RATIO
+}
+
 /**
  * Detect subtitle format type.
  */
 export function detectFormat(events: YoutubeTimedText[]): SubtitleFormat {
   if (!events || events.length === 0)
     return "standard"
+
+  if (isAnimatedFormat(events))
+    return "animated"
 
   if (isStylizedKaraokeFormat(events))
     return "karaoke-stylized"

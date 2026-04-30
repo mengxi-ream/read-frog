@@ -23,7 +23,7 @@ import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 import { detectFormat } from "./format-detector"
 import { filterNoiseFromEvents } from "./noise-filter"
-import { parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles, parseStylizedKaraokeSubtitles } from "./parser"
+import { parseAnimatedSubtitles, parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles, parseStylizedKaraokeSubtitles } from "./parser"
 import { extractPotToken } from "./pot-token"
 import { youtubeSubtitlesResponseSchema } from "./types"
 import { buildSubtitleUrl } from "./url-builder"
@@ -66,6 +66,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
   private subtitles: SubtitlesFragment[] = []
   private sourceLanguage: string = ""
   private cachedTrackHash: string | null = null
+  private preSegmented: boolean = false
 
   async fetch(): Promise<SubtitlesFragment[]> {
     const videoId = getYoutubeVideoId()
@@ -104,10 +105,15 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     return this.sourceLanguage
   }
 
+  isPreSegmented(): boolean {
+    return this.preSegmented
+  }
+
   cleanup(): void {
     this.subtitles = []
     this.sourceLanguage = ""
     this.cachedTrackHash = null
+    this.preSegmented = false
   }
 
   async hasAvailableSubtitles(): Promise<boolean> {
@@ -415,6 +421,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     const config = await getLocalConfig()
     const enableAISegmentation = config?.videoSubtitles?.aiSegmentation ?? false
 
+    this.preSegmented = false
     const filteredEvents = filterNoiseFromEvents(events)
     const format = detectFormat(filteredEvents)
 
@@ -424,6 +431,11 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
 
     if (format === "karaoke-stylized") {
       return parseStylizedKaraokeSubtitles(filteredEvents)
+    }
+
+    if (format === "animated") {
+      this.preSegmented = true
+      return parseAnimatedSubtitles(filteredEvents)
     }
 
     if (enableAISegmentation) {
