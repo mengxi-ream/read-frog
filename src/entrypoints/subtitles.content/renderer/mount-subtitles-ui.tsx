@@ -5,6 +5,7 @@ import { Toaster } from "sonner"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
+import { SUBTITLES_FORCED_THEME } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
@@ -84,7 +85,7 @@ export async function mountSubtitlesUI(
 
   const app = (
     <ShadowWrapperContext value={reactContainer}>
-      <ThemeProvider container={reactContainer}>
+      <ThemeProvider container={reactContainer} forcedTheme={SUBTITLES_FORCED_THEME}>
         <SubtitlesProviders adapter={adapter}>
           <SubtitlesContainer />
           <Toaster richColors className="z-2147483647 notranslate" />
