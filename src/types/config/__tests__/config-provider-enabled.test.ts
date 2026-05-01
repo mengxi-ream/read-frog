@@ -14,7 +14,7 @@ function getIssuePaths(input: unknown) {
 describe("config provider enabled validation", () => {
   it("fails when a built-in feature uses a disabled provider", () => {
     const providersConfig = DEFAULT_CONFIG.providersConfig.map((provider) => {
-      if (provider.id === "microsoft-translate-default") {
+      if (provider.id === "google-translate-default") {
         return { ...provider, enabled: false }
       }
       return provider
