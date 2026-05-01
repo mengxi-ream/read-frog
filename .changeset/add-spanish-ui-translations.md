@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-Add Spanish UI translation support.
+i18n: add Spanish UI translation support.
