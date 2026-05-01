@@ -411,7 +411,7 @@ options:
           tokens:
             selection: Contenido del texto seleccionado
             paragraphs: Texto de párrafos intersectados unido con líneas en blanco, truncado a los primeros 2000 caracteres cuando se envía a acciones AI personalizadas
-            targetLanguage: "Idioma de destino del usuario"
+            targetLanguage: Idioma de destino del usuario
             webTitle: Título de la página web
             webContent: Contenido de la página web extraído de la página actual, truncado a los primeros 2000 caracteres
           delete: Eliminar
