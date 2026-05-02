@@ -66,7 +66,7 @@ export const DEFAULT_TRANSLATION_POSITION = "above" as const
 export const DEFAULT_CONTROLS_HEIGHT = 60
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 // Subtitle controls sit on top of arbitrary host pages, so keep their theme fixed for readability.
-export const SUBTITLES_FORCED_THEME = "dark" as const
+export const SUBTITLES_THEME = "dark" as const
 
 // Font family mapping
 export const SUBTITLE_FONT_FAMILIES = {
