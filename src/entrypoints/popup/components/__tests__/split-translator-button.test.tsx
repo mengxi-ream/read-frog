@@ -33,16 +33,25 @@ afterEach(() => {
 })
 
 describe("splitTranslatorButton", () => {
+  beforeEach(() => {
+    browser.windows.getCurrent = vi.fn().mockResolvedValue({ id: 42 })
+  })
   it("sends an extension user-action side panel toggle message", async () => {
     sendMessageMock.mockResolvedValue({ ok: true, action: "opened" })
 
     render(<SplitTranslatorButton className="w-full" />)
+
+    // Wait for useEffect to resolve the real window ID
+    await waitFor(() => {
+      expect(browser.windows.getCurrent).toHaveBeenCalled()
+    })
+
     fireEvent.click(screen.getByRole("button", { name: "popup.splitTranslator.open" }))
 
     await waitFor(() => {
       expect(sendMessageMock).toHaveBeenCalledWith("toggleSidePanel", {
         source: "extension-user-action",
-        windowId: browser.windows.WINDOW_ID_CURRENT,
+        windowId: 42,
       })
     })
     expect(toastErrorMock).not.toHaveBeenCalled()
