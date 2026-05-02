@@ -40,11 +40,29 @@ export function extractAISDKErrorMessage(error: unknown): string {
       text?: unknown
     }
 
-    return getNonEmptyString(source.message)
-      ?? getNonEmptyString(source.responseBody)
-      ?? getNonEmptyString(source.text)
+    const message = getNonEmptyString(source.message)
+    const responseBody = getNonEmptyString(source.responseBody)
+    const text = getNonEmptyString(source.text)
+
+    if (isGenericAISDKErrorMessage(message)) {
+      return responseBody ?? text ?? message ?? "Unexpected error occurred"
+    }
+
+    return message
+      ?? responseBody
+      ?? text
       ?? "Unexpected error occurred"
   }
 
   return "Unexpected error occurred"
+}
+
+function isGenericAISDKErrorMessage(message: string | undefined): boolean {
+  if (!message) {
+    return true
+  }
+
+  const normalizedMessage = message.trim().toLowerCase()
+  return normalizedMessage === "something went wrong"
+    || normalizedMessage === "unexpected error occurred"
 }

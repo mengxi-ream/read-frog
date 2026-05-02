@@ -7,6 +7,7 @@ import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
+import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
 
 export const MENU_ID_TRANSLATE = "read-frog-translate"
 export const MENU_ID_SELECTION_TRANSLATE = "read-frog-selection-translate"
@@ -194,14 +195,13 @@ async function handleContextMenuClick(
  * Handle translate menu click - toggle page translation
  */
 async function handleTranslateClick(tabId: number) {
-  const state = await storage.getItem<{ enabled: boolean }>(
-    getTranslationStateKey(tabId),
-  )
-  const isCurrentlyTranslated = state?.enabled ?? false
+  const isCurrentlyTranslated = await getPageTranslationEnabled(tabId)
   const newState = !isCurrentlyTranslated
 
-  // Update storage directly (instead of sending message to self)
-  await storage.setItem(getTranslationStateKey(tabId), { enabled: newState })
+  if (!newState) {
+    await setPageTranslationEnabled(tabId, false)
+    void sendMessage("notifyTranslationStateChanged", { enabled: false }, tabId)
+  }
 
   // Notify content script in that specific tab
   void sendMessage("askManagerToTogglePageTranslation", {
@@ -212,7 +212,7 @@ async function handleTranslateClick(tabId: number) {
   }, tabId)
 
   // Update menu title immediately
-  await updateTranslateMenuTitle(tabId)
+  await updateTranslateMenuTitle(tabId, newState)
 }
 
 async function handleSelectionTranslateClick(

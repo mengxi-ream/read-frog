@@ -1,0 +1,1223 @@
+name: Read Frog
+extName: Read Frog - Traducción inmersiva de código abierto
+extDescription: Read Frog es una extensión de navegador de código abierto diseñada para ayudarte a aprender idiomas en profundidad desde cualquier sitio web.
+uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+dataTypes:
+  string: Texto
+  number: Número
+contextMenu:
+  translate: Traducir
+  translateSelection: Traducir "%s"
+  showOriginal: Mostrar original
+sidePanel:
+  firefoxUserActionHint: En Firefox, abre Read Frog desde la barra lateral del navegador.
+  firefoxUserActionHelpText: Aprende a abrir la barra lateral de Firefox
+  firefoxUserActionHelpUrl: https://support.mozilla.org/en-US/kb/use-sidebar-access-tools-and-vertical-tabs
+popup:
+  theme: Tema
+  autoLang: Auto
+  sourceLang: Origen
+  targetLang: Destino
+  translate: Traducir
+  showOriginal: Mostrar original
+  enabledFloatingButton: Activar botón flotante
+  enabledSelectionToolbar: Activar barra de selección
+  alwaysTranslate: Traducir siempre este sitio
+  addToWhitelist: Activar extensión en este sitio
+  addToBlacklist: Desactivar extensión en este sitio
+  options: Opciones
+  hover: Pasar el cursor
+  translateParagraph: para traducir el párrafo
+  hub:
+    tooltip: Traduce texto con varios modelos al mismo tiempo
+  discord:
+    tooltip: Únete a Discord para conectar con desarrolladores y obtener acceso anticipado a nuevas funciones
+  blog:
+    notification: Novedades de Read Frog
+  aiSmartContext: Contexto inteligente de IA
+  aiSmartContextDescription: Usa el contexto de la página web para mejorar la calidad de la traducción. Requiere un proveedor de traducción LLM.
+  more:
+    title: Más
+    translationHub: Centro de traducción
+    joinDiscord: Unirse a Discord
+    joinWechat: Unirse al grupo de WeChat
+    starGithub: Marcar con estrella en GitHub
+    rateUs: Calificarnos
+    ebook: Lector de libros electrónicos de terceros
+    tutorial: Tutorial
+errorRecovery:
+  title: Algo salió mal
+  description: El modo de recuperación está activo. Puedes exportar tu configuración actual como copia de seguridad y luego restablecer la configuración e intentarlo de nuevo.
+  backupTitle: Primero haz una copia de seguridad de la configuración actual (recomendado)
+  exportWithApiKeys: Exportar con claves API
+  exportWithoutApiKeys: Exportar sin claves API
+  recoveryTitle: Opciones de recuperación
+  refreshPage: Actualizar la página
+  resetAction: Restablecer configuración predeterminada
+  resetSuccess: Recuperación completada. La configuración se ha restablecido
+  resetFailed: Error de recuperación. No se pudo restablecer la configuración
+  errorDetails: Detalles del error
+  resetDialog:
+    title: ¿Restablecer configuración?
+    description: Esto reemplazará tu configuración actual por los valores predeterminados.
+    confirm: Restablecer
+    cancel: Cancelar
+options:
+  commandPalette:
+    placeholder: Buscar configuración...
+    noResults: No se encontró configuración
+  sidebar:
+    settings: Configuración
+    tools: Herramientas
+    product: Producto
+  tools:
+    translationHub: Centro de traducción
+  setAPIKeyWarning:
+    please: Configura la clave API en
+    page: página
+  betaExperience:
+    title: Experiencia beta
+    description: Activa funciones experimentales y acceso anticipado a nuevas funcionalidades. Estas funciones pueden ser inestables o estar incompletas.
+    enabled: Activar experiencia beta
+  apiProviders:
+    title: Proveedores de API
+    description: Configura proveedores de API para traducción e información de vocabulario. Tenemos más de 20 proveedores integrados y admitimos cualquier proveedor de API compatible con OpenAI.
+    promotion:
+      ai302:
+        description: Haz clic en el enlace de la derecha para registrarte en 302.AI y obtener 1 USD de crédito API
+        action: Registrarse para obtener una clave API gratis
+        addProvider: Añadir configuración de 302.AI
+    addProvider: Añadir proveedor
+    badges:
+      featureCount: $1 funciones
+    dialog:
+      title: Añadir nuevo proveedor
+      groups:
+        builtInProviders:
+          title: Proveedores LLM integrados
+          description: Proveedores integrados de modelos de lenguaje grandes; no hace falta completar la mayoría de configuraciones, como Base URL
+        openaiCompatibleProviders:
+          title: Proveedores personalizados compatibles con OpenAI
+          description: Si no encuentras el proveedor de AI que deseas, selecciona Proveedor personalizado para configurar cualquier proveedor compatible con OpenAI, como Zhipu AI
+        pureTranslationProviders:
+          title: Proveedores de traducción pura
+          description: Proveedores centrados en funciones de traducción sin capacidades de modelos de lenguaje grandes
+    form:
+      fields:
+        name: Nombre
+        description: Descripción
+        apiKey: Clave API
+        baseURL: Base URL
+        optional: Opcional
+      delete: Eliminar
+      deleteDialog:
+        title: ¿Eliminar proveedor?
+        description: Esta acción no se puede deshacer. Las funciones que usan este proveedor se reasignarán automáticamente a otro proveedor disponible.
+        confirm: Eliminar
+        cancel: Cancelar
+      atLeastOneLLMProvider: Se requiere al menos un proveedor de traducción LLM.
+      providerInUseCannotDisable: 'No se puede desactivar "$1" porque actualmente lo usan $2 función(es).'
+      duplicateProviderName: 'Nombre de proveedor duplicado "$1"'
+      defaultProvider:
+        translate: Establecer como proveedor de traducción predeterminado
+      models:
+        translate:
+          title: Modelo de traducción
+          customTitle: Modelo de traducción personalizado
+          placeholder: Selecciona un modelo
+        fetchModels: Obtener modelos disponibles
+        fetchError: No se pudieron obtener los modelos
+        clickToRetry: Haz clic para reintentar
+        noModels: No hay modelos disponibles
+        selectModel: Selecciona un modelo
+        apiKeyRequired: Añade primero una clave API
+        searchModels: Buscar modelos...
+        noModelsFound: No se encontraron modelos
+      featureProviders: Proveedores de funciones
+      advancedOptions: Opciones avanzadas
+      connectionOptionLabels:
+        region: Región
+      temperature: Temperatura
+      temperatureHint: Controla la aleatoriedad en las respuestas. Los valores más bajos (0) son más deterministas; los más altos son más creativos. El rango varía según el proveedor. Déjalo vacío para usar el valor predeterminado del proveedor.
+      providerOptions: Opciones del proveedor
+      providerOptionsHint: Opciones específicas del proveedor para funciones API no estándar, como el modo thinking/reasoning. Consulta la documentación de Vercel AI SDK o la documentación oficial de tu proveedor para ver detalles de configuración.
+      providerOptionsDocsLink: Ver documentación del proveedor
+      providerOptionsRecommendationTrigger: Ver opciones recomendadas del proveedor
+      providerOptionsRecommendationTitle: Opciones recomendadas del proveedor detectadas
+      providerOptionsRecommendationDescription: Revisa y aplica manualmente la configuración recomendada.
+      providerOptionsRecommendationApply: Aplicar
+      providerOptionsRecommendationApplied: Aplicado
+      invalidJson: Formato JSON no válido
+    providers:
+      description:
+        openai: Proporciona modelos como GPT-4o
+        deepseek: Recomendado para usar en China
+        openrouter: Interfaz unificada para varios proveedores LLM con precios de pago por uso
+        ollama: Ejecuta modelos de lenguaje grandes localmente en tu equipo con privacidad completa
+        google: Modelos AI principales de Google con capacidades avanzadas de razonamiento
+        anthropic: Modelos Claude conocidos por su seguridad y excelente razonamiento
+        xai: Empresa de AI de Elon Musk que ofrece modelos Grok con acceso a datos en tiempo real
+        siliconflow: Plataforma de inferencia de alto rendimiento para modelos chinos e internacionales
+        tensdaq: Plataforma revolucionaria de pujas AI MaaS con precios impulsados por el mercado, que elimina los altos precios fijos
+        ai302: Proporciona los modelos más recientes y completos con API de pago por uso
+        openaiCompatible: Compatible con API de terceros y OpenAI
+        deeplx: API de DeepL no oficial
+        deepl: API oficial de DeepL
+        bedrock: Servicio administrado de AWS para modelos fundacionales de nivel empresarial
+        groq: Hardware especializado para inferencia LLM ultrarrápida
+        deepinfra: Inferencia en la nube rentable para modelos populares de código abierto
+        mistral: Empresa europea de AI especializada en modelos multilingües eficientes
+        togetherai: Plataforma colaborativa para ejecutar y ajustar modelos de código abierto
+        cohere: AI enfocada en empresas con sólidas capacidades multilingües y RAG
+        fireworks: Plataforma de inferencia lista para producción para modelos de código abierto
+        cerebras: Inferencia AI ultrarrápida para traducción y análisis de texto rápidos
+        replicate: Acceso a diversos modelos de código abierto para tareas de traducción especializadas
+        perplexity: AI mejorada con conocimiento en tiempo real para traducciones contextuales y asistencia de lectura
+        vercel: Modelos AI optimizados para traducción y análisis de contenido web
+        volcengine: Plataforma cloud AI de ByteDance que ofrece modelos Doubao para traducción y lectura
+        minimax: Plataforma MiniMax AI que ofrece modelos avanzados MiniMax-M2 para generación de texto
+        alibaba: Serie de modelos Qwen de Alibaba Cloud con razonamiento avanzado y capacidades multilingües
+        moonshotai: Serie de modelos Kimi de Moonshot AI con razonamiento sólido y capacidades de contexto largo
+        huggingface: API de inferencia de Hugging Face que proporciona acceso a miles de modelos de código abierto
+    apiKey:
+      showAPIKey: Mostrar clave API
+    howToConfigure: ¿Cómo configurar?
+    testConnection:
+      button: Probar conexión
+      testing: Probando...
+  general:
+    title: General
+    appearance:
+      title: Apariencia
+      theme: Tema
+      system: Sistema
+      light: Claro
+      dark: Oscuro
+    featureProviders:
+      title: Proveedores de funciones
+      description: Elige qué proveedor usar para cada función
+      customActions: Acciones AI personalizadas
+      features:
+        translate: Traducción de página
+        selectionToolbar_translate: Traducción de la barra de selección
+        tts: Texto a voz
+        inputTranslation: Traducción de entrada
+        videoSubtitles: Subtítulos de video
+    translationConfig:
+      model:
+        title: Modelo
+        enterCustomModel: Introduce el nombre del modelo personalizado
+    clearCache:
+      title: Borrar caché
+      description: Borra toda la caché de traducción en tu navegador
+      clearing: Borrando...
+      dialog:
+        title: Borrar caché
+        trigger: Borrar caché
+        confirm: Confirmar
+        cancel: Cancelar
+        description: Esta operación borrará toda la caché de traducción. Esta acción no se puede deshacer.
+    languageDetection:
+      title: Detección de idioma
+      description: Afecta la detección de idioma para traducción automática, la detección de idiomas omitidos y la precisión de selección de voz.
+      mode:
+        basic: Básica
+        llm: LLM
+      provider:
+        label: Proveedor de detección
+        placeholder: Selecciona un proveedor
+      status:
+        noProviders: Configura primero un proveedor LLM
+        basicRecommend: Se recomienda activar LLM
+        llmEnabled: Detección LLM activada
+  siteControl:
+    title: Control de sitios
+    mode:
+      title: Modo de activación de la extensión
+      description: Usa el modo de lista negra para desactivar la extensión en sitios específicos, o el modo de lista blanca para limitarla solo a sitios específicos.
+      blacklist: Desactivar solo en sitios listados
+      whitelist: Ejecutar solo en sitios listados
+    patterns:
+      enterUrlPattern: Introduce patrón de URL (p. ej., example.com)
+      urlPattern: Patrón de URL
+  overlayTools:
+    title: Herramientas superpuestas
+    floatingButton:
+      title: Botón flotante
+    selectionToolbar:
+      title: Barra de selección
+    contextMenu:
+      title: Menú contextual
+    inputTranslation:
+      title: Traducción de entrada
+  inputTranslation:
+    provider:
+      title: Proveedor de traducción
+      description: Elige qué proveedor de traducción usar para la traducción de entrada
+      label: Proveedor
+    toggle:
+      title: Activar traducción con triple espacio
+      description: Pulsa la barra espaciadora 3 veces rápidamente en cualquier campo de entrada para traducir su contenido
+    languages:
+      title: Idiomas de traducción
+      description: Elige los idiomas de origen y destino para la traducción de entrada
+      sourceCode: Idioma de origen de la página
+      targetCode: Idioma de destino de la traducción
+      enableCycle: Intercambiar dirección cada vez
+    threshold:
+      title: Umbral de activación
+      description: Intervalo de tiempo entre pulsaciones de espacio para activar la traducción
+      label: Umbral (ms)
+      hint: Tiempo en milisegundos entre pulsaciones consecutivas de espacio (100-1000ms)
+      error: El valor debe estar entre $1 y $2
+  floatingButtonAndToolbar:
+    title: Botón flotante y barra de herramientas
+    floatingButtonDemoImageAlt: Demostración del botón flotante
+    selectionToolbarDemoImageAlt: Demostración de la barra de selección
+    floatingButton:
+      globalToggle:
+        title: Activar botón flotante
+        description: Muestra el botón flotante en páginas web para acceder rápidamente a las funciones de Read Frog
+      closeMenu:
+        disableForSite: Desactivar para este sitio
+        disableGlobally: Desactivar globalmente
+      disabledSites:
+        title: Sitios con botón flotante desactivado
+        description: Configura los sitios web donde se debe desactivar el botón flotante
+        enterUrlPattern: Introduce patrón de URL
+        urlPattern: Patrón de URL
+      clickAction:
+        title: Acción al hacer clic
+        description: Elige la acción al hacer clic en el botón flotante
+        panel: Abrir panel lateral
+        translate: Alternar traducción de página
+    selectionToolbar:
+      globalToggle:
+        title: Activar barra de selección
+        description: Muestra la barra de herramientas al seleccionar texto en páginas web para traducción rápida, voz y acciones AI
+      opacity:
+        title: Opacidad
+        description: Ajusta la opacidad de la barra de selección y de la ventana expandida que se abre desde ella
+      featureToggles:
+        title: Alternadores de funciones
+        description: Elige qué funciones integradas mostrar en la barra de selección
+        translate: Traducir
+        speak: Leer en voz alta
+      closeMenu:
+        disableForSite: Desactivar para este sitio
+        disableGlobally: Desactivar globalmente
+      disabledSites:
+        title: Sitios con barra de selección desactivada
+        description: Configura los sitios web donde se debe desactivar la barra de selección
+        enterUrlPattern: Introduce patrón de URL
+        urlPattern: Patrón de URL
+      errors:
+        customActionFailed: Falló la acción personalizada
+        customActionFailedFallback: Falló la solicitud de acción personalizada
+        actionUnavailable: La acción seleccionada no está disponible
+        missingSelection: No hay texto seleccionado disponible
+        providerDisabled: El proveedor seleccionado está desactivado
+        providerUnavailable: El proveedor seleccionado no está disponible
+      features:
+        provider: Proveedor
+        selectProvider: Selecciona un proveedor
+        noProviderAvailable: No hay proveedores disponibles
+        useProviderDefaultModel: Usar modelo predeterminado del proveedor
+        useCustomModel: Usar modelo personalizado
+        customModel: Modelo personalizado
+        model: Modelo
+        modelNotAvailableForNonLLM: La configuración de modelo solo está disponible para proveedores LLM
+        translate:
+          title: Traducción de selección
+          description: Configura proveedor y modelo para la función de traducción de la barra de selección
+      customActions:
+        title: Acciones AI personalizadas
+        description: Añade tus propias acciones AI estructuradas para texto seleccionado
+        add: Añadir acción AI
+        edit: Editar acción AI
+        empty: Aún no hay acciones AI personalizadas
+        noEnabledLlmProvider: Activa al menos un proveedor LLM antes de crear acciones AI personalizadas
+        table:
+          name: Nombre
+          provider: Proveedor
+          fields: Campos
+          actions: Acciones
+        form:
+          name: Nombre
+          icon: Icono (Iconify)
+          provider: Proveedor (requiere compatibilidad con salida estructurada)
+          selectProvider: Selecciona un proveedor
+          systemPrompt: Prompt del sistema
+          prompt: Prompt
+          outputSchema: Esquema de salida
+          addField: Añadir campo
+          fieldName: Nombre del campo
+          fieldType: Tipo de campo
+          fieldDescription: Descripción
+          fieldDescriptionPlaceholder: Describe qué debe contener este campo...
+          fieldSpeaking: Activar lectura en voz alta
+          actions: Acciones
+          cancel: Cancelar
+          save: Guardar
+          defaultFieldName: Resultado
+          fieldNamePlaceholder: Nombre del campo
+          autoFieldPrefix: Campo
+          addFieldDialog:
+            title: Añadir campo de salida
+          editFieldDialog:
+            title: Editar campo de salida
+            save: Guardar
+          deleteFieldDialog:
+            title: ¿Eliminar campo de salida?
+            description: Este campo de salida se eliminará.
+            confirm: Eliminar
+            cancel: Cancelar
+          notebase:
+            title: Conexión de Notebase
+            description: Guarda los resultados estructurados de esta acción en una Notebase remota.
+            loginRequiredTitle: Inicia sesión para configurar Notebase
+            loginRequiredDescription: Inicia sesión en readfrog.app antes de elegir una Notebase o editar asignaciones.
+            loginAction: Iniciar sesión
+            tableLabel: Notebase
+            tablePlaceholder: Selecciona una Notebase
+            tableClearOption: Desconectar Notebase
+            refreshAction: Actualizar
+            emptyTitle: Aún no hay Notebases
+            emptyDescription: Crea una Notebase en readfrog.app y vuelve aquí para asignar campos.
+            openNotebaseAction: Abrir Notebase
+            betaLockedTitle: Esta cuenta no está en la beta de Notebase
+            betaLockedDescription: Puedes mantener esta acción configurada, pero elegir Notebases y sincronizar resultados está limitado por ahora a cuentas beta seleccionadas.
+            tableUnavailableTitle: La Notebase seleccionada ya no está disponible
+            tableUnavailableDescription: Actualiza o elige otra Notebase antes de volver a guardar.
+            tableUnavailableOption: no disponible
+            schemaErrorTitle: No se pudo cargar el esquema de la Notebase
+            schemaErrorDescription: Intenta actualizar el esquema de nuevo en un momento.
+            schemaLoading: Cargando esquema de la Notebase...
+            mappingsLabel: Asignaciones de campos
+            mappingsEmpty: Aún no hay asignaciones. Añade una cuando estés listo para guardar campos.
+            addMappingAction: Añadir asignación
+            removeMappingAction: Eliminar asignación
+            localFieldLabel: Campo de acción
+            localFieldPlaceholder: Selecciona un campo de acción
+            remoteFieldLabel: Campo de Notebase
+            remoteFieldPlaceholder: Selecciona un campo de Notebase
+            columnUnavailableOption: eliminado
+            invalidMappingsTitle: Algunas asignaciones requieren atención
+            invalidMappingsDescription: Las asignaciones no válidas se conservan, pero Guardar en Notebase permanece desactivado hasta que las corrijas.
+            mappingMissingLocal: El campo de acción asignado ya no existe.
+            mappingMissingRemote: El campo de Notebase asignado ya no existe.
+            mappingMissingSchema: Actualiza el esquema de la Notebase para validar esta asignación.
+            mappingIncompatible: Los tipos de campo ya no coinciden.
+          tokens:
+            selection: Contenido del texto seleccionado
+            paragraphs: Texto de párrafos intersectados unido con líneas en blanco, truncado a los primeros 2000 caracteres cuando se envía a acciones AI personalizadas
+            targetLanguage: Idioma de destino del usuario
+            webTitle: Título de la página web
+            webContent: Contenido de la página web extraído de la página actual, truncado a los primeros 2000 caracteres
+          delete: Eliminar
+          deleteDialog:
+            title: ¿Eliminar acción personalizada?
+            description: Esta acción no se puede deshacer.
+            confirm: Eliminar
+            cancel: Cancelar
+        templates:
+          dialogTitle: Elegir una plantilla
+          dialogDescription: Selecciona una plantilla para crear rápidamente una nueva acción AI, o empieza desde cero.
+          dictionary:
+            name: Diccionario
+            description: Busca palabras con definiciones, fonética y traducciones de párrafos
+            systemPrompt: |-
+              Eres un asistente de diccionario para estudiantes de idiomas.
+
+              ## Objetivo
+              Dado un término y sus párrafos circundantes, produce una entrada de diccionario concisa que coincida con el objeto de salida requerido.
+
+              ## Reglas
+              1. Céntrate en el significado que mejor coincida con los párrafos proporcionados.
+              2. Normaliza Término a su forma base/canónica.
+              3. Mantén Definición precisa y fácil para estudiantes.
+              4. Mantén Párrafos exactamente como se proporcionan en el prompt.
+              5. Fonética debe usar la notación estándar del idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
+              6. Categoría gramatical en inglés (noun, verb, adjective, etc.).
+              7. Dificultad debe ser un nivel CEFR (A1, A2, B1, B2, C1 o C2).
+              8. Si un campo es desconocido, devuelve una cadena vacía en lugar de adivinar.
+              9. Responde en {{targetLanguage}} para todos los campos textuales, salvo que se requiera texto en la forma de origen para mayor claridad.
+
+              ## Ejemplos
+
+              ### Ejemplo 1
+              Entrada: Selección="blossoms", Párrafos="The ephemeral beauty of cherry blossoms reminds us to cherish each moment.", Idioma de destino=chino
+
+              Salida:
+              - Término: blossom
+              - Fonética: /ˈblɒs.əm/
+              - Categoría gramatical: noun
+              - Párrafos: The ephemeral beauty of cherry blossoms reminds us to cherish each moment.
+              - Definición: 花；花朵（尤指果树的花）
+              - Traducción de párrafos: 樱花短暂的美丽提醒我们珍惜每一刻。
+              - Dificultad: B2
+
+              ### Ejemplo 2
+              Entrada: Selección="感動", Párrafos="この映画はつまらないと思ったけど、最後は感動した。", Idioma de destino=inglés
+
+              Salida:
+              - Término: 感動
+              - Fonética: kandou
+              - Categoría gramatical: noun
+              - Párrafos: この映画はつまらないと思ったけど、最後は感動した。
+              - Definición: Being deeply moved; emotional touch
+              - Traducción de párrafos: I thought this movie was boring, but the ending was moving.
+              - Dificultad: B1
+            prompt: |-
+              ## Entrada
+              Selección: {{selection}}
+              Párrafos: {{paragraphs}}
+              Idioma de destino: {{targetLanguage}}
+            fieldTerm: Término
+            fieldTermDescription: Lema base/canónico del término seleccionado.
+            fieldPhonetic: Fonética
+            fieldPhoneticDescription: Transcripción fonética estándar para el idioma del término (p. ej., IPA para inglés, pinyin para mandarín, romaji para japonés).
+            fieldPartOfSpeech: Categoría gramatical
+            fieldPartOfSpeechDescription: Categoría gramatical (p. ej., noun, verb, adjective).
+            fieldParagraphs: Párrafos
+            fieldParagraphsDescription: Los párrafos del prompt anterior. No los reescribas.
+            fieldDefinition: Definición
+            fieldDefinitionDescription: Una definición concisa para el sentido contextual.
+            fieldParagraphsTranslation: Traducción de párrafos
+            fieldParagraphsTranslationDescription: La traducción de los párrafos.
+            fieldDifficulty: Dificultad
+            fieldDifficultyDescription: Nivel de dificultad CEFR estimado A1, A2, B1, B2, C1 o C2.
+          improveWriting:
+            name: Mejorar escritura
+            description: Analiza errores de escritura y sugiere mejoras
+            systemPrompt: |-
+              Eres un asistente de escritura para estudiantes de idiomas.
+
+              ## Objetivo
+              Dado un texto seleccionado y sus párrafos circundantes, analiza problemas de escritura y produce una versión mejorada.
+
+              ## Política de idioma (crítica)
+              1. Detecta el idioma original de Selección como {{originLanguage}}.
+              2. El campo "Análisis de errores" debe escribirse en {{targetLanguage}}.
+              3. El campo "Versión mejorada" debe mantenerse en {{originLanguage}}.
+              4. Nunca traduzcas "Versión mejorada" a {{targetLanguage}} a menos que {{originLanguage}} ya sea {{targetLanguage}}.
+
+              ## Reglas de escritura
+              1. Identifica errores de gramática, ortografía, puntuación y elección de palabras.
+              2. Mantén las ediciones naturales y conserva la intención y el tono del autor.
+              3. Si no hay errores importantes, indícalo claramente en "Análisis de errores" y devuelve una "Versión mejorada" ligeramente pulida.
+              4. Mantén "Versión mejorada" concisa y directamente utilizable.
+
+              ## Ejemplos
+              Ejemplo A:
+              - Selección: "He go to school yesterday, and he don't finish his homework."
+              - {{originLanguage}} detectado: inglés
+              - {{targetLanguage}}: chino
+              - Análisis de errores (chino — {{targetLanguage}}): 存在主谓一致和时态错误：go 应改为 went，don't 应改为 didn't，finish 应改为 finish 的过去时语境搭配。
+              - Versión mejorada (inglés — {{originLanguage}}): He went to school yesterday, and he didn't finish his homework.
+
+              Ejemplo B:
+              - Selección: "昨日私は友達に会いて、一緒に映画を見るました。"
+              - {{originLanguage}} detectado: japonés
+              - {{targetLanguage}}: inglés
+              - Análisis de errores (inglés — {{targetLanguage}}): There are verb conjugation errors: "会いて" should be "会って" (te-form of 会う), and "見るました" should be "見ました" (past tense of 見る in masu-form).
+              - Versión mejorada (japonés — {{originLanguage}}): 昨日私は友達に会って、一緒に映画を見ました。
+            prompt: |-
+              ## Entrada
+              Selección: {{selection}}
+              Párrafos: {{paragraphs}}
+              Idioma de destino: {{targetLanguage}}
+            fieldErrorAnalysis: Análisis de errores
+            fieldErrorAnalysisDescription: Explica problemas de gramática, ortografía, puntuación y elección de palabras en {{targetLanguage}}.
+            fieldImprovedVersion: Versión mejorada
+            fieldImprovedVersionDescription: Versión corregida y mejorada del texto seleccionado en su idioma original.
+          blank:
+            name: En blanco
+            description: Empieza desde cero con una acción vacía
+        errors:
+          nameRequired: El nombre es obligatorio
+          duplicateName: 'Nombre de acción duplicado "$1"'
+          invalidIcon: Cadena de icono Iconify no válida
+          providerRequired: Selecciona un proveedor LLM activado
+          outputSchemaRequired: Añade al menos un campo de salida
+          fieldKeyRequired: El nombre del campo es obligatorio
+          duplicateFieldKey: Los nombres de campo deben ser únicos
+    contextMenu:
+      title: Menú contextual
+      translate:
+        title: Activar traducción en menú contextual
+        description: Añade opciones de traducción al menú contextual del navegador para traducir rápidamente páginas y selecciones
+  translation:
+    title: Traducción
+    requestQueueConfig:
+      title: Tasa de traducción
+      firstOnDescription: Ajusta la velocidad de procesamiento de las solicitudes de traducción usando el
+      lastOnDescription: algoritmo
+      capacity:
+        title: Recuento máximo de solicitudes en ráfaga
+        description: El recuento de solicitudes temporales en ráfaga permitido determina el número máximo de solicitudes que se pueden procesar de forma concurrente durante un periodo corto
+      rate:
+        title: Solicitudes promedio por segundo
+        description: Solicitudes promedio por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes
+    batchQueueConfig:
+      title: Traducción por lotes
+      description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
+      maxCharactersPerBatch:
+        title: Caracteres máximos
+        description: Número máximo de caracteres permitido por solicitud por lote para controlar el volumen de contenido de cada traducción
+      maxItemsPerBatch:
+        title: Recuento máximo de párrafos
+        description: Número máximo de párrafos para cada traducción por lote para controlar el volumen de contenido de cada traducción
+      statisticsLink: Se ahorraron aproximadamente $1 de coste en los últimos 7 días
+    autoTranslateWebsite:
+      title: Traducción automática por sitio web
+      description: Traducir siempre este sitio web
+      urlPattern: Patrón de URL
+      enterUrlPattern: Introduce patrón de URL
+    personalizedPrompts:
+      title: Prompts personalizados
+      description: Personalizar distintos tipos de Prompts te permite ajustar tú mismo el tipo de Prompt durante la traducción. Un Prompt representa el texto que el usuario envía al LLM.
+      communityPrompts: Obtener o compartir prompts de la comunidad
+      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      addPrompt: Añadir Prompt
+      default: Predeterminado
+      importSuccess: Importación correcta
+      import: Importar
+      export: Exportar
+      current: en uso
+      editPrompt:
+        title: Editar Prompt
+        name: Nombre
+        systemPrompt: Prompt del sistema
+        prompt: Prompt
+        promptCellInput:
+          input: Contenido de texto a traducir
+          targetLanguage: Idioma de destino
+          webTitle: Título de la página web
+          webContent: Contenido de la página web (truncado a los primeros 2000 caracteres)
+          webSummary: Resumen de la página web (requiere contexto inteligente de IA)
+        save: Guardar cambios
+        close: Cancelar
+      deletePrompt:
+        title: Eliminar Prompt
+        description: Confirmar eliminación del prompt
+        confirm: Confirmar
+        cancel: Cancelar
+      exportPrompt:
+        exportSelected: Exportar seleccionados
+        cancel: Cancelar
+    translationStyle:
+      title: Estilo de visualización de traducción
+      description: Define cualquier estilo que quieras para distinguir los resultados de traducción del texto original
+      useCustomStyle: Usar estilo CSS personalizado
+      useCustomStyleDescription: Admite cualquier CSS, incluidas fuentes, animaciones y estilos específicos de idioma
+      presetStyle: Estilo preestablecido
+      cssEditor: Editor CSS
+      preview: Vista previa
+      stylePreviewLanguage: Idioma
+      stylePreviewDirection: Dirección
+      stylePreviewTranslatedText: Texto traducido
+      style:
+        default: Ninguno
+        blur: Efecto de desenfoque
+        blockquote: Cita en bloque
+        weakened: Atenuado
+        dashedLine: Línea discontinua
+        border: Borde
+        textColor: Color del texto
+        background: Fondo
+      customCSS:
+        editor:
+          placeholder: |
+            /* Example: Custom style with color and background */
+            [data-read-frog-custom-translation-style='custom'] {
+              color: #414535;
+              background-color: light-dark(#F2E3BC, #C19875);
+              padding: 2px 4px;
+              border-radius: 4px;
+            }
+          saveButton: Guardar
+          savedButton: Guardado
+          validation:
+            validating: Validando...
+            valid: CSS válido
+            syntaxError: CSS tiene errores de sintaxis
+            tooLong: CSS es demasiado largo
+            saved: Todos los cambios guardados
+    translationMode:
+      title: Modo de traducción
+      description: "Elige cómo se muestra el texto traducido: bilingüe o solo traducción."
+      mode:
+        bilingual: Bilingüe
+        translationOnly: Solo traducción
+    translateRange:
+      title: Rango de traducción
+      description: Selecciona si traducir solo el contenido principal o todo el contenido de la página.
+      range:
+        main: Contenido principal
+        all: Todo el contenido
+    pageTranslationShortcut:
+      title: Atajo de traducción de página
+      description: Personaliza la tecla de atajo para traducir páginas web completas
+    preloadConfig:
+      title: Rango de pretraducción
+      description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
+      margin:
+        title: Distancia de precarga (píxeles)
+        description: Qué tan lejos por debajo de la ventana visible empezar a traducir contenido. Los valores más bajos ahorran costes de API, pero pueden causar retrasos al desplazarse.
+      threshold:
+        title: Umbral de visibilidad
+        description: Porcentaje de visibilidad del elemento requerido para activar la traducción (0-1). Los valores más altos retrasan la traducción hasta que sea visible una mayor parte del elemento.
+    smallParagraphFilter:
+      title: Filtro de párrafos pequeños
+      description: Omitir la traducción de nodos de texto con menos caracteres o palabras que el umbral (0 = desactivado)
+      minCharacters:
+        title: Caracteres mínimos
+        description: Los nodos de texto con menos caracteres que este valor no se traducirán. El recuento de caracteres incluye espacios en blanco.
+      minWords:
+        title: Palabras mínimas
+        description: Los nodos de texto con menos palabras que este valor no se traducirán. Usa Intl.Segmenter para un recuento preciso de palabras en todos los idiomas.
+      error: El valor debe estar entre $1 y $2
+    nodeTranslationHotkey:
+      title: Atajo de traducción al pasar el cursor o mantener pulsado
+      description: Personaliza la tecla modificadora al pasar el cursor o usa pulsación larga para traducir párrafos
+      enable: Activar
+    llmProviderConfigured: Proveedor LLM seleccionado para $1
+    llmProviderNotConfigured: No se seleccionó ningún proveedor LLM para $1
+    autoTranslateLanguages:
+      title: Traducción automática por idioma
+      description: Traduce automáticamente el contenido de la página cuando se detectan idiomas específicos
+      selectLanguages: Seleccionar idiomas
+      detection:
+        label: Detección de idioma
+        basic: Básica
+        llm: LLM
+        description: La detección básica es rápida y gratis. La detección LLM es más precisa, pero añade latencia y costes de API. Requiere idiomas de traducción automática configurados.
+    skipLanguages:
+      title: Omisión automática por idioma
+      description: Omite automáticamente la traducción de párrafos cuando se detectan idiomas específicos
+      selectLanguages: Seleccionar idiomas
+      detection:
+        label: Detección de idioma
+        basic: Básica
+        llm: LLM
+        description: La detección básica es rápida y gratis. La detección LLM es más precisa, pero añade latencia y costes de API.
+    aiContentAware:
+      title: Traducción con contexto inteligente de IA
+      description: Mejora la calidad de la traducción proporcionando contexto de la página web a la AI
+      enable: Activar traducción con contexto inteligente de IA
+      enableDescription: La AI usa el resumen de la página web para mejorar la precisión de traducción. Requiere proveedor LLM. Añade latencia al empezar a traducir una página y aumenta los costes de API.
+  tts:
+    title: Texto a voz
+    description: Usa la configuración de voz de Edge TTS para el botón Leer en voz alta.
+    voice:
+      label: Voz
+      fallback: Alternativa
+      selectPlaceholder: Selecciona una voz
+      preview: Vista previa
+      previewSample: ¡Hola desde Read Frog! Así sonaré al leer en voz alta.
+    languageVoice:
+      label: Voz por idioma
+      reset: Restablecer a predeterminado
+      description: Selecciona un idioma y asigna una voz usada cuando TTS detecte ese idioma.
+    rate:
+      label: Velocidad (%)
+      hint: Acepta valores enteros entre -100 y 100
+    pitch:
+      label: Tono (Hz)
+      hint: Acepta valores enteros entre -100 y 100
+    volume:
+      label: Volumen (%)
+      hint: Acepta valores enteros entre -100 y 100
+    betaDisabled: Activa Experiencia beta para personalizar la configuración de texto a voz.
+  statistics:
+    title: Estadísticas
+    batchRequest:
+      title: Solicitudes de traducción por lotes ahorradas
+      description: Porcentaje de solicitudes ahorradas por traducción por lotes en el periodo
+      originalRequestCount: Recuento de solicitudes originales
+      batchRequestCount: Recuento de solicitudes por lotes
+  config:
+    title: Configuración
+    about:
+      title: Acerca de
+      description: Read Frog nació en abril de 2025
+      mission: Read Frog busca ampliar el acceso igualitario a educación de alta calidad en la era de la AI haciendo asequibles experiencias de aprendizaje que se sientan más cercanas a un profesor real, en el aprendizaje de idiomas, medicina y otros campos intensivos en conocimiento.
+      analytics:
+        title: Ayuda a mejorar la experiencia de usuario
+        tooltip: Cuando está activado, Read Frog envía señales anónimas de uso del producto para que podamos verificar la fiabilidad de las funciones, mejorar el rendimiento y el acabado de la UX, y priorizar trabajos futuros.
+    sync:
+      title: Sincronización manual de configuración
+      description: Importa y exporta manualmente tus ajustes de configuración
+      import: Importar configuración
+      export: Exportar configuración
+      importSuccess: Configuración importada correctamente
+      exportSuccess: Configuración exportada correctamente
+      importError: Error al importar
+      versionTooNew: La versión de configuración importada es más reciente; actualiza Read Frog a la última versión
+      migrationError: Error de migración
+      validationError: Error de validación de configuración
+      exportOptions:
+        title: Seleccionar opciones de exportación
+        description: Elige si incluir claves API en la configuración exportada. Incluir claves API puede filtrar información sensible, por lo que se recomienda usarlo solo en entornos seguros.
+        includeAPIKeys: Incluir claves API
+        excludeAPIKeys: Excluir claves API
+        cancel: Cancelar
+      viewConfig:
+        expand: Expandir configuración
+        collapse: Contraer configuración
+      googleDrive:
+        title: Sincronización cloud con Google Drive
+        description: Descarga la configuración cuando la remota es más reciente, sube la configuración cuando la local es más reciente
+        sync: Sincronizar con Google Drive
+        syncing: Sincronizando...
+        syncSuccess:
+          uploaded: Configuración local subida a la nube
+          downloaded: Configuración remota aplicada
+          sameChanges: Mismos cambios en ambos lados, sincronizado
+          noChange: Ya está sincronizado
+          unresolved: Conflictos resueltos y sincronizados
+        syncError: Error de sincronización, inténtalo de nuevo
+        metadataCorrupted: Metadatos de sincronización dañados, configuración remota aplicada
+        lastSyncTime: Última sincronización a las
+        logout: Cerrar sesión
+        logoutSuccess: Sesión de cuenta de Google cerrada
+        unresolved:
+          title: Resolución de sincronización de configuración
+          description: Las configuraciones local y remota difieren. Elige qué versión conservar para cada campo.
+          resolved: Resuelto
+          unresolved: Sin resolver
+          localValue: Valor local
+          remoteValue: Valor remoto
+          useLocal: Usar local
+          useRemote: Usar remoto
+          useAllLocal: Usar todo local
+          useAllRemote: Usar todo remoto
+          reset: Restablecer selección
+          progress: $1/$2 cambios resueltos
+          confirm: Confirmar sincronización
+          cancel: Cancelar
+          hasUnresolvedInChildren: ⚠ Contiene cambios sin resolver
+          item: elemento
+          items: elementos
+          unresolvedPrompt: "[Unresolved - Please select]"
+          localLatest: Local más reciente
+          remoteLatest: Remoto más reciente
+          bothChanged: Ambos cambiaron
+          localChanged: Local cambió
+          remoteChanged: Remoto cambió
+          configValid: La configuración es válida
+          configInvalid: La configuración no es válida
+          resolveToContinue: Resuelve los conflictos para continuar
+          validationAlert:
+            title: La configuración combinada tiene errores de validación.
+            description: "Ajusta las diferencias siguientes para corregir:"
+          moreErrors: ...y $1 errores más
+    backup:
+      title: Copia de seguridad de configuración
+      description: Se crean copias de seguridad automáticas cada hora si la configuración cambia. Puedes restaurar configuraciones anteriores aquí. (Máximo $1 copias de seguridad)
+      loading: Cargando copias de seguridad...
+      backupNow: Crear copia ahora
+      backupSuccess: Copia de seguridad creada correctamente
+      restoreSuccess: Configuración restaurada correctamente
+      empty:
+        title: Aún no hay copias de seguridad disponibles
+        description: Las copias de seguridad se crean automáticamente cada hora si la configuración cambia.
+      item:
+        extensionVersion: "Versión de la extensión:"
+        schemaVersion: "Versión del esquema:"
+        restore: Restaurar
+        export: Exportar
+        delete: Eliminar
+      restore:
+        title: ¿Restaurar copia de seguridad de configuración?
+        description: Tu configuración actual se respaldará automáticamente si es diferente de la copia de seguridad más reciente. La copia más antigua puede eliminarse si el número de copias supera el límite.
+        cancel: Cancelar
+        confirm: Restaurar
+      delete:
+        title: ¿Eliminar copia de seguridad?
+        description: ¿Seguro que quieres eliminar esta copia de seguridad? Esta acción no se puede deshacer.
+        cancel: Cancelar
+        confirm: Eliminar
+    resetConfig:
+      title: Restablecer configuración
+      description: Restablecer toda la configuración al valor predeterminado
+      dialog:
+        title: Restablecer configuración
+        trigger: Restablecer configuración
+        confirm: Confirmar
+        cancel: Cancelar
+        description: Esta operación borrará todas tus configuraciones personalizadas y las restablecerá a los valores predeterminados. Confirma para continuar.
+  videoSubtitles:
+    title: Subtítulos de video
+    description: Actualmente solo admite subtítulos de videos de YouTube
+    provider:
+      title: Proveedor de traducción
+      description: Elige qué proveedor de traducción usar para la traducción de subtítulos de video
+      label: Proveedor
+    enable: Activar subtítulos de video
+    enableDescription: Cuando está activado, aparecerá un botón de traducción en los controles del reproductor de YouTube. Haz clic para empezar a traducir subtítulos.
+    autoStart: Activar subtítulos automáticamente
+    autoStartDescription: Activa automáticamente la traducción de subtítulos cuando se carga el video.
+    style:
+      title: Estilo de subtítulos
+      description: Personaliza la apariencia de los subtítulos
+      preview: Vista previa
+      displayMode:
+        title: Modo de visualización
+        bilingual: Bilingüe
+        originalOnly: Solo original
+        translationOnly: Solo traducción
+      translationPosition:
+        title: Posición de la traducción
+        above: Arriba
+        below: Abajo
+      generalSettings: General
+      mainSubtitle: Subtítulo principal
+      translationSubtitle: Subtítulo de traducción
+      containerStyle: Fondo
+      fontFamily: Fuente
+      fontScale: Escala de fuente
+      color: Color
+      fontWeight: Grosor de fuente
+      backgroundOpacity: Opacidad del fondo
+      reset: Restablecer a predeterminado
+    aiSegmentation:
+      title: Segmentación inteligente de IA
+      enable: Activar segmentación inteligente de IA
+      enableDescription: Usa AI para segmentar subtítulos de forma inteligente y mejorar la legibilidad. La línea de tiempo la determina la AI, lo que ocasionalmente puede causar desajustes de tiempo. Requiere proveedor de traducción LLM.
+      clearCache: Borrar caché
+      clearing: Borrando...
+      clearCacheDialog:
+        title: Borrar caché de segmentación AI
+        description: Esto eliminará todos los resultados de segmentación AI en caché. La próxima vez que reproduzcas un video con segmentación AI activada, se volverán a procesar los subtítulos.
+        cancel: Cancelar
+        confirm: Confirmar
+    requestQueueConfig:
+      title: Tasa de traducción de subtítulos
+      firstOnDescription: Ajusta la velocidad de procesamiento de las solicitudes de traducción de subtítulos usando el
+      lastOnDescription: algoritmo
+      capacity:
+        title: Recuento máximo de solicitudes en ráfaga
+        description: El recuento de solicitudes temporales en ráfaga permitido determina el número máximo de solicitudes de traducción de subtítulos que se pueden procesar de forma concurrente durante un periodo corto
+      rate:
+        title: Solicitudes promedio por segundo
+        description: Solicitudes promedio de traducción de subtítulos por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes
+    batchQueueConfig:
+      title: Traducción de subtítulos por lotes
+      description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
+      maxCharactersPerBatch:
+        title: Caracteres máximos
+        description: Número máximo de caracteres permitido por solicitud por lote, usado para controlar el volumen de contenido por traducción
+      maxItemsPerBatch:
+        title: Recuento máximo de párrafos
+        description: Párrafos máximos por traducción por lote, usado para controlar el volumen de contenido por traducción
+    customPrompts:
+      title: Prompts personalizados de subtítulos
+      description: Personaliza plantillas de prompts para la traducción de subtítulos (separadas de los prompts de traducción de páginas web)
+      editPrompt:
+        promptCellInput:
+          input: Texto de subtítulos a traducir
+          targetLanguage: Idioma de destino
+          videoTitle: Título del video
+          videoSummary: Resumen del video (requiere contexto inteligente de IA)
+  whatsNew:
+    title: Novedades
+  survey:
+    title: Mejorar subtítulos 🎁
+  rateUs:
+    title: Calificarnos
+side:
+  sourceLang: Idioma de origen
+  targetLang: Idioma de destino
+  fileExport: Exportar archivo
+translateService:
+  title: Servicio de traducción
+  description: Solo para traducir la página web
+  normalTranslator: Traductor normal
+  aiTranslator: Traductor AI
+  selectServices: Seleccionar servicios
+  translationProviders: Proveedores de traducción
+  configureAPI: Configurar API
+translatePrompt:
+  title: Estilo de traducción AI
+  description: Selecciona un Prompt para usar durante la traducción. Añade o modifica Prompts personalizados en la página de opciones.
+languageLevel: Tu nivel del idioma de origen
+languageLevels:
+  beginner: Principiante
+  intermediate: Intermedio
+  advanced: Avanzado
+noAPIKeyConfig:
+  warning: Si quieres usar modelos AI, primero configura la clave API en la página de opciones
+  warningWithLink:
+    youMust: Debes
+    setTheAPIKey: configurar la clave API
+    firstOnThe: primero en la
+    optionsPage: opciones
+    page: página
+languageDetection:
+  llmFailed: Falló la detección de idioma LLM; se recurrió a la detección básica
+translation:
+  sameLanguage: Los idiomas de origen y destino deben ser diferentes
+  autoModeSameLanguage: El idioma detectado '$1' es el mismo que el idioma de destino
+speak:
+  fetchingAudio: Generando audio...
+  playingAudio: Reproduciendo audio...
+  failedToGenerateSpeech: No se pudo generar voz
+  noTextSelected: No hay texto seleccionado
+  openaiNotConfigured: El proveedor OpenAI no está configurado o activado
+  openaiApiKeyNotConfigured: La clave API de OpenAI no está configurada
+action:
+  copy: Copiar
+  copied: Copiado
+  regenerate: Regenerar
+  viewContextDetails: Contexto
+  saveToNotebase: Guardar en Notebase
+  saveToNotebaseSaving: Guardando...
+  saveToNotebaseSuccess: Guardado en Notebase
+  saveToNotebaseFailed: No se pudo guardar en Notebase
+  saveToNotebaseLoginRequired: Inicia sesión en readfrog.app para guardar en Notebase
+  saveToNotebaseBetaRequired: Esta cuenta aún no está inscrita en la beta de Notebase
+  saveToNotebaseTableUnavailable: La Notebase seleccionada ya no está disponible
+  saveToNotebaseConnectionInvalid: Esta conexión de Notebase está desactualizada. Actualízala en Acciones AI personalizadas y corrige las asignaciones.
+  saveToNotebaseNoMappings: Añade al menos una asignación válida antes de guardar
+  contextDetailsTitleLabel: Título
+  contextDetailsParagraphsLabel: Párrafos
+  translation: Traducción
+  speak: Leer en voz alta
+  playing: Reproduciendo
+thinking:
+  label: Pensando
+  complete: Razonamiento completo
+  expand: Expandir razonamiento
+  collapse: Contraer razonamiento
+shortcutKeySelector:
+  placeholder: Introduce el atajo
+subtitles:
+  actions:
+    downloadSource: Descargar subtítulos de origen
+  state:
+    loading: Read Frog está cargando subtítulos
+    error: Se produjo un error
+  errors:
+    http429: 429 Demasiadas solicitudes a la API de subtítulos de youtube; inténtalo de nuevo más tarde
+    http404: 404 Subtítulos de Youtube no encontrados
+    http403: 403 Acceso a subtítulos de Youtube denegado
+    http500: 500 Error del servidor de Youtube
+    httpUnknown: Error HTTP $1
+    invalidResponse: Formato de respuesta de subtítulos de Youtube no válido
+    networkError: Se produjo un error de red al obtener subtítulos
+    fetchSubTimeout: Se agotó el tiempo al obtener subtítulos de youtube
+    buttonNotFound: Botón de subtítulos no encontrado
+    noSubtitlesFound: No hay subtítulos disponibles para este video
+    videoNotFound: Elemento de video no encontrado
+    controlsBarNotFound: Barra de controles no encontrada
+    aiRateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde
+    aiAuthFailed: Error de autenticación de API; revisa tu clave API
+    aiServiceUnavailable: Servicio de traducción temporalmente no disponible
+    aiNoResponse: El servicio AI no respondió; se usa el texto original
+hotkey:
+  control: Ctrl
+  alt: Opción
+  shift: Mayús
+  backtick: Acento grave
+  clickAndHold: Hacer clic y mantener
+translationHub:
+  searchLanguages: Buscar idiomas...
+  noLanguagesFound: No se encontraron idiomas
+  exchangeLanguages: Intercambiar idiomas
+  title: Traducción de texto Multi-API
+  noServicesSelected: No se seleccionaron servicios de traducción
+  noServicesDescription: Selecciona servicios de traducción arriba para ver aquí las tarjetas de traducción.
+  inputPlaceholder: Introduce texto para traducir...
+  translate: Traducir
+  copiedToClipboard: ¡Traducción copiada al portapapeles!
+  copyTranslation: Copiar traducción
+  expandCard: Expandir tarjeta
+  collapseCard: Contraer tarjeta
+  expandAllCards: Expandir todo
+  collapseAllCards: Contraer todo
+  deleteCard: Eliminar tarjeta
+  translationFailed: Falló la traducción
+  translationFailedFallback: Falló la traducción
+  retryTranslation: Reintentar traducción
+languages:
+  eng: Inglés
+  cmn: Chino simplificado
+  cmnHant: Chino tradicional
+  yue: Cantonés
+  spa: Español
+  rus: Ruso
+  arb: Árabe
+  ben: Bengalí
+  hin: Hindi
+  por: Portugués
+  ind: Indonesio
+  jpn: Japonés
+  fra: Francés
+  deu: Alemán
+  jav: Javanés
+  kor: Coreano
+  tel: Telugu
+  vie: Vietnamita
+  mar: Maratí
+  ita: Italiano
+  tam: Tamil
+  tur: Turco
+  urd: Urdu
+  guj: Guyaratí
+  pol: Polaco
+  ukr: Ucraniano
+  kan: Canarés
+  mai: Maithili
+  mal: Malayalam
+  pes: Persa
+  mya: Birmano
+  swh: Suajili
+  sun: Sundanés
+  ron: Rumano
+  pan: Panyabí
+  bho: Bhojpuri
+  amh: Amárico
+  hau: Hausa
+  fuv: Fula
+  bos: Bosnio
+  hrv: Croata
+  nld: Neerlandés
+  srp: Serbio
+  tha: Tailandés
+  ckb: Kurdo central
+  yor: Yoruba
+  uzn: Uzbeko
+  zlm: Malayo
+  ibo: Igbo
+  npi: Nepalí
+  ceb: Cebuano
+  skr: Saraiki
+  tgl: Tagalo
+  hun: Húngaro
+  azj: Azerbaiyano
+  sin: Cingalés
+  koi: Komi permio
+  ell: Griego
+  ces: Checo
+  mag: Magahi
+  run: Kirundi
+  bel: Bielorruso
+  plt: Malgache
+  qug: Quichua de Chimborazo
+  mad: Madurés
+  nya: Chichewa
+  zyb: Zhuang
+  pbu: Pastún
+  kin: Kiñaruanda
+  zul: Zulú
+  bul: Búlgaro
+  swe: Sueco
+  lin: Lingala
+  som: Somalí
+  hms: Miao qiandong
+  hnj: Hmong njua
+  ilo: Ilocano
+  kaz: Kazajo
+  heb: Hebreo
+  nob: Noruego bokmål
+  nno: Noruego nynorsk
+  afr: Afrikáans
+  sqi: Albanés
+  asm: Asamés
+  eus: Vasco
+  bre: Bretón
+  cat: Catalán
+  cos: Corso
+  cym: Galés
+  dan: Danés
+  div: Dhivehi
+  epo: Esperanto
+  ekk: Estonio
+  fao: Feroés
+  fij: Fiyiano
+  fin: Finés
+  fry: Frisón occidental
+  gla: Gaélico escocés
+  gle: Irlandés
+  glg: Gallego
+  grn: Guaraní
+  hat: Criollo haitiano
+  haw: Hawaiano
+  hye: Armenio
+  ido: Ido
+  ina: Interlingua
+  isl: Islandés
+  kat: Georgiano
+  khm: Jemer
+  kir: Kirguís
+  lao: Lao
+  lat: Latín
+  lvs: Letón
+  lit: Lituano
+  ltz: Luxemburgués
+  mkd: Macedonio
+  mlt: Maltés
+  mon: Mongol
+  mri: Maorí
+  nso: Sotho del norte
+  oci: Occitano
+  ori: Odia
+  orm: Oromo
+  prs: Dari
+  san: Sánscrito
+  slk: Eslovaco
+  slv: Esloveno
+  smo: Samoano
+  sna: Shona
+  snd: Sindhi
+  sot: Sotho del sur
+  tah: Tahitiano
+  tat: Tártaro
+  tgk: Tayiko
+  tir: Tigriña
+  ton: Tongano
+  tsn: Setsuana
+  tuk: Turcomano
+  uig: Uigur
+  vol: Volapük
+  wol: Wólof
+  xho: Xhosa
+  ydd: Yidis
+  aka: Akan
+  bam: Bambara
+  bis: Bislama
+  bod: Tibetano
+  che: Checheno
+  chv: Chuvasio
+  dzo: Dzongkha
+  ewe: Ewe
+  kab: Cabilio
+  lug: Luganda
+  oss: Osetio
+  ssw: Suazi
+  ven: Venda
+  war: Samareño
+  nde: Ndebele del norte
+  nbl: Ndebele del sur
+  pam: Pampango
+  hil: Hiligainón
+  bcl: Bikol central
+  min: Minangkabau
+  ace: Acehnés
+  bug: Buginés
+  ban: Balinés
+  bjn: Banjar
+  mak: Macasar
+  sas: Sasak
+  tet: Tetun
+  cha: Chamorro
+  niu: Niueano
+  tvl: Tuvaluano
+  gil: Gilbertés
+  mah: Marshalés
+  pau: Palauano
+  wls: Wallisiano
+  rar: Rarotongano
+  hif: Hindi de Fiyi

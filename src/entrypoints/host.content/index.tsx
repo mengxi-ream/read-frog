@@ -12,7 +12,6 @@ declare global {
 export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   cssInjectionMode: "manual",
-  allFrames: true,
   async main(ctx) {
     // Prevent double injection (manifest-based + programmatic injection)
     if (window.__READ_FROG_HOST_INJECTED__)

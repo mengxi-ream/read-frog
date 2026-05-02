@@ -508,16 +508,20 @@ describe("batchQueue – error handling", () => {
     expect(batchAttemptCount).toBe(3) // Initial + 2 retries before fallback
   })
 
-  it("falls back to individual immediately on request error (no retry)", async () => {
+  it("does not fall back to individual requests on request errors", async () => {
     vi.useFakeTimers()
     let batchAttemptCount = 0
+    const executeIndividual = vi.fn(async (data: TranslateBatchData) => {
+      const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
+      return result
+    })
+
     mockExecuteTranslate.mockImplementation((text: string) => {
       const batchSeparator = `\n\n${BATCH_SEPARATOR}\n\n`
       if (text.includes(batchSeparator)) {
         batchAttemptCount++
         return Promise.reject(new Error("API error"))
       }
-      // Individual requests succeed
       return Promise.resolve(`individual-${text}`)
     })
 
@@ -525,10 +529,7 @@ describe("batchQueue – error handling", () => {
     const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
       maxRetries: 3,
       enableFallbackToIndividual: true,
-      executeIndividual: async (data) => {
-        const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
-        return result
-      },
+      executeIndividual,
     })
 
     const promises = [
@@ -549,9 +550,62 @@ describe("batchQueue – error handling", () => {
     vi.advanceTimersByTime(baseBatchConfig.batchDelay)
     vi.advanceTimersByTime(0)
 
-    const results = await Promise.all(promises)
-    expect(results).toEqual(["individual-Text1", "individual-Text2"])
+    await expect(Promise.all(promises)).rejects.toThrow("API error")
     expect(batchAttemptCount).toBe(1) // Only 1 attempt, no retry for request errors
+    expect(executeIndividual).not.toHaveBeenCalled()
+  })
+
+  it("does not fall back to individual requests after rate limit errors", async () => {
+    vi.useFakeTimers()
+    let batchAttemptCount = 0
+    const executeIndividual = vi.fn(async (data: TranslateBatchData) => {
+      const result = await executeTranslate(data.text, data.langConfig, data.providerConfig, mockPromptResolver)
+      return result
+    })
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+      responseHeaders: {
+        "retry-after": "2",
+      },
+    })
+
+    mockExecuteTranslate.mockImplementation((text: string) => {
+      const batchSeparator = `\n\n${BATCH_SEPARATOR}\n\n`
+      if (text.includes(batchSeparator)) {
+        batchAttemptCount++
+        return Promise.reject(rateLimitedError)
+      }
+      return Promise.resolve(`individual-${text}`)
+    })
+
+    const requestQueue = new RequestQueue(baseRequestQueueConfig)
+    const batchQueue = createBatchQueue(requestQueue, baseBatchConfig, {
+      maxRetries: 3,
+      enableFallbackToIndividual: true,
+      executeIndividual,
+    })
+
+    const promises = [
+      batchQueue.enqueue({
+        text: "Text1",
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: "hash1",
+      }),
+      batchQueue.enqueue({
+        text: "Text2",
+        langConfig: sampleLangConfig,
+        providerConfig: sampleProviderConfig,
+        hash: "hash2",
+      }),
+    ]
+
+    vi.advanceTimersByTime(baseBatchConfig.batchDelay)
+    vi.advanceTimersByTime(0)
+
+    await expect(Promise.all(promises)).rejects.toBe(rateLimitedError)
+    expect(batchAttemptCount).toBe(1)
+    expect(executeIndividual).not.toHaveBeenCalled()
   })
 
   it("calls onError for each retry attempt on BatchCountMismatchError", async () => {

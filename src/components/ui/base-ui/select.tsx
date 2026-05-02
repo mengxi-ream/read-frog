@@ -1,63 +1,11 @@
-import type { VariantProps } from "class-variance-authority"
 import { Select as SelectPrimitive } from "@base-ui/react/select"
 import { IconCheck, IconChevronDown, IconChevronUp } from "@tabler/icons-react"
 
-import { cva } from "class-variance-authority"
 import * as React from "react"
 import { SHARED_POPUP_CLOSED_STATE_CLASS } from "@/components/ui/base-ui/popup-animation-classes"
 import { cn } from "@/utils/styles/utils"
 
 const Select = SelectPrimitive.Root
-
-const selectTriggerVariants = cva(
-  "gap-1.5 rounded-lg border bg-transparent py-2 pr-2 pl-2.5 text-sm transition-colors select-none flex w-fit items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg:not([class*='size-'])]:size-4 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-  {
-    variants: {
-      variant: {
-        default: "shadow-xs border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 focus-visible:ring-3 aria-invalid:ring-3 [&_[data-slot=select-icon]]:text-muted-foreground",
-        dark: "border-white/10 bg-white/6 text-white/92 hover:bg-white/10 focus-visible:border-white/18 focus-visible:ring-white/18 focus-visible:ring-1 [&_[data-slot=select-icon]]:text-white/62",
-      },
-      size: {
-        default: "h-8",
-        sm: "h-7 rounded-[min(var(--radius-md),10px)]",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  },
-)
-
-const selectContentVariants = cva(
-  "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 min-w-36 rounded-lg shadow-md duration-100 data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2 relative isolate z-50 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto data-[align-trigger=true]:animate-none",
-  {
-    variants: {
-      variant: {
-        default: "bg-popover text-popover-foreground ring-foreground/10 ring-1",
-        dark: "bg-[rgba(24,26,30,0.96)] text-white/90 ring-white/10 ring-1 backdrop-blur-xl",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-)
-
-const selectItemVariants = cva(
-  "gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
-  {
-    variants: {
-      variant: {
-        default: "focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground",
-        dark: "focus:bg-white/10 focus:text-white",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-    },
-  },
-)
 
 function SelectGroup({ className, ...props }: SelectPrimitive.Group.Props) {
   return (
@@ -81,15 +29,20 @@ function SelectValue({ className, ...props }: SelectPrimitive.Value.Props) {
 
 function SelectTrigger({
   className,
-  variant = "default",
   size = "default",
   children,
   ...props
-}: SelectPrimitive.Trigger.Props & VariantProps<typeof selectTriggerVariants>) {
+}: SelectPrimitive.Trigger.Props & {
+  size?: "sm" | "default"
+}) {
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
-      className={cn(selectTriggerVariants({ variant, size, className }))}
+      data-size={size}
+      className={cn(
+        "shadow-xs border-input data-placeholder:text-muted-foreground dark:bg-input/30 dark:hover:bg-input/50 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:aria-invalid:border-destructive/50 gap-1.5 rounded-lg border bg-transparent py-2 pr-2 pl-2.5 text-sm transition-colors select-none focus-visible:ring-3 aria-invalid:ring-3 data-[size=default]:h-8 data-[size=sm]:h-7 data-[size=sm]:rounded-[min(var(--radius-md),10px)] *:data-[slot=select-value]:gap-1.5 [&_[data-slot=select-icon]]:text-muted-foreground [&_svg:not([class*='size-'])]:size-4 flex w-fit items-center justify-between whitespace-nowrap outline-none disabled:cursor-not-allowed disabled:opacity-50 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        className,
+      )}
       {...props}
     >
       {children}
@@ -106,7 +59,6 @@ function SelectTrigger({
 function SelectContent({
   container,
   className,
-  variant = "default",
   children,
   positionerClassName,
   side = "bottom",
@@ -117,7 +69,6 @@ function SelectContent({
   ...props
 }: SelectPrimitive.Popup.Props
   & Pick<SelectPrimitive.Portal.Props, "container">
-  & VariantProps<typeof selectContentVariants>
   & {
     positionerClassName?: string
   }
@@ -138,7 +89,7 @@ function SelectContent({
         <SelectPrimitive.Popup
           data-slot="select-content"
           data-align-trigger={alignItemWithTrigger}
-          className={cn(selectContentVariants({ variant }), SHARED_POPUP_CLOSED_STATE_CLASS, className)}
+          className={cn("bg-popover text-popover-foreground data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 data-closed:zoom-out-95 data-open:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 ring-foreground/10 min-w-36 rounded-lg shadow-md ring-1 duration-100 data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2 relative isolate z-50 max-h-(--available-height) w-(--anchor-width) origin-(--transform-origin) overflow-x-hidden overflow-y-auto data-[align-trigger=true]:animate-none", SHARED_POPUP_CLOSED_STATE_CLASS, className)}
           {...props}
         >
           <SelectScrollUpButton />
@@ -165,14 +116,16 @@ function SelectLabel({
 
 function SelectItem({
   className,
-  variant = "default",
   children,
   ...props
-}: SelectPrimitive.Item.Props & VariantProps<typeof selectItemVariants>) {
+}: SelectPrimitive.Item.Props) {
   return (
     <SelectPrimitive.Item
       data-slot="select-item"
-      className={cn(selectItemVariants({ variant, className }))}
+      className={cn(
+        "focus:bg-accent focus:text-accent-foreground not-data-[variant=destructive]:focus:**:text-accent-foreground gap-1.5 rounded-md py-1 pr-8 pl-1.5 text-sm [&_svg:not([class*='size-'])]:size-4 *:[span]:last:flex *:[span]:last:items-center *:[span]:last:gap-2 relative flex w-full cursor-default items-center outline-hidden select-none data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0",
+        className,
+      )}
       {...props}
     >
       <SelectPrimitive.ItemText className="flex flex-1 gap-2 shrink-0 whitespace-nowrap">

@@ -1,6 +1,7 @@
 import type { YoutubeTimedText } from "../fetchers/youtube/types"
 import { describe, expect, it } from "vitest"
 import { detectFormat } from "../fetchers/youtube/format-detector"
+import { parseAnimatedSubtitles } from "../fetchers/youtube/parser/animated-parser"
 import { parseKaraokeSubtitles } from "../fetchers/youtube/parser/karaoke-parser"
 import { parseScrollingAsrSubtitles } from "../fetchers/youtube/parser/scrolling-asr-parser"
 import { parseStylizedKaraokeSubtitles } from "../fetchers/youtube/parser/stylized-karaoke-parser"
@@ -45,6 +46,36 @@ describe("youTube Subtitle Parsers", () => {
 
     it("should return standard for empty events", () => {
       expect(detectFormat([])).toBe("standard")
+    })
+
+    it("should detect animated format (many short-duration events with wpWinPosId)", () => {
+      const events: YoutubeTimedText[] = Array.from({ length: 100 }, (_, i) => ({
+        tStartMs: 1000 + i * 67,
+        dDurationMs: 67,
+        wpWinPosId: 3 + (i % 20),
+        segs: [{ utf8: i % 5 === 0 ? "scrolling text" : "" }],
+      }))
+      expect(detectFormat(events)).toBe("animated")
+    })
+
+    it("should not detect animated for few events", () => {
+      const events: YoutubeTimedText[] = Array.from({ length: 10 }, (_, i) => ({
+        tStartMs: 1000 + i * 67,
+        dDurationMs: 67,
+        wpWinPosId: 3,
+        segs: [{ utf8: "text" }],
+      }))
+      expect(detectFormat(events)).not.toBe("animated")
+    })
+
+    it("should not detect animated for normal-duration events", () => {
+      const events: YoutubeTimedText[] = Array.from({ length: 100 }, (_, i) => ({
+        tStartMs: i * 3000,
+        dDurationMs: 2000,
+        wpWinPosId: 3,
+        segs: [{ utf8: "normal subtitle" }],
+      }))
+      expect(detectFormat(events)).not.toBe("animated")
     })
   })
 
@@ -424,6 +455,94 @@ describe("youTube Subtitle Parsers", () => {
       // Should split when character count reaches 30
       expect(result.length).toBeGreaterThan(1)
       expect(result[0].text.length).toBeLessThanOrEqual(30)
+    })
+  })
+
+  describe("animated Parser", () => {
+    it("should deduplicate consecutive identical text frames", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 4688, dDurationMs: 67, wpWinPosId: 3, segs: [{ utf8: "閃避子彈！" }] },
+        { tStartMs: 4755, dDurationMs: 67, wpWinPosId: 4, segs: [{ utf8: "閃避子彈！" }] },
+        { tStartMs: 4822, dDurationMs: 67, wpWinPosId: 5, segs: [{ utf8: "閃避子彈！" }] },
+      ]
+      const result = parseAnimatedSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("閃避子彈！")
+      expect(result[0].start).toBe(4688)
+      expect(result[0].end).toBe(4889)
+    })
+
+    it("should split when text changes between frames", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 24008, dDurationMs: 67, wpWinPosId: 3, segs: [{ utf8: "現在向你道別吧！" }] },
+        { tStartMs: 24075, dDurationMs: 67, wpWinPosId: 4, segs: [{ utf8: "現在向你道別吧！" }] },
+        { tStartMs: 24200, dDurationMs: 67, wpWinPosId: 5, segs: [{ utf8: "沒人會聽到你的哀求！" }] },
+        { tStartMs: 24300, dDurationMs: 67, wpWinPosId: 6, segs: [{ utf8: "沒人會聽到你的哀求！" }] },
+      ]
+      const result = parseAnimatedSubtitles(events)
+
+      expect(result).toHaveLength(2)
+      expect(result[0].text).toBe("現在向你道別吧！")
+      expect(result[0].end).toBeLessThanOrEqual(24200)
+      expect(result[1].text).toBe("沒人會聽到你的哀求！")
+    })
+
+    it("should skip events with empty text", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 67, wpWinPosId: 3, segs: [{ utf8: "" }] },
+        { tStartMs: 1067, dDurationMs: 67, wpWinPosId: 4, segs: [{ utf8: "" }] },
+        { tStartMs: 1134, dDurationMs: 67, wpWinPosId: 5, segs: [{ utf8: "Visible text." }] },
+      ]
+      const result = parseAnimatedSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("Visible text.")
+    })
+
+    it("should handle single event", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1, dDurationMs: 3853, wpWinPosId: 2, segs: [{ utf8: "Warning: content may be disturbing." }] },
+      ]
+      const result = parseAnimatedSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("Warning: content may be disturbing.")
+      expect(result[0].start).toBe(1)
+      expect(result[0].end).toBe(3854)
+    })
+
+    it("should clean zero-width spaces from text", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 67, wpWinPosId: 3, segs: [{ utf8: "Hello​ world​" }] },
+      ]
+      const result = parseAnimatedSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("Hello world")
+    })
+
+    it("should fix overlap between fragments", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 5000, wpWinPosId: 3, segs: [{ utf8: "First" }] },
+        { tStartMs: 4000, dDurationMs: 67, wpWinPosId: 4, segs: [{ utf8: "Second" }] },
+      ]
+      const result = parseAnimatedSubtitles(events)
+
+      expect(result).toHaveLength(2)
+      expect(result[0].end).toBe(4000)
+      expect(result[1].start).toBe(4000)
+    })
+
+    it("should merge segments from multiple segs in one event", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 67, wpWinPosId: 3, segs: [{ utf8: "" }, { utf8: "" }, { utf8: "你所有的進步" }, { utf8: "" }] },
+        { tStartMs: 1067, dDurationMs: 67, wpWinPosId: 4, segs: [{ utf8: "" }, { utf8: "" }, { utf8: "你所有的進步" }, { utf8: "" }] },
+      ]
+      const result = parseAnimatedSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("你所有的進步")
     })
   })
 

@@ -1,6 +1,6 @@
 import type { SubtitlesProvidersAdapter } from "../ui/subtitles-ui-context"
 import themeCSS from "@/assets/styles/theme.css?inline"
-import { TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
+import { SUBTITLES_THEME, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { SubtitlesSettingsPanel } from "../ui/subtitles-settings-panel"
 import { SubtitlesTranslateButton } from "../ui/subtitles-translate-button"
@@ -16,7 +16,7 @@ const wrapperCSS = `
     margin: 0;
     padding: 0;
   }
-  .light, .dark {
+  .${SUBTITLES_THEME} {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -32,7 +32,7 @@ const embedWrapperCSS = `
     position: relative;
     height: 100%;
   }
-  .light, .dark {
+  .${SUBTITLES_THEME} {
     display: flex;
     align-items: center;
     height: 100%;
@@ -58,7 +58,7 @@ export function renderSubtitlesTranslateButton(adapter: SubtitlesProvidersAdapte
     position: "inline",
     inheritStyles: false,
     cssContent: [themeCSS, adapter.embedded ? embedWrapperCSS : wrapperCSS],
-    ...(adapter.embedded && { style: { position: "relative" }, forcedTheme: "dark" as const }),
+    ...(adapter.embedded && { style: { position: "relative" } }),
   }) as HTMLDivElement
 
   shadowHost.id = TRANSLATE_BUTTON_CONTAINER_ID

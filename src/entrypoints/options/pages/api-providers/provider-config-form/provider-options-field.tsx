@@ -39,6 +39,7 @@ export const ProviderOptionsField = withForm({
     const [jsonInput, setJsonInput] = useState(() => externalJson)
     const lastCommittedJsonRef = useRef(externalJson)
     const pendingEditorCommitRef = useRef(false)
+    const editorFocusedRef = useRef(false)
 
     const syncJsonInput = useEffectEvent((nextJson: string) => {
       // eslint-disable-next-line react/set-state-in-effect
@@ -55,6 +56,18 @@ export const ProviderOptionsField = withForm({
       return jsonInput
     })
 
+    const handleJsonInputChange = useCallback((nextJson: string) => {
+      setJsonInput(nextJson)
+    }, [])
+
+    const handleEditorFocus = useCallback(() => {
+      editorFocusedRef.current = true
+    }, [])
+
+    const handleEditorBlur = useCallback(() => {
+      editorFocusedRef.current = false
+    }, [])
+
     useEffect(() => {
       resetSyncStateForProvider()
     }, [providerConfig.id])
@@ -66,9 +79,15 @@ export const ProviderOptionsField = withForm({
       }
 
       pendingEditorCommitRef.current = false
+
+      const currentJsonInput = readJsonInput()
+      if (editorFocusedRef.current && currentJsonInput !== lastCommittedJsonRef.current) {
+        return
+      }
+
       lastCommittedJsonRef.current = externalJson
 
-      if (readJsonInput() !== externalJson) {
+      if (currentJsonInput !== externalJson) {
         syncJsonInput(externalJson)
       }
     }, [providerConfig.providerOptions, externalJson])
@@ -127,7 +146,9 @@ export const ProviderOptionsField = withForm({
         </FieldLabel>
         <JSONCodeEditor
           value={jsonInput}
-          onChange={setJsonInput}
+          onChange={handleJsonInputChange}
+          onFocus={handleEditorFocus}
+          onBlur={handleEditorBlur}
           placeholder={placeholderText}
           hasError={!!jsonError}
           height="150px"

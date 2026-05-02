@@ -159,6 +159,8 @@ export class UniversalVideoAdapter {
   }
 
   private buildSourceProcessedSubtitles(rawSubtitles: SubtitlesFragment[]): SubtitlesFragment[] {
+    if (this.subtitlesFetcher.isPreSegmented?.())
+      return rawSubtitles
     const sourceLanguage = this.subtitlesFetcher.getSourceLanguage()
     return optimizeSubtitles(rawSubtitles, sourceLanguage)
   }
@@ -441,6 +443,7 @@ export class UniversalVideoAdapter {
         rawFragments: this.sessionSubtitles,
         getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
         getSourceLanguage: () => this.subtitlesFetcher.getSourceLanguage(),
+        preSegmented: this.subtitlesFetcher.isPreSegmented?.(),
       })
     }
     else {

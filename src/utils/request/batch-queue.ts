@@ -188,7 +188,7 @@ export class BatchQueue<T, R> {
         return this.executeBatchWithRetry(tasks, batchKey, retryCount + 1)
       }
 
-      if (this.enableFallbackToIndividual && this.executeIndividual) {
+      if (this.enableFallbackToIndividual && this.executeIndividual && err instanceof BatchCountMismatchError) {
         return this.executeFallbackIndividual(tasks, batchKey)
       }
 

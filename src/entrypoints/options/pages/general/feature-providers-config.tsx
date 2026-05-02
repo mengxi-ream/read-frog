@@ -21,9 +21,8 @@ function needsApiKeyWarning(providerConfig: ProviderConfig | null): boolean {
     && !providerConfig.apiKey
 }
 
-function FeatureProviderField({ featureKey, excludeProviderTypes }: {
+function FeatureProviderField({ featureKey }: {
   featureKey: FeatureKey
-  excludeProviderTypes?: string[]
 }) {
   const config = useAtomValue(configAtom)
   const setConfig = useSetAtom(writeConfigAtom)
@@ -34,9 +33,8 @@ function FeatureProviderField({ featureKey, excludeProviderTypes }: {
 
   const providers = useMemo(() =>
     filterEnabledProvidersConfig(providersConfig)
-      .filter(p => def.isProvider(p.provider))
-      .filter(p => !excludeProviderTypes?.includes(p.provider)),
-  [providersConfig, def, excludeProviderTypes])
+      .filter(p => def.isProvider(p.provider)),
+  [providersConfig, def])
 
   return (
     <Field>
@@ -111,8 +109,6 @@ function CustomActionProviderFields() {
 }
 
 export default function FeatureProvidersConfig() {
-  const config = useAtomValue(configAtom)
-
   return (
     <ConfigCard
       id="feature-providers"
@@ -122,7 +118,6 @@ export default function FeatureProvidersConfig() {
       <div className="space-y-4">
         <FeatureProviderField
           featureKey="translate"
-          excludeProviderTypes={config.translate.mode === "translationOnly" ? ["google-translate"] : undefined}
         />
         <FeatureProviderField featureKey="videoSubtitles" />
         <FeatureProviderField featureKey="selectionToolbar.translate" />

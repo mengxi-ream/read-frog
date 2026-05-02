@@ -52,7 +52,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   translate: {
-    providerId: "microsoft-translate-default",
+    providerId: "google-translate-default",
     mode: "bilingual",
     node: {
       enabled: false,
@@ -110,7 +110,7 @@ export const DEFAULT_CONFIG: Config = {
     features: {
       translate: {
         enabled: true,
-        providerId: "microsoft-translate-default",
+        providerId: "google-translate-default",
       },
       speak: {
         enabled: true,
@@ -129,7 +129,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   inputTranslation: {
     enabled: true,
-    providerId: "microsoft-translate-default",
+    providerId: "google-translate-default",
     fromLang: "targetCode",
     toLang: "sourceCode",
     enableCycle: false,
@@ -138,7 +138,7 @@ export const DEFAULT_CONFIG: Config = {
   videoSubtitles: {
     enabled: true,
     autoStart: false,
-    providerId: "microsoft-translate-default",
+    providerId: "google-translate-default",
     style: {
       displayMode: DEFAULT_DISPLAY_MODE,
       translationPosition: DEFAULT_TRANSLATION_POSITION,

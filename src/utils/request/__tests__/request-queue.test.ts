@@ -14,6 +14,16 @@ function rejectThunk(error: any, delayMs = 0) {
     new Promise((_, rej) => setTimeout(rej, delayMs, error))
 }
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void
+  let reject!: (reason?: unknown) => void
+  const promise = new Promise<T>((res, rej) => {
+    resolve = res
+    reject = rej
+  })
+  return { promise, resolve, reject }
+}
+
 // A basic queue config we reuse (easy to tweak per‑test)
 const baseConfig = {
   rate: 1, // 1 token / sec
@@ -426,7 +436,325 @@ describe("requestQueue – retry with timeout combined", () => {
   })
 })
 
-// 11. Reconfigure the request queue
+// 11. Retry policy and queue fail-fast drain
+describe("requestQueue – retry policy and queue fail-fast drain", () => {
+  it.each([
+    {
+      name: "400",
+      createError: () => Object.assign(new Error("Bad Request"), { statusCode: 400 }),
+    },
+    {
+      name: "isRetryable false",
+      createError: () => Object.assign(new Error("Do not retry"), { isRetryable: false }),
+    },
+  ])("fails only the current task for $name", async ({ createError }) => {
+    vi.useFakeTimers()
+    let attempts = 0
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const error = createError()
+    const completed: string[] = []
+
+    const firstPromise = q.enqueue(() => {
+      attempts++
+      return Promise.reject(error)
+    }, Date.now(), "current-only")
+    firstPromise.catch(() => {})
+
+    const secondPromise = q.enqueue(() => {
+      completed.push("second")
+      return Promise.resolve("second")
+    }, Date.now(), "second")
+
+    await vi.advanceTimersByTimeAsync(100)
+
+    expect(attempts).toBe(1)
+    expect(completed).toEqual(["second"])
+    await expect(firstPromise).rejects.toBe(error)
+    await expect(secondPromise).resolves.toBe("second")
+  })
+
+  it("drains waiting tasks immediately after a 429", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const completed: string[] = []
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+      responseHeaders: {
+        "retry-after": "2",
+      },
+    })
+
+    const firstPromise = q.enqueue(
+      () => Promise.reject(rateLimitedError),
+      Date.now(),
+      "first",
+    )
+    firstPromise.catch(() => {})
+
+    const secondPromise = q.enqueue(
+      () => {
+        completed.push("second")
+        return Promise.resolve("second")
+      },
+      Date.now(),
+      "second",
+    )
+    secondPromise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(completed).toEqual([])
+    await expect(firstPromise).rejects.toBe(rateLimitedError)
+    await expect(secondPromise).rejects.toBe(rateLimitedError)
+  })
+
+  it("drains other executing tasks immediately after a 429", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 2,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+    })
+    const secondDeferred = createDeferred<string>()
+
+    const firstPromise = q.enqueue(
+      () => Promise.reject(rateLimitedError),
+      Date.now(),
+      "first",
+    )
+    firstPromise.catch(() => {})
+
+    const secondPromise = q.enqueue(
+      () => secondDeferred.promise,
+      Date.now(),
+      "second",
+    )
+    secondPromise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+
+    await expect(firstPromise).rejects.toBe(rateLimitedError)
+    await expect(secondPromise).rejects.toBe(rateLimitedError)
+
+    secondDeferred.resolve("late success")
+    await vi.advanceTimersByTimeAsync(0)
+    await expect(secondPromise).rejects.toBe(rateLimitedError)
+  })
+
+  it("ignores drained in-flight failures and allows new enqueues after a 429", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 3,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+    })
+    const laterError = Object.assign(new Error("Unauthorized"), {
+      statusCode: 401,
+    })
+    const oldDeferred = createDeferred<string>()
+    const newDeferred = createDeferred<string>()
+
+    const firstPromise = q.enqueue(
+      () => Promise.reject(rateLimitedError),
+      Date.now(),
+      "first",
+    )
+    firstPromise.catch(() => {})
+
+    const oldPromise = q.enqueue(
+      () => oldDeferred.promise,
+      Date.now(),
+      "old",
+    )
+    oldPromise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+    await expect(oldPromise).rejects.toBe(rateLimitedError)
+
+    const newPromise = q.enqueue(
+      () => newDeferred.promise,
+      Date.now(),
+      "new",
+    )
+
+    oldDeferred.reject(laterError)
+    await vi.advanceTimersByTimeAsync(0)
+
+    newDeferred.resolve("new success")
+    await vi.advanceTimersByTimeAsync(0)
+
+    await expect(firstPromise).rejects.toBe(rateLimitedError)
+    await expect(newPromise).resolves.toBe("new success")
+  })
+
+  it("does not let old in-flight task cleanup remove a new task with the same hash", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 3,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const rateLimitedError = Object.assign(new Error("Too Many Requests"), {
+      statusCode: 429,
+    })
+    const oldDeferred = createDeferred<string>()
+    const newDeferred = createDeferred<string>()
+    let duplicateStarted = false
+
+    const firstPromise = q.enqueue(
+      () => Promise.reject(rateLimitedError),
+      Date.now(),
+      "first",
+    )
+    firstPromise.catch(() => {})
+
+    const oldPromise = q.enqueue(
+      () => oldDeferred.promise,
+      Date.now(),
+      "same",
+    )
+    oldPromise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+    await expect(oldPromise).rejects.toBe(rateLimitedError)
+
+    const newPromise = q.enqueue(
+      () => newDeferred.promise,
+      Date.now(),
+      "same",
+    )
+
+    oldDeferred.resolve("old success")
+    await vi.advanceTimersByTimeAsync(0)
+
+    const duplicatePromise = q.enqueue(
+      () => {
+        duplicateStarted = true
+        return Promise.resolve("duplicate")
+      },
+      Date.now(),
+      "same",
+    )
+
+    expect(duplicatePromise).toBe(newPromise)
+    expect(duplicateStarted).toBe(false)
+
+    newDeferred.resolve("new success")
+    await vi.advanceTimersByTimeAsync(0)
+
+    await expect(firstPromise).rejects.toBe(rateLimitedError)
+    await expect(newPromise).resolves.toBe("new success")
+  })
+
+  it.each([401, 403, 404])("drains the current backlog after a %s", async (statusCode) => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const completed: string[] = []
+    const error = Object.assign(new Error(`HTTP ${statusCode}`), {
+      statusCode,
+    })
+
+    const firstPromise = q.enqueue(
+      () => Promise.reject(error),
+      Date.now(),
+      "first",
+    )
+    firstPromise.catch(() => {})
+
+    const secondPromise = q.enqueue(
+      () => {
+        completed.push("second")
+        return Promise.resolve("second")
+      },
+      Date.now(),
+      "second",
+    )
+    secondPromise.catch(() => {})
+
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(completed).toEqual([])
+    await expect(firstPromise).rejects.toBe(error)
+    await expect(secondPromise).rejects.toBe(error)
+  })
+
+  it.each([408, 409])("retries transient %s errors before resolving", async (statusCode) => {
+    vi.useFakeTimers()
+    let attempts = 0
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 10,
+      capacity: 1,
+      maxRetries: 2,
+      baseRetryDelayMs: 100,
+    })
+
+    const error = Object.assign(new Error(`HTTP ${statusCode}`), {
+      statusCode,
+    })
+
+    const promise = q.enqueue(() => {
+      attempts++
+      if (attempts === 1) {
+        return Promise.reject(error)
+      }
+      return Promise.resolve("success")
+    }, Date.now(), `transient-${statusCode}`)
+
+    await vi.advanceTimersByTimeAsync(0)
+    expect(attempts).toBe(1)
+
+    await vi.advanceTimersByTimeAsync(200)
+
+    expect(attempts).toBe(2)
+    await expect(promise).resolves.toBe("success")
+  })
+})
+
+// 12. Reconfigure the request queue
 describe("requestQueue – reconfigure the request queue", () => {
   it("increase the request rate", async () => {
     vi.useFakeTimers()
