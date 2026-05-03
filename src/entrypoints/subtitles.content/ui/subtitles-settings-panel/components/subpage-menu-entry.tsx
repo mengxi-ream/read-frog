@@ -22,7 +22,7 @@ export function SubpageMenuEntry({
       className={cn("h-auto w-full justify-start rounded-[14px] px-2 py-2 text-left")}
     >
       <div className="flex items-center gap-3">
-        <div className="text-muted-foreground shrink-0">
+        <div className="text-muted-foreground flex size-5 shrink-0 items-center justify-center">
           {icon}
         </div>
 
