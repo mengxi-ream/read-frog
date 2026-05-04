@@ -1,5 +1,25 @@
 # @read-frog/extension
 
+## 1.33.2
+
+### Patch Changes
+
+- [#1435](https://github.com/mengxi-ream/read-frog/pull/1435) [`7f2849c`](https://github.com/mengxi-ream/read-frog/commit/7f2849c8436ad09b969a9062a3ece0c8b8c29b56) Thanks [@oskkas](https://github.com/oskkas)! - i18n: add Spanish UI translation support.
+
+- [#1426](https://github.com/mengxi-ream/read-frog/pull/1426) [`b816541`](https://github.com/mengxi-ream/read-frog/commit/b816541cd96bc7da6c4d241a993e464def7998e5) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(extension): add animated subtitle format parser for YouTube kinetic typography
+
+- [#1431](https://github.com/mengxi-ream/read-frog/pull/1431) [`f430675`](https://github.com/mengxi-ream/read-frog/commit/f430675706fb88373509f0f5937405a911039975) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): fail fast on queue-fatal translation request errors
+
+- [#1419](https://github.com/mengxi-ream/read-frog/pull/1419) [`bbacbf5`](https://github.com/mengxi-ream/read-frog/commit/bbacbf52a7f2bd74071b522fb4abe1cba827b302) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): preserve focused provider options drafts
+
+- [#1434](https://github.com/mengxi-ream/read-frog/pull/1434) [`3a97109`](https://github.com/mengxi-ream/read-frog/commit/3a9710911e9a6c2db9bc78920a476e3c16d63131) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): restore Google Translate provider support
+
+- [#1417](https://github.com/mengxi-ream/read-frog/pull/1417) [`8abf1cd`](https://github.com/mengxi-ream/read-frog/commit/8abf1cd0b0d442aaaab797542af715281906e893) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - perf(extension): gate iframe content script injection
+
+- [#1410](https://github.com/mengxi-ream/read-frog/pull/1410) [`281908a`](https://github.com/mengxi-ream/read-frog/commit/281908a48703286546b77f00b50f7d06ecd76436) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(page-translation): re-walk revealed accordion content
+
+- [#1436](https://github.com/mengxi-ream/read-frog/pull/1436) [`b1d728f`](https://github.com/mengxi-ream/read-frog/commit/b1d728fa04533f1f6682d2adff7f38640fcc4247) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): force dark theme for subtitle UI
+
 ## 1.33.1
 
 ### Patch Changes

@@ -32,7 +32,7 @@ jobs:
     steps:
       - name: Resolve PR metadata
         id: inspect
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             // workflow_dispatch inputs live on the event payload, not as github-script action inputs.
