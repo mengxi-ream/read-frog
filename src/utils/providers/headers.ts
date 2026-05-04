@@ -4,6 +4,10 @@ export const DEFAULT_PROVIDER_HEADERS: Partial<Record<LLMProviderTypes, Record<s
   anthropic: {
     "anthropic-dangerous-direct-browser-access": "true",
   },
+  openrouter: {
+    "HTTP-Referer": "https://readfrog.app",
+    "X-OpenRouter-Title": "Read Frog",
+  },
 }
 
 function compactStringRecord(record?: Readonly<Record<string, unknown>>): Record<string, string> | undefined {

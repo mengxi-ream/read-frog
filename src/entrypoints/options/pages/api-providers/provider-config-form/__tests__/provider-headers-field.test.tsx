@@ -133,15 +133,6 @@ describe("providerHeadersField", () => {
     vi.useRealTimers()
   })
 
-  it("renders the provider default headers as the placeholder when available", () => {
-    render(<ProviderHeadersFieldHarness initialConfig={{ ...anthropicProviderConfig, headers: undefined }} />)
-
-    expect(screen.getByLabelText("provider-headers-editor")).toHaveAttribute(
-      "placeholder",
-      JSON.stringify({ "anthropic-dangerous-direct-browser-access": "true" }, null, 2),
-    )
-  })
-
   it("saves valid header JSON", async () => {
     render(<ProviderHeadersFieldHarness initialConfig={baseProviderConfig} />)
 

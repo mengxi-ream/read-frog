@@ -1,18 +1,25 @@
 import { storage } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { DEFAULT_PROVIDER_HEADERS } from "../headers"
 
 let getStorageItemMock: ReturnType<typeof vi.fn>
 
 const {
   anthropicLanguageModelMock,
+  openRouterLanguageModelMock,
   openAICompatibleLanguageModelMock,
   createAnthropicMock,
+  createOpenRouterMock,
   createOpenAICompatibleMock,
 } = vi.hoisted(() => {
   const anthropicLanguageModelMock = vi.fn()
+  const openRouterLanguageModelMock = vi.fn()
   const openAICompatibleLanguageModelMock = vi.fn()
   const createAnthropicMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: anthropicLanguageModelMock,
+  }))
+  const createOpenRouterMock = vi.fn((_options?: Record<string, unknown>) => ({
+    languageModel: openRouterLanguageModelMock,
   }))
   const createOpenAICompatibleMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: openAICompatibleLanguageModelMock,
@@ -20,14 +27,20 @@ const {
 
   return {
     anthropicLanguageModelMock,
+    openRouterLanguageModelMock,
     openAICompatibleLanguageModelMock,
     createAnthropicMock,
+    createOpenRouterMock,
     createOpenAICompatibleMock,
   }
 })
 
 vi.mock("@ai-sdk/anthropic", () => ({
   createAnthropic: createAnthropicMock,
+}))
+
+vi.mock("@openrouter/ai-sdk-provider", () => ({
+  createOpenRouter: createOpenRouterMock,
 }))
 
 vi.mock("@ai-sdk/openai-compatible", () => ({
@@ -50,10 +63,27 @@ function createAnthropicProviderConfig(headers?: Record<string, unknown>) {
   }
 }
 
+function createOpenRouterProviderConfig(headers?: Record<string, unknown>) {
+  return {
+    id: "openrouter-default",
+    name: "OpenRouter",
+    enabled: true,
+    provider: "openrouter",
+    apiKey: "test-key",
+    model: {
+      model: "x-ai/grok-4-fast:free",
+      isCustomModel: false,
+      customModel: null,
+    },
+    ...(headers !== undefined && { headers }),
+  }
+}
+
 describe("getModelById", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     anthropicLanguageModelMock.mockReturnValue("anthropic-model")
+    openRouterLanguageModelMock.mockReturnValue("openrouter-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
     getStorageItemMock = vi.fn()
     ;(storage.getItem as unknown as ReturnType<typeof vi.fn>) = getStorageItemMock
@@ -70,11 +100,25 @@ describe("getModelById", () => {
     expect(result).toBe("anthropic-model")
     expect(createAnthropicMock).toHaveBeenCalledWith(expect.objectContaining({
       apiKey: "test-key",
-      headers: {
-        "anthropic-dangerous-direct-browser-access": "true",
-      },
+      headers: DEFAULT_PROVIDER_HEADERS.anthropic,
     }))
     expect(anthropicLanguageModelMock).toHaveBeenCalledWith("claude-haiku-4-5")
+  })
+
+  it("passes attribution headers for OpenRouter when user headers are undefined", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [createOpenRouterProviderConfig()],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("openrouter-default")
+
+    expect(result).toBe("openrouter-model")
+    expect(createOpenRouterMock).toHaveBeenCalledWith(expect.objectContaining({
+      apiKey: "test-key",
+      headers: DEFAULT_PROVIDER_HEADERS.openrouter,
+    }))
+    expect(openRouterLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
   })
 
   it("uses user headers as a full override for Anthropic", async () => {
