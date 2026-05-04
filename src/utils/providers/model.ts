@@ -76,11 +76,13 @@ async function getLanguageModelById(providerId: string) {
   }
 
   const customHeaders = CUSTOM_HEADER_MAP[providerConfig.provider]
-  const connectionOptions = compactObject(providerConfig.connectionOptions ?? {})
+  const providerSpecificSettings = "providerSpecificSettings" in providerConfig
+    ? compactObject(providerConfig.providerSpecificSettings ?? {})
+    : {}
 
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
-        ...connectionOptions,
+        ...providerSpecificSettings,
         name: providerConfig.provider,
         baseURL: providerConfig.baseURL ?? "",
         supportsStructuredOutputs: true,
@@ -88,7 +90,7 @@ async function getLanguageModelById(providerId: string) {
         ...(customHeaders && { headers: customHeaders }),
       })
     : CREATE_AI_MAPPER[providerConfig.provider]({
-        ...connectionOptions,
+        ...providerSpecificSettings,
         ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
         ...(customHeaders && { headers: customHeaders }),

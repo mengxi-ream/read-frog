@@ -33,10 +33,10 @@ import { APIKeyField } from "./api-key-field"
 import { BaseURLField } from "./base-url-field"
 import { AdvancedOptionsSection } from "./components/advanced-options-section"
 import { ConfigHeader } from "./config-header"
-import { ConnectionOptionsField } from "./connection-options-field"
 import { FeatureProviderSection } from "./feature-provider-section"
 import { formOpts, useAppForm } from "./form"
 import { ProviderOptionsField } from "./provider-options-field"
+import { ProviderSpecificSettingsField } from "./provider-specific-settings-field"
 import { TemperatureField } from "./temperature-field"
 import { TranslateModelSelector } from "./translate-model-selector"
 
@@ -160,7 +160,7 @@ export function ProviderConfigForm() {
 
           <APIKeyField form={form} />
           <BaseURLField form={form} />
-          <ConnectionOptionsField form={form} />
+          <ProviderSpecificSettingsField form={form} />
           {isTranslateProviderType && (
             <TranslateModelSelector form={form} />
           )}

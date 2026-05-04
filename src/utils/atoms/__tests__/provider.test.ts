@@ -5,6 +5,7 @@ import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { updateLLMProviderConfig, updateProviderConfig } from "../provider"
 
 type OpenAIProviderConfig = Extract<ProviderConfig, { provider: "openai" }>
+type BedrockProviderConfig = Extract<ProviderConfig, { provider: "bedrock" }>
 
 describe("provider config updates", () => {
   it("merges nested LLM model updates without changing untouched fields", () => {
@@ -25,18 +26,26 @@ describe("provider config updates", () => {
 
   it("merges provider option objects and preserves the rest of the config", () => {
     const result = updateProviderConfig(DEFAULT_PROVIDER_CONFIG.openai, {
-      connectionOptions: {
-        timeoutMs: 5000,
-      },
       providerOptions: {
         reasoningEffort: "minimal",
       },
     }) as OpenAIProviderConfig
 
-    expect(result.connectionOptions).toEqual({ timeoutMs: 5000 })
     expect(result.providerOptions).toEqual({ reasoningEffort: "minimal" })
     expect(result.model).toEqual(DEFAULT_PROVIDER_CONFIG.openai.model)
     expect(result.provider).toBe("openai")
+  })
+
+  it("merges provider-specific settings for providers that define them", () => {
+    const result = updateProviderConfig(DEFAULT_PROVIDER_CONFIG.bedrock, {
+      providerSpecificSettings: {
+        region: "us-west-2",
+      },
+    }) as BedrockProviderConfig
+
+    expect(result.providerSpecificSettings).toEqual({ region: "us-west-2" })
+    expect(result.model).toEqual(DEFAULT_PROVIDER_CONFIG.bedrock.model)
+    expect(result.provider).toBe("bedrock")
   })
 
   it("rejects merged configs that no longer match the provider schema", () => {

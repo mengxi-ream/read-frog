@@ -135,7 +135,7 @@ options:
         noModelsFound: No se encontraron modelos
       featureProviders: Proveedores de funciones
       advancedOptions: Opciones avanzadas
-      connectionOptionLabels:
+      providerSettingLabels:
         region: Región
       temperature: Temperatura
       temperatureHint: Controla la aleatoriedad en las respuestas. Los valores más bajos (0) son más deterministas; los más altos son más creativos. El rango varía según el proveedor. Déjalo vacío para usar el valor predeterminado del proveedor.
