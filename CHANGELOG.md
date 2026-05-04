@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.33.3
+
+### Patch Changes
+
+- [#1449](https://github.com/mengxi-ream/read-frog/pull/1449) [`229860e`](https://github.com/mengxi-ream/read-frog/commit/229860e6f6c55c005fea5da3e1d9981e3d09b024) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): support Bedrock provider-specific region
+
+- [#1450](https://github.com/mengxi-ream/read-frog/pull/1450) [`a0c6a4c`](https://github.com/mengxi-ream/read-frog/commit/a0c6a4c7e00cb90b98e8185e44913d6dcf43ffa9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add custom provider headers
+
+- [#1451](https://github.com/mengxi-ream/read-frog/pull/1451) [`89e6bbd`](https://github.com/mengxi-ream/read-frog/commit/89e6bbd28c178fa6a602fb7c80325cbbf7098f24) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(providers): add OpenRouter attribution headers
+
+- [#1443](https://github.com/mengxi-ream/read-frog/pull/1443) [`69ff9c9`](https://github.com/mengxi-ream/read-frog/commit/69ff9c9fed75192780b57b756b82658e48a26158) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): align subtitle settings labels
+
 ## 1.33.2
 
 ### Patch Changes
