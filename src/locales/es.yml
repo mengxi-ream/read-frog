@@ -139,6 +139,8 @@ options:
         region: Región
       temperature: Temperatura
       temperatureHint: Controla la aleatoriedad en las respuestas. Los valores más bajos (0) son más deterministas; los más altos son más creativos. El rango varía según el proveedor. Déjalo vacío para usar el valor predeterminado del proveedor.
+      headers: Encabezados
+      headersHint: Encabezados HTTP personalizados enviados al crear el cliente del proveedor de IA. Déjalo vacío para usar los valores predeterminados; usa {} para desactivarlos.
       providerOptions: Opciones del proveedor
       providerOptionsHint: Opciones específicas del proveedor para funciones API no estándar, como el modo thinking/reasoning. Consulta la documentación de Vercel AI SDK o la documentación oficial de tu proveedor para ver detalles de configuración.
       providerOptionsDocsLink: Ver documentación del proveedor

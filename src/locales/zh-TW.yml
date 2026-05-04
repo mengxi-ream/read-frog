@@ -138,6 +138,8 @@ options:
         region: 區域
       temperature: 溫度
       temperatureHint: 控制回應的隨機性。較低的值（0）更具確定性，較高的值更具創造性。範圍因提供者而異。留空則使用提供者預設值。
+      headers: 請求標頭
+      headersHint: 建立 AI 提供者客戶端時送出的自訂 HTTP 請求標頭。留空則使用提供者預設值；填入 {} 可停用預設值。
       providerOptions: 提供者選項
       providerOptionsHint: 用於非標準 API 功能（如思考/推理模式）的提供者特定選項。詳情請參閱 Vercel AI SDK 文件或您的提供者官方文件。
       providerOptionsDocsLink: 查看提供者文件

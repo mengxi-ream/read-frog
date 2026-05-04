@@ -36,6 +36,18 @@ describe("provider config updates", () => {
     expect(result.provider).toBe("openai")
   })
 
+  it("merges provider headers and preserves the rest of the config", () => {
+    const result = updateProviderConfig(DEFAULT_PROVIDER_CONFIG.openai, {
+      headers: {
+        "X-Test": "1",
+      },
+    }) as OpenAIProviderConfig
+
+    expect(result.headers).toEqual({ "X-Test": "1" })
+    expect(result.model).toEqual(DEFAULT_PROVIDER_CONFIG.openai.model)
+    expect(result.provider).toBe("openai")
+  })
+
   it("merges provider-specific settings for providers that define them", () => {
     const result = updateProviderConfig(DEFAULT_PROVIDER_CONFIG.bedrock, {
       providerSpecificSettings: {

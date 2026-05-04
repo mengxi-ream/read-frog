@@ -35,6 +35,7 @@ import { AdvancedOptionsSection } from "./components/advanced-options-section"
 import { ConfigHeader } from "./config-header"
 import { FeatureProviderSection } from "./feature-provider-section"
 import { formOpts, useAppForm } from "./form"
+import { ProviderHeadersField } from "./provider-headers-field"
 import { ProviderOptionsField } from "./provider-options-field"
 import { ProviderSpecificSettingsField } from "./provider-specific-settings-field"
 import { TemperatureField } from "./temperature-field"
@@ -169,6 +170,7 @@ export function ProviderConfigForm() {
             <AdvancedOptionsSection>
               <TemperatureField form={form} />
               <ProviderOptionsField form={form} />
+              <ProviderHeadersField form={form} />
             </AdvancedOptionsSection>
           )}
         </div>

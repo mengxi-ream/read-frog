@@ -138,6 +138,8 @@ options:
         region: Bölge
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
+      headers: Başlıklar
+      headersHint: AI sağlayıcı istemcisi oluşturulurken gönderilecek özel HTTP başlıkları. Sağlayıcı varsayılanlarını kullanmak için boş bırakın; varsayılanları devre dışı bırakmak için {} kullanın.
       providerOptions: Sağlayıcı Seçenekleri
       providerOptionsHint: Düşünme/akıl yürütme modu gibi standart dışı API özellikleri için sağlayıcıya özel seçenekler. Ayrıntılar için Vercel AI SDK belgelerine veya sağlayıcınızın resmi belgelerine bakın.
       providerOptionsDocsLink: Sağlayıcı Belgelerini Görüntüle

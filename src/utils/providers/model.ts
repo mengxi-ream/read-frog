@@ -27,6 +27,7 @@ import { isCustomLLMProvider } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
+import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
 
 const CREATE_AI_MAPPER = {
@@ -59,10 +60,6 @@ const CREATE_AI_MAPPER = {
   "huggingface": createHuggingFace,
 } as const
 
-const CUSTOM_HEADER_MAP: Partial<Record<keyof typeof CREATE_AI_MAPPER, Record<string, string>>> = {
-  anthropic: { "anthropic-dangerous-direct-browser-access": "true" },
-}
-
 async function getLanguageModelById(providerId: string) {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
@@ -75,7 +72,7 @@ async function getLanguageModelById(providerId: string) {
     throw new Error(`Provider ${providerId} not found`)
   }
 
-  const customHeaders = CUSTOM_HEADER_MAP[providerConfig.provider]
+  const headers = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers)
   const providerSpecificSettings = "providerSpecificSettings" in providerConfig
     ? compactObject(providerConfig.providerSpecificSettings ?? {})
     : {}
@@ -87,13 +84,13 @@ async function getLanguageModelById(providerId: string) {
         baseURL: providerConfig.baseURL ?? "",
         supportsStructuredOutputs: true,
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
-        ...(customHeaders && { headers: customHeaders }),
+        ...(headers && { headers }),
       })
     : CREATE_AI_MAPPER[providerConfig.provider]({
         ...providerSpecificSettings,
         ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
         ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
-        ...(customHeaders && { headers: customHeaders }),
+        ...(headers && { headers }),
       })
 
   const modelId = resolveModelId(providerConfig.model)

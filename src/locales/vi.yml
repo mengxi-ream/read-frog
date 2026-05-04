@@ -138,6 +138,8 @@ options:
         region: Khu vực
       temperature: Nhiệt độ
       temperatureHint: Kiểm soát tính ngẫu nhiên trong phản hồi. Giá trị thấp (0) mang tính xác định hơn, giá trị cao mang tính sáng tạo hơn. Phạm vi thay đổi theo nhà cung cấp. Để trống để sử dụng giá trị mặc định của nhà cung cấp.
+      headers: Header
+      headersHint: Header HTTP tùy chỉnh được gửi khi tạo client nhà cung cấp AI. Để trống để dùng mặc định của nhà cung cấp; dùng {} để tắt mặc định.
       providerOptions: Tùy chọn nhà cung cấp
       providerOptionsHint: Các tùy chọn dành riêng cho nhà cung cấp cho các tính năng API không chuẩn như chế độ suy nghĩ/lập luận. Xem tài liệu Vercel AI SDK hoặc tài liệu chính thức của nhà cung cấp để biết chi tiết cấu hình.
       providerOptionsDocsLink: Xem Tài liệu Nhà cung cấp

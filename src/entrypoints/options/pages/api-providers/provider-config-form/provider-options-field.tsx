@@ -1,14 +1,12 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
-import { useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
+import { useCallback } from "react"
 import { HelpTooltip } from "@/components/help-tooltip"
-import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
-import { JSONCodeEditor } from "@/components/ui/json-code-editor"
-import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getRecommendedProviderOptions } from "@/utils/providers/options"
+import { AutosavedJsonCodeEditorField } from "./components/autosaved-json-code-editor-field"
 import { withForm } from "./form"
 
 function parseJson(input: string): { valid: true, value: Record<string, unknown> | undefined } | { valid: false, error: string } {
@@ -23,95 +21,21 @@ function parseJson(input: string): { valid: true, value: Record<string, unknown>
   }
 }
 
+function toJson(options: APIProviderConfig["providerOptions"]) {
+  return options ? JSON.stringify(options, null, 2) : ""
+}
+
 export const ProviderOptionsField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
     const providerConfig = useStore(form.store, state => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
-    const toJson = useCallback(
-      (options: APIProviderConfig["providerOptions"]) => options ? JSON.stringify(options, null, 2) : "",
-      [],
-    )
-    const externalJson = toJson(providerConfig.providerOptions)
+    const handleProviderOptionsCommit = useCallback((value: Record<string, unknown> | undefined) => {
+      form.setFieldValue("providerOptions", value)
+    }, [form])
 
-    // Local state for the JSON string input
-    const [jsonInput, setJsonInput] = useState(() => externalJson)
-    const lastCommittedJsonRef = useRef(externalJson)
-    const pendingEditorCommitRef = useRef(false)
-    const editorFocusedRef = useRef(false)
-
-    const syncJsonInput = useEffectEvent((nextJson: string) => {
-      // eslint-disable-next-line react/set-state-in-effect
-      setJsonInput(nextJson)
-    })
-
-    const resetSyncStateForProvider = useEffectEvent(() => {
-      lastCommittedJsonRef.current = externalJson
-      pendingEditorCommitRef.current = false
-      syncJsonInput(externalJson)
-    })
-
-    const readJsonInput = useEffectEvent(() => {
-      return jsonInput
-    })
-
-    const handleJsonInputChange = useCallback((nextJson: string) => {
-      setJsonInput(nextJson)
-    }, [])
-
-    const handleEditorFocus = useCallback(() => {
-      editorFocusedRef.current = true
-    }, [])
-
-    const handleEditorBlur = useCallback(() => {
-      editorFocusedRef.current = false
-    }, [])
-
-    useEffect(() => {
-      resetSyncStateForProvider()
-    }, [providerConfig.id])
-
-    useEffect(() => {
-      if (pendingEditorCommitRef.current && externalJson === lastCommittedJsonRef.current) {
-        pendingEditorCommitRef.current = false
-        return
-      }
-
-      pendingEditorCommitRef.current = false
-
-      const currentJsonInput = readJsonInput()
-      if (editorFocusedRef.current && currentJsonInput !== lastCommittedJsonRef.current) {
-        return
-      }
-
-      lastCommittedJsonRef.current = externalJson
-
-      if (currentJsonInput !== externalJson) {
-        syncJsonInput(externalJson)
-      }
-    }, [providerConfig.providerOptions, externalJson])
-
-    // Debounce the input value
-    const debouncedJsonInput = useDebouncedValue(jsonInput, 500)
-
-    // Derive parse result from debounced value
-    const parseResult = useMemo(() => parseJson(debouncedJsonInput), [debouncedJsonInput])
-
-    // Submit when debounced value changes and is valid
-    useEffect(() => {
-      if (parseResult.valid) {
-        const normalizedJson = toJson(parseResult.value)
-        if (normalizedJson === lastCommittedJsonRef.current) {
-          return
-        }
-
-        lastCommittedJsonRef.current = normalizedJson
-        pendingEditorCommitRef.current = true
-        form.setFieldValue("providerOptions", parseResult.value)
-        void form.handleSubmit()
-      }
-    }, [parseResult, form, toJson])
+    const handleSubmit = useCallback(() => form.handleSubmit(), [form])
 
     if (!isLLMProvider) {
       return null
@@ -124,11 +48,19 @@ export const ProviderOptionsField = withForm({
         ? JSON.stringify(recommendedOptions, null, 2)
         : JSON.stringify({ field: "value" }, null, 2)
     })()
-    const jsonError = !parseResult.valid ? parseResult.error : null
 
     return (
-      <Field>
-        <FieldLabel>
+      <AutosavedJsonCodeEditorField
+        value={providerConfig.providerOptions}
+        resetKey={providerConfig.id}
+        syncSignal={providerConfig.providerOptions}
+        parse={parseJson}
+        serialize={toJson}
+        onCommit={handleProviderOptionsCommit}
+        onSubmit={handleSubmit}
+        editorAriaLabel="provider-options-editor"
+        placeholder={placeholderText}
+        label={(
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-1.5">
               <span>{i18n.t("options.apiProviders.form.providerOptions")}</span>
@@ -143,20 +75,8 @@ export const ProviderOptionsField = withForm({
               {i18n.t("options.apiProviders.form.providerOptionsDocsLink")}
             </a>
           </div>
-        </FieldLabel>
-        <JSONCodeEditor
-          value={jsonInput}
-          onChange={handleJsonInputChange}
-          onFocus={handleEditorFocus}
-          onBlur={handleEditorBlur}
-          placeholder={placeholderText}
-          hasError={!!jsonError}
-          height="150px"
-        />
-        {jsonError && (
-          <FieldError>{jsonError}</FieldError>
         )}
-      </Field>
+      />
     )
   },
 })
