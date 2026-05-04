@@ -770,6 +770,7 @@ options:
       color: 顏色
       fontWeight: 字重
       backgroundOpacity: 背景透明度
+      blurTranslation: 模糊翻譯
       reset: 重置為預設值
     aiSegmentation:
       title: AI 智能斷句

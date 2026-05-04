@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/base-ui/card"
 import { Label } from "@/components/ui/base-ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR } from "@/utils/constants/subtitles"
+import { DEFAULT_BLUR_TRANSLATION, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR } from "@/utils/constants/subtitles"
 import { SubtitlesTextStyleForm } from "./subtitles-text-style-form"
 
 export function TranslationSubtitlesStyle() {
@@ -16,6 +16,7 @@ export function TranslationSubtitlesStyle() {
   const resetSubtitlesStyleConfig = () => {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
       style: {
+        blurTranslation: DEFAULT_BLUR_TRANSLATION,
         translation: {
           fontFamily: DEFAULT_FONT_FAMILY,
           fontScale: DEFAULT_FONT_SCALE,

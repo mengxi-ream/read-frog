@@ -20,6 +20,7 @@ export const subtitleContainerStyleSchema = z.object({
 export const subtitlesStyleSchema = z.object({
   displayMode: subtitlesDisplayModeSchema,
   translationPosition: subtitlesTranslationPositionSchema,
+  blurTranslation: z.boolean(),
   main: subtitleTextStyleSchema,
   translation: subtitleTextStyleSchema,
   container: subtitleContainerStyleSchema,

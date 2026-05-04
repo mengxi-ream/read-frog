@@ -6,6 +6,7 @@ import { useEffect, useState } from "react"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
 
@@ -44,8 +45,23 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { [type]: style } }))
   }
 
+  const handleBlurTranslationChange = (blurTranslation: boolean) => {
+    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { blurTranslation } }))
+  }
+
   return (
     <FieldGroup>
+      {type === "translation" && (
+        <Field orientation="horizontal">
+          <FieldLabel htmlFor="translation-subtitles-blur-toggle" className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.blurTranslation")}</FieldLabel>
+          <Switch
+            id="translation-subtitles-blur-toggle"
+            checked={videoSubtitlesConfig.style.blurTranslation}
+            onCheckedChange={handleBlurTranslationChange}
+          />
+        </Field>
+      )}
+
       <Field className={FIELD_ROW_CLASS_NAME}>
         <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
           <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.fontFamily")}</FieldLabel>

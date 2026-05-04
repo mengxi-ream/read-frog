@@ -885,6 +885,7 @@ options:
       color: Color
       fontWeight: Font Weight
       backgroundOpacity: Background Opacity
+      blurTranslation: Blur Translation
       reset: Reset to Default
     aiSegmentation:
       title: AI Smart Segmentation

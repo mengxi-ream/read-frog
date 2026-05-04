@@ -8,9 +8,11 @@ import { Activity, use } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   DEFAULT_BACKGROUND_OPACITY,
+  DEFAULT_BLUR_TRANSLATION,
   DEFAULT_DISPLAY_MODE,
   DEFAULT_FONT_FAMILY,
   DEFAULT_FONT_SCALE,
@@ -100,13 +102,14 @@ function SliderRow({ label, value, display, min, max, step, onChange }: {
   )
 }
 
-function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalContainer }: {
+function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalContainer, children }: {
   icon: ReactNode
   title: string
   textStyle: SubtitleTextStyle
   onChange: (patch: Partial<SubtitleTextStyle>) => void
   onReset: () => void
   portalContainer: HTMLElement | null
+  children?: ReactNode
 }) {
   return (
     <SettingsGroup icon={icon} title={title} onReset={onReset}>
@@ -153,6 +156,8 @@ function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalConta
         step={100}
         onChange={v => onChange({ fontWeight: v })}
       />
+
+      {children}
     </SettingsGroup>
   )
 }
@@ -240,9 +245,19 @@ export function StyleView() {
         title={i18n.t("options.videoSubtitles.style.translationSubtitle")}
         textStyle={config.style.translation}
         onChange={patch => updateStyle({ translation: patch })}
-        onReset={() => updateStyle({ translation: DEFAULT_TEXT_STYLE })}
+        onReset={() => updateStyle({
+          blurTranslation: DEFAULT_BLUR_TRANSLATION,
+          translation: DEFAULT_TEXT_STYLE,
+        })}
         portalContainer={portalContainer}
-      />
+      >
+        <SettingRow label={i18n.t("options.videoSubtitles.style.blurTranslation")}>
+          <Switch
+            checked={config.style.blurTranslation}
+            onCheckedChange={(checked: boolean) => updateStyle({ blurTranslation: checked })}
+          />
+        </SettingRow>
+      </TextStyleGroup>
     </div>
   )
 }

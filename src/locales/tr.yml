@@ -770,6 +770,7 @@ options:
       color: Renk
       fontWeight: Yazı Kalınlığı
       backgroundOpacity: Arka Plan Şeffaflığı
+      blurTranslation: Çeviriyi Bulanıklaştır
       reset: Varsayılana Sıfırla
     aiSegmentation:
       title: AI Akıllı Bölümlendirme

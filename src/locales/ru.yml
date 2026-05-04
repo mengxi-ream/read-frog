@@ -770,6 +770,7 @@ options:
       color: Цвет
       fontWeight: Толщина шрифта
       backgroundOpacity: Прозрачность фона
+      blurTranslation: Размыть перевод
       reset: Сбросить по умолчанию
     aiSegmentation:
       title: AI Умная сегментация

@@ -885,6 +885,7 @@ options:
       color: 颜色
       fontWeight: 字体粗细
       backgroundOpacity: 背景透明度
+      blurTranslation: 模糊翻译
       reset: 重置为默认
     aiSegmentation:
       title: AI 智能断句

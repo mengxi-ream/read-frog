@@ -770,6 +770,7 @@ options:
       color: 色
       fontWeight: フォントウェイト
       backgroundOpacity: 背景の透明度
+      blurTranslation: 翻訳をぼかす
       reset: デフォルトにリセット
     aiSegmentation:
       title: AI スマート区切り

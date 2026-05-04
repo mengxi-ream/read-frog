@@ -885,6 +885,7 @@ options:
       color: Color
       fontWeight: Grosor de fuente
       backgroundOpacity: Opacidad del fondo
+      blurTranslation: Desenfoque de traducción
       reset: Restablecer a predeterminado
     aiSegmentation:
       title: Segmentación inteligente de IA
