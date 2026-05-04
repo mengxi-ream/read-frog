@@ -1,14 +1,13 @@
 import type { LLMProviderTypes } from "@/types/config/provider"
 import { APP_NAME } from "@read-frog/definitions"
-
-const OPENROUTER_ATTRIBUTION_SITE_URL = "https://readfrog.app"
+import { env } from "@/env"
 
 export const DEFAULT_PROVIDER_HEADERS: Partial<Record<LLMProviderTypes, Record<string, string>>> = {
   anthropic: {
     "anthropic-dangerous-direct-browser-access": "true",
   },
   openrouter: {
-    "HTTP-Referer": OPENROUTER_ATTRIBUTION_SITE_URL,
+    "HTTP-Referer": env.WXT_WEBSITE_URL,
     "X-OpenRouter-Title": APP_NAME,
   },
 }
