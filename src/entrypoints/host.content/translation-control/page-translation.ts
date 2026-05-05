@@ -3,7 +3,6 @@ import type { Config } from "@/types/config/config"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
-import { getDetectedCodeFromStorage } from "@/utils/config/languages"
 import { getLocalConfig } from "@/utils/config/storage"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
@@ -103,13 +102,11 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    const detectedCode = await getDetectedCodeFromStorage()
-
     if (!validateTranslationConfigAndToast({
       providersConfig: config.providersConfig,
       translate: config.translate,
       language: config.language,
-    }, detectedCode)) {
+    })) {
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,

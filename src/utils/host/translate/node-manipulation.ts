@@ -1,6 +1,5 @@
 import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
-import { getDetectedCodeFromStorage } from "@/utils/config/languages"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { isHTMLElement } from "../dom/filter"
 import { findNearestAncestorBlockNodeAt } from "../dom/find"
@@ -20,13 +19,11 @@ export async function removeOrShowNodeTranslation(point: Point, config: Config):
   if (!node || !isHTMLElement(node))
     return false
 
-  const detectedCode = await getDetectedCodeFromStorage()
-
   if (!validateTranslationConfigAndToast({
     providersConfig: config.providersConfig,
     translate: config.translate,
     language: config.language,
-  }, detectedCode)) {
+  })) {
     return false
   }
 
