@@ -115,6 +115,9 @@ describe("getProviderOptions", () => {
       const grokOptions = getProviderOptions("grok-4-fast-reasoning", "xai")
       expect(grokOptions.xai?.reasoningEffort).toBe("low")
 
+      const grok41FastOptions = getProviderOptions("grok-4-1-fast-reasoning", "xai")
+      expect(grok41FastOptions).toEqual({})
+
       const deepseekReasonerOptions = getProviderOptions("deepseek-reasoner", "deepseek")
       expect(deepseekReasonerOptions.deepseek?.thinking).toEqual({ type: "disabled" })
 

@@ -156,9 +156,10 @@ export const LLM_MODEL_OPTIONS: Array<{
   // GPT-5 chat-latest variants are intentionally omitted because their docs do not advertise reasoning.effort.
   ...OPENAI_GPT5_RECOMMENDED_MODEL_OPTIONS,
 
-  // xAI Grok reasoning-capable text models - keep effort at the lowest supported level
+  // xAI Grok reasoning-capable text models - keep effort at the lowest supported level.
+  // Exclude Grok 4.1 Fast because xAI documents that it reasons automatically and errors if reasoning_effort is specified.
   {
-    pattern: /^grok-(?:4(?:-1)?(?:-fast-reasoning)?|4(?:-latest|-0709)?|3(?:-mini)?(?:-latest)?)$/,
+    pattern: /^grok-(?:4(?:-fast-reasoning|-latest|-0709)?|4-1|3(?:-mini)?(?:-latest)?)$/,
     options: { reasoningEffort: "low" } satisfies XaiProviderOptions as Record<string, JSONValue>,
   },
 
