@@ -18,6 +18,10 @@ interface FrameInjectionDetails {
   url?: string
 }
 
+interface InjectHostContentIntoTabIframesOptions {
+  requirePageTranslationEnabled?: boolean
+}
+
 function getDocumentInjectionKey(details: FrameInjectionDetails) {
   // documentId is best, but getAllFrames may not expose it. Fall back to URL so
   // explicit per-tab injections still dedupe until the frame navigates.
@@ -86,15 +90,17 @@ async function getFrameSnapshot(tabId: number): Promise<FrameInfoForSiteControl[
 async function getShouldInjectHostContentIntoTabIframes(
   tabId: number,
   existingConfig?: Config | null,
+  options: InjectHostContentIntoTabIframesOptions = {},
 ): Promise<{ config: Config | null, shouldInject: boolean }> {
+  const requirePageTranslationEnabled = options.requirePageTranslationEnabled ?? true
   const [isPageTranslationEnabled, config] = await Promise.all([
-    getPageTranslationEnabled(tabId),
+    requirePageTranslationEnabled ? getPageTranslationEnabled(tabId) : Promise.resolve(true),
     existingConfig === undefined ? getLocalConfig() : Promise.resolve(existingConfig),
   ])
 
   return {
     config,
-    shouldInject: isPageTranslationEnabled || Boolean(config?.translate.node.enabled),
+    shouldInject: isPageTranslationEnabled,
   }
 }
 
@@ -108,8 +114,10 @@ async function injectHostContentIntoFrame(
 
   if (
     pendingDocumentKeys.has(documentKey)
-    || injectedDocumentKeysByFrame.get(frameKey) === documentKey
   ) {
+    return
+  }
+  if (injectedDocumentKeysByFrame.get(frameKey) === documentKey) {
     return
   }
 
@@ -168,11 +176,14 @@ async function injectHostContentIntoFrame(
   }
 }
 
-export async function injectHostContentIntoTabIframes(tabId: number) {
+export async function injectHostContentIntoTabIframes(
+  tabId: number,
+  options: InjectHostContentIntoTabIframesOptions = {},
+) {
   let config: Config | null
   let shouldInject: boolean
   try {
-    ({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(tabId))
+    ({ config, shouldInject } = await getShouldInjectHostContentIntoTabIframes(tabId, undefined, options))
   }
   catch (error) {
     logger.warn("[Background][IframeInjection] Failed to resolve iframe injection state", error)
@@ -204,6 +215,10 @@ export async function injectHostContentIntoTabIframes(tabId: number) {
     }, frames, config)))
 }
 
+export async function injectHostContentIntoCurrentTabIframesAfterNodeTranslation(tabId: number) {
+  await injectHostContentIntoTabIframes(tabId, { requirePageTranslationEnabled: false })
+}
+
 export function setupIframeInjection() {
   browser.tabs.onRemoved.addListener(clearTabDocumentState)
   browser.webNavigation.onBeforeNavigate.addListener((details) => {
@@ -215,10 +230,9 @@ export function setupIframeInjection() {
     clearFrameInjectedDocumentState(details.tabId, details.frameId)
   })
 
-  // Only inject into subframes after page translation or hover/node translation
-  // is enabled for the tab.
-  // This keeps iframe-heavy pages and benchmarks from paying content-script cost
-  // before the feature is actually used.
+  // Only page translation eagerly injects host content into newly completed
+  // subframes. Top-frame node translation can separately scan existing iframes
+  // once, but it does not enable late iframe injection.
   browser.webNavigation.onCompleted.addListener(async (details) => {
     // Skip main frame (frameId === 0), only handle iframes
     if (details.frameId === 0)

@@ -1,4 +1,4 @@
-import { browser, i18n } from "#imports"
+import { i18n } from "#imports"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
 import {
@@ -11,7 +11,6 @@ import {
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
-import { sendMessage } from "@/utils/message"
 
 function HotkeyDisplay({ hotkey }: { hotkey: typeof HOTKEYS[number] }) {
   const icon = HOTKEY_ICONS[hotkey]
@@ -51,14 +50,6 @@ export default function NodeTranslationHotkeySelector() {
 
   const handleNodeTranslationEnabledChange = async (checked: boolean) => {
     await setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))
-
-    if (!checked)
-      return
-
-    const [currentTab] = await browser.tabs.query({ active: true, currentWindow: true })
-    if (typeof currentTab?.id === "number") {
-      void sendMessage("ensureIframeHostContentInjected", { tabId: currentTab.id })
-    }
   }
 
   return (

@@ -34,10 +34,6 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
 
-  if (window === window.top && initialConfig?.translate.node.enabled) {
-    void sendMessage("ensureIframeHostContentInjected", {})
-  }
-
   // For late-loading iframes: check if translation is already enabled for this tab
   let translationEnabled = false
   try {

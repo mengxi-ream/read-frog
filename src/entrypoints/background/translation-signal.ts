@@ -8,7 +8,7 @@ import { getTranslationStateKey } from "@/utils/constants/storage-keys"
 import { shouldEnableAutoTranslation } from "@/utils/host/translate/auto-translation"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
-import { injectHostContentIntoTabIframes } from "./iframe-injection"
+import { injectHostContentIntoCurrentTabIframesAfterNodeTranslation, injectHostContentIntoTabIframes } from "./iframe-injection"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
 
 function notifyPageTranslationStateChanged(tabId: number, enabled: boolean) {
@@ -48,6 +48,18 @@ export function translationMessage() {
     }
 
     logger.error("Invalid tabId in ensureIframeHostContentInjected", msg)
+  })
+
+  onMessage("injectCurrentIframesAfterTopFrameNodeTranslation", async (msg) => {
+    const tabId = msg.sender?.tab?.id
+    const frameId = msg.sender?.frameId
+
+    if (typeof tabId === "number" && frameId === 0) {
+      await injectHostContentIntoCurrentTabIframesAfterNodeTranslation(tabId)
+      return
+    }
+
+    logger.error("Invalid sender in injectCurrentIframesAfterTopFrameNodeTranslation", msg)
   })
 
   onMessage("tryToSetEnablePageTranslationByTabId", async (msg) => {

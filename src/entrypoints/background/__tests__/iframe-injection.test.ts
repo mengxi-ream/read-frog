@@ -56,14 +56,20 @@ function createDetails(overrides: Partial<NavigationDetails> = {}): NavigationDe
   }
 }
 
-function createConfig({ nodeTranslationEnabled = false }: { nodeTranslationEnabled?: boolean } = {}): Config {
+function createConfig({
+  nodeTranslationEnabled = false,
+  siteControl,
+}: {
+  nodeTranslationEnabled?: boolean
+  siteControl?: Config["siteControl"]
+} = {}): Config {
   return {
     translate: {
       node: {
         enabled: nodeTranslationEnabled,
       },
     },
-    siteControl: {
+    siteControl: siteControl ?? {
       mode: "blacklist",
       blacklistPatterns: [],
       whitelistPatterns: [],
@@ -126,10 +132,21 @@ describe("setupIframeInjection", () => {
     expect(executeScriptMock).not.toHaveBeenCalled()
   })
 
-  it("injects host content when node translation is enabled without page translation", async () => {
+  it("skips eager iframe injection when only node translation is enabled", async () => {
     const { onCompleted } = await setupSubject()
     storageGetItemMock.mockResolvedValue({ enabled: false })
     getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: true }))
+
+    await onCompleted(createDetails())
+
+    expect(getAllFramesMock).not.toHaveBeenCalled()
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("injects host content when page translation is enabled", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: true })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
 
     await onCompleted(createDetails())
 
@@ -239,5 +256,75 @@ describe("setupIframeInjection", () => {
     onRemoved(currentTabId)
     await onCompleted(details)
     expect(executeScriptMock).toHaveBeenCalledTimes(6)
+  })
+
+  it("injects current tab iframes after top-frame node translation even when page translation is disabled", async () => {
+    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } = await import("../iframe-injection")
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: true }))
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, "https://example.com/app", -1),
+      createFrame(2, "https://example.com/frame-a"),
+      createFrame(3, "https://example.com/frame-b"),
+    ])
+
+    await injectHostContentIntoCurrentTabIframesAfterNodeTranslation(currentTabId)
+
+    const calls = executeScriptMock.mock.calls.map(([call]) => call)
+    expect(executeScriptMock).toHaveBeenCalledTimes(4)
+    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      func: expect.any(Function),
+      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-a"],
+    })]))
+    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      files: ["/content-scripts/host.js"],
+    })]))
+    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [3] },
+      func: expect.any(Function),
+      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://example.com/frame-b"],
+    })]))
+    expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [3] },
+      files: ["/content-scripts/host.js"],
+    })]))
+  })
+
+  it("respects site control during top-frame node activation iframe injection", async () => {
+    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } = await import("../iframe-injection")
+    getLocalConfigMock.mockResolvedValue(createConfig({
+      nodeTranslationEnabled: true,
+      siteControl: {
+        mode: "blacklist",
+        blacklistPatterns: ["example.com"],
+        whitelistPatterns: [],
+      },
+    }))
+
+    await injectHostContentIntoCurrentTabIframesAfterNodeTranslation(currentTabId)
+
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("does not enable late iframe injection after top-frame node activation", async () => {
+    const { onCompleted } = await setupSubject()
+    const { injectHostContentIntoCurrentTabIframesAfterNodeTranslation } = await import("../iframe-injection")
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: true }))
+
+    await injectHostContentIntoCurrentTabIframesAfterNodeTranslation(currentTabId)
+    executeScriptMock.mockClear()
+    getAllFramesMock.mockClear()
+
+    await onCompleted(createDetails({
+      frameId: 4,
+      documentId: "doc-late",
+      url: "https://example.com/late-frame",
+    }))
+
+    expect(getAllFramesMock).not.toHaveBeenCalled()
+    expect(executeScriptMock).not.toHaveBeenCalled()
   })
 })
