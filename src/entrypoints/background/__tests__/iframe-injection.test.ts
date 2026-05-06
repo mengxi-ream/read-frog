@@ -3,6 +3,9 @@ import { browser, storage } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 
+const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js"
+const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js"
+
 const tabsOnRemovedAddListenerMock = vi.fn()
 const webNavigationOnBeforeNavigateAddListenerMock = vi.fn()
 const webNavigationOnCompletedAddListenerMock = vi.fn()
@@ -153,7 +156,159 @@ describe("setupIframeInjection", () => {
     expect(executeScriptMock).toHaveBeenCalledTimes(2)
     expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
       target: { tabId: currentTabId, documentIds: ["doc-1"] },
-      files: ["/content-scripts/host.js"],
+      files: [HOST_CONTENT_SCRIPT_FILE],
+    }))
+    expect(executeScriptMock).not.toHaveBeenCalledWith(expect.objectContaining({
+      files: [SELECTION_CONTENT_SCRIPT_FILE],
+    }))
+  })
+
+  it("auto-injects host and selection content for allowlisted iframes when page translation is disabled", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
+
+    await onCompleted(createDetails({
+      url: "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
+    }))
+
+    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      target: { tabId: currentTabId, documentIds: ["doc-1"] },
+      func: expect.any(Function),
+      args: [
+        SITE_CONTROL_URL_WINDOW_KEY,
+        "https://browse.library.kiwix.org/content/wikipedia_en_all_maxi_2026-02/A/Computer_science",
+      ],
+    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      target: { tabId: currentTabId, documentIds: ["doc-1"] },
+      files: [HOST_CONTENT_SCRIPT_FILE],
+    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
+      target: { tabId: currentTabId, documentIds: ["doc-1"] },
+      files: [SELECTION_CONTENT_SCRIPT_FILE],
+    }))
+  })
+
+  it("auto-injects existing and late iframes for allowlisted top pages", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
+      createFrame(2, "https://reader.example/frame"),
+    ])
+
+    await onCompleted(createDetails({
+      frameId: 0,
+      documentId: "top-doc",
+      parentFrameId: -1,
+      url: "https://browse.library.kiwix.org/viewer",
+    }))
+
+    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
+    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      files: [HOST_CONTENT_SCRIPT_FILE],
+    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      files: [SELECTION_CONTENT_SCRIPT_FILE],
+    }))
+
+    executeScriptMock.mockClear()
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
+      createFrame(4, "https://reader.example/late-frame"),
+    ])
+
+    await onCompleted(createDetails({
+      frameId: 4,
+      documentId: "doc-late",
+      url: "https://reader.example/late-frame",
+    }))
+
+    expect(executeScriptMock).toHaveBeenCalledTimes(3)
+    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      target: { tabId: currentTabId, documentIds: ["doc-late"] },
+      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/viewer"],
+    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      target: { tabId: currentTabId, documentIds: ["doc-late"] },
+      files: [HOST_CONTENT_SCRIPT_FILE],
+    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(3, expect.objectContaining({
+      target: { tabId: currentTabId, documentIds: ["doc-late"] },
+      files: [SELECTION_CONTENT_SCRIPT_FILE],
+    }))
+  })
+
+  it("respects site control during allowlisted full-runtime iframe injection", async () => {
+    const { onCompleted } = await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({
+      nodeTranslationEnabled: false,
+      siteControl: {
+        mode: "blacklist",
+        blacklistPatterns: ["browse.library.kiwix.org"],
+        whitelistPatterns: [],
+      },
+    }))
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
+      createFrame(2, "https://reader.example/frame"),
+    ])
+
+    await onCompleted(createDetails({
+      frameId: 0,
+      documentId: "top-doc",
+      parentFrameId: -1,
+      url: "https://browse.library.kiwix.org/viewer",
+    }))
+
+    expect(executeScriptMock).not.toHaveBeenCalled()
+  })
+
+  it("dedupes host and selection iframe injection independently", async () => {
+    const { injectHostContentIntoTabIframes } = await import("../iframe-injection")
+    storageGetItemMock.mockResolvedValue({ enabled: false })
+    getLocalConfigMock.mockResolvedValue(createConfig({ nodeTranslationEnabled: false }))
+    getAllFramesMock.mockResolvedValue([
+      createFrame(0, "https://browse.library.kiwix.org/viewer", -1),
+      createFrame(2, "https://browse.library.kiwix.org/content/article"),
+    ])
+
+    await injectHostContentIntoTabIframes(currentTabId, { requirePageTranslationEnabled: false })
+
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
+    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      files: [HOST_CONTENT_SCRIPT_FILE],
+    }))
+
+    executeScriptMock.mockClear()
+
+    await injectHostContentIntoTabIframes(currentTabId, {
+      requirePageTranslationEnabled: false,
+      includeSelectionContent: true,
+    })
+
+    expect(executeScriptMock).toHaveBeenCalledTimes(2)
+    expect(executeScriptMock).toHaveBeenNthCalledWith(1, expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      args: [SITE_CONTROL_URL_WINDOW_KEY, "https://browse.library.kiwix.org/content/article"],
+    }))
+    expect(executeScriptMock).toHaveBeenNthCalledWith(2, expect.objectContaining({
+      target: { tabId: currentTabId, frameIds: [2] },
+      files: [SELECTION_CONTENT_SCRIPT_FILE],
+    }))
+    expect(executeScriptMock).not.toHaveBeenCalledWith(expect.objectContaining({
+      files: [HOST_CONTENT_SCRIPT_FILE],
     }))
   })
 
@@ -237,7 +392,7 @@ describe("setupIframeInjection", () => {
     expect(executeScriptMock).toHaveBeenCalledTimes(6)
     expect(executeScriptMock).toHaveBeenLastCalledWith(expect.objectContaining({
       target: { tabId: currentTabId, documentIds: ["doc-stale"] },
-      files: ["/content-scripts/host.js"],
+      files: [HOST_CONTENT_SCRIPT_FILE],
     }))
   })
 
@@ -279,7 +434,7 @@ describe("setupIframeInjection", () => {
     })]))
     expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
       target: { tabId: currentTabId, frameIds: [2] },
-      files: ["/content-scripts/host.js"],
+      files: [HOST_CONTENT_SCRIPT_FILE],
     })]))
     expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
       target: { tabId: currentTabId, frameIds: [3] },
@@ -288,7 +443,7 @@ describe("setupIframeInjection", () => {
     })]))
     expect(calls).toEqual(expect.arrayContaining([expect.objectContaining({
       target: { tabId: currentTabId, frameIds: [3] },
-      files: ["/content-scripts/host.js"],
+      files: [HOST_CONTENT_SCRIPT_FILE],
     })]))
   })
 
