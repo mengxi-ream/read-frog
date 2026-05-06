@@ -57,6 +57,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private isPageTranslating: boolean = false
   private intersectionObserver: IntersectionObserver | null = null
   private mutationObservers: MutationObserver[] = []
+  private observedMutationRoots = new WeakSet<HTMLElement>()
   private walkId: string | null = null
   private intersectionOptions: IntersectionObserverInit
   private walkBlockedElementsCache = new WeakSet<HTMLElement>()
@@ -196,6 +197,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
     this.mutationObservers.forEach(observer => observer.disconnect())
     this.mutationObservers = []
+    this.observedMutationRoots = new WeakSet()
 
     void removeAllTranslatedWrapperNodes()
   }
@@ -487,10 +489,24 @@ export class PageTranslationManager implements IPageTranslationManager {
     walkBlockedElements.forEach(el => this.walkBlockedElementsCache.add(el))
   }
 
+  private filterTopLevelElements(elements: Iterable<HTMLElement>): HTMLElement[] {
+    const uniqueElements = [...new Set(elements)]
+
+    return uniqueElements.filter(element =>
+      !uniqueElements.some(candidate => candidate !== element && candidate.contains(element)),
+    )
+  }
+
   /**
    * Start observing mutations for a container and all its shadow roots
    */
   private observeMutations(container: HTMLElement): void {
+    if (this.observedMutationRoots.has(container)) {
+      return
+    }
+
+    this.observedMutationRoots.add(container)
+
     const mutationObserver = new MutationObserver((records) => {
       void this.handleMutationRecords(records)
     })
@@ -507,28 +523,42 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
+    const addedElements: HTMLElement[] = []
+    const walkabilityTargets = new Set<HTMLElement>()
+
+    for (const rec of records) {
+      if (rec.type === "childList") {
+        rec.addedNodes.forEach((node) => {
+          if (isHTMLElement(node)) {
+            addedElements.push(node)
+          }
+        })
+      }
+      else if (this.isWalkabilityAttributeMutation(rec) && isHTMLElement(rec.target)) {
+        walkabilityTargets.add(rec.target)
+      }
+    }
+
     const config = await getLocalConfig()
     if (!config) {
       logger.error("Global config is not initialized")
       return
     }
 
-    for (const rec of records) {
-      if (rec.type === "childList") {
-        rec.addedNodes.forEach((node) => {
-          if (isHTMLElement(node)) {
-            this.addWalkBlockedElements(node, config)
-            void this.observerTopLevelParagraphs(node, config)
-            this.observeIsolatedDescendantsMutations(node)
-          }
-        })
-      }
-      else if (this.isWalkabilityAttributeMutation(rec)) {
-        const el = rec.target
-        if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
-          void this.observerTopLevelParagraphs(el, config)
-        }
-      }
+    const topLevelAddedElements = this.filterTopLevelElements(addedElements)
+    const walkableElements = [...walkabilityTargets].filter(el => this.didChangeToWalkable(el, config))
+    const topLevelWalkableElements = this
+      .filterTopLevelElements(walkableElements)
+      .filter(el => !topLevelAddedElements.some(added => added.contains(el)))
+
+    for (const element of topLevelAddedElements) {
+      this.addWalkBlockedElements(element, config)
+      this.observeIsolatedDescendantsMutations(element)
+      void this.observerTopLevelParagraphs(element, config)
+    }
+
+    for (const element of topLevelWalkableElements) {
+      void this.observerTopLevelParagraphs(element, config)
     }
   }
 

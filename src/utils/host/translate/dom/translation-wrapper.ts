@@ -1,14 +1,45 @@
-import { CONTENT_WRAPPER_CLASS, WALKED_ATTRIBUTE } from "../../../constants/dom-labels"
-import { isHTMLElement } from "../../dom/filter"
+import { CONTENT_WRAPPER_CLASS } from "../../../constants/dom-labels"
+import { isHTMLElement, isTextNode } from "../../dom/filter"
 
-export function findPreviousTranslatedWrapperInside(node: Element | Text, walkId: string): HTMLElement | null {
+function findAdjacentTranslatedWrapper(node: Element | Text): HTMLElement | null {
+  let sibling = node.nextSibling
+
+  while (sibling) {
+    if (isTextNode(sibling)) {
+      if (sibling.textContent?.trim()) {
+        return null
+      }
+      sibling = sibling.nextSibling
+      continue
+    }
+
+    if (!isHTMLElement(sibling)) {
+      return null
+    }
+
+    if (sibling.classList.contains(CONTENT_WRAPPER_CLASS)) {
+      return sibling
+    }
+
+    return null
+  }
+
+  return null
+}
+
+export function findPreviousTranslatedWrapperInside(node: Element | Text): HTMLElement | null {
   if (isHTMLElement(node)) {
     // Check if the node itself is a translated wrapper
-    if (node.classList.contains(CONTENT_WRAPPER_CLASS) && node.getAttribute(WALKED_ATTRIBUTE) !== walkId) {
+    if (node.classList.contains(CONTENT_WRAPPER_CLASS)) {
       return node
     }
-    // Otherwise, look for a wrapper as a child that doesn't match the current walkId
-    return node.querySelector(`.${CONTENT_WRAPPER_CLASS}:not([${WALKED_ATTRIBUTE}="${walkId}"])`)
+
+    // Don't check the previous sibling because the wrapper should be either the node itself or its descendant
+    const descendantWrapper = node.querySelector<HTMLElement>(`.${CONTENT_WRAPPER_CLASS}`)
+    if (descendantWrapper) {
+      return descendantWrapper
+    }
   }
-  return null
+
+  return findAdjacentTranslatedWrapper(node)
 }

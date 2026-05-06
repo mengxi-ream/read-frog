@@ -14,8 +14,16 @@ export async function translateWalkedElement(
   config: Config,
   toggle: boolean = false,
 ): Promise<void> {
-  if (!toggle && element.querySelector(`.${CONTENT_WRAPPER_CLASS}`))
+  if (element.classList.contains(CONTENT_WRAPPER_CLASS))
     return
+
+  if (
+    !toggle
+    && element.hasAttribute(PARAGRAPH_ATTRIBUTE)
+    && element.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
+  ) {
+    return
+  }
 
   // if the walkId is not the same, return
   if (element.getAttribute(WALKED_ATTRIBUTE) !== walkId)
@@ -63,13 +71,13 @@ export async function translateWalkedElement(
   }
   else {
     for (const child of element.childNodes) {
-      if (isHTMLElement(child)) {
+      if (isHTMLElement(child) && !child.classList.contains(CONTENT_WRAPPER_CLASS)) {
         promises.push(translateWalkedElement(child, walkId, config, toggle))
       }
     }
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
-        if (isHTMLElement(child)) {
+        if (isHTMLElement(child) && !child.classList.contains(CONTENT_WRAPPER_CLASS)) {
           promises.push(translateWalkedElement(child, walkId, config, toggle))
         }
       }

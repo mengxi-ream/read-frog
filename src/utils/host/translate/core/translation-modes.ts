@@ -74,7 +74,7 @@ export async function translateNodesBilingualMode(
         ? await unwrapDeepestOnlyHTMLChild(lastNode)
         : lastNode
 
-    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode, walkId)
+    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode)
     if (existedTranslatedWrapper) {
       removeTranslatedWrapperWithRestore(existedTranslatedWrapper)
       if (toggle) {
@@ -207,7 +207,7 @@ export async function translateNodeTranslationOnlyMode(
       console.error("targetNode.parentElement is not HTMLElement", targetNode.parentElement)
       return
     }
-    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode.parentElement, walkId)
+    const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode.parentElement)
     const existedTranslatedWrapperOutside = targetNode.parentElement.closest(`.${CONTENT_WRAPPER_CLASS}`)
 
     const finalTranslatedWrapper = existedTranslatedWrapperOutside ?? existedTranslatedWrapper
