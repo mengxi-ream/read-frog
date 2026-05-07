@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.33.5
+
+### Patch Changes
+
+- [#1457](https://github.com/mengxi-ream/read-frog/pull/1457) [`0c7a68c`](https://github.com/mengxi-ream/read-frog/commit/0c7a68c9dc406f28794a769506ba7f4057c830d1) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix: stop auto-applying xAI reasoningEffort to Grok 4.1 Fast models
+
+- [#1468](https://github.com/mengxi-ream/read-frog/pull/1468) [`034fbd8`](https://github.com/mengxi-ream/read-frog/commit/034fbd887bee6771d2f5d1e835bfb348aa1030da) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): decode Google Translate HTML entities
+
+- [#1462](https://github.com/mengxi-ream/read-frog/pull/1462) [`a59278e`](https://github.com/mengxi-ream/read-frog/commit/a59278e22fe00ffd68749adb4aec6fbab1c008ce) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): auto-inject iframe runtime on Kiwix viewer pages
+
+- [#1459](https://github.com/mengxi-ream/read-frog/pull/1459) [`56985d2`](https://github.com/mengxi-ream/read-frog/commit/56985d2fedfc7cad4fe002364c47299448a90f06) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: remove same-language warning for automatic source detection
+
 ## 1.33.4
 
 ### Patch Changes
