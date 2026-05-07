@@ -12,11 +12,9 @@ export default function TranslateProviderField() {
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
   const providers = useMemo(() => {
-    const exclude = translateConfig.mode === "translationOnly" ? ["google-translate"] : undefined
     return filterEnabledProvidersConfig(providersConfig)
       .filter(p => isTranslateProvider(p.provider))
-      .filter(p => !exclude?.includes(p.provider))
-  }, [providersConfig, translateConfig.mode])
+  }, [providersConfig])
 
   return (
     <div className="flex items-center justify-between gap-2">

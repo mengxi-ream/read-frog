@@ -1,7 +1,9 @@
+import type { RequestRetryPolicy } from "./retry-policy"
 import { deepmerge } from "deepmerge-ts"
 import { requestQueueConfigSchema } from "@/types/config/translate"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { BinaryHeapPQ } from "./priority-queue"
+import { defaultRequestRetryPolicy } from "./retry-policy"
 
 export interface RequestTask {
   id: string
@@ -12,7 +14,10 @@ export interface RequestTask {
   scheduleAt: number
   createdAt: number
   retryCount: number
+  drained: boolean
 }
+
+type QueuedRequestTask = RequestTask & { hash: string }
 
 export interface QueueOptions {
   rate: number // tokens/sec
@@ -20,13 +25,15 @@ export interface QueueOptions {
   timeoutMs: number
   maxRetries: number
   baseRetryDelayMs: number
+  retryPolicy?: RequestRetryPolicy
 }
 
 export class RequestQueue {
-  private waitingQueue: BinaryHeapPQ<RequestTask & { hash: string }>
-  private waitingTasks = new Map<string, RequestTask>()
-  private executingTasks = new Map<string, RequestTask>()
+  private waitingQueue: BinaryHeapPQ<QueuedRequestTask>
+  private waitingTasks = new Map<string, QueuedRequestTask>()
+  private executingTasks = new Map<string, QueuedRequestTask>()
   private nextScheduleTimer: NodeJS.Timeout | null = null
+  private retryPolicy: RequestRetryPolicy
 
   // token bucket
   private bucketTokens: number
@@ -34,9 +41,10 @@ export class RequestQueue {
 
   constructor(private options: QueueOptions) {
     this.options = options
+    this.retryPolicy = options.retryPolicy ?? defaultRequestRetryPolicy
     this.bucketTokens = options.capacity
     this.lastRefill = Date.now()
-    this.waitingQueue = new BinaryHeapPQ<RequestTask & { hash: string }>()
+    this.waitingQueue = new BinaryHeapPQ<QueuedRequestTask>()
   }
 
   enqueue<T>(thunk: () => Promise<T>, scheduleAt: number, hash: string): Promise<T> {
@@ -53,8 +61,9 @@ export class RequestQueue {
       reject = rej
     })
 
-    const task: RequestTask = {
+    const task: QueuedRequestTask = {
       id: getRandomUUID(),
+      hash,
       thunk,
       promise,
       resolve,
@@ -62,10 +71,11 @@ export class RequestQueue {
       scheduleAt,
       createdAt: Date.now(),
       retryCount: 0,
+      drained: false,
     }
 
     this.waitingTasks.set(hash, task)
-    this.waitingQueue.push({ ...task, hash }, scheduleAt)
+    this.waitingQueue.push(task, scheduleAt)
 
     // console.info(`✅ Task ${task.id} added to queue. Queue size: ${this.waitingQueue.size()}, waiting: ${this.waitingTasks.size}, executing: ${this.executingTasks.size}`)
 
@@ -74,13 +84,17 @@ export class RequestQueue {
   }
 
   setQueueOptions(options: Partial<QueueOptions>) {
-    const parseConfigStatus = requestQueueConfigSchema.partial().safeParse(options)
+    const { retryPolicy, ...queueOptions } = options
+    const parseConfigStatus = requestQueueConfigSchema.partial().safeParse(queueOptions)
     if (parseConfigStatus.error) {
       throw new Error(parseConfigStatus.error.issues[0].message)
     }
-    this.options = deepmerge(this.options, options) as QueueOptions
-    if (options.capacity) {
-      this.bucketTokens = options.capacity
+    this.options = deepmerge(this.options, queueOptions) as QueueOptions
+    if (retryPolicy) {
+      this.retryPolicy = retryPolicy
+    }
+    if (queueOptions.capacity) {
+      this.bucketTokens = queueOptions.capacity
       this.lastRefill = Date.now()
     }
   }
@@ -89,8 +103,10 @@ export class RequestQueue {
     this.refillTokens()
 
     while (this.bucketTokens >= 1 && this.waitingQueue.size() > 0) {
+      const now = Date.now()
+
       const task = this.waitingQueue.peek()
-      if (task && task.scheduleAt <= Date.now()) {
+      if (task && task.scheduleAt <= now) {
         this.waitingQueue.pop()
         this.waitingTasks.delete(task.hash)
         this.executingTasks.set(task.hash, task)
@@ -123,7 +139,7 @@ export class RequestQueue {
     }
   }
 
-  private async executeTask(task: RequestTask & { hash: string }) {
+  private async executeTask(task: QueuedRequestTask) {
     // console.info(`🏃 Starting execution of task ${task.id} (attempt ${task.retryCount + 1}) at ${Date.now()}`)
 
     let timeoutId: NodeJS.Timeout | null = null
@@ -150,7 +166,9 @@ export class RequestQueue {
       }
 
       // console.info(`✅ Task ${task.id} completed successfully at ${Date.now()}`)
-      task.resolve(result)
+      if (!task.drained) {
+        task.resolve(result)
+      }
     }
     catch (error) {
       // Clear timeout if it hasn't fired yet
@@ -161,22 +179,26 @@ export class RequestQueue {
 
       // console.error(`❌ Task ${task.id} failed at ${Date.now()}:`, error)
 
+      if (task.drained) {
+        return
+      }
+
+      const now = Date.now()
+      const decision = this.retryPolicy.decide(error, {
+        retryCount: task.retryCount,
+        maxRetries: this.options.maxRetries,
+        baseRetryDelayMs: this.options.baseRetryDelayMs,
+        now,
+      })
+
       // Check if we should retry
-      if (task.retryCount < this.options.maxRetries) {
+      if (decision.action === "retry") {
         task.retryCount++
-
-        // Calculate exponential backoff delay
-        const backoffDelayMs = this.options.baseRetryDelayMs * (2 ** (task.retryCount - 1))
-
-        // Add some jitter to prevent thundering herd
-        const jitter = Math.random() * 0.1 * backoffDelayMs
-        const delayMs = backoffDelayMs + jitter
-
         // Schedule retry
-        const retryAt = Date.now() + delayMs
+        const retryAt = now + decision.delayMs
         task.scheduleAt = retryAt
 
-        // console.warn(`🔄 Retrying task ${task.id} (attempt ${task.retryCount}/${this.options.maxRetries}) after ${Math.round(delayMs)}ms`)
+        // console.warn(`🔄 Retrying task ${task.id} (attempt ${task.retryCount}/${this.options.maxRetries}) after ${Math.round(decision.delayMs)}ms`)
 
         // Move task back to waiting queue for retry
         this.waitingTasks.set(task.hash, task)
@@ -186,7 +208,12 @@ export class RequestQueue {
       else {
         // Max retries exceeded, reject the promise
         // console.error(`💀 Task ${task.id} failed permanently after ${this.options.maxRetries} retries`)
-        task.reject(error)
+        if (decision.failQueue) {
+          this.failCurrentBacklog(error)
+        }
+        else {
+          task.reject(error)
+        }
       }
     }
     finally {
@@ -195,7 +222,9 @@ export class RequestQueue {
         clearTimeout(timeoutId)
       }
 
-      this.executingTasks.delete(task.hash)
+      if (this.executingTasks.get(task.hash) === task) {
+        this.executingTasks.delete(task.hash)
+      }
       this.schedule()
     }
   }
@@ -206,6 +235,33 @@ export class RequestQueue {
       return duplicateTask
     }
     return undefined
+  }
+
+  private failCurrentBacklog(error: unknown) {
+    if (this.nextScheduleTimer) {
+      clearTimeout(this.nextScheduleTimer)
+      this.nextScheduleTimer = null
+    }
+
+    for (const task of this.waitingTasks.values()) {
+      this.rejectDrainedTask(task, error)
+    }
+    this.waitingTasks.clear()
+    this.waitingQueue.clear()
+
+    for (const task of this.executingTasks.values()) {
+      this.rejectDrainedTask(task, error)
+    }
+    this.executingTasks.clear()
+  }
+
+  private rejectDrainedTask(task: QueuedRequestTask, error: unknown) {
+    if (task.drained) {
+      return
+    }
+
+    task.drained = true
+    task.reject(error)
   }
 
   private refillTokens() {

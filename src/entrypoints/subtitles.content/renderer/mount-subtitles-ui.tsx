@@ -3,11 +3,12 @@ import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import ReactDOM from "react-dom/client"
 import { Toaster } from "sonner"
 import themeCSS from "@/assets/styles/theme.css?inline"
-import { ThemeProvider } from "@/components/providers/theme-provider"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
+import { SUBTITLES_THEME } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
+import { applyTheme } from "@/utils/theme"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 import { SubtitlesProviders } from "../ui/subtitles-ui-context"
 
@@ -72,6 +73,7 @@ export async function mountSubtitlesUI(
     },
   })
   const reactContainer = hostBuilder.build()
+  applyTheme(reactContainer, SUBTITLES_THEME)
 
   const reactRoot = ReactDOM.createRoot(reactContainer)
 
@@ -84,12 +86,10 @@ export async function mountSubtitlesUI(
 
   const app = (
     <ShadowWrapperContext value={reactContainer}>
-      <ThemeProvider container={reactContainer}>
-        <SubtitlesProviders adapter={adapter}>
-          <SubtitlesContainer />
-          <Toaster richColors className="z-2147483647 notranslate" />
-        </SubtitlesProviders>
-      </ThemeProvider>
+      <SubtitlesProviders adapter={adapter}>
+        <SubtitlesContainer />
+        <Toaster richColors className="z-2147483647 notranslate" />
+      </SubtitlesProviders>
     </ShadowWrapperContext>
   )
 

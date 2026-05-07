@@ -28,7 +28,7 @@ import {
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesStore } from "../../../atoms"
 
-const SELECT_TRIGGER_CLASS = "min-w-[5.5rem] text-[13px] [&_[data-slot=select-value]]:text-white/92"
+const SELECT_TRIGGER_CLASS = "min-w-[5.5rem] text-[13px] text-popover-foreground [&_[data-slot=select-value]]:text-popover-foreground [&_[data-slot=select-icon]]:text-muted-foreground"
 const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-[13px]"
 const SLIDER_CLASS = "[&_[role=slider]]:border-0 [&_[role=slider]]:shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
 
@@ -43,7 +43,7 @@ function SettingsGroup({ icon, title, onReset, children }: {
   return (
     <div className="mb-4">
       <div className="mb-1.5 flex items-center justify-between px-0.5">
-        <div className="flex items-center gap-1.5 text-[13px] font-medium text-white/90">
+        <div className="text-popover-foreground flex items-center gap-1.5 text-[13px] font-medium">
           {icon}
           {title}
         </div>
@@ -52,12 +52,12 @@ function SettingsGroup({ icon, title, onReset, children }: {
           variant="ghost"
           size="icon-sm"
           onClick={onReset}
-          className="cursor-pointer text-white/62 hover:bg-white/8 hover:text-white/90"
+          className="text-muted-foreground hover:bg-accent/60 hover:text-popover-foreground cursor-pointer"
         >
           <IconRefresh className="size-3.5" />
         </Button>
       </div>
-      <div className="divide-y divide-white/6 rounded-xl bg-white/[0.04]">
+      <div className="bg-muted/50 divide-border rounded-xl border divide-y">
         {children}
       </div>
     </div>
@@ -67,7 +67,7 @@ function SettingsGroup({ icon, title, onReset, children }: {
 function SettingRow({ label, children }: { label: string, children: ReactNode }) {
   return (
     <div className="flex items-center justify-between px-3 py-2.5">
-      <span className="text-[13px] text-white/92">{label}</span>
+      <span className="text-popover-foreground text-[13px]">{label}</span>
       {children}
     </div>
   )
@@ -85,8 +85,8 @@ function SliderRow({ label, value, display, min, max, step, onChange }: {
   return (
     <div className="px-3 py-2.5">
       <div className="mb-3.5 flex items-center justify-between">
-        <span className="text-[13px] text-white/92">{label}</span>
-        <span className="text-[12px] text-white/62">{display}</span>
+        <span className="text-popover-foreground text-[13px]">{label}</span>
+        <span className="text-muted-foreground text-[12px]">{display}</span>
       </div>
       <Slider
         min={min}
@@ -125,19 +125,19 @@ function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalConta
           type="color"
           value={textStyle.color}
           onChange={e => onChange({ color: e.target.value })}
-          className="h-6 w-6 cursor-pointer rounded border border-white/15 bg-transparent p-0.5"
+          className="border-input bg-background h-6 w-6 cursor-pointer rounded border p-0.5"
         />
       </SettingRow>
 
       <SettingRow label={i18n.t("options.videoSubtitles.style.fontFamily")}>
         <Select value={textStyle.fontFamily} onValueChange={v => v && onChange({ fontFamily: v as SubtitlesFontFamily })}>
-          <SelectTrigger variant="dark" size="sm" className={SELECT_TRIGGER_CLASS}>
+          <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
             <SelectValue>{textStyle.fontFamily}</SelectValue>
           </SelectTrigger>
-          <SelectContent variant="dark" container={portalContainer} className={SELECT_CONTENT_CLASS}>
+          <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
             <SelectGroup>
               {FONT_FAMILY_OPTIONS.map(key => (
-                <SelectItem key={key} variant="dark" value={key}>{key}</SelectItem>
+                <SelectItem key={key} value={key}>{key}</SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
@@ -186,14 +186,14 @@ export function StyleView() {
       >
         <SettingRow label={i18n.t("options.videoSubtitles.style.displayMode.title")}>
           <Select value={displayMode} onValueChange={(v: SubtitlesDisplayMode | null) => v && updateStyle({ displayMode: v })}>
-            <SelectTrigger variant="dark" size="sm" className={SELECT_TRIGGER_CLASS}>
+            <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
               <SelectValue>{i18n.t(`options.videoSubtitles.style.displayMode.${displayMode}`)}</SelectValue>
             </SelectTrigger>
-            <SelectContent variant="dark" container={portalContainer} className={SELECT_CONTENT_CLASS}>
+            <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
               <SelectGroup>
-                <SelectItem variant="dark" value="bilingual">{i18n.t("options.videoSubtitles.style.displayMode.bilingual")}</SelectItem>
-                <SelectItem variant="dark" value="originalOnly">{i18n.t("options.videoSubtitles.style.displayMode.originalOnly")}</SelectItem>
-                <SelectItem variant="dark" value="translationOnly">{i18n.t("options.videoSubtitles.style.displayMode.translationOnly")}</SelectItem>
+                <SelectItem value="bilingual">{i18n.t("options.videoSubtitles.style.displayMode.bilingual")}</SelectItem>
+                <SelectItem value="originalOnly">{i18n.t("options.videoSubtitles.style.displayMode.originalOnly")}</SelectItem>
+                <SelectItem value="translationOnly">{i18n.t("options.videoSubtitles.style.displayMode.translationOnly")}</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -202,13 +202,13 @@ export function StyleView() {
         <Activity mode={displayMode === "bilingual" ? "visible" : "hidden"}>
           <SettingRow label={i18n.t("options.videoSubtitles.style.translationPosition.title")}>
             <Select value={translationPosition} onValueChange={(v: SubtitlesTranslationPosition | null) => v && updateStyle({ translationPosition: v })}>
-              <SelectTrigger variant="dark" size="sm" className={SELECT_TRIGGER_CLASS}>
+              <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
                 <SelectValue>{i18n.t(`options.videoSubtitles.style.translationPosition.${translationPosition}`)}</SelectValue>
               </SelectTrigger>
-              <SelectContent variant="dark" container={portalContainer} className={SELECT_CONTENT_CLASS}>
+              <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
                 <SelectGroup>
-                  <SelectItem variant="dark" value="above">{i18n.t("options.videoSubtitles.style.translationPosition.above")}</SelectItem>
-                  <SelectItem variant="dark" value="below">{i18n.t("options.videoSubtitles.style.translationPosition.below")}</SelectItem>
+                  <SelectItem value="above">{i18n.t("options.videoSubtitles.style.translationPosition.above")}</SelectItem>
+                  <SelectItem value="below">{i18n.t("options.videoSubtitles.style.translationPosition.below")}</SelectItem>
                 </SelectGroup>
               </SelectContent>
             </Select>

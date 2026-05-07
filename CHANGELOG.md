@@ -1,5 +1,45 @@
 # @read-frog/extension
 
+## 1.33.4
+
+### Patch Changes
+
+- [#1455](https://github.com/mengxi-ream/read-frog/pull/1455) [`f63b83f`](https://github.com/mengxi-ream/read-frog/commit/f63b83f1acca92e69cf95599d5326d732bebf1b5) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix: parse webpage context from a detached Defuddle snapshot to avoid mutating the live page DOM
+
+- [#1453](https://github.com/mengxi-ream/read-frog/pull/1453) [`47c50c7`](https://github.com/mengxi-ream/read-frog/commit/47c50c767a3a9af2700c7290539705e458ff538a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - perf: avoid eager iframe host injection for node translation
+
+## 1.33.3
+
+### Patch Changes
+
+- [#1449](https://github.com/mengxi-ream/read-frog/pull/1449) [`229860e`](https://github.com/mengxi-ream/read-frog/commit/229860e6f6c55c005fea5da3e1d9981e3d09b024) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): support Bedrock provider-specific region
+
+- [#1450](https://github.com/mengxi-ream/read-frog/pull/1450) [`a0c6a4c`](https://github.com/mengxi-ream/read-frog/commit/a0c6a4c7e00cb90b98e8185e44913d6dcf43ffa9) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat: add custom provider headers
+
+- [#1451](https://github.com/mengxi-ream/read-frog/pull/1451) [`89e6bbd`](https://github.com/mengxi-ream/read-frog/commit/89e6bbd28c178fa6a602fb7c80325cbbf7098f24) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(providers): add OpenRouter attribution headers
+
+- [#1443](https://github.com/mengxi-ream/read-frog/pull/1443) [`69ff9c9`](https://github.com/mengxi-ream/read-frog/commit/69ff9c9fed75192780b57b756b82658e48a26158) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): align subtitle settings labels
+
+## 1.33.2
+
+### Patch Changes
+
+- [#1435](https://github.com/mengxi-ream/read-frog/pull/1435) [`7f2849c`](https://github.com/mengxi-ream/read-frog/commit/7f2849c8436ad09b969a9062a3ece0c8b8c29b56) Thanks [@oskkas](https://github.com/oskkas)! - i18n: add Spanish UI translation support.
+
+- [#1426](https://github.com/mengxi-ream/read-frog/pull/1426) [`b816541`](https://github.com/mengxi-ream/read-frog/commit/b816541cd96bc7da6c4d241a993e464def7998e5) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(extension): add animated subtitle format parser for YouTube kinetic typography
+
+- [#1431](https://github.com/mengxi-ream/read-frog/pull/1431) [`f430675`](https://github.com/mengxi-ream/read-frog/commit/f430675706fb88373509f0f5937405a911039975) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): fail fast on queue-fatal translation request errors
+
+- [#1419](https://github.com/mengxi-ream/read-frog/pull/1419) [`bbacbf5`](https://github.com/mengxi-ream/read-frog/commit/bbacbf52a7f2bd74071b522fb4abe1cba827b302) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): preserve focused provider options drafts
+
+- [#1434](https://github.com/mengxi-ream/read-frog/pull/1434) [`3a97109`](https://github.com/mengxi-ream/read-frog/commit/3a9710911e9a6c2db9bc78920a476e3c16d63131) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): restore Google Translate provider support
+
+- [#1417](https://github.com/mengxi-ream/read-frog/pull/1417) [`8abf1cd`](https://github.com/mengxi-ream/read-frog/commit/8abf1cd0b0d442aaaab797542af715281906e893) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - perf(extension): gate iframe content script injection
+
+- [#1410](https://github.com/mengxi-ream/read-frog/pull/1410) [`281908a`](https://github.com/mengxi-ream/read-frog/commit/281908a48703286546b77f00b50f7d06ecd76436) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(page-translation): re-walk revealed accordion content
+
+- [#1436](https://github.com/mengxi-ream/read-frog/pull/1436) [`b1d728f`](https://github.com/mengxi-ream/read-frog/commit/b1d728fa04533f1f6682d2adff7f38640fcc4247) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): force dark theme for subtitle UI
+
 ## 1.33.1
 
 ### Patch Changes

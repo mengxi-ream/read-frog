@@ -9,10 +9,17 @@ export interface CachedWebPageContext extends WebPageContext {
 
 let cachedWebPageContext: CachedWebPageContext | null = null
 
+function createDefuddleSnapshotDocument() {
+  const clonedDoc = document.implementation.createHTMLDocument(document.title)
+  clonedDoc.documentElement.innerHTML = document.documentElement.outerHTML
+  return clonedDoc
+}
+
 async function extractWebpageContent(): Promise<string> {
   try {
     const { default: Defuddle, createMarkdownContent } = await import("defuddle/full")
-    const result = new Defuddle(document, {
+    const snapshotDoc = createDefuddleSnapshotDocument()
+    const result = new Defuddle(snapshotDoc, {
       separateMarkdown: true,
       url: window.location.href,
       useAsync: false,

@@ -36,6 +36,8 @@ interface ProtocolMap {
   tryToSetEnablePageTranslationOnContentScript: (data: { enabled: boolean, analyticsContext?: FeatureUsageContext }) => void
   setAndNotifyPageTranslationStateChangedByManager: (data: { enabled: boolean }) => void
   notifyTranslationStateChanged: (data: { enabled: boolean }) => void
+  ensureIframeHostContentInjected: (data: { tabId?: number }) => void
+  injectCurrentIframesAfterTopFrameNodeTranslation: () => void
   // for auto start page translation
   checkAndAskAutoPageTranslation: (data: { url: string, detectedCodeOrUnd: LangCodeISO6393 | "und" }) => void
   // ask host to start page translation

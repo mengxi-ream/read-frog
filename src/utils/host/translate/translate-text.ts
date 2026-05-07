@@ -3,7 +3,7 @@ import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { WebPagePromptContext } from "@/types/content"
 import { i18n } from "#imports"
-import { LANG_CODE_TO_EN_NAME, LANG_CODE_TO_LOCALE_NAME } from "@read-frog/definitions"
+import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
 import { isAPIProviderConfig, isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
@@ -162,7 +162,6 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
 
 export function validateTranslationConfigAndToast(
   config: Pick<Config, "providersConfig" | "translate" | "language">,
-  detectedCode: LangCodeISO6393,
 ): boolean {
   const { providersConfig, translate: translateConfig, language: languageConfig } = config
   const providerConfig = getProviderConfigById(providersConfig, translateConfig.providerId)
@@ -174,11 +173,6 @@ export function validateTranslationConfigAndToast(
     toast.error(i18n.t("translation.sameLanguage"))
     logger.info("validateTranslationConfig: returning false (same language)")
     return false
-  }
-  else if (languageConfig.sourceCode === "auto" && detectedCode === languageConfig.targetCode) {
-    toast.warning(i18n.t("translation.autoModeSameLanguage", [
-      LANG_CODE_TO_LOCALE_NAME[detectedCode] ?? detectedCode,
-    ]))
   }
 
   // check if the API key is configured

@@ -22,17 +22,23 @@ vi.mock("@/components/ui/json-code-editor", () => ({
   JSONCodeEditor: ({
     value,
     onChange,
+    onBlur,
+    onFocus,
     placeholder,
   }: {
     value?: string
     onChange?: (value: string) => void
+    onBlur?: () => void
+    onFocus?: () => void
     placeholder?: string
   }) => (
     <textarea
       aria-label="provider-options-editor"
       value={value}
       placeholder={placeholder}
+      onBlur={onBlur}
       onChange={event => onChange?.(event.target.value)}
+      onFocus={onFocus}
     />
   ),
 }))
@@ -53,16 +59,22 @@ const baseProviderConfig: APIProviderConfig = {
 function ProviderOptionsFieldHarness({
   initialConfig,
   externalProviderOptions,
+  submitDelayMs = 0,
 }: {
   initialConfig: APIProviderConfig
   externalProviderOptions?: Record<string, unknown>
+  submitDelayMs?: number
 }) {
   const [providerConfig, setProviderConfig] = useState(initialConfig)
   const form = useAppForm({
     ...formOpts,
     defaultValues: providerConfig,
     onSubmit: async ({ value }) => {
-      setProviderConfig(value)
+      if (submitDelayMs > 0) {
+        await new Promise(resolve => window.setTimeout(resolve, submitDelayMs))
+      }
+
+      setProviderConfig(submitDelayMs > 0 ? structuredClone(value) : value)
     },
   })
 
@@ -105,6 +117,7 @@ describe("providerOptionsField", () => {
     render(<ProviderOptionsFieldHarness initialConfig={baseProviderConfig} />)
 
     const editor = screen.getByLabelText("provider-options-editor")
+    fireEvent.focus(editor)
     fireEvent.change(editor, { target: { value: "{\"reasoningEffort\":\"minimal\"}" } })
 
     await act(async () => {
@@ -113,6 +126,29 @@ describe("providerOptionsField", () => {
     })
 
     expect(screen.getByLabelText("provider-options-editor")).toHaveValue("{\"reasoningEffort\":\"minimal\"}")
+  })
+
+  it("keeps focused draft edits when a delayed autosave echo arrives", async () => {
+    render(<ProviderOptionsFieldHarness initialConfig={baseProviderConfig} submitDelayMs={100} />)
+
+    const editor = screen.getByLabelText("provider-options-editor")
+    fireEvent.focus(editor)
+    fireEvent.change(editor, { target: { value: "{\"reasoningEffort\":\"minimal\"}" } })
+
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+      await Promise.resolve()
+    })
+
+    fireEvent.change(editor, { target: { value: "{\"reasoningEffort\":\"low\"}" } })
+
+    await act(async () => {
+      vi.advanceTimersByTime(100)
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+
+    expect(screen.getByLabelText("provider-options-editor")).toHaveValue("{\"reasoningEffort\":\"low\"}")
   })
 
   it("shows the matched recommended provider options as the placeholder when the value is empty", () => {
@@ -180,7 +216,9 @@ describe("providerOptionsField", () => {
     )
 
     const editor = screen.getByLabelText("provider-options-editor")
+    fireEvent.focus(editor)
     fireEvent.change(editor, { target: { value: "{" } })
+    fireEvent.blur(editor)
     await act(async () => {
       fireEvent.click(screen.getByRole("button", { name: "apply-external" }))
       await Promise.resolve()

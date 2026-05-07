@@ -2,88 +2,99 @@ import { describe, expect, it } from "vitest"
 import { migrate } from "../../migration-scripts/v069-to-v070"
 
 describe("v069-to-v070 migration", () => {
-  it("converts removed selector-backed provider models into preserved custom models", () => {
+  it("moves Bedrock connectionOptions.region to providerSpecificSettings.region", () => {
     const migrated = migrate({
       providersConfig: [
         {
-          provider: "google",
-          model: {
-            model: "gemini-1.5-flash",
-            isCustomModel: false,
-            customModel: "",
-          },
-        },
-        {
-          provider: "xai",
-          model: {
-            model: "grok-2",
-            isCustomModel: false,
-            customModel: "",
+          id: "bedrock-1",
+          name: "Amazon Bedrock",
+          enabled: true,
+          provider: "bedrock",
+          connectionOptions: {
+            region: "us-west-2",
           },
         },
       ],
     })
 
-    expect(migrated.providersConfig).toEqual([
-      {
-        provider: "google",
-        model: {
-          model: "gemini-2.5-flash-lite",
-          isCustomModel: true,
-          customModel: "gemini-1.5-flash",
-        },
-      },
-      {
-        provider: "xai",
-        model: {
-          model: "grok-4.20-non-reasoning",
-          isCustomModel: true,
-          customModel: "grok-2",
-        },
-      },
-    ])
+    expect(migrated.providersConfig[0]).not.toHaveProperty("connectionOptions")
+    expect(migrated.providersConfig[0].providerSpecificSettings).toEqual({
+      region: "us-west-2",
+    })
   })
 
-  it("preserves an existing customModel string when one is already set", () => {
+  it("defaults missing or empty Bedrock region to us-east-1", () => {
     const migrated = migrate({
       providersConfig: [
         {
-          provider: "groq",
-          model: {
-            model: "llama-guard-3-8b",
-            isCustomModel: false,
-            customModel: "legacy-custom-id",
+          id: "bedrock-missing",
+          name: "Amazon Bedrock Missing",
+          enabled: true,
+          provider: "bedrock",
+        },
+        {
+          id: "bedrock-empty",
+          name: "Amazon Bedrock Empty",
+          enabled: true,
+          provider: "bedrock",
+          connectionOptions: {
+            region: "   ",
           },
         },
       ],
     })
 
-    expect(migrated.providersConfig[0].model).toEqual({
-      model: "llama-3.1-8b-instant",
-      isCustomModel: true,
-      customModel: "legacy-custom-id",
+    expect(migrated.providersConfig[0].providerSpecificSettings).toEqual({
+      region: "us-east-1",
+    })
+    expect(migrated.providersConfig[1].providerSpecificSettings).toEqual({
+      region: "us-east-1",
     })
   })
 
-  it("leaves unaffected provider configs unchanged", () => {
-    const config = {
+  it("removes stale settings from non-Bedrock providers", () => {
+    const migrated = migrate({
       providersConfig: [
         {
+          id: "openai-1",
+          name: "OpenAI",
+          enabled: true,
           provider: "openai",
-          model: {
-            model: "gpt-5.4-mini",
-            isCustomModel: false,
-            customModel: "",
+          connectionOptions: {
+            timeoutMs: 5000,
+          },
+          providerSpecificSettings: {
+            region: "us-west-2",
           },
         },
       ],
-    }
+    })
 
-    expect(migrate(config)).toEqual(config)
+    expect(migrated.providersConfig[0]).not.toHaveProperty("connectionOptions")
+    expect(migrated.providersConfig[0]).not.toHaveProperty("providerSpecificSettings")
   })
 
-  it("returns the original config when providersConfig is missing", () => {
-    const config = { foo: "bar" }
-    expect(migrate(config)).toEqual(config)
+  it("preserves existing Bedrock providerSpecificSettings.region and removes unknown setting keys", () => {
+    const migrated = migrate({
+      providersConfig: [
+        {
+          id: "bedrock-1",
+          name: "Amazon Bedrock",
+          enabled: true,
+          provider: "bedrock",
+          connectionOptions: {
+            region: "us-east-1",
+          },
+          providerSpecificSettings: {
+            region: "eu-central-1",
+            timeoutMs: 5000,
+          },
+        },
+      ],
+    })
+
+    expect(migrated.providersConfig[0].providerSpecificSettings).toEqual({
+      region: "eu-central-1",
+    })
   })
 })

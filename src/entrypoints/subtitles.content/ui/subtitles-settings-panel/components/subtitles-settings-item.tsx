@@ -17,9 +17,9 @@ export function SubtitlesSettingsItem({
     <div className="hover:bg-muted/50 flex items-center gap-3 rounded-[14px] px-2 py-2 transition-colors">
       <Label
         htmlFor={labelFor}
-        className="font-light! flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md py-0.5 text-left text-[13px] leading-5 transition-colors"
+        className="font-light! flex min-w-0 flex-1 cursor-pointer items-center gap-3 rounded-md py-0.5 text-left text-[13px] leading-5 transition-colors"
       >
-        <div className="text-muted-foreground shrink-0">
+        <div className="text-muted-foreground flex size-5 shrink-0 items-center justify-center">
           {icon}
         </div>
         <div className="min-w-0 flex-1">

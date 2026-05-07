@@ -57,24 +57,6 @@ describe("getProviderOptions", () => {
         "gpt-5.3-chat-latest",
       ]))
     })
-    it("should keep docs-synced provider selectors aligned for changed providers", () => {
-      expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-opus-4-7")
-      expect(LLM_PROVIDER_MODELS.anthropic).not.toContain("claude-3-7-sonnet-latest")
-      expect(LLM_PROVIDER_MODELS.google).toEqual(expect.arrayContaining([
-        "gemini-3.1-flash-image-preview",
-        "gemini-3.1-flash-lite-preview",
-        "gemini-3-pro-image-preview",
-      ]))
-      expect(LLM_PROVIDER_MODELS.google).not.toContain("gemini-1.5-flash")
-      expect(LLM_PROVIDER_MODELS.google).not.toContain("gemini-1.5-pro")
-      expect(LLM_PROVIDER_MODELS.xai).toEqual(expect.arrayContaining([
-        "grok-4.20-reasoning",
-        "grok-4.20-non-reasoning",
-      ]))
-      expect(LLM_PROVIDER_MODELS.xai).not.toContain("grok-2")
-      expect(LLM_PROVIDER_MODELS.xai).not.toContain("grok-beta")
-      expect(LLM_PROVIDER_MODELS.deepseek).toEqual(["deepseek-chat", "deepseek-reasoner"])
-    })
 
     it("should return the documented floor for GPT-5 model-specific reasoning", () => {
       const gpt54ProOptions = getProviderOptions("gpt-5.4-pro", "openai")
@@ -133,17 +115,8 @@ describe("getProviderOptions", () => {
       const grokOptions = getProviderOptions("grok-4-fast-reasoning", "xai")
       expect(grokOptions.xai?.reasoningEffort).toBe("low")
 
-      const grok420Options = getProviderOptions("grok-4.20-reasoning", "xai")
-      expect(grok420Options.xai?.reasoningEffort).toBe("low")
-
-      const grokCodeFastOptions = getProviderOptions("grok-code-fast-1", "xai")
-      expect(grokCodeFastOptions.xai?.reasoningEffort).toBe("low")
-
-      const grok3Options = getProviderOptions("grok-3", "xai")
-      expect(grok3Options.xai?.reasoningEffort).toBe("low")
-
-      const grokLegacyOptions = getProviderOptions("grok-4-latest", "xai")
-      expect(grokLegacyOptions.xai?.reasoningEffort).toBe("low")
+      const grok41FastOptions = getProviderOptions("grok-4-1-fast-reasoning", "xai")
+      expect(grok41FastOptions).toEqual({})
 
       const deepseekReasonerOptions = getProviderOptions("deepseek-reasoner", "deepseek")
       expect(deepseekReasonerOptions.deepseek?.thinking).toEqual({ type: "disabled" })

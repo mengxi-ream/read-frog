@@ -109,7 +109,7 @@ export default defineBackground({
     setupTTSPlaybackMessageHandlers()
     void initMockData()
 
-    // Setup programmatic injection for iframes that Chrome's manifest-based all_frames misses
+    // Setup on-demand iframe injection after page translation is enabled.
     setupIframeInjection()
   },
 })

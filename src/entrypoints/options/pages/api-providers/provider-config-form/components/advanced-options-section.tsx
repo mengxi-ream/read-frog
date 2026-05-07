@@ -25,7 +25,7 @@ export function AdvancedOptionsSection({ children }: AdvancedOptionsSectionProps
         />
         <span>{i18n.t("options.apiProviders.form.advancedOptions")}</span>
       </CollapsibleTrigger>
-      <CollapsibleContent>
+      <CollapsibleContent keepMounted>
         <FieldGroup className="pt-4">
           {children}
         </FieldGroup>

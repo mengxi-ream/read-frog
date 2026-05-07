@@ -48,6 +48,10 @@ export default function NodeTranslationHotkeySelector() {
     configFieldsAtomMap.translate,
   )
 
+  const handleNodeTranslationEnabledChange = async (checked: boolean) => {
+    await setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))
+  }
+
   return (
     <div className="flex items-center justify-between gap-2">
       <Select
@@ -77,7 +81,7 @@ export default function NodeTranslationHotkeySelector() {
       </Select>
       <Switch
         checked={translateConfig.node.enabled}
-        onCheckedChange={checked => setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))}
+        onCheckedChange={checked => void handleNodeTranslationEnabledChange(checked)}
       />
     </div>
   )
