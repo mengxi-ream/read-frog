@@ -95,6 +95,7 @@
     "defuddle": "^0.18.1",
     "dequal": "^2.0.3",
     "dexie": "^4.4.2",
+    "entities": "^8.0.0",
     "file-saver": "^2.0.5",
     "franc": "^6.2.0",
     "jotai": "^2.19.1",
