@@ -2,15 +2,143 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useStore } from "@tanstack/react-form"
+import { useState } from "react"
+import { Button } from "@/components/ui/base-ui/button"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/base-ui/popover"
 import { ICON_PATTERN } from "@/utils/constants/custom-action"
+import { cn } from "@/utils/styles/utils"
 import { withForm } from "./form"
+import { CURATED_ICON_OPTIONS } from "./icon-field-options"
+
+function tIconField(key: string, fallback: string) {
+  const value = i18n.t(key as never)
+  return !value || value === key ? fallback : value
+}
+
+interface IconPickerPopoverProps {
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  previewIcon: string
+  selectedIcon: string | undefined
+  onSelect: (icon: string) => void
+}
+
+function IconPickerPopover({
+  open,
+  onOpenChange,
+  previewIcon,
+  selectedIcon,
+  onSelect,
+}: IconPickerPopoverProps) {
+  return (
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger
+        render={(
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            aria-label={tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.chooseAriaLabel", "Choose icon")}
+            className="size-8 rounded-md bg-white p-0 text-foreground shadow-xs dark:bg-muted dark:hover:bg-muted/80"
+          />
+        )}
+      >
+        <Icon icon={previewIcon} className="size-4" />
+      </PopoverTrigger>
+
+      <PopoverContent align="start" className="gap-3">
+        <PopoverHeader>
+          <PopoverTitle>{tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.chooseTitle", "Choose an icon")}</PopoverTitle>
+        </PopoverHeader>
+        <div className="grid grid-cols-6 gap-1">
+          {CURATED_ICON_OPTIONS.map(icon => (
+            <Button
+              key={icon}
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              aria-label={icon}
+              className={cn(
+                "text-zinc-600 dark:text-zinc-300",
+                selectedIcon === icon && "bg-muted text-foreground",
+              )}
+              onClick={() => onSelect(icon)}
+            >
+              <Icon icon={icon} className="size-4" />
+            </Button>
+          ))}
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
+function IconHelpPopover() {
+  return (
+    <Popover>
+      <PopoverTrigger
+        render={(
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            aria-label={tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.helpAriaLabel", "More icon help")}
+            className="-mr-0.5 size-5 shrink-0 rounded-full border border-transparent bg-transparent p-0 text-muted-foreground shadow-none hover:bg-muted hover:text-foreground dark:hover:bg-muted/80"
+          />
+        )}
+      >
+        <Icon icon="tabler:dots" className="size-3.5" />
+      </PopoverTrigger>
+      <PopoverContent align="end" sideOffset={10} className="gap-3">
+        <PopoverHeader>
+          <PopoverTitle>{tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.helpTitle", "Can't find the icon you want?")}</PopoverTitle>
+        </PopoverHeader>
+        <ol className="flex flex-col gap-1">
+          <li>
+            <span className="font-medium">1.</span>
+            {" "}
+            {tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.helpStepBrowsePrefix", "Browse icons on ")}
+            <a
+              href="https://icon-sets.iconify.design/"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-0.5 text-link hover:underline"
+            >
+              Iconify
+              <Icon icon="tabler:external-link" className="size-3.5" />
+            </a>
+            {tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.helpStepBrowseSuffix", "")}
+          </li>
+          <li>
+            <span className="font-medium">2.</span>
+            {" "}
+            {tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.helpStepCopyPrefix", "Copy the icon name, for example ")}
+            <code className="rounded-sm bg-muted px-1 py-0.5 text-[13px]">
+              tabler:book-2
+            </code>
+            {tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.helpStepCopySuffix", ", then paste it into the field.")}
+          </li>
+        </ol>
+      </PopoverContent>
+    </Popover>
+  )
+}
 
 export const IconField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
     const iconValue = useStore(form.store, state => state.values.icon)
+    const [iconPickerOpen, setIconPickerOpen] = useState(false)
+    const hasError = !ICON_PATTERN.test(iconValue?.trim() ?? "")
+    const previewIcon = hasError ? "tabler:book-2" : iconValue.trim()
 
     return (
       <form.AppField
@@ -26,28 +154,41 @@ export const IconField = withForm({
       >
         {field => (
           <Field>
-            <div className="flex items-end justify-between w-full">
-              <FieldLabel nativeLabel={false} render={<div />}>
-                Icon
-              </FieldLabel>
-              <a href="https://icon-sets.iconify.design/" className="text-xs text-link hover:opacity-90" target="_blank" rel="noreferrer">
-                Find more icons
-              </a>
-            </div>
+            <FieldLabel nativeLabel={false} render={<div />}>
+              {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.icon")}
+            </FieldLabel>
             <div className="flex items-center gap-2">
-              <div className="size-8 shadow-xs shrink-0 rounded-md border flex items-center justify-center text-zinc-600 dark:text-zinc-300">
-                {iconValue && <Icon icon={iconValue} className="size-4" />}
-              </div>
-              <Input
-                value={field.state.value ?? ""}
-                placeholder="tabler:sparkles"
-                aria-invalid={field.state.meta.errors.length > 0}
-                onBlur={field.handleBlur}
-                onChange={(e) => {
-                  field.handleChange(e.target.value)
+              <IconPickerPopover
+                open={iconPickerOpen}
+                onOpenChange={setIconPickerOpen}
+                previewIcon={previewIcon}
+                selectedIcon={field.state.value}
+                onSelect={(icon) => {
+                  field.handleChange(icon)
                   void form.handleSubmit()
+                  setIconPickerOpen(false)
                 }}
               />
+
+              <div
+                className={cn(
+                  "border-input dark:bg-input/30 focus-within:border-ring focus-within:ring-ring/50 flex h-8 flex-1 items-center rounded-md border bg-transparent px-2 py-1 shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
+                  hasError && "border-destructive ring-destructive/20 dark:ring-destructive/40 ring-[3px]",
+                )}
+              >
+                <Input
+                  value={field.state.value ?? ""}
+                  placeholder={tIconField("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.inputPlaceholder", "Enter an icon name")}
+                  className="h-6 flex-1 border-0 bg-transparent px-0 py-0 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent"
+                  aria-invalid={hasError}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => {
+                    field.handleChange(e.target.value)
+                    void form.handleSubmit()
+                  }}
+                />
+                <IconHelpPopover />
+              </div>
             </div>
             {field.state.meta.errors.length > 0 && (
               <span className="text-sm font-normal text-destructive">

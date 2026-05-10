@@ -345,7 +345,17 @@ options:
           actions: İşlemler
         form:
           name: Ad
-          icon: Simge (Iconify)
+          icon: Simge
+          iconField:
+            chooseAriaLabel: Simge seç
+            chooseTitle: Bir simge seçin
+            inputPlaceholder: Simge adını girin
+            helpAriaLabel: Daha fazla simge yardımı
+            helpTitle: Aradığınız simgeyi bulamadınız mı?
+            helpStepBrowsePrefix: ""
+            helpStepBrowseSuffix: üzerinde simgelere göz atın
+            helpStepCopyPrefix: "Örneğin "
+            helpStepCopySuffix: " simge adını kopyalayıp alana yapıştırın."
           provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
           selectProvider: Sağlayıcı seçin
           systemPrompt: Sistem Promptu

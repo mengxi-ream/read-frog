@@ -346,7 +346,17 @@ options:
           actions: Acciones
         form:
           name: Nombre
-          icon: Icono (Iconify)
+          icon: Icono
+          iconField:
+            chooseAriaLabel: Elegir icono
+            chooseTitle: Elegir un icono
+            inputPlaceholder: Introduce el nombre del icono
+            helpAriaLabel: Más ayuda sobre iconos
+            helpTitle: ¿No encuentras el icono que quieres?
+            helpStepBrowsePrefix: Busca iconos en
+            helpStepBrowseSuffix: ""
+            helpStepCopyPrefix: "Copia el nombre del icono, por ejemplo "
+            helpStepCopySuffix: ", y pégalo en el campo."
           provider: Proveedor (requiere compatibilidad con salida estructurada)
           selectProvider: Selecciona un proveedor
           systemPrompt: Prompt del sistema

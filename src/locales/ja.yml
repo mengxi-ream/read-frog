@@ -345,7 +345,17 @@ options:
           actions: 操作
         form:
           name: 名前
-          icon: アイコン (Iconify)
+          icon: アイコン
+          iconField:
+            chooseAriaLabel: アイコンを選択
+            chooseTitle: アイコンを選択
+            inputPlaceholder: アイコン名を入力
+            helpAriaLabel: アイコンのヘルプ
+            helpTitle: 欲しいアイコンが見つかりませんか？
+            helpStepBrowsePrefix: ""
+            helpStepBrowseSuffix: でアイコンを探す
+            helpStepCopyPrefix: "たとえば "
+            helpStepCopySuffix: " のようなアイコン名をコピーして、入力欄に貼り付けてください。"
           provider: プロバイダー（構造化出力対応が必要）
           selectProvider: プロバイダーを選択
           systemPrompt: システムプロンプト

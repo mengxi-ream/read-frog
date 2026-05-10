@@ -345,7 +345,17 @@ options:
           actions: Thao tác
         form:
           name: Tên
-          icon: Biểu tượng (Iconify)
+          icon: Biểu tượng
+          iconField:
+            chooseAriaLabel: Chọn biểu tượng
+            chooseTitle: Chọn một biểu tượng
+            inputPlaceholder: Nhập tên biểu tượng
+            helpAriaLabel: Trợ giúp thêm về biểu tượng
+            helpTitle: Không tìm thấy biểu tượng bạn muốn?
+            helpStepBrowsePrefix: Duyệt biểu tượng trên
+            helpStepBrowseSuffix: ""
+            helpStepCopyPrefix: "Sao chép tên biểu tượng, ví dụ "
+            helpStepCopySuffix: ", rồi dán vào ô nhập liệu."
           provider: Nhà cung cấp (yêu cầu hỗ trợ đầu ra có cấu trúc)
           selectProvider: Chọn nhà cung cấp
           systemPrompt: System Prompt

@@ -346,7 +346,17 @@ options:
           actions: 操作
         form:
           name: 名称
-          icon: 图标 (Iconify)
+          icon: 图标
+          iconField:
+            chooseAriaLabel: 选择图标
+            chooseTitle: 选择图标
+            inputPlaceholder: 输入图标名称
+            helpAriaLabel: 更多图标帮助
+            helpTitle: 没找到想要的图标？
+            helpStepBrowsePrefix: "在 "
+            helpStepBrowseSuffix: " 浏览图标"
+            helpStepCopyPrefix: 复制图标名称，例如
+            helpStepCopySuffix: ，然后粘贴到输入框中。
           provider: 提供商（需支持结构化输出）
           selectProvider: 选择提供商
           systemPrompt: 系统提示词

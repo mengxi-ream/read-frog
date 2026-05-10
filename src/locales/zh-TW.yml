@@ -345,7 +345,17 @@ options:
           actions: 操作
         form:
           name: 名稱
-          icon: 圖示 (Iconify)
+          icon: 圖示
+          iconField:
+            chooseAriaLabel: 選擇圖示
+            chooseTitle: 選擇圖示
+            inputPlaceholder: 輸入圖示名稱
+            helpAriaLabel: 更多圖示說明
+            helpTitle: 沒找到想要的圖示？
+            helpStepBrowsePrefix: "在 "
+            helpStepBrowseSuffix: " 瀏覽圖示"
+            helpStepCopyPrefix: 複製圖示名稱，例如
+            helpStepCopySuffix: ，然後貼到輸入框中。
           provider: 提供商（需支援結構化輸出）
           selectProvider: 選擇提供商
           systemPrompt: 系統提示詞

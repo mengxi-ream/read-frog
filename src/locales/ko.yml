@@ -345,7 +345,17 @@ options:
           actions: 작업
         form:
           name: 이름
-          icon: 아이콘 (Iconify)
+          icon: 아이콘
+          iconField:
+            chooseAriaLabel: 아이콘 선택
+            chooseTitle: 아이콘 선택
+            inputPlaceholder: 아이콘 이름 입력
+            helpAriaLabel: 아이콘 도움말 더보기
+            helpTitle: 원하는 아이콘을 못 찾았나요?
+            helpStepBrowsePrefix: ""
+            helpStepBrowseSuffix: 에서 아이콘 찾아보기
+            helpStepCopyPrefix: "예를 들어 "
+            helpStepCopySuffix: " 같은 아이콘 이름을 복사해 입력란에 붙여넣으세요."
           provider: 제공업체(구조화 출력 지원 필요)
           selectProvider: 제공업체 선택
           systemPrompt: 시스템 프롬프트
