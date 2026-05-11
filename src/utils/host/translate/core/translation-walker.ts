@@ -3,6 +3,7 @@ import {
   BLOCK_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
   PARAGRAPH_ATTRIBUTE,
+  RETRANSLATE_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
 import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
@@ -17,17 +18,22 @@ export async function translateWalkedElement(
   if (element.classList.contains(CONTENT_WRAPPER_CLASS))
     return
 
+  if (element.getAttribute(WALKED_ATTRIBUTE) !== walkId)
+    return
+
+  const shouldRetranslate = element.hasAttribute(RETRANSLATE_ATTRIBUTE)
+  if (shouldRetranslate) {
+    element.removeAttribute(RETRANSLATE_ATTRIBUTE)
+  }
+
   if (
     !toggle
+    && !shouldRetranslate
     && element.hasAttribute(PARAGRAPH_ATTRIBUTE)
     && element.querySelector(`.${CONTENT_WRAPPER_CLASS}`)
   ) {
     return
   }
-
-  // if the walkId is not the same, return
-  if (element.getAttribute(WALKED_ATTRIBUTE) !== walkId)
-    return
 
   const promises: Promise<void>[] = []
 

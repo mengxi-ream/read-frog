@@ -4,10 +4,10 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getLocalConfig } from "@/utils/config/storage"
-import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
+import { CONTENT_WRAPPER_CLASS, PARAGRAPH_ATTRIBUTE, RETRANSLATE_ATTRIBUTE } from "@/utils/constants/dom-labels"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { hasNoWalkAncestor, isDontWalkIntoAndDontTranslateAsChildElement, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
+import { hasNoWalkAncestor, isDontWalkIntoAndDontTranslateAsChildElement, isDontWalkIntoButTranslateAsChildElement, isHTMLElement, isTextNode } from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
@@ -489,12 +489,42 @@ export class PageTranslationManager implements IPageTranslationManager {
     walkBlockedElements.forEach(el => this.walkBlockedElementsCache.add(el))
   }
 
+  private getNearestParagraphElement(node: Node | null): HTMLElement | null {
+    if (!node) {
+      return null
+    }
+
+    const baseElement = isHTMLElement(node) ? node : node.parentElement
+    if (!baseElement || baseElement.closest(`.${CONTENT_WRAPPER_CLASS}`)) {
+      return null
+    }
+
+    if (baseElement.hasAttribute(PARAGRAPH_ATTRIBUTE)) {
+      return baseElement
+    }
+
+    return baseElement.closest<HTMLElement>(`[${PARAGRAPH_ATTRIBUTE}]`)
+  }
+
   private filterTopLevelElements(elements: Iterable<HTMLElement>): HTMLElement[] {
     const uniqueElements = [...new Set(elements)]
 
     return uniqueElements.filter(element =>
       !uniqueElements.some(candidate => candidate !== element && candidate.contains(element)),
     )
+  }
+
+  private isMeaningfulContentNode(node: Node): boolean {
+    if (isTextNode(node)) {
+      return !!node.textContent?.trim()
+    }
+
+    if (!isHTMLElement(node)) {
+      return false
+    }
+
+    return !node.classList.contains(CONTENT_WRAPPER_CLASS)
+      && !node.closest(`.${CONTENT_WRAPPER_CLASS}`)
   }
 
   /**
@@ -515,6 +545,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       childList: true,
       subtree: true,
       attributes: true,
+      characterData: true,
       attributeFilter: ["style", "class", "hidden", "aria-hidden"],
     })
 
@@ -525,6 +556,7 @@ export class PageTranslationManager implements IPageTranslationManager {
   private async handleMutationRecords(records: MutationRecord[]): Promise<void> {
     const addedElements: HTMLElement[] = []
     const walkabilityTargets = new Set<HTMLElement>()
+    const contentChangedParagraphs = new Set<HTMLElement>()
 
     for (const rec of records) {
       if (rec.type === "childList") {
@@ -533,9 +565,23 @@ export class PageTranslationManager implements IPageTranslationManager {
             addedElements.push(node)
           }
         })
+
+        const changedNodes = [...rec.addedNodes, ...rec.removedNodes]
+        if (changedNodes.some(node => this.isMeaningfulContentNode(node))) {
+          const paragraph = this.getNearestParagraphElement(rec.target)
+          if (paragraph) {
+            contentChangedParagraphs.add(paragraph)
+          }
+        }
       }
       else if (this.isWalkabilityAttributeMutation(rec) && isHTMLElement(rec.target)) {
         walkabilityTargets.add(rec.target)
+      }
+      else if (rec.type === "characterData" && this.isMeaningfulContentNode(rec.target)) {
+        const paragraph = this.getNearestParagraphElement(rec.target)
+        if (paragraph) {
+          contentChangedParagraphs.add(paragraph)
+        }
       }
     }
 
@@ -550,6 +596,12 @@ export class PageTranslationManager implements IPageTranslationManager {
     const topLevelWalkableElements = this
       .filterTopLevelElements(walkableElements)
       .filter(el => !topLevelAddedElements.some(added => added.contains(el)))
+    const topLevelChangedParagraphs = this
+      .filterTopLevelElements(contentChangedParagraphs)
+      .filter(el =>
+        !topLevelAddedElements.some(added => added.contains(el))
+        && !topLevelWalkableElements.some(walkable => walkable.contains(el)),
+      )
 
     for (const element of topLevelAddedElements) {
       this.addWalkBlockedElements(element, config)
@@ -559,6 +611,11 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     for (const element of topLevelWalkableElements) {
       void this.observerTopLevelParagraphs(element, config)
+    }
+
+    for (const paragraph of topLevelChangedParagraphs) {
+      paragraph.setAttribute(RETRANSLATE_ATTRIBUTE, "true")
+      void this.observerTopLevelParagraphs(paragraph, config)
     }
   }
 
