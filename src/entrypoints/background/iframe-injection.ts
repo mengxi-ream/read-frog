@@ -4,11 +4,21 @@ import { browser } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import { logger } from "@/utils/logger"
 import { isSiteEnabled, SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
+import { matchDomainPattern } from "@/utils/url"
 import { resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
 
-const pendingDocumentKeys = new Set<string>()
-const injectedDocumentKeysByFrame = new Map<string, string>()
+const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js" as const
+const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js" as const
+const IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS = ["browse.library.kiwix.org"] as const
+
+type IframeContentScriptFile
+  = | typeof HOST_CONTENT_SCRIPT_FILE
+    | typeof SELECTION_CONTENT_SCRIPT_FILE
+
+const pendingScriptDocumentKeys = new Set<string>()
+const injectedDocumentKeysByFrameAndScript = new Map<string, string>()
+const fullRuntimeAutoInjectUrlByTab = new Map<number, string>()
 
 interface FrameInjectionDetails {
   tabId: number
@@ -20,6 +30,8 @@ interface FrameInjectionDetails {
 
 interface InjectHostContentIntoTabIframesOptions {
   requirePageTranslationEnabled?: boolean
+  includeSelectionContent?: boolean
+  siteControlUrlOverride?: string
 }
 
 function getDocumentInjectionKey(details: FrameInjectionDetails) {
@@ -32,33 +44,48 @@ function getFrameInjectionKey(details: { tabId: number, frameId: number }) {
   return `${details.tabId}:${details.frameId}`
 }
 
+function getScriptDocumentInjectionKey(details: FrameInjectionDetails, file: IframeContentScriptFile) {
+  return `${getDocumentInjectionKey(details)}:${file}`
+}
+
+function getScriptFrameInjectionKey(details: FrameInjectionDetails, file: IframeContentScriptFile) {
+  return `${getFrameInjectionKey(details)}:${file}`
+}
+
 function clearTabDocumentState(tabId: number) {
-  for (const key of pendingDocumentKeys) {
+  for (const key of pendingScriptDocumentKeys) {
     if (key.startsWith(`${tabId}:`)) {
-      pendingDocumentKeys.delete(key)
+      pendingScriptDocumentKeys.delete(key)
     }
   }
 
-  for (const key of injectedDocumentKeysByFrame.keys()) {
+  for (const key of injectedDocumentKeysByFrameAndScript.keys()) {
     if (key.startsWith(`${tabId}:`)) {
-      injectedDocumentKeysByFrame.delete(key)
+      injectedDocumentKeysByFrameAndScript.delete(key)
     }
   }
+
+  fullRuntimeAutoInjectUrlByTab.delete(tabId)
 }
 
 function clearFrameInjectedDocumentState(tabId: number, frameId: number) {
-  injectedDocumentKeysByFrame.delete(getFrameInjectionKey({ tabId, frameId }))
+  const frameKeyPrefix = `${getFrameInjectionKey({ tabId, frameId })}:`
+  for (const key of injectedDocumentKeysByFrameAndScript.keys()) {
+    if (key.startsWith(frameKeyPrefix)) {
+      injectedDocumentKeysByFrameAndScript.delete(key)
+    }
+  }
 }
 
 function pruneInjectedFrames(tabId: number, liveFrameIds: Set<number>) {
-  for (const frameKey of injectedDocumentKeysByFrame.keys()) {
+  for (const frameKey of injectedDocumentKeysByFrameAndScript.keys()) {
     if (!frameKey.startsWith(`${tabId}:`)) {
       continue
     }
 
-    const frameId = Number(frameKey.slice(frameKey.indexOf(":") + 1))
+    const frameId = Number(frameKey.split(":")[1])
     if (!liveFrameIds.has(frameId)) {
-      injectedDocumentKeysByFrame.delete(frameKey)
+      injectedDocumentKeysByFrameAndScript.delete(frameKey)
     }
   }
 }
@@ -87,6 +114,19 @@ async function getFrameSnapshot(tabId: number): Promise<FrameInfoForSiteControl[
   return await browser.webNavigation.getAllFrames({ tabId }) ?? []
 }
 
+function isFullRuntimeAutoInjectUrl(url: string | undefined): url is string {
+  if (!url)
+    return false
+
+  return IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS.some(pattern => matchDomainPattern(url, pattern))
+}
+
+function getIframeContentScriptFiles(options: InjectHostContentIntoTabIframesOptions): IframeContentScriptFile[] {
+  return options.includeSelectionContent
+    ? [HOST_CONTENT_SCRIPT_FILE, SELECTION_CONTENT_SCRIPT_FILE]
+    : [HOST_CONTENT_SCRIPT_FILE]
+}
+
 async function getShouldInjectHostContentIntoTabIframes(
   tabId: number,
   existingConfig?: Config | null,
@@ -108,20 +148,23 @@ async function injectHostContentIntoFrame(
   details: FrameInjectionDetails,
   frames?: FrameInfoForSiteControl[],
   existingConfig?: Config | null,
+  options: InjectHostContentIntoTabIframesOptions = {},
 ) {
-  const frameKey = getFrameInjectionKey(details)
   const documentKey = getDocumentInjectionKey(details)
+  const filesToInject = getIframeContentScriptFiles(options).filter((file) => {
+    const scriptDocumentKey = getScriptDocumentInjectionKey(details, file)
+    const scriptFrameKey = getScriptFrameInjectionKey(details, file)
+    return !pendingScriptDocumentKeys.has(scriptDocumentKey)
+      && injectedDocumentKeysByFrameAndScript.get(scriptFrameKey) !== documentKey
+  })
 
-  if (
-    pendingDocumentKeys.has(documentKey)
-  ) {
+  if (filesToInject.length === 0) {
     return
   }
-  if (injectedDocumentKeysByFrame.get(frameKey) === documentKey) {
-    return
-  }
 
-  pendingDocumentKeys.add(documentKey)
+  for (const file of filesToInject) {
+    pendingScriptDocumentKeys.add(getScriptDocumentInjectionKey(details, file))
+  }
 
   try {
     let siteControlUrl: string | undefined
@@ -135,7 +178,7 @@ async function injectHostContentIntoFrame(
       liveFrameIds.add(details.frameId)
       pruneInjectedFrames(details.tabId, liveFrameIds)
 
-      siteControlUrl = resolveSiteControlUrl(
+      siteControlUrl = options.siteControlUrlOverride ?? resolveSiteControlUrl(
         details.frameId,
         details.url,
         frameSnapshot,
@@ -160,19 +203,26 @@ async function injectHostContentIntoFrame(
         args: [SITE_CONTROL_URL_WINDOW_KEY, siteControlUrl],
       })
 
-      await browser.scripting.executeScript({
-        target,
-        files: ["/content-scripts/host.js"],
-      })
+      for (const file of filesToInject) {
+        await browser.scripting.executeScript({
+          target,
+          files: [file],
+        })
 
-      injectedDocumentKeysByFrame.set(frameKey, documentKey)
+        injectedDocumentKeysByFrameAndScript.set(
+          getScriptFrameInjectionKey(details, file),
+          documentKey,
+        )
+      }
     }
     catch (error) {
       logger.warn("[Background][IframeInjection] Failed to inject iframe content scripts", error)
     }
   }
   finally {
-    pendingDocumentKeys.delete(documentKey)
+    for (const file of filesToInject) {
+      pendingScriptDocumentKeys.delete(getScriptDocumentInjectionKey(details, file))
+    }
   }
 }
 
@@ -212,7 +262,7 @@ export async function injectHostContentIntoTabIframes(
       frameId: frame.frameId,
       parentFrameId: frame.parentFrameId,
       url: frame.url,
-    }, frames, config)))
+    }, frames, config, options)))
 }
 
 export async function injectHostContentIntoCurrentTabIframesAfterNodeTranslation(tabId: number) {
@@ -224,6 +274,9 @@ export function setupIframeInjection() {
   browser.webNavigation.onBeforeNavigate.addListener((details) => {
     if (details.frameId === 0) {
       clearTabDocumentState(details.tabId)
+      if (isFullRuntimeAutoInjectUrl(details.url)) {
+        fullRuntimeAutoInjectUrlByTab.set(details.tabId, details.url)
+      }
       return
     }
 
@@ -234,9 +287,30 @@ export function setupIframeInjection() {
   // subframes. Top-frame node translation can separately scan existing iframes
   // once, but it does not enable late iframe injection.
   browser.webNavigation.onCompleted.addListener(async (details) => {
-    // Skip main frame (frameId === 0), only handle iframes
-    if (details.frameId === 0)
+    if (details.frameId === 0) {
+      if (!isFullRuntimeAutoInjectUrl(details.url)) {
+        fullRuntimeAutoInjectUrlByTab.delete(details.tabId)
+        return
+      }
+
+      fullRuntimeAutoInjectUrlByTab.set(details.tabId, details.url)
+      await injectHostContentIntoTabIframes(details.tabId, {
+        requirePageTranslationEnabled: false,
+        includeSelectionContent: true,
+        siteControlUrlOverride: details.url,
+      })
       return
+    }
+
+    const fullRuntimeAutoInjectUrl = fullRuntimeAutoInjectUrlByTab.get(details.tabId)
+      ?? (isFullRuntimeAutoInjectUrl(details.url) ? details.url : undefined)
+    if (fullRuntimeAutoInjectUrl) {
+      await injectHostContentIntoFrame(details, undefined, undefined, {
+        includeSelectionContent: true,
+        siteControlUrlOverride: fullRuntimeAutoInjectUrl,
+      })
+      return
+    }
 
     let config: Config | null
     let shouldInject: boolean

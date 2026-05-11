@@ -19,6 +19,10 @@ vi.mock("@/utils/host/translate/api/microsoft", () => ({
   microsoftTranslate: vi.fn(),
 }))
 
+vi.mock("@/utils/host/translate/api/google", () => ({
+  googleTranslate: vi.fn(),
+}))
+
 vi.mock("@/utils/prompts/translate", () => ({
   getTranslatePrompt: vi.fn(),
 }))
@@ -33,6 +37,7 @@ vi.mock("@/utils/host/translate/webpage-summary", () => ({
 
 let mockSendMessage: any
 let mockMicrosoftTranslate: any
+let mockGoogleTranslate: any
 let mockGetConfigFromStorage: any
 let mockGetTranslatePrompt: any
 let mockGetOrCreateWebPageContext: any
@@ -45,6 +50,7 @@ describe("translate-text", () => {
     document.body.innerHTML = "<main>Body content</main>"
     mockSendMessage = vi.mocked((await import("@/utils/message")).sendMessage)
     mockMicrosoftTranslate = vi.mocked((await import("@/utils/host/translate/api/microsoft")).microsoftTranslate)
+    mockGoogleTranslate = vi.mocked((await import("@/utils/host/translate/api/google")).googleTranslate)
     mockGetConfigFromStorage = vi.mocked((await import("@/utils/config/storage")).getLocalConfig)
     mockGetTranslatePrompt = vi.mocked((await import("@/utils/prompts/translate")).getTranslatePrompt)
     mockGetOrCreateWebPageContext = vi.mocked((await import("@/utils/host/translate/webpage-context")).getOrCreateWebPageContext)
@@ -277,6 +283,21 @@ describe("translate-text", () => {
       const result = await executeTranslate("test input", langConfig, providerConfig, getTranslatePrompt)
 
       expect(result).toBe("测试结果")
+    })
+
+    it("should decode Google translateHtml entities", async () => {
+      const googleProviderConfig = {
+        id: "google-translate-default",
+        enabled: true,
+        name: "Google Translate",
+        provider: "google-translate" as const,
+      }
+      mockGoogleTranslate.mockResolvedValue(" L&#39;Iran chiama &quot;Dichiarazione&quot; AT&amp;T &lt;span&gt; ")
+
+      const result = await executeTranslate("test input", langConfig, googleProviderConfig, getTranslatePrompt)
+
+      expect(result).toBe("L'Iran chiama \"Dichiarazione\" AT&T <span>")
+      expect(mockGoogleTranslate).toHaveBeenCalledWith("test input", "en", "zh")
     })
   })
 })
