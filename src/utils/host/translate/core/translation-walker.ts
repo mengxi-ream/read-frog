@@ -71,13 +71,13 @@ export async function translateWalkedElement(
   }
   else {
     for (const child of element.childNodes) {
-      if (isHTMLElement(child) && !child.classList.contains(CONTENT_WRAPPER_CLASS)) {
+      if (isHTMLElement(child)) {
         promises.push(translateWalkedElement(child, walkId, config, toggle))
       }
     }
     if (element.shadowRoot) {
       for (const child of element.shadowRoot.children) {
-        if (isHTMLElement(child) && !child.classList.contains(CONTENT_WRAPPER_CLASS)) {
+        if (isHTMLElement(child)) {
           promises.push(translateWalkedElement(child, walkId, config, toggle))
         }
       }
