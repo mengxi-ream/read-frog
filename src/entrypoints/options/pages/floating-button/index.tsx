@@ -5,6 +5,7 @@ import { PageLayout } from "../../components/page-layout"
 import { FloatingButtonClickAction } from "./floating-button-click-action"
 import { FloatingButtonDisabledSites } from "./floating-button-disabled-sites"
 import { FloatingButtonGlobalToggle } from "./floating-button-global-toggle"
+import { FloatingButtonSide } from "./floating-button-side"
 
 export function FloatingButtonPage() {
   return (
@@ -18,6 +19,7 @@ export function FloatingButtonPage() {
       </GradientBackground>
       <div className="*:border-b [&>*:last-child]:border-b-0">
         <FloatingButtonGlobalToggle />
+        <FloatingButtonSide />
         <FloatingButtonClickAction />
         <FloatingButtonDisabledSites />
       </div>

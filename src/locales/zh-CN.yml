@@ -293,6 +293,11 @@ options:
         description: 选择点击悬浮按钮时执行的操作
         panel: 打开侧边栏
         translate: 切换页面翻译
+      side:
+        title: 按钮位置
+        description: 选择悬浮按钮停靠在页面的哪一侧
+        left: 左侧
+        right: 右侧
     selectionToolbar:
       globalToggle:
         title: 启用选择工具栏

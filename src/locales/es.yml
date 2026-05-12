@@ -293,6 +293,11 @@ options:
         description: Elige la acción al hacer clic en el botón flotante
         panel: Abrir panel lateral
         translate: Alternar traducción de página
+      side:
+        title: Lado del botón
+        description: Elige en qué lado de la página se fija el botón flotante
+        left: Izquierda
+        right: Derecha
     selectionToolbar:
       globalToggle:
         title: Activar barra de selección

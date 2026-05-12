@@ -292,6 +292,11 @@ options:
         description: 選擇點擊懸浮按鈕時執行的操作
         panel: 開啟側邊欄
         translate: 切換頁面翻譯
+      side:
+        title: 按鈕位置
+        description: 選擇懸浮按鈕停靠在頁面的哪一側
+        left: 左側
+        right: 右側
     selectionToolbar:
       globalToggle:
         title: 啟用選擇工具列

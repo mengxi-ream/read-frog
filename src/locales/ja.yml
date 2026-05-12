@@ -292,6 +292,11 @@ options:
         description: フローティングボタンをクリックしたときの動作を選択
         panel: サイドパネルを開く
         translate: ページ翻訳を切り替え
+      side:
+        title: ボタンの位置
+        description: フローティングボタンをページのどちら側に固定するかを選択します
+        left: 左側
+        right: 右側
     selectionToolbar:
       globalToggle:
         title: 選択ツールバーを有効化

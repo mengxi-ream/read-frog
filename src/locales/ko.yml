@@ -292,6 +292,11 @@ options:
         description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
         panel: 사이드 패널 열기
         translate: 페이지 번역 전환
+      side:
+        title: 버튼 위치
+        description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
+        left: 왼쪽
+        right: 오른쪽
     selectionToolbar:
       globalToggle:
         title: 선택 툴바 활성화

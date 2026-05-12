@@ -293,6 +293,11 @@ options:
         description: Choose the action when clicking the floating button
         panel: Open Side Panel
         translate: Toggle Page Translation
+      side:
+        title: Button Side
+        description: Choose which side of the page the floating button is docked to
+        left: Left
+        right: Right
     selectionToolbar:
       globalToggle:
         title: Enable Selection Toolbar

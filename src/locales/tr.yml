@@ -292,6 +292,11 @@ options:
         description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
         panel: Yan Paneli Aç
         translate: Sayfa Çevirisini Aç/Kapat
+      side:
+        title: Düğme tarafı
+        description: Yüzen düğmenin sayfanın hangi kenarına sabitleneceğini seçin
+        left: Sol
+        right: Sağ
     selectionToolbar:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir

@@ -292,6 +292,11 @@ options:
         description: Chọn hành động khi nhấn vào nút nổi
         panel: Mở bảng điều khiển bên
         translate: Bật/tắt dịch trang
+      side:
+        title: Vị trí nút
+        description: Chọn cạnh của trang để ghim nút nổi
+        left: Bên trái
+        right: Bên phải
     selectionToolbar:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
