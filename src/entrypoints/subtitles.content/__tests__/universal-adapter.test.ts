@@ -26,6 +26,17 @@ function createAdapter(fetchResult: Array<{ text: string, start: number, end: nu
   return { adapter, subtitlesFetcher }
 }
 
+function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
+  const subtitlesScheduler = {
+    isActive: vi.fn(() => active),
+    reset: vi.fn(),
+    setState: vi.fn(),
+  }
+
+  ;(adapter as any).subtitlesScheduler = subtitlesScheduler
+  return subtitlesScheduler
+}
+
 describe("universalVideoAdapter", () => {
   it("keeps raw source subtitles and rebuilds processed source subtitles", async () => {
     const subtitles = [
@@ -53,7 +64,7 @@ describe("universalVideoAdapter", () => {
       { text: "hello", start: 0, end: 500 },
     ])
 
-    ;(adapter as any).subtitlesEnabled = true
+    const subtitlesScheduler = attachScheduler(adapter, true)
 
     const clearRuntimeSessionSpy = vi.spyOn(adapter as any, "clearRuntimeSession")
     const clearSourceCacheSpy = vi.spyOn(adapter as any, "clearSourceCache")
@@ -65,6 +76,8 @@ describe("universalVideoAdapter", () => {
     expect(clearRuntimeSessionSpy).toHaveBeenCalledTimes(1)
     expect(clearSourceCacheSpy).toHaveBeenCalledTimes(1)
     expect(subtitlesFetcher.cleanup).toHaveBeenCalledTimes(1)
+    expect(subtitlesScheduler.reset).toHaveBeenCalledTimes(1)
+    expect(subtitlesScheduler.setState).toHaveBeenCalledWith("loading")
     expect(startTranslationSpy).toHaveBeenCalledTimes(1)
   })
 
@@ -73,6 +86,7 @@ describe("universalVideoAdapter", () => {
       { text: "hello", start: 0, end: 500 },
     ])
 
+    attachScheduler(adapter, false)
     const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
 
     await adapter.handleSourceTrackChanged()
@@ -86,7 +100,7 @@ describe("universalVideoAdapter", () => {
       { text: "hello", start: 0, end: 500 },
     ])
 
-    ;(adapter as any).subtitlesEnabled = true
+    const subtitlesScheduler = attachScheduler(adapter, true)
     vi.mocked(subtitlesFetcher.shouldUseSameTrack).mockResolvedValue(true)
 
     const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
@@ -95,6 +109,8 @@ describe("universalVideoAdapter", () => {
 
     expect(subtitlesFetcher.shouldUseSameTrack).toHaveBeenCalledTimes(1)
     expect(subtitlesFetcher.cleanup).not.toHaveBeenCalled()
+    expect(subtitlesScheduler.reset).not.toHaveBeenCalled()
+    expect(subtitlesScheduler.setState).not.toHaveBeenCalled()
     expect(startTranslationSpy).not.toHaveBeenCalled()
   })
 })

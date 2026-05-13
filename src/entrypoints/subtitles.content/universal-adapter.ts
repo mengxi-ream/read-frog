@@ -31,7 +31,6 @@ export class UniversalVideoAdapter {
   private subtitlesFetcher: SubtitlesFetcher
   private navigationReinitTimeoutId: ReturnType<typeof setTimeout> | null = null
   private hasPendingNavigationReset = false
-  private subtitlesEnabled = false
   private trackChangeRefreshPromise: Promise<void> | null = null
 
   private sourceSubtitles: SubtitlesFragment[] = []
@@ -329,8 +328,6 @@ export class UniversalVideoAdapter {
   }
 
   private handleToggleSubtitles(enabled: boolean, analyticsContext?: FeatureUsageContext) {
-    this.subtitlesEnabled = enabled
-
     if (enabled) {
       this.subtitlesScheduler?.start()
       this.subtitlesScheduler?.show()
@@ -345,7 +342,8 @@ export class UniversalVideoAdapter {
   }
 
   private async refreshSourceTrackIfNeeded(): Promise<void> {
-    if (!this.subtitlesEnabled) {
+    const scheduler = this.subtitlesScheduler
+    if (!scheduler || !scheduler.isActive()) {
       return
     }
 
@@ -357,8 +355,8 @@ export class UniversalVideoAdapter {
     this.clearRuntimeSession()
     this.clearSourceCache()
     this.subtitlesFetcher.cleanup()
-    this.subtitlesScheduler?.reset()
-    this.subtitlesScheduler?.setState("loading")
+    scheduler.reset()
+    scheduler.setState("loading")
 
     await this.startTranslation()
   }
