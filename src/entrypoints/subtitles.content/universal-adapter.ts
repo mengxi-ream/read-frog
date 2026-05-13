@@ -31,6 +31,8 @@ export class UniversalVideoAdapter {
   private subtitlesFetcher: SubtitlesFetcher
   private navigationReinitTimeoutId: ReturnType<typeof setTimeout> | null = null
   private hasPendingNavigationReset = false
+  private subtitlesEnabled = false
+  private trackChangeRefreshPromise: Promise<void> | null = null
 
   private sourceSubtitles: SubtitlesFragment[] = []
   private sourceProcessedSubtitles: SubtitlesFragment[] = []
@@ -81,6 +83,17 @@ export class UniversalVideoAdapter {
 
   toggleSubtitlesManually = (enabled: boolean) => {
     this.toggleSubtitlesWithSource(enabled, "manual")
+  }
+
+  async handleSourceTrackChanged(): Promise<void> {
+    if (!this.trackChangeRefreshPromise) {
+      this.trackChangeRefreshPromise = this.refreshSourceTrackIfNeeded()
+        .finally(() => {
+          this.trackChangeRefreshPromise = null
+        })
+    }
+
+    await this.trackChangeRefreshPromise
   }
 
   downloadSourceSubtitles = async () => {
@@ -316,6 +329,8 @@ export class UniversalVideoAdapter {
   }
 
   private handleToggleSubtitles(enabled: boolean, analyticsContext?: FeatureUsageContext) {
+    this.subtitlesEnabled = enabled
+
     if (enabled) {
       this.subtitlesScheduler?.start()
       this.subtitlesScheduler?.show()
@@ -327,6 +342,25 @@ export class UniversalVideoAdapter {
       this.showNativeSubtitles()
       this.translationCoordinator?.stop()
     }
+  }
+
+  private async refreshSourceTrackIfNeeded(): Promise<void> {
+    if (!this.subtitlesEnabled) {
+      return
+    }
+
+    const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
+    if (useSameTrack) {
+      return
+    }
+
+    this.clearRuntimeSession()
+    this.clearSourceCache()
+    this.subtitlesFetcher.cleanup()
+    this.subtitlesScheduler?.reset()
+    this.subtitlesScheduler?.setState("loading")
+
+    await this.startTranslation()
   }
 
   private showNativeSubtitles() {

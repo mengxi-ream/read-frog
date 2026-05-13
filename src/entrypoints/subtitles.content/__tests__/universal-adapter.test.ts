@@ -2,7 +2,15 @@ import { describe, expect, it, vi } from "vitest"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
 function createAdapter(fetchResult: Array<{ text: string, start: number, end: number }>) {
-  return new UniversalVideoAdapter({
+  const subtitlesFetcher = {
+    fetch: vi.fn().mockResolvedValue(fetchResult),
+    cleanup: vi.fn(),
+    shouldUseSameTrack: vi.fn().mockResolvedValue(false),
+    getSourceLanguage: () => "en",
+    hasAvailableSubtitles: vi.fn().mockResolvedValue(true),
+  }
+
+  const adapter = new UniversalVideoAdapter({
     config: {
       selectors: {
         video: "video",
@@ -12,14 +20,10 @@ function createAdapter(fetchResult: Array<{ text: string, start: number, end: nu
       },
       events: {},
     },
-    subtitlesFetcher: {
-      fetch: vi.fn().mockResolvedValue(fetchResult),
-      cleanup: vi.fn(),
-      shouldUseSameTrack: vi.fn().mockResolvedValue(false),
-      getSourceLanguage: () => "en",
-      hasAvailableSubtitles: vi.fn().mockResolvedValue(true),
-    },
+    subtitlesFetcher,
   })
+
+  return { adapter, subtitlesFetcher }
 }
 
 describe("universalVideoAdapter", () => {
@@ -30,7 +34,7 @@ describe("universalVideoAdapter", () => {
       { text: "We can do this.", start: 1000, end: 1500 },
       { text: "Let's ship now.", start: 1500, end: 2000 },
     ]
-    const adapter = createAdapter(subtitles)
+    const { adapter } = createAdapter(subtitles)
 
     await (adapter as any).getOrLoadSourceSubtitles()
 
@@ -42,5 +46,55 @@ describe("universalVideoAdapter", () => {
         end: 2000,
       },
     ])
+  })
+
+  it("reloads subtitles when the source track changes while translation is enabled", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([
+      { text: "hello", start: 0, end: 500 },
+    ])
+
+    ;(adapter as any).subtitlesEnabled = true
+
+    const clearRuntimeSessionSpy = vi.spyOn(adapter as any, "clearRuntimeSession")
+    const clearSourceCacheSpy = vi.spyOn(adapter as any, "clearSourceCache")
+    const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
+
+    await adapter.handleSourceTrackChanged()
+
+    expect(subtitlesFetcher.shouldUseSameTrack).toHaveBeenCalledTimes(1)
+    expect(clearRuntimeSessionSpy).toHaveBeenCalledTimes(1)
+    expect(clearSourceCacheSpy).toHaveBeenCalledTimes(1)
+    expect(subtitlesFetcher.cleanup).toHaveBeenCalledTimes(1)
+    expect(startTranslationSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it("ignores source track changes when translation is disabled", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([
+      { text: "hello", start: 0, end: 500 },
+    ])
+
+    const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
+
+    await adapter.handleSourceTrackChanged()
+
+    expect(subtitlesFetcher.shouldUseSameTrack).not.toHaveBeenCalled()
+    expect(startTranslationSpy).not.toHaveBeenCalled()
+  })
+
+  it("does not reload subtitles when the selected track is unchanged", async () => {
+    const { adapter, subtitlesFetcher } = createAdapter([
+      { text: "hello", start: 0, end: 500 },
+    ])
+
+    ;(adapter as any).subtitlesEnabled = true
+    vi.mocked(subtitlesFetcher.shouldUseSameTrack).mockResolvedValue(true)
+
+    const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
+
+    await adapter.handleSourceTrackChanged()
+
+    expect(subtitlesFetcher.shouldUseSameTrack).toHaveBeenCalledTimes(1)
+    expect(subtitlesFetcher.cleanup).not.toHaveBeenCalled()
+    expect(startTranslationSpy).not.toHaveBeenCalled()
   })
 })
