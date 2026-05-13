@@ -10,6 +10,7 @@ import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
+import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
@@ -365,16 +366,23 @@ export class UniversalVideoAdapter {
   private async startTranslation(analyticsContext?: FeatureUsageContext) {
     try {
       const currentVideoId = this.config.getVideoId?.() ?? ""
-      const hasCurrentSession = this.translationCoordinator !== null && this.sessionVideoId === currentVideoId
+      const hasCurrentSession = this.sessionProcessedFragments.length > 0 && this.sessionVideoId === currentVideoId
       this.sessionVideoId = currentVideoId
 
       const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
 
       if (useSameTrack && hasCurrentSession) {
-        // Clear failed states to allow retry on resume
-        this.translationCoordinator?.clearFailed()
-        this.segmentationPipeline?.clearFailedStarts()
-        this.translationCoordinator?.start()
+        // Translated sessions create a coordinator; passthrough sessions only cache rendered fragments.
+        if (this.translationCoordinator) {
+          // Clear failed states to allow retry on resume
+          this.translationCoordinator.clearFailed()
+          this.segmentationPipeline?.clearFailedStarts()
+          this.translationCoordinator.start()
+        }
+        else {
+          this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
+          this.subtitlesScheduler?.setState("idle")
+        }
         if (analyticsContext) {
           void trackFeatureUsed({
             ...analyticsContext,
@@ -393,7 +401,12 @@ export class UniversalVideoAdapter {
       await this.getOrLoadSourceSubtitles()
       this.sessionSubtitles = this.sourceSubtitles
 
-      await this.processSubtitles()
+      if (await this.shouldSkipTranslationForCurrentTrack()) {
+        this.processPassthroughSubtitles()
+      }
+      else {
+        await this.processTranslatedSubtitles()
+      }
       if (analyticsContext) {
         void trackFeatureUsed({
           ...analyticsContext,
@@ -419,7 +432,28 @@ export class UniversalVideoAdapter {
     }
   }
 
-  private async processSubtitles() {
+  private async shouldSkipTranslationForCurrentTrack(): Promise<boolean> {
+    const config = await getLocalConfig()
+    const targetLanguage = config?.language.targetCode
+    const sourceLanguage = resolveLanguageCodeFromLocale(this.subtitlesFetcher.getSourceLanguage())
+
+    if (!targetLanguage || !sourceLanguage) {
+      return false
+    }
+
+    return sourceLanguage === targetLanguage
+  }
+
+  private processPassthroughSubtitles() {
+    this.sessionProcessedFragments = this.sourceProcessedSubtitles.map(fragment => ({
+      ...fragment,
+      translation: fragment.text,
+    }))
+    this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
+    this.subtitlesScheduler?.setState("idle")
+  }
+
+  private async processTranslatedSubtitles() {
     const scheduler = this.subtitlesScheduler
     if (!scheduler)
       return
