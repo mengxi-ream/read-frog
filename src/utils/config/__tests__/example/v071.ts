@@ -67,7 +67,7 @@ export const testSeries: TestSeriesObject = {
           name: "DeepLX",
           provider: "deeplx",
           apiKey: undefined,
-          baseURL: "https://deeplx.vercel.app",
+          baseURL: "https://deeplx.vercel.app/translate",
         },
       ],
       translate: {
@@ -314,6 +314,7 @@ export const testSeries: TestSeriesObject = {
         ],
         clickAction: "panel",
         locked: false,
+        side: "right",
       },
       sideContent: {
         width: 700,
@@ -707,6 +708,7 @@ export const testSeries: TestSeriesObject = {
         disabledFloatingButtonPatterns: [],
         clickAction: "panel",
         locked: false,
+        side: "right",
       },
       sideContent: {
         width: 420,
@@ -1107,6 +1109,7 @@ export const testSeries: TestSeriesObject = {
         disabledFloatingButtonPatterns: [],
         clickAction: "panel",
         locked: false,
+        side: "right",
       },
       sideContent: {
         width: 420,
@@ -1493,6 +1496,7 @@ export const testSeries: TestSeriesObject = {
         disabledFloatingButtonPatterns: [],
         clickAction: "panel",
         locked: false,
+        side: "right",
       },
       sideContent: {
         width: 420,
