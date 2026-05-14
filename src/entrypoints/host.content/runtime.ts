@@ -8,6 +8,7 @@ import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
+import { areSamePageTranslationOrigin } from "@/utils/url"
 import { setupUrlChangeListener } from "./listen"
 import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
@@ -51,7 +52,12 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     if (from !== to) {
       logger.info("URL changed from", from, "to", to)
       if (manager.isActive) {
-        manager.stop()
+        if (areSamePageTranslationOrigin(from, to)) {
+          await manager.restart()
+        }
+        else {
+          manager.stop()
+        }
       }
       // Only the top frame should detect and set language to avoid race conditions from iframes
       if (window === window.top) {

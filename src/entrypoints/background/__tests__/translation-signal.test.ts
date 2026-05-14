@@ -46,6 +46,14 @@ function getHandler(name: string) {
   return handler
 }
 
+function getOnCommittedListener() {
+  const listener = webNavigationOnCommittedAddListenerMock.mock.calls.at(-1)?.[0]
+  if (!listener) {
+    throw new Error("Expected webNavigation.onCommitted listener to be registered")
+  }
+  return listener as (details: { tabId: number, frameId: number, url: string }) => Promise<void>
+}
+
 async function setupSubject() {
   const { translationMessage } = await import("../translation-signal")
   translationMessage()
@@ -77,25 +85,43 @@ describe("translationMessage", () => {
     await setupSubject()
 
     await getHandler("setAndNotifyPageTranslationStateChangedByManager")({
-      data: { enabled: true },
+      data: { enabled: true, url: "https://example.com/articles/1" },
       sender: { tab: { id: 42 }, frameId: 0 },
     })
 
-    expect(storageSetItemMock).toHaveBeenCalledWith(getTranslationStateKey(42), { enabled: true })
+    expect(storageSetItemMock).toHaveBeenCalledWith(getTranslationStateKey(42), {
+      enabled: true,
+      origin: "https://example.com",
+    })
     expect(sendMessageMock).toHaveBeenCalledWith("notifyTranslationStateChanged", { enabled: true }, 42)
     expect(injectHostContentIntoTabIframesMock).toHaveBeenCalledWith(42)
   })
 
-  it("does not reinject every iframe when an iframe manager echoes enabled state", async () => {
+  it("does not overwrite tab state or reinject every iframe when an iframe manager echoes enabled state", async () => {
     await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: true, origin: "https://example.com" })
 
     await getHandler("setAndNotifyPageTranslationStateChangedByManager")({
-      data: { enabled: true },
+      data: { enabled: true, url: "https://embed.example.net/frame" },
       sender: { tab: { id: 42 }, frameId: 7 },
     })
 
-    expect(storageSetItemMock).toHaveBeenCalledWith(getTranslationStateKey(42), { enabled: true })
+    expect(storageSetItemMock).not.toHaveBeenCalled()
     expect(sendMessageMock).toHaveBeenCalledWith("notifyTranslationStateChanged", { enabled: true }, 42)
+    expect(injectHostContentIntoTabIframesMock).not.toHaveBeenCalled()
+  })
+
+  it("ignores enabled iframe manager echoes when tab translation is not already active", async () => {
+    await setupSubject()
+    storageGetItemMock.mockResolvedValue(undefined)
+
+    await getHandler("setAndNotifyPageTranslationStateChangedByManager")({
+      data: { enabled: true, url: "https://embed.example.net/frame" },
+      sender: { tab: { id: 42 }, frameId: 7 },
+    })
+
+    expect(storageSetItemMock).not.toHaveBeenCalled()
+    expect(sendMessageMock).not.toHaveBeenCalledWith("notifyTranslationStateChanged", { enabled: true }, 42)
     expect(injectHostContentIntoTabIframesMock).not.toHaveBeenCalled()
   })
 
@@ -187,5 +213,44 @@ describe("translationMessage", () => {
       enabled: true,
       analyticsContext: undefined,
     }, 42)
+  })
+
+  it("keeps enabled translation state on same-origin top-frame navigation", async () => {
+    await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: true, origin: "https://example.com" })
+
+    await getOnCommittedListener()({
+      tabId: 42,
+      frameId: 0,
+      url: "https://example.com/articles/2?from=feed#comments",
+    })
+
+    expect(storageRemoveItemMock).not.toHaveBeenCalled()
+  })
+
+  it("clears enabled translation state on cross-origin top-frame navigation", async () => {
+    await setupSubject()
+    storageGetItemMock.mockResolvedValue({ enabled: true, origin: "https://example.com" })
+
+    await getOnCommittedListener()({
+      tabId: 42,
+      frameId: 0,
+      url: "https://other.example.com/articles/2",
+    })
+
+    expect(storageRemoveItemMock).toHaveBeenCalledWith(getTranslationStateKey(42))
+  })
+
+  it("does not clear translation state for iframe navigations", async () => {
+    await setupSubject()
+
+    await getOnCommittedListener()({
+      tabId: 42,
+      frameId: 3,
+      url: "https://other.example.com/frame",
+    })
+
+    expect(storageGetItemMock).not.toHaveBeenCalled()
+    expect(storageRemoveItemMock).not.toHaveBeenCalled()
   })
 })

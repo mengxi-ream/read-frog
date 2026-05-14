@@ -40,6 +40,12 @@ interface IPageTranslationManager {
   stop: () => void
 
   /**
+   * Refreshes translation after an in-document route change without disabling
+   * the tab-level page translation session.
+   */
+  restart: () => Promise<void>
+
+  /**
    * Registers page translation triggers
    */
   registerPageTranslationTriggers: () => () => void
@@ -121,6 +127,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       await sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
         enabled: true,
+        url: window.location.href,
       })
 
       this.isPageTranslating = true
@@ -176,14 +183,31 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   stop(): void {
+    this.stopInternal({ notify: true })
+  }
+
+  async restart(): Promise<void> {
+    if (!this.isPageTranslating) {
+      await this.start()
+      return
+    }
+
+    this.stopInternal({ notify: false })
+    await this.start()
+  }
+
+  private stopInternal({ notify }: { notify: boolean }): void {
     if (!this.isPageTranslating) {
       console.warn("AutoTranslationManager is already inactive")
       return
     }
 
-    void sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
-      enabled: false,
-    })
+    if (notify) {
+      void sendMessage("setAndNotifyPageTranslationStateChangedByManager", {
+        enabled: false,
+        url: window.location.href,
+      })
+    }
 
     this.isPageTranslating = false
     this.walkId = null

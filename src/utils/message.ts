@@ -34,7 +34,7 @@ interface ProtocolMap {
   getEnablePageTranslationFromContentScript: () => Promise<boolean>
   tryToSetEnablePageTranslationByTabId: (data: { tabId: number, enabled: boolean, analyticsContext?: FeatureUsageContext }) => void
   tryToSetEnablePageTranslationOnContentScript: (data: { enabled: boolean, analyticsContext?: FeatureUsageContext }) => void
-  setAndNotifyPageTranslationStateChangedByManager: (data: { enabled: boolean }) => void
+  setAndNotifyPageTranslationStateChangedByManager: (data: { enabled: boolean, url?: string }) => void
   notifyTranslationStateChanged: (data: { enabled: boolean }) => void
   ensureIframeHostContentInjected: (data: { tabId?: number }) => void
   injectCurrentIframesAfterTopFrameNodeTranslation: () => void
