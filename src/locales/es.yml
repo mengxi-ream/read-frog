@@ -698,6 +698,8 @@ options:
     skipLanguages:
       title: Omisión automática por idioma
       description: Omite automáticamente la traducción de párrafos cuando se detectan idiomas específicos
+      targetLanguageSkip: Omitir idioma de destino
+      targetLanguageSkipDescription: Antes de traducir, detecta si el párrafo ya está en el idioma de destino. El texto coincidente se omite sin enviar una solicitud. Desactivar esto no cambia la protección posterior que oculta salidas de traducción sin cambios.
       selectLanguages: Seleccionar idiomas
       detection:
         label: Detección de idioma

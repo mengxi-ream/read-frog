@@ -18,7 +18,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 71
+export const CONFIG_SCHEMA_VERSION = 72
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -69,6 +69,7 @@ export const DEFAULT_CONFIG: Config = {
       },
       minCharactersPerNode: DEFAULT_MIN_CHARACTERS_PER_NODE,
       minWordsPerNode: DEFAULT_MIN_WORDS_PER_NODE,
+      enableTargetLanguageSkip: true,
       skipLanguages: [],
     },
     enableAIContentAware: false,

@@ -583,6 +583,8 @@ options:
     skipLanguages:
       title: Dile Göre Otomatik Atla
       description: Belirli diller algılandığında paragraf çevirisini otomatik olarak atla
+      targetLanguageSkip: Hedef dili atla
+      targetLanguageSkipDescription: Çeviriden önce paragrafın zaten hedef dilde olup olmadığını algılar. Eşleşen metin istek göndermeden atlanır. Bunu kapatmak, değişmeyen çeviri çıktısını gizleyen sonraki korumayı değiştirmez.
       selectLanguages: Dilleri seçin
       detection:
         label: Dil Algılama

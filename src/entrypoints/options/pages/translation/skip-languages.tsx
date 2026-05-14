@@ -6,8 +6,11 @@ import {
   LANG_CODE_TO_LOCALE_NAME,
 } from "@read-frog/definitions"
 import { useAtom } from "jotai"
+import { HelpTooltip } from "@/components/help-tooltip"
 import { MultiLanguageCombobox } from "@/components/multi-language-combobox"
 import { Button } from "@/components/ui/base-ui/button"
+import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { ConfigCard } from "../../components/config-card"
 
@@ -20,10 +23,40 @@ export function SkipLanguages() {
         description={i18n.t("options.translation.skipLanguages.description")}
         className="py-0"
       >
-        <SkipLanguagesSelector />
+        <div className="flex flex-col gap-4">
+          <TargetLanguageSkipToggle />
+          <SkipLanguagesSelector />
+        </div>
       </ConfigCard>
       <SelectedSkipLanguageCells />
     </div>
+  )
+}
+
+function TargetLanguageSkipToggle() {
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
+
+  return (
+    <Field orientation="horizontal">
+      <FieldContent className="self-center">
+        <FieldLabel htmlFor="target-language-skip-toggle">
+          {i18n.t("options.translation.skipLanguages.targetLanguageSkip")}
+          <HelpTooltip>{i18n.t("options.translation.skipLanguages.targetLanguageSkipDescription")}</HelpTooltip>
+        </FieldLabel>
+      </FieldContent>
+      <Switch
+        id="target-language-skip-toggle"
+        checked={translateConfig.page.enableTargetLanguageSkip}
+        onCheckedChange={(checked) => {
+          void setTranslateConfig({
+            page: {
+              ...translateConfig.page,
+              enableTargetLanguageSkip: checked,
+            },
+          })
+        }}
+      />
+    </Field>
   )
 }
 
