@@ -5,7 +5,11 @@ import { useStore } from "@tanstack/react-form"
 import { useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
-import { Input } from "@/components/ui/base-ui/input"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/base-ui/input-group"
 import {
   Popover,
   PopoverContent,
@@ -160,16 +164,11 @@ export const IconField = withForm({
                 }}
               />
 
-              <div
-                className={cn(
-                  "border-input dark:bg-input/30 focus-within:border-ring focus-within:ring-ring/50 flex h-8 flex-1 items-center rounded-md border bg-transparent px-1 py-1 shadow-xs transition-[color,box-shadow] focus-within:ring-[3px]",
-                  hasError && "border-destructive ring-destructive/20 dark:ring-destructive/40 ring-[3px]",
-                )}
-              >
-                <Input
+              <InputGroup className="flex-1">
+                <InputGroupInput
                   value={field.state.value ?? ""}
                   placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.inputPlaceholder")}
-                  className="h-6 flex-1 border-0 bg-transparent px-0 py-0 shadow-none ring-0 focus-visible:ring-0 aria-invalid:ring-0 dark:bg-transparent"
+                  className="px-0"
                   aria-invalid={hasError}
                   onBlur={field.handleBlur}
                   onChange={(e) => {
@@ -177,8 +176,10 @@ export const IconField = withForm({
                     void form.handleSubmit()
                   }}
                 />
-                <IconHelpPopover />
-              </div>
+                <InputGroupAddon align="inline-end">
+                  <IconHelpPopover />
+                </InputGroupAddon>
+              </InputGroup>
             </div>
             {field.state.meta.errors.length > 0 && (
               <span className="text-sm font-normal text-destructive">
