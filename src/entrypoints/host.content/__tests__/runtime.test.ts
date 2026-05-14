@@ -5,6 +5,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 import { bootstrapHostContent } from "../runtime"
 
 const {
+  messageHandlers,
   managerInstances,
   mockBindTranslationShortcutKey,
   mockClearEffectiveSiteControlUrl,
@@ -15,8 +16,8 @@ const {
   mockRegisterNodeTranslationTriggers,
   mockSendMessage,
   mockSetupUrlChangeListener,
-  mockStorageSetItem,
 } = vi.hoisted(() => ({
+  messageHandlers: new Map<string, (msg?: any) => any>(),
   managerInstances: [] as Array<{
     isActive: boolean
     start: ReturnType<typeof vi.fn>
@@ -33,13 +34,6 @@ const {
   mockRegisterNodeTranslationTriggers: vi.fn(),
   mockSendMessage: vi.fn(),
   mockSetupUrlChangeListener: vi.fn(),
-  mockStorageSetItem: vi.fn(),
-}))
-
-vi.mock("#imports", () => ({
-  storage: {
-    setItem: mockStorageSetItem,
-  },
 }))
 
 vi.mock("@/utils/content/page-language", () => ({
@@ -132,14 +126,17 @@ async function flushAsyncWork(): Promise<void> {
 describe("bootstrapHostContent URL changes", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    messageHandlers.clear()
     managerInstances.length = 0
 
     mockSetupUrlChangeListener.mockReturnValue(vi.fn())
     mockMountHostToast.mockReturnValue(vi.fn())
     mockRegisterNodeTranslationTriggers.mockReturnValue(vi.fn())
     mockBindTranslationShortcutKey.mockResolvedValue(vi.fn())
-    mockOnMessage.mockReturnValue(vi.fn())
-    mockStorageSetItem.mockResolvedValue(undefined)
+    mockOnMessage.mockImplementation((name: string, handler: (msg?: any) => any) => {
+      messageHandlers.set(name, handler)
+      return vi.fn()
+    })
     mockDetectPageLanguageLightweight.mockResolvedValue({ detectedCodeOrUnd: "fra" })
     mockSendMessage.mockImplementation((name: string) => {
       if (name === "getEnablePageTranslationFromContentScript")
@@ -172,7 +169,7 @@ describe("bootstrapHostContent URL changes", () => {
     expect(manager.start).toHaveBeenCalledTimes(1)
     expect(manager.restart).toHaveBeenCalledTimes(1)
     expect(manager.stop).not.toHaveBeenCalled()
-    expect(mockSendMessage).toHaveBeenCalledWith("checkAndAskAutoPageTranslation", {
+    expect(mockSendMessage).toHaveBeenCalledWith("reportDetectedPageLanguage", {
       url: "https://example.com/articles/2?ref=nav#comments",
       detectedCodeOrUnd: "fra",
     })
@@ -196,9 +193,35 @@ describe("bootstrapHostContent URL changes", () => {
     expect(manager.start).not.toHaveBeenCalled()
     expect(manager.restart).not.toHaveBeenCalled()
     expect(manager.stop).not.toHaveBeenCalled()
-    expect(mockSendMessage).toHaveBeenCalledWith("checkAndAskAutoPageTranslation", {
+    expect(mockSendMessage).toHaveBeenCalledWith("reportDetectedPageLanguage", {
       url: "https://example.com/articles/2",
       detectedCodeOrUnd: "fra",
+    })
+
+    invalidate()
+  })
+
+  it("refreshes and reports detected language when background requests active-tab refresh", async () => {
+    const { ctx, invalidate } = createContentScriptContext()
+    await bootstrapHostContent(ctx, null)
+    await flushAsyncWork()
+
+    mockSendMessage.mockClear()
+    mockDetectPageLanguageLightweight.mockClear()
+    mockDetectPageLanguageLightweight.mockResolvedValueOnce({ detectedCodeOrUnd: "jpn" })
+
+    const refreshHandler = messageHandlers.get("refreshDetectedPageLanguage")
+    if (!refreshHandler) {
+      throw new Error("Expected refreshDetectedPageLanguage handler to be registered")
+    }
+
+    refreshHandler()
+    await flushAsyncWork()
+
+    expect(mockDetectPageLanguageLightweight).toHaveBeenCalledOnce()
+    expect(mockSendMessage).toHaveBeenCalledWith("reportDetectedPageLanguage", {
+      url: window.location.href,
+      detectedCodeOrUnd: "jpn",
     })
 
     invalidate()
