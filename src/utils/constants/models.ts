@@ -169,6 +169,13 @@ export const LLM_MODEL_OPTIONS: Array<{
     options: { reasoningEffort: "none" } satisfies GroqProviderOptions as Record<string, JSONValue>,
   },
 
+  // Volcengine Doubao Seed models - disable thinking by default.
+  // Keep the version suffix optional because non-Volcengine providers may expose the same model family without it.
+  {
+    pattern: /(?:^|\/)doubao-seed-(?:code-preview|1-(?:6(?:-(?:flash|vision))?|8)|2-0-(?:lite|mini|pro|code-preview))(?:-\d{6})?$/i,
+    options: { thinking: { type: "disabled" } } satisfies Record<string, JSONValue>,
+  },
+
   // DeepSeek reasoning models - disable thinking by default
   {
     pattern: /^deepseek-(?:reasoner|v4-(?:flash|pro))$/,
