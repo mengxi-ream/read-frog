@@ -180,7 +180,10 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
     maxRetries: 3,
     enableFallbackToIndividual: true,
     getBatchKey: (data) => {
-      return Sha256Hex(`${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`)
+      return Sha256Hex(
+        `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`,
+        data.context ? JSON.stringify(data.context) : "",
+      )
     },
     getCharacters: data => data.text.length,
     executeBatch: async (dataList) => {

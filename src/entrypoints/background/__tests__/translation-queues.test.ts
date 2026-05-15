@@ -174,6 +174,91 @@ describe("translation queue helpers", () => {
     )
   })
 
+  it("keeps subtitle translations with different video context in separate batches", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        enableAIContentAware: true,
+      },
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: llmProvider.id,
+        requestQueueConfig: {
+          rate: 10,
+          capacity: 10,
+        },
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 10,
+        },
+      },
+    })
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const requests = [
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "subtitle-hash-one",
+          videoTitle: "First video",
+          videoDescription: "First description",
+        },
+      }),
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "subtitle-hash-two",
+          videoTitle: "Second video",
+          videoDescription: "Second description",
+        },
+      }),
+    ]
+
+    await expect(Promise.all(requests)).resolves.toEqual([
+      "translated subtitle",
+      "translated subtitle",
+    ])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(2)
+    expect(executeTranslateMock).toHaveBeenNthCalledWith(
+      1,
+      "hello",
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({
+        isBatch: true,
+        context: expect.objectContaining({
+          videoTitle: "First video",
+          videoDescription: "First description",
+        }),
+      }),
+    )
+    expect(executeTranslateMock).toHaveBeenNthCalledWith(
+      2,
+      "hello",
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({
+        isBatch: true,
+        context: expect.objectContaining({
+          videoTitle: "Second video",
+          videoDescription: "Second description",
+        }),
+      }),
+    )
+  })
+
   it("passes webpage context through the translation queue without generating a new summary", async () => {
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
     await setUpWebPageTranslationQueue()
