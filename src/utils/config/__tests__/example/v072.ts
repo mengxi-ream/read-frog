@@ -92,6 +92,7 @@ export const testSeries: TestSeriesObject = {
           },
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
+          enableTargetLanguageSkip: true,
           skipLanguages: [],
         },
         customPromptsConfig: {
@@ -495,6 +496,7 @@ export const testSeries: TestSeriesObject = {
           },
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
+          enableTargetLanguageSkip: true,
           skipLanguages: [],
         },
         customPromptsConfig: {
@@ -889,6 +891,7 @@ export const testSeries: TestSeriesObject = {
           },
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
+          enableTargetLanguageSkip: true,
           skipLanguages: [],
         },
         customPromptsConfig: {
@@ -1283,6 +1286,7 @@ export const testSeries: TestSeriesObject = {
           },
           minCharactersPerNode: 0,
           minWordsPerNode: 0,
+          enableTargetLanguageSkip: true,
           skipLanguages: [],
         },
         customPromptsConfig: {

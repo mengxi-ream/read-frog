@@ -9,6 +9,7 @@ import { deeplxTranslate } from "./api/deeplx"
 import { googleTranslate } from "./api/google"
 import { microsoftTranslate } from "./api/microsoft"
 import { prepareTranslationText } from "./text-preparation"
+import { normalizeTranslationOutput } from "./translation-output-normalization"
 
 export async function executeTranslate<TContext>(
   text: string,
@@ -63,5 +64,5 @@ export async function executeTranslate<TContext>(
     throw new Error(`Unknown provider: ${provider}`)
   }
 
-  return translatedText.trim()
+  return normalizeTranslationOutput(providerConfig, translatedText).trim()
 }

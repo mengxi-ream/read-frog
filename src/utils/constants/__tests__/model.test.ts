@@ -57,24 +57,6 @@ describe("getProviderOptions", () => {
         "gpt-5.3-chat-latest",
       ]))
     })
-    it("should keep docs-synced provider selectors aligned for changed providers", () => {
-      expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-opus-4-7")
-      expect(LLM_PROVIDER_MODELS.anthropic).not.toContain("claude-3-7-sonnet-latest")
-      expect(LLM_PROVIDER_MODELS.google).toEqual(expect.arrayContaining([
-        "gemini-3.1-flash-image-preview",
-        "gemini-3.1-flash-lite-preview",
-        "gemini-3-pro-image-preview",
-      ]))
-      expect(LLM_PROVIDER_MODELS.google).not.toContain("gemini-1.5-flash")
-      expect(LLM_PROVIDER_MODELS.google).not.toContain("gemini-1.5-pro")
-      expect(LLM_PROVIDER_MODELS.xai).toEqual(expect.arrayContaining([
-        "grok-4.20-reasoning",
-        "grok-4.20-non-reasoning",
-      ]))
-      expect(LLM_PROVIDER_MODELS.xai).not.toContain("grok-2")
-      expect(LLM_PROVIDER_MODELS.xai).not.toContain("grok-beta")
-      expect(LLM_PROVIDER_MODELS.deepseek).toEqual(["deepseek-chat", "deepseek-reasoner"])
-    })
 
     it("should return the documented floor for GPT-5 model-specific reasoning", () => {
       const gpt54ProOptions = getProviderOptions("gpt-5.4-pro", "openai")
@@ -135,21 +117,6 @@ describe("getProviderOptions", () => {
 
       const grok41FastOptions = getProviderOptions("grok-4-1-fast-reasoning", "xai")
       expect(grok41FastOptions).toEqual({})
-
-      const grok420Options = getProviderOptions("grok-4.20-reasoning", "xai")
-      expect(grok420Options.xai?.reasoningEffort).toBe("low")
-
-      const grokCodeFastOptions = getProviderOptions("grok-code-fast-1", "xai")
-      expect(grokCodeFastOptions.xai?.reasoningEffort).toBe("low")
-
-      const grok3Options = getProviderOptions("grok-3", "xai")
-      expect(grok3Options.xai?.reasoningEffort).toBe("low")
-
-      const grokLegacyModelOptions = getProviderOptions("grok-4", "xai")
-      expect(grokLegacyModelOptions.xai?.reasoningEffort).toBe("low")
-
-      const grokLegacyOptions = getProviderOptions("grok-4-latest", "xai")
-      expect(grokLegacyOptions.xai?.reasoningEffort).toBe("low")
 
       const deepseekReasonerOptions = getProviderOptions("deepseek-reasoner", "deepseek")
       expect(deepseekReasonerOptions.deepseek?.thinking).toEqual({ type: "disabled" })
@@ -225,6 +192,31 @@ describe("getProviderOptions", () => {
 
       const cerebrasOptions = getProviderOptions("gpt-oss-120b", "cerebras")
       expect(cerebrasOptions.cerebras?.reasoningEffort).toBe("none")
+    })
+
+    it("should apply Volcengine Doubao Seed thinking defaults with optional version suffixes", () => {
+      const twoLiteVersionedOptions = getProviderOptions("doubao-seed-2-0-lite-260428", "volcengine")
+      expect(twoLiteVersionedOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const oneFlashVersionedOptions = getProviderOptions("doubao-seed-1-6-flash-250828", "volcengine")
+      expect(oneFlashVersionedOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const codePreviewVersionedOptions = getProviderOptions("doubao-seed-code-preview-251028", "volcengine")
+      expect(codePreviewVersionedOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const twoLiteOptions = getProviderOptions("doubao-seed-2-0-lite", "volcengine")
+      expect(twoLiteOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const oneSixOptions = getProviderOptions("doubao-seed-1-6", "volcengine")
+      expect(oneSixOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const prefixedOptions = getProviderOptions("volcengine/doubao-seed-1-8", "openai-compatible")
+      expect(prefixedOptions["openai-compatible"]?.thinking).toEqual({ type: "disabled" })
+    })
+
+    it("should not apply Doubao Seed thinking defaults to unrelated Doubao models", () => {
+      expect(getProviderOptions("doubao-seedance-2-0-pro", "volcengine")).toEqual({})
+      expect(getProviderOptions("doubao-seed-1-6-thinking-250715", "volcengine")).toEqual({})
     })
 
     it("should apply broadened Qwen defaults to provider-prefixed model ids", () => {

@@ -698,6 +698,8 @@ options:
     skipLanguages:
       title: Auto Skip Based on Language
       description: Automatically skip paragraph translation when specific languages are detected
+      targetLanguageSkip: Skip target language
+      targetLanguageSkipDescription: Before translating, detect whether the paragraph is already in the target language. Matching text is skipped without sending a request. Turning this off does not change the later safeguard that hides unchanged translation output.
       selectLanguages: Select languages
       detection:
         label: Language Detection

@@ -583,6 +583,8 @@ options:
     skipLanguages:
       title: 基於語言的自動跳過
       description: 當檢測到指定語言時自動跳過段落翻譯
+      targetLanguageSkip: 跳過目標語言
+      targetLanguageSkipDescription: 翻譯前預先偵測段落是否已是目標語言；命中時不發送翻譯請求。關閉後仍保留譯文與原文相同則不顯示的後置保護。
       selectLanguages: 選擇語言
       detection:
         label: 語言偵測

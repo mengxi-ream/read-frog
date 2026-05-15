@@ -583,6 +583,8 @@ options:
     skipLanguages:
       title: 언어 기반 자동 건너뛰기
       description: 지정된 언어가 감지되면 단락 번역을 자동으로 건너뜁니다
+      targetLanguageSkip: 대상 언어 건너뛰기
+      targetLanguageSkipDescription: 번역 전에 단락이 이미 대상 언어인지 미리 감지합니다. 일치하는 텍스트는 요청을 보내지 않고 건너뜁니다. 이 옵션을 꺼도 번역 결과가 원문과 같으면 숨기는 후처리 보호는 유지됩니다.
       selectLanguages: 언어 선택
       detection:
         label: 언어 감지

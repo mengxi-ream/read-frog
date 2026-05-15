@@ -34,6 +34,11 @@ declare global {
   }
 }
 
+interface SelectedTrackSnapshot {
+  languageCode: string | null
+  vssId: string | null
+}
+
 function findYoutubePlayer(): YouTubePlayer | null {
   return document.querySelector(
     ".html5-video-player.playing-mode, .html5-video-player.paused-mode",
@@ -92,6 +97,9 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
 
     const playerResponse = player.getPlayerResponse?.()
     const videoId = playerResponse?.videoDetails?.videoId
+    const tracks = playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? []
+    const captionTracks = normalizeTracks(tracks)
+    const selectedTrack = getSelectedTrackSnapshot(player, captionTracks)
 
     if (!videoId || videoId !== expectedVideoId)
       return errorResponse(requestId, "VIDEO_ID_MISMATCH")
@@ -102,14 +110,13 @@ function getPlayerData(request: PlayerDataRequest): PlayerDataResponse {
       success: true,
       data: {
         videoId,
-        captionTracks: normalizeTracks(
-          playerResponse?.captions?.playerCaptionsTracklistRenderer?.captionTracks ?? [],
-        ),
+        captionTracks,
         audioCaptionTracks: parseAudioTracks(player.getAudioTrack?.()?.captionTracks),
         device: window.ytcfg?.get?.("DEVICE") ?? null,
         cver: player.getWebPlayerContextConfig?.()?.innertubeContextClientVersion ?? null,
         playerState: player.getPlayerState?.() ?? -1,
-        selectedTrackLanguageCode: player.getOption?.("captions", "track")?.languageCode ?? null,
+        selectedTrackLanguageCode: selectedTrack.languageCode,
+        selectedTrackVssId: selectedTrack.vssId,
         cachedTimedtextUrl: getCachedTimedtextUrl(videoId),
       },
     }
@@ -135,4 +142,67 @@ function ensureSubtitlesEnabled(): void {
   else {
     button.click()
   }
+}
+
+function getSelectedTrackSnapshot(
+  player: YouTubePlayer,
+  captionTracks: Array<{ languageCode: string, kind?: string, vssId: string }>,
+): SelectedTrackSnapshot {
+  const selectedTrack = player.getOption?.("captions", "track")
+  const languageCode = selectedTrack?.languageCode ?? null
+  const matchedTrack = matchSelectedTrack(captionTracks, selectedTrack)
+  const vssId = getSelectedTrackVssId(selectedTrack) ?? matchedTrack?.vssId ?? null
+
+  return {
+    languageCode,
+    vssId,
+  }
+}
+
+function getSelectedTrackVssId(selectedTrack: any): string | null {
+  const directVssId = selectedTrack?.vssId ?? selectedTrack?.vss_id
+  if (typeof directVssId === "string" && directVssId.length > 0)
+    return directVssId
+
+  const baseUrl = selectedTrack?.baseUrl
+  if (typeof baseUrl !== "string" || baseUrl.length === 0)
+    return null
+
+  try {
+    return new URL(baseUrl, window.location.origin).searchParams.get("vssId")
+      ?? new URL(baseUrl, window.location.origin).searchParams.get("vss_id")
+  }
+  catch {
+    return null
+  }
+}
+
+function matchSelectedTrack(
+  captionTracks: Array<{ languageCode: string, kind?: string, vssId: string }>,
+  selectedTrack: any,
+) {
+  const selectedVssId = getSelectedTrackVssId(selectedTrack)
+  if (selectedVssId) {
+    return captionTracks.find(track => track.vssId === selectedVssId)
+  }
+
+  const selectedLanguageCode = selectedTrack?.languageCode
+  const selectedKind = selectedTrack?.kind ?? selectedTrack?.trackKind ?? null
+
+  if (typeof selectedLanguageCode !== "string" || selectedLanguageCode.length === 0)
+    return undefined
+
+  if (typeof selectedKind === "string" && selectedKind.length > 0) {
+    const exactKindMatch = captionTracks.find(track =>
+      track.languageCode === selectedLanguageCode && (track.kind ?? null) === selectedKind,
+    )
+    if (exactKindMatch)
+      return exactKindMatch
+  }
+
+  const sameLanguageTracks = captionTracks.filter(track => track.languageCode === selectedLanguageCode)
+  if (sameLanguageTracks.length === 1)
+    return sameLanguageTracks[0]
+
+  return undefined
 }

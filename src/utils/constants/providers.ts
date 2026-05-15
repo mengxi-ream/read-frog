@@ -22,7 +22,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "openai": {
-    model: "gpt-5.4-mini",
+    model: "gpt-5-mini",
     isCustomModel: false,
     customModel: null,
   },
@@ -32,7 +32,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "google": {
-    model: "gemini-2.5-flash-lite",
+    model: "gemini-2.5-flash",
     isCustomModel: false,
     customModel: null,
   },
@@ -42,27 +42,27 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "xai": {
-    model: "grok-4.20-non-reasoning",
+    model: "grok-4-fast-non-reasoning",
     isCustomModel: false,
     customModel: null,
   },
   "bedrock": {
-    model: "us.amazon.nova-micro-v1:0",
+    model: "us.meta.llama4-scout-17b-instruct-v1:0",
     isCustomModel: false,
     customModel: null,
   },
   "groq": {
-    model: "llama-3.1-8b-instant",
+    model: "meta-llama/llama-4-scout-17b-16e-instruct",
     isCustomModel: false,
     customModel: null,
   },
   "deepinfra": {
-    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
+    model: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
     isCustomModel: false,
     customModel: null,
   },
   "mistral": {
-    model: "magistral-small-2507",
+    model: "magistral-small-2506",
     isCustomModel: false,
     customModel: null,
   },
@@ -72,17 +72,17 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "cohere": {
-    model: "command-r7b-12-2024",
+    model: "command-a-reasoning-08-2025",
     isCustomModel: false,
     customModel: null,
   },
   "fireworks": {
-    model: "accounts/fireworks/models/llama-v3p2-3b-instruct",
+    model: "accounts/fireworks/models/kimi-k2-instruct",
     isCustomModel: false,
     customModel: null,
   },
   "cerebras": {
-    model: "llama3.1-8b",
+    model: "qwen-3-235b-a22b-instruct-2507",
     isCustomModel: false,
     customModel: null,
   },
@@ -137,12 +137,12 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "moonshotai": {
-    model: "kimi-k2-turbo",
+    model: "kimi-k2",
     isCustomModel: false,
     customModel: null,
   },
   "huggingface": {
-    model: "meta-llama/Llama-3.1-8B-Instruct",
+    model: "Qwen/Qwen3-32B",
     isCustomModel: false,
     customModel: null,
   },
@@ -402,7 +402,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.deeplx"),
     enabled: true,
     provider: "deeplx",
-    baseURL: "https://api.deeplx.org",
+    baseURL: "https://api.deeplx.org/{{apiKey}}/translate",
   },
   "deepl": {
     id: "deepl-default",

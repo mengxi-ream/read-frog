@@ -698,6 +698,8 @@ options:
     skipLanguages:
       title: 基于语言的自动跳过
       description: 当检测到指定语言时自动跳过段落翻译
+      targetLanguageSkip: 跳过目标语言
+      targetLanguageSkipDescription: 翻译前预检测段落是否已是目标语言；命中时不发送翻译请求。关闭后仍保留译文与原文相同则不显示的后置保护。
       selectLanguages: 选择语言
       detection:
         label: 语言检测

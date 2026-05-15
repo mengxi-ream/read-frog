@@ -153,7 +153,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
       return null
     }
 
-    const track = this.selectTrack(response.data.captionTracks, response.data.selectedTrackLanguageCode)
+    const track = this.selectTrack(response.data)
     return this.buildTrackHash(videoId, track)
   }
 
@@ -183,7 +183,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     }
 
     const playerData = response.data
-    const track = this.selectTrack(playerData.captionTracks, playerData.selectedTrackLanguageCode)
+    const track = this.selectTrack(playerData)
     const currentHash = this.buildTrackHash(videoId, track)
 
     if (!track) {
@@ -222,8 +222,7 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
     await this.waitForPlayerState(videoId)
 
     const playerData = await this.getPlayerDataWithPot(videoId)
-    const track = this.selectTrack(playerData.captionTracks, playerData.selectedTrackLanguageCode)
-      ?? preferredTrack
+    const track = this.selectTrack(playerData) ?? preferredTrack
 
     if (!track) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
@@ -339,13 +338,27 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
    * 4. Auto-generated ASR subtitles (lower quality but better than nothing)
    * 5. First available track as fallback
    */
-  private selectTrack(tracks: CaptionTrack[], selectedLanguageCode: string | null): CaptionTrack | null {
+  private selectTrack(
+    playerData: PlayerData,
+  ): CaptionTrack | null {
+    const {
+      captionTracks: tracks,
+      selectedTrackLanguageCode,
+      selectedTrackVssId,
+    } = playerData
+
     if (tracks.length === 0)
       return null
 
     // Priority 1: User's selected track in YouTube player
-    if (selectedLanguageCode) {
-      const selectedTrack = tracks.find(t => t.languageCode === selectedLanguageCode)
+    if (selectedTrackVssId) {
+      const selectedTrack = tracks.find(t => t.vssId === selectedTrackVssId)
+      if (selectedTrack)
+        return selectedTrack
+    }
+
+    if (selectedTrackLanguageCode) {
+      const selectedTrack = tracks.find(t => t.languageCode === selectedTrackLanguageCode)
       if (selectedTrack)
         return selectedTrack
     }

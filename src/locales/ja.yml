@@ -583,6 +583,8 @@ options:
     skipLanguages:
       title: 言語に基づく自動スキップ
       description: 指定された言語が検出されると、段落の翻訳を自動的にスキップします
+      targetLanguageSkip: ターゲット言語をスキップ
+      targetLanguageSkipDescription: 翻訳前に段落がすでにターゲット言語かどうかを事前検出します。一致したテキストはリクエストを送信せずにスキップされます。オフにしても、翻訳結果が原文と同じ場合に非表示にする後段の保護は変わりません。
       selectLanguages: 言語を選択
       detection:
         label: 言語検出

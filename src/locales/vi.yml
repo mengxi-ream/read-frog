@@ -583,6 +583,8 @@ options:
     skipLanguages:
       title: Tự động bỏ qua theo ngôn ngữ
       description: Tự động bỏ qua dịch đoạn văn khi phát hiện các ngôn ngữ cụ thể
+      targetLanguageSkip: Bỏ qua ngôn ngữ đích
+      targetLanguageSkipDescription: Trước khi dịch, phát hiện đoạn văn đã ở ngôn ngữ đích hay chưa. Văn bản khớp sẽ bị bỏ qua mà không gửi yêu cầu. Tắt tùy chọn này không thay đổi lớp bảo vệ sau đó, nơi kết quả dịch không thay đổi vẫn bị ẩn.
       selectLanguages: Chọn ngôn ngữ
       detection:
         label: Phát hiện ngôn ngữ

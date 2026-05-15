@@ -1,5 +1,31 @@
 # @read-frog/extension
 
+## 1.33.6
+
+### Patch Changes
+
+- [#1492](https://github.com/mengxi-ream/read-frog/pull/1492) [`665ca79`](https://github.com/mengxi-ream/read-frog/commit/665ca794fd46c9475463156d2d5841582eaa02d2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): make DeepLX URLs explicit and migrate existing configs
+
+- [#1503](https://github.com/mengxi-ream/read-frog/pull/1503) [`c26ebd7`](https://github.com/mengxi-ream/read-frog/commit/c26ebd772b73de75bda2ec6dc596f83b45381c87) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: keep page translation enabled across same-origin navigation
+
+- [#1504](https://github.com/mengxi-ream/read-frog/pull/1504) [`b179e73`](https://github.com/mengxi-ream/read-frog/commit/b179e739e579da56d3d064a33cfa12f540d5c2e6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): scope detected source language to the active tab
+
+- [#1505](https://github.com/mengxi-ream/read-frog/pull/1505) [`cabe649`](https://github.com/mengxi-ream/read-frog/commit/cabe649a8b86347edb75d3b78ca65b6cb0b188b3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): allow disabling target-language precheck skips
+
+- [#1502](https://github.com/mengxi-ream/read-frog/pull/1502) [`589f584`](https://github.com/mengxi-ream/read-frog/commit/589f584d65b1675d7977bb482dccf8a9ec3c915f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): disable thinking by default for Doubao Seed models
+
+## 1.33.5
+
+### Patch Changes
+
+- [#1457](https://github.com/mengxi-ream/read-frog/pull/1457) [`0c7a68c`](https://github.com/mengxi-ream/read-frog/commit/0c7a68c9dc406f28794a769506ba7f4057c830d1) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - fix: stop auto-applying xAI reasoningEffort to Grok 4.1 Fast models
+
+- [#1468](https://github.com/mengxi-ream/read-frog/pull/1468) [`034fbd8`](https://github.com/mengxi-ream/read-frog/commit/034fbd887bee6771d2f5d1e835bfb348aa1030da) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): decode Google Translate HTML entities
+
+- [#1462](https://github.com/mengxi-ream/read-frog/pull/1462) [`a59278e`](https://github.com/mengxi-ream/read-frog/commit/a59278e22fe00ffd68749adb4aec6fbab1c008ce) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): auto-inject iframe runtime on Kiwix viewer pages
+
+- [#1459](https://github.com/mengxi-ream/read-frog/pull/1459) [`56985d2`](https://github.com/mengxi-ream/read-frog/commit/56985d2fedfc7cad4fe002364c47299448a90f06) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix: remove same-language warning for automatic source detection
+
 ## 1.33.4
 
 ### Patch Changes
