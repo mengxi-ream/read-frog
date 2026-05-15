@@ -5,6 +5,7 @@ import {
   getRecommendedProviderOptionsMatch,
 } from "../../providers/options"
 import { LLM_PROVIDER_MODELS } from "../models"
+import { DEFAULT_LLM_PROVIDER_MODELS } from "../providers"
 
 describe("getProviderOptions", () => {
   describe("model pattern matching", () => {
@@ -48,8 +49,9 @@ describe("getProviderOptions", () => {
       expect(o4MiniOptions.openai?.reasoningEffort).toBe("minimal")
     })
 
-    it("should expose the supported OpenAI GPT-5.4 model ids", () => {
+    it("should expose the supported OpenAI GPT-5.5 and GPT-5.4 model ids", () => {
       expect(LLM_PROVIDER_MODELS.openai).toEqual(expect.arrayContaining([
+        "gpt-5.5",
         "gpt-5.4-pro",
         "gpt-5.4",
         "gpt-5.4-mini",
@@ -58,7 +60,84 @@ describe("getProviderOptions", () => {
       ]))
     })
 
+    it("should keep docs-synced provider selectors aligned for changed providers", () => {
+      expect(LLM_PROVIDER_MODELS.openai).toContain("gpt-5.5")
+
+      expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-opus-4-7")
+      expect(LLM_PROVIDER_MODELS.anthropic).not.toEqual(expect.arrayContaining([
+        "claude-3-7-sonnet-latest",
+        "claude-3-5-haiku-latest",
+      ]))
+
+      expect(LLM_PROVIDER_MODELS.google).toEqual(expect.arrayContaining([
+        "gemini-3.1-flash-image-preview",
+        "gemini-3.1-flash-lite-preview",
+        "gemini-3-pro-image-preview",
+      ]))
+      expect(LLM_PROVIDER_MODELS.google).not.toEqual(expect.arrayContaining([
+        "gemini-1.5-flash",
+        "gemini-1.5-pro",
+      ]))
+
+      expect(LLM_PROVIDER_MODELS.xai).toEqual([
+        "grok-4.20-reasoning",
+        "grok-4.20-non-reasoning",
+        "grok-4-1-fast-reasoning",
+        "grok-4-1-fast-non-reasoning",
+        "grok-4-1",
+        "grok-4-fast-reasoning",
+        "grok-4-fast-non-reasoning",
+        "grok-code-fast-1",
+        "grok-3",
+        "grok-3-mini",
+      ])
+
+      expect(LLM_PROVIDER_MODELS.groq).not.toEqual(expect.arrayContaining([
+        "meta-llama/llama-guard-4-12b",
+        "llama-guard-3-8b",
+        "meta-llama/llama-prompt-guard-2-22m",
+        "meta-llama/llama-prompt-guard-2-86m",
+      ]))
+      expect(LLM_PROVIDER_MODELS.deepseek).toEqual(["deepseek-chat", "deepseek-reasoner"])
+      expect(LLM_PROVIDER_MODELS.mistral).toEqual(expect.arrayContaining([
+        "mistral-medium-3",
+        "mistral-medium-3.5",
+      ]))
+      expect(LLM_PROVIDER_MODELS.cohere).toContain("command-a-vision-07-2025")
+    })
+
+    it("should keep provider defaults biased toward fast/value models", () => {
+      expect(DEFAULT_LLM_PROVIDER_MODELS.openai.model).toBe("gpt-5.4-mini")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.google.model).toBe("gemini-2.5-flash-lite")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.xai.model).toBe("grok-4.20-non-reasoning")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.bedrock.model).toBe("us.amazon.nova-micro-v1:0")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.groq.model).toBe("llama-3.1-8b-instant")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.deepinfra.model).toBe("meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.mistral.model).toBe("magistral-small-2507")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.cohere.model).toBe("command-r7b-12-2024")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.fireworks.model).toBe("accounts/fireworks/models/llama-v3p2-3b-instruct")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.cerebras.model).toBe("llama3.1-8b")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.moonshotai.model).toBe("kimi-k2-turbo")
+      expect(DEFAULT_LLM_PROVIDER_MODELS.huggingface.model).toBe("meta-llama/Llama-3.1-8B-Instruct")
+    })
+
+    it("should keep selector-backed provider defaults in their provider model lists", () => {
+      for (const [provider, defaultModel] of Object.entries(DEFAULT_LLM_PROVIDER_MODELS)) {
+        if (defaultModel.isCustomModel || String(defaultModel.model) === "use-custom-model") {
+          continue
+        }
+
+        const providerModels = LLM_PROVIDER_MODELS[provider as keyof typeof LLM_PROVIDER_MODELS]
+        if (providerModels) {
+          expect(providerModels, `${provider} default model should be listed`).toContain(defaultModel.model)
+        }
+      }
+    })
+
     it("should return the documented floor for GPT-5 model-specific reasoning", () => {
+      const gpt55Options = getProviderOptions("gpt-5.5", "openai")
+      expect(gpt55Options.openai?.reasoningEffort).toBe("none")
+
       const gpt54ProOptions = getProviderOptions("gpt-5.4-pro", "openai")
       expect(gpt54ProOptions.openai?.reasoningEffort).toBe("medium")
 
@@ -114,6 +193,12 @@ describe("getProviderOptions", () => {
     it("should return low/disabled defaults for more mainstream reasoning providers", () => {
       const grokOptions = getProviderOptions("grok-4-fast-reasoning", "xai")
       expect(grokOptions.xai?.reasoningEffort).toBe("low")
+
+      const grok420Options = getProviderOptions("grok-4.20-reasoning", "xai")
+      expect(grok420Options.xai?.reasoningEffort).toBe("low")
+
+      const grokCodeOptions = getProviderOptions("grok-code-fast-1", "xai")
+      expect(grokCodeOptions.xai?.reasoningEffort).toBe("low")
 
       const grok41FastOptions = getProviderOptions("grok-4-1-fast-reasoning", "xai")
       expect(grok41FastOptions).toEqual({})
