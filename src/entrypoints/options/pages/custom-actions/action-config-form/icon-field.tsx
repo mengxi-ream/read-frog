@@ -168,7 +168,6 @@ export const IconField = withForm({
                 <InputGroupInput
                   value={field.state.value ?? ""}
                   placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.iconField.inputPlaceholder")}
-                  className="px-0"
                   aria-invalid={hasError}
                   onBlur={field.handleBlur}
                   onChange={(e) => {
