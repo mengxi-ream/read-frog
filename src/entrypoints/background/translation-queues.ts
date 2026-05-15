@@ -227,7 +227,7 @@ export async function setUpWebPageTranslationQueue() {
   })
 
   onMessage("enqueueTranslateRequest", async (message) => {
-    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webContent, webSummary } } = message
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webDescription, webContent, webSummary } } = message
 
     // Check cache first
     if (hash) {
@@ -240,6 +240,7 @@ export async function setUpWebPageTranslationQueue() {
     let result = ""
     const context: WebPagePromptContext = {
       webTitle: normalizePromptContextValue(webTitle),
+      webDescription: normalizePromptContextValue(webDescription),
       webContent: normalizePromptContextValue(webContent),
       webSummary: normalizePromptContextValue(webSummary),
     }
@@ -302,7 +303,7 @@ export async function setUpSubtitlesTranslationQueue() {
   })
 
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
-    const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, summary } } = message
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, videoDescription, summary } } = message
 
     if (hash) {
       const cached = await db.translationCache.get(hash)
@@ -314,6 +315,7 @@ export async function setUpSubtitlesTranslationQueue() {
     let result = ""
     const context: SubtitlePromptContext = {
       videoTitle: normalizePromptContextValue(videoTitle),
+      videoDescription: normalizePromptContextValue(videoDescription),
       videoSummary: normalizePromptContextValue(summary),
     }
 

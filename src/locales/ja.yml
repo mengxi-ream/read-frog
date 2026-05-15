@@ -491,6 +491,7 @@ options:
           input: 翻訳するテキスト内容
           targetLanguage: 目標言語
           webTitle: ウェブページタイトル
+          webDescription: ページメタデータのウェブページ説明
           webContent: ウェブページ本文（先頭 2000 文字に切り詰め）
           webSummary: ウェブページ要約（AI スマートコンテキストが必要）
         save: 保存
@@ -819,6 +820,7 @@ options:
           input: 翻訳する字幕テキスト
           targetLanguage: 対象言語
           videoTitle: 動画タイトル
+          videoDescription: ページメタデータの動画説明
           videoSummary: 動画要約（AI スマートコンテキストが必要）
   whatsNew:
     title: 新機能

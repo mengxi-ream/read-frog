@@ -491,6 +491,7 @@ options:
           input: Çevrilecek metin içeriği
           targetLanguage: Hedef dil
           webTitle: Web sayfası başlığı
+          webDescription: Sayfa meta verilerinden web sayfası açıklaması
           webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
           webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
         save: Değişiklikleri Kaydet
@@ -819,6 +820,7 @@ options:
           input: Çevrilecek altyazı metni
           targetLanguage: Hedef dil
           videoTitle: Video başlığı
+          videoDescription: Sayfa meta verilerinden video açıklaması
           videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
   whatsNew:
     title: Yenilikler

@@ -606,6 +606,7 @@ options:
           input: Contenido de texto a traducir
           targetLanguage: Idioma de destino
           webTitle: Título de la página web
+          webDescription: Descripción de la página web desde los metadatos
           webContent: Contenido de la página web (truncado a los primeros 2000 caracteres)
           webSummary: Resumen de la página web (requiere contexto inteligente de IA)
         save: Guardar cambios
@@ -934,6 +935,7 @@ options:
           input: Texto de subtítulos a traducir
           targetLanguage: Idioma de destino
           videoTitle: Título del video
+          videoDescription: Descripción del video desde los metadatos de la página
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
   whatsNew:
     title: Novedades

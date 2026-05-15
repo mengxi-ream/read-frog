@@ -491,6 +491,7 @@ options:
           input: 需要翻譯的文字內容
           targetLanguage: 目標語言
           webTitle: 網頁標題
+          webDescription: 頁面中繼資料的網頁描述
           webContent: 網頁正文內容（截斷到前 2000 個字元）
           webSummary: 網頁摘要（需啟用 AI 智慧上下文）
         save: 保存
@@ -819,6 +820,7 @@ options:
           input: 要翻譯的字幕文字
           targetLanguage: 目標語言
           videoTitle: 影片標題
+          videoDescription: 頁面中繼資料的影片描述
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
   whatsNew:
     title: 最近更新

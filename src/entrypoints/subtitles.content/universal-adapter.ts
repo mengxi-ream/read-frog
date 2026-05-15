@@ -10,6 +10,7 @@ import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
+import { getDocumentDescription } from "@/utils/content/metadata"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
@@ -499,6 +500,7 @@ export class UniversalVideoAdapter {
 
     const videoContext: SubtitlesVideoContext = {
       videoTitle: document.title || "",
+      videoDescription: getDocumentDescription(document),
       subtitlesTextContent: this.sessionSubtitles.map(f => f.text).join(""),
     }
 

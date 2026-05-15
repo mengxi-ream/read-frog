@@ -151,6 +151,7 @@ describe("translation queue helpers", () => {
         scheduleAt: Date.now(),
         hash: "subtitle-hash",
         videoTitle: "Video title",
+        videoDescription: "Video description",
         summary: "Ready summary",
       },
     })
@@ -166,6 +167,7 @@ describe("translation queue helpers", () => {
         isBatch: true,
         context: {
           videoTitle: "Video title",
+          videoDescription: "Video description",
           videoSummary: "Ready summary",
         },
       }),
@@ -185,6 +187,7 @@ describe("translation queue helpers", () => {
         scheduleAt: Date.now(),
         hash: "webpage-hash",
         webTitle: "Page title",
+        webDescription: "Page description",
         webContent: "Page body",
         webSummary: "Ready summary",
       },
@@ -200,6 +203,7 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         context: {
           webTitle: "Page title",
+          webDescription: "Page description",
           webContent: "Page body",
           webSummary: "Ready summary",
         },

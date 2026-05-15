@@ -606,6 +606,7 @@ options:
           input: 需要翻译的文本内容
           targetLanguage: 目标语言
           webTitle: 网页标题
+          webDescription: 页面元信息中的网页描述
           webContent: 网页正文内容（截断到前 2000 个字符）
           webSummary: 网页摘要（需启用 AI 智能上下文）
         save: 保存
@@ -934,6 +935,7 @@ options:
           input: 要翻译的字幕文本
           targetLanguage: 目标语言
           videoTitle: 视频标题
+          videoDescription: 页面元信息中的视频描述
           videoSummary: 视频摘要（需启用 AI 智能上下文）
   whatsNew:
     title: 最近更新

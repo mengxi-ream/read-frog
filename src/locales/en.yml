@@ -606,6 +606,7 @@ options:
           input: Text content to translate
           targetLanguage: Target language
           webTitle: Webpage title
+          webDescription: Webpage description from page metadata
           webContent: Webpage content (truncated to the first 2000 characters)
           webSummary: Webpage summary (requires AI Smart Context)
         save: Save Changes
@@ -934,6 +935,7 @@ options:
           input: Subtitle text to translate
           targetLanguage: Target language
           videoTitle: Video title
+          videoDescription: Video description from page metadata
           videoSummary: Video summary (requires AI Smart Context)
   whatsNew:
     title: What's New

@@ -9,6 +9,7 @@ import {
   getTokenCellText,
   INPUT,
   TARGET_LANGUAGE,
+  VIDEO_DESCRIPTION,
   VIDEO_SUMMARY,
   VIDEO_TITLE,
 } from "../constants/prompt"
@@ -48,6 +49,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
 
   // Build title and summary replacement values
   const title = resolvePromptReplacementValue(options?.context?.videoTitle, "No title available")
+  const description = resolvePromptReplacementValue(options?.context?.videoDescription, "No description available")
   const summary = resolvePromptReplacementValue(options?.context?.videoSummary, "No summary available")
 
   // Replace tokens in both prompts
@@ -56,6 +58,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
       .replaceAll(getTokenCellText(TARGET_LANGUAGE), targetLang)
       .replaceAll(getTokenCellText(INPUT), input)
       .replaceAll(getTokenCellText(VIDEO_TITLE), title)
+      .replaceAll(getTokenCellText(VIDEO_DESCRIPTION), description)
       .replaceAll(getTokenCellText(VIDEO_SUMMARY), summary)
 
   return {

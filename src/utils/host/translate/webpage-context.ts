@@ -1,4 +1,5 @@
 import type { WebPageContext } from "@/types/content"
+import { getDocumentDescription } from "@/utils/content/metadata"
 import { logger } from "@/utils/logger"
 import { truncateWebPageContent } from "./webpage-content"
 
@@ -48,6 +49,7 @@ export async function getOrCreateWebPageContext(): Promise<CachedWebPageContext 
   cachedWebPageContext = {
     url: currentUrl,
     webTitle: document.title || "",
+    webDescription: getDocumentDescription(document),
     webContent: truncateWebPageContent(await extractWebpageContent()),
   }
   return cachedWebPageContext
