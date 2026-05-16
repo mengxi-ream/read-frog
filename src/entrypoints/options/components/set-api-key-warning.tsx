@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { Link } from "react-router"
+import { i18n } from "#imports"
 
 export function SetApiKeyWarning() {
   return (

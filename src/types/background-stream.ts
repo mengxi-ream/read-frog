@@ -1,5 +1,5 @@
-import type { Browser } from "#imports"
 import type { JSONValue, StreamTextOnErrorCallback } from "ai"
+import type { Browser } from "#imports"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
 
 interface BaseBackgroundStreamSerializablePayload {

@@ -1,8 +1,8 @@
-import { i18n } from "#imports"
 import { IconAlertCircle } from "@tabler/icons-react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
 import { toast } from "sonner"
+import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,

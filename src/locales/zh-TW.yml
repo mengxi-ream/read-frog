@@ -350,7 +350,17 @@ options:
           actions: 操作
         form:
           name: 名稱
-          icon: 圖示 (Iconify)
+          icon: 圖示
+          iconField:
+            chooseAriaLabel: 選擇圖示
+            chooseTitle: 選擇圖示
+            inputPlaceholder: 輸入圖示名稱
+            helpAriaLabel: 更多圖示說明
+            helpTitle: 沒找到想要的圖示？
+            helpStepBrowsePrefix: "在 "
+            helpStepBrowseSuffix: " 瀏覽圖示"
+            helpStepCopyPrefix: 複製圖示名稱，例如
+            helpStepCopySuffix: ，然後貼到輸入框中。
           provider: 提供商（需支援結構化輸出）
           selectProvider: 選擇提供商
           systemPrompt: 系統提示詞
@@ -588,6 +598,8 @@ options:
     skipLanguages:
       title: 基於語言的自動跳過
       description: 當檢測到指定語言時自動跳過段落翻譯
+      targetLanguageSkip: 跳過目標語言
+      targetLanguageSkipDescription: 翻譯前預先偵測段落是否已是目標語言；命中時不發送翻譯請求。關閉後仍保留譯文與原文相同則不顯示的後置保護。
       selectLanguages: 選擇語言
       detection:
         label: 語言偵測

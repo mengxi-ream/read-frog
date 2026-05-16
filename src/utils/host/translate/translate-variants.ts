@@ -68,7 +68,10 @@ async function translateTextUsingPageConfig(
 
   const providerConfig = resolveProviderConfig(config, "translate")
 
-  if (await isTextAlreadyInTargetLanguage(preparedText, config.language.targetCode)) {
+  if (
+    config.translate.page.enableTargetLanguageSkip
+    && await isTextAlreadyInTargetLanguage(preparedText, config.language.targetCode)
+  ) {
     logger.info(`translateTextForPage: skipping translation because text is already in target language. text: ${preparedText}`)
     return ""
   }

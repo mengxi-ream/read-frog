@@ -350,7 +350,17 @@ options:
           actions: Действия
         form:
           name: Название
-          icon: Иконка (Iconify)
+          icon: Иконка
+          iconField:
+            chooseAriaLabel: Выбрать иконку
+            chooseTitle: Выберите иконку
+            inputPlaceholder: Введите имя иконки
+            helpAriaLabel: Справка по иконкам
+            helpTitle: Не нашли нужную иконку?
+            helpStepBrowsePrefix: Посмотреть иконки на
+            helpStepBrowseSuffix: ""
+            helpStepCopyPrefix: "Скопируйте имя иконки, например "
+            helpStepCopySuffix: ", и вставьте его в поле."
           provider: Провайдер (требуется поддержка структурированного вывода)
           selectProvider: Выберите провайдера
           systemPrompt: Системный промпт
@@ -588,6 +598,8 @@ options:
     skipLanguages:
       title: Автопропуск по языку
       description: Автоматически пропускать перевод абзацев при обнаружении указанных языков
+      targetLanguageSkip: Пропускать целевой язык
+      targetLanguageSkipDescription: Перед переводом определяет, написан ли абзац уже на целевом языке. Совпадающий текст пропускается без отправки запроса. Отключение этого параметра не меняет последующую защиту, которая скрывает неизменившийся результат перевода.
       selectLanguages: Выберите языки
       detection:
         label: Определение языка

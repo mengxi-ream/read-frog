@@ -1,10 +1,10 @@
 import type { Config } from "@/types/config/config"
 import type { ProvidersConfig } from "@/types/config/provider"
-import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
+import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,

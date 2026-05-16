@@ -402,7 +402,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.deeplx"),
     enabled: true,
     provider: "deeplx",
-    baseURL: "https://api.deeplx.org",
+    baseURL: "https://api.deeplx.org/{{apiKey}}/translate",
   },
   "deepl": {
     id: "deepl-default",

@@ -1,9 +1,9 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useMutation } from "@tanstack/react-query"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
 import { toast } from "sonner"
+import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,

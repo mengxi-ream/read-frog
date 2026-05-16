@@ -11,6 +11,7 @@ import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
+import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { normalizeTranslationOutput } from "@/utils/host/translate/translation-output-normalization"
@@ -345,6 +346,13 @@ export async function setUpSubtitlesTranslationQueue() {
     }
 
     return await getOrGenerateSubtitleSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
+  })
+
+  onMessage("microsoftBatchTranslate", async (message) => {
+    const { texts, fromLang, toLang } = message.data
+    const hash = Sha256Hex("ms-batch", fromLang, toLang, ...texts)
+    const thunk = () => microsoftTranslate(texts, fromLang, toLang)
+    return requestQueue.enqueue(thunk, Date.now(), hash)
   })
 
   onMessage("setSubtitlesRequestQueueConfig", (message) => {

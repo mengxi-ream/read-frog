@@ -1,7 +1,7 @@
 import type { VariantProps } from "class-variance-authority"
-import { browser } from "#imports"
 import { cva } from "class-variance-authority"
 import { useEffect, useReducer, useRef } from "react"
+import { browser } from "#imports"
 import { resolveContentScriptAssetBlob, shouldProxyAssetUrl } from "@/utils/content-script/background-asset-url"
 import { cn } from "@/utils/styles/utils"
 

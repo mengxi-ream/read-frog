@@ -350,7 +350,17 @@ options:
           actions: 작업
         form:
           name: 이름
-          icon: 아이콘 (Iconify)
+          icon: 아이콘
+          iconField:
+            chooseAriaLabel: 아이콘 선택
+            chooseTitle: 아이콘 선택
+            inputPlaceholder: 아이콘 이름 입력
+            helpAriaLabel: 아이콘 도움말 더보기
+            helpTitle: 원하는 아이콘을 못 찾았나요?
+            helpStepBrowsePrefix: ""
+            helpStepBrowseSuffix: 에서 아이콘 찾아보기
+            helpStepCopyPrefix: "예를 들어 "
+            helpStepCopySuffix: " 같은 아이콘 이름을 복사해 입력란에 붙여넣으세요."
           provider: 제공업체(구조화 출력 지원 필요)
           selectProvider: 제공업체 선택
           systemPrompt: 시스템 프롬프트
@@ -588,6 +598,8 @@ options:
     skipLanguages:
       title: 언어 기반 자동 건너뛰기
       description: 지정된 언어가 감지되면 단락 번역을 자동으로 건너뜁니다
+      targetLanguageSkip: 대상 언어 건너뛰기
+      targetLanguageSkipDescription: 번역 전에 단락이 이미 대상 언어인지 미리 감지합니다. 일치하는 텍스트는 요청을 보내지 않고 건너뜁니다. 이 옵션을 꺼도 번역 결과가 원문과 같으면 숨기는 후처리 보호는 유지됩니다.
       selectLanguages: 언어 선택
       detection:
         label: 언어 감지

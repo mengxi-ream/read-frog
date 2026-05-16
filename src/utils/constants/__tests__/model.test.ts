@@ -194,6 +194,31 @@ describe("getProviderOptions", () => {
       expect(cerebrasOptions.cerebras?.reasoningEffort).toBe("none")
     })
 
+    it("should apply Volcengine Doubao Seed thinking defaults with optional version suffixes", () => {
+      const twoLiteVersionedOptions = getProviderOptions("doubao-seed-2-0-lite-260428", "volcengine")
+      expect(twoLiteVersionedOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const oneFlashVersionedOptions = getProviderOptions("doubao-seed-1-6-flash-250828", "volcengine")
+      expect(oneFlashVersionedOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const codePreviewVersionedOptions = getProviderOptions("doubao-seed-code-preview-251028", "volcengine")
+      expect(codePreviewVersionedOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const twoLiteOptions = getProviderOptions("doubao-seed-2-0-lite", "volcengine")
+      expect(twoLiteOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const oneSixOptions = getProviderOptions("doubao-seed-1-6", "volcengine")
+      expect(oneSixOptions.volcengine?.thinking).toEqual({ type: "disabled" })
+
+      const prefixedOptions = getProviderOptions("volcengine/doubao-seed-1-8", "openai-compatible")
+      expect(prefixedOptions["openai-compatible"]?.thinking).toEqual({ type: "disabled" })
+    })
+
+    it("should not apply Doubao Seed thinking defaults to unrelated Doubao models", () => {
+      expect(getProviderOptions("doubao-seedance-2-0-pro", "volcengine")).toEqual({})
+      expect(getProviderOptions("doubao-seed-1-6-thinking-250715", "volcengine")).toEqual({})
+    })
+
     it("should apply broadened Qwen defaults to provider-prefixed model ids", () => {
       const groqOptions = getProviderOptions("qwen/qwen3-32b", "groq")
       expect(groqOptions.groq?.enableThinking).toBe(false)

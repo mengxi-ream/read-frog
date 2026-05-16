@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
+import { i18n } from "#imports"
 import {
   Select,
   SelectContent,

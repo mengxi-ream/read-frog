@@ -1,13 +1,12 @@
 import type { ContentScriptContext } from "#imports"
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
-import { storage } from "#imports"
-import { DEFAULT_CONFIG, DETECTED_CODE_STORAGE_KEY } from "@/utils/constants/config"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { detectPageLanguageLightweight } from "@/utils/content/page-language"
 import { ensurePresetStyles } from "@/utils/host/translate/ui/style-injector"
 import { logger } from "@/utils/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
+import { areSamePageTranslationOrigin } from "@/utils/url"
 import { setupUrlChangeListener } from "./listen"
 import { mountHostToast } from "./mount-host-toast"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
@@ -34,6 +33,11 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
 
+  const detectAndReportPageLanguage = async (url: string) => {
+    const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
+    void sendMessage("reportDetectedPageLanguage", { url, detectedCodeOrUnd })
+  }
+
   // For late-loading iframes: check if translation is already enabled for this tab
   let translationEnabled = false
   try {
@@ -51,15 +55,16 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     if (from !== to) {
       logger.info("URL changed from", from, "to", to)
       if (manager.isActive) {
-        manager.stop()
+        if (areSamePageTranslationOrigin(from, to)) {
+          await manager.restart()
+        }
+        else {
+          manager.stop()
+        }
       }
       // Only the top frame should detect and set language to avoid race conditions from iframes
       if (window === window.top) {
-        const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
-        const detectedCode: LangCodeISO6393 = detectedCodeOrUnd === "und" ? "eng" : detectedCodeOrUnd
-        await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, detectedCode)
-        // Notify background script that URL has changed, let it decide whether to automatically enable translation
-        void sendMessage("checkAndAskAutoPageTranslation", { url: to, detectedCodeOrUnd })
+        await detectAndReportPageLanguage(to)
       }
     }
   }
@@ -87,6 +92,12 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
         enabled ? void manager.start() : manager.stop()
       })
 
+  const cleanupDetectedLanguageRefreshListener = window === window.top
+    ? onMessage("refreshDetectedPageLanguage", () => {
+        void detectAndReportPageLanguage(window.location.href)
+      })
+    : () => {}
+
   ctx.onInvalidated(() => {
     removeHostToast()
     cleanupUrlListener()
@@ -95,6 +106,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     cleanupTranslationShortcut()
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
+    cleanupDetectedLanguageRefreshListener()
     window.removeEventListener("extension:URLChange", handleExtensionUrlChange)
     window.__READ_FROG_HOST_INJECTED__ = false
     clearEffectiveSiteControlUrl()
@@ -102,11 +114,6 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   // Only the top frame should detect and set language to avoid race conditions from iframes
   if (window === window.top) {
-    const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
-    const initialDetectedCode: LangCodeISO6393 = detectedCodeOrUnd === "und" ? "eng" : detectedCodeOrUnd
-    await storage.setItem<LangCodeISO6393>(`local:${DETECTED_CODE_STORAGE_KEY}`, initialDetectedCode)
-
-    // Check if auto-translation should be enabled for initial page load
-    void sendMessage("checkAndAskAutoPageTranslation", { url: window.location.href, detectedCodeOrUnd })
+    await detectAndReportPageLanguage(window.location.href)
   }
 }

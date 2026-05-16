@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { IconTrash } from "@tabler/icons-react"
 import { useState } from "react"
+import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,

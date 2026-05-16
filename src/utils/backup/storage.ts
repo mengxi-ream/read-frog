@@ -1,7 +1,7 @@
 import type { ConfigBackup, ConfigBackupMetadata, ConfigBackupWithMetadata } from "@/types/backup"
 import type { Config } from "@/types/config/config"
-import { storage } from "#imports"
 import { dequal } from "dequal"
+import { storage } from "#imports"
 import { BACKUP_ID_PREFIX, MAX_BACKUPS_COUNT } from "@/utils/constants/backup"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
 import { getRandomUUID } from "@/utils/crypto-polyfill"

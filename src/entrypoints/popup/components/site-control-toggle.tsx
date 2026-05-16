@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { useAtomValue, useSetAtom } from "jotai"
+import { i18n } from "#imports"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { isIgnoreTabAtom } from "../atoms/ignore"

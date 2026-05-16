@@ -1,5 +1,33 @@
 # @read-frog/extension
 
+## 1.33.7
+
+### Patch Changes
+
+- [#1472](https://github.com/mengxi-ream/read-frog/pull/1472) [`096eb8d`](https://github.com/mengxi-ream/read-frog/commit/096eb8dffbe96d4fbe295db5b1d7e5c8691e4fda) Thanks [@li-yiou](https://github.com/li-yiou)! - Add icon picker and help popover in custom action icon field.
+
+- [#1524](https://github.com/mengxi-ream/read-frog/pull/1524) [`21e10f3`](https://github.com/mengxi-ream/read-frog/commit/21e10f34c2244954ee1ebb4a152fcce8d9d768a8) Thanks [@taiiiyang](https://github.com/taiiiyang)! - chore(config): switch default translation provider from Google to Microsoft
+
+- [#1520](https://github.com/mengxi-ream/read-frog/pull/1520) [`6265ef2`](https://github.com/mengxi-ream/read-frog/commit/6265ef2b9e2b51fd4b2fb7815efac81583fff3e2) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(translate): add Microsoft batch translation support for subtitle warmup
+
+- [#1494](https://github.com/mengxi-ream/read-frog/pull/1494) [`63970bb`](https://github.com/mengxi-ream/read-frog/commit/63970bb3e02b086c8ea3f92b754049cf50771922) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(youtube): refresh overlay subtitles after caption track changes
+
+- [#1495](https://github.com/mengxi-ream/read-frog/pull/1495) [`e84c3cf`](https://github.com/mengxi-ream/read-frog/commit/e84c3cf3f31b0f21fc881ca3608f96645159e3bb) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): skip same-language subtitle translation
+
+## 1.33.6
+
+### Patch Changes
+
+- [#1492](https://github.com/mengxi-ream/read-frog/pull/1492) [`665ca79`](https://github.com/mengxi-ream/read-frog/commit/665ca794fd46c9475463156d2d5841582eaa02d2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): make DeepLX URLs explicit and migrate existing configs
+
+- [#1503](https://github.com/mengxi-ream/read-frog/pull/1503) [`c26ebd7`](https://github.com/mengxi-ream/read-frog/commit/c26ebd772b73de75bda2ec6dc596f83b45381c87) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix: keep page translation enabled across same-origin navigation
+
+- [#1504](https://github.com/mengxi-ream/read-frog/pull/1504) [`b179e73`](https://github.com/mengxi-ream/read-frog/commit/b179e739e579da56d3d064a33cfa12f540d5c2e6) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): scope detected source language to the active tab
+
+- [#1505](https://github.com/mengxi-ream/read-frog/pull/1505) [`cabe649`](https://github.com/mengxi-ream/read-frog/commit/cabe649a8b86347edb75d3b78ca65b6cb0b188b3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translate): allow disabling target-language precheck skips
+
+- [#1502](https://github.com/mengxi-ream/read-frog/pull/1502) [`589f584`](https://github.com/mengxi-ream/read-frog/commit/589f584d65b1675d7977bb482dccf8a9ec3c915f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(providers): disable thinking by default for Doubao Seed models
+
 ## 1.33.5
 
 ### Patch Changes

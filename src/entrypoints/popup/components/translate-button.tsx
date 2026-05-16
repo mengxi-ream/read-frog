@@ -1,5 +1,5 @@
-import { browser, i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
+import { browser, i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"

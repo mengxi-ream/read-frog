@@ -4,7 +4,6 @@ import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { sendMessage } from "@/utils/message"
 
 type DeepLXProviderConfig = Extract<ProviderConfig, { provider: "deeplx" }>
-const TRAILING_SLASHES_RE = /\/+$/
 const API_KEY_PLACEHOLDER_RE = /\{\{apiKey\}\}/g
 
 export async function deeplxTranslate(
@@ -99,34 +98,13 @@ async function parseDeepLXResponse(resp: { ok: boolean, status: number, statusTe
 }
 
 export function buildDeepLXUrl(baseURL: string, apiKey?: string): string {
-  // Remove trailing slash from baseURL
-  const cleanBaseURL = baseURL.replace(TRAILING_SLASHES_RE, "")
-
-  // If baseURL contains {{apiKey}} placeholder, replace it with the API key
-  if (cleanBaseURL.includes("{{apiKey}}")) {
-    if (!apiKey) {
+  if (baseURL.includes("{{apiKey}}")) {
+    const normalizedApiKey = apiKey?.trim()
+    if (!normalizedApiKey) {
       throw new Error("API key is required when using {{apiKey}} placeholder in DeepLX baseURL")
     }
-    return cleanBaseURL.replace(API_KEY_PLACEHOLDER_RE, apiKey)
+    return baseURL.replace(API_KEY_PLACEHOLDER_RE, normalizedApiKey)
   }
 
-  // Special logic for api.deeplx.org: insert token between .org and /translate
-  if (cleanBaseURL === "https://api.deeplx.org") {
-    if (apiKey) {
-      return `https://api.deeplx.org/${apiKey}/translate`
-    }
-    return `${cleanBaseURL}/translate`
-  }
-
-  // For baseURL without /translate, add it at the end
-  if (!cleanBaseURL.endsWith("/translate")) {
-    if (apiKey) {
-      return `${cleanBaseURL}/${apiKey}/translate`
-    }
-    return `${cleanBaseURL}/translate`
-  }
-
-  // If baseURL already ends with /translate, use it as-is
-  // This handles cases like "https://api.example.com/v1/translate"
-  return cleanBaseURL
+  return baseURL
 }

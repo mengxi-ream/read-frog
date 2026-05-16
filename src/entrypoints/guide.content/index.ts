@@ -1,6 +1,6 @@
 import type { Config } from "@/types/config/config"
-import { defineContentScript, storage } from "#imports"
 import { kebabCase } from "case-anything"
+import { defineContentScript, storage } from "#imports"
 import { env } from "@/env"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"

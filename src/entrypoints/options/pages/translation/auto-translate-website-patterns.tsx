@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { ConfigCard } from "../../components/config-card"
 import { PatternsTable } from "../../components/patterns-table"

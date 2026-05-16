@@ -1,6 +1,6 @@
 import type { ThemeMode } from "@/types/config/theme"
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
+import { i18n } from "#imports"
 import { useTheme } from "@/components/providers/theme-provider"
 import {
   Select,

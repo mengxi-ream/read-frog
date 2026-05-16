@@ -17,9 +17,8 @@ export const LAST_SYNCED_CONFIG_STORAGE_KEY = "lastSyncedConfig"
 export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
-export const DETECTED_CODE_STORAGE_KEY = "detectedCode"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 70
+export const CONFIG_SCHEMA_VERSION = 72
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -52,7 +51,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   translate: {
-    providerId: "google-translate-default",
+    providerId: "microsoft-translate-default",
     mode: "bilingual",
     node: {
       enabled: false,
@@ -70,6 +69,7 @@ export const DEFAULT_CONFIG: Config = {
       },
       minCharactersPerNode: DEFAULT_MIN_CHARACTERS_PER_NODE,
       minWordsPerNode: DEFAULT_MIN_WORDS_PER_NODE,
+      enableTargetLanguageSkip: true,
       skipLanguages: [],
     },
     enableAIContentAware: false,
@@ -107,7 +107,7 @@ export const DEFAULT_CONFIG: Config = {
     features: {
       translate: {
         enabled: true,
-        providerId: "google-translate-default",
+        providerId: "microsoft-translate-default",
       },
       speak: {
         enabled: true,
@@ -126,7 +126,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   inputTranslation: {
     enabled: true,
-    providerId: "google-translate-default",
+    providerId: "microsoft-translate-default",
     fromLang: "targetCode",
     toLang: "sourceCode",
     enableCycle: false,
@@ -135,7 +135,7 @@ export const DEFAULT_CONFIG: Config = {
   videoSubtitles: {
     enabled: true,
     autoStart: false,
-    providerId: "google-translate-default",
+    providerId: "microsoft-translate-default",
     style: {
       displayMode: DEFAULT_DISPLAY_MODE,
       translationPosition: DEFAULT_TRANSLATION_POSITION,
