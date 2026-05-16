@@ -1,7 +1,7 @@
-import { i18n } from "#imports"
 import { IconRefresh } from "@tabler/icons-react"
 import { useSetAtom } from "jotai"
 import { useState } from "react"
+import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,

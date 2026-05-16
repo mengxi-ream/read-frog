@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { useAtom } from "jotai"
 import { toast } from "sonner"
+import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"

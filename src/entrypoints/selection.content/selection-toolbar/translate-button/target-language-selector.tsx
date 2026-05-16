@@ -1,8 +1,8 @@
-import { i18n } from "#imports"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { IconChevronDown } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import { useMemo } from "react"
+import { i18n } from "#imports"
 import { filterLanguage, getTargetLanguageItems } from "@/components/language-combobox-options"
 import { Button } from "@/components/ui/base-ui/button"
 import {

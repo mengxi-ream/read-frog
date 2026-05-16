@@ -1,7 +1,7 @@
-import { i18n } from "#imports"
 import { IconDownload, IconLoader2 } from "@tabler/icons-react"
 import { useState } from "react"
 import { toast } from "sonner"
+import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"

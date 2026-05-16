@@ -1,6 +1,6 @@
-import { browser, storage } from "#imports"
 import { semanticVersionSchema } from "@read-frog/definitions"
 import { z } from "zod"
+import { browser, storage } from "#imports"
 import { logger } from "./logger"
 import { sendMessage } from "./message"
 

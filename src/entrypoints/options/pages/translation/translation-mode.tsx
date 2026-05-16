@@ -1,7 +1,7 @@
 import type { TranslationMode as TranslationModeType } from "@/types/config/translate"
-import { i18n } from "#imports"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import {
   Select,
   SelectContent,

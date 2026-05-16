@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { IconSearch } from "@tabler/icons-react"
 import { useSetAtom } from "jotai"
+import { i18n } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png"
 import {
   InputGroup,

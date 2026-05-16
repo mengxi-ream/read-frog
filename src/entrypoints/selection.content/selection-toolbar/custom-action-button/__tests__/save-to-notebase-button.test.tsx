@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { i18n } from "#imports"
 import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it } from "vitest"
+import { i18n } from "#imports"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { SaveToNotebaseButton } from "../save-to-notebase-button"

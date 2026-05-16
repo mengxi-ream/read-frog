@@ -1,5 +1,5 @@
-import { browser, storage } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { browser, storage } from "#imports"
 import { DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
 import { getDetectedCodeStateKey, getTranslationStateKey } from "@/utils/constants/storage-keys"
 

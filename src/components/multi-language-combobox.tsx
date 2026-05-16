@@ -1,5 +1,4 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import { i18n } from "#imports"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
 import {
@@ -8,6 +7,7 @@ import {
 } from "@read-frog/definitions"
 import { camelCase } from "case-anything"
 import { useMemo } from "react"
+import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   Combobox,

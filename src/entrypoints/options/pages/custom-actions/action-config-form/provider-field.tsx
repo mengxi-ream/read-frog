@@ -1,7 +1,7 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { i18n } from "#imports"
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
+import { i18n } from "#imports"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { isLLMProviderConfig } from "@/types/config/provider"

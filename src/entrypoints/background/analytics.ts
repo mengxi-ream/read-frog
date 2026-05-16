@@ -1,7 +1,7 @@
 import type { CaptureResult } from "posthog-js/dist/module.no-external"
 import type { FeatureUsedEventProperties } from "@/types/analytics"
-import { storage } from "#imports"
 import posthog from "posthog-js/dist/module.no-external"
+import { storage } from "#imports"
 import { env } from "@/env"
 import {
   ANALYTICS_ENABLED_STORAGE_KEY,

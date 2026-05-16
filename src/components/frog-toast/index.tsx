@@ -1,8 +1,8 @@
-import { browser } from "#imports"
 import { kebabCase } from "case-anything"
 import * as React from "react"
-
 import { Toaster } from "sonner"
+
+import { browser } from "#imports"
 import frogIcon from "@/assets/icons/read-frog.png?url&no-inline"
 import { APP_NAME } from "@/utils/constants/app"
 

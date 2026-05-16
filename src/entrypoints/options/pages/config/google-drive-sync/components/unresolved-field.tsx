@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react"
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { dequal } from "dequal"
+import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { useConflictField } from "@/hooks/use-unresolved-field"
 import { cn } from "@/utils/styles/utils"

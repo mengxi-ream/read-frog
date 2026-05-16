@@ -1,7 +1,7 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Card } from "@/components/ui/base-ui/card"
 import { Label } from "@/components/ui/base-ui/label"

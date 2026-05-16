@@ -1,9 +1,9 @@
 import type { FloatingButtonSide } from "@/types/config/floating-button"
-import { browser, i18n } from "#imports"
 import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import { browser, i18n } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
   DropdownMenu,
