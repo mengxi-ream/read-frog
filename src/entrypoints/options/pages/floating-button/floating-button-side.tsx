@@ -1,6 +1,6 @@
 import type { FloatingButtonSide as FloatingButtonSideValue } from "@/types/config/floating-button"
-import { i18n } from "#imports"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import {
   Select,
   SelectContent,
