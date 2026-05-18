@@ -176,6 +176,7 @@ options:
         perplexity: AI nâng cao kiến thức thời gian thực cho bản dịch ngữ cảnh và hỗ trợ đọc
         vercel: Các mô hình AI tối ưu hóa cho dịch và phân tích nội dung web
         volcengine: Nền tảng AI đám mây của ByteDance cung cấp các mô hình Doubao cho dịch và đọc
+        stepfun: Nền tảng Stepfun (阶跃星辰) với API tương thích OpenAI; khuyến nghị step-2-mini cho dịch nhanh, chi phí thấp
         minimax: Nền tảng AI MiniMax cung cấp các mô hình MiniMax-M2 tiên tiến
         alibaba: Dòng mô hình Qwen của Alibaba Cloud với khả năng suy luận và đa ngôn ngữ tiên tiến
         moonshotai: Dòng mô hình Kimi của Moonshot AI với khả năng suy luận mạnh mẽ và ngữ cảnh dài

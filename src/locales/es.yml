@@ -177,6 +177,7 @@ options:
         perplexity: AI mejorada con conocimiento en tiempo real para traducciones contextuales y asistencia de lectura
         vercel: Modelos AI optimizados para traducción y análisis de contenido web
         volcengine: Plataforma cloud AI de ByteDance que ofrece modelos Doubao para traducción y lectura
+        stepfun: Plataforma Stepfun (阶跃星辰) con API compatible con OpenAI; se recomienda step-2-mini para traducción rápida y económica
         minimax: Plataforma MiniMax AI que ofrece modelos avanzados MiniMax-M2 para generación de texto
         alibaba: Serie de modelos Qwen de Alibaba Cloud con razonamiento avanzado y capacidades multilingües
         moonshotai: Serie de modelos Kimi de Moonshot AI con razonamiento sólido y capacidades de contexto largo

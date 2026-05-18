@@ -42,6 +42,7 @@ export const LLM_PROVIDER_MODELS = {
   "openrouter": ["x-ai/grok-4-fast:free", "openai/gpt-4.1-mini"],
   "ollama": ["gemma3:4b", "llama3.2:3b"],
   "volcengine": ["doubao-seed-1-6-flash-250828", "doubao-seed-1-6-lite-251015", "doubao-seed-1-6-251015"],
+  "stepfun": ["step-2-mini", "step-3.5-flash", "step-3.5-flash-2603", "step-2-16k", "step-1-32k", "step-1-8k"],
   "minimax": ["MiniMax-M2.7", "MiniMax-M2.7-highspeed", "MiniMax-M2.5", "MiniMax-M2.5-highspeed", "MiniMax-M2.1", "MiniMax-M2.1-highspeed", "MiniMax-M2", "MiniMax-M2-Stable"],
   "alibaba": ["qwen3-max", "qwen3.5-plus", "qwen3.5-flash", "qwen-plus", "qwen-flash", "qwen-turbo", "qwq-plus", "qwen3-coder-plus", "deepseek-v3.2", "deepseek-v3.1", "deepseek-r1", "deepseek-v3", "kimi-k2.5", "MiniMax-M2.5", "glm-5"],
   "moonshotai": ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k", "kimi-k2", "kimi-k2.5", "kimi-k2-thinking", "kimi-k2-thinking-turbo", "kimi-k2-turbo"],

@@ -177,6 +177,7 @@ options:
         perplexity: 实时知识增强 AI，提供语境化翻译和阅读辅助
         vercel: 针对网页内容翻译和分析优化的 AI 模型
         volcengine: 字节跳动旗下云平台，提供豆包系列大模型
+        stepfun: 阶跃星辰大模型平台，兼容 OpenAI 接口，翻译推荐使用性价比较高的 step-2-mini
         minimax: MiniMax AI平台，提供先进的MiniMax-M2系列大模型
         alibaba: 阿里云通义千问系列模型，具备先进的推理和多语言能力
         moonshotai: 月之暗面Kimi系列模型，具备强大的推理和长上下文能力

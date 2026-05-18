@@ -64,6 +64,10 @@ const llmProviderConfigSchemaList = [
     provider: z.literal("volcengine"),
     model: createProviderModelSchema<"volcengine">("volcengine"),
   }),
+  baseAPIProviderConfigSchema.extend({
+    provider: z.literal("stepfun"),
+    model: createProviderModelSchema<"stepfun">("stepfun"),
+  }),
   baseCustomLLMProviderConfigSchema.extend({
     provider: z.literal("openai-compatible"),
     model: createProviderModelSchema<"openai-compatible">("openai-compatible"),

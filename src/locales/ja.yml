@@ -176,6 +176,7 @@ options:
         perplexity: 文脈的翻訳と読解支援のためのリアルタイム知識強化AI
         vercel: ウェブコンテンツの翻訳と分析に最適化されたAIモデル
         volcengine: ByteDanceのクラウドAIプラットフォーム、Doubaoモデルを提供
+        stepfun: Stepfun（阶跃星辰）のOpenAI互換APIプラットフォーム。翻訳には高コスパなstep-2-miniを推奨
         minimax: MiniMax AIプラットフォーム、先進的なMiniMax-M2モデルを提供
         alibaba: アリババクラウドのQwenモデルシリーズ、高度な推論と多言語機能を備える
         moonshotai: Moonshot AIのKimiモデルシリーズ、優れた推論と長コンテキスト能力

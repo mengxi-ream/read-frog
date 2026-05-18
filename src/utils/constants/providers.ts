@@ -4,6 +4,7 @@ import { i18n } from "#imports"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
+import stepfunLogo from "@/assets/providers/stepfun-color.png?url&no-inline"
 import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { env } from "@/env"
 import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, TRANSLATE_PROVIDER_TYPES } from "@/types/config/provider"
@@ -124,6 +125,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   "volcengine": {
     model: "doubao-seed-1-6-flash-250828",
     isCustomModel: true,
+    customModel: null,
+  },
+  "stepfun": {
+    model: "step-2-mini",
+    isCustomModel: false,
     customModel: null,
   },
   "minimax": {
@@ -284,6 +290,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn("volcengine-color"),
       name: "Volcengine",
       website: "https://www.volcengine.com/product/doubao",
+    },
+    "stepfun": {
+      logo: () => stepfunLogo,
+      name: "Stepfun",
+      website: "https://platform.stepfun.com",
     },
     "minimax": {
       logo: getLobeIconsCDNUrlFn("minimax-color"),
@@ -525,6 +536,15 @@ export const DEFAULT_PROVIDER_CONFIG = {
     provider: "volcengine",
     baseURL: "https://ark.cn-beijing.volces.com/api/v3",
     model: DEFAULT_LLM_PROVIDER_MODELS.volcengine,
+  },
+  "stepfun": {
+    id: "stepfun-default",
+    name: PROVIDER_ITEMS.stepfun.name,
+    description: i18n.t("options.apiProviders.providers.description.stepfun"),
+    enabled: true,
+    provider: "stepfun",
+    baseURL: "https://api.stepfun.com/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.stepfun,
   },
   "minimax": {
     id: "minimax-default",

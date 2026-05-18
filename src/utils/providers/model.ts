@@ -29,12 +29,14 @@ import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
 import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
+import { createStepfun } from "./stepfun"
 
 const CREATE_AI_MAPPER = {
   "siliconflow": createOpenAICompatible,
   "tensdaq": createOpenAICompatible,
   "ai302": createOpenAICompatible,
   "volcengine": createOpenAICompatible,
+  "stepfun": createStepfun,
   "openrouter": createOpenRouter,
   "openai-compatible": createOpenAICompatible,
   "openai": createOpenAI,

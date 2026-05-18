@@ -176,6 +176,7 @@ options:
         perplexity: Bağlamsal çeviriler ve okuma yardımı için gerçek zamanlı bilgi ile güçlendirilmiş AI
         vercel: Web içeriği çevirisi ve analizi için optimize edilmiş AI modelleri
         volcengine: Çeviri ve okuma için Doubao modelleri sunan ByteDance'ın bulut AI platformu
+        stepfun: OpenAI uyumlu API'ye sahip Stepfun (阶跃星辰) platformu; hızlı ve düşük maliyetli çeviri için step-2-mini önerilir
         minimax: Gelişmiş MiniMax-M2 modelleri sunan MiniMax AI platformu
         alibaba: Alibaba Cloud'un Qwen model serisi, gelişmiş muhakeme ve çok dilli yeteneklerle
         moonshotai: Moonshot AI'ın güçlü muhakeme ve uzun bağlam yeteneklerine sahip Kimi model serisi
