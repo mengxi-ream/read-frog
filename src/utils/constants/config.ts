@@ -58,8 +58,7 @@ export const DEFAULT_CONFIG: Config = {
       hotkey: "control",
     },
     page: {
-      // TODO: change this to "all" for users once our translation algorithm can handle most cases elegantly
-      range: import.meta.env.DEV ? "all" : "main",
+      range: "all",
       autoTranslatePatterns: ["news.ycombinator.com"],
       autoTranslateLanguages: [],
       shortcut: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
