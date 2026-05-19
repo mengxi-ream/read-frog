@@ -1,5 +1,17 @@
 # @read-frog/extension
 
+## 1.33.8
+
+### Patch Changes
+
+- [#1536](https://github.com/mengxi-ream/read-frog/pull/1536) [`83af4d0`](https://github.com/mengxi-ream/read-frog/commit/83af4d0388c97cc2a8e549439b14b1b7f7d0c0b2) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - chore(config): default page translation range to all
+
+- [#1535](https://github.com/mengxi-ream/read-frog/pull/1535) [`16165ca`](https://github.com/mengxi-ream/read-frog/commit/16165ca0fd7559fb68020352db0476274f90fcb8) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(input-translation): update rich text editor model via main world script injection
+
+- [#1487](https://github.com/mengxi-ream/read-frog/pull/1487) [`b2d4f4b`](https://github.com/mengxi-ream/read-frog/commit/b2d4f4ba9d59e7920b743e1353848e98d88f7a1b) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - Add a settings option for docking the floating button on the left or right side of the page.
+
+- [#1543](https://github.com/mengxi-ream/read-frog/pull/1543) [`d332f46`](https://github.com/mengxi-ream/read-frog/commit/d332f46b3c96e5eab6dc8df03aaff9e0a0fc8987) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - i18n: update extension listing name
+
 ## 1.33.7
 
 ### Patch Changes
