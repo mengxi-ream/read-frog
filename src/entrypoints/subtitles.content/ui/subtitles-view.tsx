@@ -1,9 +1,12 @@
+import type { SubtitleBlurMode } from "@/types/config/subtitles"
 import { IconGripHorizontal } from "@tabler/icons-react"
 import { useAtomValue, useSetAtom } from "jotai"
-import { Activity, useRef } from "react"
+import { Activity, useEffect, useRef, useState } from "react"
+import { subtitleBlurModeSchema } from "@/types/config/subtitles"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLES_VIEW_CLASS } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
+import { currentSubtitleAtom } from "../atoms"
 import { MainSubtitle, TranslationSubtitle } from "./subtitle-lines"
 import { useSubtitlesUI } from "./subtitles-ui-context"
 import { useControlsInfo } from "./use-controls-visible"
@@ -13,9 +16,63 @@ interface SubtitlesViewProps {
   showContent: boolean
 }
 
+function useBlurKey() {
+  const [unBlurSubtitleTimes, setUnBlurSubtitleTimes] = useState(0)
+  const currentSubtitle = useAtomValue(currentSubtitleAtom)
+  const prevStartRef = useRef(currentSubtitle?.start)
+
+  if (currentSubtitle?.start !== prevStartRef.current) {
+    prevStartRef.current = currentSubtitle?.start
+    setUnBlurSubtitleTimes(0)
+  }
+  useEffect(() => {
+    document.addEventListener("keydown", handler)
+
+    return () => {
+      document.removeEventListener("keydown", handler)
+    }
+
+    function handler(e: KeyboardEvent) {
+      if (e.key !== "e" || ["INPUT", "TEXTAREA"].includes((e.target as HTMLElement).tagName)) {
+        return
+      }
+
+      e.preventDefault()
+
+      setUnBlurSubtitleTimes(prev => prev + 1)
+    }
+  }, [setUnBlurSubtitleTimes])
+
+  return unBlurSubtitleTimes
+}
+
+interface SubtitlesBlurState {
+  blurMain: boolean
+  blurTranslation: boolean
+}
+function computeSubtitleBlurState(blurMode: SubtitleBlurMode, unBlurSubtitleTimes: number): SubtitlesBlurState {
+  const subtitleBlurModeEnum = subtitleBlurModeSchema.enum
+
+  if (blurMode === subtitleBlurModeEnum.showAll) {
+    return { blurMain: false, blurTranslation: false }
+  }
+
+  if (blurMode === subtitleBlurModeEnum.blurOnlyTranslation) {
+    return { blurMain: false, blurTranslation: unBlurSubtitleTimes % 2 === 0 }
+  }
+
+  // 0 times: blur all, 1 time: blur translation only, 2 times: show all, 3 times: blur translation only,
+  // 4 times: blur all 5 times: blur translation only, 6 times: show all, 7 times: blur translation only
+  return {
+    blurMain: unBlurSubtitleTimes % 4 === 0,
+    blurTranslation: unBlurSubtitleTimes % 4 !== 2,
+  }
+}
+
 function SubtitlesContent() {
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = style
+  const { blurMain, blurTranslation } = computeSubtitleBlurState(subtitleBlurModeSchema.enum.blurAll, useBlurKey())
 
   const translationAbove = translationPosition === "above"
   const showMain = displayMode !== "translationOnly"
@@ -32,11 +89,11 @@ function SubtitlesContent() {
         style={containerStyle}
       >
         <Activity mode={showMain ? "visible" : "hidden"}>
-          <MainSubtitle className={translationAbove ? "order-2" : "order-1"} />
+          <MainSubtitle blurred={blurMain} className={translationAbove ? "order-2" : "order-1"} />
         </Activity>
 
         <Activity mode={showTranslation ? "visible" : "hidden"}>
-          <TranslationSubtitle className={translationAbove ? "order-1" : "order-2"} />
+          <TranslationSubtitle blurred={blurTranslation} className={translationAbove ? "order-1" : "order-2"} />
         </Activity>
       </div>
     </div>

@@ -30,6 +30,8 @@ export const subtitlePositionSchema = z.object({
   anchor: z.enum(["top", "bottom"]),
 })
 
+export const subtitleBlurModeSchema = z.enum(["showAll", "blurOnlyTranslation", "blurAll"])
+
 export const videoSubtitlesSchema = z.object({
   enabled: z.boolean(),
   autoStart: z.boolean(),
@@ -40,6 +42,7 @@ export const videoSubtitlesSchema = z.object({
   batchQueueConfig: batchQueueConfigSchema,
   customPromptsConfig: customPromptsConfigSchema,
   position: subtitlePositionSchema,
+  blurMode: subtitleBlurModeSchema,
 })
 
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>
@@ -50,3 +53,4 @@ export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema
 export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>
 export type SubtitlePosition = z.infer<typeof subtitlePositionSchema>
 export type VideoSubtitles = z.infer<typeof videoSubtitlesSchema>
+export type SubtitleBlurMode = z.infer<typeof subtitleBlurModeSchema>

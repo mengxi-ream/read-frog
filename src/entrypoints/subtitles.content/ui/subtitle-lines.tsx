@@ -9,6 +9,7 @@ import { currentSubtitleAtom } from "../atoms"
 interface SubtitleLineProps {
   content?: string
   className?: string
+  blurred: boolean
 }
 
 function getTextStyles(textStyle: SubtitleTextStyle) {
@@ -20,14 +21,16 @@ function getTextStyles(textStyle: SubtitleTextStyle) {
   }
 }
 
-export function MainSubtitle({ content, className }: SubtitleLineProps) {
+const BLUR_CLASSES = "blur-md hover:blur-none transition-[filter] duration-150"
+
+export function MainSubtitle({ content, className, blurred = false }: SubtitleLineProps) {
   const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const text = content ?? subtitle?.text ?? ""
 
   return (
     <div
-      className={cn("subtitles-main leading-tight text-xl", className)}
+      className={cn("subtitles-main leading-tight text-xl", blurred && BLUR_CLASSES, className)}
       style={getTextStyles(style.main)}
     >
       {text}
@@ -35,7 +38,7 @@ export function MainSubtitle({ content, className }: SubtitleLineProps) {
   )
 }
 
-export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
+export function TranslationSubtitle({ content, className, blurred = false }: SubtitleLineProps) {
   const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const language = useAtomValue(configFieldsAtomMap.language)
@@ -44,7 +47,7 @@ export function TranslationSubtitle({ content, className }: SubtitleLineProps) {
 
   return (
     <div
-      className={cn("subtitles-translation leading-tight text-xl", className)}
+      className={cn("subtitles-translation leading-tight text-xl", blurred && BLUR_CLASSES, className)}
       style={getTextStyles(style.translation)}
       dir={dir}
       lang={lang}

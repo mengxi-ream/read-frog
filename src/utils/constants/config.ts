@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
+import { subtitleBlurModeSchema } from "@/types/config/subtitles"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
 import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
@@ -166,6 +167,7 @@ export const DEFAULT_CONFIG: Config = {
     },
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
     position: DEFAULT_SUBTITLE_POSITION,
+    blurMode: subtitleBlurModeSchema.enum.blurOnlyTranslation,
   },
   siteControl: {
     mode: "blacklist",

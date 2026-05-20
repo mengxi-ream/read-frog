@@ -88,7 +88,7 @@ export const writeConfigAtom = atom(
     })
 
     // Update queue head. Use `.catch(() => {})` to ensure queue continues even if this write fails.
-    writeQueue = task.catch(() => {})
+    writeQueue = task.catch(() => { })
 
     return task
   },
@@ -160,6 +160,12 @@ export function getConfigFieldAtom<K extends Keys>(key: K) {
 }
 
 function buildConfigFieldsAtomMap<C extends Config>(cfg: C) {
+  return Object.fromEntries(
+    Object.keys(cfg).map(key => [key, getConfigFieldAtom(key as Keys)]),
+  ) as { [K in Keys]: ReturnType<typeof getConfigFieldAtom<K>> }
+}
+
+/* function buildConfigFieldsAtomMap<C extends Config>(cfg: C) {
   type ValidKey = Extract<keyof C, keyof Config>
   type Map = { [K in ValidKey]: ReturnType<typeof getConfigFieldAtom<K>> }
 
@@ -171,6 +177,6 @@ function buildConfigFieldsAtomMap<C extends Config>(cfg: C) {
 
   (Object.keys(cfg) as ValidKey[]).forEach(add)
   return res
-}
+} */
 
 export const configFieldsAtomMap = buildConfigFieldsAtomMap(DEFAULT_CONFIG)
