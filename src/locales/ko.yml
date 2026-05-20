@@ -109,6 +109,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: 선택사항
+      duplicate: 복제
       delete: 삭제
       deleteDialog:
         title: 제공업체를 삭제하시겠습니까?

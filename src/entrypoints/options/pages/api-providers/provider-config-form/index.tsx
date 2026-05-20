@@ -29,6 +29,7 @@ import {
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdAtom } from "../atoms"
+import { duplicateProvider } from "../utils"
 import { APIKeyField } from "./api-key-field"
 import { BaseURLField } from "./base-url-field"
 import { AdvancedOptionsSection } from "./components/advanced-options-section"
@@ -79,6 +80,10 @@ export function ProviderConfigForm() {
   const chooseNextProviderConfig = (providersConfig: ProvidersConfig) => {
     const firstProvider = providersConfig.find(p => !isNonAPIProvider(p.provider))
     return firstProvider ?? providersConfig[0]
+  }
+
+  const handleDuplicate = async () => {
+    await duplicateProvider(providerConfig, allProvidersConfig, setAllProvidersConfig, setSelectedProviderId)
   }
 
   const handleDelete = async () => {
@@ -174,7 +179,10 @@ export function ProviderConfigForm() {
             </AdvancedOptionsSection>
           )}
         </div>
-        <div className="flex justify-end mt-8">
+        <div className="flex justify-end gap-2 mt-8">
+          <Button type="button" variant="outline" onClick={handleDuplicate}>
+            {i18n.t("options.apiProviders.form.duplicate")}
+          </Button>
           <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
             <AlertDialogTrigger render={<Button type="button" variant="destructive" />}>
               {i18n.t("options.apiProviders.form.delete")}

@@ -109,6 +109,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: Tùy chọn
+      duplicate: Sao chép
       delete: Xóa
       deleteDialog:
         title: Xóa nhà cung cấp?

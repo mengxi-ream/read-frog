@@ -109,6 +109,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: Optional
+      duplicate: Duplicate
       delete: Delete
       deleteDialog:
         title: Delete Provider?

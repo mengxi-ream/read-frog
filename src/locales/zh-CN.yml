@@ -109,6 +109,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: 可选
+      duplicate: 复制
       delete: 删除
       deleteDialog:
         title: 删除提供商？

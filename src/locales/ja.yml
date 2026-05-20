@@ -109,6 +109,7 @@ options:
         apiKey: APIキー
         baseURL: ベースURL
         optional: オプション
+      duplicate: 複製
       delete: 削除
       deleteDialog:
         title: プロバイダーを削除しますか？
