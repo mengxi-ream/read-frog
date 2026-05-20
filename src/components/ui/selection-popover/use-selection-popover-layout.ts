@@ -241,7 +241,7 @@ export function useSelectionPopoverLayout({
     if (nextPosition.x !== currentRect.left || nextPosition.y !== currentRect.top) {
       if (immediate) {
         // ResizeObserver fires after layout; flush to avoid a visible overflow frame.
-        // eslint-disable-next-line react-dom/no-flush-sync
+        // eslint-disable-next-line react/dom-no-flush-sync
         flushSync(() => {
           setPosition(nextPosition)
         })

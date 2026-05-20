@@ -51,15 +51,14 @@ export const DEFAULT_CONFIG: Config = {
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
   translate: {
-    providerId: "google-translate-default",
+    providerId: "microsoft-translate-default",
     mode: "bilingual",
     node: {
       enabled: false,
       hotkey: "control",
     },
     page: {
-      // TODO: change this to "all" for users once our translation algorithm can handle most cases elegantly
-      range: import.meta.env.DEV ? "all" : "main",
+      range: "all",
       autoTranslatePatterns: ["news.ycombinator.com"],
       autoTranslateLanguages: [],
       shortcut: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
@@ -107,7 +106,7 @@ export const DEFAULT_CONFIG: Config = {
     features: {
       translate: {
         enabled: true,
-        providerId: "google-translate-default",
+        providerId: "microsoft-translate-default",
       },
       speak: {
         enabled: true,
@@ -126,7 +125,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   inputTranslation: {
     enabled: true,
-    providerId: "google-translate-default",
+    providerId: "microsoft-translate-default",
     fromLang: "targetCode",
     toLang: "sourceCode",
     enableCycle: false,
@@ -135,7 +134,7 @@ export const DEFAULT_CONFIG: Config = {
   videoSubtitles: {
     enabled: true,
     autoStart: false,
-    providerId: "google-translate-default",
+    providerId: "microsoft-translate-default",
     style: {
       displayMode: DEFAULT_DISPLAY_MODE,
       translationPosition: DEFAULT_TRANSLATION_POSITION,

@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { IconCheck, IconCopy } from "@tabler/icons-react"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { i18n } from "#imports"
 import { buttonVariants } from "@/components/ui/base-ui/button"
 import { cn } from "@/utils/styles/utils"
 import { SelectionPopoverTooltip, useSelectionTooltipState } from "./selection-tooltip"

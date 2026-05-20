@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { analyticsEnabledAtom } from "@/utils/atoms/analytics"

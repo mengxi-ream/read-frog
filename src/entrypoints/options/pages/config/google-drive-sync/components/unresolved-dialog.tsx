@@ -1,8 +1,8 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity, useMemo, useState } from "react"
 import { toast } from "sonner"
+import { i18n } from "#imports"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import {
   AlertDialog,

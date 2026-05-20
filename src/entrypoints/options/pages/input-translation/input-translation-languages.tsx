@@ -1,6 +1,5 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { InputTranslationLang } from "@/types/config/config"
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import {
   LANG_CODE_TO_EN_NAME,
@@ -9,6 +8,7 @@ import {
 } from "@read-frog/definitions"
 import { useAtom } from "jotai"
 import { Activity } from "react"
+import { i18n } from "#imports"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
 import {

@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
+import { i18n } from "#imports"
 import { cn } from "@/utils/styles/utils"
 import { formatValue } from "./utils"
 

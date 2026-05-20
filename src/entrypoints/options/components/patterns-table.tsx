@@ -52,8 +52,8 @@ export function PatternsTable({
           onChange={e => setInputValue(e.target.value)}
           onKeyDown={handleKeyPress}
         />
-        <Button className="size-9" onClick={handleAddPattern}>
-          <Icon icon="tabler:plus" className="size-5" />
+        <Button size="icon" onClick={handleAddPattern}>
+          <Icon icon="tabler:plus" />
         </Button>
       </div>
       <Table>

@@ -1,6 +1,6 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { i18n } from "#imports"
 import { useAtomValue } from "jotai"
+import { i18n } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { selectedCustomActionIdAtom } from "../atoms"
 import { withForm } from "./form"

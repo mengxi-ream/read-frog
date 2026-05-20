@@ -1,5 +1,5 @@
 name: Read Frog
-extName: Read Frog - Dịch Nhúng Mã Nguồn Mở
+extName: Read Frog - Dịch và học
 extDescription: Read Frog là tiện ích mở rộng trình duyệt mã nguồn mở được thiết kế để giúp bạn học ngôn ngữ sâu từ bất kỳ trang web nào.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
@@ -109,6 +109,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: Tùy chọn
+      duplicate: Sao chép
       delete: Xóa
       deleteDialog:
         title: Xóa nhà cung cấp?
@@ -292,6 +293,11 @@ options:
         description: Chọn hành động khi nhấn vào nút nổi
         panel: Mở bảng điều khiển bên
         translate: Bật/tắt dịch trang
+      side:
+        title: Vị trí nút
+        description: Chọn cạnh của trang để ghim nút nổi
+        left: Bên trái
+        right: Bên phải
     selectionToolbar:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
@@ -345,7 +351,17 @@ options:
           actions: Thao tác
         form:
           name: Tên
-          icon: Biểu tượng (Iconify)
+          icon: Biểu tượng
+          iconField:
+            chooseAriaLabel: Chọn biểu tượng
+            chooseTitle: Chọn một biểu tượng
+            inputPlaceholder: Nhập tên biểu tượng
+            helpAriaLabel: Trợ giúp thêm về biểu tượng
+            helpTitle: Không tìm thấy biểu tượng bạn muốn?
+            helpStepBrowsePrefix: Duyệt biểu tượng trên
+            helpStepBrowseSuffix: ""
+            helpStepCopyPrefix: "Sao chép tên biểu tượng, ví dụ "
+            helpStepCopySuffix: ", rồi dán vào ô nhập liệu."
           provider: Nhà cung cấp (yêu cầu hỗ trợ đầu ra có cấu trúc)
           selectProvider: Chọn nhà cung cấp
           systemPrompt: System Prompt

@@ -1,7 +1,7 @@
-import { i18n } from "#imports"
 import { IconX } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import { useState } from "react"
+import { i18n } from "#imports"
 import {
   DropdownMenu,
   DropdownMenuContent,

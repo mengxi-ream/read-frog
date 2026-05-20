@@ -1,7 +1,7 @@
-import { i18n } from "#imports"
 import { useAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
 import { useLocation, useNavigate } from "react-router"
+import { i18n } from "#imports"
 import {
   Command,
   CommandDialog,

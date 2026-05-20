@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { inputTextAtom, sourceLangCodeAtom, targetLangCodeAtom, translateRequestAtom } from "../atoms"

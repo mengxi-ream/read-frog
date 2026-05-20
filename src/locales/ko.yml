@@ -1,5 +1,5 @@
 name: Read Frog
-extName: Read Frog - 오픈 소스 몰입형 번역
+extName: Read Frog - 번역하고 배우기
 extDescription: Read Frog는 모든 웹사이트에서 언어를 깊이 있게 학습할 수 있도록 도와주는 오픈 소스 브라우저 확장 프로그램입니다.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
@@ -109,6 +109,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: 선택사항
+      duplicate: 복제
       delete: 삭제
       deleteDialog:
         title: 제공업체를 삭제하시겠습니까?
@@ -292,6 +293,11 @@ options:
         description: 플로팅 버튼을 클릭할 때 실행할 동작 선택
         panel: 사이드 패널 열기
         translate: 페이지 번역 전환
+      side:
+        title: 버튼 위치
+        description: 플로팅 버튼을 페이지 어느 쪽에 고정할지 선택합니다
+        left: 왼쪽
+        right: 오른쪽
     selectionToolbar:
       globalToggle:
         title: 선택 툴바 활성화
@@ -345,7 +351,17 @@ options:
           actions: 작업
         form:
           name: 이름
-          icon: 아이콘 (Iconify)
+          icon: 아이콘
+          iconField:
+            chooseAriaLabel: 아이콘 선택
+            chooseTitle: 아이콘 선택
+            inputPlaceholder: 아이콘 이름 입력
+            helpAriaLabel: 아이콘 도움말 더보기
+            helpTitle: 원하는 아이콘을 못 찾았나요?
+            helpStepBrowsePrefix: ""
+            helpStepBrowseSuffix: 에서 아이콘 찾아보기
+            helpStepCopyPrefix: "예를 들어 "
+            helpStepCopySuffix: " 같은 아이콘 이름을 복사해 입력란에 붙여넣으세요."
           provider: 제공업체(구조화 출력 지원 필요)
           selectProvider: 제공업체 선택
           systemPrompt: 시스템 프롬프트

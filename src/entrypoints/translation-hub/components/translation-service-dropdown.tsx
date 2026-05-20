@@ -1,6 +1,6 @@
-import { browser, i18n } from "#imports"
 import { IconSettings } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
+import { browser, i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"

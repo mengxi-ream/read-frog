@@ -10,6 +10,7 @@ describe("background analytics", () => {
   let onMessageMock: ReturnType<typeof vi.fn>
   let storageGetItemMock: ReturnType<typeof vi.fn>
   let storageSetItemMock: ReturnType<typeof vi.fn>
+  let getTargetLanguageMock: ReturnType<typeof vi.fn>
   let posthogInitMock: ReturnType<typeof vi.fn>
   let posthogCaptureMock: ReturnType<typeof vi.fn>
   let posthogRegisterMock: ReturnType<typeof vi.fn>
@@ -41,6 +42,7 @@ describe("background analytics", () => {
       distinctIdOverride: overrides?.distinctIdOverride,
       extensionVersion: "1.0.0",
       getStorageItem: storageGetItemMock as (key: string) => Promise<unknown>,
+      getTargetLanguage: getTargetLanguageMock as () => Promise<"cmn" | undefined>,
       onMessage: onMessageMock as (type: "trackFeatureUsedEvent", handler: RegisteredMessageHandler) => unknown,
       posthog: {
         init: posthogInitMock as (token: string, config: Record<string, unknown>) => void,
@@ -56,6 +58,7 @@ describe("background analytics", () => {
     onMessageMock = vi.fn()
     storageGetItemMock = vi.fn()
     storageSetItemMock = vi.fn()
+    getTargetLanguageMock = vi.fn().mockResolvedValue("cmn")
     posthogInitMock = vi.fn()
     posthogCaptureMock = vi.fn()
     posthogRegisterMock = vi.fn()
@@ -109,8 +112,31 @@ describe("background analytics", () => {
       surface: "popup",
       outcome: "success",
       latency_ms: 1_500,
+      target_language: "cmn",
     })
     expect(storageSetItemMock).not.toHaveBeenCalled()
+  })
+
+  it("adds the configured target language to non-translation feature events", async () => {
+    storageGetItemMock
+      .mockResolvedValueOnce(true)
+      .mockResolvedValueOnce("install-123")
+
+    const { captureFeatureUsedEventInBackground } = createAnalytics()
+    await captureFeatureUsedEventInBackground({
+      feature: "text_to_speech",
+      surface: "tts_settings",
+      outcome: "success",
+      latency_ms: 100,
+    })
+
+    expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
+      feature: "text_to_speech",
+      surface: "tts_settings",
+      outcome: "success",
+      latency_ms: 100,
+      target_language: "cmn",
+    })
   })
 
   it("does not initialize PostHog when analytics is disabled", async () => {
@@ -259,6 +285,7 @@ describe("background analytics", () => {
         latency_ms: 250,
         action_id: "dictionary",
         action_name: "Dictionary",
+        target_language: "cmn",
         $browser: "Chrome",
         $browser_version: "145.0.0.0",
         $insert_id: "insert-123",
@@ -282,6 +309,7 @@ describe("background analytics", () => {
       latency_ms: 250,
       action_id: "dictionary",
       action_name: "Dictionary",
+      target_language: "cmn",
       $browser: "Chrome",
       $browser_version: "145.0.0.0",
       $insert_id: "insert-123",

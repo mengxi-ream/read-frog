@@ -1,7 +1,7 @@
 import type { TranslatePromptObj } from "@/types/config/translate"
-import { i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
 import { Activity, useId } from "react"
+import { i18n } from "#imports"
 import { Badge } from "@/components/ui/base-ui/badge"
 import {
   Card,
