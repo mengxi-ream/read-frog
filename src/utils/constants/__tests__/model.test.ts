@@ -70,6 +70,7 @@ describe("getProviderOptions", () => {
       ]))
 
       expect(LLM_PROVIDER_MODELS.google).toEqual(expect.arrayContaining([
+        "gemini-3.5-flash",
         "gemini-3.1-flash-image-preview",
         "gemini-3.1-flash-lite-preview",
         "gemini-3-pro-image-preview",
