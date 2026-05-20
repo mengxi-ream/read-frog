@@ -1,16 +1,5 @@
-interface ReactFiber {
-  memoizedState: ReactHook | null
-  memoizedProps: Record<string, unknown>
-  stateNode: Record<string, unknown> | null
-  return: ReactFiber | null
-  tag: number
-}
-
-interface ReactHook {
-  memoizedState: unknown
-  queue: { lastRenderedState: unknown } | null
-  next: ReactHook | null
-}
+import type { ReactFiber } from "./shared"
+import { findReactFiber } from "./shared"
 
 interface DraftEditorState {
   getCurrentContent: () => DraftContentState
@@ -41,11 +30,7 @@ export function isDraftElement(element: Element): boolean {
 // or manage EditorState in a parent component's React state.
 function findDraftEditor(element: Element): { editorState: DraftEditorState, onChange: (state: DraftEditorState) => void } | null {
   const contentEl = element.closest(".public-DraftEditor-content") ?? element
-  const fiberKey = Object.keys(contentEl).find(key => key.startsWith("__reactFiber$") || key.startsWith("__reactInternalInstance$"))
-  if (!fiberKey)
-    return null
-
-  let fiber: ReactFiber | null = (contentEl as unknown as Record<string, ReactFiber>)[fiberKey]
+  let fiber: ReactFiber | null = findReactFiber(contentEl)
   while (fiber) {
     const props = fiber.memoizedProps
     if (props && isDraftEditorState(props.editorState) && typeof props.onChange === "function") {
