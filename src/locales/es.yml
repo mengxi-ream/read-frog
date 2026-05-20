@@ -1,5 +1,5 @@
 name: Read Frog
-extName: Read Frog - Traducción inmersiva de código abierto
+extName: Read Frog - Traduce y aprende
 extDescription: Read Frog es una extensión de navegador de código abierto diseñada para ayudarte a aprender idiomas en profundidad desde cualquier sitio web.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
@@ -109,6 +109,7 @@ options:
         apiKey: Clave API
         baseURL: Base URL
         optional: Opcional
+      duplicate: Duplicar
       delete: Eliminar
       deleteDialog:
         title: ¿Eliminar proveedor?
@@ -293,6 +294,11 @@ options:
         description: Elige la acción al hacer clic en el botón flotante
         panel: Abrir panel lateral
         translate: Alternar traducción de página
+      side:
+        title: Lado del botón
+        description: Elige en qué lado de la página se fija el botón flotante
+        left: Izquierda
+        right: Derecha
     selectionToolbar:
       globalToggle:
         title: Activar barra de selección
@@ -346,7 +352,17 @@ options:
           actions: Acciones
         form:
           name: Nombre
-          icon: Icono (Iconify)
+          icon: Icono
+          iconField:
+            chooseAriaLabel: Elegir icono
+            chooseTitle: Elegir un icono
+            inputPlaceholder: Introduce el nombre del icono
+            helpAriaLabel: Más ayuda sobre iconos
+            helpTitle: ¿No encuentras el icono que quieres?
+            helpStepBrowsePrefix: Busca iconos en
+            helpStepBrowseSuffix: ""
+            helpStepCopyPrefix: "Copia el nombre del icono, por ejemplo "
+            helpStepCopySuffix: ", y pégalo en el campo."
           provider: Proveedor (requiere compatibilidad con salida estructurada)
           selectProvider: Selecciona un proveedor
           systemPrompt: Prompt del sistema

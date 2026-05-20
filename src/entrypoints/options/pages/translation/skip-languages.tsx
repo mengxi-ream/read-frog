@@ -1,11 +1,11 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import {
   LANG_CODE_TO_EN_NAME,
   LANG_CODE_TO_LOCALE_NAME,
 } from "@read-frog/definitions"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { MultiLanguageCombobox } from "@/components/multi-language-combobox"
 import { Button } from "@/components/ui/base-ui/button"

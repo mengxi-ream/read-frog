@@ -1,6 +1,5 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { LanguageItem } from "@/components/language-combobox-options"
-import { i18n } from "#imports"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
 import {
@@ -11,6 +10,7 @@ import {
 import { IconChevronDown } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
+import { i18n } from "#imports"
 import { filterLanguage } from "@/components/language-combobox-options"
 import { Button } from "@/components/ui/base-ui/button"
 import {

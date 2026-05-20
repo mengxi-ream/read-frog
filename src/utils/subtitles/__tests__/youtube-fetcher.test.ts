@@ -64,6 +64,7 @@ describe("youtube subtitles fetcher", () => {
                 cver: null,
                 playerState: 1,
                 selectedTrackLanguageCode: null,
+                selectedTrackVssId: null,
                 cachedTimedtextUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en",
               },
             },
@@ -97,6 +98,7 @@ describe("youtube subtitles fetcher", () => {
       cver: null,
       playerState: 0,
       selectedTrackLanguageCode: "en",
+      selectedTrackVssId: ".en",
       cachedTimedtextUrl: null,
     }
 
@@ -138,6 +140,7 @@ describe("youtube subtitles fetcher", () => {
       cver: null,
       playerState: 1,
       selectedTrackLanguageCode: "en",
+      selectedTrackVssId: ".en",
       cachedTimedtextUrl: null,
     }
     const cachedSubtitles = [{ text: "cached", start: 0, end: 1 }]
@@ -177,6 +180,7 @@ describe("youtube subtitles fetcher", () => {
       cver: null,
       playerState: 0,
       selectedTrackLanguageCode: "en",
+      selectedTrackVssId: ".en",
       cachedTimedtextUrl: null,
     }
 
@@ -219,6 +223,7 @@ describe("youtube subtitles fetcher", () => {
       cver: null,
       playerState: 0,
       selectedTrackLanguageCode: "en",
+      selectedTrackVssId: ".en",
       cachedTimedtextUrl: null,
     }
     const refreshedPlayerData = {
@@ -229,6 +234,7 @@ describe("youtube subtitles fetcher", () => {
         vssId: ".fr",
       }],
       selectedTrackLanguageCode: "fr",
+      selectedTrackVssId: ".fr",
     }
 
     vi.spyOn(fetcher as any, "requestPlayerData").mockResolvedValue({
@@ -249,6 +255,52 @@ describe("youtube subtitles fetcher", () => {
     expect(processRawEventsSpy).toHaveBeenCalledTimes(1)
     expect(waitForPlayerStateSpy).toHaveBeenCalledTimes(1)
     expect(getPlayerDataWithPotSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it("prefers the selected vssId when multiple tracks share the same language", async () => {
+    const fetcher = new YoutubeSubtitlesFetcher()
+
+    Object.defineProperty(window, "location", {
+      value: { search: "?v=test123", origin: "https://www.youtube.com", pathname: "/watch", hostname: "www.youtube.com" },
+      writable: true,
+    })
+
+    const playerData = {
+      videoId: "test123",
+      captionTracks: [
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en&fmt=vtt",
+          languageCode: "en",
+          vssId: ".en",
+        },
+        {
+          baseUrl: "https://www.youtube.com/api/timedtext?v=test123&lang=en&kind=asr",
+          languageCode: "en",
+          kind: "asr",
+          vssId: "a.en",
+        },
+      ],
+      audioCaptionTracks: [],
+      device: null,
+      cver: null,
+      playerState: 1,
+      selectedTrackLanguageCode: "en",
+      selectedTrackVssId: "a.en",
+      cachedTimedtextUrl: null,
+    }
+
+    vi.spyOn(fetcher as any, "requestPlayerData").mockResolvedValue({
+      success: true,
+      data: playerData,
+    })
+    const fetchWithRetrySpy = vi.spyOn(fetcher as any, "fetchWithRetry").mockResolvedValue([])
+    const processRawEventsSpy = vi.spyOn(fetcher as any, "processRawEvents").mockResolvedValue([])
+
+    await expect(fetcher.fetch()).resolves.toEqual([])
+
+    expect(fetchWithRetrySpy).toHaveBeenCalledTimes(1)
+    expect(fetchWithRetrySpy.mock.calls[0]?.[0]).toContain("kind=asr")
+    expect(processRawEventsSpy).toHaveBeenCalledTimes(1)
   })
 
   it("returns raw parser fragments for non-AI standard subtitles", async () => {

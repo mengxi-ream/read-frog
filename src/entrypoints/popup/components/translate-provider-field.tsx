@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
+import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { isTranslateProvider } from "@/types/config/provider"

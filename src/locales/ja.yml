@@ -1,5 +1,5 @@
 name: 読書カエル
-extName: 読書カエル - オープンソースインビジブル翻訳
+extName: 読書カエル - 翻訳して学ぶ
 extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
@@ -109,6 +109,7 @@ options:
         apiKey: APIキー
         baseURL: ベースURL
         optional: オプション
+      duplicate: 複製
       delete: 削除
       deleteDialog:
         title: プロバイダーを削除しますか？
@@ -292,6 +293,11 @@ options:
         description: フローティングボタンをクリックしたときの動作を選択
         panel: サイドパネルを開く
         translate: ページ翻訳を切り替え
+      side:
+        title: ボタンの位置
+        description: フローティングボタンをページのどちら側に固定するかを選択します
+        left: 左側
+        right: 右側
     selectionToolbar:
       globalToggle:
         title: 選択ツールバーを有効化
@@ -345,7 +351,17 @@ options:
           actions: 操作
         form:
           name: 名前
-          icon: アイコン (Iconify)
+          icon: アイコン
+          iconField:
+            chooseAriaLabel: アイコンを選択
+            chooseTitle: アイコンを選択
+            inputPlaceholder: アイコン名を入力
+            helpAriaLabel: アイコンのヘルプ
+            helpTitle: 欲しいアイコンが見つかりませんか？
+            helpStepBrowsePrefix: ""
+            helpStepBrowseSuffix: でアイコンを探す
+            helpStepCopyPrefix: "たとえば "
+            helpStepCopySuffix: " のようなアイコン名をコピーして、入力欄に貼り付けてください。"
           provider: プロバイダー（構造化出力対応が必要）
           selectProvider: プロバイダーを選択
           systemPrompt: システムプロンプト

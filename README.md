@@ -2,6 +2,8 @@
 
 [![Read Frog banner][image-banner]][website]
 
+<a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 An open-source AI-powered language learning extension for browsers.<br/>
 Supports immersive translation, article analysis, multiple AI models, and more.<br/>
 Master languages effortlessly and deeply with AI, right in your browser.
@@ -39,13 +41,12 @@ Master languages effortlessly and deeply with AI, right in your browser.
   - [Community](#community)
 - [✨ Features](#-features)
   - [🔄 Bilingual / Translation Only](#-bilingual--translation-only)
-  - [🧠 Context-Aware Translation](#-context-aware-translation)
   - [✨ Selection Translation](#-selection-translation)
-  - [📝 Custom Prompts](#-custom-prompts)
-  - [📦 Batch Requests](#-batch-requests)
-  - [🤖 20+ AI Providers](#-20-ai-providers)
+  - [🧠 Context-Aware Translation](#-context-aware-translation)
   - [🎬 Subtitle Translation](#-subtitle-translation)
   - [🔊 Text-to-Speech (TTS)](#-text-to-speech-tts)
+  - [📦 Batch Requests](#-batch-requests)
+  - [🤖 20+ AI Providers](#-20-ai-providers)
 - [🤝 Contribute](#-contribute)
   - [Contribute Code](#contribute-code)
 - [📜 Commercial License Grant](#-commercial-license-grant)
@@ -56,8 +57,6 @@ Master languages effortlessly and deeply with AI, right in your browser.
 </details>
 
 ## 📺 Demo
-
-![Read Frog](/assets/read-demo.gif)
 
 <div align="center">
   <img src="assets/node-translation-demo.gif" width="38%" alt="Read Frog Popup Interface" />
@@ -129,20 +128,6 @@ The extension automatically re-translates all visible content when you switch mo
 
 </div>
 
-<!-- ![][image-feat-context] -->
-
-### 🧠 [Context-Aware Translation][docs-tutorial]
-
-Enable AI to understand the full context of what you're reading. When activated, Read Frog extracts the page title and a concise Markdown version of the page content, providing this context to the AI for more accurate, contextually-appropriate translations.
-
-This means technical terms get translated correctly within their domain, literary expressions maintain their nuance, and ambiguous phrases are interpreted based on the surrounding content rather than in isolation.
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
 <!-- ![][image-feat-selection] -->
 
 ### ✨ [Selection Translation][docs-tutorial]
@@ -157,13 +142,39 @@ The toolbar intelligently positions itself to stay within the viewport, supports
 
 </div>
 
-<!-- ![][image-feat-prompts] -->
+<!-- ![][image-feat-context] -->
 
-### 📝 [Custom Prompts][docs-tutorial]
+### 🧠 [Context-Aware Translation][docs-tutorial]
 
-Define your own translation prompts to translate like an expert. Create domain-specific prompts for technical documents, literary works, or casual content. Use tokens like `[TARGET_LANG]`, `[INPUT]`, `[TITLE]`, and `[SUMMARY]` to build dynamic, context-aware prompts.
+Enable AI to understand the full context of what you're reading. When activated, Read Frog extracts the page title and a concise Markdown version of the page content, providing this context to the AI for more accurate, contextually-appropriate translations.
 
-Save multiple prompt patterns and switch between them based on what you're reading. Your prompts, your rules.
+This means technical terms get translated correctly within their domain, literary expressions maintain their nuance, and ambiguous phrases are interpreted based on the surrounding content rather than in isolation.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-subtitle] -->
+
+### 🎬 [Subtitle Translation][docs-tutorial]
+
+Translate YouTube subtitles directly in the video player. Watch foreign language content with translations displayed alongside the original subtitles, making video content accessible for language learning.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-tts] -->
+
+### 🔊 [Text-to-Speech (TTS)][docs-tutorial]
+
+Listen to any selected text with high-quality AI voices. Powered by **Edge TTS** — completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
+
+Automatic language detection (basic or LLM-powered) with per-language voice mapping ensures the right voice for every language. Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
 
 <div align="right">
 
@@ -192,32 +203,6 @@ The system includes smart retry logic with exponential backoff and automatic fal
 Connect to 20+ AI providers through Vercel AI SDK: OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama, and many more. Configure custom endpoints, API keys, and model settings for each provider.
 
 Plus free translation options: Google Translate, Microsoft Translate, and DeepLX for cost-free basic translations.
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
-<!-- ![][image-feat-subtitle] -->
-
-### 🎬 [Subtitle Translation][docs-tutorial]
-
-Translate YouTube subtitles directly in the video player. Watch foreign language content with translations displayed alongside the original subtitles, making video content accessible for language learning.
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
-<!-- ![][image-feat-tts] -->
-
-### 🔊 [Text-to-Speech (TTS)][docs-tutorial]
-
-Listen to any selected text with high-quality AI voices. Powered by **Edge TTS** — completely free, with 150+ voices across 80+ languages including Chinese, English, Japanese, Korean, and many more. Adjust rate, pitch, and volume to your preference.
-
-Automatic language detection (basic or LLM-powered) with per-language voice mapping ensures the right voice for every language. Smart sentence-aware chunking handles long text by splitting at natural boundaries and prefetching the next chunk for seamless playback. Perfect for pronunciation practice and auditory learning.
 
 <div align="right">
 
@@ -320,7 +305,7 @@ Every donation helps us build a better language learning experience. Thank you f
 [extension-release-shield]: https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=package.json&style=flat-square&label=Latest%20Version&color=brightgreen&labelColor=black
 [github-release-link]: https://github.com/mengxi-ream/read-frog/releases
 [github-star-link]: https://github.com/mengxi-ream/read-frog/stargazers
-[image-banner]: /assets/store/large-promo-tile.png
+[image-banner]: /assets/banner.png
 [image-star]: ./assets/star.png
 [issues-link]: https://github.com/mengxi-ream/read-frog/issues
 [issues-shield]: https://img.shields.io/github/issues/mengxi-ream/read-frog?style=flat-square&labelColor=black

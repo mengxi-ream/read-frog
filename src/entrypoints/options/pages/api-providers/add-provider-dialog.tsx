@@ -1,6 +1,6 @@
 import type { APIProviderTypes } from "@/types/config/provider"
-import { i18n } from "#imports"
 import { useAtom, useSetAtom } from "jotai"
+import { i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"

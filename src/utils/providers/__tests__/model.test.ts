@@ -1,5 +1,5 @@
-import { storage } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { storage } from "#imports"
 import { DEFAULT_PROVIDER_HEADERS } from "../headers"
 
 let getStorageItemMock: ReturnType<typeof vi.fn>

@@ -24,6 +24,7 @@ export interface PlayerData {
   cver: string | null
   playerState: number
   selectedTrackLanguageCode: string | null
+  selectedTrackVssId: string | null
   cachedTimedtextUrl: string | null
 }
 

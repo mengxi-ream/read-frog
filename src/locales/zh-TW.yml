@@ -1,5 +1,5 @@
 name: 陪讀蛙
-extName: 陪讀蛙 - 開源沉浸式翻譯
+extName: 陪讀蛙 - 翻譯與學習
 extDescription: 陪讀蛙是一款開放源代碼的瀏覽器插件，旨在幫助您從任何網站深入學習語言。
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
 dataTypes:
@@ -109,6 +109,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: 可選
+      duplicate: 複製
       delete: 刪除
       deleteDialog:
         title: 刪除提供商？
@@ -292,6 +293,11 @@ options:
         description: 選擇點擊懸浮按鈕時執行的操作
         panel: 開啟側邊欄
         translate: 切換頁面翻譯
+      side:
+        title: 按鈕位置
+        description: 選擇懸浮按鈕停靠在頁面的哪一側
+        left: 左側
+        right: 右側
     selectionToolbar:
       globalToggle:
         title: 啟用選擇工具列
@@ -345,7 +351,17 @@ options:
           actions: 操作
         form:
           name: 名稱
-          icon: 圖示 (Iconify)
+          icon: 圖示
+          iconField:
+            chooseAriaLabel: 選擇圖示
+            chooseTitle: 選擇圖示
+            inputPlaceholder: 輸入圖示名稱
+            helpAriaLabel: 更多圖示說明
+            helpTitle: 沒找到想要的圖示？
+            helpStepBrowsePrefix: "在 "
+            helpStepBrowseSuffix: " 瀏覽圖示"
+            helpStepCopyPrefix: 複製圖示名稱，例如
+            helpStepCopySuffix: ，然後貼到輸入框中。
           provider: 提供商（需支援結構化輸出）
           selectProvider: 選擇提供商
           systemPrompt: 系統提示詞

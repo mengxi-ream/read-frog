@@ -1,6 +1,6 @@
 import type { APIProviderConfig } from "@/types/config/provider"
-import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
+import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { withForm } from "./form"

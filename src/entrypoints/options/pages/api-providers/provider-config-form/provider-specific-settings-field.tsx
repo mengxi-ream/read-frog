@@ -1,7 +1,7 @@
 import type { APIProviderConfig, LLMProviderTypes, ProviderSpecificSettingField } from "@/types/config/provider"
-import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
 import { useEffect, useEffectEvent, useMemo, useState } from "react"
+import { i18n } from "#imports"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"

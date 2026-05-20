@@ -1,5 +1,5 @@
 name: Read Frog
-extName: Read Frog - Açık Kaynak Sürükleyici Çeviri
+extName: Read Frog - Çevir ve Öğren
 extDescription: Read Frog, herhangi bir web sitesinden dilleri derinlemesine öğrenmenize yardımcı olmak için tasarlanmış açık kaynaklı bir tarayıcı uzantısıdır.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
@@ -109,6 +109,7 @@ options:
         apiKey: API Anahtarı
         baseURL: Base URL
         optional: İsteğe Bağlı
+      duplicate: Çoğalt
       delete: Sil
       deleteDialog:
         title: Sağlayıcıyı sil?
@@ -292,6 +293,11 @@ options:
         description: Yüzen butona tıklandığında gerçekleştirilecek eylemi seçin
         panel: Yan Paneli Aç
         translate: Sayfa Çevirisini Aç/Kapat
+      side:
+        title: Düğme tarafı
+        description: Yüzen düğmenin sayfanın hangi kenarına sabitleneceğini seçin
+        left: Sol
+        right: Sağ
     selectionToolbar:
       globalToggle:
         title: Seçim Araç Çubuğunu Etkinleştir
@@ -345,7 +351,17 @@ options:
           actions: İşlemler
         form:
           name: Ad
-          icon: Simge (Iconify)
+          icon: Simge
+          iconField:
+            chooseAriaLabel: Simge seç
+            chooseTitle: Bir simge seçin
+            inputPlaceholder: Simge adını girin
+            helpAriaLabel: Daha fazla simge yardımı
+            helpTitle: Aradığınız simgeyi bulamadınız mı?
+            helpStepBrowsePrefix: ""
+            helpStepBrowseSuffix: üzerinde simgelere göz atın
+            helpStepCopyPrefix: "Örneğin "
+            helpStepCopySuffix: " simge adını kopyalayıp alana yapıştırın."
           provider: Sağlayıcı (yapılandırılmış çıktı desteği gerekir)
           selectProvider: Sağlayıcı seçin
           systemPrompt: Sistem Promptu

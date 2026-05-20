@@ -70,13 +70,16 @@ function computeSubtitleBlurState(blurMode: SubtitleBlurMode, unBlurSubtitleTime
 }
 
 function SubtitlesContent() {
+  const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = style
   const { blurMain, blurTranslation } = computeSubtitleBlurState(subtitleBlurModeSchema.enum.blurAll, useBlurKey())
 
   const translationAbove = translationPosition === "above"
   const showMain = displayMode !== "translationOnly"
+  const isDuplicateTranslation = !!subtitle?.translation && subtitle.translation === subtitle.text
   const showTranslation = displayMode !== "originalOnly"
+    && !(displayMode === "bilingual" && isDuplicateTranslation)
 
   const containerStyle = {
     backgroundColor: `rgba(0, 0, 0, ${container.backgroundOpacity / 100})`,

@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { IconSubtitles } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
+import { i18n } from "#imports"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { APP_NAME } from "@/utils/constants/app"
 import { subtitlesVisibleAtom } from "../../../atoms"

@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import { Switch } from "@/components/ui/base-ui/switch"

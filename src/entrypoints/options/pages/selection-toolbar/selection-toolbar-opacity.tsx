@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
+import { i18n } from "#imports"
 import { Slider } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MAX_SELECTION_OVERLAY_OPACITY, MIN_SELECTION_OVERLAY_OPACITY } from "@/utils/constants/selection"

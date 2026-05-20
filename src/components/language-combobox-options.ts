@@ -1,10 +1,10 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import { i18n } from "#imports"
 import {
   LANG_CODE_TO_LOCALE_NAME,
   langCodeISO6393Schema,
 } from "@read-frog/definitions"
 import { camelCase } from "case-anything"
+import { i18n } from "#imports"
 
 export interface LanguageItem<T extends LangCodeISO6393 | "auto" = LangCodeISO6393 | "auto"> {
   value: T

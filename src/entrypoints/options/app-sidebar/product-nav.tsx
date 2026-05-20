@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { i18n } from "#imports"
 import {
   SidebarGroup,
   SidebarGroupContent,

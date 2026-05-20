@@ -7,7 +7,7 @@ export class SubtitlesScheduler {
   private videoElement: HTMLVideoElement
   private subtitles: SubtitlesFragment[] = []
   private currentIndex = -1
-  private isActive = false
+  private active = false
   private currentState: StateData = {
     state: "idle",
   }
@@ -20,7 +20,7 @@ export class SubtitlesScheduler {
   }
 
   start() {
-    this.isActive = true
+    this.active = true
     this.updateVisibility()
   }
 
@@ -71,19 +71,23 @@ export class SubtitlesScheduler {
     return this.currentState.state ?? "idle"
   }
 
+  isActive(): boolean {
+    return this.active
+  }
+
   stop() {
-    this.isActive = false
+    this.active = false
     this.detachListeners()
     this.updateVisibility()
   }
 
   show() {
-    this.isActive = true
+    this.active = true
     this.updateVisibility()
   }
 
   hide() {
-    this.isActive = false
+    this.active = false
     this.updateVisibility()
   }
 
@@ -122,7 +126,7 @@ export class SubtitlesScheduler {
   }
 
   private handleTimeUpdate = () => {
-    if (!this.isActive)
+    if (!this.active)
       return
 
     const currentTime = this.videoElement.currentTime
@@ -130,7 +134,7 @@ export class SubtitlesScheduler {
   }
 
   private handleSeeking = () => {
-    if (!this.isActive)
+    if (!this.active)
       return
 
     const currentTime = this.videoElement.currentTime
@@ -168,6 +172,6 @@ export class SubtitlesScheduler {
   }
 
   private updateVisibility() {
-    subtitlesStore.set(subtitlesVisibleAtom, this.isActive)
+    subtitlesStore.set(subtitlesVisibleAtom, this.active)
   }
 }
