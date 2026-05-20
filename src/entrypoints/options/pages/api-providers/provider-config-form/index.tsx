@@ -179,7 +179,7 @@ export function ProviderConfigForm() {
             </AdvancedOptionsSection>
           )}
         </div>
-        <div className="flex justify-end gap-2 mt-8">
+        <div className="flex justify-between mt-8">
           <Button type="button" variant="outline" onClick={handleDuplicate}>
             {i18n.t("options.apiProviders.form.duplicate")}
           </Button>
