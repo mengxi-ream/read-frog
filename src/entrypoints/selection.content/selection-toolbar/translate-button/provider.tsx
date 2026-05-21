@@ -416,7 +416,7 @@ export function SelectionTranslationProvider({
 
         setActiveSession(nextSession)
         setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
-        setPopoverSessionKey(prev => prev + 1)
+        setTranslationNonce(prev => prev + 1)
         if (pendingRequest?.anchor) {
           setAnchor(pendingRequest.anchor)
         }
