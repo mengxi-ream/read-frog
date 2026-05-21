@@ -8,7 +8,7 @@ import { translateWalkedElement } from "./core/translation-walker"
 import { validateTranslationConfigAndToast } from "./translate-text"
 
 // Re-export public APIs
-export { translateNodes, translateNodesBilingualMode, translateNodeTranslationOnlyMode } from "./core/translation-modes"
+export { translateNodes, translateNodesBilingualMode, translateNodesLineByLineMode, translateNodeTranslationOnlyMode } from "./core/translation-modes"
 export { translateWalkedElement } from "./core/translation-walker"
 export { removeAllTranslatedWrapperNodes } from "./dom/translation-cleanup"
 

@@ -4,7 +4,7 @@ import { use } from "react"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configAtom } from "@/utils/atoms/config"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { translateNodesBilingualMode, translateNodeTranslationOnlyMode } from "@/utils/host/translate/node-manipulation"
+import { translateNodesBilingualMode, translateNodesLineByLineMode, translateNodeTranslationOnlyMode } from "@/utils/host/translate/node-manipulation"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 
 export function RetryButton({ nodes }: { nodes: ChildNode[] }) {
@@ -16,6 +16,9 @@ export function RetryButton({ nodes }: { nodes: ChildNode[] }) {
     const walkId = getRandomUUID()
     if (translationMode === "bilingual") {
       await translateNodesBilingualMode(nodes, walkId, config)
+    }
+    else if (translationMode === "lineByLine") {
+      await translateNodesLineByLineMode(nodes, walkId, config)
     }
     else if (translationMode === "translationOnly") {
       await translateNodeTranslationOnlyMode(nodes, walkId, config)

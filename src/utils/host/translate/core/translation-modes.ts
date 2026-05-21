@@ -226,6 +226,7 @@ export async function translateNodesLineByLineMode(
 
     // Single sentence → delegate to bilingual mode
     if (sentences.length <= 1) {
+      transNodes.forEach(node => translatingNodes.delete(node))
       return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
     }
 
@@ -280,6 +281,7 @@ export async function translateNodesLineByLineMode(
 
     // Count mismatch → fallback to bilingual mode
     if (translatedSentences.length !== sentences.length) {
+      transNodes.forEach(node => translatingNodes.delete(node))
       return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
     }
 
