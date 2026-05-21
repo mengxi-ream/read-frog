@@ -36,6 +36,7 @@ popup:
     notification: What's new in Read Frog
   aiSmartContext: AI Smart Context
   aiSmartContextDescription: Uses webpage context to improve translation quality. Requires LLM translation provider.
+  selectionTranslation: Selection translation
   more:
     title: More
     translationHub: Translation Hub
@@ -202,6 +203,7 @@ options:
       features:
         translate: Page Translation
         selectionToolbar_translate: Selection Toolbar Translation
+        selectionTranslation: Selection Translation
         tts: Text to Speech
         inputTranslation: Input Translation
         videoSubtitles: Video Subtitles
@@ -252,6 +254,8 @@ options:
       title: Context Menu
     inputTranslation:
       title: Input Translation
+    selectionTranslation:
+      title: Selection Translation
   inputTranslation:
     provider:
       title: Translation Provider
@@ -272,6 +276,32 @@ options:
       label: Threshold (ms)
       hint: Time in milliseconds between consecutive space presses (100-1000ms)
       error: Value must be between $1 and $2
+  selectionTranslation:
+    title: Selection Translation
+    description: Selection translation is powered by AI models. Selected words or sentences will be sent to the configured AI service to generate translation results.
+    toggle:
+      title: Enable Selection Translation
+      description: When enabled, selecting text on a webpage can trigger translation based on the configured trigger mode
+    provider:
+      title: Translation Service
+      description: Choose which translation provider to use for selection translation
+      label: Provider
+    autoPronunciation:
+      title: Enable Automatic Word Pronunciation
+      description: Automatically pronounce the selected word after translation
+    triggerMode:
+      title: Selection Translation Trigger Mode
+      description: Choose how to trigger selection translation after selecting text on a webpage
+      toolbar: Toolbar click
+      direct: Direct trigger
+      ctrl: Press Ctrl
+      alt: Press Alt
+      shift: Press Shift
+    disabledSites:
+      title: Disabled Websites for Selection Translation
+      description: Configure websites where selection translation should be disabled
+      enterUrlPattern: Enter URL pattern
+      urlPattern: URL Pattern
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
     floatingButtonDemoImageAlt: Floating Button Demo
@@ -1026,6 +1056,12 @@ hotkey:
   shift: Shift
   backtick: Backtick
   clickAndHold: Click and hold
+selectionTriggerMode:
+  toolbar: Toolbar click
+  direct: Direct
+  ctrl: Ctrl
+  alt: Alt
+  shift: Shift
 translationHub:
   searchLanguages: Search languages...
   noLanguagesFound: No languages found

@@ -19,6 +19,8 @@ import { CloseButton, DropEvent } from "./close-button"
 import { SelectionToolbarCustomActionButtons } from "./custom-action-button"
 import { SpeakButton } from "./speak-button"
 import { TranslateButton } from "./translate-button"
+import { useSelectionTranslationPopover } from "./translate-button/provider"
+import { useSelectionTranslationTrigger } from "./use-selection-translation-trigger"
 
 enum SelectionDirection {
   TOP_LEFT = "TOP_LEFT",
@@ -228,6 +230,9 @@ export function SelectionToolbar() {
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const dropdownOpenRef = useRef(false)
+  const directTriggerTimerRef = useRef<number | null>(null)
+  const { openPopover } = useSelectionTranslationPopover()
+  const { shouldShowToolbarOnMouseup, triggerTranslation } = useSelectionTranslationTrigger(openPopover)
 
   const updatePosition = useCallback(() => {
     if (!isSelectionToolbarVisible || !tooltipRef.current || !selectionPositionRef.current)
@@ -334,7 +339,14 @@ export function SelectionToolbar() {
 
           // Store pending position for useLayoutEffect to process
           selectionPositionRef.current = { x: docX, y: docY }
-          setIsSelectionToolbarVisible(true)
+          if (shouldShowToolbarOnMouseup) {
+            setIsSelectionToolbarVisible(true)
+          }
+          else {
+            // Defer to next macrotask so React flushes the selectionSession atom
+            // update before openPopover reads it via ref
+            directTriggerTimerRef.current = window.setTimeout(triggerTranslation, 0, { x: docX, y: docY })
+          }
         }
       })
     }
@@ -411,8 +423,12 @@ export function SelectionToolbar() {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId)
       }
+      if (directTriggerTimerRef.current !== null) {
+        clearTimeout(directTriggerTimerRef.current)
+        directTriggerTimerRef.current = null
+      }
     }
-  }, [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible, setSelectionState, updatePosition])
+  }, [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible, setSelectionState, shouldShowToolbarOnMouseup, triggerTranslation, updatePosition])
 
   useEffect(() => {
     const handler = (e: Event) => {

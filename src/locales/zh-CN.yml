@@ -36,6 +36,7 @@ popup:
     notification: 陪读蛙更新动态
   aiSmartContext: AI 智能上下文
   aiSmartContextDescription: 结合网页上下文提升翻译效果。需要配置 LLM 翻译服务商。
+  selectionTranslation: 划词翻译
   more:
     title: 更多
     translationHub: 翻译中心
@@ -202,6 +203,7 @@ options:
       features:
         translate: 网页翻译
         selectionToolbar_translate: 划词翻译
+        selectionTranslation: 划词翻译
         tts: 文本转语音
         inputTranslation: 输入翻译
         videoSubtitles: 视频字幕
@@ -252,6 +254,8 @@ options:
       title: 右键菜单
     inputTranslation:
       title: 输入翻译
+    selectionTranslation:
+      title: 划词翻译
   inputTranslation:
     provider:
       title: 翻译服务
@@ -272,6 +276,32 @@ options:
       label: 阈值 (毫秒)
       hint: 连续空格按键之间的时间间隔 (100-1000毫秒)
       error: 数值必须在 $1 到 $2 之间
+  selectionTranslation:
+    title: 划词翻译
+    description: 划词翻译功能基于 AI 大模型实现，选中的单词或句子会发送给配置的 AI 服务并返回翻译结果。
+    toggle:
+      title: 启用划词翻译
+      description: 启用后，在网页中选中文本可按配置的触发方式触发翻译
+    provider:
+      title: 翻译服务
+      description: 选择用于划词翻译的翻译服务
+      label: 服务
+    autoPronunciation:
+      title: 启用单词自动朗读
+      description: 翻译后自动朗读选中的单词
+    triggerMode:
+      title: 划词翻译触发方式
+      description: 选择在网页中选中文本后，如何触发划词翻译
+      toolbar: 工具栏点击触发
+      direct: 直接触发
+      ctrl: 按 Ctrl 触发
+      alt: 按 Alt 触发
+      shift: 按 Shift 触发
+    disabledSites:
+      title: 划词翻译禁用网站
+      description: 配置划词翻译应被禁用的网站
+      enterUrlPattern: 输入网址模式
+      urlPattern: 网址模式
   floatingButtonAndToolbar:
     title: 悬浮按钮和工具栏
     floatingButtonDemoImageAlt: 悬浮按钮演示
@@ -1026,6 +1056,12 @@ hotkey:
   shift: Shift
   backtick: 反引号
   clickAndHold: 点击并按住
+selectionTriggerMode:
+  toolbar: 工具栏点击
+  direct: 直接触发
+  ctrl: 按 Ctrl
+  alt: 按 Alt
+  shift: 按 Shift
 translationHub:
   searchLanguages: 搜索语言...
   noLanguagesFound: 未找到语言

@@ -72,6 +72,13 @@ export function SettingsNav() {
             </SidebarMenuButton>
           </SidebarMenuItem>
 
+          <SidebarMenuItem>
+            <SidebarMenuButton render={<Link to="/selection-translation" />} isActive={pathname === "/selection-translation"}>
+              <Icon icon="tabler:language-hiragana" />
+              <span>{i18n.t("options.overlayTools.selectionTranslation.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
           <Collapsible defaultOpen={isOverlayToolsActive} className="group/collapsible">
             <SidebarMenuItem>
               <CollapsibleTrigger render={<SidebarMenuButton isActive={isOverlayToolsActive} />}>
