@@ -25,6 +25,7 @@ interface LayoutMemory {
 interface UseSelectionPopoverLayoutOptions {
   anchor: Position | null
   isVisible: boolean
+  isPinned?: boolean
 }
 
 interface UseSelectionPopoverLayoutResult {
@@ -189,6 +190,7 @@ function getPopoverRect(rndRef: React.RefObject<Rnd | null>) {
 export function useSelectionPopoverLayout({
   anchor,
   isVisible,
+  isPinned = false,
 }: UseSelectionPopoverLayoutOptions): UseSelectionPopoverLayoutResult {
   const rndRef = useRef<Rnd | null>(null)
   const resizeFrameRef = useRef<number | null>(null)
@@ -491,12 +493,17 @@ export function useSelectionPopoverLayout({
       return
     }
 
+    if (isPinned) {
+      ensureResizeObserver()
+      return
+    }
+
     ensureResizeObserver()
     scheduleViewportLayout()
     requestAnimationFrame(() => {
       syncPreferredPositionFromElement()
     })
-  }, [anchor, ensureResizeObserver, isVisible, scheduleViewportLayout, syncPreferredPositionFromElement])
+  }, [anchor, ensureResizeObserver, isPinned, isVisible, scheduleViewportLayout, syncPreferredPositionFromElement])
 
   useEffect(() => {
     if (!isVisible) {

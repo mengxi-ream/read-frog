@@ -5,7 +5,7 @@ import { SelectionToolbarTooltip } from "../../components/selection-tooltip"
 import { useSelectionTranslationPopover } from "./provider"
 
 export function TranslateButton() {
-  const { prepareToolbarOpen } = useSelectionTranslationPopover()
+  const { prepareToolbarOpen, reTriggerTranslation } = useSelectionTranslationPopover()
   const triggerLabel = i18n.t("action.translation")
 
   return (
@@ -14,6 +14,7 @@ export function TranslateButton() {
       render={(
         <SelectionPopover.Trigger
           aria-label={triggerLabel}
+          onReTrigger={reTriggerTranslation}
           onClick={(event) => {
             event.currentTarget.blur()
             prepareToolbarOpen()

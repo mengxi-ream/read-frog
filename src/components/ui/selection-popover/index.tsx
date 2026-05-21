@@ -1,9 +1,11 @@
 "use client"
 
+import type { Atom } from "jotai"
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { IconGripHorizontal, IconPin, IconPinnedFilled, IconX } from "@tabler/icons-react"
+import { atom, useAtom } from "jotai"
 import * as React from "react"
 import { Rnd } from "react-rnd"
 import { Button } from "@/components/ui/base-ui/button"
@@ -85,6 +87,7 @@ function SelectionPopoverRoot({
   open: openProp,
   onAnchorChange,
   onOpenChange,
+  pinnedAtom: pinnedAtomProp,
 }: {
   anchor?: SelectionPopoverPosition | null
   children: React.ReactNode
@@ -92,21 +95,20 @@ function SelectionPopoverRoot({
   open?: boolean
   onAnchorChange?: (anchor: SelectionPopoverPosition | null) => void
   onOpenChange?: (open: boolean) => void
+  pinnedAtom?: Atom<boolean>
 }) {
   const instanceId = React.useId()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
   const [uncontrolledAnchor, setUncontrolledAnchor] = React.useState<SelectionPopoverPosition | null>(null)
-  const [pinned, setPinned] = React.useState(false)
+  const internalPinnedAtom = React.useMemo(() => atom(false), [])
+  const activePinnedAtom = pinnedAtomProp ?? internalPinnedAtom
+  const [pinned, setPinned] = useAtom(activePinnedAtom)
   const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null)
   const open = openProp ?? uncontrolledOpen
   const anchor = anchorProp ?? uncontrolledAnchor
 
   const setOpen = React.useCallback((value: boolean | ((value: boolean) => boolean)) => {
     const nextOpen = typeof value === "function" ? value(open) : value
-
-    if (!nextOpen) {
-      setPinned(false)
-    }
 
     if (openProp === undefined) {
       setUncontrolledOpen(nextOpen)
@@ -130,7 +132,7 @@ function SelectionPopoverRoot({
 
     const handlePeerPopoverOpen = (event: Event) => {
       const customEvent = event as CustomEvent<{ instanceId?: string }>
-      if (customEvent.detail?.instanceId && customEvent.detail.instanceId !== instanceId) {
+      if (customEvent.detail?.instanceId && customEvent.detail.instanceId !== instanceId && !pinned) {
         setOpen(false)
       }
     }
@@ -143,7 +145,7 @@ function SelectionPopoverRoot({
     return () => {
       window.removeEventListener(SELECTION_POPOVER_OPEN_EVENT, handlePeerPopoverOpen)
     }
-  }, [instanceId, open, setOpen])
+  }, [instanceId, open, pinned, setOpen])
 
   const contextValue = React.useMemo(() => ({
     open,
@@ -154,7 +156,7 @@ function SelectionPopoverRoot({
     setPinned,
     triggerElement,
     setTriggerElement,
-  }), [anchor, open, pinned, setAnchor, setOpen, triggerElement])
+  }), [anchor, open, pinned, setPinned, setAnchor, setOpen, triggerElement])
 
   return (
     <SelectionPopoverRootContext value={contextValue}>
@@ -175,16 +177,17 @@ function SelectionPopoverRoot({
 function SelectionPopoverTrigger({
   className,
   children,
+  onReTrigger,
   render,
   ...props
-}: useRender.ComponentProps<"button"> & React.ComponentProps<"button">) {
-  const { open, setAnchor, setOpen, setPinned, setTriggerElement } = useSelectionPopoverRootContext()
+}: useRender.ComponentProps<"button"> & React.ComponentProps<"button"> & {
+  onReTrigger?: () => void
+}) {
+  const { open, pinned, setAnchor, setOpen, setPinned, setTriggerElement } = useSelectionPopoverRootContext()
 
   const restartPopoverSession = React.useCallback(() => {
     // Reopen on the next frame so controlled consumers observe a full close/open
     // cycle and can refresh session-scoped state from the current selection.
-    // Example: a pinned popover keeps showing the original selection until the
-    // user clicks the same trigger again after selecting different text.
     setOpen(false)
     requestAnimationFrame(() => {
       setOpen(true)
@@ -192,6 +195,11 @@ function SelectionPopoverTrigger({
   }, [setOpen])
 
   const handleClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
+    if (pinned && open && onReTrigger) {
+      onReTrigger()
+      return
+    }
+
     const rect = event.currentTarget.getBoundingClientRect()
     setPinned(false)
     setTriggerElement(event.currentTarget)
@@ -202,7 +210,7 @@ function SelectionPopoverTrigger({
     else {
       setOpen(true)
     }
-  }, [open, restartPopoverSession, setAnchor, setOpen, setPinned, setTriggerElement])
+  }, [open, onReTrigger, pinned, restartPopoverSession, setAnchor, setOpen, setPinned, setTriggerElement])
 
   return useRender({
     defaultTagName: "button",
@@ -324,7 +332,7 @@ function SelectionPopoverContent({
   container?: SelectionPopoverPortalContainer
   finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
 }) {
-  const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
+  const { open, setOpen, anchor, pinned, triggerElement } = useSelectionPopoverRootContext()
   const bodyElementRef = React.useRef<HTMLDivElement | null>(null)
   const setBodyElement = React.useCallback((node: HTMLDivElement | null) => {
     bodyElementRef.current = node
@@ -345,6 +353,7 @@ function SelectionPopoverContent({
   } = useSelectionPopoverLayout({
     anchor,
     isVisible: open,
+    isPinned: pinned,
   })
 
   const handleClose = React.useCallback(() => {

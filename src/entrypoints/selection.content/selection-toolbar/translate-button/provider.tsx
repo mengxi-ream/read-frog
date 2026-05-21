@@ -29,6 +29,7 @@ import { SelectionToolbarFooterContent } from "../../components/selection-toolba
 import { SelectionToolbarTitleContent } from "../../components/selection-toolbar-title-content"
 import {
   isSelectionToolbarVisibleAtom,
+  selectionPopoverPinnedAtom,
   selectionSessionAtom,
   selectionToolbarTranslateRequestAtom,
 } from "../atoms"
@@ -154,6 +155,7 @@ async function translateWithStandardProvider({
 interface SelectionTranslationContextValue {
   prepareToolbarOpen: () => void
   openPopover: (anchor?: { x: number, y: number }) => void
+  reTriggerTranslation: () => void
 }
 
 const SelectionTranslationContext = createContext<SelectionTranslationContextValue | null>(null)
@@ -178,7 +180,7 @@ export function SelectionTranslationProvider({
 }) {
   const [isOpen, setIsOpen] = useState(false)
   const [anchor, setAnchor] = useState<{ x: number, y: number } | null>(null)
-  const [popoverSessionKey, setPopoverSessionKey] = useState(0)
+  const [translationNonce, setTranslationNonce] = useState(0)
   const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
   const [thinking, setThinking] = useState<ThinkingSnapshot | null>(null)
   const [error, setError] = useState<SelectionToolbarInlineError | null>(null)
@@ -191,6 +193,7 @@ export function SelectionTranslationProvider({
   const selectionSession = useAtomValue(selectionSessionAtom)
   const selectionSessionRef = useRef(selectionSession)
   selectionSessionRef.current = selectionSession
+  const pinned = useAtomValue(selectionPopoverPinnedAtom)
   const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
@@ -375,7 +378,7 @@ export function SelectionTranslationProvider({
     }
 
     const nextRunKey = JSON.stringify({
-      popoverSessionKey,
+      translationNonce,
       rerunNonce,
       sessionId: activeSession?.id ?? null,
       translateRequestKey,
@@ -393,34 +396,48 @@ export function SelectionTranslationProvider({
     return () => {
       cancelCurrentTranslation(runId)
     }
-  }, [activeSession?.id, cancelCurrentTranslation, isOpen, popoverSessionKey, rerunNonce, translateRequestKey])
+  }, [activeSession?.id, cancelCurrentTranslation, isOpen, rerunNonce, translationNonce, translateRequestKey])
 
   const handleOpenChange = useCallback((nextOpen: boolean) => {
     cancelCurrentTranslation()
     resetTranslationState()
 
     if (nextOpen) {
-      const pendingRequest = pendingOpenRequestRef.current
-      const nextSession = pendingRequest?.session ?? selectionSession
-
-      setActiveSession(nextSession)
-      setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
-      setPopoverSessionKey(prev => prev + 1)
-      if (pendingRequest?.anchor) {
-        setAnchor(pendingRequest.anchor)
+      if (pinned) {
+        const nextSession = pendingOpenRequestRef.current?.session ?? selectionSessionRef.current
+        setActiveSession(nextSession)
+        setTranslationNonce(prev => prev + 1)
+        setIsSelectionToolbarVisible(false)
+        pendingOpenRequestRef.current = null
       }
-      setIsSelectionToolbarVisible(false)
-      pendingOpenRequestRef.current = null
+      else {
+        const pendingRequest = pendingOpenRequestRef.current
+        const nextSession = pendingRequest?.session ?? selectionSession
+
+        setActiveSession(nextSession)
+        setSourceSurface(pendingRequest?.surface ?? ANALYTICS_SURFACE.SELECTION_TOOLBAR)
+        setPopoverSessionKey(prev => prev + 1)
+        if (pendingRequest?.anchor) {
+          setAnchor(pendingRequest.anchor)
+        }
+        setIsSelectionToolbarVisible(false)
+        pendingOpenRequestRef.current = null
+      }
     }
     else {
-      resetPopoverSession({
-        clearAnchor: pendingOpenRequestRef.current === null,
-      })
-      lastTranslationRunKeyRef.current = null
+      if (pinned) {
+        lastTranslationRunKeyRef.current = null
+      }
+      else {
+        resetPopoverSession({
+          clearAnchor: pendingOpenRequestRef.current === null,
+        })
+        lastTranslationRunKeyRef.current = null
+      }
     }
 
     setIsOpen(nextOpen)
-  }, [cancelCurrentTranslation, resetPopoverSession, resetTranslationState, selectionSession, setIsSelectionToolbarVisible])
+  }, [cancelCurrentTranslation, pinned, resetPopoverSession, resetTranslationState, selectionSession, setIsSelectionToolbarVisible])
 
   const prepareToolbarOpen = useCallback(() => {
     if (!selectionSession) {
@@ -493,18 +510,37 @@ export function SelectionTranslationProvider({
       return
     }
 
+    if (pinned && isOpen) {
+      setActiveSession(currentSession)
+      setTranslationNonce(prev => prev + 1)
+      setIsSelectionToolbarVisible(false)
+      return
+    }
+
     commitOpenRequest({
       session: currentSession,
       anchor,
       surface: ANALYTICS_SURFACE.SELECTION_TOOLBAR,
     })
     handleOpenChange(true)
-  }, [commitOpenRequest, handleOpenChange])
+  }, [commitOpenRequest, handleOpenChange, isOpen, pinned, setIsSelectionToolbarVisible])
+
+  const reTriggerTranslation = useCallback(() => {
+    const currentSession = selectionSessionRef.current
+    if (!currentSession) {
+      return
+    }
+
+    setActiveSession(currentSession)
+    setTranslationNonce(prev => prev + 1)
+    setIsSelectionToolbarVisible(false)
+  }, [])
 
   const contextValue = useMemo<SelectionTranslationContextValue>(() => ({
     prepareToolbarOpen,
     openPopover,
-  }), [prepareToolbarOpen, openPopover])
+    reTriggerTranslation,
+  }), [prepareToolbarOpen, openPopover, reTriggerTranslation])
 
   return (
     <SelectionTranslationContext value={contextValue}>
@@ -513,10 +549,10 @@ export function SelectionTranslationProvider({
         onOpenChange={handleOpenChange}
         anchor={anchor}
         onAnchorChange={setAnchor}
+        pinnedAtom={selectionPopoverPinnedAtom}
       >
         {children}
         <SelectionPopover.Content
-          key={popoverSessionKey}
           container={shadowWrapper ?? document.body}
           finalFocus={false}
         >

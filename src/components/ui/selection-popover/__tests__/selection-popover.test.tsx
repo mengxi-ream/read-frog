@@ -1,6 +1,6 @@
+import type * as React from "react"
 // @vitest-environment jsdom
 import { act, fireEvent, render, screen } from "@testing-library/react"
-import * as React from "react"
 import { createPortal } from "react-dom"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { SelectionPopover } from ".."
@@ -307,49 +307,6 @@ function PortalledBoundary() {
   )
 }
 
-function ReopenablePopoverHarness() {
-  const [open, setOpen] = React.useState(false)
-  const [sourceSelection, setSourceSelection] = React.useState("First selection")
-  const [snapshotSelection, setSnapshotSelection] = React.useState<string | null>(null)
-  const [sessionKey, setSessionKey] = React.useState(0)
-
-  const handleOpenChange = React.useCallback((nextOpen: boolean) => {
-    if (nextOpen) {
-      setSnapshotSelection(sourceSelection)
-      setSessionKey(prev => prev + 1)
-      setOpen(true)
-      return
-    }
-
-    setSnapshotSelection(null)
-    setOpen(false)
-  }, [sourceSelection])
-
-  return (
-    <div>
-      <button type="button" onClick={() => setSourceSelection("Second selection")}>
-        Switch selection
-      </button>
-
-      <SelectionPopover.Root open={open} onOpenChange={handleOpenChange}>
-        <SelectionPopover.Trigger>Open popover</SelectionPopover.Trigger>
-        <SelectionPopover.Content key={sessionKey}>
-          <SelectionPopover.Header className="border-b">
-            <SelectionPopover.Title>Session Popover</SelectionPopover.Title>
-            <div className="flex items-center gap-1">
-              <SelectionPopover.Pin />
-              <SelectionPopover.Close />
-            </div>
-          </SelectionPopover.Header>
-          <SelectionPopover.Body>
-            <div>{snapshotSelection ?? "empty"}</div>
-          </SelectionPopover.Body>
-        </SelectionPopover.Content>
-      </SelectionPopover.Root>
-    </div>
-  )
-}
-
 describe("selectionPopover", () => {
   const originalResizeObserver = globalThis.ResizeObserver
   const originalRequestAnimationFrame = window.requestAnimationFrame
@@ -555,7 +512,7 @@ describe("selectionPopover", () => {
     expect(onOpenChangeSpy).not.toHaveBeenCalledWith(false)
   })
 
-  it("resets the pinned state after closing and reopening", () => {
+  it("persists the pinned state after closing and reopening", () => {
     const { trigger } = renderPopover()
 
     fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
@@ -567,7 +524,7 @@ describe("selectionPopover", () => {
     fireEvent.click(trigger)
     flushRaf()
 
-    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute("aria-pressed", "false")
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
   })
 
   it("restores focus to the trigger by default when closing", async () => {
@@ -606,7 +563,7 @@ describe("selectionPopover", () => {
     expect(document.activeElement).not.toBe(trigger)
   })
 
-  it("closes a pinned popover when another popover opens", () => {
+  it("keeps a pinned popover open when another popover opens", () => {
     const { firstOnOpenChange, secondOnOpenChange, firstTrigger, secondTrigger } = renderTwoPopovers()
 
     fireEvent.click(firstTrigger)
@@ -616,14 +573,31 @@ describe("selectionPopover", () => {
     fireEvent.click(secondTrigger)
     flushRaf()
 
-    expect(firstOnOpenChange).toHaveBeenCalledWith(false)
+    expect(firstOnOpenChange).not.toHaveBeenCalledWith(false)
     expect(secondOnOpenChange).toHaveBeenLastCalledWith(true)
-    expect(screen.queryByText("First content")).not.toBeInTheDocument()
+    expect(screen.getByText("First content")).toBeInTheDocument()
     expect(screen.getByText("Second content")).toBeInTheDocument()
   })
 
-  it("restarts the same popover session when clicking the same trigger again", () => {
-    render(<ReopenablePopoverHarness />)
+  it("keeps pinned state and position when clicking the same trigger again while pinned", () => {
+    const onReTriggerSpy = vi.fn()
+    render(
+      <SelectionPopover.Root>
+        <SelectionPopover.Trigger onReTrigger={onReTriggerSpy}>Open popover</SelectionPopover.Trigger>
+        <SelectionPopover.Content>
+          <SelectionPopover.Header className="border-b">
+            <SelectionPopover.Title>Session Popover</SelectionPopover.Title>
+            <div className="flex items-center gap-1">
+              <SelectionPopover.Pin />
+              <SelectionPopover.Close />
+            </div>
+          </SelectionPopover.Header>
+          <SelectionPopover.Body>
+            <div>Popover content</div>
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>,
+    )
 
     const trigger = screen.getByRole("button", { name: "Open popover" })
     vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect())
@@ -631,22 +605,18 @@ describe("selectionPopover", () => {
     fireEvent.click(trigger)
     flushRaf()
 
-    expect(screen.getByText("First selection")).toBeInTheDocument()
+    expect(screen.getByText("Popover content")).toBeInTheDocument()
+    expectLatestPosition({ x: 120, y: 140 })
 
     fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
     expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
 
-    const firstElement = screen.getByTestId("mock-rnd")
-
-    fireEvent.click(screen.getByRole("button", { name: "Switch selection" }))
-    expect(screen.getByText("First selection")).toBeInTheDocument()
-
     fireEvent.click(trigger)
-    flushRaf()
 
-    expect(screen.getByText("Second selection")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute("aria-pressed", "false")
-    expect(screen.getByTestId("mock-rnd")).not.toBe(firstElement)
+    expect(onReTriggerSpy).toHaveBeenCalledOnce()
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
+    expectLatestPosition({ x: 120, y: 140 })
   })
 
   it("keeps growing downward until streamed content reaches the viewport bottom", async () => {

@@ -65,6 +65,8 @@ export const contextAtom = atom(
 )
 export const isSelectionToolbarVisibleAtom = atom<boolean>(false)
 
+export const selectionPopoverPinnedAtom = atom<boolean>(false)
+
 export const selectionContentAtom = atom(get => get(selectionAtom)?.text ?? null)
 
 export const setSelectionStateAtom = atom(
