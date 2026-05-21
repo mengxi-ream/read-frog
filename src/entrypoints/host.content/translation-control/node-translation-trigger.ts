@@ -2,7 +2,9 @@ import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
 import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
 
-const CLICK_AND_HOLD_TRIGGER_MS = 1000
+const NODE_TRANSLATION_HOLD_TRIGGER_MS = 500
+const CLICK_AND_HOLD_TRIGGER_MS = NODE_TRANSLATION_HOLD_TRIGGER_MS
+const HOVER_HOTKEY_HOLD_TRIGGER_MS = NODE_TRANSLATION_HOLD_TRIGGER_MS
 const CLICK_AND_HOLD_MOVE_TOLERANCE = 6
 const MOUSEMOVE_THROTTLE_MS = 300
 const MOUSEMOVE_DISTANCE_THRESHOLD = 3
@@ -259,7 +261,7 @@ export function registerNodeTranslationTriggerListeners({
               actionTriggered = true
               timerId = null
             })()
-          }, 1000)
+          }, HOVER_HOTKEY_HOLD_TRIGGER_MS)
 
           if (!isHotkeySessionPure && timerId) {
             clearTimeout(timerId)

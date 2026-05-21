@@ -144,7 +144,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
 
     dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 })
     await Promise.resolve()
-    await vi.advanceTimersByTimeAsync(1000)
+    await vi.advanceTimersByTimeAsync(500)
 
     expect(onTrigger).toHaveBeenCalledWith(
       { x: 30, y: 40 },
@@ -154,6 +154,65 @@ describe("registerNodeTranslationTriggerListeners", () => {
         }),
       }),
     )
+  })
+
+  it("triggers held hover hotkeys after the shorter hold delay without firing twice", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    dispatchKeyboardEvent("keydown", "Control")
+    await Promise.resolve()
+
+    await vi.advanceTimersByTimeAsync(499)
+    expect(onTrigger).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(1)
+    await vi.waitFor(() => {
+      expect(onTrigger).toHaveBeenCalledTimes(1)
+    })
+
+    dispatchKeyboardEvent("keyup", "Control")
+    await Promise.resolve()
+
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+    expect(onTrigger).toHaveBeenCalledWith(
+      { x: 70, y: 80 },
+      expect.objectContaining({
+        translate: expect.objectContaining({
+          node: expect.objectContaining({ hotkey: "control" }),
+        }),
+      }),
+    )
+  })
+
+  it("cancels held hover hotkey translation when another key creates a combo", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    dispatchKeyboardEvent("keydown", "Control")
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(250)
+
+    dispatchKeyboardEvent("keydown", "a")
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(500)
+    dispatchKeyboardEvent("keyup", "a")
+    dispatchKeyboardEvent("keyup", "Control")
+    await Promise.resolve()
+
+    expect(onTrigger).not.toHaveBeenCalled()
   })
 
   it("does not trigger while the caller says the event should be ignored", async () => {
