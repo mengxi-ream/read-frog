@@ -8,6 +8,7 @@ export const FEATURE_KEYS = [
   "translate",
   "videoSubtitles",
   "selectionToolbar.translate",
+  "selectionTranslation",
   "inputTranslation",
 ] as const
 
@@ -40,6 +41,11 @@ export const FEATURE_PROVIDER_DEFS = {
     getProviderId: (c: Config) => c.inputTranslation.providerId,
     configPath: ["inputTranslation", "providerId"],
   },
+  "selectionTranslation": {
+    isProvider: isTranslateProvider,
+    getProviderId: (c: Config) => c.selectionTranslation.providerId,
+    configPath: ["selectionTranslation", "providerId"],
+  },
 } as const satisfies Record<FeatureKey, FeatureProviderDef>
 
 /** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.general.featureProviders.features.*` */
@@ -47,6 +53,7 @@ export const FEATURE_KEY_I18N_MAP = {
   "translate": "translate",
   "videoSubtitles": "videoSubtitles",
   "selectionToolbar.translate": "selectionToolbar_translate",
+  "selectionTranslation": "selectionTranslation",
   "inputTranslation": "inputTranslation",
 } as const satisfies Record<FeatureKey, string>
 

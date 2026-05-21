@@ -10,6 +10,7 @@ import { DiscordButton } from "./components/discord-button"
 import LanguageOptionsSelector from "./components/language-options-selector"
 import { MoreMenu } from "./components/more-menu"
 import Hotkey from "./components/node-translation-hotkey-selector"
+import { SelectionTranslationTriggerModeSelector } from "./components/selection-translation-trigger-mode-selector"
 import { SiteControlToggle } from "./components/site-control-toggle"
 import TranslateButton from "./components/translate-button"
 import TranslatePromptSelector from "./components/translate-prompt-selector"
@@ -38,6 +39,7 @@ function App() {
         </div>
         <SiteControlToggle />
         <AlwaysTranslate />
+        <SelectionTranslationTriggerModeSelector />
         <Hotkey />
         <AISmartContext />
       </div>

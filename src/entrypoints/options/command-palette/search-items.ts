@@ -292,6 +292,29 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.overlayTools.inputTranslation.title",
   },
 
+  // Selection Translation page
+  {
+    sectionId: "selection-translation-toggle",
+    route: "/selection-translation",
+    titleKey: "options.selectionTranslation.toggle.title",
+    descriptionKey: "options.selectionTranslation.toggle.description",
+    pageKey: "options.overlayTools.selectionTranslation.title",
+  },
+  {
+    sectionId: "selection-translation-trigger-mode",
+    route: "/selection-translation",
+    titleKey: "options.selectionTranslation.triggerMode.title",
+    descriptionKey: "options.selectionTranslation.triggerMode.description",
+    pageKey: "options.overlayTools.selectionTranslation.title",
+  },
+  {
+    sectionId: "selection-translation-disabled-sites",
+    route: "/selection-translation",
+    titleKey: "options.selectionTranslation.disabledSites.title",
+    descriptionKey: "options.selectionTranslation.disabledSites.description",
+    pageKey: "options.overlayTools.selectionTranslation.title",
+  },
+
   // Video Subtitles page
   {
     sectionId: "subtitles-config",

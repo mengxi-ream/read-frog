@@ -18,7 +18,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 72
+export const CONFIG_SCHEMA_VERSION = 73
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -98,6 +98,13 @@ export const DEFAULT_CONFIG: Config = {
     disabledFloatingButtonPatterns: [],
     clickAction: "translate",
     locked: false,
+  },
+  selectionTranslation: {
+    enabled: true,
+    triggerMode: "toolbar",
+    providerId: "google-translate-default",
+    autoPronunciation: false,
+    disabledSites: [],
   },
   selectionToolbar: {
     enabled: true,

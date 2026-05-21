@@ -153,6 +153,7 @@ async function translateWithStandardProvider({
 
 interface SelectionTranslationContextValue {
   prepareToolbarOpen: () => void
+  openPopover: (anchor?: { x: number, y: number }) => void
 }
 
 const SelectionTranslationContext = createContext<SelectionTranslationContextValue | null>(null)
@@ -188,6 +189,8 @@ export function SelectionTranslationProvider({
   >(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const [activeSession, setActiveSession] = useState<SelectionSession | null>(null)
   const selectionSession = useAtomValue(selectionSessionAtom)
+  const selectionSessionRef = useRef(selectionSession)
+  selectionSessionRef.current = selectionSession
   const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
@@ -484,9 +487,24 @@ export function SelectionTranslationProvider({
     }
   }, [])
 
+  const openPopover = useCallback((anchor?: { x: number, y: number }) => {
+    const currentSession = selectionSessionRef.current
+    if (!currentSession) {
+      return
+    }
+
+    commitOpenRequest({
+      session: currentSession,
+      anchor,
+      surface: ANALYTICS_SURFACE.SELECTION_TOOLBAR,
+    })
+    handleOpenChange(true)
+  }, [commitOpenRequest, handleOpenChange])
+
   const contextValue = useMemo<SelectionTranslationContextValue>(() => ({
     prepareToolbarOpen,
-  }), [prepareToolbarOpen])
+    openPopover,
+  }), [prepareToolbarOpen, openPopover])
 
   return (
     <SelectionTranslationContext value={contextValue}>

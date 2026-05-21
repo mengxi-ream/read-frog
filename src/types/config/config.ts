@@ -30,6 +30,19 @@ const selectionToolbarSpeakFeatureSchema = z.object({
   enabled: z.boolean(),
 })
 
+const selectionTriggerModeSchema = z.enum(["toolbar", "direct", "ctrl", "alt", "shift"])
+
+export type SelectionTriggerMode = z.infer<typeof selectionTriggerModeSchema>
+
+// Selection translation config schema
+const selectionTranslationSchema = z.object({
+  enabled: z.boolean(),
+  triggerMode: selectionTriggerModeSchema,
+  providerId: z.string().nonempty(),
+  autoPronunciation: z.boolean(),
+  disabledSites: z.array(z.string()),
+})
+
 // Text selection toolbar schema
 const selectionToolbarSchema = z.object({
   enabled: z.boolean(),
@@ -94,6 +107,7 @@ export const configSchema = z.object({
   languageDetection: languageDetectionConfigSchema,
   tts: ttsConfigSchema,
   floatingButton: floatingButtonSchema,
+  selectionTranslation: selectionTranslationSchema,
   selectionToolbar: selectionToolbarSchema,
   sideContent: sideContentSchema,
   betaExperience: betaExperienceSchema,
