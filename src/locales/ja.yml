@@ -552,6 +552,7 @@ options:
       description: 翻訳テキストの表示方法を選択：バイリンガルまたは翻訳のみ
       mode:
         bilingual: バイリンガル
+        lineByLine: 1行ずつ
         translationOnly: 翻訳のみ
     translateRange:
       title: 翻訳範囲

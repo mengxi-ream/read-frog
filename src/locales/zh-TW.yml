@@ -552,6 +552,7 @@ options:
       description: 選擇翻譯文字的顯示方式：雙語對照或僅顯示翻譯
       mode:
         bilingual: 雙語對照
+        lineByLine: 逐行翻譯
         translationOnly: 僅顯示翻譯
     translateRange:
       title: 翻譯範圍

@@ -2,13 +2,16 @@ import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
 import {
+  BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
+  INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
+  PARAGRAPH_ATTRIBUTE,
   TRANSLATION_MODE_ATTRIBUTE,
   WALKED_ATTRIBUTE,
 } from "../../../constants/dom-labels"
 import { batchDOMOperation } from "../../dom/batch-dom"
-import { isBlockTransNode, isHTMLElement, isTextNode, isTransNode } from "../../dom/filter"
+import { isBlockTransNode, isCustomForceBlockTranslation, isHTMLElement, isInlineTransNode, isTextNode, isTransNode } from "../../dom/filter"
 import { unwrapDeepestOnlyHTMLChild } from "../../dom/find"
 import { getOwnerDocument } from "../../dom/node"
 import { extractTextContent } from "../../dom/traversal"
@@ -18,8 +21,11 @@ import { findPreviousTranslatedWrapperInside } from "../dom/translation-wrapper"
 import { shouldFilterSmallParagraph } from "../filter-small-paragraph"
 import { prepareTranslationText } from "../text-preparation"
 import { setTranslationDirAndLang } from "../translation-attributes"
+import { decorateTranslationNode } from "../ui/decorate-translation"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
-import { isNumericContent } from "../ui/translation-utils"
+import { isForceInlineTranslation, isNumericContent } from "../ui/translation-utils"
+import { buildLineByLineBatchText, parseLineByLineBatchResult } from "./line-by-line-utils"
+import { segmentSentences } from "./segment-sentences"
 import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from "./translation-state"
 
 const HTML_COMMENT_RE = /<!--[\s\S]*?-->/g
@@ -44,6 +50,9 @@ export async function translateNodes(
   const translationMode = config.translate.mode
   if (translationMode === "translationOnly") {
     await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
+  }
+  else if (translationMode === "lineByLine") {
+    await translateNodesLineByLineMode(nodes, walkId, config, toggle, forceBlockTranslation)
   }
   else if (translationMode === "bilingual") {
     await translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
@@ -137,6 +146,203 @@ export async function translateNodesBilingualMode(
       config.translate.translationNodeStyle,
       forceBlockTranslation,
     )
+  }
+  finally {
+    transNodes.forEach(node => translatingNodes.delete(node))
+  }
+}
+
+// ── Line-by-line helpers ────────────────────────────────────────────
+
+function findParagraphElement(node: Node): HTMLElement | null {
+  const element = isHTMLElement(node) ? node : node.parentElement
+  return element?.closest<HTMLElement>(`[${PARAGRAPH_ATTRIBUTE}]`) ?? null
+}
+
+function removeLineByLineTranslation(paragraphElement: HTMLElement): void {
+  const savedHTML = originalContentMap.get(paragraphElement)
+  if (savedHTML !== undefined) {
+    paragraphElement.innerHTML = savedHTML
+    originalContentMap.delete(paragraphElement)
+  }
+  paragraphElement.removeAttribute(TRANSLATION_MODE_ATTRIBUTE)
+  paragraphElement.removeAttribute(WALKED_ATTRIBUTE)
+}
+
+// ── Line-by-line mode ──────────────────────────────────────────────
+
+export async function translateNodesLineByLineMode(
+  nodes: ChildNode[],
+  walkId: string,
+  config: Config,
+  toggle: boolean = false,
+  forceBlockTranslation: boolean = false,
+): Promise<void> {
+  const transNodes = nodes.filter(node => isTransNode(node))
+  if (transNodes.length === 0) {
+    return
+  }
+
+  try {
+    // prevent duplicate translation
+    if (transNodes.every(node => translatingNodes.has(node))) {
+      return
+    }
+    transNodes.forEach(node => translatingNodes.add(node))
+
+    const lastNode = transNodes.at(-1)!
+    const targetNode
+      = transNodes.length === 1 && isBlockTransNode(lastNode) && isHTMLElement(lastNode)
+        ? await unwrapDeepestOnlyHTMLChild(lastNode)
+        : lastNode
+
+    // Check for existing line-by-line translation via paragraph attributes
+    const paragraphElement = findParagraphElement(targetNode)
+    const alreadyTranslated = paragraphElement
+      && paragraphElement.getAttribute(TRANSLATION_MODE_ATTRIBUTE) === "lineByLine"
+      && paragraphElement.getAttribute(WALKED_ATTRIBUTE) === walkId
+
+    if (alreadyTranslated && paragraphElement) {
+      removeLineByLineTranslation(paragraphElement)
+      if (toggle) {
+        return
+      }
+      else {
+        nodes.forEach(node => translatingNodes.delete(node))
+        void translateNodesLineByLineMode(nodes, walkId, config, toggle, forceBlockTranslation)
+        return
+      }
+    }
+
+    const textContent = transNodes.map(node => extractTextContent(node, config)).join("").trim()
+    if (!textContent || isNumericContent(textContent))
+      return
+
+    if (await shouldFilterSmallParagraph(textContent, config))
+      return
+
+    // Segment into sentences
+    const sentences = segmentSentences(textContent)
+
+    // Single sentence → delegate to bilingual mode
+    if (sentences.length <= 1) {
+      return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
+    }
+
+    // Build batch text with %% separators
+    const batchText = buildLineByLineBatchText(sentences)
+
+    // Create temporary spinner wrapper (same placement as bilingual wrapper)
+    const ownerDoc = getOwnerDocument(targetNode)
+    const spinnerWrapper = ownerDoc.createElement("span")
+    spinnerWrapper.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
+    spinnerWrapper.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "lineByLine" satisfies TranslationMode)
+    spinnerWrapper.setAttribute(WALKED_ATTRIBUTE, walkId)
+    setTranslationDirAndLang(spinnerWrapper, config)
+    const spinner = createSpinnerInside(spinnerWrapper)
+
+    // Insert spinner beside paragraph
+    const insertOperation = () => {
+      if (isTextNode(targetNode) || transNodes.length > 1) {
+        targetNode.parentNode?.insertBefore(
+          spinnerWrapper,
+          targetNode.nextSibling,
+        )
+      }
+      else {
+        targetNode.appendChild(spinnerWrapper)
+      }
+    }
+    batchDOMOperation(insertOperation)
+
+    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(
+      nodes,
+      batchText,
+      spinner,
+      spinnerWrapper,
+    )
+
+    // Error: spinner replaced with error component — keep wrapper, abort
+    if (realTranslatedText === undefined) {
+      return
+    }
+
+    // Success: remove the temporary spinner wrapper
+    spinnerWrapper.remove()
+
+    // Empty result — nothing to display
+    if (realTranslatedText === "") {
+      return
+    }
+
+    // Parse translated sentences
+    const translatedSentences = parseLineByLineBatchResult(realTranslatedText)
+
+    // Count mismatch → fallback to bilingual mode
+    if (translatedSentences.length !== sentences.length) {
+      return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
+    }
+
+    // Save original content snapshot for restore
+    const targetParagraph = paragraphElement ?? (isHTMLElement(targetNode) ? targetNode : targetNode.parentElement)
+    if (targetParagraph && !originalContentMap.has(targetParagraph)) {
+      originalContentMap.set(targetParagraph, targetParagraph.innerHTML)
+    }
+
+    // Mark paragraph as line-by-line translated
+    if (targetParagraph) {
+      targetParagraph.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "lineByLine" satisfies TranslationMode)
+      targetParagraph.setAttribute(WALKED_ATTRIBUTE, walkId)
+    }
+
+    // Determine block vs inline style — same priority chain as bilingual
+    const forceInline = isForceInlineTranslation(targetNode)
+    const customForceBlock = isHTMLElement(targetNode) && isCustomForceBlockTranslation(targetNode)
+
+    let isBlock: boolean
+    if (customForceBlock) {
+      isBlock = true
+    }
+    else if (forceInline) {
+      isBlock = false
+    }
+    else if (forceBlockTranslation) {
+      isBlock = true
+    }
+    else if (isInlineTransNode(targetNode)) {
+      isBlock = false
+    }
+    else if (isBlockTransNode(targetNode)) {
+      isBlock = true
+    }
+    else {
+      // Neither inline nor block — shouldn't happen for trans nodes, but bail
+      return
+    }
+
+    // Rebuild paragraph DOM with interleaved sentences
+    const fragment = ownerDoc.createDocumentFragment()
+
+    for (let i = 0; i < sentences.length; i++) {
+      // Original sentence — display:contents so layout is unchanged
+      const origSpan = ownerDoc.createElement("span")
+      origSpan.style.display = "contents"
+      origSpan.textContent = sentences[i]
+      fragment.appendChild(origSpan)
+
+      // Translation sentence
+      const transSpan = ownerDoc.createElement("span")
+      transSpan.className = `${NOTRANSLATE_CLASS} ${isBlock ? BLOCK_CONTENT_CLASS : INLINE_CONTENT_CLASS}`
+      transSpan.textContent = translatedSentences[i]
+      await decorateTranslationNode(transSpan, config.translate.translationNodeStyle)
+      fragment.appendChild(transSpan)
+    }
+
+    // Replace paragraph content
+    if (targetParagraph) {
+      targetParagraph.innerHTML = ""
+      targetParagraph.appendChild(fragment)
+    }
   }
   finally {
     transNodes.forEach(node => translatingNodes.delete(node))

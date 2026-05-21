@@ -552,6 +552,7 @@ options:
       description: "번역된 텍스트 표시 방법 선택: 이중 언어 또는 번역만"
       mode:
         bilingual: 이중 언어
+        lineByLine: 줄별 번역
         translationOnly: 번역만
     translateRange:
       title: 번역 범위

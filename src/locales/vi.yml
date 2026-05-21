@@ -552,6 +552,7 @@ options:
       description: "Chọn cách hiển thị văn bản đã dịch: song ngữ hoặc chỉ bản dịch."
       mode:
         bilingual: Song ngữ
+        lineByLine: Từng dòng
         translationOnly: Chỉ bản dịch
     translateRange:
       title: Phạm vi dịch

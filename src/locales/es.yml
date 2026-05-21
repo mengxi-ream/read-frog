@@ -667,6 +667,7 @@ options:
       description: "Elige cómo se muestra el texto traducido: bilingüe o solo traducción."
       mode:
         bilingual: Bilingüe
+        lineByLine: Línea por línea
         translationOnly: Solo traducción
     translateRange:
       title: Rango de traducción

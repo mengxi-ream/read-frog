@@ -552,6 +552,7 @@ options:
       description: "Çevrilmiş metnin nasıl görüntüleneceğini seçin: iki dilli veya yalnızca çeviri."
       mode:
         bilingual: İki Dilli
+        lineByLine: Satır Satır
         translationOnly: Yalnızca Çeviri
     translateRange:
       title: Çeviri Kapsamı

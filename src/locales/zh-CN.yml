@@ -667,6 +667,7 @@ options:
       description: 选择翻译文本的显示方式：双语对照或仅显示翻译
       mode:
         bilingual: 双语对照
+        lineByLine: 逐行翻译
         translationOnly: 仅显示翻译
     translateRange:
       title: 翻译范围

@@ -15,7 +15,7 @@ export const batchQueueConfigSchema = z.object({
   maxItemsPerBatch: z.number().gte(MIN_BATCH_ITEMS),
 })
 
-export const TRANSLATION_MODES = ["bilingual", "translationOnly"] as const
+export const TRANSLATION_MODES = ["bilingual", "lineByLine", "translationOnly"] as const
 export const translationModeSchema = z.enum(TRANSLATION_MODES)
 
 export const pageTranslateRangeSchema = z.enum(["main", "all"])

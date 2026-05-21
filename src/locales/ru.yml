@@ -552,6 +552,7 @@ options:
       description: "Выберите способ отображения переведённого текста: двуязычный или только перевод."
       mode:
         bilingual: Двуязычный
+        lineByLine: Построчно
         translationOnly: Только перевод
     translateRange:
       title: Диапазон перевода
