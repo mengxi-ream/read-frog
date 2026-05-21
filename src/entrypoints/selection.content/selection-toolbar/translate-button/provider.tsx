@@ -534,7 +534,7 @@ export function SelectionTranslationProvider({
     setActiveSession(currentSession)
     setTranslationNonce(prev => prev + 1)
     setIsSelectionToolbarVisible(false)
-  }, [])
+  }, [setIsSelectionToolbarVisible])
 
   const contextValue = useMemo<SelectionTranslationContextValue>(() => ({
     prepareToolbarOpen,
