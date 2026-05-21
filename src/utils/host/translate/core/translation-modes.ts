@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
 import {
+  BLOCK_ATTRIBUTE,
   BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,
   INLINE_CONTENT_CLASS,
@@ -285,8 +286,17 @@ export async function translateNodesLineByLineMode(
       return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
     }
 
-    // Save original content snapshot for restore
+    // If the paragraph has block children the walker passes only a subset of
+    // nodes (consecutive inline chunks). Rebuilding the entire paragraph would
+    // destroy the block children and untranslated siblings. Fall back to
+    // bilingual mode which handles partial chunks with wrapper elements.
     const targetParagraph = paragraphElement ?? (isHTMLElement(targetNode) ? targetNode : targetNode.parentElement)
+    if (targetParagraph?.querySelector(`[${BLOCK_ATTRIBUTE}]`)) {
+      transNodes.forEach(node => translatingNodes.delete(node))
+      return translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
+    }
+
+    // Save original content snapshot for restore
     if (targetParagraph && !originalContentMap.has(targetParagraph)) {
       originalContentMap.set(targetParagraph, targetParagraph.innerHTML)
     }
