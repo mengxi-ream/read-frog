@@ -493,6 +493,8 @@ options:
         name: 名前
         systemPrompt: システムプロンプト
         prompt: プロンプト
+        batchSystemPrompt: バッチ追記用システムプロンプト
+        appendBatchSystemPrompt: バッチ翻訳時に追記する
         promptCellInput:
           input: 翻訳するテキスト内容
           targetLanguage: 目標言語

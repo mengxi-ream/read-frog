@@ -163,7 +163,7 @@ describe("translation queue helpers", () => {
       llmProvider,
       expect.any(Function),
       expect.objectContaining({
-        isBatch: true,
+        isBatch: false,
         context: {
           videoTitle: "Video title",
           videoSummary: "Ready summary",

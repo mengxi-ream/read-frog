@@ -608,6 +608,8 @@ options:
         name: Name
         systemPrompt: System Prompt
         prompt: Prompt
+        batchSystemPrompt: Batch System Prompt
+        appendBatchSystemPrompt: Append on batch requests
         promptCellInput:
           input: Text content to translate
           targetLanguage: Target language

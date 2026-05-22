@@ -608,6 +608,8 @@ options:
         name: 标题
         systemPrompt: 系统提示词
         prompt: 提示词
+        batchSystemPrompt: 批量追加的系统提示词
+        appendBatchSystemPrompt: 批量翻译时追加此提示词
         promptCellInput:
           input: 需要翻译的文本内容
           targetLanguage: 目标语言

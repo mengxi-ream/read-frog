@@ -7,6 +7,7 @@ import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import { Label } from "@/components/ui/base-ui/label"
+import { DEFAULT_BATCH_TRANSLATE_PROMPT } from "@/utils/constants/prompt"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { usePromptAtoms } from "./context"
 import { analysisJSONFile } from "./utils/prompt-file"
@@ -21,8 +22,10 @@ export function ImportPrompts() {
     const patterns = list.map(item => ({
       ...item,
       id: getRandomUUID(),
-      // Backwards compatibility: add systemPrompt if missing from imported file
+      // Backwards compatibility: fill defaults for fields missing from older imports
       systemPrompt: item.systemPrompt ?? "",
+      batchSystemPrompt: item.batchSystemPrompt ?? DEFAULT_BATCH_TRANSLATE_PROMPT,
+      appendBatchSystemPrompt: item.appendBatchSystemPrompt ?? true,
     }))
 
     setConfig({

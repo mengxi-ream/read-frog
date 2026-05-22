@@ -493,6 +493,8 @@ options:
         name: 標題
         systemPrompt: 系統提示詞
         prompt: 提示詞
+        batchSystemPrompt: 批次追加的系統提示詞
+        appendBatchSystemPrompt: 批次翻譯時追加此提示詞
         promptCellInput:
           input: 需要翻譯的文字內容
           targetLanguage: 目標語言

@@ -15,8 +15,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/base-ui/sheet"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { QuickInsertableTextarea } from "@/components/ui/insertable-textarea"
-import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
+import { DEFAULT_BATCH_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { cn } from "@/utils/styles/utils"
 import { usePromptAtoms, usePromptInsertCells } from "./context"
@@ -37,7 +38,14 @@ export function ConfigurePrompt({
   const inEdit = !!originPrompt
   const isDefault = originPrompt?.id === DEFAULT_TRANSLATE_PROMPT_ID
 
-  const defaultPrompt = { id: getRandomUUID(), name: "", systemPrompt: "", prompt: "" }
+  const defaultPrompt: TranslatePromptObj = {
+    id: getRandomUUID(),
+    name: "",
+    systemPrompt: "",
+    prompt: "",
+    batchSystemPrompt: DEFAULT_BATCH_TRANSLATE_PROMPT,
+    appendBatchSystemPrompt: true,
+  }
   const initialPrompt = originPrompt ?? defaultPrompt
 
   const [prompt, setPrompt] = useState<TranslatePromptObj>(initialPrompt)
@@ -58,6 +66,8 @@ export function ConfigurePrompt({
       name: "",
       systemPrompt: "",
       prompt: "",
+      batchSystemPrompt: DEFAULT_BATCH_TRANSLATE_PROMPT,
+      appendBatchSystemPrompt: true,
     })
   }
 
@@ -129,6 +139,29 @@ export function ConfigurePrompt({
               className="max-h-60"
               disabled={isDefault}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPrompt({ ...prompt, prompt: e.target.value })}
+              insertCells={insertCells}
+            />
+          </Field>
+          <Field orientation="horizontal">
+            <FieldLabel htmlFor="append-batch-system-prompt">
+              {i18n.t("options.translation.personalizedPrompts.editPrompt.appendBatchSystemPrompt")}
+            </FieldLabel>
+            <Switch
+              id="append-batch-system-prompt"
+              checked={prompt.appendBatchSystemPrompt}
+              disabled={isDefault}
+              onCheckedChange={(checked) => {
+                setPrompt({ ...prompt, appendBatchSystemPrompt: checked })
+              }}
+            />
+          </Field>
+          <Field>
+            <FieldLabel htmlFor="batch-system-prompt">{i18n.t("options.translation.personalizedPrompts.editPrompt.batchSystemPrompt")}</FieldLabel>
+            <QuickInsertableTextarea
+              value={prompt.batchSystemPrompt}
+              className="min-h-40 max-h-80"
+              disabled={isDefault || !prompt.appendBatchSystemPrompt}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPrompt({ ...prompt, batchSystemPrompt: e.target.value })}
               insertCells={insertCells}
             />
           </Field>
