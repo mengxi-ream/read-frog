@@ -39,7 +39,7 @@ export async function executeBatchTranslation<TContext>(
   const texts = dataList.map(d => d.text)
 
   const batchText = texts.join(`\n\n${BATCH_SEPARATOR}\n\n`)
-  const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: true, context })
+  const result = await executeTranslate(batchText, langConfig, providerConfig, promptResolver, { isBatch: dataList.length > 1, context })
   return parseBatchResult(result)
 }
 

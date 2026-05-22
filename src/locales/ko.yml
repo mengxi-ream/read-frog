@@ -493,6 +493,8 @@ options:
         name: 이름
         systemPrompt: 시스템 프롬프트
         prompt: 프롬프트
+        batchSystemPrompt: 배치 추가 시스템 프롬프트
+        appendBatchSystemPrompt: 배치 번역 시 이 프롬프트 추가
         promptCellInput:
           input: 번역할 텍스트 내용
           targetLanguage: 목표 언어

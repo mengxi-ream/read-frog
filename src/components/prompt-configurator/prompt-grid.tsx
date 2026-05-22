@@ -14,7 +14,7 @@ import {
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
 import { Separator } from "@/components/ui/base-ui/separator"
-import { DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT_ID, DEFAULT_TRANSLATE_SYSTEM_PROMPT } from "@/utils/constants/prompt"
+import { DEFAULT_BATCH_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT_ID, DEFAULT_TRANSLATE_SYSTEM_PROMPT } from "@/utils/constants/prompt"
 import { cn } from "@/utils/styles/utils"
 import { ConfigurePrompt } from "./configure-prompt"
 import { usePromptAtoms } from "./context"
@@ -41,6 +41,8 @@ export function PromptGrid({
     name: i18n.t("options.translation.personalizedPrompts.default"),
     systemPrompt: DEFAULT_TRANSLATE_SYSTEM_PROMPT,
     prompt: DEFAULT_TRANSLATE_PROMPT,
+    batchSystemPrompt: DEFAULT_BATCH_TRANSLATE_PROMPT,
+    appendBatchSystemPrompt: true,
   }
 
   // Prepend default to patterns list

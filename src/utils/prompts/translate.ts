@@ -40,6 +40,8 @@ export function getTranslatePromptFromConfig(
   // Resolve system prompt and user prompt
   let systemPrompt: string
   let prompt: string
+  let batchSystemPrompt = DEFAULT_BATCH_TRANSLATE_PROMPT
+  let appendBatchSystemPrompt = true
 
   if (!promptId) {
     // Use default prompts from constants
@@ -51,13 +53,17 @@ export function getTranslatePromptFromConfig(
     const customPrompt = patterns.find(pattern => pattern.id === promptId)
     systemPrompt = customPrompt?.systemPrompt ?? DEFAULT_TRANSLATE_SYSTEM_PROMPT
     prompt = customPrompt?.prompt ?? DEFAULT_TRANSLATE_PROMPT
+    if (customPrompt) {
+      batchSystemPrompt = customPrompt.batchSystemPrompt
+      appendBatchSystemPrompt = customPrompt.appendBatchSystemPrompt
+    }
   }
 
   // For batch mode, append batch rules to system prompt
-  if (options?.isBatch) {
+  if (options?.isBatch && appendBatchSystemPrompt && batchSystemPrompt.trim() !== "") {
     systemPrompt = `${systemPrompt}
 
-${DEFAULT_BATCH_TRANSLATE_PROMPT}`
+${batchSystemPrompt}`
   }
 
   // Build title and summary replacement values

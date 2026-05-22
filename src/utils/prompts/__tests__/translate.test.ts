@@ -26,6 +26,8 @@ describe("translate prompt tokens", () => {
             name: "Custom",
             systemPrompt: "Target {{targetLanguage}} | Title {{webTitle}} | Content {{webContent}} | Summary {{webSummary}}",
             prompt: "Translate {{input}} for {{targetLanguage}} with {{webTitle}} / {{webContent}} / {{webSummary}}",
+            batchSystemPrompt: "",
+            appendBatchSystemPrompt: true,
           },
         ],
       },
@@ -53,6 +55,8 @@ describe("translate prompt tokens", () => {
             name: "Legacy",
             systemPrompt: "Legacy {{targetLang}} {{title}} {{summary}}",
             prompt: "Translate {{input}} to {{targetLang}}",
+            batchSystemPrompt: "",
+            appendBatchSystemPrompt: true,
           },
         ],
       },
@@ -97,6 +101,51 @@ describe("translate prompt tokens", () => {
 
     expect(result.systemPrompt).toBe("Use Japanese with Video Title and Video Summary")
     expect(result.prompt).toBe("Hello world => Japanese / Video Title / Video Summary")
+  })
+
+  it("uses custom batchSystemPrompt only when isBatch and append flag are true", () => {
+    const config: Pick<Config["translate"], "customPromptsConfig"> = {
+      customPromptsConfig: {
+        promptId: "p1",
+        patterns: [
+          {
+            id: "p1",
+            name: "P1",
+            systemPrompt: "BASE",
+            prompt: "PROMPT {{input}}",
+            batchSystemPrompt: "MY-BATCH-RULES",
+            appendBatchSystemPrompt: true,
+          },
+        ],
+      },
+    }
+
+    const off = getTranslatePromptFromConfig(config, "English", "x", { isBatch: false })
+    expect(off.systemPrompt).toBe("BASE")
+
+    const on = getTranslatePromptFromConfig(config, "English", "x", { isBatch: true })
+    expect(on.systemPrompt).toBe("BASE\n\nMY-BATCH-RULES")
+  })
+
+  it("skips batch prompt when appendBatchSystemPrompt is false", () => {
+    const config: Pick<Config["translate"], "customPromptsConfig"> = {
+      customPromptsConfig: {
+        promptId: "p1",
+        patterns: [
+          {
+            id: "p1",
+            name: "P1",
+            systemPrompt: "BASE",
+            prompt: "PROMPT {{input}}",
+            batchSystemPrompt: "MY-BATCH-RULES",
+            appendBatchSystemPrompt: false,
+          },
+        ],
+      },
+    }
+
+    const result = getTranslatePromptFromConfig(config, "English", "x", { isBatch: true })
+    expect(result.systemPrompt).toBe("BASE")
   })
 
   it("falls back when subtitle prompt context is null or undefined", async () => {

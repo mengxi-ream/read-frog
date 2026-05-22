@@ -49,6 +49,8 @@ export const translatePromptObjSchema = z.object({
   id: z.string(),
   systemPrompt: z.string(),
   prompt: z.string(),
+  batchSystemPrompt: z.string(),
+  appendBatchSystemPrompt: z.boolean(),
 })
 export type TranslatePromptObj = z.infer<typeof translatePromptObjSchema>
 
