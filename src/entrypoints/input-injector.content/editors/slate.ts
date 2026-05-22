@@ -1,12 +1,5 @@
-interface ReactFiber {
-  memoizedState: ReactHook | null
-  return: ReactFiber | null
-}
-
-interface ReactHook {
-  memoizedState: unknown
-  next: ReactHook | null
-}
+import type { ReactFiber } from "./shared"
+import { findReactFiber } from "./shared"
 
 interface SlateEditor {
   children: SlateNode[]
@@ -37,10 +30,8 @@ function isSlateEditor(value: unknown): value is SlateEditor {
 }
 
 function getEditorFromElement(element: Element): SlateEditor | null {
-  const fiberKey = Object.keys(element).find(key => key.startsWith("__reactFiber$") || key.startsWith("__reactInternalInstance$"))
-  if (!fiberKey)
-    return null
-  return findSlateEditor((element as unknown as Record<string, ReactFiber>)[fiberKey])
+  const fiber = findReactFiber(element)
+  return fiber ? findSlateEditor(fiber) : null
 }
 
 export function isSlateElement(element: Element): boolean {
