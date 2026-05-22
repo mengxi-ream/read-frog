@@ -32,7 +32,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "google": {
-    model: "gemini-2.5-flash",
+    model: "gemini-3.1-flash-lite",
     isCustomModel: false,
     customModel: null,
   },
