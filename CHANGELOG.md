@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.33.9
+
+### Patch Changes
+
+- [#1561](https://github.com/mengxi-ream/read-frog/pull/1561) [`23cc69b`](https://github.com/mengxi-ream/read-frog/commit/23cc69b7d34606d5bfb74487ba074b549c8a8dd7) Thanks [@EurFelux](https://github.com/EurFelux)! - feat(model): add gemini-3.5-flash and gemini-3.1-flash-lite and set gemini-3.1-flash-lite as default
+
+- [#1575](https://github.com/mengxi-ream/read-frog/pull/1575) [`49604b5`](https://github.com/mengxi-ream/read-frog/commit/49604b5752114c77e2725ff30cd0cc8ef7b082e4) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): only split batch translations on standalone separator lines
+
+- [#1556](https://github.com/mengxi-ream/read-frog/pull/1556) [`29fc0de`](https://github.com/mengxi-ream/read-frog/commit/29fc0ded3430c11d8fbaf2d15a6357071c3042f0) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(input-translation): support Draft.js rich text editors via main world injection
+
+- [#1574](https://github.com/mengxi-ream/read-frog/pull/1574) [`19acefb`](https://github.com/mengxi-ream/read-frog/commit/19acefbe985105b0f889c56a933af233273b9900) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(extension): prevent popup recovery from unsupported detected languages
+
+- [#1568](https://github.com/mengxi-ream/read-frog/pull/1568) [`9d10a1f`](https://github.com/mengxi-ream/read-frog/commit/9d10a1f0f82d37cd9f1746748f6d57b70e3676de) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - Speed up hover/long-press node translation triggers by shortening the hold delay.
+
+- [#1550](https://github.com/mengxi-ream/read-frog/pull/1550) [`ad8da18`](https://github.com/mengxi-ream/read-frog/commit/ad8da187778e178e895f84e546fc9a6b8042122a) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - Add a duplicate action for API provider configs so users can quickly copy credentials/settings when adding multiple models for the same provider.
+
 ## 1.33.8
 
 ### Patch Changes
