@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.33.10
+
+### Patch Changes
+
+- [#1588](https://github.com/mengxi-ream/read-frog/pull/1588) [`a6bfac3`](https://github.com/mengxi-ream/read-frog/commit/a6bfac3cc499847c7e7a1be18ea8b7a7996cf59d) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - i18n(options): replace subtitle survey entry with Notebase early access survey
+
 ## 1.33.9
 
 ### Patch Changes
