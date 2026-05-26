@@ -1,5 +1,6 @@
 import "@/utils/zod-config"
 import type { ContentScriptContext } from "#imports"
+import type { Config } from "@/types/config/config"
 import type { ThemeMode } from "@/types/config/theme"
 import { QueryClientProvider } from "@tanstack/react-query"
 import { kebabCase } from "case-anything"
@@ -12,6 +13,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
@@ -97,7 +99,16 @@ export default defineContentScript({
     })
 
     // Check global site control
-    const config = await getLocalConfig()
+    let config: Config = DEFAULT_CONFIG
+    try {
+      const storedConfig = await getLocalConfig()
+      if (storedConfig) {
+        config = storedConfig
+      }
+    }
+    catch {
+      // storage unavailable — use default config
+    }
     const siteControlUrl = getEffectiveSiteControlUrl(window.location.href)
     if (!isSiteEnabled(siteControlUrl, config)) {
       window.__READ_FROG_SELECTION_INJECTED__ = false

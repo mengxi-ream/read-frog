@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "chrome-devtools-mcp@latest",
+        "--chrome-arg=--load-extension=/Users/lu/developer/open-source/read-frog/.output/chrome-mv3-dev",
+        "--chrome-arg=--enable-unsafe-extension-debugging",
+        "--ignore-default-chrome-arg=--disable-extensions",
+        "--ignore-default-chrome-arg=--enable-automation"
+      ]
+    }
+  }
+}
