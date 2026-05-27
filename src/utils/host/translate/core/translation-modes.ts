@@ -154,6 +154,9 @@ export async function translateNodesBilingualMode(
         )
 
         if (realTranslatedText === undefined) {
+          // Error UI was injected into spinnerWrapper — remove it so retries
+          // don't accumulate stale error wrappers beside the paragraph.
+          spinnerWrapper.remove()
           return
         }
         spinnerWrapper.remove()
