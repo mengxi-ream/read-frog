@@ -33,7 +33,9 @@ baseAnalyticsEnabledAtom.onMount = (setAtom) => {
     ANALYTICS_ENABLED_STORAGE_KEY,
     DEFAULT_ANALYTICS_ENABLED,
     analyticsEnabledSchema,
-  ).then(setAtom)
+  ).then(setAtom).catch((error) => {
+    logger.error("baseAnalyticsEnabledAtom initial storage load failed", error)
+  })
 
   const unwatch = storageAdapter.watch<boolean>(
     ANALYTICS_ENABLED_STORAGE_KEY,
@@ -47,7 +49,9 @@ baseAnalyticsEnabledAtom.onMount = (setAtom) => {
         ANALYTICS_ENABLED_STORAGE_KEY,
         DEFAULT_ANALYTICS_ENABLED,
         analyticsEnabledSchema,
-      ).then(setAtom)
+      ).then(setAtom).catch((error) => {
+        logger.error("baseAnalyticsEnabledAtom visibility change storage reload failed", error)
+      })
     }
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)

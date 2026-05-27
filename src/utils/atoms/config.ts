@@ -112,13 +112,25 @@ configAtom.onMount = (setAtom: (newValue: Config) => void) => {
     if (!didReceiveStorageUpdate) {
       setAtom(value)
     }
+  }).catch((error) => {
+    logger.error("configAtom initial storage load failed", error)
+    if (!didReceiveStorageUpdate) {
+      setAtom(DEFAULT_CONFIG)
+    }
   })
 
   // Watch for changes from other extension contexts (popup, options page, other tabs)
-  const unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (value) => {
-    didReceiveStorageUpdate = true
-    setAtom(value)
-  })
+  let unwatch: () => void
+  try {
+    unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (value) => {
+      didReceiveStorageUpdate = true
+      setAtom(value)
+    })
+  }
+  catch (error) {
+    logger.error("configAtom storage watch setup failed", error)
+    unwatch = () => {}
+  }
 
   // Handle tab reactivation - inactive tabs may miss storage watch events,
   // so we reload from storage when the tab becomes visible again.
@@ -126,7 +138,9 @@ configAtom.onMount = (setAtom: (newValue: Config) => void) => {
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
       logger.info("configAtom onMount handleVisibilityChange when: ", new Date())
-      void storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema).then(setAtom)
+      void storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema).then(setAtom).catch((error) => {
+        logger.error("configAtom visibility change storage reload failed", error)
+      })
     }
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)

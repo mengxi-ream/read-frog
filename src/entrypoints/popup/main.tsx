@@ -111,4 +111,6 @@ async function initApp() {
   ))
 }
 
-void initApp()
+void initApp().catch((error) => {
+  console.error("Failed to initialize popup app:", error)
+})

@@ -25,13 +25,17 @@ export const themeModeAtom = atom(
 )
 
 baseThemeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
-  void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
+  void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom).catch((error) => {
+    logger.error("baseThemeModeAtom initial storage load failed", error)
+  })
   const unwatch = storageAdapter.watch<ThemeMode>(THEME_STORAGE_KEY, setAtom)
 
   const handleVisibilityChange = () => {
     if (document.visibilityState === "visible") {
       logger.info("baseThemeModeAtom onMount handleVisibilityChange when: ", new Date())
-      void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom)
+      void storageAdapter.get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema).then(setAtom).catch((error) => {
+        logger.error("baseThemeModeAtom visibility change storage reload failed", error)
+      })
     }
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)
