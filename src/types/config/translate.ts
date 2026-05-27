@@ -18,6 +18,9 @@ export const batchQueueConfigSchema = z.object({
 export const TRANSLATION_MODES = ["bilingual", "translationOnly"] as const
 export const translationModeSchema = z.enum(TRANSLATION_MODES)
 
+export const INTERLEAVE_MODES = ["paragraph", "sentence"] as const
+export const interleaveSchema = z.enum(INTERLEAVE_MODES)
+
 export const pageTranslateRangeSchema = z.enum(["main", "all"])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
 
@@ -107,9 +110,11 @@ export const translateConfigSchema = z.object({
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,
   translationNodeStyle: translationNodeStyleConfigSchema,
+  interleave: interleaveSchema,
 })
 
 export type RequestQueueConfig = z.infer<typeof requestQueueConfigSchema>
 export type BatchQueueConfig = z.infer<typeof batchQueueConfigSchema>
 export type TranslateConfig = z.infer<typeof translateConfigSchema>
 export type TranslationMode = z.infer<typeof translationModeSchema>
+export type InterleaveMode = z.infer<typeof interleaveSchema>

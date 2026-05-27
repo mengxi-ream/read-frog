@@ -1,4 +1,4 @@
-import { REACT_SHADOW_HOST_CLASS, TRANSLATION_MODE_ATTRIBUTE } from "../../../constants/dom-labels"
+import { REACT_SHADOW_HOST_CLASS, TRANSLATION_MODE_ATTRIBUTE, WALKED_ATTRIBUTE } from "../../../constants/dom-labels"
 import { removeReactShadowHost } from "../../../react-shadow-host/create-shadow-host"
 import { batchDOMOperation } from "../../dom/batch-dom"
 import { isHTMLElement, isTranslatedWrapperNode } from "../../dom/filter"
@@ -57,4 +57,22 @@ export function removeAllTranslatedWrapperNodes(
   translatedNodes.forEach((contentWrapperNode) => {
     removeTranslatedWrapperWithRestore(contentWrapperNode)
   })
+
+  // Also clean up line-by-line translated paragraphs — they don't have
+  // wrapper elements; their innerHTML was replaced in-place.
+  const lineByLineParas = deepQueryTopLevelSelector(
+    root,
+    el => isHTMLElement(el) && el.getAttribute(TRANSLATION_MODE_ATTRIBUTE) === "lineByLine",
+  )
+  for (const para of lineByLineParas) {
+    if (!isHTMLElement(para))
+      continue
+    const saved = originalContentMap.get(para)
+    if (saved !== undefined) {
+      para.innerHTML = saved
+      originalContentMap.delete(para)
+    }
+    para.removeAttribute(TRANSLATION_MODE_ATTRIBUTE)
+    para.removeAttribute(WALKED_ATTRIBUTE)
+  }
 }
