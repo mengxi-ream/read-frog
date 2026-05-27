@@ -686,7 +686,12 @@ export class UniversalVideoAdapter {
     this.subtitlesSummaryContextHash = summaryContextHash ?? null
 
     if (summaryContextHash) {
-      videoContext.summary = await fetchSubtitlesSummary(videoContext)
+      try {
+        videoContext.summary = await fetchSubtitlesSummary(videoContext)
+      }
+      catch {
+        videoContext.summary = null
+      }
     }
 
     return videoContext

@@ -334,4 +334,59 @@ describe("universalVideoAdapter", () => {
       suffix: "translated",
     })
   })
+
+  it("continues translated export when subtitle summary fetch fails", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+      { text: "World.", start: 1000, end: 2000 },
+    ])
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {},
+      providersConfig: [{
+        id: "test-provider",
+        name: "Test Provider",
+        provider: "openai",
+        enabled: true,
+        apiKey: "sk-test",
+        model: {
+          model: "gpt-5-mini",
+          isCustomModel: false,
+          customModel: null,
+        },
+      }],
+      videoSubtitles: {
+        aiSegmentation: false,
+        providerId: "test-provider",
+      },
+    })
+    mocks.fetchSubtitlesSummary.mockRejectedValue(new Error("Summary failed"))
+    mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) =>
+      fragments.map(fragment => ({
+        ...fragment,
+        translation: `zh:${fragment.text}`,
+      })),
+    )
+
+    await adapter.downloadTranslatedSubtitles()
+
+    expect(mocks.fetchSubtitlesSummary).toHaveBeenCalledTimes(1)
+    expect(mocks.translateSubtitles).toHaveBeenCalledWith(
+      [
+        { text: "Hello. World.", start: 0, end: 2000 },
+      ],
+      {
+        videoTitle: "Test video",
+        subtitlesTextContent: "Hello.World.",
+        summary: null,
+      },
+    )
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith({
+      subtitles: [
+        { text: "zh:Hello. World.", start: 0, end: 2000 },
+      ],
+      pageTitle: "Test video",
+      videoId: undefined,
+      suffix: "translated",
+    })
+  })
 })
