@@ -181,6 +181,7 @@ options:
         alibaba: Alibaba Cloud'un Qwen model serisi, gelişmiş muhakeme ve çok dilli yeteneklerle
         moonshotai: Moonshot AI'ın güçlü muhakeme ve uzun bağlam yeteneklerine sahip Kimi model serisi
         huggingface: Binlerce açık kaynak modele erişim sağlayan Hugging Face Çıkarım API'si
+        litellm: Birleşik API aracılığıyla 100'den fazla LLM sağlayıcısını destekleyen LiteLLM AI ağ geçidi proxy'si
     apiKey:
       showAPIKey: API Anahtarını Göster
     howToConfigure: Nasıl yapılandırılır?

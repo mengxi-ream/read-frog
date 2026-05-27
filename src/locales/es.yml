@@ -182,6 +182,7 @@ options:
         alibaba: Serie de modelos Qwen de Alibaba Cloud con razonamiento avanzado y capacidades multilingües
         moonshotai: Serie de modelos Kimi de Moonshot AI con razonamiento sólido y capacidades de contexto largo
         huggingface: API de inferencia de Hugging Face que proporciona acceso a miles de modelos de código abierto
+        litellm: Proxy de gateway de IA LiteLLM compatible con más de 100 proveedores de LLM a través de una API unificada
     apiKey:
       showAPIKey: Mostrar clave API
     howToConfigure: ¿Cómo configurar?

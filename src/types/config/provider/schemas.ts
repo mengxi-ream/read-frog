@@ -68,6 +68,10 @@ const llmProviderConfigSchemaList = [
     provider: z.literal("openai-compatible"),
     model: createProviderModelSchema<"openai-compatible">("openai-compatible"),
   }),
+  baseCustomLLMProviderConfigSchema.extend({
+    provider: z.literal("litellm"),
+    model: createProviderModelSchema<"litellm">("litellm"),
+  }),
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("openai"),
     model: createProviderModelSchema<"openai">("openai"),

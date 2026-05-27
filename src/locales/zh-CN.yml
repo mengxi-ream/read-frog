@@ -182,6 +182,7 @@ options:
         alibaba: 阿里云通义千问系列模型，具备先进的推理和多语言能力
         moonshotai: 月之暗面Kimi系列模型，具备强大的推理和长上下文能力
         huggingface: Hugging Face推理API，提供数千种开源模型访问
+        litellm: LiteLLM AI网关代理，通过统一API支持100多个LLM提供商
     apiKey:
       showAPIKey: 显示 API Key
     howToConfigure: 如何配置?

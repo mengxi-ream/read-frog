@@ -181,6 +181,7 @@ options:
         alibaba: 알리바바 클라우드의 Qwen 모델 시리즈, 고급 추론 및 다국어 기능 제공
         moonshotai: Moonshot AI의 Kimi 모델 시리즈, 강력한 추론 및 긴 컨텍스트 기능 제공
         huggingface: Hugging Face 추론 API, 수천 개의 오픈소스 모델 접근 제공
+        litellm: LiteLLM AI 게이트웨이 프록시, 통합 API를 통해 100개 이상의 LLM 공급자 지원
     apiKey:
       showAPIKey: API Key 표시
     howToConfigure: 구성 방법은?

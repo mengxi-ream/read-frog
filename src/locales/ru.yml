@@ -181,6 +181,7 @@ options:
         alibaba: Серия моделей Qwen от Alibaba Cloud с продвинутыми возможностями рассуждения и многоязычности
         moonshotai: Серия моделей Kimi от Moonshot AI с мощными возможностями рассуждения и длинного контекста
         huggingface: API вывода Hugging Face с доступом к тысячам моделей с открытым кодом
+        litellm: Прокси-шлюз LiteLLM AI с поддержкой 100+ провайдеров LLM через единый API
     apiKey:
       showAPIKey: Показать API-ключ
     howToConfigure: Как настроить?

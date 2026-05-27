@@ -182,6 +182,7 @@ options:
         alibaba: Alibaba Cloud's Qwen model series with advanced reasoning and multilingual capabilities
         moonshotai: Moonshot AI's Kimi model series with strong reasoning and long-context capabilities
         huggingface: Hugging Face Inference API providing access to thousands of open-source models
+        litellm: LiteLLM AI gateway proxy supporting 100+ LLM providers through a unified API
     apiKey:
       showAPIKey: Show API Key
     howToConfigure: How to configure?

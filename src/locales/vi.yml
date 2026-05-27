@@ -181,6 +181,7 @@ options:
         alibaba: Dòng mô hình Qwen của Alibaba Cloud với khả năng suy luận và đa ngôn ngữ tiên tiến
         moonshotai: Dòng mô hình Kimi của Moonshot AI với khả năng suy luận mạnh mẽ và ngữ cảnh dài
         huggingface: API suy luận Hugging Face cung cấp quyền truy cập hàng nghìn mô hình mã nguồn mở
+        litellm: Proxy cổng AI LiteLLM hỗ trợ hơn 100 nhà cung cấp LLM thông qua API hợp nhất
     apiKey:
       showAPIKey: Hiển thị API Key
     howToConfigure: Cấu hình như thế nào?

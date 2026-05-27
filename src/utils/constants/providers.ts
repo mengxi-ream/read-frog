@@ -4,6 +4,7 @@ import { i18n } from "#imports"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
+import litellmLogoColor from "@/assets/providers/litellm-color.svg?url&no-inline"
 import tensdaqLogoColor from "@/assets/providers/tensdaq-color.svg?url&no-inline"
 import { env } from "@/env"
 import { API_PROVIDER_TYPES, CUSTOM_LLM_PROVIDER_TYPES, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PROVIDERS_MAP, NON_CUSTOM_LLM_PROVIDER_TYPES, PURE_API_PROVIDER_TYPES, PURE_TRANSLATE_PROVIDERS, TRANSLATE_PROVIDER_TYPES } from "@/types/config/provider"
@@ -144,6 +145,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   "huggingface": {
     model: "Qwen/Qwen3-32B",
     isCustomModel: false,
+    customModel: null,
+  },
+  "litellm": {
+    model: "use-custom-model",
+    isCustomModel: true,
     customModel: null,
   },
 }
@@ -304,6 +310,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn("huggingface-color"),
       name: "Hugging Face",
       website: "https://huggingface.co/",
+    },
+    "litellm": {
+      logo: () => litellmLogoColor,
+      name: "LiteLLM",
+      website: "https://litellm.ai/",
     },
   }
 
@@ -559,6 +570,15 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "huggingface",
     model: DEFAULT_LLM_PROVIDER_MODELS.huggingface,
+  },
+  "litellm": {
+    id: "litellm-default",
+    name: PROVIDER_ITEMS.litellm.name,
+    description: i18n.t("options.apiProviders.providers.description.litellm"),
+    enabled: true,
+    provider: "litellm",
+    baseURL: "http://localhost:4000/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.litellm,
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 

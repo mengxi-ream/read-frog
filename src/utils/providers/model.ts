@@ -58,6 +58,7 @@ const CREATE_AI_MAPPER = {
   "alibaba": createAlibaba,
   "moonshotai": createMoonshotAI,
   "huggingface": createHuggingFace,
+  "litellm": createOpenAICompatible,
 } as const
 
 async function getLanguageModelById(providerId: string) {
