@@ -51,7 +51,7 @@ export default defineConfig({
     web_accessible_resources: [
       {
         resources: ["assets/*.png", "assets/*.svg", "assets/*.webp"],
-        matches: ["*://*/*", "file:///*"],
+        matches: ["*://*/*"],
       },
     ],
     // Firefox-specific settings for MV3

@@ -10,7 +10,7 @@ declare global {
 }
 
 export default defineContentScript({
-  matches: ["*://*/*", "file:///*"],
+  matches: ["*://*/*"],
   cssInjectionMode: "manual",
   async main(ctx) {
     // Prevent double injection (manifest-based + programmatic injection)

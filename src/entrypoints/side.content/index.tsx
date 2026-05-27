@@ -48,7 +48,7 @@ function HydrateAtoms({
 export let shadowWrapper: HTMLElement | null = null
 
 export default defineContentScript({
-  matches: ["*://*/*", "file:///*"],
+  matches: ["*://*/*"],
   cssInjectionMode: "ui",
   async main(ctx) {
     const config = await getLocalConfig() ?? DEFAULT_CONFIG
