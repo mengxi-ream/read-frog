@@ -300,4 +300,38 @@ describe("universalVideoAdapter", () => {
       suffix: "translated",
     })
   })
+
+  it("falls back to source processed timing when AI segmentation fails during export", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+      { text: "World.", start: 1000, end: 2000 },
+    ])
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {},
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: true,
+        providerId: "test-provider",
+      },
+    })
+    mocks.aiSegmentBlock.mockRejectedValue(new Error("AI segmentation failed"))
+    mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) =>
+      fragments.map(fragment => ({
+        ...fragment,
+        translation: `zh:${fragment.text}`,
+      })),
+    )
+
+    await adapter.downloadTranslatedSubtitles()
+
+    expect(mocks.aiSegmentBlock).toHaveBeenCalledTimes(1)
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith({
+      subtitles: [
+        { text: "zh:Hello. World.", start: 0, end: 2000 },
+      ],
+      pageTitle: "Test video",
+      videoId: undefined,
+      suffix: "translated",
+    })
+  })
 })

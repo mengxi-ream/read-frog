@@ -554,7 +554,15 @@ export class UniversalVideoAdapter {
     config: NonNullable<Awaited<ReturnType<typeof getLocalConfig>>>,
   ): Promise<SubtitlesFragment[]> {
     const sourceLanguage = this.subtitlesFetcher.getSourceLanguage()
-    const segmented = await aiSegmentBlock(chunk, config)
+    let segmented: SubtitlesFragment[]
+
+    try {
+      segmented = await aiSegmentBlock(chunk, config)
+    }
+    catch {
+      return optimizeSubtitles(chunk, sourceLanguage)
+    }
+
     const optimized = optimizeSubtitles(segmented, sourceLanguage)
 
     if (!this.hasTimingCoverageGap(chunk, optimized)) {
@@ -566,7 +574,15 @@ export class UniversalVideoAdapter {
       const retryResult: SubtitlesFragment[] = []
 
       for (const retryChunk of retryChunks) {
-        const retrySegmented = await aiSegmentBlock(retryChunk, config)
+        let retrySegmented: SubtitlesFragment[]
+
+        try {
+          retrySegmented = await aiSegmentBlock(retryChunk, config)
+        }
+        catch {
+          return optimizeSubtitles(chunk, sourceLanguage)
+        }
+
         const retryOptimized = optimizeSubtitles(retrySegmented, sourceLanguage)
 
         if (this.hasTimingCoverageGap(retryChunk, retryOptimized)) {
