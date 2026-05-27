@@ -81,39 +81,30 @@ export async function translateNodesBilingualMode(
         ? await unwrapDeepestOnlyHTMLChild(lastNode)
         : lastNode
 
-    // Check for existing translation — wrapper-based for paragraph interleave,
-    // attribute-based for sentence interleave (paragraph rebuilt in-place)
-    if (config.translate.interleave === "sentence") {
-      const paragraphElement = findParagraphElement(targetNode)
-      const alreadyTranslated = paragraphElement
-        && paragraphElement.getAttribute(TRANSLATION_MODE_ATTRIBUTE) === "lineByLine"
-        && paragraphElement.getAttribute(WALKED_ATTRIBUTE) === walkId
+    // Check for existing translation — handle both wrapper-based and
+    // line-by-line paragraph rebuild, regardless of current interleave.
+    // This prevents stale translations from the "other" mode when the
+    // user switches interleave and re-translates.
+    const paragraphElement = findParagraphElement(targetNode)
+    const lineByLineExists = paragraphElement
+      && paragraphElement.getAttribute(TRANSLATION_MODE_ATTRIBUTE) === "lineByLine"
+      && paragraphElement.getAttribute(WALKED_ATTRIBUTE) === walkId
+    const wrapperExists = findPreviousTranslatedWrapperInside(targetNode, walkId)
 
-      if (alreadyTranslated && paragraphElement) {
-        removeLineByLineTranslation(paragraphElement)
-        if (toggle) {
-          return
-        }
-        else {
-          nodes.forEach(node => translatingNodes.delete(node))
-          void translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
-          return
-        }
-      }
+    if (lineByLineExists && paragraphElement) {
+      removeLineByLineTranslation(paragraphElement)
     }
-    else {
-      const existedTranslatedWrapper = findPreviousTranslatedWrapperInside(targetNode, walkId)
-      if (existedTranslatedWrapper) {
-        removeTranslatedWrapperWithRestore(existedTranslatedWrapper)
-        if (toggle) {
-          return
-        }
-        else {
-          nodes.forEach(node => translatingNodes.delete(node))
-          void translateNodesBilingualMode(nodes, walkId, config, toggle)
-          return
-        }
+    if (wrapperExists) {
+      removeTranslatedWrapperWithRestore(wrapperExists)
+    }
+
+    if (lineByLineExists || wrapperExists) {
+      if (toggle) {
+        return
       }
+      nodes.forEach(node => translatingNodes.delete(node))
+      void translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
+      return
     }
 
     const textContent = transNodes.map(node => extractTextContent(node, config)).join("").trim()
