@@ -168,4 +168,12 @@ export const CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP: Record<string, string[
   "www.youtube.com": [
     "yt-attributed-string > span",
   ],
+  "x.com": [
+    "[data-testid=\"tweetText\"]",
+    "[data-testid=\"tweetText\"] > span:only-child",
+  ],
+  "twitter.com": [
+    "[data-testid=\"tweetText\"]",
+    "[data-testid=\"tweetText\"] > span:only-child",
+  ],
 }
