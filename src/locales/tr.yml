@@ -900,6 +900,8 @@ shortcutKeySelector:
   placeholder: Lütfen kısayolu girin
 subtitles:
   actions:
+    downloadTranslated: Çevrilmiş altyazıları indir
+    downloadTranslatedComplete: Çevrilmiş altyazılar indirildi
     downloadSource: Kaynak altyazıları indir
   state:
     loading: Read Frog altyazılar yükleniyor
@@ -921,6 +923,8 @@ subtitles:
     aiAuthFailed: API kimlik doğrulaması başarısız, lütfen API anahtarınızı kontrol edin
     aiServiceUnavailable: Çeviri hizmeti geçici olarak kullanılamıyor
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor
+    translatedExportFailed: Çevrilmiş altyazılar oluşturulamadı
+    translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
 hotkey:
   control: Ctrl
   alt: Option

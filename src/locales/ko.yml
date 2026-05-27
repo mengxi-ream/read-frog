@@ -900,6 +900,8 @@ shortcutKeySelector:
   placeholder: 단축키를 입력해 주세요
 subtitles:
   actions:
+    downloadTranslated: 번역 자막 다운로드
+    downloadTranslatedComplete: 번역 자막을 다운로드했습니다
     downloadSource: 원본 자막 다운로드
   state:
     loading: Read Frog 자막 로딩 중
@@ -921,6 +923,8 @@ subtitles:
     aiAuthFailed: API 인증에 실패했습니다. API 키를 확인해 주세요
     aiServiceUnavailable: 번역 서비스를 일시적으로 사용할 수 없습니다
     aiNoResponse: AI 서비스가 응답하지 않았습니다. 원문을 표시합니다
+    translatedExportFailed: 번역 자막 생성에 실패했습니다
+    translatedExportIncomplete: 모든 자막 줄을 번역하지 못했습니다
 hotkey:
   control: Ctrl
   alt: Option

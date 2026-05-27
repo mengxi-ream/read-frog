@@ -1,5 +1,47 @@
-import { describe, expect, it, vi } from "vitest"
+import type { SubtitlesFragment } from "@/utils/subtitles/types"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { UniversalVideoAdapter } from "../universal-adapter"
+
+const mocks = vi.hoisted(() => ({
+  aiSegmentBlock: vi.fn(),
+  downloadSubtitlesAsSrt: vi.fn(),
+  getLocalConfig: vi.fn(),
+  translateSubtitles: vi.fn(),
+  fetchSubtitlesSummary: vi.fn(),
+}))
+
+vi.mock("@/utils/subtitles/srt", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/subtitles/srt")>()
+  return {
+    ...actual,
+    downloadSubtitlesAsSrt: mocks.downloadSubtitlesAsSrt,
+  }
+})
+
+vi.mock("@/utils/subtitles/processor/translator", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/subtitles/processor/translator")>()
+  return {
+    ...actual,
+    translateSubtitles: mocks.translateSubtitles,
+    fetchSubtitlesSummary: mocks.fetchSubtitlesSummary,
+  }
+})
+
+vi.mock("@/utils/config/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/config/storage")>()
+  return {
+    ...actual,
+    getLocalConfig: mocks.getLocalConfig,
+  }
+})
+
+vi.mock("@/utils/subtitles/processor/ai-segmentation", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/subtitles/processor/ai-segmentation")>()
+  return {
+    ...actual,
+    aiSegmentBlock: mocks.aiSegmentBlock,
+  }
+})
 
 function createAdapter(fetchResult: Array<{ text: string, start: number, end: number }>) {
   const subtitlesFetcher = {
@@ -38,6 +80,20 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
 }
 
 describe("universalVideoAdapter", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal("document", { title: "Test video" })
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {},
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: false,
+        providerId: null,
+      },
+    })
+    mocks.fetchSubtitlesSummary.mockResolvedValue(null)
+  })
+
   it("keeps raw source subtitles and rebuilds processed source subtitles", async () => {
     const subtitles = [
       { text: "I agree.", start: 0, end: 500 },
@@ -112,5 +168,136 @@ describe("universalVideoAdapter", () => {
     expect(subtitlesScheduler.reset).not.toHaveBeenCalled()
     expect(subtitlesScheduler.setState).not.toHaveBeenCalled()
     expect(startTranslationSpy).not.toHaveBeenCalled()
+  })
+
+  it("downloads a complete translated subtitle SRT", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+      { text: "World.", start: 1000, end: 2000 },
+    ])
+    mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) =>
+      fragments.map(fragment => ({
+        ...fragment,
+        translation: `zh:${fragment.text}`,
+      })),
+    )
+
+    await adapter.downloadTranslatedSubtitles()
+
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith({
+      subtitles: [
+        { text: "zh:Hello. World.", start: 0, end: 2000 },
+      ],
+      pageTitle: "Test video",
+      videoId: undefined,
+      suffix: "translated",
+    })
+  })
+
+  it("does not download when any translated subtitle line is missing", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+    ])
+    mocks.translateSubtitles.mockResolvedValue([
+      { text: "Hello.", start: 0, end: 1000, translation: "" },
+    ])
+
+    await expect(adapter.downloadTranslatedSubtitles()).rejects.toThrow()
+
+    expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
+  })
+
+  it("retries a timing-degraded AI segmented export chunk as smaller chunks", async () => {
+    const { adapter } = createAdapter([
+      { text: "A", start: 0, end: 10000 },
+      { text: "B", start: 10000, end: 20000 },
+      { text: "C", start: 20000, end: 30000 },
+      { text: "D", start: 30000, end: 40000 },
+      { text: "E", start: 40000, end: 50000 },
+      { text: "F", start: 50000, end: 55000 },
+    ])
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {},
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: true,
+        providerId: "test-provider",
+      },
+    })
+    mocks.aiSegmentBlock
+      .mockResolvedValueOnce([
+        { text: "A B C D E", start: 0, end: 10000 },
+        { text: "F", start: 50000, end: 55000 },
+      ])
+      .mockResolvedValueOnce([
+        { text: "A B C", start: 0, end: 30000 },
+      ])
+      .mockResolvedValueOnce([
+        { text: "D E F", start: 30000, end: 55000 },
+      ])
+    mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) =>
+      fragments.map(fragment => ({
+        ...fragment,
+        translation: `zh:${fragment.text}`,
+      })),
+    )
+
+    await adapter.downloadTranslatedSubtitles()
+
+    expect(mocks.aiSegmentBlock).toHaveBeenCalledTimes(3)
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith({
+      subtitles: [
+        { text: "zh:A B C", start: 0, end: 30000 },
+        { text: "zh:D E F", start: 30000, end: 55000 },
+      ],
+      pageTitle: "Test video",
+      videoId: undefined,
+      suffix: "translated",
+    })
+  })
+
+  it("falls back to source processed timing when smaller AI chunks still have timing gaps", async () => {
+    const { adapter } = createAdapter([
+      { text: "A.", start: 0, end: 10000 },
+      { text: "B.", start: 10000, end: 20000 },
+      { text: "C.", start: 20000, end: 30000 },
+      { text: "D.", start: 30000, end: 40000 },
+      { text: "E.", start: 40000, end: 50000 },
+      { text: "F.", start: 50000, end: 55000 },
+    ])
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {},
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: true,
+        providerId: "test-provider",
+      },
+    })
+    mocks.aiSegmentBlock
+      .mockResolvedValueOnce([
+        { text: "A B C D E", start: 0, end: 10000 },
+        { text: "F", start: 50000, end: 55000 },
+      ])
+      .mockResolvedValueOnce([
+        { text: "A B C", start: 0, end: 10000 },
+      ])
+    mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) =>
+      fragments.map(fragment => ({
+        ...fragment,
+        translation: `zh:${fragment.text}`,
+      })),
+    )
+
+    await adapter.downloadTranslatedSubtitles()
+
+    expect(mocks.aiSegmentBlock).toHaveBeenCalledTimes(2)
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith({
+      subtitles: [
+        { text: "zh:A. B. C. D. E. F.", start: 0, end: 55000 },
+      ],
+      pageTitle: "Test video",
+      videoId: undefined,
+      suffix: "translated",
+    })
   })
 })

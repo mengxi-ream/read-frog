@@ -900,6 +900,8 @@ shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
   actions:
+    downloadTranslated: Скачать переведённые субтитры
+    downloadTranslatedComplete: Переведённые субтитры скачаны
     downloadSource: Скачать исходные субтитры
   state:
     loading: Read Frog загрузка субтитров
@@ -921,6 +923,8 @@ subtitles:
     aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
     aiServiceUnavailable: Служба перевода временно недоступна
     aiNoResponse: Служба AI не ответила, отображается оригинальный текст
+    translatedExportFailed: Не удалось создать переведённые субтитры
+    translatedExportIncomplete: Не удалось перевести все строки субтитров
 hotkey:
   control: Ctrl
   alt: Option

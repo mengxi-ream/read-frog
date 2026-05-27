@@ -1015,6 +1015,8 @@ shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
   actions:
+    downloadTranslated: Download translated subtitles
+    downloadTranslatedComplete: Translated subtitles downloaded
     downloadSource: Download source subtitles
   state:
     loading: Read Frog loading captions
@@ -1036,6 +1038,8 @@ subtitles:
     aiAuthFailed: API authentication failed, please check your API key
     aiServiceUnavailable: Translation service temporarily unavailable
     aiNoResponse: AI service did not respond, using original text
+    translatedExportFailed: Failed to generate translated subtitles
+    translatedExportIncomplete: Failed to translate all subtitle lines
 hotkey:
   control: Ctrl
   alt: Option
