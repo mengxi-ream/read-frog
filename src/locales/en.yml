@@ -82,11 +82,6 @@ options:
   apiProviders:
     title: API Providers
     description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
-    promotion:
-      ai302:
-        description: Click the link on the right to register 302.AI and get 1 USD API credit
-        action: Register to Get Free API Key
-        addProvider: Add 302.AI Configuration
     addProvider: Add Provider
     badges:
       featureCount: $1 features
@@ -162,7 +157,6 @@ options:
         xai: Elon Musk's AI company offering Grok models with real-time data access
         siliconflow: High-performance inference platform for Chinese and international models
         tensdaq: Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing
-        ai302: Provides the latest and most comprehensive models with pay-as-you-go API
         openaiCompatible: Third-party and OpenAI API compatible
         deeplx: Unofficial DeepL API
         deepl: Official DeepL API

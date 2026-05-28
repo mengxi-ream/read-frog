@@ -82,11 +82,6 @@ options:
   apiProviders:
     title: Nhà cung cấp API
     description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
-    promotion:
-      ai302:
-        description: Nhấp vào liên kết bên phải để đăng ký 302.AI và nhận 1 USD tín dụng API
-        action: Đăng ký để nhận API Key miễn phí
-        addProvider: Thêm cấu hình 302.AI
     addProvider: Thêm nhà cung cấp
     badges:
       featureCount: $1 tính năng
@@ -161,7 +156,6 @@ options:
         xai: Công ty AI của Elon Musk cung cấp các mô hình Grok với truy cập dữ liệu thời gian thực
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
-        ai302: Cung cấp các mô hình mới nhất và toàn diện nhất với API trả theo lần sử dụng
         openaiCompatible: Bên thứ ba và tương thích API OpenAI
         deeplx: API DeepL không chính thức
         deepl: API DeepL chính thức
