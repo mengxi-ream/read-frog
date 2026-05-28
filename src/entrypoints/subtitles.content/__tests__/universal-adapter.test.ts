@@ -232,6 +232,27 @@ describe("universalVideoAdapter", () => {
     expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
   })
 
+  it("does not download translated subtitles when source and target languages match", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+    ])
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {
+        targetCode: "eng",
+      },
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: false,
+        providerId: null,
+      },
+    })
+
+    await expect(adapter.downloadTranslatedSubtitles()).rejects.toThrow()
+
+    expect(mocks.translateSubtitles).not.toHaveBeenCalled()
+    expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
+  })
+
   it("retries a timing-degraded AI segmented export chunk as smaller chunks", async () => {
     const { adapter } = createAdapter([
       { text: "A", start: 0, end: 10000 },

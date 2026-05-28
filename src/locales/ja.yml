@@ -901,6 +901,8 @@ shortcutKeySelector:
 subtitles:
   actions:
     downloadTranslated: 翻訳字幕をダウンロード
+    downloadTranslatedPreparing: 字幕を準備中。長い動画は時間がかかる場合があります
+    downloadTranslatedTranslating: 字幕を翻訳中
     downloadTranslatedComplete: 翻訳字幕をダウンロードしました
     downloadSource: 元字幕をダウンロード
   state:
@@ -925,6 +927,7 @@ subtitles:
     aiNoResponse: AIサービスが応答しませんでした。原文を表示します
     translatedExportFailed: 翻訳字幕の生成に失敗しました
     translatedExportIncomplete: すべての字幕行を翻訳できませんでした
+    translatedExportSameLanguage: 元の言語と翻訳先の言語が同じです
 hotkey:
   control: Ctrl
   alt: Option

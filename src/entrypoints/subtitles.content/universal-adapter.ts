@@ -504,11 +504,7 @@ export class UniversalVideoAdapter {
 
   private async buildCompleteTranslatedSubtitles(onProgress?: (progress: number) => void): Promise<SubtitlesFragment[]> {
     if (await this.shouldSkipTranslationForCurrentTrack()) {
-      onProgress?.(100)
-      return this.sourceProcessedSubtitles.map(fragment => ({
-        ...fragment,
-        translation: fragment.text,
-      }))
+      throw new Error(i18n.t("subtitles.errors.translatedExportSameLanguage"))
     }
 
     const fragments = await this.buildExportProcessedSubtitles()

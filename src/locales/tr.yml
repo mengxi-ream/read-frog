@@ -901,6 +901,8 @@ shortcutKeySelector:
 subtitles:
   actions:
     downloadTranslated: Çevrilmiş altyazıları indir
+    downloadTranslatedPreparing: Altyazılar hazırlanıyor, uzun videolar daha uzun sürebilir
+    downloadTranslatedTranslating: Altyazılar çevriliyor
     downloadTranslatedComplete: Çevrilmiş altyazılar indirildi
     downloadSource: Kaynak altyazıları indir
   state:
@@ -925,6 +927,7 @@ subtitles:
     aiNoResponse: AI hizmeti yanıt vermedi, orijinal metin gösteriliyor
     translatedExportFailed: Çevrilmiş altyazılar oluşturulamadı
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
+    translatedExportSameLanguage: Kaynak ve hedef diller aynı
 hotkey:
   control: Ctrl
   alt: Option
