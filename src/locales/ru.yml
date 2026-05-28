@@ -137,8 +137,6 @@ options:
       advancedOptions: Расширенные настройки
       providerSettingLabels:
         region: Регион
-      requestTimeout: Request Timeout (ms)
-      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: Температура
       temperatureHint: Контролирует случайность ответов. Низкие значения (0) более детерминированы, высокие — более креативны. Диапазон зависит от провайдера. Оставьте пустым для использования значения по умолчанию.
       headers: Заголовки
@@ -464,6 +462,9 @@ options:
       rate:
         title: Среднее количество запросов в секунду
         description: Среднее количество запросов в секунду, но позволяет настроить максимальное количество пакетов для временной отправки избыточных запросов
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Пакетный перевод
       description: Настройте лимиты символов и максимальное количество абзацев для пакетного перевода (действует только для LLM-перевода)
@@ -810,6 +811,9 @@ options:
       rate:
         title: Среднее кол-во запросов/сек
         description: Среднее количество запросов перевода субтитров в секунду с возможностью настройки максимального пакета для временной отправки избыточных запросов
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one subtitle translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Пакетный перевод субтитров
       description: Настройте лимиты символов и максимальное количество абзацев для пакетного перевода (действует только для LLM-перевода)

@@ -7,7 +7,7 @@ import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/bas
 import { Input } from "@/components/ui/base-ui/input"
 import { requestQueueConfigSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from "@/utils/constants/translate"
+import { MIN_REQUEST_TIMEOUT_MS, MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from "@/utils/constants/translate"
 import { sendMessage } from "@/utils/message"
 import { ConfigCard } from "../../components/config-card"
 
@@ -29,6 +29,7 @@ export function RequestRate() {
       <FieldGroup>
         <TranslateNumberSelector property="capacity" />
         <TranslateNumberSelector property="rate" />
+        <TranslateNumberSelector property="timeoutMs" />
       </FieldGroup>
     </ConfigCard>
   )
@@ -43,11 +44,16 @@ const propertyInfo = {
     label: i18n.t("options.translation.requestQueueConfig.rate.title"),
     description: i18n.t("options.translation.requestQueueConfig.rate.description"),
   },
+  timeoutMs: {
+    label: i18n.t("options.translation.requestQueueConfig.timeoutMs.title"),
+    description: i18n.t("options.translation.requestQueueConfig.timeoutMs.description"),
+  },
 }
 
 const propertyMinAllowedValue = {
   capacity: MIN_TRANSLATE_CAPACITY,
   rate: MIN_TRANSLATE_RATE,
+  timeoutMs: MIN_REQUEST_TIMEOUT_MS,
 }
 
 function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConfig }) {

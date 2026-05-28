@@ -311,20 +311,21 @@ describe("requestQueue – timeout handling", () => {
     await expect(promise).resolves.toBe("fast")
   })
 
-  it("uses a per-task timeout override when provided", async () => {
+  it("uses updated queue timeout options for later tasks", async () => {
     vi.useFakeTimers()
     const q = new RequestQueue({
       ...baseConfig,
-      timeoutMs: 100,
+      timeoutMs: 1000,
     })
+    q.setQueueOptions({ timeoutMs: 1500 })
 
     const slowThunk = () => new Promise(resolve =>
-      setTimeout(resolve, 200, "slow-but-allowed"),
+      setTimeout(resolve, 1200, "slow-but-allowed"),
     )
 
-    const promise = q.enqueue(slowThunk, Date.now(), "slow-with-override", { timeoutMs: 300 })
+    const promise = q.enqueue(slowThunk, Date.now(), "slow-with-updated-timeout")
 
-    vi.advanceTimersByTime(200)
+    vi.advanceTimersByTime(1200)
 
     await expect(promise).resolves.toBe("slow-but-allowed")
   })

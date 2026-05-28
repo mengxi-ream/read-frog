@@ -137,8 +137,6 @@ options:
       advancedOptions: Gelişmiş Seçenekler
       providerSettingLabels:
         region: Bölge
-      requestTimeout: Request Timeout (ms)
-      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
       headers: Başlıklar
@@ -464,6 +462,9 @@ options:
       rate:
         title: Saniyedeki Ortalama İstek
         description: Saniyedeki ortalama istek, ancak geçici olarak fazla istek göndermek için maksimum ani sayısını yapılandırmaya izin verir
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Toplu Çeviri
       description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
@@ -810,6 +811,9 @@ options:
       rate:
         title: Saniyede Ortalama İstek
         description: Saniyede ortalama altyazı çeviri isteği sayısı. Geçici olarak fazla istek göndermek için maksimum patlama sayısı yapılandırılabilir
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one subtitle translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Altyazı Toplu Çeviri
       description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)

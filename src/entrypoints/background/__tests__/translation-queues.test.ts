@@ -93,6 +93,7 @@ describe("translation queue helpers", () => {
         requestQueueConfig: {
           rate: 10,
           capacity: 10,
+          timeoutMs: 20_000,
         },
         batchQueueConfig: {
           maxCharactersPerBatch: 1000,

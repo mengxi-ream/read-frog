@@ -137,8 +137,6 @@ options:
       advancedOptions: Tùy chọn nâng cao
       providerSettingLabels:
         region: Khu vực
-      requestTimeout: Request Timeout (ms)
-      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: Nhiệt độ
       temperatureHint: Kiểm soát tính ngẫu nhiên trong phản hồi. Giá trị thấp (0) mang tính xác định hơn, giá trị cao mang tính sáng tạo hơn. Phạm vi thay đổi theo nhà cung cấp. Để trống để sử dụng giá trị mặc định của nhà cung cấp.
       headers: Header
@@ -464,6 +462,9 @@ options:
       rate:
         title: Số yêu cầu trung bình mỗi giây
         description: Số yêu cầu trung bình mỗi giây, nhưng cho phép cấu hình số lượng burst tối đa để gửi tạm thời các yêu cầu vượt quá
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Dịch theo lô
       description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)
@@ -810,6 +811,9 @@ options:
       rate:
         title: Số yêu cầu trung bình/giây
         description: Số yêu cầu dịch phụ đề trung bình mỗi giây, có thể cấu hình số yêu cầu tối đa để tạm thời gửi yêu cầu vượt quá
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one subtitle translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Dịch phụ đề theo lô
       description: Cấu hình giới hạn ký tự và số đoạn văn tối đa cho dịch theo lô (chỉ có hiệu lực với dịch LLM)

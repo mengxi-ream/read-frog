@@ -137,8 +137,6 @@ options:
       advancedOptions: 고급 옵션
       providerSettingLabels:
         region: 리전
-      requestTimeout: Request Timeout (ms)
-      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
       headers: 헤더
@@ -464,6 +462,9 @@ options:
       rate:
         title: 초당 평균 요청 수
         description: 초당 평균 요청 수 (단, 최대 버스트 요청 수 설정을 통한 일시적 초과 요청 전송 허용)
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: 배치 번역
       description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)
@@ -810,6 +811,9 @@ options:
       rate:
         title: 초당 평균 요청 수
         description: 초당 평균 자막 번역 요청 수. 최대 버스트 수를 설정하여 일시적으로 초과 요청을 보낼 수 있습니다
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one subtitle translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: 자막 일괄 번역
       description: 배치 번역 시 문자 수 제한 및 최대 단락 수 구성 (대규모 언어 모델 번역에서만 유효)

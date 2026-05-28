@@ -137,8 +137,6 @@ options:
       advancedOptions: 詳細オプション
       providerSettingLabels:
         region: リージョン
-      requestTimeout: Request Timeout (ms)
-      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: 温度
       temperatureHint: 応答のランダム性を制御します。低い値（0）はより決定的で、高い値はより創造的です。範囲はプロバイダーによって異なります。空欄の場合はプロバイダーのデフォルト値を使用します。
       headers: ヘッダー
@@ -464,6 +462,9 @@ options:
       rate:
         title: 秒間平均リクエスト数
         description: 平均秒間リクエスト数（ただし、最大バーストリクエスト数を設定し一時的な超過リクエスト送信を許可）
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: バッチ翻訳
       description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）
@@ -810,6 +811,9 @@ options:
       rate:
         title: 平均リクエスト数/秒
         description: 1秒あたりの平均字幕翻訳リクエスト数。最大バースト数を設定して一時的に超過リクエストを送信できます
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one subtitle translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: 字幕バッチ翻訳
       description: バッチ翻訳時の文字数制限と最大段落数を設定（大規模言語モデル翻訳でのみ有効）

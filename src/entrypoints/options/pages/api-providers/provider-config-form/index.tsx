@@ -39,7 +39,6 @@ import { formOpts, useAppForm } from "./form"
 import { ProviderHeadersField } from "./provider-headers-field"
 import { ProviderOptionsField } from "./provider-options-field"
 import { ProviderSpecificSettingsField } from "./provider-specific-settings-field"
-import { RequestTimeoutField } from "./request-timeout-field"
 import { TemperatureField } from "./temperature-field"
 import { TranslateModelSelector } from "./translate-model-selector"
 
@@ -174,7 +173,6 @@ export function ProviderConfigForm() {
           <FeatureProviderSection form={form} />
           {isLLM && (
             <AdvancedOptionsSection>
-              <RequestTimeoutField form={form} />
               <TemperatureField form={form} />
               <ProviderOptionsField form={form} />
               <ProviderHeadersField form={form} />

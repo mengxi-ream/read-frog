@@ -31,10 +31,6 @@ export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
 }
 
-function getRequestTimeoutMs(providerConfig: ProviderConfig) {
-  return "requestTimeoutMs" in providerConfig ? providerConfig.requestTimeoutMs : undefined
-}
-
 export async function executeBatchTranslation<TContext>(
   dataList: TranslateBatchData<TContext>[],
   promptResolver: PromptResolver<TContext>,
@@ -165,14 +161,14 @@ interface TranslationQueueSetupConfig<TContext = unknown> {
 }
 
 async function createTranslationQueues<TContext>(config: TranslationQueueSetupConfig<TContext>) {
-  const { rate, capacity } = config.requestQueueConfig
+  const { rate, capacity, timeoutMs } = config.requestQueueConfig
   const { maxCharactersPerBatch, maxItemsPerBatch } = config.batchQueueConfig
   const { promptResolver } = config
 
   const requestQueue = new RequestQueue({
     rate,
     capacity,
-    timeoutMs: 20_000,
+    timeoutMs,
     maxRetries: 2,
     baseRetryDelayMs: 1_000,
   })
@@ -197,9 +193,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         return await executeBatchTranslation(dataList, promptResolver)
       }
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash, {
-        timeoutMs: getRequestTimeoutMs(providerConfig),
-      })
+      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash)
     },
     executeIndividual: async (data) => {
       const { text, langConfig, providerConfig, hash, scheduleAt, context } = data
@@ -207,9 +201,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
         return executeTranslate(text, langConfig, providerConfig, promptResolver, { context })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, hash, {
-        timeoutMs: getRequestTimeoutMs(providerConfig),
-      })
+      return requestQueue.enqueue(thunk, scheduleAt, hash)
     },
     onError: (error, context) => {
       const errorType = context.isFallback ? "Individual request" : "Batch request"
@@ -259,9 +251,7 @@ export async function setUpWebPageTranslationQueue() {
     else {
       // Create thunk based on type and params
       const thunk = () => executeTranslate(text, langConfig, providerConfig, getTranslatePrompt)
-      result = await requestQueue.enqueue(thunk, scheduleAt, hash, {
-        timeoutMs: getRequestTimeoutMs(providerConfig),
-      })
+      result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
 
     // Cache the translation result if successful
@@ -333,9 +323,7 @@ export async function setUpSubtitlesTranslationQueue() {
     }
     else {
       const thunk = () => executeTranslate(text, langConfig, providerConfig, getSubtitlesTranslatePrompt)
-      result = await requestQueue.enqueue(thunk, scheduleAt, hash, {
-        timeoutMs: getRequestTimeoutMs(providerConfig),
-      })
+      result = await requestQueue.enqueue(thunk, scheduleAt, hash)
     }
 
     if (result && hash) {

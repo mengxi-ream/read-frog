@@ -138,8 +138,6 @@ options:
       advancedOptions: Opciones avanzadas
       providerSettingLabels:
         region: Región
-      requestTimeout: Request Timeout (ms)
-      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: Temperatura
       temperatureHint: Controla la aleatoriedad en las respuestas. Los valores más bajos (0) son más deterministas; los más altos son más creativos. El rango varía según el proveedor. Déjalo vacío para usar el valor predeterminado del proveedor.
       headers: Encabezados
@@ -579,6 +577,9 @@ options:
       rate:
         title: Solicitudes promedio por segundo
         description: Solicitudes promedio por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Traducción por lotes
       description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
@@ -925,6 +926,9 @@ options:
       rate:
         title: Solicitudes promedio por segundo
         description: Solicitudes promedio de traducción de subtítulos por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes
+      timeoutMs:
+        title: Request Timeout (ms)
+        description: Maximum time to wait for one subtitle translation request. Use a larger value for slower networks or local models.
     batchQueueConfig:
       title: Traducción de subtítulos por lotes
       description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
