@@ -18,13 +18,16 @@ export function DownloadTranslatedSubtitles() {
     }
 
     setIsDownloading(true)
+    const toastId = toast.loading(`${title} (0%)`)
 
     try {
-      await downloadTranslatedSubtitles()
-      toast.success(i18n.t("subtitles.actions.downloadTranslatedComplete"))
+      await downloadTranslatedSubtitles((progress) => {
+        toast.loading(`${title} (${progress}%)`, { id: toastId })
+      })
+      toast.success(i18n.t("subtitles.actions.downloadTranslatedComplete"), { id: toastId })
     }
     catch (error) {
-      toast.error(error instanceof Error ? error.message : String(error))
+      toast.error(error instanceof Error ? error.message : String(error), { id: toastId })
     }
     finally {
       setIsDownloading(false)

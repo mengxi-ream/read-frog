@@ -194,6 +194,31 @@ describe("universalVideoAdapter", () => {
     })
   })
 
+  it("reports translated export progress after each translation batch", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+    ])
+    const fragments = Array.from({ length: 11 }, (_, index) => ({
+      text: `Line ${index + 1}.`,
+      start: index * 1000,
+      end: (index + 1) * 1000,
+    }))
+    vi.spyOn(adapter as any, "buildExportProcessedSubtitles").mockResolvedValue(fragments)
+    mocks.translateSubtitles.mockImplementation(async (batch: SubtitlesFragment[]) =>
+      batch.map(fragment => ({
+        ...fragment,
+        translation: `zh:${fragment.text}`,
+      })),
+    )
+    const onProgress = vi.fn()
+
+    await adapter.downloadTranslatedSubtitles(onProgress)
+
+    expect(onProgress).toHaveBeenNthCalledWith(1, 45)
+    expect(onProgress).toHaveBeenNthCalledWith(2, 91)
+    expect(onProgress).toHaveBeenNthCalledWith(3, 100)
+  })
+
   it("does not download when any translated subtitle line is missing", async () => {
     const { adapter } = createAdapter([
       { text: "Hello.", start: 0, end: 1000 },

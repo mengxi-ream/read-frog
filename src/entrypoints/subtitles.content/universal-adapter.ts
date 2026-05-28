@@ -106,10 +106,10 @@ export class UniversalVideoAdapter {
     })
   }
 
-  downloadTranslatedSubtitles = async () => {
+  downloadTranslatedSubtitles = async (onProgress?: (progress: number) => void) => {
     await this.getOrLoadSourceSubtitles()
 
-    const translatedSubtitles = await this.buildCompleteTranslatedSubtitles()
+    const translatedSubtitles = await this.buildCompleteTranslatedSubtitles(onProgress)
 
     await downloadSubtitlesAsSrt({
       subtitles: translatedSubtitles.map(({ translation, ...fragment }) => ({
@@ -502,8 +502,9 @@ export class UniversalVideoAdapter {
     this.subtitlesScheduler?.setState("idle")
   }
 
-  private async buildCompleteTranslatedSubtitles(): Promise<SubtitlesFragment[]> {
+  private async buildCompleteTranslatedSubtitles(onProgress?: (progress: number) => void): Promise<SubtitlesFragment[]> {
     if (await this.shouldSkipTranslationForCurrentTrack()) {
+      onProgress?.(100)
       return this.sourceProcessedSubtitles.map(fragment => ({
         ...fragment,
         translation: fragment.text,
@@ -518,6 +519,7 @@ export class UniversalVideoAdapter {
       const batch = fragments.slice(index, index + TRANSLATION_BATCH_SIZE)
       const translatedBatch = await translateSubtitles(batch, videoContext)
       translatedFragments.push(...translatedBatch)
+      onProgress?.(Math.min(100, Math.round((translatedFragments.length / fragments.length) * 100)))
     }
 
     const failedFragment = translatedFragments.find(fragment => !fragment.translation?.trim())
