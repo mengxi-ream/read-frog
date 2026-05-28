@@ -1,23 +1,52 @@
 import { IconDownload, IconLanguage, IconLoader2 } from "@tabler/icons-react"
-import { useState } from "react"
+import { useAtomValue } from "jotai"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
+import { subtitlesSettingsPanelOpenAtom } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"
+
+const SUCCESS_MESSAGE_DURATION_MS = 4000
 
 export function DownloadTranslatedSubtitles() {
   const [isDownloading, setIsDownloading] = useState(false)
   const [progress, setProgress] = useState<number | null>(null)
   const [progressMessage, setProgressMessage] = useState<string | null>(null)
+  const clearSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isOpen = useAtomValue(subtitlesSettingsPanelOpenAtom)
   const { downloadTranslatedSubtitles } = useSubtitlesUI()
   const buttonId = "read-frog-download-translated-subtitles"
   const title = i18n.t("subtitles.actions.downloadTranslated")
+
+  const clearSuccessTimeout = useCallback(() => {
+    if (clearSuccessTimeoutRef.current !== null) {
+      clearTimeout(clearSuccessTimeoutRef.current)
+      clearSuccessTimeoutRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!isOpen && !isDownloading) {
+      clearSuccessTimeout()
+      // Activity hides the panel without unmounting, so close events must clear retained local status.
+      // eslint-disable-next-line react/set-state-in-effect
+      setProgressMessage(null)
+      // eslint-disable-next-line react/set-state-in-effect
+      setProgress(null)
+    }
+  }, [clearSuccessTimeout, isOpen, isDownloading])
+
+  useEffect(() => {
+    return clearSuccessTimeout
+  }, [clearSuccessTimeout])
 
   const downloadSubtitles = async () => {
     if (isDownloading) {
       return
     }
 
+    clearSuccessTimeout()
     setIsDownloading(true)
     setProgress(0)
     const preparingMessage = i18n.t("subtitles.actions.downloadTranslatedPreparing")
@@ -30,6 +59,10 @@ export function DownloadTranslatedSubtitles() {
         setProgressMessage(translatingMessage)
       })
       setProgressMessage(i18n.t("subtitles.actions.downloadTranslatedComplete"))
+      clearSuccessTimeoutRef.current = setTimeout(() => {
+        setProgressMessage(null)
+        clearSuccessTimeoutRef.current = null
+      }, SUCCESS_MESSAGE_DURATION_MS)
     }
     catch (error) {
       setProgressMessage(error instanceof Error ? error.message : String(error))
