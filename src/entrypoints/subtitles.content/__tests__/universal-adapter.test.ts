@@ -232,6 +232,31 @@ describe("universalVideoAdapter", () => {
     expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
   })
 
+  it("aborts translated export before later batches when an earlier batch is incomplete", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+    ])
+    const fragments = Array.from({ length: 11 }, (_, index) => ({
+      text: `Line ${index + 1}.`,
+      start: index * 1000,
+      end: (index + 1) * 1000,
+    }))
+    vi.spyOn(adapter as any, "buildExportProcessedSubtitles").mockResolvedValue(fragments)
+    mocks.translateSubtitles
+      .mockResolvedValueOnce([
+        { text: "Line 1.", start: 0, end: 1000, translation: "" },
+        ...fragments.slice(1, 5).map(fragment => ({
+          ...fragment,
+          translation: `zh:${fragment.text}`,
+        })),
+      ])
+
+    await expect(adapter.downloadTranslatedSubtitles()).rejects.toThrow()
+
+    expect(mocks.translateSubtitles).toHaveBeenCalledTimes(1)
+    expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
+  })
+
   it("does not download translated subtitles when source and target languages match", async () => {
     const { adapter } = createAdapter([
       { text: "Hello.", start: 0, end: 1000 },

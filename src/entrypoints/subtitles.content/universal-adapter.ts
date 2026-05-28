@@ -514,16 +514,23 @@ export class UniversalVideoAdapter {
     for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
       const batch = fragments.slice(index, index + TRANSLATION_BATCH_SIZE)
       const translatedBatch = await translateSubtitles(batch, videoContext)
+      if (this.hasIncompleteTranslatedFragments(translatedBatch)) {
+        throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
+      }
+
       translatedFragments.push(...translatedBatch)
       onProgress?.(Math.min(100, Math.round((translatedFragments.length / fragments.length) * 100)))
     }
 
-    const failedFragment = translatedFragments.find(fragment => !fragment.translation?.trim())
-    if (failedFragment) {
+    if (this.hasIncompleteTranslatedFragments(translatedFragments)) {
       throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
     }
 
     return translatedFragments
+  }
+
+  private hasIncompleteTranslatedFragments(fragments: SubtitlesFragment[]): boolean {
+    return fragments.some(fragment => !fragment.translation?.trim())
   }
 
   private async buildExportProcessedSubtitles(): Promise<SubtitlesFragment[]> {
