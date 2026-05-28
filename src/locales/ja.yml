@@ -137,6 +137,8 @@ options:
       advancedOptions: 詳細オプション
       providerSettingLabels:
         region: リージョン
+      requestTimeout: Request Timeout (ms)
+      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: 温度
       temperatureHint: 応答のランダム性を制御します。低い値（0）はより決定的で、高い値はより創造的です。範囲はプロバイダーによって異なります。空欄の場合はプロバイダーのデフォルト値を使用します。
       headers: ヘッダー

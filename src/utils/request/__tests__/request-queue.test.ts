@@ -310,6 +310,24 @@ describe("requestQueue – timeout handling", () => {
 
     await expect(promise).resolves.toBe("fast")
   })
+
+  it("uses a per-task timeout override when provided", async () => {
+    vi.useFakeTimers()
+    const q = new RequestQueue({
+      ...baseConfig,
+      timeoutMs: 100,
+    })
+
+    const slowThunk = () => new Promise(resolve =>
+      setTimeout(resolve, 200, "slow-but-allowed"),
+    )
+
+    const promise = q.enqueue(slowThunk, Date.now(), "slow-with-override", { timeoutMs: 300 })
+
+    vi.advanceTimersByTime(200)
+
+    await expect(promise).resolves.toBe("slow-but-allowed")
+  })
 })
 
 // 9. Retry functionality

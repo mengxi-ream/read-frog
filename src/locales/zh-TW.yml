@@ -137,6 +137,8 @@ options:
       advancedOptions: 進階選項
       providerSettingLabels:
         region: 區域
+      requestTimeout: 請求逾時（毫秒）
+      requestTimeoutHint: 單個翻譯請求允許等待的最長時間。留空則使用預設 20000 毫秒；本地慢速模型可以填更大的值。
       temperature: 溫度
       temperatureHint: 控制回應的隨機性。較低的值（0）更具確定性，較高的值更具創造性。範圍因提供者而異。留空則使用提供者預設值。
       headers: 請求標頭

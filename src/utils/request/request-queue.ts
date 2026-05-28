@@ -17,7 +17,11 @@ export interface RequestTask {
   drained: boolean
 }
 
-type QueuedRequestTask = RequestTask & { hash: string }
+type QueuedRequestTask = RequestTask & { hash: string, timeoutMs?: number }
+
+interface EnqueueOptions {
+  timeoutMs?: number
+}
 
 export interface QueueOptions {
   rate: number // tokens/sec
@@ -47,7 +51,7 @@ export class RequestQueue {
     this.waitingQueue = new BinaryHeapPQ<QueuedRequestTask>()
   }
 
-  enqueue<T>(thunk: () => Promise<T>, scheduleAt: number, hash: string): Promise<T> {
+  enqueue<T>(thunk: () => Promise<T>, scheduleAt: number, hash: string, options?: EnqueueOptions): Promise<T> {
     const duplicateTask = this.duplicateTask(hash)
     if (duplicateTask) {
       // console.info(`🔄 Found duplicate task for hash: ${hash}, returning existing promise`)
@@ -72,6 +76,7 @@ export class RequestQueue {
       createdAt: Date.now(),
       retryCount: 0,
       drained: false,
+      ...(options?.timeoutMs !== undefined && { timeoutMs: options.timeoutMs }),
     }
 
     this.waitingTasks.set(hash, task)
@@ -147,10 +152,11 @@ export class RequestQueue {
     try {
       // Create a timeout promise
       const timeoutPromise = new Promise((_, reject) => {
+        const timeoutMs = this.getTaskTimeoutMs(task)
         timeoutId = setTimeout(() => {
-          // console.info(`⏰ Task ${task.id} timed out after ${this.options.timeoutMs}ms`)
-          reject(new Error(`Task ${task.id} timed out after ${this.options.timeoutMs}ms`))
-        }, this.options.timeoutMs)
+          // console.info(`⏰ Task ${task.id} timed out after ${timeoutMs}ms`)
+          reject(new Error(`Task ${task.id} timed out after ${timeoutMs}ms`))
+        }, timeoutMs)
       })
 
       // Race between the actual task and timeout
@@ -235,6 +241,12 @@ export class RequestQueue {
       return duplicateTask
     }
     return undefined
+  }
+
+  private getTaskTimeoutMs(task: QueuedRequestTask) {
+    return "timeoutMs" in task && typeof task.timeoutMs === "number"
+      ? task.timeoutMs
+      : this.options.timeoutMs
   }
 
   private failCurrentBacklog(error: unknown) {

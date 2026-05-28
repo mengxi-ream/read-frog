@@ -138,6 +138,8 @@ options:
       advancedOptions: 高级选项
       providerSettingLabels:
         region: 区域
+      requestTimeout: 请求超时（毫秒）
+      requestTimeoutHint: 单个翻译请求允许等待的最长时间。留空则使用默认 20000 毫秒；本地慢速模型可以填更大的值。
       temperature: 温度
       temperatureHint: 控制响应的随机性。较低的值（0）更确定性，较高的值更具创造性。范围因提供商而异。留空则使用提供商默认值。
       headers: 请求头

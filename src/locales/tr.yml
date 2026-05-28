@@ -137,6 +137,8 @@ options:
       advancedOptions: Gelişmiş Seçenekler
       providerSettingLabels:
         region: Bölge
+      requestTimeout: Request Timeout (ms)
+      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
       headers: Başlıklar

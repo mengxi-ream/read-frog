@@ -138,6 +138,8 @@ options:
       advancedOptions: Advanced Options
       providerSettingLabels:
         region: Region
+      requestTimeout: Request Timeout (ms)
+      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
       headers: Headers

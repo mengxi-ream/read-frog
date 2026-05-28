@@ -137,6 +137,8 @@ options:
       advancedOptions: 고급 옵션
       providerSettingLabels:
         region: 리전
+      requestTimeout: Request Timeout (ms)
+      requestTimeoutHint: Maximum time for one translation request. Leave empty to use the default 20000 ms. Use a larger value for slower local models.
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
       headers: 헤더
