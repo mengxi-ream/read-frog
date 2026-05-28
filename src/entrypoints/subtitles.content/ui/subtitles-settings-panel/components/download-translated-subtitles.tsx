@@ -1,4 +1,4 @@
-import { IconLanguage, IconLoader2 } from "@tabler/icons-react"
+import { IconDownload, IconLanguage, IconLoader2 } from "@tabler/icons-react"
 import { useState } from "react"
 import { toast } from "sonner"
 import { i18n } from "#imports"
@@ -47,7 +47,7 @@ export function DownloadTranslatedSubtitles() {
       >
         {isDownloading
           ? <IconLoader2 className="size-3.5 animate-spin" />
-          : <IconLanguage className="size-3.5" />}
+          : <IconDownload className="size-3.5" />}
       </Button>
     </SubtitlesSettingsItem>
   )

@@ -530,14 +530,14 @@ export class UniversalVideoAdapter {
 
   private async buildExportProcessedSubtitles(): Promise<SubtitlesFragment[]> {
     const config = await getLocalConfig()
+    if (!config) {
+      throw new Error(i18n.t("subtitles.errors.translatedExportFailed"))
+    }
+
     const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation
 
     if (!useAiSegmentation || this.subtitlesFetcher.isPreSegmented?.()) {
       return [...this.sourceProcessedSubtitles]
-    }
-
-    if (!config) {
-      throw new Error(i18n.t("subtitles.errors.translatedExportFailed"))
     }
 
     const result: SubtitlesFragment[] = []
