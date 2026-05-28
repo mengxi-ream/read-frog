@@ -1,14 +1,11 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { Icon } from "@iconify/react"
-import {
-  LANG_CODE_TO_EN_NAME,
-  LANG_CODE_TO_LOCALE_NAME,
-} from "@read-frog/definitions"
 import { useAtom } from "jotai"
 import { i18n } from "#imports"
 import { MultiLanguageCombobox } from "@/components/multi-language-combobox"
 import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getLanguageLabel } from "@/utils/language-labels"
 import { ConfigCard } from "../../components/config-card"
 
 export function AutoTranslateLanguages() {
@@ -72,7 +69,7 @@ function SelectedLanguageCells() {
           key={language}
           className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-1 text-sm"
         >
-          <span>{`${LANG_CODE_TO_EN_NAME[language]} (${LANG_CODE_TO_LOCALE_NAME[language]})`}</span>
+          <span>{getLanguageLabel(language)}</span>
           <Button
             variant="ghost"
             size="icon"

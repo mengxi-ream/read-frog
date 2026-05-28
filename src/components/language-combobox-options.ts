@@ -1,23 +1,11 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import {
-  LANG_CODE_TO_LOCALE_NAME,
-  langCodeISO6393Schema,
-} from "@read-frog/definitions"
-import { camelCase } from "case-anything"
-import { i18n } from "#imports"
+import { langCodeISO6393Schema } from "@read-frog/definitions"
+import { getLanguageLabel, getLanguageName } from "@/utils/language-labels"
 
 export interface LanguageItem<T extends LangCodeISO6393 | "auto" = LangCodeISO6393 | "auto"> {
   value: T
   label: string
   name?: string
-}
-
-export function getLanguageName(code: LangCodeISO6393) {
-  return i18n.t(`languages.${camelCase(code)}` as Parameters<typeof i18n.t>[0])
-}
-
-export function getLanguageLabel(code: LangCodeISO6393) {
-  return `${getLanguageName(code)} (${LANG_CODE_TO_LOCALE_NAME[code]})`
 }
 
 export function getTargetLanguageItems(): LanguageItem<LangCodeISO6393>[] {

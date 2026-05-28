@@ -2,11 +2,7 @@ import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { LanguageItem } from "@/components/language-combobox-options"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
-import {
-  LANG_CODE_TO_EN_NAME,
-  LANG_CODE_TO_LOCALE_NAME,
-  langCodeISO6393Schema,
-} from "@read-frog/definitions"
+import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { IconChevronDown } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
@@ -23,16 +19,13 @@ import {
 } from "@/components/ui/base-ui/combobox"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectedCodeAtom } from "@/utils/atoms/detected-code"
-
-function langCodeLabel(langCode: LangCodeISO6393) {
-  return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
-}
+import { getLanguageLabel, getLanguageName } from "@/utils/language-labels"
 
 function createLanguageItem(code: LangCodeISO6393): LanguageItem<LangCodeISO6393> {
   return {
     value: code,
-    label: langCodeLabel(code),
-    name: LANG_CODE_TO_EN_NAME[code],
+    label: getLanguageLabel(code),
+    name: getLanguageName(code),
   }
 }
 
@@ -81,8 +74,8 @@ export default function LanguageOptionsSelector() {
     () => [
       {
         value: "auto",
-        label: langCodeLabel(detectedCode),
-        name: LANG_CODE_TO_EN_NAME[detectedCode],
+        label: getLanguageLabel(detectedCode),
+        name: getLanguageName(detectedCode),
       },
       ...targetLanguageItems,
     ],
@@ -111,10 +104,10 @@ export default function LanguageOptionsSelector() {
 
   const sourceLangLabel
     = language.sourceCode === "auto"
-      ? `${currentSourceItem?.label ?? langCodeLabel(detectedCode)} (auto)`
-      : currentSourceItem?.label ?? langCodeLabel(language.sourceCode)
+      ? `${currentSourceItem?.label ?? getLanguageLabel(detectedCode)} (auto)`
+      : currentSourceItem?.label ?? getLanguageLabel(language.sourceCode)
 
-  const targetLangLabel = currentTargetItem?.label ?? langCodeLabel(language.targetCode)
+  const targetLangLabel = currentTargetItem?.label ?? getLanguageLabel(language.targetCode)
 
   return (
     <div className="flex items-center justify-between">

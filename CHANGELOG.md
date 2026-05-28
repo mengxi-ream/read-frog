@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.33.11
+
+### Patch Changes
+
+- [#1610](https://github.com/mengxi-ream/read-frog/pull/1610) [`4f7a3cf`](https://github.com/mengxi-ream/read-frog/commit/4f7a3cf675802c5df86492419cfa8ef9c38f261f) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - i18n(options): localize UI language labels
+
+- [#1608](https://github.com/mengxi-ream/read-frog/pull/1608) [`dbd7c61`](https://github.com/mengxi-ream/read-frog/commit/dbd7c612ec77c15ef1161a78df1d128aeca5be55) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(content): verify page language metadata against visible text
+
 ## 1.33.10
 
 ### Patch Changes
