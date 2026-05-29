@@ -33,7 +33,6 @@ import { resolveModelId } from "./model-id"
 const CREATE_AI_MAPPER = {
   "siliconflow": createOpenAICompatible,
   "tensdaq": createOpenAICompatible,
-  "ai302": createOpenAICompatible,
   "volcengine": createOpenAICompatible,
   "openrouter": createOpenRouter,
   "openai-compatible": createOpenAICompatible,

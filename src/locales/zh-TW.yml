@@ -82,11 +82,6 @@ options:
   apiProviders:
     title: API 提供商
     description: 配置用於翻譯和詞彙解析功能的 API 提供商。我們內建了 20 多個提供商，並支援任何 OpenAI 相容 API 提供商。
-    promotion:
-      ai302:
-        description: 點擊右方鏈接註冊 302.AI 可以獲得 1 美元 API 額度
-        action: 註冊獲取免費 API Key
-        addProvider: 新增 302.AI 配置
     addProvider: 新增提供商
     badges:
       featureCount: $1 個功能
@@ -161,7 +156,6 @@ options:
         xai: 馬斯克的 AI 公司，提供具有即時數據存取能力的 Grok 模型
         siliconflow: 面向中國和國際模型的高效能推理平台
         tensdaq: 革命性競價 AI MaaS 平台，價格由市場供需決定，告別高成本固定定價
-        ai302: 提供最新、全面的模型和按量付費 API
         openaiCompatible: OpenAI API 相容的第三方
         deeplx: 非官方 DeepL API
         deepl: 官方 DeepL API
