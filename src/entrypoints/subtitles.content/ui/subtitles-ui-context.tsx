@@ -1,4 +1,5 @@
 import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
+import type { DownloadTranslatedSubtitlesOptions } from "@/entrypoints/subtitles.content/translated-export"
 import type { UniversalVideoAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
 import { Provider as JotaiProvider } from "jotai"
 import { createContext, use } from "react"
@@ -7,7 +8,7 @@ import { subtitlesStore } from "../atoms"
 interface SubtitlesUIContextValue {
   toggleSubtitles: (enabled: boolean) => void
   downloadSourceSubtitles: () => Promise<void>
-  downloadTranslatedSubtitles: (onProgress?: (progress: number) => void) => Promise<void>
+  downloadTranslatedSubtitles: (options?: DownloadTranslatedSubtitlesOptions) => Promise<void>
   controlsConfig?: ControlsConfig
   embedded?: boolean
 }

@@ -212,11 +212,59 @@ describe("universalVideoAdapter", () => {
     )
     const onProgress = vi.fn()
 
-    await adapter.downloadTranslatedSubtitles(onProgress)
+    await adapter.downloadTranslatedSubtitles({ onProgress })
 
-    expect(onProgress).toHaveBeenNthCalledWith(1, 45)
-    expect(onProgress).toHaveBeenNthCalledWith(2, 91)
-    expect(onProgress).toHaveBeenNthCalledWith(3, 100)
+    expect(onProgress).toHaveBeenNthCalledWith(1, { phase: "preparing", progress: 0 })
+    expect(onProgress).toHaveBeenNthCalledWith(2, { phase: "preparing", progress: 30 })
+    expect(onProgress).toHaveBeenNthCalledWith(3, { phase: "translating", progress: 62 })
+    expect(onProgress).toHaveBeenNthCalledWith(4, { phase: "translating", progress: 94 })
+    expect(onProgress).toHaveBeenNthCalledWith(5, { phase: "translating", progress: 100 })
+  })
+
+  it("reports preparation progress while AI segmentation runs during export", async () => {
+    const { adapter } = createAdapter([
+      { text: "A", start: 0, end: 10000 },
+      { text: "B", start: 10000, end: 20000 },
+      { text: "C", start: 20000, end: 30000 },
+      { text: "D", start: 30000, end: 40000 },
+      { text: "E", start: 40000, end: 50000 },
+      { text: "F", start: 50000, end: 55000 },
+    ])
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {},
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: true,
+        providerId: "test-provider",
+      },
+    })
+    mocks.aiSegmentBlock.mockImplementation(async (chunk: SubtitlesFragment[]) => chunk)
+    mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) =>
+      fragments.map(fragment => ({
+        ...fragment,
+        translation: `zh:${fragment.text}`,
+      })),
+    )
+    const onProgress = vi.fn()
+
+    await adapter.downloadTranslatedSubtitles({ onProgress })
+
+    expect(onProgress.mock.calls.some(([update]) => update.phase === "preparing" && update.progress > 0)).toBe(true)
+    expect(onProgress.mock.calls.at(-1)).toEqual([{ phase: "translating", progress: 100 }])
+  })
+
+  it("aborts translated export when the signal is aborted", async () => {
+    const { adapter } = createAdapter([
+      { text: "Hello.", start: 0, end: 1000 },
+    ])
+    const abortController = new AbortController()
+    abortController.abort()
+
+    await expect(adapter.downloadTranslatedSubtitles({ signal: abortController.signal }))
+      .rejects
+      .toMatchObject({ name: "AbortError" })
+
+    expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
   })
 
   it("does not download when any translated subtitle line is missing", async () => {

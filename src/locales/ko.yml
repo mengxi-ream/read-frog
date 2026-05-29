@@ -898,6 +898,7 @@ subtitles:
     downloadTranslatedPreparing: 자막 준비 중, 긴 동영상은 시간이 더 걸릴 수 있습니다
     downloadTranslatedTranslating: 자막 번역 중
     downloadTranslatedComplete: 번역 자막을 다운로드했습니다
+    downloadTranslatedCancel: 번역 자막보내기 취소
     downloadSource: 원본 자막 다운로드
   state:
     loading: Read Frog 자막 로딩 중
@@ -922,6 +923,7 @@ subtitles:
     translatedExportFailed: 번역 자막 생성에 실패했습니다
     translatedExportIncomplete: 모든 자막 줄을 번역하지 못했습니다
     translatedExportSameLanguage: 원본 언어와 대상 언어가 같습니다
+    translatedExportCancelled: 번역 자막보내기가 취소되었습니다
 hotkey:
   control: Ctrl
   alt: Option

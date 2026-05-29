@@ -1013,6 +1013,7 @@ subtitles:
     downloadTranslatedPreparing: Preparando subtítulos, los videos largos pueden tardar más
     downloadTranslatedTranslating: Traduciendo subtítulos
     downloadTranslatedComplete: Subtítulos traducidos descargados
+    downloadTranslatedCancel: Cancelar exportación de subtítulos traducidos
     downloadSource: Descargar subtítulos de origen
   state:
     loading: Read Frog está cargando subtítulos
@@ -1037,6 +1038,7 @@ subtitles:
     translatedExportFailed: No se pudieron generar los subtítulos traducidos
     translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos
     translatedExportSameLanguage: El idioma de origen y el de destino son iguales
+    translatedExportCancelled: Exportación de subtítulos traducidos cancelada
 hotkey:
   control: Ctrl
   alt: Opción

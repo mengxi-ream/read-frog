@@ -898,6 +898,7 @@ subtitles:
     downloadTranslatedPreparing: Altyazılar hazırlanıyor, uzun videolar daha uzun sürebilir
     downloadTranslatedTranslating: Altyazılar çevriliyor
     downloadTranslatedComplete: Çevrilmiş altyazılar indirildi
+    downloadTranslatedCancel: Çevrilmiş altyazı dışa aktarmasını iptal et
     downloadSource: Kaynak altyazıları indir
   state:
     loading: Read Frog altyazılar yükleniyor
@@ -922,6 +923,7 @@ subtitles:
     translatedExportFailed: Çevrilmiş altyazılar oluşturulamadı
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
     translatedExportSameLanguage: Kaynak ve hedef diller aynı
+    translatedExportCancelled: Çevrilmiş altyazı dışa aktarması iptal edildi
 hotkey:
   control: Ctrl
   alt: Option

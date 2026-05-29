@@ -7,12 +7,19 @@ import { DownloadTranslatedSubtitles } from "../download-translated-subtitles"
 
 const mocks = vi.hoisted(() => ({
   downloadTranslatedSubtitles: vi.fn(),
+  toastError: vi.fn(),
 }))
 
 vi.mock("../../../subtitles-ui-context", () => ({
   useSubtitlesUI: () => ({
     downloadTranslatedSubtitles: mocks.downloadTranslatedSubtitles,
   }),
+}))
+
+vi.mock("sonner", () => ({
+  toast: {
+    error: mocks.toastError,
+  },
 }))
 
 function renderDownloadTranslatedSubtitles() {
@@ -31,14 +38,15 @@ function renderDownloadTranslatedSubtitles() {
 describe("download translated subtitles", () => {
   afterEach(() => {
     mocks.downloadTranslatedSubtitles.mockReset()
+    mocks.toastError.mockReset()
     cleanup()
     vi.useRealTimers()
   })
 
   it("shows export progress in the settings row", async () => {
     let finishDownload!: () => void
-    let reportProgress!: (progress: number) => void
-    mocks.downloadTranslatedSubtitles.mockImplementation(async (onProgress: (progress: number) => void) => {
+    let reportProgress!: (update: { phase: "preparing" | "translating", progress: number }) => void
+    mocks.downloadTranslatedSubtitles.mockImplementation(async ({ onProgress }) => {
       reportProgress = onProgress
       await new Promise<void>((resolve) => {
         finishDownload = resolve
@@ -52,7 +60,13 @@ describe("download translated subtitles", () => {
     expect(await screen.findByText("subtitles.actions.downloadTranslatedPreparing (0%)")).toBeInTheDocument()
 
     await act(async () => {
-      reportProgress(45)
+      reportProgress({ phase: "preparing", progress: 15 })
+    })
+
+    expect(await screen.findByText("subtitles.actions.downloadTranslatedPreparing (15%)")).toBeInTheDocument()
+
+    await act(async () => {
+      reportProgress({ phase: "translating", progress: 45 })
     })
 
     expect(await screen.findByText("subtitles.actions.downloadTranslatedTranslating (45%)")).toBeInTheDocument()
@@ -65,6 +79,47 @@ describe("download translated subtitles", () => {
       expect(screen.queryByText("subtitles.actions.downloadTranslatedTranslating (45%)")).not.toBeInTheDocument()
     })
     expect(screen.getByText("subtitles.actions.downloadTranslatedComplete")).toBeInTheDocument()
+  })
+
+  it("cancels an in-flight export when the button is clicked again", async () => {
+    let abortSignal: AbortSignal | undefined
+    mocks.downloadTranslatedSubtitles.mockImplementation(({ signal }) => {
+      abortSignal = signal
+      return new Promise((_resolve, reject) => {
+        signal?.addEventListener("abort", () => {
+          reject(new DOMException("cancelled", "AbortError"))
+        }, { once: true })
+      })
+    })
+
+    renderDownloadTranslatedSubtitles()
+
+    fireEvent.click(screen.getByLabelText("subtitles.actions.downloadTranslated"))
+    expect(await screen.findByLabelText("subtitles.actions.downloadTranslatedCancel")).toBeInTheDocument()
+
+    fireEvent.click(screen.getByLabelText("subtitles.actions.downloadTranslatedCancel"))
+
+    await waitFor(() => {
+      expect(abortSignal?.aborted).toBe(true)
+    })
+    await waitFor(() => {
+      expect(screen.getByLabelText("subtitles.actions.downloadTranslated")).toBeInTheDocument()
+    })
+
+    expect(mocks.toastError).not.toHaveBeenCalled()
+  })
+
+  it("shows export failures with toast errors", async () => {
+    mocks.downloadTranslatedSubtitles.mockRejectedValue(new Error("export failed"))
+
+    renderDownloadTranslatedSubtitles()
+
+    fireEvent.click(screen.getByLabelText("subtitles.actions.downloadTranslated"))
+
+    await waitFor(() => {
+      expect(mocks.toastError).toHaveBeenCalledWith("export failed")
+    })
+    expect(screen.queryByText("export failed")).not.toBeInTheDocument()
   })
 
   it("clears the success message after a short delay", async () => {

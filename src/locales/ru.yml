@@ -898,6 +898,7 @@ subtitles:
     downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени
     downloadTranslatedTranslating: Перевод субтитров
     downloadTranslatedComplete: Переведённые субтитры скачаны
+    downloadTranslatedCancel: Отменить экспорт переведённых субтитров
     downloadSource: Скачать исходные субтитры
   state:
     loading: Read Frog загрузка субтитров
@@ -922,6 +923,7 @@ subtitles:
     translatedExportFailed: Не удалось создать переведённые субтитры
     translatedExportIncomplete: Не удалось перевести все строки субтитров
     translatedExportSameLanguage: Исходный и целевой языки совпадают
+    translatedExportCancelled: Экспорт переведённых субтитров отменён
 hotkey:
   control: Ctrl
   alt: Option

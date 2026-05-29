@@ -898,6 +898,7 @@ subtitles:
     downloadTranslatedPreparing: 正在準備字幕，長影片可能需要更久
     downloadTranslatedTranslating: 正在翻譯字幕
     downloadTranslatedComplete: 翻譯字幕已下載
+    downloadTranslatedCancel: 取消匯出翻譯字幕
     downloadSource: 下載原始字幕
   state:
     loading: Read Frog 字幕載入中
@@ -922,6 +923,7 @@ subtitles:
     translatedExportFailed: 產生翻譯字幕失敗
     translatedExportIncomplete: 未能翻譯所有字幕行
     translatedExportSameLanguage: 來源語言和目標語言相同
+    translatedExportCancelled: 已取消匯出翻譯字幕
 hotkey:
   control: Ctrl
   alt: Option

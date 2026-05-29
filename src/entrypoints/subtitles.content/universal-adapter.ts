@@ -1,3 +1,4 @@
+import type { DownloadTranslatedSubtitlesOptions, TranslatedExportProgress } from "./translated-export"
 import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { FeatureUsageContext } from "@/types/analytics"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
@@ -21,6 +22,11 @@ import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesSetting
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
+import {
+
+  reportTranslatedExportTranslationProgress,
+  TRANSLATED_EXPORT_PREPARING_PROGRESS_MAX,
+} from "./translated-export"
 import { TranslationCoordinator } from "./translation-coordinator"
 import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
@@ -46,6 +52,7 @@ export class UniversalVideoAdapter {
   private segmentationPipeline: SegmentationPipeline | null = null
   private translationCoordinator: TranslationCoordinator | null = null
   private subtitlesSummaryContextHash: string | null = null
+  private translatedExportAbortController: AbortController | null = null
 
   get embedded() {
     return this.config.embedded
@@ -106,20 +113,54 @@ export class UniversalVideoAdapter {
     })
   }
 
-  downloadTranslatedSubtitles = async (onProgress?: (progress: number) => void) => {
-    await this.getOrLoadSourceSubtitles()
+  downloadTranslatedSubtitles = async (options?: DownloadTranslatedSubtitlesOptions) => {
+    this.translatedExportAbortController?.abort()
+    const abortController = new AbortController()
+    this.translatedExportAbortController = abortController
+    const { onProgress, signal = abortController.signal } = options ?? {}
 
-    const translatedSubtitles = await this.buildCompleteTranslatedSubtitles(onProgress)
+    try {
+      await this.getOrLoadSourceSubtitles()
+      this.throwIfTranslatedExportAborted(signal)
 
-    await downloadSubtitlesAsSrt({
-      subtitles: translatedSubtitles.map(({ translation, ...fragment }) => ({
-        ...fragment,
-        text: translation ?? "",
-      })),
-      pageTitle: document.title || "",
-      videoId: this.config.getVideoId?.(),
-      suffix: "translated",
-    })
+      const translatedSubtitles = await this.buildCompleteTranslatedSubtitles(onProgress, signal)
+      this.throwIfTranslatedExportAborted(signal)
+
+      await downloadSubtitlesAsSrt({
+        subtitles: translatedSubtitles.map(({ translation, ...fragment }) => ({
+          ...fragment,
+          text: translation ?? "",
+        })),
+        pageTitle: document.title || "",
+        videoId: this.config.getVideoId?.(),
+        suffix: "translated",
+      })
+    }
+    finally {
+      if (this.translatedExportAbortController === abortController) {
+        this.translatedExportAbortController = null
+      }
+    }
+  }
+
+  private throwIfTranslatedExportAborted(signal?: AbortSignal) {
+    if (signal?.aborted) {
+      throw new DOMException(i18n.t("subtitles.errors.translatedExportCancelled"), "AbortError")
+    }
+  }
+
+  private reportTranslatedExportPreparingProgress(
+    completedUnits: number,
+    totalUnits: number,
+    onProgress?: (update: TranslatedExportProgress) => void,
+  ) {
+    if (totalUnits <= 0) {
+      onProgress?.({ phase: "preparing", progress: TRANSLATED_EXPORT_PREPARING_PROGRESS_MAX })
+      return
+    }
+
+    const progress = Math.round((completedUnits / totalUnits) * TRANSLATED_EXPORT_PREPARING_PROGRESS_MAX)
+    onProgress?.({ phase: "preparing", progress })
   }
 
   private async restorePosition() {
@@ -131,6 +172,7 @@ export class UniversalVideoAdapter {
   }
 
   private resetForNavigation() {
+    this.translatedExportAbortController?.abort()
     this.clearNavigationReinitTimeout()
     this.destroyScheduler()
     this.clearRuntimeSession()
@@ -502,16 +544,27 @@ export class UniversalVideoAdapter {
     this.subtitlesScheduler?.setState("idle")
   }
 
-  private async buildCompleteTranslatedSubtitles(onProgress?: (progress: number) => void): Promise<SubtitlesFragment[]> {
+  private async buildCompleteTranslatedSubtitles(
+    onProgress?: (update: TranslatedExportProgress) => void,
+    signal?: AbortSignal,
+  ): Promise<SubtitlesFragment[]> {
     if (await this.shouldSkipTranslationForCurrentTrack()) {
       throw new Error(i18n.t("subtitles.errors.translatedExportSameLanguage"))
     }
 
-    const fragments = await this.buildExportProcessedSubtitles()
-    const videoContext = await this.buildExportVideoContext()
+    onProgress?.({ phase: "preparing", progress: 0 })
+    const fragments = await this.buildExportProcessedSubtitles(onProgress, signal)
+    this.reportTranslatedExportPreparingProgress(1, 1, onProgress)
+    this.throwIfTranslatedExportAborted(signal)
+
+    const videoContext = await this.buildExportVideoContext(signal)
+    this.throwIfTranslatedExportAborted(signal)
+
     const translatedFragments: SubtitlesFragment[] = []
 
     for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
+      this.throwIfTranslatedExportAborted(signal)
+
       const batch = fragments.slice(index, index + TRANSLATION_BATCH_SIZE)
       const translatedBatch = await translateSubtitles(batch, videoContext)
       if (this.hasIncompleteTranslatedFragments(translatedBatch)) {
@@ -519,11 +572,11 @@ export class UniversalVideoAdapter {
       }
 
       translatedFragments.push(...translatedBatch)
-      onProgress?.(Math.min(100, Math.round((translatedFragments.length / fragments.length) * 100)))
-    }
-
-    if (this.hasIncompleteTranslatedFragments(translatedFragments)) {
-      throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
+      reportTranslatedExportTranslationProgress(
+        translatedFragments.length,
+        fragments.length,
+        onProgress,
+      )
     }
 
     return translatedFragments
@@ -533,7 +586,10 @@ export class UniversalVideoAdapter {
     return fragments.some(fragment => !fragment.translation?.trim())
   }
 
-  private async buildExportProcessedSubtitles(): Promise<SubtitlesFragment[]> {
+  private async buildExportProcessedSubtitles(
+    onProgress?: (update: TranslatedExportProgress) => void,
+    signal?: AbortSignal,
+  ): Promise<SubtitlesFragment[]> {
     const config = await getLocalConfig()
     if (!config) {
       throw new Error(i18n.t("subtitles.errors.translatedExportFailed"))
@@ -545,10 +601,13 @@ export class UniversalVideoAdapter {
       return [...this.sourceProcessedSubtitles]
     }
 
+    const chunks = this.buildSourceSubtitleChunks(this.sourceSubtitles)
     const result: SubtitlesFragment[] = []
 
-    for (const chunk of this.buildSourceSubtitleChunks(this.sourceSubtitles)) {
-      result.push(...await this.buildExportProcessedChunk(chunk, config))
+    for (let index = 0; index < chunks.length; index++) {
+      this.throwIfTranslatedExportAborted(signal)
+      result.push(...await this.buildExportProcessedChunk(chunks[index], config))
+      this.reportTranslatedExportPreparingProgress(index + 1, chunks.length, onProgress)
     }
 
     return result.sort((a, b) => a.start - b.start)
@@ -678,7 +737,7 @@ export class UniversalVideoAdapter {
     return merged
   }
 
-  private async buildExportVideoContext(): Promise<SubtitlesVideoContext> {
+  private async buildExportVideoContext(signal?: AbortSignal): Promise<SubtitlesVideoContext> {
     const config = await getLocalConfig()
     const providerConfig = config
       ? getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
@@ -691,12 +750,14 @@ export class UniversalVideoAdapter {
     this.subtitlesSummaryContextHash = summaryContextHash ?? null
 
     if (summaryContextHash) {
+      this.throwIfTranslatedExportAborted(signal)
       try {
         videoContext.summary = await fetchSubtitlesSummary(videoContext)
       }
       catch {
         videoContext.summary = null
       }
+      this.throwIfTranslatedExportAborted(signal)
     }
 
     return videoContext

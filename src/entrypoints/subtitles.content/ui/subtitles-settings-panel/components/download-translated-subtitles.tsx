@@ -1,6 +1,8 @@
-import { IconDownload, IconLanguage, IconLoader2 } from "@tabler/icons-react"
+import type { TranslatedExportProgress } from "@/entrypoints/subtitles.content/translated-export"
+import { IconDownload, IconLanguage, IconX } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { toast } from "sonner"
 import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { subtitlesSettingsPanelOpenAtom } from "../../../atoms"
@@ -9,15 +11,21 @@ import { SubtitlesSettingsItem } from "./subtitles-settings-item"
 
 const SUCCESS_MESSAGE_DURATION_MS = 4000
 
+function isTranslatedExportAbortError(error: unknown): boolean {
+  return error instanceof DOMException && error.name === "AbortError"
+}
+
 export function DownloadTranslatedSubtitles() {
   const [isDownloading, setIsDownloading] = useState(false)
   const [progress, setProgress] = useState<number | null>(null)
   const [progressMessage, setProgressMessage] = useState<string | null>(null)
   const clearSuccessTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const abortControllerRef = useRef<AbortController | null>(null)
   const isOpen = useAtomValue(subtitlesSettingsPanelOpenAtom)
   const { downloadTranslatedSubtitles } = useSubtitlesUI()
   const buttonId = "read-frog-download-translated-subtitles"
   const title = i18n.t("subtitles.actions.downloadTranslated")
+  const cancelLabel = i18n.t("subtitles.actions.downloadTranslatedCancel")
 
   const clearSuccessTimeout = useCallback(() => {
     if (clearSuccessTimeoutRef.current !== null) {
@@ -38,8 +46,20 @@ export function DownloadTranslatedSubtitles() {
   }, [clearSuccessTimeout, isOpen, isDownloading])
 
   useEffect(() => {
-    return clearSuccessTimeout
+    return () => {
+      clearSuccessTimeout()
+      abortControllerRef.current?.abort()
+    }
   }, [clearSuccessTimeout])
+
+  const handleProgress = useCallback((update: TranslatedExportProgress) => {
+    setProgress(update.progress)
+    setProgressMessage(
+      update.phase === "preparing"
+        ? i18n.t("subtitles.actions.downloadTranslatedPreparing")
+        : i18n.t("subtitles.actions.downloadTranslatedTranslating"),
+    )
+  }, [])
 
   const downloadSubtitles = async () => {
     if (isDownloading) {
@@ -47,16 +67,16 @@ export function DownloadTranslatedSubtitles() {
     }
 
     clearSuccessTimeout()
+    const abortController = new AbortController()
+    abortControllerRef.current = abortController
     setIsDownloading(true)
     setProgress(0)
-    const preparingMessage = i18n.t("subtitles.actions.downloadTranslatedPreparing")
-    setProgressMessage(preparingMessage)
+    setProgressMessage(i18n.t("subtitles.actions.downloadTranslatedPreparing"))
 
     try {
-      await downloadTranslatedSubtitles((progress) => {
-        setProgress(progress)
-        const translatingMessage = i18n.t("subtitles.actions.downloadTranslatedTranslating")
-        setProgressMessage(translatingMessage)
+      await downloadTranslatedSubtitles({
+        signal: abortController.signal,
+        onProgress: handleProgress,
       })
       setProgressMessage(i18n.t("subtitles.actions.downloadTranslatedComplete"))
       clearSuccessTimeoutRef.current = setTimeout(() => {
@@ -65,12 +85,34 @@ export function DownloadTranslatedSubtitles() {
       }, SUCCESS_MESSAGE_DURATION_MS)
     }
     catch (error) {
-      setProgressMessage(error instanceof Error ? error.message : String(error))
+      if (isTranslatedExportAbortError(error)) {
+        return
+      }
+
+      const message = error instanceof Error ? error.message : String(error)
+      toast.error(message)
+      setProgressMessage(null)
     }
     finally {
+      if (abortControllerRef.current === abortController) {
+        abortControllerRef.current = null
+      }
       setIsDownloading(false)
       setProgress(null)
     }
+  }
+
+  const cancelDownload = () => {
+    abortControllerRef.current?.abort()
+  }
+
+  const handleButtonClick = () => {
+    if (isDownloading) {
+      cancelDownload()
+      return
+    }
+
+    void downloadSubtitles()
   }
 
   return (
@@ -101,11 +143,11 @@ export function DownloadTranslatedSubtitles() {
         type="button"
         variant="ghost-secondary"
         size="icon-sm"
-        onClick={downloadSubtitles}
-        disabled={isDownloading}
+        onClick={handleButtonClick}
+        aria-label={isDownloading ? cancelLabel : title}
       >
         {isDownloading
-          ? <IconLoader2 className="size-3.5 animate-spin" />
+          ? <IconX className="size-3.5" />
           : <IconDownload className="size-3.5" />}
       </Button>
     </SubtitlesSettingsItem>
