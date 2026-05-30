@@ -136,7 +136,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       )
       this.startDocumentTitleTracking()
 
-      // Listen to existing elements when they enter the viewpoint
+      // Listen to existing elements when they enter the viewport
       const walkId = getRandomUUID()
       this.walkId = walkId
       this.intersectionObserver = new IntersectionObserver(async (entries, observer) => {
@@ -159,7 +159,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
       // Initialize walkability state for existing elements
       this.addWalkBlockedElements(document.body, config)
-      await this.observerTopLevelParagraphs(document.body, config)
+      await this.observeTopLevelParagraphs(document.body, config)
 
       // Start observing mutations from document.body and all shadow roots
       this.observeMutations(document.body)
@@ -198,7 +198,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   private stopInternal({ notify }: { notify: boolean }): void {
     if (!this.isPageTranslating) {
-      console.warn("AutoTranslationManager is already inactive")
+      console.warn("PageTranslationManager is already inactive")
       return
     }
 
@@ -276,7 +276,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     document.addEventListener("touchend", onEnd, { passive: true })
     document.addEventListener("touchcancel", reset, { passive: true })
 
-    // 供调用方卸载
+    // Teardown: remove all touch listeners
     return () => {
       document.removeEventListener("touchstart", onStart)
       document.removeEventListener("touchmove", onMove)
@@ -408,7 +408,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     }
   }
 
-  private async observerTopLevelParagraphs(container: HTMLElement, existingConfig?: Config): Promise<void> {
+  private async observeTopLevelParagraphs(container: HTMLElement, existingConfig?: Config): Promise<void> {
     const observer = this.intersectionObserver
     if (!this.walkId || !observer)
       return
@@ -542,7 +542,7 @@ export class PageTranslationManager implements IPageTranslationManager {
         rec.addedNodes.forEach((node) => {
           if (isHTMLElement(node)) {
             this.addWalkBlockedElements(node, config)
-            void this.observerTopLevelParagraphs(node, config)
+            void this.observeTopLevelParagraphs(node, config)
             this.observeIsolatedDescendantsMutations(node)
           }
         })
@@ -550,7 +550,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       else if (this.isWalkabilityAttributeMutation(rec)) {
         const el = rec.target
         if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
-          void this.observerTopLevelParagraphs(el, config)
+          void this.observeTopLevelParagraphs(el, config)
         }
       }
     }
@@ -566,7 +566,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
   /**
    * Recursively find and observe shadow roots and iframes in an element and its descendants
-   * These can't be find as top level paragraph elements because isolated shadow roots and iframes are not
+   * These can't be found as top level paragraph elements because isolated shadow roots and iframes are not
    * considered as part of the document.
    */
   private observeIsolatedDescendantsMutations(element: HTMLElement): void {
