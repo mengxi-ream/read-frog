@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
 import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
 
-const NODE_TRANSLATION_HOLD_TRIGGER_MS = 500
+const DEFAULT_NODE_TRANSLATION_HOLD_TRIGGER_MS = 500
 const CLICK_AND_HOLD_MOVE_TOLERANCE = 6
 const MOUSEMOVE_THROTTLE_MS = 300
 const MOUSEMOVE_DISTANCE_THRESHOLD = 3
@@ -185,6 +185,7 @@ export function registerNodeTranslationTriggerListeners({
       mousePressPosition = { x: event.clientX, y: event.clientY }
 
       clearClickAndHoldTimer()
+      const holdTriggerMs = config.translate.node.holdTriggerMs ?? DEFAULT_NODE_TRANSLATION_HOLD_TRIGGER_MS
       clickAndHoldTimerId = setTimeout(() => {
         void (async () => {
           if (shouldIgnoreEvent())
@@ -199,7 +200,7 @@ export function registerNodeTranslationTriggerListeners({
           triggerNodeTranslation(mousePressPosition, currentConfig)
           clickAndHoldTriggered = true
         })()
-      }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
+      }, holdTriggerMs)
     })()
   }, { signal })
 
@@ -236,6 +237,7 @@ export function registerNodeTranslationTriggerListeners({
         if (!isHotkeyPressed) {
           isHotkeyPressed = true
           activeHotkeyEventKey = hotkeyEventKey
+          const holdTriggerMs = config.translate.node.holdTriggerMs ?? DEFAULT_NODE_TRANSLATION_HOLD_TRIGGER_MS
           timerId = setTimeout(() => {
             void (async () => {
               if (shouldIgnoreEvent())
@@ -259,7 +261,7 @@ export function registerNodeTranslationTriggerListeners({
               actionTriggered = true
               timerId = null
             })()
-          }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
+          }, holdTriggerMs)
 
           if (!isHotkeySessionPure && timerId) {
             clearTimeout(timerId)

@@ -90,6 +90,7 @@ export const translateConfigSchema = z.object({
   node: z.object({
     enabled: z.boolean(),
     hotkey: z.enum(HOTKEYS),
+    holdTriggerMs: z.number().min(50).max(750).default(500),
   }),
   page: z.object({
     range: pageTranslateRangeSchema,

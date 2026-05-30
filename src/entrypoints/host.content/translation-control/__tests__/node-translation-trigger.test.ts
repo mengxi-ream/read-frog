@@ -3,12 +3,13 @@ import type { Config } from "@/types/config/config"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { registerNodeTranslationTriggerListeners } from "../node-translation-trigger"
 
-function createConfig(hotkey: Config["translate"]["node"]["hotkey"]): Config {
+function createConfig(hotkey: Config["translate"]["node"]["hotkey"], holdTriggerMs: number = 500): Config {
   return {
     translate: {
       node: {
         enabled: true,
         hotkey,
+        holdTriggerMs,
       },
     },
   } as Config
@@ -151,6 +152,32 @@ describe("registerNodeTranslationTriggerListeners", () => {
       expect.objectContaining({
         translate: expect.objectContaining({
           node: expect.objectContaining({ hotkey: "clickAndHold" }),
+        }),
+      }),
+    )
+  })
+
+  it("triggers click-and-hold node translation after the custom hold delay", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("clickAndHold", 300)),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 })
+    await Promise.resolve()
+
+    await vi.advanceTimersByTimeAsync(299)
+    expect(onTrigger).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(1)
+    expect(onTrigger).toHaveBeenCalledWith(
+      { x: 30, y: 40 },
+      expect.objectContaining({
+        translate: expect.objectContaining({
+          node: expect.objectContaining({ hotkey: "clickAndHold", holdTriggerMs: 300 }),
         }),
       }),
     )

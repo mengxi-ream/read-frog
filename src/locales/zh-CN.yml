@@ -694,6 +694,9 @@ options:
       title: 悬停或长按翻译快捷键
       description: 自定义悬停翻译的修饰键，或使用鼠标长按翻译段落
       enable: 启用
+      holdTriggerMs:
+        title: 长按生效时间
+        description: 鼠标左键点击并按住该时间后触发网页段落翻译
     llmProviderConfigured: 已为$1选择 LLM 提供商
     llmProviderNotConfigured: 没有为$1选择 LLM 提供商
     autoTranslateLanguages:
