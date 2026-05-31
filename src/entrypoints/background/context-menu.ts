@@ -52,7 +52,7 @@ export function registerContextMenuListeners() {
       if (key.startsWith(TRANSLATION_STATE_KEY_PREFIX.replace("session:", ""))) {
         // Extract tabId from key (format: "translationState.{tabId}")
         const parts = key.split(".")
-        const tabId = Number.parseInt(parts[1])
+        const tabId = Number.parseInt(parts[1] ?? "", 10)
 
         if (!Number.isNaN(tabId)) {
           // Only update menu if this is the active tab
