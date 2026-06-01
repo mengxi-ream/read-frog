@@ -688,7 +688,6 @@ export class UniversalVideoAdapter {
       subtitlesTextContent: this.sourceSubtitles.map(f => f.text).join(""),
     }
     const summaryContextHash = buildSubtitlesSummaryContextHash(videoContext, providerConfig)
-    this.subtitlesSummaryContextHash = summaryContextHash ?? null
 
     if (summaryContextHash) {
       try {
