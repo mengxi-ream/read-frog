@@ -1,6 +1,6 @@
 name: 陪讀蛙
 extName: 陪讀蛙 - 翻譯與學習
-extDescription: 陪讀蛙是一款開放源代碼的瀏覽器插件，旨在幫助您從任何網站深入學習語言。
+extDescription: 陪讀蛙是一款開放原始碼的瀏覽器擴充功能，幫助你在任何網站上深入學習語言。
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
 dataTypes:
   string: 文字
@@ -26,45 +26,45 @@ popup:
   addToWhitelist: 在此網站啟用擴充功能
   addToBlacklist: 在此網站停用擴充功能
   options: 選項
-  hover: 滑鼠懸停
-  translateParagraph: 來翻譯段落
+  hover: 滑鼠停留
+  translateParagraph: 翻譯段落
   hub:
-    tooltip: 一次性調用多個翻譯模型翻譯文本
+    tooltip: 一次使用多個翻譯模型翻譯文字
   discord:
-    tooltip: 加入 Discord 與開發者交流，搶先體驗新功能
+    tooltip: 加入 Discord 與開發者討論，搶先體驗新功能
   blog:
     notification: 陪讀蛙更新動態
   aiSmartContext: AI 智慧上下文
-  aiSmartContextDescription: 結合網頁上下文提升翻譯效果。需要配置 LLM 翻譯服務商。
+  aiSmartContextDescription: 結合網頁上下文提升翻譯效果。需要設定 LLM 翻譯服務提供者。
   more:
     title: 更多
     translationHub: 翻譯中心
     joinDiscord: 加入 Discord
     joinWechat: 加入微信群
-    starGithub: Github 加星
-    rateUs: 好評支持
+    starGithub: 在 GitHub 加星
+    rateUs: 給予好評
     ebook: 第三方電子書閱讀器
-    tutorial: 使用教程
+    tutorial: 使用教學
 errorRecovery:
-  title: 應用發生異常
-  description: 已進入恢復模式。你可以先導出當前設定作為備份，再重置設定後重試。
-  backupTitle: 先備份當前設定（推薦）
-  exportWithApiKeys: 導出（包含 API Keys）
-  exportWithoutApiKeys: 導出（不包含 API Keys）
-  recoveryTitle: 恢復選項
+  title: 應用程式發生異常
+  description: 已進入復原模式。你可以先匯出目前設定作為備份，再重設設定後重試。
+  backupTitle: 先備份目前設定（推薦）
+  exportWithApiKeys: 匯出（包含 API 金鑰）
+  exportWithoutApiKeys: 匯出（不包含 API 金鑰）
+  recoveryTitle: 復原選項
   refreshPage: 重新整理頁面
-  resetAction: 重置為預設設定
-  resetSuccess: 恢復完成，設定已重置
-  resetFailed: 恢復失敗，無法重置設定
-  errorDetails: 錯誤詳情
+  resetAction: 重設為預設設定
+  resetSuccess: 復原完成，設定已重設
+  resetFailed: 復原失敗，無法重設設定
+  errorDetails: 錯誤詳細資訊
   resetDialog:
-    title: 確認重置設定？
-    description: 這會用預設設定覆蓋當前設定。
-    confirm: 重置
+    title: 確認重設設定？
+    description: 這會用預設設定覆蓋目前設定。
+    confirm: 重設
     cancel: 取消
 options:
   commandPalette:
-    placeholder: 搜尋設定...
+    placeholder: 搜尋設定…
     noResults: 找不到設定
   sidebar:
     settings: 設定
@@ -74,70 +74,70 @@ options:
     translationHub: 翻譯中心
   setAPIKeyWarning:
     please: 請在
-    page: 頁設置 API Key
+    page: 頁面設定 API 金鑰
   betaExperience:
     title: Beta 體驗
-    description: 啟用實驗性功能和早期訪問新功能。這些功能可能不穩定或不完整。
+    description: 啟用實驗性功能，並搶先體驗新功能。這些功能可能不穩定或不完整。
     enabled: 啟用 Beta 體驗
   apiProviders:
-    title: API 提供商
-    description: 配置用於翻譯和詞彙解析功能的 API 提供商。我們內建了 20 多個提供商，並支援任何 OpenAI 相容 API 提供商。
-    addProvider: 新增提供商
+    title: API 提供者
+    description: 設定用於翻譯和詞彙解析功能的 API 提供者。我們內建了 20 多個提供者，並支援任何 OpenAI 相容 API 提供者。
+    addProvider: 新增提供者
     badges:
       featureCount: $1 個功能
     dialog:
-      title: 新增提供商
+      title: 新增提供者
       groups:
         builtInProviders:
-          title: 內建 LLM 提供商
-          description: 內建的大型語言模型提供商，無需填寫大部分配置如 Base URL
+          title: 內建 LLM 提供者
+          description: 內建的大型語言模型提供者，大多數設定不需要填寫，例如 Base URL
         openaiCompatibleProviders:
-          title: OpenAI 相容自定義提供商
-          description: 如果找不到你想要的 AI 提供商，請選擇 Custom Provider 來配置任何 OpenAI 介面相容的提供商，例如智譜
+          title: OpenAI 相容自訂提供者
+          description: 如果找不到你想要的 AI 提供者，請選擇 Custom Provider 來設定任何 OpenAI API 相容的提供者，例如智譜
         pureTranslationProviders:
-          title: 純翻譯提供商
-          description: 專注於翻譯功能的提供商，沒有大型語言模型能力
+          title: 純翻譯提供者
+          description: 專注於翻譯功能的提供者，沒有大型語言模型能力
     form:
       fields:
         name: 名稱
         description: 描述
-        apiKey: API Key
+        apiKey: API 金鑰
         baseURL: Base URL
         optional: 可選
       duplicate: 複製
       delete: 刪除
       deleteDialog:
-        title: 刪除提供商？
-        description: 此操作無法撤銷。使用此提供商的功能將自動重新分配到其他可用提供商。
+        title: 刪除提供者？
+        description: 此操作無法撤銷。使用此提供者的功能將自動重新分配到其他可用提供者。
         confirm: 刪除
         cancel: 取消
-      atLeastOneLLMProvider: 至少需要一個 LLM 翻譯提供商。
-      duplicateProviderName: '重複的提供商名稱 "$1"'
+      atLeastOneLLMProvider: 至少需要一個 LLM 翻譯提供者。
+      duplicateProviderName: '重複的提供者名稱 "$1"'
       defaultProvider:
-        translate: 設為預設翻譯提供商
+        translate: 設為預設翻譯提供者
       models:
         translate:
           title: 翻譯模型
-          customTitle: 自定義翻譯模型
+          customTitle: 自訂翻譯模型
           placeholder: 選擇一個模型
-        fetchModels: 獲取可用模型
-        fetchError: 獲取模型失敗
-        clickToRetry: 點擊重試
+        fetchModels: 取得可用模型
+        fetchError: 取得模型失敗
+        clickToRetry: 點選重試
         noModels: 沒有可用的模型
         selectModel: 選擇模型
-        apiKeyRequired: 請先添加 API 密鑰
-        searchModels: 搜尋模型...
-        noModelsFound: 未找到模型
-      featureProviders: 功能提供商
+        apiKeyRequired: 請先新增 API 金鑰
+        searchModels: 搜尋模型…
+        noModelsFound: 找不到模型
+      featureProviders: 功能提供者
       advancedOptions: 進階選項
       providerSettingLabels:
         region: 區域
       temperature: 溫度
-      temperatureHint: 控制回應的隨機性。較低的值（0）更具確定性，較高的值更具創造性。範圍因提供者而異。留空則使用提供者預設值。
+      temperatureHint: 控制回應的隨機性。數值越低（如 0）越穩定，數值越高越有創造性。可用範圍依提供者而異。留空則使用提供者預設值。
       headers: 請求標頭
-      headersHint: 建立 AI 提供者客戶端時送出的自訂 HTTP 請求標頭。留空則使用提供者預設值；填入 {} 可停用預設值。
+      headersHint: 建立 AI 提供者用戶端時送出的自訂 HTTP 請求標頭。留空則使用提供者預設值；填入 {} 可停用預設值。
       providerOptions: 提供者選項
-      providerOptionsHint: 用於非標準 API 功能（如思考/推理模式）的提供者特定選項。詳情請參閱 Vercel AI SDK 文件或您的提供者官方文件。
+      providerOptionsHint: 用於非標準 API 功能（例如思考／推理模式）的提供者專屬選項。詳細資訊請參閱 Vercel AI SDK 文件或你的提供者官方文件。
       providerOptionsDocsLink: 查看提供者文件
       providerOptionsRecommendationTrigger: 查看推薦的提供者選項
       providerOptionsRecommendationTitle: 偵測到推薦的提供者選項
@@ -149,8 +149,8 @@ options:
       description:
         openai: 提供 GPT-4o 等模型
         deepseek: 推薦在中國使用
-        openrouter: 多個 LLM 提供商的統一介面，按使用量付費
-        ollama: 本地大模型服務
+        openrouter: 多個 LLM 提供者的統一介面，按使用量付費
+        ollama: 本機大型模型服務
         google: 具有先進推理能力的 Google 旗艦 AI 模型
         anthropic: 以安全性和推理能力著稱的 Claude 模型
         xai: 馬斯克的 AI 公司，提供具有即時數據存取能力的 Grok 模型
@@ -163,39 +163,39 @@ options:
         groq: 專注於超高速 LLM 推理速度的專用硬體
         deepinfra: 面向熱門開源模型的經濟高效雲端推理
         mistral: 專注於高效多語言模型的歐洲 AI 公司
-        togetherai: 用於運行和微調開源模型的協作平台
+        togetherai: 用於執行和微調開源模型的協作平台
         cohere: 具有強大多語言和 RAG 能力的企業級 AI
         fireworks: 面向開源模型的生產就緒推理平台
-        cerebras: 超快速 AI 推理，適合快速翻譯和文本分析
+        cerebras: 超快速 AI 推理，適合快速翻譯和文字分析
         replicate: 存取多樣化開源模型，適合專業翻譯任務
         perplexity: 即時知識增強 AI，提供語境化翻譯和閱讀輔助
         vercel: 針對網頁內容翻譯和分析優化的 AI 模型
-        volcengine: 字節跳動旗下雲平台，提供豆包系列大模型
-        minimax: MiniMax AI平台，提供先進的MiniMax-M2系列大模型
+        volcengine: 字節跳動旗下雲平台，提供豆包系列大語言模型
+        minimax: MiniMax AI平台，提供先進的MiniMax-M2系列大語言模型
         alibaba: 阿里雲通義千問系列模型，具備先進的推理和多語言能力
         moonshotai: 月之暗面Kimi系列模型，具備強大的推理和長上下文能力
         huggingface: Hugging Face推理API，提供數千種開源模型存取
     apiKey:
-      showAPIKey: 顯示 API Key
-    howToConfigure: 如何配置?
+      showAPIKey: 顯示 API 金鑰
+    howToConfigure: 如何設定？
     testConnection:
       button: 測試連接
-      testing: 測試中...
+      testing: 測試中…
   general:
     title: 通用
     appearance:
       title: 外觀
       theme: 主題
-      system: 跟隨系統
+      system: 跟隨系統設定
       light: 淺色
       dark: 深色
     featureProviders:
-      title: 功能提供商
-      description: 為每個功能選擇使用的提供商
+      title: 功能提供者
+      description: 為每個功能選擇使用的提供者
       customActions: 自訂 AI 指令
       features:
         translate: 網頁翻譯
-        selectionToolbar_translate: 劃詞翻譯
+        selectionToolbar_translate: 選取文字翻譯
         tts: 文字轉語音
         inputTranslation: 輸入翻譯
         videoSubtitles: 影片字幕
@@ -204,12 +204,12 @@ options:
         title: 模型
         enterCustomModel: 輸入自訂模型名稱
     clearCache:
-      title: 清理快取
+      title: 清除快取
       description: 清理瀏覽器中的所有翻譯快取
-      clearing: 清理中...
+      clearing: 清除中…
       dialog:
-        title: 清理快取
-        trigger: 清理快取
+        title: 清除快取
+        trigger: 清除快取
         confirm: 確認
         cancel: 取消
         description: 此操作將清理所有翻譯快取。此操作無法撤銷。
@@ -227,12 +227,12 @@ options:
         basicRecommend: 建議啟用 LLM
         llmEnabled: LLM 偵測已啟用
   siteControl:
-    title: 站點控制
+    title: 網站控制
     mode:
       title: 擴充功能啟動模式
-      description: 使用黑名單模式可以在特定網站上停用擴充功能，或使用白名單模式限制擴充功能僅在特定網站上執行。
-      blacklist: 僅在列出的站點禁止
-      whitelist: 僅在列出的站點執行
+      description: 使用封鎖清單模式可在特定網站停用擴充功能；使用允許清單模式則只在指定網站啟用擴充功能。
+      blacklist: 只在列出的網站停用
+      whitelist: 只在列出的網站啟用
     patterns:
       enterUrlPattern: 輸入 URL 模式（例如 example.com）
       urlPattern: URL 模式
@@ -253,18 +253,18 @@ options:
       label: 服務
     toggle:
       title: 啟用三連空格翻譯
-      description: 在任意輸入框中快速按3次空格鍵即可翻譯其內容
+      description: 在任何輸入框中連按 3 次空白鍵，即可翻譯其中的內容
     languages:
       title: 翻譯語言
-      description: 選擇輸入翻譯的源語言和目標語言
-      sourceCode: 網頁源語言
+      description: 選擇輸入翻譯的來源語言與目標語言
+      sourceCode: 網頁來源語言
       targetCode: 翻譯目標語言
       enableCycle: 每次翻譯時交換方向
     threshold:
-      title: 觸發閾值
-      description: 連續空格按鍵之間的時間間隔
-      label: 閾值 (毫秒)
-      hint: 連續空格按鍵之間的時間間隔 (100-1000毫秒)
+      title: 觸發門檻值
+      description: 連續按下空白鍵之間的時間間隔
+      label: 門檻值（毫秒）
+      hint: 連續按下空白鍵之間的時間間隔（100–1000 毫秒）
       error: 數值必須在 $1 到 $2 之間
   floatingButtonAndToolbar:
     title: 懸浮按鈕和工具列
@@ -283,8 +283,8 @@ options:
         enterUrlPattern: 輸入網址模式
         urlPattern: URL 模式
       clickAction:
-        title: 點擊行為
-        description: 選擇點擊懸浮按鈕時執行的操作
+        title: 點選行為
+        description: 選擇點選懸浮按鈕時執行的操作
         panel: 開啟側邊欄
         translate: 切換頁面翻譯
       side:
@@ -317,30 +317,30 @@ options:
         customActionFailedFallback: 自訂操作請求失敗
         actionUnavailable: 所選操作不可用
         missingSelection: 沒有可用的選取文字
-        providerDisabled: 所選提供商已被停用
-        providerUnavailable: 所選提供商不可用
+        providerDisabled: 所選提供者已被停用
+        providerUnavailable: 所選提供者不可用
       features:
-        provider: 提供商
-        selectProvider: 選擇提供商
-        noProviderAvailable: 暫無可用提供商
-        useProviderDefaultModel: 使用提供商預設模型
-        useCustomModel: 使用自定義模型
-        customModel: 自定義模型
+        provider: 提供者
+        selectProvider: 選擇提供者
+        noProviderAvailable: 目前沒有可用的提供者
+        useProviderDefaultModel: 使用提供者預設模型
+        useCustomModel: 使用自訂模型
+        customModel: 自訂模型
         model: 模型
-        modelNotAvailableForNonLLM: 僅 LLM 提供商支援模型設定
+        modelNotAvailableForNonLLM: 僅 LLM 提供者支援模型設定
         translate:
-          title: 劃詞翻譯
-          description: 配置選擇工具列翻譯功能使用的提供商與模型
+          title: 選取文字翻譯
+          description: 設定選擇工具列翻譯功能使用的提供者與模型
       customActions:
         title: 自訂 AI 指令
-        description: 為劃詞新增你自己的結構化 AI 操作
+        description: 為選取文字新增你自己的結構化 AI 操作
         add: 新增 AI 指令
         edit: 編輯 AI 指令
-        empty: 暫無自訂 AI 指令
-        noEnabledLlmProvider: 請先啟用至少一個 LLM 提供商後再建立自訂 AI 指令
+        empty: 目前沒有自訂 AI 指令
+        noEnabledLlmProvider: 請先啟用至少一個 LLM 提供者後再建立自訂 AI 指令
         table:
           name: 名稱
-          provider: 提供商
+          provider: 提供者
           fields: 欄位數
           actions: 操作
         form:
@@ -356,22 +356,22 @@ options:
             helpStepBrowseSuffix: " 瀏覽圖示"
             helpStepCopyPrefix: 複製圖示名稱，例如
             helpStepCopySuffix: ，然後貼到輸入框中。
-          provider: 提供商（需支援結構化輸出）
-          selectProvider: 選擇提供商
+          provider: 提供者（需支援結構化輸出）
+          selectProvider: 選擇提供者
           systemPrompt: 系統提示詞
           prompt: 提示詞
           outputSchema: 輸出 Schema
           addField: 新增欄位
-          fieldName: 欄位名
+          fieldName: 欄位名稱
           fieldType: 欄位類型
           fieldDescription: 描述
-          fieldDescriptionPlaceholder: 描述此欄位應包含的內容...
+          fieldDescriptionPlaceholder: 描述此欄位應包含的內容…
           fieldSpeaking: 啟用朗讀
           actions: 操作
           cancel: 取消
           save: 儲存
           defaultFieldName: 結果
-          fieldNamePlaceholder: 欄位名
+          fieldNamePlaceholder: 欄位名稱
           autoFieldPrefix: 欄位
           addFieldDialog:
             title: 新增輸出欄位
@@ -387,14 +387,14 @@ options:
             title: 筆記庫連線
             description: 將這個指令的結構化結果儲存到遠端筆記庫。
             loginRequiredTitle: 登入後才能設定筆記庫
-            loginRequiredDescription: 先到 readfrog.app 登入，再選擇筆記庫與編輯映射。
+            loginRequiredDescription: 先到 readfrog.app 登入，再選擇筆記庫與編輯對應。
             loginAction: 前往登入
             tableLabel: 筆記庫
             tablePlaceholder: 選擇一個筆記庫
             tableClearOption: 不連接筆記庫
             refreshAction: 重新整理
             emptyTitle: 還沒有筆記庫
-            emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來映射欄位。
+            emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來對應欄位。
             openNotebaseAction: 開啟筆記庫
             betaLockedTitle: 目前帳號尚未加入 Notebase Beta
             betaLockedDescription: 你可以保留目前的 action 設定，但選擇筆記庫與同步結果目前僅對部分 Beta 帳號開放。
@@ -403,28 +403,28 @@ options:
             tableUnavailableOption: 不可用
             schemaErrorTitle: 載入筆記庫 schema 失敗
             schemaErrorDescription: 請稍後再試一次重新整理。
-            schemaLoading: 正在載入筆記庫 schema...
-            mappingsLabel: 欄位映射
-            mappingsEmpty: 尚未建立映射，準備好後即可新增。
-            addMappingAction: 新增映射
-            removeMappingAction: 移除映射
+            schemaLoading: 正在載入筆記庫 schema…
+            mappingsLabel: 欄位對應
+            mappingsEmpty: 尚未建立對應，準備好後即可新增。
+            addMappingAction: 新增對應
+            removeMappingAction: 移除對應
             localFieldLabel: 指令欄位
             localFieldPlaceholder: 選擇一個指令欄位
             remoteFieldLabel: 筆記庫欄位
             remoteFieldPlaceholder: 選擇一個筆記庫欄位
             columnUnavailableOption: 已刪除
-            invalidMappingsTitle: 有些映射需要處理
-            invalidMappingsDescription: 無效映射會被保留，但在修復前會停用「儲存到筆記庫」。
-            mappingMissingLocal: 映射的指令欄位已不存在。
-            mappingMissingRemote: 映射的筆記庫欄位已不存在。
-            mappingMissingSchema: 重新整理筆記庫 schema 後才能驗證這個映射。
+            invalidMappingsTitle: 有些對應需要處理
+            invalidMappingsDescription: 無效對應會被保留，但在修復前會停用「儲存到筆記庫」。
+            mappingMissingLocal: 對應的指令欄位已不存在。
+            mappingMissingRemote: 對應的筆記庫欄位已不存在。
+            mappingMissingSchema: 重新整理筆記庫 schema 後才能驗證這個對應。
             mappingIncompatible: 欄位類型已不相容。
           tokens:
             selection: 選取的文字內容
             paragraphs: 與選取範圍相交的段落內容，會以空行串接，傳給自訂 AI 指令時會截斷到前 2000 個字元
             targetLanguage: 使用者的目標語言
             webTitle: 網頁標題
-            webContent: 從目前頁面擷取的網頁正文內容（截斷到前 2000 個字元）
+            webContent: 從目前頁面擷取的網頁內文（截斷到前 2000 個字元）
           delete: 刪除
           deleteDialog:
             title: 刪除自訂 AI 指令？
@@ -435,15 +435,15 @@ options:
           nameRequired: 名稱不能為空
           duplicateName: '重複的指令名稱 "$1"'
           invalidIcon: Iconify 圖示字串格式無效
-          providerRequired: 請選擇一個已啟用的 LLM 提供商
+          providerRequired: 請選擇一個已啟用的 LLM 提供者
           outputSchemaRequired: 至少需要一個輸出欄位
-          fieldKeyRequired: 欄位名不能為空
-          duplicateFieldKey: 欄位名不能重複
+          fieldKeyRequired: 欄位名稱不能為空
+          duplicateFieldKey: 欄位名稱不能重複
     contextMenu:
       title: 右鍵選單
       translate:
         title: 啟用右鍵翻譯
-        description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或所選文字
+        description: 在瀏覽器右鍵選單中新增翻譯選項，快速翻譯頁面或選取的文字
   translation:
     title: 翻譯
     requestQueueConfig:
@@ -457,33 +457,33 @@ options:
         title: 每秒平均請求數量
         description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫發送超量請求
     batchQueueConfig:
-      title: 批量翻譯
-      description: 配置批量翻譯時的字元數限制和最大段落數量（僅對大語言模型翻譯有效）
+      title: 批次翻譯
+      description: 設定批次翻譯時的字元數限制和最大段落數量（僅對大語言模型翻譯有效）
       maxCharactersPerBatch:
         title: 最大字元數
-        description: 每個批量請求允許的最大字元數，用於控制單次翻譯的內容量
+        description: 每個批次請求允許的最大字元數，用於控制單次翻譯的內容量
       maxItemsPerBatch:
         title: 最大段落數
-        description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量
-      statisticsLink: 過去 7 天已為您節省約 $1 成本
+        description: 每個批次翻譯的最大段落數，用於控制單次翻譯的內容量
+      statisticsLink: 過去 7 天已為你節省約 $1 成本
     autoTranslateWebsite:
-      title: 基於網站自動翻譯
+      title: 依網站自動翻譯
       description: 總是翻譯這個網站
       urlPattern: URL 模式
       enterUrlPattern: 輸入 URL 模式
     personalizedPrompts:
-      title: 個人化 Prompt
-      description: 自訂不同類型的 Prompt，可以在翻譯時自行調整 Prompt 類型。Prompt 表示以用戶身份發送給 LLM 的文字。
-      communityPrompts: 獲取或分享社區 Prompt
+      title: 個人化提示詞
+      description: 自訂不同類型的提示詞，可以在翻譯時自行調整提示詞類型。提示詞表示以使用者身份發送給 LLM 的文字。
+      communityPrompts: 取得或分享社群提示詞
       communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/820
-      addPrompt: 添加 Prompt
+      addPrompt: 新增提示詞
       default: 通用
-      importSuccess: 導入成功
-      import: 導入
-      export: 導出
+      importSuccess: 匯入成功
+      import: 匯入
+      export: 匯出
       current: 正在使用
       editPrompt:
-        title: 編輯 Prompt
+        title: 編輯提示詞
         name: 標題
         systemPrompt: 系統提示詞
         prompt: 提示詞
@@ -491,21 +491,21 @@ options:
           input: 需要翻譯的文字內容
           targetLanguage: 目標語言
           webTitle: 網頁標題
-          webContent: 網頁正文內容（截斷到前 2000 個字元）
+          webContent: 網頁內文（截斷到前 2000 個字元）
           webSummary: 網頁摘要（需啟用 AI 智慧上下文）
-        save: 保存
+        save: 儲存
         close: 取消
       deletePrompt:
-        title: 删除 Prompt
-        description: 確定要刪除 Prompt 嗎
+        title: 刪除提示詞
+        description: 確定要刪除提示詞嗎
         confirm: 確定
         cancel: 取消
       exportPrompt:
-        exportSelected: 導出所選
+        exportSelected: 匯出所選
         cancel: 取消
     translationStyle:
       title: 翻譯顯示樣式
-      description: 設置任何您想要的樣式以區分翻譯結果和原文
+      description: 設定任何你想要的樣式，用來區分翻譯結果與原文
       useCustomStyle: 使用自訂 CSS 樣式
       useCustomStyleDescription: 支援任意 CSS，包括修改字體、動畫、多語言差異化樣式
       presetStyle: 預設樣式
@@ -554,8 +554,8 @@ options:
         main: 主要內容
         all: 全部內容
     pageTranslationShortcut:
-      title: 網頁翻譯快捷鍵
-      description: 自訂翻譯整個網頁的快捷鍵
+      title: 網頁翻譯快速鍵
+      description: 自訂翻譯整個網頁的快速鍵
     preloadConfig:
       title: 預翻譯範圍
       description: 控制視窗下方多少內容會被預先翻譯，以節省 API 費用
@@ -563,7 +563,7 @@ options:
         title: 預載距離（像素）
         description: 距離視窗多遠時開始翻譯內容。較小的值可節省 API 費用，但捲動時可能會有延遲。
       threshold:
-        title: 可見度閾值
+        title: 可見度門檻值
         description: 觸發翻譯所需的元素可見度百分比（0-1）。較高的值會延遲翻譯，直到更多元素可見。
     smallParagraphFilter:
       title: 小段落過濾
@@ -576,23 +576,23 @@ options:
         description: 少於此詞數的文字節點將不會被翻譯。使用 Intl.Segmenter 進行跨語言準確分詞。
       error: 數值必須在 $1 到 $2 之間
     nodeTranslationHotkey:
-      title: 懸停或長按翻譯快捷鍵
+      title: 懸停或長按翻譯快速鍵
       description: 自訂懸停翻譯的修飾鍵，或使用滑鼠長按翻譯段落
       enable: 啟用
-    llmProviderConfigured: 已為$1選擇 LLM 提供商
-    llmProviderNotConfigured: 沒有為$1選擇 LLM 提供商
+    llmProviderConfigured: 已為$1選擇 LLM 提供者
+    llmProviderNotConfigured: 沒有為$1選擇 LLM 提供者
     autoTranslateLanguages:
-      title: 基於語言的自動翻譯
-      description: 當檢測到特定語言時自動翻譯頁面內容
+      title: 依語言自動翻譯
+      description: 當偵測到特定語言時自動翻譯頁面內容
       selectLanguages: 選擇語言
       detection:
         label: 語言偵測
         basic: 基礎
         llm: LLM
-        description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。需配置自動翻譯語言。
+        description: 基礎偵測快速且免費。LLM 偵測更準確，但會增加延遲和 API 費用。需設定自動翻譯語言。
     skipLanguages:
-      title: 基於語言的自動跳過
-      description: 當檢測到指定語言時自動跳過段落翻譯
+      title: 依語言自動跳過
+      description: 當偵測到指定語言時自動跳過段落翻譯
       targetLanguageSkip: 跳過目標語言
       targetLanguageSkipDescription: 翻譯前預先偵測段落是否已是目標語言；命中時不發送翻譯請求。關閉後仍保留譯文與原文相同則不顯示的後置保護。
       selectLanguages: 選擇語言
@@ -605,16 +605,16 @@ options:
       title: AI 智慧上下文翻譯
       description: 透過向 AI 提供網頁上下文來提高翻譯品質
       enable: 啟用 AI 智慧上下文翻譯
-      enableDescription: AI 使用網頁摘要來提高翻譯準確性。需要 LLM 翻譯提供商。剛開始翻譯頁面時會有延遲，並增加 API 費用。
+      enableDescription: AI 使用網頁摘要來提高翻譯準確性。需要 LLM 翻譯提供者。剛開始翻譯頁面時會有延遲，並增加 API 費用。
   tts:
     title: 文字轉語音
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。
     voice:
       label: 語音
-      fallback: 後備
+      fallback: 備用
       selectPlaceholder: 請選擇一個語音
       preview: 試聽
-      previewSample: Read Frog 的問候！這是我朗讀時的語音。
+      previewSample: Read Frog 向你問好！這是朗讀功能的語音。
     languageVoice:
       label: 語言語音
       reset: 重設為預設
@@ -632,22 +632,22 @@ options:
   statistics:
     title: 統計
     batchRequest:
-      title: 批量翻譯已節省請求
-      description: 週期內批量翻譯節省的請求百分比
+      title: 批次翻譯節省的請求數
+      description: 統計期間內，批次翻譯節省的請求百分比
       originalRequestCount: 原始請求數量
-      batchRequestCount: 批量請求數量
+      batchRequestCount: 批次請求數量
   config:
     title: 設定
     about:
       title: 關於
-      description: Read Frog 誕生於 2025 年 4 月
+      description: Read Frog 於 2025 年 4 月誕生
       mission: Read Frog 致力於在 AI 時代擴大高品質教育機會的平等可及性，透過更低成本地提供盡可能接近真人教師的學習體驗，涵蓋語言學習、醫學以及其他知識密集型領域。
       analytics:
         title: 幫助改進使用者體驗
         tooltip: 開啟後，Read Frog 會傳送匿名的產品使用訊號，用於驗證功能是否穩定、優化效能與互動細節，並幫助我們決定接下來優先投入的方向。
     sync:
       title: 手動設定同步
-      description: 手動匯入和匯出您的設定
+      description: 手動匯入和匯出你的設定
       import: 匯入設定
       export: 匯出設定
       importSuccess: 設定匯入成功
@@ -658,9 +658,9 @@ options:
       validationError: 設定驗證失敗
       exportOptions:
         title: 選擇匯出選項
-        description: 請選擇是否在匯出的設定中包含 API Keys。包含 API Keys 可能會洩露敏感資訊，建議僅在安全環境下使用。
-        includeAPIKeys: 包含 API Keys
-        excludeAPIKeys: 不包含 API Keys
+        description: 請選擇是否在匯出的設定中包含 API 金鑰。包含 API 金鑰 可能會洩露敏感資訊，建議僅在安全環境下使用。
+        includeAPIKeys: 包含 API 金鑰
+        excludeAPIKeys: 不包含 API 金鑰
         cancel: 取消
       viewConfig:
         expand: 展開設定
@@ -669,7 +669,7 @@ options:
         title: Google Drive 雲端同步
         description: 遠端設定較新時下載，本機設定較新時上傳
         sync: 同步到 Google Drive
-        syncing: 同步中...
+        syncing: 同步中…
         syncSuccess:
           uploaded: 本機設定已上傳至雲端
           downloaded: 已套用遠端設定
@@ -683,27 +683,27 @@ options:
         logoutSuccess: 已登出 Google 帳號
         unresolved:
           title: 設定同步解決
-          description: 本地與雲端設定存在差異，請選擇每個欄位要保留的版本。
+          description: 本機與雲端設定存在差異，請選擇每個欄位要保留的版本。
           resolved: 已解決
           unresolved: 未解決
-          localValue: 本地值
+          localValue: 本機值
           remoteValue: 遠端值
-          useLocal: 使用本地
+          useLocal: 使用本機
           useRemote: 使用遠端
-          useAllLocal: 全選本地
+          useAllLocal: 全選本機
           useAllRemote: 全選遠端
           reset: 撤銷選擇
-          progress: 已解決 $1/$2 個更改
+          progress: 已解決 $1/$2 個變更
           confirm: 確認同步
           cancel: 取消
           hasUnresolvedInChildren: ⚠ 包含待解決項
           item: 項
           items: 項
           unresolvedPrompt: "[待解決 - 請選擇]"
-          localLatest: 本地最新
+          localLatest: 本機最新
           remoteLatest: 遠端最新
           bothChanged: 雙方已變更
-          localChanged: 本地已變更
+          localChanged: 本機已變更
           remoteChanged: 遠端已變更
           configValid: 設定有效
           configInvalid: 設定無效
@@ -711,17 +711,17 @@ options:
           validationAlert:
             title: 合併後的設定存在驗證錯誤
             description: 請調整下方差異以修復：
-          moreErrors: ...還有 $1 個錯誤
+          moreErrors: …還有 $1 個錯誤
     backup:
       title: 設定備份
-      description: 如果設定發生變化，每小時會自動建立備份。您可以在這裡還原之前的設定。（最多 $1 個備份）
-      loading: 正在載入備份...
+      description: 如果設定有變更，每小時會自動建立備份。你可以在這裡還原先前的設定。（最多 $1 個備份）
+      loading: 正在載入備份…
       backupNow: 立即備份
       backupSuccess: 備份建立成功
       restoreSuccess: 設定還原成功
       empty:
         title: 尚無可用備份
-        description: 如果設定發生變化，每小時會自動建立備份。
+        description: 如果設定有變更，每小時會自動建立備份。
       item:
         extensionVersion: 擴充功能版本：
         schemaVersion: 設定版本：
@@ -730,32 +730,32 @@ options:
         delete: 刪除
       restore:
         title: 還原設定備份？
-        description: 如果目前設定與最新備份不同，將自動備份您的目前設定。如果備份數量超過限制，最舊的備份可能會被刪除。
+        description: 如果目前設定與最新備份不同，將自動備份你的目前設定。如果備份數量超過限制，最舊的備份可能會被刪除。
         cancel: 取消
         confirm: 還原
       delete:
         title: 刪除備份？
-        description: 您確定要刪除此備份嗎？此操作無法復原。
+        description: 你確定要刪除此備份嗎？此操作無法復原。
         cancel: 取消
         confirm: 刪除
     resetConfig:
-      title: 重置配置
-      description: 重置所有配置為預設值
+      title: 重設設定
+      description: 重設所有設定為預設值
       dialog:
-        title: 重置配置
-        trigger: 重置配置
+        title: 重設設定
+        trigger: 重設設定
         confirm: 確認
         cancel: 取消
-        description: 此操作將清空您的所有自定義配置，並將其重置為預設值，請確認是否清除。
+        description: 此操作將清空你的所有自訂設定，並將其重設為預設值，請確認是否清除。
   videoSubtitles:
     title: 影片字幕
     description: 目前僅支援 YouTube 影片字幕
     provider:
-      title: 翻譯服務商
-      description: 選擇用於影片字幕翻譯的翻譯服務商
-      label: 服務商
+      title: 翻譯服務提供者
+      description: 選擇用於影片字幕翻譯的翻譯服務提供者
+      label: 服務提供者
     enable: 開啟影片字幕
-    enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點擊即可開始翻譯字幕。
+    enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點選即可開始翻譯字幕。
     autoStart: 自動開啟字幕
     autoStartDescription: 當影片載入完成後，自動開啟字幕翻譯。
     style:
@@ -780,13 +780,13 @@ options:
       color: 顏色
       fontWeight: 字重
       backgroundOpacity: 背景透明度
-      reset: 重置為預設值
+      reset: 重設為預設值
     aiSegmentation:
-      title: AI 智能斷句
-      enable: 啟用 AI 智能斷句
-      enableDescription: 使用 AI 智能斷句字幕，提升可讀性。啟用後時間軸由 AI 判斷，可能出現時間軸錯位。需要配置 LLM 翻譯提供商。
+      title: AI 智慧斷句
+      enable: 啟用 AI 智慧斷句
+      enableDescription: 使用 AI 智慧斷句字幕，提升可讀性。啟用後時間軸由 AI 判斷，可能出現時間軸錯位。需要設定 LLM 翻譯提供者。
       clearCache: 清除快取
-      clearing: 清除中...
+      clearing: 清除中…
       clearCacheDialog:
         title: 清除 AI 斷句快取
         description: 這將刪除所有已快取的 AI 斷句結果。下次播放啟用 AI 斷句的影片時，將重新處理字幕。
@@ -801,16 +801,16 @@ options:
         description: 允許的臨時突發請求數決定了在短時間內可以同時處理的最大字幕翻譯請求數量
       rate:
         title: 平均每秒請求數
-        description: 平均每秒字幕翻譯請求數，但允許配置最大突發數以臨時發送超額請求
+        description: 平均每秒字幕翻譯請求數，但允許設定最大突發數以臨時發送超額請求
     batchQueueConfig:
       title: 字幕批次翻譯
-      description: 配置批量翻譯時的字元數限制和最大段落數量（僅對大語言模型翻譯有效）
+      description: 設定批次翻譯時的字元數限制和最大段落數量（僅對大語言模型翻譯有效）
       maxCharactersPerBatch:
         title: 最大字元數
-        description: 每個批量請求允許的最大字元數，用於控制單次翻譯的內容量
+        description: 每個批次請求允許的最大字元數，用於控制單次翻譯的內容量
       maxItemsPerBatch:
         title: 最大段落數
-        description: 每個批量翻譯的最大段落數，用於控制單次翻譯的內容量
+        description: 每個批次翻譯的最大段落數，用於控制單次翻譯的內容量
     customPrompts:
       title: 自訂字幕提示詞
       description: 自訂字幕翻譯的提示詞模板（與網頁翻譯提示詞分離）
@@ -823,63 +823,63 @@ options:
   whatsNew:
     title: 最近更新
   survey:
-    title: 笔记库（生词本）抢先体验
+    title: 筆記庫（單字本）搶先體驗
   rateUs:
-    title: 好評支持
+    title: 給予好評
 side:
   sourceLang: 來源語言
   targetLang: 目標語言
-  fileExport: 文件導出
+  fileExport: 文件匯出
 translateService:
   title: 翻譯服務
   description: 僅用於翻譯網頁內容
-  normalTranslator: 普通翻譯
+  normalTranslator: 一般翻譯
   aiTranslator: AI 翻譯
   selectServices: 選擇服務
   translationProviders: 翻譯服務
   configureAPI: 設定 API
 translatePrompt:
   title: AI 翻譯風格
-  description: 選擇在翻譯時使用的 Prompt。可在選項頁面新增或修改自訂 Prompt
+  description: 選擇在翻譯時使用的提示詞。可在選項頁面新增或修改自訂提示詞
 languageLevel: 你的來源語言水平
 languageLevels:
   beginner: 初級
   intermediate: 中級
-  advanced: 高級
+  advanced: 進階
 noAPIKeyConfig:
-  warning: 如果想要使用 AI 模型，請先在選項頁設置 API Key
+  warning: 如果想要使用 AI 模型，請先在選項頁面設定 API 金鑰
   warningWithLink:
-    youMust: 您必須先
-    setTheAPIKey: 設置 API Key
+    youMust: 你必須先
+    setTheAPIKey: 設定 API 金鑰
     firstOnThe: 在
     optionsPage: 選項
     page: 頁
 languageDetection:
-  llmFailed: LLM 語言偵測失敗，已回退到基礎偵測
+  llmFailed: LLM 語言偵測失敗，已改用基礎偵測
 translation:
-  sameLanguage: 源語言和目標語言必須不同
-  autoModeSameLanguage: 檢測到的語言 '$1' 與目標語言相同
+  sameLanguage: 來源語言和目標語言必須不同
+  autoModeSameLanguage: 偵測到的語言「$1」與目標語言相同
 speak:
-  fetchingAudio: 正在獲取音訊...
-  playingAudio: 正在播放音訊...
+  fetchingAudio: 正在取得音訊…
+  playingAudio: 正在播放音訊…
   failedToGenerateSpeech: 語音生成失敗
   noTextSelected: 未選擇文字
-  openaiNotConfigured: OpenAI 提供商未配置或未啟用
-  openaiApiKeyNotConfigured: OpenAI API Key 未配置
+  openaiNotConfigured: 尚未設定或啟用 OpenAI 提供者
+  openaiApiKeyNotConfigured: 尚未設定 OpenAI API 金鑰
 action:
   copy: 複製
   copied: 已複製
-  regenerate: 重新生成
+  regenerate: 重新產生
   viewContextDetails: 上下文
   saveToNotebase: 儲存到筆記庫
-  saveToNotebaseSaving: 儲存中...
+  saveToNotebaseSaving: 儲存中…
   saveToNotebaseSuccess: 已儲存到筆記庫
   saveToNotebaseFailed: 儲存到筆記庫失敗
   saveToNotebaseLoginRequired: 請先到 readfrog.app 登入後再儲存到筆記庫
   saveToNotebaseBetaRequired: 目前帳號尚未加入 Notebase Beta
   saveToNotebaseTableUnavailable: 選取的筆記庫已不可用
-  saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到 Custom AI Actions 重新整理並修復映射
-  saveToNotebaseNoMappings: 至少新增一個有效映射後才能儲存
+  saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到自訂 AI 指令重新整理並修復對應
+  saveToNotebaseNoMappings: 至少新增一個有效對應後才能儲存
   contextDetailsTitleLabel: 標題
   contextDetailsParagraphsLabel: 段落內容
   translation: 翻譯
@@ -891,7 +891,7 @@ thinking:
   expand: 展開思考
   collapse: 收起思考
 shortcutKeySelector:
-  placeholder: 請輸入快捷鍵
+  placeholder: 請輸入快速鍵
 subtitles:
   actions:
     downloadSource: 下載原始字幕
@@ -899,20 +899,20 @@ subtitles:
     loading: Read Frog 字幕載入中
     error: 發生錯誤
   errors:
-    http429: 429 youtube 字幕介面請求次數過多，請稍後再試
-    http404: 404 找不到 youtube 字幕
-    http403: 403 youtube 字幕存取被拒絕
-    http500: 500 youtube 伺服器錯誤
+    http429: 429 YouTube 字幕介面請求次數過多，請稍後再試
+    http404: 404 找不到 YouTube 字幕
+    http403: 403 YouTube 字幕存取被拒絕
+    http500: 500 YouTube 伺服器錯誤
     httpUnknown: HTTP 錯誤 $1
-    invalidResponse: youtube 字幕回應格式無效
+    invalidResponse: YouTube 字幕回應格式無效
     networkError: 取得字幕時發生網路錯誤
-    fetchSubTimeout: 取得 youtube 字幕逾時
-    buttonNotFound: 字幕按鈕未找到
-    noSubtitlesFound: 當前影片沒有字幕
-    videoNotFound: 影片元素未找到
-    controlsBarNotFound: 控制列未找到
+    fetchSubTimeout: 取得 YouTube 字幕逾時
+    buttonNotFound: 找不到字幕按鈕
+    noSubtitlesFound: 這部影片沒有字幕
+    videoNotFound: 找不到影片元素
+    controlsBarNotFound: 找不到控制列
     aiRateLimited: 請求過於頻繁，請稍後再試
-    aiAuthFailed: API 認證失敗，請檢查您的 API 金鑰
+    aiAuthFailed: API 認證失敗，請檢查你的 API 金鑰
     aiServiceUnavailable: 翻譯服務暫時無法使用
     aiNoResponse: AI 服務未回應，使用原文顯示
 hotkey:
@@ -920,15 +920,15 @@ hotkey:
   alt: Option
   shift: Shift
   backtick: 反引號
-  clickAndHold: 點擊並按住
+  clickAndHold: 點選並按住
 translationHub:
   searchLanguages: 搜尋語言...
-  noLanguagesFound: 未找到語言
+  noLanguagesFound: 找不到語言
   exchangeLanguages: 交換語言
-  title: 多接口文本翻譯
+  title: 多 API 文字翻譯
   noServicesSelected: 未選擇翻譯服務
   noServicesDescription: 請在上方選擇翻譯服務以查看翻譯結果。
-  inputPlaceholder: 輸入要翻譯的文字...
+  inputPlaceholder: 輸入要翻譯的文字…
   translate: 翻譯
   copiedToClipboard: 翻譯已複製到剪貼簿！
   copyTranslation: 複製翻譯
