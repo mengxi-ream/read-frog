@@ -34,20 +34,23 @@ export const inputTextAtom = atom("")
 // === Detected Source LangCode (from input text) ===
 export const detectedSourceLangCodeAtom = atom<LangCodeISO6393 | null>(null)
 
-// === Selected Provider IDs (only store IDs, get config from configFieldsAtomMap) ===
-const selectedProviderIdsOverrideAtom = atom<string[] | null>(null)
-
+// === Selected Provider IDs (persisted in config; only store IDs, resolve config from configFieldsAtomMap) ===
 export const selectedProviderIdsAtom = atom(
   (get) => {
-    const override = get(selectedProviderIdsOverrideAtom)
-    if (override !== null)
-      return override
-    // Default: all enabled translate providers' IDs
     const providersConfig = get(configFieldsAtomMap.providersConfig)
-    const translateProviders = getTranslateProvidersConfig(providersConfig)
-    return filterEnabledProvidersConfig(translateProviders).map(p => p.id)
+    const enabledIds = filterEnabledProvidersConfig(getTranslateProvidersConfig(providersConfig)).map(p => p.id)
+
+    const persisted = get(configFieldsAtomMap.translationHub).selectedProviderIds
+    // null = no explicit choice yet → default to all enabled translate providers
+    if (persisted === null)
+      return enabledIds
+
+    // Keep only IDs that still exist and are enabled (a provider may have been
+    // removed or disabled since the selection was saved).
+    const enabledIdSet = new Set(enabledIds)
+    return persisted.filter(id => enabledIdSet.has(id))
   },
-  (_get, set, ids: string[]) => set(selectedProviderIdsOverrideAtom, ids),
+  (_get, set, ids: string[]) => set(configFieldsAtomMap.translationHub, { selectedProviderIds: ids }),
 )
 
 // === Translation Card UI State ===

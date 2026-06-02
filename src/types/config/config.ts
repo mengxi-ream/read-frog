@@ -86,6 +86,15 @@ const siteControlSchema = z.object({
   whitelistPatterns: z.array(z.string()),
 })
 
+// translation hub schema
+const translationHubSchema = z.object({
+  // Translation services selected in the Translation Hub dropdown.
+  // `null` means "no explicit choice yet" → fall back to all enabled translate
+  // providers. Provider ids are intentionally not reference-validated here so a
+  // later deletion/disabling of a provider does not invalidate the whole config.
+  selectedProviderIds: z.array(z.string()).nullable(),
+})
+
 // Complete config schema
 export const configSchema = z.object({
   language: languageSchema,
@@ -101,6 +110,7 @@ export const configSchema = z.object({
   inputTranslation: inputTranslationSchema,
   videoSubtitles: videoSubtitlesSchema,
   siteControl: siteControlSchema,
+  translationHub: translationHubSchema,
 }).superRefine((data, ctx) => {
   const providerIdsSet = new Set(data.providersConfig.map(p => p.id))
 
