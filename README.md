@@ -28,7 +28,11 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 </div>
 
-![2025 Recap](/assets/2025-recap.png)
+<div align="center">
+  <img src="/assets/promotion/sponsor-title.svg" alt="Sponsor" width="180" />
+  <br /><br />
+  <img src="/assets/promotion/ucloud.jpg" alt="UCloud" />
+</div>
 
 <details>
 <summary><kbd>Table of contents</kbd></summary>
