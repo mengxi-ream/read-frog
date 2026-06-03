@@ -471,6 +471,11 @@ options:
       description: 이 사이트를 항상 번역합니다
       urlPattern: URL 패턴
       enterUrlPattern: URL 패턴 입력
+    neverAutoTranslateWebsite:
+      title: Never Auto Translate Based on Website
+      description: Never automatically translate this website
+      urlPattern: URL Pattern
+      enterUrlPattern: Enter URL Pattern
     personalizedPrompts:
       title: 개인화된 프롬프트
       description: 다양한 유형의 프롬프트를 사용자 정의하여, 번역 시 프롬프트 유형을 직접 조정할 수 있습니다. 프롬프트는 사용자가 LLM에게 보내는 텍스트를 나타내며.

@@ -471,6 +471,11 @@ options:
       description: Bu web sitesini her zaman çevir
       urlPattern: URL Kalıbı
       enterUrlPattern: URL Kalıbı Girin
+    neverAutoTranslateWebsite:
+      title: Never Auto Translate Based on Website
+      description: Never automatically translate this website
+      urlPattern: URL Pattern
+      enterUrlPattern: Enter URL Pattern
     personalizedPrompts:
       title: Kişiselleştirilmiş Promptlar
       description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.

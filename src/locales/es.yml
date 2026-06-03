@@ -586,6 +586,11 @@ options:
       description: Traducir siempre este sitio web
       urlPattern: Patrón de URL
       enterUrlPattern: Introduce patrón de URL
+    neverAutoTranslateWebsite:
+      title: Never Auto Translate Based on Website
+      description: Never automatically translate this website
+      urlPattern: URL Pattern
+      enterUrlPattern: Enter URL Pattern
     personalizedPrompts:
       title: Prompts personalizados
       description: Personalizar distintos tipos de Prompts te permite ajustar tú mismo el tipo de Prompt durante la traducción. Un Prompt representa el texto que el usuario envía al LLM.

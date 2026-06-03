@@ -586,6 +586,11 @@ options:
       description: 总是翻译这个网站
       urlPattern: URL 模式
       enterUrlPattern: 输入 URL 模式
+    neverAutoTranslateWebsite:
+      title: 基于网站永不自动翻译
+      description: 永不自动翻译这个网站
+      urlPattern: URL 模式
+      enterUrlPattern: 输入 URL 模式
     personalizedPrompts:
       title: 个性化 Prompt
       description: 自定义不同类型的 Prompt，可以在翻译时自行调整 Prompt 类型。Prompt 表示以用户身份发送给 LLM 的文本。
