@@ -20,6 +20,11 @@ import { prepareTranslationText } from "../text-preparation"
 import { setTranslationDirAndLang } from "../translation-attributes"
 import { createSpinnerInside, getTranslatedTextAndRemoveSpinner } from "../ui/spinner"
 import { isNumericContent } from "../ui/translation-utils"
+import {
+  buildBilingualRenderCacheKey,
+  getCachedBilingualTranslation,
+  setCachedBilingualTranslation,
+} from "./translation-render-cache"
 import { MARK_ATTRIBUTES_REGEX, originalContentMap, translatingNodes } from "./translation-state"
 
 const HTML_COMMENT_RE = /<!--[\s\S]*?-->/g
@@ -94,15 +99,21 @@ export async function translateNodesBilingualMode(
     if (await shouldFilterSmallParagraph(textContent, config))
       return
 
+    const pageContextId = typeof window === "undefined" ? undefined : window.location.href
+    const renderCacheKey = config.translate.enableAIContentAware
+      ? undefined
+      : buildBilingualRenderCacheKey(textContent, config, pageContextId)
+    const cachedTranslatedText = renderCacheKey
+      ? getCachedBilingualTranslation(renderCacheKey)
+      : undefined
+
     const ownerDoc = getOwnerDocument(targetNode)
     const translatedWrapperNode = ownerDoc.createElement("span")
     translatedWrapperNode.className = `${NOTRANSLATE_CLASS} ${CONTENT_WRAPPER_CLASS}`
     translatedWrapperNode.setAttribute(TRANSLATION_MODE_ATTRIBUTE, "bilingual" satisfies TranslationMode)
     translatedWrapperNode.setAttribute(WALKED_ATTRIBUTE, walkId)
     setTranslationDirAndLang(translatedWrapperNode, config)
-    const spinner = createSpinnerInside(translatedWrapperNode)
 
-    // Batch DOM insertion to reduce layout thrashing
     const insertOperation = () => {
       if (isTextNode(targetNode) || transNodes.length > 1) {
         targetNode.parentNode?.insertBefore(
@@ -114,6 +125,23 @@ export async function translateNodesBilingualMode(
         targetNode.appendChild(translatedWrapperNode)
       }
     }
+
+    if (cachedTranslatedText) {
+      batchDOMOperation(insertOperation)
+
+      await insertTranslatedNodeIntoWrapper(
+        translatedWrapperNode,
+        targetNode,
+        cachedTranslatedText,
+        config.translate.translationNodeStyle,
+        forceBlockTranslation,
+      )
+      return
+    }
+
+    const spinner = createSpinnerInside(translatedWrapperNode)
+
+    // Batch DOM insertion to reduce layout thrashing
     batchDOMOperation(insertOperation)
 
     const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
@@ -128,6 +156,10 @@ export async function translateNodesBilingualMode(
         batchDOMOperation(() => translatedWrapperNode.remove())
       }
       return
+    }
+
+    if (renderCacheKey) {
+      setCachedBilingualTranslation(renderCacheKey, translatedText)
     }
 
     await insertTranslatedNodeIntoWrapper(

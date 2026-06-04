@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 // @vitest-environment jsdom
 import type { TranslationMode } from "@/types/config/translate"
 import { act, render, screen, waitFor } from "@testing-library/react"
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
+import { afterAll, beforeAll, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_ATTRIBUTE,
@@ -16,6 +16,7 @@ import {
 } from "@/utils/constants/dom-labels"
 import { flushBatchedOperations } from "@/utils/host/dom/batch-dom"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
+import { clearBilingualRenderCache } from "@/utils/host/translate/core/translation-render-cache"
 import { translateWalkedElement } from "@/utils/host/translate/node-manipulation"
 import { translateTextForPage } from "@/utils/host/translate/translate-variants"
 import { expectNodeLabels, expectTranslatedContent, expectTranslationWrapper, MOCK_ORIGINAL_TEXT, MOCK_TRANSLATION } from "./utils"
@@ -103,6 +104,10 @@ describe("translate", () => {
       }
       return originalStyle
     })
+  })
+
+  beforeEach(() => {
+    clearBilingualRenderCache()
   })
 
   afterAll(() => {
