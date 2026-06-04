@@ -78,6 +78,43 @@ describe("translation-render-cache", () => {
     }))).not.toBe(baseKey)
   })
 
+  it("changes cache key when page skip settings change", () => {
+    const baseConfig = createConfig()
+    const baseKey = buildBilingualRenderCacheKey("hello", baseConfig)
+
+    expect(buildBilingualRenderCacheKey("hello", createConfig({
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        page: {
+          ...DEFAULT_CONFIG.translate.page,
+          enableTargetLanguageSkip: false,
+        },
+      },
+    }))).not.toBe(baseKey)
+
+    expect(buildBilingualRenderCacheKey("hello", createConfig({
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        page: {
+          ...DEFAULT_CONFIG.translate.page,
+          skipLanguages: ["eng"],
+        },
+      },
+    }))).not.toBe(baseKey)
+  })
+
+  it("changes cache key when language detection settings change", () => {
+    const baseConfig = createConfig()
+    const baseKey = buildBilingualRenderCacheKey("hello", baseConfig)
+
+    expect(buildBilingualRenderCacheKey("hello", createConfig({
+      languageDetection: {
+        mode: "llm",
+        providerId: "openai-default",
+      },
+    }))).not.toBe(baseKey)
+  })
+
   it("separates LLM provider cache entries by page context (url)", () => {
     const llmConfig = createConfig({
       translate: { ...DEFAULT_CONFIG.translate, providerId: "openai-default" },
