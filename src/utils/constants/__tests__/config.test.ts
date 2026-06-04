@@ -57,7 +57,7 @@ describe("dEFAULT_CONFIG", () => {
     expect(DEFAULT_CONFIG.providersConfig.find(provider => provider.id === "deepseek-default")).toEqual(
       expect.objectContaining({
         model: {
-          model: "deepseek-v4-flash",
+          model: "deepseek-chat",
           isCustomModel: false,
           customModel: null,
         },
