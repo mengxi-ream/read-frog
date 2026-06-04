@@ -115,6 +115,29 @@ describe("translation-render-cache", () => {
     }))).not.toBe(baseKey)
   })
 
+  it("changes cache key when LLM language detector provider config changes", () => {
+    const llmDetectionConfig = createConfig({
+      languageDetection: {
+        mode: "llm",
+        providerId: "openai-default",
+      },
+    })
+    const baseKey = buildBilingualRenderCacheKey("hello", llmDetectionConfig)
+    const changedDetectorConfig = createConfig({
+      languageDetection: {
+        mode: "llm",
+        providerId: "openai-default",
+      },
+      providersConfig: DEFAULT_CONFIG.providersConfig.map(provider =>
+        provider.id === "openai-default"
+          ? { ...provider, temperature: 0.7 }
+          : provider,
+      ),
+    })
+
+    expect(buildBilingualRenderCacheKey("hello", changedDetectorConfig)).not.toBe(baseKey)
+  })
+
   it("separates LLM provider cache entries by page context (url)", () => {
     const llmConfig = createConfig({
       translate: { ...DEFAULT_CONFIG.translate, providerId: "openai-default" },

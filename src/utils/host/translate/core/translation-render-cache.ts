@@ -19,6 +19,9 @@ const bilingualRenderCache = new Map<string, string>()
  */
 export function buildBilingualRenderCacheKey(sourceText: string, config: Config, pageContextId?: string): string {
   const providerConfig = getProviderConfigById(config.providersConfig, config.translate.providerId)
+  const detectorProviderConfig = config.languageDetection.mode === "llm" && config.languageDetection.providerId
+    ? getProviderConfigById(config.providersConfig, config.languageDetection.providerId)
+    : null
   const pageContext = providerConfig && isLLMProviderConfig(providerConfig)
     ? (pageContextId ?? null)
     : null
@@ -44,6 +47,7 @@ export function buildBilingualRenderCacheKey(sourceText: string, config: Config,
     languageDetection: {
       mode: config.languageDetection.mode,
       providerId: config.languageDetection.providerId ?? null,
+      providerConfig: detectorProviderConfig ?? null,
     },
     providerConfig: providerConfig ?? null,
     pageContext,
