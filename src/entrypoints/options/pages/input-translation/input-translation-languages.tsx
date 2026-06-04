@@ -1,11 +1,6 @@
-import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { InputTranslationLang } from "@/types/config/config"
 import { Icon } from "@iconify/react"
-import {
-  LANG_CODE_TO_EN_NAME,
-  LANG_CODE_TO_LOCALE_NAME,
-  langCodeISO6393Schema,
-} from "@read-frog/definitions"
+import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { useAtom } from "jotai"
 import { Activity } from "react"
 import { i18n } from "#imports"
@@ -20,11 +15,8 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { getLanguageLabel } from "@/utils/language-labels"
 import { ConfigCard } from "../../components/config-card"
-
-function langCodeLabel(langCode: LangCodeISO6393) {
-  return `${LANG_CODE_TO_EN_NAME[langCode]} (${LANG_CODE_TO_LOCALE_NAME[langCode]})`
-}
 
 interface LangSelectProps {
   value: InputTranslationLang
@@ -50,7 +42,7 @@ function LangSelect({ value, onValueChange, getDisplayLabel }: LangSelectProps) 
           </SelectItem>
           {langCodeISO6393Schema.options.map(code => (
             <SelectItem key={code} value={code}>
-              {langCodeLabel(code)}
+              {getLanguageLabel(code)}
             </SelectItem>
           ))}
         </SelectGroup>
@@ -69,13 +61,13 @@ export function InputTranslationLanguages() {
       if (language.sourceCode === "auto") {
         return `${label} (auto)`
       }
-      return `${label} (${langCodeLabel(language.sourceCode)})`
+      return `${label} (${getLanguageLabel(language.sourceCode)})`
     }
     if (value === "targetCode") {
       const label = i18n.t("options.inputTranslation.languages.targetCode")
-      return `${label} (${langCodeLabel(language.targetCode)})`
+      return `${label} (${getLanguageLabel(language.targetCode)})`
     }
-    return langCodeLabel(value)
+    return getLanguageLabel(value)
   }
 
   const handleFromLangChange = (value: InputTranslationLang) => {

@@ -57,10 +57,6 @@ const llmProviderConfigSchemaList = [
     model: createProviderModelSchema<"tensdaq">("tensdaq"),
   }),
   baseCustomLLMProviderConfigSchema.extend({
-    provider: z.literal("ai302"),
-    model: createProviderModelSchema<"ai302">("ai302"),
-  }),
-  baseCustomLLMProviderConfigSchema.extend({
     provider: z.literal("volcengine"),
     model: createProviderModelSchema<"volcengine">("volcengine"),
   }),

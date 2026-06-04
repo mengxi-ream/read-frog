@@ -166,6 +166,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
   {
+    sectionId: "never-auto-translate-website",
+    route: "/translation",
+    titleKey: "options.translation.neverAutoTranslateWebsite.title",
+    descriptionKey: "options.translation.neverAutoTranslateWebsite.description",
+    pageKey: "options.translation.title",
+  },
+  {
     sectionId: "auto-translate-languages",
     route: "/translation",
     titleKey: "options.translation.autoTranslateLanguages.title",

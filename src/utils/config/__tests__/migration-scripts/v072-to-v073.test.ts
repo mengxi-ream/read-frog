@@ -2,103 +2,99 @@ import { describe, expect, it } from "vitest"
 import { migrate } from "../../migration-scripts/v072-to-v073"
 
 describe("v072-to-v073 migration", () => {
-  it("converts removed selector-backed AI SDK models into custom model entries", () => {
+  it("converts a default 302.AI provider to an OpenAI-compatible custom provider", () => {
     const migrated = migrate({
       providersConfig: [
         {
-          id: "google-default",
-          provider: "google",
+          id: "ai302-default",
+          name: "302.AI",
+          enabled: true,
+          provider: "ai302",
+          apiKey: "302-key",
+          baseURL: "https://api.302.ai/v1",
+          temperature: 0.2,
+          headers: { "x-test": "enabled" },
+          providerOptions: { reasoning_effort: "low" },
           model: {
-            model: "gemini-1.5-flash",
-            isCustomModel: false,
-            customModel: "stale-dormant-custom-value",
-          },
-        },
-        {
-          id: "xai-default",
-          provider: "xai",
-          model: {
-            model: "grok-3-fast",
-            isCustomModel: false,
-            customModel: null,
-          },
-        },
-        {
-          id: "groq-default",
-          provider: "groq",
-          model: {
-            model: "meta-llama/llama-prompt-guard-2-86m",
-            isCustomModel: false,
-            customModel: null,
-          },
-        },
-        {
-          id: "openai-default",
-          provider: "openai",
-          model: {
-            model: "gpt-5-mini",
-            isCustomModel: false,
+            model: "gpt-4.1-mini",
+            isCustomModel: true,
             customModel: null,
           },
         },
       ],
     })
 
-    expect(migrated.providersConfig[0].model).toEqual({
-      model: "gemini-2.5-flash-lite",
-      isCustomModel: true,
-      customModel: "gemini-1.5-flash",
-    })
-    expect(migrated.providersConfig[1].model).toEqual({
-      model: "grok-3",
-      isCustomModel: true,
-      customModel: "grok-3-fast",
-    })
-    expect(migrated.providersConfig[2].model).toEqual({
-      model: "llama-3.1-8b-instant",
-      isCustomModel: true,
-      customModel: "meta-llama/llama-prompt-guard-2-86m",
-    })
-    expect(migrated.providersConfig[3].model).toEqual({
-      model: "gpt-5-mini",
-      isCustomModel: false,
-      customModel: null,
+    expect(migrated.providersConfig[0]).toEqual({
+      id: "ai302-default",
+      name: "302.AI",
+      enabled: true,
+      provider: "openai-compatible",
+      apiKey: "302-key",
+      baseURL: "https://api.302.ai/v1",
+      temperature: 0.2,
+      headers: { "x-test": "enabled" },
+      providerOptions: { reasoning_effort: "low" },
+      model: {
+        model: "use-custom-model",
+        isCustomModel: true,
+        customModel: "gpt-4.1-mini",
+      },
     })
   })
 
-  it("preserves active custom model values when a stale selector field is migrated", () => {
+  it("prefers an existing custom model when converting 302.AI", () => {
     const migrated = migrate({
       providersConfig: [
         {
-          id: "anthropic-default",
-          provider: "anthropic",
+          id: "ai302-custom",
+          name: "302.AI Custom",
+          enabled: true,
+          provider: "ai302",
           model: {
-            model: "claude-3-7-sonnet-latest",
+            model: "gpt-4.1-mini",
             isCustomModel: true,
-            customModel: "custom-claude-alias",
-          },
-        },
-        {
-          id: "deepseek-default",
-          provider: "deepseek",
-          model: {
-            model: "deepseek-v4-pro",
-            isCustomModel: true,
-            customModel: "   ",
+            customModel: "qwen3-235b-a22b",
           },
         },
       ],
     })
 
-    expect(migrated.providersConfig[0].model).toEqual({
-      model: "claude-haiku-4-5",
-      isCustomModel: true,
-      customModel: "custom-claude-alias",
+    expect(migrated.providersConfig[0]).toEqual({
+      id: "ai302-custom",
+      name: "302.AI Custom",
+      enabled: true,
+      provider: "openai-compatible",
+      baseURL: "https://api.302.ai/v1",
+      model: {
+        model: "use-custom-model",
+        isCustomModel: true,
+        customModel: "qwen3-235b-a22b",
+      },
     })
-    expect(migrated.providersConfig[1].model).toEqual({
-      model: "deepseek-chat",
-      isCustomModel: true,
-      customModel: "deepseek-v4-pro",
+  })
+
+  it("leaves non-302 providers unchanged", () => {
+    const openAIProvider = {
+      id: "openai-default",
+      name: "OpenAI",
+      enabled: true,
+      provider: "openai",
+      model: {
+        model: "gpt-5-mini",
+        isCustomModel: false,
+        customModel: null,
+      },
+    }
+    const migrated = migrate({
+      providersConfig: [openAIProvider],
     })
+
+    expect(migrated.providersConfig[0]).toBe(openAIProvider)
+  })
+
+  it("preserves malformed config shapes as much as possible", () => {
+    expect(migrate({})).toEqual({})
+    expect(migrate({ providersConfig: null })).toEqual({ providersConfig: null })
+    expect(migrate({ providersConfig: ["bad-provider"] })).toEqual({ providersConfig: ["bad-provider"] })
   })
 })

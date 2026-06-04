@@ -6,7 +6,7 @@ import type { PromptResolver } from "@/utils/host/translate/api/ai"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { BATCH_SEPARATOR } from "@/utils/constants/prompt"
+import { BATCH_SEPARATOR, BATCH_SEPARATOR_LINE_PATTERN } from "@/utils/constants/prompt"
 import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
@@ -24,7 +24,7 @@ import { RequestQueue } from "@/utils/request/request-queue"
 import { ensureInitializedConfig } from "./config"
 
 export function parseBatchResult(result: string): string[] {
-  return result.split(BATCH_SEPARATOR).map(t => t.trim())
+  return result.trim().split(BATCH_SEPARATOR_LINE_PATTERN).map(t => t.trim())
 }
 
 export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {

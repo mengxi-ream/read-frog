@@ -242,6 +242,19 @@ describe("translationMessage", () => {
     expect(storageSetItemMock).toHaveBeenCalledWith(getDetectedCodeStateKey(42), DEFAULT_DETECTED_CODE)
   })
 
+  it("normalizes unsupported page language before caching and notifying", async () => {
+    await setupSubject()
+    tabsQueryMock.mockResolvedValue([{ id: 42 }])
+
+    await getHandler("reportDetectedPageLanguage")({
+      data: { detectedCodeOrUnd: "vmw", url: "https://example.test" },
+      sender: { tab: { id: 42 }, frameId: 0 },
+    })
+
+    expect(storageSetItemMock).toHaveBeenCalledWith(getDetectedCodeStateKey(42), DEFAULT_DETECTED_CODE)
+    expect(sendMessageMock).toHaveBeenCalledWith("detectedPageLanguageChanged", { detectedCode: DEFAULT_DETECTED_CODE })
+  })
+
   it("returns the sender tab detected language to content scripts", async () => {
     await setupSubject()
     storageGetItemMock.mockImplementation(async (key: string) => {
@@ -256,6 +269,22 @@ describe("translationMessage", () => {
     })
 
     expect(detectedCode).toBe("jpn")
+  })
+
+  it("normalizes unsupported cached detected language for content scripts", async () => {
+    await setupSubject()
+    storageGetItemMock.mockImplementation(async (key: string) => {
+      if (key === getDetectedCodeStateKey(42))
+        return "vmw"
+      return undefined
+    })
+
+    const detectedCode = await getHandler("getDetectedCode")({
+      data: undefined,
+      sender: { tab: { id: 42 }, frameId: 0 },
+    })
+
+    expect(detectedCode).toBe(DEFAULT_DETECTED_CODE)
   })
 
   it("returns the active tab detected language to extension pages", async () => {

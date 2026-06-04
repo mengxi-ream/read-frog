@@ -82,11 +82,6 @@ options:
   apiProviders:
     title: API-провайдеры
     description: Настройте API-провайдеров для функций перевода и анализа слов. У нас более 20 встроенных провайдеров и поддержка любых OpenAI-совместимых API.
-    promotion:
-      ai302:
-        description: Нажмите на ссылку справа, чтобы зарегистрироваться на 302.AI и получить 1 USD API-кредита
-        action: Зарегистрироваться для получения бесплатного API-ключа
-        addProvider: Добавить конфигурацию 302.AI
     addProvider: Добавить провайдера
     badges:
       featureCount: $1 функций
@@ -161,7 +156,6 @@ options:
         xai: ИИ-компания Илона Маска, предлагающая модели Grok с доступом к данным в реальном времени
         siliconflow: Высокопроизводительная платформа вывода для китайских и международных моделей
         tensdaq: Революционная MaaS-платформа с рыночным ценообразованием, устраняющая высокие фиксированные цены
-        ai302: Предоставляет новейшие и наиболее полные модели с оплатой по мере использования API
         openaiCompatible: Сторонние и OpenAI API-совместимые
         deeplx: Неофициальный DeepL API
         deepl: Официальный DeepL API
@@ -477,6 +471,11 @@ options:
       description: Всегда переводить этот веб-сайт
       urlPattern: URL-шаблон
       enterUrlPattern: Введите URL-шаблон
+    neverAutoTranslateWebsite:
+      title: Never Auto Translate Based on Website
+      description: Never automatically translate this website
+      urlPattern: URL Pattern
+      enterUrlPattern: Enter URL Pattern
     personalizedPrompts:
       title: Персонализированные промпты
       description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
@@ -829,7 +828,7 @@ options:
   whatsNew:
     title: Что нового
   survey:
-    title: Улучшить субтитры 🎁
+    title: Ранний доступ к Notebase
   rateUs:
     title: Оцените нас
 side:

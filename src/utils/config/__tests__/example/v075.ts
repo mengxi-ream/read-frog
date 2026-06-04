@@ -84,6 +84,7 @@ export const testSeries: TestSeriesObject = {
             "spanish-news.com",
             "elmundo.es",
           ],
+          neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
           preload: {
@@ -488,6 +489,7 @@ export const testSeries: TestSeriesObject = {
         page: {
           range: "all",
           autoTranslatePatterns: [],
+          neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
           preload: {
@@ -883,6 +885,7 @@ export const testSeries: TestSeriesObject = {
         page: {
           range: "all",
           autoTranslatePatterns: [],
+          neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
           preload: {
@@ -1278,6 +1281,7 @@ export const testSeries: TestSeriesObject = {
         page: {
           range: "all",
           autoTranslatePatterns: [],
+          neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
           preload: {

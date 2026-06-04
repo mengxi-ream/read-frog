@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-feat(extension): sync AI SDK provider text models
+feat(providers): sync AI SDK-backed text model selectors and defaults
