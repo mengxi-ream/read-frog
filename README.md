@@ -29,7 +29,7 @@ Master languages effortlessly and deeply with AI, right in your browser.
 </div>
 
 <div align="center">
-  <img src="/assets/promotion/sponsor-title.svg" alt="Sponsor" width="180" />
+  <img src="/assets/promotion/sponsor-title.svg" alt="Sponsor" width="120" />
   <br /><br />
   <a href="https://readfrog.s.gy/RWqJeX">
     <img src="/assets/promotion/ucloud.jpg" alt="UCloud" />
