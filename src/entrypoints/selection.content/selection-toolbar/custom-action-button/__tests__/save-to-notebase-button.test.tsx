@@ -31,8 +31,8 @@ function createAction(): SelectionToolbarCustomAction {
       },
     ],
     notebaseConnection: {
-      tableId: "table-1",
-      tableNameSnapshot: "Articles",
+      notebaseId: "table-1",
+      notebaseNameSnapshot: "Articles",
       mappings: [],
     },
   }
