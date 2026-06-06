@@ -25,6 +25,13 @@ function isEditableTarget(target: EventTarget | null): boolean {
   return false
 }
 
+function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
+  return target === document
+    || target === window
+    || target === document.documentElement
+    || target === document.body
+}
+
 /**
  * Registers the shared node-translation interaction state machine.
  *
@@ -83,6 +90,12 @@ export function registerNodeTranslationTriggerListeners({
   let clickAndHoldTriggered = false
   let mousePressPosition: Point | null = null
   let clickAndHoldTimerId: ReturnType<typeof setTimeout> | null = null
+
+  const resetClickAndHoldState = () => {
+    isMousePressed = false
+    clickAndHoldTriggered = false
+    mousePressPosition = null
+  }
 
   const clearClickAndHoldTimer = () => {
     if (clickAndHoldTimerId) {
@@ -175,6 +188,13 @@ export function registerNodeTranslationTriggerListeners({
         return
       if (isEditableTarget(event.target))
         return
+      if (isDocumentSurfaceTarget(event.target)) {
+        resetClickAndHoldState()
+        clearClickAndHoldTimer()
+        return
+      }
+
+      const point = { x: event.clientX, y: event.clientY }
 
       const config = await getCurrentConfig()
       if (!config || !config.translate.node.enabled || config.translate.node.hotkey !== "clickAndHold")
@@ -182,7 +202,7 @@ export function registerNodeTranslationTriggerListeners({
 
       isMousePressed = true
       clickAndHoldTriggered = false
-      mousePressPosition = { x: event.clientX, y: event.clientY }
+      mousePressPosition = point
 
       clearClickAndHoldTimer()
       clickAndHoldTimerId = setTimeout(() => {
@@ -211,9 +231,7 @@ export function registerNodeTranslationTriggerListeners({
     if (!isMousePressed && !clickAndHoldTimerId)
       return
 
-    isMousePressed = false
-    clickAndHoldTriggered = false
-    mousePressPosition = null
+    resetClickAndHoldState()
     clearClickAndHoldTimer()
   }, { signal })
 

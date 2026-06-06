@@ -59,6 +59,31 @@ describe("node translation", () => {
     window.getComputedStyle = originalGetComputedStyle
   })
   describe("show translation", () => {
+    it.each([
+      ["body", () => document.body],
+      ["html", () => document.documentElement],
+    ])("should not translate the whole page when the point resolves to %s", async (_name, getRootElement) => {
+      render(
+        <main data-testid="page-content">
+          <p>{MOCK_ORIGINAL_TEXT}</p>
+        </main>,
+      )
+
+      const originalElementFromPoint = document.elementFromPoint
+      document.elementFromPoint = vi.fn(() => getRootElement())
+
+      let didTranslate = true
+      await act(async () => {
+        didTranslate = await removeOrShowNodeTranslation({ x: 150, y: 125 }, TEST_CONFIG)
+        flushBatchedOperations()
+      })
+
+      expect(didTranslate).toBe(false)
+      expect(document.body.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy()
+
+      document.elementFromPoint = originalElementFromPoint
+    })
+
     it("should show the translation when point is over the original text", async () => {
       render(
         <div data-testid="test-node">

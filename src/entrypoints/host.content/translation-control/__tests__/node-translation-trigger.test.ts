@@ -18,8 +18,12 @@ function dispatchKeyboardEvent(type: "keydown" | "keyup", key: string) {
   document.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true }))
 }
 
-function dispatchMouseEvent(type: "mousemove" | "mouseover" | "mousedown" | "mouseup", init: MouseEventInit) {
-  document.dispatchEvent(new MouseEvent(type, { bubbles: true, ...init }))
+function dispatchMouseEvent(
+  type: "mousemove" | "mouseover" | "mousedown" | "mouseup",
+  init: MouseEventInit,
+  target: EventTarget = document,
+) {
+  target.dispatchEvent(new MouseEvent(type, { bubbles: true, ...init }))
 }
 
 describe("registerNodeTranslationTriggerListeners", () => {
@@ -28,6 +32,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
   afterEach(() => {
     teardown?.()
     teardown = null
+    document.body.innerHTML = ""
     vi.useRealTimers()
     vi.restoreAllMocks()
   })
@@ -136,13 +141,15 @@ describe("registerNodeTranslationTriggerListeners", () => {
   it("triggers click-and-hold node translation after the hold delay", async () => {
     vi.useFakeTimers()
     const onTrigger = vi.fn()
+    const target = document.createElement("div")
+    document.body.append(target)
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("clickAndHold")),
       onTrigger,
     })
 
-    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 })
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 }, target)
     await Promise.resolve()
     await vi.advanceTimersByTimeAsync(500)
 
@@ -229,6 +236,26 @@ describe("registerNodeTranslationTriggerListeners", () => {
     await Promise.resolve()
     dispatchKeyboardEvent("keyup", "Control")
     await Promise.resolve()
+
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("does not start click-and-hold translation from document surface targets", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("clickAndHold")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 900, clientY: 100 }, document.body)
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(500)
+
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 900, clientY: 100 }, document.documentElement)
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(500)
 
     expect(onTrigger).not.toHaveBeenCalled()
   })
