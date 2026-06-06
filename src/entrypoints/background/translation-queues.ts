@@ -15,6 +15,7 @@ import { microsoftTranslate } from "@/utils/host/translate/api/microsoft"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { normalizePromptContextValue } from "@/utils/host/translate/translate-text"
 import { normalizeTranslationOutput } from "@/utils/host/translate/translation-output-normalization"
+import { recordTranslationMemory } from "@/utils/knowledge-base/translation-memory"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
@@ -216,7 +217,7 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
 }
 
 export async function setUpWebPageTranslationQueue() {
-  const config = await ensureInitializedConfig()
+  const config = await ensureInitializedConfig() ?? DEFAULT_CONFIG
 
   const { translate: { requestQueueConfig, batchQueueConfig } } = config ?? DEFAULT_CONFIG
 
@@ -227,13 +228,25 @@ export async function setUpWebPageTranslationQueue() {
   })
 
   onMessage("enqueueTranslateRequest", async (message) => {
-    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webContent, webSummary } } = message
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webContent, webSummary, surface = "page", url, title, contextText } } = message
 
     // Check cache first
     if (hash) {
       const cached = await db.translationCache.get(hash)
       if (cached) {
-        return normalizeTranslationOutput(providerConfig, cached.translation)
+        const cachedTranslation = normalizeTranslationOutput(providerConfig, cached.translation)
+        await recordTranslationMemory({
+          sourceText: text,
+          translatedText: cachedTranslation,
+          sourceLang: langConfig.sourceCode,
+          targetLang: langConfig.targetCode,
+          providerConfig,
+          surface,
+          url,
+          title: title ?? webTitle,
+          contextText: contextText ?? webContent,
+        }, config)
+        return cachedTranslation
       }
     }
 
@@ -262,6 +275,18 @@ export async function setUpWebPageTranslationQueue() {
         translation: result,
         createdAt: new Date(),
       })
+
+      await recordTranslationMemory({
+        sourceText: text,
+        translatedText: result,
+        sourceLang: langConfig.sourceCode,
+        targetLang: langConfig.targetCode,
+        providerConfig,
+        surface,
+        url,
+        title: title ?? webTitle,
+        contextText: contextText ?? webContent,
+      }, config)
     }
 
     return result
@@ -292,7 +317,7 @@ export async function setUpWebPageTranslationQueue() {
  * Set up subtitles translation queue and message handlers
  */
 export async function setUpSubtitlesTranslationQueue() {
-  const config = await ensureInitializedConfig()
+  const config = await ensureInitializedConfig() ?? DEFAULT_CONFIG
   const { videoSubtitles: { requestQueueConfig, batchQueueConfig } } = config ?? DEFAULT_CONFIG
 
   const { requestQueue, batchQueue } = await createTranslationQueues({
@@ -302,12 +327,24 @@ export async function setUpSubtitlesTranslationQueue() {
   })
 
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
-    const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, summary } } = message
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, summary, url, contextText } } = message
 
     if (hash) {
       const cached = await db.translationCache.get(hash)
       if (cached) {
-        return normalizeTranslationOutput(providerConfig, cached.translation)
+        const cachedTranslation = normalizeTranslationOutput(providerConfig, cached.translation)
+        await recordTranslationMemory({
+          sourceText: text,
+          translatedText: cachedTranslation,
+          sourceLang: langConfig.sourceCode,
+          targetLang: langConfig.targetCode,
+          providerConfig,
+          surface: "subtitles",
+          url,
+          title: videoTitle,
+          contextText: contextText ?? summary,
+        }, config)
+        return cachedTranslation
       }
     }
 
@@ -333,6 +370,18 @@ export async function setUpSubtitlesTranslationQueue() {
         translation: result,
         createdAt: new Date(),
       })
+
+      await recordTranslationMemory({
+        sourceText: text,
+        translatedText: result,
+        sourceLang: langConfig.sourceCode,
+        targetLang: langConfig.targetCode,
+        providerConfig,
+        surface: "subtitles",
+        url,
+        title: videoTitle,
+        contextText: contextText ?? summary,
+      }, config)
     }
 
     return result

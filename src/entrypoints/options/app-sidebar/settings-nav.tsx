@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/base-ui/sidebar"
 
 const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context-menu"] as const
+const KNOWLEDGE_BASE_TITLE_KEY = "options.knowledgeBase.title" as Parameters<typeof i18n.t>[0]
 
 export function SettingsNav() {
   const { pathname } = useLocation()
@@ -69,6 +70,13 @@ export function SettingsNav() {
             <SidebarMenuButton render={<Link to="/input-translation" />} isActive={pathname === "/input-translation"}>
               <Icon icon="tabler:keyboard" />
               <span>{i18n.t("options.overlayTools.inputTranslation.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton render={<Link to="/knowledge-base" />} isActive={pathname === "/knowledge-base"}>
+              <Icon icon="tabler:database-heart" />
+              <span>{i18n.t(KNOWLEDGE_BASE_TITLE_KEY)}</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
 

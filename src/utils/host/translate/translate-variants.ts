@@ -1,5 +1,6 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { Config, InputTranslationLang } from "@/types/config/config"
+import type { KnowledgeBaseSurface } from "@/types/knowledge-base"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getDetectedCodeFromStorage, getFinalSourceCode } from "@/utils/config/languages"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
@@ -59,6 +60,8 @@ async function translateTextUsingPageConfig(
   options: {
     extraHashTags?: string[]
     webPageContext?: { webTitle?: string | null, webContent?: string | null, webSummary?: string | null }
+    surface?: KnowledgeBaseSurface
+    contextText?: string | null
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
@@ -97,6 +100,10 @@ async function translateTextUsingPageConfig(
     enableAIContentAware: config.translate.enableAIContentAware,
     extraHashTags: options.extraHashTags,
     webPageContext: options.webPageContext,
+    surface: options.surface ?? "page",
+    url: window.location.href,
+    title: document.title,
+    contextText: options.contextText ?? text,
   })
 }
 
@@ -104,12 +111,14 @@ async function translateTextUsingPageConfig(
  * Page translation — uses FEATURE_PROVIDER_DEFS['translate'].
  * Includes skip-language logic (page translation only).
  */
-export async function translateTextForPage(text: string): Promise<string> {
+export async function translateTextForPage(text: string, surface: KnowledgeBaseSurface = "page"): Promise<string> {
   const config = await getConfigOrThrow()
   const providerConfig = resolveProviderConfig(config, "translate")
   const webPageContext = await getWebPagePromptContext(providerConfig, config.translate.enableAIContentAware, true)
 
   return translateTextUsingPageConfig(config, text, {
+    surface,
+    contextText: text,
     webPageContext,
   })
 }
@@ -127,6 +136,8 @@ export async function translateTextForPageTitle(text: string): Promise<string> {
 
   return translateTextUsingPageConfig(config, text, {
     extraHashTags: ["pageTitleTranslation"],
+    surface: "page",
+    contextText: text,
     webPageContext: {
       webTitle: text,
       webContent: webPageContext?.webContent,
@@ -184,5 +195,9 @@ export async function translateTextForInput(
     providerConfig,
     enableAIContentAware: config.translate.enableAIContentAware,
     webPageContext,
+    surface: "input",
+    url: window.location.href,
+    title: document.title,
+    contextText: text,
   })
 }

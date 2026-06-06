@@ -1759,7 +1759,7 @@ describe("translate", () => {
         await removeOrShowPageTranslation("bilingual", true)
 
         // Whitespace-only nodes return single space for word separation
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`, "node")
       })
     })
 
@@ -1774,7 +1774,7 @@ describe("translate", () => {
         )
         await removeOrShowPageTranslation("bilingual", true)
 
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`, "node")
       })
     })
 
@@ -1790,7 +1790,7 @@ describe("translate", () => {
         )
         await removeOrShowPageTranslation("bilingual", true)
 
-        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT, "node")
       })
 
       it("bilingual mode: space leading/trailing is trimmed before translation", async () => {
@@ -1804,7 +1804,7 @@ describe("translate", () => {
         await removeOrShowPageTranslation("bilingual", true)
 
         // Final text is trimmed before translation
-        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT, "node")
       })
     })
 
@@ -1821,7 +1821,7 @@ describe("translate", () => {
         await removeOrShowPageTranslation("bilingual", true)
 
         // Whitespace-only node returns single space to preserve word separation
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`, "node")
       })
 
       it("bilingual mode: space-separated inline elements", async () => {
@@ -1835,7 +1835,7 @@ describe("translate", () => {
         )
         await removeOrShowPageTranslation("bilingual", true)
 
-        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`)
+        expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`, "node")
       })
     })
 
@@ -1853,8 +1853,8 @@ describe("translate", () => {
 
         // BR elements are handled as paragraph separators, each paragraph translated separately
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "node")
+        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "node")
       })
 
       it("translationOnly mode: should handle BR elements as paragraph separators", async () => {
@@ -1869,8 +1869,8 @@ describe("translate", () => {
         await removeOrShowPageTranslation("translationOnly", true)
 
         expect(translateTextForPage).toHaveBeenCalledTimes(2)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT)
-        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT)
+        expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT, "node")
+        expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT, "node")
       })
     })
   })

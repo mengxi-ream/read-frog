@@ -14,6 +14,7 @@ import { initializeContextMenu, registerContextMenuListeners } from "./context-m
 import { cleanupAllAiSegmentationCache, cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from "./db-cleanup"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
 import { setupIframeInjection } from "./iframe-injection"
+import { setupKnowledgeBaseMessageHandlers, setupKnowledgeBaseSyncRetry } from "./knowledge-base"
 import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
@@ -62,6 +63,7 @@ export default defineBackground({
       logger,
       registerMessageHandler: onMessage,
     })
+    setupKnowledgeBaseMessageHandlers()
 
     onMessage("aiSegmentSubtitles", async (message) => {
       try {
@@ -100,6 +102,7 @@ export default defineBackground({
     void setUpWebPageTranslationQueue()
     void setUpSubtitlesTranslationQueue()
     void setUpDatabaseCleanup()
+    void setupKnowledgeBaseSyncRetry()
     setUpConfigBackup()
     void setupUninstallSurvey()
 

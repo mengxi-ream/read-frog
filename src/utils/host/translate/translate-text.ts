@@ -2,6 +2,7 @@ import type { LangCodeISO6393, LangLevel } from "@read-frog/definitions"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { WebPagePromptContext } from "@/types/content"
+import type { KnowledgeBaseSurface } from "@/types/knowledge-base"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { toast } from "sonner"
 import { i18n } from "#imports"
@@ -114,6 +115,10 @@ export interface TranslateTextOptions {
   enableAIContentAware?: boolean
   extraHashTags?: string[]
   webPageContext?: WebPagePromptContext
+  surface?: KnowledgeBaseSurface
+  url?: string | null
+  title?: string | null
+  contextText?: string | null
 }
 
 /**
@@ -128,6 +133,10 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     enableAIContentAware = false,
     extraHashTags = [],
     webPageContext,
+    surface,
+    url,
+    title,
+    contextText,
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -157,6 +166,10 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     webTitle: normalizedWebPageContext?.webTitle,
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
+    surface,
+    url,
+    title,
+    contextText,
   })
 }
 

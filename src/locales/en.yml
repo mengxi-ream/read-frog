@@ -267,6 +267,44 @@ options:
       label: Threshold (ms)
       hint: Time in milliseconds between consecutive space presses (100-1000ms)
       error: Value must be between $1 and $2
+  knowledgeBase:
+    title: Knowledge Base
+    toggle:
+      title: Save Translation Memory
+      description: Keep successful translations as long-term learning data, separate from the short-lived translation cache.
+    surfaces:
+      title: Capture Sources
+      description: Choose which translation surfaces should write into the learning knowledge base.
+      page: Page translation
+      node: Paragraph hover translation
+      selection: Selection translation
+      input: Input translation
+      subtitles: Video subtitles
+      translationHub: Translation Hub
+    remote:
+      title: External Sync API
+      description: Optionally POST each learning record to your own API endpoint for other learning apps.
+      enabled: Enable remote sync
+      endpoint: Endpoint
+      token: Bearer Token
+      test: Test Connection
+      testSuccess: Knowledge base endpoint is reachable
+      testFailed: Knowledge base endpoint test failed
+    data:
+      title: Knowledge Data
+      description: Inspect, export, or clear the long-term learning database stored in this browser.
+      items: Translation pairs
+      events: Learning events
+      queue: Pending sync
+      exportJsonl: Export JSONL
+      exportJson: Export JSON
+      exportSuccess: Knowledge base exported
+      clear: Clear
+      clearSuccess: Knowledge base cleared
+      clearDialogTitle: Clear knowledge base?
+      clearDialogDescription: This will permanently delete saved translation memory, learning events, and pending sync records from this browser.
+      cancel: Cancel
+      confirmClear: Clear
   floatingButtonAndToolbar:
     title: Floating Button & Toolbar
     floatingButtonDemoImageAlt: Floating Button Demo

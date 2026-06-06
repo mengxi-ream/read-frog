@@ -1,4 +1,5 @@
 import type { Config } from "@/types/config/config"
+import type { KnowledgeBaseSurface } from "@/types/knowledge-base"
 import {
   BLOCK_ATTRIBUTE,
   CONTENT_WRAPPER_CLASS,
@@ -22,6 +23,7 @@ export async function translateWalkedElement(
     return
 
   const promises: Promise<void>[] = []
+  const surface: KnowledgeBaseSurface = toggle ? "node" : "page"
 
   if (element.hasAttribute(PARAGRAPH_ATTRIBUTE)) {
     let hasBlockNodeChild = false
@@ -37,7 +39,7 @@ export async function translateWalkedElement(
     const isFlexParent = computedStyle.display.includes("flex")
 
     if (!hasBlockNodeChild) {
-      promises.push(translateNodes([element], walkId, toggle, config))
+      promises.push(translateNodes([element], walkId, toggle, config, false, surface))
     }
     else {
       // prevent children change during iteration
@@ -46,7 +48,7 @@ export async function translateWalkedElement(
       for (const child of children) {
         if (isTransNode(child) && isBlockTransNode(child) && !isTextNode(child)) {
           // force the children to be block translation style unless the parent is a flex parent
-          promises.push(translateNodes(consecutiveInlineNodes, walkId, toggle, config, !isFlexParent))
+          promises.push(translateNodes(consecutiveInlineNodes, walkId, toggle, config, !isFlexParent, surface))
           consecutiveInlineNodes = []
           promises.push(translateWalkedElement(child, walkId, config, toggle))
         }
@@ -56,7 +58,7 @@ export async function translateWalkedElement(
       }
 
       if (consecutiveInlineNodes.length) {
-        promises.push(translateNodes(consecutiveInlineNodes, walkId, toggle, config, !isFlexParent))
+        promises.push(translateNodes(consecutiveInlineNodes, walkId, toggle, config, !isFlexParent, surface))
         consecutiveInlineNodes = []
       }
     }

@@ -19,7 +19,7 @@ import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
 import { translateTextCore } from "@/utils/host/translate/translate-text"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { getOrGenerateWebPageSummary } from "@/utils/host/translate/webpage-summary"
-import { onMessage } from "@/utils/message"
+import { onMessage, sendMessage } from "@/utils/message"
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -146,6 +146,10 @@ async function translateWithStandardProvider({
     enableAIContentAware: translateRequest.enableAIContentAware,
     extraHashTags: ["selectionTranslation"],
     webPageContext,
+    surface: "selection",
+    url: window.location.href,
+    title: document.title,
+    contextText: text,
   })
 
   return translatedText
@@ -334,6 +338,20 @@ export function SelectionTranslationProvider({
 
       if (runIdRef.current === runId) {
         setTranslatedText(nextTranslatedText)
+      }
+
+      if (nextTranslatedText && isLLMProviderConfig(providerConfig)) {
+        await sendMessage("recordTranslationMemory", {
+          sourceText: preparedText,
+          translatedText: nextTranslatedText,
+          sourceLang: translateRequest.language.sourceCode,
+          targetLang: translateRequest.language.targetCode,
+          providerConfig,
+          surface: "selection",
+          url: window.location.href,
+          title: document.title,
+          contextText: paragraphsText,
+        })
       }
 
       void trackFeatureUsed({

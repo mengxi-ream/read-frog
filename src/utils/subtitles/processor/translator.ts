@@ -139,6 +139,8 @@ async function translateSingleSubtitle(
     hash: Sha256Hex(...hashComponents),
     videoTitle: enableAIContentAware ? subtitlePromptContext.videoTitle : undefined,
     summary: enableAIContentAware ? subtitlePromptContext.videoSummary : undefined,
+    url: globalThis.location?.href,
+    contextText: videoContext.subtitlesTextContent,
   })
 }
 

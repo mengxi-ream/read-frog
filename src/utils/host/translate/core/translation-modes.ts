@@ -1,4 +1,5 @@
 import type { Config } from "@/types/config/config"
+import type { KnowledgeBaseSurface } from "@/types/knowledge-base"
 import type { TranslationMode } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
 import {
@@ -40,13 +41,14 @@ export async function translateNodes(
   toggle: boolean = false,
   config: Config,
   forceBlockTranslation: boolean = false,
+  surface: KnowledgeBaseSurface = "page",
 ): Promise<void> {
   const translationMode = config.translate.mode
   if (translationMode === "translationOnly") {
-    await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
+    await translateNodeTranslationOnlyMode(nodes, walkId, config, toggle, surface)
   }
   else if (translationMode === "bilingual") {
-    await translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation)
+    await translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation, surface)
   }
 }
 
@@ -56,6 +58,7 @@ export async function translateNodesBilingualMode(
   config: Config,
   toggle: boolean = false,
   forceBlockTranslation: boolean = false,
+  surface: KnowledgeBaseSurface = "page",
 ): Promise<void> {
   const transNodes = nodes.filter(node => isTransNode(node))
   if (transNodes.length === 0) {
@@ -82,7 +85,7 @@ export async function translateNodesBilingualMode(
       }
       else {
         nodes.forEach(node => translatingNodes.delete(node))
-        void translateNodesBilingualMode(nodes, walkId, config, toggle)
+        void translateNodesBilingualMode(nodes, walkId, config, toggle, forceBlockTranslation, surface)
         return
       }
     }
@@ -116,7 +119,7 @@ export async function translateNodesBilingualMode(
     }
     batchDOMOperation(insertOperation)
 
-    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
+    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode, surface)
 
     const translatedText = getDisplayTranslation(textContent, realTranslatedText)
 
@@ -148,6 +151,7 @@ export async function translateNodeTranslationOnlyMode(
   walkId: string,
   config: Config,
   toggle: boolean = false,
+  surface: KnowledgeBaseSurface = "page",
 ): Promise<void> {
   const isTransNodeAndNotTranslatedWrapper = (node: Node): node is TransNode => {
     if (isHTMLElement(node) && node.classList.contains(CONTENT_WRAPPER_CLASS))
@@ -224,7 +228,7 @@ export async function translateNodeTranslationOnlyMode(
         // same nodes array, we ensure the translation uses the newly created DOM elements since the
         // function will re-query and find the correct parent and child nodes from the restored DOM.
         nodes.forEach(node => translatingNodes.delete(node))
-        void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle)
+        void translateNodeTranslationOnlyMode(nodes, walkId, config, toggle, surface)
         return
       }
     }
@@ -286,7 +290,7 @@ export async function translateNodeTranslationOnlyMode(
     }
     batchDOMOperation(insertOperation)
 
-    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode)
+    const realTranslatedText = await getTranslatedTextAndRemoveSpinner(nodes, textContent, spinner, translatedWrapperNode, surface)
     const translatedText = realTranslatedText ? getDisplayTranslation(textContent, realTranslatedText) : realTranslatedText
 
     if (!translatedText) {

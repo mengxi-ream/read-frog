@@ -13,6 +13,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { sendMessage } from "@/utils/message"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdsAtom, translateRequestAtom, translationCardExpandedStateAtom } from "../atoms"
@@ -61,6 +62,18 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
           if (requestIdRef.current !== myRequestId) {
             return undefined
           }
+
+          await sendMessage("recordTranslationMemory", {
+            sourceText: req.inputText,
+            translatedText: result,
+            sourceLang: req.sourceLanguage,
+            targetLang: req.targetLanguage,
+            providerConfig: provider,
+            surface: "translationHub",
+            url: null,
+            title: document.title,
+            contextText: null,
+          })
 
           return result
         },

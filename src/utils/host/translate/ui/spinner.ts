@@ -1,4 +1,5 @@
 import type { APICallError } from "ai"
+import type { KnowledgeBaseSurface } from "@/types/knowledge-base"
 import * as React from "react"
 import textSmallCSS from "@/assets/styles/text-small.css?inline"
 import themeCSS from "@/assets/styles/theme.css?inline"
@@ -83,11 +84,12 @@ export async function getTranslatedTextAndRemoveSpinner(
   textContent: string,
   spinner: HTMLElement,
   translatedWrapperNode: HTMLElement,
+  surface: KnowledgeBaseSurface,
 ): Promise<string | undefined> {
   let translatedText: string | undefined
 
   try {
-    translatedText = await translateTextForPage(textContent)
+    translatedText = await translateTextForPage(textContent, surface)
   }
   catch (error) {
     const errorComponent = React.createElement(TranslationError, {

@@ -11,6 +11,7 @@ const articleSummaryCacheGetMock = vi.fn()
 const articleSummaryCachePutMock = vi.fn()
 const translationCacheGetMock = vi.fn()
 const translationCachePutMock = vi.fn()
+const recordTranslationMemoryMock = vi.fn()
 
 vi.mock("@/utils/message", () => ({
   onMessage: onMessageMock,
@@ -43,6 +44,10 @@ vi.mock("@/utils/db/dexie/db", () => ({
       put: translationCachePutMock,
     },
   },
+}))
+
+vi.mock("@/utils/knowledge-base/translation-memory", () => ({
+  recordTranslationMemory: recordTranslationMemoryMock,
 }))
 
 function getRegisteredMessageHandler(name: string) {
@@ -108,6 +113,7 @@ describe("translation queue helpers", () => {
     articleSummaryCachePutMock.mockResolvedValue(undefined)
     translationCacheGetMock.mockResolvedValue(undefined)
     translationCachePutMock.mockResolvedValue(undefined)
+    recordTranslationMemoryMock.mockResolvedValue(undefined)
   })
 
   it(
@@ -230,6 +236,14 @@ describe("translation queue helpers", () => {
     expect(result).toBe("L'Iran chiama \"Dichiarazione\" <span>")
     expect(executeTranslateMock).not.toHaveBeenCalled()
     expect(translationCachePutMock).not.toHaveBeenCalled()
+    expect(recordTranslationMemoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceText: "hello",
+        translatedText: "L'Iran chiama \"Dichiarazione\" <span>",
+        surface: "page",
+      }),
+      expect.any(Object),
+    )
   })
 
   it("does not normalize cached non-Google translations", async () => {
@@ -255,6 +269,75 @@ describe("translation queue helpers", () => {
     expect(result).toBe("A&amp;B")
     expect(executeTranslateMock).not.toHaveBeenCalled()
     expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("records successful webpage translations in translation memory", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: microsoftProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+        surface: "node",
+        url: "https://example.com",
+        title: "Example",
+        contextText: "hello context",
+      },
+    })
+
+    expect(recordTranslationMemoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceText: "hello",
+        translatedText: "translated subtitle",
+        sourceLang: DEFAULT_CONFIG.language.sourceCode,
+        targetLang: DEFAULT_CONFIG.language.targetCode,
+        providerConfig: microsoftProvider,
+        surface: "node",
+        url: "https://example.com",
+        title: "Example",
+        contextText: "hello context",
+      }),
+      expect.any(Object),
+    )
+  })
+
+  it("records successful subtitle translations in translation memory", async () => {
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    await handler({
+      data: {
+        text: "subtitle",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: microsoftProvider,
+        scheduleAt: Date.now(),
+        hash: "subtitle-hash",
+        videoTitle: "Video title",
+        url: "https://youtube.com/watch?v=test",
+        contextText: "full transcript",
+      },
+    })
+
+    expect(recordTranslationMemoryMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        sourceText: "subtitle",
+        translatedText: "translated subtitle",
+        sourceLang: DEFAULT_CONFIG.language.sourceCode,
+        targetLang: DEFAULT_CONFIG.language.targetCode,
+        providerConfig: microsoftProvider,
+        surface: "subtitles",
+        url: "https://youtube.com/watch?v=test",
+        title: "Video title",
+        contextText: "full transcript",
+      }),
+      expect.any(Object),
+    )
   })
 
   it("exposes webpage summary generation as a separate background handler", async () => {

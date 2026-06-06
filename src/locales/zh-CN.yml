@@ -267,6 +267,44 @@ options:
       label: 阈值 (毫秒)
       hint: 连续空格按键之间的时间间隔 (100-1000毫秒)
       error: 数值必须在 $1 到 $2 之间
+  knowledgeBase:
+    title: 英语学习知识库
+    toggle:
+      title: 保存翻译记忆
+      description: 将成功翻译长期保存为学习数据，和短期翻译缓存分开管理。
+    surfaces:
+      title: 保存来源
+      description: 选择哪些翻译场景会写入学习知识库。
+      page: 网页翻译
+      node: 段落悬停翻译
+      selection: 划词翻译
+      input: 输入翻译
+      subtitles: 视频字幕
+      translationHub: 翻译中心
+    remote:
+      title: 外部同步 API
+      description: 可选：把每条学习记录 POST 到你自己的 API，方便其他学习类应用复用。
+      enabled: 启用远程同步
+      endpoint: 接口地址
+      token: Bearer Token
+      test: 测试连接
+      testSuccess: 知识库接口可用
+      testFailed: 知识库接口测试失败
+    data:
+      title: 知识库数据
+      description: 查看、导出或清空当前浏览器中长期保存的学习数据库。
+      items: 翻译对
+      events: 学习事件
+      queue: 待同步
+      exportJsonl: 导出 JSONL
+      exportJson: 导出 JSON
+      exportSuccess: 知识库已导出
+      clear: 清空
+      clearSuccess: 知识库已清空
+      clearDialogTitle: 清空知识库？
+      clearDialogDescription: 这会永久删除此浏览器中保存的翻译记忆、学习事件和待同步记录。
+      cancel: 取消
+      confirmClear: 清空
   floatingButtonAndToolbar:
     title: 悬浮按钮和工具栏
     floatingButtonDemoImageAlt: 悬浮按钮演示
