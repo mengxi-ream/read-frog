@@ -7,7 +7,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
+import { MAX_FONT_SCALE, MAX_FONT_SHADOW_INTENSITY, MAX_FONT_STROKE_WIDTH, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
 
 const FIELD_ROW_CLASS_NAME = "gap-0"
 const FIELD_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[8.5rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
@@ -18,6 +18,9 @@ const FONT_FAMILY_OPTIONS: { value: SubtitlesFontFamily, label: string }[] = [
   { value: "roboto", label: "Roboto" },
   { value: "noto-sans", label: "Noto Sans" },
   { value: "noto-serif", label: "Noto Serif" },
+  { value: "misans", label: "MiSans" },
+  { value: "ibm-plex", label: "IBM Plex" },
+  { value: "tsuku-ard-gothic", label: "TsukuARdGothic Std" },
 ]
 
 interface SubtitlesTextStyleFormProps {
@@ -29,6 +32,8 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
   const textStyle = videoSubtitlesConfig.style[type]
   const [draftFontScale, setDraftFontScale] = useState(textStyle.fontScale)
   const [draftFontWeight, setDraftFontWeight] = useState(textStyle.fontWeight)
+  const [draftShadowIntensity, setDraftShadowIntensity] = useState(textStyle.fontShadowIntensity)
+  const [draftStrokeWidth, setDraftStrokeWidth] = useState(textStyle.fontStrokeWidth)
 
   useEffect(() => {
     // eslint-disable-next-line react/set-state-in-effect
@@ -39,6 +44,16 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
     // eslint-disable-next-line react/set-state-in-effect
     setDraftFontWeight(textStyle.fontWeight)
   }, [textStyle.fontWeight])
+
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    setDraftShadowIntensity(textStyle.fontShadowIntensity)
+  }, [textStyle.fontShadowIntensity])
+
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    setDraftStrokeWidth(textStyle.fontStrokeWidth)
+  }, [textStyle.fontStrokeWidth])
 
   const handleChange = (style: Partial<SubtitleTextStyle>) => {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { [type]: style } }))
@@ -125,6 +140,48 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
               onChange={e => handleChange({ color: e.target.value })}
               className="!w-8 h-8 p-0.5 rounded border border-input cursor-pointer"
             />
+          </div>
+        </div>
+      </Field>
+
+      <Field className={FIELD_ROW_CLASS_NAME}>
+        <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
+          <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.shadowIntensity")}</FieldLabel>
+          <div className="flex min-w-0 items-center gap-2">
+            <Slider
+              min={0}
+              max={MAX_FONT_SHADOW_INTENSITY}
+              step={0.5}
+              value={draftShadowIntensity}
+              onValueChange={value => setDraftShadowIntensity(value as number)}
+              onValueCommitted={value => handleChange({ fontShadowIntensity: value as number })}
+              className="flex-1"
+            />
+            <span className="w-10 text-sm text-right">
+              {draftShadowIntensity}
+              px
+            </span>
+          </div>
+        </div>
+      </Field>
+
+      <Field className={FIELD_ROW_CLASS_NAME}>
+        <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
+          <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.strokeWidth")}</FieldLabel>
+          <div className="flex min-w-0 items-center gap-2">
+            <Slider
+              min={0}
+              max={MAX_FONT_STROKE_WIDTH}
+              step={0.5}
+              value={draftStrokeWidth}
+              onValueChange={value => setDraftStrokeWidth(value as number)}
+              onValueCommitted={value => handleChange({ fontStrokeWidth: value as number })}
+              className="flex-1"
+            />
+            <span className="w-10 text-sm text-right">
+              {draftStrokeWidth}
+              px
+            </span>
           </div>
         </div>
       </Field>
