@@ -1,16 +1,18 @@
 import { z } from "zod"
-import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_BACKGROUND_OPACITY, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
+import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MAX_FONT_WEIGHT, MAX_FONT_SHADOW_INTENSITY, MAX_FONT_STROKE_WIDTH, MIN_BACKGROUND_OPACITY, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
 import { batchQueueConfigSchema, customPromptsConfigSchema, requestQueueConfigSchema } from "./translate"
 
 export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "translationOnly"])
 export const subtitlesTranslationPositionSchema = z.enum(["above", "below"])
-export const subtitlesFontFamilySchema = z.enum(["system", "roboto", "noto-sans", "noto-serif"])
+export const subtitlesFontFamilySchema = z.enum(["system", "roboto", "noto-sans", "noto-serif", "misans", "ibm-plex", "tsuku-ard-gothic"])
 
 export const subtitleTextStyleSchema = z.object({
   fontFamily: subtitlesFontFamilySchema,
   fontScale: z.number().min(MIN_FONT_SCALE).max(MAX_FONT_SCALE),
   color: z.string(),
   fontWeight: z.number().min(MIN_FONT_WEIGHT).max(MAX_FONT_WEIGHT),
+  fontShadowIntensity: z.number().min(0).max(MAX_FONT_SHADOW_INTENSITY),
+  fontStrokeWidth: z.number().min(0).max(MAX_FONT_STROKE_WIDTH),
 })
 
 export const subtitleContainerStyleSchema = z.object({

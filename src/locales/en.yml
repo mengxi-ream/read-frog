@@ -900,6 +900,8 @@ options:
       color: Color
       fontWeight: Font Weight
       backgroundOpacity: Background Opacity
+      shadowIntensity: Shadow
+      strokeWidth: Outline
       reset: Reset to Default
     aiSegmentation:
       title: AI Smart Segmentation

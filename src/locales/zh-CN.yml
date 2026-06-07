@@ -900,6 +900,8 @@ options:
       color: 颜色
       fontWeight: 字体粗细
       backgroundOpacity: 背景透明度
+      shadowIntensity: 阴影
+      strokeWidth: 描边
       reset: 重置为默认
     aiSegmentation:
       title: AI 智能断句

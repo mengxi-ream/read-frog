@@ -785,6 +785,8 @@ options:
       color: 顏色
       fontWeight: 字重
       backgroundOpacity: 背景透明度
+      shadowIntensity: 陰影
+      strokeWidth: 描邊
       reset: 重設為預設值
     aiSegmentation:
       title: AI 智慧斷句

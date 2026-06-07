@@ -58,7 +58,13 @@ export const MAX_FONT_WEIGHT = 700
 export const DEFAULT_FONT_WEIGHT = 400
 export const MIN_BACKGROUND_OPACITY = 0
 export const MAX_BACKGROUND_OPACITY = 100
-export const DEFAULT_BACKGROUND_OPACITY = 75
+export const DEFAULT_BACKGROUND_OPACITY = 0
+export const MIN_FONT_SHADOW_INTENSITY = 0
+export const MAX_FONT_SHADOW_INTENSITY = 8
+export const DEFAULT_FONT_SHADOW_INTENSITY = 3
+export const MIN_FONT_STROKE_WIDTH = 0
+export const MAX_FONT_STROKE_WIDTH = 8
+export const DEFAULT_FONT_STROKE_WIDTH = 2.5
 export const DEFAULT_FONT_FAMILY = "system" as const
 export const DEFAULT_SUBTITLE_COLOR = "#FFFFFF"
 export const DEFAULT_DISPLAY_MODE = "bilingual" as const
@@ -74,4 +80,7 @@ export const SUBTITLE_FONT_FAMILIES = {
   "roboto": "Roboto, sans-serif",
   "noto-sans": "\"Noto Sans\", \"Noto Sans SC\", \"Noto Sans JP\", \"Noto Sans KR\", sans-serif",
   "noto-serif": "\"Noto Serif\", \"Noto Serif SC\", \"Noto Serif JP\", \"Noto Serif KR\", serif",
+  "misans": "\"MiSans\", \"MiSans Latin\", \"MiSans TC\", \"MiSans L3\", \"MiSans Tibetan\", \"MiSans Arabic\", \"MiSans Devanagari\", \"MiSans Gurmukhi\", \"MiSans Thai\", \"MiSans Lao\", \"MiSans Myanmar\", \"MiSans Khmer\", sans-serif",
+  "ibm-plex": "\"IBM Plex Sans SC\", \"IBM Plex Sans TC\", \"IBM Plex Sans JP\", \"IBM Plex Sans KR\", \"IBM Plex Sans\", \"IBM Plex Sans Condensed\", \"IBM Plex Sans Arabic\", \"IBM Plex Sans Devanagari\", \"IBM Plex Sans Hebrew\", \"IBM Plex Sans Thai\", \"IBM Plex Sans Thai Looped\", sans-serif",
+  "tsuku-ard-gothic": "\"TsukuARdGothic Std\", \"筑紫A丸\", sans-serif",
 }
