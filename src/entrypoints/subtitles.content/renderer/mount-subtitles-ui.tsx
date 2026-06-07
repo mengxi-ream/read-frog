@@ -52,8 +52,7 @@ export async function mountSubtitlesUI(
     right: 0;
     bottom: 0;
     pointer-events: none;
-    z-index: 9999;
-    transition: bottom 0.2s ease-out;
+    z-index: 19;
     overflow: visible;
   `
 
