@@ -191,7 +191,7 @@ export function SubtitlesPair({
     <svg
       className="subtitles-main leading-tight text-xl"
       width="100%"
-      style={{ display: "block", overflow: "visible" }}
+      style={{ display: "block", overflow: "visible", pointerEvents: "auto", userSelect: "text" }}
     >
       <defs>
         <ShadowFilter si={mainStyle.fontShadowIntensity} id={`shadow-m-${shadowId}`} />
