@@ -6,13 +6,15 @@ import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { SUBTITLES_THEME } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
-import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
+import { createReactShadowHost, removeReactShadowHost, ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 import { applyTheme } from "@/utils/theme"
 import { SubtitlesContainer } from "../ui/subtitles-container"
+import { SubtitlesOverlay } from "../ui/subtitles-overlay"
 import { SubtitlesProviders } from "../ui/subtitles-ui-context"
 
 const SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
+const SUBTITLES_SETTINGS_HOST_ID = "read-frog-subtitles-settings-host"
 
 interface MountSubtitlesUIOptions {
   adapter: SubtitlesProvidersAdapter
@@ -40,6 +42,11 @@ export async function mountSubtitlesUI(
 
     ;(existingHost as any).__reactShadowContainerCleanup?.()
     existingHost.remove()
+  }
+
+  const existingSettingsHost = document.getElementById(SUBTITLES_SETTINGS_HOST_ID) as HTMLDivElement | null
+  if (existingSettingsHost) {
+    removeReactShadowHost(existingSettingsHost)
   }
 
   const shadowHost = document.createElement("div")
@@ -93,4 +100,37 @@ export async function mountSubtitlesUI(
   )
 
   reactRoot.render(app)
+
+  // Second shadow host: settings overlay (above YouTube controls)
+  const settingsHost = createReactShadowHost(
+    <SubtitlesProviders adapter={adapter}>
+      <SubtitlesOverlay />
+    </SubtitlesProviders>,
+    {
+      position: "block",
+      cssContent: [themeCSS],
+      inheritStyles: false,
+      style: {
+        position: "absolute",
+        top: "0",
+        left: "0",
+        right: "0",
+        bottom: "0",
+        pointerEvents: "none",
+        overflow: "visible",
+      },
+    },
+  )
+  settingsHost.id = SUBTITLES_SETTINGS_HOST_ID
+  settingsHost.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 9999;
+    overflow: visible;
+  `
+  parentEl.appendChild(settingsHost)
 }
