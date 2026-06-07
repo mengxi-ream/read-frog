@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import type { BackgroundStyle, SubtitleTextStyle } from "@/types/config/subtitles"
-import { useId, useLayoutEffect, useRef } from "react"
+import { useCallback, useId, useLayoutEffect, useRef, useState } from "react"
 import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
 
 function ShadowFilter({ si, id }: { si: number, id: string }): ReactNode {
@@ -13,6 +13,203 @@ function ShadowFilter({ si, id }: { si: number, id: string }): ReactNode {
     <filter id={id} x="-200%" y="-200%" width="500%" height="500%">
       <feDropShadow dx={dx} dy={dy} stdDeviation={si} floodColor="#000" floodOpacity={alpha} />
     </filter>
+  )
+}
+
+interface Box2D { x: number, y: number, w: number, h: number }
+
+function MergedBackground({ boxes, radius, backgroundStyle, backgroundOpacity }: {
+  boxes: Box2D[]
+  radius: number
+  backgroundStyle: BackgroundStyle
+  backgroundOpacity: number
+}) {
+  if (boxes.length < 2)
+    return null
+
+  const [b1, b2] = boxes
+  const l = Math.min(b1.x, b2.x)
+  const rEdge = Math.max(b1.x + b1.w, b2.x + b2.w)
+  const top = b1.y
+  const bottom = b2.y + b2.h
+  const r = radius
+  const isGlass = backgroundStyle !== "solid"
+  const op = backgroundOpacity / 100
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: `${l}px`,
+        top: `${top}px`,
+        width: `${rEdge - l}px`,
+        height: `${bottom - top}px`,
+        borderRadius: `${r}px`,
+        pointerEvents: "none",
+        zIndex: 0,
+        ...(isGlass
+          ? {
+              backgroundColor: backgroundStyle === "blur"
+                ? `rgba(0,0,0,${(op * 0.3).toFixed(2)})`
+                : "rgba(255,255,255,0.08)",
+              backdropFilter: backgroundStyle === "blur"
+                ? "blur(12px)"
+                : "blur(24px) saturate(1.5)",
+              WebkitBackdropFilter: backgroundStyle === "blur"
+                ? "blur(12px)"
+                : "blur(24px) saturate(1.5)",
+              ...(backgroundStyle === "liquid-glass"
+                ? { boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.1)" }
+                : {}),
+            }
+          : { backgroundColor: `rgba(0,0,0,${(backgroundOpacity / 100).toFixed(2)})` }),
+      }}
+    />
+  )
+}
+
+function SubtitleLine({ text, style, backgroundOpacity, backgroundStyle, dir, lang, glass = true, onBBoxReady, lineKey }: {
+  text: string
+  style: SubtitleTextStyle
+  backgroundOpacity?: number
+  backgroundStyle?: BackgroundStyle
+  dir?: string
+  lang?: string
+  glass?: boolean
+  onBBoxReady?: (key: string, box: Box2D) => void
+  lineKey?: string
+}) {
+  const shadowId = useId()
+  const glassRef = useRef<HTMLDivElement>(null)
+  const textRef = useRef<SVGTextElement>(null)
+  const divRef = useRef<HTMLDivElement>(null)
+  const si = style.fontShadowIntensity
+  const sw = style.fontStrokeWidth
+  const hasStroke = sw > 0
+  const lines = text.split("\n")
+  const fontFamily = SUBTITLE_FONT_FAMILIES[style.fontFamily] || SUBTITLE_FONT_FAMILIES.system
+  const bboxRef = useRef<Box2D | null>(null)
+
+  useLayoutEffect(() => {
+    const textEl = textRef.current
+    const div = divRef.current
+    if (!textEl || !div || !backgroundOpacity)
+      return
+    const box = textEl.getBBox()
+    const shadowPad = si > 0 ? Math.max(1, si * 0.5) + si : 0
+    const strokePad = sw / 2
+    const pad = Math.max(shadowPad, strokePad, 0) + 4
+    const padded: Box2D = { x: box.x - pad, y: box.y - pad, w: box.width + pad * 2, h: box.height + pad * 2 }
+
+    const prev = bboxRef.current
+    if (prev && prev.x === padded.x && prev.y === padded.y && prev.w === padded.w && prev.h === padded.h)
+      return
+    bboxRef.current = padded
+
+    if (onBBoxReady && lineKey)
+      onBBoxReady(lineKey, { x: padded.x + div.offsetLeft, y: padded.y + div.offsetTop, w: padded.w, h: padded.h })
+
+    if (glass) {
+      const g = glassRef.current
+      if (!g)
+        return
+      g.style.left = `${padded.x}px`
+      g.style.top = `${padded.y}px`
+      g.style.width = `${padded.w}px`
+      g.style.height = `${padded.h}px`
+    }
+  })
+
+  return (
+    <div ref={divRef} style={{ position: "relative" }}>
+      {glass && !!backgroundOpacity && backgroundStyle !== "solid" && (
+        <div
+          ref={glassRef}
+          style={{
+            position: "absolute",
+            borderRadius: "4px",
+            pointerEvents: "none",
+            zIndex: 0,
+            ...(backgroundStyle === "blur"
+              ? {
+                  backdropFilter: "blur(12px)",
+                  WebkitBackdropFilter: "blur(12px)",
+                  backgroundColor: `rgba(0,0,0,${(backgroundOpacity / 100 * 0.3).toFixed(2)})`,
+                }
+              : {
+                  backdropFilter: "blur(24px) saturate(1.5)",
+                  WebkitBackdropFilter: "blur(24px) saturate(1.5)",
+                  background: "linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.03))",
+                  boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.1)",
+                }),
+          }}
+        />
+      )}
+      {glass && !!backgroundOpacity && backgroundStyle === "solid" && (
+        <div
+          ref={glassRef}
+          style={{
+            position: "absolute",
+            borderRadius: "4px",
+            pointerEvents: "none",
+            zIndex: 0,
+            backgroundColor: `rgba(0,0,0,${(backgroundOpacity / 100).toFixed(2)})`,
+          }}
+        />
+      )}
+      <svg
+        width="100%"
+        height={`${1.5 + (lines.length - 1) * 1.3}em`}
+        style={{ display: "block", overflow: "visible", position: "relative", zIndex: 1, pointerEvents: "auto", userSelect: "text" }}
+      >
+        <defs>
+          <ShadowFilter si={si} id={`shadow-${shadowId}`} />
+        </defs>
+        {si > 0 && (
+          <text
+            x="50%"
+            textAnchor="middle"
+            dominantBaseline="central"
+            fontFamily={fontFamily}
+            fontSize={`${style.fontScale / 100}em`}
+            fontWeight={style.fontWeight}
+            fill={style.color}
+            stroke="none"
+            filter={`url(#shadow-${shadowId})`}
+            direction={dir === "rtl" ? "rtl" : undefined}
+            lang={lang}
+            style={{ textAutospace: "normal" as const }}
+          >
+            {text}
+          </text>
+        )}
+        <text
+          ref={textRef}
+          x="50%"
+          textAnchor="middle"
+          dominantBaseline="central"
+          fontFamily={fontFamily}
+          fontSize={`${style.fontScale / 100}em`}
+          fontWeight={style.fontWeight}
+          fill={style.color}
+          direction={dir === "rtl" ? "rtl" : undefined}
+          stroke={hasStroke ? "rgba(0,0,0,0.8)" : "none"}
+          strokeWidth={hasStroke ? sw : 0}
+          strokeLinejoin="round"
+          strokeLinecap="round"
+          strokeMiterlimit={2}
+          paintOrder={hasStroke ? "stroke fill" : undefined}
+          lang={lang}
+          style={{ textAutospace: "normal" as const }}
+        >
+          {lines.map((line, i) => (
+            <tspan key={line} x="50%" dy={i ? "1.3em" : undefined}>
+              {line}
+            </tspan>
+          ))}
+        </text>
+      </svg>
+    </div>
   )
 }
 
@@ -38,31 +235,6 @@ export function SubtitlesPair({
   dir?: string
   lang?: string
 }) {
-  const shadowId = useId()
-  const groupRef = useRef<SVGGElement>(null)
-  const rectRef = useRef<SVGRectElement>(null)
-  const fontFamily = SUBTITLE_FONT_FAMILIES[mainStyle.fontFamily] || SUBTITLE_FONT_FAMILIES.system
-
-  useLayoutEffect(() => {
-    const rect = rectRef.current
-    const group = groupRef.current
-    if (!rect || !group || !backgroundOpacity)
-      return
-    const box = group.getBBox()
-    const si = Math.max(mainStyle.fontShadowIntensity, translationStyle.fontShadowIntensity)
-    const sw = Math.max(mainStyle.fontStrokeWidth, translationStyle.fontStrokeWidth)
-    const shadowPad = si > 0 ? Math.max(1, si * 0.5) + si : 0
-    const strokePad = sw / 2
-    const pad = Math.max(shadowPad, strokePad, 0) + 4
-    rect.setAttribute("x", String(box.x - pad))
-    rect.setAttribute("y", String(box.y - pad))
-    rect.setAttribute("width", String(box.width + pad * 2))
-    rect.setAttribute("height", String(box.height + pad * 2))
-  })
-
-  const lineCount = (showMain ? 1 : 0) + (showTranslation ? 1 : 0)
-  const svgHeight = `${1.5 + (lineCount - 1) * lineGap}em`
-
   const items: { text: string, style: SubtitleTextStyle, key: string }[] = []
   if (showMain && showTranslation) {
     if (translationAbove) {
@@ -81,113 +253,42 @@ export function SubtitlesPair({
     items.push({ text: translationText, style: translationStyle, key: "t" })
   }
 
+  const [boxes, setBoxes] = useState<Record<string, Box2D>>({})
+  const mergeReady = items.length === 2 && lineGap <= 0.5 && Object.keys(boxes).length === 2 && !!backgroundOpacity
+
+  const handleBBoxReady = useCallback((key: string, box: Box2D) => {
+    setBoxes((prev: Record<string, Box2D>) => {
+      const existing = prev[key]
+      if (existing && existing.x === box.x && existing.y === box.y && existing.w === box.w && existing.h === box.h)
+        return prev
+      return { ...prev, [key]: box }
+    })
+  }, [])
+
   return (
-    <svg
-      className="subtitles-main leading-tight text-xl"
-      width="100%"
-      height={svgHeight}
-      style={{
-        display: "block",
-        overflow: "visible",
-        pointerEvents: "auto",
-        userSelect: "text",
-        ...(backgroundStyle === "blur" && backgroundOpacity
-          ? { backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }
-          : {}),
-        ...(backgroundStyle === "liquid-glass" && backgroundOpacity
-          ? {
-              backdropFilter: "blur(24px) saturate(1.5)",
-              WebkitBackdropFilter: "blur(24px) saturate(1.5)",
-            }
-          : {}),
-      }}
-    >
-      <defs>
-        <ShadowFilter si={mainStyle.fontShadowIntensity} id={`shadow-m-${shadowId}`} />
-        <ShadowFilter si={translationStyle.fontShadowIntensity} id={`shadow-t-${shadowId}`} />
-        {backgroundStyle === "liquid-glass" && (
-          <>
-            <linearGradient id={`bg-glass-${shadowId}`} x1="0" y1="0" x2="0.3" y2="1.2">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.25)" />
-              <stop offset="40%" stopColor="rgba(255,255,255,0.07)" />
-              <stop offset="100%" stopColor="rgba(255,255,255,0.02)" />
-            </linearGradient>
-            <linearGradient id={`highlight-${shadowId}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
-              <stop offset="30%" stopColor="rgba(255,255,255,0.05)" />
-              <stop offset="100%" stopColor="transparent" />
-            </linearGradient>
-          </>
-        )}
-      </defs>
-      {!!backgroundOpacity && backgroundStyle === "solid" && (
-        <rect ref={rectRef} rx="4" fill="#000" opacity={backgroundOpacity / 100} />
+    <div style={{ display: "flex", flexDirection: "column", gap: `${lineGap}em`, alignItems: "center", width: "100%", position: "relative" }}>
+      {mergeReady && (
+        <MergedBackground
+          boxes={items.map(item => boxes[item.key])}
+          radius={15}
+          backgroundStyle={backgroundStyle}
+          backgroundOpacity={backgroundOpacity ?? 0}
+        />
       )}
-      {!!backgroundOpacity && backgroundStyle === "blur" && (
-        <rect ref={rectRef} rx="4" fill="#000" opacity={backgroundOpacity / 100 * 0.4} />
-      )}
-      {!!backgroundOpacity && backgroundStyle === "liquid-glass" && (
-        <>
-          <rect ref={rectRef} rx="4" fill={`url(#bg-glass-${shadowId})`} />
-          <rect
-            rx="4"
-            fill={`url(#highlight-${shadowId})`}
-            style={{ mixBlendMode: "overlay" as const }}
-          />
-        </>
-      )}
-      <g ref={groupRef}>
-        {items.map((item, i) => {
-          const si = item.style.fontShadowIntensity
-          const sw = item.style.fontStrokeWidth
-          const hasStroke = sw > 0
-          const fid = `shadow-${item.key}-${shadowId}`
-          return (
-            <g key={item.key}>
-              {si > 0 && (
-                <text
-                  x="50%"
-                  dy={i ? `${lineGap}em` : undefined}
-                  textAnchor="middle"
-                  dominantBaseline="central"
-                  fontFamily={fontFamily}
-                  fontSize={`${item.style.fontScale / 100}em`}
-                  fontWeight={item.style.fontWeight}
-                  fill={item.style.color}
-                  stroke="none"
-                  filter={`url(#${fid})`}
-                  direction={dir === "rtl" ? "rtl" : undefined}
-                  lang={lang}
-                  style={{ textAutospace: "normal" as const }}
-                >
-                  {item.text}
-                </text>
-              )}
-              <text
-                x="50%"
-                dy={i ? `${lineGap}em` : undefined}
-                textAnchor="middle"
-                dominantBaseline="central"
-                fontFamily={fontFamily}
-                fontSize={`${item.style.fontScale / 100}em`}
-                fontWeight={item.style.fontWeight}
-                fill={item.style.color}
-                direction={dir === "rtl" ? "rtl" : undefined}
-                stroke={hasStroke ? "rgba(0,0,0,0.8)" : "none"}
-                strokeWidth={hasStroke ? sw : 0}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-                strokeMiterlimit={2}
-                paintOrder={hasStroke ? "stroke fill" : undefined}
-                lang={lang}
-                style={{ textAutospace: "normal" as const }}
-              >
-                {item.text}
-              </text>
-            </g>
-          )
-        })}
-      </g>
-    </svg>
+      {items.map(item => (
+        <SubtitleLine
+          key={item.key}
+          text={item.text}
+          style={item.style}
+          backgroundOpacity={backgroundOpacity}
+          backgroundStyle={backgroundStyle}
+          glass={!mergeReady}
+          onBBoxReady={handleBBoxReady}
+          lineKey={item.key}
+          dir={item.key === "t" ? dir : undefined}
+          lang={item.key === "t" ? lang : undefined}
+        />
+      ))}
+    </div>
   )
 }

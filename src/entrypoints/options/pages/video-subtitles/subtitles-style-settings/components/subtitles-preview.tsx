@@ -23,7 +23,7 @@ export function SubtitlesPreview() {
       </Label>
       <GradientBackground>
         <div className="relative w-fit min-w-full min-h-32 rounded-lg overflow-hidden flex items-center justify-center p-4">
-          <div className="mt-3 px-3 py-2 rounded text-center text-white max-w-[90%]">
+          <div className="text-center text-white max-w-[90%]">
             <SubtitlesPair
               mainText={sampleOriginal}
               mainStyle={style.main}
