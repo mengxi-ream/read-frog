@@ -113,6 +113,7 @@ export function SubtitlesPair({
                   filter={`url(#${fid})`}
                   direction={dir === "rtl" ? "rtl" : undefined}
                   lang={lang}
+                  style={{ textAutospace: "normal" as const }}
                 >
                   {item.text}
                 </text>
@@ -134,6 +135,7 @@ export function SubtitlesPair({
                 strokeMiterlimit={2}
                 paintOrder={hasStroke ? "stroke fill" : undefined}
                 lang={lang}
+                style={{ textAutospace: "normal" as const }}
               >
                 {item.text}
               </text>
