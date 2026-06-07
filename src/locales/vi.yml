@@ -785,6 +785,8 @@ options:
       color: Màu sắc
       fontWeight: Độ đậm chữ
       backgroundOpacity: Độ trong suốt nền
+      shadowIntensity: Đổ bóng
+      strokeWidth: Viền
       reset: Đặt lại về mặc định
     aiSegmentation:
       title: AI Phân đoạn thông minh
