@@ -7,7 +7,7 @@ import { subtitlesStore } from "../atoms"
 interface SubtitlesUIContextValue {
   toggleSubtitles: (enabled: boolean) => void
   downloadSourceSubtitles: () => Promise<void>
-  downloadTranslatedSubtitles: (onProgress?: (progress: number) => void) => Promise<void>
+  downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
   embedded?: boolean
 }

@@ -9,18 +9,18 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
-import { HIDE_NATIVE_CAPTIONS_STYLE_ID, MAX_GAP_MS, NAVIGATION_HANDLER_DELAY, PROCESS_LOOK_AHEAD_MS, TRANSLATE_BUTTON_CONTAINER_ID, TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
+import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
-import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
-import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary, translateSubtitles } from "@/utils/subtitles/processor/translator"
+import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesSettingsPanelViewAtom, subtitlesStore } from "./atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
+import { TranslatedSubtitlesDownloader } from "./translated-subtitles-downloader"
 import { TranslationCoordinator } from "./translation-coordinator"
 import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
@@ -45,6 +45,7 @@ export class UniversalVideoAdapter {
   private isNativeSubtitlesHidden = false
   private segmentationPipeline: SegmentationPipeline | null = null
   private translationCoordinator: TranslationCoordinator | null = null
+  private translatedSubtitlesDownloader: TranslatedSubtitlesDownloader | null = null
   private subtitlesSummaryContextHash: string | null = null
 
   get embedded() {
@@ -68,6 +69,7 @@ export class UniversalVideoAdapter {
   }
 
   async initialize() {
+    this.initializeTranslatedSubtitlesDownloader()
     void this.restorePosition()
     void this.renderTranslateButton()
 
@@ -106,20 +108,16 @@ export class UniversalVideoAdapter {
     })
   }
 
-  downloadTranslatedSubtitles = async (onProgress?: (progress: number) => void) => {
-    await this.getOrLoadSourceSubtitles()
+  downloadTranslatedSubtitles = async () => {
+    this.initializeTranslatedSubtitlesDownloader()
+    await this.translatedSubtitlesDownloader!.download()
+  }
 
-    const translatedSubtitles = await this.buildCompleteTranslatedSubtitles(onProgress)
-
-    await downloadSubtitlesAsSrt({
-      subtitles: translatedSubtitles.map(({ translation, ...fragment }) => ({
-        ...fragment,
-        text: translation ?? "",
-      })),
-      pageTitle: document.title || "",
-      videoId: this.config.getVideoId?.(),
-      suffix: "translated",
-    })
+  private initializeTranslatedSubtitlesDownloader() {
+    this.translatedSubtitlesDownloader ??= new TranslatedSubtitlesDownloader(
+      this.subtitlesFetcher,
+      this.config,
+    )
   }
 
   private async restorePosition() {
@@ -218,6 +216,7 @@ export class UniversalVideoAdapter {
 
   private clearVisibleStateForNavigation() {
     this.clearNavigationReinitTimeout()
+    this.translatedSubtitlesDownloader?.dispose()
     this.destroyScheduler()
     this.translationCoordinator?.stop()
     this.segmentationPipeline?.stop()
@@ -500,205 +499,6 @@ export class UniversalVideoAdapter {
     }))
     this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
     this.subtitlesScheduler?.setState("idle")
-  }
-
-  private async buildCompleteTranslatedSubtitles(onProgress?: (progress: number) => void): Promise<SubtitlesFragment[]> {
-    if (await this.shouldSkipTranslationForCurrentTrack()) {
-      throw new Error(i18n.t("subtitles.errors.translatedExportSameLanguage"))
-    }
-
-    const fragments = await this.buildExportProcessedSubtitles()
-    const videoContext = await this.buildExportVideoContext()
-    const translatedFragments: SubtitlesFragment[] = []
-
-    for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
-      const batch = fragments.slice(index, index + TRANSLATION_BATCH_SIZE)
-      const translatedBatch = await translateSubtitles(batch, videoContext)
-      if (this.hasIncompleteTranslatedFragments(translatedBatch)) {
-        throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
-      }
-
-      translatedFragments.push(...translatedBatch)
-      onProgress?.(Math.min(100, Math.round((translatedFragments.length / fragments.length) * 100)))
-    }
-
-    if (this.hasIncompleteTranslatedFragments(translatedFragments)) {
-      throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
-    }
-
-    return translatedFragments
-  }
-
-  private hasIncompleteTranslatedFragments(fragments: SubtitlesFragment[]): boolean {
-    return fragments.some(fragment => !fragment.translation?.trim())
-  }
-
-  private async buildExportProcessedSubtitles(): Promise<SubtitlesFragment[]> {
-    const config = await getLocalConfig()
-    if (!config) {
-      throw new Error(i18n.t("subtitles.errors.translatedExportFailed"))
-    }
-
-    const useAiSegmentation = !!config?.videoSubtitles?.aiSegmentation
-
-    if (!useAiSegmentation || this.subtitlesFetcher.isPreSegmented?.()) {
-      return [...this.sourceProcessedSubtitles]
-    }
-
-    const result: SubtitlesFragment[] = []
-
-    for (const chunk of this.buildSourceSubtitleChunks(this.sourceSubtitles)) {
-      result.push(...await this.buildExportProcessedChunk(chunk, config))
-    }
-
-    return result.sort((a, b) => a.start - b.start)
-  }
-
-  private async buildExportProcessedChunk(
-    chunk: SubtitlesFragment[],
-    config: NonNullable<Awaited<ReturnType<typeof getLocalConfig>>>,
-  ): Promise<SubtitlesFragment[]> {
-    const sourceLanguage = this.subtitlesFetcher.getSourceLanguage()
-    let segmented: SubtitlesFragment[]
-
-    try {
-      segmented = await aiSegmentBlock(chunk, config)
-    }
-    catch {
-      return optimizeSubtitles(chunk, sourceLanguage)
-    }
-
-    const optimized = optimizeSubtitles(segmented, sourceLanguage)
-
-    if (!this.hasTimingCoverageGap(chunk, optimized)) {
-      return optimized
-    }
-
-    const retryChunks = this.buildSourceSubtitleChunks(chunk, PROCESS_LOOK_AHEAD_MS / 2)
-    if (retryChunks.length > 1) {
-      const retryResult: SubtitlesFragment[] = []
-
-      for (const retryChunk of retryChunks) {
-        let retrySegmented: SubtitlesFragment[]
-
-        try {
-          retrySegmented = await aiSegmentBlock(retryChunk, config)
-        }
-        catch {
-          return optimizeSubtitles(chunk, sourceLanguage)
-        }
-
-        const retryOptimized = optimizeSubtitles(retrySegmented, sourceLanguage)
-
-        if (this.hasTimingCoverageGap(retryChunk, retryOptimized)) {
-          return optimizeSubtitles(chunk, sourceLanguage)
-        }
-
-        retryResult.push(...retryOptimized)
-      }
-
-      return retryResult
-    }
-
-    return optimizeSubtitles(chunk, sourceLanguage)
-  }
-
-  private buildSourceSubtitleChunks(
-    subtitles: SubtitlesFragment[],
-    maxDurationMs = PROCESS_LOOK_AHEAD_MS,
-  ): SubtitlesFragment[][] {
-    const chunks: SubtitlesFragment[][] = []
-    let index = 0
-
-    while (index < subtitles.length) {
-      const chunkStart = subtitles[index].start
-      const chunkEnd = chunkStart + maxDurationMs
-      const chunk: SubtitlesFragment[] = []
-
-      while (index < subtitles.length && subtitles[index].start < chunkEnd) {
-        chunk.push(subtitles[index])
-        index++
-      }
-
-      chunks.push(chunk)
-    }
-
-    return chunks
-  }
-
-  private hasTimingCoverageGap(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
-    const sourceCoverage = this.mergeCoverageIntervals(source)
-    const candidateCoverage = this.mergeCoverageIntervals(candidate)
-
-    for (const sourceInterval of sourceCoverage) {
-      let coveredUntil = sourceInterval.start
-
-      for (const candidateInterval of candidateCoverage) {
-        if (candidateInterval.end <= coveredUntil) {
-          continue
-        }
-        if (candidateInterval.start >= sourceInterval.end) {
-          break
-        }
-
-        const overlapStart = Math.max(candidateInterval.start, sourceInterval.start)
-        if (overlapStart - coveredUntil > MAX_GAP_MS) {
-          return true
-        }
-
-        coveredUntil = Math.max(coveredUntil, Math.min(candidateInterval.end, sourceInterval.end))
-      }
-
-      if (sourceInterval.end - coveredUntil > MAX_GAP_MS) {
-        return true
-      }
-    }
-
-    return false
-  }
-
-  private mergeCoverageIntervals(fragments: SubtitlesFragment[]): Array<{ start: number, end: number }> {
-    const intervals = fragments
-      .filter(fragment => fragment.end > fragment.start)
-      .map(fragment => ({ start: fragment.start, end: fragment.end }))
-      .sort((a, b) => a.start - b.start)
-
-    const merged: Array<{ start: number, end: number }> = []
-
-    for (const interval of intervals) {
-      const previous = merged.at(-1)
-      if (previous && interval.start - previous.end <= MAX_GAP_MS) {
-        previous.end = Math.max(previous.end, interval.end)
-      }
-      else {
-        merged.push({ ...interval })
-      }
-    }
-
-    return merged
-  }
-
-  private async buildExportVideoContext(): Promise<SubtitlesVideoContext> {
-    const config = await getLocalConfig()
-    const providerConfig = config
-      ? getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
-      : undefined
-    const videoContext: SubtitlesVideoContext = {
-      videoTitle: document.title || "",
-      subtitlesTextContent: this.sourceSubtitles.map(f => f.text).join(""),
-    }
-    const summaryContextHash = buildSubtitlesSummaryContextHash(videoContext, providerConfig)
-
-    if (summaryContextHash) {
-      try {
-        videoContext.summary = await fetchSubtitlesSummary(videoContext)
-      }
-      catch {
-        videoContext.summary = null
-      }
-    }
-
-    return videoContext
   }
 
   private async processTranslatedSubtitles() {

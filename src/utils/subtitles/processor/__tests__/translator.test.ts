@@ -151,6 +151,25 @@ describe("subtitles translator", () => {
     expect(request.summary).toBeNull()
   })
 
+  it("uses an explicit config snapshot without reading current settings again", async () => {
+    const { fetchSubtitlesSummary, translateSubtitles } = await import("../translator")
+    const configSnapshot = {
+      ...DEFAULT_CONFIG,
+      translate: { ...DEFAULT_CONFIG.translate, enableAIContentAware: true },
+      videoSubtitles: { ...DEFAULT_CONFIG.videoSubtitles, providerId: "openai-default" },
+    }
+    const videoContext = { videoTitle: "Video title", subtitlesTextContent: "subtitle transcript" }
+
+    await fetchSubtitlesSummary(videoContext, configSnapshot)
+    await translateSubtitles([{ text: "hello", start: 0, end: 1_000 }], videoContext, configSnapshot)
+
+    expect(getLocalConfigMock).not.toHaveBeenCalled()
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "enqueueSubtitlesTranslateRequest",
+      expect.objectContaining({ langConfig: configSnapshot.language }),
+    )
+  })
+
   it("builds subtitle summary context hashes from subtitles text and provider config", async () => {
     const { buildSubtitlesSummaryContextHash } = await import("../translator")
 
