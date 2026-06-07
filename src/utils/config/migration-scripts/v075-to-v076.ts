@@ -25,7 +25,7 @@ function migrateTextStyle(style: any): any {
     }
   }
 
-  result.fontShadowIntensity = style.fontShadowIntensity ?? (shadowEnabled ? 50 : 0)
+  result.fontShadowIntensity = style.fontShadowIntensity ?? (shadowEnabled ? 3 : 0)
   result.fontStrokeWidth = style.fontStrokeWidth ?? (strokeEnabled ? 1 : 0)
 
   return result
