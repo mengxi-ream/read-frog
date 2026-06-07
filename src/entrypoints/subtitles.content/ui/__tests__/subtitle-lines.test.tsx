@@ -1,11 +1,10 @@
-// @vitest-environment jsdom
 import type { LangCodeISO6393 } from "@read-frog/definitions"
-import { render, screen } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
-import { MainSubtitle, TranslationSubtitle } from "../subtitle-lines"
+import { SubtitlesPair } from "../subtitle-lines"
 
 const mockedAtoms = vi.hoisted(() => ({
   languageAtom: null as any,
@@ -39,45 +38,72 @@ function createStoreWithLanguage(targetCode: LangCodeISO6393) {
 }
 
 describe("subtitle lines", () => {
-  it("applies rtl attributes to translation subtitle for Arabic target language", () => {
+  it("applies rtl direction to translation subtitle for Arabic target language", () => {
     const store = createStoreWithLanguage("arb")
 
-    render(
+    const { container } = render(
       <Provider store={store}>
-        <TranslationSubtitle content="مرحبًا" />
+        <SubtitlesPair
+          mainText=""
+          mainStyle={DEFAULT_CONFIG.videoSubtitles.style.main}
+          translationText="مرحبًا"
+          translationStyle={DEFAULT_CONFIG.videoSubtitles.style.translation}
+          showMain={false}
+          showTranslation={true}
+          translationAbove={false}
+        />
       </Provider>,
     )
 
-    const line = screen.getByText("مرحبًا")
-    expect(line).toHaveAttribute("dir", "rtl")
-    expect(line).toHaveAttribute("lang", "ar")
+    const text = container.querySelector("text")
+    expect(text).toBeTruthy()
+    expect(text!.getAttribute("direction")).toBe("rtl")
+    expect(text!.getAttribute("lang")).toBe("ar")
   })
 
-  it("applies ltr attributes to translation subtitle for English target language", () => {
+  it("applies ltr direction to translation subtitle for English target language", () => {
     const store = createStoreWithLanguage("eng")
 
-    render(
+    const { container } = render(
       <Provider store={store}>
-        <TranslationSubtitle content="Hello world" />
+        <SubtitlesPair
+          mainText=""
+          mainStyle={DEFAULT_CONFIG.videoSubtitles.style.main}
+          translationText="Hello world"
+          translationStyle={DEFAULT_CONFIG.videoSubtitles.style.translation}
+          showMain={false}
+          showTranslation={true}
+          translationAbove={false}
+        />
       </Provider>,
     )
 
-    const line = screen.getByText("Hello world")
-    expect(line).toHaveAttribute("dir", "ltr")
-    expect(line).toHaveAttribute("lang", "en")
+    const text = container.querySelector("text")
+    expect(text).toBeTruthy()
+    expect(text!.getAttribute("direction")).toBe("ltr")
+    expect(text!.getAttribute("lang")).toBe("en")
   })
 
-  it("keeps main subtitle line without forced dir/lang attributes", () => {
+  it("renders main subtitle without dir/lang attributes", () => {
     const store = createStoreWithLanguage("eng")
 
-    render(
+    const { container } = render(
       <Provider store={store}>
-        <MainSubtitle content="Hello world" />
+        <SubtitlesPair
+          mainText="Hello world"
+          mainStyle={DEFAULT_CONFIG.videoSubtitles.style.main}
+          translationText=""
+          translationStyle={DEFAULT_CONFIG.videoSubtitles.style.translation}
+          showMain={true}
+          showTranslation={false}
+          translationAbove={false}
+        />
       </Provider>,
     )
 
-    const line = screen.getByText("Hello world")
-    expect(line).not.toHaveAttribute("dir")
-    expect(line).not.toHaveAttribute("lang")
+    const text = container.querySelector("text")
+    expect(text).toBeTruthy()
+    expect(text!.getAttribute("direction")).toBeNull()
+    expect(text!.getAttribute("lang")).toBeNull()
   })
 })

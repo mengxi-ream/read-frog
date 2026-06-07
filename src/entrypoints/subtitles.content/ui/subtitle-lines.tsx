@@ -1,18 +1,7 @@
 import type { ReactNode } from "react"
 import type { SubtitleTextStyle } from "@/types/config/subtitles"
-import { useAtomValue } from "jotai"
 import { useId, useLayoutEffect, useRef } from "react"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
-import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
-import { cn } from "@/utils/styles/utils"
-import { currentSubtitleAtom } from "../atoms"
-
-interface SubtitleLineProps {
-  content?: string
-  className?: string
-  backgroundOpacity?: number
-}
 
 function ShadowFilter({ si, id }: { si: number, id: string }): ReactNode {
   if (si <= 0)
@@ -27,113 +16,12 @@ function ShadowFilter({ si, id }: { si: number, id: string }): ReactNode {
   )
 }
 
-function SubtitleSVG({ text, style, className, dir, lang, backgroundOpacity }: {
-  text: string
-  style: SubtitleTextStyle
-  className?: string
-  dir?: string
-  lang?: string
-  backgroundOpacity?: number
-}) {
-  const shadowId = useId()
-  const si = style.fontShadowIntensity
-  const sw = style.fontStrokeWidth
-  const hasStroke = sw > 0
-  const lines = text.split("\n")
-  const lineCount = lines.length
-  const fontFamily = SUBTITLE_FONT_FAMILIES[style.fontFamily] || SUBTITLE_FONT_FAMILIES.system
-  const rectRef = useRef<SVGRectElement>(null)
-  const shadowTextRef = useRef<SVGTextElement>(null)
-
-  useLayoutEffect(() => {
-    const rect = rectRef.current
-    const textEl = shadowTextRef.current
-    if (!rect || !textEl || !backgroundOpacity)
-      return
-    const box = textEl.getBBox()
-    const shadowPad = si > 0 ? Math.max(1, si * 0.5) + si : 0
-    const strokePad = sw / 2
-    const pad = Math.max(shadowPad, strokePad, 0) + 4
-    rect.setAttribute("x", String(box.x - pad))
-    rect.setAttribute("y", String(box.y - pad))
-    rect.setAttribute("width", String(box.width + pad * 2))
-    rect.setAttribute("height", String(box.height + pad * 2))
-  })
-
-  return (
-    <svg
-      className={className}
-      width="100%"
-      height={`${1.5 + (lineCount - 1) * 1.3}em`}
-      style={{ display: "block", overflow: "visible" }}
-    >
-      <defs>
-        <ShadowFilter si={si} id={`shadow-${shadowId}`} />
-      </defs>
-      {!!backgroundOpacity && (
-        <rect
-          ref={rectRef}
-          rx="4"
-          fill="#000"
-          opacity={backgroundOpacity / 100}
-        />
-      )}
-      {/* Shadow layer: fill + feDropShadow only, no stroke */}
-      {si > 0 && (
-        <text
-          ref={shadowTextRef}
-          x="50%"
-          textAnchor="middle"
-          dominantBaseline="central"
-          fontFamily={fontFamily}
-          fontSize={`${style.fontScale / 100}em`}
-          fontWeight={style.fontWeight}
-          fill={style.color}
-          stroke="none"
-          filter={`url(#shadow-${shadowId})`}
-          lang={lang}
-        >
-          {lines.map((line, i) => (
-            <tspan key={line} x="50%" dy={i ? "1.3em" : undefined}>
-              {line}
-            </tspan>
-          ))}
-        </text>
-      )}
-
-      {/* Stroke+fill layer: SVG round join eliminates spikes, no shadow */}
-      <text
-        x="50%"
-        textAnchor="middle"
-        dominantBaseline="central"
-        fontFamily={fontFamily}
-        fontSize={`${style.fontScale / 100}em`}
-        fontWeight={style.fontWeight}
-        fill={style.color}
-        direction={dir === "rtl" ? "rtl" : undefined}
-        stroke={hasStroke ? "rgba(0,0,0,0.8)" : "none"}
-        strokeWidth={hasStroke ? sw : 0}
-        strokeLinejoin="round"
-        strokeLinecap="round"
-        strokeMiterlimit={2}
-        paintOrder={hasStroke ? "stroke fill" : undefined}
-        lang={lang}
-      >
-        {lines.map((line, i) => (
-          <tspan key={line} x="50%" dy={i ? "1.3em" : undefined}>
-            {line}
-          </tspan>
-        ))}
-      </text>
-    </svg>
-  )
-}
-
 export function SubtitlesPair({
   mainText, mainStyle,
   translationText, translationStyle,
   showMain, showTranslation,
   translationAbove, backgroundOpacity,
+  lineGap = 1.3,
   dir, lang,
 }: {
   mainText: string
@@ -144,6 +32,7 @@ export function SubtitlesPair({
   showTranslation: boolean
   translationAbove: boolean
   backgroundOpacity?: number
+  lineGap?: number
   dir?: string
   lang?: string
 }) {
@@ -209,7 +98,7 @@ export function SubtitlesPair({
               {si > 0 && (
                 <text
                   x="50%"
-                  dy={i ? "1.3em" : undefined}
+                  dy={i ? `${lineGap}em` : undefined}
                   textAnchor="middle"
                   dominantBaseline="central"
                   fontFamily={fontFamily}
@@ -226,7 +115,7 @@ export function SubtitlesPair({
               )}
               <text
                 x="50%"
-                dy={i ? "1.3em" : undefined}
+                dy={i ? `${lineGap}em` : undefined}
                 textAnchor="middle"
                 dominantBaseline="central"
                 fontFamily={fontFamily}
@@ -249,39 +138,5 @@ export function SubtitlesPair({
         })}
       </g>
     </svg>
-  )
-}
-
-export function MainSubtitle({ content, className, backgroundOpacity }: SubtitleLineProps) {
-  const subtitle = useAtomValue(currentSubtitleAtom)
-  const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
-  const text = content ?? subtitle?.text ?? ""
-
-  return (
-    <SubtitleSVG
-      text={text}
-      style={style.main}
-      className={cn("subtitles-main leading-tight text-xl", className)}
-      backgroundOpacity={backgroundOpacity}
-    />
-  )
-}
-
-export function TranslationSubtitle({ content, className, backgroundOpacity }: SubtitleLineProps) {
-  const subtitle = useAtomValue(currentSubtitleAtom)
-  const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
-  const language = useAtomValue(configFieldsAtomMap.language)
-  const text = content ?? subtitle?.translation ?? ""
-  const { dir, lang } = getLanguageDirectionAndLang(language.targetCode)
-
-  return (
-    <SubtitleSVG
-      text={text}
-      style={style.translation}
-      className={cn("subtitles-translation leading-tight text-xl", className)}
-      backgroundOpacity={backgroundOpacity}
-      dir={dir}
-      lang={lang}
-    />
   )
 }
