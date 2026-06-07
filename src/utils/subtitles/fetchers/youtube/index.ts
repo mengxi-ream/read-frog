@@ -407,7 +407,11 @@ export class YoutubeSubtitlesFetcher implements SubtitlesFetcher {
           }
         }
 
-        const data = await response.json()
+        const text = await response.text()
+        if (!text) {
+          throw new Error("YouTube subtitle API returned an empty response")
+        }
+        const data = JSON.parse(text)
         const parsed = youtubeSubtitlesResponseSchema.safeParse(data)
         if (!parsed.success) {
           throw new Error("Invalid response format")
