@@ -785,6 +785,8 @@ options:
       color: 색상
       fontWeight: 글꼴 굵기
       backgroundOpacity: 배경 투명도
+      shadowIntensity: 그림자
+      strokeWidth: 윤곽선
       reset: 기본값으로 재설정
     aiSegmentation:
       title: AI 스마트 분할

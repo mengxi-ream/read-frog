@@ -15,14 +15,20 @@ import {
   DEFAULT_FONT_FAMILY,
   DEFAULT_FONT_SCALE,
   DEFAULT_FONT_WEIGHT,
+  DEFAULT_FONT_SHADOW_INTENSITY,
+  DEFAULT_FONT_STROKE_WIDTH,
   DEFAULT_SUBTITLE_COLOR,
   DEFAULT_TRANSLATION_POSITION,
   MAX_BACKGROUND_OPACITY,
   MAX_FONT_SCALE,
   MAX_FONT_WEIGHT,
+  MAX_FONT_SHADOW_INTENSITY,
+  MAX_FONT_STROKE_WIDTH,
   MIN_BACKGROUND_OPACITY,
   MIN_FONT_SCALE,
   MIN_FONT_WEIGHT,
+  MIN_FONT_SHADOW_INTENSITY,
+  MIN_FONT_STROKE_WIDTH,
   SUBTITLE_FONT_FAMILIES,
 } from "@/utils/constants/subtitles"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
@@ -153,6 +159,26 @@ function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalConta
         step={100}
         onChange={v => onChange({ fontWeight: v })}
       />
+
+      <SliderRow
+        label={i18n.t("options.videoSubtitles.style.shadowIntensity")}
+        value={textStyle.fontShadowIntensity}
+        display={`${textStyle.fontShadowIntensity}px`}
+        min={MIN_FONT_SHADOW_INTENSITY}
+        max={MAX_FONT_SHADOW_INTENSITY}
+        step={0.5}
+        onChange={v => onChange({ fontShadowIntensity: v })}
+      />
+
+      <SliderRow
+        label={i18n.t("options.videoSubtitles.style.strokeWidth")}
+        value={textStyle.fontStrokeWidth}
+        display={`${textStyle.fontStrokeWidth}px`}
+        min={MIN_FONT_STROKE_WIDTH}
+        max={MAX_FONT_STROKE_WIDTH}
+        step={0.5}
+        onChange={v => onChange({ fontStrokeWidth: v })}
+      />
     </SettingsGroup>
   )
 }
@@ -162,6 +188,8 @@ const DEFAULT_TEXT_STYLE: SubtitleTextStyle = {
   fontScale: DEFAULT_FONT_SCALE,
   color: DEFAULT_SUBTITLE_COLOR,
   fontWeight: DEFAULT_FONT_WEIGHT,
+  fontShadowIntensity: DEFAULT_FONT_SHADOW_INTENSITY,
+  fontStrokeWidth: DEFAULT_FONT_STROKE_WIDTH,
 }
 
 export function StyleView() {

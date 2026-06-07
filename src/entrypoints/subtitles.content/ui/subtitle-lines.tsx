@@ -12,11 +12,16 @@ interface SubtitleLineProps {
 }
 
 function getTextStyles(textStyle: SubtitleTextStyle) {
+  const hasShadow = textStyle.fontShadowIntensity > 0
+  const si = textStyle.fontShadowIntensity
   return {
     fontFamily: SUBTITLE_FONT_FAMILIES[textStyle.fontFamily] || SUBTITLE_FONT_FAMILIES.system,
     fontSize: `${textStyle.fontScale / 100}em`,
     color: textStyle.color,
     fontWeight: textStyle.fontWeight,
+    textShadow: hasShadow ? `${Math.max(1, si * 0.25).toFixed(1)}px ${Math.max(1, si * 0.5).toFixed(1)}px ${si}px rgba(0,0,0,${(0.5 + (si / 8) * 0.5).toFixed(2)})` : "none",
+    WebkitTextStroke: textStyle.fontStrokeWidth > 0 ? `${textStyle.fontStrokeWidth}px rgba(0,0,0,0.8)` : "0",
+    paintOrder: "stroke fill" as const,
   }
 }
 

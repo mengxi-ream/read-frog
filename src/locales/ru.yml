@@ -785,6 +785,8 @@ options:
       color: Цвет
       fontWeight: Толщина шрифта
       backgroundOpacity: Прозрачность фона
+      shadowIntensity: Тень
+      strokeWidth: Контур
       reset: Сбросить по умолчанию
     aiSegmentation:
       title: AI Умная сегментация
