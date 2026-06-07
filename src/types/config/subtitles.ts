@@ -5,6 +5,7 @@ import { batchQueueConfigSchema, customPromptsConfigSchema, requestQueueConfigSc
 export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "translationOnly"])
 export const subtitlesTranslationPositionSchema = z.enum(["above", "below"])
 export const subtitlesFontFamilySchema = z.enum(["system", "roboto", "noto-sans", "noto-serif", "misans", "ibm-plex", "tsuku-ard-gothic"])
+export const backgroundStyleSchema = z.enum(["solid", "blur", "liquid-glass"])
 
 export const subtitleTextStyleSchema = z.object({
   fontFamily: subtitlesFontFamilySchema,
@@ -17,6 +18,7 @@ export const subtitleTextStyleSchema = z.object({
 
 export const subtitleContainerStyleSchema = z.object({
   backgroundOpacity: z.number().min(MIN_BACKGROUND_OPACITY).max(MAX_BACKGROUND_OPACITY),
+  backgroundStyle: backgroundStyleSchema.optional(),
 })
 
 export const subtitlesStyleSchema = z.object({
@@ -48,6 +50,7 @@ export const videoSubtitlesSchema = z.object({
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>
 export type SubtitlesTranslationPosition = z.infer<typeof subtitlesTranslationPositionSchema>
 export type SubtitlesFontFamily = z.infer<typeof subtitlesFontFamilySchema>
+export type BackgroundStyle = z.infer<typeof backgroundStyleSchema>
 export type SubtitleTextStyle = z.infer<typeof subtitleTextStyleSchema>
 export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema>
 export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>

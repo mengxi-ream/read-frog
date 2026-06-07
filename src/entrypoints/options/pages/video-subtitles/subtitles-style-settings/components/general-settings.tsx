@@ -1,4 +1,4 @@
-import type { SubtitlesDisplayMode, SubtitlesTranslationPosition } from "@/types/config/subtitles"
+import type { BackgroundStyle, SubtitlesDisplayMode, SubtitlesTranslationPosition } from "@/types/config/subtitles"
 import { Icon } from "@iconify/react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Slider } from "@/components/ui/base-ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP } from "@/utils/constants/subtitles"
+import { BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP } from "@/utils/constants/subtitles"
 
 const SLIDER_ROW_CLASS_NAME = "gap-0"
 const SLIDER_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
@@ -58,6 +58,7 @@ export function GeneralSettings() {
         lineGap: DEFAULT_LINE_GAP,
         container: {
           backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
+          backgroundStyle: undefined,
         },
       },
     }))
@@ -172,6 +173,27 @@ export function GeneralSettings() {
               </div>
             </div>
           </div>
+        </Field>
+
+        <Field orientation="responsive-compact">
+          <FieldLabel className="text-sm whitespace-nowrap">Background</FieldLabel>
+          <Select
+            value={videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"}
+            onValueChange={(v: string | null) => v && void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: { backgroundStyle: v as BackgroundStyle } } }))}
+          >
+            <SelectTrigger className="h-8">
+              <SelectValue>
+                {BACKGROUND_STYLE_OPTIONS.find(o => o.value === (videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"))?.label}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {BACKGROUND_STYLE_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </Field>
       </FieldGroup>
     </Card>

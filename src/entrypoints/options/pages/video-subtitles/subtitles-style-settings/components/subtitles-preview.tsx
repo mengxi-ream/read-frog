@@ -33,6 +33,7 @@ export function SubtitlesPreview() {
               showTranslation={showTranslation}
               translationAbove={translationAbove}
               backgroundOpacity={container.backgroundOpacity}
+              backgroundStyle={container.backgroundStyle}
               lineGap={lineGap}
             />
           </div>

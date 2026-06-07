@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { SubtitleTextStyle } from "@/types/config/subtitles"
+import type { BackgroundStyle, SubtitleTextStyle } from "@/types/config/subtitles"
 import { useId, useLayoutEffect, useRef } from "react"
 import { SUBTITLE_FONT_FAMILIES } from "@/utils/constants/subtitles"
 
@@ -22,6 +22,7 @@ export function SubtitlesPair({
   showMain, showTranslation,
   translationAbove, backgroundOpacity,
   lineGap = 1.3,
+  backgroundStyle = "solid",
   dir, lang,
 }: {
   mainText: string
@@ -33,6 +34,7 @@ export function SubtitlesPair({
   translationAbove: boolean
   backgroundOpacity?: number
   lineGap?: number
+  backgroundStyle?: BackgroundStyle
   dir?: string
   lang?: string
 }) {
@@ -84,13 +86,56 @@ export function SubtitlesPair({
       className="subtitles-main leading-tight text-xl"
       width="100%"
       height={svgHeight}
-      style={{ display: "block", overflow: "visible", pointerEvents: "auto", userSelect: "text" }}
+      style={{
+        display: "block",
+        overflow: "visible",
+        pointerEvents: "auto",
+        userSelect: "text",
+        ...(backgroundStyle === "blur" && backgroundOpacity
+          ? { backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)" }
+          : {}),
+        ...(backgroundStyle === "liquid-glass" && backgroundOpacity
+          ? {
+              backdropFilter: "blur(24px) saturate(1.5)",
+              WebkitBackdropFilter: "blur(24px) saturate(1.5)",
+            }
+          : {}),
+      }}
     >
       <defs>
         <ShadowFilter si={mainStyle.fontShadowIntensity} id={`shadow-m-${shadowId}`} />
         <ShadowFilter si={translationStyle.fontShadowIntensity} id={`shadow-t-${shadowId}`} />
+        {backgroundStyle === "liquid-glass" && (
+          <>
+            <linearGradient id={`bg-glass-${shadowId}`} x1="0" y1="0" x2="0.3" y2="1.2">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.25)" />
+              <stop offset="40%" stopColor="rgba(255,255,255,0.07)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0.02)" />
+            </linearGradient>
+            <linearGradient id={`highlight-${shadowId}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.35)" />
+              <stop offset="30%" stopColor="rgba(255,255,255,0.05)" />
+              <stop offset="100%" stopColor="transparent" />
+            </linearGradient>
+          </>
+        )}
       </defs>
-      {!!backgroundOpacity && <rect ref={rectRef} rx="4" fill="#000" opacity={backgroundOpacity / 100} />}
+      {!!backgroundOpacity && backgroundStyle === "solid" && (
+        <rect ref={rectRef} rx="4" fill="#000" opacity={backgroundOpacity / 100} />
+      )}
+      {!!backgroundOpacity && backgroundStyle === "blur" && (
+        <rect ref={rectRef} rx="4" fill="#000" opacity={backgroundOpacity / 100 * 0.4} />
+      )}
+      {!!backgroundOpacity && backgroundStyle === "liquid-glass" && (
+        <>
+          <rect ref={rectRef} rx="4" fill={`url(#bg-glass-${shadowId})`} />
+          <rect
+            rx="4"
+            fill={`url(#highlight-${shadowId})`}
+            style={{ mixBlendMode: "overlay" as const }}
+          />
+        </>
+      )}
       <g ref={groupRef}>
         {items.map((item, i) => {
           const si = item.style.fontShadowIntensity

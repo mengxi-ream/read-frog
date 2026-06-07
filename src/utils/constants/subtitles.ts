@@ -69,6 +69,12 @@ export const DEFAULT_FONT_FAMILY = "system" as const
 export const DEFAULT_SUBTITLE_COLOR = "#FFFFFF"
 export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
+export const DEFAULT_BACKGROUND_STYLE = "solid" as const
+export const BACKGROUND_STYLE_OPTIONS = [
+  { value: "solid", label: "Solid" },
+  { value: "blur", label: "Blur" },
+  { value: "liquid-glass", label: "Liquid Glass" },
+] as const
 export const MIN_LINE_GAP = 0
 export const MAX_LINE_GAP = 4
 export const DEFAULT_LINE_GAP = 1.3

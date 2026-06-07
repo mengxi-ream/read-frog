@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { SubtitlesDisplayMode, SubtitlesFontFamily, SubtitlesTranslationPosition, SubtitleTextStyle } from "@/types/config/subtitles"
+import type { BackgroundStyle, SubtitlesDisplayMode, SubtitlesFontFamily, SubtitlesTranslationPosition, SubtitleTextStyle } from "@/types/config/subtitles"
 import { IconLanguage, IconRefresh, IconSettings, IconSubtitles } from "@tabler/icons-react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Slider } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
+  BACKGROUND_STYLE_OPTIONS,
   DEFAULT_BACKGROUND_OPACITY,
   DEFAULT_DISPLAY_MODE,
   DEFAULT_FONT_FAMILY,
@@ -220,7 +221,7 @@ export function StyleView() {
           displayMode: DEFAULT_DISPLAY_MODE,
           translationPosition: DEFAULT_TRANSLATION_POSITION,
           lineGap: DEFAULT_LINE_GAP,
-          container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY },
+          container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY, backgroundStyle: undefined },
         })}
       >
         <SettingRow label={i18n.t("options.videoSubtitles.style.displayMode.title")}>
@@ -273,6 +274,21 @@ export function StyleView() {
           step={0.1}
           onChange={v => updateStyle({ lineGap: v })}
         />
+
+        <SettingRow label="Background">
+          <Select value={container.backgroundStyle ?? "solid"} onValueChange={(v: string | null) => v && updateStyle({ container: { backgroundStyle: v as BackgroundStyle } })}>
+            <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
+              <SelectValue>{BACKGROUND_STYLE_OPTIONS.find(o => o.value === (container.backgroundStyle ?? "solid"))?.label}</SelectValue>
+            </SelectTrigger>
+            <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
+              <SelectGroup>
+                {BACKGROUND_STYLE_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </SettingRow>
       </SettingsGroup>
 
       <TextStyleGroup
