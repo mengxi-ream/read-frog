@@ -2,10 +2,10 @@ import { IconGripHorizontal } from "@tabler/icons-react"
 import { useAtomValue, useSetAtom } from "jotai"
 import { Activity, useRef } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { SUBTITLES_VIEW_CLASS } from "@/utils/constants/subtitles"
+import { getLanguageDirectionAndLang } from "@/utils/content/language-direction"
 import { cn } from "@/utils/styles/utils"
 import { currentSubtitleAtom } from "../atoms"
-import { MainSubtitle, TranslationSubtitle } from "./subtitle-lines"
+import { SubtitlesPair } from "./subtitle-lines"
 import { useSubtitlesUI } from "./subtitles-ui-context"
 import { useControlsInfo } from "./use-controls-visible"
 import { useVerticalDrag } from "./use-vertical-drag"
@@ -18,6 +18,7 @@ function SubtitlesContent() {
   const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = style
+  const language = useAtomValue(configFieldsAtomMap.language)
 
   const translationAbove = translationPosition === "above"
   const showMain = displayMode !== "translationOnly"
@@ -25,25 +26,24 @@ function SubtitlesContent() {
   const showTranslation = displayMode !== "originalOnly"
     && !(displayMode === "bilingual" && isDuplicateTranslation)
 
-  const containerStyle = {
-    backgroundColor: `rgba(0, 0, 0, ${container.backgroundOpacity / 100})`,
-  }
+  if (!showMain && !showTranslation)
+    return null
+
+  const { dir, lang } = getLanguageDirectionAndLang(language.targetCode)
 
   return (
-    <div className={`${SUBTITLES_VIEW_CLASS} flex w-full flex-col items-center justify-end pb-3 pointer-events-none`}>
-      <div
-        className="flex flex-col gap-2 w-fit max-w-[90%] mx-auto px-2 py-1.5 rounded text-center text-white pointer-events-auto select-text cursor-text"
-        style={containerStyle}
-      >
-        <Activity mode={showMain ? "visible" : "hidden"}>
-          <MainSubtitle className={translationAbove ? "order-2" : "order-1"} />
-        </Activity>
-
-        <Activity mode={showTranslation ? "visible" : "hidden"}>
-          <TranslationSubtitle className={translationAbove ? "order-1" : "order-2"} />
-        </Activity>
-      </div>
-    </div>
+    <SubtitlesPair
+      mainText={subtitle?.text ?? ""}
+      mainStyle={style.main}
+      translationText={subtitle?.translation ?? ""}
+      translationStyle={style.translation}
+      showMain={showMain}
+      showTranslation={showTranslation}
+      translationAbove={translationAbove}
+      backgroundOpacity={container.backgroundOpacity}
+      dir={dir}
+      lang={lang}
+    />
   )
 }
 
