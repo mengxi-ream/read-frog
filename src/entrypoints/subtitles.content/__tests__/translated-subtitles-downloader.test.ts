@@ -161,6 +161,29 @@ describe("translatedSubtitlesDownloader", () => {
     expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledTimes(1)
   })
 
+  it("invalidates an in-flight export on dispose and allows a new download", async () => {
+    let finishOldTranslation!: (value: SubtitlesFragment[]) => void
+    mocks.translateSubtitles
+      .mockImplementationOnce(async () => await new Promise<SubtitlesFragment[]>((resolve) => {
+        finishOldTranslation = resolve
+      }))
+      .mockImplementationOnce(async (fragments: SubtitlesFragment[]) => translated(fragments))
+    const { downloader, fetcher } = createDownloader(lines(1))
+
+    const oldDownload = downloader.download()
+    await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(1))
+    downloader.dispose()
+    const newDownload = downloader.download()
+    await newDownload
+    finishOldTranslation(translated(lines(1)))
+    await oldDownload
+
+    expect(fetcher.fetch).toHaveBeenCalledTimes(2)
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledTimes(1)
+    expect(mocks.toastError).not.toHaveBeenCalled()
+    expect(status().phase).toBe(TranslatedDownloadPhase.Complete)
+  })
+
   it("falls back to optimized source timing when AI segmentation fails", async () => {
     mocks.getLocalConfig.mockResolvedValue(createConfig({ aiSegmentation: true }))
     mocks.aiSegmentBlock.mockRejectedValue(new Error("Segmentation failed"))

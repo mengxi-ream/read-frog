@@ -19,6 +19,7 @@ const SUCCESS_MESSAGE_DURATION_MS = 4000
 
 export class TranslatedSubtitlesDownloader {
   private isDownloading = false
+  private operationId = 0
   private successTimeout: ReturnType<typeof setTimeout> | null = null
 
   constructor(
@@ -33,15 +34,20 @@ export class TranslatedSubtitlesDownloader {
 
     this.clearSuccessTimeout()
     this.isDownloading = true
+    const operationId = ++this.operationId
+    const pageTitle = document.title || ""
+    const videoId = this.config.getVideoId?.()
     this.setStatus(TranslatedDownloadPhase.Preparing, 0)
 
     try {
       const configSnapshot = await getLocalConfig()
+      this.assertActive(operationId)
       if (!configSnapshot) {
         throw new Error(i18n.t("subtitles.errors.translatedExportFailed"))
       }
 
       const sourceSubtitles = await this.fetcher.fetch()
+      this.assertActive(operationId)
       if (sourceSubtitles.length === 0) {
         throw new Error(i18n.t("subtitles.errors.noSubtitlesFound"))
       }
@@ -55,34 +61,48 @@ export class TranslatedSubtitlesDownloader {
         sourceSubtitles,
         sourceProcessedSubtitles,
         configSnapshot,
+        operationId,
+        pageTitle,
       )
 
+      this.assertActive(operationId)
       await downloadSubtitlesAsSrt({
         subtitles: translatedSubtitles.map(({ translation, ...fragment }) => ({
           ...fragment,
           text: translation ?? "",
         })),
-        pageTitle: document.title || "",
-        videoId: this.config.getVideoId?.(),
+        pageTitle,
+        videoId,
         suffix: "translated",
       })
+      this.assertActive(operationId)
 
       this.setStatus(TranslatedDownloadPhase.Complete, null)
       this.successTimeout = setTimeout(() => {
+        if (!this.isActive(operationId)) {
+          return
+        }
         this.successTimeout = null
         this.setStatus(TranslatedDownloadPhase.Idle, null)
       }, SUCCESS_MESSAGE_DURATION_MS)
     }
     catch (error) {
+      if (!this.isActive(operationId)) {
+        return
+      }
       toast.error(error instanceof Error ? error.message : String(error))
       this.setStatus(TranslatedDownloadPhase.Error, null)
     }
     finally {
-      this.isDownloading = false
+      if (this.isActive(operationId)) {
+        this.isDownloading = false
+      }
     }
   }
 
   dispose(): void {
+    this.operationId++
+    this.isDownloading = false
     this.clearSuccessTimeout()
     this.setStatus(TranslatedDownloadPhase.Idle, null)
   }
@@ -98,6 +118,16 @@ export class TranslatedSubtitlesDownloader {
     subtitlesStore.set(translatedSubtitlesDownloadStatusAtom, { phase, progress })
   }
 
+  private isActive(operationId: number): boolean {
+    return operationId === this.operationId
+  }
+
+  private assertActive(operationId: number): void {
+    if (!this.isActive(operationId)) {
+      throw new Error("Translated subtitle download was disposed")
+    }
+  }
+
   private assertDifferentTargetLanguage(config: Config): void {
     const targetLanguage = config.language.targetCode
     const sourceLanguage = resolveLanguageCodeFromLocale(this.fetcher.getSourceLanguage())
@@ -111,18 +141,24 @@ export class TranslatedSubtitlesDownloader {
     sourceSubtitles: SubtitlesFragment[],
     sourceProcessedSubtitles: SubtitlesFragment[],
     config: Config,
+    operationId: number,
+    pageTitle: string,
   ): Promise<SubtitlesFragment[]> {
     const fragments = await this.buildExportProcessedSubtitles(
       sourceSubtitles,
       sourceProcessedSubtitles,
       config,
+      operationId,
     )
-    const videoContext = await this.buildExportVideoContext(sourceSubtitles, config)
+    this.assertActive(operationId)
+    const videoContext = await this.buildExportVideoContext(sourceSubtitles, config, operationId, pageTitle)
+    this.assertActive(operationId)
     const translatedFragments: SubtitlesFragment[] = []
 
     for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
       const batch = fragments.slice(index, index + TRANSLATION_BATCH_SIZE)
       const translatedBatch = await translateSubtitles(batch, videoContext, config)
+      this.assertActive(operationId)
       if (
         translatedBatch.length !== batch.length
         || this.hasIncompleteTranslatedFragments(translatedBatch)
@@ -155,6 +191,7 @@ export class TranslatedSubtitlesDownloader {
     sourceSubtitles: SubtitlesFragment[],
     sourceProcessedSubtitles: SubtitlesFragment[],
     config: Config,
+    operationId: number,
   ): Promise<SubtitlesFragment[]> {
     if (!config.videoSubtitles.aiSegmentation || this.fetcher.isPreSegmented?.()) {
       return [...sourceProcessedSubtitles]
@@ -163,7 +200,8 @@ export class TranslatedSubtitlesDownloader {
     const result: SubtitlesFragment[] = []
 
     for (const chunk of this.buildSourceSubtitleChunks(sourceSubtitles)) {
-      result.push(...await this.buildExportProcessedChunk(chunk, config))
+      result.push(...await this.buildExportProcessedChunk(chunk, config, operationId))
+      this.assertActive(operationId)
     }
 
     return result.sort((a, b) => a.start - b.start)
@@ -172,12 +210,14 @@ export class TranslatedSubtitlesDownloader {
   private async buildExportProcessedChunk(
     chunk: SubtitlesFragment[],
     config: Config,
+    operationId: number,
   ): Promise<SubtitlesFragment[]> {
     const sourceLanguage = this.fetcher.getSourceLanguage()
     let segmented: SubtitlesFragment[]
 
     try {
       segmented = await aiSegmentBlock(chunk, config)
+      this.assertActive(operationId)
     }
     catch {
       return optimizeSubtitles(chunk, sourceLanguage)
@@ -198,6 +238,7 @@ export class TranslatedSubtitlesDownloader {
 
         try {
           retrySegmented = await aiSegmentBlock(retryChunk, config)
+          this.assertActive(operationId)
         }
         catch {
           return optimizeSubtitles(chunk, sourceLanguage)
@@ -296,10 +337,12 @@ export class TranslatedSubtitlesDownloader {
   private async buildExportVideoContext(
     sourceSubtitles: SubtitlesFragment[],
     config: Config,
+    operationId: number,
+    pageTitle: string,
   ): Promise<SubtitlesVideoContext> {
     const providerConfig = getProviderConfigById(config.providersConfig, config.videoSubtitles.providerId)
     const videoContext: SubtitlesVideoContext = {
-      videoTitle: document.title || "",
+      videoTitle: pageTitle,
       subtitlesTextContent: sourceSubtitles.map(fragment => fragment.text).join(""),
     }
     const summaryContextHash = buildSubtitlesSummaryContextHash(videoContext, providerConfig)
@@ -307,6 +350,7 @@ export class TranslatedSubtitlesDownloader {
     if (summaryContextHash) {
       try {
         videoContext.summary = await fetchSubtitlesSummary(videoContext, config)
+        this.assertActive(operationId)
       }
       catch {
         videoContext.summary = null
