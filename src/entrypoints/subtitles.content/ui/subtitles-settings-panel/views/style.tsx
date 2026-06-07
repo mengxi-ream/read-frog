@@ -17,6 +17,7 @@ import {
   DEFAULT_FONT_SHADOW_INTENSITY,
   DEFAULT_FONT_STROKE_WIDTH,
   DEFAULT_FONT_WEIGHT,
+  DEFAULT_LINE_GAP,
   DEFAULT_SUBTITLE_COLOR,
   DEFAULT_TRANSLATION_POSITION,
   MAX_BACKGROUND_OPACITY,
@@ -24,11 +25,13 @@ import {
   MAX_FONT_SHADOW_INTENSITY,
   MAX_FONT_STROKE_WIDTH,
   MAX_FONT_WEIGHT,
+  MAX_LINE_GAP,
   MIN_BACKGROUND_OPACITY,
   MIN_FONT_SCALE,
   MIN_FONT_SHADOW_INTENSITY,
   MIN_FONT_STROKE_WIDTH,
   MIN_FONT_WEIGHT,
+  MIN_LINE_GAP,
 } from "@/utils/constants/subtitles"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesStore } from "../../../atoms"
@@ -202,7 +205,7 @@ const DEFAULT_TEXT_STYLE: SubtitleTextStyle = {
 export function StyleView() {
   const [config, setConfig] = useAtom(configFieldsAtomMap.videoSubtitles, { store: subtitlesStore })
   const portalContainer = use(ShadowWrapperContext)
-  const { displayMode, translationPosition, container } = config.style
+  const { displayMode, translationPosition, lineGap, container } = config.style
 
   const updateStyle = (patch: Record<string, unknown>) => {
     void setConfig(deepmerge(config, { style: patch }))
@@ -216,6 +219,7 @@ export function StyleView() {
         onReset={() => updateStyle({
           displayMode: DEFAULT_DISPLAY_MODE,
           translationPosition: DEFAULT_TRANSLATION_POSITION,
+          lineGap: DEFAULT_LINE_GAP,
           container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY },
         })}
       >
@@ -258,6 +262,16 @@ export function StyleView() {
           max={MAX_BACKGROUND_OPACITY}
           step={5}
           onChange={v => updateStyle({ container: { backgroundOpacity: v } })}
+        />
+
+        <SliderRow
+          label={i18n.t("options.videoSubtitles.style.lineGap")}
+          value={lineGap}
+          display={`${lineGap}em`}
+          min={MIN_LINE_GAP}
+          max={MAX_LINE_GAP}
+          step={0.1}
+          onChange={v => updateStyle({ lineGap: v })}
         />
       </SettingsGroup>
 

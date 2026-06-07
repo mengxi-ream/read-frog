@@ -1,5 +1,5 @@
 import { z } from "zod"
-import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MAX_FONT_SHADOW_INTENSITY, MAX_FONT_STROKE_WIDTH, MAX_FONT_WEIGHT, MIN_BACKGROUND_OPACITY, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
+import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MAX_FONT_SHADOW_INTENSITY, MAX_FONT_STROKE_WIDTH, MAX_FONT_WEIGHT, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_FONT_SCALE, MIN_FONT_WEIGHT, MIN_LINE_GAP } from "@/utils/constants/subtitles"
 import { batchQueueConfigSchema, customPromptsConfigSchema, requestQueueConfigSchema } from "./translate"
 
 export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "translationOnly"])
@@ -22,6 +22,7 @@ export const subtitleContainerStyleSchema = z.object({
 export const subtitlesStyleSchema = z.object({
   displayMode: subtitlesDisplayModeSchema,
   translationPosition: subtitlesTranslationPositionSchema,
+  lineGap: z.number().min(MIN_LINE_GAP).max(MAX_LINE_GAP),
   main: subtitleTextStyleSchema,
   translation: subtitleTextStyleSchema,
   container: subtitleContainerStyleSchema,

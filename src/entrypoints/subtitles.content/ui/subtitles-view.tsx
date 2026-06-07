@@ -41,6 +41,7 @@ function SubtitlesContent() {
       showTranslation={showTranslation}
       translationAbove={translationAbove}
       backgroundOpacity={container.backgroundOpacity}
+      lineGap={style.lineGap}
       dir={dir}
       lang={lang}
     />

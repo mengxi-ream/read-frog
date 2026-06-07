@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectVa
 import { Slider } from "@/components/ui/base-ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MIN_BACKGROUND_OPACITY } from "@/utils/constants/subtitles"
+import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP } from "@/utils/constants/subtitles"
 
 const SLIDER_ROW_CLASS_NAME = "gap-0"
 const SLIDER_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
@@ -20,13 +20,19 @@ const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w
 
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
-  const { displayMode, translationPosition, container } = videoSubtitlesConfig.style
+  const { displayMode, translationPosition, lineGap, container } = videoSubtitlesConfig.style
   const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
+  const [draftLineGap, setDraftLineGap] = useState(lineGap)
 
   useEffect(() => {
     // eslint-disable-next-line react/set-state-in-effect
     setDraftBackgroundOpacity(container.backgroundOpacity)
   }, [container.backgroundOpacity])
+
+  useEffect(() => {
+    // eslint-disable-next-line react/set-state-in-effect
+    setDraftLineGap(lineGap)
+  }, [lineGap])
 
   const handleDisplayModeChange = (value: SubtitlesDisplayMode | null) => {
     if (!value)
@@ -49,6 +55,7 @@ export function GeneralSettings() {
       style: {
         displayMode: DEFAULT_DISPLAY_MODE,
         translationPosition: DEFAULT_TRANSLATION_POSITION,
+        lineGap: DEFAULT_LINE_GAP,
         container: {
           backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
         },
@@ -138,6 +145,29 @@ export function GeneralSettings() {
                 <span className="w-10 text-sm text-right">
                   {draftBackgroundOpacity}
                   %
+                </span>
+              </div>
+            </div>
+          </div>
+        </Field>
+
+        <Field className={SLIDER_ROW_CLASS_NAME}>
+          <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
+            <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.lineGap")}</FieldLabel>
+            <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
+              <div className="flex min-w-0 items-center gap-2">
+                <Slider
+                  min={MIN_LINE_GAP}
+                  max={MAX_LINE_GAP}
+                  step={0.1}
+                  value={draftLineGap}
+                  onValueChange={v => setDraftLineGap(v as number)}
+                  onValueCommitted={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { lineGap: v as number } }))}
+                  className="flex-1"
+                />
+                <span className="w-10 text-sm text-right">
+                  {draftLineGap}
+                  em
                 </span>
               </div>
             </div>
