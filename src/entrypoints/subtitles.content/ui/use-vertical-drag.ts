@@ -225,13 +225,9 @@ export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: 
     return setupListeners()
   }, [])
 
-  const controlsOffsetPercent = controlsVisible && position.anchor === "bottom" && windowStyle.height > 0
-    ? (controlsHeight / windowStyle.height) * 100
-    : 0
-
   const positionStyle: SubtitlePositionStyle = position.anchor === "top"
     ? { top: `${position.percent}%`, bottom: "unset" }
-    : { bottom: `${position.percent + controlsOffsetPercent}%`, top: "unset" }
+    : { bottom: `${position.percent}%`, top: "unset" }
 
   return {
     refs: { container: containerRef, handle: handleRef },
