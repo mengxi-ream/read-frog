@@ -1,5 +1,21 @@
 # @read-frog/extension
 
+## 1.33.12
+
+### Patch Changes
+
+- [#1638](https://github.com/mengxi-ream/read-frog/pull/1638) [`ae20cd8`](https://github.com/mengxi-ream/read-frog/commit/ae20cd81f77d72e39b1fcd91ff3777cb9591c72e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(translation): add a never auto-translate website list
+
+- [#1652](https://github.com/mengxi-ream/read-frog/pull/1652) [`9ef5ed4`](https://github.com/mengxi-ream/read-frog/commit/9ef5ed494e40583ff6f9baf3386e0856299c2d9a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(notebase): align extension with current Notebase API
+
+- [#1618](https://github.com/mengxi-ream/read-frog/pull/1618) [`c9b157a`](https://github.com/mengxi-ream/read-frog/commit/c9b157ad56a42d2ba691cbbbbc9859d378802f5d) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(providers): migrate 302.AI configs to custom provider
+
+  Remove 302.AI as a built-in provider, migrate existing configs to an OpenAI-compatible custom provider, and seed DeepSeek with `deepseek-v4-flash` for new installs.
+
+- [#1637](https://github.com/mengxi-ream/read-frog/pull/1637) [`da8ab16`](https://github.com/mengxi-ream/read-frog/commit/da8ab168d16ff3b09fdce7abcab6cc1259e5b466) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(translation): update the preset translation text color
+
+- [#1628](https://github.com/mengxi-ream/read-frog/pull/1628) [`17e77d7`](https://github.com/mengxi-ream/read-frog/commit/17e77d79bfb919b0875330536a8063c3d7ff820b) Thanks [@doggy8088](https://github.com/doggy8088)! - docs(i18n): update incorrect zh-TW translations
+
 ## 1.33.11
 
 ### Patch Changes
