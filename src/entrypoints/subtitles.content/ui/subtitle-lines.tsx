@@ -58,6 +58,9 @@ export function SubtitlesPair({
     rect.setAttribute("height", String(box.height + pad * 2))
   })
 
+  const lineCount = (showMain ? 1 : 0) + (showTranslation ? 1 : 0)
+  const svgHeight = `${1.5 + (lineCount - 1) * lineGap}em`
+
   const items: { text: string, style: SubtitleTextStyle, key: string }[] = []
   if (showMain && showTranslation) {
     if (translationAbove) {
@@ -80,6 +83,7 @@ export function SubtitlesPair({
     <svg
       className="subtitles-main leading-tight text-xl"
       width="100%"
+      height={svgHeight}
       style={{ display: "block", overflow: "visible", pointerEvents: "auto", userSelect: "text" }}
     >
       <defs>
