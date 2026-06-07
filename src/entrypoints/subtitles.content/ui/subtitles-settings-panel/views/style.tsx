@@ -29,7 +29,6 @@ import {
   MIN_FONT_SHADOW_INTENSITY,
   MIN_FONT_STROKE_WIDTH,
   MIN_FONT_WEIGHT,
-  SUBTITLE_FONT_FAMILIES,
 } from "@/utils/constants/subtitles"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesStore } from "../../../atoms"
@@ -38,7 +37,15 @@ const SELECT_TRIGGER_CLASS = "min-w-[5.5rem] text-[13px] text-popover-foreground
 const SELECT_CONTENT_CLASS = "[&_[role=option]]:text-[13px]"
 const SLIDER_CLASS = "[&_[role=slider]]:border-0 [&_[role=slider]]:shadow-[0_2px_4px_rgba(0,0,0,0.3)]"
 
-const FONT_FAMILY_OPTIONS = Object.keys(SUBTITLE_FONT_FAMILIES) as SubtitlesFontFamily[]
+const FONT_FAMILY_OPTIONS: { value: SubtitlesFontFamily, label: string }[] = [
+  { value: "system", label: "System Default" },
+  { value: "roboto", label: "Roboto" },
+  { value: "noto-sans", label: "Noto Sans" },
+  { value: "noto-serif", label: "Noto Serif" },
+  { value: "misans", label: "MiSans" },
+  { value: "ibm-plex", label: "IBM Plex" },
+  { value: "tsuku-ard-gothic", label: "TsukuARdGothic Std" },
+]
 
 function SettingsGroup({ icon, title, onReset, children }: {
   icon: ReactNode
@@ -138,12 +145,12 @@ function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalConta
       <SettingRow label={i18n.t("options.videoSubtitles.style.fontFamily")}>
         <Select value={textStyle.fontFamily} onValueChange={v => v && onChange({ fontFamily: v as SubtitlesFontFamily })}>
           <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
-            <SelectValue>{textStyle.fontFamily}</SelectValue>
+            <SelectValue>{FONT_FAMILY_OPTIONS.find(o => o.value === textStyle.fontFamily)?.label}</SelectValue>
           </SelectTrigger>
           <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
             <SelectGroup>
-              {FONT_FAMILY_OPTIONS.map(key => (
-                <SelectItem key={key} value={key}>{key}</SelectItem>
+              {FONT_FAMILY_OPTIONS.map(option => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
               ))}
             </SelectGroup>
           </SelectContent>
