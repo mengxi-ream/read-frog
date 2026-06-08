@@ -24,7 +24,7 @@ function MergedBackground({ boxes, radius, backgroundStyle, backgroundOpacity }:
   backgroundStyle: BackgroundStyle
   backgroundOpacity: number
 }) {
-  if (boxes.length < 2)
+  if (boxes.length < 2 || backgroundStyle === "none")
     return null
 
   const [b1, b2] = boxes
@@ -128,7 +128,7 @@ function SubtitleLine({ text, style, backgroundOpacity, backgroundStyle, dir, la
           ref={glassRef}
           style={{
             position: "absolute",
-            borderRadius: "4px",
+            borderRadius: "15px",
             pointerEvents: "none",
             zIndex: 0,
             ...(backgroundStyle === "blur"
@@ -151,7 +151,7 @@ function SubtitleLine({ text, style, backgroundOpacity, backgroundStyle, dir, la
           ref={glassRef}
           style={{
             position: "absolute",
-            borderRadius: "4px",
+            borderRadius: "15px",
             pointerEvents: "none",
             zIndex: 0,
             backgroundColor: `rgba(0,0,0,${(backgroundOpacity / 100).toFixed(2)})`,
