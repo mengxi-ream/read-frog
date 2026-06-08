@@ -1,7 +1,7 @@
 /**
  * Migration script from v075 to v076
  * - Adds fontShadowIntensity and fontStrokeWidth fields with defaults.
- * - Adds lineGap for spacing between main and translation subtitle lines.
+ * - Adds lineGap (px) for spacing between main and translation subtitle lines.
  * - Adds backgroundStyle for subtitle container background appearance.
  *
  * IMPORTANT: All values are hardcoded inline. Migration scripts are frozen
@@ -34,7 +34,7 @@ export function migrate(oldConfig: any): any {
           ...(oldStyle.container || {}),
           backgroundStyle: oldStyle.container?.backgroundStyle ?? "solid",
         },
-        lineGap: 1.3,
+        lineGap: 0,
         main: migrateTextStyle(oldStyle.main),
         translation: migrateTextStyle(oldStyle.translation),
       },

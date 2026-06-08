@@ -268,10 +268,10 @@ export function StyleView() {
         <SliderRow
           label={i18n.t("options.videoSubtitles.style.lineGap")}
           value={lineGap}
-          display={`${lineGap}em`}
+          display={`${lineGap}px`}
           min={MIN_LINE_GAP}
           max={MAX_LINE_GAP}
-          step={0.1}
+          step={1}
           onChange={v => updateStyle({ lineGap: v })}
         />
 

@@ -160,7 +160,7 @@ export function GeneralSettings() {
                 <Slider
                   min={MIN_LINE_GAP}
                   max={MAX_LINE_GAP}
-                  step={0.1}
+                  step={1}
                   value={draftLineGap}
                   onValueChange={v => setDraftLineGap(v as number)}
                   onValueCommitted={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { lineGap: v as number } }))}
@@ -168,7 +168,7 @@ export function GeneralSettings() {
                 />
                 <span className="w-10 text-sm text-right">
                   {draftLineGap}
-                  em
+                  px
                 </span>
               </div>
             </div>

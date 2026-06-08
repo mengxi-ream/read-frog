@@ -218,7 +218,7 @@ export function SubtitlesPair({
   translationText, translationStyle,
   showMain, showTranslation,
   translationAbove, backgroundOpacity,
-  lineGap = 1.3,
+  lineGap = 0,
   backgroundStyle = "solid",
   dir, lang,
 }: {
@@ -254,7 +254,7 @@ export function SubtitlesPair({
   }
 
   const [boxes, setBoxes] = useState<Record<string, Box2D>>({})
-  const mergeReady = items.length === 2 && lineGap <= 0.5 && Object.keys(boxes).length === 2 && !!backgroundOpacity
+  const mergeReady = items.length === 2 && lineGap <= 3 && Object.keys(boxes).length === 2 && !!backgroundOpacity
 
   const handleBBoxReady = useCallback((key: string, box: Box2D) => {
     setBoxes((prev: Record<string, Box2D>) => {
@@ -266,7 +266,7 @@ export function SubtitlesPair({
   }, [])
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: `${lineGap}em`, alignItems: "center", width: "100%", position: "relative" }}>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%", position: "relative" }}>
       {mergeReady && (
         <MergedBackground
           boxes={items.map(item => boxes[item.key])}
@@ -275,19 +275,20 @@ export function SubtitlesPair({
           backgroundOpacity={backgroundOpacity ?? 0}
         />
       )}
-      {items.map(item => (
-        <SubtitleLine
-          key={item.key}
-          text={item.text}
-          style={item.style}
-          backgroundOpacity={backgroundOpacity}
-          backgroundStyle={backgroundStyle}
-          glass={!mergeReady}
-          onBBoxReady={handleBBoxReady}
-          lineKey={item.key}
-          dir={item.key === "t" ? dir : undefined}
-          lang={item.key === "t" ? lang : undefined}
-        />
+      {items.map((item, i) => (
+        <div key={item.key} style={i === 1 ? { marginTop: `${lineGap}px` } : undefined}>
+          <SubtitleLine
+            text={item.text}
+            style={item.style}
+            backgroundOpacity={backgroundOpacity}
+            backgroundStyle={backgroundStyle}
+            glass={!mergeReady}
+            onBBoxReady={handleBBoxReady}
+            lineKey={item.key}
+            dir={item.key === "t" ? dir : undefined}
+            lang={item.key === "t" ? lang : undefined}
+          />
+        </div>
       ))}
     </div>
   )

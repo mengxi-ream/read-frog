@@ -75,9 +75,9 @@ export const BACKGROUND_STYLE_OPTIONS = [
   { value: "blur", label: "Blur" },
   { value: "liquid-glass", label: "Liquid Glass" },
 ] as const
-export const MIN_LINE_GAP = 0
-export const MAX_LINE_GAP = 4
-export const DEFAULT_LINE_GAP = 1.3
+export const MIN_LINE_GAP = -25
+export const MAX_LINE_GAP = 25
+export const DEFAULT_LINE_GAP = 0
 export const DEFAULT_CONTROLS_HEIGHT = 60
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 // Subtitle controls sit on top of arbitrary host pages, so keep their theme fixed for readability.
