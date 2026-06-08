@@ -98,8 +98,9 @@ function SubtitleLine({ text, style, backgroundOpacity, backgroundStyle, dir, la
     const box = textEl.getBBox()
     const shadowPad = si > 0 ? Math.max(1, si * 0.5) + si : 0
     const strokePad = sw / 2
-    const pad = Math.max(shadowPad, strokePad, 0) + 4
-    const padded: Box2D = { x: box.x - pad, y: box.y - pad, w: box.width + pad * 2, h: box.height + pad * 2 }
+    const pad = Math.max(shadowPad, strokePad, 0)
+    const wPad = pad + 6
+    const padded: Box2D = { x: box.x - wPad, y: box.y - pad, w: box.width + wPad * 2, h: box.height + pad * 2 }
 
     const prev = bboxRef.current
     if (prev && prev.x === padded.x && prev.y === padded.y && prev.w === padded.w && prev.h === padded.h)
