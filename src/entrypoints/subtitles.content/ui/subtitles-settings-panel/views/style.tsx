@@ -255,6 +255,21 @@ export function StyleView() {
           </SettingRow>
         </Activity>
 
+        <SettingRow label="Background">
+          <Select value={container.backgroundStyle ?? "solid"} onValueChange={(v: string | null) => v && updateStyle({ container: { backgroundStyle: v as BackgroundStyle } })}>
+            <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
+              <SelectValue>{BACKGROUND_STYLE_OPTIONS.find(o => o.value === (container.backgroundStyle ?? "solid"))?.label}</SelectValue>
+            </SelectTrigger>
+            <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
+              <SelectGroup>
+                {BACKGROUND_STYLE_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </SettingRow>
+
         <SliderRow
           label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
           value={container.backgroundOpacity}
@@ -274,21 +289,6 @@ export function StyleView() {
           step={1}
           onChange={v => updateStyle({ lineGap: v })}
         />
-
-        <SettingRow label="Background">
-          <Select value={container.backgroundStyle ?? "solid"} onValueChange={(v: string | null) => v && updateStyle({ container: { backgroundStyle: v as BackgroundStyle } })}>
-            <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
-              <SelectValue>{BACKGROUND_STYLE_OPTIONS.find(o => o.value === (container.backgroundStyle ?? "solid"))?.label}</SelectValue>
-            </SelectTrigger>
-            <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
-              <SelectGroup>
-                {BACKGROUND_STYLE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </SettingRow>
       </SettingsGroup>
 
       <TextStyleGroup

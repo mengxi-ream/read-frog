@@ -129,6 +129,27 @@ export function GeneralSettings() {
           </Field>
         )}
 
+        <Field orientation="responsive-compact">
+          <FieldLabel className="text-sm whitespace-nowrap">Background</FieldLabel>
+          <Select
+            value={videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"}
+            onValueChange={(v: string | null) => v && void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: { backgroundStyle: v as BackgroundStyle } } }))}
+          >
+            <SelectTrigger className="h-8">
+              <SelectValue>
+                {BACKGROUND_STYLE_OPTIONS.find(o => o.value === (videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"))?.label}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {BACKGROUND_STYLE_OPTIONS.map(option => (
+                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </Field>
+
         <Field className={SLIDER_ROW_CLASS_NAME}>
           <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
             <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldLabel>
@@ -173,27 +194,6 @@ export function GeneralSettings() {
               </div>
             </div>
           </div>
-        </Field>
-
-        <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">Background</FieldLabel>
-          <Select
-            value={videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"}
-            onValueChange={(v: string | null) => v && void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: { backgroundStyle: v as BackgroundStyle } } }))}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue>
-                {BACKGROUND_STYLE_OPTIONS.find(o => o.value === (videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"))?.label}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {BACKGROUND_STYLE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
         </Field>
       </FieldGroup>
     </Card>
