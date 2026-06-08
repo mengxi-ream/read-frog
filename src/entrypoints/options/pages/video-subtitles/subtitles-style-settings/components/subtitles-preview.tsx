@@ -22,8 +22,8 @@ export function SubtitlesPreview() {
         {i18n.t("options.videoSubtitles.style.preview")}
       </Label>
       <GradientBackground>
-        <div className="relative w-fit min-w-full min-h-32 rounded-lg overflow-hidden flex items-center justify-center p-4">
-          <div className="text-center text-white max-w-[90%]">
+        <div className="relative w-fit min-w-full min-h-32 rounded-lg overflow-hidden p-4">
+          <div className="absolute left-1/2 -translate-x-1/2 text-center text-white max-w-[90%]" style={{ fontSize: 32, top: "33%" }}>
             <SubtitlesPair
               mainText={sampleOriginal}
               mainStyle={style.main}
