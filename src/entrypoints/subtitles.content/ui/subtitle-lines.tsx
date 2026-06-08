@@ -122,7 +122,7 @@ function SubtitleLine({ text, style, backgroundOpacity, backgroundStyle, dir, la
 
   return (
     <div ref={divRef} style={{ position: "relative" }}>
-      {glass && !!backgroundOpacity && backgroundStyle !== "solid" && (
+      {glass && !!backgroundOpacity && backgroundStyle !== "solid" && backgroundStyle !== "none" && (
         <div
           ref={glassRef}
           style={{
@@ -254,7 +254,7 @@ export function SubtitlesPair({
   }
 
   const [boxes, setBoxes] = useState<Record<string, Box2D>>({})
-  const mergeReady = items.length === 2 && lineGap <= 3 && Object.keys(boxes).length === 2 && !!backgroundOpacity
+  const mergeReady = items.length === 2 && lineGap <= 3 && Object.keys(boxes).length === 2 && !!backgroundOpacity && backgroundStyle !== "none"
 
   const handleBBoxReady = useCallback((key: string, box: Box2D) => {
     setBoxes((prev: Record<string, Box2D>) => {

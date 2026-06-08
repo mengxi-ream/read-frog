@@ -255,7 +255,7 @@ export function StyleView() {
           </SettingRow>
         </Activity>
 
-        <SettingRow label="Background">
+        <SettingRow label="Background Style">
           <Select value={container.backgroundStyle ?? "solid"} onValueChange={(v: string | null) => v && updateStyle({ container: { backgroundStyle: v as BackgroundStyle } })}>
             <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
               <SelectValue>{BACKGROUND_STYLE_OPTIONS.find(o => o.value === (container.backgroundStyle ?? "solid"))?.label}</SelectValue>

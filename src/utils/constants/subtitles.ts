@@ -71,6 +71,7 @@ export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
 export const DEFAULT_BACKGROUND_STYLE = "solid" as const
 export const BACKGROUND_STYLE_OPTIONS = [
+  { value: "none", label: "None" },
   { value: "solid", label: "Solid" },
   { value: "blur", label: "Blur" },
   { value: "liquid-glass", label: "Liquid Glass" },

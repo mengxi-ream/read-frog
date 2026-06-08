@@ -5,7 +5,7 @@ import { batchQueueConfigSchema, customPromptsConfigSchema, requestQueueConfigSc
 export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "translationOnly"])
 export const subtitlesTranslationPositionSchema = z.enum(["above", "below"])
 export const subtitlesFontFamilySchema = z.enum(["system", "roboto", "noto-sans", "noto-serif", "misans", "ibm-plex", "tsuku-ard-gothic"])
-export const backgroundStyleSchema = z.enum(["solid", "blur", "liquid-glass"])
+export const backgroundStyleSchema = z.enum(["none", "solid", "blur", "liquid-glass"])
 
 export const subtitleTextStyleSchema = z.object({
   fontFamily: subtitlesFontFamilySchema,

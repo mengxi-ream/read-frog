@@ -130,7 +130,7 @@ export function GeneralSettings() {
         )}
 
         <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">Background</FieldLabel>
+          <FieldLabel className="text-sm whitespace-nowrap">Background Style</FieldLabel>
           <Select
             value={videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"}
             onValueChange={(v: string | null) => v && void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: { backgroundStyle: v as BackgroundStyle } } }))}
