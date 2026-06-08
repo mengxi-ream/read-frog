@@ -32,7 +32,7 @@ function SubtitlesContent() {
   const { dir, lang } = getLanguageDirectionAndLang(language.targetCode)
 
   return (
-    <div className="flex flex-col w-fit max-w-[90%] mx-auto text-center text-white pointer-events-auto select-text cursor-text">
+    <div className="flex flex-col w-full max-w-[90%] mx-auto text-center text-white pointer-events-auto select-text cursor-text">
       <SubtitlesPair
         mainText={subtitle?.text ?? ""}
         mainStyle={style.main}
