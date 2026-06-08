@@ -58,27 +58,33 @@ export const MAX_FONT_WEIGHT = 700
 export const DEFAULT_FONT_WEIGHT = 400
 export const MIN_BACKGROUND_OPACITY = 0
 export const MAX_BACKGROUND_OPACITY = 100
-export const DEFAULT_BACKGROUND_OPACITY = 0
+export const DEFAULT_BACKGROUND_OPACITY = 50
 export const MIN_FONT_SHADOW_INTENSITY = 0
 export const MAX_FONT_SHADOW_INTENSITY = 8
 export const DEFAULT_FONT_SHADOW_INTENSITY = 3
 export const MIN_FONT_STROKE_WIDTH = 0
 export const MAX_FONT_STROKE_WIDTH = 8
 export const DEFAULT_FONT_STROKE_WIDTH = 2.5
+export const DEFAULT_MAIN_FONT_SCALE = 80
+export const DEFAULT_MAIN_FONT_SHADOW_INTENSITY = 3
+export const DEFAULT_MAIN_FONT_STROKE_WIDTH = 3
+export const DEFAULT_TRANSLATION_FONT_SCALE = 100
+export const DEFAULT_TRANSLATION_FONT_SHADOW_INTENSITY = 3
+export const DEFAULT_TRANSLATION_FONT_STROKE_WIDTH = 3
 export const DEFAULT_FONT_FAMILY = "system" as const
 export const DEFAULT_SUBTITLE_COLOR = "#FFFFFF"
 export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
-export const DEFAULT_BACKGROUND_STYLE = "solid" as const
+export const DEFAULT_BACKGROUND_STYLE = "none" as const
 export const BACKGROUND_STYLE_OPTIONS = [
   { value: "none", label: "None" },
   { value: "solid", label: "Solid" },
   { value: "blur", label: "Blur" },
   { value: "liquid-glass", label: "Liquid Glass" },
 ] as const
-export const MIN_LINE_GAP = -25
-export const MAX_LINE_GAP = 25
-export const DEFAULT_LINE_GAP = 0
+export const MIN_LINE_GAP = -50
+export const MAX_LINE_GAP = 50
+export const DEFAULT_LINE_GAP = 2
 export const DEFAULT_CONTROLS_HEIGHT = 60
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 // Subtitle controls sit on top of arbitrary host pages, so keep their theme fixed for readability.
