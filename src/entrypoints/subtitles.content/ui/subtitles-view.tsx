@@ -90,7 +90,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
           <div
             ref={refs.handle}
             className="mb-0.5 px-2 py-1 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
-            style={{ transform: "translateY(-12px)" }}
+            style={{ transform: "translateY(-48px)" }}
           >
             <IconGripHorizontal className="size-4 text-white" />
           </div>
