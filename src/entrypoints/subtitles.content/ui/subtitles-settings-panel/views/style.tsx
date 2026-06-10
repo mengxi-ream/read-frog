@@ -122,13 +122,14 @@ function SliderRow({ label, value, display, min, max, step, onChange }: {
   )
 }
 
-function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalContainer }: {
+function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalContainer, showAdvanced }: {
   icon: ReactNode
   title: string
   textStyle: SubtitleTextStyle
   onChange: (patch: Partial<SubtitleTextStyle>) => void
   onReset: () => void
   portalContainer: HTMLElement | null
+  showAdvanced?: boolean
 }) {
   return (
     <SettingsGroup icon={icon} title={title} onReset={onReset}>
@@ -142,14 +143,16 @@ function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalConta
         onChange={v => onChange({ fontScale: v })}
       />
 
-      <SettingRow label={i18n.t("options.videoSubtitles.style.color")}>
-        <input
-          type="color"
-          value={textStyle.color}
-          onChange={e => onChange({ color: e.target.value })}
-          className="border-input bg-background h-6 w-6 cursor-pointer rounded border p-0.5"
-        />
-      </SettingRow>
+      {showAdvanced && (
+        <SettingRow label={i18n.t("options.videoSubtitles.style.color")}>
+          <input
+            type="color"
+            value={textStyle.color}
+            onChange={e => onChange({ color: e.target.value })}
+            className="border-input bg-background h-6 w-6 cursor-pointer rounded border p-0.5"
+          />
+        </SettingRow>
+      )}
 
       <SettingRow label={i18n.t("options.videoSubtitles.style.fontFamily")}>
         <Select value={textStyle.fontFamily} onValueChange={v => v && onChange({ fontFamily: v as SubtitlesFontFamily })}>
@@ -176,25 +179,29 @@ function TextStyleGroup({ icon, title, textStyle, onChange, onReset, portalConta
         onChange={v => onChange({ fontWeight: v })}
       />
 
-      <SliderRow
-        label={i18n.t("options.videoSubtitles.style.shadowIntensity")}
-        value={textStyle.fontShadowIntensity}
-        display={`${textStyle.fontShadowIntensity}px`}
-        min={MIN_FONT_SHADOW_INTENSITY}
-        max={MAX_FONT_SHADOW_INTENSITY}
-        step={0.5}
-        onChange={v => onChange({ fontShadowIntensity: v })}
-      />
+      {showAdvanced && (
+        <SliderRow
+          label={i18n.t("options.videoSubtitles.style.shadowIntensity")}
+          value={textStyle.fontShadowIntensity}
+          display={`${textStyle.fontShadowIntensity}px`}
+          min={MIN_FONT_SHADOW_INTENSITY}
+          max={MAX_FONT_SHADOW_INTENSITY}
+          step={0.5}
+          onChange={v => onChange({ fontShadowIntensity: v })}
+        />
+      )}
 
-      <SliderRow
-        label={i18n.t("options.videoSubtitles.style.strokeWidth")}
-        value={textStyle.fontStrokeWidth}
-        display={`${textStyle.fontStrokeWidth}px`}
-        min={MIN_FONT_STROKE_WIDTH}
-        max={MAX_FONT_STROKE_WIDTH}
-        step={0.5}
-        onChange={v => onChange({ fontStrokeWidth: v })}
-      />
+      {showAdvanced && (
+        <SliderRow
+          label={i18n.t("options.videoSubtitles.style.strokeWidth")}
+          value={textStyle.fontStrokeWidth}
+          display={`${textStyle.fontStrokeWidth}px`}
+          min={MIN_FONT_STROKE_WIDTH}
+          max={MAX_FONT_STROKE_WIDTH}
+          step={0.5}
+          onChange={v => onChange({ fontStrokeWidth: v })}
+        />
+      )}
     </SettingsGroup>
   )
 }
@@ -363,27 +370,25 @@ export function StyleView() {
         )}
       </SettingsGroup>
 
-      {isAdvanced && (
-        <>
-          <TextStyleGroup
-            icon={<IconSubtitles className="size-3.5" />}
-            title={i18n.t("options.videoSubtitles.style.mainSubtitle")}
-            textStyle={config.style.main}
-            onChange={patch => updateStyle({ main: patch })}
-            onReset={() => updateStyle({ main: DEFAULT_TEXT_STYLE })}
-            portalContainer={portalContainer}
-          />
+      <TextStyleGroup
+        icon={<IconSubtitles className="size-3.5" />}
+        title={i18n.t("options.videoSubtitles.style.mainSubtitle")}
+        textStyle={config.style.main}
+        onChange={patch => updateStyle({ main: patch })}
+        onReset={() => updateStyle({ main: DEFAULT_TEXT_STYLE })}
+        portalContainer={portalContainer}
+        showAdvanced={isAdvanced}
+      />
 
-          <TextStyleGroup
-            icon={<IconLanguage className="size-3.5" />}
-            title={i18n.t("options.videoSubtitles.style.translationSubtitle")}
-            textStyle={config.style.translation}
-            onChange={patch => updateStyle({ translation: patch })}
-            onReset={() => updateStyle({ translation: DEFAULT_TEXT_STYLE })}
-            portalContainer={portalContainer}
-          />
-        </>
-      )}
+      <TextStyleGroup
+        icon={<IconLanguage className="size-3.5" />}
+        title={i18n.t("options.videoSubtitles.style.translationSubtitle")}
+        textStyle={config.style.translation}
+        onChange={patch => updateStyle({ translation: patch })}
+        onReset={() => updateStyle({ translation: DEFAULT_TEXT_STYLE })}
+        portalContainer={portalContainer}
+        showAdvanced={isAdvanced}
+      />
     </div>
   )
 }

@@ -30,6 +30,7 @@ interface SubtitlesTextStyleFormProps {
 export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
   const textStyle = videoSubtitlesConfig.style[type]
+  const isAdvanced = videoSubtitlesConfig.style.mode === "advanced"
   const [draftFontScale, setDraftFontScale] = useState(textStyle.fontScale)
   const [draftFontWeight, setDraftFontWeight] = useState(textStyle.fontWeight)
   const [draftShadowIntensity, setDraftShadowIntensity] = useState(textStyle.fontShadowIntensity)
@@ -130,61 +131,67 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
         </div>
       </Field>
 
-      <Field className={FIELD_ROW_CLASS_NAME}>
-        <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
-          <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.color")}</FieldLabel>
-          <div className="flex min-w-0 @xs/field-group:justify-end">
-            <input
-              type="color"
-              value={textStyle.color}
-              onChange={e => handleChange({ color: e.target.value })}
-              className="!w-8 h-8 p-0.5 rounded border border-input cursor-pointer"
-            />
+      {isAdvanced && (
+        <Field className={FIELD_ROW_CLASS_NAME}>
+          <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
+            <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.color")}</FieldLabel>
+            <div className="flex min-w-0 @xs/field-group:justify-end">
+              <input
+                type="color"
+                value={textStyle.color}
+                onChange={e => handleChange({ color: e.target.value })}
+                className="!w-8 h-8 p-0.5 rounded border border-input cursor-pointer"
+              />
+            </div>
           </div>
-        </div>
-      </Field>
+        </Field>
+      )}
 
-      <Field className={FIELD_ROW_CLASS_NAME}>
-        <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
-          <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.shadowIntensity")}</FieldLabel>
-          <div className="flex min-w-0 items-center gap-2">
-            <Slider
-              min={0}
-              max={MAX_FONT_SHADOW_INTENSITY}
-              step={0.5}
-              value={draftShadowIntensity}
-              onValueChange={value => setDraftShadowIntensity(value as number)}
-              onValueCommitted={value => handleChange({ fontShadowIntensity: value as number })}
-              className="flex-1"
-            />
-            <span className="w-10 text-sm text-right">
-              {draftShadowIntensity}
-              px
-            </span>
+      {isAdvanced && (
+        <Field className={FIELD_ROW_CLASS_NAME}>
+          <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
+            <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.shadowIntensity")}</FieldLabel>
+            <div className="flex min-w-0 items-center gap-2">
+              <Slider
+                min={0}
+                max={MAX_FONT_SHADOW_INTENSITY}
+                step={0.5}
+                value={draftShadowIntensity}
+                onValueChange={value => setDraftShadowIntensity(value as number)}
+                onValueCommitted={value => handleChange({ fontShadowIntensity: value as number })}
+                className="flex-1"
+              />
+              <span className="w-10 text-sm text-right">
+                {draftShadowIntensity}
+                px
+              </span>
+            </div>
           </div>
-        </div>
-      </Field>
+        </Field>
+      )}
 
-      <Field className={FIELD_ROW_CLASS_NAME}>
-        <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
-          <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.strokeWidth")}</FieldLabel>
-          <div className="flex min-w-0 items-center gap-2">
-            <Slider
-              min={0}
-              max={MAX_FONT_STROKE_WIDTH}
-              step={0.5}
-              value={draftStrokeWidth}
-              onValueChange={value => setDraftStrokeWidth(value as number)}
-              onValueCommitted={value => handleChange({ fontStrokeWidth: value as number })}
-              className="flex-1"
-            />
-            <span className="w-10 text-sm text-right">
-              {draftStrokeWidth}
-              px
-            </span>
+      {isAdvanced && (
+        <Field className={FIELD_ROW_CLASS_NAME}>
+          <div className={FIELD_ROW_CONTENT_CLASS_NAME}>
+            <FieldLabel className={FIELD_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.strokeWidth")}</FieldLabel>
+            <div className="flex min-w-0 items-center gap-2">
+              <Slider
+                min={0}
+                max={MAX_FONT_STROKE_WIDTH}
+                step={0.5}
+                value={draftStrokeWidth}
+                onValueChange={value => setDraftStrokeWidth(value as number)}
+                onValueCommitted={value => handleChange({ fontStrokeWidth: value as number })}
+                className="flex-1"
+              />
+              <span className="w-10 text-sm text-right">
+                {draftStrokeWidth}
+                px
+              </span>
+            </div>
           </div>
-        </div>
-      </Field>
+        </Field>
+      )}
     </FieldGroup>
   )
 }
