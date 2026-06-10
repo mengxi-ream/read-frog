@@ -7,7 +7,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { MAX_FONT_SCALE, MAX_FONT_SHADOW_INTENSITY, MAX_FONT_STROKE_WIDTH, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
+import { ADVANCED_INDEX, MAX_FONT_SCALE, MAX_FONT_SHADOW_INTENSITY, MAX_FONT_STROKE_WIDTH, MAX_FONT_WEIGHT, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles"
 
 const FIELD_ROW_CLASS_NAME = "gap-0"
 const FIELD_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[8.5rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
@@ -30,7 +30,7 @@ interface SubtitlesTextStyleFormProps {
 export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
   const textStyle = videoSubtitlesConfig.style[type]
-  const isAdvanced = videoSubtitlesConfig.style.presetStyle === 4
+  const isAdvanced = videoSubtitlesConfig.style.presetStyle === ADVANCED_INDEX
   const [draftFontScale, setDraftFontScale] = useState(textStyle.fontScale)
   const [draftFontWeight, setDraftFontWeight] = useState(textStyle.fontWeight)
   const [draftShadowIntensity, setDraftShadowIntensity] = useState(textStyle.fontShadowIntensity)

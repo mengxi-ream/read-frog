@@ -11,6 +11,7 @@ import { Slider } from "@/components/ui/base-ui/slider"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
+  ADVANCED_INDEX,
   BACKGROUND_STYLE_OPTIONS,
   DEFAULT_BACKGROUND_FORCE_MERGE,
   DEFAULT_BACKGROUND_OPACITY,
@@ -225,8 +226,6 @@ const DEFAULT_TRANSLATION_TEXT_STYLE: SubtitleTextStyle = {
   fontStrokeWidth: DEFAULT_FONT_STROKE_WIDTH,
 }
 
-const ADVANCED_INDEX = 4
-
 export function StyleView() {
   const [config, setConfig] = useAtom(configFieldsAtomMap.videoSubtitles, { store: subtitlesStore })
   const portalContainer = use(ShadowWrapperContext)
@@ -282,19 +281,31 @@ export function StyleView() {
 
   const isAdvanced = presetStyle === ADVANCED_INDEX
 
+  const handleResetGeneral = () => {
+    if (isAdvanced) {
+      advancedSnapshotRef.current = {
+        backgroundStyle: container.backgroundStyle,
+        backgroundOpacity: container.backgroundOpacity,
+        backgroundForceMerge,
+        lineGap,
+      }
+    }
+    updateStyle({
+      displayMode: DEFAULT_DISPLAY_MODE,
+      translationPosition: DEFAULT_TRANSLATION_POSITION,
+      lineGap: DEFAULT_LINE_GAP,
+      presetStyle: DEFAULT_PRESET_STYLE,
+      backgroundForceMerge: DEFAULT_BACKGROUND_FORCE_MERGE,
+      container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY, backgroundStyle: DEFAULT_BACKGROUND_STYLE },
+    })
+  }
+
   return (
     <div className="min-h-[calc(100cqh-6rem)] px-3 pb-4 pt-3">
       <SettingsGroup
         icon={<IconSettings className="size-3.5" />}
         title={i18n.t("options.videoSubtitles.style.generalSettings")}
-        onReset={() => updateStyle({
-          displayMode: DEFAULT_DISPLAY_MODE,
-          translationPosition: DEFAULT_TRANSLATION_POSITION,
-          lineGap: DEFAULT_LINE_GAP,
-          presetStyle: DEFAULT_PRESET_STYLE,
-          backgroundForceMerge: DEFAULT_BACKGROUND_FORCE_MERGE,
-          container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY, backgroundStyle: DEFAULT_BACKGROUND_STYLE },
-        })}
+        onReset={handleResetGeneral}
       >
         <SettingRow label={i18n.t("options.videoSubtitles.style.displayMode.title")}>
           <Select value={displayMode} onValueChange={(v: SubtitlesDisplayMode | null) => v && updateStyle({ displayMode: v })}>

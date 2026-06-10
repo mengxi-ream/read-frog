@@ -277,7 +277,7 @@ export function SubtitlesPair({
       }
     }
 
-    const shouldMerge = layoutData.length === 2 && (lineGap <= 3 || backgroundForceMerge)
+    const shouldMerge = layoutData.length === 2 && (lineGap <= 4 || backgroundForceMerge)
 
     if (shouldMerge) {
       const first = makeRect(layoutData[0], 0)

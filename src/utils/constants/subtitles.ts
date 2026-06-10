@@ -94,6 +94,7 @@ export const SUBTITLE_STYLE_PRESETS = [
   { label: "Advanced", backgroundStyle: "liquid-glass" as const, backgroundOpacity: 100, backgroundForceMerge: true, lineGap: 4 },
 ] as const
 export const DEFAULT_PRESET_STYLE = 2
+export const ADVANCED_INDEX = 4
 export const DEFAULT_CONTROLS_HEIGHT = 60
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 // Subtitle controls sit on top of arbitrary host pages, so keep their theme fixed for readability.

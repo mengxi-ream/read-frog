@@ -13,13 +13,11 @@ import { Slider } from "@/components/ui/base-ui/slider"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_FORCE_MERGE, DEFAULT_BACKGROUND_OPACITY, DEFAULT_BACKGROUND_STYLE, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_PRESET_STYLE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP, SUBTITLE_STYLE_PRESETS } from "@/utils/constants/subtitles"
+import { ADVANCED_INDEX, BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_FORCE_MERGE, DEFAULT_BACKGROUND_OPACITY, DEFAULT_BACKGROUND_STYLE, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_PRESET_STYLE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP, SUBTITLE_STYLE_PRESETS } from "@/utils/constants/subtitles"
 
 const SLIDER_ROW_CLASS_NAME = "gap-0"
 const SLIDER_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
 const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w-0"
-
-const ADVANCED_INDEX = 4
 
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
@@ -101,7 +99,17 @@ export function GeneralSettings() {
     }))
   }
 
+  const isAdvanced = presetStyle === ADVANCED_INDEX
+
   const resetGeneralConfig = () => {
+    if (isAdvanced) {
+      advancedSnapshotRef.current = {
+        backgroundStyle: container.backgroundStyle,
+        backgroundOpacity: container.backgroundOpacity,
+        backgroundForceMerge,
+        lineGap,
+      }
+    }
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
       style: {
         displayMode: DEFAULT_DISPLAY_MODE,
@@ -116,8 +124,6 @@ export function GeneralSettings() {
       },
     }))
   }
-
-  const isAdvanced = presetStyle === ADVANCED_INDEX
 
   return (
     <Card className="p-5">
