@@ -784,6 +784,10 @@ options:
       fontScale: Размер шрифта
       color: Цвет
       fontWeight: Толщина шрифта
+      presetStyle: Предустановленный стиль
+      backgroundStyle: Стиль фона
+      lineGap: Интервал субтитров
+      backgroundForceMerge: Объединение фона
       backgroundOpacity: Прозрачность фона
       shadowIntensity: Тень
       strokeWidth: Контур

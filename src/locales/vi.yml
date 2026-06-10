@@ -784,6 +784,10 @@ options:
       fontScale: Cỡ chữ
       color: Màu sắc
       fontWeight: Độ đậm chữ
+      presetStyle: Kiểu đặt sẵn
+      backgroundStyle: Kiểu nền
+      lineGap: Khoảng cách phụ đề
+      backgroundForceMerge: Hợp nhất nền
       backgroundOpacity: Độ trong suốt nền
       shadowIntensity: Đổ bóng
       strokeWidth: Viền

@@ -899,6 +899,10 @@ options:
       fontScale: 字体大小
       color: 颜色
       fontWeight: 字体粗细
+      presetStyle: 预设样式
+      backgroundStyle: 背景
+      lineGap: 字幕间距
+      backgroundForceMerge: 背景合并
       backgroundOpacity: 背景透明度
       shadowIntensity: 阴影
       strokeWidth: 描边

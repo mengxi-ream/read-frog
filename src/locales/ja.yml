@@ -784,6 +784,10 @@ options:
       fontScale: フォントサイズ
       color: 色
       fontWeight: フォントウェイト
+      presetStyle: プリセットスタイル
+      backgroundStyle: 背景スタイル
+      lineGap: 字幕間隔
+      backgroundForceMerge: 背景マージ
       backgroundOpacity: 背景の透明度
       shadowIntensity: シャドウ
       strokeWidth: 輪郭

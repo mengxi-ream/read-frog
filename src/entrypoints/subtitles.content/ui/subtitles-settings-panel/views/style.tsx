@@ -355,7 +355,7 @@ export function StyleView() {
 
         {isAdvanced && (
           <>
-            <SettingRow label="Background Style">
+            <SettingRow label={i18n.t("options.videoSubtitles.style.backgroundStyle")}>
               <Select value={container.backgroundStyle ?? "solid"} onValueChange={(v: string | null) => v && updateStyle({ container: { backgroundStyle: v as BackgroundStyle } })}>
                 <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
                   <SelectValue>{BACKGROUND_STYLE_OPTIONS.find(o => o.value === (container.backgroundStyle ?? "solid"))?.label}</SelectValue>

@@ -892,7 +892,7 @@ options:
         above: Above
         below: Below
       generalSettings: General
-      presetStyle: Style
+      presetStyle: Preset
       mainSubtitle: Main Subtitle
       translationSubtitle: Translation Subtitle
       containerStyle: Background

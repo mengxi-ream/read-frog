@@ -784,6 +784,10 @@ options:
       fontScale: 字號
       color: 顏色
       fontWeight: 字重
+      presetStyle: 預設樣式
+      backgroundStyle: 背景
+      lineGap: 字幕間距
+      backgroundForceMerge: 背景合併
       backgroundOpacity: 背景透明度
       shadowIntensity: 陰影
       strokeWidth: 描邊

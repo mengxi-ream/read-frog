@@ -784,6 +784,10 @@ options:
       fontScale: Yazı Boyutu
       color: Renk
       fontWeight: Yazı Kalınlığı
+      presetStyle: Hazır Stil
+      backgroundStyle: Arka Plan Stili
+      lineGap: Altyazı Aralığı
+      backgroundForceMerge: Arka Plan Birleştirme
       backgroundOpacity: Arka Plan Şeffaflığı
       shadowIntensity: Gölge
       strokeWidth: Anahat

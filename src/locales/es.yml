@@ -899,6 +899,10 @@ options:
       fontScale: Escala de fuente
       color: Color
       fontWeight: Grosor de fuente
+      presetStyle: Estilo preestablecido
+      backgroundStyle: Estilo de fondo
+      lineGap: Espaciado de subtítulos
+      backgroundForceMerge: Combinar fondos
       backgroundOpacity: Opacidad del fondo
       shadowIntensity: Sombra
       strokeWidth: Contorno

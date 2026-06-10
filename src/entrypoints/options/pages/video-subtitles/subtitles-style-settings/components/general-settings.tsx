@@ -101,7 +101,7 @@ export function GeneralSettings() {
 
   const isAdvanced = presetStyle === ADVANCED_INDEX
 
-  const resetGeneralConfig = () => {
+  const handleResetGeneral = () => {
     if (isAdvanced) {
       advancedSnapshotRef.current = {
         backgroundStyle: container.backgroundStyle,
@@ -134,7 +134,7 @@ export function GeneralSettings() {
         </div>
         <Tooltip>
           <TooltipTrigger
-            render={<Button variant="ghost" size="sm" className="-mr-2" onClick={resetGeneralConfig} />}
+            render={<Button variant="ghost" size="sm" className="-mr-2" onClick={handleResetGeneral} />}
           >
             <Icon icon="tabler:refresh" />
           </TooltipTrigger>
@@ -211,7 +211,7 @@ export function GeneralSettings() {
         {isAdvanced && (
           <>
             <Field orientation="responsive-compact">
-              <FieldLabel className="text-sm whitespace-nowrap">Background Style</FieldLabel>
+              <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.backgroundStyle")}</FieldLabel>
               <Select
                 value={videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"}
                 onValueChange={(v: string | null) => v && void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: { backgroundStyle: v as BackgroundStyle } } }))}

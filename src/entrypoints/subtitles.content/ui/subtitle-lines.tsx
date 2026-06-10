@@ -89,7 +89,7 @@ function getBgPad(si: number, sw: number): { pad: number, wPad: number } {
   const shadowPad = si > 0 ? Math.max(1, si * 0.5) + si : 0
   const strokePad = sw / 2
   const pad = Math.max(shadowPad, strokePad, 0)
-  return { pad, wPad: pad + 12 }
+  return { pad, wPad: pad + 14 }
 }
 
 // ---- SubtitleLine (pure SVG text rendering, no layout) ----
@@ -270,9 +270,9 @@ export function SubtitlesPair({
       return {
         key: `bg-${data.key}`,
         left: (containerWidth - bw) / 2,
-        top: yTop - pad,
+        top: yTop - pad - 1,
         width: bw,
-        height: data.svgHeightPx + pad * 2 + 2,
+        height: data.svgHeightPx + pad * 2 + 4,
         borderRadius: Math.round(data.fontSizePx * 0.8),
       }
     }

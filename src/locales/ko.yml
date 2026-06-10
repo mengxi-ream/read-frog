@@ -784,6 +784,10 @@ options:
       fontScale: 글꼴 크기
       color: 색상
       fontWeight: 글꼴 굵기
+      presetStyle: 프리셋 스타일
+      backgroundStyle: 배경 스타일
+      lineGap: 자막 간격
+      backgroundForceMerge: 배경 병합
       backgroundOpacity: 배경 투명도
       shadowIntensity: 그림자
       strokeWidth: 윤곽선
