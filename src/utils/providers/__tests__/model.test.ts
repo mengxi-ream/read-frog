@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { storage } from "#imports"
+import { clearAPIKeyRotationStateForTests } from "../api-key-rotation"
 import { DEFAULT_PROVIDER_HEADERS } from "../headers"
 
 let getStorageItemMock: ReturnType<typeof vi.fn>
@@ -82,6 +83,7 @@ function createOpenRouterProviderConfig(headers?: Record<string, unknown>) {
 describe("getModelById", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    clearAPIKeyRotationStateForTests()
     anthropicLanguageModelMock.mockReturnValue("anthropic-model")
     openRouterLanguageModelMock.mockReturnValue("openrouter-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
@@ -103,6 +105,28 @@ describe("getModelById", () => {
       headers: DEFAULT_PROVIDER_HEADERS.anthropic,
     }))
     expect(anthropicLanguageModelMock).toHaveBeenCalledWith("claude-haiku-4-5")
+  })
+
+  it("rotates comma-separated API keys before creating SDK providers", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [
+        {
+          ...createAnthropicProviderConfig(),
+          apiKey: "key-a, key-b",
+        },
+      ],
+    })
+
+    const { getModelById } = await import("../model")
+    await getModelById("anthropic-default")
+    await getModelById("anthropic-default")
+
+    expect(createAnthropicMock.mock.calls[0]?.[0]).toEqual(expect.objectContaining({
+      apiKey: "key-a",
+    }))
+    expect(createAnthropicMock.mock.calls[1]?.[0]).toEqual(expect.objectContaining({
+      apiKey: "key-b",
+    }))
   })
 
   it("passes attribution headers for OpenRouter when user headers are undefined", async () => {

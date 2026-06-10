@@ -2,6 +2,7 @@ import type { LangCodeISO6391 } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { sendMessage } from "@/utils/message"
+import { withProviderAPIKeyRotation } from "@/utils/providers/api-key-rotation"
 
 type DeepLXProviderConfig = Extract<ProviderConfig, { provider: "deeplx" }>
 const API_KEY_PLACEHOLDER_RE = /\{\{apiKey\}\}/g
@@ -14,7 +15,6 @@ export async function deeplxTranslate(
   options?: { forceBackgroundFetch?: boolean },
 ): Promise<string> {
   const baseURL = providerConfig.baseURL || DEFAULT_PROVIDER_CONFIG.deeplx.baseURL
-  const apiKey = providerConfig.apiKey
 
   if (!baseURL) {
     throw new Error("DeepLX baseURL is not configured")
@@ -29,19 +29,21 @@ export async function deeplxTranslate(
     return formattedLang
   }
 
-  const url = buildDeepLXUrl(baseURL, apiKey)
+  return withProviderAPIKeyRotation(providerConfig, async (apiKey) => {
+    const url = buildDeepLXUrl(baseURL, apiKey)
 
-  const requestBody = JSON.stringify({
-    text: sourceText,
-    source_lang: formatLang(fromLang),
-    target_lang: formatLang(toLang),
+    const requestBody = JSON.stringify({
+      text: sourceText,
+      source_lang: formatLang(fromLang),
+      target_lang: formatLang(toLang),
+    })
+
+    const fetchResponse = options?.forceBackgroundFetch
+      ? await fetchViaBackground(url, requestBody)
+      : await fetchDirect(url, requestBody)
+
+    return parseDeepLXResponse(fetchResponse)
   })
-
-  const fetchResponse = options?.forceBackgroundFetch
-    ? await fetchViaBackground(url, requestBody)
-    : await fetchDirect(url, requestBody)
-
-  return parseDeepLXResponse(fetchResponse)
 }
 
 async function fetchViaBackground(url: string, body: string) {

@@ -2,7 +2,7 @@ import type { LLMProviderConfig } from "@/types/config/provider"
 import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
 import { generateText } from "ai"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
-import { getModelById } from "@/utils/providers/model"
+import { withLanguageModelAPIKeyRotation } from "@/utils/providers/model"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { attachRequestErrorMeta, getRequestErrorMeta } from "@/utils/request/retry-policy"
@@ -22,21 +22,23 @@ export async function aiTranslate<TContext>(
   promptResolver: PromptResolver<TContext>,
   options?: { isBatch?: boolean, context?: TContext },
 ) {
-  const { id: providerId, model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
+  const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const modelName = resolveModelId(providerModel)
-  const model = await getModelById(providerId)
 
   const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, options)
 
   try {
-    const { text: translatedText } = await generateText({
-      model,
-      system: systemPrompt,
-      prompt,
-      temperature,
-      providerOptions,
-      maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
+    const translatedText = await withLanguageModelAPIKeyRotation(providerConfig, async (model) => {
+      const { text: result } = await generateText({
+        model,
+        system: systemPrompt,
+        prompt,
+        temperature,
+        providerOptions,
+        maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
+      })
+      return result
     })
 
     const [, finalTranslation = translatedText] = translatedText.match(THINK_TAG_RE) || []

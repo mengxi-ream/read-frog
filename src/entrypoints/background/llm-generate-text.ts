@@ -5,17 +5,19 @@ import type {
 import { generateText } from "ai"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
-import { getModelById } from "@/utils/providers/model"
+import { withLanguageModelByIdAPIKeyRotation } from "@/utils/providers/model"
 
 export async function runGenerateTextInBackground(
   payload: BackgroundGenerateTextPayload,
 ): Promise<BackgroundGenerateTextResponse> {
   const { providerId, ...generateTextParams } = payload
-  const model = await getModelById(providerId)
 
-  const { text } = await generateText({
-    ...generateTextParams,
-    model,
+  const text = await withLanguageModelByIdAPIKeyRotation(providerId, async (model) => {
+    const { text: result } = await generateText({
+      ...generateTextParams,
+      model,
+    })
+    return result
   })
 
   return { text }

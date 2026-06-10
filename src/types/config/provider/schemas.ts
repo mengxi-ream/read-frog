@@ -37,6 +37,8 @@ export const baseProviderConfigSchema = z.strictObject({
 
 export const baseAPIProviderConfigSchema = baseProviderConfigSchema.extend({
   apiKey: z.string().optional(),
+  apiKeyRotationMode: z.enum(["sequential", "random"]).optional(),
+  apiKeyCooldownSeconds: z.number().min(0).optional(),
   baseURL: z.string().optional(),
   temperature: z.number().min(0).optional(),
   providerOptions: z.record(z.string(), z.any()).optional(),

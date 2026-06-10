@@ -51,8 +51,7 @@ export const TranslateModelSelector = withForm({
                         {recommendationTrigger}
                         {isCustomLLMProviderConfig(providerConfig) && (
                           <ModelSuggestionButton
-                            baseURL={providerConfig.baseURL}
-                            apiKey={providerConfig.apiKey}
+                            providerConfig={providerConfig}
                             onSelect={(model) => {
                               field.handleChange(model)
                               void form.handleSubmit()

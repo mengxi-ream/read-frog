@@ -31,7 +31,11 @@ export const APIKeyField = withForm({
                 />
               )}
               type={showAPIKey ? "text" : "password"}
+              placeholder="key-1, key-2, key-3"
             />
+            <p className="text-xs text-muted-foreground">
+              Use commas to add multiple API keys. Requests rotate across keys and failed keys cool down before reuse.
+            </p>
             <div className="mt-0.5 flex items-center space-x-2">
               <Checkbox
                 id={`apiKey-${providerConfig.id}`}

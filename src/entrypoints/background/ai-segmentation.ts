@@ -5,7 +5,7 @@ import { db } from "@/utils/db/dexie/db"
 import { Sha256Hex } from "@/utils/hash"
 import { logger } from "@/utils/logger"
 import { getSubtitlesSegmentationPrompt } from "@/utils/prompts/subtitles-segmentation"
-import { getModelById } from "@/utils/providers/model"
+import { withLanguageModelAPIKeyRotation } from "@/utils/providers/model"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { ensureInitializedConfig } from "./config"
@@ -76,18 +76,20 @@ export async function runAiSegmentSubtitles(data: AiSegmentSubtitlesData): Promi
   const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = providerConfig
   const modelName = resolveModelId(providerModel)
   const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
-  const model = await getModelById(providerId)
 
   const { systemPrompt, prompt } = getSubtitlesSegmentationPrompt(jsonContent)
 
   try {
-    const { text: segmentedVtt } = await generateText({
-      model,
-      system: systemPrompt,
-      prompt,
-      temperature,
-      providerOptions,
-      maxRetries: 0,
+    const segmentedVtt = await withLanguageModelAPIKeyRotation(providerConfig, async (model) => {
+      const { text: result } = await generateText({
+        model,
+        system: systemPrompt,
+        prompt,
+        temperature,
+        providerOptions,
+        maxRetries: 0,
+      })
+      return result
     })
 
     const result = cleanVttResponse(segmentedVtt)

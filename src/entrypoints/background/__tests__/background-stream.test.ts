@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const streamTextMock = vi.fn()
 const outputObjectMock = vi.fn((params: Record<string, unknown>) => params)
-const getModelByIdMock = vi.fn()
+const withLanguageModelByIdAPIKeyRotationMock = vi.fn()
 const loggerErrorMock = vi.fn()
 const parsePartialJsonMock = vi.fn(async (text: string | undefined) => {
   if (!text) {
@@ -39,7 +39,7 @@ vi.mock("ai", () => ({
 }))
 
 vi.mock("@/utils/providers/model", () => ({
-  getModelById: getModelByIdMock,
+  withLanguageModelByIdAPIKeyRotation: withLanguageModelByIdAPIKeyRotationMock,
 }))
 
 vi.mock("@/utils/logger", () => ({
@@ -101,10 +101,10 @@ describe("background-stream", () => {
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+    withLanguageModelByIdAPIKeyRotationMock.mockImplementation((_providerId, operation) => operation("mock-model"))
   })
 
   it("streams structured object output from background", async () => {
-    getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
       fullStream: (async function* () {
         yield { type: "text-delta", text: "{\"score\":97" }
@@ -136,7 +136,7 @@ describe("background-stream", () => {
       },
     )
 
-    expect(getModelByIdMock).toHaveBeenCalledWith("openai-default")
+    expect(withLanguageModelByIdAPIKeyRotationMock).toHaveBeenCalledWith("openai-default", expect.any(Function), expect.any(Object))
     expect(streamTextMock).toHaveBeenCalledWith(expect.objectContaining({
       model: "mock-model",
       prompt: "Analyze selection",
@@ -186,7 +186,6 @@ describe("background-stream", () => {
   })
 
   it("streams text via background stream port handler", async () => {
-    getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
       fullStream: (async function* () {
         yield { type: "text-delta", text: "Hello" }
@@ -208,7 +207,7 @@ describe("background-stream", () => {
       },
     })
 
-    expect(getModelByIdMock).toHaveBeenCalledWith("openai-default")
+    expect(withLanguageModelByIdAPIKeyRotationMock).toHaveBeenCalledWith("openai-default", expect.any(Function), expect.any(Object))
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(1, {
       type: "chunk",
       requestId: "req-text-1",
@@ -245,8 +244,70 @@ describe("background-stream", () => {
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
   })
 
+  it("falls back to another API key when text streaming fails before emitting chunks", async () => {
+    withLanguageModelByIdAPIKeyRotationMock.mockImplementation(async (_providerId, operation, options) => {
+      try {
+        return await operation("bad-model")
+      }
+      catch (error) {
+        if (options.shouldFallback?.(error, { apiKey: "bad-key", apiKeyCount: 2, apiKeyIndex: 0 }) === false) {
+          throw error
+        }
+        return operation("good-model")
+      }
+    })
+    streamTextMock
+      .mockReturnValueOnce({
+        fullStream: (async function* () {
+          throw new Error("bad key")
+        })(),
+      })
+      .mockReturnValueOnce({
+        fullStream: (async function* () {
+          yield { type: "text-delta", text: "Recovered" }
+        })(),
+      })
+
+    const { handleStreamTextPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-text")
+
+    handleStreamTextPort(mockPort.port as never)
+    await mockPort.emitMessage({
+      type: "start",
+      requestId: "req-text-fallback",
+      payload: {
+        providerId: "openai-default",
+        prompt: "Say hello",
+      },
+    })
+
+    expect(streamTextMock).toHaveBeenNthCalledWith(1, expect.objectContaining({ model: "bad-model" }))
+    expect(streamTextMock).toHaveBeenNthCalledWith(2, expect.objectContaining({ model: "good-model" }))
+    expect(mockPort.postMessage).toHaveBeenNthCalledWith(1, {
+      type: "chunk",
+      requestId: "req-text-fallback",
+      data: {
+        output: "Recovered",
+        thinking: {
+          status: "thinking",
+          text: "",
+        },
+      },
+    })
+    expect(mockPort.postMessage).toHaveBeenNthCalledWith(2, {
+      type: "done",
+      requestId: "req-text-fallback",
+      data: {
+        output: "Recovered",
+        thinking: {
+          status: "complete",
+          text: "",
+        },
+      },
+    })
+  })
+
   it("prefers stream onError root cause and posts error once", async () => {
-    getModelByIdMock.mockResolvedValue("mock-model")
     const rootCause = Object.assign(new Error("Incorrect API key provided"), {
       responseBody: "{\"error\":{\"message\":\"Incorrect API key provided\"}}",
     })
@@ -292,7 +353,7 @@ describe("background-stream", () => {
   })
 
   it("keeps outer catch as fallback for pre-stream errors", async () => {
-    getModelByIdMock.mockRejectedValue(new Error("Model is undefined"))
+    withLanguageModelByIdAPIKeyRotationMock.mockRejectedValue(new Error("Model is undefined"))
     const { handleStreamTextPort } = await import("../background-stream")
     const mockPort = createMockPort("stream-text")
 
@@ -317,7 +378,6 @@ describe("background-stream", () => {
   })
 
   it("treats stream port disconnect aborts as expected cancellation", async () => {
-    getModelByIdMock.mockResolvedValue("mock-model")
     let streamSignal: AbortSignal | undefined
 
     streamTextMock.mockImplementation((options: { abortSignal?: AbortSignal }) => {
@@ -379,7 +439,7 @@ describe("background-stream", () => {
       error: { message: "Invalid stream start payload" },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
-    expect(getModelByIdMock).not.toHaveBeenCalled()
+    expect(withLanguageModelByIdAPIKeyRotationMock).not.toHaveBeenCalled()
   })
 
   it("returns error for invalid structured payload and disconnects", async () => {

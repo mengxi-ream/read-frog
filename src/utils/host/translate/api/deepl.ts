@@ -1,6 +1,7 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
 import { sendMessage } from "@/utils/message"
+import { withProviderAPIKeyRotation } from "@/utils/providers/api-key-rotation"
 
 type DeepLProviderConfig = Extract<ProviderConfig, { provider: "deepl" }>
 
@@ -24,12 +25,15 @@ export async function deeplTranslate(
   providerConfig: DeepLProviderConfig,
   options?: { forceBackgroundFetch?: boolean },
 ): Promise<string> {
-  const [translatedText] = await requestDeepLTranslations(
-    [sourceText],
-    fromLang,
-    toLang,
+  const [translatedText] = await withProviderAPIKeyRotation(
     providerConfig,
-    options,
+    apiKey => requestDeepLTranslations(
+      [sourceText],
+      fromLang,
+      toLang,
+      apiKey,
+      options,
+    ),
   )
 
   if (translatedText === undefined) {
@@ -43,10 +47,9 @@ async function requestDeepLTranslations(
   sourceTexts: string[],
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
-  providerConfig: DeepLProviderConfig,
+  apiKey: string | undefined,
   options?: { forceBackgroundFetch?: boolean },
 ): Promise<string[]> {
-  const apiKey = providerConfig.apiKey?.trim()
   if (!apiKey) {
     throw new Error("DeepL API key is not configured")
   }

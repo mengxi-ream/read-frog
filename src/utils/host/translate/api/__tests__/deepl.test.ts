@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import { clearAPIKeyRotationStateForTests } from "@/utils/providers/api-key-rotation"
 import { deeplTranslate, getDeepLBaseURL } from "../deepl"
 
 const fetchMock = vi.fn()
@@ -6,6 +7,7 @@ const fetchMock = vi.fn()
 describe("deepl translate adapter", () => {
   beforeEach(() => {
     fetchMock.mockReset()
+    clearAPIKeyRotationStateForTests()
     vi.stubGlobal("fetch", fetchMock)
   })
 
@@ -98,5 +100,39 @@ describe("deepl translate adapter", () => {
       provider: "deepl",
       apiKey: "test-key",
     })).rejects.toThrow("DeepL translation response count mismatch")
+  })
+
+  it("falls back to the next API key when a DeepL request fails", async () => {
+    fetchMock
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 403,
+        statusText: "Forbidden",
+        json: vi.fn(),
+        text: vi.fn().mockResolvedValue("bad key"),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        statusText: "OK",
+        json: vi.fn().mockResolvedValue({
+          translations: [{ text: "你好" }],
+        }),
+        text: vi.fn().mockResolvedValue(""),
+      })
+
+    const result = await deeplTranslate("Hello", "auto", "zh", {
+      id: "deepl-default",
+      enabled: true,
+      name: "DeepL",
+      provider: "deepl",
+      apiKey: "bad-key, good-key",
+      apiKeyCooldownSeconds: 60,
+    })
+
+    expect(result).toBe("你好")
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(fetchMock.mock.calls[0]?.[1].headers.Authorization).toBe("DeepL-Auth-Key bad-key")
+    expect(fetchMock.mock.calls[1]?.[1].headers.Authorization).toBe("DeepL-Auth-Key good-key")
   })
 })

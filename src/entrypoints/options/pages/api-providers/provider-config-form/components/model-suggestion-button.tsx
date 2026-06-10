@@ -1,3 +1,4 @@
+import type { APIProviderConfig } from "@/types/config/provider"
 import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
 import { useMutation } from "@tanstack/react-query"
@@ -13,6 +14,7 @@ import {
   ComboboxList,
 } from "@/components/ui/base-ui/combobox"
 import { extractErrorMessage } from "@/utils/error/extract-message"
+import { withProviderAPIKeyRotation } from "@/utils/providers/api-key-rotation"
 
 interface ModelsResponse {
   object: string
@@ -20,37 +22,38 @@ interface ModelsResponse {
 }
 
 interface ModelSuggestionButtonProps {
-  baseURL: string
-  apiKey?: string
+  providerConfig: APIProviderConfig & { baseURL: string }
   onSelect: (model: string) => void
   disabled?: boolean
 }
 
 export function ModelSuggestionButton({
-  baseURL,
-  apiKey,
+  providerConfig,
   onSelect,
   disabled,
 }: ModelSuggestionButtonProps) {
+  const { baseURL } = providerConfig
   const mutation = useMutation({
-    mutationKey: ["fetchModels", baseURL],
+    mutationKey: ["fetchModels", providerConfig.id, baseURL],
     meta: {
       errorDescription: i18n.t("options.apiProviders.form.models.fetchError"),
     },
     mutationFn: async () => {
-      if (!apiKey) {
-        throw new Error(i18n.t("options.apiProviders.form.models.apiKeyRequired"))
-      }
+      return withProviderAPIKeyRotation(providerConfig, async (apiKey) => {
+        if (!apiKey) {
+          throw new Error(i18n.t("options.apiProviders.form.models.apiKeyRequired"))
+        }
 
-      const response = await fetch(`${baseURL}/models`, {
-        headers: { Authorization: `Bearer ${apiKey}` },
+        const response = await fetch(`${baseURL}/models`, {
+          headers: { Authorization: `Bearer ${apiKey}` },
+        })
+        if (!response.ok) {
+          throw new Error(await extractErrorMessage(response))
+        }
+
+        const data: ModelsResponse = await response.json()
+        return data.data.map(m => m.id)
       })
-      if (!response.ok) {
-        throw new Error(await extractErrorMessage(response))
-      }
-
-      const data: ModelsResponse = await response.json()
-      return data.data.map(m => m.id)
     },
   })
 

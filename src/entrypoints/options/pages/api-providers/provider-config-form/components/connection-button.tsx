@@ -9,6 +9,7 @@ import { getObjectWithoutAPIKeys } from "@/utils/config/api"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { parseProviderAPIKeys } from "@/utils/providers/api-key-rotation"
 
 function ConnectionSuccessIcon() {
   return (
@@ -39,6 +40,7 @@ const ConnectionTestResultIconMap = {
 
 export function ConnectionTestButton({ providerConfig }: { providerConfig: APIProviderConfig }) {
   const { apiKey, provider } = providerConfig
+  const hasAPIKey = parseProviderAPIKeys(apiKey).length > 0
   const baseURL = "baseURL" in providerConfig ? providerConfig.baseURL : undefined
   const providerSpecificSettings = "providerSpecificSettings" in providerConfig
     ? providerConfig.providerSpecificSettings
@@ -71,7 +73,7 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
         size="xs"
         variant="outline"
         onClick={handleTestConnection}
-        disabled={mutation.isPending || (!apiKey && provider !== "deeplx" && provider !== "ollama")}
+        disabled={mutation.isPending || (!hasAPIKey && provider !== "deeplx" && provider !== "ollama")}
       >
         {mutation.isPending
           ? (

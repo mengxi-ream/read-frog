@@ -31,6 +31,7 @@ import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdAtom } from "../atoms"
 import { duplicateProvider } from "../utils"
 import { APIKeyField } from "./api-key-field"
+import { APIKeyRotationField } from "./api-key-rotation-field"
 import { BaseURLField } from "./base-url-field"
 import { AdvancedOptionsSection } from "./components/advanced-options-section"
 import { ConfigHeader } from "./config-header"
@@ -165,6 +166,7 @@ export function ProviderConfigForm() {
           </form.AppField>
 
           <APIKeyField form={form} />
+          <APIKeyRotationField form={form} />
           <BaseURLField form={form} />
           <ProviderSpecificSettingsField form={form} />
           {isTranslateProviderType && (

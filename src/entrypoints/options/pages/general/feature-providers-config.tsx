@@ -10,6 +10,7 @@ import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/
 import { featureProviderConfigAtom } from "@/utils/atoms/provider"
 import { filterEnabledProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
+import { parseProviderAPIKeys } from "@/utils/providers/api-key-rotation"
 import { ConfigCard } from "../../components/config-card"
 import { SetApiKeyWarning } from "../../components/set-api-key-warning"
 
@@ -18,7 +19,7 @@ function needsApiKeyWarning(providerConfig: ProviderConfig | null): boolean {
   return !!providerConfig
     && isAPIProviderConfig(providerConfig)
     && !isPureAPIProvider(providerConfig.provider)
-    && !providerConfig.apiKey
+    && parseProviderAPIKeys(providerConfig.apiKey).length === 0
 }
 
 function FeatureProviderField({ featureKey }: {

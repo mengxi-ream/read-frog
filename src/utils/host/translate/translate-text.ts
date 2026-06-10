@@ -11,6 +11,7 @@ import { getProviderConfigById } from "@/utils/config/helpers"
 import { detectLanguage } from "@/utils/content/language"
 import { logger } from "@/utils/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { parseProviderAPIKeys } from "@/utils/providers/api-key-rotation"
 import { Sha256Hex } from "../../hash"
 import { sendMessage } from "../../message"
 import { prepareTranslationText } from "./text-preparation"
@@ -176,7 +177,7 @@ export function validateTranslationConfigAndToast(
   }
 
   // check if the API key is configured
-  if (isAPIProviderConfig(providerConfig) && !providerConfig.apiKey?.trim() && !["deeplx", "ollama"].includes(providerConfig.provider)) {
+  if (isAPIProviderConfig(providerConfig) && parseProviderAPIKeys(providerConfig.apiKey).length === 0 && !["deeplx", "ollama"].includes(providerConfig.provider)) {
     toast.error(i18n.t("noAPIKeyConfig.warning"))
     logger.info("validateTranslationConfig: returning false (no API key)")
     return false

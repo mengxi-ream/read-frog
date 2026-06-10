@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const onMessageMock = vi.fn()
-const getModelByIdMock = vi.fn()
+const withLanguageModelByIdAPIKeyRotationMock = vi.fn()
 const generateTextMock = vi.fn()
 const loggerErrorMock = vi.fn()
 
@@ -10,7 +10,7 @@ vi.mock("@/utils/message", () => ({
 }))
 
 vi.mock("@/utils/providers/model", () => ({
-  getModelById: getModelByIdMock,
+  withLanguageModelByIdAPIKeyRotation: withLanguageModelByIdAPIKeyRotationMock,
 }))
 
 vi.mock("ai", () => ({
@@ -35,10 +35,10 @@ describe("llm-generate-text", () => {
   beforeEach(() => {
     vi.resetModules()
     vi.clearAllMocks()
+    withLanguageModelByIdAPIKeyRotationMock.mockImplementation((_providerId, operation) => operation("mock-model"))
   })
 
   it("runs generateText with resolved model in background", async () => {
-    getModelByIdMock.mockResolvedValue("mock-model")
     generateTextMock.mockResolvedValue({ text: "eng" })
 
     const { runGenerateTextInBackground } = await import("../llm-generate-text")
@@ -50,7 +50,7 @@ describe("llm-generate-text", () => {
       maxRetries: 0,
     })
 
-    expect(getModelByIdMock).toHaveBeenCalledWith("openai-default")
+    expect(withLanguageModelByIdAPIKeyRotationMock).toHaveBeenCalledWith("openai-default", expect.any(Function))
     expect(generateTextMock).toHaveBeenCalledWith({
       model: "mock-model",
       system: "system",
@@ -62,7 +62,6 @@ describe("llm-generate-text", () => {
   })
 
   it("registers backgroundGenerateText message handler", async () => {
-    getModelByIdMock.mockResolvedValue("mock-model")
     generateTextMock.mockResolvedValue({ text: "cmn" })
 
     const { setupLLMGenerateTextMessageHandlers } = await import("../llm-generate-text")
@@ -80,7 +79,7 @@ describe("llm-generate-text", () => {
   })
 
   it("logs and rethrows handler errors", async () => {
-    getModelByIdMock.mockRejectedValue(new Error("provider unavailable"))
+    withLanguageModelByIdAPIKeyRotationMock.mockRejectedValue(new Error("provider unavailable"))
 
     const { setupLLMGenerateTextMessageHandlers } = await import("../llm-generate-text")
     setupLLMGenerateTextMessageHandlers()

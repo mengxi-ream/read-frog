@@ -1,4 +1,6 @@
+import type { APIKeyRotationOptions } from "./api-key-rotation"
 import type { Config } from "@/types/config/config"
+import type { LLMProviderConfig } from "@/types/config/provider"
 import { createAlibaba } from "@ai-sdk/alibaba"
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock"
 import { createAnthropic } from "@ai-sdk/anthropic"
@@ -27,6 +29,7 @@ import { isCustomLLMProvider } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
+import { getNextProviderAPIKey, withProviderAPIKeyRotation } from "./api-key-rotation"
 import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
 
@@ -59,7 +62,7 @@ const CREATE_AI_MAPPER = {
   "huggingface": createHuggingFace,
 } as const
 
-async function getLanguageModelById(providerId: string) {
+async function getLLMProviderConfigById(providerId: string): Promise<LLMProviderConfig> {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
     throw new Error("Config not found")
@@ -71,10 +74,15 @@ async function getLanguageModelById(providerId: string) {
     throw new Error(`Provider ${providerId} not found`)
   }
 
+  return providerConfig
+}
+
+export function getLanguageModelFromProviderConfig(providerConfig: LLMProviderConfig, apiKeyOverride?: string) {
   const headers = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers)
   const providerSpecificSettings = "providerSpecificSettings" in providerConfig
     ? compactObject(providerConfig.providerSpecificSettings ?? {})
     : {}
+  const apiKey = apiKeyOverride ?? getNextProviderAPIKey(providerConfig)
 
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
@@ -82,13 +90,13 @@ async function getLanguageModelById(providerId: string) {
         name: providerConfig.provider,
         baseURL: providerConfig.baseURL ?? "",
         supportsStructuredOutputs: true,
-        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+        ...(apiKey && { apiKey }),
         ...(headers && { headers }),
       })
     : CREATE_AI_MAPPER[providerConfig.provider]({
         ...providerSpecificSettings,
         ...(providerConfig.baseURL && { baseURL: providerConfig.baseURL }),
-        ...(providerConfig.apiKey && { apiKey: providerConfig.apiKey }),
+        ...(apiKey && { apiKey }),
         ...(headers && { headers }),
       })
 
@@ -101,6 +109,31 @@ async function getLanguageModelById(providerId: string) {
   return provider.languageModel(modelId)
 }
 
+async function getLanguageModelById(providerId: string) {
+  const providerConfig = await getLLMProviderConfigById(providerId)
+  return getLanguageModelFromProviderConfig(providerConfig)
+}
+
 export async function getModelById(providerId: string) {
   return getLanguageModelById(providerId)
+}
+
+export async function withLanguageModelByIdAPIKeyRotation<T>(
+  providerId: string,
+  operation: (model: ReturnType<typeof getLanguageModelFromProviderConfig>) => Promise<T>,
+  options?: APIKeyRotationOptions,
+): Promise<T> {
+  const providerConfig = await getLLMProviderConfigById(providerId)
+  return withLanguageModelAPIKeyRotation(providerConfig, operation, options)
+}
+
+export async function withLanguageModelAPIKeyRotation<T>(
+  providerConfig: LLMProviderConfig,
+  operation: (model: ReturnType<typeof getLanguageModelFromProviderConfig>) => Promise<T>,
+  options?: APIKeyRotationOptions,
+): Promise<T> {
+  return withProviderAPIKeyRotation(providerConfig, async (apiKey) => {
+    const model = getLanguageModelFromProviderConfig(providerConfig, apiKey)
+    return operation(model)
+  }, options)
 }

@@ -19,7 +19,7 @@ import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { logger } from "@/utils/logger"
-import { getModelById } from "@/utils/providers/model"
+import { withLanguageModelByIdAPIKeyRotation } from "@/utils/providers/model"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
 
@@ -251,61 +251,68 @@ export async function runStreamTextInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const model = await getModelById(providerId)
   let cumulativeText = ""
   let thinking: ThinkingSnapshot = {
     status: "thinking",
     text: "",
   }
+  let didEmitChunk = false
 
-  const result = streamText({
-    ...(streamTextParams as Parameters<typeof streamText>[0]),
-    model,
-    abortSignal: signal,
-    onError: ({ error }) => {
-      onError?.(error)
-    },
+  return withLanguageModelByIdAPIKeyRotation(providerId, async (model) => {
+    const result = streamText({
+      ...(streamTextParams as Parameters<typeof streamText>[0]),
+      model,
+      abortSignal: signal,
+      onError: ({ error }) => {
+        onError?.(error)
+      },
+    })
+
+    for await (const part of result.fullStream) {
+      if (signal?.aborted) {
+        throw new DOMException("stream aborted", "AbortError")
+      }
+
+      switch (part.type) {
+        case "text-delta": {
+          cumulativeText += part.text
+          didEmitChunk = true
+          onChunk?.(createStreamSnapshot(cumulativeText, thinking))
+          break
+        }
+        case "reasoning-delta": {
+          thinking = {
+            status: "thinking",
+            text: thinking.text + part.text,
+          }
+          didEmitChunk = true
+          onChunk?.(createStreamSnapshot(cumulativeText, thinking))
+          break
+        }
+        case "reasoning-end": {
+          thinking = {
+            ...thinking,
+            status: "complete",
+          }
+          didEmitChunk = true
+          onChunk?.(createStreamSnapshot(cumulativeText, thinking))
+          break
+        }
+        case "error": {
+          throw part.error
+        }
+      }
+    }
+
+    thinking = {
+      ...thinking,
+      status: "complete",
+    }
+
+    return createStreamSnapshot(cumulativeText, thinking)
+  }, {
+    shouldFallback: () => !didEmitChunk,
   })
-
-  for await (const part of result.fullStream) {
-    if (signal?.aborted) {
-      throw new DOMException("stream aborted", "AbortError")
-    }
-
-    switch (part.type) {
-      case "text-delta": {
-        cumulativeText += part.text
-        onChunk?.(createStreamSnapshot(cumulativeText, thinking))
-        break
-      }
-      case "reasoning-delta": {
-        thinking = {
-          status: "thinking",
-          text: thinking.text + part.text,
-        }
-        onChunk?.(createStreamSnapshot(cumulativeText, thinking))
-        break
-      }
-      case "reasoning-end": {
-        thinking = {
-          ...thinking,
-          status: "complete",
-        }
-        onChunk?.(createStreamSnapshot(cumulativeText, thinking))
-        break
-      }
-      case "error": {
-        throw part.error
-      }
-    }
-  }
-
-  thinking = {
-    ...thinking,
-    status: "complete",
-  }
-
-  return createStreamSnapshot(cumulativeText, thinking)
 }
 
 export async function runStructuredObjectStreamInBackground(
@@ -319,7 +326,6 @@ export async function runStructuredObjectStreamInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const model = await getModelById(providerId)
   let cumulativeValue: Record<string, unknown> = {}
   let thinking: ThinkingSnapshot = {
     status: "thinking",
@@ -336,66 +342,74 @@ export async function runStructuredObjectStreamInBackground(
     schemaShape[field.name] = fieldTypeToZodSchema[field.type] ?? z.string().nullable()
   }
   const objectSchema = z.object(schemaShape).strict()
+  let didEmitChunk = false
 
-  const result = streamText({
-    ...(streamParams as Parameters<typeof streamText>[0]),
-    model,
-    output: Output.object({
-      schema: objectSchema,
-    }),
-    abortSignal: signal,
-    onError: ({ error }) => {
-      onError?.(error)
-    },
-  })
-  let cumulativeText = ""
+  return withLanguageModelByIdAPIKeyRotation(providerId, async (model) => {
+    const result = streamText({
+      ...(streamParams as Parameters<typeof streamText>[0]),
+      model,
+      output: Output.object({
+        schema: objectSchema,
+      }),
+      abortSignal: signal,
+      onError: ({ error }) => {
+        onError?.(error)
+      },
+    })
+    let cumulativeText = ""
 
-  for await (const part of result.fullStream) {
-    if (signal?.aborted) {
-      throw new DOMException("stream aborted", "AbortError")
-    }
+    for await (const part of result.fullStream) {
+      if (signal?.aborted) {
+        throw new DOMException("stream aborted", "AbortError")
+      }
 
-    switch (part.type) {
-      case "text-delta": {
-        cumulativeText += part.text
-        const partial = await parsePartialJson(cumulativeText)
-        if (isRecord(partial.value)) {
-          cumulativeValue = { ...cumulativeValue, ...partial.value }
+      switch (part.type) {
+        case "text-delta": {
+          cumulativeText += part.text
+          const partial = await parsePartialJson(cumulativeText)
+          if (isRecord(partial.value)) {
+            cumulativeValue = { ...cumulativeValue, ...partial.value }
+            didEmitChunk = true
+            onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+          }
+          break
+        }
+        case "reasoning-delta": {
+          thinking = {
+            status: "thinking",
+            text: thinking.text + part.text,
+          }
+          didEmitChunk = true
           onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+          break
         }
-        break
-      }
-      case "reasoning-delta": {
-        thinking = {
-          status: "thinking",
-          text: thinking.text + part.text,
+        case "reasoning-end": {
+          thinking = {
+            ...thinking,
+            status: "complete",
+          }
+          didEmitChunk = true
+          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+          break
         }
-        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
-        break
-      }
-      case "reasoning-end": {
-        thinking = {
-          ...thinking,
-          status: "complete",
+        case "error": {
+          throw part.error
         }
-        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
-        break
-      }
-      case "error": {
-        throw part.error
       }
     }
-  }
 
-  const finalJson = await parsePartialJson(cumulativeText)
-  const finalValue = objectSchema.parse(finalJson.value)
+    const finalJson = await parsePartialJson(cumulativeText)
+    const finalValue = objectSchema.parse(finalJson.value)
 
-  thinking = {
-    ...thinking,
-    status: "complete",
-  }
+    thinking = {
+      ...thinking,
+      status: "complete",
+    }
 
-  return createStreamSnapshot(finalValue, thinking)
+    return createStreamSnapshot(finalValue, thinking)
+  }, {
+    shouldFallback: () => !didEmitChunk,
+  })
 }
 
 const parseStreamTextStartMessage = createStartMessageParser<BackgroundStreamTextSerializablePayload>(streamTextPayloadSchema)
