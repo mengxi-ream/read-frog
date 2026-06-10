@@ -7,6 +7,7 @@ import {
   buildNotebaseCreateInputFromPending,
   createPendingNotebaseSave,
   doesSchemaMatchPendingColumns,
+  getNotebaseDetailUrl,
   getOutputSchemaFingerprint,
   validatePendingNotebaseSaveAction,
 } from "../notebase-pending-save"
@@ -106,6 +107,13 @@ describe("notebase pending save", () => {
         },
       },
     })
+  })
+
+  it("builds the website detail URL from the pending notebase id", () => {
+    const notebaseId = "11111111-1111-4111-8111-111111111111"
+    const url = new URL(getNotebaseDetailUrl(notebaseId))
+
+    expect(url.pathname).toBe(`/notebase/${notebaseId}`)
   })
 
   it("writes a notebase connection into the matching action config", () => {

@@ -18,6 +18,7 @@ import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.conten
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import {
   isORPCUnauthorizedError,
@@ -27,6 +28,7 @@ import { isORPCForbiddenError } from "@/utils/notebase-beta"
 import {
   buildNotebaseConnectionFromPending,
   buildNotebaseCreateInputFromPending,
+  getNotebaseDetailUrl,
   setPendingNotebaseSave,
 } from "@/utils/notebase-pending-save"
 import { orpcClient } from "@/utils/orpc/client"
@@ -67,6 +69,16 @@ export function SaveToNotebaseDialogHost() {
       toast.success(i18n.t("action.saveToNotebaseSuccess"), {
         description: pending.actionName,
       })
+
+      try {
+        await sendMessage("openPage", {
+          url: getNotebaseDetailUrl(pending.notebaseId),
+          active: true,
+        })
+      }
+      catch (error) {
+        logger.warn("[SaveToNotebaseDialogHost] Failed to open Notebase detail page", error)
+      }
     },
     onError: (error: unknown) => {
       if (isORPCUnauthorizedError(error)) {
@@ -168,6 +180,7 @@ export function SaveToNotebaseDialogHost() {
         <DialogFooter>
           <Button
             type="button"
+            variant="brand"
             disabled={isCreateFlowBusy}
             onClick={() => {
               if (isAuthenticated) {

@@ -13,6 +13,7 @@ import {
   buildNotebaseCreateInputFromPending,
   clearPendingNotebaseSave,
   doesSchemaMatchPendingColumns,
+  getNotebaseDetailUrl,
   getPendingNotebaseSave,
   isPendingNotebaseSaveExpired,
   validatePendingNotebaseSaveAction,
@@ -27,6 +28,7 @@ interface PendingNotebaseSaveProcessorDeps {
   hasAuthenticatedSession: () => Promise<boolean>
   createNotebase: (input: NotebaseCreateInput) => Promise<unknown>
   getSchema: (id: string) => Promise<NotebaseGetSchemaOutput>
+  openNotebasePage: (notebaseId: string) => Promise<void>
   now: () => number
   log: Pick<typeof logger, "info" | "warn" | "error">
 }
@@ -71,7 +73,7 @@ function shouldClearCreateError(error: unknown) {
   return isORPCForbiddenError(error) || isORPCValidationError(error)
 }
 
-async function writePendingConnection(
+async function completePendingSave(
   deps: PendingNotebaseSaveProcessorDeps,
   pending: PendingNotebaseSave,
 ) {
@@ -98,6 +100,14 @@ async function writePendingConnection(
     actionId: pending.actionId,
     notebaseId: pending.notebaseId,
   })
+
+  try {
+    await deps.openNotebasePage(pending.notebaseId)
+  }
+  catch (error) {
+    deps.log.warn("[NotebasePendingSave] Failed to open Notebase detail page", error)
+  }
+
   return true
 }
 
@@ -115,7 +125,7 @@ async function tryDuplicateCreateRecovery(
       return false
     }
 
-    return await writePendingConnection(deps, pending)
+    return await completePendingSave(deps, pending)
   }
   catch (error) {
     deps.log.warn("[NotebasePendingSave] Duplicate recovery failed", error)
@@ -181,7 +191,7 @@ export function createNotebasePendingSaveProcessor(deps: PendingNotebaseSaveProc
 
       try {
         await deps.createNotebase(buildNotebaseCreateInputFromPending(pending))
-        await writePendingConnection(deps, pending)
+        await completePendingSave(deps, pending)
       }
       catch (error) {
         if (isORPCUnauthorizedError(error)) {
@@ -222,6 +232,12 @@ export function setupNotebasePendingSaveProcessor() {
     hasAuthenticatedSession,
     createNotebase: input => backgroundOrpcClient.notebase.create(input),
     getSchema: id => backgroundOrpcClient.notebase.getSchema({ id }),
+    openNotebasePage: async (notebaseId) => {
+      await browser.tabs.create({
+        active: true,
+        url: getNotebaseDetailUrl(notebaseId),
+      })
+    },
     now: () => Date.now(),
     log: logger,
   })

@@ -1,3 +1,4 @@
+import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PendingNotebaseSave } from "@/utils/notebase-pending-save"
@@ -6,7 +7,6 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   buildNotebaseCreateInputFromPending,
   createPendingNotebaseSave,
-
 } from "@/utils/notebase-pending-save"
 import { createNotebasePendingSaveProcessor } from "../notebase-pending-save"
 
@@ -57,12 +57,34 @@ function createDeps({
     hasAuthenticatedSession: vi.fn().mockResolvedValue(authenticated),
     createNotebase: vi.fn().mockResolvedValue({ txid: 1 }),
     getSchema: vi.fn(),
+    openNotebasePage: vi.fn().mockResolvedValue(undefined),
     now: () => 1_000,
     log: {
       info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
     },
+  }
+}
+
+function createMatchingSchema(pending: PendingNotebaseSave): NotebaseGetSchemaOutput {
+  return {
+    id: pending.notebaseId,
+    name: pending.actionName,
+    updatedAt: new Date(),
+    notebaseColumns: pending.columns.map((column, index) => ({
+      id: column.notebaseColumnId,
+      notebaseId: pending.notebaseId,
+      name: column.notebaseColumnName,
+      config: column.localFieldType === "number"
+        ? { type: "number", decimal: 0, format: "number" }
+        : { type: "string" },
+      position: index,
+      isPrimary: index === 0,
+      width: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    })),
   }
 }
 
@@ -84,6 +106,7 @@ describe("notebase pending save processor", () => {
     expect(deps.clearPending).toHaveBeenCalledTimes(1)
     expect(deps.hasAuthenticatedSession).not.toHaveBeenCalled()
     expect(deps.createNotebase).not.toHaveBeenCalled()
+    expect(deps.openNotebasePage).not.toHaveBeenCalled()
   })
 
   it("keeps pending work while logged out and resumes after auth", async () => {
@@ -99,6 +122,7 @@ describe("notebase pending save processor", () => {
 
     expect(loggedOutDeps.createNotebase).not.toHaveBeenCalled()
     expect(loggedOutDeps.clearPending).not.toHaveBeenCalled()
+    expect(loggedOutDeps.openNotebasePage).not.toHaveBeenCalled()
 
     const loggedInDeps = createDeps({
       pending,
@@ -122,5 +146,24 @@ describe("notebase pending save processor", () => {
       }),
     }))
     expect(loggedInDeps.clearPending).toHaveBeenCalledTimes(1)
+    expect(loggedInDeps.openNotebasePage).toHaveBeenCalledWith(pending.notebaseId)
+  })
+
+  it("opens the notebase page after duplicate-create recovery succeeds", async () => {
+    const action = createAction()
+    const pending = createPendingNotebaseSave(action, { summary: "A short summary" }, 1_000)
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+    deps.createNotebase.mockRejectedValueOnce(new Error("duplicate"))
+    deps.getSchema.mockResolvedValueOnce(createMatchingSchema(pending))
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.setConfig).toHaveBeenCalledTimes(1)
+    expect(deps.clearPending).toHaveBeenCalledTimes(1)
+    expect(deps.openNotebasePage).toHaveBeenCalledWith(pending.notebaseId)
   })
 })

@@ -8,6 +8,7 @@ import type {
 } from "@/types/config/selection-toolbar"
 import { z as zod } from "zod"
 import { storage } from "#imports"
+import { env } from "@/env"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
 
 export const NOTEBASE_PENDING_SAVE_STORAGE_KEY = "notebasePendingSave"
@@ -100,6 +101,10 @@ export function buildNotebaseCreateInputFromPending(pending: PendingNotebaseSave
       },
     },
   }
+}
+
+export function getNotebaseDetailUrl(notebaseId: string) {
+  return new URL(`/notebase/${encodeURIComponent(notebaseId)}`, env.WXT_WEBSITE_URL).toString()
 }
 
 export function buildNotebaseConnectionFromPending(

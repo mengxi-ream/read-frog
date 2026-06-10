@@ -132,8 +132,8 @@ function SaveToNotebaseButtonEnabled({
     return (
       <Button
         type="button"
+        variant="brand"
         size="sm"
-        variant="outline"
         disabled={isUnconnectedDisabled}
         onClick={handleOpenCreateDialog}
       >
@@ -191,7 +191,7 @@ function SaveToNotebaseButtonEnabled({
     <Button
       type="button"
       size="sm"
-      variant="outline"
+      variant="brand"
       disabled={isDisabled}
       onClick={handleSave}
     >
