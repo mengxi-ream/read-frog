@@ -1,5 +1,5 @@
 import type { ReactNode } from "react"
-import type { BackgroundStyle, SubtitlesDisplayMode, SubtitlesFontFamily, SubtitlesTranslationPosition, SubtitleTextStyle } from "@/types/config/subtitles"
+import type { BackgroundStyle, SubtitleMode, SubtitlesDisplayMode, SubtitlesFontFamily, SubtitlesTranslationPosition, SubtitleTextStyle } from "@/types/config/subtitles"
 import { IconLanguage, IconRefresh, IconSettings, IconSubtitles } from "@tabler/icons-react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
@@ -21,7 +21,9 @@ import {
   DEFAULT_FONT_STROKE_WIDTH,
   DEFAULT_FONT_WEIGHT,
   DEFAULT_LINE_GAP,
+  DEFAULT_PRESET_STYLE,
   DEFAULT_SUBTITLE_COLOR,
+  DEFAULT_SUBTITLE_MODE,
   DEFAULT_TRANSLATION_POSITION,
   MAX_BACKGROUND_OPACITY,
   MAX_FONT_SCALE,
@@ -35,6 +37,7 @@ import {
   MIN_FONT_STROKE_WIDTH,
   MIN_FONT_WEIGHT,
   MIN_LINE_GAP,
+  SUBTITLE_STYLE_PRESETS,
 } from "@/utils/constants/subtitles"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesStore } from "../../../atoms"
@@ -208,11 +211,30 @@ const DEFAULT_TEXT_STYLE: SubtitleTextStyle = {
 export function StyleView() {
   const [config, setConfig] = useAtom(configFieldsAtomMap.videoSubtitles, { store: subtitlesStore })
   const portalContainer = use(ShadowWrapperContext)
-  const { displayMode, translationPosition, lineGap, backgroundForceMerge, container } = config.style
+  const { displayMode, translationPosition, lineGap, backgroundForceMerge, mode, presetStyle, container } = config.style
 
   const updateStyle = (patch: Record<string, unknown>) => {
     void setConfig(deepmerge(config, { style: patch }))
   }
+
+  const handleModeChange = (newMode: SubtitleMode) => {
+    updateStyle({ mode: newMode })
+  }
+
+  const handlePresetChange = (index: number) => {
+    const preset = SUBTITLE_STYLE_PRESETS[index]
+    updateStyle({
+      presetStyle: index,
+      lineGap: preset.lineGap,
+      backgroundForceMerge: preset.backgroundForceMerge,
+      container: {
+        backgroundStyle: preset.backgroundStyle,
+        backgroundOpacity: preset.backgroundOpacity,
+      },
+    })
+  }
+
+  const isAdvanced = mode === "advanced"
 
   return (
     <div className="min-h-[calc(100cqh-6rem)] px-3 pb-4 pt-3">
@@ -223,6 +245,8 @@ export function StyleView() {
           displayMode: DEFAULT_DISPLAY_MODE,
           translationPosition: DEFAULT_TRANSLATION_POSITION,
           lineGap: DEFAULT_LINE_GAP,
+          mode: DEFAULT_SUBTITLE_MODE,
+          presetStyle: DEFAULT_PRESET_STYLE,
           backgroundForceMerge: DEFAULT_BACKGROUND_FORCE_MERGE,
           container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY, backgroundStyle: undefined },
         })}
@@ -258,66 +282,108 @@ export function StyleView() {
           </SettingRow>
         </Activity>
 
-        <SettingRow label="Background Style">
-          <Select value={container.backgroundStyle ?? "solid"} onValueChange={(v: string | null) => v && updateStyle({ container: { backgroundStyle: v as BackgroundStyle } })}>
-            <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
-              <SelectValue>{BACKGROUND_STYLE_OPTIONS.find(o => o.value === (container.backgroundStyle ?? "solid"))?.label}</SelectValue>
-            </SelectTrigger>
-            <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
-              <SelectGroup>
-                {BACKGROUND_STYLE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+        <SettingRow label={i18n.t("options.videoSubtitles.style.mode")}>
+          <div className="flex gap-1 rounded-lg bg-muted p-0.5">
+            {(["basic", "advanced"] as const).map(m => (
+              <Button
+                key={m}
+                type="button"
+                variant={mode === m ? "default" : "ghost"}
+                size="sm"
+                className="flex-1 text-[13px]"
+                onClick={() => handleModeChange(m)}
+              >
+                {i18n.t(`options.videoSubtitles.style.modeOptions.${m}`)}
+              </Button>
+            ))}
+          </div>
         </SettingRow>
 
-        <SliderRow
-          label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
-          value={container.backgroundOpacity}
-          display={`${container.backgroundOpacity}%`}
-          min={MIN_BACKGROUND_OPACITY}
-          max={MAX_BACKGROUND_OPACITY}
-          step={5}
-          onChange={v => updateStyle({ container: { backgroundOpacity: v } })}
-        />
+        {!isAdvanced && (
+          <SettingRow label={i18n.t("options.videoSubtitles.style.presetStyle")}>
+            <Select value={String(presetStyle)} onValueChange={v => handlePresetChange(Number(v))}>
+              <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
+                <SelectValue>{SUBTITLE_STYLE_PRESETS[presetStyle]?.label}</SelectValue>
+              </SelectTrigger>
+              <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
+                <SelectGroup>
+                  {SUBTITLE_STYLE_PRESETS.map((p, i) => (
+                    <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </SettingRow>
+        )}
 
-        <SettingRow label={i18n.t("options.videoSubtitles.style.backgroundForceMerge")}>
-          <Switch
-            checked={backgroundForceMerge ?? false}
-            onCheckedChange={v => updateStyle({ backgroundForceMerge: v })}
-          />
-        </SettingRow>
+        {isAdvanced && (
+          <>
+            <SettingRow label="Background Style">
+              <Select value={container.backgroundStyle ?? "solid"} onValueChange={(v: string | null) => v && updateStyle({ container: { backgroundStyle: v as BackgroundStyle } })}>
+                <SelectTrigger size="sm" className={SELECT_TRIGGER_CLASS}>
+                  <SelectValue>{BACKGROUND_STYLE_OPTIONS.find(o => o.value === (container.backgroundStyle ?? "solid"))?.label}</SelectValue>
+                </SelectTrigger>
+                <SelectContent container={portalContainer} className={SELECT_CONTENT_CLASS}>
+                  <SelectGroup>
+                    {BACKGROUND_STYLE_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </SettingRow>
 
-        <SliderRow
-          label={i18n.t("options.videoSubtitles.style.lineGap")}
-          value={lineGap}
-          display={`${lineGap}px`}
-          min={MIN_LINE_GAP}
-          max={MAX_LINE_GAP}
-          step={1}
-          onChange={v => updateStyle({ lineGap: v })}
-        />
+            <SliderRow
+              label={i18n.t("options.videoSubtitles.style.backgroundOpacity")}
+              value={container.backgroundOpacity}
+              display={`${container.backgroundOpacity}%`}
+              min={MIN_BACKGROUND_OPACITY}
+              max={MAX_BACKGROUND_OPACITY}
+              step={5}
+              onChange={v => updateStyle({ container: { backgroundOpacity: v } })}
+            />
+
+            <SettingRow label={i18n.t("options.videoSubtitles.style.backgroundForceMerge")}>
+              <Switch
+                checked={backgroundForceMerge ?? false}
+                onCheckedChange={v => updateStyle({ backgroundForceMerge: v })}
+              />
+            </SettingRow>
+
+            <SliderRow
+              label={i18n.t("options.videoSubtitles.style.lineGap")}
+              value={lineGap}
+              display={`${lineGap}px`}
+              min={MIN_LINE_GAP}
+              max={MAX_LINE_GAP}
+              step={1}
+              onChange={v => updateStyle({ lineGap: v })}
+            />
+          </>
+        )}
       </SettingsGroup>
 
-      <TextStyleGroup
-        icon={<IconSubtitles className="size-3.5" />}
-        title={i18n.t("options.videoSubtitles.style.mainSubtitle")}
-        textStyle={config.style.main}
-        onChange={patch => updateStyle({ main: patch })}
-        onReset={() => updateStyle({ main: DEFAULT_TEXT_STYLE })}
-        portalContainer={portalContainer}
-      />
+      {isAdvanced && (
+        <>
+          <TextStyleGroup
+            icon={<IconSubtitles className="size-3.5" />}
+            title={i18n.t("options.videoSubtitles.style.mainSubtitle")}
+            textStyle={config.style.main}
+            onChange={patch => updateStyle({ main: patch })}
+            onReset={() => updateStyle({ main: DEFAULT_TEXT_STYLE })}
+            portalContainer={portalContainer}
+          />
 
-      <TextStyleGroup
-        icon={<IconLanguage className="size-3.5" />}
-        title={i18n.t("options.videoSubtitles.style.translationSubtitle")}
-        textStyle={config.style.translation}
-        onChange={patch => updateStyle({ translation: patch })}
-        onReset={() => updateStyle({ translation: DEFAULT_TEXT_STYLE })}
-        portalContainer={portalContainer}
-      />
+          <TextStyleGroup
+            icon={<IconLanguage className="size-3.5" />}
+            title={i18n.t("options.videoSubtitles.style.translationSubtitle")}
+            textStyle={config.style.translation}
+            onChange={patch => updateStyle({ translation: patch })}
+            onReset={() => updateStyle({ translation: DEFAULT_TEXT_STYLE })}
+            portalContainer={portalContainer}
+          />
+        </>
+      )}
     </div>
   )
 }

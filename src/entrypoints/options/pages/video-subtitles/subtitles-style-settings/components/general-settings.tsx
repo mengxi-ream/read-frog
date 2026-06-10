@@ -1,4 +1,4 @@
-import type { BackgroundStyle, SubtitlesDisplayMode, SubtitlesTranslationPosition } from "@/types/config/subtitles"
+import type { BackgroundStyle, SubtitleMode, SubtitlesDisplayMode, SubtitlesTranslationPosition } from "@/types/config/subtitles"
 import { Icon } from "@iconify/react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
@@ -13,7 +13,7 @@ import { Slider } from "@/components/ui/base-ui/slider"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP } from "@/utils/constants/subtitles"
+import { BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP, SUBTITLE_STYLE_PRESETS } from "@/utils/constants/subtitles"
 
 const SLIDER_ROW_CLASS_NAME = "gap-0"
 const SLIDER_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
@@ -21,7 +21,7 @@ const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w
 
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
-  const { displayMode, translationPosition, lineGap, backgroundForceMerge, container } = videoSubtitlesConfig.style
+  const { displayMode, translationPosition, lineGap, backgroundForceMerge, mode, presetStyle, container } = videoSubtitlesConfig.style
   const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
   const [draftLineGap, setDraftLineGap] = useState(lineGap)
 
@@ -51,6 +51,25 @@ export function GeneralSettings() {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: style } }))
   }
 
+  const handleModeChange = (newMode: SubtitleMode) => {
+    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { mode: newMode } }))
+  }
+
+  const handlePresetChange = (index: number) => {
+    const preset = SUBTITLE_STYLE_PRESETS[index]
+    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
+      style: {
+        presetStyle: index,
+        lineGap: preset.lineGap,
+        backgroundForceMerge: preset.backgroundForceMerge,
+        container: {
+          backgroundStyle: preset.backgroundStyle,
+          backgroundOpacity: preset.backgroundOpacity,
+        },
+      },
+    }))
+  }
+
   const resetGeneralConfig = () => {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
       style: {
@@ -64,6 +83,8 @@ export function GeneralSettings() {
       },
     }))
   }
+
+  const isAdvanced = mode === "advanced"
 
   return (
     <Card className="p-5">
@@ -131,80 +152,121 @@ export function GeneralSettings() {
         )}
 
         <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">Background Style</FieldLabel>
-          <Select
-            value={videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"}
-            onValueChange={(v: string | null) => v && void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: { backgroundStyle: v as BackgroundStyle } } }))}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue>
-                {BACKGROUND_STYLE_OPTIONS.find(o => o.value === (videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"))?.label}
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                {BACKGROUND_STYLE_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </Field>
-
-        <Field className={SLIDER_ROW_CLASS_NAME}>
-          <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
-            <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldLabel>
-            <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
-              <div className="flex min-w-0 items-center gap-2">
-                <Slider
-                  min={MIN_BACKGROUND_OPACITY}
-                  max={MAX_BACKGROUND_OPACITY}
-                  step={5}
-                  value={draftBackgroundOpacity}
-                  onValueChange={value => setDraftBackgroundOpacity(value as number)}
-                  onValueCommitted={value => handleContainerChange({ backgroundOpacity: value as number })}
-                  className="flex-1"
-                />
-                <span className="w-10 text-sm text-right">
-                  {draftBackgroundOpacity}
-                  %
-                </span>
-              </div>
-            </div>
+          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.mode")}</FieldLabel>
+          <div className="flex gap-1 rounded-lg bg-muted p-0.5">
+            {(["basic", "advanced"] as const).map(m => (
+              <Button
+                key={m}
+                variant={mode === m ? "default" : "ghost"}
+                size="sm"
+                className="flex-1 text-[13px]"
+                onClick={() => handleModeChange(m)}
+              >
+                {i18n.t(`options.videoSubtitles.style.modeOptions.${m}`)}
+              </Button>
+            ))}
           </div>
         </Field>
 
-        <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.backgroundForceMerge")}</FieldLabel>
-          <Switch
-            checked={backgroundForceMerge ?? false}
-            onCheckedChange={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { backgroundForceMerge: v } }))}
-            size="sm"
-          />
-        </Field>
+        {!isAdvanced && (
+          <Field orientation="responsive-compact">
+            <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.presetStyle")}</FieldLabel>
+            <Select value={String(presetStyle)} onValueChange={v => handlePresetChange(Number(v))}>
+              <SelectTrigger className="h-8">
+                <SelectValue>
+                  {SUBTITLE_STYLE_PRESETS[presetStyle]?.label}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {SUBTITLE_STYLE_PRESETS.map((p, i) => (
+                    <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+        )}
 
-        <Field className={SLIDER_ROW_CLASS_NAME}>
-          <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
-            <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.lineGap")}</FieldLabel>
-            <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
-              <div className="flex min-w-0 items-center gap-2">
-                <Slider
-                  min={MIN_LINE_GAP}
-                  max={MAX_LINE_GAP}
-                  step={1}
-                  value={draftLineGap}
-                  onValueChange={v => setDraftLineGap(v as number)}
-                  onValueCommitted={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { lineGap: v as number } }))}
-                  className="flex-1"
-                />
-                <span className="w-10 text-sm text-right">
-                  {draftLineGap}
-                  px
-                </span>
+        {isAdvanced && (
+          <>
+            <Field orientation="responsive-compact">
+              <FieldLabel className="text-sm whitespace-nowrap">Background Style</FieldLabel>
+              <Select
+                value={videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"}
+                onValueChange={(v: string | null) => v && void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: { backgroundStyle: v as BackgroundStyle } } }))}
+              >
+                <SelectTrigger className="h-8">
+                  <SelectValue>
+                    {BACKGROUND_STYLE_OPTIONS.find(o => o.value === (videoSubtitlesConfig.style.container.backgroundStyle ?? "solid"))?.label}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {BACKGROUND_STYLE_OPTIONS.map(option => (
+                      <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+            </Field>
+
+            <Field className={SLIDER_ROW_CLASS_NAME}>
+              <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
+                <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldLabel>
+                <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Slider
+                      min={MIN_BACKGROUND_OPACITY}
+                      max={MAX_BACKGROUND_OPACITY}
+                      step={5}
+                      value={draftBackgroundOpacity}
+                      onValueChange={value => setDraftBackgroundOpacity(value as number)}
+                      onValueCommitted={value => handleContainerChange({ backgroundOpacity: value as number })}
+                      className="flex-1"
+                    />
+                    <span className="w-10 text-sm text-right">
+                      {draftBackgroundOpacity}
+                      %
+                    </span>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </Field>
+            </Field>
+
+            <Field orientation="responsive-compact">
+              <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.backgroundForceMerge")}</FieldLabel>
+              <Switch
+                checked={backgroundForceMerge ?? false}
+                onCheckedChange={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { backgroundForceMerge: v } }))}
+                size="sm"
+              />
+            </Field>
+
+            <Field className={SLIDER_ROW_CLASS_NAME}>
+              <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
+                <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.lineGap")}</FieldLabel>
+                <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <Slider
+                      min={MIN_LINE_GAP}
+                      max={MAX_LINE_GAP}
+                      step={1}
+                      value={draftLineGap}
+                      onValueChange={v => setDraftLineGap(v as number)}
+                      onValueCommitted={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { lineGap: v as number } }))}
+                      className="flex-1"
+                    />
+                    <span className="w-10 text-sm text-right">
+                      {draftLineGap}
+                      px
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Field>
+          </>
+        )}
       </FieldGroup>
     </Card>
   )

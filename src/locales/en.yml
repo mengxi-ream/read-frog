@@ -892,6 +892,11 @@ options:
         above: Above
         below: Below
       generalSettings: General
+      mode: Mode
+      presetStyle: Style
+      modeOptions:
+        basic: Basic
+        advanced: Advanced
       mainSubtitle: Main Subtitle
       translationSubtitle: Translation Subtitle
       containerStyle: Background
