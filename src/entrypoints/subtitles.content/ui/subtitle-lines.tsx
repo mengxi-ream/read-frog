@@ -174,7 +174,7 @@ export function SubtitlesPair({
   translationAbove, backgroundOpacity,
   lineGap = 0,
   backgroundStyle = "solid",
-  forceMergeBackground,
+  backgroundForceMerge,
   dir, lang,
 }: {
   mainText: string
@@ -187,7 +187,7 @@ export function SubtitlesPair({
   backgroundOpacity?: number
   lineGap?: number
   backgroundStyle?: BackgroundStyle
-  forceMergeBackground?: boolean
+  backgroundForceMerge?: boolean
   dir?: string
   lang?: string
 }) {
@@ -277,7 +277,7 @@ export function SubtitlesPair({
       }
     }
 
-    const shouldMerge = layoutData.length === 2 && (lineGap <= 3 || forceMergeBackground)
+    const shouldMerge = layoutData.length === 2 && (lineGap <= 3 || backgroundForceMerge)
 
     if (shouldMerge) {
       const first = makeRect(layoutData[0], 0)
@@ -304,7 +304,7 @@ export function SubtitlesPair({
         y += lineGap
     }
     return rects
-  }, [layoutData, backgroundOpacity, backgroundStyle, containerWidth, lineGap, forceMergeBackground])
+  }, [layoutData, backgroundOpacity, backgroundStyle, containerWidth, lineGap, backgroundForceMerge])
 
   // Compute total SVG height
   const svgTotalHeight = useMemo(() => {

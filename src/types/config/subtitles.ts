@@ -27,7 +27,7 @@ export const subtitlesStyleSchema = z.object({
   lineGap: z.number().min(MIN_LINE_GAP).max(MAX_LINE_GAP),
   main: subtitleTextStyleSchema,
   translation: subtitleTextStyleSchema,
-  forceMergeBackground: z.boolean().optional(),
+  backgroundForceMerge: z.boolean().optional(),
   container: subtitleContainerStyleSchema,
 })
 

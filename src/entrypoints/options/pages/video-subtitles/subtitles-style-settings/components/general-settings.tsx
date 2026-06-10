@@ -21,7 +21,7 @@ const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w
 
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
-  const { displayMode, translationPosition, lineGap, forceMergeBackground, container } = videoSubtitlesConfig.style
+  const { displayMode, translationPosition, lineGap, backgroundForceMerge, container } = videoSubtitlesConfig.style
   const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
   const [draftLineGap, setDraftLineGap] = useState(lineGap)
 
@@ -198,10 +198,10 @@ export function GeneralSettings() {
         </Field>
 
         <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.forceMergeBackground")}</FieldLabel>
+          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.backgroundForceMerge")}</FieldLabel>
           <Switch
-            checked={forceMergeBackground ?? false}
-            onCheckedChange={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { forceMergeBackground: v } }))}
+            checked={backgroundForceMerge ?? false}
+            onCheckedChange={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { backgroundForceMerge: v } }))}
             size="sm"
           />
         </Field>
