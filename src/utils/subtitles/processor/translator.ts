@@ -144,8 +144,9 @@ async function translateSingleSubtitle(
 
 export async function fetchSubtitlesSummary(
   videoContext: SubtitlesVideoContext,
+  configOverride?: Config,
 ): Promise<string | null> {
-  const config = await getLocalConfig()
+  const config = configOverride ?? await getLocalConfig()
   if (!config?.translate.enableAIContentAware) {
     return null
   }
@@ -170,8 +171,9 @@ export async function fetchSubtitlesSummary(
 export async function translateSubtitles(
   fragments: SubtitlesFragment[],
   videoContext: SubtitlesVideoContext,
+  configOverride?: Config,
 ): Promise<SubtitlesFragment[]> {
-  const config = await getLocalConfig()
+  const config = configOverride ?? await getLocalConfig()
   if (!config) {
     return fragments.map(f => ({ ...f, translation: "" }))
   }
