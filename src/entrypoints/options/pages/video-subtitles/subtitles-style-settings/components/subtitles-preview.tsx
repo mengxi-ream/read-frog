@@ -159,7 +159,7 @@ const LANG_GROUPS: Record<string, number[]> = {
 export function SubtitlesPreview() {
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const { targetCode } = useAtomValue(configFieldsAtomMap.language)
-  const { displayMode, translationPosition, lineGap, container } = style
+  const { displayMode, translationPosition, lineGap, forceMergeBackground, container } = style
 
   const [index, setIndex] = useState(0)
   const [paused, setPaused] = useState(false)
@@ -259,6 +259,7 @@ export function SubtitlesPreview() {
               backgroundOpacity={container.backgroundOpacity}
               backgroundStyle={container.backgroundStyle}
               lineGap={lineGap}
+              forceMergeBackground={forceMergeBackground}
             />
           </div>
         </div>

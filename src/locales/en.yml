@@ -902,6 +902,7 @@ options:
       backgroundOpacity: Background Opacity
       backgroundStyle: Background
       lineGap: Line Gap
+      forceMergeBackground: Merge Background
       shadowIntensity: Shadow
       strokeWidth: Outline
       reset: Reset to Default

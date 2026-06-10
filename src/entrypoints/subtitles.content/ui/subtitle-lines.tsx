@@ -174,6 +174,7 @@ export function SubtitlesPair({
   translationAbove, backgroundOpacity,
   lineGap = 0,
   backgroundStyle = "solid",
+  forceMergeBackground,
   dir, lang,
 }: {
   mainText: string
@@ -186,6 +187,7 @@ export function SubtitlesPair({
   backgroundOpacity?: number
   lineGap?: number
   backgroundStyle?: BackgroundStyle
+  forceMergeBackground?: boolean
   dir?: string
   lang?: string
 }) {
@@ -275,7 +277,7 @@ export function SubtitlesPair({
       }
     }
 
-    const shouldMerge = layoutData.length === 2 && lineGap <= 3
+    const shouldMerge = layoutData.length === 2 && (lineGap <= 3 || forceMergeBackground)
 
     if (shouldMerge) {
       const first = makeRect(layoutData[0], 0)
@@ -302,7 +304,7 @@ export function SubtitlesPair({
         y += lineGap
     }
     return rects
-  }, [layoutData, backgroundOpacity, backgroundStyle, containerWidth, lineGap])
+  }, [layoutData, backgroundOpacity, backgroundStyle, containerWidth, lineGap, forceMergeBackground])
 
   // Compute total SVG height
   const svgTotalHeight = useMemo(() => {
@@ -350,14 +352,14 @@ export function SubtitlesPair({
     if (bgIsNone)
       return { ...base, display: "none" }
     if (bgIsSolid)
-      return { ...base, backgroundColor: `rgba(0,0,0,${op.toFixed(2)})`, boxShadow: "0 2px 8px rgba(0,0,0,0.25)" }
+      return { ...base, backgroundColor: `rgba(0,0,0,${op.toFixed(2)})`, boxShadow: "0 4px 12px rgba(0,0,0,0.35)" }
     if (bgIsBlur) {
       return {
         ...base,
         backgroundColor: `rgba(0,0,0,${(op * 0.3).toFixed(2)})`,
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
+        boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
       }
     }
     return {
@@ -365,7 +367,7 @@ export function SubtitlesPair({
       backgroundColor: "rgba(255,255,255,0.08)",
       backdropFilter: "blur(24px) saturate(1.5)",
       WebkitBackdropFilter: "blur(24px) saturate(1.5)",
-      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 12px rgba(0,0,0,0.1)",
+      boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.35)",
     }
   }
 

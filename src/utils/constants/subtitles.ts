@@ -85,6 +85,7 @@ export const BACKGROUND_STYLE_OPTIONS = [
 export const MIN_LINE_GAP = -50
 export const MAX_LINE_GAP = 50
 export const DEFAULT_LINE_GAP = 2
+export const DEFAULT_FORCE_MERGE_BACKGROUND = false
 export const DEFAULT_CONTROLS_HEIGHT = 60
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 // Subtitle controls sit on top of arbitrary host pages, so keep their theme fixed for readability.

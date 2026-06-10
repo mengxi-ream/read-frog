@@ -10,6 +10,7 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Label } from "@/components/ui/base-ui/label"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP } from "@/utils/constants/subtitles"
@@ -20,7 +21,7 @@ const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w
 
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
-  const { displayMode, translationPosition, lineGap, container } = videoSubtitlesConfig.style
+  const { displayMode, translationPosition, lineGap, forceMergeBackground, container } = videoSubtitlesConfig.style
   const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
   const [draftLineGap, setDraftLineGap] = useState(lineGap)
 
@@ -194,6 +195,15 @@ export function GeneralSettings() {
               </div>
             </div>
           </div>
+        </Field>
+
+        <Field orientation="responsive-compact">
+          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.forceMergeBackground")}</FieldLabel>
+          <Switch
+            checked={forceMergeBackground ?? false}
+            onCheckedChange={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { forceMergeBackground: v } }))}
+            size="sm"
+          />
         </Field>
       </FieldGroup>
     </Card>
