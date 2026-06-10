@@ -885,6 +885,13 @@ action:
   saveToNotebaseTableUnavailable: 선택한 Notebase를 더 이상 사용할 수 없습니다
   saveToNotebaseConnectionInvalid: 현재 Notebase 연결이 오래되었습니다. Custom AI Actions에서 새로고침하고 매핑을 수정하세요.
   saveToNotebaseNoMappings: 저장하기 전에 유효한 매핑을 하나 이상 추가하세요
+  saveToNotebaseCreateTitle: Notebase를 만들까요?
+  saveToNotebaseCreateDescription: 이 Custom Action 출력 필드와 일치하는 열로 새 Notebase를 만들고, 현재 결과를 첫 노트로 저장합니다.
+  saveToNotebaseCreateAndSave: 만들고 저장
+  saveToNotebaseLoginAndCreate: 로그인하고 자동 생성
+  saveToNotebaseConnectExisting: 기존 Notebase 연결
+  saveToNotebasePendingLogin: 로그인 후 저장 완료
+  saveToNotebasePendingLoginDescription: 로그인 후 Read Frog가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
   contextDetailsTitleLabel: 제목
   contextDetailsParagraphsLabel: 문단 내용
   translation: 번역

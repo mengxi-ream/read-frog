@@ -885,6 +885,13 @@ action:
   saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
   saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
   saveToNotebaseNoMappings: 保存する前に、少なくとも1つの有効なマッピングを追加してください
+  saveToNotebaseCreateTitle: Notebase を作成しますか？
+  saveToNotebaseCreateDescription: この Custom Action の出力フィールドに合わせた列を持つ Notebase を作成し、現在の結果を最初のノートとして保存します。
+  saveToNotebaseCreateAndSave: 作成して保存
+  saveToNotebaseLoginAndCreate: ログインして自動作成
+  saveToNotebaseConnectExisting: 既存の Notebase に接続
+  saveToNotebasePendingLogin: ログイン後に保存を完了
+  saveToNotebasePendingLoginDescription: ログイン後、Read Frog が Notebase を作成し、この結果を自動で保存します。
   contextDetailsTitleLabel: タイトル
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻訳

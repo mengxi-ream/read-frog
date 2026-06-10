@@ -1000,6 +1000,13 @@ action:
   saveToNotebaseTableUnavailable: La Notebase seleccionada ya no está disponible
   saveToNotebaseConnectionInvalid: Esta conexión de Notebase está desactualizada. Actualízala en Acciones AI personalizadas y corrige las asignaciones.
   saveToNotebaseNoMappings: Añade al menos una asignación válida antes de guardar
+  saveToNotebaseCreateTitle: ¿Crear una Notebase?
+  saveToNotebaseCreateDescription: Crea una Notebase con columnas que coinciden con esta acción personalizada y guarda este resultado como la primera nota.
+  saveToNotebaseCreateAndSave: Crear y guardar
+  saveToNotebaseLoginAndCreate: Iniciar sesión y crear
+  saveToNotebaseConnectExisting: Conectar Notebase existente
+  saveToNotebasePendingLogin: Inicia sesión para terminar de guardar
+  saveToNotebasePendingLoginDescription: Después de iniciar sesión, Read Frog creará la Notebase y guardará este resultado automáticamente.
   contextDetailsTitleLabel: Título
   contextDetailsParagraphsLabel: Párrafos
   translation: Traducción

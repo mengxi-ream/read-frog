@@ -1000,6 +1000,13 @@ action:
   saveToNotebaseTableUnavailable: 选中的笔记库已不可用
   saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom AI Actions 中刷新并修复映射
   saveToNotebaseNoMappings: 至少添加一个有效映射后才能保存
+  saveToNotebaseCreateTitle: 创建笔记库？
+  saveToNotebaseCreateDescription: 创建一个与此 Custom Action 输出字段匹配的笔记库，并将当前结果保存为第一条笔记。
+  saveToNotebaseCreateAndSave: 直接创建并保存
+  saveToNotebaseLoginAndCreate: 登录并自动创建
+  saveToNotebaseConnectExisting: 连接现有笔记库
+  saveToNotebasePendingLogin: 登录后继续保存
+  saveToNotebasePendingLoginDescription: 登录完成后，Read Frog 会自动创建笔记库并保存当前结果。
   contextDetailsTitleLabel: 标题
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻译

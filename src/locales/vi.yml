@@ -885,6 +885,13 @@ action:
   saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
   saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
   saveToNotebaseNoMappings: Hãy thêm ít nhất một ánh xạ hợp lệ trước khi lưu
+  saveToNotebaseCreateTitle: Tạo Notebase?
+  saveToNotebaseCreateDescription: Tạo một Notebase có các cột khớp với Custom Action này, rồi lưu kết quả hiện tại làm ghi chú đầu tiên.
+  saveToNotebaseCreateAndSave: Tạo và lưu
+  saveToNotebaseLoginAndCreate: Đăng nhập và tự tạo
+  saveToNotebaseConnectExisting: Kết nối Notebase hiện có
+  saveToNotebasePendingLogin: Đăng nhập để hoàn tất lưu
+  saveToNotebasePendingLoginDescription: Sau khi đăng nhập, Read Frog sẽ tự động tạo Notebase và lưu kết quả này.
   contextDetailsTitleLabel: Tiêu đề
   contextDetailsParagraphsLabel: Các đoạn văn
   translation: Dịch

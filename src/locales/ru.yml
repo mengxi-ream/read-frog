@@ -885,6 +885,13 @@ action:
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением
+  saveToNotebaseCreateTitle: Создать Notebase?
+  saveToNotebaseCreateDescription: Создать Notebase с колонками из этого Custom Action и сохранить текущий результат как первую заметку.
+  saveToNotebaseCreateAndSave: Создать и сохранить
+  saveToNotebaseLoginAndCreate: Войти и создать автоматически
+  saveToNotebaseConnectExisting: Подключить существующую Notebase
+  saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
+  saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
   contextDetailsTitleLabel: Заголовок
   contextDetailsParagraphsLabel: Абзацы
   translation: Перевод

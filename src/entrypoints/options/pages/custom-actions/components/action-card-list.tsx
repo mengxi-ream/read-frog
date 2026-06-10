@@ -25,14 +25,24 @@ export function CustomActionCardList() {
   const { search } = useLocation()
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState(() => new URLSearchParams(search).has("addAction"))
+  const customActions = selectionToolbarConfig.customActions
 
   useEffect(() => {
-    if (new URLSearchParams(search).has("addAction")) {
-      void navigate({ search: "" }, { replace: true })
-    }
-  }, [search, navigate])
+    const params = new URLSearchParams(search)
+    const actionId = params.get("actionId")
 
-  const customActions = selectionToolbarConfig.customActions ?? []
+    if (actionId && customActions.some(action => action.id === actionId)) {
+      setSelectedCustomActionId(actionId)
+    }
+
+    if (params.has("addAction") || params.has("actionId")) {
+      params.delete("addAction")
+      params.delete("actionId")
+      const nextSearch = params.toString()
+      void navigate({ search: nextSearch ? `?${nextSearch}` : "" }, { replace: true })
+    }
+  }, [search, navigate, customActions, setSelectedCustomActionId])
+
   const llmProviders = useMemo(
     () => providersConfig.filter(provider => provider.enabled && isLLMProviderConfig(provider)),
     [providersConfig],

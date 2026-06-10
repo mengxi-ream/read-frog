@@ -95,6 +95,7 @@ export function proxyFetch() {
       headers,
       body,
       credentials,
+      redirect,
       cacheConfig,
       responseType = "text",
     } = message.data
@@ -151,6 +152,7 @@ export function proxyFetch() {
       headers: headers ? new Headers(headers) : undefined,
       body,
       credentials: credentials ?? "include",
+      redirect,
     })
 
     const responseHeaders: [string, string][] = [...response.headers.entries()]

@@ -16,4 +16,13 @@ describe("navigation", () => {
       url: "chrome-extension://test-extension-id/options.html",
     })
   })
+
+  it("opens the options page with a hash route", async () => {
+    await openOptionsPage({ route: "/custom-actions?actionId=action-1" })
+
+    expect(browser.tabs.create).toHaveBeenCalledWith({
+      active: true,
+      url: "chrome-extension://test-extension-id/options.html#/custom-actions?actionId=action-1",
+    })
+  })
 })

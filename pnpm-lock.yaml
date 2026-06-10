@@ -76,7 +76,7 @@ importers:
         version: 7.29.7
       '@base-ui/react':
         specifier: ^1.5.0
-        version: 1.5.0(@date-fns/tz@1.4.1)(@types/react@19.2.16)(date-fns@4.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+        version: 1.5.0(@date-fns/tz@1.5.0)(@types/react@19.2.16)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@codemirror/lang-css':
         specifier: ^6.3.1
         version: 6.3.1
@@ -129,11 +129,11 @@ importers:
         specifier: ^1.2.4
         version: 1.2.4(@types/react@19.2.16)(react@19.2.7)
       '@read-frog/api-contract':
-        specifier: 0.6.0
-        version: 0.6.0(@opentelemetry/api@1.9.1)
+        specifier: 0.7.0
+        version: 0.7.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.3.0
-        version: 0.3.0
+        specifier: 0.3.2
+        version: 0.3.2
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.2.7)
@@ -1152,8 +1152,8 @@ packages:
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
     engines: {node: '>=20.19.0'}
 
-  '@date-fns/tz@1.4.1':
-    resolution: {integrity: sha512-P5LUNhtbj6YfI3iJjw5EL9eUAG6OitD0W3fWQcpQjDRc/QIsL0tRNuO1PcDvPccWL1fSTXXdE1ds+l95DV/OFA==}
+  '@date-fns/tz@1.5.0':
+    resolution: {integrity: sha512-lwYN/vDPeNRULcepoE/LO2Pgx+7/RV+S9ARfbc9lr2DtGkOD7pAiruHvbR1RX3Qyf6ja47EWJDMsNK5vK08DJg==}
 
   '@devicefarmer/adbkit-logcat@2.1.3':
     resolution: {integrity: sha512-yeaGFjNBc/6+svbDeul1tNHtNChw6h8pSHAt5D+JsedUrMTN7tla7B15WLDyekxsuS2XlZHRxpuC6m92wiwCNw==}
@@ -1843,8 +1843,11 @@ packages:
   '@orpc/client@1.14.4':
     resolution: {integrity: sha512-i6Z9FikIm9Qz3Br10vk8/cllgjdYdlRKK2OV3x2/CdOBRr+B68tboNdpH3eeb1kv8/Zd6ZsXcWaDfrANdj2GZQ==}
 
-  '@orpc/contract@1.14.4':
-    resolution: {integrity: sha512-In7auWZL++EsDM2vMLSDekCi/w4UpwUv2SRCBx8hCkwCG/xBn5oFERnVhAGdEu/Kr55OOn/ZZuiWFYvaatEOiA==}
+  '@orpc/client@1.14.5':
+    resolution: {integrity: sha512-7kDiGJDyiwdHUnWJGGY2/evUenfAjvw6skrfuIKX+ZNtNrJecNNl3ytURmWOoZbcNZ4bX/1NKViO8BrtPgY0KA==}
+
+  '@orpc/contract@1.14.5':
+    resolution: {integrity: sha512-DARmTs1w5Z+bRtccMptc+d/k2DmZCY2pqtHhF3I2DxmN5IXEp9nch+MO/b5cnq1khjxy4XK6CIFL2psXyaXYTQ==}
 
   '@orpc/shared@1.14.4':
     resolution: {integrity: sha512-XltdytNlp68cN/WvrfsG7BdUUWV4a7kFN+7HL9LskTqt+q396ITWggJeoyBBMl+u1WHCF7GO2OHx4XQBBYOM8Q==}
@@ -1854,14 +1857,31 @@ packages:
       '@opentelemetry/api':
         optional: true
 
+  '@orpc/shared@1.14.5':
+    resolution: {integrity: sha512-D3rYULnYfTYC/ZcgSP6A2Fdypwkfm/vZQ7i2ycXXXfYNrnpAINQJfN32p6+M8GTDqmNkt0R7eALV1rrvxjmZCg==}
+    peerDependencies:
+      '@opentelemetry/api': '>=1.9.0'
+    peerDependenciesMeta:
+      '@opentelemetry/api':
+        optional: true
+
   '@orpc/standard-server-fetch@1.14.4':
     resolution: {integrity: sha512-Qkhr/W1hZXDQ40abDKb8C8icL9XBh5Uc1oDdhUOj+DxoJLQmQlH+3PtxP+/FQwnPJwr5UzQqa8BAU5goZugoGw==}
+
+  '@orpc/standard-server-fetch@1.14.5':
+    resolution: {integrity: sha512-7h83p6/TgogOpaTuEXMVMB+UkMuAMUyFQ0zw4HM2B5/XSiEOzVO1YyFzuC2EmeuuLIV11sEI3vcw5oWbNAQROQ==}
 
   '@orpc/standard-server-peer@1.14.4':
     resolution: {integrity: sha512-swN+48ekPQdZtqP81jDoaolc3IvLbpWaRsWJfXHv05d4x7Gplo1rVjk0qmwoFsYXOx5D/ZZlUaJ79BOdMJRyaA==}
 
+  '@orpc/standard-server-peer@1.14.5':
+    resolution: {integrity: sha512-zp2QyfVzw4/Be5/D1NWB+r7+WDerxC39XZYsvD1+I1sT13P5HlVWfZpBIlF6eEig416O4wMwHYLOfnN4Ngom0g==}
+
   '@orpc/standard-server@1.14.4':
     resolution: {integrity: sha512-DGhgCXaS1vghoemaK8ANnsI8u69k056vFYNuXMLbbDYn9miWeQyI7Af+Ya5Y0T/YNzGtEvqFP4nkNja7KTHivQ==}
+
+  '@orpc/standard-server@1.14.5':
+    resolution: {integrity: sha512-bCd1BkShxknFjIDixUEjOj3fvP4hxN0IIV/hvTdtk6sdWApadBjw3UuK3iprkECgoBt/31zTOKwgHB/wnnUfhw==}
 
   '@orpc/tanstack-query@1.14.4':
     resolution: {integrity: sha512-IQ7YK7mFTkwnFTcyTIUXojaTmLLG6pfZY6z9q+QaKjNyfDZ4kwW/DrR7SsB+WBc+K0oOMfko7AYKD69/Lwo2Zg==}
@@ -2213,11 +2233,11 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/api-contract@0.6.0':
-    resolution: {integrity: sha512-1SlGaVB3rGVWbiRjN/H08/hKd/clTSErj0K2Ljr+TvIneQR7+TRsat8kqaPlGV0YY8CvrOQqIYn7f3w2W4Rx4g==}
+  '@read-frog/api-contract@0.7.0':
+    resolution: {integrity: sha512-13XEQ0kiJCS/DGQIKb4CaTFm/bJfqtY+T/N3LMtb8/JvyzzrEkQkRoWuwBF4mV/SLIZIkb+aPHrgOHKJA+aXpQ==}
 
-  '@read-frog/definitions@0.3.0':
-    resolution: {integrity: sha512-HbDOl0ZBJoiSXeCmtbrVRTDncS0IdEBM2mm0AACK2EQmmKMBrpJyfTfbZnLfom1Xu/kXL561TDdrRe5P8k8tOA==}
+  '@read-frog/definitions@0.3.2':
+    resolution: {integrity: sha512-+/1hhN09uD09NNyKz6cLC6ugBNQFj/j7FCnsNq5VSu1wYDRf9YwIqqHkwusZqGOS9ZOTZRwcokzVEd4vIW5Dhw==}
 
   '@reduxjs/toolkit@2.11.2':
     resolution: {integrity: sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ==}
@@ -3899,8 +3919,8 @@ packages:
   dataloader@1.4.0:
     resolution: {integrity: sha512-68s5jYdlvasItOJnCuI2Q9s4q98g0pCyL3HrcKJu8KNugUl8ahgmZYg38ysLTgQjjXX3H8CJLkAvWrclWfcalw==}
 
-  date-fns@4.1.0:
-    resolution: {integrity: sha512-Ukq0owbQXxa/U3EGtsdVBkR1w7KOQ5gIBqdH2hkvknzZPYvBxb/aa6E8L7tmjFtkwZBu3UXBbjIgPo/Ez4xaNg==}
+  date-fns@4.4.0:
+    resolution: {integrity: sha512-+1UMbeh68lH1SegH83CGWwpb6OHHbpSgr3+s5Eww5M4CAgswBpoWS0AjTOfEJ33HiYKz1hdj/KTFprzXHmq/6w==}
 
   debounce@1.2.1:
     resolution: {integrity: sha512-XRRe6Glud4rd/ZGQfiV1ruXSfbvfJedlV9Y6zOlP+2K04vBYiJEte6stfFkCP03aMnY5tsipamumUjL14fofug==}
@@ -8059,7 +8079,7 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@base-ui/react@1.5.0(@date-fns/tz@1.4.1)(@types/react@19.2.16)(date-fns@4.1.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+  '@base-ui/react@1.5.0(@date-fns/tz@1.5.0)(@types/react@19.2.16)(date-fns@4.4.0)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
       '@babel/runtime': 7.29.7
       '@base-ui/utils': 0.2.9(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -8069,9 +8089,9 @@ snapshots:
       react-dom: 19.2.7(react@19.2.7)
       use-sync-external-store: 1.6.0(react@19.2.7)
     optionalDependencies:
-      '@date-fns/tz': 1.4.1
+      '@date-fns/tz': 1.5.0
       '@types/react': 19.2.16
-      date-fns: 4.1.0
+      date-fns: 4.4.0
 
   '@base-ui/utils@0.2.9(@types/react@19.2.16)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
     dependencies:
@@ -8528,7 +8548,7 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.0': {}
 
-  '@date-fns/tz@1.4.1': {}
+  '@date-fns/tz@1.5.0': {}
 
   '@devicefarmer/adbkit-logcat@2.1.3': {}
 
@@ -9196,16 +9216,32 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@orpc/contract@1.14.4(@opentelemetry/api@1.9.1)':
+  '@orpc/client@1.14.5(@opentelemetry/api@1.9.1)':
     dependencies:
-      '@orpc/client': 1.14.4(@opentelemetry/api@1.9.1)
-      '@orpc/shared': 1.14.4(@opentelemetry/api@1.9.1)
+      '@orpc/shared': 1.14.5(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.14.5(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-fetch': 1.14.5(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server-peer': 1.14.5(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@orpc/contract@1.14.5(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/client': 1.14.5(@opentelemetry/api@1.9.1)
+      '@orpc/shared': 1.14.5(@opentelemetry/api@1.9.1)
       '@standard-schema/spec': 1.1.0
       openapi-types: 12.1.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
   '@orpc/shared@1.14.4(@opentelemetry/api@1.9.1)':
+    dependencies:
+      radash: 12.1.1
+      type-fest: 5.7.0
+    optionalDependencies:
+      '@opentelemetry/api': 1.9.1
+
+  '@orpc/shared@1.14.5(@opentelemetry/api@1.9.1)':
     dependencies:
       radash: 12.1.1
       type-fest: 5.7.0
@@ -9219,6 +9255,13 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@orpc/standard-server-fetch@1.14.5(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/shared': 1.14.5(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.14.5(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@orpc/standard-server-peer@1.14.4(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/shared': 1.14.4(@opentelemetry/api@1.9.1)
@@ -9226,9 +9269,22 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@orpc/standard-server-peer@1.14.5(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/shared': 1.14.5(@opentelemetry/api@1.9.1)
+      '@orpc/standard-server': 1.14.5(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@orpc/standard-server@1.14.4(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/shared': 1.14.4(@opentelemetry/api@1.9.1)
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@orpc/standard-server@1.14.5(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/shared': 1.14.5(@opentelemetry/api@1.9.1)
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
@@ -9480,18 +9536,18 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.16
 
-  '@read-frog/api-contract@0.6.0(@opentelemetry/api@1.9.1)':
+  '@read-frog/api-contract@0.7.0(@opentelemetry/api@1.9.1)':
     dependencies:
-      '@orpc/contract': 1.14.4(@opentelemetry/api@1.9.1)
-      '@read-frog/definitions': 0.3.0
+      '@orpc/contract': 1.14.5(@opentelemetry/api@1.9.1)
+      '@read-frog/definitions': 0.3.2
       zod: 4.4.3
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
-  '@read-frog/definitions@0.3.0':
+  '@read-frog/definitions@0.3.2':
     dependencies:
-      '@date-fns/tz': 1.4.1
-      date-fns: 4.1.0
+      '@date-fns/tz': 1.5.0
+      date-fns: 4.4.0
       zod: 4.4.3
 
   '@reduxjs/toolkit@2.11.2(react-redux@9.2.0(@types/react@19.2.16)(react@19.2.7)(redux@5.0.1))(react@19.2.7)':
@@ -10047,8 +10103,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.57.0(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.57.0(typescript@6.0.3)
-      '@typescript-eslint/types': 8.57.0
+      '@typescript-eslint/tsconfig-utils': 8.60.1(typescript@6.0.3)
+      '@typescript-eslint/types': 8.60.1
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -11075,7 +11131,7 @@ snapshots:
 
   dataloader@1.4.0: {}
 
-  date-fns@4.1.0: {}
+  date-fns@4.4.0: {}
 
   debounce@1.2.1: {}
 

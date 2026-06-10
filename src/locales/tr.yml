@@ -885,6 +885,13 @@ action:
   saveToNotebaseTableUnavailable: Seçilen Notebase artık kullanılamıyor
   saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom AI Actions içinde yenileyin ve eşlemeleri düzeltin.
   saveToNotebaseNoMappings: Kaydetmeden önce en az bir geçerli eşleme ekleyin
+  saveToNotebaseCreateTitle: Bir Notebase oluşturulsun mu?
+  saveToNotebaseCreateDescription: Bu Custom Action çıktı alanlarıyla eşleşen sütunlara sahip bir Notebase oluşturur ve bu sonucu ilk not olarak kaydeder.
+  saveToNotebaseCreateAndSave: Oluştur ve kaydet
+  saveToNotebaseLoginAndCreate: Giriş yap ve otomatik oluştur
+  saveToNotebaseConnectExisting: Mevcut Notebase'e bağlan
+  saveToNotebasePendingLogin: Kaydetmeyi tamamlamak için giriş yapın
+  saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   contextDetailsTitleLabel: Başlık
   contextDetailsParagraphsLabel: Paragraflar
   translation: Çeviri

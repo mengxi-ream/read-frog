@@ -1,13 +1,66 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { render, screen } from "@testing-library/react"
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { i18n } from "#imports"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { SaveToNotebaseButton } from "../save-to-notebase-button"
+import { SaveToNotebaseDialogHost } from "../save-to-notebase-dialog-host"
+
+vi.mock("@/utils/auth/auth-client", () => ({
+  authClient: {
+    useSession: () => ({
+      data: {
+        user: {
+          id: "user-1",
+        },
+      },
+      isPending: false,
+    }),
+  },
+}))
+
+vi.mock("@/utils/notebase-beta", () => ({
+  isORPCForbiddenError: () => false,
+  useNotebaseBetaStatus: () => ({
+    data: {
+      allowed: true,
+    },
+    error: null,
+    isPending: false,
+  }),
+}))
+
+vi.mock("@/utils/orpc/client", () => ({
+  orpc: {
+    notebase: {
+      getSchema: {
+        queryOptions: (options: unknown) => ({
+          queryKey: ["notebase", "schema"],
+          queryFn: vi.fn(),
+          ...(options as object),
+        }),
+      },
+    },
+    notebaseRow: {
+      create: {
+        mutationOptions: (options: unknown) => ({
+          mutationFn: vi.fn(),
+          ...(options as object),
+        }),
+      },
+    },
+  },
+  orpcClient: {
+    notebase: {
+      create: vi.fn(),
+    },
+  },
+}))
 
 function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config
@@ -30,32 +83,86 @@ function createAction(): SelectionToolbarCustomAction {
         speaking: false,
       },
     ],
-    notebaseConnection: {
-      notebaseId: "table-1",
-      notebaseNameSnapshot: "Articles",
-      mappings: [],
-    },
   }
 }
 
-describe("saveToNotebaseButton beta gating", () => {
-  it("does not render when beta experience is disabled", () => {
-    const store = createStore()
-    const config = cloneConfig(DEFAULT_CONFIG)
+function renderButton(config: Config, action: SelectionToolbarCustomAction) {
+  const store = createStore()
+  store.set(configAtom, config)
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        retry: false,
+      },
+    },
+  })
 
-    config.betaExperience.enabled = false
-    store.set(configAtom, config)
-
-    render(
+  return render(
+    <QueryClientProvider client={queryClient}>
       <Provider store={store}>
         <SaveToNotebaseButton
-          action={createAction()}
+          action={action}
           isRunning={false}
           result={{ summary: "A short summary" }}
         />
-      </Provider>,
-    )
+        <SaveToNotebaseDialogHost />
+      </Provider>
+    </QueryClientProvider>,
+  )
+}
+
+describe("saveToNotebaseButton beta gating", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it("does not render when beta experience is disabled", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+
+    config.betaExperience.enabled = false
+    renderButton(config, createAction())
 
     expect(screen.queryByRole("button", { name: i18n.t("action.saveToNotebase") })).not.toBeInTheDocument()
+  })
+
+  it("opens a create/connect dialog for an unconnected custom action", () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    expect(screen.getByText(i18n.t("action.saveToNotebaseCreateTitle"))).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSave") })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") })).toBeInTheDocument()
+  })
+
+  it("closes the create/connect dialog when clicking outside", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    const overlay = document.querySelector("[data-slot='dialog-overlay']")
+    expect(overlay).toBeInTheDocument()
+
+    const mouseDownEvent = new MouseEvent("mousedown", { bubbles: true, button: 0 })
+    Object.defineProperty(mouseDownEvent, "composedPath", {
+      value: () => [overlay, document.body, document, window],
+    })
+    const clickEvent = new MouseEvent("click", { bubbles: true, button: 0 })
+    Object.defineProperty(clickEvent, "composedPath", {
+      value: () => [overlay, document.body, document, window],
+    })
+
+    act(() => {
+      overlay!.dispatchEvent(mouseDownEvent)
+      overlay!.dispatchEvent(clickEvent)
+    })
+
+    await waitFor(() => {
+      expect(screen.queryByText(i18n.t("action.saveToNotebaseCreateTitle"))).not.toBeInTheDocument()
+    })
   })
 })

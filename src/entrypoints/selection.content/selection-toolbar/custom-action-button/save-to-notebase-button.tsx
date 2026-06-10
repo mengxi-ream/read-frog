@@ -1,6 +1,6 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { useMutation, useQuery } from "@tanstack/react-query"
-import { useAtomValue } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { toast } from "sonner"
 import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
@@ -14,7 +14,11 @@ import {
   sanitizeCustomActionNotebaseConnection,
 } from "@/utils/notebase"
 import { isORPCForbiddenError, useNotebaseBetaStatus } from "@/utils/notebase-beta"
+import {
+  createPendingNotebaseSave,
+} from "@/utils/notebase-pending-save"
 import { orpc } from "@/utils/orpc/client"
+import { saveToNotebaseDialogAtom } from "./save-to-notebase-dialog-atom"
 
 export function SaveToNotebaseButton({
   action,
@@ -50,6 +54,7 @@ function SaveToNotebaseButtonEnabled({
   result: Record<string, unknown> | null
 }) {
   const connection = sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema)
+  const setSaveToNotebaseDialog = useSetAtom(saveToNotebaseDialogAtom)
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const isAuthenticated = !!session?.user
   const betaStatusQuery = useNotebaseBetaStatus(isAuthenticated)
@@ -100,8 +105,41 @@ function SaveToNotebaseButtonEnabled({
     },
   }))
 
+  const handleOpenCreateDialog = () => {
+    if (!result) {
+      return
+    }
+
+    setSaveToNotebaseDialog({
+      open: true,
+      pending: createPendingNotebaseSave(action, result),
+    })
+  }
+
+  const isUnconnectedDisabled = isSessionPending
+    || isRunning
+    || !result
+    || (
+      isAuthenticated
+      && (
+        betaStatusQuery.isPending
+        || !!betaStatusQuery.error
+        || !isBetaAllowed
+      )
+    )
+
   if (!connection) {
-    return null
+    return (
+      <Button
+        type="button"
+        size="sm"
+        variant="outline"
+        disabled={isUnconnectedDisabled}
+        onClick={handleOpenCreateDialog}
+      >
+        {i18n.t("action.saveToNotebase")}
+      </Button>
+    )
   }
 
   const resolvedMappings = schemaQuery.data
@@ -148,9 +186,6 @@ function SaveToNotebaseButtonEnabled({
     || saveMutation.isPending
     || hasInvalidMappings
     || !hasValidMappings
-  const disabledTitle = !betaStatusQuery.isPending && !isBetaAllowed
-    ? i18n.t("action.saveToNotebaseBetaRequired")
-    : undefined
 
   return (
     <Button
@@ -158,7 +193,6 @@ function SaveToNotebaseButtonEnabled({
       size="sm"
       variant="outline"
       disabled={isDisabled}
-      title={disabledTitle}
       onClick={handleSave}
     >
       {saveMutation.isPending ? i18n.t("action.saveToNotebaseSaving") : i18n.t("action.saveToNotebase")}

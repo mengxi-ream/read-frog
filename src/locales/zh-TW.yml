@@ -885,6 +885,13 @@ action:
   saveToNotebaseTableUnavailable: 選取的筆記庫已不可用
   saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到自訂 AI 指令重新整理並修復對應
   saveToNotebaseNoMappings: 至少新增一個有效對應後才能儲存
+  saveToNotebaseCreateTitle: 建立筆記庫？
+  saveToNotebaseCreateDescription: 建立一個與此 Custom Action 輸出欄位相符的筆記庫，並將目前結果儲存為第一則筆記。
+  saveToNotebaseCreateAndSave: 直接建立並儲存
+  saveToNotebaseLoginAndCreate: 登入並自動建立
+  saveToNotebaseConnectExisting: 連接現有筆記庫
+  saveToNotebasePendingLogin: 登入後繼續儲存
+  saveToNotebasePendingLoginDescription: 登入完成後，Read Frog 會自動建立筆記庫並儲存目前結果。
   contextDetailsTitleLabel: 標題
   contextDetailsParagraphsLabel: 段落內容
   translation: 翻譯

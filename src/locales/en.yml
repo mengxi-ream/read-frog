@@ -1000,6 +1000,13 @@ action:
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
   saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
   saveToNotebaseNoMappings: Add at least one valid mapping before saving
+  saveToNotebaseCreateTitle: Create a Notebase?
+  saveToNotebaseCreateDescription: Create a new Notebase with columns matching this Custom Action, then save this result as the first note.
+  saveToNotebaseCreateAndSave: Create and save
+  saveToNotebaseLoginAndCreate: Log in and auto-create
+  saveToNotebaseConnectExisting: Connect existing Notebase
+  saveToNotebasePendingLogin: Log in to finish saving
+  saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
   contextDetailsTitleLabel: Title
   contextDetailsParagraphsLabel: Paragraphs
   translation: Translation
