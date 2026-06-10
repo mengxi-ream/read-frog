@@ -8,9 +8,11 @@ import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
+import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   BACKGROUND_STYLE_OPTIONS,
+  DEFAULT_BACKGROUND_FORCE_MERGE,
   DEFAULT_BACKGROUND_OPACITY,
   DEFAULT_DISPLAY_MODE,
   DEFAULT_FONT_FAMILY,
@@ -206,7 +208,7 @@ const DEFAULT_TEXT_STYLE: SubtitleTextStyle = {
 export function StyleView() {
   const [config, setConfig] = useAtom(configFieldsAtomMap.videoSubtitles, { store: subtitlesStore })
   const portalContainer = use(ShadowWrapperContext)
-  const { displayMode, translationPosition, lineGap, container } = config.style
+  const { displayMode, translationPosition, lineGap, backgroundForceMerge, container } = config.style
 
   const updateStyle = (patch: Record<string, unknown>) => {
     void setConfig(deepmerge(config, { style: patch }))
@@ -221,6 +223,7 @@ export function StyleView() {
           displayMode: DEFAULT_DISPLAY_MODE,
           translationPosition: DEFAULT_TRANSLATION_POSITION,
           lineGap: DEFAULT_LINE_GAP,
+          backgroundForceMerge: DEFAULT_BACKGROUND_FORCE_MERGE,
           container: { backgroundOpacity: DEFAULT_BACKGROUND_OPACITY, backgroundStyle: undefined },
         })}
       >
@@ -279,6 +282,13 @@ export function StyleView() {
           step={5}
           onChange={v => updateStyle({ container: { backgroundOpacity: v } })}
         />
+
+        <SettingRow label={i18n.t("options.videoSubtitles.style.backgroundForceMerge")}>
+          <Switch
+            checked={backgroundForceMerge ?? false}
+            onCheckedChange={v => updateStyle({ backgroundForceMerge: v })}
+          />
+        </SettingRow>
 
         <SliderRow
           label={i18n.t("options.videoSubtitles.style.lineGap")}

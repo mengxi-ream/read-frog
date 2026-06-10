@@ -174,6 +174,15 @@ export function GeneralSettings() {
           </div>
         </Field>
 
+        <Field orientation="responsive-compact">
+          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.backgroundForceMerge")}</FieldLabel>
+          <Switch
+            checked={backgroundForceMerge ?? false}
+            onCheckedChange={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { backgroundForceMerge: v } }))}
+            size="sm"
+          />
+        </Field>
+
         <Field className={SLIDER_ROW_CLASS_NAME}>
           <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
             <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.lineGap")}</FieldLabel>
@@ -195,15 +204,6 @@ export function GeneralSettings() {
               </div>
             </div>
           </div>
-        </Field>
-
-        <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.backgroundForceMerge")}</FieldLabel>
-          <Switch
-            checked={backgroundForceMerge ?? false}
-            onCheckedChange={v => void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { backgroundForceMerge: v } }))}
-            size="sm"
-          />
         </Field>
       </FieldGroup>
     </Card>
