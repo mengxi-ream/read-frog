@@ -1,39 +1,36 @@
+// @vitest-environment jsdom
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { render } from "@testing-library/react"
-import { createStore, Provider } from "jotai"
+import { atom, createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
 import { SubtitlesPair } from "../subtitle-lines"
 
-const mockedAtoms = vi.hoisted(() => ({
-  languageAtom: null as any,
-  videoSubtitlesAtom: null as any,
+class MockResizeObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+globalThis.ResizeObserver = MockResizeObserver as any
+
+const languageAtom = atom(DEFAULT_CONFIG.language)
+const videoSubtitlesAtom = atom(DEFAULT_CONFIG.videoSubtitles)
+
+vi.mock("@/utils/atoms/config", () => ({
+  configFieldsAtomMap: {
+    language: languageAtom,
+    videoSubtitles: videoSubtitlesAtom,
+  },
 }))
-
-vi.mock("@/utils/atoms/config", async () => {
-  const { atom } = await import("jotai")
-  const languageAtom = atom(DEFAULT_CONFIG.language)
-  const videoSubtitlesAtom = atom(DEFAULT_CONFIG.videoSubtitles)
-
-  mockedAtoms.languageAtom = languageAtom
-  mockedAtoms.videoSubtitlesAtom = videoSubtitlesAtom
-
-  return {
-    configFieldsAtomMap: {
-      language: languageAtom,
-      videoSubtitles: videoSubtitlesAtom,
-    },
-  }
-})
 
 function createStoreWithLanguage(targetCode: LangCodeISO6393) {
   const store = createStore()
-  store.set(mockedAtoms.languageAtom, {
+  store.set(languageAtom, {
     ...DEFAULT_CONFIG.language,
     targetCode,
   })
-  store.set(mockedAtoms.videoSubtitlesAtom, DEFAULT_CONFIG.videoSubtitles)
+  store.set(videoSubtitlesAtom, DEFAULT_CONFIG.videoSubtitles)
   return store
 }
 
