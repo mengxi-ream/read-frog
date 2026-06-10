@@ -39,7 +39,8 @@ export function migrate(oldConfig: any): any {
         lineGap: 4,
         container: {
           ...(oldStyle.container || {}),
-          backgroundStyle: oldStyle.container?.backgroundStyle ?? "blur",
+          backgroundStyle: oldStyle.container?.backgroundStyle
+            ?? (oldStyle.container?.backgroundOpacity ? "blur" : "none"),
           backgroundOpacity: oldStyle.container?.backgroundOpacity ?? 50,
         },
         main: migrateTextStyle(oldStyle.main, 3, 3),
