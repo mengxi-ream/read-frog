@@ -17,59 +17,6 @@ const GRID: string[][] = [
 const COLS = 6
 const ROWS = 4
 
-// ---- WCAG contrast helpers ----
-
-function srgbToLinear(c: number): number {
-  c /= 255
-  return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
-}
-
-function relativeLuminance(hex: string): number {
-  const r = Number.parseInt(hex.slice(1, 3), 16)
-  const g = Number.parseInt(hex.slice(3, 5), 16)
-  const b = Number.parseInt(hex.slice(5, 7), 16)
-  return 0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b)
-}
-
-function calcContrastRatio(bgHex: string): number {
-  const L1 = 1
-  const L2 = relativeLuminance(bgHex)
-  return (Math.max(L1, L2) + 0.05) / (Math.min(L1, L2) + 0.05)
-}
-
-// ---- Sample grid color at canvas point ----
-
-function sampleGridColor(
-  x: number, y: number,
-  ox: number, oy: number,
-  tileSize: number,
-): string {
-  const vc = Math.floor((x + ox) / tileSize)
-  const vr = Math.floor((y + oy) / tileSize)
-  const col = ((vc % COLS) + COLS) % COLS
-  const row = ((vr % ROWS) + ROWS) % ROWS
-  return GRID[row][col]
-}
-
-// ---- Draw helpers ----
-
-function roundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number, y: number, w: number, h: number, r: number,
-) {
-  ctx.beginPath()
-  ctx.moveTo(x + r, y)
-  ctx.lineTo(x + w - r, y)
-  ctx.arcTo(x + w, y, x + w, y + r, r)
-  ctx.lineTo(x + w, y + h - r)
-  ctx.arcTo(x + w, y + h, x + w - r, y + h, r)
-  ctx.lineTo(x + r, y + h)
-  ctx.arcTo(x, y + h, x, y + h - r, r)
-  ctx.lineTo(x, y + r)
-  ctx.arcTo(x, y, x + r, y, r)
-  ctx.closePath()
-}
-
 // ---- Draw one frame ----
 
 function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, t: number) {
@@ -96,25 +43,6 @@ function drawFrame(ctx: CanvasRenderingContext2D, w: number, h: number, t: numbe
       ctx.fillRect(px, py, tileSize + 1, tileSize + 1)
     }
   }
-
-  // Contrast overlay at subtitle position (bottom-center ≈ h * 0.82)
-  const sx = w * 0.5
-  const sy = h * 0.82
-  const bgHex = sampleGridColor(sx, sy, ox, oy, tileSize)
-  const cr = calcContrastRatio(bgHex)
-  const pass = cr >= 4.5
-  const label = `${bgHex}  CR ${cr.toFixed(1)}  ${pass ? "✓" : "✗"}`
-
-  ctx.save()
-  ctx.fillStyle = "rgba(0,0,0,0.7)"
-  roundRect(ctx, w - 178, 10, 168, 24, 6)
-  ctx.fill()
-  ctx.fillStyle = pass ? "#8f8" : "#f88"
-  ctx.font = "12px monospace"
-  ctx.textAlign = "right"
-  ctx.textBaseline = "middle"
-  ctx.fillText(label, w - 14, 22)
-  ctx.restore()
 }
 
 // ---- Tab/loading idle detection ----
@@ -162,9 +90,6 @@ export function SubtitlesPreview() {
   const { displayMode, translationPosition, lineGap, backgroundForceMerge, container } = style
 
   const [index, setIndex] = useState(0)
-  const [paused, setPaused] = useState(false)
-  const pausedRef = useRef(paused)
-  pausedRef.current = paused
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const targetRef = useRef(targetCode)
 
@@ -222,9 +147,7 @@ export function SubtitlesPreview() {
   // Carousel timer
   useEffect(() => {
     const timer = setInterval(() => {
-      if (!pausedRef.current) {
-        setIndex(prev => (prev + 1) % activeSamples.length)
-      }
+      setIndex(prev => (prev + 1) % activeSamples.length)
     }, INTERVAL_MS)
     return () => clearInterval(timer)
   }, [activeSamples.length])
@@ -239,14 +162,10 @@ export function SubtitlesPreview() {
       <Label className="mb-2 block text-sm font-medium">
         {i18n.t("options.videoSubtitles.style.preview")}
       </Label>
-      <div
-        className="relative aspect-video w-full rounded-lg overflow-hidden select-none bg-black"
-        onMouseEnter={() => setPaused(true)}
-        onMouseLeave={() => setPaused(false)}
-      >
+      <div className="relative w-full h-80 rounded-lg overflow-hidden select-none bg-black">
         <canvas ref={canvasRef} className="absolute inset-0 size-full" />
 
-        <div className="absolute inset-0 flex items-end justify-center pb-[18%] z-10">
+        <div className="absolute inset-0 flex items-center justify-center z-10">
           <div className="w-full max-w-[90%]">
             <SubtitlesPair
               mainText={sample.original}

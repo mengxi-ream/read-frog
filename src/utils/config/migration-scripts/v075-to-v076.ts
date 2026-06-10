@@ -1,20 +1,22 @@
 /**
  * Migration script from v075 to v076
- * - Adds fontShadowIntensity and fontStrokeWidth fields with defaults.
+ * - Adds fontShadowIntensity and fontStrokeWidth fields with new defaults.
  * - Adds lineGap (px) for spacing between main and translation subtitle lines.
  * - Adds backgroundStyle for subtitle container background appearance.
+ * - Adds presetStyle for style presets (replaces mode: "basic"|"advanced").
+ * - Adds backgroundForceMerge toggle for merging subtitle backgrounds.
  *
  * IMPORTANT: All values are hardcoded inline. Migration scripts are frozen
  * snapshots - never import constants or helpers that may change.
  */
 
-function migrateTextStyle(style: any): any {
+function migrateTextStyle(style: any, shadow: number, stroke: number): any {
   if (!style || typeof style !== "object")
     return style
   return {
     ...style,
-    fontShadowIntensity: style.fontShadowIntensity ?? 0,
-    fontStrokeWidth: style.fontStrokeWidth ?? 0,
+    fontShadowIntensity: style.fontShadowIntensity ?? shadow,
+    fontStrokeWidth: style.fontStrokeWidth ?? stroke,
   }
 }
 
@@ -24,19 +26,24 @@ export function migrate(oldConfig: any): any {
     return oldConfig
   }
 
+  const { mode, ...cleanStyle } = oldStyle
+
   return {
     ...oldConfig,
     videoSubtitles: {
       ...oldConfig.videoSubtitles,
       style: {
-        ...oldStyle,
+        ...cleanStyle,
+        presetStyle: oldStyle.presetStyle ?? 2,
+        backgroundForceMerge: oldStyle.backgroundForceMerge ?? true,
+        lineGap: 4,
         container: {
           ...(oldStyle.container || {}),
-          backgroundStyle: oldStyle.container?.backgroundStyle ?? "solid",
+          backgroundStyle: oldStyle.container?.backgroundStyle ?? "blur",
+          backgroundOpacity: oldStyle.container?.backgroundOpacity ?? 50,
         },
-        lineGap: 0,
-        main: migrateTextStyle(oldStyle.main),
-        translation: migrateTextStyle(oldStyle.translation),
+        main: migrateTextStyle(oldStyle.main, 3, 3),
+        translation: migrateTextStyle(oldStyle.translation, 3, 3),
       },
     },
   }

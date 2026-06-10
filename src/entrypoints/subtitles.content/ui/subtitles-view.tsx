@@ -17,7 +17,7 @@ interface SubtitlesViewProps {
 function SubtitlesContent() {
   const subtitle = useAtomValue(currentSubtitleAtom)
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
-  const { displayMode, translationPosition, backgroundForceMerge, container } = style
+  const { displayMode, translationPosition, backgroundForceMerge, lineGap, container } = style
   const language = useAtomValue(configFieldsAtomMap.language)
 
   const translationAbove = translationPosition === "above"
@@ -43,7 +43,7 @@ function SubtitlesContent() {
         translationAbove={translationAbove}
         backgroundOpacity={container.backgroundOpacity}
         backgroundStyle={container.backgroundStyle}
-        lineGap={style.lineGap}
+        lineGap={lineGap}
         backgroundForceMerge={backgroundForceMerge}
         dir={dir}
         lang={lang}
