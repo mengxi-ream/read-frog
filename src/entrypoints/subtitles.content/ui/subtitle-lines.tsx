@@ -356,7 +356,7 @@ export function SubtitlesPair({
     if (bgIsBlur) {
       return {
         ...base,
-        backgroundColor: `rgba(0,0,0,${(op * 0.3).toFixed(2)})`,
+        backgroundColor: `rgba(0,0,0,${op.toFixed(2)})`,
         backdropFilter: "blur(12px)",
         WebkitBackdropFilter: "blur(12px)",
         boxShadow: "0 4px 12px rgba(0,0,0,0.35)",
@@ -364,7 +364,7 @@ export function SubtitlesPair({
     }
     return {
       ...base,
-      backgroundColor: "rgba(255,255,255,0.08)",
+      backgroundColor: `rgba(255,255,255,${(op * 0.3).toFixed(2)})`,
       backdropFilter: "blur(24px) saturate(1.5)",
       WebkitBackdropFilter: "blur(24px) saturate(1.5)",
       boxShadow: "inset 0 1px 0 rgba(255,255,255,0.2), 0 4px 12px rgba(0,0,0,0.35)",

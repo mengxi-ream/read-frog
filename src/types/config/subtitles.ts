@@ -6,7 +6,6 @@ export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "
 export const subtitlesTranslationPositionSchema = z.enum(["above", "below"])
 export const subtitlesFontFamilySchema = z.enum(["system", "roboto", "noto-sans", "noto-serif", "misans", "ibm-plex", "tsuku-ard-gothic"])
 export const backgroundStyleSchema = z.enum(["none", "solid", "blur", "liquid-glass"])
-export const subtitleModeSchema = z.enum(["basic", "advanced"])
 
 export const subtitleTextStyleSchema = z.object({
   fontFamily: subtitlesFontFamilySchema,
@@ -26,8 +25,7 @@ export const subtitlesStyleSchema = z.object({
   displayMode: subtitlesDisplayModeSchema,
   translationPosition: subtitlesTranslationPositionSchema,
   lineGap: z.number().min(MIN_LINE_GAP).max(MAX_LINE_GAP),
-  mode: subtitleModeSchema,
-  presetStyle: z.number().min(0).max(3),
+  presetStyle: z.number().min(0).max(4),
   main: subtitleTextStyleSchema,
   translation: subtitleTextStyleSchema,
   backgroundForceMerge: z.boolean().optional(),
@@ -56,7 +54,6 @@ export type SubtitlesTranslationPosition = z.infer<typeof subtitlesTranslationPo
 export type SubtitlesFontFamily = z.infer<typeof subtitlesFontFamilySchema>
 export type BackgroundStyle = z.infer<typeof backgroundStyleSchema>
 export type SubtitleTextStyle = z.infer<typeof subtitleTextStyleSchema>
-export type SubtitleMode = z.infer<typeof subtitleModeSchema>
 export type SubtitleContainerStyle = z.infer<typeof subtitleContainerStyleSchema>
 export type SubtitlesStyle = z.infer<typeof subtitlesStyleSchema>
 export type SubtitlePosition = z.infer<typeof subtitlePositionSchema>

@@ -64,7 +64,7 @@ export const MAX_FONT_SHADOW_INTENSITY = 8
 export const DEFAULT_FONT_SHADOW_INTENSITY = 3
 export const MIN_FONT_STROKE_WIDTH = 0
 export const MAX_FONT_STROKE_WIDTH = 8
-export const DEFAULT_FONT_STROKE_WIDTH = 2.5
+export const DEFAULT_FONT_STROKE_WIDTH = 3
 export const DEFAULT_MAIN_FONT_SCALE = 80
 export const DEFAULT_MAIN_FONT_SHADOW_INTENSITY = 3
 export const DEFAULT_MAIN_FONT_STROKE_WIDTH = 3
@@ -75,7 +75,7 @@ export const DEFAULT_FONT_FAMILY = "system" as const
 export const DEFAULT_SUBTITLE_COLOR = "#FFFFFF"
 export const DEFAULT_DISPLAY_MODE = "bilingual" as const
 export const DEFAULT_TRANSLATION_POSITION = "above" as const
-export const DEFAULT_BACKGROUND_STYLE = "none" as const
+export const DEFAULT_BACKGROUND_STYLE = "blur" as const
 export const BACKGROUND_STYLE_OPTIONS = [
   { value: "none", label: "None" },
   { value: "solid", label: "Solid" },
@@ -84,16 +84,16 @@ export const BACKGROUND_STYLE_OPTIONS = [
 ] as const
 export const MIN_LINE_GAP = -50
 export const MAX_LINE_GAP = 50
-export const DEFAULT_LINE_GAP = 2
-export const DEFAULT_BACKGROUND_FORCE_MERGE = false
+export const DEFAULT_LINE_GAP = 4
+export const DEFAULT_BACKGROUND_FORCE_MERGE = true
 export const SUBTITLE_STYLE_PRESETS = [
   { label: "None", backgroundStyle: "none" as const, backgroundOpacity: 0, backgroundForceMerge: true, lineGap: 4 },
   { label: "Solid", backgroundStyle: "solid" as const, backgroundOpacity: 50, backgroundForceMerge: true, lineGap: 4 },
-  { label: "Glass", backgroundStyle: "blur" as const, backgroundOpacity: 50, backgroundForceMerge: true, lineGap: 4 },
-  { label: "Liquid", backgroundStyle: "liquid-glass" as const, backgroundOpacity: 50, backgroundForceMerge: true, lineGap: 4 },
+  { label: "Blur", backgroundStyle: "blur" as const, backgroundOpacity: 35, backgroundForceMerge: true, lineGap: 4 },
+  { label: "Liquid Glass", backgroundStyle: "liquid-glass" as const, backgroundOpacity: 100, backgroundForceMerge: true, lineGap: 4 },
+  { label: "Advanced", backgroundStyle: "liquid-glass" as const, backgroundOpacity: 100, backgroundForceMerge: true, lineGap: 4 },
 ] as const
-export const DEFAULT_SUBTITLE_MODE = "advanced" as const
-export const DEFAULT_PRESET_STYLE = 1
+export const DEFAULT_PRESET_STYLE = 2
 export const DEFAULT_CONTROLS_HEIGHT = 60
 export const DEFAULT_SUBTITLE_POSITION = { percent: 10, anchor: "bottom" } as const
 // Subtitle controls sit on top of arbitrary host pages, so keep their theme fixed for readability.

@@ -1,8 +1,8 @@
-import type { BackgroundStyle, SubtitleMode, SubtitlesDisplayMode, SubtitlesTranslationPosition } from "@/types/config/subtitles"
+import type { BackgroundStyle, SubtitlesDisplayMode, SubtitlesTranslationPosition } from "@/types/config/subtitles"
 import { Icon } from "@iconify/react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Card } from "@/components/ui/base-ui/card"
@@ -13,17 +13,25 @@ import { Slider } from "@/components/ui/base-ui/slider"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP, SUBTITLE_STYLE_PRESETS } from "@/utils/constants/subtitles"
+import { BACKGROUND_STYLE_OPTIONS, DEFAULT_BACKGROUND_FORCE_MERGE, DEFAULT_BACKGROUND_OPACITY, DEFAULT_BACKGROUND_STYLE, DEFAULT_DISPLAY_MODE, DEFAULT_LINE_GAP, DEFAULT_PRESET_STYLE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MAX_LINE_GAP, MIN_BACKGROUND_OPACITY, MIN_LINE_GAP, SUBTITLE_STYLE_PRESETS } from "@/utils/constants/subtitles"
 
 const SLIDER_ROW_CLASS_NAME = "gap-0"
 const SLIDER_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
 const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w-0"
 
+const ADVANCED_INDEX = 4
+
 export function GeneralSettings() {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
-  const { displayMode, translationPosition, lineGap, backgroundForceMerge, mode, presetStyle, container } = videoSubtitlesConfig.style
+  const { displayMode, translationPosition, lineGap, backgroundForceMerge, presetStyle, container } = videoSubtitlesConfig.style
   const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
   const [draftLineGap, setDraftLineGap] = useState(lineGap)
+  const advancedSnapshotRef = useRef<{
+    backgroundStyle: string | undefined
+    backgroundOpacity: number
+    backgroundForceMerge: boolean | undefined
+    lineGap: number
+  } | null>(null)
 
   useEffect(() => {
     // eslint-disable-next-line react/set-state-in-effect
@@ -51,12 +59,35 @@ export function GeneralSettings() {
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { container: style } }))
   }
 
-  const handleModeChange = (newMode: SubtitleMode) => {
-    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { mode: newMode } }))
-  }
-
   const handlePresetChange = (index: number) => {
     const preset = SUBTITLE_STYLE_PRESETS[index]
+
+    if (presetStyle === ADVANCED_INDEX && index !== ADVANCED_INDEX) {
+      advancedSnapshotRef.current = {
+        backgroundStyle: container.backgroundStyle,
+        backgroundOpacity: container.backgroundOpacity,
+        backgroundForceMerge,
+        lineGap,
+      }
+    }
+
+    if (index === ADVANCED_INDEX && advancedSnapshotRef.current) {
+      const snap = advancedSnapshotRef.current
+      advancedSnapshotRef.current = null
+      void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
+        style: {
+          presetStyle: ADVANCED_INDEX,
+          lineGap: snap.lineGap,
+          backgroundForceMerge: snap.backgroundForceMerge,
+          container: {
+            backgroundStyle: snap.backgroundStyle as BackgroundStyle | undefined,
+            backgroundOpacity: snap.backgroundOpacity,
+          },
+        },
+      }))
+      return
+    }
+
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
       style: {
         presetStyle: index,
@@ -76,15 +107,17 @@ export function GeneralSettings() {
         displayMode: DEFAULT_DISPLAY_MODE,
         translationPosition: DEFAULT_TRANSLATION_POSITION,
         lineGap: DEFAULT_LINE_GAP,
+        presetStyle: DEFAULT_PRESET_STYLE,
+        backgroundForceMerge: DEFAULT_BACKGROUND_FORCE_MERGE,
         container: {
           backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
-          backgroundStyle: undefined,
+          backgroundStyle: DEFAULT_BACKGROUND_STYLE,
         },
       },
     }))
   }
 
-  const isAdvanced = mode === "advanced"
+  const isAdvanced = presetStyle === ADVANCED_INDEX
 
   return (
     <Card className="p-5">
@@ -152,41 +185,22 @@ export function GeneralSettings() {
         )}
 
         <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.mode")}</FieldLabel>
-          <div className="flex gap-1 rounded-lg bg-muted p-0.5">
-            {(["basic", "advanced"] as const).map(m => (
-              <Button
-                key={m}
-                variant={mode === m ? "default" : "ghost"}
-                size="sm"
-                className="flex-1 text-[13px]"
-                onClick={() => handleModeChange(m)}
-              >
-                {i18n.t(`options.videoSubtitles.style.modeOptions.${m}`)}
-              </Button>
-            ))}
-          </div>
+          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.presetStyle")}</FieldLabel>
+          <Select value={String(presetStyle)} onValueChange={v => handlePresetChange(Number(v))}>
+            <SelectTrigger className="h-8">
+              <SelectValue>
+                {SUBTITLE_STYLE_PRESETS[presetStyle]?.label}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {SUBTITLE_STYLE_PRESETS.map((p, i) => (
+                  <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </Field>
-
-        {!isAdvanced && (
-          <Field orientation="responsive-compact">
-            <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.presetStyle")}</FieldLabel>
-            <Select value={String(presetStyle)} onValueChange={v => handlePresetChange(Number(v))}>
-              <SelectTrigger className="h-8">
-                <SelectValue>
-                  {SUBTITLE_STYLE_PRESETS[presetStyle]?.label}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {SUBTITLE_STYLE_PRESETS.map((p, i) => (
-                    <SelectItem key={i} value={String(i)}>{p.label}</SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </Field>
-        )}
 
         {isAdvanced && (
           <>

@@ -30,7 +30,7 @@ interface SubtitlesTextStyleFormProps {
 export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
   const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
   const textStyle = videoSubtitlesConfig.style[type]
-  const isAdvanced = videoSubtitlesConfig.style.mode === "advanced"
+  const isAdvanced = videoSubtitlesConfig.style.presetStyle === 4
   const [draftFontScale, setDraftFontScale] = useState(textStyle.fontScale)
   const [draftFontWeight, setDraftFontWeight] = useState(textStyle.fontWeight)
   const [draftShadowIntensity, setDraftShadowIntensity] = useState(textStyle.fontShadowIntensity)

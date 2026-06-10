@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/base-ui/card"
 import { Label } from "@/components/ui/base-ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_SHADOW_INTENSITY, DEFAULT_FONT_STROKE_WIDTH, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR } from "@/utils/constants/subtitles"
+import { DEFAULT_FONT_FAMILY, DEFAULT_FONT_SHADOW_INTENSITY, DEFAULT_FONT_STROKE_WIDTH, DEFAULT_FONT_WEIGHT, DEFAULT_MAIN_FONT_SCALE, DEFAULT_SUBTITLE_COLOR } from "@/utils/constants/subtitles"
 import { SubtitlesTextStyleForm } from "./subtitles-text-style-form"
 
 export function MainSubtitlesStyle() {
@@ -18,7 +18,7 @@ export function MainSubtitlesStyle() {
       style: {
         main: {
           fontFamily: DEFAULT_FONT_FAMILY,
-          fontScale: DEFAULT_FONT_SCALE,
+          fontScale: DEFAULT_MAIN_FONT_SCALE,
           color: DEFAULT_SUBTITLE_COLOR,
           fontWeight: DEFAULT_FONT_WEIGHT,
           fontShadowIntensity: DEFAULT_FONT_SHADOW_INTENSITY,
