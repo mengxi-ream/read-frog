@@ -61,8 +61,8 @@ export function buildSubtitlesSummaryContextHash(
 
 function normalizeSubtitlePromptContext(videoContext: SubtitlesVideoContext): SubtitlePromptContext {
   return {
-    videoTitle: normalizePromptContextValue(videoContext.videoTitle),
-    videoDescription: normalizePromptContextValue(videoContext.videoDescription),
+    webTitle: normalizePromptContextValue(videoContext.videoTitle),
+    webDescription: normalizePromptContextValue(videoContext.videoDescription),
     videoSummary: normalizePromptContextValue(videoContext.summary),
   }
 }
@@ -99,11 +99,11 @@ async function buildSubtitleHashComponents(
   hashComponents.push(systemPrompt, prompt)
   hashComponents.push(enableAIContentAware ? "enableAIContentAware=true" : "enableAIContentAware=false")
 
-  if (subtitlePromptContext.videoTitle) {
-    hashComponents.push(`videoTitle:${subtitlePromptContext.videoTitle}`)
+  if (subtitlePromptContext.webTitle) {
+    hashComponents.push(`webTitle:${subtitlePromptContext.webTitle}`)
   }
-  if (subtitlePromptContext.videoDescription) {
-    hashComponents.push(`videoDescription:${subtitlePromptContext.videoDescription}`)
+  if (subtitlePromptContext.webDescription) {
+    hashComponents.push(`webDescription:${subtitlePromptContext.webDescription}`)
   }
   if (enableAIContentAware) {
     if (normalizedSubtitlesTextContent) {
@@ -145,8 +145,8 @@ async function translateSingleSubtitle(
     providerConfig,
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
-    videoTitle: subtitlePromptContext.videoTitle,
-    videoDescription: subtitlePromptContext.videoDescription,
+    webTitle: subtitlePromptContext.webTitle,
+    webDescription: subtitlePromptContext.webDescription,
     summary: enableAIContentAware ? subtitlePromptContext.videoSummary : undefined,
   })
 }

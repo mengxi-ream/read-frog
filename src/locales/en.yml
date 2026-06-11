@@ -946,8 +946,8 @@ options:
         promptCellInput:
           input: Subtitle text to translate
           targetLanguage: Target language
-          videoTitle: Video title
-          videoDescription: Video description from page metadata
+          webTitle: Webpage title
+          webDescription: Webpage description from page metadata
           videoSummary: Video summary (requires AI Smart Context)
   whatsNew:
     title: What's New

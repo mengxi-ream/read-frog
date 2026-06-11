@@ -831,8 +831,8 @@ options:
         promptCellInput:
           input: Văn bản phụ đề cần dịch
           targetLanguage: Ngôn ngữ đích
-          videoTitle: Tiêu đề video
-          videoDescription: Mô tả video từ siêu dữ liệu trang
+          webTitle: Tiêu đề trang web
+          webDescription: Mô tả trang web từ siêu dữ liệu trang
           videoSummary: Tóm tắt video (yêu cầu Ngữ cảnh thông minh AI)
   whatsNew:
     title: Có gì mới

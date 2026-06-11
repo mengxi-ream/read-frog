@@ -306,7 +306,7 @@ export async function setUpSubtitlesTranslationQueue() {
   })
 
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
-    const { data: { text, langConfig, providerConfig, scheduleAt, hash, videoTitle, videoDescription, summary } } = message
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webDescription, summary } } = message
 
     if (hash) {
       const cached = await db.translationCache.get(hash)
@@ -317,8 +317,8 @@ export async function setUpSubtitlesTranslationQueue() {
 
     let result = ""
     const context: SubtitlePromptContext = {
-      videoTitle: normalizePromptContextValue(videoTitle),
-      videoDescription: normalizePromptContextValue(videoDescription),
+      webTitle: normalizePromptContextValue(webTitle),
+      webDescription: normalizePromptContextValue(webDescription),
       videoSummary: normalizePromptContextValue(summary),
     }
 

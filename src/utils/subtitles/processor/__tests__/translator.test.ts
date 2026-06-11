@@ -58,12 +58,12 @@ describe("subtitles translator", () => {
     const firstRequest = sendMessageMock.mock.calls[0][1]
     const secondRequest = sendMessageMock.mock.calls[1][1]
 
-    expect(firstRequest.videoTitle).toBe("Video title")
-    expect(firstRequest.videoDescription).toBe("Video description")
+    expect(firstRequest.webTitle).toBe("Video title")
+    expect(firstRequest.webDescription).toBe("Video description")
     expect(firstRequest.subtitlesContext).toBeUndefined()
     expect(firstRequest.summary).toBe("Ready summary")
-    expect(secondRequest.videoTitle).toBe("Video title")
-    expect(secondRequest.videoDescription).toBe("Video description")
+    expect(secondRequest.webTitle).toBe("Video title")
+    expect(secondRequest.webDescription).toBe("Video description")
     expect(secondRequest.subtitlesContext).toBeUndefined()
     expect(secondRequest.summary).toBeUndefined()
     expect(firstRequest.hash).not.toBe(secondRequest.hash)
@@ -152,7 +152,7 @@ describe("subtitles translator", () => {
     })
 
     const request = sendMessageMock.mock.calls[0][1]
-    expect(request.videoTitle).toBe("Video title")
+    expect(request.webTitle).toBe("Video title")
     expect(request.summary).toBeNull()
   })
 
@@ -178,16 +178,16 @@ describe("subtitles translator", () => {
     })
 
     const request = sendMessageMock.mock.calls[0][1]
-    expect(request.videoTitle).toBe("Video title")
-    expect(request.videoDescription).toBe("Video description")
+    expect(request.webTitle).toBe("Video title")
+    expect(request.webDescription).toBe("Video description")
     expect(request.summary).toBeUndefined()
     expect(getSubtitlesTranslatePromptMock).toHaveBeenCalledWith(
       expect.any(String),
       expect.any(String),
       expect.objectContaining({
         context: {
-          videoTitle: "Video title",
-          videoDescription: "Video description",
+          webTitle: "Video title",
+          webDescription: "Video description",
           videoSummary: undefined,
         },
       }),

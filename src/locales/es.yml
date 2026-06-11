@@ -946,8 +946,8 @@ options:
         promptCellInput:
           input: Texto de subtítulos a traducir
           targetLanguage: Idioma de destino
-          videoTitle: Título del video
-          videoDescription: Descripción del video desde los metadatos de la página
+          webTitle: Título de la página web
+          webDescription: Descripción de la página web desde los metadatos
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
   whatsNew:
     title: Novedades

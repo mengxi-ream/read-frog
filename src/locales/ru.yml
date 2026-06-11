@@ -831,8 +831,8 @@ options:
         promptCellInput:
           input: Текст субтитров для перевода
           targetLanguage: Целевой язык
-          videoTitle: Название видео
-          videoDescription: Описание видео из метаданных страницы
+          webTitle: Заголовок веб-страницы
+          webDescription: Описание веб-страницы из метаданных
           videoSummary: Краткое содержание видео (требуется умный контекст ИИ)
   whatsNew:
     title: Что нового

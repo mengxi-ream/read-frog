@@ -13,7 +13,7 @@ export interface WebPagePromptContext {
 }
 
 export interface SubtitlePromptContext {
-  videoTitle?: string | null
-  videoDescription?: string | null
+  webTitle?: string | null
+  webDescription?: string | null
   videoSummary?: string | null
 }

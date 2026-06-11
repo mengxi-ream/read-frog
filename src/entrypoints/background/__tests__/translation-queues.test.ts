@@ -150,8 +150,8 @@ describe("translation queue helpers", () => {
         providerConfig: llmProvider,
         scheduleAt: Date.now(),
         hash: "subtitle-hash",
-        videoTitle: "Video title",
-        videoDescription: "Video description",
+        webTitle: "Video title",
+        webDescription: "Video description",
         summary: "Ready summary",
       },
     })
@@ -166,8 +166,8 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         isBatch: true,
         context: {
-          videoTitle: "Video title",
-          videoDescription: "Video description",
+          webTitle: "Video title",
+          webDescription: "Video description",
           videoSummary: "Ready summary",
         },
       }),
@@ -207,8 +207,8 @@ describe("translation queue helpers", () => {
           providerConfig: llmProvider,
           scheduleAt: Date.now(),
           hash: "subtitle-hash-one",
-          videoTitle: "First video",
-          videoDescription: "First description",
+          webTitle: "First video",
+          webDescription: "First description",
         },
       }),
       handler({
@@ -218,8 +218,8 @@ describe("translation queue helpers", () => {
           providerConfig: llmProvider,
           scheduleAt: Date.now(),
           hash: "subtitle-hash-two",
-          videoTitle: "Second video",
-          videoDescription: "Second description",
+          webTitle: "Second video",
+          webDescription: "Second description",
         },
       }),
     ]
@@ -238,8 +238,8 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         isBatch: true,
         context: expect.objectContaining({
-          videoTitle: "First video",
-          videoDescription: "First description",
+          webTitle: "First video",
+          webDescription: "First description",
         }),
       }),
     )
@@ -252,8 +252,8 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         isBatch: true,
         context: expect.objectContaining({
-          videoTitle: "Second video",
-          videoDescription: "Second description",
+          webTitle: "Second video",
+          webDescription: "Second description",
         }),
       }),
     )

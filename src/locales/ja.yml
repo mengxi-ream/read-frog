@@ -831,8 +831,8 @@ options:
         promptCellInput:
           input: 翻訳する字幕テキスト
           targetLanguage: 対象言語
-          videoTitle: 動画タイトル
-          videoDescription: ページメタデータの動画説明
+          webTitle: ウェブページタイトル
+          webDescription: ページメタデータのウェブページ説明
           videoSummary: 動画要約（AI スマートコンテキストが必要）
   whatsNew:
     title: 新機能

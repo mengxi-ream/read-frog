@@ -831,8 +831,8 @@ options:
         promptCellInput:
           input: 要翻譯的字幕文字
           targetLanguage: 目標語言
-          videoTitle: 影片標題
-          videoDescription: 頁面中繼資料的影片描述
+          webTitle: 網頁標題
+          webDescription: 頁面中繼資料的網頁描述
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
   whatsNew:
     title: 最近更新

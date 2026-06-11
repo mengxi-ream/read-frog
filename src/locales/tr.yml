@@ -831,8 +831,8 @@ options:
         promptCellInput:
           input: Çevrilecek altyazı metni
           targetLanguage: Hedef dil
-          videoTitle: Video başlığı
-          videoDescription: Sayfa meta verilerinden video açıklaması
+          webTitle: Web sayfası başlığı
+          webDescription: Sayfa meta verilerinden web sayfası açıklaması
           videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
   whatsNew:
     title: Yenilikler

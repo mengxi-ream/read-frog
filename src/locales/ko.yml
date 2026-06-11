@@ -831,8 +831,8 @@ options:
         promptCellInput:
           input: 번역할 자막 텍스트
           targetLanguage: 대상 언어
-          videoTitle: 동영상 제목
-          videoDescription: 페이지 메타데이터의 동영상 설명
+          webTitle: 웹페이지 제목
+          webDescription: 페이지 메타데이터의 웹페이지 설명
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
   whatsNew:
     title: 새로운 기능

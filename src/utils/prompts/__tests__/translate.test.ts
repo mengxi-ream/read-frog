@@ -82,8 +82,8 @@ describe("translate prompt tokens", () => {
             {
               id: "subtitle-prompt",
               name: "Subtitles",
-              systemPrompt: "Use {{targetLanguage}} with {{videoTitle}}, {{videoDescription}}, and {{videoSummary}}",
-              prompt: "{{input}} => {{targetLanguage}} / {{videoTitle}} / {{videoDescription}} / {{videoSummary}}",
+              systemPrompt: "Use {{targetLanguage}} with {{webTitle}}, {{webDescription}}, and {{videoSummary}}",
+              prompt: "{{input}} => {{targetLanguage}} / {{webTitle}} / {{webDescription}} / {{videoSummary}}",
             },
           ],
         },
@@ -92,8 +92,8 @@ describe("translate prompt tokens", () => {
 
     const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
       context: {
-        videoTitle: "Video Title",
-        videoDescription: "Video Description",
+        webTitle: "Video Title",
+        webDescription: "Video Description",
         videoSummary: "Video Summary",
       },
     })
@@ -107,14 +107,14 @@ describe("translate prompt tokens", () => {
 
     const result = await getSubtitlesTranslatePrompt("Japanese", "Hello world", {
       context: {
-        videoTitle: null,
-        videoDescription: undefined,
+        webTitle: null,
+        webDescription: undefined,
         videoSummary: undefined,
       },
     })
 
     expect(result.systemPrompt).toContain("Video title: No title available")
-    expect(result.systemPrompt).toContain("Video description: No description available")
     expect(result.systemPrompt).toContain("Video summary: No summary available")
+    expect(result.systemPrompt).not.toContain("Video description:")
   })
 })
