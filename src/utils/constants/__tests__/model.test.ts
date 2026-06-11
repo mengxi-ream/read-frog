@@ -65,6 +65,11 @@ describe("getProviderOptions", () => {
       ]))
     })
 
+    it("should expose the supported Anthropic Fable model ids", () => {
+      expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-fable-5")
+      expect(LLM_PROVIDER_MODELS.bedrock).toContain("us.anthropic.claude-fable-5")
+    })
+
     it("should return the documented floor for GPT-5 model-specific reasoning", () => {
       const gpt55Options = getProviderOptions("gpt-5.5", "openai")
       expect(gpt55Options.openai?.reasoningEffort).toBe("none")

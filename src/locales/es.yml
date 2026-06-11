@@ -1014,6 +1014,10 @@ shortcutKeySelector:
   placeholder: Introduce el atajo
 subtitles:
   actions:
+    downloadTranslated: Descargar subtítulos traducidos
+    downloadTranslatedPreparing: Preparando subtítulos, los videos largos pueden tardar más
+    downloadTranslatedTranslating: Traduciendo subtítulos
+    downloadTranslatedComplete: Subtítulos traducidos descargados
     downloadSource: Descargar subtítulos de origen
   state:
     loading: Read Frog está cargando subtítulos
@@ -1035,6 +1039,9 @@ subtitles:
     aiAuthFailed: Error de autenticación de API; revisa tu clave API
     aiServiceUnavailable: Servicio de traducción temporalmente no disponible
     aiNoResponse: El servicio AI no respondió; se usa el texto original
+    translatedExportFailed: No se pudieron generar los subtítulos traducidos
+    translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos
+    translatedExportSameLanguage: El idioma de origen y el de destino son iguales
 hotkey:
   control: Ctrl
   alt: Opción

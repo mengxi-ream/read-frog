@@ -1014,6 +1014,10 @@ shortcutKeySelector:
   placeholder: 请输入快捷键
 subtitles:
   actions:
+    downloadTranslated: 下载翻译字幕
+    downloadTranslatedPreparing: 正在准备字幕，长视频可能需要更久
+    downloadTranslatedTranslating: 正在翻译字幕
+    downloadTranslatedComplete: 翻译字幕已下载
     downloadSource: 下载原字幕
   state:
     loading: Read Frog 字幕加载中
@@ -1035,6 +1039,9 @@ subtitles:
     aiAuthFailed: API 认证失败，请检查您的 API 密钥
     aiServiceUnavailable: 翻译服务暂时不可用
     aiNoResponse: AI 服务未响应，使用原文显示
+    translatedExportFailed: 生成翻译字幕失败
+    translatedExportIncomplete: 未能翻译所有字幕行
+    translatedExportSameLanguage: 源语言和目标语言相同
 hotkey:
   control: Ctrl
   alt: Option

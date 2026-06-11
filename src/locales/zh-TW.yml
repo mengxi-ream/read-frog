@@ -899,6 +899,10 @@ shortcutKeySelector:
   placeholder: 請輸入快速鍵
 subtitles:
   actions:
+    downloadTranslated: 下載翻譯字幕
+    downloadTranslatedPreparing: 正在準備字幕，長影片可能需要更久
+    downloadTranslatedTranslating: 正在翻譯字幕
+    downloadTranslatedComplete: 翻譯字幕已下載
     downloadSource: 下載原始字幕
   state:
     loading: Read Frog 字幕載入中
@@ -920,6 +924,9 @@ subtitles:
     aiAuthFailed: API 認證失敗，請檢查你的 API 金鑰
     aiServiceUnavailable: 翻譯服務暫時無法使用
     aiNoResponse: AI 服務未回應，使用原文顯示
+    translatedExportFailed: 產生翻譯字幕失敗
+    translatedExportIncomplete: 未能翻譯所有字幕行
+    translatedExportSameLanguage: 來源語言和目標語言相同
 hotkey:
   control: Ctrl
   alt: Option

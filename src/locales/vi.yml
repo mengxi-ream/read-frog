@@ -899,6 +899,10 @@ shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
   actions:
+    downloadTranslated: Tải phụ đề đã dịch
+    downloadTranslatedPreparing: Đang chuẩn bị phụ đề, video dài có thể mất nhiều thời gian hơn
+    downloadTranslatedTranslating: Đang dịch phụ đề
+    downloadTranslatedComplete: Đã tải phụ đề đã dịch
     downloadSource: Tải phụ đề gốc
   state:
     loading: Read Frog đang tải phụ đề
@@ -920,6 +924,9 @@ subtitles:
     aiAuthFailed: Xác thực API thất bại, vui lòng kiểm tra API key của bạn
     aiServiceUnavailable: Dịch vụ dịch thuật tạm thời không khả dụng
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc
+    translatedExportFailed: Không thể tạo phụ đề đã dịch
+    translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề
+    translatedExportSameLanguage: Ngôn ngữ nguồn và ngôn ngữ đích giống nhau
 hotkey:
   control: Ctrl
   alt: Option
