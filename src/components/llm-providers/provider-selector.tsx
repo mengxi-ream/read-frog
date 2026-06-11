@@ -94,7 +94,7 @@ function TranslateGroupedSelect({
       }}
       itemToStringValue={p => p.id}
     >
-      <SelectTrigger className={className}>
+      <SelectTrigger className={className} size="sm">
         <SelectValue placeholder={placeholder}>
           {(provider: ProviderConfig) => (
             <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
@@ -151,7 +151,7 @@ function FlatSelect({
       itemToStringValue={p => p.id}
       disabled={providers.length === 0}
     >
-      <SelectTrigger className={className}>
+      <SelectTrigger className={className} size="sm">
         <SelectValue placeholder={placeholder}>
           {(provider: ProviderConfig) => (
             <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
