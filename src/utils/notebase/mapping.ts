@@ -6,13 +6,12 @@ import type {
 import type { NotebaseColumnConfig } from "@read-frog/definitions"
 import type {
   SelectionToolbarCustomAction,
-  SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionNotebaseMapping,
   SelectionToolbarCustomActionOutputField,
   SelectionToolbarCustomActionOutputType,
 } from "@/types/config/selection-toolbar"
-import { ORPCError } from "@orpc/client"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { sanitizeCustomActionNotebaseConnection } from "./connection"
 
 export type ResolvedNotebaseMappingStatus = "valid" | "missing_local" | "missing_remote" | "missing_schema" | "incompatible"
 
@@ -22,6 +21,21 @@ export interface ResolvedNotebaseMapping {
   notebaseColumn: NotebaseColumn | null
   status: ResolvedNotebaseMappingStatus
 }
+
+export type NotebaseMappingValidation
+  = | {
+    kind: "valid"
+    resolvedMappings: ResolvedNotebaseMapping[]
+  }
+  | {
+    kind: "invalid"
+    reason: Exclude<ResolvedNotebaseMappingStatus, "valid">
+    resolvedMappings: ResolvedNotebaseMapping[]
+  }
+  | {
+    kind: "empty"
+    resolvedMappings: ResolvedNotebaseMapping[]
+  }
 
 export function createNotebaseMapping(
   localFieldId: string,
@@ -41,68 +55,8 @@ export function isSupportedNotebaseColumnConfig(config: NotebaseColumnConfig) {
 }
 
 export function isNotebaseMappingCompatible(localType: SelectionToolbarCustomActionOutputType, notebaseColumnConfig: NotebaseColumnConfig) {
-  if (localType === "string") {
-    return notebaseColumnConfig.type === "string"
-  }
-
-  if (localType === "number") {
-    return notebaseColumnConfig.type === "number"
-  }
-
-  return false
-}
-
-export function sanitizeCustomActionNotebaseConnection(
-  connection: SelectionToolbarCustomActionNotebaseConnection | undefined,
-  outputSchema: SelectionToolbarCustomActionOutputField[],
-): SelectionToolbarCustomActionNotebaseConnection | undefined {
-  if (!connection) {
-    return undefined
-  }
-
-  const notebaseId = connection.notebaseId.trim()
-  if (!notebaseId) {
-    return undefined
-  }
-
-  const outputFieldIds = new Set(outputSchema.map(field => field.id))
-  const mappingIds = new Set<string>()
-  const localFieldIds = new Set<string>()
-  const notebaseColumnIds = new Set<string>()
-  const mappings = connection.mappings.filter((mapping) => {
-    if (!outputFieldIds.has(mapping.localFieldId)) {
-      return false
-    }
-
-    if (!mapping.localFieldId.trim() || !mapping.notebaseColumnId.trim()) {
-      return false
-    }
-
-    if (mappingIds.has(mapping.id) || localFieldIds.has(mapping.localFieldId) || notebaseColumnIds.has(mapping.notebaseColumnId)) {
-      return false
-    }
-
-    mappingIds.add(mapping.id)
-    localFieldIds.add(mapping.localFieldId)
-    notebaseColumnIds.add(mapping.notebaseColumnId)
-    return true
-  }).map(mapping => ({
-    ...mapping,
-    notebaseColumnNameSnapshot: mapping.notebaseColumnNameSnapshot.trim() || mapping.notebaseColumnId,
-  }))
-
-  return {
-    notebaseId,
-    notebaseNameSnapshot: connection.notebaseNameSnapshot.trim() || notebaseId,
-    mappings,
-  }
-}
-
-export function sanitizeSelectionToolbarCustomAction(action: SelectionToolbarCustomAction): SelectionToolbarCustomAction {
-  return {
-    ...action,
-    notebaseConnection: sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema),
-  }
+  return isSupportedNotebaseColumnConfig(notebaseColumnConfig)
+    && localType === notebaseColumnConfig.type
 }
 
 export function resolveNotebaseMappings(
@@ -141,6 +95,29 @@ export function resolveNotebaseMappings(
   })
 }
 
+export function validateNotebaseMappings(
+  action: SelectionToolbarCustomAction,
+  schema: NotebaseGetSchemaOutput,
+): NotebaseMappingValidation {
+  const resolvedMappings = resolveNotebaseMappings(action, schema)
+  if (resolvedMappings.length === 0) {
+    return { kind: "empty", resolvedMappings }
+  }
+
+  const invalidMapping = resolvedMappings.find((
+    mapping,
+  ): mapping is ResolvedNotebaseMapping & { status: Exclude<ResolvedNotebaseMappingStatus, "valid"> } => mapping.status !== "valid")
+  if (invalidMapping) {
+    return {
+      kind: "invalid",
+      reason: invalidMapping.status,
+      resolvedMappings,
+    }
+  }
+
+  return { kind: "valid", resolvedMappings }
+}
+
 export function buildNotebaseRowCells(
   action: SelectionToolbarCustomAction,
   schema: NotebaseGetSchemaOutput,
@@ -161,16 +138,4 @@ export function buildNotebaseRowCells(
     cells,
     resolvedMappings,
   }
-}
-
-export function isORPCUnauthorizedError(error: unknown) {
-  return error instanceof ORPCError && (error.code === "UNAUTHORIZED" || error.status === 401)
-}
-
-export function isORPCNotFoundError(error: unknown) {
-  return error instanceof ORPCError && (error.code === "NOT_FOUND" || error.status === 404)
-}
-
-export function isORPCValidationError(error: unknown) {
-  return error instanceof ORPCError && (error.code === "CELL_VALIDATION_FAILED" || error.status === 422)
 }

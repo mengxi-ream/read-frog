@@ -487,6 +487,56 @@ describe("selectionPopover", () => {
     expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
   })
 
+  it("keeps the popover open when pointer dismissal is disabled", async () => {
+    render(
+      <SelectionPopover.Root
+        onOpenChange={onOpenChangeSpy}
+        disablePointerDismissal
+      >
+        <SelectionPopover.Trigger>Open popover</SelectionPopover.Trigger>
+        <SelectionPopover.Content>
+          <SelectionPopover.Header className="border-b">
+            <SelectionPopover.Title>Test Popover</SelectionPopover.Title>
+            <div className="flex items-center gap-1">
+              <SelectionPopover.Pin />
+              <SelectionPopover.Close />
+            </div>
+          </SelectionPopover.Header>
+          <SelectionPopover.Body>
+            <div>Popover content</div>
+          </SelectionPopover.Body>
+        </SelectionPopover.Content>
+      </SelectionPopover.Root>,
+    )
+
+    const trigger = screen.getByRole("button", { name: "Open popover" })
+    vi.spyOn(trigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect())
+
+    fireEvent.click(trigger)
+    flushRaf()
+
+    await act(async () => {
+      await Promise.resolve()
+    })
+
+    const mouseDownEvent = new MouseEvent("mousedown", { bubbles: true })
+    Object.defineProperty(mouseDownEvent, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+    const clickEvent = new MouseEvent("click", { bubbles: true })
+    Object.defineProperty(clickEvent, "composedPath", {
+      value: () => [document.body, document, window],
+    })
+
+    act(() => {
+      document.body.dispatchEvent(mouseDownEvent)
+      document.body.dispatchEvent(clickEvent)
+    })
+
+    expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
+    expect(onOpenChangeSpy).not.toHaveBeenCalledWith(false)
+  })
+
   it("keeps a pinned popover open when clicking outside", async () => {
     renderPopover()
 

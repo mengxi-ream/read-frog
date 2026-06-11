@@ -82,6 +82,7 @@ function SelectionPopoverRoot({
   anchor: anchorProp,
   children,
   defaultOpen = false,
+  disablePointerDismissal = false,
   open: openProp,
   onAnchorChange,
   onOpenChange,
@@ -89,6 +90,7 @@ function SelectionPopoverRoot({
   anchor?: SelectionPopoverPosition | null
   children: React.ReactNode
   defaultOpen?: boolean
+  disablePointerDismissal?: boolean
   open?: boolean
   onAnchorChange?: (anchor: SelectionPopoverPosition | null) => void
   onOpenChange?: (open: boolean) => void
@@ -163,7 +165,7 @@ function SelectionPopoverRoot({
         onOpenChange={(nextOpen) => {
           setOpen(nextOpen)
         }}
-        disablePointerDismissal={pinned}
+        disablePointerDismissal={pinned || disablePointerDismissal}
         modal={false}
       >
         {children}

@@ -25,7 +25,7 @@ import { defineExtensionMessaging } from "@webext-core/messaging"
 interface ProtocolMap {
   // navigation
   openPage: (data: { url: string, active?: boolean }) => void
-  openOptionsPage: () => void
+  openOptionsPage: (data?: { route?: `/${string}` }) => void
   toggleSidePanel: (data?: { source?: "content-script" | "extension-user-action" }) => Promise<{ ok: true, action: "opened" | "closed" } | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action" }>
   // config
   getInitialConfig: () => Config | null

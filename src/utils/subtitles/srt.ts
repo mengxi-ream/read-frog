@@ -75,13 +75,16 @@ export function buildSubtitlesSrtContent(subtitles: SubtitlesFragment[]): string
 export function buildSubtitlesSrtFilename({
   pageTitle,
   videoId,
+  suffix,
 }: {
   pageTitle: string
   videoId?: string | null
+  suffix?: string | null
 }): string {
   const safeTitle = sanitizeFilenamePart(pageTitle)
   const safeVideoId = sanitizeFilenamePart(videoId ?? "")
-  const baseName = [safeTitle || "video-subtitles", safeVideoId].filter(Boolean).join("-")
+  const safeSuffix = sanitizeFilenamePart(suffix ?? "")
+  const baseName = [safeTitle || "video-subtitles", safeVideoId, safeSuffix].filter(Boolean).join("-")
 
   return `${baseName}.srt`
 }
@@ -90,14 +93,16 @@ export async function downloadSubtitlesAsSrt({
   subtitles,
   pageTitle,
   videoId,
+  suffix,
 }: {
   subtitles: SubtitlesFragment[]
   pageTitle: string
   videoId?: string | null
+  suffix?: string | null
 }) {
   const srt = buildSubtitlesSrtContent(subtitles)
   const blob = new Blob([srt], { type: "application/x-subrip;charset=utf-8" })
-  const filename = buildSubtitlesSrtFilename({ pageTitle, videoId })
+  const filename = buildSubtitlesSrtFilename({ pageTitle, videoId, suffix })
 
   saveAs(blob, filename)
 }

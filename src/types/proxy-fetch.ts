@@ -19,6 +19,7 @@ export interface ProxyRequest {
   headers?: [string, string][]
   body?: string
   credentials?: "omit" | "same-origin" | "include"
+  redirect?: RequestRedirect
   cacheConfig?: CacheConfig
   responseType?: "text" | "base64"
 }
