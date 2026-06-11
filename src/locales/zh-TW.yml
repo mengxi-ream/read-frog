@@ -28,6 +28,14 @@ popup:
   options: 選項
   hover: 滑鼠停留
   translateParagraph: 翻譯段落
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: 當前為雙語對照
+        action: 點擊切換為僅譯文
+      translationOnly:
+        current: 當前為僅譯文
+        action: 點擊切換為雙語對照
   hub:
     tooltip: 一次使用多個翻譯模型翻譯文字
   discord:

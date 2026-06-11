@@ -28,6 +28,14 @@ popup:
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: Currently bilingual
+        action: Click to switch to translation only
+      translationOnly:
+        current: Currently translation only
+        action: Click to switch to bilingual
   hub:
     tooltip: Translate text with multiple models simultaneously
   discord:

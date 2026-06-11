@@ -28,6 +28,14 @@ popup:
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: "Geçerli mod: İki dilli"
+        action: Yalnızca çeviriye geçmek için tıklayın
+      translationOnly:
+        current: "Geçerli mod: Yalnızca çeviri"
+        action: İki dilli moda geçmek için tıklayın
   hub:
     tooltip: Birden fazla çeviri modeliyle aynı anda metin çevirin
   discord:

@@ -28,6 +28,14 @@ popup:
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: "Текущий режим: двуязычный"
+        action: Нажмите, чтобы переключиться на только перевод
+      translationOnly:
+        current: "Текущий режим: только перевод"
+        action: Нажмите, чтобы переключиться на двуязычный
   hub:
     tooltip: Переводите текст несколькими моделями одновременно
   discord:

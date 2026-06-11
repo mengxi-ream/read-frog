@@ -28,6 +28,14 @@ popup:
   options: Tùy chọn
   hover: Di chuột
   translateParagraph: để dịch đoạn văn
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: Hiện tại là song ngữ
+        action: Nhấp để chuyển sang chỉ bản dịch
+      translationOnly:
+        current: Hiện tại chỉ bản dịch
+        action: Nhấp để chuyển sang song ngữ
   hub:
     tooltip: Dịch văn bản với nhiều mô hình đồng thời
   discord:

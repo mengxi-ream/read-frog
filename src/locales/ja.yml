@@ -28,6 +28,14 @@ popup:
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: 現在はバイリンガル
+        action: クリックして翻訳のみへ切り替え
+      translationOnly:
+        current: 現在は翻訳のみ
+        action: クリックしてバイリンガルへ切り替え
   hub:
     tooltip: 複数の翻訳モデルで同時にテキストを翻訳
   discord:

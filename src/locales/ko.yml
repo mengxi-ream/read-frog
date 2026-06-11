@@ -28,6 +28,14 @@ popup:
   options: 옵션
   hover: 마우스 오버
   translateParagraph: 단락 번역
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: 현재 이중 언어 모드
+        action: 클릭하여 번역만으로 전환
+      translationOnly:
+        current: 현재 번역만 모드
+        action: 클릭하여 이중 언어로 전환
   hub:
     tooltip: 여러 번역 모델로 동시에 텍스트 번역
   discord:
