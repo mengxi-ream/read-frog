@@ -1,5 +1,5 @@
 ---
-"@read-frog/extension": patch
+"@read-frog/extension": minor
 ---
 
 feat(notebase): auto-create Notebase for unconnected Custom Actions
