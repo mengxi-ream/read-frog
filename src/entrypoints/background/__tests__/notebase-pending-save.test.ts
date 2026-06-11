@@ -1,13 +1,14 @@
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import type { PendingNotebaseSave } from "@/utils/notebase-pending-save"
+import type { PendingCreateNotebaseSave, PendingNotebaseSave } from "@/utils/notebase/pending-save"
 import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   buildNotebaseCreateInputFromPending,
+  createPendingConnectedNotebaseSave,
   createPendingNotebaseSave,
-} from "@/utils/notebase-pending-save"
+} from "@/utils/notebase/pending-save"
 import { createNotebasePendingSaveProcessor } from "../notebase-pending-save"
 
 function cloneConfig(config: Config): Config {
@@ -40,6 +41,30 @@ function createConfig(action: SelectionToolbarCustomAction) {
   return config
 }
 
+function createConnectedAction(): SelectionToolbarCustomAction {
+  return {
+    ...createAction(),
+    notebaseConnection: {
+      notebaseId: "notebase-1",
+      notebaseNameSnapshot: "Summarize Notes",
+      connectedAccount: {
+        id: "user-1",
+        name: "Reader",
+        email: "reader@example.com",
+        image: null,
+      },
+      mappings: [
+        {
+          id: "mapping-1",
+          localFieldId: "field-summary",
+          notebaseColumnId: "column-summary",
+          notebaseColumnNameSnapshot: "Summary",
+        },
+      ],
+    },
+  }
+}
+
 function createDeps({
   pending,
   config,
@@ -50,14 +75,21 @@ function createDeps({
   authenticated: boolean
 }) {
   return {
-    getPending: vi.fn().mockResolvedValue(pending),
-    clearPending: vi.fn().mockResolvedValue(undefined),
+    getPendingNotebaseSave: vi.fn().mockResolvedValue(pending),
+    clearPendingNotebaseSave: vi.fn().mockResolvedValue(undefined),
     getConfig: vi.fn().mockResolvedValue(config),
     setConfig: vi.fn().mockResolvedValue(undefined),
-    hasAuthenticatedSession: vi.fn().mockResolvedValue(authenticated),
+    getAuthenticatedAccount: vi.fn().mockResolvedValue(
+      authenticated
+        ? { id: "user-1", name: "Reader", email: "reader@example.com", image: null }
+        : null,
+    ),
     createNotebase: vi.fn().mockResolvedValue({ txid: 1 }),
+    createRow: vi.fn().mockResolvedValue({ txid: 1 }),
+    listNotebases: vi.fn().mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }]),
     getSchema: vi.fn(),
     openNotebasePage: vi.fn().mockResolvedValue(undefined),
+    openActionOptions: vi.fn().mockResolvedValue(undefined),
     now: () => 1_000,
     log: {
       info: vi.fn(),
@@ -67,7 +99,7 @@ function createDeps({
   }
 }
 
-function createMatchingSchema(pending: PendingNotebaseSave): NotebaseGetSchemaOutput {
+function createMatchingSchema(pending: PendingCreateNotebaseSave): NotebaseGetSchemaOutput {
   return {
     id: pending.notebaseId,
     name: pending.actionName,
@@ -88,6 +120,27 @@ function createMatchingSchema(pending: PendingNotebaseSave): NotebaseGetSchemaOu
   }
 }
 
+function createConnectedSchema(): NotebaseGetSchemaOutput {
+  return {
+    id: "notebase-1",
+    name: "Summarize Notes",
+    updatedAt: new Date(),
+    notebaseColumns: [
+      {
+        id: "column-summary",
+        notebaseId: "notebase-1",
+        name: "Summary",
+        config: { type: "string" },
+        position: 0,
+        isPrimary: true,
+        width: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+  }
+}
+
 describe("notebase pending save processor", () => {
   it("clears schema-changed pending saves without probing auth or calling create", async () => {
     const action = createAction()
@@ -103,8 +156,8 @@ describe("notebase pending save processor", () => {
 
     await createNotebasePendingSaveProcessor(deps)("startup")
 
-    expect(deps.clearPending).toHaveBeenCalledTimes(1)
-    expect(deps.hasAuthenticatedSession).not.toHaveBeenCalled()
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.getAuthenticatedAccount).not.toHaveBeenCalled()
     expect(deps.createNotebase).not.toHaveBeenCalled()
     expect(deps.openNotebasePage).not.toHaveBeenCalled()
   })
@@ -121,7 +174,7 @@ describe("notebase pending save processor", () => {
     await createNotebasePendingSaveProcessor(loggedOutDeps)("startup")
 
     expect(loggedOutDeps.createNotebase).not.toHaveBeenCalled()
-    expect(loggedOutDeps.clearPending).not.toHaveBeenCalled()
+    expect(loggedOutDeps.clearPendingNotebaseSave).not.toHaveBeenCalled()
     expect(loggedOutDeps.openNotebasePage).not.toHaveBeenCalled()
 
     const loggedInDeps = createDeps({
@@ -145,7 +198,7 @@ describe("notebase pending save processor", () => {
         ],
       }),
     }))
-    expect(loggedInDeps.clearPending).toHaveBeenCalledTimes(1)
+    expect(loggedInDeps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
     expect(loggedInDeps.openNotebasePage).toHaveBeenCalledWith(pending.notebaseId)
   })
 
@@ -163,7 +216,74 @@ describe("notebase pending save processor", () => {
     await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
 
     expect(deps.setConfig).toHaveBeenCalledTimes(1)
-    expect(deps.clearPending).toHaveBeenCalledTimes(1)
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
     expect(deps.openNotebasePage).toHaveBeenCalledWith(pending.notebaseId)
+  })
+
+  it("saves a connected pending row when the logged-in account still owns the connection", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      { summary: "A short summary" },
+      1_000,
+    )
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+    deps.getSchema.mockResolvedValueOnce(createConnectedSchema())
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createRow).toHaveBeenCalledWith({
+      notebaseId: "notebase-1",
+      data: {
+        cells: {
+          "column-summary": "A short summary",
+        },
+      },
+    })
+    expect(deps.createNotebase).not.toHaveBeenCalled()
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
+    expect(deps.openNotebasePage).toHaveBeenCalledWith("notebase-1")
+  })
+
+  it("creates a replacement Notebase for a connected pending save when the logged-in account differs", async () => {
+    const action = createConnectedAction()
+    const pending = createPendingConnectedNotebaseSave(
+      action,
+      action.notebaseConnection!,
+      { summary: "A short summary" },
+      1_000,
+    )
+    const deps = createDeps({
+      pending,
+      config: createConfig(action),
+      authenticated: true,
+    })
+    deps.getAuthenticatedAccount.mockResolvedValueOnce({
+      id: "user-2",
+      name: "Other Reader",
+      email: "other@example.com",
+      image: null,
+    })
+    deps.listNotebases.mockResolvedValueOnce([])
+
+    await createNotebasePendingSaveProcessor(deps)("auth-cookie-change")
+
+    expect(deps.createRow).not.toHaveBeenCalled()
+    expect(deps.createNotebase).toHaveBeenCalledTimes(1)
+    expect(deps.setConfig).toHaveBeenCalledTimes(1)
+
+    const nextConfig = deps.setConfig.mock.calls[0]?.[0] as Config
+    const nextConnection = nextConfig.selectionToolbar.customActions[0]?.notebaseConnection
+    expect(nextConnection?.notebaseId).not.toBe("notebase-1")
+    expect(nextConnection?.connectedAccount).toMatchObject({
+      id: "user-2",
+      email: "other@example.com",
+    })
+    expect(deps.clearPendingNotebaseSave).toHaveBeenCalledTimes(1)
   })
 })

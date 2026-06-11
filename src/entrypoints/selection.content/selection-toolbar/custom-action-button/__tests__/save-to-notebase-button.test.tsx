@@ -1,4 +1,5 @@
 // @vitest-environment jsdom
+import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
@@ -17,9 +18,17 @@ const mockAuthState = vi.hoisted(() => ({
   session: {
     user: {
       id: "user-1",
+      name: "Reader",
+      email: "reader@example.com",
+      image: null,
     },
-  } as { user: { id: string } } | null,
+  } as { user: { id: string, name: string, email: string, image?: string | null } } | null,
   isPending: false,
+}))
+
+const toastMock = vi.hoisted(() => ({
+  success: vi.fn(),
+  error: vi.fn(),
 }))
 
 vi.mock("@/utils/auth/auth-client", () => ({
@@ -31,8 +40,7 @@ vi.mock("@/utils/auth/auth-client", () => ({
   },
 }))
 
-vi.mock("@/utils/notebase-beta", () => ({
-  isORPCForbiddenError: () => false,
+vi.mock("@/utils/notebase/beta", () => ({
   useNotebaseBetaStatus: () => ({
     data: {
       allowed: true,
@@ -44,6 +52,10 @@ vi.mock("@/utils/notebase-beta", () => ({
 
 vi.mock("@/utils/message", () => ({
   sendMessage: vi.fn(),
+}))
+
+vi.mock("sonner", () => ({
+  toast: toastMock,
 }))
 
 vi.mock("@/utils/orpc/client", () => ({
@@ -69,6 +81,8 @@ vi.mock("@/utils/orpc/client", () => ({
   orpcClient: {
     notebase: {
       create: vi.fn(),
+      getSchema: vi.fn(),
+      list: vi.fn(),
     },
   },
 }))
@@ -97,17 +111,65 @@ function createAction(): SelectionToolbarCustomAction {
   }
 }
 
-function renderButton(config: Config, action: SelectionToolbarCustomAction) {
+function createConnectedAction(): SelectionToolbarCustomAction {
+  return {
+    ...createAction(),
+    notebaseConnection: {
+      notebaseId: "notebase-1",
+      notebaseNameSnapshot: "Summarize Notes",
+      connectedAccount: {
+        id: "user-1",
+        name: "Reader",
+        email: "reader@example.com",
+        image: null,
+      },
+      mappings: [
+        {
+          id: "mapping-1",
+          localFieldId: "field-summary",
+          notebaseColumnId: "column-summary",
+          notebaseColumnNameSnapshot: "Summary",
+        },
+      ],
+    },
+  }
+}
+
+function createSchema(columnId = "column-summary"): NotebaseGetSchemaOutput {
+  return {
+    id: "notebase-1",
+    name: "Summarize Notes",
+    updatedAt: new Date(),
+    notebaseColumns: [
+      {
+        id: columnId,
+        notebaseId: "notebase-1",
+        name: "Summary",
+        config: { type: "string" },
+        position: 0,
+        isPrimary: true,
+        width: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    ],
+  }
+}
+
+function renderButton(
+  config: Config,
+  action: SelectionToolbarCustomAction,
+) {
   const store = createStore()
   store.set(configAtom, config)
   const queryClient = new QueryClient({
     defaultOptions: {
       queries: {
         retry: false,
+        staleTime: Infinity,
       },
     },
   })
-
   return render(
     <QueryClientProvider client={queryClient}>
       <Provider store={store}>
@@ -125,13 +187,20 @@ function renderButton(config: Config, action: SelectionToolbarCustomAction) {
 describe("saveToNotebaseButton beta gating", () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    toastMock.success.mockClear()
+    toastMock.error.mockClear()
     mockAuthState.session = {
       user: {
         id: "user-1",
+        name: "Reader",
+        email: "reader@example.com",
+        image: null,
       },
     }
     mockAuthState.isPending = false
     vi.mocked(orpcClient.notebase.create).mockResolvedValue({ txid: 1 })
+    vi.mocked(orpcClient.notebase.list).mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }])
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
     vi.mocked(sendMessage).mockResolvedValue(undefined as never)
   })
 
@@ -152,7 +221,7 @@ describe("saveToNotebaseButton beta gating", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     expect(screen.getByText(i18n.t("action.saveToNotebaseCreateTitle"))).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSave") })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") })).toBeInTheDocument()
     expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") })).toBeInTheDocument()
   })
 
@@ -162,7 +231,7 @@ describe("saveToNotebaseButton beta gating", () => {
     renderButton(config, createAction())
 
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
-    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSave") }))
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }))
 
     await waitFor(() => {
       expect(orpcClient.notebase.create).toHaveBeenCalledTimes(1)
@@ -200,6 +269,106 @@ describe("saveToNotebaseButton beta gating", () => {
     expect(loginUrl.pathname).toBe("/log-in")
     expect(loginUrl.searchParams.get("redirectTo")).toBe("/home")
     expect(loginUrl.searchParams.has("rfPending")).toBe(false)
+  })
+
+  it("keeps the connected save button enabled while logged out and opens the login-connected dialog", () => {
+    mockAuthState.session = null
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createConnectedAction())
+
+    const saveButton = screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })
+    expect(saveButton).toBeEnabled()
+
+    fireEvent.click(saveButton)
+
+    expect(screen.getByText(i18n.t("action.saveToNotebaseLoginConnectedTitle"))).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndSave") })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseGoConfigure") })).toBeInTheDocument()
+  })
+
+  it("opens the create/connect dialog when the connected account differs from the logged-in account", async () => {
+    mockAuthState.session = {
+      user: {
+        id: "user-2",
+        name: "Other Reader",
+        email: "other@example.com",
+        image: null,
+      },
+    }
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.list).mockResolvedValueOnce([])
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(screen.getByText(i18n.t("action.saveToNotebaseConnectionUnavailableTitle"))).toBeInTheDocument()
+    })
+    expect(screen.getByText(i18n.t("action.saveToNotebaseAccountUnavailableDescription"))).toBeInTheDocument()
+    expect(screen.getByText("Reader (reader@example.com)")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") })).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") })).toBeInTheDocument()
+  })
+
+  it("shows the saved notebase name in the success toast and opens its URL from the toast action", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(toastMock.success).toHaveBeenCalledWith(
+        i18n.t("action.saveToNotebaseSuccess"),
+        expect.objectContaining({
+          description: "Summarize Notes",
+          action: expect.objectContaining({
+            label: i18n.t("action.openNotebase"),
+            onClick: expect.any(Function),
+          }),
+        }),
+      )
+    })
+
+    const toastOptions = toastMock.success.mock.calls[0]?.[1] as { action?: { onClick?: () => void }, description?: string } | undefined
+    toastOptions?.action?.onClick?.()
+
+    expect(sendMessage).toHaveBeenCalledWith("openPage", {
+      url: expect.stringContaining("/notebase/notebase-1"),
+      active: true,
+    })
+  })
+
+  it("shows a Custom AI Actions toast action instead of disabling invalid mappings", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = true
+    vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchema("removed-column"))
+    renderButton(config, createConnectedAction())
+
+    const saveButton = screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })
+    expect(saveButton).toBeEnabled()
+    fireEvent.click(saveButton)
+
+    await waitFor(() => {
+      expect(toastMock.error).toHaveBeenCalledWith(
+        i18n.t("action.saveToNotebaseConnectionInvalid"),
+        expect.objectContaining({
+          action: expect.objectContaining({
+            label: i18n.t("action.openCustomActions"),
+            onClick: expect.any(Function),
+          }),
+        }),
+      )
+    })
+
+    const toastOptions = toastMock.error.mock.calls[0]?.[1] as { action?: { onClick?: () => void } } | undefined
+    toastOptions?.action?.onClick?.()
+
+    expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
+      route: "/custom-actions?actionId=action-1",
+    })
   })
 
   it("closes the create/connect dialog when clicking outside", async () => {

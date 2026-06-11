@@ -3,14 +3,14 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
-  applyPendingNotebaseConnectionToConfig,
+  applyCreatedNotebaseConnectionToConfig,
   buildNotebaseCreateInputFromPending,
   createPendingNotebaseSave,
   doesSchemaMatchPendingColumns,
   getNotebaseDetailUrl,
   getOutputSchemaFingerprint,
-  validatePendingNotebaseSaveAction,
-} from "../notebase-pending-save"
+  validateStillCanSavePendingCreateNotebaseSave,
+} from "../notebase/pending-save"
 
 function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config
@@ -121,13 +121,20 @@ describe("notebase pending save", () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.selectionToolbar.customActions = [action]
     const pending = createPendingNotebaseSave(action, { summary: "A short summary", score: 9 }, 1_000)
+    const connectedAccount = {
+      id: "user-1",
+      name: "Reader",
+      email: "reader@example.com",
+      image: null,
+    }
 
-    const result = applyPendingNotebaseConnectionToConfig(config, pending)
+    const result = applyCreatedNotebaseConnectionToConfig(config, pending, { connectedAccount })
 
     expect(result.status).toBe("valid")
     expect(result.config?.selectionToolbar.customActions[0]?.notebaseConnection).toMatchObject({
       notebaseId: pending.notebaseId,
       notebaseNameSnapshot: "Summarize",
+      connectedAccount,
       mappings: [
         {
           localFieldId: "field-summary",
@@ -158,7 +165,7 @@ describe("notebase pending save", () => {
     }]
     const pending = createPendingNotebaseSave(action, { summary: "A short summary", score: 9 }, 1_000)
 
-    expect(validatePendingNotebaseSaveAction(config, pending).status).toBe("schema_changed")
+    expect(validateStillCanSavePendingCreateNotebaseSave(config, pending).status).toBe("schema_changed")
   })
 
   it("matches duplicate-recovery schema exactly", () => {

@@ -20,7 +20,7 @@ import {
   getSelectionToolbarCustomActionTokenCellText,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
-import { sanitizeSelectionToolbarCustomAction } from "@/utils/notebase"
+import { sanitizeSelectionToolbarCustomAction } from "@/utils/notebase/connection"
 import { cn } from "@/utils/styles/utils"
 import { selectedCustomActionIdAtom } from "../atoms"
 import { formOpts, useAppForm } from "./form"

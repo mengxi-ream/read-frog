@@ -56,6 +56,12 @@ describe("customActionConfigForm beta gating", () => {
         notebaseConnection: {
           notebaseId: "table-1",
           notebaseNameSnapshot: "Articles",
+          connectedAccount: {
+            id: "user-1",
+            name: "Reader",
+            email: "reader@example.com",
+            image: null,
+          },
           mappings: [],
         },
       },
