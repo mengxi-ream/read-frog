@@ -19,6 +19,7 @@ popup:
   sourceLang: 来源语言
   targetLang: 目标语言
   translate: 翻译
+  splitTranslation: 分屏
   showOriginal: 显示原文
   enabledFloatingButton: 启用悬浮按钮
   enabledSelectionToolbar: 启用选择工具栏
@@ -692,6 +693,9 @@ options:
     pageTranslationShortcut:
       title: 网页翻译快捷键
       description: 自定义翻译整个网页的快捷键
+    sidePanelTranslationShortcut:
+      title: 分屏翻译快捷键
+      description: 自定义在右侧分屏打开翻译中心的快捷键
     preloadConfig:
       title: 预翻译范围
       description: 控制视口下方多少内容会被预先翻译，以节省 API 费用
@@ -1087,7 +1091,7 @@ translationHub:
   searchLanguages: 搜索语言...
   noLanguagesFound: 未找到语言
   exchangeLanguages: 交换语言
-  title: 多接口文本翻译
+  title: 翻译中心
   noServicesSelected: 未选择翻译服务
   noServicesDescription: 请在上方选择翻译服务以查看翻译结果。
   inputPlaceholder: 输入要翻译的文本...

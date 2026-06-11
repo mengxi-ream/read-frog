@@ -6,7 +6,7 @@ import { promptAtoms } from "./atoms"
 export function PersonalizedPrompts() {
   const insertCells = WEB_PAGE_PROMPT_TOKENS.map(token => ({
     text: getTokenCellText(token),
-    description: i18n.t(`options.translation.personalizedPrompts.editPrompt.promptCellInput.${token}`),
+    description: i18n.t(`options.translation.personalizedPrompts.editPrompt.promptCellInput.${token}` as never),
   }))
 
   return (

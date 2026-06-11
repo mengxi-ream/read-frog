@@ -8,17 +8,18 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/base-ui/empty"
+import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdsAtom, translationCardExpandedStateAtom } from "../atoms"
 import { TranslationCard } from "./translation-card"
 
-export function TranslationPanel() {
+export function TranslationPanel({ compact = false }: { compact?: boolean }) {
   const selectedProviderIds = useAtomValue(selectedProviderIdsAtom)
   const expandedById = useAtomValue(translationCardExpandedStateAtom)
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
 
   if (selectedProviderIds.length === 0) {
     return (
-      <Empty className="py-16">
+      <Empty className={compact ? "py-8" : "py-16"}>
         <EmptyHeader>
           <EmptyMedia variant="icon">
             <Icon icon="tabler:language-off" className="size-6" />
@@ -33,7 +34,7 @@ export function TranslationPanel() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className={cn(compact ? "space-y-3" : "space-y-4")}>
       {selectedProviderIds.map(id => (
         <TranslationCard
           key={id}

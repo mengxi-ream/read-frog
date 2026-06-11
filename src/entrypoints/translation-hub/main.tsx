@@ -34,6 +34,7 @@ function HydrateAtoms({ initialValues, children }: HydrateAtomsProps) {
 async function initApp() {
   const root = document.getElementById("root")!
   root.className = "text-base antialiased min-h-screen bg-background"
+  const isEmbedded = new URLSearchParams(window.location.search).get("embedded") === "side-panel"
 
   const [configValue, themeMode] = await Promise.all([
     getLocalConfig(),
@@ -50,9 +51,9 @@ async function initApp() {
           <HydrateAtoms initialValues={[[configAtom, config], [baseThemeModeAtom, themeMode]]}>
             <ThemeProvider>
               <TooltipProvider>
-                <App />
+                <App embedded={isEmbedded} />
                 <FrogToast />
-                <HelpButton />
+                {!isEmbedded && <HelpButton />}
               </TooltipProvider>
             </ThemeProvider>
           </HydrateAtoms>

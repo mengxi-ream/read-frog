@@ -84,6 +84,11 @@ export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, c
   }
 })
 
+export const translationHubConfigSchema = z.object({
+  selectedProviderIds: z.array(z.string().nonempty()),
+})
+export type TranslationHubConfig = z.infer<typeof translationHubConfigSchema>
+
 export const translateConfigSchema = z.object({
   providerId: z.string().nonempty(),
   mode: translationModeSchema,
@@ -97,6 +102,7 @@ export const translateConfigSchema = z.object({
     neverAutoTranslatePatterns: z.array(z.string()),
     autoTranslateLanguages: z.array(langCodeISO6393Schema),
     shortcut: pageTranslationShortcutSchema,
+    sidePanelShortcut: pageTranslationShortcutSchema,
     preload: preloadConfigSchema,
     minCharactersPerNode: z.number().min(MIN_CHARACTERS_PER_NODE),
     minWordsPerNode: z.number().min(MIN_WORDS_PER_NODE),
@@ -104,6 +110,7 @@ export const translateConfigSchema = z.object({
     skipLanguages: z.array(langCodeISO6393Schema),
   }),
   enableAIContentAware: z.boolean(),
+  translationHub: translationHubConfigSchema,
   customPromptsConfig: customPromptsConfigSchema,
   requestQueueConfig: requestQueueConfigSchema,
   batchQueueConfig: batchQueueConfigSchema,

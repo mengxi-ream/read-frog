@@ -12,6 +12,7 @@ import { PersonalizedPrompts } from "./personalized-prompt"
 import { PreloadConfig } from "./preload-config"
 import { RequestBatch } from "./request-batch"
 import { RequestRate } from "./request-rate"
+import { SidePanelTranslationShortcut } from "./side-panel-translation-shortcut"
 import { SkipLanguages } from "./skip-languages"
 import { SmallParagraphFilter } from "./small-paragraph-filter"
 import { TranslateRange } from "./translate-range"
@@ -23,6 +24,7 @@ export function TranslationPage() {
       <TranslationMode />
       <TranslateRange />
       <PageTranslationShortcut />
+      <SidePanelTranslationShortcut />
       <NodeTranslationHotkey />
       <CustomTranslationStyle />
       <AIContentAware />

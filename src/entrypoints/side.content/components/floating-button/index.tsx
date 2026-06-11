@@ -18,10 +18,12 @@ import { APP_NAME } from "@/utils/constants/app"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
-import { enablePageTranslationAtom, isDraggingButtonAtom } from "../../atoms"
+import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from "../../atoms"
 import { shadowWrapper } from "../../index"
+import { getTranslationHubSidePanelWidth } from "../../utils/translation-hub-panel"
 import HiddenButton from "./components/hidden-button"
 import TranslateButton from "./translate-button"
+import TranslationHubButton from "./translation-hub-button"
 
 const readFrogLogoUrl = new URL(readFrogLogo, browser.runtime.getURL("/")).href
 const LONG_PRESS_DELAY_MS = 350
@@ -127,7 +129,9 @@ export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(
     configFieldsAtomMap.floatingButton,
   )
+  const sideContent = useAtomValue(configFieldsAtomMap.sideContent)
   const translationState = useAtomValue(enablePageTranslationAtom)
+  const isSideOpen = useAtomValue(isSideOpenAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isHitAreaExpanded, setIsHitAreaExpanded] = useState(false)
@@ -138,8 +142,9 @@ export default function FloatingButton() {
   const lastDragPreviewRef = useRef<DragPoint | null>(null)
   const isFloatingButtonLocked = floatingButton.locked
   const floatingButtonSide = getFloatingButtonSide(floatingButton.side)
-  const isFloatingButtonExpanded = isHitAreaExpanded || isDropdownOpen
+  const isFloatingButtonExpanded = isHitAreaExpanded || isDropdownOpen || isSideOpen
   const isMainButtonAttached = isFloatingButtonLocked || isFloatingButtonExpanded
+  const translationHubSidePanelWidth = getTranslationHubSidePanelWidth(sideContent.width)
 
   useEffect(() => {
     if (!isDraggingButton)
@@ -333,7 +338,9 @@ export default function FloatingButton() {
     : {
         left: floatingButtonSide === "left" ? "0px" : undefined,
         right: floatingButtonSide === "right"
-          ? "var(--removed-body-scroll-bar-size, 0px)"
+          ? isSideOpen
+            ? `calc(${translationHubSidePanelWidth}px + var(--removed-body-scroll-bar-size, 0px))`
+            : "var(--removed-body-scroll-bar-size, 0px)"
           : undefined,
         top: `${floatingButton.position * 100}vh`,
       }
@@ -355,10 +362,16 @@ export default function FloatingButton() {
       onMouseLeave={handleMouseLeave}
     >
       {!isDraggingButton && (
-        <TranslateButton
-          side={floatingButtonSide}
-          expanded={isFloatingButtonExpanded}
-        />
+        <>
+          <TranslationHubButton
+            side={floatingButtonSide}
+            expanded={isFloatingButtonExpanded}
+          />
+          <TranslateButton
+            side={floatingButtonSide}
+            expanded={isFloatingButtonExpanded}
+          />
+        </>
       )}
       <div className="relative">
         <div

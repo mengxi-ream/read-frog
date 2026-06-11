@@ -6,6 +6,7 @@ import { afterEach, beforeAll, describe, expect, it, vi } from "vitest"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { sendMessage } from "@/utils/message"
 import FloatingButton from ".."
+import { hasLoadedTranslationHubAtom, isSideOpenAtom } from "../../../atoms"
 
 const toastInfoMock = vi.fn()
 
@@ -49,6 +50,7 @@ vi.mock("@/utils/atoms/config", () => {
 
 vi.mock("../../../atoms", () => ({
   enablePageTranslationAtom: atom({ enabled: false }),
+  hasLoadedTranslationHubAtom: atom(false),
   isDraggingButtonAtom: atom(false),
   isSideOpenAtom: atom(false),
 }))
@@ -284,12 +286,21 @@ describe("floatingButton controls", () => {
     )
   })
 
+  it("opens the translation hub side panel from the hidden language button", () => {
+    const { store } = renderFloatingButton()
+
+    fireEvent.click(screen.getByRole("button", { name: "popup.hub.tooltip" }))
+
+    expect(store.get(isSideOpenAtom)).toBe(true)
+    expect(store.get(hasLoadedTranslationHubAtom)).toBe(true)
+  })
+
   it("turns the frog into the only visible control after a long press", () => {
     vi.useFakeTimers()
     renderFloatingButton()
 
     const mainButton = getMainButton()
-    expect(screen.getAllByRole("button")).toHaveLength(4)
+    expect(screen.getAllByRole("button")).toHaveLength(5)
 
     fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
     act(() => {

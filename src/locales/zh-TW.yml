@@ -19,6 +19,7 @@ popup:
   sourceLang: 來源語言
   targetLang: 目標語言
   translate: 翻譯
+  splitTranslation: 分屏
   showOriginal: 顯示原文
   enabledFloatingButton: 啟用懸浮按鈕
   enabledSelectionToolbar: 啟用選擇工具列
@@ -577,6 +578,9 @@ options:
     pageTranslationShortcut:
       title: 網頁翻譯快速鍵
       description: 自訂翻譯整個網頁的快速鍵
+    sidePanelTranslationShortcut:
+      title: 分屏翻譯快速鍵
+      description: 自訂在右側分屏開啟翻譯中心的快速鍵
     preloadConfig:
       title: 預翻譯範圍
       description: 控制視窗下方多少內容會被預先翻譯，以節省 API 費用
@@ -972,7 +976,7 @@ translationHub:
   searchLanguages: 搜尋語言...
   noLanguagesFound: 找不到語言
   exchangeLanguages: 交換語言
-  title: 多 API 文字翻譯
+  title: 翻譯中心
   noServicesSelected: 未選擇翻譯服務
   noServicesDescription: 請在上方選擇翻譯服務以查看翻譯結果。
   inputPlaceholder: 輸入要翻譯的文字…

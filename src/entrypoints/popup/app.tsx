@@ -11,10 +11,10 @@ import LanguageOptionsSelector from "./components/language-options-selector"
 import { MoreMenu } from "./components/more-menu"
 import Hotkey from "./components/node-translation-hotkey-selector"
 import { SiteControlToggle } from "./components/site-control-toggle"
+import { SplitTranslationHubButton } from "./components/split-translation-hub-button"
 import TranslateButton from "./components/translate-button"
 import TranslatePromptSelector from "./components/translate-prompt-selector"
 import TranslateProviderField from "./components/translate-provider-field"
-import { TranslationHubButton } from "./components/translation-hub-button"
 import TranslationModeSelector from "./components/translation-mode-selector"
 
 function App() {
@@ -24,7 +24,7 @@ function App() {
         <div className="flex items-center justify-between">
           <UserAccount />
           <div className="flex items-center">
-            <TranslationHubButton />
+            <TranslationModeSelector />
             <DiscordButton />
             <BlogNotification />
           </div>
@@ -32,9 +32,9 @@ function App() {
         <LanguageOptionsSelector />
         <TranslateProviderField />
         <TranslatePromptSelector />
-        <div className="flex w-full items-center gap-2">
-          <TranslationModeSelector />
-          <TranslateButton className="min-w-0 flex-1" />
+        <div className="flex w-full gap-2">
+          <SplitTranslationHubButton className="flex-1" />
+          <TranslateButton className="flex-1" />
         </div>
         <SiteControlToggle />
         <AlwaysTranslate />

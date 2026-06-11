@@ -254,6 +254,8 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
         ANALYTICS_FEATURE.TEXT_TO_SPEECH,
         surface,
       ),
+    }).catch(() => {
+      // Errors are surfaced through onError; callers intentionally fire-and-forget playback.
     })
   }
 

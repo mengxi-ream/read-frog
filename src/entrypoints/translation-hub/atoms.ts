@@ -2,30 +2,19 @@ import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { TranslateProviderConfig } from "@/types/config/provider"
 import { atom } from "jotai"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { filterEnabledProvidersConfig, getTranslateProvidersConfig } from "@/utils/config/helpers"
+import { filterEnabledProvidersConfig, getProviderConfigById, getTranslateProvidersConfig } from "@/utils/config/helpers"
+import { DEFAULT_TRANSLATION_HUB_PROVIDER_IDS } from "@/utils/constants/translate"
 
-// === LangCode Atoms (derive from config, local override) ===
-const sourceLangCodeOverrideAtom = atom<LangCodeISO6393 | "auto" | null>(null)
-const targetLangCodeOverrideAtom = atom<LangCodeISO6393 | null>(null)
+const DEFAULT_TRANSLATION_HUB_PROVIDER_ID = "microsoft-translate-default"
 
 export const sourceLangCodeAtom = atom(
-  (get) => {
-    const override = get(sourceLangCodeOverrideAtom)
-    if (override !== null)
-      return override
-    return get(configFieldsAtomMap.language).sourceCode
-  },
-  (_get, set, value: LangCodeISO6393 | "auto") => set(sourceLangCodeOverrideAtom, value),
+  get => get(configFieldsAtomMap.language).sourceCode,
+  (_get, set, value: LangCodeISO6393 | "auto") => set(configFieldsAtomMap.language, { sourceCode: value }),
 )
 
 export const targetLangCodeAtom = atom(
-  (get) => {
-    const override = get(targetLangCodeOverrideAtom)
-    if (override !== null)
-      return override
-    return get(configFieldsAtomMap.language).targetCode
-  },
-  (_get, set, value: LangCodeISO6393) => set(targetLangCodeOverrideAtom, value),
+  get => get(configFieldsAtomMap.language).targetCode,
+  (_get, set, value: LangCodeISO6393) => set(configFieldsAtomMap.language, { targetCode: value }),
 )
 
 // === Input Atom ===
@@ -35,19 +24,49 @@ export const inputTextAtom = atom("")
 export const detectedSourceLangCodeAtom = atom<LangCodeISO6393 | null>(null)
 
 // === Selected Provider IDs (only store IDs, get config from configFieldsAtomMap) ===
-const selectedProviderIdsOverrideAtom = atom<string[] | null>(null)
-
 export const selectedProviderIdsAtom = atom(
   (get) => {
-    const override = get(selectedProviderIdsOverrideAtom)
-    if (override !== null)
-      return override
-    // Default: all enabled translate providers' IDs
     const providersConfig = get(configFieldsAtomMap.providersConfig)
+    const translateConfig = get(configFieldsAtomMap.translate)
     const translateProviders = getTranslateProvidersConfig(providersConfig)
-    return filterEnabledProvidersConfig(translateProviders).map(p => p.id)
+    const enabledProviders = filterEnabledProvidersConfig(translateProviders) as TranslateProviderConfig[]
+    const enabledProviderIds = new Set(enabledProviders.map(provider => provider.id))
+
+    const configuredIds = translateConfig.translationHub?.selectedProviderIds
+    if (configuredIds) {
+      const enabledConfiguredIds = configuredIds.filter(id => enabledProviderIds.has(id))
+      if (configuredIds.length === 0 || enabledConfiguredIds.length > 0) {
+        return enabledConfiguredIds
+      }
+    }
+
+    const enabledDefaultIds = DEFAULT_TRANSLATION_HUB_PROVIDER_IDS.filter(id => enabledProviderIds.has(id))
+    if (enabledDefaultIds.length > 0) {
+      return enabledDefaultIds
+    }
+
+    const defaultMicrosoftProvider = getProviderConfigById(enabledProviders, DEFAULT_TRANSLATION_HUB_PROVIDER_ID)
+    if (defaultMicrosoftProvider) {
+      return [defaultMicrosoftProvider.id]
+    }
+
+    const configuredProvider = getProviderConfigById(enabledProviders, translateConfig.providerId)
+    if (configuredProvider) {
+      return [configuredProvider.id]
+    }
+
+    return enabledProviders[0] ? [enabledProviders[0].id] : []
   },
-  (_get, set, ids: string[]) => set(selectedProviderIdsOverrideAtom, ids),
+  async (get, set, ids: string[]) => {
+    const translateConfig = get(configFieldsAtomMap.translate)
+    await set(configFieldsAtomMap.translate, {
+      ...translateConfig,
+      translationHub: {
+        ...translateConfig.translationHub,
+        selectedProviderIds: ids,
+      },
+    })
+  },
 )
 
 // === Translation Card UI State ===
@@ -63,13 +82,15 @@ export const selectedProvidersAtom = atom((get) => {
 })
 
 // === Write-Only Action Atom (only for operations that touch multiple atoms) ===
-export const exchangeLangCodesAtom = atom(null, (get, set) => {
+export const exchangeLangCodesAtom = atom(null, async (get, set) => {
   const source = get(sourceLangCodeAtom)
   if (source === "auto")
     return // Cannot exchange when source is auto
   const target = get(targetLangCodeAtom)
-  set(sourceLangCodeAtom, target)
-  set(targetLangCodeAtom, source)
+  await set(configFieldsAtomMap.language, {
+    sourceCode: target,
+    targetCode: source,
+  })
 })
 
 // === Translation Request (Command Pattern) ===

@@ -19,6 +19,7 @@ popup:
   sourceLang: Kaynak
   targetLang: Hedef
   translate: Çevir
+  splitTranslation: Böl
   showOriginal: Orijinali Göster
   enabledFloatingButton: Yüzen butonu etkinleştir
   enabledSelectionToolbar: Seçim araç çubuğunu etkinleştir
@@ -577,6 +578,9 @@ options:
     pageTranslationShortcut:
       title: Sayfa Çeviri Kısayolu
       description: Tüm web sayfalarını çevirmek için kısayol tuşunu özelleştirin
+    sidePanelTranslationShortcut:
+      title: Bölünmüş çeviri kısayolu
+      description: Çeviri Merkezi'ni sağdaki bölünmüş panelde açma kısayolunu özelleştirin
     preloadConfig:
       title: Ön Çeviri Aralığı
       description: API maliyetlerinden tasarruf etmek için görünüm alanının altındaki ne kadar içeriğin önceden çevrileceğini kontrol edin
@@ -972,7 +976,7 @@ translationHub:
   searchLanguages: Dil ara...
   noLanguagesFound: Dil bulunamadı
   exchangeLanguages: Dilleri değiştir
-  title: Çoklu API Metin Çevirisi
+  title: Çeviri Merkezi
   noServicesSelected: Çeviri Hizmeti Seçilmedi
   noServicesDescription: Çeviri kartlarını görmek için yukarıdan çeviri hizmetlerini seçin.
   inputPlaceholder: Çevrilecek metni girin...

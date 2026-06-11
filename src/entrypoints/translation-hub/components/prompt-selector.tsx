@@ -11,9 +11,10 @@ import {
 import { isLLMProvider } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_TRANSLATE_PROMPT_ID } from "@/utils/constants/prompt"
+import { cn } from "@/utils/styles/utils"
 import { selectedProvidersAtom } from "../atoms"
 
-export function PromptSelector() {
+export function PromptSelector({ compact = false }: { compact?: boolean }) {
   const selectedProviders = useAtomValue(selectedProvidersAtom)
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
 
@@ -36,7 +37,7 @@ export function PromptSelector() {
         })
       }}
     >
-      <SelectTrigger className="w-36">
+      <SelectTrigger className={cn(compact ? "w-32 max-w-full" : "w-36")}>
         <SelectValue placeholder={i18n.t("translatePrompt.title")}>
           <span className="truncate">
             {promptId

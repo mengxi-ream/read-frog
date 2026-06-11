@@ -32,7 +32,7 @@ export default function TranslationModeSelector() {
   const currentMode = translateConfig.mode
   const nextMode = NEXT_MODE[currentMode]
   const tooltipKey = MODE_TOOLTIP_KEY[currentMode]
-  const actionLabel = i18n.t(tooltipKey.action)
+  const actionLabel = i18n.t(tooltipKey.action as never)
 
   const handleModeToggle = () => {
     void setTranslateConfig(
@@ -46,7 +46,7 @@ export default function TranslationModeSelector() {
         render={(
           <Button
             type="button"
-            variant="outline"
+            variant="ghost"
             size="icon"
             aria-label={actionLabel}
             onClick={handleModeToggle}
@@ -57,7 +57,7 @@ export default function TranslationModeSelector() {
       </TooltipTrigger>
       <TooltipContent>
         <div className="whitespace-nowrap">
-          <p>{i18n.t(tooltipKey.current)}</p>
+          <p>{i18n.t(tooltipKey.current as never)}</p>
           <p>{actionLabel}</p>
         </div>
       </TooltipContent>

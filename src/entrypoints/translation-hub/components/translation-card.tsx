@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react"
 import { useMutation } from "@tanstack/react-query"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { useEffect, useEffectEvent, useRef } from "react"
+import { useEffect, useEffectEvent, useRef, useState } from "react"
 import { toast } from "sonner"
 import { i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
@@ -12,10 +12,10 @@ import { createFeatureUsageContext, trackFeatureAttempt } from "@/utils/analytic
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
-import { executeTranslate } from "@/utils/host/translate/execute-translate"
-import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdsAtom, translateRequestAtom, translationCardExpandedStateAtom } from "../atoms"
+import { translateForTranslationHub } from "../utils/translate"
+import { TranslationCardSpeakButton } from "./translation-card-speak-button"
 
 interface TranslationCardProps {
   providerId: string
@@ -23,24 +23,37 @@ interface TranslationCardProps {
   onExpandedChange: (expanded: boolean) => void
 }
 
+function isAbortError(error: unknown) {
+  return error instanceof DOMException && error.name === "AbortError"
+}
+
 export function TranslationCard({ providerId, isExpanded, onExpandedChange }: TranslationCardProps) {
   const { theme } = useTheme()
   const request = useAtomValue(translateRequestAtom)
   const language = useAtomValue(configFieldsAtomMap.language)
+  const translateConfig = useAtomValue(configFieldsAtomMap.translate)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const [selectedProviderIds, setSelectedProviderIds] = useAtom(selectedProviderIdsAtom)
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
+  const [translatedText, setTranslatedText] = useState<string | undefined>(undefined)
 
   const provider = getProviderConfigById(providersConfig, providerId)
   const providerItem = provider ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS] : undefined
 
   // Track request IDs to ignore stale responses from slow providers
   const requestIdRef = useRef(0)
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   const mutation = useMutation({
     mutationKey: ["translate", providerId],
     meta: { suppressToast: true },
     mutationFn: async (req: NonNullable<typeof request>) => {
+      const myRequestId = ++requestIdRef.current
+      abortControllerRef.current?.abort()
+      const abortController = new AbortController()
+      abortControllerRef.current = abortController
+      setTranslatedText(undefined)
+
       return await trackFeatureAttempt(
         createFeatureUsageContext(
           ANALYTICS_FEATURE.TRANSLATION_HUB,
@@ -50,19 +63,45 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
           if (!provider)
             throw new Error("Provider not found")
 
-          const myRequestId = ++requestIdRef.current
-          const result = await executeTranslate(req.inputText, {
-            sourceCode: req.sourceLanguage,
-            targetCode: req.targetLanguage,
-            level: language.level,
-          }, provider, getTranslatePrompt)
+          try {
+            const result = await translateForTranslationHub(
+              req.inputText,
+              {
+                sourceCode: req.sourceLanguage,
+                targetCode: req.targetLanguage,
+                level: language.level,
+              },
+              provider,
+              translateConfig,
+              {
+                signal: abortController.signal,
+                onChunk: (data) => {
+                  if (requestIdRef.current === myRequestId) {
+                    setTranslatedText(data.output)
+                  }
+                },
+              },
+            )
 
-          // Ignore stale responses - return undefined to silently discard
-          if (requestIdRef.current !== myRequestId) {
-            return undefined
+            // Ignore stale responses - return undefined to silently discard
+            if (requestIdRef.current !== myRequestId) {
+              return undefined
+            }
+
+            setTranslatedText(result)
+            return result
           }
-
-          return result
+          catch (error) {
+            if (requestIdRef.current !== myRequestId || isAbortError(error)) {
+              return undefined
+            }
+            throw error
+          }
+          finally {
+            if (requestIdRef.current === myRequestId) {
+              abortControllerRef.current = null
+            }
+          }
         },
       )
     },
@@ -81,15 +120,21 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
     triggerTranslation()
   }, [request?.timestamp])
 
+  useEffect(() => {
+    return () => {
+      abortControllerRef.current?.abort()
+    }
+  }, [])
+
   const handleCopy = () => {
-    if (mutation.data) {
-      void navigator.clipboard.writeText(mutation.data)
+    if (translatedText) {
+      void navigator.clipboard.writeText(translatedText)
       toast.success(i18n.t("translationHub.copiedToClipboard"))
     }
   }
 
   const handleRemove = () => {
-    setSelectedProviderIds(selectedProviderIds.filter(id => id !== providerId))
+    void setSelectedProviderIds(selectedProviderIds.filter(id => id !== providerId))
     setExpandedById((prev) => {
       if (!(providerId in prev))
         return prev
@@ -103,7 +148,7 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
   if (!provider)
     return null
 
-  const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
+  const hasContent = mutation.isError || (translatedText !== undefined && translatedText !== "")
 
   return (
     <div className="border rounded-lg bg-card">
@@ -138,7 +183,10 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
               <Icon icon="tabler:refresh" className="h-3.5 w-3.5" />
             </Button>
           )}
-          {mutation.data && !mutation.isPending && (
+          {translatedText && !mutation.isPending && (
+            <TranslationCardSpeakButton text={translatedText} langCode={request?.targetLanguage ?? language.targetCode} />
+          )}
+          {translatedText && !mutation.isPending && (
             <Button
               variant="ghost"
               size="icon"
@@ -190,10 +238,9 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
               )
             : (
                 <div
-                  key={mutation.data}
                   className="text-base leading-relaxed whitespace-pre-wrap animate-in fade-in duration-300"
                 >
-                  {mutation.data}
+                  {translatedText}
                 </div>
               )}
         </div>

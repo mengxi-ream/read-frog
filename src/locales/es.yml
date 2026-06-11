@@ -19,6 +19,7 @@ popup:
   sourceLang: Origen
   targetLang: Destino
   translate: Traducir
+  splitTranslation: Dividir
   showOriginal: Mostrar original
   enabledFloatingButton: Activar botón flotante
   enabledSelectionToolbar: Activar barra de selección
@@ -692,6 +693,9 @@ options:
     pageTranslationShortcut:
       title: Atajo de traducción de página
       description: Personaliza la tecla de atajo para traducir páginas web completas
+    sidePanelTranslationShortcut:
+      title: Atajo de traducción dividida
+      description: Personaliza el atajo para abrir el Centro de traducción en el panel dividido derecho
     preloadConfig:
       title: Rango de pretraducción
       description: Controla cuánto contenido por debajo de la ventana visible se pretraduce para ahorrar costes de API
@@ -1087,7 +1091,7 @@ translationHub:
   searchLanguages: Buscar idiomas...
   noLanguagesFound: No se encontraron idiomas
   exchangeLanguages: Intercambiar idiomas
-  title: Traducción de texto Multi-API
+  title: Centro de traducción
   noServicesSelected: No se seleccionaron servicios de traducción
   noServicesDescription: Selecciona servicios de traducción arriba para ver aquí las tarjetas de traducción.
   inputPlaceholder: Introduce texto para traducir...

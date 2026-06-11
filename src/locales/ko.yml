@@ -19,6 +19,7 @@ popup:
   sourceLang: 원본
   targetLang: 대상
   translate: 번역
+  splitTranslation: 분할
   showOriginal: 원문 보기
   enabledFloatingButton: 플로팅 버튼 활성화
   enabledSelectionToolbar: 선택 툴바 활성화
@@ -577,6 +578,9 @@ options:
     pageTranslationShortcut:
       title: 페이지 번역 단축키
       description: 전체 웹페이지를 번역하는 단축키를 사용자 지정합니다
+    sidePanelTranslationShortcut:
+      title: 분할 번역 단축키
+      description: 오른쪽 분할 패널에서 번역 허브를 여는 단축키를 사용자 지정합니다
     preloadConfig:
       title: 사전 번역 범위
       description: API 비용을 절약하기 위해 뷰포트 아래 콘텐츠를 얼마나 사전 번역할지 제어합니다
@@ -972,7 +976,7 @@ translationHub:
   searchLanguages: 언어 검색...
   noLanguagesFound: 언어를 찾을 수 없습니다
   exchangeLanguages: 언어 교환
-  title: 멀티 API 텍스트 번역
+  title: 번역 센터
   noServicesSelected: 번역 서비스가 선택되지 않았습니다
   noServicesDescription: 위에서 번역 서비스를 선택하여 번역 카드를 확인하세요.
   inputPlaceholder: 번역할 텍스트를 입력하세요...

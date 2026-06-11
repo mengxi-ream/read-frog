@@ -19,6 +19,7 @@ popup:
   sourceLang: Source
   targetLang: Target
   translate: Translate
+  splitTranslation: Split
   showOriginal: Show Original
   enabledFloatingButton: Enable floating button
   enabledSelectionToolbar: Enable selection toolbar
@@ -692,6 +693,9 @@ options:
     pageTranslationShortcut:
       title: Page Translation Shortcut
       description: Customize the shortcut key for translating entire web pages
+    sidePanelTranslationShortcut:
+      title: Split Translation Shortcut
+      description: Customize the shortcut key for opening Translation Hub in the right split panel
     preloadConfig:
       title: Pre-translate Range
       description: Control how much content below the viewport gets pre-translated to save API costs
@@ -1087,7 +1091,7 @@ translationHub:
   searchLanguages: Search languages...
   noLanguagesFound: No languages found
   exchangeLanguages: Exchange languages
-  title: Multi-API Text Translation
+  title: Translation Hub
   noServicesSelected: No Translation Services Selected
   noServicesDescription: Select translation services above to see translation cards here.
   inputPlaceholder: Enter text to translate...

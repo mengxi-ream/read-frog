@@ -16,9 +16,10 @@ import {
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { filterEnabledProvidersConfig, getLLMProvidersConfig, getNonAPIProvidersConfig, getPureAPIProvidersConfig, getTranslateProvidersConfig } from "@/utils/config/helpers"
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
+import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdsAtom } from "../atoms"
 
-export function TranslationServiceDropdown() {
+export function TranslationServiceDropdown({ compact = false }: { compact?: boolean }) {
   const { theme = "light" } = useTheme()
   const [selectedIds, setSelectedIds] = useAtom(selectedProviderIdsAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
@@ -41,13 +42,15 @@ export function TranslationServiceDropdown() {
   const pureAPIProviders = getPureAPIProvidersConfig(filteredProvidersConfig)
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", compact && "min-w-0 flex-1")}>
       <Select
         multiple
         value={selectedIds}
-        onValueChange={setSelectedIds}
+        onValueChange={(ids) => {
+          void setSelectedIds(ids)
+        }}
       >
-        <SelectTrigger className="min-w-52">
+        <SelectTrigger className={compact ? "min-w-0 flex-1" : "min-w-52"}>
           <SelectValue placeholder={i18n.t("translateService.selectServices")}>
             {selectedIds.length > 0
               ? (
@@ -92,7 +95,7 @@ export function TranslationServiceDropdown() {
         </SelectContent>
       </Select>
 
-      <Button variant="outline" size="icon" onClick={handleConfigureAPI} title={i18n.t("translateService.configureAPI")}>
+      <Button variant="outline" size="icon" className="shrink-0" onClick={handleConfigureAPI} title={i18n.t("translateService.configureAPI")}>
         <IconSettings />
       </Button>
     </div>

@@ -15,6 +15,8 @@ export const DEFAULT_BATCH_CONFIG = {
 }
 
 export const DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY = "Alt+E"
+export const DEFAULT_SIDE_PANEL_TRANSLATION_SHORTCUT_KEY = "Alt+C"
+export const DEFAULT_TRANSLATION_HUB_PROVIDER_IDS = ["microsoft-translate-default"]
 
 export const MIN_PRELOAD_MARGIN = 0
 export const MAX_PRELOAD_MARGIN = 10000

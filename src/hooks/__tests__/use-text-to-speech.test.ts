@@ -6,6 +6,7 @@ const baseTtsConfig = {
   defaultVoice: "en-US-DavisNeural",
   languageVoices: {
     eng: "en-US-DavisNeural",
+    cmn: "zh-CN-YunxiNeural",
     jpn: "ja-JP-KeitaNeural",
   },
   rate: 0,
@@ -20,6 +21,7 @@ describe("selectTTSVoice", () => {
 
   it("uses the detected language voice when present", () => {
     expect(selectTTSVoice(baseTtsConfig, "jpn")).toBe("ja-JP-KeitaNeural")
+    expect(selectTTSVoice(baseTtsConfig, "cmn")).toBe("zh-CN-YunxiNeural")
   })
 
   it("falls back to the default voice when there is no language match", () => {

@@ -2,9 +2,10 @@ import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
 import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
+import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdsAtom, translationCardExpandedStateAtom } from "../atoms"
 
-export function TranslationPanelActions() {
+export function TranslationPanelActions({ compact = false }: { compact?: boolean }) {
   const selectedProviderIds = useAtomValue(selectedProviderIdsAtom)
   const [expandedById, setExpandedById] = useAtom(translationCardExpandedStateAtom)
 
@@ -28,7 +29,7 @@ export function TranslationPanelActions() {
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={cn("flex items-center gap-2", compact && "shrink-0")}>
       <Button
         variant="outline"
         size="icon"

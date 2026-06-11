@@ -19,6 +19,7 @@ popup:
   sourceLang: Исходный
   targetLang: Целевой
   translate: Перевести
+  splitTranslation: Разделить
   showOriginal: Показать оригинал
   enabledFloatingButton: Включить плавающую кнопку
   enabledSelectionToolbar: Включить панель выделения
@@ -577,6 +578,9 @@ options:
     pageTranslationShortcut:
       title: Горячая клавиша перевода страницы
       description: Настройте горячую клавишу для перевода всей веб-страницы
+    sidePanelTranslationShortcut:
+      title: Сочетание для разделенного перевода
+      description: Настройте сочетание клавиш для открытия Центра переводов в правой разделенной панели
     preloadConfig:
       title: Диапазон предварительного перевода
       description: Управляйте количеством контента ниже области просмотра, который будет предварительно переведён для экономии затрат на API
@@ -972,7 +976,7 @@ translationHub:
   searchLanguages: Поиск языков...
   noLanguagesFound: Языки не найдены
   exchangeLanguages: Поменять языки местами
-  title: Мульти-API перевод текста
+  title: Центр перевода
   noServicesSelected: Сервисы перевода не выбраны
   noServicesDescription: Выберите сервисы перевода выше, чтобы увидеть карточки перевода.
   inputPlaceholder: Введите текст для перевода...

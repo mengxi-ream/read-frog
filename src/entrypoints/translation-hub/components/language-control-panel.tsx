@@ -6,10 +6,11 @@ import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
+import { cn } from "@/utils/styles/utils"
 import { detectedSourceLangCodeAtom, exchangeLangCodesAtom, inputTextAtom, sourceLangCodeAtom, targetLangCodeAtom } from "../atoms"
 import { SearchableLanguageSelector } from "./searchable-language-selector"
 
-export function LanguageControlPanel() {
+export function LanguageControlPanel({ compact = false }: { compact?: boolean }) {
   const [sourceLangCode, setSourceLangCode] = useAtom(sourceLangCodeAtom)
   const [targetLangCode, setTargetLangCode] = useAtom(targetLangCodeAtom)
   const exchangeLangCodes = useSetAtom(exchangeLangCodesAtom)
@@ -38,22 +39,23 @@ export function LanguageControlPanel() {
   const detectedLangCode = detectedSourceLangCode ?? "eng"
 
   return (
-    <div className="flex items-center gap-3 w-full">
+    <div className={cn("flex w-full items-center", compact ? "gap-1.5" : "gap-3")}>
       <SearchableLanguageSelector
         className="flex-1 min-w-0"
         value={sourceLangCode}
-        onValueChange={setSourceLangCode}
+        onValueChange={value => void setSourceLangCode(value)}
         detectedLangCode={detectedLangCode}
         label={i18n.t("side.sourceLang")}
       />
 
-      <div className="shrink-0 self-end pb-0.5">
+      <div className={cn("shrink-0 self-end", compact ? "pb-0" : "pb-0.5")}>
         <Button
           variant="ghost"
           size="icon"
-          onClick={exchangeLangCodes}
+          onClick={() => void exchangeLangCodes()}
           disabled={sourceLangCode === "auto"}
           title={i18n.t("translationHub.exchangeLanguages")}
+          className={compact ? "size-9" : undefined}
         >
           <Icon icon="tabler:arrows-exchange" className="h-4 w-4" />
         </Button>
@@ -64,7 +66,7 @@ export function LanguageControlPanel() {
         value={targetLangCode}
         onValueChange={(value) => {
           if (value !== "auto")
-            setTargetLangCode(value)
+            void setTargetLangCode(value)
         }}
         label={i18n.t("side.targetLang")}
       />
