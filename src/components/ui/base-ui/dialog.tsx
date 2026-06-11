@@ -1,5 +1,3 @@
-"use client"
-
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { IconX } from "@tabler/icons-react"
 
@@ -40,17 +38,24 @@ function DialogOverlay({
 function DialogContent({
   container,
   className,
+  forceRenderOverlay,
+  overlayClassName,
   children,
   showCloseButton = true,
   ...props
 }: DialogPrimitive.Popup.Props
   & Pick<DialogPrimitive.Portal.Props, "container">
   & {
+    forceRenderOverlay?: DialogPrimitive.Backdrop.Props["forceRender"]
+    overlayClassName?: string
     showCloseButton?: boolean
   }) {
   return (
     <DialogPortal container={container}>
-      <DialogOverlay />
+      <DialogOverlay
+        className={overlayClassName}
+        forceRender={forceRenderOverlay}
+      />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
@@ -116,7 +121,7 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-base leading-none font-medium", className)}
+      className={cn("leading-none font-medium", className)}
       {...props}
     />
   )

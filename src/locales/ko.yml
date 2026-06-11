@@ -388,18 +388,25 @@ options:
             description: 이 액션의 구조화된 결과를 원격 Notebase에 저장합니다.
             loginRequiredTitle: Notebase를 설정하려면 로그인하세요
             loginRequiredDescription: notebase를 선택하거나 매핑을 편집하기 전에 readfrog.app에 로그인하세요.
+            loginRequiredConnectedDescription: 이 연결은 아래 계정에서 만들어졌습니다. 같은 계정으로 로그인하면 필드 매핑이 복원됩니다. 다른 계정으로 로그인하면 Notebase를 만들거나 연결할 때 이전 매핑이 지워집니다.
             loginAction: 로그인
+            connectedAccountLabel: 연결된 계정
+            currentAccountLabel: 현재 계정
+            unknownConnectedAccount: 알 수 없는 계정
             tableLabel: Notebase
             tablePlaceholder: notebase 선택
             tableClearOption: notebase 연결 안 함
+            clearConnectionAction: 연결 지우기
             refreshAction: 새로고침
             emptyTitle: 아직 Notebase가 없습니다
             emptyDescription: readfrog.app에서 notebase를 만든 뒤 여기로 돌아와 필드를 매핑하세요.
             openNotebaseAction: Notebase 열기
             betaLockedTitle: 이 계정은 Notebase 베타에 포함되어 있지 않습니다
             betaLockedDescription: 현재 action 설정은 유지할 수 있지만, Notebase 선택과 결과 동기화는 일부 베타 계정에만 제공됩니다.
+            accountMismatchTitle: Notebase 연결이 다른 계정에 속해 있습니다
+            accountMismatchDescription: 이 연결은 아래 연결된 계정에 묶여 있습니다. 연결을 지우거나 현재 계정에서 사용할 수 있는 Notebase를 선택하세요.
             tableUnavailableTitle: 선택한 notebase를 더 이상 사용할 수 없습니다
-            tableUnavailableDescription: 다시 저장하기 전에 새로고침하거나 다른 notebase를 선택하세요.
+            tableUnavailableDescription: 이 Notebase가 없거나 열 수 없습니다. 연결을 지우거나 다른 Notebase를 선택하세요.
             tableUnavailableOption: 사용 불가
             schemaErrorTitle: notebase 스키마를 불러오지 못했습니다
             schemaErrorDescription: 잠시 후 다시 새로고침해 보세요.
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: notebase 필드 선택
             columnUnavailableOption: 삭제됨
             invalidMappingsTitle: 일부 매핑을 확인해야 합니다
-            invalidMappingsDescription: 잘못된 매핑은 유지되지만, 수정하기 전까지 Save to Notebase는 비활성화됩니다.
+            invalidMappingsDescription: 잘못된 매핑은 유지됩니다. Notebase에 저장하기 전에 수정하세요.
             mappingMissingLocal: 매핑된 액션 필드가 더 이상 존재하지 않습니다.
             mappingMissingRemote: 매핑된 notebase 필드가 더 이상 존재하지 않습니다.
             mappingMissingSchema: 이 매핑을 검증하려면 notebase 스키마를 새로고침하세요.
@@ -885,6 +892,24 @@ action:
   saveToNotebaseTableUnavailable: 선택한 Notebase를 더 이상 사용할 수 없습니다
   saveToNotebaseConnectionInvalid: 현재 Notebase 연결이 오래되었습니다. Custom AI Actions에서 새로고침하고 매핑을 수정하세요.
   saveToNotebaseNoMappings: 저장하기 전에 유효한 매핑을 하나 이상 추가하세요
+  saveToNotebaseCreateTitle: Notebase를 만들까요?
+  saveToNotebaseCreateDescription: 이 Custom Action 출력 필드와 일치하는 열로 새 Notebase를 만들고, 현재 결과를 첫 노트로 저장합니다.
+  saveToNotebaseCreateAndSave: 만들고 저장
+  saveToNotebaseCreateAndSaveShort: 만들고 저장
+  saveToNotebaseLoginAndCreate: 로그인하고 자동 생성
+  saveToNotebaseLoginAndSave: 로그인하고 저장
+  saveToNotebaseConnectExisting: 기존 Notebase 연결
+  saveToNotebaseGoConfigure: 설정하기
+  saveToNotebaseLoginConnectedTitle: 로그인하고 저장할까요?
+  saveToNotebaseLoginConnectedDescription: 이 Custom Action은 아래 계정에 연결되어 있습니다. 로그인 후 가능하면 기존 Notebase에 저장하고, 사용할 수 없으면 로그인한 계정에 새 Notebase를 만듭니다.
+  saveToNotebaseConnectionUnavailableTitle: Notebase 연결을 사용할 수 없습니다
+  saveToNotebaseMissingNotebaseDescription: 이전 Notebase가 없거나 이 계정에서 열 수 없습니다. 새 Notebase를 만들고 저장하거나 Custom AI Actions에서 기존 Notebase를 연결하세요.
+  saveToNotebaseAccountUnavailableDescription: 로그인한 계정이 아래의 연결된 계정과 다릅니다. 만들고 저장하면 이전 연결 설정과 필드 매핑이 교체됩니다. Custom AI Actions에서 기존 Notebase를 연결할 수도 있습니다.
+  saveToNotebasePendingLogin: 로그인 후 저장 완료
+  saveToNotebasePendingLoginDescription: 로그인 후 Read Frog가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
+  saveToNotebasePendingConnectedLoginDescription: 로그인 후 Read Frog는 가능하면 연결된 Notebase에 저장합니다. 이 계정에서 사용할 수 없으면 새 Notebase를 만들고 저장합니다.
+  openCustomActions: Custom AI Actions 열기
+  openNotebase: Notebase 열기
   contextDetailsTitleLabel: 제목
   contextDetailsParagraphsLabel: 문단 내용
   translation: 번역

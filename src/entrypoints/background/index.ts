@@ -17,6 +17,7 @@ import { setupIframeInjection } from "./iframe-injection"
 import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
 import { initMockData } from "./mock-data"
 import { newUserGuide } from "./new-user-guide"
+import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
 import { proxyFetch } from "./proxy-fetch"
 import { setupSidePanelMessageHandler } from "./side-panel"
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./translation-queues"
@@ -52,9 +53,9 @@ export default defineBackground({
       await browser.tabs.create({ url, active: active ?? true })
     })
 
-    onMessage("openOptionsPage", async () => {
-      logger.info("openOptionsPage")
-      await openOptionsPage()
+    onMessage("openOptionsPage", async (message) => {
+      logger.info("openOptionsPage", message.data)
+      await openOptionsPage(message.data)
     })
 
     setupSidePanelMessageHandler({
@@ -104,6 +105,7 @@ export default defineBackground({
     void setupUninstallSurvey()
 
     proxyFetch()
+    setupNotebasePendingSaveProcessor()
     setupEdgeTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()
     setupTTSPlaybackMessageHandlers()

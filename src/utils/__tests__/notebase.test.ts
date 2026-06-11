@@ -2,12 +2,14 @@ import type { NotebaseRowCreateInput } from "@read-frog/api-contract"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
 import {
+  sanitizeSelectionToolbarCustomAction,
+} from "../notebase/connection"
+import {
   buildNotebaseRowCells,
   createNotebaseMapping,
   isNotebaseMappingCompatible,
   resolveNotebaseMappings,
-  sanitizeSelectionToolbarCustomAction,
-} from "../notebase"
+} from "../notebase/mapping"
 
 function createAction(): SelectionToolbarCustomAction {
   return {
@@ -37,6 +39,13 @@ function createAction(): SelectionToolbarCustomAction {
   }
 }
 
+const connectedAccount = {
+  id: "user-1",
+  name: "Reader",
+  email: "reader@example.com",
+  image: null,
+}
+
 describe("notebase utils", () => {
   it("sanitizes invalid local mappings when output fields change", () => {
     const action = createAction()
@@ -45,6 +54,7 @@ describe("notebase utils", () => {
       notebaseConnection: {
         notebaseId: "notebase-1",
         notebaseNameSnapshot: "Articles",
+        connectedAccount,
         mappings: [
           createNotebaseMapping("field-summary", "column-summary", "Summary"),
           createNotebaseMapping("field-missing", "column-score", "Score"),
@@ -64,6 +74,7 @@ describe("notebase utils", () => {
       notebaseConnection: {
         notebaseId: "notebase-1",
         notebaseNameSnapshot: "Articles",
+        connectedAccount,
         mappings: [
           createNotebaseMapping("field-summary", "column-summary", "Summary"),
           createNotebaseMapping("field-score", "column-date", "Date"),
@@ -110,6 +121,7 @@ describe("notebase utils", () => {
       notebaseConnection: {
         notebaseId: "notebase-1",
         notebaseNameSnapshot: "Articles",
+        connectedAccount,
         mappings: [
           createNotebaseMapping("field-summary", "column-summary", "Summary"),
           createNotebaseMapping("field-score", "column-date", "Date"),

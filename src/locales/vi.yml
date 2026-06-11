@@ -388,18 +388,25 @@ options:
             description: Lưu kết quả có cấu trúc của hành động này vào Notebase từ xa.
             loginRequiredTitle: Đăng nhập để cấu hình Notebase
             loginRequiredDescription: Hãy đăng nhập trên readfrog.app trước khi chọn notebase hoặc chỉnh sửa ánh xạ.
+            loginRequiredConnectedDescription: Kết nối này được tạo bởi tài khoản bên dưới. Nếu đăng nhập bằng cùng tài khoản, ánh xạ trường sẽ được khôi phục. Nếu đăng nhập bằng tài khoản khác, các ánh xạ cũ sẽ bị xóa khi bạn tạo hoặc kết nối Notebase.
             loginAction: Đăng nhập
+            connectedAccountLabel: Tài khoản đã kết nối
+            currentAccountLabel: Tài khoản hiện tại
+            unknownConnectedAccount: Tài khoản không xác định
             tableLabel: Notebase
             tablePlaceholder: Chọn một notebase
             tableClearOption: Không kết nối notebase
+            clearConnectionAction: Xóa kết nối
             refreshAction: Làm mới
             emptyTitle: Chưa có Notebase nào
             emptyDescription: Hãy tạo một notebase trên readfrog.app rồi quay lại đây để ánh xạ các trường.
             openNotebaseAction: Mở Notebase
             betaLockedTitle: Tài khoản này chưa nằm trong beta Notebase
             betaLockedDescription: Bạn vẫn có thể giữ cấu hình action hiện tại, nhưng việc chọn Notebase và đồng bộ kết quả hiện chỉ mở cho một số tài khoản beta.
+            accountMismatchTitle: Kết nối Notebase thuộc tài khoản khác
+            accountMismatchDescription: Kết nối này gắn với tài khoản bên dưới. Hãy xóa kết nối hoặc chọn một Notebase mà tài khoản hiện tại có thể truy cập.
             tableUnavailableTitle: Notebase đã chọn không còn khả dụng
-            tableUnavailableDescription: Hãy làm mới hoặc chọn một notebase khác trước khi lưu lại.
+            tableUnavailableDescription: Notebase này không còn tồn tại hoặc không mở được. Hãy xóa kết nối hoặc chọn một Notebase khác.
             tableUnavailableOption: không khả dụng
             schemaErrorTitle: Không tải được schema notebase
             schemaErrorDescription: Hãy thử làm mới lại sau ít phút nữa.
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: Chọn một trường notebase
             columnUnavailableOption: đã xóa
             invalidMappingsTitle: Một số ánh xạ cần được xử lý
-            invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại, nhưng Save to Notebase sẽ bị vô hiệu hóa cho đến khi bạn sửa chúng.
+            invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại. Hãy sửa chúng trước khi lưu vào Notebase.
             mappingMissingLocal: Trường của hành động đã ánh xạ không còn tồn tại.
             mappingMissingRemote: Trường notebase đã ánh xạ không còn tồn tại.
             mappingMissingSchema: Hãy làm mới schema notebase để xác thực ánh xạ này.
@@ -885,6 +892,24 @@ action:
   saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
   saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
   saveToNotebaseNoMappings: Hãy thêm ít nhất một ánh xạ hợp lệ trước khi lưu
+  saveToNotebaseCreateTitle: Tạo Notebase?
+  saveToNotebaseCreateDescription: Tạo một Notebase có các cột khớp với Custom Action này, rồi lưu kết quả hiện tại làm ghi chú đầu tiên.
+  saveToNotebaseCreateAndSave: Tạo và lưu
+  saveToNotebaseCreateAndSaveShort: Tạo và lưu
+  saveToNotebaseLoginAndCreate: Đăng nhập và tự tạo
+  saveToNotebaseLoginAndSave: Đăng nhập và lưu
+  saveToNotebaseConnectExisting: Kết nối Notebase hiện có
+  saveToNotebaseGoConfigure: Cấu hình
+  saveToNotebaseLoginConnectedTitle: Đăng nhập để lưu?
+  saveToNotebaseLoginConnectedDescription: Custom Action này đang kết nối với tài khoản bên dưới. Sau khi đăng nhập, Read Frog sẽ lưu vào Notebase hiện có nếu có thể, hoặc tạo Notebase mới cho tài khoản đã đăng nhập.
+  saveToNotebaseConnectionUnavailableTitle: Kết nối Notebase không khả dụng
+  saveToNotebaseMissingNotebaseDescription: Notebase cũ không còn tồn tại hoặc tài khoản này không mở được. Hãy tạo Notebase mới và lưu kết quả này, hoặc kết nối Notebase hiện có trong Custom AI Actions.
+  saveToNotebaseAccountUnavailableDescription: Tài khoản đã đăng nhập không khớp với tài khoản đã kết nối bên dưới. Tạo và lưu sẽ thay thế kết nối trước đó cùng các ánh xạ trường. Bạn cũng có thể kết nối Notebase hiện có trong Custom AI Actions.
+  saveToNotebasePendingLogin: Đăng nhập để hoàn tất lưu
+  saveToNotebasePendingLoginDescription: Sau khi đăng nhập, Read Frog sẽ tự động tạo Notebase và lưu kết quả này.
+  saveToNotebasePendingConnectedLoginDescription: Sau khi đăng nhập, Read Frog sẽ lưu vào Notebase đã kết nối nếu có thể. Nếu tài khoản này không dùng được, Read Frog sẽ tạo Notebase mới và lưu kết quả này.
+  openCustomActions: Mở Custom AI Actions
+  openNotebase: Mở Notebase
   contextDetailsTitleLabel: Tiêu đề
   contextDetailsParagraphsLabel: Các đoạn văn
   translation: Dịch

@@ -388,18 +388,25 @@ options:
             description: 將這個指令的結構化結果儲存到遠端筆記庫。
             loginRequiredTitle: 登入後才能設定筆記庫
             loginRequiredDescription: 先到 readfrog.app 登入，再選擇筆記庫與編輯對應。
+            loginRequiredConnectedDescription: 這個連線來自下方帳號。如果登入原帳號，會恢復欄位對應；如果登入其他帳號，建立或連接筆記庫時會清除先前的欄位對應。
             loginAction: 前往登入
+            connectedAccountLabel: 已連接帳號
+            currentAccountLabel: 目前帳號
+            unknownConnectedAccount: 未知帳號
             tableLabel: 筆記庫
             tablePlaceholder: 選擇一個筆記庫
             tableClearOption: 不連接筆記庫
+            clearConnectionAction: 清空連線
             refreshAction: 重新整理
             emptyTitle: 還沒有筆記庫
             emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來對應欄位。
             openNotebaseAction: 開啟筆記庫
             betaLockedTitle: 目前帳號尚未加入 Notebase Beta
             betaLockedDescription: 你可以保留目前的 action 設定，但選擇筆記庫與同步結果目前僅對部分 Beta 帳號開放。
+            accountMismatchTitle: 筆記庫連線屬於其他帳號
+            accountMismatchDescription: 目前連線綁定到下方已連接帳號。你可以清空連線，或選擇目前帳號可存取的筆記庫。
             tableUnavailableTitle: 選取的筆記庫已不可用
-            tableUnavailableDescription: 請重新整理，或改選其他筆記庫後再儲存。
+            tableUnavailableDescription: 這個筆記庫不存在，或目前帳號無法開啟。可以清空連線，或重新選擇一個筆記庫。
             tableUnavailableOption: 不可用
             schemaErrorTitle: 載入筆記庫 schema 失敗
             schemaErrorDescription: 請稍後再試一次重新整理。
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: 選擇一個筆記庫欄位
             columnUnavailableOption: 已刪除
             invalidMappingsTitle: 有些對應需要處理
-            invalidMappingsDescription: 無效對應會被保留，但在修復前會停用「儲存到筆記庫」。
+            invalidMappingsDescription: 無效對應會被保留。儲存到筆記庫前請先修復它們。
             mappingMissingLocal: 對應的指令欄位已不存在。
             mappingMissingRemote: 對應的筆記庫欄位已不存在。
             mappingMissingSchema: 重新整理筆記庫 schema 後才能驗證這個對應。
@@ -885,6 +892,24 @@ action:
   saveToNotebaseTableUnavailable: 選取的筆記庫已不可用
   saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到自訂 AI 指令重新整理並修復對應
   saveToNotebaseNoMappings: 至少新增一個有效對應後才能儲存
+  saveToNotebaseCreateTitle: 建立筆記庫？
+  saveToNotebaseCreateDescription: 建立一個與此 Custom Action 輸出欄位相符的筆記庫，並將目前結果儲存為第一則筆記。
+  saveToNotebaseCreateAndSave: 直接建立並儲存
+  saveToNotebaseCreateAndSaveShort: 建立並儲存
+  saveToNotebaseLoginAndCreate: 登入並自動建立
+  saveToNotebaseLoginAndSave: 登入並儲存
+  saveToNotebaseConnectExisting: 連接現有筆記庫
+  saveToNotebaseGoConfigure: 去設定
+  saveToNotebaseLoginConnectedTitle: 登入後繼續儲存？
+  saveToNotebaseLoginConnectedDescription: 這個 Custom Action 已連接到下方帳號。登入後，如果可以使用原筆記庫會直接儲存；如果目前帳號無法使用它，會建立新的筆記庫並儲存。
+  saveToNotebaseConnectionUnavailableTitle: 目前筆記庫連線不可用
+  saveToNotebaseMissingNotebaseDescription: 舊筆記庫不存在，或目前帳號無法開啟。可以建立新的筆記庫並儲存目前結果，或到 Custom AI Actions 連接既有筆記庫。
+  saveToNotebaseAccountUnavailableDescription: 目前登入帳號和下方已連接帳號不同。選擇建立並儲存會替換先前的連線設定和欄位映射；也可以到 Custom AI Actions 連接既有筆記庫。
+  saveToNotebasePendingLogin: 登入後繼續儲存
+  saveToNotebasePendingLoginDescription: 登入完成後，Read Frog 會自動建立筆記庫並儲存目前結果。
+  saveToNotebasePendingConnectedLoginDescription: 登入完成後，Read Frog 會優先儲存到已連接的筆記庫；如果目前帳號無法使用它，會建立新的筆記庫並儲存目前結果。
+  openCustomActions: 開啟 Custom AI Actions
+  openNotebase: 開啟筆記庫
   contextDetailsTitleLabel: 標題
   contextDetailsParagraphsLabel: 段落內容
   translation: 翻譯

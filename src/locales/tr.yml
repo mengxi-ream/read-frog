@@ -388,18 +388,25 @@ options:
             description: Bu eylemin yapılandırılmış sonuçlarını uzak bir Notebase'e kaydedin.
             loginRequiredTitle: Notebase yapılandırmak için giriş yapın
             loginRequiredDescription: notebase seçmeden veya eşlemeleri düzenlemeden önce readfrog.app'te oturum açın.
+            loginRequiredConnectedDescription: Bu bağlantı aşağıdaki hesapla oluşturuldu. Aynı hesapla giriş yaparsanız alan eşlemeleri geri yüklenir. Başka bir hesapla giriş yaparsanız Notebase oluştururken veya bağlarken önceki eşlemeler temizlenir.
             loginAction: Giriş yap
+            connectedAccountLabel: Bağlı hesap
+            currentAccountLabel: Geçerli hesap
+            unknownConnectedAccount: Bilinmeyen hesap
             tableLabel: Notebase
             tablePlaceholder: Bir notebase seçin
             tableClearOption: Notebase bağlama
+            clearConnectionAction: Bağlantıyı temizle
             refreshAction: Yenile
             emptyTitle: Henüz Notebase yok
             emptyDescription: readfrog.app'te bir notebase oluşturun, sonra alanları eşlemek için buraya dönün.
             openNotebaseAction: Notebase'i Aç
             betaLockedTitle: Bu hesap Notebase beta programında değil
             betaLockedDescription: Bu action yapılandırmasını koruyabilirsiniz, ancak Notebase seçimi ve sonuç senkronizasyonu şimdilik yalnızca seçili beta hesapları için açık.
+            accountMismatchTitle: Notebase bağlantısı başka bir hesaba ait
+            accountMismatchDescription: Bu bağlantı aşağıdaki bağlı hesaba aittir. Bağlantıyı temizleyin veya geçerli hesabın erişebildiği bir Notebase seçin.
             tableUnavailableTitle: Seçilen notebase artık kullanılamıyor
-            tableUnavailableDescription: Tekrar kaydetmeden önce yenileyin veya başka bir notebase seçin.
+            tableUnavailableDescription: Bu Notebase artık yok veya açılamıyor. Bağlantıyı temizleyin veya başka bir Notebase seçin.
             tableUnavailableOption: kullanılamıyor
             schemaErrorTitle: notebase şeması yüklenemedi
             schemaErrorDescription: Kısa süre sonra yeniden yenilemeyi deneyin.
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: Bir notebase alanı seçin
             columnUnavailableOption: silinmiş
             invalidMappingsTitle: Bazı eşlemeler ilgi gerektiriyor
-            invalidMappingsDescription: Geçersiz eşlemeler korunur, ancak siz düzeltmeden önce Save to Notebase devre dışı kalır.
+            invalidMappingsDescription: Geçersiz eşlemeler korunur. Notebase'e kaydetmeden önce düzeltin.
             mappingMissingLocal: Eşlenen eylem alanı artık yok.
             mappingMissingRemote: Eşlenen notebase alanı artık yok.
             mappingMissingSchema: Bu eşlemeyi doğrulamak için notebase şemasını yenileyin.
@@ -885,6 +892,24 @@ action:
   saveToNotebaseTableUnavailable: Seçilen Notebase artık kullanılamıyor
   saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom AI Actions içinde yenileyin ve eşlemeleri düzeltin.
   saveToNotebaseNoMappings: Kaydetmeden önce en az bir geçerli eşleme ekleyin
+  saveToNotebaseCreateTitle: Bir Notebase oluşturulsun mu?
+  saveToNotebaseCreateDescription: Bu Custom Action çıktı alanlarıyla eşleşen sütunlara sahip bir Notebase oluşturur ve bu sonucu ilk not olarak kaydeder.
+  saveToNotebaseCreateAndSave: Oluştur ve kaydet
+  saveToNotebaseCreateAndSaveShort: Oluştur ve kaydet
+  saveToNotebaseLoginAndCreate: Giriş yap ve otomatik oluştur
+  saveToNotebaseLoginAndSave: Giriş yap ve kaydet
+  saveToNotebaseConnectExisting: Mevcut Notebase'e bağlan
+  saveToNotebaseGoConfigure: Yapılandır
+  saveToNotebaseLoginConnectedTitle: Giriş yapıp kaydedilsin mi?
+  saveToNotebaseLoginConnectedDescription: Bu Custom Action aşağıdaki hesaba bağlı. Girişten sonra mümkünse mevcut Notebase'e kaydedilir; kullanılamazsa giriş yapılan hesap için yeni bir Notebase oluşturulur.
+  saveToNotebaseConnectionUnavailableTitle: Notebase bağlantısı kullanılamıyor
+  saveToNotebaseMissingNotebaseDescription: Eski Notebase artık yok veya bu hesapla açılamıyor. Yeni bir Notebase oluşturup kaydedin ya da Custom AI Actions içinde mevcut bir Notebase bağlayın.
+  saveToNotebaseAccountUnavailableDescription: Giriş yapılan hesap aşağıdaki bağlı hesapla eşleşmiyor. Oluşturup kaydetmek önceki bağlantıyı ve alan eşlemelerini değiştirir. Custom AI Actions içinde mevcut bir Notebase de bağlayabilirsiniz.
+  saveToNotebasePendingLogin: Kaydetmeyi tamamlamak için giriş yapın
+  saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Read Frog Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
+  saveToNotebasePendingConnectedLoginDescription: Girişten sonra Read Frog mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
+  openCustomActions: Custom AI Actions'ı aç
+  openNotebase: Notebase'i aç
   contextDetailsTitleLabel: Başlık
   contextDetailsParagraphsLabel: Paragraflar
   translation: Çeviri

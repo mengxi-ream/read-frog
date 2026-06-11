@@ -13,14 +13,11 @@ const link = new RPCLink({
     "x-orpc-source": "extension",
   },
   // Proxy fetch through background to avoid CORS in content scripts
-  fetch: async (request) => {
-    // request is already a Request object with method, headers, body
-    const req = typeof request === "string" ? new Request(request) : request
-
-    const url = req.url
-    const method = req.method
-    const headerEntries = normalizeHeaders(req.headers)
-    const body = req.body ? await req.text() : undefined
+  fetch: async (request, init) => {
+    const url = request.url
+    const method = request.method
+    const headerEntries = normalizeHeaders(request.headers)
+    const body = request.body ? await request.text() : undefined
 
     const resp = await sendMessage("backgroundFetch", {
       url,
@@ -28,6 +25,7 @@ const link = new RPCLink({
       headers: headerEntries,
       body,
       credentials: "include",
+      redirect: init.redirect,
     })
 
     return new Response(resp.body, {

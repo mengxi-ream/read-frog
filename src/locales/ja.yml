@@ -388,18 +388,25 @@ options:
             description: このアクションの構造化された結果をリモート Notebase に保存します。
             loginRequiredTitle: Notebase を設定するにはログインが必要です
             loginRequiredDescription: notebase を選択したりマッピングを編集したりする前に、readfrog.app にログインしてください。
+            loginRequiredConnectedDescription: この接続は下のアカウントで作成されました。同じアカウントでログインするとフィールドマッピングが復元されます。別のアカウントでログインした場合、Notebase を作成または接続すると以前のマッピングは消去されます。
             loginAction: ログイン
+            connectedAccountLabel: 接続済みアカウント
+            currentAccountLabel: 現在のアカウント
+            unknownConnectedAccount: 不明なアカウント
             tableLabel: Notebase
             tablePlaceholder: notebase を選択
             tableClearOption: notebase を接続しない
+            clearConnectionAction: 接続をクリア
             refreshAction: 更新
             emptyTitle: Notebase がまだありません
             emptyDescription: readfrog.app で notebase を作成してから、ここに戻ってフィールドをマッピングしてください。
             openNotebaseAction: Notebase を開く
             betaLockedTitle: このアカウントは Notebase ベータ対象外です
             betaLockedDescription: このアクション設定は保持できますが、Notebase の選択と結果の同期は現在一部のベータアカウントのみに提供されています。
+            accountMismatchTitle: Notebase 接続は別のアカウントに属しています
+            accountMismatchDescription: この接続は下の接続済みアカウントに紐づいています。接続をクリアするか、現在のアカウントで利用できる Notebase を選択してください。
             tableUnavailableTitle: 選択した notebase は利用できなくなりました
-            tableUnavailableDescription: もう一度保存する前に、更新するか別の notebase を選択してください。
+            tableUnavailableDescription: この Notebase は存在しないか開けません。接続をクリアするか、別の Notebase を選択してください。
             tableUnavailableOption: 利用不可
             schemaErrorTitle: notebase スキーマの読み込みに失敗しました
             schemaErrorDescription: 少し待ってからもう一度更新してください。
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: notebase フィールドを選択
             columnUnavailableOption: 削除済み
             invalidMappingsTitle: 一部のマッピングに対応が必要です
-            invalidMappingsDescription: 無効なマッピングは保持されますが、修正するまで Save to Notebase は無効のままです。
+            invalidMappingsDescription: 無効なマッピングは保持されます。Notebase に保存する前に修正してください。
             mappingMissingLocal: マッピングされたアクションフィールドは存在しなくなりました。
             mappingMissingRemote: マッピングされた notebase フィールドは存在しなくなりました。
             mappingMissingSchema: このマッピングを検証するには、notebase スキーマを更新してください。
@@ -885,6 +892,24 @@ action:
   saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
   saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
   saveToNotebaseNoMappings: 保存する前に、少なくとも1つの有効なマッピングを追加してください
+  saveToNotebaseCreateTitle: Notebase を作成しますか？
+  saveToNotebaseCreateDescription: この Custom Action の出力フィールドに合わせた列を持つ Notebase を作成し、現在の結果を最初のノートとして保存します。
+  saveToNotebaseCreateAndSave: 作成して保存
+  saveToNotebaseCreateAndSaveShort: 作成して保存
+  saveToNotebaseLoginAndCreate: ログインして自動作成
+  saveToNotebaseLoginAndSave: ログインして保存
+  saveToNotebaseConnectExisting: 既存の Notebase に接続
+  saveToNotebaseGoConfigure: 設定へ
+  saveToNotebaseLoginConnectedTitle: ログインして保存しますか？
+  saveToNotebaseLoginConnectedDescription: この Custom Action は下のアカウントに接続されています。ログイン後、可能であれば既存の Notebase に保存し、利用できない場合はログイン中のアカウント用に新しい Notebase を作成します。
+  saveToNotebaseConnectionUnavailableTitle: Notebase 接続を利用できません
+  saveToNotebaseMissingNotebaseDescription: 以前の Notebase は存在しないか、このアカウントでは開けません。新しい Notebase を作成して保存するか、Custom AI Actions で既存の Notebase に接続してください。
+  saveToNotebaseAccountUnavailableDescription: ログイン中のアカウントが下の接続済みアカウントと一致しません。作成して保存すると、以前の接続設定とフィールドマッピングが置き換えられます。Custom AI Actions で既存の Notebase に接続することもできます。
+  saveToNotebasePendingLogin: ログイン後に保存を完了
+  saveToNotebasePendingLoginDescription: ログイン後、Read Frog が Notebase を作成し、この結果を自動で保存します。
+  saveToNotebasePendingConnectedLoginDescription: ログイン後、Read Frog は可能であれば接続済み Notebase に保存します。このアカウントで利用できない場合は、新しい Notebase を作成して保存します。
+  openCustomActions: Custom AI Actions を開く
+  openNotebase: Notebase を開く
   contextDetailsTitleLabel: タイトル
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻訳

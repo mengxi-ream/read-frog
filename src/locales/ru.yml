@@ -388,18 +388,25 @@ options:
             description: Сохранить структурированные результаты этого действия в удалённую Notebase.
             loginRequiredTitle: Войдите, чтобы настроить Notebase
             loginRequiredDescription: Войдите на readfrog.app, прежде чем выбирать notebase или редактировать сопоставления.
+            loginRequiredConnectedDescription: Это подключение создано аккаунтом ниже. Если войти в тот же аккаунт, сопоставления полей будут восстановлены. Если войти в другой аккаунт, прежние сопоставления будут очищены при создании или подключении Notebase.
             loginAction: Войти
+            connectedAccountLabel: Подключённый аккаунт
+            currentAccountLabel: Текущий аккаунт
+            unknownConnectedAccount: Неизвестный аккаунт
             tableLabel: Notebase
             tablePlaceholder: Выберите notebase
             tableClearOption: Не подключать notebase
+            clearConnectionAction: Очистить подключение
             refreshAction: Обновить
             emptyTitle: Notebase пока нет
             emptyDescription: Создайте notebase на readfrog.app, затем вернитесь сюда и сопоставьте поля.
             openNotebaseAction: Открыть Notebase
             betaLockedTitle: Этот аккаунт ещё не участвует в beta Notebase
             betaLockedDescription: Вы можете сохранить текущую настройку action, но выбор Notebase и синхронизация результатов пока доступны только выбранным beta-аккаунтам.
+            accountMismatchTitle: Подключение Notebase принадлежит другому аккаунту
+            accountMismatchDescription: Это подключение связано с аккаунтом ниже. Очистите его или выберите Notebase, доступную текущему аккаунту.
             tableUnavailableTitle: Выбранная notebase больше недоступна
-            tableUnavailableDescription: Обновите список или выберите другую notebase перед следующим сохранением.
+            tableUnavailableDescription: Эта Notebase больше не существует или не открывается. Очистите подключение или выберите другую Notebase.
             tableUnavailableOption: недоступно
             schemaErrorTitle: Не удалось загрузить схему notebase
             schemaErrorDescription: Попробуйте обновить схему ещё раз чуть позже.
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: Выберите поле notebase
             columnUnavailableOption: удалено
             invalidMappingsTitle: Некоторые сопоставления требуют внимания
-            invalidMappingsDescription: Некорректные сопоставления сохраняются, но кнопка Save to Notebase остаётся отключённой, пока вы их не исправите.
+            invalidMappingsDescription: Некорректные сопоставления сохранены. Исправьте их перед сохранением в Notebase.
             mappingMissingLocal: Сопоставленное поле действия больше не существует.
             mappingMissingRemote: Сопоставленное поле notebase больше не существует.
             mappingMissingSchema: Обновите схему notebase, чтобы проверить это сопоставление.
@@ -885,6 +892,24 @@ action:
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением
+  saveToNotebaseCreateTitle: Создать Notebase?
+  saveToNotebaseCreateDescription: Создать Notebase с колонками из этого Custom Action и сохранить текущий результат как первую заметку.
+  saveToNotebaseCreateAndSave: Создать и сохранить
+  saveToNotebaseCreateAndSaveShort: Создать и сохранить
+  saveToNotebaseLoginAndCreate: Войти и создать автоматически
+  saveToNotebaseLoginAndSave: Войти и сохранить
+  saveToNotebaseConnectExisting: Подключить существующую Notebase
+  saveToNotebaseGoConfigure: Настроить
+  saveToNotebaseLoginConnectedTitle: Войти и сохранить?
+  saveToNotebaseLoginConnectedDescription: Этот Custom Action подключён к аккаунту ниже. После входа Read Frog сохранит в существующую Notebase, если это возможно, или создаст новую Notebase для текущего аккаунта.
+  saveToNotebaseConnectionUnavailableTitle: Подключение Notebase недоступно
+  saveToNotebaseMissingNotebaseDescription: Старая Notebase больше не существует или недоступна этому аккаунту. Создайте новую Notebase и сохраните результат либо подключите существующую Notebase в Custom AI Actions.
+  saveToNotebaseAccountUnavailableDescription: Текущий аккаунт не совпадает с подключённым аккаунтом ниже. Создание и сохранение заменит прежнее подключение и сопоставления полей. Также можно подключить существующую Notebase в Custom AI Actions.
+  saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
+  saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
+  saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
+  openCustomActions: Открыть Custom AI Actions
+  openNotebase: Открыть Notebase
   contextDetailsTitleLabel: Заголовок
   contextDetailsParagraphsLabel: Абзацы
   translation: Перевод

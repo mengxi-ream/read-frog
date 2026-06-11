@@ -389,18 +389,25 @@ options:
             description: Guarda los resultados estructurados de esta acción en una Notebase remota.
             loginRequiredTitle: Inicia sesión para configurar Notebase
             loginRequiredDescription: Inicia sesión en readfrog.app antes de elegir una Notebase o editar asignaciones.
+            loginRequiredConnectedDescription: Esta conexión fue creada por la cuenta de abajo. Si inicias sesión con la misma cuenta, se restaurarán las asignaciones de campos. Si inicias sesión con otra cuenta, las asignaciones anteriores se borrarán al crear o conectar una Notebase.
             loginAction: Iniciar sesión
+            connectedAccountLabel: Cuenta conectada
+            currentAccountLabel: Cuenta actual
+            unknownConnectedAccount: Cuenta desconocida
             tableLabel: Notebase
             tablePlaceholder: Selecciona una Notebase
             tableClearOption: Desconectar Notebase
+            clearConnectionAction: Borrar conexión
             refreshAction: Actualizar
             emptyTitle: Aún no hay Notebases
             emptyDescription: Crea una Notebase en readfrog.app y vuelve aquí para asignar campos.
             openNotebaseAction: Abrir Notebase
             betaLockedTitle: Esta cuenta no está en la beta de Notebase
             betaLockedDescription: Puedes mantener esta acción configurada, pero elegir Notebases y sincronizar resultados está limitado por ahora a cuentas beta seleccionadas.
+            accountMismatchTitle: La conexión de Notebase pertenece a otra cuenta
+            accountMismatchDescription: Esta conexión está vinculada a la cuenta conectada de abajo. Bórrala o elige una Notebase disponible para la cuenta actual.
             tableUnavailableTitle: La Notebase seleccionada ya no está disponible
-            tableUnavailableDescription: Actualiza o elige otra Notebase antes de volver a guardar.
+            tableUnavailableDescription: Esta Notebase ya no existe o no se puede abrir. Borra la conexión o elige otra Notebase.
             tableUnavailableOption: no disponible
             schemaErrorTitle: No se pudo cargar el esquema de la Notebase
             schemaErrorDescription: Intenta actualizar el esquema de nuevo en un momento.
@@ -415,7 +422,7 @@ options:
             remoteFieldPlaceholder: Selecciona un campo de Notebase
             columnUnavailableOption: eliminado
             invalidMappingsTitle: Algunas asignaciones requieren atención
-            invalidMappingsDescription: Las asignaciones no válidas se conservan, pero Guardar en Notebase permanece desactivado hasta que las corrijas.
+            invalidMappingsDescription: Las asignaciones no válidas se conservan. Corrígelas antes de guardar en Notebase.
             mappingMissingLocal: El campo de acción asignado ya no existe.
             mappingMissingRemote: El campo de Notebase asignado ya no existe.
             mappingMissingSchema: Actualiza el esquema de la Notebase para validar esta asignación.
@@ -1000,6 +1007,24 @@ action:
   saveToNotebaseTableUnavailable: La Notebase seleccionada ya no está disponible
   saveToNotebaseConnectionInvalid: Esta conexión de Notebase está desactualizada. Actualízala en Acciones AI personalizadas y corrige las asignaciones.
   saveToNotebaseNoMappings: Añade al menos una asignación válida antes de guardar
+  saveToNotebaseCreateTitle: ¿Crear una Notebase?
+  saveToNotebaseCreateDescription: Crea una Notebase con columnas que coinciden con esta acción personalizada y guarda este resultado como la primera nota.
+  saveToNotebaseCreateAndSave: Crear y guardar
+  saveToNotebaseCreateAndSaveShort: Crear y guardar
+  saveToNotebaseLoginAndCreate: Iniciar sesión y crear
+  saveToNotebaseLoginAndSave: Iniciar sesión y guardar
+  saveToNotebaseConnectExisting: Conectar Notebase existente
+  saveToNotebaseGoConfigure: Configurar
+  saveToNotebaseLoginConnectedTitle: ¿Iniciar sesión para guardar?
+  saveToNotebaseLoginConnectedDescription: Esta Custom Action está conectada a la cuenta de abajo. Después de iniciar sesión, Read Frog guardará en la Notebase existente si es posible, o creará una nueva Notebase para la cuenta actual.
+  saveToNotebaseConnectionUnavailableTitle: Conexión de Notebase no disponible
+  saveToNotebaseMissingNotebaseDescription: La Notebase anterior ya no existe o esta cuenta no puede abrirla. Crea una nueva Notebase y guarda este resultado, o conecta una Notebase existente en Custom AI Actions.
+  saveToNotebaseAccountUnavailableDescription: La cuenta actual no coincide con la cuenta conectada de abajo. Crear y guardar reemplazará la conexión anterior y los mapeos de campos. También puedes conectar una Notebase existente en Custom AI Actions.
+  saveToNotebasePendingLogin: Inicia sesión para terminar de guardar
+  saveToNotebasePendingLoginDescription: Después de iniciar sesión, Read Frog creará la Notebase y guardará este resultado automáticamente.
+  saveToNotebasePendingConnectedLoginDescription: Después de iniciar sesión, Read Frog guardará en la Notebase conectada si es posible. Si esta cuenta no puede usarla, creará una nueva Notebase y guardará este resultado.
+  openCustomActions: Abrir Custom AI Actions
+  openNotebase: Abrir Notebase
   contextDetailsTitleLabel: Título
   contextDetailsParagraphsLabel: Párrafos
   translation: Traducción

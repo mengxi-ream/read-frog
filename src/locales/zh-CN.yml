@@ -389,18 +389,25 @@ options:
             description: 将这个指令的结构化结果保存到远程笔记库。
             loginRequiredTitle: 登录后才能配置笔记库
             loginRequiredDescription: 先在 readfrog.app 登录，然后再选择笔记库和编辑映射。
+            loginRequiredConnectedDescription: 这个连接来自下面的账号。如果登录原账号，会恢复字段映射；如果登录其他账号，创建或连接笔记库时会清空之前的字段映射。
             loginAction: 去登录
+            connectedAccountLabel: 已连接账号
+            currentAccountLabel: 当前账号
+            unknownConnectedAccount: 未知账号
             tableLabel: 笔记库
             tablePlaceholder: 选择一个笔记库
             tableClearOption: 不连接笔记库
+            clearConnectionAction: 清空连接
             refreshAction: 刷新
             emptyTitle: 还没有笔记库
             emptyDescription: 先去 readfrog.app 创建一个笔记库，再回来映射字段。
             openNotebaseAction: 打开笔记库
             betaLockedTitle: 当前账号尚未加入 Notebase Beta
             betaLockedDescription: 你可以继续保留当前 action 配置，但选择笔记库和同步结果目前仅对部分 Beta 账号开放。
+            accountMismatchTitle: 笔记库连接属于其他账号
+            accountMismatchDescription: 当前连接绑定到下面的已连接账号。你可以清空连接，或选择当前账号可访问的笔记库。
             tableUnavailableTitle: 选中的笔记库已不可用
-            tableUnavailableDescription: 请刷新，或重新选择一个笔记库后再保存。
+            tableUnavailableDescription: 这个笔记库不存在或当前账号无法打开。可以清空连接，或重新选择一个笔记库。
             tableUnavailableOption: 不可用
             schemaErrorTitle: 加载笔记库 schema 失败
             schemaErrorDescription: 请稍后再试一次刷新。
@@ -415,7 +422,7 @@ options:
             remoteFieldPlaceholder: 选择一个笔记库字段
             columnUnavailableOption: 已删除
             invalidMappingsTitle: 有些映射需要处理
-            invalidMappingsDescription: 无效映射会被保留，但在修复前会禁用“保存到笔记库”。
+            invalidMappingsDescription: 无效映射会被保留。保存到笔记库前请先修复它们。
             mappingMissingLocal: 映射的指令字段已经不存在。
             mappingMissingRemote: 映射的笔记库字段已经不存在。
             mappingMissingSchema: 刷新笔记库 schema 后才能校验这个映射。
@@ -1000,6 +1007,24 @@ action:
   saveToNotebaseTableUnavailable: 选中的笔记库已不可用
   saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom AI Actions 中刷新并修复映射
   saveToNotebaseNoMappings: 至少添加一个有效映射后才能保存
+  saveToNotebaseCreateTitle: 创建笔记库？
+  saveToNotebaseCreateDescription: 创建一个与此 Custom Action 输出字段匹配的笔记库，并将当前结果保存为第一条笔记。
+  saveToNotebaseCreateAndSave: 直接创建并保存
+  saveToNotebaseCreateAndSaveShort: 创建并保存
+  saveToNotebaseLoginAndCreate: 登录并自动创建
+  saveToNotebaseLoginAndSave: 登录并保存
+  saveToNotebaseConnectExisting: 连接现有笔记库
+  saveToNotebaseGoConfigure: 去配置
+  saveToNotebaseLoginConnectedTitle: 登录后继续保存？
+  saveToNotebaseLoginConnectedDescription: 这个 Custom Action 已连接到下面的账号。登录后，如果可以使用原笔记库会直接保存；如果当前账号无法使用它，会创建新的笔记库并保存。
+  saveToNotebaseConnectionUnavailableTitle: 当前笔记库连接不可用
+  saveToNotebaseMissingNotebaseDescription: 旧笔记库不存在或当前账号无法打开。可以创建新的笔记库并保存当前结果，或去 Custom AI Actions 连接已有笔记库。
+  saveToNotebaseAccountUnavailableDescription: 当前登录账号和下方已连接账号不同。选择创建并保存会替换之前的连接配置和字段映射；也可以去 Custom AI Actions 连接已有笔记库。
+  saveToNotebasePendingLogin: 登录后继续保存
+  saveToNotebasePendingLoginDescription: 登录完成后，Read Frog 会自动创建笔记库并保存当前结果。
+  saveToNotebasePendingConnectedLoginDescription: 登录完成后，Read Frog 会优先保存到已连接的笔记库；如果当前账号无法使用它，会创建新的笔记库并保存当前结果。
+  openCustomActions: 打开 Custom AI Actions
+  openNotebase: 打开笔记库
   contextDetailsTitleLabel: 标题
   contextDetailsParagraphsLabel: 段落内容
   translation: 翻译
