@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.34.0
+
+### Minor Changes
+
+- [#1670](https://github.com/mengxi-ream/read-frog/pull/1670) [`f97a4b4`](https://github.com/mengxi-ream/read-frog/commit/f97a4b40e1960979ce672bde68156418a3145489) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(notebase): auto-create Notebase for unconnected Custom Actions
+
+### Patch Changes
+
+- [#1624](https://github.com/mengxi-ream/read-frog/pull/1624) [`80aeb34`](https://github.com/mengxi-ream/read-frog/commit/80aeb349d9e2169b11dc1eee6d1589241bdb8da2) Thanks [@ringoshiina](https://github.com/ringoshiina)! - feat(subtitles): export translated subtitles
+
+  Add a "Download translated subtitles" action that exports a complete AI-translated SRT from the full source subtitle track. Fail closed on missing translations, rejects same-language export, and falls back to source timing when AI segmentation produces coverage gaps.
+
+- [#1623](https://github.com/mengxi-ream/read-frog/pull/1623) [`ac20ede`](https://github.com/mengxi-ream/read-frog/commit/ac20edeab104a7f72a263663b103a38e589dc5b2) Thanks [@qup1010](https://github.com/qup1010)! - refactor(page-translation): fix method name typo and comment errors
+
 ## 1.33.12
 
 ### Patch Changes
