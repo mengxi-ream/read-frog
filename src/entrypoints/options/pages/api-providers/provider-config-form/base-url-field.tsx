@@ -1,7 +1,7 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 
-import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
+import { i18n } from "#imports"
 import { isNonCustomLLMProvider } from "@/types/config/provider"
 import { ConnectionTestButton } from "./components/connection-button"
 import { withForm } from "./form"

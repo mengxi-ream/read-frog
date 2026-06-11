@@ -8,6 +8,7 @@ import {
 import { detectLanguageWithSource } from "./language"
 
 export const PAGE_LANGUAGE_TEXT_SAMPLE_LIMIT = 3000
+const MIN_TEXT_LENGTH_FOR_METADATA_VERIFICATION = 80
 
 const SHOW_TEXT = 4
 const FILTER_ACCEPT = 1
@@ -183,14 +184,18 @@ function collectPageTextSample(root: Node | null | undefined, maxLength = PAGE_L
   return sample
 }
 
+function areCompatibleDetectedCodes(metadataCode: LangCodeISO6393, textCode: LangCodeISO6393 | "und"): boolean {
+  return textCode === metadataCode || (metadataCode === "cmn-Hant" && textCode === "cmn")
+}
+
 export async function detectPageLanguageLightweight(doc: Document = document): Promise<PageLanguageDetectionResult> {
+  let metadataCode: LangCodeISO6393 | null = null
+
   for (const candidate of getMetaLanguageCandidates(doc)) {
     const code = resolveLanguageCodeFromLocale(candidate)
     if (code) {
-      return {
-        detectedCodeOrUnd: code,
-        detectionSource: "metadata",
-      }
+      metadataCode = code
+      break
     }
   }
 
@@ -199,9 +204,23 @@ export async function detectPageLanguageLightweight(doc: Document = document): P
     collectPageTextSample(doc.body),
   ].filter(Boolean).join("\n\n")
 
+  if (metadataCode && textForDetection.trim().length < MIN_TEXT_LENGTH_FOR_METADATA_VERIFICATION) {
+    return {
+      detectedCodeOrUnd: metadataCode,
+      detectionSource: "metadata",
+    }
+  }
+
   const { code, source } = await detectLanguageWithSource(textForDetection, {
     enableLLM: false,
   })
+
+  if (metadataCode && (code === "und" || areCompatibleDetectedCodes(metadataCode, code))) {
+    return {
+      detectedCodeOrUnd: metadataCode,
+      detectionSource: "metadata",
+    }
+  }
 
   return {
     detectedCodeOrUnd: code,

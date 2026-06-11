@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { useAtomValue } from "jotai"
 import { Activity } from "react"
+import { i18n } from "#imports"
 import { GradientBackground } from "@/components/gradient-background"
 import { Label } from "@/components/ui/base-ui/label"
 import { MainSubtitle, TranslationSubtitle } from "@/entrypoints/subtitles.content/ui/subtitle-lines"

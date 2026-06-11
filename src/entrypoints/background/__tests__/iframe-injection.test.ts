@@ -1,6 +1,6 @@
 import type { Config } from "@/types/config/config"
-import { browser, storage } from "#imports"
 import { beforeEach, describe, expect, it, vi } from "vitest"
+import { browser, storage } from "#imports"
 import { SITE_CONTROL_URL_WINDOW_KEY } from "@/utils/site-control"
 
 const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js"

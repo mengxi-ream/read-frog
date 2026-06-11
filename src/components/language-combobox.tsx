@@ -1,7 +1,7 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import type { LanguageItem } from "./language-combobox-options"
-import { i18n } from "#imports"
 import { useMemo } from "react"
+import { i18n } from "#imports"
 import {
   Combobox,
   ComboboxContent,

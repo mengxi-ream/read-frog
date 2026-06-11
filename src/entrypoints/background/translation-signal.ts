@@ -4,6 +4,7 @@ import type { Config } from "@/types/config/config"
 import { browser, storage } from "#imports"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
+import { normalizeDetectedCode } from "@/utils/config/languages"
 import { CONFIG_STORAGE_KEY, DEFAULT_DETECTED_CODE } from "@/utils/constants/config"
 import { getDetectedCodeStateKey, getTranslationStateKey } from "@/utils/constants/storage-keys"
 import { shouldEnableAutoTranslation } from "@/utils/host/translate/auto-translation"
@@ -35,16 +36,9 @@ function isIframe(frameId: number | undefined): boolean {
   return frameId !== undefined && frameId !== 0
 }
 
-function normalizeDetectedCode(detectedCodeOrUnd: LangCodeISO6393 | "und"): LangCodeISO6393 {
-  return detectedCodeOrUnd === "und" ? DEFAULT_DETECTED_CODE : detectedCodeOrUnd
-}
-
-async function getCachedDetectedCodeForTab(tabId: number): Promise<LangCodeISO6393 | undefined> {
-  return await storage.getItem<LangCodeISO6393>(getDetectedCodeStateKey(tabId)) ?? undefined
-}
-
 async function getDetectedCodeForTab(tabId: number): Promise<LangCodeISO6393> {
-  return await getCachedDetectedCodeForTab(tabId) ?? DEFAULT_DETECTED_CODE
+  const storedCode = await storage.getItem<unknown>(getDetectedCodeStateKey(tabId))
+  return normalizeDetectedCode(storedCode)
 }
 
 function notifyDetectedCodeChanged(detectedCode: LangCodeISO6393) {

@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
 import { Activity } from "react"
+import { i18n } from "#imports"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { isCurrentSiteInPatternsAtom, toggleCurrentSiteAtom } from "../atoms/auto-translate"

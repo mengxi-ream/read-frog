@@ -1,7 +1,7 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
-import { i18n } from "#imports"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useState } from "react"
+import { i18n } from "#imports"
 import { QuickInsertableTextareaFieldAutoSave } from "@/components/form/quick-insertable-textarea-field-auto-save"
 import {
   AlertDialog,
@@ -20,7 +20,7 @@ import {
   getSelectionToolbarCustomActionTokenCellText,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
-import { sanitizeSelectionToolbarCustomAction } from "@/utils/notebase"
+import { sanitizeSelectionToolbarCustomAction } from "@/utils/notebase/connection"
 import { cn } from "@/utils/styles/utils"
 import { selectedCustomActionIdAtom } from "../atoms"
 import { formOpts, useAppForm } from "./form"

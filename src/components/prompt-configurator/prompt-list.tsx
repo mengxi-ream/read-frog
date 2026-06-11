@@ -1,7 +1,7 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useSetAtom } from "jotai"
 import { Activity } from "react"
+import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { ConfigurePrompt } from "./configure-prompt"
 import { usePromptAtoms } from "./context"

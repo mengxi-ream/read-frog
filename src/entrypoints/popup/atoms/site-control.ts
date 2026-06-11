@@ -1,6 +1,6 @@
 import type { Getter, Setter } from "jotai"
-import { browser } from "#imports"
 import { atom } from "jotai"
+import { browser } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { matchDomainPattern } from "@/utils/url"
 import { getActiveTabUrl } from "@/utils/utils"

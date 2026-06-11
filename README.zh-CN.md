@@ -2,6 +2,8 @@
 
 [![Read Frog banner][image-banner]][website]
 
+<a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+
 一款开源的 AI 驱动的浏览器语言学习扩展。<br/>
 支持沉浸式翻译、文章分析、多种 AI 模型等功能。<br/>
 在浏览器中利用 AI 轻松深入地掌握语言。
@@ -26,7 +28,15 @@
 
 </div>
 
-![2025 Recap](/assets/2025-recap.png)
+<div align="center">
+  <img src="/assets/promotion/sponsor-title.svg" alt="Sponsor" width="120" />
+  <br />
+  注册<a href="https://readfrog.s.gy/RWqJeX">优云智算</a>：用最少的钱，换最高的编程效率。
+  <br /><br />
+  <a href="https://readfrog.s.gy/RWqJeX">
+    <img src="/assets/promotion/ucloud.jpg" alt="UCloud" />
+  </a>
+</div>
 
 <details>
 <summary><kbd>目录</kbd></summary>
@@ -39,13 +49,12 @@
   - [社区](#社区)
 - [✨ 功能](#-功能)
   - [🔄 双语 / 仅译文](#-双语--仅译文)
-  - [🧠 上下文感知翻译](#-上下文感知翻译)
   - [✨ 划词翻译](#-划词翻译)
-  - [📝 自定义提示词](#-自定义提示词)
-  - [📦 批量请求](#-批量请求)
-  - [🤖 20+ AI 服务商](#-20-ai-服务商)
+  - [🧠 上下文感知翻译](#-上下文感知翻译)
   - [🎬 字幕翻译](#-字幕翻译)
   - [🔊 文字转语音 (TTS)](#-文字转语音-tts)
+  - [📦 批量请求](#-批量请求)
+  - [🤖 20+ AI 服务商](#-20-ai-服务商)
 - [🤝 贡献](#-贡献)
   - [贡献代码](#贡献代码)
 - [📜 商业授权](#-商业授权)
@@ -56,8 +65,6 @@
 </details>
 
 ## 📺 演示
-
-![Read Frog](/assets/read-demo.gif)
 
 <div align="center">
   <img src="assets/node-translation-demo.gif" width="38%" alt="Read Frog 弹窗界面" />
@@ -129,20 +136,6 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 </div>
 
-<!-- ![][image-feat-context] -->
-
-### 🧠 [上下文感知翻译][docs-tutorial]
-
-让 AI 理解您正在阅读内容的完整上下文。启用后，Read Frog 会提取页面标题和简洁的 Markdown 页面内容，将此上下文提供给 AI，以获得更准确、更符合语境的翻译。
-
-这意味着技术术语会在其领域内被正确翻译，文学表达会保持其韵味，歧义短语会根据周围内容而非孤立地进行解释。
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
 <!-- ![][image-feat-selection] -->
 
 ### ✨ [划词翻译][docs-tutorial]
@@ -157,13 +150,39 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 </div>
 
-<!-- ![][image-feat-prompts] -->
+<!-- ![][image-feat-context] -->
 
-### 📝 [自定义提示词][docs-tutorial]
+### 🧠 [上下文感知翻译][docs-tutorial]
 
-定义您自己的翻译提示词，像专家一样翻译。为技术文档、文学作品或日常内容创建特定领域的提示词。使用 `[TARGET_LANG]`、`[INPUT]`、`[TITLE]` 和 `[SUMMARY]` 等令牌构建动态、上下文感知的提示词。
+让 AI 理解您正在阅读内容的完整上下文。启用后，Read Frog 会提取页面标题和简洁的 Markdown 页面内容，将此上下文提供给 AI，以获得更准确、更符合语境的翻译。
 
-保存多个提示词模板，根据阅读内容随时切换。您的提示词，您做主。
+这意味着技术术语会在其领域内被正确翻译，文学表达会保持其韵味，歧义短语会根据周围内容而非孤立地进行解释。
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-subtitle] -->
+
+### 🎬 [字幕翻译][docs-tutorial]
+
+直接在视频播放器中翻译 YouTube 字幕。观看外语内容时，翻译会与原始字幕一起显示，让视频内容成为语言学习的好帮手。
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+<!-- ![][image-feat-tts] -->
+
+### 🔊 [文字转语音 (TTS)][docs-tutorial]
+
+使用高质量 AI 语音朗读任何选中的文本。由 **Edge TTS** 驱动——完全免费，提供 150+ 种语音，覆盖 80+ 种语言，包括中文、英文、日文、韩文等。可自由调节语速、音调和音量。
+
+自动语言检测（基础模式或 LLM 驱动）与按语言映射语音，确保每种语言使用最合适的语音。智能的句子感知分块功能处理长文本时会在自然边界处分割，并预取下一个片段以实现无缝播放。非常适合发音练习和听力学习。
 
 <div align="right">
 
@@ -192,32 +211,6 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 通过 Vercel AI SDK 连接 20+ AI 服务商：OpenAI、DeepSeek、Anthropic Claude、Google Gemini、xAI Grok、Groq、Mistral、Ollama 等。为每个服务商配置自定义端点、API 密钥和模型设置。
 
 此外还有免费翻译选项：Google 翻译、微软翻译和 DeepLX，提供零成本的基础翻译。
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
-<!-- ![][image-feat-subtitle] -->
-
-### 🎬 [字幕翻译][docs-tutorial]
-
-直接在视频播放器中翻译 YouTube 字幕。观看外语内容时，翻译会与原始字幕一起显示，让视频内容成为语言学习的好帮手。
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
-<!-- ![][image-feat-tts] -->
-
-### 🔊 [文字转语音 (TTS)][docs-tutorial]
-
-使用高质量 AI 语音朗读任何选中的文本。由 **Edge TTS** 驱动——完全免费，提供 150+ 种语音，覆盖 80+ 种语言，包括中文、英文、日文、韩文等。可自由调节语速、音调和音量。
-
-自动语言检测（基础模式或 LLM 驱动）与按语言映射语音，确保每种语言使用最合适的语音。智能的句子感知分块功能处理长文本时会在自然边界处分割，并预取下一个片段以实现无缝播放。非常适合发音练习和听力学习。
 
 <div align="right">
 
@@ -318,7 +311,7 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 [extension-release-shield]: https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=package.json&style=flat-square&label=最新版本&color=brightgreen&labelColor=black
 [github-release-link]: https://github.com/mengxi-ream/read-frog/releases
 [github-star-link]: https://github.com/mengxi-ream/read-frog/stargazers
-[image-banner]: /assets/store/large-promo-tile.png
+[image-banner]: /assets/banner-zh.png
 [sponsor-image]: https://cdn.jsdelivr.net/gh/mengxi-ream/static/sponsorkit/sponsors.svg
 [image-star]: ./assets/star.png
 [issues-link]: https://github.com/mengxi-ream/read-frog/issues

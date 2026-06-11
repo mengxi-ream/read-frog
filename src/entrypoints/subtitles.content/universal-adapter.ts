@@ -3,8 +3,8 @@ import type { FeatureUsageContext } from "@/types/analytics"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
-import { i18n } from "#imports"
 import { toast } from "sonner"
+import { i18n } from "#imports"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
@@ -21,6 +21,7 @@ import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesSetting
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
+import { TranslatedSubtitlesDownloader } from "./translated-subtitles-downloader"
 import { TranslationCoordinator } from "./translation-coordinator"
 import { ROOT_VIEW } from "./ui/subtitles-settings-panel/views"
 
@@ -45,6 +46,7 @@ export class UniversalVideoAdapter {
   private isNativeSubtitlesHidden = false
   private segmentationPipeline: SegmentationPipeline | null = null
   private translationCoordinator: TranslationCoordinator | null = null
+  private translatedSubtitlesDownloader: TranslatedSubtitlesDownloader | null = null
   private subtitlesSummaryContextHash: string | null = null
 
   get embedded() {
@@ -68,6 +70,7 @@ export class UniversalVideoAdapter {
   }
 
   async initialize() {
+    this.initializeTranslatedSubtitlesDownloader()
     void this.restorePosition()
     void this.renderTranslateButton()
 
@@ -104,6 +107,18 @@ export class UniversalVideoAdapter {
       pageTitle: document.title || "",
       videoId: this.config.getVideoId?.(),
     })
+  }
+
+  downloadTranslatedSubtitles = async () => {
+    this.initializeTranslatedSubtitlesDownloader()
+    await this.translatedSubtitlesDownloader!.download()
+  }
+
+  private initializeTranslatedSubtitlesDownloader() {
+    this.translatedSubtitlesDownloader ??= new TranslatedSubtitlesDownloader(
+      this.subtitlesFetcher,
+      this.config,
+    )
   }
 
   private async restorePosition() {
@@ -202,6 +217,7 @@ export class UniversalVideoAdapter {
 
   private clearVisibleStateForNavigation() {
     this.clearNavigationReinitTimeout()
+    this.translatedSubtitlesDownloader?.dispose()
     this.destroyScheduler()
     this.translationCoordinator?.stop()
     this.segmentationPipeline?.stop()

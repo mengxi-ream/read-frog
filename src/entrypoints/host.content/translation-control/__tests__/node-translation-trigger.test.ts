@@ -18,8 +18,12 @@ function dispatchKeyboardEvent(type: "keydown" | "keyup", key: string) {
   document.dispatchEvent(new KeyboardEvent(type, { key, bubbles: true }))
 }
 
-function dispatchMouseEvent(type: "mousemove" | "mouseover" | "mousedown" | "mouseup", init: MouseEventInit) {
-  document.dispatchEvent(new MouseEvent(type, { bubbles: true, ...init }))
+function dispatchMouseEvent(
+  type: "mousemove" | "mouseover" | "mousedown" | "mouseup",
+  init: MouseEventInit,
+  target: EventTarget = document,
+) {
+  target.dispatchEvent(new MouseEvent(type, { bubbles: true, ...init }))
 }
 
 describe("registerNodeTranslationTriggerListeners", () => {
@@ -28,6 +32,7 @@ describe("registerNodeTranslationTriggerListeners", () => {
   afterEach(() => {
     teardown?.()
     teardown = null
+    document.body.innerHTML = ""
     vi.useRealTimers()
     vi.restoreAllMocks()
   })
@@ -136,15 +141,17 @@ describe("registerNodeTranslationTriggerListeners", () => {
   it("triggers click-and-hold node translation after the hold delay", async () => {
     vi.useFakeTimers()
     const onTrigger = vi.fn()
+    const target = document.createElement("div")
+    document.body.append(target)
 
     teardown = registerNodeTranslationTriggerListeners({
       getConfig: () => Promise.resolve(createConfig("clickAndHold")),
       onTrigger,
     })
 
-    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 })
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 30, clientY: 40 }, target)
     await Promise.resolve()
-    await vi.advanceTimersByTimeAsync(1000)
+    await vi.advanceTimersByTimeAsync(500)
 
     expect(onTrigger).toHaveBeenCalledWith(
       { x: 30, y: 40 },
@@ -154,6 +161,65 @@ describe("registerNodeTranslationTriggerListeners", () => {
         }),
       }),
     )
+  })
+
+  it("triggers held hover hotkeys after the shorter hold delay without firing twice", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    dispatchKeyboardEvent("keydown", "Control")
+    await Promise.resolve()
+
+    await vi.advanceTimersByTimeAsync(499)
+    expect(onTrigger).not.toHaveBeenCalled()
+
+    await vi.advanceTimersByTimeAsync(1)
+    await vi.waitFor(() => {
+      expect(onTrigger).toHaveBeenCalledTimes(1)
+    })
+
+    dispatchKeyboardEvent("keyup", "Control")
+    await Promise.resolve()
+
+    expect(onTrigger).toHaveBeenCalledTimes(1)
+    expect(onTrigger).toHaveBeenCalledWith(
+      { x: 70, y: 80 },
+      expect.objectContaining({
+        translate: expect.objectContaining({
+          node: expect.objectContaining({ hotkey: "control" }),
+        }),
+      }),
+    )
+  })
+
+  it("cancels held hover hotkey translation when another key creates a combo", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("control")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    dispatchKeyboardEvent("keydown", "Control")
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(250)
+
+    dispatchKeyboardEvent("keydown", "a")
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(500)
+    dispatchKeyboardEvent("keyup", "a")
+    dispatchKeyboardEvent("keyup", "Control")
+    await Promise.resolve()
+
+    expect(onTrigger).not.toHaveBeenCalled()
   })
 
   it("does not trigger while the caller says the event should be ignored", async () => {
@@ -170,6 +236,26 @@ describe("registerNodeTranslationTriggerListeners", () => {
     await Promise.resolve()
     dispatchKeyboardEvent("keyup", "Control")
     await Promise.resolve()
+
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("does not start click-and-hold translation from document surface targets", async () => {
+    vi.useFakeTimers()
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("clickAndHold")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 900, clientY: 100 }, document.body)
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(500)
+
+    dispatchMouseEvent("mousedown", { button: 0, clientX: 900, clientY: 100 }, document.documentElement)
+    await Promise.resolve()
+    await vi.advanceTimersByTimeAsync(500)
 
     expect(onTrigger).not.toHaveBeenCalled()
   })

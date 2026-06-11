@@ -21,11 +21,10 @@ interface OpenAIGPT5ReasoningEffortPolicy {
 export const LLM_PROVIDER_MODELS = {
   "openai": ["gpt-5.4-pro", "gpt-5.4", "gpt-5.4-mini", "gpt-5.4-nano", "gpt-5.3-chat-latest", "gpt-5.2-pro", "gpt-5.2", "gpt-5.2-chat-latest", "gpt-5.1-codex-mini", "gpt-5.1-codex", "gpt-5.1", "gpt-5.1-chat-latest", "gpt-5-pro", "gpt-5-codex", "gpt-5", "gpt-5-mini", "gpt-5-nano", "gpt-5-chat-latest", "gpt-4.1-nano", "gpt-4.1-mini", "gpt-4.1", "gpt-4o-mini", "gpt-4o"],
   "deepseek": ["deepseek-v4-flash", "deepseek-v4-pro", "deepseek-chat", "deepseek-reasoner"],
-  "google": ["gemini-3.1-pro-preview", "gemini-3-flash-preview", "gemini-3-pro-preview", "gemini-2.5-flash-lite", "gemini-2.5-flash-lite-preview-06-17", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-flash-8b", "gemini-1.5-flash-8b-latest", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-1.5-pro-latest"],
+  "google": ["gemini-3.5-flash", "gemini-3.1-pro-preview", "gemini-3.1-flash-lite", "gemini-3-flash-preview", "gemini-3-pro-preview", "gemini-2.5-flash-lite", "gemini-2.5-flash-lite-preview-06-17", "gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-1.5-flash-8b", "gemini-1.5-flash-8b-latest", "gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro", "gemini-1.5-pro-latest"],
   "anthropic": ["claude-opus-4-6", "claude-sonnet-4-6", "claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-5", "claude-opus-4-1", "claude-sonnet-4-0", "claude-opus-4-0", "claude-3-7-sonnet-latest", "claude-3-5-haiku-latest"],
   "siliconflow": ["Qwen/Qwen3-Next-80B-A3B-Instruct"],
   "tensdaq": ["Qwen3-30B-A3B-Instruct-2507", "deepseek-v3.1"],
-  "ai302": ["gpt-4.1-mini", "qwen3-235b-a22b"],
   "openai-compatible": ["use-custom-model"],
   "xai": ["grok-4-1", "grok-4-1-fast-reasoning", "grok-4-1-fast-non-reasoning", "grok-4-0709", "grok-4-latest", "grok-4-fast-non-reasoning", "grok-4-fast-reasoning", "grok-4", "grok-code-fast-1", "grok-3-mini-fast", "grok-3-mini-fast-latest", "grok-3-mini", "grok-3-mini-latest", "grok-3-fast", "grok-3-fast-latest", "grok-3", "grok-3-latest", "grok-2", "grok-2-latest", "grok-2-1212", "grok-2-vision", "grok-2-vision-latest", "grok-2-vision-1212", "grok-beta", "grok-vision-beta"],
   "bedrock": ["us.anthropic.claude-opus-4-6-v1", "us.anthropic.claude-opus-4-5-20251101-v1:0", "us.anthropic.claude-haiku-4-5-20251001-v1:0", "openai.gpt-oss-120b-1:0", "openai.gpt-oss-20b-1:0", "meta.llama3-2-11b-instruct-v1:0", "meta.llama3-2-90b-instruct-v1:0", "us.meta.llama3-2-11b-instruct-v1:0", "us.meta.llama3-2-90b-instruct-v1:0", "us.meta.llama4-scout-17b-instruct-v1:0", "us.meta.llama4-maverick-17b-instruct-v1:0", "us.deepseek.r1-v1:0", "anthropic.claude-haiku-4-5-20251001-v1:0", "anthropic.claude-sonnet-4-5-20250929-v1:0", "us.anthropic.claude-sonnet-4-5-20250929-v1:0", "anthropic.claude-sonnet-4-20250514-v1:0", "us.anthropic.claude-sonnet-4-20250514-v1:0", "anthropic.claude-opus-4-1-20250805-v1:0", "us.anthropic.claude-opus-4-1-20250805-v1:0", "anthropic.claude-opus-4-20250514-v1:0", "us.anthropic.claude-opus-4-20250514-v1:0", "anthropic.claude-3-7-sonnet-20250219-v1:0", "us.anthropic.claude-3-7-sonnet-20250219-v1:0", "us.amazon.nova-micro-v1:0", "us.amazon.nova-lite-v1:0", "us.amazon.nova-pro-v1:0", "us.amazon.nova-premier-v1:0", "anthropic.claude-3-5-haiku-20241022-v1:0", "us.anthropic.claude-3-5-haiku-20241022-v1:0", "anthropic.claude-3-5-sonnet-20241022-v2:0", "us.anthropic.claude-3-5-sonnet-20241022-v2:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.mistral.pixtral-large-2502-v1:0", "meta.llama3-2-1b-instruct-v1:0", "meta.llama3-2-3b-instruct-v1:0", "us.meta.llama3-2-1b-instruct-v1:0", "us.meta.llama3-2-3b-instruct-v1:0", "meta.llama3-1-8b-instruct-v1:0", "us.meta.llama3-1-8b-instruct-v1:0", "meta.llama3-1-70b-instruct-v1:0", "us.meta.llama3-1-70b-instruct-v1:0", "meta.llama3-1-405b-instruct-v1:0"],
@@ -127,7 +126,7 @@ export const LLM_MODEL_OPTIONS: Array<{
 }> = [
   // Gemini - specific patterns first
   {
-    pattern: /^gemini-3(?:\.1)?-.*-preview(?:-customtools)?$/,
+    pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/,
     options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
   },
   {

@@ -29,6 +29,12 @@ describe("getProviderOptions", () => {
 
       const thinkingLevel31ProOptions = getProviderOptions("gemini-3.1-pro-preview", "google")
       expect(thinkingLevel31ProOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
+
+      const thinkingLevel31FlashLiteOptions = getProviderOptions("gemini-3.1-flash-lite", "google")
+      expect(thinkingLevel31FlashLiteOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
+
+      const thinkingLevel35FlashOptions = getProviderOptions("gemini-3.5-flash", "google")
+      expect(thinkingLevel35FlashOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
     })
 
     it("should return options for claude models", () => {

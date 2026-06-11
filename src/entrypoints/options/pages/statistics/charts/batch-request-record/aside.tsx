@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { useAtom } from "jotai"
+import { i18n } from "#imports"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/base-ui/tabs"
 import { useBatchRequestRecords } from "@/hooks/use-batch-request-record"
 import { calculateAverageSavePercentage } from "@/utils/batch-request-record"

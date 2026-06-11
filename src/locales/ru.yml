@@ -1,5 +1,5 @@
 name: Read Frog
-extName: Read Frog - Иммерсивный переводчик с открытым исходным кодом
+extName: Read Frog - Переводи и учись
 extDescription: Read Frog — расширение браузера с открытым исходным кодом, которое поможет вам глубоко изучать языки на любом веб-сайте.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
@@ -82,11 +82,6 @@ options:
   apiProviders:
     title: API-провайдеры
     description: Настройте API-провайдеров для функций перевода и анализа слов. У нас более 20 встроенных провайдеров и поддержка любых OpenAI-совместимых API.
-    promotion:
-      ai302:
-        description: Нажмите на ссылку справа, чтобы зарегистрироваться на 302.AI и получить 1 USD API-кредита
-        action: Зарегистрироваться для получения бесплатного API-ключа
-        addProvider: Добавить конфигурацию 302.AI
     addProvider: Добавить провайдера
     badges:
       featureCount: $1 функций
@@ -109,6 +104,7 @@ options:
         apiKey: API-ключ
         baseURL: Base URL
         optional: Необязательно
+      duplicate: Дублировать
       delete: Удалить
       deleteDialog:
         title: Удалить провайдера?
@@ -160,7 +156,6 @@ options:
         xai: ИИ-компания Илона Маска, предлагающая модели Grok с доступом к данным в реальном времени
         siliconflow: Высокопроизводительная платформа вывода для китайских и международных моделей
         tensdaq: Революционная MaaS-платформа с рыночным ценообразованием, устраняющая высокие фиксированные цены
-        ai302: Предоставляет новейшие и наиболее полные модели с оплатой по мере использования API
         openaiCompatible: Сторонние и OpenAI API-совместимые
         deeplx: Неофициальный DeepL API
         deepl: Официальный DeepL API
@@ -292,6 +287,11 @@ options:
         description: Выберите действие при нажатии на плавающую кнопку
         panel: Открыть боковую панель
         translate: Переключить перевод страницы
+      side:
+        title: Сторона кнопки
+        description: Выберите, с какой стороны страницы закреплять плавающую кнопку
+        left: Слева
+        right: Справа
     selectionToolbar:
       globalToggle:
         title: Включить панель выделения
@@ -388,18 +388,25 @@ options:
             description: Сохранить структурированные результаты этого действия в удалённую Notebase.
             loginRequiredTitle: Войдите, чтобы настроить Notebase
             loginRequiredDescription: Войдите на readfrog.app, прежде чем выбирать notebase или редактировать сопоставления.
+            loginRequiredConnectedDescription: Это подключение создано аккаунтом ниже. Если войти в тот же аккаунт, сопоставления полей будут восстановлены. Если войти в другой аккаунт, прежние сопоставления будут очищены при создании или подключении Notebase.
             loginAction: Войти
+            connectedAccountLabel: Подключённый аккаунт
+            currentAccountLabel: Текущий аккаунт
+            unknownConnectedAccount: Неизвестный аккаунт
             tableLabel: Notebase
             tablePlaceholder: Выберите notebase
             tableClearOption: Не подключать notebase
+            clearConnectionAction: Очистить подключение
             refreshAction: Обновить
             emptyTitle: Notebase пока нет
             emptyDescription: Создайте notebase на readfrog.app, затем вернитесь сюда и сопоставьте поля.
             openNotebaseAction: Открыть Notebase
             betaLockedTitle: Этот аккаунт ещё не участвует в beta Notebase
             betaLockedDescription: Вы можете сохранить текущую настройку action, но выбор Notebase и синхронизация результатов пока доступны только выбранным beta-аккаунтам.
+            accountMismatchTitle: Подключение Notebase принадлежит другому аккаунту
+            accountMismatchDescription: Это подключение связано с аккаунтом ниже. Очистите его или выберите Notebase, доступную текущему аккаунту.
             tableUnavailableTitle: Выбранная notebase больше недоступна
-            tableUnavailableDescription: Обновите список или выберите другую notebase перед следующим сохранением.
+            tableUnavailableDescription: Эта Notebase больше не существует или не открывается. Очистите подключение или выберите другую Notebase.
             tableUnavailableOption: недоступно
             schemaErrorTitle: Не удалось загрузить схему notebase
             schemaErrorDescription: Попробуйте обновить схему ещё раз чуть позже.
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: Выберите поле notebase
             columnUnavailableOption: удалено
             invalidMappingsTitle: Некоторые сопоставления требуют внимания
-            invalidMappingsDescription: Некорректные сопоставления сохраняются, но кнопка Save to Notebase остаётся отключённой, пока вы их не исправите.
+            invalidMappingsDescription: Некорректные сопоставления сохранены. Исправьте их перед сохранением в Notebase.
             mappingMissingLocal: Сопоставленное поле действия больше не существует.
             mappingMissingRemote: Сопоставленное поле notebase больше не существует.
             mappingMissingSchema: Обновите схему notebase, чтобы проверить это сопоставление.
@@ -471,6 +478,11 @@ options:
       description: Всегда переводить этот веб-сайт
       urlPattern: URL-шаблон
       enterUrlPattern: Введите URL-шаблон
+    neverAutoTranslateWebsite:
+      title: Never Auto Translate Based on Website
+      description: Never automatically translate this website
+      urlPattern: URL Pattern
+      enterUrlPattern: Enter URL Pattern
     personalizedPrompts:
       title: Персонализированные промпты
       description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
@@ -825,7 +837,7 @@ options:
   whatsNew:
     title: Что нового
   survey:
-    title: Улучшить субтитры 🎁
+    title: Ранний доступ к Notebase
   rateUs:
     title: Оцените нас
 side:
@@ -882,6 +894,24 @@ action:
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением
+  saveToNotebaseCreateTitle: Создать Notebase?
+  saveToNotebaseCreateDescription: Создать Notebase с колонками из этого Custom Action и сохранить текущий результат как первую заметку.
+  saveToNotebaseCreateAndSave: Создать и сохранить
+  saveToNotebaseCreateAndSaveShort: Создать и сохранить
+  saveToNotebaseLoginAndCreate: Войти и создать автоматически
+  saveToNotebaseLoginAndSave: Войти и сохранить
+  saveToNotebaseConnectExisting: Подключить существующую Notebase
+  saveToNotebaseGoConfigure: Настроить
+  saveToNotebaseLoginConnectedTitle: Войти и сохранить?
+  saveToNotebaseLoginConnectedDescription: Этот Custom Action подключён к аккаунту ниже. После входа Read Frog сохранит в существующую Notebase, если это возможно, или создаст новую Notebase для текущего аккаунта.
+  saveToNotebaseConnectionUnavailableTitle: Подключение Notebase недоступно
+  saveToNotebaseMissingNotebaseDescription: Старая Notebase больше не существует или недоступна этому аккаунту. Создайте новую Notebase и сохраните результат либо подключите существующую Notebase в Custom AI Actions.
+  saveToNotebaseAccountUnavailableDescription: Текущий аккаунт не совпадает с подключённым аккаунтом ниже. Создание и сохранение заменит прежнее подключение и сопоставления полей. Также можно подключить существующую Notebase в Custom AI Actions.
+  saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
+  saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
+  saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
+  openCustomActions: Открыть Custom AI Actions
+  openNotebase: Открыть Notebase
   contextDetailsTitleLabel: Заголовок
   contextDetailsParagraphsLabel: Абзацы
   translation: Перевод
@@ -896,6 +926,10 @@ shortcutKeySelector:
   placeholder: Пожалуйста, введите горячую клавишу
 subtitles:
   actions:
+    downloadTranslated: Скачать переведённые субтитры
+    downloadTranslatedPreparing: Подготовка субтитров, длинные видео могут занять больше времени
+    downloadTranslatedTranslating: Перевод субтитров
+    downloadTranslatedComplete: Переведённые субтитры скачаны
     downloadSource: Скачать исходные субтитры
   state:
     loading: Read Frog загрузка субтитров
@@ -917,6 +951,9 @@ subtitles:
     aiAuthFailed: Ошибка аутентификации API, проверьте ваш API ключ
     aiServiceUnavailable: Служба перевода временно недоступна
     aiNoResponse: Служба AI не ответила, отображается оригинальный текст
+    translatedExportFailed: Не удалось создать переведённые субтитры
+    translatedExportIncomplete: Не удалось перевести все строки субтитров
+    translatedExportSameLanguage: Исходный и целевой языки совпадают
 hotkey:
   control: Ctrl
   alt: Option

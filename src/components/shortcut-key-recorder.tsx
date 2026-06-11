@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { isModifierKey } from "@tanstack/hotkeys"
 import { useCallback, useEffect, useRef, useState } from "react"
+import { i18n } from "#imports"
 import { Input } from "@/components/ui/base-ui/input"
 import { formatPageTranslationShortcut, isValidConfiguredPageTranslationShortcut, keyboardEventToPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 

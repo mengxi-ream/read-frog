@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
-import { i18n } from "#imports"
 import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
+import { i18n } from "#imports"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { CustomActionConfigForm } from ".."
@@ -54,8 +54,14 @@ describe("customActionConfigForm beta gating", () => {
         prompt: "Summarize the selected text.",
         outputSchema: [],
         notebaseConnection: {
-          tableId: "table-1",
-          tableNameSnapshot: "Articles",
+          notebaseId: "table-1",
+          notebaseNameSnapshot: "Articles",
+          connectedAccount: {
+            id: "user-1",
+            name: "Reader",
+            email: "reader@example.com",
+            image: null,
+          },
           mappings: [],
         },
       },

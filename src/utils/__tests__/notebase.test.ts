@@ -1,13 +1,15 @@
-import type { RowCreateInput } from "@read-frog/api-contract"
+import type { NotebaseRowCreateInput } from "@read-frog/api-contract"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { describe, expect, it } from "vitest"
+import {
+  sanitizeSelectionToolbarCustomAction,
+} from "../notebase/connection"
 import {
   buildNotebaseRowCells,
   createNotebaseMapping,
   isNotebaseMappingCompatible,
   resolveNotebaseMappings,
-  sanitizeSelectionToolbarCustomAction,
-} from "../notebase"
+} from "../notebase/mapping"
 
 function createAction(): SelectionToolbarCustomAction {
   return {
@@ -37,14 +39,22 @@ function createAction(): SelectionToolbarCustomAction {
   }
 }
 
+const connectedAccount = {
+  id: "user-1",
+  name: "Reader",
+  email: "reader@example.com",
+  image: null,
+}
+
 describe("notebase utils", () => {
   it("sanitizes invalid local mappings when output fields change", () => {
     const action = createAction()
     const mappedAction: SelectionToolbarCustomAction = {
       ...action,
       notebaseConnection: {
-        tableId: "table-1",
-        tableNameSnapshot: "Articles",
+        notebaseId: "notebase-1",
+        notebaseNameSnapshot: "Articles",
+        connectedAccount,
         mappings: [
           createNotebaseMapping("field-summary", "column-summary", "Summary"),
           createNotebaseMapping("field-missing", "column-score", "Score"),
@@ -62,8 +72,9 @@ describe("notebase utils", () => {
     const action: SelectionToolbarCustomAction = {
       ...createAction(),
       notebaseConnection: {
-        tableId: "table-1",
-        tableNameSnapshot: "Articles",
+        notebaseId: "notebase-1",
+        notebaseNameSnapshot: "Articles",
+        connectedAccount,
         mappings: [
           createNotebaseMapping("field-summary", "column-summary", "Summary"),
           createNotebaseMapping("field-score", "column-date", "Date"),
@@ -75,10 +86,10 @@ describe("notebase utils", () => {
       id: "table-1",
       name: "Articles",
       updatedAt: new Date(),
-      columns: [
+      notebaseColumns: [
         {
           id: "column-summary",
-          tableId: "table-1",
+          notebaseId: "notebase-1",
           name: "Summary",
           config: { type: "string" },
           position: 0,
@@ -89,7 +100,7 @@ describe("notebase utils", () => {
         },
         {
           id: "column-date",
-          tableId: "table-1",
+          notebaseId: "notebase-1",
           name: "Date",
           config: { type: "date" },
           position: 1,
@@ -108,8 +119,9 @@ describe("notebase utils", () => {
     const action: SelectionToolbarCustomAction = {
       ...createAction(),
       notebaseConnection: {
-        tableId: "table-1",
-        tableNameSnapshot: "Articles",
+        notebaseId: "notebase-1",
+        notebaseNameSnapshot: "Articles",
+        connectedAccount,
         mappings: [
           createNotebaseMapping("field-summary", "column-summary", "Summary"),
           createNotebaseMapping("field-score", "column-date", "Date"),
@@ -121,10 +133,10 @@ describe("notebase utils", () => {
       id: "table-1",
       name: "Articles",
       updatedAt: new Date(),
-      columns: [
+      notebaseColumns: [
         {
           id: "column-summary",
-          tableId: "table-1",
+          notebaseId: "notebase-1",
           name: "Summary",
           config: { type: "string" },
           position: 0,
@@ -135,7 +147,7 @@ describe("notebase utils", () => {
         },
         {
           id: "column-date",
-          tableId: "table-1",
+          notebaseId: "notebase-1",
           name: "Date",
           config: { type: "date" },
           position: 1,
@@ -150,7 +162,7 @@ describe("notebase utils", () => {
       score: 9,
     })
 
-    const typedCells: RowCreateInput["data"]["cells"] = cells
+    const typedCells: NotebaseRowCreateInput["data"]["cells"] = cells
 
     expect(cells).toEqual({
       "column-summary": "A short summary",

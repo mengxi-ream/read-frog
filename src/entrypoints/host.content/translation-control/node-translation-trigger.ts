@@ -2,7 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
 import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
 
-const CLICK_AND_HOLD_TRIGGER_MS = 1000
+const NODE_TRANSLATION_HOLD_TRIGGER_MS = 500
 const CLICK_AND_HOLD_MOVE_TOLERANCE = 6
 const MOUSEMOVE_THROTTLE_MS = 300
 const MOUSEMOVE_DISTANCE_THRESHOLD = 3
@@ -23,6 +23,13 @@ function isEditableTarget(target: EventTarget | null): boolean {
   if (target.isContentEditable)
     return true
   return false
+}
+
+function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
+  return target === document
+    || target === window
+    || target === document.documentElement
+    || target === document.body
 }
 
 /**
@@ -83,6 +90,12 @@ export function registerNodeTranslationTriggerListeners({
   let clickAndHoldTriggered = false
   let mousePressPosition: Point | null = null
   let clickAndHoldTimerId: ReturnType<typeof setTimeout> | null = null
+
+  const resetClickAndHoldState = () => {
+    isMousePressed = false
+    clickAndHoldTriggered = false
+    mousePressPosition = null
+  }
 
   const clearClickAndHoldTimer = () => {
     if (clickAndHoldTimerId) {
@@ -175,6 +188,13 @@ export function registerNodeTranslationTriggerListeners({
         return
       if (isEditableTarget(event.target))
         return
+      if (isDocumentSurfaceTarget(event.target)) {
+        resetClickAndHoldState()
+        clearClickAndHoldTimer()
+        return
+      }
+
+      const point = { x: event.clientX, y: event.clientY }
 
       const config = await getCurrentConfig()
       if (!config || !config.translate.node.enabled || config.translate.node.hotkey !== "clickAndHold")
@@ -182,7 +202,7 @@ export function registerNodeTranslationTriggerListeners({
 
       isMousePressed = true
       clickAndHoldTriggered = false
-      mousePressPosition = { x: event.clientX, y: event.clientY }
+      mousePressPosition = point
 
       clearClickAndHoldTimer()
       clickAndHoldTimerId = setTimeout(() => {
@@ -199,7 +219,7 @@ export function registerNodeTranslationTriggerListeners({
           triggerNodeTranslation(mousePressPosition, currentConfig)
           clickAndHoldTriggered = true
         })()
-      }, CLICK_AND_HOLD_TRIGGER_MS)
+      }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
     })()
   }, { signal })
 
@@ -211,9 +231,7 @@ export function registerNodeTranslationTriggerListeners({
     if (!isMousePressed && !clickAndHoldTimerId)
       return
 
-    isMousePressed = false
-    clickAndHoldTriggered = false
-    mousePressPosition = null
+    resetClickAndHoldState()
     clearClickAndHoldTimer()
   }, { signal })
 
@@ -259,7 +277,7 @@ export function registerNodeTranslationTriggerListeners({
               actionTriggered = true
               timerId = null
             })()
-          }, 1000)
+          }, NODE_TRANSLATION_HOLD_TRIGGER_MS)
 
           if (!isHotkeySessionPure && timerId) {
             clearTimeout(timerId)

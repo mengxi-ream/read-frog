@@ -1,10 +1,10 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { CustomActionTemplate } from "@/utils/constants/custom-action-templates"
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useMemo, useState } from "react"
 import { useLocation, useNavigate } from "react-router"
+import { i18n } from "#imports"
 import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
@@ -25,14 +25,24 @@ export function CustomActionCardList() {
   const { search } = useLocation()
   const navigate = useNavigate()
   const [dialogOpen, setDialogOpen] = useState(() => new URLSearchParams(search).has("addAction"))
+  const customActions = selectionToolbarConfig.customActions
 
   useEffect(() => {
-    if (new URLSearchParams(search).has("addAction")) {
-      void navigate({ search: "" }, { replace: true })
-    }
-  }, [search, navigate])
+    const params = new URLSearchParams(search)
+    const actionId = params.get("actionId")
 
-  const customActions = selectionToolbarConfig.customActions ?? []
+    if (actionId && customActions.some(action => action.id === actionId)) {
+      setSelectedCustomActionId(actionId)
+    }
+
+    if (params.has("addAction") || params.has("actionId")) {
+      params.delete("addAction")
+      params.delete("actionId")
+      const nextSearch = params.toString()
+      void navigate({ search: nextSearch ? `?${nextSearch}` : "" }, { replace: true })
+    }
+  }, [search, navigate, customActions, setSelectedCustomActionId])
+
   const llmProviders = useMemo(
     () => providersConfig.filter(provider => provider.enabled && isLLMProviderConfig(provider)),
     [providersConfig],

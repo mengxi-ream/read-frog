@@ -1,7 +1,7 @@
 import type { ThinkingSnapshot } from "@/types/background-stream"
-import { i18n } from "#imports"
 import { IconChevronDown } from "@tabler/icons-react"
 import { useEffect, useRef, useState } from "react"
+import { i18n } from "#imports"
 import { ThinkingIcon } from "@/components/icons/thinking-icon"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
 import { cn } from "@/utils/styles/utils"

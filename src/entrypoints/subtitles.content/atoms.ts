@@ -20,6 +20,25 @@ export const subtitlesSettingsPanelOpenAtom = atom<boolean>(false)
 
 export const subtitlesSettingsPanelViewAtom = atom<ViewId>(ROOT_VIEW)
 
+export const TranslatedDownloadPhase = {
+  Idle: "idle",
+  Preparing: "preparing",
+  Translating: "translating",
+  Complete: "complete",
+  Error: "error",
+} as const
+
+// eslint-disable-next-line ts/no-redeclare
+export type TranslatedDownloadPhase = typeof TranslatedDownloadPhase[keyof typeof TranslatedDownloadPhase]
+
+export const translatedSubtitlesDownloadStatusAtom = atom<{
+  phase: TranslatedDownloadPhase
+  progress: number | null
+}>({
+  phase: TranslatedDownloadPhase.Idle,
+  progress: null,
+})
+
 export interface SubtitlePosition {
   percent: number
   anchor: "top" | "bottom"

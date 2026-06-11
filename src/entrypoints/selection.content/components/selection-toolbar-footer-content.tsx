@@ -1,7 +1,7 @@
 import type { ProviderConfig } from "@/types/config/provider"
-import { i18n } from "#imports"
 import { IconAspectRatio, IconRefresh } from "@tabler/icons-react"
 import { useCallback } from "react"
+import { i18n } from "#imports"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { buttonVariants } from "@/components/ui/base-ui/button"
 import {

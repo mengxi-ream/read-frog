@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { Link, useLocation } from "react-router"
+import { i18n } from "#imports"
 import {
   Collapsible,
   CollapsibleContent,

@@ -1,6 +1,6 @@
 import type { ProxyResponse } from "@/types/proxy-fetch"
-import { browser } from "#imports"
 import { AUTH_COOKIE_PATTERNS } from "@read-frog/definitions"
+import { browser } from "#imports"
 import { env } from "@/env"
 import { DEFAULT_PROXY_CACHE_TTL_MS } from "@/utils/constants/proxy-fetch"
 
@@ -95,6 +95,7 @@ export function proxyFetch() {
       headers,
       body,
       credentials,
+      redirect,
       cacheConfig,
       responseType = "text",
     } = message.data
@@ -151,6 +152,7 @@ export function proxyFetch() {
       headers: headers ? new Headers(headers) : undefined,
       body,
       credentials: credentials ?? "include",
+      redirect,
     })
 
     const responseHeaders: [string, string][] = [...response.headers.entries()]

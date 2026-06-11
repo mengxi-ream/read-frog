@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { Icon } from "@iconify/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { i18n } from "#imports"
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -14,7 +14,7 @@ import { cn } from "@/utils/styles/utils"
 import { getLastViewedSurvey, hasNewSurvey, saveLastViewedSurvey } from "@/utils/survey"
 import { AnimatedIndicator } from "./animated-indicator"
 
-const SURVEY_URL = "https://tally.so/r/kdNN5R"
+const SURVEY_URL = "https://tally.so/r/aQaa4Z"
 
 export function ProductNav() {
   const { open } = useSidebar()

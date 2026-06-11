@@ -75,10 +75,32 @@ describe("batch separator parsing edge cases", () => {
     expect(parsed).toEqual(["Translation A", "", "Translation C"])
   })
 
-  it("should handle separator without any surrounding newlines", () => {
+  it("should not split separator without any surrounding newlines", () => {
     const result = `Translation A${BATCH_SEPARATOR}Translation B`
     const parsed = parseBatchResult(result)
-    expect(parsed).toEqual(["Translation A", "Translation B"])
+    expect(parsed).toEqual([`Translation A${BATCH_SEPARATOR}Translation B`])
+  })
+
+  it("should not split separator inside normal text", () => {
+    const result = `User typed ${BATCH_SEPARATOR} by mistake.`
+    const parsed = parseBatchResult(result)
+    expect(parsed).toEqual([`User typed ${BATCH_SEPARATOR} by mistake.`])
+  })
+
+  it("should not split separator inside code", () => {
+    const result = `Use const separator = "${BATCH_SEPARATOR}" in this example.`
+    const parsed = parseBatchResult(result)
+    expect(parsed).toEqual([`Use const separator = "${BATCH_SEPARATOR}" in this example.`])
+  })
+
+  it("should only split standalone separator lines when content also contains inline separators", () => {
+    const result = `Translation A mentions ${BATCH_SEPARATOR} inline.\n\n${BATCH_SEPARATOR}\n\nTranslation B has code: const separator = "${BATCH_SEPARATOR}"\n${BATCH_SEPARATOR}\nTranslation C`
+    const parsed = parseBatchResult(result)
+    expect(parsed).toEqual([
+      `Translation A mentions ${BATCH_SEPARATOR} inline.`,
+      `Translation B has code: const separator = "${BATCH_SEPARATOR}"`,
+      "Translation C",
+    ])
   })
 
   it("should handle LLM adding extra formatting", () => {

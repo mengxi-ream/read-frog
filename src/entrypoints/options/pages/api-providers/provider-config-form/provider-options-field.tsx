@@ -1,7 +1,7 @@
 import type { APIProviderConfig } from "@/types/config/provider"
-import { i18n } from "#imports"
 import { useStore } from "@tanstack/react-form"
 import { useCallback } from "react"
+import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { resolveModelId } from "@/utils/providers/model-id"

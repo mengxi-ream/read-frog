@@ -2,9 +2,9 @@ import type { SubtitlesFragment } from "../types"
 import type { Config } from "@/types/config/config"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { SubtitlePromptContext } from "@/types/content"
-import { i18n } from "#imports"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { APICallError } from "ai"
+import { i18n } from "#imports"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -153,8 +153,9 @@ async function translateSingleSubtitle(
 
 export async function fetchSubtitlesSummary(
   videoContext: SubtitlesVideoContext,
+  configOverride?: Config,
 ): Promise<string | null> {
-  const config = await getLocalConfig()
+  const config = configOverride ?? await getLocalConfig()
   if (!config?.translate.enableAIContentAware) {
     return null
   }
@@ -179,8 +180,9 @@ export async function fetchSubtitlesSummary(
 export async function translateSubtitles(
   fragments: SubtitlesFragment[],
   videoContext: SubtitlesVideoContext,
+  configOverride?: Config,
 ): Promise<SubtitlesFragment[]> {
-  const config = await getLocalConfig()
+  const config = configOverride ?? await getLocalConfig()
   if (!config) {
     return fragments.map(f => ({ ...f, translation: "" }))
   }

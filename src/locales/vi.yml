@@ -1,5 +1,5 @@
 name: Read Frog
-extName: Read Frog - Dịch Nhúng Mã Nguồn Mở
+extName: Read Frog - Dịch và học
 extDescription: Read Frog là tiện ích mở rộng trình duyệt mã nguồn mở được thiết kế để giúp bạn học ngôn ngữ sâu từ bất kỳ trang web nào.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 dataTypes:
@@ -82,11 +82,6 @@ options:
   apiProviders:
     title: Nhà cung cấp API
     description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
-    promotion:
-      ai302:
-        description: Nhấp vào liên kết bên phải để đăng ký 302.AI và nhận 1 USD tín dụng API
-        action: Đăng ký để nhận API Key miễn phí
-        addProvider: Thêm cấu hình 302.AI
     addProvider: Thêm nhà cung cấp
     badges:
       featureCount: $1 tính năng
@@ -109,6 +104,7 @@ options:
         apiKey: API Key
         baseURL: Base URL
         optional: Tùy chọn
+      duplicate: Sao chép
       delete: Xóa
       deleteDialog:
         title: Xóa nhà cung cấp?
@@ -160,7 +156,6 @@ options:
         xai: Công ty AI của Elon Musk cung cấp các mô hình Grok với truy cập dữ liệu thời gian thực
         siliconflow: Nền tảng suy luận hiệu suất cao cho các mô hình Trung Quốc và quốc tế
         tensdaq: Nền tảng MaaS đấu giá AI cách mạng với giá thị trường, loại bỏ giá cố định cao
-        ai302: Cung cấp các mô hình mới nhất và toàn diện nhất với API trả theo lần sử dụng
         openaiCompatible: Bên thứ ba và tương thích API OpenAI
         deeplx: API DeepL không chính thức
         deepl: API DeepL chính thức
@@ -292,6 +287,11 @@ options:
         description: Chọn hành động khi nhấn vào nút nổi
         panel: Mở bảng điều khiển bên
         translate: Bật/tắt dịch trang
+      side:
+        title: Vị trí nút
+        description: Chọn cạnh của trang để ghim nút nổi
+        left: Bên trái
+        right: Bên phải
     selectionToolbar:
       globalToggle:
         title: Bật thanh công cụ chọn văn bản
@@ -388,18 +388,25 @@ options:
             description: Lưu kết quả có cấu trúc của hành động này vào Notebase từ xa.
             loginRequiredTitle: Đăng nhập để cấu hình Notebase
             loginRequiredDescription: Hãy đăng nhập trên readfrog.app trước khi chọn notebase hoặc chỉnh sửa ánh xạ.
+            loginRequiredConnectedDescription: Kết nối này được tạo bởi tài khoản bên dưới. Nếu đăng nhập bằng cùng tài khoản, ánh xạ trường sẽ được khôi phục. Nếu đăng nhập bằng tài khoản khác, các ánh xạ cũ sẽ bị xóa khi bạn tạo hoặc kết nối Notebase.
             loginAction: Đăng nhập
+            connectedAccountLabel: Tài khoản đã kết nối
+            currentAccountLabel: Tài khoản hiện tại
+            unknownConnectedAccount: Tài khoản không xác định
             tableLabel: Notebase
             tablePlaceholder: Chọn một notebase
             tableClearOption: Không kết nối notebase
+            clearConnectionAction: Xóa kết nối
             refreshAction: Làm mới
             emptyTitle: Chưa có Notebase nào
             emptyDescription: Hãy tạo một notebase trên readfrog.app rồi quay lại đây để ánh xạ các trường.
             openNotebaseAction: Mở Notebase
             betaLockedTitle: Tài khoản này chưa nằm trong beta Notebase
             betaLockedDescription: Bạn vẫn có thể giữ cấu hình action hiện tại, nhưng việc chọn Notebase và đồng bộ kết quả hiện chỉ mở cho một số tài khoản beta.
+            accountMismatchTitle: Kết nối Notebase thuộc tài khoản khác
+            accountMismatchDescription: Kết nối này gắn với tài khoản bên dưới. Hãy xóa kết nối hoặc chọn một Notebase mà tài khoản hiện tại có thể truy cập.
             tableUnavailableTitle: Notebase đã chọn không còn khả dụng
-            tableUnavailableDescription: Hãy làm mới hoặc chọn một notebase khác trước khi lưu lại.
+            tableUnavailableDescription: Notebase này không còn tồn tại hoặc không mở được. Hãy xóa kết nối hoặc chọn một Notebase khác.
             tableUnavailableOption: không khả dụng
             schemaErrorTitle: Không tải được schema notebase
             schemaErrorDescription: Hãy thử làm mới lại sau ít phút nữa.
@@ -414,7 +421,7 @@ options:
             remoteFieldPlaceholder: Chọn một trường notebase
             columnUnavailableOption: đã xóa
             invalidMappingsTitle: Một số ánh xạ cần được xử lý
-            invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại, nhưng Save to Notebase sẽ bị vô hiệu hóa cho đến khi bạn sửa chúng.
+            invalidMappingsDescription: Các ánh xạ không hợp lệ vẫn được giữ lại. Hãy sửa chúng trước khi lưu vào Notebase.
             mappingMissingLocal: Trường của hành động đã ánh xạ không còn tồn tại.
             mappingMissingRemote: Trường notebase đã ánh xạ không còn tồn tại.
             mappingMissingSchema: Hãy làm mới schema notebase để xác thực ánh xạ này.
@@ -471,6 +478,11 @@ options:
       description: Luôn dịch trang web này
       urlPattern: Mẫu URL
       enterUrlPattern: Nhập mẫu URL
+    neverAutoTranslateWebsite:
+      title: Never Auto Translate Based on Website
+      description: Never automatically translate this website
+      urlPattern: URL Pattern
+      enterUrlPattern: Enter URL Pattern
     personalizedPrompts:
       title: Prompt cá nhân hóa
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.
@@ -825,7 +837,7 @@ options:
   whatsNew:
     title: Có gì mới
   survey:
-    title: Cải thiện phụ đề 🎁
+    title: Trải nghiệm sớm Notebase
   rateUs:
     title: Đánh giá chúng tôi
 side:
@@ -882,6 +894,24 @@ action:
   saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
   saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
   saveToNotebaseNoMappings: Hãy thêm ít nhất một ánh xạ hợp lệ trước khi lưu
+  saveToNotebaseCreateTitle: Tạo Notebase?
+  saveToNotebaseCreateDescription: Tạo một Notebase có các cột khớp với Custom Action này, rồi lưu kết quả hiện tại làm ghi chú đầu tiên.
+  saveToNotebaseCreateAndSave: Tạo và lưu
+  saveToNotebaseCreateAndSaveShort: Tạo và lưu
+  saveToNotebaseLoginAndCreate: Đăng nhập và tự tạo
+  saveToNotebaseLoginAndSave: Đăng nhập và lưu
+  saveToNotebaseConnectExisting: Kết nối Notebase hiện có
+  saveToNotebaseGoConfigure: Cấu hình
+  saveToNotebaseLoginConnectedTitle: Đăng nhập để lưu?
+  saveToNotebaseLoginConnectedDescription: Custom Action này đang kết nối với tài khoản bên dưới. Sau khi đăng nhập, Read Frog sẽ lưu vào Notebase hiện có nếu có thể, hoặc tạo Notebase mới cho tài khoản đã đăng nhập.
+  saveToNotebaseConnectionUnavailableTitle: Kết nối Notebase không khả dụng
+  saveToNotebaseMissingNotebaseDescription: Notebase cũ không còn tồn tại hoặc tài khoản này không mở được. Hãy tạo Notebase mới và lưu kết quả này, hoặc kết nối Notebase hiện có trong Custom AI Actions.
+  saveToNotebaseAccountUnavailableDescription: Tài khoản đã đăng nhập không khớp với tài khoản đã kết nối bên dưới. Tạo và lưu sẽ thay thế kết nối trước đó cùng các ánh xạ trường. Bạn cũng có thể kết nối Notebase hiện có trong Custom AI Actions.
+  saveToNotebasePendingLogin: Đăng nhập để hoàn tất lưu
+  saveToNotebasePendingLoginDescription: Sau khi đăng nhập, Read Frog sẽ tự động tạo Notebase và lưu kết quả này.
+  saveToNotebasePendingConnectedLoginDescription: Sau khi đăng nhập, Read Frog sẽ lưu vào Notebase đã kết nối nếu có thể. Nếu tài khoản này không dùng được, Read Frog sẽ tạo Notebase mới và lưu kết quả này.
+  openCustomActions: Mở Custom AI Actions
+  openNotebase: Mở Notebase
   contextDetailsTitleLabel: Tiêu đề
   contextDetailsParagraphsLabel: Các đoạn văn
   translation: Dịch
@@ -896,6 +926,10 @@ shortcutKeySelector:
   placeholder: Vui lòng nhập phím tắt
 subtitles:
   actions:
+    downloadTranslated: Tải phụ đề đã dịch
+    downloadTranslatedPreparing: Đang chuẩn bị phụ đề, video dài có thể mất nhiều thời gian hơn
+    downloadTranslatedTranslating: Đang dịch phụ đề
+    downloadTranslatedComplete: Đã tải phụ đề đã dịch
     downloadSource: Tải phụ đề gốc
   state:
     loading: Read Frog đang tải phụ đề
@@ -917,6 +951,9 @@ subtitles:
     aiAuthFailed: Xác thực API thất bại, vui lòng kiểm tra API key của bạn
     aiServiceUnavailable: Dịch vụ dịch thuật tạm thời không khả dụng
     aiNoResponse: Dịch vụ AI không phản hồi, hiển thị văn bản gốc
+    translatedExportFailed: Không thể tạo phụ đề đã dịch
+    translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề
+    translatedExportSameLanguage: Ngôn ngữ nguồn và ngôn ngữ đích giống nhau
 hotkey:
   control: Ctrl
   alt: Option
