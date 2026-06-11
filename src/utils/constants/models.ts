@@ -177,7 +177,7 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // DeepSeek reasoning models - disable thinking by default
   {
-    pattern: /^deepseek-(?:reasoner|v4-(?:flash|pro))$/,
+    pattern: /^deepseek-(?:reasoner|v4-(?:flash|pro))$/i,
     options: { thinking: { type: "disabled" } } satisfies DeepSeekLanguageModelOptions as Record<string, JSONValue>,
   },
 

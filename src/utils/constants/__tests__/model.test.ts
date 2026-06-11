@@ -130,6 +130,9 @@ describe("getProviderOptions", () => {
       const deepseekV4FlashOptions = getProviderOptions("deepseek-v4-flash", "deepseek")
       expect(deepseekV4FlashOptions.deepseek?.thinking).toEqual({ type: "disabled" })
 
+      const mixedCaseDeepseekV4FlashOptions = getProviderOptions("DeepSeek-V4-Flash", "deepseek")
+      expect(mixedCaseDeepseekV4FlashOptions.deepseek?.thinking).toEqual({ type: "disabled" })
+
       const deepseekV4ProOptions = getProviderOptions("deepseek-v4-pro", "deepseek")
       expect(deepseekV4ProOptions.deepseek?.thinking).toEqual({ type: "disabled" })
 
@@ -336,6 +339,10 @@ describe("getProviderOptions", () => {
 
       expect(getRecommendedProviderOptionsMatch("qwen3.5-flash")?.options).toEqual({
         enableThinking: false,
+      })
+
+      expect(getRecommendedProviderOptionsMatch("DeepSeek-V4-Flash")?.options).toEqual({
+        thinking: { type: "disabled" },
       })
     })
   })
