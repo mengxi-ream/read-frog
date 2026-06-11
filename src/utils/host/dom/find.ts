@@ -6,10 +6,6 @@ import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import { isDontWalkIntoAndDontTranslateAsChildElement, isHTMLElement, isShallowInlineHTMLElement, isTranslatedContentNode, isTranslatedWrapperNode } from "./filter"
 import { smashTruncationStyle } from "./style"
 
-function isDocumentRootElement(element: Element) {
-  return element === document.documentElement || element === document.body
-}
-
 /**
  * Find the deepest element at the given point, including inside shadow roots
  * @param root - The root element (Document or ShadowRoot)
@@ -82,11 +78,7 @@ export function findNearestAncestorBlockNodeAt(point: Point) {
   if (!currentNode)
     return null
 
-  const blockNode = findNearestAncestorBlockNodeFor(currentNode)
-  if (isDocumentRootElement(blockNode))
-    return null
-
-  return blockNode
+  return findNearestAncestorBlockNodeFor(currentNode)
 }
 
 export function deepQueryTopLevelSelector(element: HTMLElement | ShadowRoot | Document, selectorFn: (element: HTMLElement) => boolean): HTMLElement[] {
