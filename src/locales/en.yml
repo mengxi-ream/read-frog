@@ -313,6 +313,9 @@ options:
         description: Choose which built-in features to show in the selection toolbar
         translate: Translate
         speak: Speak
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally

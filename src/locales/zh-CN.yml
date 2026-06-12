@@ -313,6 +313,9 @@ options:
         description: 选择在选择工具栏中显示哪些内置功能
         translate: 翻译
         speak: 朗读
+      shortcut:
+        title: 划词翻译快捷键
+        description: 自定义翻译选中文本的快捷键
       closeMenu:
         disableForSite: 当前网站禁用
         disableGlobally: 全局禁用

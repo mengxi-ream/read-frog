@@ -1,9 +1,11 @@
+import type { Hotkey } from "@tanstack/hotkeys"
 import type { ReactNode } from "react"
 import type { SelectionSession, SelectionToolbarTranslateRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
 import type { BackgroundTextStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
 import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
+import { HotkeyManager } from "@tanstack/hotkeys"
 import { useAtomValue, useSetAtom } from "jotai"
 import { createContext, use, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react"
 import { toast } from "sonner"
@@ -20,6 +22,7 @@ import { translateTextCore } from "@/utils/host/translate/translate-text"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { getOrGenerateWebPageSummary } from "@/utils/host/translate/webpage-summary"
 import { onMessage } from "@/utils/message"
+import { isPageTranslationShortcutEmpty, isValidConfiguredPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
@@ -37,14 +40,14 @@ import {
   createSelectionToolbarRuntimeError,
   isAbortError,
 } from "../inline-error"
-import { useSelectionContextMenuRequestResolver } from "../use-selection-context-menu-request"
+import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 import { TargetLanguageSelector } from "./target-language-selector"
 import { TranslationContent } from "./translation-content"
 
 interface SelectionTranslatePendingOpenRequest {
   anchor?: { x: number, y: number }
   session: SelectionSession
-  surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+  surface: typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU | typeof ANALYTICS_SURFACE.SHORTCUT
 }
 
 async function getSelectionWebPagePromptContext(
@@ -186,12 +189,13 @@ export function SelectionTranslationProvider({
   const [isTranslating, setIsTranslating] = useState(false)
   const [rerunNonce, setRerunNonce] = useState(0)
   const [sourceSurface, setSourceSurface] = useState<
-    typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU
+    typeof ANALYTICS_SURFACE.SELECTION_TOOLBAR | typeof ANALYTICS_SURFACE.CONTEXT_MENU | typeof ANALYTICS_SURFACE.SHORTCUT
   >(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const [activeSession, setActiveSession] = useState<SelectionSession | null>(null)
   const selectionSession = useAtomValue(selectionSessionAtom)
   const translateRequest = useAtomValue(selectionToolbarTranslateRequestAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+  const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const setIsSelectionToolbarVisible = useSetAtom(isSelectionToolbarVisibleAtom)
   const setConfig = useSetAtom(writeConfigAtom)
   const abortControllerRef = useRef<AbortController | null>(null)
@@ -199,7 +203,10 @@ export function SelectionTranslationProvider({
   const reopenFrameRef = useRef<number | null>(null)
   const lastTranslationRunKeyRef = useRef<string | null>(null)
   const runIdRef = useRef(0)
-  const { resolveContextMenuSelectionRequest } = useSelectionContextMenuRequestResolver(selectionSession)
+  const {
+    resolveContextMenuOpenRequest,
+    resolveShortcutOpenRequest,
+  } = useSelectionOpenRequestResolver(selectionSession)
   const selectionText = activeSession?.selectionSnapshot.text ?? null
   const paragraphsText = activeSession?.contextSnapshot.text ?? selectionText
   const titleText = document.title || null
@@ -433,7 +440,7 @@ export function SelectionTranslationProvider({
   }, [commitOpenRequest, selectionSession])
 
   const resolveContextMenuRequest = useCallback((): SelectionTranslatePendingOpenRequest | null => {
-    const request = resolveContextMenuSelectionRequest()
+    const request = resolveContextMenuOpenRequest()
     if (!request) {
       return null
     }
@@ -443,13 +450,30 @@ export function SelectionTranslationProvider({
       session: request.session,
       surface: ANALYTICS_SURFACE.CONTEXT_MENU,
     }
-  }, [resolveContextMenuSelectionRequest])
+  }, [resolveContextMenuOpenRequest])
 
-  const openFromContextMenu = useCallback(() => {
-    const request = resolveContextMenuRequest()
+  const resolveShortcutRequest = useCallback((): SelectionTranslatePendingOpenRequest | null => {
+    const request = resolveShortcutOpenRequest()
     if (!request) {
-      const nextError = createSelectionToolbarPrecheckError("translate", "missingSelection")
-      toast.error(nextError.description)
+      return null
+    }
+
+    return {
+      anchor: request.anchor,
+      session: request.session,
+      surface: ANALYTICS_SURFACE.SHORTCUT,
+    }
+  }, [resolveShortcutOpenRequest])
+
+  const openSelectionTranslationRequest = useCallback((
+    request: SelectionTranslatePendingOpenRequest | null,
+    options?: { showMissingSelectionToast?: boolean },
+  ) => {
+    if (!request) {
+      if (options?.showMissingSelectionToast) {
+        const nextError = createSelectionToolbarPrecheckError("translate", "missingSelection")
+        toast.error(nextError.description)
+      }
       return
     }
 
@@ -470,7 +494,40 @@ export function SelectionTranslationProvider({
 
     commitOpenRequest(request)
     handleOpenChange(true)
-  }, [commitOpenRequest, handleOpenChange, isOpen, resolveContextMenuRequest])
+  }, [commitOpenRequest, handleOpenChange, isOpen])
+
+  const openFromContextMenu = useCallback(() => {
+    openSelectionTranslationRequest(resolveContextMenuRequest(), {
+      showMissingSelectionToast: true,
+    })
+  }, [openSelectionTranslationRequest, resolveContextMenuRequest])
+
+  const openFromShortcut = useCallback(() => {
+    openSelectionTranslationRequest(resolveShortcutRequest())
+  }, [openSelectionTranslationRequest, resolveShortcutRequest])
+
+  useEffect(() => {
+    const shortcut = selectionToolbar.features.translate.shortcut
+    if (isPageTranslationShortcutEmpty(shortcut) || !isValidConfiguredPageTranslationShortcut(shortcut)) {
+      return
+    }
+
+    const registration = HotkeyManager.getInstance().register(
+      shortcut as Hotkey,
+      () => {
+        openFromShortcut()
+      },
+      {
+        ignoreInputs: true,
+        preventDefault: true,
+        stopPropagation: true,
+      },
+    )
+
+    return () => {
+      registration.unregister()
+    }
+  }, [openFromShortcut, selectionToolbar.features.translate.shortcut])
 
   useEffect(() => {
     return onMessage("openSelectionTranslationFromContextMenu", () => {

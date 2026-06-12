@@ -313,6 +313,9 @@ options:
         description: Elige qué funciones integradas mostrar en la barra de selección
         translate: Traducir
         speak: Leer en voz alta
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: Desactivar para este sitio
         disableGlobally: Desactivar globalmente

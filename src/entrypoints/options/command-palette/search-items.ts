@@ -260,6 +260,13 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.overlayTools.selectionToolbar.title",
   },
   {
+    sectionId: "selection-translation-shortcut",
+    route: "/selection-toolbar",
+    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.shortcut.title",
+    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.shortcut.description",
+    pageKey: "options.overlayTools.selectionToolbar.title",
+  },
+  {
     sectionId: "selection-toolbar-disabled-sites",
     route: "/selection-toolbar",
     titleKey: "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.title",

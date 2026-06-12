@@ -312,6 +312,9 @@ options:
         description: 選擇在選擇工具列中顯示哪些內建功能
         translate: 翻譯
         speak: 朗讀
+      shortcut:
+        title: 選取文字翻譯快捷鍵
+        description: 自訂翻譯選取文字的快捷鍵
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用

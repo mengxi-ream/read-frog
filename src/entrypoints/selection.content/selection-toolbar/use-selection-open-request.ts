@@ -8,16 +8,27 @@ interface SelectionAnchor {
   y: number
 }
 
-export interface SelectionContextMenuRequest {
+export interface SelectionOpenRequest {
   anchor: SelectionAnchor
   session: SelectionSession
 }
 
-interface CachedSelectionContextMenuSnapshot extends SelectionContextMenuRequest {
+interface CachedSelectionOpenRequest extends SelectionOpenRequest {
   capturedAt: number
 }
 
-const CONTEXT_MENU_SNAPSHOT_TTL_MS = 10_000
+const RECENT_OPEN_REQUEST_TTL_MS = 10_000
+const SELECTION_OPEN_REQUEST_TRIGGER = {
+  CONTEXT_MENU: "contextMenu",
+  SHORTCUT: "shortcut",
+} as const
+
+type SelectionOpenRequestTrigger
+  = typeof SELECTION_OPEN_REQUEST_TRIGGER[keyof typeof SELECTION_OPEN_REQUEST_TRIGGER]
+
+function shouldUseRecentCapturedRequest(trigger: SelectionOpenRequestTrigger) {
+  return trigger === SELECTION_OPEN_REQUEST_TRIGGER.CONTEXT_MENU
+}
 
 function getSelectionAnchorFromRange(rangeSnapshot: SelectionRangeSnapshot) {
   try {
@@ -62,17 +73,17 @@ function getViewportCenterAnchor(): SelectionAnchor {
   }
 }
 
-export function useSelectionContextMenuRequestResolver(selectionSession: SelectionSession | null) {
-  const contextMenuSnapshotRef = useRef<CachedSelectionContextMenuSnapshot | null>(null)
+export function useSelectionOpenRequestResolver(selectionSession: SelectionSession | null) {
+  const recentCapturedOpenRequestRef = useRef<CachedSelectionOpenRequest | null>(null)
 
   useEffect(() => {
     const handleContextMenu = (event: MouseEvent) => {
       if (!selectionSession) {
-        contextMenuSnapshotRef.current = null
+        recentCapturedOpenRequestRef.current = null
         return
       }
 
-      contextMenuSnapshotRef.current = {
+      recentCapturedOpenRequestRef.current = {
         anchor: { x: event.clientX, y: event.clientY },
         session: selectionSession,
         capturedAt: Date.now(),
@@ -85,12 +96,16 @@ export function useSelectionContextMenuRequestResolver(selectionSession: Selecti
     }
   }, [selectionSession])
 
-  const resolveContextMenuSelectionRequest = useCallback((): SelectionContextMenuRequest | null => {
-    const cachedSnapshot = contextMenuSnapshotRef.current
-    if (cachedSnapshot && Date.now() - cachedSnapshot.capturedAt <= CONTEXT_MENU_SNAPSHOT_TTL_MS) {
+  const resolveSelectionOpenRequest = useCallback((trigger: SelectionOpenRequestTrigger): SelectionOpenRequest | null => {
+    const cachedRequest = recentCapturedOpenRequestRef.current
+    if (
+      shouldUseRecentCapturedRequest(trigger)
+      && cachedRequest
+      && Date.now() - cachedRequest.capturedAt <= RECENT_OPEN_REQUEST_TTL_MS
+    ) {
       return {
-        anchor: cachedSnapshot.anchor,
-        session: cachedSnapshot.session,
+        anchor: cachedRequest.anchor,
+        session: cachedRequest.session,
       }
     }
 
@@ -105,7 +120,14 @@ export function useSelectionContextMenuRequestResolver(selectionSession: Selecti
     }
   }, [selectionSession])
 
+  const resolveContextMenuOpenRequest = useCallback((): SelectionOpenRequest | null =>
+    resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.CONTEXT_MENU), [resolveSelectionOpenRequest])
+
+  const resolveShortcutOpenRequest = useCallback((): SelectionOpenRequest | null =>
+    resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.SHORTCUT), [resolveSelectionOpenRequest])
+
   return {
-    resolveContextMenuSelectionRequest,
+    resolveContextMenuOpenRequest,
+    resolveShortcutOpenRequest,
   }
 }

@@ -16,6 +16,7 @@ describe("page translation shortcut helpers", () => {
 
   it("validates configured shortcuts while rejecting single keys and modifier-only shortcuts", () => {
     expect(isValidConfiguredPageTranslationShortcut("Alt+E", "windows")).toBe(true)
+    expect(isValidConfiguredPageTranslationShortcut("Alt+T", "mac")).toBe(true)
     expect(isValidConfiguredPageTranslationShortcut("Mod+K", "mac")).toBe(true)
     expect(isValidConfiguredPageTranslationShortcut("K", "windows")).toBe(false)
     expect(isValidConfiguredPageTranslationShortcut("Mod", "windows")).toBe(false)

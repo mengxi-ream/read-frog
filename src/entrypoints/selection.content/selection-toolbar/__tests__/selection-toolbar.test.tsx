@@ -32,7 +32,7 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
         disabledSelectionToolbarPatterns: [],
         opacity: 100,
         features: {
-          translate: { enabled: true, providerId: "microsoft-translate-default" },
+          translate: { enabled: true, providerId: "microsoft-translate-default", shortcut: "Alt+T" },
           speak: { enabled: true },
         },
         customActions: [],

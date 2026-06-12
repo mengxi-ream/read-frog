@@ -312,6 +312,9 @@ options:
         description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
         translate: Çeviri
         speak: Sesli Okuma
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
