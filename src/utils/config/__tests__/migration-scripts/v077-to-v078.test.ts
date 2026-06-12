@@ -2,55 +2,56 @@ import { describe, expect, it } from "vitest"
 import { migrate } from "../../migration-scripts/v077-to-v078"
 
 describe("v077-to-v078 migration", () => {
-  it("does not add translate config when translate is absent", () => {
-    expect(migrate({})).toEqual({})
-  })
-
-  it("adds the side panel translation shortcut to translate page config", () => {
+  it("adds the default selection translation shortcut", () => {
     const migrated = migrate({
-      translate: {
-        page: {
-          shortcut: "Alt+B",
+      selectionToolbar: {
+        enabled: true,
+        features: {
+          translate: {
+            enabled: true,
+            providerId: "google-default",
+          },
+          speak: {
+            enabled: true,
+          },
         },
       },
     })
 
-    expect(migrated.translate.page.sidePanelShortcut).toBe("Alt+C")
+    expect(migrated.selectionToolbar.features.translate).toEqual({
+      enabled: true,
+      providerId: "google-default",
+      shortcut: "Alt+T",
+    })
+    expect(migrated.selectionToolbar.features.speak).toEqual({
+      enabled: true,
+    })
   })
 
-  it("preserves an existing side panel translation shortcut", () => {
+  it("preserves an existing selection translation shortcut", () => {
     const migrated = migrate({
-      translate: {
-        page: {
-          shortcut: "Alt+B",
-          sidePanelShortcut: "Control+Shift+Y",
+      selectionToolbar: {
+        features: {
+          translate: {
+            providerId: "google-default",
+            shortcut: "Control+Shift+Y",
+          },
         },
       },
     })
 
-    expect(migrated.translate.page.sidePanelShortcut).toBe("Control+Shift+Y")
+    expect(migrated.selectionToolbar.features.translate.shortcut).toBe("Control+Shift+Y")
   })
 
-  it("adds translation hub selected providers", () => {
-    const migrated = migrate({
-      translate: {},
-    })
-
-    expect(migrated.translate.translationHub.selectedProviderIds).toEqual(["microsoft-translate-default"])
-  })
-
-  it("preserves existing translation hub selected providers", () => {
-    const migrated = migrate({
-      translate: {
-        translationHub: {
-          selectedProviderIds: ["google-translate-default", "microsoft-translate-default"],
+  it("is safe for configs without existing selection toolbar fields", () => {
+    expect(migrate({})).toEqual({
+      selectionToolbar: {
+        features: {
+          translate: {
+            shortcut: "Alt+T",
+          },
         },
       },
     })
-
-    expect(migrated.translate.translationHub.selectedProviderIds).toEqual([
-      "google-translate-default",
-      "microsoft-translate-default",
-    ])
   })
 })

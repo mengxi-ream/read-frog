@@ -74,6 +74,9 @@ export const testSeries: TestSeriesObject = {
         providerId: "openai-default",
         mode: "translationOnly",
         enableAIContentAware: false,
+        translationHub: {
+          selectedProviderIds: ["microsoft-translate-default"],
+        },
         node: {
           enabled: true,
           hotkey: "alt",
@@ -87,6 +90,7 @@ export const testSeries: TestSeriesObject = {
           neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
+          sidePanelShortcut: "Alt+C",
           preload: {
             margin: 1000,
             threshold: 0,
@@ -483,6 +487,9 @@ export const testSeries: TestSeriesObject = {
         providerId: "google-default",
         mode: "translationOnly",
         enableAIContentAware: false,
+        translationHub: {
+          selectedProviderIds: ["microsoft-translate-default"],
+        },
         node: {
           enabled: true,
           hotkey: "alt",
@@ -493,6 +500,7 @@ export const testSeries: TestSeriesObject = {
           neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
+          sidePanelShortcut: "Alt+C",
           preload: {
             margin: 1000,
             threshold: 0,
@@ -880,6 +888,9 @@ export const testSeries: TestSeriesObject = {
         providerId: "google-default",
         mode: "translationOnly",
         enableAIContentAware: false,
+        translationHub: {
+          selectedProviderIds: ["microsoft-translate-default"],
+        },
         node: {
           enabled: true,
           hotkey: "alt",
@@ -890,6 +901,7 @@ export const testSeries: TestSeriesObject = {
           neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
+          sidePanelShortcut: "Alt+C",
           preload: {
             margin: 1000,
             threshold: 0,
@@ -1277,6 +1289,9 @@ export const testSeries: TestSeriesObject = {
         providerId: "google-default",
         mode: "translationOnly",
         enableAIContentAware: false,
+        translationHub: {
+          selectedProviderIds: ["microsoft-translate-default"],
+        },
         node: {
           enabled: true,
           hotkey: "alt",
@@ -1287,6 +1302,7 @@ export const testSeries: TestSeriesObject = {
           neverAutoTranslatePatterns: [],
           autoTranslateLanguages: [],
           shortcut: "Alt+B",
+          sidePanelShortcut: "Alt+C",
           preload: {
             margin: 1000,
             threshold: 0,
