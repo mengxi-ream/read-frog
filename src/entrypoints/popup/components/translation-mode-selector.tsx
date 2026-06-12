@@ -5,10 +5,11 @@ import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { cn } from "@/utils/styles/utils"
 
 const MODE_ICON: Record<TranslationModeType, { icon: string, className?: string, strokeWidth?: number }> = {
-  bilingual: { icon: "system-uicons:translate", strokeWidth: 1.6 },
-  translationOnly: { icon: "mingcute:text-area-line" },
+  bilingual: { icon: "garden:translation-exists-stroke-12" },
+  translationOnly: { icon: "tabler:text-resize" },
 }
 
 const NEXT_MODE: Record<TranslationModeType, TranslationModeType> = {
@@ -53,7 +54,7 @@ export default function TranslationModeSelector() {
           />
         )}
       >
-        <Icon {...MODE_ICON[currentMode]} className="size-4.5" />
+        <Icon {...MODE_ICON[currentMode]} className={cn(currentMode === "translationOnly" && "size-4.5")} />
       </TooltipTrigger>
       <TooltipContent>
         <div className="whitespace-nowrap">
