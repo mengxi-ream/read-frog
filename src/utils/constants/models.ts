@@ -57,42 +57,42 @@ export const PURE_TRANSLATE_PROVIDERS = ["google-translate", "microsoft-translat
 
 const OPENAI_GPT5_REASONING_EFFORT_POLICIES: OpenAIGPT5ReasoningEffortPolicy[] = [
   {
-    pattern: /^gpt-5\.4-pro$/,
+    pattern: /^gpt-5\.4-pro$/i,
     supportedValues: ["medium", "high", "xhigh"],
     recommendedValue: "medium",
   },
   {
-    pattern: /^gpt-5\.2-pro$/,
+    pattern: /^gpt-5\.2-pro$/i,
     supportedValues: ["medium", "high", "xhigh"],
     recommendedValue: "medium",
   },
   {
-    pattern: /^gpt-5-pro$/,
+    pattern: /^gpt-5-pro$/i,
     supportedValues: ["high"],
     recommendedValue: "high",
   },
   {
-    pattern: /^(?:gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano)$/,
+    pattern: /^(?:gpt-5\.4|gpt-5\.4-mini|gpt-5\.4-nano)$/i,
     supportedValues: ["none", "low", "medium", "high", "xhigh"],
     recommendedValue: "none",
   },
   {
-    pattern: /^gpt-5\.2$/,
+    pattern: /^gpt-5\.2$/i,
     supportedValues: ["none", "low", "medium", "high", "xhigh"],
     recommendedValue: "none",
   },
   {
-    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/,
+    pattern: /^(?:gpt-5\.1|gpt-5\.1-codex|gpt-5\.1-codex-mini)$/i,
     supportedValues: ["none", "low", "medium", "high"],
     recommendedValue: "none",
   },
   {
-    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/,
+    pattern: /^(?:gpt-5|gpt-5-mini|gpt-5-nano|gpt-5-codex)$/i,
     supportedValues: ["minimal", "low", "medium", "high"],
     recommendedValue: "minimal",
   },
   {
-    pattern: /^(?:gpt-5-chat-latest|gpt-5\.1-chat-latest|gpt-5\.2-chat-latest|gpt-5\.3-chat-latest)$/,
+    pattern: /^(?:gpt-5-chat-latest|gpt-5\.1-chat-latest|gpt-5\.2-chat-latest|gpt-5\.3-chat-latest)$/i,
     supportedValues: [],
   },
 ]
@@ -126,28 +126,28 @@ export const LLM_MODEL_OPTIONS: Array<{
 }> = [
   // Gemini - specific patterns first
   {
-    pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/,
+    pattern: /^gemini-3(?:\.\d+)?-.*?(?:-preview(?:-customtools)?)?$/i,
     options: { thinkingConfig: { thinkingLevel: "minimal", includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
   },
   {
-    pattern: /^gemini-2\.5-/,
+    pattern: /^gemini-2\.5-/i,
     options: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
   },
   {
     // Default for all other Gemini models
-    pattern: /^gemini-/,
+    pattern: /^gemini-/i,
     options: { thinkingConfig: { thinkingBudget: 0, includeThoughts: false } } satisfies GoogleGenerativeAIProviderOptions as Record<string, JSONValue>,
   },
 
   // Claude - disable thinking
   {
-    pattern: /^claude-/,
+    pattern: /^claude-/i,
     options: { thinking: { type: "disabled" } } satisfies AnthropicProviderOptions as Record<string, JSONValue>,
   },
 
   // OpenAI reasoning models - use the lowest supported reasoning effort
   {
-    pattern: /^(?:o1|o3|o4-mini)(?:-|$)/,
+    pattern: /^(?:o1|o3|o4-mini)(?:-|$)/i,
     options: { reasoningEffort: "minimal" } satisfies OpenAIResponsesProviderOptions as Record<string, JSONValue>,
   },
 
@@ -158,7 +158,7 @@ export const LLM_MODEL_OPTIONS: Array<{
   // xAI Grok reasoning-capable text models - keep effort at the lowest supported level.
   // Exclude Grok 4.1 Fast because xAI documents that it reasons automatically and errors if reasoning_effort is specified.
   {
-    pattern: /^grok-(?:4(?:-fast-reasoning|-latest|-0709)?|4-1|3(?:-mini)?(?:-latest)?)$/,
+    pattern: /^grok-(?:4(?:-fast-reasoning|-latest|-0709)?|4-1|3(?:-mini)?(?:-latest)?)$/i,
     options: { reasoningEffort: "low" } satisfies XaiProviderOptions as Record<string, JSONValue>,
   },
 
@@ -177,13 +177,13 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // DeepSeek reasoning models - disable thinking by default
   {
-    pattern: /^deepseek-(?:reasoner|v4-(?:flash|pro))$/,
+    pattern: /^deepseek-(?:reasoner|v4-(?:flash|pro))$/i,
     options: { thinking: { type: "disabled" } } satisfies DeepSeekLanguageModelOptions as Record<string, JSONValue>,
   },
 
   // Cohere reasoning models - disable thinking by default
   {
-    pattern: /^command-a-reasoning(?:-.+)?$/,
+    pattern: /^command-a-reasoning(?:-.+)?$/i,
     options: { thinking: { type: "disabled" } } satisfies CohereLanguageModelOptions as Record<string, JSONValue>,
   },
 
