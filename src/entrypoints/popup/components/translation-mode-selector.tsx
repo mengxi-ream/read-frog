@@ -7,9 +7,11 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { cn } from "@/utils/styles/utils"
 
-const MODE_ICON: Record<TranslationModeType, { icon: string, className?: string, strokeWidth?: number }> = {
-  bilingual: { icon: "garden:translation-exists-stroke-12" },
-  translationOnly: { icon: "tabler:text-resize" },
+const TABLER_ICON_STROKE_WIDTH_CLASS = "[&_path]:[stroke-width:1.2]"
+
+const MODE_ICON: Record<TranslationModeType, { icon: string, className?: string }> = {
+  bilingual: { icon: "garden:translation-exists-stroke-16" },
+  translationOnly: { icon: "tabler:text-resize", className: TABLER_ICON_STROKE_WIDTH_CLASS },
 }
 
 const NEXT_MODE: Record<TranslationModeType, TranslationModeType> = {
@@ -31,6 +33,7 @@ const MODE_TOOLTIP_KEY = {
 export default function TranslationModeSelector() {
   const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
   const currentMode = translateConfig.mode
+  const currentModeIcon = MODE_ICON[currentMode]
   const nextMode = NEXT_MODE[currentMode]
   const tooltipKey = MODE_TOOLTIP_KEY[currentMode]
   const actionLabel = i18n.t(tooltipKey.action)
@@ -54,7 +57,13 @@ export default function TranslationModeSelector() {
           />
         )}
       >
-        <Icon {...MODE_ICON[currentMode]} className={cn(currentMode === "translationOnly" && "size-4.5")} />
+        <Icon
+          {...currentModeIcon}
+          className={cn(
+            currentModeIcon.className,
+            currentMode === "translationOnly" && "size-4.5",
+          )}
+        />
       </TooltipTrigger>
       <TooltipContent>
         <div className="whitespace-nowrap">
