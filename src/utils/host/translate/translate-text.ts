@@ -58,6 +58,7 @@ function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): W
 
   return {
     webTitle: normalizePromptContextValue(webPageContext.webTitle),
+    webDescription: normalizePromptContextValue(webPageContext.webDescription),
     webContent: normalizePromptContextValue(webPageContext.webContent),
     webSummary: normalizePromptContextValue(webPageContext.webSummary),
   }
@@ -94,6 +95,9 @@ async function buildWebPageHashComponents(
   if (enableAIContentAware && normalizedWebPageContext) {
     if (normalizedWebPageContext.webTitle) {
       hashComponents.push(`webTitle:${normalizedWebPageContext.webTitle}`)
+    }
+    if (normalizedWebPageContext.webDescription) {
+      hashComponents.push(`webDescription:${normalizedWebPageContext.webDescription}`)
     }
     if (normalizedWebPageContext.webContent) {
       // Use a substring hash to avoid huge hash inputs while still differentiating contexts.
@@ -155,6 +159,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     scheduleAt: Date.now(),
     hash: Sha256Hex(...hashComponents),
     webTitle: normalizedWebPageContext?.webTitle,
+    webDescription: normalizedWebPageContext?.webDescription,
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
   })

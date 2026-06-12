@@ -28,6 +28,14 @@ popup:
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: "Geçerli mod: İki dilli"
+        action: Yalnızca çeviriye geçmek için tıklayın
+      translationOnly:
+        current: "Geçerli mod: Yalnızca çeviri"
+        action: İki dilli moda geçmek için tıklayın
   hub:
     tooltip: Birden fazla çeviri modeliyle aynı anda metin çevirin
   discord:
@@ -304,6 +312,9 @@ options:
         description: Seçim araç çubuğunda hangi yerleşik özelliklerin gösterileceğini seçin
         translate: Çeviri
         speak: Sesli Okuma
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: Bu site için devre dışı bırak
         disableGlobally: Genel olarak devre dışı bırak
@@ -503,6 +514,7 @@ options:
           input: Çevrilecek metin içeriği
           targetLanguage: Hedef dil
           webTitle: Web sayfası başlığı
+          webDescription: Sayfa meta verilerinden web sayfası açıklaması
           webContent: Web sayfası içeriği (ilk 2000 karaktere kısaltılır)
           webSummary: Web sayfası özeti (AI Akıllı Bağlam gerektirir)
         save: Değişiklikleri Kaydet
@@ -830,7 +842,8 @@ options:
         promptCellInput:
           input: Çevrilecek altyazı metni
           targetLanguage: Hedef dil
-          videoTitle: Video başlığı
+          webTitle: Web sayfası başlığı
+          webDescription: Sayfa meta verilerinden web sayfası açıklaması
           videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
   whatsNew:
     title: Yenilikler

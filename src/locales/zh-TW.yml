@@ -28,6 +28,14 @@ popup:
   options: 選項
   hover: 滑鼠停留
   translateParagraph: 翻譯段落
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: 當前為雙語對照
+        action: 點擊切換為僅譯文
+      translationOnly:
+        current: 當前為僅譯文
+        action: 點擊切換為雙語對照
   hub:
     tooltip: 一次使用多個翻譯模型翻譯文字
   discord:
@@ -304,6 +312,9 @@ options:
         description: 選擇在選擇工具列中顯示哪些內建功能
         translate: 翻譯
         speak: 朗讀
+      shortcut:
+        title: 選取文字翻譯快捷鍵
+        description: 自訂翻譯選取文字的快捷鍵
       closeMenu:
         disableForSite: 停用此網站
         disableGlobally: 全域停用
@@ -503,6 +514,7 @@ options:
           input: 需要翻譯的文字內容
           targetLanguage: 目標語言
           webTitle: 網頁標題
+          webDescription: 頁面中繼資料的網頁描述
           webContent: 網頁內文（截斷到前 2000 個字元）
           webSummary: 網頁摘要（需啟用 AI 智慧上下文）
         save: 儲存
@@ -830,7 +842,8 @@ options:
         promptCellInput:
           input: 要翻譯的字幕文字
           targetLanguage: 目標語言
-          videoTitle: 影片標題
+          webTitle: 網頁標題
+          webDescription: 頁面中繼資料的網頁描述
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
   whatsNew:
     title: 最近更新

@@ -48,6 +48,7 @@ describe("subtitles translator", () => {
     const fragments = [{ text: "hello", start: 0, end: 1_000 }]
     const baseContext = {
       videoTitle: "Video title",
+      videoDescription: "Video description",
       subtitlesTextContent: "subtitle transcript",
     }
 
@@ -57,10 +58,12 @@ describe("subtitles translator", () => {
     const firstRequest = sendMessageMock.mock.calls[0][1]
     const secondRequest = sendMessageMock.mock.calls[1][1]
 
-    expect(firstRequest.videoTitle).toBe("Video title")
+    expect(firstRequest.webTitle).toBe("Video title")
+    expect(firstRequest.webDescription).toBe("Video description")
     expect(firstRequest.subtitlesContext).toBeUndefined()
     expect(firstRequest.summary).toBe("Ready summary")
-    expect(secondRequest.videoTitle).toBe("Video title")
+    expect(secondRequest.webTitle).toBe("Video title")
+    expect(secondRequest.webDescription).toBe("Video description")
     expect(secondRequest.subtitlesContext).toBeUndefined()
     expect(secondRequest.summary).toBeUndefined()
     expect(firstRequest.hash).not.toBe(secondRequest.hash)
@@ -73,12 +76,14 @@ describe("subtitles translator", () => {
 
     await translateSubtitles(fragments, {
       videoTitle: "Video title",
+      videoDescription: "description-a",
       subtitlesTextContent: "subtitle transcript",
       summary: "summary-a",
     })
 
     await translateSubtitles(fragments, {
       videoTitle: "Video title",
+      videoDescription: "description-b",
       subtitlesTextContent: "subtitle transcript",
       summary: "summary-b",
     })
@@ -147,8 +152,46 @@ describe("subtitles translator", () => {
     })
 
     const request = sendMessageMock.mock.calls[0][1]
-    expect(request.videoTitle).toBe("Video title")
+    expect(request.webTitle).toBe("Video title")
     expect(request.summary).toBeNull()
+  })
+
+  it("passes title and description when AI content awareness is disabled", async () => {
+    getLocalConfigMock.mockResolvedValueOnce({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        enableAIContentAware: false,
+      },
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: "openai-default",
+      },
+    })
+    const { translateSubtitles } = await import("../translator")
+
+    await translateSubtitles([{ text: "hello", start: 0, end: 1_000 }], {
+      videoTitle: "Video title",
+      videoDescription: "Video description",
+      subtitlesTextContent: "subtitle transcript",
+      summary: "Ready summary",
+    })
+
+    const request = sendMessageMock.mock.calls[0][1]
+    expect(request.webTitle).toBe("Video title")
+    expect(request.webDescription).toBe("Video description")
+    expect(request.summary).toBeUndefined()
+    expect(getSubtitlesTranslatePromptMock).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      expect.objectContaining({
+        context: {
+          webTitle: "Video title",
+          webDescription: "Video description",
+          videoSummary: undefined,
+        },
+      }),
+    )
   })
 
   it("uses an explicit config snapshot without reading current settings again", async () => {

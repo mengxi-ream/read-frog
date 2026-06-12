@@ -28,6 +28,14 @@ popup:
   options: 옵션
   hover: 마우스 오버
   translateParagraph: 단락 번역
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: 현재 이중 언어 모드
+        action: 클릭하여 번역만으로 전환
+      translationOnly:
+        current: 현재 번역만 모드
+        action: 클릭하여 이중 언어로 전환
   hub:
     tooltip: 여러 번역 모델로 동시에 텍스트 번역
   discord:
@@ -304,6 +312,9 @@ options:
         description: 선택 툴바에 표시할 기본 제공 기능 선택
         translate: 번역
         speak: 읽기
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: 이 사이트에서 비활성화
         disableGlobally: 전역 비활성화
@@ -503,6 +514,7 @@ options:
           input: 번역할 텍스트 내용
           targetLanguage: 목표 언어
           webTitle: 웹페이지 제목
+          webDescription: 페이지 메타데이터의 웹페이지 설명
           webContent: 웹페이지 본문(앞의 2000자로 잘림)
           webSummary: 웹페이지 요약 (AI 스마트 컨텍스트 필요)
         save: 저장
@@ -830,7 +842,8 @@ options:
         promptCellInput:
           input: 번역할 자막 텍스트
           targetLanguage: 대상 언어
-          videoTitle: 동영상 제목
+          webTitle: 웹페이지 제목
+          webDescription: 페이지 메타데이터의 웹페이지 설명
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
   whatsNew:
     title: 새로운 기능

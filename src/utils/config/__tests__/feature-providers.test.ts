@@ -68,7 +68,7 @@ describe("feature providers", () => {
           ...DEFAULT_CONFIG.selectionToolbar,
           features: {
             ...DEFAULT_CONFIG.selectionToolbar.features,
-            translate: { enabled: true, providerId: "deleted-provider" },
+            translate: { enabled: true, providerId: "deleted-provider", shortcut: "Alt+T" },
           },
         },
         inputTranslation: {

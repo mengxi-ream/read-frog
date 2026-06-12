@@ -28,6 +28,14 @@ popup:
   options: 选项
   hover: 鼠标悬停
   translateParagraph: 来翻译段落
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: 当前为双语对照
+        action: 点击切换为仅译文
+      translationOnly:
+        current: 当前为仅译文
+        action: 点击切换为双语对照
   hub:
     tooltip: 一次性调用多个翻译模型翻译文本
   discord:
@@ -305,6 +313,9 @@ options:
         description: 选择在选择工具栏中显示哪些内置功能
         translate: 翻译
         speak: 朗读
+      shortcut:
+        title: 划词翻译快捷键
+        description: 自定义翻译选中文本的快捷键
       closeMenu:
         disableForSite: 当前网站禁用
         disableGlobally: 全局禁用
@@ -618,6 +629,7 @@ options:
           input: 需要翻译的文本内容
           targetLanguage: 目标语言
           webTitle: 网页标题
+          webDescription: 页面元信息中的网页描述
           webContent: 网页正文内容（截断到前 2000 个字符）
           webSummary: 网页摘要（需启用 AI 智能上下文）
         save: 保存
@@ -945,7 +957,8 @@ options:
         promptCellInput:
           input: 要翻译的字幕文本
           targetLanguage: 目标语言
-          videoTitle: 视频标题
+          webTitle: 网页标题
+          webDescription: 页面元信息中的网页描述
           videoSummary: 视频摘要（需启用 AI 智能上下文）
   whatsNew:
     title: 最近更新

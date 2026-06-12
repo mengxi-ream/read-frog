@@ -28,6 +28,14 @@ popup:
   options: Opciones
   hover: Pasar el cursor
   translateParagraph: para traducir el párrafo
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: Modo bilingüe actual
+        action: Haz clic para cambiar a solo traducción
+      translationOnly:
+        current: Modo solo traducción actual
+        action: Haz clic para cambiar a bilingüe
   hub:
     tooltip: Traduce texto con varios modelos al mismo tiempo
   discord:
@@ -305,6 +313,9 @@ options:
         description: Elige qué funciones integradas mostrar en la barra de selección
         translate: Traducir
         speak: Leer en voz alta
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: Desactivar para este sitio
         disableGlobally: Desactivar globalmente
@@ -618,6 +629,7 @@ options:
           input: Contenido de texto a traducir
           targetLanguage: Idioma de destino
           webTitle: Título de la página web
+          webDescription: Descripción de la página web desde los metadatos
           webContent: Contenido de la página web (truncado a los primeros 2000 caracteres)
           webSummary: Resumen de la página web (requiere contexto inteligente de IA)
         save: Guardar cambios
@@ -945,7 +957,8 @@ options:
         promptCellInput:
           input: Texto de subtítulos a traducir
           targetLanguage: Idioma de destino
-          videoTitle: Título del video
+          webTitle: Título de la página web
+          webDescription: Descripción de la página web desde los metadatos
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
   whatsNew:
     title: Novedades

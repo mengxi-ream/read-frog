@@ -384,6 +384,7 @@ export const testSeries: TestSeriesObject = {
           translate: {
             enabled: true,
             providerId: "openai-default",
+            shortcut: "Alt+T",
           },
           speak: {
             enabled: true,
@@ -780,6 +781,7 @@ export const testSeries: TestSeriesObject = {
           translate: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+T",
           },
           speak: {
             enabled: true,
@@ -1169,6 +1171,7 @@ export const testSeries: TestSeriesObject = {
           translate: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+T",
           },
           speak: {
             enabled: true,
@@ -1579,6 +1582,7 @@ export const testSeries: TestSeriesObject = {
           translate: {
             enabled: true,
             providerId: "google-default",
+            shortcut: "Alt+T",
           },
           speak: {
             enabled: true,

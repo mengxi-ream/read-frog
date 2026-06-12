@@ -28,6 +28,14 @@ popup:
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: 現在はバイリンガル
+        action: クリックして翻訳のみへ切り替え
+      translationOnly:
+        current: 現在は翻訳のみ
+        action: クリックしてバイリンガルへ切り替え
   hub:
     tooltip: 複数の翻訳モデルで同時にテキストを翻訳
   discord:
@@ -304,6 +312,9 @@ options:
         description: 選択ツールバーに表示する組み込み機能を選択
         translate: 翻訳
         speak: 読み上げ
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: このサイトで無効化
         disableGlobally: グローバルで無効化
@@ -503,6 +514,7 @@ options:
           input: 翻訳するテキスト内容
           targetLanguage: 目標言語
           webTitle: ウェブページタイトル
+          webDescription: ページメタデータのウェブページ説明
           webContent: ウェブページ本文（先頭 2000 文字に切り詰め）
           webSummary: ウェブページ要約（AI スマートコンテキストが必要）
         save: 保存
@@ -830,7 +842,8 @@ options:
         promptCellInput:
           input: 翻訳する字幕テキスト
           targetLanguage: 対象言語
-          videoTitle: 動画タイトル
+          webTitle: ウェブページタイトル
+          webDescription: ページメタデータのウェブページ説明
           videoSummary: 動画要約（AI スマートコンテキストが必要）
   whatsNew:
     title: 新機能

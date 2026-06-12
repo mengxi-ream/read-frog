@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.34.1
+
+### Patch Changes
+
+- [#1682](https://github.com/mengxi-ream/read-frog/pull/1682) [`6b08f61`](https://github.com/mengxi-ream/read-frog/commit/6b08f6181a264dc4f847015d4441dc62d724cccb) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(provider-options): match recommended provider option models case-insensitively
+
+- [#1679](https://github.com/mengxi-ream/read-frog/pull/1679) [`e0358f5`](https://github.com/mengxi-ream/read-frog/commit/e0358f514086bdd74089dedecbf020d89b45529b) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - style(provider-selector): use compact provider select triggers
+
+- [#1649](https://github.com/mengxi-ream/read-frog/pull/1649) [`540b288`](https://github.com/mengxi-ream/read-frog/commit/540b288f5de83d2300c36d88b71b4484fbe00f11) Thanks [@EurFelux](https://github.com/EurFelux)! - fix(language-detection): harden LLM output parsing with JSON prompt and code fence stripping
+
+- [#1521](https://github.com/mengxi-ream/read-frog/pull/1521) [`2f4252f`](https://github.com/mengxi-ream/read-frog/commit/2f4252f1d59975d20322bf93dadc37b6d4c01053) Thanks [@AjTheSpidey](https://github.com/AjTheSpidey)! - Add page metadata description prompt tokens and migrate subtitle title prompts to `{{webTitle}}`.
+
+- [#1678](https://github.com/mengxi-ream/read-frog/pull/1678) [`4e8dd71`](https://github.com/mengxi-ream/read-frog/commit/4e8dd7105125697ffdbc017b5945e37477104230) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(popup): add a quick toggle for bilingual and translation-only modes
+
 ## 1.34.0
 
 ### Minor Changes

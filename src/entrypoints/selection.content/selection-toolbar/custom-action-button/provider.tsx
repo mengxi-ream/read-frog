@@ -22,7 +22,7 @@ import {
   selectionSessionAtom,
 } from "../atoms"
 import { createSelectionToolbarPrecheckError } from "../inline-error"
-import { useSelectionContextMenuRequestResolver } from "../use-selection-context-menu-request"
+import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 import { CustomActionContent } from "./custom-action-content"
 import { SaveToNotebaseButton } from "./save-to-notebase-button"
 import { isSaveToNotebaseDialogOpenAtom } from "./save-to-notebase-dialog-atom"
@@ -87,7 +87,7 @@ export function SelectionCustomActionProvider({
   const reopenFrameRef = useRef<number | null>(null)
   const nextEphemeralSessionIdRef = useRef(0)
   const trackedPrecheckErrorKeyRef = useRef<string | null>(null)
-  const { resolveContextMenuSelectionRequest } = useSelectionContextMenuRequestResolver(selectionSession)
+  const { resolveContextMenuOpenRequest } = useSelectionOpenRequestResolver(selectionSession)
   const selectionText = activeSession?.selectionSnapshot.text ?? null
   const cleanSelection = useMemo(
     () => normalizeSelectedText(selectionText),
@@ -248,7 +248,7 @@ export function SelectionCustomActionProvider({
       return
     }
 
-    const request = resolveContextMenuSelectionRequest()
+    const request = resolveContextMenuOpenRequest()
     if (!request) {
       const nextError = createSelectionToolbarPrecheckError("customAction", "missingSelection")
       void trackFeatureUsed({
@@ -273,7 +273,7 @@ export function SelectionCustomActionProvider({
       session: request.session,
       surface: ANALYTICS_SURFACE.CONTEXT_MENU,
     })
-  }, [openActionRequest, resolveContextMenuSelectionRequest, selectionToolbarConfig.customActions])
+  }, [openActionRequest, resolveContextMenuOpenRequest, selectionToolbarConfig.customActions])
 
   const handleProviderChange = useCallback((providerId: string) => {
     if (!activeActionId) {

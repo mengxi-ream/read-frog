@@ -150,7 +150,8 @@ describe("translation queue helpers", () => {
         providerConfig: llmProvider,
         scheduleAt: Date.now(),
         hash: "subtitle-hash",
-        videoTitle: "Video title",
+        webTitle: "Video title",
+        webDescription: "Video description",
         summary: "Ready summary",
       },
     })
@@ -165,9 +166,95 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         isBatch: true,
         context: {
-          videoTitle: "Video title",
+          webTitle: "Video title",
+          webDescription: "Video description",
           videoSummary: "Ready summary",
         },
+      }),
+    )
+  })
+
+  it("keeps subtitle translations with different video context in separate batches", async () => {
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        enableAIContentAware: true,
+      },
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: llmProvider.id,
+        requestQueueConfig: {
+          rate: 10,
+          capacity: 10,
+        },
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 10,
+        },
+      },
+    })
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const requests = [
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "subtitle-hash-one",
+          webTitle: "First video",
+          webDescription: "First description",
+        },
+      }),
+      handler({
+        data: {
+          text: "hello",
+          langConfig: DEFAULT_CONFIG.language,
+          providerConfig: llmProvider,
+          scheduleAt: Date.now(),
+          hash: "subtitle-hash-two",
+          webTitle: "Second video",
+          webDescription: "Second description",
+        },
+      }),
+    ]
+
+    await expect(Promise.all(requests)).resolves.toEqual([
+      "translated subtitle",
+      "translated subtitle",
+    ])
+    expect(executeTranslateMock).toHaveBeenCalledTimes(2)
+    expect(executeTranslateMock).toHaveBeenNthCalledWith(
+      1,
+      "hello",
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({
+        isBatch: true,
+        context: expect.objectContaining({
+          webTitle: "First video",
+          webDescription: "First description",
+        }),
+      }),
+    )
+    expect(executeTranslateMock).toHaveBeenNthCalledWith(
+      2,
+      "hello",
+      DEFAULT_CONFIG.language,
+      llmProvider,
+      expect.any(Function),
+      expect.objectContaining({
+        isBatch: true,
+        context: expect.objectContaining({
+          webTitle: "Second video",
+          webDescription: "Second description",
+        }),
       }),
     )
   })
@@ -185,6 +272,7 @@ describe("translation queue helpers", () => {
         scheduleAt: Date.now(),
         hash: "webpage-hash",
         webTitle: "Page title",
+        webDescription: "Page description",
         webContent: "Page body",
         webSummary: "Ready summary",
       },
@@ -200,6 +288,7 @@ describe("translation queue helpers", () => {
       expect.objectContaining({
         context: {
           webTitle: "Page title",
+          webDescription: "Page description",
           webContent: "Page body",
           webSummary: "Ready summary",
         },

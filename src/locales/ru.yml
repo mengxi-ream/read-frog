@@ -28,6 +28,14 @@ popup:
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: "Текущий режим: двуязычный"
+        action: Нажмите, чтобы переключиться на только перевод
+      translationOnly:
+        current: "Текущий режим: только перевод"
+        action: Нажмите, чтобы переключиться на двуязычный
   hub:
     tooltip: Переводите текст несколькими моделями одновременно
   discord:
@@ -304,6 +312,9 @@ options:
         description: Выберите, какие встроенные функции показывать в панели выделения
         translate: Перевод
         speak: Озвучивание
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: Отключить для этого сайта
         disableGlobally: Отключить глобально
@@ -503,6 +514,7 @@ options:
           input: Текстовое содержимое для перевода
           targetLanguage: Целевой язык
           webTitle: Заголовок веб-страницы
+          webDescription: Описание веб-страницы из метаданных
           webContent: Содержимое веб-страницы (обрезается до первых 2000 символов)
           webSummary: Резюме веб-страницы (требуется умный контекст ИИ)
         save: Сохранить изменения
@@ -830,7 +842,8 @@ options:
         promptCellInput:
           input: Текст субтитров для перевода
           targetLanguage: Целевой язык
-          videoTitle: Название видео
+          webTitle: Заголовок веб-страницы
+          webDescription: Описание веб-страницы из метаданных
           videoSummary: Краткое содержание видео (требуется умный контекст ИИ)
   whatsNew:
     title: Что нового

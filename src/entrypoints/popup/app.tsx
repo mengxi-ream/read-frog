@@ -30,11 +30,11 @@ function App() {
           </div>
         </div>
         <LanguageOptionsSelector />
-        <TranslationModeSelector />
         <TranslateProviderField />
         <TranslatePromptSelector />
-        <div className="w-full">
-          <TranslateButton className="w-full" />
+        <div className="flex w-full items-center gap-2">
+          <TranslationModeSelector />
+          <TranslateButton className="min-w-0 flex-1" />
         </div>
         <SiteControlToggle />
         <AlwaysTranslate />
