@@ -21,6 +21,9 @@ export const translationModeSchema = z.enum(TRANSLATION_MODES)
 export const pageTranslateRangeSchema = z.enum(["main", "all"])
 export type PageTranslateRange = z.infer<typeof pageTranslateRangeSchema>
 
+export const splitPanelModeSchema = z.enum(["dom", "sideAPI"])
+export type SplitPanelMode = z.infer<typeof splitPanelModeSchema>
+
 export const preloadConfigSchema = z.object({
   margin: z.number().min(MIN_PRELOAD_MARGIN).max(MAX_PRELOAD_MARGIN),
   threshold: z.number().min(MIN_PRELOAD_THRESHOLD).max(MAX_PRELOAD_THRESHOLD),
@@ -86,6 +89,8 @@ export const pageTranslationShortcutSchema = z.string().superRefine((shortcut, c
 
 export const translationHubConfigSchema = z.object({
   selectedProviderIds: z.array(z.string().nonempty()),
+  sourceCode: z.union([langCodeISO6393Schema, z.literal("auto")]).optional(),
+  targetCode: langCodeISO6393Schema.optional(),
 })
 export type TranslationHubConfig = z.infer<typeof translationHubConfigSchema>
 
@@ -103,6 +108,7 @@ export const translateConfigSchema = z.object({
     autoTranslateLanguages: z.array(langCodeISO6393Schema),
     shortcut: pageTranslationShortcutSchema,
     sidePanelShortcut: pageTranslationShortcutSchema,
+    splitPanelMode: splitPanelModeSchema,
     preload: preloadConfigSchema,
     minCharactersPerNode: z.number().min(MIN_CHARACTERS_PER_NODE),
     minWordsPerNode: z.number().min(MIN_WORDS_PER_NODE),

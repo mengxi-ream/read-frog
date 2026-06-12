@@ -1,12 +1,12 @@
 import type { Config } from "@/types/config/config"
 import type { ConfigMeta, ConfigValueAndMeta } from "@/types/config/meta"
-import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
 import { logger } from "../logger"
+import { getResilientLocalItem, getResilientLocalMeta, setResilientLocalItem, setResilientLocalMeta } from "../storage/resilient-local-storage"
 
 export async function getLocalConfig() {
-  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+  const config = await getResilientLocalItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
     logger.warn("No config found in storage")
     return null
@@ -24,15 +24,15 @@ export async function setLocalConfig(config: Config) {
   if (!parsedConfig.success) {
     throw new Error("Config is invalid")
   }
-  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, parsedConfig.data)
-  await storage.setMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, { lastModifiedAt: Date.now() })
+  await setResilientLocalItem<Config>(`local:${CONFIG_STORAGE_KEY}`, parsedConfig.data)
+  await setResilientLocalMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, { lastModifiedAt: Date.now() })
 }
 
 export async function getLocalConfigAndMeta(): Promise<ConfigValueAndMeta> {
   try {
     const [config, meta] = await Promise.all([
-      storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
-      storage.getMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`),
+      getResilientLocalItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
+      getResilientLocalMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`),
     ])
 
     if (!config) {
@@ -64,6 +64,6 @@ export async function setLocalConfigAndMeta(config: Config, meta: Partial<Config
   if (!parsedConfig.success) {
     throw new Error("Config is invalid")
   }
-  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, parsedConfig.data)
-  await storage.setMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, { ...meta, lastModifiedAt })
+  await setResilientLocalItem<Config>(`local:${CONFIG_STORAGE_KEY}`, parsedConfig.data)
+  await setResilientLocalMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, { ...meta, lastModifiedAt })
 }

@@ -236,6 +236,12 @@ options:
         noProviders: Configure an LLM provider first
         basicRecommend: Recommend enabling LLM
         llmEnabled: LLM detection enabled
+    splitPanelMode:
+      title: Split Mode
+      description: Default is DOM. Split API may have compatibility issues.
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: Site Control
     mode:

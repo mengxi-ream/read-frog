@@ -18,7 +18,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 79
+export const CONFIG_SCHEMA_VERSION = 80
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -64,6 +64,7 @@ export const DEFAULT_CONFIG: Config = {
       autoTranslateLanguages: [],
       shortcut: DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
       sidePanelShortcut: DEFAULT_SIDE_PANEL_TRANSLATION_SHORTCUT_KEY,
+      splitPanelMode: "dom",
       preload: {
         margin: DEFAULT_PRELOAD_MARGIN,
         threshold: DEFAULT_PRELOAD_THRESHOLD,
@@ -76,6 +77,8 @@ export const DEFAULT_CONFIG: Config = {
     enableAIContentAware: false,
     translationHub: {
       selectedProviderIds: DEFAULT_TRANSLATION_HUB_PROVIDER_IDS,
+      sourceCode: "auto",
+      targetCode: "cmn",
     },
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
     requestQueueConfig: {

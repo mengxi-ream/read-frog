@@ -235,6 +235,12 @@ options:
         noProviders: 請先設定 LLM 提供者
         basicRecommend: 建議啟用 LLM
         llmEnabled: LLM 偵測已啟用
+    splitPanelMode:
+      title: 分屏模式
+      description: 預設 DOM，使用分屏 API 可能出現相容問題。
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: 網站控制
     mode:

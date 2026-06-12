@@ -1,3 +1,4 @@
+import type { SplitPanelMode } from "@/types/config/translate"
 import { browser } from "#imports"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
 import { sendMessage } from "@/utils/message"
@@ -37,12 +38,30 @@ export async function openTranslationHubInNewTab() {
 export function openTranslationHubSidePanel({
   setHasLoadedTranslationHub,
   setIsSideOpen,
+  splitPanelMode = "dom",
 }: {
   setHasLoadedTranslationHub: (loaded: boolean) => void
   setIsSideOpen: (open: boolean) => void
+  splitPanelMode?: SplitPanelMode
 }) {
   if (shouldOpenTranslationHubInNewTab()) {
     void openTranslationHubInNewTab()
+    return
+  }
+
+  if (splitPanelMode === "sideAPI" && !import.meta.env.FIREFOX) {
+    void Promise.resolve(sendMessage("openTranslationHubBrowserSidePanel", undefined))
+      .then((result) => {
+        if (result?.ok)
+          return
+
+        setHasLoadedTranslationHub(true)
+        setIsSideOpen(true)
+      })
+      .catch(() => {
+        setHasLoadedTranslationHub(true)
+        setIsSideOpen(true)
+      })
     return
   }
 

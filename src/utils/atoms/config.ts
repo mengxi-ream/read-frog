@@ -5,6 +5,7 @@ import { selectAtom } from "jotai/utils"
 import { configSchema } from "@/types/config/config"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
 import { logger } from "../logger"
+import { isStorageMutationUnavailableError } from "../storage/resilient-local-storage"
 import { storageAdapter } from "./storage-adapter"
 
 export const configAtom = atom<Config>(DEFAULT_CONFIG)
@@ -54,13 +55,15 @@ export const writeConfigAtom = atom(
     // Note: `.then(callback)` schedules callback to microtask queue (async),
     // but `writeQueue = task` assignment happens synchronously.
     const task = writeQueue.then(async () => {
+      let configInStorage = localPrev
+      let nextToPersist = optimisticNext
       // Always read fresh from storage to capture any writes that completed before us.
       // This ensures we don't lose concurrent field updates:
       //   write({x:1}) then write({y:2}) → storage ends up with {x:1, y:2}
-      const configInStorage = await storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
-      const nextToPersist = mergeWithArrayOverwrite(configInStorage, patch)
-
       try {
+        configInStorage = await storageAdapter.get<Config>(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
+        nextToPersist = mergeWithArrayOverwrite(configInStorage, patch)
+
         // Storage write always executes (not affected by version check)
         await storageAdapter.set(CONFIG_STORAGE_KEY, nextToPersist, configSchema)
         await storageAdapter.setMeta(CONFIG_STORAGE_KEY, { lastModifiedAt: Date.now() })
@@ -76,6 +79,14 @@ export const writeConfigAtom = atom(
         }
       }
       catch (error) {
+        if (isStorageMutationUnavailableError(error)) {
+          logger.warn("Config storage is unavailable; keeping optimistic config in memory", error)
+          if (currentWriteVersion === writeVersion) {
+            set(configAtom, optimisticNext)
+          }
+          return
+        }
+
         console.error("Failed to set config to storage:", nextToPersist, error)
 
         // Roll back to storage value on error, but only if we're still the latest write.

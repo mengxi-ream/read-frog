@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { createSidePanelWindowState, createToggleSidePanelHandler, getSidePanelApi, setupSidePanelMessageHandler } from "../side-panel"
+import { createOpenSidePanelHandler, createSidePanelWindowState, createToggleSidePanelHandler, getSidePanelApi, setupSidePanelMessageHandler } from "../side-panel"
 
 function createLogger() {
   return {
@@ -60,6 +60,28 @@ describe("background side panel", () => {
     expect(sidePanel.open.mock.calls[0]?.[0]).not.toHaveProperty("tabId")
     expect(sidePanel.setOptions).not.toHaveBeenCalled()
     expect(calls).toEqual(["open"])
+    await expect(result).resolves.toEqual({ ok: true, action: "opened" })
+  })
+
+  it("opens the global side panel from an explicit extension window id", async () => {
+    const logger = createLogger()
+    const sidePanel = {
+      open: vi.fn((_options: { windowId: number }) => Promise.resolve()),
+    }
+
+    const handler = createOpenSidePanelHandler({
+      getApi: () => chromiumSidePanel(sidePanel),
+      logger,
+    })
+
+    const result = handler({
+      data: {
+        source: "extension-user-action",
+        windowId: 789,
+      },
+    })
+
+    expect(sidePanel.open).toHaveBeenCalledWith({ windowId: 789 })
     await expect(result).resolves.toEqual({ ok: true, action: "opened" })
   })
 
@@ -222,6 +244,36 @@ describe("background side panel", () => {
 
     expect(sidebarAction.open).toHaveBeenCalled()
     await expect(result).resolves.toEqual({ ok: true, action: "opened" })
+  })
+
+  it("opens the Firefox sidebar from the open-only handler when called from an extension user action", async () => {
+    const logger = createLogger()
+    const sidebarAction = {
+      open: vi.fn().mockResolvedValue(undefined),
+    }
+    const handler = createOpenSidePanelHandler({
+      getApi: () => firefoxSidebarAction(sidebarAction),
+      logger,
+    })
+
+    const result = handler({ data: { source: "extension-user-action" } })
+
+    expect(sidebarAction.open).toHaveBeenCalled()
+    await expect(result).resolves.toEqual({ ok: true, action: "opened" })
+  })
+
+  it("returns a missing-window result when open-only Chrome requests have no sender window", async () => {
+    const logger = createLogger()
+    const handler = createOpenSidePanelHandler({
+      getApi: () => chromiumSidePanel({ open: vi.fn() }),
+      logger,
+    })
+
+    await expect(handler({ sender: { tab: { id: 123 } } })).resolves.toEqual({ ok: false, reason: "missing-window" })
+    expect(logger.warn).toHaveBeenCalledWith(
+      "Cannot open side panel without a sender window",
+      { sender: { tab: { id: 123 } } },
+    )
   })
 
   it("returns a missing-window result when the sender window id is unavailable", async () => {

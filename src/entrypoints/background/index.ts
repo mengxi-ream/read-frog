@@ -20,6 +20,7 @@ import { newUserGuide } from "./new-user-guide"
 import { setupNotebasePendingSaveProcessor } from "./notebase-pending-save"
 import { proxyFetch } from "./proxy-fetch"
 import { setupSidePanelMessageHandler } from "./side-panel"
+import { setupFirefoxSidebarShortcutSync } from "./sidebar-shortcut"
 import { setUpSubtitlesTranslationQueue, setUpWebPageTranslationQueue } from "./translation-queues"
 import { translationMessage } from "./translation-signal"
 import { setupTTSPlaybackMessageHandlers } from "./tts-playback"
@@ -63,6 +64,7 @@ export default defineBackground({
       logger,
       registerMessageHandler: onMessage,
     })
+    setupFirefoxSidebarShortcutSync({ logger })
 
     onMessage("aiSegmentSubtitles", async (message) => {
       try {
@@ -108,7 +110,9 @@ export default defineBackground({
     setupNotebasePendingSaveProcessor()
     setupEdgeTTSMessageHandlers()
     setupLLMGenerateTextMessageHandlers()
-    setupTTSPlaybackMessageHandlers()
+    if (!import.meta.env.FIREFOX) {
+      setupTTSPlaybackMessageHandlers()
+    }
     void initMockData()
 
     // Setup on-demand iframe injection after page translation is enabled.

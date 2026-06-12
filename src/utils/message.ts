@@ -27,6 +27,7 @@ interface ProtocolMap {
   openPage: (data: { url: string, active?: boolean }) => void
   openOptionsPage: (data?: { route?: `/${string}` }) => void
   openTranslationHubSidePanel: () => void
+  openTranslationHubBrowserSidePanel: (data?: { source?: "content-script" | "extension-user-action", windowId?: number }) => Promise<{ ok: true, action: "opened" } | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action" }>
   toggleSidePanel: (data?: { source?: "content-script" | "extension-user-action" }) => Promise<{ ok: true, action: "opened" | "closed" } | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action" }>
   // config
   getInitialConfig: () => Config | null

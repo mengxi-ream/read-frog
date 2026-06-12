@@ -1,7 +1,8 @@
 import type { FloatingButtonSide } from "@/types/config/floating-button"
-import { useSetAtom } from "jotai"
+import { useAtomValue, useSetAtom } from "jotai"
 import { i18n } from "#imports"
 import { TranslationHubIcon } from "@/components/icons/translation-hub-icon"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { hasLoadedTranslationHubAtom, isSideOpenAtom } from "../../atoms"
 import { openTranslationHubSidePanel } from "../../utils/translation-hub-panel"
 import HiddenButton from "./components/hidden-button"
@@ -17,6 +18,7 @@ export default function TranslationHubButton({
 }) {
   const setIsSideOpen = useSetAtom(isSideOpenAtom)
   const setHasLoadedTranslationHub = useSetAtom(hasLoadedTranslationHubAtom)
+  const translateConfig = useAtomValue(configFieldsAtomMap.translate)
 
   return (
     <HiddenButton
@@ -29,6 +31,7 @@ export default function TranslationHubButton({
         openTranslationHubSidePanel({
           setHasLoadedTranslationHub,
           setIsSideOpen,
+          splitPanelMode: translateConfig.page.splitPanelMode,
         })
       }}
     />

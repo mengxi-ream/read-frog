@@ -1,5 +1,6 @@
 import type { AnalyticsSurface, FeatureUsageContext } from "@/types/analytics"
 import type { TTSConfig } from "@/types/config/tts"
+import type { TTSPlaybackStartResponse, TTSPlaybackStopReason } from "@/types/tts-playback"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { useRef, useState } from "react"
@@ -24,6 +25,15 @@ interface PlayAudioParams {
 interface SynthesizedAudioChunk {
   audioBase64: string
   contentType: string
+}
+
+interface BrowserAudioPlayback {
+  requestId: string
+  audio: HTMLAudioElement
+  audioUrl: string
+  settled: boolean
+  settle: (response: TTSPlaybackStartResponse) => void
+  reject: (error: Error) => void
 }
 
 const TTS_ERROR_TOAST_ID = "tts-synthesize-error"
@@ -118,6 +128,31 @@ async function synthesizeEdgeTTSAudioChunk(
   }
 }
 
+function base64ToUint8Array(base64: string): Uint8Array {
+  const binary = atob(base64)
+  const bytes = new Uint8Array(binary.length)
+  for (let index = 0; index < binary.length; index++) {
+    bytes[index] = binary.charCodeAt(index)
+  }
+  return bytes
+}
+
+function createAudioUrl(audioBase64: string, contentType: string): string {
+  const bytes = base64ToUint8Array(audioBase64)
+  const audioBuffer = new ArrayBuffer(bytes.byteLength)
+  new Uint8Array(audioBuffer).set(bytes)
+  return URL.createObjectURL(new Blob([audioBuffer], { type: contentType }))
+}
+
+function cleanupBrowserPlayback(playback: BrowserAudioPlayback) {
+  playback.audio.onended = null
+  playback.audio.onerror = null
+  playback.audio.pause()
+  playback.audio.removeAttribute("src")
+  playback.audio.load()
+  URL.revokeObjectURL(playback.audioUrl)
+}
+
 export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SELECTION_TOOLBAR) {
   const queryClient = useQueryClient()
   const languageDetection = useAtomValue(configFieldsAtomMap.languageDetection)
@@ -126,13 +161,104 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
   const [totalChunks, setTotalChunks] = useState(0)
   const shouldStopRef = useRef(false)
   const activeRequestIdRef = useRef<string | null>(null)
+  const browserPlaybackRef = useRef<BrowserAudioPlayback | null>(null)
+
+  const settleBrowserPlayback = (
+    playback: BrowserAudioPlayback,
+    response: TTSPlaybackStartResponse,
+  ): boolean => {
+    if (playback.settled) {
+      return false
+    }
+
+    playback.settled = true
+    cleanupBrowserPlayback(playback)
+    if (browserPlaybackRef.current === playback) {
+      browserPlaybackRef.current = null
+    }
+    playback.settle(response)
+    return true
+  }
+
+  const failBrowserPlayback = (
+    playback: BrowserAudioPlayback,
+    error: Error,
+  ): boolean => {
+    if (playback.settled) {
+      return false
+    }
+
+    playback.settled = true
+    cleanupBrowserPlayback(playback)
+    if (browserPlaybackRef.current === playback) {
+      browserPlaybackRef.current = null
+    }
+    playback.reject(error)
+    return true
+  }
+
+  const stopBrowserPlayback = (reason: TTSPlaybackStopReason, requestId?: string) => {
+    const playback = browserPlaybackRef.current
+    if (!playback) {
+      return false
+    }
+
+    if (requestId && playback.requestId !== requestId) {
+      return false
+    }
+
+    return settleBrowserPlayback(playback, { ok: false, reason })
+  }
+
+  const startBrowserPlayback = (
+    requestId: string,
+    audioChunk: SynthesizedAudioChunk,
+  ): Promise<TTSPlaybackStartResponse> => {
+    stopBrowserPlayback("interrupted")
+
+    if (typeof Audio !== "function") {
+      throw new TypeError("Audio playback is unavailable in this browser context")
+    }
+
+    return new Promise<TTSPlaybackStartResponse>((resolve, reject) => {
+      const audioUrl = createAudioUrl(audioChunk.audioBase64, audioChunk.contentType)
+      const audio = new Audio(audioUrl)
+
+      const playback: BrowserAudioPlayback = {
+        requestId,
+        audio,
+        audioUrl,
+        settled: false,
+        settle: resolve,
+        reject,
+      }
+
+      browserPlaybackRef.current = playback
+
+      audio.onended = () => {
+        settleBrowserPlayback(playback, { ok: true })
+      }
+
+      audio.onerror = () => {
+        failBrowserPlayback(playback, new Error("Failed to play audio in this browser context"))
+      }
+
+      audio.play().catch((error) => {
+        const normalizedError = error instanceof Error
+          ? error
+          : new Error(typeof error === "string" ? error : "Unknown audio playback error")
+        failBrowserPlayback(playback, normalizedError)
+      })
+    })
+  }
 
   const stop = () => {
     shouldStopRef.current = true
 
     const activeRequestId = activeRequestIdRef.current
     activeRequestIdRef.current = null
-    if (activeRequestId) {
+    stopBrowserPlayback("stopped", activeRequestId ?? undefined)
+    if (activeRequestId && !import.meta.env.FIREFOX) {
       void sendMessage("ttsPlaybackStop", { requestId: activeRequestId }).catch(() => {})
     }
 
@@ -159,7 +285,9 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       }
       const chunks = splitTextByUtf8Bytes(text)
       setTotalChunks(chunks.length)
-      await sendMessage("ttsPlaybackEnsureOffscreen")
+      if (!import.meta.env.FIREFOX) {
+        await sendMessage("ttsPlaybackEnsureOffscreen")
+      }
 
       const fetchChunkAudio = async (chunk: string) => {
         logger.info("[TextToSpeech] Fetching chunk audio", { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume })
@@ -177,11 +305,13 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       const playChunk = async (audioChunk: SynthesizedAudioChunk): Promise<boolean> => {
         setIsPlaying(true)
         try {
-          const playbackResult = await sendMessage("ttsPlaybackStart", {
-            requestId,
-            audioBase64: audioChunk.audioBase64,
-            contentType: audioChunk.contentType,
-          })
+          const playbackResult = import.meta.env.FIREFOX
+            ? await startBrowserPlayback(requestId, audioChunk)
+            : await sendMessage("ttsPlaybackStart", {
+                requestId,
+                audioBase64: audioChunk.audioBase64,
+                contentType: audioChunk.contentType,
+              })
           if (playbackResult.ok) {
             didStartPlayback = true
           }

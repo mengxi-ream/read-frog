@@ -1,6 +1,6 @@
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react"
-import { useAtom, useAtomValue } from "jotai"
+import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { browser, i18n } from "#imports"
@@ -18,9 +18,9 @@ import { APP_NAME } from "@/utils/constants/app"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"
-import { enablePageTranslationAtom, isDraggingButtonAtom, isSideOpenAtom } from "../../atoms"
+import { enablePageTranslationAtom, hasLoadedTranslationHubAtom, isDraggingButtonAtom, isSideOpenAtom } from "../../atoms"
 import { shadowWrapper } from "../../index"
-import { getTranslationHubSidePanelWidth } from "../../utils/translation-hub-panel"
+import { getTranslationHubSidePanelWidth, openTranslationHubSidePanel } from "../../utils/translation-hub-panel"
 import HiddenButton from "./components/hidden-button"
 import TranslateButton from "./translate-button"
 import TranslationHubButton from "./translation-hub-button"
@@ -129,9 +129,12 @@ export default function FloatingButton() {
   const [floatingButton, setFloatingButton] = useAtom(
     configFieldsAtomMap.floatingButton,
   )
+  const translateConfig = useAtomValue(configFieldsAtomMap.translate)
   const sideContent = useAtomValue(configFieldsAtomMap.sideContent)
   const translationState = useAtomValue(enablePageTranslationAtom)
   const isSideOpen = useAtomValue(isSideOpenAtom)
+  const setIsSideOpen = useSetAtom(isSideOpenAtom)
+  const setHasLoadedTranslationHub = useSetAtom(hasLoadedTranslationHubAtom)
   const [isDraggingButton, setIsDraggingButton] = useAtom(isDraggingButtonAtom)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isHitAreaExpanded, setIsHitAreaExpanded] = useState(false)
@@ -182,11 +185,30 @@ export default function FloatingButton() {
       return
     }
 
-    void Promise.resolve(sendMessage("toggleSidePanel", undefined)).then((result) => {
-      if (result?.ok === false && result.reason === "requires-extension-user-action") {
-        toast.info(<FirefoxSidebarHelpToast />)
-      }
-    })
+    const openDomSplitPanel = () => {
+      openTranslationHubSidePanel({
+        setHasLoadedTranslationHub,
+        setIsSideOpen,
+        splitPanelMode: "dom",
+      })
+    }
+
+    if (translateConfig.page.splitPanelMode !== "sideAPI" || import.meta.env.FIREFOX) {
+      openDomSplitPanel()
+      return
+    }
+
+    void Promise.resolve(sendMessage("toggleSidePanel", undefined))
+      .then((result) => {
+        if (result?.ok)
+          return
+
+        if (result?.reason === "requires-extension-user-action") {
+          toast.info(<FirefoxSidebarHelpToast />)
+        }
+        openDomSplitPanel()
+      })
+      .catch(openDomSplitPanel)
   }
 
   const startActiveDrag = () => {

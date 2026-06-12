@@ -10,6 +10,7 @@ const ALLOWED_BUNDLED_API_KEYS = new Set([
 ])
 const useLocalPackages = isLocalPackagesEnabled(process.env)
 const shouldSkipEnvValidation = process.env.WXT_SKIP_ENV_VALIDATION === "true"
+const FIREFOX_SIDEBAR_SHORTCUT = "Alt+C"
 
 // See https://wxt.dev/api/config.html
 export default defineConfig({
@@ -43,6 +44,15 @@ export default defineConfig({
       "webNavigation",
       ...(browser !== "firefox" ? ["offscreen", "sidePanel"] : []),
     ],
+    ...(browser === "firefox" && {
+      commands: {
+        _execute_sidebar_action: {
+          suggested_key: {
+            default: FIREFOX_SIDEBAR_SHORTCUT,
+          },
+        },
+      },
+    }),
     host_permissions: [
       "*://*/*", // Required for scripting.executeScript in any frame
     ],

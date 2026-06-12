@@ -236,6 +236,12 @@ options:
         noProviders: Configura primero un proveedor LLM
         basicRecommend: Se recomienda activar LLM
         llmEnabled: Detección LLM activada
+    splitPanelMode:
+      title: Split Mode
+      description: Default is DOM. Split API may have compatibility issues.
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: Control de sitios
     mode:

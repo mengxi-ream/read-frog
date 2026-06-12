@@ -235,6 +235,12 @@ options:
         noProviders: LLM 제공자를 먼저 구성하세요
         basicRecommend: LLM 활성화 권장
         llmEnabled: LLM 감지 활성화됨
+    splitPanelMode:
+      title: Split Mode
+      description: Default is DOM. Split API may have compatibility issues.
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: 사이트 제어
     mode:

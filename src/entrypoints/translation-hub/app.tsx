@@ -8,7 +8,7 @@ import { TranslationServiceDropdown } from "./components/translation-service-dro
 
 export default function App({ embedded = false }: { embedded?: boolean }) {
   return (
-    <div className="min-h-screen bg-background">
+    <div className={embedded ? "min-h-screen min-w-[360px] bg-background" : "min-h-screen bg-background"}>
       <div className={embedded ? "mx-auto w-full" : "mx-auto max-w-6xl"}>
         {!embedded && (
           <header className="px-6 py-4">
@@ -24,8 +24,8 @@ export default function App({ embedded = false }: { embedded?: boolean }) {
             <div className={embedded ? "" : "order-1"}>
               <LanguageControlPanel compact={embedded} />
             </div>
-            <div className={embedded ? "" : "order-3 flex justify-end lg:order-2 lg:h-full lg:items-end"}>
-              <div className={embedded ? "flex flex-wrap items-center gap-2" : "flex items-center gap-2"}>
+            <div className={embedded ? "min-w-0" : "order-3 flex justify-end lg:order-2 lg:h-full lg:items-end"}>
+              <div className={embedded ? "flex min-w-0 flex-wrap items-center gap-2" : "flex items-center gap-2"}>
                 <PromptSelector compact={embedded} />
                 <TranslationServiceDropdown compact={embedded} />
                 <TranslationPanelActions compact={embedded} />

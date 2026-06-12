@@ -31,6 +31,31 @@ export function shouldUseBatchQueue(providerConfig: ProviderConfig): boolean {
   return isLLMProviderConfig(providerConfig)
 }
 
+async function readOptionalCache<T>(
+  label: string,
+  read: () => Promise<T | undefined>,
+): Promise<T | undefined> {
+  try {
+    return await read()
+  }
+  catch (error) {
+    logger.warn(`${label} cache read failed; continuing without cache`, error)
+    return undefined
+  }
+}
+
+async function writeOptionalCache(
+  label: string,
+  write: () => Promise<unknown>,
+): Promise<void> {
+  try {
+    await write()
+  }
+  catch (error) {
+    logger.warn(`${label} cache write failed; continuing without cache`, error)
+  }
+}
+
 export async function executeBatchTranslation<TContext>(
   dataList: TranslateBatchData<TContext>[],
   promptResolver: PromptResolver<TContext>,
@@ -57,14 +82,14 @@ async function getOrGenerateWebPageSummary(
   const textHash = Sha256Hex(preparedText)
   const cacheKey = Sha256Hex(webTitle, textHash, JSON.stringify(providerConfig))
 
-  const cached = await db.articleSummaryCache.get(cacheKey)
+  const cached = await readOptionalCache("Article summary", () => db.articleSummaryCache.get(cacheKey))
   if (cached) {
     logger.info("Using cached summary")
     return cached.summary
   }
 
   const thunk = async () => {
-    const cachedAgain = await db.articleSummaryCache.get(cacheKey)
+    const cachedAgain = await readOptionalCache("Article summary", () => db.articleSummaryCache.get(cacheKey))
     if (cachedAgain) {
       return cachedAgain.summary
     }
@@ -74,11 +99,11 @@ async function getOrGenerateWebPageSummary(
       return ""
     }
 
-    await db.articleSummaryCache.put({
+    await writeOptionalCache("Article summary", () => db.articleSummaryCache.put({
       key: cacheKey,
       summary,
       createdAt: new Date(),
-    })
+    }))
 
     logger.info("Generated and cached new summary")
     return summary
@@ -108,14 +133,14 @@ async function getOrGenerateSubtitleSummary(
   const textHash = Sha256Hex(preparedText)
   const cacheKey = Sha256Hex(textHash, JSON.stringify(providerConfig))
 
-  const cached = await db.articleSummaryCache.get(cacheKey)
+  const cached = await readOptionalCache("Subtitle summary", () => db.articleSummaryCache.get(cacheKey))
   if (cached) {
     logger.info("Using cached summary")
     return cached.summary
   }
 
   const thunk = async () => {
-    const cachedAgain = await db.articleSummaryCache.get(cacheKey)
+    const cachedAgain = await readOptionalCache("Subtitle summary", () => db.articleSummaryCache.get(cacheKey))
     if (cachedAgain) {
       return cachedAgain.summary
     }
@@ -125,11 +150,11 @@ async function getOrGenerateSubtitleSummary(
       return ""
     }
 
-    await db.articleSummaryCache.put({
+    await writeOptionalCache("Subtitle summary", () => db.articleSummaryCache.put({
       key: cacheKey,
       summary,
       createdAt: new Date(),
-    })
+    }))
 
     logger.info("Generated and cached new summary")
     return summary
@@ -234,7 +259,7 @@ export async function setUpWebPageTranslationQueue() {
 
     // Check cache first
     if (hash) {
-      const cached = await db.translationCache.get(hash)
+      const cached = await readOptionalCache("Translation", () => db.translationCache.get(hash))
       if (cached) {
         return normalizeTranslationOutput(providerConfig, cached.translation)
       }
@@ -261,11 +286,11 @@ export async function setUpWebPageTranslationQueue() {
     // Cache the translation result if successful
     if (result && hash) {
       result = normalizeTranslationOutput(providerConfig, result)
-      await db.translationCache.put({
+      await writeOptionalCache("Translation", () => db.translationCache.put({
         key: hash,
         translation: result,
         createdAt: new Date(),
-      })
+      }))
     }
 
     return result
@@ -309,7 +334,7 @@ export async function setUpSubtitlesTranslationQueue() {
     const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webDescription, summary } } = message
 
     if (hash) {
-      const cached = await db.translationCache.get(hash)
+      const cached = await readOptionalCache("Subtitle translation", () => db.translationCache.get(hash))
       if (cached) {
         return normalizeTranslationOutput(providerConfig, cached.translation)
       }
@@ -333,11 +358,11 @@ export async function setUpSubtitlesTranslationQueue() {
 
     if (result && hash) {
       result = normalizeTranslationOutput(providerConfig, result)
-      await db.translationCache.put({
+      await writeOptionalCache("Subtitle translation", () => db.translationCache.put({
         key: hash,
         translation: result,
         createdAt: new Date(),
-      })
+      }))
     }
 
     return result

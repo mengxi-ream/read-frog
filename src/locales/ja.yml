@@ -235,6 +235,12 @@ options:
         noProviders: LLMプロバイダーを設定してください
         basicRecommend: LLM有効化を推奨
         llmEnabled: LLM検出が有効
+    splitPanelMode:
+      title: Split Mode
+      description: Default is DOM. Split API may have compatibility issues.
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: サイト制御
     mode:

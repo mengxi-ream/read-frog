@@ -7,6 +7,33 @@ import { sendMessage } from "@/utils/message"
 import { formatHotkey } from "@/utils/os"
 import { cn } from "@/utils/styles/utils"
 
+interface FirefoxSidebarActionApi {
+  open?: () => Promise<void> | void
+  toggle?: () => Promise<void> | void
+}
+
+function openFirefoxSidebarActionDirect(): Promise<boolean> | false {
+  const sidebarAction = (browser as typeof browser & { sidebarAction?: FirefoxSidebarActionApi }).sidebarAction
+  const openSidebar = typeof sidebarAction?.open === "function"
+    ? () => sidebarAction.open?.()
+    : typeof sidebarAction?.toggle === "function"
+      ? () => sidebarAction.toggle?.()
+      : null
+
+  if (!openSidebar) {
+    return false
+  }
+
+  try {
+    return Promise.resolve(openSidebar())
+      .then(() => true)
+      .catch(() => false)
+  }
+  catch {
+    return false
+  }
+}
+
 export function SplitTranslationHubButton({
   className,
 }: {
@@ -16,10 +43,34 @@ export function SplitTranslationHubButton({
   const shortcut = translateConfig.page.sidePanelShortcut ?? DEFAULT_SIDE_PANEL_TRANSLATION_SHORTCUT_KEY
 
   const openSidePanel = async () => {
+    if (translateConfig.page.splitPanelMode === "sideAPI" && import.meta.env.FIREFOX) {
+      const opened = openFirefoxSidebarActionDirect()
+      if (opened && await opened) {
+        window.close()
+        return
+      }
+    }
+
     const [currentTab] = await browser.tabs.query({
       active: true,
       currentWindow: true,
     })
+
+    if (translateConfig.page.splitPanelMode === "sideAPI" && !import.meta.env.FIREFOX && currentTab.windowId !== undefined) {
+      try {
+        const result = await sendMessage("openTranslationHubBrowserSidePanel", {
+          source: "extension-user-action",
+          windowId: currentTab.windowId,
+        })
+        if (result.ok) {
+          window.close()
+          return
+        }
+      }
+      catch {
+        // Fall through to the DOM split panel.
+      }
+    }
 
     if (currentTab.id !== undefined) {
       try {

@@ -29,6 +29,7 @@ interface SidePanelStateInfo {
 interface ToggleSidePanelMessage {
   data?: {
     source?: "content-script" | "extension-user-action"
+    windowId?: number
   }
   sender?: {
     tab?: {
@@ -40,6 +41,10 @@ interface ToggleSidePanelMessage {
 
 type ToggleSidePanelResult
   = | { ok: true, action: "opened" | "closed" }
+    | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action" }
+
+type OpenSidePanelResult
+  = | { ok: true, action: "opened" }
     | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action" }
 
 interface SidePanelLogger {
@@ -69,6 +74,10 @@ export function createSidePanelWindowState() {
 
 function getToggleSource(message: ToggleSidePanelMessage) {
   return message.data?.source ?? "content-script"
+}
+
+function getMessageWindowId(message: ToggleSidePanelMessage) {
+  return message.data?.windowId ?? message.sender?.tab?.windowId
 }
 
 function toChromiumSidePanelApi(api: Partial<ChromiumSidePanelApi> | undefined): BrowserSidePanelApi | null {
@@ -186,7 +195,7 @@ export function createToggleSidePanelHandler({
       })
     }
 
-    const windowId = message.sender?.tab?.windowId
+    const windowId = getMessageWindowId(message)
     if (typeof windowId !== "number") {
       logger.warn("Cannot toggle side panel without a sender window", message)
       return Promise.resolve({ ok: false, reason: "missing-window" } as const)
@@ -241,6 +250,55 @@ export function createToggleSidePanelHandler({
   }
 }
 
+export function createOpenSidePanelHandler({
+  getApi,
+  logger,
+  windowState = createSidePanelWindowState(),
+}: {
+  getApi: () => BrowserSidePanelApi | null
+  logger: SidePanelLogger
+  windowState?: ReturnType<typeof createSidePanelWindowState>
+}) {
+  return (message: ToggleSidePanelMessage): Promise<OpenSidePanelResult> => {
+    const browserSidePanel = getApi()
+    if (!browserSidePanel) {
+      logger.warn("Side panel API is unavailable in this browser")
+      return Promise.resolve({ ok: false, reason: "unsupported" } as const)
+    }
+
+    if (browserSidePanel.kind === "firefox-sidebar-action") {
+      return toggleFirefoxSidebarAction({
+        api: browserSidePanel.api,
+        logger,
+        source: getToggleSource(message),
+      }) as Promise<OpenSidePanelResult>
+    }
+
+    const windowId = getMessageWindowId(message)
+    if (typeof windowId !== "number") {
+      logger.warn("Cannot open side panel without a sender window", message)
+      return Promise.resolve({ ok: false, reason: "missing-window" } as const)
+    }
+
+    try {
+      const openResult = browserSidePanel.api.open({ windowId })
+      return Promise.resolve(openResult)
+        .then(() => {
+          windowState.markOpened({ windowId })
+          return { ok: true, action: "opened" } as const
+        })
+        .catch((error) => {
+          logger.error("Failed to open side panel", error)
+          return { ok: false, reason: "toggle-failed" } as const
+        })
+    }
+    catch (error) {
+      logger.error("Failed to open side panel", error)
+      return Promise.resolve({ ok: false, reason: "toggle-failed" } as const)
+    }
+  }
+}
+
 export function setupSidePanelMessageHandler({
   extensionBrowser,
   logger,
@@ -253,6 +311,11 @@ export function setupSidePanelMessageHandler({
   const windowState = createSidePanelWindowState()
   const sidePanel = getSidePanelApi(extensionBrowser)
   if (sidePanel?.kind !== "chromium-side-panel") {
+    registerMessageHandler("openTranslationHubBrowserSidePanel", createOpenSidePanelHandler({
+      getApi: () => getSidePanelApi(extensionBrowser),
+      logger,
+      windowState,
+    }))
     registerMessageHandler("toggleSidePanel", createToggleSidePanelHandler({
       getApi: () => getSidePanelApi(extensionBrowser),
       logger,
@@ -268,6 +331,11 @@ export function setupSidePanelMessageHandler({
     windowState.markClosed(info)
   })
 
+  registerMessageHandler("openTranslationHubBrowserSidePanel", createOpenSidePanelHandler({
+    getApi: () => getSidePanelApi(extensionBrowser),
+    logger,
+    windowState,
+  }))
   registerMessageHandler("toggleSidePanel", createToggleSidePanelHandler({
     getApi: () => getSidePanelApi(extensionBrowser),
     logger,

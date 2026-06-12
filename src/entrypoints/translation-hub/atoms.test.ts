@@ -111,37 +111,54 @@ describe("translation hub atoms", () => {
     expect(store.get(selectedProviderIdsAtom)).toEqual([])
   })
 
-  it("persists source and target language selections to config", async () => {
-    const store = createStore()
-    store.set(configAtom, createTestConfig())
-
-    await store.set(sourceLangCodeAtom, "cmn")
-    await store.set(targetLangCodeAtom, "eng")
-
-    expect(store.get(configAtom).language).toMatchObject({
-      sourceCode: "cmn",
-      targetCode: "eng",
-    })
-    expect(storageAdapterMock.set).toHaveBeenCalled()
-  })
-
-  it("persists exchanged languages to config", async () => {
+  it("persists source and target language selections to translation hub config", async () => {
     const store = createStore()
     const config = createTestConfig()
     store.set(configAtom, {
       ...config,
       language: {
         ...config.language,
-        sourceCode: "cmn",
-        targetCode: "eng",
+        sourceCode: "auto",
+        targetCode: "jpn",
+      },
+    })
+    storageState.value = structuredClone(store.get(configAtom))
+
+    await store.set(sourceLangCodeAtom, "cmn")
+    await store.set(targetLangCodeAtom, "eng")
+
+    expect(store.get(configAtom).translate.translationHub).toMatchObject({
+      sourceCode: "cmn",
+      targetCode: "eng",
+    })
+    expect(store.get(configAtom).language).toMatchObject({
+      sourceCode: "auto",
+      targetCode: "jpn",
+    })
+    expect(storageAdapterMock.set).toHaveBeenCalled()
+  })
+
+  it("persists exchanged languages to translation hub config", async () => {
+    const store = createStore()
+    const config = createTestConfig()
+    store.set(configAtom, {
+      ...config,
+      translate: {
+        ...config.translate,
+        translationHub: {
+          ...config.translate.translationHub,
+          sourceCode: "cmn",
+          targetCode: "eng",
+        },
       },
     })
 
     await store.set(exchangeLangCodesAtom)
 
-    expect(store.get(configAtom).language).toMatchObject({
+    expect(store.get(configAtom).translate.translationHub).toMatchObject({
       sourceCode: "eng",
       targetCode: "cmn",
     })
+    expect(store.get(configAtom).language).toEqual(config.language)
   })
 })

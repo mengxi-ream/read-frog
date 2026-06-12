@@ -1,9 +1,13 @@
 import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query"
 import { toast } from "sonner"
+import { isStorageMutationUnavailableError } from "./storage/resilient-local-storage"
 
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
+      if (isStorageMutationUnavailableError(error))
+        return
+
       if (query.meta?.suppressToast)
         return
 
@@ -16,6 +20,9 @@ export const queryClient = new QueryClient({
   }),
   mutationCache: new MutationCache({
     onError: (error, _variables, _context, mutation) => {
+      if (isStorageMutationUnavailableError(error))
+        return
+
       if (mutation.meta?.suppressToast)
         return
 

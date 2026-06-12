@@ -8,13 +8,37 @@ import { DEFAULT_TRANSLATION_HUB_PROVIDER_IDS } from "@/utils/constants/translat
 const DEFAULT_TRANSLATION_HUB_PROVIDER_ID = "microsoft-translate-default"
 
 export const sourceLangCodeAtom = atom(
-  get => get(configFieldsAtomMap.language).sourceCode,
-  (_get, set, value: LangCodeISO6393 | "auto") => set(configFieldsAtomMap.language, { sourceCode: value }),
+  (get) => {
+    const translateConfig = get(configFieldsAtomMap.translate)
+    return translateConfig.translationHub.sourceCode ?? get(configFieldsAtomMap.language).sourceCode
+  },
+  async (get, set, value: LangCodeISO6393 | "auto") => {
+    const translateConfig = get(configFieldsAtomMap.translate)
+    await set(configFieldsAtomMap.translate, {
+      ...translateConfig,
+      translationHub: {
+        ...translateConfig.translationHub,
+        sourceCode: value,
+      },
+    })
+  },
 )
 
 export const targetLangCodeAtom = atom(
-  get => get(configFieldsAtomMap.language).targetCode,
-  (_get, set, value: LangCodeISO6393) => set(configFieldsAtomMap.language, { targetCode: value }),
+  (get) => {
+    const translateConfig = get(configFieldsAtomMap.translate)
+    return translateConfig.translationHub.targetCode ?? get(configFieldsAtomMap.language).targetCode
+  },
+  async (get, set, value: LangCodeISO6393) => {
+    const translateConfig = get(configFieldsAtomMap.translate)
+    await set(configFieldsAtomMap.translate, {
+      ...translateConfig,
+      translationHub: {
+        ...translateConfig.translationHub,
+        targetCode: value,
+      },
+    })
+  },
 )
 
 // === Input Atom ===
@@ -87,9 +111,14 @@ export const exchangeLangCodesAtom = atom(null, async (get, set) => {
   if (source === "auto")
     return // Cannot exchange when source is auto
   const target = get(targetLangCodeAtom)
-  await set(configFieldsAtomMap.language, {
-    sourceCode: target,
-    targetCode: source,
+  const translateConfig = get(configFieldsAtomMap.translate)
+  await set(configFieldsAtomMap.translate, {
+    ...translateConfig,
+    translationHub: {
+      ...translateConfig.translationHub,
+      sourceCode: target,
+      targetCode: source,
+    },
   })
 })
 

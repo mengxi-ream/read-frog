@@ -236,6 +236,12 @@ options:
         noProviders: 请先配置 LLM 提供商
         basicRecommend: 建议启用 LLM
         llmEnabled: LLM 检测已启用
+    splitPanelMode:
+      title: 分屏模式
+      description: 默认 DOM，使用分屏 API 可能出现兼容问题。
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: 站点控制
     mode:

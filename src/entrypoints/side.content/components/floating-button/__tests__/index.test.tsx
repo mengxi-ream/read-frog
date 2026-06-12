@@ -22,6 +22,24 @@ vi.mock("#imports", () => ({
 }))
 
 vi.mock("@/utils/atoms/config", () => {
+  const translateBaseAtom = atom({
+    page: {
+      splitPanelMode: "dom",
+    },
+  })
+  const translateAtom = atom(
+    get => get(translateBaseAtom),
+    (get, set, patch: { page?: { splitPanelMode?: "dom" | "sideAPI" } }) => {
+      set(translateBaseAtom, {
+        ...get(translateBaseAtom),
+        ...patch,
+        page: {
+          ...get(translateBaseAtom).page,
+          ...patch.page,
+        },
+      })
+    },
+  )
   const floatingButtonBaseAtom = atom<FloatingButtonConfig>({
     enabled: true,
     position: 0.66,
@@ -44,6 +62,7 @@ vi.mock("@/utils/atoms/config", () => {
     configFieldsAtomMap: {
       floatingButton: floatingButtonAtom,
       sideContent: atom({ width: 360 }),
+      translate: translateAtom,
     },
   }
 })
@@ -100,9 +119,11 @@ function setViewport(width: number, height: number) {
 
 function renderFloatingButton(
   floatingButtonOverrides: Partial<FloatingButtonConfig> = {},
+  translateOverrides: { page?: { splitPanelMode?: "dom" | "sideAPI" } } = {},
 ) {
   const store = createStore()
   void store.set(configFieldsAtomMap.floatingButton, floatingButtonOverrides)
+  void store.set(configFieldsAtomMap.translate as any, translateOverrides)
 
   return {
     store,
@@ -225,9 +246,27 @@ describe("floatingButton controls", () => {
     expect(screen.getByText("options.floatingButtonAndToolbar.floatingButton.closeMenu.disableForSite")).toBeInTheDocument()
   })
 
-  it("toggles the browser side panel on a normal panel click", () => {
+  it("opens the DOM split panel on a normal panel click by default", () => {
     vi.useFakeTimers()
-    renderFloatingButton({ clickAction: "panel" })
+    const { store } = renderFloatingButton({ clickAction: "panel" })
+
+    const mainButton = getMainButton()
+
+    fireEvent.pointerDown(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+    vi.advanceTimersByTime(349)
+    fireEvent.pointerUp(mainButton, { pointerId: 1, pointerType: "mouse", button: 0, clientX: 900, clientY: 500 })
+
+    expect(sendMessage).not.toHaveBeenCalledWith("toggleSidePanel", undefined)
+    expect(store.get(isSideOpenAtom)).toBe(true)
+    expect(store.get(hasLoadedTranslationHubAtom)).toBe(true)
+  })
+
+  it("toggles the browser side panel when side API split mode is selected", () => {
+    vi.useFakeTimers()
+    renderFloatingButton(
+      { clickAction: "panel" },
+      { page: { splitPanelMode: "sideAPI" } },
+    )
 
     const mainButton = getMainButton()
 
@@ -244,7 +283,10 @@ describe("floatingButton controls", () => {
       ok: false,
       reason: "requires-extension-user-action",
     })
-    renderFloatingButton({ clickAction: "panel" })
+    renderFloatingButton(
+      { clickAction: "panel" },
+      { page: { splitPanelMode: "sideAPI" } },
+    )
 
     const mainButton = getMainButton()
 

@@ -235,6 +235,12 @@ options:
         noProviders: Сначала настройте LLM-провайдер
         basicRecommend: Рекомендуется включить LLM
         llmEnabled: LLM-определение включено
+    splitPanelMode:
+      title: Split Mode
+      description: Default is DOM. Split API may have compatibility issues.
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: Управление сайтами
     mode:

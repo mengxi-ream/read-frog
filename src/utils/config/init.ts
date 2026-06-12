@@ -1,10 +1,10 @@
 import type { Config } from "@/types/config/config"
 import type { ConfigMeta } from "@/types/config/meta"
-import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
 import { isAPIProviderConfig } from "@/types/config/provider"
 import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
 import { logger } from "../logger"
+import { getResilientLocalItem, getResilientLocalMeta, setResilientLocalItem, setResilientLocalMeta } from "../storage/resilient-local-storage"
 import { runMigration } from "./migration"
 
 /**
@@ -13,8 +13,8 @@ import { runMigration } from "./migration"
  */
 export async function initializeConfig() {
   const [storedConfig, configMeta] = await Promise.all([
-    storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
-    storage.getMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`),
+    getResilientLocalItem<Config>(`local:${CONFIG_STORAGE_KEY}`),
+    getResilientLocalMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`),
   ])
 
   let config: Config
@@ -66,11 +66,11 @@ export async function initializeConfig() {
       || configMeta?.lastModifiedAt === undefined
 
   if (didConfigChange) {
-    await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, config)
+    await setResilientLocalItem<Config>(`local:${CONFIG_STORAGE_KEY}`, config)
   }
 
   if (didConfigChange || didMetaNeedUpdate) {
-    await storage.setMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`, {
+    await setResilientLocalMeta<ConfigMeta>(`local:${CONFIG_STORAGE_KEY}`, {
       schemaVersion: currentVersion,
       lastModifiedAt: configMeta?.lastModifiedAt ?? Date.now(),
     })

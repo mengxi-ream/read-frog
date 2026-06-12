@@ -22,11 +22,16 @@ export default function App() {
       openTranslationHubSidePanel({
         setHasLoadedTranslationHub,
         setIsSideOpen,
+        splitPanelMode: translateConfig.page.splitPanelMode,
       })
     })
-  }, [setHasLoadedTranslationHub, setIsSideOpen])
+  }, [setHasLoadedTranslationHub, setIsSideOpen, translateConfig.page.splitPanelMode])
 
   useEffect(() => {
+    if (import.meta.env.FIREFOX && translateConfig.page.splitPanelMode === "sideAPI") {
+      return () => {}
+    }
+
     const shortcut = translateConfig.page.sidePanelShortcut ?? DEFAULT_SIDE_PANEL_TRANSLATION_SHORTCUT_KEY
     if (isPageTranslationShortcutEmpty(shortcut) || !isValidConfiguredPageTranslationShortcut(shortcut)) {
       return () => {}
@@ -38,6 +43,7 @@ export default function App() {
         openTranslationHubSidePanel({
           setHasLoadedTranslationHub,
           setIsSideOpen,
+          splitPanelMode: translateConfig.page.splitPanelMode,
         })
       },
       {
@@ -50,7 +56,7 @@ export default function App() {
     return () => {
       registration.unregister()
     }
-  }, [setHasLoadedTranslationHub, setIsSideOpen, translateConfig.page.sidePanelShortcut])
+  }, [setHasLoadedTranslationHub, setIsSideOpen, translateConfig.page.sidePanelShortcut, translateConfig.page.splitPanelMode])
 
   return (
     <>

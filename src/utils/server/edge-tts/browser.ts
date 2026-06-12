@@ -2,7 +2,7 @@ import { EDGE_TTS_HTTP_ENABLED, EDGE_TTS_SUPPORTED_BROWSERS } from "./constants"
 import { EdgeTTSError } from "./errors"
 
 export function isEdgeTTSBrowserSupported(): boolean {
-  return EDGE_TTS_SUPPORTED_BROWSERS.includes(import.meta.env.BROWSER as "chrome" | "edge")
+  return (EDGE_TTS_SUPPORTED_BROWSERS as readonly string[]).includes(import.meta.env.BROWSER)
 }
 
 export function assertEdgeTTSAvailable(): void {

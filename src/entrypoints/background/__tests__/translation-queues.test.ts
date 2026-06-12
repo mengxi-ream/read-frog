@@ -296,6 +296,39 @@ describe("translation queue helpers", () => {
     )
   })
 
+  it("continues translating when translation cache storage is unavailable", async () => {
+    translationCacheGetMock.mockRejectedValueOnce(new DOMException(
+      "A mutation operation was attempted on a database that did not allow mutations.",
+      "InvalidStateError",
+    ))
+    translationCachePutMock.mockRejectedValueOnce(new DOMException(
+      "A mutation operation was attempted on a database that did not allow mutations.",
+      "InvalidStateError",
+    ))
+
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("enqueueTranslateRequest")
+    const result = await handler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: microsoftProvider,
+        scheduleAt: Date.now(),
+        hash: "webpage-hash",
+      },
+    })
+
+    expect(result).toBe("translated subtitle")
+    expect(executeTranslateMock).toHaveBeenCalledWith(
+      "hello",
+      DEFAULT_CONFIG.language,
+      microsoftProvider,
+      expect.any(Function),
+    )
+  })
+
   it("normalizes cached Google translations before returning them", async () => {
     translationCacheGetMock.mockResolvedValueOnce({
       key: "webpage-hash",
@@ -347,6 +380,40 @@ describe("translation queue helpers", () => {
   })
 
   it("exposes webpage summary generation as a separate background handler", async () => {
+    const { setUpWebPageTranslationQueue } = await import("../translation-queues")
+    await setUpWebPageTranslationQueue()
+
+    const handler = getRegisteredMessageHandler("getOrGenerateWebPageSummary")
+    const result = await handler({
+      data: {
+        webTitle: "Page title",
+        webContent: "page body",
+        providerConfig: llmProvider,
+      },
+    })
+
+    expect(result).toBe("Generated summary")
+    expect(generateArticleSummaryMock).toHaveBeenCalledWith(
+      "Page title",
+      "page body",
+      llmProvider,
+    )
+  })
+
+  it("returns generated summaries when summary cache storage is unavailable", async () => {
+    articleSummaryCacheGetMock.mockRejectedValueOnce(new DOMException(
+      "A mutation operation was attempted on a database that did not allow mutations.",
+      "InvalidStateError",
+    ))
+    articleSummaryCacheGetMock.mockRejectedValueOnce(new DOMException(
+      "A mutation operation was attempted on a database that did not allow mutations.",
+      "InvalidStateError",
+    ))
+    articleSummaryCachePutMock.mockRejectedValueOnce(new DOMException(
+      "A mutation operation was attempted on a database that did not allow mutations.",
+      "InvalidStateError",
+    ))
+
     const { setUpWebPageTranslationQueue } = await import("../translation-queues")
     await setUpWebPageTranslationQueue()
 
@@ -450,6 +517,8 @@ describe("translation queue helpers", () => {
       },
     })
 
+    await Promise.resolve()
+    await Promise.resolve()
     await Promise.resolve()
     await Promise.resolve()
     resolveSummary("Generated summary")

@@ -235,6 +235,12 @@ options:
         noProviders: Önce bir LLM sağlayıcısı yapılandırın
         basicRecommend: LLM etkinleştirmesi önerilir
         llmEnabled: LLM algılama etkin
+    splitPanelMode:
+      title: Split Mode
+      description: Default is DOM. Split API may have compatibility issues.
+      mode:
+        dom: DOM
+        sideAPI: Side API
   siteControl:
     title: Site Kontrolü
     mode:
