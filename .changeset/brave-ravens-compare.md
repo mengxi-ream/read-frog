@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix(provider-options): match DeepSeek recommended options case-insensitively
+fix(provider-options): match recommended provider option models case-insensitively
