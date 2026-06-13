@@ -118,6 +118,65 @@ describe("translatedSubtitlesDownloader", () => {
     }))
   })
 
+  it("translates exported SRT batches with a bounded two-batch window", async () => {
+    const fragments = lines(15)
+    const resolvers: Array<(value: SubtitlesFragment[]) => void> = []
+    let activeBatches = 0
+    let maxActiveBatches = 0
+    mocks.translateSubtitles.mockImplementation(async () => {
+      activeBatches += 1
+      maxActiveBatches = Math.max(maxActiveBatches, activeBatches)
+      const translatedBatch = await new Promise<SubtitlesFragment[]>(resolve => resolvers.push(resolve))
+      activeBatches -= 1
+      return translatedBatch
+    })
+    const { downloader } = createDownloader(fragments)
+
+    const download = downloader.download()
+    await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(2))
+
+    expect(maxActiveBatches).toBe(2)
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(1, fragments.slice(0, 5), expect.any(Object), expect.any(Object))
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(2, fragments.slice(5, 10), expect.any(Object), expect.any(Object))
+
+    resolvers[1](translated(fragments.slice(5, 10)))
+    await vi.waitFor(() => expect(activeBatches).toBe(1))
+    expect(mocks.translateSubtitles).toHaveBeenCalledTimes(2)
+
+    resolvers[0](translated(fragments.slice(0, 5)))
+    await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(3))
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(3, fragments.slice(10), expect.any(Object), expect.any(Object))
+
+    resolvers[2](translated(fragments.slice(10)))
+    await download
+
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith(expect.objectContaining({
+      subtitles: translated(fragments).map(({ translation, ...fragment }) => ({ ...fragment, text: translation })),
+    }))
+  })
+
+  it("fails closed when one concurrent export batch fails", async () => {
+    const fragments = lines(10)
+    let finishSlowBatch!: (value: SubtitlesFragment[]) => void
+    mocks.translateSubtitles
+      .mockRejectedValueOnce(new Error("Batch failed"))
+      .mockImplementationOnce(async () => await new Promise<SubtitlesFragment[]>((resolve) => {
+        finishSlowBatch = resolve
+      }))
+    const { downloader } = createDownloader(fragments)
+
+    const download = downloader.download()
+    await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(2))
+    await download
+
+    expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
+    expect(mocks.toastError).toHaveBeenCalledWith("Batch failed")
+    expect(status()).toEqual({ phase: TranslatedDownloadPhase.Error, progress: null })
+
+    finishSlowBatch(translated(fragments.slice(5)))
+    await vi.waitFor(() => expect(status()).toEqual({ phase: TranslatedDownloadPhase.Error, progress: null }))
+  })
+
   it.each([
     ["missing result", (fragments: SubtitlesFragment[]) => translated(fragments.slice(0, -1))],
     ["empty translation", (fragments: SubtitlesFragment[]) => fragments.map(fragment => ({ ...fragment, translation: "" }))],
@@ -162,20 +221,24 @@ describe("translatedSubtitlesDownloader", () => {
   })
 
   it("invalidates an in-flight export on dispose and allows a new download", async () => {
-    let finishOldTranslation!: (value: SubtitlesFragment[]) => void
-    mocks.translateSubtitles
-      .mockImplementationOnce(async () => await new Promise<SubtitlesFragment[]>((resolve) => {
-        finishOldTranslation = resolve
-      }))
-      .mockImplementationOnce(async (fragments: SubtitlesFragment[]) => translated(fragments))
-    const { downloader, fetcher } = createDownloader(lines(1))
+    const fragments = lines(10)
+    const finishOldTranslations: Array<(value: SubtitlesFragment[]) => void> = []
+    mocks.translateSubtitles.mockImplementation(async (batch: SubtitlesFragment[]) => {
+      if (finishOldTranslations.length < 2) {
+        return await new Promise<SubtitlesFragment[]>(resolve => finishOldTranslations.push(resolve))
+      }
+      return translated(batch)
+    })
+    const { downloader, fetcher } = createDownloader(fragments)
 
     const oldDownload = downloader.download()
-    await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(1))
+    await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(2))
     downloader.dispose()
     const newDownload = downloader.download()
+    await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(4))
     await newDownload
-    finishOldTranslation(translated(lines(1)))
+    finishOldTranslations[0](translated(fragments.slice(0, 5)))
+    finishOldTranslations[1](translated(fragments.slice(5)))
     await oldDownload
 
     expect(fetcher.fetch).toHaveBeenCalledTimes(2)

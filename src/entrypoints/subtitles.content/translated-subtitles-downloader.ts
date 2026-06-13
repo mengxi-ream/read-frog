@@ -16,6 +16,7 @@ import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesStore, TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "./atoms"
 
 const SUCCESS_MESSAGE_DURATION_MS = 4000
+const TRANSLATED_EXPORT_BATCH_CONCURRENCY = 2
 
 export class TranslatedSubtitlesDownloader {
   private isDownloading = false
@@ -154,23 +155,43 @@ export class TranslatedSubtitlesDownloader {
     const videoContext = await this.buildExportVideoContext(sourceSubtitles, config, operationId, pageTitle)
     this.assertActive(operationId)
     const translatedFragments: SubtitlesFragment[] = []
+    let translatedCount = 0
+    const batches = this.buildTranslationBatches(fragments)
 
-    for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
-      const batch = fragments.slice(index, index + TRANSLATION_BATCH_SIZE)
-      const translatedBatch = await translateSubtitles(batch, videoContext, config)
-      this.assertActive(operationId)
-      if (
-        translatedBatch.length !== batch.length
-        || this.hasIncompleteTranslatedFragments(translatedBatch)
-      ) {
-        throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
-      }
+    for (let index = 0; index < batches.length; index += TRANSLATED_EXPORT_BATCH_CONCURRENCY) {
+      const batchWindow = batches.slice(index, index + TRANSLATED_EXPORT_BATCH_CONCURRENCY)
+      let windowFailed = false
+      const translatedBatchWindow = await Promise.all(
+        batchWindow.map(async (batch) => {
+          try {
+            const translatedBatch = await translateSubtitles(batch, videoContext, config)
+            this.assertActive(operationId)
+            if (windowFailed) {
+              return []
+            }
+            if (
+              translatedBatch.length !== batch.length
+              || this.hasIncompleteTranslatedFragments(translatedBatch)
+            ) {
+              throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
+            }
 
-      translatedFragments.push(...translatedBatch)
-      this.setStatus(
-        TranslatedDownloadPhase.Translating,
-        Math.min(100, Math.round((translatedFragments.length / fragments.length) * 100)),
+            translatedCount += translatedBatch.length
+            this.setStatus(
+              TranslatedDownloadPhase.Translating,
+              Math.min(100, Math.round((translatedCount / fragments.length) * 100)),
+            )
+
+            return translatedBatch
+          }
+          catch (error) {
+            windowFailed = true
+            throw error
+          }
+        }),
       )
+      this.assertActive(operationId)
+      translatedFragments.push(...translatedBatchWindow.flat())
     }
 
     if (
@@ -185,6 +206,16 @@ export class TranslatedSubtitlesDownloader {
 
   private hasIncompleteTranslatedFragments(fragments: SubtitlesFragment[]): boolean {
     return fragments.some(fragment => !fragment.translation?.trim())
+  }
+
+  private buildTranslationBatches(fragments: SubtitlesFragment[]): SubtitlesFragment[][] {
+    const batches: SubtitlesFragment[][] = []
+
+    for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
+      batches.push(fragments.slice(index, index + TRANSLATION_BATCH_SIZE))
+    }
+
+    return batches
   }
 
   private async buildExportProcessedSubtitles(
