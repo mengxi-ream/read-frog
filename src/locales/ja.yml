@@ -896,6 +896,7 @@ action:
   copied: コピー済み
   regenerate: 再生成
   viewContextDetails: コンテキスト
+  customizeCustomAction: $1 アクションをカスタマイズ
   saveToNotebase: Notebase に保存
   saveToNotebaseSaving: 保存中...
   saveToNotebaseSuccess: Notebase に保存しました

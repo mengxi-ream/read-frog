@@ -1011,6 +1011,7 @@ action:
   copied: Copied
   regenerate: Regenerate
   viewContextDetails: Context
+  customizeCustomAction: Customize $1 action
   saveToNotebase: Save to Notebase
   saveToNotebaseSaving: Saving...
   saveToNotebaseSuccess: Saved to Notebase

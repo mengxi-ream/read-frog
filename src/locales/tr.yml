@@ -896,6 +896,7 @@ action:
   copied: Kopyalandı
   regenerate: Yeniden oluştur
   viewContextDetails: Bağlam
+  customizeCustomAction: $1 eylemini özelleştir
   saveToNotebase: Notebase'e Kaydet
   saveToNotebaseSaving: Kaydediliyor...
   saveToNotebaseSuccess: Notebase'e kaydedildi

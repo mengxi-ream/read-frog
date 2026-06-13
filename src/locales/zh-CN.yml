@@ -1011,6 +1011,7 @@ action:
   copied: 已复制
   regenerate: 重新生成
   viewContextDetails: 上下文
+  customizeCustomAction: 定制“$1”动作
   saveToNotebase: 保存到笔记库
   saveToNotebaseSaving: 保存中...
   saveToNotebaseSuccess: 已保存到笔记库

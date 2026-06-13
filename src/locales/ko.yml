@@ -896,6 +896,7 @@ action:
   copied: 복사됨
   regenerate: 다시 생성
   viewContextDetails: 컨텍스트
+  customizeCustomAction: $1 작업 맞춤 설정
   saveToNotebase: Notebase에 저장
   saveToNotebaseSaving: 저장 중...
   saveToNotebaseSuccess: Notebase에 저장했습니다

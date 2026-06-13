@@ -24,6 +24,7 @@ import {
 import { createSelectionToolbarPrecheckError } from "../inline-error"
 import { useSelectionOpenRequestResolver } from "../use-selection-open-request"
 import { CustomActionContent } from "./custom-action-content"
+import { CustomActionToolButton } from "./custom-action-tool-button"
 import { SaveToNotebaseButton } from "./save-to-notebase-button"
 import { isSaveToNotebaseDialogOpenAtom } from "./save-to-notebase-dialog-atom"
 import { SaveToNotebaseDialogHost } from "./save-to-notebase-dialog-host"
@@ -397,11 +398,14 @@ export function SelectionCustomActionProvider({
             onRegenerate={handleRegenerate}
           >
             {activeAction && (
-              <SaveToNotebaseButton
-                action={activeAction}
-                isRunning={displayedIsRunning}
-                result={displayedResult}
-              />
+              <>
+                <SaveToNotebaseButton
+                  action={activeAction}
+                  isRunning={displayedIsRunning}
+                  result={displayedResult}
+                />
+                <CustomActionToolButton action={activeAction} />
+              </>
             )}
           </SelectionToolbarFooterContent>
         </SelectionPopover.Content>

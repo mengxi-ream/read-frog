@@ -896,6 +896,7 @@ action:
   copied: Скопировано
   regenerate: Сгенерировать заново
   viewContextDetails: Контекст
+  customizeCustomAction: Настроить действие $1
   saveToNotebase: Сохранить в Notebase
   saveToNotebaseSaving: Сохранение...
   saveToNotebaseSuccess: Сохранено в Notebase

@@ -896,6 +896,7 @@ action:
   copied: Đã sao chép
   regenerate: Tạo lại
   viewContextDetails: Ngữ cảnh
+  customizeCustomAction: Tùy chỉnh hành động $1
   saveToNotebase: Lưu vào Notebase
   saveToNotebaseSaving: Đang lưu...
   saveToNotebaseSuccess: Đã lưu vào Notebase

@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { ReactElement } from "react"
+import type { ReactElement, ReactNode } from "react"
 import type {
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
@@ -184,6 +184,7 @@ vi.mock("../../components/selection-toolbar-title-content", () => ({
 
 vi.mock("../../components/selection-toolbar-footer-content", () => ({
   SelectionToolbarFooterContent: ({
+    children,
     paragraphsText,
     onProviderChange,
     onRegenerate,
@@ -191,6 +192,7 @@ vi.mock("../../components/selection-toolbar-footer-content", () => ({
     titleText,
     value,
   }: {
+    children?: ReactNode
     paragraphsText: string | null | undefined
     onProviderChange: (id: string) => void
     onRegenerate: () => void
@@ -204,6 +206,7 @@ vi.mock("../../components/selection-toolbar-footer-content", () => ({
       <div>
         <span data-testid="footer-title">{titleText}</span>
         <span data-testid="footer-paragraphs">{paragraphsText}</span>
+        {children}
         <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
           Regenerate
         </button>
@@ -1303,6 +1306,39 @@ describe("selection toolbar requests", () => {
         action_name: action.name,
       }),
     )
+  })
+
+  it("renders a custom action footer tool button that opens the action options", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "done" }))
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
+    if (!action) {
+      throw new Error("Default custom action is missing")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: action.name }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    const customizeButton = screen.getByRole("button", { name: "action.customizeCustomAction" })
+
+    expect(customizeButton).toHaveClass("size-7")
+
+    const { sendMessage } = await import("@/utils/message")
+    vi.mocked(sendMessage).mockClear()
+
+    fireEvent.click(customizeButton)
+
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith("openOptionsPage", {
+      route: `/custom-actions?actionId=${encodeURIComponent(action.id)}`,
+    })
   })
 
   it("renders the custom action tooltip as non-interactive and closes it on hover leave", async () => {
