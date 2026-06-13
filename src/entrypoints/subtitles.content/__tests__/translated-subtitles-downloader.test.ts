@@ -199,6 +199,48 @@ describe("translatedSubtitlesDownloader", () => {
     }))
   })
 
+  it("falls back to optimized source timing when AI segmentation creates overlapping export cues", async () => {
+    const questionText = "I was wondering whether you have tested scaling laws when source text is transformed into image inputs across many different controlled experiments."
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ aiSegmentation: true }))
+    mocks.aiSegmentBlock.mockResolvedValue([
+      { text: "Hello.", start: 0, end: 3420 },
+      { text: questionText, start: 500, end: 3420 },
+    ])
+
+    await createDownloader([
+      { text: "Hello.", start: 0, end: 500 },
+      { text: questionText, start: 500, end: 3420 },
+    ], false).downloader.download()
+
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith(expect.objectContaining({
+      subtitles: [
+        { text: "zh:Hello.", start: 0, end: 500 },
+        { text: `zh:${questionText}`, start: 500, end: 3420 },
+      ],
+    }))
+  })
+
+  it("falls back to optimized source timing when AI segmentation collapses a cue to a boundary", async () => {
+    const followUpText = "Actually this next cue contains enough words that it should remain separate from the short greeting during subtitle optimization across many different transcript timing examples."
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ aiSegmentation: true }))
+    mocks.aiSegmentBlock.mockResolvedValue([
+      { text: "Hi.", start: 500, end: 501 },
+      { text: followUpText, start: 501, end: 3500 },
+    ])
+
+    await createDownloader([
+      { text: "Hi.", start: 0, end: 500 },
+      { text: followUpText, start: 500, end: 3500 },
+    ], false).downloader.download()
+
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith(expect.objectContaining({
+      subtitles: [
+        { text: "zh:Hi.", start: 0, end: 500 },
+        { text: `zh:${followUpText}`, start: 500, end: 3500 },
+      ],
+    }))
+  })
+
   it("continues without a summary when summary generation fails", async () => {
     mocks.fetchSubtitlesSummary.mockRejectedValue(new Error("Summary failed"))
     await createDownloader(lines(1)).downloader.download()

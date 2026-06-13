@@ -16,6 +16,7 @@ import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesStore, TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "./atoms"
 
 const SUCCESS_MESSAGE_DURATION_MS = 4000
+const MAX_COLLAPSED_AI_SEGMENT_DURATION_MS = 1
 
 export class TranslatedSubtitlesDownloader {
   private isDownloading = false
@@ -225,7 +226,7 @@ export class TranslatedSubtitlesDownloader {
 
     const optimized = optimizeSubtitles(segmented, sourceLanguage)
 
-    if (!this.hasTimingCoverageGap(chunk, optimized)) {
+    if (!this.hasUnsafeExportTiming(chunk, optimized)) {
       return optimized
     }
 
@@ -246,7 +247,7 @@ export class TranslatedSubtitlesDownloader {
 
         const retryOptimized = optimizeSubtitles(retrySegmented, sourceLanguage)
 
-        if (this.hasTimingCoverageGap(retryChunk, retryOptimized)) {
+        if (this.hasUnsafeExportTiming(retryChunk, retryOptimized)) {
           return optimizeSubtitles(chunk, sourceLanguage)
         }
 
@@ -257,6 +258,10 @@ export class TranslatedSubtitlesDownloader {
     }
 
     return optimizeSubtitles(chunk, sourceLanguage)
+  }
+
+  private hasUnsafeExportTiming(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
+    return this.hasInvalidTimingShape(source, candidate) || this.hasTimingCoverageGap(source, candidate)
   }
 
   private buildSourceSubtitleChunks(
@@ -306,6 +311,36 @@ export class TranslatedSubtitlesDownloader {
       }
 
       if (sourceInterval.end - coveredUntil > MAX_GAP_MS) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private hasInvalidTimingShape(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
+    if (source.length === 0 || candidate.length === 0) {
+      return true
+    }
+
+    const sourceStart = Math.min(...source.map(fragment => fragment.start))
+    const sourceEnd = Math.max(...source.map(fragment => fragment.end))
+    const sortedCandidates = [...candidate].sort((a, b) => a.start - b.start || a.end - b.end)
+
+    for (let index = 0; index < sortedCandidates.length; index++) {
+      const fragment = sortedCandidates[index]
+      if (
+        !Number.isFinite(fragment.start)
+        || !Number.isFinite(fragment.end)
+        || fragment.end - fragment.start <= MAX_COLLAPSED_AI_SEGMENT_DURATION_MS
+        || fragment.start < sourceStart
+        || fragment.end > sourceEnd
+      ) {
+        return true
+      }
+
+      const previous = sortedCandidates[index - 1]
+      if (previous && previous.end > fragment.start) {
         return true
       }
     }
