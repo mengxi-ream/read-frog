@@ -82,7 +82,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
         )}
         style={positionStyle}
       >
-        <div className="w-full flex justify-center pointer-events-auto">
+        <div className="pointer-events-auto">
           <div
             ref={refs.handle}
             className="mb-0.5 px-2 py-1 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
