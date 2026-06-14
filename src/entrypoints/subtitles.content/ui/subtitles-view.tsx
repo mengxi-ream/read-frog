@@ -1,13 +1,11 @@
 import { IconGripHorizontal } from "@tabler/icons-react"
-import { useAtomValue, useSetAtom } from "jotai"
-import { Activity, useRef } from "react"
+import { useAtomValue } from "jotai"
+import { Activity } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { SUBTITLES_VIEW_CLASS } from "@/utils/constants/subtitles"
 import { cn } from "@/utils/styles/utils"
 import { currentSubtitleAtom } from "../atoms"
 import { MainSubtitle, TranslationSubtitle } from "./subtitle-lines"
-import { useSubtitlesUI } from "./subtitles-ui-context"
-import { useControlsInfo } from "./use-controls-visible"
 import { useVerticalDrag } from "./use-vertical-drag"
 
 interface SubtitlesViewProps {
@@ -48,20 +46,11 @@ function SubtitlesContent() {
 }
 
 export function SubtitlesView({ showContent }: SubtitlesViewProps) {
-  const windowRef = useRef<HTMLDivElement>(null)
-  const { controlsConfig } = useSubtitlesUI()
-  const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
-  const setVideoSubtitles = useSetAtom(configFieldsAtomMap.videoSubtitles)
-
-  const { refs, windowStyle, positionStyle, isDragging } = useVerticalDrag({
-    controlsVisible,
-    controlsHeight,
-    onDragEnd: pos => void setVideoSubtitles({ position: pos }),
-  })
+  const { refs, windowStyle, positionStyle, isDragging } = useVerticalDrag()
 
   return (
     <div
-      ref={windowRef}
+      ref={refs.window}
       style={{
         width: windowStyle.width,
         height: windowStyle.height,
