@@ -160,38 +160,29 @@ export class TranslatedSubtitlesDownloader {
 
     for (let index = 0; index < batches.length; index += TRANSLATED_EXPORT_BATCH_CONCURRENCY) {
       const batchWindow = batches.slice(index, index + TRANSLATED_EXPORT_BATCH_CONCURRENCY)
-      let windowFailed = false
       const translatedBatchWindow = await Promise.all(
         batchWindow.map(async (batch) => {
-          try {
-            const translatedBatch = await translateSubtitles(batch, videoContext, config)
-            this.assertActive(operationId)
-            if (windowFailed) {
-              return []
-            }
-            if (
-              translatedBatch.length !== batch.length
-              || this.hasIncompleteTranslatedFragments(translatedBatch)
-            ) {
-              throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
-            }
-
-            translatedCount += translatedBatch.length
-            this.setStatus(
-              TranslatedDownloadPhase.Translating,
-              Math.min(100, Math.round((translatedCount / fragments.length) * 100)),
-            )
-
-            return translatedBatch
+          const translatedBatch = await translateSubtitles(batch, videoContext, config)
+          this.assertActive(operationId)
+          if (
+            translatedBatch.length !== batch.length
+            || this.hasIncompleteTranslatedFragments(translatedBatch)
+          ) {
+            throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
           }
-          catch (error) {
-            windowFailed = true
-            throw error
-          }
+
+          return translatedBatch
         }),
       )
       this.assertActive(operationId)
-      translatedFragments.push(...translatedBatchWindow.flat())
+      for (const translatedBatch of translatedBatchWindow) {
+        translatedFragments.push(...translatedBatch)
+        translatedCount += translatedBatch.length
+        this.setStatus(
+          TranslatedDownloadPhase.Translating,
+          Math.min(100, Math.round((translatedCount / fragments.length) * 100)),
+        )
+      }
     }
 
     if (
