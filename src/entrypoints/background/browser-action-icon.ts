@@ -1,4 +1,5 @@
 import { browser } from "#imports"
+import { translationStateSchema } from "@/types/translation-state"
 import { TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
 import { logger } from "@/utils/logger"
 import { getPageTranslationEnabled } from "./page-translation-state"
@@ -18,7 +19,7 @@ const ACTIVE_ACTION_ICON_PATHS: ActionIconPathMap = {
   48: "/icon/48-active.png",
 }
 
-export async function updateActionIconForPageTranslation(tabId: number, enabled: boolean) {
+async function updateActionIconForPageTranslation(tabId: number, enabled: boolean) {
   await browser.action.setIcon({
     tabId,
     path: enabled ? ACTIVE_ACTION_ICON_PATHS : DEFAULT_ACTION_ICON_PATHS,
@@ -27,19 +28,20 @@ export async function updateActionIconForPageTranslation(tabId: number, enabled:
 
 export function registerActionIconListeners() {
   browser.storage.session.onChanged.addListener(async (changes) => {
-    await Promise.all(
+    await Promise.allSettled(
       Object.entries(changes).map(async ([storageKey, change]) => {
         if (!storageKey.startsWith(TRANSLATION_STATE_KEY_PREFIX.replace("session:", ""))) {
           return
         }
 
         const parts = storageKey.split(".")
-        const tabId = Number.parseInt(parts[1] ?? "", 10)
+        const tabId = Number.parseInt(parts[1])
         if (Number.isNaN(tabId)) {
           return
         }
 
-        const enabled = (change.newValue as { enabled?: boolean } | undefined)?.enabled ?? false
+        const parsed = translationStateSchema.safeParse(change.newValue)
+        const enabled = parsed.success ? parsed.data.enabled : false
         await updateActionIconForPageTranslation(tabId, enabled)
       }),
     )
