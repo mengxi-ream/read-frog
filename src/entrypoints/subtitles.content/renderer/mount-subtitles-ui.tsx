@@ -1,7 +1,6 @@
 import type { SubtitlesProvidersAdapter } from "../ui/subtitles-ui-context"
 import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import ReactDOM from "react-dom/client"
-import { Toaster } from "sonner"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { SUBTITLES_THEME } from "@/utils/constants/subtitles"
@@ -11,6 +10,7 @@ import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder
 import { applyTheme } from "@/utils/theme"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 import { SubtitlesProviders } from "../ui/subtitles-ui-context"
+import { mountSubtitlesToast } from "./mount-subtitles-toast"
 
 const SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
 
@@ -76,8 +76,10 @@ export async function mountSubtitlesUI(
   applyTheme(reactContainer, SUBTITLES_THEME)
 
   const reactRoot = ReactDOM.createRoot(reactContainer)
+  const cleanupToast = mountSubtitlesToast()
 
   ;(shadowHost as any).__reactShadowContainerCleanup = () => {
+    cleanupToast()
     reactRoot?.unmount()
     hostBuilder.cleanup()
   }
@@ -88,7 +90,6 @@ export async function mountSubtitlesUI(
     <ShadowWrapperContext value={reactContainer}>
       <SubtitlesProviders adapter={adapter}>
         <SubtitlesContainer />
-        <Toaster richColors className="z-2147483647 notranslate" />
       </SubtitlesProviders>
     </ShadowWrapperContext>
   )
