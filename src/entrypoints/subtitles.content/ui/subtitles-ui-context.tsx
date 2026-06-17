@@ -10,6 +10,7 @@ interface SubtitlesUIContextValue {
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
   embedded?: boolean
+  containerShrinkRatio?: (container: HTMLElement) => number | null
 }
 
 export const SubtitlesUIContext = createContext<SubtitlesUIContextValue | null>(null)
@@ -24,7 +25,7 @@ export function useSubtitlesUI() {
 
 export type SubtitlesProvidersAdapter = Pick<
   UniversalVideoAdapter,
-  "downloadSourceSubtitles" | "downloadTranslatedSubtitles" | "embedded" | "getControlsConfig" | "toggleSubtitlesManually"
+  "downloadSourceSubtitles" | "downloadTranslatedSubtitles" | "embedded" | "containerShrinkRatio" | "getControlsConfig" | "toggleSubtitlesManually"
 >
 
 export function SubtitlesProviders({
@@ -43,6 +44,7 @@ export function SubtitlesProviders({
           downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
           controlsConfig: adapter.getControlsConfig(),
           embedded: adapter.embedded,
+          containerShrinkRatio: adapter.containerShrinkRatio,
         }}
       >
         {children}

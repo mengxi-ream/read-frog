@@ -111,18 +111,11 @@ function shouldReplaceFamilyText(currentText: string, nextText: string): boolean
   return nextText.length > currentText.length
 }
 
-export function parseStylizedKaraokeSubtitles(events: YoutubeTimedText[]): SubtitlesFragment[] {
-  const mainTrackId = selectMainTrack(events)
-  if (mainTrackId === null)
-    return []
-
+function mergeFamilies(events: YoutubeTimedText[]): SubtitlesFragment[] {
   const result: SubtitlesFragment[] = []
   let currentFamily: SentenceFamily | null = null
 
   for (const event of events) {
-    if (event.wpWinPosId !== mainTrackId)
-      continue
-
     const text = cleanStylizedText(getEventText(event))
     if (!text)
       continue
@@ -172,6 +165,44 @@ export function parseStylizedKaraokeSubtitles(events: YoutubeTimedText[]): Subti
       start: currentFamily.start,
       end: currentFamily.end,
     })
+  }
+
+  return result
+}
+
+function overlapsAny(start: number, end: number, intervals: SubtitlesFragment[]): boolean {
+  return intervals.some(interval => start < interval.end && end > interval.start)
+}
+
+export function parseStylizedKaraokeSubtitles(events: YoutubeTimedText[]): SubtitlesFragment[] {
+  const mainTrackId = selectMainTrack(events)
+  if (mainTrackId === null)
+    return []
+
+  const mainFragments = mergeFamilies(
+    events.filter(event => event.wpWinPosId === mainTrackId),
+  )
+
+  const offTrackEvents = events.filter((event) => {
+    if (event.wpWinPosId === mainTrackId)
+      return false
+    if (!cleanStylizedText(getEventText(event)))
+      return false
+
+    const start = event.tStartMs
+    const end = start + (event.dDurationMs ?? 0)
+    return !overlapsAny(start, end, mainFragments)
+  })
+
+  const offFragments = mergeFamilies(offTrackEvents)
+
+  const merged = [...mainFragments, ...offFragments].sort(
+    (left, right) => left.start - right.start,
+  )
+
+  const result: SubtitlesFragment[] = []
+  for (const fragment of merged) {
+    pushFragment(result, { ...fragment })
   }
 
   return result

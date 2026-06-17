@@ -40,6 +40,10 @@ interface SelectedTrackSnapshot {
 }
 
 function findYoutubePlayer(): YouTubePlayer | null {
+  const shortsActive = document.querySelector<YouTubePlayer>("#reel-overlay-container .html5-video-player")
+  if (shortsActive)
+    return shortsActive
+
   return document.querySelector(
     ".html5-video-player.playing-mode, .html5-video-player.paused-mode",
   ) ?? document.querySelector(".html5-video-player")

@@ -53,6 +53,10 @@ export class UniversalVideoAdapter {
     return this.config.embedded
   }
 
+  get containerShrinkRatio() {
+    return this.config.containerShrinkRatio
+  }
+
   get videoIdChanged() {
     const currentVideoId = this.config.getVideoId?.()
     return !!(this.sessionVideoId && currentVideoId && currentVideoId !== this.sessionVideoId)
@@ -75,7 +79,6 @@ export class UniversalVideoAdapter {
     void this.renderTranslateButton()
 
     await this.initializeScheduler()
-    void this.getOrLoadSourceSubtitles().catch(() => {})
     await this.tryAutoStartSubtitles()
     this.setupNavigationListeners()
   }
@@ -266,6 +269,17 @@ export class UniversalVideoAdapter {
     }, NAVIGATION_HANDLER_DELAY)
   }
 
+  notifyNavigation() {
+    this.hasPendingNavigationReset = true
+    this.clearVisibleStateForNavigation()
+
+    this.clearNavigationReinitTimeout()
+    this.navigationReinitTimeoutId = setTimeout(() => {
+      this.navigationReinitTimeoutId = null
+      void this.handleNavigation()
+    }, NAVIGATION_HANDLER_DELAY)
+  }
+
   private async handleNavigation() {
     if (!this.hasPendingNavigationReset || !this.videoIdChanged) {
       return
@@ -276,12 +290,16 @@ export class UniversalVideoAdapter {
     void this.renderTranslateButton()
 
     await this.initializeScheduler()
-    void this.getOrLoadSourceSubtitles().catch(() => {})
     await this.tryAutoStartSubtitles()
   }
 
   private async renderTranslateButton() {
-    const container = await waitForElement(this.config.selectors.controlsBar)
+    const controlsBar = this.config.selectors.controlsBar
+    if (!controlsBar) {
+      return
+    }
+
+    const container = await waitForElement(controlsBar)
     if (!container) {
       if (!this.config.embedded)
         toast.error(i18n.t("subtitles.errors.controlsBarNotFound"))
@@ -476,7 +494,7 @@ export class UniversalVideoAdapter {
         toast.error(errorMessage)
       }
       else {
-        this.subtitlesScheduler?.setState("error", { message: errorMessage })
+        this.subtitlesScheduler?.setState("error", { message: this.config.silentErrors ? "" : errorMessage })
       }
     }
   }

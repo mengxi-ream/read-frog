@@ -6,11 +6,13 @@ export interface ControlsConfig {
 
 export interface PlatformConfig {
   embedded?: boolean
+  silentErrors?: boolean
+  containerShrinkRatio?: (container: HTMLElement) => number | null
 
   selectors: {
     video: string
     playerContainer: string
-    controlsBar: string
+    controlsBar?: string
     nativeSubtitles: string
   }
 

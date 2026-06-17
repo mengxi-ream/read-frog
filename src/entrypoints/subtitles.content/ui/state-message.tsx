@@ -26,6 +26,9 @@ export function StateMessage({ state, message }: StateMessageProps) {
 
   const text = state === "error" ? message : getText()
 
+  if (!text)
+    return null
+
   return (
     <div
       className={`${STATE_MESSAGE_CLASS} absolute left-4 bottom-18 pointer-events-auto`}
