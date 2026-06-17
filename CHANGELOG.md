@@ -1,5 +1,29 @@
 # @read-frog/extension
 
+## 1.35.0
+
+### Minor Changes
+
+- [#1695](https://github.com/mengxi-ream/read-frog/pull/1695) [`4d223f7`](https://github.com/mengxi-ream/read-frog/commit/4d223f77db85c40b30725662bea6dc3ab44e9ed3) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): support YouTube Shorts subtitle translation
+
+### Patch Changes
+
+- [#1393](https://github.com/mengxi-ream/read-frog/pull/1393) [`0b15ad6`](https://github.com/mengxi-ream/read-frog/commit/0b15ad67ca4221df2c857788334a724379c45f77) Thanks [@frogGuaGuaGuaGua](https://github.com/frogGuaGuaGuaGua)! - feat(providers): sync AI SDK-backed text model selectors and defaults
+
+- [#1688](https://github.com/mengxi-ream/read-frog/pull/1688) [`eec1796`](https://github.com/mengxi-ream/read-frog/commit/eec1796490ad98268b2c529396aec20299db5d92) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(selection-toolbar): add custom action settings shortcut
+
+- [#1692](https://github.com/mengxi-ream/read-frog/pull/1692) [`1167883`](https://github.com/mengxi-ream/read-frog/commit/11678833d9122bfb1ea0f65bdf2ebbadee37b162) Thanks [@ringoshiina](https://github.com/ringoshiina)! - perf(subtitles): translate exported SRT batches concurrently
+
+- [#1696](https://github.com/mengxi-ream/read-frog/pull/1696) [`44237ac`](https://github.com/mengxi-ream/read-frog/commit/44237ace0b8c6b7afe7ea6ab643756be08574286) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(youtube-subtitles): recover off-track dialogue dropped in stylized karaoke videos
+
+- [#1698](https://github.com/mengxi-ream/read-frog/pull/1698) [`a125f67`](https://github.com/mengxi-ream/read-frog/commit/a125f6736d675ebb61b9e18a0c3b61f90cfa87df) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): render subtitle toast at body level so it shows above the player with correct sonner styling
+
+- [#1691](https://github.com/mengxi-ream/read-frog/pull/1691) [`f920c55`](https://github.com/mengxi-ream/read-frog/commit/f920c554156f4c10e82a0d7eb233c516ce4501b9) Thanks [@ringoshiina](https://github.com/ringoshiina)! - fix(subtitles): reject unsafe AI timings in translated SRT export
+
+- [#1693](https://github.com/mengxi-ream/read-frog/pull/1693) [`51e9762`](https://github.com/mengxi-ream/read-frog/commit/51e976259d8431ed7b55909d7a92e032eda96465) Thanks [@PeterDaveHello](https://github.com/PeterDaveHello)! - i18n: update and improve zh-TW Traditional Chinese locale
+
+- [#1694](https://github.com/mengxi-ream/read-frog/pull/1694) [`f1d4284`](https://github.com/mengxi-ream/read-frog/commit/f1d4284b91309fdad175edba0b1da7f2cb2a3702) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): only capture pointer events on the YouTube drag handle so player menus stay clickable
+
 ## 1.34.1
 
 ### Patch Changes
