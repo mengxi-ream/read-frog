@@ -213,6 +213,32 @@ describe("subtitles translator", () => {
     )
   })
 
+  it("passes a cancel group only for explicit cancellable subtitle translations", async () => {
+    const { cancelSubtitlesTranslateRequestGroup, translateSubtitles } = await import("../translator")
+    const fragments = [{ text: "hello", start: 0, end: 1_000 }]
+    const videoContext = { videoTitle: "Video title", subtitlesTextContent: "subtitle transcript" }
+
+    await translateSubtitles(fragments, videoContext, undefined, { cancelGroupId: "export-group" })
+    await translateSubtitles(fragments, videoContext)
+    await cancelSubtitlesTranslateRequestGroup("export-group")
+
+    expect(sendMessageMock).toHaveBeenNthCalledWith(
+      1,
+      "enqueueSubtitlesTranslateRequest",
+      expect.objectContaining({ cancelGroupId: "export-group" }),
+    )
+    expect(sendMessageMock).toHaveBeenNthCalledWith(
+      2,
+      "enqueueSubtitlesTranslateRequest",
+      expect.not.objectContaining({ cancelGroupId: expect.any(String) }),
+    )
+    expect(sendMessageMock).toHaveBeenNthCalledWith(
+      3,
+      "cancelSubtitlesTranslateRequestGroup",
+      { cancelGroupId: "export-group" },
+    )
+  })
+
   it("builds subtitle summary context hashes from subtitles text and provider config", async () => {
     const { buildSubtitlesSummaryContextHash } = await import("../translator")
 

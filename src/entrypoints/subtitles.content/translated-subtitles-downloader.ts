@@ -9,9 +9,10 @@ import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
 import { MAX_GAP_MS, PROCESS_LOOK_AHEAD_MS, TRANSLATION_BATCH_SIZE } from "@/utils/constants/subtitles"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
+import { getRandomUUID } from "@/utils/crypto-polyfill"
 import { aiSegmentBlock } from "@/utils/subtitles/processor/ai-segmentation"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
-import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary, translateSubtitles } from "@/utils/subtitles/processor/translator"
+import { buildSubtitlesSummaryContextHash, cancelSubtitlesTranslateRequestGroup, fetchSubtitlesSummary, translateSubtitles } from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesStore, TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "./atoms"
 
@@ -22,6 +23,7 @@ const TRANSLATED_EXPORT_BATCH_CONCURRENCY = 2
 export class TranslatedSubtitlesDownloader {
   private isDownloading = false
   private operationId = 0
+  private activeCancelGroupId: string | null = null
   private successTimeout: ReturnType<typeof setTimeout> | null = null
 
   constructor(
@@ -37,6 +39,8 @@ export class TranslatedSubtitlesDownloader {
     this.clearSuccessTimeout()
     this.isDownloading = true
     const operationId = ++this.operationId
+    const cancelGroupId = getRandomUUID()
+    this.activeCancelGroupId = cancelGroupId
     const pageTitle = document.title || ""
     const videoId = this.config.getVideoId?.()
     this.setStatus(TranslatedDownloadPhase.Preparing, 0)
@@ -64,6 +68,7 @@ export class TranslatedSubtitlesDownloader {
         sourceProcessedSubtitles,
         configSnapshot,
         operationId,
+        cancelGroupId,
         pageTitle,
       )
 
@@ -98,15 +103,21 @@ export class TranslatedSubtitlesDownloader {
     finally {
       if (this.isActive(operationId)) {
         this.isDownloading = false
+        this.activeCancelGroupId = null
       }
     }
   }
 
   dispose(): void {
+    const cancelGroupId = this.activeCancelGroupId
+    this.activeCancelGroupId = null
     this.operationId++
     this.isDownloading = false
     this.clearSuccessTimeout()
     this.setStatus(TranslatedDownloadPhase.Idle, null)
+    if (cancelGroupId) {
+      void cancelSubtitlesTranslateRequestGroup(cancelGroupId).catch(() => {})
+    }
   }
 
   private clearSuccessTimeout(): void {
@@ -144,6 +155,7 @@ export class TranslatedSubtitlesDownloader {
     sourceProcessedSubtitles: SubtitlesFragment[],
     config: Config,
     operationId: number,
+    cancelGroupId: string,
     pageTitle: string,
   ): Promise<SubtitlesFragment[]> {
     const fragments = await this.buildExportProcessedSubtitles(
@@ -163,7 +175,7 @@ export class TranslatedSubtitlesDownloader {
       const batchWindow = batches.slice(index, index + TRANSLATED_EXPORT_BATCH_CONCURRENCY)
       const translatedBatchWindow = await Promise.all(
         batchWindow.map(async (batch) => {
-          const translatedBatch = await translateSubtitles(batch, videoContext, config)
+          const translatedBatch = await translateSubtitles(batch, videoContext, config, { cancelGroupId })
           this.assertActive(operationId)
           if (
             translatedBatch.length !== batch.length

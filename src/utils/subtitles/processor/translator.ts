@@ -46,6 +46,10 @@ export interface SubtitlesVideoContext {
   summary?: string | null
 }
 
+export interface TranslateSubtitlesOptions {
+  cancelGroupId?: string
+}
+
 export function buildSubtitlesSummaryContextHash(
   videoContext: Pick<SubtitlesVideoContext, "subtitlesTextContent">,
   providerConfig?: ProviderConfig,
@@ -123,6 +127,7 @@ async function translateSingleSubtitle(
   providerConfig: ProviderConfig,
   enableAIContentAware: boolean,
   videoContext: SubtitlesVideoContext,
+  options: TranslateSubtitlesOptions = {},
 ): Promise<string> {
   const subtitlePromptContext = normalizeSubtitlePromptContext(videoContext)
   const hashComponents = await buildSubtitleHashComponents(
@@ -148,7 +153,12 @@ async function translateSingleSubtitle(
     webTitle: subtitlePromptContext.webTitle,
     webDescription: subtitlePromptContext.webDescription,
     summary: enableAIContentAware ? subtitlePromptContext.videoSummary : undefined,
+    ...(options.cancelGroupId ? { cancelGroupId: options.cancelGroupId } : {}),
   })
+}
+
+export async function cancelSubtitlesTranslateRequestGroup(cancelGroupId: string): Promise<void> {
+  await sendMessage("cancelSubtitlesTranslateRequestGroup", { cancelGroupId })
 }
 
 export async function fetchSubtitlesSummary(
@@ -181,6 +191,7 @@ export async function translateSubtitles(
   fragments: SubtitlesFragment[],
   videoContext: SubtitlesVideoContext,
   configOverride?: Config,
+  options: TranslateSubtitlesOptions = {},
 ): Promise<SubtitlesFragment[]> {
   const config = configOverride ?? await getLocalConfig()
   if (!config) {
@@ -197,7 +208,7 @@ export async function translateSubtitles(
   const enableAIContentAware = !!config.translate.enableAIContentAware
 
   const translationPromises = fragments.map(fragment =>
-    translateSingleSubtitle(fragment.text, langConfig, providerConfig, enableAIContentAware, videoContext),
+    translateSingleSubtitle(fragment.text, langConfig, providerConfig, enableAIContentAware, videoContext, options),
   )
 
   const results = await Promise.allSettled(translationPromises)

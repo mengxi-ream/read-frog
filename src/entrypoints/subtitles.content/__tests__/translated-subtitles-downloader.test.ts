@@ -8,18 +8,22 @@ import { TranslatedSubtitlesDownloader } from "../translated-subtitles-downloade
 
 const mocks = vi.hoisted(() => ({
   aiSegmentBlock: vi.fn(),
+  cancelSubtitlesTranslateRequestGroup: vi.fn(),
   downloadSubtitlesAsSrt: vi.fn(),
   fetchSubtitlesSummary: vi.fn(),
   getLocalConfig: vi.fn(),
+  getRandomUUID: vi.fn(),
   toastError: vi.fn(),
   translateSubtitles: vi.fn(),
 }))
 
 vi.mock("sonner", () => ({ toast: { error: mocks.toastError } }))
 vi.mock("@/utils/config/storage", () => ({ getLocalConfig: mocks.getLocalConfig }))
+vi.mock("@/utils/crypto-polyfill", () => ({ getRandomUUID: mocks.getRandomUUID }))
 vi.mock("@/utils/subtitles/processor/ai-segmentation", () => ({ aiSegmentBlock: mocks.aiSegmentBlock }))
 vi.mock("@/utils/subtitles/processor/translator", () => ({
   buildSubtitlesSummaryContextHash: () => "summary-hash",
+  cancelSubtitlesTranslateRequestGroup: mocks.cancelSubtitlesTranslateRequestGroup,
   fetchSubtitlesSummary: mocks.fetchSubtitlesSummary,
   translateSubtitles: mocks.translateSubtitles,
 }))
@@ -86,7 +90,10 @@ describe("translatedSubtitlesDownloader", () => {
       progress: null,
     })
     mocks.getLocalConfig.mockResolvedValue(createConfig())
+    mocks.cancelSubtitlesTranslateRequestGroup.mockResolvedValue(undefined)
     mocks.fetchSubtitlesSummary.mockResolvedValue(null)
+    let nextCancelGroup = 0
+    mocks.getRandomUUID.mockImplementation(() => `cancel-group-${++nextCancelGroup}`)
     mocks.translateSubtitles.mockImplementation(async (fragments: SubtitlesFragment[]) => translated(fragments))
   })
 
@@ -103,8 +110,8 @@ describe("translatedSubtitlesDownloader", () => {
 
     expect(mocks.getLocalConfig).toHaveBeenCalledTimes(1)
     expect(mocks.fetchSubtitlesSummary).toHaveBeenCalledWith(expect.any(Object), config)
-    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(1, fragments.slice(0, 5), expect.any(Object), config)
-    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(2, fragments.slice(5), expect.any(Object), config)
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(1, fragments.slice(0, 5), expect.any(Object), config, { cancelGroupId: "cancel-group-1" })
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(2, fragments.slice(5), expect.any(Object), config, { cancelGroupId: "cancel-group-1" })
     expect(statuses).toEqual(expect.arrayContaining([
       { phase: TranslatedDownloadPhase.Preparing, progress: 0 },
       { phase: TranslatedDownloadPhase.Translating, progress: 83 },
@@ -136,8 +143,8 @@ describe("translatedSubtitlesDownloader", () => {
     await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(2))
 
     expect(maxActiveBatches).toBe(2)
-    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(1, fragments.slice(0, 5), expect.any(Object), expect.any(Object))
-    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(2, fragments.slice(5, 10), expect.any(Object), expect.any(Object))
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(1, fragments.slice(0, 5), expect.any(Object), expect.any(Object), { cancelGroupId: "cancel-group-1" })
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(2, fragments.slice(5, 10), expect.any(Object), expect.any(Object), { cancelGroupId: "cancel-group-1" })
 
     resolvers[1](translated(fragments.slice(5, 10)))
     await vi.waitFor(() => expect(activeBatches).toBe(1))
@@ -145,7 +152,7 @@ describe("translatedSubtitlesDownloader", () => {
 
     resolvers[0](translated(fragments.slice(0, 5)))
     await vi.waitFor(() => expect(mocks.translateSubtitles).toHaveBeenCalledTimes(3))
-    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(3, fragments.slice(10), expect.any(Object), expect.any(Object))
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(3, fragments.slice(10), expect.any(Object), expect.any(Object), { cancelGroupId: "cancel-group-1" })
 
     resolvers[2](translated(fragments.slice(10)))
     await download
@@ -242,6 +249,9 @@ describe("translatedSubtitlesDownloader", () => {
     await oldDownload
 
     expect(fetcher.fetch).toHaveBeenCalledTimes(2)
+    expect(mocks.cancelSubtitlesTranslateRequestGroup).toHaveBeenCalledWith("cancel-group-1")
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(3, fragments.slice(0, 5), expect.any(Object), expect.any(Object), { cancelGroupId: "cancel-group-2" })
+    expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(4, fragments.slice(5), expect.any(Object), expect.any(Object), { cancelGroupId: "cancel-group-2" })
     expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledTimes(1)
     expect(mocks.toastError).not.toHaveBeenCalled()
     expect(status().phase).toBe(TranslatedDownloadPhase.Complete)
@@ -359,6 +369,7 @@ describe("translatedSubtitlesDownloader", () => {
       expect.any(Array),
       expect.objectContaining({ summary: null }),
       expect.any(Object),
+      { cancelGroupId: "cancel-group-1" },
     )
     expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalled()
   })

@@ -1,5 +1,5 @@
 import type { ProviderConfig } from "@/types/config/provider"
-import { beforeEach, describe, expect, it, vi } from "vitest"
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
 const onMessageMock = vi.fn()
@@ -108,6 +108,10 @@ describe("translation queue helpers", () => {
     articleSummaryCachePutMock.mockResolvedValue(undefined)
     translationCacheGetMock.mockResolvedValue(undefined)
     translationCachePutMock.mockResolvedValue(undefined)
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
   })
 
   it(
@@ -459,5 +463,274 @@ describe("translation queue helpers", () => {
       "Generated summary",
     ])
     expect(generateArticleSummaryMock).toHaveBeenCalledTimes(1)
+  })
+
+  it("cancels pending subtitle translation requests in the same export group before flushing a batch", async () => {
+    vi.useFakeTimers()
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        enableAIContentAware: true,
+      },
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: llmProvider.id,
+        requestQueueConfig: {
+          rate: 10,
+          capacity: 10,
+        },
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 10,
+        },
+      },
+    })
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const enqueueHandler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cancelHandler = getRegisteredMessageHandler("cancelSubtitlesTranslateRequestGroup")
+    const request = enqueueHandler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "subtitle-hash",
+        cancelGroupId: "export-group",
+      },
+    })
+
+    await Promise.resolve()
+    await Promise.resolve()
+    await cancelHandler({ data: { cancelGroupId: "export-group" } })
+
+    await expect(request).rejects.toThrow("Batch group cancelled: export-group")
+    await vi.runAllTimersAsync()
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects late subtitle translation requests after their export group was already cancelled", async () => {
+    vi.useFakeTimers()
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const enqueueHandler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cancelHandler = getRegisteredMessageHandler("cancelSubtitlesTranslateRequestGroup")
+
+    await cancelHandler({ data: { cancelGroupId: "export-group" } })
+    const lateRequest = enqueueHandler({
+      data: {
+        text: "late request",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "late-subtitle-hash",
+        cancelGroupId: "export-group",
+      },
+    })
+
+    await expect(lateRequest).rejects.toThrow("Subtitles translation group cancelled: export-group")
+    expect(translationCacheGetMock).not.toHaveBeenCalled()
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects subtitle translation requests cancelled while reading the translation cache", async () => {
+    vi.useFakeTimers()
+    let resolveCacheLookup!: (value: undefined) => void
+    translationCacheGetMock.mockImplementationOnce(
+      () => new Promise<undefined>((resolve) => {
+        resolveCacheLookup = resolve
+      }),
+    )
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const enqueueHandler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cancelHandler = getRegisteredMessageHandler("cancelSubtitlesTranslateRequestGroup")
+    const request = enqueueHandler({
+      data: {
+        text: "cache race request",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "cache-race-subtitle-hash",
+        cancelGroupId: "export-group",
+      },
+    })
+
+    await Promise.resolve()
+    await cancelHandler({ data: { cancelGroupId: "export-group" } })
+    resolveCacheLookup(undefined)
+
+    await expect(request).rejects.toThrow("Subtitles translation group cancelled: export-group")
+    expect(executeTranslateMock).not.toHaveBeenCalled()
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+  })
+
+  it("forgets cancelled subtitle translation groups after the cancellation guard TTL", async () => {
+    vi.useFakeTimers()
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const enqueueHandler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cancelHandler = getRegisteredMessageHandler("cancelSubtitlesTranslateRequestGroup")
+
+    await cancelHandler({ data: { cancelGroupId: "export-group" } })
+    await vi.advanceTimersByTimeAsync(5 * 60 * 1000)
+
+    const request = enqueueHandler({
+      data: {
+        text: "fresh request after ttl",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "fresh-subtitle-hash",
+        cancelGroupId: "export-group",
+      },
+    })
+
+    await expect(request).resolves.toBe("translated subtitle")
+    expect(translationCacheGetMock).toHaveBeenCalledWith("fresh-subtitle-hash")
+    expect(executeTranslateMock).toHaveBeenCalledTimes(1)
+  })
+
+  it("keeps different export groups and uncancellable subtitle requests running when one group is cancelled", async () => {
+    vi.useFakeTimers()
+    ensureInitializedConfigMock.mockResolvedValue({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        enableAIContentAware: true,
+      },
+      videoSubtitles: {
+        ...DEFAULT_CONFIG.videoSubtitles,
+        providerId: llmProvider.id,
+        requestQueueConfig: {
+          rate: 10,
+          capacity: 10,
+        },
+        batchQueueConfig: {
+          maxCharactersPerBatch: 1000,
+          maxItemsPerBatch: 10,
+        },
+      },
+    })
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const enqueueHandler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cancelHandler = getRegisteredMessageHandler("cancelSubtitlesTranslateRequestGroup")
+    const cancelledRequest = enqueueHandler({
+      data: {
+        text: "cancelled",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "cancelled-hash",
+        cancelGroupId: "export-group",
+      },
+    })
+    const otherGroupRequest = enqueueHandler({
+      data: {
+        text: "other group",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "other-group-hash",
+        cancelGroupId: "other-group",
+      },
+    })
+    const uncancellableRequest = enqueueHandler({
+      data: {
+        text: "playback",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "playback-hash",
+      },
+    })
+
+    await Promise.resolve()
+    await Promise.resolve()
+    await cancelHandler({ data: { cancelGroupId: "export-group" } })
+    await expect(cancelledRequest).rejects.toThrow("Batch group cancelled: export-group")
+    await vi.runAllTimersAsync()
+
+    await expect(otherGroupRequest).resolves.toBe("translated subtitle")
+    await expect(uncancellableRequest).resolves.toBe("translated subtitle")
+    expect(executeTranslateMock).toHaveBeenCalledTimes(2)
+  })
+
+  it("cancels an executing batched subtitle translation without waiting for the provider response", async () => {
+    let finishProvider!: (value: string) => void
+    executeTranslateMock.mockImplementation(
+      () => new Promise((resolve: (value: string) => void) => {
+        finishProvider = resolve
+      }),
+    )
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const enqueueHandler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cancelHandler = getRegisteredMessageHandler("cancelSubtitlesTranslateRequestGroup")
+    const request = enqueueHandler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: llmProvider,
+        scheduleAt: Date.now(),
+        hash: "subtitle-hash",
+        cancelGroupId: "export-group",
+      },
+    })
+
+    await vi.waitFor(() => expect(executeTranslateMock).toHaveBeenCalledTimes(1))
+    await cancelHandler({ data: { cancelGroupId: "export-group" } })
+
+    await expect(request).rejects.toThrow("Batch group cancelled: export-group")
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+
+    finishProvider("late translated subtitle")
+    await Promise.resolve()
+  })
+
+  it("cancels an executing non-batched subtitle translation in the same export group", async () => {
+    let finishProvider!: (value: string) => void
+    executeTranslateMock.mockImplementation(
+      () => new Promise((resolve: (value: string) => void) => {
+        finishProvider = resolve
+      }),
+    )
+
+    const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
+    await setUpSubtitlesTranslationQueue()
+
+    const enqueueHandler = getRegisteredMessageHandler("enqueueSubtitlesTranslateRequest")
+    const cancelHandler = getRegisteredMessageHandler("cancelSubtitlesTranslateRequestGroup")
+    const request = enqueueHandler({
+      data: {
+        text: "hello",
+        langConfig: DEFAULT_CONFIG.language,
+        providerConfig: googleProvider,
+        scheduleAt: Date.now(),
+        hash: "google-subtitle-hash",
+        cancelGroupId: "export-group",
+      },
+    })
+
+    await vi.waitFor(() => expect(executeTranslateMock).toHaveBeenCalledTimes(1))
+    await cancelHandler({ data: { cancelGroupId: "export-group" } })
+
+    await expect(request).rejects.toThrow("Request group cancelled: export-group")
+    expect(translationCachePutMock).not.toHaveBeenCalled()
+
+    finishProvider("late translated subtitle")
+    await Promise.resolve()
   })
 })

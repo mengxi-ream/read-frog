@@ -15,9 +15,21 @@ export interface RequestTask {
   createdAt: number
   retryCount: number
   drained: boolean
+  cancelGroupId?: string
 }
 
 type QueuedRequestTask = RequestTask & { hash: string }
+
+export interface RequestQueueEnqueueOptions {
+  cancelGroupId?: string
+}
+
+export class RequestQueueCancelledError extends Error {
+  constructor(cancelGroupId: string) {
+    super(`Request group cancelled: ${cancelGroupId}`)
+    this.name = "RequestQueueCancelledError"
+  }
+}
 
 export interface QueueOptions {
   rate: number // tokens/sec
@@ -47,8 +59,14 @@ export class RequestQueue {
     this.waitingQueue = new BinaryHeapPQ<QueuedRequestTask>()
   }
 
-  enqueue<T>(thunk: () => Promise<T>, scheduleAt: number, hash: string): Promise<T> {
-    const duplicateTask = this.duplicateTask(hash)
+  enqueue<T>(
+    thunk: () => Promise<T>,
+    scheduleAt: number,
+    hash: string,
+    options: RequestQueueEnqueueOptions = {},
+  ): Promise<T> {
+    const queueHash = this.buildQueueHash(hash, options.cancelGroupId)
+    const duplicateTask = this.duplicateTask(queueHash)
     if (duplicateTask) {
       // console.info(`🔄 Found duplicate task for hash: ${hash}, returning existing promise`)
       return duplicateTask.promise
@@ -63,7 +81,7 @@ export class RequestQueue {
 
     const task: QueuedRequestTask = {
       id: getRandomUUID(),
-      hash,
+      hash: queueHash,
       thunk,
       promise,
       resolve,
@@ -72,15 +90,32 @@ export class RequestQueue {
       createdAt: Date.now(),
       retryCount: 0,
       drained: false,
+      cancelGroupId: options.cancelGroupId,
     }
 
-    this.waitingTasks.set(hash, task)
+    this.waitingTasks.set(queueHash, task)
     this.waitingQueue.push(task, scheduleAt)
 
     // console.info(`✅ Task ${task.id} added to queue. Queue size: ${this.waitingQueue.size()}, waiting: ${this.waitingTasks.size}, executing: ${this.executingTasks.size}`)
 
     this.schedule()
     return promise
+  }
+
+  cancelGroup(cancelGroupId: string): void {
+    const error = new RequestQueueCancelledError(cancelGroupId)
+    const tasks = [
+      ...this.waitingTasks.values(),
+      ...this.executingTasks.values(),
+    ]
+
+    for (const task of tasks) {
+      if (task.cancelGroupId === cancelGroupId) {
+        this.rejectDrainedTask(task, error)
+      }
+    }
+
+    this.schedule()
   }
 
   setQueueOptions(options: Partial<QueueOptions>) {
@@ -101,17 +136,27 @@ export class RequestQueue {
 
   private schedule() {
     this.refillTokens()
+    this.popDrainedWaitingTasks()
 
     while (this.bucketTokens >= 1 && this.waitingQueue.size() > 0) {
       const now = Date.now()
 
       const task = this.waitingQueue.peek()
+      if (task?.drained) {
+        this.waitingQueue.pop()
+        if (this.waitingTasks.get(task.hash) === task) {
+          this.waitingTasks.delete(task.hash)
+        }
+        continue
+      }
+
       if (task && task.scheduleAt <= now) {
         this.waitingQueue.pop()
         this.waitingTasks.delete(task.hash)
         this.executingTasks.set(task.hash, task)
         this.bucketTokens--
         void this.executeTask(task)
+        this.popDrainedWaitingTasks()
       }
       else {
         break
@@ -237,6 +282,24 @@ export class RequestQueue {
     return undefined
   }
 
+  private buildQueueHash(hash: string, cancelGroupId?: string): string {
+    return cancelGroupId ? `${hash}:cancelGroup:${cancelGroupId}` : hash
+  }
+
+  private popDrainedWaitingTasks(): void {
+    while (this.waitingQueue.size() > 0) {
+      const task = this.waitingQueue.peek()
+      if (!task?.drained) {
+        return
+      }
+
+      this.waitingQueue.pop()
+      if (this.waitingTasks.get(task.hash) === task) {
+        this.waitingTasks.delete(task.hash)
+      }
+    }
+  }
+
   private failCurrentBacklog(error: unknown) {
     if (this.nextScheduleTimer) {
       clearTimeout(this.nextScheduleTimer)
@@ -261,6 +324,12 @@ export class RequestQueue {
     }
 
     task.drained = true
+    if (this.waitingTasks.get(task.hash) === task) {
+      this.waitingTasks.delete(task.hash)
+    }
+    if (this.executingTasks.get(task.hash) === task) {
+      this.executingTasks.delete(task.hash)
+    }
     task.reject(error)
   }
 

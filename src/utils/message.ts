@@ -55,7 +55,8 @@ interface ProtocolMap {
   // request
   enqueueTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webDescription?: string | null, webContent?: string | null, webSummary?: string | null }) => Promise<string>
   getOrGenerateWebPageSummary: (data: { webTitle: string, webContent: string, providerConfig: ProviderConfig }) => Promise<string | null>
-  enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webDescription?: string | null, summary?: string | null }) => Promise<string>
+  enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webDescription?: string | null, summary?: string | null, cancelGroupId?: string }) => Promise<string>
+  cancelSubtitlesTranslateRequestGroup: (data: { cancelGroupId: string }) => void
   getSubtitlesSummary: (data: { videoTitle: string, subtitlesContext: string, providerConfig: ProviderConfig }) => Promise<string | null>
   backgroundGenerateText: (data: BackgroundGenerateTextPayload) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation

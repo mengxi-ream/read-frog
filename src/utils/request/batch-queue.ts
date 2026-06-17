@@ -15,6 +15,9 @@ interface BatchTask<T, R> {
   data: T
   resolve: (value: R) => void
   reject: (error: Error) => void
+  cancelGroupId?: string
+  executionCancelGroupId?: string
+  drained: boolean
 }
 
 interface PendingBatch<T, R> {
@@ -22,6 +25,11 @@ interface PendingBatch<T, R> {
   tasks: BatchTask<T, R>[]
   totalCharacters: number
   createdAt: number
+  executionCancelGroupId?: string
+}
+
+export interface BatchQueueExecutionContext {
+  cancelGroupId?: string
 }
 
 export interface BatchOptions<T, R> {
@@ -32,13 +40,26 @@ export interface BatchOptions<T, R> {
   enableFallbackToIndividual?: boolean
   getBatchKey: (data: T) => string
   getCharacters: (data: T) => number
-  executeBatch: (dataList: T[]) => Promise<R[]>
-  executeIndividual?: (data: T) => Promise<R>
+  executeBatch: (dataList: T[], context: BatchQueueExecutionContext) => Promise<R[]>
+  executeIndividual?: (data: T, context: BatchQueueExecutionContext) => Promise<R>
+  cancelExecution?: (context: BatchQueueExecutionContext) => void
   onError?: (error: Error, context: { batchKey: string, retryCount: number, isFallback: boolean }) => void
+}
+
+export interface BatchQueueEnqueueOptions {
+  cancelGroupId?: string
+}
+
+export class BatchQueueCancelledError extends Error {
+  constructor(cancelGroupId: string) {
+    super(`Batch group cancelled: ${cancelGroupId}`)
+    this.name = "BatchQueueCancelledError"
+  }
 }
 
 export class BatchQueue<T, R> {
   private pendingBatchMap = new Map<string, PendingBatch<T, R>>()
+  private executingBatchMap = new Map<string, PendingBatch<T, R>>()
   private nextScheduleTimer: NodeJS.Timeout | null = null
   private maxCharactersPerBatch: number
   private maxItemsPerBatch: number
@@ -47,8 +68,9 @@ export class BatchQueue<T, R> {
   private enableFallbackToIndividual: boolean
   private getBatchKey: (data: T) => string
   private getCharacters: (data: T) => number
-  private executeBatch: (dataList: T[]) => Promise<R[]>
-  private executeIndividual?: (data: T) => Promise<R>
+  private executeBatch: (dataList: T[], context: BatchQueueExecutionContext) => Promise<R[]>
+  private executeIndividual?: (data: T, context: BatchQueueExecutionContext) => Promise<R>
+  private cancelExecution?: (context: BatchQueueExecutionContext) => void
   private onError?: (error: Error, context: { batchKey: string, retryCount: number, isFallback: boolean }) => void
 
   constructor(config: BatchOptions<T, R>) {
@@ -61,10 +83,11 @@ export class BatchQueue<T, R> {
     this.getCharacters = config.getCharacters
     this.executeBatch = config.executeBatch
     this.executeIndividual = config.executeIndividual
+    this.cancelExecution = config.cancelExecution
     this.onError = config.onError
   }
 
-  enqueue(data: T): Promise<R> {
+  enqueue(data: T, options: BatchQueueEnqueueOptions = {}): Promise<R> {
     let resolve!: (value: R) => void
     let reject!: (error: Error) => void
     const promise = new Promise<R>((res, rej) => {
@@ -73,12 +96,39 @@ export class BatchQueue<T, R> {
     })
 
     const batchKey = this.getBatchKey(data)
-    const task: BatchTask<T, R> = { data, resolve, reject }
+    const task: BatchTask<T, R> = {
+      data,
+      resolve,
+      reject,
+      cancelGroupId: options.cancelGroupId,
+      drained: false,
+    }
 
     this.addTaskToBatch(task, batchKey)
     this.schedule()
 
     return promise
+  }
+
+  cancelGroup(cancelGroupId: string): void {
+    const error = new BatchQueueCancelledError(cancelGroupId)
+
+    for (const [batchKey, batch] of this.pendingBatchMap.entries()) {
+      this.cancelTasksForGroup(batch, cancelGroupId, error)
+      this.removeDrainedTasks(batch)
+      if (batch.tasks.length === 0) {
+        this.pendingBatchMap.delete(batchKey)
+      }
+    }
+
+    for (const batch of this.executingBatchMap.values()) {
+      this.cancelTasksForGroup(batch, cancelGroupId, error)
+      if (!this.hasActiveTasks(batch)) {
+        this.cancelBatchExecution(batch)
+      }
+    }
+
+    this.schedule()
   }
 
   private schedule() {
@@ -157,14 +207,32 @@ export class BatchQueue<T, R> {
 
     this.pendingBatchMap.delete(batchKey)
 
-    const { tasks } = pendingBatch
+    if (pendingBatch.tasks.length === 0)
+      return
 
-    void this.executeBatchWithRetry(tasks, batchKey, 0)
+    this.executingBatchMap.set(pendingBatch.id, pendingBatch)
+
+    void this.executeBatchWithRetry(pendingBatch, batchKey, 0)
   }
 
-  private async executeBatchWithRetry(tasks: BatchTask<T, R>[], batchKey: string, retryCount: number): Promise<void> {
+  private async executeBatchWithRetry(batch: PendingBatch<T, R>, batchKey: string, retryCount: number): Promise<void> {
+    this.removeDrainedTasks(batch)
+
+    if (!this.hasActiveTasks(batch)) {
+      this.executingBatchMap.delete(batch.id)
+      return
+    }
+
+    const tasks = [...batch.tasks]
+
     try {
-      const results = await this.executeBatch(tasks.map(task => task.data))
+      const context = this.getBatchExecutionContext(batch)
+      const results = await this.executeBatch(tasks.map(task => task.data), context)
+
+      if (!this.hasActiveTasks(batch)) {
+        this.executingBatchMap.delete(batch.id)
+        return
+      }
 
       if (!results) {
         throw new Error("Batch execution results are undefined")
@@ -174,10 +242,17 @@ export class BatchQueue<T, R> {
         throw new BatchCountMismatchError(tasks.length, results.length, results)
       }
 
-      tasks.forEach((task, index) => task.resolve(results[index]))
+      tasks.forEach((task, index) => this.resolveTask(task, results[index]))
+      this.executingBatchMap.delete(batch.id)
     }
     catch (error) {
       const err = error as Error
+      this.removeDrainedTasks(batch)
+
+      if (!this.hasActiveTasks(batch)) {
+        this.executingBatchMap.delete(batch.id)
+        return
+      }
 
       this.onError?.(err, { batchKey, retryCount, isFallback: false })
 
@@ -185,34 +260,42 @@ export class BatchQueue<T, R> {
       if (retryCount < this.maxRetries && err instanceof BatchCountMismatchError) {
         const delay = this.calculateBackoffDelay(retryCount)
         await this.sleep(delay)
-        return this.executeBatchWithRetry(tasks, batchKey, retryCount + 1)
+        return this.executeBatchWithRetry(batch, batchKey, retryCount + 1)
       }
 
       if (this.enableFallbackToIndividual && this.executeIndividual && err instanceof BatchCountMismatchError) {
-        return this.executeFallbackIndividual(tasks, batchKey)
+        return this.executeFallbackIndividual(batch, batchKey)
       }
 
-      tasks.forEach(task => task.reject(err))
+      batch.tasks.forEach(task => this.rejectTask(task, err))
+      this.executingBatchMap.delete(batch.id)
     }
   }
 
-  private async executeFallbackIndividual(tasks: BatchTask<T, R>[], batchKey: string) {
+  private async executeFallbackIndividual(batch: PendingBatch<T, R>, batchKey: string) {
     await Promise.allSettled(
-      tasks.map(async (task) => {
+      batch.tasks.map(async (task) => {
         try {
+          if (task.drained) {
+            return
+          }
           if (!this.executeIndividual) {
             throw new Error("executeIndividual is not defined")
           }
-          const result = await this.executeIndividual(task.data)
-          task.resolve(result)
+          const context = this.createTaskExecutionContext(task)
+          const result = await this.executeIndividual(task.data, context)
+          this.resolveTask(task, result)
+          task.executionCancelGroupId = undefined
         }
         catch (error) {
           const err = error as Error
           this.onError?.(err, { batchKey, retryCount: this.maxRetries, isFallback: true })
-          task.reject(err)
+          this.rejectTask(task, err)
+          task.executionCancelGroupId = undefined
         }
       }),
     )
+    this.executingBatchMap.delete(batch.id)
   }
 
   private calculateBackoffDelay(retryCount: number): number {
@@ -221,6 +304,76 @@ export class BatchQueue<T, R> {
 
   private sleep(ms: number): Promise<void> {
     return new Promise(resolve => setTimeout(resolve, ms))
+  }
+
+  private createTaskExecutionContext(task: BatchTask<T, R>): BatchQueueExecutionContext {
+    if (!task.cancelGroupId) {
+      return {}
+    }
+
+    task.executionCancelGroupId = getRandomUUID()
+    return { cancelGroupId: task.executionCancelGroupId }
+  }
+
+  private getBatchExecutionContext(batch: PendingBatch<T, R>): BatchQueueExecutionContext {
+    if (!batch.tasks.some(task => task.cancelGroupId)) {
+      return {}
+    }
+
+    batch.executionCancelGroupId ??= getRandomUUID()
+    return { cancelGroupId: batch.executionCancelGroupId }
+  }
+
+  private cancelTasksForGroup(batch: PendingBatch<T, R>, cancelGroupId: string, error: Error) {
+    for (const task of batch.tasks) {
+      if (task.cancelGroupId === cancelGroupId) {
+        this.rejectTask(task, error)
+        this.cancelTaskExecution(task)
+      }
+    }
+  }
+
+  private hasActiveTasks(batch: PendingBatch<T, R>): boolean {
+    return batch.tasks.some(task => !task.drained)
+  }
+
+  private removeDrainedTasks(batch: PendingBatch<T, R>) {
+    batch.tasks = batch.tasks.filter(task => !task.drained)
+    batch.totalCharacters = batch.tasks.reduce((total, task) => total + this.getCharacters(task.data), 0)
+  }
+
+  private resolveTask(task: BatchTask<T, R>, value: R) {
+    if (task.drained) {
+      return
+    }
+    task.drained = true
+    task.resolve(value)
+  }
+
+  private rejectTask(task: BatchTask<T, R>, error: Error) {
+    if (task.drained) {
+      return
+    }
+    task.drained = true
+    task.reject(error)
+  }
+
+  private cancelBatchExecution(batch: PendingBatch<T, R>) {
+    if (!batch.executionCancelGroupId) {
+      return
+    }
+
+    this.cancelExecution?.({ cancelGroupId: batch.executionCancelGroupId })
+    batch.executionCancelGroupId = undefined
+  }
+
+  private cancelTaskExecution(task: BatchTask<T, R>) {
+    if (!task.executionCancelGroupId) {
+      return
+    }
+
+    this.cancelExecution?.({ cancelGroupId: task.executionCancelGroupId })
+    task.executionCancelGroupId = undefined
   }
 
   setBatchConfig(config: Partial<Pick<BatchOptions<T, R>, "maxCharactersPerBatch" | "maxItemsPerBatch">>) {

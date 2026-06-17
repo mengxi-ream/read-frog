@@ -152,6 +152,7 @@ export interface TranslateBatchData<TContext = unknown> {
   hash: string
   scheduleAt: number
   context?: TContext
+  cancelGroupId?: string
 }
 
 interface TranslationQueueSetupConfig<TContext = unknown> {
@@ -183,10 +184,11 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
       return Sha256Hex(
         `${data.langConfig.sourceCode}-${data.langConfig.targetCode}-${data.providerConfig.id}`,
         data.context ? JSON.stringify(data.context) : "",
+        data.cancelGroupId ?? "",
       )
     },
     getCharacters: data => data.text.length,
-    executeBatch: async (dataList) => {
+    executeBatch: async (dataList, executionContext) => {
       const { providerConfig } = dataList[0]
       const hash = Sha256Hex(...dataList.map(d => d.hash))
       const earliestScheduleAt = Math.min(...dataList.map(d => d.scheduleAt))
@@ -196,15 +198,30 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
         return await executeBatchTranslation(dataList, promptResolver)
       }
 
-      return requestQueue.enqueue(batchThunk, earliestScheduleAt, hash)
+      return requestQueue.enqueue(
+        batchThunk,
+        earliestScheduleAt,
+        hash,
+        executionContext.cancelGroupId ? { cancelGroupId: executionContext.cancelGroupId } : undefined,
+      )
     },
-    executeIndividual: async (data) => {
+    executeIndividual: async (data, executionContext) => {
       const { text, langConfig, providerConfig, hash, scheduleAt, context } = data
       const thunk = async () => {
         await putBatchRequestRecord({ originalRequestCount: 1, providerConfig })
         return executeTranslate(text, langConfig, providerConfig, promptResolver, { context })
       }
-      return requestQueue.enqueue(thunk, scheduleAt, hash)
+      return requestQueue.enqueue(
+        thunk,
+        scheduleAt,
+        hash,
+        executionContext.cancelGroupId ? { cancelGroupId: executionContext.cancelGroupId } : undefined,
+      )
+    },
+    cancelExecution: (executionContext) => {
+      if (executionContext.cancelGroupId) {
+        requestQueue.cancelGroup(executionContext.cancelGroupId)
+      }
     },
     onError: (error, context) => {
       const errorType = context.isFallback ? "Individual request" : "Batch request"
@@ -216,6 +233,15 @@ async function createTranslationQueues<TContext>(config: TranslationQueueSetupCo
   })
 
   return { requestQueue, batchQueue }
+}
+
+const CANCELLED_SUBTITLES_TRANSLATE_GROUP_TTL_MS = 5 * 60 * 1000
+
+class SubtitlesTranslateRequestGroupCancelledError extends Error {
+  constructor(cancelGroupId: string) {
+    super(`Subtitles translation group cancelled: ${cancelGroupId}`)
+    this.name = "SubtitlesTranslateRequestGroupCancelledError"
+  }
 }
 
 export async function setUpWebPageTranslationQueue() {
@@ -304,9 +330,29 @@ export async function setUpSubtitlesTranslationQueue() {
     batchQueueConfig,
     promptResolver: getSubtitlesTranslatePrompt,
   })
+  const cancelledGroupTimers = new Map<string, ReturnType<typeof setTimeout>>()
+
+  function rememberCancelledGroup(cancelGroupId: string): void {
+    const existingTimer = cancelledGroupTimers.get(cancelGroupId)
+    if (existingTimer) {
+      clearTimeout(existingTimer)
+    }
+
+    const cleanupTimer = setTimeout(() => {
+      cancelledGroupTimers.delete(cancelGroupId)
+    }, CANCELLED_SUBTITLES_TRANSLATE_GROUP_TTL_MS)
+    cancelledGroupTimers.set(cancelGroupId, cleanupTimer)
+  }
+
+  function throwIfGroupCancelled(cancelGroupId?: string): void {
+    if (cancelGroupId && cancelledGroupTimers.has(cancelGroupId)) {
+      throw new SubtitlesTranslateRequestGroupCancelledError(cancelGroupId)
+    }
+  }
 
   onMessage("enqueueSubtitlesTranslateRequest", async (message) => {
-    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webDescription, summary } } = message
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webDescription, summary, cancelGroupId } } = message
+    throwIfGroupCancelled(cancelGroupId)
 
     if (hash) {
       const cached = await db.translationCache.get(hash)
@@ -314,6 +360,7 @@ export async function setUpSubtitlesTranslationQueue() {
         return normalizeTranslationOutput(providerConfig, cached.translation)
       }
     }
+    throwIfGroupCancelled(cancelGroupId)
 
     let result = ""
     const context: SubtitlePromptContext = {
@@ -323,12 +370,20 @@ export async function setUpSubtitlesTranslationQueue() {
     }
 
     if (shouldUseBatchQueue(providerConfig)) {
-      const data = { text, langConfig, providerConfig, hash, scheduleAt, context }
-      result = await batchQueue.enqueue(data)
+      const data = { text, langConfig, providerConfig, hash, scheduleAt, context, cancelGroupId }
+      result = await batchQueue.enqueue(
+        data,
+        cancelGroupId ? { cancelGroupId } : undefined,
+      )
     }
     else {
       const thunk = () => executeTranslate(text, langConfig, providerConfig, getSubtitlesTranslatePrompt)
-      result = await requestQueue.enqueue(thunk, scheduleAt, hash)
+      result = await requestQueue.enqueue(
+        thunk,
+        scheduleAt,
+        hash,
+        cancelGroupId ? { cancelGroupId } : undefined,
+      )
     }
 
     if (result && hash) {
@@ -351,6 +406,13 @@ export async function setUpSubtitlesTranslationQueue() {
     }
 
     return await getOrGenerateSubtitleSummary(videoTitle, subtitlesContext, providerConfig, requestQueue)
+  })
+
+  onMessage("cancelSubtitlesTranslateRequestGroup", (message) => {
+    const { cancelGroupId } = message.data
+    rememberCancelledGroup(cancelGroupId)
+    batchQueue.cancelGroup(cancelGroupId)
+    requestQueue.cancelGroup(cancelGroupId)
   })
 
   onMessage("microsoftBatchTranslate", async (message) => {
