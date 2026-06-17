@@ -66,7 +66,7 @@ describe("v078-to-v079 migration", () => {
     })
   })
 
-  it("preserves active custom model values when a stale selector field is migrated", () => {
+  it("preserves active custom values and leaves retained DeepSeek models untouched", () => {
     const migrated = migrate({
       providersConfig: [
         {
@@ -105,9 +105,9 @@ describe("v078-to-v079 migration", () => {
       customModel: "custom-claude-alias",
     })
     expect(migrated.providersConfig[1].model).toEqual({
-      model: "deepseek-chat",
+      model: "deepseek-v4-pro",
       isCustomModel: true,
-      customModel: "deepseek-v4-pro",
+      customModel: "   ",
     })
     expect(migrated.providersConfig[2].model).toEqual({
       model: "us.amazon.nova-micro-v1:0",

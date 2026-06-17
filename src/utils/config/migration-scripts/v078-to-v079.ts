@@ -53,10 +53,6 @@ const DEPRECATED_PROVIDER_MODEL_FALLBACKS: Record<string, Record<string, string>
     "meta-llama/llama-prompt-guard-2-22m": "llama-3.1-8b-instant",
     "meta-llama/llama-prompt-guard-2-86m": "llama-3.1-8b-instant",
   },
-  deepseek: {
-    "deepseek-v4-flash": "deepseek-chat",
-    "deepseek-v4-pro": "deepseek-chat",
-  },
 }
 
 function getNonEmptyString(value: unknown): string | null {

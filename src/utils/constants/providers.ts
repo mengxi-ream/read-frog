@@ -27,7 +27,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "deepseek": {
-    model: "deepseek-chat",
+    model: "deepseek-v4-flash",
     isCustomModel: false,
     customModel: null,
   },
