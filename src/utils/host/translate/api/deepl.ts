@@ -69,7 +69,7 @@ async function requestDeepLTranslations(
 }
 
 function shouldUseBackgroundFetch(options?: { forceBackgroundFetch?: boolean }): boolean {
-  return options?.forceBackgroundFetch ?? typeof window !== "undefined"
+  return options?.forceBackgroundFetch === true
 }
 
 async function fetchViaBackground(url: string, apiKey: string, body: string): Promise<DeepLFetchResponse> {
