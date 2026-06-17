@@ -310,6 +310,26 @@ describe("translatedSubtitlesDownloader", () => {
     }))
   })
 
+  it("falls back when optimization hides a raw collapsed AI segment", async () => {
+    mocks.getLocalConfig.mockResolvedValue(createConfig({ aiSegmentation: true }))
+    mocks.aiSegmentBlock.mockResolvedValue([
+      { text: "Hi.", start: 500, end: 501 },
+      { text: "OK.", start: 501, end: 1000 },
+    ])
+
+    await createDownloader([
+      { text: "Hi.", start: 0, end: 500 },
+      { text: "OK.", start: 500, end: 1000 },
+    ], false).downloader.download()
+
+    expect(mocks.aiSegmentBlock).toHaveBeenCalledTimes(1)
+    expect(mocks.downloadSubtitlesAsSrt).toHaveBeenCalledWith(expect.objectContaining({
+      subtitles: [
+        { text: "zh:Hi. OK.", start: 0, end: 1000 },
+      ],
+    }))
+  })
+
   it("falls back to optimized source timing when AI segmentation collapses a cue to a boundary", async () => {
     const followUpText = "Actually this next cue contains enough words that it should remain separate from the short greeting during subtitle optimization across many different transcript timing examples."
     mocks.getLocalConfig.mockResolvedValue(createConfig({ aiSegmentation: true }))

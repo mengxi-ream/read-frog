@@ -248,7 +248,7 @@ export class TranslatedSubtitlesDownloader {
 
     const optimized = optimizeSubtitles(segmented, sourceLanguage)
 
-    if (!this.hasUnsafeExportTiming(chunk, optimized)) {
+    if (!this.hasUnsafeSegmentedExportTiming(chunk, segmented, optimized)) {
       return optimized
     }
 
@@ -269,7 +269,7 @@ export class TranslatedSubtitlesDownloader {
 
         const retryOptimized = optimizeSubtitles(retrySegmented, sourceLanguage)
 
-        if (this.hasUnsafeExportTiming(retryChunk, retryOptimized)) {
+        if (this.hasUnsafeSegmentedExportTiming(retryChunk, retrySegmented, retryOptimized)) {
           return optimizeSubtitles(chunk, sourceLanguage)
         }
 
@@ -284,6 +284,14 @@ export class TranslatedSubtitlesDownloader {
 
   private hasUnsafeExportTiming(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
     return this.hasInvalidTimingShape(source, candidate) || this.hasTimingCoverageGap(source, candidate)
+  }
+
+  private hasUnsafeSegmentedExportTiming(
+    source: SubtitlesFragment[],
+    segmented: SubtitlesFragment[],
+    optimized: SubtitlesFragment[],
+  ): boolean {
+    return this.hasInvalidTimingShape(source, segmented) || this.hasUnsafeExportTiming(source, optimized)
   }
 
   private buildSourceSubtitleChunks(
