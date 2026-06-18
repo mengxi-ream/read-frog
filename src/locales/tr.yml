@@ -637,11 +637,11 @@ options:
       label: Ses
       fallback: Yedek
       selectPlaceholder: Bir ses seçin
-      preview: Önizleme
+      noVoicesFound: Ses bulunamadı
       previewSample: Read Frog'dan merhaba! Yüksek sesle okurken böyle ses çıkaracağım.
     languageVoice:
       label: Dil Sesi
-      reset: Varsayılana Sıfırla
+      reset: Sıfırla
       description: Bir dil seçin ve TTS bu dili algıladığında kullanılacak sesi atayın.
     rate:
       label: Hız (%)

@@ -637,11 +637,11 @@ options:
       label: Giọng nói
       fallback: Dự phòng
       selectPlaceholder: Chọn giọng nói
-      preview: Xem trước
+      noVoicesFound: Không tìm thấy giọng nói
       previewSample: Xin chào từ Read Frog! Đây là cách tôi sẽ phát âm khi đọc to.
     languageVoice:
       label: Giọng nói theo ngôn ngữ
-      reset: Đặt lại mặc định
+      reset: Đặt lại
       description: Chọn một ngôn ngữ và gán giọng nói sẽ được dùng khi TTS phát hiện ngôn ngữ đó.
     rate:
       label: Tốc độ (%)

@@ -752,11 +752,11 @@ options:
       label: Voz
       fallback: Alternativa
       selectPlaceholder: Selecciona una voz
-      preview: Vista previa
+      noVoicesFound: No se encontraron voces
       previewSample: ¡Hola desde Read Frog! Así sonaré al leer en voz alta.
     languageVoice:
       label: Voz por idioma
-      reset: Restablecer a predeterminado
+      reset: Restablecer
       description: Selecciona un idioma y asigna una voz usada cuando TTS detecte ese idioma.
     rate:
       label: Velocidad (%)

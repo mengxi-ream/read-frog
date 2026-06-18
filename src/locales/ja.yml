@@ -637,11 +637,11 @@ options:
       label: ボイス
       fallback: フォールバック
       selectPlaceholder: ボイスを選択
-      preview: 試聴
+      noVoicesFound: ボイスが見つかりません
       previewSample: Read Frog からこんにちは！朗読するときはこのように聞こえます。
     languageVoice:
       label: 言語別ボイス
-      reset: デフォルトにリセット
+      reset: リセット
       description: 言語を選択し、TTS がその言語を検出したときに使用するボイスを割り当てます。
     rate:
       label: 速度 (%)

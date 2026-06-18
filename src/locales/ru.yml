@@ -637,11 +637,11 @@ options:
       label: Голос
       fallback: Резервный
       selectPlaceholder: Выберите голос
-      preview: Предпросмотр
+      noVoicesFound: Голоса не найдены
       previewSample: Привет от Read Frog! Так я буду звучать при чтении вслух.
     languageVoice:
       label: Голос для языка
-      reset: Сбросить на значение по умолчанию
+      reset: Сброс
       description: Выберите язык и назначьте голос, который будет использоваться, когда TTS определит этот язык.
     rate:
       label: Скорость (%)

@@ -752,11 +752,11 @@ options:
       label: 語音
       fallback: 備用
       selectPlaceholder: 請選擇一個語音
-      preview: 試聽
+      noVoicesFound: 找不到語音
       previewSample: 陪讀蛙向你問好！這是朗讀功能的語音。
     languageVoice:
       label: 語言語音
-      reset: 重設為預設
+      reset: 重設
       description: 選擇一種語言，並指定當 TTS 偵測到該語言時要使用的語音。
     rate:
       label: 語速 (%)

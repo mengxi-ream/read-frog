@@ -752,11 +752,11 @@ options:
       label: 声音
       fallback: 兜底
       selectPlaceholder: 请选择一个声音
-      preview: 试听
+      noVoicesFound: 未找到语音
       previewSample: 来自 Read Frog 的问候！这是我朗读时的声音。
     languageVoice:
       label: 语言语音
-      reset: 重置为默认
+      reset: 重置
       description: 选择一种语言，并指定在 TTS 检测到该语言时使用的语音。
     rate:
       label: 语速 (%)

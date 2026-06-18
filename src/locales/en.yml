@@ -752,11 +752,11 @@ options:
       label: Voice
       fallback: Fallback
       selectPlaceholder: Select a voice
-      preview: Preview
+      noVoicesFound: No voices found
       previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
     languageVoice:
       label: Language Voice
-      reset: Reset to Default
+      reset: Reset
       description: Select a language and assign a voice used when TTS detects that language.
     rate:
       label: Rate (%)
