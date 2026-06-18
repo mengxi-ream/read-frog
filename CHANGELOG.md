@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.35.1
+
+### Patch Changes
+
+- [#1702](https://github.com/mengxi-ream/read-frog/pull/1702) [`89d05cf`](https://github.com/mengxi-ream/read-frog/commit/89d05cf0ddd93ccd610d93f57db8b5ccf2f0f52a) Thanks [@cinziw](https://github.com/cinziw)! - fix(translate): remove unused background fetch path for DeepL providers
+
+- [#1709](https://github.com/mengxi-ream/read-frog/pull/1709) [`0bb271a`](https://github.com/mengxi-ream/read-frog/commit/0bb271a155b36010851fd42efdaa18163ebf902a) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(tts): support Firefox background audio playback
+
 ## 1.35.0
 
 ### Minor Changes
