@@ -1,4 +1,4 @@
-export const WEB_PAGE_PROMPT_TOKENS = ["targetLanguage", "input", "webTitle", "webDescription", "webContent", "webSummary"] as const
+export const WEB_PAGE_PROMPT_TOKENS = ["targetLanguage", "input", "webTitle", "webDescription", "webContent", "webSummary", "glossary"] as const
 export const SUBTITLE_PROMPT_TOKENS = ["targetLanguage", "input", "webTitle", "webDescription", "videoSummary"] as const
 export const TOKENS = WEB_PAGE_PROMPT_TOKENS
 
@@ -15,6 +15,7 @@ export const WEB_TITLE = WEB_PAGE_PROMPT_TOKENS[2]
 export const WEB_DESCRIPTION = WEB_PAGE_PROMPT_TOKENS[3]
 export const WEB_CONTENT = WEB_PAGE_PROMPT_TOKENS[4]
 export const WEB_SUMMARY = WEB_PAGE_PROMPT_TOKENS[5]
+export const GLOSSARY = WEB_PAGE_PROMPT_TOKENS[6]
 export const SUBTITLE_TARGET_LANGUAGE = SUBTITLE_PROMPT_TOKENS[0]
 export const SUBTITLE_INPUT = SUBTITLE_PROMPT_TOKENS[1]
 export const SUBTITLE_WEB_TITLE = SUBTITLE_PROMPT_TOKENS[2]
@@ -33,7 +34,8 @@ export const DEFAULT_TRANSLATE_SYSTEM_PROMPT = `You are a professional ${getToke
 
 ## Document Metadata for Context Awareness
 Webpage title: ${getTokenCellText(WEB_TITLE)}
-Webpage summary: ${getTokenCellText(WEB_SUMMARY)}`
+Webpage summary: ${getTokenCellText(WEB_SUMMARY)}
+${getTokenCellText(GLOSSARY)}`
 
 export const DEFAULT_SUBTITLE_TRANSLATE_SYSTEM_PROMPT = `You are a professional ${getTokenCellText(SUBTITLE_TARGET_LANGUAGE)} native translator who needs to fluently translate subtitles into ${getTokenCellText(SUBTITLE_TARGET_LANGUAGE)}.
 

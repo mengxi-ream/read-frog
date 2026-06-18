@@ -7,6 +7,7 @@ import { isLLMProviderConfig } from "@/types/config/provider"
 import { putBatchRequestRecord } from "@/utils/batch-request-record"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { BATCH_SEPARATOR, BATCH_SEPARATOR_LINE_PATTERN } from "@/utils/constants/prompt"
+import { generateText } from "ai"
 import { generateArticleSummary } from "@/utils/content/summary"
 import { cleanText } from "@/utils/content/utils"
 import { db } from "@/utils/db/dexie/db"
@@ -19,6 +20,9 @@ import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { getSubtitlesTranslatePrompt } from "@/utils/prompts/subtitles"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { getModelById } from "@/utils/providers/model"
+import { resolveModelId } from "@/utils/providers/model-id"
+import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { BatchQueue } from "@/utils/request/batch-queue"
 import { RequestQueue } from "@/utils/request/request-queue"
 import { ensureInitializedConfig } from "./config"
@@ -230,7 +234,7 @@ export async function setUpWebPageTranslationQueue() {
   })
 
   onMessage("enqueueTranslateRequest", async (message) => {
-    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webDescription, webContent, webSummary } } = message
+    const { data: { text, langConfig, providerConfig, scheduleAt, hash, webTitle, webDescription, webContent, webSummary, glossary } } = message
 
     // Check cache first
     if (hash) {
@@ -246,6 +250,7 @@ export async function setUpWebPageTranslationQueue() {
       webDescription: normalizePromptContextValue(webDescription),
       webContent: normalizePromptContextValue(webContent),
       webSummary: normalizePromptContextValue(webSummary),
+      glossary: normalizePromptContextValue(glossary),
     }
 
     if (shouldUseBatchQueue(providerConfig)) {
@@ -279,6 +284,46 @@ export async function setUpWebPageTranslationQueue() {
     }
 
     return await getOrGenerateWebPageSummary(webTitle, webContent, providerConfig, requestQueue)
+  })
+
+  onMessage("generateGlossary", async (message) => {
+    const { pageContent, providerConfig } = message.data
+
+    if (!isLLMProviderConfig(providerConfig) || !pageContent) {
+      return null
+    }
+
+    try {
+      const modelName = resolveModelId(providerConfig.model)
+      const model = await getModelById(providerConfig.id)
+      const providerOptions = getProviderOptionsWithOverride(modelName ?? "", providerConfig.provider, providerConfig.providerOptions)
+
+      const result = await generateText({
+        model,
+        prompt: `Extract terminology that needs consistent translation from the following content.
+For each term, provide its recommended translation.
+Only include terms where consistent translation across the document matters:
+proper nouns, technical terms, domain-specific vocabulary, and ambiguous words.
+
+Output ONLY the term list in this exact format, one per line:
+- original term → translation
+
+Content:
+${pageContent}`,
+        maxOutputTokens: 500,
+        temperature: 0.1,
+        providerOptions,
+      })
+
+      const lines = result.text.trim().split("\n").filter(line => line.trim().startsWith("-") && line.includes("→"))
+      if (lines.length === 0) return null
+
+      return lines.join("\n")
+    }
+    catch (error) {
+      logger.warn("generateGlossary failed:", error)
+      return null
+    }
   })
 
   onMessage("setTranslateRequestQueueConfig", (message) => {

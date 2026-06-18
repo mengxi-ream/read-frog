@@ -10,6 +10,7 @@ export interface WebPagePromptContext {
   webDescription?: string | null
   webContent?: string | null
   webSummary?: string | null
+  glossary?: string | null
 }
 
 export interface SubtitlePromptContext {

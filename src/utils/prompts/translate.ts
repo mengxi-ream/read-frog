@@ -7,6 +7,7 @@ import {
   DEFAULT_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_SYSTEM_PROMPT,
   getTokenCellText,
+  GLOSSARY,
   INPUT,
   TARGET_LANGUAGE,
   WEB_CONTENT,
@@ -61,11 +62,12 @@ export function getTranslatePromptFromConfig(
 ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
   }
 
-  // Build title and summary replacement values
+  // Build context replacement values
   const title = resolvePromptReplacementValue(options?.context?.webTitle, "No title available")
   const description = resolvePromptReplacementValue(options?.context?.webDescription, "No description available")
   const contentText = resolvePromptReplacementValue(options?.context?.webContent, "No content available")
   const summary = resolvePromptReplacementValue(options?.context?.webSummary, "No summary available")
+  const glossary = resolvePromptReplacementValue(options?.context?.glossary, "")
 
   // Replace tokens in both prompts
   const replaceTokens = (text: string) =>
@@ -76,6 +78,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
       .replaceAll(getTokenCellText(WEB_DESCRIPTION), description)
       .replaceAll(getTokenCellText(WEB_CONTENT), contentText)
       .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
+      .replaceAll(getTokenCellText(GLOSSARY), glossary)
 
   return {
     systemPrompt: replaceTokens(systemPrompt),

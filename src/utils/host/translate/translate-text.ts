@@ -61,6 +61,7 @@ function normalizeWebPagePromptContext(webPageContext?: WebPagePromptContext): W
     webDescription: normalizePromptContextValue(webPageContext.webDescription),
     webContent: normalizePromptContextValue(webPageContext.webContent),
     webSummary: normalizePromptContextValue(webPageContext.webSummary),
+    glossary: normalizePromptContextValue(webPageContext.glossary),
   }
 }
 
@@ -105,6 +106,9 @@ async function buildWebPageHashComponents(
     }
     if (normalizedWebPageContext.webSummary) {
       hashComponents.push(`webSummary:${normalizedWebPageContext.webSummary}`)
+    }
+    if (normalizedWebPageContext.glossary) {
+      hashComponents.push(`glossary:${normalizedWebPageContext.glossary}`)
     }
   }
 
@@ -162,6 +166,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     webDescription: normalizedWebPageContext?.webDescription,
     webContent: normalizedWebPageContext?.webContent,
     webSummary: normalizedWebPageContext?.webSummary,
+    glossary: normalizedWebPageContext?.glossary,
   })
 }
 

@@ -8,6 +8,7 @@ import { logger } from "@/utils/logger"
 import { getLocalConfig } from "../../config/storage"
 import { prepareTranslationText } from "./text-preparation"
 import { MIN_LENGTH_FOR_SKIP_LLM_DETECTION, shouldSkipByLanguage, translateTextCore } from "./translate-text"
+import { extractGlossary } from "./term-extraction"
 import { getOrCreateWebPageContext } from "./webpage-context"
 import { getOrGenerateWebPageSummary } from "./webpage-summary"
 
@@ -32,7 +33,7 @@ async function getWebPagePromptContext(
   providerConfig: ReturnType<typeof resolveProviderConfig>,
   enableAIContentAware: boolean,
   includeSummary: boolean,
-): Promise<{ webTitle: string, webDescription?: string, webContent: string, webSummary?: string } | undefined> {
+): Promise<{ webTitle: string, webDescription?: string, webContent: string, webSummary?: string, glossary?: string } | undefined> {
   if (!isLLMProviderConfig(providerConfig)) {
     return undefined
   }
@@ -42,15 +43,19 @@ async function getWebPagePromptContext(
     return undefined
   }
 
-  const webSummary = includeSummary
-    ? await getOrGenerateWebPageSummary(webPageContext, providerConfig, enableAIContentAware)
-    : undefined
+  const [webSummary, glossary] = await Promise.all([
+    includeSummary
+      ? getOrGenerateWebPageSummary(webPageContext, providerConfig, enableAIContentAware)
+      : Promise.resolve(undefined),
+    extractGlossary(webPageContext.webContent, providerConfig),
+  ])
 
   return {
     webTitle: webPageContext.webTitle,
     webDescription: webPageContext.webDescription,
     webContent: webPageContext.webContent,
     webSummary: webSummary ?? undefined,
+    glossary: glossary ?? undefined,
   }
 }
 
@@ -59,7 +64,7 @@ async function translateTextUsingPageConfig(
   text: string,
   options: {
     extraHashTags?: string[]
-    webPageContext?: { webTitle?: string | null, webDescription?: string | null, webContent?: string | null, webSummary?: string | null }
+    webPageContext?: { webTitle?: string | null, webDescription?: string | null, webContent?: string | null, webSummary?: string | null, glossary?: string | null }
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
