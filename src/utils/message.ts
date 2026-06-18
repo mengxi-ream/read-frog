@@ -14,7 +14,6 @@ import type {
 } from "@/types/edge-tts"
 import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import type {
-  TTSOffscreenStopRequest,
   TTSPlaybackStartRequest,
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
@@ -77,12 +76,12 @@ interface ProtocolMap {
   edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>
   edgeTtsHealthCheck: () => Promise<EdgeTTSHealthStatus>
   // tts playback
-  ttsPlaybackEnsureOffscreen: () => Promise<{ ok: true }>
+  ttsPlaybackPrepare: () => Promise<{ ok: true }>
   ttsPlaybackStart: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>
   ttsPlaybackStop: (data: TTSPlaybackStopRequest) => Promise<{ ok: true }>
   // offscreen internal
   ttsOffscreenPlay: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>
-  ttsOffscreenStop: (data: TTSOffscreenStopRequest) => Promise<{ ok: true }>
+  ttsOffscreenStop: (data: TTSPlaybackStopRequest) => Promise<{ ok: true }>
 }
 
 export const { sendMessage, onMessage }

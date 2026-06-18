@@ -10,23 +10,19 @@ export interface SearchItem {
   pageKey: string
 }
 
-const IS_FIREFOX = import.meta.env.BROWSER === "firefox"
-
 type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pageKey"> & {
   titleKey: I18nKey
   descriptionKey?: I18nKey
   pageKey: I18nKey
 }
 
-const TTS_SEARCH_ITEMS: SearchItemDefinition[] = !IS_FIREFOX
-  ? [{
-      sectionId: "tts-config",
-      route: "/tts",
-      titleKey: "options.tts.title",
-      descriptionKey: "options.tts.description",
-      pageKey: "options.tts.title",
-    }]
-  : []
+const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [{
+  sectionId: "tts-config",
+  route: "/tts",
+  titleKey: "options.tts.title",
+  descriptionKey: "options.tts.description",
+  pageKey: "options.tts.title",
+}]
 
 const CONFIG_SEARCH_ITEMS = [
   {

@@ -12,9 +12,5 @@ export type TTSPlaybackStartResponse
 
 export interface TTSPlaybackStopRequest {
   requestId?: string
-}
-
-export interface TTSOffscreenStopRequest {
-  requestId?: string
   reason?: TTSPlaybackStopReason
 }
