@@ -10,23 +10,11 @@ export interface SearchItem {
   pageKey: string
 }
 
-const IS_FIREFOX = import.meta.env.BROWSER === "firefox"
-
 type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pageKey"> & {
   titleKey: I18nKey
   descriptionKey?: I18nKey
   pageKey: I18nKey
 }
-
-const TTS_SEARCH_ITEMS: SearchItemDefinition[] = !IS_FIREFOX
-  ? [{
-      sectionId: "tts-config",
-      route: "/tts",
-      titleKey: "options.tts.title",
-      descriptionKey: "options.tts.description",
-      pageKey: "options.tts.title",
-    }]
-  : []
 
 const CONFIG_SEARCH_ITEMS = [
   {
@@ -99,15 +87,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.apiProviders.title",
   },
 
-  // Custom Actions page
-  {
-    sectionId: "custom-actions",
-    route: "/custom-actions",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.description",
-    pageKey: "options.floatingButtonAndToolbar.selectionToolbar.customActions.title",
-  },
-
   // Translation page
   {
     sectionId: "translation-mode",
@@ -142,20 +121,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     route: "/translation",
     titleKey: "options.translation.translationStyle.title",
     descriptionKey: "options.translation.translationStyle.description",
-    pageKey: "options.translation.title",
-  },
-  {
-    sectionId: "ai-content-aware",
-    route: "/translation",
-    titleKey: "options.translation.aiContentAware.title",
-    descriptionKey: "options.translation.aiContentAware.description",
-    pageKey: "options.translation.title",
-  },
-  {
-    sectionId: "personalized-prompts",
-    route: "/translation",
-    titleKey: "options.translation.personalizedPrompts.title",
-    descriptionKey: "options.translation.personalizedPrompts.description",
     pageKey: "options.translation.title",
   },
   {
@@ -221,59 +186,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
 
-  // Floating Button page
-  {
-    sectionId: "floating-button-toggle",
-    route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.globalToggle.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.globalToggle.description",
-    pageKey: "options.overlayTools.floatingButton.title",
-  },
-  {
-    sectionId: "floating-button-click-action",
-    route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.clickAction.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.clickAction.description",
-    pageKey: "options.overlayTools.floatingButton.title",
-  },
-  {
-    sectionId: "floating-button-disabled-sites",
-    route: "/floating-button",
-    titleKey: "options.floatingButtonAndToolbar.floatingButton.disabledSites.title",
-    descriptionKey: "options.floatingButtonAndToolbar.floatingButton.disabledSites.description",
-    pageKey: "options.overlayTools.floatingButton.title",
-  },
-
-  // Selection Toolbar page
-  {
-    sectionId: "selection-toolbar-toggle",
-    route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.globalToggle.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.globalToggle.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
-  },
-  {
-    sectionId: "selection-toolbar-opacity",
-    route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.opacity.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
-  },
-  {
-    sectionId: "selection-translation-shortcut",
-    route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.shortcut.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.shortcut.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
-  },
-  {
-    sectionId: "selection-toolbar-disabled-sites",
-    route: "/selection-toolbar",
-    titleKey: "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.title",
-    descriptionKey: "options.floatingButtonAndToolbar.selectionToolbar.disabledSites.description",
-    pageKey: "options.overlayTools.selectionToolbar.title",
-  },
-
   // Context Menu page
   {
     sectionId: "context-menu-translate",
@@ -282,75 +194,6 @@ export const SEARCH_ITEMS: SearchItem[] = [
     descriptionKey: "options.floatingButtonAndToolbar.contextMenu.translate.description",
     pageKey: "options.overlayTools.contextMenu.title",
   },
-
-  // Input Translation page
-  {
-    sectionId: "input-translation-toggle",
-    route: "/input-translation",
-    titleKey: "options.inputTranslation.toggle.title",
-    descriptionKey: "options.inputTranslation.toggle.description",
-    pageKey: "options.overlayTools.inputTranslation.title",
-  },
-  {
-    sectionId: "input-translation-threshold-section",
-    route: "/input-translation",
-    titleKey: "options.inputTranslation.threshold.title",
-    descriptionKey: "options.inputTranslation.threshold.description",
-    pageKey: "options.overlayTools.inputTranslation.title",
-  },
-  {
-    sectionId: "input-translation-languages",
-    route: "/input-translation",
-    titleKey: "options.inputTranslation.languages.title",
-    descriptionKey: "options.inputTranslation.languages.description",
-    pageKey: "options.overlayTools.inputTranslation.title",
-  },
-
-  // Video Subtitles page
-  {
-    sectionId: "subtitles-config",
-    route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.title",
-    descriptionKey: "options.videoSubtitles.description",
-    pageKey: "options.videoSubtitles.title",
-  },
-  {
-    sectionId: "subtitles-style",
-    route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.style.title",
-    descriptionKey: "options.videoSubtitles.style.description",
-    pageKey: "options.videoSubtitles.title",
-  },
-  {
-    sectionId: "subtitles-custom-prompts",
-    route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.customPrompts.title",
-    descriptionKey: "options.videoSubtitles.customPrompts.description",
-    pageKey: "options.videoSubtitles.title",
-  },
-  {
-    sectionId: "subtitles-request-rate",
-    route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.requestQueueConfig.title",
-    pageKey: "options.videoSubtitles.title",
-  },
-  {
-    sectionId: "subtitles-request-batch",
-    route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.batchQueueConfig.title",
-    descriptionKey: "options.videoSubtitles.batchQueueConfig.description",
-    pageKey: "options.videoSubtitles.title",
-  },
-  {
-    sectionId: "clear-ai-segmentation-cache",
-    route: "/video-subtitles",
-    titleKey: "options.videoSubtitles.aiSegmentation.clearCacheDialog.title",
-    descriptionKey: "options.videoSubtitles.aiSegmentation.clearCacheDialog.description",
-    pageKey: "options.videoSubtitles.title",
-  },
-
-  // Text to Speech page
-  ...TTS_SEARCH_ITEMS,
 
   // Config page
   ...CONFIG_SEARCH_ITEMS,
