@@ -22,10 +22,10 @@ export const subtitlesSettingsPanelViewAtom = atom<ViewId>(ROOT_VIEW)
 
 export const TranslatedDownloadPhase = {
   Idle: "idle",
+  Checking: "checking",
   Preparing: "preparing",
   Translating: "translating",
   Complete: "complete",
-  Error: "error",
 } as const
 
 // eslint-disable-next-line ts/no-redeclare

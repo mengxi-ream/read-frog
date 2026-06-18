@@ -33,20 +33,67 @@ describe("download translated subtitles", () => {
   afterEach(() => {
     downloadTranslatedSubtitles.mockReset()
     cleanup()
+    vi.useRealTimers()
   })
 
-  it("delegates downloads and renders atom-backed phases", () => {
+  it("delegates downloads and keeps the checking phase silent", () => {
     const store = renderComponent()
     const button = screen.getByRole("button")
     fireEvent.click(button)
     expect(downloadTranslatedSubtitles).toHaveBeenCalledTimes(1)
 
+    setStatus(store, TranslatedDownloadPhase.Checking, null)
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(button).toBeDisabled()
+  })
+
+  it("delays the preparing message and does not show preparing progress", async () => {
+    vi.useFakeTimers()
+    const store = renderComponent()
+    const button = screen.getByRole("button")
+
+    setStatus(store, TranslatedDownloadPhase.Preparing, 0)
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(button).toBeDisabled()
+
+    await act(() => vi.advanceTimersByTime(599))
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+
+    await act(() => vi.advanceTimersByTime(1))
+    const message = screen.getByText("subtitles.actions.downloadTranslatedPreparing")
+    expect(message).toBeInTheDocument()
+    expect(message).toHaveClass("text-muted-foreground")
+    expect(message).not.toHaveTextContent("(0%)")
+  })
+
+  it("does not show a delayed preparing message after leaving preparing", async () => {
+    vi.useFakeTimers()
+    const store = renderComponent()
+
+    setStatus(store, TranslatedDownloadPhase.Preparing, 0)
+    await act(() => vi.advanceTimersByTime(300))
+
+    setStatus(store, TranslatedDownloadPhase.Translating, 20)
+    await act(() => vi.advanceTimersByTime(300))
+
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(screen.getByText("subtitles.actions.downloadTranslatedTranslating (20%)")).toBeInTheDocument()
+  })
+
+  it("renders translating progress immediately and completion as success", () => {
+    const store = renderComponent()
+    const button = screen.getByRole("button")
+
     setStatus(store, TranslatedDownloadPhase.Translating, 45)
-    expect(screen.getByText("subtitles.actions.downloadTranslatedTranslating (45%)")).toBeInTheDocument()
+    const translatingMessage = screen.getByText("subtitles.actions.downloadTranslatedTranslating (45%)")
+    expect(translatingMessage).toBeInTheDocument()
+    expect(translatingMessage).toHaveClass("text-muted-foreground")
     expect(button).toBeDisabled()
 
     setStatus(store, TranslatedDownloadPhase.Complete, null)
-    expect(screen.getByText("subtitles.actions.downloadTranslatedComplete")).toBeInTheDocument()
+    const completeMessage = screen.getByText("subtitles.actions.downloadTranslatedComplete")
+    expect(completeMessage).toBeInTheDocument()
+    expect(completeMessage).toHaveClass("text-emerald-300")
     expect(button).not.toBeDisabled()
   })
 })

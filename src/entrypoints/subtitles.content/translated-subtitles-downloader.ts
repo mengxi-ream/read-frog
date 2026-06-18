@@ -39,7 +39,7 @@ export class TranslatedSubtitlesDownloader {
     const operationId = ++this.operationId
     const pageTitle = document.title || ""
     const videoId = this.config.getVideoId?.()
-    this.setStatus(TranslatedDownloadPhase.Preparing, 0)
+    this.setStatus(TranslatedDownloadPhase.Checking, null)
 
     try {
       const configSnapshot = await getLocalConfig()
@@ -55,6 +55,7 @@ export class TranslatedSubtitlesDownloader {
       }
 
       this.assertDifferentTargetLanguage(configSnapshot)
+      this.setStatus(TranslatedDownloadPhase.Preparing, 0)
 
       const sourceProcessedSubtitles = this.fetcher.isPreSegmented?.()
         ? [...sourceSubtitles]
@@ -93,7 +94,7 @@ export class TranslatedSubtitlesDownloader {
         return
       }
       toast.error(error instanceof Error ? error.message : String(error))
-      this.setStatus(TranslatedDownloadPhase.Error, null)
+      this.setStatus(TranslatedDownloadPhase.Idle, null)
     }
     finally {
       if (this.isActive(operationId)) {

@@ -4,8 +4,13 @@ import { Button } from "@/components/ui/base-ui/button"
 import { SubtitlesSettingsItem } from "./subtitles-settings-item"
 import { useDownloadTranslatedSubtitles } from "./use-download-translated-subtitles"
 
+const MESSAGE_TONE_CLASS = {
+  muted: "text-muted-foreground",
+  success: "text-emerald-300",
+} as const
+
 export function DownloadTranslatedSubtitles() {
-  const { message, progress, isRunning, download } = useDownloadTranslatedSubtitles()
+  const { message, messageTone, progress, isRunning, download } = useDownloadTranslatedSubtitles()
   const buttonId = "read-frog-download-translated-subtitles"
   const title = i18n.t("subtitles.actions.downloadTranslated")
 
@@ -16,7 +21,10 @@ export function DownloadTranslatedSubtitles() {
         <div className="flex min-w-0 flex-col">
           <span className="truncate">{title}</span>
           {message && (
-            <span className="text-xs leading-4 text-yellow-300 drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]" aria-live="polite">
+            <span
+              className={`text-xs leading-4 ${MESSAGE_TONE_CLASS[messageTone ?? "muted"]} drop-shadow-[0_1px_1px_rgba(0,0,0,0.85)]`}
+              aria-live="polite"
+            >
               {message}
               {progress !== null && (
                 <>

@@ -106,6 +106,7 @@ describe("translatedSubtitlesDownloader", () => {
     expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(1, fragments.slice(0, 5), expect.any(Object), config)
     expect(mocks.translateSubtitles).toHaveBeenNthCalledWith(2, fragments.slice(5), expect.any(Object), config)
     expect(statuses).toEqual(expect.arrayContaining([
+      { phase: TranslatedDownloadPhase.Checking, progress: null },
       { phase: TranslatedDownloadPhase.Preparing, progress: 0 },
       { phase: TranslatedDownloadPhase.Translating, progress: 83 },
       { phase: TranslatedDownloadPhase.Translating, progress: 100 },
@@ -171,10 +172,10 @@ describe("translatedSubtitlesDownloader", () => {
 
     expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
     expect(mocks.toastError).toHaveBeenCalledWith("Batch failed")
-    expect(status()).toEqual({ phase: TranslatedDownloadPhase.Error, progress: null })
+    expect(status()).toEqual({ phase: TranslatedDownloadPhase.Idle, progress: null })
 
     finishSlowBatch(translated(fragments.slice(5)))
-    await vi.waitFor(() => expect(status()).toEqual({ phase: TranslatedDownloadPhase.Error, progress: null }))
+    await vi.waitFor(() => expect(status()).toEqual({ phase: TranslatedDownloadPhase.Idle, progress: null }))
   })
 
   it.each([
@@ -188,16 +189,23 @@ describe("translatedSubtitlesDownloader", () => {
 
     expect(mocks.downloadSubtitlesAsSrt).not.toHaveBeenCalled()
     expect(mocks.toastError).toHaveBeenCalledWith("subtitles.errors.translatedExportIncomplete")
-    expect(status()).toEqual({ phase: TranslatedDownloadPhase.Error, progress: null })
+    expect(status()).toEqual({ phase: TranslatedDownloadPhase.Idle, progress: null })
   })
 
-  it("rejects same-language export", async () => {
+  it("rejects same-language export before showing the preparing state", async () => {
     mocks.getLocalConfig.mockResolvedValue(createConfig({ targetCode: "eng" }))
+    const statuses: Array<ReturnType<typeof status>> = []
+    const unsubscribe = subtitlesStore.sub(translatedSubtitlesDownloadStatusAtom, () => statuses.push(status()))
 
     await createDownloader(lines(1)).downloader.download()
+    unsubscribe()
 
     expect(mocks.translateSubtitles).not.toHaveBeenCalled()
     expect(mocks.toastError).toHaveBeenCalledWith("subtitles.errors.translatedExportSameLanguage")
+    expect(statuses).toEqual([
+      { phase: TranslatedDownloadPhase.Checking, progress: null },
+      { phase: TranslatedDownloadPhase.Idle, progress: null },
+    ])
   })
 
   it("prevents concurrent duplicate downloads", async () => {
