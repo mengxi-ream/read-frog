@@ -33,7 +33,7 @@ describe("getProviderOptions", () => {
       const thinkingLevel31ProOptions = getProviderOptions("gemini-3.1-pro-preview", "google")
       expect(thinkingLevel31ProOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
 
-      const thinkingLevel31FlashLiteOptions = getProviderOptions("gemini-3.1-flash-lite", "google")
+      const thinkingLevel31FlashLiteOptions = getProviderOptions("gemini-3.1-flash-lite-preview", "google")
       expect(thinkingLevel31FlashLiteOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
 
       const thinkingLevel35FlashOptions = getProviderOptions("gemini-3.5-flash", "google")
@@ -63,8 +63,9 @@ describe("getProviderOptions", () => {
       expect(mixedCaseO4MiniOptions.openai?.reasoningEffort).toBe("minimal")
     })
 
-    it("should expose the supported OpenAI GPT-5.4 model ids", () => {
+    it("should expose the supported OpenAI GPT-5.5 and GPT-5.4 model ids", () => {
       expect(LLM_PROVIDER_MODELS.openai).toEqual(expect.arrayContaining([
+        "gpt-5.5",
         "gpt-5.4-pro",
         "gpt-5.4",
         "gpt-5.4-mini",
@@ -73,7 +74,15 @@ describe("getProviderOptions", () => {
       ]))
     })
 
+    it("should expose the supported Anthropic Fable model ids", () => {
+      expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-fable-5")
+      expect(LLM_PROVIDER_MODELS.bedrock).toContain("us.anthropic.claude-fable-5")
+    })
+
     it("should return the documented floor for GPT-5 model-specific reasoning", () => {
+      const gpt55Options = getProviderOptions("gpt-5.5", "openai")
+      expect(gpt55Options.openai?.reasoningEffort).toBe("none")
+
       const gpt54ProOptions = getProviderOptions("gpt-5.4-pro", "openai")
       expect(gpt54ProOptions.openai?.reasoningEffort).toBe("medium")
 
@@ -135,6 +144,12 @@ describe("getProviderOptions", () => {
 
       const mixedCaseGrokOptions = getProviderOptions("Grok-4-Fast-Reasoning", "xai")
       expect(mixedCaseGrokOptions.xai?.reasoningEffort).toBe("low")
+
+      const grok420ReasoningOptions = getProviderOptions("grok-4.20-reasoning", "xai")
+      expect(grok420ReasoningOptions.xai?.reasoningEffort).toBe("low")
+
+      const grok420NonReasoningOptions = getProviderOptions("grok-4.20-non-reasoning", "xai")
+      expect(grok420NonReasoningOptions).toEqual({})
 
       const grok41FastOptions = getProviderOptions("grok-4-1-fast-reasoning", "xai")
       expect(grok41FastOptions).toEqual({})
@@ -214,6 +229,11 @@ describe("getProviderOptions", () => {
     })
 
     it("should return low/default-compatible reasoning settings for gpt-oss models", () => {
+      expect(LLM_PROVIDER_MODELS.bedrock).toEqual(expect.arrayContaining([
+        "openai.gpt-oss-20b",
+        "openai.gpt-oss-120b",
+      ]))
+
       const groqOptions = getProviderOptions("openai/gpt-oss-120b", "groq")
       expect(groqOptions.groq?.reasoningEffort).toBe("none")
 

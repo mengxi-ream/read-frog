@@ -16,6 +16,8 @@ import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesStore, TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "./atoms"
 
 const SUCCESS_MESSAGE_DURATION_MS = 4000
+const MAX_COLLAPSED_AI_SEGMENT_DURATION_MS = 1
+const TRANSLATED_EXPORT_BATCH_CONCURRENCY = 2
 
 export class TranslatedSubtitlesDownloader {
   private isDownloading = false
@@ -154,23 +156,34 @@ export class TranslatedSubtitlesDownloader {
     const videoContext = await this.buildExportVideoContext(sourceSubtitles, config, operationId, pageTitle)
     this.assertActive(operationId)
     const translatedFragments: SubtitlesFragment[] = []
+    let translatedCount = 0
+    const batches = this.buildTranslationBatches(fragments)
 
-    for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
-      const batch = fragments.slice(index, index + TRANSLATION_BATCH_SIZE)
-      const translatedBatch = await translateSubtitles(batch, videoContext, config)
-      this.assertActive(operationId)
-      if (
-        translatedBatch.length !== batch.length
-        || this.hasIncompleteTranslatedFragments(translatedBatch)
-      ) {
-        throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
-      }
+    for (let index = 0; index < batches.length; index += TRANSLATED_EXPORT_BATCH_CONCURRENCY) {
+      const batchWindow = batches.slice(index, index + TRANSLATED_EXPORT_BATCH_CONCURRENCY)
+      const translatedBatchWindow = await Promise.all(
+        batchWindow.map(async (batch) => {
+          const translatedBatch = await translateSubtitles(batch, videoContext, config)
+          this.assertActive(operationId)
+          if (
+            translatedBatch.length !== batch.length
+            || this.hasIncompleteTranslatedFragments(translatedBatch)
+          ) {
+            throw new Error(i18n.t("subtitles.errors.translatedExportIncomplete"))
+          }
 
-      translatedFragments.push(...translatedBatch)
-      this.setStatus(
-        TranslatedDownloadPhase.Translating,
-        Math.min(100, Math.round((translatedFragments.length / fragments.length) * 100)),
+          return translatedBatch
+        }),
       )
+      this.assertActive(operationId)
+      for (const translatedBatch of translatedBatchWindow) {
+        translatedFragments.push(...translatedBatch)
+        translatedCount += translatedBatch.length
+        this.setStatus(
+          TranslatedDownloadPhase.Translating,
+          Math.min(100, Math.round((translatedCount / fragments.length) * 100)),
+        )
+      }
     }
 
     if (
@@ -185,6 +198,16 @@ export class TranslatedSubtitlesDownloader {
 
   private hasIncompleteTranslatedFragments(fragments: SubtitlesFragment[]): boolean {
     return fragments.some(fragment => !fragment.translation?.trim())
+  }
+
+  private buildTranslationBatches(fragments: SubtitlesFragment[]): SubtitlesFragment[][] {
+    const batches: SubtitlesFragment[][] = []
+
+    for (let index = 0; index < fragments.length; index += TRANSLATION_BATCH_SIZE) {
+      batches.push(fragments.slice(index, index + TRANSLATION_BATCH_SIZE))
+    }
+
+    return batches
   }
 
   private async buildExportProcessedSubtitles(
@@ -225,7 +248,7 @@ export class TranslatedSubtitlesDownloader {
 
     const optimized = optimizeSubtitles(segmented, sourceLanguage)
 
-    if (!this.hasTimingCoverageGap(chunk, optimized)) {
+    if (!this.hasUnsafeSegmentedExportTiming(chunk, segmented, optimized)) {
       return optimized
     }
 
@@ -246,7 +269,7 @@ export class TranslatedSubtitlesDownloader {
 
         const retryOptimized = optimizeSubtitles(retrySegmented, sourceLanguage)
 
-        if (this.hasTimingCoverageGap(retryChunk, retryOptimized)) {
+        if (this.hasUnsafeSegmentedExportTiming(retryChunk, retrySegmented, retryOptimized)) {
           return optimizeSubtitles(chunk, sourceLanguage)
         }
 
@@ -257,6 +280,18 @@ export class TranslatedSubtitlesDownloader {
     }
 
     return optimizeSubtitles(chunk, sourceLanguage)
+  }
+
+  private hasUnsafeExportTiming(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
+    return this.hasInvalidTimingShape(source, candidate) || this.hasTimingCoverageGap(source, candidate)
+  }
+
+  private hasUnsafeSegmentedExportTiming(
+    source: SubtitlesFragment[],
+    segmented: SubtitlesFragment[],
+    optimized: SubtitlesFragment[],
+  ): boolean {
+    return this.hasInvalidTimingShape(source, segmented) || this.hasUnsafeExportTiming(source, optimized)
   }
 
   private buildSourceSubtitleChunks(
@@ -306,6 +341,36 @@ export class TranslatedSubtitlesDownloader {
       }
 
       if (sourceInterval.end - coveredUntil > MAX_GAP_MS) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  private hasInvalidTimingShape(source: SubtitlesFragment[], candidate: SubtitlesFragment[]): boolean {
+    if (source.length === 0 || candidate.length === 0) {
+      return true
+    }
+
+    const sourceStart = Math.min(...source.map(fragment => fragment.start))
+    const sourceEnd = Math.max(...source.map(fragment => fragment.end))
+    const sortedCandidates = [...candidate].sort((a, b) => a.start - b.start || a.end - b.end)
+
+    for (let index = 0; index < sortedCandidates.length; index++) {
+      const fragment = sortedCandidates[index]
+      if (
+        !Number.isFinite(fragment.start)
+        || !Number.isFinite(fragment.end)
+        || fragment.end - fragment.start <= MAX_COLLAPSED_AI_SEGMENT_DURATION_MS
+        || fragment.start < sourceStart
+        || fragment.end > sourceEnd
+      ) {
+        return true
+      }
+
+      const previous = sortedCandidates[index - 1]
+      if (previous && previous.end > fragment.start) {
         return true
       }
     }
