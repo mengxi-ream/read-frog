@@ -2,7 +2,7 @@
 
 ## Build Environment
 
-- **Node.js**: >= 22.0.0
+- **Node.js**: >= 22.22.0
 - **pnpm**: 10.30.2 (auto-installed via corepack)
 
 ## Build Steps
