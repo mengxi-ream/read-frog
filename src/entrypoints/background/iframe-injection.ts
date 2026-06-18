@@ -9,12 +9,9 @@ import { resolveSiteControlUrl } from "./iframe-injection-utils"
 import { getPageTranslationEnabled } from "./page-translation-state"
 
 const HOST_CONTENT_SCRIPT_FILE = "/content-scripts/host.js" as const
-const SELECTION_CONTENT_SCRIPT_FILE = "/content-scripts/selection.js" as const
 const IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS = ["browse.library.kiwix.org"] as const
 
-type IframeContentScriptFile
-  = | typeof HOST_CONTENT_SCRIPT_FILE
-    | typeof SELECTION_CONTENT_SCRIPT_FILE
+type IframeContentScriptFile = typeof HOST_CONTENT_SCRIPT_FILE
 
 const pendingScriptDocumentKeys = new Set<string>()
 const injectedDocumentKeysByFrameAndScript = new Map<string, string>()
@@ -30,7 +27,6 @@ interface FrameInjectionDetails {
 
 interface InjectHostContentIntoTabIframesOptions {
   requirePageTranslationEnabled?: boolean
-  includeSelectionContent?: boolean
   siteControlUrlOverride?: string
 }
 
@@ -121,10 +117,8 @@ function isFullRuntimeAutoInjectUrl(url: string | undefined): url is string {
   return IFRAME_FULL_RUNTIME_AUTO_INJECT_PATTERNS.some(pattern => matchDomainPattern(url, pattern))
 }
 
-function getIframeContentScriptFiles(options: InjectHostContentIntoTabIframesOptions): IframeContentScriptFile[] {
-  return options.includeSelectionContent
-    ? [HOST_CONTENT_SCRIPT_FILE, SELECTION_CONTENT_SCRIPT_FILE]
-    : [HOST_CONTENT_SCRIPT_FILE]
+function getIframeContentScriptFiles(_options: InjectHostContentIntoTabIframesOptions): IframeContentScriptFile[] {
+  return [HOST_CONTENT_SCRIPT_FILE]
 }
 
 async function getShouldInjectHostContentIntoTabIframes(
@@ -296,7 +290,6 @@ export function setupIframeInjection() {
       fullRuntimeAutoInjectUrlByTab.set(details.tabId, details.url)
       await injectHostContentIntoTabIframes(details.tabId, {
         requirePageTranslationEnabled: false,
-        includeSelectionContent: true,
         siteControlUrlOverride: details.url,
       })
       return
@@ -306,7 +299,6 @@ export function setupIframeInjection() {
       ?? (isFullRuntimeAutoInjectUrl(details.url) ? details.url : undefined)
     if (fullRuntimeAutoInjectUrl) {
       await injectHostContentIntoFrame(details, undefined, undefined, {
-        includeSelectionContent: true,
         siteControlUrlOverride: fullRuntimeAutoInjectUrl,
       })
       return

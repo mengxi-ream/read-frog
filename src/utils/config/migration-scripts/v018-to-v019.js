@@ -1,0 +1,31 @@
+export function migrate(oldConfig) {
+    const newPromptConfig = {
+        ...oldConfig.translate.promptsConfig,
+        patterns: oldConfig.translate.promptsConfig.patterns.map((pattern) => {
+            if (pattern.id === "default") {
+                return {
+                    ...pattern,
+                    prompt: `You are a professional {{targetLang}} native translator who needs to fluently translate text into {{targetLang}}.
+
+## Translation Rules
+1. Output only the translated content, without explanations or additional content (such as "Here's the translation:" or "Translation as follows:")
+2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.
+3. If the text contains HTML tags, consider where the tags should be placed in the translation while maintaining fluency.
+4. For content that should not be translated (such as proper nouns, code, etc.), keep the original text.
+
+Translate to {{targetLang}}:
+{{input}}
+`,
+                };
+            }
+            return pattern;
+        }),
+    };
+    return {
+        ...oldConfig,
+        translate: {
+            ...oldConfig.translate,
+            promptsConfig: newPromptConfig,
+        },
+    };
+}

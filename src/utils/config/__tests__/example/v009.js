@@ -1,0 +1,105 @@
+export const testSeries = {
+    default: {
+        description: "Expose Translate Request Rate",
+        config: {
+            language: {
+                detectedCode: "eng",
+                sourceCode: "auto",
+                targetCode: "jpn",
+                level: "intermediate",
+            },
+            providersConfig: {
+                openai: {
+                    apiKey: "sk-1234567890",
+                    baseURL: "https://api.openai.com/v1",
+                },
+                deepseek: {
+                    apiKey: undefined,
+                    baseURL: "https://api.deepseek.com/v1",
+                },
+                openrouter: {
+                    apiKey: undefined,
+                    baseURL: "https://openrouter.ai/api/v1",
+                },
+                ollama: {
+                    apiKey: undefined,
+                    baseURL: "http://127.0.0.1:11434/v1",
+                },
+            },
+            read: {
+                provider: "openai",
+                models: {
+                    openai: {
+                        model: "gpt-4o-mini",
+                        isCustomModel: true,
+                        customModel: "gpt-4.1-nano",
+                    },
+                    deepseek: {
+                        model: "deepseek-chat",
+                        isCustomModel: false,
+                        customModel: "",
+                    },
+                },
+            },
+            translate: {
+                provider: "microsoft",
+                models: {
+                    microsoft: null,
+                    google: null,
+                    openai: {
+                        model: "gpt-4o-mini",
+                        isCustomModel: true,
+                        customModel: "gpt-4.1-nano",
+                    },
+                    deepseek: {
+                        model: "deepseek-chat",
+                        isCustomModel: false,
+                        customModel: "",
+                    },
+                    openrouter: {
+                        model: "meta-llama/llama-4-maverick:free",
+                        isCustomModel: false,
+                        customModel: "",
+                    },
+                    ollama: {
+                        model: "gemma3:1b",
+                        isCustomModel: false,
+                        customModel: "",
+                    },
+                },
+                node: {
+                    enabled: true,
+                    hotkey: "Control",
+                },
+                page: {
+                    range: "main",
+                    autoTranslatePatterns: ["news.ycombinator.com"],
+                },
+                promptsConfig: {
+                    prompt: "Read Frog: TRANSLATE_DEFAULT_PROMPT",
+                    patterns: [
+                        {
+                            id: "Read Frog: TRANSLATE_DEFAULT_PROMPT",
+                            name: "Read Frog: TRANSLATE_DEFAULT_PROMPT",
+                            prompt: `Treat input as plain text input and translate it into {{targetLang}}, output translation ONLY. If translation is unnecessary (e.g. proper nouns, codes, etc.), return the original text. NO explanations. NO notes.
+Input:
+{{input}}
+`,
+                        },
+                    ],
+                },
+                requestQueueConfig: {
+                    capacity: 300,
+                    rate: 5,
+                },
+            },
+            floatingButton: {
+                enabled: true,
+                position: 0.66,
+            },
+            sideContent: {
+                width: 600,
+            },
+        },
+    },
+};

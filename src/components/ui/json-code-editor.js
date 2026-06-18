@@ -1,0 +1,35 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import { json, jsonParseLinter } from "@codemirror/lang-json";
+import { linter, lintGutter } from "@codemirror/lint";
+import CodeMirror from "@uiw/react-codemirror";
+import { useTheme } from "@/components/providers/theme-provider";
+import { cn } from "@/utils/styles/utils";
+// Custom linter that allows empty content (jsonParseLinter throws on empty string)
+const allowEmptyJsonLinter = linter((view) => {
+    const content = view.state.doc.toString().trim();
+    if (!content) {
+        return [];
+    }
+    return jsonParseLinter()(view);
+});
+export function JSONCodeEditor({ hasError, className, editable = true, ...props }) {
+    const { theme } = useTheme();
+    return (_jsx(CodeMirror, { extensions: [
+            json(),
+            allowEmptyJsonLinter,
+            lintGutter(),
+        ], theme: theme, basicSetup: {
+            lineNumbers: true,
+            highlightActiveLineGutter: true,
+            highlightActiveLine: true,
+            foldGutter: true,
+            bracketMatching: true,
+            closeBrackets: true,
+            autocompletion: true,
+            syntaxHighlighting: true,
+        }, className: cn("overflow-hidden rounded-md border", "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]", hasError && "border-destructive focus-within:border-destructive focus-within:ring-destructive/50", !editable && "opacity-50 cursor-not-allowed", className), style: {
+            fontSize: 14,
+            fontFamily: "ui-monospace, SFMono-Regular, \"SF Mono\", Menlo, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+        }, editable: editable, ...props }));
+}
+JSONCodeEditor.displayName = "JSONCodeEditor";

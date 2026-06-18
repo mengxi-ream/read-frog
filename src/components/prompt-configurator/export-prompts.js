@@ -1,0 +1,25 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Icon } from "@iconify/react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { i18n } from "#imports";
+import { Button } from "@/components/ui/base-ui/button";
+import { usePromptAtoms } from "./context";
+import { downloadJSONFile } from "./utils/prompt-file";
+export function ExportPrompts() {
+    const promptAtoms = usePromptAtoms();
+    const config = useAtomValue(promptAtoms.config);
+    const [selectedPrompts, setSelectedPrompts] = useAtom(promptAtoms.selectedPrompts);
+    const setIsExportMode = useSetAtom(promptAtoms.exportMode);
+    const patterns = config.patterns;
+    const sortOutDownloadPrompts = patterns
+        .filter(pattern => selectedPrompts.includes(pattern.id))
+        .map((pattern) => {
+        const { id, ...patternWithoutId } = pattern;
+        return patternWithoutId;
+    });
+    return (_jsxs(Button, { onClick: () => {
+            downloadJSONFile(sortOutDownloadPrompts);
+            setIsExportMode(false);
+            setSelectedPrompts([]);
+        }, disabled: !selectedPrompts.length, children: [_jsx(Icon, { icon: "tabler:check", className: "size-4" }), i18n.t("options.translation.personalizedPrompts.exportPrompt.exportSelected")] }));
+}

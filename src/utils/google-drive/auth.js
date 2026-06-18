@@ -1,0 +1,146 @@
+import { z } from "zod";
+import { browser, storage } from "#imports";
+import { env } from "@/env";
+import { GOOGLE_DRIVE_TOKEN_STORAGE_KEY } from "../constants/config";
+import { logger } from "../logger";
+const GOOGLE_CLIENT_ID = env.WXT_GOOGLE_CLIENT_ID ?? "YOUR_CLIENT_ID";
+const GOOGLE_REDIRECT_URI = browser.identity.getRedirectURL();
+const GOOGLE_SCOPES = [
+    "https://www.googleapis.com/auth/drive.appdata",
+    "https://www.googleapis.com/auth/userinfo.email",
+];
+const TOKEN_EXPIRY_BUFFER_MS = 60000;
+const googleAuthTokenSchema = z.object({
+    access_token: z.string(),
+    expires_at: z.number(),
+    token_type: z.string().default("Bearer"),
+});
+const googleUserInfoSchema = z.object({
+    id: z.string(),
+    email: z.email(),
+    verified_email: z.boolean(),
+    picture: z.url().optional(),
+});
+/**
+ * Get token from storage with validation
+ */
+async function getTokenFromStorage() {
+    try {
+        const tokenData = await storage.getItem(`local:${GOOGLE_DRIVE_TOKEN_STORAGE_KEY}`);
+        if (!tokenData) {
+            return null;
+        }
+        const parsed = googleAuthTokenSchema.safeParse(tokenData);
+        if (!parsed.success) {
+            logger.warn("Invalid token data in storage", parsed.error);
+            return null;
+        }
+        return parsed.data;
+    }
+    catch (error) {
+        logger.error("Failed to get token from storage", error);
+        return null;
+    }
+}
+/**
+ * Authenticate with Google Drive using OAuth 2.0
+ */
+export async function authenticateGoogleDriveAndSaveTokenToStorage() {
+    try {
+        const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+        authUrl.searchParams.set("client_id", GOOGLE_CLIENT_ID);
+        authUrl.searchParams.set("response_type", "token");
+        authUrl.searchParams.set("redirect_uri", GOOGLE_REDIRECT_URI);
+        authUrl.searchParams.set("scope", GOOGLE_SCOPES.join(" "));
+        authUrl.searchParams.set("prompt", "select_account");
+        const responseUrl = await browser.identity.launchWebAuthFlow({
+            url: authUrl.toString(),
+            interactive: true,
+        });
+        if (!responseUrl) {
+            throw new Error("No response URL from Google OAuth");
+        }
+        const url = new URL(responseUrl);
+        const params = new URLSearchParams(url.hash.slice(1));
+        const accessToken = params.get("access_token");
+        const expiresIn = params.get("expires_in");
+        if (!accessToken) {
+            throw new Error("No access token in OAuth response");
+        }
+        const expiresAt = Date.now() + (expiresIn ? Number.parseInt(expiresIn) * 1000 : 3600 * 1000);
+        const tokenData = {
+            access_token: accessToken,
+            expires_at: expiresAt,
+            token_type: "Bearer",
+        };
+        // Validate before storing
+        const validatedToken = googleAuthTokenSchema.parse(tokenData);
+        await storage.setItem(`local:${GOOGLE_DRIVE_TOKEN_STORAGE_KEY}`, validatedToken);
+        return accessToken;
+    }
+    catch (error) {
+        logger.error("Google OAuth authentication failed", error);
+        throw error;
+    }
+}
+/**
+ * Get valid access token, re-authenticate if expired
+ */
+export async function getValidAccessToken() {
+    try {
+        const tokenData = await getTokenFromStorage();
+        // Re-authenticate if token not found or expiring soon (within 1 minute)
+        if (!tokenData || Date.now() >= tokenData.expires_at - TOKEN_EXPIRY_BUFFER_MS) {
+            return await authenticateGoogleDriveAndSaveTokenToStorage();
+        }
+        // Trust local expiry check - validate only on API 401 errors
+        return tokenData.access_token;
+    }
+    catch (error) {
+        logger.error("Failed to get valid access token", error);
+        throw error;
+    }
+}
+export async function clearAccessToken() {
+    try {
+        await storage.removeItem(`local:${GOOGLE_DRIVE_TOKEN_STORAGE_KEY}`);
+    }
+    catch (error) {
+        logger.error("Failed to clear access token", error);
+        throw error;
+    }
+}
+/**
+ * Check if user is authenticated with valid token
+ */
+export async function getIsAuthenticated() {
+    try {
+        const tokenData = await getTokenFromStorage();
+        if (!tokenData) {
+            return false;
+        }
+        return Date.now() < tokenData.expires_at - TOKEN_EXPIRY_BUFFER_MS;
+    }
+    catch (error) {
+        logger.error("Failed to check authentication status", error);
+        return false;
+    }
+}
+/**
+ * Fetch Google user info using access token
+ */
+export async function getGoogleUserInfo(accessToken) {
+    const res = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to fetch user info: ${res.status}`);
+    }
+    const data = await res.json();
+    const parsed = googleUserInfoSchema.safeParse(data);
+    if (!parsed.success) {
+        logger.error("Invalid user info response", parsed.error);
+        throw new Error("Invalid user info response");
+    }
+    return parsed.data;
+}

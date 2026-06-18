@@ -1,0 +1,26 @@
+export const MIN_TRANSLATE_RATE = 1;
+export const MIN_TRANSLATE_CAPACITY = 1;
+export const MIN_BATCH_CHARACTERS = 1;
+export const MIN_BATCH_ITEMS = 1;
+export const DEFAULT_REQUEST_RATE = 8;
+export const DEFAULT_REQUEST_CAPACITY = 60;
+export const DEFAULT_MAX_CHARACTER_PER_BATCH = 1000;
+export const DEFAULT_MAX_ITEMS_PER_BATCH = 4;
+export const DEFAULT_BATCH_CONFIG = {
+    maxCharactersPerBatch: DEFAULT_MAX_CHARACTER_PER_BATCH,
+    maxItemsPerBatch: DEFAULT_MAX_ITEMS_PER_BATCH,
+};
+export const DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY = "Alt+E";
+export const DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY = "Alt+T";
+export const MIN_PRELOAD_MARGIN = 0;
+export const MAX_PRELOAD_MARGIN = 10000;
+export const DEFAULT_PRELOAD_MARGIN = 1000;
+export const MIN_PRELOAD_THRESHOLD = 0;
+export const MAX_PRELOAD_THRESHOLD = 1;
+export const DEFAULT_PRELOAD_THRESHOLD = 0;
+export const MIN_CHARACTERS_PER_NODE = 0;
+export const MAX_CHARACTERS_PER_NODE = 1000;
+export const DEFAULT_MIN_CHARACTERS_PER_NODE = 0;
+export const MIN_WORDS_PER_NODE = 0;
+export const MAX_WORDS_PER_NODE = 100;
+export const DEFAULT_MIN_WORDS_PER_NODE = 0;

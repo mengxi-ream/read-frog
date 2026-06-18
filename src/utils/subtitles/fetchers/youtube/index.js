@@ -1,0 +1,336 @@
+import { i18n } from "#imports";
+import { getLocalConfig } from "@/utils/config/storage";
+import { ENSURE_SUBTITLES_REQUEST_TYPE, ENSURE_SUBTITLES_RESPONSE_TYPE, FETCH_RETRY_DELAY_MS, MAX_FETCH_RETRIES, MAX_POT_WAIT_ATTEMPTS, MAX_STATE_WAIT_ATTEMPTS, PLAYER_DATA_REQUEST_TYPE, PLAYER_DATA_RESPONSE_TYPE, POST_MESSAGE_TIMEOUT_MS, POT_WAIT_INTERVAL_MS, STATE_WAIT_INTERVAL_MS, WAIT_TIMEDTEXT_REQUEST_TYPE, WAIT_TIMEDTEXT_RESPONSE_TYPE, } from "@/utils/constants/subtitles";
+import { getRandomUUID } from "@/utils/crypto-polyfill";
+import { OverlaySubtitlesError } from "@/utils/subtitles/errors";
+import { getYoutubeVideoId } from "@/utils/subtitles/video-id";
+import { detectFormat } from "./format-detector";
+import { filterNoiseFromEvents } from "./noise-filter";
+import { parseAnimatedSubtitles, parseKaraokeSubtitles, parseScrollingAsrSubtitles, parseStandardSubtitles, parseStylizedKaraokeSubtitles } from "./parser";
+import { extractPotToken } from "./pot-token";
+import { youtubeSubtitlesResponseSchema } from "./types";
+import { buildSubtitleUrl } from "./url-builder";
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+function postMessageRequest(responseType, message) {
+    return new Promise((resolve) => {
+        const requestId = getRandomUUID();
+        const handler = (event) => {
+            if (event.origin !== window.location.origin
+                || event.data?.type !== responseType
+                || event.data?.requestId !== requestId) {
+                return;
+            }
+            window.removeEventListener("message", handler);
+            resolve(event.data);
+        };
+        window.addEventListener("message", handler);
+        window.postMessage({ ...message, requestId }, window.location.origin);
+        setTimeout(() => {
+            window.removeEventListener("message", handler);
+            resolve(null);
+        }, POST_MESSAGE_TIMEOUT_MS);
+    });
+}
+export class YoutubeSubtitlesFetcher {
+    subtitles = [];
+    sourceLanguage = "";
+    cachedTrackHash = null;
+    preSegmented = false;
+    async fetch() {
+        const videoId = getYoutubeVideoId();
+        if (!videoId) {
+            throw new OverlaySubtitlesError(i18n.t("subtitles.errors.videoNotFound"));
+        }
+        const currentHash = await this.computeTrackHash();
+        if (currentHash && this.subtitles.length > 0 && this.cachedTrackHash === currentHash) {
+            return this.subtitles;
+        }
+        const fastPathResult = await this.tryFastFetch(videoId);
+        let resolvedTrack = fastPathResult.track;
+        let events = fastPathResult.events;
+        if (!events) {
+            const fallbackResult = await this.fetchWithFallback(videoId, fastPathResult.track);
+            resolvedTrack = fallbackResult.track;
+            events = fallbackResult.events;
+        }
+        if (!resolvedTrack) {
+            throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"));
+        }
+        this.sourceLanguage = resolvedTrack.languageCode;
+        this.subtitles = await this.processRawEvents(events);
+        this.cachedTrackHash = this.buildTrackHash(videoId, resolvedTrack);
+        return this.subtitles;
+    }
+    getSourceLanguage() {
+        return this.sourceLanguage;
+    }
+    isPreSegmented() {
+        return this.preSegmented;
+    }
+    cleanup() {
+        this.subtitles = [];
+        this.sourceLanguage = "";
+        this.cachedTrackHash = null;
+        this.preSegmented = false;
+    }
+    async hasAvailableSubtitles() {
+        const videoId = getYoutubeVideoId();
+        if (!videoId) {
+            return false;
+        }
+        const response = await this.requestPlayerData(videoId);
+        return response.success === true
+            && response.data != null
+            && response.data.captionTracks.length > 0;
+    }
+    async shouldUseSameTrack() {
+        if (this.subtitles.length === 0 || !this.cachedTrackHash) {
+            return false;
+        }
+        try {
+            const currentHash = await this.computeTrackHash();
+            return currentHash !== null && this.cachedTrackHash === currentHash;
+        }
+        catch {
+            return false;
+        }
+    }
+    async computeTrackHash() {
+        const videoId = getYoutubeVideoId();
+        if (!videoId) {
+            return null;
+        }
+        const response = await this.requestPlayerData(videoId);
+        if (!response.success || !response.data) {
+            return null;
+        }
+        const track = this.selectTrack(response.data);
+        return this.buildTrackHash(videoId, track);
+    }
+    buildTrackHash(videoId, track) {
+        if (!track) {
+            return null;
+        }
+        return `${videoId}:${track.languageCode}:${track.kind ?? ""}:${track.vssId}`;
+    }
+    async tryFastFetch(videoId) {
+        const response = await this.requestPlayerData(videoId);
+        if (!response.success || !response.data) {
+            return {
+                currentHash: null,
+                track: null,
+                events: null,
+            };
+        }
+        const playerData = response.data;
+        const track = this.selectTrack(playerData);
+        const currentHash = this.buildTrackHash(videoId, track);
+        if (!track) {
+            return {
+                currentHash,
+                track: null,
+                events: null,
+            };
+        }
+        try {
+            const events = await this.fetchTrackEvents(track, playerData);
+            return {
+                currentHash,
+                track,
+                events,
+            };
+        }
+        catch {
+            return {
+                currentHash,
+                track,
+                events: null,
+            };
+        }
+    }
+    async fetchWithFallback(videoId, preferredTrack) {
+        // Wait for player state >= 1 before retrying with the slower POT/timedtext flow.
+        await this.waitForPlayerState(videoId);
+        const playerData = await this.getPlayerDataWithPot(videoId);
+        const track = this.selectTrack(playerData) ?? preferredTrack;
+        if (!track) {
+            throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"));
+        }
+        const events = await this.fetchTrackEvents(track, playerData);
+        return { track, events };
+    }
+    async waitForPlayerState(videoId) {
+        for (let i = 0; i < MAX_STATE_WAIT_ATTEMPTS; i++) {
+            const response = await this.requestPlayerData(videoId);
+            if (response.success && response.data && response.data.playerState >= 1) {
+                return;
+            }
+            await sleep(STATE_WAIT_INTERVAL_MS);
+        }
+    }
+    async getPlayerDataWithPot(videoId) {
+        const response = await this.requestPlayerData(videoId);
+        if (!response.success || !response.data) {
+            throw new OverlaySubtitlesError(i18n.t("subtitles.errors.fetchSubTimeout"));
+        }
+        let playerData = response.data;
+        if (this.hasPotInAudioTracks(playerData) || playerData.cachedTimedtextUrl) {
+            return playerData;
+        }
+        if (playerData.captionTracks.length === 0) {
+            return playerData;
+        }
+        await this.ensureSubtitlesEnabled();
+        for (let i = 0; i < MAX_POT_WAIT_ATTEMPTS; i++) {
+            await sleep(POT_WAIT_INTERVAL_MS);
+            const pollResponse = await this.requestPlayerData(videoId);
+            if (pollResponse.success && pollResponse.data) {
+                playerData = pollResponse.data;
+                if (this.hasPotInAudioTracks(playerData) || playerData.cachedTimedtextUrl) {
+                    return playerData;
+                }
+            }
+        }
+        const timedtextUrl = await this.waitForTimedtextUrl(videoId);
+        if (timedtextUrl) {
+            playerData.cachedTimedtextUrl = timedtextUrl;
+        }
+        return playerData;
+    }
+    async fetchTrackEvents(track, playerData) {
+        const potToken = extractPotToken(track, playerData);
+        const url = buildSubtitleUrl(track, playerData, potToken);
+        return this.fetchWithRetry(url);
+    }
+    hasPotInAudioTracks(playerData) {
+        return playerData.audioCaptionTracks.some((t) => {
+            try {
+                return new URL(t.url).searchParams.has("pot");
+            }
+            catch {
+                return false;
+            }
+        });
+    }
+    async waitForTimedtextUrl(videoId) {
+        const resp = await postMessageRequest(WAIT_TIMEDTEXT_RESPONSE_TYPE, { type: WAIT_TIMEDTEXT_REQUEST_TYPE, videoId });
+        return resp?.url ?? null;
+    }
+    async requestPlayerData(videoId) {
+        const resp = await postMessageRequest(PLAYER_DATA_RESPONSE_TYPE, { type: PLAYER_DATA_REQUEST_TYPE, expectedVideoId: videoId });
+        if (!resp)
+            return { success: false, error: "TIMEOUT" };
+        return { success: resp.success, error: resp.error, data: resp.data };
+    }
+    async ensureSubtitlesEnabled() {
+        await postMessageRequest(ENSURE_SUBTITLES_RESPONSE_TYPE, { type: ENSURE_SUBTITLES_REQUEST_TYPE });
+    }
+    /**
+     * Select the best subtitle track from available tracks.
+     *
+     * Priority order:
+     * 1. User's currently selected track in YouTube player (if available)
+     * 2. Human-created subtitles without name (original language, highest quality)
+     * 3. Human-created subtitles with name (may be translated versions)
+     * 4. Auto-generated ASR subtitles (lower quality but better than nothing)
+     * 5. First available track as fallback
+     */
+    selectTrack(playerData) {
+        const { captionTracks: tracks, selectedTrackLanguageCode, selectedTrackVssId, } = playerData;
+        if (tracks.length === 0)
+            return null;
+        // Priority 1: User's selected track in YouTube player
+        if (selectedTrackVssId) {
+            const selectedTrack = tracks.find(t => t.vssId === selectedTrackVssId);
+            if (selectedTrack)
+                return selectedTrack;
+        }
+        if (selectedTrackLanguageCode) {
+            const selectedTrack = tracks.find(t => t.languageCode === selectedTrackLanguageCode);
+            if (selectedTrack)
+                return selectedTrack;
+        }
+        // Priority 2: Human subtitles without name - these are typically the original
+        // language subtitles uploaded by the video creator
+        const humanExact = tracks.find(t => t.kind !== "asr" && !t.name);
+        if (humanExact)
+            return humanExact;
+        // Priority 3: Human subtitles with name - may be translated or have additional metadata
+        const humanWithName = tracks.find(t => t.kind !== "asr");
+        if (humanWithName)
+            return humanWithName;
+        // Priority 4: Auto-generated speech recognition subtitles
+        const asr = tracks.find(t => t.kind === "asr");
+        if (asr)
+            return asr;
+        return tracks[0];
+    }
+    async fetchWithRetry(url) {
+        let lastError = null;
+        for (let i = 0; i < MAX_FETCH_RETRIES; i++) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const status = response.status;
+                    switch (status) {
+                        // Permanent errors - don't retry
+                        case 403:
+                            throw new OverlaySubtitlesError(i18n.t("subtitles.errors.http403"));
+                        case 404:
+                            throw new OverlaySubtitlesError(i18n.t("subtitles.errors.http404"));
+                        case 429:
+                            throw new OverlaySubtitlesError(i18n.t("subtitles.errors.http429"));
+                        // Retryable errors - throw and let retry logic handle
+                        case 500:
+                            throw new Error(`${i18n.t("subtitles.errors.http500")}`);
+                        default:
+                            throw new Error(`${i18n.t("subtitles.errors.httpUnknown", [status])}`);
+                    }
+                }
+                const data = await response.json();
+                const parsed = youtubeSubtitlesResponseSchema.safeParse(data);
+                if (!parsed.success) {
+                    throw new Error("Invalid response format");
+                }
+                return parsed.data.events;
+            }
+            catch (e) {
+                // Don't retry permanent errors (OverlaySubtitlesError)
+                if (e instanceof OverlaySubtitlesError) {
+                    throw e;
+                }
+                lastError = e instanceof Error ? e : new Error(String(e));
+                if (i < MAX_FETCH_RETRIES - 1) {
+                    await sleep(FETCH_RETRY_DELAY_MS);
+                }
+            }
+        }
+        throw new OverlaySubtitlesError(lastError?.message ?? i18n.t("subtitles.errors.fetchSubTimeout"));
+    }
+    async processRawEvents(events) {
+        const config = await getLocalConfig();
+        const enableAISegmentation = config?.videoSubtitles?.aiSegmentation ?? false;
+        this.preSegmented = false;
+        const filteredEvents = filterNoiseFromEvents(events);
+        const format = detectFormat(filteredEvents);
+        if (format === "karaoke") {
+            return parseKaraokeSubtitles(filteredEvents);
+        }
+        if (format === "karaoke-stylized") {
+            return parseStylizedKaraokeSubtitles(filteredEvents);
+        }
+        if (format === "animated") {
+            this.preSegmented = true;
+            return parseAnimatedSubtitles(filteredEvents);
+        }
+        if (enableAISegmentation) {
+            return parseStandardSubtitles(filteredEvents);
+        }
+        const fragments = format === "scrolling-asr"
+            ? parseScrollingAsrSubtitles(filteredEvents, this.sourceLanguage)
+            : parseStandardSubtitles(filteredEvents);
+        return fragments;
+    }
+}

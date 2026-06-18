@@ -1,5 +1,5 @@
 import { Icon } from "@iconify/react"
-import { browser, i18n } from "#imports"
+import { i18n } from "#imports"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,14 +53,6 @@ export function MoreMenu() {
         >
           <Icon icon="tabler:star" className="size-4" strokeWidth={1.6} />
           {i18n.t("popup.more.rateUs")}
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={() => void browser.tabs.create({ url: browser.runtime.getURL("/translation-hub.html") })}
-          className="cursor-pointer"
-        >
-          <Icon icon="tabler:language-hiragana" className="size-4" strokeWidth={1.6} />
-          {i18n.t("popup.more.translationHub")}
         </DropdownMenuItem>
 
         <DropdownMenuItem

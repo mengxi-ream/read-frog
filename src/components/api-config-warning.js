@@ -1,0 +1,7 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { i18n } from "#imports";
+import { sendMessage } from "@/utils/message";
+import { cn } from "@/utils/styles/utils";
+export function APIConfigWarning({ className }) {
+    return (_jsxs("div", { className: cn("rounded-md border border-amber-500 bg-amber-100 px-2 py-1.5 text-center text-sm font-medium dark:bg-amber-900", className), children: [i18n.t("noAPIKeyConfig.warningWithLink.youMust"), " ", _jsx("a", { href: "https://readfrog.app/docs/api-key", target: "_blank", rel: "noreferrer", className: "underline", children: i18n.t("noAPIKeyConfig.warningWithLink.setTheAPIKey") }), " ", i18n.t("noAPIKeyConfig.warningWithLink.firstOnThe"), " ", _jsx("button", { type: "button", className: "cursor-pointer underline", onClick: () => sendMessage("openOptionsPage", undefined), children: i18n.t("noAPIKeyConfig.warningWithLink.optionsPage") }), " ", i18n.t("noAPIKeyConfig.warningWithLink.page"), "."] }));
+}

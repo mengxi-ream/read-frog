@@ -1,0 +1,37 @@
+import { z } from "zod";
+import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_BACKGROUND_OPACITY, MIN_FONT_SCALE, MIN_FONT_WEIGHT } from "@/utils/constants/subtitles";
+import { batchQueueConfigSchema, customPromptsConfigSchema, requestQueueConfigSchema } from "./translate";
+export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "translationOnly"]);
+export const subtitlesTranslationPositionSchema = z.enum(["above", "below"]);
+export const subtitlesFontFamilySchema = z.enum(["system", "roboto", "noto-sans", "noto-serif"]);
+export const subtitleTextStyleSchema = z.object({
+    fontFamily: subtitlesFontFamilySchema,
+    fontScale: z.number().min(MIN_FONT_SCALE).max(MAX_FONT_SCALE),
+    color: z.string(),
+    fontWeight: z.number().min(MIN_FONT_WEIGHT).max(MAX_FONT_WEIGHT),
+});
+export const subtitleContainerStyleSchema = z.object({
+    backgroundOpacity: z.number().min(MIN_BACKGROUND_OPACITY).max(MAX_BACKGROUND_OPACITY),
+});
+export const subtitlesStyleSchema = z.object({
+    displayMode: subtitlesDisplayModeSchema,
+    translationPosition: subtitlesTranslationPositionSchema,
+    main: subtitleTextStyleSchema,
+    translation: subtitleTextStyleSchema,
+    container: subtitleContainerStyleSchema,
+});
+export const subtitlePositionSchema = z.object({
+    percent: z.number().min(0).max(100),
+    anchor: z.enum(["top", "bottom"]),
+});
+export const videoSubtitlesSchema = z.object({
+    enabled: z.boolean(),
+    autoStart: z.boolean(),
+    providerId: z.string().nonempty(),
+    style: subtitlesStyleSchema,
+    aiSegmentation: z.boolean(),
+    requestQueueConfig: requestQueueConfigSchema,
+    batchQueueConfig: batchQueueConfigSchema,
+    customPromptsConfig: customPromptsConfigSchema,
+    position: subtitlePositionSchema,
+});

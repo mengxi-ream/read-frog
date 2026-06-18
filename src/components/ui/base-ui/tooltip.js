@@ -1,0 +1,17 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip";
+import { SHARED_POPUP_CLOSED_STATE_CLASS } from "@/components/ui/base-ui/popup-animation-classes";
+import { cn } from "@/utils/styles/utils";
+function TooltipProvider({ delay = 0, ...props }) {
+    return (_jsx(TooltipPrimitive.Provider, { "data-slot": "tooltip-provider", delay: delay, ...props }));
+}
+function Tooltip({ ...props }) {
+    return _jsx(TooltipPrimitive.Root, { "data-slot": "tooltip", ...props });
+}
+function TooltipTrigger({ ...props }) {
+    return _jsx(TooltipPrimitive.Trigger, { "data-slot": "tooltip-trigger", ...props });
+}
+function TooltipContent({ container, className, positionerClassName, side = "top", sideOffset = 4, align = "center", alignOffset = 0, children, ...props }) {
+    return (_jsx(TooltipPrimitive.Portal, { container: container, children: _jsx(TooltipPrimitive.Positioner, { align: align, alignOffset: alignOffset, side: side, sideOffset: sideOffset, className: cn("isolate z-50", positionerClassName), children: _jsxs(TooltipPrimitive.Popup, { "data-slot": "tooltip-content", className: cn("data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-[state=delayed-open]:animate-in data-[state=delayed-open]:fade-in-0 data-[state=delayed-open]:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 rounded-md px-3 py-1.5 text-xs data-[side=inline-start]:slide-in-from-right-2 data-[side=inline-end]:slide-in-from-left-2 bg-foreground text-background z-50 w-fit max-w-xs origin-(--transform-origin)", SHARED_POPUP_CLOSED_STATE_CLASS, className), ...props, children: [children, _jsx(TooltipPrimitive.Arrow, { className: "size-2.5 translate-y-[calc(-50%-2px)] rotate-45 rounded-[2px] data-[side=inline-end]:top-1/2! data-[side=inline-end]:-left-1 data-[side=inline-end]:-translate-y-1/2 data-[side=inline-start]:top-1/2! data-[side=inline-start]:-right-1 data-[side=inline-start]:-translate-y-1/2 bg-foreground fill-foreground z-50 data-[side=bottom]:top-1 data-[side=left]:top-1/2! data-[side=left]:-right-1 data-[side=left]:-translate-y-1/2 data-[side=right]:top-1/2! data-[side=right]:-left-1 data-[side=right]:-translate-y-1/2 data-[side=top]:-bottom-2.5" })] }) }) }));
+}
+export { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger };

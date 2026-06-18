@@ -1,0 +1,1269 @@
+import { jsx as _jsx, jsxs as _jsxs } from "react/jsx-runtime";
+import { act, render, screen, waitFor } from "@testing-library/react";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { DEFAULT_CONFIG } from "@/utils/constants/config";
+import { BLOCK_ATTRIBUTE, BLOCK_CONTENT_CLASS, CONTENT_WRAPPER_CLASS, FLOAT_WRAP_ATTRIBUTE, INLINE_ATTRIBUTE, INLINE_CONTENT_CLASS, PARAGRAPH_ATTRIBUTE, TRANSLATION_ERROR_CONTAINER_CLASS, } from "@/utils/constants/dom-labels";
+import { flushBatchedOperations } from "@/utils/host/dom/batch-dom";
+import { walkAndLabelElement } from "@/utils/host/dom/traversal";
+import { translateWalkedElement } from "@/utils/host/translate/node-manipulation";
+import { translateTextForPage } from "@/utils/host/translate/translate-variants";
+import { expectNodeLabels, expectTranslatedContent, expectTranslationWrapper, MOCK_ORIGINAL_TEXT, MOCK_TRANSLATION } from "./utils";
+vi.mock("@/utils/host/translate/translate-variants", () => ({
+    translateTextForPage: vi.fn(() => Promise.resolve(MOCK_TRANSLATION)),
+}));
+vi.mock("@/utils/config/storage", () => ({
+    getLocalConfig: vi.fn(),
+}));
+const BILINGUAL_CONFIG = {
+    ...DEFAULT_CONFIG,
+    translate: {
+        ...DEFAULT_CONFIG.translate,
+        mode: "bilingual",
+    },
+};
+const TRANSLATION_ONLY_CONFIG = {
+    ...DEFAULT_CONFIG,
+    translate: {
+        ...DEFAULT_CONFIG.translate,
+        mode: "translationOnly",
+    },
+};
+function setHost(host) {
+    Object.defineProperty(window, "location", {
+        value: new URL(`https://${host}/some/path`),
+        writable: true,
+        configurable: true,
+    });
+}
+function createRect({ top, left, width, height }) {
+    return {
+        top,
+        left,
+        width,
+        height,
+        right: left + width,
+        bottom: top + height,
+        x: left,
+        y: top,
+        toJSON() {
+            return {
+                top,
+                left,
+                width,
+                height,
+                right: left + width,
+                bottom: top + height,
+                x: left,
+                y: top,
+            };
+        },
+    };
+}
+describe("translate", () => {
+    // Setup and teardown for getComputedStyle mock
+    const originalGetComputedStyle = window.getComputedStyle;
+    beforeAll(async () => {
+        // Mock getLocalConfig to return DEFAULT_CONFIG
+        const { getLocalConfig } = await import("@/utils/config/storage");
+        vi.mocked(getLocalConfig).mockResolvedValue(DEFAULT_CONFIG);
+        window.getComputedStyle = vi.fn((element) => {
+            const originalStyle = originalGetComputedStyle(element);
+            // Check if element has inline style float property
+            const inlineFloat = element.style?.float;
+            if (originalStyle.float === "") {
+                Object.defineProperty(originalStyle, "float", {
+                    // Use inline style float if present, otherwise default to 'none'
+                    value: inlineFloat || "none",
+                    writable: true,
+                    enumerable: true,
+                    configurable: true,
+                });
+            }
+            return originalStyle;
+        });
+    });
+    afterAll(() => {
+        window.getComputedStyle = originalGetComputedStyle;
+    });
+    // Helper functions
+    async function removeOrShowPageTranslation(translationMode, toggle = false) {
+        const id = crypto.randomUUID();
+        walkAndLabelElement(document.body, id, translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG);
+        await act(async () => {
+            await translateWalkedElement(document.body, id, translationMode === "bilingual" ? BILINGUAL_CONFIG : TRANSLATION_ONLY_CONFIG, toggle);
+            // Flush batched DOM operations to ensure all changes are applied before assertions
+            flushBatchedOperations();
+        });
+    }
+    async function waitForTranslationError(wrapper) {
+        await waitFor(() => {
+            expect(wrapper?.querySelector(`.${TRANSLATION_ERROR_CONTAINER_CLASS}`)).toBeTruthy();
+        });
+    }
+    describe("translateTextForPage stub", () => {
+        it("translateTextForPage should be mocked", async () => {
+            expect(await translateTextForPage("任何文字")).toBe(MOCK_TRANSLATION);
+        });
+    });
+    describe("block node with single child node", () => {
+        describe("text node", () => {
+            it("bilingual mode: should insert translation wrapper after original text node", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: MOCK_ORIGINAL_TEXT }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.childNodes[1]);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("translation only mode: should replace original text with translation wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: MOCK_ORIGINAL_TEXT }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+        });
+        describe("inline HTML node", () => {
+            it("bilingual mode: should insert translation wrapper after inline node content", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[1]);
+                expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("translation only mode: should replace inline node content with translation wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+        });
+        describe("block node", () => {
+            it("bilingual mode: should insert translation wrapper after child block node content", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { children: MOCK_ORIGINAL_TEXT }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[1]);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("translation only mode: should replace child block node content with translation wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { children: MOCK_ORIGINAL_TEXT }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+        });
+        describe("block node -> block node -> inline node", () => {
+            it("bilingual mode: should insert translation wrapper after deepest inline node", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { children: _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }) }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0].childNodes[1]);
+                expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("translation only mode: should replace deepest inline node content with translation wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { children: _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }) }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0].childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+        });
+        describe("block node -> shallow inline node (block node) -> block node", () => {
+            it("bilingual mode: should insert translation wrapper after deepest block node content", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { style: { display: "inline" }, children: _jsx("div", { children: MOCK_ORIGINAL_TEXT }) }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0].childNodes[1]);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("translation only mode: should replace deepest block node content with translation wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { style: { display: "inline" }, children: _jsx("div", { children: MOCK_ORIGINAL_TEXT }) }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0].childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+        });
+        describe("block node -> shallow inline node -> inline node", () => {
+            it("bilingual mode: should insert translation wrapper after nested inline node content", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { style: { display: "inline" }, children: _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }) }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0].childNodes[1]);
+                expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("translation only mode: should replace nested inline node content with translation wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { style: { display: "inline" }, children: _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }) }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0].childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+        });
+        describe("block node -> shallow inline node (inline node) -> inline node + inline node", () => {
+            it("bilingual mode: should insert translation wrapper after parent inline node", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "inline" }, children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[2]);
+                expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("translation only mode: should replace parent inline node content with translation wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "inline" }, children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0].childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("block node -> shallow inline node (inline node) -> single inline node + block node", () => {
+            it("bilingual mode: should translate the unwrapped inline parent as a single inline wrapper", async () => {
+                // https://github.com/mengxi-ream/read-frog/pull/1055
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "inline" }, children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { children: MOCK_ORIGINAL_TEXT })] }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[1], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node.children[0], "bilingual");
+                expect(wrapper).toBe(node.children[0].lastChild);
+                expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+                expect(node.children[0].querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)).toHaveLength(1);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("translation only mode: should replace the unwrapped inline parent content with a single wrapper", async () => {
+                // https://github.com/mengxi-ream/read-frog/pull/1055
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "inline" }, children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { children: MOCK_ORIGINAL_TEXT })] }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node.children[0], "translationOnly");
+                expect(wrapper).toBe(node.children[0].firstChild);
+                expect(node.children[0].children).toHaveLength(1);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            });
+        });
+        describe("block node -> shallow inline node (inline node) -> inline nodes + block node", () => {
+            it("bilingual mode: should translate the unwrapped inline parent as one inline wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "inline" }, children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { children: MOCK_ORIGINAL_TEXT })] }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[1], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[2], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node.children[0], "bilingual");
+                expect(wrapper).toBe(node.children[0].lastChild);
+                expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+                expect(node.children[0].querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)).toHaveLength(1);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            });
+            it("translation only mode: should replace the unwrapped inline parent content with one wrapper", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "inline" }, children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { children: MOCK_ORIGINAL_TEXT })] }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node.children[0], "translationOnly");
+                expect(wrapper).toBe(node.children[0].firstChild);
+                expect(node.children[0].children).toHaveLength(1);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            });
+        });
+    });
+    describe("block node with multiple child nodes", () => {
+        describe("all inline HTML nodes", () => {
+            it("bilingual mode: should insert wrapper after the last inline node", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[1], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[2], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("translation only mode: should replace all inline nodes with single wrapper", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("inline nodes with aria-hidden block children", () => {
+            it("bilingual mode: should treat inline node with aria-hidden block child as inline and translate as one paragraph", async () => {
+                // Github issue: https://github.com/mengxi-ream/read-frog/issues/737
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("div", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsxs("div", { style: { display: "inline" }, children: [_jsx("div", { "aria-hidden": "true", style: { display: "block" } }), MOCK_ORIGINAL_TEXT] })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[1], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                // Should have single translation wrapper at the end (one paragraph)
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            });
+        });
+        describe("text node and inline HTML nodes", () => {
+            it("bilingual mode: should insert wrapper after the last inline node", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("translation only mode: should replace mixed text and inline nodes with single wrapper", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("inline nodes + block node + inline nodes", () => {
+            it("bilingual mode: should insert three wrappers", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper1 = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper1).toBe(node.childNodes[2]);
+                // force translate span as inline even it's block node
+                expectTranslatedContent(wrapper1, INLINE_CONTENT_CLASS);
+                const wrapper2 = expectTranslationWrapper(node.children[2], "bilingual");
+                expect(wrapper2).toBe(node.childNodes[3].childNodes[1]);
+                expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS);
+                const wrapper3 = node.lastChild;
+                expect(wrapper3).toHaveClass(CONTENT_WRAPPER_CLASS);
+                expectTranslatedContent(wrapper3, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("translation only mode: should replace inline groups and block node with separate wrappers", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper1 = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper1).toBe(node.childNodes[0]);
+                const wrapper2 = expectTranslationWrapper(node.children[1], "translationOnly");
+                expect(wrapper2).toBe(node.childNodes[1].childNodes[0]);
+                const wrapper3 = node.lastChild;
+                expect(wrapper3).toHaveClass(CONTENT_WRAPPER_CLASS);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("floating inline HTML nodes", () => {
+            describe("large initial floating letter (float: left + inline next sibling)", () => {
+                it("bilingual mode: should treat float left with inline next sibling as large initial letter", async () => {
+                    render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { float: "left" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                    const node = screen.getByTestId("test-node");
+                    await removeOrShowPageTranslation("bilingual", true);
+                    expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                    expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                    expectNodeLabels(node.children[1], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                    const wrapper = expectTranslationWrapper(node, "bilingual");
+                    expect(wrapper).toBe(node.lastChild);
+                    expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                    await removeOrShowPageTranslation("bilingual", true);
+                    expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                    expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+                });
+                it("translation only mode: should treat float left with inline next sibling as large initial letter", async () => {
+                    render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { float: "left" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                    const node = screen.getByTestId("test-node");
+                    await removeOrShowPageTranslation("translationOnly", true);
+                    expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                    const wrapper = expectTranslationWrapper(node, "translationOnly");
+                    expect(wrapper).toBe(node.childNodes[0]);
+                    await removeOrShowPageTranslation("translationOnly", true);
+                    expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                    expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+                });
+            });
+            // Note: jsdom doesn't implement CSS "float blockifies display" rule,
+            // so floated <span> elements remain display:inline in jsdom.
+            // In real browsers, floated elements would be blockified.
+            describe("float: right should NOT be treated as large initial letter", () => {
+                it("bilingual mode: float right span remains inline in jsdom (no blockification)", async () => {
+                    render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { float: "right" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                    const node = screen.getByTestId("test-node");
+                    await removeOrShowPageTranslation("bilingual", true);
+                    expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                    // jsdom returns display:inline for floated spans (no blockification)
+                    expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                    expectNodeLabels(node.children[1], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                });
+            });
+            describe("float: left without inline next sibling should NOT be treated as large initial letter", () => {
+                it("bilingual mode: float left span without next sibling remains inline in jsdom", async () => {
+                    render(_jsx("div", { "data-testid": "test-node", children: _jsx("span", { style: { float: "left" }, children: MOCK_ORIGINAL_TEXT }) }));
+                    const node = screen.getByTestId("test-node");
+                    await removeOrShowPageTranslation("bilingual", true);
+                    expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                    // jsdom returns display:inline for floated spans (no blockification)
+                    expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                });
+                it("bilingual mode: float left span with block next sibling remains inline in jsdom", async () => {
+                    // https://theqoo.net/genrefiction/1771494967
+                    render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { float: "left" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { children: MOCK_ORIGINAL_TEXT })] }));
+                    const node = screen.getByTestId("test-node");
+                    await removeOrShowPageTranslation("bilingual", true);
+                    expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                    // jsdom returns display:inline for floated spans (no blockification)
+                    expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                    expectNodeLabels(node.children[1], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                });
+            });
+            describe("block translations beside floated siblings", () => {
+                it("bilingual mode: marks block translation for float wrap when inline-block would drop below the float", async () => {
+                    render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("figure", { "data-testid": "float-node", style: { float: "right" }, children: _jsx("span", { "aria-hidden": "true" }) }), _jsx("p", { "data-testid": "paragraph", children: MOCK_ORIGINAL_TEXT })] }));
+                    const node = screen.getByTestId("test-node");
+                    const paragraph = screen.getByTestId("paragraph");
+                    const floatNode = screen.getByTestId("float-node");
+                    const rectSpy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function () {
+                        if (this === floatNode) {
+                            return createRect({ top: 80, left: 600, width: 200, height: 320 });
+                        }
+                        if (this === paragraph) {
+                            return createRect({ top: 100, left: 0, width: 600, height: 60 });
+                        }
+                        if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
+                            return createRect({ top: 420, left: 0, width: 500, height: 40 });
+                        }
+                        return createRect({ top: 0, left: 0, width: 200, height: 20 });
+                    });
+                    try {
+                        await removeOrShowPageTranslation("bilingual", true);
+                    }
+                    finally {
+                        rectSpy.mockRestore();
+                    }
+                    expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                    expectNodeLabels(paragraph, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                    const wrapper = expectTranslationWrapper(paragraph, "bilingual");
+                    const translatedContent = expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                    expect(translatedContent).toHaveAttribute(FLOAT_WRAP_ATTRIBUTE, "true");
+                });
+                it("bilingual mode: leaves block translation unchanged when the translated node stays beside the float", async () => {
+                    render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("figure", { "data-testid": "float-node", style: { float: "right" }, children: _jsx("span", { "aria-hidden": "true" }) }), _jsx("p", { "data-testid": "paragraph", children: MOCK_ORIGINAL_TEXT })] }));
+                    const paragraph = screen.getByTestId("paragraph");
+                    const floatNode = screen.getByTestId("float-node");
+                    const rectSpy = vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function () {
+                        if (this === floatNode) {
+                            return createRect({ top: 80, left: 600, width: 200, height: 320 });
+                        }
+                        if (this === paragraph) {
+                            return createRect({ top: 420, left: 0, width: 600, height: 60 });
+                        }
+                        if (this.classList.contains(BLOCK_CONTENT_CLASS)) {
+                            return createRect({ top: 500, left: 0, width: 500, height: 40 });
+                        }
+                        return createRect({ top: 0, left: 0, width: 200, height: 20 });
+                    });
+                    try {
+                        await removeOrShowPageTranslation("bilingual", true);
+                    }
+                    finally {
+                        rectSpy.mockRestore();
+                    }
+                    const wrapper = expectTranslationWrapper(paragraph, "bilingual");
+                    const translatedContent = expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                    expect(translatedContent).not.toHaveAttribute(FLOAT_WRAP_ATTRIBUTE);
+                });
+            });
+        });
+        describe("br dom between inline nodes", () => {
+            it("bilingual mode: should insert separate wrappers for paragraphs and be block wrappers", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("br", {}), MOCK_ORIGINAL_TEXT, _jsx("br", {}), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                const wrapper1 = node.children[0];
+                expectTranslatedContent(wrapper1, BLOCK_CONTENT_CLASS);
+                const wrapper2 = node.children[2];
+                expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS);
+                const wrapper3 = node.children[4];
+                expectTranslatedContent(wrapper3, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("bilingual mode: should let br node to make its ancestor node to be forced block node", async () => {
+                // Github issue: https://github.com/mengxi-ream/read-frog/issues/587
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("span", { children: _jsx("br", {}) }), MOCK_ORIGINAL_TEXT, _jsx("span", { children: _jsx("br", {}) }), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                const wrapper1 = node.children[0];
+                expectTranslatedContent(wrapper1, BLOCK_CONTENT_CLASS);
+                const wrapper2 = node.children[2];
+                expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS);
+                const wrapper3 = node.children[4];
+                expectTranslatedContent(wrapper3, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("bilingual mode: should insert separate wrappers for inline groups separated by br", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("br", {}), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT, _jsx("br", {}), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper1 = expectTranslationWrapper(node.children[0], "bilingual");
+                expect(wrapper1).toBe(node.childNodes[0].childNodes[1]);
+                expectTranslatedContent(wrapper1, INLINE_CONTENT_CLASS);
+                expectNodeLabels(node.children[2], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper2 = node.children[3];
+                expect(wrapper2).toHaveClass(CONTENT_WRAPPER_CLASS);
+                expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS);
+                expectNodeLabels(node.children[5], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper3 = expectTranslationWrapper(node.children[5], "bilingual");
+                expect(wrapper3).toBe(node.children[5].childNodes[1]);
+                expectTranslatedContent(wrapper3, INLINE_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("translation only mode: should replace inline groups separated by br with wrappers", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("br", {}), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT, _jsx("br", {}), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper1 = expectTranslationWrapper(node.children[0], "translationOnly");
+                expect(wrapper1).toBe(node.childNodes[0].childNodes[0]);
+                const wrapper2 = node.childNodes[2];
+                expect(wrapper2).toHaveClass(CONTENT_WRAPPER_CLASS);
+                const wrapper3 = expectTranslationWrapper(node.children[4], "translationOnly");
+                expect(wrapper3).toBe(node.childNodes[4].childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("inline node has only one block node child", () => {
+            // Github issue: https://github.com/mengxi-ream/read-frog/issues/530
+            it("bilingual mode: should treat inline node with only one block node child as inline", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: _jsx("div", { style: { display: "block" }, children: MOCK_ORIGINAL_TEXT }) }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[1], [INLINE_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("translation only mode: should replace inline node with only one block node child with single wrapper", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("span", { style: { display: "inline" }, children: _jsx("div", { style: { display: "block" }, children: MOCK_ORIGINAL_TEXT }) }), _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.childNodes[0]);
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("should treat inline element with only one meaningful block child as inline (not block)", async () => {
+                // https://github.com/mengxi-ream/read-frog/issues/530
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("span", { style: { display: "inline" }, children: ["\n  ", _jsx("div", { style: { display: "block" }, children: MOCK_ORIGINAL_TEXT }), "\n  "] }) }));
+                const node = screen.getByTestId("test-node");
+                const inlineSpan = node.children[0];
+                await removeOrShowPageTranslation("bilingual", true);
+                // The span should be labeled as INLINE, not BLOCK, because it has only one meaningful child
+                expectNodeLabels(inlineSpan, [INLINE_ATTRIBUTE]);
+                expectNodeLabels(inlineSpan.children[0], [BLOCK_ATTRIBUTE]);
+            });
+            it("should translate the inline parent itself when it has one block child and text siblings", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsxs("span", { style: { display: "inline" }, children: [_jsx("div", { style: { display: "block" }, children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [BLOCK_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node.children[0], "bilingual");
+                expect(wrapper).toBe(node.children[0].lastChild);
+                expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+                expect(node.children[0].querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)).toHaveLength(1);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("should unwrap through the inline parent into the single block container", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("span", { style: { display: "inline" }, children: _jsxs("div", { style: { display: "block" }, children: [_jsx("div", { style: { display: "block" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { style: { display: "block" }, children: MOCK_ORIGINAL_TEXT }), _jsx("div", { style: { display: "block" }, children: MOCK_ORIGINAL_TEXT })] }) }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE]);
+                expectNodeLabels(node.children[0].children[0], [BLOCK_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node.children[0].children[0], "bilingual");
+                expect(wrapper).toBe(node.children[0].children[0].lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                expect(node.children[0].children[0].querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)).toHaveLength(1);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("force inline tags inside paragraphs", () => {
+            it("bilingual mode: should not split paragraph when inline tag has only decorative block child", async () => {
+                render(_jsxs("p", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsxs("a", { style: { display: "inline-flex" }, children: [_jsx("span", { style: { display: "block" } }), MOCK_ORIGINAL_TEXT] }), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                expect(node.querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`).length).toBe(1);
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("bilingual mode: should skip ruby annotations without splitting the paragraph", async () => {
+                // https://github.com/mengxi-ream/read-frog/pull/1055
+                render(_jsxs("p", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsxs("ruby", { children: [MOCK_ORIGINAL_TEXT, _jsx("rp", { children: "(" }), _jsx("rt", { children: MOCK_ORIGINAL_TEXT }), _jsx("rp", { children: ")" })] }), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                const ruby = node.children[0];
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                expect(ruby).toHaveAttribute(INLINE_ATTRIBUTE);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+                expect(node.querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`).length).toBe(1);
+                expect(ruby.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}(${MOCK_ORIGINAL_TEXT})${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+    });
+    describe("don't walk into siblings (SVG, style, etc.)", () => {
+        // https://github.com/mengxi-ream/read-frog/issues/754
+        it("bilingual mode: should filter out SVG and style siblings and translate inside inline div", async () => {
+            render(_jsxs("div", { "data-testid": "test-node", children: [_jsxs("svg", { viewBox: "0 0 24 24", children: [_jsx("path", { d: "M12 2L2 7l10 5 10-5-10-5z" }), _jsx("circle", { cx: "12", cy: "12", r: "3" })] }), _jsx("style", { children: `.some-class { color: red; }` }), _jsx("div", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            expectNodeLabels(node.children[2], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper = expectTranslationWrapper(node.children[2], "bilingual");
+            expect(wrapper).toBe(node.children[2].lastChild);
+            expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toContain(MOCK_ORIGINAL_TEXT);
+        });
+        it("translation only mode: should filter out SVG and style siblings and replace inline div content", async () => {
+            render(_jsxs("div", { "data-testid": "test-node", children: [_jsxs("svg", { viewBox: "0 0 24 24", children: [_jsx("path", { d: "M12 2L2 7l10 5 10-5-10-5z" }), _jsx("circle", { cx: "12", cy: "12", r: "3" })] }), _jsx("style", { children: `.some-class { color: red; }` }), _jsx("div", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("translationOnly", true);
+            expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            expectNodeLabels(node.children[2], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper = expectTranslationWrapper(node.children[2], "translationOnly");
+            expect(wrapper).toBe(node.children[2].childNodes[0]);
+            await removeOrShowPageTranslation("translationOnly", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toContain(MOCK_ORIGINAL_TEXT);
+        });
+    });
+    describe("empty nodes in multiple child nodes", () => {
+        it("bilingual mode: should not insert translation wrapper", async () => {
+            // https://github.com/mengxi-ream/read-frog/issues/717
+            render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("div", { children: _jsx("div", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }) }), _jsx("div", {})] }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE]);
+            expectNodeLabels(node.children[0].children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper = expectTranslationWrapper(node.children[0].children[0], "bilingual");
+            expect(wrapper).toBe(node.children[0].children[0].lastChild);
+            expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}`);
+        });
+    });
+    describe("empty text nodes with only one inline node in middle", () => {
+        it("bilingual mode: should insert translation wrapper in inline node", async () => {
+            render(_jsxs("div", { "data-testid": "test-node", children: [" ", _jsx("div", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), "\n "] }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper = expectTranslationWrapper(node.children[0], "bilingual");
+            expect(wrapper).toBe(node.children[0].lastChild);
+            expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(` ${MOCK_ORIGINAL_TEXT}\n `);
+        });
+        it("translation only mode: should have translation wrapper in inline node", async () => {
+            render(_jsxs("div", { "data-testid": "test-node", children: [" ", _jsx("div", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), "\n "] }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("translationOnly", true);
+            expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper = expectTranslationWrapper(node.children[0], "translationOnly");
+            expect(wrapper).toBe(node.children[0].childNodes[0]);
+            await removeOrShowPageTranslation("translationOnly", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(` ${MOCK_ORIGINAL_TEXT}\n `);
+        });
+    });
+    describe("empty text nodes with \"no need to translate\" node in middle", () => {
+        it("bilingual mode: should not insert translation wrapper", async () => {
+            render(_jsxs("div", { "data-testid": "test-node", children: [" ", _jsx("div", { children: MOCK_TRANSLATION }), " "] }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            // test no translation wrapper
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(` ${MOCK_TRANSLATION} `);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(` ${MOCK_TRANSLATION} `);
+        });
+        it("translation only mode: should have translation wrapper", async () => {
+            // Mock translateTextForPage to return the exact HTML string with spaces
+            const TRANSLATED_TEXT = `<div>${MOCK_TRANSLATION}</div>`;
+            vi.mocked(translateTextForPage).mockResolvedValueOnce(TRANSLATED_TEXT);
+            render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { children: MOCK_TRANSLATION }) }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("translationOnly", true);
+            const wrapper = node.querySelector(`.${CONTENT_WRAPPER_CLASS}`);
+            expect(wrapper).toBeTruthy();
+            expect(wrapper?.innerHTML).toBe(TRANSLATED_TEXT);
+            await removeOrShowPageTranslation("translationOnly", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+        });
+    });
+    describe("switching between translation modes", () => {
+        it("should properly clean up translations when switching from bilingual to translation-only mode", async () => {
+            render(_jsx("div", { "data-testid": "test-node", children: MOCK_ORIGINAL_TEXT }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            await removeOrShowPageTranslation("translationOnly", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+        });
+        it("should properly clean up translations when switching from translation-only to bilingual mode", async () => {
+            render(_jsx("div", { "data-testid": "test-node", children: MOCK_ORIGINAL_TEXT }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("translationOnly", true);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+        });
+    });
+    describe("translation errors", () => {
+        it("bilingual mode: should keep original text and show inline error UI when translation fails", async () => {
+            vi.mocked(translateTextForPage).mockRejectedValueOnce(new Error("Translation failed"));
+            render(_jsx("div", { "data-testid": "test-node", children: MOCK_ORIGINAL_TEXT }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            const wrapper = expectTranslationWrapper(node, "bilingual");
+            expect(node.textContent).toContain(MOCK_ORIGINAL_TEXT);
+            await waitForTranslationError(wrapper);
+        });
+        it("translationOnly mode: should keep original text and show inline error UI when translation fails", async () => {
+            vi.mocked(translateTextForPage).mockRejectedValueOnce(new Error("Translation failed"));
+            render(_jsx("div", { "data-testid": "test-node", children: MOCK_ORIGINAL_TEXT }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("translationOnly", true);
+            const wrapper = expectTranslationWrapper(node, "translationOnly");
+            expect(node.textContent).toContain(MOCK_ORIGINAL_TEXT);
+            await waitForTranslationError(wrapper);
+        });
+        it("translationOnly mode: should still remove the wrapper when translation returns an empty string", async () => {
+            vi.mocked(translateTextForPage).mockResolvedValueOnce("");
+            render(_jsx("div", { "data-testid": "test-node", children: MOCK_ORIGINAL_TEXT }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("translationOnly", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+        });
+    });
+    describe("pre and code tag handling", () => {
+        describe("pre tag - should not translate content inside pre", () => {
+            it("bilingual mode: should not translate content inside pre tag", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("pre", { children: MOCK_ORIGINAL_TEXT }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                // Should not have any translation wrapper
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("translation only mode: should not translate content inside pre tag", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("pre", { children: MOCK_ORIGINAL_TEXT }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                // Should not have any translation wrapper
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+            });
+            it("bilingual mode: should not translate pre with multiple lines", async () => {
+                const codeContent = `function test() {
+  return "hello"
+}`;
+                render(_jsx("div", { "data-testid": "test-node", children: _jsx("pre", { children: codeContent }) }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe(codeContent);
+            });
+        });
+        describe("github diff table - should not translate review code snippets", () => {
+            it("bilingual mode: should skip github diff-table content entirely", async () => {
+                const originalLocation = window.location;
+                setHost("github.com");
+                vi.mocked(translateTextForPage).mockClear();
+                try {
+                    render(_jsx("div", { "data-testid": "test-node", children: _jsx("table", { className: "diff-table", children: _jsx("tbody", { children: _jsx("tr", { children: _jsx("td", { children: "const foo = 1" }) }) }) }) }));
+                    const node = screen.getByTestId("test-node");
+                    await removeOrShowPageTranslation("bilingual", true);
+                    expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                    expect(node.textContent).toBe("const foo = 1");
+                    expect(translateTextForPage).not.toHaveBeenCalled();
+                }
+                finally {
+                    Object.defineProperty(window, "location", {
+                        value: originalLocation,
+                        writable: true,
+                        configurable: true,
+                    });
+                }
+            });
+        });
+        describe("code tag - should not walk into but translate as child", () => {
+            it("bilingual mode: should translate text with code elements", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("code", { children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expect(wrapper).toBe(node.lastChild);
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+            });
+            it("translation only mode: should translate text with code elements", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("code", { children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBe(node.children[0]);
+            });
+        });
+    });
+    describe("numeric content handling", () => {
+        describe("bilingual mode", () => {
+            it("should not translate pure numbers", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "12345" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                // Should not have any translation wrapper
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("12345");
+            });
+            it("should not translate numbers with thousand separators", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "1,234,567" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("1,234,567");
+            });
+            it("should not translate decimal numbers", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "3.14159" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("3.14159");
+            });
+            it("should translate text with numbers mixed in", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "\u539F\u6587 123 \u6587\u5B57" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                // Should have translation wrapper since it contains text
+                const wrapper = expectTranslationWrapper(node, "bilingual");
+                expectTranslatedContent(wrapper, BLOCK_CONTENT_CLASS);
+            });
+        });
+        describe("translation only mode", () => {
+            it("should not translate pure numbers", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "67890" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                // Should not have any translation wrapper
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("67890");
+            });
+            it("should not translate numbers with spaces", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "1 234 567" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("1 234 567");
+            });
+            it("should not translate European format numbers", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "1.234,56" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("1.234,56");
+            });
+            it("should translate text with numbers", async () => {
+                render(_jsx("div", { "data-testid": "test-node", children: "\u539F\u6587\u5305\u542B\u6570\u5B57 999" }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                // Should have translation wrapper since it contains text
+                const wrapper = expectTranslationWrapper(node, "translationOnly");
+                expect(wrapper).toBeTruthy();
+            });
+        });
+        describe("numeric content with multiple nodes", () => {
+            it("bilingual mode: should not translate when all nodes contain only numbers", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: "123" }), _jsx("span", { style: { display: "inline" }, children: "456" }), _jsx("span", { style: { display: "inline" }, children: "789" })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("123456789");
+            });
+            it("translation only mode: should not translate when all nodes contain only numbers", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: "100" }), _jsx("span", { style: { display: "inline" }, children: "200" }), _jsx("span", { style: { display: "inline" }, children: "300" })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(node.textContent).toBe("100200300");
+            });
+        });
+    });
+    describe("force block node", () => {
+        describe("force <li> as block node", () => {
+            it("should treat <li> as block node", async () => {
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("li", { style: { float: "left" }, children: MOCK_ORIGINAL_TEXT }), _jsx("li", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                const node = screen.getByTestId("test-node");
+                await removeOrShowPageTranslation("bilingual", true);
+                expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE]);
+                expectNodeLabels(node.children[1], [BLOCK_ATTRIBUTE]);
+            });
+        });
+    });
+    describe("flex parent", () => {
+        it("flex parent: should force the translation style to be inline", async () => {
+            render(_jsx("div", { "data-testid": "test-node", children: _jsx("div", { style: { display: "flex" }, children: MOCK_ORIGINAL_TEXT }) }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+            expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper = expectTranslationWrapper(node.children[0], "bilingual");
+            expect(wrapper).toBe(node.children[0].lastChild);
+            expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(MOCK_ORIGINAL_TEXT);
+        });
+        it("flex parent: should translate the inline children to be inline style even have block children", async () => {
+            render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "flex" }, children: [MOCK_ORIGINAL_TEXT, _jsx("div", { children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }) }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+            expectNodeLabels(node.children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            // First inline group wrapper (text node before block div)
+            const wrapper1 = node.children[0].childNodes[1];
+            expect(wrapper1).toHaveClass(CONTENT_WRAPPER_CLASS);
+            expectTranslatedContent(wrapper1, INLINE_CONTENT_CLASS);
+            // Block child should have its own wrapper
+            expectNodeLabels(node.children[0].children[1], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper2 = expectTranslationWrapper(node.children[0].children[1], "bilingual");
+            expect(wrapper2).toBe(node.children[0].children[1].lastChild);
+            expectTranslatedContent(wrapper2, BLOCK_CONTENT_CLASS);
+            // Second inline group wrapper (text node after block div)
+            const wrapper3 = node.children[0].lastChild;
+            expect(wrapper3).toHaveClass(CONTENT_WRAPPER_CLASS);
+            expectTranslatedContent(wrapper3, INLINE_CONTENT_CLASS);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+        });
+        it("inline-flex parent: should unwrap into the inline-flex container and translate it once", async () => {
+            render(_jsx("div", { "data-testid": "test-node", children: _jsxs("div", { style: { display: "inline-flex" }, children: [MOCK_ORIGINAL_TEXT, _jsx("div", { children: MOCK_ORIGINAL_TEXT }), MOCK_ORIGINAL_TEXT] }) }));
+            const node = screen.getByTestId("test-node");
+            await removeOrShowPageTranslation("bilingual", true);
+            expectNodeLabels(node, [BLOCK_ATTRIBUTE]);
+            expectNodeLabels(node.children[0], [INLINE_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            expectNodeLabels(node.children[0].children[0], [BLOCK_ATTRIBUTE, PARAGRAPH_ATTRIBUTE]);
+            const wrapper = expectTranslationWrapper(node.children[0], "bilingual");
+            expect(wrapper).toBe(node.children[0].lastChild);
+            expectTranslatedContent(wrapper, INLINE_CONTENT_CLASS);
+            expect(node.children[0].querySelectorAll(`.${CONTENT_WRAPPER_CLASS}`)).toHaveLength(1);
+            await removeOrShowPageTranslation("bilingual", true);
+            expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+            expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`);
+        });
+    });
+    describe("whitespace and newline handling", () => {
+        describe("inline elements separated by newline-only whitespace", () => {
+            it("bilingual mode: should preserve word separation when separated by newlines", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                // When inline elements are separated by newline-only whitespace,
+                // whitespace-only nodes still return single space to preserve word separation
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), "\n", _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                await removeOrShowPageTranslation("bilingual", true);
+                // Whitespace-only nodes return single space for word separation
+                expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("inline elements has space in between", () => {
+            it("bilingual mode: should preserve word separation when separated by newlines", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), _jsx("span", { style: { display: "inline" }, children: ` ${MOCK_ORIGINAL_TEXT}` })] }));
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("text node with newline-only vs space leading/trailing whitespace", () => {
+            it("bilingual mode: newline-only leading/trailing should not add inner spaces", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                // Text like "\nHello\n" - the newlines are trimmed without adding spaces
+                // Final text is trimmed before translation anyway
+                render(_jsx("div", { "data-testid": "test-node", children: `\n${MOCK_ORIGINAL_TEXT} \n` }));
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT);
+            });
+            it("bilingual mode: space leading/trailing is trimmed before translation", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                // Text like " Hello " - extracted with spaces, then trimmed before translation
+                render(_jsx("div", { "data-testid": "test-node", children: ` ${MOCK_ORIGINAL_TEXT} ` }));
+                await removeOrShowPageTranslation("bilingual", true);
+                // Final text is trimmed before translation
+                expect(translateTextForPage).toHaveBeenCalledWith(MOCK_ORIGINAL_TEXT);
+            });
+        });
+        describe("multiple inline elements with different whitespace separators", () => {
+            it("bilingual mode: whitespace-only nodes between elements preserve word separation", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), "\n\n", _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                await removeOrShowPageTranslation("bilingual", true);
+                // Whitespace-only node returns single space to preserve word separation
+                expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`);
+            });
+            it("bilingual mode: space-separated inline elements", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsxs("div", { "data-testid": "test-node", children: [_jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT }), " ", _jsx("span", { style: { display: "inline" }, children: MOCK_ORIGINAL_TEXT })] }));
+                await removeOrShowPageTranslation("bilingual", true);
+                expect(translateTextForPage).toHaveBeenCalledWith(`${MOCK_ORIGINAL_TEXT} ${MOCK_ORIGINAL_TEXT}`);
+            });
+        });
+        describe("br elements in content", () => {
+            it("bilingual mode: should handle BR elements as paragraph separators", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("br", {}), MOCK_ORIGINAL_TEXT] }));
+                await removeOrShowPageTranslation("bilingual", true);
+                // BR elements are handled as paragraph separators, each paragraph translated separately
+                expect(translateTextForPage).toHaveBeenCalledTimes(2);
+                expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT);
+                expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT);
+            });
+            it("translationOnly mode: should handle BR elements as paragraph separators", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsxs("div", { "data-testid": "test-node", children: [MOCK_ORIGINAL_TEXT, _jsx("br", {}), MOCK_ORIGINAL_TEXT] }));
+                await removeOrShowPageTranslation("translationOnly", true);
+                expect(translateTextForPage).toHaveBeenCalledTimes(2);
+                expect(translateTextForPage).toHaveBeenNthCalledWith(1, MOCK_ORIGINAL_TEXT);
+                expect(translateTextForPage).toHaveBeenNthCalledWith(2, MOCK_ORIGINAL_TEXT);
+            });
+        });
+    });
+    describe("small paragraph filter", () => {
+        const SHORT_TEXT = "Hi";
+        const LONG_TEXT = "This is a longer text with multiple words for testing";
+        const MIN_CHARS_CONFIG = {
+            ...DEFAULT_CONFIG,
+            translate: {
+                ...DEFAULT_CONFIG.translate,
+                mode: "bilingual",
+                page: {
+                    ...DEFAULT_CONFIG.translate.page,
+                    minCharactersPerNode: 10,
+                    minWordsPerNode: 0,
+                },
+            },
+        };
+        const MIN_WORDS_CONFIG = {
+            ...DEFAULT_CONFIG,
+            translate: {
+                ...DEFAULT_CONFIG.translate,
+                mode: "bilingual",
+                page: {
+                    ...DEFAULT_CONFIG.translate.page,
+                    minCharactersPerNode: 0,
+                    minWordsPerNode: 5,
+                },
+            },
+        };
+        async function translateWithConfig(config, toggle = false) {
+            const id = crypto.randomUUID();
+            walkAndLabelElement(document.body, id, config);
+            await act(async () => {
+                await translateWalkedElement(document.body, id, config, toggle);
+                flushBatchedOperations();
+            });
+        }
+        describe("minCharactersPerNode filter", () => {
+            it("should skip translation for text shorter than minCharactersPerNode", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsx("div", { "data-testid": "test-node", children: SHORT_TEXT }));
+                const node = screen.getByTestId("test-node");
+                await translateWithConfig(MIN_CHARS_CONFIG, true);
+                // Should not have translation wrapper because text is too short
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(translateTextForPage).not.toHaveBeenCalled();
+            });
+            it("should translate text longer than minCharactersPerNode", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsx("div", { "data-testid": "test-node", children: LONG_TEXT }));
+                const node = screen.getByTestId("test-node");
+                await translateWithConfig(MIN_CHARS_CONFIG, true);
+                // Should have translation wrapper because text is long enough
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeTruthy();
+                expect(translateTextForPage).toHaveBeenCalled();
+            });
+        });
+        describe("minWordsPerNode filter", () => {
+            it("should skip translation for text with fewer words than minWordsPerNode", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsx("div", { "data-testid": "test-node", children: "Two words" }));
+                const node = screen.getByTestId("test-node");
+                await translateWithConfig(MIN_WORDS_CONFIG, true);
+                // Should not have translation wrapper because word count is too low
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeFalsy();
+                expect(translateTextForPage).not.toHaveBeenCalled();
+            });
+            it("should translate text with more words than minWordsPerNode", async () => {
+                vi.mocked(translateTextForPage).mockClear();
+                render(_jsx("div", { "data-testid": "test-node", children: LONG_TEXT }));
+                const node = screen.getByTestId("test-node");
+                await translateWithConfig(MIN_WORDS_CONFIG, true);
+                // Should have translation wrapper because word count is enough
+                expect(node.querySelector(`.${CONTENT_WRAPPER_CLASS}`)).toBeTruthy();
+                expect(translateTextForPage).toHaveBeenCalled();
+            });
+        });
+    });
+});

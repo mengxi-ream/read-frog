@@ -1,0 +1,45 @@
+export const testSeries = {
+    default: {
+        description: "Refactor to translate config structure",
+        config: {
+            language: {
+                detectedCode: "eng",
+                sourceCode: "auto",
+                targetCode: "jpn",
+                level: "intermediate",
+            },
+            provider: "openai",
+            providersConfig: {
+                openai: {
+                    apiKey: "sk-1234567890",
+                    model: "gpt-4o-mini",
+                    isCustomModel: true,
+                    customModel: "gpt-4.1-nano",
+                },
+                deepseek: {
+                    apiKey: undefined,
+                    model: "deepseek-chat",
+                    isCustomModel: false,
+                    customModel: "",
+                },
+            },
+            translate: {
+                provider: "microsoft",
+                node: {
+                    enabled: true,
+                    hotkey: "Control",
+                },
+                page: {
+                    range: "main",
+                },
+            },
+            floatingButton: {
+                enabled: true,
+                position: 0.66,
+            },
+            sideContent: {
+                width: 600,
+            },
+        },
+    },
+};
