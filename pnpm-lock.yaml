@@ -358,7 +358,7 @@ importers:
         specifier: ^17.0.7
         version: 17.0.7
       node:
-        specifier: runtime:>=22.0.0
+        specifier: runtime:>=22.22.0
         version: runtime:26.3.1
       nx:
         specifier: ^22.7.5
