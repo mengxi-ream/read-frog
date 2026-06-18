@@ -16,7 +16,7 @@ import TranslationModeSelector from "./components/translation-mode-selector"
 function App() {
   return (
     <>
-      <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
+      <div className="bg-background flex flex-col gap-3 px-4 pt-4 pb-3">
         <div className="flex items-center justify-between">
           <UserAccount />
         </div>
