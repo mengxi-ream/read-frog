@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-fix(deepl): use direct fetch in correct contexts to fix Firefox translation
+fix(translate): remove unused background fetch path for DeepL providers

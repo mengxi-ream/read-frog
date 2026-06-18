@@ -17,7 +17,6 @@ export async function executeTranslate<TContext>(
   providerConfig: ProviderConfig,
   promptResolver: PromptResolver<TContext>,
   options?: {
-    forceBackgroundFetch?: boolean
     isBatch?: boolean
     context?: TContext
   },
@@ -50,10 +49,10 @@ export async function executeTranslate<TContext>(
       throw new Error(`Invalid target language code: ${langConfig.targetCode}`)
     }
     if (provider === "deeplx") {
-      translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig, options)
+      translatedText = await deeplxTranslate(preparedText, sourceLang, targetLang, providerConfig)
     }
     else if (provider === "deepl") {
-      translatedText = await deeplTranslate(text, sourceLang, targetLang, providerConfig, options)
+      translatedText = await deeplTranslate(text, sourceLang, targetLang, providerConfig)
     }
   }
   else if (isLLMProviderConfig(providerConfig)) {

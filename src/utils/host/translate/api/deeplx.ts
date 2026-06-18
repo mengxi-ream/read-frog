@@ -1,7 +1,6 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
 import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
-import { sendMessage } from "@/utils/message"
 
 type DeepLXProviderConfig = Extract<ProviderConfig, { provider: "deeplx" }>
 const API_KEY_PLACEHOLDER_RE = /\{\{apiKey\}\}/g
@@ -11,7 +10,6 @@ export async function deeplxTranslate(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLXProviderConfig,
-  options?: { forceBackgroundFetch?: boolean },
 ): Promise<string> {
   const baseURL = providerConfig.baseURL || DEFAULT_PROVIDER_CONFIG.deeplx.baseURL
   const apiKey = providerConfig.apiKey
@@ -37,29 +35,9 @@ export async function deeplxTranslate(
     target_lang: formatLang(toLang),
   })
 
-  const fetchResponse = options?.forceBackgroundFetch
-    ? await fetchViaBackground(url, requestBody)
-    : await fetchDirect(url, requestBody)
+  const fetchResponse = await fetchDirect(url, requestBody)
 
   return parseDeepLXResponse(fetchResponse)
-}
-
-async function fetchViaBackground(url: string, body: string) {
-  const resp = await sendMessage("backgroundFetch", {
-    url,
-    method: "POST",
-    headers: [["Content-Type", "application/json"]],
-    body,
-    credentials: "omit",
-  })
-
-  return {
-    ok: resp.status >= 200 && resp.status < 300,
-    status: resp.status,
-    statusText: resp.statusText,
-    text: () => Promise.resolve(resp.body),
-    json: () => Promise.resolve(JSON.parse(resp.body)),
-  }
 }
 
 async function fetchDirect(url: string, body: string) {
