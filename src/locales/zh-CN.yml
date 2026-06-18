@@ -7,7 +7,8 @@ dataTypes:
   number: 数字
 contextMenu:
   translate: 翻译
-  translateSelection: 翻译“%s”
+  translateSelection: 翻译”%s”
+  readAloudSelection: 朗读”%s”
   showOriginal: 显示原文
 sidePanel:
   firefoxUserActionHint: 在 Firefox 中，请从浏览器侧边栏打开陪读蛙。

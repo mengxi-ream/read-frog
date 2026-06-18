@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: 翻譯
   translateSelection: 翻譯「%s」
+  readAloudSelection: 朗讀「%s」
   showOriginal: 顯示原文
 sidePanel:
   firefoxUserActionHint: 在 Firefox 中，請從瀏覽器側邊欄開啟陪讀蛙。

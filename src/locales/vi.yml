@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: Dịch
   translateSelection: Dịch "%s"
+  readAloudSelection: Đọc to "%s"
   showOriginal: Hiển thị bản gốc
 sidePanel:
   firefoxUserActionHint: Trong Firefox, hãy mở Read Frog từ thanh bên của trình duyệt.

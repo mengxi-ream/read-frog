@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: 翻訳
   translateSelection: 「%s」を翻訳
+  readAloudSelection: 「%s」を読み上げ
   showOriginal: 原文を表示
 sidePanel:
   firefoxUserActionHint: Firefox では、ブラウザーのサイドバーから Read Frog を開いてください。

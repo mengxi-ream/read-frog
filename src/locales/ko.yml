@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: 번역
   translateSelection: '"%s" 번역'
+  readAloudSelection: '"%s" 읽어주기'
   showOriginal: 원문 보기
 sidePanel:
   firefoxUserActionHint: Firefox에서는 브라우저 사이드바에서 Read Frog를 열어 주세요.

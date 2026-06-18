@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: Перевести
   translateSelection: Перевести "%s"
+  readAloudSelection: Прочитать вслух "%s"
   showOriginal: Показать оригинал
 sidePanel:
   firefoxUserActionHint: В Firefox откройте Read Frog из боковой панели браузера.
