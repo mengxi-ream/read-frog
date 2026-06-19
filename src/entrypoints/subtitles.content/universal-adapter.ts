@@ -309,7 +309,7 @@ export class UniversalVideoAdapter {
     const existingButton = container.querySelector(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
     existingButton?.remove()
 
-    const toggleButton = renderSubtitlesTranslateButton(this)
+    const toggleButton = renderSubtitlesTranslateButton({ adapter: this })
 
     if (this.config.embedded) {
       container.appendChild(toggleButton)
