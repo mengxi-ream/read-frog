@@ -140,6 +140,12 @@ options:
       advancedOptions: 詳細オプション
       providerSettingLabels:
         region: リージョン
+        apiMode: API モード
+        resourceName: Azure リソース名（任意）
+        apiVersion: API バージョン
+      providerSettingOptionLabels:
+        responses: Responses API
+        chatCompletions: Chat Completions
       temperature: 温度
       temperatureHint: 応答のランダム性を制御します。低い値（0）はより決定的で、高い値はより創造的です。範囲はプロバイダーによって異なります。空欄の場合はプロバイダーのデフォルト値を使用します。
       headers: ヘッダー
@@ -156,6 +162,7 @@ options:
     providers:
       description:
         openai: GPT-4oなどのモデルを提供
+        azure: Azure のデプロイ経由で OpenAI モデルを利用
         deepseek: 中国国内での使用を推奨
         openrouter: 複数のLLMプロバイダの統合インターフェース、従量課金制
         ollama: ローカル大規模言語モデルサービス

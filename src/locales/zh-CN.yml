@@ -141,6 +141,12 @@ options:
       advancedOptions: 高级选项
       providerSettingLabels:
         region: 区域
+        apiMode: API 模式
+        resourceName: Azure 资源名称（可选）
+        apiVersion: API 版本
+      providerSettingOptionLabels:
+        responses: Responses API
+        chatCompletions: Chat Completions
       temperature: 温度
       temperatureHint: 控制响应的随机性。较低的值（0）更确定性，较高的值更具创造性。范围因提供商而异。留空则使用提供商默认值。
       headers: 请求头
@@ -157,6 +163,7 @@ options:
     providers:
       description:
         openai: 提供 GPT-4o 等模型
+        azure: 通过 Azure 部署使用 OpenAI 模型
         deepseek: 推荐在中国使用
         openrouter: 多个 LLM 提供商的统一接口，按使用量付费
         ollama: 在本地机器上运行大语言模型，确保完全隐私

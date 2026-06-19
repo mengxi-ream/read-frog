@@ -6,17 +6,26 @@ let getStorageItemMock: ReturnType<typeof vi.fn>
 
 const {
   anthropicLanguageModelMock,
+  azureChatModelMock,
+  azureLanguageModelMock,
   openRouterLanguageModelMock,
   openAICompatibleLanguageModelMock,
   createAnthropicMock,
+  createAzureMock,
   createOpenRouterMock,
   createOpenAICompatibleMock,
 } = vi.hoisted(() => {
   const anthropicLanguageModelMock = vi.fn()
+  const azureChatModelMock = vi.fn()
+  const azureLanguageModelMock = vi.fn()
   const openRouterLanguageModelMock = vi.fn()
   const openAICompatibleLanguageModelMock = vi.fn()
   const createAnthropicMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: anthropicLanguageModelMock,
+  }))
+  const createAzureMock = vi.fn((_options?: Record<string, unknown>) => ({
+    chat: azureChatModelMock,
+    languageModel: azureLanguageModelMock,
   }))
   const createOpenRouterMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: openRouterLanguageModelMock,
@@ -27,9 +36,12 @@ const {
 
   return {
     anthropicLanguageModelMock,
+    azureChatModelMock,
+    azureLanguageModelMock,
     openRouterLanguageModelMock,
     openAICompatibleLanguageModelMock,
     createAnthropicMock,
+    createAzureMock,
     createOpenRouterMock,
     createOpenAICompatibleMock,
   }
@@ -37,6 +49,10 @@ const {
 
 vi.mock("@ai-sdk/anthropic", () => ({
   createAnthropic: createAnthropicMock,
+}))
+
+vi.mock("@ai-sdk/azure", () => ({
+  createAzure: createAzureMock,
 }))
 
 vi.mock("@openrouter/ai-sdk-provider", () => ({
@@ -83,6 +99,8 @@ describe("getModelById", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     anthropicLanguageModelMock.mockReturnValue("anthropic-model")
+    azureChatModelMock.mockReturnValue("azure-chat-model")
+    azureLanguageModelMock.mockReturnValue("azure-model")
     openRouterLanguageModelMock.mockReturnValue("openrouter-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
     getStorageItemMock = vi.fn()
@@ -119,6 +137,92 @@ describe("getModelById", () => {
       headers: DEFAULT_PROVIDER_HEADERS.openrouter,
     }))
     expect(openRouterLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
+  })
+
+  it("passes Azure settings and resolves the deployment name with languageModel", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [
+        {
+          id: "azure-default",
+          name: "Azure OpenAI",
+          enabled: true,
+          provider: "azure",
+          apiKey: "azure-key",
+          baseURL: "https://proxy.example.test/openai",
+          model: {
+            model: "gpt-5.4-mini",
+            isCustomModel: true,
+            customModel: "read-frog-gpt-4o",
+          },
+          providerSpecificSettings: {
+            apiMode: "responses",
+            resourceName: "read-frog-openai",
+            apiVersion: "2025-04-01-preview",
+          },
+          headers: {
+            "X-Test": "1",
+          },
+        },
+      ],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("azure-default")
+
+    expect(result).toBe("azure-model")
+    expect(createAzureMock).toHaveBeenCalledWith(expect.objectContaining({
+      resourceName: "read-frog-openai",
+      apiVersion: "2025-04-01-preview",
+      baseURL: "https://proxy.example.test/openai",
+      apiKey: "azure-key",
+      headers: {
+        "X-Test": "1",
+      },
+    }))
+    expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("apiMode")
+    expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("region")
+    expect(azureLanguageModelMock).toHaveBeenCalledWith("read-frog-gpt-4o")
+    expect(azureChatModelMock).not.toHaveBeenCalled()
+  })
+
+  it("uses Azure chat completions when API mode is chat", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [
+        {
+          id: "azure-default",
+          name: "Azure OpenAI",
+          enabled: true,
+          provider: "azure",
+          apiKey: "azure-key",
+          baseURL: "https://proxy.example.test/openai",
+          model: {
+            model: "gpt-5.4-mini",
+            isCustomModel: true,
+            customModel: "read-frog-gpt-4o",
+          },
+          providerSpecificSettings: {
+            apiMode: "chat",
+            resourceName: "read-frog-openai",
+            apiVersion: "2025-04-01-preview",
+          },
+        },
+      ],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("azure-default")
+
+    expect(result).toBe("azure-chat-model")
+    expect(createAzureMock).toHaveBeenCalledWith(expect.objectContaining({
+      resourceName: "read-frog-openai",
+      apiVersion: "2025-04-01-preview",
+      baseURL: "https://proxy.example.test/openai",
+      apiKey: "azure-key",
+    }))
+    expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("apiMode")
+    expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("region")
+    expect(azureChatModelMock).toHaveBeenCalledWith("read-frog-gpt-4o")
+    expect(azureLanguageModelMock).not.toHaveBeenCalled()
   })
 
   it("uses user headers as a full override for Anthropic", async () => {

@@ -17,6 +17,9 @@ importers:
       '@ai-sdk/anthropic':
         specifier: ^3.0.85
         version: 3.0.85(zod@4.4.3)
+      '@ai-sdk/azure':
+        specifier: ^3.0.76
+        version: 3.0.76(zod@4.4.3)
       '@ai-sdk/cerebras':
         specifier: ^2.0.57
         version: 2.0.57(zod@4.4.3)
@@ -419,6 +422,12 @@ packages:
 
   '@ai-sdk/anthropic@3.0.85':
     resolution: {integrity: sha512-fNeDB644l5wbRNQU0FnI+F7UTtOenMnPtACfMPUJaS2zJfuBlseEa1TMg+otHkETZgaJB+6Na51NQEv0+m7czw==}
+    engines: {node: '>=18'}
+    peerDependencies:
+      zod: ^3.25.76 || ^4.1.8
+
+  '@ai-sdk/azure@3.0.76':
+    resolution: {integrity: sha512-Z7CsB0Vc/UsM3gkrUb9BiEJ/Lvf1mABj17UMjHFuK0GzyYRRMb6anxvJ9FtP7G5lItnifRHZ4ZrTSi5e7ghTYQ==}
     engines: {node: '>=18'}
     peerDependencies:
       zod: ^3.25.76 || ^4.1.8
@@ -7674,6 +7683,14 @@ snapshots:
 
   '@ai-sdk/anthropic@3.0.85(zod@4.4.3)':
     dependencies:
+      '@ai-sdk/provider': 3.0.10
+      '@ai-sdk/provider-utils': 4.0.30(zod@4.4.3)
+      zod: 4.4.3
+
+  '@ai-sdk/azure@3.0.76(zod@4.4.3)':
+    dependencies:
+      '@ai-sdk/deepseek': 2.0.39(zod@4.4.3)
+      '@ai-sdk/openai': 3.0.73(zod@4.4.3)
       '@ai-sdk/provider': 3.0.10
       '@ai-sdk/provider-utils': 4.0.30(zod@4.4.3)
       zod: 4.4.3

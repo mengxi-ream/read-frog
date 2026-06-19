@@ -4,6 +4,7 @@ import { useEffect, useEffectEvent, useMemo, useState } from "react"
 import { i18n } from "#imports"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getProviderSpecificSettingFields, isLLMProvider, PROVIDER_SPECIFIC_SETTINGS_SCHEMAS } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
@@ -68,6 +69,39 @@ export const ProviderSpecificSettingsField = withForm({
       const fieldId = `${def.key}-${providerConfig.id}`
       const fieldLabel = i18n.t(`options.apiProviders.form.providerSettingLabels.${def.labelKey}` as Parameters<typeof i18n.t>[0])
       const fieldValue = localSettings[def.key]
+
+      if (def.type === "select") {
+        const selectedValue = typeof fieldValue === "string" ? fieldValue : def.defaultValue
+        const selectedOption = def.options.find(option => option.value === selectedValue)
+
+        return (
+          <Field key={fieldId}>
+            <FieldLabel htmlFor={fieldId}>{fieldLabel}</FieldLabel>
+            <Select
+              value={selectedValue}
+              onValueChange={value => setLocalSettings(prev => ({ ...prev, [def.key]: value }))}
+            >
+              <SelectTrigger id={fieldId} className="w-full">
+                <SelectValue placeholder={def.placeholder}>
+                  {selectedOption
+                    ? i18n.t(`options.apiProviders.form.providerSettingOptionLabels.${selectedOption.labelKey}` as Parameters<typeof i18n.t>[0])
+                    : undefined}
+                </SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {def.options.map(option => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {i18n.t(`options.apiProviders.form.providerSettingOptionLabels.${option.labelKey}` as Parameters<typeof i18n.t>[0])}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Field>
+        )
+      }
+
       return (
         <Field key={fieldId}>
           <FieldLabel htmlFor={fieldId}>{fieldLabel}</FieldLabel>

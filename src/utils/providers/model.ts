@@ -1,7 +1,9 @@
 import type { Config } from "@/types/config/config"
+import type { AzureApiMode, LLMProviderConfig } from "@/types/config/provider"
 import { createAlibaba } from "@ai-sdk/alibaba"
 import { createAmazonBedrock } from "@ai-sdk/amazon-bedrock"
 import { createAnthropic } from "@ai-sdk/anthropic"
+import { createAzure } from "@ai-sdk/azure"
 import { createCerebras } from "@ai-sdk/cerebras"
 import { createCohere } from "@ai-sdk/cohere"
 import { createDeepInfra } from "@ai-sdk/deepinfra"
@@ -23,7 +25,7 @@ import { createOpenRouter } from "@openrouter/ai-sdk-provider"
 import { createOllama } from "ollama-ai-provider-v2"
 import { createMinimax } from "vercel-minimax-ai-provider"
 import { storage } from "#imports"
-import { isCustomLLMProvider } from "@/types/config/provider"
+import { DEFAULT_AZURE_API_MODE, isCustomLLMProvider } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
 import { getLLMProvidersConfig, getProviderConfigById } from "../config/helpers"
 import { CONFIG_STORAGE_KEY } from "../constants/config"
@@ -37,6 +39,7 @@ const CREATE_AI_MAPPER = {
   "openrouter": createOpenRouter,
   "openai-compatible": createOpenAICompatible,
   "openai": createOpenAI,
+  "azure": createAzure,
   "deepseek": createDeepSeek,
   "google": createGoogleGenerativeAI,
   "anthropic": createAnthropic,
@@ -59,6 +62,28 @@ const CREATE_AI_MAPPER = {
   "huggingface": createHuggingFace,
 } as const
 
+function getProviderSpecificSettings(providerConfig: LLMProviderConfig) {
+  const settings = "providerSpecificSettings" in providerConfig
+    ? compactObject(providerConfig.providerSpecificSettings ?? {})
+    : {}
+
+  if (providerConfig.provider !== "azure") {
+    return settings
+  }
+
+  const { apiMode: _apiMode, ...azureSettings } = settings as Record<string, unknown>
+  return azureSettings
+}
+
+function getAzureApiMode(providerConfig: LLMProviderConfig): AzureApiMode {
+  if (providerConfig.provider !== "azure") {
+    return DEFAULT_AZURE_API_MODE
+  }
+
+  const apiMode = (providerConfig.providerSpecificSettings as { apiMode?: unknown } | undefined)?.apiMode
+  return apiMode === "chat" ? "chat" : DEFAULT_AZURE_API_MODE
+}
+
 async function getLanguageModelById(providerId: string) {
   const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
   if (!config) {
@@ -72,9 +97,7 @@ async function getLanguageModelById(providerId: string) {
   }
 
   const headers = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers)
-  const providerSpecificSettings = "providerSpecificSettings" in providerConfig
-    ? compactObject(providerConfig.providerSpecificSettings ?? {})
-    : {}
+  const providerSpecificSettings = getProviderSpecificSettings(providerConfig)
 
   const provider = isCustomLLMProvider(providerConfig.provider)
     ? CREATE_AI_MAPPER[providerConfig.provider]({
@@ -96,6 +119,10 @@ async function getLanguageModelById(providerId: string) {
 
   if (!modelId) {
     throw new Error("Model is undefined")
+  }
+
+  if (providerConfig.provider === "azure" && getAzureApiMode(providerConfig) === "chat") {
+    return (provider as ReturnType<typeof createAzure>).chat(modelId)
   }
 
   return provider.languageModel(modelId)

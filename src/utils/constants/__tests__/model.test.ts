@@ -74,6 +74,18 @@ describe("getProviderOptions", () => {
       ]))
     })
 
+    it("should expose Azure shortcut deployment names for GPT, DeepSeek, and Grok", () => {
+      expect(LLM_PROVIDER_MODELS.azure).toEqual(expect.arrayContaining([
+        "gpt-5.4-mini",
+        "gpt-5.4",
+        "DeepSeek-V4-Flash",
+        "DeepSeek-V4-Pro",
+        "grok-4.3",
+        "grok-4-20-non-reasoning",
+        "grok-4-20-reasoning",
+      ]))
+    })
+
     it("should expose the supported Anthropic Fable model ids", () => {
       expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-fable-5")
       expect(LLM_PROVIDER_MODELS.bedrock).toContain("us.anthropic.claude-fable-5")

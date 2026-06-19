@@ -140,6 +140,12 @@ options:
       advancedOptions: Gelişmiş Seçenekler
       providerSettingLabels:
         region: Bölge
+        apiMode: API modu
+        resourceName: Azure kaynak adı (isteğe bağlı)
+        apiVersion: API sürümü
+      providerSettingOptionLabels:
+        responses: Responses API
+        chatCompletions: Chat Completions
       temperature: Sıcaklık
       temperatureHint: Yanıtlardaki rastgeleliği kontrol eder. Düşük değerler (0) daha belirleyici, yüksek değerler daha yaratıcıdır. Aralık sağlayıcıya göre değişir. Sağlayıcı varsayılanını kullanmak için boş bırakın.
       headers: Başlıklar
@@ -156,6 +162,7 @@ options:
     providers:
       description:
         openai: GPT-4o gibi modeller sağlar
+        azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
         deepseek: Çin'de kullanım için önerilir
         openrouter: Kullandıkça öde fiyatlandırmasıyla birden fazla LLM sağlayıcısı için birleşik arayüz
         ollama: Tam gizlilik için büyük dil modellerini makinenizde yerel olarak çalıştırın

@@ -140,6 +140,12 @@ options:
       advancedOptions: 고급 옵션
       providerSettingLabels:
         region: 리전
+        apiMode: API 모드
+        resourceName: Azure 리소스 이름(선택 사항)
+        apiVersion: API 버전
+      providerSettingOptionLabels:
+        responses: Responses API
+        chatCompletions: Chat Completions
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
       headers: 헤더
@@ -156,6 +162,7 @@ options:
     providers:
       description:
         openai: GPT-4o 같은 모델을 제공합니다
+        azure: Azure 배포를 통해 OpenAI 모델 사용
         deepseek: 중국에서 사용을 권장합니다
         openrouter: 여러 LLM 제공업체를 위한 통합 인터페이스, 사용량 기반 과금
         ollama: 로컬 LLM

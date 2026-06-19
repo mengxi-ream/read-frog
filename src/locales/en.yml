@@ -141,6 +141,12 @@ options:
       advancedOptions: Advanced Options
       providerSettingLabels:
         region: Region
+        apiMode: API mode
+        resourceName: Azure resource name (Optional)
+        apiVersion: API version
+      providerSettingOptionLabels:
+        responses: Responses API
+        chatCompletions: Chat Completions
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
       headers: Headers
@@ -157,6 +163,7 @@ options:
     providers:
       description:
         openai: Provides models like GPT-4o
+        azure: Azure-hosted OpenAI models through your deployments
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
         ollama: Run large language models locally on your machine for complete privacy

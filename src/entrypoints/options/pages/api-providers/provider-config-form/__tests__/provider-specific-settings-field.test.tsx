@@ -62,6 +62,32 @@ describe("providerSpecificSettingsField", () => {
     expect(screen.getByLabelText("persisted-provider-specific-settings")).toHaveTextContent("{\"region\":\"us-west-2\"}")
   })
 
+  it("renders Azure settings without a region field and persists non-empty values", async () => {
+    render(<ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG.azure} />)
+
+    expect(screen.queryByLabelText("options.apiProviders.form.providerSettingLabels.region")).not.toBeInTheDocument()
+
+    const apiModeSelect = screen.getByLabelText("options.apiProviders.form.providerSettingLabels.apiMode")
+    const resourceNameInput = screen.getByLabelText("options.apiProviders.form.providerSettingLabels.resourceName")
+    const apiVersionInput = screen.getByLabelText("options.apiProviders.form.providerSettingLabels.apiVersion")
+
+    expect(apiModeSelect).toHaveTextContent("options.apiProviders.form.providerSettingOptionLabels.responses")
+    expect(resourceNameInput).toHaveValue("")
+    expect(apiVersionInput).toHaveValue("v1")
+
+    fireEvent.change(resourceNameInput, { target: { value: "read-frog-openai" } })
+    fireEvent.change(apiVersionInput, { target: { value: "2025-04-01-preview" } })
+
+    await act(async () => {
+      vi.advanceTimersByTime(500)
+      await Promise.resolve()
+    })
+
+    expect(screen.getByLabelText("persisted-provider-specific-settings")).toHaveTextContent(
+      "{\"apiMode\":\"responses\",\"apiVersion\":\"2025-04-01-preview\",\"resourceName\":\"read-frog-openai\"}",
+    )
+  })
+
   it("does not render or write settings for providers without provider-specific schemas", async () => {
     render(<ProviderSpecificSettingsFieldHarness initialConfig={DEFAULT_PROVIDER_CONFIG.openai} />)
 

@@ -140,6 +140,12 @@ options:
       advancedOptions: Tùy chọn nâng cao
       providerSettingLabels:
         region: Khu vực
+        apiMode: Chế độ API
+        resourceName: Tên tài nguyên Azure (tùy chọn)
+        apiVersion: Phiên bản API
+      providerSettingOptionLabels:
+        responses: Responses API
+        chatCompletions: Chat Completions
       temperature: Nhiệt độ
       temperatureHint: Kiểm soát tính ngẫu nhiên trong phản hồi. Giá trị thấp (0) mang tính xác định hơn, giá trị cao mang tính sáng tạo hơn. Phạm vi thay đổi theo nhà cung cấp. Để trống để sử dụng giá trị mặc định của nhà cung cấp.
       headers: Header
@@ -156,6 +162,7 @@ options:
     providers:
       description:
         openai: Cung cấp các mô hình như GPT-4o
+        azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
         deepseek: Khuyến nghị sử dụng ở Trung Quốc
         openrouter: Giao diện thống nhất cho nhiều nhà cung cấp LLM với giá trả theo lần sử dụng
         ollama: Chạy các mô hình ngôn ngữ lớn cục bộ trên máy của bạn để bảo mật hoàn toàn

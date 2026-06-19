@@ -11,7 +11,7 @@ import type {
 import { z } from "zod"
 
 import { LLM_PROVIDER_MODELS } from "./constants"
-import { bedrockProviderSpecificSettingsSchema } from "./provider-specific-settings"
+import { azureProviderSpecificSettingsSchema, bedrockProviderSpecificSettingsSchema } from "./provider-specific-settings"
 
 /* ──────────────────────────────
   Providers config schema
@@ -67,6 +67,11 @@ const llmProviderConfigSchemaList = [
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("openai"),
     model: createProviderModelSchema<"openai">("openai"),
+  }),
+  baseAPIProviderConfigSchema.extend({
+    provider: z.literal("azure"),
+    model: createProviderModelSchema<"azure">("azure"),
+    providerSpecificSettings: azureProviderSpecificSettingsSchema.optional(),
   }),
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("deepseek"),

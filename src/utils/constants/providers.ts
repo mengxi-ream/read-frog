@@ -26,6 +26,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     isCustomModel: false,
     customModel: null,
   },
+  "azure": {
+    model: "gpt-5.4-mini",
+    isCustomModel: false,
+    customModel: null,
+  },
   "deepseek": {
     model: "deepseek-v4-flash",
     isCustomModel: false,
@@ -184,6 +189,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn("openai"),
       name: "OpenAI",
       website: "https://platform.openai.com",
+    },
+    "azure": {
+      logo: getLobeIconsCDNUrlFn("azure-color"),
+      name: "Azure",
+      website: "https://azure.microsoft.com/products/ai-services/openai-service",
     },
     "deepseek": {
       logo: getLobeIconsCDNUrlFn("deepseek-color"),
@@ -344,6 +354,18 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "openai",
     model: DEFAULT_LLM_PROVIDER_MODELS.openai,
+  },
+  "azure": {
+    id: "azure-default",
+    name: PROVIDER_ITEMS.azure.name,
+    description: i18n.t("options.apiProviders.providers.description.azure"),
+    enabled: true,
+    provider: "azure",
+    model: DEFAULT_LLM_PROVIDER_MODELS.azure,
+    providerSpecificSettings: {
+      apiMode: "responses",
+      apiVersion: "v1",
+    },
   },
   "deepseek": {
     id: "deepseek-default",
@@ -542,6 +564,37 @@ export const DEFAULT_PROVIDER_CONFIG = {
     model: DEFAULT_LLM_PROVIDER_MODELS.huggingface,
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
+
+export const PROVIDER_BASE_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
+  "siliconflow": DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
+  "tensdaq": DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
+  "openai-compatible": DEFAULT_PROVIDER_CONFIG["openai-compatible"].baseURL,
+  "openai": "https://api.openai.com/v1",
+  "azure": "https://<resource>.services.ai.azure.com/openai",
+  "deepseek": "https://api.deepseek.com",
+  "google": "https://generativelanguage.googleapis.com/v1beta",
+  "anthropic": "https://api.anthropic.com/v1",
+  "xai": "https://api.x.ai/v1",
+  "deeplx": DEFAULT_PROVIDER_CONFIG.deeplx.baseURL,
+  "bedrock": "https://bedrock-runtime.us-east-1.amazonaws.com",
+  "groq": "https://api.groq.com/openai/v1",
+  "deepinfra": "https://api.deepinfra.com/v1",
+  "mistral": "https://api.mistral.ai/v1",
+  "togetherai": "https://api.together.xyz/v1",
+  "cohere": "https://api.cohere.com/v2",
+  "fireworks": "https://api.fireworks.ai/inference/v1",
+  "cerebras": "https://api.cerebras.ai/v1",
+  "replicate": "https://api.replicate.com/v1",
+  "perplexity": "https://api.perplexity.ai",
+  "vercel": "https://api.v0.dev/v1",
+  "openrouter": "https://openrouter.ai/api/v1",
+  "ollama": DEFAULT_PROVIDER_CONFIG.ollama.baseURL,
+  "volcengine": DEFAULT_PROVIDER_CONFIG.volcengine.baseURL,
+  "minimax": DEFAULT_PROVIDER_CONFIG.minimax.baseURL,
+  "alibaba": DEFAULT_PROVIDER_CONFIG.alibaba.baseURL,
+  "moonshotai": "https://api.moonshot.ai/v1",
+  "huggingface": "https://router.huggingface.co/v1",
+}
 
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
