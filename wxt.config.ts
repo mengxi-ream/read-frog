@@ -75,7 +75,7 @@ export default defineConfig({
   }),
   zip: {
     includeSources: [".env.production"],
-    excludeSources: ["docs/**/*", "assets/**/*", "repos/**/*"],
+    excludeSources: ["docs/**/*", "assets/**/*", "repos/**/*", "readmes/**/*"],
   },
   dev: {
     server: {

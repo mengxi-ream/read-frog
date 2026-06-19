@@ -2,13 +2,24 @@
 
 [![Read Frog banner][image-banner]][website]
 
-<a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+<p align="center">
+  <a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" width="250" height="55" /></a>
+  <a href="https://www.star-history.com/mengxi-ream/read-frog">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=mengxi-ream/read-frog&theme=dark" />
+      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=mengxi-ream/read-frog" />
+      <img alt="Star History Rank" src="https://api.star-history.com/badge?repo=mengxi-ream/read-frog" width="260" height="55" />
+    </picture>
+  </a>
+</p>
 
 一款开源的 AI 驱动的浏览器语言学习扩展。<br/>
 支持沉浸式翻译、文章分析、多种 AI 模型等功能。<br/>
 在浏览器中利用 AI 轻松深入地掌握语言。
 
-[English](./README.md) · **简体中文** · [官方网站](https://readfrog.app) · [教程](https://www.readfrog.app/zh/docs) · [更新日志](https://www.readfrog.app/zh/changelog) · [博客](https://www.readfrog.app/zh/blog)
+[![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
+
+[官方网站](https://readfrog.app) · [教程](https://www.readfrog.app/zh/docs) · [更新日志][github-release-link] · [博客](https://www.readfrog.app/zh/blog)
 
 <!-- SHIELD GROUP -->
 
@@ -29,12 +40,12 @@
 </div>
 
 <div align="center">
-  <img src="/assets/promotion/sponsor-title.svg" alt="Sponsor" width="120" />
+  <img src="../assets/promotion/sponsor-title.svg" alt="Sponsor" width="120" />
   <br />
   注册<a href="https://readfrog.s.gy/RWqJeX">优云智算</a>：用最少的钱，换最高的编程效率。
   <br /><br />
   <a href="https://readfrog.s.gy/RWqJeX">
-    <img src="/assets/promotion/ucloud.jpg" alt="UCloud" />
+    <img src="../assets/promotion/ucloud.jpg" alt="UCloud" />
   </a>
 </div>
 
@@ -67,8 +78,8 @@
 ## 📺 演示
 
 <div align="center">
-  <img src="assets/node-translation-demo.gif" width="38%" alt="Read Frog 弹窗界面" />
-  <img src="assets/page-translation-demo.gif" width="60%" alt="Read Frog 翻译界面" />
+  <img src="../assets/node-translation-demo.gif" width="38%" alt="Read Frog 弹窗界面" />
+  <img src="../assets/page-translation-demo.gif" width="60%" alt="Read Frog 翻译界面" />
 </div>
 
 ## 👋🏻 快速开始 & 加入我们的社区
@@ -234,7 +245,7 @@ Read Frog 的愿景是为各个级别的语言学习者提供易于使用、智�
 
 ReadFrog 采用 GPLv3 和商业许可双重授权。
 
-贡献者许可条款请参阅 [CONTRIBUTING.md](./CONTRIBUTING.md)。
+贡献者许可条款请参阅 [CONTRIBUTING.md](../CONTRIBUTING.md)。
 
 <a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
   <table>
@@ -270,7 +281,7 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 
 ## 📜 商业授权
 
-<img src="/assets/tabbit.avif" alt="Tabbit" height="20" /> **美团 Tabbit 浏览器团队**：**免费**授权闭源商业使用，授权范围限于 v1.21.3 及之前的版本（commit [`724863f`](https://github.com/mengxi-ream/read-frog/commit/724863fdbc2d777766cada6c111235534ee03ca0)）。授权日期：2026 年 3 月 3 日上午 9:00（温哥华时间，UTC-8）。
+<img src="../assets/tabbit.avif" alt="Tabbit" height="20" /> **美团 Tabbit 浏览器团队**：**免费**授权闭源商业使用，授权范围限于 v1.21.3 及之前的版本（commit [`724863f`](https://github.com/mengxi-ream/read-frog/commit/724863fdbc2d777766cada6c111235534ee03ca0)）。授权日期：2026 年 3 月 3 日上午 9:00（温哥华时间，UTC-8）。
 
 <div align="right">
 
@@ -299,10 +310,12 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 [contributors-link]: https://github.com/mengxi-ream/read-frog/graphs/contributors
 [contributors-shield]: https://img.shields.io/github/contributors/mengxi-ream/read-frog?style=flat-square&labelColor=black
 [crxsoso-link]: https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb
+[chinese-shield]: https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-gray?style=flat-square
 [discord-link]: https://discord.gg/ej45e3PezJ
 [discord-shield]: https://img.shields.io/discord/1371229720942874646?style=flat-square&label=Discord&logo=discord&logoColor=white&color=5865F2&labelColor=black
 [discord-shield-badge]: https://img.shields.io/badge/聊天-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=black
 [edge-store-link]: https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo
+[english-shield]: https://img.shields.io/badge/English-gray?style=flat-square
 [firefox-store-link]: https://addons.mozilla.org/firefox/addon/read-frog-open-ai-translator/
 [firefox-version-shield]: https://img.shields.io/amo/v/read-frog-open-ai-translator?style=flat-square&label=Firefox%20版本&labelColor=black&color=orange
 [firefox-users-shield]: https://img.shields.io/amo/users/read-frog-open-ai-translator?style=flat-square&label=Firefox%20用户&color=orange&labelColor=black
@@ -311,18 +324,25 @@ ReadFrog 采用 GPLv3 和商业许可双重授权。
 [extension-release-shield]: https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=package.json&style=flat-square&label=最新版本&color=brightgreen&labelColor=black
 [github-release-link]: https://github.com/mengxi-ream/read-frog/releases
 [github-star-link]: https://github.com/mengxi-ream/read-frog/stargazers
-[image-banner]: /assets/banner-zh.png
+[image-banner]: ../assets/banner-zh.png
 [sponsor-image]: https://cdn.jsdelivr.net/gh/mengxi-ream/static/sponsorkit/sponsors.svg
-[image-star]: ./assets/star.png
+[image-star]: ../assets/star.png
 [issues-link]: https://github.com/mengxi-ream/read-frog/issues
 [issues-shield]: https://img.shields.io/github/issues/mengxi-ream/read-frog?style=flat-square&labelColor=black
+[japanese-shield]: https://img.shields.io/badge/%E6%97%A5%E6%9C%AC%E8%AA%9E-gray?style=flat-square
+[korean-shield]: https://img.shields.io/badge/%ED%95%9C%EA%B5%AD%EC%96%B4-gray?style=flat-square
 [last-commit-shield]: https://img.shields.io/github/last-commit/mengxi-ream/read-frog?style=flat-square&label=commit&labelColor=black
+[russian-shield]: https://img.shields.io/badge/%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-gray?style=flat-square
 [sponsor-link]: https://github.com/sponsors/mengxi-ream
 [sponsor-shield]: https://img.shields.io/github/sponsors/mengxi-ream?style=flat-square&label=赞助&color=EA4AAA&labelColor=black
+[spanish-shield]: https://img.shields.io/badge/Espa%C3%B1ol-gray?style=flat-square
 [star-history-link]: https://www.star-history.com/#mengxi-ream/read-frog&Timeline
 [star-history-shield]: https://img.shields.io/github/stars/mengxi-ream/read-frog?style=flat-square&label=stars&color=yellow&labelColor=black
+[traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
+[turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
+[vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
 [website]: https://readfrog.app
-[wechat-link]: ./assets/wechat-account.jpg
+[wechat-link]: ../assets/wechat-account.jpg
 [wechat-shield-badge]: https://img.shields.io/badge/聊天-微信-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
 
 <!-- Feature docs link -->
