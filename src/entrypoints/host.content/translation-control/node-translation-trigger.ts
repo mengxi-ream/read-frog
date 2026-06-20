@@ -9,7 +9,9 @@ const MOUSEMOVE_THROTTLE_MS = 300
 const MOUSEMOVE_DISTANCE_THRESHOLD = 3
 
 export interface NodeTranslationTriggerOptions {
+  initialConfig?: Config | null
   getConfig: () => Promise<Config | null>
+  subscribeToConfig?: (callback: (config: Config | null) => void) => () => void
   onTrigger: (point: Point, config: Config) => void | Promise<void>
   shouldIgnoreEvent?: () => boolean
 }
@@ -40,7 +42,9 @@ function isDocumentSurfaceTarget(target: EventTarget | null): boolean {
  * the hotkey and click-and-hold handling in one place.
  */
 export function registerNodeTranslationTriggerListeners({
+  initialConfig = null,
   getConfig,
+  subscribeToConfig,
   onTrigger,
   shouldIgnoreEvent = () => false,
 }: NodeTranslationTriggerOptions): () => void {
@@ -105,16 +109,37 @@ export function registerNodeTranslationTriggerListeners({
     }
   }
 
+  let cachedConfig: Config | null = initialConfig
+
   const getCurrentConfig = async (): Promise<Config | null> => {
     const config = await getConfig()
     if (signal.aborted)
       return null
+    cachedConfig = config
     return config
   }
 
   const triggerNodeTranslation = (point: Point, config: Config) => {
     void onTrigger(point, config)
   }
+
+  const matchesCurrentNodeCustomShortcut = (event: KeyboardEvent, config: Config | null) => {
+    return !!config
+      && config.translate.node.enabled
+      && config.translate.node.hotkey === "custom"
+      && !event.repeat
+      && matchesNodeCustomShortcut(event, config.translate.node.customShortcut)
+  }
+
+  const consumeShortcutEvent = (event: KeyboardEvent) => {
+    event.preventDefault()
+    event.stopPropagation()
+    event.stopImmediatePropagation()
+  }
+
+  const unsubscribeConfig = subscribeToConfig?.((config) => {
+    cachedConfig = config
+  })
 
   document.addEventListener("mousemove", (event) => {
     if (shouldIgnoreEvent())
@@ -237,6 +262,14 @@ export function registerNodeTranslationTriggerListeners({
   }, { signal })
 
   document.addEventListener("keydown", (event) => {
+    const didConsumeCustomShortcut = !shouldIgnoreEvent()
+      && !isEditableTarget(event.target)
+      && matchesCurrentNodeCustomShortcut(event, cachedConfig)
+
+    if (didConsumeCustomShortcut) {
+      consumeShortcutEvent(event)
+    }
+
     void (async () => {
       if (shouldIgnoreEvent())
         return
@@ -251,6 +284,9 @@ export function registerNodeTranslationTriggerListeners({
 
       if (config.translate.node.hotkey === "custom") {
         if (!event.repeat && matchesNodeCustomShortcut(event, config.translate.node.customShortcut)) {
+          if (!didConsumeCustomShortcut) {
+            consumeShortcutEvent(event)
+          }
           triggerNodeTranslation(resolveTriggerPoint(), config)
         }
         return
@@ -301,7 +337,7 @@ export function registerNodeTranslationTriggerListeners({
         }
       }
     })()
-  }, { signal })
+  }, { signal, capture: true })
 
   document.addEventListener("keyup", (event) => {
     void (async () => {
@@ -339,6 +375,7 @@ export function registerNodeTranslationTriggerListeners({
   }, { signal })
 
   return () => {
+    unsubscribeConfig?.()
     ac.abort()
     resetHotkeySession()
     if (moveThrottleTimer) {

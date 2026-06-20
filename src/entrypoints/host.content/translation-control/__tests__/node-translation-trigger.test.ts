@@ -266,9 +266,11 @@ describe("registerNodeTranslationTriggerListeners", () => {
 
   it("triggers custom combo (Alt+T) at the latest mouseover position", async () => {
     const onTrigger = vi.fn()
+    const config = createConfig("custom", "Alt+T")
 
     teardown = registerNodeTranslationTriggerListeners({
-      getConfig: () => Promise.resolve(createConfig("custom", "Alt+T")),
+      initialConfig: config,
+      getConfig: () => Promise.resolve(config),
       onTrigger,
     })
 
@@ -285,6 +287,92 @@ describe("registerNodeTranslationTriggerListeners", () => {
         }),
       )
     })
+  })
+
+  it("consumes matched custom combo before triggering node translation", async () => {
+    const onTrigger = vi.fn()
+    const onDocumentKeydown = vi.fn()
+    const onWindowKeydown = vi.fn()
+    const config = createConfig("custom", "Alt+T")
+
+    window.addEventListener("keydown", onWindowKeydown)
+
+    try {
+      teardown = registerNodeTranslationTriggerListeners({
+        initialConfig: config,
+        getConfig: () => Promise.resolve(config),
+        onTrigger,
+      })
+      document.addEventListener("keydown", onDocumentKeydown)
+
+      dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+      const event = new KeyboardEvent("keydown", {
+        key: "t",
+        altKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
+
+      const dispatchResult = document.body.dispatchEvent(event)
+
+      expect(dispatchResult).toBe(false)
+      expect(event.defaultPrevented).toBe(true)
+      expect(onDocumentKeydown).not.toHaveBeenCalled()
+      expect(onWindowKeydown).not.toHaveBeenCalled()
+
+      await vi.waitFor(() => {
+        expect(onTrigger).toHaveBeenCalledTimes(1)
+      })
+    }
+    finally {
+      document.removeEventListener("keydown", onDocumentKeydown)
+      window.removeEventListener("keydown", onWindowKeydown)
+    }
+  })
+
+  it("consumes custom combo after cached config changes", async () => {
+    const onTrigger = vi.fn()
+    const onDocumentKeydown = vi.fn()
+    const oldConfig = createConfig("custom", "Alt+E")
+    const newConfig = createConfig("custom", "Alt+T")
+    let onConfigChange: (config: Config | null) => void = (_config) => {
+      throw new Error("Expected config subscription to be registered")
+    }
+
+    teardown = registerNodeTranslationTriggerListeners({
+      initialConfig: oldConfig,
+      getConfig: () => Promise.resolve(newConfig),
+      subscribeToConfig: (callback) => {
+        onConfigChange = callback
+        return vi.fn()
+      },
+      onTrigger,
+    })
+    document.addEventListener("keydown", onDocumentKeydown)
+
+    try {
+      onConfigChange(newConfig)
+      dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+      const event = new KeyboardEvent("keydown", {
+        key: "t",
+        altKey: true,
+        bubbles: true,
+        cancelable: true,
+      })
+
+      const dispatchResult = document.body.dispatchEvent(event)
+
+      expect(dispatchResult).toBe(false)
+      expect(event.defaultPrevented).toBe(true)
+      expect(onDocumentKeydown).not.toHaveBeenCalled()
+
+      await vi.waitFor(() => {
+        expect(onTrigger).toHaveBeenCalledTimes(1)
+      })
+    }
+    finally {
+      document.removeEventListener("keydown", onDocumentKeydown)
+    }
   })
 
   it("does not trigger custom combo twice on auto-repeat", async () => {

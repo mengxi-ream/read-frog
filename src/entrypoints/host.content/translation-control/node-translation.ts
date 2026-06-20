@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
+import { storage } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
-import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "@/utils/constants/config"
 import { removeOrShowNodeTranslation } from "@/utils/host/translate/node-manipulation"
 import { sendMessage } from "@/utils/message"
 import { registerNodeTranslationTriggerListeners } from "./node-translation-trigger"
@@ -12,7 +13,7 @@ import { registerNodeTranslationTriggerListeners } from "./node-translation-trig
  * Config is read on demand when the interaction fires so long-lived content
  * scripts don't drift if the page was frozen and missed storage events.
  */
-export function registerNodeTranslationTriggers(): () => void {
+export function registerNodeTranslationTriggers(initialConfig: Config | null = null): () => void {
   const ac = new AbortController()
   const { signal } = ac
 
@@ -42,7 +43,9 @@ export function registerNodeTranslationTriggers(): () => void {
   }
 
   const teardownTriggerListeners = registerNodeTranslationTriggerListeners({
+    initialConfig,
     getConfig: getCurrentConfig,
+    subscribeToConfig: onConfigChange => storage.watch<Config | null>(`local:${CONFIG_STORAGE_KEY}`, onConfigChange),
     onTrigger: (point, config) => {
       void translateNode(point, config)
     },

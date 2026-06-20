@@ -20,7 +20,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   const removeHostToast = window === window.top ? mountHostToast() : () => {}
 
-  const teardownNodeTranslation = registerNodeTranslationTriggers()
+  const teardownNodeTranslation = registerNodeTranslationTriggers(initialConfig)
 
   const preloadConfig = initialConfig?.translate.page.preload ?? DEFAULT_CONFIG.translate.page.preload
   const manager = new PageTranslationManager({
