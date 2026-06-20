@@ -141,6 +141,12 @@ export function registerNodeTranslationTriggerListeners({
     cachedConfig = config
   })
 
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      void getCurrentConfig()
+    }
+  }, { signal })
+
   document.addEventListener("mousemove", (event) => {
     if (shouldIgnoreEvent())
       return
