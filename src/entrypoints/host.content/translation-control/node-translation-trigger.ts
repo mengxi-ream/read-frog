@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import type { Point } from "@/types/dom"
 import { HOTKEY_EVENT_KEYS } from "@/utils/constants/hotkeys"
+import { matchesNodeCustomShortcut } from "@/utils/node-translation-shortcut"
 
 const NODE_TRANSLATION_HOLD_TRIGGER_MS = 500
 const CLICK_AND_HOLD_MOVE_TOLERANCE = 6
@@ -245,6 +246,13 @@ export function registerNodeTranslationTriggerListeners({
       const config = await getCurrentConfig()
       if (!config || !config.translate.node.enabled || config.translate.node.hotkey === "clickAndHold") {
         resetHotkeySession()
+        return
+      }
+
+      if (config.translate.node.hotkey === "custom") {
+        if (!event.repeat && matchesNodeCustomShortcut(event, config.translate.node.customShortcut)) {
+          triggerNodeTranslation(resolveTriggerPoint(), config)
+        }
         return
       }
 

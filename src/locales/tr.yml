@@ -28,6 +28,7 @@ popup:
   options: Seçenekler
   hover: Üzerine Gel
   translateParagraph: paragrafı çevirmek için
+  customShortcutEmpty: Seçenekler'de ayarlayın
   translationModeToggle:
     tooltip:
       bilingual:
@@ -608,7 +609,7 @@ options:
       error: Değer $1 ile $2 arasında olmalıdır
     nodeTranslationHotkey:
       title: Üzerine Gelme veya Uzun Basma Çeviri Kısayolu
-      description: Üzerine gelme için değiştirici tuşu özelleştirin veya paragrafları çevirmek için uzun basın
+      description: Üzerine gelme için değiştirici tuşu özelleştirin, uzun basın veya paragrafları çevirmek için özel bir kısayol tuşu kombinasyonu ayarlayın
       enable: Etkinleştir
     llmProviderConfigured: $1 için LLM sağlayıcısı seçildi
     llmProviderNotConfigured: $1 için LLM sağlayıcısı seçilmedi
@@ -979,6 +980,7 @@ hotkey:
   shift: Shift
   backtick: Ters tırnak
   clickAndHold: Tıkla ve basılı tut
+  custom: Özel
 translationHub:
   searchLanguages: Dil ara...
   noLanguagesFound: Dil bulunamadı

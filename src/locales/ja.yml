@@ -28,6 +28,7 @@ popup:
   options: オプション
   hover: ホバー
   translateParagraph: 段落を翻訳
+  customShortcutEmpty: オプションで設定
   translationModeToggle:
     tooltip:
       bilingual:
@@ -608,7 +609,7 @@ options:
       error: 値は $1 から $2 の間である必要があります
     nodeTranslationHotkey:
       title: ホバーまたは長押し翻訳ショートカットキー
-      description: ホバー翻訳の修飾キーをカスタマイズするか、長押しで段落を翻訳します
+      description: ホバー翻訳の修飾キーをカスタマイズするか、長押し、またはカスタムショートカットで段落を翻訳します
       enable: 有効化
     llmProviderConfigured: $1の LLM プロバイダー選択済み
     llmProviderNotConfigured: $1の LLM プロバイダー未選択
@@ -979,6 +980,7 @@ hotkey:
   shift: Shift
   backtick: バッククォート
   clickAndHold: クリックして長押し
+  custom: カスタム
 translationHub:
   searchLanguages: 言語を検索...
   noLanguagesFound: 言語が見つかりません

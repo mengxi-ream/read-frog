@@ -3,12 +3,16 @@ import type { Config } from "@/types/config/config"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { registerNodeTranslationTriggerListeners } from "../node-translation-trigger"
 
-function createConfig(hotkey: Config["translate"]["node"]["hotkey"]): Config {
+function createConfig(
+  hotkey: Config["translate"]["node"]["hotkey"],
+  customShortcut = "",
+): Config {
   return {
     translate: {
       node: {
         enabled: true,
         hotkey,
+        customShortcut,
       },
     },
   } as Config
@@ -257,6 +261,132 @@ describe("registerNodeTranslationTriggerListeners", () => {
     await Promise.resolve()
     await vi.advanceTimersByTimeAsync(500)
 
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("triggers custom combo (Alt+T) at the latest mouseover position", async () => {
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "Alt+T")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "t", altKey: true, bubbles: true }))
+
+    await vi.waitFor(() => {
+      expect(onTrigger).toHaveBeenCalledWith(
+        { x: 70, y: 80 },
+        expect.objectContaining({
+          translate: expect.objectContaining({
+            node: expect.objectContaining({ hotkey: "custom", customShortcut: "Alt+T" }),
+          }),
+        }),
+      )
+    })
+  })
+
+  it("does not trigger custom combo twice on auto-repeat", async () => {
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "Alt+T")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "t", altKey: true, bubbles: true }))
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "t", altKey: true, bubbles: true, repeat: true }))
+
+    await vi.waitFor(() => {
+      expect(onTrigger).toHaveBeenCalledTimes(1)
+    })
+  })
+
+  it("does not trigger custom combo when modifier is missing", async () => {
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "Alt+T")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "t", altKey: false, bubbles: true }))
+
+    await Promise.resolve()
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("triggers custom combo with multiple modifiers (Ctrl+Alt+T)", async () => {
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "Ctrl+Alt+T")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 100, clientY: 200 })
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "t", ctrlKey: true, altKey: true, bubbles: true }))
+
+    await vi.waitFor(() => {
+      expect(onTrigger).toHaveBeenCalledWith(
+        { x: 100, y: 200 },
+        expect.objectContaining({
+          translate: expect.objectContaining({
+            node: expect.objectContaining({ hotkey: "custom", customShortcut: "Ctrl+Alt+T" }),
+          }),
+        }),
+      )
+    })
+  })
+
+  it("does not trigger custom combo on editable targets", async () => {
+    const onTrigger = vi.fn()
+    const input = document.createElement("input")
+    document.body.append(input)
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "Alt+T")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "t", altKey: true, bubbles: true }))
+
+    await Promise.resolve()
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("does not trigger custom combo when shouldIgnoreEvent returns true", async () => {
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "Alt+T")),
+      onTrigger,
+      shouldIgnoreEvent: () => true,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "t", altKey: true, bubbles: true }))
+
+    await Promise.resolve()
+    expect(onTrigger).not.toHaveBeenCalled()
+  })
+
+  it("does not trigger custom combo when customShortcut is empty", async () => {
+    const onTrigger = vi.fn()
+
+    teardown = registerNodeTranslationTriggerListeners({
+      getConfig: () => Promise.resolve(createConfig("custom", "")),
+      onTrigger,
+    })
+
+    dispatchMouseEvent("mouseover", { clientX: 70, clientY: 80 })
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "t", altKey: true, bubbles: true }))
+
+    await Promise.resolve()
     expect(onTrigger).not.toHaveBeenCalled()
   })
 })

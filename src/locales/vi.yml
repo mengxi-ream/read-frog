@@ -28,6 +28,7 @@ popup:
   options: Tùy chọn
   hover: Di chuột
   translateParagraph: để dịch đoạn văn
+  customShortcutEmpty: cài đặt trong Tùy chọn
   translationModeToggle:
     tooltip:
       bilingual:
@@ -608,7 +609,7 @@ options:
       error: Giá trị phải từ $1 đến $2
     nodeTranslationHotkey:
       title: Phím tắt dịch khi di chuột hoặc nhấn giữ
-      description: Tùy chỉnh phím bổ trợ khi di chuột hoặc dùng nhấn giữ để dịch đoạn văn
+      description: Tùy chỉnh phím bổ trợ khi di chuột, dùng nhấn giữ, hoặc đặt tổ hợp phím tắt tùy chỉnh để dịch đoạn văn
       enable: Bật
     llmProviderConfigured: Đã chọn nhà cung cấp LLM cho $1
     llmProviderNotConfigured: Chưa chọn nhà cung cấp LLM cho $1
@@ -979,6 +980,7 @@ hotkey:
   shift: Shift
   backtick: Dấu huyền
   clickAndHold: Nhấn và giữ
+  custom: Tùy chỉnh
 translationHub:
   searchLanguages: Tìm kiếm ngôn ngữ...
   noLanguagesFound: Không tìm thấy ngôn ngữ

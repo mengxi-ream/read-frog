@@ -28,6 +28,7 @@ popup:
   options: 選項
   hover: 滑鼠停留
   translateParagraph: 翻譯段落
+  customShortcutEmpty: 在選項中設定
   translationModeToggle:
     tooltip:
       bilingual:
@@ -723,7 +724,7 @@ options:
       error: 數值必須在 $1 到 $2 之間
     nodeTranslationHotkey:
       title: 滑鼠停留或長按翻譯快速鍵
-      description: 自訂滑鼠停留翻譯的修飾鍵，或使用滑鼠長按翻譯段落
+      description: 自訂滑鼠停留翻譯的修飾鍵、使用滑鼠長按，或設定自訂組合鍵來翻譯段落
       enable: 啟用
     llmProviderConfigured: 已為 $1 選擇 LLM 提供者
     llmProviderNotConfigured: 沒有為 $1 選擇 LLM 提供者
@@ -1094,6 +1095,7 @@ hotkey:
   shift: Shift
   backtick: 反引號
   clickAndHold: 點選並按住
+  custom: 自訂組合鍵
 translationHub:
   searchLanguages: 搜尋語言…
   noLanguagesFound: 找不到語言

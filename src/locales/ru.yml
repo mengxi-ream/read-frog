@@ -28,6 +28,7 @@ popup:
   options: Настройки
   hover: Наведение
   translateParagraph: для перевода абзаца
+  customShortcutEmpty: настройте в Параметрах
   translationModeToggle:
     tooltip:
       bilingual:
@@ -608,7 +609,7 @@ options:
       error: Значение должно быть от $1 до $2
     nodeTranslationHotkey:
       title: Горячая клавиша перевода при наведении или долгом нажатии
-      description: Настройте клавишу-модификатор для перевода при наведении или используйте долгое нажатие для перевода абзацев
+      description: Настройте клавишу-модификатор для перевода при наведении, используйте долгое нажатие или задайте своё сочетание клавиш для перевода абзацев
       enable: Включить
     llmProviderConfigured: LLM-провайдер выбран для $1
     llmProviderNotConfigured: LLM-провайдер не выбран для $1
@@ -979,6 +980,7 @@ hotkey:
   shift: Shift
   backtick: Обратный апостроф
   clickAndHold: Нажмите и удерживайте
+  custom: Своё сочетание клавиш
 translationHub:
   searchLanguages: Поиск языков...
   noLanguagesFound: Языки не найдены

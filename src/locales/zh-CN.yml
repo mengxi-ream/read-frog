@@ -28,6 +28,7 @@ popup:
   options: 选项
   hover: 鼠标悬停
   translateParagraph: 来翻译段落
+  customShortcutEmpty: 在选项中设置
   translationModeToggle:
     tooltip:
       bilingual:
@@ -723,7 +724,7 @@ options:
       error: 数值必须在 $1 到 $2 之间
     nodeTranslationHotkey:
       title: 悬停或长按翻译快捷键
-      description: 自定义悬停翻译的修饰键，或使用鼠标长按翻译段落
+      description: 自定义悬停修饰键、使用长按，或设置自定义组合快捷键来翻译段落
       enable: 启用
     llmProviderConfigured: 已为$1选择 LLM 提供商
     llmProviderNotConfigured: 没有为$1选择 LLM 提供商
@@ -1094,6 +1095,7 @@ hotkey:
   shift: Shift
   backtick: 反引号
   clickAndHold: 点击并按住
+  custom: 自定义组合键
 translationHub:
   searchLanguages: 搜索语言...
   noLanguagesFound: 未找到语言

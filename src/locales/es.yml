@@ -28,6 +28,7 @@ popup:
   options: Opciones
   hover: Pasar el cursor
   translateParagraph: para traducir el párrafo
+  customShortcutEmpty: configurar en Opciones
   translationModeToggle:
     tooltip:
       bilingual:
@@ -723,7 +724,7 @@ options:
       error: El valor debe estar entre $1 y $2
     nodeTranslationHotkey:
       title: Atajo de traducción al pasar el cursor o mantener pulsado
-      description: Personaliza la tecla modificadora al pasar el cursor o usa pulsación larga para traducir párrafos
+      description: Personaliza la tecla modificadora al pasar el cursor, usa pulsación larga, o establece una combinación de teclas personalizada para traducir párrafos
       enable: Activar
     llmProviderConfigured: Proveedor LLM seleccionado para $1
     llmProviderNotConfigured: No se seleccionó ningún proveedor LLM para $1
@@ -1094,6 +1095,7 @@ hotkey:
   shift: Mayús
   backtick: Acento grave
   clickAndHold: Hacer clic y mantener
+  custom: Personalizado
 translationHub:
   searchLanguages: Buscar idiomas...
   noLanguagesFound: No se encontraron idiomas

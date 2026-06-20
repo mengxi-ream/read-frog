@@ -28,6 +28,7 @@ popup:
   options: 옵션
   hover: 마우스 오버
   translateParagraph: 단락 번역
+  customShortcutEmpty: 옵션에서 설정
   translationModeToggle:
     tooltip:
       bilingual:
@@ -608,7 +609,7 @@ options:
       error: 값은 $1에서 $2 사이여야 합니다
     nodeTranslationHotkey:
       title: 호버 또는 길게 누르기 번역 단축키
-      description: 호버 번역 수정 키를 사용자 지정하거나 마우스 길게 누르기로 단락을 번역합니다
+      description: 호버 번역 수정 키를 사용자 지정하거나, 마우스 길게 누르기, 또는 사용자 지정 단축키 조합으로 단락을 번역합니다
       enable: 활성화
     llmProviderConfigured: $1에 LLM 제공업체 선택됨
     llmProviderNotConfigured: $1에 LLM 제공업체 미선택
@@ -979,6 +980,7 @@ hotkey:
   shift: Shift
   backtick: 백틱
   clickAndHold: 클릭하고 길게 누르기
+  custom: 사용자 지정
 translationHub:
   searchLanguages: 언어 검색...
   noLanguagesFound: 언어를 찾을 수 없습니다

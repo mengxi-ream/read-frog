@@ -1,6 +1,7 @@
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
 import { i18n } from "#imports"
+import { ShortcutKeyRecorder } from "@/components/shortcut-key-recorder"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import {
   Select,
@@ -73,6 +74,18 @@ export function NodeTranslationHotkey() {
             </SelectGroup>
           </SelectContent>
         </Select>
+        {translateConfig.node.hotkey === "custom" && (
+          <div className="mt-4">
+            <ShortcutKeyRecorder
+              shortcutKey={translateConfig.node.customShortcut ?? ""}
+              onChange={(shortcut) => {
+                void setTranslateConfig(
+                  deepmerge(translateConfig, { node: { customShortcut: shortcut } }),
+                )
+              }}
+            />
+          </div>
+        )}
       </div>
     </ConfigCard>
   )
