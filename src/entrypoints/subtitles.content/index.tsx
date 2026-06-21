@@ -1,6 +1,7 @@
 import "@/utils/zod-config"
 import { defineContentScript } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
+import { subtitlesContentScriptMatches } from "./content-script-matches"
 
 declare global {
   interface Window {
@@ -9,7 +10,7 @@ declare global {
 }
 
 export default defineContentScript({
-  matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
+  matches: subtitlesContentScriptMatches,
   allFrames: true,
   cssInjectionMode: "manifest",
   async main(ctx) {

@@ -780,13 +780,13 @@ options:
         description: 이 작업은 모든 사용자 지정 설정을 지우고 기본값으로 재설정합니다. 삭제하시겠습니까?
   videoSubtitles:
     title: 비디오 자막
-    description: 현재 YouTube 비디오 자막만 지원
+    description: YouTube 비디오와 사용 가능한 자막이 있는 x.com 상태 비디오를 지원합니다.
     provider:
       title: 번역 제공자
       description: 비디오 자막 번역에 사용할 번역 제공자를 선택하세요
       label: 제공자
     enable: 비디오 자막 활성화
-    enableDescription: 활성화하면 YouTube 플레이어 컨트롤 바에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
+    enableDescription: 활성화하면 지원되는 비디오 플레이어에 번역 버튼이 나타납니다. 클릭하여 자막 번역을 시작하세요.
     autoStart: 자막 자동 활성화
     autoStartDescription: 비디오가 로드되면 자동으로 자막 번역을 활성화합니다.
     style:

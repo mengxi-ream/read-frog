@@ -895,13 +895,13 @@ options:
         description: 此操作會清空所有自訂設定，並將其重設為預設值，請確認是否清除。
   videoSubtitles:
     title: 影片字幕
-    description: 目前僅支援 YouTube 影片字幕
+    description: 支援 YouTube 影片和有可用字幕的 x.com 狀態影片。
     provider:
       title: 翻譯服務提供者
       description: 選擇用於影片字幕翻譯的翻譯服務提供者
       label: 服務提供者
     enable: 開啟影片字幕
-    enableDescription: 啟用後，YouTube 播放器控制列會出現翻譯按鈕。點選即可開始翻譯字幕。
+    enableDescription: 啟用後，支援的影片播放器上會出現翻譯按鈕。點選即可開始翻譯字幕。
     autoStart: 自動開啟字幕
     autoStartDescription: 當影片載入完成後，自動開啟字幕翻譯。
     style:

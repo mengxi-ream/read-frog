@@ -895,13 +895,13 @@ options:
         description: Esta operación borrará todas tus configuraciones personalizadas y las restablecerá a los valores predeterminados. Confirma para continuar.
   videoSubtitles:
     title: Subtítulos de video
-    description: Actualmente solo admite subtítulos de videos de YouTube
+    description: Admite videos de YouTube y videos de estado de x.com con subtítulos disponibles.
     provider:
       title: Proveedor de traducción
       description: Elige qué proveedor de traducción usar para la traducción de subtítulos de video
       label: Proveedor
     enable: Activar subtítulos de video
-    enableDescription: Cuando está activado, aparecerá un botón de traducción en los controles del reproductor de YouTube. Haz clic para empezar a traducir subtítulos.
+    enableDescription: Cuando está activado, aparecerá un botón de traducción en los reproductores de video compatibles. Haz clic para empezar a traducir subtítulos.
     autoStart: Activar subtítulos automáticamente
     autoStartDescription: Activa automáticamente la traducción de subtítulos cuando se carga el video.
     style:

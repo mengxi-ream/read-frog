@@ -895,13 +895,13 @@ options:
         description: This operation will clear all your custom configurations and reset them to default values. Please confirm.
   videoSubtitles:
     title: Video Subtitles
-    description: Currently only supports YouTube video subtitles
+    description: Supports YouTube videos and x.com status videos with available captions.
     provider:
       title: Translation Provider
       description: Choose which translation provider to use for video subtitle translation
       label: Provider
     enable: Enable Video Subtitles
-    enableDescription: When enabled, a translation button will appear in the YouTube player controls. Click it to start translating subtitles.
+    enableDescription: When enabled, a translation button will appear on supported video players. Click it to start translating subtitles.
     autoStart: Auto-Enable Subtitles
     autoStartDescription: Automatically enable subtitle translation when the video is loaded.
     style:

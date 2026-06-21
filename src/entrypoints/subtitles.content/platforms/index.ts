@@ -4,9 +4,12 @@ export interface ControlsConfig {
   checkVisibility: (container: HTMLElement) => boolean
 }
 
+export type SubtitlesPanelPlacement = "above" | "left"
+
 export interface PlatformConfig {
   embedded?: boolean
   silentErrors?: boolean
+  subtitlesPanelPlacement?: SubtitlesPanelPlacement
   containerShrinkRatio?: (container: HTMLElement) => number | null
 
   selectors: {

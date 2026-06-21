@@ -780,13 +780,13 @@ options:
         description: Bu işlem tüm özel yapılandırmalarınızı temizleyecek ve varsayılan değerlere sıfırlayacaktır. Lütfen onaylayın.
   videoSubtitles:
     title: Video Altyazıları
-    description: Şu anda yalnızca YouTube video altyazılarını desteklemektedir
+    description: YouTube videolarını ve uygun altyazıları olan x.com durum videolarını destekler.
     provider:
       title: Çeviri Sağlayıcısı
       description: Video altyazı çevirisi için kullanılacak çeviri sağlayıcısını seçin
       label: Sağlayıcı
     enable: Video Altyazılarını Etkinleştir
-    enableDescription: Etkinleştirildiğinde, YouTube oynatıcı kontrollerinde bir çeviri düğmesi görünecektir. Altyazıları çevirmeye başlamak için tıklayın.
+    enableDescription: Etkinleştirildiğinde, desteklenen video oynatıcılarda bir çeviri düğmesi görünecektir. Altyazıları çevirmeye başlamak için tıklayın.
     autoStart: Altyazıyı Otomatik Etkinleştir
     autoStartDescription: Video yüklendiğinde altyazı çevirisini otomatik olarak etkinleştirir.
     style:

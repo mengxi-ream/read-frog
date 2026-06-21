@@ -780,13 +780,13 @@ options:
         description: Thao tác này sẽ xóa tất cả cấu hình tùy chỉnh của bạn và đặt lại về giá trị mặc định. Vui lòng xác nhận.
   videoSubtitles:
     title: Phụ đề video
-    description: Hiện chỉ hỗ trợ phụ đề video YouTube
+    description: Hỗ trợ video YouTube và video trạng thái x.com có phụ đề.
     provider:
       title: Nhà cung cấp dịch thuật
       description: Chọn nhà cung cấp dịch thuật để sử dụng cho phụ đề video
       label: Nhà cung cấp
     enable: Bật phụ đề video
-    enableDescription: Khi bật, nút dịch sẽ xuất hiện trong thanh điều khiển YouTube. Nhấp để bắt đầu dịch phụ đề.
+    enableDescription: Khi bật, nút dịch sẽ xuất hiện trên các trình phát video được hỗ trợ. Nhấp để bắt đầu dịch phụ đề.
     autoStart: Tự động bật phụ đề
     autoStartDescription: Tự động bật dịch phụ đề khi video được tải xong.
     style:

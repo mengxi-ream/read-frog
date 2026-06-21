@@ -1,3 +1,4 @@
+import type { SubtitlesPanelPlacement } from "@/entrypoints/subtitles.content/platforms"
 import { IconChevronLeft } from "@tabler/icons-react"
 import { Activity, useMemo, useRef } from "react"
 import { Button } from "@/components/ui/base-ui/button"
@@ -91,6 +92,53 @@ function PanelContent({
   )
 }
 
+interface PanelPlacementOptions {
+  positionClassName: string
+  positionStyle: React.CSSProperties
+  maxHeight: string
+}
+
+export function getSubtitlesPanelPlacementOptions({
+  bottomOffset,
+  embedded,
+  placement = "above",
+  open,
+}: {
+  bottomOffset: number
+  embedded?: boolean
+  placement?: SubtitlesPanelPlacement
+  open: boolean
+}): PanelPlacementOptions {
+  const baseClassName = "absolute z-40 duration-200 ease-out"
+
+  if (embedded && placement === "left") {
+    return {
+      positionClassName: cn(
+        baseClassName,
+        "right-full bottom-0 transition-[opacity,transform]",
+        open ? "translate-x-0 opacity-100" : "translate-x-2 opacity-0",
+      ),
+      positionStyle: { marginRight: "12px" },
+      maxHeight: "min(24rem, 60vh)",
+    }
+  }
+
+  return {
+    positionClassName: cn(
+      baseClassName,
+      "transition-[bottom,opacity,transform]",
+      embedded ? "bottom-full right-0" : "right-4",
+      open ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
+    ),
+    positionStyle: embedded
+      ? { marginBottom: `${bottomOffset}px` }
+      : { bottom: `${bottomOffset}px` },
+    maxHeight: embedded
+      ? "min(24rem, 60vh)"
+      : `calc(100cqh - ${bottomOffset}px - 1rem)`,
+  }
+}
+
 export function PanelShell({
   children,
   open,
@@ -100,7 +148,7 @@ export function PanelShell({
 }: PanelShellProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
-  const { controlsConfig, embedded } = useSubtitlesUI()
+  const { controlsConfig, embedded, subtitlesPanelPlacement } = useSubtitlesUI()
   const { controlsHeight, controlsVisible } = useControlsInfo(rootRef, controlsConfig)
 
   const bottomOffset = useMemo(
@@ -118,19 +166,16 @@ export function PanelShell({
     ? "relative z-40 pointer-events-none font-light h-full"
     : "absolute inset-0 z-40 pointer-events-none overflow-visible font-light [container-type:size]"
 
-  const positionClassName = cn(
-    "absolute z-40 transition-[bottom,opacity,transform] duration-200 ease-out",
-    embedded ? "bottom-full right-0" : "right-4",
-    open ? "translate-y-0 opacity-100" : "translate-y-2 opacity-0",
-  )
-
-  const positionStyle = embedded
-    ? { marginBottom: `${bottomOffset}px` }
-    : { bottom: `${bottomOffset}px` }
-
-  const maxHeight = embedded
-    ? "min(24rem, 60vh)"
-    : `calc(100cqh - ${bottomOffset}px - 1rem)`
+  const {
+    maxHeight,
+    positionClassName,
+    positionStyle,
+  } = getSubtitlesPanelPlacementOptions({
+    bottomOffset,
+    embedded,
+    placement: subtitlesPanelPlacement,
+    open,
+  })
 
   return (
     <div ref={rootRef} className={rootClassName}>

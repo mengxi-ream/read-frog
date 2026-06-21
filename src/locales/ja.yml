@@ -780,13 +780,13 @@ options:
         description: この操作は、すべての設定をデフォルト値にリセットします。ご確認ください。
   videoSubtitles:
     title: 動画字幕
-    description: 現在 YouTube 動画字幕のみ対応
+    description: YouTube 動画と利用可能な字幕がある x.com ステータス動画に対応しています。
     provider:
       title: 翻訳プロバイダー
       description: 動画字幕翻訳に使用する翻訳プロバイダーを選択
       label: プロバイダー
     enable: 動画字幕を有効にする
-    enableDescription: 有効にすると、YouTube プレーヤーのコントロールバーに翻訳ボタンが表示されます。クリックして字幕の翻訳を開始します。
+    enableDescription: 有効にすると、対応動画プレーヤーに翻訳ボタンが表示されます。クリックして字幕の翻訳を開始します。
     autoStart: 字幕を自動有効化
     autoStartDescription: 動画の読み込みが完了したら、自動的に字幕翻訳を有効にします。
     style:

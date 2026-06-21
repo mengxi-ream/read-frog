@@ -96,3 +96,13 @@ export async function mountSubtitlesUI(
 
   reactRoot.render(app)
 }
+
+export function unmountSubtitlesUI(): void {
+  const existingHost = document.getElementById(SUBTITLES_UI_HOST_ID) as HTMLDivElement | null
+  if (!existingHost) {
+    return
+  }
+
+  ;(existingHost as any).__reactShadowContainerCleanup?.()
+  existingHost.remove()
+}

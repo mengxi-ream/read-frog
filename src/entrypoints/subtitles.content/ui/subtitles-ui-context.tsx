@@ -1,4 +1,4 @@
-import type { ControlsConfig } from "@/entrypoints/subtitles.content/platforms"
+import type { ControlsConfig, SubtitlesPanelPlacement } from "@/entrypoints/subtitles.content/platforms"
 import type { UniversalVideoAdapter } from "@/entrypoints/subtitles.content/universal-adapter"
 import { Provider as JotaiProvider } from "jotai"
 import { createContext, use } from "react"
@@ -10,6 +10,7 @@ interface SubtitlesUIContextValue {
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
   embedded?: boolean
+  subtitlesPanelPlacement?: SubtitlesPanelPlacement
   containerShrinkRatio?: (container: HTMLElement) => number | null
 }
 
@@ -25,7 +26,7 @@ export function useSubtitlesUI() {
 
 export type SubtitlesProvidersAdapter = Pick<
   UniversalVideoAdapter,
-  "downloadSourceSubtitles" | "downloadTranslatedSubtitles" | "embedded" | "containerShrinkRatio" | "getControlsConfig" | "toggleSubtitlesManually"
+  "downloadSourceSubtitles" | "downloadTranslatedSubtitles" | "embedded" | "subtitlesPanelPlacement" | "containerShrinkRatio" | "getControlsConfig" | "toggleSubtitlesManually"
 >
 
 export function SubtitlesProviders({
@@ -44,6 +45,7 @@ export function SubtitlesProviders({
           downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
           controlsConfig: adapter.getControlsConfig(),
           embedded: adapter.embedded,
+          subtitlesPanelPlacement: adapter.subtitlesPanelPlacement,
           containerShrinkRatio: adapter.containerShrinkRatio,
         }}
       >

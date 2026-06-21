@@ -9,6 +9,14 @@ function isYoutubeWatch(): boolean {
   return window.location.href.includes(YOUTUBE_WATCH_URL_PATTERN)
 }
 
+function isYoutubeRuntimeHost(): boolean {
+  const { hostname } = window.location
+  return hostname === "youtube.com"
+    || hostname.endsWith(".youtube.com")
+    || hostname === "youtube-nocookie.com"
+    || hostname.endsWith(".youtube-nocookie.com")
+}
+
 function isYoutubeEmbed(): boolean {
   return YOUTUBE_EMBED_PATH_PATTERN.test(window.location.pathname)
 }
@@ -18,6 +26,10 @@ function isYoutubeShorts(): boolean {
 }
 
 export function initYoutubeSubtitles() {
+  if (!isYoutubeRuntimeHost()) {
+    return
+  }
+
   let initialized = false
   let adapter: ReturnType<typeof createYoutubeSubtitlesAdapter> | null = null
 

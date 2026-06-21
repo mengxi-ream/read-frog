@@ -50,6 +50,12 @@ export const FETCH_RETRY_DELAY_MS = 1000
 export const MAX_POT_WAIT_ATTEMPTS = 30
 export const POT_WAIT_INTERVAL_MS = 200
 
+// x.com specific
+export const XCOM_PLAYER_CONTAINER_ATTRIBUTE = "data-read-frog-xcom-player-container"
+export const XCOM_CONTROLS_CONTAINER_ATTRIBUTE = "data-read-frog-xcom-controls"
+export const XCOM_PLAYER_CONTAINER_SELECTOR = `[${XCOM_PLAYER_CONTAINER_ATTRIBUTE}="true"]`
+export const XCOM_CONTROLS_CONTAINER_SELECTOR = `[${XCOM_CONTROLS_CONTAINER_ATTRIBUTE}="true"]`
+
 // Subtitle style constants
 export const MIN_FONT_SCALE = 30
 export const MAX_FONT_SCALE = 150
