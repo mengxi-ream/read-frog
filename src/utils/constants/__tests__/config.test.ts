@@ -35,7 +35,7 @@ describe("dEFAULT_CONFIG", () => {
     expect(getRandomValues).toHaveBeenCalled()
   })
 
-  it("seeds DeepSeek without the removed legacy provider in the default providers config", async () => {
+  it("seeds default translation providers and the default LLM providers in the default providers config", async () => {
     const { DEFAULT_CONFIG } = await import("../config")
     const { configSchema } = await import("@/types/config/config")
 
@@ -50,14 +50,25 @@ describe("dEFAULT_CONFIG", () => {
       "google-translate-default",
       "openai-default",
       "deepseek-default",
-      "tensdaq-default",
-      "google-default",
-      "deeplx-default",
+      "atlascloud-default",
     ])
+    expect(DEFAULT_CONFIG.translate.providerId).toBe("microsoft-translate-default")
+    expect(DEFAULT_CONFIG.selectionToolbar.features.translate.providerId).toBe("microsoft-translate-default")
+    expect(DEFAULT_CONFIG.inputTranslation.providerId).toBe("microsoft-translate-default")
+    expect(DEFAULT_CONFIG.videoSubtitles.providerId).toBe("microsoft-translate-default")
     expect(DEFAULT_CONFIG.providersConfig.find(provider => provider.id === "deepseek-default")).toEqual(
       expect.objectContaining({
         model: {
           model: "deepseek-v4-flash",
+          isCustomModel: false,
+          customModel: null,
+        },
+      }),
+    )
+    expect(DEFAULT_CONFIG.providersConfig.find(provider => provider.id === "atlascloud-default")).toEqual(
+      expect.objectContaining({
+        model: {
+          model: "deepseek-ai/deepseek-v4-flash",
           isCustomModel: false,
           customModel: null,
         },

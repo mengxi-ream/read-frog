@@ -26,6 +26,7 @@ export const LLM_PROVIDER_MODELS = {
   "anthropic": ["claude-fable-5", "claude-opus-4-8", "claude-opus-4-7", "claude-opus-4-6", "claude-sonnet-4-6", "claude-opus-4-5", "claude-haiku-4-5", "claude-sonnet-4-5", "claude-opus-4-1", "claude-opus-4-0", "claude-sonnet-4-0"],
   "siliconflow": ["Qwen/Qwen3-Next-80B-A3B-Instruct"],
   "tensdaq": ["Qwen3-30B-A3B-Instruct-2507", "deepseek-v3.1"],
+  "atlascloud": ["deepseek-ai/deepseek-v4-flash", "deepseek-ai/deepseek-v4-pro", "moonshotai/Kimi-K2-Instruct", "moonshotai/Kimi-K2-Instruct-0905", "moonshotai/kimi-k2.5", "qwen/qwen3.5-flash", "qwen/qwen3.5-plus", "qwen/qwen3.6-35b-a3b", "qwen/qwen3.6-plus", "qwen/qwen3.7-plus", "bytedance/doubao-seed-2.0-mini-260428", "bytedance/doubao-seed-2.0-lite-260428", "zai-org/glm-4.7", "zai-org/glm-5", "minimaxai/minimax-m2.7", "minimaxai/minimax-m3", "google/gemini-3.1-flash-lite"],
   "openai-compatible": ["use-custom-model"],
   "xai": ["grok-4.20-reasoning", "grok-4.20-non-reasoning", "grok-4-1-fast-reasoning", "grok-4-1-fast-non-reasoning", "grok-4-1", "grok-4-fast-reasoning", "grok-4-fast-non-reasoning", "grok-code-fast-1", "grok-3", "grok-3-mini"],
   "bedrock": ["amazon.titan-tg1-large", "amazon.titan-text-express-v1", "amazon.titan-text-lite-v1", "us.amazon.nova-premier-v1:0", "us.amazon.nova-pro-v1:0", "us.amazon.nova-lite-v1:0", "us.amazon.nova-micro-v1:0", "anthropic.claude-haiku-4-5-20251001-v1:0", "anthropic.claude-sonnet-4-20250514-v1:0", "anthropic.claude-sonnet-4-5-20250929-v1:0", "anthropic.claude-opus-4-20250514-v1:0", "anthropic.claude-opus-4-1-20250805-v1:0", "anthropic.claude-3-5-sonnet-20241022-v2:0", "anthropic.claude-3-5-sonnet-20240620-v1:0", "anthropic.claude-3-opus-20240229-v1:0", "anthropic.claude-3-sonnet-20240229-v1:0", "anthropic.claude-3-haiku-20240307-v1:0", "us.anthropic.claude-sonnet-4-20250514-v1:0", "us.anthropic.claude-sonnet-4-5-20250929-v1:0", "us.anthropic.claude-opus-4-20250514-v1:0", "us.anthropic.claude-opus-4-1-20250805-v1:0", "us.anthropic.claude-3-5-sonnet-20241022-v2:0", "us.anthropic.claude-3-5-sonnet-20240620-v1:0", "us.anthropic.claude-3-sonnet-20240229-v1:0", "us.anthropic.claude-3-opus-20240229-v1:0", "us.anthropic.claude-3-haiku-20240307-v1:0", "anthropic.claude-v2", "anthropic.claude-v2:1", "anthropic.claude-instant-v1", "cohere.command-text-v14", "cohere.command-light-text-v14", "cohere.command-r-v1:0", "cohere.command-r-plus-v1:0", "us.deepseek.r1-v1:0", "meta.llama3-8b-instruct-v1:0", "meta.llama3-70b-instruct-v1:0", "meta.llama3-1-8b-instruct-v1:0", "meta.llama3-1-70b-instruct-v1:0", "meta.llama3-1-405b-instruct-v1:0", "meta.llama3-2-1b-instruct-v1:0", "meta.llama3-2-3b-instruct-v1:0", "meta.llama3-2-11b-instruct-v1:0", "meta.llama3-2-90b-instruct-v1:0", "us.meta.llama3-2-1b-instruct-v1:0", "us.meta.llama3-2-3b-instruct-v1:0", "us.meta.llama3-2-11b-instruct-v1:0", "us.meta.llama3-2-90b-instruct-v1:0", "us.meta.llama3-1-8b-instruct-v1:0", "us.meta.llama3-1-70b-instruct-v1:0", "us.meta.llama3-3-70b-instruct-v1:0", "us.meta.llama4-scout-17b-instruct-v1:0", "us.meta.llama4-maverick-17b-instruct-v1:0", "mistral.mistral-7b-instruct-v0:2", "mistral.mixtral-8x7b-instruct-v0:1", "mistral.mistral-large-2402-v1:0", "mistral.mistral-small-2402-v1:0", "us.mistral.pixtral-large-2502-v1:0", "openai.gpt-oss-120b-1:0", "openai.gpt-oss-20b-1:0", "us.anthropic.claude-fable-5", "us.anthropic.claude-opus-4-8", "us.anthropic.claude-opus-4-7", "us.anthropic.claude-opus-4-6-v1", "us.anthropic.claude-opus-4-5-20251101-v1:0", "us.anthropic.claude-haiku-4-5-20251001-v1:0", "openai.gpt-oss-20b", "openai.gpt-oss-120b"],
@@ -172,13 +173,13 @@ export const LLM_MODEL_OPTIONS: Array<{
   // Volcengine Doubao Seed models - disable thinking by default.
   // Keep the version suffix optional because non-Volcengine providers may expose the same model family without it.
   {
-    pattern: /(?:^|\/)doubao-seed-(?:code-preview|1-(?:6(?:-(?:flash|vision))?|8)|2-0-(?:lite|mini|pro|code-preview))(?:-\d{6})?$/i,
+    pattern: /(?:^|\/)doubao-seed-(?:code-preview|1[.-](?:6(?:-(?:flash|vision))?|8)|2[.-]0-(?:lite|mini|pro|code-preview))(?:-\d{6})?$/i,
     options: { thinking: { type: "disabled" } } satisfies Record<string, JSONValue>,
   },
 
   // DeepSeek reasoning models - disable thinking by default
   {
-    pattern: /^deepseek-(?:reasoner|v4-(?:flash|pro))$/i,
+    pattern: /(?:^|\/)deepseek-(?:reasoner|v4-(?:flash|pro))$/i,
     options: { thinking: { type: "disabled" } } satisfies DeepSeekLanguageModelOptions as Record<string, JSONValue>,
   },
 
@@ -213,7 +214,7 @@ export const LLM_MODEL_OPTIONS: Array<{
 
   // GLM models - disable thinking (compatibility issues)
   {
-    pattern: /^GLM-/i,
+    pattern: /(?:^|\/)GLM-/i,
     options: { thinking: { type: "disabled" } },
   },
 ]

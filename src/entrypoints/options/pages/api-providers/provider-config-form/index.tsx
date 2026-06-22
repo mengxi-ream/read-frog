@@ -62,6 +62,7 @@ export function ProviderConfigForm() {
   })
 
   const providerType = useStore(form.store, state => state.values.provider)
+  const apiKey = useStore(form.store, state => state.values.apiKey)
   const isTranslateProviderType = isTranslateProvider(providerType)
   const isLLM = isLLMProvider(providerType)
 
@@ -143,7 +144,7 @@ export function ProviderConfigForm() {
     <form.AppForm>
       <div className={cn("flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between", selectedProviderId !== providerConfig.id && "hidden")}>
         <div className="flex flex-col gap-4">
-          <ConfigHeader providerType={providerType} />
+          <ConfigHeader providerType={providerType} apiKey={apiKey} />
           <form.AppField
             name="name"
             validators={{

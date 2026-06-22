@@ -91,8 +91,10 @@ options:
     title: API 提供者
     description: 設定用於翻譯和詞彙解析功能的 API 提供者。內建 20 多個提供者，並支援任何 OpenAI 相容 API 提供者。
     addProvider: 新增提供者
+    sponsorCta: 取得高速高性價比 AI
     badges:
       featureCount: $1 個功能
+      sponsor: 贊助
     dialog:
       title: 新增提供者
       groups:
@@ -170,6 +172,7 @@ options:
         google: 具有先進推理能力的 Google 旗艦 AI 模型
         anthropic: 以安全性和推理能力著稱的 Claude 模型
         xai: 馬斯克的 AI 公司，提供具有即時資料存取能力的 Grok 模型
+        atlascloud: 統一的 OpenAI 相容模型平台，提供 DeepSeek、Kimi、Qwen、豆包、GLM 等較新模型
         siliconflow: 針對中國和國際模型的高效能推理平台
         tensdaq: 革命性競價 AI MaaS 平台，價格由市場供需決定，告別高成本固定定價
         openaiCompatible: OpenAI API 相容的第三方

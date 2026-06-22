@@ -1,4 +1,4 @@
-import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig } from "@/types/config/provider"
+import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig, ProviderSponsorConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import { i18n } from "#imports"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
@@ -13,6 +13,11 @@ import { getLobeIconsCDNUrlFn } from "../logo"
 export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   "openrouter": {
     model: "x-ai/grok-4-fast:free",
+    isCustomModel: false,
+    customModel: null,
+  },
+  "atlascloud": {
+    model: "deepseek-ai/deepseek-v4-flash",
     isCustomModel: false,
     customModel: null,
   },
@@ -148,7 +153,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
   },
 }
 
-export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string }>
+export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string, sponsor?: ProviderSponsorConfig }>
   = {
     "microsoft-translate": {
       logo: getLobeIconsCDNUrlFn("microsoft-color"),
@@ -169,6 +174,15 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: (theme: Theme) => theme === "light" ? deeplxLogoLight : deeplxLogoDark,
       name: "DeepL",
       website: "https://www.deepl.com/pro-api",
+    },
+    "atlascloud": {
+      logo: getLobeIconsCDNUrlFn("atlascloud"),
+      name: "Atlas Cloud",
+      website: "https://www.atlascloud.ai/",
+      sponsor: {
+        sponsoring: true,
+        referUrl: "https://www.atlascloud.ai?ref=LH8NST&utm_source=github&utm_medium=link&utm_campaign=read-frog",
+      },
     },
     "siliconflow": {
       logo: getLobeIconsCDNUrlFn("siliconcloud-color"),
@@ -319,6 +333,15 @@ export const DEFAULT_PROVIDER_CONFIG = {
     name: PROVIDER_ITEMS["microsoft-translate"].name,
     enabled: true,
     provider: "microsoft-translate",
+  },
+  "atlascloud": {
+    id: "atlascloud-default",
+    name: PROVIDER_ITEMS.atlascloud.name,
+    description: i18n.t("options.apiProviders.providers.description.atlascloud"),
+    enabled: true,
+    provider: "atlascloud",
+    baseURL: "https://api.atlascloud.ai/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.atlascloud,
   },
   "siliconflow": {
     id: "siliconflow-default",
@@ -566,6 +589,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 
 export const PROVIDER_BASE_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
+  "atlascloud": DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
   "siliconflow": DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
   "tensdaq": DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
   "openai-compatible": DEFAULT_PROVIDER_CONFIG["openai-compatible"].baseURL,
@@ -601,23 +625,7 @@ export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["google-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.deepseek,
-  DEFAULT_PROVIDER_CONFIG.tensdaq,
-  DEFAULT_PROVIDER_CONFIG.google,
-  // DEFAULT_PROVIDER_CONFIG.openaiCompatible,
-  DEFAULT_PROVIDER_CONFIG.deeplx,
-  // DEFAULT_PROVIDER_CONFIG.anthropic,
-  // DEFAULT_PROVIDER_CONFIG.xai,
-  // DEFAULT_PROVIDER_CONFIG.bedrock,
-  // DEFAULT_PROVIDER_CONFIG.groq,
-  // DEFAULT_PROVIDER_CONFIG.deepinfra,
-  // DEFAULT_PROVIDER_CONFIG.mistral,
-  // DEFAULT_PROVIDER_CONFIG.togetherai,
-  // DEFAULT_PROVIDER_CONFIG.cohere,
-  // DEFAULT_PROVIDER_CONFIG.fireworks,
-  // DEFAULT_PROVIDER_CONFIG.cerebras,
-  // DEFAULT_PROVIDER_CONFIG.replicate,
-  // DEFAULT_PROVIDER_CONFIG.perplexity,
-  // DEFAULT_PROVIDER_CONFIG.vercel,
+  DEFAULT_PROVIDER_CONFIG.atlascloud,
 ]
 
 export const NON_API_TRANSLATE_PROVIDER_ITEMS = pick(

@@ -178,6 +178,9 @@ describe("getProviderOptions", () => {
       const deepseekV4ProOptions = getProviderOptions("deepseek-v4-pro", "deepseek")
       expect(deepseekV4ProOptions.deepseek?.thinking).toEqual({ type: "disabled" })
 
+      const prefixedDeepseekV4Options = getProviderOptions("deepseek-ai/deepseek-v4-flash", "atlascloud")
+      expect(prefixedDeepseekV4Options.atlascloud?.thinking).toEqual({ type: "disabled" })
+
       const cohereReasoningOptions = getProviderOptions("command-a-reasoning-08-2025", "cohere")
       expect(cohereReasoningOptions.cohere?.thinking).toEqual({ type: "disabled" })
 
@@ -271,6 +274,9 @@ describe("getProviderOptions", () => {
 
       const prefixedOptions = getProviderOptions("volcengine/doubao-seed-1-8", "openai-compatible")
       expect(prefixedOptions["openai-compatible"]?.thinking).toEqual({ type: "disabled" })
+
+      const atlasTwoLiteOptions = getProviderOptions("bytedance/doubao-seed-2.0-lite-260428", "atlascloud")
+      expect(atlasTwoLiteOptions.atlascloud?.thinking).toEqual({ type: "disabled" })
     })
 
     it("should not apply Doubao Seed thinking defaults to unrelated Doubao models", () => {
@@ -289,6 +295,9 @@ describe("getProviderOptions", () => {
     it("should keep provider-prefixed Kimi instruct model ids untouched", () => {
       const huggingfaceOptions = getProviderOptions("moonshotai/Kimi-K2-Instruct", "huggingface")
       expect(huggingfaceOptions).toEqual({})
+
+      const atlasOptions = getProviderOptions("moonshotai/Kimi-K2-Instruct", "atlascloud")
+      expect(atlasOptions).toEqual({})
     })
 
     it("should return empty object for non-matching models", () => {
@@ -307,6 +316,9 @@ describe("getProviderOptions", () => {
 
       const mixed = getProviderOptions("GlM-3-Turbo", "tensdaq")
       expect(mixed.tensdaq?.thinking).toEqual({ type: "disabled" })
+
+      const prefixed = getProviderOptions("zai-org/glm-4.7", "atlascloud")
+      expect(prefixed.atlascloud?.thinking).toEqual({ type: "disabled" })
     })
 
     it("should only match models starting with GLM-", () => {

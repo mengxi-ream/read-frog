@@ -91,8 +91,10 @@ options:
     title: APIプロバイダー
     description: 翻訳および語彙分析機能用のAPIプロバイダーを設定。20以上の内蔵プロバイダーに加え、OpenAI互換APIもサポートしています。
     addProvider: プロバイダーを追加
+    sponsorCta: 高速で高コスパのAIを入手
     badges:
       featureCount: $1 件の機能
+      sponsor: スポンサー
     dialog:
       title: 新しいプロバイダーを追加
       groups:
@@ -169,6 +171,7 @@ options:
         google: 高度な推論能力を持つGoogleの主力AIモデル
         anthropic: 安全性と推論能力に優れたClaudeモデル
         xai: リアルタイムデータアクセス可能なGrokモデルを提供するイーロン・マスクのAI企業
+        atlascloud: DeepSeek、Kimi、Qwen、Doubao、GLMなどの新しめのモデルにOpenAI互換でアクセスできる統合プラットフォーム
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
         tensdaq: 革命的入札型AI MaaSプラットフォーム、市場の需給で価格が決まり高コスト固定料金を排除
         openaiCompatible: OpenAI API互換のサードパーティー

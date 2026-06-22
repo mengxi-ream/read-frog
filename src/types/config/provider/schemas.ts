@@ -13,6 +13,12 @@ import { z } from "zod"
 import { LLM_PROVIDER_MODELS } from "./constants"
 import { azureProviderSpecificSettingsSchema, bedrockProviderSpecificSettingsSchema } from "./provider-specific-settings"
 
+export const providerSponsorConfigSchema = z.object({
+  sponsoring: z.boolean(),
+  referUrl: z.url(),
+})
+export type ProviderSponsorConfig = z.infer<typeof providerSponsorConfigSchema>
+
 /* ──────────────────────────────
   Providers config schema
   ────────────────────────────── */
@@ -48,6 +54,10 @@ export const baseCustomLLMProviderConfigSchema = baseAPIProviderConfigSchema.ext
 })
 
 const llmProviderConfigSchemaList = [
+  baseCustomLLMProviderConfigSchema.extend({
+    provider: z.literal("atlascloud"),
+    model: createProviderModelSchema<"atlascloud">("atlascloud"),
+  }),
   baseCustomLLMProviderConfigSchema.extend({
     provider: z.literal("siliconflow"),
     model: createProviderModelSchema<"siliconflow">("siliconflow"),

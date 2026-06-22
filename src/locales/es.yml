@@ -91,8 +91,10 @@ options:
     title: Proveedores de API
     description: Configura proveedores de API para traducción e información de vocabulario. Tenemos más de 20 proveedores integrados y admitimos cualquier proveedor de API compatible con OpenAI.
     addProvider: Añadir proveedor
+    sponsorCta: Obtén IA rápida y rentable
     badges:
       featureCount: $1 funciones
+      sponsor: Patrocinador
     dialog:
       title: Añadir nuevo proveedor
       groups:
@@ -170,6 +172,7 @@ options:
         google: Modelos AI principales de Google con capacidades avanzadas de razonamiento
         anthropic: Modelos Claude conocidos por su seguridad y excelente razonamiento
         xai: Empresa de AI de Elon Musk que ofrece modelos Grok con acceso a datos en tiempo real
+        atlascloud: Plataforma unificada compatible con OpenAI para modelos recientes como DeepSeek, Kimi, Qwen, Doubao y GLM
         siliconflow: Plataforma de inferencia de alto rendimiento para modelos chinos e internacionales
         tensdaq: Plataforma revolucionaria de pujas AI MaaS con precios impulsados por el mercado, que elimina los altos precios fijos
         openaiCompatible: Compatible con API de terceros y OpenAI
