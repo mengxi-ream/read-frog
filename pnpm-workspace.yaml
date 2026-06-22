@@ -1,3 +1,7 @@
+shellEmulator: true
+
+trustPolicy: no-downgrade
+
 allowBuilds:
   core-js: true
   esbuild: true
