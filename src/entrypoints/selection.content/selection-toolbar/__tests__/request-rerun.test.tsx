@@ -49,6 +49,15 @@ vi.mock("@tanstack/hotkeys", async (importOriginal) => {
   }
 })
 
+vi.mock("@/utils/auth/auth-client", () => ({
+  authClient: {
+    useSession: () => ({
+      data: null,
+      isPending: false,
+    }),
+  },
+}))
+
 vi.mock("@/components/ui/selection-popover", async () => {
   const React = await import("react")
 
