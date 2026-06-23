@@ -1,9 +1,10 @@
 import type {
-  CustomTableGetSchemaOutput,
-  CustomTableListOutput,
+  NotebaseGetSchemaOutput,
+  NotebaseListOutput,
 } from "@read-frog/api-contract"
 import type {
   SelectionToolbarCustomAction,
+  SelectionToolbarCustomActionNotebaseAccount,
   SelectionToolbarCustomActionNotebaseConnection,
   SelectionToolbarCustomActionNotebaseMapping,
   SelectionToolbarCustomActionOutputField,
@@ -12,9 +13,10 @@ import { IconChevronsRight, IconPlus, IconRefresh, IconTrash } from "@tabler/ico
 import { useStore } from "@tanstack/react-form"
 import { useQuery } from "@tanstack/react-query"
 import { dequal } from "dequal"
-import { useEffect, useMemo } from "react"
+import { useCallback, useEffect, useMemo } from "react"
 import { i18n } from "#imports"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   Field,
@@ -31,21 +33,29 @@ import {
 } from "@/components/ui/base-ui/select"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
+import { useNotebaseBetaStatus } from "@/utils/notebase/beta"
+import {
+  classifyConnectedNotebaseOwnership,
+  createNotebaseConnectedAccountSnapshot,
+  formatNotebaseConnectedAccountLabel,
+  isConnectedNotebaseInList,
+  refreshNotebaseConnectionAccountSnapshot,
+  sanitizeCustomActionNotebaseConnection,
+} from "@/utils/notebase/connection"
+import { isORPCForbiddenError } from "@/utils/notebase/errors"
 import {
   createNotebaseMapping,
   isNotebaseMappingCompatible,
-  isORPCNotFoundError,
   isSupportedNotebaseColumnConfig,
   resolveNotebaseMappings,
-  sanitizeCustomActionNotebaseConnection,
-} from "@/utils/notebase"
-import { isORPCForbiddenError, useNotebaseBetaStatus } from "@/utils/notebase-beta"
+  validateNotebaseMappings,
+} from "@/utils/notebase/mapping"
 import { orpc } from "@/utils/orpc/client"
 import { withForm } from "./form"
 
 type NotebaseI18nKey = Parameters<typeof i18n.t>[0]
-type NotebaseTableItem = CustomTableListOutput[number]
-type NotebaseColumn = CustomTableGetSchemaOutput["columns"][number]
+type NotebaseItem = NotebaseListOutput[number]
+type NotebaseColumn = NotebaseGetSchemaOutput["notebaseColumns"][number]
 
 interface SelectItemData<T> {
   value: T
@@ -54,6 +64,31 @@ interface SelectItemData<T> {
 
 function t(key: string) {
   return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.${key}` as NotebaseI18nKey)
+}
+
+function getAccountFallback(account: SelectionToolbarCustomActionNotebaseAccount | undefined, fallbackLabel: string) {
+  const label = formatNotebaseConnectedAccountLabel(account) ?? fallbackLabel
+  return Array.from(label).slice(0, 2).join("").toUpperCase()
+}
+
+function ConnectedAccountDisplay({
+  account,
+  label,
+}: {
+  account: SelectionToolbarCustomActionNotebaseAccount | undefined
+  label: string
+}) {
+  const accountLabel = formatNotebaseConnectedAccountLabel(account) ?? label
+
+  return (
+    <span className="inline-flex min-w-0 items-center gap-2 align-middle">
+      <Avatar size="sm">
+        <AvatarImage src={account?.image ?? ""} alt={accountLabel} />
+        <AvatarFallback>{getAccountFallback(account, label)}</AvatarFallback>
+      </Avatar>
+      <span className="min-w-0 truncate">{accountLabel}</span>
+    </span>
+  )
 }
 
 function getMappingStatusMessage(status: ReturnType<typeof resolveNotebaseMappings>[number]["status"]) {
@@ -91,28 +126,28 @@ function getSelectableRemoteColumns(
   connection: SelectionToolbarCustomActionNotebaseConnection,
   currentLocalField: SelectionToolbarCustomActionOutputField | null,
   currentMapping: SelectionToolbarCustomActionNotebaseMapping,
-  schemaColumns: CustomTableGetSchemaOutput["columns"],
+  notebaseColumns: NotebaseGetSchemaOutput["notebaseColumns"],
 ) {
   const usedRemoteColumnIds = new Set(
     connection.mappings
       .filter(mapping => mapping.id !== currentMapping.id)
-      .map(mapping => mapping.remoteColumnId),
+      .map(mapping => mapping.notebaseColumnId),
   )
 
-  return schemaColumns.filter((column) => {
+  return notebaseColumns.filter((column) => {
     if (!isSupportedNotebaseColumnConfig(column.config)) {
       return false
     }
 
-    if (usedRemoteColumnIds.has(column.id) && column.id !== currentMapping.remoteColumnId) {
+    if (usedRemoteColumnIds.has(column.id) && column.id !== currentMapping.notebaseColumnId) {
       return false
     }
 
     if (!currentLocalField) {
-      return column.id === currentMapping.remoteColumnId
+      return column.id === currentMapping.notebaseColumnId
     }
 
-    return column.id === currentMapping.remoteColumnId
+    return column.id === currentMapping.notebaseColumnId
       || isNotebaseMappingCompatible(currentLocalField.type, column.config)
   })
 }
@@ -120,49 +155,32 @@ function getSelectableRemoteColumns(
 function getNextDefaultMapping(
   connection: SelectionToolbarCustomActionNotebaseConnection,
   outputSchema: SelectionToolbarCustomActionOutputField[],
-  schemaColumns: CustomTableGetSchemaOutput["columns"],
+  notebaseColumns: NotebaseGetSchemaOutput["notebaseColumns"],
 ) {
   const usedLocalFieldIds = new Set(connection.mappings.map(mapping => mapping.localFieldId))
-  const usedRemoteColumnIds = new Set(connection.mappings.map(mapping => mapping.remoteColumnId))
+  const usedRemoteColumnIds = new Set(connection.mappings.map(mapping => mapping.notebaseColumnId))
 
   for (const localField of outputSchema) {
     if (usedLocalFieldIds.has(localField.id)) {
       continue
     }
 
-    const remoteColumn = schemaColumns.find(column =>
+    const notebaseColumn = notebaseColumns.find(column =>
       !usedRemoteColumnIds.has(column.id)
       && isSupportedNotebaseColumnConfig(column.config)
       && isNotebaseMappingCompatible(localField.type, column.config),
     )
 
-    if (remoteColumn) {
-      return createNotebaseMapping(localField.id, remoteColumn.id, remoteColumn.name)
+    if (notebaseColumn) {
+      return createNotebaseMapping(localField.id, notebaseColumn.id, notebaseColumn.name)
     }
   }
 
   return null
 }
 
-function getTableSelectItems(
-  connection: SelectionToolbarCustomActionNotebaseConnection | undefined,
-  tables: CustomTableListOutput | undefined,
-) {
-  if (!connection?.tableId) {
-    return tables ?? []
-  }
-
-  if (!tables?.some(table => table.id === connection.tableId)) {
-    return [
-      {
-        id: connection.tableId,
-        name: `${connection.tableNameSnapshot} (${t("tableUnavailableOption")})`,
-      },
-      ...(tables ?? []),
-    ]
-  }
-
-  return tables
+function getNotebaseSelectItems(notebases: NotebaseListOutput | undefined) {
+  return notebases
 }
 
 function getLocalFieldSelectItems(fields: SelectionToolbarCustomActionOutputField[]): SelectItemData<string>[] {
@@ -174,14 +192,14 @@ function getLocalFieldSelectItems(fields: SelectionToolbarCustomActionOutputFiel
 
 function getRemoteFieldSelectItems(
   mapping: SelectionToolbarCustomActionNotebaseMapping,
-  remoteOptions: CustomTableGetSchemaOutput["columns"],
+  remoteOptions: NotebaseGetSchemaOutput["notebaseColumns"],
   currentRemoteMissing: boolean,
 ): SelectItemData<string>[] {
   return [
     ...(currentRemoteMissing
       ? [{
-          value: mapping.remoteColumnId,
-          label: `${mapping.remoteColumnNameSnapshot} (${t("columnUnavailableOption")})`,
+          value: mapping.notebaseColumnId,
+          label: `${mapping.notebaseColumnNameSnapshot} (${t("columnUnavailableOption")})`,
         }]
       : []),
     ...remoteOptions.map(column => ({
@@ -199,32 +217,52 @@ export const NotebaseConnectionField = withForm({
     const connection = action.notebaseConnection
     const { data: session, isPending: isSessionPending } = authClient.useSession()
     const isAuthenticated = !!session?.user
+    const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
+    const canWriteConnection = isAuthenticated && !!currentAccount
     const betaStatusQuery = useNotebaseBetaStatus(isAuthenticated)
     const isBetaAllowed = betaStatusQuery.data?.allowed === true
     const isBetaLocked = betaStatusQuery.data?.allowed === false
+    const sanitizedConnection = useMemo(
+      () => sanitizeCustomActionNotebaseConnection(connection, outputSchema),
+      [connection, outputSchema],
+    )
 
-    const listQuery = useQuery(orpc.customTable.list.queryOptions({
+    const updateConnection = useCallback((nextConnection: SelectionToolbarCustomActionNotebaseConnection | undefined) => {
+      form.setFieldValue("notebaseConnection", nextConnection)
+      void form.handleSubmit()
+    }, [form])
+
+    const listQuery = useQuery(orpc.notebase.list.queryOptions({
       input: {},
-      enabled: isAuthenticated && isBetaAllowed,
+      enabled: canWriteConnection && isBetaAllowed,
       staleTime: 60_000,
       meta: {
         suppressToast: true,
       },
     }))
 
-    const schemaQuery = useQuery(orpc.customTable.getSchema.queryOptions({
-      input: { id: connection?.tableId ?? "" },
-      enabled: isAuthenticated && isBetaAllowed && !!connection?.tableId,
+    const ownedNotebase = sanitizedConnection
+      ? listQuery.data?.find((item: NotebaseItem) => item.id === sanitizedConnection.notebaseId)
+      : undefined
+    const connectionOwnership = sanitizedConnection && currentAccount && listQuery.data
+      ? classifyConnectedNotebaseOwnership({
+          connection: sanitizedConnection,
+          currentAccount,
+          isOwned: isConnectedNotebaseInList(sanitizedConnection, listQuery.data),
+        })
+      : null
+    const isOwnedConnection = connectionOwnership?.kind === "owned"
+    const isNotebaseUnavailableConnection = connectionOwnership?.kind === "notebase_unavailable"
+    const isForeignConnection = connectionOwnership?.kind === "foreign_account"
+
+    const schemaQuery = useQuery(orpc.notebase.getSchema.queryOptions({
+      input: { id: sanitizedConnection?.notebaseId ?? "" },
+      enabled: canWriteConnection && isBetaAllowed && !!sanitizedConnection?.notebaseId && isOwnedConnection,
       retry: false,
       meta: {
         suppressToast: true,
       },
     }))
-
-    const sanitizedConnection = useMemo(
-      () => sanitizeCustomActionNotebaseConnection(connection, outputSchema),
-      [connection, outputSchema],
-    )
 
     useEffect(() => {
       if (!dequal(connection, sanitizedConnection)) {
@@ -233,42 +271,69 @@ export const NotebaseConnectionField = withForm({
       }
     }, [connection, form, sanitizedConnection])
 
-    const resolvedMappings = useMemo(
-      () => resolveNotebaseMappings({ ...action, notebaseConnection: sanitizedConnection }, schemaQuery.data),
-      [action, sanitizedConnection, schemaQuery.data],
-    )
-
-    const hasInvalidMappings = resolvedMappings.some(mapping => mapping.status !== "valid")
-    const selectableTableItems = useMemo(
-      () => getTableSelectItems(sanitizedConnection, listQuery.data),
-      [listQuery.data, sanitizedConnection],
-    )
-    const tableUnavailable = !!sanitizedConnection?.tableId
-      && !schemaQuery.isPending
-      && !schemaQuery.isFetching
-      && !!schemaQuery.error
-      && isORPCNotFoundError(schemaQuery.error)
-
-    const updateConnection = (nextConnection: SelectionToolbarCustomActionNotebaseConnection | undefined) => {
-      form.setFieldValue("notebaseConnection", nextConnection)
-      void form.handleSubmit()
-    }
-
-    const handleTableChange = (tableId: string | null) => {
-      if (!tableId) {
-        updateConnection(undefined)
+    useEffect(() => {
+      if (!isOwnedConnection || !sanitizedConnection || !currentAccount) {
         return
       }
 
-      const table = listQuery.data?.find((item: NotebaseTableItem) => item.id === tableId)
+      const refreshedConnection = refreshNotebaseConnectionAccountSnapshot(
+        sanitizedConnection,
+        currentAccount,
+        ownedNotebase?.name,
+      )
+      if (!dequal(sanitizedConnection, refreshedConnection)) {
+        updateConnection(refreshedConnection)
+      }
+    }, [currentAccount, isOwnedConnection, ownedNotebase?.name, sanitizedConnection, updateConnection])
+
+    const mappingValidation = useMemo(
+      () => schemaQuery.data
+        ? validateNotebaseMappings({ ...action, notebaseConnection: sanitizedConnection }, schemaQuery.data)
+        : null,
+      [action, sanitizedConnection, schemaQuery.data],
+    )
+    const resolvedMappings = useMemo(
+      () => mappingValidation?.resolvedMappings
+        ?? resolveNotebaseMappings({ ...action, notebaseConnection: sanitizedConnection }, schemaQuery.data),
+      [action, mappingValidation?.resolvedMappings, sanitizedConnection, schemaQuery.data],
+    )
+
+    const hasInvalidMappings = mappingValidation?.kind === "invalid"
+    const selectableNotebaseItems = useMemo(
+      () => getNotebaseSelectItems(listQuery.data),
+      [listQuery.data],
+    )
+    const notebaseUnavailable = !!sanitizedConnection && isNotebaseUnavailableConnection
+    const notebaseAccountUnavailable = !!sanitizedConnection && isForeignConnection
+
+    const handleClearConnection = () => {
+      updateConnection(undefined)
+    }
+
+    const handleNotebaseChange = (notebaseId: string | null) => {
+      if (!notebaseId) {
+        handleClearConnection()
+        return
+      }
+
+      if (!currentAccount) {
+        return
+      }
+
+      const notebase = listQuery.data?.find((item: NotebaseItem) => item.id === notebaseId)
       updateConnection({
-        tableId,
-        tableNameSnapshot: table?.name ?? sanitizedConnection?.tableNameSnapshot ?? tableId,
+        notebaseId,
+        notebaseNameSnapshot: notebase?.name ?? sanitizedConnection?.notebaseNameSnapshot ?? notebaseId,
+        connectedAccount: currentAccount,
         mappings: [],
       })
     }
 
     const handleRefresh = async () => {
+      if (!currentAccount || !isOwnedConnection) {
+        return
+      }
+
       const refreshResult = await schemaQuery.refetch()
       if (!refreshResult.data || !sanitizedConnection) {
         return
@@ -276,13 +341,14 @@ export const NotebaseConnectionField = withForm({
 
       updateConnection({
         ...sanitizedConnection,
-        tableNameSnapshot: refreshResult.data.name,
+        notebaseNameSnapshot: refreshResult.data.name,
+        connectedAccount: currentAccount,
         mappings: sanitizedConnection.mappings.map(mapping => ({
           ...mapping,
-          remoteColumnNameSnapshot:
-            refreshResult.data.columns.find(
-              (column: NotebaseColumn) => column.id === mapping.remoteColumnId,
-            )?.name ?? mapping.remoteColumnNameSnapshot,
+          notebaseColumnNameSnapshot:
+            refreshResult.data.notebaseColumns.find(
+              (column: NotebaseColumn) => column.id === mapping.notebaseColumnId,
+            )?.name ?? mapping.notebaseColumnNameSnapshot,
         })),
       })
     }
@@ -292,7 +358,7 @@ export const NotebaseConnectionField = withForm({
         return
       }
 
-      const nextMapping = getNextDefaultMapping(sanitizedConnection, outputSchema, schemaQuery.data.columns)
+      const nextMapping = getNextDefaultMapping(sanitizedConnection, outputSchema, schemaQuery.data.notebaseColumns)
       if (!nextMapping) {
         return
       }
@@ -318,8 +384,17 @@ export const NotebaseConnectionField = withForm({
           <Alert>
             <AlertTitle>{t("loginRequiredTitle")}</AlertTitle>
             <AlertDescription>
-              {t("loginRequiredDescription")}
-              {sanitizedConnection ? ` ${sanitizedConnection.tableNameSnapshot}` : ""}
+              {sanitizedConnection
+                ? (
+                    <div className="flex flex-col gap-2">
+                      <span>{t("loginRequiredConnectedDescription")}</span>
+                      <ConnectedAccountDisplay
+                        account={sanitizedConnection.connectedAccount}
+                        label={t("unknownConnectedAccount")}
+                      />
+                    </div>
+                  )
+                : t("loginRequiredDescription")}
             </AlertDescription>
             <AlertAction>
               <Button
@@ -370,7 +445,7 @@ export const NotebaseConnectionField = withForm({
                   variant="outline"
                   size="sm"
                   onClick={handleRefresh}
-                  disabled={!isBetaAllowed || !sanitizedConnection?.tableId || schemaQuery.isFetching}
+                  disabled={!isBetaAllowed || !currentAccount || !sanitizedConnection?.notebaseId || !isOwnedConnection || schemaQuery.isFetching}
                 >
                   <IconRefresh className={schemaQuery.isFetching ? "animate-spin" : undefined} />
                   {t("refreshAction")}
@@ -378,19 +453,19 @@ export const NotebaseConnectionField = withForm({
               </div>
 
               <Select<string | null>
-                value={sanitizedConnection?.tableId ?? null}
+                value={isOwnedConnection ? sanitizedConnection?.notebaseId ?? null : null}
                 items={[
                   {
                     value: null,
                     label: t("tableClearOption"),
                   },
-                  ...(selectableTableItems?.map(table => ({
-                    value: table.id,
-                    label: table.name,
+                  ...(selectableNotebaseItems?.map(notebase => ({
+                    value: notebase.id,
+                    label: notebase.name,
                   })) ?? []),
                 ]}
-                onValueChange={handleTableChange}
-                disabled={!isBetaAllowed}
+                onValueChange={handleNotebaseChange}
+                disabled={!isBetaAllowed || !currentAccount}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t("tablePlaceholder")} />
@@ -400,15 +475,50 @@ export const NotebaseConnectionField = withForm({
                     <SelectItem value={null}>
                       {t("tableClearOption")}
                     </SelectItem>
-                    {selectableTableItems?.map(table => (
-                      <SelectItem key={table.id} value={table.id}>
-                        {table.name}
+                    {selectableNotebaseItems?.map(notebase => (
+                      <SelectItem key={notebase.id} value={notebase.id}>
+                        {notebase.name}
                       </SelectItem>
                     ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>
             </Field>
+
+            {notebaseAccountUnavailable && (
+              <Alert variant="destructive">
+                <AlertTitle>{t("accountMismatchTitle")}</AlertTitle>
+                <AlertDescription>
+                  <div className="flex flex-col gap-2">
+                    <span>{t("accountMismatchDescription")}</span>
+                    <div className="grid gap-1">
+                      <span className="text-xs font-medium text-muted-foreground">{t("connectedAccountLabel")}</span>
+                      <ConnectedAccountDisplay
+                        account={sanitizedConnection?.connectedAccount}
+                        label={t("unknownConnectedAccount")}
+                      />
+                    </div>
+                    <div className="grid gap-1">
+                      <span className="text-xs font-medium text-muted-foreground">{t("currentAccountLabel")}</span>
+                      <ConnectedAccountDisplay
+                        account={currentAccount}
+                        label={t("unknownConnectedAccount")}
+                      />
+                    </div>
+                  </div>
+                </AlertDescription>
+                <AlertAction>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleClearConnection}
+                  >
+                    {t("clearConnectionAction")}
+                  </Button>
+                </AlertAction>
+              </Alert>
+            )}
 
             {isBetaAllowed && !listQuery.isPending && !listQuery.error && listQuery.data?.length === 0 && (
               <Alert>
@@ -434,25 +544,35 @@ export const NotebaseConnectionField = withForm({
               </Alert>
             )}
 
-            {tableUnavailable && (
+            {notebaseUnavailable && (
               <Alert variant="destructive">
                 <AlertTitle>{t("tableUnavailableTitle")}</AlertTitle>
                 <AlertDescription>{t("tableUnavailableDescription")}</AlertDescription>
+                <AlertAction>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                    onClick={handleClearConnection}
+                  >
+                    {t("clearConnectionAction")}
+                  </Button>
+                </AlertAction>
               </Alert>
             )}
 
-            {!!sanitizedConnection?.tableId && !!schemaQuery.error && !tableUnavailable && (
+            {isOwnedConnection && !!sanitizedConnection?.notebaseId && !!schemaQuery.error && !notebaseUnavailable && !notebaseAccountUnavailable && (
               <Alert variant="destructive">
                 <AlertTitle>{t("schemaErrorTitle")}</AlertTitle>
                 <AlertDescription>{t("schemaErrorDescription")}</AlertDescription>
               </Alert>
             )}
 
-            {!!sanitizedConnection?.tableId && schemaQuery.isPending && (
+            {isOwnedConnection && !!sanitizedConnection?.notebaseId && schemaQuery.isPending && (
               <p className="text-sm text-muted-foreground">{t("schemaLoading")}</p>
             )}
 
-            {!!sanitizedConnection?.tableId && schemaQuery.data && (
+            {isOwnedConnection && !!sanitizedConnection?.notebaseId && schemaQuery.data && (
               <>
                 {hasInvalidMappings && (
                   <Alert variant="destructive">
@@ -471,7 +591,7 @@ export const NotebaseConnectionField = withForm({
                       size="sm"
                       variant="outline"
                       onClick={handleAddMapping}
-                      disabled={!getNextDefaultMapping(sanitizedConnection, outputSchema, schemaQuery.data.columns)}
+                      disabled={!getNextDefaultMapping(sanitizedConnection, outputSchema, schemaQuery.data.notebaseColumns)}
                     >
                       <IconPlus className="size-4" />
                       {t("addMappingAction")}
@@ -490,16 +610,16 @@ export const NotebaseConnectionField = withForm({
                       <span />
                     </div>
 
-                    {resolvedMappings.map(({ localField, mapping, remoteColumn, status }) => {
+                    {resolvedMappings.map(({ localField, mapping, notebaseColumn, status }) => {
                       const localOptions = getSelectableLocalFields(outputSchema, sanitizedConnection, mapping)
                       const remoteOptions = getSelectableRemoteColumns(
                         sanitizedConnection,
                         localField,
                         mapping,
-                        schemaQuery.data.columns,
+                        schemaQuery.data.notebaseColumns,
                       )
-                      const currentRemoteMissing = !schemaQuery.data.columns.some(
-                        (column: NotebaseColumn) => column.id === mapping.remoteColumnId,
+                      const currentRemoteMissing = !schemaQuery.data.notebaseColumns.some(
+                        (column: NotebaseColumn) => column.id === mapping.notebaseColumnId,
                       )
                       const localSelectItems = getLocalFieldSelectItems(localOptions)
                       const remoteSelectItems = getRemoteFieldSelectItems(mapping, remoteOptions, currentRemoteMissing)
@@ -544,14 +664,14 @@ export const NotebaseConnectionField = withForm({
                             </div>
 
                             <Select<string>
-                              value={mapping.remoteColumnId}
+                              value={mapping.notebaseColumnId}
                               items={remoteSelectItems}
                               onValueChange={(value) => {
                                 if (typeof value !== "string") {
                                   return
                                 }
 
-                                const nextRemoteColumn = schemaQuery.data.columns.find(
+                                const nextNotebaseColumn = schemaQuery.data.notebaseColumns.find(
                                   (column: NotebaseColumn) => column.id === value,
                                 )
                                 updateConnection({
@@ -560,8 +680,8 @@ export const NotebaseConnectionField = withForm({
                                     item.id === mapping.id
                                       ? {
                                           ...item,
-                                          remoteColumnId: value,
-                                          remoteColumnNameSnapshot: nextRemoteColumn?.name ?? item.remoteColumnNameSnapshot,
+                                          notebaseColumnId: value,
+                                          notebaseColumnNameSnapshot: nextNotebaseColumn?.name ?? item.notebaseColumnNameSnapshot,
                                         }
                                       : item,
                                   ),
@@ -570,17 +690,17 @@ export const NotebaseConnectionField = withForm({
                             >
                               <SelectTrigger className="w-full" aria-invalid={status !== "valid"}>
                                 <SelectValue placeholder={t("remoteFieldPlaceholder")}>
-                                  {remoteColumn?.name
+                                  {notebaseColumn?.name
                                     ?? (currentRemoteMissing
-                                      ? `${mapping.remoteColumnNameSnapshot} (${t("columnUnavailableOption")})`
-                                      : mapping.remoteColumnNameSnapshot)}
+                                      ? `${mapping.notebaseColumnNameSnapshot} (${t("columnUnavailableOption")})`
+                                      : mapping.notebaseColumnNameSnapshot)}
                                 </SelectValue>
                               </SelectTrigger>
                               <SelectContent>
                                 <SelectGroup>
                                   {currentRemoteMissing && (
-                                    <SelectItem key={`${mapping.id}-missing`} value={mapping.remoteColumnId}>
-                                      {`${mapping.remoteColumnNameSnapshot} (${t("columnUnavailableOption")})`}
+                                    <SelectItem key={`${mapping.id}-missing`} value={mapping.notebaseColumnId}>
+                                      {`${mapping.notebaseColumnNameSnapshot} (${t("columnUnavailableOption")})`}
                                     </SelectItem>
                                   )}
                                   {remoteOptions.map(column => (

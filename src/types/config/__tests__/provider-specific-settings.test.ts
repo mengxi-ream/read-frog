@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
-import { bedrockProviderSpecificSettingsSchema, getProviderSpecificSettingFields } from "../provider"
+import { azureProviderSpecificSettingsSchema, bedrockProviderSpecificSettingsSchema, getProviderSpecificSettingFields } from "../provider"
 
 describe("provider-specific settings metadata", () => {
   it("returns the Bedrock region field from Zod metadata", () => {
@@ -10,6 +10,33 @@ describe("provider-specific settings metadata", () => {
         labelKey: "region",
         type: "text",
         placeholder: "us-east-1",
+      },
+    ])
+  })
+
+  it("returns the Azure resource fields from Zod metadata", () => {
+    expect(getProviderSpecificSettingFields(azureProviderSpecificSettingsSchema)).toEqual([
+      {
+        key: "apiMode",
+        labelKey: "apiMode",
+        type: "select",
+        defaultValue: "responses",
+        options: [
+          { value: "responses", labelKey: "responses" },
+          { value: "chat", labelKey: "chatCompletions" },
+        ],
+      },
+      {
+        key: "resourceName",
+        labelKey: "resourceName",
+        type: "text",
+        placeholder: "my-azure-openai-resource",
+      },
+      {
+        key: "apiVersion",
+        labelKey: "apiVersion",
+        type: "text",
+        placeholder: "v1",
       },
     ])
   })

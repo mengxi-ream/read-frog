@@ -7,8 +7,11 @@ import { subtitlesStore } from "../atoms"
 interface SubtitlesUIContextValue {
   toggleSubtitles: (enabled: boolean) => void
   downloadSourceSubtitles: () => Promise<void>
+  downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
   embedded?: boolean
+  openBelow?: boolean
+  containerShrinkRatio?: (container: HTMLElement) => number | null
 }
 
 export const SubtitlesUIContext = createContext<SubtitlesUIContextValue | null>(null)
@@ -23,15 +26,17 @@ export function useSubtitlesUI() {
 
 export type SubtitlesProvidersAdapter = Pick<
   UniversalVideoAdapter,
-  "downloadSourceSubtitles" | "embedded" | "getControlsConfig" | "toggleSubtitlesManually"
+  "downloadSourceSubtitles" | "downloadTranslatedSubtitles" | "embedded" | "containerShrinkRatio" | "getControlsConfig" | "toggleSubtitlesManually"
 >
 
 export function SubtitlesProviders({
   adapter,
   children,
+  openBelow,
 }: {
   adapter: SubtitlesProvidersAdapter
   children: React.ReactNode
+  openBelow?: boolean
 }) {
   return (
     <JotaiProvider store={subtitlesStore}>
@@ -39,8 +44,11 @@ export function SubtitlesProviders({
         value={{
           toggleSubtitles: adapter.toggleSubtitlesManually,
           downloadSourceSubtitles: adapter.downloadSourceSubtitles,
+          downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
           controlsConfig: adapter.getControlsConfig(),
           embedded: adapter.embedded,
+          openBelow,
+          containerShrinkRatio: adapter.containerShrinkRatio,
         }}
       >
         {children}

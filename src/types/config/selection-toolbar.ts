@@ -13,13 +13,21 @@ export const selectionToolbarCustomActionOutputFieldSchema = z.object({
 export const selectionToolbarCustomActionNotebaseMappingSchema = z.object({
   id: z.string().nonempty(),
   localFieldId: z.string().nonempty(),
-  remoteColumnId: z.string().nonempty(),
-  remoteColumnNameSnapshot: z.string().trim().min(1),
+  notebaseColumnId: z.string().nonempty(),
+  notebaseColumnNameSnapshot: z.string().trim().min(1),
+})
+
+export const selectionToolbarCustomActionNotebaseAccountSchema = z.object({
+  id: z.string().trim().min(1),
+  name: z.string().trim().min(1),
+  email: z.string().trim().min(1),
+  image: z.string().trim().min(1).nullable().optional(),
 })
 
 export const selectionToolbarCustomActionNotebaseConnectionSchema = z.object({
-  tableId: z.string().nonempty(),
-  tableNameSnapshot: z.string().trim().min(1),
+  notebaseId: z.string().nonempty(),
+  notebaseNameSnapshot: z.string().trim().min(1),
+  connectedAccount: selectionToolbarCustomActionNotebaseAccountSchema,
   mappings: z.array(selectionToolbarCustomActionNotebaseMappingSchema),
 })
 
@@ -57,7 +65,7 @@ export const selectionToolbarCustomActionSchema = z.object({
 
   const mappingIdSet = new Set<string>()
   const localFieldIdSet = new Set<string>()
-  const remoteColumnIdSet = new Set<string>()
+  const notebaseColumnIdSet = new Set<string>()
 
   connection.mappings.forEach((mapping, index) => {
     if (mappingIdSet.has(mapping.id)) {
@@ -86,14 +94,14 @@ export const selectionToolbarCustomActionSchema = z.object({
     }
     localFieldIdSet.add(mapping.localFieldId)
 
-    if (remoteColumnIdSet.has(mapping.remoteColumnId)) {
+    if (notebaseColumnIdSet.has(mapping.notebaseColumnId)) {
       ctx.addIssue({
         code: "custom",
-        message: `Duplicate remote column id "${mapping.remoteColumnId}" in notebase mappings.`,
-        path: ["notebaseConnection", "mappings", index, "remoteColumnId"],
+        message: `Duplicate notebase column id "${mapping.notebaseColumnId}" in notebase mappings.`,
+        path: ["notebaseConnection", "mappings", index, "notebaseColumnId"],
       })
     }
-    remoteColumnIdSet.add(mapping.remoteColumnId)
+    notebaseColumnIdSet.add(mapping.notebaseColumnId)
   })
 })
 
@@ -125,8 +133,10 @@ export const selectionToolbarCustomActionsSchema = z.array(selectionToolbarCusto
   },
 )
 
+// TODO: make these vairbale shorter by deleteing SelectionToolbar or "selectionToolbar"
 export type SelectionToolbarCustomActionOutputType = z.infer<typeof selectionToolbarCustomActionOutputTypeSchema>
 export type SelectionToolbarCustomActionOutputField = z.infer<typeof selectionToolbarCustomActionOutputFieldSchema>
 export type SelectionToolbarCustomActionNotebaseMapping = z.infer<typeof selectionToolbarCustomActionNotebaseMappingSchema>
+export type SelectionToolbarCustomActionNotebaseAccount = z.infer<typeof selectionToolbarCustomActionNotebaseAccountSchema>
 export type SelectionToolbarCustomActionNotebaseConnection = z.infer<typeof selectionToolbarCustomActionNotebaseConnectionSchema>
 export type SelectionToolbarCustomAction = z.infer<typeof selectionToolbarCustomActionSchema>

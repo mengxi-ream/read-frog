@@ -14,7 +14,6 @@ import type {
 } from "@/types/edge-tts"
 import type { ProxyRequest, ProxyResponse } from "@/types/proxy-fetch"
 import type {
-  TTSOffscreenStopRequest,
   TTSPlaybackStartRequest,
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
@@ -25,7 +24,7 @@ import { defineExtensionMessaging } from "@webext-core/messaging"
 interface ProtocolMap {
   // navigation
   openPage: (data: { url: string, active?: boolean }) => void
-  openOptionsPage: () => void
+  openOptionsPage: (data?: { route?: `/${string}` }) => void
   toggleSidePanel: (data?: { source?: "content-script" | "extension-user-action" }) => Promise<{ ok: true, action: "opened" | "closed" } | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action" }>
   // config
   getInitialConfig: () => Config | null
@@ -53,9 +52,9 @@ interface ProtocolMap {
   getPinState: () => boolean
   returnPinState: (data: { isPinned: boolean }) => void
   // request
-  enqueueTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webContent?: string | null, webSummary?: string | null }) => Promise<string>
+  enqueueTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webDescription?: string | null, webContent?: string | null, webSummary?: string | null }) => Promise<string>
   getOrGenerateWebPageSummary: (data: { webTitle: string, webContent: string, providerConfig: ProviderConfig }) => Promise<string | null>
-  enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, videoTitle?: string | null, summary?: string | null }) => Promise<string>
+  enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webDescription?: string | null, summary?: string | null }) => Promise<string>
   getSubtitlesSummary: (data: { videoTitle: string, subtitlesContext: string, providerConfig: ProviderConfig }) => Promise<string | null>
   backgroundGenerateText: (data: BackgroundGenerateTextPayload) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
@@ -77,12 +76,12 @@ interface ProtocolMap {
   edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>
   edgeTtsHealthCheck: () => Promise<EdgeTTSHealthStatus>
   // tts playback
-  ttsPlaybackEnsureOffscreen: () => Promise<{ ok: true }>
+  ttsPlaybackPrepare: () => Promise<{ ok: true }>
   ttsPlaybackStart: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>
   ttsPlaybackStop: (data: TTSPlaybackStopRequest) => Promise<{ ok: true }>
   // offscreen internal
   ttsOffscreenPlay: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>
-  ttsOffscreenStop: (data: TTSOffscreenStopRequest) => Promise<{ ok: true }>
+  ttsOffscreenStop: (data: TTSPlaybackStopRequest) => Promise<{ ok: true }>
 }
 
 export const { sendMessage, onMessage }

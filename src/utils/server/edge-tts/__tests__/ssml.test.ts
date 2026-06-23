@@ -43,6 +43,20 @@ describe("buildSSMLRequest", () => {
     expect(ssml).not.toContain("<break strength=")
   })
 
+  it("preserves Azure voice names with model suffixes", () => {
+    const dragonHdSSML = buildSSMLRequest({
+      text: "Hello world",
+      voice: "en-US-Ava:DragonHDLatestNeural",
+    })
+    const openAIHdSSML = buildSSMLRequest({
+      text: "Hello world",
+      voice: "en-US-AlloyMultilingualNeuralHD",
+    })
+
+    expect(dragonHdSSML).toContain("<voice name=\"en-US-Ava:DragonHDLatestNeural\">")
+    expect(openAIHdSSML).toContain("<voice name=\"en-US-AlloyMultilingualNeuralHD\">")
+  })
+
   it("rejects empty text", () => {
     expect(() => buildSSMLRequest({
       text: "   ",

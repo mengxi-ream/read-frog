@@ -2,11 +2,29 @@ import type { LLMProviderTypes } from "./constants"
 
 import { z } from "zod"
 
-export interface ProviderSettingUiMeta {
+export const AZURE_API_MODES = ["responses", "chat"] as const
+export type AzureApiMode = typeof AZURE_API_MODES[number]
+export const DEFAULT_AZURE_API_MODE: AzureApiMode = "responses"
+
+interface ProviderSettingBaseUiMeta {
   labelKey: string
-  type: "text"
   placeholder?: string
 }
+
+interface ProviderSettingTextUiMeta extends ProviderSettingBaseUiMeta {
+  type: "text"
+}
+
+interface ProviderSettingSelectUiMeta extends ProviderSettingBaseUiMeta {
+  type: "select"
+  defaultValue?: string
+  options: Array<{
+    value: string
+    labelKey: string
+  }>
+}
+
+export type ProviderSettingUiMeta = ProviderSettingTextUiMeta | ProviderSettingSelectUiMeta
 
 declare module "zod" {
   interface GlobalMeta {
@@ -14,7 +32,7 @@ declare module "zod" {
   }
 }
 
-export interface ProviderSpecificSettingField extends ProviderSettingUiMeta {
+export type ProviderSpecificSettingField = ProviderSettingUiMeta & {
   key: string
 }
 
@@ -30,7 +48,36 @@ export const bedrockProviderSpecificSettingsSchema = z.strictObject({
   }),
 })
 
+export const azureProviderSpecificSettingsSchema = z.strictObject({
+  apiMode: z.enum(AZURE_API_MODES).optional().meta({
+    providerSettingUi: {
+      labelKey: "apiMode",
+      type: "select",
+      defaultValue: DEFAULT_AZURE_API_MODE,
+      options: [
+        { value: "responses", labelKey: "responses" },
+        { value: "chat", labelKey: "chatCompletions" },
+      ],
+    },
+  }),
+  resourceName: z.string().trim().optional().meta({
+    providerSettingUi: {
+      labelKey: "resourceName",
+      type: "text",
+      placeholder: "my-azure-openai-resource",
+    },
+  }),
+  apiVersion: z.string().trim().optional().meta({
+    providerSettingUi: {
+      labelKey: "apiVersion",
+      type: "text",
+      placeholder: "v1",
+    },
+  }),
+})
+
 export const PROVIDER_SPECIFIC_SETTINGS_SCHEMAS: Partial<Record<LLMProviderTypes, ProviderSpecificSettingsSchema>> = {
+  azure: azureProviderSpecificSettingsSchema,
   bedrock: bedrockProviderSpecificSettingsSchema,
 }
 
@@ -44,15 +91,13 @@ export function getProviderSpecificSettingFields(
       throw new Error(`providerSpecificSettings.${key} is missing providerSettingUi metadata`)
     }
 
-    if (ui.type !== "text") {
-      throw new Error(`Unsupported providerSpecificSettings.${key} field type: ${String(ui.type)}`)
+    if (ui.type !== "text" && ui.type !== "select") {
+      throw new Error(`Unsupported providerSpecificSettings.${key} field type: ${(ui as { type: unknown }).type}`)
     }
 
     return {
       key,
-      labelKey: ui.labelKey,
-      type: ui.type,
-      placeholder: ui.placeholder,
+      ...ui,
     }
   })
 }

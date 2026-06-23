@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import type { ReactElement } from "react"
+import type { ReactElement, ReactNode } from "react"
 import type {
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
@@ -10,7 +10,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { createStore, Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
-import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
@@ -32,12 +32,37 @@ const getOrCreateWebPageContextMock = vi.fn().mockResolvedValue(null)
 const getOrGenerateWebPageSummaryMock = vi.fn()
 const toastErrorMock = vi.fn()
 const onMessageMock = vi.fn()
+const hotkeyRegisterMock = vi.fn()
+const hotkeyUnregisterMock = vi.fn()
 const originalGetSelection = window.getSelection
+
+vi.mock("@tanstack/hotkeys", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@tanstack/hotkeys")>()
+
+  return {
+    ...actual,
+    HotkeyManager: {
+      getInstance: () => ({
+        register: hotkeyRegisterMock,
+      }),
+    },
+  }
+})
+
+vi.mock("@/utils/auth/auth-client", () => ({
+  authClient: {
+    useSession: () => ({
+      data: null,
+      isPending: false,
+    }),
+  },
+}))
 
 vi.mock("@/components/ui/selection-popover", async () => {
   const React = await import("react")
 
   interface PopoverContextValue {
+    anchor?: { x: number, y: number } | null
     open: boolean
     onOpenChange?: (open: boolean) => void
   }
@@ -53,16 +78,18 @@ vi.mock("@/components/ui/selection-popover", async () => {
   }
 
   function Root({
+    anchor,
     children,
     open,
     onOpenChange,
   }: {
+    anchor?: { x: number, y: number } | null
     children: React.ReactNode
     open: boolean
     onOpenChange?: (open: boolean) => void
   }) {
     return (
-      <PopoverContext value={{ open, onOpenChange }}>
+      <PopoverContext value={{ anchor, open, onOpenChange }}>
         {children}
       </PopoverContext>
     )
@@ -97,11 +124,13 @@ vi.mock("@/components/ui/selection-popover", async () => {
     children: React.ReactNode
     finalFocus?: boolean
   }) {
-    const { open } = usePopoverContext()
+    const { anchor, open } = usePopoverContext()
     return open
       ? (
           <div
             data-testid="selection-popover-content"
+            data-anchor-x={anchor?.x}
+            data-anchor-y={anchor?.y}
             data-final-focus={finalFocus === false ? "false" : undefined}
             data-rf-selection-overlay-root=""
           >
@@ -164,6 +193,7 @@ vi.mock("../../components/selection-toolbar-title-content", () => ({
 
 vi.mock("../../components/selection-toolbar-footer-content", () => ({
   SelectionToolbarFooterContent: ({
+    children,
     paragraphsText,
     onProviderChange,
     onRegenerate,
@@ -171,6 +201,7 @@ vi.mock("../../components/selection-toolbar-footer-content", () => ({
     titleText,
     value,
   }: {
+    children?: ReactNode
     paragraphsText: string | null | undefined
     onProviderChange: (id: string) => void
     onRegenerate: () => void
@@ -184,6 +215,7 @@ vi.mock("../../components/selection-toolbar-footer-content", () => ({
       <div>
         <span data-testid="footer-title">{titleText}</span>
         <span data-testid="footer-paragraphs">{paragraphsText}</span>
+        {children}
         <button type="button" aria-label="Regenerate" onClick={onRegenerate}>
           Regenerate
         </button>
@@ -356,6 +388,84 @@ function getRegisteredMessageHandler<T>(name: string) {
   return registration[1] as (message: { data: T }) => void
 }
 
+async function getRegisteredShortcutCallback(shortcut = "Alt+T") {
+  await waitFor(() => {
+    expect(hotkeyRegisterMock.mock.calls.some(call => call[0] === shortcut)).toBe(true)
+  })
+
+  const registration = hotkeyRegisterMock.mock.calls.find(call => call[0] === shortcut)
+  if (!registration) {
+    throw new Error(`Shortcut not registered: ${shortcut}`)
+  }
+
+  return registration[1] as () => void
+}
+
+function createRect({
+  bottom,
+  height,
+  left,
+  right,
+  top,
+  width,
+}: {
+  bottom: number
+  height: number
+  left: number
+  right: number
+  top: number
+  width: number
+}) {
+  return {
+    bottom,
+    height,
+    left,
+    right,
+    top,
+    width,
+    x: left,
+    y: top,
+    toJSON: () => ({}),
+  } as DOMRect
+}
+
+function mockLiveRangeRects(rects: DOMRect[], boundingRect = createRect({
+  bottom: 0,
+  height: 0,
+  left: 0,
+  right: 0,
+  top: 0,
+  width: 0,
+})) {
+  const previousGetClientRects = Object.getOwnPropertyDescriptor(Range.prototype, "getClientRects")
+  const previousGetBoundingClientRect = Object.getOwnPropertyDescriptor(Range.prototype, "getBoundingClientRect")
+
+  Object.defineProperty(Range.prototype, "getClientRects", {
+    configurable: true,
+    value: vi.fn(() => rects),
+  })
+  Object.defineProperty(Range.prototype, "getBoundingClientRect", {
+    configurable: true,
+    value: vi.fn(() => boundingRect),
+  })
+
+  return () => {
+    if (previousGetClientRects) {
+      Object.defineProperty(Range.prototype, "getClientRects", previousGetClientRects)
+    }
+    else {
+      Reflect.deleteProperty(Range.prototype, "getClientRects")
+    }
+
+    if (previousGetBoundingClientRect) {
+      Object.defineProperty(Range.prototype, "getBoundingClientRect", previousGetBoundingClientRect)
+    }
+    else {
+      Reflect.deleteProperty(Range.prototype, "getBoundingClientRect")
+    }
+  }
+}
+
 function createStructuredObjectSnapshot(output: Record<string, unknown>): BackgroundStructuredObjectStreamSnapshot {
   return {
     output,
@@ -364,12 +474,6 @@ function createStructuredObjectSnapshot(output: Record<string, unknown>): Backgr
       text: "",
     },
   }
-}
-
-function findAlternateTranslateProviderId(config: Config, currentProviderId: string) {
-  return config.providersConfig.find(provider =>
-    provider.id !== currentProviderId && isTranslateProviderConfig(provider),
-  )?.id
 }
 
 function findAlternateLLMProviderId(config: Config, currentProviderId: string) {
@@ -423,6 +527,9 @@ async function openTooltip(trigger: HTMLElement) {
 
 describe("selection toolbar requests", () => {
   beforeEach(() => {
+    hotkeyRegisterMock.mockReturnValue({
+      unregister: hotkeyUnregisterMock,
+    })
     getOrCreateWebPageContextMock.mockResolvedValue(null)
     getOrGenerateWebPageSummaryMock.mockResolvedValue(undefined)
   })
@@ -474,14 +581,7 @@ describe("selection toolbar requests", () => {
     expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
 
     const updatedConfig = cloneConfig(store.get(configAtom))
-    const nextProviderId = findAlternateTranslateProviderId(
-      updatedConfig,
-      updatedConfig.selectionToolbar.features.translate.providerId,
-    )
-    if (!nextProviderId) {
-      throw new Error("No alternate translate provider available for test")
-    }
-    updatedConfig.selectionToolbar.features.translate.providerId = nextProviderId
+    updatedConfig.language.targetCode = "jpn"
 
     act(() => {
       store.set(configAtom, updatedConfig)
@@ -492,8 +592,8 @@ describe("selection toolbar requests", () => {
     })
 
     expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
-      providerConfig: expect.objectContaining({
-        id: nextProviderId,
+      langConfig: expect.objectContaining({
+        targetCode: "jpn",
       }),
     })
 
@@ -944,6 +1044,202 @@ describe("selection toolbar requests", () => {
     expect(translateTextCoreMock).not.toHaveBeenCalled()
   })
 
+  it("opens selection translation from the shortcut and tracks the shortcut surface", async () => {
+    translateTextCoreMock.mockResolvedValue("Shortcut result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    const shortcutCallback = await getRegisteredShortcutCallback()
+
+    await act(async () => {
+      shortcutCallback()
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    await waitFor(() => {
+      expect(screen.getByTestId("translation-result").textContent).toBe("Shortcut result")
+    })
+
+    const { sendMessage } = await import("@/utils/message")
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith(
+      "trackFeatureUsedEvent",
+      expect.objectContaining({
+        feature: "selection_translation",
+        surface: "shortcut",
+        outcome: "success",
+      }),
+    )
+  })
+
+  it("opens selection translation from the shortcut when the toolbar UI is disabled", async () => {
+    translateTextCoreMock.mockResolvedValue("Toolbar disabled shortcut result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.selectionToolbar.enabled = false
+
+    const store = createStore()
+    store.set(configAtom, config)
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<SelectionToolbar />, store)
+
+    expect(screen.queryByRole("button", { name: "action.translation" })).toBeNull()
+
+    const shortcutCallback = await getRegisteredShortcutCallback()
+
+    await act(async () => {
+      shortcutCallback()
+      await Promise.resolve()
+    })
+
+    await waitFor(() => {
+      expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
+    })
+
+    expect(screen.getByTestId("translation-result").textContent).toBe("Toolbar disabled shortcut result")
+  })
+
+  it("ignores the selection translation shortcut when no selection is available", async () => {
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    renderWithProviders(<TranslateButton />, store)
+
+    const shortcutCallback = await getRegisteredShortcutCallback()
+
+    act(() => {
+      shortcutCallback()
+    })
+
+    expect(translateTextCoreMock).not.toHaveBeenCalled()
+    expect(toastErrorMock).not.toHaveBeenCalled()
+  })
+
+  it("does not register an empty or invalid selection translation shortcut", () => {
+    const emptyShortcutConfig = cloneConfig(DEFAULT_CONFIG)
+    emptyShortcutConfig.selectionToolbar.features.translate.shortcut = ""
+    const emptyStore = createStore()
+    emptyStore.set(configAtom, emptyShortcutConfig)
+    const emptyView = renderWithProviders(<TranslateButton />, emptyStore)
+    expect(hotkeyRegisterMock).not.toHaveBeenCalled()
+    emptyView.unmount()
+
+    cleanup()
+    hotkeyRegisterMock.mockClear()
+
+    const invalidShortcutConfig = cloneConfig(DEFAULT_CONFIG)
+    invalidShortcutConfig.selectionToolbar.features.translate.shortcut = "T"
+    const invalidStore = createStore()
+    invalidStore.set(configAtom, invalidShortcutConfig)
+    renderWithProviders(<TranslateButton />, invalidStore)
+
+    expect(hotkeyRegisterMock).not.toHaveBeenCalled()
+  })
+
+  it("positions shortcut selection translation near the selected range", async () => {
+    translateTextCoreMock.mockResolvedValue("Range anchor result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    const restoreCreateRange = mockLiveRangeRects([
+      createRect({
+        bottom: 82,
+        height: 20,
+        left: 120,
+        right: 260,
+        top: 62,
+        width: 140,
+      }),
+    ])
+
+    try {
+      const shortcutCallback = await getRegisteredShortcutCallback()
+
+      await act(async () => {
+        shortcutCallback()
+        await Promise.resolve()
+      })
+    }
+    finally {
+      restoreCreateRange()
+    }
+
+    await waitFor(() => {
+      expect(screen.getByTestId("selection-popover-content")).toBeInTheDocument()
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", "260")
+    expect(content).toHaveAttribute("data-anchor-y", "82")
+  })
+
+  it("falls back to the viewport center when shortcut range anchoring fails", async () => {
+    translateTextCoreMock.mockResolvedValue("Viewport center result")
+    getOrCreateWebPageContextMock.mockResolvedValue(null)
+
+    const paragraph = document.createElement("p")
+    paragraph.textContent = "Selected text inside a paragraph."
+    document.body.appendChild(paragraph)
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text", range: createRangeFor(paragraph) })
+    renderWithProviders(<TranslateButton />, store)
+
+    act(() => {
+      document.dispatchEvent(new MouseEvent("mousemove", {
+        bubbles: true,
+        clientX: 321,
+        clientY: 123,
+      }))
+    })
+
+    const restoreCreateRange = mockLiveRangeRects([])
+
+    try {
+      const shortcutCallback = await getRegisteredShortcutCallback()
+
+      await act(async () => {
+        shortcutCallback()
+        await Promise.resolve()
+      })
+    }
+    finally {
+      restoreCreateRange()
+    }
+
+    await waitFor(() => {
+      expect(screen.getByTestId("selection-popover-content")).toBeInTheDocument()
+    })
+
+    const content = screen.getByTestId("selection-popover-content")
+    expect(content).toHaveAttribute("data-anchor-x", String(window.innerWidth / 2))
+    expect(content).toHaveAttribute("data-anchor-y", String(window.innerHeight / 2))
+  })
+
   it("opens a custom action from the context menu with the captured selection session", async () => {
     streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "Context menu result" }))
 
@@ -1006,6 +1302,39 @@ describe("selection toolbar requests", () => {
         action_name: action.name,
       }),
     )
+  })
+
+  it("renders a custom action footer tool button that opens the action options", async () => {
+    streamBackgroundStructuredObjectMock.mockResolvedValue(createStructuredObjectSnapshot({ summary: "done" }))
+
+    const store = createStore()
+    store.set(configAtom, cloneConfig(DEFAULT_CONFIG))
+    setSelectionState(store, { text: "Selected text" })
+    renderWithProviders(<SelectionToolbarCustomActionButtons />, store)
+
+    const action = DEFAULT_CONFIG.selectionToolbar.customActions[0]
+    if (!action) {
+      throw new Error("Default custom action is missing")
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: action.name }))
+
+    await waitFor(() => {
+      expect(streamBackgroundStructuredObjectMock).toHaveBeenCalledTimes(1)
+    })
+
+    const customizeButton = screen.getByRole("button", { name: "action.customizeCustomAction" })
+
+    expect(customizeButton).toHaveClass("size-7")
+
+    const { sendMessage } = await import("@/utils/message")
+    vi.mocked(sendMessage).mockClear()
+
+    fireEvent.click(customizeButton)
+
+    expect(vi.mocked(sendMessage)).toHaveBeenCalledWith("openOptionsPage", {
+      route: `/custom-actions?actionId=${encodeURIComponent(action.id)}`,
+    })
   })
 
   it("renders the custom action tooltip as non-interactive and closes it on hover leave", async () => {

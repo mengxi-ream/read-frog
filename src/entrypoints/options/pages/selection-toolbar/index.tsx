@@ -6,6 +6,7 @@ import { SelectionToolbarDisabledSites } from "./selection-toolbar-disabled-site
 import { SelectionToolbarFeatureToggles } from "./selection-toolbar-feature-toggles"
 import { SelectionToolbarGlobalToggle } from "./selection-toolbar-global-toggle"
 import { SelectionToolbarOpacity } from "./selection-toolbar-opacity"
+import { SelectionTranslationShortcut } from "./selection-translation-shortcut"
 
 export function SelectionToolbarPage() {
   return (
@@ -21,6 +22,7 @@ export function SelectionToolbarPage() {
         <SelectionToolbarGlobalToggle />
         <SelectionToolbarOpacity />
         <SelectionToolbarFeatureToggles />
+        <SelectionTranslationShortcut />
         <SelectionToolbarDisabledSites />
       </div>
     </PageLayout>

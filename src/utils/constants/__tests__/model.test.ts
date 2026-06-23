@@ -12,6 +12,9 @@ describe("getProviderOptions", () => {
       const options = getProviderOptions("gemini-2.5-pro", "google")
       expect(options.google).toBeDefined()
       expect(options.google?.thinkingConfig).toMatchObject({ thinkingBudget: 0, includeThoughts: false })
+
+      const mixedCaseOptions = getProviderOptions("Gemini-2.5-Pro", "google")
+      expect(mixedCaseOptions.google?.thinkingConfig).toMatchObject({ thinkingBudget: 0, includeThoughts: false })
     })
 
     it("should handle thinking models correctly", () => {
@@ -30,7 +33,7 @@ describe("getProviderOptions", () => {
       const thinkingLevel31ProOptions = getProviderOptions("gemini-3.1-pro-preview", "google")
       expect(thinkingLevel31ProOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
 
-      const thinkingLevel31FlashLiteOptions = getProviderOptions("gemini-3.1-flash-lite", "google")
+      const thinkingLevel31FlashLiteOptions = getProviderOptions("gemini-3.1-flash-lite-preview", "google")
       expect(thinkingLevel31FlashLiteOptions.google?.thinkingConfig).toMatchObject({ thinkingLevel: "minimal", includeThoughts: false })
 
       const thinkingLevel35FlashOptions = getProviderOptions("gemini-3.5-flash", "google")
@@ -41,6 +44,9 @@ describe("getProviderOptions", () => {
       const options = getProviderOptions("claude-3-5-sonnet", "anthropic")
       expect(options.anthropic).toBeDefined()
       expect(options.anthropic?.thinking).toEqual({ type: "disabled" })
+
+      const mixedCaseOptions = getProviderOptions("Claude-3-5-Sonnet", "anthropic")
+      expect(mixedCaseOptions.anthropic?.thinking).toEqual({ type: "disabled" })
     })
 
     it("should return options for OpenAI o1/o3/o4 reasoning models", () => {
@@ -52,10 +58,14 @@ describe("getProviderOptions", () => {
 
       const o4MiniOptions = getProviderOptions("o4-mini", "openai")
       expect(o4MiniOptions.openai?.reasoningEffort).toBe("minimal")
+
+      const mixedCaseO4MiniOptions = getProviderOptions("O4-Mini", "openai")
+      expect(mixedCaseO4MiniOptions.openai?.reasoningEffort).toBe("minimal")
     })
 
-    it("should expose the supported OpenAI GPT-5.4 model ids", () => {
+    it("should expose the supported OpenAI GPT-5.5 and GPT-5.4 model ids", () => {
       expect(LLM_PROVIDER_MODELS.openai).toEqual(expect.arrayContaining([
+        "gpt-5.5",
         "gpt-5.4-pro",
         "gpt-5.4",
         "gpt-5.4-mini",
@@ -64,9 +74,40 @@ describe("getProviderOptions", () => {
       ]))
     })
 
+    it("should expose Azure shortcut deployment names for GPT, DeepSeek, and Grok", () => {
+      expect(LLM_PROVIDER_MODELS.azure).toEqual(expect.arrayContaining([
+        "gpt-5.4-mini",
+        "gpt-5.4",
+        "DeepSeek-V4-Flash",
+        "DeepSeek-V4-Pro",
+        "grok-4.3",
+        "grok-4-20-non-reasoning",
+        "grok-4-20-reasoning",
+      ]))
+    })
+
+    it("should expose the current xAI Grok chat model ids", () => {
+      expect(LLM_PROVIDER_MODELS.xai).toEqual([
+        "grok-4.20-0309-non-reasoning",
+        "grok-4.20-0309-reasoning",
+        "grok-4.3",
+      ])
+    })
+
+    it("should expose the supported Anthropic Fable model ids", () => {
+      expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-fable-5")
+      expect(LLM_PROVIDER_MODELS.bedrock).toContain("us.anthropic.claude-fable-5")
+    })
+
     it("should return the documented floor for GPT-5 model-specific reasoning", () => {
+      const gpt55Options = getProviderOptions("gpt-5.5", "openai")
+      expect(gpt55Options.openai?.reasoningEffort).toBe("none")
+
       const gpt54ProOptions = getProviderOptions("gpt-5.4-pro", "openai")
       expect(gpt54ProOptions.openai?.reasoningEffort).toBe("medium")
+
+      const mixedCaseGpt54ProOptions = getProviderOptions("GPT-5.4-Pro", "openai")
+      expect(mixedCaseGpt54ProOptions.openai?.reasoningEffort).toBe("medium")
 
       const gpt52ProOptions = getProviderOptions("gpt-5.2-pro", "openai")
       expect(gpt52ProOptions.openai?.reasoningEffort).toBe("medium")
@@ -118,11 +159,18 @@ describe("getProviderOptions", () => {
     })
 
     it("should return low/disabled defaults for more mainstream reasoning providers", () => {
-      const grokOptions = getProviderOptions("grok-4-fast-reasoning", "xai")
+      const grokOptions = getProviderOptions("grok-4.3", "xai")
       expect(grokOptions.xai?.reasoningEffort).toBe("low")
 
-      const grok41FastOptions = getProviderOptions("grok-4-1-fast-reasoning", "xai")
-      expect(grok41FastOptions).toEqual({})
+      const mixedCaseGrokOptions = getProviderOptions("Grok-4.3", "xai")
+      expect(mixedCaseGrokOptions.xai?.reasoningEffort).toBe("low")
+
+      const datedGrokReasoningOptions = getProviderOptions("grok-4.20-0309-reasoning", "xai")
+      expect(datedGrokReasoningOptions.xai?.reasoningEffort).toBe("low")
+
+      expect(getProviderOptions("grok-4.20-0309-non-reasoning", "xai")).toEqual({})
+      expect(getProviderOptions("grok-4.20-reasoning", "xai")).toEqual({})
+      expect(getProviderOptions("grok-4-fast-reasoning", "xai")).toEqual({})
 
       const deepseekReasonerOptions = getProviderOptions("deepseek-reasoner", "deepseek")
       expect(deepseekReasonerOptions.deepseek?.thinking).toEqual({ type: "disabled" })
@@ -130,11 +178,20 @@ describe("getProviderOptions", () => {
       const deepseekV4FlashOptions = getProviderOptions("deepseek-v4-flash", "deepseek")
       expect(deepseekV4FlashOptions.deepseek?.thinking).toEqual({ type: "disabled" })
 
+      const mixedCaseDeepseekV4FlashOptions = getProviderOptions("DeepSeek-V4-Flash", "deepseek")
+      expect(mixedCaseDeepseekV4FlashOptions.deepseek?.thinking).toEqual({ type: "disabled" })
+
       const deepseekV4ProOptions = getProviderOptions("deepseek-v4-pro", "deepseek")
       expect(deepseekV4ProOptions.deepseek?.thinking).toEqual({ type: "disabled" })
 
+      const prefixedDeepseekV4Options = getProviderOptions("deepseek-ai/deepseek-v4-flash", "atlascloud")
+      expect(prefixedDeepseekV4Options.atlascloud?.thinking).toEqual({ type: "disabled" })
+
       const cohereReasoningOptions = getProviderOptions("command-a-reasoning-08-2025", "cohere")
       expect(cohereReasoningOptions.cohere?.thinking).toEqual({ type: "disabled" })
+
+      const mixedCaseCohereReasoningOptions = getProviderOptions("Command-A-Reasoning-08-2025", "cohere")
+      expect(mixedCaseCohereReasoningOptions.cohere?.thinking).toEqual({ type: "disabled" })
 
       const moonshotOptions = getProviderOptions("kimi-k2.5", "moonshotai")
       expect(moonshotOptions.moonshotai?.thinking).toEqual({ type: "disabled" })
@@ -193,6 +250,11 @@ describe("getProviderOptions", () => {
     })
 
     it("should return low/default-compatible reasoning settings for gpt-oss models", () => {
+      expect(LLM_PROVIDER_MODELS.bedrock).toEqual(expect.arrayContaining([
+        "openai.gpt-oss-20b",
+        "openai.gpt-oss-120b",
+      ]))
+
       const groqOptions = getProviderOptions("openai/gpt-oss-120b", "groq")
       expect(groqOptions.groq?.reasoningEffort).toBe("none")
 
@@ -218,6 +280,9 @@ describe("getProviderOptions", () => {
 
       const prefixedOptions = getProviderOptions("volcengine/doubao-seed-1-8", "openai-compatible")
       expect(prefixedOptions["openai-compatible"]?.thinking).toEqual({ type: "disabled" })
+
+      const atlasTwoLiteOptions = getProviderOptions("bytedance/doubao-seed-2.0-lite-260428", "atlascloud")
+      expect(atlasTwoLiteOptions.atlascloud?.thinking).toEqual({ type: "disabled" })
     })
 
     it("should not apply Doubao Seed thinking defaults to unrelated Doubao models", () => {
@@ -236,6 +301,9 @@ describe("getProviderOptions", () => {
     it("should keep provider-prefixed Kimi instruct model ids untouched", () => {
       const huggingfaceOptions = getProviderOptions("moonshotai/Kimi-K2-Instruct", "huggingface")
       expect(huggingfaceOptions).toEqual({})
+
+      const atlasOptions = getProviderOptions("moonshotai/Kimi-K2-Instruct", "atlascloud")
+      expect(atlasOptions).toEqual({})
     })
 
     it("should return empty object for non-matching models", () => {
@@ -254,6 +322,9 @@ describe("getProviderOptions", () => {
 
       const mixed = getProviderOptions("GlM-3-Turbo", "tensdaq")
       expect(mixed.tensdaq?.thinking).toEqual({ type: "disabled" })
+
+      const prefixed = getProviderOptions("zai-org/glm-4.7", "atlascloud")
+      expect(prefixed.atlascloud?.thinking).toEqual({ type: "disabled" })
     })
 
     it("should only match models starting with GLM-", () => {
@@ -336,6 +407,14 @@ describe("getProviderOptions", () => {
 
       expect(getRecommendedProviderOptionsMatch("qwen3.5-flash")?.options).toEqual({
         enableThinking: false,
+      })
+
+      expect(getRecommendedProviderOptionsMatch("DeepSeek-V4-Flash")?.options).toEqual({
+        thinking: { type: "disabled" },
+      })
+
+      expect(getRecommendedProviderOptionsMatch("GPT-5.4-Pro")?.options).toEqual({
+        reasoningEffort: "medium",
       })
     })
   })

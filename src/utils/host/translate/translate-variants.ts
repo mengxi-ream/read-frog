@@ -32,7 +32,7 @@ async function getWebPagePromptContext(
   providerConfig: ReturnType<typeof resolveProviderConfig>,
   enableAIContentAware: boolean,
   includeSummary: boolean,
-): Promise<{ webTitle: string, webContent: string, webSummary?: string } | undefined> {
+): Promise<{ webTitle: string, webDescription?: string, webContent: string, webSummary?: string } | undefined> {
   if (!isLLMProviderConfig(providerConfig)) {
     return undefined
   }
@@ -48,6 +48,7 @@ async function getWebPagePromptContext(
 
   return {
     webTitle: webPageContext.webTitle,
+    webDescription: webPageContext.webDescription,
     webContent: webPageContext.webContent,
     webSummary: webSummary ?? undefined,
   }
@@ -58,7 +59,7 @@ async function translateTextUsingPageConfig(
   text: string,
   options: {
     extraHashTags?: string[]
-    webPageContext?: { webTitle?: string | null, webContent?: string | null, webSummary?: string | null }
+    webPageContext?: { webTitle?: string | null, webDescription?: string | null, webContent?: string | null, webSummary?: string | null }
   } = {},
 ): Promise<string> {
   const preparedText = prepareTranslationText(text)
@@ -129,6 +130,7 @@ export async function translateTextForPageTitle(text: string): Promise<string> {
     extraHashTags: ["pageTitleTranslation"],
     webPageContext: {
       webTitle: text,
+      webDescription: webPageContext?.webDescription,
       webContent: webPageContext?.webContent,
       webSummary: webPageContext?.webSummary,
     },

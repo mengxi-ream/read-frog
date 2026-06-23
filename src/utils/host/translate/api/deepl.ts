@@ -1,16 +1,7 @@
 import type { LangCodeISO6391 } from "@read-frog/definitions"
 import type { ProviderConfig } from "@/types/config/provider"
-import { sendMessage } from "@/utils/message"
 
 type DeepLProviderConfig = Extract<ProviderConfig, { provider: "deepl" }>
-
-interface DeepLFetchResponse {
-  ok: boolean
-  status: number
-  statusText: string
-  text: () => Promise<string>
-  json: () => Promise<unknown>
-}
 
 interface DeepLLanguagePair {
   source?: string
@@ -22,14 +13,12 @@ export async function deeplTranslate(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
-  options?: { forceBackgroundFetch?: boolean },
 ): Promise<string> {
   const [translatedText] = await requestDeepLTranslations(
     [sourceText],
     fromLang,
     toLang,
     providerConfig,
-    options,
   )
 
   if (translatedText === undefined) {
@@ -44,7 +33,6 @@ async function requestDeepLTranslations(
   fromLang: LangCodeISO6391 | "auto",
   toLang: LangCodeISO6391,
   providerConfig: DeepLProviderConfig,
-  options?: { forceBackgroundFetch?: boolean },
 ): Promise<string[]> {
   const apiKey = providerConfig.apiKey?.trim()
   if (!apiKey) {
@@ -61,36 +49,9 @@ async function requestDeepLTranslations(
     target_lang: normalizedLanguages.target,
   })
 
-  const fetchResponse = shouldUseBackgroundFetch(options)
-    ? await fetchViaBackground(url, apiKey, requestBody)
-    : await fetchDirect(url, apiKey, requestBody)
+  const fetchResponse = await fetchDirect(url, apiKey, requestBody)
 
   return await parseDeepLResponse(fetchResponse, sourceTexts.length)
-}
-
-function shouldUseBackgroundFetch(options?: { forceBackgroundFetch?: boolean }): boolean {
-  return options?.forceBackgroundFetch ?? typeof window !== "undefined"
-}
-
-async function fetchViaBackground(url: string, apiKey: string, body: string): Promise<DeepLFetchResponse> {
-  const resp = await sendMessage("backgroundFetch", {
-    url,
-    method: "POST",
-    headers: [
-      ["Authorization", `DeepL-Auth-Key ${apiKey}`],
-      ["Content-Type", "application/json"],
-    ],
-    body,
-    credentials: "omit",
-  })
-
-  return {
-    ok: resp.status >= 200 && resp.status < 300,
-    status: resp.status,
-    statusText: resp.statusText,
-    text: () => Promise.resolve(resp.body),
-    json: () => Promise.resolve(JSON.parse(resp.body)),
-  }
 }
 
 async function fetchDirect(url: string, apiKey: string, body: string): Promise<Response> {
@@ -108,7 +69,7 @@ async function fetchDirect(url: string, apiKey: string, body: string): Promise<R
   return resp
 }
 
-async function parseDeepLResponse(resp: DeepLFetchResponse, expectedCount: number): Promise<string[]> {
+async function parseDeepLResponse(resp: Response, expectedCount: number): Promise<string[]> {
   if (!resp.ok) {
     const errorText = await resp.text().catch(() => "Unable to read error response")
     throw new Error(

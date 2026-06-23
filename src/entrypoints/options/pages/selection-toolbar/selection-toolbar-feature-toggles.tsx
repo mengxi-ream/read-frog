@@ -7,7 +7,6 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { ConfigCard } from "../../components/config-card"
 
 export function SelectionToolbarFeatureToggles() {
-  const isFirefox = import.meta.env.BROWSER === "firefox"
   const [selectionToolbar, setSelectionToolbar] = useAtom(
     configFieldsAtomMap.selectionToolbar,
   )
@@ -44,18 +43,16 @@ export function SelectionToolbarFeatureToggles() {
             onCheckedChange={checked => setFeatureEnabled("translate", checked)}
           />
         </div>
-        {!isFirefox && (
-          <div className="flex items-center justify-between">
-            <span className="flex items-center gap-2 text-sm">
-              <IconVolume className="size-4 text-muted-foreground" />
-              {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.featureToggles.speak")}
-            </span>
-            <Switch
-              checked={features.speak.enabled}
-              onCheckedChange={checked => setFeatureEnabled("speak", checked)}
-            />
-          </div>
-        )}
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-sm">
+            <IconVolume className="size-4 text-muted-foreground" />
+            {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.featureToggles.speak")}
+          </span>
+          <Switch
+            checked={features.speak.enabled}
+            onCheckedChange={checked => setFeatureEnabled("speak", checked)}
+          />
+        </div>
       </div>
     </ConfigCard>
   )

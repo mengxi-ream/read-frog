@@ -28,11 +28,21 @@ function detectOS(): OS {
   return "Unknown"
 }
 
-export function formatHotkey(hotkey: string): string {
+function getHotkeyPlatform() {
   const os = detectOS()
-  const platform = os === "MacOS" ? "mac" : os === "Windows" ? "windows" : "linux"
+  return os === "MacOS" ? "mac" : os === "Windows" ? "windows" : "linux"
+}
 
-  return formatPageTranslationShortcut(hotkey, platform)
+export function formatHotkey(hotkey: string): string {
+  return formatPageTranslationShortcut(hotkey, getHotkeyPlatform())
+}
+
+export function formatHotkeyParts(hotkey: string): string[] {
+  const platform = getHotkeyPlatform()
+  const formattedHotkey = formatPageTranslationShortcut(hotkey, platform)
+  const separator = platform === "mac" ? /\s+/ : /\+/
+
+  return formattedHotkey.split(separator).map(part => part.trim()).filter(Boolean)
 }
 
 export function getCommandPaletteShortcutHint(): string {

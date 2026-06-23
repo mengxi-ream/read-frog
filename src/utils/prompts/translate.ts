@@ -10,6 +10,7 @@ import {
   INPUT,
   TARGET_LANGUAGE,
   WEB_CONTENT,
+  WEB_DESCRIPTION,
   WEB_SUMMARY,
   WEB_TITLE,
 } from "../constants/prompt"
@@ -62,6 +63,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
 
   // Build title and summary replacement values
   const title = resolvePromptReplacementValue(options?.context?.webTitle, "No title available")
+  const description = resolvePromptReplacementValue(options?.context?.webDescription, "No description available")
   const contentText = resolvePromptReplacementValue(options?.context?.webContent, "No content available")
   const summary = resolvePromptReplacementValue(options?.context?.webSummary, "No summary available")
 
@@ -71,6 +73,7 @@ ${DEFAULT_BATCH_TRANSLATE_PROMPT}`
       .replaceAll(getTokenCellText(TARGET_LANGUAGE), targetLang)
       .replaceAll(getTokenCellText(INPUT), input)
       .replaceAll(getTokenCellText(WEB_TITLE), title)
+      .replaceAll(getTokenCellText(WEB_DESCRIPTION), description)
       .replaceAll(getTokenCellText(WEB_CONTENT), contentText)
       .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
 

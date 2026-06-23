@@ -28,6 +28,14 @@ popup:
   options: Options
   hover: Hover
   translateParagraph: to translate paragraph
+  translationModeToggle:
+    tooltip:
+      bilingual:
+        current: Currently bilingual
+        action: Click to switch to translation only
+      translationOnly:
+        current: Currently translation only
+        action: Click to switch to bilingual
   hub:
     tooltip: Translate text with multiple models simultaneously
   discord:
@@ -83,8 +91,10 @@ options:
     title: API Providers
     description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
     addProvider: Add Provider
+    sponsorCta: Get fast, cost-effective AI
     badges:
       featureCount: $1 features
+      sponsor: Sponsor
     dialog:
       title: Add New Provider
       groups:
@@ -133,6 +143,12 @@ options:
       advancedOptions: Advanced Options
       providerSettingLabels:
         region: Region
+        apiMode: API mode
+        resourceName: Azure resource name (Optional)
+        apiVersion: API version
+      providerSettingOptionLabels:
+        responses: Responses API
+        chatCompletions: Chat Completions
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
       headers: Headers
@@ -149,12 +165,14 @@ options:
     providers:
       description:
         openai: Provides models like GPT-4o
+        azure: Azure-hosted OpenAI models through your deployments
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
         ollama: Run large language models locally on your machine for complete privacy
         google: Google's flagship AI models with advanced reasoning capabilities
         anthropic: Claude models known for safety and reasoning excellence
         xai: Elon Musk's AI company offering Grok models with real-time data access
+        atlascloud: Unified OpenAI-compatible access to newer DeepSeek, Kimi, Qwen, Doubao, GLM, and other models
         siliconflow: High-performance inference platform for Chinese and international models
         tensdaq: Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing
         openaiCompatible: Third-party and OpenAI API compatible
@@ -305,6 +323,9 @@ options:
         description: Choose which built-in features to show in the selection toolbar
         translate: Translate
         speak: Speak
+      shortcut:
+        title: Selection Translation Shortcut
+        description: Customize the shortcut key for translating selected text
       closeMenu:
         disableForSite: Disable for this site
         disableGlobally: Disable globally
@@ -389,18 +410,25 @@ options:
             description: Save this action's structured results to a remote notebase.
             loginRequiredTitle: Log in to configure Notebase
             loginRequiredDescription: Sign in on readfrog.app before choosing a notebase or editing mappings.
+            loginRequiredConnectedDescription: This connection was created by the account below. If you log in as the same account, field mappings will be restored. If you log in as another account, the previous mappings will be cleared when you create or connect a Notebase.
             loginAction: Log in
+            connectedAccountLabel: Connected account
+            currentAccountLabel: Current account
+            unknownConnectedAccount: Unknown account
             tableLabel: Notebase
             tablePlaceholder: Select a notebase
             tableClearOption: Disconnect notebase
+            clearConnectionAction: Clear connection
             refreshAction: Refresh
             emptyTitle: No notebases yet
             emptyDescription: Create a notebase on readfrog.app, then come back here to map fields.
             openNotebaseAction: Open Notebase
             betaLockedTitle: This account is not in the Notebase beta
             betaLockedDescription: You can keep this action configured, but choosing notebases and syncing results is limited to selected beta accounts for now.
+            accountMismatchTitle: Notebase connection belongs to another account
+            accountMismatchDescription: This connection is tied to the connected account below. Clear it, or choose a Notebase available to the current account.
             tableUnavailableTitle: Selected notebase is no longer available
-            tableUnavailableDescription: Refresh or choose another notebase before saving again.
+            tableUnavailableDescription: This Notebase no longer exists or cannot be opened. Clear the connection or choose another Notebase.
             tableUnavailableOption: unavailable
             schemaErrorTitle: Failed to load notebase schema
             schemaErrorDescription: Try refreshing the schema again in a moment.
@@ -415,7 +443,7 @@ options:
             remoteFieldPlaceholder: Select a notebase field
             columnUnavailableOption: removed
             invalidMappingsTitle: Some mappings need attention
-            invalidMappingsDescription: Invalid mappings are preserved, but Save to Notebase stays disabled until you fix them.
+            invalidMappingsDescription: Invalid mappings are preserved. Fix them before saving to Notebase.
             mappingMissingLocal: The mapped action field no longer exists.
             mappingMissingRemote: The mapped notebase field no longer exists.
             mappingMissingSchema: Refresh the notebase schema to validate this mapping.
@@ -586,6 +614,11 @@ options:
       description: Always translate this website
       urlPattern: URL Pattern
       enterUrlPattern: Enter URL Pattern
+    neverAutoTranslateWebsite:
+      title: Never Auto Translate Based on Website
+      description: Never automatically translate this website
+      urlPattern: URL Pattern
+      enterUrlPattern: Enter URL Pattern
     personalizedPrompts:
       title: Personalized Prompts
       description: Customizing different types of Prompts allows you to adjust the Prompt type yourself during translation. A Prompt represents the text that the user sends to the LLM.
@@ -606,6 +639,7 @@ options:
           input: Text content to translate
           targetLanguage: Target language
           webTitle: Webpage title
+          webDescription: Webpage description from page metadata
           webContent: Webpage content (truncated to the first 2000 characters)
           webSummary: Webpage summary (requires AI Smart Context)
         save: Save Changes
@@ -728,11 +762,11 @@ options:
       label: Voice
       fallback: Fallback
       selectPlaceholder: Select a voice
-      preview: Preview
+      noVoicesFound: No voices found
       previewSample: Hello from Read Frog! This is how I will sound when reading aloud.
     languageVoice:
       label: Language Voice
-      reset: Reset to Default
+      reset: Reset
       description: Select a language and assign a voice used when TTS detects that language.
     rate:
       label: Rate (%)
@@ -933,7 +967,8 @@ options:
         promptCellInput:
           input: Subtitle text to translate
           targetLanguage: Target language
-          videoTitle: Video title
+          webTitle: Webpage title
+          webDescription: Webpage description from page metadata
           videoSummary: Video summary (requires AI Smart Context)
   whatsNew:
     title: What's New
@@ -986,6 +1021,7 @@ action:
   copied: Copied
   regenerate: Regenerate
   viewContextDetails: Context
+  customizeCustomAction: Customize $1 action
   saveToNotebase: Save to Notebase
   saveToNotebaseSaving: Saving...
   saveToNotebaseSuccess: Saved to Notebase
@@ -995,6 +1031,24 @@ action:
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
   saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
   saveToNotebaseNoMappings: Add at least one valid mapping before saving
+  saveToNotebaseCreateTitle: Create a Notebase?
+  saveToNotebaseCreateDescription: Create a new Notebase with columns matching this Custom Action, then save this result as the first note.
+  saveToNotebaseCreateAndSave: Create and save
+  saveToNotebaseCreateAndSaveShort: Create and save
+  saveToNotebaseLoginAndCreate: Log in and auto-create
+  saveToNotebaseLoginAndSave: Log in and save
+  saveToNotebaseConnectExisting: Connect existing Notebase
+  saveToNotebaseGoConfigure: Configure
+  saveToNotebaseLoginConnectedTitle: Log in to save?
+  saveToNotebaseLoginConnectedDescription: This Custom Action is connected to the account below. After login, Read Frog will save to the existing Notebase when possible, or create a new Notebase for the logged-in account.
+  saveToNotebaseConnectionUnavailableTitle: Notebase connection unavailable
+  saveToNotebaseMissingNotebaseDescription: The old Notebase no longer exists or cannot be opened by this account. Create a new Notebase and save this result, or connect an existing Notebase in Custom AI Actions.
+  saveToNotebaseAccountUnavailableDescription: The logged-in account does not match the connected account below. Creating and saving will replace the previous connection and field mappings. You can also connect an existing Notebase in Custom AI Actions.
+  saveToNotebasePendingLogin: Log in to finish saving
+  saveToNotebasePendingLoginDescription: After login, Read Frog will create the Notebase and save this result automatically.
+  saveToNotebasePendingConnectedLoginDescription: After login, Read Frog will save to the connected Notebase when possible. If this account cannot use it, Read Frog will create a new Notebase and save this result.
+  openCustomActions: Open Custom AI Actions
+  openNotebase: Open Notebase
   contextDetailsTitleLabel: Title
   contextDetailsParagraphsLabel: Paragraphs
   translation: Translation
@@ -1009,6 +1063,10 @@ shortcutKeySelector:
   placeholder: Please enter the shortcut
 subtitles:
   actions:
+    downloadTranslated: Download translated subtitles
+    downloadTranslatedPreparing: Preparing subtitles, longer videos may take a while
+    downloadTranslatedTranslating: Translating subtitles
+    downloadTranslatedComplete: Translated subtitles downloaded
     downloadSource: Download source subtitles
   state:
     loading: Read Frog loading captions
@@ -1030,6 +1088,9 @@ subtitles:
     aiAuthFailed: API authentication failed, please check your API key
     aiServiceUnavailable: Translation service temporarily unavailable
     aiNoResponse: AI service did not respond, using original text
+    translatedExportFailed: Failed to generate translated subtitles
+    translatedExportIncomplete: Failed to translate all subtitle lines
+    translatedExportSameLanguage: Source and target languages are the same
 hotkey:
   control: Ctrl
   alt: Option

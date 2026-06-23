@@ -3,6 +3,7 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { useStore } from "@tanstack/react-form"
 import { i18n } from "#imports"
 import { isNonCustomLLMProvider } from "@/types/config/provider"
+import { PROVIDER_BASE_URL_PLACEHOLDERS } from "@/utils/constants/providers"
 import { ConnectionTestButton } from "./components/connection-button"
 import { withForm } from "./form"
 
@@ -27,6 +28,7 @@ export const BaseURLField = withForm({
           <field.InputFieldAutoSave
             formForSubmit={form}
             label={labelText}
+            placeholder={PROVIDER_BASE_URL_PLACEHOLDERS[providerType]}
             labelExtra={providerType === "ollama" && (
               <ConnectionTestButton
                 providerConfig={providerConfig}

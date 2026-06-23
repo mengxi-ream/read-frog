@@ -54,8 +54,14 @@ describe("customActionConfigForm beta gating", () => {
         prompt: "Summarize the selected text.",
         outputSchema: [],
         notebaseConnection: {
-          tableId: "table-1",
-          tableNameSnapshot: "Articles",
+          notebaseId: "table-1",
+          notebaseNameSnapshot: "Articles",
+          connectedAccount: {
+            id: "user-1",
+            name: "Reader",
+            email: "reader@example.com",
+            image: null,
+          },
           mappings: [],
         },
       },

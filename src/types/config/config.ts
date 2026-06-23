@@ -12,7 +12,7 @@ import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
 import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
 import { videoSubtitlesSchema } from "./subtitles"
-import { translateConfigSchema } from "./translate"
+import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
 // Language schema
 const languageSchema = z.object({
@@ -24,6 +24,7 @@ const languageSchema = z.object({
 const selectionToolbarFeatureSchema = z.object({
   enabled: z.boolean(),
   providerId: z.string().nonempty(),
+  shortcut: pageTranslationShortcutSchema,
 })
 
 const selectionToolbarSpeakFeatureSchema = z.object({

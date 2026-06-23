@@ -236,6 +236,59 @@ describe("youTube Subtitle Parsers", () => {
       expect(result[0].text).toBe("Do you think even the worst person")
       expect(result[1].text).toBe("Can change...?")
     })
+
+    it("should keep off-track dialogue that ends before the main track starts", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 1000, wpWinPosId: 2, segs: [{ utf8: "​嘿呀" }] },
+        { tStartMs: 2000, dDurationMs: 1000, wpWinPosId: 2, segs: [{ utf8: "​你一直很忙,對吧?" }] },
+        { tStartMs: 10000, dDurationMs: 200, wpWinPosId: 3, segs: [{ utf8: "​Can /​change...?" }] },
+        { tStartMs: 10200, dDurationMs: 200, wpWinPosId: 3, segs: [{ utf8: "​Can change...?/" }] },
+      ]
+
+      const result = parseStylizedKaraokeSubtitles(events)
+
+      expect(result).toHaveLength(3)
+      expect(result[0].text).toBe("嘿呀")
+      expect(result[1].text).toBe("你一直很忙,對吧?")
+      expect(result[2].text).toBe("Can change...?")
+      expect(result[0].start).toBeLessThan(result[1].start)
+    })
+
+    it("should still drop off-track events that overlap the main track", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 1000, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "​Do you think even the wor/​st person" }] },
+        { tStartMs: 1200, dDurationMs: 200, wpWinPosId: 2, segs: [{ utf8: "​Do you think even the worst person/" }] },
+        { tStartMs: 1100, dDurationMs: 200, wpWinPosId: 3, segs: [{ utf8: "Sparse overlay" }] },
+      ]
+
+      const result = parseStylizedKaraokeSubtitles(events)
+
+      expect(result).toHaveLength(1)
+      expect(result[0].text).toBe("Do you think even the worst person")
+    })
+
+    it("should recover intro dialogue while still collapsing repeated song frames", () => {
+      const events: YoutubeTimedText[] = [
+        { tStartMs: 217, dDurationMs: 1835, wpWinPosId: 2, pPenId: 2, segs: [{ utf8: "​嘿呀" }] },
+        { tStartMs: 2052, dDurationMs: 1936, wpWinPosId: 2, pPenId: 2, segs: [{ utf8: "​你一直很忙,對吧?" }] },
+        { tStartMs: 58008, dDurationMs: 2069, wpWinPosId: 3, segs: [{ utf8: "​你知道嗎，我總是在想" }] },
+        { tStartMs: 58008, dDurationMs: 2069, wpWinPosId: 3, segs: [{ utf8: "​你知道嗎，我總是在想" }] },
+        { tStartMs: 58008, dDurationMs: 2069, wpWinPosId: 3, segs: [{ utf8: "​你知道嗎，我總是在想" }] },
+        { tStartMs: 60077, dDurationMs: 1935, wpWinPosId: 3, segs: [{ utf8: "​關於你我相戰" }] },
+      ] as YoutubeTimedText[]
+
+      const result = parseStylizedKaraokeSubtitles(events)
+
+      const texts = result.map(fragment => fragment.text)
+      expect(texts).toContain("嘿呀")
+      expect(texts).toContain("你一直很忙,對吧?")
+      expect(texts.filter(text => text === "你知道嗎，我總是在想")).toHaveLength(1)
+
+      for (let i = 1; i < result.length; i++) {
+        expect(result[i].start).toBeGreaterThanOrEqual(result[i - 1].start)
+        expect(result[i - 1].end).toBeLessThanOrEqual(result[i].start)
+      }
+    })
   })
 
   describe("scrolling ASR Parser", () => {

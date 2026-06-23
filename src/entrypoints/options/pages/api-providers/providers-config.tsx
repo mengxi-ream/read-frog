@@ -4,6 +4,7 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
 import { i18n } from "#imports"
+import { SponsorBadge } from "@/components/badges/sponsor-badge"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
@@ -122,6 +123,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const setProviderConfig = useSetAtom(providerConfigAtom(id))
   const config = useAtomValue(configAtom)
+  const sponsor = API_PROVIDER_ITEMS[provider].sponsor
 
   const assignedFeatures = FEATURE_KEYS
     .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
@@ -148,6 +150,9 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       )}
       onClick={() => setSelectedProviderId(id)}
     >
+      {sponsor?.sponsoring && (
+        <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />
+      )}
       {totalAssigned > 0 && (
         <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
           <Tooltip>

@@ -11,7 +11,13 @@ import type {
 import { z } from "zod"
 
 import { LLM_PROVIDER_MODELS } from "./constants"
-import { bedrockProviderSpecificSettingsSchema } from "./provider-specific-settings"
+import { azureProviderSpecificSettingsSchema, bedrockProviderSpecificSettingsSchema } from "./provider-specific-settings"
+
+export const providerSponsorConfigSchema = z.object({
+  sponsoring: z.boolean(),
+  referUrl: z.url(),
+})
+export type ProviderSponsorConfig = z.infer<typeof providerSponsorConfigSchema>
 
 /* ──────────────────────────────
   Providers config schema
@@ -49,6 +55,10 @@ export const baseCustomLLMProviderConfigSchema = baseAPIProviderConfigSchema.ext
 
 const llmProviderConfigSchemaList = [
   baseCustomLLMProviderConfigSchema.extend({
+    provider: z.literal("atlascloud"),
+    model: createProviderModelSchema<"atlascloud">("atlascloud"),
+  }),
+  baseCustomLLMProviderConfigSchema.extend({
     provider: z.literal("siliconflow"),
     model: createProviderModelSchema<"siliconflow">("siliconflow"),
   }),
@@ -67,6 +77,11 @@ const llmProviderConfigSchemaList = [
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("openai"),
     model: createProviderModelSchema<"openai">("openai"),
+  }),
+  baseAPIProviderConfigSchema.extend({
+    provider: z.literal("azure"),
+    model: createProviderModelSchema<"azure">("azure"),
+    providerSpecificSettings: azureProviderSpecificSettingsSchema.optional(),
   }),
   baseAPIProviderConfigSchema.extend({
     provider: z.literal("deepseek"),

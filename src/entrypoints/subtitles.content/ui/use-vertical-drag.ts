@@ -1,10 +1,13 @@
 import type { RefObject } from "react"
 import type { SubtitlePosition } from "../atoms"
-import { useAtom } from "jotai"
+import { useAtom, useSetAtom } from "jotai"
 import { useEffect, useEffectEvent, useRef, useState } from "react"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_SUBTITLE_POSITION } from "@/utils/constants/subtitles"
 import { getContainingShadowRoot } from "@/utils/host/dom/node"
 import { subtitlesPositionAtom } from "../atoms"
+import { useSubtitlesUI } from "./subtitles-ui-context"
+import { useControlsInfo } from "./use-controls-visible"
 
 const BASE_FONT_RATIO = 0.03
 
@@ -79,13 +82,11 @@ function calculateAnchorPosition(ctx: AnchorPositionContext): SubtitlePosition {
   return { percent: Math.max(0, percent), anchor: "bottom" }
 }
 
-interface UseVerticalDragOptions {
-  controlsVisible: boolean
-  controlsHeight: number
-  onDragEnd?: (position: SubtitlePosition) => void
-}
-
-export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: UseVerticalDragOptions) {
+export function useVerticalDrag() {
+  const { controlsConfig, containerShrinkRatio } = useSubtitlesUI()
+  const windowRef = useRef<HTMLDivElement>(null)
+  const { controlsVisible, controlsHeight } = useControlsInfo(windowRef, controlsConfig)
+  const setVideoSubtitles = useSetAtom(configFieldsAtomMap.videoSubtitles)
   const containerRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<HTMLDivElement>(null)
   const isDraggingRef = useRef(false)
@@ -104,10 +105,12 @@ export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: 
     if (!rects)
       return
 
+    const shrinkRatio = containerShrinkRatio?.(rects.videoContainer) ?? 1
+
     setWindowStyle({
       width: rects.videoRect.width,
       height: rects.videoRect.height,
-      fontSize: rects.videoRect.height * BASE_FONT_RATIO,
+      fontSize: rects.videoRect.height * BASE_FONT_RATIO * shrinkRatio,
     })
   })
 
@@ -174,7 +177,7 @@ export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: 
     isDraggingRef.current = false
     setIsDragging(false)
 
-    onDragEnd?.(position)
+    void setVideoSubtitles({ position })
   })
 
   const clampPosition = useEffectEvent(() => {
@@ -234,7 +237,7 @@ export function useVerticalDrag({ controlsVisible, controlsHeight, onDragEnd }: 
     : { bottom: `${position.percent + controlsOffsetPercent}%`, top: "unset" }
 
   return {
-    refs: { container: containerRef, handle: handleRef },
+    refs: { window: windowRef, container: containerRef, handle: handleRef },
     windowStyle,
     positionStyle,
     isDragging,

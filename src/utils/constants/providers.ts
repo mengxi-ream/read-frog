@@ -1,4 +1,4 @@
-import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig } from "@/types/config/provider"
+import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig, ProviderSponsorConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import { i18n } from "#imports"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
@@ -16,13 +16,23 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     isCustomModel: false,
     customModel: null,
   },
+  "atlascloud": {
+    model: "deepseek-ai/deepseek-v4-flash",
+    isCustomModel: false,
+    customModel: null,
+  },
   "openai-compatible": {
     model: "use-custom-model",
     isCustomModel: true,
     customModel: null,
   },
   "openai": {
-    model: "gpt-5-mini",
+    model: "gpt-5.4-mini",
+    isCustomModel: false,
+    customModel: null,
+  },
+  "azure": {
+    model: "gpt-5.4-mini",
     isCustomModel: false,
     customModel: null,
   },
@@ -32,7 +42,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "google": {
-    model: "gemini-3.1-flash-lite",
+    model: "gemini-2.5-flash-lite",
     isCustomModel: false,
     customModel: null,
   },
@@ -42,27 +52,27 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "xai": {
-    model: "grok-4-fast-non-reasoning",
+    model: "grok-4.20-0309-non-reasoning",
     isCustomModel: false,
     customModel: null,
   },
   "bedrock": {
-    model: "us.meta.llama4-scout-17b-instruct-v1:0",
+    model: "us.amazon.nova-micro-v1:0",
     isCustomModel: false,
     customModel: null,
   },
   "groq": {
-    model: "meta-llama/llama-4-scout-17b-16e-instruct",
+    model: "llama-3.1-8b-instant",
     isCustomModel: false,
     customModel: null,
   },
   "deepinfra": {
-    model: "meta-llama/Llama-4-Scout-17B-16E-Instruct",
+    model: "meta-llama/Meta-Llama-3.1-8B-Instruct-Turbo",
     isCustomModel: false,
     customModel: null,
   },
   "mistral": {
-    model: "magistral-small-2506",
+    model: "magistral-small-2507",
     isCustomModel: false,
     customModel: null,
   },
@@ -72,17 +82,17 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "cohere": {
-    model: "command-a-reasoning-08-2025",
+    model: "command-r7b-12-2024",
     isCustomModel: false,
     customModel: null,
   },
   "fireworks": {
-    model: "accounts/fireworks/models/kimi-k2-instruct",
+    model: "accounts/fireworks/models/llama-v3p2-3b-instruct",
     isCustomModel: false,
     customModel: null,
   },
   "cerebras": {
-    model: "qwen-3-235b-a22b-instruct-2507",
+    model: "llama3.1-8b",
     isCustomModel: false,
     customModel: null,
   },
@@ -132,18 +142,18 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "moonshotai": {
-    model: "kimi-k2",
+    model: "kimi-k2-turbo",
     isCustomModel: false,
     customModel: null,
   },
   "huggingface": {
-    model: "Qwen/Qwen3-32B",
+    model: "meta-llama/Llama-3.1-8B-Instruct",
     isCustomModel: false,
     customModel: null,
   },
 }
 
-export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string }>
+export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => string, name: string, website: string, sponsor?: ProviderSponsorConfig }>
   = {
     "microsoft-translate": {
       logo: getLobeIconsCDNUrlFn("microsoft-color"),
@@ -165,6 +175,15 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       name: "DeepL",
       website: "https://www.deepl.com/pro-api",
     },
+    "atlascloud": {
+      logo: getLobeIconsCDNUrlFn("atlascloud"),
+      name: "Atlas Cloud",
+      website: "https://www.atlascloud.ai/",
+      sponsor: {
+        sponsoring: true,
+        referUrl: "https://www.atlascloud.ai?ref=LH8NST&utm_source=github&utm_medium=link&utm_campaign=read-frog",
+      },
+    },
     "siliconflow": {
       logo: getLobeIconsCDNUrlFn("siliconcloud-color"),
       name: "SiliconFlow",
@@ -184,6 +203,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn("openai"),
       name: "OpenAI",
       website: "https://platform.openai.com",
+    },
+    "azure": {
+      logo: getLobeIconsCDNUrlFn("azure-color"),
+      name: "Azure",
+      website: "https://azure.microsoft.com/products/ai-services/openai-service",
     },
     "deepseek": {
       logo: getLobeIconsCDNUrlFn("deepseek-color"),
@@ -310,6 +334,15 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "microsoft-translate",
   },
+  "atlascloud": {
+    id: "atlascloud-default",
+    name: PROVIDER_ITEMS.atlascloud.name,
+    description: i18n.t("options.apiProviders.providers.description.atlascloud"),
+    enabled: true,
+    provider: "atlascloud",
+    baseURL: "https://api.atlascloud.ai/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.atlascloud,
+  },
   "siliconflow": {
     id: "siliconflow-default",
     name: PROVIDER_ITEMS.siliconflow.name,
@@ -344,6 +377,18 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "openai",
     model: DEFAULT_LLM_PROVIDER_MODELS.openai,
+  },
+  "azure": {
+    id: "azure-default",
+    name: PROVIDER_ITEMS.azure.name,
+    description: i18n.t("options.apiProviders.providers.description.azure"),
+    enabled: true,
+    provider: "azure",
+    model: DEFAULT_LLM_PROVIDER_MODELS.azure,
+    providerSpecificSettings: {
+      apiMode: "responses",
+      apiVersion: "v1",
+    },
   },
   "deepseek": {
     id: "deepseek-default",
@@ -543,28 +588,44 @@ export const DEFAULT_PROVIDER_CONFIG = {
   },
 } as const satisfies Record<AllProviderTypes, ProviderConfig>
 
+export const PROVIDER_BASE_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, string>> = {
+  "atlascloud": DEFAULT_PROVIDER_CONFIG.atlascloud.baseURL,
+  "siliconflow": DEFAULT_PROVIDER_CONFIG.siliconflow.baseURL,
+  "tensdaq": DEFAULT_PROVIDER_CONFIG.tensdaq.baseURL,
+  "openai-compatible": DEFAULT_PROVIDER_CONFIG["openai-compatible"].baseURL,
+  "openai": "https://api.openai.com/v1",
+  "azure": "https://<resource>.services.ai.azure.com/openai",
+  "deepseek": "https://api.deepseek.com",
+  "google": "https://generativelanguage.googleapis.com/v1beta",
+  "anthropic": "https://api.anthropic.com/v1",
+  "xai": "https://api.x.ai/v1",
+  "deeplx": DEFAULT_PROVIDER_CONFIG.deeplx.baseURL,
+  "bedrock": "https://bedrock-runtime.us-east-1.amazonaws.com",
+  "groq": "https://api.groq.com/openai/v1",
+  "deepinfra": "https://api.deepinfra.com/v1",
+  "mistral": "https://api.mistral.ai/v1",
+  "togetherai": "https://api.together.xyz/v1",
+  "cohere": "https://api.cohere.com/v2",
+  "fireworks": "https://api.fireworks.ai/inference/v1",
+  "cerebras": "https://api.cerebras.ai/v1",
+  "replicate": "https://api.replicate.com/v1",
+  "perplexity": "https://api.perplexity.ai",
+  "vercel": "https://api.v0.dev/v1",
+  "openrouter": "https://openrouter.ai/api/v1",
+  "ollama": DEFAULT_PROVIDER_CONFIG.ollama.baseURL,
+  "volcengine": DEFAULT_PROVIDER_CONFIG.volcengine.baseURL,
+  "minimax": DEFAULT_PROVIDER_CONFIG.minimax.baseURL,
+  "alibaba": DEFAULT_PROVIDER_CONFIG.alibaba.baseURL,
+  "moonshotai": "https://api.moonshot.ai/v1",
+  "huggingface": "https://router.huggingface.co/v1",
+}
+
 export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
   DEFAULT_PROVIDER_CONFIG["google-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
   DEFAULT_PROVIDER_CONFIG.deepseek,
-  DEFAULT_PROVIDER_CONFIG.tensdaq,
-  DEFAULT_PROVIDER_CONFIG.google,
-  // DEFAULT_PROVIDER_CONFIG.openaiCompatible,
-  DEFAULT_PROVIDER_CONFIG.deeplx,
-  // DEFAULT_PROVIDER_CONFIG.anthropic,
-  // DEFAULT_PROVIDER_CONFIG.xai,
-  // DEFAULT_PROVIDER_CONFIG.bedrock,
-  // DEFAULT_PROVIDER_CONFIG.groq,
-  // DEFAULT_PROVIDER_CONFIG.deepinfra,
-  // DEFAULT_PROVIDER_CONFIG.mistral,
-  // DEFAULT_PROVIDER_CONFIG.togetherai,
-  // DEFAULT_PROVIDER_CONFIG.cohere,
-  // DEFAULT_PROVIDER_CONFIG.fireworks,
-  // DEFAULT_PROVIDER_CONFIG.cerebras,
-  // DEFAULT_PROVIDER_CONFIG.replicate,
-  // DEFAULT_PROVIDER_CONFIG.perplexity,
-  // DEFAULT_PROVIDER_CONFIG.vercel,
+  DEFAULT_PROVIDER_CONFIG.atlascloud,
 ]
 
 export const NON_API_TRANSLATE_PROVIDER_ITEMS = pick(

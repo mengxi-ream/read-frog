@@ -1,5 +1,17 @@
-import { describe, expect, it, vi } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { UniversalVideoAdapter } from "../universal-adapter"
+
+const mocks = vi.hoisted(() => ({
+  getLocalConfig: vi.fn(),
+}))
+
+vi.mock("@/utils/config/storage", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@/utils/config/storage")>()
+  return {
+    ...actual,
+    getLocalConfig: mocks.getLocalConfig,
+  }
+})
 
 function createAdapter(fetchResult: Array<{ text: string, start: number, end: number }>) {
   const subtitlesFetcher = {
@@ -30,6 +42,7 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
   const subtitlesScheduler = {
     isActive: vi.fn(() => active),
     reset: vi.fn(),
+    stop: vi.fn(),
     setState: vi.fn(),
   }
 
@@ -38,6 +51,19 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
 }
 
 describe("universalVideoAdapter", () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    vi.stubGlobal("document", { title: "Test video" })
+    mocks.getLocalConfig.mockResolvedValue({
+      language: {},
+      providersConfig: [],
+      videoSubtitles: {
+        aiSegmentation: false,
+        providerId: null,
+      },
+    })
+  })
+
   it("keeps raw source subtitles and rebuilds processed source subtitles", async () => {
     const subtitles = [
       { text: "I agree.", start: 0, end: 500 },
@@ -112,5 +138,32 @@ describe("universalVideoAdapter", () => {
     expect(subtitlesScheduler.reset).not.toHaveBeenCalled()
     expect(subtitlesScheduler.setState).not.toHaveBeenCalled()
     expect(startTranslationSpy).not.toHaveBeenCalled()
+  })
+
+  it("delegates translated subtitle downloads to the downloader", async () => {
+    const { adapter } = createAdapter([])
+    const downloader = {
+      download: vi.fn().mockResolvedValue(undefined),
+      dispose: vi.fn(),
+    }
+    ;(adapter as any).translatedSubtitlesDownloader = downloader
+
+    await adapter.downloadTranslatedSubtitles()
+
+    expect(downloader.download).toHaveBeenCalledTimes(1)
+  })
+
+  it("disposes translated subtitle download state when navigation starts", () => {
+    const { adapter } = createAdapter([])
+    const downloader = {
+      download: vi.fn(),
+      dispose: vi.fn(),
+    }
+    ;(adapter as any).translatedSubtitlesDownloader = downloader
+    attachScheduler(adapter, false)
+
+    ;(adapter as any).clearVisibleStateForNavigation()
+
+    expect(downloader.dispose).toHaveBeenCalledTimes(1)
   })
 })

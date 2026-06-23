@@ -159,7 +159,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       }
       const chunks = splitTextByUtf8Bytes(text)
       setTotalChunks(chunks.length)
-      await sendMessage("ttsPlaybackEnsureOffscreen")
+      await sendMessage("ttsPlaybackPrepare")
 
       const fetchChunkAudio = async (chunk: string) => {
         logger.info("[TextToSpeech] Fetching chunk audio", { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume })

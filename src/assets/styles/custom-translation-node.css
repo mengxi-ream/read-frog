@@ -35,7 +35,7 @@
 }
 
 [data-read-frog-custom-translation-style="textColor"] {
-  color: var(--read-frog-brand) !important;
+  color: oklch(0.693 0.17 162.48) !important;
 }
 
 [data-read-frog-custom-translation-style="background"] {

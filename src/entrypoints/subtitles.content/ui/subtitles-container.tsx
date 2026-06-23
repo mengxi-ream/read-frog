@@ -23,7 +23,7 @@ export function SubtitlesContainer() {
         )}
       </div>
 
-      {!ui?.embedded && (
+      {(!ui?.embedded || ui?.openBelow) && (
         <div className="absolute inset-0 z-40 overflow-visible">
           <SubtitlesSettingsPanel />
         </div>
