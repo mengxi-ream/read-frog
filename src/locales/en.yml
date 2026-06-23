@@ -8,7 +8,7 @@ dataTypes:
 contextMenu:
   translate: Translate
   translateSelection: Translate "%s"
-  readAloudSelection: Read Aloud "%s"
+  readAloudSelection: Read aloud "%s"
   showOriginal: Show Original
 sidePanel:
   firefoxUserActionHint: In Firefox, open Read Frog from the browser sidebar.

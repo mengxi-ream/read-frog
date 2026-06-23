@@ -49,7 +49,7 @@ describe("background context menu", () => {
     i18n.t = vi.fn((key: string) => ({
       "contextMenu.translate": "Translate",
       "contextMenu.translateSelection": "Translate \"%s\"",
-      "contextMenu.readAloudSelection": "Read Aloud \"%s\"",
+      "contextMenu.readAloudSelection": "Read aloud \"%s\"",
       "contextMenu.showOriginal": "Show Original",
     })[key] ?? key) as typeof i18n.t
   })
@@ -74,7 +74,7 @@ describe("background context menu", () => {
     })
     expect(browser.contextMenus.create).toHaveBeenNthCalledWith(3, {
       id: MENU_ID_SELECTION_READ_ALOUD,
-      title: "Read Aloud \"%s\"",
+      title: "Read aloud \"%s\"",
       contexts: ["selection"],
     })
     expect(browser.contextMenus.update).toHaveBeenCalledWith(MENU_ID_TRANSLATE, {

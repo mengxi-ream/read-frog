@@ -8,7 +8,7 @@ dataTypes:
 contextMenu:
   translate: Çevir
   translateSelection: '"%s" Çevir'
-  readAloudSelection: '"%s" Sesli Oku'
+  readAloudSelection: '"%s" Sesli oku'
   showOriginal: Orijinali Göster
 sidePanel:
   firefoxUserActionHint: Firefox'ta Read Frog'u tarayıcının kenar çubuğundan açın.
