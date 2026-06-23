@@ -4,7 +4,7 @@ import { browser, i18n, storage } from "#imports"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
-import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
+import { getTranslationStateKey, parseTabIdFromStorageKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
@@ -50,9 +50,7 @@ export function registerContextMenuListeners() {
     for (const [key, change] of Object.entries(changes)) {
       // Check if this is a translation state change
       if (key.startsWith(TRANSLATION_STATE_KEY_PREFIX.replace("session:", ""))) {
-        // Extract tabId from key (format: "translationState.{tabId}")
-        const parts = key.split(".")
-        const tabId = Number.parseInt(parts[1] ?? "", 10)
+        const tabId = parseTabIdFromStorageKey(key)
 
         if (!Number.isNaN(tabId)) {
           // Only update menu if this is the active tab

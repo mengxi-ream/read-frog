@@ -1,6 +1,6 @@
 import { browser } from "#imports"
 import { translationStateSchema } from "@/types/translation-state"
-import { TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
+import { parseTabIdFromStorageKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
 import { logger } from "@/utils/logger"
 import { getPageTranslationEnabled } from "./page-translation-state"
 
@@ -34,8 +34,7 @@ export function registerActionIconListeners() {
           return
         }
 
-        const parts = storageKey.split(".")
-        const tabId = Number.parseInt(parts[1])
+        const tabId = parseTabIdFromStorageKey(storageKey)
         if (Number.isNaN(tabId)) {
           return
         }
