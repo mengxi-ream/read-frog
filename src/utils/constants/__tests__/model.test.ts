@@ -86,6 +86,14 @@ describe("getProviderOptions", () => {
       ]))
     })
 
+    it("should expose the current xAI Grok chat model ids", () => {
+      expect(LLM_PROVIDER_MODELS.xai).toEqual([
+        "grok-4.20-0309-non-reasoning",
+        "grok-4.20-0309-reasoning",
+        "grok-4.3",
+      ])
+    })
+
     it("should expose the supported Anthropic Fable model ids", () => {
       expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-fable-5")
       expect(LLM_PROVIDER_MODELS.bedrock).toContain("us.anthropic.claude-fable-5")
@@ -151,20 +159,18 @@ describe("getProviderOptions", () => {
     })
 
     it("should return low/disabled defaults for more mainstream reasoning providers", () => {
-      const grokOptions = getProviderOptions("grok-4-fast-reasoning", "xai")
+      const grokOptions = getProviderOptions("grok-4.3", "xai")
       expect(grokOptions.xai?.reasoningEffort).toBe("low")
 
-      const mixedCaseGrokOptions = getProviderOptions("Grok-4-Fast-Reasoning", "xai")
+      const mixedCaseGrokOptions = getProviderOptions("Grok-4.3", "xai")
       expect(mixedCaseGrokOptions.xai?.reasoningEffort).toBe("low")
 
-      const grok420ReasoningOptions = getProviderOptions("grok-4.20-reasoning", "xai")
-      expect(grok420ReasoningOptions.xai?.reasoningEffort).toBe("low")
+      const datedGrokReasoningOptions = getProviderOptions("grok-4.20-0309-reasoning", "xai")
+      expect(datedGrokReasoningOptions.xai?.reasoningEffort).toBe("low")
 
-      const grok420NonReasoningOptions = getProviderOptions("grok-4.20-non-reasoning", "xai")
-      expect(grok420NonReasoningOptions).toEqual({})
-
-      const grok41FastOptions = getProviderOptions("grok-4-1-fast-reasoning", "xai")
-      expect(grok41FastOptions).toEqual({})
+      expect(getProviderOptions("grok-4.20-0309-non-reasoning", "xai")).toEqual({})
+      expect(getProviderOptions("grok-4.20-reasoning", "xai")).toEqual({})
+      expect(getProviderOptions("grok-4-fast-reasoning", "xai")).toEqual({})
 
       const deepseekReasonerOptions = getProviderOptions("deepseek-reasoner", "deepseek")
       expect(deepseekReasonerOptions.deepseek?.thinking).toEqual({ type: "disabled" })

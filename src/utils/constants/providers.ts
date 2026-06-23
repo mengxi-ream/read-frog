@@ -52,7 +52,7 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     customModel: null,
   },
   "xai": {
-    model: "grok-4.20-non-reasoning",
+    model: "grok-4.20-0309-non-reasoning",
     isCustomModel: false,
     customModel: null,
   },
