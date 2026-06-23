@@ -1,11 +1,7 @@
 import type { SubtitlesProvidersAdapter } from "../ui/subtitles-ui-context"
-import ReactDOM from "react-dom/client"
 import themeCSS from "@/assets/styles/theme.css?inline"
-import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { SUBTITLES_THEME, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
-import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
-import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
-import { applyTheme } from "@/utils/theme"
+import { createReactShadowHost } from "@/utils/react-shadow-host/create-shadow-host"
 import { SubtitlesSettingsPanel } from "../ui/subtitles-settings-panel"
 import { SubtitlesTranslateButton } from "../ui/subtitles-translate-button"
 import { SubtitlesProviders } from "../ui/subtitles-ui-context"
@@ -58,32 +54,15 @@ export function renderSubtitlesTranslateButton(adapter: SubtitlesProvidersAdapte
       )
     : <SubtitlesTranslateButton />
 
-  const shadowHost = document.createElement("div")
-  shadowHost.id = TRANSLATE_BUTTON_CONTAINER_ID
-  shadowHost.classList.add(REACT_SHADOW_HOST_CLASS)
-  shadowHost.style.display = "inline"
-
-  const shadowRoot = shadowHost.attachShadow({ mode: "open" })
-  const hostBuilder = new ShadowHostBuilder(shadowRoot, {
+  const shadowHost = createReactShadowHost(component, {
     position: "inline",
     inheritStyles: false,
     cssContent: [themeCSS, adapter.embedded ? embedWrapperCSS : wrapperCSS],
+    theme: SUBTITLES_THEME,
     ...(adapter.embedded && { style: { position: "relative" } }),
-  })
-  const reactContainer = hostBuilder.build()
-  applyTheme(reactContainer, SUBTITLES_THEME)
+  }) as HTMLDivElement
 
-  const root = ReactDOM.createRoot(reactContainer)
-  root.render(
-    <ShadowWrapperContext value={reactContainer}>
-      {component}
-    </ShadowWrapperContext>,
-  )
-
-  ;(shadowHost as any).__reactShadowContainerCleanup = () => {
-    root.unmount()
-    hostBuilder.cleanup()
-  }
+  shadowHost.id = TRANSLATE_BUTTON_CONTAINER_ID
 
   if (adapter.embedded) {
     for (const eventType of ["click", "mousedown", "pointerdown", "dblclick"]) {

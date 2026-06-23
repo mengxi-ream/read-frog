@@ -15,9 +15,11 @@ export const ThemeContext = createContext<ThemeContextI | undefined>(undefined)
 export function ThemeProvider({
   children,
   container,
+  theme: forcedTheme,
 }: {
   children: React.ReactNode
   container?: HTMLElement
+  theme?: Theme
 }) {
   const [themeMode, setThemeMode] = useAtom(themeModeAtom)
 
@@ -34,9 +36,9 @@ export function ThemeProvider({
     () => !!window?.matchMedia?.("(prefers-color-scheme: dark)")?.matches,
   )
 
-  const theme: Theme = themeMode === "system"
+  const theme: Theme = forcedTheme ?? (themeMode === "system"
     ? (prefersDark ? "dark" : "light")
-    : themeMode
+    : themeMode)
 
   // Apply theme to document or shadow root container
   useLayoutEffect(() => {
