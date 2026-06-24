@@ -16,6 +16,7 @@ const mocks = vi.hoisted(() => ({
   getAuthorMetrics: vi.fn(),
   getCollaboratorPermission: vi.fn(),
   getPullRequest: vi.fn(),
+  listPullRequestFiles: vi.fn(),
   listIssueComments: vi.fn(),
   listIssueLabels: vi.fn(),
   removeLabelFromIssue: vi.fn(),
@@ -36,6 +37,7 @@ vi.mock("./github-api.js", () => ({
   getAuthorMetrics: mocks.getAuthorMetrics,
   getCollaboratorPermission: mocks.getCollaboratorPermission,
   getPullRequest: mocks.getPullRequest,
+  listPullRequestFiles: mocks.listPullRequestFiles,
   listIssueComments: mocks.listIssueComments,
   listIssueLabels: mocks.listIssueLabels,
   removeLabelFromIssue: mocks.removeLabelFromIssue,
@@ -109,6 +111,7 @@ describe("main", () => {
 
     expect(mocks.ensureRepositoryLabels).not.toHaveBeenCalled()
     expect(mocks.listIssueLabels).not.toHaveBeenCalled()
+    expect(mocks.listPullRequestFiles).not.toHaveBeenCalled()
     expect(mocks.getCollaboratorPermission).not.toHaveBeenCalled()
     expect(mocks.getAuthorMetrics).not.toHaveBeenCalled()
 
@@ -118,7 +121,7 @@ describe("main", () => {
 
   it("continues to process human-authored pull requests", async () => {
     mocks.getPullRequest.mockResolvedValue({
-      additions: 20,
+      additions: 1520,
       deletions: 5,
       draft: false,
       number: 42,
@@ -131,6 +134,18 @@ describe("main", () => {
     })
     mocks.ensureRepositoryLabels.mockResolvedValue(undefined)
     mocks.listIssueLabels.mockResolvedValue([])
+    mocks.listPullRequestFiles.mockResolvedValue([
+      {
+        additions: 1500,
+        deletions: 0,
+        filename: "src/utils/config/__tests__/example/v081.ts",
+      },
+      {
+        additions: 20,
+        deletions: 5,
+        filename: "src/entrypoints/options/pages/translation/index.tsx",
+      },
+    ])
     mocks.getCollaboratorPermission.mockResolvedValue("write")
     mocks.getAuthorMetrics.mockResolvedValue({
       author: {
@@ -200,9 +215,23 @@ describe("main", () => {
       "mengxi-ream",
     )
     expect(mocks.getAuthorMetrics).toHaveBeenCalledTimes(1)
+    expect(mocks.listPullRequestFiles).toHaveBeenCalledWith(
+      "test-token",
+      "read-frog",
+      "read-frog",
+      42,
+    )
+    expect(mocks.buildTrustComment).toHaveBeenCalledWith(expect.objectContaining({
+      plan: expect.objectContaining({
+        changedLines: 25,
+        excludedChangedLines: 1500,
+      }),
+    }))
     expect(mocks.createIssueComment).toHaveBeenCalledTimes(1)
 
     const summary = await readFile(process.env.GITHUB_STEP_SUMMARY, "utf8")
     expect(summary).toContain("- Trust score: **78/100**")
+    expect(summary).toContain("- PR counted changed lines: 25")
+    expect(summary).toContain("- Migration-related changed lines excluded: 1500")
   })
 })
