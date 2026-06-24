@@ -582,6 +582,10 @@ options:
       mode:
         bilingual: バイリンガル
         translationOnly: 翻訳のみ
+    translationModeShortcut:
+      title: 翻訳モード切り替えショートカット
+      description: バイリンガルモードと翻訳のみモードを切り替えるショートカットキーをカスタマイズ
+      switched: 翻訳モード：$1
     translateRange:
       title: 翻訳範囲
       description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。

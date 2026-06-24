@@ -582,6 +582,10 @@ options:
       mode:
         bilingual: İki Dilli
         translationOnly: Yalnızca Çeviri
+    translationModeShortcut:
+      title: Çeviri Modu Kısayolu
+      description: İki dilli ve yalnızca çeviri modları arasında geçiş yapmak için kısayol tuşunu özelleştirin
+      switched: "Çeviri Modu: $1"
     translateRange:
       title: Çeviri Kapsamı
       description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.

@@ -16,11 +16,13 @@ import { SkipLanguages } from "./skip-languages"
 import { SmallParagraphFilter } from "./small-paragraph-filter"
 import { TranslateRange } from "./translate-range"
 import { TranslationMode } from "./translation-mode"
+import { TranslationModeShortcut } from "./translation-mode-shortcut"
 
 export function TranslationPage() {
   return (
     <PageLayout title={i18n.t("options.translation.title")} innerClassName="*:border-b [&>*:last-child]:border-b-0">
       <TranslationMode />
+      <TranslationModeShortcut />
       <TranslateRange />
       <PageTranslationShortcut />
       <NodeTranslationHotkey />

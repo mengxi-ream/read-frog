@@ -582,6 +582,10 @@ options:
       mode:
         bilingual: Song ngữ
         translationOnly: Chỉ bản dịch
+    translationModeShortcut:
+      title: Phím tắt chế độ dịch
+      description: Tùy chỉnh phím tắt để chuyển đổi giữa chế độ song ngữ và chỉ bản dịch
+      switched: "Chế độ dịch: $1"
     translateRange:
       title: Phạm vi dịch
       description: Chọn chỉ dịch nội dung chính hay tất cả nội dung trên trang.

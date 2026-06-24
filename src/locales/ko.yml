@@ -582,6 +582,10 @@ options:
       mode:
         bilingual: 이중 언어
         translationOnly: 번역만
+    translationModeShortcut:
+      title: 번역 모드 전환 단축키
+      description: 이중 언어 모드와 번역만 모드 간 전환 단축키를 사용자 지정합니다
+      switched: "번역 모드: $1"
     translateRange:
       title: 번역 범위
       description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.

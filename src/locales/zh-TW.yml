@@ -697,6 +697,10 @@ options:
       mode:
         bilingual: 雙語對照
         translationOnly: 僅顯示翻譯
+    translationModeShortcut:
+      title: 切換翻譯模式快捷鍵
+      description: 自訂在雙語對照和僅顯示翻譯模式之間切換的快捷鍵
+      switched: 翻譯模式：$1
     translateRange:
       title: 翻譯範圍
       description: 選擇是僅翻譯主要內容還是翻譯頁面上的所有內容。

@@ -697,6 +697,10 @@ options:
       mode:
         bilingual: Bilingüe
         translationOnly: Solo traducción
+    translationModeShortcut:
+      title: Atajo de modo de traducción
+      description: Personaliza el atajo de teclado para alternar entre los modos bilingüe y solo traducción
+      switched: "Modo de traducción: $1"
     translateRange:
       title: Rango de traducción
       description: Selecciona si traducir solo el contenido principal o todo el contenido de la página.

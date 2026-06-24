@@ -697,6 +697,10 @@ options:
       mode:
         bilingual: Bilingual
         translationOnly: Translation Only
+    translationModeShortcut:
+      title: Translation Mode Shortcut
+      description: Customize the shortcut key for switching between bilingual and translation only modes
+      switched: "Translation Mode: $1"
     translateRange:
       title: Translate Range
       description: Select whether to translate only the main content or all content on the page.
