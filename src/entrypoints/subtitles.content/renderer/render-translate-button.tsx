@@ -58,7 +58,7 @@ export function renderSubtitlesTranslateButton(adapter: SubtitlesProvidersAdapte
     position: "inline",
     inheritStyles: false,
     cssContent: [themeCSS, adapter.embedded ? embedWrapperCSS : wrapperCSS],
-    theme: SUBTITLES_THEME,
+    forcedTheme: SUBTITLES_THEME,
     ...(adapter.embedded && { style: { position: "relative" } }),
   }) as HTMLDivElement
 

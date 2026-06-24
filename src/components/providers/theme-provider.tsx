@@ -15,11 +15,11 @@ export const ThemeContext = createContext<ThemeContextI | undefined>(undefined)
 export function ThemeProvider({
   children,
   container,
-  theme: forcedTheme,
+  forcedTheme,
 }: {
   children: React.ReactNode
   container?: HTMLElement
-  theme?: Theme
+  forcedTheme?: Theme
 }) {
   const [themeMode, setThemeMode] = useAtom(themeModeAtom)
 
