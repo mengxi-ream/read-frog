@@ -4,6 +4,7 @@ import { createStore, Provider } from "jotai"
 import { afterEach, describe, expect, it, vi } from "vitest"
 import { TranslatedDownloadPhase, translatedSubtitlesDownloadStatusAtom } from "../../../../atoms"
 import { DownloadTranslatedSubtitles } from "../download-translated-subtitles"
+import { DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS } from "../download-translated-subtitles.constants"
 
 const downloadTranslatedSubtitles = vi.hoisted(() => vi.fn())
 
@@ -11,8 +12,15 @@ vi.mock("../../../subtitles-ui-context", () => ({
   useSubtitlesUI: () => ({ downloadTranslatedSubtitles }),
 }))
 
-function renderComponent() {
+function renderComponent(initialStatus?: {
+  phase: TranslatedDownloadPhase
+  progress: number | null
+}) {
   const store = createStore()
+  if (initialStatus) {
+    store.set(translatedSubtitlesDownloadStatusAtom, initialStatus)
+  }
+
   render(
     <Provider store={store}>
       <DownloadTranslatedSubtitles />
@@ -56,7 +64,7 @@ describe("download translated subtitles", () => {
     expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
     expect(button).toBeDisabled()
 
-    await act(() => vi.advanceTimersByTime(599))
+    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1))
     expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
 
     await act(() => vi.advanceTimersByTime(1))
@@ -66,18 +74,25 @@ describe("download translated subtitles", () => {
     expect(message).not.toHaveTextContent("(0%)")
   })
 
-  it("does not show a delayed preparing message after leaving preparing", async () => {
+  it("restarts the preparing delay after a visible preparing message is cleared", async () => {
     vi.useFakeTimers()
     const store = renderComponent()
 
     setStatus(store, TranslatedDownloadPhase.Preparing, 0)
-    await act(() => vi.advanceTimersByTime(300))
+    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS))
+    expect(screen.getByText("subtitles.actions.downloadTranslatedPreparing")).toBeInTheDocument()
 
     setStatus(store, TranslatedDownloadPhase.Translating, 20)
-    await act(() => vi.advanceTimersByTime(300))
-
     expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
-    expect(screen.getByText("subtitles.actions.downloadTranslatedTranslating (20%)")).toBeInTheDocument()
+
+    setStatus(store, TranslatedDownloadPhase.Preparing, 0)
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+
+    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1))
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+
+    await act(() => vi.advanceTimersByTime(1))
+    expect(screen.getByText("subtitles.actions.downloadTranslatedPreparing")).toBeInTheDocument()
   })
 
   it("renders translating progress immediately and completion as success", () => {

@@ -1,42 +1,36 @@
+import type { DownloadTranslatedSubtitlesMessageTone } from "./download-translated-subtitles.constants"
 import { useAtomValue } from "jotai"
-import { useEffect, useState } from "react"
 import { i18n } from "#imports"
+import { useDelayedTruthy } from "@/hooks/use-delayed-truthy"
 import {
   TranslatedDownloadPhase,
   translatedSubtitlesDownloadStatusAtom,
 } from "../../../atoms"
 import { useSubtitlesUI } from "../../subtitles-ui-context"
-
-const PREPARING_MESSAGE_DELAY_MS = 600
-
-type DownloadTranslatedSubtitlesMessageTone = "muted" | "success"
+import {
+  DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE,
+  DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS,
+} from "./download-translated-subtitles.constants"
 
 function getMessageTone(
   phase: TranslatedDownloadPhase,
   message: string | null,
 ): DownloadTranslatedSubtitlesMessageTone | null {
   if (phase === TranslatedDownloadPhase.Complete) {
-    return "success"
+    return DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE.Success
   }
 
-  return message !== null ? "muted" : null
+  return message !== null ? DOWNLOAD_TRANSLATED_SUBTITLES_MESSAGE_TONE.Muted : null
 }
 
 export function useDownloadTranslatedSubtitles() {
   const status = useAtomValue(translatedSubtitlesDownloadStatusAtom)
   const { downloadTranslatedSubtitles } = useSubtitlesUI()
-  const [showPreparingMessage, setShowPreparingMessage] = useState(false)
-
-  useEffect(() => {
-    if (status.phase !== TranslatedDownloadPhase.Preparing) {
-      // eslint-disable-next-line react/set-state-in-effect
-      setShowPreparingMessage(false)
-      return
-    }
-
-    const timeoutId = setTimeout(setShowPreparingMessage, PREPARING_MESSAGE_DELAY_MS, true)
-    return () => clearTimeout(timeoutId)
-  }, [status.phase])
+  const showPreparingMessage = useDelayedTruthy(
+    status.phase === TranslatedDownloadPhase.Preparing,
+    DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS,
+    status,
+  )
 
   const message = {
     [TranslatedDownloadPhase.Preparing]: showPreparingMessage
