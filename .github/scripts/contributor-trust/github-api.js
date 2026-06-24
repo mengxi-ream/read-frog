@@ -121,6 +121,10 @@ export async function getPullRequest(token, owner, repo, pullNumber) {
   return apiRequest(token, `/repos/${owner}/${repo}/pulls/${pullNumber}`)
 }
 
+export async function listPullRequestFiles(token, owner, repo, pullNumber) {
+  return paginate(token, `/repos/${owner}/${repo}/pulls/${pullNumber}/files`)
+}
+
 export async function listIssueLabels(token, owner, repo, issueNumber) {
   const labels = await apiRequest(token, `/repos/${owner}/${repo}/issues/${issueNumber}/labels?per_page=100`)
   return labels.map(label => label.name)

@@ -5,6 +5,7 @@ import {
   countReviewsOnOthersPullRequestsInRepo,
   createContributorMetrics,
   createPullRequestStateList,
+  listPullRequestFiles,
   selectOwnedNonForkRepositories,
 } from "./github-api.js"
 
@@ -151,6 +152,50 @@ describe("countAuthorCommitsInRepo", () => {
       )
 
       expect(count).toBe(1)
+    }
+    finally {
+      globalThis.fetch = originalFetch
+    }
+  })
+})
+
+describe("listPullRequestFiles", () => {
+  it("lists changed pull request files through the paginated files API", async () => {
+    const originalFetch = globalThis.fetch
+    const requests = []
+    globalThis.fetch = async (input) => {
+      requests.push(String(input))
+
+      return new Response(JSON.stringify([
+        {
+          additions: 20,
+          deletions: 5,
+          filename: "src/index.ts",
+        },
+      ]), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      })
+    }
+
+    try {
+      const files = await listPullRequestFiles(
+        "token",
+        "mengxi-ream",
+        "read-frog",
+        1735,
+      )
+
+      expect(files).toEqual([
+        {
+          additions: 20,
+          deletions: 5,
+          filename: "src/index.ts",
+        },
+      ])
+      expect(requests).toEqual([
+        "https://api.github.com/repos/mengxi-ream/read-frog/pulls/1735/files?per_page=100&page=1",
+      ])
     }
     finally {
       globalThis.fetch = originalFetch
