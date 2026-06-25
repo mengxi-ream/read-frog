@@ -17,6 +17,7 @@ import {
   getPullRequest,
   listIssueComments,
   listIssueLabels,
+  listPullRequestFiles,
   removeLabelFromIssue,
   updateIssueComment,
 } from "./github-api.js"
@@ -199,8 +200,11 @@ export async function main() {
     return
   }
 
-  const permission = await getCollaboratorPermission(token, owner, repo, pullRequest.user.login)
-  const authorMetrics = await getAuthorMetrics(token, owner, repo, pullRequest.user.login)
+  const [pullRequestFiles, permission, authorMetrics] = await Promise.all([
+    listPullRequestFiles(token, owner, repo, pullRequest.number),
+    getCollaboratorPermission(token, owner, repo, pullRequest.user.login),
+    getAuthorMetrics(token, owner, repo, pullRequest.user.login),
+  ])
   const scoreInput = createContributorMetrics({
     author: authorMetrics.author,
     permission,
@@ -208,7 +212,7 @@ export async function main() {
   })
 
   const score = computeContributorScore(scoreInput)
-  const plan = planTrustActions({ currentLabels, pullRequest, score })
+  const plan = planTrustActions({ currentLabels, pullRequest, pullRequestFiles, score })
   const comment = buildTrustComment({
     author: {
       login: authorMetrics.author.login,
@@ -259,7 +263,9 @@ export async function main() {
   logScoreBreakdown(score)
 
   summaryLines.push(`- Trust score: **${score.total}/100**`)
-  summaryLines.push(`- PR changed lines: ${plan.changedLines}`)
+  summaryLines.push(`- PR counted changed lines: ${plan.changedLines}`)
+  if (plan.excludedChangedLines > 0)
+    summaryLines.push(`- Migration-related changed lines excluded: ${plan.excludedChangedLines}`)
   summaryLines.push(`- Bucket: \`${score.bucket}\``)
   summaryLines.push(`- Target label: \`${plan.targetTrustLabel}\``)
   summaryLines.push(`- Maintainer review: ${plan.needsMaintainerReview ? "required" : "not required"}`)

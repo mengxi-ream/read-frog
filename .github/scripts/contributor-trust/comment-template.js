@@ -33,6 +33,26 @@ function summarizeTopRepositories(repositories) {
   }
 }
 
+function getChangedLineSignal(pullRequest, plan) {
+  const additions = Number(plan.changedLineAdditions ?? pullRequest.additions) || 0
+  const deletions = Number(plan.changedLineDeletions ?? pullRequest.deletions) || 0
+  const changedLines = Number(plan.changedLines ?? additions + deletions) || 0
+  const excludedAdditions = Number(plan.excludedChangedLineAdditions) || 0
+  const excludedDeletions = Number(plan.excludedChangedLineDeletions) || 0
+  const excludedChangedLines = Number(plan.excludedChangedLines) || 0
+  const lines = [
+    `- PR counted changed lines: ${changedLines} (+${additions} / -${deletions})`,
+  ]
+
+  if (excludedChangedLines > 0) {
+    lines.push(
+      `- Migration-related changed lines excluded: ${excludedChangedLines} (+${excludedAdditions} / -${excludedDeletions})`,
+    )
+  }
+
+  return lines
+}
+
 function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }) {
   const bucketTitle = BUCKET_TITLES[score.bucket]
   const trustLabel = plan.targetTrustLabel ?? "none"
@@ -67,7 +87,7 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
     `- Repo commits: ${metrics.commitsInRepo} (author commits reachable from the repository default branch)`,
     `- Repo PR history: merged ${metrics.mergedPrs}, open ${metrics.openPrs}, closed-unmerged ${metrics.closedPrs}`,
     `- Repo reviews: ${metrics.reviews}`,
-    `- PR changed lines: ${(Number(pullRequest.additions) || 0) + (Number(pullRequest.deletions) || 0)} (+${Number(pullRequest.additions) || 0} / -${Number(pullRequest.deletions) || 0})`,
+    ...getChangedLineSignal(pullRequest, plan),
     `- Repo permission: ${metrics.repoPermission ?? "none"}`,
     `- Followers: ${metrics.followers}`,
     `- Account age: ${formatMonths(metrics.accountCreated)}`,
@@ -75,7 +95,8 @@ function buildContent({ owner, repo, pullRequest, author, metrics, score, plan }
     "",
     "**Policy**",
     `- Low-score review threshold: < ${POLICY.lowScoreThreshold}`,
-    `- Auto-close: score < ${POLICY.autoCloseBelowScore} and changed lines > ${POLICY.autoCloseAboveChangedLines}`,
+    `- Auto-close: score < ${POLICY.autoCloseBelowScore} and counted changed lines > ${POLICY.autoCloseAboveChangedLines}`,
+    "- Migration-related files are excluded from the auto-close line count",
     `- Policy version: \`${POLICY.version}\``,
     "",
     `_${pullRequest.state === "closed" ? "Manually re-evaluated on a closed PR." : "Updated automatically when the PR changes or when a maintainer reruns the workflow."}_`,
