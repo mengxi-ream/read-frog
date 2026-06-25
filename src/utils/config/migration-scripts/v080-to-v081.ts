@@ -1,6 +1,6 @@
 /**
  * Migration script from v080 to v081
- * - Adds `modeShortcut` field to translate config with "Alt+Q" default.
+ * - Adds `modeShortcut` field to translate config with "Alt+Shift+M" default.
  *
  * IMPORTANT: All values are hardcoded inline. Migration scripts are frozen
  * snapshots - never import constants or helpers that may change.
@@ -24,7 +24,7 @@ export function migrate(oldConfig: any): any {
     ...oldConfig,
     translate: {
       ...translate,
-      modeShortcut: "Alt+Q",
+      modeShortcut: "Alt+Shift+M",
     },
   }
 }

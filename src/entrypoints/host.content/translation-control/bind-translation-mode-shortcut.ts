@@ -1,5 +1,4 @@
 import type { Hotkey } from "@tanstack/hotkeys"
-import type { PageTranslationManager } from "./page-translation"
 import type { TranslationMode } from "@/types/config/translate"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { toast } from "sonner"
@@ -12,7 +11,7 @@ const NEXT_MODE: Record<TranslationMode, TranslationMode> = {
   translationOnly: "bilingual",
 }
 
-export async function bindTranslationModeShortcutKey(pageTranslationManager: PageTranslationManager) {
+export async function bindTranslationModeShortcutKey() {
   const config = await getLocalConfig()
   if (!config || isPageTranslationShortcutEmpty(config.translate.modeShortcut)) {
     return () => {}
@@ -42,11 +41,6 @@ export async function bindTranslationModeShortcutKey(pageTranslationManager: Pag
 
       const modeName = i18n.t(`options.translation.translationMode.mode.${nextMode}`)
       toast.info(i18n.t("options.translation.translationModeShortcut.switched", [modeName]))
-
-      if (pageTranslationManager.isActive) {
-        pageTranslationManager.stop()
-        void pageTranslationManager.start()
-      }
     },
     {
       ignoreInputs: true,

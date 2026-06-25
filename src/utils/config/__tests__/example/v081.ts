@@ -73,7 +73,7 @@ export const testSeries: TestSeriesObject = {
       translate: {
         providerId: "openai-default",
         mode: "translationOnly",
-        modeShortcut: "Alt+Q",
+        modeShortcut: "Alt+Shift+M",
         enableAIContentAware: false,
         node: {
           enabled: true,
@@ -483,7 +483,7 @@ export const testSeries: TestSeriesObject = {
       translate: {
         providerId: "google-default",
         mode: "translationOnly",
-        modeShortcut: "Alt+Q",
+        modeShortcut: "Alt+Shift+M",
         enableAIContentAware: false,
         node: {
           enabled: true,
@@ -881,7 +881,7 @@ export const testSeries: TestSeriesObject = {
       translate: {
         providerId: "google-default",
         mode: "translationOnly",
-        modeShortcut: "Alt+Q",
+        modeShortcut: "Alt+Shift+M",
         enableAIContentAware: false,
         node: {
           enabled: true,
@@ -1279,7 +1279,7 @@ export const testSeries: TestSeriesObject = {
       translate: {
         providerId: "google-default",
         mode: "translationOnly",
-        modeShortcut: "Alt+Q",
+        modeShortcut: "Alt+Shift+M",
         enableAIContentAware: false,
         node: {
           enabled: true,

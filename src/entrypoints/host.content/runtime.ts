@@ -34,7 +34,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
 
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
 
-  const cleanupTranslationModeShortcut = await bindTranslationModeShortcutKey(manager)
+  const cleanupTranslationModeShortcut = await bindTranslationModeShortcutKey()
 
   const detectAndReportPageLanguage = async (url: string) => {
     const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
