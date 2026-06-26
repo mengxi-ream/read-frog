@@ -132,11 +132,11 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.17)(react@19.2.7)
       '@read-frog/api-contract':
-        specifier: link:../read-frog-monorepo/packages/api-contract
-        version: link:../read-frog-monorepo/packages/api-contract
+        specifier: 0.8.0
+        version: 0.8.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
-        specifier: 0.3.2
-        version: 0.3.2
+        specifier: 0.3.3
+        version: 0.3.3
       '@remixicon/react':
         specifier: ^4.9.0
         version: 4.9.0(react@19.2.7)
@@ -1855,6 +1855,9 @@ packages:
   '@orpc/client@1.14.6':
     resolution: {integrity: sha512-Y03NcTtmEJdxcqkKBkdGxqe1IHVpD9IorshG4PaTnz9dQIW+RYI8anRo7o0IlbBlzBICN+Ubo1rnw6bpkhagCQ==}
 
+  '@orpc/contract@1.14.6':
+    resolution: {integrity: sha512-o4i2ciYWtALidF969S8yj/VFk7ZUmHHKaYGRVitX5K2uMaSB8lJM6TMyBKzRC5Clo99VPjCb9mcl6jMLEAgmKw==}
+
   '@orpc/shared@1.14.6':
     resolution: {integrity: sha512-P2W+DdrUq18kUiF7nIw5wDOA0SR41mM/NsVKDVRsdyhdHk9V9KDuW1JRymyMl+7Wo5SDeSr1Rm/VjA5v08+PHw==}
     peerDependencies:
@@ -2240,8 +2243,11 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/definitions@0.3.2':
-    resolution: {integrity: sha512-+/1hhN09uD09NNyKz6cLC6ugBNQFj/j7FCnsNq5VSu1wYDRf9YwIqqHkwusZqGOS9ZOTZRwcokzVEd4vIW5Dhw==}
+  '@read-frog/api-contract@0.8.0':
+    resolution: {integrity: sha512-QA+q4KfZJf1dTU5jffFuo+RsR3jY3vAUT0Y1nApq7A38Xid0hvwQxusOMr1mLmD21dRFOliFU0xkefQMYbe88Q==}
+
+  '@read-frog/definitions@0.3.3':
+    resolution: {integrity: sha512-SCx5wbP8bNSSlvIeIOBoAScAakdV6vp2b49AZRRYWvhbV2KN+/xcMaYVCZWy/HjJmO7ioFIiLafrj2CbzXrglA==}
 
   '@reduxjs/toolkit@2.11.2':
     resolution: {integrity: sha512-Kd6kAHTA6/nUpp8mySPqj3en3dm0tdMIgbttnQ1xFMVpufoj+ADi8pXLBsd4xzTRHQa7t/Jv8W5UnCuW4kuWMQ==}
@@ -6126,6 +6132,9 @@ packages:
     resolution: {integrity: sha512-7x81NCL719oNbsq/3mh+hVrAWmFuEYUqrq/Iw3kUzH8ReypT9QQ0BLoJS7/G9k6N81XjW4qHWtjWwe/9eLy1EQ==}
     engines: {node: '>=12'}
 
+  openapi-types@12.1.3:
+    resolution: {integrity: sha512-N4YtSYJqghVu4iek2ZUvcN/0aqH1kRDuNqzcycDxhOUpg7GdvLa2F3DgS6yBNhInhv2r/6I0Flkn7CqL8+nIcw==}
+
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -9284,6 +9293,15 @@ snapshots:
     transitivePeerDependencies:
       - '@opentelemetry/api'
 
+  '@orpc/contract@1.14.6(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/client': 1.14.6(@opentelemetry/api@1.9.1)
+      '@orpc/shared': 1.14.6(@opentelemetry/api@1.9.1)
+      '@standard-schema/spec': 1.1.0
+      openapi-types: 12.1.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
   '@orpc/shared@1.14.6(@opentelemetry/api@1.9.1)':
     dependencies:
       radash: 12.1.1
@@ -9572,7 +9590,15 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
-  '@read-frog/definitions@0.3.2':
+  '@read-frog/api-contract@0.8.0(@opentelemetry/api@1.9.1)':
+    dependencies:
+      '@orpc/contract': 1.14.6(@opentelemetry/api@1.9.1)
+      '@read-frog/definitions': 0.3.3
+      zod: 4.4.3
+    transitivePeerDependencies:
+      - '@opentelemetry/api'
+
+  '@read-frog/definitions@0.3.3':
     dependencies:
       '@date-fns/tz': 1.5.0
       date-fns: 4.4.0
@@ -10133,8 +10159,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.57.0(typescript@6.0.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.57.0(typescript@6.0.3)
-      '@typescript-eslint/types': 8.57.0
+      '@typescript-eslint/tsconfig-utils': 8.61.1(typescript@6.0.3)
+      '@typescript-eslint/types': 8.61.1
       debug: 4.4.3
       typescript: 6.0.3
     transitivePeerDependencies:
@@ -13609,6 +13635,8 @@ snapshots:
       define-lazy-prop: 2.0.0
       is-docker: 2.2.1
       is-wsl: 2.2.0
+
+  openapi-types@12.1.3: {}
 
   optionator@0.9.4:
     dependencies:
