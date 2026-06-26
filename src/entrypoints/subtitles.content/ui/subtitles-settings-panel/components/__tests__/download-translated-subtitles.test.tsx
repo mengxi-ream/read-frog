@@ -44,7 +44,8 @@ describe("download translated subtitles", () => {
     vi.useRealTimers()
   })
 
-  it("delegates downloads and keeps the checking phase silent", () => {
+  it("delegates downloads and keeps delayed feedback through checking and preparing", async () => {
+    vi.useFakeTimers()
     const store = renderComponent()
     const button = screen.getByRole("button")
     fireEvent.click(button)
@@ -53,6 +54,22 @@ describe("download translated subtitles", () => {
     setStatus(store, TranslatedDownloadPhase.Checking, null)
     expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
     expect(button).toBeDisabled()
+
+    await act(() => vi.advanceTimersByTime(DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS - 1))
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+
+    setStatus(store, TranslatedDownloadPhase.Preparing, 0)
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+
+    await act(() => vi.advanceTimersByTime(1))
+    const message = screen.getByText("subtitles.actions.downloadTranslatedPreparing")
+    expect(message).toBeInTheDocument()
+    expect(message).toHaveClass("text-muted-foreground")
+    expect(message).not.toHaveTextContent("(0%)")
+
+    setStatus(store, TranslatedDownloadPhase.Idle, null)
+    expect(screen.queryByText("subtitles.actions.downloadTranslatedPreparing")).not.toBeInTheDocument()
+    expect(button).not.toBeDisabled()
   })
 
   it("delays the preparing message and does not show preparing progress", async () => {

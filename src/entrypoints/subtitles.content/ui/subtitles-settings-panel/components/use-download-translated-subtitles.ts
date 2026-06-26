@@ -27,9 +27,11 @@ export function useDownloadTranslatedSubtitles() {
   const status = useAtomValue(translatedSubtitlesDownloadStatusAtom)
   const { downloadTranslatedSubtitles } = useSubtitlesUI()
   const [showPreparingMessage, setShowPreparingMessage] = useState(false)
+  const shouldShowPreparingMessageAfterDelay = status.phase === TranslatedDownloadPhase.Checking
+    || status.phase === TranslatedDownloadPhase.Preparing
 
   useEffect(() => {
-    if (status.phase !== TranslatedDownloadPhase.Preparing) {
+    if (!shouldShowPreparingMessageAfterDelay) {
       // eslint-disable-next-line react/set-state-in-effect
       setShowPreparingMessage(false)
       return
@@ -41,16 +43,18 @@ export function useDownloadTranslatedSubtitles() {
       true,
     )
     return () => clearTimeout(timeoutId)
-  }, [status.phase])
+  }, [shouldShowPreparingMessageAfterDelay])
+
+  const preparingMessage = showPreparingMessage
+    ? i18n.t("subtitles.actions.downloadTranslatedPreparing")
+    : null
 
   const message = {
-    [TranslatedDownloadPhase.Preparing]: showPreparingMessage
-      ? i18n.t("subtitles.actions.downloadTranslatedPreparing")
-      : null,
+    [TranslatedDownloadPhase.Preparing]: preparingMessage,
     [TranslatedDownloadPhase.Translating]: i18n.t("subtitles.actions.downloadTranslatedTranslating"),
     [TranslatedDownloadPhase.Complete]: i18n.t("subtitles.actions.downloadTranslatedComplete"),
     [TranslatedDownloadPhase.Idle]: null,
-    [TranslatedDownloadPhase.Checking]: null,
+    [TranslatedDownloadPhase.Checking]: preparingMessage,
   }[status.phase]
   const messageTone = getMessageTone(status.phase, message)
   const isRunning = status.phase === TranslatedDownloadPhase.Preparing
