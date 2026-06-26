@@ -1,7 +1,21 @@
 import { describe, expect, it } from "vitest"
 
 import { POLICY } from "./config.js"
-import { planTrustActions } from "./plan-actions.js"
+import { isMigrationChangedLineFile, planTrustActions } from "./plan-actions.js"
+
+describe("isMigrationChangedLineFile", () => {
+  it("matches read-frog config migration scripts, tests, and generated fixtures", () => {
+    expect(isMigrationChangedLineFile("src/utils/config/migration-scripts/v080-to-v081.ts")).toBe(true)
+    expect(isMigrationChangedLineFile("src/utils/config/__tests__/migration-scripts/v079-to-v080.test.ts")).toBe(true)
+    expect(isMigrationChangedLineFile("src/utils/config/__tests__/example/v081.ts")).toBe(true)
+    expect(isMigrationChangedLineFile(".agents/skills/migration-scripts/SKILL.md")).toBe(false)
+    expect(isMigrationChangedLineFile("src/utils/config/migration.ts")).toBe(false)
+    expect(isMigrationChangedLineFile("src/utils/config/migration-scripts/types.ts")).toBe(false)
+    expect(isMigrationChangedLineFile("src/utils/config/__tests__/migration-scripts/all-migrations.test.ts")).toBe(false)
+    expect(isMigrationChangedLineFile("src/utils/config/__tests__/example/types.ts")).toBe(false)
+    expect(isMigrationChangedLineFile("src/entrypoints/host.content/runtime.ts")).toBe(false)
+  })
+})
 
 describe("planTrustActions", () => {
   it("assigns the low-trust labels for new contributors", () => {
@@ -108,6 +122,55 @@ describe("planTrustActions", () => {
     expect(plan.closeReason).toContain("Score 19 is below 20")
     expect(plan.closeReason).toContain("1065 lines")
     expect(plan.closeReason).toContain("exceeding 1000")
+  })
+
+  it("excludes migration-related files from the changed-line threshold", () => {
+    const plan = planTrustActions({
+      currentLabels: [],
+      pullRequest: { additions: 1699, deletions: 2 },
+      pullRequestFiles: [
+        {
+          additions: 1662,
+          deletions: 0,
+          filename: "src/utils/config/__tests__/example/v081.ts",
+        },
+        {
+          additions: 30,
+          deletions: 0,
+          filename: "src/utils/config/migration-scripts/v080-to-v081.ts",
+        },
+        {
+          additions: 4,
+          deletions: 0,
+          filename: "src/entrypoints/host.content/runtime.ts",
+        },
+        {
+          additions: 3,
+          deletions: 2,
+          filename: "src/utils/constants/config.ts",
+        },
+      ],
+      score: {
+        bucket: "new",
+        exemptReason: null,
+        total: 19,
+      },
+    })
+
+    expect(plan).toMatchObject({
+      changedLineAdditions: 7,
+      changedLineDeletions: 2,
+      changedLines: 9,
+      excludedChangedLineAdditions: 1692,
+      excludedChangedLineDeletions: 0,
+      excludedChangedLines: 1692,
+      shouldClosePr: false,
+    })
+    expect(plan.excludedChangedLineFiles).toEqual([
+      "src/utils/config/__tests__/example/v081.ts",
+      "src/utils/config/migration-scripts/v080-to-v081.ts",
+    ])
+    expect(plan.closeReason).toBeNull()
   })
 
   it("does not auto-close a low-score PR when it is still under the line threshold", () => {

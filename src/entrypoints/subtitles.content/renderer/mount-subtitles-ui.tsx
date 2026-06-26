@@ -17,10 +17,11 @@ const SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
 interface MountSubtitlesUIOptions {
   adapter: SubtitlesProvidersAdapter
   config: Pick<PlatformConfig, "selectors">
+  menuBelow?: boolean
 }
 
 export async function mountSubtitlesUI(
-  { adapter, config }: MountSubtitlesUIOptions,
+  { adapter, config, menuBelow }: MountSubtitlesUIOptions,
 ): Promise<void> {
   const videoContainer = await waitForElement(config.selectors.playerContainer)
   if (!videoContainer)
@@ -88,7 +89,7 @@ export async function mountSubtitlesUI(
 
   const app = (
     <ShadowWrapperContext value={reactContainer}>
-      <SubtitlesProviders adapter={adapter}>
+      <SubtitlesProviders adapter={adapter} openBelow={menuBelow}>
         <SubtitlesContainer />
       </SubtitlesProviders>
     </ShadowWrapperContext>

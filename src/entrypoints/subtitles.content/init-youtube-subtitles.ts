@@ -3,6 +3,7 @@ import { createYoutubeSubtitlesAdapter } from "./platforms/youtube"
 import { createYoutubeCaptionTrackListener } from "./platforms/youtube/caption-track-listener"
 import { getYoutubeConfig } from "./platforms/youtube/config"
 import { watchShortsActiveReel } from "./platforms/youtube/shorts-active-reel-watcher"
+import { mountShortsTranslateButton } from "./renderer/mount-shorts-translate-button"
 import { mountSubtitlesUI } from "./renderer/mount-subtitles-ui"
 
 function isYoutubeWatch(): boolean {
@@ -39,7 +40,7 @@ export function initYoutubeSubtitles() {
       return
     }
 
-    await mountSubtitlesUI({ adapter, config })
+    await mountSubtitlesUI({ adapter, config, menuBelow: shorts })
 
     if (initialized) {
       return
@@ -57,7 +58,11 @@ export function initYoutubeSubtitles() {
 
     if (shorts) {
       const shortsAdapter = adapter
-      watchShortsActiveReel(() => shortsAdapter.notifyNavigation())
+      void mountShortsTranslateButton(shortsAdapter)
+      watchShortsActiveReel(() => {
+        void mountShortsTranslateButton(shortsAdapter)
+        shortsAdapter.notifyNavigation()
+      })
     }
   }
 

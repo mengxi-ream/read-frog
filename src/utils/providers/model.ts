@@ -33,6 +33,7 @@ import { getProviderHeadersWithOverride } from "./headers"
 import { resolveModelId } from "./model-id"
 
 const CREATE_AI_MAPPER = {
+  "atlascloud": createOpenAICompatible,
   "siliconflow": createOpenAICompatible,
   "tensdaq": createOpenAICompatible,
   "volcengine": createOpenAICompatible,

@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: Translate
   translateSelection: Translate "%s"
+  readAloudSelection: Read aloud "%s"
   showOriginal: Show Original
 sidePanel:
   firefoxUserActionHint: In Firefox, open Read Frog from the browser sidebar.
@@ -91,8 +92,10 @@ options:
     title: API Providers
     description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
     addProvider: Add Provider
+    sponsorCta: Get fast, cost-effective AI
     badges:
       featureCount: $1 features
+      sponsor: Sponsor
     dialog:
       title: Add New Provider
       groups:
@@ -172,6 +175,7 @@ options:
         google: Google's flagship AI models with advanced reasoning capabilities
         anthropic: Claude models known for safety and reasoning excellence
         xai: Elon Musk's AI company offering Grok models with real-time data access
+        atlascloud: Unified OpenAI-compatible access to newer DeepSeek, Kimi, Qwen, Doubao, GLM, and other models
         siliconflow: High-performance inference platform for Chinese and international models
         tensdaq: Revolutionary bidding AI MaaS platform with market-driven pricing, eliminating high-cost fixed pricing
         openaiCompatible: Third-party and OpenAI API compatible
@@ -199,6 +203,9 @@ options:
     testConnection:
       button: Test Connection
       testing: Testing...
+      success: Success
+      failed: Failed
+      slow: Slow (try adjusting thinking mode)
   general:
     title: General
     appearance:
@@ -695,6 +702,10 @@ options:
       mode:
         bilingual: Bilingual
         translationOnly: Translation Only
+    translationModeShortcut:
+      title: Translation Mode Shortcut
+      description: Customize the shortcut key for switching between bilingual and translation only modes
+      switched: "Translation Mode: $1"
     translateRange:
       title: Translate Range
       description: Select whether to translate only the main content or all content on the page.

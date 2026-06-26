@@ -10,7 +10,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from "@testing-libra
 import { createStore, Provider } from "jotai"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
-import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
@@ -48,6 +48,15 @@ vi.mock("@tanstack/hotkeys", async (importOriginal) => {
     },
   }
 })
+
+vi.mock("@/utils/auth/auth-client", () => ({
+  authClient: {
+    useSession: () => ({
+      data: null,
+      isPending: false,
+    }),
+  },
+}))
 
 vi.mock("@/components/ui/selection-popover", async () => {
   const React = await import("react")
@@ -467,12 +476,6 @@ function createStructuredObjectSnapshot(output: Record<string, unknown>): Backgr
   }
 }
 
-function findAlternateTranslateProviderId(config: Config, currentProviderId: string) {
-  return config.providersConfig.find(provider =>
-    provider.id !== currentProviderId && isTranslateProviderConfig(provider),
-  )?.id
-}
-
 function findAlternateLLMProviderId(config: Config, currentProviderId: string) {
   return config.providersConfig.find(provider =>
     provider.id !== currentProviderId && isLLMProviderConfig(provider),
@@ -578,14 +581,7 @@ describe("selection toolbar requests", () => {
     expect(translateTextCoreMock).toHaveBeenCalledTimes(1)
 
     const updatedConfig = cloneConfig(store.get(configAtom))
-    const nextProviderId = findAlternateTranslateProviderId(
-      updatedConfig,
-      updatedConfig.selectionToolbar.features.translate.providerId,
-    )
-    if (!nextProviderId) {
-      throw new Error("No alternate translate provider available for test")
-    }
-    updatedConfig.selectionToolbar.features.translate.providerId = nextProviderId
+    updatedConfig.language.targetCode = "jpn"
 
     act(() => {
       store.set(configAtom, updatedConfig)
@@ -596,8 +592,8 @@ describe("selection toolbar requests", () => {
     })
 
     expect(translateTextCoreMock.mock.calls[1]?.[0]).toMatchObject({
-      providerConfig: expect.objectContaining({
-        id: nextProviderId,
+      langConfig: expect.objectContaining({
+        targetCode: "jpn",
       }),
     })
 

@@ -25,6 +25,7 @@ describe("provider constants", () => {
   })
 
   it("defines provider-specific Base URL placeholders", () => {
+    expect(PROVIDER_BASE_URL_PLACEHOLDERS.atlascloud).toBe("https://api.atlascloud.ai/v1")
     expect(PROVIDER_BASE_URL_PLACEHOLDERS.azure).toBe("https://<resource>.services.ai.azure.com/openai")
     expect(PROVIDER_BASE_URL_PLACEHOLDERS.openai).toBe("https://api.openai.com/v1")
     expect(PROVIDER_BASE_URL_PLACEHOLDERS["openai-compatible"]).toBe("https://api.example.com/v1")

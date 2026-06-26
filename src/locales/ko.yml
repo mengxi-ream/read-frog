@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: 번역
   translateSelection: '"%s" 번역'
+  readAloudSelection: '"%s" 읽어주기'
   showOriginal: 원문 보기
 sidePanel:
   firefoxUserActionHint: Firefox에서는 브라우저 사이드바에서 Read Frog를 열어 주세요.
@@ -91,8 +92,10 @@ options:
     title: API 제공업체
     description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
     addProvider: 제공업체 추가
+    sponsorCta: 빠르고 가성비 좋은 AI 받기
     badges:
       featureCount: $1 개 기능
+      sponsor: 스폰서
     dialog:
       title: 새 제공업체 추가
       groups:
@@ -171,6 +174,7 @@ options:
         google: 고급 추론 능력을 갖춘 구글의 주력 AI 모델
         anthropic: 안전성과 추론 능력이 뛰어난 Claude 모델
         xai: 실시간 데이터 접근이 가능한 Grok 모델을 제공하는 일론 머스크의 AI 회사
+        atlascloud: DeepSeek, Kimi, Qwen, Doubao, GLM 등 최신 모델에 OpenAI 호환 방식으로 접근하는 통합 플랫폼
         siliconflow: 중국 및 국제 모델을 위한 고성능 추론 플랫폼
         tensdaq: 혁신적인 경매 AI MaaS 플랫폼으로 시장 수요와 공급에 따라 가격이 결정되어 고비용 고정 요금제를 없앰
         openaiCompatible: OpenAI API 호환 서드파티
@@ -198,6 +202,9 @@ options:
     testConnection:
       button: 연결 테스트
       testing: 테스트 중...
+      success: 성공
+      failed: 실패
+      slow: 느림(사고 모드 조정 권장)
   general:
     title: 일반
     appearance:
@@ -580,6 +587,10 @@ options:
       mode:
         bilingual: 이중 언어
         translationOnly: 번역만
+    translationModeShortcut:
+      title: 번역 모드 전환 단축키
+      description: 이중 언어 모드와 번역만 모드 간 전환 단축키를 사용자 지정합니다
+      switched: "번역 모드: $1"
     translateRange:
       title: 번역 범위
       description: 페이지의 주요 내용만 번역할지 모든 내용을 번역할지 선택합니다.

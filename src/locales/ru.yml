@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: Перевести
   translateSelection: Перевести "%s"
+  readAloudSelection: Прочитать вслух "%s"
   showOriginal: Показать оригинал
 sidePanel:
   firefoxUserActionHint: В Firefox откройте Read Frog из боковой панели браузера.
@@ -91,8 +92,10 @@ options:
     title: API-провайдеры
     description: Настройте API-провайдеров для функций перевода и анализа слов. У нас более 20 встроенных провайдеров и поддержка любых OpenAI-совместимых API.
     addProvider: Добавить провайдера
+    sponsorCta: Получить быстрый и выгодный AI
     badges:
       featureCount: $1 функций
+      sponsor: Спонсор
     dialog:
       title: Добавить нового провайдера
       groups:
@@ -171,6 +174,7 @@ options:
         google: Флагманские ИИ-модели Google с продвинутыми возможностями рассуждения
         anthropic: Модели Claude, известные своей безопасностью и превосходными рассуждениями
         xai: ИИ-компания Илона Маска, предлагающая модели Grok с доступом к данным в реальном времени
+        atlascloud: Единая OpenAI-совместимая платформа для новых моделей DeepSeek, Kimi, Qwen, Doubao, GLM и других
         siliconflow: Высокопроизводительная платформа вывода для китайских и международных моделей
         tensdaq: Революционная MaaS-платформа с рыночным ценообразованием, устраняющая высокие фиксированные цены
         openaiCompatible: Сторонние и OpenAI API-совместимые
@@ -198,6 +202,9 @@ options:
     testConnection:
       button: Проверить соединение
       testing: Тестирование...
+      success: Успешно
+      failed: Ошибка
+      slow: Медленно (рекомендуется настроить режим рассуждения)
   general:
     title: Общие
     appearance:
@@ -580,6 +587,10 @@ options:
       mode:
         bilingual: Двуязычный
         translationOnly: Только перевод
+    translationModeShortcut:
+      title: Горячая клавиша режима перевода
+      description: Настройте горячую клавишу для переключения между двуязычным режимом и режимом только перевода
+      switched: "Режим перевода: $1"
     translateRange:
       title: Диапазон перевода
       description: Выберите, переводить только основное содержимое или всё содержимое на странице.

@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: Çevir
   translateSelection: '"%s" Çevir'
+  readAloudSelection: '"%s" Sesli oku'
   showOriginal: Orijinali Göster
 sidePanel:
   firefoxUserActionHint: Firefox'ta Read Frog'u tarayıcının kenar çubuğundan açın.
@@ -91,8 +92,10 @@ options:
     title: API Sağlayıcıları
     description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
     addProvider: Sağlayıcı Ekle
+    sponsorCta: Hızlı ve uygun maliyetli AI al
     badges:
       featureCount: $1 özellik
+      sponsor: Sponsor
     dialog:
       title: Yeni Sağlayıcı Ekle
       groups:
@@ -171,6 +174,7 @@ options:
         google: Gelişmiş akıl yürütme yeteneklerine sahip Google'ın amiral gemisi AI modelleri
         anthropic: Güvenlik ve akıl yürütme mükemmelliğiyle tanınan Claude modelleri
         xai: Gerçek zamanlı veri erişimli Grok modelleri sunan Elon Musk'ın AI şirketi
+        atlascloud: DeepSeek, Kimi, Qwen, Doubao ve GLM gibi yeni modellere OpenAI uyumlu birleşik erişim platformu
         siliconflow: Çin ve uluslararası modeller için yüksek performanslı çıkarım platformu
         tensdaq: Yüksek maliyetli sabit fiyatlandırmayı ortadan kaldıran pazar odaklı fiyatlandırma ile devrimci açık artırma AI MaaS platformu
         openaiCompatible: Üçüncü taraf ve OpenAI API uyumlu
@@ -198,6 +202,9 @@ options:
     testConnection:
       button: Bağlantıyı Test Et
       testing: Test ediliyor...
+      success: Başarılı
+      failed: Başarısız
+      slow: Yavaş (düşünme modunu ayarlamanız önerilir)
   general:
     title: Genel
     appearance:
@@ -580,6 +587,10 @@ options:
       mode:
         bilingual: İki Dilli
         translationOnly: Yalnızca Çeviri
+    translationModeShortcut:
+      title: Çeviri Modu Kısayolu
+      description: İki dilli ve yalnızca çeviri modları arasında geçiş yapmak için kısayol tuşunu özelleştirin
+      switched: "Çeviri Modu: $1"
     translateRange:
       title: Çeviri Kapsamı
       description: Sayfadaki yalnızca ana içeriğin mi yoksa tüm içeriğin mi çevrileceğini seçin.

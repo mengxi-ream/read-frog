@@ -40,12 +40,12 @@ const embedWrapperCSS = `
   }
 `
 
-export function renderSubtitlesTranslateButton(adapter: SubtitlesProvidersAdapter): HTMLDivElement {
+export function renderSubtitlesTranslateButton({ adapter, openBelow = false }: { adapter: SubtitlesProvidersAdapter, openBelow?: boolean }): HTMLDivElement {
   const existingContainer = document.querySelector<HTMLDivElement>(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
   if (existingContainer)
     return existingContainer
 
-  const component = adapter.embedded
+  const component = adapter.embedded && !openBelow
     ? (
         <SubtitlesProviders adapter={adapter}>
           <SubtitlesTranslateButton />
@@ -58,6 +58,7 @@ export function renderSubtitlesTranslateButton(adapter: SubtitlesProvidersAdapte
     position: "inline",
     inheritStyles: false,
     cssContent: [themeCSS, adapter.embedded ? embedWrapperCSS : wrapperCSS],
+    forcedTheme: SUBTITLES_THEME,
     ...(adapter.embedded && { style: { position: "relative" } }),
   }) as HTMLDivElement
 

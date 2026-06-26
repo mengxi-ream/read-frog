@@ -8,6 +8,7 @@ import { SessionCacheGroupRegistry } from "@/utils/session-cache/session-cache-g
 import { runAiSegmentSubtitles } from "./ai-segmentation"
 import { setupAnalyticsMessageHandlers } from "./analytics"
 import { dispatchBackgroundStreamPort } from "./background-stream"
+import { initializeActionIcons, registerActionIconListeners } from "./browser-action-icon"
 import { ensureInitializedConfig } from "./config"
 import { setUpConfigBackup } from "./config-backup"
 import { initializeContextMenu, registerContextMenuListeners } from "./context-menu"
@@ -90,12 +91,14 @@ export default defineBackground({
     newUserGuide()
     setupAnalyticsMessageHandlers()
     translationMessage()
+    registerActionIconListeners()
 
     // Register context menu listeners synchronously
     // This ensures listeners are registered before Chrome completes initialization
     registerContextMenuListeners()
 
     // Initialize context menu items asynchronously
+    void initializeActionIcons()
     void initializeContextMenu()
 
     void setUpWebPageTranslationQueue()

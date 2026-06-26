@@ -225,7 +225,7 @@ describe("feature providers", () => {
           ...getProviderById("openai-default"),
           enabled: false,
         },
-        getProviderById("google-default"),
+        getProviderById("deepseek-default"),
       ]
 
       const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
@@ -237,7 +237,7 @@ describe("feature providers", () => {
       expect(result).toEqual([
         expect.objectContaining({
           id: "action-a",
-          providerId: "google-default",
+          providerId: "deepseek-default",
         }),
       ])
     })
@@ -310,7 +310,7 @@ describe("feature providers", () => {
       const result = resolveLanguageDetectionConfigForModeChange(
         {
           mode: "basic",
-          providerId: "google-default",
+          providerId: "deepseek-default",
         },
         "llm",
         DEFAULT_CONFIG.providersConfig,
@@ -318,7 +318,7 @@ describe("feature providers", () => {
 
       expect(result).toEqual({
         mode: "llm",
-        providerId: "google-default",
+        providerId: "deepseek-default",
       })
     })
 
@@ -332,7 +332,7 @@ describe("feature providers", () => {
             enabled: false,
           },
           {
-            ...getProviderById("google-default"),
+            ...getProviderById("deepseek-default"),
             enabled: false,
           },
         ],
@@ -360,11 +360,11 @@ describe("feature providers", () => {
             ...getProviderById("openai-default"),
             enabled: false,
           },
-          getProviderById("google-default"),
+          getProviderById("deepseek-default"),
         ],
       )
 
-      expect(result).toBe("google-default")
+      expect(result).toBe("deepseek-default")
     })
   })
 })

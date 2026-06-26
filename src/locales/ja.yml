@@ -8,6 +8,7 @@ dataTypes:
 contextMenu:
   translate: 翻訳
   translateSelection: 「%s」を翻訳
+  readAloudSelection: 「%s」を読み上げ
   showOriginal: 原文を表示
 sidePanel:
   firefoxUserActionHint: Firefox では、ブラウザーのサイドバーから Read Frog を開いてください。
@@ -91,8 +92,10 @@ options:
     title: APIプロバイダー
     description: 翻訳および語彙分析機能用のAPIプロバイダーを設定。20以上の内蔵プロバイダーに加え、OpenAI互換APIもサポートしています。
     addProvider: プロバイダーを追加
+    sponsorCta: 高速で高コスパのAIを入手
     badges:
       featureCount: $1 件の機能
+      sponsor: スポンサー
     dialog:
       title: 新しいプロバイダーを追加
       groups:
@@ -171,6 +174,7 @@ options:
         google: 高度な推論能力を持つGoogleの主力AIモデル
         anthropic: 安全性と推論能力に優れたClaudeモデル
         xai: リアルタイムデータアクセス可能なGrokモデルを提供するイーロン・マスクのAI企業
+        atlascloud: DeepSeek、Kimi、Qwen、Doubao、GLMなどの新しめのモデルにOpenAI互換でアクセスできる統合プラットフォーム
         siliconflow: 中国および国際モデル向けの高性能推論プラットフォーム
         tensdaq: 革命的入札型AI MaaSプラットフォーム、市場の需給で価格が決まり高コスト固定料金を排除
         openaiCompatible: OpenAI API互換のサードパーティー
@@ -198,6 +202,9 @@ options:
     testConnection:
       button: 接続テスト
       testing: テスト中...
+      success: 成功
+      failed: 失敗
+      slow: 低速（思考モードの調整を推奨）
   general:
     title: 一般
     appearance:
@@ -580,6 +587,10 @@ options:
       mode:
         bilingual: バイリンガル
         translationOnly: 翻訳のみ
+    translationModeShortcut:
+      title: 翻訳モード切り替えショートカット
+      description: バイリンガルモードと翻訳のみモードを切り替えるショートカットキーをカスタマイズ
+      switched: 翻訳モード：$1
     translateRange:
       title: 翻訳範囲
       description: ページのメインコンテンツのみを翻訳するか、すべてのコンテンツを翻訳するかを選択します。

@@ -4,13 +4,14 @@ import { browser, i18n, storage } from "#imports"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
-import { getTranslationStateKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
+import { getTranslationStateKey, parseTabIdFromStorageKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
 import { getPageTranslationEnabled, setPageTranslationEnabled } from "./page-translation-state"
 
 export const MENU_ID_TRANSLATE = "read-frog-translate"
 export const MENU_ID_SELECTION_TRANSLATE = "read-frog-selection-translate"
+export const MENU_ID_SELECTION_READ_ALOUD = "read-frog-selection-read-aloud"
 export const MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX = "read-frog-selection-custom-action:"
 
 function getSelectionCustomActionMenuId(actionId: string) {
@@ -50,9 +51,7 @@ export function registerContextMenuListeners() {
     for (const [key, change] of Object.entries(changes)) {
       // Check if this is a translation state change
       if (key.startsWith(TRANSLATION_STATE_KEY_PREFIX.replace("session:", ""))) {
-        // Extract tabId from key (format: "translationState.{tabId}")
-        const parts = key.split(".")
-        const tabId = Number.parseInt(parts[1])
+        const tabId = parseTabIdFromStorageKey(key)
 
         if (!Number.isNaN(tabId)) {
           // Only update menu if this is the active tab
@@ -105,6 +104,12 @@ async function updateContextMenuItems(config: Config) {
     browser.contextMenus.create({
       id: MENU_ID_SELECTION_TRANSLATE,
       title: i18n.t("contextMenu.translateSelection"),
+      contexts: ["selection"],
+    })
+
+    browser.contextMenus.create({
+      id: MENU_ID_SELECTION_READ_ALOUD,
+      title: i18n.t("contextMenu.readAloudSelection"),
       contexts: ["selection"],
     })
 
@@ -181,6 +186,11 @@ async function handleContextMenuClick(
     return
   }
 
+  if (info.menuItemId === MENU_ID_SELECTION_READ_ALOUD) {
+    await handleSelectionReadAloudClick(info, tab.id)
+    return
+  }
+
   if (typeof info.menuItemId === "string" && info.menuItemId.startsWith(MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX)) {
     const actionId = info.menuItemId.slice(MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX.length)
     if (!actionId) {
@@ -231,6 +241,22 @@ async function handleSelectionTranslateClick(
   void sendMessage("openSelectionTranslationFromContextMenu", {
     selectionText,
   }, target)
+}
+
+async function handleSelectionReadAloudClick(
+  info: Browser.contextMenus.OnClickData,
+  tabId: number,
+) {
+  const selectionText = info.selectionText?.trim()
+  if (!selectionText) {
+    return
+  }
+
+  const target = typeof info.frameId === "number"
+    ? { tabId, frameId: info.frameId }
+    : tabId
+
+  void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target)
 }
 
 async function handleSelectionCustomActionClick(

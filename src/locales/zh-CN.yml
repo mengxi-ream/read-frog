@@ -7,7 +7,8 @@ dataTypes:
   number: 数字
 contextMenu:
   translate: 翻译
-  translateSelection: 翻译“%s”
+  translateSelection: 翻译”%s”
+  readAloudSelection: 朗读”%s”
   showOriginal: 显示原文
 sidePanel:
   firefoxUserActionHint: 在 Firefox 中，请从浏览器侧边栏打开陪读蛙。
@@ -91,8 +92,10 @@ options:
     title: API 提供商
     description: 配置用于翻译和词汇解析功能的 API 提供商。我们内置了 20 多个提供商，并支持任何 OpenAI 兼容 API 提供商。
     addProvider: 添加提供商
+    sponsorCta: 获取高速性价比 AI
     badges:
       featureCount: $1 个功能
+      sponsor: 赞助
     dialog:
       title: 添加新提供商
       groups:
@@ -172,6 +175,7 @@ options:
         google: 具有先进推理能力的谷歌旗舰 AI 模型
         anthropic: 以安全性和推理能力著称的 Claude 模型
         xai: 马斯克的 AI 公司，提供具有实时数据访问能力的 Grok 模型
+        atlascloud: 统一的 OpenAI 兼容模型平台，提供 DeepSeek、Kimi、Qwen、豆包、GLM 等较新模型
         siliconflow: 面向中国和国际模型的高性能推理平台
         tensdaq: 革命性竞价 AI MaaS 平台，价格由市场供需决定，告别高成本固定定价
         openaiCompatible: OpenAI API 兼容的第三方
@@ -199,6 +203,9 @@ options:
     testConnection:
       button: 测试连接
       testing: 测试中...
+      success: 成功
+      failed: 失败
+      slow: 缓慢（建议调节思考模式）
   general:
     title: 通用
     appearance:
@@ -695,6 +702,10 @@ options:
       mode:
         bilingual: 双语对照
         translationOnly: 仅显示翻译
+    translationModeShortcut:
+      title: 切换翻译模式快捷键
+      description: 自定义在双语对照和仅显示翻译模式之间切换的快捷键
+      switched: 翻译模式：$1
     translateRange:
       title: 翻译范围
       description: 选择是仅翻译主要内容还是翻译页面上的所有内容。

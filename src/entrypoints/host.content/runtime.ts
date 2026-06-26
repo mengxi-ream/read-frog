@@ -9,6 +9,7 @@ import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
 import { areSamePageTranslationOrigin } from "@/utils/url"
 import { setupUrlChangeListener } from "./listen"
 import { mountHostToast } from "./mount-host-toast"
+import { bindTranslationModeShortcutKey } from "./translation-control/bind-translation-mode-shortcut"
 import { bindTranslationShortcutKey } from "./translation-control/bind-translation-shortcut"
 import { registerNodeTranslationTriggers } from "./translation-control/node-translation"
 import { PageTranslationManager } from "./translation-control/page-translation"
@@ -32,6 +33,8 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
   const cleanupPageTranslationTriggers = manager.registerPageTranslationTriggers()
 
   const cleanupTranslationShortcut = await bindTranslationShortcutKey(manager)
+
+  const cleanupTranslationModeShortcut = await bindTranslationModeShortcutKey()
 
   const detectAndReportPageLanguage = async (url: string) => {
     const { detectedCodeOrUnd } = await detectPageLanguageLightweight()
@@ -104,6 +107,7 @@ export async function bootstrapHostContent(ctx: ContentScriptContext, initialCon
     teardownNodeTranslation()
     cleanupPageTranslationTriggers()
     cleanupTranslationShortcut()
+    cleanupTranslationModeShortcut()
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
     cleanupDetectedLanguageRefreshListener()

@@ -49,6 +49,7 @@ describe("background context menu", () => {
     i18n.t = vi.fn((key: string) => ({
       "contextMenu.translate": "Translate",
       "contextMenu.translateSelection": "Translate \"%s\"",
+      "contextMenu.readAloudSelection": "Read aloud \"%s\"",
       "contextMenu.showOriginal": "Show Original",
     })[key] ?? key) as typeof i18n.t
   })
@@ -56,7 +57,7 @@ describe("background context menu", () => {
   it("creates page and selection menu items when the context menu is enabled", async () => {
     ensureInitializedConfigMock.mockResolvedValue(createConfig(true))
 
-    const { initializeContextMenu, MENU_ID_SELECTION_TRANSLATE, MENU_ID_TRANSLATE } = await import("../context-menu")
+    const { initializeContextMenu, MENU_ID_SELECTION_TRANSLATE, MENU_ID_TRANSLATE, MENU_ID_SELECTION_READ_ALOUD } = await import("../context-menu")
 
     await initializeContextMenu()
 
@@ -69,6 +70,11 @@ describe("background context menu", () => {
     expect(browser.contextMenus.create).toHaveBeenNthCalledWith(2, {
       id: MENU_ID_SELECTION_TRANSLATE,
       title: "Translate \"%s\"",
+      contexts: ["selection"],
+    })
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(3, {
+      id: MENU_ID_SELECTION_READ_ALOUD,
+      title: "Read aloud \"%s\"",
       contexts: ["selection"],
     })
     expect(browser.contextMenus.update).toHaveBeenCalledWith(MENU_ID_TRANSLATE, {
@@ -92,12 +98,12 @@ describe("background context menu", () => {
 
     await initializeContextMenu()
 
-    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(3, {
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(4, {
       id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}dictionary`,
       title: "Dictionary",
       contexts: ["selection"],
     })
-    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(4, {
+    expect(browser.contextMenus.create).toHaveBeenNthCalledWith(5, {
       id: `${MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX}rewrite`,
       title: "Rewrite",
       contexts: ["selection"],
@@ -138,6 +144,31 @@ describe("background context menu", () => {
       "openSelectionTranslationFromContextMenu",
       { selectionText: "Selected text" },
       { tabId: 5, frameId: 7 },
+    )
+  })
+
+  it("routes read aloud menu clicks to the matching tab and frame", async () => {
+    const { MENU_ID_SELECTION_READ_ALOUD, registerContextMenuListeners } = await import("../context-menu")
+
+    registerContextMenuListeners()
+
+    const clickHandler = contextMenuClickListeners[0]
+    if (!clickHandler) {
+      throw new Error("Context menu click listener was not registered")
+    }
+
+    await clickHandler({
+      menuItemId: MENU_ID_SELECTION_READ_ALOUD,
+      selectionText: "Selected text",
+      frameId: 4,
+    }, {
+      id: 2,
+    })
+
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "readAloudSelectionFromContextMenu",
+      { selectionText: "Selected text" },
+      { tabId: 2, frameId: 4 },
     )
   })
 

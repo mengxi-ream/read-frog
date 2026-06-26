@@ -10,6 +10,7 @@ interface SubtitlesUIContextValue {
   downloadTranslatedSubtitles: () => Promise<void>
   controlsConfig?: ControlsConfig
   embedded?: boolean
+  openBelow?: boolean
   containerShrinkRatio?: (container: HTMLElement) => number | null
 }
 
@@ -31,9 +32,11 @@ export type SubtitlesProvidersAdapter = Pick<
 export function SubtitlesProviders({
   adapter,
   children,
+  openBelow,
 }: {
   adapter: SubtitlesProvidersAdapter
   children: React.ReactNode
+  openBelow?: boolean
 }) {
   return (
     <JotaiProvider store={subtitlesStore}>
@@ -44,6 +47,7 @@ export function SubtitlesProviders({
           downloadTranslatedSubtitles: adapter.downloadTranslatedSubtitles,
           controlsConfig: adapter.getControlsConfig(),
           embedded: adapter.embedded,
+          openBelow,
           containerShrinkRatio: adapter.containerShrinkRatio,
         }}
       >

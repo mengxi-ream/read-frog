@@ -45,10 +45,6 @@ function isInlineDisplay(display: string): boolean {
     return false
   }
 
-  if (normalizedDisplay === "contents") {
-    return true
-  }
-
   if (normalizedDisplay.startsWith("inline")) {
     return true
   }
