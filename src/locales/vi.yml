@@ -200,6 +200,9 @@ options:
     testConnection:
       button: Kiểm tra kết nối
       testing: Đang kiểm tra...
+      success: Thành công
+      failed: Thất bại
+      slow: Chậm (nên điều chỉnh chế độ suy nghĩ)
   general:
     title: Chung
     appearance:

@@ -201,6 +201,9 @@ options:
     testConnection:
       button: Probar conexión
       testing: Probando...
+      success: Correcto
+      failed: Falló
+      slow: Lento (se recomienda ajustar el modo de razonamiento)
   general:
     title: General
     appearance:

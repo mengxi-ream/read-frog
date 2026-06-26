@@ -200,6 +200,9 @@ options:
     testConnection:
       button: Bağlantıyı Test Et
       testing: Test ediliyor...
+      success: Başarılı
+      failed: Başarısız
+      slow: Yavaş (düşünme modunu ayarlamanız önerilir)
   general:
     title: Genel
     appearance:

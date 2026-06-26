@@ -200,6 +200,9 @@ options:
     testConnection:
       button: 接続テスト
       testing: テスト中...
+      success: 成功
+      failed: 失敗
+      slow: 低速（思考モードの調整を推奨）
   general:
     title: 一般
     appearance:

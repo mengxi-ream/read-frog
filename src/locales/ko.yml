@@ -200,6 +200,9 @@ options:
     testConnection:
       button: 연결 테스트
       testing: 테스트 중...
+      success: 성공
+      failed: 실패
+      slow: 느림(사고 모드 조정 권장)
   general:
     title: 일반
     appearance:

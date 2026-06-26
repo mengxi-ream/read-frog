@@ -200,6 +200,9 @@ options:
     testConnection:
       button: Проверить соединение
       testing: Тестирование...
+      success: Успешно
+      failed: Ошибка
+      slow: Медленно (рекомендуется настроить режим рассуждения)
   general:
     title: Общие
     appearance:

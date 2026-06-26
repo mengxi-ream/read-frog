@@ -201,6 +201,9 @@ options:
     testConnection:
       button: Test Connection
       testing: Testing...
+      success: Success
+      failed: Failed
+      slow: Slow (try adjusting thinking mode)
   general:
     title: General
     appearance:

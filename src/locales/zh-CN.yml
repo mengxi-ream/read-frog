@@ -201,6 +201,9 @@ options:
     testConnection:
       button: 测试连接
       testing: 测试中...
+      success: 成功
+      failed: 失败
+      slow: 缓慢（建议调节思考模式）
   general:
     title: 通用
     appearance:

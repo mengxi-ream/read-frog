@@ -201,6 +201,9 @@ options:
     testConnection:
       button: 測試連線
       testing: 測試中…
+      success: 成功
+      failed: 失敗
+      slow: 緩慢（建議調整思考模式）
   general:
     title: 通用
     appearance:
