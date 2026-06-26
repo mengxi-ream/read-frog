@@ -96,6 +96,16 @@ describe("inline/block display detection", () => {
     expect(isShallowInlineHTMLElement(element)).toBe(false)
     expect(isShallowBlockHTMLElement(element)).toBe(true)
   })
+
+  it("should treat display contents as block", () => {
+    const element = document.createElement("a")
+    element.textContent = "Market item"
+    element.style.display = "contents"
+
+    expect(window.getComputedStyle(element).display).toBe("contents")
+    expect(isShallowInlineHTMLElement(element)).toBe(false)
+    expect(isShallowBlockHTMLElement(element)).toBe(true)
+  })
 })
 
 function createConfig(range: "main" | "all"): Config {
