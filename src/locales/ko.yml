@@ -160,6 +160,8 @@ options:
       providerOptionsRecommendationApplied: 적용됨
       invalidJson: 잘못된 JSON 형식
     providers:
+      name:
+        freeAi: 무료 AI 서비스
       description:
         openai: GPT-4o 같은 모델을 제공합니다
         azure: Azure 배포를 통해 OpenAI 모델 사용
@@ -865,8 +867,9 @@ side:
 translateService:
   title: 번역 서비스
   description: 웹페이지 번역 전용
+  builtInModels: Built-in Models
+  llmModels: LLM Models
   normalTranslator: 일반 번역기
-  aiTranslator: AI 번역기
   selectServices: 서비스 선택
   translationProviders: 번역 서비스
   configureAPI: API 설정
@@ -973,6 +976,11 @@ subtitles:
     translatedExportFailed: 번역 자막 생성에 실패했습니다
     translatedExportIncomplete: 모든 자막 줄을 번역하지 못했습니다
     translatedExportSameLanguage: 원본 언어와 대상 언어가 같습니다
+hostedAi:
+  errors:
+    rateLimited: 요청이 너무 많습니다. 나중에 다시 시도해 주세요.
+    guestRateLimited: 게스트 한도에 도달했습니다. 로그인하면 무료 AI 요청을 더 사용할 수 있습니다.
+    userRateLimited: 요청이 너무 많습니다. 무료 사용 한도를 초과했습니다. 나중에 다시 시도해 주세요.
 hotkey:
   control: Ctrl
   alt: Option

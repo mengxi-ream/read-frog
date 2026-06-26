@@ -4,6 +4,7 @@ import type {
   BackgroundStreamSnapshot,
   BackgroundStreamStructuredObjectSerializablePayload,
   BackgroundStreamTextSerializablePayload,
+  BackgroundStructuredObjectOutputField,
   BackgroundStructuredObjectStreamSnapshot,
   BackgroundTextStreamSnapshot,
   StartMessageParseResult,
@@ -16,12 +17,21 @@ import type {
 } from "@/types/background-stream"
 import { Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
+import { i18n } from "#imports"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { logger } from "@/utils/logger"
+import { backgroundOrpcClient } from "@/utils/orpc/background-client"
 import { getModelById } from "@/utils/providers/model"
+import { isFreeAiProviderId } from "@/utils/providers/provider-registry"
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
+const aiStreamProtocolErrorMessage = "Invalid AI stream response."
+const aiOutputValidationErrorMessage = "AI output does not match the expected format."
+const aiOutputLengthLimitErrorMessage
+  = "The AI output reached the length limit. Please reduce the requested output length and try again."
+
+type AiStreamPart = Record<string, unknown> & { type: string }
 
 function createStreamAbortError(message: string) {
   return new DOMException(message, "AbortError")
@@ -240,48 +250,153 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value)
 }
 
-export async function runStreamTextInBackground(
-  serializablePayload: BackgroundStreamTextSerializablePayload,
-  options: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {},
-): Promise<BackgroundTextStreamSnapshot> {
-  const { providerId, ...streamTextParams } = serializablePayload
-  const { signal, onChunk, onError } = options
-
-  if (signal?.aborted) {
-    throw new DOMException("stream aborted", "AbortError")
+class BackgroundStreamError extends Error {
+  constructor(
+    readonly code: string,
+    message: string,
+    options?: { cause?: unknown, retryAfterMs?: number },
+  ) {
+    super(message, { cause: options?.cause })
+    this.retryAfterMs = options?.retryAfterMs
   }
 
-  const model = await getModelById(providerId)
+  readonly retryAfterMs?: number
+}
+
+function toAiStreamPart(part: unknown): AiStreamPart {
+  if (!isRecord(part) || typeof part.type !== "string" || part.type.trim().length === 0) {
+    throw new BackgroundStreamError("stream_protocol_error", aiStreamProtocolErrorMessage)
+  }
+
+  return part as AiStreamPart
+}
+
+function createStructuredObjectSchema(
+  outputSchema: BackgroundStructuredObjectOutputField[],
+): z.ZodObject<Record<string, z.ZodTypeAny>> {
+  const fieldTypeToZodSchema: Record<string, z.ZodTypeAny> = {
+    string: z.string().nullable(),
+    number: z.number().nullable(),
+  }
+
+  const schemaShape: Record<string, z.ZodTypeAny> = {}
+  for (const field of outputSchema) {
+    schemaShape[field.name] = fieldTypeToZodSchema[field.type] ?? z.string().nullable()
+  }
+
+  return z.strictObject(schemaShape)
+}
+
+function getStringPartField(part: Record<string, unknown>, field: string): string {
+  const value = part[field]
+  if (typeof value !== "string") {
+    throw new BackgroundStreamError("stream_protocol_error", aiStreamProtocolErrorMessage)
+  }
+
+  return value
+}
+
+function getStreamPartError(part: Record<string, unknown>): unknown {
+  return "error" in part
+    ? part.error
+    : new BackgroundStreamError("stream_protocol_error", aiStreamProtocolErrorMessage)
+}
+
+function isOrpcRateLimitError(error: unknown): boolean {
+  if (typeof error !== "object" || error === null) {
+    return false
+  }
+
+  const candidate = error as { code?: unknown, status?: unknown }
+  return candidate.status === 429 || candidate.code === "TOO_MANY_REQUESTS"
+}
+
+function getHostedAiRateLimitQuotaScope(error: unknown): "guest" | "user" | undefined {
+  if (!isRecord(error) || !isRecord(error.data)) {
+    return undefined
+  }
+
+  if (error.data.quotaScope === "guest" || error.data.quotaScope === "user") {
+    return error.data.quotaScope
+  }
+
+  return undefined
+}
+
+function getHostedAiRateLimitMessage(error: unknown): string {
+  switch (getHostedAiRateLimitQuotaScope(error)) {
+    case "guest":
+      return i18n.t("hostedAi.errors.guestRateLimited")
+    case "user":
+      return i18n.t("hostedAi.errors.userRateLimited")
+    default:
+      return i18n.t("hostedAi.errors.rateLimited")
+  }
+}
+
+function normalizeHostedAiError(error: unknown): unknown {
+  if (isOrpcRateLimitError(error)) {
+    return new BackgroundStreamError("rate_limited", getHostedAiRateLimitMessage(error), { cause: error })
+  }
+
+  return error
+}
+
+function getStreamFinishReason(part: Record<string, unknown>): string | undefined {
+  return typeof part.finishReason === "string"
+    ? part.finishReason
+    : undefined
+}
+
+function validateFinishedStream(hasFinish: boolean, finishReason: string | undefined): void {
+  if (!hasFinish) {
+    throw new BackgroundStreamError("stream_protocol_error", aiStreamProtocolErrorMessage)
+  }
+
+  if (finishReason === "length") {
+    throw new BackgroundStreamError("output_validation_failed", aiOutputLengthLimitErrorMessage)
+  }
+}
+
+async function consumeTextPartStream(
+  partStream: AsyncIterable<unknown>,
+  options: {
+    onChunk?: StreamRuntimeOptions<BackgroundTextStreamSnapshot>["onChunk"]
+    signal?: AbortSignal
+  },
+): Promise<BackgroundTextStreamSnapshot> {
+  const { onChunk, signal } = options
   let cumulativeText = ""
   let thinking: ThinkingSnapshot = {
     status: "thinking",
     text: "",
   }
+  let hasFinish = false
+  let finishReason: string | undefined
 
-  const result = streamText({
-    ...(streamTextParams as Parameters<typeof streamText>[0]),
-    model,
-    abortSignal: signal,
-    onError: ({ error }) => {
-      onError?.(error)
-    },
-  })
-
-  for await (const part of result.fullStream) {
+  for await (const rawPart of partStream) {
     if (signal?.aborted) {
       throw new DOMException("stream aborted", "AbortError")
     }
 
+    const part = toAiStreamPart(rawPart)
     switch (part.type) {
       case "text-delta": {
-        cumulativeText += part.text
+        cumulativeText += getStringPartField(part, "text")
         onChunk?.(createStreamSnapshot(cumulativeText, thinking))
+        break
+      }
+      case "reasoning-start": {
+        thinking = {
+          ...thinking,
+          status: "thinking",
+        }
         break
       }
       case "reasoning-delta": {
         thinking = {
           status: "thinking",
-          text: thinking.text + part.text,
+          text: thinking.text + getStringPartField(part, "text"),
         }
         onChunk?.(createStreamSnapshot(cumulativeText, thinking))
         break
@@ -294,11 +409,21 @@ export async function runStreamTextInBackground(
         onChunk?.(createStreamSnapshot(cumulativeText, thinking))
         break
       }
+      case "finish": {
+        hasFinish = true
+        finishReason = getStreamFinishReason(part)
+        break
+      }
       case "error": {
-        throw part.error
+        throw getStreamPartError(part)
+      }
+      default: {
+        break
       }
     }
   }
+
+  validateFinishedStream(hasFinish, finishReason)
 
   thinking = {
     ...thinking,
@@ -308,35 +433,165 @@ export async function runStreamTextInBackground(
   return createStreamSnapshot(cumulativeText, thinking)
 }
 
-export async function runStructuredObjectStreamInBackground(
-  serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
-  options: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot> = {},
+async function consumeStructuredObjectPartStream(
+  partStream: AsyncIterable<unknown>,
+  options: {
+    objectSchema: z.ZodObject<Record<string, z.ZodTypeAny>>
+    onChunk?: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot>["onChunk"]
+    signal?: AbortSignal
+  },
 ): Promise<BackgroundStructuredObjectStreamSnapshot> {
-  const { providerId, outputSchema, ...streamParams } = serializablePayload
-  const { signal, onChunk, onError } = options
-
-  if (signal?.aborted) {
-    throw new DOMException("stream aborted", "AbortError")
-  }
-
-  const model = await getModelById(providerId)
+  const { objectSchema, onChunk, signal } = options
+  let cumulativeText = ""
   let cumulativeValue: Record<string, unknown> = {}
   let thinking: ThinkingSnapshot = {
     status: "thinking",
     text: "",
   }
+  let hasFinish = false
+  let finishReason: string | undefined
 
-  const fieldTypeToZodSchema: Record<string, z.ZodTypeAny> = {
-    string: z.string().nullable(),
-    number: z.number().nullable(),
+  for await (const rawPart of partStream) {
+    if (signal?.aborted) {
+      throw new DOMException("stream aborted", "AbortError")
+    }
+
+    const part = toAiStreamPart(rawPart)
+    switch (part.type) {
+      case "text-delta": {
+        cumulativeText += getStringPartField(part, "text")
+        const partial = await parsePartialJson(cumulativeText)
+        if (isRecord(partial.value)) {
+          cumulativeValue = { ...cumulativeValue, ...partial.value }
+          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+        }
+        break
+      }
+      case "reasoning-start": {
+        thinking = {
+          ...thinking,
+          status: "thinking",
+        }
+        break
+      }
+      case "reasoning-delta": {
+        thinking = {
+          status: "thinking",
+          text: thinking.text + getStringPartField(part, "text"),
+        }
+        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+        break
+      }
+      case "reasoning-end": {
+        thinking = {
+          ...thinking,
+          status: "complete",
+        }
+        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
+        break
+      }
+      case "finish": {
+        hasFinish = true
+        finishReason = getStreamFinishReason(part)
+        break
+      }
+      case "error": {
+        throw getStreamPartError(part)
+      }
+      default: {
+        break
+      }
+    }
   }
 
-  const schemaShape: Record<string, z.ZodTypeAny> = {}
-  for (const field of outputSchema) {
-    schemaShape[field.name] = fieldTypeToZodSchema[field.type] ?? z.string().nullable()
-  }
-  const objectSchema = z.object(schemaShape).strict()
+  validateFinishedStream(hasFinish, finishReason)
 
+  try {
+    const finalJson = await parsePartialJson(cumulativeText)
+    const finalValue = objectSchema.parse(finalJson.value)
+    thinking = {
+      ...thinking,
+      status: "complete",
+    }
+
+    return createStreamSnapshot(finalValue, thinking)
+  }
+  catch (error) {
+    throw new BackgroundStreamError("output_validation_failed", aiOutputValidationErrorMessage, { cause: error })
+  }
+}
+
+async function createLocalTextPartStream(
+  serializablePayload: BackgroundStreamTextSerializablePayload,
+  options: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {},
+): Promise<AsyncIterable<unknown>> {
+  const { providerId, ...streamTextParams } = serializablePayload
+  const { signal, onError } = options
+
+  const model = await getModelById(providerId)
+  const result = streamText({
+    ...(streamTextParams as Parameters<typeof streamText>[0]),
+    model,
+    abortSignal: signal,
+    onError: ({ error }) => {
+      onError?.(error)
+    },
+  })
+
+  return result.fullStream
+}
+
+async function createHostedTextPartStream(
+  serializablePayload: BackgroundStreamTextSerializablePayload,
+  signal?: AbortSignal,
+): Promise<AsyncIterable<unknown>> {
+  const { prompt, system, temperature } = serializablePayload
+
+  if (!system || !prompt) {
+    throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
+  }
+
+  try {
+    return await backgroundOrpcClient.hostedAi.translate.streamText({
+      system,
+      prompt,
+      temperature,
+    }, { signal })
+  }
+  catch (error) {
+    throw normalizeHostedAiError(error)
+  }
+}
+
+export async function runStreamTextInBackground(
+  serializablePayload: BackgroundStreamTextSerializablePayload,
+  options: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {},
+): Promise<BackgroundTextStreamSnapshot> {
+  const { signal, onChunk } = options
+
+  if (signal?.aborted) {
+    throw new DOMException("stream aborted", "AbortError")
+  }
+
+  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+    ? await createHostedTextPartStream(serializablePayload, signal)
+    : await createLocalTextPartStream(serializablePayload, options)
+
+  return consumeTextPartStream(partStream, {
+    onChunk,
+    signal,
+  })
+}
+
+async function createLocalStructuredObjectPartStream(
+  serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
+  objectSchema: z.ZodObject<Record<string, z.ZodTypeAny>>,
+  options: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot> = {},
+): Promise<AsyncIterable<unknown>> {
+  const { providerId, outputSchema: _outputSchema, ...streamParams } = serializablePayload
+  const { signal, onError } = options
+
+  const model = await getModelById(providerId)
   const result = streamText({
     ...(streamParams as Parameters<typeof streamText>[0]),
     model,
@@ -348,54 +603,53 @@ export async function runStructuredObjectStreamInBackground(
       onError?.(error)
     },
   })
-  let cumulativeText = ""
 
-  for await (const part of result.fullStream) {
-    if (signal?.aborted) {
-      throw new DOMException("stream aborted", "AbortError")
-    }
+  return result.fullStream
+}
 
-    switch (part.type) {
-      case "text-delta": {
-        cumulativeText += part.text
-        const partial = await parsePartialJson(cumulativeText)
-        if (isRecord(partial.value)) {
-          cumulativeValue = { ...cumulativeValue, ...partial.value }
-          onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
-        }
-        break
-      }
-      case "reasoning-delta": {
-        thinking = {
-          status: "thinking",
-          text: thinking.text + part.text,
-        }
-        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
-        break
-      }
-      case "reasoning-end": {
-        thinking = {
-          ...thinking,
-          status: "complete",
-        }
-        onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
-        break
-      }
-      case "error": {
-        throw part.error
-      }
-    }
+async function createHostedStructuredObjectPartStream(
+  serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
+  signal?: AbortSignal,
+): Promise<AsyncIterable<unknown>> {
+  const { outputSchema, prompt, system, temperature } = serializablePayload
+
+  if (!system || !prompt) {
+    throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
   }
 
-  const finalJson = await parsePartialJson(cumulativeText)
-  const finalValue = objectSchema.parse(finalJson.value)
+  try {
+    return await backgroundOrpcClient.hostedAi.customAction.streamStructuredObject({
+      system,
+      prompt,
+      outputSchema,
+      temperature,
+    }, { signal })
+  }
+  catch (error) {
+    throw normalizeHostedAiError(error)
+  }
+}
 
-  thinking = {
-    ...thinking,
-    status: "complete",
+export async function runStructuredObjectStreamInBackground(
+  serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
+  options: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot> = {},
+): Promise<BackgroundStructuredObjectStreamSnapshot> {
+  const { signal, onChunk } = options
+
+  if (signal?.aborted) {
+    throw new DOMException("stream aborted", "AbortError")
   }
 
-  return createStreamSnapshot(finalValue, thinking)
+  const objectSchema = createStructuredObjectSchema(serializablePayload.outputSchema)
+  const partStream = isFreeAiProviderId(serializablePayload.providerId)
+    ? await createHostedStructuredObjectPartStream(serializablePayload, signal)
+    : await createLocalStructuredObjectPartStream(serializablePayload, objectSchema, options)
+
+  return consumeStructuredObjectPartStream(partStream, {
+    objectSchema,
+    onChunk,
+    signal,
+  })
 }
 
 const parseStreamTextStartMessage = createStartMessageParser<BackgroundStreamTextSerializablePayload>(streamTextPayloadSchema)

@@ -50,4 +50,49 @@ describe("config provider enabled validation", () => {
 
     expect(issuePaths).toContain("selectionToolbar.customActions.0.providerId")
   })
+
+  it("allows free AI for custom actions", () => {
+    const result = configSchema.safeParse({
+      ...DEFAULT_CONFIG,
+      selectionToolbar: {
+        ...DEFAULT_CONFIG.selectionToolbar,
+        customActions: DEFAULT_CONFIG.selectionToolbar.customActions.map(action => ({
+          ...action,
+          providerId: "read-frog-free-ai",
+        })),
+      },
+    })
+
+    expect(result.success).toBe(true)
+  })
+
+  it("rejects free AI for selection toolbar translation", () => {
+    const issuePaths = getIssuePaths({
+      ...DEFAULT_CONFIG,
+      selectionToolbar: {
+        ...DEFAULT_CONFIG.selectionToolbar,
+        features: {
+          ...DEFAULT_CONFIG.selectionToolbar.features,
+          translate: {
+            ...DEFAULT_CONFIG.selectionToolbar.features.translate,
+            providerId: "read-frog-free-ai",
+          },
+        },
+      },
+    })
+
+    expect(issuePaths).toContain("selectionToolbar.features.translate.providerId")
+  })
+
+  it("rejects free AI for fixed translation features that have not enabled the capability", () => {
+    const issuePaths = getIssuePaths({
+      ...DEFAULT_CONFIG,
+      translate: {
+        ...DEFAULT_CONFIG.translate,
+        providerId: "read-frog-free-ai",
+      },
+    })
+
+    expect(issuePaths).toContain("translate.providerId")
+  })
 })

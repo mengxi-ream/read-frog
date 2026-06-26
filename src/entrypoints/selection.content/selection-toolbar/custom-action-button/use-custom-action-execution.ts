@@ -4,13 +4,12 @@ import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
 import type { AnalyticsSurface } from "@/types/analytics"
 import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
-import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
+import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
 import { LANG_CODE_TO_EN_NAME } from "@read-frog/definitions"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { ANALYTICS_FEATURE } from "@/types/analytics"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { streamBackgroundStructuredObject } from "@/utils/content-script/background-stream-client"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
@@ -26,7 +25,7 @@ import {
 
 export interface CustomActionExecutionContext {
   action: SelectionToolbarCustomAction
-  providerConfig: LLMProviderConfig
+  provider: CustomActionProviderRef
   promptTokens: {
     selection: string
     paragraphs: string
@@ -114,15 +113,15 @@ export function buildCustomActionExecutionPlan(
     }
   }
 
-  const providerConfig = customActionRequest.providerConfig
-  if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
+  const provider = customActionRequest.provider
+  if (!provider) {
     return {
       error: createSelectionToolbarPrecheckError("customAction", "providerUnavailable"),
       executionContext: null,
     }
   }
 
-  if (!providerConfig.enabled) {
+  if (provider.kind === "local" && !provider.config.enabled) {
     return {
       error: createSelectionToolbarPrecheckError("customAction", "providerDisabled"),
       executionContext: null,
@@ -140,7 +139,7 @@ export function buildCustomActionExecutionPlan(
     error: null,
     executionContext: {
       action,
-      providerConfig,
+      provider,
       promptTokens: {
         selection: cleanSelection,
         paragraphs: truncateContextTextForCustomAction(contextText || cleanSelection),
@@ -203,20 +202,25 @@ function buildCustomActionExecutionRequest({
   popoverSessionKey: number
   rerunNonce: number
 }): CustomActionExecutionRequest {
-  const { action, providerConfig, promptTokens } = executionContext
+  const { action, provider, promptTokens } = executionContext
   const systemPrompt = buildSelectionToolbarCustomActionSystemPrompt(
     action.systemPrompt,
     promptTokens,
     action.outputSchema,
   )
   const prompt = replaceSelectionToolbarCustomActionPromptTokens(action.prompt, promptTokens)
-  const modelName = resolveModelId(providerConfig.model) ?? ""
-  const providerOptions = getProviderOptionsWithOverride(
-    modelName,
-    providerConfig.provider,
-    providerConfig.providerOptions,
-  )
   const outputSchema = action.outputSchema.map(({ name, type }) => ({ name, type }))
+  const providerKey = provider.kind === "local" ? provider.config.provider : provider.id
+  const model = provider.kind === "local" ? provider.config.model : undefined
+  const modelName = provider.kind === "local" ? resolveModelId(provider.config.model) ?? "" : ""
+  const providerOptions = provider.kind === "local"
+    ? getProviderOptionsWithOverride(
+        modelName,
+        provider.config.provider,
+        provider.config.providerOptions,
+      )
+    : undefined
+  const temperature = provider.kind === "local" ? provider.config.temperature : undefined
 
   return {
     analytics: {
@@ -227,25 +231,25 @@ function buildCustomActionExecutionRequest({
     key: stringifyExecutionRequestKey({
       actionId: action.id,
       analyticsSurface,
-      model: providerConfig.model,
+      model,
       outputSchema: action.outputSchema.map(({ description, name, type }) => ({ description, name, type })),
       popoverSessionKey,
       prompt,
       promptTokens,
-      provider: providerConfig.provider,
-      providerId: providerConfig.id,
+      provider: providerKey,
+      providerId: provider.id,
       providerOptions,
       rerunNonce,
       system: systemPrompt,
-      temperature: providerConfig.temperature,
+      temperature,
     }),
     payload: {
-      providerId: providerConfig.id,
+      providerId: provider.id,
       system: systemPrompt,
       prompt,
       outputSchema,
       providerOptions,
-      temperature: providerConfig.temperature,
+      temperature,
     },
   }
 }

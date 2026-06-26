@@ -4,6 +4,7 @@ import type { APIProviderConfig, LLMProviderConfig, NonAPIProviderConfig, Provid
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import { isAPIProviderConfig, isLLMProviderConfig, isNonAPIProviderConfig, isPureAPIProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { getProviderIdsForCapability } from "@/utils/providers/provider-registry"
 
 export function getProviderConfigById<T extends ProviderConfig>(providersConfig: T[], providerId: string): T | undefined {
   return providersConfig.find(p => p.id === providerId)
@@ -102,9 +103,9 @@ export function computeProviderFallbacksAfterDeletion(
     const currentId = def.getProviderId(config)
     if (currentId !== deletedProviderId)
       continue
-    const candidates = remainingProviders.filter(p => p.enabled && def.isProvider(p.provider))
-    if (candidates.length > 0)
-      updates[key] = candidates[0].id
+    const fallbackProviderId = getProviderIdsForCapability(key, remainingProviders, { requireEnable: true })[0]
+    if (fallbackProviderId)
+      updates[key] = fallbackProviderId
   }
   return updates
 }
@@ -113,8 +114,7 @@ export function findFeatureMissingProvider(
   remainingProviders: ProvidersConfig,
 ): FeatureKey | null {
   for (const key of FEATURE_KEYS) {
-    const def = FEATURE_PROVIDER_DEFS[key]
-    if (!remainingProviders.some(p => p.enabled && def.isProvider(p.provider)))
+    if (!getProviderIdsForCapability(key, remainingProviders, { requireEnable: true })[0])
       return key
   }
   return null
@@ -137,9 +137,8 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
     return null
   }
 
-  const fallbackProvider = getEnabledLLMProvidersConfig(remainingProviders)[0]
-
-  if (!fallbackProvider) {
+  const fallbackProviderId = getProviderIdsForCapability("selectionToolbar.customAction", remainingProviders, { requireEnable: true })[0]
+  if (!fallbackProviderId) {
     return null
   }
 
@@ -150,7 +149,7 @@ export function computeSelectionToolbarCustomActionFallbacksAfterDeletion(
 
     return {
       ...action,
-      providerId: fallbackProvider.id,
+      providerId: fallbackProviderId,
     }
   })
 }

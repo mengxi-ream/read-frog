@@ -4,9 +4,11 @@ import { useMemo } from "react"
 import { i18n } from "#imports"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
+import {
+  getProviderIdsForCapability,
+  getSelectableProvidersForCapability,
+} from "@/utils/providers/provider-registry"
 import { withForm } from "./form"
 
 export const ProviderField = withForm({
@@ -14,13 +16,13 @@ export const ProviderField = withForm({
   render: function Render({ form }) {
     const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
-    const llmProviders = useMemo(
-      () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
+    const customActionProviders = useMemo(
+      () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
       [providersConfig],
     )
-    const llmProviderIds = useMemo(
-      () => llmProviders.map(p => p.id),
-      [llmProviders],
+    const customActionProviderIds = useMemo(
+      () => getProviderIdsForCapability("selectionToolbar.customAction", providersConfig, { requireEnable: true }),
+      [providersConfig],
     )
 
     return (
@@ -28,7 +30,7 @@ export const ProviderField = withForm({
         name="providerId"
         validators={{
           onChange: ({ value }) => {
-            if (!llmProviderIds.includes(value)) {
+            if (!customActionProviderIds.includes(value)) {
               return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.providerRequired")
             }
             return undefined
@@ -41,7 +43,7 @@ export const ProviderField = withForm({
               {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.provider")}
             </FieldLabel>
             <ProviderSelector
-              providers={llmProviders}
+              providers={customActionProviders}
               value={field.state.value}
               onChange={(id) => {
                 field.handleChange(id)

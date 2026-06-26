@@ -160,6 +160,8 @@ options:
       providerOptionsRecommendationApplied: Đã áp dụng
       invalidJson: Định dạng JSON không hợp lệ
     providers:
+      name:
+        freeAi: Dịch vụ AI miễn phí
       description:
         openai: Cung cấp các mô hình như GPT-4o
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
@@ -865,8 +867,9 @@ side:
 translateService:
   title: Dịch vụ dịch thuật
   description: Chỉ để dịch trang web
+  builtInModels: Built-in Models
+  llmModels: LLM Models
   normalTranslator: Trình dịch thông thường
-  aiTranslator: Trình dịch AI
   selectServices: Chọn dịch vụ
   translationProviders: Dịch vụ dịch thuật
   configureAPI: Cấu hình API
@@ -973,6 +976,11 @@ subtitles:
     translatedExportFailed: Không thể tạo phụ đề đã dịch
     translatedExportIncomplete: Không thể dịch tất cả các dòng phụ đề
     translatedExportSameLanguage: Ngôn ngữ nguồn và ngôn ngữ đích giống nhau
+hostedAi:
+  errors:
+    rateLimited: Quá nhiều yêu cầu, vui lòng thử lại sau.
+    guestRateLimited: Đã đạt giới hạn khách. Đăng nhập để nhận thêm lượt dùng AI miễn phí.
+    userRateLimited: Quá nhiều yêu cầu. Bạn đã vượt quá giới hạn miễn phí, vui lòng thử lại sau.
 hotkey:
   control: Ctrl
   alt: Option

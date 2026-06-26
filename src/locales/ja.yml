@@ -160,6 +160,8 @@ options:
       providerOptionsRecommendationApplied: 適用済み
       invalidJson: 無効なJSON形式
     providers:
+      name:
+        freeAi: 無料 AI サービス
       description:
         openai: GPT-4oなどのモデルを提供
         azure: Azure のデプロイ経由で OpenAI モデルを利用
@@ -865,8 +867,9 @@ side:
 translateService:
   title: 翻訳サービス
   description: ウェブページの翻訳にのみ使用
+  builtInModels: Built-in Models
+  llmModels: LLM Models
   normalTranslator: 通常翻訳
-  aiTranslator: AI翻訳
   selectServices: サービスを選択
   translationProviders: 翻訳サービス
   configureAPI: API設定
@@ -973,6 +976,11 @@ subtitles:
     translatedExportFailed: 翻訳字幕の生成に失敗しました
     translatedExportIncomplete: すべての字幕行を翻訳できませんでした
     translatedExportSameLanguage: 元の言語と翻訳先の言語が同じです
+hostedAi:
+  errors:
+    rateLimited: リクエストが多すぎます。後でもう一度お試しください。
+    guestRateLimited: ゲストの上限に達しました。ログインすると無料 AI リクエストをさらに利用できます。
+    userRateLimited: リクエストが多すぎます。無料利用枠の上限を超えました。後でもう一度お試しください。
 hotkey:
   control: Ctrl
   alt: Option

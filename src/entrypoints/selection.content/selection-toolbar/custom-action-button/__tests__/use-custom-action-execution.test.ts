@@ -3,8 +3,8 @@ import type { CachedWebPageContext } from "@/utils/host/translate/webpage-contex
 import { act, render, screen, waitFor } from "@testing-library/react"
 import { createElement } from "react"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_CONTEXT_CHAR_LIMIT } from "../../../utils"
 import { buildCustomActionExecutionPlan, useCustomActionWebPageContext } from "../use-custom-action-execution"
 
@@ -55,18 +55,16 @@ function createCustomActionRequest() {
     throw new Error("Default custom action is missing")
   }
 
-  const providerConfig = DEFAULT_CONFIG.providersConfig.find(provider =>
-    provider.id === action.providerId,
-  )
+  const provider = resolveProviderRefForCapability("selectionToolbar.customAction", DEFAULT_CONFIG.providersConfig, action.providerId)
 
-  if (!providerConfig || !isLLMProviderConfig(providerConfig)) {
-    throw new Error("Default custom action provider must be an enabled LLM provider")
+  if (!provider) {
+    throw new Error("Default custom action provider must be available")
   }
 
   return {
     language: DEFAULT_CONFIG.language,
     action,
-    providerConfig,
+    provider,
   }
 }
 

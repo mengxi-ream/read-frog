@@ -5,11 +5,13 @@ import { createContext, use, useCallback, useEffect, useMemo, useRef, useState }
 import { toast } from "sonner"
 import { SelectionPopover } from "@/components/ui/selection-popover"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
-import { filterEnabledProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
 import { onMessage } from "@/utils/message"
+import {
+  getSelectableProvidersForCapability,
+  resolveProviderRefForCapability,
+} from "@/utils/providers/provider-registry"
 import { shadowWrapper } from "../.."
 import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
@@ -112,12 +114,12 @@ export function SelectionCustomActionProvider({
   const customActionRequest = useMemo(() => ({
     language,
     action: activeAction,
-    providerConfig: activeAction
-      ? getProviderConfigById(providersConfig, activeAction.providerId) ?? null
+    provider: activeAction
+      ? resolveProviderRefForCapability("selectionToolbar.customAction", providersConfig, activeAction.providerId)
       : null,
   }), [activeAction, language, providersConfig])
-  const llmProviders = useMemo(
-    () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
+  const customActionProviders = useMemo(
+    () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
     [providersConfig],
   )
   const executionPlan = useMemo(
@@ -391,9 +393,9 @@ export function SelectionCustomActionProvider({
           </SelectionPopover.Body>
           <SelectionToolbarFooterContent
             paragraphsText={paragraphsText}
-            providers={llmProviders}
+            providers={customActionProviders}
             titleText={titleText}
-            value={customActionRequest.providerConfig?.id ?? ""}
+            value={customActionRequest.provider?.id ?? ""}
             onProviderChange={handleProviderChange}
             onRegenerate={handleRegenerate}
           >

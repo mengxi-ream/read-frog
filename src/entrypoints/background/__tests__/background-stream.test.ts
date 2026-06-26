@@ -1,10 +1,12 @@
-import type { BackgroundStructuredObjectStreamSnapshot } from "@/types/background-stream"
+import type { BackgroundStructuredObjectStreamSnapshot, BackgroundTextStreamSnapshot } from "@/types/background-stream"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 
 const streamTextMock = vi.fn()
 const outputObjectMock = vi.fn((params: Record<string, unknown>) => params)
 const getModelByIdMock = vi.fn()
 const loggerErrorMock = vi.fn()
+const hostedStreamTextMock = vi.fn()
+const hostedStreamStructuredObjectMock = vi.fn()
 const parsePartialJsonMock = vi.fn(async (text: string | undefined) => {
   if (!text) {
     return { state: "undefined-input", value: undefined }
@@ -40,6 +42,19 @@ vi.mock("ai", () => ({
 
 vi.mock("@/utils/providers/model", () => ({
   getModelById: getModelByIdMock,
+}))
+
+vi.mock("@/utils/orpc/background-client", () => ({
+  backgroundOrpcClient: {
+    hostedAi: {
+      translate: {
+        streamText: hostedStreamTextMock,
+      },
+      customAction: {
+        streamStructuredObject: hostedStreamStructuredObjectMock,
+      },
+    },
+  },
 }))
 
 vi.mock("@/utils/logger", () => ({
@@ -109,6 +124,7 @@ describe("background-stream", () => {
       fullStream: (async function* () {
         yield { type: "text-delta", text: "{\"score\":97" }
         yield { type: "text-delta", text: ",\"summary\":\"Strong argument structure\"}" }
+        yield { type: "finish", finishReason: "stop" }
       })(),
       get output() {
         throw new Error("structured stream should not consume output separately")
@@ -185,12 +201,164 @@ describe("background-stream", () => {
     }).success).toBe(false)
   })
 
+  it("streams hosted structured object output from background", async () => {
+    hostedStreamStructuredObjectMock.mockResolvedValue((async function* () {
+      yield { type: "start" }
+      yield { type: "text-delta", id: "text-1", text: "{\"score\":97" }
+      yield { type: "start-step", request: {}, warnings: [] }
+      yield { type: "reasoning-start", id: "reasoning-1" }
+      yield { type: "reasoning-delta", id: "reasoning-1", text: "checking context" }
+      yield { type: "reasoning-end", id: "reasoning-1" }
+      yield { type: "text-delta", id: "text-1", text: ",\"summary\":\"Strong argument structure\"}" }
+      yield { type: "finish", finishReason: "stop" }
+    })())
+
+    const chunkSnapshots: BackgroundStructuredObjectStreamSnapshot[] = []
+    const { runStructuredObjectStreamInBackground } = await import("../background-stream")
+    const result = await runStructuredObjectStreamInBackground(
+      {
+        providerId: "read-frog-free-ai",
+        system: "Return structured data",
+        prompt: "Analyze selection",
+        outputSchema: [
+          { name: "score", type: "number" },
+          { name: "summary", type: "string" },
+        ],
+      },
+      {
+        onChunk: (snapshot) => {
+          chunkSnapshots.push(snapshot)
+        },
+      },
+    )
+
+    expect(getModelByIdMock).not.toHaveBeenCalled()
+    expect(hostedStreamStructuredObjectMock).toHaveBeenCalledWith({
+      system: "Return structured data",
+      prompt: "Analyze selection",
+      outputSchema: [
+        { name: "score", type: "number" },
+        { name: "summary", type: "string" },
+      ],
+      temperature: undefined,
+    }, { signal: undefined })
+    expect(result).toEqual({
+      output: {
+        score: 97,
+        summary: "Strong argument structure",
+      },
+      thinking: {
+        status: "complete",
+        text: "checking context",
+      },
+    })
+    expect(chunkSnapshots.at(-1)).toEqual(result)
+  })
+
+  it("surfaces guest hosted rate limit errors with the sign-in message", async () => {
+    hostedStreamStructuredObjectMock.mockRejectedValue(
+      Object.assign(new Error("Too Many Requests"), {
+        code: "TOO_MANY_REQUESTS",
+        status: 429,
+        data: { quotaScope: "guest" },
+      }),
+    )
+
+    const { runStructuredObjectStreamInBackground } = await import("../background-stream")
+
+    await expect(runStructuredObjectStreamInBackground({
+      providerId: "read-frog-free-ai",
+      system: "Return structured data",
+      prompt: "Analyze selection",
+      outputSchema: [
+        { name: "score", type: "number" },
+      ],
+    })).rejects.toThrow("hostedAi.errors.guestRateLimited")
+  })
+
+  it("treats structured object streams without finish as protocol errors", async () => {
+    getModelByIdMock.mockResolvedValue("mock-model")
+    streamTextMock.mockReturnValue({
+      fullStream: (async function* () {
+        yield { type: "text-delta", text: "{\"score\":97}" }
+      })(),
+    })
+
+    const { runStructuredObjectStreamInBackground } = await import("../background-stream")
+
+    await expect(runStructuredObjectStreamInBackground(
+      {
+        providerId: "openai-default",
+        prompt: "Analyze selection",
+        outputSchema: [
+          { name: "score", type: "number" },
+        ],
+      },
+    )).rejects.toThrow("Invalid AI stream response.")
+  })
+
+  it("treats length-finished structured object streams as truncated output", async () => {
+    getModelByIdMock.mockResolvedValue("mock-model")
+    streamTextMock.mockReturnValue({
+      fullStream: (async function* () {
+        yield { type: "text-delta", text: "{\"summary\":\"partial but parseable" }
+        yield { type: "finish", finishReason: "length" }
+      })(),
+    })
+
+    const { runStructuredObjectStreamInBackground } = await import("../background-stream")
+
+    await expect(runStructuredObjectStreamInBackground(
+      {
+        providerId: "openai-default",
+        prompt: "Analyze selection",
+        outputSchema: [
+          { name: "summary", type: "string" },
+        ],
+      },
+    )).rejects.toThrow("The AI output reached the length limit. Please reduce the requested output length and try again.")
+  })
+
+  it("treats text streams without finish as protocol errors", async () => {
+    getModelByIdMock.mockResolvedValue("mock-model")
+    streamTextMock.mockReturnValue({
+      fullStream: (async function* () {
+        yield { type: "text-delta", text: "Hello" }
+      })(),
+    })
+
+    const { runStreamTextInBackground } = await import("../background-stream")
+
+    await expect(runStreamTextInBackground({
+      providerId: "openai-default",
+      prompt: "Say hello",
+    })).rejects.toThrow("Invalid AI stream response.")
+  })
+
+  it("treats length-finished text streams as truncated output", async () => {
+    getModelByIdMock.mockResolvedValue("mock-model")
+    streamTextMock.mockReturnValue({
+      fullStream: (async function* () {
+        yield { type: "text-delta", text: "partial" }
+        yield { type: "finish", finishReason: "length" }
+      })(),
+    })
+
+    const { runStreamTextInBackground } = await import("../background-stream")
+
+    await expect(runStreamTextInBackground({
+      providerId: "openai-default",
+      prompt: "Say hello",
+    })).rejects.toThrow("The AI output reached the length limit. Please reduce the requested output length and try again.")
+  })
+
   it("streams text via background stream port handler", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
       fullStream: (async function* () {
         yield { type: "text-delta", text: "Hello" }
         yield { type: "text-delta", text: " world" }
+        yield { type: "finish", finishReason: "stop" }
       })(),
       output: Promise.resolve("Hello world"),
     })
@@ -243,6 +411,48 @@ describe("background-stream", () => {
       },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
+  })
+
+  it("streams hosted text output from background", async () => {
+    hostedStreamTextMock.mockResolvedValue((async function* () {
+      yield { type: "start" }
+      yield { type: "reasoning-start", id: "reasoning-1" }
+      yield { type: "reasoning-delta", id: "reasoning-1", text: "checking language" }
+      yield { type: "reasoning-end", id: "reasoning-1" }
+      yield { type: "text-delta", id: "text-1", text: "Hola" }
+      yield { type: "text-delta", id: "text-1", text: " mundo" }
+      yield { type: "finish", finishReason: "stop" }
+    })())
+
+    const chunkSnapshots: BackgroundTextStreamSnapshot[] = []
+    const { runStreamTextInBackground } = await import("../background-stream")
+    const result = await runStreamTextInBackground(
+      {
+        providerId: "read-frog-free-ai",
+        system: "Translate text",
+        prompt: "Hello world",
+      },
+      {
+        onChunk: (snapshot) => {
+          chunkSnapshots.push(snapshot)
+        },
+      },
+    )
+
+    expect(getModelByIdMock).not.toHaveBeenCalled()
+    expect(hostedStreamTextMock).toHaveBeenCalledWith({
+      system: "Translate text",
+      prompt: "Hello world",
+      temperature: undefined,
+    }, { signal: undefined })
+    expect(result).toEqual({
+      output: "Hola mundo",
+      thinking: {
+        status: "complete",
+        text: "checking language",
+      },
+    })
+    expect(chunkSnapshots.at(-1)).toEqual(result)
   })
 
   it("prefers stream onError root cause and posts error once", async () => {

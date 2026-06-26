@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
+import { FREE_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
 import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
@@ -28,7 +29,7 @@ function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
   if (!template)
     return null
 
-  const action = template.createAction("openai-default")
+  const action = template.createAction(FREE_AI_PROVIDER_ID)
   return {
     ...action,
     id: "default-dictionary",

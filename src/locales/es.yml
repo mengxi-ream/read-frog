@@ -161,6 +161,8 @@ options:
       providerOptionsRecommendationApplied: Aplicado
       invalidJson: Formato JSON no válido
     providers:
+      name:
+        freeAi: Servicio AI gratuito
       description:
         openai: Proporciona modelos como GPT-4o
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones
@@ -980,8 +982,9 @@ side:
 translateService:
   title: Servicio de traducción
   description: Solo para traducir la página web
+  builtInModels: Built-in Models
+  llmModels: LLM Models
   normalTranslator: Traductor normal
-  aiTranslator: Traductor AI
   selectServices: Seleccionar servicios
   translationProviders: Proveedores de traducción
   configureAPI: Configurar API
@@ -1088,6 +1091,11 @@ subtitles:
     translatedExportFailed: No se pudieron generar los subtítulos traducidos
     translatedExportIncomplete: No se pudieron traducir todas las líneas de subtítulos
     translatedExportSameLanguage: El idioma de origen y el de destino son iguales
+hostedAi:
+  errors:
+    rateLimited: Demasiadas solicitudes, inténtalo de nuevo más tarde.
+    guestRateLimited: Límite de invitado alcanzado. Inicia sesión para obtener más solicitudes gratuitas de AI.
+    userRateLimited: Demasiadas solicitudes. Has superado el límite de uso gratuito, inténtalo de nuevo más tarde.
 hotkey:
   control: Ctrl
   alt: Opción

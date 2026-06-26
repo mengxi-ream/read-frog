@@ -14,7 +14,6 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
-import { filterEnabledProvidersConfig } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { prepareTranslationText } from "@/utils/host/translate/text-preparation"
@@ -26,6 +25,7 @@ import { isPageTranslationShortcutEmpty, isValidConfiguredPageTranslationShortcu
 import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { shadowWrapper } from "../.."
 import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
@@ -68,28 +68,25 @@ async function getSelectionWebPagePromptContext(
   }
 }
 
-async function translateWithLlm({
+async function translateWithTextStream({
   preparedText,
+  providerId,
   providerConfig,
   translateRequest,
   onChunk,
   registerAbortController,
 }: {
   preparedText: string
+  providerId: string
   providerConfig: LLMProviderConfig
   translateRequest: SelectionToolbarTranslateRequestSlice
   onChunk: (data: BackgroundTextStreamSnapshot) => void
   registerAbortController: (abortController: AbortController) => void
 }) {
   const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
-  const {
-    id: providerId,
-    provider,
-    providerOptions: userProviderOptions,
-    temperature,
-  } = providerConfig
   const modelName = resolveModelId(providerConfig.model)
-  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
+  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", providerConfig.provider, providerConfig.providerOptions)
+  const temperature = providerConfig.temperature
   const abortController = new AbortController()
   registerAbortController(abortController)
 
@@ -211,7 +208,7 @@ export function SelectionTranslationProvider({
   const paragraphsText = activeSession?.contextSnapshot.text ?? selectionText
   const titleText = document.title || null
   const translateProviders = useMemo(
-    () => filterEnabledProvidersConfig(providersConfig).filter(isTranslateProviderConfig),
+    () => getSelectableProvidersForCapability("selectionToolbar.translate", providersConfig),
     [providersConfig],
   )
   const translateRequestKey = useMemo(
@@ -279,8 +276,8 @@ export function SelectionTranslationProvider({
     setThinking(null)
     setError(null)
 
-    const providerConfig = translateRequest.providerConfig
-    if (!providerConfig || !isTranslateProviderConfig(providerConfig)) {
+    const provider = translateRequest.provider
+    if (!provider) {
       if (runIdRef.current === runId) {
         setIsTranslating(false)
         setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
@@ -292,7 +289,7 @@ export function SelectionTranslationProvider({
       return
     }
 
-    if (!providerConfig.enabled) {
+    if (provider.kind === "local" && !provider.config.enabled) {
       if (runIdRef.current === runId) {
         setIsTranslating(false)
         setError(createSelectionToolbarPrecheckError("translate", "providerDisabled"))
@@ -305,6 +302,31 @@ export function SelectionTranslationProvider({
     }
 
     try {
+      if (provider.kind !== "local") {
+        if (runIdRef.current === runId) {
+          setIsTranslating(false)
+          setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
+        }
+        void trackFeatureUsed({
+          ...analyticsContext,
+          outcome: "failure",
+        })
+        return
+      }
+
+      const providerConfig = provider.config
+      if (!isTranslateProviderConfig(providerConfig)) {
+        if (runIdRef.current === runId) {
+          setIsTranslating(false)
+          setError(createSelectionToolbarPrecheckError("translate", "providerUnavailable"))
+        }
+        void trackFeatureUsed({
+          ...analyticsContext,
+          outcome: "failure",
+        })
+        return
+      }
+
       let nextTranslatedText = ""
       if (isLLMProviderConfig(providerConfig)) {
         setThinking({
@@ -312,8 +334,9 @@ export function SelectionTranslationProvider({
           text: "",
         })
 
-        const nextSnapshot = await translateWithLlm({
+        const nextSnapshot = await translateWithTextStream({
           preparedText,
+          providerId: providerConfig.id,
           providerConfig,
           translateRequest,
           onChunk: (data) => {
@@ -586,7 +609,7 @@ export function SelectionTranslationProvider({
             paragraphsText={paragraphsText}
             providers={translateProviders}
             titleText={titleText}
-            value={translateRequest.providerConfig?.id ?? ""}
+            value={translateRequest.provider?.id ?? ""}
             onProviderChange={handleProviderChange}
             onRegenerate={handleRegenerate}
           />

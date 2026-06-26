@@ -36,7 +36,7 @@ export function TranslationServiceDropdown() {
     }
   }
 
-  const aiProviders = getLLMProvidersConfig(filteredProvidersConfig)
+  const llmProviders = getLLMProvidersConfig(filteredProvidersConfig)
   const nonAPIProviders = getNonAPIProvidersConfig(filteredProvidersConfig)
   const pureAPIProviders = getPureAPIProvidersConfig(filteredProvidersConfig)
 
@@ -64,10 +64,10 @@ export function TranslationServiceDropdown() {
           </SelectValue>
         </SelectTrigger>
         <SelectContent>
-          {aiProviders.length > 0 && (
+          {llmProviders.length > 0 && (
             <SelectGroup>
-              <SelectLabel>{i18n.t("translateService.aiTranslator")}</SelectLabel>
-              {aiProviders.map(({ id, name, provider }) => (
+              <SelectLabel>{i18n.t("translateService.llmModels")}</SelectLabel>
+              {llmProviders.map(({ id, name, provider }) => (
                 <SelectItem key={id} value={id}>
                   <ProviderIcon logo={PROVIDER_ITEMS[provider].logo(theme)} name={name} size="sm" />
                 </SelectItem>

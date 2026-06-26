@@ -160,6 +160,8 @@ options:
       providerOptionsRecommendationApplied: Uygulandı
       invalidJson: Geçersiz JSON formatı
     providers:
+      name:
+        freeAi: Ücretsiz AI Hizmeti
       description:
         openai: GPT-4o gibi modeller sağlar
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
@@ -865,8 +867,9 @@ side:
 translateService:
   title: Çeviri Servisi
   description: Yalnızca web sayfası çevirisi için
+  builtInModels: Built-in Models
+  llmModels: LLM Models
   normalTranslator: Normal Çevirmen
-  aiTranslator: AI Çevirmen
   selectServices: Hizmet seçin
   translationProviders: Çeviri Hizmetleri
   configureAPI: API Yapılandır
@@ -973,6 +976,11 @@ subtitles:
     translatedExportFailed: Çevrilmiş altyazılar oluşturulamadı
     translatedExportIncomplete: Tüm altyazı satırları çevrilemedi
     translatedExportSameLanguage: Kaynak ve hedef diller aynı
+hostedAi:
+  errors:
+    rateLimited: Çok fazla istek, lütfen daha sonra tekrar deneyin.
+    guestRateLimited: Misafir sınırına ulaşıldı. Daha fazla ücretsiz AI isteği için giriş yapın.
+    userRateLimited: Çok fazla istek. Ücretsiz kullanım sınırını aştınız, lütfen daha sonra tekrar deneyin.
 hotkey:
   control: Ctrl
   alt: Option

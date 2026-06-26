@@ -1,14 +1,13 @@
 import type { ContextSnapshot, SelectionSnapshot } from "../utils"
 import type { Config } from "@/types/config/config"
-import type { ProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import type { CustomActionProviderRef, SelectionToolbarTranslateProviderRef } from "@/utils/providers/provider-registry"
 import { dequal } from "dequal"
 import { atom } from "jotai"
 import { atomFamily } from "jotai-family"
 import { selectAtom } from "jotai/utils"
 import { configAtom } from "@/utils/atoms/config"
-import { getProviderConfigById } from "@/utils/config/helpers"
-import { resolveProviderConfigOrNull } from "@/utils/constants/feature-providers"
+import { resolveProviderRefForCapability } from "@/utils/providers/provider-registry"
 import { buildContextSnapshot } from "../utils"
 
 export interface SelectionSession {
@@ -81,42 +80,38 @@ export const clearSelectionStateAtom = atom(
   },
 )
 
-function createSelectionToolbarFeatureRequestAtom<T>(
-  featureKey: "selectionToolbar.translate", // TODO: make these string in const map
-  buildSlice: (config: Config, providerConfig: ProviderConfig | null) => T,
-) {
-  return selectAtom(
-    configAtom,
-    config => buildSlice(config, resolveProviderConfigOrNull(config, featureKey)),
-    dequal,
-  )
-}
-
 export interface SelectionToolbarTranslateRequestSlice {
   language: Config["language"]
   enableAIContentAware: boolean
   customPromptsConfig: Config["translate"]["customPromptsConfig"]
-  providerConfig: ProviderConfig | null
+  provider: SelectionToolbarTranslateProviderRef | null
 }
-
-export const selectionToolbarTranslateRequestAtom = createSelectionToolbarFeatureRequestAtom(
-  "selectionToolbar.translate",
-  (config, providerConfig): SelectionToolbarTranslateRequestSlice => ({
-    language: config.language,
-    enableAIContentAware: config.translate.enableAIContentAware,
-    customPromptsConfig: config.translate.customPromptsConfig,
-    providerConfig,
-  }),
-)
 
 export interface SelectionToolbarCustomActionRequestSlice {
   language: Config["language"]
   action: SelectionToolbarCustomAction | null
-  providerConfig: ProviderConfig | null
+  provider: CustomActionProviderRef | null
 }
 
-export const selectionToolbarCustomActionRequestAtomFamily = atomFamily((actionId: string) =>
-  selectAtom(
+function createSelectionToolbarTranslateRequestSliceAtom() {
+  return selectAtom(
+    configAtom,
+    (config): SelectionToolbarTranslateRequestSlice => ({
+      language: config.language,
+      enableAIContentAware: config.translate.enableAIContentAware,
+      customPromptsConfig: config.translate.customPromptsConfig,
+      provider: resolveProviderRefForCapability(
+        "selectionToolbar.translate",
+        config.providersConfig,
+        config.selectionToolbar.features.translate.providerId,
+      ),
+    }),
+    dequal,
+  )
+}
+
+function createSelectionToolbarCustomActionRequestSliceAtom(actionId: string) {
+  return selectAtom(
     configAtom,
     (config): SelectionToolbarCustomActionRequestSlice => {
       const action = config.selectionToolbar.customActions
@@ -125,11 +120,17 @@ export const selectionToolbarCustomActionRequestAtomFamily = atomFamily((actionI
       return {
         language: config.language,
         action,
-        providerConfig: action
-          ? getProviderConfigById(config.providersConfig, action.providerId) ?? null
+        provider: action
+          ? resolveProviderRefForCapability("selectionToolbar.customAction", config.providersConfig, action.providerId)
           : null,
       }
     },
     dequal,
-  ),
+  )
+}
+
+export const selectionToolbarTranslateRequestAtom = createSelectionToolbarTranslateRequestSliceAtom()
+
+export const selectionToolbarCustomActionRequestAtomFamily = atomFamily((actionId: string) =>
+  createSelectionToolbarCustomActionRequestSliceAtom(actionId),
 )

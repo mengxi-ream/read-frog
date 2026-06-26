@@ -1,4 +1,4 @@
-import type { ProviderConfig } from "@/types/config/provider"
+import type { ProviderSelectorOption } from "@/components/llm-providers/provider-selector"
 import { IconAspectRatio, IconRefresh } from "@tabler/icons-react"
 import { useCallback } from "react"
 import { i18n } from "#imports"
@@ -153,7 +153,7 @@ export function SelectionToolbarFooterContent({
   paragraphsText: string | null | undefined
   onProviderChange: (id: string) => void
   onRegenerate: () => void
-  providers: ProviderConfig[]
+  providers: ProviderSelectorOption[]
   titleText: string | null | undefined
   value: string
 }) {

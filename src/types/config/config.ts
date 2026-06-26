@@ -1,15 +1,19 @@
 import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
 
 import { z } from "zod"
-import { FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import {
   MAX_SELECTION_OVERLAY_OPACITY,
   MIN_SELECTION_OVERLAY_OPACITY,
 } from "@/utils/constants/selection"
 import { MIN_SIDE_CONTENT_WIDTH } from "@/utils/constants/side"
+import {
+  doesProviderSupportsCapability,
+  getProviderIdsForCapability,
+} from "@/utils/providers/provider-registry"
 import { floatingButtonSchema } from "./floating-button"
 import { languageDetectionConfigSchema } from "./language-detection"
-import { isLLMProvider, NON_API_TRANSLATE_PROVIDERS_MAP, providersConfigSchema } from "./provider"
+import { isLLMProvider, providersConfigSchema } from "./provider"
 import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
 import { videoSubtitlesSchema } from "./subtitles"
 import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
@@ -103,43 +107,18 @@ export const configSchema = z.object({
   videoSubtitles: videoSubtitlesSchema,
   siteControl: siteControlSchema,
 }).superRefine((data, ctx) => {
-  const providerIdsSet = new Set(data.providersConfig.map(p => p.id))
-
-  for (const def of Object.values(FEATURE_PROVIDER_DEFS)) {
+  for (const featureKey of FEATURE_KEYS) {
+    const def = FEATURE_PROVIDER_DEFS[featureKey]
     const providerId = def.getProviderId(data)
 
-    const validIds = new Set(providerIdsSet)
-    for (const [type, name] of Object.entries(NON_API_TRANSLATE_PROVIDERS_MAP)) {
-      if (def.isProvider(type))
-        validIds.add(name)
-    }
-
-    if (!validIds.has(providerId)) {
+    if (!doesProviderSupportsCapability(featureKey, data.providersConfig, providerId, { requireEnable: true })) {
       ctx.addIssue({
         code: "invalid_value",
-        values: [...validIds],
+        values: getProviderIdsForCapability(featureKey, data.providersConfig, { requireEnable: true }),
         message: `Invalid provider id "${providerId}".`,
         path: [...def.configPath],
       })
       continue
-    }
-
-    const provider = data.providersConfig.find(p => p.id === providerId)
-    if (provider && !def.isProvider(provider.provider)) {
-      ctx.addIssue({
-        code: "invalid_value",
-        values: [...validIds],
-        message: `Provider "${providerId}" is not a valid provider for this feature.`,
-        path: [...def.configPath],
-      })
-    }
-
-    if (provider && !provider.enabled) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Provider "${providerId}" must be enabled for this feature.`,
-        path: [...def.configPath],
-      })
     }
   }
 
@@ -183,30 +162,11 @@ export const configSchema = z.object({
 
   data.selectionToolbar.customActions.forEach((action, index) => {
     const providerId = action.providerId
-    if (!providerIdsSet.has(providerId)) {
+    if (!doesProviderSupportsCapability("selectionToolbar.customAction", data.providersConfig, providerId, { requireEnable: true })) {
       ctx.addIssue({
         code: "invalid_value",
-        values: [...providerIdsSet],
+        values: getProviderIdsForCapability("selectionToolbar.customAction", data.providersConfig, { requireEnable: true }),
         message: `Invalid provider id "${providerId}".`,
-        path: ["selectionToolbar", "customActions", index, "providerId"],
-      })
-      return
-    }
-
-    const provider = data.providersConfig.find(p => p.id === providerId)
-    if (provider && !isLLMProvider(provider.provider)) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Provider "${providerId}" is not an LLM provider.`,
-        path: ["selectionToolbar", "customActions", index, "providerId"],
-      })
-      return
-    }
-
-    if (provider && !provider.enabled) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Provider "${providerId}" must be enabled for this custom action.`,
         path: ["selectionToolbar", "customActions", index, "providerId"],
       })
     }

@@ -161,6 +161,8 @@ options:
       providerOptionsRecommendationApplied: 已应用
       invalidJson: JSON 格式无效
     providers:
+      name:
+        freeAi: 免费 AI 服务
       description:
         openai: 提供 GPT-4o 等模型
         azure: 通过 Azure 部署使用 OpenAI 模型
@@ -980,8 +982,9 @@ side:
 translateService:
   title: 翻译服务
   description: 仅用于翻译网页内容
+  builtInModels: 内建模型
+  llmModels: 大语言模型
   normalTranslator: 普通翻译
-  aiTranslator: AI 翻译
   selectServices: 选择服务
   translationProviders: 翻译服务
   configureAPI: 配置 API
@@ -1088,6 +1091,11 @@ subtitles:
     translatedExportFailed: 生成翻译字幕失败
     translatedExportIncomplete: 未能翻译所有字幕行
     translatedExportSameLanguage: 源语言和目标语言相同
+hostedAi:
+  errors:
+    rateLimited: 请求过于频繁，请稍后再试
+    guestRateLimited: 请求过于频繁，请登录以获取更多免费额度
+    userRateLimited: 请求过于频繁，超过免费额度限制，请稍后再试
 hotkey:
   control: Ctrl
   alt: Option

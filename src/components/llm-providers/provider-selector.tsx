@@ -16,13 +16,60 @@ import { isLLMProviderConfig, isPureTranslateProviderConfig } from "@/types/conf
 import { PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { useTheme } from "../providers/theme-provider"
 
+export interface ProviderSelectorItem {
+  kind: "system"
+  id: string
+  logo: (theme: Theme) => string
+  name: string
+}
+
+export type ProviderSelectorOption = ProviderConfig | ProviderSelectorItem
+type ProviderSelectorLabelKey = "translateService.builtInModels" | "translateService.llmModels" | "translateService.normalTranslator"
+
+export interface ProviderSelectorGroup {
+  labelKey: ProviderSelectorLabelKey
+  providers: ProviderSelectorOption[]
+}
+
 interface ProviderSelectorProps {
-  providers: ProviderConfig[]
+  providers: ProviderSelectorOption[]
   value: string
   onChange: (id: string) => void
   placeholder?: string
   className?: string
   selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
+}
+
+function isProviderSelectorItem(provider: ProviderSelectorOption): provider is ProviderSelectorItem {
+  return "kind" in provider && provider.kind === "system"
+}
+
+function getProviderLogo(provider: ProviderSelectorOption, theme: Theme): string {
+  return isProviderSelectorItem(provider)
+    ? provider.logo(theme)
+    : PROVIDER_ITEMS[provider.provider].logo(theme)
+}
+
+function getProviderName(provider: ProviderSelectorOption): string {
+  return provider.name
+}
+
+export function getProviderSelectorGroups(providers: ProviderSelectorOption[]): ProviderSelectorGroup[] {
+  const builtInProviders = providers.filter(isProviderSelectorItem)
+  const llmProviders = providers.filter(provider =>
+    !isProviderSelectorItem(provider) && isLLMProviderConfig(provider),
+  )
+  const pureTranslateProviders = providers.filter(provider =>
+    !isProviderSelectorItem(provider) && isPureTranslateProviderConfig(provider),
+  )
+
+  const groups: ProviderSelectorGroup[] = [
+    { labelKey: "translateService.builtInModels", providers: builtInProviders },
+    { labelKey: "translateService.llmModels", providers: llmProviders },
+    { labelKey: "translateService.normalTranslator", providers: pureTranslateProviders },
+  ]
+
+  return groups.filter(group => group.providers.length > 0)
 }
 
 export default function ProviderSelector({
@@ -35,12 +82,12 @@ export default function ProviderSelector({
 }: ProviderSelectorProps) {
   const { theme } = useTheme()
   const currentProvider = providers.find(p => p.id === value)
+  const providerGroups = getProviderSelectorGroups(providers)
 
-  const hasGrouping = providers.some(isPureTranslateProviderConfig)
-  if (hasGrouping) {
+  if (providerGroups.length > 1) {
     return (
-      <TranslateGroupedSelect
-        providers={providers}
+      <GroupedSelect
+        providerGroups={providerGroups}
         currentProvider={currentProvider}
         onChange={onChange}
         placeholder={placeholder}
@@ -52,7 +99,7 @@ export default function ProviderSelector({
   }
 
   return (
-    <FlatSelect
+    <UngroupedSelect
       providers={providers}
       currentProvider={currentProvider}
       onChange={onChange}
@@ -64,8 +111,8 @@ export default function ProviderSelector({
   )
 }
 
-function TranslateGroupedSelect({
-  providers,
+function GroupedSelect({
+  providerGroups,
   currentProvider,
   onChange,
   placeholder,
@@ -73,19 +120,16 @@ function TranslateGroupedSelect({
   theme,
   selectContentProps,
 }: {
-  providers: ProviderConfig[]
-  currentProvider: ProviderConfig | undefined
+  providerGroups: ProviderSelectorGroup[]
+  currentProvider: ProviderSelectorOption | undefined
   onChange: (id: string) => void
   placeholder?: string
   className?: string
   selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
   theme: Theme
 }) {
-  const llmProviders = providers.filter(isLLMProviderConfig)
-  const pureTranslateProviders = providers.filter(isPureTranslateProviderConfig)
-
   return (
-    <Select<ProviderConfig>
+    <Select<ProviderSelectorOption>
       value={currentProvider}
       onValueChange={(provider) => {
         if (!provider)
@@ -96,34 +140,28 @@ function TranslateGroupedSelect({
     >
       <SelectTrigger className={className} size="sm">
         <SelectValue placeholder={placeholder}>
-          {(provider: ProviderConfig) => (
-            <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
+          {(provider: ProviderSelectorOption) => (
+            <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
           )}
         </SelectValue>
       </SelectTrigger>
       <SelectContent className="min-w-fit" {...selectContentProps}>
-        <SelectGroup>
-          <SelectLabel>{i18n.t("translateService.aiTranslator")}</SelectLabel>
-          {llmProviders.map(provider => (
-            <SelectItem key={provider.id} value={provider}>
-              <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
-            </SelectItem>
-          ))}
-        </SelectGroup>
-        <SelectGroup>
-          <SelectLabel>{i18n.t("translateService.normalTranslator")}</SelectLabel>
-          {pureTranslateProviders.map(provider => (
-            <SelectItem key={provider.id} value={provider}>
-              <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
-            </SelectItem>
-          ))}
-        </SelectGroup>
+        {providerGroups.map(group => (
+          <SelectGroup key={group.labelKey}>
+            <SelectLabel>{i18n.t(group.labelKey)}</SelectLabel>
+            {group.providers.map(provider => (
+              <SelectItem key={provider.id} value={provider}>
+                <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
+              </SelectItem>
+            ))}
+          </SelectGroup>
+        ))}
       </SelectContent>
     </Select>
   )
 }
 
-function FlatSelect({
+function UngroupedSelect({
   providers,
   currentProvider,
   onChange,
@@ -132,8 +170,8 @@ function FlatSelect({
   theme,
   selectContentProps,
 }: {
-  providers: ProviderConfig[]
-  currentProvider: ProviderConfig | undefined
+  providers: ProviderSelectorOption[]
+  currentProvider: ProviderSelectorOption | undefined
   onChange: (id: string) => void
   placeholder?: string
   className?: string
@@ -141,7 +179,7 @@ function FlatSelect({
   theme: Theme
 }) {
   return (
-    <Select<ProviderConfig>
+    <Select<ProviderSelectorOption>
       value={currentProvider}
       onValueChange={(provider) => {
         if (!provider)
@@ -153,8 +191,8 @@ function FlatSelect({
     >
       <SelectTrigger className={className} size="sm">
         <SelectValue placeholder={placeholder}>
-          {(provider: ProviderConfig) => (
-            <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
+          {(provider: ProviderSelectorOption) => (
+            <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
           )}
         </SelectValue>
       </SelectTrigger>
@@ -162,7 +200,7 @@ function FlatSelect({
         <SelectGroup>
           {providers.map(provider => (
             <SelectItem key={provider.id} value={provider}>
-              <ProviderIcon logo={PROVIDER_ITEMS[provider.provider].logo(theme)} name={provider.name} size="sm" />
+              <ProviderIcon logo={getProviderLogo(provider, theme)} name={getProviderName(provider)} size="sm" />
             </SelectItem>
           ))}
         </SelectGroup>

@@ -5,11 +5,12 @@ import { useMemo } from "react"
 import { i18n } from "#imports"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
-import { isAPIProviderConfig, isLLMProviderConfig, isPureAPIProvider } from "@/types/config/provider"
+import { isAPIProviderConfig, isPureAPIProvider } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { featureProviderConfigAtom } from "@/utils/atoms/provider"
-import { filterEnabledProvidersConfig, getProviderConfigById } from "@/utils/config/helpers"
+import { getProviderConfigById } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
+import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { ConfigCard } from "../../components/config-card"
 import { SetApiKeyWarning } from "../../components/set-api-key-warning"
 
@@ -32,9 +33,8 @@ function FeatureProviderField({ featureKey }: {
   const providerConfig = useAtomValue(featureProviderConfigAtom(featureKey))
 
   const providers = useMemo(() =>
-    filterEnabledProvidersConfig(providersConfig)
-      .filter(p => def.isProvider(p.provider)),
-  [providersConfig, def])
+    getSelectableProvidersForCapability(featureKey, providersConfig),
+  [providersConfig, featureKey])
 
   return (
     <Field>
@@ -57,8 +57,8 @@ function CustomActionProviderFields() {
   const setConfig = useSetAtom(writeConfigAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
-  const llmProviders = useMemo(
-    () => filterEnabledProvidersConfig(providersConfig).filter(isLLMProviderConfig),
+  const customActionProviders = useMemo(
+    () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
     [providersConfig],
   )
 
@@ -82,7 +82,7 @@ function CustomActionProviderFields() {
               {needsApiKeyWarning(currentProviderConfig) && <SetApiKeyWarning />}
             </FieldLabel>
             <ProviderSelector
-              providers={llmProviders}
+              providers={customActionProviders}
               value={action.providerId}
               onChange={(id) => {
                 const updatedCustomActions = config.selectionToolbar.customActions.map(item =>

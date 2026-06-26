@@ -2,6 +2,7 @@ import type { ProviderConfig } from "@/types/config/provider"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
+import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import {
   computeLanguageDetectionFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
@@ -49,6 +50,22 @@ describe("feature providers", () => {
           },
         },
       })
+    })
+  })
+
+  describe("getSelectableProvidersForCapability", () => {
+    it("marks registry-backed system providers for selector grouping", () => {
+      const providers = getSelectableProvidersForCapability(
+        "selectionToolbar.customAction",
+        [],
+      )
+
+      expect(providers).toEqual([
+        expect.objectContaining({
+          kind: "system",
+          id: "read-frog-free-ai",
+        }),
+      ])
     })
   })
 
@@ -127,6 +144,23 @@ describe("feature providers", () => {
       const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, remainingProviders)
 
       expect(fallbacks.translate).toBeUndefined()
+    })
+
+    it("skips selection toolbar translation when no local provider is available", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        selectionToolbar: {
+          ...DEFAULT_CONFIG.selectionToolbar,
+          features: {
+            ...DEFAULT_CONFIG.selectionToolbar.features,
+            translate: { enabled: true, providerId: "deleted-provider", shortcut: "Alt+T" },
+          },
+        },
+      }
+
+      const fallbacks = computeProviderFallbacksAfterDeletion("deleted-provider", config, [])
+
+      expect(fallbacks).toEqual({})
     })
   })
 
@@ -208,7 +242,7 @@ describe("feature providers", () => {
       ])
     })
 
-    it("returns null when no enabled llm provider is available", () => {
+    it("falls back to free AI when no enabled llm provider is available", () => {
       const config = {
         ...DEFAULT_CONFIG,
         selectionToolbar: {
@@ -249,7 +283,12 @@ describe("feature providers", () => {
         remainingProviders,
       )
 
-      expect(result).toBeNull()
+      expect(result).toEqual([
+        expect.objectContaining({
+          id: "action-a",
+          providerId: "read-frog-free-ai",
+        }),
+      ])
     })
   })
 

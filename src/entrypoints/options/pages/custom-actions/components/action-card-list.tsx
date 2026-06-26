@@ -9,10 +9,10 @@ import { SortableList } from "@/components/sortable-list"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_ACTION_NAME } from "@/utils/constants/custom-action"
 import { getUniqueName } from "@/utils/name"
+import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 import { EntityListRail } from "../../../components/entity-list-rail"
 import { selectedCustomActionIdAtom } from "../atoms"
@@ -43,16 +43,16 @@ export function CustomActionCardList() {
     }
   }, [search, navigate, customActions, setSelectedCustomActionId])
 
-  const llmProviders = useMemo(
-    () => providersConfig.filter(provider => provider.enabled && isLLMProviderConfig(provider)),
+  const customActionProviders = useMemo(
+    () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
     [providersConfig],
   )
 
   const handleTemplateSelect = (template: CustomActionTemplate) => {
-    if (llmProviders.length === 0)
+    if (customActionProviders.length === 0)
       return
 
-    const newAction = template.createAction(llmProviders[0].id)
+    const newAction = template.createAction(customActionProviders[0].id)
 
     const existingNames = new Set(customActions.map(action => action.name))
     const baseName = template.id === "blank" ? DEFAULT_ACTION_NAME : newAction.name
@@ -78,7 +78,7 @@ export function CustomActionCardList() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger
           render={(
-            <Button variant="outline" className="h-auto p-3 border-dashed rounded-xl" disabled={llmProviders.length === 0}>
+            <Button variant="outline" className="h-auto p-3 border-dashed rounded-xl" disabled={customActionProviders.length === 0}>
               <div className="flex items-center justify-center gap-2 w-full">
                 <Icon icon="tabler:plus" className="size-4" />
                 <span className="text-sm">{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.add")}</span>
@@ -89,7 +89,7 @@ export function CustomActionCardList() {
         <AddActionDialog onSelect={handleTemplateSelect} />
       </Dialog>
 
-      {llmProviders.length === 0 && (
+      {customActionProviders.length === 0 && (
         <div className="text-sm text-amber-600 dark:text-amber-400">
           {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.noEnabledLlmProvider")}
         </div>

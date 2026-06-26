@@ -160,6 +160,8 @@ options:
       providerOptionsRecommendationApplied: Применено
       invalidJson: Неверный формат JSON
     providers:
+      name:
+        freeAi: Бесплатный ИИ-сервис
       description:
         openai: Предоставляет модели, такие как GPT-4o
         azure: Модели OpenAI в Azure через ваши развертывания
@@ -865,8 +867,9 @@ side:
 translateService:
   title: Сервис перевода
   description: Только для перевода веб-страницы
+  builtInModels: Built-in Models
+  llmModels: LLM Models
   normalTranslator: Обычный переводчик
-  aiTranslator: ИИ-переводчик
   selectServices: Выберите сервисы
   translationProviders: Сервисы перевода
   configureAPI: Настроить API
@@ -973,6 +976,11 @@ subtitles:
     translatedExportFailed: Не удалось создать переведённые субтитры
     translatedExportIncomplete: Не удалось перевести все строки субтитров
     translatedExportSameLanguage: Исходный и целевой языки совпадают
+hostedAi:
+  errors:
+    rateLimited: Слишком много запросов, пожалуйста, повторите позже.
+    guestRateLimited: Лимит гостя достигнут. Войдите, чтобы получить больше бесплатных AI-запросов.
+    userRateLimited: Слишком много запросов. Вы превысили бесплатный лимит, пожалуйста, повторите позже.
 hotkey:
   control: Ctrl
   alt: Option
