@@ -1,7 +1,7 @@
 import type { DownloadTranslatedSubtitlesMessageTone } from "./download-translated-subtitles.constants"
 import { useAtomValue } from "jotai"
+import { useEffect, useState } from "react"
 import { i18n } from "#imports"
-import { useDelayedTruthy } from "@/hooks/use-delayed-truthy"
 import {
   TranslatedDownloadPhase,
   translatedSubtitlesDownloadStatusAtom,
@@ -26,11 +26,22 @@ function getMessageTone(
 export function useDownloadTranslatedSubtitles() {
   const status = useAtomValue(translatedSubtitlesDownloadStatusAtom)
   const { downloadTranslatedSubtitles } = useSubtitlesUI()
-  const showPreparingMessage = useDelayedTruthy(
-    status.phase === TranslatedDownloadPhase.Preparing,
-    DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS,
-    status,
-  )
+  const [showPreparingMessage, setShowPreparingMessage] = useState(false)
+
+  useEffect(() => {
+    if (status.phase !== TranslatedDownloadPhase.Preparing) {
+      // eslint-disable-next-line react/set-state-in-effect
+      setShowPreparingMessage(false)
+      return
+    }
+
+    const timeoutId = setTimeout(
+      setShowPreparingMessage,
+      DOWNLOAD_TRANSLATED_SUBTITLES_PREPARING_MESSAGE_DELAY_MS,
+      true,
+    )
+    return () => clearTimeout(timeoutId)
+  }, [status.phase])
 
   const message = {
     [TranslatedDownloadPhase.Preparing]: showPreparingMessage
