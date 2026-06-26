@@ -1,3 +1,6 @@
+minimumReleaseAgeExclude:
+  - "@read-frog/*"
+
 shellEmulator: true
 
 trustPolicy: no-downgrade
