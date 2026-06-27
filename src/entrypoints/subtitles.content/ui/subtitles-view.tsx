@@ -17,7 +17,7 @@ function SubtitlesContent() {
   const { style } = useAtomValue(configFieldsAtomMap.videoSubtitles)
   const { displayMode, translationPosition, container } = style
 
-  const translationAbove = translationPosition === "above"
+  const translationAbove = shouldPlaceTranslationAbove(translationPosition)
   const showMain = displayMode !== "translationOnly"
   const isDuplicateTranslation = !!subtitle?.translation && subtitle.translation === subtitle.text
   const showTranslation = displayMode !== "originalOnly"
@@ -43,6 +43,13 @@ function SubtitlesContent() {
       </div>
     </div>
   )
+}
+
+export function shouldPlaceTranslationAbove(
+  translationPosition: "above" | "below",
+  hostname = window.location.hostname,
+) {
+  return translationPosition === "above" && !/(?:^|\.)netflix\.com$/i.test(hostname)
 }
 
 export function SubtitlesView({ showContent }: SubtitlesViewProps) {

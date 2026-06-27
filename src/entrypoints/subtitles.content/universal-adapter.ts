@@ -48,6 +48,7 @@ export class UniversalVideoAdapter {
   private translationCoordinator: TranslationCoordinator | null = null
   private translatedSubtitlesDownloader: TranslatedSubtitlesDownloader | null = null
   private subtitlesSummaryContextHash: string | null = null
+  private liveSubtitlesUnsubscribe: (() => void) | null = null
 
   get embedded() {
     return this.config.embedded
@@ -208,6 +209,7 @@ export class UniversalVideoAdapter {
   }
 
   private clearRuntimeSession() {
+    this.stopLiveSubtitles()
     this.translationCoordinator?.stop()
     this.segmentationPipeline?.stop()
     this.translationCoordinator = null
@@ -222,6 +224,7 @@ export class UniversalVideoAdapter {
     this.clearNavigationReinitTimeout()
     this.translatedSubtitlesDownloader?.dispose()
     this.destroyScheduler()
+    this.stopLiveSubtitles()
     this.translationCoordinator?.stop()
     this.segmentationPipeline?.stop()
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
@@ -373,6 +376,7 @@ export class UniversalVideoAdapter {
       this.subtitlesScheduler?.hide()
       this.showNativeSubtitles()
       this.translationCoordinator?.stop()
+      this.stopLiveSubtitles()
     }
   }
 
@@ -421,9 +425,7 @@ export class UniversalVideoAdapter {
     style.textContent = `
       ${this.config.selectors.nativeSubtitles},
       ${this.config.selectors.nativeSubtitles} * {
-        display: none !important;
         opacity: 0 !important;
-        visibility: hidden !important;
       }
     `
     document.head.appendChild(style)
@@ -468,11 +470,18 @@ export class UniversalVideoAdapter {
       await this.getOrLoadSourceSubtitles()
       this.sessionSubtitles = this.sourceSubtitles
 
-      if (await this.shouldSkipTranslationForCurrentTrack()) {
+      if (this.sourceProcessedSubtitles.some(fragment => fragment.translation)) {
+        this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
+        this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
+        this.subtitlesScheduler?.setState("idle")
+      }
+      else if (await this.shouldSkipTranslationForCurrentTrack()) {
         this.processPassthroughSubtitles()
+        this.startLiveSubtitles()
       }
       else {
         await this.processTranslatedSubtitles()
+        this.startLiveSubtitles()
       }
       if (analyticsContext) {
         void trackFeatureUsed({
@@ -518,6 +527,55 @@ export class UniversalVideoAdapter {
     }))
     this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
     this.subtitlesScheduler?.setState("idle")
+  }
+
+  private startLiveSubtitles() {
+    if (!this.subtitlesFetcher.watchLiveSubtitles || this.liveSubtitlesUnsubscribe)
+      return
+
+    if (this.translationCoordinator)
+      this.subtitlesScheduler?.supplementSubtitles(this.sourceProcessedSubtitles)
+
+    const seenStarts = new Set(this.sourceSubtitles.map(fragment => fragment.start))
+    this.liveSubtitlesUnsubscribe = this.subtitlesFetcher.watchLiveSubtitles((subtitles) => {
+      const fresh = subtitles.filter(fragment => !seenStarts.has(fragment.start))
+      if (fresh.length === 0)
+        return
+
+      fresh.forEach(fragment => seenStarts.add(fragment.start))
+      this.sourceSubtitles.push(...fresh)
+      this.sessionSubtitles.push(...fresh)
+
+      const processed = this.subtitlesFetcher.isPreSegmented?.()
+        ? fresh
+        : optimizeSubtitles(fresh, this.subtitlesFetcher.getSourceLanguage())
+
+      this.sourceProcessedSubtitles.push(...processed)
+
+      if (this.translationCoordinator) {
+        if (this.segmentationPipeline) {
+          this.segmentationPipeline.processedFragments.push(...processed)
+          this.segmentationPipeline.processedFragments.sort((a, b) => a.start - b.start)
+        }
+        else {
+          this.sessionProcessedFragments.push(...processed)
+        }
+        this.subtitlesScheduler?.supplementSubtitles(processed)
+        return
+      }
+
+      const passthrough = processed.map(fragment => ({
+        ...fragment,
+        translation: fragment.text,
+      }))
+      this.sessionProcessedFragments.push(...passthrough)
+      this.subtitlesScheduler?.supplementSubtitles(passthrough)
+    })
+  }
+
+  private stopLiveSubtitles() {
+    this.liveSubtitlesUnsubscribe?.()
+    this.liveSubtitlesUnsubscribe = null
   }
 
   private async processTranslatedSubtitles() {

@@ -9,8 +9,17 @@ declare global {
 }
 
 export default defineContentScript({
-  matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
+  matches: [
+    "*://*.youtube.com/*",
+    "*://*.youtube-nocookie.com/*",
+    "*://*.netflix.com/*",
+    "*://*.paramountplus.com/*",
+    "*://*.disneyplus.com/*",
+    "*://play.max.com/*",
+    "*://*.max.com/*",
+  ],
   allFrames: true,
+  runAt: "document_start",
   cssInjectionMode: "manifest",
   async main(ctx) {
     if (window.__READ_FROG_SUBTITLES_INJECTED__)

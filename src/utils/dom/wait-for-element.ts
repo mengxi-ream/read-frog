@@ -5,6 +5,23 @@ export function waitForElement(
   validate?: (element: Element) => boolean,
 ): Promise<Element | null> {
   return new Promise((resolve) => {
+    let settled = false
+    let observer: MutationObserver | null = null
+    let timeoutId: ReturnType<typeof setTimeout> | null = null
+
+    const finish = (element: Element | null) => {
+      if (settled) {
+        return
+      }
+
+      settled = true
+      observer?.disconnect()
+      if (timeoutId !== null) {
+        clearTimeout(timeoutId)
+      }
+      resolve(element)
+    }
+
     const tryFind = () => {
       const element = document.querySelector(selector)
       if (element && (!validate || validate(element))) {
@@ -15,26 +32,30 @@ export function waitForElement(
 
     const found = tryFind()
     if (found) {
-      resolve(found)
+      finish(found)
       return
     }
 
-    const observer = new MutationObserver(() => {
+    const root = document.body ?? document.documentElement
+    if (!root) {
+      finish(null)
+      return
+    }
+
+    observer = new MutationObserver(() => {
       const found = tryFind()
       if (found) {
-        observer.disconnect()
-        resolve(found)
+        finish(found)
       }
     })
 
-    observer.observe(document.body, {
+    observer.observe(root, {
       childList: true,
       subtree: true,
     })
 
-    setTimeout(() => {
-      observer.disconnect()
-      resolve(null)
+    timeoutId = setTimeout(() => {
+      finish(null)
     }, WAIT_TIMEOUT)
   })
 }

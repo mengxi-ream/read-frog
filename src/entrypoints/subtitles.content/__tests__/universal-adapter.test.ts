@@ -1,3 +1,4 @@
+import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { UniversalVideoAdapter } from "../universal-adapter"
 
@@ -13,13 +14,14 @@ vi.mock("@/utils/config/storage", async (importOriginal) => {
   }
 })
 
-function createAdapter(fetchResult: Array<{ text: string, start: number, end: number }>) {
+function createAdapter(fetchResult: SubtitlesFragment[], preSegmented = false) {
   const subtitlesFetcher = {
     fetch: vi.fn().mockResolvedValue(fetchResult),
     cleanup: vi.fn(),
     shouldUseSameTrack: vi.fn().mockResolvedValue(false),
     getSourceLanguage: () => "en",
     hasAvailableSubtitles: vi.fn().mockResolvedValue(true),
+    isPreSegmented: () => preSegmented,
   }
 
   const adapter = new UniversalVideoAdapter({
@@ -44,6 +46,7 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
     reset: vi.fn(),
     stop: vi.fn(),
     setState: vi.fn(),
+    supplementSubtitles: vi.fn(),
   }
 
   ;(adapter as any).subtitlesScheduler = subtitlesScheduler
@@ -151,6 +154,21 @@ describe("universalVideoAdapter", () => {
     await adapter.downloadTranslatedSubtitles()
 
     expect(downloader.download).toHaveBeenCalledTimes(1)
+  })
+
+  it("uses official translated subtitles without starting machine translation", async () => {
+    const subtitles = [
+      { text: "Hello", translation: "你好", start: 0, end: 1000 },
+    ]
+    const { adapter } = createAdapter(subtitles, true)
+    const subtitlesScheduler = attachScheduler(adapter, true)
+    const processTranslatedSubtitlesSpy = vi.spyOn(adapter as any, "processTranslatedSubtitles")
+
+    await (adapter as any).startTranslation()
+
+    expect(subtitlesScheduler.supplementSubtitles).toHaveBeenCalledWith(subtitles)
+    expect(subtitlesScheduler.setState).toHaveBeenCalledWith("idle")
+    expect(processTranslatedSubtitlesSpy).not.toHaveBeenCalled()
   })
 
   it("disposes translated subtitle download state when navigation starts", () => {

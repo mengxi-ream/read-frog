@@ -1,3 +1,4 @@
+import { initStreamingSubtitles } from "./init-streaming-subtitles"
 import { initYoutubeSubtitles } from "./init-youtube-subtitles"
 
 let hasBootstrappedSubtitlesRuntime = false
@@ -8,5 +9,11 @@ export function bootstrapSubtitlesRuntime() {
   }
 
   hasBootstrappedSubtitlesRuntime = true
-  initYoutubeSubtitles()
+
+  if (/(?:^|\.)youtube(?:-nocookie)?\.com$/i.test(window.location.hostname)) {
+    initYoutubeSubtitles()
+    return
+  }
+
+  void initStreamingSubtitles()
 }

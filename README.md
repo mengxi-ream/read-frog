@@ -179,7 +179,7 @@ This means technical terms get translated correctly within their domain, literar
 
 ### 🎬 [Subtitle Translation][docs-tutorial]
 
-Translate YouTube subtitles directly in the video player. Watch foreign language content with translations displayed alongside the original subtitles, making video content accessible for language learning.
+Translate YouTube and streaming subtitles directly in the video player. Watch foreign language content with translations displayed alongside the original subtitles, making video content accessible for language learning.
 
 <div align="right">
 
