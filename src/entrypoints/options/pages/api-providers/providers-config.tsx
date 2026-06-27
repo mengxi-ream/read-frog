@@ -162,35 +162,45 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
           {sponsor?.sponsoring && (
             <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />
           )}
-          {totalAssigned > 0 && (
-            <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
-              <Tooltip>
-                <TooltipTrigger
-                  render={(
-                    <Badge className="bg-blue-500 cursor-default" size="sm" />
-                  )}
-                >
-                  {i18n.t("options.apiProviders.badges.featureCount", [totalAssigned])}
-                </TooltipTrigger>
-                <TooltipContent>
-                  <ul className="list-disc list-inside marker:text-green-500">
-                    {assignedFeatures.map(key => (
-                      <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
-                    ))}
-                    {isLanguageDetectionProvider && (
-                      <li>{i18n.t("options.general.languageDetection.title")}</li>
-                    )}
-                    {assignedCustomActions.map(action => (
-                      <li key={action.id}>{action.name}</li>
-                    ))}
-                  </ul>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
+          <FeatureCountBadge count={totalAssigned}>
+            {assignedFeatures.map(key => (
+              <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
+            ))}
+            {isLanguageDetectionProvider && (
+              <li>{i18n.t("options.general.languageDetection.title")}</li>
+            )}
+            {assignedCustomActions.map(action => (
+              <li key={action.id}>{action.name}</li>
+            ))}
+          </FeatureCountBadge>
         </>
       )}
     />
+  )
+}
+
+function FeatureCountBadge({ count, children }: { count: number, children: React.ReactNode }) {
+  if (count === 0) {
+    return null
+  }
+
+  return (
+    <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
+      <Tooltip>
+        <TooltipTrigger
+          render={(
+            <Badge className="bg-blue-500 cursor-default" size="sm" />
+          )}
+        >
+          {i18n.t("options.apiProviders.badges.featureCount", [count])}
+        </TooltipTrigger>
+        <TooltipContent>
+          <ul className="list-disc list-inside marker:text-green-500">
+            {children}
+          </ul>
+        </TooltipContent>
+      </Tooltip>
+    </div>
   )
 }
 
@@ -245,7 +255,10 @@ function ProviderListCell({
 function BuiltInProviderSection() {
   const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
+  const config = useAtomValue(configAtom)
   const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
+  const assignedCustomActions = config.selectionToolbar.customActions
+    .filter(action => action.providerId === FREE_AI_PROVIDER_ID)
 
   return (
     <section className="flex flex-col gap-2 pt-1">
@@ -260,6 +273,13 @@ function BuiltInProviderSection() {
         disabled
         selected={selectedProviderId === FREE_AI_PROVIDER_ID}
         onSelect={() => setSelectedProviderId(FREE_AI_PROVIDER_ID)}
+        badges={(
+          <FeatureCountBadge count={assignedCustomActions.length}>
+            {assignedCustomActions.map(action => (
+              <li key={action.id}>{action.name}</li>
+            ))}
+          </FeatureCountBadge>
+        )}
       />
     </section>
   )
