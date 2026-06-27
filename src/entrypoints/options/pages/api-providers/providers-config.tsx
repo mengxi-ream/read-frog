@@ -20,7 +20,7 @@ import { providerConfigAtom } from "@/utils/atoms/provider"
 import { getAPIProvidersConfig } from "@/utils/config/helpers"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
-import { FREE_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
+import { FREE_AI_PROVIDER_ID, FREE_AI_PROVIDER_LOGO } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 import { ConfigCard } from "../../components/config-card"
 import { EntityEditorLayout } from "../../components/entity-editor-layout"
@@ -253,7 +253,6 @@ function ProviderListCell({
 }
 
 function BuiltInProviderSection() {
-  const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const config = useAtomValue(configAtom)
   const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
@@ -267,7 +266,7 @@ function BuiltInProviderSection() {
       </h3>
       <ProviderListCell
         providerId={FREE_AI_PROVIDER_ID}
-        logo={API_PROVIDER_ITEMS.atlascloud.logo(theme)}
+        logo={FREE_AI_PROVIDER_LOGO}
         name={providerName}
         checked
         disabled
@@ -286,7 +285,6 @@ function BuiltInProviderSection() {
 }
 
 function BuiltInProviderPanel() {
-  const { theme } = useTheme()
   const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
   const atlasCloudProvider = API_PROVIDER_ITEMS.atlascloud
   const atlasCloudUrl = atlasCloudProvider.sponsor?.referUrl ?? atlasCloudProvider.website
@@ -296,7 +294,7 @@ function BuiltInProviderPanel() {
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <ProviderIcon
-            logo={atlasCloudProvider.logo(theme)}
+            logo={FREE_AI_PROVIDER_LOGO}
             name={providerName}
             size="base"
             textClassName="font-medium"

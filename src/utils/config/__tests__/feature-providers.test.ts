@@ -2,7 +2,8 @@ import type { ProviderConfig } from "@/types/config/provider"
 import { describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
-import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
+import { isProviderSelectorItem } from "@/utils/providers/provider-display"
+import { FREE_AI_PROVIDER_LOGO, getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import {
   computeLanguageDetectionFallbackAfterDeletion,
   computeProviderFallbacksAfterDeletion,
@@ -64,8 +65,16 @@ describe("feature providers", () => {
         expect.objectContaining({
           kind: "system",
           id: "read-frog-free-ai",
+          logo: expect.any(Function),
         }),
       ])
+
+      const freeAiProvider = providers[0]
+      expect(freeAiProvider && isProviderSelectorItem(freeAiProvider)).toBe(true)
+      if (!freeAiProvider || !isProviderSelectorItem(freeAiProvider)) {
+        throw new Error("Free AI provider selector item was not returned")
+      }
+      expect(freeAiProvider.logo("light")).toBe(FREE_AI_PROVIDER_LOGO)
     })
   })
 
