@@ -1,4 +1,4 @@
-import type { ReactNode } from "react"
+import type { ComponentProps, ReactNode } from "react"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import { useAtomValue, useSetAtom } from "jotai"
@@ -13,9 +13,12 @@ import { buildFeatureProviderPatch, FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeat
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 
+type ProviderSelectorTriggerSize = ComponentProps<typeof ProviderSelector>["triggerSize"]
+
 interface FeatureProviderSelectorListProps {
   className?: string
   providerSelectorClassName?: string
+  providerSelectorTriggerSize?: ProviderSelectorTriggerSize
   includeCustomActions?: boolean
   renderApiKeyWarning?: (providerConfig: ProviderConfig | null) => ReactNode
 }
@@ -30,10 +33,12 @@ export function needsApiKeyWarning(providerConfig: ProviderConfig | null): boole
 function FeatureProviderField({
   featureKey,
   providerSelectorClassName,
+  providerSelectorTriggerSize,
   renderApiKeyWarning,
 }: {
   featureKey: FeatureKey
   providerSelectorClassName?: string
+  providerSelectorTriggerSize?: ProviderSelectorTriggerSize
   renderApiKeyWarning?: (providerConfig: ProviderConfig | null) => ReactNode
 }) {
   const config = useAtomValue(configAtom)
@@ -58,6 +63,7 @@ function FeatureProviderField({
         value={providerId}
         onChange={id => void setConfig(buildFeatureProviderPatch({ [featureKey]: id }))}
         className={providerSelectorClassName}
+        triggerSize={providerSelectorTriggerSize}
       />
     </Field>
   )
@@ -65,9 +71,11 @@ function FeatureProviderField({
 
 function CustomActionProviderFields({
   providerSelectorClassName,
+  providerSelectorTriggerSize,
   renderApiKeyWarning,
 }: {
   providerSelectorClassName?: string
+  providerSelectorTriggerSize?: ProviderSelectorTriggerSize
   renderApiKeyWarning?: (providerConfig: ProviderConfig | null) => ReactNode
 }) {
   const config = useAtomValue(configAtom)
@@ -116,6 +124,7 @@ function CustomActionProviderFields({
                 })
               }}
               className={providerSelectorClassName}
+              triggerSize={providerSelectorTriggerSize}
               placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider")}
             />
           </Field>
@@ -128,6 +137,7 @@ function CustomActionProviderFields({
 export function FeatureProviderSelectorList({
   className,
   providerSelectorClassName = "w-full",
+  providerSelectorTriggerSize,
   includeCustomActions = true,
   renderApiKeyWarning,
 }: FeatureProviderSelectorListProps) {
@@ -138,12 +148,14 @@ export function FeatureProviderSelectorList({
           key={featureKey}
           featureKey={featureKey}
           providerSelectorClassName={providerSelectorClassName}
+          providerSelectorTriggerSize={providerSelectorTriggerSize}
           renderApiKeyWarning={renderApiKeyWarning}
         />
       ))}
       {includeCustomActions && (
         <CustomActionProviderFields
           providerSelectorClassName={providerSelectorClassName}
+          providerSelectorTriggerSize={providerSelectorTriggerSize}
           renderApiKeyWarning={renderApiKeyWarning}
         />
       )}

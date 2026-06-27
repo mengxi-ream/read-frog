@@ -167,6 +167,7 @@ export function SelectionToolbarFooterContent({
           value={value}
           onChange={onProviderChange}
           className="max-w-60"
+          triggerSize="sm"
           selectContentProps={popoverOverlay}
         />
       </div>
