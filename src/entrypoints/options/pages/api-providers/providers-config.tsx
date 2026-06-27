@@ -10,15 +10,17 @@ import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { isAPIProviderConfig } from "@/types/config/provider"
-import { configAtom, configFieldsAtomMap } from "@/utils/atoms/config"
+import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import { getAPIProvidersConfig } from "@/utils/config/helpers"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
+import { FREE_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
 import { ConfigCard } from "../../components/config-card"
 import { EntityEditorLayout } from "../../components/entity-editor-layout"
@@ -29,6 +31,9 @@ import { ProviderConfigForm } from "./provider-config-form"
 
 export function ProvidersConfig() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
+  const editor = selectedProviderId === FREE_AI_PROVIDER_ID
+    ? <BuiltInProviderPanel />
+    : <ProviderConfigForm key={selectedProviderId} />
 
   return (
     <ConfigCard
@@ -37,7 +42,7 @@ export function ProvidersConfig() {
       description={i18n.t("options.apiProviders.description")}
       className="lg:flex-col"
     >
-      <EntityEditorLayout list={<ProviderCardList />} editor={<ProviderConfigForm key={selectedProviderId} />} />
+      <EntityEditorLayout list={<ProviderCardList />} editor={editor} />
     </ConfigCard>
   )
 }
@@ -113,6 +118,7 @@ function ProviderCardList() {
           )}
         />
       </EntityListRail>
+      <BuiltInProviderSection />
     </div>
   )
 }
@@ -143,51 +149,212 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   }
 
   return (
+    <ProviderListCell
+      providerId={id}
+      logo={API_PROVIDER_ITEMS[provider].logo(theme)}
+      name={name}
+      checked={enabled}
+      selected={selectedProviderId === id}
+      onSelect={() => setSelectedProviderId(id)}
+      onCheckedChange={handleProviderEnabledChange}
+      badges={(
+        <>
+          {sponsor?.sponsoring && (
+            <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />
+          )}
+          {totalAssigned > 0 && (
+            <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
+              <Tooltip>
+                <TooltipTrigger
+                  render={(
+                    <Badge className="bg-blue-500 cursor-default" size="sm" />
+                  )}
+                >
+                  {i18n.t("options.apiProviders.badges.featureCount", [totalAssigned])}
+                </TooltipTrigger>
+                <TooltipContent>
+                  <ul className="list-disc list-inside marker:text-green-500">
+                    {assignedFeatures.map(key => (
+                      <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
+                    ))}
+                    {isLanguageDetectionProvider && (
+                      <li>{i18n.t("options.general.languageDetection.title")}</li>
+                    )}
+                    {assignedCustomActions.map(action => (
+                      <li key={action.id}>{action.name}</li>
+                    ))}
+                  </ul>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
+        </>
+      )}
+    />
+  )
+}
+
+interface ProviderListCellProps {
+  providerId: string
+  logo: string
+  name: string
+  checked: boolean
+  selected: boolean
+  disabled?: boolean
+  badges?: React.ReactNode
+  onSelect: () => void
+  onCheckedChange?: (checked: boolean) => void
+}
+
+function ProviderListCell({
+  providerId,
+  logo,
+  name,
+  checked,
+  selected,
+  disabled,
+  badges,
+  onSelect,
+  onCheckedChange,
+}: ProviderListCellProps) {
+  return (
     <div
+      data-provider-id={providerId}
       className={cn(
-        "rounded-xl p-3 border bg-card relative",
-        selectedProviderId === id && "border-primary",
+        "rounded-xl p-3 border bg-card relative cursor-pointer",
+        selected && "border-primary",
       )}
-      onClick={() => setSelectedProviderId(id)}
+      onClick={onSelect}
     >
-      {sponsor?.sponsoring && (
-        <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />
-      )}
-      {totalAssigned > 0 && (
-        <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
-          <Tooltip>
-            <TooltipTrigger
-              render={(
-                <Badge className="bg-blue-500 cursor-default" size="sm" />
-              )}
-            >
-              {i18n.t("options.apiProviders.badges.featureCount", [totalAssigned])}
-            </TooltipTrigger>
-            <TooltipContent>
-              <ul className="list-disc list-inside marker:text-green-500">
-                {assignedFeatures.map(key => (
-                  <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
-                ))}
-                {isLanguageDetectionProvider && (
-                  <li>{i18n.t("options.general.languageDetection.title")}</li>
-                )}
-                {assignedCustomActions.map(action => (
-                  <li key={action.id}>{action.name}</li>
-                ))}
-              </ul>
-            </TooltipContent>
-          </Tooltip>
-        </div>
-      )}
+      {badges}
       <div className="flex items-center justify-between gap-2">
-        <ProviderIcon logo={API_PROVIDER_ITEMS[provider].logo(theme)} name={name} size="base" textClassName="text-sm" />
+        <ProviderIcon logo={logo} name={name} size="base" textClassName="text-sm" />
         <Switch
-          checked={enabled}
-          onCheckedChange={handleProviderEnabledChange}
+          aria-label={name}
+          checked={checked}
+          disabled={disabled}
+          onCheckedChange={onCheckedChange}
           onPointerDown={e => e.stopPropagation()}
           onClick={e => e.stopPropagation()}
         />
       </div>
     </div>
+  )
+}
+
+function BuiltInProviderSection() {
+  const { theme } = useTheme()
+  const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
+  const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
+
+  return (
+    <section className="flex flex-col gap-2 pt-1">
+      <h3 className="px-1 text-xs font-medium text-muted-foreground">
+        {i18n.t("options.apiProviders.builtInProvider" as never)}
+      </h3>
+      <ProviderListCell
+        providerId={FREE_AI_PROVIDER_ID}
+        logo={API_PROVIDER_ITEMS.atlascloud.logo(theme)}
+        name={providerName}
+        checked
+        disabled
+        selected={selectedProviderId === FREE_AI_PROVIDER_ID}
+        onSelect={() => setSelectedProviderId(FREE_AI_PROVIDER_ID)}
+      />
+    </section>
+  )
+}
+
+function BuiltInProviderPanel() {
+  const { theme } = useTheme()
+  const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
+  const atlasCloudProvider = API_PROVIDER_ITEMS.atlascloud
+  const atlasCloudUrl = atlasCloudProvider.sponsor?.referUrl ?? atlasCloudProvider.website
+
+  return (
+    <div className="flex-1 bg-card rounded-xl p-4 border">
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
+          <ProviderIcon
+            logo={atlasCloudProvider.logo(theme)}
+            name={providerName}
+            size="base"
+            textClassName="font-medium"
+          />
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-sm text-muted-foreground leading-6">
+              {i18n.t("options.apiProviders.providers.attribution.freeAi" as never)}
+            </p>
+            <Button
+              variant="brand"
+              render={<a href={atlasCloudUrl} target="_blank" rel="noreferrer" />}
+            >
+              {i18n.t("options.apiProviders.sponsorCta")}
+            </Button>
+          </div>
+        </div>
+        <BuiltInFeatureProviderSection />
+      </div>
+    </div>
+  )
+}
+
+function BuiltInFeatureProviderSection() {
+  const config = useAtomValue(configAtom)
+  const setConfig = useSetAtom(writeConfigAtom)
+  const [isOpen, setIsOpen] = useState(true)
+  const customActions = config.selectionToolbar.customActions
+
+  if (customActions.length === 0) {
+    return null
+  }
+
+  return (
+    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+      <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
+        <Icon
+          icon="tabler:chevron-right"
+          className={cn(
+            "size-4 transition-transform duration-200",
+            isOpen && "rotate-90",
+          )}
+        />
+        <span>{i18n.t("options.apiProviders.form.featureProviders")}</span>
+      </CollapsibleTrigger>
+      <CollapsibleContent>
+        <div className="flex flex-col gap-3">
+          {customActions.map((action) => {
+            const isAssigned = action.providerId === FREE_AI_PROVIDER_ID
+            return (
+              <div key={action.id} className="flex items-center gap-2">
+                <Switch
+                  checked={isAssigned}
+                  disabled={isAssigned}
+                  onCheckedChange={(checked) => {
+                    if (!checked) {
+                      return
+                    }
+
+                    const updatedCustomActions = config.selectionToolbar.customActions.map(currentAction =>
+                      currentAction.id === action.id
+                        ? { ...currentAction, providerId: FREE_AI_PROVIDER_ID }
+                        : currentAction,
+                    )
+
+                    void setConfig({
+                      selectionToolbar: {
+                        ...config.selectionToolbar,
+                        customActions: updatedCustomActions,
+                      },
+                    })
+                  }}
+                />
+                <span className="text-sm">{action.name}</span>
+              </div>
+            )
+          })}
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   )
 }

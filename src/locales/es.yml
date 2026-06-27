@@ -96,6 +96,7 @@ options:
     title: Proveedores de API
     description: Configura proveedores de API para traducción e información de vocabulario. Tenemos más de 20 proveedores integrados y admitimos cualquier proveedor de API compatible con OpenAI.
     addProvider: Añadir proveedor
+    builtInProvider: Proveedor integrado
     sponsorCta: Obtén IA rápida y rentable
     badges:
       featureCount: $1 funciones
@@ -170,6 +171,8 @@ options:
     providers:
       name:
         freeAi: Servicio AI gratuito
+      attribution:
+        freeAi: Proporcionado por Atlas Cloud. Actualmente solo está disponible para acciones de IA personalizadas. Para desbloquear una experiencia sin restricciones, compra créditos muy rentables en el sitio web oficial.
       description:
         openai: Proporciona modelos como GPT-4o
         azure: Modelos OpenAI hospedados en Azure mediante tus implementaciones

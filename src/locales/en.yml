@@ -96,6 +96,7 @@ options:
     title: API Providers
     description: Configure API providers for translation and vocabulary insight. We have 20+ built-in providers and support any OpenAI-compatible API provider.
     addProvider: Add Provider
+    builtInProvider: Built-in Provider
     sponsorCta: Get fast, cost-effective AI
     badges:
       featureCount: $1 features
@@ -170,6 +171,8 @@ options:
     providers:
       name:
         freeAi: Free AI Service
+      attribution:
+        freeAi: Provided by Atlas Cloud. Currently only available for Custom AI Actions. To unlock an unrestricted experience, purchase highly cost-effective credits on the official website.
       description:
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments

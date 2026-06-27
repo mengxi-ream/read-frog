@@ -96,6 +96,7 @@ options:
     title: Nhà cung cấp API
     description: Cấu hình các nhà cung cấp API cho chức năng dịch và phân tích từ vựng tại đây. Chúng tôi có hơn 20 nhà cung cấp tích hợp sẵn và hỗ trợ mọi API tương thích OpenAI.
     addProvider: Thêm nhà cung cấp
+    builtInProvider: Nhà cung cấp tích hợp
     sponsorCta: Nhận AI nhanh, tiết kiệm chi phí
     badges:
       featureCount: $1 tính năng
@@ -169,6 +170,8 @@ options:
     providers:
       name:
         freeAi: Dịch vụ AI miễn phí
+      attribution:
+        freeAi: Được cung cấp bởi Atlas Cloud. Hiện chỉ khả dụng cho Hành động AI tùy chỉnh. Để mở khóa trải nghiệm không giới hạn, bạn có thể mua tín dụng có chi phí rất hiệu quả trên trang web chính thức.
       description:
         openai: Cung cấp các mô hình như GPT-4o
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn

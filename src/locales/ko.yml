@@ -96,6 +96,7 @@ options:
     title: API 제공업체
     description: 번역 및 어휘 분석 기능을 위한 API 제공업체를 구성합니다. 20개 이상의 내장 제공업체와 모든 OpenAI 호환 API를 지원합니다.
     addProvider: 제공업체 추가
+    builtInProvider: 내장 제공업체
     sponsorCta: 빠르고 가성비 좋은 AI 받기
     badges:
       featureCount: $1 개 기능
@@ -169,6 +170,8 @@ options:
     providers:
       name:
         freeAi: 무료 AI 서비스
+      attribution:
+        freeAi: Atlas Cloud 제공. 현재는 사용자 지정 AI 작업에서만 사용할 수 있습니다. 제한 없는 경험을 사용하려면 공식 웹사이트에서 가성비 높은 크레딧을 구매하세요.
       description:
         openai: GPT-4o 같은 모델을 제공합니다
         azure: Azure 배포를 통해 OpenAI 모델 사용

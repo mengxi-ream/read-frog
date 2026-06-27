@@ -96,6 +96,7 @@ options:
     title: API 提供者
     description: 設定用於翻譯和詞彙解析功能的 API 提供者。內建 20 多個提供者，並支援任何 OpenAI 相容 API 提供者。
     addProvider: 新增提供者
+    builtInProvider: 內建提供者
     sponsorCta: 取得高速高性價比 AI
     badges:
       featureCount: $1 個功能
@@ -170,6 +171,8 @@ options:
     providers:
       name:
         freeAi: 免費 AI 服務
+      attribution:
+        freeAi: 由 Atlas Cloud 提供。目前僅對自訂 AI 指令開放。若要解鎖無限制體驗，可以前往官網購買高性價比額度。
       description:
         openai: 提供 GPT-4o 等模型
         azure: 透過 Azure 部署使用 OpenAI 模型

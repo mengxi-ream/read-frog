@@ -96,6 +96,7 @@ options:
     title: API Sağlayıcıları
     description: Çeviri ve kelime analizi işlevleri için API sağlayıcılarını buradan yapılandırın. 20'den fazla yerleşik sağlayıcımız var ve OpenAI uyumlu tüm API sağlayıcılarını destekliyoruz.
     addProvider: Sağlayıcı Ekle
+    builtInProvider: Yerleşik Sağlayıcı
     sponsorCta: Hızlı ve uygun maliyetli AI al
     badges:
       featureCount: $1 özellik
@@ -169,6 +170,8 @@ options:
     providers:
       name:
         freeAi: Ücretsiz AI Hizmeti
+      attribution:
+        freeAi: Atlas Cloud tarafından sağlanır. Şu anda yalnızca özel AI eylemleri için kullanılabilir. Sınırsız deneyimin kilidini açmak için resmi web sitesinden uygun maliyetli kredi satın alabilirsiniz.
       description:
         openai: GPT-4o gibi modeller sağlar
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
