@@ -1,3 +1,4 @@
+import { initNetflixSubtitles } from "./init-netflix-subtitles"
 import { initYoutubeSubtitles } from "./init-youtube-subtitles"
 
 let hasBootstrappedSubtitlesRuntime = false
@@ -8,5 +9,8 @@ export function bootstrapSubtitlesRuntime() {
   }
 
   hasBootstrappedSubtitlesRuntime = true
-  initYoutubeSubtitles()
+  if (/(?:^|\.)netflix\.com$/i.test(window.location.hostname))
+    void initNetflixSubtitles()
+  else
+    initYoutubeSubtitles()
 }

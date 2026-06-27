@@ -9,7 +9,7 @@ declare global {
 }
 
 export default defineContentScript({
-  matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"],
+  matches: ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*", "*://*.netflix.com/*"],
   allFrames: true,
   cssInjectionMode: "manifest",
   async main(ctx) {

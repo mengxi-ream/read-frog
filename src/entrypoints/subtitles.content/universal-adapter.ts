@@ -468,7 +468,12 @@ export class UniversalVideoAdapter {
       await this.getOrLoadSourceSubtitles()
       this.sessionSubtitles = this.sourceSubtitles
 
-      if (await this.shouldSkipTranslationForCurrentTrack()) {
+      if (this.sourceProcessedSubtitles.some(fragment => fragment.translation)) {
+        this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
+        this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
+        this.subtitlesScheduler?.setState("idle")
+      }
+      else if (await this.shouldSkipTranslationForCurrentTrack()) {
         this.processPassthroughSubtitles()
       }
       else {
