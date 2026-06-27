@@ -1,5 +1,43 @@
 # @read-frog/extension
 
+## 1.36.0
+
+### Minor Changes
+
+- [#1718](https://github.com/mengxi-ream/read-frog/pull/1718) [`46a0178`](https://github.com/mengxi-ream/read-frog/commit/46a01782fc194e3a26327d68bbd786d52d0fee06) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add Azure provider.
+
+- [#1720](https://github.com/mengxi-ream/read-frog/pull/1720) [`b27d54a`](https://github.com/mengxi-ream/read-frog/commit/b27d54a2eb9d3ce1889d99f3592fdf66d613b937) Thanks [@cinziw](https://github.com/cinziw)! - feat(context menu): add read-aloud option in right-click menu for selected text
+
+- [#1735](https://github.com/mengxi-ream/read-frog/pull/1735) [`1dbcb61`](https://github.com/mengxi-ream/read-frog/commit/1dbcb612dc069ba0a79d9f9b79ae2b30b5ae1620) Thanks [@AmeowCAT](https://github.com/AmeowCAT)! - feat: add configurable shortcut key (default Alt+Shift+M) to toggle translation mode between bilingual and translation-only
+
+### Patch Changes
+
+- [#1729](https://github.com/mengxi-ream/read-frog/pull/1729) [`5a3d688`](https://github.com/mengxi-ream/read-frog/commit/5a3d688f1954d9d3e6f2913e24b991e8eff766bb) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add Atlas Cloud as an OpenAI-compatible provider and seed it by default
+
+- [#1711](https://github.com/mengxi-ream/read-frog/pull/1711) [`555e8c6`](https://github.com/mengxi-ream/read-frog/commit/555e8c66afed26edc4a4e0bd1d57bdde22c6ff9e) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(tts): add Azure voice metadata to TTS selectors and prefer multilingual defaults
+
+- [#1744](https://github.com/mengxi-ream/read-frog/pull/1744) [`e8bb726`](https://github.com/mengxi-ream/read-frog/commit/e8bb726dc0ac936bc8f1194a5b4df0baf21c3c92) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - feat(api-providers): show the built-in free AI provider in the providers settings.
+
+- [#1741](https://github.com/mengxi-ream/read-frog/pull/1741) [`c9f6938`](https://github.com/mengxi-ream/read-frog/commit/c9f6938b5496ccb8d8e569d4421d9b2097e7926e) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(options): show test connection feedback inside button
+
+- [#1714](https://github.com/mengxi-ream/read-frog/pull/1714) [`edd846e`](https://github.com/mengxi-ream/read-frog/commit/edd846e6ee21239db160a1a9f9c0261cef8ab78e) Thanks [@taiiiyang](https://github.com/taiiiyang)! - fix(subtitles): force dark theme for the embedded YouTube subtitle menu
+
+- [#1742](https://github.com/mengxi-ream/read-frog/pull/1742) [`9eb2a89`](https://github.com/mengxi-ream/read-frog/commit/9eb2a896211e88c0c6826aaa4d56527b86285e42) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(custom-actions): localize the hosted free AI provider name and keep it scoped to custom actions
+
+- [#1745](https://github.com/mengxi-ream/read-frog/pull/1745) [`5cedf9e`](https://github.com/mengxi-ream/read-frog/commit/5cedf9e3fcd3f570513f38cf8c4a212eb2305067) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(custom-actions): use the Read Frog avatar for the free AI service icon
+
+- [#1743](https://github.com/mengxi-ream/read-frog/pull/1743) [`ca5c026`](https://github.com/mengxi-ream/read-frog/commit/ca5c026667b5f91050e733b27460c5a66dbcf3cd) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - Add a popup provider drawer for choosing feature-specific providers.
+
+- [#1626](https://github.com/mengxi-ream/read-frog/pull/1626) [`a33fde7`](https://github.com/mengxi-ream/read-frog/commit/a33fde7cc0723d8447d25efb44378011a21e4c00) Thanks [@li-yiou](https://github.com/li-yiou)! - feat: sync browser action icon with translation status
+
+- [#1740](https://github.com/mengxi-ream/read-frog/pull/1740) [`54ae70e`](https://github.com/mengxi-ream/read-frog/commit/54ae70e6d9bbdee1b32d3ff57dae4892a9af3d9b) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(translation): treat display contents wrappers as block containers
+
+- [#1703](https://github.com/mengxi-ream/read-frog/pull/1703) [`4377926`](https://github.com/mengxi-ream/read-frog/commit/4377926b71dbe0df7b3476f9d3d58c22d1c54901) Thanks [@ringoshiina](https://github.com/ringoshiina)! - fix(subtitles): avoid translated subtitle download status flicker
+
+- [#1734](https://github.com/mengxi-ream/read-frog/pull/1734) [`d5f5c4d`](https://github.com/mengxi-ream/read-frog/commit/d5f5c4d06d993ad069b378676eae5ecc39b6312f) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(providers): add current xAI Grok models
+
+- [#1717](https://github.com/mengxi-ream/read-frog/pull/1717) [`accf05b`](https://github.com/mengxi-ream/read-frog/commit/accf05b21e2909264a3fd03cc4740854e729cc02) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(subtitles): add a Read Frog menu button to YouTube Shorts controls
+
 ## 1.35.1
 
 ### Patch Changes
