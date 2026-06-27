@@ -19,6 +19,10 @@ popup:
   autoLang: Otomatik
   sourceLang: Kaynak
   targetLang: Hedef
+  providers:
+    title: Providers
+    description: Choose which provider to use for each feature
+    open: Open provider settings
   translate: Çevir
   showOriginal: Orijinali Göster
   enabledFloatingButton: Yüzen butonu etkinleştir

@@ -19,6 +19,10 @@ popup:
   autoLang: 自动检测
   sourceLang: 来源语言
   targetLang: 目标语言
+  providers:
+    title: 提供商
+    description: 为每个功能选择使用的提供商
+    open: 打开提供商设置
   translate: 翻译
   showOriginal: 显示原文
   enabledFloatingButton: 启用悬浮按钮

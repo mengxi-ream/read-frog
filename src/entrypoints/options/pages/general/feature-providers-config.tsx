@@ -1,112 +1,7 @@
-import type { ProviderConfig } from "@/types/config/provider"
-import type { FeatureKey } from "@/utils/constants/feature-providers"
-import { useAtomValue, useSetAtom } from "jotai"
-import { useMemo } from "react"
 import { i18n } from "#imports"
-import ProviderSelector from "@/components/llm-providers/provider-selector"
-import { Field, FieldLabel } from "@/components/ui/base-ui/field"
-import { isAPIProviderConfig, isPureAPIProvider } from "@/types/config/provider"
-import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
-import { featureProviderConfigAtom } from "@/utils/atoms/provider"
-import { getProviderConfigById } from "@/utils/config/helpers"
-import { buildFeatureProviderPatch, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
-import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
+import { FeatureProviderSelectorList, needsApiKeyWarning } from "@/components/llm-providers/feature-provider-selector-list"
 import { ConfigCard } from "../../components/config-card"
 import { SetApiKeyWarning } from "../../components/set-api-key-warning"
-
-/** Pure API providers (e.g. DeepLX) don't require an API key */
-function needsApiKeyWarning(providerConfig: ProviderConfig | null): boolean {
-  return !!providerConfig
-    && isAPIProviderConfig(providerConfig)
-    && !isPureAPIProvider(providerConfig.provider)
-    && !providerConfig.apiKey
-}
-
-function FeatureProviderField({ featureKey }: {
-  featureKey: FeatureKey
-}) {
-  const config = useAtomValue(configAtom)
-  const setConfig = useSetAtom(writeConfigAtom)
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-  const def = FEATURE_PROVIDER_DEFS[featureKey]
-  const providerId = def.getProviderId(config)
-  const providerConfig = useAtomValue(featureProviderConfigAtom(featureKey))
-
-  const providers = useMemo(() =>
-    getSelectableProvidersForCapability(featureKey, providersConfig),
-  [providersConfig, featureKey])
-
-  return (
-    <Field>
-      <FieldLabel nativeLabel={false} render={<div className="flex flex-wrap" />}>
-        {i18n.t(getFeatureLabelI18nKey(featureKey))}
-        {needsApiKeyWarning(providerConfig) && <SetApiKeyWarning />}
-      </FieldLabel>
-      <ProviderSelector
-        providers={providers}
-        value={providerId}
-        onChange={id => void setConfig(buildFeatureProviderPatch({ [featureKey]: id }))}
-        className="w-full"
-      />
-    </Field>
-  )
-}
-
-function CustomActionProviderFields() {
-  const config = useAtomValue(configAtom)
-  const setConfig = useSetAtom(writeConfigAtom)
-  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
-
-  const customActionProviders = useMemo(
-    () => getSelectableProvidersForCapability("selectionToolbar.customAction", providersConfig),
-    [providersConfig],
-  )
-
-  const customActions = config.selectionToolbar.customActions
-
-  if (customActions.length === 0) {
-    return null
-  }
-
-  return (
-    <>
-      <p className="text-sm font-medium text-muted-foreground">
-        {i18n.t("options.general.featureProviders.customActions")}
-      </p>
-      {customActions.map((action) => {
-        const currentProviderConfig = getProviderConfigById(providersConfig, action.providerId) ?? null
-        return (
-          <Field key={action.id}>
-            <FieldLabel nativeLabel={false} render={<div />}>
-              {action.name}
-              {needsApiKeyWarning(currentProviderConfig) && <SetApiKeyWarning />}
-            </FieldLabel>
-            <ProviderSelector
-              providers={customActionProviders}
-              value={action.providerId}
-              onChange={(id) => {
-                const updatedCustomActions = config.selectionToolbar.customActions.map(item =>
-                  item.id === action.id
-                    ? { ...item, providerId: id }
-                    : item,
-                )
-
-                void setConfig({
-                  selectionToolbar: {
-                    ...config.selectionToolbar,
-                    customActions: updatedCustomActions,
-                  },
-                })
-              }}
-              className="w-full"
-              placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider")}
-            />
-          </Field>
-        )
-      })}
-    </>
-  )
-}
 
 export default function FeatureProvidersConfig() {
   return (
@@ -115,15 +10,10 @@ export default function FeatureProvidersConfig() {
       title={i18n.t("options.general.featureProviders.title")}
       description={i18n.t("options.general.featureProviders.description")}
     >
-      <div className="space-y-4">
-        <FeatureProviderField
-          featureKey="translate"
-        />
-        <FeatureProviderField featureKey="videoSubtitles" />
-        <FeatureProviderField featureKey="selectionToolbar.translate" />
-        <FeatureProviderField featureKey="inputTranslation" />
-        <CustomActionProviderFields />
-      </div>
+      <FeatureProviderSelectorList
+        renderApiKeyWarning={providerConfig =>
+          needsApiKeyWarning(providerConfig) ? <SetApiKeyWarning /> : null}
+      />
     </ConfigCard>
   )
 }

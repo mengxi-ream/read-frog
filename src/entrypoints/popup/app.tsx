@@ -10,10 +10,10 @@ import { DiscordButton } from "./components/discord-button"
 import LanguageOptionsSelector from "./components/language-options-selector"
 import { MoreMenu } from "./components/more-menu"
 import Hotkey from "./components/node-translation-hotkey-selector"
+import ProvidersField from "./components/providers-field"
 import { SiteControlToggle } from "./components/site-control-toggle"
 import TranslateButton from "./components/translate-button"
 import TranslatePromptSelector from "./components/translate-prompt-selector"
-import TranslateProviderField from "./components/translate-provider-field"
 import { TranslationHubButton } from "./components/translation-hub-button"
 import TranslationModeSelector from "./components/translation-mode-selector"
 
@@ -30,7 +30,7 @@ function App() {
           </div>
         </div>
         <LanguageOptionsSelector />
-        <TranslateProviderField />
+        <ProvidersField />
         <TranslatePromptSelector />
         <div className="flex w-full items-center gap-2">
           <TranslationModeSelector />

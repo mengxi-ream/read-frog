@@ -19,6 +19,10 @@ popup:
   autoLang: Auto
   sourceLang: Source
   targetLang: Target
+  providers:
+    title: Providers
+    description: Choose which provider to use for each feature
+    open: Open provider settings
   translate: Translate
   showOriginal: Show Original
   enabledFloatingButton: Enable floating button

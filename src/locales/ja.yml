@@ -19,6 +19,10 @@ popup:
   autoLang: 自動検出
   sourceLang: ソース言語
   targetLang: 翻訳言語
+  providers:
+    title: Providers
+    description: Choose which provider to use for each feature
+    open: Open provider settings
   translate: 翻訳
   showOriginal: 原文を表示
   enabledFloatingButton: フローティングボタンを有効化

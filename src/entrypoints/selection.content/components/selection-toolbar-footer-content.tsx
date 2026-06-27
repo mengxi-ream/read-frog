@@ -1,4 +1,4 @@
-import type { ProviderSelectorOption } from "@/components/llm-providers/provider-selector"
+import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { IconAspectRatio, IconRefresh } from "@tabler/icons-react"
 import { useCallback } from "react"
 import { i18n } from "#imports"

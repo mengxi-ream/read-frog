@@ -19,6 +19,10 @@ popup:
   autoLang: Tự động
   sourceLang: Nguồn
   targetLang: Đích
+  providers:
+    title: Providers
+    description: Choose which provider to use for each feature
+    open: Open provider settings
   translate: Dịch
   showOriginal: Hiển thị bản gốc
   enabledFloatingButton: Bật nút nổi

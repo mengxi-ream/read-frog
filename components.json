@@ -5,18 +5,18 @@
   "tsx": true,
   "tailwind": {
     "config": "",
-    "css": "@/assets/styles/theme.css",
+    "css": "src/assets/styles/theme.css",
     "baseColor": "zinc",
     "cssVariables": true,
     "prefix": ""
   },
   "iconLibrary": "tabler",
   "aliases": {
-    "components": "@/components",
-    "utils": "@/utils/styles/tailwind",
-    "ui": "@/components/ui/base-ui",
-    "lib": "@/utils/styles",
-    "hooks": "@/hooks"
+    "components": "src/components",
+    "utils": "@/utils/styles/utils",
+    "ui": "src/components/ui/base-ui",
+    "lib": "src/utils/styles",
+    "hooks": "src/hooks"
   },
   "menuColor": "default",
   "menuAccent": "subtle",

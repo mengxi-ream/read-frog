@@ -19,6 +19,10 @@ popup:
   autoLang: 自動偵測
   sourceLang: 來源語言
   targetLang: 目標語言
+  providers:
+    title: 提供商
+    description: 為每個功能選擇使用的提供商
+    open: 打開提供商設定
   translate: 翻譯
   showOriginal: 顯示原文
   enabledFloatingButton: 啟用懸浮按鈕

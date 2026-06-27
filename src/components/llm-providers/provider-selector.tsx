@@ -1,6 +1,6 @@
 import type { ComponentProps } from "react"
-import type { ProviderConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
+import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
 import {
@@ -13,17 +13,9 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { isLLMProviderConfig, isPureTranslateProviderConfig } from "@/types/config/provider"
-import { PROVIDER_ITEMS } from "@/utils/constants/providers"
+import { getProviderLogo, getProviderName, isProviderSelectorItem } from "@/utils/providers/provider-display"
 import { useTheme } from "../providers/theme-provider"
 
-export interface ProviderSelectorItem {
-  kind: "system"
-  id: string
-  logo: (theme: Theme) => string
-  name: string
-}
-
-export type ProviderSelectorOption = ProviderConfig | ProviderSelectorItem
 type ProviderSelectorLabelKey = "translateService.builtInModels" | "translateService.llmModels" | "translateService.normalTranslator"
 
 export interface ProviderSelectorGroup {
@@ -38,20 +30,6 @@ interface ProviderSelectorProps {
   placeholder?: string
   className?: string
   selectContentProps?: Pick<ComponentProps<typeof SelectContent>, "container" | "positionerClassName">
-}
-
-function isProviderSelectorItem(provider: ProviderSelectorOption): provider is ProviderSelectorItem {
-  return "kind" in provider && provider.kind === "system"
-}
-
-function getProviderLogo(provider: ProviderSelectorOption, theme: Theme): string {
-  return isProviderSelectorItem(provider)
-    ? provider.logo(theme)
-    : PROVIDER_ITEMS[provider.provider].logo(theme)
-}
-
-function getProviderName(provider: ProviderSelectorOption): string {
-  return provider.name
 }
 
 export function getProviderSelectorGroups(providers: ProviderSelectorOption[]): ProviderSelectorGroup[] {
