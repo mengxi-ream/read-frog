@@ -189,6 +189,21 @@ describe("feature providers", () => {
 
       expect(findFeatureMissingProvider(remainingProviders)).toBe("translate")
     })
+
+    it("treats llm language detection as unavailable when no enabled llm provider remains", () => {
+      const config = {
+        ...DEFAULT_CONFIG,
+        languageDetection: {
+          mode: "llm" as const,
+          providerId: "deleted-provider",
+        },
+      }
+      const remainingProviders = [
+        getProviderById("microsoft-translate-default"),
+      ]
+
+      expect(findFeatureMissingProvider(remainingProviders, config)).toBe("languageDetection")
+    })
   })
 
   describe("computeSelectionToolbarCustomActionFallbacksAfterDeletion", () => {

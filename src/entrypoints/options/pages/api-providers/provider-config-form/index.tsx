@@ -90,7 +90,7 @@ export function ProviderConfigForm() {
   const handleDelete = async () => {
     const updatedAllProviders = allProvidersConfig.filter(provider => provider.id !== providerConfig.id)
 
-    const unsatisfied = findFeatureMissingProvider(updatedAllProviders)
+    const unsatisfied = findFeatureMissingProvider(updatedAllProviders, config)
     if (unsatisfied) {
       toast.error(i18n.t("options.apiProviders.form.atLeastOneLLMProvider")) // TODO: make this word more general
       return

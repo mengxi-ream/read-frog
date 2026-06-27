@@ -112,11 +112,17 @@ export function computeProviderFallbacksAfterDeletion(
 
 export function findFeatureMissingProvider(
   remainingProviders: ProvidersConfig,
-): FeatureKey | null {
+  config?: Config,
+): FeatureKey | "languageDetection" | null {
   for (const key of FEATURE_KEYS) {
     if (!getProviderIdsForCapability(key, remainingProviders, { requireEnable: true })[0])
       return key
   }
+
+  if (config?.languageDetection.mode === "llm" && getEnabledLLMProvidersConfig(remainingProviders).length === 0) {
+    return "languageDetection"
+  }
+
   return null
 }
 
