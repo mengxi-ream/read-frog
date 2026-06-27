@@ -29,7 +29,7 @@ export class SubtitlesScheduler {
       return
     }
 
-    const existingMap = new Map(this.subtitles.map(s => [s.start, s]))
+    const existingMap = new Map(this.subtitles.map((subtitle, index) => [subtitle.start, { subtitle, index }]))
     const currentSubtitle = this.currentIndex >= 0 ? this.subtitles[this.currentIndex] : null
     let currentSubtitleUpdated = false
 
@@ -41,17 +41,14 @@ export class SubtitlesScheduler {
         continue
       }
 
-      if (newSub.translation) {
-        const updatedSub = { ...existing, translation: newSub.translation }
-        const idx = this.subtitles.findIndex(s => s.start === existing.start)
-        if (idx >= 0) {
-          this.subtitles[idx] = updatedSub
-        }
-
-        if (currentSubtitle && existing.start === currentSubtitle.start) {
-          currentSubtitleUpdated = true
-        }
+      const updatedSub = {
+        ...existing.subtitle,
+        ...newSub,
+        translation: newSub.translation ?? existing.subtitle.translation,
       }
+      this.subtitles[existing.index] = updatedSub
+
+      currentSubtitleUpdated ||= currentSubtitle?.start === existing.subtitle.start
     }
 
     this.subtitles.sort((a, b) => a.start - b.start)

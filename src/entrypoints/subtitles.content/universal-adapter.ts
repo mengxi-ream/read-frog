@@ -538,11 +538,33 @@ export class UniversalVideoAdapter {
 
     const seenStarts = new Set(this.sourceSubtitles.map(fragment => fragment.start))
     this.liveSubtitlesUnsubscribe = this.subtitlesFetcher.watchLiveSubtitles((subtitles) => {
-      const fresh = subtitles.filter(fragment => !seenStarts.has(fragment.start))
+      const fresh: SubtitlesFragment[] = []
+      const updatedProcessed: SubtitlesFragment[] = []
+      for (const fragment of subtitles) {
+        if (!seenStarts.has(fragment.start)) {
+          seenStarts.add(fragment.start)
+          fresh.push(fragment)
+          continue
+        }
+
+        this.updateCachedSubtitleTiming(this.sourceSubtitles, fragment)
+        this.updateCachedSubtitleTiming(this.sessionSubtitles, fragment)
+        this.updateCachedSubtitleTiming(this.sourceProcessedSubtitles, fragment)
+        const updatedSessionFragment = this.updateCachedSubtitleTiming(this.sessionProcessedFragments, fragment)
+        const updatedSourceFragment = this.sourceProcessedSubtitles.find(source => source.start === fragment.start)
+        const updatedFragment = updatedSessionFragment ?? updatedSourceFragment
+        if (updatedFragment) {
+          updatedProcessed.push(updatedFragment)
+        }
+      }
+
+      if (updatedProcessed.length > 0) {
+        this.subtitlesScheduler?.supplementSubtitles(updatedProcessed)
+      }
+
       if (fresh.length === 0)
         return
 
-      fresh.forEach(fragment => seenStarts.add(fragment.start))
       this.sourceSubtitles.push(...fresh)
       this.sessionSubtitles.push(...fresh)
 
@@ -571,6 +593,22 @@ export class UniversalVideoAdapter {
       this.sessionProcessedFragments.push(...passthrough)
       this.subtitlesScheduler?.supplementSubtitles(passthrough)
     })
+  }
+
+  private updateCachedSubtitleTiming(
+    subtitles: SubtitlesFragment[],
+    fragment: SubtitlesFragment,
+  ): SubtitlesFragment | null {
+    const index = subtitles.findIndex(subtitle => subtitle.start === fragment.start)
+    if (index < 0)
+      return null
+
+    const updated = {
+      ...subtitles[index],
+      end: fragment.end,
+    }
+    subtitles[index] = updated
+    return updated
   }
 
   private stopLiveSubtitles() {
@@ -609,6 +647,13 @@ export class UniversalVideoAdapter {
     else {
       this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
     }
+
+    this.subtitlesScheduler?.supplementSubtitles(
+      this.sessionProcessedFragments.map(fragment => ({
+        ...fragment,
+        translation: fragment.translation ?? "",
+      })),
+    )
 
     this.translationCoordinator = new TranslationCoordinator({
       getFragments: () => this.segmentationPipeline

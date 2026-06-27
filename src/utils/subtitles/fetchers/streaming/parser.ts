@@ -60,11 +60,12 @@ function parseTimedTextXml(text: string): SubtitlesFragment[] {
   if (parseError)
     return []
 
+  const tickRate = parseTickRate(doc.documentElement)
   return [...doc.querySelectorAll("p")]
     .map((node): SubtitlesFragment | null => {
-      const start = parseTimeExpression(node.getAttribute("begin") ?? node.getAttribute("t"))
-      const explicitEnd = parseTimeExpression(node.getAttribute("end"))
-      const duration = parseTimeExpression(node.getAttribute("dur") ?? node.getAttribute("d"))
+      const start = parseTimeExpression(node.getAttribute("begin") ?? node.getAttribute("t"), { tickRate })
+      const explicitEnd = parseTimeExpression(node.getAttribute("end"), { tickRate })
+      const duration = parseTimeExpression(node.getAttribute("dur") ?? node.getAttribute("d"), { tickRate })
       const end = explicitEnd ?? (start !== null && duration !== null ? start + duration : null)
 
       if (start === null || end === null || end <= start)
@@ -74,6 +75,15 @@ function parseTimedTextXml(text: string): SubtitlesFragment[] {
       return cueText ? { text: cueText, start, end } : null
     })
     .filter((fragment): fragment is SubtitlesFragment => fragment !== null)
+}
+
+function parseTickRate(root: Element): number | undefined {
+  const value = root.getAttribute("ttp:tickRate") ?? root.getAttribute("tickRate")
+  if (!value)
+    return undefined
+
+  const tickRate = Number.parseFloat(value)
+  return Number.isFinite(tickRate) && tickRate > 0 ? tickRate : undefined
 }
 
 function readNodeText(node: Element): string {
@@ -105,11 +115,17 @@ function cleanSubtitleText(text: string): string {
   )
 }
 
-export function parseTimeExpression(value: string | null | undefined): number | null {
+export function parseTimeExpression(
+  value: string | null | undefined,
+  options: { tickRate?: number } = {},
+): number | null {
   if (!value)
     return null
 
   const text = value.trim().replace(",", ".")
+
+  if (/^\d+(?:\.\d+)?t$/.test(text) && options.tickRate)
+    return (Number.parseFloat(text.slice(0, -1)) / options.tickRate) * 1000
 
   if (/^\d+(?:\.\d+)?ms$/.test(text))
     return Number.parseFloat(text) || 0

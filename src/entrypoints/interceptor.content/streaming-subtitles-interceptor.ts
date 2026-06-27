@@ -20,6 +20,10 @@ declare global {
 
 const STREAMING_HOST_PATTERN = /(?:^|\.)(?:(?:netflix|paramountplus|disneyplus)\.com|play\.max\.com|max\.com)$/i
 const SUBTITLE_URL_PATTERN = /\.(?:vtt|srt|webvtt|xml|ttml|dfxp)(?:[?#]|$)|timedtext|texttrack|transcripts_url|textstream_|captions?|subtitles?/i
+const SUBTITLE_JSON_HINT_PATTERN = /timedtext|texttrack|transcripts_url|textstream_|captions?|subtitles?|ttDownloadables?|downloadUrls?/i
+const SUBTITLE_TRACK_KEY_PATTERN = /timedtext|texttrack|transcript|caption|subtitle|ttDownloadables?/i
+const JSON_RESPONSE_URL_PATTERN = /manifest|metadata|pathEvaluator|shakti|cadmium|timedtext|texttrack|caption|subtitle/i
+const nativeJSONParse = JSON.parse.bind(JSON)
 const trackByUrl = new Map<string, StreamingSubtitleTrackMessage>()
 
 export function injectStreamingSubtitlesInterceptor(): void {
@@ -68,8 +72,11 @@ function findTrackUrls(track: any): string[] {
   const urls = new Set<string>()
   const visit = (value: any, key = "") => {
     if (typeof value === "string") {
-      const url = normalizeUrl(value)
-      if (url && (looksLikeSubtitleUrl(url) || key.toLowerCase().includes("url")))
+      const lowerKey = key.toLowerCase()
+      const isUrlKey = lowerKey.includes("url")
+      const isUrlLikeValue = /^(?:https?:)?\/\//i.test(value) || value.startsWith("/")
+      const url = (isUrlKey || isUrlLikeValue) ? normalizeUrl(value) : null
+      if (url && (looksLikeSubtitleUrl(url) || isUrlKey))
         urls.add(url)
       return
     }
@@ -83,7 +90,7 @@ function findTrackUrls(track: any): string[] {
     }
 
     for (const [childKey, childValue] of Object.entries(value)) {
-      visit(childValue, childKey)
+      visit(childValue, key ? `${key}.${childKey}` : childKey)
     }
   }
 
@@ -91,13 +98,100 @@ function findTrackUrls(track: any): string[] {
   return [...urls]
 }
 
+function getFirstString(track: any, keys: string[]): string | undefined {
+  for (const key of keys) {
+    const value = track?.[key]
+    if (typeof value === "string" && value.trim())
+      return value
+  }
+}
+
 function normalizeTrack(track: any): StreamingSubtitleTrackMessage[] {
   return findTrackUrls(track).map(url => ({
     url,
-    language: track?.language ?? track?.languageCode ?? track?.lang ?? track?.bcp47,
-    label: track?.languageDescription ?? track?.label ?? track?.name,
-    kind: track?.trackType ?? track?.kind,
+    language: getFirstString(track, ["language", "languageCode", "lang", "bcp47", "locale", "languageId"]),
+    label: getFirstString(track, ["languageDescription", "displayName", "label", "name", "description"]),
+    kind: getFirstString(track, ["trackType", "kind", "type", "role"]),
   }))
+}
+
+function hasSubtitleTrackHint(track: any, key = ""): boolean {
+  if (SUBTITLE_TRACK_KEY_PATTERN.test(key))
+    return true
+
+  if (!track || typeof track !== "object" || Array.isArray(track))
+    return false
+
+  return Object.keys(track).some(childKey => SUBTITLE_TRACK_KEY_PATTERN.test(childKey))
+}
+
+function hasLanguageMetadata(track: any): boolean {
+  return Boolean(getFirstString(track, [
+    "language",
+    "languageCode",
+    "lang",
+    "bcp47",
+    "locale",
+    "languageId",
+    "languageDescription",
+    "displayName",
+    "label",
+    "name",
+  ]))
+}
+
+function looksLikeSubtitleTrackObject(track: any, key = ""): boolean {
+  if (!track || typeof track !== "object" || Array.isArray(track))
+    return false
+
+  const urls = findTrackUrls(track)
+  if (urls.length === 0)
+    return false
+
+  const hasSubtitleUrl = urls.some(looksLikeSubtitleUrl)
+  return hasSubtitleUrl || (hasSubtitleTrackHint(track, key) && hasLanguageMetadata(track))
+}
+
+export function collectStreamingSubtitleTracks(value: unknown): StreamingSubtitleTrackMessage[] {
+  const tracks: StreamingSubtitleTrackMessage[] = []
+  const seen = new WeakSet<object>()
+
+  const visit = (node: unknown, key = "") => {
+    if (!node || typeof node !== "object")
+      return
+
+    if (seen.has(node))
+      return
+    seen.add(node)
+
+    if (Array.isArray(node)) {
+      if (SUBTITLE_TRACK_KEY_PATTERN.test(key))
+        tracks.push(...node.flatMap(normalizeTrack))
+
+      for (const item of node) {
+        visit(item, key)
+      }
+      return
+    }
+
+    if (looksLikeSubtitleTrackObject(node, key))
+      tracks.push(...normalizeTrack(node))
+
+    for (const [childKey, childValue] of Object.entries(node)) {
+      if (Array.isArray(childValue) && SUBTITLE_TRACK_KEY_PATTERN.test(childKey))
+        tracks.push(...childValue.flatMap(normalizeTrack))
+
+      visit(childValue, childKey)
+    }
+  }
+
+  visit(value)
+
+  const byUrl = new Map<string, StreamingSubtitleTrackMessage>()
+  for (const track of tracks) {
+    byUrl.set(track.url, track)
+  }
+  return [...byUrl.values()]
 }
 
 function publishTracks(tracks: StreamingSubtitleTrackMessage[]) {
@@ -112,6 +206,30 @@ function publishTracks(tracks: StreamingSubtitleTrackMessage[]) {
     type: STREAMING_SUBTITLE_TRACKS_TYPE,
     tracks,
   })
+}
+
+function replayCachedTracks() {
+  publishTracks([...trackByUrl.values()])
+}
+
+function publishTracksFromParsedJSON(value: unknown) {
+  publishTracks(collectStreamingSubtitleTracks(value))
+}
+
+function publishTracksFromJSONText(text: string | null) {
+  if (!text || !SUBTITLE_JSON_HINT_PATTERN.test(text))
+    return
+
+  try {
+    publishTracksFromParsedJSON(nativeJSONParse(text))
+  }
+  catch {
+    // Ignore non-JSON responses and unrelated page data.
+  }
+}
+
+function shouldInspectJSONResponse(url: string | null, contentType: string | null): boolean {
+  return /\bjson\b/i.test(contentType ?? "") || Boolean(url && JSON_RESPONSE_URL_PATTERN.test(url))
 }
 
 function captureSubtitle(url: string | null, text: string | null) {
@@ -136,17 +254,11 @@ function hookJSONParse() {
 
   JSON.parse = function (text, reviver) {
     const result = originalParse.call(this, text, reviver)
+    if (typeof text === "string" && !SUBTITLE_JSON_HINT_PATTERN.test(text))
+      return result
 
     try {
-      const timedTextTracks = result?.result?.timedtexttracks
-      if (Array.isArray(timedTextTracks)) {
-        publishTracks(timedTextTracks.flatMap(normalizeTrack))
-      }
-
-      const disneyCaptions = result?.asset?.captions
-      if (Array.isArray(disneyCaptions)) {
-        publishTracks(disneyCaptions.flatMap(normalizeTrack))
-      }
+      publishTracksFromParsedJSON(result)
     }
     catch {
       // Ignore page JSON that is unrelated to subtitles.
@@ -171,6 +283,16 @@ function getXHRResponseText(xhr: XMLHttpRequest): string | null {
   return null
 }
 
+function getXHRResponseJSON(xhr: XMLHttpRequest): unknown {
+  try {
+    if (xhr.responseType === "json")
+      return xhr.response
+  }
+  catch {
+    return null
+  }
+}
+
 function hookXHR() {
   const originalOpen = XMLHttpRequest.prototype.open
   const originalSend = XMLHttpRequest.prototype.send
@@ -183,7 +305,16 @@ function hookXHR() {
   XMLHttpRequest.prototype.send = function (...args: any[]) {
     this.addEventListener("load", function () {
       const url = this.responseURL || (this as any).__readFrogSubtitleUrl
-      captureSubtitle(url, getXHRResponseText(this))
+      const text = getXHRResponseText(this)
+      captureSubtitle(url, text)
+
+      if (shouldInspectJSONResponse(normalizeUrl(url), this.getResponseHeader("content-type"))) {
+        const json = getXHRResponseJSON(this)
+        if (json)
+          publishTracksFromParsedJSON(json)
+        else
+          publishTracksFromJSONText(text)
+      }
     })
     return originalSend.apply(this, args as any)
   }
@@ -201,26 +332,36 @@ function hookFetch() {
         : input.url
 
     const normalizedUrl = normalizeUrl(url)
-    if (!normalizedUrl || !looksLikeSubtitleUrl(normalizedUrl))
+    if (!normalizedUrl)
       return response
 
-    void response.clone().text().then(text => captureSubtitle(normalizedUrl, text)).catch(() => {})
+    if (looksLikeSubtitleUrl(normalizedUrl)) {
+      void response.clone().text().then(text => captureSubtitle(normalizedUrl, text)).catch(() => {})
+      return response
+    }
+
+    if (shouldInspectJSONResponse(normalizedUrl, response.headers.get("content-type")))
+      void response.clone().text().then(publishTracksFromJSONText).catch(() => {})
 
     return response
   }
 }
 
 function ensureNativeSubtitles() {
+  replayCachedTracks()
+
   const player = getNetflixPlayer()
   if (!player)
     return
 
-  const current = player.getTimedTextTrack?.()
-  if (isUsableNetflixTrack(current) && isEnglishNetflixTrack(current))
-    return
-
   const tracks = player.getTimedTextTrackList?.()
   if (!Array.isArray(tracks))
+    return
+
+  publishTracks(tracks.flatMap(normalizeTrack))
+
+  const current = player.getTimedTextTrack?.()
+  if (isUsableNetflixTrack(current))
     return
 
   const nextTrack = tracks.find((track: any) => isUsableNetflixTrack(track) && isEnglishNetflixTrack(track))

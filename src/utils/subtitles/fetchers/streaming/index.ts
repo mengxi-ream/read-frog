@@ -7,6 +7,7 @@ import { getLocalConfig } from "@/utils/config/storage"
 import {
   STREAMING_ENSURE_NATIVE_SUBTITLES_TYPE,
   STREAMING_NATIVE_SUBTITLES_SELECTOR,
+  STREAMING_OFFICIAL_SUBTITLE_TRACK_WAIT_TIMEOUT_MS,
   STREAMING_SUBTITLE_WAIT_TIMEOUT_MS,
 } from "@/utils/constants/subtitles"
 import { backgroundFetch } from "@/utils/content-script/background-fetch-client"
@@ -18,11 +19,16 @@ import {
   getStreamingSubtitleTracks,
   waitForStreamingSubtitleCandidate,
   waitForStreamingSubtitleCapture,
+  waitForStreamingSubtitleTracks,
 } from "./captured-subtitles"
 import { parseStreamingSubtitles } from "./parser"
 
 type StreamingSubtitleSource = StreamingSubtitleTrack | StreamingSubtitleCapture
 type LiveSubtitlesSubscriber = (subtitles: SubtitlesFragment[]) => void
+
+const NATIVE_SUBTITLE_LEAD_IN_MS = 300
+const NATIVE_SUBTITLE_TRAILING_MS = 6_000
+const NATIVE_SUBTITLE_BLANK_GRACE_MS = 500
 
 function isTrack(source: StreamingSubtitleSource): source is StreamingSubtitleTrack {
   return !("text" in source)
@@ -46,6 +52,19 @@ function isChineseTrack(track: StreamingSubtitleTrack): boolean {
 
 function isChineseCode(code: LangCodeISO6393 | null | undefined): boolean {
   return code === "cmn" || code === "cmn-Hant" || code === "yue"
+}
+
+function getTrackRoleText(track: StreamingSubtitleTrack): string {
+  return `${track.kind ?? ""} ${track.label ?? ""}`.toLowerCase()
+}
+
+function isCaptionLikeTrack(track: StreamingSubtitleTrack): boolean {
+  return /assistive|caption|closed\s*caption|subtitle|\bcc\b|字幕|情境字幕/.test(getTrackRoleText(track))
+}
+
+function isLikelyOriginalAudioTrack(track: StreamingSubtitleTrack): boolean {
+  const roleText = getTrackRoleText(track)
+  return /original|原始/.test(roleText) && /primary|audio/.test(roleText)
 }
 
 export function selectStreamingSubtitleTrack(
@@ -90,17 +109,41 @@ function isForcedTrack(track: StreamingSubtitleTrack): boolean {
   return kind.includes("forced") || kind.includes("narrative")
 }
 
+function isNetflixWatchRouteTrack(track: StreamingSubtitleTrack): boolean {
+  try {
+    const url = new URL(track.url)
+    return /(?:^|\.)netflix\.com$/i.test(url.hostname)
+      && /^\/watch\/(?:timedtext|subtitles|closedcaptions)\/?$/i.test(url.pathname)
+  }
+  catch {
+    return false
+  }
+}
+
+function hasOfficialTrackMetadata(track: StreamingSubtitleTrack): boolean {
+  return Boolean(track.language?.trim() && track.label?.trim())
+}
+
+function getOfficialTrackCandidates(tracks: StreamingSubtitleTrack[]): StreamingSubtitleTrack[] {
+  const usableTracks = tracks.filter(track => !isForcedTrack(track) && !isNetflixWatchRouteTrack(track))
+  const tracksWithMetadata = usableTracks.filter(hasOfficialTrackMetadata)
+  return tracksWithMetadata.length > 0 ? tracksWithMetadata : usableTracks
+}
+
 function selectOfficialSourceTrack(
   tracks: StreamingSubtitleTrack[],
   sourceCode: LangCodeISO6393 | "auto" | undefined,
   targetCode: LangCodeISO6393,
 ): StreamingSubtitleTrack | null {
-  const usableTracks = tracks.filter(track => !isForcedTrack(track))
+  const usableTracks = getOfficialTrackCandidates(tracks)
   if (sourceCode && sourceCode !== "auto") {
     return selectStreamingSubtitleTrack(usableTracks, { sourceCode, targetCode })
   }
 
-  return usableTracks.find(isEnglishTrack)
+  const englishTracks = usableTracks.filter(isEnglishTrack)
+  return englishTracks.find(isCaptionLikeTrack)
+    ?? englishTracks.find(track => !isLikelyOriginalAudioTrack(track))
+    ?? englishTracks[0]
     ?? selectStreamingSubtitleTrack(usableTracks, { targetCode })
 }
 
@@ -108,14 +151,75 @@ function selectOfficialTargetTrack(
   tracks: StreamingSubtitleTrack[],
   targetCode: LangCodeISO6393,
 ): StreamingSubtitleTrack | null {
-  return tracks.find(track => !isForcedTrack(track)
-    && (resolveTrackLanguage(track) === targetCode || (isChineseCode(targetCode) && isChineseTrack(track)))) ?? null
+  return getOfficialTrackCandidates(tracks).find(track =>
+    resolveTrackLanguage(track) === targetCode || (isChineseCode(targetCode) && isChineseTrack(track))) ?? null
+}
+
+function hasOfficialTrackPair(
+  tracks: StreamingSubtitleTrack[],
+  sourceCode: LangCodeISO6393 | "auto" | undefined,
+  targetCode: LangCodeISO6393,
+): boolean {
+  const sourceTrack = selectOfficialSourceTrack(tracks, sourceCode, targetCode)
+  const targetTrack = selectOfficialTargetTrack(tracks, targetCode)
+  return Boolean(sourceTrack && targetTrack && sourceTrack.url !== targetTrack.url)
+}
+
+function buildOfficialBilingualSubtitles(
+  sourceSubtitles: SubtitlesFragment[],
+  targetSubtitles: SubtitlesFragment[],
+): SubtitlesFragment[] {
+  const sourceByTargetIndex = new Map<number, SubtitlesFragment[]>()
+  for (const source of sourceSubtitles) {
+    let bestTargetIndex = -1
+    let bestOverlap = 0
+    for (const [targetIndex, target] of targetSubtitles.entries()) {
+      const overlap = getSubtitleOverlapMs(source, target)
+      if (overlap > bestOverlap) {
+        bestOverlap = overlap
+        bestTargetIndex = targetIndex
+      }
+    }
+
+    if (bestTargetIndex >= 0) {
+      sourceByTargetIndex.set(bestTargetIndex, [
+        ...(sourceByTargetIndex.get(bestTargetIndex) ?? []),
+        source,
+      ])
+    }
+  }
+
+  return targetSubtitles
+    .map((target, targetIndex): SubtitlesFragment | null => {
+      const text = (sourceByTargetIndex.get(targetIndex) ?? [])
+        .map(source => source.text)
+        .filter((text, index, texts) => text && text !== texts[index - 1])
+        .join("\n")
+
+      return text
+        ? {
+            text,
+            translation: target.text,
+            start: target.start,
+            end: target.end,
+          }
+        : null
+    })
+    .filter((fragment): fragment is SubtitlesFragment => fragment !== null)
+}
+
+function getSubtitleOverlapMs(a: SubtitlesFragment, b: SubtitlesFragment): number {
+  return Math.max(0, Math.min(a.end, b.end) - Math.max(a.start, b.start))
 }
 
 function attachOfficialTranslations(
   sourceSubtitles: SubtitlesFragment[],
   targetSubtitles: SubtitlesFragment[],
 ): SubtitlesFragment[] {
+  const targetAligned = buildOfficialBilingualSubtitles(sourceSubtitles, targetSubtitles)
+  if (targetAligned.length > 0)
+    return targetAligned
+
   return sourceSubtitles.map((source) => {
     const translation = targetSubtitles
       .filter(target => target.start < source.end && target.end > source.start)
@@ -136,6 +240,7 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
   private lastNativeText = ""
   private lastNativeFingerprint = ""
   private lastNativeCapturedAt = -Infinity
+  private nativeBlankStartedAt = -Infinity
   private sourceLanguage = ""
   private cachedTrackHash: string | null = null
   private preSegmented = false
@@ -206,6 +311,7 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
     this.lastNativeText = ""
     this.lastNativeFingerprint = ""
     this.lastNativeCapturedAt = -Infinity
+    this.nativeBlankStartedAt = -Infinity
     this.sourceLanguage = ""
     this.cachedTrackHash = null
     this.preSegmented = false
@@ -278,7 +384,10 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
     return this.resolveSource()
   }
 
-  private async resolveTrackText(track: StreamingSubtitleTrack): Promise<string> {
+  private async resolveTrackText(
+    track: StreamingSubtitleTrack,
+    timeoutMs = STREAMING_SUBTITLE_WAIT_TIMEOUT_MS,
+  ): Promise<string> {
     const capture = getStreamingSubtitleCapture(track.url)
     if (capture)
       return capture.text
@@ -292,7 +401,7 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
       // Fall back to the page-world capture below.
     }
 
-    const lateCapture = await waitForStreamingSubtitleCapture(track.url, STREAMING_SUBTITLE_WAIT_TIMEOUT_MS)
+    const lateCapture = await waitForStreamingSubtitleCapture(track.url, timeoutMs)
     if (lateCapture)
       return lateCapture.text
 
@@ -305,7 +414,14 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
     if (!targetCode)
       return null
 
-    const tracks = getStreamingSubtitleTracks()
+    let tracks = getStreamingSubtitleTracks()
+    if (!hasOfficialTrackPair(tracks, config?.language.sourceCode, targetCode)) {
+      tracks = await waitForStreamingSubtitleTracks(
+        nextTracks => hasOfficialTrackPair(nextTracks, config?.language.sourceCode, targetCode),
+        STREAMING_OFFICIAL_SUBTITLE_TRACK_WAIT_TIMEOUT_MS,
+      )
+    }
+
     const sourceTrack = selectOfficialSourceTrack(tracks, config?.language.sourceCode, targetCode)
     const targetTrack = selectOfficialTargetTrack(tracks, targetCode)
     if (!sourceTrack || !targetTrack || sourceTrack.url === targetTrack.url)
@@ -315,14 +431,8 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
     if (this.subtitles.length > 0 && this.cachedTrackHash === trackHash)
       return this.subtitles
 
-    const [sourceText, targetText] = await Promise.all([
-      this.resolveTrackText(sourceTrack),
-      this.resolveTrackText(targetTrack),
-    ])
-    const sourceSubtitles = normalizeOfficialSubtitles(parseStreamingSubtitles(sourceText))
-    const targetSubtitles = normalizeOfficialSubtitles(parseStreamingSubtitles(targetText))
-    const subtitles = attachOfficialTranslations(sourceSubtitles, targetSubtitles)
-    if (!subtitles.some(subtitle => subtitle.translation))
+    const subtitles = await this.tryResolveOfficialBilingualSubtitles(sourceTrack, targetTrack)
+    if (!subtitles)
       return null
 
     this.sourceLanguage = sourceTrack.language ?? ""
@@ -330,6 +440,25 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
     this.cachedTrackHash = trackHash
     this.preSegmented = true
     return subtitles
+  }
+
+  private async tryResolveOfficialBilingualSubtitles(
+    sourceTrack: StreamingSubtitleTrack,
+    targetTrack: StreamingSubtitleTrack,
+  ): Promise<SubtitlesFragment[] | null> {
+    try {
+      const [sourceText, targetText] = await Promise.all([
+        this.resolveTrackText(sourceTrack, STREAMING_OFFICIAL_SUBTITLE_TRACK_WAIT_TIMEOUT_MS),
+        this.resolveTrackText(targetTrack, STREAMING_OFFICIAL_SUBTITLE_TRACK_WAIT_TIMEOUT_MS),
+      ])
+      const sourceSubtitles = normalizeOfficialSubtitles(parseStreamingSubtitles(sourceText))
+      const targetSubtitles = normalizeOfficialSubtitles(parseStreamingSubtitles(targetText))
+      const subtitles = attachOfficialTranslations(sourceSubtitles, targetSubtitles)
+      return subtitles.some(subtitle => subtitle.translation) ? subtitles : null
+    }
+    catch {
+      return null
+    }
   }
 
   private async resolveNativeSubtitles(): Promise<SubtitlesFragment[]> {
@@ -393,30 +522,69 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
 
   private captureNativeSubtitle() {
     const text = readNativeSubtitleText()
-    if (!text)
+    if (!text) {
+      this.captureNativeSubtitleBlank()
       return
+    }
 
     const video = document.querySelector<HTMLVideoElement>("video")
     if (!video)
       return
 
     const nowMs = Math.max(0, Math.round(video.currentTime * 1000))
+    this.nativeBlankStartedAt = -Infinity
     const fingerprint = toNativeTextFingerprint(text)
     if (fingerprint === this.lastNativeFingerprint && nowMs - this.lastNativeCapturedAt < 10_000)
       return
+
+    const start = Math.max(0, nowMs - NATIVE_SUBTITLE_LEAD_IN_MS)
+    const updatedSubtitles: SubtitlesFragment[] = []
+    const previousSubtitle = this.nativeSubtitles.at(-1)
+    if (previousSubtitle && previousSubtitle.end > start) {
+      previousSubtitle.end = Math.max(previousSubtitle.start + 1, start)
+      updatedSubtitles.push(previousSubtitle)
+    }
 
     this.lastNativeText = text
     this.lastNativeFingerprint = fingerprint
     this.lastNativeCapturedAt = nowMs
     const subtitle: SubtitlesFragment = {
       text,
-      start: Math.max(0, nowMs - 300),
-      end: nowMs + 6000,
+      start,
+      end: nowMs + NATIVE_SUBTITLE_TRAILING_MS,
     }
 
     this.nativeSubtitles.push(subtitle)
+    updatedSubtitles.push(subtitle)
     for (const subscriber of this.nativeSubscribers) {
-      subscriber([subtitle])
+      subscriber(updatedSubtitles)
+    }
+  }
+
+  private captureNativeSubtitleBlank() {
+    const video = document.querySelector<HTMLVideoElement>("video")
+    if (!video)
+      return
+
+    const previousSubtitle = this.nativeSubtitles.at(-1)
+    if (!previousSubtitle)
+      return
+
+    const nowMs = Math.max(0, Math.round(video.currentTime * 1000))
+    if (previousSubtitle.end <= nowMs)
+      return
+
+    if (!Number.isFinite(this.nativeBlankStartedAt)) {
+      this.nativeBlankStartedAt = nowMs
+      return
+    }
+
+    if (nowMs - this.nativeBlankStartedAt < NATIVE_SUBTITLE_BLANK_GRACE_MS)
+      return
+
+    previousSubtitle.end = Math.max(previousSubtitle.start + 1, nowMs)
+    for (const subscriber of this.nativeSubscribers) {
+      subscriber([previousSubtitle])
     }
   }
 }

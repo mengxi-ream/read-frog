@@ -68,6 +68,35 @@ export function waitForStreamingSubtitleCandidate(timeoutMs: number): Promise<bo
   })
 }
 
+export function waitForStreamingSubtitleTracks(
+  predicate: (tracks: StreamingSubtitleTrack[]) => boolean,
+  timeoutMs: number,
+): Promise<StreamingSubtitleTrack[]> {
+  const existing = getStreamingSubtitleTracks()
+  if (predicate(existing))
+    return Promise.resolve(existing)
+
+  return new Promise((resolve) => {
+    let timer: ReturnType<typeof setTimeout>
+    const listener = () => {
+      const current = getStreamingSubtitleTracks()
+      if (!predicate(current))
+        return
+
+      clearTimeout(timer)
+      window.removeEventListener("message", listener)
+      resolve(current)
+    }
+
+    timer = setTimeout(() => {
+      window.removeEventListener("message", listener)
+      resolve(getStreamingSubtitleTracks())
+    }, timeoutMs)
+
+    window.addEventListener("message", listener)
+  })
+}
+
 export function waitForStreamingSubtitleCapture(url: string | null, timeoutMs: number): Promise<StreamingSubtitleCapture | null> {
   const existing = getStreamingSubtitleCapture(url)
   if (existing)
