@@ -179,6 +179,7 @@ options:
         azure: Azure dağıtımlarınız üzerinden OpenAI modelleri
         deepseek: Çin'de kullanım için önerilir
         openrouter: Kullandıkça öde fiyatlandırmasıyla birden fazla LLM sağlayıcısı için birleşik arayüz
+        requesty: OpenAI-compatible LLM gateway routing to many models through one API
         ollama: Tam gizlilik için büyük dil modellerini makinenizde yerel olarak çalıştırın
         google: Gelişmiş akıl yürütme yeteneklerine sahip Google'ın amiral gemisi AI modelleri
         anthropic: Güvenlik ve akıl yürütme mükemmelliğiyle tanınan Claude modelleri

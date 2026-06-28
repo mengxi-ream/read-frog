@@ -16,6 +16,11 @@ export const DEFAULT_LLM_PROVIDER_MODELS: LLMProviderModels = {
     isCustomModel: false,
     customModel: null,
   },
+  "requesty": {
+    model: "openai/gpt-4o-mini",
+    isCustomModel: false,
+    customModel: null,
+  },
   "atlascloud": {
     model: "deepseek-ai/deepseek-v4-flash",
     isCustomModel: false,
@@ -193,6 +198,11 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       logo: getLobeIconsCDNUrlFn("openrouter"),
       name: "OpenRouter",
       website: "https://openrouter.ai/",
+    },
+    "requesty": {
+      logo: getLobeIconsCDNUrlFn("requesty"),
+      name: "Requesty",
+      website: "https://requesty.ai/",
     },
     "minimax": {
       logo: getLobeIconsCDNUrlFn("minimax-color"),
@@ -542,6 +552,15 @@ export const DEFAULT_PROVIDER_CONFIG = {
     provider: "openrouter",
     baseURL: "https://openrouter.ai/api/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.openrouter,
+  },
+  "requesty": {
+    id: "requesty-default",
+    name: PROVIDER_ITEMS.requesty.name,
+    description: i18n.t("options.apiProviders.providers.description.requesty"),
+    enabled: true,
+    provider: "requesty",
+    baseURL: "https://router.requesty.ai/v1",
+    model: DEFAULT_LLM_PROVIDER_MODELS.requesty,
   },
   "ollama": {
     id: "ollama-default",

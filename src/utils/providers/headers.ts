@@ -10,6 +10,10 @@ export const DEFAULT_PROVIDER_HEADERS: Partial<Record<LLMProviderTypes, Record<s
     "HTTP-Referer": env.WXT_WEBSITE_URL,
     "X-OpenRouter-Title": APP_NAME,
   },
+  requesty: {
+    "HTTP-Referer": env.WXT_WEBSITE_URL,
+    "X-Title": APP_NAME,
+  },
 }
 
 function compactStringRecord(record?: Readonly<Record<string, unknown>>): Record<string, string> | undefined {

@@ -180,6 +180,7 @@ options:
         azure: Azure-hosted OpenAI models through your deployments
         deepseek: Recommend to use in China
         openrouter: Unified interface for multiple LLM providers with pay-per-use pricing
+        requesty: OpenAI-compatible LLM gateway routing to many models through one API
         ollama: Run large language models locally on your machine for complete privacy
         google: Google's flagship AI models with advanced reasoning capabilities
         anthropic: Claude models known for safety and reasoning excellence

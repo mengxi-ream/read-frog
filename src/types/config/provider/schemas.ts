@@ -84,6 +84,10 @@ const llmProviderConfigSchemaList = [
     model: createProviderModelSchema<"openrouter">("openrouter"),
   }),
   baseCustomLLMProviderConfigSchema.extend({
+    provider: z.literal("requesty"),
+    model: createProviderModelSchema<"requesty">("requesty"),
+  }),
+  baseCustomLLMProviderConfigSchema.extend({
     provider: z.literal("minimax"),
     model: createProviderModelSchema<"minimax">("minimax"),
   }),

@@ -179,6 +179,7 @@ options:
         azure: Mô hình OpenAI lưu trữ trên Azure qua các bản triển khai của bạn
         deepseek: Khuyến nghị sử dụng ở Trung Quốc
         openrouter: Giao diện thống nhất cho nhiều nhà cung cấp LLM với giá trả theo lần sử dụng
+        requesty: OpenAI-compatible LLM gateway routing to many models through one API
         ollama: Chạy các mô hình ngôn ngữ lớn cục bộ trên máy của bạn để bảo mật hoàn toàn
         google: Các mô hình AI hàng đầu của Google với khả năng suy luận tiên tiến
         anthropic: Các mô hình Claude nổi tiếng về độ an toàn và khả năng suy luận xuất sắc

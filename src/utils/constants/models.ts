@@ -32,6 +32,7 @@ export const LLM_PROVIDER_MODELS = {
   "perplexity": ["sonar-deep-research", "sonar-reasoning-pro", "sonar-reasoning", "sonar-pro", "sonar"],
   "vercel": ["v0-1.5-md", "v0-1.5-lg", "v0-1.0-md"],
   "openrouter": ["x-ai/grok-4-fast:free", "openai/gpt-4.1-mini"],
+  "requesty": ["openai/gpt-4o-mini", "anthropic/claude-sonnet-4-5"],
   "ollama": ["gemma3:4b", "llama3.2:3b"],
   "volcengine": ["doubao-seed-1-6-flash-250828", "doubao-seed-1-6-lite-251015", "doubao-seed-1-6-251015"],
   "minimax": ["MiniMax-M2.7", "MiniMax-M2.7-highspeed", "MiniMax-M2.5", "MiniMax-M2.5-highspeed", "MiniMax-M2.1", "MiniMax-M2.1-highspeed", "MiniMax-M2", "MiniMax-M2-Stable"],

@@ -37,6 +37,7 @@ const CREATE_AI_MAPPER = {
   "volcengine": createOpenAICompatible,
   "openai-compatible": createOpenAICompatible,
   "openrouter": createOpenAICompatible,
+  "requesty": createOpenAICompatible,
   "minimax": createOpenAICompatible,
   "openai": createOpenAI,
   "azure": createAzure,

@@ -179,6 +179,7 @@ options:
         azure: Azure のデプロイ経由で OpenAI モデルを利用
         deepseek: 中国国内での使用を推奨
         openrouter: 複数のLLMプロバイダの統合インターフェース、従量課金制
+        requesty: OpenAI-compatible LLM gateway routing to many models through one API
         ollama: ローカル大規模言語モデルサービス
         google: 高度な推論能力を持つGoogleの主力AIモデル
         anthropic: 安全性と推論能力に優れたClaudeモデル

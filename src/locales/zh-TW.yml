@@ -180,6 +180,7 @@ options:
         azure: 透過 Azure 部署使用 OpenAI 模型
         deepseek: 建議在中國使用
         openrouter: 多個 LLM 提供者的統一介面，按使用量付費
+        requesty: OpenAI-compatible LLM gateway routing to many models through one API
         ollama: 在本機執行大型語言模型，確保完整隱私
         google: 具有先進推理能力的 Google 旗艦 AI 模型
         anthropic: 以安全性和推理能力著稱的 Claude 模型
