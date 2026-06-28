@@ -198,7 +198,7 @@ describe("providerOptionsField", () => {
 
     expect(screen.getByLabelText("provider-options-editor")).toHaveAttribute(
       "placeholder",
-      JSON.stringify({ enableThinking: false }, null, 2),
+      JSON.stringify({ reasoningEffort: "none" }, null, 2),
     )
   })
 

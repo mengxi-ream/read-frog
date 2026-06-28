@@ -235,8 +235,8 @@ describe("getProviderOptions", () => {
       const vlOptions = getProviderOptions("qwen2.5-vl-72b-instruct", "alibaba")
       expect(vlOptions.alibaba?.enableThinking).toBe(false)
 
-      const nextOptions = getProviderOptions("Qwen/Qwen3-Next-80B-A3B-Instruct", "alibaba")
-      expect(nextOptions.alibaba?.enableThinking).toBe(false)
+      const dashOptions = getProviderOptions("qwen3-coder-plus", "alibaba")
+      expect(dashOptions.alibaba?.enableThinking).toBe(false)
     })
 
     it("should keep explicit Alibaba thinking-only Qwen variants untouched", () => {
@@ -290,10 +290,18 @@ describe("getProviderOptions", () => {
       expect(getProviderOptions("doubao-seed-1-6-thinking-250715", "volcengine")).toEqual({})
     })
 
-    it("should apply broadened Qwen defaults to provider-prefixed model ids", () => {
+    it("should apply reasoning effort defaults to provider-prefixed Qwen3 model ids", () => {
       const groqOptions = getProviderOptions("qwen/qwen3-32b", "groq")
-      expect(groqOptions.groq?.enableThinking).toBe(false)
+      expect(groqOptions.groq?.reasoningEffort).toBe("none")
 
+      const qwen36Options = getProviderOptions("qwen/qwen3.6-27b", "atlascloud")
+      expect(qwen36Options.atlascloud?.reasoningEffort).toBe("none")
+
+      const nextOptions = getProviderOptions("Qwen/Qwen3-Next-80B-A3B-Instruct", "siliconflow")
+      expect(nextOptions.siliconflow?.reasoningEffort).toBe("none")
+    })
+
+    it("should apply broadened Qwen defaults to non-Qwen3 provider-prefixed model ids", () => {
       const deepinfraOptions = getProviderOptions("Qwen/Qwen2.5-72B-Instruct", "deepinfra")
       expect(deepinfraOptions.deepinfra?.enableThinking).toBe(false)
     })
