@@ -1,6 +1,6 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { Icon } from "@iconify/react"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
 import { i18n } from "#imports"
@@ -15,8 +15,8 @@ import { withForm } from "./form"
 export const FeatureProviderSection = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerType = useStore(form.store, state => state.values.provider)
-    const providerId = useStore(form.store, state => state.values.id)
+    const providerType = useSelector(form.store, state => state.values.provider)
+    const providerId = useSelector(form.store, state => state.values.id)
     const config = useAtomValue(configAtom)
     const setConfig = useSetAtom(writeConfigAtom)
     const [isOpen, setIsOpen] = useState(false)

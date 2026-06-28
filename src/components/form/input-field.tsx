@@ -1,4 +1,4 @@
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { useFieldContext } from "./form-context"
@@ -8,7 +8,7 @@ export function InputField(
   { label: React.ReactNode, labelExtra?: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>,
 ) {
   const field = useFieldContext<string | number | undefined>()
-  const errors = useStore(field.store, state => state.meta.errors)
+  const errors = useSelector(field.store, state => state.meta.errors)
   const hasError = errors.length > 0
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

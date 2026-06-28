@@ -1,6 +1,6 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { Icon } from "@iconify/react"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { useState } from "react"
 import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
@@ -129,7 +129,7 @@ function IconHelpPopover() {
 export const IconField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
-    const iconValue = useStore(form.store, state => state.values.icon)
+    const iconValue = useSelector(form.store, state => state.values.icon)
     const [iconPickerOpen, setIconPickerOpen] = useState(false)
     const hasError = !ICON_PATTERN.test(iconValue?.trim() ?? "")
     const previewIcon = iconValue?.trim() ?? ""

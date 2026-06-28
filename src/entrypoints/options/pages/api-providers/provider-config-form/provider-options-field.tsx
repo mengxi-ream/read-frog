@@ -1,5 +1,5 @@
 import type { APIProviderConfig } from "@/types/config/provider"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { useCallback } from "react"
 import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
@@ -28,7 +28,7 @@ function toJson(options: APIProviderConfig["providerOptions"]) {
 export const ProviderOptionsField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useStore(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, state => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
     const handleProviderOptionsCommit = useCallback((value: Record<string, unknown> | undefined) => {

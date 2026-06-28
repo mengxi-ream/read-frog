@@ -1,5 +1,5 @@
 import type * as React from "react"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { useCallback } from "react"
 import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select } from "@/components/ui/base-ui/select"
@@ -13,7 +13,7 @@ export function SelectField(
   { label, ...props }: SelectFieldProps,
 ) {
   const field = useFieldContext<string | undefined>()
-  const errors = useStore(field.store, state => state.meta.errors)
+  const errors = useSelector(field.store, state => state.meta.errors)
   const hasError = errors.length > 0
 
   const handleValueChange = useCallback((value: unknown) => {

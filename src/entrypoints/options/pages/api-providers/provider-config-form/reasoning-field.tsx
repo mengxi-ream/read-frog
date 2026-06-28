@@ -1,5 +1,5 @@
 import type { APIProviderConfig } from "@/types/config/provider"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { i18n } from "#imports"
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { AI_SDK_REASONING_VALUES, isLLMProviderConfig, supportsTopLevelReasoning } from "@/types/config/provider"
@@ -8,7 +8,7 @@ import { withForm } from "./form"
 export const ReasoningField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useStore(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, state => state.values)
 
     if (!isLLMProviderConfig(providerConfig) || !supportsTopLevelReasoning(providerConfig.provider)) {
       return null

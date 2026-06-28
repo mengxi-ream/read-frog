@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { APIProviderConfig } from "@/types/config/provider"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { act, fireEvent, render, screen } from "@testing-library/react"
 import { useEffect, useState } from "react"
 import { describe, expect, it, vi } from "vitest"
@@ -71,7 +71,7 @@ function TranslateModelSelectorHarness({
       setProviderConfig(value)
     },
   })
-  const formValues = useStore(form.store, state => state.values)
+  const formValues = useSelector(form.store, state => state.values)
 
   useEffect(() => {
     form.reset(providerConfig)

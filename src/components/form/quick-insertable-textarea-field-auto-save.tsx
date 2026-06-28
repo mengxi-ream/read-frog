@@ -1,5 +1,5 @@
 import type { InsertCell } from "@/components/ui/insertable-textarea"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { QuickInsertableTextarea } from "@/components/ui/insertable-textarea"
 import { useFieldContext } from "./form-context"
@@ -18,7 +18,7 @@ export function QuickInsertableTextareaFieldAutoSave({
   className,
 }: QuickInsertableTextareaFieldAutoSaveProps) {
   const field = useFieldContext<string>()
-  const errors = useStore(field.store, state => state.meta.errors)
+  const errors = useSelector(field.store, state => state.meta.errors)
   const hasError = errors.length > 0
 
   return (

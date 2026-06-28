@@ -1,5 +1,5 @@
 import type { APIProviderConfig, LLMProviderTypes, ProviderSpecificSettingField } from "@/types/config/provider"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { useEffect, useEffectEvent, useMemo, useState } from "react"
 import { i18n } from "#imports"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
@@ -19,7 +19,7 @@ function getProviderSpecificSettings(providerConfig: APIProviderConfig) {
 export const ProviderSpecificSettingsField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useStore(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, state => state.values)
     const providerType = providerConfig.provider
     const [localSettings, setLocalSettings] = useState<Record<string, unknown>>(
       () => getProviderSpecificSettings(providerConfig),

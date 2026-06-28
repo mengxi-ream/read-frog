@@ -1,5 +1,5 @@
 import type { APIProviderConfig } from "@/types/config/provider"
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { useState } from "react"
 import { i18n } from "#imports"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
@@ -11,7 +11,7 @@ export const APIKeyField = withForm({
   render: function Render({ form }) {
     // const providerConfig = form.state.values
     const [showAPIKey, setShowAPIKey] = useState(false)
-    const providerConfig = useStore(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, state => state.values)
 
     const providerType = providerConfig.provider
     if (providerType === "ollama") {

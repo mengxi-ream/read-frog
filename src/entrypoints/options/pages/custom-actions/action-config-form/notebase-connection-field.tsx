@@ -10,8 +10,8 @@ import type {
   SelectionToolbarCustomActionOutputField,
 } from "@/types/config/selection-toolbar"
 import { IconChevronsRight, IconPlus, IconRefresh, IconTrash } from "@tabler/icons-react"
-import { useStore } from "@tanstack/react-form"
 import { useQuery } from "@tanstack/react-query"
+import { useSelector } from "@tanstack/react-store"
 import { dequal } from "dequal"
 import { useCallback, useEffect, useMemo } from "react"
 import { i18n } from "#imports"
@@ -212,7 +212,7 @@ function getRemoteFieldSelectItems(
 export const NotebaseConnectionField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
-    const action = useStore(form.store, state => state.values)
+    const action = useSelector(form.store, state => state.values)
     const outputSchema = action.outputSchema
     const connection = action.notebaseConnection
     const { data: session, isPending: isSessionPending } = authClient.useSession()

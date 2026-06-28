@@ -1,6 +1,6 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 
-import { useStore } from "@tanstack/react-form"
+import { useSelector } from "@tanstack/react-store"
 import { i18n } from "#imports"
 import { isNonCustomLLMProvider } from "@/types/config/provider"
 import { PROVIDER_BASE_URL_PLACEHOLDERS } from "@/utils/constants/providers"
@@ -10,7 +10,7 @@ import { withForm } from "./form"
 export const BaseURLField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useStore(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, state => state.values)
     const providerType = providerConfig.provider
 
     if (providerType === "deepl") {
