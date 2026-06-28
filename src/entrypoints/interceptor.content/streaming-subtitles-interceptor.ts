@@ -9,6 +9,7 @@ interface StreamingSubtitleTrackMessage {
   language?: string
   label?: string
   kind?: string
+  pagePath?: string
 }
 
 declare global {
@@ -23,6 +24,10 @@ const JSON_RESPONSE_URL_PATTERN = /manifest|metadata|pathEvaluator|shakti|cadmiu
 const nativeJSONParse = JSON.parse.bind(JSON)
 const trackByUrl = new Map<string, StreamingSubtitleTrackMessage>()
 
+function getCurrentPagePath(): string {
+  return window.location.pathname
+}
+
 export function injectStreamingSubtitlesInterceptor(): void {
   if (window.__READ_FROG_STREAMING_SUBTITLES_INTERCEPTOR__ || !/(?:^|\.)netflix\.com$/i.test(window.location.hostname))
     return
@@ -30,7 +35,7 @@ export function injectStreamingSubtitlesInterceptor(): void {
   window.__READ_FROG_STREAMING_SUBTITLES_INTERCEPTOR__ = true
   window.addEventListener("message", (event) => {
     if (event.origin === window.location.origin && event.data?.type === STREAMING_ENSURE_NATIVE_SUBTITLES_TYPE)
-      publishTracks([...trackByUrl.values()])
+      postTracks([...trackByUrl.values()].filter(track => track.pagePath === getCurrentPagePath()))
   })
   hookJSONParse()
   hookXHR()
@@ -128,11 +133,17 @@ export function collectStreamingSubtitleTracks(value: unknown): StreamingSubtitl
   return [...new Map(tracks.map(track => [track.url, track])).values()]
 }
 
-function publishTracks(tracks: StreamingSubtitleTrackMessage[]) {
+function postTracks(tracks: StreamingSubtitleTrackMessage[]) {
   if (tracks.length === 0)
     return
-  tracks.forEach(track => trackByUrl.set(track.url, track))
   window.postMessage({ type: STREAMING_SUBTITLE_TRACKS_TYPE, tracks }, window.location.origin)
+}
+
+function publishTracks(tracks: StreamingSubtitleTrackMessage[]) {
+  const pagePath = getCurrentPagePath()
+  const scopedTracks = tracks.map(track => ({ ...track, pagePath }))
+  scopedTracks.forEach(track => trackByUrl.set(track.url, track))
+  postTracks(scopedTracks)
 }
 
 function publishTracksFromJSONText(text: string | null) {
@@ -155,13 +166,14 @@ function captureSubtitle(url: string | null, text: string | null) {
   if (!normalizedUrl || !text)
     return
   const track = trackByUrl.get(normalizedUrl)
-  if (!track)
+  if (!track || track.pagePath !== getCurrentPagePath())
     return
   window.postMessage({
     type: STREAMING_SUBTITLE_CAPTURED_TYPE,
     url: normalizedUrl,
     text,
     language: track?.language,
+    pagePath: track.pagePath,
   }, window.location.origin)
 }
 

@@ -16,31 +16,52 @@ interface StreamingTrack {
   language?: string
   label?: string
   kind?: string
+  pagePath?: string
+}
+
+interface StreamingCapture {
+  text: string
+  pagePath: string
 }
 
 const tracksByUrl = new Map<string, StreamingTrack>()
-const capturesByUrl = new Map<string, string>()
+const capturesByUrl = new Map<string, StreamingCapture>()
 const trackWaiters = new Set<() => void>()
+
+function getCurrentPagePath(): string {
+  return window.location.pathname
+}
 
 if (typeof window !== "undefined") {
   window.addEventListener("message", (event) => {
     if (event.origin !== window.location.origin)
       return
     if (event.data?.type === STREAMING_SUBTITLE_TRACKS_TYPE && Array.isArray(event.data.tracks)) {
-      event.data.tracks.forEach((track: StreamingTrack) => tracksByUrl.set(track.url, track))
+      event.data.tracks.forEach((track: StreamingTrack) => {
+        tracksByUrl.set(track.url, { ...track, pagePath: track.pagePath ?? getCurrentPagePath() })
+      })
       trackWaiters.forEach(resolve => resolve())
       trackWaiters.clear()
     }
-    if (event.data?.type === STREAMING_SUBTITLE_CAPTURED_TYPE && event.data.url && event.data.text)
-      capturesByUrl.set(event.data.url, event.data.text)
+    if (event.data?.type === STREAMING_SUBTITLE_CAPTURED_TYPE && event.data.url && event.data.text) {
+      capturesByUrl.set(event.data.url, {
+        text: event.data.text,
+        pagePath: event.data.pagePath ?? getCurrentPagePath(),
+      })
+    }
   })
 }
 
 export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
   private sourceLanguage = ""
   private subtitles: SubtitlesFragment[] = []
+  private subtitlesPagePath: string | null = null
 
   async fetch(): Promise<SubtitlesFragment[]> {
+    const pagePath = getCurrentPagePath()
+    this.subtitles = []
+    this.subtitlesPagePath = null
+
     const tracks = await this.waitForTracks()
     const config = await getLocalConfig()
     const sourceTrack = selectSourceTrack(tracks)
@@ -53,6 +74,7 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
       this.resolveTrackText(targetTrack),
     ])
     this.subtitles = alignOfficialSubtitles(parseSubtitleText(sourceText), parseSubtitleText(targetText))
+    this.subtitlesPagePath = pagePath
     this.sourceLanguage = sourceTrack.language ?? ""
     return this.subtitles
   }
@@ -64,10 +86,18 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
   }
 
   shouldUseSameTrack(): Promise<boolean> {
-    return Promise.resolve(this.subtitles.length > 0)
+    return Promise.resolve(this.subtitles.length > 0 && this.subtitlesPagePath === getCurrentPagePath())
   }
 
-  cleanup() {}
+  cleanup() {
+    this.sourceLanguage = ""
+    this.subtitles = []
+    this.subtitlesPagePath = null
+    tracksByUrl.clear()
+    capturesByUrl.clear()
+    trackWaiters.forEach(resolve => resolve())
+    trackWaiters.clear()
+  }
 
   getSourceLanguage() {
     return this.sourceLanguage
@@ -79,8 +109,9 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
 
   private async waitForTracks(): Promise<StreamingTrack[]> {
     window.postMessage({ type: STREAMING_ENSURE_NATIVE_SUBTITLES_TYPE }, window.location.origin)
-    if (tracksByUrl.size > 0)
-      return [...tracksByUrl.values()]
+    const currentTracks = getCurrentTracks()
+    if (currentTracks.length > 0)
+      return currentTracks
 
     await new Promise<void>((resolve) => {
       const timer = setTimeout(resolve, STREAMING_SUBTITLE_WAIT_TIMEOUT_MS)
@@ -89,19 +120,24 @@ export class NetflixSubtitlesFetcher implements SubtitlesFetcher {
         resolve()
       })
     })
-    return [...tracksByUrl.values()]
+    return getCurrentTracks()
   }
 
   private async resolveTrackText(track: StreamingTrack): Promise<string> {
     const captured = capturesByUrl.get(track.url)
-    if (captured)
-      return captured
+    if (captured?.pagePath === getCurrentPagePath())
+      return captured.text
 
     const response = await backgroundFetch(track.url, undefined, { credentials: "include" })
     if (!response.ok)
       throw new Error(`Failed to fetch Netflix subtitle track: ${response.status}`)
     return response.text()
   }
+}
+
+function getCurrentTracks(): StreamingTrack[] {
+  const pagePath = getCurrentPagePath()
+  return [...tracksByUrl.values()].filter(track => track.pagePath === pagePath)
 }
 
 function selectSourceTrack(tracks: StreamingTrack[]): StreamingTrack | null {
@@ -112,10 +148,19 @@ function selectSourceTrack(tracks: StreamingTrack[]): StreamingTrack | null {
 }
 
 function selectTargetTrack(tracks: StreamingTrack[], targetCode: LangCodeISO6393): StreamingTrack | null {
-  return tracks.find((track) => {
-    const resolved = resolveLanguageCodeFromLocale(track.language ?? track.label ?? "")
-    return resolved === targetCode || (isChineseCode(targetCode) && /zh|中文|Chinese/i.test(`${track.language ?? ""} ${track.label ?? ""}`))
-  }) ?? null
+  const candidates = tracks.map(track => ({
+    track,
+    resolved: resolveLanguageCodeFromLocale(track.language ?? track.label ?? ""),
+  }))
+  const exactMatch = candidates.find(({ resolved }) => resolved === targetCode)
+  if (exactMatch)
+    return exactMatch.track
+
+  return candidates.find(({ track, resolved }) => {
+    if (resolved || !isChineseCode(targetCode))
+      return false
+    return /zh|中文|Chinese/i.test(`${track.language ?? ""} ${track.label ?? ""}`)
+  })?.track ?? null
 }
 
 function isChineseCode(code: LangCodeISO6393): boolean {
