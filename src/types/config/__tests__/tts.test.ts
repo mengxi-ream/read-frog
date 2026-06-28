@@ -49,7 +49,7 @@ describe("tts config defaults", () => {
   })
 
   it("exposes a unique sorted voice list from voice metadata", () => {
-    expect(EDGE_TTS_VOICE_ITEMS).toHaveLength(584)
+    expect(EDGE_TTS_VOICE_ITEMS).toHaveLength(631)
     expect(EDGE_TTS_VOICES).toEqual(EDGE_TTS_VOICE_ITEMS.map(item => item.voice))
     expect(new Set(EDGE_TTS_VOICES).size).toBe(EDGE_TTS_VOICES.length)
     expect(EDGE_TTS_VOICES).toEqual([...EDGE_TTS_VOICES].sort((a, b) => a.localeCompare(b)))
@@ -75,6 +75,11 @@ describe("tts config defaults", () => {
     })
     expect(getEdgeTTSVoiceItem("en-US-AvaMultilingualNeural")).toMatchObject({
       type: "Multilingual",
+      gender: "Female",
+    })
+    expect(getEdgeTTSVoiceItem("zh-CN-Mei:MAI-Voice-2")).toMatchObject({
+      language: "Chinese (Mandarin, Simplified)",
+      type: "Standard",
       gender: "Female",
     })
   })
