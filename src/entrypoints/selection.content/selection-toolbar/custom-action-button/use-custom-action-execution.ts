@@ -4,6 +4,7 @@ import type { SelectionToolbarCustomActionRequestSlice } from "../atoms"
 import type { SelectionToolbarInlineError } from "../inline-error"
 import type { AnalyticsSurface } from "@/types/analytics"
 import type { BackgroundStructuredObjectStreamSnapshot, ThinkingSnapshot } from "@/types/background-stream"
+import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { CachedWebPageContext } from "@/utils/host/translate/webpage-context"
 import type { CustomActionProviderRef } from "@/utils/providers/provider-registry"
@@ -15,6 +16,7 @@ import { streamBackgroundStructuredObject } from "@/utils/content-script/backgro
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { truncateContextTextForCustomAction } from "../../utils"
 import { buildSelectionToolbarCustomActionSystemPrompt, replaceSelectionToolbarCustomActionPromptTokens } from "../custom-action-prompt"
 import {
@@ -57,7 +59,8 @@ interface CustomActionExecutionRequest {
     prompt: string
     providerId: string
     providerOptions?: Record<string, Record<string, JSONValue>>
-    system: string
+    reasoning?: AISDKReasoning
+    instructions: string
     temperature?: number
   }
 }
@@ -213,11 +216,13 @@ function buildCustomActionExecutionRequest({
   const providerKey = provider.kind === "local" ? provider.config.provider : provider.id
   const model = provider.kind === "local" ? provider.config.model : undefined
   const modelName = provider.kind === "local" ? resolveModelId(provider.config.model) ?? "" : ""
+  const reasoning = provider.kind === "local" ? getTopLevelReasoning(provider.config) : undefined
   const providerOptions = provider.kind === "local"
     ? getProviderOptionsWithOverride(
         modelName,
         provider.config.provider,
         provider.config.providerOptions,
+        reasoning,
       )
     : undefined
   const temperature = provider.kind === "local" ? provider.config.temperature : undefined
@@ -239,16 +244,18 @@ function buildCustomActionExecutionRequest({
       provider: providerKey,
       providerId: provider.id,
       providerOptions,
+      reasoning,
       rerunNonce,
-      system: systemPrompt,
+      instructions: systemPrompt,
       temperature,
     }),
     payload: {
       providerId: provider.id,
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt,
       outputSchema,
       providerOptions,
+      reasoning,
       temperature,
     },
   }

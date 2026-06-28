@@ -26,6 +26,7 @@ import { getTranslatePromptFromConfig } from "@/utils/prompts/translate"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
+import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { shadowWrapper } from "../.."
 import { SelectionToolbarErrorAlert } from "../../components/selection-toolbar-error-alert"
 import { SelectionToolbarFooterContent } from "../../components/selection-toolbar-footer-content"
@@ -85,7 +86,8 @@ async function translateWithTextStream({
 }) {
   const targetLangName = LANG_CODE_TO_EN_NAME[translateRequest.language.targetCode]
   const modelName = resolveModelId(providerConfig.model)
-  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", providerConfig.provider, providerConfig.providerOptions)
+  const reasoning = getTopLevelReasoning(providerConfig)
+  const providerOptions = getProviderOptionsWithOverride(modelName ?? "", providerConfig.provider, providerConfig.providerOptions, reasoning)
   const temperature = providerConfig.temperature
   const abortController = new AbortController()
   registerAbortController(abortController)
@@ -117,9 +119,10 @@ async function translateWithTextStream({
   const translatedText = await streamBackgroundText(
     {
       providerId,
-      system: systemPrompt,
+      instructions: systemPrompt,
       prompt,
       providerOptions,
+      reasoning,
       temperature,
     },
     {

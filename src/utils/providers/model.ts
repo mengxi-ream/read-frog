@@ -21,9 +21,7 @@ import { createReplicate } from "@ai-sdk/replicate"
 import { createTogetherAI } from "@ai-sdk/togetherai"
 import { createVercel } from "@ai-sdk/vercel"
 import { createXai } from "@ai-sdk/xai"
-import { createOpenRouter } from "@openrouter/ai-sdk-provider"
-import { createOllama } from "ollama-ai-provider-v2"
-import { createMinimax } from "vercel-minimax-ai-provider"
+import { createOllama } from "ai-sdk-ollama"
 import { storage } from "#imports"
 import { DEFAULT_AZURE_API_MODE, isCustomLLMProvider } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
@@ -37,8 +35,9 @@ const CREATE_AI_MAPPER = {
   "siliconflow": createOpenAICompatible,
   "tensdaq": createOpenAICompatible,
   "volcengine": createOpenAICompatible,
-  "openrouter": createOpenRouter,
   "openai-compatible": createOpenAICompatible,
+  "openrouter": createOpenAICompatible,
+  "minimax": createOpenAICompatible,
   "openai": createOpenAI,
   "azure": createAzure,
   "deepseek": createDeepSeek,
@@ -57,7 +56,6 @@ const CREATE_AI_MAPPER = {
   "perplexity": createPerplexity,
   "vercel": createVercel,
   "ollama": createOllama,
-  "minimax": createMinimax,
   "alibaba": createAlibaba,
   "moonshotai": createMoonshotAI,
   "huggingface": createHuggingFace,

@@ -13,6 +13,7 @@ import { sendMessage } from "@/utils/message"
 import { getLanguageDetectionSystemPrompt, parseDetectedLanguageCode } from "@/utils/prompts/language-detection"
 import { resolveModelId } from "@/utils/providers/model-id"
 import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 import { cleanText } from "./utils"
 
 const DEFAULT_MIN_LENGTH = 10
@@ -154,12 +155,14 @@ export async function detectLanguageWithLLM(
 
   try {
     const { model: providerModel, provider, providerOptions: userProviderOptions, temperature } = config
+    const reasoning = getTopLevelReasoning(config)
     const modelName = resolveModelId(providerModel)
-    const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions)
+    const providerOptions = getProviderOptionsWithOverride(modelName ?? "", provider, userProviderOptions, reasoning)
     const payload: BackgroundGenerateTextPayload = {
       providerId: config.id,
-      system: getLanguageDetectionSystemPrompt(),
+      instructions: getLanguageDetectionSystemPrompt(),
       prompt: text,
+      reasoning,
       temperature,
       providerOptions,
       maxRetries: 0,

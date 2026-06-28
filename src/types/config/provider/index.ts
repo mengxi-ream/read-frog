@@ -6,6 +6,7 @@ import type {
   NonCustomLLMProviderConfig,
   ProviderConfig,
   PureAPIProviderConfig,
+  TopLevelReasoningProviderConfig,
   TranslateProviderConfig,
 } from "./schemas"
 import {
@@ -17,6 +18,7 @@ import {
   isPureAPIProvider,
   isPureTranslateProvider,
   isTranslateProvider,
+  supportsTopLevelReasoning,
 } from "./constants"
 
 export * from "./constants"
@@ -29,6 +31,10 @@ export function isTranslateProviderConfig(config: ProviderConfig): config is Tra
 
 export function isLLMProviderConfig(config: ProviderConfig): config is LLMProviderConfig {
   return isLLMProvider(config.provider)
+}
+
+export function isTopLevelReasoningProviderConfig(config: LLMProviderConfig): config is TopLevelReasoningProviderConfig {
+  return supportsTopLevelReasoning(config.provider)
 }
 
 export function isCustomLLMProviderConfig(config: ProviderConfig): config is CustomLLMProviderConfig {

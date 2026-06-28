@@ -156,6 +156,8 @@ options:
         chatCompletions: Chat Completions
       temperature: 온도
       temperatureHint: 응답의 무작위성을 제어합니다. 낮은 값(0)은 더 결정적이고, 높은 값은 더 창의적입니다. 범위는 제공자에 따라 다릅니다. 비워두면 제공자 기본값을 사용합니다.
+      reasoning:
+        title: Reasoning
       headers: 헤더
       headersHint: AI 제공자 클라이언트를 만들 때 전송할 사용자 지정 HTTP 헤더입니다. 비워두면 제공자 기본값을 사용하고, {}를 입력하면 기본값을 비활성화합니다.
       providerOptions: 제공자 옵션

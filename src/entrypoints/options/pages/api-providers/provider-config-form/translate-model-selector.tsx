@@ -18,7 +18,7 @@ export const TranslateModelSelector = withForm({
     const providerConfig = useStore(form.store, state => state.values)
     const setProviderConfig = useSetAtom(providerConfigAtom(providerConfig.id))
     if (!isLLMProviderConfig(providerConfig))
-      return <></>
+      return null
 
     const modelId = resolveModelId(providerConfig.model)
     const { isCustomModel, customModel, model } = providerConfig.model

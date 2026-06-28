@@ -157,6 +157,8 @@ options:
         chatCompletions: Chat Completions
       temperature: 溫度
       temperatureHint: 控制回應的隨機性。數值越低（如 0）越穩定，數值越高越有創造性。可用範圍依提供者而異。留空則使用提供者預設值。
+      reasoning:
+        title: 推理
       headers: 請求標頭
       headersHint: 建立 AI 提供者連線時送出的自訂 HTTP 請求標頭。留空則使用提供者預設值；填入 {} 可停用預設值。
       providerOptions: 提供者選項

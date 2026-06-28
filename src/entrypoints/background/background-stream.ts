@@ -409,6 +409,9 @@ async function consumeTextPartStream(
         onChunk?.(createStreamSnapshot(cumulativeText, thinking))
         break
       }
+      case "reasoning-file": {
+        break
+      }
       case "finish": {
         hasFinish = true
         finishReason = getStreamFinishReason(part)
@@ -490,6 +493,9 @@ async function consumeStructuredObjectPartStream(
         onChunk?.(createStreamSnapshot(cumulativeValue, thinking))
         break
       }
+      case "reasoning-file": {
+        break
+      }
       case "finish": {
         hasFinish = true
         finishReason = getStreamFinishReason(part)
@@ -538,22 +544,22 @@ async function createLocalTextPartStream(
     },
   })
 
-  return result.fullStream
+  return result.stream
 }
 
 async function createHostedTextPartStream(
   serializablePayload: BackgroundStreamTextSerializablePayload,
   signal?: AbortSignal,
 ): Promise<AsyncIterable<unknown>> {
-  const { prompt, system, temperature } = serializablePayload
+  const { prompt, instructions, temperature } = serializablePayload
 
-  if (!system || !prompt) {
+  if (!instructions || !prompt) {
     throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
   }
 
   try {
     return await backgroundOrpcClient.hostedAi.translate.streamText({
-      system,
+      instructions,
       prompt,
       temperature,
     }, { signal })
@@ -604,22 +610,22 @@ async function createLocalStructuredObjectPartStream(
     },
   })
 
-  return result.fullStream
+  return result.stream
 }
 
 async function createHostedStructuredObjectPartStream(
   serializablePayload: BackgroundStreamStructuredObjectSerializablePayload,
   signal?: AbortSignal,
 ): Promise<AsyncIterable<unknown>> {
-  const { outputSchema, prompt, system, temperature } = serializablePayload
+  const { outputSchema, prompt, instructions, temperature } = serializablePayload
 
-  if (!system || !prompt) {
+  if (!instructions || !prompt) {
     throw new BackgroundStreamError("invalid_request", "Invalid hosted AI request")
   }
 
   try {
     return await backgroundOrpcClient.hostedAi.customAction.streamStructuredObject({
-      system,
+      instructions,
       prompt,
       outputSchema,
       temperature,

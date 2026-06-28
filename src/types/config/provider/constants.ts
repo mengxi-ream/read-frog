@@ -8,7 +8,7 @@ export { LLM_PROVIDER_MODELS, NON_API_TRANSLATE_PROVIDERS, NON_API_TRANSLATE_PRO
   ────────────────────────────── */
 
 // translate provider names
-export const TRANSLATE_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "deepl", "openai", "deepseek", "google", "anthropic", "xai", "atlascloud", "openai-compatible", "siliconflow", "tensdaq", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+export const TRANSLATE_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "deepl", "openai", "deepseek", "google", "anthropic", "xai", "openai-compatible", "atlascloud", "openrouter", "minimax", "siliconflow", "tensdaq", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "ollama", "volcengine", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
   (keyof typeof LLM_PROVIDER_MODELS | typeof PURE_TRANSLATE_PROVIDERS[number])[]
 >
 export type TranslateProviderTypes = typeof TRANSLATE_PROVIDER_TYPES[number]
@@ -16,7 +16,7 @@ export function isTranslateProvider(provider: string): provider is TranslateProv
   return TRANSLATE_PROVIDER_TYPES.includes(provider)
 }
 
-export const LLM_PROVIDER_TYPES = ["openai", "deepseek", "google", "anthropic", "xai", "atlascloud", "openai-compatible", "siliconflow", "tensdaq", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+export const LLM_PROVIDER_TYPES = ["openai", "deepseek", "google", "anthropic", "xai", "openai-compatible", "atlascloud", "openrouter", "minimax", "siliconflow", "tensdaq", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "ollama", "volcengine", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
   (keyof typeof LLM_PROVIDER_MODELS)[]
 >
 export type LLMProviderTypes = typeof LLM_PROVIDER_TYPES[number]
@@ -24,7 +24,7 @@ export function isLLMProvider(provider: string): provider is LLMProviderTypes {
   return LLM_PROVIDER_TYPES.includes(provider)
 }
 
-export const CUSTOM_LLM_PROVIDER_TYPES = ["openai-compatible", "atlascloud", "tensdaq", "siliconflow", "volcengine"] as const satisfies Readonly<
+export const CUSTOM_LLM_PROVIDER_TYPES = ["openai-compatible", "atlascloud", "openrouter", "minimax", "siliconflow", "tensdaq", "volcengine"] as const satisfies Readonly<
   (keyof typeof LLM_PROVIDER_MODELS)[]
 >
 export type CustomLLMProviderTypes = typeof CUSTOM_LLM_PROVIDER_TYPES[number]
@@ -32,7 +32,7 @@ export function isCustomLLMProvider(provider: string): provider is CustomLLMProv
   return CUSTOM_LLM_PROVIDER_TYPES.includes(provider)
 }
 
-export const NON_CUSTOM_LLM_PROVIDER_TYPES = ["openai", "deepseek", "google", "anthropic", "xai", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+export const NON_CUSTOM_LLM_PROVIDER_TYPES = ["openai", "deepseek", "google", "anthropic", "xai", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "ollama", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
   Exclude<keyof typeof LLM_PROVIDER_MODELS, CustomLLMProviderTypes>[]
 >
 export type NonCustomLLMProviderTypes = typeof NON_CUSTOM_LLM_PROVIDER_TYPES[number]
@@ -40,7 +40,7 @@ export function isNonCustomLLMProvider(provider: string): provider is NonCustomL
   return NON_CUSTOM_LLM_PROVIDER_TYPES.includes(provider)
 }
 
-export const API_PROVIDER_TYPES = ["openai-compatible", "atlascloud", "siliconflow", "tensdaq", "openai", "deepseek", "google", "anthropic", "xai", "deeplx", "deepl", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+export const API_PROVIDER_TYPES = ["openai-compatible", "atlascloud", "openrouter", "minimax", "siliconflow", "tensdaq", "volcengine", "openai", "deepseek", "google", "anthropic", "xai", "deeplx", "deepl", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "ollama", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
   (keyof typeof LLM_PROVIDER_MODELS | "deeplx" | "deepl")[]
 >
 export type APIProviderTypes = typeof API_PROVIDER_TYPES[number]
@@ -62,10 +62,19 @@ export function isNonAPIProvider(provider: string): provider is NonAPIProviderTy
 }
 
 // all provider names
-export const ALL_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "deepl", "openai-compatible", "atlascloud", "siliconflow", "tensdaq", "openai", "deepseek", "google", "anthropic", "xai", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "openrouter", "ollama", "volcengine", "minimax", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
+export const ALL_PROVIDER_TYPES = ["google-translate", "microsoft-translate", "deeplx", "deepl", "openai-compatible", "atlascloud", "openrouter", "minimax", "siliconflow", "tensdaq", "volcengine", "openai", "deepseek", "google", "anthropic", "xai", "azure", "bedrock", "groq", "deepinfra", "mistral", "togetherai", "cohere", "fireworks", "cerebras", "replicate", "perplexity", "vercel", "ollama", "alibaba", "moonshotai", "huggingface"] as const satisfies Readonly<
   TranslateProviderTypes[]
 >
 export type AllProviderTypes = typeof ALL_PROVIDER_TYPES[number]
+
+export const AI_SDK_REASONING_VALUES = ["provider-default", "none", "minimal", "low", "medium", "high", "xhigh"] as const
+export type AISDKReasoning = typeof AI_SDK_REASONING_VALUES[number]
+
+export const TOP_LEVEL_REASONING_PROVIDER_TYPES = ["openai", "anthropic", "google", "xai", "groq", "deepseek", "fireworks", "bedrock"] as const satisfies Readonly<LLMProviderTypes[]>
+export type TopLevelReasoningProviderTypes = typeof TOP_LEVEL_REASONING_PROVIDER_TYPES[number]
+export function supportsTopLevelReasoning(provider: string): provider is TopLevelReasoningProviderTypes {
+  return TOP_LEVEL_REASONING_PROVIDER_TYPES.includes(provider)
+}
 
 export function isPureTranslateProvider(provider: TranslateProviderTypes): provider is typeof PURE_TRANSLATE_PROVIDERS[number] {
   return PURE_TRANSLATE_PROVIDERS.includes(provider)

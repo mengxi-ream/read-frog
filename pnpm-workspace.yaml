@@ -1,5 +1,4 @@
-minimumReleaseAgeExclude:
-  - "@read-frog/*"
+minimumReleaseAge: 0
 
 shellEmulator: true
 

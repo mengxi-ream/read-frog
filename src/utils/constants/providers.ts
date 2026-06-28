@@ -184,20 +184,25 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
         referUrl: "https://readfrog.s.gy/altas",
       },
     },
-    "siliconflow": {
-      logo: getLobeIconsCDNUrlFn("siliconcloud-color"),
-      name: "SiliconFlow",
-      website: "https://siliconflow.cn/",
+    "openai-compatible": {
+      logo: () => customProviderLogo,
+      name: "Custom Provider",
+      website: `${env.WXT_WEBSITE_URL}/docs/providers/openai-compatible-providers`,
     },
     "openrouter": {
       logo: getLobeIconsCDNUrlFn("openrouter"),
       name: "OpenRouter",
       website: "https://openrouter.ai/",
     },
-    "openai-compatible": {
-      logo: () => customProviderLogo,
-      name: "Custom Provider",
-      website: `${env.WXT_WEBSITE_URL}/docs/providers/openai-compatible-providers`,
+    "minimax": {
+      logo: getLobeIconsCDNUrlFn("minimax-color"),
+      name: "MiniMax",
+      website: "https://platform.minimax.io",
+    },
+    "siliconflow": {
+      logo: getLobeIconsCDNUrlFn("siliconcloud-color"),
+      name: "SiliconFlow",
+      website: "https://siliconflow.cn/",
     },
     "openai": {
       logo: getLobeIconsCDNUrlFn("openai"),
@@ -299,11 +304,6 @@ export const PROVIDER_ITEMS: Record<AllProviderTypes, { logo: (theme: Theme) => 
       name: "Volcengine",
       website: "https://www.volcengine.com/product/doubao",
     },
-    "minimax": {
-      logo: getLobeIconsCDNUrlFn("minimax-color"),
-      name: "MiniMax",
-      website: "https://platform.minimax.io",
-    },
     "alibaba": {
       logo: getLobeIconsCDNUrlFn("bailian-color"),
       name: "Alibaba Cloud",
@@ -377,6 +377,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "openai",
     model: DEFAULT_LLM_PROVIDER_MODELS.openai,
+    reasoning: "none",
   },
   "azure": {
     id: "azure-default",
@@ -397,6 +398,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "deepseek",
     model: DEFAULT_LLM_PROVIDER_MODELS.deepseek,
+    reasoning: "none",
   },
   "google": {
     id: "google-default",
@@ -405,6 +407,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "google",
     model: DEFAULT_LLM_PROVIDER_MODELS.google,
+    reasoning: "none",
   },
   "anthropic": {
     id: "anthropic-default",
@@ -413,6 +416,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "anthropic",
     model: DEFAULT_LLM_PROVIDER_MODELS.anthropic,
+    reasoning: "none",
   },
   "xai": {
     id: "xai-default",
@@ -421,6 +425,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "xai",
     model: DEFAULT_LLM_PROVIDER_MODELS.xai,
+    reasoning: "none",
   },
   "deeplx": {
     id: "deeplx-default",
@@ -444,6 +449,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "bedrock",
     model: DEFAULT_LLM_PROVIDER_MODELS.bedrock,
+    reasoning: "none",
     providerSpecificSettings: { region: "us-east-1" },
   },
   "groq": {
@@ -453,6 +459,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "groq",
     model: DEFAULT_LLM_PROVIDER_MODELS.groq,
+    reasoning: "none",
   },
   "deepinfra": {
     id: "deepinfra-default",
@@ -493,6 +500,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     enabled: true,
     provider: "fireworks",
     model: DEFAULT_LLM_PROVIDER_MODELS.fireworks,
+    reasoning: "none",
   },
   "cerebras": {
     id: "cerebras-default",
@@ -532,6 +540,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.openrouter"),
     enabled: true,
     provider: "openrouter",
+    baseURL: "https://openrouter.ai/api/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.openrouter,
   },
   "ollama": {
@@ -558,7 +567,7 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.minimax"),
     enabled: true,
     provider: "minimax",
-    baseURL: "https://api.minimaxi.com/anthropic/v1",
+    baseURL: "https://api.minimax.io/v1",
     model: DEFAULT_LLM_PROVIDER_MODELS.minimax,
   },
   "alibaba": {

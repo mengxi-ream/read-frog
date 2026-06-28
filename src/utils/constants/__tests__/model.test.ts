@@ -352,6 +352,16 @@ describe("getProviderOptions", () => {
       expect(options).toEqual({ alibaba: { foo: "bar" } })
     })
 
+    it("should skip reasoning-only recommendations when top-level reasoning is explicit", () => {
+      const options = getProviderOptionsWithOverride("gpt-5-mini", "openai", undefined, "minimal")
+      expect(options).toBeUndefined()
+    })
+
+    it("should preserve explicit user provider options when top-level reasoning is explicit", () => {
+      const options = getProviderOptionsWithOverride("gpt-5-mini", "openai", { reasoningEffort: "high" }, "minimal")
+      expect(options).toEqual({ openai: { reasoningEffort: "high" } })
+    })
+
     it("should normalize common OpenAI-compatible snake_case aliases", () => {
       const options = getProviderOptionsWithOverride("glm-4-flash", "openai-compatible", {
         reasoning_effort: "minimal",

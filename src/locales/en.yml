@@ -157,6 +157,8 @@ options:
         chatCompletions: Chat Completions
       temperature: Temperature
       temperatureHint: Controls randomness in responses. Lower values (0) are more deterministic, higher values are more creative. Range varies by provider. Leave empty to use provider default.
+      reasoning:
+        title: Reasoning
       headers: Headers
       headersHint: Custom HTTP headers sent when creating the AI provider client. Leave empty to use provider defaults; use {} to disable defaults.
       providerOptions: Provider Options

@@ -8,17 +8,14 @@ const {
   anthropicLanguageModelMock,
   azureChatModelMock,
   azureLanguageModelMock,
-  openRouterLanguageModelMock,
   openAICompatibleLanguageModelMock,
   createAnthropicMock,
   createAzureMock,
-  createOpenRouterMock,
   createOpenAICompatibleMock,
 } = vi.hoisted(() => {
   const anthropicLanguageModelMock = vi.fn()
   const azureChatModelMock = vi.fn()
   const azureLanguageModelMock = vi.fn()
-  const openRouterLanguageModelMock = vi.fn()
   const openAICompatibleLanguageModelMock = vi.fn()
   const createAnthropicMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: anthropicLanguageModelMock,
@@ -26,9 +23,6 @@ const {
   const createAzureMock = vi.fn((_options?: Record<string, unknown>) => ({
     chat: azureChatModelMock,
     languageModel: azureLanguageModelMock,
-  }))
-  const createOpenRouterMock = vi.fn((_options?: Record<string, unknown>) => ({
-    languageModel: openRouterLanguageModelMock,
   }))
   const createOpenAICompatibleMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: openAICompatibleLanguageModelMock,
@@ -38,11 +32,9 @@ const {
     anthropicLanguageModelMock,
     azureChatModelMock,
     azureLanguageModelMock,
-    openRouterLanguageModelMock,
     openAICompatibleLanguageModelMock,
     createAnthropicMock,
     createAzureMock,
-    createOpenRouterMock,
     createOpenAICompatibleMock,
   }
 })
@@ -53,10 +45,6 @@ vi.mock("@ai-sdk/anthropic", () => ({
 
 vi.mock("@ai-sdk/azure", () => ({
   createAzure: createAzureMock,
-}))
-
-vi.mock("@openrouter/ai-sdk-provider", () => ({
-  createOpenRouter: createOpenRouterMock,
 }))
 
 vi.mock("@ai-sdk/openai-compatible", () => ({
@@ -86,6 +74,7 @@ function createOpenRouterProviderConfig(headers?: Record<string, unknown>) {
     enabled: true,
     provider: "openrouter",
     apiKey: "test-key",
+    baseURL: "https://openrouter.ai/api/v1",
     model: {
       model: "x-ai/grok-4-fast:free",
       isCustomModel: false,
@@ -101,7 +90,6 @@ describe("getModelById", () => {
     anthropicLanguageModelMock.mockReturnValue("anthropic-model")
     azureChatModelMock.mockReturnValue("azure-chat-model")
     azureLanguageModelMock.mockReturnValue("azure-model")
-    openRouterLanguageModelMock.mockReturnValue("openrouter-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
     getStorageItemMock = vi.fn()
     ;(storage.getItem as unknown as ReturnType<typeof vi.fn>) = getStorageItemMock
@@ -131,12 +119,15 @@ describe("getModelById", () => {
     const { getModelById } = await import("../model")
     const result = await getModelById("openrouter-default")
 
-    expect(result).toBe("openrouter-model")
-    expect(createOpenRouterMock).toHaveBeenCalledWith(expect.objectContaining({
+    expect(result).toBe("custom-model")
+    expect(createOpenAICompatibleMock).toHaveBeenCalledWith(expect.objectContaining({
+      name: "openrouter",
+      baseURL: "https://openrouter.ai/api/v1",
       apiKey: "test-key",
       headers: DEFAULT_PROVIDER_HEADERS.openrouter,
+      supportsStructuredOutputs: true,
     }))
-    expect(openRouterLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
+    expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
   })
 
   it("passes Azure settings and resolves the deployment name with languageModel", async () => {

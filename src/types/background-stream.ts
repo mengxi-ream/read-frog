@@ -1,10 +1,11 @@
 import type { JSONValue, StreamTextOnErrorCallback } from "ai"
 import type { Browser } from "#imports"
+import type { AISDKReasoning } from "@/types/config/provider"
 import type { SelectionToolbarCustomActionOutputType } from "@/types/config/selection-toolbar"
 
 interface BaseBackgroundStreamSerializablePayload {
   providerId: string
-  system?: string
+  instructions?: string
   prompt?: string
   messages?: JSONValue[]
   temperature?: number
@@ -14,6 +15,7 @@ interface BaseBackgroundStreamSerializablePayload {
   presencePenalty?: number
   seed?: number
   stopSequences?: string[]
+  reasoning?: AISDKReasoning
   providerOptions?: Record<string, Record<string, JSONValue>>
 }
 

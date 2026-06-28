@@ -44,8 +44,9 @@ describe("llm-generate-text", () => {
     const { runGenerateTextInBackground } = await import("../llm-generate-text")
     const result = await runGenerateTextInBackground({
       providerId: "openai-default",
-      system: "system",
+      instructions: "system",
       prompt: "hello world",
+      reasoning: "minimal",
       temperature: 0.2,
       maxRetries: 0,
     })
@@ -53,8 +54,9 @@ describe("llm-generate-text", () => {
     expect(getModelByIdMock).toHaveBeenCalledWith("openai-default")
     expect(generateTextMock).toHaveBeenCalledWith({
       model: "mock-model",
-      system: "system",
+      instructions: "system",
       prompt: "hello world",
+      reasoning: "minimal",
       temperature: 0.2,
       maxRetries: 0,
     })

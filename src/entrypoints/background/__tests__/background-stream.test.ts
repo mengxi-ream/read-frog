@@ -121,7 +121,7 @@ describe("background-stream", () => {
   it("streams structured object output from background", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      fullStream: (async function* () {
+      stream: (async function* () {
         yield { type: "text-delta", text: "{\"score\":97" }
         yield { type: "text-delta", text: ",\"summary\":\"Strong argument structure\"}" }
         yield { type: "finish", finishReason: "stop" }
@@ -218,7 +218,7 @@ describe("background-stream", () => {
     const result = await runStructuredObjectStreamInBackground(
       {
         providerId: "read-frog-free-ai",
-        system: "Return structured data",
+        instructions: "Return structured data",
         prompt: "Analyze selection",
         outputSchema: [
           { name: "score", type: "number" },
@@ -234,7 +234,7 @@ describe("background-stream", () => {
 
     expect(getModelByIdMock).not.toHaveBeenCalled()
     expect(hostedStreamStructuredObjectMock).toHaveBeenCalledWith({
-      system: "Return structured data",
+      instructions: "Return structured data",
       prompt: "Analyze selection",
       outputSchema: [
         { name: "score", type: "number" },
@@ -268,7 +268,7 @@ describe("background-stream", () => {
 
     await expect(runStructuredObjectStreamInBackground({
       providerId: "read-frog-free-ai",
-      system: "Return structured data",
+      instructions: "Return structured data",
       prompt: "Analyze selection",
       outputSchema: [
         { name: "score", type: "number" },
@@ -279,7 +279,7 @@ describe("background-stream", () => {
   it("treats structured object streams without finish as protocol errors", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      fullStream: (async function* () {
+      stream: (async function* () {
         yield { type: "text-delta", text: "{\"score\":97}" }
       })(),
     })
@@ -300,7 +300,7 @@ describe("background-stream", () => {
   it("treats length-finished structured object streams as truncated output", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      fullStream: (async function* () {
+      stream: (async function* () {
         yield { type: "text-delta", text: "{\"summary\":\"partial but parseable" }
         yield { type: "finish", finishReason: "length" }
       })(),
@@ -322,7 +322,7 @@ describe("background-stream", () => {
   it("treats text streams without finish as protocol errors", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      fullStream: (async function* () {
+      stream: (async function* () {
         yield { type: "text-delta", text: "Hello" }
       })(),
     })
@@ -338,7 +338,7 @@ describe("background-stream", () => {
   it("treats length-finished text streams as truncated output", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      fullStream: (async function* () {
+      stream: (async function* () {
         yield { type: "text-delta", text: "partial" }
         yield { type: "finish", finishReason: "length" }
       })(),
@@ -355,7 +355,7 @@ describe("background-stream", () => {
   it("streams text via background stream port handler", async () => {
     getModelByIdMock.mockResolvedValue("mock-model")
     streamTextMock.mockReturnValue({
-      fullStream: (async function* () {
+      stream: (async function* () {
         yield { type: "text-delta", text: "Hello" }
         yield { type: "text-delta", text: " world" }
         yield { type: "finish", finishReason: "stop" }
@@ -372,11 +372,17 @@ describe("background-stream", () => {
       requestId: "req-text-1",
       payload: {
         providerId: "openai-default",
+        instructions: "Be concise",
         prompt: "Say hello",
+        reasoning: "low",
       },
     })
 
     expect(getModelByIdMock).toHaveBeenCalledWith("openai-default")
+    expect(streamTextMock).toHaveBeenCalledWith(expect.objectContaining({
+      instructions: "Be concise",
+      reasoning: "low",
+    }))
     expect(mockPort.postMessage).toHaveBeenNthCalledWith(1, {
       type: "chunk",
       requestId: "req-text-1",
@@ -429,7 +435,7 @@ describe("background-stream", () => {
     const result = await runStreamTextInBackground(
       {
         providerId: "read-frog-free-ai",
-        system: "Translate text",
+        instructions: "Translate text",
         prompt: "Hello world",
       },
       {
@@ -441,7 +447,7 @@ describe("background-stream", () => {
 
     expect(getModelByIdMock).not.toHaveBeenCalled()
     expect(hostedStreamTextMock).toHaveBeenCalledWith({
-      system: "Translate text",
+      instructions: "Translate text",
       prompt: "Hello world",
       temperature: undefined,
     }, { signal: undefined })
@@ -466,7 +472,7 @@ describe("background-stream", () => {
     }) => {
       options.onError?.({ error: rootCause })
       return {
-        fullStream: (async function* () {})(),
+        stream: (async function* () {})(),
         get output() {
           throw new Error("text stream should not consume output separately")
         },
@@ -533,7 +539,7 @@ describe("background-stream", () => {
     streamTextMock.mockImplementation((options: { abortSignal?: AbortSignal }) => {
       streamSignal = options.abortSignal
       return {
-        fullStream: (async function* () {
+        stream: (async function* () {
           await new Promise<void>((_resolve, reject) => {
             options.abortSignal?.addEventListener("abort", () => {
               reject(options.abortSignal?.reason ?? new DOMException("aborted", "AbortError"))
