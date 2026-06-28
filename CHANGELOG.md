@@ -1,5 +1,19 @@
 # @read-frog/extension
 
+## 1.37.0
+
+### Minor Changes
+
+- [#1753](https://github.com/mengxi-ream/read-frog/pull/1753) [`1d8abce`](https://github.com/mengxi-ream/read-frog/commit/1d8abce3c88946c94a9c32a2f1b9bead49ef6fec) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - ai: upgrade Vercel AI SDK providers to v7, move OpenRouter and MiniMax to OpenAI-compatible provider implementations, and add provider-level reasoning configuration for supported models.
+
+### Patch Changes
+
+- [#1754](https://github.com/mengxi-ream/read-frog/pull/1754) [`18965e5`](https://github.com/mengxi-ream/read-frog/commit/18965e5e222ff8065eae5e23791a2f4c2d33daa5) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - fix(tts): add MAI-Voice-2 options to the Edge TTS voice selector.
+
+- [#1750](https://github.com/mengxi-ream/read-frog/pull/1750) [`abb000b`](https://github.com/mengxi-ream/read-frog/commit/abb000b7e14b86e51f554ab72fdb2894b3fd4dca) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(ui): restore contextual compact select sizing and brand indicators.
+
+- [#1753](https://github.com/mengxi-ream/read-frog/pull/1753) [`1d8abce`](https://github.com/mengxi-ream/read-frog/commit/1d8abce3c88946c94a9c32a2f1b9bead49ef6fec) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(ai): default provider-prefixed Qwen3 model reasoning effort to none.
+
 ## 1.36.0
 
 ### Minor Changes
