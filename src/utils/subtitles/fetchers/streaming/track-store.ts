@@ -7,10 +7,6 @@ import {
 } from "@/utils/constants/subtitles"
 import { backgroundFetch } from "@/utils/content-script/background-fetch-client"
 
-// Shared store for subtitle tracks/text published by the MAIN-world interceptor
-// (Netflix manifest tracks, HBO Max .vtt captures). Page-path scoped so stale
-// tracks from a previous title are ignored.
-
 interface StreamingCapture {
   text: string
   pagePath: string

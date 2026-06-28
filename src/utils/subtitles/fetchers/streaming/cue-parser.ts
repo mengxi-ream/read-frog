@@ -1,9 +1,5 @@
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 
-// Shared WebVTT / TTML parsing + official-track alignment for streaming subtitle
-// adapters (Netflix, HBO Max, ...). Extracted from the Netflix fetcher so every
-// adapter reuses the same battle-tested parsers.
-
 export function parseSubtitleText(text: string, offsetMs = 0): SubtitlesFragment[] {
   const trimmed = text.trim()
   if (trimmed.includes("-->"))
@@ -70,8 +66,6 @@ export function cleanSubtitleText(text: string): string {
   return text.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "").replace(/[ \t]+/g, " ").trim()
 }
 
-// Align an official source-language track with an official target-language track
-// by maximum timeline overlap, producing bilingual fragments.
 export function alignOfficialSubtitles(sourceSubtitles: SubtitlesFragment[], targetSubtitles: SubtitlesFragment[]): SubtitlesFragment[] {
   const sourceByTargetIndex = new Map<number, SubtitlesFragment[]>()
   for (const source of sourceSubtitles) {

@@ -7,4 +7,5 @@ export interface SubtitlesFetcher {
   getSourceLanguage: () => string
   hasAvailableSubtitles: () => Promise<boolean>
   isPreSegmented?: () => boolean
+  startLiveCapture?: (onFragments: (fragments: SubtitlesFragment[]) => void) => (() => void) | void
 }

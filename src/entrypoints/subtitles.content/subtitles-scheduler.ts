@@ -41,16 +41,19 @@ export class SubtitlesScheduler {
         continue
       }
 
-      if (newSub.translation) {
-        const updatedSub = { ...existing, translation: newSub.translation }
-        const idx = this.subtitles.findIndex(s => s.start === existing.start)
-        if (idx >= 0) {
-          this.subtitles[idx] = updatedSub
-        }
+      const updatedSub = {
+        ...existing,
+        text: newSub.text || existing.text,
+        end: newSub.end || existing.end,
+        translation: newSub.translation ?? existing.translation,
+      }
+      const idx = this.subtitles.findIndex(s => s.start === existing.start)
+      if (idx >= 0) {
+        this.subtitles[idx] = updatedSub
+      }
 
-        if (currentSubtitle && existing.start === currentSubtitle.start) {
-          currentSubtitleUpdated = true
-        }
+      if (currentSubtitle && existing.start === currentSubtitle.start) {
+        currentSubtitleUpdated = true
       }
     }
 

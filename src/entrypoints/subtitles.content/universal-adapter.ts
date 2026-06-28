@@ -48,6 +48,7 @@ export class UniversalVideoAdapter {
   private translationCoordinator: TranslationCoordinator | null = null
   private translatedSubtitlesDownloader: TranslatedSubtitlesDownloader | null = null
   private subtitlesSummaryContextHash: string | null = null
+  private stopLiveCapture: (() => void) | null = null
 
   get embedded() {
     return this.config.embedded
@@ -179,7 +180,7 @@ export class UniversalVideoAdapter {
     }
 
     const subtitles = await this.subtitlesFetcher.fetch()
-    if (subtitles.length === 0) {
+    if (subtitles.length === 0 && !this.subtitlesFetcher.startLiveCapture) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
 
@@ -208,6 +209,8 @@ export class UniversalVideoAdapter {
   }
 
   private clearRuntimeSession() {
+    this.stopLiveCapture?.()
+    this.stopLiveCapture = null
     this.translationCoordinator?.stop()
     this.segmentationPipeline?.stop()
     this.translationCoordinator = null
@@ -372,6 +375,8 @@ export class UniversalVideoAdapter {
     else {
       this.subtitlesScheduler?.hide()
       this.showNativeSubtitles()
+      this.stopLiveCapture?.()
+      this.stopLiveCapture = null
       this.translationCoordinator?.stop()
     }
   }
@@ -458,6 +463,7 @@ export class UniversalVideoAdapter {
           this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
           this.subtitlesScheduler?.setState("idle")
         }
+        this.startLiveCapture()
         if (analyticsContext) {
           void trackFeatureUsed({
             ...analyticsContext,
@@ -487,6 +493,7 @@ export class UniversalVideoAdapter {
       else {
         await this.processTranslatedSubtitles()
       }
+      this.startLiveCapture()
       if (analyticsContext) {
         void trackFeatureUsed({
           ...analyticsContext,
@@ -531,6 +538,34 @@ export class UniversalVideoAdapter {
     }))
     this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
     this.subtitlesScheduler?.setState("idle")
+  }
+
+  private startLiveCapture() {
+    this.stopLiveCapture?.()
+    this.stopLiveCapture = this.subtitlesFetcher.startLiveCapture?.((fragments) => {
+      const next = this.mergeLiveFragments(fragments)
+      if (next.length === 0)
+        return
+      this.subtitlesScheduler?.supplementSubtitles(next)
+    }) ?? null
+  }
+
+  private mergeLiveFragments(fragments: SubtitlesFragment[]): SubtitlesFragment[] {
+    const next: SubtitlesFragment[] = []
+    for (const fragment of fragments) {
+      if (!fragment.text || fragment.end <= fragment.start)
+        continue
+      const existing = this.sessionProcessedFragments.find(item => item.start === fragment.start)
+      const merged = existing
+        ? { ...existing, ...fragment, translation: fragment.translation ?? existing.translation }
+        : fragment
+      upsertFragment(this.sourceSubtitles, merged)
+      upsertFragment(this.sourceProcessedSubtitles, merged)
+      upsertFragment(this.sessionSubtitles, merged)
+      upsertFragment(this.sessionProcessedFragments, merged)
+      next.push(merged)
+    }
+    return next
   }
 
   private async processTranslatedSubtitles() {
@@ -591,4 +626,13 @@ export class UniversalVideoAdapter {
       videoContext.summary = summary
     })
   }
+}
+
+function upsertFragment(fragments: SubtitlesFragment[], fragment: SubtitlesFragment) {
+  const index = fragments.findIndex(item => item.start === fragment.start)
+  if (index >= 0)
+    fragments[index] = { ...fragments[index], ...fragment, translation: fragment.translation ?? fragments[index].translation }
+  else
+    fragments.push(fragment)
+  fragments.sort((a, b) => a.start - b.start)
 }

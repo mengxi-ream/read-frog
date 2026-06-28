@@ -5,9 +5,6 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { alignOfficialSubtitles } from "./cue-parser"
 
-// A subtitle track on a streaming site, discovered from network traffic the
-// MAIN-world interceptor captures: a Netflix manifest-json download URL, or an
-// HBO Max .vtt request / DASH manifest (segmented across `urls`).
 export interface StreamingTrack {
   id?: string
   url?: string
@@ -19,14 +16,12 @@ export interface StreamingTrack {
   pagePath?: string
 }
 
-// Unified entry every streaming site implements. Discovery + per-track fetch are
-// site-specific; source/target selection and bilingual-vs-translate routing are
-// handled once in StreamingSubtitlesFetcher below.
 export interface StreamingSiteAdapter {
   id: string
   matches: (url: URL) => boolean
   discoverTracks: () => Promise<StreamingTrack[]>
   fetchTrack: (track: StreamingTrack) => Promise<SubtitlesFragment[]>
+  startLiveCapture?: (onFragments: (fragments: SubtitlesFragment[]) => void) => (() => void) | void
   cleanup?: () => void
 }
 
@@ -65,8 +60,6 @@ function trackKey(track: StreamingTrack): string {
   return track.id ?? track.url ?? track.urls?.join("\n") ?? track.label ?? track.language ?? ""
 }
 
-// Generic SubtitlesFetcher: discovers a site's tracks, picks source + optional
-// target, and aligns both official tracks into bilingual cues (else source-only).
 export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
   private readonly site: StreamingSiteAdapter
   private sourceLanguage = ""
@@ -102,7 +95,6 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
       const aligned = alignOfficialSubtitles(sourceFragments, targetFragments)
       if (aligned.length > 0)
         return this.cache(aligned, true)
-      // Alignment produced nothing usable: fall back to source-only translation.
       return this.cache(sourceFragments, false)
     }
 
@@ -130,9 +122,11 @@ export class StreamingSubtitlesFetcher implements SubtitlesFetcher {
   }
 
   isPreSegmented(): boolean {
-    // Aligned official bilingual tracks are already segmented; source-only tracks
-    // still flow through optimizeSubtitles + translation.
     return this.bilingual
+  }
+
+  startLiveCapture(onFragments: (fragments: SubtitlesFragment[]) => void): (() => void) | void {
+    return this.site.startLiveCapture?.(onFragments)
   }
 
   private cache(subtitles: SubtitlesFragment[], bilingual: boolean): SubtitlesFragment[] {
