@@ -50,6 +50,27 @@ function attachScheduler(adapter: UniversalVideoAdapter, active: boolean) {
   return subtitlesScheduler
 }
 
+function fakeStyleDocument() {
+  const styles = new Map<string, { id: string, textContent: string, remove: () => void }>()
+  const document = {
+    title: "Test video",
+    createElement: vi.fn(() => {
+      const style = {
+        id: "",
+        textContent: "",
+        remove: vi.fn(() => styles.delete(style.id)),
+      }
+      return style
+    }),
+    getElementById: vi.fn((id: string) => styles.get(id) ?? null),
+    head: {
+      appendChild: vi.fn((style: { id: string, textContent: string, remove: () => void }) => styles.set(style.id, style)),
+    },
+  }
+
+  return { document, styles }
+}
+
 describe("universalVideoAdapter", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -165,5 +186,21 @@ describe("universalVideoAdapter", () => {
     ;(adapter as any).clearVisibleStateForNavigation()
 
     expect(downloader.dispose).toHaveBeenCalledTimes(1)
+  })
+
+  it("hides native WebVTT cues while overlay subtitles are enabled", () => {
+    const { adapter } = createAdapter([])
+    const { document, styles } = fakeStyleDocument()
+    vi.stubGlobal("document", document)
+
+    ;(adapter as any).hideNativeSubtitles()
+
+    const style = styles.get("read-frog-hide-native-captions")
+    expect(style?.textContent).toContain(".native-subtitles")
+    expect(style?.textContent).toContain("video::cue")
+
+    ;(adapter as any).showNativeSubtitles()
+
+    expect(styles.has("read-frog-hide-native-captions")).toBe(false)
   })
 })

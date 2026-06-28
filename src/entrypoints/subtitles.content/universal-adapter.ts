@@ -425,6 +425,14 @@ export class UniversalVideoAdapter {
         opacity: 0 !important;
         visibility: hidden !important;
       }
+
+      video::cue {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        color: transparent !important;
+        background: transparent !important;
+        text-shadow: none !important;
+      }
     `
     document.head.appendChild(style)
     this.isNativeSubtitlesHidden = true
@@ -468,7 +476,12 @@ export class UniversalVideoAdapter {
       await this.getOrLoadSourceSubtitles()
       this.sessionSubtitles = this.sourceSubtitles
 
-      if (await this.shouldSkipTranslationForCurrentTrack()) {
+      if (this.sourceProcessedSubtitles.some(fragment => fragment.translation)) {
+        this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
+        this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
+        this.subtitlesScheduler?.setState("idle")
+      }
+      else if (await this.shouldSkipTranslationForCurrentTrack()) {
         this.processPassthroughSubtitles()
       }
       else {
