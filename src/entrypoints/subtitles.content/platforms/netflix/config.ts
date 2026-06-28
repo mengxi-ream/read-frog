@@ -19,6 +19,8 @@ export function getNetflixConfig(): PlatformConfig {
       measureHeight: () => 0,
       checkVisibility: () => true,
     },
-    getVideoId: () => window.location.pathname,
+    // Only /watch/<id> pages carry a video id; browse/details pages return null so
+    // they don't trigger a navigation reset that would drop the next title's session.
+    getVideoId: () => window.location.pathname.match(/^\/watch\/([^/?#]+)/)?.[1] ?? null,
   }
 }

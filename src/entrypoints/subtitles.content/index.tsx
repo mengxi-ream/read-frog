@@ -10,9 +10,6 @@ declare global {
 
 const NETFLIX_WATCH_PATH_PATTERN = /^\/watch\//
 const URL_CHANGE_EVENT = "extension:URLChange"
-// ponytail: bounded poll for the SPA to reach a /watch/ page; raise if it routes slower.
-const WATCH_WAIT_MAX_ATTEMPTS = 20
-const WATCH_WAIT_INTERVAL_MS = 1000
 
 function isNetflixPage(): boolean {
   return /(?:^|\.)netflix\.com$/i.test(window.location.hostname)
@@ -72,28 +69,17 @@ export default defineContentScript({
     if (isNetflixPage()) {
       cleanupHandlers.push(watchStreamingUrlChanges())
       if (!isPlaybackReady()) {
-        // Defer bootstrap until the SPA navigates to a /watch/ page.
-        let attempts = 0
-        let pollId: ReturnType<typeof setInterval>
-        function stop() {
-          window.removeEventListener(URL_CHANGE_EVENT, onTick)
-          clearInterval(pollId)
-        }
-        function onTick() {
+        // Not on a /watch/ page yet. Netflix navigates SPA-only, so keep listening
+        // until the user reaches a title — no timeout, since they may browse for a
+        // while first — then bootstrap once.
+        const onNavigate = () => {
           if (!isPlaybackReady())
             return
-          stop()
+          window.removeEventListener(URL_CHANGE_EVENT, onNavigate)
           void bootstrapRuntime()
         }
-        pollId = setInterval(() => {
-          if (++attempts >= WATCH_WAIT_MAX_ATTEMPTS) {
-            stop()
-            return
-          }
-          onTick()
-        }, WATCH_WAIT_INTERVAL_MS)
-        window.addEventListener(URL_CHANGE_EVENT, onTick)
-        cleanupHandlers.push(stop)
+        window.addEventListener(URL_CHANGE_EVENT, onNavigate)
+        cleanupHandlers.push(() => window.removeEventListener(URL_CHANGE_EVENT, onNavigate))
         window.__READ_FROG_SUBTITLES_INJECTED__ = false
         return
       }
