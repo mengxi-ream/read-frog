@@ -2,6 +2,10 @@ name: Read Frog
 extName: Read Frog - Dịch và học
 extDescription: Read Frog là tiện ích mở rộng trình duyệt mã nguồn mở được thiết kế để giúp bạn học ngôn ngữ sâu từ bất kỳ trang web nào.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+account:
+  login: Đăng nhập
+  logout: Đăng xuất
+  logoutError: Đăng xuất thất bại. Vui lòng thử lại.
 dataTypes:
   string: Văn bản
   number: Số

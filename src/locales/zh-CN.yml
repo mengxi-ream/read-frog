@@ -2,6 +2,10 @@ name: 陪读蛙
 extName: 陪读蛙 - 翻译与学习
 extDescription: 陪读蛙是一款开放源代码的浏览器插件，旨在帮助您从任何网站深入学习语言。
 uninstallSurveyUrl: https://tally.so/r/3E9XDL
+account:
+  login: 登录
+  logout: 退出登录
+  logoutError: 退出登录失败，请重试
 dataTypes:
   string: 文本
   number: 数字

@@ -260,6 +260,9 @@ importers:
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
+      ts-pattern:
+        specifier: ^5.9.0
+        version: 5.9.0
       tw-animate-css:
         specifier: ^1.4.0
         version: 1.4.0

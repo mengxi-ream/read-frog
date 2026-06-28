@@ -14,6 +14,7 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/components/ui/base-ui/sidebar"
+import { UserAccountMenuSidebar } from "@/components/user-account-menu"
 import { getCommandPaletteShortcutHint } from "@/utils/os"
 import { version } from "../../../../package.json"
 import { commandPaletteOpenAtom } from "../command-palette/atoms"
@@ -63,6 +64,7 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="group-data-[state=expanded]:px-2 transition-all">
         <WhatsNewFooter />
+        <UserAccountMenuSidebar />
       </SidebarFooter>
     </Sidebar>
   )

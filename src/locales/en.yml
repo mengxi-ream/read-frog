@@ -2,6 +2,10 @@ name: Read Frog
 extName: "Read Frog - Translate & Learn"
 extDescription: Read Frog is an open source browser extension designed to help you learn languages deeply from any website.
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+account:
+  login: Log in
+  logout: Log out
+  logoutError: Failed to log out. Please try again.
 dataTypes:
   string: Text
   number: Number

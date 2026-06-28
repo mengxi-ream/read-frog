@@ -2,6 +2,10 @@ name: 読書カエル
 extName: 読書カエル - 翻訳して学ぶ
 extDescription: 読書カエルは、あらゆるウェブサイトから言語を深く学ぶために設計されたオープンソースのブラウザ拡張機能です。
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+account:
+  login: ログイン
+  logout: ログアウト
+  logoutError: ログアウトに失敗しました。もう一度お試しください。
 dataTypes:
   string: テキスト
   number: 数値

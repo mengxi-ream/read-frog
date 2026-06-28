@@ -1,6 +1,6 @@
 import { Icon } from "@iconify/react"
 import { i18n } from "#imports"
-import { UserAccount } from "@/components/user-account"
+import { UserAccountMenuPopup } from "@/components/user-account-menu"
 import { openOptionsPage } from "@/utils/navigation"
 import { version } from "../../../package.json"
 import { AISmartContext } from "./components/ai-smart-context"
@@ -22,7 +22,7 @@ function App() {
     <>
       <div className="bg-background flex flex-col gap-4 px-6 pt-5 pb-4">
         <div className="flex items-center justify-between">
-          <UserAccount />
+          <UserAccountMenuPopup />
           <div className="flex items-center">
             <TranslationHubButton />
             <DiscordButton />
