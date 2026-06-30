@@ -9,14 +9,17 @@ const {
   azureChatModelMock,
   azureLanguageModelMock,
   openAICompatibleLanguageModelMock,
+  ollamaLanguageModelMock,
   createAnthropicMock,
   createAzureMock,
+  createOllamaMock,
   createOpenAICompatibleMock,
 } = vi.hoisted(() => {
   const anthropicLanguageModelMock = vi.fn()
   const azureChatModelMock = vi.fn()
   const azureLanguageModelMock = vi.fn()
   const openAICompatibleLanguageModelMock = vi.fn()
+  const ollamaLanguageModelMock = vi.fn()
   const createAnthropicMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: anthropicLanguageModelMock,
   }))
@@ -27,14 +30,19 @@ const {
   const createOpenAICompatibleMock = vi.fn((_options?: Record<string, unknown>) => ({
     languageModel: openAICompatibleLanguageModelMock,
   }))
+  const createOllamaMock = vi.fn((_options?: Record<string, unknown>) => ({
+    languageModel: ollamaLanguageModelMock,
+  }))
 
   return {
     anthropicLanguageModelMock,
     azureChatModelMock,
     azureLanguageModelMock,
     openAICompatibleLanguageModelMock,
+    ollamaLanguageModelMock,
     createAnthropicMock,
     createAzureMock,
+    createOllamaMock,
     createOpenAICompatibleMock,
   }
 })
@@ -49,6 +57,10 @@ vi.mock("@ai-sdk/azure", () => ({
 
 vi.mock("@ai-sdk/openai-compatible", () => ({
   createOpenAICompatible: createOpenAICompatibleMock,
+}))
+
+vi.mock("ai-sdk-ollama", () => ({
+  createOllama: createOllamaMock,
 }))
 
 function createAnthropicProviderConfig(headers?: Record<string, unknown>) {
@@ -84,6 +96,22 @@ function createOpenRouterProviderConfig(headers?: Record<string, unknown>) {
   }
 }
 
+function createOllamaProviderConfig(providerOptions?: Record<string, unknown>) {
+  return {
+    id: "ollama-default",
+    name: "Ollama",
+    enabled: true,
+    provider: "ollama",
+    baseURL: "http://127.0.0.1:11434/",
+    model: {
+      model: "gemma3:4b",
+      isCustomModel: false,
+      customModel: null,
+    },
+    ...(providerOptions !== undefined && { providerOptions }),
+  }
+}
+
 describe("getModelById", () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -91,6 +119,7 @@ describe("getModelById", () => {
     azureChatModelMock.mockReturnValue("azure-chat-model")
     azureLanguageModelMock.mockReturnValue("azure-model")
     openAICompatibleLanguageModelMock.mockReturnValue("custom-model")
+    ollamaLanguageModelMock.mockReturnValue("ollama-model")
     getStorageItemMock = vi.fn()
     ;(storage.getItem as unknown as ReturnType<typeof vi.fn>) = getStorageItemMock
   })
@@ -128,6 +157,21 @@ describe("getModelById", () => {
       supportsStructuredOutputs: true,
     }))
     expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
+  })
+
+  it("passes Ollama root base URL and disables think on the language model", async () => {
+    getStorageItemMock.mockResolvedValue({
+      providersConfig: [createOllamaProviderConfig({ think: true })],
+    })
+
+    const { getModelById } = await import("../model")
+    const result = await getModelById("ollama-default")
+
+    expect(result).toBe("ollama-model")
+    expect(createOllamaMock).toHaveBeenCalledWith({
+      baseURL: "http://127.0.0.1:11434/",
+    })
+    expect(ollamaLanguageModelMock).toHaveBeenCalledWith("gemma3:4b", { think: false })
   })
 
   it("passes Azure settings and resolves the deployment name with languageModel", async () => {

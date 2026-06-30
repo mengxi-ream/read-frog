@@ -30,7 +30,21 @@ describe("provider constants", () => {
     expect(PROVIDER_BASE_URL_PLACEHOLDERS.openai).toBe("https://api.openai.com/v1")
     expect(PROVIDER_BASE_URL_PLACEHOLDERS["openai-compatible"]).toBe("https://api.example.com/v1")
     expect(PROVIDER_BASE_URL_PLACEHOLDERS.openrouter).toBe("https://openrouter.ai/api/v1")
+    expect(PROVIDER_BASE_URL_PLACEHOLDERS.ollama).toBe("http://127.0.0.1:11434/")
     expect(PROVIDER_BASE_URL_PLACEHOLDERS.minimax).toBe("https://api.minimax.io/v1")
+  })
+
+  it("defines Ollama with AI SDK v7 root URL", () => {
+    expect(DEFAULT_PROVIDER_CONFIG.ollama).toEqual(expect.objectContaining({
+      provider: "ollama",
+      baseURL: "http://127.0.0.1:11434/",
+      model: {
+        model: "gemma3:4b",
+        isCustomModel: false,
+        customModel: null,
+      },
+    }))
+    expect(apiProviderConfigItemSchema.parse(DEFAULT_PROVIDER_CONFIG.ollama)).toEqual(DEFAULT_PROVIDER_CONFIG.ollama)
   })
 
   it("places Atlas Cloud second in OpenAI-compatible providers", () => {

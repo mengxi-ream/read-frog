@@ -94,6 +94,15 @@ describe("getProviderOptions", () => {
       ])
     })
 
+    it("should expose current Ollama recommended model ids", () => {
+      expect(LLM_PROVIDER_MODELS.ollama).toEqual([
+        "gemma4:e2b",
+        "gemma4:e4b",
+        "gemma3:4b",
+        "llama3.2:3b",
+      ])
+    })
+
     it("should expose the supported Anthropic Fable model ids", () => {
       expect(LLM_PROVIDER_MODELS.anthropic).toContain("claude-fable-5")
       expect(LLM_PROVIDER_MODELS.bedrock).toContain("us.anthropic.claude-fable-5")
