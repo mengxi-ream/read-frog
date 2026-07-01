@@ -17,7 +17,6 @@ import {
 import { getCommandPaletteShortcutHint } from "@/utils/os"
 import { version } from "../../../../package.json"
 import { commandPaletteOpenAtom } from "../command-palette/atoms"
-import { ProductNav } from "./product-nav"
 import { SettingsNav } from "./settings-nav"
 import { ToolsNav } from "./tools-nav"
 import { WhatsNewFooter } from "./whats-new-footer"
@@ -59,7 +58,6 @@ export function AppSidebar() {
       <SidebarContent className="group-data-[state=expanded]:px-2 transition-all">
         <SettingsNav />
         <ToolsNav />
-        <ProductNav />
       </SidebarContent>
       <SidebarFooter className="group-data-[state=expanded]:px-2 transition-all">
         <WhatsNewFooter />

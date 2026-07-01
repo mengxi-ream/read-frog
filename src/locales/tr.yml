@@ -878,8 +878,6 @@ options:
           videoSummary: Video özeti (AI Akıllı Bağlam gerektirir)
   whatsNew:
     title: Yenilikler
-  survey:
-    title: Notebase Erken Erişim
   rateUs:
     title: Bizi Değerlendirin
 side:

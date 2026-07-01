@@ -878,8 +878,6 @@ options:
           videoSummary: 동영상 요약 (AI 스마트 컨텍스트 필요)
   whatsNew:
     title: 새로운 기능
-  survey:
-    title: Notebase 사전 체험
   rateUs:
     title: 리뷰 남기기
 side:

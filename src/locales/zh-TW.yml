@@ -993,8 +993,6 @@ options:
           videoSummary: 影片摘要（需啟用 AI 智慧上下文）
   whatsNew:
     title: 最近更新
-  survey:
-    title: 筆記庫（單字本）搶先體驗
   rateUs:
     title: 給予好評
 side:

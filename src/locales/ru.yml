@@ -878,8 +878,6 @@ options:
           videoSummary: Краткое содержание видео (требуется умный контекст ИИ)
   whatsNew:
     title: Что нового
-  survey:
-    title: Ранний доступ к Notebase
   rateUs:
     title: Оцените нас
 side:

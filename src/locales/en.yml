@@ -993,8 +993,6 @@ options:
           videoSummary: Video summary (requires AI Smart Context)
   whatsNew:
     title: What's New
-  survey:
-    title: Notebase Early Access
   rateUs:
     title: Rate Us
 side:

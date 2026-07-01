@@ -878,8 +878,6 @@ options:
           videoSummary: Tóm tắt video (yêu cầu Ngữ cảnh thông minh AI)
   whatsNew:
     title: Có gì mới
-  survey:
-    title: Trải nghiệm sớm Notebase
   rateUs:
     title: Đánh giá chúng tôi
 side:

@@ -993,8 +993,6 @@ options:
           videoSummary: Resumen del video (requiere contexto inteligente de IA)
   whatsNew:
     title: Novedades
-  survey:
-    title: Acceso anticipado a Notebase
   rateUs:
     title: Calificarnos
 side:
