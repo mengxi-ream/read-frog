@@ -1,5 +1,13 @@
 # @read-frog/extension
 
+## 1.37.1
+
+### Patch Changes
+
+- [#1767](https://github.com/mengxi-ream/read-frog/pull/1767) [`dbf3793`](https://github.com/mengxi-ream/read-frog/commit/dbf37938080f37c75b8b8015c999b96877456ce7) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(notebase): make Notebase available to signed-in users and remove early access survey
+
+- [#1760](https://github.com/mengxi-ream/read-frog/pull/1760) [`5355399`](https://github.com/mengxi-ream/read-frog/commit/535539950a3b85da2b3412e182c8b6572376d0d5) Thanks [@ishiko732](https://github.com/ishiko732)! - fix(ai): update Ollama defaults for AI SDK v7 and disable thinking
+
 ## 1.37.0
 
 ### Minor Changes
