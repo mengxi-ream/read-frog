@@ -28,6 +28,7 @@ import {
 } from "@/utils/notebase/connection"
 import {
   isORPCForbiddenError,
+  isORPCNoteLimitExceededError,
   isORPCUnauthorizedError,
   isORPCValidationError,
 } from "@/utils/notebase/errors"
@@ -119,8 +120,13 @@ export function SaveToNotebaseDialogHost() {
         return
       }
 
+      if (isORPCNoteLimitExceededError(error)) {
+        toast.error(i18n.t("action.saveToNotebaseLimitExceeded"))
+        return
+      }
+
       if (isORPCForbiddenError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseBetaRequired"))
+        toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
         return
       }
 

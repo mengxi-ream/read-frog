@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/base-ui/select"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
-import { useNotebaseBetaStatus } from "@/utils/notebase/beta"
 import {
   classifyConnectedNotebaseOwnership,
   createNotebaseConnectedAccountSnapshot,
@@ -219,9 +218,6 @@ export const NotebaseConnectionField = withForm({
     const isAuthenticated = !!session?.user
     const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
     const canWriteConnection = isAuthenticated && !!currentAccount
-    const betaStatusQuery = useNotebaseBetaStatus(isAuthenticated)
-    const isBetaAllowed = betaStatusQuery.data?.allowed === true
-    const isBetaLocked = betaStatusQuery.data?.allowed === false
     const sanitizedConnection = useMemo(
       () => sanitizeCustomActionNotebaseConnection(connection, outputSchema),
       [connection, outputSchema],
@@ -234,7 +230,7 @@ export const NotebaseConnectionField = withForm({
 
     const listQuery = useQuery(orpc.notebase.list.queryOptions({
       input: {},
-      enabled: canWriteConnection && isBetaAllowed,
+      enabled: canWriteConnection,
       staleTime: 60_000,
       meta: {
         suppressToast: true,
@@ -257,7 +253,7 @@ export const NotebaseConnectionField = withForm({
 
     const schemaQuery = useQuery(orpc.notebase.getSchema.queryOptions({
       input: { id: sanitizedConnection?.notebaseId ?? "" },
-      enabled: canWriteConnection && isBetaAllowed && !!sanitizedConnection?.notebaseId && isOwnedConnection,
+      enabled: canWriteConnection && !!sanitizedConnection?.notebaseId && isOwnedConnection,
       retry: false,
       meta: {
         suppressToast: true,
@@ -411,30 +407,6 @@ export const NotebaseConnectionField = withForm({
 
         {isAuthenticated && (
           <FieldGroup className="gap-4">
-            {!!betaStatusQuery.error && (
-              <Alert variant="destructive">
-                <AlertTitle>{t("schemaErrorTitle")}</AlertTitle>
-                <AlertDescription>{t("schemaErrorDescription")}</AlertDescription>
-              </Alert>
-            )}
-
-            {isBetaLocked && (
-              <Alert>
-                <AlertTitle>{t("betaLockedTitle")}</AlertTitle>
-                <AlertDescription>{t("betaLockedDescription")}</AlertDescription>
-                <AlertAction>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                    onClick={() => window.open(`${env.WXT_WEBSITE_URL}/notebase`, "_blank")}
-                  >
-                    {t("openNotebaseAction")}
-                  </Button>
-                </AlertAction>
-              </Alert>
-            )}
-
             <Field>
               <div className="flex items-center justify-between gap-3">
                 <FieldLabel nativeLabel={false} render={<div />}>
@@ -445,7 +417,7 @@ export const NotebaseConnectionField = withForm({
                   variant="outline"
                   size="sm"
                   onClick={handleRefresh}
-                  disabled={!isBetaAllowed || !currentAccount || !sanitizedConnection?.notebaseId || !isOwnedConnection || schemaQuery.isFetching}
+                  disabled={!currentAccount || !sanitizedConnection?.notebaseId || !isOwnedConnection || schemaQuery.isFetching}
                 >
                   <IconRefresh className={schemaQuery.isFetching ? "animate-spin" : undefined} />
                   {t("refreshAction")}
@@ -465,7 +437,7 @@ export const NotebaseConnectionField = withForm({
                   })) ?? []),
                 ]}
                 onValueChange={handleNotebaseChange}
-                disabled={!isBetaAllowed || !currentAccount}
+                disabled={!currentAccount}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder={t("tablePlaceholder")} />
@@ -520,7 +492,7 @@ export const NotebaseConnectionField = withForm({
               </Alert>
             )}
 
-            {isBetaAllowed && !listQuery.isPending && !listQuery.error && listQuery.data?.length === 0 && (
+            {!listQuery.isPending && !listQuery.error && listQuery.data?.length === 0 && (
               <Alert>
                 <AlertTitle>{t("emptyTitle")}</AlertTitle>
                 <AlertDescription>{t("emptyDescription")}</AlertDescription>
@@ -537,10 +509,14 @@ export const NotebaseConnectionField = withForm({
               </Alert>
             )}
 
-            {!!listQuery.error && !isORPCForbiddenError(listQuery.error) && (
+            {!!listQuery.error && (
               <Alert variant="destructive">
-                <AlertTitle>{t("schemaErrorTitle")}</AlertTitle>
-                <AlertDescription>{t("schemaErrorDescription")}</AlertDescription>
+                <AlertTitle>
+                  {isORPCForbiddenError(listQuery.error) ? t("accessDeniedTitle") : t("listErrorTitle")}
+                </AlertTitle>
+                <AlertDescription>
+                  {isORPCForbiddenError(listQuery.error) ? t("accessDeniedDescription") : t("listErrorDescription")}
+                </AlertDescription>
               </Alert>
             )}
 

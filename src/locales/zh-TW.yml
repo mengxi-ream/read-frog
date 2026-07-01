@@ -438,8 +438,10 @@ options:
             emptyTitle: 還沒有筆記庫
             emptyDescription: 先到 readfrog.app 建立一個筆記庫，再回來對應欄位。
             openNotebaseAction: 開啟筆記庫
-            betaLockedTitle: 目前帳號尚未加入筆記庫 Beta
-            betaLockedDescription: 可保留目前的指令設定，但選擇筆記庫與同步結果目前僅對部分 Beta 帳號開放。
+            accessDeniedTitle: 無法存取筆記庫
+            accessDeniedDescription: 目前帳號沒有權限載入筆記庫資料。
+            listErrorTitle: 載入筆記庫失敗
+            listErrorDescription: 請稍後再試一次。
             accountMismatchTitle: 筆記庫連線屬於其他帳號
             accountMismatchDescription: 目前連線綁定到下方已連線帳號。可清除連線，或選擇目前帳號可存取的筆記庫。
             tableUnavailableTitle: 所選筆記庫已無法使用
@@ -1047,7 +1049,8 @@ action:
   saveToNotebaseSuccess: 已儲存到筆記庫
   saveToNotebaseFailed: 儲存到筆記庫失敗
   saveToNotebaseLoginRequired: 請先到 readfrog.app 登入後再儲存到筆記庫
-  saveToNotebaseBetaRequired: 目前帳號尚未加入筆記庫 Beta
+  saveToNotebaseAccessDenied: 目前帳號無法存取所選筆記庫
+  saveToNotebaseLimitExceeded: 需要升級後才能儲存更多筆記庫內容
   saveToNotebaseTableUnavailable: 所選筆記庫已無法使用
   saveToNotebaseConnectionInvalid: 目前的筆記庫連線已過期，請到自訂 AI 指令重新整理並修復對應
   saveToNotebaseNoMappings: 至少新增一個有效對應後才能儲存

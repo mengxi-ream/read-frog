@@ -129,8 +129,8 @@ importers:
         specifier: ^1.3.0
         version: 1.3.0(@types/react@19.2.17)(react@19.2.7)
       '@read-frog/api-contract':
-        specifier: 0.8.1
-        version: 0.8.1(@opentelemetry/api@1.9.1)
+        specifier: 0.9.0
+        version: 0.9.0(@opentelemetry/api@1.9.1)
       '@read-frog/definitions':
         specifier: 0.3.3
         version: 0.3.3
@@ -2219,8 +2219,8 @@ packages:
       '@types/react':
         optional: true
 
-  '@read-frog/api-contract@0.8.1':
-    resolution: {integrity: sha512-xFs+dDhWrohooMmzVXbCB4Txkuj4LeBT5T3fiai6FbEkYha+GFsZwnjsQm63VPDKhshXxV04ARqBihIvqsol7w==}
+  '@read-frog/api-contract@0.9.0':
+    resolution: {integrity: sha512-Fi931MCsGWKVGbflNvC9ISksdO0wJyzaSP48Ef/GJKHyHpPfgEMAotx5SrhAmxwivDVCZ+fLDjxK87bSdR+Yug==}
 
   '@read-frog/definitions@0.3.3':
     resolution: {integrity: sha512-SCx5wbP8bNSSlvIeIOBoAScAakdV6vp2b49AZRRYWvhbV2KN+/xcMaYVCZWy/HjJmO7ioFIiLafrj2CbzXrglA==}
@@ -9554,7 +9554,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.17
 
-  '@read-frog/api-contract@0.8.1(@opentelemetry/api@1.9.1)':
+  '@read-frog/api-contract@0.9.0(@opentelemetry/api@1.9.1)':
     dependencies:
       '@orpc/contract': 1.14.6(@opentelemetry/api@1.9.1)
       '@read-frog/definitions': 0.3.3

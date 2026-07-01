@@ -38,8 +38,8 @@ function cloneConfig(config: Config): Config {
   return JSON.parse(JSON.stringify(config)) as Config
 }
 
-describe("customActionConfigForm beta gating", () => {
-  it("hides the notebase connection field when beta experience is disabled", () => {
+describe("customActionConfigForm notebase availability", () => {
+  it("shows the notebase connection field when beta experience is disabled", () => {
     const store = createStore()
     const config = cloneConfig(DEFAULT_CONFIG)
 
@@ -76,7 +76,7 @@ describe("customActionConfigForm beta gating", () => {
     )
 
     expect(
-      screen.queryByText(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title")),
-    ).not.toBeInTheDocument()
+      screen.getByText(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title")),
+    ).toBeInTheDocument()
   })
 })

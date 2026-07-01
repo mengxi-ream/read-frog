@@ -3,7 +3,7 @@ import type {
   SelectionToolbarCustomActionNotebaseAccount,
 } from "@/types/config/selection-toolbar"
 import { useMutation } from "@tanstack/react-query"
-import { useAtom, useAtomValue, useSetAtom } from "jotai"
+import { useAtom, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
 import { i18n } from "#imports"
@@ -11,7 +11,6 @@ import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
 import { sendMessage } from "@/utils/message"
-import { useNotebaseBetaStatus } from "@/utils/notebase/beta"
 import {
   classifyConnectedNotebaseOwnership,
   createNotebaseConnectedAccountSnapshot,
@@ -21,6 +20,7 @@ import {
 } from "@/utils/notebase/connection"
 import {
   isORPCForbiddenError,
+  isORPCNoteLimitExceededError,
   isORPCNotFoundError,
   isORPCUnauthorizedError,
   isORPCValidationError,
@@ -46,30 +46,6 @@ export function SaveToNotebaseButton({
   isRunning: boolean
   result: Record<string, unknown> | null
 }) {
-  const betaExperienceConfig = useAtomValue(configFieldsAtomMap.betaExperience)
-
-  if (!betaExperienceConfig.enabled) {
-    return null
-  }
-
-  return (
-    <SaveToNotebaseButtonEnabled
-      action={action}
-      isRunning={isRunning}
-      result={result}
-    />
-  )
-}
-
-function SaveToNotebaseButtonEnabled({
-  action,
-  isRunning,
-  result,
-}: {
-  action: SelectionToolbarCustomAction
-  isRunning: boolean
-  result: Record<string, unknown> | null
-}) {
   const connection = sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema)
   const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
   const setSaveToNotebaseDialog = useSetAtom(saveToNotebaseDialogAtom)
@@ -78,8 +54,6 @@ function SaveToNotebaseButtonEnabled({
   const currentAccount = createNotebaseConnectedAccountSnapshot(session?.user)
   const [isPreparingSave, setIsPreparingSave] = useState(false)
   const savingNotebaseNameRef = useRef<string | undefined>(connection?.notebaseNameSnapshot)
-  const betaStatusQuery = useNotebaseBetaStatus(isAuthenticated)
-  const isBetaAllowed = betaStatusQuery.data?.allowed === true
 
   const openCustomActionOptions = () => {
     void sendMessage("openOptionsPage", {
@@ -121,8 +95,13 @@ function SaveToNotebaseButtonEnabled({
         return
       }
 
+      if (isORPCNoteLimitExceededError(error)) {
+        toast.error(i18n.t("action.saveToNotebaseLimitExceeded"))
+        return
+      }
+
       if (isORPCForbiddenError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseBetaRequired"))
+        toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
         return
       }
 
@@ -170,14 +149,6 @@ function SaveToNotebaseButtonEnabled({
   const isUnconnectedDisabled = isSessionPending
     || isRunning
     || !result
-    || (
-      isAuthenticated
-      && (
-        betaStatusQuery.isPending
-        || !!betaStatusQuery.error
-        || !isBetaAllowed
-      )
-    )
 
   if (!connection) {
     return (
@@ -274,7 +245,7 @@ function SaveToNotebaseButtonEnabled({
       }
 
       if (isORPCForbiddenError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseBetaRequired"))
+        toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
         return
       }
 
@@ -302,12 +273,7 @@ function SaveToNotebaseButtonEnabled({
     || !result
     || (
       isAuthenticated
-      && (
-        betaStatusQuery.isPending
-        || !!betaStatusQuery.error
-        || !isBetaAllowed
-        || !currentAccount
-      )
+      && !currentAccount
     )
     || isPreparingSave
     || saveMutation.isPending

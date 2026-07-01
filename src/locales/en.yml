@@ -438,8 +438,10 @@ options:
             emptyTitle: No notebases yet
             emptyDescription: Create a notebase on readfrog.app, then come back here to map fields.
             openNotebaseAction: Open Notebase
-            betaLockedTitle: This account is not in the Notebase beta
-            betaLockedDescription: You can keep this action configured, but choosing notebases and syncing results is limited to selected beta accounts for now.
+            accessDeniedTitle: Cannot access Notebase
+            accessDeniedDescription: This account does not have permission to load Notebase data.
+            listErrorTitle: Failed to load notebases
+            listErrorDescription: Try refreshing the Notebase list again in a moment.
             accountMismatchTitle: Notebase connection belongs to another account
             accountMismatchDescription: This connection is tied to the connected account below. Clear it, or choose a Notebase available to the current account.
             tableUnavailableTitle: Selected notebase is no longer available
@@ -1047,7 +1049,8 @@ action:
   saveToNotebaseSuccess: Saved to Notebase
   saveToNotebaseFailed: Failed to save to Notebase
   saveToNotebaseLoginRequired: Log in on readfrog.app to save to Notebase
-  saveToNotebaseBetaRequired: This account is not enrolled in the Notebase beta yet
+  saveToNotebaseAccessDenied: This account cannot access the selected Notebase
+  saveToNotebaseLimitExceeded: Upgrade is required to save more Notebase notes
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
   saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
   saveToNotebaseNoMappings: Add at least one valid mapping before saving

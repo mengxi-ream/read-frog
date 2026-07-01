@@ -438,8 +438,10 @@ options:
             emptyTitle: 还没有笔记库
             emptyDescription: 先去 readfrog.app 创建一个笔记库，再回来映射字段。
             openNotebaseAction: 打开笔记库
-            betaLockedTitle: 当前账号尚未加入 Notebase Beta
-            betaLockedDescription: 你可以继续保留当前 action 配置，但选择笔记库和同步结果目前仅对部分 Beta 账号开放。
+            accessDeniedTitle: 无法访问笔记库
+            accessDeniedDescription: 当前账号没有权限加载笔记库数据。
+            listErrorTitle: 加载笔记库失败
+            listErrorDescription: 请稍后再试一次。
             accountMismatchTitle: 笔记库连接属于其他账号
             accountMismatchDescription: 当前连接绑定到下面的已连接账号。你可以清空连接，或选择当前账号可访问的笔记库。
             tableUnavailableTitle: 选中的笔记库已不可用
@@ -1047,7 +1049,8 @@ action:
   saveToNotebaseSuccess: 已保存到笔记库
   saveToNotebaseFailed: 保存到笔记库失败
   saveToNotebaseLoginRequired: 请先在 readfrog.app 登录后再保存到笔记库
-  saveToNotebaseBetaRequired: 当前账号尚未加入 Notebase Beta
+  saveToNotebaseAccessDenied: 当前账号无法访问选中的笔记库
+  saveToNotebaseLimitExceeded: 需要升级后才能保存更多笔记库内容
   saveToNotebaseTableUnavailable: 选中的笔记库已不可用
   saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom AI Actions 中刷新并修复映射
   saveToNotebaseNoMappings: 至少添加一个有效映射后才能保存

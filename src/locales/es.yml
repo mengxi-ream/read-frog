@@ -438,8 +438,10 @@ options:
             emptyTitle: Aún no hay Notebases
             emptyDescription: Crea una Notebase en readfrog.app y vuelve aquí para asignar campos.
             openNotebaseAction: Abrir Notebase
-            betaLockedTitle: Esta cuenta no está en la beta de Notebase
-            betaLockedDescription: Puedes mantener esta acción configurada, pero elegir Notebases y sincronizar resultados está limitado por ahora a cuentas beta seleccionadas.
+            accessDeniedTitle: No se puede acceder a Notebase
+            accessDeniedDescription: Esta cuenta no tiene permiso para cargar datos de Notebase.
+            listErrorTitle: No se pudieron cargar las Notebases
+            listErrorDescription: Intenta actualizar la lista de Notebase de nuevo en un momento.
             accountMismatchTitle: La conexión de Notebase pertenece a otra cuenta
             accountMismatchDescription: Esta conexión está vinculada a la cuenta conectada de abajo. Bórrala o elige una Notebase disponible para la cuenta actual.
             tableUnavailableTitle: La Notebase seleccionada ya no está disponible
@@ -1047,7 +1049,8 @@ action:
   saveToNotebaseSuccess: Guardado en Notebase
   saveToNotebaseFailed: No se pudo guardar en Notebase
   saveToNotebaseLoginRequired: Inicia sesión en readfrog.app para guardar en Notebase
-  saveToNotebaseBetaRequired: Esta cuenta aún no está inscrita en la beta de Notebase
+  saveToNotebaseAccessDenied: Esta cuenta no puede acceder a la Notebase seleccionada
+  saveToNotebaseLimitExceeded: Se requiere una mejora para guardar más notas de Notebase
   saveToNotebaseTableUnavailable: La Notebase seleccionada ya no está disponible
   saveToNotebaseConnectionInvalid: Esta conexión de Notebase está desactualizada. Actualízala en Acciones AI personalizadas y corrige las asignaciones.
   saveToNotebaseNoMappings: Añade al menos una asignación válida antes de guardar

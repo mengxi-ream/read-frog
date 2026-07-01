@@ -437,8 +437,10 @@ options:
             emptyTitle: Notebase がまだありません
             emptyDescription: readfrog.app で notebase を作成してから、ここに戻ってフィールドをマッピングしてください。
             openNotebaseAction: Notebase を開く
-            betaLockedTitle: このアカウントは Notebase ベータ対象外です
-            betaLockedDescription: このアクション設定は保持できますが、Notebase の選択と結果の同期は現在一部のベータアカウントのみに提供されています。
+            accessDeniedTitle: Notebase にアクセスできません
+            accessDeniedDescription: このアカウントには Notebase データを読み込む権限がありません。
+            listErrorTitle: Notebase 一覧を読み込めませんでした
+            listErrorDescription: 少し待ってから Notebase 一覧をもう一度更新してください。
             accountMismatchTitle: Notebase 接続は別のアカウントに属しています
             accountMismatchDescription: この接続は下の接続済みアカウントに紐づいています。接続をクリアするか、現在のアカウントで利用できる Notebase を選択してください。
             tableUnavailableTitle: 選択した notebase は利用できなくなりました
@@ -932,7 +934,8 @@ action:
   saveToNotebaseSuccess: Notebase に保存しました
   saveToNotebaseFailed: Notebase への保存に失敗しました
   saveToNotebaseLoginRequired: Notebase に保存するには readfrog.app にログインしてください
-  saveToNotebaseBetaRequired: このアカウントはまだ Notebase ベータに参加していません
+  saveToNotebaseAccessDenied: このアカウントでは選択した Notebase にアクセスできません
+  saveToNotebaseLimitExceeded: さらに Notebase ノートを保存するにはアップグレードが必要です
   saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
   saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
   saveToNotebaseNoMappings: 保存する前に、少なくとも1つの有効なマッピングを追加してください

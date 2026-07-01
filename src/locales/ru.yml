@@ -437,8 +437,10 @@ options:
             emptyTitle: Notebase пока нет
             emptyDescription: Создайте notebase на readfrog.app, затем вернитесь сюда и сопоставьте поля.
             openNotebaseAction: Открыть Notebase
-            betaLockedTitle: Этот аккаунт ещё не участвует в beta Notebase
-            betaLockedDescription: Вы можете сохранить текущую настройку action, но выбор Notebase и синхронизация результатов пока доступны только выбранным beta-аккаунтам.
+            accessDeniedTitle: Нет доступа к Notebase
+            accessDeniedDescription: У этого аккаунта нет разрешения на загрузку данных Notebase.
+            listErrorTitle: Не удалось загрузить список Notebase
+            listErrorDescription: Попробуйте обновить список Notebase чуть позже.
             accountMismatchTitle: Подключение Notebase принадлежит другому аккаунту
             accountMismatchDescription: Это подключение связано с аккаунтом ниже. Очистите его или выберите Notebase, доступную текущему аккаунту.
             tableUnavailableTitle: Выбранная notebase больше недоступна
@@ -932,7 +934,8 @@ action:
   saveToNotebaseSuccess: Сохранено в Notebase
   saveToNotebaseFailed: Не удалось сохранить в Notebase
   saveToNotebaseLoginRequired: Войдите на readfrog.app, чтобы сохранить в Notebase
-  saveToNotebaseBetaRequired: Для этого аккаунта beta-доступ к Notebase пока не включён
+  saveToNotebaseAccessDenied: Этот аккаунт не может открыть выбранную Notebase
+  saveToNotebaseLimitExceeded: Для сохранения большего числа заметок Notebase требуется апгрейд
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
   saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
   saveToNotebaseNoMappings: Добавьте хотя бы одно корректное сопоставление перед сохранением

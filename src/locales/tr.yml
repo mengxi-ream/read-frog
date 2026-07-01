@@ -437,8 +437,10 @@ options:
             emptyTitle: Henüz Notebase yok
             emptyDescription: readfrog.app'te bir notebase oluşturun, sonra alanları eşlemek için buraya dönün.
             openNotebaseAction: Notebase'i Aç
-            betaLockedTitle: Bu hesap Notebase beta programında değil
-            betaLockedDescription: Bu action yapılandırmasını koruyabilirsiniz, ancak Notebase seçimi ve sonuç senkronizasyonu şimdilik yalnızca seçili beta hesapları için açık.
+            accessDeniedTitle: Notebase'e erişilemiyor
+            accessDeniedDescription: Bu hesabın Notebase verilerini yükleme izni yok.
+            listErrorTitle: Notebase listesi yüklenemedi
+            listErrorDescription: Biraz sonra Notebase listesini yeniden yenilemeyi deneyin.
             accountMismatchTitle: Notebase bağlantısı başka bir hesaba ait
             accountMismatchDescription: Bu bağlantı aşağıdaki bağlı hesaba aittir. Bağlantıyı temizleyin veya geçerli hesabın erişebildiği bir Notebase seçin.
             tableUnavailableTitle: Seçilen notebase artık kullanılamıyor
@@ -932,7 +934,8 @@ action:
   saveToNotebaseSuccess: Notebase'e kaydedildi
   saveToNotebaseFailed: Notebase'e kaydetme başarısız oldu
   saveToNotebaseLoginRequired: Notebase'e kaydetmek için readfrog.app'te oturum açın
-  saveToNotebaseBetaRequired: Bu hesap henüz Notebase beta erişimine sahip değil
+  saveToNotebaseAccessDenied: Bu hesap seçilen Notebase'e erişemiyor
+  saveToNotebaseLimitExceeded: Daha fazla Notebase notu kaydetmek için yükseltme gerekir
   saveToNotebaseTableUnavailable: Seçilen Notebase artık kullanılamıyor
   saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom AI Actions içinde yenileyin ve eşlemeleri düzeltin.
   saveToNotebaseNoMappings: Kaydetmeden önce en az bir geçerli eşleme ekleyin

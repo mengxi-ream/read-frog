@@ -2,6 +2,7 @@
 import type { NotebaseGetSchemaOutput } from "@read-frog/api-contract"
 import type { Config } from "@/types/config/config"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
+import { ORPCError } from "@orpc/client"
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
@@ -31,6 +32,8 @@ const toastMock = vi.hoisted(() => ({
   error: vi.fn(),
 }))
 
+const notebaseRowCreateMock = vi.hoisted(() => vi.fn())
+
 vi.mock("@/utils/auth/auth-client", () => ({
   authClient: {
     useSession: () => ({
@@ -38,16 +41,6 @@ vi.mock("@/utils/auth/auth-client", () => ({
       isPending: mockAuthState.isPending,
     }),
   },
-}))
-
-vi.mock("@/utils/notebase/beta", () => ({
-  useNotebaseBetaStatus: () => ({
-    data: {
-      allowed: true,
-    },
-    error: null,
-    isPending: false,
-  }),
 }))
 
 vi.mock("@/utils/message", () => ({
@@ -72,7 +65,7 @@ vi.mock("@/utils/orpc/client", () => ({
     notebaseRow: {
       create: {
         mutationOptions: (options: unknown) => ({
-          mutationFn: vi.fn(),
+          mutationFn: notebaseRowCreateMock,
           ...(options as object),
         }),
       },
@@ -184,11 +177,12 @@ function renderButton(
   )
 }
 
-describe("saveToNotebaseButton beta gating", () => {
+describe("saveToNotebaseButton notebase availability", () => {
   beforeEach(() => {
     vi.clearAllMocks()
     toastMock.success.mockClear()
     toastMock.error.mockClear()
+    notebaseRowCreateMock.mockReset()
     mockAuthState.session = {
       user: {
         id: "user-1",
@@ -201,16 +195,17 @@ describe("saveToNotebaseButton beta gating", () => {
     vi.mocked(orpcClient.notebase.create).mockResolvedValue({ txid: 1 })
     vi.mocked(orpcClient.notebase.list).mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }])
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
+    notebaseRowCreateMock.mockResolvedValue({ txid: 1 })
     vi.mocked(sendMessage).mockResolvedValue(undefined as never)
   })
 
-  it("does not render when beta experience is disabled", () => {
+  it("renders when beta experience is disabled", () => {
     const config = cloneConfig(DEFAULT_CONFIG)
 
     config.betaExperience.enabled = false
     renderButton(config, createAction())
 
-    expect(screen.queryByRole("button", { name: i18n.t("action.saveToNotebase") })).not.toBeInTheDocument()
+    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") })).toBeEnabled()
   })
 
   it("opens a create/connect dialog for an unconnected custom action", () => {
@@ -368,6 +363,32 @@ describe("saveToNotebaseButton beta gating", () => {
 
     expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
       route: "/custom-actions?actionId=action-1",
+    })
+  })
+
+  it("shows an access denied toast for generic Notebase permission errors", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = false
+    notebaseRowCreateMock.mockRejectedValueOnce(new ORPCError("FORBIDDEN", { status: 403 }))
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(toastMock.error).toHaveBeenCalledWith(i18n.t("action.saveToNotebaseAccessDenied"))
+    })
+  })
+
+  it("shows a note limit toast when the backend rejects the save for quota", async () => {
+    const config = cloneConfig(DEFAULT_CONFIG)
+    config.betaExperience.enabled = false
+    notebaseRowCreateMock.mockRejectedValueOnce(new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }))
+    renderButton(config, createConnectedAction())
+
+    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
+
+    await waitFor(() => {
+      expect(toastMock.error).toHaveBeenCalledWith(i18n.t("action.saveToNotebaseLimitExceeded"))
     })
   })
 
