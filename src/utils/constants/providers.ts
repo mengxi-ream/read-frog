@@ -549,7 +549,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
     description: i18n.t("options.apiProviders.providers.description.ollama"),
     enabled: true,
     provider: "ollama",
-    baseURL: "http://127.0.0.1:11434/",
     model: DEFAULT_LLM_PROVIDER_MODELS.ollama,
   },
   "volcengine": {
@@ -621,7 +620,7 @@ export const PROVIDER_BASE_URL_PLACEHOLDERS: Partial<Record<APIProviderTypes, st
   "perplexity": "https://api.perplexity.ai",
   "vercel": "https://api.v0.dev/v1",
   "openrouter": "https://openrouter.ai/api/v1",
-  "ollama": DEFAULT_PROVIDER_CONFIG.ollama.baseURL,
+  "ollama": "http://127.0.0.1:11434/",
   "volcengine": DEFAULT_PROVIDER_CONFIG.volcengine.baseURL,
   "minimax": DEFAULT_PROVIDER_CONFIG.minimax.baseURL,
   "alibaba": DEFAULT_PROVIDER_CONFIG.alibaba.baseURL,

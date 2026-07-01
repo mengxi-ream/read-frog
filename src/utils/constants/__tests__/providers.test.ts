@@ -34,16 +34,16 @@ describe("provider constants", () => {
     expect(PROVIDER_BASE_URL_PLACEHOLDERS.minimax).toBe("https://api.minimax.io/v1")
   })
 
-  it("defines Ollama with AI SDK v7 root URL", () => {
+  it("defines Ollama without injecting the root URL into the default config", () => {
     expect(DEFAULT_PROVIDER_CONFIG.ollama).toEqual(expect.objectContaining({
       provider: "ollama",
-      baseURL: "http://127.0.0.1:11434/",
       model: {
         model: "gemma3:4b",
         isCustomModel: false,
         customModel: null,
       },
     }))
+    expect(DEFAULT_PROVIDER_CONFIG.ollama).not.toHaveProperty("baseURL")
     expect(apiProviderConfigItemSchema.parse(DEFAULT_PROVIDER_CONFIG.ollama)).toEqual(DEFAULT_PROVIDER_CONFIG.ollama)
   })
 
