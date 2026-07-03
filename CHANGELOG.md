@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.37.2
+
+### Patch Changes
+
+- [#1771](https://github.com/mengxi-ream/read-frog/pull/1771) [`c8ac979`](https://github.com/mengxi-ream/read-frog/commit/c8ac97968408f41b71bad7eb47d53a4930072cab) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(selection): resolve Read Frog subtitle selections inside the subtitles shadow root
+
 ## 1.37.1
 
 ### Patch Changes
