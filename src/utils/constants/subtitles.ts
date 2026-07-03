@@ -16,6 +16,7 @@ export const TRANSLATE_LOOK_AHEAD_MS = 30_000
 export const PROCESS_LOOK_AHEAD_MS = 60_000
 
 // DOM IDs
+export const READ_FROG_SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
 export const TRANSLATE_BUTTON_CONTAINER_ID = "read-frog-subtitles-translate-button-container"
 export const HIDE_NATIVE_CAPTIONS_STYLE_ID = "read-frog-hide-native-captions"
 

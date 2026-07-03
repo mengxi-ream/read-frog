@@ -3,7 +3,7 @@ import type { PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import ReactDOM from "react-dom/client"
 import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
-import { SUBTITLES_THEME } from "@/utils/constants/subtitles"
+import { READ_FROG_SUBTITLES_UI_HOST_ID, SUBTITLES_THEME } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
@@ -11,8 +11,6 @@ import { applyTheme } from "@/utils/theme"
 import { SubtitlesContainer } from "../ui/subtitles-container"
 import { SubtitlesProviders } from "../ui/subtitles-ui-context"
 import { mountSubtitlesToast } from "./mount-subtitles-toast"
-
-const SUBTITLES_UI_HOST_ID = "read-frog-subtitles-ui-host"
 
 interface MountSubtitlesUIOptions {
   adapter: SubtitlesProvidersAdapter
@@ -33,7 +31,7 @@ export async function mountSubtitlesUI(
     parentEl.style.position = "relative"
   }
 
-  const existingHost = document.getElementById(SUBTITLES_UI_HOST_ID) as HTMLDivElement | null
+  const existingHost = document.getElementById(READ_FROG_SUBTITLES_UI_HOST_ID) as HTMLDivElement | null
   if (existingHost) {
     if (existingHost.parentElement === parentEl) {
       return
@@ -44,7 +42,7 @@ export async function mountSubtitlesUI(
   }
 
   const shadowHost = document.createElement("div")
-  shadowHost.id = SUBTITLES_UI_HOST_ID
+  shadowHost.id = READ_FROG_SUBTITLES_UI_HOST_ID
   shadowHost.classList.add(REACT_SHADOW_HOST_CLASS)
   shadowHost.style.cssText = `
     position: absolute;

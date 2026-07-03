@@ -28,11 +28,11 @@ jobs:
     steps:
       - name: Checkout Repo
         if: github.event_name != 'workflow_dispatch'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Checkout Release Tag
         if: github.event_name == 'workflow_dispatch'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.event.inputs.tag }}
 
