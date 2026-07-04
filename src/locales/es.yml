@@ -615,7 +615,7 @@ options:
         description: El recuento de solicitudes temporales en ráfaga permitido determina el número máximo de solicitudes que se pueden procesar de forma concurrente durante un periodo corto
       rate:
         title: Solicitudes promedio por segundo
-        description: Solicitudes promedio por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes
+        description: Solicitudes promedio por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes. Se admiten decimales — por ejemplo, 0.25 significa una solicitud cada 4 segundos, útil para APIs con límites bajos como el nivel gratuito de Gemini
     batchQueueConfig:
       title: Traducción por lotes
       description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)
@@ -971,7 +971,7 @@ options:
         description: El recuento de solicitudes temporales en ráfaga permitido determina el número máximo de solicitudes de traducción de subtítulos que se pueden procesar de forma concurrente durante un periodo corto
       rate:
         title: Solicitudes promedio por segundo
-        description: Solicitudes promedio de traducción de subtítulos por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes
+        description: Solicitudes promedio de traducción de subtítulos por segundo, pero permite configurar un recuento máximo en ráfaga para enviar temporalmente solicitudes excedentes. Se admiten decimales — por ejemplo, 0.25 significa una solicitud cada 4 segundos, útil para APIs con límites bajos como el nivel gratuito de Gemini
     batchQueueConfig:
       title: Traducción de subtítulos por lotes
       description: Configura límites de caracteres y recuento máximo de párrafos para la traducción por lotes (solo efectivo para traducción LLM)

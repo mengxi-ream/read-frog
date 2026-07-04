@@ -615,7 +615,7 @@ options:
         description: The allowed temporary burst request count determines the maximum number of requests that can be processed concurrently within a short period
       rate:
         title: Average Requests Per Second
-        description: Average requests per second, but allows configuring a maximum burst count to temporarily send excess requests
+        description: Average requests per second, but allows configuring a maximum burst count to temporarily send excess requests. Decimals are supported — e.g. 0.25 means one request every 4 seconds, useful for low-rate-limit APIs like the Gemini free tier
     batchQueueConfig:
       title: Batch Translation
       description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)
@@ -971,7 +971,7 @@ options:
         description: The allowed temporary burst request count determines the maximum number of subtitle translation requests that can be processed concurrently within a short period
       rate:
         title: Average Requests Per Second
-        description: Average subtitle translation requests per second, but allows configuring a maximum burst count to temporarily send excess requests
+        description: Average subtitle translation requests per second, but allows configuring a maximum burst count to temporarily send excess requests. Decimals are supported — e.g. 0.25 means one request every 4 seconds, useful for low-rate-limit APIs like the Gemini free tier
     batchQueueConfig:
       title: Subtitle Batch Translation
       description: Configure character limits and maximum paragraph count for batch translation (only effective for LLM translation)

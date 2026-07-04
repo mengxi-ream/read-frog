@@ -615,7 +615,7 @@ options:
         description: 允许的暂时突发请求数量，决定了在短时间内最多能同时处理多少个请求
       rate:
         title: 每秒平均请求数量
-        description: 平均每秒的请求数量，不过允许配置最大突发请求数来短暂发送超量请求。
+        description: 平均每秒的请求数量，不过允许配置最大突发请求数来短暂发送超量请求。支持小数，例如 0.25 表示每 4 秒发送一次请求，适用于 Gemini 免费版等低限额 API。
     batchQueueConfig:
       title: 批量翻译
       description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）
@@ -971,7 +971,7 @@ options:
         description: 允许的临时突发请求数决定了在短时间内可以并发处理的最大字幕翻译请求数量
       rate:
         title: 平均每秒请求数
-        description: 平均每秒字幕翻译请求数，但允许配置最大突发数以临时发送超额请求
+        description: 平均每秒字幕翻译请求数，但允许配置最大突发数以临时发送超额请求。支持小数，例如 0.25 表示每 4 秒发送一次请求，适用于 Gemini 免费版等低限额 API
     batchQueueConfig:
       title: 字幕批量翻译
       description: 配置批量翻译时的字符数限制和最大段落数量（仅对大语言模型翻译有效）

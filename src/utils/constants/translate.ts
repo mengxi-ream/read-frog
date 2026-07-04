@@ -1,4 +1,4 @@
-export const MIN_TRANSLATE_RATE = 1
+export const MIN_TRANSLATE_RATE = 0.01
 export const MIN_TRANSLATE_CAPACITY = 1
 export const MIN_BATCH_CHARACTERS = 1
 export const MIN_BATCH_ITEMS = 1

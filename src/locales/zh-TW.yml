@@ -615,7 +615,7 @@ options:
         description: 允許的暫時突發請求數量，決定了在短時間內最多能同時處理多少個請求
       rate:
         title: 每秒平均請求數量
-        description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫傳送超額請求
+        description: 平均每秒的請求數量，但允許設定最大突發請求數來短暫傳送超額請求。支援小數，例如 0.25 表示每 4 秒傳送一次請求，適用於 Gemini 免費版等低限額 API
     batchQueueConfig:
       title: 批次翻譯
       description: 設定批次翻譯時的字元數限制和最大段落數量（僅對大型語言模型翻譯有效）
@@ -971,7 +971,7 @@ options:
         description: 可暫時突增的請求數，決定短時間內最多能同時處理多少個字幕翻譯請求
       rate:
         title: 平均每秒請求數
-        description: 平均每秒字幕翻譯請求數，但允許設定最大突發數以暫時傳送超額請求
+        description: 平均每秒字幕翻譯請求數，但允許設定最大突發數以暫時傳送超額請求。支援小數，例如 0.25 表示每 4 秒傳送一次請求，適用於 Gemini 免費版等低限額 API
     batchQueueConfig:
       title: 字幕批次翻譯
       description: 設定批次翻譯時的字元數限制和最大段落數量（僅對大型語言模型翻譯有效）

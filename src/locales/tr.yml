@@ -500,7 +500,7 @@ options:
         description: İzin verilen geçici ani istek sayısı, kısa bir süre içinde eşzamanlı olarak işlenebilecek maksimum istek sayısını belirler
       rate:
         title: Saniyedeki Ortalama İstek
-        description: Saniyedeki ortalama istek, ancak geçici olarak fazla istek göndermek için maksimum ani sayısını yapılandırmaya izin verir
+        description: Saniyedeki ortalama istek, ancak geçici olarak fazla istek göndermek için maksimum ani sayısını yapılandırmaya izin verir. Ondalık değerler desteklenir — örneğin 0.25, her 4 saniyede bir istek anlamına gelir ve Gemini ücretsiz katmanı gibi düşük limitli API'ler için kullanışlıdır
     batchQueueConfig:
       title: Toplu Çeviri
       description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)
@@ -856,7 +856,7 @@ options:
         description: Kısa sürede eşzamanlı olarak işlenebilecek maksimum altyazı çeviri isteği sayısı
       rate:
         title: Saniyede Ortalama İstek
-        description: Saniyede ortalama altyazı çeviri isteği sayısı. Geçici olarak fazla istek göndermek için maksimum patlama sayısı yapılandırılabilir
+        description: Saniyede ortalama altyazı çeviri isteği sayısı. Geçici olarak fazla istek göndermek için maksimum patlama sayısı yapılandırılabilir. Ondalık değerler desteklenir — örneğin 0.25, her 4 saniyede bir istek anlamına gelir ve Gemini ücretsiz katmanı gibi düşük limitli API'ler için kullanışlıdır
     batchQueueConfig:
       title: Altyazı Toplu Çeviri
       description: Toplu çeviri için karakter limitleri ve maksimum paragraf sayısını yapılandırın (yalnızca LLM çevirisi için geçerlidir)

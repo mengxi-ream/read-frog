@@ -1,5 +1,6 @@
 import type { RequestQueueConfig } from "@/types/config/translate"
 import { useAtom } from "jotai"
+import { useState } from "react"
 import { toast } from "sonner"
 import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
@@ -57,6 +58,15 @@ function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConf
   const currentConfigValue = requestQueueConfig[property]
   const minAllowedValue = propertyMinAllowedValue[property]
 
+  const [inputValue, setInputValue] = useState(String(currentConfigValue))
+  const [prevConfigValue, setPrevConfigValue] = useState(currentConfigValue)
+
+  // Reset the draft input when the config value changes externally
+  if (prevConfigValue !== currentConfigValue) {
+    setPrevConfigValue(currentConfigValue)
+    setInputValue(String(currentConfigValue))
+  }
+
   const info = propertyInfo[property]
 
   return (
@@ -72,11 +82,14 @@ function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConf
         className="w-40 shrink-0"
         type="number"
         min={minAllowedValue}
-        value={currentConfigValue}
+        step="any"
+        value={inputValue}
         onChange={(e) => {
-          const newConfigValue = Number(e.target.value)
+          const rawValue = e.target.value
+          setInputValue(rawValue)
+          const newConfigValue = Number(rawValue)
           const configParseResult = requestQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
-          if (configParseResult.success) {
+          if (rawValue !== "" && configParseResult.success) {
             void setTranslateConfig({
               ...translateConfig,
               requestQueueConfig: {
@@ -88,8 +101,13 @@ function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConf
               [property]: newConfigValue,
             })
           }
-          else {
+        }}
+        onBlur={() => {
+          const newConfigValue = Number(inputValue)
+          const configParseResult = requestQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          if (inputValue === "" || !configParseResult.success) {
             toast.error(configParseResult.error?.issues[0].message)
+            setInputValue(String(currentConfigValue))
           }
         }}
       />

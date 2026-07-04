@@ -154,6 +154,37 @@ describe("requestQueue – token bucket", () => {
     vi.advanceTimersByTime(1_000)
     expect(completed).toEqual([0, 1, 2])
   })
+
+  it("supports fractional rates below 1 (e.g. 0.25 = one request every 4s)", async () => {
+    vi.useFakeTimers()
+
+    const q = new RequestQueue({
+      ...baseConfig,
+      rate: 0.25,
+      capacity: 1,
+    })
+    const started: string[] = []
+
+    const trackingThunk = (id: string) => () => {
+      started.push(id)
+      return Promise.resolve(id)
+    }
+
+    void q.enqueue(trackingThunk("A"), Date.now(), "A")
+    void q.enqueue(trackingThunk("B"), Date.now(), "B")
+
+    // t=0: bucket starts full (1 token) so A dispatches immediately, B waits
+    vi.advanceTimersByTime(0)
+    expect(started).toEqual(["A"])
+
+    // t=3999ms: still less than 1 token refilled (0.25 tokens/sec)
+    vi.advanceTimersByTime(3_999)
+    expect(started).toEqual(["A"])
+
+    // t=4000ms: exactly 1 token refilled, B dispatches
+    vi.advanceTimersByTime(1)
+    expect(started).toEqual(["A", "B"])
+  })
 })
 
 // 4. scheduleAt in the future should delay execution even when tokens are available.
