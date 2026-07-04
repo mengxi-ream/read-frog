@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.37.3
+
+### Patch Changes
+
+- [#1775](https://github.com/mengxi-ream/read-frog/pull/1775) [`cf1da5e`](https://github.com/mengxi-ream/read-frog/commit/cf1da5e089043613eaa9c910502fdf55233193a3) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - Allow fractional translation rates below 1 request per second (minimum lowered from 1 to 0.01), so low-rate-limit APIs like the Gemini free tier (e.g. 0.25 req/s = 15 RPM) no longer hit 429 errors. The rate/capacity inputs now accept decimal input and validate on blur instead of rejecting each keystroke.
+
 ## 1.37.2
 
 ### Patch Changes
