@@ -184,10 +184,11 @@ describe("resolveBlogLocale", () => {
     expect(resolveBlogLocale("zh_Hans")).toBe("zh")
   })
 
-  it("maps traditional Chinese locales to zh", () => {
-    expect(resolveBlogLocale("zh-TW")).toBe("zh")
-    expect(resolveBlogLocale("zh_Hant")).toBe("zh")
-    expect(resolveBlogLocale("zh-HK")).toBe("zh")
+  it("maps traditional Chinese locales to zh-Hant", () => {
+    expect(resolveBlogLocale("zh-TW")).toBe("zh-Hant")
+    expect(resolveBlogLocale("zh_Hant")).toBe("zh-Hant")
+    expect(resolveBlogLocale("zh-HK")).toBe("zh-Hant")
+    expect(resolveBlogLocale("zh-MO")).toBe("zh-Hant")
   })
 
   it("keeps English as en", () => {
@@ -195,10 +196,18 @@ describe("resolveBlogLocale", () => {
     expect(resolveBlogLocale("en-US")).toBe("en")
   })
 
+  it("maps supported localized blog languages", () => {
+    expect(resolveBlogLocale("ja-JP")).toBe("ja")
+    expect(resolveBlogLocale("ko-KR")).toBe("ko")
+    expect(resolveBlogLocale("vi-VN")).toBe("vi")
+    expect(resolveBlogLocale("ru-RU")).toBe("ru")
+    expect(resolveBlogLocale("tr-TR")).toBe("tr")
+    expect(resolveBlogLocale("es-ES")).toBe("es")
+  })
+
   it("falls back unsupported locales to en", () => {
-    expect(resolveBlogLocale("ja")).toBe("en")
-    expect(resolveBlogLocale("vi")).toBe("en")
     expect(resolveBlogLocale("pt-BR")).toBe("en")
+    expect(resolveBlogLocale("de")).toBe("en")
   })
 
   it("falls back empty locale values to en", () => {

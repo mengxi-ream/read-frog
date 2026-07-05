@@ -11,7 +11,17 @@ const BILIBILI_HOSTNAME_PATTERN = /(?:^|\.)bilibili\.com$/i
 const BILIBILI_VIDEO_ID_PATTERN = /^BV[0-9A-Z]+$/i
 const DEFAULT_BLOG_LOCALE = "en"
 
-export type BlogLocale = "en" | "zh"
+export type BlogLocale = "en" | "zh" | "zh-Hant" | "ko" | "vi" | "ru" | "tr" | "ja" | "es"
+
+const BLOG_LOCALE_BY_PRIMARY_LANGUAGE: Partial<Record<string, BlogLocale>> = {
+  en: "en",
+  es: "es",
+  ja: "ja",
+  ko: "ko",
+  ru: "ru",
+  tr: "tr",
+  vi: "vi",
+}
 
 function getBilibiliVideoIdFromParsedUrl(parsedUrl: URL): string | null {
   if (!BILIBILI_HOSTNAME_PATTERN.test(parsedUrl.hostname)) {
@@ -47,6 +57,7 @@ const latestBlogPostSchema = z.object({
   title: z.string(),
   description: z.string(),
   url: z.string(),
+  imageUrl: z.url().optional(),
   videoUrl: bilibiliVideoUrlSchema.optional(),
   extensionVersion: semanticVersionSchema.optional(),
 })
@@ -111,16 +122,22 @@ export function buildBilibiliEmbedUrl(url: string): string | null {
 }
 
 export function resolveBlogLocale(uiLocale?: string | null): BlogLocale {
-  const normalizedLocale = uiLocale?.trim().toLowerCase()
+  const normalizedLocale = uiLocale?.trim().replaceAll("_", "-").toLowerCase()
   if (!normalizedLocale) {
     return DEFAULT_BLOG_LOCALE
   }
 
   if (normalizedLocale.startsWith("zh")) {
-    return "zh"
+    return normalizedLocale.includes("hant")
+      || normalizedLocale === "zh-tw"
+      || normalizedLocale === "zh-hk"
+      || normalizedLocale === "zh-mo"
+      ? "zh-Hant"
+      : "zh"
   }
 
-  return DEFAULT_BLOG_LOCALE
+  return BLOG_LOCALE_BY_PRIMARY_LANGUAGE[normalizedLocale.split("-")[0] ?? ""]
+    ?? DEFAULT_BLOG_LOCALE
 }
 
 export function getBlogLocaleFromUILanguage(): BlogLocale {
@@ -151,6 +168,7 @@ export function getBlogLocaleFromUILanguage(): BlogLocale {
  * //   title: 'Spring update',
  * //   description: 'New subtitle features shipped.',
  * //   url: '/blog/post-slug',
+ * //   imageUrl: 'https://www.readfrog.app/blog/landing-page-refresh/cover-en.png',
  * //   videoUrl: 'https://www.bilibili.com/video/BV...',
  * //   extensionVersion: '1.11.0',
  * // }

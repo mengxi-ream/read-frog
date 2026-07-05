@@ -175,6 +175,7 @@ function renderWhatsNewFooter() {
 const latestBlogPost = {
   date: new Date("2026-03-20T12:00:00.000Z"),
   description: "Latest updates",
+  imageUrl: "https://www.readfrog.app/blog/landing-page-refresh/cover-en.png",
   title: "Spring release",
   url: "/blog/spring-release",
 }
@@ -239,6 +240,20 @@ describe("whatsNewFooter", () => {
 
     expect(screen.queryByTestId("whats-new-popover-content")).not.toBeInTheDocument()
     expect(saveLastViewedBlogDateMock).not.toHaveBeenCalled()
+  })
+
+  it("renders the latest blog image in the popover", async () => {
+    getLatestBlogDateMock.mockResolvedValue(latestBlogPost)
+    getLastViewedBlogDateMock.mockResolvedValue(latestBlogPost.date)
+    saveLastViewedBlogDateMock.mockResolvedValue(undefined)
+
+    renderWhatsNewFooter()
+
+    const trigger = await screen.findByRole("button", { name: "options.whatsNew.title" })
+    fireEvent.click(trigger)
+
+    const image = await screen.findByRole("img", { name: latestBlogPost.title })
+    expect(image).toHaveAttribute("src", latestBlogPost.imageUrl)
   })
 
   it("marks the post as viewed after a manual open once the unread query finishes", async () => {

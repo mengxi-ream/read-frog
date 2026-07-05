@@ -99,6 +99,7 @@ export function WhatsNewFooter() {
 
   const blogUrl = new URL(latestBlogPost.url, env.WXT_WEBSITE_URL).toString()
   const embedUrl = latestBlogPost.videoUrl ? buildBilibiliEmbedUrl(latestBlogPost.videoUrl) : null
+  const imageUrl = embedUrl ? null : latestBlogPost.imageUrl
 
   return (
     <Popover
@@ -140,6 +141,22 @@ export function WhatsNewFooter() {
               referrerPolicy="strict-origin-when-cross-origin"
             />
           </div>
+        )}
+        {imageUrl && (
+          <a
+            href={blogUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block overflow-hidden rounded-md border bg-muted"
+          >
+            <img
+              src={imageUrl}
+              alt={latestBlogPost.title}
+              className="aspect-[1200/630] w-full object-cover"
+              loading="eager"
+              referrerPolicy="strict-origin-when-cross-origin"
+            />
+          </a>
         )}
 
         <PopoverHeader className="gap-2">
