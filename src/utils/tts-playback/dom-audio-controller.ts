@@ -60,6 +60,25 @@ export class DOMAudioPlaybackController {
 
         this.activePlayback = playback
 
+        // Real-time time-stretching: when the caller requests a playback rate
+        // (to fit audio into a subtitle window), apply it with pitch
+        // preservation so the voice stays natural at non-1.0 speeds.
+        const targetRate = request.playbackRate
+        if (targetRate && targetRate > 0 && Number.isFinite(targetRate)) {
+          // preservesPitch is widely supported; set both the standard and
+          // vendor-prefixed properties for safety.
+          type AudioWithPitch = HTMLAudioElement & {
+            preservesPitch?: boolean
+            mozPreservesPitch?: boolean
+            webkitPreservesPitch?: boolean
+          }
+          const audioWithPitch = audio as AudioWithPitch
+          audioWithPitch.preservesPitch = true
+          audioWithPitch.mozPreservesPitch = true
+          audioWithPitch.webkitPreservesPitch = true
+          audio.playbackRate = targetRate
+        }
+
         audio.onended = () => {
           this.settlePlayback(playback!, { ok: true })
         }

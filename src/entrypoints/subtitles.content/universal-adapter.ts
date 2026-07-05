@@ -1,14 +1,16 @@
 import type { ControlsConfig, PlatformConfig } from "@/entrypoints/subtitles.content/platforms"
 import type { FeatureUsageContext } from "@/types/analytics"
+import type { Config } from "@/types/config/config"
 import type { SubtitlesFetcher } from "@/utils/subtitles/fetchers/types"
 import type { SubtitlesVideoContext } from "@/utils/subtitles/processor/translator"
 import type { SubtitlesFragment } from "@/utils/subtitles/types"
 import { toast } from "sonner"
-import { i18n } from "#imports"
+import { i18n, storage } from "#imports"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
 import { getDocumentDescription } from "@/utils/content/metadata"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
@@ -20,6 +22,7 @@ import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
 import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesSettingsPanelViewAtom, subtitlesStore } from "./atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
+import { SubtitleTTSController } from "./subtitle-tts-controller"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
 import { TranslatedSubtitlesDownloader } from "./translated-subtitles-downloader"
 import { TranslationCoordinator } from "./translation-coordinator"
@@ -48,6 +51,8 @@ export class UniversalVideoAdapter {
   private translationCoordinator: TranslationCoordinator | null = null
   private translatedSubtitlesDownloader: TranslatedSubtitlesDownloader | null = null
   private subtitlesSummaryContextHash: string | null = null
+  private subtitleTTSController: SubtitleTTSController | null = null
+  private configWatchUnsub: (() => void) | null = null
 
   get embedded() {
     return this.config.embedded
@@ -148,6 +153,8 @@ export class UniversalVideoAdapter {
     this.subtitlesScheduler?.reset()
     this.subtitlesScheduler?.stop()
     this.subtitlesScheduler = null
+    this.configWatchUnsub?.()
+    this.configWatchUnsub = null
   }
 
   private async initializeScheduler() {
@@ -164,6 +171,7 @@ export class UniversalVideoAdapter {
     this.subtitlesScheduler = new SubtitlesScheduler({ videoElement: video })
     this.subtitlesScheduler.start()
     this.subtitlesScheduler.hide()
+    this.setupConfigWatcher()
   }
 
   private async getOrLoadSourceSubtitles(): Promise<SubtitlesFragment[]> {
@@ -212,6 +220,8 @@ export class UniversalVideoAdapter {
     this.segmentationPipeline?.stop()
     this.translationCoordinator = null
     this.segmentationPipeline = null
+    this.subtitleTTSController?.stop()
+    this.subtitleTTSController = null
     this.sessionSubtitles = []
     this.sessionProcessedFragments = []
     this.sessionVideoId = null
@@ -224,6 +234,8 @@ export class UniversalVideoAdapter {
     this.destroyScheduler()
     this.translationCoordinator?.stop()
     this.segmentationPipeline?.stop()
+    this.subtitleTTSController?.stop()
+    this.subtitleTTSController = null
     subtitlesStore.set(subtitlesSettingsPanelOpenAtom, false)
     subtitlesStore.set(subtitlesSettingsPanelViewAtom, ROOT_VIEW)
     this.showNativeSubtitles()
@@ -474,6 +486,9 @@ export class UniversalVideoAdapter {
       else {
         await this.processTranslatedSubtitles()
       }
+      // Subtitles are ready (translated or passthrough) — sync the TTS controller
+      // against the latest config so toggling it on/off doesn't require a reload.
+      void this.syncSubtitleTTSController()
       if (analyticsContext) {
         void trackFeatureUsed({
           ...analyticsContext,
@@ -577,5 +592,83 @@ export class UniversalVideoAdapter {
 
       videoContext.summary = summary
     })
+  }
+
+  /**
+   * Watch the persisted config and sync the TTS controller whenever the TTS
+   * enabled flag flips. Uses `storage.watch` (the same mechanism background
+   * scripts use for context menus) rather than a Jotai subscription, so it
+   * works regardless of whether the settings panel UI has ever been opened.
+   */
+  private setupConfigWatcher() {
+    if (this.configWatchUnsub)
+      return
+
+    let lastTtsEnabled: boolean | null = null
+    // Seed the baseline so we don't fire spuriously on the first watch event.
+    void getLocalConfig().then((cfg) => {
+      lastTtsEnabled = cfg?.videoSubtitles.tts.enabled ?? false
+    })
+
+    this.configWatchUnsub = storage.watch<Config>(`local:${CONFIG_STORAGE_KEY}`, (newConfig) => {
+      if (!newConfig)
+        return
+      const ttsEnabled = newConfig.videoSubtitles?.tts?.enabled ?? false
+      if (ttsEnabled !== lastTtsEnabled) {
+        lastTtsEnabled = ttsEnabled
+        void this.syncSubtitleTTSController()
+      }
+    })
+  }
+
+  /**
+   * Start or stop the subtitle TTS controller based on the current config.
+   * Called whenever a subtitle session becomes ready (after translation or
+   * passthrough) so users can flip the TTS toggle without reloading the page.
+   * The controller itself reads config on each cue, so once started it picks
+   * up read-target / voice / rate changes live.
+   */
+  private async syncSubtitleTTSController(): Promise<void> {
+    const config = await getLocalConfig()
+    if (!config) {
+      return
+    }
+
+    const ttsEnabled = config.videoSubtitles.tts.enabled
+    const scheduler = this.subtitlesScheduler
+    const video = scheduler?.getVideoElement() ?? null
+
+    if (!ttsEnabled || !scheduler || !video) {
+      this.subtitleTTSController?.stop()
+      this.subtitleTTSController = null
+      return
+    }
+
+    // Already running — keep it; the controller reacts to config on each cue.
+    if (this.subtitleTTSController) {
+      return
+    }
+
+    this.subtitleTTSController = new SubtitleTTSController({
+      // Read from the scheduler's subtitle list — that's the single source of
+      // truth the UI renders, and where TranslationCoordinator merges in
+      // translations via supplementSubtitles. Reading sessionProcessedFragments
+      // or segmentationPipeline.processedFragments misses translations in AI
+      // segmentation mode (they land in a different array).
+      getFragments: () => this.subtitlesScheduler?.getSubtitles() ?? this.sessionProcessedFragments,
+      getVideoElement: () => this.subtitlesScheduler?.getVideoElement() ?? null,
+      getConfig: async () => {
+        const fresh = await getLocalConfig()
+        if (!fresh) {
+          return null
+        }
+        return {
+          videoSubtitles: fresh.videoSubtitles,
+          tts: fresh.tts,
+          language: fresh.language,
+        }
+      },
+    })
+    void this.subtitleTTSController.start()
   }
 }

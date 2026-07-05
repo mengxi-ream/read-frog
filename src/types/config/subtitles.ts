@@ -3,6 +3,37 @@ import { MAX_BACKGROUND_OPACITY, MAX_FONT_SCALE, MAX_FONT_WEIGHT, MIN_BACKGROUND
 import { batchQueueConfigSchema, customPromptsConfigSchema, requestQueueConfigSchema } from "./translate"
 
 export const subtitlesDisplayModeSchema = z.enum(["bilingual", "originalOnly", "translationOnly"])
+
+// Which text the subtitle TTS should read aloud.
+export const subtitleTtsReadTargetSchema = z.enum(["translation", "original"])
+export type SubtitleTtsReadTarget = z.infer<typeof subtitleTtsReadTargetSchema>
+
+// Voice selection strategy: "auto" picks a voice matching the read-target
+// language from the shared TTS config; "custom" uses the explicitly chosen voice.
+export const subtitleTtsVoiceModeSchema = z.enum(["auto", "custom"])
+export type SubtitleTtsVoiceMode = z.infer<typeof subtitleTtsVoiceModeSchema>
+
+export const subtitleTtsConfigSchema = z.object({
+  enabled: z.boolean(),
+  readTarget: subtitleTtsReadTargetSchema,
+  voiceMode: subtitleTtsVoiceModeSchema,
+  // Only meaningful when voiceMode === "custom"; empty string means "not set".
+  customVoice: z.string(),
+  // Signed percentage offset applied on top of the shared TTS rate.
+  rate: z.number().int().min(-100).max(100),
+  // Whether to stop TTS when the video is paused, and resume-friendly behavior.
+  pauseWithVideo: z.boolean(),
+})
+export type SubtitleTtsConfig = z.infer<typeof subtitleTtsConfigSchema>
+
+export const DEFAULT_SUBTITLE_TTS_CONFIG: SubtitleTtsConfig = {
+  enabled: false,
+  readTarget: "translation",
+  voiceMode: "auto",
+  customVoice: "",
+  rate: 0,
+  pauseWithVideo: true,
+}
 export const subtitlesTranslationPositionSchema = z.enum(["above", "below"])
 export const subtitlesFontFamilySchema = z.enum(["system", "roboto", "noto-sans", "noto-serif"])
 
@@ -40,6 +71,7 @@ export const videoSubtitlesSchema = z.object({
   batchQueueConfig: batchQueueConfigSchema,
   customPromptsConfig: customPromptsConfigSchema,
   position: subtitlePositionSchema,
+  tts: subtitleTtsConfigSchema,
 })
 
 export type SubtitlesDisplayMode = z.infer<typeof subtitlesDisplayModeSchema>

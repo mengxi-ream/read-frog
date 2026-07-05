@@ -951,6 +951,22 @@ options:
       fontWeight: Font Weight
       backgroundOpacity: Background Opacity
       reset: Reset to Default
+    tts:
+      title: Read Aloud
+      description: Read subtitle text aloud with text-to-speech as the video plays.
+      enable: Read Subtitles Aloud
+      enableDescription: Automatically speak the active subtitle cue using the configured TTS voice.
+      readTarget:
+        title: Read
+        translation: Translation
+        original: Original
+      voiceMode:
+        title: Voice
+        auto: Auto (match language)
+        custom: Custom voice
+      rate: Playback Rate
+      pauseWithVideo: Pause with video
+      pauseWithVideoDescription: Stop TTS when the video is paused.
     aiSegmentation:
       title: AI Smart Segmentation
       enable: Enable AI Smart Segmentation

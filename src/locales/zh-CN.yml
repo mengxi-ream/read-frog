@@ -951,6 +951,22 @@ options:
       fontWeight: 字体粗细
       backgroundOpacity: 背景透明度
       reset: 重置为默认
+    tts:
+      title: 朗读
+      description: 视频播放时使用语音合成朗读字幕文本。
+      enable: 朗读字幕
+      enableDescription: 使用已配置的 TTS 语音自动朗读当前字幕。
+      readTarget:
+        title: 朗读内容
+        translation: 译文
+        original: 原文
+      voiceMode:
+        title: 语音
+        auto: 自动（匹配语言）
+        custom: 自定义音色
+      rate: 播放语速
+      pauseWithVideo: 跟随视频暂停
+      pauseWithVideoDescription: 视频暂停时停止朗读。
     aiSegmentation:
       title: AI 智能断句
       enable: 启用 AI 智能断句

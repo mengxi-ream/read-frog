@@ -1,9 +1,10 @@
 import type { ComponentType, ReactNode } from "react"
-import { IconAdjustmentsHorizontal } from "@tabler/icons-react"
+import { IconAdjustmentsHorizontal, IconSpeakerphone } from "@tabler/icons-react"
 import { i18n } from "#imports"
 import { StyleView } from "./style"
+import { TTSView } from "./tts"
 
-export type ViewId = "main" | "style"
+export type ViewId = "main" | "style" | "tts"
 export const ROOT_VIEW = "main" satisfies ViewId
 
 export interface SubpageConfig {
@@ -20,6 +21,12 @@ export const SUBPAGES: SubpageConfig[] = [
     title: i18n.t("options.videoSubtitles.style.title"),
     icon: <IconAdjustmentsHorizontal className="size-4" />,
     component: StyleView,
+  },
+  {
+    id: "tts",
+    title: i18n.t("options.videoSubtitles.tts.title"),
+    icon: <IconSpeakerphone className="size-4" />,
+    component: TTSView,
   },
 ]
 

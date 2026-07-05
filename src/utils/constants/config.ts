@@ -2,6 +2,7 @@ import type { Config } from "@/types/config/config"
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
+import { DEFAULT_SUBTITLE_TTS_CONFIG } from "@/types/config/subtitles"
 import { FREE_AI_PROVIDER_ID } from "@/utils/providers/provider-registry"
 import { CUSTOM_ACTION_TEMPLATES } from "./custom-action-templates"
 import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
@@ -19,7 +20,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 83
+export const CONFIG_SCHEMA_VERSION = 84
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -169,6 +170,7 @@ export const DEFAULT_CONFIG: Config = {
     },
     customPromptsConfig: DEFAULT_TRANSLATE_PROMPTS_CONFIG,
     position: DEFAULT_SUBTITLE_POSITION,
+    tts: { ...DEFAULT_SUBTITLE_TTS_CONFIG },
   },
   siteControl: {
     mode: "blacklist",

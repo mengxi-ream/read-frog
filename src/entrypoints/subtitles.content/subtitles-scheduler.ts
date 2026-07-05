@@ -67,6 +67,15 @@ export class SubtitlesScheduler {
     return this.videoElement
   }
 
+  /**
+   * Returns the scheduler's working subtitle list — the same array the UI
+   * renders and into which TranslationCoordinator merges translations. This is
+   * the source of truth for translated content, so TTS reads from here.
+   */
+  getSubtitles(): SubtitlesFragment[] {
+    return this.subtitles
+  }
+
   getState(): SubtitlesState {
     return this.currentState.state ?? "idle"
   }
