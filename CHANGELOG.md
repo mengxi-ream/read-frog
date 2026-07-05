@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.37.4
+
+### Patch Changes
+
+- [#1779](https://github.com/mengxi-ream/read-frog/pull/1779) [`13cc949`](https://github.com/mengxi-ream/read-frog/commit/13cc94991a62dd02e8fc6706bd8819e1a6348b82) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): Honor overridden What's New links.
+
 ## 1.37.3
 
 ### Patch Changes
