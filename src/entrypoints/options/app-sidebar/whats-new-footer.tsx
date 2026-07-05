@@ -97,7 +97,7 @@ export function WhatsNewFooter() {
     return null
   }
 
-  const blogUrl = new URL(latestBlogPost.url, env.WXT_WEBSITE_URL).toString()
+  const blogUrl = new URL(latestBlogPost.urlOverride ?? latestBlogPost.url, env.WXT_WEBSITE_URL).toString()
   const embedUrl = latestBlogPost.videoUrl ? buildBilibiliEmbedUrl(latestBlogPost.videoUrl) : null
   const imageUrl = embedUrl ? null : latestBlogPost.imageUrl
 

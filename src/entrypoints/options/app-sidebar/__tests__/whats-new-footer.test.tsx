@@ -256,6 +256,23 @@ describe("whatsNewFooter", () => {
     expect(image).toHaveAttribute("src", latestBlogPost.imageUrl)
   })
 
+  it("uses the override URL for the latest blog title and image links", async () => {
+    const urlOverride = "https://www.readfrog.app"
+    getLatestBlogDateMock.mockResolvedValue({ ...latestBlogPost, urlOverride })
+    getLastViewedBlogDateMock.mockResolvedValue(latestBlogPost.date)
+    saveLastViewedBlogDateMock.mockResolvedValue(undefined)
+
+    renderWhatsNewFooter()
+
+    const trigger = await screen.findByRole("button", { name: "options.whatsNew.title" })
+    fireEvent.click(trigger)
+
+    const links = await screen.findAllByRole("link", { name: latestBlogPost.title })
+    expect(links).toHaveLength(2)
+    const expectedHref = new URL(urlOverride).toString()
+    expect(links.map(link => link.getAttribute("href"))).toEqual([expectedHref, expectedHref])
+  })
+
   it("marks the post as viewed after a manual open once the unread query finishes", async () => {
     const lastViewedDateDeferred = createDeferred<Date | null>()
 
