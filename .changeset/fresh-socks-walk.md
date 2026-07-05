@@ -2,4 +2,4 @@
 "@read-frog/extension": patch
 ---
 
-Prefer the browser runtime options-page API when opening settings from the extension popup.
+fix(extension): open settings via the runtime options-page API
