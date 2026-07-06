@@ -86,6 +86,20 @@ export default defineConfig({
     },
   },
   vite: configEnv => ({
+    resolve: {
+      // CodeMirror breaks with "Unrecognized extension value in extension set"
+      // if the bundle contains more than one copy of these packages (#1782).
+      dedupe: [
+        "@codemirror/state",
+        "@codemirror/view",
+        "@codemirror/language",
+        "@codemirror/lint",
+        "@codemirror/autocomplete",
+        "@codemirror/search",
+        "@codemirror/commands",
+        "@lezer/common",
+      ],
+    },
     plugins: [
       ...(configEnv.mode === "production"
         ? [
