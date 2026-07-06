@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.37.5
+
+### Patch Changes
+
+- [#1783](https://github.com/mengxi-ream/read-frog/pull/1783) [`d4c4545`](https://github.com/mengxi-ream/read-frog/commit/d4c4545e1315ffc0cfe55ca086c82a344ca66372) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(options): resolve settings crash "Unrecognized extension value in extension set" when opening pages with code editors ([#1782](https://github.com/mengxi-ream/read-frog/issues/1782)) by deduplicating bundled CodeMirror packages
+
 ## 1.37.4
 
 ### Patch Changes
