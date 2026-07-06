@@ -1,6 +1,5 @@
 import { IconLogout } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
-import { toast } from "sonner"
 import { i18n } from "#imports"
 import guest from "@/assets/icons/avatars/guest.svg"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
@@ -48,9 +47,7 @@ export function useUserAccountMenu() {
       if (error)
         throw error
     },
-    onError: () => {
-      toast.error(i18n.t("account.logoutError"))
-    },
+    meta: { errorDescription: i18n.t("account.logoutError") },
   })
 
   const state: AccountState = isPending
@@ -70,9 +67,9 @@ export function useUserAccountMenu() {
   }
 }
 
-export function AccountAvatar({ account }: { account: AccountMenu }) {
+export function AccountAvatar({ account, size = "sm" }: { account: AccountMenu, size?: "default" | "sm" | "lg" }) {
   return (
-    <Avatar size="sm" className={cn(account.isPending && "animate-pulse")}>
+    <Avatar size={size} className={cn(account.isPending && "animate-pulse")}>
       <AvatarImage src={account.avatarSrc || ""} alt={account.displayName} />
       <AvatarFallback>{account.fallbackText}</AvatarFallback>
     </Avatar>
@@ -91,8 +88,14 @@ export function AccountDropdownContent({
   const { logout } = account
   return (
     <DropdownMenuContent align={align} side={side} className="min-w-56">
-      <div className="flex flex-col gap-0.5 px-1.5 py-1.5">
-        <span className="truncate text-sm font-medium text-foreground">{account.displayName}</span>
+      <div className="flex items-center gap-2 px-1.5 py-1.5">
+        <AccountAvatar account={account} />
+        <div className="grid flex-1 text-left text-sm leading-tight">
+          <span className="truncate font-medium text-foreground">{account.displayName}</span>
+          {account.user?.email && (
+            <span className="truncate text-xs font-normal text-muted-foreground">{account.user.email}</span>
+          )}
+        </div>
       </div>
       <DropdownMenuSeparator />
       <DropdownMenuItem

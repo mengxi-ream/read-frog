@@ -1,4 +1,4 @@
-import { IconChevronDown } from "@tabler/icons-react"
+import { IconSelector } from "@tabler/icons-react"
 import { match } from "ts-pattern"
 import { i18n } from "#imports"
 import {
@@ -22,7 +22,7 @@ export function UserAccountMenuSidebar() {
   const account = useUserAccountMenu()
   const { displayName } = account
 
-  const avatar = <AccountAvatar account={account} />
+  const avatar = <AccountAvatar account={account} size="default" />
 
   return match(account.state)
     .with(ACCOUNT_STATE.LOADING, () => (
@@ -37,7 +37,7 @@ export function UserAccountMenuSidebar() {
     .with(ACCOUNT_STATE.GUEST, () => (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" tooltip={i18n.t("account.login")} onClick={openLogIn}>
+          <SidebarMenuButton size="lg" tooltip={i18n.t("account.login")} onClick={openLogIn} className="cursor-pointer">
             {avatar}
             <span className="truncate font-medium">{i18n.t("account.login")}</span>
           </SidebarMenuButton>
@@ -48,15 +48,17 @@ export function UserAccountMenuSidebar() {
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<SidebarMenuButton size="lg" tooltip={displayName} className="group/account" />}>
+            <DropdownMenuTrigger render={<SidebarMenuButton size="lg" tooltip={displayName} className="cursor-pointer data-[popup-open]:bg-sidebar-accent data-[popup-open]:text-sidebar-accent-foreground" />}>
               {avatar}
-              <span className="truncate font-medium">{displayName}</span>
-              <IconChevronDown
-                aria-hidden
-                className="ml-auto size-4 transition-transform duration-200 group-data-[popup-open]/account:rotate-180"
-              />
+              <div className="grid flex-1 text-left text-sm leading-tight">
+                <span className="truncate font-medium">{displayName}</span>
+                {account.user?.email && (
+                  <span className="truncate text-xs text-muted-foreground">{account.user.email}</span>
+                )}
+              </div>
+              <IconSelector aria-hidden className="ml-auto size-4" />
             </DropdownMenuTrigger>
-            <AccountDropdownContent account={account} align="start" side="top" />
+            <AccountDropdownContent account={account} align="start" side="bottom" />
           </DropdownMenu>
         </SidebarMenuItem>
       </SidebarMenu>
