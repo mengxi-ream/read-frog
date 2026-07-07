@@ -4841,7 +4841,13 @@
     "matches": "vercel.com",
     "excludeSelectors": [
       "[class^=fade-in-words]"
-    ]
+    ],
+    "injectedCss": "[data-docs-heading] .read-frog-translated-content-wrapper,[data-docs-heading] .read-frog-translated-content-wrapper * {visibility:visible!important;opacity:1!important;display:inline!important;margin-left:0!important;}"
+  },
+  {
+    "id": "ai-sdk",
+    "matches": "ai-sdk.dev",
+    "injectedCss": "[data-docs-heading] .read-frog-translated-content-wrapper,[data-docs-heading] .read-frog-translated-content-wrapper * {visibility:visible!important;opacity:1!important;display:inline!important;margin-left:0!important;}"
   },
   {
     "id": "moltbook",

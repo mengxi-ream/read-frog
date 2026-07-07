@@ -9,6 +9,7 @@ import {
 } from "@/utils/constants/subtitles"
 import { BUILT_IN_SITE_RULES } from "../built-in"
 import { normalizeUrlPattern } from "../match"
+import { resolveSiteRule } from "../resolve"
 
 function allSelectors(rule: (typeof BUILT_IN_SITE_RULES)[number]): string[] {
   return [
@@ -65,6 +66,20 @@ describe("built-in site rules", () => {
       }
     }
     expect(invalid).toEqual([])
+  })
+
+  // Vercel `prose-vercel` docs hide `[data-docs-heading] a span`, which also
+  // hides Read Frog's injected wrapper once it lands inside the heading anchor.
+  // See https://github.com/mengxi-ream/read-frog/issues/1050
+  it("un-hides translations inside Vercel doc headings (issue #1050)", () => {
+    for (const url of [
+      "https://ai-sdk.dev/docs/foundations/providers-and-models",
+      "https://vercel.com/docs",
+    ]) {
+      const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
+      expect(resolved.injectedCss).toContain("[data-docs-heading] .read-frog-translated-content-wrapper")
+      expect(resolved.injectedCss).toContain("visibility:visible!important")
+    }
   })
 
   it("keeps the youtube rule in sync with the subtitle class constants", () => {
