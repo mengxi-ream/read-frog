@@ -1,5 +1,15 @@
 # @read-frog/extension
 
+## 1.38.0
+
+### Minor Changes
+
+- [#1791](https://github.com/mengxi-ream/read-frog/pull/1791) [`9621107`](https://github.com/mengxi-ream/read-frog/commit/96211079841a0d48e8afbc2ee30a05ea65c2b1c9) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat(i18n): support switching the extension interface language independently of the browser
+
+### Patch Changes
+
+- [#1756](https://github.com/mengxi-ream/read-frog/pull/1756) [`d961a47`](https://github.com/mengxi-ream/read-frog/commit/d961a47d0d50b1137f669471009861fb4293819f) Thanks [@taiiiyang](https://github.com/taiiiyang)! - feat(auth): add log out from the popup and options sidebar
+
 ## 1.37.5
 
 ### Patch Changes
