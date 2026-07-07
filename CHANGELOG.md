@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.39.0
+
+### Minor Changes
+
+- [#1794](https://github.com/mengxi-ream/read-frog/pull/1794) [`2b60271`](https://github.com/mengxi-ream/read-frog/commit/2b602716b04bdca90943f3044bbf256f375efd48) Thanks [@ananaBMaster](https://github.com/ananaBMaster)! - feat: add a per-site translation rule engine. 463 built-in rules plus user-defined JSON rules control what gets translated per site: exclude/include selectors, force block/inline rendering, minimum character/word thresholds, and per-site injected CSS. URL matching now supports subdomain, TLD, and path wildcards. A new "Site Rules" options page provides a zod-validated JSON editor for custom rules and a searchable, per-rule-disableable viewer for built-in rules. The previous hardcoded site adaptations are migrated into built-in rules.
+
 ## 1.38.0
 
 ### Minor Changes
