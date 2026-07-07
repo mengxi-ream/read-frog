@@ -1,6 +1,5 @@
 import { Icon } from "@iconify/react"
 import { Link, useLocation } from "react-router"
-import { i18n } from "#imports"
 import {
   Collapsible,
   CollapsibleContent,
@@ -17,6 +16,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/base-ui/sidebar"
+import { i18n } from "@/utils/i18n"
 
 const OVERLAY_TOOLS_PATHS = ["/floating-button", "/selection-toolbar", "/context-menu"] as const
 

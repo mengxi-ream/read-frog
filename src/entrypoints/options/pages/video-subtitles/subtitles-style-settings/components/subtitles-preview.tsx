@@ -1,10 +1,10 @@
 import { useAtomValue } from "jotai"
 import { Activity } from "react"
-import { i18n } from "#imports"
 import { GradientBackground } from "@/components/gradient-background"
 import { Label } from "@/components/ui/base-ui/label"
 import { MainSubtitle, TranslationSubtitle } from "@/entrypoints/subtitles.content/ui/subtitle-lines"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 export function SubtitlesPreview() {

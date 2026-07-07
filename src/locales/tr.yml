@@ -220,6 +220,10 @@ options:
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
   general:
     title: Genel
+    interfaceLanguage:
+      title: Arayüz Dili
+      description: Uzantı arayüzünün dilini tarayıcı dilinizden bağımsız olarak seçin.
+      auto: Otomatik (tarayıcıyı izle)
     appearance:
       title: Görünüm
       theme: Tema

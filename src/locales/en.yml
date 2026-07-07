@@ -221,6 +221,10 @@ options:
       slow: Slow (try adjusting thinking mode)
   general:
     title: General
+    interfaceLanguage:
+      title: Interface Language
+      description: Choose the language for the extension's interface, independent of your browser language.
+      auto: Auto (follow browser)
     appearance:
       title: Appearance
       theme: Theme

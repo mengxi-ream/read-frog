@@ -4,7 +4,6 @@ import { useMutation } from "@tanstack/react-query"
 import { useAtom } from "jotai"
 import { useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -20,6 +19,7 @@ import { SELECTION_CONTENT_OVERLAY_LAYERS } from "@/entrypoints/selection.conten
 import { env } from "@/env"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import { i18n } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
 import {

@@ -1,4 +1,4 @@
-import { i18n } from "#imports"
+import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { AboutCard } from "./about-card"
 import { BetaExperienceConfig } from "./beta-experience"

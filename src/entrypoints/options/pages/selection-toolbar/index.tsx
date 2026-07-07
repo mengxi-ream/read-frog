@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import selectionToolbarDemoImage from "@/assets/demo/selection-toolbar.png"
 import { GradientBackground } from "@/components/gradient-background"
+import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { SelectionToolbarDisabledSites } from "./selection-toolbar-disabled-sites"
 import { SelectionToolbarFeatureToggles } from "./selection-toolbar-feature-toggles"

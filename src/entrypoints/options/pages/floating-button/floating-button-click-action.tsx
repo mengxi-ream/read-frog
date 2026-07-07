@@ -1,6 +1,5 @@
 import type { FloatingButtonClickAction as FloatingButtonClickActionValue } from "@/types/config/floating-button"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import {
   Select,
   SelectContent,
@@ -11,17 +10,19 @@ import {
 } from "@/components/ui/base-ui/select"
 import { floatingButtonClickActionSchema } from "@/types/config/floating-button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
-
-const items = [
-  { value: "panel", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.panel") },
-  { value: "translate", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.translate") },
-] satisfies Array<{ value: FloatingButtonClickActionValue, label: string }>
 
 export function FloatingButtonClickAction() {
   const [floatingButton, setFloatingButton] = useAtom(
     configFieldsAtomMap.floatingButton,
   )
+
+  // Resolved at render (not module scope) so labels follow a runtime UI-language switch.
+  const items = [
+    { value: "panel", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.panel") },
+    { value: "translate", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.clickAction.translate") },
+  ] satisfies Array<{ value: FloatingButtonClickActionValue, label: string }>
 
   return (
     <ConfigCard

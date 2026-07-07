@@ -1,6 +1,6 @@
 import type { SubtitlesState } from "@/utils/subtitles/types"
-import { i18n } from "#imports"
 import { STATE_MESSAGE_CLASS } from "@/utils/constants/subtitles"
+import { i18n } from "@/utils/i18n"
 
 const STATE_CONFIG: Record<Exclude<SubtitlesState, "idle">, { color: string, getText: () => string }> = {
   loading: {

@@ -14,6 +14,8 @@ import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { initI18n } from "@/utils/i18n"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { sendMessage } from "@/utils/message"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
@@ -58,6 +60,8 @@ async function initApp() {
   ])
   const config = configValue ?? DEFAULT_CONFIG
 
+  await initI18n(config.uiLanguage)
+
   const tabId = activeTab[0].id
 
   let isPageTranslated: boolean = false
@@ -99,9 +103,11 @@ async function initApp() {
             <ThemeProvider>
               <TooltipProvider>
                 <FrogToast />
-                <RecoveryBoundary>
-                  <App />
-                </RecoveryBoundary>
+                <LocaleBoundary>
+                  <RecoveryBoundary>
+                    <App />
+                  </RecoveryBoundary>
+                </LocaleBoundary>
               </TooltipProvider>
             </ThemeProvider>
           </HydrateAtoms>

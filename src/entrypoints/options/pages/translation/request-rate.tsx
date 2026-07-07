@@ -2,13 +2,13 @@ import type { RequestQueueConfig } from "@/types/config/translate"
 import { useAtom } from "jotai"
 import { useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { requestQueueConfigSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MIN_TRANSLATE_CAPACITY, MIN_TRANSLATE_RATE } from "@/utils/constants/translate"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { ConfigCard } from "../../components/config-card"
 
@@ -35,14 +35,16 @@ export function RequestRate() {
   )
 }
 
+// Resolve labels lazily (thunks) so a runtime UI-language switch re-reads them at render
+// instead of freezing the strings at module-import time.
 const propertyInfo = {
   capacity: {
-    label: i18n.t("options.translation.requestQueueConfig.capacity.title"),
-    description: i18n.t("options.translation.requestQueueConfig.capacity.description"),
+    label: () => i18n.t("options.translation.requestQueueConfig.capacity.title"),
+    description: () => i18n.t("options.translation.requestQueueConfig.capacity.description"),
   },
   rate: {
-    label: i18n.t("options.translation.requestQueueConfig.rate.title"),
-    description: i18n.t("options.translation.requestQueueConfig.rate.description"),
+    label: () => i18n.t("options.translation.requestQueueConfig.rate.title"),
+    description: () => i18n.t("options.translation.requestQueueConfig.rate.description"),
   },
 }
 
@@ -73,8 +75,8 @@ function TranslateNumberSelector({ property }: { property: KeyOfRequestQueueConf
     <Field orientation="responsive">
       <FieldContent className="self-center">
         <FieldLabel htmlFor={`translate-${property}`}>
-          {info.label}
-          <HelpTooltip>{info.description}</HelpTooltip>
+          {info.label()}
+          <HelpTooltip>{info.description()}</HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Input

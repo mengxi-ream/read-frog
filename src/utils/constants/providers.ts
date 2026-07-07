@@ -1,6 +1,5 @@
 import type { AllProviderTypes, APIProviderTypes, LLMProviderModels, ProviderConfig, ProvidersConfig, ProviderSponsorConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
-import { i18n } from "#imports"
 import customProviderLogo from "@/assets/providers/custom-provider.svg?url&no-inline"
 import deeplxLogoDark from "@/assets/providers/deeplx-dark.svg?url&no-inline"
 import deeplxLogoLight from "@/assets/providers/deeplx-light.svg?url&no-inline"
@@ -337,7 +336,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "atlascloud": {
     id: "atlascloud-default",
     name: PROVIDER_ITEMS.atlascloud.name,
-    description: i18n.t("options.apiProviders.providers.description.atlascloud"),
     enabled: true,
     provider: "atlascloud",
     baseURL: "https://api.atlascloud.ai/v1",
@@ -346,7 +344,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "siliconflow": {
     id: "siliconflow-default",
     name: PROVIDER_ITEMS.siliconflow.name,
-    description: i18n.t("options.apiProviders.providers.description.siliconflow"),
     enabled: true,
     provider: "siliconflow",
     baseURL: "https://api.siliconflow.cn/v1",
@@ -355,7 +352,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "tensdaq": {
     id: "tensdaq-default",
     name: PROVIDER_ITEMS.tensdaq.name,
-    description: i18n.t("options.apiProviders.providers.description.tensdaq"),
     enabled: true,
     provider: "tensdaq",
     baseURL: "https://tensdaq-api.x-aio.com/v1",
@@ -364,7 +360,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "openai-compatible": {
     id: "openai-compatible-default",
     name: PROVIDER_ITEMS["openai-compatible"].name,
-    description: i18n.t("options.apiProviders.providers.description.openaiCompatible"),
     enabled: true,
     provider: "openai-compatible",
     baseURL: "https://api.example.com/v1",
@@ -373,7 +368,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "openai": {
     id: "openai-default",
     name: PROVIDER_ITEMS.openai.name,
-    description: i18n.t("options.apiProviders.providers.description.openai"),
     enabled: true,
     provider: "openai",
     model: DEFAULT_LLM_PROVIDER_MODELS.openai,
@@ -382,7 +376,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "azure": {
     id: "azure-default",
     name: PROVIDER_ITEMS.azure.name,
-    description: i18n.t("options.apiProviders.providers.description.azure"),
     enabled: true,
     provider: "azure",
     model: DEFAULT_LLM_PROVIDER_MODELS.azure,
@@ -394,7 +387,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "deepseek": {
     id: "deepseek-default",
     name: PROVIDER_ITEMS.deepseek.name,
-    description: i18n.t("options.apiProviders.providers.description.deepseek"),
     enabled: true,
     provider: "deepseek",
     model: DEFAULT_LLM_PROVIDER_MODELS.deepseek,
@@ -403,7 +395,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "google": {
     id: "google-default",
     name: PROVIDER_ITEMS.google.name,
-    description: i18n.t("options.apiProviders.providers.description.google"),
     enabled: true,
     provider: "google",
     model: DEFAULT_LLM_PROVIDER_MODELS.google,
@@ -412,7 +403,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "anthropic": {
     id: "anthropic-default",
     name: PROVIDER_ITEMS.anthropic.name,
-    description: i18n.t("options.apiProviders.providers.description.anthropic"),
     enabled: true,
     provider: "anthropic",
     model: DEFAULT_LLM_PROVIDER_MODELS.anthropic,
@@ -421,7 +411,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "xai": {
     id: "xai-default",
     name: PROVIDER_ITEMS.xai.name,
-    description: i18n.t("options.apiProviders.providers.description.xai"),
     enabled: true,
     provider: "xai",
     model: DEFAULT_LLM_PROVIDER_MODELS.xai,
@@ -430,7 +419,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "deeplx": {
     id: "deeplx-default",
     name: PROVIDER_ITEMS.deeplx.name,
-    description: i18n.t("options.apiProviders.providers.description.deeplx"),
     enabled: true,
     provider: "deeplx",
     baseURL: "https://api.deeplx.org/{{apiKey}}/translate",
@@ -438,14 +426,12 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "deepl": {
     id: "deepl-default",
     name: PROVIDER_ITEMS.deepl.name,
-    description: i18n.t("options.apiProviders.providers.description.deepl"),
     enabled: true,
     provider: "deepl",
   },
   "bedrock": {
     id: "bedrock-default",
     name: PROVIDER_ITEMS.bedrock.name,
-    description: i18n.t("options.apiProviders.providers.description.bedrock"),
     enabled: true,
     provider: "bedrock",
     model: DEFAULT_LLM_PROVIDER_MODELS.bedrock,
@@ -455,7 +441,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "groq": {
     id: "groq-default",
     name: PROVIDER_ITEMS.groq.name,
-    description: i18n.t("options.apiProviders.providers.description.groq"),
     enabled: true,
     provider: "groq",
     model: DEFAULT_LLM_PROVIDER_MODELS.groq,
@@ -464,7 +449,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "deepinfra": {
     id: "deepinfra-default",
     name: PROVIDER_ITEMS.deepinfra.name,
-    description: i18n.t("options.apiProviders.providers.description.deepinfra"),
     enabled: true,
     provider: "deepinfra",
     model: DEFAULT_LLM_PROVIDER_MODELS.deepinfra,
@@ -472,7 +456,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "mistral": {
     id: "mistral-default",
     name: PROVIDER_ITEMS.mistral.name,
-    description: i18n.t("options.apiProviders.providers.description.mistral"),
     enabled: true,
     provider: "mistral",
     model: DEFAULT_LLM_PROVIDER_MODELS.mistral,
@@ -480,7 +463,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "togetherai": {
     id: "togetherai-default",
     name: PROVIDER_ITEMS.togetherai.name,
-    description: i18n.t("options.apiProviders.providers.description.togetherai"),
     enabled: true,
     provider: "togetherai",
     model: DEFAULT_LLM_PROVIDER_MODELS.togetherai,
@@ -488,7 +470,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "cohere": {
     id: "cohere-default",
     name: PROVIDER_ITEMS.cohere.name,
-    description: i18n.t("options.apiProviders.providers.description.cohere"),
     enabled: true,
     provider: "cohere",
     model: DEFAULT_LLM_PROVIDER_MODELS.cohere,
@@ -496,7 +477,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "fireworks": {
     id: "fireworks-default",
     name: PROVIDER_ITEMS.fireworks.name,
-    description: i18n.t("options.apiProviders.providers.description.fireworks"),
     enabled: true,
     provider: "fireworks",
     model: DEFAULT_LLM_PROVIDER_MODELS.fireworks,
@@ -505,7 +485,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "cerebras": {
     id: "cerebras-default",
     name: PROVIDER_ITEMS.cerebras.name,
-    description: i18n.t("options.apiProviders.providers.description.cerebras"),
     enabled: true,
     provider: "cerebras",
     model: DEFAULT_LLM_PROVIDER_MODELS.cerebras,
@@ -513,7 +492,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "replicate": {
     id: "replicate-default",
     name: PROVIDER_ITEMS.replicate.name,
-    description: i18n.t("options.apiProviders.providers.description.replicate"),
     enabled: true,
     provider: "replicate",
     model: DEFAULT_LLM_PROVIDER_MODELS.replicate,
@@ -521,7 +499,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "perplexity": {
     id: "perplexity-default",
     name: PROVIDER_ITEMS.perplexity.name,
-    description: i18n.t("options.apiProviders.providers.description.perplexity"),
     enabled: true,
     provider: "perplexity",
     model: DEFAULT_LLM_PROVIDER_MODELS.perplexity,
@@ -529,7 +506,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "vercel": {
     id: "vercel-default",
     name: PROVIDER_ITEMS.vercel.name,
-    description: i18n.t("options.apiProviders.providers.description.vercel"),
     enabled: true,
     provider: "vercel",
     model: DEFAULT_LLM_PROVIDER_MODELS.vercel,
@@ -537,7 +513,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "openrouter": {
     id: "openrouter-default",
     name: PROVIDER_ITEMS.openrouter.name,
-    description: i18n.t("options.apiProviders.providers.description.openrouter"),
     enabled: true,
     provider: "openrouter",
     baseURL: "https://openrouter.ai/api/v1",
@@ -546,7 +521,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "ollama": {
     id: "ollama-default",
     name: PROVIDER_ITEMS.ollama.name,
-    description: i18n.t("options.apiProviders.providers.description.ollama"),
     enabled: true,
     provider: "ollama",
     model: DEFAULT_LLM_PROVIDER_MODELS.ollama,
@@ -554,7 +528,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "volcengine": {
     id: "volcengine-default",
     name: PROVIDER_ITEMS.volcengine.name,
-    description: i18n.t("options.apiProviders.providers.description.volcengine"),
     enabled: true,
     provider: "volcengine",
     baseURL: "https://ark.cn-beijing.volces.com/api/v3",
@@ -563,7 +536,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "minimax": {
     id: "minimax-default",
     name: PROVIDER_ITEMS.minimax.name,
-    description: i18n.t("options.apiProviders.providers.description.minimax"),
     enabled: true,
     provider: "minimax",
     baseURL: "https://api.minimax.io/v1",
@@ -572,7 +544,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "alibaba": {
     id: "alibaba-default",
     name: PROVIDER_ITEMS.alibaba.name,
-    description: i18n.t("options.apiProviders.providers.description.alibaba"),
     enabled: true,
     provider: "alibaba",
     baseURL: "https://dashscope.aliyuncs.com/compatible-mode/v1",
@@ -581,7 +552,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "moonshotai": {
     id: "moonshotai-default",
     name: PROVIDER_ITEMS.moonshotai.name,
-    description: i18n.t("options.apiProviders.providers.description.moonshotai"),
     enabled: true,
     provider: "moonshotai",
     model: DEFAULT_LLM_PROVIDER_MODELS.moonshotai,
@@ -589,7 +559,6 @@ export const DEFAULT_PROVIDER_CONFIG = {
   "huggingface": {
     id: "huggingface-default",
     name: PROVIDER_ITEMS.huggingface.name,
-    description: i18n.t("options.apiProviders.providers.description.huggingface"),
     enabled: true,
     provider: "huggingface",
     model: DEFAULT_LLM_PROVIDER_MODELS.huggingface,

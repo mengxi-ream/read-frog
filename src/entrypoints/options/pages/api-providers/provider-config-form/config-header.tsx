@@ -1,10 +1,10 @@
 import type { APIProviderTypes } from "@/types/config/provider"
-import { i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { Button } from "@/components/ui/base-ui/button"
 import { env } from "@/env"
 import { PROVIDER_GROUPS, PROVIDER_ITEMS, SPECIFIC_TUTORIAL_PROVIDER_TYPES } from "@/utils/constants/providers"
+import { i18n } from "@/utils/i18n"
 
 export function ConfigHeader({ providerType, apiKey }: { providerType: APIProviderTypes, apiKey?: string }) {
   const tutorialUrl = getHowToConfigureURL(providerType)

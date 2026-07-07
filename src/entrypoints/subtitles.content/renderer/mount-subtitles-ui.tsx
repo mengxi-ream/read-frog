@@ -5,6 +5,7 @@ import themeCSS from "@/assets/styles/theme.css?inline"
 import { REACT_SHADOW_HOST_CLASS } from "@/utils/constants/dom-labels"
 import { READ_FROG_SUBTITLES_UI_HOST_ID, SUBTITLES_THEME } from "@/utils/constants/subtitles"
 import { waitForElement } from "@/utils/dom/wait-for-element"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { ShadowHostBuilder } from "@/utils/react-shadow-host/shadow-host-builder"
 import { applyTheme } from "@/utils/theme"
@@ -88,7 +89,9 @@ export async function mountSubtitlesUI(
   const app = (
     <ShadowWrapperContext value={reactContainer}>
       <SubtitlesProviders adapter={adapter} openBelow={menuBelow}>
-        <SubtitlesContainer />
+        <LocaleBoundary>
+          <SubtitlesContainer />
+        </LocaleBoundary>
       </SubtitlesProviders>
     </ShadowWrapperContext>
   )

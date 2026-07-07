@@ -1,6 +1,5 @@
 import { IconLogout } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
-import { i18n } from "#imports"
 import guest from "@/assets/icons/avatars/guest.svg"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import {
@@ -10,6 +9,7 @@ import {
 } from "@/components/ui/base-ui/dropdown-menu"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 export const ACCOUNT_STATE = {

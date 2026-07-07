@@ -1,11 +1,11 @@
 import { useAtom } from "jotai"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MAX_CHARACTERS_PER_NODE, MAX_WORDS_PER_NODE, MIN_CHARACTERS_PER_NODE, MIN_WORDS_PER_NODE } from "@/utils/constants/translate"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function SmallParagraphFilter() {

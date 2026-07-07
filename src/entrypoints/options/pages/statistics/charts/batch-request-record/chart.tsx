@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
 } from "recharts"
-import { i18n } from "#imports"
 import { Card, CardContent } from "@/components/ui/base-ui/card"
 import {
 
@@ -19,6 +18,7 @@ import {
   ChartTooltipContent,
 } from "@/components/ui/base-ui/chart"
 import { useBatchRequestRecords } from "@/hooks/use-batch-request-record"
+import { i18n } from "@/utils/i18n"
 import { addThousandsSeparator } from "@/utils/utils"
 import { recentDayAtom } from "./atom"
 

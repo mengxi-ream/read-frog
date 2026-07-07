@@ -2,10 +2,10 @@ import { IconLoader2, IconPlayerStopFilled, IconVolume } from "@tabler/icons-rea
 import { useAtomValue } from "jotai"
 import { useCallback } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { SelectionToolbarTooltip, useSelectionTooltipState } from "../components/selection-tooltip"
 import { selectionContentAtom } from "./atoms"
 

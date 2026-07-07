@@ -1,6 +1,7 @@
 import "@/utils/zod-config"
 import { defineContentScript } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
+import { initI18n } from "@/utils/i18n"
 import { clearEffectiveSiteControlUrl, getEffectiveSiteControlUrl, isSiteEnabled } from "@/utils/site-control"
 
 declare global {
@@ -26,6 +27,8 @@ export default defineContentScript({
       clearEffectiveSiteControlUrl()
       return
     }
+
+    await initI18n(initialConfig?.uiLanguage)
 
     const { bootstrapHostContent } = await import("./runtime")
     await bootstrapHostContent(ctx, initialConfig)

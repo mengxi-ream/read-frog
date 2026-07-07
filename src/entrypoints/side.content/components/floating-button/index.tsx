@@ -3,7 +3,7 @@ import { IconLock, IconLockOpen, IconSettings, IconX } from "@tabler/icons-react
 import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
-import { browser, i18n } from "#imports"
+import { browser } from "#imports"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import {
   DropdownMenu,
@@ -15,6 +15,7 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { APP_NAME } from "@/utils/constants/app"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import { matchDomainPattern } from "@/utils/url"

@@ -4,7 +4,6 @@ import type { TTSVoice, TTSVoiceGroup, TTSVoiceItem } from "@/types/config/tts"
 import { IconLoader2, IconPlayerPlayFilled } from "@tabler/icons-react"
 import { useAtom } from "jotai"
 import { useState } from "react"
-import { i18n } from "#imports"
 import { LanguageCombobox } from "@/components/language-combobox"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
@@ -53,6 +52,7 @@ import {
   ttsVolumeSchema,
 } from "@/types/config/tts"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 interface TtsNumberFieldProps {

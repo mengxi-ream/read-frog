@@ -1,13 +1,11 @@
 import type { CustomActionTemplate } from "@/utils/constants/custom-action-templates"
 import { Icon } from "@iconify/react"
-import { i18n } from "#imports"
 import { DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
 import { CUSTOM_ACTION_TEMPLATES } from "@/utils/constants/custom-action-templates"
-
-type TemplateI18nKey = Parameters<typeof i18n.t>[0]
+import { i18n } from "@/utils/i18n"
 
 function tTemplateKey(key: string) {
-  return i18n.t(key as TemplateI18nKey)
+  return i18n.t(key as never)
 }
 
 export function AddActionDialog({ onSelect }: { onSelect: (template: CustomActionTemplate) => void }) {

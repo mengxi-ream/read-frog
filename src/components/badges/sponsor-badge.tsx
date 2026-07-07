@@ -1,8 +1,8 @@
 import type { VariantProps } from "class-variance-authority"
 import type { badgeVariants } from "@/components/ui/base-ui/badge"
 import { Icon } from "@iconify/react"
-import { i18n } from "#imports"
 import { Badge } from "@/components/ui/base-ui/badge"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 type SponsorBadgeProps = Pick<VariantProps<typeof badgeVariants>, "size"> & { className?: string }

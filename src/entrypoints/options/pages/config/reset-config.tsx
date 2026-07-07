@@ -1,7 +1,6 @@
 import { IconRefresh } from "@tabler/icons-react"
 import { useSetAtom } from "jotai"
 import { useState } from "react"
-import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,6 +15,7 @@ import {
 import { Button } from "@/components/ui/base-ui/button"
 import { writeConfigAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function ResetConfig() {

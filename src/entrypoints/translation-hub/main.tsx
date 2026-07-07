@@ -12,6 +12,8 @@ import { configAtom } from "@/utils/atoms/config"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { initI18n } from "@/utils/i18n"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
 import { applyTheme, getLocalThemeMode, isDarkMode } from "@/utils/theme"
@@ -41,6 +43,8 @@ async function initApp() {
   ])
   const config = configValue ?? DEFAULT_CONFIG
 
+  await initI18n(config.uiLanguage)
+
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 
   renderPersistentReactRoot(root, (
@@ -50,9 +54,11 @@ async function initApp() {
           <HydrateAtoms initialValues={[[configAtom, config], [baseThemeModeAtom, themeMode]]}>
             <ThemeProvider>
               <TooltipProvider>
-                <App />
                 <FrogToast />
-                <HelpButton />
+                <LocaleBoundary>
+                  <App />
+                  <HelpButton />
+                </LocaleBoundary>
               </TooltipProvider>
             </ThemeProvider>
           </HydrateAtoms>

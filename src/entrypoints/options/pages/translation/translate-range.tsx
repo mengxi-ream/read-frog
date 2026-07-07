@@ -1,10 +1,10 @@
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { pageTranslateRangeSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function TranslateRange() {

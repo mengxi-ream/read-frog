@@ -1,8 +1,8 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { IconTool } from "@tabler/icons-react"
 import { useCallback } from "react"
-import { i18n } from "#imports"
 import { buttonVariants } from "@/components/ui/base-ui/button"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { cn } from "@/utils/styles/utils"
 import {

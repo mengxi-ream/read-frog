@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
+import { i18n } from "@/utils/i18n"
 import { usePromptAtoms } from "./context"
 import { downloadJSONFile } from "./utils/prompt-file"
 

@@ -91,6 +91,17 @@ const siteControlSchema = z.object({
   whitelistPatterns: z.array(z.string()),
 })
 
+// Interface language for the extension UI, independent of the browser language.
+// "auto" follows the browser UI language; explicit values are the supported locales.
+// MUST stay in sync with SUPPORTED_UI_LOCALES in `@/utils/i18n/resources` and `src/locales/`.
+// `.default("auto")` is load-bearing: it lets configs stored before this field existed still
+// parse successfully, avoiding the destructive fallback-to-DEFAULT_CONFIG path in
+// `writeConfigAtom` / `initializeConfig` during the upgrade window.
+const uiLanguageSchema = z
+  .enum(["auto", "en", "es", "ja", "ko", "ru", "tr", "vi", "zh-CN", "zh-TW"])
+  .default("auto")
+export type UiLanguage = z.infer<typeof uiLanguageSchema>
+
 // Complete config schema
 export const configSchema = z.object({
   language: languageSchema,
@@ -106,6 +117,7 @@ export const configSchema = z.object({
   inputTranslation: inputTranslationSchema,
   videoSubtitles: videoSubtitlesSchema,
   siteControl: siteControlSchema,
+  uiLanguage: uiLanguageSchema,
 }).superRefine((data, ctx) => {
   for (const featureKey of FEATURE_KEYS) {
     const def = FEATURE_PROVIDER_DEFS[featureKey]

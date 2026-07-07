@@ -3,9 +3,9 @@ import type { ProviderConfig, ProvidersConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
 import type { ProviderSelectorItem, ProviderSelectorOption } from "@/utils/providers/provider-display"
-import { i18n } from "#imports"
 import readFrogLogo from "@/assets/providers/read-frog-provider.png?url&no-inline"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
+import { i18n } from "@/utils/i18n"
 
 export const FREE_AI_PROVIDER_ID = "read-frog-free-ai"
 export const FREE_AI_PROVIDER_LOGO = readFrogLogo

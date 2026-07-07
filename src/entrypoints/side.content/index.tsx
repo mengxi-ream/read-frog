@@ -15,6 +15,8 @@ import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { initI18n } from "@/utils/i18n"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
 import { isSiteEnabled } from "@/utils/site-control"
@@ -58,6 +60,8 @@ export default defineContentScript({
       return
     }
 
+    await initI18n(config.uiLanguage)
+
     const themeMode = await getLocalThemeMode()
 
     const ui = await createShadowRootUi(ctx, {
@@ -98,7 +102,9 @@ export default defineContentScript({
               >
                 <ThemeProvider container={wrapper}>
                   <TooltipProvider>
-                    <App />
+                    <LocaleBoundary>
+                      <App />
+                    </LocaleBoundary>
                   </TooltipProvider>
                 </ThemeProvider>
               </HydrateAtoms>

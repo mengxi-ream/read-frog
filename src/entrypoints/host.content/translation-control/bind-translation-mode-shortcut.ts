@@ -2,8 +2,8 @@ import type { Hotkey } from "@tanstack/hotkeys"
 import type { TranslationMode } from "@/types/config/translate"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { getLocalConfig, setLocalConfig } from "@/utils/config/storage"
+import { i18n } from "@/utils/i18n"
 import { isPageTranslationShortcutEmpty, isValidConfiguredPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 
 const NEXT_MODE: Record<TranslationMode, TranslationMode> = {

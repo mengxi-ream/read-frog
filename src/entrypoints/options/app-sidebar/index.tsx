@@ -1,6 +1,5 @@
 import { IconSearch } from "@tabler/icons-react"
 import { useSetAtom } from "jotai"
-import { i18n } from "#imports"
 import {
   InputGroup,
   InputGroupAddon,
@@ -14,6 +13,7 @@ import {
   SidebarHeader,
 } from "@/components/ui/base-ui/sidebar"
 import { UserAccountMenuSidebar } from "@/components/user-account-menu"
+import { i18n } from "@/utils/i18n"
 import { getCommandPaletteShortcutHint } from "@/utils/os"
 import { commandPaletteOpenAtom } from "../command-palette/atoms"
 import { SettingsNav } from "./settings-nav"

@@ -1,8 +1,8 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
-import { i18n } from "#imports"
 import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { AI_SDK_REASONING_VALUES, isLLMProviderConfig, supportsTopLevelReasoning } from "@/types/config/provider"
+import { i18n } from "@/utils/i18n"
 import { withForm } from "./form"
 
 export const ReasoningField = withForm({

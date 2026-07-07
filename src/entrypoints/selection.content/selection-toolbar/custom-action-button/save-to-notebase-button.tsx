@@ -6,10 +6,10 @@ import { useMutation } from "@tanstack/react-query"
 import { useAtom, useSetAtom } from "jotai"
 import { useRef, useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { authClient } from "@/utils/auth/auth-client"
+import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import {
   classifyConnectedNotebaseOwnership,

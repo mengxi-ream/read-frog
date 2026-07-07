@@ -1,6 +1,7 @@
 import type { Config } from "@/types/config/config"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { browser, i18n, storage } from "#imports"
+import { browser, storage } from "#imports"
+import { i18n } from "@/utils/i18n"
 
 const sendMessageMock = vi.fn()
 const ensureInitializedConfigMock = vi.fn()

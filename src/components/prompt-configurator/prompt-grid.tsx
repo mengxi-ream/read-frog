@@ -1,7 +1,6 @@
 import type { TranslatePromptObj } from "@/types/config/translate"
 import { useAtom, useAtomValue } from "jotai"
 import { Activity, useId } from "react"
-import { i18n } from "#imports"
 import { Badge } from "@/components/ui/base-ui/badge"
 import {
   Card,
@@ -15,6 +14,7 @@ import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
 import { Separator } from "@/components/ui/base-ui/separator"
 import { DEFAULT_TRANSLATE_PROMPT, DEFAULT_TRANSLATE_PROMPT_ID, DEFAULT_TRANSLATE_SYSTEM_PROMPT } from "@/utils/constants/prompt"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { ConfigurePrompt } from "./configure-prompt"
 import { usePromptAtoms } from "./context"

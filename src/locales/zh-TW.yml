@@ -221,6 +221,10 @@ options:
       slow: 緩慢（建議調整思考模式）
   general:
     title: 通用
+    interfaceLanguage:
+      title: 介面語言
+      description: 選擇擴充功能介面的語言，獨立於瀏覽器語言。
+      auto: 自動（跟隨瀏覽器）
     appearance:
       title: 外觀
       theme: 主題

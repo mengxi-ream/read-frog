@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import { FieldGroup } from "@/components/ui/base-ui/field"
 import { ConfigCard } from "@/entrypoints/options/components/config-card"
+import { i18n } from "@/utils/i18n"
 import { CSSEditor } from "./css-editor"
 import { CustomTranslationStyleSwitch } from "./custom-translation-style-switch"
 import { PresetStyleSelector } from "./preset-style-selector"

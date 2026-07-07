@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
+import { i18n } from "@/utils/i18n"
 
 export interface SelectionToolbarInlineError {
   title: string

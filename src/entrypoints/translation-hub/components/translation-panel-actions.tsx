@@ -1,7 +1,7 @@
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
+import { i18n } from "@/utils/i18n"
 import { selectedProviderIdsAtom, translationCardExpandedStateAtom } from "../atoms"
 
 export function TranslationPanelActions() {

@@ -220,6 +220,10 @@ options:
       slow: Chậm (nên điều chỉnh chế độ suy nghĩ)
   general:
     title: Chung
+    interfaceLanguage:
+      title: Ngôn ngữ giao diện
+      description: Chọn ngôn ngữ cho giao diện tiện ích, độc lập với ngôn ngữ trình duyệt.
+      auto: Tự động (theo trình duyệt)
     appearance:
       title: Giao diện
       theme: Chủ đề

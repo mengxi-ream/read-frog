@@ -1,7 +1,6 @@
 import type { TranslationMode as TranslationModeType } from "@/types/config/translate"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import {
   Select,
   SelectContent,
@@ -12,6 +11,7 @@ import {
 } from "@/components/ui/base-ui/select"
 import { TRANSLATION_MODES } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function TranslationMode() {

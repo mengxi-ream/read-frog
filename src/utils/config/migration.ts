@@ -1,7 +1,7 @@
 import type { MigrationFunction } from "./migration-scripts/types"
 import type { Config } from "@/types/config/config"
-import { i18n } from "#imports"
 import { configSchema } from "@/types/config/config"
+import { i18n } from "@/utils/i18n"
 import { CONFIG_SCHEMA_VERSION } from "../constants/config"
 import { logger } from "../logger"
 import { ConfigVersionTooNewError } from "./errors"

@@ -220,6 +220,10 @@ options:
       slow: 低速（思考モードの調整を推奨）
   general:
     title: 一般
+    interfaceLanguage:
+      title: インターフェース言語
+      description: ブラウザの言語とは別に、拡張機能のインターフェース言語を選択します。
+      auto: 自動（ブラウザに従う）
     appearance:
       title: 外観
       theme: テーマ

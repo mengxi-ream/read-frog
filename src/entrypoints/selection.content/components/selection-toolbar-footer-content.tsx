@@ -1,7 +1,6 @@
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import { IconAspectRatio, IconRefresh } from "@tabler/icons-react"
 import { useCallback } from "react"
-import { i18n } from "#imports"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { buttonVariants } from "@/components/ui/base-ui/button"
 import {
@@ -16,6 +15,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/base-ui/popover"
 import { SelectionPopover, useSelectionPopoverOverlayProps } from "@/components/ui/selection-popover"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import {
   SelectionPopoverTooltip,

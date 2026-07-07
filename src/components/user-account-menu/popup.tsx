@@ -1,10 +1,10 @@
 import { match } from "ts-pattern"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
+import { i18n } from "@/utils/i18n"
 import {
   ACCOUNT_STATE,
   AccountAvatar,

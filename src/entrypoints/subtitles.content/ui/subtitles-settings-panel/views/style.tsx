@@ -4,7 +4,6 @@ import { IconLanguage, IconRefresh, IconSettings, IconSubtitles } from "@tabler/
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
 import { Activity, use } from "react"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
@@ -25,6 +24,7 @@ import {
   MIN_FONT_WEIGHT,
   SUBTITLE_FONT_FAMILIES,
 } from "@/utils/constants/subtitles"
+import { i18n } from "@/utils/i18n"
 import { ShadowWrapperContext } from "@/utils/react-shadow-host/create-shadow-host"
 import { subtitlesStore } from "../../../atoms"
 

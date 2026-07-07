@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { Badge } from "@/components/ui/base-ui/badge"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 import { EntityEditorLayout } from "../../components/entity-editor-layout"
 import { CustomActionConfigForm } from "./action-config-form"

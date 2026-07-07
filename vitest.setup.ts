@@ -51,11 +51,22 @@ Object.defineProperty(globalThis, "sessionStorage", {
   value: new MemoryStorage(),
 })
 
-// Mock @wxt-dev/i18n module to avoid browser.i18n.getMessage not implemented error
-vi.mock("#i18n", () => ({
+// Mock the runtime i18n facade so tests resolve keys deterministically (returning the
+// dot-key, matching the pre-migration behaviour that test assertions rely on) without
+// initializing i18next or touching browser.i18n.
+vi.mock("@/utils/i18n", () => ({
   i18n: {
     t: (key: string) => key,
   },
+  initI18n: async () => {},
+  setUiLanguage: async () => {},
+}))
+
+// LocaleBoundary is a separate module from the mocked facade above and pulls in i18next +
+// the bundled YAML resources (which vitest has no plugin for). Stub it to a passthrough so
+// no test loads i18next or the .yml files; runtime language switching is not under test here.
+vi.mock("@/utils/i18n/locale-boundary", () => ({
+  LocaleBoundary: ({ children }: { children: unknown }) => children,
 }))
 
 // Mock the fakeBrowser's i18n.getMessage method which is not implemented in fake-browser

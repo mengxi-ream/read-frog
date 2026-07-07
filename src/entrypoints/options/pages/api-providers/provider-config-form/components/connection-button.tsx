@@ -2,12 +2,12 @@ import type { APIProviderConfig } from "@/types/config/provider"
 import { IconCheck, IconHourglassLow, IconX } from "@tabler/icons-react"
 import { useMutation } from "@tanstack/react-query"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { i18n } from "#imports"
 import LoadingDots from "@/components/loading-dots"
 import { Button } from "@/components/ui/base-ui/button"
 import { getObjectWithoutAPIKeys } from "@/utils/config/api"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { i18n } from "@/utils/i18n"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 
 const SLOW_CONNECTION_THRESHOLD_MS = 3_000

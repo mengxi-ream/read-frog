@@ -19,12 +19,23 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const DEFAULT_DETECTED_CODE = "eng" as const
-export const CONFIG_SCHEMA_VERSION = 83
+export const CONFIG_SCHEMA_VERSION = 84
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
 
-function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
+/**
+ * Build the default "Dictionary" custom action. Its `name`/`systemPrompt`/`prompt`/output
+ * field labels are resolved via `i18n.t` and, once written to a user's config, become
+ * frozen user data. To persist them in the user's chosen `uiLanguage` (not whatever the
+ * i18next singleton defaulted to at module-import time), `initializeConfig` calls this
+ * again after `initI18n` for the config it actually writes on a fresh install.
+ *
+ * The module-scope `defaultDictionaryAction` below stays (DEFAULT_CONFIG must expose a
+ * populated `customActions` for in-memory fallbacks and tests); its strings are only ever
+ * a transient fallback, never the persisted value.
+ */
+export function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
   const template = CUSTOM_ACTION_TEMPLATES.find(t => t.id === "dictionary")
   if (!template)
     return null
@@ -40,6 +51,12 @@ function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
         : `default-dictionary-${field.id}`,
     })),
   }
+}
+
+/** Default custom actions for a fresh install, resolved against the current i18next language. */
+export function buildDefaultCustomActions(): SelectionToolbarCustomAction[] {
+  const dictionaryAction = createDefaultDictionaryAction()
+  return dictionaryAction ? [dictionaryAction] : []
 }
 
 const defaultDictionaryAction = createDefaultDictionaryAction()
@@ -175,6 +192,7 @@ export const DEFAULT_CONFIG: Config = {
     blacklistPatterns: [],
     whitelistPatterns: [],
   },
+  uiLanguage: "auto",
 }
 
 export const PAGE_TRANSLATE_RANGE_ITEMS: Record<

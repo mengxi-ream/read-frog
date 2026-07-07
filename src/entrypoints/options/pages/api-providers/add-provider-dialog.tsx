@@ -1,12 +1,12 @@
 import type { APIProviderTypes } from "@/types/config/provider"
 import { useAtom, useSetAtom } from "jotai"
-import { i18n } from "#imports"
 import { SponsorBadge } from "@/components/badges/sponsor-badge"
 import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { API_PROVIDER_ITEMS, PROVIDER_GROUPS } from "@/utils/constants/providers"
+import { i18n } from "@/utils/i18n"
 import { selectedProviderIdAtom } from "./atoms"
 import { addProvider } from "./utils"
 

@@ -1,13 +1,13 @@
 import type { PreloadConfig as PreloadConfigType } from "@/types/config/translate"
 import { useAtom } from "jotai"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { preloadConfigSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD } from "@/utils/constants/translate"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 type KeyOfPreloadConfig = keyof PreloadConfigType

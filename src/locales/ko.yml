@@ -220,6 +220,10 @@ options:
       slow: 느림(사고 모드 조정 권장)
   general:
     title: 일반
+    interfaceLanguage:
+      title: 인터페이스 언어
+      description: 브라우저 언어와 별개로 확장 프로그램의 인터페이스 언어를 선택합니다.
+      auto: 자동(브라우저 따름)
     appearance:
       title: 외관
       theme: 테마

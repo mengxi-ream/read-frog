@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import floatingButtonDemoImage from "@/assets/demo/floating-button.png"
 import { GradientBackground } from "@/components/gradient-background"
+import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { FloatingButtonClickAction } from "./floating-button-click-action"
 import { FloatingButtonDisabledSites } from "./floating-button-disabled-sites"

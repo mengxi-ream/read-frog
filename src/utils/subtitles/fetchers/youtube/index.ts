@@ -1,7 +1,6 @@
 import type { SubtitlesFragment } from "../../types"
 import type { SubtitlesFetcher } from "../types"
 import type { CaptionTrack, PlayerData, YoutubeTimedText } from "./types"
-import { i18n } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
 import {
   ENSURE_SUBTITLES_REQUEST_TYPE,
@@ -19,6 +18,7 @@ import {
   WAIT_TIMEDTEXT_RESPONSE_TYPE,
 } from "@/utils/constants/subtitles"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
+import { i18n } from "@/utils/i18n"
 import { OverlaySubtitlesError } from "@/utils/subtitles/errors"
 import { getYoutubeVideoId } from "@/utils/subtitles/video-id"
 import { detectFormat } from "./format-detector"

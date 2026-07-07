@@ -3,10 +3,10 @@ import type { buttonVariants } from "@/components/ui/base-ui/button"
 import type { Config } from "@/types/config/config"
 import { Icon } from "@iconify/react"
 import { useState } from "react"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { ScrollArea } from "@/components/ui/base-ui/scroll-area"
 import { CONFIG_SCHEMA_VERSION } from "@/utils/constants/config"
+import { i18n } from "@/utils/i18n"
 
 export function ViewConfig(
   { config, configSchemaVersion, size = "default" }:

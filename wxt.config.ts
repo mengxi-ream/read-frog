@@ -1,5 +1,6 @@
 import path from "node:path"
 import process from "node:process"
+import ViteYaml from "@modyfi/vite-plugin-yaml"
 import { defineConfig } from "wxt"
 import { z } from "zod"
 import { createExtensionClientEnvSchema, isLocalPackagesEnabled, resolveExtensionEnv } from "./src/env/shared"
@@ -101,6 +102,20 @@ export default defineConfig({
       ],
     },
     plugins: [
+      // Lets the runtime i18next facade (src/utils/i18n) `import` the `src/locales/*.yml`
+      // files as JS objects so i18next can bundle them for runtime language switching.
+      //
+      // This does NOT replace `@wxt-dev/i18n/module` (still registered in `modules` above).
+      // That module reads the same .yml files via its own fs-based mechanism — a separate
+      // path from this Vite `import` — and is kept ONLY for two build-time jobs it still owns:
+      //   1. Emitting `_locales/*/messages.json`, which the browser uses to localize the
+      //      manifest `__MSG_extName__` / `__MSG_extDescription__` below. That is chosen by
+      //      the browser UI language at load time and is NOT runtime-switchable (platform
+      //      constraint), so it stays with @wxt-dev/i18n.
+      //   2. Generating the `#i18n` key types (.wxt/i18n/structure.d.ts) that the facade
+      //      reuses for autocomplete/type-checking at every `i18n.t('key')` call site.
+      // Runtime UI string lookup itself no longer goes through @wxt-dev/i18n.
+      ViteYaml(),
       ...(configEnv.mode === "production"
         ? [
             {

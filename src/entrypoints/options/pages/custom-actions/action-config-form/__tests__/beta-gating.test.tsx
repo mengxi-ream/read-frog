@@ -3,9 +3,9 @@ import type { Config } from "@/types/config/config"
 import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
-import { i18n } from "#imports"
 import { configAtom } from "@/utils/atoms/config"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { i18n } from "@/utils/i18n"
 import { CustomActionConfigForm } from ".."
 
 vi.mock("@/components/form/quick-insertable-textarea-field-auto-save", () => ({

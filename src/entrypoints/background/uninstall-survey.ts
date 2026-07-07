@@ -1,5 +1,6 @@
-import { browser, i18n } from "#imports"
+import { browser } from "#imports"
 import { EXTENSION_VERSION } from "@/utils/constants/app"
+import { i18n } from "@/utils/i18n"
 
 const EDGE_VERSION_RE = /Edg(?:e|A|iOS)?\/([\d.]+)/i
 const EDGE_LEGACY_VERSION_RE = /Edge\/([\d.]+)/i

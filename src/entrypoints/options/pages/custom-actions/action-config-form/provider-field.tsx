@@ -1,10 +1,10 @@
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import { useAtomValue } from "jotai"
 import { useMemo } from "react"
-import { i18n } from "#imports"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import {
   getProviderIdsForCapability,
   getSelectableProvidersForCapability,

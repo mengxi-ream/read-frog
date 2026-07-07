@@ -4,7 +4,6 @@ import { Combobox as ComboboxPrimitive } from "@base-ui/react"
 import { Icon } from "@iconify/react"
 import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { useMemo } from "react"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   Combobox,
@@ -14,6 +13,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from "@/components/ui/base-ui/combobox"
+import { i18n } from "@/utils/i18n"
 import { getLanguageLabel } from "@/utils/language-labels"
 import { filterLanguage } from "./language-combobox-options"
 

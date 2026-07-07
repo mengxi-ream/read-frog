@@ -1,8 +1,8 @@
 import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-record"
 import { useAtomValue } from "jotai"
-import { i18n } from "#imports"
 import { MetricCard } from "@/entrypoints/options/components/metric-card"
 import { useBatchRequestRecords } from "@/hooks/use-batch-request-record"
+import { i18n } from "@/utils/i18n"
 import { recentDayAtom } from "./atom"
 
 export default function Metrics() {

@@ -1,6 +1,10 @@
 import "@/utils/zod-config"
+import type { Config, UiLanguage } from "@/types/config/config"
 import { browser, defineBackground } from "#imports"
 import { env } from "@/env"
+import { storageAdapter } from "@/utils/atoms/storage-adapter"
+import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
+import { initI18n, setUiLanguage } from "@/utils/i18n"
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
 import { openOptionsPage } from "@/utils/navigation"
@@ -97,15 +101,13 @@ export default defineBackground({
     // This ensures listeners are registered before Chrome completes initialization
     registerContextMenuListeners()
 
-    // Initialize context menu items asynchronously
+    // Initialize action icons asynchronously
     void initializeActionIcons()
-    void initializeContextMenu()
 
     void setUpWebPageTranslationQueue()
     void setUpSubtitlesTranslationQueue()
     void setUpDatabaseCleanup()
     setUpConfigBackup()
-    void setupUninstallSurvey()
 
     proxyFetch()
     setupNotebasePendingSaveProcessor()
@@ -116,5 +118,32 @@ export default defineBackground({
 
     // Setup on-demand iframe injection after page translation is enabled.
     setupIframeInjection()
+
+    // i18n bootstrap for the non-React background context. Runs after the synchronous
+    // listener registration above (MV3 requires listeners before the first await). The
+    // context menu and the uninstall-survey URL both resolve i18n.t at registration time,
+    // so they must be created AFTER initI18n or they freeze in the wrong language.
+    let currentUiLanguage: UiLanguage | undefined
+    void (async () => {
+      const config = await ensureInitializedConfig()
+      currentUiLanguage = config?.uiLanguage ?? "auto"
+      await initI18n(currentUiLanguage)
+      void initializeContextMenu()
+      await setupUninstallSurvey()
+    })()
+
+    // Keep background-resolved strings in the selected language when it changes.
+    // The context menu re-creates itself via its own config watcher
+    // (registerContextMenuListeners), so here we only drive the i18next singleton and
+    // re-set the frozen (localized) uninstall-survey URL.
+    storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (newConfig) => {
+      if (newConfig.uiLanguage === currentUiLanguage)
+        return
+      currentUiLanguage = newConfig.uiLanguage
+      void (async () => {
+        await setUiLanguage(newConfig.uiLanguage)
+        await setupUninstallSurvey()
+      })()
+    })
   },
 })

@@ -221,6 +221,10 @@ options:
       slow: Lento (se recomienda ajustar el modo de razonamiento)
   general:
     title: General
+    interfaceLanguage:
+      title: Idioma de la interfaz
+      description: Elige el idioma de la interfaz de la extensión, independiente del idioma de tu navegador.
+      auto: Automático (seguir el navegador)
     appearance:
       title: Apariencia
       theme: Tema

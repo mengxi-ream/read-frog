@@ -1,7 +1,7 @@
 import { useAtomValue, useSetAtom } from "jotai"
-import { i18n } from "#imports"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { isIgnoreTabAtom } from "../atoms/ignore"
 import { isCurrentSiteInBlacklistAtom, isCurrentSiteInWhitelistAtom, toggleCurrentSiteInBlacklistAtom, toggleCurrentSiteInWhitelistAtom } from "../atoms/site-control"
 

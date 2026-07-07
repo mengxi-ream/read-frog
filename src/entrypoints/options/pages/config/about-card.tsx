@@ -1,8 +1,8 @@
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { analyticsEnabledAtom } from "@/utils/atoms/analytics"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function AboutCard() {

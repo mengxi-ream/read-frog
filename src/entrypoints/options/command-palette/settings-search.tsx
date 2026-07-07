@@ -1,7 +1,6 @@
 import { useAtom } from "jotai"
 import { useEffect, useMemo, useRef } from "react"
 import { useLocation, useNavigate } from "react-router"
-import { i18n } from "#imports"
 import {
   Command,
   CommandDialog,
@@ -11,6 +10,7 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/base-ui/command"
+import { i18n } from "@/utils/i18n"
 import { commandPaletteOpenAtom } from "./atoms"
 import { SEARCH_ITEMS } from "./search-items"
 import {
@@ -19,10 +19,8 @@ import {
   scrollToSectionWhenReady,
 } from "./section-scroll"
 
-type SearchI18nKey = Parameters<typeof i18n.t>[0]
-
 function tSearchKey(key: string) {
-  return i18n.t(key as SearchI18nKey)
+  return i18n.t(key as never)
 }
 
 export function SettingsSearch() {

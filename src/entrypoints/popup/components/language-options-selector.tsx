@@ -6,7 +6,6 @@ import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { IconChevronDown } from "@tabler/icons-react"
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
-import { i18n } from "#imports"
 import { filterLanguage } from "@/components/language-combobox-options"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -19,6 +18,7 @@ import {
 } from "@/components/ui/base-ui/combobox"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectedCodeAtom } from "@/utils/atoms/detected-code"
+import { i18n } from "@/utils/i18n"
 import { getLanguageLabel, getLanguageName } from "@/utils/language-labels"
 
 function createLanguageItem(code: LangCodeISO6393): LanguageItem<LangCodeISO6393> {

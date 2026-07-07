@@ -35,7 +35,7 @@ export function SubtitlesSettingsPanel() {
     <PanelShell
       open={isOpen}
       onClose={close}
-      header={subpage ? { title: subpage.title, onBack: navigateBack } : undefined}
+      header={subpage ? { title: subpage.title(), onBack: navigateBack } : undefined}
       transition={subpage
         ? {
             key: view,

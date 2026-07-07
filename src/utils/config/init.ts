@@ -3,9 +3,25 @@ import type { ConfigMeta } from "@/types/config/meta"
 import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
 import { isAPIProviderConfig } from "@/types/config/provider"
-import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
+import { initI18n } from "@/utils/i18n"
+import { buildDefaultCustomActions, CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
 import { logger } from "../logger"
 import { runMigration } from "./migration"
+
+/**
+ * DEFAULT_CONFIG whose default custom-action strings are resolved against the current
+ * i18next language. Callers MUST `await initI18n(...)` first so the persisted strings
+ * match the user's `uiLanguage` rather than the module-import-time singleton language.
+ */
+function buildFreshDefaultConfig(): Config {
+  return {
+    ...DEFAULT_CONFIG,
+    selectionToolbar: {
+      ...DEFAULT_CONFIG.selectionToolbar,
+      customActions: buildDefaultCustomActions(),
+    },
+  }
+}
 
 /**
  * Initialize the config, this function should only be called once in the background script
@@ -22,7 +38,10 @@ export async function initializeConfig() {
   let didConfigChange = false
 
   if (!storedConfig) {
-    config = DEFAULT_CONFIG
+    // Fresh install: resolve the default custom-action strings in the browser locale
+    // ("auto") before they are persisted and frozen.
+    await initI18n(DEFAULT_CONFIG.uiLanguage)
+    config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
     didConfigChange = true
   }
@@ -46,7 +65,8 @@ export async function initializeConfig() {
 
   if (!configSchema.safeParse(config).success) {
     logger.warn("Config is invalid, using default config")
-    config = DEFAULT_CONFIG
+    await initI18n(DEFAULT_CONFIG.uiLanguage)
+    config = buildFreshDefaultConfig()
     currentVersion = CONFIG_SCHEMA_VERSION
     didConfigChange = true
   }

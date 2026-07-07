@@ -1,8 +1,8 @@
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { ShortcutKeyRecorder } from "@/components/shortcut-key-recorder"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY } from "@/utils/constants/translate"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function PageTranslationShortcut() {

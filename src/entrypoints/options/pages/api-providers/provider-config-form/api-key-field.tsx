@@ -1,8 +1,8 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useState } from "react"
-import { i18n } from "#imports"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
+import { i18n } from "@/utils/i18n"
 import { ConnectionTestButton } from "./components/connection-button"
 import { withForm } from "./form"
 

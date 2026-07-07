@@ -1,7 +1,6 @@
 import type { ComponentProps } from "react"
 import type { Theme } from "@/types/config/theme"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
-import { i18n } from "#imports"
 import ProviderIcon from "@/components/provider-icon"
 import {
   Select,
@@ -13,6 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { isLLMProviderConfig, isPureTranslateProviderConfig } from "@/types/config/provider"
+import { i18n } from "@/utils/i18n"
 import { getProviderLogo, getProviderName, isProviderSelectorItem } from "@/utils/providers/provider-display"
 import { useTheme } from "../providers/theme-provider"
 

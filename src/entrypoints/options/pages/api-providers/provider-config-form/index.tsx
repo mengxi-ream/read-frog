@@ -4,7 +4,6 @@ import { useSelector } from "@tanstack/react-store"
 import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { useEffect, useState } from "react"
 import { toast } from "sonner"
-import { i18n } from "#imports"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +26,7 @@ import {
   findFeatureMissingProvider,
 } from "@/utils/config/helpers"
 import { buildFeatureProviderPatch } from "@/utils/constants/feature-providers"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { selectedProviderIdAtom } from "../atoms"
 import { duplicateProvider } from "../utils"

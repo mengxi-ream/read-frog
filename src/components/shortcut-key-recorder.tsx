@@ -1,7 +1,7 @@
 import { isModifierKey } from "@tanstack/hotkeys"
 import { useCallback, useEffect, useRef, useState } from "react"
-import { i18n } from "#imports"
 import { Input } from "@/components/ui/base-ui/input"
+import { i18n } from "@/utils/i18n"
 import { formatPageTranslationShortcut, isValidConfiguredPageTranslationShortcut, keyboardEventToPageTranslationShortcut } from "@/utils/page-translation-shortcut"
 
 const CLEAR_KEYS = new Set(["Backspace", "Delete"])

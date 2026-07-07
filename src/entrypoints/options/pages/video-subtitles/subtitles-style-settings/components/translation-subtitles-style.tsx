@@ -1,13 +1,13 @@
 import { Icon } from "@iconify/react"
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Card } from "@/components/ui/base-ui/card"
 import { Label } from "@/components/ui/base-ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR } from "@/utils/constants/subtitles"
+import { i18n } from "@/utils/i18n"
 import { SubtitlesTextStyleForm } from "./subtitles-text-style-form"
 
 export function TranslationSubtitlesStyle() {

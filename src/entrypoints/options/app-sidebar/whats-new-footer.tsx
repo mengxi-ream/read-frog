@@ -1,7 +1,6 @@
 import { Icon } from "@iconify/react"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { useCallback, useEffect, useEffectEvent, useState } from "react"
-import { i18n } from "#imports"
 import {
   Popover,
   PopoverContent,
@@ -24,6 +23,7 @@ import {
   hasNewBlogPost,
   saveLastViewedBlogDate,
 } from "@/utils/blog"
+import { i18n } from "@/utils/i18n"
 import { version } from "../../../../package.json"
 
 export function WhatsNewFooter() {

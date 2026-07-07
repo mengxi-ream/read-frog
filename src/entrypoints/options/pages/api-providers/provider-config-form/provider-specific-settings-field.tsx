@@ -1,13 +1,13 @@
 import type { APIProviderConfig, LLMProviderTypes, ProviderSpecificSettingField } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
 import { useEffect, useEffectEvent, useMemo, useState } from "react"
-import { i18n } from "#imports"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getProviderSpecificSettingFields, isLLMProvider, PROVIDER_SPECIFIC_SETTINGS_SCHEMAS } from "@/types/config/provider"
 import { compactObject } from "@/types/utils"
+import { i18n } from "@/utils/i18n"
 import { withForm } from "./form"
 
 function getProviderSpecificSettings(providerConfig: APIProviderConfig) {
@@ -67,7 +67,7 @@ export const ProviderSpecificSettingsField = withForm({
 
     const renderField = (def: ProviderSpecificSettingField) => {
       const fieldId = `${def.key}-${providerConfig.id}`
-      const fieldLabel = i18n.t(`options.apiProviders.form.providerSettingLabels.${def.labelKey}` as Parameters<typeof i18n.t>[0])
+      const fieldLabel = i18n.t(`options.apiProviders.form.providerSettingLabels.${def.labelKey}` as never)
       const fieldValue = localSettings[def.key]
 
       if (def.type === "select") {
@@ -84,7 +84,7 @@ export const ProviderSpecificSettingsField = withForm({
               <SelectTrigger id={fieldId} className="w-full">
                 <SelectValue placeholder={def.placeholder}>
                   {selectedOption
-                    ? i18n.t(`options.apiProviders.form.providerSettingOptionLabels.${selectedOption.labelKey}` as Parameters<typeof i18n.t>[0])
+                    ? i18n.t(`options.apiProviders.form.providerSettingOptionLabels.${selectedOption.labelKey}` as never)
                     : undefined}
                 </SelectValue>
               </SelectTrigger>
@@ -92,7 +92,7 @@ export const ProviderSpecificSettingsField = withForm({
                 <SelectGroup>
                   {def.options.map(option => (
                     <SelectItem key={option.value} value={option.value}>
-                      {i18n.t(`options.apiProviders.form.providerSettingOptionLabels.${option.labelKey}` as Parameters<typeof i18n.t>[0])}
+                      {i18n.t(`options.apiProviders.form.providerSettingOptionLabels.${option.labelKey}` as never)}
                     </SelectItem>
                   ))}
                 </SelectGroup>

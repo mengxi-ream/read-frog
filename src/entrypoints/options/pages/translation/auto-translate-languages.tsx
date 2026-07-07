@@ -1,10 +1,10 @@
 import type { LangCodeISO6393 } from "@read-frog/definitions"
 import { Icon } from "@iconify/react"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { MultiLanguageCombobox } from "@/components/multi-language-combobox"
 import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { getLanguageLabel } from "@/utils/language-labels"
 import { ConfigCard } from "../../components/config-card"
 

@@ -6,7 +6,7 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { sendMessage } from "@/utils/message"
 import { CustomActionToolButton } from "../custom-action-tool-button"
 
-vi.mock("#i18n", () => ({
+vi.mock("@/utils/i18n", () => ({
   i18n: {
     t: (key: string, args?: string[]) => {
       if (key === "action.customizeCustomAction") {
@@ -16,6 +16,8 @@ vi.mock("#i18n", () => ({
       return key
     },
   },
+  initI18n: async () => {},
+  setUiLanguage: async () => {},
 }))
 
 vi.mock("@/utils/message", () => ({

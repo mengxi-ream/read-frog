@@ -5,7 +5,6 @@ import type {
 import { Icon } from "@iconify/react"
 import { useForm } from "@tanstack/react-form"
 import { useEffect, useState } from "react"
-import { i18n } from "#imports"
 import { fieldContext as FieldContext } from "@/components/form/form-context"
 import { InputField } from "@/components/form/input-field"
 import { QuickInsertableTextareaField } from "@/components/form/quick-insertable-textarea-field"
@@ -48,6 +47,7 @@ import {
   normalizeOutputSchemaFieldName,
   SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS,
 } from "@/utils/constants/custom-action"
+import { i18n } from "@/utils/i18n"
 import { withForm } from "./form"
 
 type CustomActionFormKey = "fieldName"

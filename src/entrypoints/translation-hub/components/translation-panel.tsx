@@ -1,6 +1,5 @@
 import { Icon } from "@iconify/react"
 import { useAtomValue, useSetAtom } from "jotai"
-import { i18n } from "#imports"
 import {
   Empty,
   EmptyDescription,
@@ -8,6 +7,7 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/base-ui/empty"
+import { i18n } from "@/utils/i18n"
 import { selectedProviderIdsAtom, translationCardExpandedStateAtom } from "../atoms"
 import { TranslationCard } from "./translation-card"
 

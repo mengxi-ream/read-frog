@@ -1,9 +1,9 @@
 import type { ReactNode } from "react"
 import { Icon } from "@iconify/react"
 import { useState } from "react"
-import { i18n } from "#imports"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
 import { FieldGroup } from "@/components/ui/base-ui/field"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 interface AdvancedOptionsSectionProps {

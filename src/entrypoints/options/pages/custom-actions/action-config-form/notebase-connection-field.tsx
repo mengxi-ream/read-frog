@@ -14,7 +14,6 @@ import { useQuery } from "@tanstack/react-query"
 import { useSelector } from "@tanstack/react-store"
 import { dequal } from "dequal"
 import { useCallback, useEffect, useMemo } from "react"
-import { i18n } from "#imports"
 import { Alert, AlertAction, AlertDescription, AlertTitle } from "@/components/ui/base-ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/base-ui/avatar"
 import { Button } from "@/components/ui/base-ui/button"
@@ -33,6 +32,7 @@ import {
 } from "@/components/ui/base-ui/select"
 import { env } from "@/env"
 import { authClient } from "@/utils/auth/auth-client"
+import { i18n } from "@/utils/i18n"
 import {
   classifyConnectedNotebaseOwnership,
   createNotebaseConnectedAccountSnapshot,
@@ -52,7 +52,6 @@ import {
 import { orpc } from "@/utils/orpc/client"
 import { withForm } from "./form"
 
-type NotebaseI18nKey = Parameters<typeof i18n.t>[0]
 type NotebaseItem = NotebaseListOutput[number]
 type NotebaseColumn = NotebaseGetSchemaOutput["notebaseColumns"][number]
 
@@ -62,7 +61,7 @@ interface SelectItemData<T> {
 }
 
 function t(key: string) {
-  return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.${key}` as NotebaseI18nKey)
+  return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.${key}` as never)
 }
 
 function getAccountFallback(account: SelectionToolbarCustomActionNotebaseAccount | undefined, fallbackLabel: string) {

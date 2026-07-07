@@ -12,6 +12,8 @@ import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { APP_NAME } from "@/utils/constants/app"
+import { initI18n } from "@/utils/i18n"
+import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
@@ -64,7 +66,9 @@ async function mountSelectionUI(ctx: ContentScriptContext) {
             <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
               <ThemeProvider container={wrapper}>
                 <TooltipProvider>
-                  <App uiContainer={container} />
+                  <LocaleBoundary>
+                    <App uiContainer={container} />
+                  </LocaleBoundary>
                 </TooltipProvider>
               </ThemeProvider>
             </HydrateAtoms>
@@ -104,6 +108,8 @@ export default defineContentScript({
       clearEffectiveSiteControlUrl()
       return
     }
+
+    await initI18n(config?.uiLanguage)
 
     void mountSelectionUI(ctx)
   },

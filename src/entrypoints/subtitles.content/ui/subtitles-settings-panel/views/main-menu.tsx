@@ -17,7 +17,7 @@ export function MainMenu({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
           <SubpageMenuEntry
             key={page.id}
             icon={page.icon}
-            label={page.title}
+            label={page.title()}
             onClick={() => onNavigate(page.id)}
           />
         ))}

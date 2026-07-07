@@ -1,6 +1,6 @@
-import { i18n } from "#imports"
 import contextMenuDemoImage from "@/assets/demo/context-menu.png"
 import { GradientBackground } from "@/components/gradient-background"
+import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { ContextMenuTranslateToggle } from "./context-menu-translate-toggle"
 

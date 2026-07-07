@@ -1,8 +1,8 @@
 import type { APIProviderConfig } from "@/types/config/provider"
 import { useSelector } from "@tanstack/react-store"
-import { i18n } from "#imports"
 import { HelpTooltip } from "@/components/help-tooltip"
 import { isLLMProviderConfig } from "@/types/config/provider"
+import { i18n } from "@/utils/i18n"
 import { withForm } from "./form"
 
 export const TemperatureField = withForm({

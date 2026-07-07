@@ -1,5 +1,5 @@
-import { i18n } from "#imports"
 import { FeatureProviderSelectorList, needsApiKeyWarning } from "@/components/llm-providers/feature-provider-selector-list"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 import { SetApiKeyWarning } from "../../components/set-api-key-warning"
 

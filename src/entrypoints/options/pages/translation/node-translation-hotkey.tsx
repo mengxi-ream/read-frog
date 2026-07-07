@@ -1,6 +1,5 @@
 import { deepmerge } from "deepmerge-ts"
 import { useAtom } from "jotai"
-import { i18n } from "#imports"
 import { Field, FieldContent, FieldLabel } from "@/components/ui/base-ui/field"
 import {
   Select,
@@ -13,6 +12,7 @@ import {
 import { Switch } from "@/components/ui/base-ui/switch"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
+import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function NodeTranslationHotkey() {

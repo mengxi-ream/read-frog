@@ -1,4 +1,4 @@
-import { i18n } from "#imports"
+import { i18n } from "@/utils/i18n"
 
 interface LLMStatusIndicatorProps {
   hasLLMProvider: boolean

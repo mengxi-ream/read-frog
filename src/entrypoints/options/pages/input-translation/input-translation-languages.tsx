@@ -3,7 +3,6 @@ import { Icon } from "@iconify/react"
 import { langCodeISO6393Schema } from "@read-frog/definitions"
 import { useAtom } from "jotai"
 import { Activity } from "react"
-import { i18n } from "#imports"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { Label } from "@/components/ui/base-ui/label"
 import {
@@ -15,6 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { getLanguageLabel } from "@/utils/language-labels"
 import { ConfigCard } from "../../components/config-card"
 

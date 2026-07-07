@@ -1,6 +1,5 @@
 import { IconSelector } from "@tabler/icons-react"
 import { match } from "ts-pattern"
-import { i18n } from "#imports"
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -10,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/base-ui/sidebar"
+import { i18n } from "@/utils/i18n"
 import {
   ACCOUNT_STATE,
   AccountAvatar,

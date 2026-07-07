@@ -2,7 +2,6 @@ import type { SelectionToolbarCustomAction } from "@/types/config/selection-tool
 import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useState } from "react"
-import { i18n } from "#imports"
 import { Button } from "@/components/ui/base-ui/button"
 import { Field, FieldLabel } from "@/components/ui/base-ui/field"
 import {
@@ -18,6 +17,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/base-ui/popover"
 import { ICON_PATTERN } from "@/utils/constants/custom-action"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { withForm } from "./form"
 import { CURATED_ICON_OPTIONS } from "./icon-field-options"
