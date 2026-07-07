@@ -58,6 +58,13 @@ export function SettingsNav() {
           </SidebarMenuItem>
 
           <SidebarMenuItem>
+            <SidebarMenuButton render={<Link to="/site-rules" />} isActive={pathname === "/site-rules"}>
+              <Icon icon="tabler:world-cog" />
+              <span>{i18n.t("options.siteRules.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
             <SidebarMenuButton render={<Link to="/video-subtitles" />} isActive={pathname === "/video-subtitles"}>
               <Icon icon="tabler:subtitles" />
               <span>{i18n.t("options.videoSubtitles.title")}</span>

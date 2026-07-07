@@ -13,9 +13,11 @@ import { walkAndLabelElement } from "@/utils/host/dom/traversal"
 import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
 import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
+import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
 import { getOrCreateWebPageContext } from "@/utils/host/translate/webpage-context"
 import { logger } from "@/utils/logger"
 import { sendMessage } from "@/utils/message"
+import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
 type SimpleIntersectionOptions = Omit<IntersectionObserverInit, "threshold"> & {
   threshold?: number
@@ -131,6 +133,12 @@ export class PageTranslationManager implements IPageTranslationManager {
       })
 
       this.isPageTranslating = true
+
+      const siteRule = getEffectiveSiteRule(config, window.location.href)
+      if (siteRule.injectedCss) {
+        void ensureSiteRuleCSS(document, siteRule.injectedCss)
+      }
+
       await this.primeDocumentTitleContext(
         config.translate.enableAIContentAware && isLLMProviderConfig(providerConfig),
       )
@@ -221,6 +229,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     this.mutationObservers.forEach(observer => observer.disconnect())
     this.mutationObservers = []
 
+    removeSiteRuleCSS(document)
     void removeAllTranslatedWrapperNodes()
   }
 

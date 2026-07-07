@@ -1,3 +1,4 @@
+import type { Config } from "@/types/config/config"
 import type { TranslationNodeStyleConfig } from "@/types/config/translate"
 import type { TransNode } from "@/types/dom"
 import {
@@ -7,7 +8,7 @@ import {
   NOTRANSLATE_CLASS,
   PARAGRAPH_ATTRIBUTE,
 } from "../../../constants/dom-labels"
-import { isBlockTransNode, isCustomForceBlockTranslation, isHTMLElement, isInlineTransNode } from "../../dom/filter"
+import { isBlockTransNode, isHTMLElement, isInlineTransNode, isSiteRuleForceBlockElement, isSiteRuleForceInlineElement } from "../../dom/filter"
 import { getOwnerDocument } from "../../dom/node"
 import { decorateTranslationNode } from "../ui/decorate-translation"
 import { isForceInlineTranslation } from "../ui/translation-utils"
@@ -79,16 +80,18 @@ export async function insertTranslatedNodeIntoWrapper(
   targetNode: TransNode,
   translatedText: string,
   translationNodeStyle: TranslationNodeStyleConfig,
+  config: Config,
   forceBlockTranslation: boolean = false,
 ): Promise<void> {
   // Use the wrapper's owner document
   const ownerDoc = getOwnerDocument(translatedWrapperNode)
   const translatedNode = ownerDoc.createElement("span")
-  const forceInlineTranslation = isForceInlineTranslation(targetNode)
-  const customForceBlock = isHTMLElement(targetNode) && isCustomForceBlockTranslation(targetNode)
+  const siteRuleForceInline = isHTMLElement(targetNode) && isSiteRuleForceInlineElement(targetNode, config)
+  const forceInlineTranslation = isForceInlineTranslation(targetNode) || siteRuleForceInline
+  const siteRuleForceBlock = isHTMLElement(targetNode) && isSiteRuleForceBlockElement(targetNode, config)
 
-  // priority: customForceBlock > forceInlineTranslation > forceBlockTranslation > isInlineTransNode > isBlockTransNode
-  if (customForceBlock) {
+  // priority: siteRuleForceBlock > forceInlineTranslation > forceBlockTranslation > isInlineTransNode > isBlockTransNode
+  if (siteRuleForceBlock) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
   }
   else if (forceInlineTranslation) {

@@ -784,6 +784,31 @@ options:
       description: Mejora la calidad de la traducción proporcionando contexto de la página web a la AI
       enable: Activar traducción con contexto inteligente de IA
       enableDescription: La AI usa el resumen de la página web para mejorar la precisión de traducción. Requiere proveedor LLM. Añade latencia al empezar a traducir una página y aumenta los costes de API.
+  siteRules:
+    title: Reglas de sitio
+    description: Reglas por sitio que ajustan cómo se traducen determinados sitios web.
+    userRules:
+      title: Reglas de usuario
+      description: Define tus propias reglas de sitio como un array JSON. Las reglas se aplican a las páginas cuya URL coincide con sus patrones; las reglas de usuario tienen prioridad sobre las integradas.
+      saveButton: Guardar
+      savedButton: Guardado
+      validation:
+        validating: Validando...
+        valid: Las reglas son válidas
+        syntaxError: El JSON tiene errores de sintaxis
+        notArray: El valor JSON de nivel superior debe ser un array de reglas
+        tooLong: El documento de reglas es demasiado largo
+        tooMany: Demasiadas reglas
+        duplicateIds: Ids de regla duplicados
+        schemaErrors: Algunas reglas no son válidas
+        moreErrors: ...y $1 errores más
+        saved: Todos los cambios guardados
+    builtIn:
+      title: Reglas integradas
+      description: Reglas de sitio incluidas con la extensión. Desactiva una regla con su interruptor si causa problemas en un sitio.
+      searchPlaceholder: Buscar por id, descripción o patrón de URL
+      showMore: Mostrar más
+      count: Mostrando $1 de $2 reglas
   tts:
     title: Texto a voz
     description: Usa la configuración de voz de Edge TTS para el botón Leer en voz alta.

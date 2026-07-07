@@ -15,6 +15,7 @@ import { floatingButtonSchema } from "./floating-button"
 import { languageDetectionConfigSchema } from "./language-detection"
 import { isLLMProvider, providersConfigSchema } from "./provider"
 import { selectionToolbarCustomActionsSchema } from "./selection-toolbar"
+import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
 import { pageTranslationShortcutSchema, translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
@@ -117,6 +118,7 @@ export const configSchema = z.object({
   inputTranslation: inputTranslationSchema,
   videoSubtitles: videoSubtitlesSchema,
   siteControl: siteControlSchema,
+  siteRules: siteRulesConfigSchema,
   uiLanguage: uiLanguageSchema,
 }).superRefine((data, ctx) => {
   for (const featureKey of FEATURE_KEYS) {

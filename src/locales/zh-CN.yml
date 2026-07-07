@@ -784,6 +784,31 @@ options:
       description: 通过向 AI 提供网页上下文来提高翻译质量
       enable: 启用 AI 智能上下文翻译
       enableDescription: AI 使用网页摘要来提高翻译准确性。需要 LLM 翻译提供商。刚开始翻译页面时会有延迟，并增加 API 费用。
+  siteRules:
+    title: 站点规则
+    description: 针对特定网站调整翻译行为的规则。
+    userRules:
+      title: 用户规则
+      description: 以 JSON 数组形式编写自己的站点规则。规则会应用于 URL 匹配的页面；用户规则优先于内置规则。
+      saveButton: 保存
+      savedButton: 已保存
+      validation:
+        validating: 验证中...
+        valid: 规则有效
+        syntaxError: JSON 存在语法错误
+        notArray: JSON 顶层必须是规则数组
+        tooLong: 规则文档过长
+        tooMany: 规则数量过多
+        duplicateIds: 规则 id 重复
+        schemaErrors: 部分规则无效
+        moreErrors: ...还有 $1 个错误
+        saved: 所有更改已保存
+    builtIn:
+      title: 内置规则
+      description: 随扩展提供的站点规则。如果某条规则在网站上引起问题，可用开关将其停用。
+      searchPlaceholder: 按 id、描述或网址模式搜索
+      showMore: 显示更多
+      count: 显示 $1 / $2 条规则
   tts:
     title: 文本转语音
     description: 使用 Edge TTS 语音参数来自定义朗读按钮。

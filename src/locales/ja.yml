@@ -669,6 +669,31 @@ options:
       description: ウェブページのコンテキストを AI に提供して翻訳品質を向上させます
       enable: AI スマートコンテキスト翻訳を有効にする
       enableDescription: AI はウェブページの要約を使用して翻訳精度を向上させます。LLM プロバイダーが必要です。翻訳開始時に遅延が発生し、API コストが増加します。
+  siteRules:
+    title: サイトルール
+    description: 特定のウェブサイトの翻訳動作を調整するルールです。
+    userRules:
+      title: ユーザールール
+      description: JSON 配列として独自のサイトルールを定義します。URL がパターンに一致するページに適用され、ユーザールールは組み込みルールより優先されます。
+      saveButton: 保存
+      savedButton: 保存済み
+      validation:
+        validating: 検証中...
+        valid: ルールは有効です
+        syntaxError: JSON に構文エラーがあります
+        notArray: JSON のトップレベルはルールの配列である必要があります
+        tooLong: ルールのドキュメントが長すぎます
+        tooMany: ルールが多すぎます
+        duplicateIds: ルール id が重複しています
+        schemaErrors: 無効なルールがあります
+        moreErrors: ...他 $1 件のエラー
+        saved: すべての変更が保存されました
+    builtIn:
+      title: 組み込みルール
+      description: 拡張機能に同梱されているサイトルールです。サイトで問題が発生する場合は、スイッチで個別に無効化できます。
+      searchPlaceholder: id、説明、URL パターンで検索
+      showMore: さらに表示
+      count: $2 件中 $1 件のルールを表示
   tts:
     title: テキスト読み上げ
     description: Edge TTS の音声設定で読み上げボタンをカスタマイズします。

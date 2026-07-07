@@ -669,6 +669,31 @@ options:
       description: AI'ya web sayfası bağlamı sağlayarak çeviri kalitesini artırın
       enable: AI Akıllı Bağlam Çevirisini Etkinleştir
       enableDescription: AI, çeviri doğruluğunu artırmak için web sayfası özetini kullanır. LLM sağlayıcısı gerektirir. Bir sayfayı çevirmeye başlarken gecikme ekler ve API maliyetlerini artırır.
+  siteRules:
+    title: Site Kuralları
+    description: Belirli web sitelerinin nasıl çevrileceğini ayarlayan site bazlı kurallar.
+    userRules:
+      title: Kullanıcı Kuralları
+      description: Kendi site kurallarınızı JSON dizisi olarak tanımlayın. Kurallar, URL'si kalıplarıyla eşleşen sayfalara uygulanır; kullanıcı kuralları yerleşik kurallardan önceliklidir.
+      saveButton: Kaydet
+      savedButton: Kaydedildi
+      validation:
+        validating: Doğrulanıyor...
+        valid: Kurallar geçerli
+        syntaxError: JSON sözdizimi hataları içeriyor
+        notArray: JSON'un en üst düzey değeri bir kural dizisi olmalıdır
+        tooLong: Kural belgesi çok uzun
+        tooMany: Çok fazla kural var
+        duplicateIds: Yinelenen kural id'leri
+        schemaErrors: Bazı kurallar geçersiz
+        moreErrors: ...ve $1 hata daha
+        saved: Tüm değişiklikler kaydedildi
+    builtIn:
+      title: Yerleşik Kurallar
+      description: Eklentiyle birlikte gelen site kuralları. Bir kural bir sitede soruna yol açıyorsa anahtarıyla devre dışı bırakın.
+      searchPlaceholder: id, açıklama veya URL kalıbına göre ara
+      showMore: Daha fazla göster
+      count: $2 kuraldan $1 tanesi gösteriliyor
   tts:
     title: Metinden Konuşmaya
     description: Konuş butonunu Edge TTS ses ayarlarıyla özelleştirin.

@@ -8,7 +8,8 @@ import {
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from "@/utils/constants/dom-labels"
-import { CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP, CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP, DONT_WALK_AND_TRANSLATE_TAGS, DONT_WALK_BUT_TRANSLATE_TAGS, FORCE_BLOCK_TAGS, MAIN_CONTENT_IGNORE_TAGS } from "@/utils/constants/dom-rules"
+import { DONT_WALK_AND_TRANSLATE_TAGS, DONT_WALK_BUT_TRANSLATE_TAGS, FORCE_BLOCK_TAGS, MAIN_CONTENT_IGNORE_TAGS } from "@/utils/constants/dom-rules"
+import { getEffectiveSiteRule } from "@/utils/site-rules/effective"
 
 export function isEditable(element: HTMLElement): boolean {
   const tag = element.tagName
@@ -102,26 +103,51 @@ export function isShallowBlockHTMLElement(element: HTMLElement): boolean {
   return !isInlineDisplay(computedStyle.display)
 }
 
-export function isCustomDontWalkIntoElement(element: HTMLElement): boolean {
-  const dontWalkIntoElementSelectorList = CUSTOM_DONT_WALK_INTO_ELEMENT_SELECTOR_MAP[window.location.hostname] ?? []
-
-  const dontWalkSelector = dontWalkIntoElementSelectorList.join(",")
-
-  if (!dontWalkSelector)
+export function isSiteRuleExcludedElement(element: HTMLElement, config: Config): boolean {
+  const { excludeSelector, includeSelector } = getEffectiveSiteRule(config, window.location.href)
+  if (excludeSelector === null || !element.matches(excludeSelector)) {
     return false
-
-  return element.matches(dontWalkSelector)
+  }
+  if (includeSelector !== null) {
+    // An element matching an include selector is re-included even when it also
+    // matches an exclude selector. Rule data relies on this priority: e.g. the
+    // github rule excludes `a[data-hovercard-type]` broadly, then whitelists
+    // `a[data-hovercard-type='issue']` to bring issue titles back.
+    if (element.matches(includeSelector)) {
+      return false
+    }
+    // Keep descending when the excluded subtree still contains include
+    // targets deeper down — isWithinIncludeScope guarantees only those
+    // targets get translated, so the rest of the subtree stays untouched.
+    if (element.querySelector(includeSelector) !== null) {
+      return false
+    }
+  }
+  return true
 }
 
-export function isCustomForceBlockTranslation(element: HTMLElement): boolean {
-  const forceBlockSelectorList = CUSTOM_FORCE_BLOCK_TRANSLATION_SELECTOR_MAP[window.location.hostname] ?? []
+export function isSiteRuleForceBlockElement(element: HTMLElement, config: Config): boolean {
+  const { forceBlockSelector } = getEffectiveSiteRule(config, window.location.href)
+  return forceBlockSelector !== null && element.matches(forceBlockSelector)
+}
 
-  const forceBlockSelector = forceBlockSelectorList.join(",")
+export function isSiteRuleForceInlineElement(element: HTMLElement, config: Config): boolean {
+  const { forceInlineSelector } = getEffectiveSiteRule(config, window.location.href)
+  return forceInlineSelector !== null && element.matches(forceInlineSelector)
+}
 
-  if (!forceBlockSelector)
-    return false
-
-  return element.matches(forceBlockSelector)
+/**
+ * Whitelist gate: when the effective site rule declares `includeSelectors`,
+ * only elements inside (or matching) one of them may become translation
+ * paragraphs. Rules without `includeSelectors` include everything.
+ *
+ * Note: exclusion wins unless the excluded element itself also matches an
+ * include selector (see isSiteRuleExcludedElement) — exclude selectors can
+ * still carve holes inside included regions.
+ */
+export function isWithinIncludeScope(element: HTMLElement, config: Config): boolean {
+  const { includeSelector } = getEffectiveSiteRule(config, window.location.href)
+  return includeSelector === null || element.closest(includeSelector) !== null
 }
 
 export function isDontWalkIntoButTranslateAsChildElement(element: HTMLElement): boolean {
@@ -148,7 +174,7 @@ function isInsideContentContainer(element: HTMLElement): boolean {
 }
 
 export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElement, config: Config): boolean {
-  const dontWalkCustomElement = isCustomDontWalkIntoElement(element)
+  const dontWalkCustomElement = isSiteRuleExcludedElement(element, config)
   const dontWalkContent = config.translate.page.range !== "all"
     && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
     && !isInsideContentContainer(element)

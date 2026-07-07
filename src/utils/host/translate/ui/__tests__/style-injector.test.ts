@@ -125,4 +125,44 @@ describe("style-injector", () => {
     expect(Array.from(document.adoptedStyleSheets[1]?.cssRules ?? [], rule => rule.cssText).join("\n")).toContain("color: blue")
     expect(document.head.querySelector("#read-frog-custom-styles")).toBeNull()
   })
+
+  it("injects and removes site rule CSS via style elements", async () => {
+    const { ensureSiteRuleCSS, removeSiteRuleCSS } = await loadStyleInjector()
+
+    await ensureSiteRuleCSS(document, ".line-clamped { -webkit-line-clamp: unset; }")
+
+    const siteRuleStyle = document.head.querySelector<HTMLStyleElement>("#read-frog-site-rule-styles")
+    expect(siteRuleStyle).not.toBeNull()
+    expect(siteRuleStyle?.textContent).toContain("line-clamp")
+
+    removeSiteRuleCSS(document)
+    expect(document.head.querySelector("#read-frog-site-rule-styles")).toBeNull()
+  })
+
+  it("injects and removes site rule CSS via adoptedStyleSheets when available", async () => {
+    const { ensureSiteRuleCSS, removeSiteRuleCSS } = await loadStyleInjector()
+
+    Object.defineProperty(document, "adoptedStyleSheets", {
+      configurable: true,
+      value: [],
+      writable: true,
+    })
+
+    await ensureSiteRuleCSS(document, ".clamped { max-height: none; }")
+
+    expect(document.adoptedStyleSheets).toHaveLength(1)
+    expect(Array.from(document.adoptedStyleSheets[0]?.cssRules ?? [], rule => rule.cssText).join("\n")).toContain("max-height")
+
+    // Re-ensuring reuses the same sheet instead of stacking a new one
+    await ensureSiteRuleCSS(document, ".clamped { max-height: none; } .other { height: auto; }")
+    expect(document.adoptedStyleSheets).toHaveLength(1)
+
+    removeSiteRuleCSS(document)
+    expect(document.adoptedStyleSheets).toHaveLength(0)
+
+    // Removal is idempotent and re-injection works afterwards
+    removeSiteRuleCSS(document)
+    await ensureSiteRuleCSS(document, ".again { color: red; }")
+    expect(document.adoptedStyleSheets).toHaveLength(1)
+  })
 })

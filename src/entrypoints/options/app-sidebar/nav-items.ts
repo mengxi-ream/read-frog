@@ -3,6 +3,7 @@ export const ROUTE_DEFS = [
   { path: "/api-providers" },
   { path: "/custom-actions" },
   { path: "/translation" },
+  { path: "/site-rules" },
   { path: "/video-subtitles" },
   { path: "/floating-button" },
   { path: "/selection-toolbar" },

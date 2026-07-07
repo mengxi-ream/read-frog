@@ -9,6 +9,7 @@ type RoutePath = (typeof ROUTE_DEFS)[number]["path"]
 const ApiProvidersPage = lazy(() => import("./pages/api-providers").then(module => ({ default: module.ApiProvidersPage })))
 const CustomActionsPage = lazy(() => import("./pages/custom-actions").then(module => ({ default: module.CustomActionsPage })))
 const TranslationPage = lazy(() => import("./pages/translation").then(module => ({ default: module.TranslationPage })))
+const SiteRulesPage = lazy(() => import("./pages/site-rules").then(module => ({ default: module.SiteRulesPage })))
 const VideoSubtitlesPage = lazy(() => import("./pages/video-subtitles").then(module => ({ default: module.VideoSubtitlesPage })))
 const FloatingButtonPage = lazy(() => import("./pages/floating-button").then(module => ({ default: module.FloatingButtonPage })))
 const SelectionToolbarPage = lazy(() => import("./pages/selection-toolbar").then(module => ({ default: module.SelectionToolbarPage })))
@@ -23,6 +24,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/api-providers": ApiProvidersPage,
   "/custom-actions": CustomActionsPage,
   "/translation": TranslationPage,
+  "/site-rules": SiteRulesPage,
   "/video-subtitles": VideoSubtitlesPage,
   "/floating-button": FloatingButtonPage,
   "/selection-toolbar": SelectionToolbarPage,

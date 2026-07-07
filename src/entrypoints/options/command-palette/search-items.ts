@@ -231,6 +231,22 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.translation.title",
   },
 
+  // Site Rules page
+  {
+    sectionId: "site-rules-user-rules",
+    route: "/site-rules",
+    titleKey: "options.siteRules.userRules.title",
+    descriptionKey: "options.siteRules.userRules.description",
+    pageKey: "options.siteRules.title",
+  },
+  {
+    sectionId: "site-rules-built-in",
+    route: "/site-rules",
+    titleKey: "options.siteRules.builtIn.title",
+    descriptionKey: "options.siteRules.builtIn.description",
+    pageKey: "options.siteRules.title",
+  },
+
   // Floating Button page
   {
     sectionId: "floating-button-toggle",

@@ -82,6 +82,7 @@
     "@tanstack/react-store": "^0.11.0",
     "@uiw/codemirror-extensions-color": "^4.25.10",
     "@uiw/react-codemirror": "^4.25.10",
+    "@webext-core/match-patterns": "1.0.3",
     "@webext-core/messaging": "^3.0.2",
     "@wxt-dev/i18n": "^0.2.6",
     "ai": "^7.0.15",

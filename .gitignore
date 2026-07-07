@@ -46,3 +46,4 @@ docs/
 scripts/output/
 
 reference/
+.gstack/

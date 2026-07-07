@@ -8,13 +8,14 @@ import {
 } from "@/utils/constants/dom-labels"
 import { FORCE_BLOCK_TAGS } from "@/utils/constants/dom-rules"
 import {
-  isCustomForceBlockTranslation,
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
   isHTMLElement,
   isShallowBlockHTMLElement,
   isShallowInlineHTMLElement,
+  isSiteRuleForceBlockElement,
   isTextNode,
+  isWithinIncludeScope,
 } from "./filter"
 
 const NON_NEWLINE_WHITESPACE_RE = /[^\S\n]/
@@ -112,7 +113,7 @@ export function walkAndLabelElement(
     }
   }
 
-  if (hasInlineNodeChild) {
+  if (hasInlineNodeChild && isWithinIncludeScope(element, config)) {
     element.setAttribute(PARAGRAPH_ATTRIBUTE, "")
   }
 
@@ -128,7 +129,7 @@ export function walkAndLabelElement(
 
   const isInlineNode = isShallowInlineHTMLElement(element)
 
-  if (isShallowBlockHTMLElement(element) || forceBlock || isCustomForceBlockTranslation(element)) {
+  if (isShallowBlockHTMLElement(element) || forceBlock || isSiteRuleForceBlockElement(element, config)) {
     element.setAttribute(BLOCK_ATTRIBUTE, "")
   }
   else if (isInlineNode) {

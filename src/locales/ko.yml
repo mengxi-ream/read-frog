@@ -669,6 +669,31 @@ options:
       description: AI에 웹페이지 컨텍스트를 제공하여 번역 품질을 향상시킵니다
       enable: AI 스마트 컨텍스트 번역 활성화
       enableDescription: AI가 웹페이지 요약을 사용하여 번역 정확도를 향상시킵니다. LLM 제공업체가 필요합니다. 번역 시작 시 지연이 발생하고 API 비용이 증가합니다.
+  siteRules:
+    title: 사이트 규칙
+    description: 특정 웹사이트의 번역 동작을 조정하는 규칙입니다.
+    userRules:
+      title: 사용자 규칙
+      description: JSON 배열로 자신만의 사이트 규칙을 정의합니다. URL이 패턴과 일치하는 페이지에 적용되며, 사용자 규칙이 내장 규칙보다 우선합니다.
+      saveButton: 저장
+      savedButton: 저장됨
+      validation:
+        validating: 검증 중...
+        valid: 규칙이 유효합니다
+        syntaxError: JSON에 구문 오류가 있습니다
+        notArray: JSON 최상위 값은 규칙 배열이어야 합니다
+        tooLong: 규칙 문서가 너무 깁니다
+        tooMany: 규칙이 너무 많습니다
+        duplicateIds: 규칙 id가 중복되었습니다
+        schemaErrors: 유효하지 않은 규칙이 있습니다
+        moreErrors: ...그리고 $1개의 오류가 더 있습니다
+        saved: 모든 변경사항이 저장되었습니다
+    builtIn:
+      title: 내장 규칙
+      description: 확장 프로그램과 함께 제공되는 사이트 규칙입니다. 특정 사이트에서 문제가 생기면 스위치로 개별 비활성화할 수 있습니다.
+      searchPlaceholder: id, 설명 또는 URL 패턴으로 검색
+      showMore: 더 보기
+      count: 규칙 $2개 중 $1개 표시
   tts:
     title: 텍스트 음성 변환
     description: Edge TTS 음성 설정으로 말하기 버튼을 사용자 지정하세요.

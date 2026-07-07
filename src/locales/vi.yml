@@ -669,6 +669,31 @@ options:
       description: Nâng cao chất lượng dịch bằng cách cung cấp ngữ cảnh trang web cho AI
       enable: Bật dịch ngữ cảnh thông minh AI
       enableDescription: AI sử dụng tóm tắt trang web để cải thiện độ chính xác dịch. Yêu cầu nhà cung cấp LLM. Thêm độ trễ khi bắt đầu dịch trang và tăng chi phí API.
+  siteRules:
+    title: Quy tắc trang web
+    description: Quy tắc theo từng trang web để điều chỉnh cách dịch các trang web cụ thể.
+    userRules:
+      title: Quy tắc của người dùng
+      description: Định nghĩa quy tắc trang web của riêng bạn dưới dạng mảng JSON. Quy tắc áp dụng cho các trang có URL khớp với mẫu; quy tắc của người dùng được ưu tiên hơn quy tắc tích hợp.
+      saveButton: Lưu
+      savedButton: Đã lưu
+      validation:
+        validating: Đang xác thực...
+        valid: Quy tắc hợp lệ
+        syntaxError: JSON có lỗi cú pháp
+        notArray: Giá trị JSON cấp cao nhất phải là một mảng quy tắc
+        tooLong: Tài liệu quy tắc quá dài
+        tooMany: Quá nhiều quy tắc
+        duplicateIds: Trùng lặp id quy tắc
+        schemaErrors: Một số quy tắc không hợp lệ
+        moreErrors: ...và $1 lỗi nữa
+        saved: Tất cả thay đổi đã được lưu
+    builtIn:
+      title: Quy tắc tích hợp
+      description: Quy tắc trang web đi kèm với tiện ích mở rộng. Nếu một quy tắc gây ra sự cố trên trang web, hãy tắt nó bằng công tắc.
+      searchPlaceholder: Tìm theo id, mô tả hoặc mẫu URL
+      showMore: Hiển thị thêm
+      count: Đang hiển thị $1 / $2 quy tắc
   tts:
     title: Chuyển văn bản thành giọng nói
     description: Tùy chỉnh nút Đọc với cài đặt giọng nói Edge TTS.

@@ -121,6 +121,42 @@ export function ensurePresetStyles(root: StyleRoot): void {
   }
 }
 
+// ============ Site Rule CSS Injection ============
+
+const SITE_RULE_STYLE_ID = "read-frog-site-rule-styles"
+const siteRuleCSSMap = new WeakMap<StyleRoot, CSSStyleSheet>()
+
+/**
+ * Inject per-site rule CSS into the given root. Unlike the custom-style slot
+ * below, this one is removable: it only applies while a translation session
+ * is active on a matched site (see PageTranslationManager).
+ */
+export async function ensureSiteRuleCSS(root: StyleRoot, cssText: string): Promise<void> {
+  if (supportsConstructableStyleSheets(root)) {
+    let sheet = siteRuleCSSMap.get(root)
+    if (!sheet) {
+      sheet = new CSSStyleSheet()
+      // Set in map first to prevent race condition with concurrent calls
+      siteRuleCSSMap.set(root, sheet)
+      root.adoptedStyleSheets = [...root.adoptedStyleSheets, sheet]
+    }
+    await sheet.replace(cssText)
+  }
+  else {
+    injectStyleElement(root, SITE_RULE_STYLE_ID, cssText)
+  }
+}
+
+/** Remove per-site rule CSS previously injected by ensureSiteRuleCSS */
+export function removeSiteRuleCSS(root: StyleRoot): void {
+  const sheet = siteRuleCSSMap.get(root)
+  if (sheet && supportsConstructableStyleSheets(root)) {
+    root.adoptedStyleSheets = root.adoptedStyleSheets.filter(adopted => adopted !== sheet)
+    siteRuleCSSMap.delete(root)
+  }
+  root.querySelector(`#${SITE_RULE_STYLE_ID}`)?.remove()
+}
+
 // ============ Custom CSS Injection ============
 
 const customCSSMap = new WeakMap<StyleRoot, CSSStyleSheet>()

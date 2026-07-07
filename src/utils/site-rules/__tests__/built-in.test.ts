@@ -1,0 +1,80 @@
+// @vitest-environment jsdom
+import { describe, expect, it } from "vitest"
+import { siteRuleSchema } from "@/types/config/site-rules"
+import {
+  STATE_MESSAGE_CLASS,
+  SUBTITLES_VIEW_CLASS,
+  TRANSLATE_BUTTON_CLASS,
+  YOUTUBE_NATIVE_SUBTITLES_CLASS,
+} from "@/utils/constants/subtitles"
+import { BUILT_IN_SITE_RULES } from "../built-in"
+import { normalizeUrlPattern } from "../match"
+
+function allSelectors(rule: (typeof BUILT_IN_SITE_RULES)[number]): string[] {
+  return [
+    ...(rule.excludeSelectors ?? []),
+    ...(rule.includeSelectors ?? []),
+    ...(rule.forceBlockSelectors ?? []),
+    ...(rule.forceInlineSelectors ?? []),
+  ]
+}
+
+describe("built-in site rules", () => {
+  it("all rules pass the schema", () => {
+    for (const rule of BUILT_IN_SITE_RULES) {
+      const result = siteRuleSchema.safeParse(rule)
+      if (!result.success) {
+        console.error(`Rule "${rule.id}" failed schema validation:`, result.error.issues)
+      }
+      expect(result.success).toBe(true)
+    }
+  })
+
+  it("rule ids are unique", () => {
+    const ids = BUILT_IN_SITE_RULES.map(rule => rule.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it("every URL pattern normalizes", () => {
+    const unsupported: string[] = []
+    for (const rule of BUILT_IN_SITE_RULES) {
+      const patterns = [
+        ...(Array.isArray(rule.matches) ? rule.matches : [rule.matches]),
+        ...(rule.excludeMatches ?? []),
+      ]
+      for (const pattern of patterns) {
+        if (normalizeUrlPattern(pattern) === null) {
+          unsupported.push(`${rule.id}: ${pattern}`)
+        }
+      }
+    }
+    expect(unsupported).toEqual([])
+  })
+
+  it("every selector parses", () => {
+    const probe = document.createDocumentFragment()
+    const invalid: string[] = []
+    for (const rule of BUILT_IN_SITE_RULES) {
+      for (const selector of allSelectors(rule)) {
+        try {
+          probe.querySelector(selector)
+        }
+        catch {
+          invalid.push(`${rule.id}: ${selector}`)
+        }
+      }
+    }
+    expect(invalid).toEqual([])
+  })
+
+  it("keeps the youtube rule in sync with the subtitle class constants", () => {
+    const youtube = BUILT_IN_SITE_RULES.find(rule => rule.id === "readfrog-youtube")
+    expect(youtube).toBeDefined()
+    expect(youtube!.excludeSelectors).toEqual(expect.arrayContaining([
+      YOUTUBE_NATIVE_SUBTITLES_CLASS,
+      `.${SUBTITLES_VIEW_CLASS}`,
+      `.${STATE_MESSAGE_CLASS}`,
+      `.${TRANSLATE_BUTTON_CLASS}`,
+    ]))
+  })
+})

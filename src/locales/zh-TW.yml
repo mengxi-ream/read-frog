@@ -784,6 +784,31 @@ options:
       description: 將網頁前後文提供給 AI，以提升翻譯品質
       enable: 啟用 AI 智慧上下文翻譯
       enableDescription: AI 會使用網頁摘要來提高翻譯準確性。需要 LLM 翻譯提供者。剛開始翻譯頁面時會有延遲，並增加 API 費用。
+  siteRules:
+    title: 網站規則
+    description: 針對特定網站調整翻譯行為的規則。
+    userRules:
+      title: 使用者規則
+      description: 以 JSON 陣列形式編寫自己的網站規則。規則會套用於 URL 相符的頁面；使用者規則優先於內建規則。
+      saveButton: 儲存
+      savedButton: 已儲存
+      validation:
+        validating: 驗證中…
+        valid: 規則有效
+        syntaxError: JSON 存在語法錯誤
+        notArray: JSON 頂層必須是規則陣列
+        tooLong: 規則文件過長
+        tooMany: 規則數量過多
+        duplicateIds: 規則 id 重複
+        schemaErrors: 部分規則無效
+        moreErrors: …還有 $1 個錯誤
+        saved: 所有變更已儲存
+    builtIn:
+      title: 內建規則
+      description: 隨擴充功能提供的網站規則。如果某條規則在網站上造成問題，可用開關將其停用。
+      searchPlaceholder: 依 id、描述或網址模式搜尋
+      showMore: 顯示更多
+      count: 顯示 $1 / $2 條規則
   tts:
     title: 文字轉語音
     description: 使用 Edge TTS 語音參數來自訂「朗讀」按鈕。

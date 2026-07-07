@@ -135,6 +135,7 @@ export async function translateNodesBilingualMode(
       targetNode,
       translatedText,
       config.translate.translationNodeStyle,
+      config,
       forceBlockTranslation,
     )
   }
