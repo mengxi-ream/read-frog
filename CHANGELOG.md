@@ -1,5 +1,11 @@
 # @read-frog/extension
 
+## 1.39.1
+
+### Patch Changes
+
+- [#1796](https://github.com/mengxi-ream/read-frog/pull/1796) [`e2aa840`](https://github.com/mengxi-ream/read-frog/commit/e2aa8400db04915dd4fcd4cc5e55291345373661) Thanks [@mengxi-ream](https://github.com/mengxi-ream)! - fix(site-rules): preserve original inline link text in page translation
+
 ## 1.39.0
 
 ### Minor Changes
