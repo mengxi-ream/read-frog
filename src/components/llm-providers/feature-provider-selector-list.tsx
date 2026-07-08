@@ -87,7 +87,9 @@ function CustomActionProviderFields({
     [providersConfig],
   )
 
-  const customActions = config.selectionToolbar.customActions
+  const customActions = config.selectionToolbar.customActions.filter(
+    action => action.enabled !== false,
+  )
 
   if (customActions.length === 0) {
     return null
