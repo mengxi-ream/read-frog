@@ -19,12 +19,13 @@ interface MountSubtitlesUIOptions {
   menuBelow?: boolean
 }
 
-export async function mountSubtitlesUI(
-  { adapter, config, menuBelow }: MountSubtitlesUIOptions,
-): Promise<void> {
+export async function mountSubtitlesUI({
+  adapter,
+  config,
+  menuBelow,
+}: MountSubtitlesUIOptions): Promise<void> {
   const videoContainer = await waitForElement(config.selectors.playerContainer)
-  if (!videoContainer)
-    return
+  if (!videoContainer) return
 
   const parentEl = videoContainer as HTMLElement
   const computedStyle = window.getComputedStyle(parentEl)
@@ -32,7 +33,9 @@ export async function mountSubtitlesUI(
     parentEl.style.position = "relative"
   }
 
-  const existingHost = document.getElementById(READ_FROG_SUBTITLES_UI_HOST_ID) as HTMLDivElement | null
+  const existingHost = document.getElementById(
+    READ_FROG_SUBTITLES_UI_HOST_ID,
+  ) as HTMLDivElement | null
   if (existingHost) {
     if (existingHost.parentElement === parentEl) {
       return

@@ -12,8 +12,8 @@ interface PanelShellProps {
   children: React.ReactNode
   open: boolean
   onClose: () => void
-  header?: { title: string, onBack: () => void }
-  transition?: { key: string, direction: TransitionDirection }
+  header?: { title: string; onBack: () => void }
+  transition?: { key: string; direction: TransitionDirection }
 }
 
 function TransitionContent({
@@ -72,32 +72,24 @@ function PanelContent({
             <IconChevronLeft className="size-4" />
           </Button>
 
-          <div className="min-w-0 truncate text-xs font-medium">
-            {header?.title}
-          </div>
+          <div className="min-w-0 truncate text-xs font-medium">{header?.title}</div>
         </div>
       </Activity>
 
       <div className="min-h-0 flex-1 overflow-y-auto">
-        {transition
-          ? (
-              <TransitionContent direction={transition.direction} transitionKey={transition.key}>
-                {children}
-              </TransitionContent>
-            )
-          : children}
+        {transition ? (
+          <TransitionContent direction={transition.direction} transitionKey={transition.key}>
+            {children}
+          </TransitionContent>
+        ) : (
+          children
+        )}
       </div>
     </div>
   )
 }
 
-export function PanelShell({
-  children,
-  open,
-  onClose,
-  header,
-  transition,
-}: PanelShellProps) {
+export function PanelShell({ children, open, onClose, header, transition }: PanelShellProps) {
   const rootRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
   const { controlsConfig, embedded, openBelow } = useSubtitlesUI()
@@ -128,11 +120,11 @@ export function PanelShell({
 
   const positionStyle = buttonRelative
     ? { marginBottom: `${bottomOffset}px` }
-    : (openBelow ? { top: `${bottomOffset}px` } : { bottom: `${bottomOffset}px` })
+    : openBelow
+      ? { top: `${bottomOffset}px` }
+      : { bottom: `${bottomOffset}px` }
 
-  const maxHeight = buttonRelative
-    ? "min(24rem, 60vh)"
-    : `calc(100cqh - ${bottomOffset}px - 1rem)`
+  const maxHeight = buttonRelative ? "min(24rem, 60vh)" : `calc(100cqh - ${bottomOffset}px - 1rem)`
 
   return (
     <div ref={rootRef} className={rootClassName}>

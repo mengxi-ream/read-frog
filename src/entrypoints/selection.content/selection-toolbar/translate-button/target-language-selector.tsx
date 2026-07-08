@@ -21,7 +21,7 @@ export function TargetLanguageSelector() {
   const popoverOverlay = useSelectionPopoverOverlayProps()
   const languageItems = useMemo(() => getTargetLanguageItems(), [])
   const currentItem = useMemo(
-    () => languageItems.find(item => item.value === language.targetCode) ?? null,
+    () => languageItems.find((item) => item.value === language.targetCode) ?? null,
     [language.targetCode, languageItems],
   )
   const title = currentItem?.label ?? i18n.t("side.targetLang")
@@ -41,7 +41,7 @@ export function TargetLanguageSelector() {
       autoHighlight
     >
       <ComboboxPrimitive.Trigger
-        render={(
+        render={
           <Button
             variant="ghost-secondary"
             size="sm"
@@ -50,7 +50,7 @@ export function TargetLanguageSelector() {
             title={title}
             data-rf-no-drag
           />
-        )}
+        }
       >
         <span className="min-w-0 truncate">{currentItem?.name ?? i18n.t("side.targetLang")}</span>
         <IconChevronDown className="size-3.5 text-muted-foreground" />
@@ -61,12 +61,9 @@ export function TargetLanguageSelector() {
         align="end"
         className="w-72"
       >
-        <ComboboxInput
-          showTrigger={false}
-          placeholder={i18n.t("translationHub.searchLanguages")}
-        />
+        <ComboboxInput showTrigger={false} placeholder={i18n.t("translationHub.searchLanguages")} />
         <ComboboxList>
-          {item => (
+          {(item) => (
             <ComboboxItem key={item.value} value={item}>
               {item.label}
             </ComboboxItem>

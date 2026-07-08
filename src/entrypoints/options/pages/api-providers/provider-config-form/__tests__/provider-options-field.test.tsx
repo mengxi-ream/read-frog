@@ -37,7 +37,7 @@ vi.mock("@/components/ui/json-code-editor", () => ({
       value={value}
       placeholder={placeholder}
       onBlur={onBlur}
-      onChange={event => onChange?.(event.target.value)}
+      onChange={(event) => onChange?.(event.target.value)}
       onFocus={onFocus}
     />
   ),
@@ -71,7 +71,7 @@ function ProviderOptionsFieldHarness({
     defaultValues: providerConfig,
     onSubmit: async ({ value }) => {
       if (submitDelayMs > 0) {
-        await new Promise(resolve => window.setTimeout(resolve, submitDelayMs))
+        await new Promise((resolve) => window.setTimeout(resolve, submitDelayMs))
       }
 
       setProviderConfig(submitDelayMs > 0 ? structuredClone(value) : value)
@@ -92,9 +92,11 @@ function ProviderOptionsFieldHarness({
             return
           }
 
-          setProviderConfig(updateProviderConfig(providerConfig, {
-            providerOptions: externalProviderOptions,
-          }) as APIProviderConfig)
+          setProviderConfig(
+            updateProviderConfig(providerConfig, {
+              providerOptions: externalProviderOptions,
+            }) as APIProviderConfig,
+          )
         }}
       >
         apply-external
@@ -118,14 +120,16 @@ describe("providerOptionsField", () => {
 
     const editor = screen.getByLabelText("provider-options-editor")
     fireEvent.focus(editor)
-    fireEvent.change(editor, { target: { value: "{\"reasoningEffort\":\"minimal\"}" } })
+    fireEvent.change(editor, { target: { value: '{"reasoningEffort":"minimal"}' } })
 
     await act(async () => {
       vi.advanceTimersByTime(500)
       await Promise.resolve()
     })
 
-    expect(screen.getByLabelText("provider-options-editor")).toHaveValue("{\"reasoningEffort\":\"minimal\"}")
+    expect(screen.getByLabelText("provider-options-editor")).toHaveValue(
+      '{"reasoningEffort":"minimal"}',
+    )
   })
 
   it("keeps focused draft edits when a delayed autosave echo arrives", async () => {
@@ -133,14 +137,14 @@ describe("providerOptionsField", () => {
 
     const editor = screen.getByLabelText("provider-options-editor")
     fireEvent.focus(editor)
-    fireEvent.change(editor, { target: { value: "{\"reasoningEffort\":\"minimal\"}" } })
+    fireEvent.change(editor, { target: { value: '{"reasoningEffort":"minimal"}' } })
 
     await act(async () => {
       vi.advanceTimersByTime(500)
       await Promise.resolve()
     })
 
-    fireEvent.change(editor, { target: { value: "{\"reasoningEffort\":\"low\"}" } })
+    fireEvent.change(editor, { target: { value: '{"reasoningEffort":"low"}' } })
 
     await act(async () => {
       vi.advanceTimersByTime(100)
@@ -148,7 +152,9 @@ describe("providerOptionsField", () => {
       await Promise.resolve()
     })
 
-    expect(screen.getByLabelText("provider-options-editor")).toHaveValue("{\"reasoningEffort\":\"low\"}")
+    expect(screen.getByLabelText("provider-options-editor")).toHaveValue(
+      '{"reasoningEffort":"low"}',
+    )
   })
 
   it("shows the matched recommended provider options as the placeholder when the value is empty", () => {
@@ -224,7 +230,9 @@ describe("providerOptionsField", () => {
       await Promise.resolve()
     })
 
-    expect(screen.getByLabelText("provider-options-editor")).toHaveValue(JSON.stringify(externalProviderOptions, null, 2))
+    expect(screen.getByLabelText("provider-options-editor")).toHaveValue(
+      JSON.stringify(externalProviderOptions, null, 2),
+    )
   })
 
   it("keeps an explicit empty object instead of falling back to the placeholder value", async () => {

@@ -16,7 +16,7 @@ import { i18n } from "@/utils/i18n"
 
 interface ModelsResponse {
   object: string
-  data: Array<{ id: string, object: string, created: number, owned_by: string }>
+  data: Array<{ id: string; object: string; created: number; owned_by: string }>
 }
 
 interface ModelSuggestionButtonProps {
@@ -50,13 +50,12 @@ export function ModelSuggestionButton({
       }
 
       const data: ModelsResponse = await response.json()
-      return data.data.map(m => m.id)
+      return data.data.map((m) => m.id)
     },
   })
 
   const handleFetch = () => {
-    if (!baseURL)
-      return
+    if (!baseURL) return
     mutation.reset()
     mutation.mutate()
   }
@@ -66,13 +65,7 @@ export function ModelSuggestionButton({
   // Idle state - show fetch button
   if (mutation.isIdle) {
     return (
-      <Button
-        type="button"
-        variant="outline"
-        size="xs"
-        onClick={handleFetch}
-        disabled={isDisabled}
-      >
+      <Button type="button" variant="outline" size="xs" onClick={handleFetch} disabled={isDisabled}>
         <Icon icon="tabler:list-search" className="size-3.5" />
         {i18n.t("options.apiProviders.form.models.fetchModels")}
       </Button>
@@ -111,12 +104,7 @@ export function ModelSuggestionButton({
 
     if (models.length === 0) {
       return (
-        <Button
-          type="button"
-          variant="outline"
-          size="xs"
-          onClick={handleFetch}
-        >
+        <Button type="button" variant="outline" size="xs" onClick={handleFetch}>
           <Icon icon="tabler:list" />
           {i18n.t("options.apiProviders.form.models.noModels")}
         </Button>
@@ -128,8 +116,7 @@ export function ModelSuggestionButton({
         items={models}
         defaultOpen
         onValueChange={(model: string | null) => {
-          if (model)
-            onSelect(model)
+          if (model) onSelect(model)
         }}
       >
         <ComboboxPrimitive.Trigger render={<Button type="button" variant="outline" size="xs" />}>
@@ -137,7 +124,10 @@ export function ModelSuggestionButton({
           {i18n.t("options.apiProviders.form.models.selectModel")}
         </ComboboxPrimitive.Trigger>
         <ComboboxContent align="end" className="w-64">
-          <ComboboxInput showTrigger={false} placeholder={i18n.t("options.apiProviders.form.models.searchModels")} />
+          <ComboboxInput
+            showTrigger={false}
+            placeholder={i18n.t("options.apiProviders.form.models.searchModels")}
+          />
           <ComboboxList>
             {(model: string) => (
               <ComboboxItem key={model} value={model}>

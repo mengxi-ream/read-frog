@@ -13,7 +13,7 @@ export function getFaviconUrl(): string {
     "mask-icon",
   ]
 
-  const candidates: { url: string, size: number, type: string } [] = []
+  const candidates: { url: string; size: number; type: string }[] = []
 
   for (const rel of relList) {
     const links = document.head.querySelectorAll(
@@ -22,9 +22,10 @@ export function getFaviconUrl(): string {
 
     links.forEach((link) => {
       if (link.href) {
-        const size = link.sizes.length > 0
-          ? Math.max(...Array.from(link.sizes, s => Number.parseInt(s) || 0))
-          : 0
+        const size =
+          link.sizes.length > 0
+            ? Math.max(...Array.from(link.sizes, (s) => Number.parseInt(s) || 0))
+            : 0
 
         candidates.push({
           url: link.href,
@@ -40,16 +41,11 @@ export function getFaviconUrl(): string {
   // 2. SVG 格式优先（通常更清晰）
   // 3. PNG 格式优先于 ICO
   candidates.sort((a, b) => {
-    if (a.size !== b.size)
-      return b.size - a.size
-    if (a.type === "image/svg+xml" && b.type !== "image/svg+xml")
-      return -1
-    if (b.type === "image/svg+xml" && a.type !== "image/svg+xml")
-      return 1
-    if (a.type === "image/png" && b.type === "image/x-icon")
-      return -1
-    if (b.type === "image/png" && a.type === "image/x-icon")
-      return 1
+    if (a.size !== b.size) return b.size - a.size
+    if (a.type === "image/svg+xml" && b.type !== "image/svg+xml") return -1
+    if (b.type === "image/svg+xml" && a.type !== "image/svg+xml") return 1
+    if (a.type === "image/png" && b.type === "image/x-icon") return -1
+    if (b.type === "image/png" && a.type === "image/x-icon") return 1
     return 0
   })
 

@@ -46,7 +46,9 @@ describe("mergeWithArrayOverwrite", () => {
 
     // Ensure immutability
     expect(result).not.toBe(config)
-    expect(result.translate.page.autoTranslatePatterns).not.toBe(config.translate.page.autoTranslatePatterns)
+    expect(result.translate.page.autoTranslatePatterns).not.toBe(
+      config.translate.page.autoTranslatePatterns,
+    )
   })
 
   it("should handle edge cases and type conversions", () => {
@@ -54,12 +56,17 @@ describe("mergeWithArrayOverwrite", () => {
     expect(mergeWithArrayOverwrite({ arr: [1, 2] }, { arr: "string" })).toEqual({ arr: "string" })
 
     // Non-array to array conversion
-    expect(mergeWithArrayOverwrite({ val: "text" }, { val: ["a", "b"] })).toEqual({ val: ["a", "b"] })
+    expect(mergeWithArrayOverwrite({ val: "text" }, { val: ["a", "b"] })).toEqual({
+      val: ["a", "b"],
+    })
 
     // Empty array overwrite
     expect(mergeWithArrayOverwrite({ items: ["x"] }, { items: [] })).toEqual({ items: [] })
 
     // Null/undefined handling
-    expect(mergeWithArrayOverwrite({ a: null }, { a: 1, b: undefined })).toEqual({ a: 1, b: undefined })
+    expect(mergeWithArrayOverwrite({ a: null }, { a: 1, b: undefined })).toEqual({
+      a: 1,
+      b: undefined,
+    })
   })
 })

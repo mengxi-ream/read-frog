@@ -25,16 +25,17 @@ interface JSONCodeEditorProps extends Omit<ReactCodeMirrorProps, "theme" | "exte
   hasError?: boolean
 }
 
-export function JSONCodeEditor({ hasError, className, editable = true, ...props }: JSONCodeEditorProps) {
+export function JSONCodeEditor({
+  hasError,
+  className,
+  editable = true,
+  ...props
+}: JSONCodeEditorProps) {
   const { theme } = useTheme()
 
   return (
     <CodeMirror
-      extensions={[
-        json(),
-        allowEmptyJsonLinter,
-        lintGutter(),
-      ]}
+      extensions={[json(), allowEmptyJsonLinter, lintGutter()]}
       theme={theme}
       basicSetup={{
         lineNumbers: true,
@@ -49,13 +50,15 @@ export function JSONCodeEditor({ hasError, className, editable = true, ...props 
       className={cn(
         "overflow-hidden rounded-md border",
         "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
-        hasError && "border-destructive focus-within:border-destructive focus-within:ring-destructive/50",
+        hasError &&
+          "border-destructive focus-within:border-destructive focus-within:ring-destructive/50",
         !editable && "opacity-50 cursor-not-allowed",
         className,
       )}
       style={{
         fontSize: 14,
-        fontFamily: "ui-monospace, SFMono-Regular, \"SF Mono\", Menlo, Consolas, \"Liberation Mono\", \"Courier New\", monospace",
+        fontFamily:
+          'ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono", "Courier New", monospace',
       }}
       editable={editable}
       {...props}

@@ -71,9 +71,8 @@ function getFirstWord(text: string): string {
 }
 
 function isQualityPoor(fragments: SubtitlesFragment[]): boolean {
-  if (fragments.length === 0)
-    return false
-  const longCount = fragments.filter(f => f.text.length > QUALITY_LENGTH_THRESHOLD).length
+  if (fragments.length === 0) return false
+  const longCount = fragments.filter((f) => f.text.length > QUALITY_LENGTH_THRESHOLD).length
   return longCount / fragments.length > QUALITY_PERCENTAGE_THRESHOLD
 }
 
@@ -96,10 +95,12 @@ function processSubtitles(
   const maxLength = getMaxLength(isCJK)
 
   const flushBuffer = () => {
-    if (buffer.length === 0)
-      return
+    if (buffer.length === 0) return
     result.push({
-      text: buffer.map(s => s.text).join(separator).trim(),
+      text: buffer
+        .map((s) => s.text)
+        .join(separator)
+        .trim(),
       start: buffer[0].start,
       end: buffer.at(-1)!.end,
     })
@@ -109,12 +110,10 @@ function processSubtitles(
 
   for (let i = 0; i < fragments.length; i++) {
     const frag = fragments[i]
-    if (!frag.text)
-      continue
+    if (!frag.text) continue
 
     const text = cleanText(frag.text)
-    if (!text)
-      continue
+    if (!text) continue
     const fragLength = getTextLength(text, isCJK)
     const lastSegment = buffer.at(-1)
 
@@ -124,11 +123,16 @@ function processSubtitles(
       const wouldExceedLimit = bufferLength + fragLength > maxLength
 
       const startsWithSign = STARTS_WITH_SIGN_PATTERN.test(frag.text)
-      const startsWithPauseWord = usePause
-        && PAUSE_WORDS.has(getFirstWord(frag.text))
-        && buffer.length > 1
+      const startsWithPauseWord =
+        usePause && PAUSE_WORDS.has(getFirstWord(frag.text)) && buffer.length > 1
 
-      if (isEndOfSentence || isTimeout || wouldExceedLimit || startsWithSign || startsWithPauseWord) {
+      if (
+        isEndOfSentence ||
+        isTimeout ||
+        wouldExceedLimit ||
+        startsWithSign ||
+        startsWithPauseWord
+      ) {
         flushBuffer()
       }
     }
@@ -141,7 +145,7 @@ function processSubtitles(
   return result
 }
 
-function getTargetBounds(isCJK: boolean): { min: number, max: number } {
+function getTargetBounds(isCJK: boolean): { min: number; max: number } {
   return isCJK
     ? { min: TARGET_MIN_CJK, max: TARGET_MAX_CJK }
     : { min: TARGET_MIN_NON_CJK, max: TARGET_MAX_NON_CJK }
@@ -226,8 +230,7 @@ export function optimizeSubtitles(
   fragments: SubtitlesFragment[],
   language: string,
 ): SubtitlesFragment[] {
-  if (fragments.length === 0)
-    return []
+  if (fragments.length === 0) return []
 
   // First pass without aggressive pause detection
   let result = processSubtitles(fragments, language, false)

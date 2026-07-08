@@ -86,18 +86,9 @@ export const DONT_WALK_AND_TRANSLATE_TAGS = new Set([
   ...MATH_TAGS,
 ])
 
-export const DONT_WALK_BUT_TRANSLATE_TAGS = new Set([
-  "CODE",
-  "TIME",
-])
+export const DONT_WALK_BUT_TRANSLATE_TAGS = new Set(["CODE", "TIME"])
 
 // force translation style as inline node, but not force the node as inline node
-export const FORCE_INLINE_TRANSLATION_TAGS = new Set([
-  "A",
-  "BUTTON",
-  "SELECT",
-  "OPTION",
-  "SPAN",
-])
+export const FORCE_INLINE_TRANSLATION_TAGS = new Set(["A", "BUTTON", "SELECT", "OPTION", "SPAN"])
 
 export const MAIN_CONTENT_IGNORE_TAGS = new Set(["HEADER", "FOOTER", "NAV", "NOSCRIPT"])

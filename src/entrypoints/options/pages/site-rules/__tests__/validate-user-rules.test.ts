@@ -94,7 +94,9 @@ describe("validateUserRulesDocument", () => {
     expect(result.kind).toBe("schema")
     expect(result.issues[0]!.path).toBe("rules[1].matches")
     // The editor renders each issue as `${path}: ${message}`.
-    expect(`${result.issues[0]!.path}: ${result.issues[0]!.message}`.startsWith("rules[1].matches: ")).toBe(true)
+    expect(
+      `${result.issues[0]!.path}: ${result.issues[0]!.message}`.startsWith("rules[1].matches: "),
+    ).toBe(true)
   })
 
   it("round-trips a valid rules document", () => {

@@ -13,7 +13,7 @@ vi.mock("@/utils/config/storage", async (importOriginal) => {
   }
 })
 
-function createAdapter(fetchResult: Array<{ text: string, start: number, end: number }>) {
+function createAdapter(fetchResult: Array<{ text: string; start: number; end: number }>) {
   const subtitlesFetcher = {
     fetch: vi.fn().mockResolvedValue(fetchResult),
     cleanup: vi.fn(),
@@ -86,15 +86,15 @@ describe("universalVideoAdapter", () => {
   })
 
   it("reloads subtitles when the source track changes while translation is enabled", async () => {
-    const { adapter, subtitlesFetcher } = createAdapter([
-      { text: "hello", start: 0, end: 500 },
-    ])
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
 
     const subtitlesScheduler = attachScheduler(adapter, true)
 
     const clearRuntimeSessionSpy = vi.spyOn(adapter as any, "clearRuntimeSession")
     const clearSourceCacheSpy = vi.spyOn(adapter as any, "clearSourceCache")
-    const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
+    const startTranslationSpy = vi
+      .spyOn(adapter as any, "startTranslation")
+      .mockResolvedValue(undefined)
 
     await adapter.handleSourceTrackChanged()
 
@@ -108,12 +108,12 @@ describe("universalVideoAdapter", () => {
   })
 
   it("ignores source track changes when translation is disabled", async () => {
-    const { adapter, subtitlesFetcher } = createAdapter([
-      { text: "hello", start: 0, end: 500 },
-    ])
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
 
     attachScheduler(adapter, false)
-    const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
+    const startTranslationSpy = vi
+      .spyOn(adapter as any, "startTranslation")
+      .mockResolvedValue(undefined)
 
     await adapter.handleSourceTrackChanged()
 
@@ -122,14 +122,14 @@ describe("universalVideoAdapter", () => {
   })
 
   it("does not reload subtitles when the selected track is unchanged", async () => {
-    const { adapter, subtitlesFetcher } = createAdapter([
-      { text: "hello", start: 0, end: 500 },
-    ])
+    const { adapter, subtitlesFetcher } = createAdapter([{ text: "hello", start: 0, end: 500 }])
 
     const subtitlesScheduler = attachScheduler(adapter, true)
     vi.mocked(subtitlesFetcher.shouldUseSameTrack).mockResolvedValue(true)
 
-    const startTranslationSpy = vi.spyOn(adapter as any, "startTranslation").mockResolvedValue(undefined)
+    const startTranslationSpy = vi
+      .spyOn(adapter as any, "startTranslation")
+      .mockResolvedValue(undefined)
 
     await adapter.handleSourceTrackChanged()
 

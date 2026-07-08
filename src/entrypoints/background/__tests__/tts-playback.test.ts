@@ -26,7 +26,7 @@ vi.mock("@/utils/logger", () => ({
 }))
 
 function getRegisteredMessageHandler<TData = unknown, TResult = unknown>(name: string) {
-  const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+  const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
@@ -83,15 +83,13 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     vi.unstubAllGlobals()
     if (createObjectURLDescriptor) {
       Object.defineProperty(URL, "createObjectURL", createObjectURLDescriptor)
-    }
-    else {
+    } else {
       delete (URL as { createObjectURL?: unknown }).createObjectURL
     }
 
     if (revokeObjectURLDescriptor) {
       Object.defineProperty(URL, "revokeObjectURL", revokeObjectURLDescriptor)
-    }
-    else {
+    } else {
       delete (URL as { revokeObjectURL?: unknown }).revokeObjectURL
     }
   })
@@ -122,11 +120,14 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<
+      {
+        requestId: string
+        audioBase64: string
+        contentType: string
+      },
+      { ok: boolean }
+    >("ttsPlaybackStart")
 
     const payload = {
       data: {
@@ -143,9 +144,7 @@ describe("setupTTSPlaybackMessageHandlers", () => {
   })
 
   it("retries once when offscreen receiver is temporarily missing", async () => {
-    const getContextsMock = vi.fn().mockResolvedValue([
-      { contextType: "OFFSCREEN_DOCUMENT" },
-    ])
+    const getContextsMock = vi.fn().mockResolvedValue([{ contextType: "OFFSCREEN_DOCUMENT" }])
     ;(globalThis as { chrome?: unknown }).chrome = {
       runtime: {
         getContexts: getContextsMock,
@@ -174,11 +173,14 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<
+      {
+        requestId: string
+        audioBase64: string
+        contentType: string
+      },
+      { ok: boolean }
+    >("ttsPlaybackStart")
 
     const result = await startHandler({
       data: {
@@ -189,7 +191,9 @@ describe("setupTTSPlaybackMessageHandlers", () => {
     })
 
     expect(result).toEqual({ ok: true })
-    expect(sendMessageMock.mock.calls.filter(call => call[0] === "ttsOffscreenPlay")).toHaveLength(2)
+    expect(
+      sendMessageMock.mock.calls.filter((call) => call[0] === "ttsOffscreenPlay"),
+    ).toHaveLength(2)
     expect(loggerWarnMock).toHaveBeenCalled()
   })
 
@@ -216,7 +220,9 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const prepareHandler = getRegisteredMessageHandler<undefined, { ok: true }>("ttsPlaybackPrepare")
+    const prepareHandler = getRegisteredMessageHandler<undefined, { ok: true }>(
+      "ttsPlaybackPrepare",
+    )
 
     await prepareHandler({ data: undefined })
 
@@ -229,11 +235,14 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
+    const startHandler = getRegisteredMessageHandler<
+      {
+        requestId: string
+        audioBase64: string
+        contentType: string
+      },
+      { ok: boolean }
+    >("ttsPlaybackStart")
 
     const playbackPromise = startHandler({
       data: {
@@ -260,12 +269,17 @@ describe("setupTTSPlaybackMessageHandlers", () => {
 
     const { setupTTSPlaybackMessageHandlers } = await import("../tts-playback")
     setupTTSPlaybackMessageHandlers()
-    const startHandler = getRegisteredMessageHandler<{
-      requestId: string
-      audioBase64: string
-      contentType: string
-    }, { ok: boolean }>("ttsPlaybackStart")
-    const stopHandler = getRegisteredMessageHandler<{ requestId?: string }, { ok: true }>("ttsPlaybackStop")
+    const startHandler = getRegisteredMessageHandler<
+      {
+        requestId: string
+        audioBase64: string
+        contentType: string
+      },
+      { ok: boolean }
+    >("ttsPlaybackStart")
+    const stopHandler = getRegisteredMessageHandler<{ requestId?: string }, { ok: true }>(
+      "ttsPlaybackStop",
+    )
 
     const playbackPromise = startHandler({
       data: {

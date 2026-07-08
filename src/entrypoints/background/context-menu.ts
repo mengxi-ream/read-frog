@@ -4,7 +4,11 @@ import { browser, storage } from "#imports"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
-import { getTranslationStateKey, parseTabIdFromStorageKey, TRANSLATION_STATE_KEY_PREFIX } from "@/utils/constants/storage-keys"
+import {
+  getTranslationStateKey,
+  parseTabIdFromStorageKey,
+  TRANSLATION_STATE_KEY_PREFIX,
+} from "@/utils/constants/storage-keys"
 import { i18n } from "@/utils/i18n"
 import { sendMessage } from "@/utils/message"
 import { ensureInitializedConfig } from "./config"
@@ -92,8 +96,9 @@ async function updateContextMenuItems(config: Config) {
   await browser.contextMenus.removeAll()
 
   const { enabled: translateEnabled } = config.contextMenu
-  const enabledCustomActions = config.selectionToolbar.customActions
-    .filter(action => action.enabled !== false)
+  const enabledCustomActions = config.selectionToolbar.customActions.filter(
+    (action) => action.enabled !== false,
+  )
 
   if (translateEnabled) {
     browser.contextMenus.create({
@@ -147,21 +152,15 @@ async function updateTranslateMenuTitle(tabId: number, enabled?: boolean) {
     let isTranslated: boolean
     if (enabled !== undefined) {
       isTranslated = enabled
-    }
-    else {
-      const state = await storage.getItem<{ enabled: boolean }>(
-        getTranslationStateKey(tabId),
-      )
+    } else {
+      const state = await storage.getItem<{ enabled: boolean }>(getTranslationStateKey(tabId))
       isTranslated = state?.enabled ?? false
     }
 
     await browser.contextMenus.update(MENU_ID_TRANSLATE, {
-      title: isTranslated
-        ? i18n.t("contextMenu.showOriginal")
-        : i18n.t("contextMenu.translate"),
+      title: isTranslated ? i18n.t("contextMenu.showOriginal") : i18n.t("contextMenu.translate"),
     })
-  }
-  catch {
+  } catch {
     // Menu item might not exist if translateEnabled is false
   }
 }
@@ -192,7 +191,10 @@ async function handleContextMenuClick(
     return
   }
 
-  if (typeof info.menuItemId === "string" && info.menuItemId.startsWith(MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX)) {
+  if (
+    typeof info.menuItemId === "string" &&
+    info.menuItemId.startsWith(MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX)
+  ) {
     const actionId = info.menuItemId.slice(MENU_ID_SELECTION_CUSTOM_ACTION_PREFIX.length)
     if (!actionId) {
       return
@@ -215,12 +217,19 @@ async function handleTranslateClick(tabId: number) {
   }
 
   // Notify content script in that specific tab
-  void sendMessage("askManagerToTogglePageTranslation", {
-    enabled: newState,
-    analyticsContext: newState
-      ? createFeatureUsageContext(ANALYTICS_FEATURE.PAGE_TRANSLATION, ANALYTICS_SURFACE.CONTEXT_MENU)
-      : undefined,
-  }, tabId)
+  void sendMessage(
+    "askManagerToTogglePageTranslation",
+    {
+      enabled: newState,
+      analyticsContext: newState
+        ? createFeatureUsageContext(
+            ANALYTICS_FEATURE.PAGE_TRANSLATION,
+            ANALYTICS_SURFACE.CONTEXT_MENU,
+          )
+        : undefined,
+    },
+    tabId,
+  )
 
   // Update menu title immediately
   await updateTranslateMenuTitle(tabId, newState)
@@ -235,13 +244,15 @@ async function handleSelectionTranslateClick(
     return
   }
 
-  const target = typeof info.frameId === "number"
-    ? { tabId, frameId: info.frameId }
-    : tabId
+  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
 
-  void sendMessage("openSelectionTranslationFromContextMenu", {
-    selectionText,
-  }, target)
+  void sendMessage(
+    "openSelectionTranslationFromContextMenu",
+    {
+      selectionText,
+    },
+    target,
+  )
 }
 
 async function handleSelectionReadAloudClick(
@@ -253,9 +264,7 @@ async function handleSelectionReadAloudClick(
     return
   }
 
-  const target = typeof info.frameId === "number"
-    ? { tabId, frameId: info.frameId }
-    : tabId
+  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
 
   void sendMessage("readAloudSelectionFromContextMenu", { selectionText }, target)
 }
@@ -270,12 +279,14 @@ async function handleSelectionCustomActionClick(
     return
   }
 
-  const target = typeof info.frameId === "number"
-    ? { tabId, frameId: info.frameId }
-    : tabId
+  const target = typeof info.frameId === "number" ? { tabId, frameId: info.frameId } : tabId
 
-  void sendMessage("openSelectionCustomActionFromContextMenu", {
-    actionId,
-    selectionText,
-  }, target)
+  void sendMessage(
+    "openSelectionCustomActionFromContextMenu",
+    {
+      actionId,
+      selectionText,
+    },
+    target,
+  )
 }

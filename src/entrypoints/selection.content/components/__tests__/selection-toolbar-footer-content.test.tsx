@@ -18,7 +18,7 @@ vi.mock("@/components/llm-providers/provider-selector", () => ({
     providers: ProviderConfig[]
     value: string
   }) => {
-    const nextProvider = providers.find(provider => provider.id !== value)
+    const nextProvider = providers.find((provider) => provider.id !== value)
 
     return (
       <button
@@ -84,7 +84,9 @@ describe("selectionToolbarFooterContent", () => {
     expect(screen.getByText("Page Title")).toBeInTheDocument()
     expect(screen.getByText("Context text")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Save to Notebase" })).toBeInTheDocument()
-    const contextPreview = screen.getByText("Context text").closest("[data-slot='selection-toolbar-footer-preview-value']")
+    const contextPreview = screen
+      .getByText("Context text")
+      .closest("[data-slot='selection-toolbar-footer-preview-value']")
 
     expect(contextPreview).toHaveClass("max-h-36", "overflow-y-auto", "break-words")
     expect(contextPreview?.className).toContain("[overflow-wrap:anywhere]")

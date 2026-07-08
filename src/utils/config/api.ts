@@ -19,8 +19,7 @@ export function getObjectWithoutAPIKeys<T extends Record<string, any>>(originalO
 
   try {
     return deepClean(originalObject)
-  }
-  catch {
+  } catch {
     return originalObject
   }
 }
@@ -45,8 +44,7 @@ export function hasAPIKey(obj: any): boolean {
 
   try {
     return deepCheck(obj)
-  }
-  catch {
+  } catch {
     return false
   }
 }

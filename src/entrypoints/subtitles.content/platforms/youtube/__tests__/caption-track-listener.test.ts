@@ -4,7 +4,7 @@ import { YOUTUBE_NAVIGATE_FINISH_EVENT } from "@/utils/constants/subtitles"
 import { createYoutubeCaptionTrackListener } from "../caption-track-listener"
 
 function flushObserver() {
-  return new Promise(resolve => setTimeout(resolve, 0))
+  return new Promise((resolve) => setTimeout(resolve, 0))
 }
 
 function renderSettingsMenu({
@@ -41,7 +41,8 @@ function getSummaryNode() {
 }
 
 function clickSummaryItem() {
-  document.querySelector<HTMLElement>(".ytp-menuitem")
+  document
+    .querySelector<HTMLElement>(".ytp-menuitem")
     ?.dispatchEvent(new MouseEvent("click", { bubbles: true }))
 }
 
@@ -170,7 +171,9 @@ describe("youtube caption track listener", () => {
     await vi.runAllTimersAsync()
 
     clickSummaryItem()
-    document.querySelector<HTMLElement>(".ytp-settings-button")?.setAttribute("aria-expanded", "false")
+    document
+      .querySelector<HTMLElement>(".ytp-settings-button")
+      ?.setAttribute("aria-expanded", "false")
     getSummaryNode()!.textContent = "英语 (自动生成) >> 阿拉伯语"
     await vi.advanceTimersByTimeAsync(60)
 

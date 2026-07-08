@@ -83,7 +83,9 @@ describe("customActionToolButton", () => {
     fireEvent.focus(button)
 
     await waitFor(() => {
-      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent("Customize Summarize action")
+      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(
+        "Customize Summarize action",
+      )
     })
   })
 })

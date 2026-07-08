@@ -1,6 +1,11 @@
 import type { YoutubeTimedText } from "./types"
 
-export type SubtitleFormat = "animated" | "karaoke" | "karaoke-stylized" | "scrolling-asr" | "standard"
+export type SubtitleFormat =
+  | "animated"
+  | "karaoke"
+  | "karaoke-stylized"
+  | "scrolling-asr"
+  | "standard"
 
 const ZERO_WIDTH_SPACE_PATTERN = /\u200B/g
 const WHITESPACE_PATTERN = /\s+/g
@@ -9,16 +14,11 @@ const STYLIZED_GAP_MS = 400
 const MIN_STYLIZED_MATCHES = 3
 
 function getEventText(event: YoutubeTimedText): string {
-  return (event.segs ?? [])
-    .map(seg => seg.utf8 || "")
-    .join("")
+  return (event.segs ?? []).map((seg) => seg.utf8 || "").join("")
 }
 
 function cleanEventText(text: string): string {
-  return text
-    .replace(ZERO_WIDTH_SPACE_PATTERN, "")
-    .replace(WHITESPACE_PATTERN, " ")
-    .trim()
+  return text.replace(ZERO_WIDTH_SPACE_PATTERN, "").replace(WHITESPACE_PATTERN, " ").trim()
 }
 
 function normalizeStylizedText(text: string): string {
@@ -34,18 +34,15 @@ function normalizeStylizedText(text: string): string {
  * Feature: multiple events at the same timestamp with different wpWinPosId values.
  */
 function isKaraokeFormat(events: YoutubeTimedText[]): boolean {
-  if (events.length < 2)
-    return false
+  if (events.length < 2) return false
 
   const groupsByTime = new Map<number, Set<number>>()
   for (const event of events) {
-    if (event.wpWinPosId === undefined)
-      continue
+    if (event.wpWinPosId === undefined) continue
 
     const group = groupsByTime.get(event.tStartMs) ?? new Set<number>()
     group.add(event.wpWinPosId)
-    if (group.size > 1)
-      return true
+    if (group.size > 1) return true
     groupsByTime.set(event.tStartMs, group)
   }
 
@@ -57,26 +54,22 @@ function isKaraokeFormat(events: YoutubeTimedText[]): boolean {
  * single track with slash-based syllable markers and zero-width spacing.
  */
 function isStylizedKaraokeFormat(events: YoutubeTimedText[]): boolean {
-  if (events.length < 4)
-    return false
+  if (events.length < 4) return false
 
   const tracks = new Map<number, YoutubeTimedText[]>()
   for (const event of events) {
-    if (event.wpWinPosId === undefined)
-      continue
+    if (event.wpWinPosId === undefined) continue
 
     const trackEvents = tracks.get(event.wpWinPosId)
     if (trackEvents) {
       trackEvents.push(event)
-    }
-    else {
+    } else {
       tracks.set(event.wpWinPosId, [event])
     }
   }
 
   for (const trackEvents of tracks.values()) {
-    if (trackEvents.length < 4)
-      continue
+    if (trackEvents.length < 4) continue
 
     let stylizedMatches = 0
     let previousNormalized = ""
@@ -87,25 +80,22 @@ function isStylizedKaraokeFormat(events: YoutubeTimedText[]): boolean {
       const cleanedText = cleanEventText(rawText)
       const normalizedText = normalizeStylizedText(rawText)
 
-      if (!cleanedText || !normalizedText)
-        continue
+      if (!cleanedText || !normalizedText) continue
 
-      const hasStylizedMarkers = rawText.includes("/")
-        || rawText.includes("\u200B")
+      const hasStylizedMarkers = rawText.includes("/") || rawText.includes("\u200B")
 
-      const isCloseInTime = previousNormalized.length > 0
-        && event.tStartMs - previousTime <= STYLIZED_GAP_MS
+      const isCloseInTime =
+        previousNormalized.length > 0 && event.tStartMs - previousTime <= STYLIZED_GAP_MS
 
-      const isDuplicateOrExpansion = isCloseInTime && (
-        normalizedText === previousNormalized
-        || normalizedText.startsWith(previousNormalized)
-        || previousNormalized.startsWith(normalizedText)
-      )
+      const isDuplicateOrExpansion =
+        isCloseInTime &&
+        (normalizedText === previousNormalized ||
+          normalizedText.startsWith(previousNormalized) ||
+          previousNormalized.startsWith(normalizedText))
 
       if (hasStylizedMarkers && isDuplicateOrExpansion) {
         stylizedMatches += 1
-        if (stylizedMatches >= MIN_STYLIZED_MATCHES)
-          return true
+        if (stylizedMatches >= MIN_STYLIZED_MATCHES) return true
       }
 
       previousNormalized = normalizedText
@@ -121,7 +111,7 @@ function isStylizedKaraokeFormat(events: YoutubeTimedText[]): boolean {
  * Feature: events with wWinId and aAppend: 1.
  */
 function isScrollingAsrFormat(events: YoutubeTimedText[]): boolean {
-  return events.some(event => event.wWinId !== undefined && event.aAppend === 1)
+  return events.some((event) => event.wWinId !== undefined && event.aAppend === 1)
 }
 
 const ANIMATED_DURATION_THRESHOLD_MS = 100
@@ -134,14 +124,13 @@ const ANIMATED_SHORT_DURATION_RATIO = 0.5
  * Used in music videos where text bounces/scrolls across the screen.
  */
 function isAnimatedFormat(events: YoutubeTimedText[]): boolean {
-  if (events.length < ANIMATED_MIN_EVENTS)
-    return false
+  if (events.length < ANIMATED_MIN_EVENTS) return false
 
   let shortWithPos = 0
   for (const event of events) {
     if (
-      event.wpWinPosId !== undefined
-      && (event.dDurationMs ?? 0) <= ANIMATED_DURATION_THRESHOLD_MS
+      event.wpWinPosId !== undefined &&
+      (event.dDurationMs ?? 0) <= ANIMATED_DURATION_THRESHOLD_MS
     ) {
       shortWithPos += 1
     }
@@ -154,20 +143,15 @@ function isAnimatedFormat(events: YoutubeTimedText[]): boolean {
  * Detect subtitle format type.
  */
 export function detectFormat(events: YoutubeTimedText[]): SubtitleFormat {
-  if (!events || events.length === 0)
-    return "standard"
+  if (!events || events.length === 0) return "standard"
 
-  if (isAnimatedFormat(events))
-    return "animated"
+  if (isAnimatedFormat(events)) return "animated"
 
-  if (isStylizedKaraokeFormat(events))
-    return "karaoke-stylized"
+  if (isStylizedKaraokeFormat(events)) return "karaoke-stylized"
 
-  if (isKaraokeFormat(events))
-    return "karaoke"
+  if (isKaraokeFormat(events)) return "karaoke"
 
-  if (isScrollingAsrFormat(events))
-    return "scrolling-asr"
+  if (isScrollingAsrFormat(events)) return "scrolling-asr"
 
   return "standard"
 }

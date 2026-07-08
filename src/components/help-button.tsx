@@ -16,10 +16,8 @@ const cornerStyles: Record<Corner, React.CSSProperties> = {
 function getStoredCorner(): Corner {
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored && stored in cornerStyles)
-      return stored as Corner
-  }
-  catch {}
+    if (stored && stored in cornerStyles) return stored as Corner
+  } catch {}
   return "bottom-right"
 }
 
@@ -31,7 +29,7 @@ function getNearestCorner(_x: number, y: number): Corner {
 export function HelpButton() {
   const [corner, setCorner] = useState<Corner>(getStoredCorner)
   const [dragging, setDragging] = useState(false)
-  const [dragPos, setDragPos] = useState<{ x: number, y: number } | null>(null)
+  const [dragPos, setDragPos] = useState<{ x: number; y: number } | null>(null)
   const hasDraggedRef = useRef(false)
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
@@ -44,8 +42,7 @@ export function HelpButton() {
       const dx = ev.clientX - startX
       const dy = ev.clientY - startY
 
-      if (!hasDraggedRef.current && Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD)
-        return
+      if (!hasDraggedRef.current && Math.sqrt(dx * dx + dy * dy) < DRAG_THRESHOLD) return
 
       hasDraggedRef.current = true
       setDragging(true)
@@ -60,9 +57,11 @@ export function HelpButton() {
         const newCorner = getNearestCorner(ev.clientX, ev.clientY)
         setCorner(newCorner)
         localStorage.setItem(STORAGE_KEY, newCorner)
-      }
-      else {
-        window.open("https://github.com/mengxi-ream/read-frog/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen", "_blank")
+      } else {
+        window.open(
+          "https://github.com/mengxi-ream/read-frog/issues?q=sort%3Aupdated-desc+is%3Aissue+is%3Aopen",
+          "_blank",
+        )
       }
       hasDraggedRef.current = false
       setDragging(false)
@@ -73,9 +72,17 @@ export function HelpButton() {
     document.addEventListener("mouseup", onMouseUp)
   }, [])
 
-  const style: React.CSSProperties = dragging && dragPos
-    ? { position: "fixed", left: dragPos.x, top: dragPos.y, right: "auto", bottom: "auto", transition: "none" }
-    : { position: "fixed", ...cornerStyles[corner], transition: "all 300ms ease" }
+  const style: React.CSSProperties =
+    dragging && dragPos
+      ? {
+          position: "fixed",
+          left: dragPos.x,
+          top: dragPos.y,
+          right: "auto",
+          bottom: "auto",
+          transition: "none",
+        }
+      : { position: "fixed", ...cornerStyles[corner], transition: "all 300ms ease" }
 
   return (
     <button

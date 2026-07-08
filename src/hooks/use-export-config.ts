@@ -22,10 +22,14 @@ export function useExportConfig({ config, schemaVersion, onSuccess }: UseExportC
         exportConfig = getObjectWithoutAPIKeys(config)
       }
 
-      const json = JSON.stringify({
-        config: exportConfig,
-        schemaVersion,
-      }, null, 2)
+      const json = JSON.stringify(
+        {
+          config: exportConfig,
+          schemaVersion,
+        },
+        null,
+        2,
+      )
       const blob = new Blob([json], { type: "text/json" })
       saveAs(blob, `${kebabCase(APP_NAME)}-config-v${schemaVersion}.json`)
     },

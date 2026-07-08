@@ -1,14 +1,12 @@
 // @vitest-environment jsdom
 import type { Config } from "@/types/config/config"
 import { describe, expect, it } from "vitest"
-
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import {
   BLOCK_CONTENT_CLASS,
   INLINE_CONTENT_CLASS,
   NOTRANSLATE_CLASS,
 } from "@/utils/constants/dom-labels"
-
 import {
   isDontWalkIntoAndDontTranslateAsChildElement,
   isDontWalkIntoButTranslateAsChildElement,
@@ -141,14 +139,14 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(true)
   })
 
-  it("should not block aria-hidden=\"true\" by default", () => {
+  it('should not block aria-hidden="true" by default', () => {
     setHost("non-configured-example.org")
     const element = document.createElement("div")
     element.setAttribute("aria-hidden", "true")
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(false)
   })
 
-  it("should still block aria-hidden=\"true\" on WhatsApp through the built-in site rule", () => {
+  it('should still block aria-hidden="true" on WhatsApp through the built-in site rule', () => {
     setHost("web.whatsapp.com")
     const element = document.createElement("div")
     element.setAttribute("aria-hidden", "true")

@@ -1,7 +1,6 @@
 import { kebabCase } from "case-anything"
 import * as React from "react"
 import { Toaster } from "sonner"
-
 import { browser } from "#imports"
 import frogIcon from "@/assets/icons/read-frog.png?url&no-inline"
 import { APP_NAME } from "@/utils/constants/app"
@@ -21,7 +20,11 @@ const frogIconElement = (
   />
 )
 
-function FrogToast({ position = "bottom-left", toastOptions, ...props }: React.ComponentProps<typeof Toaster>) {
+function FrogToast({
+  position = "bottom-left",
+  toastOptions,
+  ...props
+}: React.ComponentProps<typeof Toaster>) {
   return (
     <Toaster
       {...props}
@@ -36,7 +39,9 @@ function FrogToast({ position = "bottom-left", toastOptions, ...props }: React.C
       }}
       toastOptions={{
         ...toastOptions,
-        className: [`${kebabCase(APP_NAME)}-toaster`, toastOptions?.className].filter(Boolean).join(" "),
+        className: [`${kebabCase(APP_NAME)}-toaster`, toastOptions?.className]
+          .filter(Boolean)
+          .join(" "),
       }}
       className="z-[2147483647] notranslate"
     />

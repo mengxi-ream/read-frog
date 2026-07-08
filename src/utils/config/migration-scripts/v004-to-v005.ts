@@ -7,10 +7,13 @@ export function migrate(oldConfig: any): any {
         deepseek: "https://api.deepseek.com/v1",
         openrouter: "https://openrouter.ai/api/v1",
       }
-      return [key, {
-        ...value,
-        baseURL: baseURLs[key as keyof typeof baseURLs],
-      }]
+      return [
+        key,
+        {
+          ...value,
+          baseURL: baseURLs[key as keyof typeof baseURLs],
+        },
+      ]
     }),
   )
 

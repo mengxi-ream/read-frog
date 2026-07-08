@@ -9,14 +9,14 @@ import { UserRulesEditor } from "../user-rules-editor"
 
 vi.mock("@/components/ui/json-code-editor", () => ({
   JSONCodeEditor: (props: {
-    "value"?: string
-    "onChange"?: (value: string) => void
+    value?: string
+    onChange?: (value: string) => void
     "aria-label"?: string
   }) => (
     <textarea
       aria-label={props["aria-label"]}
       value={props.value}
-      onChange={event => props.onChange?.(event.target.value)}
+      onChange={(event) => props.onChange?.(event.target.value)}
     />
   ),
 }))
@@ -67,14 +67,21 @@ describe("userRulesEditor", () => {
     const alert = screen.getByRole("alert")
     expect(alert).toHaveTextContent("options.siteRules.userRules.validation.syntaxError")
     expect(alert.querySelector("code")).toHaveTextContent("rules")
-    expect(screen.getByRole("button", { name: "options.siteRules.userRules.saveButton" })).toBeDisabled()
+    expect(
+      screen.getByRole("button", { name: "options.siteRules.userRules.saveButton" }),
+    ).toBeDisabled()
   })
 
   it("shows schema issues with formatted paths", async () => {
     renderEditor()
 
     fireEvent.change(screen.getByLabelText("site-rules-user-rules-editor"), {
-      target: { value: JSON.stringify([{ id: "ok", matches: "example.com" }, { id: "bad", matches: 42 }]) },
+      target: {
+        value: JSON.stringify([
+          { id: "ok", matches: "example.com" },
+          { id: "bad", matches: 42 },
+        ]),
+      },
     })
 
     await advanceDebounce()
@@ -82,7 +89,9 @@ describe("userRulesEditor", () => {
     const alert = screen.getByRole("alert")
     expect(alert).toHaveTextContent("options.siteRules.userRules.validation.schemaErrors")
     expect(alert.querySelector("code")).toHaveTextContent("rules[1].matches")
-    expect(screen.getByRole("button", { name: "options.siteRules.userRules.saveButton" })).toBeDisabled()
+    expect(
+      screen.getByRole("button", { name: "options.siteRules.userRules.saveButton" }),
+    ).toBeDisabled()
   })
 
   it("persists parsed rules to the store on save", async () => {
@@ -96,7 +105,9 @@ describe("userRulesEditor", () => {
     await advanceDebounce()
 
     expect(screen.queryByRole("alert")).not.toBeInTheDocument()
-    const saveButton = screen.getByRole("button", { name: "options.siteRules.userRules.saveButton" })
+    const saveButton = screen.getByRole("button", {
+      name: "options.siteRules.userRules.saveButton",
+    })
     expect(saveButton).toBeEnabled()
 
     await act(async () => {
@@ -106,6 +117,8 @@ describe("userRulesEditor", () => {
 
     expect(store.get(configAtom).siteRules.userRules).toEqual(rules)
     expect(store.get(configAtom).siteRules.disabledBuiltInRules).toEqual([])
-    expect(screen.getByRole("button", { name: "options.siteRules.userRules.savedButton" })).toBeDisabled()
+    expect(
+      screen.getByRole("button", { name: "options.siteRules.userRules.savedButton" }),
+    ).toBeDisabled()
   })
 })

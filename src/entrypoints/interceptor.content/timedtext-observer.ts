@@ -13,7 +13,7 @@ function cacheTimedtextUrl(url: string): void {
 
       const waiters = timedtextUrlWaiters.get(videoId)
       if (waiters) {
-        waiters.forEach(resolve => resolve(url))
+        waiters.forEach((resolve) => resolve(url))
         timedtextUrlWaiters.delete(videoId)
       }
     }
@@ -49,7 +49,7 @@ export function setupTimedtextObserver(): void {
   const originalXhrSend = XMLHttpRequest.prototype.send
 
   XMLHttpRequest.prototype.open = function (method: string, url: string | URL, ...args: any[]) {
-    (this as any)._url = url.toString()
+    ;(this as any)._url = url.toString()
     return originalXhrOpen.apply(this, [method, url, ...args] as any)
   }
 

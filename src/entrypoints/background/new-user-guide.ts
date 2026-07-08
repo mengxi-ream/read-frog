@@ -18,21 +18,22 @@ export async function guidePinExtension() {
 
   if (browser.action.onUserSettingsChanged) {
     browser.action.onUserSettingsChanged.addListener(checkPinnedAndNotify)
-  }
-  else {
+  } else {
     setInterval(checkPinnedAndNotify, 1_000)
   }
 }
 
 async function checkPinnedAndNotify() {
   const { isOnToolbar } = await browser.action.getUserSettings()
-  if (isOnToolbar === lastIsPinned)
-    return
+  if (isOnToolbar === lastIsPinned) return
   lastIsPinned = isOnToolbar
 
-  browser.tabs.query({ url: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`) }, (tabs) => {
-    for (const tab of tabs) {
-      void sendMessage("pinStateChanged", { isPinned: isOnToolbar }, tab.id)
-    }
-  })
+  browser.tabs.query(
+    { url: env.WXT_OFFICIAL_SITE_ORIGINS.map((origin: string) => `${origin}/*`) },
+    (tabs) => {
+      for (const tab of tabs) {
+        void sendMessage("pinStateChanged", { isPinned: isOnToolbar }, tab.id)
+      }
+    },
+  )
 }

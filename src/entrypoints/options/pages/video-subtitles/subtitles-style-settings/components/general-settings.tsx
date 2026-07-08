@@ -7,19 +7,35 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Card } from "@/components/ui/base-ui/card"
 import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Label } from "@/components/ui/base-ui/label"
-import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/base-ui/select"
 import { Slider } from "@/components/ui/base-ui/slider"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_TRANSLATION_POSITION, MAX_BACKGROUND_OPACITY, MIN_BACKGROUND_OPACITY } from "@/utils/constants/subtitles"
+import {
+  DEFAULT_BACKGROUND_OPACITY,
+  DEFAULT_DISPLAY_MODE,
+  DEFAULT_TRANSLATION_POSITION,
+  MAX_BACKGROUND_OPACITY,
+  MIN_BACKGROUND_OPACITY,
+} from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 
 const SLIDER_ROW_CLASS_NAME = "gap-0"
-const SLIDER_ROW_CONTENT_CLASS_NAME = "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
+const SLIDER_ROW_CONTENT_CLASS_NAME =
+  "flex flex-col gap-2 @xs/field-group:grid @xs/field-group:grid-cols-[12rem_minmax(0,1fr)] @xs/field-group:items-center @xs/field-group:gap-x-4"
 const SLIDER_LABEL_CLASS_NAME = "text-sm whitespace-nowrap @xs/field-group:min-w-0"
 
 export function GeneralSettings() {
-  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
+  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
+    configFieldsAtomMap.videoSubtitles,
+  )
   const { displayMode, translationPosition, container } = videoSubtitlesConfig.style
   const [draftBackgroundOpacity, setDraftBackgroundOpacity] = useState(container.backgroundOpacity)
 
@@ -29,15 +45,15 @@ export function GeneralSettings() {
   }, [container.backgroundOpacity])
 
   const handleDisplayModeChange = (value: SubtitlesDisplayMode | null) => {
-    if (!value)
-      return
+    if (!value) return
     void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { displayMode: value } }))
   }
 
   const handleTranslationPositionChange = (value: SubtitlesTranslationPosition | null) => {
-    if (!value)
-      return
-    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, { style: { translationPosition: value } }))
+    if (!value) return
+    void setVideoSubtitlesConfig(
+      deepmerge(videoSubtitlesConfig, { style: { translationPosition: value } }),
+    )
   }
 
   const handleContainerChange = (style: Partial<typeof container>) => {
@@ -45,15 +61,17 @@ export function GeneralSettings() {
   }
 
   const resetGeneralConfig = () => {
-    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
-      style: {
-        displayMode: DEFAULT_DISPLAY_MODE,
-        translationPosition: DEFAULT_TRANSLATION_POSITION,
-        container: {
-          backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
+    void setVideoSubtitlesConfig(
+      deepmerge(videoSubtitlesConfig, {
+        style: {
+          displayMode: DEFAULT_DISPLAY_MODE,
+          translationPosition: DEFAULT_TRANSLATION_POSITION,
+          container: {
+            backgroundOpacity: DEFAULT_BACKGROUND_OPACITY,
+          },
         },
-      },
-    }))
+      }),
+    )
   }
 
   return (
@@ -61,11 +79,15 @@ export function GeneralSettings() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon icon="tabler:settings" className="size-4" />
-          <Label className="text-sm font-semibold">{i18n.t("options.videoSubtitles.style.generalSettings")}</Label>
+          <Label className="text-sm font-semibold">
+            {i18n.t("options.videoSubtitles.style.generalSettings")}
+          </Label>
         </div>
         <Tooltip>
           <TooltipTrigger
-            render={<Button variant="ghost" size="sm" className="-mr-2" onClick={resetGeneralConfig} />}
+            render={
+              <Button variant="ghost" size="sm" className="-mr-2" onClick={resetGeneralConfig} />
+            }
           >
             <Icon icon="tabler:refresh" />
           </TooltipTrigger>
@@ -75,7 +97,9 @@ export function GeneralSettings() {
 
       <FieldGroup>
         <Field orientation="responsive-compact">
-          <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.displayMode.title")}</FieldLabel>
+          <FieldLabel className="text-sm whitespace-nowrap">
+            {i18n.t("options.videoSubtitles.style.displayMode.title")}
+          </FieldLabel>
           <Select value={displayMode} onValueChange={handleDisplayModeChange}>
             <SelectTrigger className="h-8">
               <SelectValue>
@@ -100,11 +124,15 @@ export function GeneralSettings() {
 
         {displayMode === "bilingual" && (
           <Field orientation="responsive-compact">
-            <FieldLabel className="text-sm whitespace-nowrap">{i18n.t("options.videoSubtitles.style.translationPosition.title")}</FieldLabel>
+            <FieldLabel className="text-sm whitespace-nowrap">
+              {i18n.t("options.videoSubtitles.style.translationPosition.title")}
+            </FieldLabel>
             <Select value={translationPosition} onValueChange={handleTranslationPositionChange}>
               <SelectTrigger className="h-8">
                 <SelectValue>
-                  {i18n.t(`options.videoSubtitles.style.translationPosition.${translationPosition}`)}
+                  {i18n.t(
+                    `options.videoSubtitles.style.translationPosition.${translationPosition}`,
+                  )}
                 </SelectValue>
               </SelectTrigger>
               <SelectContent>
@@ -123,7 +151,9 @@ export function GeneralSettings() {
 
         <Field className={SLIDER_ROW_CLASS_NAME}>
           <div className={SLIDER_ROW_CONTENT_CLASS_NAME}>
-            <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>{i18n.t("options.videoSubtitles.style.backgroundOpacity")}</FieldLabel>
+            <FieldLabel className={SLIDER_LABEL_CLASS_NAME}>
+              {i18n.t("options.videoSubtitles.style.backgroundOpacity")}
+            </FieldLabel>
             <div className="w-full min-w-0 @xs/field-group:ml-auto @xs/field-group:max-w-[15rem]">
               <div className="flex min-w-0 items-center gap-2">
                 <Slider
@@ -131,14 +161,13 @@ export function GeneralSettings() {
                   max={MAX_BACKGROUND_OPACITY}
                   step={5}
                   value={draftBackgroundOpacity}
-                  onValueChange={value => setDraftBackgroundOpacity(value as number)}
-                  onValueCommitted={value => handleContainerChange({ backgroundOpacity: value as number })}
+                  onValueChange={(value) => setDraftBackgroundOpacity(value as number)}
+                  onValueCommitted={(value) =>
+                    handleContainerChange({ backgroundOpacity: value as number })
+                  }
                   className="flex-1"
                 />
-                <span className="w-10 text-sm text-right">
-                  {draftBackgroundOpacity}
-                  %
-                </span>
+                <span className="w-10 text-sm text-right">{draftBackgroundOpacity}%</span>
               </div>
             </div>
           </div>

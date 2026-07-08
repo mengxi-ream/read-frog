@@ -27,7 +27,11 @@ export function ResetConfig() {
   }
 
   return (
-    <ConfigCard id="reset-config" title={i18n.t("options.config.resetConfig.title")} description={i18n.t("options.config.resetConfig.description")}>
+    <ConfigCard
+      id="reset-config"
+      title={i18n.t("options.config.resetConfig.title")}
+      description={i18n.t("options.config.resetConfig.description")}
+    >
       <AlertDialog open={open} onOpenChange={setOpen}>
         <div className="w-full flex justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" />}>
@@ -43,7 +47,9 @@ export function ResetConfig() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{i18n.t("options.config.resetConfig.dialog.cancel")}</AlertDialogCancel>
+            <AlertDialogCancel>
+              {i18n.t("options.config.resetConfig.dialog.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={resetToDefaultConfig}>
               {i18n.t("options.config.resetConfig.dialog.confirm")}
             </AlertDialogAction>

@@ -1,14 +1,7 @@
 import { IconSelector } from "@tabler/icons-react"
 import { match } from "ts-pattern"
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-} from "@/components/ui/base-ui/dropdown-menu"
-import {
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/base-ui/sidebar"
+import { DropdownMenu, DropdownMenuTrigger } from "@/components/ui/base-ui/dropdown-menu"
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/base-ui/sidebar"
 import { i18n } from "@/utils/i18n"
 import {
   ACCOUNT_STATE,
@@ -37,7 +30,12 @@ export function UserAccountMenuSidebar() {
     .with(ACCOUNT_STATE.GUEST, () => (
       <SidebarMenu>
         <SidebarMenuItem>
-          <SidebarMenuButton size="lg" tooltip={i18n.t("account.login")} onClick={openLogIn} className="cursor-pointer">
+          <SidebarMenuButton
+            size="lg"
+            tooltip={i18n.t("account.login")}
+            onClick={openLogIn}
+            className="cursor-pointer"
+          >
             {avatar}
             <span className="truncate font-medium">{i18n.t("account.login")}</span>
           </SidebarMenuButton>
@@ -48,12 +46,22 @@ export function UserAccountMenuSidebar() {
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
-            <DropdownMenuTrigger render={<SidebarMenuButton size="lg" tooltip={displayName} className="cursor-pointer data-[popup-open]:bg-sidebar-accent data-[popup-open]:text-sidebar-accent-foreground" />}>
+            <DropdownMenuTrigger
+              render={
+                <SidebarMenuButton
+                  size="lg"
+                  tooltip={displayName}
+                  className="cursor-pointer data-[popup-open]:bg-sidebar-accent data-[popup-open]:text-sidebar-accent-foreground"
+                />
+              }
+            >
               {avatar}
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{displayName}</span>
                 {account.user?.email && (
-                  <span className="truncate text-xs text-muted-foreground">{account.user.email}</span>
+                  <span className="truncate text-xs text-muted-foreground">
+                    {account.user.email}
+                  </span>
                 )}
               </div>
               <IconSelector aria-hidden className="ml-auto size-4" />

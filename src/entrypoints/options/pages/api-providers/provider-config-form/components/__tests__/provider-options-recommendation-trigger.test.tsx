@@ -10,16 +10,8 @@ vi.mock("#imports", () => ({
 }))
 
 vi.mock("@/components/ui/json-code-editor", () => ({
-  JSONCodeEditor: ({
-    value,
-    placeholder,
-  }: {
-    value?: string
-    placeholder?: string
-  }) => (
-    <pre data-testid="provider-options-preview">
-      {value || placeholder}
-    </pre>
+  JSONCodeEditor: ({ value, placeholder }: { value?: string; placeholder?: string }) => (
+    <pre data-testid="provider-options-preview">{value || placeholder}</pre>
   ),
 }))
 
@@ -42,9 +34,11 @@ describe("providerOptionsRecommendationTrigger", () => {
       />,
     )
 
-    expect(screen.queryByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    ).not.toBeInTheDocument()
   })
 
   it("does not render a trigger for GPT-5 chat-latest models", () => {
@@ -56,9 +50,11 @@ describe("providerOptionsRecommendationTrigger", () => {
       />,
     )
 
-    expect(screen.queryByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    ).not.toBeInTheDocument()
   })
 
   it("flashes once when the model starts matching a new recommendation rule", () => {
@@ -103,16 +99,24 @@ describe("providerOptionsRecommendationTrigger", () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    }))
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    )
 
-    expect(screen.getByText("options.apiProviders.form.providerOptionsRecommendationTitle")).toBeInTheDocument()
-    expect(screen.getByTestId("provider-options-preview")).toHaveTextContent("\"reasoningEffort\": \"none\"")
+    expect(
+      screen.getByText("options.apiProviders.form.providerOptionsRecommendationTitle"),
+    ).toBeInTheDocument()
+    expect(screen.getByTestId("provider-options-preview")).toHaveTextContent(
+      '"reasoningEffort": "none"',
+    )
 
-    fireEvent.click(screen.getByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationApply",
-    }))
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationApply",
+      }),
+    )
 
     expect(onApply).toHaveBeenCalledWith({ reasoningEffort: "none" })
   })
@@ -126,8 +130,10 @@ describe("providerOptionsRecommendationTrigger", () => {
       />,
     )
 
-    expect(screen.queryByRole("button", {
-      name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
-    })).not.toBeInTheDocument()
+    expect(
+      screen.queryByRole("button", {
+        name: "options.apiProviders.form.providerOptionsRecommendationTrigger",
+      }),
+    ).not.toBeInTheDocument()
   })
 })

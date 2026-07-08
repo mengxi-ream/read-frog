@@ -44,8 +44,7 @@ export class TranslationCoordinator {
     }
 
     const video = this.getVideoElement()
-    if (!video)
-      return
+    if (!video) return
 
     video.addEventListener("timeupdate", this.handleTranslationTick)
     video.addEventListener("seeked", this.handleTranslationTick)
@@ -60,8 +59,7 @@ export class TranslationCoordinator {
 
   stop() {
     const video = this.getVideoElement()
-    if (!video)
-      return
+    if (!video) return
     video.removeEventListener("timeupdate", this.handleTranslationTick)
     video.removeEventListener("seeked", this.handleTranslationTick)
     video.removeEventListener("seeked", this.handleSeek)
@@ -83,24 +81,24 @@ export class TranslationCoordinator {
 
   private handleTranslationTick = () => {
     const video = this.getVideoElement()
-    if (!video)
-      return
+    if (!video) return
 
     const currentTimeMs = video.currentTime * 1000
     const fragments = this.getFragments()
 
-    if (this.getCurrentState() === "error")
-      return
+    if (this.getCurrentState() === "error") return
 
     this.updateLoadingStateAt(currentTimeMs, fragments)
 
-    if (this.segmentationPipeline && !this.segmentationPipeline.isRunning
-      && this.segmentationPipeline.hasUnprocessedChunks()) {
+    if (
+      this.segmentationPipeline &&
+      !this.segmentationPipeline.isRunning &&
+      this.segmentationPipeline.hasUnprocessedChunks()
+    ) {
       this.segmentationPipeline.restart()
     }
 
-    if (this.isTranslating)
-      return
+    if (this.isTranslating) return
     void this.translateNearby(currentTimeMs)
   }
 
@@ -108,11 +106,14 @@ export class TranslationCoordinator {
     const fragments = this.getFragments()
 
     const batch = fragments
-      .filter(f => !this.translatedStarts.has(f.start)
-        && !this.translatingStarts.has(f.start)
-        && !this.failedStarts.has(f.start)
-        && f.start >= currentTimeMs - 5000
-        && f.start <= currentTimeMs + TRANSLATE_LOOK_AHEAD_MS)
+      .filter(
+        (f) =>
+          !this.translatedStarts.has(f.start) &&
+          !this.translatingStarts.has(f.start) &&
+          !this.failedStarts.has(f.start) &&
+          f.start >= currentTimeMs - 5000 &&
+          f.start <= currentTimeMs + TRANSLATE_LOOK_AHEAD_MS,
+      )
       .slice(0, TRANSLATION_BATCH_SIZE)
 
     if (batch.length === 0) {
@@ -120,7 +121,7 @@ export class TranslationCoordinator {
     }
 
     this.isTranslating = true
-    batch.forEach(f => this.translatingStarts.add(f.start))
+    batch.forEach((f) => this.translatingStarts.add(f.start))
 
     try {
       const translated = await translateSubtitles(batch, this.videoContext)
@@ -133,8 +134,7 @@ export class TranslationCoordinator {
       const latestTimeMs = this.getCurrentVideoTimeMs(currentTimeMs)
       const latestFragments = this.getFragments()
       this.updateLoadingStateAt(latestTimeMs, latestFragments)
-    }
-    catch (error) {
+    } catch (error) {
       batch.forEach((f) => {
         this.translatingStarts.delete(f.start)
         this.failedStarts.add(f.start)
@@ -142,16 +142,16 @@ export class TranslationCoordinator {
 
       const config = await getLocalConfig()
       const displayMode = config?.videoSubtitles?.style.displayMode
-      const fallback = displayMode === "translationOnly"
-        ? batch.map(f => ({ ...f, translation: f.text }))
-        : batch.map(f => ({ ...f, translation: "" }))
+      const fallback =
+        displayMode === "translationOnly"
+          ? batch.map((f) => ({ ...f, translation: f.text }))
+          : batch.map((f) => ({ ...f, translation: "" }))
       this.onTranslated(fallback)
 
       const errorMessage = error instanceof Error ? error.message : String(error)
       this.lastEmittedState = "error"
       this.onStateChange("error", { message: errorMessage })
-    }
-    finally {
+    } finally {
       this.isTranslating = false
     }
   }
@@ -164,11 +164,8 @@ export class TranslationCoordinator {
     return video.currentTime * 1000
   }
 
-  private findActiveCue(
-    timeMs: number,
-    fragments: SubtitlesFragment[],
-  ): SubtitlesFragment | null {
-    return fragments.find(f => f.start <= timeMs && f.end > timeMs) ?? null
+  private findActiveCue(timeMs: number, fragments: SubtitlesFragment[]): SubtitlesFragment | null {
+    return fragments.find((f) => f.start <= timeMs && f.end > timeMs) ?? null
   }
 
   private isCueResolved(startMs: number): boolean {
@@ -180,18 +177,17 @@ export class TranslationCoordinator {
 
     if (activeCue) {
       const nextState: SubtitlesState = this.isCueResolved(activeCue.start) ? "idle" : "loading"
-      if (nextState === this.lastEmittedState)
-        return
+      if (nextState === this.lastEmittedState) return
       this.lastEmittedState = nextState
       this.onStateChange(nextState)
       return
     }
 
     // Gap: keep loading if next cue needs translation
-    const nextCue = fragments.find(f => f.start > timeMs)
-    const nextState: SubtitlesState = nextCue && !this.isCueResolved(nextCue.start) ? "loading" : "idle"
-    if (nextState === this.lastEmittedState)
-      return
+    const nextCue = fragments.find((f) => f.start > timeMs)
+    const nextState: SubtitlesState =
+      nextCue && !this.isCueResolved(nextCue.start) ? "loading" : "idle"
+    if (nextState === this.lastEmittedState) return
     this.lastEmittedState = nextState
     this.onStateChange(nextState)
   }

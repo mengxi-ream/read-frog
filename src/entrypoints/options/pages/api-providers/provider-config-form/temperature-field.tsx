@@ -8,7 +8,7 @@ import { withForm } from "./form"
 export const TemperatureField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useSelector(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, (state) => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
     if (!isLLMProvider) {
@@ -17,15 +17,15 @@ export const TemperatureField = withForm({
 
     return (
       <form.AppField name="temperature">
-        {field => (
+        {(field) => (
           <field.InputFieldAutoSave
             formForSubmit={form}
-            label={(
+            label={
               <div className="flex items-center gap-1.5">
                 <span>{i18n.t("options.apiProviders.form.temperature")}</span>
                 <HelpTooltip>{i18n.t("options.apiProviders.form.temperatureHint")}</HelpTooltip>
               </div>
-            )}
+            }
             type="number"
             min={0}
             step={0.01}

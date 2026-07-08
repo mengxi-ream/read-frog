@@ -32,7 +32,11 @@ vi.mock("@/utils/atoms/config", async (importOriginal) => {
         disabledSelectionToolbarPatterns: [],
         opacity: 100,
         features: {
-          translate: { enabled: true, providerId: "microsoft-translate-default", shortcut: "Alt+T" },
+          translate: {
+            enabled: true,
+            providerId: "microsoft-translate-default",
+            shortcut: "Alt+T",
+          },
           speak: { enabled: true },
         },
         customActions: [],
@@ -99,11 +103,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     setMockSelectionText(MOCK_SELECTED_TEXT)
   }
 
-  const triggerMouseUpWithSelection = async (
-    target: Element,
-    clientX = 100,
-    clientY = 100,
-  ) => {
+  const triggerMouseUpWithSelection = async (target: Element, clientX = 100, clientY = 100) => {
     const mouseUpEvent = new MouseEvent("mouseup", {
       bubbles: true,
       clientX,
@@ -119,7 +119,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       target.dispatchEvent(mouseUpEvent)
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
   }
 
@@ -133,7 +133,8 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
   const getToolbar = () => document.querySelector(".absolute.z-2147483647") as HTMLElement | null
 
-  const getToolbarSurface = () => document.querySelector("[data-slot='selection-toolbar-surface']") as HTMLElement | null
+  const getToolbarSurface = () =>
+    document.querySelector("[data-slot='selection-toolbar-surface']") as HTMLElement | null
 
   it("applies configured opacity on the toolbar surface instead of the overlay host", () => {
     render(<SelectionToolbar />)
@@ -199,9 +200,9 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await clearToolbarState()
 
-    const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(
-      screen.getByTestId("input-element"),
-    )
+    const spy = vi
+      .spyOn(document, "activeElement", "get")
+      .mockReturnValue(screen.getByTestId("input-element"))
 
     await triggerMouseUpWithSelection(screen.getByTestId("outside-div"))
     expectToolbarHidden()
@@ -220,9 +221,9 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
 
     await clearToolbarState()
 
-    const spy = vi.spyOn(document, "activeElement", "get").mockReturnValue(
-      screen.getByTestId("textarea-element"),
-    )
+    const spy = vi
+      .spyOn(document, "activeElement", "get")
+      .mockReturnValue(screen.getByTestId("textarea-element"))
 
     await triggerMouseUpWithSelection(screen.getByTestId("outside-div"))
     expectToolbarHidden()
@@ -276,12 +277,14 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     await waitFor(expectToolbarVisible)
 
     await act(async () => {
-      target.dispatchEvent(new MouseEvent("mousedown", {
-        bubbles: true,
-        button: 2,
-        clientX: 100,
-        clientY: 100,
-      }))
+      target.dispatchEvent(
+        new MouseEvent("mousedown", {
+          bubbles: true,
+          button: 2,
+          clientX: 100,
+          clientY: 100,
+        }),
+      )
     })
 
     expectToolbarVisible()
@@ -292,7 +295,9 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       <div>
         <SelectionToolbar />
         <input data-testid="selected-element" type="text" defaultValue={MOCK_SELECTED_TEXT} />
-        <button data-testid="click-element" type="button">Click target</button>
+        <button data-testid="click-element" type="button">
+          Click target
+        </button>
       </div>,
     )
 
@@ -385,7 +390,8 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
     })
 
     Object.defineProperty(mouseUpEvent, "composedPath", {
-      value: () => dispatchComplete ? [] : [shadowButton, shadowHost, document.body, document, window],
+      value: () =>
+        dispatchComplete ? [] : [shadowButton, shadowHost, document.body, document, window],
     })
 
     await act(async () => {
@@ -393,7 +399,7 @@ describe("selectionToolbar - isInputOrTextarea logic", () => {
       dispatchComplete = true
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
 
     expectToolbarHidden()
@@ -644,7 +650,7 @@ describe("selectionToolbar - positioning logic", () => {
       target.dispatchEvent(mouseUpEvent)
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
   }
 
@@ -878,7 +884,7 @@ describe("selectionToolbar - positioning logic", () => {
         window.dispatchEvent(new Event("scroll"))
         const callbacks = [...rafCallbacks]
         rafCallbacks = []
-        callbacks.forEach(cb => cb(0))
+        callbacks.forEach((cb) => cb(0))
       })
     })
 
@@ -923,7 +929,7 @@ describe("selectionToolbar - positioning logic", () => {
         window.dispatchEvent(new Event("scroll"))
         const callbacks = [...rafCallbacks]
         rafCallbacks = []
-        callbacks.forEach(cb => cb(0))
+        callbacks.forEach((cb) => cb(0))
       })
     })
 
@@ -969,7 +975,7 @@ describe("selectionToolbar - positioning logic", () => {
       window.dispatchEvent(new Event("scroll"))
       const callbacks = [...rafCallbacks]
       rafCallbacks = []
-      callbacks.forEach(cb => cb(0))
+      callbacks.forEach((cb) => cb(0))
     })
 
     // After scrolling, the toolbar position should be updated

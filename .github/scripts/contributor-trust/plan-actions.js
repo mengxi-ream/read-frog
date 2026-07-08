@@ -20,7 +20,7 @@ function getPullRequestFilePath(file) {
 
 export function isMigrationChangedLineFile(filePath) {
   const normalizedPath = String(filePath).replaceAll("\\", "/")
-  return CONFIG_MIGRATION_CHANGED_LINE_PATH_PATTERNS.some(pattern => pattern.test(normalizedPath))
+  return CONFIG_MIGRATION_CHANGED_LINE_PATH_PATTERNS.some((pattern) => pattern.test(normalizedPath))
 }
 
 function getFallbackChangedLineDetails(pullRequest) {
@@ -40,8 +40,7 @@ function getFallbackChangedLineDetails(pullRequest) {
 }
 
 function getPullRequestChangedLineDetails(pullRequest, pullRequestFiles) {
-  if (!Array.isArray(pullRequestFiles))
-    return getFallbackChangedLineDetails(pullRequest)
+  if (!Array.isArray(pullRequestFiles)) return getFallbackChangedLineDetails(pullRequest)
 
   const details = {
     additions: 0,
@@ -77,14 +76,20 @@ function getPullRequestChangedLineDetails(pullRequest, pullRequestFiles) {
 }
 
 function formatChangedLineThresholdReason(score, changedLineDetails) {
-  const changedLineDescription = changedLineDetails.excludedChangedLines > 0
-    ? `${changedLineDetails.changedLines} counted lines after excluding ${changedLineDetails.excludedChangedLines} migration-related lines`
-    : `${changedLineDetails.changedLines} lines`
+  const changedLineDescription =
+    changedLineDetails.excludedChangedLines > 0
+      ? `${changedLineDetails.changedLines} counted lines after excluding ${changedLineDetails.excludedChangedLines} migration-related lines`
+      : `${changedLineDetails.changedLines} lines`
 
   return `Score ${score.total} is below ${POLICY.autoCloseBelowScore} and the PR changes ${changedLineDescription}, exceeding ${POLICY.autoCloseAboveChangedLines}.`
 }
 
-export function planTrustActions({ currentLabels = [], pullRequest = null, pullRequestFiles, score }) {
+export function planTrustActions({
+  currentLabels = [],
+  pullRequest = null,
+  pullRequestFiles,
+  score,
+}) {
   const labelSet = new Set(currentLabels)
 
   if (labelSet.has(POLICY.overrideLabel)) {
@@ -109,25 +114,23 @@ export function planTrustActions({ currentLabels = [], pullRequest = null, pullR
   const labelsToAdd = []
   const labelsToRemove = []
 
-  if (!labelSet.has(targetTrustLabel))
-    labelsToAdd.push(targetTrustLabel)
+  if (!labelSet.has(targetTrustLabel)) labelsToAdd.push(targetTrustLabel)
 
   for (const label of MANAGED_TRUST_LABELS) {
-    if (label !== targetTrustLabel && labelSet.has(label))
-      labelsToRemove.push(label)
+    if (label !== targetTrustLabel && labelSet.has(label)) labelsToRemove.push(label)
   }
 
   if (needsMaintainerReview) {
     if (!labelSet.has(POLICY.needsMaintainerReviewLabel))
       labelsToAdd.push(POLICY.needsMaintainerReviewLabel)
-  }
-  else if (labelSet.has(POLICY.needsMaintainerReviewLabel)) {
+  } else if (labelSet.has(POLICY.needsMaintainerReviewLabel)) {
     labelsToRemove.push(POLICY.needsMaintainerReviewLabel)
   }
 
-  const shouldClosePr = POLICY.autoCloseBelowScore !== null
-    && score.total < POLICY.autoCloseBelowScore
-    && changedLineDetails.changedLines > POLICY.autoCloseAboveChangedLines
+  const shouldClosePr =
+    POLICY.autoCloseBelowScore !== null &&
+    score.total < POLICY.autoCloseBelowScore &&
+    changedLineDetails.changedLines > POLICY.autoCloseAboveChangedLines
 
   return {
     skipAutomation: false,
@@ -145,8 +148,6 @@ export function planTrustActions({ currentLabels = [], pullRequest = null, pullR
     excludedChangedLines: changedLineDetails.excludedChangedLines,
     hasFileBreakdown: changedLineDetails.hasFileBreakdown,
     shouldClosePr,
-    closeReason: shouldClosePr
-      ? formatChangedLineThresholdReason(score, changedLineDetails)
-      : null,
+    closeReason: shouldClosePr ? formatChangedLineThresholdReason(score, changedLineDetails) : null,
   }
 }

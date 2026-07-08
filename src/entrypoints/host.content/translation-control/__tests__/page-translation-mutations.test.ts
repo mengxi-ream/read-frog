@@ -115,16 +115,21 @@ class MockIntersectionObserver {
   }
 
   async triggerIntersect(target: Element): Promise<void> {
-    await this.callback([{
-      isIntersecting: true,
-      target,
-    } as IntersectionObserverEntry], this as unknown as IntersectionObserver)
+    await this.callback(
+      [
+        {
+          isIntersecting: true,
+          target,
+        } as IntersectionObserverEntry,
+      ],
+      this as unknown as IntersectionObserver,
+    )
   }
 }
 
 async function flushDomUpdates(): Promise<void> {
   await Promise.resolve()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise((resolve) => setTimeout(resolve, 0))
   await Promise.resolve()
 }
 
@@ -156,9 +161,11 @@ function deepQueryTopLevelSelectorImpl(
 }
 
 function isBlockedForTraversal(element: HTMLElement): boolean {
-  return Boolean(element.hidden)
-    || element.matches("[data-site-rule-blocked][aria-hidden='true']")
-    || element.classList.contains("closed")
+  return (
+    Boolean(element.hidden) ||
+    element.matches("[data-site-rule-blocked][aria-hidden='true']") ||
+    element.classList.contains("closed")
+  )
 }
 
 function walkAndLabelVisibleParagraphs(element: HTMLElement, walkId: string) {
@@ -207,9 +214,13 @@ describe("pageTranslationManager mutation re-walk", () => {
     })
     mockHasNoWalkAncestor.mockReturnValue(false)
     mockIsDontWalkIntoButTranslateAsChildElement.mockReturnValue(false)
-    mockIsDontWalkIntoAndDontTranslateAsChildElement.mockImplementation((element: HTMLElement) => isBlockedForTraversal(element))
+    mockIsDontWalkIntoAndDontTranslateAsChildElement.mockImplementation((element: HTMLElement) =>
+      isBlockedForTraversal(element),
+    )
     mockDeepQueryTopLevelSelector.mockImplementation(deepQueryTopLevelSelectorImpl)
-    mockWalkAndLabelElement.mockImplementation((element: HTMLElement, walkId: string) => walkAndLabelVisibleParagraphs(element, walkId))
+    mockWalkAndLabelElement.mockImplementation((element: HTMLElement, walkId: string) =>
+      walkAndLabelVisibleParagraphs(element, walkId),
+    )
     mockTranslateTextForPageTitle.mockResolvedValue("")
     mockValidateTranslationConfigAndToast.mockReturnValue(true)
     mockSendMessage.mockResolvedValue(undefined)

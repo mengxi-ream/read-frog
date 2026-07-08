@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
-import { createSidePanelWindowState, createToggleSidePanelHandler, getSidePanelApi, setupSidePanelMessageHandler } from "../side-panel"
+import {
+  createSidePanelWindowState,
+  createToggleSidePanelHandler,
+  getSidePanelApi,
+  setupSidePanelMessageHandler,
+} from "../side-panel"
 
 function createLogger() {
   return {
@@ -97,7 +102,10 @@ describe("background side panel", () => {
     const logger = createLogger()
     const onOpenedListeners: Array<(info: { windowId?: number }) => void> = []
     const onClosedListeners: Array<(info: { windowId?: number }) => void> = []
-    const registeredMessageHandlers = new Map<string, (message: typeof senderWindowMessage) => Promise<{ ok: true } | { ok: false, reason: string }>>()
+    const registeredMessageHandlers = new Map<
+      string,
+      (message: typeof senderWindowMessage) => Promise<{ ok: true } | { ok: false; reason: string }>
+    >()
     const sidePanel = {
       close: vi.fn().mockResolvedValue(undefined),
       open: vi.fn().mockResolvedValue(undefined),
@@ -116,7 +124,12 @@ describe("background side panel", () => {
     setupSidePanelMessageHandler({
       extensionBrowser: { sidePanel } as any,
       logger,
-      registerMessageHandler: ((type: string, handler: (message: typeof senderWindowMessage) => Promise<{ ok: true } | { ok: false, reason: string }>) => {
+      registerMessageHandler: ((
+        type: string,
+        handler: (
+          message: typeof senderWindowMessage,
+        ) => Promise<{ ok: true } | { ok: false; reason: string }>,
+      ) => {
         registeredMessageHandlers.set(type, handler)
       }) as any,
     })
@@ -150,7 +163,10 @@ describe("background side panel", () => {
       windowState,
     })
 
-    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: false, reason: "unsupported" })
+    await expect(handler(senderWindowMessage)).resolves.toEqual({
+      ok: false,
+      reason: "unsupported",
+    })
     expect(logger.warn).toHaveBeenCalledWith("Side panel close API is unavailable in this browser")
     expect(sidePanel.open).not.toHaveBeenCalled()
   })
@@ -171,7 +187,10 @@ describe("background side panel", () => {
       windowState,
     })
 
-    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: false, reason: "toggle-failed" })
+    await expect(handler(senderWindowMessage)).resolves.toEqual({
+      ok: false,
+      reason: "toggle-failed",
+    })
     expect(logger.error).toHaveBeenCalledWith("Failed to close side panel", error)
     expect(windowState.isOpen(456)).toBe(false)
 
@@ -186,7 +205,10 @@ describe("background side panel", () => {
       logger,
     })
 
-    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: false, reason: "unsupported" })
+    await expect(handler(senderWindowMessage)).resolves.toEqual({
+      ok: false,
+      reason: "unsupported",
+    })
     expect(logger.warn).toHaveBeenCalledWith("Side panel API is unavailable in this browser")
   })
 
@@ -231,24 +253,30 @@ describe("background side panel", () => {
       logger,
     })
 
-    await expect(handler({ sender: { tab: { id: 123 } } })).resolves.toEqual({ ok: false, reason: "missing-window" })
-    expect(logger.warn).toHaveBeenCalledWith(
-      "Cannot toggle side panel without a sender window",
-      { sender: { tab: { id: 123 } } },
-    )
+    await expect(handler({ sender: { tab: { id: 123 } } })).resolves.toEqual({
+      ok: false,
+      reason: "missing-window",
+    })
+    expect(logger.warn).toHaveBeenCalledWith("Cannot toggle side panel without a sender window", {
+      sender: { tab: { id: 123 } },
+    })
   })
 
   it("returns a toggle-failed result when Chrome rejects the open request", async () => {
     const logger = createLogger()
     const error = new Error("sidePanel.open() may only be called in response to a user gesture")
     const handler = createToggleSidePanelHandler({
-      getApi: () => chromiumSidePanel({
-        open: vi.fn().mockRejectedValue(error),
-      }),
+      getApi: () =>
+        chromiumSidePanel({
+          open: vi.fn().mockRejectedValue(error),
+        }),
       logger,
     })
 
-    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: false, reason: "toggle-failed" })
+    await expect(handler(senderWindowMessage)).resolves.toEqual({
+      ok: false,
+      reason: "toggle-failed",
+    })
     expect(logger.error).toHaveBeenCalledWith("Failed to open side panel", error)
   })
 

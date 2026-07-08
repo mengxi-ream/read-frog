@@ -1,6 +1,10 @@
 import { logger } from "@/utils/logger"
 import { onMessage } from "@/utils/message"
-import { getEdgeTTSHealthStatus, listEdgeTTSVoices, synthesizeEdgeTTS } from "@/utils/server/edge-tts"
+import {
+  getEdgeTTSHealthStatus,
+  listEdgeTTSVoices,
+  synthesizeEdgeTTS,
+} from "@/utils/server/edge-tts"
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
   const bytes = new Uint8Array(buffer)

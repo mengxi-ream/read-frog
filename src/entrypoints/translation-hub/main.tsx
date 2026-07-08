@@ -21,10 +21,7 @@ import App from "./app"
 import "@/assets/styles/theme.css"
 
 interface HydrateAtomsProps {
-  initialValues: [
-    [typeof configAtom, Config],
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }
 
@@ -37,21 +34,24 @@ async function initApp() {
   const root = document.getElementById("root")!
   root.className = "text-base antialiased min-h-screen bg-background"
 
-  const [configValue, themeMode] = await Promise.all([
-    getLocalConfig(),
-    getLocalThemeMode(),
-  ])
+  const [configValue, themeMode] = await Promise.all([getLocalConfig(), getLocalThemeMode()])
   const config = configValue ?? DEFAULT_CONFIG
 
   await initI18n(config.uiLanguage)
 
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 
-  renderPersistentReactRoot(root, (
+  renderPersistentReactRoot(
+    root,
     <React.StrictMode>
       <QueryClientProvider client={queryClient}>
         <JotaiProvider>
-          <HydrateAtoms initialValues={[[configAtom, config], [baseThemeModeAtom, themeMode]]}>
+          <HydrateAtoms
+            initialValues={[
+              [configAtom, config],
+              [baseThemeModeAtom, themeMode],
+            ]}
+          >
             <ThemeProvider>
               <TooltipProvider>
                 <FrogToast />
@@ -64,8 +64,8 @@ async function initApp() {
           </HydrateAtoms>
         </JotaiProvider>
       </QueryClientProvider>
-    </React.StrictMode>
-  ))
+    </React.StrictMode>,
+  )
 }
 
 void initApp()

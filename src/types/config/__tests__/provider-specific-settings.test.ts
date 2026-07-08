@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest"
 import { z } from "zod"
-import { azureProviderSpecificSettingsSchema, bedrockProviderSpecificSettingsSchema, getProviderSpecificSettingFields } from "../provider"
+import {
+  azureProviderSpecificSettingsSchema,
+  bedrockProviderSpecificSettingsSchema,
+  getProviderSpecificSettingFields,
+} from "../provider"
 
 describe("provider-specific settings metadata", () => {
   it("returns the Bedrock region field from Zod metadata", () => {

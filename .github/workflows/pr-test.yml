@@ -44,7 +44,7 @@ jobs:
           fi
         shell: bash
 
-      - name: ESLint
+      - name: Lint
         run: pnpm lint
 
       - name: Type check

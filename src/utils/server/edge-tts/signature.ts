@@ -58,15 +58,19 @@ export async function generateTranslatorSignature(
     const requestId = getRandomUUID().replace(HYPHEN_PATTERN, "")
     const formattedDate = buildSignatureDate(now)
 
-    const payload = `${EDGE_TTS_SIGNATURE_APP_ID}${encodedUrl}${formattedDate}${requestId}`.toLowerCase()
+    const payload =
+      `${EDGE_TTS_SIGNATURE_APP_ID}${encodedUrl}${formattedDate}${requestId}`.toLowerCase()
     const key = base64ToBytes(getEdgeTTSSignatureSecretBase64())
     const signature = await hmacSha256(key, payload)
 
     return `${EDGE_TTS_SIGNATURE_APP_ID}::${bytesToBase64(signature)}::${formattedDate}::${requestId}`
-  }
-  catch (error) {
-    throw new EdgeTTSError("SIGNATURE_GENERATION_FAILED", "Failed to generate translator signature", {
-      cause: error,
-    })
+  } catch (error) {
+    throw new EdgeTTSError(
+      "SIGNATURE_GENERATION_FAILED",
+      "Failed to generate translator signature",
+      {
+        cause: error,
+      },
+    )
   }
 }

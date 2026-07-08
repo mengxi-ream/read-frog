@@ -16,11 +16,10 @@ export function streamBackgroundText(
   serializablePayload: BackgroundStreamTextSerializablePayload,
   options: ContentScriptStreamOptions<BackgroundStreamResponseMap["streamText"]> = {},
 ) {
-  return createPortStreamPromise<BackgroundStreamResponseMap["streamText"], BackgroundStreamTextSerializablePayload>(
-    BACKGROUND_STREAM_PORTS.streamText,
-    serializablePayload,
-    options,
-  )
+  return createPortStreamPromise<
+    BackgroundStreamResponseMap["streamText"],
+    BackgroundStreamTextSerializablePayload
+  >(BACKGROUND_STREAM_PORTS.streamText, serializablePayload, options)
 }
 
 export function streamBackgroundStructuredObject(
@@ -30,9 +29,5 @@ export function streamBackgroundStructuredObject(
   return createPortStreamPromise<
     BackgroundStreamResponseMap["streamStructuredObject"],
     BackgroundStreamStructuredObjectSerializablePayload
-  >(
-    BACKGROUND_STREAM_PORTS.streamStructuredObject,
-    serializablePayload,
-    options,
-  )
+  >(BACKGROUND_STREAM_PORTS.streamStructuredObject, serializablePayload, options)
 }

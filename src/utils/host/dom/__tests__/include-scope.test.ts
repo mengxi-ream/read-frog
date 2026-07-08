@@ -47,7 +47,11 @@ describe("includeSelectors whitelist", () => {
       <div class="sidebar"><p id="outside">Outside</p></div>
     `
 
-    walkAndLabelElement(document.body, "w1", configWithUserRule({ excludeSelectors: [".unrelated"] }))
+    walkAndLabelElement(
+      document.body,
+      "w1",
+      configWithUserRule({ excludeSelectors: [".unrelated"] }),
+    )
 
     expect(document.querySelector("#inside")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
     expect(document.querySelector("#outside")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
@@ -62,10 +66,14 @@ describe("includeSelectors whitelist", () => {
       </article>
     `
 
-    walkAndLabelElement(document.body, "w1", configWithUserRule({
-      includeSelectors: ["article"],
-      excludeSelectors: [".code-sample"],
-    }))
+    walkAndLabelElement(
+      document.body,
+      "w1",
+      configWithUserRule({
+        includeSelectors: ["article"],
+        excludeSelectors: [".code-sample"],
+      }),
+    )
 
     expect(document.querySelector("#kept")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
     expect(document.querySelector("#carved")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
@@ -89,10 +97,14 @@ describe("includeSelectors whitelist", () => {
       </div>
     `
 
-    walkAndLabelElement(document.body, "w1", configWithUserRule({
-      excludeSelectors: [".sidebar"],
-      includeSelectors: [".sidebar .recommended"],
-    }))
+    walkAndLabelElement(
+      document.body,
+      "w1",
+      configWithUserRule({
+        excludeSelectors: [".sidebar"],
+        includeSelectors: [".sidebar .recommended"],
+      }),
+    )
 
     expect(document.querySelector("#rescued")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
     expect(document.querySelector("#noise")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
@@ -105,10 +117,14 @@ describe("includeSelectors whitelist", () => {
       <div class="recommended"><p id="kept">Recommended outside sidebar</p></div>
     `
 
-    walkAndLabelElement(document.body, "w1", configWithUserRule({
-      excludeSelectors: [".sidebar"],
-      includeSelectors: [".recommended"],
-    }))
+    walkAndLabelElement(
+      document.body,
+      "w1",
+      configWithUserRule({
+        excludeSelectors: [".sidebar"],
+        includeSelectors: [".recommended"],
+      }),
+    )
 
     expect(document.querySelector("#blocked")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
     expect(document.querySelector("#kept")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
@@ -121,10 +137,14 @@ describe("includeSelectors whitelist", () => {
       <a data-kind="user" id="stays-excluded">octocat</a>
     `
 
-    walkAndLabelElement(document.body, "w1", configWithUserRule({
-      excludeSelectors: ["a[data-kind]"],
-      includeSelectors: ["a[data-kind='issue']"],
-    }))
+    walkAndLabelElement(
+      document.body,
+      "w1",
+      configWithUserRule({
+        excludeSelectors: ["a[data-kind]"],
+        includeSelectors: ["a[data-kind='issue']"],
+      }),
+    )
 
     expect(document.querySelector("#reincluded")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(true)
     expect(document.querySelector("#stays-excluded")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)

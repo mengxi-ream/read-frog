@@ -39,16 +39,8 @@ export function MarkdownRenderer({ content, className = "" }: MarkdownRendererPr
               {children}
             </p>
           ),
-          ul: ({ children }) => (
-            <ul className="mb-3 mt-3 first:mt-0 space-y-2">
-              {children}
-            </ul>
-          ),
-          ol: ({ children }) => (
-            <ol className="mb-3 mt-3 first:mt-0 space-y-2">
-              {children}
-            </ol>
-          ),
+          ul: ({ children }) => <ul className="mb-3 mt-3 first:mt-0 space-y-2">{children}</ul>,
+          ol: ({ children }) => <ol className="mb-3 mt-3 first:mt-0 space-y-2">{children}</ol>,
           li: ({ children }) => (
             <li className="text-sm text-slate-700 dark:text-slate-300 flex items-start">
               <span className="w-1.5 h-1.5 bg-slate-400 dark:bg-slate-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>

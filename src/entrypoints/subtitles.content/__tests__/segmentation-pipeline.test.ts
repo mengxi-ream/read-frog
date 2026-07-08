@@ -1,5 +1,4 @@
 import { describe, expect, it, vi } from "vitest"
-
 import { SegmentationPipeline } from "../segmentation-pipeline"
 
 vi.mock("@/utils/config/storage", () => ({
@@ -22,18 +21,14 @@ describe("segmentation pipeline", () => {
     ]
 
     const pipeline = new SegmentationPipeline({
-      baselineFragments: [
-        { text: "hello world", start: 0, end: 1000 },
-      ],
+      baselineFragments: [{ text: "hello world", start: 0, end: 1000 }],
       rawFragments,
-      getVideoElement: () => ({ currentTime: 0 } as HTMLVideoElement),
+      getVideoElement: () => ({ currentTime: 0 }) as HTMLVideoElement,
       getSourceLanguage: () => "en",
     })
 
     await (pipeline as any).processNextChunk(0)
 
-    expect(pipeline.processedFragments).toEqual([
-      { text: "hello world", start: 0, end: 1000 },
-    ])
+    expect(pipeline.processedFragments).toEqual([{ text: "hello world", start: 0, end: 1000 }])
   })
 })

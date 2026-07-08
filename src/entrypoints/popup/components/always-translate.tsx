@@ -20,9 +20,7 @@ export function AlwaysTranslate() {
   return (
     <Activity mode={shouldShow ? "visible" : "hidden"}>
       <div className="flex items-center justify-between gap-2">
-        <span className="text-[13px] font-medium">
-          {i18n.t("popup.alwaysTranslate")}
-        </span>
+        <span className="text-[13px] font-medium">{i18n.t("popup.alwaysTranslate")}</span>
         <Switch
           checked={isCurrentSiteInPatterns}
           onCheckedChange={toggleCurrentSite}

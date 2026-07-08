@@ -17,8 +17,7 @@ export const storageAdapter = {
     const parsedValue = schema.safeParse(value)
     if (parsedValue.success) {
       await storage.setItem(`local:${key}`, parsedValue.data)
-    }
-    else {
+    } else {
       throw new Error(parsedValue.error.message)
     }
   },
@@ -27,8 +26,7 @@ export const storageAdapter = {
   },
   watch<T>(key: string, callback: (newValue: T) => void) {
     const unwatch = storage.watch<T>(`local:${key}`, (newValue) => {
-      if (isNonNullish(newValue))
-        callback(newValue)
+      if (isNonNullish(newValue)) callback(newValue)
     })
     return unwatch
   },

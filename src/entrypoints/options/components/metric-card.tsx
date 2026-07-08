@@ -1,13 +1,24 @@
 import { Icon } from "@iconify/react"
-import { IconCircleArrowDownRightFilled, IconCircleArrowUpRightFilled, IconMinus } from "@tabler/icons-react"
+import {
+  IconCircleArrowDownRightFilled,
+  IconCircleArrowUpRightFilled,
+  IconMinus,
+} from "@tabler/icons-react"
 import { Activity } from "react"
 import { Card, CardContent } from "@/components/ui/base-ui/card"
 import { addThousandsSeparator, numberToPercentage } from "@/utils/utils"
 
-export function MetricCard(
-  { title, metric, comparison, icon }:
-  { title: string, metric: number, icon: string, comparison?: number },
-) {
+export function MetricCard({
+  title,
+  metric,
+  comparison,
+  icon,
+}: {
+  title: string
+  metric: number
+  icon: string
+  comparison?: number
+}) {
   return (
     <Card className="flex flex-row hover:scale-[1.01] hover:-translate-y-1/12 transition-all duration-200 shadow-xs">
       <CardContent className="flex gap-4 w-full">
@@ -29,8 +40,7 @@ export function MetricCard(
 }
 
 function Comparison({ comparison }: { comparison?: number }) {
-  if (comparison === undefined)
-    return null
+  if (comparison === undefined) return null
 
   const comparisonText = numberToPercentage(comparison)
 

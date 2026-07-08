@@ -20,12 +20,12 @@ export function migrate(oldConfig: any): any {
 
     const outputSchema = action.outputSchema.map((field: any) => ({
       ...field,
-      speaking: field.speaking ?? (
-        field.id === "dictionary-term"
-        || field.id === "dictionary-context"
-        || field.id === "default-dictionary-term"
-        || field.id === "default-dictionary-context"
-      ),
+      speaking:
+        field.speaking ??
+        (field.id === "dictionary-term" ||
+          field.id === "dictionary-context" ||
+          field.id === "default-dictionary-term" ||
+          field.id === "default-dictionary-context"),
     }))
 
     return {

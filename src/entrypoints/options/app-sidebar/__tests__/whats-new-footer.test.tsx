@@ -17,7 +17,7 @@ vi.mock("#imports", () => ({
 }))
 
 vi.mock("@iconify/react", () => ({
-  Icon: ({ className, icon }: { className?: string, icon: string }) => (
+  Icon: ({ className, icon }: { className?: string; icon: string }) => (
     <span
       aria-hidden="true"
       className={className}
@@ -64,11 +64,7 @@ vi.mock("@/components/ui/base-ui/popover", async () => {
     open?: boolean
     onOpenChange?: (open: boolean) => void
   }) {
-    return (
-      <PopoverContext value={{ open, onOpenChange }}>
-        {children}
-      </PopoverContext>
-    )
+    return <PopoverContext value={{ open, onOpenChange }}>{children}</PopoverContext>
   }
 
   function PopoverTrigger({
@@ -226,9 +222,7 @@ describe("whatsNewFooter", () => {
 
   it("does not auto-open or mark the post as viewed when it is already read", async () => {
     getLatestBlogDateMock.mockResolvedValue(latestBlogPost)
-    getLastViewedBlogDateMock.mockResolvedValue(
-      new Date("2026-03-21T12:00:00.000Z"),
-    )
+    getLastViewedBlogDateMock.mockResolvedValue(new Date("2026-03-21T12:00:00.000Z"))
     saveLastViewedBlogDateMock.mockResolvedValue(undefined)
 
     renderWhatsNewFooter()
@@ -270,7 +264,7 @@ describe("whatsNewFooter", () => {
     const links = await screen.findAllByRole("link", { name: latestBlogPost.title })
     expect(links).toHaveLength(2)
     const expectedHref = new URL(urlOverride).toString()
-    expect(links.map(link => link.getAttribute("href"))).toEqual([expectedHref, expectedHref])
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([expectedHref, expectedHref])
   })
 
   it("marks the post as viewed after a manual open once the unread query finishes", async () => {

@@ -100,21 +100,22 @@
 .read-frog-translated-content-wrapper[lang="ar"],
 .read-frog-translated-content-wrapper[lang="ar"] * {
   font-family:
-    "SF Arabic", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Traditional Arabic", "Segoe UI", Tahoma, Arial,
-    sans-serif;
+    "SF Arabic", "Noto Sans Arabic", "Noto Naskh Arabic", "Geeza Pro", "Traditional Arabic",
+    "Segoe UI", Tahoma, Arial, sans-serif;
 }
 
 /* Persian/Farsi - macOS > Cross-platform > Platform-specific > Fallback */
 .read-frog-translated-content-wrapper[lang="fa"],
 .read-frog-translated-content-wrapper[lang="fa"] * {
   font-family:
-    "SF Arabic", "Noto Sans Arabic", "Geeza Pro", "Iranian Sans", "Segoe UI", Tahoma, Arial, sans-serif !important;
+    "SF Arabic", "Noto Sans Arabic", "Geeza Pro", "Iranian Sans", "Segoe UI", Tahoma, Arial,
+    sans-serif !important;
 }
 
 /* Urdu - Specialized Nastaliq > Cross-platform > Fallback */
 .read-frog-translated-content-wrapper[lang="ur"],
 .read-frog-translated-content-wrapper[lang="ur"] * {
   font-family:
-    "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "SF Arabic", "Noto Sans Arabic", "Alvi Nastaleeq", "Segoe UI",
-    Tahoma, Arial, sans-serif;
+    "Noto Nastaliq Urdu", "Jameel Noori Nastaleeq", "SF Arabic", "Noto Sans Arabic",
+    "Alvi Nastaleeq", "Segoe UI", Tahoma, Arial, sans-serif;
 }

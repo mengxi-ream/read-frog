@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import {
   BLOCK_CONTENT_CLASS,
   CONTENT_WRAPPER_CLASS,

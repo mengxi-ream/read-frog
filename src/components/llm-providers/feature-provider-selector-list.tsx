@@ -8,7 +8,12 @@ import { Field, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { isAPIProviderConfig, isPureAPIProvider } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { getProviderConfigById } from "@/utils/config/helpers"
-import { buildFeatureProviderPatch, FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
+import {
+  buildFeatureProviderPatch,
+  FEATURE_KEYS,
+  FEATURE_PROVIDER_DEFS,
+  getFeatureLabelI18nKey,
+} from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { cn } from "@/utils/styles/utils"
@@ -24,10 +29,12 @@ interface FeatureProviderSelectorListProps {
 }
 
 export function needsApiKeyWarning(providerConfig: ProviderConfig | null): boolean {
-  return !!providerConfig
-    && isAPIProviderConfig(providerConfig)
-    && !isPureAPIProvider(providerConfig.provider)
-    && !providerConfig.apiKey
+  return (
+    !!providerConfig &&
+    isAPIProviderConfig(providerConfig) &&
+    !isPureAPIProvider(providerConfig.provider) &&
+    !providerConfig.apiKey
+  )
 }
 
 function FeatureProviderField({
@@ -48,9 +55,10 @@ function FeatureProviderField({
   const providerId = def.getProviderId(config)
   const providerConfig = getProviderConfigById(providersConfig, providerId) ?? null
 
-  const providers = useMemo(() =>
-    getSelectableProvidersForCapability(featureKey, providersConfig),
-  [providersConfig, featureKey])
+  const providers = useMemo(
+    () => getSelectableProvidersForCapability(featureKey, providersConfig),
+    [providersConfig, featureKey],
+  )
 
   return (
     <Field>
@@ -61,7 +69,7 @@ function FeatureProviderField({
       <ProviderSelector
         providers={providers}
         value={providerId}
-        onChange={id => void setConfig(buildFeatureProviderPatch({ [featureKey]: id }))}
+        onChange={(id) => void setConfig(buildFeatureProviderPatch({ [featureKey]: id }))}
         className={providerSelectorClassName}
         triggerSize={providerSelectorTriggerSize}
       />
@@ -88,7 +96,7 @@ function CustomActionProviderFields({
   )
 
   const customActions = config.selectionToolbar.customActions.filter(
-    action => action.enabled !== false,
+    (action) => action.enabled !== false,
   )
 
   if (customActions.length === 0) {
@@ -101,7 +109,8 @@ function CustomActionProviderFields({
         {i18n.t("options.general.featureProviders.customActions")}
       </p>
       {customActions.map((action) => {
-        const currentProviderConfig = getProviderConfigById(providersConfig, action.providerId) ?? null
+        const currentProviderConfig =
+          getProviderConfigById(providersConfig, action.providerId) ?? null
         return (
           <Field key={action.id}>
             <FieldLabel nativeLabel={false} render={<div />}>
@@ -112,10 +121,8 @@ function CustomActionProviderFields({
               providers={customActionProviders}
               value={action.providerId}
               onChange={(id) => {
-                const updatedCustomActions = config.selectionToolbar.customActions.map(item =>
-                  item.id === action.id
-                    ? { ...item, providerId: id }
-                    : item,
+                const updatedCustomActions = config.selectionToolbar.customActions.map((item) =>
+                  item.id === action.id ? { ...item, providerId: id } : item,
                 )
 
                 void setConfig({
@@ -127,7 +134,9 @@ function CustomActionProviderFields({
               }}
               className={providerSelectorClassName}
               triggerSize={providerSelectorTriggerSize}
-              placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider")}
+              placeholder={i18n.t(
+                "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider",
+              )}
             />
           </Field>
         )
@@ -145,7 +154,7 @@ export function FeatureProviderSelectorList({
 }: FeatureProviderSelectorListProps) {
   return (
     <FieldGroup className={cn("gap-4", className)}>
-      {FEATURE_KEYS.map(featureKey => (
+      {FEATURE_KEYS.map((featureKey) => (
         <FeatureProviderField
           key={featureKey}
           featureKey={featureKey}

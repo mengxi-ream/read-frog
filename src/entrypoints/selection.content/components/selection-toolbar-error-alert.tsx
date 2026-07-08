@@ -19,9 +19,7 @@ export function SelectionToolbarErrorAlert({
       <Alert variant="destructive">
         <IconAlertCircle className="size-4" />
         <AlertTitle>{error.title}</AlertTitle>
-        <AlertDescription>
-          {error.description}
-        </AlertDescription>
+        <AlertDescription>{error.description}</AlertDescription>
       </Alert>
     </div>
   )

@@ -50,15 +50,13 @@ describe("dom audio playback controller", () => {
     vi.unstubAllGlobals()
     if (createObjectURLDescriptor) {
       Object.defineProperty(URL, "createObjectURL", createObjectURLDescriptor)
-    }
-    else {
+    } else {
       delete (URL as { createObjectURL?: unknown }).createObjectURL
     }
 
     if (revokeObjectURLDescriptor) {
       Object.defineProperty(URL, "revokeObjectURL", revokeObjectURLDescriptor)
-    }
-    else {
+    } else {
       delete (URL as { revokeObjectURL?: unknown }).revokeObjectURL
     }
   })

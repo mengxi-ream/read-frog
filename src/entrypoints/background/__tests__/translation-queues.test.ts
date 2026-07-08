@@ -46,7 +46,7 @@ vi.mock("@/utils/db/dexie/db", () => ({
 }))
 
 function getRegisteredMessageHandler(name: string) {
-  const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+  const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
@@ -110,33 +110,29 @@ describe("translation queue helpers", () => {
     translationCachePutMock.mockResolvedValue(undefined)
   })
 
-  it(
-    "routes only llm providers through the batch queue",
-    async () => {
-      const { shouldUseBatchQueue } = await import("../translation-queues")
+  it("routes only llm providers through the batch queue", async () => {
+    const { shouldUseBatchQueue } = await import("../translation-queues")
 
-      const deeplProvider: ProviderConfig = {
-        id: "deepl",
-        name: "DeepL",
-        provider: "deepl",
-        enabled: true,
-        apiKey: "key",
-      }
+    const deeplProvider: ProviderConfig = {
+      id: "deepl",
+      name: "DeepL",
+      provider: "deepl",
+      enabled: true,
+      apiKey: "key",
+    }
 
-      const deeplxProvider: ProviderConfig = {
-        id: "deeplx",
-        name: "DeepLX",
-        provider: "deeplx",
-        enabled: true,
-        baseURL: "https://api.deeplx.org",
-      }
+    const deeplxProvider: ProviderConfig = {
+      id: "deeplx",
+      name: "DeepLX",
+      provider: "deeplx",
+      enabled: true,
+      baseURL: "https://api.deeplx.org",
+    }
 
-      expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
-      expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
-      expect(shouldUseBatchQueue(llmProvider)).toBe(true)
-    },
-    15_000,
-  )
+    expect(shouldUseBatchQueue(deeplProvider)).toBe(false)
+    expect(shouldUseBatchQueue(deeplxProvider)).toBe(false)
+    expect(shouldUseBatchQueue(llmProvider)).toBe(true)
+  }, 15_000)
 
   it("passes subtitle summary through the translation queue without generating a new summary", async () => {
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")
@@ -316,7 +312,7 @@ describe("translation queue helpers", () => {
       },
     })
 
-    expect(result).toBe("L'Iran chiama \"Dichiarazione\" <span>")
+    expect(result).toBe('L\'Iran chiama "Dichiarazione" <span>')
     expect(executeTranslateMock).not.toHaveBeenCalled()
     expect(translationCachePutMock).not.toHaveBeenCalled()
   })
@@ -360,11 +356,7 @@ describe("translation queue helpers", () => {
     })
 
     expect(result).toBe("Generated summary")
-    expect(generateArticleSummaryMock).toHaveBeenCalledWith(
-      "Page title",
-      "page body",
-      llmProvider,
-    )
+    expect(generateArticleSummaryMock).toHaveBeenCalledWith("Page title", "page body", llmProvider)
   })
 
   it("exposes subtitle summary generation as a separate background handler", async () => {
@@ -426,9 +418,10 @@ describe("translation queue helpers", () => {
   it("deduplicates concurrent subtitle summary generation requests", async () => {
     let resolveSummary!: (summary: string) => void
     generateArticleSummaryMock.mockImplementation(
-      () => new Promise((resolve: (summary: string) => void) => {
-        resolveSummary = resolve
-      }),
+      () =>
+        new Promise((resolve: (summary: string) => void) => {
+          resolveSummary = resolve
+        }),
     )
 
     const { setUpSubtitlesTranslationQueue } = await import("../translation-queues")

@@ -14,7 +14,11 @@ export function SpeakButton() {
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
   const isBusy = isFetching || isPlaying
-  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
+  const {
+    handlePress,
+    onOpenChange: handleTooltipOpenChange,
+    open: tooltipOpen,
+  } = useSelectionTooltipState()
 
   const handleClick = useCallback(async () => {
     if (isBusy) {
@@ -43,26 +47,22 @@ export function SpeakButton() {
       content={tooltipText}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
-      render={(
+      render={
         <button
           type="button"
           className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer"
           onClick={handleClick}
           aria-label={tooltipText}
         />
-      )}
+      }
     >
-      {isFetching
-        ? (
-            <IconLoader2 className="size-4.5 animate-spin" strokeWidth={1.6} />
-          )
-        : isPlaying
-          ? (
-              <IconPlayerStopFilled className="size-4.5" strokeWidth={1.6} />
-            )
-          : (
-              <IconVolume className="size-4.5" strokeWidth={1.6} />
-            )}
+      {isFetching ? (
+        <IconLoader2 className="size-4.5 animate-spin" strokeWidth={1.6} />
+      ) : isPlaying ? (
+        <IconPlayerStopFilled className="size-4.5" strokeWidth={1.6} />
+      ) : (
+        <IconVolume className="size-4.5" strokeWidth={1.6} />
+      )}
     </SelectionToolbarTooltip>
   )
 }

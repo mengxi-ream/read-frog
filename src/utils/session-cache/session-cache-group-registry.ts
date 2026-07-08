@@ -14,17 +14,15 @@ export class SessionCacheGroupRegistry {
         await storage.setItem(this.REGISTRY_KEY, registry)
         logger.info("[CacheRegistry] Registered group:", groupKey)
       }
-    }
-    catch (error) {
+    } catch (error) {
       logger.error("[CacheRegistry] Failed to register group:", error)
     }
   }
 
   static async getAllCacheGroup(): Promise<string[]> {
     try {
-      return await storage.getItem<string[]>(this.REGISTRY_KEY) || []
-    }
-    catch (error) {
+      return (await storage.getItem<string[]>(this.REGISTRY_KEY)) || []
+    } catch (error) {
       logger.error("[CacheRegistry] Failed to get registry:", error)
       return []
     }
@@ -52,8 +50,7 @@ export class SessionCacheGroupRegistry {
       // Clear the registry itself
       await storage.removeItem(this.REGISTRY_KEY)
       logger.info("[CacheRegistry] All caches cleared")
-    }
-    catch (error) {
+    } catch (error) {
       logger.error("[CacheRegistry] Failed to clear all caches:", error)
     }
   }
@@ -65,12 +62,11 @@ export class SessionCacheGroupRegistry {
       await cache.clear()
 
       const registry = await this.getAllCacheGroup()
-      const updatedRegistry = registry.filter(key => key !== groupKey)
+      const updatedRegistry = registry.filter((key) => key !== groupKey)
       await storage.setItem(this.REGISTRY_KEY, updatedRegistry)
 
       logger.info("[CacheRegistry] Removed group completely:", groupKey)
-    }
-    catch (error) {
+    } catch (error) {
       logger.error("[CacheRegistry] Failed to remove group:", error)
     }
   }

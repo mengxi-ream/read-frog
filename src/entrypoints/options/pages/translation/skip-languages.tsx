@@ -38,7 +38,9 @@ function TargetLanguageSkipToggle() {
       <FieldContent className="self-center">
         <FieldLabel htmlFor="target-language-skip-toggle">
           {i18n.t("options.translation.skipLanguages.targetLanguageSkip")}
-          <HelpTooltip>{i18n.t("options.translation.skipLanguages.targetLanguageSkipDescription")}</HelpTooltip>
+          <HelpTooltip>
+            {i18n.t("options.translation.skipLanguages.targetLanguageSkipDescription")}
+          </HelpTooltip>
         </FieldLabel>
       </FieldContent>
       <Switch
@@ -65,13 +67,14 @@ function SkipLanguagesSelector() {
     <div className="w-full flex justify-start md:justify-end">
       <MultiLanguageCombobox
         selectedLanguages={selectedLanguages}
-        onLanguagesChange={languages =>
+        onLanguagesChange={(languages) =>
           void setTranslateConfig({
             page: {
               ...translateConfig.page,
               skipLanguages: languages,
             },
-          })}
+          })
+        }
         buttonLabel={i18n.t("options.translation.skipLanguages.selectLanguages")}
       />
     </div>
@@ -86,7 +89,7 @@ function SelectedSkipLanguageCells() {
     void setTranslateConfig({
       page: {
         ...translateConfig.page,
-        skipLanguages: selectedLanguages.filter(lang => lang !== language),
+        skipLanguages: selectedLanguages.filter((lang) => lang !== language),
       },
     })
   }
@@ -97,7 +100,7 @@ function SelectedSkipLanguageCells() {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {selectedLanguages.map(language => (
+      {selectedLanguages.map((language) => (
         <div
           key={language}
           className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-1 text-sm"

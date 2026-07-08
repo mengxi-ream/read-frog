@@ -1,6 +1,5 @@
 import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { IconX } from "@tabler/icons-react"
-
 import * as React from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { SHARED_POPUP_CLOSED_STATE_CLASS } from "@/components/ui/base-ui/popup-animation-classes"
@@ -22,14 +21,15 @@ function DialogClose({ ...props }: DialogPrimitive.Close.Props) {
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
-function DialogOverlay({
-  className,
-  ...props
-}: DialogPrimitive.Backdrop.Props) {
+function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) {
   return (
     <DialogPrimitive.Backdrop
       data-slot="dialog-overlay"
-      className={cn("data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 isolate z-50", SHARED_POPUP_CLOSED_STATE_CLASS, className)}
+      className={cn(
+        "data-open:animate-in data-closed:animate-out data-closed:fade-out-0 data-open:fade-in-0 bg-black/10 duration-100 supports-backdrop-filter:backdrop-blur-xs fixed inset-0 isolate z-50",
+        SHARED_POPUP_CLOSED_STATE_CLASS,
+        className,
+      )}
       {...props}
     />
   )
@@ -43,19 +43,15 @@ function DialogContent({
   children,
   showCloseButton = true,
   ...props
-}: DialogPrimitive.Popup.Props
-  & Pick<DialogPrimitive.Portal.Props, "container">
-  & {
+}: DialogPrimitive.Popup.Props &
+  Pick<DialogPrimitive.Portal.Props, "container"> & {
     forceRenderOverlay?: DialogPrimitive.Backdrop.Props["forceRender"]
     overlayClassName?: string
     showCloseButton?: boolean
   }) {
   return (
     <DialogPortal container={container}>
-      <DialogOverlay
-        className={overlayClassName}
-        forceRender={forceRenderOverlay}
-      />
+      <DialogOverlay className={overlayClassName} forceRender={forceRenderOverlay} />
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
@@ -69,12 +65,12 @@ function DialogContent({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            render={(
+            render={
               <Button variant="ghost" className="absolute top-2 right-2" size="icon-sm">
                 <IconX />
                 <span className="sr-only">Close</span>
               </Button>
-            )}
+            }
           />
         )}
       </DialogPrimitive.Popup>
@@ -84,11 +80,7 @@ function DialogContent({
 
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
-    <div
-      data-slot="dialog-header"
-      className={cn("gap-2 flex flex-col", className)}
-      {...props}
-    />
+    <div data-slot="dialog-header" className={cn("gap-2 flex flex-col", className)} {...props} />
   )
 }
 
@@ -127,14 +119,14 @@ function DialogTitle({ className, ...props }: DialogPrimitive.Title.Props) {
   )
 }
 
-function DialogDescription({
-  className,
-  ...props
-}: DialogPrimitive.Description.Props) {
+function DialogDescription({ className, ...props }: DialogPrimitive.Description.Props) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn("text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3", className)}
+      className={cn(
+        "text-muted-foreground *:[a]:hover:text-foreground text-sm *:[a]:underline *:[a]:underline-offset-3",
+        className,
+      )}
       {...props}
     />
   )

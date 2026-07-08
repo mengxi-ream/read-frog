@@ -23,7 +23,7 @@ const mockAuthState = vi.hoisted(() => ({
       email: "reader@example.com",
       image: null,
     },
-  } as { user: { id: string, name: string, email: string, image?: string | null } } | null,
+  } as { user: { id: string; name: string; email: string; image?: string | null } } | null,
   isPending: false,
 }))
 
@@ -149,10 +149,7 @@ function createSchema(columnId = "column-summary"): NotebaseGetSchemaOutput {
   }
 }
 
-function renderButton(
-  config: Config,
-  action: SelectionToolbarCustomAction,
-) {
+function renderButton(config: Config, action: SelectionToolbarCustomAction) {
   const store = createStore()
   store.set(configAtom, config)
   const queryClient = new QueryClient({
@@ -193,7 +190,9 @@ describe("saveToNotebaseButton notebase availability", () => {
     }
     mockAuthState.isPending = false
     vi.mocked(orpcClient.notebase.create).mockResolvedValue({ txid: 1 })
-    vi.mocked(orpcClient.notebase.list).mockResolvedValue([{ id: "notebase-1", name: "Summarize Notes" }])
+    vi.mocked(orpcClient.notebase.list).mockResolvedValue([
+      { id: "notebase-1", name: "Summarize Notes" },
+    ])
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValue(createSchema())
     notebaseRowCreateMock.mockResolvedValue({ txid: 1 })
     vi.mocked(sendMessage).mockResolvedValue(undefined as never)
@@ -216,8 +215,12 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     expect(screen.getByText(i18n.t("action.saveToNotebaseCreateTitle"))).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    ).toBeInTheDocument()
   })
 
   it("opens the created notebase after creating and saving", async () => {
@@ -226,13 +229,17 @@ describe("saveToNotebaseButton notebase availability", () => {
     renderButton(config, createAction())
 
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
-    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    )
 
     await waitFor(() => {
       expect(orpcClient.notebase.create).toHaveBeenCalledTimes(1)
     })
 
-    const createInput = vi.mocked(orpcClient.notebase.create).mock.calls[0]?.[0] as { id: string } | undefined
+    const createInput = vi.mocked(orpcClient.notebase.create).mock.calls[0]?.[0] as
+      | { id: string }
+      | undefined
     expect(createInput?.id).toBeTruthy()
 
     await waitFor(() => {
@@ -250,15 +257,22 @@ describe("saveToNotebaseButton notebase availability", () => {
     renderButton(config, createAction())
 
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
-    fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndCreate") }))
+    fireEvent.click(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndCreate") }),
+    )
 
     await waitFor(() => {
-      expect(sendMessage).toHaveBeenCalledWith("openPage", expect.objectContaining({
-        active: true,
-      }))
+      expect(sendMessage).toHaveBeenCalledWith(
+        "openPage",
+        expect.objectContaining({
+          active: true,
+        }),
+      )
     })
 
-    const openPageCall = vi.mocked(sendMessage).mock.calls.find(([message]) => message === "openPage")
+    const openPageCall = vi
+      .mocked(sendMessage)
+      .mock.calls.find(([message]) => message === "openPage")
     const loginUrl = new URL((openPageCall?.[1] as { url: string }).url)
 
     expect(loginUrl.pathname).toBe("/log-in")
@@ -278,8 +292,12 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(saveButton)
 
     expect(screen.getByText(i18n.t("action.saveToNotebaseLoginConnectedTitle"))).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndSave") })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseGoConfigure") })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseLoginAndSave") }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseGoConfigure") }),
+    ).toBeInTheDocument()
   })
 
   it("opens the create/connect dialog when the connected account differs from the logged-in account", async () => {
@@ -299,12 +317,20 @@ describe("saveToNotebaseButton notebase availability", () => {
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))
 
     await waitFor(() => {
-      expect(screen.getByText(i18n.t("action.saveToNotebaseConnectionUnavailableTitle"))).toBeInTheDocument()
+      expect(
+        screen.getByText(i18n.t("action.saveToNotebaseConnectionUnavailableTitle")),
+      ).toBeInTheDocument()
     })
-    expect(screen.getByText(i18n.t("action.saveToNotebaseAccountUnavailableDescription"))).toBeInTheDocument()
+    expect(
+      screen.getByText(i18n.t("action.saveToNotebaseAccountUnavailableDescription")),
+    ).toBeInTheDocument()
     expect(screen.getByText("Reader (reader@example.com)")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") })).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") })).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseCreateAndSaveShort") }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: i18n.t("action.saveToNotebaseConnectExisting") }),
+    ).toBeInTheDocument()
   })
 
   it("shows the saved notebase name in the success toast and opens its URL from the toast action", async () => {
@@ -327,7 +353,9 @@ describe("saveToNotebaseButton notebase availability", () => {
       )
     })
 
-    const toastOptions = toastMock.success.mock.calls[0]?.[1] as { action?: { onClick?: () => void }, description?: string } | undefined
+    const toastOptions = toastMock.success.mock.calls[0]?.[1] as
+      | { action?: { onClick?: () => void }; description?: string }
+      | undefined
     toastOptions?.action?.onClick?.()
 
     expect(sendMessage).toHaveBeenCalledWith("openPage", {
@@ -358,7 +386,9 @@ describe("saveToNotebaseButton notebase availability", () => {
       )
     })
 
-    const toastOptions = toastMock.error.mock.calls[0]?.[1] as { action?: { onClick?: () => void } } | undefined
+    const toastOptions = toastMock.error.mock.calls[0]?.[1] as
+      | { action?: { onClick?: () => void } }
+      | undefined
     toastOptions?.action?.onClick?.()
 
     expect(sendMessage).toHaveBeenCalledWith("openOptionsPage", {
@@ -382,7 +412,9 @@ describe("saveToNotebaseButton notebase availability", () => {
   it("shows a note limit toast when the backend rejects the save for quota", async () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = false
-    notebaseRowCreateMock.mockRejectedValueOnce(new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }))
+    notebaseRowCreateMock.mockRejectedValueOnce(
+      new ORPCError("NOTE_LIMIT_EXCEEDED", { status: 403 }),
+    )
     renderButton(config, createConnectedAction())
 
     fireEvent.click(screen.getByRole("button", { name: i18n.t("action.saveToNotebase") }))

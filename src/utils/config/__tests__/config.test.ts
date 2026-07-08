@@ -18,7 +18,9 @@ describe("config utilities", () => {
     }
 
     it("should remove apiKey from OpenAI provider config", () => {
-      const openaiConfigFromConstants = DEFAULT_PROVIDER_CONFIG_LIST.find(config => config.provider === "openai")!
+      const openaiConfigFromConstants = DEFAULT_PROVIDER_CONFIG_LIST.find(
+        (config) => config.provider === "openai",
+      )!
       const openaiConfigWithApiKey = {
         ...openaiConfigFromConstants,
         apiKey: "sk-1234567890abcdef",

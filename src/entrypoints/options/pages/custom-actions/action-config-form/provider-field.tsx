@@ -21,7 +21,10 @@ export const ProviderField = withForm({
       [providersConfig],
     )
     const customActionProviderIds = useMemo(
-      () => getProviderIdsForCapability("selectionToolbar.customAction", providersConfig, { requireEnable: true }),
+      () =>
+        getProviderIdsForCapability("selectionToolbar.customAction", providersConfig, {
+          requireEnable: true,
+        }),
       [providersConfig],
     )
 
@@ -31,16 +34,20 @@ export const ProviderField = withForm({
         validators={{
           onChange: ({ value }) => {
             if (!customActionProviderIds.includes(value)) {
-              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.providerRequired")
+              return i18n.t(
+                "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.providerRequired",
+              )
             }
             return undefined
           },
         }}
       >
-        {field => (
+        {(field) => (
           <Field>
             <FieldLabel nativeLabel={false} render={<div />}>
-              {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.provider")}
+              {i18n.t(
+                "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.provider",
+              )}
             </FieldLabel>
             <ProviderSelector
               providers={customActionProviders}
@@ -49,7 +56,9 @@ export const ProviderField = withForm({
                 field.handleChange(id)
                 void form.handleSubmit()
               }}
-              placeholder={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider")}
+              placeholder={i18n.t(
+                "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.selectProvider",
+              )}
             />
             {field.state.meta.errors.length > 0 && (
               <span className="text-sm font-normal text-destructive">

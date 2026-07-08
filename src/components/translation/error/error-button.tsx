@@ -13,14 +13,18 @@ export function ErrorButton({ error }: { error: APICallError }) {
       <HoverCardTrigger
         delay={0}
         closeDelay={0}
-        render={<IconAlertCircle className="size-4 text-destructive hover:text-destructive/90 cursor-pointer" />}
+        render={
+          <IconAlertCircle className="size-4 text-destructive hover:text-destructive/90 cursor-pointer" />
+        }
       />
       <HoverCardContent container={shadowWrapper} className="w-64 notranslate" render={<Alert />}>
         <IconAlertCircle className="size-4 text-red-500!" />
         <AlertTitle>Translation Error</AlertTitle>
         <AlertDescription className="break-all">
           <StatusCode statusCode={error.statusCode ?? 500} />
-          <p className="text-zinc-900 dark:text-zinc-100">{error.message || "Something went wrong"}</p>
+          <p className="text-zinc-900 dark:text-zinc-100">
+            {error.message || "Something went wrong"}
+          </p>
         </AlertDescription>
       </HoverCardContent>
     </HoverCard>
@@ -31,11 +35,16 @@ function StatusCode({ statusCode }: { statusCode: number }) {
   const getStatusCodeColor = (code: number) => {
     const firstDigit = Math.floor(code / 100)
     switch (firstDigit) {
-      case 2: return "bg-green-500" // 2xx - Success
-      case 3: return "bg-blue-500" // 3xx - Redirection
-      case 4: return "bg-yellow-500" // 4xx - Client Error
-      case 5: return "bg-red-500" // 5xx - Server Error
-      default: return "bg-gray-500" // Unknown
+      case 2:
+        return "bg-green-500" // 2xx - Success
+      case 3:
+        return "bg-blue-500" // 3xx - Redirection
+      case 4:
+        return "bg-yellow-500" // 4xx - Client Error
+      case 5:
+        return "bg-red-500" // 5xx - Server Error
+      default:
+        return "bg-gray-500" // Unknown
     }
   }
 

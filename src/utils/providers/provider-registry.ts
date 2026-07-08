@@ -2,7 +2,10 @@ import type { GeneratedI18nStructure } from "#i18n"
 import type { ProviderConfig, ProvidersConfig } from "@/types/config/provider"
 import type { Theme } from "@/types/config/theme"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
-import type { ProviderSelectorItem, ProviderSelectorOption } from "@/utils/providers/provider-display"
+import type {
+  ProviderSelectorItem,
+  ProviderSelectorOption,
+} from "@/utils/providers/provider-display"
 import readFrogLogo from "@/assets/providers/read-frog-provider.png?url&no-inline"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import { i18n } from "@/utils/i18n"
@@ -15,7 +18,9 @@ const FREE_AI_PROVIDER_FALLBACK_NAME = "Free AI Service"
 
 export type ProviderCapability = FeatureKey | "selectionToolbar.customAction"
 type SystemProviderNameKey = keyof GeneratedI18nStructure
-type ProviderConfigPredicate<T extends ProviderConfig = ProviderConfig> = (provider: ProviderConfig) => provider is T
+type ProviderConfigPredicate<T extends ProviderConfig = ProviderConfig> = (
+  provider: ProviderConfig,
+) => provider is T
 
 interface SystemProviderDef {
   id: string
@@ -38,9 +43,9 @@ export interface SystemProviderRef {
   name: string
 }
 
-export type ResolvedProviderRef<T extends ProviderConfig = ProviderConfig>
-  = | LocalProviderRef<T>
-    | SystemProviderRef
+export type ResolvedProviderRef<T extends ProviderConfig = ProviderConfig> =
+  | LocalProviderRef<T>
+  | SystemProviderRef
 
 const SYSTEM_PROVIDER_DEFS = {
   [FREE_AI_PROVIDER_ID]: {
@@ -53,23 +58,25 @@ const SYSTEM_PROVIDER_DEFS = {
 } as const satisfies Record<string, SystemProviderDef>
 
 const LOCAL_PROVIDER_CAPABILITY_PREDICATES = {
-  "translate": isTranslateProviderConfig,
-  "videoSubtitles": isTranslateProviderConfig,
+  translate: isTranslateProviderConfig,
+  videoSubtitles: isTranslateProviderConfig,
   "selectionToolbar.translate": isTranslateProviderConfig,
-  "inputTranslation": isTranslateProviderConfig,
+  inputTranslation: isTranslateProviderConfig,
   "selectionToolbar.customAction": isLLMProviderConfig,
 } as const satisfies Record<ProviderCapability, ProviderConfigPredicate>
 
-export type ProviderConfigForCapability<C extends ProviderCapability>
-  = (typeof LOCAL_PROVIDER_CAPABILITY_PREDICATES)[C] extends ProviderConfigPredicate<infer T>
+export type ProviderConfigForCapability<C extends ProviderCapability> =
+  (typeof LOCAL_PROVIDER_CAPABILITY_PREDICATES)[C] extends ProviderConfigPredicate<infer T>
     ? T
     : never
 
-export type ProviderRefForCapability<C extends ProviderCapability>
-  = ResolvedProviderRef<ProviderConfigForCapability<C>>
+export type ProviderRefForCapability<C extends ProviderCapability> = ResolvedProviderRef<
+  ProviderConfigForCapability<C>
+>
 
 export type CustomActionProviderRef = ProviderRefForCapability<"selectionToolbar.customAction">
-export type SelectionToolbarTranslateProviderRef = ProviderRefForCapability<"selectionToolbar.translate">
+export type SelectionToolbarTranslateProviderRef =
+  ProviderRefForCapability<"selectionToolbar.translate">
 
 function getSystemProviderName(def: SystemProviderDef): string {
   return i18n.t(def.nameKey as never) || def.fallbackName
@@ -93,7 +100,7 @@ function createSystemProviderRef(def: SystemProviderDef): SystemProviderRef {
 }
 
 function getSystemProviderDef(providerId: string): SystemProviderDef | undefined {
-  return Object.values(SYSTEM_PROVIDER_DEFS).find(def => def.id === providerId)
+  return Object.values(SYSTEM_PROVIDER_DEFS).find((def) => def.id === providerId)
 }
 
 export function isFreeAiProviderId(providerId: string): providerId is typeof FREE_AI_PROVIDER_ID {
@@ -107,7 +114,9 @@ export function isSystemProviderId(providerId: string): boolean {
 export function getLocalProviderPredicateForCapability<C extends ProviderCapability>(
   capability: C,
 ): ProviderConfigPredicate<ProviderConfigForCapability<C>> {
-  return LOCAL_PROVIDER_CAPABILITY_PREDICATES[capability] as ProviderConfigPredicate<ProviderConfigForCapability<C>>
+  return LOCAL_PROVIDER_CAPABILITY_PREDICATES[capability] as ProviderConfigPredicate<
+    ProviderConfigForCapability<C>
+  >
 }
 
 export function isLocalProviderConfigCompatibleWithCapability<C extends ProviderCapability>(
@@ -119,8 +128,8 @@ export function isLocalProviderConfigCompatibleWithCapability<C extends Provider
 
 export function getSystemProviderIdsForCapability(capability: ProviderCapability): string[] {
   return Object.values(SYSTEM_PROVIDER_DEFS)
-    .filter(def => def.capabilities.includes(capability))
-    .map(def => def.id)
+    .filter((def) => def.capabilities.includes(capability))
+    .map((def) => def.id)
 }
 
 export function doesProviderSupportsCapability(
@@ -129,10 +138,12 @@ export function doesProviderSupportsCapability(
   providerId: string,
   options: { requireEnable?: boolean } = {},
 ): boolean {
-  const providerConfig = providersConfig.find(provider => provider.id === providerId)
+  const providerConfig = providersConfig.find((provider) => provider.id === providerId)
   if (providerConfig) {
-    return (!options.requireEnable || providerConfig.enabled)
-      && isLocalProviderConfigCompatibleWithCapability(capability, providerConfig)
+    return (
+      (!options.requireEnable || providerConfig.enabled) &&
+      isLocalProviderConfigCompatibleWithCapability(capability, providerConfig)
+    )
   }
 
   const systemProvider = getSystemProviderDef(providerId)
@@ -145,16 +156,14 @@ export function getProviderIdsForCapability(
   options: { requireEnable?: boolean } = {},
 ): string[] {
   const localIds = providersConfig
-    .filter(provider =>
-      (!options.requireEnable || provider.enabled)
-      && isLocalProviderConfigCompatibleWithCapability(capability, provider),
+    .filter(
+      (provider) =>
+        (!options.requireEnable || provider.enabled) &&
+        isLocalProviderConfigCompatibleWithCapability(capability, provider),
     )
-    .map(provider => provider.id)
+    .map((provider) => provider.id)
 
-  return [
-    ...localIds,
-    ...getSystemProviderIdsForCapability(capability),
-  ]
+  return [...localIds, ...getSystemProviderIdsForCapability(capability)]
 }
 
 export function getSelectableProvidersForCapability(
@@ -162,17 +171,15 @@ export function getSelectableProvidersForCapability(
   providersConfig: ProvidersConfig,
 ): ProviderSelectorOption[] {
   const systemProviders = Object.values(SYSTEM_PROVIDER_DEFS)
-    .filter(def => def.capabilities.includes(capability))
+    .filter((def) => def.capabilities.includes(capability))
     .map(createSystemProviderSelectorItem)
 
-  const localProviders = providersConfig.filter(provider =>
-    provider.enabled && isLocalProviderConfigCompatibleWithCapability(capability, provider),
+  const localProviders = providersConfig.filter(
+    (provider) =>
+      provider.enabled && isLocalProviderConfigCompatibleWithCapability(capability, provider),
   )
 
-  return [
-    ...systemProviders,
-    ...localProviders,
-  ]
+  return [...systemProviders, ...localProviders]
 }
 
 export function resolveProviderRefForCapability<C extends ProviderCapability>(
@@ -180,7 +187,7 @@ export function resolveProviderRefForCapability<C extends ProviderCapability>(
   providersConfig: ProvidersConfig,
   providerId: string,
 ): ProviderRefForCapability<C> | null {
-  const providerConfig = providersConfig.find(provider => provider.id === providerId)
+  const providerConfig = providersConfig.find((provider) => provider.id === providerId)
   if (providerConfig) {
     if (!isLocalProviderConfigCompatibleWithCapability(capability, providerConfig)) {
       return null

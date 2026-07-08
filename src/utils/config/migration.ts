@@ -16,11 +16,12 @@ const MIGRATION_FILENAME_RE = /v\d+-to-v(\d+)\.ts$/
  * modules : key: ./migration-scripts/v*-to-v*.ts value: migrate function
  * migrationScripts : key: version number value: migrate function
  */
-const modules = import.meta.glob<MigrationFunction>(["./migration-scripts/v*-to-v*.ts"], { eager: true, import: "migrate" })
+const modules = import.meta.glob<MigrationFunction>(["./migration-scripts/v*-to-v*.ts"], {
+  eager: true,
+  import: "migrate",
+})
 export const migrationScripts: Record<number, MigrationFunction> = Object.fromEntries(
-  Object.entries(
-    modules,
-  ).map(([path, migrate]) => {
+  Object.entries(modules).map(([path, migrate]) => {
     const match = path.match(MIGRATION_FILENAME_RE)
     if (!match) {
       throw new Error(`Invalid migration filename: ${path}`)
@@ -42,7 +43,10 @@ export async function runMigration(version: number, config: any): Promise<any> {
   return migrationFn(config)
 }
 
-export async function migrateConfig(originalConfig: unknown, originalConfigSchemaVersion: number): Promise<Config> {
+export async function migrateConfig(
+  originalConfig: unknown,
+  originalConfigSchemaVersion: number,
+): Promise<Config> {
   if (originalConfigSchemaVersion > CONFIG_SCHEMA_VERSION) {
     throw new ConfigVersionTooNewError(i18n.t("options.config.sync.versionTooNew"))
   }
@@ -58,7 +62,9 @@ export async function migrateConfig(originalConfig: unknown, originalConfigSchem
 
   const parseResult = configSchema.safeParse(originalConfig)
   if (!parseResult.success) {
-    throw new Error(`${i18n.t("options.config.sync.validationError")}: ${parseResult.error.message}`)
+    throw new Error(
+      `${i18n.t("options.config.sync.validationError")}: ${parseResult.error.message}`,
+    )
   }
 
   return parseResult.data

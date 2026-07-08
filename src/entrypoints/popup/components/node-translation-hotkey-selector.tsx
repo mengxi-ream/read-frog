@@ -12,41 +12,27 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { HOTKEY_ICONS, HOTKEYS } from "@/utils/constants/hotkeys"
 import { i18n } from "@/utils/i18n"
 
-function HotkeyDisplay({ hotkey }: { hotkey: typeof HOTKEYS[number] }) {
+function HotkeyDisplay({ hotkey }: { hotkey: (typeof HOTKEYS)[number] }) {
   const icon = HOTKEY_ICONS[hotkey]
   const label = i18n.t(`hotkey.${hotkey}`)
 
   if (hotkey === "clickAndHold") {
     return (
       <>
-        {icon}
-        {" "}
-        {label}
-        {" "}
-        {i18n.t("popup.translateParagraph")}
+        {icon} {label} {i18n.t("popup.translateParagraph")}
       </>
     )
   }
 
   return (
     <>
-      {i18n.t("popup.hover")}
-      {" "}
-      +
-      {" "}
-      {icon}
-      {" "}
-      {label}
-      {" "}
-      {i18n.t("popup.translateParagraph")}
+      {i18n.t("popup.hover")} + {icon} {label} {i18n.t("popup.translateParagraph")}
     </>
   )
 }
 
 export default function NodeTranslationHotkeySelector() {
-  const [translateConfig, setTranslateConfig] = useAtom(
-    configFieldsAtomMap.translate,
-  )
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
 
   const handleNodeTranslationEnabledChange = async (checked: boolean) => {
     await setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))
@@ -56,7 +42,7 @@ export default function NodeTranslationHotkeySelector() {
     <div className="flex items-center justify-between gap-2">
       <Select
         value={translateConfig.node.hotkey}
-        onValueChange={(value: typeof HOTKEYS[number] | null) => {
+        onValueChange={(value: (typeof HOTKEYS)[number] | null) => {
           if (value)
             void setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))
         }}
@@ -71,7 +57,7 @@ export default function NodeTranslationHotkeySelector() {
         </SelectTrigger>
         <SelectContent className="min-w-fit">
           <SelectGroup>
-            {HOTKEYS.map(item => (
+            {HOTKEYS.map((item) => (
               <SelectItem key={item} value={item}>
                 <HotkeyDisplay hotkey={item} />
               </SelectItem>
@@ -81,7 +67,7 @@ export default function NodeTranslationHotkeySelector() {
       </Select>
       <Switch
         checked={translateConfig.node.enabled}
-        onCheckedChange={checked => void handleNodeTranslationEnabledChange(checked)}
+        onCheckedChange={(checked) => void handleNodeTranslationEnabledChange(checked)}
       />
     </div>
   )

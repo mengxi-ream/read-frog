@@ -47,19 +47,12 @@ export function createLightweightSpinner(ownerDoc: Document): HTMLElement {
     ? ownerDoc.defaultView.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false
   if (!prefersReducedMotion && spinner.animate) {
-    spinner.animate(
-      [
-        { transform: "rotate(0deg)" },
-        { transform: "rotate(360deg)" },
-      ],
-      {
-        duration: 600,
-        iterations: Infinity,
-        easing: "linear",
-      },
-    )
-  }
-  else {
+    spinner.animate([{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }], {
+      duration: 600,
+      iterations: Infinity,
+      easing: "linear",
+    })
+  } else {
     // For reduced motion or when Web Animations API isn't available,
     // keep a static muted segment so the loading state stays visible
     // without requiring animation.
@@ -88,29 +81,24 @@ export async function getTranslatedTextAndRemoveSpinner(
 
   try {
     translatedText = await translateTextForPage(textContent)
-  }
-  catch (error) {
+  } catch (error) {
     const errorComponent = React.createElement(TranslationError, {
       nodes,
       error: error as APICallError,
     })
 
-    const container = createReactShadowHost(
-      errorComponent,
-      {
-        className: TRANSLATION_ERROR_CONTAINER_CLASS,
-        position: "inline",
-        inheritStyles: false,
-        cssContent: [themeCSS, textSmallCSS],
-        style: {
-          verticalAlign: "middle",
-        },
+    const container = createReactShadowHost(errorComponent, {
+      className: TRANSLATION_ERROR_CONTAINER_CLASS,
+      position: "inline",
+      inheritStyles: false,
+      cssContent: [themeCSS, textSmallCSS],
+      style: {
+        verticalAlign: "middle",
       },
-    )
+    })
 
     translatedWrapperNode.appendChild(container)
-  }
-  finally {
+  } finally {
     spinner.remove()
   }
 

@@ -1,6 +1,5 @@
 import react from "@vitejs/plugin-react"
 import { configDefaults, defineConfig } from "vitest/config"
-
 import { WxtVitest } from "wxt/testing"
 
 export default defineConfig({

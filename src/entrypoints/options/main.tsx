@@ -31,10 +31,7 @@ function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [
-    [typeof configAtom, Config],
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -45,20 +42,23 @@ async function initApp() {
   const root = document.getElementById("root")!
   root.className = "antialiased bg-background"
 
-  const [configValue, themeMode] = await Promise.all([
-    getLocalConfig(),
-    getLocalThemeMode(),
-  ])
+  const [configValue, themeMode] = await Promise.all([getLocalConfig(), getLocalThemeMode()])
   const config = configValue ?? DEFAULT_CONFIG
 
   await initI18n(config.uiLanguage)
 
   applyTheme(document.documentElement, isDarkMode(themeMode) ? "dark" : "light")
 
-  renderPersistentReactRoot(root, (
+  renderPersistentReactRoot(
+    root,
     <React.StrictMode>
       <JotaiProvider>
-        <HydrateAtoms initialValues={[[configAtom, config], [baseThemeModeAtom, themeMode]]}>
+        <HydrateAtoms
+          initialValues={[
+            [configAtom, config],
+            [baseThemeModeAtom, themeMode],
+          ]}
+        >
           <QueryClientProvider client={queryClient}>
             <HashRouter>
               <SidebarProvider>
@@ -80,8 +80,8 @@ async function initApp() {
           </QueryClientProvider>
         </HydrateAtoms>
       </JotaiProvider>
-    </React.StrictMode>
-  ))
+    </React.StrictMode>,
+  )
 }
 
 void initApp()

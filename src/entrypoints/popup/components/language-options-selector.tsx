@@ -29,7 +29,8 @@ function createLanguageItem(code: LangCodeISO6393): LanguageItem<LangCodeISO6393
   }
 }
 
-const langSelectorTriggerClasses = "!h-14 w-30 rounded-lg shadow-xs pr-2 gap-1 justify-between bg-transparent"
+const langSelectorTriggerClasses =
+  "!h-14 w-30 rounded-lg shadow-xs pr-2 gap-1 justify-between bg-transparent"
 
 const langSelectorContentClasses = "flex flex-col items-start text-base font-medium min-w-0 flex-1"
 
@@ -44,7 +45,7 @@ function LanguageComboboxTrigger({
 }) {
   return (
     <ComboboxPrimitive.Trigger
-      render={(
+      render={
         <Button
           type="button"
           variant="outline"
@@ -52,7 +53,7 @@ function LanguageComboboxTrigger({
           aria-label={ariaLabel}
           title={label}
         />
-      )}
+      }
     >
       <div className={langSelectorContentClasses}>
         <span className="truncate w-full text-left">{label}</span>
@@ -82,30 +83,31 @@ export default function LanguageOptionsSelector() {
     [detectedCode, targetLanguageItems],
   )
   const currentSourceItem = useMemo(
-    () => sourceLanguageItems.find(item => item.value === language.sourceCode) ?? sourceLanguageItems[0] ?? null,
+    () =>
+      sourceLanguageItems.find((item) => item.value === language.sourceCode) ??
+      sourceLanguageItems[0] ??
+      null,
     [language.sourceCode, sourceLanguageItems],
   )
   const currentTargetItem = useMemo(
-    () => targetLanguageItems.find(item => item.value === language.targetCode) ?? null,
+    () => targetLanguageItems.find((item) => item.value === language.targetCode) ?? null,
     [language.targetCode, targetLanguageItems],
   )
 
   const handleSourceLangChange = (item: LanguageItem | null) => {
-    if (!item || item.value === language.sourceCode)
-      return
+    if (!item || item.value === language.sourceCode) return
     void setLanguage({ sourceCode: item.value })
   }
 
   const handleTargetLangChange = (item: LanguageItem | null) => {
-    if (!item || item.value === "auto" || item.value === language.targetCode)
-      return
+    if (!item || item.value === "auto" || item.value === language.targetCode) return
     void setLanguage({ targetCode: item.value })
   }
 
-  const sourceLangLabel
-    = language.sourceCode === "auto"
+  const sourceLangLabel =
+    language.sourceCode === "auto"
       ? `${currentSourceItem?.label ?? getLanguageLabel(detectedCode)} (auto)`
-      : currentSourceItem?.label ?? getLanguageLabel(language.sourceCode)
+      : (currentSourceItem?.label ?? getLanguageLabel(language.sourceCode))
 
   const targetLangLabel = currentTargetItem?.label ?? getLanguageLabel(language.targetCode)
 
@@ -120,9 +122,9 @@ export default function LanguageOptionsSelector() {
       >
         <LanguageComboboxTrigger
           label={sourceLangLabel}
-          subtitle={language.sourceCode === "auto"
-            ? i18n.t("popup.autoLang")
-            : i18n.t("popup.sourceLang")}
+          subtitle={
+            language.sourceCode === "auto" ? i18n.t("popup.autoLang") : i18n.t("popup.sourceLang")
+          }
           ariaLabel={i18n.t("popup.sourceLang")}
         />
         <ComboboxContent className="rounded-lg shadow-md w-72">
@@ -174,5 +176,9 @@ export default function LanguageOptionsSelector() {
 }
 
 function AutoLangCell() {
-  return <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800 flex items-center">auto</span>
+  return (
+    <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800 flex items-center">
+      auto
+    </span>
+  )
 }

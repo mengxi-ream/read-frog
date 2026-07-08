@@ -12,8 +12,13 @@ interface SelectionTooltipOpenChangeDetails {
   reason: string
 }
 
-interface SelectionTooltipProps extends Pick<React.ComponentProps<typeof Tooltip>, "open" | "onOpenChange">,
-  Pick<React.ComponentProps<typeof TooltipContent>, "align" | "alignOffset" | "className" | "side" | "sideOffset"> {
+interface SelectionTooltipProps
+  extends
+    Pick<React.ComponentProps<typeof Tooltip>, "open" | "onOpenChange">,
+    Pick<
+      React.ComponentProps<typeof TooltipContent>,
+      "align" | "alignOffset" | "className" | "side" | "sideOffset"
+    > {
   children?: ReactNode
   content: ReactNode
   render: React.ReactElement
@@ -28,13 +33,16 @@ export function useSelectionTooltipState() {
     setOpen(true)
   }, [])
 
-  const handleOpenChange = useCallback((nextOpen: boolean, eventDetails: SelectionTooltipOpenChangeDetails) => {
-    if (!nextOpen && eventDetails.reason === TOOLTIP_TRIGGER_PRESS_REASON) {
-      return
-    }
+  const handleOpenChange = useCallback(
+    (nextOpen: boolean, eventDetails: SelectionTooltipOpenChangeDetails) => {
+      if (!nextOpen && eventDetails.reason === TOOLTIP_TRIGGER_PRESS_REASON) {
+        return
+      }
 
-    setOpen(nextOpen)
-  }, [])
+      setOpen(nextOpen)
+    },
+    [],
+  )
 
   return {
     handlePress,
@@ -59,9 +67,7 @@ function SelectionTooltip({
 }: SelectionTooltipProps) {
   return (
     <Tooltip open={open} onOpenChange={onOpenChange}>
-      <TooltipTrigger render={render}>
-        {children}
-      </TooltipTrigger>
+      <TooltipTrigger render={render}>{children}</TooltipTrigger>
       <TooltipContent
         align={align}
         alignOffset={alignOffset}
@@ -90,7 +96,9 @@ function SelectionTooltip({
   )
 }
 
-export function SelectionToolbarTooltip(props: Omit<SelectionTooltipProps, "container" | "positionerClassName">) {
+export function SelectionToolbarTooltip(
+  props: Omit<SelectionTooltipProps, "container" | "positionerClassName">,
+) {
   return (
     <SelectionTooltip
       container={shadowWrapper ?? document.body}
@@ -100,7 +108,9 @@ export function SelectionToolbarTooltip(props: Omit<SelectionTooltipProps, "cont
   )
 }
 
-export function SelectionPopoverTooltip(props: Omit<SelectionTooltipProps, "container" | "positionerClassName">) {
+export function SelectionPopoverTooltip(
+  props: Omit<SelectionTooltipProps, "container" | "positionerClassName">,
+) {
   const popoverOverlay = useSelectionPopoverOverlayProps()
 
   return (

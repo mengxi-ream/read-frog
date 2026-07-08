@@ -17,7 +17,11 @@ export function CustomActionToolButton({
   action: SelectionToolbarCustomAction
   className?: string
 }) {
-  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
+  const {
+    handlePress,
+    onOpenChange: handleTooltipOpenChange,
+    open: tooltipOpen,
+  } = useSelectionTooltipState()
   const label = i18n.t("action.customizeCustomAction", [action.name])
 
   const handleClick = useCallback(() => {
@@ -32,7 +36,7 @@ export function CustomActionToolButton({
       content={label}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
-      render={(
+      render={
         <button
           type="button"
           className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-sm" }), className)}
@@ -40,7 +44,7 @@ export function CustomActionToolButton({
           aria-label={label}
           title={label}
         />
-      )}
+      }
     >
       <IconTool />
     </SelectionPopoverTooltip>

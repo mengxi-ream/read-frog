@@ -25,10 +25,7 @@ import {
   isORPCUnauthorizedError,
   isORPCValidationError,
 } from "@/utils/notebase/errors"
-import {
-  buildNotebaseRowCells,
-  validateNotebaseMappings,
-} from "@/utils/notebase/mapping"
+import { buildNotebaseRowCells, validateNotebaseMappings } from "@/utils/notebase/mapping"
 import {
   createPendingConnectedNotebaseSave,
   createPendingNotebaseSave,
@@ -46,8 +43,13 @@ export function SaveToNotebaseButton({
   isRunning: boolean
   result: Record<string, unknown> | null
 }) {
-  const connection = sanitizeCustomActionNotebaseConnection(action.notebaseConnection, action.outputSchema)
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const connection = sanitizeCustomActionNotebaseConnection(
+    action.notebaseConnection,
+    action.outputSchema,
+  )
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
   const setSaveToNotebaseDialog = useSetAtom(saveToNotebaseDialogAtom)
   const { data: session, isPending: isSessionPending } = authClient.useSession()
   const isAuthenticated = !!session?.user
@@ -70,56 +72,58 @@ export function SaveToNotebaseButton({
     })
   }
 
-  const saveMutation = useMutation(orpc.notebaseRow.create.mutationOptions({
-    meta: {
-      suppressToast: true,
-    },
-    onSuccess: (_data, variables) => {
-      const notebaseUrl = getNotebaseDetailUrl(variables.notebaseId)
-      toast.success(i18n.t("action.saveToNotebaseSuccess"), {
-        description: savingNotebaseNameRef.current ?? connection?.notebaseNameSnapshot,
-        action: {
-          label: i18n.t("action.openNotebase"),
-          onClick: () => {
-            void sendMessage("openPage", {
-              url: notebaseUrl,
-              active: true,
-            })
+  const saveMutation = useMutation(
+    orpc.notebaseRow.create.mutationOptions({
+      meta: {
+        suppressToast: true,
+      },
+      onSuccess: (_data, variables) => {
+        const notebaseUrl = getNotebaseDetailUrl(variables.notebaseId)
+        toast.success(i18n.t("action.saveToNotebaseSuccess"), {
+          description: savingNotebaseNameRef.current ?? connection?.notebaseNameSnapshot,
+          action: {
+            label: i18n.t("action.openNotebase"),
+            onClick: () => {
+              void sendMessage("openPage", {
+                url: notebaseUrl,
+                active: true,
+              })
+            },
           },
-        },
-      })
-    },
-    onError: (error: unknown) => {
-      if (isORPCUnauthorizedError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
-        return
-      }
+        })
+      },
+      onError: (error: unknown) => {
+        if (isORPCUnauthorizedError(error)) {
+          toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
+          return
+        }
 
-      if (isORPCNoteLimitExceededError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseLimitExceeded"))
-        return
-      }
+        if (isORPCNoteLimitExceededError(error)) {
+          toast.error(i18n.t("action.saveToNotebaseLimitExceeded"))
+          return
+        }
 
-      if (isORPCForbiddenError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
-        return
-      }
+        if (isORPCForbiddenError(error)) {
+          toast.error(i18n.t("action.saveToNotebaseAccessDenied"))
+          return
+        }
 
-      if (isORPCNotFoundError(error)) {
-        toast.error(i18n.t("action.saveToNotebaseTableUnavailable"))
-        return
-      }
+        if (isORPCNotFoundError(error)) {
+          toast.error(i18n.t("action.saveToNotebaseTableUnavailable"))
+          return
+        }
 
-      if (isORPCValidationError(error)) {
-        showConnectionInvalidToast()
-        return
-      }
+        if (isORPCValidationError(error)) {
+          showConnectionInvalidToast()
+          return
+        }
 
-      toast.error(i18n.t("action.saveToNotebaseFailed"), {
-        description: error instanceof Error ? error.message : undefined,
-      })
-    },
-  }))
+        toast.error(i18n.t("action.saveToNotebaseFailed"), {
+          description: error instanceof Error ? error.message : undefined,
+        })
+      },
+    }),
+  )
 
   const openCreateOrConnectDialog = () => {
     if (!result) {
@@ -133,7 +137,9 @@ export function SaveToNotebaseButton({
     })
   }
 
-  const openForeignConnectionDialog = (connectedAccount: SelectionToolbarCustomActionNotebaseAccount) => {
+  const openForeignConnectionDialog = (
+    connectedAccount: SelectionToolbarCustomActionNotebaseAccount,
+  ) => {
     if (!result) {
       return
     }
@@ -146,9 +152,7 @@ export function SaveToNotebaseButton({
     })
   }
 
-  const isUnconnectedDisabled = isSessionPending
-    || isRunning
-    || !result
+  const isUnconnectedDisabled = isSessionPending || isRunning || !result
 
   if (!connection) {
     return (
@@ -167,10 +171,8 @@ export function SaveToNotebaseButton({
   const refreshConnectionInConfig = async (nextConnection: NonNullable<typeof connection>) => {
     await setSelectionToolbarConfig({
       ...selectionToolbarConfig,
-      customActions: selectionToolbarConfig.customActions.map(item =>
-        item.id === action.id
-          ? { ...item, notebaseConnection: nextConnection }
-          : item,
+      customActions: selectionToolbarConfig.customActions.map((item) =>
+        item.id === action.id ? { ...item, notebaseConnection: nextConnection } : item,
       ),
     })
   }
@@ -216,7 +218,11 @@ export function SaveToNotebaseButton({
       }
 
       const schema = await orpcClient.notebase.getSchema({ id: connection.notebaseId })
-      const refreshedConnection = refreshNotebaseConnectionAccountSnapshot(connection, currentAccount, schema.name)
+      const refreshedConnection = refreshNotebaseConnectionAccountSnapshot(
+        connection,
+        currentAccount,
+        schema.name,
+      )
       await refreshConnectionInConfig(refreshedConnection)
 
       const actionWithRefreshedConnection = {
@@ -237,8 +243,7 @@ export function SaveToNotebaseButton({
           cells,
         },
       })
-    }
-    catch (error) {
+    } catch (error) {
       if (isORPCUnauthorizedError(error)) {
         toast.error(i18n.t("action.saveToNotebaseLoginRequired"))
         return
@@ -262,21 +267,18 @@ export function SaveToNotebaseButton({
       toast.error(i18n.t("action.saveToNotebaseFailed"), {
         description: error instanceof Error ? error.message : undefined,
       })
-    }
-    finally {
+    } finally {
       setIsPreparingSave(false)
     }
   }
 
-  const isDisabled = isSessionPending
-    || isRunning
-    || !result
-    || (
-      isAuthenticated
-      && !currentAccount
-    )
-    || isPreparingSave
-    || saveMutation.isPending
+  const isDisabled =
+    isSessionPending ||
+    isRunning ||
+    !result ||
+    (isAuthenticated && !currentAccount) ||
+    isPreparingSave ||
+    saveMutation.isPending
 
   return (
     <Button
@@ -286,7 +288,9 @@ export function SaveToNotebaseButton({
       disabled={isDisabled}
       onClick={() => void handleSave()}
     >
-      {isPreparingSave || saveMutation.isPending ? i18n.t("action.saveToNotebaseSaving") : i18n.t("action.saveToNotebase")}
+      {isPreparingSave || saveMutation.isPending
+        ? i18n.t("action.saveToNotebaseSaving")
+        : i18n.t("action.saveToNotebase")}
     </Button>
   )
 }

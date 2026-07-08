@@ -7,13 +7,15 @@ export function DiscordButton() {
   return (
     <Tooltip>
       <TooltipTrigger
-        render={(
+        render={
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => window.open("https://discord.gg/ej45e3PezJ", "_blank", "noopener,noreferrer")}
+            onClick={() =>
+              window.open("https://discord.gg/ej45e3PezJ", "_blank", "noopener,noreferrer")
+            }
           />
-        )}
+        }
       >
         <Icon icon="logos:discord-icon" />
       </TooltipTrigger>

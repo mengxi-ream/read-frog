@@ -23,13 +23,11 @@ export function SubtitlesTranslateButton() {
       aria-pressed={panelOpen}
       onClick={() => {
         setPanelView(ROOT_VIEW)
-        setPanelOpen(prev => !prev)
+        setPanelOpen((prev) => !prev)
       }}
       className={cn(
         `${TRANSLATE_BUTTON_CLASS} w-12 h-full flex items-center justify-center relative border-none p-0 m-0 cursor-pointer rounded-[14px] transition-all duration-200`,
-        panelOpen
-          ? "bg-accent shadow-inner"
-          : "bg-transparent",
+        panelOpen ? "bg-accent shadow-inner" : "bg-transparent",
       )}
     >
       <img

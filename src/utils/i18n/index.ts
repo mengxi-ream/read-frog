@@ -24,8 +24,9 @@ import { DEFAULT_UI_LOCALE, resources } from "./resources"
 type Substitution = string | number
 
 /** Build an N-length tuple of `Substitution` (positional `$1..$9` → array of N values). */
-type SubstitutionTuple<N extends number, Acc extends Substitution[] = []>
-  = Acc["length"] extends N ? Acc : SubstitutionTuple<N, [...Acc, Substitution]>
+type SubstitutionTuple<N extends number, Acc extends Substitution[] = []> = Acc["length"] extends N
+  ? Acc
+  : SubstitutionTuple<N, [...Acc, Substitution]>
 
 export type I18nKey = keyof GeneratedI18nStructure
 

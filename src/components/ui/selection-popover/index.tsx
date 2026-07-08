@@ -27,7 +27,11 @@ interface SelectionPopoverPosition {
   y: number
 }
 
-type SelectionPopoverPortalContainer = HTMLElement | ShadowRoot | React.RefObject<HTMLElement | ShadowRoot | null> | null
+type SelectionPopoverPortalContainer =
+  | HTMLElement
+  | ShadowRoot
+  | React.RefObject<HTMLElement | ShadowRoot | null>
+  | null
 
 interface SelectionPopoverRootContextValue {
   open: boolean
@@ -47,8 +51,11 @@ interface SelectionPopoverContentContextValue {
   setBodyElement: (node: HTMLDivElement | null) => void
 }
 
-const SelectionPopoverRootContext = React.createContext<SelectionPopoverRootContextValue | null>(null)
-const SelectionPopoverContentContext = React.createContext<SelectionPopoverContentContextValue | null>(null)
+const SelectionPopoverRootContext = React.createContext<SelectionPopoverRootContextValue | null>(
+  null,
+)
+const SelectionPopoverContentContext =
+  React.createContext<SelectionPopoverContentContextValue | null>(null)
 const SELECTION_POPOVER_OPEN_EVENT = "read-frog:selection-popover-open"
 
 function useSelectionPopoverRootContext() {
@@ -97,33 +104,40 @@ function SelectionPopoverRoot({
 }) {
   const instanceId = React.useId()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(defaultOpen)
-  const [uncontrolledAnchor, setUncontrolledAnchor] = React.useState<SelectionPopoverPosition | null>(null)
+  const [uncontrolledAnchor, setUncontrolledAnchor] =
+    React.useState<SelectionPopoverPosition | null>(null)
   const [pinned, setPinned] = React.useState(false)
   const [triggerElement, setTriggerElement] = React.useState<HTMLElement | null>(null)
   const open = openProp ?? uncontrolledOpen
   const anchor = anchorProp ?? uncontrolledAnchor
 
-  const setOpen = React.useCallback((value: boolean | ((value: boolean) => boolean)) => {
-    const nextOpen = typeof value === "function" ? value(open) : value
+  const setOpen = React.useCallback(
+    (value: boolean | ((value: boolean) => boolean)) => {
+      const nextOpen = typeof value === "function" ? value(open) : value
 
-    if (!nextOpen) {
-      setPinned(false)
-    }
+      if (!nextOpen) {
+        setPinned(false)
+      }
 
-    if (openProp === undefined) {
-      setUncontrolledOpen(nextOpen)
-    }
+      if (openProp === undefined) {
+        setUncontrolledOpen(nextOpen)
+      }
 
-    onOpenChange?.(nextOpen)
-  }, [onOpenChange, open, openProp])
+      onOpenChange?.(nextOpen)
+    },
+    [onOpenChange, open, openProp],
+  )
 
-  const setAnchor = React.useCallback((value: SelectionPopoverPosition | null) => {
-    if (anchorProp === undefined) {
-      setUncontrolledAnchor(value)
-    }
+  const setAnchor = React.useCallback(
+    (value: SelectionPopoverPosition | null) => {
+      if (anchorProp === undefined) {
+        setUncontrolledAnchor(value)
+      }
 
-    onAnchorChange?.(value)
-  }, [anchorProp, onAnchorChange])
+      onAnchorChange?.(value)
+    },
+    [anchorProp, onAnchorChange],
+  )
 
   React.useEffect(() => {
     if (!open) {
@@ -138,25 +152,30 @@ function SelectionPopoverRoot({
     }
 
     window.addEventListener(SELECTION_POPOVER_OPEN_EVENT, handlePeerPopoverOpen)
-    window.dispatchEvent(new CustomEvent(SELECTION_POPOVER_OPEN_EVENT, {
-      detail: { instanceId },
-    }))
+    window.dispatchEvent(
+      new CustomEvent(SELECTION_POPOVER_OPEN_EVENT, {
+        detail: { instanceId },
+      }),
+    )
 
     return () => {
       window.removeEventListener(SELECTION_POPOVER_OPEN_EVENT, handlePeerPopoverOpen)
     }
   }, [instanceId, open, setOpen])
 
-  const contextValue = React.useMemo(() => ({
-    open,
-    setOpen,
-    anchor,
-    setAnchor,
-    pinned,
-    setPinned,
-    triggerElement,
-    setTriggerElement,
-  }), [anchor, open, pinned, setAnchor, setOpen, triggerElement])
+  const contextValue = React.useMemo(
+    () => ({
+      open,
+      setOpen,
+      anchor,
+      setAnchor,
+      pinned,
+      setPinned,
+      triggerElement,
+      setTriggerElement,
+    }),
+    [anchor, open, pinned, setAnchor, setOpen, triggerElement],
+  )
 
   return (
     <SelectionPopoverRootContext value={contextValue}>
@@ -180,7 +199,8 @@ function SelectionPopoverTrigger({
   render,
   ...props
 }: useRender.ComponentProps<"button"> & React.ComponentProps<"button">) {
-  const { open, setAnchor, setOpen, setPinned, setTriggerElement } = useSelectionPopoverRootContext()
+  const { open, setAnchor, setOpen, setPinned, setTriggerElement } =
+    useSelectionPopoverRootContext()
 
   const restartPopoverSession = React.useCallback(() => {
     // Reopen on the next frame so controlled consumers observe a full close/open
@@ -193,25 +213,30 @@ function SelectionPopoverTrigger({
     })
   }, [setOpen])
 
-  const handleClick = React.useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect()
-    setPinned(false)
-    setTriggerElement(event.currentTarget)
-    setAnchor({ x: rect.left, y: rect.top })
-    if (open) {
-      restartPopoverSession()
-    }
-    else {
-      setOpen(true)
-    }
-  }, [open, restartPopoverSession, setAnchor, setOpen, setPinned, setTriggerElement])
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const rect = event.currentTarget.getBoundingClientRect()
+      setPinned(false)
+      setTriggerElement(event.currentTarget)
+      setAnchor({ x: rect.left, y: rect.top })
+      if (open) {
+        restartPopoverSession()
+      } else {
+        setOpen(true)
+      }
+    },
+    [open, restartPopoverSession, setAnchor, setOpen, setPinned, setTriggerElement],
+  )
 
   return useRender({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
         type: "button",
-        className: cn("px-2 h-7 shrink-0 flex items-center justify-center hover:bg-accent cursor-pointer", className),
+        className: cn(
+          "px-2 h-7 shrink-0 flex items-center justify-center hover:bg-accent cursor-pointer",
+          className,
+        ),
         children,
         onClick: handleClick,
       },
@@ -225,9 +250,13 @@ function SelectionPopoverTrigger({
   })
 }
 
-type SelectionPopoverShellProps = Omit<React.ComponentProps<"div">, "onDrag" | "onDragStart" | "ref"> & ReturnType<typeof useSelectionPopoverLayout> & {
-  ref?: React.Ref<HTMLDivElement>
-}
+type SelectionPopoverShellProps = Omit<
+  React.ComponentProps<"div">,
+  "onDrag" | "onDragStart" | "ref"
+> &
+  ReturnType<typeof useSelectionPopoverLayout> & {
+    ref?: React.Ref<HTMLDivElement>
+  }
 
 function SelectionPopoverShell({
   children,
@@ -249,19 +278,22 @@ function SelectionPopoverShell({
   style,
   ...props
 }: SelectionPopoverShellProps) {
-  const assignRndRef = React.useCallback((instance: Rnd | null) => {
-    rndRef.current = instance
-    const element = instance?.getSelfElement() as HTMLDivElement | null
+  const assignRndRef = React.useCallback(
+    (instance: Rnd | null) => {
+      rndRef.current = instance
+      const element = instance?.getSelfElement() as HTMLDivElement | null
 
-    if (typeof forwardedRef === "function") {
-      forwardedRef(element)
-      return
-    }
+      if (typeof forwardedRef === "function") {
+        forwardedRef(element)
+        return
+      }
 
-    if (forwardedRef) {
-      forwardedRef.current = element
-    }
-  }, [forwardedRef, rndRef])
+      if (forwardedRef) {
+        forwardedRef.current = element
+      }
+    },
+    [forwardedRef, rndRef],
+  )
 
   return (
     <Rnd
@@ -277,12 +309,14 @@ function SelectionPopoverShell({
       cancel={SELECTION_POPOVER_NO_DRAG_SELECTOR}
       enableResizing={SELECTION_POPOVER_RESIZE_HANDLES}
       resizeHandleStyles={SELECTION_POPOVER_RESIZE_HANDLE_STYLES}
-      onMouseDown={onMouseDown
-        ? e => onMouseDown(e as unknown as React.MouseEvent<HTMLDivElement>)
-        : undefined}
-      onMouseUp={onMouseUp
-        ? e => onMouseUp(e as unknown as React.MouseEvent<HTMLDivElement>)
-        : undefined}
+      onMouseDown={
+        onMouseDown
+          ? (e) => onMouseDown(e as unknown as React.MouseEvent<HTMLDivElement>)
+          : undefined
+      }
+      onMouseUp={
+        onMouseUp ? (e) => onMouseUp(e as unknown as React.MouseEvent<HTMLDivElement>) : undefined
+      }
       {...props}
       className={cn(
         `pointer-events-auto flex flex-col overflow-hidden rounded-lg border bg-popover text-popover-foreground shadow-floating ${NOTRANSLATE_CLASS}`,
@@ -322,10 +356,11 @@ function SelectionPopoverContent({
   finalFocus,
   render,
   ...props
-}: useRender.ComponentProps<"div"> & React.ComponentProps<"div"> & {
-  container?: SelectionPopoverPortalContainer
-  finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
-}) {
+}: useRender.ComponentProps<"div"> &
+  React.ComponentProps<"div"> & {
+    container?: SelectionPopoverPortalContainer
+    finalFocus?: DialogPrimitive.Popup.Props["finalFocus"]
+  }) {
   const { open, setOpen, anchor, triggerElement } = useSelectionPopoverRootContext()
   const bodyElementRef = React.useRef<HTMLDivElement | null>(null)
   const setBodyElement = React.useCallback((node: HTMLDivElement | null) => {
@@ -358,21 +393,21 @@ function SelectionPopoverContent({
     elementRef: bodyElementRef,
   })
 
-  const contentContextValue = React.useMemo(() => ({
-    close: handleClose,
-    isDragging,
-    portalContainer: container ?? null,
-    setBodyElement,
-  }), [container, handleClose, isDragging, setBodyElement])
+  const contentContextValue = React.useMemo(
+    () => ({
+      close: handleClose,
+      isDragging,
+      portalContainer: container ?? null,
+      setBodyElement,
+    }),
+    [container, handleClose, isDragging, setBodyElement],
+  )
 
   const shell = useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        className: cn(
-          "flex min-h-0 h-full flex-1 flex-col",
-          className,
-        ),
+        className: cn("flex min-h-0 h-full flex-1 flex-col", className),
         children: (
           <SelectionPopoverContentContext value={contentContextValue}>
             {children}
@@ -469,9 +504,10 @@ function SelectionPopoverBody({
   render,
   ref: forwardedRef,
   ...props
-}: useRender.ComponentProps<"div"> & React.ComponentProps<"div"> & {
-  ref?: React.Ref<HTMLDivElement>
-}) {
+}: useRender.ComponentProps<"div"> &
+  React.ComponentProps<"div"> & {
+    ref?: React.Ref<HTMLDivElement>
+  }) {
   const { setBodyElement } = useSelectionPopoverContentContext()
 
   return useRender({
@@ -490,34 +526,15 @@ function SelectionPopoverBody({
   })
 }
 
-function SelectionPopoverFooter({
-  className,
-  ...props
-}: React.ComponentProps<"div">) {
-  return (
-    <div
-      className={cn("flex items-center gap-2 py-2 px-4", className)}
-      {...props}
-    />
-  )
+function SelectionPopoverFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return <div className={cn("flex items-center gap-2 py-2 px-4", className)} {...props} />
 }
 
-function SelectionPopoverTitle({
-  className,
-  ...props
-}: React.ComponentProps<"h2">) {
-  return (
-    <DialogPrimitive.Title
-      className={cn("text-base font-semibold", className)}
-      {...props}
-    />
-  )
+function SelectionPopoverTitle({ className, ...props }: React.ComponentProps<"h2">) {
+  return <DialogPrimitive.Title className={cn("text-base font-semibold", className)} {...props} />
 }
 
-function SelectionPopoverDescription({
-  className,
-  ...props
-}: React.ComponentProps<"p">) {
+function SelectionPopoverDescription({ className, ...props }: React.ComponentProps<"p">) {
   return (
     <DialogPrimitive.Description
       className={cn("text-sm text-zinc-600 dark:text-zinc-400", className)}
@@ -533,7 +550,7 @@ function SelectionPopoverPin({
 }: React.ComponentProps<typeof Button>) {
   const { pinned, setPinned } = useSelectionPopoverRootContext()
   const togglePinned = React.useCallback(() => {
-    setPinned(prev => !prev)
+    setPinned((prev) => !prev)
   }, [setPinned])
   const label = pinned ? "Unpin popover" : "Pin popover"
 
@@ -566,14 +583,9 @@ function SelectionPopoverClose({
 }: React.ComponentProps<typeof Button>) {
   return (
     <DialogPrimitive.Close
-      render={(
-        <Button
-          variant="ghost-secondary"
-          size="icon-sm"
-          className={className}
-          data-rf-no-drag
-        />
-      )}
+      render={
+        <Button variant="ghost-secondary" size="icon-sm" className={className} data-rf-no-drag />
+      }
       {...props}
     >
       {children ?? (

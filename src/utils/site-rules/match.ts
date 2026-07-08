@@ -81,12 +81,13 @@ class WildcardHostPattern implements CompiledPattern {
     let parsed: URL
     try {
       parsed = new URL(url.toString())
-    }
-    catch {
+    } catch {
       return false
     }
     const protocol = parsed.protocol.slice(0, -1)
-    if (this.scheme === "*" ? protocol !== "http" && protocol !== "https" : protocol !== this.scheme) {
+    if (
+      this.scheme === "*" ? protocol !== "http" && protocol !== "https" : protocol !== this.scheme
+    ) {
       return false
     }
     return this.hostRegex.test(parsed.hostname) && this.pathRegex.test(parsed.pathname)
@@ -117,14 +118,12 @@ function getCompiledPattern(rawPattern: string): CompiledPattern | null {
   const normalized = normalizeUrlPattern(rawPattern)
   if (normalized === null) {
     logger.warn(`[site-rules] Unsupported URL pattern dropped: "${rawPattern}"`)
-  }
-  else {
+  } else {
     try {
       compiled = needsWildcardHostPattern(normalized)
         ? new WildcardHostPattern(normalized)
         : new MatchPattern(normalized)
-    }
-    catch (error) {
+    } catch (error) {
       logger.warn(`[site-rules] Invalid URL pattern dropped: "${rawPattern}"`, error)
     }
   }
@@ -140,8 +139,7 @@ export function urlMatchesPattern(url: string, rawPattern: string): boolean {
   }
   try {
     return pattern.includes(url)
-  }
-  catch {
+  } catch {
     // MatchPattern.includes throws for URLs with unimplemented protocols.
     return false
   }
@@ -152,8 +150,8 @@ export function urlMatchesRule(
   rule: Pick<SiteRule, "matches" | "excludeMatches">,
 ): boolean {
   const matches = Array.isArray(rule.matches) ? rule.matches : [rule.matches]
-  if (!matches.some(pattern => urlMatchesPattern(url, pattern))) {
+  if (!matches.some((pattern) => urlMatchesPattern(url, pattern))) {
     return false
   }
-  return !(rule.excludeMatches ?? []).some(pattern => urlMatchesPattern(url, pattern))
+  return !(rule.excludeMatches ?? []).some((pattern) => urlMatchesPattern(url, pattern))
 }

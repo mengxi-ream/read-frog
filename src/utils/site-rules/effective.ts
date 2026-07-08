@@ -3,7 +3,7 @@ import type { Config } from "@/types/config/config"
 import { BUILT_IN_SITE_RULES } from "./built-in"
 import { resolveSiteRule } from "./resolve"
 
-const cache = new WeakMap<Config, { url: string, rule: ResolvedSiteRule }>()
+const cache = new WeakMap<Config, { url: string; rule: ResolvedSiteRule }>()
 
 /**
  * Resolve the effective site rule for `url` under `config`, memoized on the

@@ -5,9 +5,7 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function ContextMenuTranslateToggle() {
-  const [contextMenu, setContextMenu] = useAtom(
-    configFieldsAtomMap.contextMenu,
-  )
+  const [contextMenu, setContextMenu] = useAtom(configFieldsAtomMap.contextMenu)
 
   return (
     <ConfigCard

@@ -6,10 +6,12 @@ async function loadStyleInjector() {
   vi.resetModules()
 
   vi.doMock("@/assets/styles/custom-translation-node.css?raw", () => ({
-    default: "@import '@/assets/styles/host-theme.css';\n[data-read-frog-custom-translation-style='blur'] { opacity: 0.75; }",
+    default:
+      "@import '@/assets/styles/host-theme.css';\n[data-read-frog-custom-translation-style='blur'] { opacity: 0.75; }",
   }))
   vi.doMock("@/assets/styles/host-theme.css?raw", () => ({
-    default: ":root { --read-frog-primary: oklch(0.205 0 0); --read-frog-brand: oklch(76.034% 0.12361 82.191); }",
+    default:
+      ":root { --read-frog-primary: oklch(0.205 0 0); --read-frog-brand: oklch(76.034% 0.12361 82.191); }",
   }))
   vi.doMock("@/assets/styles/translation-node-preset.css?raw", () => ({
     default: ".read-frog-translated-content-wrapper { display: inline; }",
@@ -122,7 +124,9 @@ describe("style-injector", () => {
     await ensureCustomCSS(document, ".custom-translation-style { color: blue; }")
 
     expect(document.adoptedStyleSheets).toHaveLength(2)
-    expect(Array.from(document.adoptedStyleSheets[1]?.cssRules ?? [], rule => rule.cssText).join("\n")).toContain("color: blue")
+    expect(
+      Array.from(document.adoptedStyleSheets[1]?.cssRules ?? [], (rule) => rule.cssText).join("\n"),
+    ).toContain("color: blue")
     expect(document.head.querySelector("#read-frog-custom-styles")).toBeNull()
   })
 
@@ -131,7 +135,9 @@ describe("style-injector", () => {
 
     await ensureSiteRuleCSS(document, ".line-clamped { -webkit-line-clamp: unset; }")
 
-    const siteRuleStyle = document.head.querySelector<HTMLStyleElement>("#read-frog-site-rule-styles")
+    const siteRuleStyle = document.head.querySelector<HTMLStyleElement>(
+      "#read-frog-site-rule-styles",
+    )
     expect(siteRuleStyle).not.toBeNull()
     expect(siteRuleStyle?.textContent).toContain("line-clamp")
 
@@ -151,7 +157,9 @@ describe("style-injector", () => {
     await ensureSiteRuleCSS(document, ".clamped { max-height: none; }")
 
     expect(document.adoptedStyleSheets).toHaveLength(1)
-    expect(Array.from(document.adoptedStyleSheets[0]?.cssRules ?? [], rule => rule.cssText).join("\n")).toContain("max-height")
+    expect(
+      Array.from(document.adoptedStyleSheets[0]?.cssRules ?? [], (rule) => rule.cssText).join("\n"),
+    ).toContain("max-height")
 
     // Re-ensuring reuses the same sheet instead of stacking a new one
     await ensureSiteRuleCSS(document, ".clamped { max-height: none; } .other { height: auto; }")

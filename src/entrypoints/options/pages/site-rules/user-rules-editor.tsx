@@ -33,7 +33,10 @@ const VALIDATION_ERROR_MESSAGE_KEYS = {
 
 export function UserRulesEditor() {
   const [siteRules, setSiteRules] = useAtom(configFieldsAtomMap.siteRules)
-  const externalJson = useMemo(() => JSON.stringify(siteRules.userRules, null, 2), [siteRules.userRules])
+  const externalJson = useMemo(
+    () => JSON.stringify(siteRules.userRules, null, 2),
+    [siteRules.userRules],
+  )
   const [jsonInput, setJsonInput] = useState(externalJson)
 
   // Re-sync the editor when the atom changes externally (config sync, another
@@ -52,7 +55,10 @@ export function UserRulesEditor() {
   }, [externalJson])
 
   const debouncedJsonInput = useDebouncedValue(jsonInput, 500)
-  const validation = useMemo(() => validateUserRulesDocument(debouncedJsonInput), [debouncedJsonInput])
+  const validation = useMemo(
+    () => validateUserRulesDocument(debouncedJsonInput),
+    [debouncedJsonInput],
+  )
 
   const isValidating = jsonInput !== debouncedJsonInput
   const hasChanges = jsonInput !== externalJson
@@ -85,12 +91,10 @@ export function UserRulesEditor() {
         {!validation.ok && (
           <Alert variant="destructive">
             <Icon icon="tabler:alert-circle-filled" className="size-4" />
-            <AlertTitle>
-              {i18n.t(VALIDATION_ERROR_MESSAGE_KEYS[validation.kind])}
-            </AlertTitle>
+            <AlertTitle>{i18n.t(VALIDATION_ERROR_MESSAGE_KEYS[validation.kind])}</AlertTitle>
             <AlertDescription>
               <ul className="list-disc list-inside text-xs">
-                {validation.issues.slice(0, MAX_VISIBLE_ISSUES).map(issue => (
+                {validation.issues.slice(0, MAX_VISIBLE_ISSUES).map((issue) => (
                   <li key={`${issue.path}-${issue.message}`}>
                     <code className="text-xs">{issue.path}</code>
                     {": "}
@@ -109,7 +113,13 @@ export function UserRulesEditor() {
           </Alert>
         )}
         <div className="flex items-center gap-2 justify-between">
-          <div className={cn("text-sm text-green-500", isValidating && "text-muted-foreground", !validation.ok && "text-destructive")}>
+          <div
+            className={cn(
+              "text-sm text-green-500",
+              isValidating && "text-muted-foreground",
+              !validation.ok && "text-destructive",
+            )}
+          >
             {getValidationMessage(validation, isValidating, hasChanges)}
           </div>
           <Button onClick={handleSave} disabled={isValidating || !validation.ok || !hasChanges}>
@@ -123,7 +133,11 @@ export function UserRulesEditor() {
   )
 }
 
-function getValidationMessage(validation: UserRulesValidationResult, isValidating: boolean, hasChanges: boolean) {
+function getValidationMessage(
+  validation: UserRulesValidationResult,
+  isValidating: boolean,
+  hasChanges: boolean,
+) {
   if (isValidating) {
     return i18n.t("options.siteRules.userRules.validation.validating")
   }

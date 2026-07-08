@@ -133,10 +133,12 @@ describe("getModelById", () => {
     const result = await getModelById("anthropic-default")
 
     expect(result).toBe("anthropic-model")
-    expect(createAnthropicMock).toHaveBeenCalledWith(expect.objectContaining({
-      apiKey: "test-key",
-      headers: DEFAULT_PROVIDER_HEADERS.anthropic,
-    }))
+    expect(createAnthropicMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiKey: "test-key",
+        headers: DEFAULT_PROVIDER_HEADERS.anthropic,
+      }),
+    )
     expect(anthropicLanguageModelMock).toHaveBeenCalledWith("claude-haiku-4-5")
   })
 
@@ -149,13 +151,15 @@ describe("getModelById", () => {
     const result = await getModelById("openrouter-default")
 
     expect(result).toBe("custom-model")
-    expect(createOpenAICompatibleMock).toHaveBeenCalledWith(expect.objectContaining({
-      name: "openrouter",
-      baseURL: "https://openrouter.ai/api/v1",
-      apiKey: "test-key",
-      headers: DEFAULT_PROVIDER_HEADERS.openrouter,
-      supportsStructuredOutputs: true,
-    }))
+    expect(createOpenAICompatibleMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "openrouter",
+        baseURL: "https://openrouter.ai/api/v1",
+        apiKey: "test-key",
+        headers: DEFAULT_PROVIDER_HEADERS.openrouter,
+        supportsStructuredOutputs: true,
+      }),
+    )
     expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith("x-ai/grok-4-fast:free")
   })
 
@@ -205,15 +209,17 @@ describe("getModelById", () => {
     const result = await getModelById("azure-default")
 
     expect(result).toBe("azure-model")
-    expect(createAzureMock).toHaveBeenCalledWith(expect.objectContaining({
-      resourceName: "read-frog-openai",
-      apiVersion: "2025-04-01-preview",
-      baseURL: "https://proxy.example.test/openai",
-      apiKey: "azure-key",
-      headers: {
-        "X-Test": "1",
-      },
-    }))
+    expect(createAzureMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resourceName: "read-frog-openai",
+        apiVersion: "2025-04-01-preview",
+        baseURL: "https://proxy.example.test/openai",
+        apiKey: "azure-key",
+        headers: {
+          "X-Test": "1",
+        },
+      }),
+    )
     expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("apiMode")
     expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("region")
     expect(azureLanguageModelMock).toHaveBeenCalledWith("read-frog-gpt-4o")
@@ -248,12 +254,14 @@ describe("getModelById", () => {
     const result = await getModelById("azure-default")
 
     expect(result).toBe("azure-chat-model")
-    expect(createAzureMock).toHaveBeenCalledWith(expect.objectContaining({
-      resourceName: "read-frog-openai",
-      apiVersion: "2025-04-01-preview",
-      baseURL: "https://proxy.example.test/openai",
-      apiKey: "azure-key",
-    }))
+    expect(createAzureMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        resourceName: "read-frog-openai",
+        apiVersion: "2025-04-01-preview",
+        baseURL: "https://proxy.example.test/openai",
+        apiKey: "azure-key",
+      }),
+    )
     expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("apiMode")
     expect(createAzureMock.mock.calls[0]?.[0]).not.toHaveProperty("region")
     expect(azureChatModelMock).toHaveBeenCalledWith("read-frog-gpt-4o")
@@ -268,11 +276,13 @@ describe("getModelById", () => {
     const { getModelById } = await import("../model")
     await getModelById("anthropic-default")
 
-    expect(createAnthropicMock).toHaveBeenCalledWith(expect.objectContaining({
-      headers: {
-        "X-Test": "1",
-      },
-    }))
+    expect(createAnthropicMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: {
+          "X-Test": "1",
+        },
+      }),
+    )
   })
 
   it("omits headers for Anthropic when user headers are an explicit empty object", async () => {
@@ -313,15 +323,19 @@ describe("getModelById", () => {
     const result = await getModelById("custom-openai")
 
     expect(result).toBe("custom-model")
-    expect(createOpenAICompatibleMock).toHaveBeenCalledWith(expect.objectContaining({
-      name: "openai-compatible",
-      baseURL: "http://127.0.0.1:1234/v1",
-      apiKey: "custom-key",
-      headers: {
-        "HTTP-Referer": "https://example.com",
-        "X-Title": "Read Frog",
-      },
-    }))
-    expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith("huihui-hy-mt1.5-1.8b-abliterated")
+    expect(createOpenAICompatibleMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "openai-compatible",
+        baseURL: "http://127.0.0.1:1234/v1",
+        apiKey: "custom-key",
+        headers: {
+          "HTTP-Referer": "https://example.com",
+          "X-Title": "Read Frog",
+        },
+      }),
+    )
+    expect(openAICompatibleLanguageModelMock).toHaveBeenCalledWith(
+      "huihui-hy-mt1.5-1.8b-abliterated",
+    )
   })
 })

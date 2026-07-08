@@ -67,7 +67,7 @@ export function ConfigurePrompt({
     setConfig({
       ...config,
       patterns: inEdit
-        ? _patterns.map(p => p.id === prompt.id ? prompt : p)
+        ? _patterns.map((p) => (p.id === prompt.id ? prompt : p))
         : [..._patterns, prompt],
     })
 
@@ -75,31 +75,41 @@ export function ConfigurePrompt({
   }
 
   return (
-    <Sheet onOpenChange={(open) => {
-      if (open) {
-        resetPrompt()
-      }
-    }}
+    <Sheet
+      onOpenChange={(open) => {
+        if (open) {
+          resetPrompt()
+        }
+      }}
     >
-      {inEdit
-        ? (
-            <SheetTrigger render={<Button variant="ghost" className={cn("size-8", className)} disabled={isExportMode} {...props} />}>
-              <Icon icon={isDefault ? "tabler:eye" : "tabler:pencil"} className="size-4" />
-            </SheetTrigger>
-          )
-        : (
-            <SheetTrigger render={<Button className={className} {...props} />}>
-              <Icon icon="tabler:plus" className="size-4" />
-              {i18n.t("options.translation.personalizedPrompts.addPrompt")}
-            </SheetTrigger>
-          )}
+      {inEdit ? (
+        <SheetTrigger
+          render={
+            <Button
+              variant="ghost"
+              className={cn("size-8", className)}
+              disabled={isExportMode}
+              {...props}
+            />
+          }
+        >
+          <Icon icon={isDefault ? "tabler:eye" : "tabler:pencil"} className="size-4" />
+        </SheetTrigger>
+      ) : (
+        <SheetTrigger render={<Button className={className} {...props} />}>
+          <Icon icon="tabler:plus" className="size-4" />
+          {i18n.t("options.translation.personalizedPrompts.addPrompt")}
+        </SheetTrigger>
+      )}
       <SheetContent className="w-[400px] sm:w-[500px] sm:max-w-none">
         <SheetHeader>
           <SheetTitle>{sheetTitle}</SheetTitle>
         </SheetHeader>
         <FieldGroup className="flex-1 overflow-y-auto px-4">
           <Field>
-            <FieldLabel htmlFor="prompt-name">{i18n.t("options.translation.personalizedPrompts.editPrompt.name")}</FieldLabel>
+            <FieldLabel htmlFor="prompt-name">
+              {i18n.t("options.translation.personalizedPrompts.editPrompt.name")}
+            </FieldLabel>
             <Input
               id="prompt-name"
               value={prompt.name}
@@ -113,22 +123,30 @@ export function ConfigurePrompt({
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="system-prompt">{i18n.t("options.translation.personalizedPrompts.editPrompt.systemPrompt")}</FieldLabel>
+            <FieldLabel htmlFor="system-prompt">
+              {i18n.t("options.translation.personalizedPrompts.editPrompt.systemPrompt")}
+            </FieldLabel>
             <QuickInsertableTextarea
               value={prompt.systemPrompt}
               className="min-h-40 max-h-80"
               disabled={isDefault}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPrompt({ ...prompt, systemPrompt: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setPrompt({ ...prompt, systemPrompt: e.target.value })
+              }
               insertCells={insertCells}
             />
           </Field>
           <Field>
-            <FieldLabel htmlFor="prompt">{i18n.t("options.translation.personalizedPrompts.editPrompt.prompt")}</FieldLabel>
+            <FieldLabel htmlFor="prompt">
+              {i18n.t("options.translation.personalizedPrompts.editPrompt.prompt")}
+            </FieldLabel>
             <QuickInsertableTextarea
               value={prompt.prompt}
               className="max-h-60"
               disabled={isDefault}
-              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setPrompt({ ...prompt, prompt: e.target.value })}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+                setPrompt({ ...prompt, prompt: e.target.value })
+              }
               insertCells={insertCells}
             />
           </Field>

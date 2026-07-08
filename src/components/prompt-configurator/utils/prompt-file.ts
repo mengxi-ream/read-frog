@@ -12,7 +12,7 @@ export function checkPromptConfig(list: PromptConfig[]) {
     return false
   }
 
-  return list.every(item => item.name && item.prompt)
+  return list.every((item) => item.name && item.prompt)
 }
 
 export function downloadJSONFile(data: object) {
@@ -32,15 +32,13 @@ export function analysisJSONFile(file: File): Promise<PromptConfigList> {
           const list = JSON.parse(fileResult)
           const checked = checkPromptConfig(list)
           checked ? resolve(list) : reject(new Error("Prompt config is invalid"))
-        }
-        else {
+        } else {
           reject(new Error("Prompt config is invalid"))
         }
-      }
-      catch (e) {
+      } catch (e) {
         reject(e)
       }
     }
-    reader.onerror = error => reject(error)
+    reader.onerror = (error) => reject(error)
   })
 }

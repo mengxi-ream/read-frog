@@ -18,7 +18,7 @@ export function QuickInsertableTextareaFieldAutoSave({
   className,
 }: QuickInsertableTextareaFieldAutoSaveProps) {
   const field = useFieldContext<string>()
-  const errors = useSelector(field.store, state => state.meta.errors)
+  const errors = useSelector(field.store, (state) => state.meta.errors)
   const hasError = errors.length > 0
 
   return (
@@ -35,7 +35,7 @@ export function QuickInsertableTextareaFieldAutoSave({
         insertCells={insertCells}
       />
       <FieldError match={hasError}>
-        {errors.map(error => typeof error === "string" ? error : error?.message).join(", ")}
+        {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>
     </Field>
   )

@@ -19,13 +19,21 @@ export function SubtitlesRequestRate() {
     <ConfigCard
       id="subtitles-request-rate"
       title={i18n.t("options.videoSubtitles.requestQueueConfig.title")}
-      description={(
+      description={
         <div>
           {i18n.t("options.videoSubtitles.requestQueueConfig.firstOnDescription")}
-          <a target="_blank" rel="noopener noreferrer" href="https://en.wikipedia.org/wiki/Token_bucket" aria-label="Learn more about the Token Bucket algorithm on Wikipedia"> Token Bucket </a>
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
+            href="https://en.wikipedia.org/wiki/Token_bucket"
+            aria-label="Learn more about the Token Bucket algorithm on Wikipedia"
+          >
+            {" "}
+            Token Bucket{" "}
+          </a>
           {i18n.t("options.videoSubtitles.requestQueueConfig.lastOnDescription")}
         </div>
-      )}
+      }
     >
       <FieldGroup>
         <SubtitlesNumberSelector property="capacity" />
@@ -54,7 +62,9 @@ const propertyMinAllowedValue = {
 }
 
 function SubtitlesNumberSelector({ property }: { property: KeyOfRequestQueueConfig }) {
-  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
+  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
+    configFieldsAtomMap.videoSubtitles,
+  )
   const { requestQueueConfig } = videoSubtitlesConfig
 
   const currentConfigValue = requestQueueConfig[property]
@@ -90,7 +100,9 @@ function SubtitlesNumberSelector({ property }: { property: KeyOfRequestQueueConf
           const rawValue = e.target.value
           setInputValue(rawValue)
           const newConfigValue = Number(rawValue)
-          const configParseResult = requestQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          const configParseResult = requestQueueConfigSchema
+            .partial()
+            .safeParse({ [property]: newConfigValue })
           if (rawValue !== "" && configParseResult.success) {
             void setVideoSubtitlesConfig({
               ...videoSubtitlesConfig,
@@ -106,7 +118,9 @@ function SubtitlesNumberSelector({ property }: { property: KeyOfRequestQueueConf
         }}
         onBlur={() => {
           const newConfigValue = Number(inputValue)
-          const configParseResult = requestQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          const configParseResult = requestQueueConfigSchema
+            .partial()
+            .safeParse({ [property]: newConfigValue })
           if (inputValue === "" || !configParseResult.success) {
             toast.error(configParseResult.error?.issues[0].message)
             setInputValue(String(currentConfigValue))

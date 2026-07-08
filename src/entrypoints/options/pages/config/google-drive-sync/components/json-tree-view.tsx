@@ -35,12 +35,14 @@ function buildTreeData(data: Config): {
       const entries = Array.isArray(value)
         ? value.map((v, i) => [String(i), v] as const)
         : Object.entries(value)
-      children.set(itemId, entries.map(([k]) => [...path, k].join(".")))
+      children.set(
+        itemId,
+        entries.map(([k]) => [...path, k].join(".")),
+      )
       for (const [childKey, childValue] of entries) {
         traverse(childValue, [...path, childKey])
       }
-    }
-    else {
+    } else {
       children.set(itemId, [])
     }
   }
@@ -54,9 +56,8 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
   const { items, children } = useMemo(() => buildTreeData(resolvedConfig), [resolvedConfig])
 
   const conflictPaths = useMemo(() => {
-    if (!diffConflictsResult)
-      return new Set<string>()
-    return new Set(diffConflictsResult.conflicts.map(c => c.path.join(".")))
+    if (!diffConflictsResult) return new Set<string>()
+    return new Set(diffConflictsResult.conflicts.map((c) => c.path.join(".")))
   }, [diffConflictsResult])
 
   // Expand all items that have conflicts when the component is mounted
@@ -77,16 +78,17 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
       getItem: (itemId: string) => items.get(itemId)!,
       getChildren: (itemId: string) => children.get(itemId) || [],
     },
-    isItemFolder: item => (children.get(item.getId()) || []).length > 0,
-    getItemName: item => item.getItemData().key,
+    isItemFolder: (item) => (children.get(item.getId()) || []).length > 0,
+    getItemName: (item) => item.getItemData().key,
     initialState: { expandedItems: initialExpandedItems },
     features: [syncDataLoaderFeature],
   })
 
   const formatFolderLabel = (value: unknown, childrenCount: number): string => {
-    const countText = childrenCount === 1
-      ? `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.item")}`
-      : `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.items")}`
+    const countText =
+      childrenCount === 1
+        ? `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.item")}`
+        : `${childrenCount} ${i18n.t("options.config.sync.googleDrive.unresolved.items")}`
 
     return Array.isArray(value) ? `[${countText}]` : `{${countText}}`
   }
@@ -110,7 +112,9 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
             {!isArrayItem && <span className="text-blue-600 dark:text-blue-400">{key}</span>}
             {!isArrayItem && <span className="text-slate-500 mx-1">:</span>}
             <span className="text-slate-700 dark:text-slate-300">
-              {isFolder ? formatFolderLabel(value, item.getChildren().length ?? 0) : formatValue(value)}
+              {isFolder
+                ? formatFolderLabel(value, item.getChildren().length ?? 0)
+                : formatValue(value)}
             </span>
           </TreeItemLabel>
         </TreeItem>

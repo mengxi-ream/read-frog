@@ -7,16 +7,17 @@ import { ANALYTICS_SURFACE } from "@/types/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
-import { SelectionPopoverTooltip, useSelectionTooltipState } from "../../components/selection-tooltip"
+import {
+  SelectionPopoverTooltip,
+  useSelectionTooltipState,
+} from "../../components/selection-tooltip"
 
-export function FieldSpeakButton({
-  text,
-  disabled,
-}: {
-  text: string
-  disabled: boolean
-}) {
-  const { handlePress, onOpenChange: handleTooltipOpenChange, open: tooltipOpen } = useSelectionTooltipState()
+export function FieldSpeakButton({ text, disabled }: { text: string; disabled: boolean }) {
+  const {
+    handlePress,
+    onOpenChange: handleTooltipOpenChange,
+    open: tooltipOpen,
+  } = useSelectionTooltipState()
   const ttsConfig = useAtomValue(configFieldsAtomMap.tts)
   const { play, stop, isFetching, isPlaying } = useTextToSpeech(ANALYTICS_SURFACE.SELECTION_TOOLBAR)
 
@@ -41,26 +42,31 @@ export function FieldSpeakButton({
       ? i18n.t("action.playing")
       : i18n.t("action.speak")
 
-  const icon = isFetching
-    ? <IconLoader2 className="animate-spin" />
-    : isPlaying
-      ? <IconPlayerStopFilled />
-      : <IconVolume />
+  const icon = isFetching ? (
+    <IconLoader2 className="animate-spin" />
+  ) : isPlaying ? (
+    <IconPlayerStopFilled />
+  ) : (
+    <IconVolume />
+  )
 
   return (
     <SelectionPopoverTooltip
       content={tooltipText}
       open={tooltipOpen}
       onOpenChange={handleTooltipOpenChange}
-      render={(
+      render={
         <button
           type="button"
-          className={cn(buttonVariants({ variant: "ghost-secondary", size: "icon-xs" }), "text-muted-foreground")}
+          className={cn(
+            buttonVariants({ variant: "ghost-secondary", size: "icon-xs" }),
+            "text-muted-foreground",
+          )}
           onClick={handleClick}
           aria-label={tooltipText}
           disabled={disabled}
         />
-      )}
+      }
     >
       {icon}
     </SelectionPopoverTooltip>

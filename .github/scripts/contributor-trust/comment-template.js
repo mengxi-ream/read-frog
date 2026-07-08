@@ -1,30 +1,26 @@
 import { createHash } from "node:crypto"
-
 import { BUCKET_TITLES, COMMENT_MARKER_HTML, FINGERPRINT_MARKER_PREFIX, POLICY } from "./config.js"
 
 function formatMonths(createdAt) {
-  if (!createdAt)
-    return "unknown"
+  if (!createdAt) return "unknown"
 
   const timestamp = new Date(createdAt).getTime()
-  if (Number.isNaN(timestamp))
-    return "unknown"
+  if (Number.isNaN(timestamp)) return "unknown"
 
   const months = Math.max(0, Math.floor((Date.now() - timestamp) / 2.628e9))
   return `${months} month${months === 1 ? "" : "s"}`
 }
 
 function formatRepositoryList(repositories) {
-  if (repositories.length === 0)
-    return "none"
+  if (repositories.length === 0) return "none"
 
   return repositories
-    .map(repository => `${repository.nameWithOwner} (${repository.stargazerCount})`)
+    .map((repository) => `${repository.nameWithOwner} (${repository.stargazerCount})`)
     .join(", ")
 }
 
 function summarizeTopRepositories(repositories) {
-  const stars = repositories.map(repository => repository.stargazerCount)
+  const stars = repositories.map((repository) => repository.stargazerCount)
 
   return {
     list: formatRepositoryList(repositories),
@@ -40,9 +36,7 @@ function getChangedLineSignal(pullRequest, plan) {
   const excludedAdditions = Number(plan.excludedChangedLineAdditions) || 0
   const excludedDeletions = Number(plan.excludedChangedLineDeletions) || 0
   const excludedChangedLines = Number(plan.excludedChangedLines) || 0
-  const lines = [
-    `- PR counted changed lines: ${changedLines} (+${additions} / -${deletions})`,
-  ]
+  const lines = [`- PR counted changed lines: ${changedLines} (+${additions} / -${deletions})`]
 
   if (excludedChangedLines > 0) {
     lines.push(

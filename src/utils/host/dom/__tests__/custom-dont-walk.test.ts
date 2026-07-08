@@ -2,7 +2,11 @@
 import type { Config } from "@/types/config/config"
 import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { hasNoWalkAncestor, isDontWalkIntoAndDontTranslateAsChildElement, isSiteRuleExcludedElement } from "../filter"
+import {
+  hasNoWalkAncestor,
+  isDontWalkIntoAndDontTranslateAsChildElement,
+  isSiteRuleExcludedElement,
+} from "../filter"
 
 function setHost(host: string) {
   // jsdom exposes location as read-only; override via defineProperty
@@ -137,7 +141,9 @@ describe("isSiteRuleExcludedElement", () => {
     setHost("my-blog.example.org")
 
     const config = configWithSiteRules({
-      userRules: [{ id: "my-blog", matches: "my-blog.example.org", excludeSelectors: [".comments"] }],
+      userRules: [
+        { id: "my-blog", matches: "my-blog.example.org", excludeSelectors: [".comments"] },
+      ],
       disabledBuiltInRules: [],
     })
 

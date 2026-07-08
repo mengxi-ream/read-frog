@@ -2,7 +2,6 @@ import type { VariantProps } from "class-variance-authority"
 import { Tabs as TabsPrimitive } from "@base-ui/react/tabs"
 import { cva } from "class-variance-authority"
 import * as React from "react"
-
 import { cn } from "@/utils/styles/utils"
 
 type TabsProps = Omit<TabsPrimitive.Root.Props, "onValueChange"> & {
@@ -13,12 +12,7 @@ type TabsProps = Omit<TabsPrimitive.Root.Props, "onValueChange"> & {
   onValueChange?: (value: any) => void
 }
 
-function Tabs({
-  className,
-  orientation = "horizontal",
-  onValueChange,
-  ...props
-}: TabsProps) {
+function Tabs({ className, orientation = "horizontal", onValueChange, ...props }: TabsProps) {
   const handleValueChange = React.useCallback(
     (value: unknown, _eventDetails: unknown) => {
       onValueChange?.(value)
@@ -30,10 +24,7 @@ function Tabs({
     <TabsPrimitive.Root
       data-slot="tabs"
       data-orientation={orientation}
-      className={cn(
-        "gap-2 group/tabs flex data-[orientation=horizontal]:flex-col",
-        className,
-      )}
+      className={cn("gap-2 group/tabs flex data-[orientation=horizontal]:flex-col", className)}
       onValueChange={handleValueChange}
       {...props}
     />

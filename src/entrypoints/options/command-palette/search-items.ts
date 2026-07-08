@@ -16,13 +16,15 @@ type SearchItemDefinition = Omit<SearchItem, "titleKey" | "descriptionKey" | "pa
   pageKey: I18nKey
 }
 
-const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [{
-  sectionId: "tts-config",
-  route: "/tts",
-  titleKey: "options.tts.title",
-  descriptionKey: "options.tts.description",
-  pageKey: "options.tts.title",
-}]
+const TTS_SEARCH_ITEMS: SearchItemDefinition[] = [
+  {
+    sectionId: "tts-config",
+    route: "/tts",
+    titleKey: "options.tts.title",
+    descriptionKey: "options.tts.description",
+    pageKey: "options.tts.title",
+  },
+]
 
 const CONFIG_SEARCH_ITEMS = [
   {

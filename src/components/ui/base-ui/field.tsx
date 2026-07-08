@@ -1,7 +1,6 @@
 import type { VariantProps } from "class-variance-authority"
 import { Field as FieldPrimitive } from "@base-ui/react/field"
 import { cva } from "class-variance-authority"
-
 import * as React from "react"
 import { Separator } from "@/components/ui/base-ui/separator"
 import { cn } from "@/utils/styles/utils"
@@ -53,34 +52,31 @@ function FieldGroup({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-const fieldVariants = cva(
-  "group/field flex w-full gap-2 data-[invalid]:text-destructive",
-  {
-    variants: {
-      orientation: {
-        "vertical": ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
-        "horizontal": [
-          "flex-row items-center",
-          "[&>[data-slot=field-label]]:flex-auto",
-          "has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-        ],
-        "responsive": [
-          "flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto",
-          "@md/field-group:[&>[data-slot=field-label]]:flex-auto",
-          "@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-        ],
-        "responsive-compact": [
-          "flex-col [&>*]:w-full [&>.sr-only]:w-auto @xs/field-group:flex-row @xs/field-group:items-center @xs/field-group:[&>*]:w-auto",
-          "@xs/field-group:[&>[data-slot=field-label]]:flex-auto",
-          "@xs/field-group:has-[>[data-slot=field-content]]:items-start @xs/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-        ],
-      },
-    },
-    defaultVariants: {
-      orientation: "vertical",
+const fieldVariants = cva("group/field flex w-full gap-2 data-[invalid]:text-destructive", {
+  variants: {
+    orientation: {
+      vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
+      horizontal: [
+        "flex-row items-center",
+        "[&>[data-slot=field-label]]:flex-auto",
+        "has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+      ],
+      responsive: [
+        "flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto",
+        "@md/field-group:[&>[data-slot=field-label]]:flex-auto",
+        "@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+      ],
+      "responsive-compact": [
+        "flex-col [&>*]:w-full [&>.sr-only]:w-auto @xs/field-group:flex-row @xs/field-group:items-center @xs/field-group:[&>*]:w-auto",
+        "@xs/field-group:[&>[data-slot=field-label]]:flex-auto",
+        "@xs/field-group:has-[>[data-slot=field-content]]:items-start @xs/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+      ],
     },
   },
-)
+  defaultVariants: {
+    orientation: "vertical",
+  },
+})
 
 function FieldRoot({
   className,
@@ -101,10 +97,7 @@ function FieldContent({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
       data-slot="field-content"
-      className={cn(
-        "group/field-content flex flex-1 flex-col gap-1.5 leading-snug",
-        className,
-      )}
+      className={cn("group/field-content flex flex-1 flex-col gap-1.5 leading-snug", className)}
       {...props}
     />
   )

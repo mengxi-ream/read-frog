@@ -11,7 +11,12 @@ function rule(partial: Partial<SiteRule> & { id: string }): SiteRule {
 
 describe("resolveSiteRule", () => {
   it("returns the empty rule when nothing matches", () => {
-    const resolved = resolveSiteRule(URL_ON_SITE, [rule({ id: "other", matches: "other.com" })], [], [])
+    const resolved = resolveSiteRule(
+      URL_ON_SITE,
+      [rule({ id: "other", matches: "other.com" })],
+      [],
+      [],
+    )
     expect(resolved).toBe(EMPTY_RESOLVED_SITE_RULE)
   })
 
@@ -50,11 +55,19 @@ describe("resolveSiteRule", () => {
   it("concatenates injectedCss.add in matched rule order", () => {
     const resolved = resolveSiteRule(
       URL_ON_SITE,
-      [rule({ "id": "built-in", "injectedCss": ".a { color: red; }", "injectedCss.add": [".b { color: blue; }"] })],
-      [rule({ "id": "user", "injectedCss.add": [".c { color: green; }"] })],
+      [
+        rule({
+          id: "built-in",
+          injectedCss: ".a { color: red; }",
+          "injectedCss.add": [".b { color: blue; }"],
+        }),
+      ],
+      [rule({ id: "user", "injectedCss.add": [".c { color: green; }"] })],
       [],
     )
-    expect(resolved.injectedCss).toBe(".a { color: red; }\n.b { color: blue; }\n.c { color: green; }")
+    expect(resolved.injectedCss).toBe(
+      ".a { color: red; }\n.b { color: blue; }\n.c { color: green; }",
+    )
   })
 
   it("skips disabled built-in rules", () => {
@@ -93,19 +106,19 @@ describe("resolveSiteRule", () => {
       URL_ON_SITE,
       [
         rule({
-          "id": "built-in-a",
-          "excludeSelectors": ["nav", ".ads"],
+          id: "built-in-a",
+          excludeSelectors: ["nav", ".ads"],
           "excludeSelectors.add": [".promo"],
           "excludeSelectors.remove": [".ads"],
         }),
         rule({
-          "id": "built-in-b",
+          id: "built-in-b",
           "excludeSelectors.add": [".toast"],
         }),
       ],
       [
         rule({
-          "id": "user",
+          id: "user",
           "excludeSelectors.remove": ["nav"],
           "excludeSelectors.add": ["footer"],
         }),
@@ -120,17 +133,17 @@ describe("resolveSiteRule", () => {
       URL_ON_SITE,
       [
         rule({
-          "id": "built-in",
-          "includeSelectors": ["article"],
+          id: "built-in",
+          includeSelectors: ["article"],
           "includeSelectors.add": [".content"],
           "includeSelectors.remove": ["article"],
-          "forceBlockSelectors": [".post"],
+          forceBlockSelectors: [".post"],
           "forceBlockSelectors.add": [".card"],
           "forceBlockSelectors.remove": [".post"],
-          "forceInlineSelectors": [".tag"],
+          forceInlineSelectors: [".tag"],
           "forceInlineSelectors.add": [".badge"],
           "forceInlineSelectors.remove": [".tag"],
-          "preserveTextSelectors": [".code"],
+          preserveTextSelectors: [".code"],
           "preserveTextSelectors.add": [".math"],
           "preserveTextSelectors.remove": [".code"],
         }),
@@ -149,7 +162,13 @@ describe("resolveSiteRule", () => {
     const resolved = resolveSiteRule(
       URL_ON_SITE,
       [],
-      [rule({ "id": "user", "preserveTextSelectors.add": ["bad[", ".token"], "preserveTextSelectors.remove": ["bad["] })],
+      [
+        rule({
+          id: "user",
+          "preserveTextSelectors.add": ["bad[", ".token"],
+          "preserveTextSelectors.remove": ["bad["],
+        }),
+      ],
       [],
     )
     expect(resolved.preserveTextSelector).toBe(".token")

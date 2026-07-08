@@ -1,6 +1,5 @@
 // @vitest-environment jsdom
 import { afterEach, describe, expect, it, vi } from "vitest"
-
 import { renderPersistentReactRoot, unmountPersistentReactRoot } from "../react-root"
 
 const createRootMock = vi.hoisted(() => vi.fn())
@@ -42,9 +41,7 @@ describe("react root registry", () => {
   it("creates separate roots for different containers", () => {
     const firstRoot = createMockRoot()
     const secondRoot = createMockRoot()
-    createRootMock
-      .mockReturnValueOnce(firstRoot)
-      .mockReturnValueOnce(secondRoot)
+    createRootMock.mockReturnValueOnce(firstRoot).mockReturnValueOnce(secondRoot)
 
     const firstContainer = document.createElement("div")
     const secondContainer = document.createElement("div")
@@ -60,9 +57,7 @@ describe("react root registry", () => {
   it("unmounts and removes a cached root so the container can create a new one later", () => {
     const firstRoot = createMockRoot()
     const secondRoot = createMockRoot()
-    createRootMock
-      .mockReturnValueOnce(firstRoot)
-      .mockReturnValueOnce(secondRoot)
+    createRootMock.mockReturnValueOnce(firstRoot).mockReturnValueOnce(secondRoot)
 
     const container = document.createElement("div")
 

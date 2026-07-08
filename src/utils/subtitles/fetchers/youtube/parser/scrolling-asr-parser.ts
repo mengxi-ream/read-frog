@@ -71,8 +71,7 @@ export function parseScrollingAsrSubtitles(
       continue
     }
 
-    if (!event.segs || event.segs.length === 0)
-      continue
+    if (!event.segs || event.segs.length === 0) continue
 
     // If pending split and starting new event, output current fragment first
     if (pendingSplit && currentText) {

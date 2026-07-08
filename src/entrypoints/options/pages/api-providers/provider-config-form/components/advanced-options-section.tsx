@@ -1,7 +1,11 @@
 import type { ReactNode } from "react"
 import { Icon } from "@iconify/react"
 import { useState } from "react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/base-ui/collapsible"
 import { FieldGroup } from "@/components/ui/base-ui/field"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
@@ -18,17 +22,12 @@ export function AdvancedOptionsSection({ children }: AdvancedOptionsSectionProps
       <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer">
         <Icon
           icon="tabler:chevron-right"
-          className={cn(
-            "size-4 transition-transform duration-200",
-            isOpen && "rotate-90",
-          )}
+          className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}
         />
         <span>{i18n.t("options.apiProviders.form.advancedOptions")}</span>
       </CollapsibleTrigger>
       <CollapsibleContent keepMounted>
-        <FieldGroup className="pt-4">
-          {children}
-        </FieldGroup>
+        <FieldGroup className="pt-4">{children}</FieldGroup>
       </CollapsibleContent>
     </Collapsible>
   )

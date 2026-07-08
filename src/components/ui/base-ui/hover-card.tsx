@@ -1,5 +1,4 @@
 import { PreviewCard as PreviewCardPrimitive } from "@base-ui/react/preview-card"
-
 import { SHARED_POPUP_CLOSED_STATE_CLASS } from "@/components/ui/base-ui/popup-animation-classes"
 import { cn } from "@/utils/styles/utils"
 
@@ -8,9 +7,7 @@ function HoverCard({ ...props }: PreviewCardPrimitive.Root.Props) {
 }
 
 function HoverCardTrigger({ ...props }: PreviewCardPrimitive.Trigger.Props) {
-  return (
-    <PreviewCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />
-  )
+  return <PreviewCardPrimitive.Trigger data-slot="hover-card-trigger" {...props} />
 }
 
 function HoverCardContent({
@@ -21,12 +18,9 @@ function HoverCardContent({
   align = "center",
   alignOffset = 4,
   ...props
-}: PreviewCardPrimitive.Popup.Props
-  & Pick<PreviewCardPrimitive.Portal.Props, "container">
-  & Pick<
-    PreviewCardPrimitive.Positioner.Props,
-    "align" | "alignOffset" | "side" | "sideOffset"
-  >) {
+}: PreviewCardPrimitive.Popup.Props &
+  Pick<PreviewCardPrimitive.Portal.Props, "container"> &
+  Pick<PreviewCardPrimitive.Positioner.Props, "align" | "alignOffset" | "side" | "sideOffset">) {
   return (
     <PreviewCardPrimitive.Portal container={container} data-slot="hover-card-portal">
       <PreviewCardPrimitive.Positioner

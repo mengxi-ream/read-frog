@@ -22,12 +22,12 @@ export function RequestBatch() {
     <ConfigCard
       id="request-batch"
       title={i18n.t("options.translation.batchQueueConfig.title")}
-      description={(
+      description={
         <div className="flex flex-col">
           <span>{i18n.t("options.translation.batchQueueConfig.description")}</span>
           <StatisticsLink />
         </div>
-      )}
+      }
     >
       <FieldGroup>
         <BatchNumberSelector property="maxCharactersPerBatch" />
@@ -48,8 +48,7 @@ function StatisticsLink() {
       to="/statistics"
       target="_blank"
     >
-      {i18n.t("options.translation.batchQueueConfig.statisticsLink", [averageSavePercentage])}
-      {" "}
+      {i18n.t("options.translation.batchQueueConfig.statisticsLink", [averageSavePercentage])}{" "}
       <Icon icon="tabler:external-link" className="inline w-3.5 h-3.5" />
     </Link>
   )
@@ -60,7 +59,8 @@ function StatisticsLink() {
 const propertyInfo = {
   maxCharactersPerBatch: {
     label: () => i18n.t("options.translation.batchQueueConfig.maxCharactersPerBatch.title"),
-    description: () => i18n.t("options.translation.batchQueueConfig.maxCharactersPerBatch.description"),
+    description: () =>
+      i18n.t("options.translation.batchQueueConfig.maxCharactersPerBatch.description"),
   },
   maxItemsPerBatch: {
     label: () => i18n.t("options.translation.batchQueueConfig.maxItemsPerBatch.title"),
@@ -98,7 +98,9 @@ function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) 
         value={currentConfigValue}
         onChange={(e) => {
           const newConfigValue = Number(e.target.value)
-          const configParseResult = batchQueueConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          const configParseResult = batchQueueConfigSchema
+            .partial()
+            .safeParse({ [property]: newConfigValue })
           if (configParseResult.success) {
             void setTranslateConfig({
               ...translateConfig,
@@ -110,8 +112,7 @@ function BatchNumberSelector({ property }: { property: KeyOfBatchQueueConfig }) 
             void sendMessage("setTranslateBatchQueueConfig", {
               [property]: newConfigValue,
             })
-          }
-          else {
+          } else {
             toast.error(configParseResult.error?.issues[0].message)
           }
         }}

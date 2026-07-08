@@ -22,8 +22,7 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
 
   useEffect(() => {
     return () => {
-      if (timerRef.current)
-        clearTimeout(timerRef.current)
+      if (timerRef.current) clearTimeout(timerRef.current)
     }
   }, [])
 
@@ -34,14 +33,13 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
     event.stopPropagation()
     void navigator.clipboard.writeText(JSON.stringify(rule, null, 2))
     setCopied(true)
-    if (timerRef.current)
-      clearTimeout(timerRef.current)
+    if (timerRef.current) clearTimeout(timerRef.current)
     timerRef.current = setTimeout(setCopied, 1500, false)
   }
 
   const handleToggle = (checked: boolean) => {
     const disabledBuiltInRules = checked
-      ? siteRules.disabledBuiltInRules.filter(id => id !== rule.id)
+      ? siteRules.disabledBuiltInRules.filter((id) => id !== rule.id)
       : [...siteRules.disabledBuiltInRules, rule.id]
     void setSiteRules({ ...siteRules, disabledBuiltInRules })
   }
@@ -59,16 +57,13 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
             <span className="text-xs text-muted-foreground truncate">{rule.description}</span>
           )}
           <span className="ml-auto flex items-center gap-1 shrink-0">
-            {matches.slice(0, VISIBLE_MATCH_BADGES).map(pattern => (
+            {matches.slice(0, VISIBLE_MATCH_BADGES).map((pattern) => (
               <Badge key={pattern} variant="secondary">
                 <span className="max-w-40 truncate">{pattern}</span>
               </Badge>
             ))}
             {matches.length > VISIBLE_MATCH_BADGES && (
-              <Badge variant="outline">
-                +
-                {matches.length - VISIBLE_MATCH_BADGES}
-              </Badge>
+              <Badge variant="outline">+{matches.length - VISIBLE_MATCH_BADGES}</Badge>
             )}
           </span>
         </CollapsibleTrigger>
@@ -78,14 +73,16 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
           aria-label={copied ? i18n.t("action.copied") : i18n.t("action.copy")}
           onClick={handleCopy}
         >
-          {copied
-            ? <Icon icon="tabler:check" className="text-green-500" />
-            : <Icon icon="tabler:copy" />}
+          {copied ? (
+            <Icon icon="tabler:check" className="text-green-500" />
+          ) : (
+            <Icon icon="tabler:copy" />
+          )}
         </Button>
         <Switch
           checked={enabled}
           onCheckedChange={handleToggle}
-          onClick={event => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
           aria-label={rule.id}
         />
       </div>

@@ -33,7 +33,7 @@ export function SortableList<T extends { id: string }>({
 }) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
-  const activeItem = activeId ? (list.find(item => item.id === activeId) ?? null) : null
+  const activeItem = activeId ? (list.find((item) => item.id === activeId) ?? null) : null
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -56,14 +56,15 @@ export function SortableList<T extends { id: string }>({
     if (over && String(active.id) !== String(over.id)) {
       const activeItemId = String(active.id)
 
-      const activeElement = document.querySelector<HTMLElement>(`[data-sortable-id="${activeItemId}"]`)
+      const activeElement = document.querySelector<HTMLElement>(
+        `[data-sortable-id="${activeItemId}"]`,
+      )
       const scrollContainer = findVerticalScrollContainer(activeElement)
       const scrollTopBeforeUpdate = scrollContainer?.scrollTop
 
-      const oldIndex = list.findIndex(item => item.id === activeItemId)
-      const newIndex = list.findIndex(item => item.id === String(over.id))
-      if (oldIndex === -1 || newIndex === -1)
-        return
+      const oldIndex = list.findIndex((item) => item.id === activeItemId)
+      const newIndex = list.findIndex((item) => item.id === String(over.id))
+      if (oldIndex === -1 || newIndex === -1) return
       setList(arrayMove(list, oldIndex, newIndex))
 
       // Keep the scroll position stable after reordering.
@@ -84,12 +85,9 @@ export function SortableList<T extends { id: string }>({
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <SortableContext
-        items={list.map(item => item.id)}
-        strategy={verticalListSortingStrategy}
-      >
+      <SortableContext items={list.map((item) => item.id)} strategy={verticalListSortingStrategy}>
         <div className={className} style={{ overflowAnchor: "none" }}>
-          {list.map(item => (
+          {list.map((item) => (
             <SortableItemWrapper key={item.id} id={item.id}>
               {renderItem(item)}
             </SortableItemWrapper>
@@ -105,15 +103,10 @@ export function SortableList<T extends { id: string }>({
   )
 }
 
-function SortableItemWrapper({ id, children }: { id: string, children: React.ReactNode }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id })
+function SortableItemWrapper({ id, children }: { id: string; children: React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id,
+  })
 
   const style = {
     transform: CSS.Transform.toString(transform),

@@ -58,19 +58,23 @@ describe("aiTranslate", () => {
     })
     mocks.generateText.mockRejectedValue(rateLimitedError)
 
-    const error = await aiTranslate("hello", "Chinese", providerConfig, promptResolver).catch(error => error)
+    const error = await aiTranslate("hello", "Chinese", providerConfig, promptResolver).catch(
+      (error) => error,
+    )
 
     expect(error).toBe(rateLimitedError)
-    expect(getRequestErrorMeta(error)).toEqual(expect.objectContaining({
-      statusCode: 429,
-      isRetryable: true,
-      retryAfterMs: 2000,
-      kind: "rate-limit",
-    }))
+    expect(getRequestErrorMeta(error)).toEqual(
+      expect.objectContaining({
+        statusCode: 429,
+        isRetryable: true,
+        retryAfterMs: 2000,
+        kind: "rate-limit",
+      }),
+    )
   })
 
   it("preserves response body as the display message when the AI SDK message is generic", async () => {
-    const responseBody = "{\"code\":404,\"message\":\"模型 Kimi-K2-Instruct-09051 无效\",\"data\":{}}"
+    const responseBody = '{"code":404,"message":"模型 Kimi-K2-Instruct-09051 无效","data":{}}'
     const invalidModelError = Object.assign(new Error("Something went wrong"), {
       statusCode: 404,
       isRetryable: false,
@@ -78,14 +82,18 @@ describe("aiTranslate", () => {
     })
     mocks.generateText.mockRejectedValue(invalidModelError)
 
-    const error = await aiTranslate("hello", "Chinese", providerConfig, promptResolver).catch(error => error)
+    const error = await aiTranslate("hello", "Chinese", providerConfig, promptResolver).catch(
+      (error) => error,
+    )
 
     expect(error).toBe(invalidModelError)
     expect(error.message).toBe(responseBody)
-    expect(getRequestErrorMeta(error)).toEqual(expect.objectContaining({
-      statusCode: 404,
-      isRetryable: false,
-      kind: "bad-request",
-    }))
+    expect(getRequestErrorMeta(error)).toEqual(
+      expect.objectContaining({
+        statusCode: 404,
+        isRetryable: false,
+        kind: "bad-request",
+      }),
+    )
   })
 })

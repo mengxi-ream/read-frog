@@ -29,7 +29,7 @@ enum SelectionDirection {
 
 const SELECTION_GUARD_INTERACTIVE_SELECTOR = [
   "button",
-  "[role=\"button\"]",
+  '[role="button"]',
   "a[href]",
   "input",
   "textarea",
@@ -129,8 +129,7 @@ function collectSelectionBoundaryNodes(selection: Selection) {
       const range = selection.getRangeAt(index)
       boundaryNodes.add(range.startContainer)
       boundaryNodes.add(range.endContainer)
-    }
-    catch {
+    } catch {
       break
     }
   }
@@ -147,7 +146,7 @@ function isSelectionInsideSelectionOverlay(
     return false
   }
 
-  return collectSelectionBoundaryNodes(selection).some(node =>
+  return collectSelectionBoundaryNodes(selection).some((node) =>
     isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot),
   )
 }
@@ -160,7 +159,10 @@ function isMouseEventInsideSelectionOverlay(
   const eventPath = event.composedPath()
 
   for (const node of eventPath) {
-    if (node instanceof Node && isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot)) {
+    if (
+      node instanceof Node &&
+      isNodeInsideSelectionOverlay(node, overlayContainer, overlayShadowRoot)
+    ) {
       return true
     }
   }
@@ -183,12 +185,9 @@ function getSelectionDirection(
   const isRightward = startX <= endX
   const isDownward = startY - DOWNWARD_TOLERANCE <= endY
 
-  if (isRightward && isDownward)
-    return SelectionDirection.BOTTOM_RIGHT
-  if (isRightward && !isDownward)
-    return SelectionDirection.TOP_RIGHT
-  if (!isRightward && isDownward)
-    return SelectionDirection.BOTTOM_LEFT
+  if (isRightward && isDownward) return SelectionDirection.BOTTOM_RIGHT
+  if (isRightward && !isDownward) return SelectionDirection.TOP_RIGHT
+  if (!isRightward && isDownward) return SelectionDirection.BOTTOM_LEFT
   return SelectionDirection.TOP_LEFT
 }
 
@@ -198,7 +197,7 @@ function applyDirectionOffset(
   baseY: number,
   tooltipWidth: number,
   tooltipHeight: number,
-): { x: number, y: number } {
+): { x: number; y: number } {
   const CURSOR_CLEARANCE = 20
   switch (direction) {
     case SelectionDirection.BOTTOM_RIGHT:
@@ -217,20 +216,21 @@ function applyDirectionOffset(
 export function SelectionToolbar() {
   const tooltipRef = useRef<HTMLDivElement>(null)
   const tooltipContainerRef = useRef<HTMLDivElement>(null)
-  const selectionPositionRef = useRef<{ x: number, y: number } | null>(null) // store selection position (base position without direction offset)
-  const selectionStartRef = useRef<{ x: number, y: number } | null>(null) // store selection start position
+  const selectionPositionRef = useRef<{ x: number; y: number } | null>(null) // store selection position (base position without direction offset)
+  const selectionStartRef = useRef<{ x: number; y: number } | null>(null) // store selection start position
   const selectionDirectionRef = useRef<SelectionDirection>(SelectionDirection.BOTTOM_RIGHT) // store selection direction
   const isPointerDownInsideOverlayRef = useRef(false)
   const preserveSelectionStateRef = useRef(false)
-  const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(isSelectionToolbarVisibleAtom)
+  const [isSelectionToolbarVisible, setIsSelectionToolbarVisible] = useAtom(
+    isSelectionToolbarVisibleAtom,
+  )
   const setSelectionState = useSetAtom(setSelectionStateAtom)
   const clearSelectionState = useSetAtom(clearSelectionStateAtom)
   const selectionToolbar = useAtomValue(configFieldsAtomMap.selectionToolbar)
   const dropdownOpenRef = useRef(false)
 
   const updatePosition = useCallback(() => {
-    if (!isSelectionToolbarVisible || !tooltipRef.current || !selectionPositionRef.current)
-      return
+    if (!isSelectionToolbarVisible || !tooltipRef.current || !selectionPositionRef.current) return
 
     const scrollY = window.scrollY
     const viewportHeight = window.innerHeight
@@ -281,7 +281,9 @@ export function SelectionToolbar() {
       // Use requestAnimationFrame to delay selection check
       // This ensures selectionchange event fires first if text selection was cleared
       requestAnimationFrame(() => {
-        const isInputOrTextarea = document.activeElement instanceof HTMLInputElement || document.activeElement instanceof HTMLTextAreaElement
+        const isInputOrTextarea =
+          document.activeElement instanceof HTMLInputElement ||
+          document.activeElement instanceof HTMLTextAreaElement
 
         if (isInputOrTextarea && e.target !== document.activeElement) {
           return
@@ -291,7 +293,13 @@ export function SelectionToolbar() {
         const selection = window.getSelection()
         const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
 
-        if (isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)) {
+        if (
+          isSelectionInsideSelectionOverlay(
+            selection,
+            tooltipContainerRef.current,
+            overlayShadowRoot,
+          )
+        ) {
           preserveSelectionStateRef.current = true
           return
         }
@@ -300,7 +308,11 @@ export function SelectionToolbar() {
 
         // https://github.com/mengxi-ream/read-frog/issues/547
         // https://github.com/mengxi-ream/read-frog/pull/790
-        if (!isInputOrTextarea && interactiveTarget && !selection?.containsNode(interactiveTarget, true)) {
+        if (
+          !isInputOrTextarea &&
+          interactiveTarget &&
+          !selection?.containsNode(interactiveTarget, true)
+        ) {
           return
         }
 
@@ -323,8 +335,7 @@ export function SelectionToolbar() {
 
             // Determine and store selection direction
             selectionDirectionRef.current = getSelectionDirection(startX, startY, endX, endY)
-          }
-          else {
+          } else {
             selectionDirectionRef.current = SelectionDirection.BOTTOM_RIGHT
           }
 
@@ -368,7 +379,9 @@ export function SelectionToolbar() {
       const selection = window.getSelection()
       const overlayShadowRoot = getSelectionOverlayShadowRoot(tooltipContainerRef.current)
 
-      if (isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)) {
+      if (
+        isSelectionInsideSelectionOverlay(selection, tooltipContainerRef.current, overlayShadowRoot)
+      ) {
         preserveSelectionStateRef.current = true
         return
       }
@@ -382,8 +395,7 @@ export function SelectionToolbar() {
         clearSelectionState()
         // Don't hide toolbar when dropdown is open to prevent unwanted dismissal
         // (Firefox clears selection when dropdown gains focus)
-        if (!dropdownOpenRef.current)
-          setIsSelectionToolbarVisible(false)
+        if (!dropdownOpenRef.current) setIsSelectionToolbarVisible(false)
       }
     }
 
@@ -411,7 +423,13 @@ export function SelectionToolbar() {
         cancelAnimationFrame(animationFrameId)
       }
     }
-  }, [clearSelectionState, isSelectionToolbarVisible, setIsSelectionToolbarVisible, setSelectionState, updatePosition])
+  }, [
+    clearSelectionState,
+    isSelectionToolbarVisible,
+    setIsSelectionToolbarVisible,
+    setSelectionState,
+    updatePosition,
+  ])
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -422,15 +440,15 @@ export function SelectionToolbar() {
   }, [])
 
   // Check if current site is disabled
-  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some(pattern =>
+  const isSiteDisabled = selectionToolbar.disabledSelectionToolbarPatterns?.some((pattern) =>
     matchDomainPattern(window.location.href, pattern),
   )
 
   const { features } = selectionToolbar
-  const hasAnyEnabledFeature
-    = features.translate.enabled
-      || features.speak.enabled
-      || selectionToolbar.customActions.some(a => a.enabled !== false)
+  const hasAnyEnabledFeature =
+    features.translate.enabled ||
+    features.speak.enabled ||
+    selectionToolbar.customActions.some((a) => a.enabled !== false)
 
   return (
     <div
@@ -444,7 +462,9 @@ export function SelectionToolbar() {
           inert={!isSelectionToolbarVisible}
           className={cn(
             `group absolute ${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} overflow-visible transition-opacity`,
-            isSelectionToolbarVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
+            isSelectionToolbarVisible
+              ? "pointer-events-auto opacity-100"
+              : "pointer-events-none opacity-0",
           )}
         >
           <div

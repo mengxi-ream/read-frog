@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest"
-
 import { TRUST_BUCKETS } from "./config.js"
 import { computeContributorScore, getTrustBucket } from "./score-author.js"
 
@@ -72,10 +71,7 @@ describe("computeContributorScore", () => {
       contributionCount: 18,
       followers: 230,
       isContributor: true,
-      prsInRepo: [
-        ...Array.from({ length: 9 }).fill({ state: "merged" }),
-        { state: "closed" },
-      ],
+      prsInRepo: [...Array.from({ length: 9 }).fill({ state: "merged" }), { state: "closed" }],
       reviewsInRepo: 12,
       topRepoStars: [520, 40, 12],
     })

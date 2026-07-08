@@ -13,11 +13,13 @@ describe("provider headers", () => {
   })
 
   it("filters empty and non-string header values", () => {
-    expect(getProviderHeadersWithOverride("openai", {
-      "X-Empty": "",
-      "X-Count": 1,
-      "X-Test": "1",
-    })).toEqual({
+    expect(
+      getProviderHeadersWithOverride("openai", {
+        "X-Empty": "",
+        "X-Count": 1,
+        "X-Test": "1",
+      }),
+    ).toEqual({
       "X-Test": "1",
     })
   })

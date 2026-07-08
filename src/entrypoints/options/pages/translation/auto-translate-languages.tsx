@@ -32,13 +32,14 @@ function AutoTranslateLanguagesSelector() {
     <div className="w-full flex justify-start md:justify-end">
       <MultiLanguageCombobox
         selectedLanguages={selectedLanguages}
-        onLanguagesChange={languages =>
+        onLanguagesChange={(languages) =>
           void setTranslateConfig({
             page: {
               ...translateConfig.page,
               autoTranslateLanguages: languages,
             },
-          })}
+          })
+        }
         buttonLabel={i18n.t("options.translation.autoTranslateLanguages.selectLanguages")}
       />
     </div>
@@ -53,7 +54,7 @@ function SelectedLanguageCells() {
     void setTranslateConfig({
       page: {
         ...translateConfig.page,
-        autoTranslateLanguages: selectedLanguages.filter(lang => lang !== language),
+        autoTranslateLanguages: selectedLanguages.filter((lang) => lang !== language),
       },
     })
   }
@@ -64,7 +65,7 @@ function SelectedLanguageCells() {
 
   return (
     <div className="flex flex-wrap gap-2">
-      {selectedLanguages.map(language => (
+      {selectedLanguages.map((language) => (
         <div
           key={language}
           className="inline-flex items-center gap-1 rounded-md border bg-muted px-2 py-1 text-sm"

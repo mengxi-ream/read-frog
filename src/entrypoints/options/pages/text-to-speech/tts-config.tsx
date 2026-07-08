@@ -29,12 +29,7 @@ import {
   FieldLabel,
 } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
-import {
-  Item,
-  ItemContent,
-  ItemDescription,
-  ItemTitle,
-} from "@/components/ui/base-ui/item"
+import { Item, ItemContent, ItemDescription, ItemTitle } from "@/components/ui/base-ui/item"
 import { useTextToSpeech } from "@/hooks/use-text-to-speech"
 import { ANALYTICS_SURFACE } from "@/types/analytics"
 import {
@@ -96,17 +91,14 @@ function filterTTSVoiceItem(item: TTSVoiceItem, query: string): boolean {
 
 function TTSVoiceComboboxItem({ item }: { item: TTSVoiceItem }) {
   return (
-    <ComboboxItem
-      key={item.voice}
-      value={item}
-      className="overflow-hidden py-1.5"
-    >
-      <Item size="sm" className="w-full min-w-0 max-w-[calc(var(--anchor-width)_-_2.5rem)] flex-nowrap gap-2 overflow-hidden p-0">
+    <ComboboxItem key={item.voice} value={item} className="overflow-hidden py-1.5">
+      <Item
+        size="sm"
+        className="w-full min-w-0 max-w-[calc(var(--anchor-width)_-_2.5rem)] flex-nowrap gap-2 overflow-hidden p-0"
+      >
         <ItemContent className="min-w-0 gap-1 overflow-hidden">
           <ItemTitle className="w-full min-w-0 max-w-full overflow-hidden font-mono text-xs">
-            <span className="block min-w-0 truncate">
-              {item.voice}
-            </span>
+            <span className="block min-w-0 truncate">{item.voice}</span>
           </ItemTitle>
           <ItemDescription className="m-0 flex min-w-0 max-w-full flex-wrap items-center gap-1.5 overflow-hidden">
             <Badge variant="secondary" size="sm">
@@ -135,9 +127,7 @@ function TTSVoiceComboboxGroup({ group }: { group: TTSVoiceGroup }) {
     >
       <ComboboxLabel className="max-w-full truncate">{group.language}</ComboboxLabel>
       <ComboboxCollection>
-        {(item: TTSVoiceItem) => (
-          <TTSVoiceComboboxItem key={item.voice} item={item} />
-        )}
+        {(item: TTSVoiceItem) => <TTSVoiceComboboxItem key={item.voice} item={item} />}
       </ComboboxCollection>
       <ComboboxSeparator />
     </ComboboxGroup>
@@ -165,33 +155,29 @@ function TTSVoiceCombobox({ id, value, onValueChange }: TTSVoiceComboboxProps) {
       }}
       items={EDGE_TTS_VOICE_GROUPS}
       filter={filterTTSVoiceItem}
-      itemToStringLabel={item => item.voice}
-      itemToStringValue={item => item.voice}
+      itemToStringLabel={(item) => item.voice}
+      itemToStringValue={(item) => item.voice}
       isItemEqualToValue={(item, selectedValue) => item.voice === selectedValue.voice}
       autoHighlight
     >
       <ComboboxTrigger
-        render={(
+        render={
           <Button
             id={id}
             type="button"
             variant="outline"
             className="w-full min-w-0 justify-between font-normal"
           />
-        )}
+        }
       >
         <ComboboxValue placeholder={placeholder}>
-          {(item: TTSVoiceItem | null) => (
-            <TTSVoiceSelectValue voice={item?.voice ?? value} />
-          )}
+          {(item: TTSVoiceItem | null) => <TTSVoiceSelectValue voice={item?.voice ?? value} />}
         </ComboboxValue>
       </ComboboxTrigger>
       <ComboboxContent className="max-h-80 !min-w-(--anchor-width)">
         <ComboboxInput showTrigger={false} placeholder={placeholder} />
         <ComboboxList>
-          {(group: TTSVoiceGroup) => (
-            <TTSVoiceComboboxGroup key={group.language} group={group} />
-          )}
+          {(group: TTSVoiceGroup) => <TTSVoiceComboboxGroup key={group.language} group={group} />}
         </ComboboxList>
         <ComboboxEmpty>{i18n.t("options.tts.voice.noVoicesFound")}</ComboboxEmpty>
       </ComboboxContent>
@@ -203,13 +189,14 @@ export function TtsConfig() {
   return (
     <ConfigCard
       id="tts-config"
-      title={(
+      title={
         <>
-          {i18n.t("options.tts.title")}
-          {" "}
-          <Badge variant="secondary" className="align-middle">Public Beta</Badge>
+          {i18n.t("options.tts.title")}{" "}
+          <Badge variant="secondary" className="align-middle">
+            Public Beta
+          </Badge>
         </>
-      )}
+      }
       description={i18n.t("options.tts.description")}
     >
       <FieldGroup>
@@ -229,11 +216,7 @@ function TtsDefaultVoiceField() {
   return (
     <Field>
       <FieldLabel nativeLabel={false} render={<div />}>
-        {i18n.t("options.tts.voice.label")}
-        {" "}
-        (
-        {i18n.t("options.tts.voice.fallback")}
-        )
+        {i18n.t("options.tts.voice.label")} ({i18n.t("options.tts.voice.fallback")})
       </FieldLabel>
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
         <div className="flex min-w-0 flex-1 items-center gap-2">
@@ -257,7 +240,10 @@ function TtsLanguageVoiceField() {
   const isFetchingOrPlaying = isFetching || isPlaying
 
   const selectedLanguageVoice = ttsConfig.languageVoices[selectedLanguage] ?? ttsConfig.defaultVoice
-  const defaultLanguageVoice = getDefaultTTSVoiceForLanguage(selectedLanguage, ttsConfig.defaultVoice)
+  const defaultLanguageVoice = getDefaultTTSVoiceForLanguage(
+    selectedLanguage,
+    ttsConfig.defaultVoice,
+  )
 
   const updateLanguageVoice = (voice: TTSVoice) => {
     void setTtsConfig({
@@ -314,9 +300,11 @@ function TtsLanguageVoiceField() {
             onClick={handlePreview}
             disabled={isFetchingOrPlaying}
           >
-            {isFetchingOrPlaying
-              ? <IconLoader2 className="animate-spin" />
-              : <IconPlayerPlayFilled />}
+            {isFetchingOrPlaying ? (
+              <IconLoader2 className="animate-spin" />
+            ) : (
+              <IconPlayerPlayFilled />
+            )}
           </Button>
           <Button
             type="button"
@@ -329,9 +317,7 @@ function TtsLanguageVoiceField() {
           </Button>
         </div>
       </div>
-      <FieldDescription>
-        {i18n.t("options.tts.languageVoice.description")}
-      </FieldDescription>
+      <FieldDescription>{i18n.t("options.tts.languageVoice.description")}</FieldDescription>
     </Field>
   )
 }
@@ -369,9 +355,7 @@ function TtsNumberField({
 
   return (
     <Field validationMode="onBlur" validate={validate}>
-      <FieldLabel htmlFor={id}>
-        {label}
-      </FieldLabel>
+      <FieldLabel htmlFor={id}>{label}</FieldLabel>
       <Input
         id={id}
         type="number"
@@ -385,9 +369,7 @@ function TtsNumberField({
         onBlur={handleBlur}
       />
       <FieldError />
-      <FieldDescription>
-        {hint}
-      </FieldDescription>
+      <FieldDescription>{hint}</FieldDescription>
     </Field>
   )
 }

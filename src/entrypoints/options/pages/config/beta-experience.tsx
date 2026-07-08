@@ -5,7 +5,9 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function BetaExperienceConfig() {
-  const [betaExperienceConfig, setBetaExperienceConfig] = useAtom(configFieldsAtomMap.betaExperience)
+  const [betaExperienceConfig, setBetaExperienceConfig] = useAtom(
+    configFieldsAtomMap.betaExperience,
+  )
 
   return (
     <ConfigCard

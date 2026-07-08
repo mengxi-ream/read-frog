@@ -2,7 +2,12 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai"
 import { Button } from "@/components/ui/base-ui/button"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { i18n } from "@/utils/i18n"
-import { inputTextAtom, sourceLangCodeAtom, targetLangCodeAtom, translateRequestAtom } from "../atoms"
+import {
+  inputTextAtom,
+  sourceLangCodeAtom,
+  targetLangCodeAtom,
+  translateRequestAtom,
+} from "../atoms"
 
 export function TextInput() {
   const [value, setValue] = useAtom(inputTextAtom)
@@ -11,8 +16,7 @@ export function TextInput() {
   const setTranslateRequest = useSetAtom(translateRequestAtom)
 
   const handleTranslate = () => {
-    if (!value.trim())
-      return
+    if (!value.trim()) return
     setTranslateRequest({
       inputText: value,
       sourceLanguage: sourceLangCode,
@@ -29,12 +33,10 @@ export function TextInput() {
   }
 
   return (
-    <div
-      className="relative"
-    >
+    <div className="relative">
       <Textarea
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder={i18n.t("translationHub.inputPlaceholder")}
         className="h-96 min-h-0 resize-none px-4 py-3 text-lg!"

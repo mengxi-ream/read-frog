@@ -29,17 +29,16 @@ import "@/assets/styles/theme.css"
 import "@/assets/styles/text-small.css"
 
 const ReactQueryDevtools = import.meta.env.DEV
-  ? lazy(() => import("@tanstack/react-query-devtools").then(m => ({ default: m.ReactQueryDevtools })))
+  ? lazy(() =>
+      import("@tanstack/react-query-devtools").then((m) => ({ default: m.ReactQueryDevtools })),
+    )
   : null
 
 function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [
-    [typeof configAtom, Config],
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -53,7 +52,7 @@ export default defineContentScript({
   matches: ["*://*/*", "file:///*"],
   cssInjectionMode: "ui",
   async main(ctx) {
-    const config = await getLocalConfig() ?? DEFAULT_CONFIG
+    const config = (await getLocalConfig()) ?? DEFAULT_CONFIG
 
     // Check global site control
     if (!isSiteEnabled(window.location.href, config)) {
@@ -111,10 +110,7 @@ export default defineContentScript({
             </JotaiProvider>
             {ReactQueryDevtools && (
               <Suspense>
-                <ReactQueryDevtools
-                  initialIsOpen={false}
-                  buttonPosition="bottom-right"
-                />
+                <ReactQueryDevtools initialIsOpen={false} buttonPosition="bottom-right" />
               </Suspense>
             )}
           </QueryClientProvider>,

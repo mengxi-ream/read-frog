@@ -15,7 +15,11 @@ import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { i18n } from "@/utils/i18n"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { cn } from "@/utils/styles/utils"
-import { selectedProviderIdsAtom, translateRequestAtom, translationCardExpandedStateAtom } from "../atoms"
+import {
+  selectedProviderIdsAtom,
+  translateRequestAtom,
+  translationCardExpandedStateAtom,
+} from "../atoms"
 
 interface TranslationCardProps {
   providerId: string
@@ -23,7 +27,11 @@ interface TranslationCardProps {
   onExpandedChange: (expanded: boolean) => void
 }
 
-export function TranslationCard({ providerId, isExpanded, onExpandedChange }: TranslationCardProps) {
+export function TranslationCard({
+  providerId,
+  isExpanded,
+  onExpandedChange,
+}: TranslationCardProps) {
   const { theme } = useTheme()
   const request = useAtomValue(translateRequestAtom)
   const language = useAtomValue(configFieldsAtomMap.language)
@@ -32,7 +40,9 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
   const setExpandedById = useSetAtom(translationCardExpandedStateAtom)
 
   const provider = getProviderConfigById(providersConfig, providerId)
-  const providerItem = provider ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS] : undefined
+  const providerItem = provider
+    ? PROVIDER_ITEMS[provider.provider as keyof typeof PROVIDER_ITEMS]
+    : undefined
 
   // Track request IDs to ignore stale responses from slow providers
   const requestIdRef = useRef(0)
@@ -47,15 +57,19 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
           ANALYTICS_SURFACE.TRANSLATION_HUB,
         ),
         async () => {
-          if (!provider)
-            throw new Error("Provider not found")
+          if (!provider) throw new Error("Provider not found")
 
           const myRequestId = ++requestIdRef.current
-          const result = await executeTranslate(req.inputText, {
-            sourceCode: req.sourceLanguage,
-            targetCode: req.targetLanguage,
-            level: language.level,
-          }, provider, getTranslatePrompt)
+          const result = await executeTranslate(
+            req.inputText,
+            {
+              sourceCode: req.sourceLanguage,
+              targetCode: req.targetLanguage,
+              level: language.level,
+            },
+            provider,
+            getTranslatePrompt,
+          )
 
           // Ignore stale responses - return undefined to silently discard
           if (requestIdRef.current !== myRequestId) {
@@ -89,10 +103,9 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
   }
 
   const handleRemove = () => {
-    setSelectedProviderIds(selectedProviderIds.filter(id => id !== providerId))
+    setSelectedProviderIds(selectedProviderIds.filter((id) => id !== providerId))
     setExpandedById((prev) => {
-      if (!(providerId in prev))
-        return prev
+      if (!(providerId in prev)) return prev
 
       const next = { ...prev }
       delete next[providerId]
@@ -100,28 +113,26 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
     })
   }
 
-  if (!provider)
-    return null
+  if (!provider) return null
 
   const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
 
   return (
     <div className="border rounded-lg bg-card">
-      <div className={cn("flex items-center justify-between px-3 py-2", hasContent && isExpanded && "border-b")}>
+      <div
+        className={cn(
+          "flex items-center justify-between px-3 py-2",
+          hasContent && isExpanded && "border-b",
+        )}
+      >
         <div className="flex items-center space-x-2">
-          {providerItem
-            ? (
-                <ProviderIcon
-                  logo={providerItem.logo(theme)}
-                  name={provider.name}
-                  size="sm"
-                />
-              )
-            : (
-                <div className="w-5 h-5 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
-                  ?
-                </div>
-              )}
+          {providerItem ? (
+            <ProviderIcon logo={providerItem.logo(theme)} name={provider.name} size="sm" />
+          ) : (
+            <div className="w-5 h-5 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+              ?
+            </div>
+          )}
         </div>
         <div className="flex items-center space-x-1">
           {mutation.isPending && (
@@ -155,11 +166,18 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
               size="icon"
               onClick={() => onExpandedChange(!isExpanded)}
               className="h-7 w-7"
-              title={i18n.t(isExpanded ? "translationHub.collapseCard" : "translationHub.expandCard")}
-              aria-label={i18n.t(isExpanded ? "translationHub.collapseCard" : "translationHub.expandCard")}
+              title={i18n.t(
+                isExpanded ? "translationHub.collapseCard" : "translationHub.expandCard",
+              )}
+              aria-label={i18n.t(
+                isExpanded ? "translationHub.collapseCard" : "translationHub.expandCard",
+              )}
               aria-expanded={isExpanded}
             >
-              <Icon icon={isExpanded ? "tabler:chevron-up" : "tabler:chevron-down"} className="h-3.5 w-3.5" />
+              <Icon
+                icon={isExpanded ? "tabler:chevron-up" : "tabler:chevron-down"}
+                className="h-3.5 w-3.5"
+              />
             </Button>
           )}
           <Button
@@ -176,26 +194,28 @@ export function TranslationCard({ providerId, isExpanded, onExpandedChange }: Tr
 
       {hasContent && isExpanded && (
         <div className="p-3">
-          {mutation.isError
-            ? (
-                <div>
-                  <div className="flex items-center space-x-2 text-destructive mb-1">
-                    <Icon icon="tabler:alert-circle" className="h-4 w-4" />
-                    <span className="text-sm font-medium">{i18n.t("translationHub.translationFailed")}</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    {mutation.error instanceof Error ? mutation.error.message : i18n.t("translationHub.translationFailedFallback")}
-                  </p>
-                </div>
-              )
-            : (
-                <div
-                  key={mutation.data}
-                  className="text-base leading-relaxed whitespace-pre-wrap animate-in fade-in duration-300"
-                >
-                  {mutation.data}
-                </div>
-              )}
+          {mutation.isError ? (
+            <div>
+              <div className="flex items-center space-x-2 text-destructive mb-1">
+                <Icon icon="tabler:alert-circle" className="h-4 w-4" />
+                <span className="text-sm font-medium">
+                  {i18n.t("translationHub.translationFailed")}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {mutation.error instanceof Error
+                  ? mutation.error.message
+                  : i18n.t("translationHub.translationFailedFallback")}
+              </p>
+            </div>
+          ) : (
+            <div
+              key={mutation.data}
+              className="text-base leading-relaxed whitespace-pre-wrap animate-in fade-in duration-300"
+            >
+              {mutation.data}
+            </div>
+          )}
         </div>
       )}
     </div>

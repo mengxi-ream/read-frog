@@ -16,7 +16,12 @@ import { initializeActionIcons, registerActionIconListeners } from "./browser-ac
 import { ensureInitializedConfig } from "./config"
 import { setUpConfigBackup } from "./config-backup"
 import { initializeContextMenu, registerContextMenuListeners } from "./context-menu"
-import { cleanupAllAiSegmentationCache, cleanupAllSummaryCache, cleanupAllTranslationCache, setUpDatabaseCleanup } from "./db-cleanup"
+import {
+  cleanupAllAiSegmentationCache,
+  cleanupAllSummaryCache,
+  cleanupAllTranslationCache,
+  setUpDatabaseCleanup,
+} from "./db-cleanup"
 import { setupEdgeTTSMessageHandlers } from "./edge-tts"
 import { setupIframeInjection } from "./iframe-injection"
 import { setupLLMGenerateTextMessageHandlers } from "./llm-generate-text"
@@ -72,8 +77,7 @@ export default defineBackground({
     onMessage("aiSegmentSubtitles", async (message) => {
       try {
         return await runAiSegmentSubtitles(message.data)
-      }
-      catch (error) {
+      } catch (error) {
         logger.error("[Background] aiSegmentSubtitles failed", error)
         throw error
       }
@@ -137,8 +141,7 @@ export default defineBackground({
     // (registerContextMenuListeners), so here we only drive the i18next singleton and
     // re-set the frozen (localized) uninstall-survey URL.
     storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, (newConfig) => {
-      if (newConfig.uiLanguage === currentUiLanguage)
-        return
+      if (newConfig.uiLanguage === currentUiLanguage) return
       currentUiLanguage = newConfig.uiLanguage
       void (async () => {
         await setUiLanguage(newConfig.uiLanguage)

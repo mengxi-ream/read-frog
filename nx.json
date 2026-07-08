@@ -50,13 +50,20 @@
       "cache": true,
       "inputs": [
         "{projectRoot}/src/**/*",
-        "{projectRoot}/eslint.config.*"
+        "{projectRoot}/.oxlintrc.json",
+        "{projectRoot}/.oxfmtrc.json",
+        "{projectRoot}/package.json",
+        "{projectRoot}/pnpm-lock.yaml",
+        "{projectRoot}/tsconfig.json"
       ]
     },
     "type-check": {
       "cache": true,
       "inputs": [
         "{projectRoot}/src/**/*",
+        "{projectRoot}/.oxlintrc.json",
+        "{projectRoot}/package.json",
+        "{projectRoot}/pnpm-lock.yaml",
         "{projectRoot}/tsconfig.json"
       ]
     }

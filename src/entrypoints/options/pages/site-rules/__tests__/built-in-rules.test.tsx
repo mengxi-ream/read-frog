@@ -100,15 +100,17 @@ describe("builtInRules", () => {
       await Promise.resolve()
     })
 
-    expect(writeText).toHaveBeenCalledWith(JSON.stringify(
-      {
-        id: "rule-github",
-        description: "GitHub tweaks",
-        matches: ["github.com", "gist.github.com", "*.githubusercontent.com"],
-      },
-      null,
-      2,
-    ))
+    expect(writeText).toHaveBeenCalledWith(
+      JSON.stringify(
+        {
+          id: "rule-github",
+          description: "GitHub tweaks",
+          matches: ["github.com", "gist.github.com", "*.githubusercontent.com"],
+        },
+        null,
+        2,
+      ),
+    )
     expect(screen.getByRole("button", { name: "action.copied" })).toBeInTheDocument()
   })
 })

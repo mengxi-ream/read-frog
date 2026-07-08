@@ -15,9 +15,7 @@ function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -28,18 +26,10 @@ function SidePanelShell() {
   return (
     <main className="bg-background text-foreground flex min-h-screen flex-col px-5 py-6">
       <section className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <img
-          src={readFrogLogo}
-          alt={APP_NAME}
-          className="size-16 rounded-full"
-        />
+        <img src={readFrogLogo} alt={APP_NAME} className="size-16 rounded-full" />
         <div className="space-y-2">
-          <h1 className="text-xl font-semibold tracking-tight">
-            {APP_NAME}
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Side Panel is coming soon.
-          </p>
+          <h1 className="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
+          <p className="text-muted-foreground text-sm">Side Panel is coming soon.</p>
         </div>
       </section>
     </main>
@@ -52,15 +42,16 @@ async function initApp() {
 
   const themeMode = await getLocalThemeMode()
 
-  renderPersistentReactRoot(root, (
+  renderPersistentReactRoot(
+    root,
     <JotaiProvider>
       <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
         <ThemeProvider>
           <SidePanelShell />
         </ThemeProvider>
       </HydrateAtoms>
-    </JotaiProvider>
-  ))
+    </JotaiProvider>,
+  )
 }
 
 void initApp()

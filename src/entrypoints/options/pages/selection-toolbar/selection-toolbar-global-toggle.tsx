@@ -5,15 +5,15 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function SelectionToolbarGlobalToggle() {
-  const [selectionToolbar, setSelectionToolbar] = useAtom(
-    configFieldsAtomMap.selectionToolbar,
-  )
+  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
 
   return (
     <ConfigCard
       id="selection-toolbar-toggle"
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.globalToggle.title")}
-      description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.globalToggle.description")}
+      description={i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.globalToggle.description",
+      )}
     >
       <div className="w-full flex justify-end">
         <Switch

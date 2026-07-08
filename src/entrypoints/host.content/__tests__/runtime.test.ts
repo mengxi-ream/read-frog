@@ -119,7 +119,7 @@ function createContentScriptContext() {
 
 async function flushAsyncWork(): Promise<void> {
   await Promise.resolve()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise((resolve) => setTimeout(resolve, 0))
   await Promise.resolve()
 }
 
@@ -139,8 +139,7 @@ describe("bootstrapHostContent URL changes", () => {
     })
     mockDetectPageLanguageLightweight.mockResolvedValue({ detectedCodeOrUnd: "fra" })
     mockSendMessage.mockImplementation((name: string) => {
-      if (name === "getEnablePageTranslationFromContentScript")
-        return Promise.resolve(false)
+      if (name === "getEnablePageTranslationFromContentScript") return Promise.resolve(false)
 
       return Promise.resolve(undefined)
     })
@@ -148,8 +147,7 @@ describe("bootstrapHostContent URL changes", () => {
 
   it("refreshes active page translation on same-origin SPA navigation without disabling the session", async () => {
     mockSendMessage.mockImplementation((name: string) => {
-      if (name === "getEnablePageTranslationFromContentScript")
-        return Promise.resolve(true)
+      if (name === "getEnablePageTranslationFromContentScript") return Promise.resolve(true)
 
       return Promise.resolve(undefined)
     })
@@ -158,12 +156,14 @@ describe("bootstrapHostContent URL changes", () => {
     await bootstrapHostContent(ctx, null)
     const manager = managerInstances[0]
 
-    window.dispatchEvent(new CustomEvent("extension:URLChange", {
-      detail: {
-        from: "https://example.com/articles/1",
-        to: "https://example.com/articles/2?ref=nav#comments",
-      },
-    }))
+    window.dispatchEvent(
+      new CustomEvent("extension:URLChange", {
+        detail: {
+          from: "https://example.com/articles/1",
+          to: "https://example.com/articles/2?ref=nav#comments",
+        },
+      }),
+    )
     await flushAsyncWork()
 
     expect(manager.start).toHaveBeenCalledTimes(1)
@@ -182,12 +182,14 @@ describe("bootstrapHostContent URL changes", () => {
     await bootstrapHostContent(ctx, null)
     const manager = managerInstances[0]
 
-    window.dispatchEvent(new CustomEvent("extension:URLChange", {
-      detail: {
-        from: "https://example.com/articles/1",
-        to: "https://example.com/articles/2",
-      },
-    }))
+    window.dispatchEvent(
+      new CustomEvent("extension:URLChange", {
+        detail: {
+          from: "https://example.com/articles/1",
+          to: "https://example.com/articles/2",
+        },
+      }),
+    )
     await flushAsyncWork()
 
     expect(manager.start).not.toHaveBeenCalled()

@@ -42,11 +42,10 @@ function SnapshotProbe() {
         onClick={() => {
           if (open) {
             clearSelectionSnapshot()
-          }
-          else {
+          } else {
             captureSelectionSnapshot()
           }
-          setOpen(prev => !prev)
+          setOpen((prev) => !prev)
         }}
       >
         {open ? "Close" : "Open"}

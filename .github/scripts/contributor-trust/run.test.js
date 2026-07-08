@@ -2,7 +2,6 @@ import { mkdtemp, readFile, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 import process from "node:process"
-
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 const mocks = vi.hoisted(() => ({
@@ -88,8 +87,7 @@ describe("main", () => {
   })
 
   afterEach(() => {
-    for (const key of ENV_KEYS)
-      delete process.env[key]
+    for (const key of ENV_KEYS) delete process.env[key]
 
     Object.assign(process.env, originalEnv)
   })
@@ -221,12 +219,14 @@ describe("main", () => {
       "read-frog",
       42,
     )
-    expect(mocks.buildTrustComment).toHaveBeenCalledWith(expect.objectContaining({
-      plan: expect.objectContaining({
-        changedLines: 25,
-        excludedChangedLines: 1500,
+    expect(mocks.buildTrustComment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        plan: expect.objectContaining({
+          changedLines: 25,
+          excludedChangedLines: 1500,
+        }),
       }),
-    }))
+    )
     expect(mocks.createIssueComment).toHaveBeenCalledTimes(1)
 
     const summary = await readFile(process.env.GITHUB_STEP_SUMMARY, "utf8")

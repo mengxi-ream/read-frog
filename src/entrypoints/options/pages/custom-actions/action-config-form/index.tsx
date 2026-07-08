@@ -35,7 +35,7 @@ export function CustomActionConfigForm() {
   const [selectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
 
   const customActions = selectionToolbarConfig.customActions ?? []
-  const selectedAction = customActions.find(action => action.id === selectedCustomActionId)
+  const selectedAction = customActions.find((action) => action.id === selectedCustomActionId)
 
   if (!selectedAction) {
     return (
@@ -51,8 +51,14 @@ export function CustomActionConfigForm() {
   return <CustomActionConfigEditor key={selectedAction.id} selectedAction={selectedAction} />
 }
 
-function CustomActionConfigEditor({ selectedAction }: { selectedAction: SelectionToolbarCustomAction }) {
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+function CustomActionConfigEditor({
+  selectedAction,
+}: {
+  selectedAction: SelectionToolbarCustomAction
+}) {
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
   const [, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
 
   const customActions = selectionToolbarConfig.customActions ?? []
@@ -62,7 +68,7 @@ function CustomActionConfigEditor({ selectedAction }: { selectedAction: Selectio
     defaultValues: selectedAction,
     onSubmit: async ({ value }) => {
       const nextValue = sanitizeSelectionToolbarCustomAction(value)
-      const updatedCustomActions = customActions.map(action =>
+      const updatedCustomActions = customActions.map((action) =>
         action.id === selectedAction.id ? nextValue : action,
       )
 
@@ -77,21 +83,24 @@ function CustomActionConfigEditor({ selectedAction }: { selectedAction: Selectio
     form.reset(selectedAction)
   }, [selectedAction, form])
 
-  const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map(token => ({
+  const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map((token) => ({
     text: getSelectionToolbarCustomActionTokenCellText(token),
-    description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}`),
+    description: i18n.t(
+      `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}`,
+    ),
   }))
 
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
 
   const handleDeleteAction = () => {
-    const currentIndex = customActions.findIndex(action => action.id === selectedAction.id)
+    const currentIndex = customActions.findIndex((action) => action.id === selectedAction.id)
     if (currentIndex < 0) {
       return
     }
 
-    const updatedCustomActions = customActions.filter(action => action.id !== selectedAction.id)
-    const nextSelectedAction = updatedCustomActions[currentIndex] ?? updatedCustomActions[currentIndex - 1]
+    const updatedCustomActions = customActions.filter((action) => action.id !== selectedAction.id)
+    const nextSelectedAction =
+      updatedCustomActions[currentIndex] ?? updatedCustomActions[currentIndex - 1]
 
     void setSelectionToolbarConfig({
       ...selectionToolbarConfig,
@@ -114,7 +123,9 @@ function CustomActionConfigEditor({ selectedAction }: { selectedAction: Selectio
             {() => (
               <QuickInsertableTextareaFieldAutoSave
                 formForSubmit={form}
-                label={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.systemPrompt")}
+                label={i18n.t(
+                  "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.systemPrompt",
+                )}
                 className="min-h-36 max-h-80"
                 insertCells={customActionInsertCells}
               />
@@ -125,7 +136,9 @@ function CustomActionConfigEditor({ selectedAction }: { selectedAction: Selectio
             {() => (
               <QuickInsertableTextareaFieldAutoSave
                 formForSubmit={form}
-                label={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.prompt")}
+                label={i18n.t(
+                  "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.prompt",
+                )}
                 className="min-h-28 max-h-80"
                 insertCells={customActionInsertCells}
               />
@@ -139,16 +152,34 @@ function CustomActionConfigEditor({ selectedAction }: { selectedAction: Selectio
         <div className="flex justify-end mt-8">
           <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
             <AlertDialogTrigger render={<Button type="button" variant="destructive" />}>
-              {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete")}
+              {i18n.t(
+                "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.delete",
+              )}
             </AlertDialogTrigger>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.title")}</AlertDialogTitle>
-                <AlertDialogDescription>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.description")}</AlertDialogDescription>
+                <AlertDialogTitle>
+                  {i18n.t(
+                    "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.title",
+                  )}
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  {i18n.t(
+                    "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.description",
+                  )}
+                </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.cancel")}</AlertDialogCancel>
-                <AlertDialogAction variant="destructive" onClick={handleDeleteAction}>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.confirm")}</AlertDialogAction>
+                <AlertDialogCancel>
+                  {i18n.t(
+                    "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.cancel",
+                  )}
+                </AlertDialogCancel>
+                <AlertDialogAction variant="destructive" onClick={handleDeleteAction}>
+                  {i18n.t(
+                    "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.deleteDialog.confirm",
+                  )}
+                </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>

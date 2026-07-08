@@ -6,24 +6,33 @@ import { Card } from "@/components/ui/base-ui/card"
 import { Label } from "@/components/ui/base-ui/label"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR } from "@/utils/constants/subtitles"
+import {
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_FONT_SCALE,
+  DEFAULT_FONT_WEIGHT,
+  DEFAULT_SUBTITLE_COLOR,
+} from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 import { SubtitlesTextStyleForm } from "./subtitles-text-style-form"
 
 export function MainSubtitlesStyle() {
-  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(configFieldsAtomMap.videoSubtitles)
+  const [videoSubtitlesConfig, setVideoSubtitlesConfig] = useAtom(
+    configFieldsAtomMap.videoSubtitles,
+  )
 
   const resetSubtitlesStyleConfig = () => {
-    void setVideoSubtitlesConfig(deepmerge(videoSubtitlesConfig, {
-      style: {
-        main: {
-          fontFamily: DEFAULT_FONT_FAMILY,
-          fontScale: DEFAULT_FONT_SCALE,
-          color: DEFAULT_SUBTITLE_COLOR,
-          fontWeight: DEFAULT_FONT_WEIGHT,
+    void setVideoSubtitlesConfig(
+      deepmerge(videoSubtitlesConfig, {
+        style: {
+          main: {
+            fontFamily: DEFAULT_FONT_FAMILY,
+            fontScale: DEFAULT_FONT_SCALE,
+            color: DEFAULT_SUBTITLE_COLOR,
+            fontWeight: DEFAULT_FONT_WEIGHT,
+          },
         },
-      },
-    }))
+      }),
+    )
   }
 
   return (
@@ -31,11 +40,20 @@ export function MainSubtitlesStyle() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Icon icon="tabler:typography" className="size-4" />
-          <Label className="text-sm font-semibold">{i18n.t("options.videoSubtitles.style.mainSubtitle")}</Label>
+          <Label className="text-sm font-semibold">
+            {i18n.t("options.videoSubtitles.style.mainSubtitle")}
+          </Label>
         </div>
         <Tooltip>
           <TooltipTrigger
-            render={<Button variant="ghost" size="sm" className="-mr-2" onClick={resetSubtitlesStyleConfig} />}
+            render={
+              <Button
+                variant="ghost"
+                size="sm"
+                className="-mr-2"
+                onClick={resetSubtitlesStyleConfig}
+              />
+            }
           >
             <Icon icon="tabler:refresh" />
           </TooltipTrigger>

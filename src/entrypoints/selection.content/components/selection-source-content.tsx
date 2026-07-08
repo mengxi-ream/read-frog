@@ -28,7 +28,12 @@ export function SelectionSourceContent({
       <div className="space-y-2">
         <div className="flex items-start justify-between gap-2">
           <ScrollArea className={cn("min-w-0 flex-1", actionsExpanded && "h-18 overflow-hidden")}>
-            <p className={cn("text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-zinc-600 dark:text-zinc-400", !actionsExpanded && "line-clamp-3")}>
+            <p
+              className={cn(
+                "text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-zinc-600 dark:text-zinc-400",
+                !actionsExpanded && "line-clamp-3",
+              )}
+            >
               {displayText}
             </p>
           </ScrollArea>
@@ -36,7 +41,7 @@ export function SelectionSourceContent({
             variant="ghost-secondary"
             size="icon-xs"
             className="size-5.5 shrink-0"
-            onClick={() => setActionsExpanded(prev => !prev)}
+            onClick={() => setActionsExpanded((prev) => !prev)}
           >
             <Activity mode={actionsExpanded ? "visible" : "hidden"}>
               <IconChevronUp />
@@ -53,7 +58,9 @@ export function SelectionSourceContent({
           </div>
         </Activity>
       </div>
-      <Separator className={cn("opacity-60", actionsExpanded ? "mt-1.5" : "mt-3", separatorClassName)} />
+      <Separator
+        className={cn("opacity-60", actionsExpanded ? "mt-1.5" : "mt-3", separatorClassName)}
+      />
     </>
   )
 }

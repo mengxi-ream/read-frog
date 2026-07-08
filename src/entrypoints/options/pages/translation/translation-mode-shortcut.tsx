@@ -16,7 +16,11 @@ export function TranslationModeShortcut() {
   }
 
   return (
-    <ConfigCard id="translation-mode-shortcut" title={i18n.t("options.translation.translationModeShortcut.title")} description={i18n.t("options.translation.translationModeShortcut.description")}>
+    <ConfigCard
+      id="translation-mode-shortcut"
+      title={i18n.t("options.translation.translationModeShortcut.title")}
+      description={i18n.t("options.translation.translationModeShortcut.description")}
+    >
       <ShortcutKeyRecorder shortcutKey={shortcut} onChange={updateShortcut} />
     </ConfigCard>
   )

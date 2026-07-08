@@ -16,9 +16,7 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function NodeTranslationHotkey() {
-  const [translateConfig, setTranslateConfig] = useAtom(
-    configFieldsAtomMap.translate,
-  )
+  const [translateConfig, setTranslateConfig] = useAtom(configFieldsAtomMap.translate)
 
   return (
     <ConfigCard
@@ -37,37 +35,31 @@ export function NodeTranslationHotkey() {
             id="node-translation-hotkey-toggle"
             checked={translateConfig.node.enabled}
             onCheckedChange={(checked) => {
-              void setTranslateConfig(
-                deepmerge(translateConfig, { node: { enabled: checked } }),
-              )
+              void setTranslateConfig(deepmerge(translateConfig, { node: { enabled: checked } }))
             }}
           />
         </Field>
         <Select
           value={translateConfig.node.hotkey}
-          onValueChange={(value: typeof HOTKEYS[number] | null) => {
-            if (!value)
-              return
-            void setTranslateConfig(
-              deepmerge(translateConfig, { node: { hotkey: value } }),
-            )
+          onValueChange={(value: (typeof HOTKEYS)[number] | null) => {
+            if (!value) return
+            void setTranslateConfig(deepmerge(translateConfig, { node: { hotkey: value } }))
           }}
           disabled={!translateConfig.node.enabled}
         >
-          <SelectTrigger className={`w-full ${!translateConfig.node.enabled ? "opacity-50 pointer-events-none" : ""}`}>
+          <SelectTrigger
+            className={`w-full ${!translateConfig.node.enabled ? "opacity-50 pointer-events-none" : ""}`}
+          >
             <SelectValue render={<span />}>
-              {HOTKEY_ICONS[translateConfig.node.hotkey]}
-              {" "}
+              {HOTKEY_ICONS[translateConfig.node.hotkey]}{" "}
               {i18n.t(`hotkey.${translateConfig.node.hotkey}`)}
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectGroup>
-              {HOTKEYS.map(item => (
+              {HOTKEYS.map((item) => (
                 <SelectItem key={item} value={item}>
-                  {HOTKEY_ICONS[item]}
-                  {" "}
-                  {i18n.t(`hotkey.${item}`)}
+                  {HOTKEY_ICONS[item]} {i18n.t(`hotkey.${item}`)}
                 </SelectItem>
               ))}
             </SelectGroup>

@@ -1,23 +1,27 @@
 import type { SiteRule } from "@/types/config/site-rules"
 import { z } from "zod"
-import { MAX_SITE_RULES_JSON_LENGTH, MAX_USER_SITE_RULES, siteRuleSchema } from "@/types/config/site-rules"
+import {
+  MAX_SITE_RULES_JSON_LENGTH,
+  MAX_USER_SITE_RULES,
+  siteRuleSchema,
+} from "@/types/config/site-rules"
 
 export interface UserRulesIssue {
   path: string
   message: string
 }
 
-export type UserRulesValidationErrorKind
-  = | "syntax"
-    | "notArray"
-    | "tooLong"
-    | "tooMany"
-    | "schema"
-    | "duplicateIds"
+export type UserRulesValidationErrorKind =
+  | "syntax"
+  | "notArray"
+  | "tooLong"
+  | "tooMany"
+  | "schema"
+  | "duplicateIds"
 
-export type UserRulesValidationResult
-  = | { ok: true, rules: SiteRule[] }
-    | { ok: false, kind: UserRulesValidationErrorKind, issues: UserRulesIssue[] }
+export type UserRulesValidationResult =
+  | { ok: true; rules: SiteRule[] }
+  | { ok: false; kind: UserRulesValidationErrorKind; issues: UserRulesIssue[] }
 
 const userRulesArraySchema = z.array(siteRuleSchema)
 
@@ -45,15 +49,19 @@ export function validateUserRulesDocument(text: string): UserRulesValidationResu
     return {
       ok: false,
       kind: "tooLong",
-      issues: [{ path: "rules", message: `Document is ${text.length} characters (max ${MAX_SITE_RULES_JSON_LENGTH})` }],
+      issues: [
+        {
+          path: "rules",
+          message: `Document is ${text.length} characters (max ${MAX_SITE_RULES_JSON_LENGTH})`,
+        },
+      ],
     }
   }
 
   let parsed: unknown
   try {
     parsed = JSON.parse(text)
-  }
-  catch (error) {
+  } catch (error) {
     return {
       ok: false,
       kind: "syntax",
@@ -82,7 +90,7 @@ export function validateUserRulesDocument(text: string): UserRulesValidationResu
     return {
       ok: false,
       kind: "schema",
-      issues: result.error.issues.map(issue => ({
+      issues: result.error.issues.map((issue) => ({
         path: formatIssuePath(issue.path),
         message: issue.message,
       })),

@@ -18,14 +18,16 @@ export async function getLastSyncedConfigAndMeta(): Promise<LastSyncedConfigValu
   try {
     const value = await migrateConfig(rawValue, meta.schemaVersion)
     return { value, meta }
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to migrate last synced config", error)
     return null
   }
 }
 
-export async function setLastSyncConfigAndMeta(value: Config, meta: Partial<LastSyncedConfigMeta>): Promise<void> {
+export async function setLastSyncConfigAndMeta(
+  value: Config,
+  meta: Partial<LastSyncedConfigMeta>,
+): Promise<void> {
   const lastSyncedAt = meta.lastSyncedAt ?? Date.now()
 
   await Promise.all([

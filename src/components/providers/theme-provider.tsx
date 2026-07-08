@@ -36,9 +36,8 @@ export function ThemeProvider({
     () => !!window?.matchMedia?.("(prefers-color-scheme: dark)")?.matches,
   )
 
-  const theme: Theme = forcedTheme ?? (themeMode === "system"
-    ? (prefersDark ? "dark" : "light")
-    : themeMode)
+  const theme: Theme =
+    forcedTheme ?? (themeMode === "system" ? (prefersDark ? "dark" : "light") : themeMode)
 
   // Apply theme to document or shadow root container
   useLayoutEffect(() => {
@@ -51,11 +50,7 @@ export function ThemeProvider({
     [theme, themeMode, setThemeMode],
   )
 
-  return (
-    <ThemeContext value={contextValue}>
-      {children}
-    </ThemeContext>
-  )
+  return <ThemeContext value={contextValue}>{children}</ThemeContext>
 }
 
 export function useTheme(): ThemeContextI {

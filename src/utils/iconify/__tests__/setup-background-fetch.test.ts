@@ -74,6 +74,8 @@ describe("ensureIconifyBackgroundFetch", () => {
 
     const customFetch = setFetchMock.mock.calls[0][0] as typeof fetch
 
-    await expect(customFetch("https://api.iconify.design/tabler.json?icons=sparkles")).rejects.toThrow("network error")
+    await expect(
+      customFetch("https://api.iconify.design/tabler.json?icons=sparkles"),
+    ).rejects.toThrow("network error")
   })
 })

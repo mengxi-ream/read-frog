@@ -1,5 +1,4 @@
 import { langCodeISO6393Schema, langLevel } from "@read-frog/definitions"
-
 import { z } from "zod"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
 import {
@@ -40,9 +39,7 @@ const selectionToolbarSpeakFeatureSchema = z.object({
 const selectionToolbarSchema = z.object({
   enabled: z.boolean(),
   disabledSelectionToolbarPatterns: z.array(z.string()),
-  opacity: z.number()
-    .min(MIN_SELECTION_OVERLAY_OPACITY)
-    .max(MAX_SELECTION_OVERLAY_OPACITY),
+  opacity: z.number().min(MIN_SELECTION_OVERLAY_OPACITY).max(MAX_SELECTION_OVERLAY_OPACITY),
   features: z.object({
     translate: selectionToolbarFeatureSchema,
     speak: selectionToolbarSpeakFeatureSchema,
@@ -104,87 +101,104 @@ const uiLanguageSchema = z
 export type UiLanguage = z.infer<typeof uiLanguageSchema>
 
 // Complete config schema
-export const configSchema = z.object({
-  language: languageSchema,
-  providersConfig: providersConfigSchema,
-  translate: translateConfigSchema,
-  languageDetection: languageDetectionConfigSchema,
-  tts: ttsConfigSchema,
-  floatingButton: floatingButtonSchema,
-  selectionToolbar: selectionToolbarSchema,
-  sideContent: sideContentSchema,
-  betaExperience: betaExperienceSchema,
-  contextMenu: contextMenuSchema,
-  inputTranslation: inputTranslationSchema,
-  videoSubtitles: videoSubtitlesSchema,
-  siteControl: siteControlSchema,
-  siteRules: siteRulesConfigSchema,
-  uiLanguage: uiLanguageSchema,
-}).superRefine((data, ctx) => {
-  for (const featureKey of FEATURE_KEYS) {
-    const def = FEATURE_PROVIDER_DEFS[featureKey]
-    const providerId = def.getProviderId(data)
+export const configSchema = z
+  .object({
+    language: languageSchema,
+    providersConfig: providersConfigSchema,
+    translate: translateConfigSchema,
+    languageDetection: languageDetectionConfigSchema,
+    tts: ttsConfigSchema,
+    floatingButton: floatingButtonSchema,
+    selectionToolbar: selectionToolbarSchema,
+    sideContent: sideContentSchema,
+    betaExperience: betaExperienceSchema,
+    contextMenu: contextMenuSchema,
+    inputTranslation: inputTranslationSchema,
+    videoSubtitles: videoSubtitlesSchema,
+    siteControl: siteControlSchema,
+    siteRules: siteRulesConfigSchema,
+    uiLanguage: uiLanguageSchema,
+  })
+  .superRefine((data, ctx) => {
+    for (const featureKey of FEATURE_KEYS) {
+      const def = FEATURE_PROVIDER_DEFS[featureKey]
+      const providerId = def.getProviderId(data)
 
-    if (!doesProviderSupportsCapability(featureKey, data.providersConfig, providerId, { requireEnable: true })) {
-      ctx.addIssue({
-        code: "invalid_value",
-        values: getProviderIdsForCapability(featureKey, data.providersConfig, { requireEnable: true }),
-        message: `Invalid provider id "${providerId}".`,
-        path: [...def.configPath],
-      })
-      continue
+      if (
+        !doesProviderSupportsCapability(featureKey, data.providersConfig, providerId, {
+          requireEnable: true,
+        })
+      ) {
+        ctx.addIssue({
+          code: "invalid_value",
+          values: getProviderIdsForCapability(featureKey, data.providersConfig, {
+            requireEnable: true,
+          }),
+          message: `Invalid provider id "${providerId}".`,
+          path: [...def.configPath],
+        })
+        continue
+      }
     }
-  }
 
-  // Validate languageDetection: when mode is "llm", providerId must be a valid enabled LLM provider
-  if (data.languageDetection.mode === "llm") {
-    const ldProviderId = data.languageDetection.providerId
-    if (!ldProviderId) {
-      ctx.addIssue({
-        code: "custom",
-        message: `Language detection mode is "llm" but no providerId is configured.`,
-        path: ["languageDetection", "providerId"],
-      })
-    }
-    else {
-      const ldProvider = data.providersConfig.find(p => p.id === ldProviderId)
-      if (!ldProvider) {
+    // Validate languageDetection: when mode is "llm", providerId must be a valid enabled LLM provider
+    if (data.languageDetection.mode === "llm") {
+      const ldProviderId = data.languageDetection.providerId
+      if (!ldProviderId) {
         ctx.addIssue({
           code: "custom",
-          message: `Language detection provider "${ldProviderId}" not found in providersConfig.`,
+          message: `Language detection mode is "llm" but no providerId is configured.`,
           path: ["languageDetection", "providerId"],
         })
-      }
-      else {
-        if (!isLLMProvider(ldProvider.provider)) {
+      } else {
+        const ldProvider = data.providersConfig.find((p) => p.id === ldProviderId)
+        if (!ldProvider) {
           ctx.addIssue({
             code: "custom",
-            message: `Language detection provider "${ldProviderId}" is not an LLM provider.`,
+            message: `Language detection provider "${ldProviderId}" not found in providersConfig.`,
             path: ["languageDetection", "providerId"],
           })
-        }
-        if (!ldProvider.enabled) {
-          ctx.addIssue({
-            code: "custom",
-            message: `Language detection provider "${ldProviderId}" must be enabled.`,
-            path: ["languageDetection", "providerId"],
-          })
+        } else {
+          if (!isLLMProvider(ldProvider.provider)) {
+            ctx.addIssue({
+              code: "custom",
+              message: `Language detection provider "${ldProviderId}" is not an LLM provider.`,
+              path: ["languageDetection", "providerId"],
+            })
+          }
+          if (!ldProvider.enabled) {
+            ctx.addIssue({
+              code: "custom",
+              message: `Language detection provider "${ldProviderId}" must be enabled.`,
+              path: ["languageDetection", "providerId"],
+            })
+          }
         }
       }
     }
-  }
 
-  data.selectionToolbar.customActions.forEach((action, index) => {
-    const providerId = action.providerId
-    if (!doesProviderSupportsCapability("selectionToolbar.customAction", data.providersConfig, providerId, { requireEnable: true })) {
-      ctx.addIssue({
-        code: "invalid_value",
-        values: getProviderIdsForCapability("selectionToolbar.customAction", data.providersConfig, { requireEnable: true }),
-        message: `Invalid provider id "${providerId}".`,
-        path: ["selectionToolbar", "customActions", index, "providerId"],
-      })
-    }
+    data.selectionToolbar.customActions.forEach((action, index) => {
+      const providerId = action.providerId
+      if (
+        !doesProviderSupportsCapability(
+          "selectionToolbar.customAction",
+          data.providersConfig,
+          providerId,
+          { requireEnable: true },
+        )
+      ) {
+        ctx.addIssue({
+          code: "invalid_value",
+          values: getProviderIdsForCapability(
+            "selectionToolbar.customAction",
+            data.providersConfig,
+            { requireEnable: true },
+          ),
+          message: `Invalid provider id "${providerId}".`,
+          path: ["selectionToolbar", "customActions", index, "providerId"],
+        })
+      }
+    })
   })
-})
 
 export type Config = z.infer<typeof configSchema>

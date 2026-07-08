@@ -7,10 +7,18 @@ import { getLocalConfig } from "@/utils/config/storage"
 import { CONTENT_WRAPPER_CLASS } from "@/utils/constants/dom-labels"
 import { resolveProviderConfig } from "@/utils/constants/feature-providers"
 import { getRandomUUID } from "@/utils/crypto-polyfill"
-import { hasNoWalkAncestor, isDontWalkIntoAndDontTranslateAsChildElement, isDontWalkIntoButTranslateAsChildElement, isHTMLElement } from "@/utils/host/dom/filter"
+import {
+  hasNoWalkAncestor,
+  isDontWalkIntoAndDontTranslateAsChildElement,
+  isDontWalkIntoButTranslateAsChildElement,
+  isHTMLElement,
+} from "@/utils/host/dom/filter"
 import { deepQueryTopLevelSelector } from "@/utils/host/dom/find"
 import { walkAndLabelElement } from "@/utils/host/dom/traversal"
-import { removeAllTranslatedWrapperNodes, translateWalkedElement } from "@/utils/host/translate/node-manipulation"
+import {
+  removeAllTranslatedWrapperNodes,
+  translateWalkedElement,
+} from "@/utils/host/translate/node-manipulation"
 import { validateTranslationConfigAndToast } from "@/utils/host/translate/translate-text"
 import { translateTextForPageTitle } from "@/utils/host/translate/translate-variants"
 import { ensureSiteRuleCSS, removeSiteRuleCSS } from "@/utils/host/translate/ui/style-injector"
@@ -110,11 +118,13 @@ export class PageTranslationManager implements IPageTranslationManager {
       return
     }
 
-    if (!validateTranslationConfigAndToast({
-      providersConfig: config.providersConfig,
-      translate: config.translate,
-      language: config.language,
-    })) {
+    if (
+      !validateTranslationConfigAndToast({
+        providersConfig: config.providersConfig,
+        translate: config.translate,
+        language: config.language,
+      })
+    ) {
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
@@ -178,8 +188,7 @@ export class PageTranslationManager implements IPageTranslationManager {
           outcome: "success",
         })
       }
-    }
-    catch (error) {
+    } catch (error) {
       if (trackedContext) {
         void trackFeatureUsed({
           ...trackedContext,
@@ -226,7 +235,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       this.intersectionObserver.disconnect()
       this.intersectionObserver = null
     }
-    this.mutationObservers.forEach(observer => observer.disconnect())
+    this.mutationObservers.forEach((observer) => observer.disconnect())
     this.mutationObservers = []
 
     removeSiteRuleCSS(document)
@@ -246,36 +255,33 @@ export class PageTranslationManager implements IPageTranslationManager {
       if (e.touches.length === 4) {
         startTime = performance.now()
         startTouches = e.touches
-      }
-      else {
+      } else {
         reset()
       }
     }
 
     const onMove = (e: TouchEvent) => {
-      if (!startTouches)
-        return
-      if (e.touches.length !== 4)
-        return reset()
+      if (!startTouches) return
+      if (e.touches.length !== 4) return reset()
 
       for (let i = 0; i < 4; i++) {
         const dx = e.touches[i].clientX - startTouches[i].clientX
         const dy = e.touches[i].clientY - startTouches[i].clientY
-        if (dx * dx + dy * dy > PageTranslationManager.MOVE_THRESHOLD)
-          return reset()
+        if (dx * dx + dy * dy > PageTranslationManager.MOVE_THRESHOLD) return reset()
       }
     }
 
     const onEnd = () => {
-      if (!startTouches)
-        return
+      if (!startTouches) return
       if (performance.now() - startTime < PageTranslationManager.MAX_DURATION) {
         this.isPageTranslating
           ? this.stop()
-          : void this.start(createFeatureUsageContext(
-            ANALYTICS_FEATURE.PAGE_TRANSLATION,
-            ANALYTICS_SURFACE.TOUCH_GESTURE,
-          ))
+          : void this.start(
+              createFeatureUsageContext(
+                ANALYTICS_FEATURE.PAGE_TRANSLATION,
+                ANALYTICS_SURFACE.TOUCH_GESTURE,
+              ),
+            )
       }
       reset()
     }
@@ -305,8 +311,7 @@ export class PageTranslationManager implements IPageTranslationManager {
 
     try {
       await getOrCreateWebPageContext()
-    }
-    catch (error) {
+    } catch (error) {
       logger.warn("Failed to prime webpage context before translating document title:", error)
     }
   }
@@ -409,32 +414,35 @@ export class PageTranslationManager implements IPageTranslationManager {
       }
 
       document.title = nextTitle
-    }
-    catch (error) {
+    } catch (error) {
       if (requestVersion === this.titleRequestVersion) {
         logger.warn("Failed to translate document title:", error)
       }
     }
   }
 
-  private async observeTopLevelParagraphs(container: HTMLElement, existingConfig?: Config): Promise<void> {
+  private async observeTopLevelParagraphs(
+    container: HTMLElement,
+    existingConfig?: Config,
+  ): Promise<void> {
     const observer = this.intersectionObserver
-    if (!this.walkId || !observer)
-      return
+    if (!this.walkId || !observer) return
 
-    const config = existingConfig ?? await getLocalConfig()
+    const config = existingConfig ?? (await getLocalConfig())
     if (!config) {
       logger.error("Global config is not initialized")
       return
     }
 
     // Skip if container has an ancestor that should not be walked into
-    if (hasNoWalkAncestor(container, config))
-      return
+    if (hasNoWalkAncestor(container, config)) return
 
     walkAndLabelElement(container, this.walkId, config)
     // if container itself has paragraph and the id
-    if (container.hasAttribute("data-read-frog-paragraph") && container.getAttribute("data-read-frog-walked") === this.walkId) {
+    if (
+      container.hasAttribute("data-read-frog-paragraph") &&
+      container.getAttribute("data-read-frog-walked") === this.walkId
+    ) {
       observer.observe(container)
       return
     }
@@ -447,7 +455,7 @@ export class PageTranslationManager implements IPageTranslationManager {
       //  • the ancestor is *not* inside container
       return !ancestor || !container.contains(ancestor)
     })
-    topLevelParagraphs.forEach(el => observer.observe(el))
+    topLevelParagraphs.forEach((el) => observer.observe(el))
   }
 
   /**
@@ -457,7 +465,9 @@ export class PageTranslationManager implements IPageTranslationManager {
     const result: HTMLElement[] = []
 
     const collectFromContainer = (root: HTMLElement | Document | ShadowRoot) => {
-      const elements = root.querySelectorAll<HTMLElement>(`[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(walkId)}"]`)
+      const elements = root.querySelectorAll<HTMLElement>(
+        `[data-read-frog-paragraph][data-read-frog-walked="${CSS.escape(walkId)}"]`,
+      )
       result.push(...[...elements])
     }
 
@@ -489,8 +499,10 @@ export class PageTranslationManager implements IPageTranslationManager {
    * panels can be re-walked when the site reveals an existing subtree.
    */
   private isWalkBlockedElement(element: HTMLElement, config: Config): boolean {
-    return isDontWalkIntoButTranslateAsChildElement(element, config)
-      || isDontWalkIntoAndDontTranslateAsChildElement(element, config)
+    return (
+      isDontWalkIntoButTranslateAsChildElement(element, config) ||
+      isDontWalkIntoAndDontTranslateAsChildElement(element, config)
+    )
   }
 
   /**
@@ -504,8 +516,7 @@ export class PageTranslationManager implements IPageTranslationManager {
     // Update cache with current state
     if (isWalkBlockedNow) {
       this.walkBlockedElementsCache.add(element)
-    }
-    else {
+    } else {
       this.walkBlockedElementsCache.delete(element)
     }
 
@@ -516,8 +527,10 @@ export class PageTranslationManager implements IPageTranslationManager {
    * Initialize walkability state for an element and its descendants
    */
   private addWalkBlockedElements(element: HTMLElement, config: Config): void {
-    const walkBlockedElements = deepQueryTopLevelSelector(element, el => this.isWalkBlockedElement(el, config))
-    walkBlockedElements.forEach(el => this.walkBlockedElementsCache.add(el))
+    const walkBlockedElements = deepQueryTopLevelSelector(element, (el) =>
+      this.isWalkBlockedElement(el, config),
+    )
+    walkBlockedElements.forEach((el) => this.walkBlockedElementsCache.add(el))
   }
 
   /**
@@ -555,8 +568,7 @@ export class PageTranslationManager implements IPageTranslationManager {
             this.observeIsolatedDescendantsMutations(node)
           }
         })
-      }
-      else if (this.isWalkabilityAttributeMutation(rec)) {
+      } else if (this.isWalkabilityAttributeMutation(rec)) {
         const el = rec.target
         if (isHTMLElement(el) && this.didChangeToWalkable(el, config)) {
           void this.observeTopLevelParagraphs(el, config)
@@ -566,11 +578,13 @@ export class PageTranslationManager implements IPageTranslationManager {
   }
 
   private isWalkabilityAttributeMutation(record: MutationRecord): boolean {
-    return record.type === "attributes"
-      && (record.attributeName === "style"
-        || record.attributeName === "class"
-        || record.attributeName === "hidden"
-        || record.attributeName === "aria-hidden")
+    return (
+      record.type === "attributes" &&
+      (record.attributeName === "style" ||
+        record.attributeName === "class" ||
+        record.attributeName === "hidden" ||
+        record.attributeName === "aria-hidden")
+    )
   }
 
   /**

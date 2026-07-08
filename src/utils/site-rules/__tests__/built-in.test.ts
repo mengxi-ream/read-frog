@@ -43,7 +43,7 @@ describe("built-in site rules", () => {
   })
 
   it("rule ids are unique", () => {
-    const ids = BUILT_IN_SITE_RULES.map(rule => rule.id)
+    const ids = BUILT_IN_SITE_RULES.map((rule) => rule.id)
     expect(new Set(ids).size).toBe(ids.length)
   })
 
@@ -70,8 +70,7 @@ describe("built-in site rules", () => {
       for (const selector of allSelectors(rule)) {
         try {
           probe.querySelector(selector)
-        }
-        catch {
+        } catch {
           invalid.push(`${rule.id}: ${selector}`)
         }
       }
@@ -88,19 +87,23 @@ describe("built-in site rules", () => {
       "https://vercel.com/docs",
     ]) {
       const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])
-      expect(resolved.injectedCss).toContain("[data-docs-heading] .read-frog-translated-content-wrapper")
+      expect(resolved.injectedCss).toContain(
+        "[data-docs-heading] .read-frog-translated-content-wrapper",
+      )
       expect(resolved.injectedCss).toContain("visibility:visible!important")
     }
   })
 
   it("keeps the youtube rule in sync with the subtitle class constants", () => {
-    const youtube = BUILT_IN_SITE_RULES.find(rule => rule.id === "readfrog-youtube")
+    const youtube = BUILT_IN_SITE_RULES.find((rule) => rule.id === "readfrog-youtube")
     expect(youtube).toBeDefined()
-    expect(youtube!.excludeSelectors).toEqual(expect.arrayContaining([
-      YOUTUBE_NATIVE_SUBTITLES_CLASS,
-      `.${SUBTITLES_VIEW_CLASS}`,
-      `.${STATE_MESSAGE_CLASS}`,
-      `.${TRANSLATE_BUTTON_CLASS}`,
-    ]))
+    expect(youtube!.excludeSelectors).toEqual(
+      expect.arrayContaining([
+        YOUTUBE_NATIVE_SUBTITLES_CLASS,
+        `.${SUBTITLES_VIEW_CLASS}`,
+        `.${STATE_MESSAGE_CLASS}`,
+        `.${TRANSLATE_BUTTON_CLASS}`,
+      ]),
+    )
   })
 })

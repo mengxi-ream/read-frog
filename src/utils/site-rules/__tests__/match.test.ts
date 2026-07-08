@@ -12,7 +12,9 @@ describe("normalizeUrlPattern", () => {
 
   it("keeps paths verbatim", () => {
     expect(normalizeUrlPattern("github.com/settings")).toBe("*://github.com/settings")
-    expect(normalizeUrlPattern("developer.apple.com/documentation/*")).toBe("*://developer.apple.com/documentation/*")
+    expect(normalizeUrlPattern("developer.apple.com/documentation/*")).toBe(
+      "*://developer.apple.com/documentation/*",
+    )
   })
 
   it("appends /* when a scheme is given without a path", () => {
@@ -21,7 +23,9 @@ describe("normalizeUrlPattern", () => {
 
   it("passes full match patterns through", () => {
     expect(normalizeUrlPattern("*://x.com/*")).toBe("*://x.com/*")
-    expect(normalizeUrlPattern("https://www.npmjs.com/package/*")).toBe("https://www.npmjs.com/package/*")
+    expect(normalizeUrlPattern("https://www.npmjs.com/package/*")).toBe(
+      "https://www.npmjs.com/package/*",
+    )
   })
 
   it("lowercases scheme and host but not the path", () => {
@@ -77,7 +81,9 @@ describe("urlMatchesPattern", () => {
     expect(urlMatchesPattern("https://www.amazon.com/dp/1", "www.amazon.*")).toBe(true)
     expect(urlMatchesPattern("https://www.amazon.co.jp/dp/1", "www.amazon.*")).toBe(true)
     expect(urlMatchesPattern("https://www.amazonaws.com/", "www.amazon.*")).toBe(false)
-    expect(urlMatchesPattern("https://scholar.google.co.uk/scholar?q=x", "scholar.google.*/*")).toBe(true)
+    expect(
+      urlMatchesPattern("https://scholar.google.co.uk/scholar?q=x", "scholar.google.*/*"),
+    ).toBe(true)
   })
 
   it("matches apex and subdomains for patterns with both leading and trailing wildcards", () => {

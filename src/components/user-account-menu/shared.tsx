@@ -23,13 +23,13 @@ type AccountMenu = ReturnType<typeof useUserAccountMenu>
 
 function getUserInitials(name: string | null | undefined) {
   const normalizedName = name?.trim()
-  if (!normalizedName)
-    return "U"
+  if (!normalizedName) return "U"
 
   const parts = normalizedName.split(/\s+/)
-  const initials = parts.length > 1
-    ? `${parts[0]?.[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}`
-    : Array.from(normalizedName).slice(0, 2).join("")
+  const initials =
+    parts.length > 1
+      ? `${parts[0]?.[0] ?? ""}${parts[parts.length - 1]?.[0] ?? ""}`
+      : Array.from(normalizedName).slice(0, 2).join("")
 
   return initials.toUpperCase()
 }
@@ -44,8 +44,7 @@ export function useUserAccountMenu() {
   const logout = useMutation({
     mutationFn: async () => {
       const { error } = await authClient.signOut()
-      if (error)
-        throw error
+      if (error) throw error
     },
     meta: { errorDescription: i18n.t("account.logoutError") },
   })
@@ -53,8 +52,8 @@ export function useUserAccountMenu() {
   const state: AccountState = isPending
     ? ACCOUNT_STATE.LOADING
     : !user
-        ? ACCOUNT_STATE.GUEST
-        : ACCOUNT_STATE.AUTHED
+      ? ACCOUNT_STATE.GUEST
+      : ACCOUNT_STATE.AUTHED
 
   return {
     state,
@@ -67,7 +66,13 @@ export function useUserAccountMenu() {
   }
 }
 
-export function AccountAvatar({ account, size = "sm" }: { account: AccountMenu, size?: "default" | "sm" | "lg" }) {
+export function AccountAvatar({
+  account,
+  size = "sm",
+}: {
+  account: AccountMenu
+  size?: "default" | "sm" | "lg"
+}) {
   return (
     <Avatar size={size} className={cn(account.isPending && "animate-pulse")}>
       <AvatarImage src={account.avatarSrc || ""} alt={account.displayName} />
@@ -93,7 +98,9 @@ export function AccountDropdownContent({
         <div className="grid flex-1 text-left text-sm leading-tight">
           <span className="truncate font-medium text-foreground">{account.displayName}</span>
           {account.user?.email && (
-            <span className="truncate text-xs font-normal text-muted-foreground">{account.user.email}</span>
+            <span className="truncate text-xs font-normal text-muted-foreground">
+              {account.user.email}
+            </span>
           )}
         </div>
       </div>

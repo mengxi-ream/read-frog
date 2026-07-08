@@ -1,6 +1,7 @@
 import { cssRegistry } from "./css-registry"
 
-const PROPERTY_AND_FONT_FACE_RULES_PATTERN = /(@(?:property|font-face)[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g
+const PROPERTY_AND_FONT_FACE_RULES_PATTERN =
+  /(@(?:property|font-face)[^{}]*\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\})/g
 
 interface ShadowHostOptions {
   position: "inline" | "block"
@@ -43,8 +44,7 @@ export class ShadowHostBuilder {
     if (!inheritStyles) {
       css.push(resetCss)
     }
-    if (cssContent)
-      css.push(...cssContent.map(css => css.replaceAll(":root", ":host")))
+    if (cssContent) css.push(...cssContent.map((css) => css.replaceAll(":root", ":host")))
 
     const { shadowCss, documentCss } = this.splitShadowRootCss(css.join("\n"))
     if (documentCss) {
@@ -68,8 +68,7 @@ export class ShadowHostBuilder {
   }
 
   cleanup() {
-    if (this.documentCssKey)
-      cssRegistry.remove(this.documentCssKey)
+    if (this.documentCssKey) cssRegistry.remove(this.documentCssKey)
   }
 
   splitShadowRootCss(css: string): {

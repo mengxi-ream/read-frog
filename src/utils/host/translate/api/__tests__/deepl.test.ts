@@ -38,13 +38,16 @@ describe("deepl translate adapter", () => {
     })
 
     expect(result).toBe("你好")
-    expect(fetchMock).toHaveBeenCalledWith("https://api-free.deepl.com/v2/translate", expect.objectContaining({
-      method: "POST",
-      headers: expect.objectContaining({
-        "Authorization": "DeepL-Auth-Key test-key:fx",
-        "Content-Type": "application/json",
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://api-free.deepl.com/v2/translate",
+      expect.objectContaining({
+        method: "POST",
+        headers: expect.objectContaining({
+          Authorization: "DeepL-Auth-Key test-key:fx",
+          "Content-Type": "application/json",
+        }),
       }),
-    }))
+    )
 
     const [, requestInit] = fetchMock.mock.calls[0]
     expect(JSON.parse(requestInit.body)).toEqual({
@@ -91,12 +94,14 @@ describe("deepl translate adapter", () => {
       text: vi.fn().mockResolvedValue(""),
     })
 
-    await expect(deeplTranslate("A", "en", "de", {
-      id: "deepl-default",
-      enabled: true,
-      name: "DeepL",
-      provider: "deepl",
-      apiKey: "test-key",
-    })).rejects.toThrow("DeepL translation response count mismatch")
+    await expect(
+      deeplTranslate("A", "en", "de", {
+        id: "deepl-default",
+        enabled: true,
+        name: "DeepL",
+        provider: "deepl",
+        apiKey: "test-key",
+      }),
+    ).rejects.toThrow("DeepL translation response count mismatch")
   })
 })

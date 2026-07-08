@@ -2,26 +2,26 @@ import type { VariantProps } from "class-variance-authority"
 import { cva } from "class-variance-authority"
 import { useEffect, useReducer, useRef } from "react"
 import { browser } from "#imports"
-import { resolveContentScriptAssetBlob, shouldProxyAssetUrl } from "@/utils/content-script/background-asset-url"
+import {
+  resolveContentScriptAssetBlob,
+  shouldProxyAssetUrl,
+} from "@/utils/content-script/background-asset-url"
 import { cn } from "@/utils/styles/utils"
 
-const providerIconVariants = cva(
-  "flex items-center min-w-0",
-  {
-    variants: {
-      size: {
-        sm: "gap-1.5",
-        base: "gap-2",
-        md: "gap-3",
-        lg: "gap-4",
-        xl: "gap-5",
-      },
-    },
-    defaultVariants: {
-      size: "base",
+const providerIconVariants = cva("flex items-center min-w-0", {
+  variants: {
+    size: {
+      sm: "gap-1.5",
+      base: "gap-2",
+      md: "gap-3",
+      lg: "gap-4",
+      xl: "gap-5",
     },
   },
-)
+  defaultVariants: {
+    size: "base",
+  },
+})
 
 const iconContainerVariants = cva(
   "rounded-full bg-white dark:bg-muted border border-border flex items-center justify-center flex-shrink-0",
@@ -41,41 +41,35 @@ const iconContainerVariants = cva(
   },
 )
 
-const iconVariants = cva(
-  "",
-  {
-    variants: {
-      size: {
-        sm: "size-[11px]",
-        base: "size-3.5",
-        md: "size-5",
-        lg: "size-6",
-        xl: "size-7",
-      },
-    },
-    defaultVariants: {
-      size: "base",
+const iconVariants = cva("", {
+  variants: {
+    size: {
+      sm: "size-[11px]",
+      base: "size-3.5",
+      md: "size-5",
+      lg: "size-6",
+      xl: "size-7",
     },
   },
-)
+  defaultVariants: {
+    size: "base",
+  },
+})
 
-const textVariants = cva(
-  "truncate",
-  {
-    variants: {
-      size: {
-        sm: "text-sm",
-        base: "text-base",
-        md: "text-md",
-        lg: "text-lg",
-        xl: "text-xl",
-      },
-    },
-    defaultVariants: {
-      size: "base",
+const textVariants = cva("truncate", {
+  variants: {
+    size: {
+      sm: "text-sm",
+      base: "text-base",
+      md: "text-md",
+      lg: "text-lg",
+      xl: "text-xl",
     },
   },
-)
+  defaultVariants: {
+    size: "base",
+  },
+})
 
 interface ProviderIconProps extends VariantProps<typeof providerIconVariants> {
   logo: string
@@ -84,7 +78,7 @@ interface ProviderIconProps extends VariantProps<typeof providerIconVariants> {
   textClassName?: string
 }
 
-type ResolvedLogo = { kind: "src", src: string } | { kind: "bitmap", bitmap: ImageBitmap } | null
+type ResolvedLogo = { kind: "src"; src: string } | { kind: "bitmap"; bitmap: ImageBitmap } | null
 
 const PROTOCOL_RELATIVE_URL_RE = /^(?:[a-z][a-z\d+\-.]*:)?\/\//i
 const SCHEME_URL_RE = /^[a-z][a-z\d+\-.]*:/i
@@ -104,8 +98,7 @@ function normalizeLogoUrl(logo: string) {
 
   try {
     return new URL(logo, browser.runtime.getURL("/")).href
-  }
-  catch {
+  } catch {
     return logo
   }
 }
@@ -114,7 +107,13 @@ function getInitialResolvedLogo(logo: string): ResolvedLogo {
   return shouldProxyAssetUrl(logo) ? null : { kind: "src", src: logo }
 }
 
-export default function ProviderIcon({ logo, name, size, className, textClassName }: ProviderIconProps) {
+export default function ProviderIcon({
+  logo,
+  name,
+  size,
+  className,
+  textClassName,
+}: ProviderIconProps) {
   const normalizedLogo = normalizeLogoUrl(logo)
   const [resolvedLogo, setResolvedLogo] = useReducer(
     (_current: ResolvedLogo, next: ResolvedLogo) => next,
@@ -144,24 +143,26 @@ export default function ProviderIcon({ logo, name, size, className, textClassNam
       }
     }
 
-    void resolveContentScriptAssetBlob(normalizedLogo).then(async (assetBlob) => {
-      if (!assetBlob || isCancelled) {
-        return
-      }
+    void resolveContentScriptAssetBlob(normalizedLogo)
+      .then(async (assetBlob) => {
+        if (!assetBlob || isCancelled) {
+          return
+        }
 
-      const nextBitmap = await createImageBitmap(assetBlob)
-      if (isCancelled) {
-        nextBitmap.close?.()
-        return
-      }
+        const nextBitmap = await createImageBitmap(assetBlob)
+        if (isCancelled) {
+          nextBitmap.close?.()
+          return
+        }
 
-      resolvedBitmap = nextBitmap
-      setResolvedLogo({ kind: "bitmap", bitmap: nextBitmap })
-    }).catch(() => {
-      if (!isCancelled) {
-        setResolvedLogo(null)
-      }
-    })
+        resolvedBitmap = nextBitmap
+        setResolvedLogo({ kind: "bitmap", bitmap: nextBitmap })
+      })
+      .catch(() => {
+        if (!isCancelled) {
+          setResolvedLogo(null)
+        }
+      })
 
     return () => {
       isCancelled = true

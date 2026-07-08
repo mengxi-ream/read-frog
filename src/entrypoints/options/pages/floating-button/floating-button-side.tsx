@@ -14,15 +14,13 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function FloatingButtonSide() {
-  const [floatingButton, setFloatingButton] = useAtom(
-    configFieldsAtomMap.floatingButton,
-  )
+  const [floatingButton, setFloatingButton] = useAtom(configFieldsAtomMap.floatingButton)
 
   // Resolved at render (not module scope) so labels follow a runtime UI-language switch.
   const items = [
     { value: "right", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.side.right") },
     { value: "left", label: i18n.t("options.floatingButtonAndToolbar.floatingButton.side.left") },
-  ] satisfies Array<{ value: FloatingButtonSideValue, label: string }>
+  ] satisfies Array<{ value: FloatingButtonSideValue; label: string }>
 
   return (
     <ConfigCard
@@ -36,8 +34,7 @@ export function FloatingButtonSide() {
           value={floatingButton.side}
           onValueChange={(value) => {
             const parsedValue = floatingButtonSideSchema.safeParse(value)
-            if (!parsedValue.success)
-              return
+            if (!parsedValue.success) return
             void setFloatingButton({ ...floatingButton, side: parsedValue.data })
           }}
         >
@@ -46,7 +43,7 @@ export function FloatingButtonSide() {
           </SelectTrigger>
           <SelectContent align="end" className="min-w-fit">
             <SelectGroup>
-              {items.map(item => (
+              {items.map((item) => (
                 <SelectItem key={item.value} value={item.value}>
                   {item.label}
                 </SelectItem>

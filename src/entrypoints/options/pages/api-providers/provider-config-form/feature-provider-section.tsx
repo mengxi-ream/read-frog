@@ -3,11 +3,20 @@ import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useAtomValue, useSetAtom } from "jotai"
 import { useState } from "react"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/base-ui/collapsible"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProvider } from "@/types/config/provider"
 import { configAtom, writeConfigAtom } from "@/utils/atoms/config"
-import { buildFeatureProviderPatch, FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
+import {
+  buildFeatureProviderPatch,
+  FEATURE_KEYS,
+  FEATURE_PROVIDER_DEFS,
+  getFeatureLabelI18nKey,
+} from "@/utils/constants/feature-providers"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { withForm } from "./form"
@@ -15,27 +24,26 @@ import { withForm } from "./form"
 export const FeatureProviderSection = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerType = useSelector(form.store, state => state.values.provider)
-    const providerId = useSelector(form.store, state => state.values.id)
+    const providerType = useSelector(form.store, (state) => state.values.provider)
+    const providerId = useSelector(form.store, (state) => state.values.id)
     const config = useAtomValue(configAtom)
     const setConfig = useSetAtom(writeConfigAtom)
     const [isOpen, setIsOpen] = useState(false)
 
-    const compatibleFeatures = FEATURE_KEYS
-      .filter(featureKey => FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType))
+    const compatibleFeatures = FEATURE_KEYS.filter((featureKey) =>
+      FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType),
+    )
     const supportsLanguageDetection = isLLMProvider(providerType)
 
-    const customActions = isLLMProvider(providerType)
-      ? config.selectionToolbar.customActions
-      : []
+    const customActions = isLLMProvider(providerType) ? config.selectionToolbar.customActions : []
 
     const getEnableCurrentProviderPatch = () => {
-      const targetProvider = config.providersConfig.find(provider => provider.id === providerId)
+      const targetProvider = config.providersConfig.find((provider) => provider.id === providerId)
       if (!targetProvider || targetProvider.enabled) {
         return null
       }
 
-      return config.providersConfig.map(provider =>
+      return config.providersConfig.map((provider) =>
         provider.id === providerId ? { ...provider, enabled: true } : provider,
       )
     }
@@ -48,10 +56,7 @@ export const FeatureProviderSection = withForm({
         <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
           <Icon
             icon="tabler:chevron-right"
-            className={cn(
-              "size-4 transition-transform duration-200",
-              isOpen && "rotate-90",
-            )}
+            className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}
           />
           <span>{i18n.t("options.apiProviders.form.featureProviders")}</span>
         </CollapsibleTrigger>
@@ -80,17 +85,21 @@ export const FeatureProviderSection = withForm({
                       }
                     }}
                   />
-                  <span className="text-sm">
-                    {i18n.t(getFeatureLabelI18nKey(featureKey))}
-                  </span>
+                  <span className="text-sm">{i18n.t(getFeatureLabelI18nKey(featureKey))}</span>
                 </div>
               )
             })}
             {supportsLanguageDetection && (
               <div className="flex items-center gap-2">
                 <Switch
-                  checked={config.languageDetection.mode === "llm" && config.languageDetection.providerId === providerId}
-                  disabled={config.languageDetection.mode === "llm" && config.languageDetection.providerId === providerId}
+                  checked={
+                    config.languageDetection.mode === "llm" &&
+                    config.languageDetection.providerId === providerId
+                  }
+                  disabled={
+                    config.languageDetection.mode === "llm" &&
+                    config.languageDetection.providerId === providerId
+                  }
                   onCheckedChange={(checked) => {
                     if (checked) {
                       const providersConfigPatch = getEnableCurrentProviderPatch()
@@ -114,9 +123,7 @@ export const FeatureProviderSection = withForm({
                     }
                   }}
                 />
-                <span className="text-sm">
-                  {i18n.t("options.general.languageDetection.title")}
-                </span>
+                <span className="text-sm">{i18n.t("options.general.languageDetection.title")}</span>
               </div>
             )}
             {customActions.map((action) => {
@@ -128,18 +135,29 @@ export const FeatureProviderSection = withForm({
                     disabled={isAssigned}
                     onCheckedChange={(checked) => {
                       if (checked) {
-                        const updatedCustomActions = config.selectionToolbar.customActions.map(currentAction =>
-                          currentAction.id === action.id ? { ...currentAction, providerId } : currentAction,
+                        const updatedCustomActions = config.selectionToolbar.customActions.map(
+                          (currentAction) =>
+                            currentAction.id === action.id
+                              ? { ...currentAction, providerId }
+                              : currentAction,
                         )
                         const providersConfigPatch = getEnableCurrentProviderPatch()
                         if (providersConfigPatch) {
                           void setConfig({
                             providersConfig: providersConfigPatch,
-                            selectionToolbar: { ...config.selectionToolbar, customActions: updatedCustomActions },
+                            selectionToolbar: {
+                              ...config.selectionToolbar,
+                              customActions: updatedCustomActions,
+                            },
                           })
                           return
                         }
-                        void setConfig({ selectionToolbar: { ...config.selectionToolbar, customActions: updatedCustomActions } })
+                        void setConfig({
+                          selectionToolbar: {
+                            ...config.selectionToolbar,
+                            customActions: updatedCustomActions,
+                          },
+                        })
                       }
                     }}
                   />

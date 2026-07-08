@@ -13,7 +13,7 @@ export function MainMenu({ onNavigate }: { onNavigate: (id: ViewId) => void }) {
         <DownloadTranslatedSubtitles />
         <DownloadSourceSubtitles />
 
-        {VISIBLE_SUBPAGES.map(page => (
+        {VISIBLE_SUBPAGES.map((page) => (
           <SubpageMenuEntry
             key={page.id}
             icon={page.icon}

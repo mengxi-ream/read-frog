@@ -32,24 +32,30 @@ interface ConnectionTestVariables {
 const connectionTestFeedbackIconConfig = {
   success: {
     Icon: IconCheck,
-    containerClassName: "flex size-4 items-center justify-center rounded-full bg-green-200 dark:bg-green-800/50",
+    containerClassName:
+      "flex size-4 items-center justify-center rounded-full bg-green-200 dark:bg-green-800/50",
     iconClassName: "size-3 text-green-700 dark:text-green-300 stroke-[2.5]",
   },
   failed: {
     Icon: IconX,
-    containerClassName: "flex size-4 items-center justify-center rounded-full bg-red-200 dark:bg-red-800/50",
+    containerClassName:
+      "flex size-4 items-center justify-center rounded-full bg-red-200 dark:bg-red-800/50",
     iconClassName: "size-3 text-red-700 dark:text-red-300 stroke-[2.5]",
   },
   slow: {
     Icon: IconHourglassLow,
-    containerClassName: "flex size-4 items-center justify-center rounded-full bg-yellow-200 dark:bg-yellow-800/50",
+    containerClassName:
+      "flex size-4 items-center justify-center rounded-full bg-yellow-200 dark:bg-yellow-800/50",
     iconClassName: "size-3 text-yellow-700 dark:text-yellow-300 stroke-[2.5]",
   },
-} satisfies Record<ConnectionTestFeedback, {
-  Icon: typeof IconCheck
-  containerClassName: string
-  iconClassName: string
-}>
+} satisfies Record<
+  ConnectionTestFeedback,
+  {
+    Icon: typeof IconCheck
+    containerClassName: string
+    iconClassName: string
+  }
+>
 
 const connectionTestFeedbackLabelKey = {
   success: "options.apiProviders.testConnection.success",
@@ -78,9 +84,10 @@ function ConnectionFeedbackIcon({ feedback }: { feedback: ConnectionTestFeedback
 export function ConnectionTestButton({ providerConfig }: { providerConfig: APIProviderConfig }) {
   const { apiKey, provider } = providerConfig
   const baseURL = "baseURL" in providerConfig ? providerConfig.baseURL : undefined
-  const providerSpecificSettings = "providerSpecificSettings" in providerConfig
-    ? providerConfig.providerSpecificSettings
-    : undefined
+  const providerSpecificSettings =
+    "providerSpecificSettings" in providerConfig
+      ? providerConfig.providerSpecificSettings
+      : undefined
   const [feedback, setFeedback] = useState<ConnectionTestFeedbackState | null>(null)
   const latestRequestIdRef = useRef(0)
   const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -89,7 +96,12 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     // for safety, we should not include apiKey in the mutationKey
     mutationKey: ["apiConnection", getObjectWithoutAPIKeys(providerConfig)],
     mutationFn: async (_variables: ConnectionTestVariables) => {
-      return await executeTranslate("Hi", DEFAULT_CONFIG.language, providerConfig, getTranslatePrompt)
+      return await executeTranslate(
+        "Hi",
+        DEFAULT_CONFIG.language,
+        providerConfig,
+        getTranslatePrompt,
+      )
     },
   })
 
@@ -100,27 +112,32 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     }
   }, [])
 
-  const showFeedback = useCallback((nextFeedback: ConnectionTestFeedback, requestId: number) => {
-    if (requestId !== latestRequestIdRef.current) {
-      return
-    }
-
-    clearFeedbackTimeout()
-    setFeedback({
-      status: nextFeedback,
-      requestId,
-      provider,
-      apiKey,
-      baseURL,
-      providerSpecificSettings,
-    })
-    feedbackTimeoutRef.current = setTimeout(() => {
-      if (requestId === latestRequestIdRef.current) {
-        setFeedback(currentFeedback => currentFeedback?.requestId === requestId ? null : currentFeedback)
+  const showFeedback = useCallback(
+    (nextFeedback: ConnectionTestFeedback, requestId: number) => {
+      if (requestId !== latestRequestIdRef.current) {
+        return
       }
-      feedbackTimeoutRef.current = null
-    }, CONNECTION_TEST_FEEDBACK_DURATION_MS)
-  }, [apiKey, baseURL, clearFeedbackTimeout, provider, providerSpecificSettings])
+
+      clearFeedbackTimeout()
+      setFeedback({
+        status: nextFeedback,
+        requestId,
+        provider,
+        apiKey,
+        baseURL,
+        providerSpecificSettings,
+      })
+      feedbackTimeoutRef.current = setTimeout(() => {
+        if (requestId === latestRequestIdRef.current) {
+          setFeedback((currentFeedback) =>
+            currentFeedback?.requestId === requestId ? null : currentFeedback,
+          )
+        }
+        feedbackTimeoutRef.current = null
+      }, CONNECTION_TEST_FEEDBACK_DURATION_MS)
+    },
+    [apiKey, baseURL, clearFeedbackTimeout, provider, providerSpecificSettings],
+  )
 
   const handleTestConnection = () => {
     clearFeedbackTimeout()
@@ -130,21 +147,24 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     latestRequestIdRef.current = requestId
     const startedAt = Date.now()
 
-    mutation.mutate({ requestId, startedAt }, {
-      onSuccess: (_data, variables) => {
-        showFeedback(getConnectionTestFeedback(variables.startedAt), variables.requestId)
+    mutation.mutate(
+      { requestId, startedAt },
+      {
+        onSuccess: (_data, variables) => {
+          showFeedback(getConnectionTestFeedback(variables.startedAt), variables.requestId)
+        },
+        onError: (_error, variables) => {
+          showFeedback("failed", variables.requestId)
+        },
       },
-      onError: (_error, variables) => {
-        showFeedback("failed", variables.requestId)
-      },
-    })
+    )
   }
 
   useEffect(() => {
     latestRequestIdRef.current += 1
     clearFeedbackTimeout()
     mutation.reset()
-  // eslint-disable-next-line react/exhaustive-deps
+    // eslint-disable-next-line react/exhaustive-deps
   }, [provider, apiKey, baseURL, providerSpecificSettings, clearFeedbackTimeout])
 
   useEffect(() => {
@@ -154,14 +174,15 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
     }
   }, [clearFeedbackTimeout])
 
-  const visibleFeedback = feedback
-    && feedback.requestId === latestRequestIdRef.current
-    && feedback.provider === provider
-    && feedback.apiKey === apiKey
-    && feedback.baseURL === baseURL
-    && feedback.providerSpecificSettings === providerSpecificSettings
-    ? feedback.status
-    : null
+  const visibleFeedback =
+    feedback &&
+    feedback.requestId === latestRequestIdRef.current &&
+    feedback.provider === provider &&
+    feedback.apiKey === apiKey &&
+    feedback.baseURL === baseURL &&
+    feedback.providerSpecificSettings === providerSpecificSettings
+      ? feedback.status
+      : null
 
   return (
     <Button
@@ -171,29 +192,19 @@ export function ConnectionTestButton({ providerConfig }: { providerConfig: APIPr
       onClick={handleTestConnection}
       disabled={mutation.isPending || (!apiKey && provider !== "deeplx" && provider !== "ollama")}
     >
-      {mutation.isPending
-        ? (
-            <>
-              <LoadingDots className="scale-75" />
-              <span className="text-xs">
-                {i18n.t("options.apiProviders.testConnection.testing")}
-              </span>
-            </>
-          )
-        : visibleFeedback
-          ? (
-              <>
-                <ConnectionFeedbackIcon feedback={visibleFeedback} />
-                <span className="text-xs">
-                  {i18n.t(connectionTestFeedbackLabelKey[visibleFeedback])}
-                </span>
-              </>
-            )
-          : (
-              <span className="text-xs">
-                {i18n.t("options.apiProviders.testConnection.button")}
-              </span>
-            )}
+      {mutation.isPending ? (
+        <>
+          <LoadingDots className="scale-75" />
+          <span className="text-xs">{i18n.t("options.apiProviders.testConnection.testing")}</span>
+        </>
+      ) : visibleFeedback ? (
+        <>
+          <ConnectionFeedbackIcon feedback={visibleFeedback} />
+          <span className="text-xs">{i18n.t(connectionTestFeedbackLabelKey[visibleFeedback])}</span>
+        </>
+      ) : (
+        <span className="text-xs">{i18n.t("options.apiProviders.testConnection.button")}</span>
+      )}
     </Button>
   )
 }

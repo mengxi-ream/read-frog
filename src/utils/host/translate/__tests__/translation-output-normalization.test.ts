@@ -7,7 +7,9 @@ describe("normalizeTranslationOutput", () => {
 
   it("decodes apostrophe and quote entities returned by Google translateHtml", () => {
     expect(normalizeTranslationOutput(googleProvider, "L&#39;Iran")).toBe("L'Iran")
-    expect(normalizeTranslationOutput(googleProvider, "&quot;Dichiarazione&quot;")).toBe("\"Dichiarazione\"")
+    expect(normalizeTranslationOutput(googleProvider, "&quot;Dichiarazione&quot;")).toBe(
+      '"Dichiarazione"',
+    )
   })
 
   it("decodes safe text entities for Google Translate", () => {
@@ -20,7 +22,9 @@ describe("normalizeTranslationOutput", () => {
   })
 
   it("keeps real HTML tags while decoding text entities inside them", () => {
-    expect(normalizeTranslationOutput(googleProvider, "<span>L&#39;Iran</span>")).toBe("<span>L'Iran</span>")
+    expect(normalizeTranslationOutput(googleProvider, "<span>L&#39;Iran</span>")).toBe(
+      "<span>L'Iran</span>",
+    )
   })
 
   it("does not normalize non-Google providers", () => {

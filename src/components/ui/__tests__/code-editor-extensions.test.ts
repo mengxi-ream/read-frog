@@ -16,7 +16,10 @@ import { json, jsonParseLinter } from "@codemirror/lang-json"
 import { linter, lintGutter } from "@codemirror/lint"
 import { EditorState } from "@codemirror/state"
 import { color } from "@uiw/codemirror-extensions-color"
-import { getDefaultExtensions, EditorState as ReactCodeMirrorEditorState } from "@uiw/react-codemirror"
+import {
+  getDefaultExtensions,
+  EditorState as ReactCodeMirrorEditorState,
+} from "@uiw/react-codemirror"
 import { describe, expect, it } from "vitest"
 import { cssLinter } from "@/utils/css/lint-css"
 
@@ -34,25 +37,29 @@ describe("codeMirror extension sets resolve with a single @codemirror/state inst
       return jsonParseLinter()(view)
     })
 
-    expect(() => EditorState.create({
-      extensions: [
-        ...getDefaultExtensions({ theme: "dark" }),
-        json(),
-        allowEmptyJsonLinter,
-        lintGutter(),
-      ],
-    })).not.toThrow()
+    expect(() =>
+      EditorState.create({
+        extensions: [
+          ...getDefaultExtensions({ theme: "dark" }),
+          json(),
+          allowEmptyJsonLinter,
+          lintGutter(),
+        ],
+      }),
+    ).not.toThrow()
   })
 
   it("resolves the CSSCodeEditor extension set", () => {
-    expect(() => EditorState.create({
-      extensions: [
-        ...getDefaultExtensions({ theme: "light" }),
-        color,
-        css(),
-        cssLinter(),
-        lintGutter(),
-      ],
-    })).not.toThrow()
+    expect(() =>
+      EditorState.create({
+        extensions: [
+          ...getDefaultExtensions({ theme: "light" }),
+          color,
+          css(),
+          cssLinter(),
+          lintGutter(),
+        ],
+      }),
+    ).not.toThrow()
   })
 })

@@ -20,15 +20,17 @@ function SubtitlesContent() {
   const translationAbove = translationPosition === "above"
   const showMain = displayMode !== "translationOnly"
   const isDuplicateTranslation = !!subtitle?.translation && subtitle.translation === subtitle.text
-  const showTranslation = displayMode !== "originalOnly"
-    && !(displayMode === "bilingual" && isDuplicateTranslation)
+  const showTranslation =
+    displayMode !== "originalOnly" && !(displayMode === "bilingual" && isDuplicateTranslation)
 
   const containerStyle = {
     backgroundColor: `rgba(0, 0, 0, ${container.backgroundOpacity / 100})`,
   }
 
   return (
-    <div className={`${SUBTITLES_VIEW_CLASS} flex w-full flex-col items-center justify-end pb-3 pointer-events-none`}>
+    <div
+      className={`${SUBTITLES_VIEW_CLASS} flex w-full flex-col items-center justify-end pb-3 pointer-events-none`}
+    >
       <div
         className="flex flex-col gap-2 w-fit max-w-[90%] mx-auto px-2 py-1.5 rounded text-center text-white pointer-events-auto select-text cursor-text"
         style={containerStyle}

@@ -42,7 +42,10 @@ export function selectTTSVoice(
   }
 
   if (detectedLanguage && detectedLanguage in ttsConfig.languageVoices) {
-    return ttsConfig.languageVoices[detectedLanguage as keyof typeof ttsConfig.languageVoices] ?? ttsConfig.defaultVoice
+    return (
+      ttsConfig.languageVoices[detectedLanguage as keyof typeof ttsConfig.languageVoices] ??
+      ttsConfig.defaultVoice
+    )
   }
 
   return ttsConfig.defaultVoice
@@ -84,7 +87,11 @@ function getTTSFriendlyErrorDescription(error: Error): string | undefined {
     return "Too many TTS requests. Please try again in a moment."
   }
 
-  if (error.message.includes("[NETWORK_ERROR]") || error.message.includes("[TOKEN_FETCH_FAILED]") || error.message.includes("[TOKEN_INVALID]")) {
+  if (
+    error.message.includes("[NETWORK_ERROR]") ||
+    error.message.includes("[TOKEN_FETCH_FAILED]") ||
+    error.message.includes("[TOKEN_INVALID]")
+  ) {
     return "Edge TTS is temporarily unavailable. Please check your network and retry."
   }
 
@@ -153,7 +160,12 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       activeRequestIdRef.current = requestId
       let didStartPlayback = false
 
-      const selectedVoice = await resolveVoiceForText(text, ttsConfig, languageDetection.mode === "llm", forcedVoice)
+      const selectedVoice = await resolveVoiceForText(
+        text,
+        ttsConfig,
+        languageDetection.mode === "llm",
+        forcedVoice,
+      )
       if (shouldStopRef.current || activeRequestIdRef.current !== requestId) {
         return
       }
@@ -162,9 +174,24 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       await sendMessage("ttsPlaybackPrepare")
 
       const fetchChunkAudio = async (chunk: string) => {
-        logger.info("[TextToSpeech] Fetching chunk audio", { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume })
+        logger.info("[TextToSpeech] Fetching chunk audio", {
+          text: chunk,
+          voice: selectedVoice,
+          rate: ttsConfig.rate,
+          pitch: ttsConfig.pitch,
+          volume: ttsConfig.volume,
+        })
         return queryClient.fetchQuery({
-          queryKey: ["tts-audio", { text: chunk, voice: selectedVoice, rate: ttsConfig.rate, pitch: ttsConfig.pitch, volume: ttsConfig.volume }],
+          queryKey: [
+            "tts-audio",
+            {
+              text: chunk,
+              voice: selectedVoice,
+              rate: ttsConfig.rate,
+              pitch: ttsConfig.pitch,
+              volume: ttsConfig.volume,
+            },
+          ],
           queryFn: () => synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig),
           staleTime: Number.POSITIVE_INFINITY,
           gcTime: 1000 * 60 * 10,
@@ -186,8 +213,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
             didStartPlayback = true
           }
           return playbackResult.ok
-        }
-        finally {
+        } finally {
           setIsPlaying(false)
         }
       }
@@ -199,7 +225,8 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
 
         setCurrentChunk(index + 1)
         const currentAudioPromise = fetchChunkAudio(chunks[index]!)
-        const nextAudioPromise = index + 1 < chunks.length ? fetchChunkAudio(chunks[index + 1]!) : null
+        const nextAudioPromise =
+          index + 1 < chunks.length ? fetchChunkAudio(chunks[index + 1]!) : null
         const audioChunk = await currentAudioPromise
 
         if (shouldStopRef.current) {
@@ -250,10 +277,7 @@ export function useTextToSpeech(surface: AnalyticsSurface = ANALYTICS_SURFACE.SE
       text,
       ttsConfig,
       forcedVoice: options?.forcedVoice,
-      analyticsContext: createFeatureUsageContext(
-        ANALYTICS_FEATURE.TEXT_TO_SPEECH,
-        surface,
-      ),
+      analyticsContext: createFeatureUsageContext(ANALYTICS_FEATURE.TEXT_TO_SPEECH, surface),
     })
   }
 

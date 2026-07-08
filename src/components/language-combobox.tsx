@@ -35,30 +35,26 @@ export function LanguageCombobox({
   placeholder,
   className,
 }: LanguageComboboxProps) {
-  const languageItems = useMemo(
-    () => getLanguageItems(detectedLangCode),
-    [detectedLangCode],
-  )
+  const languageItems = useMemo(() => getLanguageItems(detectedLangCode), [detectedLangCode])
 
   return (
     <Combobox
-      value={languageItems.find(item => item.value === value) ?? null}
+      value={languageItems.find((item) => item.value === value) ?? null}
       onValueChange={(item) => {
-        if (item)
-          onValueChange(item.value)
+        if (item) onValueChange(item.value)
       }}
       items={languageItems}
       filter={filterLanguage}
       autoHighlight
     >
       <ComboboxTrigger
-        render={(
+        render={
           <Button
             type="button"
             variant="outline"
             className={cn("w-auto min-w-0 justify-between font-normal", className)}
           />
-        )}
+        }
       >
         <ComboboxValue placeholder={placeholder ?? i18n.t("translationHub.searchLanguages")}>
           {(item: LanguageItem | null) => (

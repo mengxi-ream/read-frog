@@ -30,15 +30,13 @@ function InsertableTextarea({ className, ref, ...props }: InsertableTextareaProp
 
   React.useImperativeHandle(ref, () => {
     const textarea = textareaRef.current
-    if (!textarea)
-      throw new Error("Textarea ref is null")
+    if (!textarea) throw new Error("Textarea ref is null")
 
     return {
       ...textarea,
       insertTextAtCursor(text: string) {
         const textarea = textareaRef.current
-        if (!textarea)
-          return
+        if (!textarea) return
 
         const { selectionStart, selectionEnd, value } = textarea
         const newValue = value.slice(0, selectionStart) + text + value.slice(selectionEnd)
@@ -62,18 +60,19 @@ function InsertableTextarea({ className, ref, ...props }: InsertableTextareaProp
     }
   }, [])
 
-  return (
-    <Textarea
-      ref={textareaRef}
-      className={className}
-      {...props}
-    />
-  )
+  return <Textarea ref={textareaRef} className={className} {...props} />
 }
 
 const DEFAULT_INSERT_CELLS: InsertCell[] = []
 
-function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS, cellsClassName, cellClassName, containerClassName, ...props }: QuickInsertableTextareaProps) {
+function QuickInsertableTextarea({
+  className,
+  insertCells = DEFAULT_INSERT_CELLS,
+  cellsClassName,
+  cellClassName,
+  containerClassName,
+  ...props
+}: QuickInsertableTextareaProps) {
   const textareaRef = React.useRef<InsertableTextareaHandle>(null)
 
   const handleCellClick = (cellText: string) => {
@@ -81,32 +80,16 @@ function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS
   }
 
   if (insertCells.length === 0) {
-    return (
-      <InsertableTextarea
-        ref={textareaRef}
-        className={className}
-        {...props}
-      />
-    )
+    return <InsertableTextarea ref={textareaRef} className={className} {...props} />
   }
 
   return (
     <div className={cn("space-y-2 w-full min-w-0", containerClassName)}>
-      <InsertableTextarea
-        ref={textareaRef}
-        className={className}
-        {...props}
-      />
-      <div className={cn(
-        "flex flex-wrap gap-2",
-        cellsClassName,
-      )}
-      >
-        {insertCells.map(cell => (
+      <InsertableTextarea ref={textareaRef} className={className} {...props} />
+      <div className={cn("flex flex-wrap gap-2", cellsClassName)}>
+        {insertCells.map((cell) => (
           <Tooltip key={cell.text}>
-            <TooltipTrigger
-              render={<div className="inline-flex" />}
-            >
+            <TooltipTrigger render={<div className="inline-flex" />}>
               <Button
                 type="button"
                 variant="outline"
@@ -129,4 +112,9 @@ function QuickInsertableTextarea({ className, insertCells = DEFAULT_INSERT_CELLS
 }
 
 export { InsertableTextarea, QuickInsertableTextarea }
-export type { InsertableTextareaHandle, InsertableTextareaProps, InsertCell, QuickInsertableTextareaProps }
+export type {
+  InsertableTextareaHandle,
+  InsertableTextareaProps,
+  InsertCell,
+  QuickInsertableTextareaProps,
+}

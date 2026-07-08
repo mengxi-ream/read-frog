@@ -9,11 +9,7 @@ interface SubpageMenuEntryProps {
   onClick: () => void
 }
 
-export function SubpageMenuEntry({
-  icon,
-  label,
-  onClick,
-}: SubpageMenuEntryProps) {
+export function SubpageMenuEntry({ icon, label, onClick }: SubpageMenuEntryProps) {
   return (
     <Button
       type="button"

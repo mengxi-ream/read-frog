@@ -22,9 +22,7 @@ export default function HiddenButton({
       className={cn(
         "border-border cursor-pointer rounded-full border bg-white shadow-lg p-1.5 text-neutral-600 dark:text-neutral-400 transition-transform duration-300 hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800",
         side === "right" ? "mr-2" : "ml-2",
-        expanded
-          ? "translate-x-0"
-          : side === "right" ? "translate-x-12" : "-translate-x-12",
+        expanded ? "translate-x-0" : side === "right" ? "translate-x-12" : "-translate-x-12",
         className,
       )}
       onClick={onClick}

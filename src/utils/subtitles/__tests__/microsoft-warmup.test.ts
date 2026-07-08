@@ -1,6 +1,5 @@
 import type { SubtitlesFragment } from "../types"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-
 import { sendMessage } from "@/utils/message"
 import { microsoftWarmupTranslate } from "../warmup/microsoft-warmup"
 
@@ -65,9 +64,7 @@ describe("microsoftWarmupTranslate", () => {
   })
 
   it("splits fragments into chunks by element count (100 max)", async () => {
-    const fragments = Array.from({ length: 150 }, (_, i) =>
-      makeFragment(`Text ${i}`, i * 1000),
-    )
+    const fragments = Array.from({ length: 150 }, (_, i) => makeFragment(`Text ${i}`, i * 1000))
 
     mockSendMessage
       .mockResolvedValueOnce(Array.from({ length: 100 }, (_, i) => `翻译 ${i}`) as never)
@@ -105,9 +102,7 @@ describe("microsoftWarmupTranslate", () => {
   })
 
   it("handles partial chunk failure gracefully", async () => {
-    const fragments = Array.from({ length: 150 }, (_, i) =>
-      makeFragment(`Text ${i}`, i * 1000),
-    )
+    const fragments = Array.from({ length: 150 }, (_, i) => makeFragment(`Text ${i}`, i * 1000))
 
     // chunk1: 100 fragments succeeds, chunk2: 50 fragments fails
     mockSendMessage

@@ -50,7 +50,8 @@ import {
 import { i18n } from "@/utils/i18n"
 import { withForm } from "./form"
 
-type CustomActionFormKey = "fieldName"
+type CustomActionFormKey =
+  | "fieldName"
   | "fieldNamePlaceholder"
   | "fieldType"
   | "fieldDescription"
@@ -67,11 +68,15 @@ type CustomActionFormKey = "fieldName"
   | "addFieldDialog.title"
   | "editFieldDialog.title"
 
-type CustomActionFormI18nKey = `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${CustomActionFormKey}`
-type CustomActionTokenI18nKey = `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${(typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]}`
+type CustomActionFormI18nKey =
+  `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${CustomActionFormKey}`
+type CustomActionTokenI18nKey =
+  `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${(typeof SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS)[number]}`
 
 function t(key: CustomActionFormKey) {
-  return i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}` as CustomActionFormI18nKey)
+  return i18n.t(
+    `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.${key}` as CustomActionFormI18nKey,
+  )
 }
 
 function FieldDialog({
@@ -103,17 +108,23 @@ function FieldDialog({
   const validateNameField = (value: string) => {
     const errorType = getOutputSchemaFieldNameError(value, existingFields, outputField.id)
     if (errorType === "blank") {
-      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired")
+      return i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired",
+      )
     }
     if (errorType === "duplicate") {
-      return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey")
+      return i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey",
+      )
     }
     return undefined
   }
 
-  const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map(token => ({
+  const customActionInsertCells = SELECTION_TOOLBAR_CUSTOM_ACTION_TOKENS.map((token) => ({
     text: getSelectionToolbarCustomActionTokenCellText(token),
-    description: i18n.t(`options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}` as CustomActionTokenI18nKey),
+    description: i18n.t(
+      `options.floatingButtonAndToolbar.selectionToolbar.customActions.form.tokens.${token}` as CustomActionTokenI18nKey,
+    ),
   }))
 
   useEffect(() => {
@@ -144,21 +155,18 @@ function FieldDialog({
                 onSubmit: ({ value }) => validateNameField(value),
               }}
             >
-              {nameField => (
+              {(nameField) => (
                 <FieldContext value={nameField}>
-                  <InputField
-                    label={t("fieldName")}
-                    placeholder={t("fieldNamePlaceholder")}
-                  />
+                  <InputField label={t("fieldName")} placeholder={t("fieldNamePlaceholder")} />
                 </FieldContext>
               )}
             </form.Field>
             <form.Field name="type">
-              {typeField => (
+              {(typeField) => (
                 <FieldContext value={typeField}>
                   <SelectField
                     label={t("fieldType")}
-                    items={selectionToolbarCustomActionOutputTypeSchema.options.map(type => ({
+                    items={selectionToolbarCustomActionOutputTypeSchema.options.map((type) => ({
                       value: type,
                       label: i18n.t(`dataTypes.${type}`),
                     }))}
@@ -168,7 +176,7 @@ function FieldDialog({
                     </SelectTrigger>
                     <SelectContent>
                       <SelectGroup>
-                        {selectionToolbarCustomActionOutputTypeSchema.options.map(type => (
+                        {selectionToolbarCustomActionOutputTypeSchema.options.map((type) => (
                           <SelectItem key={type} value={type}>
                             {i18n.t(`dataTypes.${type}`)}
                           </SelectItem>
@@ -180,7 +188,7 @@ function FieldDialog({
               )}
             </form.Field>
             <form.Field name="description">
-              {descriptionField => (
+              {(descriptionField) => (
                 <FieldContext value={descriptionField}>
                   <QuickInsertableTextareaField
                     label={t("fieldDescription")}
@@ -200,7 +208,7 @@ function FieldDialog({
                     <Checkbox
                       id={checkboxId}
                       checked={speakingField.state.value}
-                      onCheckedChange={checked => speakingField.handleChange(checked)}
+                      onCheckedChange={(checked) => speakingField.handleChange(checked)}
                     />
                     <FieldLabel htmlFor={checkboxId}>{t("fieldSpeaking")}</FieldLabel>
                   </Field>
@@ -209,7 +217,7 @@ function FieldDialog({
             </form.Field>
           </FieldGroup>
           <DialogFooter>
-            <form.Subscribe selector={state => [state.canSubmit, state.isSubmitting]}>
+            <form.Subscribe selector={(state) => [state.canSubmit, state.isSubmitting]}>
               {([canSubmit, isSubmitting]) => (
                 <Button type="submit" disabled={!canSubmit || isSubmitting}>
                   {t("editFieldDialog.save")}
@@ -241,7 +249,9 @@ function DeleteFieldDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t("deleteFieldDialog.cancel")}</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={onConfirm}>{t("deleteFieldDialog.confirm")}</AlertDialogAction>
+          <AlertDialogAction variant="destructive" onClick={onConfirm}>
+            {t("deleteFieldDialog.confirm")}
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
@@ -251,8 +261,11 @@ function DeleteFieldDialog({
 export const OutputSchemaField = withForm({
   ...{ defaultValues: {} as SelectionToolbarCustomAction },
   render: function Render({ form }) {
-    const [editingField, setEditingField] = useState<SelectionToolbarCustomActionOutputField | null>(null)
-    const [addingField, setAddingField] = useState<SelectionToolbarCustomActionOutputField | null>(null)
+    const [editingField, setEditingField] =
+      useState<SelectionToolbarCustomActionOutputField | null>(null)
+    const [addingField, setAddingField] = useState<SelectionToolbarCustomActionOutputField | null>(
+      null,
+    )
     const [deletingFieldId, setDeletingFieldId] = useState<string | null>(null)
 
     return (
@@ -262,16 +275,26 @@ export const OutputSchemaField = withForm({
           onChange: ({ value }) => {
             const outputSchema = Array.isArray(value) ? value : []
             if (outputSchema.length === 0) {
-              return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.outputSchemaRequired")
+              return i18n.t(
+                "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.outputSchemaRequired",
+              )
             }
 
             for (const outputField of outputSchema) {
-              const errorType = getOutputSchemaFieldNameError(outputField.name, outputSchema, outputField.id)
+              const errorType = getOutputSchemaFieldNameError(
+                outputField.name,
+                outputSchema,
+                outputField.id,
+              )
               if (errorType === "blank") {
-                return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired")
+                return i18n.t(
+                  "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.fieldKeyRequired",
+                )
               }
               if (errorType === "duplicate") {
-                return i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey")
+                return i18n.t(
+                  "options.floatingButtonAndToolbar.selectionToolbar.customActions.errors.duplicateFieldKey",
+                )
               }
             }
 
@@ -307,11 +330,16 @@ export const OutputSchemaField = withForm({
                   void form.handleSubmit()
                 }}
                 className="flex flex-col gap-2"
-                renderItem={outputField => (
+                renderItem={(outputField) => (
                   <div className="flex items-center gap-2 rounded-lg border bg-card p-2">
-                    <Icon icon="tabler:grip-vertical" className="size-4 text-muted-foreground shrink-0" />
+                    <Icon
+                      icon="tabler:grip-vertical"
+                      className="size-4 text-muted-foreground shrink-0"
+                    />
                     <span className="text-sm font-medium shrink-0">{outputField.name}</span>
-                    <Badge variant="secondary" className="shrink-0">{i18n.t(`dataTypes.${outputField.type}`)}</Badge>
+                    <Badge variant="secondary" className="shrink-0">
+                      {i18n.t(`dataTypes.${outputField.type}`)}
+                    </Badge>
                     <span className="text-sm text-muted-foreground truncate min-w-0 flex-1">
                       {outputField.description || "—"}
                     </span>
@@ -322,7 +350,7 @@ export const OutputSchemaField = withForm({
                         size="icon"
                         className="size-7"
                         onClick={() => setEditingField(outputField)}
-                        onPointerDown={e => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
                       >
                         <Icon icon="tabler:pencil" className="size-3.5" />
                       </Button>
@@ -332,7 +360,7 @@ export const OutputSchemaField = withForm({
                         size="icon"
                         className="size-7"
                         onClick={() => setDeletingFieldId(outputField.id)}
-                        onPointerDown={e => e.stopPropagation()}
+                        onPointerDown={(e) => e.stopPropagation()}
                         disabled={outputSchema.length === 1}
                       >
                         <Icon icon="tabler:trash" className="size-3.5" />
@@ -349,8 +377,7 @@ export const OutputSchemaField = withForm({
                   title={t("addFieldDialog.title")}
                   open={!!addingField}
                   onOpenChange={(open) => {
-                    if (!open)
-                      setAddingField(null)
+                    if (!open) setAddingField(null)
                   }}
                   onSave={(created) => {
                     field.handleChange([...outputSchema, created])
@@ -367,11 +394,10 @@ export const OutputSchemaField = withForm({
                   title={t("editFieldDialog.title")}
                   open={!!editingField}
                   onOpenChange={(open) => {
-                    if (!open)
-                      setEditingField(null)
+                    if (!open) setEditingField(null)
                   }}
                   onSave={(updated) => {
-                    const nextOutputSchema = outputSchema.map(item =>
+                    const nextOutputSchema = outputSchema.map((item) =>
                       item.id === updated.id ? updated : item,
                     )
                     field.handleChange(nextOutputSchema)
@@ -384,12 +410,11 @@ export const OutputSchemaField = withForm({
               <DeleteFieldDialog
                 open={!!deletingFieldId}
                 onOpenChange={(open) => {
-                  if (!open)
-                    setDeletingFieldId(null)
+                  if (!open) setDeletingFieldId(null)
                 }}
                 onConfirm={() => {
                   if (deletingFieldId) {
-                    field.handleChange(outputSchema.filter(item => item.id !== deletingFieldId))
+                    field.handleChange(outputSchema.filter((item) => item.id !== deletingFieldId))
                     void form.handleSubmit()
                     setDeletingFieldId(null)
                   }

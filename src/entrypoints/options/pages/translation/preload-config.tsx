@@ -6,7 +6,12 @@ import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/bas
 import { Input } from "@/components/ui/base-ui/input"
 import { preloadConfigSchema } from "@/types/config/translate"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { MAX_PRELOAD_MARGIN, MAX_PRELOAD_THRESHOLD, MIN_PRELOAD_MARGIN, MIN_PRELOAD_THRESHOLD } from "@/utils/constants/translate"
+import {
+  MAX_PRELOAD_MARGIN,
+  MAX_PRELOAD_THRESHOLD,
+  MIN_PRELOAD_MARGIN,
+  MIN_PRELOAD_THRESHOLD,
+} from "@/utils/constants/translate"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
@@ -69,7 +74,9 @@ function PreloadNumberSelector({ property }: { property: KeyOfPreloadConfig }) {
         value={currentConfigValue}
         onChange={(e) => {
           const newConfigValue = Number(e.target.value)
-          const configParseResult = preloadConfigSchema.partial().safeParse({ [property]: newConfigValue })
+          const configParseResult = preloadConfigSchema
+            .partial()
+            .safeParse({ [property]: newConfigValue })
           if (configParseResult.success) {
             void setTranslateConfig({
               ...translateConfig,
@@ -81,8 +88,7 @@ function PreloadNumberSelector({ property }: { property: KeyOfPreloadConfig }) {
                 },
               },
             })
-          }
-          else {
+          } else {
             toast.error(configParseResult.error?.issues[0].message)
           }
         }}

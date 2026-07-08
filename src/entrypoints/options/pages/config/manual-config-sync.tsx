@@ -59,8 +59,7 @@ function ImportConfig() {
           const result = event.target?.result
           if (typeof result === "string") {
             resolve(result)
-          }
-          else {
+          } else {
             reject(new Error("Invalid file content"))
           }
         }
@@ -74,7 +73,10 @@ function ImportConfig() {
       }
 
       const importConfigSchemaVersion = parsed.schemaVersion
-      if (typeof importConfigSchemaVersion !== "number" || !Number.isInteger(importConfigSchemaVersion)) {
+      if (
+        typeof importConfigSchemaVersion !== "number" ||
+        !Number.isInteger(importConfigSchemaVersion)
+      ) {
         throw new TypeError("Invalid config schemaVersion")
       }
 
@@ -146,12 +148,21 @@ function ExportConfig() {
         </AlertDialogHeader>
 
         <AlertDialogFooter className="flex justify-between!">
-          <AlertDialogCancel>{i18n.t("options.config.sync.exportOptions.cancel")}</AlertDialogCancel>
+          <AlertDialogCancel>
+            {i18n.t("options.config.sync.exportOptions.cancel")}
+          </AlertDialogCancel>
           <div className="flex gap-2">
-            <AlertDialogAction variant="secondary" onClick={() => exportConfig(true, { onSettled: () => setOpen(false) })} disabled={isExporting}>
+            <AlertDialogAction
+              variant="secondary"
+              onClick={() => exportConfig(true, { onSettled: () => setOpen(false) })}
+              disabled={isExporting}
+            >
               {i18n.t("options.config.sync.exportOptions.includeAPIKeys")}
             </AlertDialogAction>
-            <AlertDialogAction onClick={() => exportConfig(false, { onSettled: () => setOpen(false) })} disabled={isExporting}>
+            <AlertDialogAction
+              onClick={() => exportConfig(false, { onSettled: () => setOpen(false) })}
+              disabled={isExporting}
+            >
               {i18n.t("options.config.sync.exportOptions.excludeAPIKeys")}
             </AlertDialogAction>
           </div>

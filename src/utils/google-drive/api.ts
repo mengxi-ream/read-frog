@@ -54,8 +54,7 @@ export async function findFileInAppData(fileName: string): Promise<GoogleDriveFi
     }
 
     return result.data.files.length > 0 ? result.data.files[0] : null
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to find file in appData", error)
     throw error
   }
@@ -81,8 +80,7 @@ export async function downloadFile(fileId: string): Promise<string> {
     }
 
     return await response.text()
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to download file", error)
     throw error
   }
@@ -109,12 +107,9 @@ export async function uploadFile(
     const delimiter = `\r\n--${boundary}\r\n`
     const closeDelimiter = `\r\n--${boundary}--`
 
-    const multipartRequestBody
-      = `${delimiter}Content-Type: application/json\r\n\r\n${
-        JSON.stringify(metadata)
-      }${delimiter}Content-Type: application/json\r\n\r\n${
-        content
-      }${closeDelimiter}`
+    const multipartRequestBody = `${delimiter}Content-Type: application/json\r\n\r\n${JSON.stringify(
+      metadata,
+    )}${delimiter}Content-Type: application/json\r\n\r\n${content}${closeDelimiter}`
 
     const method = fileId ? "PATCH" : "POST"
     const url = fileId
@@ -124,7 +119,7 @@ export async function uploadFile(
     const response = await fetch(url, {
       method,
       headers: {
-        "Authorization": `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": `multipart/related; boundary=${boundary}`,
       },
       body: multipartRequestBody,
@@ -146,8 +141,7 @@ export async function uploadFile(
     }
 
     return result.data
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to upload file", error)
     throw error
   }
@@ -172,8 +166,7 @@ export async function deleteFile(fileId: string): Promise<void> {
       }
       throw new Error(`Failed to delete file: ${response.statusText}`)
     }
-  }
-  catch (error) {
+  } catch (error) {
     logger.error("Failed to delete file", error)
     throw error
   }

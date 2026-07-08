@@ -6,8 +6,7 @@ export function isBotAuthor(user = null) {
 }
 
 export function getBotAuthorSkipReason(user = null) {
-  if (!isBotAuthor(user))
-    return null
+  if (!isBotAuthor(user)) return null
 
   const login = typeof user?.login === "string" ? user.login.trim() : ""
   return login ? `bot-authored PR by @${login}` : "bot-authored PR"

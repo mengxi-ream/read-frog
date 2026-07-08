@@ -2,7 +2,6 @@
 
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 import * as React from "react"
-
 import { SHARED_POPUP_CLOSED_STATE_CLASS } from "@/components/ui/base-ui/popup-animation-classes"
 import { cn } from "@/utils/styles/utils"
 
@@ -23,15 +22,10 @@ function PopoverContent({
   side = "bottom",
   sideOffset = 4,
   ...props
-}: PopoverPrimitive.Popup.Props
-  & Pick<PopoverPrimitive.Portal.Props, "container">
-  & {
+}: PopoverPrimitive.Popup.Props &
+  Pick<PopoverPrimitive.Portal.Props, "container"> & {
     positionerClassName?: string
-  }
-  & Pick<
-    PopoverPrimitive.Positioner.Props,
-    "align" | "alignOffset" | "side" | "sideOffset"
-  >) {
+  } & Pick<PopoverPrimitive.Positioner.Props, "align" | "alignOffset" | "side" | "sideOffset">) {
   return (
     <PopoverPrimitive.Portal container={container}>
       <PopoverPrimitive.Positioner
@@ -75,10 +69,7 @@ function PopoverTitle({ className, ...props }: PopoverPrimitive.Title.Props) {
   )
 }
 
-function PopoverDescription({
-  className,
-  ...props
-}: PopoverPrimitive.Description.Props) {
+function PopoverDescription({ className, ...props }: PopoverPrimitive.Description.Props) {
   return (
     <PopoverPrimitive.Description
       data-slot="popover-description"
@@ -88,11 +79,4 @@ function PopoverDescription({
   )
 }
 
-export {
-  Popover,
-  PopoverContent,
-  PopoverDescription,
-  PopoverHeader,
-  PopoverTitle,
-  PopoverTrigger,
-}
+export { Popover, PopoverContent, PopoverDescription, PopoverHeader, PopoverTitle, PopoverTrigger }

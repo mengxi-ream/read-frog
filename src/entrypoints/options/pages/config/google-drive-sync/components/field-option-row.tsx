@@ -39,13 +39,25 @@ interface FieldOptionRowProps {
   onClick: () => void
 }
 
-export function FieldOptionRow({ type, value, isSelected, fieldKey, showFieldKey, onClick }: FieldOptionRowProps) {
+export function FieldOptionRow({
+  type,
+  value,
+  isSelected,
+  fieldKey,
+  showFieldKey,
+  onClick,
+}: FieldOptionRowProps) {
   const { text, hover, selected, badge, label } = STYLE_MAP[type]
   const isComplexValue = typeof value === "object" && value !== null
 
   return (
     <div
-      className={cn("flex cursor-pointer py-1 ps-(--indent) text-xs", hover, isSelected && selected, isComplexValue ? "flex-col items-start gap-1" : "items-center")}
+      className={cn(
+        "flex cursor-pointer py-1 ps-(--indent) text-xs",
+        hover,
+        isSelected && selected,
+        isComplexValue ? "flex-col items-start gap-1" : "items-center",
+      )}
       onClick={onClick}
     >
       <div className="flex items-center">
@@ -54,11 +66,7 @@ export function FieldOptionRow({ type, value, isSelected, fieldKey, showFieldKey
         </span>
         {showFieldKey && (
           <>
-            <span className={text}>
-              "
-              {fieldKey}
-              "
-            </span>
+            <span className={text}>"{fieldKey}"</span>
             <span className="text-slate-500 mx-1">:</span>
           </>
         )}

@@ -13,9 +13,11 @@ function chunkFragments(fragments: SubtitlesFragment[]): SubtitlesFragment[][] {
   for (const fragment of fragments) {
     const textLength = fragment.text.length
 
-    if (currentChunk.length > 0
-      && (currentChunk.length >= MS_BATCH_MAX_ELEMENTS
-        || currentCharCount + textLength > MS_BATCH_MAX_CHARACTERS)) {
+    if (
+      currentChunk.length > 0 &&
+      (currentChunk.length >= MS_BATCH_MAX_ELEMENTS ||
+        currentCharCount + textLength > MS_BATCH_MAX_CHARACTERS)
+    ) {
       chunks.push(currentChunk)
       currentChunk = []
       currentCharCount = 0
@@ -43,9 +45,9 @@ export async function microsoftWarmupTranslate(
 
   const chunks = chunkFragments(fragments)
   const results = await Promise.allSettled(
-    chunks.map(chunk =>
+    chunks.map((chunk) =>
       sendMessage("microsoftBatchTranslate", {
-        texts: chunk.map(f => f.text),
+        texts: chunk.map((f) => f.text),
         fromLang,
         toLang,
       }),
@@ -67,8 +69,7 @@ export async function microsoftWarmupTranslate(
           translation: translations[j],
         }
       }
-    }
-    else {
+    } else {
       logger.warn(`Microsoft warmup chunk ${i} failed:`, result.reason)
     }
 

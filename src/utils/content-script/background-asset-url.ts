@@ -27,8 +27,7 @@ export function shouldProxyAssetUrl(resourceUrl: string, pageUrl = getCurrentPag
   try {
     const protocol = new URL(pageUrl).protocol
     return !EXTENSION_PROTOCOLS.has(protocol)
-  }
-  catch {
+  } catch {
     return true
   }
 }
@@ -65,11 +64,9 @@ export async function resolveContentScriptAssetBlob(resourceUrl: string) {
 
       resolvedAssetBlobCache.set(resourceUrl, assetBlob)
       return assetBlob
-    }
-    catch {
+    } catch {
       return null
-    }
-    finally {
+    } finally {
       pendingAssetBlobCache.delete(resourceUrl)
     }
   })()

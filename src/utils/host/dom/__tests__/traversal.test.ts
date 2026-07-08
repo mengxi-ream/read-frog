@@ -102,19 +102,19 @@ describe("extractTextContent", () => {
   describe("visually hidden element exclusion", () => {
     it("should exclude sr-only child element text", () => {
       const div = document.createElement("div")
-      div.innerHTML = "Visible text<span class=\"sr-only\">Hidden text</span>"
+      div.innerHTML = 'Visible text<span class="sr-only">Hidden text</span>'
       expect(extractTextContent(div, DEFAULT_CONFIG)).toBe("Visible text")
     })
 
     it("should exclude visually-hidden child element text", () => {
       const div = document.createElement("div")
-      div.innerHTML = "Visible text<span class=\"visually-hidden\">Hidden text</span>"
+      div.innerHTML = 'Visible text<span class="visually-hidden">Hidden text</span>'
       expect(extractTextContent(div, DEFAULT_CONFIG)).toBe("Visible text")
     })
 
     it("should exclude sr-only text mixed with visible siblings", () => {
       const div = document.createElement("div")
-      div.innerHTML = "<span>Hello</span><span class=\"sr-only\">Secret</span> <span>World</span>"
+      div.innerHTML = '<span>Hello</span><span class="sr-only">Secret</span> <span>World</span>'
       expect(extractTextContent(div, DEFAULT_CONFIG)).toBe("Hello World")
     })
   })

@@ -22,14 +22,10 @@ export function SubtitlesSettingsItem({
         <div className="text-muted-foreground flex size-5 shrink-0 items-center justify-center">
           {icon}
         </div>
-        <div className="min-w-0 flex-1">
-          {label}
-        </div>
+        <div className="min-w-0 flex-1">{label}</div>
       </Label>
 
-      <div className="shrink-0">
-        {children}
-      </div>
+      <div className="shrink-0">{children}</div>
     </div>
   )
 }

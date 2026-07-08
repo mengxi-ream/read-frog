@@ -3,12 +3,19 @@ import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { useFieldContext } from "./form-context"
 
-export function InputFieldAutoSave(
-  { formForSubmit, label, labelExtra, type, ...props }:
-  { formForSubmit: { handleSubmit: () => void }, label: React.ReactNode, labelExtra?: React.ReactNode } & React.InputHTMLAttributes<HTMLInputElement>,
-) {
+export function InputFieldAutoSave({
+  formForSubmit,
+  label,
+  labelExtra,
+  type,
+  ...props
+}: {
+  formForSubmit: { handleSubmit: () => void }
+  label: React.ReactNode
+  labelExtra?: React.ReactNode
+} & React.InputHTMLAttributes<HTMLInputElement>) {
   const field = useFieldContext<string | number | undefined>()
-  const errors = useSelector(field.store, state => state.meta.errors)
+  const errors = useSelector(field.store, (state) => state.meta.errors)
   const hasError = errors.length > 0
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,15 +24,13 @@ export function InputFieldAutoSave(
     if (type === "number") {
       if (value === "") {
         field.handleChange(undefined)
-      }
-      else {
+      } else {
         const num = Number(value)
         if (!Number.isNaN(num)) {
           field.handleChange(num)
         }
       }
-    }
-    else {
+    } else {
       field.handleChange(value)
     }
 
@@ -50,7 +55,7 @@ export function InputFieldAutoSave(
         {...props}
       />
       <FieldError match={hasError}>
-        {errors.map(error => typeof error === "string" ? error : error?.message).join(", ")}
+        {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>
     </Field>
   )

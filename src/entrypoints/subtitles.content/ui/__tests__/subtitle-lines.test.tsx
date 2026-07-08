@@ -4,7 +4,6 @@ import { render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-
 import { MainSubtitle, TranslationSubtitle } from "../subtitle-lines"
 
 const mockedAtoms = vi.hoisted(() => ({

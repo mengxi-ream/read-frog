@@ -14,9 +14,8 @@ export const selectedProviderIdAtom = atom(
 
     const providersConfig = get(configFieldsAtomMap.providersConfig)
     const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
-    const firstProviderId = apiProvidersConfig.length > 0
-      ? apiProvidersConfig[0].id
-      : FREE_AI_PROVIDER_ID
+    const firstProviderId =
+      apiProvidersConfig.length > 0 ? apiProvidersConfig[0].id : FREE_AI_PROVIDER_ID
     return firstProviderId
   },
   (_get, set, newValue: string | undefined) => {

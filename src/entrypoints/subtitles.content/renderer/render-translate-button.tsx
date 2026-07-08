@@ -40,19 +40,27 @@ const embedWrapperCSS = `
   }
 `
 
-export function renderSubtitlesTranslateButton({ adapter, openBelow = false }: { adapter: SubtitlesProvidersAdapter, openBelow?: boolean }): HTMLDivElement {
-  const existingContainer = document.querySelector<HTMLDivElement>(`#${TRANSLATE_BUTTON_CONTAINER_ID}`)
-  if (existingContainer)
-    return existingContainer
+export function renderSubtitlesTranslateButton({
+  adapter,
+  openBelow = false,
+}: {
+  adapter: SubtitlesProvidersAdapter
+  openBelow?: boolean
+}): HTMLDivElement {
+  const existingContainer = document.querySelector<HTMLDivElement>(
+    `#${TRANSLATE_BUTTON_CONTAINER_ID}`,
+  )
+  if (existingContainer) return existingContainer
 
-  const component = adapter.embedded && !openBelow
-    ? (
-        <SubtitlesProviders adapter={adapter}>
-          <SubtitlesTranslateButton />
-          <SubtitlesSettingsPanel />
-        </SubtitlesProviders>
-      )
-    : <SubtitlesTranslateButton />
+  const component =
+    adapter.embedded && !openBelow ? (
+      <SubtitlesProviders adapter={adapter}>
+        <SubtitlesTranslateButton />
+        <SubtitlesSettingsPanel />
+      </SubtitlesProviders>
+    ) : (
+      <SubtitlesTranslateButton />
+    )
 
   const shadowHost = createReactShadowHost(component, {
     position: "inline",
@@ -66,7 +74,7 @@ export function renderSubtitlesTranslateButton({ adapter, openBelow = false }: {
 
   if (adapter.embedded) {
     for (const eventType of ["click", "mousedown", "pointerdown", "dblclick"]) {
-      shadowHost.addEventListener(eventType, e => e.stopPropagation())
+      shadowHost.addEventListener(eventType, (e) => e.stopPropagation())
     }
   }
 

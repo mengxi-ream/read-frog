@@ -8,16 +8,28 @@ import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
 import { createFeatureUsageContext, trackFeatureUsed } from "@/utils/analytics"
 import { getProviderConfigById } from "@/utils/config/helpers"
 import { getLocalConfig } from "@/utils/config/storage"
-import { HIDE_NATIVE_CAPTIONS_STYLE_ID, NAVIGATION_HANDLER_DELAY, TRANSLATE_BUTTON_CONTAINER_ID } from "@/utils/constants/subtitles"
+import {
+  HIDE_NATIVE_CAPTIONS_STYLE_ID,
+  NAVIGATION_HANDLER_DELAY,
+  TRANSLATE_BUTTON_CONTAINER_ID,
+} from "@/utils/constants/subtitles"
 import { getDocumentDescription } from "@/utils/content/metadata"
 import { resolveLanguageCodeFromLocale } from "@/utils/content/page-language"
 import { waitForElement } from "@/utils/dom/wait-for-element"
 import { i18n } from "@/utils/i18n"
 import { OverlaySubtitlesError, ToastSubtitlesError } from "@/utils/subtitles/errors"
 import { optimizeSubtitles } from "@/utils/subtitles/processor/optimizer"
-import { buildSubtitlesSummaryContextHash, fetchSubtitlesSummary } from "@/utils/subtitles/processor/translator"
+import {
+  buildSubtitlesSummaryContextHash,
+  fetchSubtitlesSummary,
+} from "@/utils/subtitles/processor/translator"
 import { downloadSubtitlesAsSrt } from "@/utils/subtitles/srt"
-import { subtitlesPositionAtom, subtitlesSettingsPanelOpenAtom, subtitlesSettingsPanelViewAtom, subtitlesStore } from "./atoms"
+import {
+  subtitlesPositionAtom,
+  subtitlesSettingsPanelOpenAtom,
+  subtitlesSettingsPanelViewAtom,
+  subtitlesStore,
+} from "./atoms"
 import { renderSubtitlesTranslateButton } from "./renderer/render-translate-button"
 import { SegmentationPipeline } from "./segmentation-pipeline"
 import { SubtitlesScheduler } from "./subtitles-scheduler"
@@ -93,10 +105,9 @@ export class UniversalVideoAdapter {
 
   async handleSourceTrackChanged(): Promise<void> {
     if (!this.trackChangeRefreshPromise) {
-      this.trackChangeRefreshPromise = this.refreshSourceTrackIfNeeded()
-        .finally(() => {
-          this.trackChangeRefreshPromise = null
-        })
+      this.trackChangeRefreshPromise = this.refreshSourceTrackIfNeeded().finally(() => {
+        this.trackChangeRefreshPromise = null
+      })
     }
 
     await this.trackChangeRefreshPromise
@@ -151,10 +162,10 @@ export class UniversalVideoAdapter {
   }
 
   private async initializeScheduler() {
-    const video = await waitForElement(
+    const video = (await waitForElement(
       this.config.selectors.video,
-      el => !!el.closest(this.config.selectors.playerContainer),
-    ) as HTMLVideoElement | null
+      (el) => !!el.closest(this.config.selectors.playerContainer),
+    )) as HTMLVideoElement | null
 
     if (!video) {
       toast.error(i18n.t("subtitles.errors.videoNotFound"))
@@ -174,7 +185,7 @@ export class UniversalVideoAdapter {
       return this.sourceSubtitles
     }
 
-    if (!await this.subtitlesFetcher.hasAvailableSubtitles()) {
+    if (!(await this.subtitlesFetcher.hasAvailableSubtitles())) {
       throw new OverlaySubtitlesError(i18n.t("subtitles.errors.noSubtitlesFound"))
     }
 
@@ -191,8 +202,7 @@ export class UniversalVideoAdapter {
   }
 
   private buildSourceProcessedSubtitles(rawSubtitles: SubtitlesFragment[]): SubtitlesFragment[] {
-    if (this.subtitlesFetcher.isPreSegmented?.())
-      return rawSubtitles
+    if (this.subtitlesFetcher.isPreSegmented?.()) return rawSubtitles
     const sourceLanguage = this.subtitlesFetcher.getSourceLanguage()
     return optimizeSubtitles(rawSubtitles, sourceLanguage)
   }
@@ -301,8 +311,7 @@ export class UniversalVideoAdapter {
 
     const container = await waitForElement(controlsBar)
     if (!container) {
-      if (!this.config.embedded)
-        toast.error(i18n.t("subtitles.errors.controlsBarNotFound"))
+      if (!this.config.embedded) toast.error(i18n.t("subtitles.errors.controlsBarNotFound"))
       return
     }
 
@@ -313,8 +322,7 @@ export class UniversalVideoAdapter {
 
     if (this.config.embedded) {
       container.appendChild(toggleButton)
-    }
-    else {
+    } else {
       container.insertBefore(toggleButton, container.firstChild)
     }
   }
@@ -323,13 +331,11 @@ export class UniversalVideoAdapter {
     const config = await getLocalConfig()
     const autoStart = config?.videoSubtitles?.autoStart ?? false
 
-    if (!autoStart)
-      return
+    if (!autoStart) return
 
     if (this.config.embedded) {
       const video = this.subtitlesScheduler?.getVideoElement()
-      if (!video)
-        return
+      if (!video) return
 
       const start = () => {
         video.removeEventListener("playing", start)
@@ -338,8 +344,7 @@ export class UniversalVideoAdapter {
 
       if (!video.paused) {
         this.toggleSubtitlesWithSource(true, "auto")
-      }
-      else {
+      } else {
         video.addEventListener("playing", start)
       }
       return
@@ -368,8 +373,7 @@ export class UniversalVideoAdapter {
       this.subtitlesScheduler?.show()
       this.hideNativeSubtitles()
       void this.startTranslation(analyticsContext)
-    }
-    else {
+    } else {
       this.subtitlesScheduler?.hide()
       this.showNativeSubtitles()
       this.translationCoordinator?.stop()
@@ -433,7 +437,8 @@ export class UniversalVideoAdapter {
   private async startTranslation(analyticsContext?: FeatureUsageContext) {
     try {
       const currentVideoId = this.config.getVideoId?.() ?? ""
-      const hasCurrentSession = this.sessionProcessedFragments.length > 0 && this.sessionVideoId === currentVideoId
+      const hasCurrentSession =
+        this.sessionProcessedFragments.length > 0 && this.sessionVideoId === currentVideoId
       this.sessionVideoId = currentVideoId
 
       const useSameTrack = await this.subtitlesFetcher.shouldUseSameTrack()
@@ -445,8 +450,7 @@ export class UniversalVideoAdapter {
           this.translationCoordinator.clearFailed()
           this.segmentationPipeline?.clearFailedStarts()
           this.translationCoordinator.start()
-        }
-        else {
+        } else {
           this.subtitlesScheduler?.supplementSubtitles(this.sessionProcessedFragments)
           this.subtitlesScheduler?.setState("idle")
         }
@@ -470,8 +474,7 @@ export class UniversalVideoAdapter {
 
       if (await this.shouldSkipTranslationForCurrentTrack()) {
         this.processPassthroughSubtitles()
-      }
-      else {
+      } else {
         await this.processTranslatedSubtitles()
       }
       if (analyticsContext) {
@@ -480,8 +483,7 @@ export class UniversalVideoAdapter {
           outcome: "success",
         })
       }
-    }
-    catch (error) {
+    } catch (error) {
       if (analyticsContext) {
         void trackFeatureUsed({
           ...analyticsContext,
@@ -492,9 +494,10 @@ export class UniversalVideoAdapter {
 
       if (error instanceof ToastSubtitlesError) {
         toast.error(errorMessage)
-      }
-      else {
-        this.subtitlesScheduler?.setState("error", { message: this.config.silentErrors ? "" : errorMessage })
+      } else {
+        this.subtitlesScheduler?.setState("error", {
+          message: this.config.silentErrors ? "" : errorMessage,
+        })
       }
     }
   }
@@ -512,7 +515,7 @@ export class UniversalVideoAdapter {
   }
 
   private processPassthroughSubtitles() {
-    this.sessionProcessedFragments = this.sourceProcessedSubtitles.map(fragment => ({
+    this.sessionProcessedFragments = this.sourceProcessedSubtitles.map((fragment) => ({
       ...fragment,
       translation: fragment.text,
     }))
@@ -522,8 +525,7 @@ export class UniversalVideoAdapter {
 
   private async processTranslatedSubtitles() {
     const scheduler = this.subtitlesScheduler
-    if (!scheduler)
-      return
+    if (!scheduler) return
 
     const config = await getLocalConfig()
 
@@ -535,7 +537,7 @@ export class UniversalVideoAdapter {
     const videoContext: SubtitlesVideoContext = {
       videoTitle: document.title || "",
       videoDescription: getDocumentDescription(document),
-      subtitlesTextContent: this.sessionSubtitles.map(f => f.text).join(""),
+      subtitlesTextContent: this.sessionSubtitles.map((f) => f.text).join(""),
     }
 
     if (useAiSegmentation) {
@@ -547,19 +549,19 @@ export class UniversalVideoAdapter {
         getSourceLanguage: () => this.subtitlesFetcher.getSourceLanguage(),
         preSegmented: this.subtitlesFetcher.isPreSegmented?.(),
       })
-    }
-    else {
+    } else {
       this.sessionProcessedFragments = [...this.sourceProcessedSubtitles]
     }
 
     this.translationCoordinator = new TranslationCoordinator({
-      getFragments: () => this.segmentationPipeline
-        ? this.segmentationPipeline.processedFragments
-        : this.sessionProcessedFragments,
+      getFragments: () =>
+        this.segmentationPipeline
+          ? this.segmentationPipeline.processedFragments
+          : this.sessionProcessedFragments,
       getVideoElement: () => scheduler.getVideoElement(),
       getCurrentState: () => scheduler.getState(),
       segmentationPipeline: this.segmentationPipeline,
-      onTranslated: fragments => scheduler.supplementSubtitles(fragments),
+      onTranslated: (fragments) => scheduler.supplementSubtitles(fragments),
       onStateChange: (state, data) => scheduler.setState(state, data),
     })
     this.translationCoordinator.start(videoContext)

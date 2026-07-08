@@ -2,7 +2,6 @@
 
 import { Switch as SwitchPrimitive } from "@base-ui/react/switch"
 import * as React from "react"
-
 import { cn } from "@/utils/styles/utils"
 
 type SwitchProps = Omit<SwitchPrimitive.Root.Props, "onCheckedChange"> & {
@@ -14,12 +13,7 @@ type SwitchProps = Omit<SwitchPrimitive.Root.Props, "onCheckedChange"> & {
   onCheckedChange?: (checked: boolean) => void
 }
 
-function Switch({
-  className,
-  size = "default",
-  onCheckedChange,
-  ...props
-}: SwitchProps) {
+function Switch({ className, size = "default", onCheckedChange, ...props }: SwitchProps) {
   const handleCheckedChange = React.useCallback(
     (checked: boolean, _eventDetails: unknown) => {
       onCheckedChange?.(checked)

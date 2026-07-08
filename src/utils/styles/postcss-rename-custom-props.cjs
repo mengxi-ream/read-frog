@@ -6,8 +6,7 @@ const DEFAULTS = {
 }
 
 function renameVarName(varName, fromPrefix, toPrefix) {
-  if (!varName.startsWith(fromPrefix))
-    return varName
+  if (!varName.startsWith(fromPrefix)) return varName
   return toPrefix + varName.slice(fromPrefix.length)
 }
 
@@ -23,7 +22,7 @@ function rewriteValueVars(rawValue, fromPrefix, toPrefix) {
         // Only transform var() references
         if (node.value.toLowerCase() === "var" && node.nodes.length) {
           // The first "word" inside var() is the custom property name
-          const first = node.nodes.find(n => n.type === "word")
+          const first = node.nodes.find((n) => n.type === "word")
           if (first) {
             const newName = renameVarName(first.value, fromPrefix, toPrefix)
             first.value = newName

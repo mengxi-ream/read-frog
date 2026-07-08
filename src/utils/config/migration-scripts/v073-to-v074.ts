@@ -13,7 +13,9 @@ export function migrate(oldConfig: any): any {
       ...oldConfig?.translate,
       page: {
         ...oldConfig?.translate?.page,
-        neverAutoTranslatePatterns: Array.isArray(oldConfig?.translate?.page?.neverAutoTranslatePatterns)
+        neverAutoTranslatePatterns: Array.isArray(
+          oldConfig?.translate?.page?.neverAutoTranslatePatterns,
+        )
           ? oldConfig.translate.page.neverAutoTranslatePatterns
           : [],
       },

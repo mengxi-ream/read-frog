@@ -4,11 +4,9 @@ import { toast } from "sonner"
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
-      if (query.meta?.suppressToast)
-        return
+      if (query.meta?.suppressToast) return
 
-      const errorDescription
-        = query.meta?.errorDescription || "Something went wrong"
+      const errorDescription = query.meta?.errorDescription || "Something went wrong"
       toast.error(`${errorDescription}`, {
         description: error.message || undefined,
       })
@@ -16,11 +14,9 @@ export const queryClient = new QueryClient({
   }),
   mutationCache: new MutationCache({
     onError: (error, _variables, _context, mutation) => {
-      if (mutation.meta?.suppressToast)
-        return
+      if (mutation.meta?.suppressToast) return
 
-      const errorDescription
-        = mutation.meta?.errorDescription || "Something went wrong"
+      const errorDescription = mutation.meta?.errorDescription || "Something went wrong"
       toast.error(`${errorDescription}`, {
         description: error.message || undefined,
       })

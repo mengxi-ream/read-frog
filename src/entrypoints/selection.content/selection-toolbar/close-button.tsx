@@ -32,18 +32,23 @@ export function CloseButton() {
       }}
     >
       <DropdownMenuTrigger
-        render={(
+        render={
           <button
             type="button"
             title="Close selection toolbar"
             className={`border-border absolute -top-1 -right-1 cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? "block" : "hidden group-hover:block"}`}
             onMouseDown={handleMouseDown}
           />
-        )}
+        }
       >
         <IconX className="h-3 w-3 text-neutral-400 dark:text-neutral-600" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent container={shadowWrapper} align="start" side="right" className={`${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} w-fit! whitespace-nowrap`}>
+      <DropdownMenuContent
+        container={shadowWrapper}
+        align="start"
+        side="right"
+        className={`${SELECTION_CONTENT_OVERLAY_LAYERS.selectionOverlay} w-fit! whitespace-nowrap`}
+      >
         <DropdownMenuItem
           onMouseDown={handleMouseDown}
           onClick={() => {

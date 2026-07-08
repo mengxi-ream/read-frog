@@ -1,10 +1,9 @@
 {
   "name": "@read-frog/extension",
-  "type": "module",
   "version": "1.39.2",
   "private": true,
-  "packageManager": "pnpm@11.9.0+sha512.bd682d5d03fe525ef7c9fd6780c6884d1e756ac4c9c9fe00c538782824310dcf90e3ddc4f53835f06dfaebd5085e41855e0bcbb3b60de2ac5bbab89e5036f03b",
   "description": "Read Frog browser extension for language learning",
+  "type": "module",
   "scripts": {
     "build": "wxt build",
     "build:edge": "wxt build -b edge",
@@ -14,13 +13,15 @@
     "dev": "wxt",
     "dev:edge": "wxt -b edge",
     "dev:firefox": "wxt -b firefox --mv3",
-    "lint": "eslint",
-    "lint:fix": "eslint --fix",
+    "fmt": "oxfmt --write .",
+    "fmt:check": "oxfmt --check .",
+    "lint": "oxlint --type-aware",
+    "lint:fix": "oxlint --type-aware --fix",
     "postinstall": "WXT_SKIP_ENV_VALIDATION=true wxt prepare",
     "test": "vitest run",
     "test:cov": "vitest run --coverage",
     "test:watch": "vitest",
-    "type-check": "tsc --noEmit",
+    "type-check": "oxlint --type-aware --type-check",
     "scrape:ai-sdk-models": "npx tsx scripts/scrape-ai-sdk-provider-models.ts --out scripts/output/ai-sdk-provider-models.json",
     "zip": "wxt zip",
     "zip:edge": "wxt zip -b edge",
@@ -121,17 +122,14 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.1.0",
     "@changesets/changelog-github": "^0.7.0",
     "@changesets/cli": "^2.31.0",
     "@commitlint/cli": "^21.2.0",
     "@commitlint/config-conventional": "^21.2.0",
-    "@eslint-react/eslint-plugin": "^5.11.2",
     "@faker-js/faker": "^10.5.0",
     "@iconify/react": "^6.0.2",
     "@modyfi/vite-plugin-yaml": "^1.1.1",
     "@tailwindcss/postcss": "^4.3.2",
-    "@tanstack/eslint-plugin-query": "^5.101.2",
     "@tanstack/react-query-devtools": "^5.101.2",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
@@ -146,19 +144,20 @@
     "@wxt-dev/module-react": "^1.2.2",
     "autoprefixer": "^10.5.2",
     "eruda": "^3.4.3",
-    "eslint": "^10.6.0",
-    "eslint-plugin-format": "^2.0.1",
-    "eslint-plugin-react-refresh": "^0.5.3",
     "husky": "^9.1.7",
     "jsdom": "^29.1.1",
     "lint-staged": "^17.0.8",
     "nx": "^23.0.1",
+    "oxfmt": "^0.58.0",
+    "oxlint": "^1.73.0",
+    "oxlint-plugin-query": "^0.1.1",
+    "oxlint-tsgolint": "^0.24.0",
     "postcss": "^8.5.16",
     "postcss-rem-to-responsive-pixel": "^7.0.4",
     "postcss-value-parser": "^4.2.0",
     "tailwindcss": "^4.3.2",
     "type-fest": "^5.8.0",
-    "typescript": "^6.0.3",
+    "typescript": "^7.0.2",
     "vite": "^8.1.3",
     "vitest": "^4.1.9",
     "wxt": "0.20.27"
@@ -170,6 +169,7 @@
       "onFail": "download"
     }
   },
+  "packageManager": "pnpm@11.9.0+sha512.bd682d5d03fe525ef7c9fd6780c6884d1e756ac4c9c9fe00c538782824310dcf90e3ddc4f53835f06dfaebd5085e41855e0bcbb3b60de2ac5bbab89e5036f03b",
   "nx": {
     "targets": {
       "build": {
@@ -199,13 +199,13 @@
       "lint": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "eslint"
+          "command": "oxlint --type-aware"
         }
       },
       "type-check": {
         "executor": "nx:run-commands",
         "options": {
-          "command": "tsc --noEmit"
+          "command": "oxlint --type-aware --type-check"
         }
       }
     }

@@ -27,8 +27,12 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
       {Object.entries(PROVIDER_GROUPS).map(([groupKey, group]) => (
         <ProviderButtonGroup
           key={groupKey}
-          groupTitle={i18n.t(`options.apiProviders.dialog.groups.${groupKey as keyof typeof PROVIDER_GROUPS}.title`)}
-          groupDescription={i18n.t(`options.apiProviders.dialog.groups.${groupKey as keyof typeof PROVIDER_GROUPS}.description`)}
+          groupTitle={i18n.t(
+            `options.apiProviders.dialog.groups.${groupKey as keyof typeof PROVIDER_GROUPS}.title`,
+          )}
+          groupDescription={i18n.t(
+            `options.apiProviders.dialog.groups.${groupKey as keyof typeof PROVIDER_GROUPS}.description`,
+          )}
           providerTypes={group.types}
           handleAddProvider={handleAddProvider}
         />
@@ -37,21 +41,45 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
   )
 }
 
-function ProviderButtonGroup({ groupTitle, groupDescription, providerTypes, handleAddProvider }: { groupTitle: string, groupDescription: string, providerTypes: readonly APIProviderTypes[], handleAddProvider: (providerType: APIProviderTypes) => void }) {
+function ProviderButtonGroup({
+  groupTitle,
+  groupDescription,
+  providerTypes,
+  handleAddProvider,
+}: {
+  groupTitle: string
+  groupDescription: string
+  providerTypes: readonly APIProviderTypes[]
+  handleAddProvider: (providerType: APIProviderTypes) => void
+}) {
   return (
     <div className="my-2.5">
-      <h3 className="text-base font-base text-input-foreground text-center sm:text-left">{groupTitle}</h3>
-      <p className="text-sm text-muted-foreground mt-1 mb-2 text-center sm:text-left">{groupDescription}</p>
+      <h3 className="text-base font-base text-input-foreground text-center sm:text-left">
+        {groupTitle}
+      </h3>
+      <p className="text-sm text-muted-foreground mt-1 mb-2 text-center sm:text-left">
+        {groupDescription}
+      </p>
       <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-7 lg:grid-cols-9 xl:grid-cols-11 gap-1.5 py-2">
-        {providerTypes.map(providerType => (
-          <ProviderButton key={providerType} providerType={providerType} handleAddProvider={handleAddProvider} />
+        {providerTypes.map((providerType) => (
+          <ProviderButton
+            key={providerType}
+            providerType={providerType}
+            handleAddProvider={handleAddProvider}
+          />
         ))}
       </div>
     </div>
   )
 }
 
-function ProviderButton({ providerType, handleAddProvider }: { providerType: APIProviderTypes, handleAddProvider: (providerType: APIProviderTypes) => void }) {
+function ProviderButton({
+  providerType,
+  handleAddProvider,
+}: {
+  providerType: APIProviderTypes
+  handleAddProvider: (providerType: APIProviderTypes) => void
+}) {
   const { theme } = useTheme()
   const sponsor = API_PROVIDER_ITEMS[providerType].sponsor
   return (

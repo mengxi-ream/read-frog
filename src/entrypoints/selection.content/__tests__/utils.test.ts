@@ -151,12 +151,14 @@ describe("readSelectionSnapshot", () => {
 
     expect(readSelectionSnapshot(selection)).toMatchObject({
       text: "Beta",
-      ranges: [expect.objectContaining({
-        startContainer: selectionNode,
-        startOffset: 0,
-        endContainer: selectionNode,
-        endOffset: 4,
-      })],
+      ranges: [
+        expect.objectContaining({
+          startContainer: selectionNode,
+          startOffset: 0,
+          endContainer: selectionNode,
+          endOffset: 4,
+        }),
+      ],
     })
   })
 
@@ -281,7 +283,8 @@ describe("readSelectionSnapshot", () => {
     const subtitlesShadowRoot = subtitlesHost.attachShadow({ mode: "open" })
     const subtitleLine = document.createElement("div")
     subtitleLine.className = "subtitles-main"
-    subtitleLine.textContent = "fears that anti-immigration protests could descend into widespread violence against foreigners."
+    subtitleLine.textContent =
+      "fears that anti-immigration protests could descend into widespread violence against foreigners."
     subtitlesShadowRoot.appendChild(subtitleLine)
 
     const subtitleNode = subtitleLine.firstChild
@@ -327,7 +330,9 @@ describe("readSelectionSnapshot", () => {
     })
     expect(buildContextSnapshot(snapshot)).toEqual({
       text: "fears that anti-immigration protests could descend into widespread violence against foreigners.",
-      paragraphs: ["fears that anti-immigration protests could descend into widespread violence against foreigners."],
+      paragraphs: [
+        "fears that anti-immigration protests could descend into widespread violence against foreigners.",
+      ],
     })
   })
 
@@ -356,12 +361,14 @@ describe("readSelectionSnapshot", () => {
 
     expect(readSelectionSnapshot(selection)).toMatchObject({
       text: "Beta",
-      ranges: [expect.objectContaining({
-        startContainer: selectionNode,
-        startOffset: 0,
-        endContainer: selectionNode,
-        endOffset: 4,
-      })],
+      ranges: [
+        expect.objectContaining({
+          startContainer: selectionNode,
+          startOffset: 0,
+          endContainer: selectionNode,
+          endOffset: 4,
+        }),
+      ],
     })
     expect(getRangeAt).toHaveBeenCalledWith(0)
   })

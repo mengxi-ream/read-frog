@@ -122,9 +122,7 @@ const { registry: STRUCTURED_OBJECT_REGISTRY } = defineRegistry(structuredObject
               {getFieldTypeIcon(type)}
               <span className="truncate">{label}</span>
             </div>
-            {speakingEnabled && (
-              <FieldSpeakButton text={value} disabled={speakButtonDisabled} />
-            )}
+            {speakingEnabled && <FieldSpeakButton text={value} disabled={speakButtonDisabled} />}
           </div>
           <div className="text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
             {pending ? "…" : value || "—"}
@@ -148,9 +146,7 @@ export function StructuredObjectRenderer({
 
   return (
     <div className="space-y-2">
-      {thinking && (
-        <Thinking status={thinking.status} content={thinking.text} />
-      )}
+      {thinking && <Thinking status={thinking.status} content={thinking.text} />}
       <JSONUIProvider registry={STRUCTURED_OBJECT_REGISTRY} initialState={{}}>
         <Renderer spec={spec} registry={STRUCTURED_OBJECT_REGISTRY} loading={isStreaming} />
       </JSONUIProvider>

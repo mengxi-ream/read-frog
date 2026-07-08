@@ -21,11 +21,9 @@ export function DownloadSourceSubtitles() {
 
     try {
       await downloadSourceSubtitles()
-    }
-    catch (error) {
+    } catch (error) {
       toast.error(error instanceof Error ? error.message : String(error))
-    }
-    finally {
+    } finally {
       setIsDownloading(false)
     }
   }
@@ -44,9 +42,11 @@ export function DownloadSourceSubtitles() {
         onClick={downloadSubtitles}
         disabled={isDownloading}
       >
-        {isDownloading
-          ? <IconLoader2 className="size-3.5 animate-spin" />
-          : <IconDownload className="size-3.5" />}
+        {isDownloading ? (
+          <IconLoader2 className="size-3.5 animate-spin" />
+        ) : (
+          <IconDownload className="size-3.5" />
+        )}
       </Button>
     </SubtitlesSettingsItem>
   )

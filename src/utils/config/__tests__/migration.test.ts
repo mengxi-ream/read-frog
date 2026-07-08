@@ -8,8 +8,6 @@ describe("migrateConfig", () => {
     const futureVersion = CONFIG_SCHEMA_VERSION + 1
     const config = {}
 
-    await expect(migrateConfig(config, futureVersion))
-      .rejects
-      .toThrow(ConfigVersionTooNewError)
+    await expect(migrateConfig(config, futureVersion)).rejects.toThrow(ConfigVersionTooNewError)
   })
 })

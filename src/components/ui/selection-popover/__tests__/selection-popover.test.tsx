@@ -45,7 +45,7 @@ function flushRaf() {
   act(() => {
     const callbacks = [...rafCallbacks.values()]
     rafCallbacks.clear()
-    callbacks.forEach(callback => callback(0))
+    callbacks.forEach((callback) => callback(0))
   })
 }
 
@@ -57,20 +57,24 @@ vi.mock("react-rnd", async () => {
     const elementRef = React.useRef<HTMLDivElement>(null)
     const appliedDefaultRef = React.useRef(false)
 
-    React.useImperativeHandle(ref, () => ({
-      updatePosition: (position: { x: number, y: number }) => {
-        updatePositionSpy(position)
-        updateMockRect({
-          left: position.x + mockRndOffset.left,
-          top: position.y + mockRndOffset.top,
-        })
-      },
-      updateSize: (size: { width: number, height: number }) => {
-        updateSizeSpy(size)
-        updateMockRect({ width: size.width, height: size.height })
-      },
-      getSelfElement: () => elementRef.current,
-    }), [])
+    React.useImperativeHandle(
+      ref,
+      () => ({
+        updatePosition: (position: { x: number; y: number }) => {
+          updatePositionSpy(position)
+          updateMockRect({
+            left: position.x + mockRndOffset.left,
+            top: position.y + mockRndOffset.top,
+          })
+        },
+        updateSize: (size: { width: number; height: number }) => {
+          updateSizeSpy(size)
+          updateMockRect({ width: size.width, height: size.height })
+        },
+        getSelfElement: () => elementRef.current,
+      }),
+      [],
+    )
 
     React.useLayoutEffect(() => {
       if (!elementRef.current) {
@@ -79,8 +83,7 @@ vi.mock("react-rnd", async () => {
 
       if (props.position) {
         updateMockRect({ left: props.position.x, top: props.position.y })
-      }
-      else if (!appliedDefaultRef.current && props.default) {
+      } else if (!appliedDefaultRef.current && props.default) {
         appliedDefaultRef.current = true
         updateMockRect({
           left: props.default.x,
@@ -147,7 +150,9 @@ class MockResizeObserver {
 
 function triggerResizeObserver() {
   act(() => {
-    resizeObservers.forEach(observer => observer.callback([], observer as unknown as ResizeObserver))
+    resizeObservers.forEach((observer) =>
+      observer.callback([], observer as unknown as ResizeObserver),
+    )
   })
 }
 
@@ -189,7 +194,7 @@ function buildTriggerRect({
   } as DOMRect
 }
 
-function expectLatestPosition(position: { x: number, y: number }) {
+function expectLatestPosition(position: { x: number; y: number }) {
   expect(latestRndProps?.position).toEqual(position)
   expect(mockRndRect.left).toBe(position.x)
   expect(mockRndRect.top).toBe(position.y)
@@ -213,7 +218,11 @@ function renderPopover({
   render(
     <SelectionPopover.Root onOpenChange={onOpenChange}>
       <SelectionPopover.Trigger
-        render={customTrigger ? <button data-testid="custom-trigger" className="custom-trigger" /> : undefined}
+        render={
+          customTrigger ? (
+            <button data-testid="custom-trigger" className="custom-trigger" />
+          ) : undefined
+        }
       >
         {triggerLabel}
       </SelectionPopover.Trigger>
@@ -287,8 +296,12 @@ function renderTwoPopovers() {
   const firstTrigger = screen.getByRole("button", { name: "Open first popover" })
   const secondTrigger = screen.getByRole("button", { name: "Open second popover" })
 
-  vi.spyOn(firstTrigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect({ left: 120, top: 140 }))
-  vi.spyOn(secondTrigger, "getBoundingClientRect").mockReturnValue(buildTriggerRect({ left: 320, top: 240 }))
+  vi.spyOn(firstTrigger, "getBoundingClientRect").mockReturnValue(
+    buildTriggerRect({ left: 120, top: 140 }),
+  )
+  vi.spyOn(secondTrigger, "getBoundingClientRect").mockReturnValue(
+    buildTriggerRect({ left: 320, top: 240 }),
+  )
 
   return {
     firstOnOpenChange,
@@ -299,12 +312,7 @@ function renderTwoPopovers() {
 }
 
 function PortalledBoundary() {
-  return createPortal(
-    <div data-testid="portalled-boundary">
-      Portalled boundary
-    </div>,
-    document.body,
-  )
+  return createPortal(<div data-testid="portalled-boundary">Portalled boundary</div>, document.body)
 }
 
 function ReopenablePopoverHarness() {
@@ -313,17 +321,20 @@ function ReopenablePopoverHarness() {
   const [snapshotSelection, setSnapshotSelection] = React.useState<string | null>(null)
   const [sessionKey, setSessionKey] = React.useState(0)
 
-  const handleOpenChange = React.useCallback((nextOpen: boolean) => {
-    if (nextOpen) {
-      setSnapshotSelection(sourceSelection)
-      setSessionKey(prev => prev + 1)
-      setOpen(true)
-      return
-    }
+  const handleOpenChange = React.useCallback(
+    (nextOpen: boolean) => {
+      if (nextOpen) {
+        setSnapshotSelection(sourceSelection)
+        setSessionKey((prev) => prev + 1)
+        setOpen(true)
+        return
+      }
 
-    setSnapshotSelection(null)
-    setOpen(false)
-  }, [sourceSelection])
+      setSnapshotSelection(null)
+      setOpen(false)
+    },
+    [sourceSelection],
+  )
 
   return (
     <div>
@@ -441,8 +452,16 @@ describe("selectionPopover", () => {
     const { element } = renderPopover()
 
     expect(element).toHaveStyle({ display: "flex" })
-    expect(screen.getByText("Test Popover").parentElement?.parentElement).toHaveClass("flex-1", "h-full", "min-h-0")
-    expect(screen.getByText("Popover content").parentElement).toHaveClass("min-h-0", "flex-1", "overflow-y-auto")
+    expect(screen.getByText("Test Popover").parentElement?.parentElement).toHaveClass(
+      "flex-1",
+      "h-full",
+      "min-h-0",
+    )
+    expect(screen.getByText("Popover content").parentElement).toHaveClass(
+      "min-h-0",
+      "flex-1",
+      "overflow-y-auto",
+    )
   })
 
   it("renders the popover inside a fixed viewport host so page scroll does not move it", () => {
@@ -489,10 +508,7 @@ describe("selectionPopover", () => {
 
   it("keeps the popover open when pointer dismissal is disabled", async () => {
     render(
-      <SelectionPopover.Root
-        onOpenChange={onOpenChangeSpy}
-        disablePointerDismissal
-      >
+      <SelectionPopover.Root onOpenChange={onOpenChangeSpy} disablePointerDismissal>
         <SelectionPopover.Trigger>Open popover</SelectionPopover.Trigger>
         <SelectionPopover.Content>
           <SelectionPopover.Header className="border-b">
@@ -561,7 +577,10 @@ describe("selectionPopover", () => {
     })
 
     expect(screen.getByTestId("mock-rnd")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
     expect(onOpenChangeSpy).not.toHaveBeenCalledWith(false)
   })
 
@@ -609,7 +628,10 @@ describe("selectionPopover", () => {
     const { trigger } = renderPopover()
 
     fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
-    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
 
     fireEvent.click(screen.getByRole("button", { name: "Close" }))
     expect(screen.queryByTestId("mock-rnd")).not.toBeInTheDocument()
@@ -617,7 +639,10 @@ describe("selectionPopover", () => {
     fireEvent.click(trigger)
     flushRaf()
 
-    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute("aria-pressed", "false")
+    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    )
   })
 
   it("restores focus to the trigger by default when closing", async () => {
@@ -657,7 +682,8 @@ describe("selectionPopover", () => {
   })
 
   it("closes a pinned popover when another popover opens", () => {
-    const { firstOnOpenChange, secondOnOpenChange, firstTrigger, secondTrigger } = renderTwoPopovers()
+    const { firstOnOpenChange, secondOnOpenChange, firstTrigger, secondTrigger } =
+      renderTwoPopovers()
 
     fireEvent.click(firstTrigger)
     flushRaf()
@@ -684,7 +710,10 @@ describe("selectionPopover", () => {
     expect(screen.getByText("First selection")).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole("button", { name: "Pin popover" }))
-    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute("aria-pressed", "true")
+    expect(screen.getByRole("button", { name: "Unpin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
 
     const firstElement = screen.getByTestId("mock-rnd")
 
@@ -695,7 +724,10 @@ describe("selectionPopover", () => {
     flushRaf()
 
     expect(screen.getByText("Second selection")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute("aria-pressed", "false")
+    expect(screen.getByRole("button", { name: "Pin popover" })).toHaveAttribute(
+      "aria-pressed",
+      "false",
+    )
     expect(screen.getByTestId("mock-rnd")).not.toBe(firstElement)
   })
 

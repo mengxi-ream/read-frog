@@ -23,7 +23,7 @@ export function SubtitlesToggle() {
       <Switch
         id={switchId}
         checked={isVisible}
-        onCheckedChange={checked => toggleSubtitles(checked)}
+        onCheckedChange={(checked) => toggleSubtitles(checked)}
         aria-label={title}
       />
     </SubtitlesSettingsItem>

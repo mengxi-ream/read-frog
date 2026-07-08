@@ -50,13 +50,9 @@ function App() {
           }}
         >
           <Icon icon="tabler:settings" className="size-4" strokeWidth={1.6} />
-          <span className="text-[13px] font-medium">
-            {i18n.t("popup.options")}
-          </span>
+          <span className="text-[13px] font-medium">{i18n.t("popup.options")}</span>
         </button>
-        <span className="text-sm text-neutral-500 dark:text-neutral-400">
-          {version}
-        </span>
+        <span className="text-sm text-neutral-500 dark:text-neutral-400">{version}</span>
         <MoreMenu />
       </div>
     </>

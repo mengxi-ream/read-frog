@@ -96,10 +96,13 @@ describe("initializeConfig", () => {
     expect(setItemMock).toHaveBeenCalledTimes(1)
     expect(setItemMock).toHaveBeenCalledWith("local:config", expect.any(Object))
     expect(setMetaMock).toHaveBeenCalledTimes(1)
-    expect(setMetaMock).toHaveBeenCalledWith("local:config", expect.objectContaining({
-      schemaVersion: CONFIG_SCHEMA_VERSION,
-      lastModifiedAt: expect.any(Number),
-    }))
+    expect(setMetaMock).toHaveBeenCalledWith(
+      "local:config",
+      expect.objectContaining({
+        schemaVersion: CONFIG_SCHEMA_VERSION,
+        lastModifiedAt: expect.any(Number),
+      }),
+    )
   })
 
   it("runs migration and persists migrated config once", async () => {
@@ -144,9 +147,12 @@ describe("initializeConfig", () => {
 
     expect(setItemMock).not.toHaveBeenCalled()
     expect(setMetaMock).toHaveBeenCalledTimes(1)
-    expect(setMetaMock).toHaveBeenCalledWith("local:config", expect.objectContaining({
-      schemaVersion: CONFIG_SCHEMA_VERSION,
-      lastModifiedAt: expect.any(Number),
-    }))
+    expect(setMetaMock).toHaveBeenCalledWith(
+      "local:config",
+      expect.objectContaining({
+        schemaVersion: CONFIG_SCHEMA_VERSION,
+        lastModifiedAt: expect.any(Number),
+      }),
+    )
   })
 })

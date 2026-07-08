@@ -23,28 +23,57 @@ import { defineExtensionMessaging } from "@webext-core/messaging"
 
 interface ProtocolMap {
   // navigation
-  openPage: (data: { url: string, active?: boolean }) => void
+  openPage: (data: { url: string; active?: boolean }) => void
   openOptionsPage: (data?: { route?: `/${string}` }) => void
-  toggleSidePanel: (data?: { source?: "content-script" | "extension-user-action" }) => Promise<{ ok: true, action: "opened" | "closed" } | { ok: false, reason: "missing-window" | "unsupported" | "toggle-failed" | "requires-extension-user-action" }>
+  toggleSidePanel: (data?: { source?: "content-script" | "extension-user-action" }) => Promise<
+    | { ok: true; action: "opened" | "closed" }
+    | {
+        ok: false
+        reason:
+          | "missing-window"
+          | "unsupported"
+          | "toggle-failed"
+          | "requires-extension-user-action"
+      }
+  >
   // config
   getInitialConfig: () => Config | null
   // translation state
   getEnablePageTranslationByTabId: (data: { tabId: number }) => boolean | undefined
   getEnablePageTranslationFromContentScript: () => Promise<boolean>
-  tryToSetEnablePageTranslationByTabId: (data: { tabId: number, enabled: boolean, analyticsContext?: FeatureUsageContext }) => void
-  tryToSetEnablePageTranslationOnContentScript: (data: { enabled: boolean, analyticsContext?: FeatureUsageContext }) => void
-  setAndNotifyPageTranslationStateChangedByManager: (data: { enabled: boolean, url?: string }) => void
+  tryToSetEnablePageTranslationByTabId: (data: {
+    tabId: number
+    enabled: boolean
+    analyticsContext?: FeatureUsageContext
+  }) => void
+  tryToSetEnablePageTranslationOnContentScript: (data: {
+    enabled: boolean
+    analyticsContext?: FeatureUsageContext
+  }) => void
+  setAndNotifyPageTranslationStateChangedByManager: (data: {
+    enabled: boolean
+    url?: string
+  }) => void
   notifyTranslationStateChanged: (data: { enabled: boolean }) => void
   ensureIframeHostContentInjected: (data: { tabId?: number }) => void
   injectCurrentIframesAfterTopFrameNodeTranslation: () => void
-  reportDetectedPageLanguage: (data: { detectedCodeOrUnd: LangCodeISO6393 | "und", url: string }) => void
+  reportDetectedPageLanguage: (data: {
+    detectedCodeOrUnd: LangCodeISO6393 | "und"
+    url: string
+  }) => void
   refreshDetectedPageLanguage: () => void
   getDetectedCode: () => LangCodeISO6393
   detectedPageLanguageChanged: (data: { detectedCode: LangCodeISO6393 }) => void
   // ask host to start page translation
-  askManagerToTogglePageTranslation: (data: { enabled: boolean, analyticsContext?: FeatureUsageContext }) => void
+  askManagerToTogglePageTranslation: (data: {
+    enabled: boolean
+    analyticsContext?: FeatureUsageContext
+  }) => void
   openSelectionTranslationFromContextMenu: (data: { selectionText: string }) => void
-  openSelectionCustomActionFromContextMenu: (data: { actionId: string, selectionText: string }) => void
+  openSelectionCustomActionFromContextMenu: (data: {
+    actionId: string
+    selectionText: string
+  }) => void
   readAloudSelectionFromContextMenu: (data: { selectionText: string }) => void
   // analytics
   trackFeatureUsedEvent: (data: FeatureUsedEventProperties) => void
@@ -53,20 +82,53 @@ interface ProtocolMap {
   getPinState: () => boolean
   returnPinState: (data: { isPinned: boolean }) => void
   // request
-  enqueueTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webDescription?: string | null, webContent?: string | null, webSummary?: string | null }) => Promise<string>
-  getOrGenerateWebPageSummary: (data: { webTitle: string, webContent: string, providerConfig: ProviderConfig }) => Promise<string | null>
-  enqueueSubtitlesTranslateRequest: (data: { text: string, langConfig: Config["language"], providerConfig: ProviderConfig, scheduleAt: number, hash: string, webTitle?: string | null, webDescription?: string | null, summary?: string | null }) => Promise<string>
-  getSubtitlesSummary: (data: { videoTitle: string, subtitlesContext: string, providerConfig: ProviderConfig }) => Promise<string | null>
-  backgroundGenerateText: (data: BackgroundGenerateTextPayload) => Promise<BackgroundGenerateTextResponse>
+  enqueueTranslateRequest: (data: {
+    text: string
+    langConfig: Config["language"]
+    providerConfig: ProviderConfig
+    scheduleAt: number
+    hash: string
+    webTitle?: string | null
+    webDescription?: string | null
+    webContent?: string | null
+    webSummary?: string | null
+  }) => Promise<string>
+  getOrGenerateWebPageSummary: (data: {
+    webTitle: string
+    webContent: string
+    providerConfig: ProviderConfig
+  }) => Promise<string | null>
+  enqueueSubtitlesTranslateRequest: (data: {
+    text: string
+    langConfig: Config["language"]
+    providerConfig: ProviderConfig
+    scheduleAt: number
+    hash: string
+    webTitle?: string | null
+    webDescription?: string | null
+    summary?: string | null
+  }) => Promise<string>
+  getSubtitlesSummary: (data: {
+    videoTitle: string
+    subtitlesContext: string
+    providerConfig: ProviderConfig
+  }) => Promise<string | null>
+  backgroundGenerateText: (
+    data: BackgroundGenerateTextPayload,
+  ) => Promise<BackgroundGenerateTextResponse>
   // AI subtitle segmentation
-  aiSegmentSubtitles: (data: { jsonContent: string, providerId: string }) => Promise<string>
+  aiSegmentSubtitles: (data: { jsonContent: string; providerId: string }) => Promise<string>
   setTranslateRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
   setTranslateBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
   // Subtitle-specific queue config messages
   setSubtitlesRequestQueueConfig: (data: Partial<RequestQueueConfig>) => void
   setSubtitlesBatchQueueConfig: (data: Partial<BatchQueueConfig>) => void
   // microsoft batch translation
-  microsoftBatchTranslate: (data: { texts: string[], fromLang: string, toLang: string }) => Promise<string[]>
+  microsoftBatchTranslate: (data: {
+    texts: string[]
+    fromLang: string
+    toLang: string
+  }) => Promise<string[]>
   // network proxy
   backgroundFetch: (data: ProxyRequest) => Promise<ProxyResponse>
   // cache management
@@ -85,5 +147,4 @@ interface ProtocolMap {
   ttsOffscreenStop: (data: TTSPlaybackStopRequest) => Promise<{ ok: true }>
 }
 
-export const { sendMessage, onMessage }
-  = defineExtensionMessaging<ProtocolMap>()
+export const { sendMessage, onMessage } = defineExtensionMessaging<ProtocolMap>()

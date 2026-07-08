@@ -18,7 +18,7 @@ import { getLanguageLabel } from "@/utils/language-labels"
 import { filterLanguage } from "./language-combobox-options"
 
 function getLanguageItems(): LanguageItem<LangCodeISO6393>[] {
-  return langCodeISO6393Schema.options.map(code => ({
+  return langCodeISO6393Schema.options.map((code) => ({
     value: code,
     label: getLanguageLabel(code),
   }))
@@ -38,7 +38,7 @@ export function MultiLanguageCombobox({
   const languageItems = useMemo(() => getLanguageItems(), [])
 
   const selectedItems = useMemo(
-    () => languageItems.filter(item => selectedLanguages.includes(item.value)),
+    () => languageItems.filter((item) => selectedLanguages.includes(item.value)),
     [languageItems, selectedLanguages],
   )
 
@@ -47,12 +47,14 @@ export function MultiLanguageCombobox({
       multiple
       value={selectedItems}
       onValueChange={(items: LanguageItem<LangCodeISO6393>[]) => {
-        onLanguagesChange(items.map(item => item.value))
+        onLanguagesChange(items.map((item) => item.value))
       }}
       items={languageItems}
       filter={filterLanguage}
     >
-      <ComboboxPrimitive.Trigger render={<Button variant="outline" className="w-40 justify-between" />}>
+      <ComboboxPrimitive.Trigger
+        render={<Button variant="outline" className="w-40 justify-between" />}
+      >
         <span className="truncate">{buttonLabel}</span>
         <Icon icon="tabler:chevron-down" className="text-muted-foreground" />
       </ComboboxPrimitive.Trigger>

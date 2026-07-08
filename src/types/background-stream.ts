@@ -38,11 +38,14 @@ export interface BackgroundStreamSnapshot<TOutput> {
 
 export type BackgroundTextStreamSnapshot = BackgroundStreamSnapshot<string>
 
-export type BackgroundStructuredObjectStreamSnapshot = BackgroundStreamSnapshot<Record<string, unknown>>
+export type BackgroundStructuredObjectStreamSnapshot = BackgroundStreamSnapshot<
+  Record<string, unknown>
+>
 
-export type BackgroundStreamStructuredObjectSerializablePayload = BaseBackgroundStreamSerializablePayload & {
-  outputSchema: BackgroundStructuredObjectOutputField[]
-}
+export type BackgroundStreamStructuredObjectSerializablePayload =
+  BaseBackgroundStreamSerializablePayload & {
+    outputSchema: BackgroundStructuredObjectOutputField[]
+  }
 
 export const BACKGROUND_STREAM_PORTS = {
   streamText: "stream-text",
@@ -61,14 +64,17 @@ export interface StreamPortErrorPayload {
   message: string
 }
 
-export type StreamPortResponse<T = string>
-  = | { type: "chunk", requestId: string, data: T }
-    | { type: "done", requestId: string, data: T }
-    | { type: "error", requestId: string, error: StreamPortErrorPayload }
+export type StreamPortResponse<T = string> =
+  | { type: "chunk"; requestId: string; data: T }
+  | { type: "done"; requestId: string; data: T }
+  | { type: "error"; requestId: string; error: StreamPortErrorPayload }
 
 type DistributiveOmit<T, K extends string> = T extends unknown ? Omit<T, K> : never
 
-export type StreamPortResponseWithoutRequestId<T = string> = DistributiveOmit<StreamPortResponse<T>, "requestId">
+export type StreamPortResponseWithoutRequestId<T = string> = DistributiveOmit<
+  StreamPortResponse<T>,
+  "requestId"
+>
 
 export interface StreamPortStartMessage<TSerializablePayload> {
   type: "start"
@@ -81,12 +87,13 @@ export interface StreamPortPingMessage {
   requestId: string
 }
 
-export type StreamPortRequestMessage<TSerializablePayload>
-  = StreamPortStartMessage<TSerializablePayload> | { type: "ping", requestId: string }
+export type StreamPortRequestMessage<TSerializablePayload> =
+  | StreamPortStartMessage<TSerializablePayload>
+  | { type: "ping"; requestId: string }
 
-export type StartMessageParseResult<TSerializablePayload>
-  = | { success: true, message: StreamPortStartMessage<TSerializablePayload> }
-    | { success: false, requestId?: string }
+export type StartMessageParseResult<TSerializablePayload> =
+  | { success: true; message: StreamPortStartMessage<TSerializablePayload> }
+  | { success: false; requestId?: string }
 
 type AISDKStreamTextError = Parameters<StreamTextOnErrorCallback>[0]["error"]
 

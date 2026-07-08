@@ -3,7 +3,14 @@ import { useMutation, useQuery } from "@tanstack/react-query"
 import { useAtomValue } from "jotai"
 import { toast } from "sonner"
 import { Button } from "@/components/ui/base-ui/button"
-import { Empty, EmptyContent, EmptyDescription, EmptyHeader, EmptyMedia, EmptyTitle } from "@/components/ui/base-ui/empty"
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/base-ui/empty"
 import { ConfigCard } from "@/entrypoints/options/components/config-card"
 import { configAtom } from "@/utils/atoms/config"
 import { addBackup, getAllBackupsWithMetadata } from "@/utils/backup/storage"
@@ -32,13 +39,11 @@ export function ConfigBackup() {
           </div>
         )}
 
-        {backupsWithMetadata && backupsWithMetadata?.length === 0 && (
-          <EmptyState />
-        )}
+        {backupsWithMetadata && backupsWithMetadata?.length === 0 && <EmptyState />}
         {backupsWithMetadata && backupsWithMetadata?.length > 0 && (
           <>
             <Toolbar />
-            {backupsWithMetadata.map(backupWithMetadata => (
+            {backupsWithMetadata.map((backupWithMetadata) => (
               <BackupConfigItem
                 key={backupWithMetadata.id}
                 backupId={backupWithMetadata.id}
@@ -95,9 +100,7 @@ function EmptyState() {
           <Icon icon="tabler:file-off" />
         </EmptyMedia>
         <EmptyTitle>{i18n.t("options.config.backup.empty.title")}</EmptyTitle>
-        <EmptyDescription>
-          {i18n.t("options.config.backup.empty.description")}
-        </EmptyDescription>
+        <EmptyDescription>{i18n.t("options.config.backup.empty.description")}</EmptyDescription>
       </EmptyHeader>
       <EmptyContent>
         <Button variant="outline" size="sm" disabled={isBackingUp} onClick={() => backupConfig()}>

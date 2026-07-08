@@ -26,7 +26,7 @@ interface LangSelectProps {
 
 function LangSelect({ value, onValueChange, getDisplayLabel }: LangSelectProps) {
   return (
-    <Select value={value} onValueChange={v => onValueChange(v as InputTranslationLang)}>
+    <Select value={value} onValueChange={(v) => onValueChange(v as InputTranslationLang)}>
       <SelectTrigger className="w-full max-h-52 min-w-0">
         <SelectValue render={<span className="flex-1 min-w-0" />}>
           <span className="block min-w-0 truncate">{getDisplayLabel(value)}</span>
@@ -34,13 +34,9 @@ function LangSelect({ value, onValueChange, getDisplayLabel }: LangSelectProps) 
       </SelectTrigger>
       <SelectContent className="max-h-64" align="end">
         <SelectGroup>
-          <SelectItem value="targetCode">
-            {getDisplayLabel("targetCode")}
-          </SelectItem>
-          <SelectItem value="sourceCode">
-            {getDisplayLabel("sourceCode")}
-          </SelectItem>
-          {langCodeISO6393Schema.options.map(code => (
+          <SelectItem value="targetCode">{getDisplayLabel("targetCode")}</SelectItem>
+          <SelectItem value="sourceCode">{getDisplayLabel("sourceCode")}</SelectItem>
+          {langCodeISO6393Schema.options.map((code) => (
             <SelectItem key={code} value={code}>
               {getLanguageLabel(code)}
             </SelectItem>

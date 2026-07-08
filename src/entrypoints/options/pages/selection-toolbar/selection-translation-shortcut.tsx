@@ -7,7 +7,8 @@ import { ConfigCard } from "../../components/config-card"
 
 export function SelectionTranslationShortcut() {
   const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
-  const shortcut = selectionToolbar.features.translate.shortcut ?? DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY
+  const shortcut =
+    selectionToolbar.features.translate.shortcut ?? DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY
 
   const updateShortcut = (shortcut: string) => {
     void setSelectionToolbar({

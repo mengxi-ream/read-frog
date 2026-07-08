@@ -3,10 +3,20 @@ import type { Config } from "@/types/config/config"
 import { act, render, screen } from "@testing-library/react"
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
-import { BLOCK_ATTRIBUTE, BLOCK_CONTENT_CLASS, CONTENT_WRAPPER_CLASS, PARAGRAPH_ATTRIBUTE } from "@/utils/constants/dom-labels"
+import {
+  BLOCK_ATTRIBUTE,
+  BLOCK_CONTENT_CLASS,
+  CONTENT_WRAPPER_CLASS,
+  PARAGRAPH_ATTRIBUTE,
+} from "@/utils/constants/dom-labels"
 import { flushBatchedOperations } from "../dom/batch-dom"
 import { removeOrShowNodeTranslation } from "../translate/node-manipulation"
-import { expectNodeLabels, expectTranslatedContent, expectTranslationWrapper, MOCK_ORIGINAL_TEXT } from "./utils"
+import {
+  expectNodeLabels,
+  expectTranslatedContent,
+  expectTranslationWrapper,
+  MOCK_ORIGINAL_TEXT,
+} from "./utils"
 
 // Test config with fixed bilingual mode - won't change with DEFAULT_CONFIG
 const TEST_CONFIG: Config = {
@@ -60,11 +70,7 @@ describe("node translation", () => {
   })
   describe("show translation", () => {
     it("should show the translation when point is over the original text", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
       const originalElementFromPoint = document.elementFromPoint
       document.elementFromPoint = vi.fn(() => node)
@@ -84,11 +90,7 @@ describe("node translation", () => {
   })
   describe("hide translation", () => {
     it("should hide the translation when point is over the translation content node", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
 
       const originalElementFromPoint = document.elementFromPoint
@@ -111,11 +113,7 @@ describe("node translation", () => {
       document.elementFromPoint = originalElementFromPoint
     })
     it("should hide the translation when point is over the translation wrapper", async () => {
-      render(
-        <div data-testid="test-node">
-          {MOCK_ORIGINAL_TEXT}
-        </div>,
-      )
+      render(<div data-testid="test-node">{MOCK_ORIGINAL_TEXT}</div>)
       const node = screen.getByTestId("test-node")
       const originalElementFromPoint = document.elementFromPoint
       document.elementFromPoint = vi.fn(() => node)

@@ -4,7 +4,12 @@ import { HelpTooltip } from "@/components/help-tooltip"
 import { Field, FieldContent, FieldGroup, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { MAX_CHARACTERS_PER_NODE, MAX_WORDS_PER_NODE, MIN_CHARACTERS_PER_NODE, MIN_WORDS_PER_NODE } from "@/utils/constants/translate"
+import {
+  MAX_CHARACTERS_PER_NODE,
+  MAX_WORDS_PER_NODE,
+  MIN_CHARACTERS_PER_NODE,
+  MIN_WORDS_PER_NODE,
+} from "@/utils/constants/translate"
 import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
@@ -23,7 +28,9 @@ export function SmallParagraphFilter() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="min-characters-per-node">
               {i18n.t("options.translation.smallParagraphFilter.minCharacters.title")}
-              <HelpTooltip>{i18n.t("options.translation.smallParagraphFilter.minCharacters.description")}</HelpTooltip>
+              <HelpTooltip>
+                {i18n.t("options.translation.smallParagraphFilter.minCharacters.description")}
+              </HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Input
@@ -44,9 +51,13 @@ export function SmallParagraphFilter() {
                     minCharactersPerNode: newValue,
                   },
                 })
-              }
-              else {
-                toast.error(i18n.t("options.translation.smallParagraphFilter.error", [MIN_CHARACTERS_PER_NODE, MAX_CHARACTERS_PER_NODE]))
+              } else {
+                toast.error(
+                  i18n.t("options.translation.smallParagraphFilter.error", [
+                    MIN_CHARACTERS_PER_NODE,
+                    MAX_CHARACTERS_PER_NODE,
+                  ]),
+                )
               }
             }}
           />
@@ -55,7 +66,9 @@ export function SmallParagraphFilter() {
           <FieldContent className="self-center">
             <FieldLabel htmlFor="min-words-per-node">
               {i18n.t("options.translation.smallParagraphFilter.minWords.title")}
-              <HelpTooltip>{i18n.t("options.translation.smallParagraphFilter.minWords.description")}</HelpTooltip>
+              <HelpTooltip>
+                {i18n.t("options.translation.smallParagraphFilter.minWords.description")}
+              </HelpTooltip>
             </FieldLabel>
           </FieldContent>
           <Input
@@ -76,9 +89,13 @@ export function SmallParagraphFilter() {
                     minWordsPerNode: newValue,
                   },
                 })
-              }
-              else {
-                toast.error(i18n.t("options.translation.smallParagraphFilter.error", [MIN_WORDS_PER_NODE, MAX_WORDS_PER_NODE]))
+              } else {
+                toast.error(
+                  i18n.t("options.translation.smallParagraphFilter.error", [
+                    MIN_WORDS_PER_NODE,
+                    MAX_WORDS_PER_NODE,
+                  ]),
+                )
               }
             }}
           />

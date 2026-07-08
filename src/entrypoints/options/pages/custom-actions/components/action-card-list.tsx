@@ -19,7 +19,9 @@ import { selectedCustomActionIdAtom } from "../atoms"
 import { AddActionDialog } from "./add-action-dialog"
 
 export function CustomActionCardList() {
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
   const [, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
   const { search } = useLocation()
@@ -31,7 +33,7 @@ export function CustomActionCardList() {
     const params = new URLSearchParams(search)
     const actionId = params.get("actionId")
 
-    if (actionId && customActions.some(action => action.id === actionId)) {
+    if (actionId && customActions.some((action) => action.id === actionId)) {
       setSelectedCustomActionId(actionId)
     }
 
@@ -49,12 +51,11 @@ export function CustomActionCardList() {
   )
 
   const handleTemplateSelect = (template: CustomActionTemplate) => {
-    if (customActionProviders.length === 0)
-      return
+    if (customActionProviders.length === 0) return
 
     const newAction = template.createAction(customActionProviders[0].id)
 
-    const existingNames = new Set(customActions.map(action => action.name))
+    const existingNames = new Set(customActions.map((action) => action.name))
     const baseName = template.id === "blank" ? DEFAULT_ACTION_NAME : newAction.name
     newAction.name = getUniqueName(baseName, existingNames)
 
@@ -77,21 +78,29 @@ export function CustomActionCardList() {
     <div className="flex flex-col gap-4">
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogTrigger
-          render={(
-            <Button variant="outline" className="h-auto p-3 border-dashed rounded-xl" disabled={customActionProviders.length === 0}>
+          render={
+            <Button
+              variant="outline"
+              className="h-auto p-3 border-dashed rounded-xl"
+              disabled={customActionProviders.length === 0}
+            >
               <div className="flex items-center justify-center gap-2 w-full">
                 <Icon icon="tabler:plus" className="size-4" />
-                <span className="text-sm">{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.add")}</span>
+                <span className="text-sm">
+                  {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.add")}
+                </span>
               </div>
             </Button>
-          )}
+          }
         />
         <AddActionDialog onSelect={handleTemplateSelect} />
       </Dialog>
 
       {customActionProviders.length === 0 && (
         <div className="text-sm text-amber-600 dark:text-amber-400">
-          {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.noEnabledLlmProvider")}
+          {i18n.t(
+            "options.floatingButtonAndToolbar.selectionToolbar.customActions.noEnabledLlmProvider",
+          )}
         </div>
       )}
 
@@ -101,9 +110,7 @@ export function CustomActionCardList() {
             list={customActions}
             setList={handleReorder}
             className="flex flex-col gap-3 pt-2"
-            renderItem={action => (
-              <CustomActionCard action={action} />
-            )}
+            renderItem={(action) => <CustomActionCard action={action} />}
           />
         </EntityListRail>
       )}
@@ -112,7 +119,9 @@ export function CustomActionCardList() {
 }
 
 function CustomActionCard({ action }: { action: SelectionToolbarCustomAction }) {
-  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(configFieldsAtomMap.selectionToolbar)
+  const [selectionToolbarConfig, setSelectionToolbarConfig] = useAtom(
+    configFieldsAtomMap.selectionToolbar,
+  )
   const [selectedCustomActionId, setSelectedCustomActionId] = useAtom(selectedCustomActionIdAtom)
   const customActions = selectionToolbarConfig.customActions ?? []
 
@@ -137,13 +146,13 @@ function CustomActionCard({ action }: { action: SelectionToolbarCustomAction }) 
           onCheckedChange={(checked) => {
             void setSelectionToolbarConfig({
               ...selectionToolbarConfig,
-              customActions: customActions.map(item =>
+              customActions: customActions.map((item) =>
                 item.id === action.id ? { ...item, enabled: checked } : item,
               ),
             })
           }}
-          onPointerDown={event => event.stopPropagation()}
-          onClick={event => event.stopPropagation()}
+          onPointerDown={(event) => event.stopPropagation()}
+          onClick={(event) => event.stopPropagation()}
         />
       </div>
     </div>

@@ -22,7 +22,7 @@ function cloneSelectionSnapshot(snapshot: SelectionSnapshot | null): SelectionSn
 
   return {
     ...snapshot,
-    ranges: snapshot.ranges.map(range => ({ ...range })),
+    ranges: snapshot.ranges.map((range) => ({ ...range })),
   }
 }
 
@@ -48,7 +48,7 @@ export function useSelectionPopoverSnapshot() {
       selectionSnapshot: cloneSelectionSnapshot(selection),
       contextSnapshot: cloneContextSnapshot(context),
     })
-    setPopoverSessionKey(prev => prev + 1)
+    setPopoverSessionKey((prev) => prev + 1)
   }, [context, selection])
 
   const clearSelectionSnapshot = useCallback(() => {

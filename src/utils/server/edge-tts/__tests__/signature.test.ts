@@ -2,8 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { buildSignatureDate, generateTranslatorSignature } from "../signature"
 
 describe("edge tts signature", () => {
-  const testSignatureSecret
-    = "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA="
+  const testSignatureSecret = "AQIDBAUGBwgJCgsMDQ4PEBESExQVFhcYGRobHB0eHyA="
 
   beforeEach(() => {
     vi.stubEnv("WXT_EDGE_TTS_SIGNATURE_SECRET_BASE64", testSignatureSecret)

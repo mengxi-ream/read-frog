@@ -48,8 +48,7 @@ function isValidSelector(selector: string): boolean {
     try {
       document.createDocumentFragment().querySelector(selector)
       valid = true
-    }
-    catch {
+    } catch {
       logger.warn(`[site-rules] Invalid CSS selector dropped: "${selector}"`)
       valid = false
     }
@@ -121,11 +120,11 @@ export function resolveSiteRule(
 ): ResolvedSiteRule {
   const disabled = new Set(disabledBuiltInRuleIds)
   const candidates = [
-    ...builtInRules.filter(rule => !disabled.has(rule.id)),
-    ...userRules.filter(rule => rule.enabled !== false),
+    ...builtInRules.filter((rule) => !disabled.has(rule.id)),
+    ...userRules.filter((rule) => rule.enabled !== false),
   ]
 
-  const matched = candidates.filter(rule => urlMatchesRule(url, rule))
+  const matched = candidates.filter((rule) => urlMatchesRule(url, rule))
   if (matched.length === 0) {
     return EMPTY_RESOLVED_SITE_RULE
   }
@@ -140,10 +139,7 @@ export function resolveSiteRule(
     if (rule.minWords !== undefined) {
       minWords = rule.minWords
     }
-    const injectedCssParts = [
-      rule.injectedCss,
-      ...(rule["injectedCss.add"] ?? []),
-    ]
+    const injectedCssParts = [rule.injectedCss, ...(rule["injectedCss.add"] ?? [])]
     for (const css of injectedCssParts) {
       if (css !== undefined && css.trim()) {
         cssParts.push(css)
@@ -152,12 +148,37 @@ export function resolveSiteRule(
   }
 
   return {
-    matchedRuleIds: matched.map(rule => rule.id),
-    excludeSelector: mergeSelectorDelta(matched, "excludeSelectors", "excludeSelectors.add", "excludeSelectors.remove"),
-    includeSelector: mergeSelectorDelta(matched, "includeSelectors", "includeSelectors.add", "includeSelectors.remove"),
-    forceBlockSelector: mergeSelectorDelta(matched, "forceBlockSelectors", "forceBlockSelectors.add", "forceBlockSelectors.remove"),
-    forceInlineSelector: mergeSelectorDelta(matched, "forceInlineSelectors", "forceInlineSelectors.add", "forceInlineSelectors.remove"),
-    preserveTextSelector: mergeSelectorDelta(matched, "preserveTextSelectors", "preserveTextSelectors.add", "preserveTextSelectors.remove"),
+    matchedRuleIds: matched.map((rule) => rule.id),
+    excludeSelector: mergeSelectorDelta(
+      matched,
+      "excludeSelectors",
+      "excludeSelectors.add",
+      "excludeSelectors.remove",
+    ),
+    includeSelector: mergeSelectorDelta(
+      matched,
+      "includeSelectors",
+      "includeSelectors.add",
+      "includeSelectors.remove",
+    ),
+    forceBlockSelector: mergeSelectorDelta(
+      matched,
+      "forceBlockSelectors",
+      "forceBlockSelectors.add",
+      "forceBlockSelectors.remove",
+    ),
+    forceInlineSelector: mergeSelectorDelta(
+      matched,
+      "forceInlineSelectors",
+      "forceInlineSelectors.add",
+      "forceInlineSelectors.remove",
+    ),
+    preserveTextSelector: mergeSelectorDelta(
+      matched,
+      "preserveTextSelectors",
+      "preserveTextSelectors.add",
+      "preserveTextSelectors.remove",
+    ),
     minCharacters,
     minWords,
     injectedCss: cssParts.length > 0 ? cssParts.join("\n") : null,

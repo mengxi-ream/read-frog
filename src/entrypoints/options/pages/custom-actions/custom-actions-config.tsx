@@ -9,13 +9,17 @@ export function CustomActionsConfig() {
   return (
     <ConfigCard
       id="custom-actions"
-      title={(
+      title={
         <span className="inline-flex items-center gap-2">
           {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.title")}
-          <Badge variant="secondary" className="text-xs font-medium">Public Beta</Badge>
+          <Badge variant="secondary" className="text-xs font-medium">
+            Public Beta
+          </Badge>
         </span>
+      }
+      description={i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.description",
       )}
-      description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.description")}
       className="lg:flex-col"
     >
       <EntityEditorLayout list={<CustomActionCardList />} editor={<CustomActionConfigForm />} />

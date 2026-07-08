@@ -45,28 +45,36 @@ function createAction(): SelectionToolbarCustomAction {
 
 describe("notebase pending save", () => {
   it("fingerprints only output field id, name, and type", () => {
-    expect(getOutputSchemaFingerprint(createAction().outputSchema)).toBe(JSON.stringify([
-      { id: "field-summary", name: "summary", type: "string" },
-      { id: "field-score", name: "score", type: "number" },
-    ]))
+    expect(getOutputSchemaFingerprint(createAction().outputSchema)).toBe(
+      JSON.stringify([
+        { id: "field-summary", name: "summary", type: "string" },
+        { id: "field-score", name: "score", type: "number" },
+      ]),
+    )
   })
 
   it("creates a pending payload and Notebase create input with one-to-one columns", () => {
-    const pending = createPendingNotebaseSave(createAction(), {
-      summary: "A short summary",
-      score: 9,
-    }, 1_000)
+    const pending = createPendingNotebaseSave(
+      createAction(),
+      {
+        summary: "A short summary",
+        score: 9,
+      },
+      1_000,
+    )
 
     expect(pending.actionId).toBe("action-1")
     expect(pending.actionName).toBe("Summarize")
     expect(pending.createdAt).toBe(1_000)
     expect(pending.expiresAt).toBe(601_000)
-    expect(pending.columns.map(column => ({
-      localFieldId: column.localFieldId,
-      localFieldName: column.localFieldName,
-      localFieldType: column.localFieldType,
-      notebaseColumnName: column.notebaseColumnName,
-    }))).toEqual([
+    expect(
+      pending.columns.map((column) => ({
+        localFieldId: column.localFieldId,
+        localFieldName: column.localFieldName,
+        localFieldType: column.localFieldType,
+        notebaseColumnName: column.notebaseColumnName,
+      })),
+    ).toEqual([
       {
         localFieldId: "field-summary",
         localFieldName: "summary",
@@ -120,7 +128,11 @@ describe("notebase pending save", () => {
     const action = createAction()
     const config = cloneConfig(DEFAULT_CONFIG)
     config.selectionToolbar.customActions = [action]
-    const pending = createPendingNotebaseSave(action, { summary: "A short summary", score: 9 }, 1_000)
+    const pending = createPendingNotebaseSave(
+      action,
+      { summary: "A short summary", score: 9 },
+      1_000,
+    )
     const connectedAccount = {
       id: "user-1",
       name: "Reader",
@@ -153,44 +165,62 @@ describe("notebase pending save", () => {
   it("detects changed schemas before applying pending work", () => {
     const action = createAction()
     const config = cloneConfig(DEFAULT_CONFIG)
-    config.selectionToolbar.customActions = [{
-      ...action,
-      outputSchema: [
-        {
-          ...action.outputSchema[0]!,
-          name: "changed",
-        },
-        action.outputSchema[1]!,
-      ],
-    }]
-    const pending = createPendingNotebaseSave(action, { summary: "A short summary", score: 9 }, 1_000)
+    config.selectionToolbar.customActions = [
+      {
+        ...action,
+        outputSchema: [
+          {
+            ...action.outputSchema[0]!,
+            name: "changed",
+          },
+          action.outputSchema[1]!,
+        ],
+      },
+    ]
+    const pending = createPendingNotebaseSave(
+      action,
+      { summary: "A short summary", score: 9 },
+      1_000,
+    )
 
-    expect(validateStillCanSavePendingCreateNotebaseSave(config, pending).status).toBe("schema_changed")
+    expect(validateStillCanSavePendingCreateNotebaseSave(config, pending).status).toBe(
+      "schema_changed",
+    )
   })
 
   it("matches duplicate-recovery schema exactly", () => {
-    const pending = createPendingNotebaseSave(createAction(), {
-      summary: "A short summary",
-      score: 9,
-    }, 1_000)
+    const pending = createPendingNotebaseSave(
+      createAction(),
+      {
+        summary: "A short summary",
+        score: 9,
+      },
+      1_000,
+    )
 
-    expect(doesSchemaMatchPendingColumns({
-      id: pending.notebaseId,
-      name: pending.actionName,
-      updatedAt: new Date(),
-      notebaseColumns: pending.columns.map((column, index) => ({
-        id: column.notebaseColumnId,
-        notebaseId: pending.notebaseId,
-        name: column.notebaseColumnName,
-        config: column.localFieldType === "number"
-          ? { type: "number", decimal: 0, format: "number" }
-          : { type: "string" },
-        position: index,
-        isPrimary: index === 0,
-        width: null,
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      })),
-    }, pending)).toBe(true)
+    expect(
+      doesSchemaMatchPendingColumns(
+        {
+          id: pending.notebaseId,
+          name: pending.actionName,
+          updatedAt: new Date(),
+          notebaseColumns: pending.columns.map((column, index) => ({
+            id: column.notebaseColumnId,
+            notebaseId: pending.notebaseId,
+            name: column.notebaseColumnName,
+            config:
+              column.localFieldType === "number"
+                ? { type: "number", decimal: 0, format: "number" }
+                : { type: "string" },
+            position: index,
+            isPrimary: index === 0,
+            width: null,
+            createdAt: new Date(),
+            updatedAt: new Date(),
+          })),
+        },
+        pending,
+      ),
+    ).toBe(true)
   })
 })

@@ -1,10 +1,6 @@
 import { IconSearch } from "@tabler/icons-react"
 import { useSetAtom } from "jotai"
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/ui/base-ui/input-group"
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/base-ui/input-group"
 import { Kbd } from "@/components/ui/base-ui/kbd"
 import {
   Sidebar,
@@ -28,10 +24,7 @@ export function AppSidebar() {
     <Sidebar collapsible="icon">
       <SidebarHeader className="group-data-[state=expanded]:px-5 group-data-[state=expanded]:pt-4 transition-all">
         <UserAccountMenuSidebar />
-        <InputGroup
-          onClick={() => setCommandPaletteOpen(true)}
-          className="bg-background"
-        >
+        <InputGroup onClick={() => setCommandPaletteOpen(true)} className="bg-background">
           <InputGroupInput
             readOnly
             placeholder={i18n.t("options.commandPalette.placeholder")}
@@ -40,10 +33,7 @@ export function AppSidebar() {
           <InputGroupAddon>
             <IconSearch className="size-4 text-muted-foreground group-data-[state=collapsed]:-mx-px" />
           </InputGroupAddon>
-          <InputGroupAddon
-            align="inline-end"
-            className="group-data-[state=collapsed]:hidden"
-          >
+          <InputGroupAddon align="inline-end" className="group-data-[state=collapsed]:hidden">
             <Kbd>{commandPaletteShortcutHint}</Kbd>
           </InputGroupAddon>
         </InputGroup>

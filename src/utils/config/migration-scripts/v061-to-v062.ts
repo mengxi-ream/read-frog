@@ -12,12 +12,12 @@
  */
 export function migrate(oldConfig: any): any {
   const enableLLMDetection = oldConfig?.translate?.page?.enableLLMDetection === true
-  const enableSkipLanguagesLLMDetection = oldConfig?.translate?.page?.enableSkipLanguagesLLMDetection === true
+  const enableSkipLanguagesLLMDetection =
+    oldConfig?.translate?.page?.enableSkipLanguagesLLMDetection === true
   const ttsDetectLanguageMode = oldConfig?.tts?.detectLanguageMode
 
-  const anyLLMEnabled = enableLLMDetection
-    || enableSkipLanguagesLLMDetection
-    || ttsDetectLanguageMode === "llm"
+  const anyLLMEnabled =
+    enableLLMDetection || enableSkipLanguagesLLMDetection || ttsDetectLanguageMode === "llm"
 
   // Non-LLM provider types at the time of this migration (frozen snapshot)
   const NON_LLM_PROVIDERS = ["google-translate", "microsoft-translate", "deeplx"]
@@ -27,8 +27,8 @@ export function migrate(oldConfig: any): any {
   // else first enabled LLM provider in the list.
   const translateProviderId = oldConfig?.translate?.providerId
   const translateProvider = providers.find((p: any) => p.id === translateProviderId)
-  const translateIsEnabledLLM = translateProvider?.enabled === true
-    && !NON_LLM_PROVIDERS.includes(translateProvider.provider)
+  const translateIsEnabledLLM =
+    translateProvider?.enabled === true && !NON_LLM_PROVIDERS.includes(translateProvider.provider)
 
   const providerId = translateIsEnabledLLM
     ? translateProviderId
@@ -39,18 +39,11 @@ export function migrate(oldConfig: any): any {
 
   // Remove old fields from translate.page
   const oldPage = oldConfig?.translate?.page ?? {}
-  const {
-    enableLLMDetection: _a,
-    enableSkipLanguagesLLMDetection: _b,
-    ...restPage
-  } = oldPage
+  const { enableLLMDetection: _a, enableSkipLanguagesLLMDetection: _b, ...restPage } = oldPage
 
   // Remove old field from tts
   const oldTts = oldConfig?.tts ?? {}
-  const {
-    detectLanguageMode: _c,
-    ...restTts
-  } = oldTts
+  const { detectLanguageMode: _c, ...restTts } = oldTts
 
   return {
     ...oldConfig,

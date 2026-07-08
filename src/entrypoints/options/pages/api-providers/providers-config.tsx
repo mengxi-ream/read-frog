@@ -9,7 +9,11 @@ import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/base-ui/collapsible"
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/base-ui/collapsible"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
@@ -17,7 +21,11 @@ import { isAPIProviderConfig } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import { providerConfigAtom } from "@/utils/atoms/provider"
 import { getAPIProvidersConfig } from "@/utils/config/helpers"
-import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS, getFeatureLabelI18nKey } from "@/utils/constants/feature-providers"
+import {
+  FEATURE_KEYS,
+  FEATURE_PROVIDER_DEFS,
+  getFeatureLabelI18nKey,
+} from "@/utils/constants/feature-providers"
 import { API_PROVIDER_ITEMS } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
 import { FREE_AI_PROVIDER_ID, FREE_AI_PROVIDER_LOGO } from "@/utils/providers/provider-registry"
@@ -31,9 +39,12 @@ import { ProviderConfigForm } from "./provider-config-form"
 
 export function ProvidersConfig() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
-  const editor = selectedProviderId === FREE_AI_PROVIDER_ID
-    ? <BuiltInProviderPanel />
-    : <ProviderConfigForm key={selectedProviderId} />
+  const editor =
+    selectedProviderId === FREE_AI_PROVIDER_ID ? (
+      <BuiltInProviderPanel />
+    ) : (
+      <ProviderConfigForm key={selectedProviderId} />
+    )
 
   return (
     <ConfigCard
@@ -55,19 +66,20 @@ function ProviderCardList() {
   const didLockInitialSelectionRef = useRef(false)
 
   const handleReorder = (newList: APIProviderConfig[]) => {
-    const desiredOrderIds = newList.map(provider => provider.id)
+    const desiredOrderIds = newList.map((provider) => provider.id)
     const desiredOrderIdSet = new Set(desiredOrderIds)
 
-    const nonApiProviders = providersConfig.filter(provider => !isAPIProviderConfig(provider))
+    const nonApiProviders = providersConfig.filter((provider) => !isAPIProviderConfig(provider))
     const currentApiProviders = providersConfig.filter(isAPIProviderConfig)
 
-    const apiProvidersById = new Map(currentApiProviders.map(provider => [provider.id, provider] as const))
+    const apiProvidersById = new Map(
+      currentApiProviders.map((provider) => [provider.id, provider] as const),
+    )
 
     const reorderedApiProviders: APIProviderConfig[] = []
     for (const id of desiredOrderIds) {
       const provider = apiProvidersById.get(id)
-      if (provider)
-        reorderedApiProviders.push(provider)
+      if (provider) reorderedApiProviders.push(provider)
     }
 
     // Preserve any API providers that appeared while dragging (e.g. config sync)
@@ -81,8 +93,7 @@ function ProviderCardList() {
   }
 
   useEffect(() => {
-    if (didLockInitialSelectionRef.current)
-      return
+    if (didLockInitialSelectionRef.current) return
     if (selectedProviderId) {
       setSelectedProviderId(selectedProviderId)
       didLockInitialSelectionRef.current = true
@@ -93,13 +104,13 @@ function ProviderCardList() {
     <div className="flex flex-col gap-4">
       <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
         <DialogTrigger
-          render={(
+          render={
             <Button
               variant="outline"
               className="h-auto p-3 border-dashed rounded-xl"
               onClick={() => setIsAddDialogOpen(true)}
             />
-          )}
+          }
         >
           <div className="flex items-center justify-center gap-2 w-full">
             <Icon icon="tabler:plus" className="size-4" />
@@ -113,9 +124,7 @@ function ProviderCardList() {
           list={apiProvidersConfig}
           setList={handleReorder}
           className="flex flex-col gap-4 pt-2"
-          renderItem={providerConfig => (
-            <ProviderCard providerConfig={providerConfig} />
-          )}
+          renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
         />
       </EntityListRail>
       <BuiltInProviderSection />
@@ -131,17 +140,22 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const config = useAtomValue(configAtom)
   const sponsor = API_PROVIDER_ITEMS[provider].sponsor
 
-  const assignedFeatures = FEATURE_KEYS
-    .filter(key => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id)
-  const assignedCustomActions = config.selectionToolbar.customActions
-    .filter(action => action.providerId === id)
-  const isLanguageDetectionProvider = config.languageDetection.mode === "llm"
-    && config.languageDetection.providerId === id
-  const totalAssigned = assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
+  const assignedFeatures = FEATURE_KEYS.filter(
+    (key) => FEATURE_PROVIDER_DEFS[key].getProviderId(config) === id,
+  )
+  const assignedCustomActions = config.selectionToolbar.customActions.filter(
+    (action) => action.providerId === id,
+  )
+  const isLanguageDetectionProvider =
+    config.languageDetection.mode === "llm" && config.languageDetection.providerId === id
+  const totalAssigned =
+    assignedFeatures.length + assignedCustomActions.length + (isLanguageDetectionProvider ? 1 : 0)
 
   const handleProviderEnabledChange = (checked: boolean) => {
     if (!checked && enabled && totalAssigned > 0) {
-      toast.error(i18n.t("options.apiProviders.form.providerInUseCannotDisable", [name, totalAssigned]))
+      toast.error(
+        i18n.t("options.apiProviders.form.providerInUseCannotDisable", [name, totalAssigned]),
+      )
       return
     }
 
@@ -157,29 +171,27 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
       selected={selectedProviderId === id}
       onSelect={() => setSelectedProviderId(id)}
       onCheckedChange={handleProviderEnabledChange}
-      badges={(
+      badges={
         <>
-          {sponsor?.sponsoring && (
-            <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />
-          )}
+          {sponsor?.sponsoring && <SponsorBadge className="absolute -top-2 left-2 text-[10px]" />}
           <FeatureCountBadge count={totalAssigned}>
-            {assignedFeatures.map(key => (
+            {assignedFeatures.map((key) => (
               <li key={key}>{i18n.t(getFeatureLabelI18nKey(key))}</li>
             ))}
             {isLanguageDetectionProvider && (
               <li>{i18n.t("options.general.languageDetection.title")}</li>
             )}
-            {assignedCustomActions.map(action => (
+            {assignedCustomActions.map((action) => (
               <li key={action.id}>{action.name}</li>
             ))}
           </FeatureCountBadge>
         </>
-      )}
+      }
     />
   )
 }
 
-function FeatureCountBadge({ count, children }: { count: number, children: React.ReactNode }) {
+function FeatureCountBadge({ count, children }: { count: number; children: React.ReactNode }) {
   if (count === 0) {
     return null
   }
@@ -187,17 +199,11 @@ function FeatureCountBadge({ count, children }: { count: number, children: React
   return (
     <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
       <Tooltip>
-        <TooltipTrigger
-          render={(
-            <Badge className="bg-blue-500 cursor-default" size="sm" />
-          )}
-        >
+        <TooltipTrigger render={<Badge className="bg-blue-500 cursor-default" size="sm" />}>
           {i18n.t("options.apiProviders.badges.featureCount", [count])}
         </TooltipTrigger>
         <TooltipContent>
-          <ul className="list-disc list-inside marker:text-green-500">
-            {children}
-          </ul>
+          <ul className="list-disc list-inside marker:text-green-500">{children}</ul>
         </TooltipContent>
       </Tooltip>
     </div>
@@ -244,8 +250,8 @@ function ProviderListCell({
           checked={checked}
           disabled={disabled}
           onCheckedChange={onCheckedChange}
-          onPointerDown={e => e.stopPropagation()}
-          onClick={e => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => e.stopPropagation()}
         />
       </div>
     </div>
@@ -256,8 +262,9 @@ function BuiltInProviderSection() {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const config = useAtomValue(configAtom)
   const providerName = i18n.t("options.apiProviders.providers.name.freeAi")
-  const assignedCustomActions = config.selectionToolbar.customActions
-    .filter(action => action.providerId === FREE_AI_PROVIDER_ID)
+  const assignedCustomActions = config.selectionToolbar.customActions.filter(
+    (action) => action.providerId === FREE_AI_PROVIDER_ID,
+  )
 
   return (
     <section className="flex flex-col gap-2 pt-1">
@@ -272,13 +279,13 @@ function BuiltInProviderSection() {
         disabled
         selected={selectedProviderId === FREE_AI_PROVIDER_ID}
         onSelect={() => setSelectedProviderId(FREE_AI_PROVIDER_ID)}
-        badges={(
+        badges={
           <FeatureCountBadge count={assignedCustomActions.length}>
-            {assignedCustomActions.map(action => (
+            {assignedCustomActions.map((action) => (
               <li key={action.id}>{action.name}</li>
             ))}
           </FeatureCountBadge>
-        )}
+        }
       />
     </section>
   )
@@ -332,10 +339,7 @@ function BuiltInFeatureProviderSection() {
       <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
         <Icon
           icon="tabler:chevron-right"
-          className={cn(
-            "size-4 transition-transform duration-200",
-            isOpen && "rotate-90",
-          )}
+          className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}
         />
         <span>{i18n.t("options.apiProviders.form.featureProviders")}</span>
       </CollapsibleTrigger>
@@ -353,10 +357,11 @@ function BuiltInFeatureProviderSection() {
                       return
                     }
 
-                    const updatedCustomActions = config.selectionToolbar.customActions.map(currentAction =>
-                      currentAction.id === action.id
-                        ? { ...currentAction, providerId: FREE_AI_PROVIDER_ID }
-                        : currentAction,
+                    const updatedCustomActions = config.selectionToolbar.customActions.map(
+                      (currentAction) =>
+                        currentAction.id === action.id
+                          ? { ...currentAction, providerId: FREE_AI_PROVIDER_ID }
+                          : currentAction,
                     )
 
                     void setConfig({

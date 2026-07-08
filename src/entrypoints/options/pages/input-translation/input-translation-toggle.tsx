@@ -5,9 +5,7 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function InputTranslationToggle() {
-  const [inputTranslation, setInputTranslation] = useAtom(
-    configFieldsAtomMap.inputTranslation,
-  )
+  const [inputTranslation, setInputTranslation] = useAtom(configFieldsAtomMap.inputTranslation)
 
   return (
     <ConfigCard

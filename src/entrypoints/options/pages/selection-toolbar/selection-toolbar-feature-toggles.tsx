@@ -7,16 +7,11 @@ import { i18n } from "@/utils/i18n"
 import { ConfigCard } from "../../components/config-card"
 
 export function SelectionToolbarFeatureToggles() {
-  const [selectionToolbar, setSelectionToolbar] = useAtom(
-    configFieldsAtomMap.selectionToolbar,
-  )
+  const [selectionToolbar, setSelectionToolbar] = useAtom(configFieldsAtomMap.selectionToolbar)
 
   const { features } = selectionToolbar
 
-  const setFeatureEnabled = (
-    key: "translate" | "speak",
-    enabled: boolean,
-  ) => {
+  const setFeatureEnabled = (key: "translate" | "speak", enabled: boolean) => {
     void setSelectionToolbar({
       ...selectionToolbar,
       features: {
@@ -30,7 +25,9 @@ export function SelectionToolbarFeatureToggles() {
     <ConfigCard
       id="selection-toolbar-feature-toggles"
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.featureToggles.title")}
-      description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.featureToggles.description")}
+      description={i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.featureToggles.description",
+      )}
     >
       <div className="w-full flex flex-col gap-3">
         <div className="flex items-center justify-between">
@@ -40,7 +37,7 @@ export function SelectionToolbarFeatureToggles() {
           </span>
           <Switch
             checked={features.translate.enabled}
-            onCheckedChange={checked => setFeatureEnabled("translate", checked)}
+            onCheckedChange={(checked) => setFeatureEnabled("translate", checked)}
           />
         </div>
         <div className="flex items-center justify-between">
@@ -50,7 +47,7 @@ export function SelectionToolbarFeatureToggles() {
           </span>
           <Switch
             checked={features.speak.enabled}
-            onCheckedChange={checked => setFeatureEnabled("speak", checked)}
+            onCheckedChange={(checked) => setFeatureEnabled("speak", checked)}
           />
         </div>
       </div>

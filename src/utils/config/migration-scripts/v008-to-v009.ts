@@ -9,6 +9,5 @@ export function migrate(oldConfig: any): any {
         rate: 5,
       },
     },
-
   }
 }

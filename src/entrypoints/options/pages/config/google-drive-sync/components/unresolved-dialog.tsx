@@ -33,17 +33,10 @@ interface UnresolvedDialogProps {
   onCancelled: () => void
 }
 
-export function UnresolvedDialog({
-  open,
-  onResolved,
-  onCancelled,
-}: UnresolvedDialogProps) {
+export function UnresolvedDialog({ open, onResolved, onCancelled }: UnresolvedDialogProps) {
   return (
     <AlertDialog open={open}>
-      <DialogContent
-        onResolved={onResolved}
-        onCancelled={onCancelled}
-      />
+      <DialogContent onResolved={onResolved} onCancelled={onCancelled} />
     </AlertDialog>
   )
 }
@@ -60,7 +53,9 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
   const status = useAtomValue(resolutionStatusAtom)
   const selectAllLocal = useSetAtom(selectAllLocalAtom)
   const selectAllRemote = useSetAtom(selectAllRemoteAtom)
-  const { query: { data: authData } } = useGoogleDriveAuth()
+  const {
+    query: { data: authData },
+  } = useGoogleDriveAuth()
 
   const email = useMemo(() => authData?.userInfo?.email, [authData])
 
@@ -76,12 +71,10 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
     try {
       await syncMergedConfig(resolvedConfigResult.config, email)
       onResolved()
-    }
-    catch (error) {
+    } catch (error) {
       logger.error("Failed to sync merged config", error)
       onCancelled()
-    }
-    finally {
+    } finally {
       setIsConfirming(false)
     }
   }
@@ -108,26 +101,24 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
       {/* Status bar */}
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div className="flex items-center gap-4 text-xs">
-          {status.allResolved
-            ? (!status.isValid
-                ? (
-                    <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
-                      <Icon icon="tabler:alert-circle-filled" className="size-4" />
-                      {i18n.t("options.config.sync.googleDrive.unresolved.configInvalid")}
-                    </span>
-                  )
-                : (
-                    <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
-                      <Icon icon="tabler:circle-check-filled" className="size-4" />
-                      {i18n.t("options.config.sync.googleDrive.unresolved.configValid")}
-                    </span>
-                  ))
-            : (
-                <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
-                  <Icon icon="tabler:circle-dashed-check" className="size-4" />
-                  {i18n.t("options.config.sync.googleDrive.unresolved.resolveToContinue")}
-                </span>
-              )}
+          {status.allResolved ? (
+            !status.isValid ? (
+              <span className="flex items-center gap-1 text-red-600 dark:text-red-400">
+                <Icon icon="tabler:alert-circle-filled" className="size-4" />
+                {i18n.t("options.config.sync.googleDrive.unresolved.configInvalid")}
+              </span>
+            ) : (
+              <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                <Icon icon="tabler:circle-check-filled" className="size-4" />
+                {i18n.t("options.config.sync.googleDrive.unresolved.configValid")}
+              </span>
+            )
+          ) : (
+            <span className="flex items-center gap-1 text-gray-600 dark:text-gray-400">
+              <Icon icon="tabler:circle-dashed-check" className="size-4" />
+              {i18n.t("options.config.sync.googleDrive.unresolved.resolveToContinue")}
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           <Button
@@ -159,9 +150,11 @@ function DialogContent({ onResolved, onCancelled }: DialogContentProps) {
             {i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.title")}
           </AlertTitle>
           <AlertDescription>
-            <p>{i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.description")}</p>
+            <p>
+              {i18n.t("options.config.sync.googleDrive.unresolved.validationAlert.description")}
+            </p>
             <ul className="list-disc list-inside text-xs">
-              {status.validationError.issues.slice(0, 5).map(issue => (
+              {status.validationError.issues.slice(0, 5).map((issue) => (
                 <li key={`${issue.path.join(".")}-${issue.message}`}>
                   <code className="text-xs">{issue.path.join(".")}</code>
                   {": "}
@@ -210,8 +203,7 @@ function MergeConfigView() {
   const resolvedConfigResult = useAtomValue(resolvedConfigResultAtom)
   const status = useAtomValue(resolutionStatusAtom)
   const resolvedConfig = resolvedConfigResult?.config
-  if (!resolvedConfig)
-    return null
+  if (!resolvedConfig) return null
 
   return (
     <div className="h-full rounded-lg overflow-hidden flex flex-col bg-muted">

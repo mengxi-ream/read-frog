@@ -26,7 +26,12 @@ export function useSubtitlesUI() {
 
 export type SubtitlesProvidersAdapter = Pick<
   UniversalVideoAdapter,
-  "downloadSourceSubtitles" | "downloadTranslatedSubtitles" | "embedded" | "containerShrinkRatio" | "getControlsConfig" | "toggleSubtitlesManually"
+  | "downloadSourceSubtitles"
+  | "downloadTranslatedSubtitles"
+  | "embedded"
+  | "containerShrinkRatio"
+  | "getControlsConfig"
+  | "toggleSubtitlesManually"
 >
 
 export function SubtitlesProviders({

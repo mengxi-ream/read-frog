@@ -4,15 +4,13 @@ function normalizeMetaContent(value: string | null | undefined): string {
 
 export function getDocumentDescription(doc: Document = document): string {
   const selectors = [
-    "meta[name=\"description\"]",
-    "meta[property=\"og:description\"]",
-    "meta[name=\"twitter:description\"]",
+    'meta[name="description"]',
+    'meta[property="og:description"]',
+    'meta[name="twitter:description"]',
   ]
 
   for (const selector of selectors) {
-    const content = normalizeMetaContent(
-      doc.querySelector<HTMLMetaElement>(selector)?.content,
-    )
+    const content = normalizeMetaContent(doc.querySelector<HTMLMetaElement>(selector)?.content)
     if (content) {
       return content
     }

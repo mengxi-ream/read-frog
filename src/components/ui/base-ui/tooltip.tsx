@@ -1,19 +1,9 @@
 import { Tooltip as TooltipPrimitive } from "@base-ui/react/tooltip"
-
 import { SHARED_POPUP_CLOSED_STATE_CLASS } from "@/components/ui/base-ui/popup-animation-classes"
 import { cn } from "@/utils/styles/utils"
 
-function TooltipProvider({
-  delay = 0,
-  ...props
-}: TooltipPrimitive.Provider.Props) {
-  return (
-    <TooltipPrimitive.Provider
-      data-slot="tooltip-provider"
-      delay={delay}
-      {...props}
-    />
-  )
+function TooltipProvider({ delay = 0, ...props }: TooltipPrimitive.Provider.Props) {
+  return <TooltipPrimitive.Provider data-slot="tooltip-provider" delay={delay} {...props} />
 }
 
 function Tooltip({ ...props }: TooltipPrimitive.Root.Props) {
@@ -34,15 +24,10 @@ function TooltipContent({
   alignOffset = 0,
   children,
   ...props
-}: TooltipPrimitive.Popup.Props
-  & Pick<TooltipPrimitive.Portal.Props, "container">
-  & {
+}: TooltipPrimitive.Popup.Props &
+  Pick<TooltipPrimitive.Portal.Props, "container"> & {
     positionerClassName?: string
-  }
-  & Pick<
-    TooltipPrimitive.Positioner.Props,
-    "align" | "alignOffset" | "side" | "sideOffset"
-  >) {
+  } & Pick<TooltipPrimitive.Positioner.Props, "align" | "alignOffset" | "side" | "sideOffset">) {
   return (
     <TooltipPrimitive.Portal container={container}>
       <TooltipPrimitive.Positioner

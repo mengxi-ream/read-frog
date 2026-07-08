@@ -30,7 +30,11 @@ vi.mock("../output-schema-field", () => ({
 
 vi.mock("../notebase-connection-field", () => ({
   NotebaseConnectionField: () => (
-    <div>{i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title")}</div>
+    <div>
+      {i18n.t(
+        "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title",
+      )}
+    </div>
   ),
 }))
 
@@ -76,7 +80,11 @@ describe("customActionConfigForm notebase availability", () => {
     )
 
     expect(
-      screen.getByText(i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title")),
+      screen.getByText(
+        i18n.t(
+          "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.notebase.title",
+        ),
+      ),
     ).toBeInTheDocument()
   })
 })

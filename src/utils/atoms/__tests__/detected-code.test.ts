@@ -19,7 +19,7 @@ vi.mock("@/utils/message", () => ({
 }))
 
 function flushPromises() {
-  return new Promise(resolve => setTimeout(resolve, 0))
+  return new Promise((resolve) => setTimeout(resolve, 0))
 }
 
 describe("detectedCodeAtom", () => {

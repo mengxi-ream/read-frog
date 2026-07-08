@@ -140,9 +140,11 @@ describe("setUpDatabaseCleanup", () => {
 
   it("runs only the matching cleanup handler for each alarm", async () => {
     let alarmListener: ((alarm: { name: string }) => Promise<void>) | undefined
-    alarmsAddListenerMock.mockImplementation((listener: (alarm: { name: string }) => Promise<void>) => {
-      alarmListener = listener
-    })
+    alarmsAddListenerMock.mockImplementation(
+      (listener: (alarm: { name: string }) => Promise<void>) => {
+        alarmListener = listener
+      },
+    )
 
     const {
       setUpDatabaseCleanup,

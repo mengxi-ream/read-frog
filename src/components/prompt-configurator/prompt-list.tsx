@@ -54,10 +54,7 @@ export function PromptList() {
           <ConfigurePrompt />
         </Activity>
       </div>
-      <PromptGrid
-        currentPromptId={currentPromptId}
-        setCurrentPromptId={setCurrentPromptId}
-      />
+      <PromptGrid currentPromptId={currentPromptId} setCurrentPromptId={setCurrentPromptId} />
     </section>
   )
 }

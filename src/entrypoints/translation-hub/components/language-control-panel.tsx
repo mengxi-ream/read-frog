@@ -6,7 +6,13 @@ import { Button } from "@/components/ui/base-ui/button"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { detectLanguage } from "@/utils/content/language"
 import { i18n } from "@/utils/i18n"
-import { detectedSourceLangCodeAtom, exchangeLangCodesAtom, inputTextAtom, sourceLangCodeAtom, targetLangCodeAtom } from "../atoms"
+import {
+  detectedSourceLangCodeAtom,
+  exchangeLangCodesAtom,
+  inputTextAtom,
+  sourceLangCodeAtom,
+  targetLangCodeAtom,
+} from "../atoms"
 import { SearchableLanguageSelector } from "./searchable-language-selector"
 
 export function LanguageControlPanel() {
@@ -20,13 +26,14 @@ export function LanguageControlPanel() {
   // Debounced language detection from input text
   const enableLLM = languageDetection.mode === "llm"
   const debouncedDetect = useMemo(
-    () => debounce(async (text: string) => {
-      const detected = await detectLanguage(text, {
-        minLength: 1,
-        enableLLM,
-      })
-      setDetectedSourceLangCode(detected)
-    }, 1000),
+    () =>
+      debounce(async (text: string) => {
+        const detected = await detectLanguage(text, {
+          minLength: 1,
+          enableLLM,
+        })
+        setDetectedSourceLangCode(detected)
+      }, 1000),
     [setDetectedSourceLangCode, enableLLM],
   )
 
@@ -63,8 +70,7 @@ export function LanguageControlPanel() {
         className="flex-1 min-w-0"
         value={targetLangCode}
         onValueChange={(value) => {
-          if (value !== "auto")
-            setTargetLangCode(value)
+          if (value !== "auto") setTargetLangCode(value)
         }}
         label={i18n.t("side.targetLang")}
       />

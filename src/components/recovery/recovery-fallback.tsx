@@ -41,11 +41,9 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
       await setConfig(DEFAULT_CONFIG)
       toast.success(i18n.t("errorRecovery.resetSuccess"))
       onRecovered()
-    }
-    catch {
+    } catch {
       toast.error(i18n.t("errorRecovery.resetFailed"))
-    }
-    finally {
+    } finally {
       setIsResetting(false)
     }
   }
@@ -92,7 +90,9 @@ export function RecoveryFallback({ error, onRecovered }: RecoveryFallbackProps) 
             {i18n.t("errorRecovery.refreshPage")}
           </Button>
           <AlertDialog>
-            <AlertDialogTrigger render={<Button variant="destructive" disabled={isExporting || isResetting} />}>
+            <AlertDialogTrigger
+              render={<Button variant="destructive" disabled={isExporting || isResetting} />}
+            >
               {i18n.t("errorRecovery.resetAction")}
             </AlertDialogTrigger>
             <AlertDialogContent>

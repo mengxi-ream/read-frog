@@ -12,7 +12,9 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value)
 }
 
-function parseHeadersJson(input: string): { valid: true, value: Record<string, unknown> | undefined } | { valid: false, error: string } {
+function parseHeadersJson(
+  input: string,
+): { valid: true; value: Record<string, unknown> | undefined } | { valid: false; error: string } {
   if (!input.trim()) {
     return { valid: true, value: undefined }
   }
@@ -23,13 +25,12 @@ function parseHeadersJson(input: string): { valid: true, value: Record<string, u
       return { valid: false, error: i18n.t("options.apiProviders.form.invalidJson") }
     }
 
-    if (Object.values(parsed).some(value => typeof value !== "string")) {
+    if (Object.values(parsed).some((value) => typeof value !== "string")) {
       return { valid: false, error: i18n.t("options.apiProviders.form.invalidJson") }
     }
 
     return { valid: true, value: parsed }
-  }
-  catch {
+  } catch {
     return { valid: false, error: i18n.t("options.apiProviders.form.invalidJson") }
   }
 }
@@ -45,12 +46,15 @@ const EXAMPLE_HEADERS_PLACEHOLDER = {
 export const ProviderHeadersField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useSelector(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, (state) => state.values)
     const isLLMProvider = isLLMProviderConfig(providerConfig)
 
-    const handleHeadersCommit = useCallback((value: Record<string, unknown> | undefined) => {
-      form.setFieldValue("headers", value)
-    }, [form])
+    const handleHeadersCommit = useCallback(
+      (value: Record<string, unknown> | undefined) => {
+        form.setFieldValue("headers", value)
+      },
+      [form],
+    )
 
     const handleSubmit = useCallback(() => form.handleSubmit(), [form])
 
@@ -72,12 +76,12 @@ export const ProviderHeadersField = withForm({
         onSubmit={handleSubmit}
         editorAriaLabel="provider-headers-editor"
         placeholder={placeholderText}
-        label={(
+        label={
           <div className="flex items-center gap-1.5">
             <span>{i18n.t("options.apiProviders.form.headers")}</span>
             <HelpTooltip>{i18n.t("options.apiProviders.form.headersHint")}</HelpTooltip>
           </div>
-        )}
+        }
       />
     )
   },

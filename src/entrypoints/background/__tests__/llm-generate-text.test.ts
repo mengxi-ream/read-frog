@@ -24,11 +24,13 @@ vi.mock("@/utils/logger", () => ({
 }))
 
 function getRegisteredMessageHandler(name: string) {
-  const registration = onMessageMock.mock.calls.find(call => call[0] === name)
+  const registration = onMessageMock.mock.calls.find((call) => call[0] === name)
   if (!registration) {
     throw new Error(`Message handler not registered: ${name}`)
   }
-  return registration[1] as (message: { data: Record<string, unknown> }) => Promise<{ text: string }>
+  return registration[1] as (message: {
+    data: Record<string, unknown>
+  }) => Promise<{ text: string }>
 }
 
 describe("llm-generate-text", () => {
@@ -88,12 +90,14 @@ describe("llm-generate-text", () => {
     setupLLMGenerateTextMessageHandlers()
     const handler = getRegisteredMessageHandler("backgroundGenerateText")
 
-    await expect(handler({
-      data: {
-        providerId: "openai-default",
-        prompt: "test",
-      },
-    })).rejects.toThrow("provider unavailable")
+    await expect(
+      handler({
+        data: {
+          providerId: "openai-default",
+          prompt: "test",
+        },
+      }),
+    ).rejects.toThrow("provider unavailable")
 
     expect(loggerErrorMock).toHaveBeenCalled()
   })

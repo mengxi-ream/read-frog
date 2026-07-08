@@ -17,7 +17,11 @@ import { LocaleBoundary } from "@/utils/i18n/locale-boundary"
 import { ensureIconifyBackgroundFetch } from "@/utils/iconify/setup-background-fetch"
 import { protectSelectAllShadowRoot } from "@/utils/select-all"
 import { insertShadowRootUIWrapperInto } from "@/utils/shadow-root"
-import { clearEffectiveSiteControlUrl, getEffectiveSiteControlUrl, isSiteEnabled } from "@/utils/site-control"
+import {
+  clearEffectiveSiteControlUrl,
+  getEffectiveSiteControlUrl,
+  isSiteEnabled,
+} from "@/utils/site-control"
 import { addStyleToShadow } from "@/utils/styles"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
@@ -91,8 +95,7 @@ export default defineContentScript({
   cssInjectionMode: "ui",
   async main(ctx) {
     // Prevent double injection (manifest-based + programmatic injection)
-    if (window.__READ_FROG_SELECTION_INJECTED__)
-      return
+    if (window.__READ_FROG_SELECTION_INJECTED__) return
     window.__READ_FROG_SELECTION_INJECTED__ = true
 
     ctx.onInvalidated(() => {

@@ -1,0 +1,50 @@
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["import", "react", "typescript", "vitest"],
+  "jsPlugins": ["./node_modules/oxlint-plugin-query/dist/index.js"],
+  "env": {
+    "browser": true,
+    "builtin": true,
+    "es2026": true,
+    "node": true
+  },
+  "categories": {
+    "correctness": "off",
+    "nursery": "off",
+    "pedantic": "off",
+    "perf": "off",
+    "restriction": "off",
+    "style": "off",
+    "suspicious": "off"
+  },
+  "ignorePatterns": [
+    "**/node_modules/**",
+    "**/.wxt/**",
+    "**/.output/**",
+    "**/coverage/**",
+    "**/dist/**",
+    "**/.nx/**",
+    "**/.turbo/**",
+    "repos/**",
+    "scripts/output/**",
+    ".agents/**",
+    ".claude/**",
+    ".codex/**",
+    ".cursor/**",
+    "**/skills/**",
+    "**/*.md/**",
+    "**/pnpm-lock.yaml"
+  ],
+  "rules": {
+    "no-inner-declarations": "error",
+    "react/exhaustive-deps": "warn",
+    "react/rules-of-hooks": "error",
+    "typescript/no-floating-promises": "error",
+    "oxlint-plugin-query/exhaustive-deps": "error",
+    "oxlint-plugin-query/no-rest-destructuring": "warn",
+    "oxlint-plugin-query/stable-query-client": "error",
+    "vitest/consistent-test-it": ["error", { "fn": "it" }],
+    "vitest/no-identical-title": "error",
+    "vitest/prefer-hooks-on-top": "error"
+  }
+}

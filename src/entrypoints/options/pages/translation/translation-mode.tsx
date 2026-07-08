@@ -16,7 +16,11 @@ import { ConfigCard } from "../../components/config-card"
 
 export function TranslationMode() {
   return (
-    <ConfigCard id="translation-mode" title={i18n.t("options.translation.translationMode.title")} description={i18n.t("options.translation.translationMode.description")}>
+    <ConfigCard
+      id="translation-mode"
+      title={i18n.t("options.translation.translationMode.title")}
+      description={i18n.t("options.translation.translationMode.description")}
+    >
       <TranslationModeSelector />
     </ConfigCard>
   )
@@ -27,20 +31,14 @@ function TranslationModeSelector() {
   const currentMode = translateConfig.mode
 
   const handleModeChange = (mode: TranslationModeType | null) => {
-    if (!mode)
-      return
+    if (!mode) return
 
-    void setTranslateConfig(
-      deepmerge(translateConfig, { mode }),
-    )
+    void setTranslateConfig(deepmerge(translateConfig, { mode }))
   }
 
   return (
     <div className="w-full flex justify-start md:justify-end">
-      <Select
-        value={currentMode}
-        onValueChange={handleModeChange}
-      >
+      <Select value={currentMode} onValueChange={handleModeChange}>
         <SelectTrigger className="w-40">
           <SelectValue render={<span />}>
             {i18n.t(`options.translation.translationMode.mode.${currentMode}`)}
@@ -48,7 +46,7 @@ function TranslationModeSelector() {
         </SelectTrigger>
         <SelectContent>
           <SelectGroup>
-            {TRANSLATION_MODES.map(mode => (
+            {TRANSLATION_MODES.map((mode) => (
               <SelectItem key={mode} value={mode}>
                 {i18n.t(`options.translation.translationMode.mode.${mode}`)}
               </SelectItem>

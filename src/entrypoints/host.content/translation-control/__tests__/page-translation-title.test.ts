@@ -99,7 +99,7 @@ function createDeferred<T>() {
 
 async function flushDomUpdates(): Promise<void> {
   await Promise.resolve()
-  await new Promise(resolve => setTimeout(resolve, 0))
+  await new Promise((resolve) => setTimeout(resolve, 0))
   await Promise.resolve()
 }
 
@@ -180,14 +180,20 @@ describe("pageTranslationManager title handling", () => {
     manager.stop()
 
     expect(document.title).toBe("Updated Source Title")
-    expect(mockSendMessage).toHaveBeenCalledWith("setAndNotifyPageTranslationStateChangedByManager", {
-      enabled: true,
-      url: window.location.href,
-    })
-    expect(mockSendMessage).toHaveBeenCalledWith("setAndNotifyPageTranslationStateChangedByManager", {
-      enabled: false,
-      url: window.location.href,
-    })
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      "setAndNotifyPageTranslationStateChangedByManager",
+      {
+        enabled: true,
+        url: window.location.href,
+      },
+    )
+    expect(mockSendMessage).toHaveBeenCalledWith(
+      "setAndNotifyPageTranslationStateChangedByManager",
+      {
+        enabled: false,
+        url: window.location.href,
+      },
+    )
   })
 
   it("does not retrigger title translation for its own managed title updates", async () => {

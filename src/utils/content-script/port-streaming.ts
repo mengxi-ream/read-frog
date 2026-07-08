@@ -19,11 +19,7 @@ export function createPortStreamPromise<TResponse = string, TSerializablePayload
   } = {},
 ): Promise<TResponse> {
   return new Promise<TResponse>((resolve, reject) => {
-    const {
-      signal,
-      onChunk,
-      keepAliveIntervalMs = 20_000,
-    } = options
+    const { signal, onChunk, keepAliveIntervalMs = 20_000 } = options
 
     const requestId = getRandomUUID()
     const port = browser.runtime.connect({ name: portName })
@@ -58,8 +54,7 @@ export function createPortStreamPromise<TResponse = string, TSerializablePayload
 
       try {
         port.disconnect()
-      }
-      catch {
+      } catch {
         // The port may already be closed due to a race with onDisconnect.
         // This is expected during cleanup and safe to ignore.
       }
@@ -128,8 +123,7 @@ export function createPortStreamPromise<TResponse = string, TSerializablePayload
             requestId,
           }
           port.postMessage(pingMessage)
-        }
-        catch {
+        } catch {
           // Ignore keepalive send failures; disconnect listener will handle it.
         }
       }, keepAliveIntervalMs)

@@ -49,10 +49,12 @@ export function migrate(oldConfig: any): any {
   })
 
   // Update translate.providerId if it references an old ID
-  const newTranslateProviderId = PROVIDER_ID_MIGRATION[oldConfig.translate?.providerId] ?? oldConfig.translate?.providerId
+  const newTranslateProviderId =
+    PROVIDER_ID_MIGRATION[oldConfig.translate?.providerId] ?? oldConfig.translate?.providerId
 
   // Update read.providerId if it references an old ID
-  const newReadProviderId = PROVIDER_ID_MIGRATION[oldConfig.read?.providerId] ?? oldConfig.read?.providerId
+  const newReadProviderId =
+    PROVIDER_ID_MIGRATION[oldConfig.read?.providerId] ?? oldConfig.read?.providerId
 
   return {
     ...oldConfig,

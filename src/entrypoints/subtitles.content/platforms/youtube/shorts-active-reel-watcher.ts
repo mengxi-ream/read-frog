@@ -6,7 +6,11 @@ const SHORTS_CONTAINER_SELECTOR = "ytd-shorts"
 const ACTIVE_REEL_CHANGE_DEBOUNCE_MS = 200
 
 function getActiveReel(): HTMLElement | null {
-  return document.querySelector(OVERLAY_CONTAINER_SELECTOR)?.closest<HTMLElement>(ACTIVE_REEL_SELECTOR) ?? null
+  return (
+    document
+      .querySelector(OVERLAY_CONTAINER_SELECTOR)
+      ?.closest<HTMLElement>(ACTIVE_REEL_SELECTOR) ?? null
+  )
 }
 
 export function watchShortsActiveReel(onActiveReelChanged: () => void) {

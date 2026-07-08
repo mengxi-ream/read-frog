@@ -2,11 +2,7 @@ import type { PageTranslationManager } from "../page-translation"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { bindTranslationShortcutKey } from "../bind-translation-shortcut"
 
-const {
-  mockGetLocalConfig,
-  mockRegister,
-  mockUnregister,
-} = vi.hoisted(() => ({
+const { mockGetLocalConfig, mockRegister, mockUnregister } = vi.hoisted(() => ({
   mockGetLocalConfig: vi.fn(),
   mockRegister: vi.fn(),
   mockUnregister: vi.fn(),

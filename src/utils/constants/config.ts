@@ -8,8 +8,28 @@ import { DEFAULT_TRANSLATE_PROMPTS_CONFIG } from "./prompt"
 import { DEFAULT_PROVIDER_CONFIG_LIST } from "./providers"
 import { DEFAULT_SELECTION_OVERLAY_OPACITY } from "./selection"
 import { DEFAULT_SIDE_CONTENT_WIDTH } from "./side"
-import { DEFAULT_BACKGROUND_OPACITY, DEFAULT_DISPLAY_MODE, DEFAULT_FONT_FAMILY, DEFAULT_FONT_SCALE, DEFAULT_FONT_WEIGHT, DEFAULT_SUBTITLE_COLOR, DEFAULT_SUBTITLE_POSITION, DEFAULT_TRANSLATION_POSITION } from "./subtitles"
-import { DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY, DEFAULT_BATCH_CONFIG, DEFAULT_MIN_CHARACTERS_PER_NODE, DEFAULT_MIN_WORDS_PER_NODE, DEFAULT_PRELOAD_MARGIN, DEFAULT_PRELOAD_THRESHOLD, DEFAULT_REQUEST_CAPACITY, DEFAULT_REQUEST_RATE, DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY, DEFAULT_TRANSLATION_MODE_SHORTCUT_KEY } from "./translate"
+import {
+  DEFAULT_BACKGROUND_OPACITY,
+  DEFAULT_DISPLAY_MODE,
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_FONT_SCALE,
+  DEFAULT_FONT_WEIGHT,
+  DEFAULT_SUBTITLE_COLOR,
+  DEFAULT_SUBTITLE_POSITION,
+  DEFAULT_TRANSLATION_POSITION,
+} from "./subtitles"
+import {
+  DEFAULT_AUTO_TRANSLATE_SHORTCUT_KEY,
+  DEFAULT_BATCH_CONFIG,
+  DEFAULT_MIN_CHARACTERS_PER_NODE,
+  DEFAULT_MIN_WORDS_PER_NODE,
+  DEFAULT_PRELOAD_MARGIN,
+  DEFAULT_PRELOAD_THRESHOLD,
+  DEFAULT_REQUEST_CAPACITY,
+  DEFAULT_REQUEST_RATE,
+  DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY,
+  DEFAULT_TRANSLATION_MODE_SHORTCUT_KEY,
+} from "./translate"
 import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from "./translation-node-style"
 import { DEFAULT_TTS_CONFIG } from "./tts"
 
@@ -36,15 +56,14 @@ export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
  * a transient fallback, never the persisted value.
  */
 export function createDefaultDictionaryAction(): SelectionToolbarCustomAction | null {
-  const template = CUSTOM_ACTION_TEMPLATES.find(t => t.id === "dictionary")
-  if (!template)
-    return null
+  const template = CUSTOM_ACTION_TEMPLATES.find((t) => t.id === "dictionary")
+  if (!template) return null
 
   const action = template.createAction(FREE_AI_PROVIDER_ID)
   return {
     ...action,
     id: "default-dictionary",
-    outputSchema: action.outputSchema.map(field => ({
+    outputSchema: action.outputSchema.map((field) => ({
       ...field,
       id: field.id.startsWith("dictionary-")
         ? `default-${field.id}`
@@ -199,10 +218,7 @@ export const DEFAULT_CONFIG: Config = {
   uiLanguage: "auto",
 }
 
-export const PAGE_TRANSLATE_RANGE_ITEMS: Record<
-  PageTranslateRange,
-  { label: string }
-> = {
+export const PAGE_TRANSLATE_RANGE_ITEMS: Record<PageTranslateRange, { label: string }> = {
   main: { label: "Main" },
   all: { label: "All" },
 }

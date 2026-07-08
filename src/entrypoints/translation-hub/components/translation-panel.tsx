@@ -24,9 +24,7 @@ export function TranslationPanel() {
             <Icon icon="tabler:language-off" className="size-6" />
           </EmptyMedia>
           <EmptyTitle>{i18n.t("translationHub.noServicesSelected")}</EmptyTitle>
-          <EmptyDescription>
-            {i18n.t("translationHub.noServicesDescription")}
-          </EmptyDescription>
+          <EmptyDescription>{i18n.t("translationHub.noServicesDescription")}</EmptyDescription>
         </EmptyHeader>
       </Empty>
     )
@@ -34,13 +32,13 @@ export function TranslationPanel() {
 
   return (
     <div className="space-y-4">
-      {selectedProviderIds.map(id => (
+      {selectedProviderIds.map((id) => (
         <TranslationCard
           key={id}
           providerId={id}
           isExpanded={expandedById[id] ?? true}
           onExpandedChange={(expanded) => {
-            setExpandedById(prev => ({ ...prev, [id]: expanded }))
+            setExpandedById((prev) => ({ ...prev, [id]: expanded }))
           }}
         />
       ))}

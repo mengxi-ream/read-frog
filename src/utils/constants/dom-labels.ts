@@ -11,7 +11,12 @@ export const INLINE_ATTRIBUTE = "data-read-frog-inline-node"
 
 export const TRANSLATION_MODE_ATTRIBUTE = "data-read-frog-translation-mode"
 
-export const MARK_ATTRIBUTES = new Set([WALKED_ATTRIBUTE, PARAGRAPH_ATTRIBUTE, BLOCK_ATTRIBUTE, INLINE_ATTRIBUTE])
+export const MARK_ATTRIBUTES = new Set([
+  WALKED_ATTRIBUTE,
+  PARAGRAPH_ATTRIBUTE,
+  BLOCK_ATTRIBUTE,
+  INLINE_ATTRIBUTE,
+])
 
 export const NOTRANSLATE_CLASS = "notranslate"
 

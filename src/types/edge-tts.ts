@@ -17,7 +17,7 @@ export const EDGE_TTS_ERROR_CODES = [
   "UNKNOWN_ERROR",
 ] as const
 
-export type EdgeTTSErrorCode = typeof EDGE_TTS_ERROR_CODES[number]
+export type EdgeTTSErrorCode = (typeof EDGE_TTS_ERROR_CODES)[number]
 
 export interface EdgeTTSErrorPayload {
   code: EdgeTTSErrorCode

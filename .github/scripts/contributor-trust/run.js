@@ -2,7 +2,6 @@ import { appendFile, readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import process from "node:process"
 import { fileURLToPath } from "node:url"
-
 import { getBotAuthorSkipReason } from "./bot-author.js"
 import { buildTrustComment } from "./comment-template.js"
 import { LABEL_DEFINITIONS, POLICY } from "./config.js"
@@ -27,16 +26,14 @@ import { computeContributorScore } from "./score-author.js"
 
 function getRequiredEnv(name) {
   const value = process.env[name]
-  if (!value)
-    throw new Error(`Missing required environment variable: ${name}`)
+  if (!value) throw new Error(`Missing required environment variable: ${name}`)
   return value
 }
 
 function getRepository() {
   const repository = getRequiredEnv("GITHUB_REPOSITORY")
   const [owner, repo] = repository.split("/")
-  if (!owner || !repo)
-    throw new Error(`Invalid GITHUB_REPOSITORY value: ${repository}`)
+  if (!owner || !repo) throw new Error(`Invalid GITHUB_REPOSITORY value: ${repository}`)
   return { owner, repo }
 }
 
@@ -47,19 +44,16 @@ async function getEventPayload() {
 
 function resolvePullNumber(eventName, payload) {
   const manualInput = process.env.TRUST_PR_NUMBER?.trim()
-  if (manualInput)
-    return Number.parseInt(manualInput, 10)
+  if (manualInput) return Number.parseInt(manualInput, 10)
 
-  if (eventName === "pull_request_target")
-    return payload.pull_request?.number
+  if (eventName === "pull_request_target") return payload.pull_request?.number
 
   return null
 }
 
 async function writeJobSummary(lines) {
   const summaryPath = process.env.GITHUB_STEP_SUMMARY
-  if (!summaryPath)
-    return
+  if (!summaryPath) return
 
   await appendFile(summaryPath, `${lines.join("\n")}\n`)
 }
@@ -92,22 +86,35 @@ function buildScoreBreakdownSummary(score) {
 
 function logScoreBreakdown(score) {
   console.log("Contributor trust score breakdown:")
-  console.log(JSON.stringify({
-    bucket: score.bucket,
-    breakdown: score.breakdown,
-    total: score.total,
-  }, null, 2))
+  console.log(
+    JSON.stringify(
+      {
+        bucket: score.bucket,
+        breakdown: score.breakdown,
+        total: score.total,
+      },
+      null,
+      2,
+    ),
+  )
 }
 
-async function syncLabels({ currentLabels, issueNumber, labelsToAdd, labelsToRemove, owner, repo, token }) {
+async function syncLabels({
+  currentLabels,
+  issueNumber,
+  labelsToAdd,
+  labelsToRemove,
+  owner,
+  repo,
+  token,
+}) {
   for (const label of labelsToRemove) {
-    if (!currentLabels.includes(label))
-      continue
+    if (!currentLabels.includes(label)) continue
     await removeLabelFromIssue(token, owner, repo, issueNumber, label)
     console.log(`Removed label: ${label}`)
   }
 
-  const missingLabels = labelsToAdd.filter(label => !currentLabels.includes(label))
+  const missingLabels = labelsToAdd.filter((label) => !currentLabels.includes(label))
   if (missingLabels.length > 0) {
     await addLabelsToIssue(token, owner, repo, issueNumber, missingLabels)
     console.log(`Added labels: ${missingLabels.join(", ")}`)
@@ -195,7 +202,9 @@ export async function main() {
 
     summaryLines.push(`- Result: skipped due to \`${POLICY.overrideLabel}\``)
     if (overridePlan.labelsToRemove.length > 0)
-      summaryLines.push(`- Cleanup: removed ${overridePlan.labelsToRemove.map(label => `\`${label}\``).join(", ")}`)
+      summaryLines.push(
+        `- Cleanup: removed ${overridePlan.labelsToRemove.map((label) => `\`${label}\``).join(", ")}`,
+      )
     await writeJobSummary(summaryLines)
     return
   }
@@ -268,9 +277,10 @@ export async function main() {
     summaryLines.push(`- Migration-related changed lines excluded: ${plan.excludedChangedLines}`)
   summaryLines.push(`- Bucket: \`${score.bucket}\``)
   summaryLines.push(`- Target label: \`${plan.targetTrustLabel}\``)
-  summaryLines.push(`- Maintainer review: ${plan.needsMaintainerReview ? "required" : "not required"}`)
-  if (plan.closeReason)
-    summaryLines.push(`- Auto-close: ${plan.closeReason}`)
+  summaryLines.push(
+    `- Maintainer review: ${plan.needsMaintainerReview ? "required" : "not required"}`,
+  )
+  if (plan.closeReason) summaryLines.push(`- Auto-close: ${plan.closeReason}`)
   summaryLines.push(`- Comment: ${commentResult.action}`)
   summaryLines.push(`- Fingerprint: \`${comment.fingerprint}\``)
   summaryLines.push(...buildScoreBreakdownSummary(score))
@@ -278,8 +288,8 @@ export async function main() {
   await writeJobSummary(summaryLines)
 }
 
-const isDirectExecution = process.argv[1]
-  && resolve(process.argv[1]) === fileURLToPath(import.meta.url)
+const isDirectExecution =
+  process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)
 
 if (isDirectExecution) {
   main().catch(async (error) => {

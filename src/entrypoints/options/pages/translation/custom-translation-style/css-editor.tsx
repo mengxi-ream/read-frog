@@ -67,7 +67,12 @@ export function CSSEditor() {
           <FieldLabel htmlFor="css-editor" data-invalid>
             {i18n.t("options.translation.translationStyle.cssEditor")}
           </FieldLabel>
-          <a href={`${env.WXT_WEBSITE_URL}/docs/custom-css`} className="text-xs text-link hover:opacity-90" target="_blank" rel="noreferrer">
+          <a
+            href={`${env.WXT_WEBSITE_URL}/docs/custom-css`}
+            className="text-xs text-link hover:opacity-90"
+            target="_blank"
+            rel="noreferrer"
+          >
             {i18n.t("options.apiProviders.howToConfigure")}
           </a>
         </div>
@@ -109,10 +114,21 @@ export function CSSEditor() {
           </Alert>
         </Activity> */}
         <div className="flex items-center gap-2 justify-between">
-          <div className={cn("text-sm text-green-500", isValidating && "text-muted-foreground", (hasSyntaxError || hasLengthError) && "text-destructive")}>
-            {cssInput.trim().length > 0 ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError, hasChanges) : ""}
+          <div
+            className={cn(
+              "text-sm text-green-500",
+              isValidating && "text-muted-foreground",
+              (hasSyntaxError || hasLengthError) && "text-destructive",
+            )}
+          >
+            {cssInput.trim().length > 0
+              ? getValidationMessage(isValidating, hasSyntaxError, hasLengthError, hasChanges)
+              : ""}
           </div>
-          <Button onClick={handleSave} disabled={isValidating || hasSyntaxError || hasLengthError || !hasChanges}>
+          <Button
+            onClick={handleSave}
+            disabled={isValidating || hasSyntaxError || hasLengthError || !hasChanges}
+          >
             {hasChanges
               ? i18n.t("options.translation.translationStyle.customCSS.editor.saveButton")
               : i18n.t("options.translation.translationStyle.customCSS.editor.savedButton")}
@@ -123,7 +139,12 @@ export function CSSEditor() {
   )
 }
 
-function getValidationMessage(isValidating: boolean, hasSyntaxError: boolean, hasLengthError: boolean, hasChanges: boolean) {
+function getValidationMessage(
+  isValidating: boolean,
+  hasSyntaxError: boolean,
+  hasLengthError: boolean,
+  hasChanges: boolean,
+) {
   if (isValidating) {
     return i18n.t("options.translation.translationStyle.customCSS.editor.validation.validating")
   }

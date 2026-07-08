@@ -11,19 +11,24 @@ type SelectFieldAutoSaveProps = React.ComponentProps<typeof Select> & {
   labelExtra?: React.ReactNode
 }
 
-export function SelectFieldAutoSave(
-  { formForSubmit, label, labelExtra, ...props }: SelectFieldAutoSaveProps,
-) {
+export function SelectFieldAutoSave({
+  formForSubmit,
+  label,
+  labelExtra,
+  ...props
+}: SelectFieldAutoSaveProps) {
   const field = useFieldContext<string | undefined>()
-  const errors = useSelector(field.store, state => state.meta.errors)
+  const errors = useSelector(field.store, (state) => state.meta.errors)
   const hasError = errors.length > 0
 
-  const handleValueChange = useCallback((value: unknown) => {
-    if (typeof value !== "string")
-      return
-    field.handleChange(value)
-    void formForSubmit.handleSubmit()
-  }, [field, formForSubmit])
+  const handleValueChange = useCallback(
+    (value: unknown) => {
+      if (typeof value !== "string") return
+      field.handleChange(value)
+      void formForSubmit.handleSubmit()
+    },
+    [field, formForSubmit],
+  )
 
   return (
     <Field invalid={hasError}>
@@ -33,15 +38,11 @@ export function SelectFieldAutoSave(
         </FieldLabel>
         {labelExtra}
       </div>
-      <Select
-        value={field.state.value}
-        onValueChange={handleValueChange}
-        {...props}
-      >
+      <Select value={field.state.value} onValueChange={handleValueChange} {...props}>
         {props.children}
       </Select>
       <FieldError match={hasError}>
-        {errors.map(error => typeof error === "string" ? error : error?.message).join(", ")}
+        {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>
     </Field>
   )

@@ -8,7 +8,13 @@ import {
   NOTRANSLATE_CLASS,
   PARAGRAPH_ATTRIBUTE,
 } from "../../../constants/dom-labels"
-import { isBlockTransNode, isHTMLElement, isInlineTransNode, isSiteRuleForceBlockElement, isSiteRuleForceInlineElement } from "../../dom/filter"
+import {
+  isBlockTransNode,
+  isHTMLElement,
+  isInlineTransNode,
+  isSiteRuleForceBlockElement,
+  isSiteRuleForceInlineElement,
+} from "../../dom/filter"
 import { getOwnerDocument } from "../../dom/node"
 import { decorateTranslationNode } from "../ui/decorate-translation"
 import { isForceInlineTranslation } from "../ui/translation-utils"
@@ -25,26 +31,22 @@ function hasVisibleLayoutBox(element: HTMLElement): boolean {
 
 function findActiveFloatSibling(paragraphElement: HTMLElement): HTMLElement | null {
   const flowContainer = paragraphElement.parentElement
-  if (!flowContainer)
-    return null
+  if (!flowContainer) return null
 
   const paragraphRect = paragraphElement.getBoundingClientRect()
 
   for (const sibling of flowContainer.children) {
-    if (!isHTMLElement(sibling))
-      continue
-    if (sibling === paragraphElement || sibling.contains(paragraphElement))
-      continue
+    if (!isHTMLElement(sibling)) continue
+    if (sibling === paragraphElement || sibling.contains(paragraphElement)) continue
 
     const floatCandidates = [sibling, ...sibling.querySelectorAll<HTMLElement>("*")]
     for (const candidate of floatCandidates) {
-      if (!isFloatedElement(candidate) || !hasVisibleLayoutBox(candidate))
-        continue
+      if (!isFloatedElement(candidate) || !hasVisibleLayoutBox(candidate)) continue
 
       const floatRect = candidate.getBoundingClientRect()
-      const verticallyAffectsParagraph = paragraphRect.top < floatRect.bottom - 1 && paragraphRect.bottom > floatRect.top + 1
-      if (verticallyAffectsParagraph)
-        return candidate
+      const verticallyAffectsParagraph =
+        paragraphRect.top < floatRect.bottom - 1 && paragraphRect.bottom > floatRect.top + 1
+      if (verticallyAffectsParagraph) return candidate
     }
   }
 
@@ -53,23 +55,32 @@ function findActiveFloatSibling(paragraphElement: HTMLElement): HTMLElement | nu
 
 function shouldWrapInsideFloatFlow(targetNode: TransNode): boolean {
   const paragraphElement = isHTMLElement(targetNode)
-    ? (targetNode.hasAttribute(PARAGRAPH_ATTRIBUTE) ? targetNode : targetNode.closest<HTMLElement>(`[${PARAGRAPH_ATTRIBUTE}]`))
+    ? targetNode.hasAttribute(PARAGRAPH_ATTRIBUTE)
+      ? targetNode
+      : targetNode.closest<HTMLElement>(`[${PARAGRAPH_ATTRIBUTE}]`)
     : targetNode.parentElement?.closest<HTMLElement>(`[${PARAGRAPH_ATTRIBUTE}]`)
-  if (!paragraphElement)
-    return false
+  if (!paragraphElement) return false
 
   const activeFloat = findActiveFloatSibling(paragraphElement)
   return !!activeFloat
 }
 
-export function addInlineTranslation(ownerDoc: Document, translatedWrapperNode: HTMLElement, translatedNode: HTMLElement): void {
+export function addInlineTranslation(
+  ownerDoc: Document,
+  translatedWrapperNode: HTMLElement,
+  translatedNode: HTMLElement,
+): void {
   const spaceNode = ownerDoc.createElement("span")
   spaceNode.textContent = "  "
   translatedWrapperNode.appendChild(spaceNode)
   translatedNode.className = `${NOTRANSLATE_CLASS} ${INLINE_CONTENT_CLASS}`
 }
 
-export function addBlockTranslation(ownerDoc: Document, translatedWrapperNode: HTMLElement, translatedNode: HTMLElement): void {
+export function addBlockTranslation(
+  ownerDoc: Document,
+  translatedWrapperNode: HTMLElement,
+  translatedNode: HTMLElement,
+): void {
   const brNode = ownerDoc.createElement("br")
   translatedWrapperNode.appendChild(brNode)
   translatedNode.className = `${NOTRANSLATE_CLASS} ${BLOCK_CONTENT_CLASS}`
@@ -86,27 +97,24 @@ export async function insertTranslatedNodeIntoWrapper(
   // Use the wrapper's owner document
   const ownerDoc = getOwnerDocument(translatedWrapperNode)
   const translatedNode = ownerDoc.createElement("span")
-  const siteRuleForceInline = isHTMLElement(targetNode) && isSiteRuleForceInlineElement(targetNode, config)
+  const siteRuleForceInline =
+    isHTMLElement(targetNode) && isSiteRuleForceInlineElement(targetNode, config)
   const forceInlineTranslation = isForceInlineTranslation(targetNode) || siteRuleForceInline
-  const siteRuleForceBlock = isHTMLElement(targetNode) && isSiteRuleForceBlockElement(targetNode, config)
+  const siteRuleForceBlock =
+    isHTMLElement(targetNode) && isSiteRuleForceBlockElement(targetNode, config)
 
   // priority: siteRuleForceBlock > forceInlineTranslation > forceBlockTranslation > isInlineTransNode > isBlockTransNode
   if (siteRuleForceBlock) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  }
-  else if (forceInlineTranslation) {
+  } else if (forceInlineTranslation) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  }
-  else if (forceBlockTranslation) {
+  } else if (forceBlockTranslation) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  }
-  else if (isInlineTransNode(targetNode)) {
+  } else if (isInlineTransNode(targetNode)) {
     addInlineTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  }
-  else if (isBlockTransNode(targetNode)) {
+  } else if (isBlockTransNode(targetNode)) {
     addBlockTranslation(ownerDoc, translatedWrapperNode, translatedNode)
-  }
-  else {
+  } else {
     // not inline or block, maybe notranslate
     return
   }
@@ -115,7 +123,10 @@ export async function insertTranslatedNodeIntoWrapper(
   translatedWrapperNode.appendChild(translatedNode)
   await decorateTranslationNode(translatedNode, translationNodeStyle)
 
-  if (translatedNode.classList.contains(BLOCK_CONTENT_CLASS) && shouldWrapInsideFloatFlow(targetNode)) {
+  if (
+    translatedNode.classList.contains(BLOCK_CONTENT_CLASS) &&
+    shouldWrapInsideFloatFlow(targetNode)
+  ) {
     translatedNode.setAttribute(FLOAT_WRAP_ATTRIBUTE, "true")
   }
 }

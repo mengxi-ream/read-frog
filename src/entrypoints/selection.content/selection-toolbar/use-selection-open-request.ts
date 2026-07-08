@@ -23,8 +23,8 @@ const SELECTION_OPEN_REQUEST_TRIGGER = {
   SHORTCUT: "shortcut",
 } as const
 
-type SelectionOpenRequestTrigger
-  = typeof SELECTION_OPEN_REQUEST_TRIGGER[keyof typeof SELECTION_OPEN_REQUEST_TRIGGER]
+type SelectionOpenRequestTrigger =
+  (typeof SELECTION_OPEN_REQUEST_TRIGGER)[keyof typeof SELECTION_OPEN_REQUEST_TRIGGER]
 
 function shouldUseRecentCapturedRequest(trigger: SelectionOpenRequestTrigger) {
   return trigger === SELECTION_OPEN_REQUEST_TRIGGER.CONTEXT_MENU
@@ -34,8 +34,9 @@ function getSelectionAnchorFromRange(rangeSnapshot: SelectionRangeSnapshot) {
   try {
     const range = toLiveRange(rangeSnapshot)
     const clientRects = [...range.getClientRects()]
-    const targetRect = clientRects.toReversed().find(rect => rect.width > 0 || rect.height > 0)
-      ?? range.getBoundingClientRect()
+    const targetRect =
+      clientRects.toReversed().find((rect) => rect.width > 0 || rect.height > 0) ??
+      range.getBoundingClientRect()
 
     if (targetRect.width === 0 && targetRect.height === 0) {
       return null
@@ -45,8 +46,7 @@ function getSelectionAnchorFromRange(rangeSnapshot: SelectionRangeSnapshot) {
       x: Math.max(targetRect.left, targetRect.right),
       y: Math.max(targetRect.top, targetRect.bottom),
     }
-  }
-  catch {
+  } catch {
     return null
   }
 }
@@ -96,35 +96,43 @@ export function useSelectionOpenRequestResolver(selectionSession: SelectionSessi
     }
   }, [selectionSession])
 
-  const resolveSelectionOpenRequest = useCallback((trigger: SelectionOpenRequestTrigger): SelectionOpenRequest | null => {
-    const cachedRequest = recentCapturedOpenRequestRef.current
-    if (
-      shouldUseRecentCapturedRequest(trigger)
-      && cachedRequest
-      && Date.now() - cachedRequest.capturedAt <= RECENT_OPEN_REQUEST_TTL_MS
-    ) {
-      return {
-        anchor: cachedRequest.anchor,
-        session: cachedRequest.session,
+  const resolveSelectionOpenRequest = useCallback(
+    (trigger: SelectionOpenRequestTrigger): SelectionOpenRequest | null => {
+      const cachedRequest = recentCapturedOpenRequestRef.current
+      if (
+        shouldUseRecentCapturedRequest(trigger) &&
+        cachedRequest &&
+        Date.now() - cachedRequest.capturedAt <= RECENT_OPEN_REQUEST_TTL_MS
+      ) {
+        return {
+          anchor: cachedRequest.anchor,
+          session: cachedRequest.session,
+        }
       }
-    }
 
-    if (!selectionSession) {
-      return null
-    }
+      if (!selectionSession) {
+        return null
+      }
 
-    return {
-      anchor: getSelectionAnchor(selectionSession)
-        ?? getViewportCenterAnchor(),
-      session: selectionSession,
-    }
-  }, [selectionSession])
+      return {
+        anchor: getSelectionAnchor(selectionSession) ?? getViewportCenterAnchor(),
+        session: selectionSession,
+      }
+    },
+    [selectionSession],
+  )
 
-  const resolveContextMenuOpenRequest = useCallback((): SelectionOpenRequest | null =>
-    resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.CONTEXT_MENU), [resolveSelectionOpenRequest])
+  const resolveContextMenuOpenRequest = useCallback(
+    (): SelectionOpenRequest | null =>
+      resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.CONTEXT_MENU),
+    [resolveSelectionOpenRequest],
+  )
 
-  const resolveShortcutOpenRequest = useCallback((): SelectionOpenRequest | null =>
-    resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.SHORTCUT), [resolveSelectionOpenRequest])
+  const resolveShortcutOpenRequest = useCallback(
+    (): SelectionOpenRequest | null =>
+      resolveSelectionOpenRequest(SELECTION_OPEN_REQUEST_TRIGGER.SHORTCUT),
+    [resolveSelectionOpenRequest],
+  )
 
   return {
     resolveContextMenuOpenRequest,

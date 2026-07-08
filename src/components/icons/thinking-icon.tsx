@@ -16,19 +16,10 @@ interface ThinkingIconProps extends React.ComponentProps<"svg"> {
   animated?: boolean
 }
 
-export function ThinkingIcon({
-  animated = true,
-  className,
-  ...props
-}: ThinkingIconProps) {
+export function ThinkingIcon({ animated = true, className, ...props }: ThinkingIconProps) {
   return (
-    <svg
-      viewBox="0 0 105 105"
-      fill="currentColor"
-      className={cn("size-2.5", className)}
-      {...props}
-    >
-      {THINKING_DOTS.map(dot => (
+    <svg viewBox="0 0 105 105" fill="currentColor" className={cn("size-2.5", className)} {...props}>
+      {THINKING_DOTS.map((dot) => (
         <circle
           key={`${dot.cx}-${dot.cy}`}
           cx={dot.cx}

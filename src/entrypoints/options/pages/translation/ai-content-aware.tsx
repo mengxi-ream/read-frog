@@ -24,18 +24,23 @@ export function AIContentAware() {
     <ConfigCard
       id="ai-content-aware"
       title={i18n.t("options.translation.aiContentAware.title")}
-      description={(
+      description={
         <>
           {i18n.t("options.translation.aiContentAware.description")}
-          <LLMStatusIndicator hasLLMProvider={hasLLMProvider} featureName={i18n.t("options.general.featureProviders.features.translate")} />
+          <LLMStatusIndicator
+            hasLLMProvider={hasLLMProvider}
+            featureName={i18n.t("options.general.featureProviders.features.translate")}
+          />
         </>
-      )}
+      }
     >
       <Field orientation="horizontal">
         <FieldContent className="self-center">
           <FieldLabel htmlFor="ai-content-aware-toggle">
             {i18n.t("options.translation.aiContentAware.enable")}
-            <HelpTooltip>{i18n.t("options.translation.aiContentAware.enableDescription")}</HelpTooltip>
+            <HelpTooltip>
+              {i18n.t("options.translation.aiContentAware.enableDescription")}
+            </HelpTooltip>
           </FieldLabel>
         </FieldContent>
         <Switch

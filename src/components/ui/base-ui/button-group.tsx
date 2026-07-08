@@ -2,12 +2,11 @@ import type { VariantProps } from "class-variance-authority"
 import { mergeProps } from "@base-ui/react/merge-props"
 import { useRender } from "@base-ui/react/use-render"
 import { cva } from "class-variance-authority"
-
 import { Separator } from "@/components/ui/base-ui/separator"
 import { cn } from "@/utils/styles/utils"
 
 const buttonGroupVariants = cva(
-  "has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*=\"w-\"])]:w-fit [&>input]:flex-1",
+  'has-[>[data-slot=button-group]]:gap-2 has-[select[aria-hidden=true]:last-child]:[&>[data-slot=select-trigger]:last-of-type]:rounded-r-md flex w-fit items-stretch [&>*]:focus-visible:z-10 [&>*]:focus-visible:relative [&>[data-slot=select-trigger]:not([class*="w-"])]:w-fit [&>input]:flex-1',
   {
     variants: {
       orientation: {
@@ -39,11 +38,7 @@ function ButtonGroup({
   )
 }
 
-function ButtonGroupText({
-  className,
-  render,
-  ...props
-}: useRender.ComponentProps<"div">) {
+function ButtonGroupText({ className, render, ...props }: useRender.ComponentProps<"div">) {
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
@@ -80,9 +75,4 @@ function ButtonGroupSeparator({
   )
 }
 
-export {
-  ButtonGroup,
-  ButtonGroupSeparator,
-  ButtonGroupText,
-  buttonGroupVariants,
-}
+export { ButtonGroup, ButtonGroupSeparator, ButtonGroupText, buttonGroupVariants }

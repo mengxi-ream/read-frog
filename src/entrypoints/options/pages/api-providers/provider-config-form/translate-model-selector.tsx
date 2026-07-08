@@ -3,8 +3,18 @@ import { useSelector } from "@tanstack/react-store"
 import { useSetAtom } from "jotai"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/base-ui/checkbox"
-import { SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/base-ui/select"
-import { isCustomLLMProviderConfig, isLLMProviderConfig, LLM_PROVIDER_MODELS } from "@/types/config/provider"
+import {
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/base-ui/select"
+import {
+  isCustomLLMProviderConfig,
+  isLLMProviderConfig,
+  LLM_PROVIDER_MODELS,
+} from "@/types/config/provider"
 import { providerConfigAtom, updateLLMProviderConfig } from "@/utils/atoms/provider"
 import { i18n } from "@/utils/i18n"
 import { resolveModelId } from "@/utils/providers/model-id"
@@ -15,10 +25,9 @@ import { withForm } from "./form"
 export const TranslateModelSelector = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    const providerConfig = useSelector(form.store, state => state.values)
+    const providerConfig = useSelector(form.store, (state) => state.values)
     const setProviderConfig = useSetAtom(providerConfigAtom(providerConfig.id))
-    if (!isLLMProviderConfig(providerConfig))
-      return null
+    if (!isLLMProviderConfig(providerConfig)) return null
 
     const modelId = resolveModelId(providerConfig.model)
     const { isCustomModel, customModel, model } = providerConfig.model
@@ -39,60 +48,60 @@ export const TranslateModelSelector = withForm({
 
     return (
       <div>
-        {isCustomModel
-          ? (
-              <form.AppField name="model.customModel">
-                {field => (
-                  <field.InputFieldAutoSave
-                    formForSubmit={form}
-                    label={i18n.t("options.general.translationConfig.model.title")}
-                    labelExtra={(
-                      <div className="flex items-center gap-2">
-                        {recommendationTrigger}
-                        {isCustomLLMProviderConfig(providerConfig) && (
-                          <ModelSuggestionButton
-                            baseURL={providerConfig.baseURL}
-                            apiKey={providerConfig.apiKey}
-                            onSelect={(model) => {
-                              field.handleChange(model)
-                              void form.handleSubmit()
-                            }}
-                          />
-                        )}
-                      </div>
+        {isCustomModel ? (
+          <form.AppField name="model.customModel">
+            {(field) => (
+              <field.InputFieldAutoSave
+                formForSubmit={form}
+                label={i18n.t("options.general.translationConfig.model.title")}
+                labelExtra={
+                  <div className="flex items-center gap-2">
+                    {recommendationTrigger}
+                    {isCustomLLMProviderConfig(providerConfig) && (
+                      <ModelSuggestionButton
+                        baseURL={providerConfig.baseURL}
+                        apiKey={providerConfig.apiKey}
+                        onSelect={(model) => {
+                          field.handleChange(model)
+                          void form.handleSubmit()
+                        }}
+                      />
                     )}
-                    value={customModel ?? ""}
-                  />
-                )}
-              </form.AppField>
-            )
-          : (
-              <form.AppField name="model.model">
-                {field => (
-                  <field.SelectFieldAutoSave
-                    formForSubmit={form}
-                    label={i18n.t("options.general.translationConfig.model.title")}
-                    labelExtra={recommendationTrigger}
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={i18n.t("options.apiProviders.form.models.translate.placeholder")} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectGroup>
-                        {LLM_PROVIDER_MODELS[providerConfig.provider].map(model => (
-                          <SelectItem key={model} value={model}>
-                            {model}
-                          </SelectItem>
-                        ))}
-                      </SelectGroup>
-                    </SelectContent>
-                  </field.SelectFieldAutoSave>
-                )}
-              </form.AppField>
+                  </div>
+                }
+                value={customModel ?? ""}
+              />
             )}
+          </form.AppField>
+        ) : (
+          <form.AppField name="model.model">
+            {(field) => (
+              <field.SelectFieldAutoSave
+                formForSubmit={form}
+                label={i18n.t("options.general.translationConfig.model.title")}
+                labelExtra={recommendationTrigger}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue
+                    placeholder={i18n.t("options.apiProviders.form.models.translate.placeholder")}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {LLM_PROVIDER_MODELS[providerConfig.provider].map((model) => (
+                      <SelectItem key={model} value={model}>
+                        {model}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </field.SelectFieldAutoSave>
+            )}
+          </form.AppField>
+        )}
         {providerConfig.provider !== "openai-compatible" && (
           <form.Field name="model.isCustomModel">
-            {field => (
+            {(field) => (
               <div className="mt-2.5 flex items-center space-x-2">
                 <Checkbox
                   id="isCustomModel-translate"
@@ -108,8 +117,7 @@ export const TranslateModelSelector = withForm({
                             },
                           }),
                         )
-                      }
-                      else if (checked === true) {
+                      } else if (checked === true) {
                         void setProviderConfig(
                           updateLLMProviderConfig(providerConfig, {
                             model: {
@@ -119,9 +127,10 @@ export const TranslateModelSelector = withForm({
                           }),
                         )
                       }
-                    }
-                    catch (error) {
-                      toast.error(error instanceof Error ? error.message : "Failed to update configuration")
+                    } catch (error) {
+                      toast.error(
+                        error instanceof Error ? error.message : "Failed to update configuration",
+                      )
                     }
                   }}
                 />

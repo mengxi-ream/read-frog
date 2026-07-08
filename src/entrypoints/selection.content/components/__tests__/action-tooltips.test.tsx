@@ -41,9 +41,7 @@ describe("selection action tooltips", () => {
 
     return render(
       <Provider store={store}>
-        <TooltipProvider>
-          {ui}
-        </TooltipProvider>
+        <TooltipProvider>{ui}</TooltipProvider>
       </Provider>,
     )
   }
@@ -101,7 +99,9 @@ describe("selection action tooltips", () => {
     fireEvent.click(trigger!)
 
     await waitFor(() => {
-      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent("action.copied")
+      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(
+        "action.copied",
+      )
     })
 
     expect(writeTextMock).toHaveBeenCalledWith("Copied text")
@@ -157,7 +157,9 @@ describe("selection action tooltips", () => {
     fireEvent.click(trigger!)
 
     await waitFor(() => {
-      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent("action.speak")
+      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(
+        "action.speak",
+      )
     })
   })
 
@@ -174,7 +176,9 @@ describe("selection action tooltips", () => {
     fireEvent.click(trigger!)
 
     await waitFor(() => {
-      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent("action.regenerate")
+      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(
+        "action.regenerate",
+      )
     })
 
     expect(onRegenerate).toHaveBeenCalledTimes(1)
@@ -194,7 +198,9 @@ describe("selection action tooltips", () => {
     fireEvent.click(trigger!)
 
     await waitFor(() => {
-      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent("action.viewContextDetails")
+      expect(document.querySelector("[data-slot='tooltip-content']")).toHaveTextContent(
+        "action.viewContextDetails",
+      )
     })
   })
 

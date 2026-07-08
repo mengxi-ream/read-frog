@@ -253,7 +253,11 @@ describe("registerNodeTranslationTriggerListeners", () => {
     await Promise.resolve()
     await vi.advanceTimersByTimeAsync(500)
 
-    dispatchMouseEvent("mousedown", { button: 0, clientX: 900, clientY: 100 }, document.documentElement)
+    dispatchMouseEvent(
+      "mousedown",
+      { button: 0, clientX: 900, clientY: 100 },
+      document.documentElement,
+    )
     await Promise.resolve()
     await vi.advanceTimersByTimeAsync(500)
 

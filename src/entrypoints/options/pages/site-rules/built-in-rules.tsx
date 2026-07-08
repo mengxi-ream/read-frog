@@ -19,9 +19,11 @@ export function BuiltInRules() {
     }
     return BUILT_IN_SITE_RULES.filter((rule) => {
       const matches = Array.isArray(rule.matches) ? rule.matches : [rule.matches]
-      return rule.id.toLowerCase().includes(query)
-        || (rule.description?.toLowerCase().includes(query) ?? false)
-        || matches.some(pattern => pattern.toLowerCase().includes(query))
+      return (
+        rule.id.toLowerCase().includes(query) ||
+        (rule.description?.toLowerCase().includes(query) ?? false) ||
+        matches.some((pattern) => pattern.toLowerCase().includes(query))
+      )
     })
   }, [search])
 
@@ -43,15 +45,18 @@ export function BuiltInRules() {
           placeholder={i18n.t("options.siteRules.builtIn.searchPlaceholder")}
         />
         <div className="text-xs text-muted-foreground">
-          {i18n.t("options.siteRules.builtIn.count", [filteredRules.length, BUILT_IN_SITE_RULES.length])}
+          {i18n.t("options.siteRules.builtIn.count", [
+            filteredRules.length,
+            BUILT_IN_SITE_RULES.length,
+          ])}
         </div>
         <div className="flex flex-col divide-y rounded-md border">
-          {visibleRules.map(rule => (
+          {visibleRules.map((rule) => (
             <BuiltInRuleRow key={rule.id} rule={rule} />
           ))}
         </div>
         {filteredRules.length > visibleCount && (
-          <Button variant="outline" onClick={() => setVisibleCount(count => count + PAGE_SIZE)}>
+          <Button variant="outline" onClick={() => setVisibleCount((count) => count + PAGE_SIZE)}>
             {i18n.t("options.siteRules.builtIn.showMore")}
           </Button>
         )}

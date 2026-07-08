@@ -1,16 +1,9 @@
 import type { ChartConfig } from "@/components/ui/base-ui/chart"
 import type BatchRequestRecord from "@/utils/db/dexie/tables/batch-request-record"
 import { useAtomValue } from "jotai"
-import {
-  Area,
-  AreaChart,
-  CartesianGrid,
-  XAxis,
-  YAxis,
-} from "recharts"
+import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
 import { Card, CardContent } from "@/components/ui/base-ui/card"
 import {
-
   ChartContainer,
   ChartLegend,
   ChartLegendContent,
@@ -55,8 +48,16 @@ export default function Chart() {
           >
             <defs>
               <linearGradient id="fillOriginalRequest" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor={chartConfig.originalRequest.color} stopOpacity={0.22} />
-                <stop offset="100%" stopColor={chartConfig.originalRequest.color} stopOpacity={0.04} />
+                <stop
+                  offset="0%"
+                  stopColor={chartConfig.originalRequest.color}
+                  stopOpacity={0.22}
+                />
+                <stop
+                  offset="100%"
+                  stopColor={chartConfig.originalRequest.color}
+                  stopOpacity={0.04}
+                />
               </linearGradient>
               <linearGradient id="fillBatchRequest" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={chartConfig.batchRequest.color} stopOpacity={0.28} />
@@ -116,8 +117,13 @@ export default function Chart() {
   )
 }
 
-function transformBatchRequestRecordsToChartPoints(batchRequestRecords: BatchRequestRecord[]): RequestRecordPoint[] {
-  const requestTimesGroupByDay: Record<string, { originalRequestCount: number, batchRequestCount: number }> = {}
+function transformBatchRequestRecordsToChartPoints(
+  batchRequestRecords: BatchRequestRecord[],
+): RequestRecordPoint[] {
+  const requestTimesGroupByDay: Record<
+    string,
+    { originalRequestCount: number; batchRequestCount: number }
+  > = {}
 
   for (const record of batchRequestRecords) {
     const createdAt = record.createdAt.toLocaleDateString("en-CA")
@@ -131,8 +137,7 @@ function transformBatchRequestRecordsToChartPoints(batchRequestRecords: BatchReq
     requestTimesGroupByDay[createdAt].batchRequestCount += 1
   }
 
-  return Object
-    .entries(requestTimesGroupByDay)
+  return Object.entries(requestTimesGroupByDay)
     .sort(([leftDate], [rightDate]) => leftDate.localeCompare(rightDate))
     .map(([createdAt, { originalRequestCount, batchRequestCount }]) => ({
       createdAt,

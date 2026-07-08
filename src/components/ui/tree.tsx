@@ -34,7 +34,8 @@ interface TreeProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 function Tree({ indent = 20, tree, className, toggleIconType = "chevron", ...props }: TreeProps) {
-  const containerProps = tree && typeof tree.getContainerProps === "function" ? tree.getContainerProps() : {}
+  const containerProps =
+    tree && typeof tree.getContainerProps === "function" ? tree.getContainerProps() : {}
   const mergedProps = { ...props, ...containerProps }
 
   // Extract style from mergedProps to merge with our custom styles
@@ -53,7 +54,12 @@ function Tree({ indent = 20, tree, className, toggleIconType = "chevron", ...pro
 
   return (
     <TreeContext value={contextValue}>
-      <div data-slot="tree" style={mergedStyle} className={cn("flex flex-col", className)} {...otherProps} />
+      <div
+        data-slot="tree"
+        style={mergedStyle}
+        className={cn("flex flex-col", className)}
+        {...otherProps}
+      />
     </TreeContext>
   )
 }
@@ -64,7 +70,13 @@ interface TreeItemProps<T = any> extends React.HTMLAttributes<HTMLButtonElement>
   asChild?: boolean
 }
 
-function TreeItem<T = any>({ item, className, asChild, children, ...props }: Omit<TreeItemProps<T>, "indent">) {
+function TreeItem<T = any>({
+  item,
+  className,
+  asChild,
+  children,
+  ...props
+}: Omit<TreeItemProps<T>, "indent">) {
   const parentContext = useTreeContext<T>()
   const { indent } = parentContext
 
@@ -98,9 +110,15 @@ function TreeItem<T = any>({ item, className, asChild, children, ...props }: Omi
         )}
         data-focus={typeof item.isFocused === "function" ? item.isFocused() || false : undefined}
         data-folder={typeof item.isFolder === "function" ? item.isFolder() || false : undefined}
-        data-selected={typeof item.isSelected === "function" ? item.isSelected() || false : undefined}
-        data-drag-target={typeof item.isDragTarget === "function" ? item.isDragTarget() || false : undefined}
-        data-search-match={typeof item.isMatchingSearch === "function" ? item.isMatchingSearch() || false : undefined}
+        data-selected={
+          typeof item.isSelected === "function" ? item.isSelected() || false : undefined
+        }
+        data-drag-target={
+          typeof item.isDragTarget === "function" ? item.isDragTarget() || false : undefined
+        }
+        data-search-match={
+          typeof item.isMatchingSearch === "function" ? item.isMatchingSearch() || false : undefined
+        }
         aria-expanded={item.isExpanded()}
         {...otherProps}
       >
@@ -114,7 +132,12 @@ interface TreeItemLabelProps<T = any> extends React.HTMLAttributes<HTMLSpanEleme
   item?: ItemInstance<T>
 }
 
-function TreeItemLabel<T = any>({ item: propItem, children, className, ...props }: TreeItemLabelProps<T>) {
+function TreeItemLabel<T = any>({
+  item: propItem,
+  children,
+  className,
+  ...props
+}: TreeItemLabelProps<T>) {
   const { currentItem, toggleIconType } = useTreeContext<T>()
   const item = propItem || currentItem
 
@@ -137,20 +160,24 @@ function TreeItemLabel<T = any>({ item: propItem, children, className, ...props 
       )}
       {...props}
     >
-      {item.isFolder()
-        && (toggleIconType === "plus-minus"
-          ? (
-              item.isExpanded()
-                ? (
-                    <IconSquareMinus className="text-muted-foreground size-3.5" stroke="currentColor" strokeWidth="1" />
-                  )
-                : (
-                    <IconSquarePlus className="text-muted-foreground size-3.5" stroke="currentColor" strokeWidth="1" />
-                  )
-            )
-          : (
-              <IconChevronDown className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90" />
-            ))}
+      {item.isFolder() &&
+        (toggleIconType === "plus-minus" ? (
+          item.isExpanded() ? (
+            <IconSquareMinus
+              className="text-muted-foreground size-3.5"
+              stroke="currentColor"
+              strokeWidth="1"
+            />
+          ) : (
+            <IconSquarePlus
+              className="text-muted-foreground size-3.5"
+              stroke="currentColor"
+              strokeWidth="1"
+            />
+          )
+        ) : (
+          <IconChevronDown className="text-muted-foreground size-4 in-aria-[expanded=false]:-rotate-90" />
+        ))}
       {children || (typeof item.getItemName === "function" ? item.getItemName() : null)}
     </span>
   )
@@ -161,7 +188,9 @@ function TreeDragLine({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 
   React.useEffect(() => {
     if (!tree || typeof tree.getDragLineStyle !== "function") {
-      console.warn("TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method")
+      console.warn(
+        "TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method",
+      )
     }
   }, [tree])
 

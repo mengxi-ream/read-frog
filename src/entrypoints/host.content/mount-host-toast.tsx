@@ -42,8 +42,7 @@ export function mountHostToast(): () => void {
   let cleaned = false
 
   return () => {
-    if (cleaned)
-      return
+    if (cleaned) return
 
     cleaned = true
     root.unmount()

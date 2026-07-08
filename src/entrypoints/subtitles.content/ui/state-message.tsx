@@ -2,7 +2,10 @@ import type { SubtitlesState } from "@/utils/subtitles/types"
 import { STATE_MESSAGE_CLASS } from "@/utils/constants/subtitles"
 import { i18n } from "@/utils/i18n"
 
-const STATE_CONFIG: Record<Exclude<SubtitlesState, "idle">, { color: string, getText: () => string }> = {
+const STATE_CONFIG: Record<
+  Exclude<SubtitlesState, "idle">,
+  { color: string; getText: () => string }
+> = {
   loading: {
     color: "oklch(70% 0.19 250)",
     getText: () => i18n.t("subtitles.state.loading"),
@@ -19,21 +22,20 @@ interface StateMessageProps {
 }
 
 export function StateMessage({ state, message }: StateMessageProps) {
-  if (!state)
-    return null
+  if (!state) return null
 
   const { color, getText } = STATE_CONFIG[state]
 
   const text = state === "error" ? message : getText()
 
-  if (!text)
-    return null
+  if (!text) return null
 
   return (
     <div
       className={`${STATE_MESSAGE_CLASS} absolute left-4 bottom-18 pointer-events-auto`}
       style={{
-        fontFamily: "Roboto, \"Arial Unicode Ms\", Arial, Helvetica, Verdana, \"PT Sans Caption\", sans-serif",
+        fontFamily:
+          'Roboto, "Arial Unicode Ms", Arial, Helvetica, Verdana, "PT Sans Caption", sans-serif',
       }}
     >
       <div

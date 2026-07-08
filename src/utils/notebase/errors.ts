@@ -22,5 +22,7 @@ export function isORPCNotFoundError(error: unknown) {
 }
 
 export function isORPCValidationError(error: unknown) {
-  return error instanceof ORPCError && (error.code === "CELL_VALIDATION_FAILED" || error.status === 422)
+  return (
+    error instanceof ORPCError && (error.code === "CELL_VALIDATION_FAILED" || error.status === 422)
+  )
 }

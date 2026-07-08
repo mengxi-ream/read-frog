@@ -48,7 +48,10 @@ describe("generateUUIDv4", () => {
   it("should generate correct UUID for known input", () => {
     // Mock specific bytes to verify the algorithm
     getRandomValuesSpy.mockImplementation((array: Uint8Array<ArrayBuffer>) => {
-      const mockBytes = [0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF]
+      const mockBytes = [
+        0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee,
+        0xff,
+      ]
       array.set(mockBytes)
       return array
     })
@@ -88,7 +91,9 @@ describe("getRandomUUID", () => {
   })
 
   it("should fall back to crypto.getRandomValues when crypto.randomUUID is unavailable", () => {
-    const getRandomValues = vi.fn((array: Uint8Array<ArrayBuffer>) => originalCrypto.getRandomValues(array))
+    const getRandomValues = vi.fn((array: Uint8Array<ArrayBuffer>) =>
+      originalCrypto.getRandomValues(array),
+    )
     Object.defineProperty(globalThis, "crypto", {
       configurable: true,
       value: {

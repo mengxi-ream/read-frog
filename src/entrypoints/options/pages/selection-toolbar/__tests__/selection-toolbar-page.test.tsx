@@ -41,7 +41,7 @@ describe("selection toolbar page", () => {
   it("renders the selection translation shortcut between feature toggles and disabled sites", () => {
     const { container } = render(<SelectionToolbarPage />)
 
-    const sections = [...container.querySelectorAll("[data-section]")].map(section =>
+    const sections = [...container.querySelectorAll("[data-section]")].map((section) =>
       section.getAttribute("data-section"),
     )
 

@@ -22,7 +22,8 @@ export function EntityListRail({ children, className, containerClassName }: Enti
       }
 
       const nextCanScroll = container.scrollHeight > container.clientHeight
-      const nextIsAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 2
+      const nextIsAtBottom =
+        Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 2
       const nextIsAtTop = container.scrollTop < 2
 
       setCanScroll(nextCanScroll)
@@ -41,7 +42,8 @@ export function EntityListRail({ children, className, containerClassName }: Enti
       }
 
       const nextCanScroll = container.scrollHeight > container.clientHeight
-      const nextIsAtBottom = Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 2
+      const nextIsAtBottom =
+        Math.abs(container.scrollHeight - container.clientHeight - container.scrollTop) < 2
       const nextIsAtTop = container.scrollTop < 2
 
       setCanScroll(nextCanScroll)
@@ -88,7 +90,10 @@ export function EntityListRail({ children, className, containerClassName }: Enti
       </div>
       {canScroll && !isScrolledToBottom && (
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
-          <Icon icon="tabler:chevron-down" className="size-4 text-muted-foreground animate-bounce" />
+          <Icon
+            icon="tabler:chevron-down"
+            className="size-4 text-muted-foreground animate-bounce"
+          />
         </div>
       )}
     </div>

@@ -16,8 +16,7 @@ interface ConflictFieldProps {
 export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
   const { conflict, resolution, selectLocal, selectRemote, reset } = useConflictField(pathKey)
 
-  if (!conflict)
-    return null
+  if (!conflict) return null
 
   const fieldKey = conflict.path.at(-1) ?? ""
   const showFieldKey = isMeaningfulFieldKey(fieldKey)
@@ -29,8 +28,7 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
 
   // Select appropriate container style
   const getContainerStyle = () => {
-    if (resolution)
-      return STYLE_MAP[resolution]
+    if (resolution) return STYLE_MAP[resolution]
     return STYLE_MAP.unresolved
   }
   const containerStyle = getContainerStyle()
@@ -64,9 +62,7 @@ export function ConflictField({ pathKey, indent }: ConflictFieldProps) {
     >
       <div className="flex items-center py-1 ps-(--indent) h-8">
         <Icon icon={icon} className={cn("size-4 shrink-0 mr-2", iconClass)} />
-        <span className={cn("text-xs", labelClass)}>
-          {label}
-        </span>
+        <span className={cn("text-xs", labelClass)}>{label}</span>
         {resolution && (
           <Button
             size="sm"
