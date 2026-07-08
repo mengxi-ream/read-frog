@@ -136,6 +136,11 @@ export function isSiteRuleForceInlineElement(element: HTMLElement, config: Confi
   return forceInlineSelector !== null && element.matches(forceInlineSelector)
 }
 
+export function isSiteRulePreserveTextElement(element: HTMLElement, config: Config): boolean {
+  const { preserveTextSelector } = getEffectiveSiteRule(config, window.location.href)
+  return preserveTextSelector !== null && element.matches(preserveTextSelector)
+}
+
 /**
  * Whitelist gate: when the effective site rule declares `includeSelectors`,
  * only elements inside (or matching) one of them may become translation
@@ -150,15 +155,17 @@ export function isWithinIncludeScope(element: HTMLElement, config: Config): bool
   return includeSelector === null || element.closest(includeSelector) !== null
 }
 
-export function isDontWalkIntoButTranslateAsChildElement(element: HTMLElement): boolean {
+export function isDontWalkIntoButTranslateAsChildElement(element: HTMLElement, config?: Config): boolean {
   const dontWalkClass = element.classList.contains(NOTRANSLATE_CLASS)
 
   const dontWalkTag = DONT_WALK_BUT_TRANSLATE_TAGS.has(element.tagName)
 
+  const dontWalkPreserveText = config !== undefined && isSiteRulePreserveTextElement(element, config)
+
   // issue: https://github.com/mengxi-ream/read-frog/issues/459
   // const dontWalkAttr = element.getAttribute('translate') === 'no'
 
-  return dontWalkClass || dontWalkTag
+  return dontWalkClass || dontWalkTag || dontWalkPreserveText
 }
 
 // https://github.com/mengxi-ream/read-frog/issues/940
@@ -174,7 +181,7 @@ function isInsideContentContainer(element: HTMLElement): boolean {
 }
 
 export function isDontWalkIntoAndDontTranslateAsChildElement(element: HTMLElement, config: Config): boolean {
-  const dontWalkCustomElement = isSiteRuleExcludedElement(element, config)
+  const dontWalkCustomElement = !isDontWalkIntoButTranslateAsChildElement(element, config) && isSiteRuleExcludedElement(element, config)
   const dontWalkContent = config.translate.page.range !== "all"
     && MAIN_CONTENT_IGNORE_TAGS.has(element.tagName)
     && !isInsideContentContainer(element)
@@ -265,7 +272,7 @@ export function isTranslatedContentNode(node: Node): boolean {
 export function hasNoWalkAncestor(element: HTMLElement, config: Config): boolean {
   let current: HTMLElement | null = element.parentElement
   while (current) {
-    if (isDontWalkIntoButTranslateAsChildElement(current) || isDontWalkIntoAndDontTranslateAsChildElement(current, config)) {
+    if (isDontWalkIntoButTranslateAsChildElement(current, config) || isDontWalkIntoAndDontTranslateAsChildElement(current, config)) {
       return true
     }
     current = current.parentElement

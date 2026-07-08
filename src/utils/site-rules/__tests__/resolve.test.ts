@@ -47,6 +47,16 @@ describe("resolveSiteRule", () => {
     expect(resolved.injectedCss).toBe(".a { color: red; }\n.b { color: blue; }")
   })
 
+  it("concatenates injectedCss.add in matched rule order", () => {
+    const resolved = resolveSiteRule(
+      URL_ON_SITE,
+      [rule({ "id": "built-in", "injectedCss": ".a { color: red; }", "injectedCss.add": [".b { color: blue; }"] })],
+      [rule({ "id": "user", "injectedCss.add": [".c { color: green; }"] })],
+      [],
+    )
+    expect(resolved.injectedCss).toBe(".a { color: red; }\n.b { color: blue; }\n.c { color: green; }")
+  })
+
   it("skips disabled built-in rules", () => {
     const resolved = resolveSiteRule(
       URL_ON_SITE,
@@ -76,6 +86,73 @@ describe("resolveSiteRule", () => {
       [],
     )
     expect(resolved.excludeSelector).toBe("nav,footer")
+  })
+
+  it("applies selector add and remove deltas in rule order", () => {
+    const resolved = resolveSiteRule(
+      URL_ON_SITE,
+      [
+        rule({
+          "id": "built-in-a",
+          "excludeSelectors": ["nav", ".ads"],
+          "excludeSelectors.add": [".promo"],
+          "excludeSelectors.remove": [".ads"],
+        }),
+        rule({
+          "id": "built-in-b",
+          "excludeSelectors.add": [".toast"],
+        }),
+      ],
+      [
+        rule({
+          "id": "user",
+          "excludeSelectors.remove": ["nav"],
+          "excludeSelectors.add": ["footer"],
+        }),
+      ],
+      [],
+    )
+    expect(resolved.excludeSelector).toBe(".promo,.toast,footer")
+  })
+
+  it("supports add and remove deltas for every selector family", () => {
+    const resolved = resolveSiteRule(
+      URL_ON_SITE,
+      [
+        rule({
+          "id": "built-in",
+          "includeSelectors": ["article"],
+          "includeSelectors.add": [".content"],
+          "includeSelectors.remove": ["article"],
+          "forceBlockSelectors": [".post"],
+          "forceBlockSelectors.add": [".card"],
+          "forceBlockSelectors.remove": [".post"],
+          "forceInlineSelectors": [".tag"],
+          "forceInlineSelectors.add": [".badge"],
+          "forceInlineSelectors.remove": [".tag"],
+          "preserveTextSelectors": [".code"],
+          "preserveTextSelectors.add": [".math"],
+          "preserveTextSelectors.remove": [".code"],
+        }),
+      ],
+      [],
+      [],
+    )
+
+    expect(resolved.includeSelector).toBe(".content")
+    expect(resolved.forceBlockSelector).toBe(".card")
+    expect(resolved.forceInlineSelector).toBe(".badge")
+    expect(resolved.preserveTextSelector).toBe(".math")
+  })
+
+  it("drops invalid selector deltas without killing valid siblings", () => {
+    const resolved = resolveSiteRule(
+      URL_ON_SITE,
+      [],
+      [rule({ "id": "user", "preserveTextSelectors.add": ["bad[", ".token"], "preserveTextSelectors.remove": ["bad["] })],
+      [],
+    )
+    expect(resolved.preserveTextSelector).toBe(".token")
   })
 
   it("merges include and force selectors independently", () => {

@@ -489,7 +489,7 @@ export class PageTranslationManager implements IPageTranslationManager {
    * panels can be re-walked when the site reveals an existing subtree.
    */
   private isWalkBlockedElement(element: HTMLElement, config: Config): boolean {
-    return isDontWalkIntoButTranslateAsChildElement(element)
+    return isDontWalkIntoButTranslateAsChildElement(element, config)
       || isDontWalkIntoAndDontTranslateAsChildElement(element, config)
   }
 

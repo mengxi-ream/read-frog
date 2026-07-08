@@ -65,7 +65,7 @@ export function walkAndLabelElement(
   walkId: string,
   config: Config,
 ): { forceBlock: boolean, isInlineNode: boolean } {
-  if (isDontWalkIntoButTranslateAsChildElement(element) || isDontWalkIntoAndDontTranslateAsChildElement(element, config)) {
+  if (isDontWalkIntoButTranslateAsChildElement(element, config) || isDontWalkIntoAndDontTranslateAsChildElement(element, config)) {
     return {
       forceBlock: false,
       isInlineNode: false,
@@ -89,7 +89,7 @@ export function walkAndLabelElement(
     if (child.nodeType === Node.TEXT_NODE)
       return true
     if (isHTMLElement(child)) {
-      return !((isDontWalkIntoButTranslateAsChildElement(child) || isDontWalkIntoAndDontTranslateAsChildElement(child, config)))
+      return !((isDontWalkIntoButTranslateAsChildElement(child, config) || isDontWalkIntoAndDontTranslateAsChildElement(child, config)))
     }
     return false
   })

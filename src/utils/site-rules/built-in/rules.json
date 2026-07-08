@@ -1,11 +1,52 @@
 [
   {
+    "id": "readfrog-preserve-text-defaults",
+    "description": "Preserve common inline math/code tokens as source text",
+    "matches": "*",
+    "preserveTextSelectors": [
+      "span.katex",
+      ".math-block",
+      ".MathJax_Preview",
+      ".MathJax_Display",
+      ".math-container",
+      ".MathJax",
+      ".MathJax_SVG",
+      "math-renderer",
+      "[aria-labelledby^=\"MathJax-SVG\"]",
+      ".mwe-math-element",
+      "em[translate=no]",
+      "code[translate=no]",
+      "a[translate=no]",
+      "b[translate=no]",
+      "span.math.inline",
+      "span.math.display",
+      ".ltx_Math",
+      ".mathjax-block",
+      ".MathJax_CHTML",
+      "kbd",
+      "span.pretex-inline",
+      "span.math-inline",
+      ".reference-citations",
+      ".code",
+      "[data-test='json-editor']",
+      ".jp-CodeMirrorEditor",
+      "cds-code-snippet",
+      ".interactive-markdown__code",
+      "span.variable[translate=no]",
+      "#ace-editor",
+      "table.processedcode"
+    ]
+  },
+  {
     "id": "pdf",
     "matches": "https://app.infread.com/pdf/*",
     "includeSelectors": [
       "#viewerContainer p"
     ],
-    "injectedCss": ".read-frog-translated-content-wrapper {display: contents!important;position:absolute;}\n.read-frog-translated-content-wrapper br {display: none;!important;}\n.read-frog-translated-content-wrapper span {position: relative;!important;}\n.read-frog-translated-content-wrapper[dir='rtl'] {text-align: right;display: inline-block!important;position:unset;}"
+    "injectedCss": ".read-frog-translated-content-wrapper {display: contents!important;position:absolute;}\n.read-frog-translated-content-wrapper br {display: none;!important;}\n.read-frog-translated-content-wrapper span {position: relative;!important;}\n.read-frog-translated-content-wrapper[dir='rtl'] {text-align: right;display: inline-block!important;position:unset;}",
+    "excludeSelectors.remove": [
+      "[contenteditable=\"true\"]"
+    ]
   },
   {
     "id": "isEbookBuilder",
@@ -37,7 +78,9 @@
       "seller.shopee.*",
       "shopee.*"
     ],
-    "injectedCss": ".WBVL_7,.ellipsis-content {-webkit-line-clamp:unset!important;}"
+    "injectedCss.add": [
+      ".WBVL_7,.ellipsis-content {-webkit-line-clamp:unset!important;}"
+    ]
   },
   {
     "id": "wikipedia",
@@ -48,8 +91,7 @@
       "#p-lang-btn",
       "#right-navigation",
       "#p-associated-pages",
-      ".vector-header",
-      ".lazy-image-placeholder"
+      ".vector-header"
     ],
     "forceInlineSelectors": [
       ".chemf",
@@ -59,7 +101,19 @@
     ],
     "minCharacters": 4,
     "minWords": 2,
-    "injectedCss": ".mwe-popups-extract {max-height:unset!important;height:unset!important;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}\n.no-article-text-sister-projects li { height:unset; }"
+    "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}\n.no-article-text-sister-projects li { height:unset; }",
+    "excludeSelectors.add": [
+      ".lazy-image-placeholder"
+    ],
+    "preserveTextSelectors": [
+      ".chemf",
+      ".mwe-math-element",
+      "[role=math]",
+      ".nowrap"
+    ],
+    "injectedCss.add": [
+      ".mwe-popups-extract {max-height:unset!important;height:unset!important;}"
+    ]
   },
   {
     "id": "twitter",
@@ -90,27 +144,6 @@
       "x.com/i/chat*",
       "x.com/settings*"
     ],
-    "excludeSelectors": [
-      "[aria-describedby][role=button]",
-      "header",
-      "[data-testid='radioGroupplayback_rate'] div",
-      "[data-testid='userFollowIndicator']",
-      "[class='css-901oao r-14j79pv r-37j5jr r-n6v787 r-16dba41 r-1cwl3u0 r-bcqeeo r-qvutc0']",
-      "[class='css-175oi2r r-1wbh5a2 r-dnmrzs']",
-      "[aria-label=Grok] button",
-      "[aria-label=Grok] [style*='rgb(89, 93, 98)']",
-      "[aria-label=Grok] .r-uho16t",
-      "[data-testid=User-Name]",
-      "[data-testid=socialContext]",
-      "[data-testid=tweet-text-show-more-link]",
-      "[aria-label=Grok] [class='css-175oi2r r-1habvwh r-vqp9x9 r-1q9bdsx r-1loqt21 r-9njtsq r-1wtj0ep r-nsbfu8 r-xbdcod r-13c7hvr'] > div:last-child",
-      "[role='tab']",
-      "[data-testid=hoverCardParent] [role=menuitem]",
-      "[data-testid=sidebarColumn]",
-      "h2[role=heading]",
-      "[class='css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-6gpygo'],[class='css-175oi2r r-1d09ksm r-18u37iz r-1wbh5a2 r-1471scf'],[class='css-175oi2r r-1kbdv8c r-18u37iz r-1wtj0ep r-1ye8kvj r-1s2bzr4']",
-      "[data-testid=videoComponent]"
-    ],
     "includeSelectors": [
       "[data-testid='tweetText']",
       "[style*='-webkit-line-clamp']",
@@ -139,9 +172,6 @@
       "[data-testid=primaryColumn] [class='css-175oi2r r-kzbkwu r-3pj75a'] > div > span[class='css-1jxf684 r-bcqeeo r-1ttztb7 r-qvutc0 r-poiln3']",
       ".font-chirp.text-body.font-normal"
     ],
-    "forceBlockSelectors": [
-      "[data-testid=\"tweetText\"] div.r-6koalj"
-    ],
     "forceInlineSelectors": [
       "[data-testid=\"tweetText\"] div.r-xoduu5",
       "[data-testid=\"tweetText\"] span",
@@ -151,22 +181,62 @@
     ],
     "minCharacters": 2,
     "minWords": 1,
-    "injectedCss": "[data-testid='card.layoutLarge.detail'] > div:nth-child(2) {-webkit-line-clamp: unset!important;}\n[data-testid='card.layoutSmall.detail'] > div:nth-child(2) {-webkit-line-clamp: unset!important;}\n[data-testid='tweetText'],[style*='-webkit-line-clamp'] {-webkit-line-clamp: unset!important;}\n[role=dialog] [style*='webkit-line-clamp'] {-webkit-line-clamp: unset!important;}\n.r-h9hxbl{width:unset;}\n[aria-label=Grok] [data-testid=ScrollSnap-SwipeableList] [role=presentation] > div > div { max-height: unset !important; }"
+    "excludeSelectors.add": [
+      "[aria-describedby][role=button]",
+      "header",
+      "[data-testid='radioGroupplayback_rate'] div",
+      "[data-testid='userFollowIndicator']",
+      "[class='css-901oao r-14j79pv r-37j5jr r-n6v787 r-16dba41 r-1cwl3u0 r-bcqeeo r-qvutc0']",
+      "[class='css-175oi2r r-1wbh5a2 r-dnmrzs']",
+      "[aria-label=Grok] button",
+      "[aria-label=Grok] [style*='rgb(89, 93, 98)']",
+      "[aria-label=Grok] .r-uho16t",
+      "[data-testid=User-Name]",
+      "[data-testid=socialContext]",
+      "[data-testid=tweet-text-show-more-link]",
+      "[aria-label=Grok] [class='css-175oi2r r-1habvwh r-vqp9x9 r-1q9bdsx r-1loqt21 r-9njtsq r-1wtj0ep r-nsbfu8 r-xbdcod r-13c7hvr'] > div:last-child",
+      "[role='tab']",
+      "[data-testid=hoverCardParent] [role=menuitem]",
+      "[data-testid=sidebarColumn]",
+      "h2[role=heading]",
+      "[class='css-175oi2r r-1awozwy r-18u37iz r-1wtj0ep r-6gpygo'],[class='css-175oi2r r-1d09ksm r-18u37iz r-1wbh5a2 r-1471scf'],[class='css-175oi2r r-1kbdv8c r-18u37iz r-1wtj0ep r-1ye8kvj r-1s2bzr4']",
+      ".imt-caption-container *",
+      "[data-testid=videoComponent]"
+    ],
+    "forceBlockSelectors.add": [
+      "[data-testid=\"tweetText\"] div.r-6koalj"
+    ],
+    "preserveTextSelectors.add": [
+      "[data-testid=\"tweetText\"] a",
+      "[data-testid='UserDescription'] a",
+      "[data-testid='HoverCard'] a",
+      "[data-testid='UserCell'] a",
+      "[data-testid='birdwatch-pivot'] a",
+      ".DocsMarkdown--link-external-icon"
+    ],
+    "injectedCss.add": [
+      "[data-testid='card.layoutLarge.detail'] > div:nth-child(2) {-webkit-line-clamp: unset!important;}",
+      "[data-testid='card.layoutSmall.detail'] > div:nth-child(2) {-webkit-line-clamp: unset!important;}",
+      "[data-testid='tweetText'],[style*='-webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
+      "[role=dialog] [style*='webkit-line-clamp'] {-webkit-line-clamp: unset!important;}",
+      ".r-h9hxbl{width:unset;}",
+      "[aria-label=Grok] [data-testid=ScrollSnap-SwipeableList] [role=presentation] > div > div { max-height: unset !important; }"
+    ]
   },
   {
     "id": "zoom-asu",
     "matches": "*.zoom.us/rec/*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".player-share .video-js"
     ]
   },
   {
     "id": "zoom",
     "matches": "*.zoom.us",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".live-transcription-subtitle__box"
     ],
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       ".live-transcription-subtitle__item"
     ]
   },
@@ -176,30 +246,34 @@
       "teams.live.com",
       "teams.microsoft.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".ui-box .ui-box[class='ui-box']",
       "[data-tid='author']",
       ".fui-ChatMessageCompact__author"
     ],
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "[data-tid='closed-caption-text']"
+    ],
+    "preserveTextSelectors.add": [
+      "span[title][style='min-width: 20px; height: 20px;']"
     ]
   },
   {
     "id": "googleMeet",
     "matches": "meet.google.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".iOzk7[jsname='dsyhDe']",
       ".ygicle.VbkSUe"
     ],
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       ".ygicle.VbkSUe"
     ]
   },
   {
     "id": "openrouter",
     "matches": "openrouter.ai",
-    "excludeSelectors": [
+    "injectedCss": "button.text-primary-foreground { height: 100%;white-space: normal;word-wrap: break-word; }",
+    "excludeSelectors.add": [
       ".line-clamp-1.text-lg",
       ".text-muted-foreground.text-sm.col-span-4.text-right",
       "div[title='Tokens this week']",
@@ -208,18 +282,21 @@
       "button[role='tab']",
       "[data-badge-type=http-method]",
       "div[role='region'] > div > ul"
-    ],
-    "injectedCss": "button.text-primary-foreground { height: 100%;white-space: normal;word-wrap: break-word; }"
+    ]
   },
   {
     "id": "polymarket",
     "matches": "polymarket.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "number-flow-react",
       "button",
       "a.inline-flex"
     ],
-    "injectedCss": "div[data-index] p.decoration-2 {-webkit-line-clamp:unset;}\ndiv[data-index] .items-start.relative.gap-2.px-3.flex.w-full {height:unset; max-height:unset;}\ndiv[data-index] .absolute.w-full {overflow:scroll;}"
+    "injectedCss.add": [
+      "div[data-index] p.decoration-2 {-webkit-line-clamp:unset;}",
+      "div[data-index] .items-start.relative.gap-2.px-3.flex.w-full {height:unset; max-height:unset;}",
+      "div[data-index] .absolute.w-full {overflow:scroll;}"
+    ]
   },
   {
     "id": "hoyolab",
@@ -229,7 +306,7 @@
       ".mhy-user-card__name",
       ".mhy-account-title__name"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".reply-card__content__detail p:first-child",
       ".reply-card-inner-reply__content > p:first-child"
     ]
@@ -237,7 +314,7 @@
   {
     "id": "chatter.hume.ai",
     "matches": "chatter.hume.ai",
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "[class*=' flex-wrap'] > span"
     ]
   },
@@ -247,13 +324,17 @@
       "www.threads.net",
       "www.threads.com"
     ],
-    "excludeSelectors": [
+    "injectedCss": "span,.x569fbc { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }",
+    "excludeSelectors.add": [
       ".x6s0dn4.x40hh3e.xrvj5dj.xxfwaov",
       ".x6s0dn4.x78zum5",
       ".xpvyfi4.x1xdureb.x1agbcgv,.xqcrz7y.x1xdureb.x1agbcgv",
       ".xpvyfi4.x1npkx4u.x1ms6mhf"
     ],
-    "injectedCss": "span,.x569fbc { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }"
+    "preserveTextSelectors": [
+      ".x1rg5ohu",
+      ".xat24cr.xdj266r a"
+    ]
   },
   {
     "id": "stackoverflow",
@@ -264,7 +345,10 @@
       "askubuntu.com",
       "serverfault.com"
     ],
-    "excludeSelectors": [
+    "minCharacters": 4,
+    "minWords": 2,
+    "injectedCss": ".s-post-summary--content-excerpt { -webkit-line-clamp:unset; }",
+    "excludeSelectors.add": [
       ".votecell",
       "header",
       "#footer",
@@ -284,23 +368,20 @@
       ".s-post-summary--stats",
       ".s-post-summary--meta"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "span.comment-copy"
-    ],
-    "minCharacters": 4,
-    "minWords": 2,
-    "injectedCss": ".s-post-summary--content-excerpt { -webkit-line-clamp:unset; }"
+    ]
   },
   {
     "id": "appleDeveloper",
     "matches": "developer.apple.com/documentation/*",
-    "excludeSelectors": [
-      ".vue-recycle-scroller"
-    ],
     "includeSelectors": [
       ".container",
       "h3.title",
       "div.content"
+    ],
+    "excludeSelectors.add": [
+      ".vue-recycle-scroller"
     ]
   },
   {
@@ -347,10 +428,12 @@
       "[class='q-text qu-dynamicFontSize--tiny qu-mt--small qu-color--gray_light qu-passColorToLinks']",
       ".qt_read_more",
       "[class='q-flex qu-alignItems--flex-start']",
-      "[class='q-box qu-pl--tiny']",
-      ".qu-zIndex--action_bar"
+      "[class='q-box qu-pl--tiny']"
     ],
-    "injectedCss": ".qu-truncateLines--3 { -webkit-line-clamp: unset; }"
+    "injectedCss": ".qu-truncateLines--3 { -webkit-line-clamp: unset; }",
+    "excludeSelectors.add": [
+      ".qu-zIndex--action_bar"
+    ]
   },
   {
     "id": "oldReddit",
@@ -388,10 +471,6 @@
     "excludeMatches": [
       "https://www.reddit.com/r/*/wiki/*"
     ],
-    "excludeSelectors": [
-      "shreddit-comment-action-row",
-      "faceplate-hovercard"
-    ],
     "includeSelectors": [
       "h1",
       ".PostHeader__post-title-line",
@@ -416,7 +495,11 @@
       "div.md[id^=t3_]",
       ".pt-md"
     ],
-    "injectedCss": "div.XPromoBottomBar { display:none; }\n[class*='line-clamp'] { -webkit-line-clamp: unset; }\na.pointer-events-none { pointer-events: unset; }\na.absolute.inset-0 { inset: unset !important; }"
+    "injectedCss": "div.XPromoBottomBar { display:none; }\n[class*='line-clamp'] { -webkit-line-clamp: unset; }\na.pointer-events-none { pointer-events: unset; }\na.absolute.inset-0 { inset: unset !important; }",
+    "excludeSelectors.add": [
+      "shreddit-comment-action-row",
+      "faceplate-hovercard"
+    ]
   },
   {
     "id": "reddit",
@@ -471,7 +554,7 @@
   {
     "id": "angel",
     "matches": "www.angel.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".bmpui-subtitle-position-vtt *"
     ]
   },
@@ -514,37 +597,6 @@
       "https://github.com/collections*",
       "https://github.com/resources/events*",
       "https://github.com/pricing*"
-    ],
-    "excludeSelectors": [
-      "a[data-hovercard-type]",
-      "[data-test-selector='commit-tease-commit-message']",
-      "[data-test-selector='create-branch.developmentForm']",
-      "div.Box-header.position-relative",
-      "div.blob-wrapper-embedded",
-      "div.Box.Box--condensed.my-2",
-      "div.jp-CodeCell",
-      "[aria-label=\"Account\"] .markdown-title",
-      ".js-repos-container .markdown-title",
-      "a.anchor",
-      "div.file-navigation + div.Box",
-      "[data-testid^='breadcrumbs']",
-      "[data-ga-click*=Star]",
-      ".markdown-body h3",
-      "div.vcard-names-container",
-      "div.js-disable-context-menu",
-      ".BorderGrid-cell a[role='link']",
-      ".BorderGrid-cell .topic-tag-link",
-      "table[class*='Table-module__Box']",
-      ".author,.assignee",
-      ".blob-code",
-      ".timeline-comment-header",
-      ".review-thread-reply",
-      ".codeRepository",
-      "[title='Label: Private']",
-      "[aria-label*='language']",
-      ".js-suggested-changes-blob.diff-view",
-      "h1[data-component=PH_Title] span[class*='issueNumberText']",
-      "[data-testid=list-row-repo-name-and-number]"
     ],
     "includeSelectors": [
       "h1",
@@ -618,19 +670,63 @@
       "[class*='ModelsPlaygroundRoute-module__playgroundContainer']",
       "article [class='f6 color-fg-muted mt-1']"
     ],
-    "forceBlockSelectors": [
-      "bdi"
-    ],
     "forceInlineSelectors": [
       "g-emoji",
       "a.anchor"
     ],
-    "injectedCss": ".bpDald,.discussion-title {-webkit-line-clamp:unset!important;}\nli>div[class*='Box-sc'],div[class*='Box-sc']>button[class*='prc-Token-TokenBase'],li[class*='card-label-module']>button[class*='prc-Token-TokenBase'] {height:unset!important;}\n#memex-project-view-root [class*=table-row__StyledTableRow-sc],#memex-project-view-root [class*=base-cell-module__Box] {height:unset!important;}\n[class*='GridCard-module__description'] {-webkit-line-clamp: unset;}\n.TimelineItem-body .Link--primary { -webkit-line-clamp: unset; }"
+    "injectedCss": ".TimelineItem-body .Link--primary { -webkit-line-clamp: unset; }",
+    "excludeSelectors.add": [
+      "a[data-hovercard-type]",
+      "[data-test-selector='commit-tease-commit-message']",
+      "[data-test-selector='create-branch.developmentForm']",
+      "div.Box-header.position-relative",
+      "div.blob-wrapper-embedded",
+      "div.Box.Box--condensed.my-2",
+      "div.jp-CodeCell",
+      "[aria-label=\"Account\"] .markdown-title",
+      ".js-repos-container .markdown-title",
+      "a.anchor",
+      "div.file-navigation + div.Box",
+      "[data-testid^='breadcrumbs']",
+      "[data-ga-click*=Star]",
+      ".markdown-body h3",
+      "div.vcard-names-container",
+      "div.js-disable-context-menu",
+      ".BorderGrid-cell a[role='link']",
+      ".BorderGrid-cell .topic-tag-link",
+      "table[class*='Table-module__Box']",
+      ".author,.assignee",
+      ".blob-code",
+      ".timeline-comment-header",
+      ".review-thread-reply",
+      ".codeRepository",
+      "[title='Label: Private']",
+      "[aria-label*='language']",
+      ".js-suggested-changes-blob.diff-view",
+      "h1[data-component=PH_Title] span[class*='issueNumberText']",
+      "[data-testid=list-row-repo-name-and-number]"
+    ],
+    "forceBlockSelectors.add": [
+      "bdi"
+    ],
+    "preserveTextSelectors.add": [
+      ".issue-link"
+    ],
+    "injectedCss.add": [
+      ".bpDald,.discussion-title {-webkit-line-clamp:unset!important;}",
+      "li>div[class*='Box-sc'],div[class*='Box-sc']>button[class*='prc-Token-TokenBase'],li[class*='card-label-module']>button[class*='prc-Token-TokenBase'] {height:unset!important;}",
+      "#memex-project-view-root [class*=table-row__StyledTableRow-sc],#memex-project-view-root [class*=base-cell-module__Box] {height:unset!important;}",
+      "[class*='GridCard-module__description'] {-webkit-line-clamp: unset;}"
+    ]
   },
   {
     "id": "github-blog",
     "matches": "github.blog",
-    "injectedCss": "font {word-break: break-all !important;}"
+    "injectedCss": "font {word-break: break-all !important;}",
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ]
   },
   {
     "id": "githubNotebook",
@@ -647,10 +743,6 @@
   {
     "id": "mfacebook",
     "matches": "m.facebook.com",
-    "excludeSelectors": [
-      "[data-ad-comet-preview=message] [role=button]",
-      "[role=button]"
-    ],
     "includeSelectors": [
       "div[dir=auto][style]",
       "div[dir=auto][class]",
@@ -660,7 +752,11 @@
       "[data-type=container][data-mcomponent=MContainer][class='m displayed'] .native-text",
       "[data-mcomponent=ServerTextArea] .native-text"
     ],
-    "injectedCss": ".native-text.rslh {line-height:unset!important;}"
+    "injectedCss": ".native-text.rslh {line-height:unset!important;}",
+    "excludeSelectors.add": [
+      "[data-ad-comet-preview=message] [role=button]",
+      "[role=button]"
+    ]
   },
   {
     "id": "facebook",
@@ -677,11 +773,6 @@
       "www.facebook.com/terms*",
       "www.facebook.com/privacy*"
     ],
-    "excludeSelectors": [
-      "[data-ad-comet-preview=message] [role=button]",
-      "object[type='nested/pressable']",
-      "[data-ad-rendering-role=profile_name]"
-    ],
     "includeSelectors": [
       "div[dir=auto][style]",
       "div[dir=auto][class]",
@@ -697,17 +788,18 @@
       "[role='presentation']",
       "form#platformDialogForm"
     ],
-    "injectedCss": "._4ik4._4ik5 {max-height:unset!important;}"
+    "excludeSelectors.add": [
+      "[data-ad-comet-preview=message] [role=button]",
+      "object[type='nested/pressable']",
+      "[data-ad-rendering-role=profile_name]"
+    ],
+    "injectedCss.add": [
+      "._4ik4._4ik5 {max-height:unset!important;}"
+    ]
   },
   {
     "id": "youtubeMobile",
     "matches": "m.youtube.com",
-    "excludeSelectors": [
-      ".ytm-badge-and-byline-item-byline",
-      ".ytp-caption-window-container",
-      "text",
-      "ytd-live-chat-frame"
-    ],
     "includeSelectors": [
       ".comment-text",
       "#content-text",
@@ -721,15 +813,22 @@
       ".ytAttributedStringHost",
       ".title"
     ],
-    "forceBlockSelectors": [
-      ".caption-visual-line"
+    "injectedCss": ".read-frog-translated-content-wrapper img { width: 16px; height: 16px }\n.shortsLockupViewModelHostMetadataTitle,h4.compact-media-item-headline {max-height:unset !important;line-clamp:unset !important;overflow:unset !important;-webkit-line-clamp:unset !important;}\n.comment-text {max-height:unset;}\n.details,.subhead,.video-card-title,.media-item-headline {max-height:unset!important;-webkit-line-clamp:unset!important;}\ntruncated-text-content {max-height: unset !important;}",
+    "excludeSelectors.add": [
+      ".ytm-badge-and-byline-item-byline",
+      ".ytp-caption-window-container",
+      "text",
+      ".imt-caption-container",
+      "ytd-live-chat-frame"
     ],
-    "injectedCss": ".read-frog-translated-content-wrapper img { width: 16px; height: 16px }\n.shortsLockupViewModelHostMetadataTitle,h4.compact-media-item-headline {max-height:unset !important;line-clamp:unset !important;overflow:unset !important;-webkit-line-clamp:unset !important;}\n.comment-text {max-height:unset;}\n.details,.subhead,.video-card-title,.media-item-headline {max-height:unset!important;-webkit-line-clamp:unset!important;}\ntruncated-text-content {max-height: unset !important;}"
+    "forceBlockSelectors.add": [
+      ".caption-visual-line"
+    ]
   },
   {
     "id": "twitch",
     "matches": "www.twitch.tv",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".persistent-player",
       ".chat-line__username-container",
       ".chat-line__no-background span[aria-hidden=true]",
@@ -739,18 +838,6 @@
   {
     "id": "youtube",
     "matches": "www.youtube.com",
-    "excludeSelectors": [
-      ".ytp-caption-window-container",
-      "text",
-      "ytd-button-renderer",
-      ".ytp-sfn-content div :last-child",
-      "ytd-live-chat-frame",
-      "yt-button-shape",
-      "ytd-comments-header-renderer",
-      "yt-content-metadata-view-model",
-      "yt-description-preview-view-model button",
-      ".yt-page-header-view-model__page-header-title"
-    ],
     "includeSelectors": [
       "yt-formatted-string[slot=content].ytd-comment-renderer",
       "yt-formatted-string.ytd-video-renderer",
@@ -776,11 +863,24 @@
       "#commentCanvas .cmt",
       ".ytwTranscriptSegmentViewModelHost"
     ],
-    "forceBlockSelectors": [
+    "injectedCss": ".read-frog-translated-content-wrapper img { width: 16px; height: 16px }\n.metadata-snippet-container {max-height: unset !important;}\n.read-frog-translated-content-wrapper {text-align: left;}\n.read-frog-translated-content-wrapper[dir=rtl] {text-align: right;}\n#commentCanvas .cmt {display:flex;flex-direction: column;}\n#commentCanvas .cmt font br {display: none;}\n#video-title,h1.ytd-watch-metadata,.ytd-video-renderer,.yt-lockup-metadata-view-model-wiz__title {-webkit-line-clamp: unset !important;max-height: unset !important;}\nyt-formatted-string#video-title,.ShortsLockupViewModelHostOutsideMetadataTitle {-webkit-line-clamp: unset !important;max-height: unset !important;}\nytd-expander.ytd-comment-renderer {--ytd-expander-max-lines: 1000;}\n.page-header-view-model-wiz__page-header-title--page-header-title-large {-webkit-line-clamp: unset !important;max-height: unset !important;}\n#title,#video-title,.yt-lockup-metadata-view-model__title,.ytLockupMetadataViewModelTitle,.shortsLockupViewModelHostOutsideMetadataTitle,h1.ytd-watch-metadata,.ytwFeedAdMetadataViewModelHostTextsStyleStandardHeadline {-webkit-line-clamp: unset !important;max-height: unset !important;}",
+    "excludeSelectors.add": [
+      ".ytp-caption-window-container",
+      "text",
+      ".imt-caption-container",
+      "ytd-button-renderer",
+      ".ytp-sfn-content div :last-child",
+      "ytd-live-chat-frame",
+      "yt-button-shape",
+      "ytd-comments-header-renderer",
+      "yt-content-metadata-view-model",
+      "yt-description-preview-view-model button",
+      ".yt-page-header-view-model__page-header-title"
+    ],
+    "forceBlockSelectors.add": [
       "yt-formatted-string.ytd-transcript-segment-renderer",
       ".caption-visual-line"
-    ],
-    "injectedCss": ".read-frog-translated-content-wrapper img { width: 16px; height: 16px }\n.metadata-snippet-container {max-height: unset !important;}\n.read-frog-translated-content-wrapper {text-align: left;}\n.read-frog-translated-content-wrapper[dir=rtl] {text-align: right;}\n#commentCanvas .cmt {display:flex;flex-direction: column;}\n#commentCanvas .cmt font br {display: none;}\n#video-title,h1.ytd-watch-metadata,.ytd-video-renderer,.yt-lockup-metadata-view-model-wiz__title {-webkit-line-clamp: unset !important;max-height: unset !important;}\nyt-formatted-string#video-title,.ShortsLockupViewModelHostOutsideMetadataTitle {-webkit-line-clamp: unset !important;max-height: unset !important;}\nytd-expander.ytd-comment-renderer {--ytd-expander-max-lines: 1000;}\n.page-header-view-model-wiz__page-header-title--page-header-title-large {-webkit-line-clamp: unset !important;max-height: unset !important;}\n#title,#video-title,.yt-lockup-metadata-view-model__title,.ytLockupMetadataViewModelTitle,.shortsLockupViewModelHostOutsideMetadataTitle,h1.ytd-watch-metadata,.ytwFeedAdMetadataViewModelHostTextsStyleStandardHeadline {-webkit-line-clamp: unset !important;max-height: unset !important;}"
+    ]
   },
   {
     "id": "youtubekids",
@@ -793,11 +893,11 @@
       "www.youtube-nocookie.com",
       "music.youtube.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".captions-text",
       ".ytp-caption-segment"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".caption-visual-line"
     ]
   },
@@ -825,7 +925,12 @@
       "div:not([class]) > div > div:nth-child(2)"
     ],
     "minCharacters": 2,
-    "injectedCss": "article ._aagw {position:unset !important;}"
+    "excludeSelectors.remove": [
+      "h1 br"
+    ],
+    "injectedCss.add": [
+      "article ._aagw {position:unset !important;}"
+    ]
   },
   {
     "id": "otherInstagram",
@@ -884,13 +989,13 @@
       ".comment-meta",
       ".comment-actions"
     ],
-    "forceBlockSelectors": [
+    "injectedCss": ".reader2-clamp-lines { max-height: unset; -webkit-line-clamp: unset; }\n[class*='clamp-'] { max-height: unset; -webkit-line-clamp:unset; }\n.blurb-text { max-height: unset; }\n.comment-body { max-height: unset; }\n[class*='_hideSelectio'] { overflow: scroll; }",
+    "forceBlockSelectors.add": [
       ".reader2-post-title",
       ".tweet-link-top",
       ".tweet-link-bottom",
       ".expanded-link"
-    ],
-    "injectedCss": ".reader2-clamp-lines { max-height: unset; -webkit-line-clamp: unset; }\n[class*='clamp-'] { max-height: unset; -webkit-line-clamp:unset; }\n.blurb-text { max-height: unset; }\n.comment-body { max-height: unset; }\n[class*='_hideSelectio'] { overflow: scroll; }"
+    ]
   },
   {
     "id": "seekingalpha",
@@ -949,7 +1054,14 @@
       ".header_name",
       ".blog-content"
     ],
-    "injectedCss": ".article_title_link,.library_article_text h4,.gadget_overview_article_title,.article_magazine_title_link,.reader_pane_view_style_2 .column_view_title {-webkit-line-clamp: unset!important;max-height: unset!important;}\n.article_tile_content_wraper,div.article_tile {overflow:auto}\n.article_header_title {white-space:normal;max-height: unset!important;}\n.article_header_title span {display:flex !important;flex-direction: column;}\n.ar.article_no_thumbnail,[data-type=article] {height:unset!important;}\n.view_style_2 #reader_pane .ar .article_header_text .column_view_info {position:relative!important;}"
+    "injectedCss.add": [
+      ".article_title_link,.library_article_text h4,.gadget_overview_article_title,.article_magazine_title_link,.reader_pane_view_style_2 .column_view_title {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      ".article_tile_content_wraper,div.article_tile {overflow:auto}",
+      ".article_header_title {white-space:normal;max-height: unset!important;}",
+      ".article_header_title span {display:flex !important;flex-direction: column;}",
+      ".ar.article_no_thumbnail,[data-type=article] {height:unset!important;}",
+      ".view_style_2 #reader_pane .ar .article_header_text .column_view_info {position:relative!important;}"
+    ]
   },
   {
     "id": "aha",
@@ -1020,7 +1132,11 @@
       "time",
       ".bInasb"
     ],
-    "injectedCss": ".oovtQ,.MCAGUe,.To2ZZb.DbQnIe {height: unset;}\nh4,.IBr9hb,.gPFEn{-webkit-line-clamp: unset!important;}\n.cp7Yvc > h2 {display: block;}"
+    "injectedCss.add": [
+      ".oovtQ,.MCAGUe,.To2ZZb.DbQnIe {height: unset;}",
+      "h4,.IBr9hb,.gPFEn{-webkit-line-clamp: unset!important;}",
+      ".cp7Yvc > h2 {display: block;}"
+    ]
   },
   {
     "id": "outlook",
@@ -1044,21 +1160,17 @@
     "excludeMatches": [
       "https://www.producthunt.com/stories/*"
     ],
-    "excludeSelectors": [
+    "injectedCss": "h5 + p { height:unset; }\n.noOfLines-1,.noOfLines-2,.noOfLines-3,.styles_noOfLines-2__k_Ta_,[data-test=\"post-name-481116\"] { -webkit-line-clamp:unset; }",
+    "excludeSelectors.add": [
       ".styles_extraInfo__Xs_5Y",
       "[data-test=\"show-more-shoutouts-button\"]",
       ".styles_buttons__kKy_S",
       ".styles_count___6_8F"
-    ],
-    "injectedCss": "h5 + p { height:unset; }\n.noOfLines-1,.noOfLines-2,.noOfLines-3,.styles_noOfLines-2__k_Ta_,[data-test=\"post-name-481116\"] { -webkit-line-clamp:unset; }"
+    ]
   },
   {
     "id": "discord",
     "matches": "https://discord.com/channels/*",
-    "excludeSelectors": [
-      "[class*='username']",
-      "[class*='repliedMessage']"
-    ],
     "includeSelectors": [
       "li[id^=chat-messages] div[id^=message-content]",
       "div[class^=headerText]",
@@ -1069,14 +1181,22 @@
       "[class^='promptContent']",
       "li[class^='container'] > div[class^='header']"
     ],
-    "forceBlockSelectors": [
+    "minCharacters": 4,
+    "minWords": 2,
+    "excludeSelectors.add": [
+      "[class*='username']",
+      "[class*='repliedMessage']"
+    ],
+    "forceBlockSelectors.add": [
       "[class^='embedFieldValue']",
       "li[class^='card'] div[class^='message']",
       "[data-list-item-id^='forum-channel-list'] div[class^='headerText']"
     ],
-    "minCharacters": 4,
-    "minWords": 2,
-    "injectedCss": "main div[class^=headerText],main div[class^=message],main div[class^=text] {max-height: unset;}\nh3[data-text-variant='heading-lg/semibold'] {-webkit-line-clamp: unset;line-height: unset;}\n[class*='guildDetails'] > [class*='description'] {-webkit-line-clamp: unset;}"
+    "injectedCss.add": [
+      "main div[class^=headerText],main div[class^=message],main div[class^=text] {max-height: unset;}",
+      "h3[data-text-variant='heading-lg/semibold'] {-webkit-line-clamp: unset;line-height: unset;}",
+      "[class*='guildDetails'] > [class*='description'] {-webkit-line-clamp: unset;}"
+    ]
   },
   {
     "id": "telegram",
@@ -1100,7 +1220,11 @@
       "[class*='tabs-tab page-password active']",
       "#auth-qr-form"
     ],
-    "forceBlockSelectors": [
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "forceBlockSelectors.add": [
       ".message.spoilers-container em",
       ".message.spoilers-container strong"
     ]
@@ -1134,6 +1258,9 @@
       ".p-message_pane__foreword",
       ".c-alert__message",
       "[data-qa=message_attachment_text]"
+    ],
+    "preserveTextSelectors.add": [
+      "[data-qa=emoji]"
     ]
   },
   {
@@ -1188,7 +1315,10 @@
     "includeSelectors": [
       "div[class*='mini_cardBottomRow_Metadata']"
     ],
-    "injectedCss": "div[class*='mini_cardBottomRowSizing'] { height: 3em; }"
+    "injectedCss": "div[class*='mini_cardBottomRowSizing'] { height: 3em; }",
+    "preserveTextSelectors": [
+      "[data-tooltip='tooltip-user-info']"
+    ]
   },
   {
     "id": "googleIndex",
@@ -1235,14 +1365,24 @@
       "[class='ZtihLe YrbPuc']",
       "[class='kb0PBd A9Y9g'] .TXwUJf,[class='kb0PBd cvP2Ce'] .TXwUJf",
       "[class='wep10b vDF3Oc jIrdcd'],[class='gqF9jc YrbPuc']",
-      "span[data-ts]",
+      "span[data-ts]"
+    ],
+    "excludeSelectors.add": [
       "[jscontroller='UsftYd']"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".MUFPAc",
       "[role=heading]"
     ],
-    "injectedCss": ".V82bz,.uAKcGb,.F0FGWb,.Hdw6tb,.M1Sizc,.XVPTd,.Yt787.JGD2rd,.ITZIwc {-webkit-line-clamp: unset!important;max-height: unset!important;}\n.pe7FNb {-webkit-line-clamp: unset!important;}\n.promotion-3PDMAb {display: none!important;}\ndiv[data-content-feature='1'] > div {-webkit-line-clamp: unset!important;max-height: unset!important;}\ndiv[style='-webkit-line-clamp:*'] {-webkit-line-clamp: unset!important;max-height: unset!important;}\n.Pw4Ldf.RsCEN {height:unset!important;}\n.related-question-pair {overflow:auto!important;}"
+    "injectedCss.add": [
+      ".V82bz,.uAKcGb,.F0FGWb,.Hdw6tb,.M1Sizc,.XVPTd,.Yt787.JGD2rd,.ITZIwc {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      ".pe7FNb {-webkit-line-clamp: unset!important;}",
+      ".promotion-3PDMAb {display: none!important;}",
+      "div[data-content-feature='1'] > div {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      "div[style='-webkit-line-clamp:*'] {-webkit-line-clamp: unset!important;max-height: unset!important;}",
+      ".Pw4Ldf.RsCEN {height:unset!important;}",
+      ".related-question-pair {overflow:auto!important;}"
+    ]
   },
   {
     "id": "lowendtalk",
@@ -1270,7 +1410,7 @@
   {
     "id": "indiehackers",
     "matches": "www.indiehackers.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".portal-entry__date",
       ".portal-entry__byline",
       ".firestore-post__header-metadata",
@@ -1282,12 +1422,18 @@
       ".author-bio__name-link",
       ".comment__footer"
     ],
-    "injectedCss": ".meetups__meetup-name,.partnerships__title { -webkit-line-clamp: unset!important;max-height: unset!important; }"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "injectedCss.add": [
+      ".meetups__meetup-name,.partnerships__title { -webkit-line-clamp: unset!important;max-height: unset!important; }"
+    ]
   },
   {
     "id": "deepwiki",
     "matches": "deepwiki.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class*='flex items-center break-all rounded-l px-2 py-1.5 bg-[#e5e5e5] text-[#333333] dark:bg-[#252525] dark:text-[#e4e4e4] rounded-r']",
       "[class*='mb-1 mr-1 inline-flex items-stretch font-mono text-xs !no-underline transition-opacity hover:opacity-75']"
     ]
@@ -1352,7 +1498,7 @@
   {
     "id": "lesswrong",
     "matches": "www.lesswrong.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".PostsPagePostHeader-authorAndSecondaryInfo",
       ".Answer-answerHeader",
       "time",
@@ -1362,7 +1508,7 @@
       ".CommentsTableOfContents-commentAuthor",
       ".CommentBottom-bottom"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "span.commentOnSelection"
     ]
   },
@@ -1387,14 +1533,17 @@
   {
     "id": "cnbc",
     "matches": "www.cnbc.com",
-    "excludeSelectors": [
+    "injectedCss": "div.Card-titleContainer > div { -webkit-line-clamp: unset;max-height: unset; }",
+    "excludeSelectors.add": [
       "#GlobalNavigation",
       "#GlobalFooter",
       ".LiveBlogHeader-timestampAndShareBarContainer",
       ".LiveBlogHeader-liveUpdatesPill",
       ".QuoteInBody-inlineButton"
     ],
-    "injectedCss": "div.Card-titleContainer > div { -webkit-line-clamp: unset;max-height: unset; }"
+    "forceBlockSelectors.remove": [
+      "button"
+    ]
   },
   {
     "id": "dailyDev",
@@ -1417,22 +1566,22 @@
       "*.pornhub.com/insights/*",
       "pornhub.com/insights/*"
     ],
-    "forceBlockSelectors": [
+    "injectedCss": "span.title { height:unset; max-height:unset; }\n.detailedInfo { max-height:unset; }\n.pcVideoListItem { max-height:unset; }\n.wrap { height:unset; }\n.entry-header { height:unset; }\n.entry-title > a { height:unset;-webkit-line-clamp:unset; }",
+    "forceBlockSelectors.add": [
       ".trendingNow",
       ".searchItem",
       ".tagcloud > a"
-    ],
-    "injectedCss": "span.title { height:unset; max-height:unset; }\n.detailedInfo { max-height:unset; }\n.pcVideoListItem { max-height:unset; }\n.wrap { height:unset; }\n.entry-header { height:unset; }\n.entry-title > a { height:unset;-webkit-line-clamp:unset; }"
+    ]
   },
   {
     "id": "missav",
     "matches": "https://missav.*/*",
-    "excludeSelectors": [
+    "injectedCss": ".truncate { white-space:unset; }\n.overflow-y-hidden { max-height:unset;overflow-y:unset; }",
+    "excludeSelectors.add": [
       ".leading-normal",
       "[class='absolute bottom-1 right-1 rounded-lg px-2 py-1 text-xs text-nord5 bg-gray-800 bg-opacity-75']",
       "[class='absolute bottom-1 left-1 rounded-lg px-2 py-1 text-xs text-nord5 bg-blue-800 bg-opacity-75']"
-    ],
-    "injectedCss": ".truncate { white-space:unset; }\n.overflow-y-hidden { max-height:unset;overflow-y:unset; }"
+    ]
   },
   {
     "id": "javbus",
@@ -1450,13 +1599,13 @@
       ".stats",
       ".thumb"
     ],
-    "forceBlockSelectors": [
+    "injectedCss": ".video-item > a { white-space:unset; }",
+    "forceBlockSelectors.add": [
       ".searches > a",
       ".tag > a",
       ".extra > a",
       ".positions > li"
-    ],
-    "injectedCss": ".video-item > a { white-space:unset; }"
+    ]
   },
   {
     "id": "javdb",
@@ -1476,11 +1625,11 @@
   {
     "id": "netflav",
     "matches": "https://netflav*.com/*",
-    "forceBlockSelectors": [
+    "injectedCss": ".grid_title { max-height:unset; }",
+    "forceBlockSelectors.add": [
       ".genre_filter_item",
       "button"
-    ],
-    "injectedCss": ".grid_title { max-height:unset; }"
+    ]
   },
   {
     "id": "czechvideo",
@@ -1502,6 +1651,9 @@
       ".m-feed",
       ".wbpro-feed-content",
       ".wbpro-list .text"
+    ],
+    "preserveTextSelectors.add": [
+      ".expand"
     ]
   },
   {
@@ -1536,10 +1688,18 @@
     "excludeSelectors": [
       "[aria-label='Post Preview Reading Time']",
       ".speechify-ignore",
-      "article pre",
+      "article pre"
+    ],
+    "injectedCss": ".u-lineClamp4,.u-lineClamp3,.u-lineClamp2 {-webkit-line-clamp:unset!important;max-height:unset!important;}\nh2,h3 { -webkit-line-clamp: unset;max-height:unset; }\narticle p { -webkit-line-clamp: unset;max-height:unset; }",
+    "excludeSelectors.add": [
       "pre > span"
     ],
-    "injectedCss": ".u-lineClamp4,.u-lineClamp3,.u-lineClamp2 {-webkit-line-clamp:unset!important;max-height:unset!important;}\nh2,h3 { -webkit-line-clamp: unset;max-height:unset; }\narticle p { -webkit-line-clamp: unset;max-height:unset; }"
+    "excludeSelectors.remove": [
+      "i.fa",
+      "i[class^=fa-]",
+      ".navmenu-container",
+      ".google-symbols"
+    ]
   },
   {
     "id": "economist",
@@ -1570,7 +1730,10 @@
     ],
     "minCharacters": 4,
     "minWords": 2,
-    "injectedCss": ".iS4T .zgfQ .uHzw .Ep66 {-webkit-line-clamp: unset;max-height: unset;}\n[itemprop=name],.merch-item-title {-webkit-line-clamp: unset;max-height: unset;}"
+    "injectedCss.add": [
+      ".iS4T .zgfQ .uHzw .Ep66 {-webkit-line-clamp: unset;max-height: unset;}",
+      "[itemprop=name],.merch-item-title {-webkit-line-clamp: unset;max-height: unset;}"
+    ]
   },
   {
     "id": "skinstore",
@@ -1590,14 +1753,16 @@
       "https://*.amazon.*/*video*"
     ],
     "description": "应该是有广告会破坏时间轴，所以暂时不加自托管",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#dv-web-player"
     ]
   },
   {
     "id": "amazon",
     "matches": "www.amazon.*",
-    "excludeSelectors": [
+    "minCharacters": 1,
+    "minWords": 1,
+    "excludeSelectors.add": [
       "#navFooter",
       ".s-price-instructions-style",
       "[class*='-star ']",
@@ -1608,17 +1773,25 @@
       "#glow-ingress-block,#nav-link-accountList,#nav-orders,#nav-cart",
       ".a-profile-content,[data-hook=product-variation-attributes],[data-hook=helpfulVoteWidget],[data-hook=reportAbuseButton],[data-hook=helpful-vote-statement]"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".a-size-small.a-link-normal.page-banner-link.a-nowrap"
     ],
-    "minCharacters": 1,
-    "minWords": 1,
-    "injectedCss": ".a-carousel-viewport {height:unset;}\n[class*='clamp'] {max-height: unset!important;-webkit-line-clamp: unset!important;}\n[data-rows] {max-height: unset!important;-webkit-line-clamp: unset!important;}\n[data-a-expander-name='review_text_read_more'] { max-height: unset;}\n.compact.primaryText.primaryTextOnly {max-height: unset;-webkit-line-clamp: unset;}\n.format {-webkit-line-clamp: unset;}\n.dcl-truncate,[class*='textButton'],span[data-a-max-rows] {max-height:unset!important;-webkit-line-clamp: unset!important;}\n.a-reactive-container-transition,.a-cardui-uninitialized {height:unset!important;max-height:unset!important;}"
+    "injectedCss.add": [
+      ".a-carousel-viewport {height:unset;}",
+      "[class*='clamp'] {max-height: unset!important;-webkit-line-clamp: unset!important;}",
+      "[data-rows] {max-height: unset!important;-webkit-line-clamp: unset!important;}",
+      "[data-a-expander-name='review_text_read_more'] { max-height: unset;}",
+      ".compact.primaryText.primaryTextOnly {max-height: unset;-webkit-line-clamp: unset;}",
+      ".format {-webkit-line-clamp: unset;}",
+      ".dcl-truncate,[class*='textButton'],span[data-a-max-rows] {max-height:unset!important;-webkit-line-clamp: unset!important;}",
+      ".a-reactive-container-transition,.a-cardui-uninitialized {height:unset!important;max-height:unset!important;}"
+    ]
   },
   {
     "id": "visualstudioMarketplace",
     "matches": "marketplace.visualstudio.com",
-    "excludeSelectors": [
+    "injectedCss": ".item-details-control-root.ux-item-shortdesc { height: unset; overflow: visible; max-height:unset; }",
+    "excludeSelectors.add": [
       ".core-info-second-row",
       ".core-info-third-row",
       ".meta-data-list",
@@ -1630,8 +1803,7 @@
       ".ux-item-second-row-wrapper",
       ".stats-and-offer",
       ".header-container"
-    ],
-    "injectedCss": ".item-details-control-root.ux-item-shortdesc { height: unset; overflow: visible; max-height:unset; }"
+    ]
   },
   {
     "id": "bloomberg",
@@ -1660,21 +1832,29 @@
     "excludeMatches": [
       "www.sciencedirect.com/*/pdf/download/*"
     ],
-    "excludeSelectors": [
+    "injectedCss": ".read-frog-translated-content-wrapper {content-visibility:auto;}",
+    "excludeSelectors.add": [
       ".bibliography",
       ".author-group"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "span.display",
       "span.captions",
       "span[id^=cap]"
     ],
-    "injectedCss": "h2 {font-size:unset;}\n.u-clamp-2-lines {-webkit-line-clamp:unset!important;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}"
+    "preserveTextSelectors": [
+      "span.display",
+      "span.math"
+    ],
+    "injectedCss.add": [
+      "h2 {font-size:unset;}",
+      ".u-clamp-2-lines {-webkit-line-clamp:unset!important;}"
+    ]
   },
   {
     "id": "thehighestofthemountains",
     "matches": "www.thehighestofthemountains.com",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "div"
     ]
   },
@@ -1684,10 +1864,10 @@
       "*.annas-archive.org",
       "annas-archive.org"
     ],
-    "forceBlockSelectors": [
+    "injectedCss": "div[id^='link-index-'] { height: unset; max-height: unset; }\nmain div[class*='h-[125]'] { height:auto; }",
+    "forceBlockSelectors.add": [
       "a.custom-a"
-    ],
-    "injectedCss": "div[id^='link-index-'] { height: unset; max-height: unset; }\nmain div[class*='h-[125]'] { height:auto; }"
+    ]
   },
   {
     "id": "explainshell",
@@ -1772,7 +1952,15 @@
       "preview.construct.net",
       "editor.construct.net"
     ],
-    "excludeSelectors": [
+    "includeSelectors": [
+      "aside",
+      "div.manualContent"
+    ],
+    "forceInlineSelectors": [
+      "a.forumLink"
+    ],
+    "injectedCss": "td.location a#LocationLink { padding-top: 4px; }\ndiv.articleMain .tutCourseWrap { align-items: flex-start; }",
+    "excludeSelectors.add": [
       "div.topNav",
       "div.usernameLink",
       "ul.authorDetails",
@@ -1812,31 +2000,27 @@
       ".blogPostStats",
       ".manualContent dl dt"
     ],
-    "includeSelectors": [
-      "aside",
-      "div.manualContent"
-    ],
-    "forceInlineSelectors": [
-      "a.forumLink"
-    ],
-    "injectedCss": "td.location a#LocationLink { padding-top: 4px; }\ndiv.articleMain .tutCourseWrap { align-items: flex-start; }"
+    "preserveTextSelectors": [
+      "a.usernameReference"
+    ]
   },
   {
     "id": "fandom",
     "matches": "*.fandom.com",
-    "excludeSelectors": [
+    "injectedCss": "#mw-content-text > div > div:nth-child(1) { height:100%; }",
+    "excludeSelectors.add": [
       "header.fandom-community-header",
       "div.ph-registration-buttons"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".mp-nav a"
-    ],
-    "injectedCss": "#mw-content-text > div > div:nth-child(1) { height:100%; }"
+    ]
   },
   {
     "id": "huggingface",
     "matches": "huggingface.co",
-    "excludeSelectors": [
+    "injectedCss": ".line-clamp-2 { -webkit-line-clamp:unset;max-height:unset; }",
+    "excludeSelectors.add": [
       "thead",
       "ul.text-base",
       "a.group > div.flex-1",
@@ -1844,8 +2028,7 @@
       "nav",
       "ul[class*='dark:border-gray-800']",
       "div[class*='from-gray-100-to-white']"
-    ],
-    "injectedCss": ".line-clamp-2 { -webkit-line-clamp:unset;max-height:unset; }"
+    ]
   },
   {
     "id": "statista",
@@ -1961,7 +2144,7 @@
       "https://www.tiktok.com/*/video/*",
       "https://www.tiktok.com/*"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class*='DivInfoPosition']",
       "[data-e2e*='-count']",
       "[data-e2e='nav-foryou']",
@@ -1970,6 +2153,10 @@
       "[data-e2e*='comment-username']",
       "[class*='DivCommentSubContentSplitWrapper']",
       "[class*='DivViewRepliesContainer']"
+    ],
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
     ]
   },
   {
@@ -1999,10 +2186,14 @@
       ".discussion_search_pagingcontrols",
       ".found_helpful,.vote_header,.date_posted,.early_access_review,.apphub_CardContentAuthorBlock"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".apphub_sectionTab"
     ],
-    "injectedCss": ".forum_topic,.rightbox_list_option,.appHubShortcut {height: unset;}\n.forum_topic_name {white-space:normal;line-height: 1.25rem; padding: 6px 20px 0 0;}\n.forum_topic_op {clear: left; padding: 0 0 6px 2rem;}"
+    "injectedCss.add": [
+      ".forum_topic,.rightbox_list_option,.appHubShortcut {height: unset;}",
+      ".forum_topic_name {white-space:normal;line-height: 1.25rem; padding: 6px 20px 0 0;}",
+      ".forum_topic_op {clear: left; padding: 0 0 6px 2rem;}"
+    ]
   },
   {
     "id": "steampoweredApp",
@@ -2075,7 +2266,8 @@
       "webofscience-clarivate*.*",
       "*.ustc.edu.*/*wos*"
     ],
-    "excludeSelectors": [
+    "injectedCss": ".abstract { height:auto !important; }\n.show-more-lines { height:unset !important; }",
+    "excludeSelectors.add": [
       "app-custom-breadcrumbs",
       ".summary-left-panel",
       ".authors",
@@ -2088,20 +2280,22 @@
       ".mat-drawer-inner-container",
       "[class*='sidenav-panel']"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "app-summary-authors + div",
       "app-full-record-keywords span span",
       "[data-ta=summary-record-title-link]",
       "[cdxanalyticscategory=wos-recordCard_ExpandAbstract]"
-    ],
-    "injectedCss": ".abstract { height:auto !important; }\n.show-more-lines { height:unset !important; }"
+    ]
   },
   {
     "id": "science",
     "matches": "www.science.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".core-self-citation",
       ".contributors"
+    ],
+    "preserveTextSelectors.add": [
+      ".open-in-viewer"
     ]
   },
   {
@@ -2116,23 +2310,25 @@
     "matches": "https://*.jetbrains.com",
     "excludeSelectors": [
       ".toolbar__ee8",
-      "[data-test=\"left-sidebar\"]",
+      "[data-test=\"left-sidebar\"]"
+    ],
+    "injectedCss": ".card p,.card h4 { -webkit-line-clamp:unset; }",
+    "excludeSelectors.add": [
       ".comment__info",
       ".symbol.monospace"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "[data-test=prompt]"
-    ],
-    "injectedCss": ".card p,.card h4 { -webkit-line-clamp:unset; }"
+    ]
   },
   {
     "id": "theverge",
     "matches": "www.theverge.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".k8dtcj0",
       "._2xqpwjf._2xqpwj0"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "[role='article'] p"
     ]
   },
@@ -2146,7 +2342,7 @@
   {
     "id": "openaiDocs",
     "matches": "https://platform.openai.com/docs*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".pheader"
     ]
   },
@@ -2179,7 +2375,7 @@
   {
     "id": "coinmarketcap",
     "matches": "coinmarketcap.com",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "div[class='sc-3502f6cd-0 JxHqg']"
     ]
   },
@@ -2188,6 +2384,9 @@
     "matches": "wandb.ai",
     "includeSelectors": [
       ".report-page-top"
+    ],
+    "preserveTextSelectors.add": [
+      "span[data-slate-inline=true]"
     ]
   },
   {
@@ -2196,7 +2395,7 @@
     "includeSelectors": [
       "font[face=verdana]"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "font[face=verdana]"
     ]
   },
@@ -2243,17 +2442,17 @@
   {
     "id": "fiverr",
     "matches": "https://www.fiverr.com/inbox/*",
-    "excludeSelectors": [
+    "includeSelectors": [
+      ".message-body",
+      "article[data-testid=index-container]"
+    ],
+    "excludeSelectors.add": [
       "[data-testid=basic-message-header]",
       "[data-testid=message-header-timestamp]",
       "time",
       ".user-name",
       ".user-info",
       ".header"
-    ],
-    "includeSelectors": [
-      ".message-body",
-      "article[data-testid=index-container]"
     ]
   },
   {
@@ -2321,14 +2520,14 @@
   {
     "id": "ietf",
     "matches": "*.ietf.org/doc/html/*",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "[href^='#page']"
     ]
   },
   {
     "id": "newsminimalist",
     "matches": "https://www.newsminimalist.com/",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".inline-flex"
     ]
   },
@@ -2368,7 +2567,9 @@
   {
     "id": "react",
     "matches": "react.dev",
-    "injectedCss": "[class*='h-\\[40px\\]'] {height: unset !important;}"
+    "injectedCss.add": [
+      "[class*='h-\\[40px\\]'] {height: unset !important;}"
+    ]
   },
   {
     "id": "perplexity",
@@ -2380,10 +2581,14 @@
       "https://www.perplexity.ai/enterprise*",
       "https://www.perplexity.ai/2024recap"
     ],
-    "excludeSelectors": [
+    "injectedCss": "[class*=line-clamp] { -webkit-line-clamp: unset !important; }",
+    "excludeSelectors.add": [
       "[data-framer-name='Desktop']"
     ],
-    "injectedCss": "[class*=line-clamp] { -webkit-line-clamp: unset !important; }"
+    "preserveTextSelectors.add": [
+      "a.citation",
+      "[class='my-md pb-xs pt-sm']"
+    ]
   },
   {
     "id": "allmyfaves",
@@ -2426,7 +2631,7 @@
   {
     "id": "braynzarsoft",
     "matches": "www.braynzarsoft.net",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#content-header",
       ".sidebar-section",
       ".rating-box",
@@ -2439,7 +2644,10 @@
       ".views",
       ".questioninputcode"
     ],
-    "injectedCss": ".tutorial-desc {overflow: scroll !important;}\n.question-title {display:inline-flex !important;}"
+    "injectedCss.add": [
+      ".tutorial-desc {overflow: scroll !important;}",
+      ".question-title {display:inline-flex !important;}"
+    ]
   },
   {
     "id": "yuque",
@@ -2463,7 +2671,7 @@
       "www.theatlantic.com",
       "https://mashable.com/*"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "footer:last-of-type",
       "nav",
       "header div.subtitle-2.w-full"
@@ -2479,7 +2687,7 @@
   {
     "id": "sentry",
     "matches": "docs.sentry.io",
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       ".term-wrapper",
       "span.description"
     ]
@@ -2495,30 +2703,30 @@
   {
     "id": "whatsapp",
     "matches": "web.whatsapp.com",
-    "excludeSelectors": [
-      "[aria-hidden=true]"
-    ],
     "includeSelectors": [
       "._akbu",
       "[role=list]",
       ".copyable-text",
       ".quoted-mention"
     ],
-    "forceInlineSelectors": [
+    "excludeSelectors.add": [
+      "[aria-hidden=true]"
+    ],
+    "forceInlineSelectors.add": [
       ".x1lliihq"
     ]
   },
   {
     "id": "bing",
     "matches": "https://*.bing.com/search*",
-    "excludeSelectors": [
-      ".tptxt"
-    ],
     "forceInlineSelectors": [
       "a",
       "i"
     ],
-    "injectedCss": "[class*='lineclamp'],.b_title { -webkit-line-clamp:unset; }\n.b_gwaDl,.b_snipwithnsl { height:unset !important; }"
+    "injectedCss": "[class*='lineclamp'],.b_title { -webkit-line-clamp:unset; }\n.b_gwaDl,.b_snipwithnsl { height:unset !important; }",
+    "excludeSelectors.add": [
+      ".tptxt"
+    ]
   },
   {
     "id": "bingNews",
@@ -2528,7 +2736,7 @@
   {
     "id": "drizzle",
     "matches": "orm.drizzle.team",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class^='codetabs_tab']",
       ".npm__tab"
     ]
@@ -2536,7 +2744,7 @@
   {
     "id": "yahoo",
     "matches": "*.yahoo.*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "._ys_jiqava",
       "#Col2-5-Rmp-Proxy",
       ".readmore",
@@ -2544,11 +2752,18 @@
       ".ticker-list",
       ".footer"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".SIPGg",
       ".sc-kzMCTH.pSZXj"
     ],
-    "injectedCss": "[class*='line-clamp'],h3.clamp {-webkit-line-clamp:unset!important;}\n#atomic .Mt\\(20px\\) {margin-top: 100px;}\n[class*='LineClamp'] {-webkit-line-clamp:unset;max-height:unset;}\na[class*='js-content-viewer']> div[class*='Td\\(n\\)'] {overflow: scroll;}\n[class*='_ys_24482e'] {-webkit-line-clamp:unset;}\n#Aside > :first-child {overflow:scroll;}"
+    "injectedCss.add": [
+      "[class*='line-clamp'],h3.clamp {-webkit-line-clamp:unset!important;}",
+      "#atomic .Mt\\(20px\\) {margin-top: 100px;}",
+      "[class*='LineClamp'] {-webkit-line-clamp:unset;max-height:unset;}",
+      "a[class*='js-content-viewer']> div[class*='Td\\(n\\)'] {overflow: scroll;}",
+      "[class*='_ys_24482e'] {-webkit-line-clamp:unset;}",
+      "#Aside > :first-child {overflow:scroll;}"
+    ]
   },
   {
     "id": "wsj",
@@ -2562,10 +2777,10 @@
       "nav",
       "[aria-label='Markets summary']"
     ],
-    "forceBlockSelectors": [
+    "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}",
+    "forceBlockSelectors.add": [
       ".series-nav__link-thumbnail"
-    ],
-    "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}"
+    ]
   },
   {
     "id": "businessinsider",
@@ -2601,18 +2816,20 @@
     "id": "nytimes",
     "matches": "www.nytimes.com",
     "excludeSelectors": [
-      "#in-story-masthead",
+      "#in-story-masthead"
+    ],
+    "injectedCss": "a::after {position:relative!important;}\nfooter {line-height: unset!important;;}",
+    "excludeSelectors.add": [
       "[data-testid=user-header]",
       "[data-testid^='recommend-button']",
       "[data-testid=copy-link]",
       ".css-mydst6 > a"
-    ],
-    "injectedCss": "a::after {position:relative!important;}\nfooter {line-height: unset!important;;}"
+    ]
   },
   {
     "id": "bugsKde",
     "matches": "bugs.kde.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".bz_first_comment_head",
       ".bz_comment_head",
       ".related_actions"
@@ -2621,7 +2838,9 @@
   {
     "id": "plati",
     "matches": "plati.market",
-    "injectedCss": ".card .custom-link{-webkit-line-clamp: unset !important;}"
+    "injectedCss.add": [
+      ".card .custom-link{-webkit-line-clamp: unset !important;}"
+    ]
   },
   {
     "id": "bmvrMarseille",
@@ -2649,8 +2868,12 @@
       "*.larkoffice.com",
       "*.larksuite.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".catalogue__list"
+    ],
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
     ]
   },
   {
@@ -2661,18 +2884,25 @@
   {
     "id": "kaggle",
     "matches": "www.kaggle.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".sc-kHItYk.kCjSZT",
       ".sc-hagvSa.guBIfV",
       ".sc-jhZTHU.btgPPn",
       "#editor-sidebar-scroll-container"
     ],
-    "injectedCss": ".km-listitem--large {height:unset !important;}\n.km-listitem--large .jWyUHl {height:unset !important;}\n[role=listitem] {overflow:scroll;}\n[role=listitem] div {-webkit-line-clamp:unset;}\n[class*='km-listitem--medium'] {height:unset !important;}\n.MuiListItem-root a > div :nth-child(2) {height:unset !important;}"
+    "injectedCss.add": [
+      ".km-listitem--large {height:unset !important;}",
+      ".km-listitem--large .jWyUHl {height:unset !important;}",
+      "[role=listitem] {overflow:scroll;}",
+      "[role=listitem] div {-webkit-line-clamp:unset;}",
+      "[class*='km-listitem--medium'] {height:unset !important;}",
+      ".MuiListItem-root a > div :nth-child(2) {height:unset !important;}"
+    ]
   },
   {
     "id": "ieee",
     "matches": "spectrum.ieee.org",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       "small"
     ]
   },
@@ -2680,7 +2910,7 @@
     "id": "cnn",
     "matches": "*.cnn.com",
     "description": "多视频页面不好处理，暂时不支持",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".ad-slot-header__wrapper",
       "#pageFooter"
     ]
@@ -2707,7 +2937,7 @@
   {
     "id": "bilibili",
     "matches": "www.bilibili.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".bpx-player-subtitle-panel-text",
       ".bili-video-card__info--author, .bili-video-card__info--date",
       "#pictures,#note,#info,#footer,#expander-footer,.playinfo,.upname,#bilibili-player"
@@ -2757,10 +2987,10 @@
       ".actions-buttons.sidebar",
       ".title-copy"
     ],
-    "forceBlockSelectors": [
+    "injectedCss": "#Scholarscope_HighlightOrigin > p font,#Scholarscope_HighlightContent > p font {display: inline!important;}\n#Scholarscope_HighlightOrigin > p font br,#Scholarscope_HighlightContent > p font br {display: none!important;}\n.title-translate {display:block;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}",
+    "forceBlockSelectors.add": [
       ".mixed-citation"
-    ],
-    "injectedCss": "#Scholarscope_HighlightOrigin > p font,#Scholarscope_HighlightContent > p font {display: inline!important;}\n#Scholarscope_HighlightOrigin > p font br,#Scholarscope_HighlightContent > p font br {display: none!important;}\n.title-translate {display:block;}\n.read-frog-translated-content-wrapper {content-visibility:auto;}"
+    ]
   },
   {
     "id": "chosun",
@@ -2770,23 +3000,31 @@
   {
     "id": "yna",
     "matches": "*.yna*",
-    "injectedCss": "font > br {display:none}\na,strong { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }\ndiv,p,li,.item-box01,.news-con { height:unset;max-height:unset;-webkit-line-clamp:unset; }"
+    "injectedCss": "font > br {display:none}\na,strong { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }\ndiv,p,li,.item-box01,.news-con { height:unset;max-height:unset;-webkit-line-clamp:unset; }",
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ]
   },
   {
     "id": "digitimes",
     "matches": "www.digitimes.com",
-    "excludeSelectors": [
+    "injectedCss": "a,.title,.abstract,.display-5,.top { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }",
+    "excludeSelectors.add": [
       ".main-nav-frame",
       ".sub-header-wrapper",
       ".footer",
       ".date"
     ],
-    "injectedCss": "a,.title,.abstract,.display-5,.top { max-height:unset;-webkit-line-clamp:unset;height:unset;white-space:unset; }"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ]
   },
   {
     "id": "vdi-nachrichten",
     "matches": "www.vdi-nachrichten.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".header-menu__item > a",
       ".linkbar__item",
       ".header__button-group"
@@ -2795,10 +3033,10 @@
   {
     "id": "qqMail",
     "matches": "*.mail.qq.com",
-    "excludeSelectors": [
+    "injectedCss": ".mail-list-page-wide-item { height:unset; }",
+    "excludeSelectors.add": [
       ".xmail-cmp-account"
-    ],
-    "injectedCss": ".mail-list-page-wide-item { height:unset; }"
+    ]
   },
   {
     "id": "indeed",
@@ -2815,19 +3053,23 @@
       "h1 > a",
       "h3 > a",
       "h2 >a"
+    ],
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
     ]
   },
   {
     "id": "maxroll",
     "matches": "maxroll.gg",
-    "excludeSelectors": [
-      "span[class^='text-opac'] + span[class^='text-']"
-    ],
     "forceInlineSelectors": [
       ".d4t-sprite-icon",
       ".d4t-icon"
     ],
-    "injectedCss": "font {font-family: sans-serif !important;}\n.d4t-sprite-icon {display: unset !important;}"
+    "injectedCss": "font {font-family: sans-serif !important;}\n.d4t-sprite-icon {display: unset !important;}",
+    "excludeSelectors.add": [
+      "span[class^='text-opac'] + span[class^='text-']"
+    ]
   },
   {
     "id": "gradioappdocs",
@@ -2842,10 +3084,10 @@
   {
     "id": "arca",
     "matches": "arca.live",
-    "excludeSelectors": [
+    "injectedCss": ".vrow.column { height:unset !important; }\n.body .board-article .article-list .list-table .vrow.column .vcol { width:unset !important; }",
+    "excludeSelectors.add": [
       "span.user-info"
-    ],
-    "injectedCss": ".vrow.column { height:unset !important; }\n.body .board-article .article-list .list-table .vrow.column .vcol { width:unset !important; }"
+    ]
   },
   {
     "id": "chatpdf",
@@ -2853,15 +3095,21 @@
     "excludeSelectors": [
       ".chat-message-row.ai *",
       ".pdf-viewer"
+    ],
+    "excludeSelectors.remove": [
+      ".notranslate"
     ]
   },
   {
     "id": "app.element.io",
     "matches": "app.element.io",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".mx_DisambiguatedProfile",
       ".mx_ReplyChain_wrapper",
       ".mx_ThreadSummary_replies_amount"
+    ],
+    "excludeSelectors.remove": [
+      ".notranslate"
     ]
   },
   {
@@ -2872,22 +3120,22 @@
   {
     "id": "epam",
     "matches": "*.epam.com",
-    "excludeSelectors": [
+    "injectedCss": "[class*='ContentAnchorLinkList'] { word-break:unset; }",
+    "excludeSelectors.add": [
       "#blog-page-sidebar-wrapper"
-    ],
-    "injectedCss": "[class*='ContentAnchorLinkList'] { word-break:unset; }"
+    ]
   },
   {
     "id": "discussions.apple",
     "matches": "discussions.apple.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".page-number"
     ]
   },
   {
     "id": "www.sixthtone.com",
     "matches": "www.sixthtone.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#footer",
       "[class^=index_time]",
       "[class^=index_anthorList]",
@@ -2898,7 +3146,7 @@
   {
     "id": "forum.unity",
     "matches": "forum.unity.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".bbCodeCode"
     ]
   },
@@ -2910,7 +3158,7 @@
   {
     "id": "netflix",
     "matches": "www.netflix.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".player-timedtext",
       ".source-cue"
     ]
@@ -2918,7 +3166,7 @@
   {
     "id": "udemy",
     "matches": "*.udemy.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-purpose='captions-cue-text']",
       ".shaka-text-container"
     ]
@@ -2952,7 +3200,7 @@
       "onlinelibrary.wiley.com/doi/pdf/*",
       "onlinelibrary.wiley.com/doi/am-pdf/*"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".loa-authors",
       ".MuiBox-root > .MuiTypography-root.MuiTypography-body2"
     ]
@@ -2998,7 +3246,7 @@
   {
     "id": "apple",
     "matches": "developer.apple.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".developer-video-player",
       ".vue-recycle-scroller"
     ]
@@ -3006,7 +3254,7 @@
   {
     "id": "nebula",
     "matches": "nebula.tv",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-subtitles-container='true']"
     ]
   },
@@ -3014,7 +3262,7 @@
     "id": "mangaplus-shueisha",
     "matches": "mangaplus.shueisha.*",
     "description": "all",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".zao-surface"
     ]
   },
@@ -3022,24 +3270,31 @@
     "id": "zebrack-shueisha",
     "matches": "zebrack-comic.shueisha.*",
     "description": "all",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".eAvsta_root"
     ]
   },
   {
     "id": "scholar.cnki.net",
     "matches": "scholar.cnki.net",
-    "injectedCss": ".result .searchItem {height: auto!important;}"
+    "injectedCss.add": [
+      ".result .searchItem {height: auto!important;}"
+    ]
   },
   {
     "id": "datalab.naver",
     "matches": "datalab.naver.com",
-    "injectedCss": ".tab_list_area .list_itm {height: unset !important;}\n.section.main_tab_opt .select {height: unset !important;}"
+    "injectedCss.add": [
+      ".tab_list_area .list_itm {height: unset !important;}",
+      ".section.main_tab_opt .select {height: unset !important;}"
+    ]
   },
   {
     "id": "championcross.jp",
     "matches": "https://championcross.jp",
-    "injectedCss": "[class^='Original_section_title'] {overflow:hidden!important;}"
+    "injectedCss.add": [
+      "[class^='Original_section_title'] {overflow:hidden!important;}"
+    ]
   },
   {
     "id": "shonenjumpplus",
@@ -3056,12 +3311,14 @@
       "rookie.shonenjump.com"
     ],
     "description": "all",
-    "injectedCss": "[class^='Original_section_title'] {overflow:hidden!important;}"
+    "injectedCss.add": [
+      "[class^='Original_section_title'] {overflow:hidden!important;}"
+    ]
   },
   {
     "id": "runoob",
     "matches": "www.runoob.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".example_code"
     ]
   },
@@ -3073,59 +3330,59 @@
   {
     "id": "nicovideo",
     "matches": "seiga.nicovideo.*/watch/mg*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".page"
     ]
   },
   {
     "id": "frontendmasters",
     "matches": "frontendmasters.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
   {
     "id": "udacity",
     "matches": "*.udacity.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
   {
     "id": "skillshare",
     "matches": "www.skillshare.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
   {
     "id": "tubitv",
     "matches": "tubitv.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
   {
     "id": "iaabcfoundation",
     "matches": "learning.iaabcfoundation.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-testid=\"video-player\"]"
     ]
   },
   {
     "id": "domestika",
     "matches": "www.domestika.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
   {
     "id": "barrons",
     "matches": "www.barrons.com",
-    "forceInlineSelectors": [
+    "injectedCss": "font.read-frog-translated-content-wrapper > br {display:none;}",
+    "forceInlineSelectors.add": [
       "article p span"
-    ],
-    "injectedCss": "font.read-frog-translated-content-wrapper > br {display:none;}"
+    ]
   },
   {
     "id": "scrimba",
@@ -3139,7 +3396,7 @@
       "play.hbomax.com"
     ],
     "description": "自托管会导致时间轴对应不上",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-testid='playerContainer']",
       "[data-testid='CueBoxContainer']"
     ]
@@ -3147,14 +3404,14 @@
   {
     "id": "mindvalley",
     "matches": "home.mindvalley.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
   {
     "id": "viki",
     "matches": "www.viki.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
@@ -3164,36 +3421,38 @@
       "www.masterclass.com",
       "learn.microsoft.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".mc-video--text-track"
     ]
   },
   {
     "id": "slideslive",
     "matches": "slideslive.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".slp__video"
     ]
   },
   {
     "id": "viu",
     "matches": "www.viu.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".bmpui-ui-viu-subtitle-overlay"
     ]
   },
   {
     "id": "linkin",
     "matches": "*.linkedin.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ],
-    "injectedCss": ".linked-area * {max-height: unset !important;}"
+    "injectedCss.add": [
+      ".linked-area * {max-height: unset !important;}"
+    ]
   },
   {
     "id": "kanopy",
     "matches": "*.kanopy.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
@@ -3203,20 +3462,20 @@
       "www.iflix.com",
       "wetv.vip"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".text-track"
     ]
   },
   {
     "id": "app.rapidlaunch.wtf",
     "matches": "app.rapidlaunch.wtf",
-    "excludeSelectors": [
+    "injectedCss": ".max-h-24 { max-height: unset !important; }\n.line-clamp-2 {-webkit-line-clamp: unset !important;}",
+    "excludeSelectors.add": [
       "div.border-b.border-gray-700\\/50.flex",
       "a.text-blue-400",
       ".flex.items-center.text-xs.text-gray-400",
       ".flex.items-center.gap-1\\.5.mb-1"
-    ],
-    "injectedCss": ".max-h-24 { max-height: unset !important; }\n.line-clamp-2 {-webkit-line-clamp: unset !important;}"
+    ]
   },
   {
     "id": "letsjelly",
@@ -3235,22 +3494,24 @@
       "www.imdb.com",
       "m.imdb.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jw-text-track-container"
     ],
-    "injectedCss": "[class*=overflow] {max-height:unset!important;}"
+    "injectedCss.add": [
+      "[class*=overflow] {max-height:unset!important;}"
+    ]
   },
   {
     "id": "foxnews-video",
     "matches": "https://static.foxnews.com/static/orion/html/video/iframe/vod.html*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#player"
     ]
   },
   {
     "id": "quark",
     "matches": "pan.quark.*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".video-container"
     ]
   },
@@ -3260,14 +3521,14 @@
       "ocrtraining.cit.nih.gov",
       "videocast.nih.gov"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#videocastPlayer"
     ]
   },
   {
     "id": "espn",
     "matches": "*.espn.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#fittPageContainer"
     ]
   },
@@ -3279,7 +3540,7 @@
   {
     "id": "bank",
     "matches": "xfb.nbcb.com.cn",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".ibm, .ibt",
       ".cell-box",
       "[role=tab]"
@@ -3308,43 +3569,48 @@
       "anthropic.skilljar.com",
       "streameeeeee.site"
     ],
-    "excludeSelectors": [
-      ".jw-wrapper"
+    "excludeSelectors.add": [
+      ".jw-wrapper",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "dailymotion",
     "matches": "*.dailymotion.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".player"
     ]
   },
   {
     "id": "crunchyroll",
     "matches": "*.crunchyroll.com",
-    "excludeSelectors": [
-      "#vilos"
+    "excludeSelectors.add": [
+      "#vilos",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "osmosis",
     "matches": "*.osmosis.org",
-    "excludeSelectors": [
-      "#video-player-container"
+    "excludeSelectors.add": [
+      "#video-player-container",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "pbs",
     "matches": "*.pbs.org",
-    "excludeSelectors": [
-      ".wrapper"
+    "excludeSelectors.add": [
+      ".wrapper",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "internetfundamentals",
     "matches": "internetfundamentals.com",
-    "excludeSelectors": [
-      "#vjs_video_3"
+    "excludeSelectors.add": [
+      "#vjs_video_3",
+      "#immersive-translate-caption-window"
     ]
   },
   {
@@ -3355,63 +3621,63 @@
       "*.vidbinge.com",
       "vidsrc.xyz"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#root"
     ]
   },
   {
     "id": "deeplearning",
     "matches": "learn.deeplearning.ai",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-layout=\"video\"]"
     ]
   },
   {
     "id": "weverse",
     "matches": "weverse.io",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".pzp-pc__video"
     ]
   },
   {
     "id": "quantinsti",
     "matches": "quantra.quantinsti.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#vjs_video_3"
     ]
   },
   {
     "id": "paramountplus",
     "matches": "*.paramountplus.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".aa-player-skin"
     ]
   },
   {
     "id": "pluto",
     "matches": "pluto.tv",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".video-player-layout"
     ]
   },
   {
     "id": "ted",
     "matches": "www.ted.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#video"
     ]
   },
   {
     "id": "devEpicGames",
     "matches": "dev.epicgames.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-poster"
     ]
   },
   {
     "id": "hikaritv",
     "matches": "boosterx.stream",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jw-wrapper"
     ]
   },
@@ -3421,35 +3687,35 @@
       "khflix.com",
       "watch.globaltv.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#video-playlist"
     ]
   },
   {
     "id": "donghuaworld",
     "matches": "dwserver.donghuaworld.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jw-media"
     ]
   },
   {
     "id": "lecturio",
     "matches": "app.lecturio.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#vjs_video_3"
     ]
   },
   {
     "id": "ganjingworld",
     "matches": "www.ganjingworld.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vidPlayerWrap"
     ]
   },
   {
     "id": "fautv",
     "matches": "www.fau.tv",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jw-wrapper"
     ]
   },
@@ -3459,7 +3725,7 @@
       "vimeo.com",
       "training.leveleffect.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vp-captions"
     ]
   },
@@ -3469,10 +3735,14 @@
       "https://player.vimeo.com/video/*",
       "www.physeo.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vp-captions-line"
     ],
-    "forceBlockSelectors": [
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "forceBlockSelectors.add": [
       "span.vp-captions-line",
       "span[class^=CaptionsRenderer_]"
     ]
@@ -3480,14 +3750,14 @@
   {
     "id": "tv.adobe",
     "matches": "https://*.tv.adobe.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".mpc-player"
     ]
   },
   {
     "id": "threejs-journey",
     "matches": "threejs-journey.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".video-area"
     ]
   },
@@ -3500,7 +3770,7 @@
       "www.comsol.com/video/*",
       "www.comsol.com/blogs/*"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".w-captions",
       ".w-captions-line > div > span"
     ]
@@ -3508,7 +3778,7 @@
   {
     "id": "panopto",
     "matches": "southampton.cloud.panopto.eu_no_subitle",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".primaryPlayer"
     ]
   },
@@ -3518,7 +3788,7 @@
       "*.edx.org",
       "courses.mitxonline.mit.edu"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".closed-captions",
       ".wrapper-video-bottom-section",
       ".secondary-controls"
@@ -3527,28 +3797,28 @@
   {
     "id": "ardmediathek",
     "matches": "www.ardmediathek.*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".ardplayer-viewport-addon-overlays"
     ]
   },
   {
     "id": "bbc-iplayer",
     "matches": "https://www.bbc.*/iplayer*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".player"
     ]
   },
   {
     "id": "bbc-emp",
     "matches": "https://emp.bbc.*/emp/*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".p_accessibleHitArea"
     ]
   },
   {
     "id": "bbc",
     "matches": "*.bbc.*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "section.module--languages",
       ".drop-capped",
       ".smp-toucan-player",
@@ -3559,14 +3829,15 @@
   {
     "id": "zdf.de",
     "matches": "www.zdf.de",
-    "excludeSelectors": [
-      ".zdfplayer-video-container"
+    "excludeSelectors.add": [
+      ".zdfplayer-video-container",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "disneyplus",
     "matches": "www.disneyplus.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".dss-hls-subtitle-overlay"
     ]
   },
@@ -3577,7 +3848,7 @@
       "https://*.hulu.*"
     ],
     "description": "无法自托管，自托管字幕广告后会偏移",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".PlayerMetadata__subTitle",
       ".CaptionBox"
     ]
@@ -3585,118 +3856,123 @@
   {
     "id": "youku.tv",
     "matches": "www.youku.tv",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#subtitle"
     ]
   },
   {
     "id": "starz",
     "matches": "www.starz.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "starz-player"
     ]
   },
   {
     "id": "rtve",
     "matches": "www.rtve.*",
-    "injectedCss": ".errorHead * {font-size: 3.2rem!important;}"
+    "injectedCss.add": [
+      ".errorHead * {font-size: 3.2rem!important;}"
+    ]
   },
   {
     "id": "www.iq.com",
     "matches": "www.iq.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".iqp-subtitle"
     ]
   },
   {
     "id": "cbsnews",
     "matches": "www.cbsnews.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".avia-container"
     ]
   },
   {
     "id": "gaia",
     "matches": "www.gaia.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "video-js"
     ]
   },
   {
     "id": "medbridge",
     "matches": "www.medbridge.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#player-video"
     ]
   },
   {
     "id": "urplay",
     "matches": "urplay.se",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jw-media"
     ]
   },
   {
     "id": "medici",
     "matches": "www.medici.tv",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#player-movie-page"
     ]
   },
   {
     "id": "asu",
     "matches": "api.playposit.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#overlay-container"
     ]
   },
   {
     "id": "gagaoolala",
     "matches": "www.gagaoolala.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#gl-id-video-container"
     ]
   },
   {
     "id": "curiositystream",
     "matches": "curiositystream.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-testid=\"video-player\"]"
     ]
   },
   {
     "id": "shangpaAcademy",
     "matches": "shangpa-academy.mn.co",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".mighty-video-player-container"
     ]
   },
   {
     "id": "ucdavis",
     "matches": "aggievideo.canvas.ucdavis.edu",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-testid=\"video-player\"]"
     ]
   },
   {
     "id": "f1tv",
     "matches": "f1tv.formula1.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#main-embeddedPlayer"
     ]
   },
   {
     "id": "datacamp",
     "matches": "projector.datacamp.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".video"
     ]
   },
   {
     "id": "imigresen-online",
     "matches": "imigresen-online.imi.gov.my",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#clock"
+    ],
+    "excludeSelectors.remove": [
+      "[default-translate]"
     ]
   },
   {
@@ -3707,50 +3983,56 @@
   {
     "id": "coindesk",
     "matches": "www.coindesk.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-subtitles-container='true']"
     ]
   },
   {
     "id": "dr",
     "matches": "*.dr.dk",
-    "excludeSelectors": [
-      ".vjs-text-track-display > div"
+    "excludeSelectors.add": [
+      ".vjs-text-track-display > div",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "nrk",
     "matches": "tv.nrk.no",
-    "excludeSelectors": [
-      "tv-player[data-testid=\"tv-player\"]"
+    "excludeSelectors.add": [
+      "tv-player[data-testid=\"tv-player\"]",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "mediadelivery",
     "matches": "iframe.mediadelivery.net",
-    "excludeSelectors": [
-      ".plyr__captions"
+    "excludeSelectors.add": [
+      ".plyr__captions",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "tver",
     "matches": "tver.jp",
-    "excludeSelectors": [
-      "div[class*=\"player_container\"]"
+    "excludeSelectors.add": [
+      "div[class*=\"player_container\"]",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "learningSap",
     "matches": "learning.sap.com",
-    "excludeSelectors": [
-      ".playkit-subtitles"
+    "excludeSelectors.add": [
+      ".playkit-subtitles",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "feynmanlectures",
     "matches": "www.feynmanlectures.caltech.edu",
-    "excludeSelectors": [
-      ".videoview"
+    "excludeSelectors.add": [
+      ".videoview",
+      "#immersive-translate-caption-window"
     ]
   },
   {
@@ -3761,14 +4043,14 @@
       "archive.is",
       "archive.md"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#HEADER"
     ]
   },
   {
     "id": "arxiv-vanity.com",
     "matches": "www.arxiv-vanity.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".arxiv-vanity-wrapper"
     ]
   },
@@ -3795,7 +4077,9 @@
   {
     "id": "gemini.google",
     "matches": "gemini.google.com",
-    "injectedCss": "[data-test-id=conversation] {height: unset!important;}"
+    "injectedCss.add": [
+      "[data-test-id=conversation] {height: unset!important;}"
+    ]
   },
   {
     "id": "otherGoogle",
@@ -3805,7 +4089,7 @@
       "*.google",
       "*.googleapis.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".o_35",
       "[style*='Google Symbols']",
       "md-icon-button",
@@ -3821,12 +4105,14 @@
       "#selected-cat",
       ".GmuOkf,.d8aLif,.JYW4cc"
     ],
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "ms-cmark-node > strong > ms-cmark-node",
       "p ms-cmark-node",
       "span > button"
     ],
-    "injectedCss": ".scSearchSearch_results_listSearchresultslistsnippet { -webkit-line-clamp:unset;}"
+    "injectedCss.add": [
+      ".scSearchSearch_results_listSearchresultslistsnippet { -webkit-line-clamp:unset;}"
+    ]
   },
   {
     "id": "arxiv",
@@ -3834,7 +4120,7 @@
       "https://browse.arxiv.org",
       "https://arxiv.org/html/*"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".desktop_header",
       "[class*='ltx_lst_language_']",
       "div.package-alerts",
@@ -3846,14 +4132,17 @@
   {
     "id": "ar5iv",
     "matches": "ar5iv.labs.arxiv.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".ltx_bibliography",
       ".ltx_tag.ltx_tag_item",
       ".ltx_listing.ltx_lstlisting.ltx_listing",
       ".ltx_eqn_table"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".ltx_p"
+    ],
+    "preserveTextSelectors.add": [
+      ".ltx_note"
     ]
   },
   {
@@ -3862,24 +4151,30 @@
     "excludeMatches": [
       "www.jstor.org/stable/pdf*"
     ],
-    "excludeSelectors": [
+    "injectedCss": ".card__heading { -webkit-line-clamp:unset; }\nsearch-results-vue-pharos-image-card,search-ui-pharos-image-card { display:flex; }\nsearch-results-vue-pharos-link { display:inline; }",
+    "excludeSelectors.add": [
       ".audio-duration",
       "[data-qa='card-item-count']"
-    ],
-    "injectedCss": ".card__heading { -webkit-line-clamp:unset; }\nsearch-results-vue-pharos-image-card,search-ui-pharos-image-card { display:flex; }\nsearch-results-vue-pharos-link { display:inline; }"
+    ]
   },
   {
     "id": "tandfonline",
     "matches": "*.tandfonline.com",
     "description": "该站点服务器对pdf资源做了保护，会严格要求host以及cookie才会响应application/pdf的请求 https://www.tandfonline.com/doi/pdf/10.1111/ajpy.12198",
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "span.off-screen"
     ]
   },
   {
     "id": "bsky.app",
     "matches": "https://bsky.app",
-    "excludeSelectors": [
+    "forceInlineSelectors": [
+      "a[role=link][href^='/hashtag/']",
+      "[data-testid*=postThread] a[role=link]",
+      "[data-feed-context] button",
+      "[data-feed-context] a[role=link]"
+    ],
+    "excludeSelectors.add": [
       "[data-testid^=homeScreenFeedTabs]",
       "[data-testid^=repostCount]",
       "[data-testid^=likeCount]",
@@ -3887,13 +4182,13 @@
       "[data-testid^=replyBtn]",
       "[aria-label='View profile']"
     ],
-    "forceInlineSelectors": [
-      "a[role=link][href^='/hashtag/']",
-      "[data-testid*=postThread] a[role=link]",
-      "[data-feed-context] button",
-      "[data-feed-context] a[role=link]"
+    "forceBlockSelectors.remove": [
+      "button"
     ],
-    "injectedCss": ".r-xoduu5 {display:inline!important;}\n[style*='-webkit-line-clamp'] {-webkit-line-clamp:unset!important;}"
+    "injectedCss.add": [
+      ".r-xoduu5 {display:inline!important;}",
+      "[style*='-webkit-line-clamp'] {-webkit-line-clamp:unset!important;}"
+    ]
   },
   {
     "id": "peacocktv",
@@ -3905,25 +4200,29 @@
     "matches": "*.jmir.org",
     "forceInlineSelectors": [
       ".tooltiptext"
+    ],
+    "preserveTextSelectors.add": [
+      ".article-content .footers"
     ]
   },
   {
     "id": "smzdm",
     "matches": "www.smzdm.com",
-    "excludeSelectors": [
+    "injectedCss": ".feed-block-title { height:unset; }",
+    "excludeSelectors.add": [
       ".z-highlight",
       ".feed-block-info",
       ".z-feed-foot",
       ".feed-block-descripe",
       "#J_column_tab_box",
       ".crumbs"
-    ],
-    "injectedCss": ".feed-block-title { height:unset; }"
+    ]
   },
   {
     "id": "xiaohongshu.com",
     "matches": "www.xiaohongshu.com",
-    "excludeSelectors": [
+    "injectedCss": "a.title { -webkit-line-clamp:3; }",
+    "excludeSelectors.add": [
       ".author-wrapper",
       ".info",
       ".side-bar",
@@ -3932,8 +4231,7 @@
       ".bottom-container",
       ".total",
       ".reds-sticky"
-    ],
-    "injectedCss": "a.title { -webkit-line-clamp:3; }"
+    ]
   },
   {
     "id": "learnopengl",
@@ -3943,7 +4241,7 @@
   {
     "id": "notateslaapp",
     "matches": "www.notateslaapp.com",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".nav > *"
     ]
   },
@@ -3955,7 +4253,8 @@
   {
     "id": "soundcloud",
     "matches": "soundcloud.com",
-    "excludeSelectors": [
+    "injectedCss": ".compactTrackListItem {height: unset !important;}",
+    "excludeSelectors.add": [
       ".searchTitle__textContent",
       ".searchOptions__container",
       ".compactTrackListItem__additional",
@@ -3964,27 +4263,26 @@
       ".sc-ministats-group",
       ".compactTrackList__moreLink",
       ".sound__soundActions"
-    ],
-    "injectedCss": ".compactTrackListItem {height: unset !important;}"
+    ]
   },
   {
     "id": "section.blog.naver.com",
     "matches": "section.blog.naver.com",
-    "excludeSelectors": [
+    "injectedCss": ".text,.title_post,.text_post,p,strong,div { -webkit-line-clamp:unset;max-height:unset;height:unset; }",
+    "excludeSelectors.add": [
       ".comments",
       ".time"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".item",
       ".heading a",
       ".info_find a"
-    ],
-    "injectedCss": ".text,.title_post,.text_post,p,strong,div { -webkit-line-clamp:unset;max-height:unset;height:unset; }"
+    ]
   },
   {
     "id": "hadoop.apache.org",
     "matches": "hadoop.apache.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".xleft",
       ".xright",
       "#navcolumn"
@@ -3996,7 +4294,7 @@
     "excludeMatches": [
       "pubs.acs.org/doi/pdf*"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".articleHeaderDropzone2",
       "header"
     ]
@@ -4004,7 +4302,7 @@
   {
     "id": "liquipedia",
     "matches": "liquipedia.net",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".carousel-item"
     ]
   },
@@ -4014,69 +4312,79 @@
       "archiveofourown.org",
       "ao3-cn.top"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".meta,.navigation,.byline,.pagination,.datetime,.stats",
       "#add_comment",
       "#footer",
       ".summary > h3",
       ".notes > h3"
     ],
-    "injectedCss": "sub {line-height: unset !important;}"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "injectedCss.add": [
+      "sub {line-height: unset !important;}"
+    ]
   },
   {
     "id": "bitwarden.com",
     "matches": "bitwarden.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".status-widget__state"
     ]
   },
   {
     "id": "www.ey.com",
     "matches": "www.ey.com",
-    "injectedCss": ".up-rich-text__container {height: unset!important;}"
+    "injectedCss.add": [
+      ".up-rich-text__container {height: unset!important;}"
+    ]
   },
   {
     "id": "yodayo.chat",
     "matches": "https://yodayo.com/*/chat/*",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".inline-flex span"
     ]
   },
   {
     "id": "ipinfo",
     "matches": "ipinfo.io",
-    "injectedCss": ".text-bali-hai-primary:last-child {display:none!important;}"
+    "injectedCss.add": [
+      ".text-bali-hai-primary:last-child {display:none!important;}"
+    ]
   },
   {
     "id": "help.maxon.net",
     "matches": "help.maxon.net",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#contentBody"
     ]
   },
   {
     "id": "character.ai",
     "matches": "character.ai",
-    "forceInlineSelectors": [
+    "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}\n.swiper,.rah-static,[class*=max-h],.line-clamp-1 { overflow:scroll;-webkit-line-clamp:unset; }",
+    "forceInlineSelectors.add": [
       ".auto-content",
       ".auto-content *",
       "#chat-messages > .group:first-child .prose *",
       "#chat-messages > .group:not(:first-child) .font-display *"
-    ],
-    "injectedCss": ".read-frog-translated-content-wrapper br {display:none;}\n.swiper,.rah-static,[class*=max-h],.line-clamp-1 { overflow:scroll;-webkit-line-clamp:unset; }"
+    ]
   },
   {
     "id": "queenslibrary.org",
     "matches": "queenslibrary.org",
-    "excludeSelectors": [
+    "injectedCss": "font.notranslate { all: unset!important;}",
+    "excludeSelectors.add": [
       "#Web-QBPL-Menu"
-    ],
-    "injectedCss": "font.notranslate { all: unset!important;}"
+    ]
   },
   {
     "id": "ac.nowcoder",
     "matches": "ac.nowcoder.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".answer-module",
       ".question-intr",
       ".language-list",
@@ -4086,7 +4394,7 @@
   {
     "id": "chromium",
     "matches": "*.chromium.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "ancestors-breadcrumbs",
       "depth-finder[role='tree']",
       "repository-detail",
@@ -4097,12 +4405,14 @@
       "b-attachment-viewer",
       "i"
     ],
-    "injectedCss": "font svg {display:none;}"
+    "injectedCss.add": [
+      "font svg {display:none;}"
+    ]
   },
   {
     "id": "ffmpeg",
     "matches": "ffmpeg.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".memproto",
       ".memtitle"
     ]
@@ -4110,32 +4420,45 @@
   {
     "id": "podcasts",
     "matches": "podcasts.apple.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".detailed-play-button-wrapper"
     ],
-    "injectedCss": ".multiline-clamp { display: flex!important;flex-direction: column; }\n.headings__title,.powerswoosh__title,[data-testid=truncate-text] {-webkit-line-clamp:unset!important;}\n.show-artwork {height:fit-content!important;}\n.powerswoosh__lockup-details-container,.powerswoosh__chin,[data-testid=amp-review__text] {max-height:unset!important;height:unset!important;}\n.episode-hero__overlay {overflow:auto!important;}\nul .multiline-clamp {display:unset!important;}"
+    "injectedCss.add": [
+      ".multiline-clamp { display: flex!important;flex-direction: column; }",
+      ".headings__title,.powerswoosh__title,[data-testid=truncate-text] {-webkit-line-clamp:unset!important;}",
+      ".show-artwork {height:fit-content!important;}",
+      ".powerswoosh__lockup-details-container,.powerswoosh__chin,[data-testid=amp-review__text] {max-height:unset!important;height:unset!important;}",
+      ".episode-hero__overlay {overflow:auto!important;}",
+      "ul .multiline-clamp {display:unset!important;}"
+    ]
   },
   {
     "id": "sp-codeSites",
     "matches": "docs.wxwidgets.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".doxygen-awesome-fragment-wrapper"
     ],
-    "injectedCss": ".textblock p > font{display:flex;}"
+    "injectedCss.add": [
+      ".textblock p > font{display:flex;}"
+    ]
   },
   {
     "id": "wayfair",
     "matches": "www.wayfair.com",
-    "injectedCss": "[data-enzyme-id=\"Collapse-Collapsible\"] {height:unset!important;}"
+    "injectedCss.add": [
+      "[data-enzyme-id=\"Collapse-Collapsible\"] {height:unset!important;}"
+    ]
   },
   {
     "id": "followis",
     "matches": "https://app.follow.is/feeds/*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".bg-native",
       "main > div > div.h-full:first-child span"
     ],
-    "injectedCss": "[class*='line-clamp'] {-webkit-line-clamp:unset;}"
+    "injectedCss.add": [
+      "[class*='line-clamp'] {-webkit-line-clamp:unset;}"
+    ]
   },
   {
     "id": "svelte",
@@ -4179,49 +4502,65 @@
   {
     "id": "casino",
     "matches": "www.casino.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".material-symbols-outlined"
     ]
   },
   {
     "id": "wisdom",
     "matches": "wisdom.nec.com",
-    "injectedCss": "a > font {width: max-content;}"
+    "injectedCss.add": [
+      "a > font {width: max-content;}"
+    ]
   },
   {
     "id": "www.acrobiosystems.com",
     "matches": "www.acrobiosystems.com",
-    "injectedCss": ".productDetialDetail .productLink {overflow: hidden;}\n.productDetialDetail .productLink .box a {display: flex; justify-content: center; white-space: nowrap;}"
+    "injectedCss.add": [
+      ".productDetialDetail .productLink {overflow: hidden;}",
+      ".productDetialDetail .productLink .box a {display: flex; justify-content: center; white-space: nowrap;}"
+    ]
   },
   {
     "id": "www.metacritic.com",
     "matches": "www.metacritic.com",
-    "injectedCss": ".c-finderProductCard_info .c-finderProductCard_meta {display: block;}"
+    "injectedCss.add": [
+      ".c-finderProductCard_info .c-finderProductCard_meta {display: block;}"
+    ]
   },
   {
     "id": "motrix.app",
     "matches": "motrix.app",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".download-section__right .el-tabs__nav"
     ]
   },
   {
     "id": "xgo",
     "matches": "www.xgo.ing",
-    "injectedCss": "[class*='line-clamp']{-webkit-line-clamp:unset !important;}"
+    "injectedCss.add": [
+      "[class*='line-clamp']{-webkit-line-clamp:unset !important;}"
+    ]
   },
   {
     "id": "nebula.starbreeze",
     "matches": "https://nebula.starbreeze.com/support",
-    "injectedCss": "main section>div {overflow-y:scroll !important;}\nmain section>div::-webkit-scrollbar {display: none;width: 0px;background: transparent;}"
+    "injectedCss.add": [
+      "main section>div {overflow-y:scroll !important;}",
+      "main section>div::-webkit-scrollbar {display: none;width: 0px;background: transparent;}"
+    ]
   },
   {
     "id": "app.schildi.chat",
     "matches": "app.schildi.chat",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".mx_DisambiguatedProfile",
       ".mx_MessageTimestamp",
       ".mx_EventTile_avatar"
+    ],
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
     ]
   },
   {
@@ -4233,7 +4572,9 @@
   {
     "id": "csust",
     "matches": "tsgvpn2.csust.edu.cn",
-    "injectedCss": "h2 {font-size:unset;}"
+    "injectedCss.add": [
+      "h2 {font-size:unset;}"
+    ]
   },
   {
     "id": "curseforge",
@@ -4243,29 +4584,31 @@
   {
     "id": "ml4vis",
     "matches": "ml4vis.github.io",
-    "excludeSelectors": [
+    "injectedCss": ".jss42 { height:unset; }\n.jss44 { max-height:unset; }",
+    "excludeSelectors.add": [
       ".jss45"
-    ],
-    "injectedCss": ".jss42 { height:unset; }\n.jss44 { max-height:unset; }"
+    ]
   },
   {
     "id": "www.dgl.ai",
     "matches": "www.dgl.ai",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "header"
     ]
   },
   {
     "id": "monmouthcoffee",
     "matches": "www.monmouthcoffee.*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#basket"
     ]
   },
   {
     "id": "jddonline.com",
     "matches": "jddonline.com",
-    "injectedCss": ".article-body {column-count:unset;-webkit-column-count:unset;-moz-column-count:unset;}"
+    "injectedCss.add": [
+      ".article-body {column-count:unset;-webkit-column-count:unset;-moz-column-count:unset;}"
+    ]
   },
   {
     "id": "novel-site",
@@ -4274,35 +4617,53 @@
       "www.zhenhunxiaoshuo.com",
       "www.hetushu.com"
     ],
-    "injectedCss": ".centent ul { display: flex; }\n.centent ul li { height: unset !important; float: none !important; }\narticle.excerpt { white-space: normal !important; overflow: visible !important; }\n#dir dd { white-space: normal !important; overflow: visible !important; }"
+    "injectedCss.add": [
+      ".centent ul { display: flex; }",
+      ".centent ul li { height: unset !important; float: none !important; }",
+      "article.excerpt { white-space: normal !important; overflow: visible !important; }",
+      "#dir dd { white-space: normal !important; overflow: visible !important; }"
+    ]
   },
   {
     "id": "xianqihaotianmi",
     "matches": "www.xianqihaotianmi.org",
-    "injectedCss": ".list-charts { display: flex; flex-wrap: wrap; }\n.list-charts li { white-space: normal !important; overflow: visible !important; }"
+    "injectedCss.add": [
+      ".list-charts { display: flex; flex-wrap: wrap; }",
+      ".list-charts li { white-space: normal !important; overflow: visible !important; }"
+    ]
   },
   {
     "id": "sobqg",
     "matches": "www.sobqg.com/book/*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#hot .g_book > span"
     ],
-    "injectedCss": "#volumes { display: flex; flex-wrap: wrap; }\na.ell { white-space: normal !important; overflow: visible !important; }\n#hot .g_book > a > h3 { white-space: normal; overflow: visible; max-height: none; -webkit-line-clamp: none; }\n#hot .g_book { height: 330px; }"
+    "injectedCss.add": [
+      "#volumes { display: flex; flex-wrap: wrap; }",
+      "a.ell { white-space: normal !important; overflow: visible !important; }",
+      "#hot .g_book > a > h3 { white-space: normal; overflow: visible; max-height: none; -webkit-line-clamp: none; }",
+      "#hot .g_book { height: 330px; }"
+    ]
   },
   {
     "id": "luminousfox",
     "matches": "www.luminousfox.com/book/*",
-    "injectedCss": "#detail_chapter .box_content ul li { height: unset !important; overflow: visible !important; }"
+    "injectedCss.add": [
+      "#detail_chapter .box_content ul li { height: unset !important; overflow: visible !important; }"
+    ]
   },
   {
     "id": "doupocangqiong",
     "matches": "www.doupocangqiong.org",
-    "injectedCss": "#play_0 ul { display: grid; grid-template-columns: repeat(3, 1fr); }\n#play_0 ul li { height: unset !important; }"
+    "injectedCss.add": [
+      "#play_0 ul { display: grid; grid-template-columns: repeat(3, 1fr); }",
+      "#play_0 ul li { height: unset !important; }"
+    ]
   },
   {
     "id": "proko",
     "matches": "www.proko.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".proko-preview-statistic-wrap",
       ".lesson-instructors-wrap",
       ".proko-comments-item-title",
@@ -4310,42 +4671,65 @@
       ".course-card__details .border-outline075",
       ".category-subscribe"
     ],
-    "injectedCss": ".lesson-video-banner-skip,.lesson-title,.lesson-content,.course-card__details {height:unset!important;overflow:scroll;}\n[class*='clamp'],.course-card__description{-webkit-line-clamp:unset!important;overflow:unset;}\nproko-button{z-index:1;}\n.truncate {white-space:unset;}"
+    "injectedCss.add": [
+      ".lesson-video-banner-skip,.lesson-title,.lesson-content,.course-card__details {height:unset!important;overflow:scroll;}",
+      "[class*='clamp'],.course-card__description{-webkit-line-clamp:unset!important;overflow:unset;}",
+      "proko-button{z-index:1;}",
+      ".truncate {white-space:unset;}"
+    ]
   },
   {
     "id": "vodtw",
     "matches": "www.vodtw.com/book/*",
-    "injectedCss": "dl { display: flex; flex-wrap: wrap; }\ndl dd { white-space: normal !important; overflow: visible !important; }\n#info p { height: unset !important; }"
+    "injectedCss.add": [
+      "dl { display: flex; flex-wrap: wrap; }",
+      "dl dd { white-space: normal !important; overflow: visible !important; }",
+      "#info p { height: unset !important; }"
+    ]
   },
   {
     "id": "jwxs",
     "matches": "www.jwxs.org/book/*",
-    "injectedCss": "#list dd { height: 5rem !important; line-height: unset !important; }\n.readbtn .chapterlist { margin: unset !important; }"
+    "injectedCss.add": [
+      "#list dd { height: 5rem !important; line-height: unset !important; }",
+      ".readbtn .chapterlist { margin: unset !important; }"
+    ]
   },
   {
     "id": "ceros",
     "matches": "view.ceros.com",
-    "injectedCss": ".page-object.group > .page-object.text > p { height: 100% !important; overflow: auto !important; }"
+    "injectedCss.add": [
+      ".page-object.group > .page-object.text > p { height: 100% !important; overflow: auto !important; }"
+    ]
   },
   {
     "id": "aliexpress",
     "matches": "*.aliexpress.*",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class*='multi--price']"
     ],
-    "injectedCss": "[class*='multi--title'],.G7dOC {-webkit-line-clamp:unset;}"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "injectedCss.add": [
+      "[class*='multi--title'],.G7dOC {-webkit-line-clamp:unset;}"
+    ]
   },
   {
     "id": "journals.aps",
     "matches": "journals.aps.*",
     "forceInlineSelectors": [
       "[class*='article'] button"
+    ],
+    "preserveTextSelectors.add": [
+      "button"
     ]
   },
   {
     "id": "mobalytics",
     "matches": "mobalytics.gg",
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "p.xlpi6m9.x5qbwci.xw7yly9 span span"
     ]
   },
@@ -4355,19 +4739,22 @@
       "https://www.inven.co.kr/*",
       "*.grandefratello.mediaset.*"
     ],
-    "injectedCss": "li {height:unset!important;}\n.big_box,article .text,article .title {height:unset!important;}"
+    "injectedCss.add": [
+      "li {height:unset!important;}",
+      ".big_box,article .text,article .title {height:unset!important;}"
+    ]
   },
   {
     "id": "codeium",
     "matches": "codeium.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "nav a[class*=C]"
     ]
   },
   {
     "id": "book-douban",
     "matches": "book.douban.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "a.author-name",
       "p.user > a",
       "div#collector > div > div[style^='padding-left'] > a",
@@ -4377,53 +4764,58 @@
   {
     "id": "taobao",
     "matches": "*.taobao.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".text-price"
     ]
   },
   {
     "id": "graphcore",
     "matches": "www.graphcore.ai",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".morph"
     ]
   },
   {
     "id": "digitaltrends",
     "matches": "www.digitaltrends.com",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".b-mem-post__title"
     ],
-    "injectedCss": ".b-mem__inner .b-mem-post:first-child h3{-webkit-line-clamp: 2;}\n.b-mem__inner .b-mem-post:first-child .b-mem-post__excerpt{display:inline;}"
+    "injectedCss.add": [
+      ".b-mem__inner .b-mem-post:first-child h3{-webkit-line-clamp: 2;}",
+      ".b-mem__inner .b-mem-post:first-child .b-mem-post__excerpt{display:inline;}"
+    ]
   },
   {
     "id": "jscires",
     "matches": "jscires.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jatsa_contrib_info"
     ],
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".jatsauthtab_title"
     ]
   },
   {
     "id": "vaseven",
     "matches": "www.vaseven.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".et_pb_main_blurb_image"
     ]
   },
   {
     "id": "qidian",
     "matches": "www.qidian.com",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".type-list a"
     ]
   },
   {
     "id": "alphaxiv",
     "matches": "www.alphaxiv.org",
-    "injectedCss": "[class*=line-clamp] {-webkit-line-clamp:unset;}"
+    "injectedCss.add": [
+      "[class*=line-clamp] {-webkit-line-clamp:unset;}"
+    ]
   },
   {
     "id": "nexusmods",
@@ -4432,12 +4824,14 @@
     "excludeMatches": [
       "https://www.nexusmods.com/games/*"
     ],
-    "injectedCss": "[class*='line-clamp-'] {-webkit-line-clamp: unset!important; max-height: unset!important;}"
+    "injectedCss.add": [
+      "[class*='line-clamp-'] {-webkit-line-clamp: unset!important; max-height: unset!important;}"
+    ]
   },
   {
     "id": "ollama",
     "matches": "ollama.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#file-explorer",
       "span[x-test-search-response-title]",
       "a[x-test-model-name]",
@@ -4448,58 +4842,74 @@
   {
     "id": "swaycloud",
     "matches": "sway.cloud.microsoft",
-    "injectedCss": ".text_wrapper ul li {max-height:unset!important;}\n.container {overflow:scroll;}"
+    "injectedCss.add": [
+      ".text_wrapper ul li {max-height:unset!important;}",
+      ".container {overflow:scroll;}"
+    ]
   },
   {
     "id": "teacherspayteachers",
     "matches": "www.teacherspayteachers.com/browse/*",
-    "injectedCss": ".ProductRowCard-module__cardTitleLink--YPqiC { display:unset !important; }"
+    "injectedCss.add": [
+      ".ProductRowCard-module__cardTitleLink--YPqiC { display:unset !important; }"
+    ]
   },
   {
     "id": "claudeartifacts",
     "matches": "claudeartifacts.com",
     "excludeSelectors": [
-      "h1",
+      "h1"
+    ],
+    "injectedCss": ".line-clamp-3 { -webkit-line-clamp: unset; }",
+    "excludeSelectors.add": [
       "h3 + span.rounded-full",
       "[class='p-6 pt-0 flex justify-between items-center']",
       "[class='text-xs text-gray-500']"
-    ],
-    "injectedCss": ".line-clamp-3 { -webkit-line-clamp: unset; }"
+    ]
   },
   {
     "id": "1password",
     "matches": "*.1password.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".secret-key"
     ]
   },
   {
     "id": "descript",
     "matches": "www.descript.com",
-    "excludeSelectors": [
+    "injectedCss": ".read-frog-translated-content-wrapper, .read-frog-translated-content-wrapper *{color:unset!important;}",
+    "excludeSelectors.add": [
       "h1.home-hero"
-    ],
-    "injectedCss": ".read-frog-translated-content-wrapper, .read-frog-translated-content-wrapper *{color:unset!important;}"
+    ]
   },
   {
     "id": "law.mit.edu",
     "matches": "law.mit.edu",
-    "injectedCss": "@media screen and (min-width: 768px) { .pub-header-theme-light {top:-80% !important;} }"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "injectedCss.add": [
+      "@media screen and (min-width: 768px) { .pub-header-theme-light {top:-80% !important;} }"
+    ]
   },
   {
     "id": "noon",
     "matches": "www.noon.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class*='priceContainer']",
       "[class*='ProductImageFooter']",
       "[class*='Nudges_nudges']"
     ],
-    "injectedCss": "[class*='ProductDetailsSection'] {-webkit-line-clamp:unset!important;}\n[class*='title'] {-webkit-line-clamp:unset!important;}"
+    "injectedCss.add": [
+      "[class*='ProductDetailsSection'] {-webkit-line-clamp:unset!important;}",
+      "[class*='title'] {-webkit-line-clamp:unset!important;}"
+    ]
   },
   {
     "id": "klibs",
     "matches": "klibs.io",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class*='styles_footerWrapper']",
       "[class*='styles_searchFilterContainerWrapper']",
       "[class*='styles_headingWrapper']",
@@ -4507,19 +4917,23 @@
       "[class*='styles_rightSideColumnWrapper']",
       ".breadcrumb"
     ],
-    "injectedCss": "[class*='styles_card'] {height:unset!important; -webkit-line-clamp:unset!important; max-height:unset!important;}"
+    "injectedCss.add": [
+      "[class*='styles_card'] {height:unset!important; -webkit-line-clamp:unset!important; max-height:unset!important;}"
+    ]
   },
   {
     "id": "androidpolice",
     "matches": "www.androidpolice.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".author",
       ".w-total-info",
       ".images-header-menu-list",
       ".w-display-card-details",
       ".w-display-card-extra"
     ],
-    "injectedCss": ".display-card-title,.display-card-title * {height:unset!important;-webkit-line-clamp:unset!important;}"
+    "injectedCss.add": [
+      ".display-card-title,.display-card-title * {height:unset!important;-webkit-line-clamp:unset!important;}"
+    ]
   },
   {
     "id": "doc2x",
@@ -4527,21 +4941,21 @@
       "doc2x.com",
       "doc2x.noedgeai.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#md-scroll-top-dom"
     ]
   },
   {
     "id": "trade",
     "matches": "axiom.trade",
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "[class^=tweet-body_root]"
     ]
   },
   {
     "id": "pytorch",
     "matches": "pytorch.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".with-down-arrow",
       ".hello-bar",
       "[data-cta='join']"
@@ -4550,7 +4964,10 @@
   {
     "id": "1688",
     "matches": "www.1688.com",
-    "injectedCss": "[class^='defaultSubNav'],[class^='loginButton'] {height:unset!important;}\n[data-tracker='category'] > font {white-space:nowrap!important;}"
+    "injectedCss.add": [
+      "[class^='defaultSubNav'],[class^='loginButton'] {height:unset!important;}",
+      "[data-tracker='category'] > font {white-space:nowrap!important;}"
+    ]
   },
   {
     "id": "seller-tiktok",
@@ -4561,22 +4978,32 @@
       "seller.*.tiktokglobalshop.com",
       "seller.tiktokshopglobalselling.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".chatd-message-userName"
     ],
-    "injectedCss": "[data-tid=m4b_overflow_text_multiply] {height:unset!important;-webkit-line-clamp:unset!important;}\n[class^=replyText],[class^=productItemInfo],[class^=reviewText] {height:unset!important;-webkit-line-clamp:unset!important;}"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "injectedCss.add": [
+      "[data-tid=m4b_overflow_text_multiply] {height:unset!important;-webkit-line-clamp:unset!important;}",
+      "[class^=replyText],[class^=productItemInfo],[class^=reviewText] {height:unset!important;-webkit-line-clamp:unset!important;}"
+    ]
   },
   {
     "id": "ccfddl",
     "matches": "ccfddl.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "div.conf-timer > span[style^='color: black']"
     ]
   },
   {
     "id": "pinboard",
     "matches": "pinboard.in",
-    "injectedCss": "div.blurb_box,div.homepage_quad,div.signup_button {height: unset !important;}\nh1.magazine_title {line-height: 1.2 !important;}"
+    "injectedCss.add": [
+      "div.blurb_box,div.homepage_quad,div.signup_button {height: unset !important;}",
+      "h1.magazine_title {line-height: 1.2 !important;}"
+    ]
   },
   {
     "id": "flutterDev",
@@ -4584,7 +5011,7 @@
       "docs.flutter.dev",
       "docs.flutter.cn"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "span.expander.material-symbols",
       "span.material-symbols"
     ]
@@ -4592,15 +5019,17 @@
   {
     "id": "dtmstation",
     "matches": "www.dtmstation.com",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".entry-card-title,.entry-card-snippet"
     ],
-    "injectedCss": ".entry-card-title,.entry-card-snippet { -webkit-line-clamp: unset!important; max-height: unset!important;}"
+    "injectedCss.add": [
+      ".entry-card-title,.entry-card-snippet { -webkit-line-clamp: unset!important; max-height: unset!important;}"
+    ]
   },
   {
     "id": "docs-tutorials",
     "matches": "docs.pytorch.org",
-    "forceBlockSelectors": [
+    "forceBlockSelectors.add": [
       ".tutorial-filter"
     ]
   },
@@ -4610,14 +5039,19 @@
       "www.wildberries.ru",
       "www.ozon.ru"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".product-card__tip--sale",
       ".price,[class^=priceWrap]",
       ".j-big-media-placements-block",
       "[class^='priceBlock'],[class^='product-card__rating'],[class^=productLinePrice],[class^=sizesList]",
       ".c35_3_16-a0,.pdp_jb1,.b5_6_3-a3,.tsHeadline600Large,.tsHeadline500Medium"
     ],
-    "injectedCss": ".product-page,.comment-card,.comment-card__message {block-size:unset!important;}\n[class^=supplierName],[class^=supplierName] * {white-space:unset;}\n[class*=categoryLinkNav] {width:min-content;}\n.bq03_5_3-a6,.bq03_5_3-a5,.a2p5_6_9-a0 {-webkit-line-clamp:unset!important;height:unset!important;}"
+    "injectedCss.add": [
+      ".product-page,.comment-card,.comment-card__message {block-size:unset!important;}",
+      "[class^=supplierName],[class^=supplierName] * {white-space:unset;}",
+      "[class*=categoryLinkNav] {width:min-content;}",
+      ".bq03_5_3-a6,.bq03_5_3-a5,.a2p5_6_9-a0 {-webkit-line-clamp:unset!important;height:unset!important;}"
+    ]
   },
   {
     "id": "wistia-hook",
@@ -4626,15 +5060,16 @@
       "dynamous.ai",
       "dynamous.wistia.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "div[data-handle='captions']"
     ]
   },
   {
     "id": "graphpad",
     "matches": "www.graphpad.com",
-    "excludeSelectors": [
-      "div[data-handle='captions']"
+    "excludeSelectors.add": [
+      "div[data-handle='captions']",
+      "#immersive-translate-caption-window"
     ]
   },
   {
@@ -4650,19 +5085,23 @@
       "courses.mavenanalytics.io",
       "apclassroom.collegeboard.org"
     ],
-    "excludeSelectors": [
-      "div[data-handle='captions']"
+    "excludeSelectors.add": [
+      "div[data-handle='captions']",
+      "#immersive-translate-caption-window"
     ]
   },
   {
     "id": "barotem",
     "matches": "www.barotem.com",
-    "injectedCss": ".product_name {-webkit-line-clamp: unset!important;}\n.lists_goods_content > div {height: unset!important; min-height: 76px}"
+    "injectedCss.add": [
+      ".product_name {-webkit-line-clamp: unset!important;}",
+      ".lists_goods_content > div {height: unset!important; min-height: 76px}"
+    ]
   },
   {
     "id": "msn",
     "matches": "www.msn.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".attribution",
       ".super-nav-container",
       "#follow-button",
@@ -4675,12 +5114,16 @@
       ".match-data",
       ".me-stripe-container"
     ],
-    "injectedCss": ".root {overflow-y: scroll!important;}\n.heading {-webkit-line-clamp: unset!important;}\n.content .text {overflow-y: scroll !important;}"
+    "injectedCss.add": [
+      ".root {overflow-y: scroll!important;}",
+      ".heading {-webkit-line-clamp: unset!important;}",
+      ".content .text {overflow-y: scroll !important;}"
+    ]
   },
   {
     "id": "edclub.com",
     "matches": "www.edclub.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".vjs-text-track-display"
     ]
   },
@@ -4689,19 +5132,22 @@
     "matches": "mediaspace.illinois.edu",
     "excludeSelectors": [
       ".playkit-overlay-action"
+    ],
+    "excludeSelectors.add": [
+      ".playkit-overlay-action "
     ]
   },
   {
     "id": "nbcnews",
     "matches": "www.nbcnews.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jw-wrapper.jw-reset"
     ]
   },
   {
     "id": "skool",
     "matches": "www.skool.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class^=styled__ShowMore]",
       "[class^=styled__UserNameText]",
       "[class^=styled__GroupNameWrapper]",
@@ -4723,7 +5169,13 @@
       "[class^=styled__MemberPercentage]",
       "[class^=styled__LevelBlockTitle]"
     ],
-    "injectedCss": ".erGJuk {max-height:unset!important;}"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "injectedCss.add": [
+      ".erGJuk {max-height:unset!important;}"
+    ]
   },
   {
     "id": "futuretools",
@@ -4733,7 +5185,7 @@
   {
     "id": "xiaosaas",
     "matches": "*.xiaosaas.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "p.marginRight10",
       "p.marginLeft10"
     ]
@@ -4741,55 +5193,69 @@
   {
     "id": "freecodecamp",
     "matches": "www.freecodecamp.org",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".monaco-mouse-cursor-text",
       ".challenge-preview"
+    ],
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]",
+      "[role=code]"
     ]
   },
   {
     "id": "gta5-mods",
     "matches": "www.gta5-mods.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "#main-nav"
     ]
   },
   {
     "id": "cooperativa",
     "matches": "cooperativa.cl",
-    "injectedCss": "font.notranslate {display:unset!important}"
+    "injectedCss.add": [
+      "font.notranslate {display:unset!important}"
+    ]
   },
   {
     "id": "sdk-cooperate",
     "matches": "pandaily.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[data-discover]",
       "header"
     ],
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "h3"
     ]
   },
   {
     "id": "read.amazon",
     "matches": "read.amazon.com",
-    "forceInlineSelectors": [
+    "forceInlineSelectors.add": [
       "span.kg-a11y-rel[role=text]"
     ],
-    "injectedCss": "font { color:#333!important; white-space: pre-wrap;}\np > font { position:absolute;left:0;right:0; }\n.kg-a11y-rel { background:white!important; }"
+    "injectedCss.add": [
+      "font { color:#333!important; white-space: pre-wrap;}",
+      "p > font { position:absolute;left:0;right:0; }",
+      ".kg-a11y-rel { background:white!important; }"
+    ]
   },
   {
     "id": "dcinside",
     "matches": "*.dcinside.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".num",
       ".time"
     ],
-    "injectedCss": ".time_best .typet_list li a {font-size:unset !important;}\nfont {background:unset!important;padding:unset!important;}"
+    "injectedCss.add": [
+      ".time_best .typet_list li a {font-size:unset !important;}",
+      "font {background:unset!important;padding:unset!important;}"
+    ]
   },
   {
     "id": "f95zone",
     "matches": "f95zone.to",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".pageNavWrapper",
       ".message-userExtras",
       ".message-name"
@@ -4798,7 +5264,7 @@
   {
     "id": "marquee-gs",
     "matches": "marquee.gs.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class*='article-header-sub-header']",
       "[role=img]"
     ]
@@ -4807,12 +5273,14 @@
     "id": "toneking",
     "matches": "www.toneking.com",
     "description": "解决莫名奇妙的ul li text-wrap: pretty 卡顿问题",
-    "injectedCss": "ul li {text-wrap:unset!important;}"
+    "injectedCss.add": [
+      "ul li {text-wrap:unset!important;}"
+    ]
   },
   {
     "id": "folo",
     "matches": "app.folo.is",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[role=button]"
     ]
   },
@@ -4822,27 +5290,32 @@
       "skyvipservices.com",
       "book.novelpia.com"
     ],
-    "injectedCss": "font {display:block !important;}\n#book-box font {font-family:unset!important;}"
+    "injectedCss.add": [
+      "font {display:block !important;}",
+      "#book-box font {font-family:unset!important;}"
+    ]
   },
   {
     "id": "arena",
     "matches": "lmarena.ai",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "table"
     ]
   },
   {
     "id": "murlok",
     "matches": "murlok.io",
-    "injectedCss": ".vi-media-object {display:flex;}"
+    "injectedCss.add": [
+      ".vi-media-object {display:flex;}"
+    ]
   },
   {
     "id": "vercel",
     "matches": "vercel.com",
-    "excludeSelectors": [
+    "injectedCss": "[data-docs-heading] .read-frog-translated-content-wrapper,[data-docs-heading] .read-frog-translated-content-wrapper * {visibility:visible!important;opacity:1!important;display:inline!important;margin-left:0!important;}",
+    "excludeSelectors.add": [
       "[class^=fade-in-words]"
-    ],
-    "injectedCss": "[data-docs-heading] .read-frog-translated-content-wrapper,[data-docs-heading] .read-frog-translated-content-wrapper * {visibility:visible!important;opacity:1!important;display:inline!important;margin-left:0!important;}"
+    ]
   },
   {
     "id": "ai-sdk",
@@ -4852,7 +5325,7 @@
   {
     "id": "moltbook",
     "matches": "www.moltbook.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       "[class='flex items-center gap-1 sm:gap-2 text-[10px] sm:text-xs text-[#7c7c7c] mb-1.5 sm:mb-2 flex-wrap']",
       "[class='flex items-center gap-2 sm:gap-4 text-[10px] sm:text-xs text-[#7c7c7c]']",
       "[class='flex items-center gap-2 p-2 rounded-lg transition-all duration-200 group animate-fadeIn bg-gradient-to-r from-[#ffd700]/10 to-transparent hover:from-[#ffd700]/20']",
@@ -4864,7 +5337,9 @@
       "[class='flex items-center gap-3 text-xs text-[#818384]']",
       "a[class='text-[#d7dadc] font-medium hover:underline']"
     ],
-    "injectedCss": "[class*='line-clamp']{-webkit-line-clamp:unset !important;}"
+    "injectedCss.add": [
+      "[class*='line-clamp']{-webkit-line-clamp:unset !important;}"
+    ]
   },
   {
     "id": "common-vtt-jw",
@@ -4873,7 +5348,7 @@
       "megaplay.buzz",
       "www.brighttalk.com"
     ],
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".jw-wrapper"
     ]
   },
@@ -4922,29 +5397,56 @@
       "dolmods.net",
       "detail.1688.com"
     ],
-    "injectedCss": ".side_list a,.title a,.tit,.item-title {-webkit-line-clamp:unset!important;height:unset!important;}\ndetails {height:unset!important;}\n.product-title {height:unset!important;-webkit-line-clamp:unset!important;}\n.plugin-product-comment-content {height:unset!important;-webkit-line-clamp:unset!important;}\ndiv.jdd-product-info-box {height:unset!important;}\nspan.hotData-text { -webkit-line-clamp: unset !important; line-clamp: unset !important;}\ndiv.line-clamp-4 { -webkit-line-clamp: unset; max-height: unset;}\n[class*='titleTypography'] {-webkit-line-clamp: unset !important;}\n.div-text-line-three { -webkit-line-clamp: unset; max-height: unset;}\n.data-title { -webkit-line-clamp: unset!important; max-height: unset!important;}\n.paper-title,.search-result-abstract.folded,.list-group-item-mod h5 { -webkit-line-clamp: unset!important; max-height: unset!important;}\n.kb-advanced-heading-link,.limited-text { -webkit-line-clamp: unset!important; max-height: unset!important;}\n.entry-card-title,.entry-card-snippet { -webkit-line-clamp: unset!important; max-height: unset!important;}\nspan.line-clamp-2 { -webkit-line-clamp: unset!important; max-height: unset!important;}\n.css-1yo0yr8 {-webkit-line-clamp: unset!important; max-height: unset!important;}\n[class*='line-clamp-'],[class*='line-clamp-'] font {white-space:unset!important;-webkit-line-clamp: unset!important; max-height: unset!important;}\n.product-card__brand-wrap {white-space:unset;}\n.card-recommend-oneImg article h4 {max-height:unset;-webkit-line-clamp:unset;}\n.description__4cb8a {max-height:unset;-webkit-line-clamp:unset;}\n.link-container {height:unset!important;-webkit-line-clamp:unset!important;}"
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "injectedCss.add": [
+      ".side_list a,.title a,.tit,.item-title {-webkit-line-clamp:unset!important;height:unset!important;}",
+      "details {height:unset!important;}",
+      ".product-title {height:unset!important;-webkit-line-clamp:unset!important;}",
+      ".plugin-product-comment-content {height:unset!important;-webkit-line-clamp:unset!important;}",
+      "div.jdd-product-info-box {height:unset!important;}",
+      "span.hotData-text { -webkit-line-clamp: unset !important; line-clamp: unset !important;}",
+      "div.line-clamp-4 { -webkit-line-clamp: unset; max-height: unset;}",
+      "[class*='titleTypography'] {-webkit-line-clamp: unset !important;}",
+      ".div-text-line-three { -webkit-line-clamp: unset; max-height: unset;}",
+      ".data-title { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".paper-title,.search-result-abstract.folded,.list-group-item-mod h5 { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".kb-advanced-heading-link,.limited-text { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".entry-card-title,.entry-card-snippet { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      "span.line-clamp-2 { -webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".css-1yo0yr8 {-webkit-line-clamp: unset!important; max-height: unset!important;}",
+      "[class*='line-clamp-'],[class*='line-clamp-'] font {white-space:unset!important;-webkit-line-clamp: unset!important; max-height: unset!important;}",
+      ".product-card__brand-wrap {white-space:unset;}",
+      ".card-recommend-oneImg article h4 {max-height:unset;-webkit-line-clamp:unset;}",
+      ".description__4cb8a {max-height:unset;-webkit-line-clamp:unset;}",
+      ".link-container {height:unset!important;-webkit-line-clamp:unset!important;}"
+    ]
   },
   {
     "id": "other-chatapps",
     "matches": "app.salesmartly.com",
-    "includeSelectors": [
+    "includeSelectors.add": [
       ".chat__inbox_item_text_ordinary",
       ".ivu-tooltip [title]"
     ],
-    "injectedCss": "._ss_2FLBr4_u {height:unset!important;}"
+    "injectedCss.add": [
+      "._ss_2FLBr4_u {height:unset!important;}"
+    ]
   },
   {
     "id": "dynamic-repets",
     "matches": "khovar.tj",
     "description": "1.25.3 在这种情况下会导致脏段落重新翻译",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".slide_container [style*='position: absolute']"
     ]
   },
   {
     "id": "txt",
     "matches": "*://*/*.txt",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".api-code",
       "pre.highlight.def"
     ]
@@ -4961,16 +5463,27 @@
       "moddota.com",
       "www.nogizaka46.com"
     ],
-    "injectedCss": "#main-content {overflow:unset;}\n.TextImage--inner {overflow:auto !important;}\nbody{overflow-y:scroll!important;}\nli.expanded > div{ overflow:scroll; }\n.book_list ul li { height: unset !important; overflow: visible !important; }\n#tabs-content-wrap {overflow:scroll;}\n.ReactVirtualized__Grid__innerScrollContainer {overflow:scroll!important;}\n.b--wrap {overflow:scroll!important;}"
+    "injectedCss.add": [
+      "#main-content {overflow:unset;}",
+      ".TextImage--inner {overflow:auto !important;}",
+      "body{overflow-y:scroll!important;}",
+      "li.expanded > div{ overflow:scroll; }",
+      ".book_list ul li { height: unset !important; overflow: visible !important; }",
+      "#tabs-content-wrap {overflow:scroll;}",
+      ".ReactVirtualized__Grid__innerScrollContainer {overflow:scroll!important;}",
+      ".b--wrap {overflow:scroll!important;}"
+    ]
   },
   {
     "id": "mailSites",
     "matches": "mail.126.com",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".mail-list-time",
       ".mail-list-frome"
     ],
-    "injectedCss": ".mail-list-frome {display:none;}"
+    "injectedCss.add": [
+      ".mail-list-frome {display:none;}"
+    ]
   },
   {
     "id": "fix-header",
@@ -4980,13 +5493,19 @@
       "notefolio.net"
     ],
     "description": "给部分网页开后门翻译 header标签",
-    "excludeSelectors": [
+    "excludeSelectors.add": [
       ".site-header"
     ],
-    "forceBlockSelectors": [
+    "excludeSelectors.remove": [
+      ".notranslate",
+      "[translate=no]"
+    ],
+    "forceBlockSelectors.add": [
       ".btn"
     ],
-    "injectedCss": "[class*='line-clamp-'] {-webkit-line-clamp: unset!important; max-height: unset!important;}"
+    "injectedCss.add": [
+      "[class*='line-clamp-'] {-webkit-line-clamp: unset!important; max-height: unset!important;}"
+    ]
   },
   {
     "id": "readfrog-chatgpt",
@@ -5081,6 +5600,124 @@
     "matches": "engoo.com",
     "forceBlockSelectors": [
       "#windowexercise-2 > div > div > div.css-ep7xq6 > div > div > div.css-19m2fbm *"
+    ]
+  },
+  {
+    "id": "ieeexplore",
+    "matches": "ieeexplore.ieee.org",
+    "preserveTextSelectors": [
+      "a[ref-type]",
+      ".inline-formula",
+      ".display-formula"
+    ]
+  },
+  {
+    "id": "htdp",
+    "matches": "htdp.org",
+    "preserveTextSelectors": [
+      ".RktIn"
+    ]
+  },
+  {
+    "id": "pubs.rsc.org",
+    "matches": "pubs.rsc.org",
+    "preserveTextSelectors.add": [
+      "[class*='eqn']"
+    ]
+  },
+  {
+    "id": "khanacademy",
+    "matches": [
+      "www.khanacademy.org"
+    ],
+    "preserveTextSelectors.add": [
+      ".mathjax-wrapper"
+    ]
+  },
+  {
+    "id": "ideastatica",
+    "matches": "www.ideastatica.com",
+    "preserveTextSelectors.remove": [
+      ".math-container"
+    ]
+  },
+  {
+    "id": "fibery",
+    "matches": [
+      "the.fibery.io"
+    ],
+    "preserveTextSelectors.add": [
+      ".entity-node-view-container"
+    ]
+  },
+  {
+    "id": "docs.unity3d",
+    "matches": "docs.unity3d.com",
+    "preserveTextSelectors": [
+      ".tooltip"
+    ]
+  },
+  {
+    "id": "docs.unity.cn",
+    "matches": "docs.unity.cn",
+    "preserveTextSelectors": [
+      ".tooltip"
+    ]
+  },
+  {
+    "id": "typeset.io",
+    "matches": "typeset.io",
+    "preserveTextSelectors.remove": [
+      "span.notranslate"
+    ]
+  },
+  {
+    "id": "transformer-circuits.pub",
+    "matches": [
+      "transformer-circuits.pub"
+    ],
+    "preserveTextSelectors.add": [
+      "d-cite"
+    ]
+  },
+  {
+    "id": "next_westlaw",
+    "matches": "*.next.westlaw.com",
+    "preserveTextSelectors.add": [
+      ".docLinkWrapper"
+    ]
+  },
+  {
+    "id": "mathsisfun",
+    "matches": "www.mathsisfun.com",
+    "preserveTextSelectors.add": [
+      ".center.large"
+    ]
+  },
+  {
+    "id": "jfrog",
+    "matches": "jfrog.com",
+    "preserveTextSelectors.add": [
+      ".readercontent-topic-codeblockcontainer"
+    ]
+  },
+  {
+    "id": "solidity-by-example",
+    "matches": [
+      "solidity-by-example.org"
+    ],
+    "preserveTextSelectors.remove": [
+      ".code"
+    ]
+  },
+  {
+    "id": "remove_em",
+    "matches": [
+      "git-scm.com",
+      "models.com"
+    ],
+    "preserveTextSelectors.add": [
+      "em"
     ]
   }
 ]

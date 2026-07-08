@@ -13,6 +13,7 @@ export interface ResolvedSiteRule {
   includeSelector: string | null
   forceBlockSelector: string | null
   forceInlineSelector: string | null
+  preserveTextSelector: string | null
   minCharacters: number | null
   minWords: number | null
   injectedCss: string | null
@@ -24,6 +25,7 @@ export const EMPTY_RESOLVED_SITE_RULE: ResolvedSiteRule = {
   includeSelector: null,
   forceBlockSelector: null,
   forceInlineSelector: null,
+  preserveTextSelector: null,
   minCharacters: null,
   minWords: null,
   injectedCss: null,
@@ -56,17 +58,50 @@ function isValidSelector(selector: string): boolean {
   return valid
 }
 
-function mergeSelectors(lists: (string[] | undefined)[]): string | null {
+function joinSelectors(selectors: Iterable<string>): string | null {
   const merged = new Set<string>()
-  for (const list of lists) {
-    for (const selector of list ?? []) {
-      const trimmed = selector.trim()
+  for (const selector of selectors) {
+    const trimmed = selector.trim()
+    if (trimmed && isValidSelector(trimmed)) {
+      merged.add(trimmed)
+    }
+  }
+  return merged.size > 0 ? [...merged].join(",") : null
+}
+
+function mergeSelectorDelta(
+  matched: SiteRule[],
+  baseKey: keyof SiteRule,
+  addKey: keyof SiteRule,
+  removeKey: keyof SiteRule,
+): string | null {
+  const merged = new Set<string>()
+
+  const addSelectors = (selectors: unknown) => {
+    for (const selector of Array.isArray(selectors) ? selectors : []) {
+      const trimmed = typeof selector === "string" ? selector.trim() : ""
       if (trimmed && isValidSelector(trimmed)) {
         merged.add(trimmed)
       }
     }
   }
-  return merged.size > 0 ? [...merged].join(",") : null
+
+  const removeSelectors = (selectors: unknown) => {
+    for (const selector of Array.isArray(selectors) ? selectors : []) {
+      const trimmed = typeof selector === "string" ? selector.trim() : ""
+      if (trimmed && isValidSelector(trimmed)) {
+        merged.delete(trimmed)
+      }
+    }
+  }
+
+  for (const rule of matched) {
+    addSelectors(rule[baseKey])
+    addSelectors(rule[addKey])
+    removeSelectors(rule[removeKey])
+  }
+
+  return joinSelectors(merged)
 }
 
 /**
@@ -105,17 +140,24 @@ export function resolveSiteRule(
     if (rule.minWords !== undefined) {
       minWords = rule.minWords
     }
-    if (rule.injectedCss !== undefined && rule.injectedCss.trim()) {
-      cssParts.push(rule.injectedCss)
+    const injectedCssParts = [
+      rule.injectedCss,
+      ...(rule["injectedCss.add"] ?? []),
+    ]
+    for (const css of injectedCssParts) {
+      if (css !== undefined && css.trim()) {
+        cssParts.push(css)
+      }
     }
   }
 
   return {
     matchedRuleIds: matched.map(rule => rule.id),
-    excludeSelector: mergeSelectors(matched.map(rule => rule.excludeSelectors)),
-    includeSelector: mergeSelectors(matched.map(rule => rule.includeSelectors)),
-    forceBlockSelector: mergeSelectors(matched.map(rule => rule.forceBlockSelectors)),
-    forceInlineSelector: mergeSelectors(matched.map(rule => rule.forceInlineSelectors)),
+    excludeSelector: mergeSelectorDelta(matched, "excludeSelectors", "excludeSelectors.add", "excludeSelectors.remove"),
+    includeSelector: mergeSelectorDelta(matched, "includeSelectors", "includeSelectors.add", "includeSelectors.remove"),
+    forceBlockSelector: mergeSelectorDelta(matched, "forceBlockSelectors", "forceBlockSelectors.add", "forceBlockSelectors.remove"),
+    forceInlineSelector: mergeSelectorDelta(matched, "forceInlineSelectors", "forceInlineSelectors.add", "forceInlineSelectors.remove"),
+    preserveTextSelector: mergeSelectorDelta(matched, "preserveTextSelectors", "preserveTextSelectors.add", "preserveTextSelectors.remove"),
     minCharacters,
     minWords,
     injectedCss: cssParts.length > 0 ? cssParts.join("\n") : null,

@@ -14,9 +14,20 @@ import { resolveSiteRule } from "../resolve"
 function allSelectors(rule: (typeof BUILT_IN_SITE_RULES)[number]): string[] {
   return [
     ...(rule.excludeSelectors ?? []),
+    ...(rule["excludeSelectors.add"] ?? []),
+    ...(rule["excludeSelectors.remove"] ?? []),
     ...(rule.includeSelectors ?? []),
+    ...(rule["includeSelectors.add"] ?? []),
+    ...(rule["includeSelectors.remove"] ?? []),
     ...(rule.forceBlockSelectors ?? []),
+    ...(rule["forceBlockSelectors.add"] ?? []),
+    ...(rule["forceBlockSelectors.remove"] ?? []),
     ...(rule.forceInlineSelectors ?? []),
+    ...(rule["forceInlineSelectors.add"] ?? []),
+    ...(rule["forceInlineSelectors.remove"] ?? []),
+    ...(rule.preserveTextSelectors ?? []),
+    ...(rule["preserveTextSelectors.add"] ?? []),
+    ...(rule["preserveTextSelectors.remove"] ?? []),
   ]
 }
 

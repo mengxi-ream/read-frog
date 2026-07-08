@@ -1429,6 +1429,46 @@ describe("translate", () => {
     })
 
     describe("github diff table - should not translate review code snippets", () => {
+      it("bilingual mode: should keep github release attribution in translation source", async () => {
+        const originalLocation = window.location
+        setHost("github.com")
+        vi.mocked(translateTextForPage).mockClear()
+
+        try {
+          render(
+            <div data-testid="test-node" className="markdown-body">
+              <ul>
+                <li>
+                  {"perf(main): drop localhost label routes when a worktree is removed by "}
+                  <a className="user-mention notranslate" data-hovercard-type="user" href="/taiiiyang">
+                    @taiiiyang
+                  </a>
+                  {" in "}
+                  <a className="issue-link js-issue-link" data-hovercard-type="pull_request" href="/stablyai/orca/pull/7557">
+                    #7557
+                  </a>
+                </li>
+              </ul>
+            </div>,
+          )
+
+          await removeOrShowPageTranslation("bilingual", true)
+
+          expect(translateTextForPage).toHaveBeenCalledWith(
+            "perf(main): drop localhost label routes when a worktree is removed by @taiiiyang in #7557",
+          )
+          expect(document.querySelector(".user-mention")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+          expect(document.querySelector(".issue-link")!.hasAttribute(PARAGRAPH_ATTRIBUTE)).toBe(false)
+        }
+        finally {
+          Object.defineProperty(window, "location", {
+            value: originalLocation,
+            writable: true,
+            configurable: true,
+          })
+        }
+      })
+
       it("bilingual mode: should skip github diff-table content entirely", async () => {
         const originalLocation = window.location
         setHost("github.com")

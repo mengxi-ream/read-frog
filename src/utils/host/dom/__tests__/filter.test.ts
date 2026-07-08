@@ -112,6 +112,22 @@ function createConfig(range: "main" | "all"): Config {
   return { translate: { page: { range } } } as unknown as Config
 }
 
+function setHost(host: string) {
+  Object.defineProperty(window, "location", {
+    value: new URL(`https://${host}/some/path`),
+    writable: true,
+  })
+}
+
+function configWithSiteRule(rule: NonNullable<Config["siteRules"]>["userRules"][number]): Config {
+  const config = structuredClone(DEFAULT_CONFIG)
+  config.siteRules = {
+    userRules: [rule],
+    disabledBuiltInRules: [],
+  }
+  return config
+}
+
 describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
   it("should return true for sr-only class", () => {
     const element = document.createElement("span")
@@ -139,6 +155,36 @@ describe("isDontWalkIntoAndDontTranslateAsChildElement", () => {
   it("should return false for regular elements", () => {
     const element = document.createElement("div")
     expect(isDontWalkIntoAndDontTranslateAsChildElement(element, DEFAULT_CONFIG)).toBe(false)
+  })
+
+  it("should treat preserveTextSelectors as dont-walk-but-translate", () => {
+    setHost("preserve-example.org")
+    const config = configWithSiteRule({
+      id: "preserve",
+      matches: "preserve-example.org",
+      preserveTextSelectors: [".token"],
+    })
+    const element = document.createElement("span")
+    element.classList.add("token")
+
+    expect(isDontWalkIntoButTranslateAsChildElement(element, config)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, config)).toBe(false)
+  })
+
+  it("should let preserveTextSelectors win over excludeSelectors on the same element", () => {
+    setHost("preserve-example.org")
+    const config = configWithSiteRule({
+      id: "preserve",
+      matches: "preserve-example.org",
+      excludeSelectors: ["a[data-hovercard-type]"],
+      preserveTextSelectors: [".issue-link"],
+    })
+    const element = document.createElement("a")
+    element.classList.add("issue-link")
+    element.setAttribute("data-hovercard-type", "pull_request")
+
+    expect(isDontWalkIntoButTranslateAsChildElement(element, config)).toBe(true)
+    expect(isDontWalkIntoAndDontTranslateAsChildElement(element, config)).toBe(false)
   })
 
   it("should skip top-level <header> in main mode", () => {
