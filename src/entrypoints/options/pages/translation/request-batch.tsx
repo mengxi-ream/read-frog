@@ -44,12 +44,12 @@ function StatisticsLink() {
 
   return (
     <Link
-      className="text-primary hover:opacity-80 cursor-pointer transition-opacity"
+      className="cursor-pointer text-primary transition-opacity hover:opacity-80"
       to="/statistics"
       target="_blank"
     >
       {i18n.t("options.translation.batchQueueConfig.statisticsLink", [averageSavePercentage])}{" "}
-      <Icon icon="tabler:external-link" className="inline w-3.5 h-3.5" />
+      <Icon icon="tabler:external-link" className="inline h-3.5 w-3.5" />
     </Link>
   )
 }

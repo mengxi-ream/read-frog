@@ -22,7 +22,7 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="group-data-[state=expanded]:px-5 group-data-[state=expanded]:pt-4 transition-all">
+      <SidebarHeader className="transition-all group-data-[state=expanded]:px-5 group-data-[state=expanded]:pt-4">
         <UserAccountMenuSidebar />
         <InputGroup onClick={() => setCommandPaletteOpen(true)} className="bg-background">
           <InputGroupInput
@@ -38,11 +38,11 @@ export function AppSidebar() {
           </InputGroupAddon>
         </InputGroup>
       </SidebarHeader>
-      <SidebarContent className="group-data-[state=expanded]:px-2 transition-all">
+      <SidebarContent className="transition-all group-data-[state=expanded]:px-2">
         <SettingsNav />
         <ToolsNav />
       </SidebarContent>
-      <SidebarFooter className="group-data-[state=expanded]:px-2 transition-all">
+      <SidebarFooter className="transition-all group-data-[state=expanded]:px-2">
         <WhatsNewFooter />
       </SidebarFooter>
     </Sidebar>

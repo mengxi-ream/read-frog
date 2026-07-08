@@ -55,7 +55,7 @@ export default function UiLanguageSelector() {
       title={i18n.t("options.general.interfaceLanguage.title")}
       description={i18n.t("options.general.interfaceLanguage.description")}
     >
-      <div className="w-full flex justify-start md:justify-end">
+      <div className="flex w-full justify-start md:justify-end">
         <Select
           value={uiLanguage}
           onValueChange={(value) => void setUiLanguage(value as UiLanguage)}

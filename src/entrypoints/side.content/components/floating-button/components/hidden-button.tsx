@@ -20,7 +20,7 @@ export default function HiddenButton({
     <button
       type="button"
       className={cn(
-        "border-border cursor-pointer rounded-full border bg-white shadow-lg p-1.5 text-neutral-600 dark:text-neutral-400 transition-transform duration-300 hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800",
+        "cursor-pointer rounded-full border border-border bg-white p-1.5 text-neutral-600 shadow-lg transition-transform duration-300 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800",
         side === "right" ? "mr-2" : "ml-2",
         expanded ? "translate-x-0" : side === "right" ? "translate-x-12" : "-translate-x-12",
         className,

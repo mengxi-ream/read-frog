@@ -34,7 +34,7 @@ export default function TranslatePromptSelector() {
 
   return (
     <div className="flex items-center justify-between gap-2">
-      <span className="text-[13px] font-medium flex items-center gap-1.5">
+      <span className="flex items-center gap-1.5 text-[13px] font-medium">
         {i18n.t("translatePrompt.title")}
         <HelpTooltip>{i18n.t("translatePrompt.description")}</HelpTooltip>
       </span>

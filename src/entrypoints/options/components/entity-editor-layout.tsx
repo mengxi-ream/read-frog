@@ -15,8 +15,8 @@ export function EntityEditorLayout({
 }: EntityEditorLayoutProps) {
   return (
     <div className={cn("flex gap-4", className)}>
-      <div className={cn("w-40 lg:w-52 flex flex-col gap-4", listClassName)}>{list}</div>
-      <div className="flex-1 min-w-0">{editor}</div>
+      <div className={cn("flex w-40 flex-col gap-4 lg:w-52", listClassName)}>{list}</div>
+      <div className="min-w-0 flex-1">{editor}</div>
     </div>
   )
 }

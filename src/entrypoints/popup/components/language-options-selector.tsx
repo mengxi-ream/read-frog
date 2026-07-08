@@ -56,7 +56,7 @@ function LanguageComboboxTrigger({
       }
     >
       <div className={langSelectorContentClasses}>
-        <span className="truncate w-full text-left">{label}</span>
+        <span className="w-full truncate text-left">{label}</span>
         <span className="text-sm text-neutral-500">{subtitle}</span>
       </div>
       <IconChevronDown className="size-4 text-muted-foreground" />
@@ -127,7 +127,7 @@ export default function LanguageOptionsSelector() {
           }
           ariaLabel={i18n.t("popup.sourceLang")}
         />
-        <ComboboxContent className="rounded-lg shadow-md w-72">
+        <ComboboxContent className="w-72 rounded-lg shadow-md">
           <ComboboxInput
             showTrigger={false}
             placeholder={i18n.t("translationHub.searchLanguages")}
@@ -156,7 +156,7 @@ export default function LanguageOptionsSelector() {
           subtitle={i18n.t("popup.targetLang")}
           ariaLabel={i18n.t("popup.targetLang")}
         />
-        <ComboboxContent className="rounded-lg shadow-md w-72">
+        <ComboboxContent className="w-72 rounded-lg shadow-md">
           <ComboboxInput
             showTrigger={false}
             placeholder={i18n.t("translationHub.searchLanguages")}
@@ -177,7 +177,7 @@ export default function LanguageOptionsSelector() {
 
 function AutoLangCell() {
   return (
-    <span className="rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800 flex items-center">
+    <span className="flex items-center rounded-full bg-neutral-200 px-1 text-xs dark:bg-neutral-800">
       auto
     </span>
   )

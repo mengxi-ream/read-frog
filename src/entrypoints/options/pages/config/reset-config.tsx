@@ -33,7 +33,7 @@ export function ResetConfig() {
       description={i18n.t("options.config.resetConfig.description")}
     >
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <div className="w-full flex justify-end">
+        <div className="flex w-full justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" />}>
             <IconRefresh className="size-4" />
             {i18n.t("options.config.resetConfig.dialog.trigger")}

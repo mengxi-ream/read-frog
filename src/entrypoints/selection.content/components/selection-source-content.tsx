@@ -30,7 +30,7 @@ export function SelectionSourceContent({
           <ScrollArea className={cn("min-w-0 flex-1", actionsExpanded && "h-18 overflow-hidden")}>
             <p
               className={cn(
-                "text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-zinc-600 dark:text-zinc-400",
+                "text-sm [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-zinc-600 dark:text-zinc-400",
                 !actionsExpanded && "line-clamp-3",
               )}
             >

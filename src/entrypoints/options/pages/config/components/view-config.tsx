@@ -20,7 +20,7 @@ export function ViewConfig({
   const [isExpanded, setIsExpanded] = useState(false)
 
   return (
-    <div className="w-full flex flex-col justify-end">
+    <div className="flex w-full flex-col justify-end">
       <Button variant="outline" size={size} onClick={() => setIsExpanded(!isExpanded)}>
         <Icon icon={isExpanded ? "tabler:chevron-up" : "tabler:chevron-down"} />
         {isExpanded
@@ -29,8 +29,8 @@ export function ViewConfig({
       </Button>
 
       {isExpanded && (
-        <ScrollArea className="h-96 w-full rounded-lg border bg-muted mt-3">
-          <pre className="text-xs p-4 whitespace-pre-wrap break-all overflow-wrap-anywhere">
+        <ScrollArea className="mt-3 h-96 w-full rounded-lg border bg-muted">
+          <pre className="overflow-wrap-anywhere p-4 text-xs break-all whitespace-pre-wrap">
             {JSON.stringify(
               {
                 schemaVersion: configSchemaVersion ?? CONFIG_SCHEMA_VERSION,

@@ -84,7 +84,7 @@ export function GoogleDriveSyncCard() {
                   <img
                     src={authData.userInfo.picture}
                     alt="Google Account"
-                    className="size-5 border rounded-full"
+                    className="size-5 rounded-full border"
                   />
                 )}
                 <span className="text-sm text-muted-foreground">{authData?.userInfo?.email}</span>
@@ -93,8 +93,8 @@ export function GoogleDriveSyncCard() {
           </div>
         }
       >
-        <div className="w-full flex flex-col items-end gap-4">
-          <div className="flex flex-col gap-2 items-end">
+        <div className="flex w-full flex-col items-end gap-4">
+          <div className="flex flex-col items-end gap-2">
             <div className="flex gap-2">
               <Button onClick={handleSync} disabled={isSyncing}>
                 <Icon icon="logos:google-drive" className="size-4" />

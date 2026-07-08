@@ -19,15 +19,15 @@ export function ConfigCard({
     <section
       id={id}
       className={cn(
-        "py-6 flex lg:flex-row flex-col lg:gap-x-[50px] xl:gap-x-[100px] gap-y-6",
+        "flex flex-col gap-y-6 py-6 lg:flex-row lg:gap-x-[50px] xl:gap-x-[100px]",
         className,
       )}
     >
-      <div className="lg:basis-2/5 shrink-0">
-        <h2 className={cn("text-lg font-bold mb-1", titleClassName)}>{title}</h2>
+      <div className="shrink-0 lg:basis-2/5">
+        <h2 className={cn("mb-1 text-lg font-bold", titleClassName)}>{title}</h2>
         <div className="text-sm text-muted-foreground">{description}</div>
       </div>
-      <div className="lg:basis-3/5 min-w-0">{children}</div>
+      <div className="min-w-0 lg:basis-3/5">{children}</div>
     </section>
   )
 }

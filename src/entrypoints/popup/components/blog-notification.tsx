@@ -49,7 +49,7 @@ export default function BlogNotification() {
       >
         <Icon icon="tabler:bell-filled" />
         {showIndicator && (
-          <span className="absolute top-1.5 right-1.5 flex items-center justify-center size-2">
+          <span className="absolute top-1.5 right-1.5 flex size-2 items-center justify-center">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-75"></span>
             <span className="relative inline-flex size-1.5 rounded-full bg-brand"></span>
           </span>

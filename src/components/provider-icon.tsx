@@ -8,7 +8,7 @@ import {
 } from "@/utils/content-script/background-asset-url"
 import { cn } from "@/utils/styles/utils"
 
-const providerIconVariants = cva("flex items-center min-w-0", {
+const providerIconVariants = cva("flex min-w-0 items-center", {
   variants: {
     size: {
       sm: "gap-1.5",
@@ -24,7 +24,7 @@ const providerIconVariants = cva("flex items-center min-w-0", {
 })
 
 const iconContainerVariants = cva(
-  "rounded-full bg-white dark:bg-muted border border-border flex items-center justify-center flex-shrink-0",
+  "flex flex-shrink-0 items-center justify-center rounded-full border border-border bg-white dark:bg-muted",
   {
     variants: {
       size: {

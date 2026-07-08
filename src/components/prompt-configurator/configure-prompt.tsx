@@ -128,7 +128,7 @@ export function ConfigurePrompt({
             </FieldLabel>
             <QuickInsertableTextarea
               value={prompt.systemPrompt}
-              className="min-h-40 max-h-80"
+              className="max-h-80 min-h-40"
               disabled={isDefault}
               onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                 setPrompt({ ...prompt, systemPrompt: e.target.value })

@@ -167,7 +167,7 @@ export function ProviderConfigForm() {
     <form.AppForm>
       <div
         className={cn(
-          "flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between",
+          "flex flex-1 flex-col justify-between rounded-xl border bg-card p-4",
           selectedProviderId !== providerConfig.id && "hidden",
         )}
       >
@@ -221,7 +221,7 @@ export function ProviderConfigForm() {
             </AdvancedOptionsSection>
           )}
         </div>
-        <div className="flex justify-between mt-8">
+        <div className="mt-8 flex justify-between">
           <Button type="button" variant="outline" onClick={handleDuplicate}>
             {i18n.t("options.apiProviders.form.duplicate")}
           </Button>

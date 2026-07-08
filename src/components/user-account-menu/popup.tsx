@@ -33,7 +33,7 @@ export function UserAccountMenuPopup() {
           render={
             <button
               type="button"
-              className="group/account flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-accent active:bg-accent/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring data-[popup-open]:bg-accent"
+              className="group/account flex cursor-pointer items-center gap-2 rounded-md px-1.5 py-1 transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none active:bg-accent/70 data-[popup-open]:bg-accent"
             />
           }
         >

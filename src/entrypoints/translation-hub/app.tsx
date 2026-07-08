@@ -9,7 +9,7 @@ import { TranslationServiceDropdown } from "./components/translation-service-dro
 export default function App() {
   return (
     <div className="min-h-screen">
-      <div className="max-w-6xl mx-auto">
+      <div className="mx-auto max-w-6xl">
         <header className="px-6 py-4">
           <h1 className="text-2xl font-semibold text-foreground">
             {i18n.t("translationHub.title")}
@@ -17,12 +17,12 @@ export default function App() {
         </header>
 
         <main className="p-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
             {/* Row 1: Controls */}
             <div className="order-1">
               <LanguageControlPanel />
             </div>
-            <div className="order-3 lg:order-2 flex justify-end lg:items-end lg:h-full">
+            <div className="order-3 flex justify-end lg:order-2 lg:h-full lg:items-end">
               <div className="flex items-center gap-2">
                 <PromptSelector />
                 <TranslationServiceDropdown />

@@ -116,7 +116,7 @@ export function TranslationCard({
   const hasContent = mutation.isError || (mutation.data !== undefined && mutation.data !== "")
 
   return (
-    <div className="border rounded-lg bg-card">
+    <div className="rounded-lg border bg-card">
       <div
         className={cn(
           "flex items-center justify-between px-3 py-2",
@@ -127,7 +127,7 @@ export function TranslationCard({
           {providerItem ? (
             <ProviderIcon logo={providerItem.logo(theme)} name={provider.name} size="sm" />
           ) : (
-            <div className="w-5 h-5 bg-muted rounded flex items-center justify-center text-xs text-muted-foreground">
+            <div className="flex h-5 w-5 items-center justify-center rounded bg-muted text-xs text-muted-foreground">
               ?
             </div>
           )}
@@ -194,7 +194,7 @@ export function TranslationCard({
         <div className="p-3">
           {mutation.isError ? (
             <div>
-              <div className="flex items-center space-x-2 text-destructive mb-1">
+              <div className="mb-1 flex items-center space-x-2 text-destructive">
                 <Icon icon="tabler:alert-circle" className="h-4 w-4" />
                 <span className="text-sm font-medium">
                   {i18n.t("translationHub.translationFailed")}
@@ -209,7 +209,7 @@ export function TranslationCard({
           ) : (
             <div
               key={mutation.data}
-              className="text-base leading-relaxed whitespace-pre-wrap animate-in fade-in duration-300"
+              className="animate-in text-base leading-relaxed whitespace-pre-wrap duration-300 fade-in"
             >
               {mutation.data}
             </div>

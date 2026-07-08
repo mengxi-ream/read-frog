@@ -34,7 +34,7 @@ export function ConfigBackup() {
     >
       <div className="space-y-4">
         {isPending && (
-          <div className="text-center text-muted-foreground py-8">
+          <div className="py-8 text-center text-muted-foreground">
             {i18n.t("options.config.backup.loading")}
           </div>
         )}

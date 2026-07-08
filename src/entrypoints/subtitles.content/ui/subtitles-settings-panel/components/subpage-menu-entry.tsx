@@ -18,12 +18,12 @@ export function SubpageMenuEntry({ icon, label, onClick }: SubpageMenuEntryProps
       className={cn("h-auto w-full justify-start rounded-[14px] px-2 py-2 text-left")}
     >
       <div className="flex items-center gap-3">
-        <div className="text-muted-foreground flex size-5 shrink-0 items-center justify-center">
+        <div className="flex size-5 shrink-0 items-center justify-center text-muted-foreground">
           {icon}
         </div>
 
         <div className="min-w-0 flex-1">
-          <Label className="font-light! cursor-pointer text-left text-[13px] leading-5">
+          <Label className="cursor-pointer text-left text-[13px] leading-5 font-light!">
             {label}
           </Label>
         </div>

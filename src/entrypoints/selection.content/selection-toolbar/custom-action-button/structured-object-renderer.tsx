@@ -123,14 +123,14 @@ const { registry: STRUCTURED_OBJECT_REGISTRY } = defineRegistry(structuredObject
 
       return (
         <div className="" data-slot="custom-action-field-row" data-field-name={label}>
-          <div className="flex items-center gap-0.5 h-6">
+          <div className="flex h-6 items-center gap-0.5">
             <div className="inline-flex min-w-0 items-center gap-0.5 text-xs font-medium text-muted-foreground">
               {getFieldTypeIcon(type)}
               <span className="truncate">{label}</span>
             </div>
             {speakingEnabled && <FieldSpeakButton text={value} disabled={speakButtonDisabled} />}
           </div>
-          <div className="text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere]">
+          <div className="text-sm [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
             {pending ? "…" : value || "—"}
           </div>
         </div>

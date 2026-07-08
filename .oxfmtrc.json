@@ -22,6 +22,10 @@
     "pnpm-lock.yaml",
     "**/*.svg"
   ],
+  "sortTailwindcss": {
+    "stylesheet": "./src/assets/styles/theme.css",
+    "functions": ["clsx", "cn", "cva"]
+  },
   "sortImports": {
     "groups": [
       "setup",

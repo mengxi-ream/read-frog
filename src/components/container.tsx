@@ -9,7 +9,7 @@ function Container({
   return (
     <div
       ref={ref}
-      className={cn("max-w-7xl mx-auto w-full px-6 md:px-8 lg:px-14", className)}
+      className={cn("mx-auto w-full max-w-7xl px-6 md:px-8 lg:px-14", className)}
       {...props}
     >
       {children}

@@ -83,7 +83,7 @@ function QuickInsertableTextarea({
   }
 
   return (
-    <div className={cn("space-y-2 w-full min-w-0", containerClassName)}>
+    <div className={cn("w-full min-w-0 space-y-2", containerClassName)}>
       <InsertableTextarea ref={textareaRef} className={className} {...props} />
       <div className={cn("flex flex-wrap gap-2", cellsClassName)}>
         {insertCells.map((cell) => (

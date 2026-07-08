@@ -27,8 +27,8 @@ interface LangSelectProps {
 function LangSelect({ value, onValueChange, getDisplayLabel }: LangSelectProps) {
   return (
     <Select value={value} onValueChange={(v) => onValueChange(v as InputTranslationLang)}>
-      <SelectTrigger className="w-full max-h-52 min-w-0">
-        <SelectValue render={<span className="flex-1 min-w-0" />}>
+      <SelectTrigger className="max-h-52 w-full min-w-0">
+        <SelectValue render={<span className="min-w-0 flex-1" />}>
           <span className="block min-w-0 truncate">{getDisplayLabel(value)}</span>
         </SelectValue>
       </SelectTrigger>
@@ -84,15 +84,15 @@ export function InputTranslationLanguages() {
       title={i18n.t("options.inputTranslation.languages.title")}
       description={i18n.t("options.inputTranslation.languages.description")}
     >
-      <div className="flex flex-col gap-4 min-w-0 w-full">
-        <div className="flex flex-col items-end gap-1 min-w-0 w-full">
+      <div className="flex w-full min-w-0 flex-col gap-4">
+        <div className="flex w-full min-w-0 flex-col items-end gap-1">
           <LangSelect
             value={inputTranslation.fromLang}
             onValueChange={handleFromLangChange}
             getDisplayLabel={getDisplayLabel}
           />
 
-          <div className="relative size-5 shrink-0 mx-auto my-2">
+          <div className="relative mx-auto my-2 size-5 shrink-0">
             <Activity mode={inputTranslation.enableCycle ? "visible" : "hidden"}>
               <Icon
                 icon="fluent:arrow-sort-24-filled"
@@ -120,7 +120,7 @@ export function InputTranslationLanguages() {
             checked={inputTranslation.enableCycle}
             onCheckedChange={handleEnableCycleChange}
           />
-          <Label htmlFor="enable-cycle" className="text-sm font-normal cursor-pointer">
+          <Label htmlFor="enable-cycle" className="cursor-pointer text-sm font-normal">
             {i18n.t("options.inputTranslation.languages.enableCycle")}
           </Label>
         </div>

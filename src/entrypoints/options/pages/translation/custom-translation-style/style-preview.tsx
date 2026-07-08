@@ -96,7 +96,7 @@ export function StylePreview() {
 
       <Field>
         <FieldLabel>{i18n.t("options.translation.translationStyle.preview")}</FieldLabel>
-        <div id="style-preview" className="w-full flex flex-col gap-2 p-4 border rounded-md">
+        <div id="style-preview" className="flex w-full flex-col gap-2 rounded-md border p-4">
           <span className={CONTENT_WRAPPER_CLASS} lang={language} dir={dir}>
             <span className={`text-sm ${BLOCK_CONTENT_CLASS}`} ref={blockContentRef}>
               {translatedText}

@@ -107,12 +107,12 @@ function ProviderCardList() {
           render={
             <Button
               variant="outline"
-              className="h-auto p-3 border-dashed rounded-xl"
+              className="h-auto rounded-xl border-dashed p-3"
               onClick={() => setIsAddDialogOpen(true)}
             />
           }
         >
-          <div className="flex items-center justify-center gap-2 w-full">
+          <div className="flex w-full items-center justify-center gap-2">
             <Icon icon="tabler:plus" className="size-4" />
             <span className="text-sm">{i18n.t("options.apiProviders.addProvider")}</span>
           </div>
@@ -199,11 +199,11 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
   return (
     <div className="absolute -top-2 right-2 flex items-center justify-center gap-1">
       <Tooltip>
-        <TooltipTrigger render={<Badge className="bg-blue-500 cursor-default" size="sm" />}>
+        <TooltipTrigger render={<Badge className="cursor-default bg-blue-500" size="sm" />}>
           {i18n.t("options.apiProviders.badges.featureCount", [count])}
         </TooltipTrigger>
         <TooltipContent>
-          <ul className="list-disc list-inside marker:text-green-500">{children}</ul>
+          <ul className="list-inside list-disc marker:text-green-500">{children}</ul>
         </TooltipContent>
       </Tooltip>
     </div>
@@ -237,7 +237,7 @@ function ProviderListCell({
     <div
       data-provider-id={providerId}
       className={cn(
-        "rounded-xl p-3 border bg-card relative cursor-pointer",
+        "relative cursor-pointer rounded-xl border bg-card p-3",
         selected && "border-primary",
       )}
       onClick={onSelect}
@@ -297,7 +297,7 @@ function BuiltInProviderPanel() {
   const atlasCloudUrl = atlasCloudProvider.sponsor?.referUrl ?? atlasCloudProvider.website
 
   return (
-    <div className="flex-1 bg-card rounded-xl p-4 border">
+    <div className="flex-1 rounded-xl border bg-card p-4">
       <div className="flex flex-col gap-6">
         <div className="flex flex-col gap-4">
           <ProviderIcon
@@ -307,7 +307,7 @@ function BuiltInProviderPanel() {
             textClassName="font-medium"
           />
           <div className="flex flex-col items-start gap-3">
-            <p className="text-sm text-muted-foreground leading-6">
+            <p className="text-sm leading-6 text-muted-foreground">
               {i18n.t("options.apiProviders.providers.attribution.freeAi" as never)}
             </p>
             <Button
@@ -336,7 +336,7 @@ function BuiltInFeatureProviderSection() {
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
+      <CollapsibleTrigger className="flex cursor-pointer items-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground">
         <Icon
           icon="tabler:chevron-right"
           className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}

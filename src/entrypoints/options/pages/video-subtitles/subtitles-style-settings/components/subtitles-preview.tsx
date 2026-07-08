@@ -32,9 +32,9 @@ export function SubtitlesPreview() {
         {i18n.t("options.videoSubtitles.style.preview")}
       </Label>
       <GradientBackground>
-        <div className="relative w-fit min-w-full h-fit min-h-32 rounded-lg overflow-hidden flex items-center justify-center p-4">
+        <div className="relative flex h-fit min-h-32 w-fit min-w-full items-center justify-center overflow-hidden rounded-lg p-4">
           <div
-            className="flex flex-col gap-2 px-3 py-2 rounded text-center text-white max-w-[90%]"
+            className="flex max-w-[90%] flex-col gap-2 rounded px-3 py-2 text-center text-white"
             style={containerStyle}
           >
             <Activity mode={showMain ? "visible" : "hidden"}>

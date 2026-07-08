@@ -234,7 +234,7 @@ function SelectionPopoverTrigger({
       {
         type: "button",
         className: cn(
-          "px-2 h-7 shrink-0 flex items-center justify-center hover:bg-accent cursor-pointer",
+          "flex h-7 shrink-0 cursor-pointer items-center justify-center px-2 hover:bg-accent",
           className,
         ),
         children,
@@ -407,7 +407,7 @@ function SelectionPopoverContent({
     defaultTagName: "div",
     props: mergeProps<"div">(
       {
-        className: cn("flex min-h-0 h-full flex-1 flex-col", className),
+        className: cn("flex h-full min-h-0 flex-1 flex-col", className),
         children: (
           <SelectionPopoverContentContext value={contentContextValue}>
             {children}
@@ -434,7 +434,7 @@ function SelectionPopoverContent({
     <DialogPrimitive.Portal container={container}>
       <DialogPrimitive.Popup
         className={cn(
-          "fixed inset-0 pointer-events-none focus:outline-none",
+          "pointer-events-none fixed inset-0 focus:outline-none",
           SELECTION_CONTENT_OVERLAY_LAYERS.popover,
         )}
         finalFocus={resolvedFinalFocus}
@@ -472,14 +472,14 @@ function SelectionPopoverHeader({
     props: mergeProps<"div">(
       {
         className: cn(
-          `${SELECTION_POPOVER_DRAG_HANDLE_CLASS} group relative flex items-center justify-between gap-3 py-2 px-4 select-none hover:cursor-grab active:cursor-grabbing`,
+          `${SELECTION_POPOVER_DRAG_HANDLE_CLASS} group relative flex items-center justify-between gap-3 px-4 py-2 select-none hover:cursor-grab active:cursor-grabbing`,
           className,
         ),
         children: (
           <>
             <div
               className={cn(
-                "absolute left-1/2 top-0 -translate-x-1/2 p-1 transition-all duration-200",
+                "absolute top-0 left-1/2 -translate-x-1/2 p-1 transition-all duration-200",
                 isDragging ? "opacity-100" : "opacity-0 group-hover:opacity-100",
               )}
             >
@@ -527,7 +527,7 @@ function SelectionPopoverBody({
 }
 
 function SelectionPopoverFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return <div className={cn("flex items-center gap-2 py-2 px-4", className)} {...props} />
+  return <div className={cn("flex items-center gap-2 px-4 py-2", className)} {...props} />
 }
 
 function SelectionPopoverTitle({ className, ...props }: React.ComponentProps<"h2">) {

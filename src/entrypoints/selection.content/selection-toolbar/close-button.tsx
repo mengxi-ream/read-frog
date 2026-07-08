@@ -36,7 +36,7 @@ export function CloseButton() {
           <button
             type="button"
             title="Close selection toolbar"
-            className={`border-border absolute -top-1 -right-1 cursor-pointer rounded-full border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? "block" : "hidden group-hover:block"}`}
+            className={`absolute -top-1 -right-1 cursor-pointer rounded-full border border-border bg-neutral-100 dark:bg-neutral-900 ${isDropdownOpen ? "block" : "hidden group-hover:block"}`}
             onMouseDown={handleMouseDown}
           />
         }

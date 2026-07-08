@@ -68,7 +68,7 @@ export function PromptGrid({
   return (
     <div
       aria-label={i18n.t("options.translation.personalizedPrompts.title")}
-      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 max-h-96 overflow-auto p-2 select-none"
+      className="grid max-h-96 grid-cols-1 gap-4 overflow-auto p-2 select-none md:grid-cols-2 lg:grid-cols-4"
     >
       {allPrompts.map((pattern) => {
         const isDefault = pattern.id === DEFAULT_TRANSLATE_PROMPT_ID
@@ -77,7 +77,7 @@ export function PromptGrid({
         return (
           <Card
             className={cn(
-              "h-full gap-0 pb-2 py-0 cursor-pointer hover:scale-[1.02] transition-transform duration-30 ease-in-out",
+              "h-full cursor-pointer gap-0 py-0 pb-2 transition-transform duration-30 ease-in-out hover:scale-[1.02]",
               // for highlight checked card in export mode
               isExportMode
                 ? "has-aria-checked:border-primary has-aria-checked:bg-primary/5 dark:has-aria-checked:border-primary/70 dark:has-aria-checked:bg-primary/10"
@@ -86,11 +86,11 @@ export function PromptGrid({
             key={pattern.id}
           >
             <CardHeader
-              className="grid-rows-1 pt-4 px-4 mb-3"
+              className="mb-3 grid-rows-1 px-4 pt-4"
               onClick={() => handleCardClick(pattern)}
             >
               <CardTitle className="w-full min-w-0">
-                <div className="leading-relaxed gap-3 flex items-center w-full h-5">
+                <div className="flex h-5 w-full items-center gap-3 leading-relaxed">
                   {/* Checkbox: only show in export mode for custom prompts (not default) */}
                   <Activity mode={isExportMode && !isDefault ? "visible" : "hidden"}>
                     <Checkbox
@@ -108,7 +108,7 @@ export function PromptGrid({
                   </Activity>
                   <Label
                     htmlFor={`${checkboxBaseId}-check-${pattern.id}`}
-                    className="flex-1 min-w-0 block truncate cursor-pointer"
+                    className="block min-w-0 flex-1 cursor-pointer truncate"
                     title={pattern.name}
                   >
                     {pattern.name}
@@ -122,17 +122,17 @@ export function PromptGrid({
               </CardTitle>
             </CardHeader>
             <CardContent
-              className="flex flex-col gap-4 h-16 flex-1 px-4 mb-3"
+              className="mb-3 flex h-16 flex-1 flex-col gap-4 px-4"
               onClick={() => handleCardClick(pattern)}
             >
-              <p className="text-sm text-ellipsis whitespace-pre-wrap line-clamp-3">
+              <p className="line-clamp-3 text-sm text-ellipsis whitespace-pre-wrap">
                 {pattern.systemPrompt && pattern.prompt
                   ? `${pattern.systemPrompt}\n---\n${pattern.prompt}`
                   : pattern.systemPrompt || pattern.prompt}
               </p>
             </CardContent>
             <Separator className="my-0" />
-            <CardFooter className="w-full flex justify-between px-4 items-center py-2 cursor-default">
+            <CardFooter className="flex w-full cursor-default items-center justify-between px-4 py-2">
               <Activity mode={isDefault ? "visible" : "hidden"}>
                 <CardAction>
                   <ConfigurePrompt originPrompt={pattern} />

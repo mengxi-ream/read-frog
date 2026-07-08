@@ -45,9 +45,9 @@ export function LanguageControlPanel() {
   const detectedLangCode = detectedSourceLangCode ?? "eng"
 
   return (
-    <div className="flex items-center gap-3 w-full">
+    <div className="flex w-full items-center gap-3">
       <SearchableLanguageSelector
-        className="flex-1 min-w-0"
+        className="min-w-0 flex-1"
         value={sourceLangCode}
         onValueChange={setSourceLangCode}
         detectedLangCode={detectedLangCode}
@@ -67,7 +67,7 @@ export function LanguageControlPanel() {
       </div>
 
       <SearchableLanguageSelector
-        className="flex-1 min-w-0"
+        className="min-w-0 flex-1"
         value={targetLangCode}
         onValueChange={(value) => {
           if (value !== "auto") setTargetLangCode(value)

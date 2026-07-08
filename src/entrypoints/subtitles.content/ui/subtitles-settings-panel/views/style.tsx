@@ -62,7 +62,7 @@ function SettingsGroup({
   return (
     <div className="mb-4">
       <div className="mb-1.5 flex items-center justify-between px-0.5">
-        <div className="text-popover-foreground flex items-center gap-1.5 text-[13px] font-medium">
+        <div className="flex items-center gap-1.5 text-[13px] font-medium text-popover-foreground">
           {icon}
           {title}
         </div>
@@ -71,12 +71,12 @@ function SettingsGroup({
           variant="ghost"
           size="icon-sm"
           onClick={onReset}
-          className="text-muted-foreground hover:bg-accent/60 hover:text-popover-foreground cursor-pointer"
+          className="cursor-pointer text-muted-foreground hover:bg-accent/60 hover:text-popover-foreground"
         >
           <IconRefresh className="size-3.5" />
         </Button>
       </div>
-      <div className="bg-muted/50 divide-border rounded-xl border divide-y">{children}</div>
+      <div className="divide-y divide-border rounded-xl border bg-muted/50">{children}</div>
     </div>
   )
 }
@@ -84,7 +84,7 @@ function SettingsGroup({
 function SettingRow({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="flex items-center justify-between px-3 py-2.5">
-      <span className="text-popover-foreground text-[13px]">{label}</span>
+      <span className="text-[13px] text-popover-foreground">{label}</span>
       {children}
     </div>
   )
@@ -110,8 +110,8 @@ function SliderRow({
   return (
     <div className="px-3 py-2.5">
       <div className="mb-3.5 flex items-center justify-between">
-        <span className="text-popover-foreground text-[13px]">{label}</span>
-        <span className="text-muted-foreground text-[12px]">{display}</span>
+        <span className="text-[13px] text-popover-foreground">{label}</span>
+        <span className="text-[12px] text-muted-foreground">{display}</span>
       </div>
       <Slider
         min={min}
@@ -157,7 +157,7 @@ function TextStyleGroup({
           type="color"
           value={textStyle.color}
           onChange={(e) => onChange({ color: e.target.value })}
-          className="border-input bg-background h-6 w-6 cursor-pointer rounded border p-0.5"
+          className="h-6 w-6 cursor-pointer rounded border border-input bg-background p-0.5"
         />
       </SettingRow>
 
@@ -211,7 +211,7 @@ export function StyleView() {
   }
 
   return (
-    <div className="min-h-[calc(100cqh-6rem)] px-3 pb-4 pt-3">
+    <div className="min-h-[calc(100cqh-6rem)] px-3 pt-3 pb-4">
       <SettingsGroup
         icon={<IconSettings className="size-3.5" />}
         title={i18n.t("options.videoSubtitles.style.generalSettings")}

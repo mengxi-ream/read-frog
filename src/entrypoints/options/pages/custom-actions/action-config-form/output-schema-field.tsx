@@ -327,16 +327,16 @@ export const OutputSchemaField = withForm({
                   <div className="flex items-center gap-2 rounded-lg border bg-card p-2">
                     <Icon
                       icon="tabler:grip-vertical"
-                      className="size-4 text-muted-foreground shrink-0"
+                      className="size-4 shrink-0 text-muted-foreground"
                     />
-                    <span className="text-sm font-medium shrink-0">{outputField.name}</span>
+                    <span className="shrink-0 text-sm font-medium">{outputField.name}</span>
                     <Badge variant="secondary" className="shrink-0">
                       {i18n.t(`dataTypes.${outputField.type}`)}
                     </Badge>
-                    <span className="text-sm text-muted-foreground truncate min-w-0 flex-1">
+                    <span className="min-w-0 flex-1 truncate text-sm text-muted-foreground">
                       {outputField.description || "—"}
                     </span>
-                    <div className="flex gap-1 shrink-0">
+                    <div className="flex shrink-0 gap-1">
                       <Button
                         type="button"
                         variant="outline"

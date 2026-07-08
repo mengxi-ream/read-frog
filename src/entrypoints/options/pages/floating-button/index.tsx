@@ -14,7 +14,7 @@ export function FloatingButtonPage() {
         <img
           src={floatingButtonDemoImage}
           alt={i18n.t("options.floatingButtonAndToolbar.floatingButtonDemoImageAlt")}
-          className="w-100 h-auto"
+          className="h-auto w-100"
         />
       </GradientBackground>
       <div className="*:border-b [&>*:last-child]:border-b-0">

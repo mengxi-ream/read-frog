@@ -108,9 +108,9 @@ export function JsonTreeView({ resolvedConfig }: { resolvedConfig: Config }) {
     return (
       <div key={item.getId()}>
         <TreeItem item={item}>
-          <TreeItemLabel className="font-mono text-xs bg-transparent hover:bg-transparent">
+          <TreeItemLabel className="bg-transparent font-mono text-xs hover:bg-transparent">
             {!isArrayItem && <span className="text-blue-600 dark:text-blue-400">{key}</span>}
-            {!isArrayItem && <span className="text-slate-500 mx-1">:</span>}
+            {!isArrayItem && <span className="mx-1 text-slate-500">:</span>}
             <span className="text-slate-700 dark:text-slate-300">
               {isFolder
                 ? formatFolderLabel(value, item.getChildren().length ?? 0)

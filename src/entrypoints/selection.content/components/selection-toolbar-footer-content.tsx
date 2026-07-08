@@ -31,7 +31,7 @@ function PreviewField({
         <div
           data-slot="selection-toolbar-footer-preview-value"
           data-field={field}
-          className="max-h-36 overflow-y-auto rounded-md border bg-muted/40 px-2 py-1 text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere] text-muted-foreground"
+          className="max-h-36 overflow-y-auto rounded-md border bg-muted/40 px-2 py-1 text-sm [overflow-wrap:anywhere] break-words whitespace-pre-wrap text-muted-foreground"
         >
           {displayValue}
         </div>
@@ -171,7 +171,7 @@ export function SelectionToolbarFooterContent({
 
   return (
     <SelectionPopover.Footer className={cn("justify-between gap-3 border-t", className)}>
-      <div className="min-w-0 max-w-52 flex-1">
+      <div className="max-w-52 min-w-0 flex-1">
         <ProviderSelector
           providers={providers}
           value={value}

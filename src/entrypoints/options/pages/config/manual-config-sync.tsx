@@ -37,7 +37,7 @@ export function ManualConfigSync() {
       description={i18n.t("options.config.sync.description")}
     >
       <div className="w-full space-y-4">
-        <div className="text-end gap-3 flex justify-end">
+        <div className="flex justify-end gap-3 text-end">
           <ImportConfig />
           <ExportConfig />
         </div>

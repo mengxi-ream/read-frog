@@ -57,7 +57,7 @@ export function BackupConfigItem({ backupId, backupMetadata, backup }: BackupCon
     <Item variant="muted">
       <ItemContent>
         <ItemTitle>{formatDate(backupMetadata.createdAt)}</ItemTitle>
-        <ItemDescription className="text-xs flex flex-wrap items-center gap-x-4">
+        <ItemDescription className="flex flex-wrap items-center gap-x-4 text-xs">
           <span>
             {i18n.t("options.config.backup.item.extensionVersion")}{" "}
             {backupMetadata.extensionVersion}

@@ -34,7 +34,7 @@ export default function AppearanceSettings() {
       title={i18n.t("options.general.appearance.title")}
       description={i18n.t("options.general.appearance.theme")}
     >
-      <div className="w-full flex justify-start md:justify-end">
+      <div className="flex w-full justify-start md:justify-end">
         <Select value={themeMode} onValueChange={(value) => setThemeMode(value as ThemeMode)}>
           <SelectTrigger className="w-full">
             <SelectValue render={<span />}>

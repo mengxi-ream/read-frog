@@ -48,10 +48,10 @@ export function CSSCodeEditor({
       }}
       className={cn(
         "overflow-hidden rounded-md border",
-        "focus-within:border-ring focus-within:ring-ring/50 focus-within:ring-[3px]",
+        "focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50",
         hasError &&
           "border-destructive focus-within:border-destructive focus-within:ring-destructive/50",
-        !editable && "opacity-50 cursor-not-allowed",
+        !editable && "cursor-not-allowed opacity-50",
         className,
       )}
       style={{

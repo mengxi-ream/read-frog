@@ -26,7 +26,7 @@ export function SubtitlesTranslateButton() {
         setPanelOpen((prev) => !prev)
       }}
       className={cn(
-        `${TRANSLATE_BUTTON_CLASS} w-12 h-full flex items-center justify-center relative border-none p-0 m-0 cursor-pointer rounded-[14px] transition-all duration-200`,
+        `${TRANSLATE_BUTTON_CLASS} relative m-0 flex h-full w-12 cursor-pointer items-center justify-center rounded-[14px] border-none p-0 transition-all duration-200`,
         panelOpen ? "bg-accent shadow-inner" : "bg-transparent",
       )}
     >
@@ -34,14 +34,14 @@ export function SubtitlesTranslateButton() {
         src={logo}
         alt="Subtitle Toggle"
         className={cn(
-          "w-8 h-8 transition-all duration-200 object-contain block",
+          "block h-8 w-8 object-contain transition-all duration-200",
           isVisible ? "opacity-100 saturate-110" : "opacity-75 saturate-90",
           panelOpen && "scale-[1.02]",
         )}
       />
       <div
         className={cn(
-          "absolute bottom-1 right-0 min-w-7 px-1 py-0.5 rounded-md text-[8px] font-semibold leading-none tracking-[0.08em] text-center transition-colors duration-200",
+          "absolute right-0 bottom-1 min-w-7 rounded-md px-1 py-0.5 text-center text-[8px] leading-none font-semibold tracking-[0.08em] transition-colors duration-200",
           isVisible
             ? "bg-primary text-primary-foreground shadow-sm"
             : "bg-secondary text-secondary-foreground",

@@ -43,7 +43,7 @@ function FrogToast({
           .filter(Boolean)
           .join(" "),
       }}
-      className="z-[2147483647] notranslate"
+      className="notranslate z-[2147483647]"
     />
   )
 }

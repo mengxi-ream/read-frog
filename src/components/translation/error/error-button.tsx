@@ -14,10 +14,10 @@ export function ErrorButton({ error }: { error: APICallError }) {
         delay={0}
         closeDelay={0}
         render={
-          <IconAlertCircle className="size-4 text-destructive hover:text-destructive/90 cursor-pointer" />
+          <IconAlertCircle className="size-4 cursor-pointer text-destructive hover:text-destructive/90" />
         }
       />
-      <HoverCardContent container={shadowWrapper} className="w-64 notranslate" render={<Alert />}>
+      <HoverCardContent container={shadowWrapper} className="notranslate w-64" render={<Alert />}>
         <IconAlertCircle className="size-4 text-red-500!" />
         <AlertTitle>Translation Error</AlertTitle>
         <AlertDescription className="break-all">
@@ -49,8 +49,8 @@ function StatusCode({ statusCode }: { statusCode: number }) {
   }
 
   return (
-    <div className="flex items-center gap-2 mb-2">
-      <div className={`w-2 h-2 rounded-full ${getStatusCodeColor(statusCode)}`} />
+    <div className="mb-2 flex items-center gap-2">
+      <div className={`h-2 w-2 rounded-full ${getStatusCodeColor(statusCode)}`} />
       <span className="text-sm font-medium">
         Status Code:
         {statusCode}

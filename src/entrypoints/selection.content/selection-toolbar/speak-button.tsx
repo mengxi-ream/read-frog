@@ -50,7 +50,7 @@ export function SpeakButton() {
       render={
         <button
           type="button"
-          className="px-2 h-7 flex items-center justify-center hover:bg-accent cursor-pointer"
+          className="flex h-7 cursor-pointer items-center justify-center px-2 hover:bg-accent"
           onClick={handleClick}
           aria-label={tooltipText}
         />

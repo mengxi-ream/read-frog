@@ -86,14 +86,14 @@ export function UserRulesEditor() {
           value={jsonInput}
           onChange={setJsonInput}
           hasError={!validation.ok}
-          className="min-h-[200px] max-h-[400px] overflow-y-auto"
+          className="max-h-[400px] min-h-[200px] overflow-y-auto"
         />
         {!validation.ok && (
           <Alert variant="destructive">
             <Icon icon="tabler:alert-circle-filled" className="size-4" />
             <AlertTitle>{i18n.t(VALIDATION_ERROR_MESSAGE_KEYS[validation.kind])}</AlertTitle>
             <AlertDescription>
-              <ul className="list-disc list-inside text-xs">
+              <ul className="list-inside list-disc text-xs">
                 {validation.issues.slice(0, MAX_VISIBLE_ISSUES).map((issue) => (
                   <li key={`${issue.path}-${issue.message}`}>
                     <code className="text-xs">{issue.path}</code>
@@ -112,7 +112,7 @@ export function UserRulesEditor() {
             </AlertDescription>
           </Alert>
         )}
-        <div className="flex items-center gap-2 justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div
             className={cn(
               "text-sm text-green-500",

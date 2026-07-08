@@ -469,10 +469,10 @@ export function SelectionToolbar() {
         >
           <div
             data-slot="selection-toolbar-surface"
-            className="bg-popover rounded-sm shadow-floating border border-border/50 flex items-center"
+            className="flex items-center rounded-sm border border-border/50 bg-popover shadow-floating"
             style={{ opacity: "var(--rf-selection-opacity, 1)" }}
           >
-            <div className="flex items-center overflow-x-auto overflow-y-hidden rounded-sm max-w-105 no-scrollbar">
+            <div className="no-scrollbar flex max-w-105 items-center overflow-x-auto overflow-y-hidden rounded-sm">
               {features.translate.enabled && <TranslateButton />}
               {features.speak.enabled && <SpeakButton />}
               <SelectionToolbarCustomActionButtons />

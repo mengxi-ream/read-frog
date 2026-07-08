@@ -15,7 +15,7 @@ export function BetaExperienceConfig() {
       title={i18n.t("options.betaExperience.title")}
       description={i18n.t("options.betaExperience.description")}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Switch
           checked={betaExperienceConfig.enabled}
           onCheckedChange={(checked) => {

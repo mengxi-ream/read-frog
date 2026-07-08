@@ -47,16 +47,16 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
   return (
     <Collapsible className="group/site-rule">
       <div className="flex items-center gap-2 px-3 py-2">
-        <CollapsibleTrigger className="flex flex-1 items-center gap-2 min-w-0 text-left cursor-pointer">
+        <CollapsibleTrigger className="flex min-w-0 flex-1 cursor-pointer items-center gap-2 text-left">
           <Icon
             icon="tabler:chevron-right"
             className="size-4 shrink-0 text-muted-foreground transition-transform duration-200 group-data-[state=open]/site-rule:rotate-90"
           />
-          <code className="text-xs shrink-0">{rule.id}</code>
+          <code className="shrink-0 text-xs">{rule.id}</code>
           {rule.description && (
-            <span className="text-xs text-muted-foreground truncate">{rule.description}</span>
+            <span className="truncate text-xs text-muted-foreground">{rule.description}</span>
           )}
-          <span className="ml-auto flex items-center gap-1 shrink-0">
+          <span className="ml-auto flex shrink-0 items-center gap-1">
             {matches.slice(0, VISIBLE_MATCH_BADGES).map((pattern) => (
               <Badge key={pattern} variant="secondary">
                 <span className="max-w-40 truncate">{pattern}</span>
@@ -87,7 +87,7 @@ export function BuiltInRuleRow({ rule }: { rule: SiteRule }) {
         />
       </div>
       <CollapsibleContent>
-        <pre className="text-xs overflow-x-auto rounded-md bg-muted p-3 mx-3 mb-3">
+        <pre className="mx-3 mb-3 overflow-x-auto rounded-md bg-muted p-3 text-xs">
           {JSON.stringify(rule, null, 2)}
         </pre>
       </CollapsibleContent>

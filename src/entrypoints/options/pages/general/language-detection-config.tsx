@@ -50,7 +50,7 @@ export default function LanguageDetectionConfig() {
       description={
         <>
           {i18n.t("options.general.languageDetection.description")}
-          <div className="flex items-center gap-1.5 mt-2">
+          <div className="mt-2 flex items-center gap-1.5">
             <div className={`size-2 rounded-full ${statusIndicator.color}`} />
             <span className="text-xs">{statusIndicator.text}</span>
           </div>

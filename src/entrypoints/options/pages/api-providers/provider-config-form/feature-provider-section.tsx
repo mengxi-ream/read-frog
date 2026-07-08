@@ -53,7 +53,7 @@ export const FeatureProviderSection = withForm({
 
     return (
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer py-2">
+        <CollapsibleTrigger className="flex cursor-pointer items-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground">
           <Icon
             icon="tabler:chevron-right"
             className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}

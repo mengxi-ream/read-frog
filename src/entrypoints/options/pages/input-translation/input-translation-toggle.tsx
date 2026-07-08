@@ -13,7 +13,7 @@ export function InputTranslationToggle() {
       title={i18n.t("options.inputTranslation.toggle.title")}
       description={i18n.t("options.inputTranslation.toggle.description")}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Switch
           checked={inputTranslation.enabled}
           onCheckedChange={(checked) => {

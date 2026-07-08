@@ -65,7 +65,7 @@ export const ProviderOptionsField = withForm({
         editorAriaLabel="provider-options-editor"
         placeholder={placeholderText}
         label={
-          <div className="flex items-center justify-between w-full">
+          <div className="flex w-full items-center justify-between">
             <div className="flex items-center gap-1.5">
               <span>{i18n.t("options.apiProviders.form.providerOptions")}</span>
               <HelpTooltip>{i18n.t("options.apiProviders.form.providerOptionsHint")}</HelpTooltip>

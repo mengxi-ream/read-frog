@@ -13,7 +13,7 @@ import { ConfigCard } from "../../components/config-card"
 
 export function SkipLanguages() {
   return (
-    <div className="py-6 flex flex-col gap-y-4">
+    <div className="flex flex-col gap-y-4 py-6">
       <ConfigCard
         id="skip-languages"
         title={i18n.t("options.translation.skipLanguages.title")}
@@ -64,7 +64,7 @@ function SkipLanguagesSelector() {
   const selectedLanguages = translateConfig.page.skipLanguages
 
   return (
-    <div className="w-full flex justify-start md:justify-end">
+    <div className="flex w-full justify-start md:justify-end">
       <MultiLanguageCombobox
         selectedLanguages={selectedLanguages}
         onLanguagesChange={(languages) =>
@@ -109,7 +109,7 @@ function SelectedSkipLanguageCells() {
           <Button
             variant="ghost"
             size="icon"
-            className="h-4 w-4 p-0 hover:bg-input hover:text-input-foreground"
+            className="hover:text-input-foreground h-4 w-4 p-0 hover:bg-input"
             onClick={() => removeLanguage(language)}
           >
             <Icon icon="tabler:x" className="h-3 w-3" />

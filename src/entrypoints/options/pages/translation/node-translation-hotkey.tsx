@@ -48,7 +48,7 @@ export function NodeTranslationHotkey() {
           disabled={!translateConfig.node.enabled}
         >
           <SelectTrigger
-            className={`w-full ${!translateConfig.node.enabled ? "opacity-50 pointer-events-none" : ""}`}
+            className={`w-full ${!translateConfig.node.enabled ? "pointer-events-none opacity-50" : ""}`}
           >
             <SelectValue render={<span />}>
               {HOTKEY_ICONS[translateConfig.node.hotkey]}{" "}

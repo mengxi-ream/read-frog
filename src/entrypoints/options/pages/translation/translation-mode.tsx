@@ -37,7 +37,7 @@ function TranslationModeSelector() {
   }
 
   return (
-    <div className="w-full flex justify-start md:justify-end">
+    <div className="flex w-full justify-start md:justify-end">
       <Select value={currentMode} onValueChange={handleModeChange}>
         <SelectTrigger className="w-40">
           <SelectValue render={<span />}>

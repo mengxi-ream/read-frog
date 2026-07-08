@@ -13,7 +13,7 @@ export function SubtitlesContainer() {
   const ui = use(SubtitlesUIContext)
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-visible">
+    <div className="pointer-events-none absolute inset-0 overflow-visible">
       <div className="absolute inset-0 z-10 overflow-visible">
         {isVisible && (
           <>

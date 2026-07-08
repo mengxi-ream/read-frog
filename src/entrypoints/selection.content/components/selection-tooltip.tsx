@@ -81,7 +81,7 @@ function SelectionTooltip({
         // This path keeps the popup mouse-transparent while open so
         // hover-leave cannot land on the tooltip itself and contaminate the
         // hover chain.
-        className={cn("pointer-events-none whitespace-nowrap leading-5", className)}
+        className={cn("pointer-events-none leading-5 whitespace-nowrap", className)}
         container={container}
         // The positioner is a separate overlay box around the popup. Making the
         // popup itself transparent is not enough if the pointer can still land

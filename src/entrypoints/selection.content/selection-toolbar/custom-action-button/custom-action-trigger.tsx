@@ -27,7 +27,7 @@ export function SelectionToolbarCustomActionTrigger({
         <button
           type="button"
           aria-label={action.name}
-          className="px-2 h-7 shrink-0 flex items-center justify-center hover:bg-accent cursor-pointer"
+          className="flex h-7 shrink-0 cursor-pointer items-center justify-center px-2 hover:bg-accent"
           onClick={handleClick}
         />
       }

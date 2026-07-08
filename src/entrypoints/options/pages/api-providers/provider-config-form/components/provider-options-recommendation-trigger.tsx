@@ -132,7 +132,7 @@ export function ProviderOptionsRecommendationTrigger({
             size="icon-xs"
             aria-label={i18n.t("options.apiProviders.form.providerOptionsRecommendationTrigger")}
             className={cn(
-              "text-muted-foreground hover:text-foreground transition-colors duration-700 ease-in-out",
+              "text-muted-foreground transition-colors duration-700 ease-in-out hover:text-foreground",
               isFlashing && "text-primary",
             )}
           />

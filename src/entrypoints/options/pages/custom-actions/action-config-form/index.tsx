@@ -39,7 +39,7 @@ export function CustomActionConfigForm() {
 
   if (!selectedAction) {
     return (
-      <div className="flex-1 bg-card rounded-xl p-4 border min-h-[420px] flex items-center justify-center text-sm text-muted-foreground">
+      <div className="flex min-h-[420px] flex-1 items-center justify-center rounded-xl border bg-card p-4 text-sm text-muted-foreground">
         {customActions.length === 0
           ? i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.empty")
           : i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.edit")}
@@ -111,7 +111,7 @@ function CustomActionConfigEditor({
 
   return (
     <form.AppForm>
-      <div className={cn("flex-1 bg-card rounded-xl p-4 border flex flex-col justify-between")}>
+      <div className={cn("flex flex-1 flex-col justify-between rounded-xl border bg-card p-4")}>
         <div className="flex flex-col gap-4">
           <NameField form={form} />
 
@@ -126,7 +126,7 @@ function CustomActionConfigEditor({
                 label={i18n.t(
                   "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.systemPrompt",
                 )}
-                className="min-h-36 max-h-80"
+                className="max-h-80 min-h-36"
                 insertCells={customActionInsertCells}
               />
             )}
@@ -139,7 +139,7 @@ function CustomActionConfigEditor({
                 label={i18n.t(
                   "options.floatingButtonAndToolbar.selectionToolbar.customActions.form.prompt",
                 )}
-                className="min-h-28 max-h-80"
+                className="max-h-80 min-h-28"
                 insertCells={customActionInsertCells}
               />
             )}
@@ -149,7 +149,7 @@ function CustomActionConfigEditor({
 
           <NotebaseConnectionField form={form} />
         </div>
-        <div className="flex justify-end mt-8">
+        <div className="mt-8 flex justify-end">
           <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
             <AlertDialogTrigger render={<Button type="button" variant="destructive" />}>
               {i18n.t(

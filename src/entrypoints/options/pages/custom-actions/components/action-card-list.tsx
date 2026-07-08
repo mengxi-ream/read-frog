@@ -81,10 +81,10 @@ export function CustomActionCardList() {
           render={
             <Button
               variant="outline"
-              className="h-auto p-3 border-dashed rounded-xl"
+              className="h-auto rounded-xl border-dashed p-3"
               disabled={customActionProviders.length === 0}
             >
-              <div className="flex items-center justify-center gap-2 w-full">
+              <div className="flex w-full items-center justify-center gap-2">
                 <Icon icon="tabler:plus" className="size-4" />
                 <span className="text-sm">
                   {i18n.t("options.floatingButtonAndToolbar.selectionToolbar.customActions.add")}
@@ -128,18 +128,18 @@ function CustomActionCard({ action }: { action: SelectionToolbarCustomAction }) 
   return (
     <div
       className={cn(
-        "rounded-xl border p-3 bg-card transition-colors cursor-pointer",
+        "cursor-pointer rounded-xl border bg-card p-3 transition-colors",
         selectedCustomActionId === action.id && "border-primary",
         action.enabled === false && "opacity-70",
       )}
       onClick={() => setSelectedCustomActionId(action.id)}
     >
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex min-w-0 items-center gap-2">
           <div className="size-4">
-            <Icon icon={action.icon} className="size-4 text-zinc-600 dark:text-zinc-300 shrink-0" />
+            <Icon icon={action.icon} className="size-4 shrink-0 text-zinc-600 dark:text-zinc-300" />
           </div>
-          <span className="text-sm font-medium truncate">{action.name}</span>
+          <span className="truncate text-sm font-medium">{action.name}</span>
         </div>
         <Switch
           checked={action.enabled !== false}

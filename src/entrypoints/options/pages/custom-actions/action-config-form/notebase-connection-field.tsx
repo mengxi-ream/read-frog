@@ -403,7 +403,7 @@ export const NotebaseConnectionField = withForm({
     }
 
     return (
-      <Field className="rounded-xl border border-dashed bg-muted/10 p-4 gap-4">
+      <Field className="gap-4 rounded-xl border border-dashed bg-muted/10 p-4">
         <div className="space-y-1">
           <FieldLabel nativeLabel={false} render={<div />}>
             {t("title")}
@@ -625,7 +625,7 @@ export const NotebaseConnectionField = withForm({
                   )}
 
                   <div className="space-y-2">
-                    <div className="hidden md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] md:items-center gap-2 px-1 text-xs font-medium text-muted-foreground">
+                    <div className="hidden gap-2 px-1 text-xs font-medium text-muted-foreground md:grid md:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)_auto] md:items-center">
                       <span>{t("localFieldLabel")}</span>
                       <span />
                       <span>{t("remoteFieldLabel")}</span>
@@ -689,7 +689,7 @@ export const NotebaseConnectionField = withForm({
                               </SelectContent>
                             </Select>
 
-                            <div className="hidden md:flex items-center justify-center text-muted-foreground">
+                            <div className="hidden items-center justify-center text-muted-foreground md:flex">
                               <IconChevronsRight className="size-4" />
                             </div>
 

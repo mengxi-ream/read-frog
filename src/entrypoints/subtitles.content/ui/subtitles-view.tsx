@@ -29,10 +29,10 @@ function SubtitlesContent() {
 
   return (
     <div
-      className={`${SUBTITLES_VIEW_CLASS} flex w-full flex-col items-center justify-end pb-3 pointer-events-none`}
+      className={`${SUBTITLES_VIEW_CLASS} pointer-events-none flex w-full flex-col items-center justify-end pb-3`}
     >
       <div
-        className="flex flex-col gap-2 w-fit max-w-[90%] mx-auto px-2 py-1.5 rounded text-center text-white pointer-events-auto select-text cursor-text"
+        className="pointer-events-auto mx-auto flex w-fit max-w-[90%] cursor-text flex-col gap-2 rounded px-2 py-1.5 text-center text-white select-text"
         style={containerStyle}
       >
         <Activity mode={showMain ? "visible" : "hidden"}>
@@ -67,7 +67,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
       <div
         ref={refs.container}
         className={cn(
-          "group flex flex-col items-center absolute w-full left-0 right-0",
+          "group absolute right-0 left-0 flex w-full flex-col items-center",
           !isDragging && "transition-[top,bottom] duration-200",
           !showContent && "invisible",
         )}
@@ -76,7 +76,7 @@ export function SubtitlesView({ showContent }: SubtitlesViewProps) {
         <div className="pointer-events-auto">
           <div
             ref={refs.handle}
-            className="mb-0.5 px-2 py-1 rounded cursor-grab active:cursor-grabbing bg-black/75 opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity duration-200"
+            className="mb-0.5 cursor-grab rounded bg-black/75 px-2 py-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 active:cursor-grabbing active:opacity-100"
           >
             <IconGripHorizontal className="size-4 text-white" />
           </div>

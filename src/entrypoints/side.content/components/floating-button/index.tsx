@@ -51,7 +51,7 @@ interface PendingDragState {
 }
 
 const floatingButtonControlClassName = cn(
-  "absolute invisible cursor-pointer pointer-events-none flex size-6 items-center justify-center",
+  "pointer-events-none invisible absolute flex size-6 cursor-pointer items-center justify-center",
   "text-neutral-300 transition-[color,left,right,transform] duration-300 hover:scale-110 hover:text-neutral-500 active:scale-90 active:text-neutral-500",
   "dark:text-neutral-700 dark:hover:text-neutral-500 dark:active:text-neutral-500",
 )
@@ -356,9 +356,9 @@ export default function FloatingButton() {
           ref={mainButtonRef}
           data-testid="floating-main-button"
           className={cn(
-            "border-border relative flex h-10 items-center bg-white shadow-lg transition-transform duration-300 dark:bg-neutral-900",
+            "relative flex h-10 items-center border-border bg-white shadow-lg transition-transform duration-300 dark:bg-neutral-900",
             isDraggingButton
-              ? "w-10 touch-none justify-center rounded-full border cursor-grabbing opacity-100"
+              ? "w-10 cursor-grabbing touch-none justify-center rounded-full border opacity-100"
               : floatingButtonSide === "right"
                 ? "w-11 justify-start rounded-l-full border border-r-0"
                 : "w-11 justify-end rounded-r-full border border-l-0",
@@ -463,8 +463,8 @@ function FloatingButtonCloseMenu({
               floatingButtonControlClassName,
               "-top-1",
               controlOffsetClassName,
-              expanded && "visible pointer-events-auto",
-              open && "visible pointer-events-auto",
+              expanded && "pointer-events-auto visible",
+              open && "pointer-events-auto visible",
             )}
           />
         }
@@ -513,7 +513,7 @@ function FloatingButtonLockControl({ expanded, side }: FloatingButtonLockControl
         floatingButtonControlClassName,
         "-bottom-1",
         controlOffsetClassName,
-        expanded && "visible pointer-events-auto",
+        expanded && "pointer-events-auto visible",
       )}
       onClick={handleToggleLocked}
     >

@@ -27,7 +27,7 @@ export function PromptList() {
 
   return (
     <section className="w-full">
-      <div className="w-full text-end mb-4 gap-3 flex justify-end">
+      <div className="mb-4 flex w-full justify-end gap-3 text-end">
         <Activity mode={isExportMode ? "visible" : "hidden"}>
           <Button
             variant="outline"

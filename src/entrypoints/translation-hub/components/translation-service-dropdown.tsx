@@ -54,7 +54,7 @@ export function TranslationServiceDropdown() {
             {selectedIds.length > 0 ? (
               <div className="flex items-center gap-2">
                 <span>{i18n.t("translateService.translationProviders")}</span>
-                <span className="text-xs bg-primary text-primary-foreground px-1.5 py-0.5 rounded-full">
+                <span className="rounded-full bg-primary px-1.5 py-0.5 text-xs text-primary-foreground">
                   {selectedIds.length}
                 </span>
               </div>

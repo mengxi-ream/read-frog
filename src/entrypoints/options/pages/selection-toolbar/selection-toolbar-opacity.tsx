@@ -24,7 +24,7 @@ export function SelectionToolbarOpacity() {
       title={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.opacity.title")}
       description={i18n.t("options.floatingButtonAndToolbar.selectionToolbar.opacity.description")}
     >
-      <div className="w-full flex items-center gap-2">
+      <div className="flex w-full items-center gap-2">
         <Slider
           min={MIN_SELECTION_OVERLAY_OPACITY}
           max={MAX_SELECTION_OVERLAY_OPACITY}
@@ -38,7 +38,7 @@ export function SelectionToolbarOpacity() {
           }}
           className="flex-1"
         />
-        <span className="w-10 text-sm text-right">{draftOpacity}%</span>
+        <span className="w-10 text-right text-sm">{draftOpacity}%</span>
       </div>
     </ConfigCard>
   )

@@ -78,7 +78,7 @@ function getTTSVoiceGenderBadgeClass(gender: TTSVoiceItem["gender"]): string | u
 }
 
 function TTSVoiceSelectValue({ voice }: { voice: TTSVoice }) {
-  return <span className="block min-w-0 max-w-full truncate">{voice}</span>
+  return <span className="block max-w-full min-w-0 truncate">{voice}</span>
 }
 
 function getTTSVoiceSearchValue(item: TTSVoiceItem): string {
@@ -94,13 +94,13 @@ function TTSVoiceComboboxItem({ item }: { item: TTSVoiceItem }) {
     <ComboboxItem key={item.voice} value={item} className="overflow-hidden py-1.5">
       <Item
         size="sm"
-        className="w-full min-w-0 max-w-[calc(var(--anchor-width)_-_2.5rem)] flex-nowrap gap-2 overflow-hidden p-0"
+        className="w-full max-w-[calc(var(--anchor-width)_-_2.5rem)] min-w-0 flex-nowrap gap-2 overflow-hidden p-0"
       >
         <ItemContent className="min-w-0 gap-1 overflow-hidden">
-          <ItemTitle className="w-full min-w-0 max-w-full overflow-hidden font-mono text-xs">
+          <ItemTitle className="w-full max-w-full min-w-0 overflow-hidden font-mono text-xs">
             <span className="block min-w-0 truncate">{item.voice}</span>
           </ItemTitle>
-          <ItemDescription className="m-0 flex min-w-0 max-w-full flex-wrap items-center gap-1.5 overflow-hidden">
+          <ItemDescription className="m-0 flex max-w-full min-w-0 flex-wrap items-center gap-1.5 overflow-hidden">
             <Badge variant="secondary" size="sm">
               {item.type}
             </Badge>

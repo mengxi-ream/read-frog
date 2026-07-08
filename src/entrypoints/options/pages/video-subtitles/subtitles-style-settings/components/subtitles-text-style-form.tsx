@@ -107,7 +107,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
               onValueCommitted={(value) => handleChange({ fontScale: value as number })}
               className="flex-1"
             />
-            <span className="w-10 text-sm text-right">{draftFontScale}%</span>
+            <span className="w-10 text-right text-sm">{draftFontScale}%</span>
           </div>
         </div>
       </Field>
@@ -127,7 +127,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
               onValueCommitted={(value) => handleChange({ fontWeight: value as number })}
               className="flex-1"
             />
-            <span className="w-10 text-sm text-right">{draftFontWeight}</span>
+            <span className="w-10 text-right text-sm">{draftFontWeight}</span>
           </div>
         </div>
       </Field>
@@ -142,7 +142,7 @@ export function SubtitlesTextStyleForm({ type }: SubtitlesTextStyleFormProps) {
               type="color"
               value={textStyle.color}
               onChange={(e) => handleChange({ color: e.target.value })}
-              className="!w-8 h-8 p-0.5 rounded border border-input cursor-pointer"
+              className="h-8 !w-8 cursor-pointer rounded border border-input p-0.5"
             />
           </div>
         </div>

@@ -47,7 +47,7 @@ export function TextInput() {
         onClick={handleTranslate}
         disabled={!value.trim()}
         size="sm"
-        className="absolute bottom-3 right-3"
+        className="absolute right-3 bottom-3"
       >
         {i18n.t("translationHub.translate")}
         <span className="ml-1.5 text-xs">⌘↵</span>

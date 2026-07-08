@@ -81,7 +81,7 @@ export function CSSEditor() {
           onChange={setCssInput}
           hasError={hasSyntaxError || hasLengthError}
           placeholder={i18n.t("options.translation.translationStyle.customCSS.editor.placeholder")}
-          className="min-h-[200px] max-h-[400px] overflow-y-auto"
+          className="max-h-[400px] min-h-[200px] overflow-y-auto"
         />
         {/* Show syntax errors */}
         {/* <Activity mode={hasSyntaxError ? 'visible' : 'hidden'}>
@@ -113,7 +113,7 @@ export function CSSEditor() {
             </AlertDescription>
           </Alert>
         </Activity> */}
-        <div className="flex items-center gap-2 justify-between">
+        <div className="flex items-center justify-between gap-2">
           <div
             className={cn(
               "text-sm text-green-500",

@@ -167,7 +167,7 @@ export function GeneralSettings() {
                   }
                   className="flex-1"
                 />
-                <span className="w-10 text-sm text-right">{draftBackgroundOpacity}%</span>
+                <span className="w-10 text-right text-sm">{draftBackgroundOpacity}%</span>
               </div>
             </div>
           </div>

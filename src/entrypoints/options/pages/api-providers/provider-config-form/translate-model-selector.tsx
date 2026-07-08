@@ -136,7 +136,7 @@ export const TranslateModelSelector = withForm({
                 />
                 <label
                   htmlFor="isCustomModel-translate"
-                  className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  className="cursor-pointer text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                 >
                   {i18n.t("options.general.translationConfig.model.enterCustomModel")}
                 </label>

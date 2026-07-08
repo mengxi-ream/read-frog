@@ -62,12 +62,12 @@ const fieldVariants = cva("group/field flex w-full gap-2 data-[invalid]:text-des
         "has-[>[data-slot=field-content]]:items-start has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
       ],
       responsive: [
-        "flex-col [&>*]:w-full [&>.sr-only]:w-auto @md/field-group:flex-row @md/field-group:items-center @md/field-group:[&>*]:w-auto",
+        "flex-col @md/field-group:flex-row @md/field-group:items-center [&>*]:w-full @md/field-group:[&>*]:w-auto [&>.sr-only]:w-auto",
         "@md/field-group:[&>[data-slot=field-label]]:flex-auto",
         "@md/field-group:has-[>[data-slot=field-content]]:items-start @md/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
       ],
       "responsive-compact": [
-        "flex-col [&>*]:w-full [&>.sr-only]:w-auto @xs/field-group:flex-row @xs/field-group:items-center @xs/field-group:[&>*]:w-auto",
+        "flex-col @xs/field-group:flex-row @xs/field-group:items-center [&>*]:w-full @xs/field-group:[&>*]:w-auto [&>.sr-only]:w-auto",
         "@xs/field-group:[&>[data-slot=field-label]]:flex-auto",
         "@xs/field-group:has-[>[data-slot=field-content]]:items-start @xs/field-group:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
       ],
@@ -108,11 +108,11 @@ function FieldLabel({ className, ...props }: FieldPrimitive.Label.Props) {
     <FieldPrimitive.Label
       data-slot="field-label"
       className={cn(
-        "group/field-label peer/field-label flex w-fit gap-2 text-sm font-medium leading-snug text-foreground",
+        "group/field-label peer/field-label flex w-fit gap-2 text-sm leading-snug font-medium text-foreground",
         "group-data-[disabled]/field:opacity-50",
         // Nested field support
         "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>*]:data-[slot=field]:p-4",
-        "has-data-[state=checked]:bg-primary/5 has-data-[state=checked]:border-primary dark:has-data-[state=checked]:bg-primary/10",
+        "has-data-[state=checked]:border-primary has-data-[state=checked]:bg-primary/5 dark:has-data-[state=checked]:bg-primary/10",
         className,
       )}
       {...props}
@@ -125,7 +125,7 @@ function FieldTitle({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="field-label"
       className={cn(
-        "flex w-fit items-center gap-2 text-sm font-medium leading-snug",
+        "flex w-fit items-center gap-2 text-sm leading-snug font-medium",
         "group-data-[disabled]/field:opacity-50",
         className,
       )}
@@ -139,12 +139,12 @@ function FieldDescription({ className, ...props }: FieldPrimitive.Description.Pr
     <FieldPrimitive.Description
       data-slot="field-description"
       className={cn(
-        "text-sm font-normal leading-normal text-muted-foreground",
+        "text-sm leading-normal font-normal text-muted-foreground",
         "group-has-[[data-orientation=horizontal]]/field:text-balance",
         // Spacing adjustments
         "last:mt-0 nth-last-2:-mt-1 [[data-variant=legend]+&]:-mt-1.5",
         // Link styling
-        "[&>a:hover]:text-primary [&>a]:underline [&>a]:underline-offset-4",
+        "[&>a]:underline [&>a]:underline-offset-4 [&>a:hover]:text-primary",
         className,
       )}
       {...props}
@@ -163,7 +163,7 @@ function FieldControl({
       data-slot="field-control"
       className={cn(
         "h-8 w-full rounded-md border border-input bg-background px-3 text-sm text-foreground",
-        "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+        "focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:outline-none",
         className,
       )}
       {...props}

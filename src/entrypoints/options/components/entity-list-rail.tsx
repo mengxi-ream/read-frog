@@ -74,25 +74,25 @@ export function EntityListRail({ children, className, containerClassName }: Enti
   return (
     <div className={cn("relative", className)}>
       {canScroll && !isScrolledToTop && (
-        <div className="absolute top-0 left-0 right-0 h-8 bg-linear-to-b from-background to-transparent flex items-center justify-center z-10 pointer-events-none">
-          <Icon icon="tabler:chevron-up" className="size-4 text-muted-foreground animate-bounce" />
+        <div className="pointer-events-none absolute top-0 right-0 left-0 z-10 flex h-8 items-center justify-center bg-linear-to-b from-background to-transparent">
+          <Icon icon="tabler:chevron-up" className="size-4 animate-bounce text-muted-foreground" />
         </div>
       )}
       <div
         ref={scrollContainerRef}
         style={{ overflowAnchor: "none" }}
         className={cn(
-          "overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] max-h-[720px]",
+          "max-h-[720px] [scrollbar-width:none] overflow-y-auto [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden",
           containerClassName,
         )}
       >
         {children}
       </div>
       {canScroll && !isScrolledToBottom && (
-        <div className="absolute bottom-0 left-0 right-0 h-8 bg-linear-to-t from-background to-transparent flex items-center justify-center pointer-events-none">
+        <div className="pointer-events-none absolute right-0 bottom-0 left-0 flex h-8 items-center justify-center bg-linear-to-t from-background to-transparent">
           <Icon
             icon="tabler:chevron-down"
-            className="size-4 text-muted-foreground animate-bounce"
+            className="size-4 animate-bounce text-muted-foreground"
           />
         </div>
       )}

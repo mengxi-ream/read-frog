@@ -28,7 +28,7 @@ export function FloatingButtonSide() {
       title={i18n.t("options.floatingButtonAndToolbar.floatingButton.side.title")}
       description={i18n.t("options.floatingButtonAndToolbar.floatingButton.side.description")}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Select
           items={items}
           value={floatingButton.side}

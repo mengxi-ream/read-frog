@@ -36,7 +36,7 @@ export function FloatingButtonClickAction() {
         "options.floatingButtonAndToolbar.floatingButton.clickAction.description",
       )}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Select
           items={items}
           value={floatingButton.clickAction}

@@ -39,7 +39,7 @@ export function ClearAiSegmentationCache() {
       description={i18n.t("options.videoSubtitles.aiSegmentation.clearCacheDialog.description")}
     >
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <div className="w-full flex justify-end">
+        <div className="flex w-full justify-end">
           <AlertDialogTrigger render={<Button variant="destructive" disabled={isClearing} />}>
             <IconTrash className="size-4" />
             {isClearing

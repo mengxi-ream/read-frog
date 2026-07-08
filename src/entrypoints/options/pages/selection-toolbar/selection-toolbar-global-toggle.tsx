@@ -15,7 +15,7 @@ export function SelectionToolbarGlobalToggle() {
         "options.floatingButtonAndToolbar.selectionToolbar.globalToggle.description",
       )}
     >
-      <div className="w-full flex justify-end">
+      <div className="flex w-full justify-end">
         <Switch
           checked={selectionToolbar.enabled}
           onCheckedChange={(checked) => {

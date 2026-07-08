@@ -39,7 +39,7 @@ export function InputFieldAutoSave({
 
   return (
     <Field invalid={hasError}>
-      <div className="flex items-end justify-between w-full">
+      <div className="flex w-full items-end justify-between">
         <FieldLabel nativeLabel={false} render={<div />}>
           {label}
         </FieldLabel>
