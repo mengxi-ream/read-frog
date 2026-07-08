@@ -10,11 +10,7 @@
   },
   "categories": {
     "correctness": "error",
-    "nursery": "off",
-    "pedantic": "off",
     "perf": "error",
-    "restriction": "off",
-    "style": "off",
     "suspicious": "error"
   },
   "ignorePatterns": [
